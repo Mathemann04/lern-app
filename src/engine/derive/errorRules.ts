@@ -59,8 +59,9 @@ export const ERROR_RULES: readonly ErrorRule[] = [
     name: 'Exponent nicht verringert',
     wrongFormula: "(x^n)' = n \\cdot x^n",
     apply(node) {
+      // auch für x selbst: (x)' = x statt 1
       const r = powerExponent(node)
-      if (!r || isOne(r) || r.n === 0n) return null
+      if (!r || r.n === 0n) return null
       return mul(num(r), pow(node.parts.base!, num(r)))
     },
   },

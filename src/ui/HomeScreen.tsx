@@ -1,4 +1,5 @@
 import { Formula } from './Formula.tsx'
+import { practiceHref } from './routes.ts'
 import { derivativeLevels, notationSamples } from './samples.ts'
 
 export function HomeScreen() {
@@ -15,16 +16,22 @@ export function HomeScreen() {
       </section>
 
       <section aria-labelledby="topic-derivatives" className="rounded-2xl border border-zinc-200">
-        <header className="flex items-start justify-between gap-4 p-5 pb-3">
+        <header className="space-y-4 p-5 pb-3">
           <div>
             <h2 id="topic-derivatives" className="text-xl font-semibold">
               Ableitungen
             </h2>
             <p className="mt-1 text-zinc-600">Fünf Stufen, vom Einstieg bis zum Profi.</p>
           </div>
-          <span className="shrink-0 rounded-full bg-accent-50 px-3 py-1 text-sm font-medium text-accent-800">
-            Bald verfügbar
-          </span>
+          <div className="space-y-2">
+            <a
+              href={practiceHref(1)}
+              className="block rounded-xl bg-accent-700 px-4 py-3 text-center text-lg font-medium text-white hover:bg-accent-800"
+            >
+              Stufe 1 geführt üben
+            </a>
+            <p className="text-sm text-zinc-500">Die Stufen 2 bis 5 und der freie Modus folgen in den nächsten Schritten.</p>
+          </div>
         </header>
         <ol className="divide-y divide-zinc-100">
           {derivativeLevels.map((level) => (
