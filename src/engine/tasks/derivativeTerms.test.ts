@@ -1,9 +1,9 @@
-import katex from 'katex'
 import { describe, expect, it } from 'vitest'
 import { closeEnough } from '../expr/arbitraries.ts'
 import { contains } from '../expr/compare.ts'
 import { simplify } from '../expr/display.ts'
 import { evaluate } from '../expr/evaluate.ts'
+import { latexProblem } from '../expr/latexChecks.ts'
 import { normalize } from '../expr/normalize.ts'
 import { equationToLatex, toLatex } from '../expr/print.ts'
 import { samplePoints } from '../expr/sample.ts'
@@ -13,31 +13,12 @@ import { LEVELS, formatTaskNumber, parseTaskNumber } from './taskNumber.ts'
 
 const SEEDS_PER_LEVEL = 400
 
-// Muster, die in sauber gesetzten Formeln nie vorkommen dürfen
-const UGLY_PATTERNS: Array<[string, RegExp]> = [
-  ['Faktor 1', /(?<![\d{,])1(?=[a-z\\(])/],
-  ['Faktor 0', /(?<![\d{,])0(?=[a-z\\(])/],
-  ['Exponent 1', /\^\{1\}/],
-  ['Exponent 0', /\^\{0\}/],
-  ['plus minus', /\+ -/],
-  ['minus minus', /- -|--/],
-  ['plus plus', /\+ \+/],
-  ['mal 1', /\\cdot 1(?![\d,{])/],
-  ['leere Klammer', /\(\)/],
-  ['Zähler 0', /\\frac\{0\}/],
-  ['Nenner 1', /\\frac\{[^{}]*\}\{1\}/],
-  ['Malzeichen ×', /\\times/],
-]
-
 function latexOf(task: DerivativeTask): string {
   return task.kind === 'function' ? toLatex(task.expr) : equationToLatex(task.equation)
 }
 
 function expectCleanLatex(latex: string, context: string) {
-  expect(() => katex.renderToString(latex, { throwOnError: true, strict: 'error' }), context).not.toThrow()
-  for (const [name, pattern] of UGLY_PATTERNS) {
-    expect(pattern.test(latex), `${name} in ${latex} (${context})`).toBe(false)
-  }
+  expect(latexProblem(latex), context).toBeNull()
 }
 
 describe.each(LEVELS)('Stufe %i', (level) => {

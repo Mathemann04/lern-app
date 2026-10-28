@@ -36,15 +36,27 @@ test('Galerie zeigt in jeder Stufe sauber gesetzte Aufgaben', async ({ page }) =
   expect(errors).toEqual([])
 })
 
-test('Neue Aufgaben würfelt neu, vereinfachte Form lässt sich einblenden', async ({ page }) => {
+test('Neue Aufgaben würfelt neu, Rechenweg und typische Fehler lassen sich einblenden', async ({ page }) => {
+  const errors = collectErrors(page)
   await page.goto('./#/galerie')
   const before = await randomTasks(page).first().textContent()
   await page.getByRole('button', { name: 'Neue Aufgaben' }).click()
   await expect(randomTasks(page).first()).not.toHaveText(before ?? '')
 
-  await expect(page.getByText('Vereinfacht:')).toHaveCount(0)
-  await page.getByLabel('Vereinfachte Form zeigen').check()
-  await expect(page.getByText('Vereinfacht:')).toHaveCount(8)
+  await expect(page.getByTestId('derivative').first()).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Rechenweg' })).toHaveCount(0)
+
+  for (const level of [1, 3, 4, 5]) {
+    await page.getByRole('button', { name: `Stufe ${level}` }).click()
+    await page.getByLabel('Rechenweg zeigen').check()
+    await page.getByLabel('Typische Fehler zeigen').check()
+    await expect(page.getByRole('heading', { name: /Typische Fehler/ }).first()).toBeVisible()
+    await expect(page.locator('code.text-red-700')).toHaveCount(0)
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
+    expect(overflow, `Stufe ${level} ragt seitlich heraus`).toBeLessThanOrEqual(0)
+  }
+  await expect(page.getByRole('heading', { name: 'Rechenweg' }).first()).toBeVisible()
+  expect(errors).toEqual([])
 })
 
 test('Gleiche Aufgaben-Nummer ergibt immer dieselbe Aufgabe', async ({ page }) => {
