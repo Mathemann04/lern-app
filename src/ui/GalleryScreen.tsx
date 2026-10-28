@@ -1,5 +1,6 @@
 import { type FormEvent, useMemo, useState } from 'react'
-import { simplify } from '../engine/expr/display.ts'
+import { derive } from '../engine/derive/derive.ts'
+import { wrongAnswers } from '../engine/derive/errorRules.ts'
 import { equationToLatex, toLatex } from '../engine/expr/print.ts'
 import { type GeneratedTask, generateDerivativeTask } from '../engine/tasks/derivativeTerms.ts'
 import {
@@ -11,6 +12,7 @@ import {
   parseTaskNumber,
   randomSeed,
 } from '../engine/tasks/taskNumber.ts'
+import { DerivationView } from './DerivationView.tsx'
 import { Formula } from './Formula.tsx'
 
 const TASKS_PER_PAGE = 8
@@ -19,7 +21,8 @@ const TASKS_PER_PAGE = 8
 export function GalleryScreen() {
   const [level, setLevel] = useState<Level>(1)
   const [baseSeed, setBaseSeed] = useState(randomSeed)
-  const [showSimplified, setShowSimplified] = useState(false)
+  const [showSteps, setShowSteps] = useState(false)
+  const [showErrors, setShowErrors] = useState(false)
   const [lookupText, setLookupText] = useState('')
   const [lookup, setLookup] = useState<TaskRef | 'invalid' | null>(null)
 
@@ -42,8 +45,8 @@ export function GalleryScreen() {
       <section className="space-y-2">
         <h1 className="text-3xl font-semibold tracking-tight">Formel-Galerie</h1>
         <p className="text-zinc-600 text-pretty">
-          Testseite: Hier zeigt die Mathe-Engine zufällige Aufgaben aus allen Stufen. Prüfe, ob alles
-          aussieht wie in deinem Skript.
+          Testseite: Hier zeigt die Mathe-Engine zufällige Aufgaben aus allen Stufen mit Ableitung,
+          Rechenweg und typischen Fehlern. Prüfe, ob alles aussieht wie in deinem Skript.
         </p>
       </section>
 
@@ -76,15 +79,26 @@ export function GalleryScreen() {
           >
             Neue Aufgaben
           </button>
-          <label className="flex items-center gap-2 text-zinc-700">
-            <input
-              type="checkbox"
-              checked={showSimplified}
-              onChange={(event) => setShowSimplified(event.target.checked)}
-              className="size-4 accent-accent-700"
-            />
-            Vereinfachte Form zeigen
-          </label>
+          <div className="flex flex-wrap gap-x-5 gap-y-2">
+            <label className="flex items-center gap-2 text-zinc-700">
+              <input
+                type="checkbox"
+                checked={showSteps}
+                onChange={(event) => setShowSteps(event.target.checked)}
+                className="size-4 accent-accent-700"
+              />
+              Rechenweg zeigen
+            </label>
+            <label className="flex items-center gap-2 text-zinc-700">
+              <input
+                type="checkbox"
+                checked={showErrors}
+                onChange={(event) => setShowErrors(event.target.checked)}
+                className="size-4 accent-accent-700"
+              />
+              Typische Fehler zeigen
+            </label>
+          </div>
         </div>
 
         <form onSubmit={handleLookup} className="space-y-2">
@@ -115,13 +129,13 @@ export function GalleryScreen() {
 
       {lookedUp && (
         <section aria-label="Aufgerufene Aufgabe">
-          <TaskCard generated={lookedUp} showSimplified={showSimplified} highlighted />
+          <TaskCard generated={lookedUp} showSteps={showSteps} showErrors={showErrors} highlighted />
         </section>
       )}
 
       <section aria-label="Zufällige Aufgaben" className="space-y-3">
         {tasks.map((generated) => (
-          <TaskCard key={generated.ref.seed} generated={generated} showSimplified={showSimplified} />
+          <TaskCard key={generated.ref.seed} generated={generated} showSteps={showSteps} showErrors={showErrors} />
         ))}
       </section>
     </main>
@@ -130,30 +144,61 @@ export function GalleryScreen() {
 
 type CardProps = {
   generated: GeneratedTask
-  showSimplified: boolean
+  showSteps: boolean
+  showErrors: boolean
   highlighted?: boolean
 }
 
-function TaskCard({ generated, showSimplified, highlighted = false }: CardProps) {
+function TaskCard({ generated, showSteps, showErrors, highlighted = false }: CardProps) {
   const { task, template, ref } = generated
   const latex = task.kind === 'function' ? `f(x) = ${toLatex(task.expr)}` : equationToLatex(task.equation)
-  const simplified = task.kind === 'function' ? toLatex(simplify(task.expr)) : null
-  const alreadySimple = simplified !== null && `f(x) = ${simplified}` === latex
+  const derivation = useMemo(() => (task.kind === 'function' ? derive(task.expr) : null), [task])
+  const errors = useMemo(
+    () => (showErrors && task.kind === 'function' && derivation ? wrongAnswers(task.expr, derivation) : []),
+    [showErrors, task, derivation],
+  )
 
   return (
     <article
-      className={`rounded-2xl border p-4 ${highlighted ? 'border-accent-600 bg-accent-50' : 'border-zinc-200'}`}
+      className={`space-y-3 rounded-2xl border p-4 ${highlighted ? 'border-accent-600 bg-accent-50' : 'border-zinc-200'}`}
     >
       <div className="overflow-x-auto py-1 text-xl">
         <Formula tex={latex} />
       </div>
-      {showSimplified && simplified !== null && (
-        <div className="mt-2 overflow-x-auto border-t border-zinc-100 pt-2 text-zinc-600">
-          <span className="mr-2 text-sm">Vereinfacht:</span>
-          {alreadySimple ? <span className="text-sm">schon so einfach wie möglich</span> : <Formula tex={simplified} />}
+      {derivation ? (
+        <div className="overflow-x-auto py-1 text-xl" data-testid="derivative">
+          <Formula tex={`f'(x) = ${toLatex(derivation.result)}`} />
         </div>
+      ) : (
+        <p className="text-sm text-zinc-500">Implizites Ableiten kommt in Schritt 11.</p>
       )}
-      <p className="mt-2 text-sm text-zinc-500">
+
+      {showSteps && derivation && (
+        <section className="border-t border-zinc-100 pt-3">
+          <h3 className="mb-2 text-sm font-semibold text-zinc-500">Rechenweg</h3>
+          <DerivationView derivation={derivation} />
+        </section>
+      )}
+
+      {showErrors && derivation && (
+        <section className="border-t border-zinc-100 pt-3">
+          <h3 className="mb-2 text-sm font-semibold text-zinc-500">Typische Fehler ({errors.length})</h3>
+          <ul className="space-y-2">
+            {errors.map((w) => (
+              <li key={`${w.errorRule.id}:${w.node.path.join(',')}`} className="space-y-0.5">
+                <p className="text-sm text-red-800">
+                  {[w.errorRule, ...w.alsoMatches].map((r) => r.name).join(' oder ')}
+                </p>
+                <div className="overflow-x-auto">
+                  <Formula tex={`f'(x) = ${toLatex(w.result)}`} />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <p className="text-sm text-zinc-500">
         Aufgabe {formatTaskNumber(ref)} · {template.label}
       </p>
     </article>

@@ -225,16 +225,20 @@ Die Engine kennt kein React. Spätere Themen (M2 ff.) bauen auf `expr/`,
    numerisch an mindestens 30 Zufallsstellen im Definitionsbereich der
    Aufgabe mit relativer Toleranz. Beim impliziten Ableiten an
    Zufallspunkten $(x, y)$.
+   Umgesetzt in `src/engine/derive/` (Schritt 3).
 8. **Fehlerdiagnose (frei).** Zu jeder Aufgabe werden alle
    Fehlerregel-Ergebnisse vorberechnet; die Eingabe wird mit jedem
    verglichen.
 9. **Seeds.** Jede Aufgabe ist (Vorlage, Stufe, Seed) und damit
    reproduzierbar.
-10. **Definitionsbereich** nach deutscher Schulkonvention: Wurzeln und
+10. **Endform** (`finalForm`): Ergebnisse werden zusammengefasst wie im Skript:
+    Polynome ausmultipliziert, Funktionsfaktoren wie $e^x$ ausgeklammert, gegen $x$
+    im Nenner gekürzt, reine Potenzsummen bleiben stehen.
+11. **Definitionsbereich** nach deutscher Schulkonvention: Wurzeln und
     gebrochene Exponenten nur für Zahlen ≥ 0 (auch die dritte Wurzel),
     Potenzen mit variablem Exponenten nur für Basis > 0. Vereinfachen darf
     den Definitionsbereich vergrößern, nie verkleinern.
-11. **Erklärungen** sind Textbausteine je Regel und Fehlerregel in zwei
+12. **Erklärungen** sind Textbausteine je Regel und Fehlerregel in zwei
     Varianten mit Platzhaltern für die Terme der Aufgabe; Fachbegriffe
     kommen aus einem Glossar.
 
@@ -297,9 +301,10 @@ ausprobieren".
 | Faktor | Faktor vergessen | $(5x^3)' = 3x^2$ |
 | Summe | konstanter Summand bleibt stehen | $(x^2 + 5)' = 2x + 5$ |
 | $e^x$ | Potenzregel auf $e^x$ angewendet | $(e^x)' = x e^{x-1}$ |
-| $\sin$/$\cos$ | Vorzeichen vertauscht | $(\cos x)' = \sin x$ |
+| $\sin$/$\cos$ | Vorzeichen vertauscht | $(\cos x)' = \sin x$, $(\sin x)' = -\cos x$ |
 | Produkt | Ableitungen multipliziert | $(uv)' = u'v'$ |
 | Produkt | zweiter Summand fehlt | $(uv)' = u'v$ |
+| Produkt | Minus statt Plus (mit Quotientenregel verwechselt) | $(uv)' = u'v - uv'$ |
 | Quotient | Reihenfolge im Zähler vertauscht | $\frac{uv' - u'v}{v^2}$ |
 | Quotient | Nenner nicht quadriert | $\frac{u'v - uv'}{v}$ |
 | Quotient | Zähler und Nenner einzeln abgeleitet | $\frac{u'}{v'}$ |

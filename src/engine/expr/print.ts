@@ -36,7 +36,7 @@ export function toLatex(e: Expr): string {
     case 'add':
       return printSum(e.terms)
     case 'mul':
-      return printProduct(e.factors)
+      return e.explicit ? printExplicitProduct(e.factors) : printProduct(e.factors)
     case 'neg':
       return '-' + (e.arg.kind === 'add' || isNegative(e.arg) ? paren(toLatex(e.arg)) : toLatex(e.arg))
     case 'div':
@@ -125,7 +125,7 @@ function printSummand(term: Expr): string {
 
 function printProduct(rawFactors: readonly Expr[]): string {
   // Verschachtelte Produkte sehen genauso aus wie ein flaches Produkt
-  const factors = rawFactors.flatMap((f) => (f.kind === 'mul' && !isNegative(f) ? f.factors : [f]))
+  const factors = rawFactors.flatMap((f) => (f.kind === 'mul' && !f.explicit && !isNegative(f) ? f.factors : [f]))
   const [first, ...rest] = factors
 
   if (first.kind === 'num' && ratSign(first.value) < 0) {
@@ -143,6 +143,16 @@ function printProduct(rawFactors: readonly Expr[]): string {
     out += parts[i]
   }
   return out
+}
+
+// Eingesetzte Formel: Faktoren als Einheit, überall Malpunkt (2x \cdot e^{x})
+function printExplicitProduct(factors: readonly Expr[]): string {
+  return factors
+    .map((f, i) => {
+      if (f.kind === 'add' || f.kind === 'neg' || (i > 0 && isNegative(f))) return paren(toLatex(f))
+      return toLatex(f)
+    })
+    .join(' \\cdot ')
 }
 
 function printFactor(f: Expr, index: number): string {

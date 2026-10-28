@@ -1,6 +1,6 @@
 import fc from 'fast-check'
 import { describe, expect, it } from 'vitest'
-import { CHECK_POINTS, arbExpr, closeEnough } from './arbitraries.ts'
+import { CHECK_POINTS, arbExpr, closeEnough, reliableValue } from './arbitraries.ts'
 import { key } from './compare.ts'
 import { simplify, toDisplayForm } from './display.ts'
 import { evaluate } from './evaluate.ts'
@@ -68,8 +68,8 @@ describe('Vereinfachen: Eigenschaften für zufällige Terme', () => {
       fc.property(arbExpr, (e) => {
         const n = normalize(e)
         for (const value of CHECK_POINTS) {
-          const original = evaluate(e, { x: value })
-          if (Number.isNaN(original)) continue
+          const original = reliableValue(e, value)
+          if (original === null) continue
           const normalized = evaluate(n, { x: value })
           if (!closeEnough(original, normalized)) {
             throw new Error(`x = ${value}: ${toLatex(e)} = ${original}, Normalform ${toLatex(n)} = ${normalized}`)
@@ -99,8 +99,8 @@ describe('Vereinfachen: Eigenschaften für zufällige Terme', () => {
         const d = toDisplayForm(n)
         expect(key(normalize(d))).toBe(key(n))
         for (const value of CHECK_POINTS) {
-          const a = evaluate(n, { x: value })
-          if (Number.isNaN(a)) continue
+          const a = reliableValue(n, value)
+          if (a === null) continue
           const b = evaluate(d, { x: value })
           if (!closeEnough(a, b)) throw new Error(`x = ${value}: ${toLatex(n)} = ${a}, Anzeige ${toLatex(d)} = ${b}`)
         }

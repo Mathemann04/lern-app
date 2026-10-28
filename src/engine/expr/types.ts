@@ -27,7 +27,8 @@ export type Num = { readonly kind: 'num'; readonly value: Rational; readonly dec
 export type Const = { readonly kind: 'const'; readonly name: 'e' | 'pi' }
 export type Var = { readonly kind: 'var'; readonly name: string }
 export type Add = { readonly kind: 'add'; readonly terms: readonly Expr[] }
-export type Mul = { readonly kind: 'mul'; readonly factors: readonly Expr[] }
+// explicit: beim Ausgeben überall Malpunkt setzen (für eingesetzte Formeln wie u' · v)
+export type Mul = { readonly kind: 'mul'; readonly factors: readonly Expr[]; readonly explicit?: boolean }
 export type Neg = { readonly kind: 'neg'; readonly arg: Expr }
 export type Div = { readonly kind: 'div'; readonly num: Expr; readonly den: Expr }
 export type Pow = { readonly kind: 'pow'; readonly base: Expr; readonly exp: Expr }
@@ -54,8 +55,9 @@ export function dec(value: Rational): Num {
 
 export const E: Const = { kind: 'const', name: 'e' }
 export const PI: Const = { kind: 'const', name: 'pi' }
-export const x: Var = { kind: 'var', name: 'x' }
-export const y: Var = { kind: 'var', name: 'y' }
+export const variable = (name: string): Var => ({ kind: 'var', name })
+export const x: Var = variable('x')
+export const y: Var = variable('y')
 
 export function add(...terms: Expr[]): Expr {
   return terms.length === 1 ? terms[0] : { kind: 'add', terms }
@@ -63,6 +65,11 @@ export function add(...terms: Expr[]): Expr {
 
 export function mul(...factors: Expr[]): Expr {
   return factors.length === 1 ? factors[0] : { kind: 'mul', factors }
+}
+
+// Produkt mit sichtbarem Malpunkt zwischen allen Faktoren: 2x · e^x
+export function mulDot(...factors: Expr[]): Expr {
+  return factors.length === 1 ? factors[0] : { kind: 'mul', factors, explicit: true }
 }
 
 export const neg = (arg: Expr): Neg => ({ kind: 'neg', arg })

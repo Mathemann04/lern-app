@@ -39,6 +39,13 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     `simplify` = Normalform als *Anzeigeform* (schöne Schreibweise)
   - `expr/print.ts`: LaTeX in deutscher Schreibweise; `expr/evaluate.ts`,
     `expr/sample.ts`: Werte und Prüfstellen im Definitionsbereich
+  - `expr/finalForm.ts`: Endform von Ergebnissen (Ausklammern, Kürzen,
+    Ausmultiplizieren wie im Skript)
+  - `derive/`: Ableiten mit Protokoll (`derive` liefert einen Ableitungsbaum mit
+    Regel, Teilen, eingesetzter Formel und Ergebnis je Knoten), Regelkatalog
+    (`rules.ts`), Fehlerregeln und falsche Ergebnisse (`errorRules.ts`)
+  - `check/numeric.ts`: numerische Vergleiche und numerische Ableitung als
+    unabhängige Gegenprobe
   - `random/rng.ts`: Zufall mit Startwert; `tasks/`: Aufgaben-Nummern
     („3-48213") und Vorlagen je Stufe
 - `e2e/`: Browser-Tests (Playwright)
@@ -62,7 +69,11 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   Wurzel; variable Exponenten nur für Basis > 0). Vereinfachen darf den
   Definitionsbereich vergrößern (x/x → 1), nie verkleinern und nie einen Wert
   ändern; z. B. (u^a)^k → u^(a·k) nur für ganzzahliges k. Die Zufallstests in
-  `normalize.test.ts` prüfen das; nach Änderungen mehrmals laufen lassen.
+  `normalize.test.ts` und `finalForm.test.ts` prüfen das; nach Änderungen
+  mehrmals laufen lassen. Numerische Vergleiche nur an aussagekräftigen,
+  stabilen Stellen (Rundungseffekte sonst als Scheinfehler).
+- **Fehlerregeln:** Jede neue Fehlerregel bekommt ein Katalogbeispiel in
+  `errorRules.test.ts` und einen Eintrag im Katalog in docs/PLAN-M1.md.
 - **Schreibweise:** Formeln immer über KaTeX gesetzt, nie als Text wie
   „x^2/(3x+1)". Deutsche Konventionen: Dezimalkomma, Malpunkt, ln, f'(x).
 - **Sprache:** Oberfläche, Erklärungen und Doku auf Deutsch, Code-Kommentare
