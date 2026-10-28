@@ -18,7 +18,7 @@ Details: [PLAN-M1.md](PLAN-M1.md)
 
 - [x] Projektdokumentation (VISION, ROADMAP, CLAUDE.md, Plan M1)
 - [x] 1. Grundgerüst und Handy-Zugang
-- [ ] 2. Mathe-Engine: Terme und Schreibweise
+- [x] 2. Mathe-Engine: Terme und Schreibweise
 - [ ] 3. Mathe-Engine: Ableiten mit Rechenweg und Fehlerregeln
 - [ ] 4. Geführter Modus (Stufe 1) mit Erklärungen
 - [ ] 5. Stufen 2 und 3 im geführten Modus, Stufenwahl
@@ -36,3 +36,6 @@ Details: [PLAN-M1.md](PLAN-M1.md)
 - 28.10.2026: Handy-Test über GitHub Pages, Repo ist dafür öffentlich.
   Adresse: https://mathemann04.github.io/lern-app/
 - 28.10.2026: Claude erstellt am Ende jeder Sitzung den Pull Request selbst.
+- 28.10.2026: Definitionsbereich nach deutscher Schulkonvention: Wurzeln aus
+  negativen Zahlen sind nicht definiert, auch nicht die dritte Wurzel
+  (änderbar, falls das Skript es anders handhabt).
