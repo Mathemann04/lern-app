@@ -30,7 +30,17 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
 ## Aufbau
 - `src/ui/`: Oberfläche (React). Formeln nur über `Formula`
   (`src/ui/Formula.tsx`), das setzt alles in voller Größe (`\displaystyle`).
-- `src/engine/`: Mathe-Engine (ab Schritt 2)
+  Seiten über `#/…` (`useHashRoute`), z. B. Testseite `#/galerie`.
+- `src/engine/`: Mathe-Engine, reines TypeScript
+  - `rational.ts`: exakte Brüche (bigint)
+  - `expr/types.ts`: Termbaum in *Aufgabenform* (Bruch, Wurzel, Minus bleiben,
+    wie geschrieben) mit Bauhelfern
+  - `expr/normalize.ts`: *Normalform* zum Vergleichen; `expr/display.ts`:
+    `simplify` = Normalform als *Anzeigeform* (schöne Schreibweise)
+  - `expr/print.ts`: LaTeX in deutscher Schreibweise; `expr/evaluate.ts`,
+    `expr/sample.ts`: Werte und Prüfstellen im Definitionsbereich
+  - `random/rng.ts`: Zufall mit Startwert; `tasks/`: Aufgaben-Nummern
+    („3-48213") und Vorlagen je Stufe
 - `e2e/`: Browser-Tests (Playwright)
 - `.github/workflows/app.yml`: prüft jeden Pull Request, veröffentlicht `main`
 - Akzentfarbe zentral in `src/index.css` (`--color-accent-*`)
@@ -47,6 +57,12 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   Beispiele kommen aus der Engine, nie von Hand. Jede neue Regel,
   Fehlerregel oder Vorlage bekommt Tests: Ergebnis gegen numerische
   Gegenprobe, falsche Optionen nie gleichwertig zur Lösung.
+- **Engine-Regeln:** Definitionsbereich nach deutscher Schulkonvention
+  (Wurzeln und gebrochene Exponenten nur für Zahlen ≥ 0, auch die dritte
+  Wurzel; variable Exponenten nur für Basis > 0). Vereinfachen darf den
+  Definitionsbereich vergrößern (x/x → 1), nie verkleinern und nie einen Wert
+  ändern; z. B. (u^a)^k → u^(a·k) nur für ganzzahliges k. Die Zufallstests in
+  `normalize.test.ts` prüfen das; nach Änderungen mehrmals laufen lassen.
 - **Schreibweise:** Formeln immer über KaTeX gesetzt, nie als Text wie
   „x^2/(3x+1)". Deutsche Konventionen: Dezimalkomma, Malpunkt, ln, f'(x).
 - **Sprache:** Oberfläche, Erklärungen und Doku auf Deutsch, Code-Kommentare

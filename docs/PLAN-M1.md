@@ -194,11 +194,12 @@ Die Engine kennt kein React. Spätere Themen (M2 ff.) bauen auf `expr/`,
 `parse/`, `check/` und `random/` auf.
 
 ### Kern-Entscheidungen der Engine
-1. **Zwei Formen eines Terms.** Die *Aufgabenform* behält die Struktur, wie
+1. **Drei Formen eines Terms.** Die *Aufgabenform* behält die Struktur, wie
    sie geschrieben ist (Bruch bleibt Bruch, Wurzel bleibt Wurzel), denn davon
    hängt ab, welche Regel die richtige ist. Die *Normalform* (negative und
    gebrochene Exponenten, sortiert, zusammengefasst) dient zum Vergleichen
-   und Vereinfachen.
+   und Vereinfachen. Die *Anzeigeform* schreibt eine Normalform wieder schön
+   auf (Brüche, Wurzeln, fallender Grad).
 2. **Zahlen exakt.** Koeffizienten sind Brüche aus ganzen Zahlen, nie
    Gleitkommazahlen. Dezimalzahlen der Eingabe ($0{,}5$) werden exakt
    eingelesen.
@@ -229,7 +230,11 @@ Die Engine kennt kein React. Spätere Themen (M2 ff.) bauen auf `expr/`,
    verglichen.
 9. **Seeds.** Jede Aufgabe ist (Vorlage, Stufe, Seed) und damit
    reproduzierbar.
-10. **Erklärungen** sind Textbausteine je Regel und Fehlerregel in zwei
+10. **Definitionsbereich** nach deutscher Schulkonvention: Wurzeln und
+    gebrochene Exponenten nur für Zahlen ≥ 0 (auch die dritte Wurzel),
+    Potenzen mit variablem Exponenten nur für Basis > 0. Vereinfachen darf
+    den Definitionsbereich vergrößern, nie verkleinern.
+11. **Erklärungen** sind Textbausteine je Regel und Fehlerregel in zwei
     Varianten mit Platzhaltern für die Terme der Aufgabe; Fachbegriffe
     kommen aus einem Glossar.
 

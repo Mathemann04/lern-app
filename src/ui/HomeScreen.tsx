@@ -49,6 +49,13 @@ export function HomeScreen() {
             </li>
           ))}
         </ol>
+        <a
+          href="#/galerie"
+          className="flex items-center justify-between rounded-b-2xl border-t border-zinc-100 px-5 py-4 font-medium text-accent-700 hover:bg-accent-50"
+        >
+          Formel-Galerie ansehen (Testseite)
+          <span aria-hidden>→</span>
+        </a>
       </section>
 
       <section aria-labelledby="notation" className="space-y-4">
