@@ -18,6 +18,23 @@ vite-plugin-pwa, Vitest + fast-check (Tests), Playwright (Browser-Tests).
 Kein Server, keine KI in der App; Daten lokal. Herzstück ist eine eigene
 Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
 
+## Befehle
+- `npm install`: zuerst in jeder neuen Cloud-Sitzung (Pakete sind nicht
+  vorinstalliert)
+- `npm run dev`: Entwicklungsserver
+- `npm run check`: Typprüfung, Stilprüfung (oxlint), Tests, Build
+- `npm run e2e`: Browser-Tests in Handy- und Laptopgröße inkl. Offline-Test,
+  gegen den Build unter `/lern-app/` wie auf GitHub Pages
+- `node scripts/generate-icons.ts`: App-Symbol neu erzeugen
+
+## Aufbau
+- `src/ui/`: Oberfläche (React). Formeln nur über `Formula`
+  (`src/ui/Formula.tsx`), das setzt alles in voller Größe (`\displaystyle`).
+- `src/engine/`: Mathe-Engine (ab Schritt 2)
+- `e2e/`: Browser-Tests (Playwright)
+- `.github/workflows/app.yml`: prüft jeden Pull Request, veröffentlicht `main`
+- Akzentfarbe zentral in `src/index.css` (`--color-accent-*`)
+
 ## Arbeitsregeln
 - **Erst Plan, dann bauen.** Jeder Meilenstein in kleinen Schritten, die der
   Nutzer einzeln ausprobieren kann. Ohne OK des Nutzers zum Plan nicht

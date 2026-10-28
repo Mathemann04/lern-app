@@ -17,7 +17,7 @@ Stand: 28.10.2026
 Details: [PLAN-M1.md](PLAN-M1.md)
 
 - [x] Projektdokumentation (VISION, ROADMAP, CLAUDE.md, Plan M1)
-- [ ] 1. Grundgerüst und Handy-Zugang
+- [x] 1. Grundgerüst und Handy-Zugang
 - [ ] 2. Mathe-Engine: Terme und Schreibweise
 - [ ] 3. Mathe-Engine: Ableiten mit Rechenweg und Fehlerregeln
 - [ ] 4. Geführter Modus (Stufe 1) mit Erklärungen

@@ -1,0 +1,63 @@
+# Prüft jeden Pull Request und veröffentlicht jeden Stand von main auf GitHub Pages:
+# https://mathemann04.github.io/lern-app/
+name: Prüfen und veröffentlichen
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # Veraltete Prüfungen von Pull Requests abbrechen, Veröffentlichungen nie
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  check:
+    name: Prüfen
+    runs-on: ubuntu-latest
+    env:
+      BASE_PATH: /lern-app/
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Typprüfung
+        run: npm run typecheck
+      - name: Stilprüfung
+        run: npm run lint
+      - name: Tests
+        run: npm test
+      - name: Bauen
+        run: npm run build
+      - name: Browser installieren
+        run: npx playwright install --with-deps chromium
+      - name: Browser-Tests
+        run: npx playwright test
+      - name: Ergebnis für GitHub Pages bereitstellen
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  deploy:
+    name: Veröffentlichen
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: check
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
