@@ -1,6 +1,6 @@
 # Plan für Meilenstein 1: Grundgerüst + Ableitungsregeln
 
-Status: **wartet auf Freigabe**. Erst nach deinem OK wird programmiert.
+Status: **freigegeben** (28.10.2026), in Arbeit.
 
 Ziel von M1: Du kannst Ableitungsaufgaben aller 5 Stufen geführt und frei
 lösen, mit Erklärungen, Lernkarten und Fortschritt, am Handy und am Laptop,
@@ -22,8 +22,9 @@ ausprobieren kannst. Pro Sitzung schaffen wir etwa ein bis zwei Schritte.
 - Leeres App-Gerüst mit Startseite „Rechenweg" und ein paar gesetzten
   Beispielformeln (Bruchstriche, Wurzeln, Dezimalkomma).
 - Installierbar auf dem Homescreen, läuft offline.
-- Jede Änderung, die ich pushe, wird automatisch veröffentlicht, sodass du sie
-  über einen Link am Handy öffnen kannst (siehe Entscheidung 1 unten).
+- Sobald du einen Pull Request übernimmst, wird die App automatisch neu
+  veröffentlicht. Du öffnest sie am Handy unter
+  https://mathemann04.github.io/lern-app/ (siehe Entscheidung 1 unten).
 - Erste Design-Grundlagen (Schrift, Farben, Abstände) als Vorschlag mit
   Screenshots, damit du früh sagen kannst, ob dir die Richtung gefällt.
 
@@ -81,7 +82,17 @@ $e^{x^2}\cos x$, $\frac{\ln x}{x^2}$ lösen.
 **Ausprobieren:** Dieselbe Aufgabe in verschiedenen richtigen Formen
 eintippen, dann absichtlich die innere Ableitung vergessen.
 
-### Schritt 7: Fortschritt und Fehlerstatistik
+### Schritt 7: Stufe 4 (dein Uni-Niveau, deshalb vorgezogen)
+- Zusätzlich $a^x$, $\log_a x$, $\tan x$, $\arctan x$; mehrere Regeln
+  verschachtelt, z. B. $\frac{x^2 e^{-3x}}{\sqrt{1+x^2}}$ oder
+  $\ln\left(\frac{x^2+1}{x-1}\right)$.
+- Geführt und frei.
+- Der Rechenweg wird gröber: Was in Stufe 1 bis 3 geübt wurde, ist hier ein
+  einzelner Schritt, damit eine Aufgabe nicht 20 Bildschirme lang wird.
+
+**Ausprobieren:** Stufe 4 wählen und Aufgaben in beiden Modi lösen.
+
+### Schritt 8: Fortschritt und Fehlerstatistik
 - Fortschritt pro Thema und Stufe.
 - Vorschlag „Eine Stufe höher?" nach 8 von 10 richtig (nie automatisch).
 - „Deine häufigsten Fehler" mit gezieltem Üben: Aufgaben, in denen genau
@@ -90,16 +101,10 @@ eintippen, dann absichtlich die innere Ableitung vergessen.
 **Ausprobieren:** 10 Aufgaben lösen und den Vorschlag sehen; einen Fehler
 mehrmals machen und das gezielte Üben starten.
 
-### Schritt 8: Lernkarten
+### Schritt 9: Lernkarten
 - Pro Regel eine Karte: Regel, Merksatz, durchgerechnetes Beispiel. Das
   Beispiel rechnet die Engine, nicht ich von Hand.
 - Aufrufbar aus dem Menü und direkt aus jeder Aufgabe.
-
-### Schritt 9: Stufe 4
-- Zusätzlich $a^x$, $\log_a x$, $\tan x$, $\arctan x$; mehrere Regeln
-  verschachtelt, z. B. $\frac{x^2 e^{-3x}}{\sqrt{1+x^2}}$.
-- Der Rechenweg wird gröber: Was in Stufe 1 bis 3 geübt wurde, ist hier ein
-  einzelner Schritt, damit eine Aufgabe nicht 20 Bildschirme lang wird.
 
 ### Schritt 10: Stufe 5, Teil 1
 - Logarithmisches Ableiten ($x^x$, $x^{\sin x}$), Umkehrfunktionen
@@ -118,27 +123,19 @@ mehrmals machen und das gezielte Üben starten.
 
 ---
 
-## Entscheidungen, die bei dir liegen
+## Entscheidungen
 
-### Entscheidung 1: Wie testest du am Handy? (vor Schritt 1 nötig)
-Ich arbeite in einer Cloud-Sitzung, dein Handy kann diese nicht direkt
-erreichen. Die App muss also im Internet unter einer Adresse liegen. Dein
-GitHub-Repo ist **privat**, deshalb:
+### Entscheidung 1: Handy-Test über GitHub Pages (entschieden: Weg B)
+Das Repo ist öffentlich, die App wird über GitHub Pages veröffentlicht:
+https://mathemann04.github.io/lern-app/
 
-| Weg | Kosten | Aufwand für dich |
-| --- | --- | --- |
-| **A: Cloudflare Pages** (Empfehlung) | kostenlos | einmalig ca. 10 Minuten: Konto anlegen, Repo verbinden. Ich schreibe dir eine genaue Klick-Anleitung. |
-| B: Repo öffentlich machen + GitHub Pages | kostenlos | ein Klick, aber jeder kann deinen Code sehen. |
-| C: GitHub Pro + GitHub Pages | ca. 4 $ pro Monat | Abo abschließen. |
+Veröffentlicht wird immer der Stand von `main`, also erst nachdem du einen
+Pull Request übernommen hast. Diese Adresse installierst du auf dem
+Homescreen.
 
-Warum A: kostenlos, Repo bleibt privat, und jeder Arbeitsstand bekommt eine
-eigene Test-Adresse. Du kannst also am Handy ausprobieren, **bevor** du meine
-Änderungen übernimmst. Die Hauptadresse zeigt immer den übernommenen Stand,
-die installierst du auf dem Homescreen.
-
-### Entscheidung 2: Darf ich am Ende jeder Sitzung den Pull Request selbst erstellen?
-Dann musst du auf GitHub nur noch „Merge" drücken (siehe „Änderungen
-übernehmen" in der Antwort bzw. in CLAUDE.md).
+### Entscheidung 2: Pull Requests (entschieden: ja)
+Claude erstellt am Ende jeder Sitzung den Pull Request selbst. Du drückst auf
+GitHub nur noch „Merge pull request" und „Confirm merge".
 
 ### Vorschläge, zu denen du jederzeit etwas sagen kannst
 Diese setze ich so um, wenn du nichts anderes sagst:
@@ -279,7 +276,7 @@ ausprobieren".
 | --- | --- | --- |
 | 1 | Potenz-, Faktor-, Summenregel; 2–4 Summanden aus $a x^n$ (auch negativ), $\frac{a}{x^n}$, $\sqrt{x}$, $\sqrt[n]{x^m}$, Konstanten | $4x^3 - \frac{2}{x} + \sqrt{x}$ |
 | 2 | $e^x$, $\ln x$, $\sin x$, $\cos x$ einzeln oder mit genau einer Verknüpfung: Produkt mit einer Potenz oder Kettenregel mit linearer innerer Funktion | $x^2 e^x$, $\sin(3x)$, $e^{-2x}$ |
-| 3 | Zwei Regeln kombiniert: Produkt + Kette, Quotientenregel, Kette mit nichtlinearer innerer Funktion | $e^{x^2}\cos x$, $\frac{\ln x}{x^2}$, $\ln(x^2+1)$ |
+| 3 | Zwei Regeln kombiniert: Produkt + Kette, Quotientenregel, Kette mit nichtlinearer innerer Funktion | $e^{x^2}\cos x$, $\frac{\ln x}{x^2}$, $\ln(x^2+1)$, $\sin^2 x$ |
 | 4 | Mehrere Regeln verschachtelt, zusätzlich $a^x$, $\log_a x$, $\tan x$, $\arctan x$ | $\frac{x^2 e^{-3x}}{\sqrt{1+x^2}}$, $\ln\left(\frac{x^2+1}{x-1}\right)$ |
 | 5 | Logarithmisches Ableiten, implizites Ableiten, Umkehr- und Hyperbelfunktionen | $x^x$, $x^{\sin x}$, $x^2+y^2=25$, $\arcsin(2x)$, $\cosh(x^2)$ |
 
@@ -291,6 +288,8 @@ ausprobieren".
 | Potenz | bei negativem Exponenten in die falsche Richtung gezählt | $(x^{-2})' = -2x^{-1}$ |
 | Potenz | Vorzeichen bei negativem Exponenten vergessen | $\left(\frac{1}{x}\right)' = \frac{1}{x^2}$ |
 | Potenz | Wurzel: Faktor $\frac{1}{2}$ vergessen | $(\sqrt{x})' = \frac{1}{\sqrt{x}}$ |
+| Potenz | gebrochener Exponent: 1 nur vom Zähler abgezogen | $\left(x^{\frac{2}{3}}\right)' = \frac{2}{3}x^{\frac{1}{3}}$ |
+| Faktor | Faktor vergessen | $(5x^3)' = 3x^2$ |
 | Summe | konstanter Summand bleibt stehen | $(x^2 + 5)' = 2x + 5$ |
 | $e^x$ | Potenzregel auf $e^x$ angewendet | $(e^x)' = x e^{x-1}$ |
 | $\sin$/$\cos$ | Vorzeichen vertauscht | $(\cos x)' = \sin x$ |
@@ -302,6 +301,8 @@ ausprobieren".
 | Kette | innere Ableitung vergessen | $(\sin(3x))' = \cos(3x)$ |
 | Kette | äußere Ableitung an falscher Stelle | $(\sin(3x))' = 3\cos x$ |
 | Kette | innere Ableitung in die äußere eingesetzt | $(\sin(x^2))' = \cos(2x)$ |
+| Kette | mit der inneren Funktion statt mit der inneren Ableitung multipliziert | $\left(e^{x^2}\right)' = x^2 e^{x^2}$ |
+| Schreibweise | $\sin^2 x$ als $\sin(x^2)$ gelesen | $(\sin^2 x)' = 2x\cos(x^2)$ |
 | $a^x$ | Potenzregel angewendet | $(2^x)' = x \cdot 2^{x-1}$ |
 | $a^x$ | Faktor $\ln a$ vergessen | $(2^x)' = 2^x$ |
 | $\log_a$ | Faktor $\frac{1}{\ln a}$ vergessen | $(\log_2 x)' = \frac{1}{x}$ |
@@ -348,6 +349,3 @@ Produktregel …"
   wochenlang nicht öffnet. Auf dem Homescreen installiert passiert das
   nicht. Deshalb: App immer installieren. Eine Sicherungsfunktion
   (Fortschritt exportieren) kann später dazukommen.
-- **Getrennte Fortschritte:** Jede Adresse speichert für sich. Dein echter
-  Fortschritt liegt in der installierten App, Test-Adressen haben ihren
-  eigenen.

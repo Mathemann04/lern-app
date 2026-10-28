@@ -34,16 +34,28 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   „x^2/(3x+1)". Deutsche Konventionen: Dezimalkomma, Malpunkt, ln, f'(x).
 - **Sprache:** Oberfläche, Erklärungen und Doku auf Deutsch, Code-Kommentare
   auf Deutsch, Bezeichner im Code auf Englisch.
-- **Kommunikation:** Der Nutzer hat kaum Programmiererfahrung. Technisches
-  kurz und ohne Fachchinesisch erklären. Nur bei Entscheidungen fragen, die
-  wirklich beim Nutzer liegen (Aussehen, Inhalte, Kosten); sonst sinnvoll
-  entscheiden und kurz sagen, was entschieden wurde.
+- **Kommunikation:** Der Nutzer hat keine Programmierkenntnisse.
+  - So schreiben, dass es jemand ohne Programmierkenntnisse versteht.
+  - Fachwörter vermeiden. Wenn eins nötig ist, in wenigen Worten erklären.
+  - Jede Antwort endet mit „Das musst du jetzt tun:" und nummerierten
+    Schritten mit den genauen Namen der Knöpfe. Wenn nichts zu tun ist:
+    „Nichts".
+  - Nur bei Entscheidungen fragen, die wirklich beim Nutzer liegen (Aussehen,
+    Inhalte, Kosten); sonst sinnvoll entscheiden und kurz sagen, was
+    entschieden wurde.
 - **Doku aktuell halten:** CLAUDE.md und docs/ROADMAP.md bei jeder Änderung
   am Stand oder an den Regeln mitpflegen.
 
 ## Git und Cloud-Sitzungen
 - Jede Sitzung arbeitet auf einem eigenen Branch `claude/...`, nie direkt auf
   `main`.
-- Der Nutzer übernimmt Änderungen per Pull Request nach `main`. Neue
-  Sitzungen starten mit dem Stand von `main`; nicht übernommene Branches
-  sieht die nächste Sitzung also nicht.
+- Am Ende jeder Sitzung erstellt Claude selbst einen Pull Request nach
+  `main` (vom Nutzer so gewünscht). Der Nutzer übernimmt ihn mit
+  „Merge pull request" und „Confirm merge".
+- Neue Sitzungen starten mit dem Stand von `main`; nicht übernommene
+  Branches sieht die nächste Sitzung also nicht.
+
+## Veröffentlichung
+- Das Repo ist öffentlich. Jeder Stand von `main` wird automatisch über
+  GitHub Pages veröffentlicht: https://mathemann04.github.io/lern-app/
+- Dort testet der Nutzer am Handy und installiert die App auf dem Homescreen.
