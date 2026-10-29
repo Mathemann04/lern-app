@@ -1,26 +1,12 @@
-import { useSyncExternalStore } from 'react'
-import { type AppState, type Settings, loadState, saveState } from './storage.ts'
+import type { Settings } from './storage.ts'
+import { updateAppState, useAppState } from './store.ts'
 
-// Einstellungen für die ganze App: gelesen beim Start, gespeichert bei jeder Änderung
-
-let state: AppState = loadState()
-const listeners = new Set<() => void>()
-
-function subscribe(listener: () => void) {
-  listeners.add(listener)
-  return () => listeners.delete(listener)
-}
+// Einstellungen für die ganze App
 
 export function updateSettings(patch: Partial<Settings>) {
-  state = { ...state, settings: { ...state.settings, ...patch } }
-  saveState(state)
-  for (const listener of listeners) listener()
+  updateAppState((state) => ({ ...state, settings: { ...state.settings, ...patch } }))
 }
 
 export function useSettings(): Settings {
-  return useSyncExternalStore(
-    subscribe,
-    () => state.settings,
-    () => state.settings,
-  )
+  return useAppState((state) => state.settings)
 }

@@ -32,7 +32,9 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   (`src/ui/Formula.tsx`), das setzt alles in voller Größe (`\displaystyle`).
   Seiten über `#/…` (`routes.ts`): Start `#/`, geführt üben `#/ueben/1` (neue
   Aufgabe) bzw. `#/ueben/1-4711` (bestimmte Aufgabe), frei üben `#/frei/1`
-  bzw. `#/frei/1-4711`, `#/einstellungen`, Testseite `#/galerie`.
+  bzw. `#/frei/1-4711`, gezielt üben mit `?fokus=<Fehlerregel>` (z. B.
+  `#/ueben/2?fokus=cos-sign`), `#/fortschritt`, `#/einstellungen`, Testseite
+  `#/galerie`.
   Lernbildschirm geführt in `src/ui/guided/`, frei in `src/ui/free/`
   (MathLive mit eigener Bildschirm-Tastatur `keyboard.ts`, wird erst im
   freien Modus geladen), gemeinsame Teile in `src/ui/task/`. Welche Stufen
@@ -65,10 +67,12 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     innere Ableitung, Zusammensetzen, ab Stufe 4 ohne eigenen Außen-Schritt;
     Antworten aus Fehlerregeln)
   - `random/rng.ts`: Zufall mit Startwert; `tasks/`: Aufgaben-Nummern
-    („3-48213") und Vorlagen je Stufe
-- `src/state/`: Speichern auf dem Gerät (`storage.ts`, versioniert, robust
-  gegen kaputten Inhalt) und Einstellungen (`settings.ts`, auch die gewählte
-  Stufe und „Geführt"/„Frei")
+    („3-48213"), Vorlagen je Stufe, `focus.ts` (Aufgaben für gezieltes Üben)
+- `src/state/`: Speichern auf dem Gerät (`storage.ts`, Version 2, robust
+  gegen kaputten Inhalt, alte Versionen werden umgezogen), gemeinsamer
+  Zustand (`store.ts`), Einstellungen (`settings.ts`, auch die gewählte Stufe
+  und „Geführt"/„Frei") und Fortschritt mit Fehlerstatistik und
+  8-von-10-Vorschlag (`progress.ts`)
 - `e2e/`: Browser-Tests (Playwright). Im freien Modus vor dem Tippen warten,
   bis das Feld bereit ist und den Fokus hat (`math-field[data-ready]`,
   `toBeFocused`): MathLive setzt den Fokus leicht verzögert.
