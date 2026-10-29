@@ -4,7 +4,7 @@ Stand: 29.10.2026
 
 | Meilenstein | Inhalt | Status |
 | --- | --- | --- |
-| M1 | Grundgerüst + Ableitungsregeln (beide Modi, 5 Stufen, Erklärungen, Lernkarten, Fortschritt) | in Arbeit |
+| M1 | Grundgerüst + Ableitungsregeln (beide Modi, 5 Stufen, Erklärungen, Lernkarten, Fortschritt) | fertig |
 | M2 | Brüche und Formeln umstellen (Bruchrechnung, Doppelbrüche, nach einer Variablen auflösen) | offen |
 | M3 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
 | M4 | weitere Themen aus Mathematik MB1 | offen |
@@ -28,7 +28,7 @@ Details: [PLAN-M1.md](PLAN-M1.md)
 - [x] 9. Lernkarten
 - [x] 10. Stufe 5: logarithmisches Ableiten, Umkehr- und Hyperbelfunktionen
 - [x] 11. Stufe 5: implizites Ableiten
-- [ ] 12. Feinschliff und Abschluss von M1
+- [x] 12. Feinschliff und Abschluss von M1
 
 ## Entscheidungen
 
@@ -100,3 +100,10 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   bekommt den Hinweis, $y$ stehen zu lassen. Taste $y$ auf der
   Mathe-Tastatur (statt $\pi$, das in keiner Aufgabe vorkommt). Namen
   typischer Fehler setzen Zeichen wie $y$ oder $\ln a$ jetzt als Formel.
+- 29.10.2026: Aufbau wie bei Brilliant: Startseite mit den Fächern als
+  Überschriften und ihren Gebieten als Kacheln (Kommendes blass mit
+  „kommt bald"), Gebiet → Themen → Stufen. Karte „Weitermachen" ganz oben.
+  Ableiten gehört zur Differentialrechnung. Neue Fächer, Gebiete und Themen
+  kommen in `src/ui/catalog.ts` dazu.
+- 29.10.2026: Meilenstein 1 abgeschlossen (Schritt 12: Animationen,
+  Tippflächen, Ladezeit).
