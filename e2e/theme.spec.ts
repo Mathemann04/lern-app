@@ -22,13 +22,16 @@ test('Dunkles Design: automatisch wie das Gerät oder fest gewählt', async ({ p
 })
 
 test('Gebiete zeigen sich in ihrer eigenen Farbe', async ({ page }) => {
-  // Hintergrund des Übungsknopfs: Blau der Differentialrechnung statt Blaugrün der App
+  // Hintergrund des Übungsknopfs: Blau der Differentialrechnung
   await page.goto('./#/thema/ableiten')
   const button = page.getByRole('link', { name: 'Stufe 1 geführt üben' })
   const blue = await button.evaluate((el) => getComputedStyle(el).backgroundColor)
+  // In der Galerie: Ableiten blau wie die Differentialrechnung, Brüche orange wie die Grundlagen
   await page.goto('./#/galerie')
-  const teal = await page.getByRole('button', { name: 'Neue Aufgaben' }).evaluate((el) => getComputedStyle(el).backgroundColor)
-  expect(blue).not.toEqual(teal)
+  const newTasks = page.getByRole('button', { name: 'Neue Aufgaben' })
+  expect(await newTasks.evaluate((el) => getComputedStyle(el).backgroundColor)).toEqual(blue)
+  await page.getByRole('button', { name: 'Brüche' }).click()
+  await expect.poll(() => newTasks.evaluate((el) => getComputedStyle(el).backgroundColor)).not.toEqual(blue)
   await page.goto('./')
   await expect(page.getByRole('link', { name: /^Differentialrechnung/ })).toHaveAttribute('data-tone', 'blue')
   await expect(page.getByRole('region', { name: 'Los geht’s' })).toHaveAttribute('data-tone', 'blue')

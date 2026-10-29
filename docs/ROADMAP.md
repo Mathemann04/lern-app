@@ -19,7 +19,7 @@ Details: [PLAN-M2.md](PLAN-M2.md)
 
 - [x] Plan M2
 - [x] 1. Neues Aussehen: dunkles Design, Farben je Gebiet, neue Symbole
-- [ ] 2. Mathe-Engine für Brüche
+- [x] 2. Mathe-Engine für Brüche
 - [ ] 3. Mehrere Themen, Brüche Stufe 1 und 2 geführt
 - [ ] 4. Stufen 3 und 4 geführt
 - [ ] 5. Freier Modus für Brüche
@@ -136,3 +136,8 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   violett, Formeln mit Einheiten pink, Statik türkis; Startseite, Menü und
   Einstellungen bleiben Blaugrün. Farbige Bilder für Gebiete und Themen;
   „kommt bald" zeigt das Bild blass.
+- 29.10.2026: Bruch-Engine (Schritt 2 von M2): rechnet exakt mit Polynomen
+  statt mit Zahlenstellen, zerlegt wie im Skript (ausklammern, binomische
+  Formeln, $x^2 + px + q$), Ergebnis mit ausmultipliziertem Zähler und
+  Nenner in Faktoren; „gilt für $x \neq \dots$" bei Aufgaben mit $x$. 23
+  typische Fehler, Bruchaufgaben in der Formel-Galerie.

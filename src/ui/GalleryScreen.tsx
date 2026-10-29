@@ -4,6 +4,7 @@ import { wrongAnswers } from '../engine/derive/errorRules.ts'
 import { deriveImplicit, implicitResult, implicitWrongAnswers } from '../engine/derive/implicit.ts'
 import { equationToLatex, toLatex } from '../engine/expr/print.ts'
 import { type GeneratedTask, generateDerivativeTask } from '../engine/tasks/derivativeTerms.ts'
+import { type GeneratedFractionTask, generateFractionTask, isFractionLevelAvailable } from '../engine/tasks/fractionTerms.ts'
 import {
   LEVELS,
   type Level,
@@ -14,15 +15,33 @@ import {
   randomSeed,
 } from '../engine/tasks/taskNumber.ts'
 import { BackLink } from './BackLink.tsx'
+import { areaById, courseById } from './catalog.ts'
 import { DerivationView } from './DerivationView.tsx'
+import { FractionGalleryCard } from './FractionGalleryCard.tsx'
 import { Formula } from './Formula.tsx'
 import { RichText } from './RichText.tsx'
 import { notationSamples } from './samples.ts'
 
 const TASKS_PER_PAGE = 8
 
-// Testseite: zeigt zufällige Aufgaben-Terme der Mathe-Engine, um die Schreibweise zu prüfen
+// Themen der Testseite, in der Farbe ihres Gebiets
+type Topic = 'ableiten' | 'brueche'
+const TOPICS: Array<{ value: Topic; title: string; tone: string | undefined }> = [
+  { value: 'ableiten', title: 'Ableiten', tone: courseById('ableiten')?.area.tone },
+  { value: 'brueche', title: 'Brüche', tone: areaById('grundlagen')?.area.tone },
+]
+
+type Generated = { topic: 'ableiten'; task: GeneratedTask } | { topic: 'brueche'; task: GeneratedFractionTask }
+
+const isLevelAvailable = (topic: Topic, level: Level) => topic === 'ableiten' || isFractionLevelAvailable(level)
+
+function generate(topic: Topic, ref: TaskRef): Generated {
+  return topic === 'ableiten' ? { topic, task: generateDerivativeTask(ref) } : { topic, task: generateFractionTask(ref) }
+}
+
+// Testseite: zeigt zufällige Aufgaben der Mathe-Engine, um Schreibweise und Rechenweg zu prüfen
 export function GalleryScreen() {
+  const [topic, setTopic] = useState<Topic>('ableiten')
   const [level, setLevel] = useState<Level>(1)
   const [baseSeed, setBaseSeed] = useState(randomSeed)
   const [showSteps, setShowSteps] = useState(false)
@@ -31,13 +50,17 @@ export function GalleryScreen() {
   const [lookup, setLookup] = useState<TaskRef | 'invalid' | null>(null)
 
   const tasks = useMemo(
-    () =>
-      Array.from({ length: TASKS_PER_PAGE }, (_, i) =>
-        generateDerivativeTask({ level, seed: ((baseSeed + i * 7919) % MAX_SEED) + 1 }),
-      ),
-    [level, baseSeed],
+    () => Array.from({ length: TASKS_PER_PAGE }, (_, i) => generate(topic, { level, seed: ((baseSeed + i * 7919) % MAX_SEED) + 1 })),
+    [topic, level, baseSeed],
   )
-  const lookedUp = lookup && lookup !== 'invalid' ? generateDerivativeTask(lookup) : null
+  const lookupUnavailable = lookup && lookup !== 'invalid' && !isLevelAvailable(topic, lookup.level)
+  const lookedUp = lookup && lookup !== 'invalid' && !lookupUnavailable ? generate(topic, lookup) : null
+
+  function chooseTopic(next: Topic) {
+    setTopic(next)
+    if (!isLevelAvailable(next, level)) setLevel(1)
+    setLookup(null)
+  }
 
   function handleLookup(event: FormEvent) {
     event.preventDefault()
@@ -50,12 +73,31 @@ export function GalleryScreen() {
         <BackLink href="#/einstellungen" label="Einstellungen" />
         <h1 className="text-3xl font-semibold tracking-tight">Formel-Galerie</h1>
         <p className="text-zinc-600 text-pretty">
-          Testseite: Hier zeigt die Mathe-Engine zufällige Aufgaben aus allen Stufen mit Ableitung,
+          Testseite: Hier zeigt die Mathe-Engine zufällige Aufgaben aus allen Stufen mit Lösung,
           Rechenweg und typischen Fehlern. Prüfe, ob alles aussieht wie in deinem Skript.
         </p>
       </section>
 
-      <section className="space-y-4">
+      <section className="space-y-4" data-tone={TOPICS.find((t) => t.value === topic)?.tone}>
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-zinc-500">Thema</span>
+          <div className="flex flex-1 gap-1 rounded-xl bg-zinc-100 p-1">
+            {TOPICS.map((t) => (
+              <button
+                key={t.value}
+                type="button"
+                aria-pressed={t.value === topic}
+                onClick={() => chooseTopic(t.value)}
+                className={`min-h-11 flex-1 rounded-lg py-2 font-medium transition-colors ${
+                  t.value === topic ? 'bg-raised text-accent-700 shadow-sm' : 'text-zinc-600 hover:text-zinc-900'
+                }`}
+              >
+                {t.title}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="flex items-center gap-3">
           <span className="text-sm font-medium text-zinc-500">Stufe</span>
           <div className="flex flex-1 gap-1 rounded-xl bg-zinc-100 p-1">
@@ -65,9 +107,11 @@ export function GalleryScreen() {
                 type="button"
                 aria-label={`Stufe ${l}`}
                 aria-pressed={l === level}
+                disabled={!isLevelAvailable(topic, l)}
+                title={isLevelAvailable(topic, l) ? undefined : 'folgt bald'}
                 onClick={() => setLevel(l)}
-                className={`flex-1 rounded-lg py-2 font-medium transition-colors ${
-                  l === level ? 'bg-raised text-accent-700 shadow-sm' : 'text-zinc-600 hover:text-zinc-900'
+                className={`flex-1 rounded-lg py-2 font-medium transition-colors disabled:opacity-40 ${
+                  l === level ? 'bg-raised text-accent-700 shadow-sm' : 'text-zinc-600 enabled:hover:text-zinc-900'
                 }`}
               >
                 {l}
@@ -129,20 +173,23 @@ export function GalleryScreen() {
           {lookup === 'invalid' && (
             <p className="text-sm text-red-700">Bitte so eingeben: Stufe, Bindestrich, Nummer, z. B. 3-48213.</p>
           )}
+          {lookupUnavailable && <p className="text-sm text-red-700">Diese Stufe gibt es hier noch nicht.</p>}
         </form>
       </section>
 
-      {lookedUp && (
-        <section aria-label="Aufgerufene Aufgabe">
-          <TaskCard generated={lookedUp} showSteps={showSteps} showErrors={showErrors} highlighted />
-        </section>
-      )}
+      <div data-tone={TOPICS.find((t) => t.value === topic)?.tone} className="space-y-8">
+        {lookedUp && (
+          <section aria-label="Aufgerufene Aufgabe">
+            <GalleryCard generated={lookedUp} showSteps={showSteps} showErrors={showErrors} highlighted />
+          </section>
+        )}
 
-      <section aria-label="Zufällige Aufgaben" className="space-y-3">
-        {tasks.map((generated) => (
-          <TaskCard key={generated.ref.seed} generated={generated} showSteps={showSteps} showErrors={showErrors} />
-        ))}
-      </section>
+        <section aria-label="Zufällige Aufgaben" className="space-y-3">
+          {tasks.map((generated) => (
+            <GalleryCard key={`${generated.topic}:${generated.task.ref.seed}`} generated={generated} showSteps={showSteps} showErrors={showErrors} />
+          ))}
+        </section>
+      </div>
 
       <section aria-labelledby="notation" className="space-y-4 border-t border-zinc-100 pt-8">
         <div>
@@ -164,6 +211,10 @@ export function GalleryScreen() {
       </section>
     </main>
   )
+}
+
+function GalleryCard({ generated, ...rest }: { generated: Generated; showSteps: boolean; showErrors: boolean; highlighted?: boolean }) {
+  return generated.topic === 'ableiten' ? <TaskCard generated={generated.task} {...rest} /> : <FractionGalleryCard generated={generated.task} {...rest} />
 }
 
 type CardProps = {

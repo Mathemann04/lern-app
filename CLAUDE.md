@@ -43,8 +43,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   bzw. `#/frei/1-4711`, gezielt üben mit `?fokus=<Fehlerregel>` (z. B.
   `#/ueben/2?fokus=cos-sign`), Lernkarten in Ordnern nach Themen `#/karten`,
   `#/karten/ableitungen`, `#/karten/ableitungen/product`, `#/fortschritt`,
-  `#/einstellungen`, Testseite `#/galerie` (Link in den Einstellungen, mit
-  den Schreibweise-Beispielen). Startseite, Gebiet, Einstellungen,
+  `#/einstellungen`, Testseite `#/galerie` (Link in den Einstellungen,
+  Themen Ableiten und Brüche, mit den Schreibweise-Beispielen). Startseite, Gebiet, Einstellungen,
   `routes.ts` und `catalog.ts` kommen ohne Mathe-Engine und KaTeX aus
   (Ladezeit); alle anderen Seiten lädt `App.tsx` erst bei Bedarf. Ob es
   eine Lernkarte oder einen typischen Fehler aus der Adresse gibt, prüfen
@@ -98,9 +98,16 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     implizit (Stufe 5): Term mit y ableiten, beide Seiten ableiten, nach y'
     auflösen; Antworten aus Fehlerregeln; je Schritt die passenden
     Lernkarten)
+  - `fraction/`: Bruch-Engine (Brüche aus Polynomen, exakt): `poly.ts`
+    (Polynome in mehreren Buchstaben), `frac.ts` (Bruch, Termbaum ↔
+    Polynom; $e^x$, $\ln x$, $\sin x$, $\cos x$ als eigene Buchstaben),
+    `factor.ts` (zerlegen, Hauptnenner, kürzen; Ergebnis: Zähler
+    ausmultipliziert, Nenner in Faktoren), `task.ts` (Aufgabenformen:
+    kürzen, plus/minus, mal, geteilt, Doppelbruch), `solve.ts` (Rechenweg,
+    verbotene Zahlen), `errorRules.ts` (typische Fehler, Ids `frac-…`)
   - `random/rng.ts`: Zufall mit Startwert; `tasks/`: Aufgaben-Nummern
-    („3-48213"), Vorlagen je Stufe, `focus.ts` (Aufgaben für
-    gezieltes Üben)
+    („3-48213"), Vorlagen je Stufe (`derivativeTerms.ts`,
+    `fractionTerms.ts`), `focus.ts` (Aufgaben für gezieltes Üben)
 - `src/state/`: Speichern auf dem Gerät (`storage.ts`, Version 2, robust
   gegen kaputten Inhalt, alte Versionen werden umgezogen), gemeinsamer
   Zustand (`store.ts`), Einstellungen (`settings.ts`, auch die gewählte Stufe,
@@ -143,7 +150,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   mehrmals laufen lassen. Numerische Vergleiche nur an aussagekräftigen,
   stabilen Stellen (Rundungseffekte sonst als Scheinfehler).
 - **Fehlerregeln:** Jede neue Fehlerregel bekommt ein Katalogbeispiel in
-  `errorRules.test.ts` und einen Eintrag im Katalog in docs/PLAN-M1.md.
+  `errorRules.test.ts` und einen Eintrag im Katalog (Ableiten:
+  docs/PLAN-M1.md, Brüche: docs/PLAN-M2.md).
 - **Lernkarten:** Jede Regel, die in Aufgaben vorkommt, braucht eine Karte in
   `explain/cards.ts`, und jede ihrer Fehlerregeln steht auf einer Karte
   (`cards.test.ts` prüft das). Beispiele nur als Term; den Rechenweg rechnet
