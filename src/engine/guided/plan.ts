@@ -1,6 +1,7 @@
 import { type Derivation, PLACEHOLDER, allNodes, derive } from '../derive/derive.ts'
 import { type WrongAnswer, wrongAnswers } from '../derive/errorRules.ts'
 import { RULES, type RuleId } from '../derive/rules.ts'
+import { cardIdsFor } from '../explain/cards.ts'
 import {
   type Explanation,
   EXTRA_RULE_OPTION,
@@ -63,16 +64,22 @@ export type GuidedStep = {
   readonly explanation: Explanation
   // was nach dem Schritt feststeht, als LaTeX-Zeile, z. B. (4x^3)' = 12x^2
   readonly established?: string
+  // passende Lernkarten (Ids aus cards.ts); bei der Regelwahl die Karten aller angebotenen Regeln
+  readonly cards: readonly string[]
 }
 
 export type GuidedTask = {
   readonly ref: TaskRef
+  // abzuleitende Funktion (Aufgabenform)
+  readonly expr: Expr
   readonly functionLatex: string
   readonly steps: readonly GuidedStep[]
   // Welche Regel ganz außen? (auch, wenn die Frage danach entfällt; Tipp im freien Modus)
   readonly ruleHint: Explanation
   readonly result: Expr
   readonly resultLatex: string
+  // Lernkarten zu allen Regeln der Aufgabe, außen zuerst
+  readonly cards: readonly string[]
 }
 
 const MAX_WRONG_CHOICES = 3
@@ -113,11 +120,13 @@ export function planForExpression(f: Expr, ref: TaskRef, focus?: string): Guided
   const { factors, core } = splitFactors(root)
   return {
     ref,
+    expr: f,
     functionLatex: `f(x) = ${toLatex(f)}`,
     steps,
     ruleHint: explainRuleChoice(core.rule, factors),
     result: root.result,
     resultLatex: `f'(x) = ${toLatex(root.result)}`,
+    cards: cardIdsFor(allNodes(root).map((n) => n.rule)),
   }
 }
 
@@ -213,23 +222,29 @@ function ruleStep(root: Derivation, rng: Rng): GuidedStep | null {
   // Bei verschachtelten Termen bleiben oft zu wenige: dann auch die Faktorregel, falls sie nirgends vorkommt
   if (wrong.length < 2 && !excluded.has(EXTRA_RULE_OPTION)) wrong.push(EXTRA_RULE_OPTION)
   if (wrong.length === 0) return null
-  const choices: Choice[] = [
-    { id: 'regel-richtig', content: RULES[correct].name, caption: tex(RULES[correct].formula), correct: true },
+  // Regel und Antwort gemeinsam mischen: Die Karten folgen der Reihenfolge der Antworten
+  const options = rng.shuffle<{ rule: RuleId; choice: Choice }>([
+    { rule: correct, choice: { id: 'regel-richtig', content: RULES[correct].name, caption: tex(RULES[correct].formula), correct: true } },
     ...wrong.map((r) => ({
-      id: `regel-${r}`,
-      content: RULES[r].name,
-      caption: tex(RULES[r].formula),
-      correct: false,
-      whyWrong: explainWrongRuleChoice(r, correct, root),
+      rule: r,
+      choice: {
+        id: `regel-${r}`,
+        content: RULES[r].name,
+        caption: tex(RULES[r].formula),
+        correct: false,
+        whyWrong: explainWrongRuleChoice(r, correct, root),
+      },
     })),
-  ]
+  ])
   return {
     id: 'regel',
     title: 'Regel wählen',
     question: 'Welche Regel wendest du als Erstes an?',
-    choices: rng.shuffle(choices),
+    choices: options.map((o) => o.choice),
     hint: 'Schau, wie die Teile des ganzen Terms verbunden sind: mit $+$ oder $-$, mit $\\cdot$, als Bruch oder ineinander eingesetzt.',
     explanation: explainRuleChoice(correct, factors),
+    // Karten aller angebotenen Regeln, damit die Karten die Antwort nicht verraten
+    cards: cardIdsFor(options.map((o) => o.rule)),
   }
 }
 
@@ -297,6 +312,7 @@ function derivativeStep(node: Derivation, { title, question, name }: StepText, {
     variable: node.variable,
     explanation: explainCalculation(local),
     established: name ? `${name} = ${calculation}` : calculation,
+    cards: cardIdsFor(allNodes(local).map((n) => n.rule)),
   }
 }
 
@@ -351,5 +367,11 @@ function assembleStep(root: Derivation, title: string, question: string, { rng, 
     variable: root.variable,
     explanation: explainAssembly(root, factors, core, formula),
     established: `f'(x) = ${toLatex(formula)}`,
+    // Regel zum Einsetzen; ab Stufe 4 wird dabei auch die äußere Funktion abgeleitet
+    cards: cardIdsFor([
+      core.rule,
+      ...(withOuter && core.rule === 'chain' ? allNodes(core.children[0]).map((n) => n.rule) : []),
+      ...factors.map((f) => f.rule),
+    ]),
   }
 }

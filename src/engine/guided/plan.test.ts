@@ -1,6 +1,9 @@
 import katex from 'katex'
 import { describe, expect, it } from 'vitest'
 import { compareValues, numericDerivative } from '../check/numeric.ts'
+import { derive } from '../derive/derive.ts'
+import { RULES, type RuleId } from '../derive/rules.ts'
+import { cardById, cardForRule } from '../explain/cards.ts'
 import { FALLBACK_MARKER } from '../explain/texts.ts'
 import { parseRichText } from '../explain/richText.ts'
 import { isStableAt } from '../expr/arbitraries.ts'
@@ -12,6 +15,9 @@ import { createRng } from '../random/rng.ts'
 import { type GuidedStep, type GuidedTask, planForExpression, planGuidedTask } from './plan.ts'
 
 const correctChoice = (step: GuidedStep) => step.choices.find((c) => c.correct)!
+
+// Regel zu einer Antwort der Regelwahl
+const ruleNamed = (name: string) => (Object.keys(RULES) as RuleId[]).find((r) => RULES[r].name === name)!
 
 // Alle Texte eines Schritts mit Formeln
 function texts(step: GuidedStep): string[] {
@@ -69,6 +75,16 @@ describe('Beispiel aus dem Plan: 4x³ − 2/x + √x', () => {
     expect(plan.steps[1].explanation.detailed).toContain('Faktorregel')
     expect(plan.steps[1].explanation.detailed).toContain('3 \\cdot x^{3 - 1}')
     expect(plan.steps[2].explanation.detailed).toContain('2x^{-1}')
+  })
+
+  it('nennt zu jedem Schritt die passenden Lernkarten', () => {
+    expect(plan.steps.map((s) => s.cards)).toEqual([
+      plan.steps[0].choices.map((c) => cardForRule(ruleNamed(c.content))!.id),
+      ['constant-factor', 'power'],
+      ['constant-factor', 'rewrite', 'power'],
+      ['rewrite', 'power'],
+    ])
+    expect(plan.cards).toEqual(['sum', 'constant-factor', 'power', 'rewrite'])
   })
 
   it('erklärt einen vergessenen Faktor konkret', () => {
@@ -257,6 +273,25 @@ describe.each([1, 2, 3, 4] as const)('alle Aufgaben der Stufe %i', (level) => {
         for (const text of [wrong.whyWrong!.detailed, wrong.whyWrong!.short]) {
           expect(text, `${level}-${plan.ref.seed} ${wrong.errorRuleId}`).not.toContain(solution)
           expect(text, `${level}-${plan.ref.seed} ${wrong.errorRuleId}`).not.toContain(`$${result}$`)
+        }
+      }
+    }
+  })
+
+  it('zeigen in jedem Schritt passende Lernkarten, ohne bei der Regelwahl die Antwort zu verraten', () => {
+    for (const plan of plans) {
+      for (const step of plan.steps) {
+        const context = `${level}-${plan.ref.seed} ${step.title}`
+        expect(step.cards.length, context).toBeGreaterThan(0)
+        for (const id of step.cards) expect(cardById(id), context).toBeDefined()
+        if (step.id === 'regel') {
+          // jede angebotene Regel hat ihre Karte, nicht nur die richtige
+          expect(step.cards, context).toEqual(step.choices.map((c) => cardForRule(ruleNamed(c.content))!.id))
+        } else {
+          const rule = derive(step.subject!, step.variable).rule
+          expect(step.cards, context).toContain(cardForRule(rule)!.id)
+          // Die Aufgabe kennt alle Karten ihrer Schritte (außer den falschen Regeln der Regelwahl)
+          expect(plan.cards, context).toEqual(expect.arrayContaining([...step.cards]))
         }
       }
     }

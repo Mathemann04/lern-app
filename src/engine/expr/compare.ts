@@ -62,3 +62,27 @@ export function contains(e: Expr, name: string): boolean {
       return contains(e.base, name) || contains(e.arg, name)
   }
 }
+
+// Alle Teilterme, der Term selbst zuerst
+export function subterms(e: Expr): Expr[] {
+  switch (e.kind) {
+    case 'num':
+    case 'const':
+    case 'var':
+      return [e]
+    case 'add':
+      return [e, ...e.terms.flatMap(subterms)]
+    case 'mul':
+      return [e, ...e.factors.flatMap(subterms)]
+    case 'neg':
+    case 'root':
+    case 'fn':
+      return [e, ...subterms(e.arg)]
+    case 'div':
+      return [e, ...subterms(e.num), ...subterms(e.den)]
+    case 'pow':
+      return [e, ...subterms(e.base), ...subterms(e.exp)]
+    case 'log':
+      return [e, ...subterms(e.base), ...subterms(e.arg)]
+  }
+}

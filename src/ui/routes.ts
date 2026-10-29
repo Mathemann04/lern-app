@@ -1,4 +1,5 @@
 import { ERROR_RULES } from '../engine/derive/errorRules.ts'
+import { cardById } from '../engine/explain/cards.ts'
 import { type Level, type TaskRef, formatTaskNumber, parseTaskNumber } from '../engine/tasks/taskNumber.ts'
 import type { PracticeMode } from '../state/storage.ts'
 
@@ -8,6 +9,9 @@ export type Route =
   | { readonly page: 'gallery' }
   | { readonly page: 'settings' }
   | { readonly page: 'progress' }
+  // Lernkarten: Übersicht #/karten, eine Karte #/karten/product
+  | { readonly page: 'cards' }
+  | { readonly page: 'card'; readonly id: string }
   // Üben: ohne Startwert wird eine neue Aufgabe gewürfelt; focus: gezielt einen typischen Fehler üben
   | {
       readonly page: 'practice'
@@ -25,6 +29,9 @@ export function parseRoute(fullPath: string): Route {
   if (path === '/galerie') return { page: 'gallery' }
   if (path === '/einstellungen') return { page: 'settings' }
   if (path === '/fortschritt') return { page: 'progress' }
+  if (path === '/karten') return { page: 'cards' }
+  const card = /^\/karten\/(.+)$/.exec(path)
+  if (card) return cardById(card[1]) ? { page: 'card', id: card[1] } : { page: 'cards' }
   const practice = /^\/(ueben|frei)\/(.+)$/.exec(path)
   if (practice) {
     const mode: PracticeMode = practice[1] === 'frei' ? 'free' : 'guided'
@@ -43,3 +50,5 @@ export const practiceHref = (level: Level, mode: PracticeMode = 'guided', focus?
   `#/${PREFIX[mode]}/${level}${focusQuery(focus)}`
 export const taskHref = (ref: TaskRef, mode: PracticeMode = 'guided', focus?: string | null) =>
   `#/${PREFIX[mode]}/${formatTaskNumber(ref)}${focusQuery(focus)}`
+
+export const cardHref = (id: string) => `#/karten/${id}`

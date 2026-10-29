@@ -25,7 +25,7 @@ Details: [PLAN-M1.md](PLAN-M1.md)
 - [x] 6. Freier Modus
 - [x] 7. Stufe 4 (vorgezogen, wichtigstes Niveau)
 - [x] 8. Fortschritt und Fehlerstatistik
-- [ ] 9. Lernkarten
+- [x] 9. Lernkarten
 - [ ] 10. Stufe 5: logarithmisches Ableiten, Umkehr- und Hyperbelfunktionen
 - [ ] 11. Stufe 5: implizites Ableiten
 - [ ] 12. Feinschliff und Abschluss von M1
@@ -74,3 +74,9 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   je Aufgabe. Gezieltes Üben sucht Aufgaben, in denen genau dieser Fehler
   passieren kann, zuerst in der gewählten Stufe; im geführten Modus erscheint
   er dann sicher als Antwort. Speicher-Format Version 2 (mit Fortschritt).
+- 29.10.2026: Lernkarten: eine Karte je Regel der Stufen 1 bis 4 (15 Karten)
+  mit Formel, Merksatz, Beispielen mit Rechenweg aus der Engine und typischen
+  Fehlern. Aus einer Aufgabe öffnen sie sich als Fenster über der Aufgabe;
+  bei der Regelwahl mit allen angebotenen Regeln, damit die Antwort nicht
+  verraten wird. Beispiele, die Teil der Aufgabe sind, werden dort nicht
+  gezeigt. Lernkarten zählen wie ein Tipp (Aufgabe bleibt „ohne Fehler").

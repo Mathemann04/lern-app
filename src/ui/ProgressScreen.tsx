@@ -3,6 +3,7 @@ import { errorRule } from '../engine/derive/errorRules.ts'
 import { SUGGEST_WINDOW, levelSummary, resetProgress, topErrors, useProgress } from '../state/progress.ts'
 import { useSettings } from '../state/settings.ts'
 import type { Attempt } from '../state/storage.ts'
+import { FitWidth } from './FitWidth.tsx'
 import { Formula } from './Formula.tsx'
 import { practiceHref } from './routes.ts'
 import { derivativeLevels } from './samples.ts'
@@ -74,9 +75,11 @@ export function ProgressScreen() {
                     <p className="font-medium">{rule.name}</p>
                     <p className="shrink-0 text-sm text-zinc-500">{times}-mal</p>
                   </div>
-                  <div className="overflow-x-auto text-zinc-700">
-                    <span className="text-sm text-zinc-500">So sieht der Fehler aus: </span>
-                    <Formula tex={rule.wrongFormula} />
+                  <div className="text-zinc-700">
+                    <span className="text-sm text-zinc-500">So sieht der Fehler aus:</span>
+                    <FitWidth>
+                      <Formula tex={rule.wrongFormula} />
+                    </FitWidth>
                   </div>
                   <a
                     href={practiceHref(derivativeLevel, practiceMode, id)}

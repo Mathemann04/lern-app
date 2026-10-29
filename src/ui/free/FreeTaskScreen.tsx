@@ -9,6 +9,7 @@ import type { ExplanationDetail } from '../../state/storage.ts'
 import { FitWidth } from '../FitWidth.tsx'
 import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
+import { CardSheetButton, TaskCardLinks } from '../cards/CardSheet.tsx'
 import { practiceHref, taskHref } from '../routes.ts'
 import { LevelUpSuggestion } from '../task/LevelUpSuggestion.tsx'
 import { FocusBanner, TaskIntro, TaskTopBar } from '../task/TaskParts.tsx'
@@ -107,16 +108,19 @@ export default function FreeTaskScreen({ taskRef, focus = null }: { taskRef: Tas
       {solved && <LevelUpSuggestion level={level} mode="free" />}
 
       {solved ? (
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <a
-            href={practiceHref(level, 'free', focus)}
-            className="flex-1 rounded-xl bg-accent-700 px-4 py-3 text-center text-lg font-medium text-white hover:bg-accent-800"
-          >
-            Nächste Aufgabe
-          </a>
-          <a href="#/" className="flex-1 rounded-xl border border-zinc-300 px-4 py-3 text-center text-lg font-medium hover:bg-zinc-50">
-            Zur Startseite
-          </a>
+        <div className="space-y-5">
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <a
+              href={practiceHref(level, 'free', focus)}
+              className="flex-1 rounded-xl bg-accent-700 px-4 py-3 text-center text-lg font-medium text-white hover:bg-accent-800"
+            >
+              Nächste Aufgabe
+            </a>
+            <a href="#/" className="flex-1 rounded-xl border border-zinc-300 px-4 py-3 text-center text-lg font-medium hover:bg-zinc-50">
+              Zur Startseite
+            </a>
+          </div>
+          <TaskCardLinks ids={plan.cards} />
         </div>
       ) : (
         <div className="flex flex-wrap gap-2">
@@ -137,6 +141,9 @@ export default function FreeTaskScreen({ taskRef, focus = null }: { taskRef: Tas
               Lösungsweg aufdecken
             </button>
           )}
+          <CardSheetButton ids={plan.cards} title={plan.cards.length === 1 ? 'Lernkarte zu dieser Aufgabe' : 'Lernkarten zu dieser Aufgabe'}
+            task={plan.expr}
+          />
           <a href={taskHref(taskRef, 'guided', focus)} className="rounded-xl px-3 py-2 font-medium text-accent-700 hover:bg-accent-50">
             Geführt lösen
           </a>

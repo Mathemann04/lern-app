@@ -105,6 +105,21 @@ mehrmals machen und das gezielte Üben starten.
 - Pro Regel eine Karte: Regel, Merksatz, durchgerechnetes Beispiel. Das
   Beispiel rechnet die Engine, nicht ich von Hand.
 - Aufrufbar aus dem Menü und direkt aus jeder Aufgabe.
+- Umgesetzt: 15 Karten für die Regeln der Stufen 1 bis 4 (Sinus und Kosinus
+  auf einer Karte, „Wurzeln und Brüche" als eigene Karte zum Umschreiben).
+  Jede Karte hat Formel, Merksatz, oft eine Merkhilfe (z. B. „NAZ minus ZAN"),
+  bei den Regeln für den Aufbau eines Terms „Wann brauchst du sie?", 2 bis 4
+  Beispiele mit Rechenweg („Anderes Beispiel") und die typischen Fehler mit
+  „Gezielt üben". Seiten `#/karten` und `#/karten/<id>`, Knopf in der
+  Kopfzeile und auf der Startseite.
+- In einer Aufgabe öffnet „Lernkarte" ein Fenster über der Aufgabe (die
+  Aufgabe bleibt, wie sie ist; die Zurück-Taste schließt nur das Fenster).
+  Gezeigt werden die Karten zum aktuellen Schritt, bei der Regelwahl die
+  Karten aller angebotenen Regeln (verrät die Antwort nicht), im freien Modus
+  die Karten der ganzen Aufgabe. Beispiele, die Teil der Aufgabe sind,
+  fallen dort weg. Lernkarten zählen wie ein Tipp: Die Aufgabe bleibt „ohne
+  Fehler". Nach dem Lösen verlinkt die Aufgabe ihre Karten zum Nachlesen.
+- Karten der Stufe 5 kommen mit den Schritten 10 und 11.
 
 ### Schritt 10: Stufe 5, Teil 1
 - Logarithmisches Ableiten ($x^x$, $x^{\sin x}$), Umkehrfunktionen
@@ -293,7 +308,10 @@ Die Engine kennt kein React. Spätere Themen (M2 ff.) bauen auf `expr/`,
 - Leser: Ausgabe → Einlesen ergibt wieder denselben Term.
 - Gleichwertigkeitsprüfung: Sammlung bekannter gleichwertiger Formen wird
   angenommen, Fehlerregel-Ergebnisse werden abgelehnt und richtig benannt.
-- Lernkarten-Beispiele werden von der Engine berechnet und getestet.
+- Lernkarten-Beispiele werden von der Engine berechnet und getestet
+  (`src/engine/explain/cards.test.ts`: Ergebnis gegen numerische Ableitung,
+  jede Regel und jeder typische Fehler der Stufen 1 bis 4 hat eine Karte,
+  Zusätze wie $1 + \tan^2 x$ numerisch geprüft).
 - Playwright: je eine Aufgabe geführt und frei komplett durchspielen,
   Screenshots bei 390×844 (Handy) und 1280×800 (Laptop).
 

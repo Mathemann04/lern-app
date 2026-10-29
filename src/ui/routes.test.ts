@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { parseRoute, practiceHref, taskHref } from './routes.ts'
+import { cardHref, parseRoute, practiceHref, taskHref } from './routes.ts'
 
 describe('parseRoute', () => {
   it('erkennt die Seiten', () => {
@@ -8,6 +8,13 @@ describe('parseRoute', () => {
     expect(parseRoute('/einstellungen')).toEqual({ page: 'settings' })
     expect(parseRoute('/fortschritt')).toEqual({ page: 'progress' })
     expect(parseRoute('/unbekannt')).toEqual({ page: 'home' })
+  })
+
+  it('erkennt die Lernkarten, unbekannte Karten führen zur Übersicht', () => {
+    expect(parseRoute('/karten')).toEqual({ page: 'cards' })
+    expect(parseRoute('/karten/product')).toEqual({ page: 'card', id: 'product' })
+    expect(parseRoute('/karten/gibt-es-nicht')).toEqual({ page: 'cards' })
+    expect(cardHref('sin-cos')).toBe('#/karten/sin-cos')
   })
 
   it('erkennt Übungsaufgaben mit und ohne Nummer', () => {

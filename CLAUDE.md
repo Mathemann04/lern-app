@@ -33,11 +33,14 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   Seiten über `#/…` (`routes.ts`): Start `#/`, geführt üben `#/ueben/1` (neue
   Aufgabe) bzw. `#/ueben/1-4711` (bestimmte Aufgabe), frei üben `#/frei/1`
   bzw. `#/frei/1-4711`, gezielt üben mit `?fokus=<Fehlerregel>` (z. B.
-  `#/ueben/2?fokus=cos-sign`), `#/fortschritt`, `#/einstellungen`, Testseite
+  `#/ueben/2?fokus=cos-sign`), Lernkarten `#/karten` und `#/karten/<id>`
+  (z. B. `#/karten/product`), `#/fortschritt`, `#/einstellungen`, Testseite
   `#/galerie`.
   Lernbildschirm geführt in `src/ui/guided/`, frei in `src/ui/free/`
   (MathLive mit eigener Bildschirm-Tastatur `keyboard.ts`, wird erst im
-  freien Modus geladen), gemeinsame Teile in `src/ui/task/`. Welche Stufen
+  freien Modus geladen), gemeinsame Teile in `src/ui/task/`. Lernkarten in
+  `src/ui/cards/` (`CardSheet.tsx`: Fenster über der Aufgabe, die
+  Zurück-Taste schließt nur das Fenster). Welche Stufen
   schon spielbar sind: `available` in `src/ui/samples.ts`. Lange Formeln in
   `FitWidth` (`src/ui/FitWidth.tsx`) setzen sich selbst kleiner, bis sie
   passen. Texte mit Formeln über
@@ -61,11 +64,13 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   - `parse/latex.ts`: liest die Eingabe der Mathe-Tastatur (LaTeX) ein, mit
     verständlichen Fehlermeldungen
   - `explain/`: Textbausteine für Erklärungen (ausführlich/kurz), Tipps und
-    „Warum ist das falsch?" (`texts.ts`); Format Text mit `$…$`-Formeln
+    „Warum ist das falsch?" (`texts.ts`); Format Text mit `$…$`-Formeln.
+    Lernkarten (`cards.ts`: Formel, Merksatz, Beispiele, typische Fehler je
+    Regel) und durchgerechnete Beispiele (`example.ts`, aus `derive`)
   - `guided/plan.ts`: Schrittplaner für den geführten Modus (Regelwahl, dann je
     Summand ein Schritt; Produkt/Quotient: u', v', Einsetzen; Kette: äußere,
     innere Ableitung, Zusammensetzen, ab Stufe 4 ohne eigenen Außen-Schritt;
-    Antworten aus Fehlerregeln)
+    Antworten aus Fehlerregeln; je Schritt die passenden Lernkarten)
   - `random/rng.ts`: Zufall mit Startwert; `tasks/`: Aufgaben-Nummern
     („3-48213"), Vorlagen je Stufe, `focus.ts` (Aufgaben für gezieltes Üben)
 - `src/state/`: Speichern auf dem Gerät (`storage.ts`, Version 2, robust
@@ -101,6 +106,10 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   stabilen Stellen (Rundungseffekte sonst als Scheinfehler).
 - **Fehlerregeln:** Jede neue Fehlerregel bekommt ein Katalogbeispiel in
   `errorRules.test.ts` und einen Eintrag im Katalog in docs/PLAN-M1.md.
+- **Lernkarten:** Jede Regel, die in Aufgaben vorkommt, braucht eine Karte in
+  `explain/cards.ts`, und jede ihrer Fehlerregeln steht auf einer Karte
+  (`cards.test.ts` prüft das). Beispiele nur als Term; den Rechenweg rechnet
+  die Engine.
 - **Texte:** „Warum ist das falsch?" benennt den Fehler und zeigt die Regel,
   verrät aber nicht das Endergebnis des Schritts. Jede Fehlerregel, die in einer
   Stufe vorkommt, braucht einen eigenen Text in `explain/texts.ts` (Tests
