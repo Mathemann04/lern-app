@@ -39,9 +39,15 @@ export function shouldSuggestLevelUp(progress: Progress, level: Level): boolean 
   return dismissedAt === undefined || solved >= dismissedAt + SUGGEST_WINDOW
 }
 
-// Häufigste Fehler zuerst; bei Gleichstand in fester Reihenfolge (nach Id)
-export function topErrors(progress: Progress, count: number): Array<{ id: string; times: number }> {
+// Häufigste Fehler zuerst; bei Gleichstand in fester Reihenfolge (nach Id). known: nur Fehler, die
+// es (noch) gibt; gespeichert sein kann auch eine Id aus einer älteren Version.
+export function topErrors(
+  progress: Progress,
+  count: number,
+  known: (id: string) => boolean = () => true,
+): Array<{ id: string; times: number }> {
   return Object.entries(progress.errors)
+    .filter(([id]) => known(id))
     .map(([id, times]) => ({ id, times }))
     .sort((a, b) => b.times - a.times || a.id.localeCompare(b.id))
     .slice(0, count)

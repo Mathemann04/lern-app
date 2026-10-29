@@ -39,7 +39,7 @@ export function CardsScreen() {
         <p className="text-zinc-600 text-pretty">Jede Regel mit Merksatz, durchgerechneten Beispielen und den typischen Fehlern.</p>
       </div>
       {FOLDER_GROUPS.map(({ subject, area, topics }) => (
-        <section key={area.id} aria-labelledby={`cards-${area.id}`} className="space-y-3">
+        <section key={area.id} aria-labelledby={`cards-${area.id}`} data-tone={area.tone} className="space-y-3">
           <div>
             <p className="text-sm text-zinc-500">{subject.title}</p>
             <h2 id={`cards-${area.id}`} className="text-xl font-semibold">

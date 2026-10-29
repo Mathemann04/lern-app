@@ -3,14 +3,18 @@
 // spielbares Thema stehen blass mit „kommt bald" da. Absichtlich ohne Mathe-Engine, damit die
 // Startseite schnell lädt.
 
-// Bild auf der Kachel eines Gebiets (AreaIcon.tsx)
-export type AreaIcon = 'basics' | 'derivative' | 'integral' | 'units' | 'statics'
+// Bild eines Gebiets oder Themas (AreaIcon.tsx)
+export type AreaIcon = 'basics' | 'derivative' | 'integral' | 'units' | 'statics' | 'slope'
+
+// Farbe eines Gebiets (Farbfamilie aus index.css, gesetzt über data-tone). Die App selbst ist Blaugrün.
+export type Tone = 'orange' | 'blue' | 'violet' | 'pink' | 'cyan'
 
 // Ein Thema, z. B. „Ableiten"
 export type Course = {
   readonly id: string
   readonly title: string
   readonly description: string
+  readonly icon: AreaIcon
   // Ordner der Lernkarten (Id in explain/cards.ts)
   readonly cards: string
 }
@@ -21,6 +25,7 @@ export type Area = {
   readonly title: string
   readonly description: string
   readonly icon: AreaIcon
+  readonly tone: Tone
   // leer: Gebiet kommt bald
   readonly courses: readonly Course[]
 }
@@ -42,6 +47,7 @@ export const SUBJECTS: readonly Subject[] = [
         title: 'Grundlagen',
         description: 'Brüche, Formeln umstellen, Potenzen und Logarithmen',
         icon: 'basics',
+        tone: 'orange',
         courses: [],
       },
       {
@@ -49,11 +55,13 @@ export const SUBJECTS: readonly Subject[] = [
         title: 'Differentialrechnung',
         description: 'Ableiten, vom Einstieg bis zum Profi',
         icon: 'derivative',
+        tone: 'blue',
         courses: [
           {
             id: 'ableiten',
             title: 'Ableiten',
             description: 'Fünf Stufen, von der Potenzregel bis zum impliziten Ableiten',
+            icon: 'slope',
             cards: 'ableitungen',
           },
         ],
@@ -63,6 +71,7 @@ export const SUBJECTS: readonly Subject[] = [
         title: 'Integralrechnung',
         description: 'Stammfunktionen und Flächen',
         icon: 'integral',
+        tone: 'violet',
         courses: [],
       },
     ],
@@ -76,6 +85,7 @@ export const SUBJECTS: readonly Subject[] = [
         title: 'Formeln mit Einheiten',
         description: 'Physikalische Formeln umstellen und mit Einheiten rechnen',
         icon: 'units',
+        tone: 'pink',
         courses: [],
       },
     ],
@@ -89,6 +99,7 @@ export const SUBJECTS: readonly Subject[] = [
         title: 'Statik',
         description: 'Freischnitt, Gleichgewicht und Lagerkräfte',
         icon: 'statics',
+        tone: 'cyan',
         courses: [],
       },
     ],
@@ -109,6 +120,11 @@ export function courseById(id: string): { subject: Subject; area: Area; course: 
     if (course) return { subject, area, course }
   }
   return undefined
+}
+
+// Gebiet, zu dem ein Lernkarten-Ordner gehört (über das Thema mit diesem Ordner)
+export function areaOfCards(folder: string): Area | undefined {
+  return AREAS.find(({ area }) => area.courses.some((course) => course.cards === folder))?.area
 }
 
 // Zurzeit gibt es ein Thema; mit weiteren merkt sich die App das zuletzt geübte

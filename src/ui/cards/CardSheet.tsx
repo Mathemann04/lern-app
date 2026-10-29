@@ -80,7 +80,7 @@ function CardSheet({ ids, title, task, open, onClose }: SheetProps) {
       onClick={(event) => {
         if (event.target === ref.current) onClose()
       }}
-      className="mx-0 mt-auto mb-0 max-h-[85dvh] w-full max-w-none overflow-y-auto overscroll-contain rounded-t-3xl bg-white p-0 text-zinc-900 shadow-xl backdrop:bg-zinc-900/40 sm:m-auto sm:max-w-xl sm:rounded-3xl"
+      className="mx-0 mt-auto mb-0 max-h-[85dvh] w-full max-w-none overflow-y-auto overscroll-contain rounded-t-3xl bg-surface p-0 text-zinc-900 shadow-xl backdrop:bg-black/50 sm:m-auto sm:max-w-xl sm:rounded-3xl"
     >
       {open && (
         <div className="space-y-5 px-5 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))]">

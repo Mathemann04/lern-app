@@ -1,9 +1,15 @@
 import { updateSettings, useSettings } from '../state/settings.ts'
-import type { ExplanationDetail } from '../state/storage.ts'
+import type { ExplanationDetail, ThemeChoice } from '../state/storage.ts'
 
 const DETAILS: Array<{ value: ExplanationDetail; title: string; description: string }> = [
   { value: 'detailed', title: 'Ausführlich', description: 'Einfache Sprache, alle Fachbegriffe erklärt.' },
   { value: 'short', title: 'Kurz', description: 'Nur die Rechnung.' },
+]
+
+const THEMES: Array<{ value: ThemeChoice; title: string }> = [
+  { value: 'system', title: 'Automatisch' },
+  { value: 'light', title: 'Hell' },
+  { value: 'dark', title: 'Dunkel' },
 ]
 
 export function SettingsScreen() {
@@ -58,6 +64,35 @@ export function SettingsScreen() {
         <p className="text-sm text-zinc-500">
           In einer Aufgabe kannst du das oben rechts auch nur für diese Aufgabe umstellen.
         </p>
+      </section>
+
+      <section aria-labelledby="appearance" className="space-y-3">
+        <h2 id="appearance" className="text-xl font-semibold">
+          Aussehen
+        </h2>
+        <fieldset>
+          <legend className="sr-only">Hell oder dunkel</legend>
+          <div className="flex gap-1 rounded-xl bg-zinc-100 p-1">
+            {THEMES.map((option) => (
+              <label
+                key={option.value}
+                className={`flex min-h-11 flex-1 cursor-pointer items-center justify-center rounded-lg px-2 py-2 text-center font-medium transition-colors has-focus-visible:ring-2 has-focus-visible:ring-accent-600 ${
+                  settings.theme === option.value ? 'bg-raised text-accent-700 shadow-sm' : 'text-zinc-600 hover:text-zinc-900'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="theme"
+                  className="sr-only"
+                  checked={settings.theme === option.value}
+                  onChange={() => updateSettings({ theme: option.value })}
+                />
+                {option.title}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+        <p className="text-sm text-zinc-500">„Automatisch" wechselt mit deinem Gerät zwischen hell und dunkel.</p>
       </section>
 
       <section aria-labelledby="more" className="space-y-3">

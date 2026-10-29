@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { errorRule } from '../engine/derive/errorRules.ts'
+import { ERROR_RULES, errorRule } from '../engine/derive/errorRules.ts'
 import { levelSummary, resetProgress, topErrors, useProgress } from '../state/progress.ts'
 import { useSettings } from '../state/settings.ts'
+import { DERIVATIVES, courseById } from './catalog.ts'
 import { FitWidth } from './FitWidth.tsx'
 import { Formula } from './Formula.tsx'
 import { practiceHref } from './routes.ts'
@@ -14,14 +15,14 @@ import { RichText } from './RichText.tsx'
 export function ProgressScreen() {
   const progress = useProgress()
   const { derivativeLevel, practiceMode } = useSettings()
-  const errors = topErrors(progress, 5)
+  const errors = topErrors(progress, 5, (id) => ERROR_RULES.some((rule) => rule.id === id))
   const [confirmReset, setConfirmReset] = useState(false)
 
   return (
     <main className="space-y-10">
       <h1 className="text-3xl font-semibold tracking-tight">Dein Fortschritt</h1>
 
-      <section aria-labelledby="progress-levels" className="space-y-3">
+      <section aria-labelledby="progress-levels" data-tone={courseById(DERIVATIVES)!.area.tone} className="space-y-3">
         <div>
           <p className="text-sm text-zinc-500">Differentialrechnung</p>
           <h2 id="progress-levels" className="text-xl font-semibold">
@@ -60,7 +61,7 @@ export function ProgressScreen() {
         </ul>
       </section>
 
-      <section aria-labelledby="progress-errors" className="space-y-3">
+      <section aria-labelledby="progress-errors" data-tone={courseById(DERIVATIVES)!.area.tone} className="space-y-3">
         <h2 id="progress-errors" className="text-xl font-semibold">
           Deine häufigsten Fehler
         </h2>
@@ -87,7 +88,7 @@ export function ProgressScreen() {
                   </div>
                   <a
                     href={practiceHref(derivativeLevel, practiceMode, id)}
-                    className="inline-block rounded-xl bg-accent-700 px-4 py-2.5 font-medium text-white hover:bg-accent-800"
+                    className="inline-block rounded-xl bg-accent-700 px-4 py-2.5 font-medium text-on-accent hover:bg-accent-800"
                   >
                     Gezielt üben
                   </a>
@@ -110,7 +111,7 @@ export function ProgressScreen() {
                     resetProgress()
                     setConfirmReset(false)
                   }}
-                  className="rounded-xl bg-red-700 px-4 py-2.5 font-medium text-white hover:bg-red-800"
+                  className="rounded-xl bg-red-700 px-4 py-2.5 font-medium text-on-accent hover:bg-red-800"
                 >
                   Ja, löschen
                 </button>

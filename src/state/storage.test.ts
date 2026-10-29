@@ -19,7 +19,7 @@ describe('Speicher', () => {
 
   it('speichert und lädt Einstellungen', () => {
     const store = memoryStore()
-    const settings = { explanations: false, detail: 'short', derivativeLevel: 3, practiceMode: 'free' } as const
+    const settings = { explanations: false, detail: 'short', derivativeLevel: 3, practiceMode: 'free', theme: 'dark' } as const
     saveState({ ...DEFAULT_STATE, settings }, store)
     expect(loadState(store).settings).toEqual(settings)
   })
@@ -27,7 +27,7 @@ describe('Speicher', () => {
   it('übersteht kaputten oder fremden Inhalt', () => {
     expect(loadState(memoryStore('{kaputt'))).toEqual(DEFAULT_STATE)
     expect(loadState(memoryStore('42'))).toEqual(DEFAULT_STATE)
-    expect(loadState(memoryStore('{"settings":{"detail":"riesig","explanations":"ja","derivativeLevel":7,"practiceMode":"schnell"}}')).settings).toEqual(
+    expect(loadState(memoryStore('{"settings":{"detail":"riesig","explanations":"ja","derivativeLevel":7,"practiceMode":"schnell","theme":"lila"}}')).settings).toEqual(
       DEFAULT_STATE.settings,
     )
   })
@@ -38,6 +38,7 @@ describe('Speicher', () => {
       detail: 'short',
       derivativeLevel: 1,
       practiceMode: 'guided',
+      theme: 'system',
     })
   })
 

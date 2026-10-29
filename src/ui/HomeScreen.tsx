@@ -43,19 +43,22 @@ function ContinueCard() {
   const progress = useProgress()
   const level = isLevelAvailable(derivativeLevel) ? derivativeLevel : 1
   const levelTitle = derivativeLevels.find((l) => l.level === level)!.title
-  const { course } = courseById(DERIVATIVES)!
+  const { area, course } = courseById(DERIVATIVES)!
   const { solved, recent, recentClean } = levelSummary(progress, level)
   const started = progress.attempts.length > 0
   return (
-    <section aria-labelledby="continue" className="space-y-4 rounded-2xl bg-accent-50 p-5">
-      <div className="space-y-1">
-        <h2 id="continue" className="text-sm font-semibold tracking-wide text-accent-700 uppercase">
-          {started ? 'Weitermachen' : 'Los geht’s'}
-        </h2>
-        <p className="text-2xl font-semibold tracking-tight">{course.title}</p>
-        <p className="text-zinc-700">
-          Stufe {level}: {levelTitle}
-        </p>
+    <section aria-labelledby="continue" data-tone={area.tone} className="space-y-4 rounded-2xl bg-accent-50 p-5">
+      <div className="flex items-start gap-4">
+        <div className="min-w-0 flex-1 space-y-1">
+          <h2 id="continue" className="text-sm font-semibold tracking-wide text-accent-700 uppercase">
+            {started ? 'Weitermachen' : 'Los geht’s'}
+          </h2>
+          <p className="text-2xl font-semibold tracking-tight">{course.title}</p>
+          <p className="text-zinc-700">
+            Stufe {level}: {levelTitle}
+          </p>
+        </div>
+        <AreaIcon kind={course.icon} className="size-16 shrink-0" />
       </div>
       {solved > 0 && (
         <div className="space-y-1.5">
@@ -68,7 +71,7 @@ function ContinueCard() {
       <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
         <a
           href={practiceHref(level, practiceMode)}
-          className="rounded-xl bg-accent-700 px-5 py-3 text-lg font-medium text-white hover:bg-accent-800"
+          className="rounded-xl bg-accent-700 px-5 py-3 text-lg font-medium text-on-accent hover:bg-accent-800"
         >
           {started ? 'Weiter üben' : 'Erste Aufgabe'} · {practiceMode === 'free' ? 'frei' : 'geführt'}
         </a>
@@ -84,13 +87,7 @@ function AreaTile({ area }: { area: Area }) {
   const available = isAreaAvailable(area)
   const body = (
     <>
-      <span
-        className={`flex size-12 shrink-0 items-center justify-center rounded-xl ${
-          available ? 'bg-accent-50 text-accent-700' : 'bg-zinc-100 text-zinc-400'
-        }`}
-      >
-        <AreaIcon kind={area.icon} />
-      </span>
+      <AreaIcon kind={area.icon} className={`size-14 shrink-0 ${available ? '' : 'opacity-50'}`} />
       <span className="min-w-0 flex-1">
         <span className={`block text-lg font-semibold ${available ? '' : 'text-zinc-500'}`}>{area.title}</span>
         <span className={`block text-sm text-pretty ${available ? 'text-zinc-600' : 'text-zinc-500'}`}>{area.description}</span>
@@ -102,13 +99,16 @@ function AreaTile({ area }: { area: Area }) {
   )
   if (!available) {
     return (
-      <div className="flex items-center gap-4 rounded-2xl border border-dashed border-zinc-300 px-4 py-4">{body}</div>
+      <div data-tone={area.tone} className="flex items-center gap-4 rounded-2xl border border-dashed border-zinc-300 px-4 py-3">
+        {body}
+      </div>
     )
   }
   return (
     <a
       href={areaHref(area.id)}
-      className="flex items-center gap-4 rounded-2xl border border-zinc-200 px-4 py-4 transition-colors hover:border-accent-600 hover:bg-accent-50"
+      data-tone={area.tone}
+      className="flex items-center gap-4 rounded-2xl border border-zinc-200 px-4 py-3 transition-colors hover:border-accent-600 hover:bg-accent-50"
     >
       {body}
       <span aria-hidden className="text-accent-700">

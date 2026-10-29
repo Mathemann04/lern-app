@@ -41,7 +41,7 @@ export function MainNav({ active }: { active: Section | null }) {
   return (
     <nav
       aria-label="Hauptmenü"
-      className="fixed inset-x-0 bottom-0 z-10 border-t border-zinc-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:static md:-mr-3 md:border-0 md:bg-transparent md:pb-0 md:backdrop-blur-none"
+      className="fixed inset-x-0 bottom-0 z-10 border-t border-zinc-200 bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:static md:-mr-3 md:border-0 md:bg-transparent md:pb-0 md:backdrop-blur-none"
     >
       <ul className="mx-auto flex max-w-2xl md:mx-0">
         {ITEMS.map((item) => {

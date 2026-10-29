@@ -5,12 +5,26 @@ Stand: 29.10.2026
 | Meilenstein | Inhalt | Status |
 | --- | --- | --- |
 | M1 | Grundgerüst + Ableitungsregeln (beide Modi, 5 Stufen, Erklärungen, Lernkarten, Fortschritt) | fertig |
-| M2 | Brüche und Formeln umstellen (Bruchrechnung, Doppelbrüche, nach einer Variablen auflösen) | offen |
-| M3 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
-| M4 | weitere Themen aus Mathematik MB1 | offen |
-| M5 | Physik: Formeln umstellen, mit Einheiten | offen |
-| M6 | Technische Mechanik: Freischnitt, Gleichgewicht, Lagerkräfte, statische Bestimmtheit | offen |
+| M2 | Brüche (Bruchrechnung, Bruchterme kürzen und zusammenfassen, Doppelbrüche); App für mehrere Themen | in Arbeit |
+| M3 | Formeln umstellen (nach einer Variablen auflösen, auch mit Brüchen) | offen |
+| M4 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
+| M5 | weitere Themen aus Mathematik MB1 | offen |
+| M6 | Physik: Formeln umstellen, mit Einheiten | offen |
+| M7 | Technische Mechanik: Freischnitt, Gleichgewicht, Lagerkräfte, statische Bestimmtheit | offen |
 | Später | Konto und Sync, Teilen mit Kommilitonen, App-Store-Version, optional KI-Hilfe | offen |
+
+## M2: Schritte
+
+Details: [PLAN-M2.md](PLAN-M2.md)
+
+- [x] Plan M2
+- [x] 1. Neues Aussehen: dunkles Design, Farben je Gebiet, neue Symbole
+- [ ] 2. Mathe-Engine für Brüche
+- [ ] 3. Mehrere Themen, Brüche Stufe 1 und 2 geführt
+- [ ] 4. Stufen 3 und 4 geführt
+- [ ] 5. Freier Modus für Brüche
+- [ ] 6. Stufe 5 geführt und frei
+- [ ] 7. Gezieltes Üben, Feinschliff, Abschluss von M2
 
 ## M1: Schritte
 
@@ -107,3 +121,18 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   kommen in `src/ui/catalog.ts` dazu.
 - 29.10.2026: Meilenstein 1 abgeschlossen (Schritt 12: Animationen,
   Tippflächen, Ladezeit).
+- 29.10.2026: Brüche und Formeln umstellen getrennt (Wunsch des Nutzers):
+  zwei Themen im Gebiet „Grundlagen" und zwei Meilensteine (M2 Brüche,
+  M3 Formeln umstellen); die späteren Meilensteine rücken eine Nummer
+  weiter.
+- 29.10.2026: Plan M2 freigegeben mit zwei Ergänzungen des Nutzers:
+  „fiesere" Bausteine in den Stufen 4 und 5 ($e^x$, $\ln x$, $\sin x$;
+  in Stufe 5 auch $\sqrt{x}$ und Winkelfunktionen mit ihren Regeln) und
+  ein neues Aussehen als Schritt 1 (dunkles Design wie das Gerät oder fest
+  gewählt, Farben je Gebiet, farbige Symbole wie bei Brilliant).
+- 29.10.2026: Neues Aussehen (Schritt 1 von M2): Hell/Dunkel in den
+  Einstellungen („Automatisch" wie das Gerät, „Hell", „Dunkel"). Farben je
+  Gebiet: Grundlagen orange, Differentialrechnung blau, Integralrechnung
+  violett, Formeln mit Einheiten pink, Statik türkis; Startseite, Menü und
+  Einstellungen bleiben Blaugrün. Farbige Bilder für Gebiete und Themen;
+  „kommt bald" zeigt das Bild blass.

@@ -8,6 +8,20 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <title>Rechenweg</title>
+    <script>
+      // Dunkles Design schon vor dem ersten Bild setzen (wie src/ui/useTheme.ts), damit nichts aufblitzt
+      ;(function () {
+        var theme
+        try {
+          theme = JSON.parse(localStorage.getItem('rechenweg') || '{}').settings.theme
+        } catch (e) {}
+        var dark = theme === 'dark' || (theme !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches)
+        if (dark) {
+          document.documentElement.classList.add('dark')
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#09090b')
+        }
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

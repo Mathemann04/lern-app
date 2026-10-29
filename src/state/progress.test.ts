@@ -57,4 +57,9 @@ describe('Häufigste Fehler', () => {
       { id: 'sin-sign', times: 2 },
     ])
   })
+
+  it('lässt Fehler weg, die es nicht mehr gibt', () => {
+    const p = addError(addError(addError(EMPTY_PROGRESS, 'alter-fehler'), 'alter-fehler'), 'cos-sign')
+    expect(topErrors(p, 5, (id) => id !== 'alter-fehler')).toEqual([{ id: 'cos-sign', times: 1 }])
+  })
 })
