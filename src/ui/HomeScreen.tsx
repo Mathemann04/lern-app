@@ -1,3 +1,5 @@
+import type { Level } from '../engine/tasks/taskNumber.ts'
+import { levelSummary, useProgress } from '../state/progress.ts'
 import { updateSettings, useSettings } from '../state/settings.ts'
 import type { PracticeMode } from '../state/storage.ts'
 import { Formula } from './Formula.tsx'
@@ -103,6 +105,7 @@ export function HomeScreen() {
                         {level.title}
                         {!level.available && <span className="font-normal text-zinc-500"> · folgt bald</span>}
                       </span>
+                      <LevelProgressLine level={level.level} />
                       <span className="flex flex-wrap items-center gap-x-6 gap-y-2 text-lg">
                         {level.examples.map((tex) => (
                           <Formula key={tex} tex={tex} />
@@ -116,6 +119,13 @@ export function HomeScreen() {
           </fieldset>
         </div>
         <p className="px-5 pb-4 text-sm text-zinc-500">Stufe 5 folgt in den nächsten Schritten.</p>
+        <a
+          href="#/fortschritt"
+          className="flex items-center justify-between border-t border-zinc-100 px-5 py-4 font-medium text-accent-700 hover:bg-accent-50"
+        >
+          Dein Fortschritt und deine häufigsten Fehler
+          <span aria-hidden>→</span>
+        </a>
         <a
           href="#/galerie"
           className="flex items-center justify-between rounded-b-2xl border-t border-zinc-100 px-5 py-4 font-medium text-accent-700 hover:bg-accent-50"
@@ -146,5 +156,16 @@ export function HomeScreen() {
         </dl>
       </section>
     </main>
+  )
+}
+
+// „12 gelöst · zuletzt 8 von 10 ohne Fehler"; nichts, solange noch keine Aufgabe gelöst ist
+function LevelProgressLine({ level }: { level: Level }) {
+  const { solved, recent, recentClean } = levelSummary(useProgress(), level)
+  if (solved === 0) return null
+  return (
+    <span className="block text-sm text-zinc-500">
+      {solved} gelöst · zuletzt {recentClean} von {recent.length} ohne Fehler
+    </span>
   )
 }

@@ -1,10 +1,13 @@
 import { Suspense, lazy, useEffect } from 'react'
+import { createRng } from './engine/random/rng.ts'
+import { findTaskWithError } from './engine/tasks/focus.ts'
 import { type Level, randomSeed } from './engine/tasks/taskNumber.ts'
 import { GalleryScreen } from './ui/GalleryScreen.tsx'
 import { HomeScreen } from './ui/HomeScreen.tsx'
+import { ProgressScreen } from './ui/ProgressScreen.tsx'
 import { SettingsScreen } from './ui/SettingsScreen.tsx'
 import { buildInfoLabel } from './ui/buildInfo.ts'
-import { isLevelAvailable } from './ui/samples.ts'
+import { derivativeLevels, isLevelAvailable } from './ui/samples.ts'
 import { TaskScreen } from './ui/guided/TaskScreen.tsx'
 import { type PracticeMode } from './state/storage.ts'
 import { type Route, parseRoute, taskHref } from './ui/routes.ts'
@@ -32,16 +35,23 @@ export function App() {
           <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" className="size-8" />
           <span className="text-lg font-semibold tracking-tight">Rechenweg</span>
         </a>
-        <a
-          href="#/einstellungen"
-          aria-label="Einstellungen"
-          className="-mr-2 rounded-lg p-2 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900"
-        >
-          <svg aria-hidden viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="1.8">
-            <circle cx="12" cy="12" r="3" />
-            <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" />
-          </svg>
-        </a>
+        <nav className="-mr-2 flex items-center gap-1">
+          <a href="#/fortschritt" aria-label="Fortschritt" className="rounded-lg p-2 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
+            <svg aria-hidden viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+              <path d="M4 20h16M7 16v-4M12 16V8M17 16v-7" />
+            </svg>
+          </a>
+          <a
+            href="#/einstellungen"
+            aria-label="Einstellungen"
+            className="rounded-lg p-2 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900"
+          >
+            <svg aria-hidden viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" />
+            </svg>
+          </a>
+        </nav>
       </header>
 
       <div className="flex-1 py-8">
@@ -87,19 +97,37 @@ function Page({ route }: { route: Route }) {
       return <GalleryScreen />
     case 'settings':
       return <SettingsScreen />
+    case 'progress':
+      return <ProgressScreen />
     case 'practice':
-      return <PracticePage mode={route.mode} level={route.level} seed={route.seed} />
+      return <PracticePage mode={route.mode} level={route.level} seed={route.seed} focus={route.focus} />
     case 'home':
       return <HomeScreen />
   }
 }
 
-function PracticePage({ mode, level, seed }: { mode: PracticeMode; level: Level; seed: number | null }) {
+// Stufen für gezieltes Üben: zuerst die gewählte, dann die nächstgelegenen
+function levelsNear(level: Level): Level[] {
+  return derivativeLevels
+    .filter((l) => l.available)
+    .map((l) => l.level)
+    .sort((a, b) => Math.abs(a - level) - Math.abs(b - level) || a - b)
+}
+
+function newTask(mode: PracticeMode, level: Level, focus: string | null): string {
+  // Gezielt üben: eine Aufgabe, in der genau dieser Fehler passieren kann
+  const found = focus ? findTaskWithError(focus, levelsNear(level), createRng(String(Math.random()))) : null
+  return taskHref(found ?? { level, seed: randomSeed() }, mode, found ? focus : null)
+}
+
+type PracticeProps = { mode: PracticeMode; level: Level; seed: number | null; focus: string | null }
+
+function PracticePage({ mode, level, seed, focus }: PracticeProps) {
   // Ohne Nummer: neue Aufgabe würfeln und ihre Nummer in die Adresse schreiben,
   // damit Neuladen dieselbe Aufgabe zeigt
   useEffect(() => {
-    if (seed === null) window.location.replace(taskHref({ level, seed: randomSeed() }, mode))
-  }, [mode, level, seed])
+    if (seed === null) window.location.replace(newTask(mode, level, focus))
+  }, [mode, level, seed, focus])
   if (seed === null) return null
   if (!isLevelAvailable(level)) {
     return (
@@ -112,12 +140,13 @@ function PracticePage({ mode, level, seed }: { mode: PracticeMode; level: Level;
       </main>
     )
   }
+  const key = `${level}-${seed}-${focus ?? ''}`
   if (mode === 'free') {
     return (
       <Suspense fallback={<p className="text-zinc-500">Mathe-Tastatur wird geladen …</p>}>
-        <FreeTaskScreen key={`${level}-${seed}`} taskRef={{ level, seed }} />
+        <FreeTaskScreen key={key} taskRef={{ level, seed }} focus={focus} />
       </Suspense>
     )
   }
-  return <TaskScreen key={`${level}-${seed}`} taskRef={{ level, seed }} />
+  return <TaskScreen key={key} taskRef={{ level, seed }} focus={focus} />
 }

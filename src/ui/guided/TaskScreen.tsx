@@ -2,21 +2,32 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Choice, GuidedStep, GuidedTask } from '../../engine/guided/plan.ts'
 import { planGuidedTask } from '../../engine/guided/plan.ts'
 import type { TaskRef } from '../../engine/tasks/taskNumber.ts'
+import { recordAttempt, recordError } from '../../state/progress.ts'
 import type { ExplanationDetail } from '../../state/storage.ts'
 import { FitWidth } from '../FitWidth.tsx'
 import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
 import { practiceHref } from '../routes.ts'
-import { TaskIntro, TaskTopBar } from '../task/TaskParts.tsx'
+import { LevelUpSuggestion } from '../task/LevelUpSuggestion.tsx'
+import { FocusBanner, TaskIntro, TaskTopBar } from '../task/TaskParts.tsx'
 import { type ExplanationMode, useExplanationMode } from '../task/explanationMode.ts'
 
-export function TaskScreen({ taskRef }: { taskRef: TaskRef }) {
+// focus: gezielt einen typischen Fehler üben (der Fehler erscheint sicher als Antwort)
+export function TaskScreen({ taskRef, focus = null }: { taskRef: TaskRef; focus?: string | null }) {
   const { level, seed } = taskRef
-  const task = useMemo(() => planGuidedTask({ level, seed }), [level, seed])
+  const task = useMemo(() => planGuidedTask({ level, seed }, focus ?? undefined), [level, seed, focus])
   const { mode, detail, cycle } = useExplanationMode()
   const [stepIndex, setStepIndex] = useState(0)
   const [mistakes, setMistakes] = useState(0)
   const finished = stepIndex >= task.steps.length
+
+  // Fertig gelöst: einmal in den Fortschritt eintragen (ohne Fehlversuch zählt als „ohne Fehler")
+  const recorded = useRef(false)
+  useEffect(() => {
+    if (!finished || recorded.current) return
+    recorded.current = true
+    recordAttempt({ level, mode: 'guided', clean: mistakes === 0 })
+  }, [finished, level, mistakes])
 
   return (
     <main className="space-y-6">
@@ -36,10 +47,12 @@ export function TaskScreen({ taskRef }: { taskRef: TaskRef }) {
         </div>
       </TaskTopBar>
 
+      {focus && <FocusBanner focus={focus} />}
+
       <TaskHeader task={task} stepIndex={stepIndex} />
 
       {finished ? (
-        <FinishView task={task} mistakes={mistakes} />
+        <FinishView task={task} mistakes={mistakes} focus={focus} />
       ) : (
         <StepView
           key={stepIndex}
@@ -105,6 +118,8 @@ function StepView({ step, isLast, mode, detail, onMistake, onNext }: StepProps) 
     if (choice.correct) {
       setSolved(true)
     } else {
+      // Für die Fehlerstatistik zählt nur der erste Fehlgriff je Schritt; danach wird oft nur ausprobiert
+      if (wrongPicks.length === 0 && choice.errorRuleId) recordError(choice.errorRuleId)
       setWrongPicks((picks) => [...picks, choice.id])
       setWhyOpen(false)
       onMistake()
@@ -209,7 +224,7 @@ function StepView({ step, isLast, mode, detail, onMistake, onNext }: StepProps) 
   )
 }
 
-function FinishView({ task, mistakes }: { task: GuidedTask; mistakes: number }) {
+function FinishView({ task, mistakes, focus }: { task: GuidedTask; mistakes: number; focus: string | null }) {
   const headingRef = useRef<HTMLHeadingElement>(null)
   useEffect(() => {
     headingRef.current?.focus({ preventScroll: true })
@@ -231,9 +246,10 @@ function FinishView({ task, mistakes }: { task: GuidedTask; mistakes: number }) 
           <Formula tex={task.resultLatex} />
         </FitWidth>
       </div>
+      <LevelUpSuggestion level={task.ref.level} mode="guided" />
       <div className="flex flex-col gap-3 sm:flex-row">
         <a
-          href={practiceHref(task.ref.level)}
+          href={practiceHref(task.ref.level, 'guided', focus)}
           className="flex-1 rounded-xl bg-accent-700 px-4 py-3 text-center text-lg font-medium text-white hover:bg-accent-800"
         >
           Nächste Aufgabe

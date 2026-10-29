@@ -143,6 +143,8 @@ Diese setze ich so um, wenn du nichts anderes sagst:
   Rot nur für richtig/falsch. Du siehst es in Schritt 1 auf Screenshots.
 - **Wann zählt eine Aufgabe als „richtig"** (für 8 von 10)? Wenn du sie ohne
   falsche Antwort gelöst hast. Einen Tipp anzuschauen zählt nicht als Fehler.
+  Umgesetzt in Schritt 8; im freien Modus zählt der aufgedeckte Lösungsweg als
+  Hilfe (dann nicht „ohne Fehler"), eine unlesbare Eingabe nicht als Fehler.
 - **Modus:** Du wählst vor der Aufgabe „Geführt" oder „Frei", die App merkt
   sich deine Wahl.
 - **Stufen-Vorlagen und Fehlerkatalog:** siehe unten. Wenn dir typische

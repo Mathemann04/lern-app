@@ -4,19 +4,21 @@ import { explainError } from '../../engine/explain/texts.ts'
 import { type GuidedStep, planGuidedTask } from '../../engine/guided/plan.ts'
 import { generateDerivativeTask } from '../../engine/tasks/derivativeTerms.ts'
 import type { TaskRef } from '../../engine/tasks/taskNumber.ts'
+import { recordAttempt, recordError } from '../../state/progress.ts'
 import type { ExplanationDetail } from '../../state/storage.ts'
 import { FitWidth } from '../FitWidth.tsx'
 import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
 import { practiceHref, taskHref } from '../routes.ts'
-import { TaskIntro, TaskTopBar } from '../task/TaskParts.tsx'
+import { LevelUpSuggestion } from '../task/LevelUpSuggestion.tsx'
+import { FocusBanner, TaskIntro, TaskTopBar } from '../task/TaskParts.tsx'
 import { type ExplanationMode, useExplanationMode } from '../task/explanationMode.ts'
 import { MathInput } from './MathInput.tsx'
 
 // Freier Modus: Ableitung selbst eintippen. Die Engine prüft auf Gleichwertigkeit, erkennt
 // typische Fehler und kann den Lösungsweg Schritt für Schritt aufdecken (aus dem geführten Modus).
 
-export default function FreeTaskScreen({ taskRef }: { taskRef: TaskRef }) {
+export default function FreeTaskScreen({ taskRef, focus = null }: { taskRef: TaskRef; focus?: string | null }) {
   const { level, seed } = taskRef
   const { context, plan } = useMemo(() => {
     const { task } = generateDerivativeTask({ level, seed })
@@ -34,10 +36,29 @@ export default function FreeTaskScreen({ taskRef }: { taskRef: TaskRef }) {
   const submittedRef = useRef<string | null>(null)
   const solved = verdict?.kind === 'correct'
 
+  // Für den Fortschritt: Gab es eine falsche (lesbare) Antwort oder den aufgedeckten Lösungsweg
+  // vor dem Lösen? Typische Fehler je Aufgabe nur einmal zählen.
+  const tally = useRef({ mistake: false, helped: false, errors: new Set<string>(), recorded: false })
+
   function submit(value: string) {
     setLatex(value)
     submittedRef.current = value
-    setVerdict(checkAnswer(context, value))
+    const result = checkAnswer(context, value)
+    setVerdict(result)
+    const t = tally.current
+    if (result.kind === 'correct') {
+      if (!t.recorded) {
+        t.recorded = true
+        recordAttempt({ level, mode: 'free', clean: !t.mistake && !t.helped })
+      }
+    } else if (result.kind !== 'unreadable') {
+      t.mistake = true
+      const id = result.kind === 'knownError' ? result.wrong.errorRule.id : null
+      if (id && !t.errors.has(id)) {
+        t.errors.add(id)
+        recordError(id)
+      }
+    }
     // Rückmeldung sichtbar machen, auch wenn die Bildschirm-Tastatur offen ist
     requestAnimationFrame(() => feedbackRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
   }
@@ -45,6 +66,8 @@ export default function FreeTaskScreen({ taskRef }: { taskRef: TaskRef }) {
   return (
     <main className="space-y-6" style={{ paddingBottom: keyboardHeight }}>
       <TaskTopBar mode={mode} onCycleMode={cycle} />
+
+      {focus && <FocusBanner focus={focus} />}
 
       <section className="space-y-3">
         <TaskIntro taskRef={taskRef} functionLatex={plan.functionLatex} />
@@ -81,10 +104,12 @@ export default function FreeTaskScreen({ taskRef }: { taskRef: TaskRef }) {
         {verdict && <Feedback verdict={verdict} resultLatex={plan.resultLatex} detail={detail} mode={mode} />}
       </div>
 
+      {solved && <LevelUpSuggestion level={level} mode="free" />}
+
       {solved ? (
         <div className="flex flex-col gap-3 sm:flex-row">
           <a
-            href={practiceHref(level, 'free')}
+            href={practiceHref(level, 'free', focus)}
             className="flex-1 rounded-xl bg-accent-700 px-4 py-3 text-center text-lg font-medium text-white hover:bg-accent-800"
           >
             Nächste Aufgabe
@@ -101,11 +126,18 @@ export default function FreeTaskScreen({ taskRef }: { taskRef: TaskRef }) {
             </button>
           )}
           {revealed === 0 && (
-            <button type="button" onClick={() => setRevealed(1)} className="rounded-xl px-3 py-2 font-medium text-accent-700 hover:bg-accent-50">
+            <button
+              type="button"
+              onClick={() => {
+                tally.current.helped = true
+                setRevealed(1)
+              }}
+              className="rounded-xl px-3 py-2 font-medium text-accent-700 hover:bg-accent-50"
+            >
               Lösungsweg aufdecken
             </button>
           )}
-          <a href={taskHref(taskRef, 'guided')} className="rounded-xl px-3 py-2 font-medium text-accent-700 hover:bg-accent-50">
+          <a href={taskHref(taskRef, 'guided', focus)} className="rounded-xl px-3 py-2 font-medium text-accent-700 hover:bg-accent-50">
             Geführt lösen
           </a>
         </div>

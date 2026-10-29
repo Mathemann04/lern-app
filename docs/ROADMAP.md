@@ -24,7 +24,7 @@ Details: [PLAN-M1.md](PLAN-M1.md)
 - [x] 5. Stufen 2 und 3 im geführten Modus, Stufenwahl
 - [x] 6. Freier Modus
 - [x] 7. Stufe 4 (vorgezogen, wichtigstes Niveau)
-- [ ] 8. Fortschritt und Fehlerstatistik
+- [x] 8. Fortschritt und Fehlerstatistik
 - [ ] 9. Lernkarten
 - [ ] 10. Stufe 5: logarithmisches Ableiten, Umkehr- und Hyperbelfunktionen
 - [ ] 11. Stufe 5: implizites Ableiten
@@ -65,3 +65,12 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   $\frac{(-3x^4 + x^3 - 3x^2 + 2x)e^{-3x}}{(x^2+1)^{3/2}}$ statt eines
   Bruchs im Bruch. Lange Formeln werden am Handy automatisch etwas kleiner
   gesetzt.
+- 29.10.2026: Fortschritt: Eine Aufgabe zählt als „ohne Fehler", wenn keine
+  falsche Antwort gegeben wurde (Tipp ist erlaubt, aufgedeckter Lösungsweg im
+  freien Modus nicht). Vorschlag „Eine Stufe höher?" bei mindestens 8 von den
+  letzten 10 Aufgaben einer Stufe ohne Fehler; nach „Später" erst wieder nach
+  10 weiteren Aufgaben. Fehlerstatistik zählt im geführten Modus nur den
+  ersten Fehlgriff je Schritt, im freien Modus jeden typischen Fehler einmal
+  je Aufgabe. Gezieltes Üben sucht Aufgaben, in denen genau dieser Fehler
+  passieren kann, zuerst in der gewählten Stufe; im geführten Modus erscheint
+  er dann sicher als Antwort. Speicher-Format Version 2 (mit Fortschritt).

@@ -77,10 +77,12 @@ export type GuidedTask = {
 
 const MAX_WRONG_CHOICES = 3
 
-export function planGuidedTask(ref: TaskRef): GuidedTask {
+// focus: Id einer Fehlerregel für gezieltes Üben; dieser Fehler erscheint sicher als Antwort,
+// wo er passieren kann
+export function planGuidedTask(ref: TaskRef, focus?: string): GuidedTask {
   const { task } = generateDerivativeTask(ref)
   if (task.kind !== 'function') throw new Error('Implizites Ableiten kommt in Schritt 11.')
-  return planForExpression(task.expr, ref)
+  return planForExpression(task.expr, ref, focus)
 }
 
 // Feste Faktoren vor der Hauptregel (−3 bei −3x² sin x) und der Knoten dahinter
@@ -102,12 +104,12 @@ export function mainRule(d: Derivation): RuleId {
 // Ab dieser Stufe wird der Rechenweg gröber: Geübtes ist ein einzelner Schritt
 const COARSE_FROM_LEVEL = 4
 
-export function planForExpression(f: Expr, ref: TaskRef): GuidedTask {
+export function planForExpression(f: Expr, ref: TaskRef, focus?: string): GuidedTask {
   const root = derive(f)
   const rngFor = (step: number) => createRng(`geführt:${ref.level}:${ref.seed}:${step}`)
   const rule = ruleStep(root, rngFor(0))
   const coarse = ref.level >= COARSE_FROM_LEVEL
-  const steps = [...(rule ? [rule] : []), ...partSteps(root, coarse).map((build, i) => build(rngFor(i + 1)))]
+  const steps = [...(rule ? [rule] : []), ...partSteps(root, coarse).map((build, i) => build({ rng: rngFor(i + 1), focus }))]
   const { factors, core } = splitFactors(root)
   return {
     ref,
@@ -120,12 +122,12 @@ export function planForExpression(f: Expr, ref: TaskRef): GuidedTask {
 }
 
 // Die Schritte nach der Regelwahl, je Hauptregel
-function partSteps(root: Derivation, coarse: boolean): Array<(rng: Rng) => GuidedStep> {
+function partSteps(root: Derivation, coarse: boolean): Array<(ctx: StepContext) => GuidedStep> {
   const { factors, core } = splitFactors(root)
 
   if (root.rule === 'sum') {
-    return root.children.map((child, i) => (rng: Rng) =>
-      derivativeStep(child, { title: `Summand ${i + 1} von ${root.children.length}`, question: `Leite den Summanden ${m(child.input)} ab.` }, rng),
+    return root.children.map((child, i) => (ctx: StepContext) =>
+      derivativeStep(child, { title: `Summand ${i + 1} von ${root.children.length}`, question: `Leite den Summanden ${m(child.input)} ab.` }, ctx),
     )
   }
 
@@ -139,10 +141,10 @@ function partSteps(root: Derivation, coarse: boolean): Array<(rng: Rng) => Guide
     const [U, V, dU, dV] = ['u', 'v', "u'", "v'"].map(variable)
     const pattern = isQuotient ? div(add(mulDot(dU, V), neg(mulDot(U, dV))), pow(V, num(2))) : add(mulDot(dU, V), mulDot(U, dV))
     return [
-      (rng) => derivativeStep(du, { title: isQuotient ? 'Zähler ableiten' : 'Ersten Faktor ableiten', question: `${names} Was ist $u'$?`, name: "u'" }, rng),
-      (rng) => derivativeStep(dv, { title: isQuotient ? 'Nenner ableiten' : 'Zweiten Faktor ableiten', question: `Was ist $v'$ für $v = ${v}$?`, name: "v'" }, rng),
-      (rng) =>
-        assembleStep(root, 'Einsetzen', `Setze in die ${RULES[core.rule].name} ein: $f'(x) = ${toLatex(withFactors(factors, pattern))}$`, rng),
+      (ctx) => derivativeStep(du, { title: isQuotient ? 'Zähler ableiten' : 'Ersten Faktor ableiten', question: `${names} Was ist $u'$?`, name: "u'" }, ctx),
+      (ctx) => derivativeStep(dv, { title: isQuotient ? 'Nenner ableiten' : 'Zweiten Faktor ableiten', question: `Was ist $v'$ für $v = ${v}$?`, name: "v'" }, ctx),
+      (ctx) =>
+        assembleStep(root, 'Einsetzen', `Setze in die ${RULES[core.rule].name} ein: $f'(x) = ${toLatex(withFactors(factors, pattern))}$`, ctx),
     ]
   }
 
@@ -150,43 +152,43 @@ function partSteps(root: Derivation, coarse: boolean): Array<(rng: Rng) => Guide
     const [outer, inner] = core.children
     const innerLatex = toLatex(core.parts.inner!)
     const factorNote = keepFactorNote(factors)
-    const innerStep = (rng: Rng) =>
-      derivativeStep(inner, { title: 'Innere Ableitung', question: `Leite die innere Funktion $${PLACEHOLDER} = ${innerLatex}$ ab.`, name: `${PLACEHOLDER}'` }, rng)
+    const innerStep = (ctx: StepContext) =>
+      derivativeStep(inner, { title: 'Innere Ableitung', question: `Leite die innere Funktion $${PLACEHOLDER} = ${innerLatex}$ ab.`, name: `${PLACEHOLDER}'` }, ctx)
     if (coarse) {
       return [
         innerStep,
-        (rng) =>
+        (ctx) =>
           assembleStep(
             root,
             'Zusammensetzen',
             `Die äußere Funktion ist ${m(core.parts.outer!)} mit $${PLACEHOLDER} = ${innerLatex}$. Kettenregel: äußere Ableitung mal innere Ableitung.${factorNote ? ` ${factorNote}` : ''} Was ist $f'(x)$?`,
-            rng,
+            ctx,
             true,
           ),
       ]
     }
     return [
-      (rng) =>
+      (ctx) =>
         derivativeStep(
           outer,
           {
             title: 'Äußere Ableitung',
             question: `Setze $${PLACEHOLDER} = ${innerLatex}$. Die äußere Funktion ist dann ${m(core.parts.outer!)}. Leite sie nach $${PLACEHOLDER}$ ab.`,
           },
-          rng,
+          ctx,
         ),
       innerStep,
-      (rng) =>
+      (ctx) =>
         assembleStep(
           root,
           'Zusammensetzen',
           `Kettenregel: äußere Ableitung mal innere Ableitung, dabei $${PLACEHOLDER} = ${innerLatex}$ wieder einsetzen.${factorNote ? ` ${factorNote}` : ''} Was ist $f'(x)$?`,
-          rng,
+          ctx,
         ),
     ]
   }
 
-  return [(rng) => derivativeStep(root, { title: 'Ableitung', question: `Leite ${m(root.input)} ab.` }, rng)]
+  return [(ctx) => derivativeStep(root, { title: 'Ableitung', question: `Leite ${m(root.input)} ab.` }, ctx)]
 }
 
 // Regeln, die nach einem Umschreiben ebenfalls zum Ziel führen und deshalb nie als falsch gelten:
@@ -232,12 +234,22 @@ function ruleStep(root: Derivation, rng: Rng): GuidedStep | null {
 }
 
 // Wählt bis zu MAX_WRONG_CHOICES falsche Antworten, möglichst aus verschiedenen Fehlerregeln
-function pickWrong<T extends { readonly answer: WrongAnswer }>(candidates: readonly T[], rng: Rng): T[] {
+function pickWrong<T extends { readonly answer: WrongAnswer }>(candidates: readonly T[], rng: Rng, focus?: string): T[] {
   const byRule = new Map<string, T>()
   for (const c of candidates) if (!byRule.has(c.answer.errorRule.id)) byRule.set(c.answer.errorRule.id, c)
   const distinct = rng.shuffle([...byRule.values()])
   const rest = rng.shuffle(candidates.filter((c) => !distinct.includes(c)))
-  return [...distinct, ...rest].slice(0, MAX_WRONG_CHOICES)
+  const ordered = [...distinct, ...rest]
+  // Gezieltes Üben: Der gesuchte Fehler kommt sicher mit (gleiche Zufallszüge, nur umsortiert)
+  const focused = ordered.findIndex((c) => c.answer.errorRule.id === focus)
+  if (focused > 0) ordered.unshift(...ordered.splice(focused, 1))
+  return ordered.slice(0, MAX_WRONG_CHOICES)
+}
+
+// Was jeder Schritt-Bauer bekommt: eigenen Zufall und den Fehler für gezieltes Üben
+type StepContext = {
+  readonly rng: Rng
+  readonly focus?: string
 }
 
 type StepText = {
@@ -248,7 +260,7 @@ type StepText = {
 }
 
 // Ein Teilterm wird in einem Schritt abgeleitet; die Antworten sind fertig zusammengefasst
-function derivativeStep(node: Derivation, { title, question, name }: StepText, rng: Rng): GuidedStep {
+function derivativeStep(node: Derivation, { title, question, name }: StepText, { rng, focus }: StepContext): GuidedStep {
   const local = derive(node.input, node.variable)
   const correct: Choice = { id: 'richtig', content: m(local.result), correct: true, expr: local.result }
   let wrongChoices: Choice[]
@@ -265,7 +277,7 @@ function derivativeStep(node: Derivation, { title, question, name }: StepText, r
     ]
   } else {
     const candidates = wrongAnswers(node.input, local).map((answer) => ({ answer }))
-    wrongChoices = pickWrong(candidates, rng).map(({ answer }, i) => ({
+    wrongChoices = pickWrong(candidates, rng, focus).map(({ answer }, i) => ({
       id: `falsch-${i + 1}`,
       content: m(answer.result),
       correct: false,
@@ -307,7 +319,7 @@ const isWithin = (node: Derivation, path: readonly number[]) => path.every((i, k
 // Formel vor dem Zusammenfassen; die falschen entstehen aus Fehlern an genau dieser Regel.
 // withOuter: Bei der Kettenregel zählen auch Fehler beim Ableiten der äußeren Funktion
 // (wenn die äußere Ableitung nicht vorher einzeln gefragt wurde).
-function assembleStep(root: Derivation, title: string, question: string, rng: Rng, withOuter = false): GuidedStep {
+function assembleStep(root: Derivation, title: string, question: string, { rng, focus }: StepContext, withOuter = false): GuidedStep {
   const { factors, core } = splitFactors(root)
   const formula = withFactors(factors, core.formula)
   const outerPath = [...core.path, 0]
@@ -321,7 +333,7 @@ function assembleStep(root: Derivation, title: string, question: string, rng: Rn
     return []
   })
   const correct: Choice = { id: 'richtig', content: m(formula), correct: true, expr: formula }
-  const wrongChoices = pickWrong(candidates, rng).map(({ answer, formula: wrongFormula }, i) => ({
+  const wrongChoices = pickWrong(candidates, rng, focus).map(({ answer, formula: wrongFormula }, i) => ({
     id: `falsch-${i + 1}`,
     content: m(wrongFormula),
     correct: false,
