@@ -36,8 +36,9 @@ body {
   @apply bg-white font-sans text-zinc-900 antialiased;
 }
 
-/* Formeln etwas größer als der Fließtext, wie im Skript gut lesbar */
-.katex {
+/* Formeln etwas größer als der Fließtext, wie im Skript gut lesbar. Mit body davor, weil die
+   KaTeX-Regeln erst mit der ersten Formel nachgeladen werden und sonst Vorrang hätten. */
+body .katex {
   font-size: 1.15em;
 }
 
@@ -67,6 +68,11 @@ body {
 }
 .animate-page-in {
   animation: page-in 160ms ease-out;
+}
+
+/* „Wird geladen …" erst nach einer Weile zeigen; meist ist die Seite vorher da */
+.animate-late {
+  animation: page-in 200ms ease-out 400ms both;
 }
 
 /* Haken und Kreuz springen kurz auf */
@@ -123,6 +129,7 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .animate-step-in,
   .animate-page-in,
+  .animate-late,
   .animate-pop,
   .animate-glow,
   .animate-shake {

@@ -1,4 +1,6 @@
 import katex from 'katex'
+// mit der ersten Formel geladen, nicht schon für die Startseite
+import 'katex/dist/katex.min.css'
 
 // Setzt eine Formel (LaTeX) mit KaTeX zu HTML.
 // Auch Formeln im Text werden in voller Größe gesetzt (\displaystyle), damit

@@ -4,9 +4,23 @@ import { FitWidth } from '../FitWidth.tsx'
 import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
 import { SUBJECTS } from '../catalog.ts'
-import { cardFolderHref, cardHref } from '../routes.ts'
+import { cardFolderHref } from '../routes.ts'
+import { cardHref, resolveCardPage } from './cardRoute.ts'
 import { derivativeLevels } from '../samples.ts'
 import { CardBody } from './CardBody.tsx'
+
+// Lernkarten-Seite zur Adresse: alle Ordner, ein Ordner oder eine Karte
+export function CardsPage({ folder, card }: { folder: string | null; card: string | null }) {
+  const page = resolveCardPage(folder, card)
+  switch (page.kind) {
+    case 'folders':
+      return <CardsScreen />
+    case 'folder':
+      return <CardTopicScreen key={page.topic} topic={page.topic} />
+    case 'card':
+      return <CardScreen key={page.id} id={page.id} />
+  }
+}
 
 // Ordner der Lernkarten nach Fach und Gebiet wie auf der Startseite (je Thema ein Ordner)
 const FOLDER_GROUPS = SUBJECTS.flatMap((subject) =>

@@ -92,4 +92,11 @@ test('App funktioniert nach dem ersten Besuch auch offline', async ({ page, cont
   await expect(page.locator('.katex').first()).toBeVisible()
   await page.getByRole('link', { name: 'Stufe 1 geführt üben' }).click()
   await expect(page.locator('#question')).toBeVisible()
+  // Auch die Seiten, die erst bei Bedarf geladen werden, liegen schon auf dem Gerät
+  await page.goto('./#/karten/ableitungen/product')
+  await expect(page.getByRole('heading', { name: 'Produktregel', level: 1 })).toBeVisible()
+  await page.goto('./#/fortschritt')
+  await expect(page.getByRole('heading', { name: 'Dein Fortschritt' })).toBeVisible()
+  await page.goto('./#/galerie')
+  await expect(page.getByRole('heading', { name: 'Formel-Galerie' })).toBeVisible()
 })

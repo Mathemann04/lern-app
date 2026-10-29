@@ -1,10 +1,10 @@
-import { ERROR_RULES } from '../engine/derive/errorRules.ts'
-import { cardById, topicById } from '../engine/explain/cards.ts'
 import { type Level, type TaskRef, formatTaskNumber, parseTaskNumber } from '../engine/tasks/taskNumber.ts'
 import type { PracticeMode } from '../state/storage.ts'
 import { areaById, courseById, isAreaAvailable } from './catalog.ts'
 
-// Seiten der App und ihre Adressen (Teil nach „#")
+// Seiten der App und ihre Adressen (Teil nach „#"). Absichtlich ohne Mathe-Engine, damit die
+// Startseite schnell lädt: Ob es eine Lernkarte oder einen typischen Fehler gibt, prüfen erst die
+// Seiten selbst (cards/cardRoute.ts, PracticePage.tsx).
 export type Route =
   | { readonly page: 'home' }
   | { readonly page: 'gallery' }
@@ -14,10 +14,9 @@ export type Route =
   | { readonly page: 'area'; readonly id: string }
   | { readonly page: 'course'; readonly id: string }
   // Lernkarten: Ordner #/karten, ein Ordner #/karten/ableitungen, eine Karte #/karten/ableitungen/product
-  | { readonly page: 'cards' }
-  | { readonly page: 'cardTopic'; readonly topic: string }
-  | { readonly page: 'card'; readonly id: string }
+  | { readonly page: 'cards'; readonly folder: string | null; readonly card: string | null }
   // Üben: ohne Startwert wird eine neue Aufgabe gewürfelt; focus: gezielt einen typischen Fehler üben
+  // (Id einer Fehlerregel, noch ungeprüft)
   | {
       readonly page: 'practice'
       readonly mode: PracticeMode
@@ -34,7 +33,6 @@ export function parseRoute(fullPath: string): Route {
   if (path === '/galerie') return { page: 'gallery' }
   if (path === '/einstellungen') return { page: 'settings' }
   if (path === '/fortschritt') return { page: 'progress' }
-  if (path === '/karten') return { page: 'cards' }
   const catalog = /^\/(gebiet|thema)\/([^/]+)$/.exec(path)
   if (catalog) {
     const [, kind, id] = catalog
@@ -42,20 +40,12 @@ export function parseRoute(fullPath: string): Route {
     const found = areaById(id)
     return found && isAreaAvailable(found.area) ? { page: 'area', id } : { page: 'home' }
   }
-  const cards = /^\/karten\/([^/]+)(?:\/([^/]+))?$/.exec(path)
-  if (cards) {
-    const [, first, second] = cards
-    if (second) return cardById(second)?.topic === first ? { page: 'card', id: second } : parseRoute(`/karten/${first}`)
-    if (topicById(first)) return { page: 'cardTopic', topic: first }
-    // ältere Adresse ohne Ordner, z. B. #/karten/product
-    if (cardById(first)) return { page: 'card', id: first }
-    return { page: 'cards' }
-  }
+  const cards = /^\/karten(?:\/([^/]+))?(?:\/([^/]+))?$/.exec(path)
+  if (cards) return { page: 'cards', folder: cards[1] ?? null, card: cards[2] ?? null }
   const practice = /^\/(ueben|frei)\/(.+)$/.exec(path)
   if (practice) {
     const mode: PracticeMode = practice[1] === 'frei' ? 'free' : 'guided'
-    const wanted = new URLSearchParams(query).get('fokus')
-    const focus = wanted && ERROR_RULES.some((r) => r.id === wanted) ? wanted : null
+    const focus = new URLSearchParams(query).get('fokus') || null
     const ref = parseTaskNumber(practice[2])
     if (ref) return { page: 'practice', mode, level: ref.level, seed: ref.seed, focus }
     if (/^[1-5]$/.test(practice[2])) return { page: 'practice', mode, level: Number(practice[2]) as Level, seed: null, focus }
@@ -73,9 +63,8 @@ export const taskHref = (ref: TaskRef, mode: PracticeMode = 'guided', focus?: st
 export const areaHref = (id: string) => `#/gebiet/${id}`
 export const courseHref = (id: string) => `#/thema/${id}`
 
-// Ordner der Lernkarten (in explain/cards.ts „topic")
+// Ordner der Lernkarten (in explain/cards.ts „topic"); eine Karte: cardHref in cards/cardRoute.ts
 export const cardFolderHref = (topic: string) => `#/karten/${topic}`
-export const cardHref = (id: string) => `${cardFolderHref(cardById(id)!.topic)}/${id}`
 
 // Bereiche des Hauptmenüs
 export type Section = 'home' | 'cards' | 'progress' | 'settings'
@@ -88,8 +77,6 @@ export function sectionOf(route: Route): Section | null {
     case 'course':
       return 'home'
     case 'cards':
-    case 'cardTopic':
-    case 'card':
       return 'cards'
     case 'progress':
       return 'progress'

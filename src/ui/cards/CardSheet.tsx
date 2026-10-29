@@ -4,7 +4,7 @@ import type { Expr } from '../../engine/expr/types.ts'
 import { FitWidth } from '../FitWidth.tsx'
 import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
-import { cardHref } from '../routes.ts'
+import { cardHref } from './cardRoute.ts'
 import { CardBody } from './CardBody.tsx'
 
 // Lernkarten aus einer Aufgabe heraus: als Fenster über der Aufgabe, damit nichts verloren geht.
