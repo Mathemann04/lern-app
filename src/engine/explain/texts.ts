@@ -1,8 +1,9 @@
 import { type Derivation, PLACEHOLDER, allNodes } from '../derive/derive.ts'
+import { type ImplicitDerivation, type SolveMistake, implicitResult, sortedEquation } from '../derive/implicit.ts'
 import type { WrongAnswer } from '../derive/errorRules.ts'
 import { RULES, type RuleId } from '../derive/rules.ts'
 import { finalForm } from '../expr/finalForm.ts'
-import { toLatex } from '../expr/print.ts'
+import { equationToLatex, toLatex } from '../expr/print.ts'
 import { substitute } from '../expr/substitute.ts'
 import { type Expr, asRational, fn, ln, mulDot, num, pow } from '../expr/types.ts'
 import { type Rational, ONE, isInteger, ratSign, ratSub } from '../rational.ts'
@@ -118,6 +119,8 @@ function describe(node: Derivation): string[] {
     case 'arcosh':
     case 'artanh':
       return [`${BASIC_SENTENCE[node.rule]} ${tex(chain(prime(node.input), node.result))}.`]
+    case 'dependent':
+      return [`${m(node.input)} hängt von $${node.variable}$ ab. Seine Ableitung heißt ${m(node.result)}: ${tex(chain(prime(node.input), node.result))}.`]
     case 'logarithmic': {
       const [inner] = node.children
       return [
@@ -267,6 +270,8 @@ export function hintFor(node: Derivation): string {
       return `Die Ableitungen der Areafunktionen sind Brüche ohne Hyperbelfunktion. Achte auf das Vorzeichen unter der Wurzel bzw. im Nenner.${factor}`
     case 'logarithmic':
       return `Basis und Exponent hängen von $${core.variable}$ ab. Logarithmiere zuerst: $\\ln(a^b) = b \\cdot \\ln a$.${factor}`
+    case 'dependent':
+      return `${m(core.input)} hängt von $${core.variable}$ ab. Seine Ableitung schreibt man ${m(core.result)}.${factor}`
     case 'sum': {
       const hasConstant = core.children.some((c) => c.rule === 'constant')
       return `Leite jeden Summanden einzeln ab.${hasConstant ? ' Was passiert mit einer Zahl ohne $x$?' : ''}${factor}`
@@ -419,6 +424,65 @@ export function explainLogLawMistake(mistake: LogLawMistake, u: Expr, v: Expr): 
     sum: 'Das Gesetz $\\ln(a \\cdot b) = \\ln a + \\ln b$ gilt für ein Produkt. Hier steht aber eine Potenz.',
   }
   return { detailed: `${what[mistake]} ${rule}`, short: rule }
+}
+
+// --- Implizites Ableiten ---
+
+const IMPLICIT_RULE = tex(RULES.dependent.formula)
+
+const sideLine = (side: Derivation) => tex(chain(prime(side.input), side.result))
+
+// Schritt „Beide Seiten ableiten"
+export function explainDifferentiateSides(d: ImplicitDerivation): Explanation {
+  return {
+    detailed: [
+      `Du leitest beide Seiten nach $x$ ab. Dabei hängt $y$ von $x$ ab: Jeder Term mit $y$ bekommt nach der Kettenregel den Faktor $y'$, ${IMPLICIT_RULE}.`,
+      `Links: ${sideLine(d.left)}.`,
+      `Rechts: ${sideLine(d.right)}.`,
+    ].join('\n'),
+    short: `${sideLine(d.left)}, ${sideLine(d.right)}.`,
+  }
+}
+
+export const HINT_DIFFERENTIATE_SIDES =
+  "Leite jeden Term nach $x$ ab. Bei Termen mit $y$ kommt nach der Kettenregel der Faktor $y'$ dazu. Vergiss die andere Seite nicht."
+
+// Schritt „Nach y' auflösen"
+export function explainSolve(d: ImplicitDerivation): Explanation {
+  const result = tex(`y' = ${toLatex(implicitResult(d))}`)
+  return {
+    detailed: [
+      `Bringe alle Terme mit $y'$ auf eine Seite, den Rest auf die andere, und klammere $y'$ aus: ${tex(equationToLatex(sortedEquation(d)))}.`,
+      `Dann teilst du durch ${m(d.coefficient)}: ${result}. Im Ergebnis darf $y$ stehen bleiben.`,
+    ].join('\n'),
+    short: `${tex(equationToLatex(sortedEquation(d)))}, also ${result}.`,
+  }
+}
+
+export const HINT_SOLVE = "Bringe alle Terme mit $y'$ auf eine Seite und klammere $y'$ aus. Dann teile durch den Faktor vor $y'$."
+
+export function explainSolveMistake(mistake: SolveMistake): Explanation {
+  const texts: Record<SolveMistake, Explanation> = {
+    sign: {
+      detailed: 'Prüfe das Vorzeichen: Ein Term, der auf die andere Seite der Gleichung kommt, wechselt sein Vorzeichen.',
+      short: 'Vorzeichen beim Umstellen prüfen.',
+    },
+    reciprocal: {
+      detailed: "Du hast durch die falsche Seite geteilt. Damit $y'$ allein steht, teilst du durch den Faktor vor $y'$.",
+      short: "Durch den Faktor vor $y'$ teilen.",
+    },
+    partial: {
+      detailed: "Hier gibt es mehrere Terme mit $y'$. Bring alle auf eine Seite und klammere $y'$ aus allen aus, bevor du teilst.",
+      short: "Alle Terme mit $y'$ sammeln.",
+    },
+  }
+  return texts[mistake]
+}
+
+// Tipp im freien Modus
+export const IMPLICIT_RULE_HINT: Explanation = {
+  detailed: `Leite beide Seiten nach $x$ ab. Jeder Term mit $y$ bekommt den Faktor $y'$: ${IMPLICIT_RULE}. Dann löst du nach $y'$ auf.`,
+  short: "Beide Seiten nach $x$ ableiten (Terme mit $y$ bekommen den Faktor $y'$), dann nach $y'$ auflösen.",
 }
 
 // --- „Warum ist das falsch?" ---
@@ -647,6 +711,22 @@ const ERROR_TEXTS: Record<string, (c: ErrorContext) => Explanation> = {
     detailed:
       "Beim Areatangens hyperbolicus steht $1 - x^2$ im Nenner: $(\\operatorname{artanh} x)' = \\frac{1}{1 - x^2}$. Mit $1 + x^2$ ist es die Ableitung des Arkustangens.",
     short: "Minus im Nenner: $(\\operatorname{artanh} x)' = \\frac{1}{1 - x^2}$.",
+  }),
+  'implicit-y-constant': () => ({
+    detailed: `$y$ ist keine feste Zahl, sondern hängt von $x$ ab. Beim Ableiten eines Terms mit $y$ fällt es deshalb nicht weg, sondern es entsteht nach der Kettenregel der Faktor $y'$: ${IMPLICIT_RULE}.`,
+    short: `$y$ hängt von $x$ ab: ${IMPLICIT_RULE}.`,
+  }),
+  'implicit-y-prime-forgotten': () => ({
+    detailed: `Du hast $y$ abgeleitet, als wäre es $x$. Weil $y$ von $x$ abhängt, kommt nach der Kettenregel noch der Faktor $y'$ dazu (die innere Ableitung): ${IMPLICIT_RULE}.`,
+    short: `Faktor $y'$ vergessen: ${IMPLICIT_RULE}.`,
+  }),
+  'implicit-x-as-constant': ({ node }) => ({
+    detailed: `Bei ${m(node.input)} hängen beide Faktoren von $x$ ab, auch der mit $y$. Du brauchst die Produktregel: ${PRODUCT_RULE}. ${partsSentence(node)}`,
+    short: `Beide Faktoren hängen von $x$ ab: ${PRODUCT_RULE}.`,
+  }),
+  'implicit-constant-side-kept': ({ input }) => ({
+    detailed: `Auch die andere Seite der Gleichung wird abgeleitet. ${m(input)} ist eine feste Zahl, ihre Ableitung ist $0$.`,
+    short: `Auch rechts ableiten: ${tex(chain(prime(input), '0'))}.`,
   }),
   'notation-power-on-name': ({ input }) => {
     // \sin^2 x bedeutet (\sin x)^2: außen die Potenz, innen der Sinus

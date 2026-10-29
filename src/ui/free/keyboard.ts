@@ -3,6 +3,7 @@ import type { VirtualKeyboardKeycap, VirtualKeyboardLayout } from 'mathlive'
 // Bildschirm-Tastatur für Ableitungen: alles bis Stufe 4 auf der ersten Seite, die
 // Funktionen der Stufe 5 (Hyperbel-, Arkus- und Areafunktionen) auf einer zweiten.
 // Funktionen kommen gleich mit Klammer, damit „sin 3x" nicht mehrdeutig ist.
+// y braucht es beim impliziten Ableiten (Stufe 5): y' wird in x und y angegeben.
 
 type Key = string | Partial<VirtualKeyboardKeycap>
 
@@ -27,7 +28,7 @@ const ROWS: Key[][] = [
   [
     fnKey('arctan'),
     { label: 'log<sub>a</sub>', insert: '\\log_{#?}\\left(#?\\right)', class: 'small' },
-    { latex: '\\pi' },
+    'y',
     { label: ',', key: ',' },
     '0',
     '+',

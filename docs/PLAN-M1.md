@@ -133,9 +133,8 @@ mehrmals machen und das gezielte Üben starten.
   ($\arcsin$, $\arccos$, Ableitung der Umkehrfunktion), Hyperbelfunktionen
   ($\sinh$, $\cosh$, $\tanh$ und ihre Umkehrfunktionen).
 - Umgesetzt: Stufe 5 ist spielbar (geführt und frei); Aufgaben zum
-  impliziten Ableiten werden bis Schritt 11 übersprungen (die
-  Aufgaben-Nummern bleiben dieselben, über ihre Nummer aufgerufen zeigen sie
-  einen Hinweis).
+  impliziten Ableiten wurden bis Schritt 11 übersprungen (die
+  Aufgaben-Nummern sind dieselben geblieben).
 - Logarithmisches Ableiten geführt in vier Schritten: Regelwahl (Potenzregel
   und die Regel für $a^x$ als typische falsche Wahl, die Kettenregel über
   $e^{v \ln u}$ gilt nie als falsch), Logarithmieren
@@ -157,6 +156,28 @@ mehrmals machen und das gezielte Üben starten.
 ### Schritt 11: Stufe 5, Teil 2: implizites Ableiten
 - Aufgaben mit $x$ und $y$, z. B. $x^2 + y^2 = 25$ oder $x y + e^y = 1$,
   Ergebnis $y'$ in Abhängigkeit von $x$ und $y$.
+- Umgesetzt: Vorlagen $x^2 + y^2 = r^2$, $a x^2 + b y^2 = c$,
+  $k\,xy + e^y = c$, $x^2 y + y^3 = c$, $x^3 + y^3 = k\,xy$,
+  $x^2 + k\,xy + y^2 = c$ (ohne $k = 2$: das wären zwei Geraden mit
+  $y' = -1$), $\sin(xy) = k x$, $y^2 = x^3 + k x$.
+- Die Engine leitet beide Seiten ab, wobei $y$ von $x$ abhängt
+  ($(y)' = y'$, sonst die bekannten Regeln), und löst nach $y'$ auf:
+  Die abgeleitete Gleichung ist in $y'$ linear, also
+  $A \cdot y' + B = 0$ und $y' = -\frac{B}{A}$ (gemeinsame Zahlfaktoren
+  gekürzt). Gegenprobe: An Punkten auf der Kurve (mit dem Newton-Verfahren
+  gesucht) wird die Steigung numerisch bestimmt und mit $y'$ verglichen.
+- Geführt in drei Schritten: einen Term mit $y$ ableiten (z. B. $y^2$,
+  $xy$, $\sin(xy)$), beide Seiten ableiten (falsche Antworten aus den
+  typischen Fehlern, auch auf der rechten Seite), nach $y'$ auflösen
+  (falsch: Vorzeichen beim Umstellen vergessen, durch die falsche Seite
+  geteilt, nicht alle Terme mit $y'$ gesammelt).
+- Frei: Eingabe „$y' = \dots$" oder nur der Term. Verglichen wird auf der
+  Kurve; erkannt werden typische Fehler beim Ableiten und beim Auflösen.
+  Ein Ergebnis mit $y'$ darin oder ohne $y$ (eingesetzt) bekommt einen
+  eigenen Hinweis. Taste $y$ auf der Mathe-Tastatur.
+- Neue Lernkarte „Implizites Ableiten", vier neue typische Fehler (siehe
+  Katalog). Die Galerie zeigt bei impliziten Aufgaben beide Seiten im
+  Rechenweg und die falsch abgeleiteten Gleichungen.
 
 ### Schritt 12: Feinschliff und Abschluss von M1
 - Dezente Animationen, Startseite und Themenübersicht, letzte
@@ -288,7 +309,7 @@ Die Engine kennt kein React. Spätere Themen (M2 ff.) bauen auf `expr/`,
 7. **Gleichwertigkeit.** Erst Vergleich der Normalformen (schnell), sonst
    numerisch an mindestens 30 Zufallsstellen im Definitionsbereich der
    Aufgabe mit relativer Toleranz. Beim impliziten Ableiten an
-   Zufallspunkten $(x, y)$.
+   Punkten $(x, y)$ auf der Kurve.
    Umgesetzt in `src/engine/derive/` (Schritt 3) und
    `src/engine/check/answer.ts` (Schritt 6). Die Eingabe muss überall dort
    definiert sein, wo die Lösung definiert ist; gleiche Normalform allein
@@ -406,9 +427,10 @@ ausprobieren".
 | $\operatorname{arsinh}$ | mit $\operatorname{arcosh}$ verwechselt | $(\operatorname{arsinh} x)' = \frac{1}{\sqrt{x^2-1}}$ |
 | $\operatorname{arcosh}$ | mit $\operatorname{arsinh}$ verwechselt | $(\operatorname{arcosh} x)' = \frac{1}{\sqrt{x^2+1}}$ |
 | $\operatorname{artanh}$ | mit $\arctan$ verwechselt | $(\operatorname{artanh} x)' = \frac{1}{1+x^2}$ |
-| implizit | $y$ wie eine Konstante behandelt | $(y^2)' = 0$ |
-| implizit | $y'$ vergessen | $(y^2)' = 2y$ |
-| implizit | Produktregel bei $xy$ vergessen | $(xy)' = x\,y'$ |
+| implizit | $y$ wie eine feste Zahl abgeleitet | $(y^2)' = 0$ |
+| implizit | innere Ableitung von $y$ vergessen | $(y^2)' = 2y$ |
+| implizit | $x$ wie eine feste Zahl behandelt (Produktregel bei $xy$ vergessen) | $(x \cdot y)' = x \cdot y'$ |
+| implizit | Zahl auf der anderen Seite nicht abgeleitet | $(25)' = 25$ |
 
 ## Beispiel: So sieht eine geführte Aufgabe aus
 
@@ -434,10 +456,11 @@ richtig. Bei $2x\,e^x$ sagt die App: „Das ist $u' \cdot v'$. Bei der
 Produktregel …"
 
 ## Bekannte Risiken
-- **Implizites Ableiten:** Ergebnisse, die nur auf der Kurve gleich sind
-  (z. B. mit $y = \sqrt{25-x^2}$ eingesetzt), erkennt die Prüfung in M1
-  zunächst nicht als richtig. Wir zeigen dann einen Hinweis, $y$ stehen zu
-  lassen.
+- **Implizites Ableiten:** Die Prüfung vergleicht an Punkten auf der
+  Kurve, deshalb zählen auch Formen als richtig, die die Gleichung schon
+  benutzen. Wer $y$ durch einen Term mit $x$ ersetzt (z. B.
+  $y = \sqrt{25-x^2}$), stimmt meist nur auf einem Teil der Kurve; dann
+  zeigt die App einen Hinweis, $y$ stehen zu lassen.
 - **iPhone:** Safari löscht gespeicherte Daten von Webseiten, die man
   wochenlang nicht öffnet. Auf dem Homescreen installiert passiert das
   nicht. Deshalb: App immer installieren. Eine Sicherungsfunktion

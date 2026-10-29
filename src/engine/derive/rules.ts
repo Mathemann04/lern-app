@@ -15,6 +15,8 @@ export type RuleId =
   | 'exp'
   | 'expBase'
   | 'logBase'
+  // implizites Ableiten: y hängt von x ab
+  | 'dependent'
   | FnName
 
 export type RuleInfo = {
@@ -42,6 +44,7 @@ export const RULES: Readonly<Record<RuleId, RuleInfo>> = {
     name: 'Logarithmisches Ableiten',
     formula: "\\bigl(u^v\\bigr)' = u^v \\cdot \\bigl(v \\cdot \\ln u\\bigr)'",
   },
+  dependent: { name: 'Implizites Ableiten', formula: "\\bigl(g(y)\\bigr)' = g'(y) \\cdot y'" },
   exp: { name: 'e-Funktion', formula: "(e^x)' = e^x" },
   expBase: { name: 'Exponentialfunktion zur Basis a', formula: "(a^x)' = a^x \\cdot \\ln a" },
   logBase: { name: 'Logarithmus zur Basis a', formula: "(\\log_a x)' = \\frac{1}{x \\cdot \\ln a}" },

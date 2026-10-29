@@ -1,8 +1,11 @@
 import { RULES, type RuleId } from '../derive/rules.ts'
 import { key, subterms } from '../expr/compare.ts'
 import {
+  type Equation,
   type Expr,
   add,
+  eq,
+  isEquation,
   cos,
   div,
   exp,
@@ -19,6 +22,7 @@ import {
   sub,
   tan,
   x,
+  y,
 } from '../expr/types.ts'
 import type { Level } from '../tasks/taskNumber.ts'
 import { WHEN_NEEDED } from './texts.ts'
@@ -57,8 +61,9 @@ export type Card = {
   readonly note?: string
   // wann man die Regel braucht (bei Regeln für den Aufbau eines Terms)
   readonly when?: string
-  // Beispielfunktionen in Aufgabenform; die erste ist die einfachste
-  readonly examples: readonly Expr[]
+  // Beispielfunktionen in Aufgabenform (beim impliziten Ableiten Gleichungen); die erste ist
+  // die einfachste
+  readonly examples: readonly (Expr | Equation)[]
   // Ids der typischen Fehler (Fehlerregeln)
   readonly errors: readonly string[]
 }
@@ -306,6 +311,28 @@ export const CARDS: readonly Card[] = [
     examples: [fn('arsinh', mul(num(2), x)), fn('arcosh', x2), add(x, fn('artanh', x))],
     errors: ['arsinh-arcosh', 'arcosh-arsinh', 'artanh-arctan'],
   },
+  {
+    id: 'implicit',
+    topic: 'ableitungen',
+    title: 'Implizites Ableiten',
+    level: 5,
+    rules: ['dependent'],
+    formulas: [RULES.dependent.formula, "(x \\cdot y)' = y + x \\cdot y'"],
+    memo: "$y$ hängt von $x$ ab: Jeder Term mit $y$ bekommt beim Ableiten den Faktor $y'$. Danach löst du nach $y'$ auf.",
+    note: [
+      'So gehst du vor:',
+      '1. Beide Seiten nach $x$ ableiten.',
+      "2. Alle Terme mit $y'$ auf eine Seite bringen und $y'$ ausklammern.",
+      "3. Durch den Faktor vor $y'$ teilen. Im Ergebnis darf $y$ stehen bleiben.",
+    ].join('\n'),
+    when: 'Du brauchst es, wenn eine Kurve als Gleichung in $x$ und $y$ gegeben ist, z. B. $x^2 + y^2 = 25$, und sich nicht gut nach $y$ auflösen lässt.',
+    examples: [
+      eq(add(x2, pow(y, num(2))), num(25)),
+      eq(add(mul(x, y), exp(y)), num(2)),
+      eq(pow(y, num(2)), sub(x3, mul(num(2), x))),
+    ],
+    errors: ['implicit-y-constant', 'implicit-y-prime-forgotten', 'implicit-x-as-constant', 'implicit-constant-side-kept'],
+  },
 ]
 
 export function topicById(id: string): Topic | undefined {
@@ -324,10 +351,11 @@ export function cardForRule(rule: RuleId): Card | undefined {
 
 // Beispiele einer Karte. In einer Aufgabe ohne die, die dort als Teil vorkommen: Sonst verriete
 // die Karte das Ergebnis eines Schritts (z. B. 4x³ in 4x³ − 2/x + √x).
-export function examplesFor(card: Card, task?: Expr): readonly Expr[] {
+// (Bei Gleichungen ist task linke minus rechte Seite.)
+export function examplesFor(card: Card, task?: Expr): readonly (Expr | Equation)[] {
   if (!task) return card.examples
   const parts = new Set(subterms(task).map(key))
-  const fresh = card.examples.filter((e) => !parts.has(key(e)))
+  const fresh = card.examples.filter((e) => !parts.has(key(isEquation(e) ? sub(e.lhs, e.rhs) : e)))
   return fresh.length > 0 ? fresh : card.examples
 }
 

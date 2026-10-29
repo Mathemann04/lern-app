@@ -524,10 +524,12 @@ const level5Implicit: TermTemplate = {
     const equation = rng.pick<() => Equation>([
       () => eq(add(xPow(2), pow(y, num(2))), num(r * r)),
       () => eq(add(times(rng.int(2, 5), xPow(2)), times(rng.int(2, 5), pow(y, num(2)))), num(c * 10)),
-      () => eq(add(times(rng.int(1, 4), mul(x, y)), exp(y)), num(rng.int(1, 5))),
+      // rechts nicht 1: sonst liegt die ganze Gerade y = 0 auf der Kurve (dort ist y' überall 0)
+      () => eq(add(times(rng.int(1, 4), mul(x, y)), exp(y)), num(rng.int(2, 5))),
       () => eq(add(mul(xPow(2), y), pow(y, num(3))), num(c)),
       () => eq(add(xPow(3), pow(y, num(3))), times(k, mul(x, y))),
-      () => eq(add(xPow(2), times(rng.int(1, 3), mul(x, y)), pow(y, num(2))), num(c)),
+      // nicht 2xy: x² + 2xy + y² = (x + y)², das sind zwei Geraden mit y' = −1
+      () => eq(add(xPow(2), times(rng.pick([1, 3]), mul(x, y)), pow(y, num(2))), num(c)),
       () => eq(sin(mul(x, y)), times(rng.int(1, 3), x)),
       () => eq(pow(y, num(2)), add(xPow(3), times(signed(rng, rng.int(1, 4)), x))),
     ])()
@@ -559,12 +561,6 @@ export const DERIVATIVE_TEMPLATES: readonly TermTemplate[] = [
 
 export function templatesForLevel(level: Level): TermTemplate[] {
   return DERIVATIVE_TEMPLATES.filter((t) => t.level === level)
-}
-
-// Schon spielbar? Implizites Ableiten (Stufe 5) kommt in Schritt 11; die Nummern bleiben
-// trotzdem dieselben, solche Aufgaben werden bis dahin nur übersprungen.
-export function isPlayable(ref: TaskRef): boolean {
-  return generateDerivativeTask(ref).task.kind === 'function'
 }
 
 // Erzeugt die Aufgabe zu einer Aufgaben-Nummer. Gleiche Nummer → gleiche Aufgabe.

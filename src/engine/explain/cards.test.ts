@@ -1,17 +1,21 @@
 import { describe, expect, it } from 'vitest'
+import { numericImplicitDerivative } from '../check/curve.ts'
 import { numericDerivative } from '../check/numeric.ts'
 import { ERROR_RULES } from '../derive/errorRules.ts'
 import { allNodes, derive } from '../derive/derive.ts'
+import { deriveImplicit, implicitCurvePoints, implicitResult } from '../derive/implicit.ts'
 import type { RuleId } from '../derive/rules.ts'
 import { CHECK_POINTS, isStableAt } from '../expr/arbitraries.ts'
 import { evaluate } from '../expr/evaluate.ts'
 import { latexProblem } from '../expr/latexChecks.ts'
-import { toLatex } from '../expr/print.ts'
-import { type Expr, E, add, cos, div, exp, fn, ln, log, mul, neg, num, pow, sin, sqrt, sub, tan, x } from '../expr/types.ts'
+import { equationToLatex, toLatex } from '../expr/print.ts'
+import { type Equation, type Expr, E, add, cos, div, exp, fn, isEquation, ln, log, mul, neg, num, pow, sin, sqrt, sub, tan, x } from '../expr/types.ts'
 import { generateDerivativeTask } from '../tasks/derivativeTerms.ts'
 import { CARDS, TOPICS, cardById, cardForRule, cardIdsFor, cardsInTopic, examplesFor, topicById } from './cards.ts'
 import { workedExample } from './example.ts'
 import { parseRichText } from './richText.ts'
+
+const latexOf = (e: Expr | Equation) => (isEquation(e) ? equationToLatex(e) : toLatex(e))
 
 function expectRenderable(text: string, context: string) {
   expect(text, context).not.toMatch(/undefined|NaN|\[object|null/)
@@ -72,8 +76,8 @@ describe('Lernkarten: Katalog', () => {
     for (const level of [1, 2, 3, 4, 5] as const) {
       for (let seed = 1; seed <= 150; seed++) {
         const { task } = generateDerivativeTask({ level, seed })
-        if (task.kind !== 'function') continue
-        for (const node of allNodes(derive(task.expr))) {
+        const trees = task.kind === 'function' ? [derive(task.expr)] : (({ left, right }) => [left, right])(deriveImplicit(task.equation))
+        for (const node of trees.flatMap(allNodes)) {
           const card = cardForRule(node.rule)
           expect(card, `Stufe ${level}, Aufgabe ${seed}: ${node.rule}`).toBeDefined()
           expect(card!.level, `${card!.id} kommt schon in Stufe ${level} vor`).toBeLessThanOrEqual(level)
@@ -85,7 +89,7 @@ describe('Lernkarten: Katalog', () => {
   it('verrät in einer Aufgabe kein Ergebnis: Beispiele, die Teil der Aufgabe sind, fallen weg', () => {
     const factorCard = cardById('constant-factor')!
     const task = add(mul(num(4), pow(x, num(3))), neg(div(num(2), x)))
-    expect(examplesFor(factorCard, task).map(toLatex)).toEqual(['-2x^{5}', '\\frac{x^{4}}{8}'])
+    expect(examplesFor(factorCard, task).map(latexOf)).toEqual(['-2x^{5}', '\\frac{x^{4}}{8}'])
     expect(examplesFor(factorCard)).toBe(factorCard.examples)
     // Für jede Karte bleibt mindestens ein Beispiel
     expect(examplesFor(cardById('tan')!, add(mul(num(3), tan(x)), tan(mul(num(2), x)))).length).toBeGreaterThan(0)
@@ -99,25 +103,42 @@ describe('Lernkarten: Katalog', () => {
 })
 
 describe('Lernkarten: durchgerechnete Beispiele', () => {
-  const examples = CARDS.flatMap((card) => card.examples.map((f) => [card.id, toLatex(f), card, f] as const))
+  const examples = CARDS.flatMap((card) => card.examples.map((f) => [card.id, latexOf(f), card, f] as const))
 
   it('hat je Karte mindestens zwei verschiedene Beispiele', () => {
     for (const card of CARDS) {
       expect(card.examples.length, card.id).toBeGreaterThanOrEqual(2)
-      expect(new Set(card.examples.map(toLatex)).size, card.id).toBe(card.examples.length)
+      expect(new Set(card.examples.map(latexOf)).size, card.id).toBe(card.examples.length)
     }
   })
 
   it.each(examples)('%s: %s', (_id, _latex, card, f) => {
     const example = workedExample(f)
-    const d = derive(f)
-    // Das Beispiel braucht die Regel der Karte
-    expect(allNodes(d).some((n) => card.rules.includes(n.rule))).toBe(true)
-    // Ergebnis gegen die numerische Ableitung
-    const compared = compareAt(valueOf(example.result), (at) => (isStableAt(f, at) ? numericDerivative(f, at) : null))
-    expect(compared).toBeGreaterThanOrEqual(3)
-    // Die letzte Zeile endet mit dem Ergebnis, alles lässt sich setzen
-    expect(example.lines.at(-1)!.latex.endsWith(` = ${toLatex(d.result)}`)).toBe(true)
+    if (isEquation(f)) {
+      // Implizit: Regel der Karte auf einer der Seiten, Ergebnis gegen die Steigung auf der Kurve
+      const d = deriveImplicit(f)
+      expect([d.left, d.right].flatMap(allNodes).some((n) => card.rules.includes(n.rule))).toBe(true)
+      let compared = 0
+      for (const point of implicitCurvePoints(f, 'karte', 20)) {
+        const slope = numericImplicitDerivative(f, point.x, point.y)
+        if (slope === null) continue
+        const exact = evaluate(example.result, point)
+        expect(Math.abs(exact - slope)).toBeLessThanOrEqual(1e-5 * Math.max(1, Math.abs(exact)))
+        compared++
+      }
+      expect(compared).toBeGreaterThanOrEqual(5)
+      expect(example.lines.at(-1)!.latex).toBe(`y' = ${toLatex(implicitResult(d))}`)
+    } else {
+      const d = derive(f)
+      // Das Beispiel braucht die Regel der Karte
+      expect(allNodes(d).some((n) => card.rules.includes(n.rule))).toBe(true)
+      // Ergebnis gegen die numerische Ableitung
+      const compared = compareAt(valueOf(example.result), (at) => (isStableAt(f, at) ? numericDerivative(f, at) : null))
+      expect(compared).toBeGreaterThanOrEqual(3)
+      // Die letzte Zeile endet mit dem Ergebnis
+      expect(example.lines.at(-1)!.latex.endsWith(` = ${toLatex(d.result)}`)).toBe(true)
+    }
+    // Alles lässt sich setzen
     expect(latexProblem(example.functionLatex, { checkUgly: false })).toBeNull()
     for (const line of example.lines) {
       expectRenderable(line.label, card.id)

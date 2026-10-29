@@ -21,7 +21,9 @@ const feedback = (page: Page) => page.locator('[aria-live="polite"]')
 const isPhone = () => test.info().project.name === 'handy'
 
 // Tasten der Bildschirm-Tastatur, auf der gerade sichtbaren Seite
-const key = (page: Page, label: string) => page.locator(`.MLK__keycap[aria-label="${label}"]`).filter({ visible: true }).first()
+// (Backslashes wie in \\frac müssen im Suchausdruck doppelt stehen)
+const key = (page: Page, label: string) =>
+  page.locator(`.MLK__keycap[aria-label="${label.replaceAll('\\', '\\\\')}"]`).filter({ visible: true }).first()
 const commandKey = (page: Page, command: string) => page.locator(`[data-command*="${command}"]`).filter({ visible: true }).first()
 
 // Gibt eine Antwort ein: am Handy über die Bildschirm-Tastatur, am Laptop über die normale Tastatur.
@@ -137,7 +139,8 @@ test('Freier Modus in Stufe 4: erkennt den vergessenen Faktor ln a', async ({ pa
     mf.value = '5^{\\sin\\left(4x\\right)}\\cdot4\\cos\\left(4x\\right)'
     mf.executeCommand('commit')
   })
-  await expect(feedback(page)).toContainText('Typischer Fehler: Faktor ln a vergessen.')
+  await expect(feedback(page)).toContainText('Typischer Fehler: Faktor')
+  await expect(feedback(page).locator('.katex-html').first()).toHaveText('lna')
   await page.evaluate(() => {
     const mf = document.querySelector('math-field') as HTMLElement & { value: string; executeCommand: (c: string) => void }
     mf.value = '4\\ln5\\cdot5^{\\sin\\left(4x\\right)}\\cos\\left(4x\\right)'
@@ -168,4 +171,42 @@ test('Freier Modus in Stufe 5: Hyperbelfunktion über die zweite Tastaturseite',
   await submit(page)
   await expect(feedback(page)).toContainText('Richtig!')
   await expectCleanPage(page, 'Stufe 5 frei')
+})
+
+test('Freier Modus in Stufe 5: implizit ableiten, mit y auf der Tastatur', async ({ page }) => {
+  // Aufgabe 5-15: x² + y² = 4, Lösung y' = −x/y
+  const errors = collectErrors(page)
+  await page.goto('./#/frei/5-15')
+  await expect(field(page)).toBeVisible()
+  await expect(page.getByText(/· Leite implizit ab$/)).toBeVisible()
+  await expect(page.getByLabel('Deine Antwort')).toContainText("y′=")
+
+  // x/y: bis auf das Vorzeichen richtig
+  await enter(page, ['x', '\\frac{#@}{#?}', 'y'], 'x/y')
+  await expect(field(page)).toHaveJSProperty('value', '\\frac{x}{y}')
+  await submit(page)
+  await expect(feedback(page)).toContainText('Bis auf das Vorzeichen')
+
+  const answer = async (latex: string) =>
+    page.evaluate((value) => {
+      const mf = document.querySelector('math-field') as HTMLElement & { value: string; executeCommand: (c: string) => void }
+      mf.value = value
+      mf.executeCommand('commit')
+    }, latex)
+
+  // durch die falsche Seite geteilt
+  await answer('-\\frac{y}{x}')
+  await expect(feedback(page)).toContainText('beim Auflösen')
+  // y durch einen Term mit x ersetzt
+  await answer('-\\frac{x}{\\sqrt{4-x^2}}')
+  await expect(feedback(page)).toContainText('im Ergebnis stehen')
+  // y' gehört nicht ins Ergebnis
+  await answer("-\\frac{x}{y'}")
+  await expect(feedback(page)).toContainText('Löse nach')
+
+  await answer('-\\frac{x}{y}')
+  await expect(feedback(page)).toContainText('Richtig!')
+  await expect(page.getByTestId('result')).toContainText('y′')
+  await expectCleanPage(page, 'Stufe 5 implizit frei')
+  expect(errors).toEqual([])
 })

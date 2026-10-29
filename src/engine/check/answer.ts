@@ -1,24 +1,54 @@
 import { type Derivation, derive } from '../derive/derive.ts'
 import { type WrongAnswer, wrongAnswers } from '../derive/errorRules.ts'
-import { key } from '../expr/compare.ts'
+import {
+  DEPENDENT,
+  type ImplicitDerivation,
+  type ImplicitWrongAnswer,
+  type SolveMistake,
+  deriveImplicit,
+  implicitCurvePoints,
+  implicitResult,
+  implicitWrongAnswers,
+  solveMistakes,
+} from '../derive/implicit.ts'
+import { clearlyDifferent } from './numeric.ts'
+import { contains, key } from '../expr/compare.ts'
 import { type Env, evaluate } from '../expr/evaluate.ts'
 import { normalize } from '../expr/normalize.ts'
 import { samplePoints } from '../expr/sample.ts'
-import { type Expr, neg } from '../expr/types.ts'
+import { type Equation, type Expr, asRational, neg } from '../expr/types.ts'
 import { parseLatex } from '../parse/latex.ts'
 import { createRng } from '../random/rng.ts'
 
 // Prüft eine frei eingegebene Ableitung: Ist sie gleichwertig zur Lösung (in jeder
 // richtigen Form)? Wenn nicht: Passt sie zu einem typischen Fehler aus den Fehlerregeln?
 // Gleichwertig heißt: gleiche Normalform, sonst gleiche Werte an vielen Stellen im
-// Definitionsbereich der Aufgabe.
+// Definitionsbereich der Aufgabe. Beim impliziten Ableiten zählen Stellen auf der Kurve:
+// Dort sind auch Formen gleich, die die Gleichung schon benutzen.
 
-export type AnswerContext = {
+export type FunctionAnswerContext = {
+  readonly kind: 'function'
   readonly task: Expr
   readonly derivation: Derivation
   readonly wrongAnswers: readonly WrongAnswer[]
   readonly points: readonly Env[]
 }
+
+export type ImplicitAnswerContext = {
+  readonly kind: 'implicit'
+  readonly equation: Equation
+  readonly derivation: ImplicitDerivation
+  // y' in x und y
+  readonly result: Expr
+  // typische Fehler beim Ableiten, die zu einem anderen y' führen
+  readonly wrongAnswers: readonly ImplicitWrongAnswer[]
+  // typische Fehler beim Auflösen nach y'
+  readonly mistakes: ReadonlyArray<{ readonly mistake: SolveMistake; readonly result: Expr }>
+  // Punkte (x, y) auf der Kurve
+  readonly points: readonly Env[]
+}
+
+export type AnswerContext = FunctionAnswerContext | ImplicitAnswerContext
 
 export type Verdict =
   | { readonly kind: 'unreadable'; readonly message: string }
@@ -30,6 +60,9 @@ export type Verdict =
   // richtig bis auf das Vorzeichen bzw. einen Zahlenfaktor
   | { readonly kind: 'wrongSign'; readonly answer: Expr }
   | { readonly kind: 'wrongFactor'; readonly answer: Expr }
+  // implizit: Fehler beim Auflösen nach y'; y durch einen Term mit x ersetzt
+  | { readonly kind: 'solveMistake'; readonly answer: Expr; readonly mistake: SolveMistake }
+  | { readonly kind: 'keepY'; readonly answer: Expr }
   | { readonly kind: 'wrong'; readonly answer: Expr }
 
 const POINT_COUNT = 40
@@ -42,14 +75,32 @@ const RELATIVE_TOLERANCE = 1e-7
 const SMALLEST_INFORMATIVE = 1e-6
 const LARGEST_INFORMATIVE = 1e12
 
-export function prepareAnswerCheck(task: Expr): AnswerContext {
+export function prepareAnswerCheck(task: Expr): FunctionAnswerContext {
   const derivation = derive(task)
   return {
+    kind: 'function',
     task,
     derivation,
     wrongAnswers: wrongAnswers(task, derivation),
     points: samplePoints([task, derivation.result], createRng(`prüfen:${key(task)}`), POINT_COUNT),
   }
+}
+
+export function prepareImplicitCheck(equation: Equation): ImplicitAnswerContext {
+  const derivation = deriveImplicit(equation)
+  const result = implicitResult(derivation)
+  const points = implicitCurvePoints(equation, 'prüfen')
+  // nur Fehler, die zu einem eigenen y' führen (auf der Kurve deutlich verschieden)
+  const wrongAnswers: ImplicitWrongAnswer[] = []
+  // Verschieden in beide Richtungen: Ein Ergebnis 0 hat keine aussagekräftigen Werte zum Vergleichen
+  const differ = (a: Expr, b: Expr) => clearlyDifferent(a, b, points) || clearlyDifferent(b, a, points)
+  for (const wrong of implicitWrongAnswers(equation, derivation)) {
+    const solved = wrong.solved
+    if (!solved || asRational(solved) !== null || !differ(result, solved)) continue
+    if (wrongAnswers.some((other) => !differ(other.solved!, solved))) continue
+    wrongAnswers.push(wrong)
+  }
+  return { kind: 'implicit', equation, derivation, result, wrongAnswers, mistakes: solveMistakes(derivation, points), points }
 }
 
 const close = (a: number, b: number) => Math.abs(a - b) <= RELATIVE_TOLERANCE * Math.max(Math.abs(a), Math.abs(b))
@@ -125,19 +176,34 @@ function variablesOf(e: Expr, found = new Set<string>()): Set<string> {
 }
 
 export function checkAnswer(context: AnswerContext, latex: string): Verdict {
+  const implicit = context.kind === 'implicit'
+  // y' gehört nicht ins Ergebnis (links vom Gleichheitszeichen darf es stehen)
+  if (implicit && /'|\\prime/.test(latex.split('=').at(-1)!)) {
+    return { kind: 'unreadable', message: "Im Ergebnis stehen nur $x$ und $y$, kein $y'$. Löse nach $y'$ auf." }
+  }
   const parsed = parseLatex(latex)
   if (!parsed.ok) return { kind: 'unreadable', message: parsed.message }
   const answer = parsed.expr
 
-  const unknown = [...variablesOf(answer)].filter((name) => name !== 'x')
+  const allowed = implicit ? ['x', DEPENDENT] : ['x']
+  const unknown = [...variablesOf(answer)].filter((name) => !allowed.includes(name))
   if (unknown.length > 0) {
     const name = unknown[0]
+    const capital = allowed.find((v) => v.toUpperCase() === name)
     return {
       kind: 'unreadable',
-      message: name === 'X' ? 'Schreibe $x$ bitte klein.' : `In der Ableitung kommt nur $x$ vor. Was soll $${name}$ bedeuten?`,
+      message: capital
+        ? `Schreibe $${capital}$ bitte klein.`
+        : implicit
+          ? `Im Ergebnis kommen nur $x$ und $y$ vor. Was soll $${name}$ bedeuten?`
+          : `In der Ableitung kommt nur $x$ vor. Was soll $${name}$ bedeuten?`,
     }
   }
 
+  return implicit ? checkImplicit(context, answer) : checkFunction(context, answer)
+}
+
+function checkFunction(context: FunctionAnswerContext, answer: Expr): Verdict {
   const { task, derivation, points } = context
   const correct = derivation.result
   if (sameFunction(correct, answer, points)) return { kind: 'correct', answer }
@@ -147,6 +213,25 @@ export function checkAnswer(context: AnswerContext, latex: string): Verdict {
   if (sameFunction(task, answer, points)) return { kind: 'functionItself', answer }
   if (sameFunction(neg(correct), answer, points)) return { kind: 'wrongSign', answer }
   const ratio = constantRatio(correct, answer, points)
+  if (ratio !== null && ratio !== 0) return { kind: 'wrongFactor', answer }
+  return { kind: 'wrong', answer }
+}
+
+// Implizit: verglichen wird auf der Kurve
+function checkImplicit(context: ImplicitAnswerContext, answer: Expr): Verdict {
+  const { result, points } = context
+  if (sameFunction(result, answer, points)) return { kind: 'correct', answer }
+  for (const wrong of context.wrongAnswers) {
+    if (sameFunction(wrong.solved!, answer, points, MIN_COMPARED_ERROR)) return { kind: 'knownError', answer, wrong }
+  }
+  for (const { mistake, result: wrong } of context.mistakes) {
+    if (!sameFunction(wrong, answer, points, MIN_COMPARED_ERROR)) continue
+    return mistake === 'sign' ? { kind: 'wrongSign', answer } : { kind: 'solveMistake', answer, mistake }
+  }
+  if (sameFunction(neg(result), answer, points)) return { kind: 'wrongSign', answer }
+  // y durch einen Term mit x ersetzt: stimmt meist nur auf einem Teil der Kurve
+  if (contains(result, DEPENDENT) && !contains(answer, DEPENDENT)) return { kind: 'keepY', answer }
+  const ratio = constantRatio(result, answer, points)
   if (ratio !== null && ratio !== 0) return { kind: 'wrongFactor', answer }
   return { kind: 'wrong', answer }
 }

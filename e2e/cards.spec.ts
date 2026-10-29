@@ -29,7 +29,7 @@ test('Lernkarten über das Menü: Ordner, Karte, anderes Beispiel, zurück, gezi
   await page.getByRole('link', { name: /^Ableitungen/ }).click()
   await expect(page).toHaveURL(/#\/karten\/ableitungen$/)
   await expect(page.getByRole('heading', { name: 'Ableitungen', level: 1 })).toBeVisible()
-  await expect(page.locator('main li a')).toHaveCount(19)
+  await expect(page.locator('main li a')).toHaveCount(20)
   await expectCleanPage(page, 'Ordner Ableitungen')
 
   await page.getByRole('link', { name: /^Produktregel/ }).click()

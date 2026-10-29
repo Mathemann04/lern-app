@@ -1,6 +1,6 @@
 import { type ReactNode, useMemo, useRef, useState } from 'react'
-import { type Verdict, checkAnswer, prepareAnswerCheck } from '../../engine/check/answer.ts'
-import { explainError } from '../../engine/explain/texts.ts'
+import { type Verdict, checkAnswer, prepareAnswerCheck, prepareImplicitCheck } from '../../engine/check/answer.ts'
+import { explainError, explainSolveMistake } from '../../engine/explain/texts.ts'
 import { type GuidedStep, planGuidedTask } from '../../engine/guided/plan.ts'
 import { generateDerivativeTask } from '../../engine/tasks/derivativeTerms.ts'
 import type { TaskRef } from '../../engine/tasks/taskNumber.ts'
@@ -23,8 +23,8 @@ export default function FreeTaskScreen({ taskRef, focus = null }: { taskRef: Tas
   const { level, seed } = taskRef
   const { context, plan } = useMemo(() => {
     const { task } = generateDerivativeTask({ level, seed })
-    if (task.kind !== 'function') throw new Error('Implizites Ableiten kommt in Schritt 11.')
-    return { context: prepareAnswerCheck(task.expr), plan: planGuidedTask({ level, seed }) }
+    const context = task.kind === 'function' ? prepareAnswerCheck(task.expr) : prepareImplicitCheck(task.equation)
+    return { context, plan: planGuidedTask({ level, seed }) }
   }, [level, seed])
   const { mode, detail, cycle } = useExplanationMode()
   const [latex, setLatex] = useState('')
@@ -71,13 +71,13 @@ export default function FreeTaskScreen({ taskRef, focus = null }: { taskRef: Tas
       {focus && <FocusBanner focus={focus} />}
 
       <section className="space-y-3">
-        <TaskIntro taskRef={taskRef} functionLatex={plan.functionLatex} />
+        <TaskIntro taskRef={taskRef} functionLatex={plan.functionLatex} instruction={plan.instruction} />
       </section>
 
       <section className="space-y-3" aria-label="Deine Antwort">
         <div className="flex items-center gap-2 rounded-2xl border-2 border-zinc-200 bg-white px-3 py-2 focus-within:border-accent-600">
           <span className="shrink-0 text-2xl">
-            <Formula tex="f'(x) =" />
+            <Formula tex={`${plan.answerLabel} =`} />
           </span>
           <MathInput
             label="Deine Ableitung"
@@ -201,7 +201,7 @@ function Feedback({ verdict, resultLatex, detail, mode }: { verdict: Verdict; re
       return (
         <Box tone="red" title="Nicht ganz.">
           <p>
-            Typischer Fehler: <span className="font-medium">{verdict.wrong.errorRule.name}</span>.
+            Typischer Fehler: <RichText text={`${verdict.wrong.errorRule.name}.`} className="font-medium" inline />
           </p>
           {whyOpen ? (
             <RichText text={why[detail]} className="text-zinc-800" />
@@ -233,6 +233,19 @@ function Feedback({ verdict, resultLatex, detail, mode }: { verdict: Verdict; re
       return (
         <Box tone="red" title="Fast!">
           <p>Bis auf einen Zahlenfaktor stimmt es. Prüfe die Zahlen vor den Termen.</p>
+        </Box>
+      )
+    case 'solveMistake':
+      return (
+        <Box tone="red" title="Fast!">
+          <p>Abgeleitet hast du richtig, aber beim Auflösen ist etwas schiefgegangen.</p>
+          <RichText text={explainSolveMistake(verdict.mistake)[detail]} className="text-zinc-800" />
+        </Box>
+      )
+    case 'keepY':
+      return (
+        <Box tone="red" title="Nicht ganz.">
+          <RichText text="Lass $y$ im Ergebnis stehen. Beim impliziten Ableiten wird nicht nach $y$ aufgelöst: $y'$ darf $x$ und $y$ enthalten." />
         </Box>
       )
     case 'wrong':
@@ -282,7 +295,7 @@ function SolutionPath({
           const answer = step.choices.find((c) => c.correct)!
           return (
             <li key={step.id} className="animate-step-in space-y-2 rounded-2xl border border-zinc-200 p-4">
-              <p className="text-sm font-medium text-accent-700">{step.title}</p>
+              <RichText text={step.title} className="block text-sm font-medium text-accent-700" inline />
               <RichText text={step.question} className="block font-medium" />
               <div className="rounded-xl bg-accent-50 px-3 py-2">
                 <FitWidth className="text-lg">

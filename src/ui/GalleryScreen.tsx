@@ -1,6 +1,7 @@
 import { type FormEvent, useMemo, useState } from 'react'
 import { derive } from '../engine/derive/derive.ts'
 import { wrongAnswers } from '../engine/derive/errorRules.ts'
+import { deriveImplicit, implicitResult, implicitWrongAnswers } from '../engine/derive/implicit.ts'
 import { equationToLatex, toLatex } from '../engine/expr/print.ts'
 import { type GeneratedTask, generateDerivativeTask } from '../engine/tasks/derivativeTerms.ts'
 import {
@@ -15,6 +16,7 @@ import {
 import { BackLink } from './BackLink.tsx'
 import { DerivationView } from './DerivationView.tsx'
 import { Formula } from './Formula.tsx'
+import { RichText } from './RichText.tsx'
 
 const TASKS_PER_PAGE = 8
 
@@ -154,11 +156,28 @@ type CardProps = {
 function TaskCard({ generated, showSteps, showErrors, highlighted = false }: CardProps) {
   const { task, template, ref } = generated
   const latex = task.kind === 'function' ? `f(x) = ${toLatex(task.expr)}` : equationToLatex(task.equation)
-  const derivation = useMemo(() => (task.kind === 'function' ? derive(task.expr) : null), [task])
-  const errors = useMemo(
-    () => (showErrors && task.kind === 'function' && derivation ? wrongAnswers(task.expr, derivation) : []),
-    [showErrors, task, derivation],
-  )
+  // Implizit: beide Seiten abgeleitet, Ergebnis y'; Fehler als falsch abgeleitete Gleichung
+  const worked = useMemo(() => {
+    if (task.kind === 'function') {
+      const d = derive(task.expr)
+      return { resultLatex: `f'(x) = ${toLatex(d.result)}`, trees: [{ label: null, derivation: d }] }
+    }
+    const d = deriveImplicit(task.equation)
+    return {
+      resultLatex: `y' = ${toLatex(implicitResult(d))}`,
+      trees: [
+        { label: 'Linke Seite', derivation: d.left },
+        { label: 'Rechte Seite', derivation: d.right },
+      ],
+    }
+  }, [task])
+  const errors = useMemo(() => {
+    if (!showErrors) return []
+    if (task.kind === 'function') {
+      return wrongAnswers(task.expr, worked.trees[0].derivation).map((w) => ({ ...w, latex: `f'(x) = ${toLatex(w.result)}` }))
+    }
+    return implicitWrongAnswers(task.equation).map((w) => ({ ...w, latex: equationToLatex(w.differentiated) }))
+  }, [showErrors, task, worked])
 
   return (
     <article
@@ -167,32 +186,35 @@ function TaskCard({ generated, showSteps, showErrors, highlighted = false }: Car
       <div className="overflow-x-auto py-1 text-xl">
         <Formula tex={latex} />
       </div>
-      {derivation ? (
-        <div className="overflow-x-auto py-1 text-xl" data-testid="derivative">
-          <Formula tex={`f'(x) = ${toLatex(derivation.result)}`} />
-        </div>
-      ) : (
-        <p className="text-sm text-zinc-500">Implizites Ableiten kommt in Schritt 11.</p>
-      )}
+      <div className="overflow-x-auto py-1 text-xl" data-testid="derivative">
+        <Formula tex={worked.resultLatex} />
+      </div>
 
-      {showSteps && derivation && (
-        <section className="border-t border-zinc-100 pt-3">
-          <h3 className="mb-2 text-sm font-semibold text-zinc-500">Rechenweg</h3>
-          <DerivationView derivation={derivation} />
+      {showSteps && (
+        <section className="space-y-3 border-t border-zinc-100 pt-3">
+          <h3 className="text-sm font-semibold text-zinc-500">Rechenweg</h3>
+          {worked.trees.map(({ label, derivation }) => (
+            <div key={label ?? 'f'} className="space-y-2">
+              {label && <p className="text-sm text-zinc-500">{label}</p>}
+              <DerivationView derivation={derivation} />
+            </div>
+          ))}
         </section>
       )}
 
-      {showErrors && derivation && (
+      {showErrors && (
         <section className="border-t border-zinc-100 pt-3">
           <h3 className="mb-2 text-sm font-semibold text-zinc-500">Typische Fehler ({errors.length})</h3>
           <ul className="space-y-2">
             {errors.map((w) => (
-              <li key={`${w.errorRule.id}:${w.node.path.join(',')}`} className="space-y-0.5">
-                <p className="text-sm text-red-800">
-                  {[w.errorRule, ...w.alsoMatches].map((r) => r.name).join(' oder ')}
-                </p>
+              <li key={`${w.errorRule.id}:${'side' in w ? w.side : ''}:${w.node.path.join(',')}`} className="space-y-0.5">
+                <RichText
+                  text={[w.errorRule, ...w.alsoMatches].map((r) => r.name).join(' oder ')}
+                  className="block text-sm text-red-800"
+                  inline
+                />
                 <div className="overflow-x-auto">
-                  <Formula tex={`f'(x) = ${toLatex(w.result)}`} />
+                  <Formula tex={w.latex} />
                 </div>
               </li>
             ))}

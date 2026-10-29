@@ -7,6 +7,7 @@ import { FitWidth } from './FitWidth.tsx'
 import { Formula } from './Formula.tsx'
 import { practiceHref } from './routes.ts'
 import { derivativeLevels } from './samples.ts'
+import { RichText } from './RichText.tsx'
 
 // Fortschritt je Stufe und die häufigsten typischen Fehler, mit gezieltem Üben
 
@@ -72,7 +73,7 @@ export function ProgressScreen() {
               return (
                 <li key={id} className="space-y-2 rounded-2xl border border-zinc-200 p-4">
                   <div className="flex items-baseline justify-between gap-3">
-                    <p className="font-medium">{rule.name}</p>
+                    <RichText text={rule.name} className="block font-medium" inline />
                     <p className="shrink-0 text-sm text-zinc-500">{times}-mal</p>
                   </div>
                   <div className="text-zinc-700">

@@ -39,7 +39,7 @@ async function solveStep(page: Page, askWhy: boolean): Promise<boolean> {
   throw new Error('Keine richtige Antwort gefunden')
 }
 
-async function solveWholeTask(page: Page) {
+async function solveWholeTask(page: Page, resultLabel = 'f′(x)') {
   let askedWhy = false
   for (let step = 0; step < 8; step++) {
     if (await page.getByRole('heading', { name: 'Geschafft!' }).isVisible()) break
@@ -51,7 +51,7 @@ async function solveWholeTask(page: Page) {
     await page.getByRole('button', { name: /^(Weiter|Ergebnis ansehen)$/ }).click()
   }
   await expect(page.getByRole('heading', { name: 'Geschafft!' })).toBeVisible()
-  await expect(page.getByTestId('result')).toContainText('f′(x)')
+  await expect(page.getByTestId('result')).toContainText(resultLabel)
   await expectCleanPage(page, 'Abschluss')
 }
 
@@ -128,13 +128,27 @@ test('Stufe 5: Bei x^x sind Potenzregel und die Regel für a^x falsch, dann wird
   await expectCleanPage(page, 'Logarithmieren')
 })
 
-test('Stufe 5: Aufgaben zum impliziten Ableiten zeigen bis Schritt 11 einen Hinweis', async ({ page }) => {
-  // 5-5 ist eine Gleichung mit x und y
-  await page.goto('./#/ueben/5-5')
-  await expect(page.getByRole('heading', { name: 'Diese Aufgabe kommt bald' })).toBeVisible()
-  await page.getByRole('link', { name: 'Andere Aufgabe' }).click()
-  await expect(page).toHaveURL(/#\/ueben\/5-\d+$/)
-  await expect(page.locator('#question')).toBeVisible()
+// Stufe 5: implizites Ableiten (Kreis, xy + e^y, sin(xy))
+for (const task of ['5-15', '5-43', '5-8']) {
+  test(`Stufe 5: implizite Aufgabe ${task} lässt sich komplett lösen`, async ({ page }) => {
+    const errors = collectErrors(page)
+    await page.goto(`./#/ueben/${task}`)
+    await expect(page.getByText(/^Stufe 5 · Aufgabe 5-\d+ · Leite implizit ab$/)).toBeVisible()
+    await solveWholeTask(page, 'y′')
+    await expect(page.getByLabel('Bisher').locator('.katex')).toHaveCount(3)
+    expect(errors).toEqual([])
+  })
+}
+
+test('Stufe 5: Beim Kreis ist y wie eine feste Zahl abgeleitet falsch', async ({ page }) => {
+  // Aufgabe 5-15: x² + y² = 4
+  await page.goto('./#/ueben/5-15')
+  await expect(page.getByText('Term ableiten', { exact: true })).toBeVisible()
+  // die Antwort 0 (nur der sichtbare Teil der Formel, ohne den Text für Vorleseprogramme)
+  await answers(page).filter({ has: page.locator('.katex-html', { hasText: /^0$/ }) }).click()
+  await page.getByRole('button', { name: 'Warum ist das falsch?' }).click()
+  await expect(page.locator('[aria-live="polite"]')).toContainText('hängt von')
+  await expectCleanPage(page, 'Term ableiten')
 })
 
 // Je eine Aufgabe mit Produkt-, Quotienten- und Kettenregel

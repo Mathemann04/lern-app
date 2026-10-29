@@ -98,6 +98,7 @@ export function scale(c: Rational, e: Expr): Expr {
 }
 
 export const eq = (lhs: Expr, rhs: Expr): Equation => ({ lhs, rhs })
+export const isEquation = (e: Expr | Equation): e is Equation => !('kind' in e)
 
 // Liest einen Zahlenwert aus einem Knoten wie 3, −2 oder 2/3 (auch geschrieben als
 // Minus- oder Bruch-Knoten). null, wenn der Knoten keine reine Zahl ist.
