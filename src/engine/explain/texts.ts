@@ -18,7 +18,7 @@ const numLatex = (r: Rational) => toLatex(num(r))
 // Zahl als Faktor vor einem Malpunkt: negative in Klammern
 const factorLatex = (r: Rational) => (ratSign(r) < 0 ? `(${numLatex(r)})` : numLatex(r))
 
-const exponentOf = (node: Derivation) => (node.parts.exponent ? asRational(node.parts.exponent) : null)
+export const exponentOf = (node: Derivation) => (node.parts.exponent ? asRational(node.parts.exponent) : null)
 
 const isMinusOne = (e: Expr) => {
   const c = asRational(e)
@@ -31,14 +31,14 @@ function withoutFactors(node: Derivation): Derivation {
 }
 
 // Potenzregel mit eingesetzten Zahlen: 3 \cdot x^{3 - 1}
-function powerRuleWithNumbers(node: Derivation, n: Rational): string {
+export function powerRuleWithNumbers(node: Derivation, n: Rational): string {
   const base = toLatex(node.parts.base!)
   return String.raw`${factorLatex(n)} \cdot ${base}^{${numLatex(n)} - 1}`
 }
 
 // --- Rechnung eines Teilbaums erklären ---
 
-const BASIC_SENTENCE: Partial<Record<RuleId, string>> = {
+export const BASIC_SENTENCE: Partial<Record<RuleId, string>> = {
   exp: 'Die e-Funktion ändert sich beim Ableiten nicht:',
   ln: 'Die Ableitung des natürlichen Logarithmus ist der Kehrwert:',
   sin: 'Die Ableitung des Sinus ist der Kosinus:',
@@ -284,7 +284,7 @@ const NOT_SHORT: Record<RuleOption, string> = {
   constantFactor: 'keine Zahl mal Term',
 }
 
-const WHEN_NEEDED: Record<RuleOption, string> = {
+export const WHEN_NEEDED: Record<RuleOption, string> = {
   sum: 'Die Summenregel brauchst du, wenn der ganze Term eine Summe ist, z. B. $x^2 + \\sin x$.',
   product:
     'Die Produktregel brauchst du, wenn zwei Teile, die beide $x$ enthalten, malgenommen werden, z. B. $x^2 \\cdot \\sin x$.',

@@ -6,6 +6,7 @@ import { GalleryScreen } from './ui/GalleryScreen.tsx'
 import { HomeScreen } from './ui/HomeScreen.tsx'
 import { ProgressScreen } from './ui/ProgressScreen.tsx'
 import { SettingsScreen } from './ui/SettingsScreen.tsx'
+import { CardScreen, CardsScreen } from './ui/cards/CardsScreen.tsx'
 import { buildInfoLabel } from './ui/buildInfo.ts'
 import { derivativeLevels, isLevelAvailable } from './ui/samples.ts'
 import { TaskScreen } from './ui/guided/TaskScreen.tsx'
@@ -36,6 +37,12 @@ export function App() {
           <span className="text-lg font-semibold tracking-tight">Rechenweg</span>
         </a>
         <nav className="-mr-2 flex items-center gap-1">
+          <a href="#/karten" aria-label="Lernkarten" className="rounded-lg p-2 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
+            <svg aria-hidden viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">
+              <rect x="3" y="7" width="14" height="14" rx="2" />
+              <path d="M7 3h11a3 3 0 0 1 3 3v11" strokeLinecap="round" />
+            </svg>
+          </a>
           <a href="#/fortschritt" aria-label="Fortschritt" className="rounded-lg p-2 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
             <svg aria-hidden viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
               <path d="M4 20h16M7 16v-4M12 16V8M17 16v-7" />
@@ -99,6 +106,10 @@ function Page({ route }: { route: Route }) {
       return <SettingsScreen />
     case 'progress':
       return <ProgressScreen />
+    case 'cards':
+      return <CardsScreen />
+    case 'card':
+      return <CardScreen key={route.id} id={route.id} />
     case 'practice':
       return <PracticePage mode={route.mode} level={route.level} seed={route.seed} focus={route.focus} />
     case 'home':

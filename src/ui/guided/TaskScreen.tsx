@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Choice, GuidedStep, GuidedTask } from '../../engine/guided/plan.ts'
 import { planGuidedTask } from '../../engine/guided/plan.ts'
+import type { Expr } from '../../engine/expr/types.ts'
 import type { TaskRef } from '../../engine/tasks/taskNumber.ts'
 import { recordAttempt, recordError } from '../../state/progress.ts'
 import type { ExplanationDetail } from '../../state/storage.ts'
 import { FitWidth } from '../FitWidth.tsx'
 import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
+import { CardSheetButton, TaskCardLinks } from '../cards/CardSheet.tsx'
 import { practiceHref } from '../routes.ts'
 import { LevelUpSuggestion } from '../task/LevelUpSuggestion.tsx'
 import { FocusBanner, TaskIntro, TaskTopBar } from '../task/TaskParts.tsx'
@@ -57,6 +59,7 @@ export function TaskScreen({ taskRef, focus = null }: { taskRef: TaskRef; focus?
         <StepView
           key={stepIndex}
           step={task.steps[stepIndex]}
+          task={task.expr}
           isLast={stepIndex === task.steps.length - 1}
           mode={mode}
           detail={detail}
@@ -89,6 +92,7 @@ function TaskHeader({ task, stepIndex }: { task: GuidedTask; stepIndex: number }
 
 type StepProps = {
   step: GuidedStep
+  task: Expr
   isLast: boolean
   mode: ExplanationMode
   detail: ExplanationDetail
@@ -96,7 +100,7 @@ type StepProps = {
   onNext: () => void
 }
 
-function StepView({ step, isLast, mode, detail, onMistake, onNext }: StepProps) {
+function StepView({ step, task, isLast, mode, detail, onMistake, onNext }: StepProps) {
   const [wrongPicks, setWrongPicks] = useState<string[]>([])
   const [solved, setSolved] = useState(false)
   const [hintOpen, setHintOpen] = useState(false)
@@ -169,14 +173,15 @@ function StepView({ step, isLast, mode, detail, onMistake, onNext }: StepProps) 
         })}
       </div>
 
-      {!solved && (
-        <div>
-          {hintOpen ? (
-            <div className="rounded-2xl bg-amber-50 px-4 py-3 text-zinc-800">
-              <p className="mb-1 text-sm font-semibold text-amber-800">Tipp</p>
-              <RichText text={step.hint} />
-            </div>
-          ) : (
+      <div className="space-y-3">
+        {!solved && hintOpen && (
+          <div className="rounded-2xl bg-amber-50 px-4 py-3 text-zinc-800">
+            <p className="mb-1 text-sm font-semibold text-amber-800">Tipp</p>
+            <RichText text={step.hint} />
+          </div>
+        )}
+        <div className="flex flex-wrap gap-2">
+          {!solved && !hintOpen && (
             <button
               type="button"
               onClick={() => setHintOpen(true)}
@@ -185,8 +190,9 @@ function StepView({ step, isLast, mode, detail, onMistake, onNext }: StepProps) 
               Tipp anzeigen
             </button>
           )}
+          <CardSheetButton ids={step.cards} title={cardSheetTitle(step)} task={task} />
         </div>
-      )}
+      </div>
 
       <div ref={feedbackRef} aria-live="polite">
         {solved ? (
@@ -224,6 +230,12 @@ function StepView({ step, isLast, mode, detail, onMistake, onNext }: StepProps) 
   )
 }
 
+// Bei der Regelwahl zeigen die Karten alle angebotenen Regeln, nicht nur die richtige
+function cardSheetTitle(step: GuidedStep): string {
+  if (step.id === 'regel') return 'Die Regeln zur Auswahl'
+  return step.cards.length === 1 ? 'Lernkarte zu diesem Schritt' : 'Lernkarten zu diesem Schritt'
+}
+
 function FinishView({ task, mistakes, focus }: { task: GuidedTask; mistakes: number; focus: string | null }) {
   const headingRef = useRef<HTMLHeadingElement>(null)
   useEffect(() => {
@@ -258,6 +270,7 @@ function FinishView({ task, mistakes, focus }: { task: GuidedTask; mistakes: num
           Zur Startseite
         </a>
       </div>
+      <TaskCardLinks ids={task.cards} />
     </section>
   )
 }

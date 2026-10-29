@@ -120,6 +120,13 @@ export function HomeScreen() {
         </div>
         <p className="px-5 pb-4 text-sm text-zinc-500">Stufe 5 folgt in den nächsten Schritten.</p>
         <a
+          href="#/karten"
+          className="flex items-center justify-between border-t border-zinc-100 px-5 py-4 font-medium text-accent-700 hover:bg-accent-50"
+        >
+          Lernkarten: alle Regeln mit Beispielen
+          <span aria-hidden>→</span>
+        </a>
+        <a
           href="#/fortschritt"
           className="flex items-center justify-between border-t border-zinc-100 px-5 py-4 font-medium text-accent-700 hover:bg-accent-50"
         >
