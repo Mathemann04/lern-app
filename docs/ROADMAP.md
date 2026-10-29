@@ -26,7 +26,7 @@ Details: [PLAN-M1.md](PLAN-M1.md)
 - [x] 7. Stufe 4 (vorgezogen, wichtigstes Niveau)
 - [x] 8. Fortschritt und Fehlerstatistik
 - [x] 9. Lernkarten
-- [ ] 10. Stufe 5: logarithmisches Ableiten, Umkehr- und Hyperbelfunktionen
+- [x] 10. Stufe 5: logarithmisches Ableiten, Umkehr- und Hyperbelfunktionen
 - [ ] 11. Stufe 5: implizites Ableiten
 - [ ] 12. Feinschliff und Abschluss von M1
 
@@ -84,3 +84,11 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   Ordner die Namen der Formeln mit den Formeln. Hauptmenü als Leiste unten
   (Start, Lernkarten, Fortschritt, Einstellungen), am Laptop oben; in
   Aufgaben ausgeblendet. Unterseiten haben oben einen Zurück-Knopf.
+- 29.10.2026: Stufe 5 (ohne implizites Ableiten) geführt und frei.
+  Logarithmisches Ableiten in vier Schritten (Regel, Logarithmieren, rechte
+  Seite ableiten, mit $f(x)$ malnehmen). Neue typische Fehler für
+  $x^x$, $\arcsin$, $\sinh$, $\tanh$ und die Areafunktionen. Die Ableitung
+  der Umkehrfunktion steht als Herleitung auf der Lernkarte; eigene
+  Aufgaben dazu bei Bedarf später. Mathe-Tastatur mit zweiter Seite „Mehr
+  Funktionen". Aufgaben zum impliziten Ableiten werden bis Schritt 11
+  übersprungen.

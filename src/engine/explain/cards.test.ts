@@ -7,7 +7,7 @@ import { CHECK_POINTS, isStableAt } from '../expr/arbitraries.ts'
 import { evaluate } from '../expr/evaluate.ts'
 import { latexProblem } from '../expr/latexChecks.ts'
 import { toLatex } from '../expr/print.ts'
-import { type Expr, E, add, cos, div, exp, fn, ln, log, mul, neg, num, pow, sin, tan, x } from '../expr/types.ts'
+import { type Expr, E, add, cos, div, exp, fn, ln, log, mul, neg, num, pow, sin, sqrt, sub, tan, x } from '../expr/types.ts'
 import { generateDerivativeTask } from '../tasks/derivativeTerms.ts'
 import { CARDS, TOPICS, cardById, cardForRule, cardIdsFor, cardsInTopic, examplesFor, topicById } from './cards.ts'
 import { workedExample } from './example.ts'
@@ -68,8 +68,8 @@ describe('Lernkarten: Katalog', () => {
     expect(missing).toEqual([])
   })
 
-  it('hat für jede Regel aus den Aufgaben der Stufen 1 bis 4 eine Karte, spätestens ab dieser Stufe', () => {
-    for (const level of [1, 2, 3, 4] as const) {
+  it('hat für jede Regel aus den Aufgaben eine Karte, spätestens ab dieser Stufe', () => {
+    for (const level of [1, 2, 3, 4, 5] as const) {
       for (let seed = 1; seed <= 150; seed++) {
         const { task } = generateDerivativeTask({ level, seed })
         if (task.kind !== 'function') continue
@@ -92,7 +92,8 @@ describe('Lernkarten: Katalog', () => {
   })
 
   it('ordnet Regeln Karten zu, jede einmal, in der Reihenfolge der Regeln', () => {
-    const rules: RuleId[] = ['product', 'power', 'sin', 'cos', 'power', 'logarithmic', 'constantFactor']
+    // cot kommt in keiner Aufgabe vor und hat keine Karte
+    const rules: RuleId[] = ['product', 'power', 'sin', 'cos', 'power', 'cot', 'constantFactor']
     expect(cardIdsFor(rules)).toEqual(['product', 'power', 'sin-cos', 'constant-factor'])
   })
 })
@@ -164,6 +165,17 @@ describe('Lernkarten: Zusätze stimmen', () => {
   it('Sinus und Kosinus: abgeleitet geht es im Kreis', () => {
     const circle = [sin(x), cos(x), neg(sin(x)), neg(cos(x)), sin(x)]
     for (let i = 0; i < 4; i++) expect(compareAt(derivativeOf(circle[i]), valueOf(circle[i + 1]))).toBeGreaterThanOrEqual(5)
+  })
+
+  it('Umkehrfunktion: cos(arcsin x) = √(1 − x²)', () => {
+    expect(compareAt(valueOf(cos(fn('arcsin', x))), valueOf(sqrt(sub(num(1), pow(x, num(2))))))).toBeGreaterThanOrEqual(3)
+  })
+
+  it('Hyperbelfunktionen: Definition über e^x und (tanh x)\' = 1 − tanh² x', () => {
+    const half = (e: Expr) => div(e, num(2))
+    expect(compareAt(valueOf(fn('sinh', x)), valueOf(half(sub(exp(x), exp(neg(x))))))).toBeGreaterThanOrEqual(5)
+    expect(compareAt(valueOf(fn('cosh', x)), valueOf(half(add(exp(x), exp(neg(x))))))).toBeGreaterThanOrEqual(5)
+    expect(compareAt(derivativeOf(fn('tanh', x)), valueOf(sub(num(1), pow(fn('tanh', x), num(2)))))).toBeGreaterThanOrEqual(5)
   })
 
   it('Arkustangens: Die Ableitung enthält keine Winkelfunktion', () => {

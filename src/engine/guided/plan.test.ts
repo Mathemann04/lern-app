@@ -2,7 +2,6 @@ import katex from 'katex'
 import { describe, expect, it } from 'vitest'
 import { compareValues, numericDerivative } from '../check/numeric.ts'
 import { derive } from '../derive/derive.ts'
-import { RULES, type RuleId } from '../derive/rules.ts'
 import { cardById, cardForRule } from '../explain/cards.ts'
 import { FALLBACK_MARKER } from '../explain/texts.ts'
 import { parseRichText } from '../explain/richText.ts'
@@ -12,12 +11,10 @@ import { samplePoints } from '../expr/sample.ts'
 import { substitute } from '../expr/substitute.ts'
 import { type Expr, add, div, exp, fn, ln, mul, neg, num, pow, sin, sqrt, x } from '../expr/types.ts'
 import { createRng } from '../random/rng.ts'
+import { generateDerivativeTask } from '../tasks/derivativeTerms.ts'
 import { type GuidedStep, type GuidedTask, planForExpression, planGuidedTask } from './plan.ts'
 
 const correctChoice = (step: GuidedStep) => step.choices.find((c) => c.correct)!
-
-// Regel zu einer Antwort der Regelwahl
-const ruleNamed = (name: string) => (Object.keys(RULES) as RuleId[]).find((r) => RULES[r].name === name)!
 
 // Alle Texte eines Schritts mit Formeln
 function texts(step: GuidedStep): string[] {
@@ -79,7 +76,7 @@ describe('Beispiel aus dem Plan: 4x³ − 2/x + √x', () => {
 
   it('nennt zu jedem Schritt die passenden Lernkarten', () => {
     expect(plan.steps.map((s) => s.cards)).toEqual([
-      plan.steps[0].choices.map((c) => cardForRule(ruleNamed(c.content))!.id),
+      plan.steps[0].choices.map((c) => cardForRule(c.rule!)!.id),
       ['constant-factor', 'power'],
       ['constant-factor', 'rewrite', 'power'],
       ['rewrite', 'power'],
@@ -195,8 +192,11 @@ describe('Stufe 4: gröberer Rechenweg', () => {
 // Ableitung von subject nach variable, an einer Stelle; als x geschrieben für die Prüfhilfen
 const asX = (e: Expr, variable: string) => substitute(e, variable, x)
 
-describe.each([1, 2, 3, 4] as const)('alle Aufgaben der Stufe %i', (level) => {
-  const plans: GuidedTask[] = Array.from({ length: 200 }, (_, i) => planGuidedTask({ level, seed: i + 1 }))
+describe.each([1, 2, 3, 4, 5] as const)('alle Aufgaben der Stufe %i', (level) => {
+  // implizites Ableiten (Stufe 5) kommt in Schritt 11
+  const plans: GuidedTask[] = Array.from({ length: 200 }, (_, i) => ({ level, seed: i + 1 }))
+    .filter((ref) => generateDerivativeTask(ref).task.kind === 'function')
+    .map((ref) => planGuidedTask(ref))
 
   it('beginnen (fast immer) mit der Regelwahl', () => {
     const withRule = plans.filter((p) => p.steps[0].title === 'Regel wählen').length
@@ -220,7 +220,8 @@ describe.each([1, 2, 3, 4] as const)('alle Aufgaben der Stufe %i', (level) => {
   it('richtige Antworten stimmen mit der numerischen Ableitung überein, falsche nicht', () => {
     let checked = 0
     for (const plan of plans) {
-      for (const step of plan.steps.slice(1)) {
+      // Ableitungsschritte; das Logarithmieren prüft ein eigener Test
+      for (const step of plan.steps.filter((s) => s.subject)) {
         const context = `${level}-${plan.ref.seed} ${step.title}`
         const variable = step.variable ?? 'x'
         const subject = asX(step.subject!, variable)
@@ -286,8 +287,8 @@ describe.each([1, 2, 3, 4] as const)('alle Aufgaben der Stufe %i', (level) => {
         for (const id of step.cards) expect(cardById(id), context).toBeDefined()
         if (step.id === 'regel') {
           // jede angebotene Regel hat ihre Karte, nicht nur die richtige
-          expect(step.cards, context).toEqual(step.choices.map((c) => cardForRule(ruleNamed(c.content))!.id))
-        } else {
+          expect(step.cards, context).toEqual(step.choices.map((c) => cardForRule(c.rule!)!.id))
+        } else if (step.subject) {
           const rule = derive(step.subject!, step.variable).rule
           expect(step.cards, context).toContain(cardForRule(rule)!.id)
           // Die Aufgabe kennt alle Karten ihrer Schritte (außer den falschen Regeln der Regelwahl)
@@ -316,5 +317,51 @@ describe('Erklärung bei einem vergessenen Teiler', () => {
     const wrong = plan.steps[1].choices.find((c) => c.errorRuleId === 'factor-forgotten')
     expect(wrong?.whyWrong?.short).toBe("Faktor $3$ vergessen: $\\left(\\frac{x^{2}}{3}\\right)' = \\frac{\\left(x^{2}\\right)'}{3}$.")
     expectRenderable(wrong!.whyWrong!.detailed, 'Teiler')
+  })
+})
+
+describe('Stufe 5: logarithmisches Ableiten', () => {
+  // f(x) = x^{sin x}
+  const plan = planForExpression(pow(x, sin(x)), { level: 5, seed: 3 })
+
+  it('fragt nach Regel, Logarithmieren, Ableiten der rechten Seite und Zusammensetzen', () => {
+    expect(plan.steps.map((s) => s.title)).toEqual(['Regel wählen', 'Logarithmieren', 'Ableiten', 'Zusammensetzen'])
+    expect(correctChoice(plan.steps[1]).content).toBe('$\\sin x \\cdot \\ln x$')
+    expect(plan.resultLatex).toBe("f'(x) = x^{\\sin x}\\left(\\cos x \\cdot \\ln x + \\frac{\\sin x}{x}\\right)")
+  })
+
+  it('bietet bei der Regelwahl Potenzregel und die Regel für a^x als falsch an, nie die Kettenregel', () => {
+    const wrong = plan.steps[0].choices.filter((c) => !c.correct).map((c) => c.rule)
+    expect(wrong).toEqual(expect.arrayContaining(['power', 'expBase']))
+    expect(wrong).not.toContain('chain')
+    expect(correctChoice(plan.steps[0]).rule).toBe('logarithmic')
+  })
+
+  it('zeigt beim Zusammensetzen die typischen Fehler des logarithmischen Ableitens', () => {
+    expect(plan.steps[3].choices.filter((c) => !c.correct).map((c) => c.errorRuleId).sort()).toEqual([
+      'logarithmic-as-exponential',
+      'logarithmic-factor-forgotten',
+      'logarithmic-power-rule',
+    ])
+  })
+
+  it('Logarithmieren: richtig ist ln f, die falschen Antworten unterscheiden sich davon', () => {
+    for (let seed = 1; seed <= 400; seed++) {
+      const ref = { level: 5 as const, seed }
+      const { task } = generateDerivativeTask(ref)
+      if (task.kind !== 'function' || task.expr.kind !== 'pow') continue
+      const step = planGuidedTask(ref).steps.find((s) => s.id === 'logarithmieren')
+      if (!step) continue
+      const lnF = ln(task.expr)
+      const points = samplePoints([task.expr], createRng(`ln:${seed}`), 30)
+      const right = compareValues(lnF, correctChoice(step).expr!, points)
+      expect(right.compared, `5-${seed}`).toBeGreaterThanOrEqual(8)
+      expect(right.differing, `5-${seed}`).toBe(0)
+      expect(step.choices.length, `5-${seed}`).toBeGreaterThanOrEqual(3)
+      for (const wrong of step.choices.filter((c) => !c.correct)) {
+        const { compared, differing } = compareValues(lnF, wrong.expr!, points)
+        expect(differing / compared, `5-${seed} ${wrong.content}`).toBeGreaterThanOrEqual(0.25)
+      }
+    }
   })
 })

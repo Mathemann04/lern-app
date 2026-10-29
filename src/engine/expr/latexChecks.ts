@@ -3,8 +3,9 @@ import katex from 'katex'
 
 // Muster, die in sauber gesetzten Ergebnissen nie vorkommen dürfen
 export const UGLY_PATTERNS: Array<[string, RegExp]> = [
-  ['Faktor 1', /(?<![\d{,])1(?=[a-z\\(])/],
-  ['Faktor 0', /(?<![\d{,])0(?=[a-z\\(])/],
+  // ein Summand 1 vor \right) ist kein Faktor
+  ['Faktor 1', /(?<![\d{,])1(?=[a-z(]|\\(?!right))/],
+  ['Faktor 0', /(?<![\d{,])0(?=[a-z(]|\\(?!right))/],
   ['Exponent 1', /\^\{1\}/],
   ['Exponent 0', /\^\{0\}/],
   ['plus minus', /\+ -/],

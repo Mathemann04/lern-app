@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { simplify } from '../expr/display.ts'
 import { toLatex } from '../expr/print.ts'
-import { type Expr, exp, mul, num, pow, sin, sqrt, x } from '../expr/types.ts'
+import { type Expr, exp, fn, mul, num, pow, sin, sqrt, x } from '../expr/types.ts'
 import { generateDerivativeTask } from '../tasks/derivativeTerms.ts'
 import { LEVELS } from '../tasks/taskNumber.ts'
 import { type Verdict, checkAnswer, prepareAnswerCheck } from './answer.ts'
@@ -65,6 +65,23 @@ describe('Eingaben, die sich nicht lesen lassen', () => {
   it('verlangt die Ableitung auch dort, wo sie definiert ist', () => {
     // 2\sqrt{x}\sqrt{x} stimmt nur für x ≥ 0 mit 2x überein
     expect(verdict(pow(x, num(2)), '2\\sqrt{x}\\sqrt{x}').kind).not.toBe('correct')
+  })
+})
+
+describe('Stufe 5', () => {
+  it('logarithmisches Ableiten: richtig, Potenzregel und vergessener Faktor', () => {
+    const task = pow(x, x)
+    expect(verdict(task, 'x^{x}\\left(\\ln\\left(x\\right)+1\\right)').kind).toBe('correct')
+    expect(verdict(task, 'x^x\\ln x+x^x').kind).toBe('correct')
+    expect(errorOf(verdict(task, 'x\\cdot x^{x-1}'))).toContain('logarithmic-power-rule')
+    expect(errorOf(verdict(task, '\\ln x+1'))).toContain('logarithmic-factor-forgotten')
+  })
+
+  it('Areafunktionen, so wie MathLive sie schreibt', () => {
+    const task = fn('arsinh', pow(x, num(2)))
+    expect(verdict(task, '\\frac{2x}{\\sqrt{x^4+1}}').kind).toBe('correct')
+    expect(errorOf(verdict(task, '\\frac{2x}{\\sqrt{x^4-1}}'))).toContain('arsinh-arcosh')
+    expect(verdict(task, '\\operatorname{\\mathrm{arsinh}}\\left(x^2\\right)').kind).toBe('functionItself')
   })
 })
 

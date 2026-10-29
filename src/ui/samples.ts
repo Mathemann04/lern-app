@@ -41,9 +41,9 @@ export const derivativeLevels: LevelPreview[] = [
   },
   {
     level: 5,
-    available: false,
+    available: true,
     title: 'Profi: logarithmisch, implizit, Umkehr- und Hyperbelfunktionen',
-    examples: [String.raw`x^x`, String.raw`x^{\sin x}`, String.raw`x^2 + y^2 = 25`],
+    examples: [String.raw`x^{\sin x}`, String.raw`\arcsin(2x)`, String.raw`\cosh(x^2)`],
   },
 ]
 

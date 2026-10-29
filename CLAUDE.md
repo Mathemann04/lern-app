@@ -40,8 +40,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   im Kopf, in Aufgaben ausgeblendet. Unterseiten haben oben `BackLink`
   („← Ordner", eine Ebene höher).
   Lernbildschirm geführt in `src/ui/guided/`, frei in `src/ui/free/`
-  (MathLive mit eigener Bildschirm-Tastatur `keyboard.ts`, wird erst im
-  freien Modus geladen), gemeinsame Teile in `src/ui/task/`. Lernkarten in
+  (MathLive mit eigener Bildschirm-Tastatur `keyboard.ts`, zwei Seiten
+  „Standard" und „Mehr Funktionen", wird erst im freien Modus geladen), gemeinsame Teile in `src/ui/task/`. Lernkarten in
   `src/ui/cards/` (`CardSheet.tsx`: Fenster über der Aufgabe, die
   Zurück-Taste schließt nur das Fenster). Welche Stufen
   schon spielbar sind: `available` in `src/ui/samples.ts`. Lange Formeln in
@@ -74,9 +74,12 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   - `guided/plan.ts`: Schrittplaner für den geführten Modus (Regelwahl, dann je
     Summand ein Schritt; Produkt/Quotient: u', v', Einsetzen; Kette: äußere,
     innere Ableitung, Zusammensetzen, ab Stufe 4 ohne eigenen Außen-Schritt;
+    u^v (Stufe 5): Logarithmieren, rechte Seite ableiten, mit f malnehmen;
     Antworten aus Fehlerregeln; je Schritt die passenden Lernkarten)
   - `random/rng.ts`: Zufall mit Startwert; `tasks/`: Aufgaben-Nummern
-    („3-48213"), Vorlagen je Stufe, `focus.ts` (Aufgaben für gezieltes Üben)
+    („3-48213"), Vorlagen je Stufe (`isPlayable`: implizite Aufgaben der
+    Stufe 5 werden bis Schritt 11 übersprungen), `focus.ts` (Aufgaben für
+    gezieltes Üben)
 - `src/state/`: Speichern auf dem Gerät (`storage.ts`, Version 2, robust
   gegen kaputten Inhalt, alte Versionen werden umgezogen), gemeinsamer
   Zustand (`store.ts`), Einstellungen (`settings.ts`, auch die gewählte Stufe

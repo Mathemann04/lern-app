@@ -351,18 +351,30 @@ class Parser {
     }
   }
 
-  // \operatorname{arsinh}, \mathrm{e} …
+  // \operatorname{arsinh}, \mathrm{e} …; MathLive schreibt auch \operatorname{\mathrm{arsinh}}
   private parseText(): Expr {
-    if (!isSymbol(this.peek(), '{')) throw new ParseError('Hier fehlt etwas in geschweiften Klammern.')
-    this.pos++
-    let word = ''
-    while (this.peek()?.kind === 'letter') word += this.next().value
-    this.expectClosing('{')
+    const word = this.readTextWord()
     if (word === 'e') return E
     if (word in FUNCTIONS) return this.parseFunction(FUNCTIONS[word], `\\operatorname{${word}}`)
     if (word === 'lg') return this.parseFunctionArgument((arg) => log(num(10), arg), '\\lg')
     if (word.length === 1) return variable(word)
     throw new ParseError(`„${word}" kenne ich nicht.`)
+  }
+
+  // Buchstaben in geschweiften Klammern, auch verschachtelt in einem weiteren Textbefehl
+  private readTextWord(): string {
+    if (!isSymbol(this.peek(), '{')) throw new ParseError('Hier fehlt etwas in geschweiften Klammern.')
+    this.pos++
+    const inner = this.peek()
+    let word = ''
+    if (inner?.kind === 'command' && TEXT_COMMANDS.has(inner.value)) {
+      this.pos++
+      word = this.readTextWord()
+    } else {
+      while (this.peek()?.kind === 'letter') word += this.next().value
+    }
+    this.expectClosing('{')
+    return word
   }
 
   // Funktion mit möglicher Potenz am Namen: \sin^2 x = (\sin x)^2

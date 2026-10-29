@@ -65,6 +65,8 @@ describe('Leser für die Mathe-Tastatur', () => {
     ['\\log_{10}\\left(x^2+1\\right)', log(num(10), add(pow(x, num(2)), num(1)))],
     ['\\lg x', log(num(10), x)],
     ['\\operatorname{arsinh}\\left(2x\\right)', fn('arsinh', mul(num(2), x))],
+    // so schreibt MathLive die Areafunktionen
+    ['\\operatorname{\\mathrm{artanh}}\\left(3x\\right)', fn('artanh', mul(num(3), x))],
     ['\\mathrm{e}^x', exp(x)],
     ['\\exponentialE^{x}', exp(x)],
     // Vorzeichen und Rechenzeichen

@@ -1,7 +1,8 @@
 import { Suspense, lazy, useEffect } from 'react'
 import { createRng } from './engine/random/rng.ts'
+import { isPlayable } from './engine/tasks/derivativeTerms.ts'
 import { findTaskWithError } from './engine/tasks/focus.ts'
-import { type Level, randomSeed } from './engine/tasks/taskNumber.ts'
+import { type Level, type TaskRef, randomSeed } from './engine/tasks/taskNumber.ts'
 import { GalleryScreen } from './ui/GalleryScreen.tsx'
 import { HomeScreen } from './ui/HomeScreen.tsx'
 import { ProgressScreen } from './ui/ProgressScreen.tsx'
@@ -11,7 +12,7 @@ import { buildInfoLabel } from './ui/buildInfo.ts'
 import { derivativeLevels, isLevelAvailable } from './ui/samples.ts'
 import { TaskScreen } from './ui/guided/TaskScreen.tsx'
 import { type PracticeMode } from './state/storage.ts'
-import { type Route, parseRoute, sectionOf, taskHref } from './ui/routes.ts'
+import { type Route, parseRoute, practiceHref, sectionOf, taskHref } from './ui/routes.ts'
 import { MainNav } from './ui/MainNav.tsx'
 import { useHashRoute } from './ui/useHashRoute.ts'
 import { usePwa } from './ui/usePwa.ts'
@@ -115,10 +116,19 @@ function levelsNear(level: Level): Level[] {
     .sort((a, b) => Math.abs(a - level) - Math.abs(b - level) || a - b)
 }
 
+// Zufällige spielbare Aufgabe der Stufe (implizites Ableiten wird bis Schritt 11 übersprungen)
+function randomTask(level: Level): TaskRef {
+  for (let i = 0; i < 100; i++) {
+    const ref = { level, seed: randomSeed() }
+    if (isPlayable(ref)) return ref
+  }
+  return { level: 1, seed: randomSeed() }
+}
+
 function newTask(mode: PracticeMode, level: Level, focus: string | null): string {
   // Gezielt üben: eine Aufgabe, in der genau dieser Fehler passieren kann
   const found = focus ? findTaskWithError(focus, levelsNear(level), createRng(String(Math.random()))) : null
-  return taskHref(found ?? { level, seed: randomSeed() }, mode, found ? focus : null)
+  return taskHref(found ?? randomTask(level), mode, found ? focus : null)
 }
 
 type PracticeProps = { mode: PracticeMode; level: Level; seed: number | null; focus: string | null }
@@ -130,14 +140,25 @@ function PracticePage({ mode, level, seed, focus }: PracticeProps) {
     if (seed === null) window.location.replace(newTask(mode, level, focus))
   }, [mode, level, seed, focus])
   if (seed === null) return null
-  if (!isLevelAvailable(level)) {
+  if (!isLevelAvailable(level) || !isPlayable({ level, seed })) {
+    // z. B. eine Aufgabe zum impliziten Ableiten, die über ihre Nummer aufgerufen wurde
     return (
       <main className="space-y-4">
-        <h1 className="text-2xl font-semibold">Stufe {level} kommt bald</h1>
-        <p className="text-zinc-600">Bisher gibt es die Stufen 1 bis 4. Stufe 5 folgt bald.</p>
-        <a href="#/" className="inline-block rounded-xl border border-zinc-300 px-4 py-2 font-medium hover:bg-zinc-50">
-          Zur Startseite
-        </a>
+        <h1 className="text-2xl font-semibold">Diese Aufgabe kommt bald</h1>
+        <p className="text-zinc-600 text-pretty">
+          Aufgaben zum impliziten Ableiten gibt es ab dem nächsten Schritt. Bis dahin bekommst du in Stufe 5 andere Aufgaben.
+        </p>
+        <div className="flex flex-wrap gap-3">
+          <a
+            href={practiceHref(level, mode)}
+            className="inline-block rounded-xl bg-accent-700 px-4 py-2 font-medium text-white hover:bg-accent-800"
+          >
+            Andere Aufgabe
+          </a>
+          <a href="#/" className="inline-block rounded-xl border border-zinc-300 px-4 py-2 font-medium hover:bg-zinc-50">
+            Zur Startseite
+          </a>
+        </div>
       </main>
     )
   }

@@ -20,9 +20,9 @@ const field = (page: Page) => page.locator('math-field[data-ready]')
 const feedback = (page: Page) => page.locator('[aria-live="polite"]')
 const isPhone = () => test.info().project.name === 'handy'
 
-// Tasten der Bildschirm-Tastatur
-const key = (page: Page, label: string) => page.locator(`.MLK__keycap[aria-label="${label}"]`).first()
-const commandKey = (page: Page, command: string) => page.locator(`[data-command*="${command}"]`).first()
+// Tasten der Bildschirm-Tastatur, auf der gerade sichtbaren Seite
+const key = (page: Page, label: string) => page.locator(`.MLK__keycap[aria-label="${label}"]`).filter({ visible: true }).first()
+const commandKey = (page: Page, command: string) => page.locator(`[data-command*="${command}"]`).filter({ visible: true }).first()
 
 // Gibt eine Antwort ein: am Handy über die Bildschirm-Tastatur, am Laptop über die normale Tastatur.
 // Die Tasten sind Folgen von Beschriftungen; „→" springt aus einer Klammer heraus.
@@ -145,4 +145,27 @@ test('Freier Modus in Stufe 4: erkennt den vergessenen Faktor ln a', async ({ pa
   })
   await expect(feedback(page)).toContainText('Richtig!')
   await expectCleanPage(page, 'Stufe 4 frei')
+})
+
+test('Freier Modus in Stufe 5: Hyperbelfunktion über die zweite Tastaturseite', async ({ page }) => {
+  // Aufgabe 5-35: f(x) = sinh(2x)
+  await page.goto('./#/frei/5-35')
+  await expect(field(page)).toBeVisible()
+  if (isPhone()) {
+    await field(page).tap()
+    await expect(field(page)).toBeFocused()
+    await page.getByText('Mehr Funktionen').first().tap()
+    // Tasten der gerade sichtbaren Tastaturseite
+    const visibleKey = (text: string) => page.locator('.MLK__keycap', { hasText: new RegExp(`^${text}$`) }).filter({ visible: true }).first()
+    for (const k of ['2', 'cosh', '2', 'x']) await visibleKey(k).tap()
+    await commandKey(page, 'moveToNextChar').tap()
+    await expect(field(page)).toHaveJSProperty('value', '2\\cosh\\left(2x\\right)')
+  } else {
+    await field(page).click()
+    await expect(field(page)).toBeFocused()
+    await page.keyboard.type('2cosh(2x)')
+  }
+  await submit(page)
+  await expect(feedback(page)).toContainText('Richtig!')
+  await expectCleanPage(page, 'Stufe 5 frei')
 })

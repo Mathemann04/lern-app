@@ -132,6 +132,27 @@ mehrmals machen und das gezielte Üben starten.
 - Logarithmisches Ableiten ($x^x$, $x^{\sin x}$), Umkehrfunktionen
   ($\arcsin$, $\arccos$, Ableitung der Umkehrfunktion), Hyperbelfunktionen
   ($\sinh$, $\cosh$, $\tanh$ und ihre Umkehrfunktionen).
+- Umgesetzt: Stufe 5 ist spielbar (geführt und frei); Aufgaben zum
+  impliziten Ableiten werden bis Schritt 11 übersprungen (die
+  Aufgaben-Nummern bleiben dieselben, über ihre Nummer aufgerufen zeigen sie
+  einen Hinweis).
+- Logarithmisches Ableiten geführt in vier Schritten: Regelwahl (Potenzregel
+  und die Regel für $a^x$ als typische falsche Wahl, die Kettenregel über
+  $e^{v \ln u}$ gilt nie als falsch), Logarithmieren
+  ($\ln f(x) = v \cdot \ln u$; falsch: vertauscht, $(\ln u)^v$,
+  $\ln u + \ln v$), die rechte Seite ableiten, dann mit $f(x)$ malnehmen.
+- Arkus-, Hyperbel- und Areafunktionen wie die anderen Grundfunktionen; neue
+  typische Fehler (siehe Katalog), eigene Texte, vier neue Lernkarten. Die
+  Ableitung der Umkehrfunktion steht als Herleitung auf der Karte
+  „Arkussinus und Arkuskosinus"; eigene Aufgaben dazu („Berechne
+  $(f^{-1})'(2)$") gibt es noch nicht.
+- Mathe-Tastatur mit zweiter Seite „Mehr Funktionen" ($\sinh$, $\cosh$,
+  $\tanh$, $\operatorname{arsinh}$, …, $\arcsin$, $\arccos$); am Laptop
+  lassen sich die Namen eintippen.
+- Unschöne Vorlagen entfernt: $\arcsin\left(\frac{x}{k}\right)$ und
+  $\arcsin\left(\frac{1}{x}\right)$ ergaben Doppelbrüche unter der Wurzel,
+  $\operatorname{artanh}\left(\frac{x}{k}\right)$ wurde zu
+  $\operatorname{artanh}(kx)$.
 
 ### Schritt 11: Stufe 5, Teil 2: implizites Ableiten
 - Aufgaben mit $x$ und $y$, z. B. $x^2 + y^2 = 25$ oder $x y + e^y = 1$,
@@ -374,8 +395,17 @@ ausprobieren".
 | $\arctan$ | mit $\arcsin$ verwechselt | $(\arctan x)' = \frac{1}{\sqrt{1-x^2}}$ |
 | $x^x$ | Potenzregel angewendet | $(x^x)' = x \cdot x^{x-1}$ |
 | $x^x$ | wie $a^x$ behandelt | $(x^x)' = x^x \ln x$ |
+| $x^x$ | am Ende nicht mit $f(x)$ malgenommen | $(x^x)' = \ln x + 1$ |
 | $\arccos$ | Vorzeichen vergessen | $(\arccos x)' = \frac{1}{\sqrt{1-x^2}}$ |
+| $\arcsin$ | mit $\arccos$ verwechselt (Minus davor) | $(\arcsin x)' = -\frac{1}{\sqrt{1-x^2}}$ |
+| $\arcsin$ | Plus statt Minus unter der Wurzel | $(\arcsin x)' = \frac{1}{\sqrt{1+x^2}}$ |
+| $\sinh$ | Minuszeichen gesetzt | $(\sinh x)' = -\cosh x$ |
 | $\cosh$ | Vorzeichen wie beim $\cos$ | $(\cosh x)' = -\sinh x$ |
+| $\tanh$ | mit $\tan$ verwechselt | $(\tanh x)' = \frac{1}{\cos^2 x}$ |
+| $\tanh$ | $\sinh$ statt $\cosh$ im Nenner | $(\tanh x)' = \frac{1}{\sinh^2 x}$ |
+| $\operatorname{arsinh}$ | mit $\operatorname{arcosh}$ verwechselt | $(\operatorname{arsinh} x)' = \frac{1}{\sqrt{x^2-1}}$ |
+| $\operatorname{arcosh}$ | mit $\operatorname{arsinh}$ verwechselt | $(\operatorname{arcosh} x)' = \frac{1}{\sqrt{x^2+1}}$ |
+| $\operatorname{artanh}$ | mit $\arctan$ verwechselt | $(\operatorname{artanh} x)' = \frac{1}{1+x^2}$ |
 | implizit | $y$ wie eine Konstante behandelt | $(y^2)' = 0$ |
 | implizit | $y'$ vergessen | $(y^2)' = 2y$ |
 | implizit | Produktregel bei $xy$ vergessen | $(xy)' = x\,y'$ |

@@ -13,10 +13,10 @@ describe('Gezieltes Üben', () => {
     expect(errorPossible(add(pow(x, num(2)), num(5)), 'constant-summand-kept')).toBe(true)
   })
 
-  // Jede Fehlerregel der Stufen 1 bis 4 lässt sich in mindestens einer Stufe üben, und der
-  // geführte Modus zeigt den Fehler dann sicher als Antwort
-  it.each(ERROR_RULES.filter((r) => !['logarithmic', 'arccos', 'cosh'].includes(r.rule)).map((r) => r.id))('%s', (id) => {
-    const levels: Level[] = [1, 2, 3, 4]
+  // Jede Fehlerregel lässt sich in mindestens einer Stufe üben, und der geführte Modus zeigt
+  // den Fehler dann sicher als Antwort
+  it.each(ERROR_RULES.map((r) => r.id))('%s', (id) => {
+    const levels: Level[] = [1, 2, 3, 4, 5]
     const ref = findTaskWithError(id, levels, createRng(`test:${id}`))
     expect(ref, id).not.toBeNull()
     const plan = planGuidedTask(ref!, id)

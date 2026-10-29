@@ -339,6 +339,70 @@ export const ERROR_RULES: readonly ErrorRule[] = [
     wrongFormula: "(\\cosh x)' = -\\sinh x",
     apply: (node) => neg(fn('sinh', X(node))),
   },
+  {
+    id: 'logarithmic-factor-forgotten',
+    rule: 'logarithmic',
+    name: 'Am Ende nicht mit der Funktion malgenommen',
+    wrongFormula: "(u^v)' = (v \\cdot \\ln u)'",
+    // nur die Ableitung von v · ln u, ohne den Faktor u^v
+    apply: (node) => node.children[0].result,
+  },
+  {
+    id: 'sinh-sign',
+    rule: 'sinh',
+    name: 'Minuszeichen beim Sinus hyperbolicus gesetzt',
+    wrongFormula: "(\\sinh x)' = -\\cosh x",
+    apply: (node) => neg(fn('cosh', X(node))),
+  },
+  {
+    id: 'tanh-like-tan',
+    rule: 'tanh',
+    name: 'Mit dem Tangens verwechselt',
+    wrongFormula: "(\\tanh x)' = \\frac{1}{\\cos^2 x}",
+    apply: (node) => div(num(1), pow(cos(X(node)), num(2))),
+  },
+  {
+    id: 'tanh-sinh-cosh-swapped',
+    rule: 'tanh',
+    name: 'Sinus hyperbolicus statt Kosinus hyperbolicus im Nenner',
+    wrongFormula: "(\\tanh x)' = \\frac{1}{\\sinh^2 x}",
+    apply: (node) => div(num(1), pow(fn('sinh', X(node)), num(2))),
+  },
+  {
+    id: 'arcsin-arccos',
+    rule: 'arcsin',
+    name: 'Mit dem Arkuskosinus verwechselt',
+    wrongFormula: "(\\arcsin x)' = -\\frac{1}{\\sqrt{1 - x^2}}",
+    apply: (node) => neg(div(num(1), sqrt(sub(num(1), pow(X(node), num(2)))))),
+  },
+  {
+    id: 'arcsin-root-sign',
+    rule: 'arcsin',
+    name: 'Plus statt Minus unter der Wurzel',
+    wrongFormula: "(\\arcsin x)' = \\frac{1}{\\sqrt{1 + x^2}}",
+    apply: (node) => div(num(1), sqrt(add(num(1), pow(X(node), num(2))))),
+  },
+  {
+    id: 'arsinh-arcosh',
+    rule: 'arsinh',
+    name: 'Mit dem Areakosinus hyperbolicus verwechselt',
+    wrongFormula: "(\\operatorname{arsinh} x)' = \\frac{1}{\\sqrt{x^2 - 1}}",
+    apply: (node) => div(num(1), sqrt(sub(pow(X(node), num(2)), num(1)))),
+  },
+  {
+    id: 'arcosh-arsinh',
+    rule: 'arcosh',
+    name: 'Mit dem Areasinus hyperbolicus verwechselt',
+    wrongFormula: "(\\operatorname{arcosh} x)' = \\frac{1}{\\sqrt{x^2 + 1}}",
+    apply: (node) => div(num(1), sqrt(add(pow(X(node), num(2)), num(1)))),
+  },
+  {
+    id: 'artanh-arctan',
+    rule: 'artanh',
+    name: 'Mit dem Arkustangens verwechselt',
+    wrongFormula: "(\\operatorname{artanh} x)' = \\frac{1}{1 + x^2}",
+    apply: (node) => div(num(1), add(num(1), pow(X(node), num(2)))),
+  },
 ]
 
 export function errorRule(id: string): ErrorRule {

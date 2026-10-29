@@ -482,11 +482,9 @@ const level5Inverse: TermTemplate = {
         () => fn(name, times(k, x)),
         // innere Funktion kx ± 1, damit der Definitionsbereich nahe 0 liegt
         () => fn(name, add(times(k, x), num(signed(rng, 1)))),
-        () => fn(name, div(x, num(k))),
         () => fn(name, times(rng.int(1, 3), xPow(2))),
         () => fn(name, sqrt(x)),
         () => mul(xPow(rng.int(1, 3)), fn(name, x)),
-        () => fn(name, div(num(1), x)),
         () => fn(name, exp(times(rng.int(1, 3), x))),
       ])(),
     )
@@ -509,7 +507,7 @@ const level5Hyperbolic: TermTemplate = {
         () => pow(fn(rng.pick(['sinh', 'cosh', 'tanh'] as const), x), num(rng.int(2, 3))),
         () => fn('arsinh', times(rng.int(1, 3), xPow(2))),
         () => fn('arcosh', times(Math.abs(k), x)),
-        () => fn('artanh', div(x, num(Math.abs(k)))),
+        () => fn('artanh', times(Math.abs(k), x)),
       ])(),
     )
   },
@@ -561,6 +559,12 @@ export const DERIVATIVE_TEMPLATES: readonly TermTemplate[] = [
 
 export function templatesForLevel(level: Level): TermTemplate[] {
   return DERIVATIVE_TEMPLATES.filter((t) => t.level === level)
+}
+
+// Schon spielbar? Implizites Ableiten (Stufe 5) kommt in Schritt 11; die Nummern bleiben
+// trotzdem dieselben, solche Aufgaben werden bis dahin nur übersprungen.
+export function isPlayable(ref: TaskRef): boolean {
+  return generateDerivativeTask(ref).task.kind === 'function'
 }
 
 // Erzeugt die Aufgabe zu einer Aufgaben-Nummer. Gleiche Nummer → gleiche Aufgabe.
