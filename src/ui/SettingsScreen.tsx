@@ -59,6 +59,26 @@ export function SettingsScreen() {
           In einer Aufgabe kannst du das oben rechts auch nur für diese Aufgabe umstellen.
         </p>
       </section>
+
+      <section aria-labelledby="more" className="space-y-3">
+        <h2 id="more" className="text-xl font-semibold">
+          Für Neugierige
+        </h2>
+        <a
+          href="#/galerie"
+          className="flex items-center gap-4 rounded-2xl border border-zinc-200 px-4 py-3 transition-colors hover:border-accent-600 hover:bg-accent-50"
+        >
+          <span className="min-w-0 flex-1">
+            <span className="block font-medium">Formel-Galerie (Testseite)</span>
+            <span className="block text-sm text-zinc-500">
+              Zufällige Aufgaben mit Ableitung, Rechenweg und typischen Fehlern, dazu die Schreibweise der Formeln.
+            </span>
+          </span>
+          <span aria-hidden className="text-accent-700">
+            →
+          </span>
+        </a>
+      </section>
     </main>
   )
 }

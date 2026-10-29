@@ -11,12 +11,15 @@ function collectErrors(page: Page): string[] {
 
 const randomTasks = (page: Page) => page.getByRole('region', { name: 'Zufällige Aufgaben' }).getByRole('article')
 
-test('Galerie ist von der Startseite erreichbar und zurück', async ({ page }) => {
-  await page.goto('./')
-  await page.getByRole('link', { name: /Formel-Galerie ansehen/ }).click()
+test('Galerie ist über die Einstellungen erreichbar, mit der Schreibweise der Formeln', async ({ page }) => {
+  await page.goto('./#/einstellungen')
+  await page.getByRole('link', { name: /Formel-Galerie/ }).click()
   await expect(page.getByRole('heading', { name: 'Formel-Galerie' })).toBeVisible()
+  const notation = page.getByRole('region', { name: 'Schreibweise' })
+  await expect(notation.locator('.katex')).toHaveCount(6)
+  await expect(notation.locator('code.text-red-700')).toHaveCount(0)
   await page.getByRole('link', { name: 'Rechenweg' }).click()
-  await expect(page.getByRole('heading', { name: 'Ableitungen' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Mathematik MB1' })).toBeVisible()
 })
 
 test('Galerie zeigt in jeder Stufe sauber gesetzte Aufgaben', async ({ page }) => {

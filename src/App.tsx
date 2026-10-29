@@ -1,23 +1,22 @@
 import { Suspense, lazy, useEffect } from 'react'
-import { createRng } from './engine/random/rng.ts'
-import { findTaskWithError } from './engine/tasks/focus.ts'
-import { type Level, randomSeed } from './engine/tasks/taskNumber.ts'
-import { GalleryScreen } from './ui/GalleryScreen.tsx'
+import { AreaScreen } from './ui/AreaScreen.tsx'
 import { HomeScreen } from './ui/HomeScreen.tsx'
-import { ProgressScreen } from './ui/ProgressScreen.tsx'
 import { SettingsScreen } from './ui/SettingsScreen.tsx'
-import { CardScreen, CardTopicScreen, CardsScreen } from './ui/cards/CardsScreen.tsx'
 import { buildInfoLabel } from './ui/buildInfo.ts'
-import { derivativeLevels, isLevelAvailable } from './ui/samples.ts'
-import { TaskScreen } from './ui/guided/TaskScreen.tsx'
-import { type PracticeMode } from './state/storage.ts'
-import { type Route, parseRoute, sectionOf, taskHref } from './ui/routes.ts'
+import { type Route, parseRoute, sectionOf } from './ui/routes.ts'
 import { MainNav } from './ui/MainNav.tsx'
 import { useHashRoute } from './ui/useHashRoute.ts'
 import { usePwa } from './ui/usePwa.ts'
 
-// Der freie Modus mit der Mathe-Tastatur ist groß und wird erst bei Bedarf geladen
-const FreeTaskScreen = lazy(() => import('./ui/free/FreeTaskScreen.tsx'))
+// Seiten mit Formeln oder Mathe-Engine werden erst bei Bedarf geladen: Die Startseite kommt ohne
+// beides aus und erscheint so schneller. (Offline liegen alle Teile ohnehin schon auf dem Gerät.)
+const CourseScreen = lazy(() => loadCourse().then((m) => ({ default: m.CourseScreen })))
+const ProgressScreen = lazy(() => import('./ui/ProgressScreen.tsx').then((m) => ({ default: m.ProgressScreen })))
+const CardsPage = lazy(() => import('./ui/cards/CardsScreen.tsx').then((m) => ({ default: m.CardsPage })))
+const GalleryScreen = lazy(() => import('./ui/GalleryScreen.tsx').then((m) => ({ default: m.GalleryScreen })))
+const loadPractice = () => import('./ui/PracticePage.tsx')
+const loadCourse = () => import('./ui/CourseScreen.tsx')
+const PracticePage = lazy(loadPractice)
 
 export function App() {
   const pwa = usePwa()
@@ -25,6 +24,15 @@ export function App() {
   const route = parseRoute(path)
   // In Aufgaben kein Hauptmenü: dort beendet das X die Aufgabe
   const showNav = route.page !== 'practice'
+
+  // Kurz nach dem Start schon die Teile für Aufgaben holen, damit „Weiter üben" sofort reagiert
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      void loadPractice()
+      void loadCourse()
+    }, 1500)
+    return () => clearTimeout(timer)
+  }, [])
 
   // Neue Seite beginnt oben. Geschweifte Klammern sind nötig: Neuere Browser geben bei
   // scrollTo einen Wert zurück, den React sonst für eine Aufräumfunktion hält.
@@ -40,18 +48,21 @@ export function App() {
       }`}
     >
       <header className="flex items-center justify-between py-2">
-        <a href="#/" className="inline-flex items-center gap-3">
+        <a href="#/" className="-my-1.5 inline-flex items-center gap-3 py-1.5">
           <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" className="size-8" />
           <span className="text-lg font-semibold tracking-tight">Rechenweg</span>
         </a>
         {showNav && <MainNav active={sectionOf(route)} />}
       </header>
 
-      <div className="flex-1 py-8">
-        <Page route={route} />
+      <div key={path} className="animate-page-in flex-1 py-8">
+        {/* Hinweis erst nach einer Weile: Meist ist der Teil sofort da */}
+        <Suspense fallback={<p className="animate-late text-zinc-500">Wird geladen …</p>}>
+          <Page route={route} />
+        </Suspense>
       </div>
 
-      <footer className="space-y-1 pt-6 text-center text-sm text-zinc-400">
+      <footer className="space-y-1 pt-6 text-center text-sm text-zinc-500">
         <p data-testid="offline-status">
           {pwa.isOfflineReady ? 'Offline nutzbar ✓' : 'Wird für die Offline-Nutzung vorbereitet …'}
         </p>
@@ -94,59 +105,15 @@ function Page({ route }: { route: Route }) {
       return <SettingsScreen />
     case 'progress':
       return <ProgressScreen />
+    case 'area':
+      return <AreaScreen key={route.id} id={route.id} />
+    case 'course':
+      return <CourseScreen key={route.id} id={route.id} />
     case 'cards':
-      return <CardsScreen />
-    case 'cardTopic':
-      return <CardTopicScreen key={route.topic} topic={route.topic} />
-    case 'card':
-      return <CardScreen key={route.id} id={route.id} />
+      return <CardsPage folder={route.folder} card={route.card} />
     case 'practice':
       return <PracticePage mode={route.mode} level={route.level} seed={route.seed} focus={route.focus} />
     case 'home':
       return <HomeScreen />
   }
-}
-
-// Stufen für gezieltes Üben: zuerst die gewählte, dann die nächstgelegenen
-function levelsNear(level: Level): Level[] {
-  return derivativeLevels
-    .filter((l) => l.available)
-    .map((l) => l.level)
-    .sort((a, b) => Math.abs(a - level) - Math.abs(b - level) || a - b)
-}
-
-function newTask(mode: PracticeMode, level: Level, focus: string | null): string {
-  // Gezielt üben: eine Aufgabe, in der genau dieser Fehler passieren kann
-  const found = focus ? findTaskWithError(focus, levelsNear(level), createRng(String(Math.random()))) : null
-  return taskHref(found ?? { level, seed: randomSeed() }, mode, found ? focus : null)
-}
-
-type PracticeProps = { mode: PracticeMode; level: Level; seed: number | null; focus: string | null }
-
-function PracticePage({ mode, level, seed, focus }: PracticeProps) {
-  // Ohne Nummer: neue Aufgabe würfeln und ihre Nummer in die Adresse schreiben,
-  // damit Neuladen dieselbe Aufgabe zeigt
-  useEffect(() => {
-    if (seed === null) window.location.replace(newTask(mode, level, focus))
-  }, [mode, level, seed, focus])
-  if (seed === null) return null
-  if (!isLevelAvailable(level)) {
-    return (
-      <main className="space-y-4">
-        <h1 className="text-2xl font-semibold">Stufe {level} kommt bald</h1>
-        <a href="#/" className="inline-block rounded-xl border border-zinc-300 px-4 py-2 font-medium hover:bg-zinc-50">
-          Zur Startseite
-        </a>
-      </main>
-    )
-  }
-  const key = `${level}-${seed}-${focus ?? ''}`
-  if (mode === 'free') {
-    return (
-      <Suspense fallback={<p className="text-zinc-500">Mathe-Tastatur wird geladen …</p>}>
-        <FreeTaskScreen key={key} taskRef={{ level, seed }} focus={focus} />
-      </Suspense>
-    )
-  }
-  return <TaskScreen key={key} taskRef={{ level, seed }} focus={focus} />
 }

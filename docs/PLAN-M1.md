@@ -184,6 +184,27 @@ mehrmals machen und das gezielte Üben starten.
   Design-Politur, Ladezeit, Offline-Test, Bedienbarkeit (große Tippflächen,
   gut lesbar).
 - Doku aktualisieren, M1 abhaken.
+- Umgesetzt: Aufbau wie bei Brilliant (Wunsch des Nutzers): Die Startseite
+  zeigt die Fächer (Mathematik MB1, Physik, Technische Mechanik) als
+  Überschriften, darunter ihre Gebiete als Kacheln. Was noch nicht spielbar
+  ist (Grundlagen, Integralrechnung, Formeln mit Einheiten, Statik), steht
+  blass mit „kommt bald" da. Ein Gebiet öffnet seine Themen
+  (Differentialrechnung → Ableiten), ein Thema die Wahl von Stufe und Art
+  mit „Üben". Ganz oben die Karte „Weitermachen" (beim ersten Besuch
+  „Los geht's") mit der zuletzt gewählten Stufe und Art. Aufgaben führen
+  zurück zum Thema. Lernkarten und Fortschritt sind genauso geordnet.
+- Die Schreibweise-Beispiele aus Schritt 1 stehen jetzt in der
+  Formel-Galerie, die über die Einstellungen erreichbar ist.
+- Animationen: Seiten blenden ein, richtige Antworten leuchten kurz grün
+  auf, falsche wackeln, Haken springen auf; nichts davon bei „Bewegung
+  reduzieren".
+- Bedienbarkeit: Knöpfe und Links mindestens 44 px hoch, Fußzeile mit mehr
+  Kontrast, geprüft auch mit 130 % Schriftgröße.
+- Ladezeit: Formelsatz und Mathe-Engine werden erst geladen, wenn eine Seite
+  sie braucht. Erstes Öffnen der Startseite bei langsamem Handy-Netz etwa
+  1,1 s statt 2,0 s. Offline liegen alle Teile weiterhin auf dem Gerät
+  (Browser-Test), der Hinweis „Eine neue Version ist da" lädt die neue
+  Version.
 
 ---
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { cardHref, parseRoute, practiceHref, sectionOf, taskHref, topicHref } from './routes.ts'
+import { areaHref, cardFolderHref, courseHref, parseRoute, practiceHref, sectionOf, taskHref } from './routes.ts'
 
 describe('parseRoute', () => {
   it('erkennt die Seiten', () => {
@@ -10,17 +10,23 @@ describe('parseRoute', () => {
     expect(parseRoute('/unbekannt')).toEqual({ page: 'home' })
   })
 
-  it('erkennt die Lernkarten mit Ordnern, Unbekanntes führt eine Ebene höher', () => {
-    expect(parseRoute('/karten')).toEqual({ page: 'cards' })
-    expect(parseRoute('/karten/ableitungen')).toEqual({ page: 'cardTopic', topic: 'ableitungen' })
-    expect(parseRoute('/karten/ableitungen/product')).toEqual({ page: 'card', id: 'product' })
-    expect(parseRoute('/karten/ableitungen/gibt-es-nicht')).toEqual({ page: 'cardTopic', topic: 'ableitungen' })
-    expect(parseRoute('/karten/gibt-es-nicht/product')).toEqual({ page: 'cards' })
-    expect(parseRoute('/karten/gibt-es-nicht')).toEqual({ page: 'cards' })
-    // ältere Adresse ohne Ordner
-    expect(parseRoute('/karten/product')).toEqual({ page: 'card', id: 'product' })
-    expect(cardHref('sin-cos')).toBe('#/karten/ableitungen/sin-cos')
-    expect(topicHref('ableitungen')).toBe('#/karten/ableitungen')
+  it('erkennt Gebiete und Themen, aber nur spielbare', () => {
+    expect(parseRoute('/gebiet/differentialrechnung')).toEqual({ page: 'area', id: 'differentialrechnung' })
+    expect(parseRoute('/thema/ableiten')).toEqual({ page: 'course', id: 'ableiten' })
+    // Integralrechnung kommt bald
+    expect(parseRoute('/gebiet/integralrechnung')).toEqual({ page: 'home' })
+    expect(parseRoute('/gebiet/gibt-es-nicht')).toEqual({ page: 'home' })
+    expect(parseRoute('/thema/gibt-es-nicht')).toEqual({ page: 'home' })
+    expect(areaHref('differentialrechnung')).toBe('#/gebiet/differentialrechnung')
+    expect(courseHref('ableiten')).toBe('#/thema/ableiten')
+  })
+
+  it('erkennt die Lernkarten-Adressen (welche Karte gemeint ist, klärt cardRoute.ts)', () => {
+    expect(parseRoute('/karten')).toEqual({ page: 'cards', folder: null, card: null })
+    expect(parseRoute('/karten/ableitungen')).toEqual({ page: 'cards', folder: 'ableitungen', card: null })
+    expect(parseRoute('/karten/ableitungen/product')).toEqual({ page: 'cards', folder: 'ableitungen', card: 'product' })
+    expect(parseRoute('/karten/a/b/c')).toEqual({ page: 'home' })
+    expect(cardFolderHref('ableitungen')).toBe('#/karten/ableitungen')
   })
 
   it('erkennt Übungsaufgaben mit und ohne Nummer', () => {
@@ -37,9 +43,9 @@ describe('parseRoute', () => {
     expect(taskHref({ level: 2, seed: 17 }, 'free')).toBe('#/frei/2-17')
   })
 
-  it('liest den Fehler für gezieltes Üben, aber nur bekannte', () => {
+  it('liest den Fehler für gezieltes Üben (ob es ihn gibt, prüft die Übungsseite)', () => {
     expect(parseRoute('/ueben/2-17?fokus=cos-sign')).toEqual({ page: 'practice', mode: 'guided', level: 2, seed: 17, focus: 'cos-sign' })
-    expect(parseRoute('/frei/3?fokus=gibt-es-nicht')).toEqual({ page: 'practice', mode: 'free', level: 3, seed: null, focus: null })
+    expect(parseRoute('/frei/3?fokus=')).toEqual({ page: 'practice', mode: 'free', level: 3, seed: null, focus: null })
     expect(practiceHref(2, 'guided', 'cos-sign')).toBe('#/ueben/2?fokus=cos-sign')
     expect(taskHref({ level: 2, seed: 17 }, 'free', 'cos-sign')).toBe('#/frei/2-17?fokus=cos-sign')
   })
@@ -48,6 +54,8 @@ describe('parseRoute', () => {
 describe('sectionOf', () => {
   it('markiert den Bereich im Hauptmenü, Aufgaben und Galerie gehören zu keinem', () => {
     expect(sectionOf(parseRoute('/'))).toBe('home')
+    expect(sectionOf(parseRoute('/gebiet/differentialrechnung'))).toBe('home')
+    expect(sectionOf(parseRoute('/thema/ableiten'))).toBe('home')
     expect(sectionOf(parseRoute('/karten/ableitungen/product'))).toBe('cards')
     expect(sectionOf(parseRoute('/fortschritt'))).toBe('progress')
     expect(sectionOf(parseRoute('/einstellungen'))).toBe('settings')

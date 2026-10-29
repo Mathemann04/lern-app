@@ -26,11 +26,11 @@ test('Lernkarten über das Menü: Ordner, Karte, anderes Beispiel, zurück, gezi
   await expectCleanPage(page, 'Ordner')
 
   // Ordner öffnen: Namen der Formeln mit den Formeln
-  await page.getByRole('link', { name: /^Ableitungen/ }).click()
+  await page.getByRole('link', { name: /^Ableiten/ }).click()
   await expect(page).toHaveURL(/#\/karten\/ableitungen$/)
-  await expect(page.getByRole('heading', { name: 'Ableitungen', level: 1 })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Ableiten', level: 1 })).toBeVisible()
   await expect(page.locator('main li a')).toHaveCount(20)
-  await expectCleanPage(page, 'Ordner Ableitungen')
+  await expectCleanPage(page, 'Ordner Ableiten')
 
   await page.getByRole('link', { name: /^Produktregel/ }).click()
   await expect(page).toHaveURL(/#\/karten\/ableitungen\/product$/)
@@ -53,8 +53,8 @@ test('Lernkarten über das Menü: Ordner, Karte, anderes Beispiel, zurück, gezi
   await expectCleanPage(page, 'Kettenregel')
 
   // Zurück führt in den Ordner, von dort zu allen Ordnern
-  await page.getByRole('link', { name: 'Ableitungen', exact: true }).click()
-  await expect(page.getByRole('heading', { name: 'Ableitungen', level: 1 })).toBeVisible()
+  await page.getByRole('link', { name: 'Ableiten', exact: true }).click()
+  await expect(page.getByRole('heading', { name: 'Ableiten', level: 1 })).toBeVisible()
   await page.getByRole('link', { name: 'Lernkarten', exact: true }).first().click()
   await expect(page).toHaveURL(/#\/karten$/)
   await page.goto('./#/karten/ableitungen/chain')

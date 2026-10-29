@@ -4,7 +4,7 @@ import type { Expr } from '../../engine/expr/types.ts'
 import { FitWidth } from '../FitWidth.tsx'
 import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
-import { cardHref } from '../routes.ts'
+import { cardHref } from './cardRoute.ts'
 import { CardBody } from './CardBody.tsx'
 
 // Lernkarten aus einer Aufgabe heraus: als Fenster über der Aufgabe, damit nichts verloren geht.
@@ -46,7 +46,7 @@ export function CardSheetButton({ ids, title, task }: { ids: readonly string[]; 
   if (ids.length === 0) return null
   return (
     <>
-      <button type="button" onClick={sheet.show} className="rounded-xl px-3 py-2 font-medium text-accent-700 hover:bg-accent-50">
+      <button type="button" onClick={sheet.show} className="rounded-xl px-3 py-2.5 font-medium text-accent-700 hover:bg-accent-50">
         {ids.length === 1 ? 'Lernkarte' : 'Lernkarten'}
       </button>
       <CardSheet ids={ids} title={title} task={task} open={sheet.open} onClose={sheet.close} />
@@ -88,7 +88,7 @@ function CardSheet({ ids, title, task, open, onClose }: SheetProps) {
             <h2 id="card-sheet-title" className="text-sm font-medium text-zinc-500">
               {title}
             </h2>
-            <button type="button" onClick={onClose} className="-mr-2 rounded-lg px-3 py-2 font-medium text-accent-700 hover:bg-accent-50">
+            <button type="button" onClick={onClose} className="-mr-2 rounded-lg px-3 py-2.5 font-medium text-accent-700 hover:bg-accent-50">
               Schließen
             </button>
           </div>

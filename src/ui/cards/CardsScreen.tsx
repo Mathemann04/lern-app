@@ -1,11 +1,34 @@
-import { TOPICS, cardById, cardsInTopic, topicById } from '../../engine/explain/cards.ts'
+import { cardById, cardsInTopic, topicById } from '../../engine/explain/cards.ts'
 import { BackLink } from '../BackLink.tsx'
 import { FitWidth } from '../FitWidth.tsx'
 import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
-import { cardHref, topicHref } from '../routes.ts'
+import { SUBJECTS } from '../catalog.ts'
+import { cardFolderHref } from '../routes.ts'
+import { cardHref, resolveCardPage } from './cardRoute.ts'
 import { derivativeLevels } from '../samples.ts'
 import { CardBody } from './CardBody.tsx'
+
+// Lernkarten-Seite zur Adresse: alle Ordner, ein Ordner oder eine Karte
+export function CardsPage({ folder, card }: { folder: string | null; card: string | null }) {
+  const page = resolveCardPage(folder, card)
+  switch (page.kind) {
+    case 'folders':
+      return <CardsScreen />
+    case 'folder':
+      return <CardTopicScreen key={page.topic} topic={page.topic} />
+    case 'card':
+      return <CardScreen key={page.id} id={page.id} />
+  }
+}
+
+// Ordner der Lernkarten nach Fach und Gebiet wie auf der Startseite (je Thema ein Ordner)
+const FOLDER_GROUPS = SUBJECTS.flatMap((subject) =>
+  subject.areas.flatMap((area) => {
+    const topics = area.courses.map((course) => topicById(course.cards)!)
+    return topics.length > 0 ? [{ subject, area, topics }] : []
+  }),
+)
 
 // Lernkarten in Ordnern nach Themen, wie eine Formelsammlung
 export function CardsScreen() {
@@ -15,30 +38,40 @@ export function CardsScreen() {
         <h1 className="text-3xl font-semibold tracking-tight">Lernkarten</h1>
         <p className="text-zinc-600 text-pretty">Jede Regel mit Merksatz, durchgerechneten Beispielen und den typischen Fehlern.</p>
       </div>
-      <ul className="space-y-3">
-        {TOPICS.map((topic) => (
-          <li key={topic.id}>
-            <a
-              href={topicHref(topic.id)}
-              className="flex items-center gap-4 rounded-2xl border border-zinc-200 px-4 py-4 hover:border-accent-600 hover:bg-accent-50"
-            >
-              <span aria-hidden className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-accent-50 text-accent-700">
-                <svg viewBox="0 0 24 24" className="size-7" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">
-                  <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                </svg>
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-lg font-semibold">{topic.title}</span>
-                <span className="block text-sm text-zinc-600">{topic.description}</span>
-                <span className="block text-sm text-zinc-500">{cardsInTopic(topic.id).length} Karten</span>
-              </span>
-              <span aria-hidden className="text-accent-700">
-                →
-              </span>
-            </a>
-          </li>
-        ))}
-      </ul>
+      {FOLDER_GROUPS.map(({ subject, area, topics }) => (
+        <section key={area.id} aria-labelledby={`cards-${area.id}`} className="space-y-3">
+          <div>
+            <p className="text-sm text-zinc-500">{subject.title}</p>
+            <h2 id={`cards-${area.id}`} className="text-xl font-semibold">
+              {area.title}
+            </h2>
+          </div>
+          <ul className="space-y-3">
+            {topics.map((topic) => (
+              <li key={topic.id}>
+                <a
+                  href={cardFolderHref(topic.id)}
+                  className="flex items-center gap-4 rounded-2xl border border-zinc-200 px-4 py-4 transition-colors hover:border-accent-600 hover:bg-accent-50"
+                >
+                  <span aria-hidden className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-accent-50 text-accent-700">
+                    <svg viewBox="0 0 24 24" className="size-7" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">
+                      <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                    </svg>
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-lg font-semibold">{topic.title}</span>
+                    <span className="block text-sm text-zinc-600">{topic.description}</span>
+                    <span className="block text-sm text-zinc-500">{cardsInTopic(topic.id).length} Karten</span>
+                  </span>
+                  <span aria-hidden className="text-accent-700">
+                    →
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
       <p className="text-sm text-zinc-500 text-pretty">Weitere Ordner kommen dazu, sobald neue Themen in der App sind.</p>
     </main>
   )
@@ -97,7 +130,7 @@ export function CardScreen({ id }: { id: string }) {
   const [previous, next] = [siblings[index - 1], siblings[index + 1]]
   return (
     <main className="space-y-6">
-      <BackLink href={topicHref(topic.id)} label={topic.title} />
+      <BackLink href={cardFolderHref(topic.id)} label={topic.title} />
       <div className="space-y-1">
         <p className="text-sm text-zinc-500">Lernkarte · ab Stufe {card.level}</p>
         <h1 className="text-3xl font-semibold tracking-tight">

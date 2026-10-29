@@ -24,12 +24,12 @@ test('Hauptmenü: Start, Lernkarten, Fortschritt, Einstellungen, der aktuelle Be
   await menu(page).getByRole('link', { name: 'Einstellungen' }).click()
   await expect(page).toHaveURL(/#\/einstellungen$/)
   await menu(page).getByRole('link', { name: 'Lernkarten' }).click()
-  await page.getByRole('link', { name: /^Ableitungen/ }).click()
+  await page.getByRole('link', { name: /^Ableiten/ }).click()
   await page.getByRole('link', { name: /^Potenzregel/ }).click()
   // Auch auf einer einzelnen Karte bleibt „Lernkarten" markiert
   await expect(menu(page).getByRole('link', { name: 'Lernkarten' })).toHaveAttribute('aria-current', 'page')
   await menu(page).getByRole('link', { name: 'Start' }).click()
-  await expect(page.getByRole('heading', { name: 'Ableitungen' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Mathematik MB1' })).toBeVisible()
 })
 
 test('Die Leiste verdeckt nichts und ist in Aufgaben ausgeblendet', async ({ page }) => {
@@ -49,10 +49,15 @@ test('Die Leiste verdeckt nichts und ist in Aufgaben ausgeblendet', async ({ pag
 
 test('Unterseiten haben einen Zurück-Knopf', async ({ page }) => {
   await page.goto('./#/galerie')
-  await page.getByRole('link', { name: 'Start', exact: true }).first().click()
+  await page.getByRole('main').getByRole('link', { name: 'Einstellungen', exact: true }).click()
+  await expect(page).toHaveURL(/#\/einstellungen$/)
+  await page.goto('./#/thema/ableiten')
+  await page.getByRole('link', { name: 'Differentialrechnung', exact: true }).click()
+  await expect(page).toHaveURL(/#\/gebiet\/differentialrechnung$/)
+  await page.getByRole('main').getByRole('link', { name: 'Start', exact: true }).click()
   await expect(page).toHaveURL(/#\/$/)
   await page.goto('./#/karten/ableitungen/quotient')
-  await page.getByRole('link', { name: 'Ableitungen', exact: true }).click()
+  await page.getByRole('link', { name: 'Ableiten', exact: true }).click()
   await expect(page).toHaveURL(/#\/karten\/ableitungen$/)
   await page.getByRole('link', { name: 'Lernkarten', exact: true }).first().click()
   await expect(page).toHaveURL(/#\/karten$/)

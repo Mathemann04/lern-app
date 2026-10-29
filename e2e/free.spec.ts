@@ -108,10 +108,13 @@ test('Freier Modus: meldet Unlesbares verständlich und hilft weiter', async ({ 
   await expect(page.locator('#question')).toBeVisible()
 })
 
-test('Moduswahl auf der Startseite bleibt gespeichert', async ({ page }) => {
-  await page.goto('./')
+test('Moduswahl bleibt gespeichert, auch für „Weitermachen" auf der Startseite', async ({ page }) => {
+  await page.goto('./#/thema/ableiten')
   await page.getByText('Selbst eintippen').click()
   await expect(page.getByRole('link', { name: 'Stufe 1 frei üben' })).toBeVisible()
+  await page.goto('./')
+  await expect(page.getByRole('link', { name: 'Erste Aufgabe · frei' })).toBeVisible()
+  await page.goto('./#/thema/ableiten')
   await page.reload()
   await page.getByRole('link', { name: 'Stufe 1 frei üben' }).click()
   await expect(page).toHaveURL(/#\/frei\/1-\d+$/)

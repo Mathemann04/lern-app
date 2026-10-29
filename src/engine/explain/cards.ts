@@ -40,7 +40,7 @@ export type Topic = {
 }
 
 export const TOPICS: readonly Topic[] = [
-  { id: 'ableitungen', title: 'Ableitungen', description: 'Von der Potenzregel bis zur Kettenregel' },
+  { id: 'ableitungen', title: 'Ableiten', description: 'Von der Potenzregel bis zum impliziten Ableiten' },
 ]
 
 export type Card = {

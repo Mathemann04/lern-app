@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { errorRule } from '../engine/derive/errorRules.ts'
-import { SUGGEST_WINDOW, levelSummary, resetProgress, topErrors, useProgress } from '../state/progress.ts'
+import { levelSummary, resetProgress, topErrors, useProgress } from '../state/progress.ts'
 import { useSettings } from '../state/settings.ts'
-import type { Attempt } from '../state/storage.ts'
 import { FitWidth } from './FitWidth.tsx'
 import { Formula } from './Formula.tsx'
 import { practiceHref } from './routes.ts'
+import { RecentDots } from './RecentDots.tsx'
 import { derivativeLevels } from './samples.ts'
 import { RichText } from './RichText.tsx'
 
@@ -22,9 +22,12 @@ export function ProgressScreen() {
       <h1 className="text-3xl font-semibold tracking-tight">Dein Fortschritt</h1>
 
       <section aria-labelledby="progress-levels" className="space-y-3">
-        <h2 id="progress-levels" className="text-xl font-semibold">
-          Ableitungen
-        </h2>
+        <div>
+          <p className="text-sm text-zinc-500">Differentialrechnung</p>
+          <h2 id="progress-levels" className="text-xl font-semibold">
+            Ableiten
+          </h2>
+        </div>
         <ul className="divide-y divide-zinc-100 rounded-2xl border border-zinc-200">
           {derivativeLevels
             .filter((l) => l.available)
@@ -84,7 +87,7 @@ export function ProgressScreen() {
                   </div>
                   <a
                     href={practiceHref(derivativeLevel, practiceMode, id)}
-                    className="inline-block rounded-xl bg-accent-700 px-4 py-2 font-medium text-white hover:bg-accent-800"
+                    className="inline-block rounded-xl bg-accent-700 px-4 py-2.5 font-medium text-white hover:bg-accent-800"
                   >
                     Gezielt üben
                   </a>
@@ -107,36 +110,22 @@ export function ProgressScreen() {
                     resetProgress()
                     setConfirmReset(false)
                   }}
-                  className="rounded-xl bg-red-700 px-4 py-2 font-medium text-white hover:bg-red-800"
+                  className="rounded-xl bg-red-700 px-4 py-2.5 font-medium text-white hover:bg-red-800"
                 >
                   Ja, löschen
                 </button>
-                <button type="button" onClick={() => setConfirmReset(false)} className="rounded-xl px-4 py-2 font-medium hover:bg-red-100">
+                <button type="button" onClick={() => setConfirmReset(false)} className="rounded-xl px-4 py-2.5 font-medium hover:bg-red-100">
                   Abbrechen
                 </button>
               </div>
             </div>
           ) : (
-            <button type="button" onClick={() => setConfirmReset(true)} className="rounded-xl px-3 py-2 text-sm text-zinc-500 hover:bg-zinc-100">
+            <button type="button" onClick={() => setConfirmReset(true)} className="rounded-xl px-3 py-3 text-sm text-zinc-500 hover:bg-zinc-100">
               Fortschritt löschen
             </button>
           )}
         </section>
       )}
     </main>
-  )
-}
-
-// Die letzten Aufgaben als Punkte: grün ohne Fehler, gelb mit Fehlern, grau noch offen
-function RecentDots({ recent }: { recent: readonly Attempt[] }) {
-  const clean = recent.filter((a) => a.clean).length
-  return (
-    <div className="flex gap-1.5" role="img" aria-label={`Letzte ${recent.length}: ${clean} ohne Fehler`}>
-      {Array.from({ length: SUGGEST_WINDOW }, (_, i) => {
-        const attempt = recent[i]
-        const color = !attempt ? 'border border-zinc-300' : attempt.clean ? 'bg-green-600' : 'bg-amber-400'
-        return <span key={i} className={`size-3 rounded-full ${color}`} />
-      })}
-    </div>
   )
 }

@@ -30,15 +30,25 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
 ## Aufbau
 - `src/ui/`: Oberfläche (React). Formeln nur über `Formula`
   (`src/ui/Formula.tsx`), das setzt alles in voller Größe (`\displaystyle`).
-  Seiten über `#/…` (`routes.ts`): Start `#/`, geführt üben `#/ueben/1` (neue
+  Aufbau wie bei Brilliant in `catalog.ts`: Fächer (Überschriften auf der
+  Startseite) → Gebiete (Kacheln, ohne Thema blass mit „kommt bald") →
+  Themen (Stufe und Art wählen, üben); neue Inhalte dort eintragen.
+  Seiten über `#/…` (`routes.ts`): Start `#/` („Weitermachen" und die
+  Fächer), Gebiet `#/gebiet/differentialrechnung`, Thema `#/thema/ableiten`,
+  geführt üben `#/ueben/1` (neue
   Aufgabe) bzw. `#/ueben/1-4711` (bestimmte Aufgabe), frei üben `#/frei/1`
   bzw. `#/frei/1-4711`, gezielt üben mit `?fokus=<Fehlerregel>` (z. B.
   `#/ueben/2?fokus=cos-sign`), Lernkarten in Ordnern nach Themen `#/karten`,
   `#/karten/ableitungen`, `#/karten/ableitungen/product`, `#/fortschritt`,
-  `#/einstellungen`, Testseite `#/galerie`. Hauptmenü `MainNav.tsx`: am Handy
+  `#/einstellungen`, Testseite `#/galerie` (Link in den Einstellungen, mit
+  den Schreibweise-Beispielen). Startseite, Gebiet, Einstellungen,
+  `routes.ts` und `catalog.ts` kommen ohne Mathe-Engine und KaTeX aus
+  (Ladezeit); alle anderen Seiten lädt `App.tsx` erst bei Bedarf. Ob es
+  eine Lernkarte oder einen typischen Fehler aus der Adresse gibt, prüfen
+  `cards/cardRoute.ts` und `practice.ts`. Hauptmenü `MainNav.tsx`: am Handy
   Leiste unten (Start, Lernkarten, Fortschritt, Einstellungen), ab `md` oben
-  im Kopf, in Aufgaben ausgeblendet. Unterseiten haben oben `BackLink`
-  („← Ordner", eine Ebene höher).
+  im Kopf, in Aufgaben ausgeblendet (das X führt zum Thema). Unterseiten
+  haben oben `BackLink` („← Ordner", eine Ebene höher).
   Lernbildschirm geführt in `src/ui/guided/`, frei in `src/ui/free/`
   (MathLive mit eigener Bildschirm-Tastatur `keyboard.ts`, zwei Seiten
   „Standard" (mit Taste y) und „Mehr Funktionen", wird erst im freien Modus
@@ -97,7 +107,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   bis das Feld bereit ist und den Fokus hat (`math-field[data-ready]`,
   `toBeFocused`): MathLive setzt den Fokus leicht verzögert.
 - `.github/workflows/app.yml`: prüft jeden Pull Request, veröffentlicht `main`
-- Akzentfarbe zentral in `src/index.css` (`--color-accent-*`)
+- Akzentfarbe zentral in `src/index.css` (`--color-accent-*`), dort auch die
+  dezenten Animationen (`animate-*`, aus bei „Bewegung reduzieren")
 
 ## Arbeitsregeln
 - **Erst Plan, dann bauen.** Jeder Meilenstein in kleinen Schritten, die der
@@ -130,6 +141,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   Stufe vorkommt, braucht einen eigenen Text in `explain/texts.ts` (Tests
   verbieten den Rückfalltext). Beim Bearbeiten mit Skripten auf Backslashes
   achten (`\f` in `\frac` wird sonst zum Steuerzeichen).
+- **Bedienbarkeit:** Knöpfe und Links mindestens 44 px hoch; Text nicht
+  heller als `zinc-500`.
 - **Schreibweise:** Formeln immer über KaTeX gesetzt, nie als Text wie
   „x^2/(3x+1)". Deutsche Konventionen: Dezimalkomma, Malpunkt, ln, f'(x).
 - **Sprache:** Oberfläche, Erklärungen und Doku auf Deutsch, Code-Kommentare

@@ -9,9 +9,10 @@ import { FitWidth } from '../FitWidth.tsx'
 import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
 import { CardSheetButton, TaskCardLinks } from '../cards/CardSheet.tsx'
-import { practiceHref } from '../routes.ts'
+import { DERIVATIVES } from '../catalog.ts'
+import { courseHref, practiceHref } from '../routes.ts'
 import { LevelUpSuggestion } from '../task/LevelUpSuggestion.tsx'
-import { FocusBanner, TaskIntro, TaskTopBar } from '../task/TaskParts.tsx'
+import { CheckBadge, FocusBanner, TaskIntro, TaskTopBar } from '../task/TaskParts.tsx'
 import { type ExplanationMode, useExplanationMode } from '../task/explanationMode.ts'
 
 // focus: gezielt einen typischen Fehler üben (der Fehler erscheint sicher als Antwort)
@@ -154,9 +155,9 @@ function StepView({ step, task, isLast, mode, detail, onMistake, onNext }: StepP
               aria-label={isWrong ? 'Falsche Antwort' : isRight ? 'Richtige Antwort' : undefined}
               className={`flex w-full items-center gap-3 rounded-2xl border-2 px-4 py-3 text-left transition-colors ${
                 isRight
-                  ? 'border-green-600 bg-green-50'
+                  ? 'animate-glow border-green-600 bg-green-50'
                   : isWrong
-                    ? 'border-red-300 bg-red-50 opacity-70'
+                    ? 'animate-shake border-red-300 bg-red-50 opacity-70'
                     : solved
                       ? 'border-zinc-200 opacity-50'
                       : 'border-zinc-200 bg-white hover:border-accent-600 active:bg-accent-50'
@@ -166,8 +167,8 @@ function StepView({ step, task, isLast, mode, detail, onMistake, onNext }: StepP
                 <RichText text={choice.content} className="block font-medium" inline />
                 {choice.caption && <RichText text={choice.caption} className="mt-1 block text-[0.78em] text-zinc-500" inline />}
               </FitWidth>
-              {isRight && <span className="text-xl text-green-700" aria-hidden>✓</span>}
-              {isWrong && <span className="text-xl text-red-700" aria-hidden>✗</span>}
+              {isRight && <span className="animate-pop text-xl text-green-700" aria-hidden>✓</span>}
+              {isWrong && <span className="animate-pop text-xl text-red-700" aria-hidden>✗</span>}
             </button>
           )
         })}
@@ -185,7 +186,7 @@ function StepView({ step, task, isLast, mode, detail, onMistake, onNext }: StepP
             <button
               type="button"
               onClick={() => setHintOpen(true)}
-              className="rounded-xl px-3 py-2 font-medium text-amber-800 hover:bg-amber-50"
+              className="rounded-xl px-3 py-2.5 font-medium text-amber-800 hover:bg-amber-50"
             >
               Tipp anzeigen
             </button>
@@ -197,7 +198,10 @@ function StepView({ step, task, isLast, mode, detail, onMistake, onNext }: StepP
       <div ref={feedbackRef} aria-live="polite">
         {solved ? (
           <div className="animate-step-in space-y-4 rounded-2xl bg-green-50 p-4">
-            <p className="text-lg font-semibold text-green-800">Richtig!</p>
+            <p className="text-lg font-semibold text-green-800">
+              <CheckBadge />
+              Richtig!
+            </p>
             {mode !== 'off' && <RichText text={step.explanation[mode]} className="text-zinc-800" />}
             <button
               type="button"
@@ -217,7 +221,7 @@ function StepView({ step, task, isLast, mode, detail, onMistake, onNext }: StepP
                 <button
                   type="button"
                   onClick={() => setWhyOpen(true)}
-                  className="rounded-xl border border-red-200 bg-white px-4 py-2 font-medium text-red-800 hover:bg-red-100"
+                  className="rounded-xl border border-red-200 bg-white px-4 py-2.5 font-medium text-red-800 hover:bg-red-100"
                 >
                   Warum ist das falsch?
                 </button>
@@ -245,6 +249,7 @@ function FinishView({ task, mistakes, focus }: { task: GuidedTask; mistakes: num
     <section className="animate-step-in space-y-5">
       <div className="space-y-1">
         <h1 ref={headingRef} tabIndex={-1} className="text-3xl font-semibold tracking-tight outline-none">
+          <CheckBadge large />
           Geschafft!
         </h1>
         <p className="text-zinc-600">
@@ -266,8 +271,8 @@ function FinishView({ task, mistakes, focus }: { task: GuidedTask; mistakes: num
         >
           Nächste Aufgabe
         </a>
-        <a href="#/" className="flex-1 rounded-xl border border-zinc-300 px-4 py-3 text-center text-lg font-medium hover:bg-zinc-50">
-          Zur Startseite
+        <a href={courseHref(DERIVATIVES)} className="flex-1 rounded-xl border border-zinc-300 px-4 py-3 text-center text-lg font-medium hover:bg-zinc-50">
+          Zur Übersicht
         </a>
       </div>
       <TaskCardLinks ids={task.cards} />
