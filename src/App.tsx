@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { Suspense, lazy, useEffect } from 'react'
 import { type Level, randomSeed } from './engine/tasks/taskNumber.ts'
 import { GalleryScreen } from './ui/GalleryScreen.tsx'
 import { HomeScreen } from './ui/HomeScreen.tsx'
@@ -6,9 +6,13 @@ import { SettingsScreen } from './ui/SettingsScreen.tsx'
 import { buildInfoLabel } from './ui/buildInfo.ts'
 import { isLevelAvailable } from './ui/samples.ts'
 import { TaskScreen } from './ui/guided/TaskScreen.tsx'
+import { type PracticeMode } from './state/storage.ts'
 import { type Route, parseRoute, taskHref } from './ui/routes.ts'
 import { useHashRoute } from './ui/useHashRoute.ts'
 import { usePwa } from './ui/usePwa.ts'
+
+// Der freie Modus mit der Mathe-Tastatur ist groß und wird erst bei Bedarf geladen
+const FreeTaskScreen = lazy(() => import('./ui/free/FreeTaskScreen.tsx'))
 
 export function App() {
   const pwa = usePwa()
@@ -84,18 +88,18 @@ function Page({ route }: { route: Route }) {
     case 'settings':
       return <SettingsScreen />
     case 'practice':
-      return <PracticePage level={route.level} seed={route.seed} />
+      return <PracticePage mode={route.mode} level={route.level} seed={route.seed} />
     case 'home':
       return <HomeScreen />
   }
 }
 
-function PracticePage({ level, seed }: { level: Level; seed: number | null }) {
+function PracticePage({ mode, level, seed }: { mode: PracticeMode; level: Level; seed: number | null }) {
   // Ohne Nummer: neue Aufgabe würfeln und ihre Nummer in die Adresse schreiben,
   // damit Neuladen dieselbe Aufgabe zeigt
   useEffect(() => {
-    if (seed === null) window.location.replace(taskHref({ level, seed: randomSeed() }))
-  }, [level, seed])
+    if (seed === null) window.location.replace(taskHref({ level, seed: randomSeed() }, mode))
+  }, [mode, level, seed])
   if (seed === null) return null
   if (!isLevelAvailable(level)) {
     return (
@@ -106,6 +110,13 @@ function PracticePage({ level, seed }: { level: Level; seed: number | null }) {
           Zur Startseite
         </a>
       </main>
+    )
+  }
+  if (mode === 'free') {
+    return (
+      <Suspense fallback={<p className="text-zinc-500">Mathe-Tastatur wird geladen …</p>}>
+        <FreeTaskScreen key={`${level}-${seed}`} taskRef={{ level, seed }} />
+      </Suspense>
     )
   }
   return <TaskScreen key={`${level}-${seed}`} taskRef={{ level, seed }} />

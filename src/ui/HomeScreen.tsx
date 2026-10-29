@@ -1,10 +1,16 @@
 import { updateSettings, useSettings } from '../state/settings.ts'
+import type { PracticeMode } from '../state/storage.ts'
 import { Formula } from './Formula.tsx'
 import { practiceHref } from './routes.ts'
 import { derivativeLevels, isLevelAvailable, notationSamples } from './samples.ts'
 
+const MODES: Array<{ value: PracticeMode; title: string; description: string }> = [
+  { value: 'guided', title: 'Geführt', description: 'Auswahl-Antworten' },
+  { value: 'free', title: 'Frei', description: 'Selbst eintippen' },
+]
+
 export function HomeScreen() {
-  const { derivativeLevel } = useSettings()
+  const { derivativeLevel, practiceMode } = useSettings()
   // Eine gespeicherte Stufe, die (noch) nicht spielbar ist, zählt als Stufe 1
   const selected = isLevelAvailable(derivativeLevel) ? derivativeLevel : 1
   return (
@@ -27,11 +33,34 @@ export function HomeScreen() {
             </h2>
             <p className="mt-1 text-zinc-600">Fünf Stufen, vom Einstieg bis zum Profi.</p>
           </div>
+          <fieldset>
+            <legend className="sr-only">Wie willst du üben?</legend>
+            <div className="flex gap-1 rounded-xl bg-zinc-100 p-1">
+              {MODES.map((option) => (
+                <label
+                  key={option.value}
+                  className={`flex-1 cursor-pointer rounded-lg px-3 py-2 text-center transition-colors has-focus-visible:ring-2 has-focus-visible:ring-accent-600 ${
+                    practiceMode === option.value ? 'bg-white shadow-sm' : 'text-zinc-600 hover:text-zinc-900'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="art"
+                    className="sr-only"
+                    checked={practiceMode === option.value}
+                    onChange={() => updateSettings({ practiceMode: option.value })}
+                  />
+                  <span className={`block font-medium ${practiceMode === option.value ? 'text-accent-700' : ''}`}>{option.title}</span>
+                  <span className="block text-sm text-zinc-500">{option.description}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
           <a
-            href={practiceHref(selected)}
+            href={practiceHref(selected, practiceMode)}
             className="block rounded-xl bg-accent-700 px-4 py-3 text-center text-lg font-medium text-white hover:bg-accent-800"
           >
-            Stufe {selected} geführt üben
+            Stufe {selected} {practiceMode === 'free' ? 'frei' : 'geführt'} üben
           </a>
         </header>
         {/* Linie am umgebenden Element: Bei fieldset würde die Beschriftung sie unterbrechen */}
@@ -86,7 +115,7 @@ export function HomeScreen() {
             </div>
           </fieldset>
         </div>
-        <p className="px-5 pb-4 text-sm text-zinc-500">Die Stufen 4 und 5 und der freie Modus folgen in den nächsten Schritten.</p>
+        <p className="px-5 pb-4 text-sm text-zinc-500">Die Stufen 4 und 5 folgen in den nächsten Schritten.</p>
         <a
           href="#/galerie"
           className="flex items-center justify-between rounded-b-2xl border-t border-zinc-100 px-5 py-4 font-medium text-accent-700 hover:bg-accent-50"
