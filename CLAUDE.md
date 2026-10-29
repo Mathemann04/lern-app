@@ -33,7 +33,9 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   (`src/ui/Formula.tsx`), das setzt alles in voller Größe (`\displaystyle`).
   Aufbau wie bei Brilliant in `catalog.ts`: Fächer (Überschriften auf der
   Startseite) → Gebiete (Kacheln, ohne Thema blass mit „kommt bald") →
-  Themen (Stufe und Art wählen, üben); neue Inhalte dort eintragen.
+  Themen (Stufe und Art wählen, üben); neue Inhalte dort eintragen. Jedes
+  Gebiet hat eine Farbe (`tone`) und ein Bild, jedes Thema ein Bild
+  (`AreaIcon.tsx`, SVG in der Tonleiter `tone-*`).
   Seiten über `#/…` (`routes.ts`): Start `#/` („Weitermachen" und die
   Fächer), Gebiet `#/gebiet/differentialrechnung`, Thema `#/thema/ableiten`,
   geführt üben `#/ueben/1` (neue
@@ -101,22 +103,31 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     gezieltes Üben)
 - `src/state/`: Speichern auf dem Gerät (`storage.ts`, Version 2, robust
   gegen kaputten Inhalt, alte Versionen werden umgezogen), gemeinsamer
-  Zustand (`store.ts`), Einstellungen (`settings.ts`, auch die gewählte Stufe
-  und „Geführt"/„Frei") und Fortschritt mit Fehlerstatistik und
+  Zustand (`store.ts`), Einstellungen (`settings.ts`, auch die gewählte Stufe,
+  „Geführt"/„Frei" und hell/dunkel) und Fortschritt mit Fehlerstatistik und
   8-von-10-Vorschlag (`progress.ts`)
 - `e2e/`: Browser-Tests (Playwright). Im freien Modus vor dem Tippen warten,
   bis das Feld bereit ist und den Fokus hat (`math-field[data-ready]`,
   `toBeFocused`): MathLive setzt den Fokus leicht verzögert.
 - `.github/workflows/app.yml`: prüft jeden Pull Request, veröffentlicht `main`
-- Akzentfarbe zentral in `src/index.css` (`--color-accent-*`), dort auch die
-  dezenten Animationen (`animate-*`, aus bei „Bewegung reduzieren")
+- Farben zentral in `src/index.css`:
+  - `accent-*` ist die Farbe des Gebiets: `data-tone="blue"` an einer Seite
+    oder Kachel färbt alles darin, ohne Angabe Blaugrün (App). `App.tsx`
+    setzt den Ton je Seite (`toneOf`).
+  - Dunkles Design über die Klasse `dark` am html-Element (Einstellung
+    „Aussehen", `useTheme.ts`, Skript in `index.html`). Die Leitern `zinc`,
+    `red`, `green`, `amber` werden dort umgedreht, deshalb `bg-surface`
+    statt `bg-white`, `bg-raised` für den gewählten Teil eines Umschalters,
+    `text-on-accent` auf farbigen Knöpfen, nie `text-white` auf Farbe.
+  - Dort auch die dezenten Animationen (`animate-*`, aus bei „Bewegung
+    reduzieren").
 
 ## Arbeitsregeln
 - **Erst Plan, dann bauen.** Jeder Meilenstein in kleinen Schritten, die der
   Nutzer einzeln ausprobieren kann. Ohne OK des Nutzers zum Plan nicht
   programmieren.
 - **Nach jedem Schritt:** Tests, Typprüfung und Build laufen lassen; im
-  Browser in Handygröße (390×844) und Laptopgröße prüfen; committen und
+  Browser in Handygröße (390×844) und Laptopgröße prüfen, hell und dunkel; committen und
   pushen; ROADMAP abhaken; dem Nutzer in wenigen Sätzen sagen, was sich jetzt
   ausprobieren lässt.
 - **Mathematische Korrektheit zuerst.** Alle Lösungen, Zwischenschritte und

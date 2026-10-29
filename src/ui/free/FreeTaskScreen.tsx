@@ -76,7 +76,7 @@ export default function FreeTaskScreen({ taskRef, focus = null }: { taskRef: Tas
       </section>
 
       <section className="space-y-3" aria-label="Deine Antwort">
-        <div className="flex items-center gap-2 rounded-2xl border-2 border-zinc-200 bg-white px-3 py-2 focus-within:border-accent-600">
+        <div className="flex items-center gap-2 rounded-2xl border-2 border-zinc-200 bg-surface px-3 py-2 focus-within:border-accent-600">
           <span className="shrink-0 text-2xl">
             <Formula tex={`${plan.answerLabel} =`} />
           </span>
@@ -95,7 +95,7 @@ export default function FreeTaskScreen({ taskRef, focus = null }: { taskRef: Tas
           <button
             type="button"
             onClick={() => submit(latex)}
-            className="w-full rounded-xl bg-accent-700 px-4 py-3 text-lg font-medium text-white hover:bg-accent-800"
+            className="w-full rounded-xl bg-accent-700 px-4 py-3 text-lg font-medium text-on-accent hover:bg-accent-800"
           >
             Prüfen
           </button>
@@ -113,7 +113,7 @@ export default function FreeTaskScreen({ taskRef, focus = null }: { taskRef: Tas
           <div className="flex flex-col gap-3 sm:flex-row">
             <a
               href={practiceHref(level, 'free', focus)}
-              className="flex-1 rounded-xl bg-accent-700 px-4 py-3 text-center text-lg font-medium text-white hover:bg-accent-800"
+              className="flex-1 rounded-xl bg-accent-700 px-4 py-3 text-center text-lg font-medium text-on-accent hover:bg-accent-800"
             >
               Nächste Aufgabe
             </a>
@@ -210,7 +210,7 @@ function Feedback({ verdict, resultLatex, detail, mode }: { verdict: Verdict; re
             <button
               type="button"
               onClick={() => setWhyOpen(true)}
-              className="rounded-xl border border-red-200 bg-white px-4 py-2.5 font-medium text-red-800 hover:bg-red-100"
+              className="rounded-xl border border-red-200 bg-surface px-4 py-2.5 font-medium text-red-800 hover:bg-red-100"
             >
               Warum ist das falsch?
             </button>

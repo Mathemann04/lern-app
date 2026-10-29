@@ -67,7 +67,7 @@ export function GalleryScreen() {
                 aria-pressed={l === level}
                 onClick={() => setLevel(l)}
                 className={`flex-1 rounded-lg py-2 font-medium transition-colors ${
-                  l === level ? 'bg-white text-accent-700 shadow-sm' : 'text-zinc-600 hover:text-zinc-900'
+                  l === level ? 'bg-raised text-accent-700 shadow-sm' : 'text-zinc-600 hover:text-zinc-900'
                 }`}
               >
                 {l}
@@ -80,7 +80,7 @@ export function GalleryScreen() {
           <button
             type="button"
             onClick={() => setBaseSeed(randomSeed())}
-            className="rounded-xl bg-accent-700 px-4 py-2.5 font-medium text-white hover:bg-accent-800"
+            className="rounded-xl bg-accent-700 px-4 py-2.5 font-medium text-on-accent hover:bg-accent-800"
           >
             Neue Aufgaben
           </button>

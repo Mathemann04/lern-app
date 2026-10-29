@@ -7,6 +7,8 @@ import { LEVELS, type Level } from '../engine/tasks/taskNumber.ts'
 export type ExplanationDetail = 'detailed' | 'short'
 // geführt: Auswahl-Antworten Schritt für Schritt; frei: Ableitung selbst eintippen
 export type PracticeMode = 'guided' | 'free'
+// Hell oder dunkel; system: wie das Gerät
+export type ThemeChoice = 'system' | 'light' | 'dark'
 
 export type Settings = {
   // Erklärungen nach jeder Antwort automatisch zeigen
@@ -15,6 +17,7 @@ export type Settings = {
   // zuletzt gewählte Stufe beim Thema Ableitungen
   readonly derivativeLevel: Level
   readonly practiceMode: PracticeMode
+  readonly theme: ThemeChoice
 }
 
 // Eine fertig gelöste Aufgabe
@@ -45,7 +48,7 @@ export type AppState = {
 export const STORAGE_KEY = 'rechenweg'
 export const MAX_ATTEMPTS = 1000
 
-export const DEFAULT_SETTINGS: Settings = { explanations: true, detail: 'detailed', derivativeLevel: 1, practiceMode: 'guided' }
+export const DEFAULT_SETTINGS: Settings = { explanations: true, detail: 'detailed', derivativeLevel: 1, practiceMode: 'guided', theme: 'system' }
 export const EMPTY_PROGRESS: Progress = { attempts: [], errors: {}, suggestionDismissed: {} }
 export const DEFAULT_STATE: AppState = { version: 2, settings: DEFAULT_SETTINGS, progress: EMPTY_PROGRESS }
 
@@ -61,6 +64,8 @@ export function browserStore(): KeyValueStore | null {
   }
 }
 
+const THEMES: readonly ThemeChoice[] = ['system', 'light', 'dark']
+
 function readSettings(value: unknown): Settings {
   const raw = (typeof value === 'object' && value !== null ? value : {}) as Record<string, unknown>
   return {
@@ -68,6 +73,7 @@ function readSettings(value: unknown): Settings {
     detail: raw.detail === 'short' || raw.detail === 'detailed' ? raw.detail : DEFAULT_SETTINGS.detail,
     derivativeLevel: LEVELS.find((l) => l === raw.derivativeLevel) ?? DEFAULT_SETTINGS.derivativeLevel,
     practiceMode: raw.practiceMode === 'free' || raw.practiceMode === 'guided' ? raw.practiceMode : DEFAULT_SETTINGS.practiceMode,
+    theme: THEMES.find((t) => t === raw.theme) ?? DEFAULT_SETTINGS.theme,
   }
 }
 

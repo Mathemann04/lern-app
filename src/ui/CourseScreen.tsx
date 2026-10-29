@@ -2,6 +2,7 @@ import type { Level } from '../engine/tasks/taskNumber.ts'
 import { levelSummary, useProgress } from '../state/progress.ts'
 import { updateSettings, useSettings } from '../state/settings.ts'
 import type { PracticeMode } from '../state/storage.ts'
+import { AreaIcon } from './AreaIcon.tsx'
 import { BackLink } from './BackLink.tsx'
 import { courseById } from './catalog.ts'
 import { Formula } from './Formula.tsx'
@@ -23,8 +24,13 @@ export function CourseScreen({ id }: { id: string }) {
     <main className="space-y-6">
       <div className="space-y-3">
         <BackLink href={areaHref(area.id)} label={area.title} />
-        <h1 className="text-3xl font-semibold tracking-tight">{course.title}</h1>
-        <p className="text-zinc-600 text-pretty">{course.description}</p>
+        <div className="flex items-center gap-4">
+          <AreaIcon kind={course.icon} className="size-16 shrink-0" />
+          <div className="min-w-0 space-y-1">
+            <h1 className="text-3xl font-semibold tracking-tight">{course.title}</h1>
+            <p className="text-zinc-600 text-pretty">{course.description}</p>
+          </div>
+        </div>
       </div>
 
       <section aria-label="Üben" className="rounded-2xl border border-zinc-200">
@@ -36,7 +42,7 @@ export function CourseScreen({ id }: { id: string }) {
                 <label
                   key={option.value}
                   className={`flex-1 cursor-pointer rounded-lg px-3 py-2 text-center transition-colors has-focus-visible:ring-2 has-focus-visible:ring-accent-600 ${
-                    practiceMode === option.value ? 'bg-white shadow-sm' : 'text-zinc-600 hover:text-zinc-900'
+                    practiceMode === option.value ? 'bg-raised shadow-sm' : 'text-zinc-600 hover:text-zinc-900'
                   }`}
                 >
                   <input
@@ -54,7 +60,7 @@ export function CourseScreen({ id }: { id: string }) {
           </fieldset>
           <a
             href={practiceHref(selected, practiceMode)}
-            className="block rounded-xl bg-accent-700 px-4 py-3 text-center text-lg font-medium text-white hover:bg-accent-800"
+            className="block rounded-xl bg-accent-700 px-4 py-3 text-center text-lg font-medium text-on-accent hover:bg-accent-800"
           >
             Stufe {selected} {practiceMode === 'free' ? 'frei' : 'geführt'} üben
           </a>
@@ -89,7 +95,7 @@ export function CourseScreen({ id }: { id: string }) {
                     <span
                       aria-hidden
                       className={`flex size-8 shrink-0 items-center justify-center rounded-full font-semibold ${
-                        isSelected ? 'bg-accent-700 text-white' : 'bg-accent-50 text-accent-700'
+                        isSelected ? 'bg-accent-700 text-on-accent' : 'bg-accent-50 text-accent-700'
                       }`}
                     >
                       {level.level}

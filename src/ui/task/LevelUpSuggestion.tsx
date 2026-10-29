@@ -22,7 +22,7 @@ export function LevelUpSuggestion({ level, mode }: { level: Level; mode: Practic
         <a
           href={practiceHref(next, mode)}
           onClick={() => updateSettings({ derivativeLevel: next })}
-          className="rounded-xl bg-accent-700 px-4 py-2.5 font-medium text-white hover:bg-accent-800"
+          className="rounded-xl bg-accent-700 px-4 py-2.5 font-medium text-on-accent hover:bg-accent-800"
         >
           Stufe {next} probieren
         </a>

@@ -1,12 +1,14 @@
 import { Suspense, lazy, useEffect } from 'react'
 import { AreaScreen } from './ui/AreaScreen.tsx'
 import { HomeScreen } from './ui/HomeScreen.tsx'
+import { DERIVATIVES, type Tone, areaById, areaOfCards, courseById } from './ui/catalog.ts'
 import { SettingsScreen } from './ui/SettingsScreen.tsx'
 import { buildInfoLabel } from './ui/buildInfo.ts'
 import { type Route, parseRoute, sectionOf } from './ui/routes.ts'
 import { MainNav } from './ui/MainNav.tsx'
 import { useHashRoute } from './ui/useHashRoute.ts'
 import { usePwa } from './ui/usePwa.ts'
+import { useTheme } from './ui/useTheme.ts'
 
 // Seiten mit Formeln oder Mathe-Engine werden erst bei Bedarf geladen: Die Startseite kommt ohne
 // beides aus und erscheint so schneller. (Offline liegen alle Teile ohnehin schon auf dem Gerät.)
@@ -20,6 +22,7 @@ const PracticePage = lazy(loadPractice)
 
 export function App() {
   const pwa = usePwa()
+  useTheme()
   const path = useHashRoute()
   const route = parseRoute(path)
   // In Aufgaben kein Hauptmenü: dort beendet das X die Aufgabe
@@ -55,7 +58,7 @@ export function App() {
         {showNav && <MainNav active={sectionOf(route)} />}
       </header>
 
-      <div key={path} className="animate-page-in flex-1 py-8">
+      <div key={path} data-tone={toneOf(route)} className="animate-page-in flex-1 py-8">
         {/* Hinweis erst nach einer Weile: Meist ist der Teil sofort da */}
         <Suspense fallback={<p className="animate-late text-zinc-500">Wird geladen …</p>}>
           <Page route={route} />
@@ -72,7 +75,7 @@ export function App() {
       {pwa.needRefresh && (
         <div
           role="status"
-          className={`fixed inset-x-4 z-20 mx-auto flex max-w-md items-center gap-3 rounded-2xl bg-zinc-900 p-4 text-white shadow-lg md:bottom-4 ${
+          className={`fixed inset-x-4 z-20 mx-auto flex max-w-md items-center gap-3 rounded-2xl bg-zinc-900 p-4 text-zinc-50 shadow-lg md:bottom-4 ${
             showNav ? 'bottom-[calc(4.5rem+env(safe-area-inset-bottom))]' : 'bottom-[max(1rem,env(safe-area-inset-bottom))]'
           }`}
         >
@@ -80,14 +83,14 @@ export function App() {
           <button
             type="button"
             onClick={pwa.dismissUpdate}
-            className="rounded-lg px-3 py-2 text-zinc-300 hover:text-white"
+            className="rounded-lg px-3 py-2 text-zinc-300 hover:text-zinc-50"
           >
             Später
           </button>
           <button
             type="button"
             onClick={pwa.applyUpdate}
-            className="rounded-lg bg-white px-3 py-2 font-medium text-zinc-900"
+            className="rounded-lg bg-surface px-3 py-2 font-medium text-zinc-900"
           >
             Jetzt laden
           </button>
@@ -95,6 +98,22 @@ export function App() {
       )}
     </div>
   )
+}
+
+// Seiten, die zu einem Gebiet gehören, zeigen sich in dessen Farbe; die übrigen im Blaugrün der App
+function toneOf(route: Route): Tone | undefined {
+  switch (route.page) {
+    case 'area':
+      return areaById(route.id)?.area.tone
+    case 'course':
+      return courseById(route.id)?.area.tone
+    case 'practice':
+      return courseById(DERIVATIVES)?.area.tone
+    case 'cards':
+      return route.folder ? areaOfCards(route.folder)?.tone : undefined
+    default:
+      return undefined
+  }
 }
 
 function Page({ route }: { route: Route }) {

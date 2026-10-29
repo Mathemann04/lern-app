@@ -160,7 +160,7 @@ function StepView({ step, task, isLast, mode, detail, onMistake, onNext }: StepP
                     ? 'animate-shake border-red-300 bg-red-50 opacity-70'
                     : solved
                       ? 'border-zinc-200 opacity-50'
-                      : 'border-zinc-200 bg-white hover:border-accent-600 active:bg-accent-50'
+                      : 'border-zinc-200 bg-surface hover:border-accent-600 active:bg-accent-50'
               }`}
             >
               <FitWidth className="min-w-0 flex-1 text-lg">
@@ -206,7 +206,7 @@ function StepView({ step, task, isLast, mode, detail, onMistake, onNext }: StepP
             <button
               type="button"
               onClick={onNext}
-              className="w-full rounded-xl bg-accent-700 px-4 py-3 text-lg font-medium text-white hover:bg-accent-800"
+              className="w-full rounded-xl bg-accent-700 px-4 py-3 text-lg font-medium text-on-accent hover:bg-accent-800"
             >
               {isLast ? 'Ergebnis ansehen' : 'Weiter'}
             </button>
@@ -221,7 +221,7 @@ function StepView({ step, task, isLast, mode, detail, onMistake, onNext }: StepP
                 <button
                   type="button"
                   onClick={() => setWhyOpen(true)}
-                  className="rounded-xl border border-red-200 bg-white px-4 py-2.5 font-medium text-red-800 hover:bg-red-100"
+                  className="rounded-xl border border-red-200 bg-surface px-4 py-2.5 font-medium text-red-800 hover:bg-red-100"
                 >
                   Warum ist das falsch?
                 </button>
@@ -267,7 +267,7 @@ function FinishView({ task, mistakes, focus }: { task: GuidedTask; mistakes: num
       <div className="flex flex-col gap-3 sm:flex-row">
         <a
           href={practiceHref(task.ref.level, 'guided', focus)}
-          className="flex-1 rounded-xl bg-accent-700 px-4 py-3 text-center text-lg font-medium text-white hover:bg-accent-800"
+          className="flex-1 rounded-xl bg-accent-700 px-4 py-3 text-center text-lg font-medium text-on-accent hover:bg-accent-800"
         >
           Nächste Aufgabe
         </a>

@@ -16,9 +16,7 @@ export function AreaScreen({ id }: { id: string }) {
       <div className="space-y-3">
         <BackLink href="#/" label="Start" />
         <div className="flex items-center gap-4">
-          <span className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-accent-50 text-accent-700">
-            <AreaIcon kind={area.icon} className="size-8" />
-          </span>
+          <AreaIcon kind={area.icon} className="size-16 shrink-0" />
           <div className="min-w-0">
             <p className="text-sm text-zinc-500">{subject.title}</p>
             <h1 className="text-3xl font-semibold tracking-tight hyphens-auto">{area.title}</h1>
@@ -32,6 +30,7 @@ export function AreaScreen({ id }: { id: string }) {
               href={courseHref(course.id)}
               className="flex items-center gap-4 rounded-2xl border border-zinc-200 px-4 py-4 transition-colors hover:border-accent-600 hover:bg-accent-50"
             >
+              <AreaIcon kind={course.icon} className="size-14 shrink-0" />
               <span className="min-w-0 flex-1 space-y-1">
                 <span className="block text-lg font-semibold">{course.title}</span>
                 <span className="block text-zinc-600 text-pretty">{course.description}</span>

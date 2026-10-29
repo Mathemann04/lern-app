@@ -1,11 +1,13 @@
 # Plan für Meilenstein 2: Brüche
 
-Status: **Entwurf** (29.10.2026), wartet auf das OK des Nutzers.
+Status: **freigegeben** (29.10.2026) mit zwei Wünschen des Nutzers:
+„fiesere" Bausteine wie Wurzeln und Winkelfunktionen in den hohen Stufen
+und ein neues Aussehen (dunkles Design, Farben je Gebiet, neue Symbole).
 
 Ziel von M2: Du kannst Bruchaufgaben aller 5 Stufen geführt und frei lösen,
 von Zahlenbrüchen bis zu Doppelbrüchen mit $x$, mit Erklärungen,
 Lernkarten und Fortschritt. Dafür lernt die App, mehrere Themen
-nebeneinander zu führen.
+nebeneinander zu führen, und bekommt ein neues Aussehen.
 
 Teil A beschreibt in einfachen Worten, was in welcher Reihenfolge entsteht.
 Teil B ist der technische Bauplan.
@@ -40,15 +42,29 @@ Auf Wunsch des Nutzers:
 | 1 | Zahlenbrüche: kürzen, erweitern, plus, minus, mal, geteilt; ganze Zahl und Bruch | $\frac{3}{4} + \frac{5}{6}$, $\frac{3}{4} : \frac{2}{5}$, $2 - \frac{3}{5}$ |
 | 2 | Buchstaben in Produkten: Potenzen kürzen, gleichnamig machen, mal und geteilt | $\frac{6x^2y}{9xy^3}$, $\frac{2}{x} - \frac{1}{x^2}$, $\frac{3a}{4b} \cdot \frac{8b^2}{9a}$ |
 | 3 | Summen in Zähler und Nenner: ausklammern, binomische Formeln, kürzen; Nenner wie $x+1$ und $x-1$ | $\frac{x^2-9}{2x+6}$, $\frac{1}{x-1} + \frac{2}{x+1}$ |
-| 4 | Uni-Niveau: Hauptnenner aus Faktoren, $x^2 + px + q$ zerlegen, Doppelbrüche | $\frac{x}{x^2-1} - \frac{1}{x+1}$, $\frac{x^2-x-6}{x^2-9}$, $\frac{1 + \frac{1}{x}}{1 - \frac{1}{x^2}}$ |
-| 5 | Profi: mehrere Rechenarten in einer Aufgabe, verschachtelte Doppelbrüche, zwei Variablen | $\frac{\frac{1}{x+h} - \frac{1}{x}}{h}$, $\frac{1}{1 + \frac{1}{1 + \frac{1}{x}}}$, $\left(\frac{a}{b} - \frac{b}{a}\right) : \frac{a+b}{ab}$ |
+| 4 | Uni-Niveau: Hauptnenner aus Faktoren, $x^2 + px + q$ zerlegen, Doppelbrüche; statt $x$ auch Bausteine wie $e^x$, $\ln x$, $\sin x$ | $\frac{x}{x^2-1} - \frac{1}{x+1}$, $\frac{1 + \frac{1}{x}}{1 - \frac{1}{x^2}}$, $\frac{e^{2x}-1}{e^x+1}$, $\frac{2}{\sin x} - \frac{1}{\sin^2 x}$ |
+| 5 | Profi: mehrere Rechenarten in einer Aufgabe, verschachtelte Doppelbrüche, zwei Variablen; Wurzeln und Winkelfunktionen mit ihren Regeln | $\frac{\frac{1}{x+h} - \frac{1}{x}}{h}$, $\frac{x-1}{\sqrt{x}-1}$, $\frac{1}{1-\sin x} + \frac{1}{1+\sin x}$, $\frac{\frac{1}{\cos x} - \cos x}{\sin x}$ |
+
+„Fiesere" Bausteine (Wunsch des Nutzers), damit die hohen Stufen
+fordernder werden:
+- **Stufe 4:** Statt $x$ steht ein Baustein wie $e^x$, $\ln x$ oder
+  $\sin x$. Man rechnet damit genau wie mit $x$, muss den Baustein aber
+  erst als „eine Größe" erkennen, z. B.
+  $\frac{e^{2x}-1}{e^x+1} = \frac{(e^x-1)(e^x+1)}{e^x+1} = e^x - 1$.
+- **Stufe 5:** Zusätzlich braucht man die Regeln der Bausteine:
+  - $(\sqrt{x})^2 = x$, z. B. $\frac{x-1}{\sqrt{x}-1} = \sqrt{x}+1$
+  - $\sin^2 x + \cos^2 x = 1$, z. B.
+    $\frac{1}{1-\sin x} + \frac{1}{1+\sin x} = \frac{2}{\cos^2 x}$
+  - $\tan x = \frac{\sin x}{\cos x}$, z. B.
+    $\frac{\frac{1}{\cos x} - \cos x}{\sin x} = \tan x$
 
 Bewusst nicht in M2:
 - **Gemischte Zahlen** wie $2\frac{1}{3}$: An der Uni unüblich, und man
   verwechselt sie leicht mit $2 \cdot \frac{1}{3}$. Ergebnisse stehen als
   $\frac{7}{3}$.
-- **Wurzeln im Nenner beseitigen** („Nenner rational machen"): kommt mit
-  den Wurzeln in M4.
+- **Wurzeln im Nenner beseitigen** („Nenner rational machen") als eigene
+  Aufgabe: kommt mit den Wurzeln in M4. Steht im Ergebnis eine Wurzel im
+  Nenner, zählt aber auch die Form ohne Wurzel im Nenner.
 - **Polynomdivision**: kommt mit der Partialbruchzerlegung bei der
   Integralrechnung.
 
@@ -58,6 +74,9 @@ Bewusst nicht in M2:
   Term ohne Bruch, z. B. $a - b$.
 - Der Nenner darf in Klammern stehen oder ausmultipliziert sein:
   $\frac{3x-1}{(x-1)(x+1)}$ und $\frac{3x-1}{x^2-1}$ zählen beide.
+- Bei Wurzeln und Winkelfunktionen gibt es oft mehrere gleich gute
+  Endformen, z. B. $\frac{2}{\cos^2 x}$ und $\frac{2}{1-\sin^2 x}$. Dann
+  zählt jede, die nicht länger ist als die Lösung der App.
 - Die App zeigt die Lösung mit dem Nenner in Klammern, so wie er beim
   Hauptnenner entsteht, und nennt die ausmultiplizierte Form in der
   Erklärung.
@@ -65,7 +84,49 @@ Bewusst nicht in M2:
   Ergebnis gilt, z. B. $\frac{x^2-9}{2x+6} = \frac{x-3}{2}$ für
   $x \neq -3$. Eintippen musst du das nicht.
 
-### Schritt 1: Mathe-Engine für Brüche
+### Schritt 1: Neues Aussehen (Wunsch des Nutzers)
+- **Dunkles Design:** Die App richtet sich nach deinem Gerät (hell oder
+  dunkel). In den Einstellungen lässt es sich auch fest wählen: „Wie das
+  Gerät", „Hell", „Dunkel". Die Mathe-Tastatur macht mit.
+- **Farben je Gebiet** statt überall Grün. Vorschlag:
+  - Grundlagen orange
+  - Differentialrechnung blau
+  - Integralrechnung violett
+  - Formeln mit Einheiten pink
+  - Statik türkis
+- Die Farbe zieht sich durch alles, was zum Gebiet gehört: Kachel,
+  Gebiets- und Themenseite, Aufgaben, Lernkarten, Fortschritt. Startseite,
+  Menü und Einstellungen behalten das Blaugrün der App. Richtig bleibt grün,
+  falsch rot.
+- **Neue Symbole:** farbige Bilder für Gebiete und Themen, ähnlich wie bei
+  Brilliant. Die Karte „Weitermachen" zeigt das Bild des Themas.
+- Du bekommst vorher Bilder (hell und dunkel) und kannst Farben und
+  Symbole ändern lassen.
+
+**Ausprobieren:** Am Handy das dunkle Design einschalten (oder in den
+Einstellungen „Dunkel" wählen) und durch Gebiete, Themen und Aufgaben
+klicken.
+
+Umgesetzt:
+- Einstellungen → „Aussehen": „Automatisch" (wie das Gerät, wechselt mit),
+  „Hell", „Dunkel". Die Wahl gilt schon beim Öffnen, ohne helles
+  Aufblitzen. Mathe-Tastatur und Statusleiste machen mit.
+- Farben wie vorgeschlagen. Die Farbe gilt auf der Kachel, der Gebiets- und
+  Themenseite, in Aufgaben samt Lernkarten-Fenster, im Lernkarten-Ordner, in
+  der Karte „Weitermachen" und beim Fortschritt.
+- Bilder (Brilliant-Stil, je in der Farbe des Gebiets):
+  - Grundlagen: gestapelte Bausteine
+  - Differentialrechnung: Kurve mit Tangente
+  - Integralrechnung: Fläche unter einer Kurve mit Rechteckstreifen
+  - Formeln mit Einheiten: Messuhr
+  - Statik: Balken auf Fest- und Loslager mit Kraftpfeil
+  - Thema Ableiten: Parabel mit Tangente und Steigungsdreieck
+- „Kommt bald" zeigt das Bild blass.
+- Nebenbei behoben: Die Fortschrittsseite stürzte ab, wenn ein gespeicherter
+  typischer Fehler in der App nicht mehr vorkommt; solche Einträge werden
+  jetzt übersprungen.
+
+### Schritt 2: Mathe-Engine für Brüche
 - Die Engine rechnet mit Brüchen aus Termen:
   - kürzen und erweitern
   - Hauptnenner finden
@@ -83,7 +144,7 @@ Bewusst nicht in M2:
 Lösung, Rechenweg und typischen falschen Ergebnissen. Du prüfst, ob die
 Aufgaben aussehen wie in deinen Übungen.
 
-### Schritt 2: Mehrere Themen, Brüche Stufe 1 und 2 geführt
+### Schritt 3: Mehrere Themen, Brüche Stufe 1 und 2 geführt
 - Das Gebiet „Grundlagen" lässt sich öffnen und zeigt die drei Themen von
   oben.
 - Jedes Thema merkt sich seine eigene Stufe.
@@ -101,10 +162,11 @@ Aufgaben aussehen wie in deinen Übungen.
   - Die Karte „Weitermachen" führt zu den Brüchen.
   - Beim Ableiten ist noch deine alte Stufe eingestellt.
 
-### Schritt 3: Stufen 3 und 4 geführt
+### Schritt 4: Stufen 3 und 4 geführt
 - Neu: in Faktoren zerlegen, Hauptnenner aus Faktoren, Doppelbrüche.
 - Ab Stufe 4 wird der Rechenweg gröber, wie beim Ableiten: Was in den
   Stufen davor geübt wurde, ist dort ein einzelner Schritt.
+- Neu in Stufe 4: Bausteine wie $e^x$, $\ln x$, $\sin x$ statt $x$.
 - Neue Lernkarten:
   - Ausklammern
   - binomische Formeln
@@ -116,7 +178,7 @@ Aufgaben aussehen wie in deinen Übungen.
 $\frac{x}{x^2-1} - \frac{1}{x+1}$ und
 $\frac{1 + \frac{1}{x}}{1 - \frac{1}{x^2}}$ geführt lösen.
 
-### Schritt 4: Freier Modus für Brüche
+### Schritt 5: Freier Modus für Brüche
 - Du tippst das Ergebnis ein. Die Mathe-Tastatur zeigt die Buchstaben, die
   in der Aufgabe vorkommen.
 - Richtig ist jede gleichwertige Form, die fertig ist (siehe oben).
@@ -135,16 +197,19 @@ $\frac{1 + \frac{1}{x}}{1 - \frac{1}{x^2}}$ geführt lösen.
 - Dann ungekürzt eingeben.
 - Zum Schluss absichtlich die Klammer nach dem Minus vergessen.
 
-### Schritt 5: Stufe 5 geführt und frei
+### Schritt 6: Stufe 5 geführt und frei
 - Mehrere Rechenarten in einer Aufgabe.
 - Verschachtelte Doppelbrüche.
 - Zwei Variablen, z. B. der Differenzenquotient
   $\frac{\frac{1}{x+h} - \frac{1}{x}}{h}$, den du von der Herleitung der
   Ableitung kennst.
+- Wurzeln und Winkelfunktionen mit ihren Regeln ($(\sqrt{x})^2 = x$,
+  $\sin^2 x + \cos^2 x = 1$, $\tan x = \frac{\sin x}{\cos x}$), dazu eine
+  Lernkarte „Bausteine mit eigenen Regeln".
 
 **Ausprobieren:** Stufe 5 in beiden Modi.
 
-### Schritt 6: Gezieltes Üben, Feinschliff, Abschluss von M2
+### Schritt 7: Gezieltes Üben, Feinschliff, Abschluss von M2
 - „Deine häufigsten Fehler" mit „Gezielt üben" auch für Brüche.
 - Letzte Design-Politur, Offline-Test, Doku, M2 abhaken.
 
@@ -214,6 +279,10 @@ erkennt die App den Fehler in beiden.
 | Zerlegen | Vorzeichen bei $x^2 + px + q$ vertauscht | $x^2 - x - 6 = (x+3)(x-2)$ |
 | Doppelbruch | mit dem Nenner statt mit seinem Kehrwert malgenommen | $\frac{\frac{1}{2}}{\frac{3}{4}} = \frac{1}{2} \cdot \frac{3}{4}$ |
 | Doppelbruch | Zahl im Nenner in den Zähler geholt | $\frac{\frac{a}{b}}{c} = \frac{ac}{b}$ |
+| Potenzen | Exponenten geteilt statt abgezogen | $\frac{x^6}{x^2} = x^3$ |
+| Bausteine | im Inneren einer Funktion gekürzt | $\frac{\sin(2x)}{2} = \sin x$, $\frac{e^{2x}}{e^x} = e^2$ |
+| Bausteine | binomische Formel bei der Wurzel vergessen | $(\sqrt{x}+1)^2 = x + 1$ |
+| Bausteine | Quadrat vergessen | $1 - \cos^2 x = \sin x$ |
 
 Wenn dir typische Fehler aus deinen Übungen fehlen, sag es. Die sind Gold
 wert.
@@ -222,7 +291,29 @@ wert.
 
 ## Teil B: Technischer Bauplan
 
-### Mehrere Themen (Schritt 2)
+### Neues Aussehen (Schritt 1)
+- **Farben über Variablen:** Die Oberfläche nutzt weiter die Farbnamen
+  `zinc`, `accent`, `red`, `green`, `amber`. Im dunklen Design werden diese
+  Farbleitern umgedreht (Schritt 50 wird dunkel, Schritt 900 hell), wie bei
+  Radix Colors. Dazu kommen wenige feste Rollen:
+  - `surface` für den Seitenhintergrund
+  - `raised` für erhobene Flächen
+  - `on-accent` für Schrift auf farbigen Knöpfen
+  So braucht nicht jede Klasse eine eigene Dunkel-Variante.
+- **Ton je Gebiet:** `data-tone="blue"` an einer Seite setzt die
+  `accent`-Farben für alles darin. Tailwind liest die Akzentfarben über
+  `@theme inline` direkt aus diesen Variablen. Bilder nutzen die
+  Tonleiter `tone-*`.
+- **Hell/Dunkel:** Einstellung `theme` (`system`, `light`, `dark`).
+  - Ein kleines Skript in `index.html` setzt die Klasse `dark` schon vor dem
+    ersten Bild, damit nichts aufblitzt.
+  - MathLive bekommt `theme` am `body`.
+  - Die Farbe der Statusleiste (`theme-color`) passt sich an.
+- **Bilder:** `AreaIcon.tsx` mit Bildern je Gebiet und Thema, als SVG in
+  den Farben des Tons. Keine Bilddateien, damit alles offline und scharf
+  bleibt.
+
+### Mehrere Themen (Schritt 3)
 - **Katalog** (`src/ui/catalog.ts`):
   - Jedes Thema bekommt seine Stufen-Vorschau mit Titel, Beispielen und der
     Angabe, ob die Stufe spielbar ist. `derivativeLevels` aus `samples.ts`
@@ -272,10 +363,24 @@ wert.
    - Einen beliebigen Term zerlegen muss die Engine nicht. Zum Zerlegen wie
      im Skript (`factor.ts`): ausklammern (Zahl und Potenzen), binomische
      Formeln, $x^2 + px + q$ mit ganzzahligen Nullstellen.
-3. **Gleichwertig** heißt $N_1 \cdot D_2 = N_2 \cdot D_1$ als Polynome. Das
+3. **Bausteine** wie $\sqrt{x}$, $e^x$, $\ln x$, $\sin x$, $\cos x$,
+   $\tan x$ (Stufen 4 und 5):
+   - Intern wie eigene Buchstaben behandelt, z. B. $s = \sin x$.
+   - Dazu die Regeln zwischen ihnen:
+     - $(\sqrt{x})^2 = x$: gerechnet wird mit $t = \sqrt{x}$, also $x = t^2$
+     - $e^{kx} = (e^x)^k$
+     - $\tan x = \frac{\sin x}{\cos x}$
+     - $\sin^2 x + \cos^2 x = 1$: beim Vergleichen wird $\cos^2 x$ so lange
+       durch $1 - \sin^2 x$ ersetzt, bis höchstens $\cos x$ übrig bleibt
+   - Definitionsbereich der Bausteine nach den Engine-Regeln (Wurzel nur
+     für $x \geq 0$, $\ln$ nur für $x > 0$).
+   - Hier ist die numerische Gegenprobe in den Tests besonders wichtig.
+   - „Fertig" heißt bei Bausteinen mit Regeln: nicht länger als die
+     Lösung, weil es mehrere gleich gute Endformen gibt.
+4. **Gleichwertig** heißt $N_1 \cdot D_2 = N_2 \cdot D_1$ als Polynome. Das
    ist exakt. In den Tests kommt eine unabhängige Gegenprobe an Zahlenstellen
    dazu.
-4. **Rechenweg** (`steps.ts`): eine Folge von Umformungen, jede mit vorher
+5. **Rechenweg** (`steps.ts`): eine Folge von Umformungen, jede mit vorher
    und nachher:
    - Hauptnenner
    - erweitern
@@ -288,12 +393,12 @@ wert.
    Eine Fehlerregel (`errorRules.ts`) führt genau eine Umformung falsch aus,
    der Rest wird richtig gerechnet. Falsche Ergebnisse werden gefiltert:
    nicht gleichwertig zur Lösung und paarweise verschieden.
-5. **Vorlagen** (`src/engine/tasks/fractionTerms.ts`):
+6. **Vorlagen** (`src/engine/tasks/fractionTerms.ts`):
    - je Stufe mit Zufallsparametern
    - kleine, „schöne" Zahlen
    - nie trivial: Es gibt immer etwas zu tun, und Kürzen ergibt nicht
      einfach $1$
-6. **Schrittplaner** (`src/engine/guided/fractionPlan.ts`):
+7. **Schrittplaner** (`src/engine/guided/fractionPlan.ts`):
    - Plus und minus: Hauptnenner, erweitern, Zähler zusammenfassen, kürzen
      (nur wenn möglich)
    - Kürzen: Zähler zerlegen, Nenner zerlegen, kürzen
@@ -304,7 +409,7 @@ wert.
    - Ein gleichwertiger anderer Weg gilt nie als falsch. Deshalb wird z. B.
      das Produkt der Nenner bei der Frage nach dem Hauptnenner nicht als
      falsche Antwort angeboten, wenn es ein gemeinsamer Nenner ist.
-7. **Prüfen der freien Eingabe** (`src/engine/check/fractionAnswer.ts`):
+8. **Prüfen der freien Eingabe** (`src/engine/check/fractionAnswer.ts`):
    - Erst gleichwertig, dann fertig?
    - Fertig heißt:
      - ein Bruch, Vorzeichen davor erlaubt
@@ -320,18 +425,18 @@ wert.
        Nenner teilerfremd sind.
    - Typische Fehler: Eingabe gegen die vorberechneten falschen Ergebnisse
      vergleichen.
-8. **Definitionsbereich:**
+9. **Definitionsbereich:**
    - Ausgeschlossen sind alle Stellen, an denen ein Nenner der Aufgabe null
      wird. Das gilt auch für innere Nenner und für den Bruch, durch den
      geteilt wird.
    - Bei Aufgaben mit einer Variablen steht „für $x \neq \dots$" beim
      Ergebnis.
-9. **Lernkarten:**
+10. **Lernkarten:**
    - Ordner „Brüche" in `explain/cards.ts`.
    - Die Beispiele rechnet die Bruch-Engine.
    - `cards.test.ts` prüft auch hier: Jede Regel und jeder typische Fehler
      steht auf einer Karte.
-10. **Tastatur:** Die erste Seite bekommt bei Brüchen Ziffern, Bruch,
+11. **Tastatur:** Die erste Seite bekommt bei Brüchen Ziffern, Bruch,
     Klammern, Hochzahl und die Buchstaben der Aufgabe. Funktionen wie
     $\sin$ fallen dort weg.
 
