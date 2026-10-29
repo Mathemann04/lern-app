@@ -110,8 +110,11 @@ mehrmals machen und das gezielte Üben starten.
   Jede Karte hat Formel, Merksatz, oft eine Merkhilfe (z. B. „NAZ minus ZAN"),
   bei den Regeln für den Aufbau eines Terms „Wann brauchst du sie?", 2 bis 4
   Beispiele mit Rechenweg („Anderes Beispiel") und die typischen Fehler mit
-  „Gezielt üben". Seiten `#/karten` und `#/karten/<id>`, Knopf in der
-  Kopfzeile und auf der Startseite.
+  „Gezielt üben". Die Karten liegen in Ordnern nach Themen (bisher
+  „Ableitungen"; spätere Themen bekommen eigene Ordner): `#/karten` zeigt die
+  Ordner, `#/karten/ableitungen` die Namen der Formeln mit den Formeln,
+  `#/karten/ableitungen/<id>` eine Karte. Aufruf über das Hauptmenü und die
+  Startseite.
 - In einer Aufgabe öffnet „Lernkarte" ein Fenster über der Aufgabe (die
   Aufgabe bleibt, wie sie ist; die Zurück-Taste schließt nur das Fenster).
   Gezeigt werden die Karten zum aktuellen Schritt, bei der Regelwahl die
@@ -120,6 +123,10 @@ mehrmals machen und das gezielte Üben starten.
   fallen dort weg. Lernkarten zählen wie ein Tipp: Die Aufgabe bleibt „ohne
   Fehler". Nach dem Lösen verlinkt die Aufgabe ihre Karten zum Nachlesen.
 - Karten der Stufe 5 kommen mit den Schritten 10 und 11.
+- Nach deinem Feedback dazu: Hauptmenü als Leiste unten (Start, Lernkarten,
+  Fortschritt, Einstellungen; am Laptop oben im Kopf, in Aufgaben
+  ausgeblendet) und „← Zurück" oben auf Unterseiten, weil es in der
+  installierten App sonst nur das Wischen gab.
 
 ### Schritt 10: Stufe 5, Teil 1
 - Logarithmisches Ableiten ($x^x$, $x^{\sin x}$), Umkehrfunktionen

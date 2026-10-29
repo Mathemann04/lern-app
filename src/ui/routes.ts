@@ -1,5 +1,5 @@
 import { ERROR_RULES } from '../engine/derive/errorRules.ts'
-import { cardById } from '../engine/explain/cards.ts'
+import { cardById, topicById } from '../engine/explain/cards.ts'
 import { type Level, type TaskRef, formatTaskNumber, parseTaskNumber } from '../engine/tasks/taskNumber.ts'
 import type { PracticeMode } from '../state/storage.ts'
 
@@ -9,8 +9,9 @@ export type Route =
   | { readonly page: 'gallery' }
   | { readonly page: 'settings' }
   | { readonly page: 'progress' }
-  // Lernkarten: Übersicht #/karten, eine Karte #/karten/product
+  // Lernkarten: Ordner #/karten, ein Ordner #/karten/ableitungen, eine Karte #/karten/ableitungen/product
   | { readonly page: 'cards' }
+  | { readonly page: 'cardTopic'; readonly topic: string }
   | { readonly page: 'card'; readonly id: string }
   // Üben: ohne Startwert wird eine neue Aufgabe gewürfelt; focus: gezielt einen typischen Fehler üben
   | {
@@ -30,8 +31,15 @@ export function parseRoute(fullPath: string): Route {
   if (path === '/einstellungen') return { page: 'settings' }
   if (path === '/fortschritt') return { page: 'progress' }
   if (path === '/karten') return { page: 'cards' }
-  const card = /^\/karten\/(.+)$/.exec(path)
-  if (card) return cardById(card[1]) ? { page: 'card', id: card[1] } : { page: 'cards' }
+  const cards = /^\/karten\/([^/]+)(?:\/([^/]+))?$/.exec(path)
+  if (cards) {
+    const [, first, second] = cards
+    if (second) return cardById(second)?.topic === first ? { page: 'card', id: second } : parseRoute(`/karten/${first}`)
+    if (topicById(first)) return { page: 'cardTopic', topic: first }
+    // ältere Adresse ohne Ordner, z. B. #/karten/product
+    if (cardById(first)) return { page: 'card', id: first }
+    return { page: 'cards' }
+  }
   const practice = /^\/(ueben|frei)\/(.+)$/.exec(path)
   if (practice) {
     const mode: PracticeMode = practice[1] === 'frei' ? 'free' : 'guided'
@@ -51,4 +59,26 @@ export const practiceHref = (level: Level, mode: PracticeMode = 'guided', focus?
 export const taskHref = (ref: TaskRef, mode: PracticeMode = 'guided', focus?: string | null) =>
   `#/${PREFIX[mode]}/${formatTaskNumber(ref)}${focusQuery(focus)}`
 
-export const cardHref = (id: string) => `#/karten/${id}`
+export const topicHref = (topic: string) => `#/karten/${topic}`
+export const cardHref = (id: string) => `${topicHref(cardById(id)!.topic)}/${id}`
+
+// Bereiche des Hauptmenüs
+export type Section = 'home' | 'cards' | 'progress' | 'settings'
+
+// Bereich der Seite für die Markierung im Menü; null: Seite gehört zu keinem Bereich
+export function sectionOf(route: Route): Section | null {
+  switch (route.page) {
+    case 'home':
+      return 'home'
+    case 'cards':
+    case 'cardTopic':
+    case 'card':
+      return 'cards'
+    case 'progress':
+      return 'progress'
+    case 'settings':
+      return 'settings'
+    default:
+      return null
+  }
+}

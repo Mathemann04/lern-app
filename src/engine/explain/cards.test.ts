@@ -9,7 +9,7 @@ import { latexProblem } from '../expr/latexChecks.ts'
 import { toLatex } from '../expr/print.ts'
 import { type Expr, E, add, cos, div, exp, fn, ln, log, mul, neg, num, pow, sin, tan, x } from '../expr/types.ts'
 import { generateDerivativeTask } from '../tasks/derivativeTerms.ts'
-import { CARDS, cardById, cardForRule, cardIdsFor, examplesFor } from './cards.ts'
+import { CARDS, TOPICS, cardById, cardForRule, cardIdsFor, cardsInTopic, examplesFor, topicById } from './cards.ts'
 import { workedExample } from './example.ts'
 import { parseRichText } from './richText.ts'
 
@@ -40,6 +40,15 @@ describe('Lernkarten: Katalog', () => {
     expect(new Set(ids).size).toBe(ids.length)
     for (const id of ids) expect(cardById(id)?.id).toBe(id)
     expect(cardById('gibt-es-nicht')).toBeUndefined()
+  })
+
+  it('legt jede Karte in einen bestehenden Ordner, keine Ordner-Id ist auch eine Karten-Id', () => {
+    for (const card of CARDS) expect(topicById(card.topic), card.id).toBeDefined()
+    for (const topic of TOPICS) {
+      expect(cardsInTopic(topic.id).length, topic.id).toBeGreaterThan(0)
+      expect(cardById(topic.id)).toBeUndefined()
+    }
+    expect(cardsInTopic('ableitungen')).toHaveLength(CARDS.length)
   })
 
   it.each(CARDS.map((c) => [c.id, c] as const))('%s: alle Texte und Formeln lassen sich setzen', (id, card) => {

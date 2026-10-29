@@ -3,7 +3,7 @@ import { levelSummary, useProgress } from '../state/progress.ts'
 import { updateSettings, useSettings } from '../state/settings.ts'
 import type { PracticeMode } from '../state/storage.ts'
 import { Formula } from './Formula.tsx'
-import { practiceHref } from './routes.ts'
+import { practiceHref, topicHref } from './routes.ts'
 import { derivativeLevels, isLevelAvailable, notationSamples } from './samples.ts'
 
 const MODES: Array<{ value: PracticeMode; title: string; description: string }> = [
@@ -120,10 +120,10 @@ export function HomeScreen() {
         </div>
         <p className="px-5 pb-4 text-sm text-zinc-500">Stufe 5 folgt in den nächsten Schritten.</p>
         <a
-          href="#/karten"
+          href={topicHref('ableitungen')}
           className="flex items-center justify-between border-t border-zinc-100 px-5 py-4 font-medium text-accent-700 hover:bg-accent-50"
         >
-          Lernkarten: alle Regeln mit Beispielen
+          Lernkarten: alle Regeln zum Ableiten
           <span aria-hidden>→</span>
         </a>
         <a

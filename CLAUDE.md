@@ -33,9 +33,12 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   Seiten über `#/…` (`routes.ts`): Start `#/`, geführt üben `#/ueben/1` (neue
   Aufgabe) bzw. `#/ueben/1-4711` (bestimmte Aufgabe), frei üben `#/frei/1`
   bzw. `#/frei/1-4711`, gezielt üben mit `?fokus=<Fehlerregel>` (z. B.
-  `#/ueben/2?fokus=cos-sign`), Lernkarten `#/karten` und `#/karten/<id>`
-  (z. B. `#/karten/product`), `#/fortschritt`, `#/einstellungen`, Testseite
-  `#/galerie`.
+  `#/ueben/2?fokus=cos-sign`), Lernkarten in Ordnern nach Themen `#/karten`,
+  `#/karten/ableitungen`, `#/karten/ableitungen/product`, `#/fortschritt`,
+  `#/einstellungen`, Testseite `#/galerie`. Hauptmenü `MainNav.tsx`: am Handy
+  Leiste unten (Start, Lernkarten, Fortschritt, Einstellungen), ab `md` oben
+  im Kopf, in Aufgaben ausgeblendet. Unterseiten haben oben `BackLink`
+  („← Ordner", eine Ebene höher).
   Lernbildschirm geführt in `src/ui/guided/`, frei in `src/ui/free/`
   (MathLive mit eigener Bildschirm-Tastatur `keyboard.ts`, wird erst im
   freien Modus geladen), gemeinsame Teile in `src/ui/task/`. Lernkarten in
@@ -65,8 +68,9 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     verständlichen Fehlermeldungen
   - `explain/`: Textbausteine für Erklärungen (ausführlich/kurz), Tipps und
     „Warum ist das falsch?" (`texts.ts`); Format Text mit `$…$`-Formeln.
-    Lernkarten (`cards.ts`: Formel, Merksatz, Beispiele, typische Fehler je
-    Regel) und durchgerechnete Beispiele (`example.ts`, aus `derive`)
+    Lernkarten (`cards.ts`: Ordner `TOPICS`, je Regel Formel, Merksatz,
+    Beispiele, typische Fehler) und durchgerechnete Beispiele (`example.ts`,
+    aus `derive`)
   - `guided/plan.ts`: Schrittplaner für den geführten Modus (Regelwahl, dann je
     Summand ein Schritt; Produkt/Quotient: u', v', Einsetzen; Kette: äußere,
     innere Ableitung, Zusammensetzen, ab Stufe 4 ohne eigenen Außen-Schritt;
