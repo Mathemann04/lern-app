@@ -7,3 +7,7 @@ export function formatBuildTime(iso: string): string {
   }).format(new Date(iso))
   return `${formatted} Uhr`
 }
+
+export function buildInfoLabel(): string {
+  return `Version vom ${formatBuildTime(__BUILD_INFO__.builtAt)} · ${__BUILD_INFO__.commit}`
+}

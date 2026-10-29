@@ -220,7 +220,9 @@ Die Engine kennt kein React. Spätere Themen (M2 ff.) bauen auf `expr/`,
    Umschreiben) wird nie als „falsch" angeboten.
 6. **Schrittplaner.** Wandelt den Ableitungsbaum in Bildschirm-Schritte um
    (Frage, richtige Option, falsche Optionen aus Fehlerregeln, Tipp,
-   Erklärungen). Die Feinheit hängt von der Stufe ab.
+   Erklärungen). Die Feinheit hängt von der Stufe ab. Stufe 1 (Schritt 4):
+   Regelwahl, dann je Summand ein Schritt; Umschreiben (Bruch, Wurzel) steckt
+   im Tipp und in der Erklärung, nicht in einem eigenen Schritt.
 7. **Gleichwertigkeit.** Erst Vergleich der Normalformen (schnell), sonst
    numerisch an mindestens 30 Zufallsstellen im Definitionsbereich der
    Aufgabe mit relativer Toleranz. Beim impliziten Ableiten an

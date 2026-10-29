@@ -55,5 +55,8 @@ export default defineConfig({
   ],
   test: {
     include: ['src/**/*.test.ts'],
+    // Die Engine-Tests rechnen absichtlich Hunderte Aufgaben und Tausende Zufallsterme durch.
+    // Auf den langsameren GitHub-Rechnern reichen die üblichen 5 Sekunden pro Test nicht.
+    testTimeout: 60_000,
   },
 })

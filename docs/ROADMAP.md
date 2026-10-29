@@ -20,7 +20,7 @@ Details: [PLAN-M1.md](PLAN-M1.md)
 - [x] 1. Grundgerüst und Handy-Zugang
 - [x] 2. Mathe-Engine: Terme und Schreibweise
 - [x] 3. Mathe-Engine: Ableiten mit Rechenweg und Fehlerregeln
-- [ ] 4. Geführter Modus (Stufe 1) mit Erklärungen
+- [x] 4. Geführter Modus (Stufe 1) mit Erklärungen
 - [ ] 5. Stufen 2 und 3 im geführten Modus, Stufenwahl
 - [ ] 6. Freier Modus
 - [ ] 7. Stufe 4 (vorgezogen, wichtigstes Niveau)
