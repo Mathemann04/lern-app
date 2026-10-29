@@ -144,6 +144,40 @@ Umgesetzt:
 Lösung, Rechenweg und typischen falschen Ergebnissen. Du prüfst, ob die
 Aufgaben aussehen wie in deinen Übungen.
 
+Umgesetzt:
+- Bruch-Engine in `src/engine/fraction/`:
+  - `poly.ts`: Polynome in mehreren Buchstaben mit exakten Zahlen
+  - `frac.ts`: Brüche daraus, Übersetzung Termbaum ↔ Polynom; die
+    Bausteine $e^x$, $\ln x$, $\sin x$, $\cos x$ zählen als eigene
+    Buchstaben
+  - `factor.ts`: Zerlegen, Hauptnenner, Kürzen
+  - `task.ts`: Aufgabenformen kürzen, plus/minus, mal, geteilt, Doppelbruch
+  - `solve.ts`: Rechenweg
+  - `errorRules.ts`: 23 typische Fehler
+- Vorlagen in `src/engine/tasks/fractionTerms.ts`, 14 Vorlagen für die
+  Stufen 1 bis 4. Aufgaben-Nummern wie beim Ableiten; brauchbar ist eine
+  Aufgabe nur, wenn das Ergebnis nicht 0 ist, ab Stufe 2 noch einen
+  Buchstaben enthält und die Zahlen klein bleiben.
+- Schreibweise der Ergebnisse:
+  - Zähler ausmultipliziert, Nenner in Faktoren in der Reihenfolge der
+    Aufgabe
+  - ein Minus vor den Bruch, z. B. $-\frac{2x + 9}{(x + 3)(x - 3)}$
+  - Produkte alphabetisch ($ax$, $2xy$)
+- Rechenweg mit dem ganzen Zwischenstand je Schritt. Beim Kürzen steht, durch
+  welchen Faktor gekürzt wird.
+- Bei Aufgaben nur mit $x$ nennt die Engine die verbotenen Zahlen
+  („gilt für $x \neq -3$"). Dazu zählen auch die Nullstellen des Teilers
+  bei „geteilt" und beim Doppelbruch.
+- Tests mit 300 Aufgaben je Stufe; vor dem Commit einmal mit 3000 geprüft:
+  - Ergebnis exakt gleichwertig und an Zahlenstellen gegengeprüft
+  - jeder Schritt wertgleich
+  - Ergebnis vollständig gekürzt
+  - falsche Antworten nie gleichwertig, im selben Schritt nicht doppelt
+  - verbotene Zahlen wirklich verboten
+  - jeder typische Fehler kommt in Aufgaben vor
+- Formel-Galerie mit Umschalter „Ableiten / Brüche", in der Farbe des
+  Gebiets.
+
 ### Schritt 3: Mehrere Themen, Brüche Stufe 1 und 2 geführt
 - Das Gebiet „Grundlagen" lässt sich öffnen und zeigt die drei Themen von
   oben.
@@ -254,14 +288,20 @@ weitergekürzten $\frac{1}{x-1}$ sagt sie: „Nach dem Minus fehlt die
 Klammer: $-2(x-1) = -2x + 2$." Beide Eingaben haben denselben Wert, deshalb
 erkennt die App den Fehler in beiden.
 
-### Katalog der Fehlerregeln (Vorschlag)
+### Katalog der Fehlerregeln
+
+Umgesetzt in `src/engine/fraction/errorRules.ts` (Ids mit `frac-`), je mit
+Katalogbeispiel in `errorRules.test.ts`. Die Fehler beim Hauptnenner gibt es
+nur im geführten Modus (mit einem falschen Hauptnenner kann man nicht
+weiterrechnen). Die Fehler zu Bausteinen kommen mit Stufe 5 (Schritt 6).
 
 | Rechenart | Typischer Fehler | Beispiel (falsch) |
 | --- | --- | --- |
 | Plus, minus | Zähler plus Zähler, Nenner plus Nenner | $\frac{1}{2} + \frac{1}{3} = \frac{2}{5}$ |
 | Plus, minus | Nenner gleichnamig gemacht, Zähler nicht erweitert | $\frac{1}{2} + \frac{1}{3} = \frac{2}{6}$ |
 | Plus, minus | Klammer um den zweiten Zähler vergessen | $3(x+1) - 2(x-1) = 3x + 3 - 2x - 2$ |
-| Plus, minus | ganze Zahl nur zum Zähler addiert | $1 + \frac{2}{x} = \frac{3}{x}$ |
+| Plus, minus | ganze Zahl nur zum Zähler addiert (nicht erweitert) | $1 + \frac{2}{x} = \frac{3}{x}$ |
+| Erweitern | mit dem eigenen Nenner erweitert | $\frac{3}{x-1} = \frac{3(x-1)}{(x-1)(x+1)}$ |
 | Hauptnenner | größter gemeinsamer Teiler statt kleinstem gemeinsamen Vielfachen | Hauptnenner von $\frac{1}{4}$ und $\frac{1}{6}$: $2$ |
 | Hauptnenner | Nenner addiert statt malgenommen | Hauptnenner von $\frac{1}{x-1}$ und $\frac{1}{x+1}$: $2x$ |
 | Hauptnenner | einen Faktor vergessen | Hauptnenner von $\frac{1}{x^2}$ und $\frac{1}{x(x+1)}$: $x(x+1)$ |
@@ -278,7 +318,7 @@ erkennt die App den Fehler in beiden.
 | Zerlegen | binomische Formeln verwechselt | $x^2 - 9 = (x-3)^2$ |
 | Zerlegen | Vorzeichen bei $x^2 + px + q$ vertauscht | $x^2 - x - 6 = (x+3)(x-2)$ |
 | Doppelbruch | mit dem Nenner statt mit seinem Kehrwert malgenommen | $\frac{\frac{1}{2}}{\frac{3}{4}} = \frac{1}{2} \cdot \frac{3}{4}$ |
-| Doppelbruch | Zahl im Nenner in den Zähler geholt | $\frac{\frac{a}{b}}{c} = \frac{ac}{b}$ |
+| Doppelbruch | Term im Nenner in den Zähler geholt | $\frac{\frac{a}{b}}{x} = \frac{ax}{b}$ |
 | Potenzen | Exponenten geteilt statt abgezogen | $\frac{x^6}{x^2} = x^3$ |
 | Bausteine | im Inneren einer Funktion gekürzt | $\frac{\sin(2x)}{2} = \sin x$, $\frac{e^{2x}}{e^x} = e^2$ |
 | Bausteine | binomische Formel bei der Wurzel vergessen | $(\sqrt{x}+1)^2 = x + 1$ |

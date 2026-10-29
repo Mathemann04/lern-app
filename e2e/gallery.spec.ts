@@ -97,3 +97,36 @@ test('Implizite Aufgabe in der Galerie: y\', beide Seiten im Rechenweg, typische
   await expect(page.locator('code.text-red-700')).toHaveCount(0)
   expect(errors).toEqual([])
 })
+
+test('Galerie zeigt Bruchaufgaben der Stufen 1 bis 4 mit Rechenweg und typischen Fehlern', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./#/galerie')
+  await page.getByRole('button', { name: 'Brüche' }).click()
+  await expect(page.getByRole('button', { name: 'Brüche' })).toHaveAttribute('aria-pressed', 'true')
+  // Stufe 5 der Brüche folgt erst später
+  await expect(page.getByRole('button', { name: 'Stufe 5' })).toBeDisabled()
+  await page.getByLabel('Rechenweg zeigen').check()
+  await page.getByLabel('Typische Fehler zeigen').check()
+
+  for (const level of [1, 2, 3, 4]) {
+    await page.getByRole('button', { name: `Stufe ${level}` }).click()
+    await expect(randomTasks(page)).toHaveCount(8)
+    await expect(randomTasks(page).first()).toContainText(`Aufgabe ${level}-`)
+    await expect(page.getByTestId('fraction-result')).toHaveCount(8)
+    await expect(page.getByRole('heading', { name: 'Rechenweg' }).first()).toBeVisible()
+    await expect(page.locator('code.text-red-700')).toHaveCount(0)
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
+    expect(overflow, `Stufe ${level} ragt seitlich heraus`).toBeLessThanOrEqual(0)
+  }
+
+  // Aufgabe über ihre Nummer, z. B. 3-2: \frac{4}{x + 1} - \frac{3}{x - 3}
+  await page.getByLabel('Aufgabe über ihre Nummer aufrufen').fill('3-2')
+  await page.getByRole('button', { name: 'Anzeigen' }).click()
+  const card = page.getByRole('region', { name: 'Aufgerufene Aufgabe' }).getByRole('article')
+  await expect(card).toContainText('Aufgabe 3-2')
+  await expect(card.getByText('Hauptnenner', { exact: true })).toBeVisible()
+  await page.getByLabel('Aufgabe über ihre Nummer aufrufen').fill('5-1')
+  await page.getByRole('button', { name: 'Anzeigen' }).click()
+  await expect(page.getByText('Diese Stufe gibt es hier noch nicht.')).toBeVisible()
+  expect(errors).toEqual([])
+})
