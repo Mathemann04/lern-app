@@ -1,37 +1,27 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Choice, GuidedStep, GuidedTask } from '../../engine/guided/plan.ts'
 import { planGuidedTask } from '../../engine/guided/plan.ts'
-import { type TaskRef, formatTaskNumber } from '../../engine/tasks/taskNumber.ts'
-import { useSettings } from '../../state/settings.ts'
+import type { TaskRef } from '../../engine/tasks/taskNumber.ts'
 import type { ExplanationDetail } from '../../state/storage.ts'
 import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
 import { practiceHref } from '../routes.ts'
-
-// Erklärungen in dieser Aufgabe: ausführlich, kurz oder aus (startet mit der globalen Einstellung)
-type Mode = ExplanationDetail | 'off'
-const MODE_LABEL: Record<Mode, string> = { detailed: 'Ausführlich', short: 'Kurz', off: 'Aus' }
-const NEXT_MODE: Record<Mode, Mode> = { detailed: 'short', short: 'off', off: 'detailed' }
+import { TaskIntro, TaskTopBar } from '../task/TaskParts.tsx'
+import { type ExplanationMode, useExplanationMode } from '../task/explanationMode.ts'
 
 export function TaskScreen({ taskRef }: { taskRef: TaskRef }) {
   const { level, seed } = taskRef
   const task = useMemo(() => planGuidedTask({ level, seed }), [level, seed])
-  const settings = useSettings()
-  const [mode, setMode] = useState<Mode>(settings.explanations ? settings.detail : 'off')
+  const { mode, detail, cycle } = useExplanationMode()
   const [stepIndex, setStepIndex] = useState(0)
   const [mistakes, setMistakes] = useState(0)
   const finished = stepIndex >= task.steps.length
 
   return (
     <main className="space-y-6">
-      <div className="flex items-center gap-3">
-        <a href="#/" aria-label="Aufgabe beenden" className="-ml-2 rounded-lg p-2 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
-          <svg aria-hidden viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-            <path d="M6 6l12 12M18 6L6 18" />
-          </svg>
-        </a>
+      <TaskTopBar mode={mode} onCycleMode={cycle}>
         <div
-          className="h-2 flex-1 overflow-hidden rounded-full bg-zinc-100"
+          className="h-2 overflow-hidden rounded-full bg-zinc-100"
           role="progressbar"
           aria-label="Fortschritt"
           aria-valuemin={0}
@@ -43,15 +33,7 @@ export function TaskScreen({ taskRef }: { taskRef: TaskRef }) {
             style={{ width: `${(Math.min(stepIndex, task.steps.length) / task.steps.length) * 100}%` }}
           />
         </div>
-        <button
-          type="button"
-          onClick={() => setMode(NEXT_MODE[mode])}
-          className="rounded-lg px-2 py-1 text-sm text-zinc-600 hover:bg-zinc-100"
-          title="Nur für diese Aufgabe umstellen"
-        >
-          Erklärungen: {MODE_LABEL[mode]}
-        </button>
-      </div>
+      </TaskTopBar>
 
       <TaskHeader task={task} stepIndex={stepIndex} />
 
@@ -63,7 +45,7 @@ export function TaskScreen({ taskRef }: { taskRef: TaskRef }) {
           step={task.steps[stepIndex]}
           isLast={stepIndex === task.steps.length - 1}
           mode={mode}
-          fallbackDetail={settings.detail}
+          detail={detail}
           onMistake={() => setMistakes((n) => n + 1)}
           onNext={() => setStepIndex((i) => i + 1)}
         />
@@ -76,12 +58,7 @@ function TaskHeader({ task, stepIndex }: { task: GuidedTask; stepIndex: number }
   const established = task.steps.slice(0, stepIndex).flatMap((s) => (s.established ? [s.established] : []))
   return (
     <section className="space-y-3">
-      <p className="text-sm text-zinc-500">
-        Stufe {task.ref.level} · Aufgabe {formatTaskNumber(task.ref)} · Leite ab
-      </p>
-      <div className="overflow-x-auto text-2xl">
-        <Formula tex={task.functionLatex} />
-      </div>
+      <TaskIntro taskRef={task.ref} functionLatex={task.functionLatex} />
       {established.length > 0 && (
         <div className="space-y-1 rounded-xl bg-zinc-50 px-4 py-3" aria-label="Bisher">
           <p className="text-sm text-zinc-500">Bisher</p>
@@ -99,21 +76,19 @@ function TaskHeader({ task, stepIndex }: { task: GuidedTask; stepIndex: number }
 type StepProps = {
   step: GuidedStep
   isLast: boolean
-  mode: Mode
-  fallbackDetail: ExplanationDetail
+  mode: ExplanationMode
+  detail: ExplanationDetail
   onMistake: () => void
   onNext: () => void
 }
 
-function StepView({ step, isLast, mode, fallbackDetail, onMistake, onNext }: StepProps) {
+function StepView({ step, isLast, mode, detail, onMistake, onNext }: StepProps) {
   const [wrongPicks, setWrongPicks] = useState<string[]>([])
   const [solved, setSolved] = useState(false)
   const [hintOpen, setHintOpen] = useState(false)
   const [whyOpen, setWhyOpen] = useState(false)
   const questionRef = useRef<HTMLHeadingElement>(null)
   const feedbackRef = useRef<HTMLDivElement>(null)
-  // „Warum ist das falsch?" geht auch bei ausgeschalteten Erklärungen, dann in der globalen Ausführlichkeit
-  const detail: ExplanationDetail = mode === 'off' ? fallbackDetail : mode
 
   // Neuer Schritt: Fokus auf die Frage (für Tastatur und Vorlesehilfen)
   useEffect(() => {

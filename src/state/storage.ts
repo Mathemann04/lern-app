@@ -5,6 +5,8 @@
 import { LEVELS, type Level } from '../engine/tasks/taskNumber.ts'
 
 export type ExplanationDetail = 'detailed' | 'short'
+// geführt: Auswahl-Antworten Schritt für Schritt; frei: Ableitung selbst eintippen
+export type PracticeMode = 'guided' | 'free'
 
 export type Settings = {
   // Erklärungen nach jeder Antwort automatisch zeigen
@@ -12,6 +14,7 @@ export type Settings = {
   readonly detail: ExplanationDetail
   // zuletzt gewählte Stufe beim Thema Ableitungen
   readonly derivativeLevel: Level
+  readonly practiceMode: PracticeMode
 }
 
 export type AppState = {
@@ -21,7 +24,7 @@ export type AppState = {
 
 export const STORAGE_KEY = 'rechenweg'
 
-export const DEFAULT_SETTINGS: Settings = { explanations: true, detail: 'detailed', derivativeLevel: 1 }
+export const DEFAULT_SETTINGS: Settings = { explanations: true, detail: 'detailed', derivativeLevel: 1, practiceMode: 'guided' }
 export const DEFAULT_STATE: AppState = { version: 1, settings: DEFAULT_SETTINGS }
 
 // Was von localStorage gebraucht wird (in Tests durch einen Ersatz austauschbar)
@@ -42,6 +45,7 @@ function readSettings(value: unknown): Settings {
     explanations: typeof raw.explanations === 'boolean' ? raw.explanations : DEFAULT_SETTINGS.explanations,
     detail: raw.detail === 'short' || raw.detail === 'detailed' ? raw.detail : DEFAULT_SETTINGS.detail,
     derivativeLevel: LEVELS.find((l) => l === raw.derivativeLevel) ?? DEFAULT_SETTINGS.derivativeLevel,
+    practiceMode: raw.practiceMode === 'free' || raw.practiceMode === 'guided' ? raw.practiceMode : DEFAULT_SETTINGS.practiceMode,
   }
 }
 

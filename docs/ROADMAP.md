@@ -22,7 +22,7 @@ Details: [PLAN-M1.md](PLAN-M1.md)
 - [x] 3. Mathe-Engine: Ableiten mit Rechenweg und Fehlerregeln
 - [x] 4. Geführter Modus (Stufe 1) mit Erklärungen
 - [x] 5. Stufen 2 und 3 im geführten Modus, Stufenwahl
-- [ ] 6. Freier Modus
+- [x] 6. Freier Modus
 - [ ] 7. Stufe 4 (vorgezogen, wichtigstes Niveau)
 - [ ] 8. Fortschritt und Fehlerstatistik
 - [ ] 9. Lernkarten
@@ -47,3 +47,11 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   Potenzen wie $\sin^2 x$ nie als falsch (gleichwertiger Weg).
 - 29.10.2026: Neue Fehlerregeln: $(\ln x)' = \ln x$, $(\ln x)' = \frac{1}{\ln x}$,
   Exponent nicht als Faktor nach vorne geholt ($(x^3)' = x^2$).
+- 29.10.2026: Freier Modus: Eingabe mit MathLive und eigener
+  Bildschirm-Tastatur (lädt erst im freien Modus, offline vorgehalten),
+  eigener Leser für die Eingabe (`src/engine/parse/`). Richtig ist jede
+  gleichwertige Form; geprüft an den Werten im Definitionsbereich, nicht nur
+  über die Normalform (die darf den Definitionsbereich vergrößern). Erkannt
+  werden alle typischen Fehler, dazu „Funktion selbst eingegeben",
+  „Vorzeichen falsch" und „falscher Zahlenfaktor". Moduswahl „Geführt/Frei"
+  auf der Startseite, gespeichert.

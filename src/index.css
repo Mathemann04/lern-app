@@ -60,3 +60,13 @@ body {
     animation: none;
   }
 }
+
+/* Eingabefeld der Mathe-Tastatur: Rahmen und Fokus kommen vom umgebenden Kasten, kein Menü */
+math-field {
+  border: none;
+  outline: none;
+  background: transparent;
+}
+math-field::part(menu-toggle) {
+  display: none;
+}

@@ -237,10 +237,14 @@ Die Engine kennt kein React. Spätere Themen (M2 ff.) bauen auf `expr/`,
    numerisch an mindestens 30 Zufallsstellen im Definitionsbereich der
    Aufgabe mit relativer Toleranz. Beim impliziten Ableiten an
    Zufallspunkten $(x, y)$.
-   Umgesetzt in `src/engine/derive/` (Schritt 3).
+   Umgesetzt in `src/engine/derive/` (Schritt 3) und
+   `src/engine/check/answer.ts` (Schritt 6). Die Eingabe muss überall dort
+   definiert sein, wo die Lösung definiert ist; gleiche Normalform allein
+   reicht nicht ($2\sqrt{x}\sqrt{x}$ ist nicht $2x$).
 8. **Fehlerdiagnose (frei).** Zu jeder Aufgabe werden alle
    Fehlerregel-Ergebnisse vorberechnet; die Eingabe wird mit jedem
-   verglichen.
+   verglichen. Zusätzlich erkannt: die Funktion selbst eingegeben, nur das
+   Vorzeichen falsch, nur ein Zahlenfaktor falsch.
 9. **Seeds.** Jede Aufgabe ist (Vorlage, Stufe, Seed) und damit
    reproduzierbar.
 10. **Endform** (`finalForm`): Ergebnisse werden zusammengefasst wie im Skript:
