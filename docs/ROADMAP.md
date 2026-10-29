@@ -1,6 +1,6 @@
 # Roadmap
 
-Stand: 28.10.2026
+Stand: 29.10.2026
 
 | Meilenstein | Inhalt | Status |
 | --- | --- | --- |
@@ -21,7 +21,7 @@ Details: [PLAN-M1.md](PLAN-M1.md)
 - [x] 2. Mathe-Engine: Terme und Schreibweise
 - [x] 3. Mathe-Engine: Ableiten mit Rechenweg und Fehlerregeln
 - [x] 4. Geführter Modus (Stufe 1) mit Erklärungen
-- [ ] 5. Stufen 2 und 3 im geführten Modus, Stufenwahl
+- [x] 5. Stufen 2 und 3 im geführten Modus, Stufenwahl
 - [ ] 6. Freier Modus
 - [ ] 7. Stufe 4 (vorgezogen, wichtigstes Niveau)
 - [ ] 8. Fortschritt und Fehlerstatistik
@@ -39,3 +39,11 @@ Details: [PLAN-M1.md](PLAN-M1.md)
 - 28.10.2026: Definitionsbereich nach deutscher Schulkonvention: Wurzeln aus
   negativen Zahlen sind nicht definiert, auch nicht die dritte Wurzel
   (änderbar, falls das Skript es anders handhabt).
+- 29.10.2026: Geführter Modus für Produkt und Quotient: $u'$, $v'$, dann
+  Einsetzen (Antworten als eingesetzte Formel, Ergebnis danach
+  zusammengefasst). Kettenregel: äußere Ableitung nach $u$, innere
+  Ableitung, Zusammensetzen. Ein Faktor davor wird beim Einsetzen mitgeführt.
+- 29.10.2026: Bei der Regelwahl gilt die Produktregel bei Brüchen und bei
+  Potenzen wie $\sin^2 x$ nie als falsch (gleichwertiger Weg).
+- 29.10.2026: Neue Fehlerregeln: $(\ln x)' = \ln x$, $(\ln x)' = \frac{1}{\ln x}$,
+  Exponent nicht als Faktor nach vorne geholt ($(x^3)' = x^2$).

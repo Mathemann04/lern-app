@@ -10,6 +10,7 @@ import {
   div,
   exp,
   fn,
+  ln,
   log,
   mul,
   num,
@@ -35,11 +36,14 @@ describe('Fehlerkatalog: Beispiele', () => {
     ['power-sign-forgotten', div(num(1), x), '\\frac{1}{x^{2}}'],
     ['power-root-factor-forgotten', sqrt(x), '\\frac{1}{\\sqrt{x}}'],
     ['power-fraction-numerator-only', pow(x, num(2, 3)), '\\frac{2}{3}\\sqrt[3]{x}'],
+    ['power-exponent-not-multiplied', pow(x, num(3)), 'x^{2}'],
     ['factor-forgotten', mul(num(5), pow(x, num(3))), '3x^{2}'],
     ['constant-summand-kept', add(x2, num(5)), '2x + 5'],
     ['exp-power-rule', exp(x), 'xe^{x - 1}'],
     ['sin-sign', sin(x), '-\\cos x'],
     ['cos-sign', cos(x), '\\sin x'],
+    ['ln-like-exp', ln(x), '\\ln x'],
+    ['ln-reciprocal-of-ln', ln(x), '\\frac{1}{\\ln x}'],
     ['product-derivatives-multiplied', mul(x2, exp(x)), '2xe^{x}'],
     ['product-second-summand-missing', mul(x2, sin(x)), '2x\\sin x'],
     ['product-minus', mul(x2, exp(x)), '(-x^{2} + 2x)e^{x}'],
@@ -68,7 +72,7 @@ describe('Fehlerkatalog: Beispiele', () => {
 
   it('deckt jede Fehlerregel mit einem Beispiel ab', () => {
     // Schutz davor, eine neue Regel ohne Beispiel hinzuzufügen
-    expect(ERROR_RULES.length).toBe(31)
+    expect(ERROR_RULES.length).toBe(34)
   })
 })
 

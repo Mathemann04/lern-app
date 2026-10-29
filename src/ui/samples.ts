@@ -1,30 +1,38 @@
+import type { Level } from '../engine/tasks/taskNumber.ts'
+
 // Vorschau-Formeln für die Startseite. Nur Aufgabenterme aus docs/VISION.md,
 // keine Lösungen: Lösungen berechnet ab Schritt 3 die Mathe-Engine.
 
 export type LevelPreview = {
-  level: number
+  level: Level
   title: string
   examples: string[]
+  // schon im geführten Modus spielbar
+  available: boolean
 }
 
 export const derivativeLevels: LevelPreview[] = [
   {
     level: 1,
+    available: true,
     title: 'Potenz-, Faktor- und Summenregel',
     examples: [String.raw`4x^3 - \frac{2}{x} + \sqrt{x}`],
   },
   {
     level: 2,
+    available: true,
     title: 'Mit e-Funktion, ln, sin und cos',
     examples: [String.raw`x^2 e^x`, String.raw`\sin(3x)`],
   },
   {
     level: 3,
+    available: true,
     title: 'Zwei Regeln kombiniert',
     examples: [String.raw`e^{x^2} \cos x`, String.raw`\frac{\ln x}{x^2}`],
   },
   {
     level: 4,
+    available: false,
     title: 'Uni-Niveau: mehrere Regeln verschachtelt',
     examples: [
       String.raw`\frac{x^2 e^{-3x}}{\sqrt{1+x^2}}`,
@@ -33,10 +41,13 @@ export const derivativeLevels: LevelPreview[] = [
   },
   {
     level: 5,
+    available: false,
     title: 'Profi: logarithmisch, implizit, Umkehr- und Hyperbelfunktionen',
     examples: [String.raw`x^x`, String.raw`x^{\sin x}`, String.raw`x^2 + y^2 = 25`],
   },
 ]
+
+export const isLevelAvailable = (level: Level) => derivativeLevels.some((l) => l.level === level && l.available)
 
 export type NotationSample = {
   label: string

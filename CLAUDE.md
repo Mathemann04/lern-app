@@ -32,7 +32,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   (`src/ui/Formula.tsx`), das setzt alles in voller Größe (`\displaystyle`).
   Seiten über `#/…` (`routes.ts`): Start `#/`, Üben `#/ueben/1` (neue Aufgabe)
   bzw. `#/ueben/1-4711` (bestimmte Aufgabe), `#/einstellungen`, Testseite
-  `#/galerie`. Lernbildschirm in `src/ui/guided/`. Texte mit Formeln über
+  `#/galerie`. Lernbildschirm in `src/ui/guided/`. Welche Stufen schon
+  spielbar sind: `available` in `src/ui/samples.ts`. Texte mit Formeln über
   `RichText` (Formeln zwischen `$…$`).
 - `src/engine/`: Mathe-Engine, reines TypeScript
   - `rational.ts`: exakte Brüche (bigint)
@@ -52,11 +53,13 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   - `explain/`: Textbausteine für Erklärungen (ausführlich/kurz), Tipps und
     „Warum ist das falsch?" (`texts.ts`); Format Text mit `$…$`-Formeln
   - `guided/plan.ts`: Schrittplaner für den geführten Modus (Regelwahl, dann je
-    Summand ein Schritt; Antworten aus Fehlerregeln)
+    Summand ein Schritt; Produkt/Quotient: u', v', Einsetzen; Kette: äußere,
+    innere Ableitung, Zusammensetzen; Antworten aus Fehlerregeln)
   - `random/rng.ts`: Zufall mit Startwert; `tasks/`: Aufgaben-Nummern
     („3-48213") und Vorlagen je Stufe
 - `src/state/`: Speichern auf dem Gerät (`storage.ts`, versioniert, robust
-  gegen kaputten Inhalt) und Einstellungen (`settings.ts`)
+  gegen kaputten Inhalt) und Einstellungen (`settings.ts`, auch die gewählte
+  Stufe)
 - `e2e/`: Browser-Tests (Playwright)
 - `.github/workflows/app.yml`: prüft jeden Pull Request, veröffentlicht `main`
 - Akzentfarbe zentral in `src/index.css` (`--color-accent-*`)

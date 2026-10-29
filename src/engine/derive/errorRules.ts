@@ -110,6 +110,17 @@ export const ERROR_RULES: readonly ErrorRule[] = [
     },
   },
   {
+    id: 'power-exponent-not-multiplied',
+    rule: 'power',
+    name: 'Exponent nicht als Faktor nach vorne geholt',
+    wrongFormula: "(x^n)' = x^{n-1}",
+    apply(node) {
+      const r = powerExponent(node)
+      if (!r || r.n === 0n || isOne(r)) return null
+      return pow(node.parts.base!, num(ratSub(r, ONE)))
+    },
+  },
+  {
     id: 'factor-forgotten',
     rule: 'constantFactor',
     name: 'Faktor vergessen',
@@ -151,6 +162,20 @@ export const ERROR_RULES: readonly ErrorRule[] = [
     name: 'Minuszeichen beim Kosinus vergessen',
     wrongFormula: "(\\cos x)' = \\sin x",
     apply: (node) => sin(X(node)),
+  },
+  {
+    id: 'ln-like-exp',
+    rule: 'ln',
+    name: 'Wie die e-Funktion behandelt',
+    wrongFormula: "(\\ln x)' = \\ln x",
+    apply: (node) => ln(X(node)),
+  },
+  {
+    id: 'ln-reciprocal-of-ln',
+    rule: 'ln',
+    name: 'Kehrwert des Logarithmus statt Kehrwert von x',
+    wrongFormula: "(\\ln x)' = \\frac{1}{\\ln x}",
+    apply: (node) => div(num(1), ln(X(node))),
   },
   {
     id: 'product-derivatives-multiplied',
@@ -338,7 +363,7 @@ export type WrongAnswer = {
 // Behalten werden nur Ergebnisse, die sich deutlich von der Lösung und voneinander
 // unterscheiden. Eine falsche Option ist also nie zufällig doch richtig.
 export function wrongAnswers(expr: Expr, correct: Derivation = derive(expr)): WrongAnswer[] {
-  const points = samplePoints([expr, correct.result], createRng(`fehler:${key(expr)}`), 60)
+  const points = samplePoints([expr, correct.result], createRng(`fehler:${key(expr)}`), 60, correct.variable)
   const kept: Array<WrongAnswer & { alsoMatches: ErrorRule[] }> = []
 
   for (const node of allNodes(correct)) {

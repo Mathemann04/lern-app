@@ -39,12 +39,7 @@ async function solveStep(page: Page, askWhy: boolean): Promise<boolean> {
   throw new Error('Keine richtige Antwort gefunden')
 }
 
-test('Eine Aufgabe der Stufe 1 lässt sich geführt komplett lösen', async ({ page }) => {
-  const errors = collectErrors(page)
-  await page.goto('./')
-  await page.getByRole('link', { name: 'Stufe 1 geführt üben' }).click()
-  await expect(page).toHaveURL(/#\/ueben\/1-\d+$/)
-
+async function solveWholeTask(page: Page) {
   let askedWhy = false
   for (let step = 0; step < 8; step++) {
     if (await page.getByRole('heading', { name: 'Geschafft!' }).isVisible()) break
@@ -55,16 +50,52 @@ test('Eine Aufgabe der Stufe 1 lässt sich geführt komplett lösen', async ({ p
     await expectCleanPage(page, `Schritt ${step + 1} gelöst`)
     await page.getByRole('button', { name: /^(Weiter|Ergebnis ansehen)$/ }).click()
   }
-
   await expect(page.getByRole('heading', { name: 'Geschafft!' })).toBeVisible()
-  await expect(page.getByTestId('result')).toContainText("f′(x)")
-  await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuenow', /\d+/)
+  await expect(page.getByTestId('result')).toContainText('f′(x)')
   await expectCleanPage(page, 'Abschluss')
+}
+
+test('Eine Aufgabe der Stufe 1 lässt sich geführt komplett lösen', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./')
+  await page.getByRole('link', { name: 'Stufe 1 geführt üben' }).click()
+  await expect(page).toHaveURL(/#\/ueben\/1-\d+$/)
+
+  await solveWholeTask(page)
+  await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuenow', /\d+/)
   expect(errors).toEqual([])
 
   await page.getByRole('link', { name: 'Nächste Aufgabe' }).click()
   await expect(page.locator('#question')).toBeVisible()
 })
+
+test('Stufenwahl bleibt gespeichert, Stufe 2 lässt sich komplett lösen', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./')
+  await expect(page.getByRole('radio', { name: /^Stufe 4/ })).toBeDisabled()
+  await page.getByText('Mit e-Funktion, ln, sin und cos').click()
+  await expect(page.getByRole('radio', { name: /^Stufe 2/ })).toBeChecked()
+  await page.reload()
+  await expect(page.getByRole('radio', { name: /^Stufe 2/ })).toBeChecked()
+
+  await page.getByRole('link', { name: 'Stufe 2 geführt üben' }).click()
+  await expect(page).toHaveURL(/#\/ueben\/2-\d+$/)
+  await expect(page.getByText(/^Stufe 2 · Aufgabe 2-\d+/)).toBeVisible()
+  await solveWholeTask(page)
+  expect(errors).toEqual([])
+})
+
+// Je eine Aufgabe mit Produkt-, Quotienten- und Kettenregel
+for (const task of ['3-2', '3-4', '3-9']) {
+  test(`Stufe 3: Aufgabe ${task} lässt sich komplett lösen`, async ({ page }) => {
+    const errors = collectErrors(page)
+    await page.goto(`./#/ueben/${task}`)
+    await solveWholeTask(page)
+    // Nach dem Lösen steht der ganze Rechenweg unter „Bisher"
+    await expect(page.getByLabel('Bisher').locator('.katex')).toHaveCount(3)
+    expect(errors).toEqual([])
+  })
+}
 
 test('Tipp lässt sich vor dem Antworten aufrufen', async ({ page }) => {
   await page.goto('./#/ueben/1-1')
@@ -77,10 +108,10 @@ test('Gleiche Adresse zeigt nach dem Neuladen dieselbe Aufgabe', async ({ page }
   await page.goto('./#/ueben/1')
   await expect(page).toHaveURL(/#\/ueben\/1-\d+$/)
   const url = page.url()
-  const task = await page.getByText(/^Aufgabe 1-\d+/).textContent()
+  const task = await page.getByText(/Aufgabe 1-\d+/).textContent()
   await page.reload()
   expect(page.url()).toBe(url)
-  await expect(page.getByText(/^Aufgabe 1-\d+/)).toHaveText(task ?? '')
+  await expect(page.getByText(/Aufgabe 1-\d+/)).toHaveText(task ?? '')
 })
 
 test('Einstellungen werden gespeichert und wirken in der Aufgabe', async ({ page }) => {

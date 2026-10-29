@@ -223,6 +223,16 @@ Die Engine kennt kein React. Spätere Themen (M2 ff.) bauen auf `expr/`,
    Erklärungen). Die Feinheit hängt von der Stufe ab. Stufe 1 (Schritt 4):
    Regelwahl, dann je Summand ein Schritt; Umschreiben (Bruch, Wurzel) steckt
    im Tipp und in der Erklärung, nicht in einem eigenen Schritt.
+   Stufen 2 und 3 (Schritt 5): Produkt und Quotient fragen $u'$ und $v'$
+   einzeln ab, dann das Einsetzen in die Regel (Antworten als eingesetzte
+   Formel, z. B. $2x \cdot e^x + x^2 \cdot e^x$; zusammengefasst wird danach
+   in der Erklärung). Kettenregel: äußere Ableitung nach $u$ (mit
+   $u$ = innere Funktion), innere Ableitung, Zusammensetzen. Die Ableitung
+   eines Teils ist immer ein Schritt, auch wenn darin selbst eine Regel
+   steckt. Ein fester Faktor davor ($-3x^2 \sin x$) wird beim Einsetzen
+   mitgeführt. Bei der Regelwahl gilt die Produktregel bei Brüchen
+   ($u \cdot v^{-1}$) und Potenzen wie $\sin^2 x$ ($\sin x \cdot \sin x$)
+   nie als falsch.
 7. **Gleichwertigkeit.** Erst Vergleich der Normalformen (schnell), sonst
    numerisch an mindestens 30 Zufallsstellen im Definitionsbereich der
    Aufgabe mit relativer Toleranz. Beim impliziten Ableiten an
@@ -300,10 +310,13 @@ ausprobieren".
 | Potenz | Vorzeichen bei negativem Exponenten vergessen | $\left(\frac{1}{x}\right)' = \frac{1}{x^2}$ |
 | Potenz | Wurzel: Faktor $\frac{1}{2}$ vergessen | $(\sqrt{x})' = \frac{1}{\sqrt{x}}$ |
 | Potenz | gebrochener Exponent: 1 nur vom Zähler abgezogen | $\left(x^{\frac{2}{3}}\right)' = \frac{2}{3}x^{\frac{1}{3}}$ |
+| Potenz | Exponent nicht als Faktor nach vorne geholt | $(x^3)' = x^2$ |
 | Faktor | Faktor vergessen | $(5x^3)' = 3x^2$ |
 | Summe | konstanter Summand bleibt stehen | $(x^2 + 5)' = 2x + 5$ |
 | $e^x$ | Potenzregel auf $e^x$ angewendet | $(e^x)' = x e^{x-1}$ |
 | $\sin$/$\cos$ | Vorzeichen vertauscht | $(\cos x)' = \sin x$, $(\sin x)' = -\cos x$ |
+| $\ln$ | wie die e-Funktion behandelt | $(\ln x)' = \ln x$ |
+| $\ln$ | Kehrwert des Logarithmus statt Kehrwert von $x$ | $(\ln x)' = \frac{1}{\ln x}$ |
 | Produkt | Ableitungen multipliziert | $(uv)' = u'v'$ |
 | Produkt | zweiter Summand fehlt | $(uv)' = u'v$ |
 | Produkt | Minus statt Plus (mit Quotientenregel verwechselt) | $(uv)' = u'v - uv'$ |

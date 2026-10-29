@@ -6,7 +6,8 @@ import { parseRichText } from '../explain/richText.ts'
 import { isStableAt } from '../expr/arbitraries.ts'
 import { evaluate } from '../expr/evaluate.ts'
 import { samplePoints } from '../expr/sample.ts'
-import { add, div, mul, neg, num, pow, sqrt, x } from '../expr/types.ts'
+import { substitute } from '../expr/substitute.ts'
+import { type Expr, add, div, exp, ln, mul, neg, num, pow, sin, sqrt, x } from '../expr/types.ts'
 import { createRng } from '../random/rng.ts'
 import { type GuidedStep, type GuidedTask, planForExpression, planGuidedTask } from './plan.ts'
 
@@ -77,13 +78,86 @@ describe('Beispiel aus dem Plan: 4x³ − 2/x + √x', () => {
   })
 })
 
-describe('alle Aufgaben der Stufe 1', () => {
-  const plans: GuidedTask[] = Array.from({ length: 300 }, (_, i) => planGuidedTask({ level: 1, seed: i + 1 }))
+describe('Beispiel aus dem Plan: x² eˣ (Produktregel)', () => {
+  const plan = planForExpression(mul(pow(x, num(2)), exp(x)), { level: 2, seed: 1 })
 
-  it('haben in jedem Schritt genau eine richtige und 1 bis 3 falsche Antworten', () => {
+  it('fragt nach Regel, u\', v\' und dem Einsetzen', () => {
+    expect(plan.steps.map((s) => s.title)).toEqual(['Regel wählen', 'Ersten Faktor ableiten', 'Zweiten Faktor ableiten', 'Einsetzen'])
+    expect(plan.steps.map((s) => correctChoice(s).content)).toEqual([
+      'Produktregel',
+      '$2x$',
+      '$e^{x}$',
+      '$2x \\cdot e^{x} + x^{2} \\cdot e^{x}$',
+    ])
+    expect(plan.resultLatex).toBe("f'(x) = (x^{2} + 2x)e^{x}")
+  })
+
+  it('bietet beim Einsetzen die typischen Fehler der Produktregel an', () => {
+    const wrong = plan.steps[3].choices.filter((c) => !c.correct)
+    expect(wrong.map((c) => c.content).sort()).toEqual(['$2x \\cdot e^{x} - x^{2} \\cdot e^{x}$', '$2x \\cdot e^{x}$'])
+    expect(plan.steps[3].explanation.detailed).toContain('Zusammengefasst')
+    expect(plan.steps[3].established).toBe("f'(x) = 2x \\cdot e^{x} + x^{2} \\cdot e^{x}")
+  })
+})
+
+describe('Kettenregel: sin(3x)', () => {
+  const plan = planForExpression(sin(mul(num(3), x)), { level: 2, seed: 1 })
+
+  it('fragt nach äußerer und innerer Ableitung, dann nach dem Zusammensetzen', () => {
+    expect(plan.steps.map((s) => s.title)).toEqual(['Regel wählen', 'Äußere Ableitung', 'Innere Ableitung', 'Zusammensetzen'])
+    expect(plan.steps.map((s) => correctChoice(s).content)).toEqual(['Kettenregel', '$\\cos u$', '$3$', '$\\cos(3x) \\cdot 3$'])
+    expect(plan.steps[1].variable).toBe('u')
+  })
+
+  it('zeigt beim Zusammensetzen die Fehler der Kettenregel', () => {
+    const ids = plan.steps[3].choices.filter((c) => !c.correct).map((c) => c.errorRuleId!)
+    expect(ids).toHaveLength(3)
+    for (const id of ids) expect(id).toMatch(/^chain-/)
+  })
+
+  it('nimmt einen Faktor davor in die eingesetzte Formel mit', () => {
+    const withFactor = planForExpression(mul(num(4), sin(mul(num(3), x))), { level: 2, seed: 1 })
+    const last = withFactor.steps.at(-1)!
+    expect(last.question).toContain('Der Faktor $4$ davor bleibt stehen.')
+    expect(correctChoice(last).content).toBe('$4 \\cdot \\cos(3x) \\cdot 3$')
+    const ids = last.choices.filter((c) => !c.correct).map((c) => c.errorRuleId!)
+    expect(ids).toHaveLength(3)
+    for (const id of ids) expect(id).toMatch(/^(chain-|factor-forgotten)/)
+  })
+})
+
+describe('Regelwahl: gleichwertige Wege gelten nie als falsch', () => {
+  it('bietet beim Bruch die Produktregel nicht als falsch an', () => {
+    const plan = planForExpression(div(ln(x), pow(x, num(2))), { level: 3, seed: 1 })
+    expect(correctChoice(plan.steps[0]).content).toBe('Quotientenregel')
+    expect(plan.steps[0].choices.map((c) => c.content)).not.toContain('Produktregel')
+  })
+
+  it('bietet bei sin² x die Produktregel nicht als falsch an', () => {
+    const plan = planForExpression(pow(sin(x), num(2)), { level: 3, seed: 1 })
+    expect(correctChoice(plan.steps[0]).content).toBe('Kettenregel')
+    expect(plan.steps[0].choices.map((c) => c.content)).not.toContain('Produktregel')
+  })
+
+  it('zeigt bei −3x² sin x den Faktor in der Regel zum Einsetzen', () => {
+    const plan = planForExpression(neg(mul(num(3), pow(x, num(2)), sin(x))), { level: 2, seed: 1 })
+    expect(correctChoice(plan.steps[0]).content).toBe('Produktregel')
+    expect(plan.steps[0].explanation.detailed).toContain('Der Faktor $-3$ davor bleibt stehen.')
+    expect(plan.steps[3].question).toContain("-3 \\cdot (u' \\cdot v + u \\cdot v')")
+  })
+})
+
+// Ableitung von subject nach variable, an einer Stelle; als x geschrieben für die Prüfhilfen
+const asX = (e: Expr, variable: string) => substitute(e, variable, x)
+
+describe.each([1, 2, 3] as const)('alle Aufgaben der Stufe %i', (level) => {
+  const plans: GuidedTask[] = Array.from({ length: 200 }, (_, i) => planGuidedTask({ level, seed: i + 1 }))
+
+  it('beginnen mit der Regelwahl und haben in jedem Schritt eine richtige und 1 bis 3 falsche Antworten', () => {
     for (const plan of plans) {
+      expect(plan.steps[0].title, `${level}-${plan.ref.seed}`).toBe('Regel wählen')
       for (const step of plan.steps) {
-        const context = `1-${plan.ref.seed} ${step.title}`
+        const context = `${level}-${plan.ref.seed} ${step.title}`
         expect(step.choices.filter((c) => c.correct), context).toHaveLength(1)
         expect(step.choices.length, context).toBeGreaterThanOrEqual(2)
         expect(step.choices.length, context).toBeLessThanOrEqual(4)
@@ -94,41 +168,61 @@ describe('alle Aufgaben der Stufe 1', () => {
   })
 
   it('richtige Antworten stimmen mit der numerischen Ableitung überein, falsche nicht', () => {
+    let checked = 0
     for (const plan of plans) {
       for (const step of plan.steps.slice(1)) {
-        const subject = step.subject!
-        const correct = correctChoice(step).expr!
+        const context = `${level}-${plan.ref.seed} ${step.title}`
+        const variable = step.variable ?? 'x'
+        const subject = asX(step.subject!, variable)
+        const correct = asX(correctChoice(step).expr!, variable)
         const points = samplePoints([subject, correct], createRng(`plan:${plan.ref.seed}`), 30)
         for (const p of points) {
           if (!isStableAt(subject, p.x)) continue
           const approx = numericDerivative(subject, p.x)
           if (approx === null) continue
+          checked++
           const exact = evaluate(correct, p)
-          expect(Math.abs(exact - approx), `1-${plan.ref.seed} ${step.title}`).toBeLessThanOrEqual(
-            1e-5 * Math.max(1, Math.abs(exact)),
-          )
+          expect(Math.abs(exact - approx), context).toBeLessThanOrEqual(1e-5 * Math.max(1, Math.abs(exact)))
         }
         for (const wrong of step.choices.filter((c) => !c.correct)) {
-          const { compared, differing } = compareValues(correct, wrong.expr!, points)
+          const { compared, differing } = compareValues(correct, asX(wrong.expr!, variable), points)
           // Konstanten: Ableitung 0 ist überall gleich; dort zählt der Vergleich mit der Zahl selbst
           if (compared === 0) {
-            expect(evaluate(wrong.expr!, {}), `1-${plan.ref.seed}`).not.toBe(0)
+            expect(evaluate(wrong.expr!, {}), context).not.toBe(0)
             continue
           }
-          expect(differing / compared, `1-${plan.ref.seed} ${step.title} ${wrong.content}`).toBeGreaterThanOrEqual(0.25)
+          expect(differing / compared, `${context} ${wrong.content}`).toBeGreaterThanOrEqual(0.25)
         }
       }
     }
+    expect(checked).toBeGreaterThan(plans.length * 20)
   })
 
   it('haben setzbare Texte und zu jeder falschen Antwort eine eigene Erklärung', () => {
     for (const plan of plans) {
       for (const step of plan.steps) {
-        for (const text of texts(step)) expectRenderable(text, `1-${plan.ref.seed} ${step.title}`)
+        const context = `${level}-${plan.ref.seed} ${step.title}`
+        for (const text of texts(step)) expectRenderable(text, context)
+        if (step.established) expectRenderable(`$${step.established}$`, context)
         for (const wrong of step.choices.filter((c) => !c.correct)) {
-          expect(wrong.whyWrong?.detailed, `1-${plan.ref.seed}`).toBeTruthy()
-          expect(wrong.whyWrong?.short, `1-${plan.ref.seed}`).toBeTruthy()
-          expect(wrong.whyWrong?.detailed, `1-${plan.ref.seed} ${wrong.errorRuleId}`).not.toContain(FALLBACK_MARKER)
+          expect(wrong.whyWrong?.detailed, context).toBeTruthy()
+          expect(wrong.whyWrong?.short, context).toBeTruthy()
+          expect(wrong.whyWrong?.detailed, `${context} ${wrong.errorRuleId}`).not.toContain(FALLBACK_MARKER)
+        }
+      }
+    }
+  })
+
+  it('verraten beim Einsetzen in „Warum ist das falsch?" weder die Lösung noch das Endergebnis', () => {
+    for (const plan of plans) {
+      const last = plan.steps.at(-1)!
+      if (!last.id.startsWith('einsetzen')) continue
+      const solution = correctChoice(last).content.slice(1, -1)
+      const result = plan.resultLatex.replace("f'(x) = ", '')
+      for (const wrong of last.choices.filter((c) => !c.correct)) {
+        for (const text of [wrong.whyWrong!.detailed, wrong.whyWrong!.short]) {
+          expect(text, `${level}-${plan.ref.seed} ${wrong.errorRuleId}`).not.toContain(solution)
+          expect(text, `${level}-${plan.ref.seed} ${wrong.errorRuleId}`).not.toContain(`$${result}$`)
         }
       }
     }
