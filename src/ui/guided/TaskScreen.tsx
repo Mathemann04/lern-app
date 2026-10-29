@@ -3,6 +3,7 @@ import type { Choice, GuidedStep, GuidedTask } from '../../engine/guided/plan.ts
 import { planGuidedTask } from '../../engine/guided/plan.ts'
 import type { TaskRef } from '../../engine/tasks/taskNumber.ts'
 import type { ExplanationDetail } from '../../state/storage.ts'
+import { FitWidth } from '../FitWidth.tsx'
 import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
 import { practiceHref } from '../routes.ts'
@@ -63,9 +64,9 @@ function TaskHeader({ task, stepIndex }: { task: GuidedTask; stepIndex: number }
         <div className="space-y-1 rounded-xl bg-zinc-50 px-4 py-3" aria-label="Bisher">
           <p className="text-sm text-zinc-500">Bisher</p>
           {established.map((line) => (
-            <div key={line} className="overflow-x-auto">
+            <FitWidth key={line}>
               <Formula tex={line} />
-            </div>
+            </FitWidth>
           ))}
         </div>
       )}
@@ -142,10 +143,10 @@ function StepView({ step, isLast, mode, detail, onMistake, onNext }: StepProps) 
                       : 'border-zinc-200 bg-white hover:border-accent-600 active:bg-accent-50'
               }`}
             >
-              <span className="block min-w-0 flex-1 overflow-x-auto">
-                <RichText text={choice.content} className="block text-lg font-medium" inline />
-                {choice.caption && <RichText text={choice.caption} className="mt-1 block text-sm text-zinc-500" inline />}
-              </span>
+              <FitWidth className="min-w-0 flex-1 text-lg">
+                <RichText text={choice.content} className="block font-medium" inline />
+                {choice.caption && <RichText text={choice.caption} className="mt-1 block text-[0.78em] text-zinc-500" inline />}
+              </FitWidth>
               {isRight && <span className="text-xl text-green-700" aria-hidden>✓</span>}
               {isWrong && <span className="text-xl text-red-700" aria-hidden>✗</span>}
             </button>
@@ -225,8 +226,10 @@ function FinishView({ task, mistakes }: { task: GuidedTask; mistakes: number }) 
             : `Gelöst mit ${mistakes} ${mistakes === 1 ? 'Fehlversuch' : 'Fehlversuchen'}.`}
         </p>
       </div>
-      <div className="overflow-x-auto rounded-2xl bg-accent-50 px-4 py-4 text-2xl" data-testid="result">
-        <Formula tex={task.resultLatex} />
+      <div className="rounded-2xl bg-accent-50 px-4 py-4" data-testid="result">
+        <FitWidth className="text-2xl">
+          <Formula tex={task.resultLatex} />
+        </FitWidth>
       </div>
       <div className="flex flex-col gap-3 sm:flex-row">
         <a

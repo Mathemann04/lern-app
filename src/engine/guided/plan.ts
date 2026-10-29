@@ -3,6 +3,7 @@ import { type WrongAnswer, wrongAnswers } from '../derive/errorRules.ts'
 import { RULES, type RuleId } from '../derive/rules.ts'
 import {
   type Explanation,
+  EXTRA_RULE_OPTION,
   RULE_OPTIONS,
   explainAssembly,
   explainCalculation,
@@ -29,7 +30,8 @@ import type { TaskRef } from '../tasks/taskNumber.ts'
 // Ablauf: zuerst „Welche Regel?", dann je nach Hauptregel
 // - Summe: je Summand ein Schritt
 // - Produkt, Quotient: u' und v' einzeln, dann in die Regel einsetzen
-// - Kette: äußere Ableitung (nach u), innere Ableitung, dann zusammensetzen
+// - Kette: äußere Ableitung (nach u), innere Ableitung, dann zusammensetzen;
+//   ab Stufe 4 gröber: innere Ableitung, dann gleich zusammensetzen
 // Die Ableitung eines Teils ist immer ein einzelner Schritt, auch wenn darin selbst
 // wieder eine Regel steckt (z. B. u = e^{x^2} bei der Produktregel).
 
@@ -67,6 +69,8 @@ export type GuidedTask = {
   readonly ref: TaskRef
   readonly functionLatex: string
   readonly steps: readonly GuidedStep[]
+  // Welche Regel ganz außen? (auch, wenn die Frage danach entfällt; Tipp im freien Modus)
+  readonly ruleHint: Explanation
   readonly result: Expr
   readonly resultLatex: string
 }
@@ -95,22 +99,28 @@ export function mainRule(d: Derivation): RuleId {
   return splitFactors(d).core.rule
 }
 
+// Ab dieser Stufe wird der Rechenweg gröber: Geübtes ist ein einzelner Schritt
+const COARSE_FROM_LEVEL = 4
+
 export function planForExpression(f: Expr, ref: TaskRef): GuidedTask {
   const root = derive(f)
   const rngFor = (step: number) => createRng(`geführt:${ref.level}:${ref.seed}:${step}`)
   const rule = ruleStep(root, rngFor(0))
-  const steps = [...(rule ? [rule] : []), ...partSteps(root).map((build, i) => build(rngFor(i + 1)))]
+  const coarse = ref.level >= COARSE_FROM_LEVEL
+  const steps = [...(rule ? [rule] : []), ...partSteps(root, coarse).map((build, i) => build(rngFor(i + 1)))]
+  const { factors, core } = splitFactors(root)
   return {
     ref,
     functionLatex: `f(x) = ${toLatex(f)}`,
     steps,
+    ruleHint: explainRuleChoice(core.rule, factors),
     result: root.result,
     resultLatex: `f'(x) = ${toLatex(root.result)}`,
   }
 }
 
 // Die Schritte nach der Regelwahl, je Hauptregel
-function partSteps(root: Derivation): Array<(rng: Rng) => GuidedStep> {
+function partSteps(root: Derivation, coarse: boolean): Array<(rng: Rng) => GuidedStep> {
   const { factors, core } = splitFactors(root)
 
   if (root.rule === 'sum') {
@@ -140,6 +150,21 @@ function partSteps(root: Derivation): Array<(rng: Rng) => GuidedStep> {
     const [outer, inner] = core.children
     const innerLatex = toLatex(core.parts.inner!)
     const factorNote = keepFactorNote(factors)
+    const innerStep = (rng: Rng) =>
+      derivativeStep(inner, { title: 'Innere Ableitung', question: `Leite die innere Funktion $${PLACEHOLDER} = ${innerLatex}$ ab.`, name: `${PLACEHOLDER}'` }, rng)
+    if (coarse) {
+      return [
+        innerStep,
+        (rng) =>
+          assembleStep(
+            root,
+            'Zusammensetzen',
+            `Die äußere Funktion ist ${m(core.parts.outer!)} mit $${PLACEHOLDER} = ${innerLatex}$. Kettenregel: äußere Ableitung mal innere Ableitung.${factorNote ? ` ${factorNote}` : ''} Was ist $f'(x)$?`,
+            rng,
+            true,
+          ),
+      ]
+    }
     return [
       (rng) =>
         derivativeStep(
@@ -150,7 +175,7 @@ function partSteps(root: Derivation): Array<(rng: Rng) => GuidedStep> {
           },
           rng,
         ),
-      (rng) => derivativeStep(inner, { title: 'Innere Ableitung', question: `Leite die innere Funktion $${PLACEHOLDER} = ${innerLatex}$ ab.`, name: `${PLACEHOLDER}'` }, rng),
+      innerStep,
       (rng) =>
         assembleStep(
           root,
@@ -183,6 +208,8 @@ function ruleStep(root: Derivation, rng: Rng): GuidedStep | null {
   // Falsche Optionen nur aus Regeln, die im ganzen Rechenweg nirgends gebraucht werden
   const excluded = new Set<RuleId>([...allNodes(root).map((n) => n.rule), ...equivalentRules(core)])
   const wrong = RULE_OPTIONS.filter((r) => r !== correct && !excluded.has(r))
+  // Bei verschachtelten Termen bleiben oft zu wenige: dann auch die Faktorregel, falls sie nirgends vorkommt
+  if (wrong.length < 2 && !excluded.has(EXTRA_RULE_OPTION)) wrong.push(EXTRA_RULE_OPTION)
   if (wrong.length === 0) return null
   const choices: Choice[] = [
     { id: 'regel-richtig', content: RULES[correct].name, caption: tex(RULES[correct].formula), correct: true },
@@ -273,13 +300,19 @@ function withFactors(factors: readonly Derivation[], formula: Expr): Expr {
 
 const nodeAt = (d: Derivation, path: readonly number[]): Derivation => path.reduce((n, i) => n.children[i], d)
 
+// Liegt der Knoten im Teilbaum unter `path` (oder ist er es selbst)?
+const isWithin = (node: Derivation, path: readonly number[]) => path.every((i, k) => node.path[k] === i)
+
 // Einsetzen in Produkt-, Quotienten- oder Kettenregel. Die Antworten zeigen die eingesetzte
 // Formel vor dem Zusammenfassen; die falschen entstehen aus Fehlern an genau dieser Regel.
-function assembleStep(root: Derivation, title: string, question: string, rng: Rng): GuidedStep {
+// withOuter: Bei der Kettenregel zählen auch Fehler beim Ableiten der äußeren Funktion
+// (wenn die äußere Ableitung nicht vorher einzeln gefragt wurde).
+function assembleStep(root: Derivation, title: string, question: string, rng: Rng, withOuter = false): GuidedStep {
   const { factors, core } = splitFactors(root)
   const formula = withFactors(factors, core.formula)
+  const outerPath = [...core.path, 0]
   const candidates = wrongAnswers(root.input, root).flatMap((answer) => {
-    if (answer.node === core) {
+    if (answer.node === core || (withOuter && core.rule === 'chain' && isWithin(answer.node, outerPath))) {
       return [{ answer, formula: withFactors(factors, nodeAt(answer.derivation, core.path).formula) }]
     }
     if (factors.includes(answer.node) && answer.errorRule.id === 'factor-forgotten') {
@@ -301,7 +334,7 @@ function assembleStep(root: Derivation, title: string, question: string, rng: Rn
     title,
     question,
     choices: rng.shuffle([correct, ...wrongChoices]),
-    hint: hintForAssembly(core),
+    hint: hintForAssembly(core, withOuter),
     subject: root.input,
     variable: root.variable,
     explanation: explainAssembly(root, factors, core, formula),

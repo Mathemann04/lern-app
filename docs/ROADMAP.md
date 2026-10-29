@@ -23,7 +23,7 @@ Details: [PLAN-M1.md](PLAN-M1.md)
 - [x] 4. Geführter Modus (Stufe 1) mit Erklärungen
 - [x] 5. Stufen 2 und 3 im geführten Modus, Stufenwahl
 - [x] 6. Freier Modus
-- [ ] 7. Stufe 4 (vorgezogen, wichtigstes Niveau)
+- [x] 7. Stufe 4 (vorgezogen, wichtigstes Niveau)
 - [ ] 8. Fortschritt und Fehlerstatistik
 - [ ] 9. Lernkarten
 - [ ] 10. Stufe 5: logarithmisches Ableiten, Umkehr- und Hyperbelfunktionen
@@ -55,3 +55,13 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   werden alle typischen Fehler, dazu „Funktion selbst eingegeben",
   „Vorzeichen falsch" und „falscher Zahlenfaktor". Moduswahl „Geführt/Frei"
   auf der Startseite, gespeichert.
+- 29.10.2026: Stufe 4 geführt und frei. Rechenweg gröber: Bei der
+  Kettenregel entfällt der eigene Schritt „Äußere Ableitung"; deren typische
+  Fehler erscheinen beim Zusammensetzen. Bleibt bei der Regelwahl keine
+  sicher falsche Regel, kommt die Faktorregel als falsche Option dazu (wenn
+  sie nirgends gebraucht wird); sonst entfällt die Regelwahl (etwa 4 % der
+  Stufe-4-Aufgaben).
+- 29.10.2026: Endform löst Doppelbrüche auf (wie im Skript):
+  $\frac{(-3x^4 + x^3 - 3x^2 + 2x)e^{-3x}}{(x^2+1)^{3/2}}$ statt eines
+  Bruchs im Bruch. Lange Formeln werden am Handy automatisch etwas kleiner
+  gesetzt.

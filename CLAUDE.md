@@ -36,7 +36,9 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   Lernbildschirm geführt in `src/ui/guided/`, frei in `src/ui/free/`
   (MathLive mit eigener Bildschirm-Tastatur `keyboard.ts`, wird erst im
   freien Modus geladen), gemeinsame Teile in `src/ui/task/`. Welche Stufen
-  schon spielbar sind: `available` in `src/ui/samples.ts`. Texte mit Formeln über
+  schon spielbar sind: `available` in `src/ui/samples.ts`. Lange Formeln in
+  `FitWidth` (`src/ui/FitWidth.tsx`) setzen sich selbst kleiner, bis sie
+  passen. Texte mit Formeln über
   `RichText` (Formeln zwischen `$…$`).
 - `src/engine/`: Mathe-Engine, reines TypeScript
   - `rational.ts`: exakte Brüche (bigint)
@@ -47,7 +49,7 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   - `expr/print.ts`: LaTeX in deutscher Schreibweise; `expr/evaluate.ts`,
     `expr/sample.ts`: Werte und Prüfstellen im Definitionsbereich
   - `expr/finalForm.ts`: Endform von Ergebnissen (Ausklammern, Kürzen,
-    Ausmultiplizieren wie im Skript)
+    Ausmultiplizieren, Doppelbrüche auflösen wie im Skript)
   - `derive/`: Ableiten mit Protokoll (`derive` liefert einen Ableitungsbaum mit
     Regel, Teilen, eingesetzter Formel und Ergebnis je Knoten), Regelkatalog
     (`rules.ts`), Fehlerregeln und falsche Ergebnisse (`errorRules.ts`)
@@ -60,7 +62,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     „Warum ist das falsch?" (`texts.ts`); Format Text mit `$…$`-Formeln
   - `guided/plan.ts`: Schrittplaner für den geführten Modus (Regelwahl, dann je
     Summand ein Schritt; Produkt/Quotient: u', v', Einsetzen; Kette: äußere,
-    innere Ableitung, Zusammensetzen; Antworten aus Fehlerregeln)
+    innere Ableitung, Zusammensetzen, ab Stufe 4 ohne eigenen Außen-Schritt;
+    Antworten aus Fehlerregeln)
   - `random/rng.ts`: Zufall mit Startwert; `tasks/`: Aufgaben-Nummern
     („3-48213") und Vorlagen je Stufe
 - `src/state/`: Speichern auf dem Gerät (`storage.ts`, versioniert, robust

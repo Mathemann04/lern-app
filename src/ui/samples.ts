@@ -32,7 +32,7 @@ export const derivativeLevels: LevelPreview[] = [
   },
   {
     level: 4,
-    available: false,
+    available: true,
     title: 'Uni-Niveau: mehrere Regeln verschachtelt',
     examples: [
       String.raw`\frac{x^2 e^{-3x}}{\sqrt{1+x^2}}`,

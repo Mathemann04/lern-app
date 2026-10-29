@@ -6,7 +6,7 @@ import { evaluate } from './evaluate.ts'
 import { finalForm } from './finalForm.ts'
 import { normalize } from './normalize.ts'
 import { toLatex } from './print.ts'
-import { type Expr, add, cos, div, exp, ln, mul, neg, num, pow, sin, sub, x } from './types.ts'
+import { type Expr, add, cos, div, exp, ln, mul, neg, num, pow, sin, sqrt, sub, x } from './types.ts'
 
 const x2 = pow(x, num(2))
 
@@ -50,6 +50,27 @@ describe('Endform: feste Beispiele', () => {
     ['schreibt 1 - 2x² statt -2x² + 1', mul(sub(num(1), mul(num(2), x2)), exp(neg(x2))), '(1 - 2x^{2})e^{-x^{2}}'],
     ['lässt Polynom mit negativer Zahl absteigend', sub(neg(x2), num(3)), '-x^{2} - 3'],
     ['ln x + 1 ausgeklammert', add(mul(pow(x, x), ln(x)), pow(x, x)), 'x^{x}(\\ln x + 1)'],
+    [
+      'löst einen Doppelbruch auf (Quotientenregel mit ln x)',
+      div(sub(mul(div(num(1), x), add(x2, num(9))), mul(ln(x), num(2), x)), pow(add(x2, num(9)), num(2))),
+      '\\frac{x^{2} + 9 - 2x^{2}\\ln x}{x(x^{2} + 9)^{2}}',
+    ],
+    [
+      'löst einen Doppelbruch mit Wurzel auf (Beispiel aus dem Plan)',
+      div(
+        sub(
+          mul(add(mul(num(2), x, exp(mul(num(-3), x))), mul(num(-3), x2, exp(mul(num(-3), x)))), sqrt(add(x2, num(1)))),
+          mul(x2, exp(mul(num(-3), x)), div(x, sqrt(add(x2, num(1))))),
+        ),
+        add(x2, num(1)),
+      ),
+      '\\frac{(-3x^{4} + x^{3} - 3x^{2} + 2x)e^{-3x}}{(x^{2} + 1)^{\\frac{3}{2}}}',
+    ],
+    [
+      'löst einen Bruch im Nenner auf',
+      neg(div(num(1), mul(x2, add(div(num(1), x2), num(1))))),
+      '-\\frac{1}{x^{2} + 1}',
+    ],
   ])('%s', (_name, expr, expected) => {
     expect(toLatex(finalForm(expr))).toBe(expected)
   })

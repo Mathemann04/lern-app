@@ -233,6 +233,13 @@ Die Engine kennt kein React. Spätere Themen (M2 ff.) bauen auf `expr/`,
    mitgeführt. Bei der Regelwahl gilt die Produktregel bei Brüchen
    ($u \cdot v^{-1}$) und Potenzen wie $\sin^2 x$ ($\sin x \cdot \sin x$)
    nie als falsch.
+   Stufe 4 (Schritt 7): Kettenregel ohne eigenen Schritt „Äußere Ableitung"
+   (innere Ableitung, dann gleich zusammensetzen; Fehler der äußeren
+   Ableitung sind dort falsche Optionen). Bleiben bei der Regelwahl weniger
+   als zwei sicher falsche Regeln, kommt die Faktorregel dazu, falls sie
+   nirgends gebraucht wird; bleibt keine, entfällt die Regelwahl. In
+   verschachtelten Erklärungen keine Buchstaben $u$, $v$ für innere Teile
+   (die stehen schon für Zähler/Nenner bzw. die innere Funktion).
 7. **Gleichwertigkeit.** Erst Vergleich der Normalformen (schnell), sonst
    numerisch an mindestens 30 Zufallsstellen im Definitionsbereich der
    Aufgabe mit relativer Toleranz. Beim impliziten Ableiten an
@@ -249,7 +256,7 @@ Die Engine kennt kein React. Spätere Themen (M2 ff.) bauen auf `expr/`,
    reproduzierbar.
 10. **Endform** (`finalForm`): Ergebnisse werden zusammengefasst wie im Skript:
     Polynome ausmultipliziert, Funktionsfaktoren wie $e^x$ ausgeklammert, gegen $x$
-    im Nenner gekürzt, reine Potenzsummen bleiben stehen.
+    im Nenner gekürzt, reine Potenzsummen bleiben stehen, Doppelbrüche aufgelöst.
 11. **Definitionsbereich** nach deutscher Schulkonvention: Wurzeln und
     gebrochene Exponenten nur für Zahlen ≥ 0 (auch die dritte Wurzel),
     Potenzen mit variablem Exponenten nur für Basis > 0. Vereinfachen darf
