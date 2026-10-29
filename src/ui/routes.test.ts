@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { cardHref, parseRoute, practiceHref, taskHref } from './routes.ts'
+import { cardHref, parseRoute, practiceHref, sectionOf, taskHref, topicHref } from './routes.ts'
 
 describe('parseRoute', () => {
   it('erkennt die Seiten', () => {
@@ -10,11 +10,17 @@ describe('parseRoute', () => {
     expect(parseRoute('/unbekannt')).toEqual({ page: 'home' })
   })
 
-  it('erkennt die Lernkarten, unbekannte Karten führen zur Übersicht', () => {
+  it('erkennt die Lernkarten mit Ordnern, Unbekanntes führt eine Ebene höher', () => {
     expect(parseRoute('/karten')).toEqual({ page: 'cards' })
-    expect(parseRoute('/karten/product')).toEqual({ page: 'card', id: 'product' })
+    expect(parseRoute('/karten/ableitungen')).toEqual({ page: 'cardTopic', topic: 'ableitungen' })
+    expect(parseRoute('/karten/ableitungen/product')).toEqual({ page: 'card', id: 'product' })
+    expect(parseRoute('/karten/ableitungen/gibt-es-nicht')).toEqual({ page: 'cardTopic', topic: 'ableitungen' })
+    expect(parseRoute('/karten/gibt-es-nicht/product')).toEqual({ page: 'cards' })
     expect(parseRoute('/karten/gibt-es-nicht')).toEqual({ page: 'cards' })
-    expect(cardHref('sin-cos')).toBe('#/karten/sin-cos')
+    // ältere Adresse ohne Ordner
+    expect(parseRoute('/karten/product')).toEqual({ page: 'card', id: 'product' })
+    expect(cardHref('sin-cos')).toBe('#/karten/ableitungen/sin-cos')
+    expect(topicHref('ableitungen')).toBe('#/karten/ableitungen')
   })
 
   it('erkennt Übungsaufgaben mit und ohne Nummer', () => {
@@ -36,5 +42,16 @@ describe('parseRoute', () => {
     expect(parseRoute('/frei/3?fokus=gibt-es-nicht')).toEqual({ page: 'practice', mode: 'free', level: 3, seed: null, focus: null })
     expect(practiceHref(2, 'guided', 'cos-sign')).toBe('#/ueben/2?fokus=cos-sign')
     expect(taskHref({ level: 2, seed: 17 }, 'free', 'cos-sign')).toBe('#/frei/2-17?fokus=cos-sign')
+  })
+})
+
+describe('sectionOf', () => {
+  it('markiert den Bereich im Hauptmenü, Aufgaben und Galerie gehören zu keinem', () => {
+    expect(sectionOf(parseRoute('/'))).toBe('home')
+    expect(sectionOf(parseRoute('/karten/ableitungen/product'))).toBe('cards')
+    expect(sectionOf(parseRoute('/fortschritt'))).toBe('progress')
+    expect(sectionOf(parseRoute('/einstellungen'))).toBe('settings')
+    expect(sectionOf(parseRoute('/ueben/2-4'))).toBeNull()
+    expect(sectionOf(parseRoute('/galerie'))).toBeNull()
   })
 })

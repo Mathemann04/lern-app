@@ -12,6 +12,7 @@ import {
   parseTaskNumber,
   randomSeed,
 } from '../engine/tasks/taskNumber.ts'
+import { BackLink } from './BackLink.tsx'
 import { DerivationView } from './DerivationView.tsx'
 import { Formula } from './Formula.tsx'
 
@@ -43,6 +44,7 @@ export function GalleryScreen() {
   return (
     <main className="space-y-8">
       <section className="space-y-2">
+        <BackLink href="#/" label="Start" />
         <h1 className="text-3xl font-semibold tracking-tight">Formel-Galerie</h1>
         <p className="text-zinc-600 text-pretty">
           Testseite: Hier zeigt die Mathe-Engine zufällige Aufgaben aus allen Stufen mit Ableitung,

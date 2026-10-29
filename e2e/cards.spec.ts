@@ -18,16 +18,22 @@ async function expectCleanPage(page: Page, context: string) {
 const sheet = (page: Page) => page.getByRole('dialog')
 const answers = (page: Page) => page.getByRole('group', { name: 'Antworten' })
 
-test('Lernkarten über das Menü: Übersicht, Karte, anderes Beispiel, gezielt üben', async ({ page }) => {
+test('Lernkarten über das Menü: Ordner, Karte, anderes Beispiel, zurück, gezielt üben', async ({ page }) => {
   const errors = collectErrors(page)
   await page.goto('./')
-  await page.getByRole('link', { name: 'Lernkarten', exact: true }).click()
+  await page.getByRole('navigation', { name: 'Hauptmenü' }).getByRole('link', { name: 'Lernkarten' }).click()
   await expect(page.getByRole('heading', { name: 'Lernkarten', level: 1 })).toBeVisible()
+  await expectCleanPage(page, 'Ordner')
+
+  // Ordner öffnen: Namen der Formeln mit den Formeln
+  await page.getByRole('link', { name: /^Ableitungen/ }).click()
+  await expect(page).toHaveURL(/#\/karten\/ableitungen$/)
+  await expect(page.getByRole('heading', { name: 'Ableitungen', level: 1 })).toBeVisible()
   await expect(page.locator('main li a')).toHaveCount(15)
-  await expectCleanPage(page, 'Übersicht')
+  await expectCleanPage(page, 'Ordner Ableitungen')
 
   await page.getByRole('link', { name: /^Produktregel/ }).click()
-  await expect(page).toHaveURL(/#\/karten\/product$/)
+  await expect(page).toHaveURL(/#\/karten\/ableitungen\/product$/)
   await expect(page.getByRole('heading', { name: 'Produktregel', level: 1 })).toBeVisible()
   await expect(page.getByText('Einmal den ersten Faktor ableiten')).toBeVisible()
   const example = page.getByRole('region', { name: 'Beispiel' })
@@ -45,6 +51,13 @@ test('Lernkarten über das Menü: Übersicht, Karte, anderes Beispiel, gezielt �
   await expect(page.getByRole('heading', { name: 'Kettenregel', level: 1 })).toBeVisible()
   await expect(page.getByRole('region', { name: 'Beispiel' })).toContainText('1 von 4')
   await expectCleanPage(page, 'Kettenregel')
+
+  // Zurück führt in den Ordner, von dort zu allen Ordnern
+  await page.getByRole('link', { name: 'Ableitungen', exact: true }).click()
+  await expect(page.getByRole('heading', { name: 'Ableitungen', level: 1 })).toBeVisible()
+  await page.getByRole('link', { name: 'Lernkarten', exact: true }).first().click()
+  await expect(page).toHaveURL(/#\/karten$/)
+  await page.goto('./#/karten/ableitungen/chain')
 
   await page.getByRole('link', { name: 'Gezielt üben' }).first().click()
   await expect(page).toHaveURL(/#\/ueben\/2-\d+\?fokus=chain-inner-forgotten$/)
@@ -115,6 +128,6 @@ test('Freier Modus: Lernkarten zur Aufgabe und nach dem Lösen zum Nachlesen', a
   await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
   const links = page.getByRole('navigation', { name: 'Lernkarten zu dieser Aufgabe' })
   await links.getByRole('link', { name: 'Sinus und Kosinus' }).click()
-  await expect(page).toHaveURL(/#\/karten\/sin-cos$/)
+  await expect(page).toHaveURL(/#\/karten\/ableitungen\/sin-cos$/)
   await expect(page.getByRole('heading', { name: 'Sinus und Kosinus', level: 1 })).toBeVisible()
 })

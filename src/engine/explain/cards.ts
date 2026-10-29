@@ -25,10 +25,24 @@ import { WHEN_NEEDED } from './texts.ts'
 
 // Lernkarten: je Regel die Formel, ein Merksatz, wann man sie braucht, Beispiele und die
 // typischen Fehler dazu. Die Beispiele rechnet die Engine (example.ts), nicht die Karte.
-// Texte mit Formeln im Format von richText.ts.
+// Texte mit Formeln im Format von richText.ts. Die Karten liegen in Ordnern nach Themen;
+// spätere Themen (z. B. Formeln umstellen) bekommen eigene Ordner.
+
+export type Topic = {
+  // Teil der Adresse, z. B. #/karten/ableitungen
+  readonly id: string
+  readonly title: string
+  readonly description: string
+}
+
+export const TOPICS: readonly Topic[] = [
+  { id: 'ableitungen', title: 'Ableitungen', description: 'Von der Potenzregel bis zur Kettenregel' },
+]
 
 export type Card = {
   readonly id: string
+  // Ordner (Id eines Themas)
+  readonly topic: string
   // Text mit $…$-Formeln
   readonly title: string
   // ab dieser Stufe kommt die Regel in Aufgaben vor
@@ -54,6 +68,7 @@ const [x2, x3] = [pow(x, num(2)), pow(x, num(3))]
 export const CARDS: readonly Card[] = [
   {
     id: 'constant',
+    topic: 'ableitungen',
     title: 'Konstante',
     level: 1,
     rules: ['constant'],
@@ -64,6 +79,7 @@ export const CARDS: readonly Card[] = [
   },
   {
     id: 'power',
+    topic: 'ableitungen',
     title: 'Potenzregel',
     level: 1,
     rules: ['power'],
@@ -75,6 +91,7 @@ export const CARDS: readonly Card[] = [
   },
   {
     id: 'rewrite',
+    topic: 'ableitungen',
     title: 'Wurzeln und Brüche',
     level: 1,
     rules: ['rewrite'],
@@ -86,6 +103,7 @@ export const CARDS: readonly Card[] = [
   },
   {
     id: 'constant-factor',
+    topic: 'ableitungen',
     title: 'Faktorregel',
     level: 1,
     rules: ['constantFactor'],
@@ -97,6 +115,7 @@ export const CARDS: readonly Card[] = [
   },
   {
     id: 'sum',
+    topic: 'ableitungen',
     title: 'Summenregel',
     level: 1,
     rules: ['sum'],
@@ -108,6 +127,7 @@ export const CARDS: readonly Card[] = [
   },
   {
     id: 'exp',
+    topic: 'ableitungen',
     title: 'e-Funktion',
     level: 2,
     rules: ['exp'],
@@ -118,6 +138,7 @@ export const CARDS: readonly Card[] = [
   },
   {
     id: 'ln',
+    topic: 'ableitungen',
     title: 'Natürlicher Logarithmus',
     level: 2,
     rules: ['ln'],
@@ -129,6 +150,7 @@ export const CARDS: readonly Card[] = [
   },
   {
     id: 'sin-cos',
+    topic: 'ableitungen',
     title: 'Sinus und Kosinus',
     level: 2,
     rules: ['sin', 'cos'],
@@ -140,6 +162,7 @@ export const CARDS: readonly Card[] = [
   },
   {
     id: 'product',
+    topic: 'ableitungen',
     title: 'Produktregel',
     level: 2,
     rules: ['product'],
@@ -151,6 +174,7 @@ export const CARDS: readonly Card[] = [
   },
   {
     id: 'chain',
+    topic: 'ableitungen',
     title: 'Kettenregel',
     level: 2,
     rules: ['chain'],
@@ -169,6 +193,7 @@ export const CARDS: readonly Card[] = [
   },
   {
     id: 'quotient',
+    topic: 'ableitungen',
     title: 'Quotientenregel',
     level: 3,
     rules: ['quotient'],
@@ -181,6 +206,7 @@ export const CARDS: readonly Card[] = [
   },
   {
     id: 'exp-base',
+    topic: 'ableitungen',
     title: 'Exponentialfunktion $a^x$',
     level: 4,
     rules: ['expBase'],
@@ -192,6 +218,7 @@ export const CARDS: readonly Card[] = [
   },
   {
     id: 'log-base',
+    topic: 'ableitungen',
     title: 'Logarithmus $\\log_a x$',
     level: 4,
     rules: ['logBase'],
@@ -203,6 +230,7 @@ export const CARDS: readonly Card[] = [
   },
   {
     id: 'tan',
+    topic: 'ableitungen',
     title: 'Tangens',
     level: 4,
     rules: ['tan'],
@@ -214,6 +242,7 @@ export const CARDS: readonly Card[] = [
   },
   {
     id: 'arctan',
+    topic: 'ableitungen',
     title: 'Arkustangens',
     level: 4,
     rules: ['arctan'],
@@ -223,6 +252,12 @@ export const CARDS: readonly Card[] = [
     errors: ['arctan-sign', 'arctan-arcsin'],
   },
 ]
+
+export function topicById(id: string): Topic | undefined {
+  return TOPICS.find((topic) => topic.id === id)
+}
+
+export const cardsInTopic = (topic: string) => CARDS.filter((card) => card.topic === topic)
 
 export function cardById(id: string): Card | undefined {
   return CARDS.find((card) => card.id === id)

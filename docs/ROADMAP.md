@@ -80,3 +80,7 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   bei der Regelwahl mit allen angebotenen Regeln, damit die Antwort nicht
   verraten wird. Beispiele, die Teil der Aufgabe sind, werden dort nicht
   gezeigt. Lernkarten zählen wie ein Tipp (Aufgabe bleibt „ohne Fehler").
+- 29.10.2026: Lernkarten in Ordnern nach Themen (bisher „Ableitungen"), im
+  Ordner die Namen der Formeln mit den Formeln. Hauptmenü als Leiste unten
+  (Start, Lernkarten, Fortschritt, Einstellungen), am Laptop oben; in
+  Aufgaben ausgeblendet. Unterseiten haben oben einen Zurück-Knopf.

@@ -6,12 +6,13 @@ import { GalleryScreen } from './ui/GalleryScreen.tsx'
 import { HomeScreen } from './ui/HomeScreen.tsx'
 import { ProgressScreen } from './ui/ProgressScreen.tsx'
 import { SettingsScreen } from './ui/SettingsScreen.tsx'
-import { CardScreen, CardsScreen } from './ui/cards/CardsScreen.tsx'
+import { CardScreen, CardTopicScreen, CardsScreen } from './ui/cards/CardsScreen.tsx'
 import { buildInfoLabel } from './ui/buildInfo.ts'
 import { derivativeLevels, isLevelAvailable } from './ui/samples.ts'
 import { TaskScreen } from './ui/guided/TaskScreen.tsx'
 import { type PracticeMode } from './state/storage.ts'
-import { type Route, parseRoute, taskHref } from './ui/routes.ts'
+import { type Route, parseRoute, sectionOf, taskHref } from './ui/routes.ts'
+import { MainNav } from './ui/MainNav.tsx'
 import { useHashRoute } from './ui/useHashRoute.ts'
 import { usePwa } from './ui/usePwa.ts'
 
@@ -22,6 +23,8 @@ export function App() {
   const pwa = usePwa()
   const path = useHashRoute()
   const route = parseRoute(path)
+  // In Aufgaben kein Hauptmenü: dort beendet das X die Aufgabe
+  const showNav = route.page !== 'practice'
 
   // Neue Seite beginnt oben. Geschweifte Klammern sind nötig: Neuere Browser geben bei
   // scrollTo einen Wert zurück, den React sonst für eine Aufräumfunktion hält.
@@ -30,35 +33,18 @@ export function App() {
   }, [path])
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-2xl flex-col px-5 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:px-8">
+    <div
+      className={`mx-auto flex min-h-dvh max-w-2xl flex-col px-5 pt-[max(1.25rem,env(safe-area-inset-top))] sm:px-8 md:pb-5 ${
+        // Platz für die Leiste unten am Handy
+        showNav ? 'pb-[calc(5rem+env(safe-area-inset-bottom))]' : 'pb-[max(1.25rem,env(safe-area-inset-bottom))]'
+      }`}
+    >
       <header className="flex items-center justify-between py-2">
         <a href="#/" className="inline-flex items-center gap-3">
           <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" className="size-8" />
           <span className="text-lg font-semibold tracking-tight">Rechenweg</span>
         </a>
-        <nav className="-mr-2 flex items-center gap-1">
-          <a href="#/karten" aria-label="Lernkarten" className="rounded-lg p-2 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
-            <svg aria-hidden viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">
-              <rect x="3" y="7" width="14" height="14" rx="2" />
-              <path d="M7 3h11a3 3 0 0 1 3 3v11" strokeLinecap="round" />
-            </svg>
-          </a>
-          <a href="#/fortschritt" aria-label="Fortschritt" className="rounded-lg p-2 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
-            <svg aria-hidden viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-              <path d="M4 20h16M7 16v-4M12 16V8M17 16v-7" />
-            </svg>
-          </a>
-          <a
-            href="#/einstellungen"
-            aria-label="Einstellungen"
-            className="rounded-lg p-2 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900"
-          >
-            <svg aria-hidden viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="1.8">
-              <circle cx="12" cy="12" r="3" />
-              <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" />
-            </svg>
-          </a>
-        </nav>
+        {showNav && <MainNav active={sectionOf(route)} />}
       </header>
 
       <div className="flex-1 py-8">
@@ -75,7 +61,9 @@ export function App() {
       {pwa.needRefresh && (
         <div
           role="status"
-          className="fixed inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] mx-auto flex max-w-md items-center gap-3 rounded-2xl bg-zinc-900 p-4 text-white shadow-lg"
+          className={`fixed inset-x-4 z-20 mx-auto flex max-w-md items-center gap-3 rounded-2xl bg-zinc-900 p-4 text-white shadow-lg md:bottom-4 ${
+            showNav ? 'bottom-[calc(4.5rem+env(safe-area-inset-bottom))]' : 'bottom-[max(1rem,env(safe-area-inset-bottom))]'
+          }`}
         >
           <p className="flex-1">Eine neue Version ist da.</p>
           <button
@@ -108,6 +96,8 @@ function Page({ route }: { route: Route }) {
       return <ProgressScreen />
     case 'cards':
       return <CardsScreen />
+    case 'cardTopic':
+      return <CardTopicScreen key={route.topic} topic={route.topic} />
     case 'card':
       return <CardScreen key={route.id} id={route.id} />
     case 'practice':
