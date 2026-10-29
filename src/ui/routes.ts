@@ -2,6 +2,7 @@ import { ERROR_RULES } from '../engine/derive/errorRules.ts'
 import { cardById, topicById } from '../engine/explain/cards.ts'
 import { type Level, type TaskRef, formatTaskNumber, parseTaskNumber } from '../engine/tasks/taskNumber.ts'
 import type { PracticeMode } from '../state/storage.ts'
+import { areaById, courseById, isAreaAvailable } from './catalog.ts'
 
 // Seiten der App und ihre Adressen (Teil nach „#")
 export type Route =
@@ -9,6 +10,9 @@ export type Route =
   | { readonly page: 'gallery' }
   | { readonly page: 'settings' }
   | { readonly page: 'progress' }
+  // Gebiet #/gebiet/differentialrechnung, Thema #/thema/ableiten (Aufbau in catalog.ts)
+  | { readonly page: 'area'; readonly id: string }
+  | { readonly page: 'course'; readonly id: string }
   // Lernkarten: Ordner #/karten, ein Ordner #/karten/ableitungen, eine Karte #/karten/ableitungen/product
   | { readonly page: 'cards' }
   | { readonly page: 'cardTopic'; readonly topic: string }
@@ -31,6 +35,13 @@ export function parseRoute(fullPath: string): Route {
   if (path === '/einstellungen') return { page: 'settings' }
   if (path === '/fortschritt') return { page: 'progress' }
   if (path === '/karten') return { page: 'cards' }
+  const catalog = /^\/(gebiet|thema)\/([^/]+)$/.exec(path)
+  if (catalog) {
+    const [, kind, id] = catalog
+    if (kind === 'thema') return courseById(id) ? { page: 'course', id } : { page: 'home' }
+    const found = areaById(id)
+    return found && isAreaAvailable(found.area) ? { page: 'area', id } : { page: 'home' }
+  }
   const cards = /^\/karten\/([^/]+)(?:\/([^/]+))?$/.exec(path)
   if (cards) {
     const [, first, second] = cards
@@ -59,8 +70,12 @@ export const practiceHref = (level: Level, mode: PracticeMode = 'guided', focus?
 export const taskHref = (ref: TaskRef, mode: PracticeMode = 'guided', focus?: string | null) =>
   `#/${PREFIX[mode]}/${formatTaskNumber(ref)}${focusQuery(focus)}`
 
-export const topicHref = (topic: string) => `#/karten/${topic}`
-export const cardHref = (id: string) => `${topicHref(cardById(id)!.topic)}/${id}`
+export const areaHref = (id: string) => `#/gebiet/${id}`
+export const courseHref = (id: string) => `#/thema/${id}`
+
+// Ordner der Lernkarten (in explain/cards.ts „topic")
+export const cardFolderHref = (topic: string) => `#/karten/${topic}`
+export const cardHref = (id: string) => `${cardFolderHref(cardById(id)!.topic)}/${id}`
 
 // Bereiche des Hauptmenüs
 export type Section = 'home' | 'cards' | 'progress' | 'settings'
@@ -69,6 +84,8 @@ export type Section = 'home' | 'cards' | 'progress' | 'settings'
 export function sectionOf(route: Route): Section | null {
   switch (route.page) {
     case 'home':
+    case 'area':
+    case 'course':
       return 'home'
     case 'cards':
     case 'cardTopic':

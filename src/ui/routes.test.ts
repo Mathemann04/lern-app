@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { cardHref, parseRoute, practiceHref, sectionOf, taskHref, topicHref } from './routes.ts'
+import { areaHref, cardFolderHref, cardHref, courseHref, parseRoute, practiceHref, sectionOf, taskHref } from './routes.ts'
 
 describe('parseRoute', () => {
   it('erkennt die Seiten', () => {
@@ -8,6 +8,17 @@ describe('parseRoute', () => {
     expect(parseRoute('/einstellungen')).toEqual({ page: 'settings' })
     expect(parseRoute('/fortschritt')).toEqual({ page: 'progress' })
     expect(parseRoute('/unbekannt')).toEqual({ page: 'home' })
+  })
+
+  it('erkennt Gebiete und Themen, aber nur spielbare', () => {
+    expect(parseRoute('/gebiet/differentialrechnung')).toEqual({ page: 'area', id: 'differentialrechnung' })
+    expect(parseRoute('/thema/ableiten')).toEqual({ page: 'course', id: 'ableiten' })
+    // Integralrechnung kommt bald
+    expect(parseRoute('/gebiet/integralrechnung')).toEqual({ page: 'home' })
+    expect(parseRoute('/gebiet/gibt-es-nicht')).toEqual({ page: 'home' })
+    expect(parseRoute('/thema/gibt-es-nicht')).toEqual({ page: 'home' })
+    expect(areaHref('differentialrechnung')).toBe('#/gebiet/differentialrechnung')
+    expect(courseHref('ableiten')).toBe('#/thema/ableiten')
   })
 
   it('erkennt die Lernkarten mit Ordnern, Unbekanntes führt eine Ebene höher', () => {
@@ -20,7 +31,7 @@ describe('parseRoute', () => {
     // ältere Adresse ohne Ordner
     expect(parseRoute('/karten/product')).toEqual({ page: 'card', id: 'product' })
     expect(cardHref('sin-cos')).toBe('#/karten/ableitungen/sin-cos')
-    expect(topicHref('ableitungen')).toBe('#/karten/ableitungen')
+    expect(cardFolderHref('ableitungen')).toBe('#/karten/ableitungen')
   })
 
   it('erkennt Übungsaufgaben mit und ohne Nummer', () => {
@@ -48,6 +59,8 @@ describe('parseRoute', () => {
 describe('sectionOf', () => {
   it('markiert den Bereich im Hauptmenü, Aufgaben und Galerie gehören zu keinem', () => {
     expect(sectionOf(parseRoute('/'))).toBe('home')
+    expect(sectionOf(parseRoute('/gebiet/differentialrechnung'))).toBe('home')
+    expect(sectionOf(parseRoute('/thema/ableiten'))).toBe('home')
     expect(sectionOf(parseRoute('/karten/ableitungen/product'))).toBe('cards')
     expect(sectionOf(parseRoute('/fortschritt'))).toBe('progress')
     expect(sectionOf(parseRoute('/einstellungen'))).toBe('settings')

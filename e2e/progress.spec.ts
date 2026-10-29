@@ -47,7 +47,7 @@ test('Nach 8 von 10 ohne Fehler schlägt die App eine Stufe höher vor', async (
   await expect(page).toHaveURL(/#\/ueben\/2-\d+$/)
 
   // Gewechselt wird nur auf Knopfdruck; jetzt ist Stufe 2 gewählt
-  await page.goto('./')
+  await page.goto('./#/thema/ableiten')
   await expect(page.getByRole('radio', { name: /^Stufe 2/ })).toBeChecked()
   await expect(page.getByText('10 gelöst')).toBeVisible()
 })

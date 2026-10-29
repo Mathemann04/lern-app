@@ -1,9 +1,11 @@
 import type { ReactNode } from 'react'
 import { errorRule } from '../../engine/derive/errorRules.ts'
 import { type TaskRef, formatTaskNumber } from '../../engine/tasks/taskNumber.ts'
+import { DERIVATIVES } from '../catalog.ts'
 import { Formula } from '../Formula.tsx'
 import { type ExplanationMode, MODE_LABEL } from './explanationMode.ts'
 import { RichText } from '../RichText.tsx'
+import { courseHref } from '../routes.ts'
 
 // Teile, die geführter und freier Modus gemeinsam haben
 
@@ -11,7 +13,7 @@ import { RichText } from '../RichText.tsx'
 export function TaskTopBar({ mode, onCycleMode, children }: { mode: ExplanationMode; onCycleMode: () => void; children?: ReactNode }) {
   return (
     <div className="flex items-center gap-3">
-      <a href="#/" aria-label="Aufgabe beenden" className="-ml-2 rounded-lg p-2 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
+      <a href={courseHref(DERIVATIVES)} aria-label="Aufgabe beenden" className="-ml-2 rounded-lg p-2 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
         <svg aria-hidden viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
           <path d="M6 6l12 12M18 6L6 18" />
         </svg>

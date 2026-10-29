@@ -17,6 +17,7 @@ import { BackLink } from './BackLink.tsx'
 import { DerivationView } from './DerivationView.tsx'
 import { Formula } from './Formula.tsx'
 import { RichText } from './RichText.tsx'
+import { notationSamples } from './samples.ts'
 
 const TASKS_PER_PAGE = 8
 
@@ -46,7 +47,7 @@ export function GalleryScreen() {
   return (
     <main className="space-y-8">
       <section className="space-y-2">
-        <BackLink href="#/" label="Start" />
+        <BackLink href="#/einstellungen" label="Einstellungen" />
         <h1 className="text-3xl font-semibold tracking-tight">Formel-Galerie</h1>
         <p className="text-zinc-600 text-pretty">
           Testseite: Hier zeigt die Mathe-Engine zufällige Aufgaben aus allen Stufen mit Ableitung,
@@ -141,6 +142,25 @@ export function GalleryScreen() {
         {tasks.map((generated) => (
           <TaskCard key={generated.ref.seed} generated={generated} showSteps={showSteps} showErrors={showErrors} />
         ))}
+      </section>
+
+      <section aria-labelledby="notation" className="space-y-4 border-t border-zinc-100 pt-8">
+        <div>
+          <h2 id="notation" className="text-xl font-semibold">
+            Schreibweise
+          </h2>
+          <p className="mt-1 text-zinc-600">So werden Formeln in der App gesetzt. Sieht das aus wie in deinem Skript?</p>
+        </div>
+        <dl className="grid gap-3 sm:grid-cols-2">
+          {notationSamples.map((sample) => (
+            <div key={sample.label} className="rounded-xl bg-zinc-50 px-4 py-3">
+              <dt className="text-sm text-zinc-500">{sample.label}</dt>
+              <dd className="mt-1 text-xl">
+                <Formula tex={sample.tex} />
+              </dd>
+            </div>
+          ))}
+        </dl>
       </section>
     </main>
   )

@@ -10,7 +10,8 @@ import { FitWidth } from '../FitWidth.tsx'
 import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
 import { CardSheetButton, TaskCardLinks } from '../cards/CardSheet.tsx'
-import { practiceHref, taskHref } from '../routes.ts'
+import { DERIVATIVES } from '../catalog.ts'
+import { courseHref, practiceHref, taskHref } from '../routes.ts'
 import { LevelUpSuggestion } from '../task/LevelUpSuggestion.tsx'
 import { FocusBanner, TaskIntro, TaskTopBar } from '../task/TaskParts.tsx'
 import { type ExplanationMode, useExplanationMode } from '../task/explanationMode.ts'
@@ -116,8 +117,8 @@ export default function FreeTaskScreen({ taskRef, focus = null }: { taskRef: Tas
             >
               Nächste Aufgabe
             </a>
-            <a href="#/" className="flex-1 rounded-xl border border-zinc-300 px-4 py-3 text-center text-lg font-medium hover:bg-zinc-50">
-              Zur Startseite
+            <a href={courseHref(DERIVATIVES)} className="flex-1 rounded-xl border border-zinc-300 px-4 py-3 text-center text-lg font-medium hover:bg-zinc-50">
+              Zur Übersicht
             </a>
           </div>
           <TaskCardLinks ids={plan.cards} />

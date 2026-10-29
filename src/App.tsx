@@ -2,6 +2,8 @@ import { Suspense, lazy, useEffect } from 'react'
 import { createRng } from './engine/random/rng.ts'
 import { findTaskWithError } from './engine/tasks/focus.ts'
 import { type Level, randomSeed } from './engine/tasks/taskNumber.ts'
+import { AreaScreen } from './ui/AreaScreen.tsx'
+import { CourseScreen } from './ui/CourseScreen.tsx'
 import { GalleryScreen } from './ui/GalleryScreen.tsx'
 import { HomeScreen } from './ui/HomeScreen.tsx'
 import { ProgressScreen } from './ui/ProgressScreen.tsx'
@@ -94,6 +96,10 @@ function Page({ route }: { route: Route }) {
       return <SettingsScreen />
     case 'progress':
       return <ProgressScreen />
+    case 'area':
+      return <AreaScreen key={route.id} id={route.id} />
+    case 'course':
+      return <CourseScreen key={route.id} id={route.id} />
     case 'cards':
       return <CardsScreen />
     case 'cardTopic':

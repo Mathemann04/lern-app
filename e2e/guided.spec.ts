@@ -57,7 +57,7 @@ async function solveWholeTask(page: Page, resultLabel = 'f′(x)') {
 
 test('Eine Aufgabe der Stufe 1 lässt sich geführt komplett lösen', async ({ page }) => {
   const errors = collectErrors(page)
-  await page.goto('./')
+  await page.goto('./#/thema/ableiten')
   await page.getByRole('link', { name: 'Stufe 1 geführt üben' }).click()
   await expect(page).toHaveURL(/#\/ueben\/1-\d+$/)
 
@@ -71,7 +71,7 @@ test('Eine Aufgabe der Stufe 1 lässt sich geführt komplett lösen', async ({ p
 
 test('Stufenwahl bleibt gespeichert, Stufe 2 lässt sich komplett lösen', async ({ page }) => {
   const errors = collectErrors(page)
-  await page.goto('./')
+  await page.goto('./#/thema/ableiten')
   await expect(page.getByRole('radio', { name: /^Stufe 5/ })).toBeEnabled()
   await page.getByText('Mit e-Funktion, ln, sin und cos').click()
   await expect(page.getByRole('radio', { name: /^Stufe 2/ })).toBeChecked()
