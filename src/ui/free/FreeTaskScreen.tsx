@@ -13,7 +13,7 @@ import { CardSheetButton, TaskCardLinks } from '../cards/CardSheet.tsx'
 import { DERIVATIVES } from '../catalog.ts'
 import { courseHref, practiceHref, taskHref } from '../routes.ts'
 import { LevelUpSuggestion } from '../task/LevelUpSuggestion.tsx'
-import { FocusBanner, TaskIntro, TaskTopBar } from '../task/TaskParts.tsx'
+import { CheckBadge, FocusBanner, TaskIntro, TaskTopBar } from '../task/TaskParts.tsx'
 import { type ExplanationMode, useExplanationMode } from '../task/explanationMode.ts'
 import { MathInput } from './MathInput.tsx'
 
@@ -126,7 +126,7 @@ export default function FreeTaskScreen({ taskRef, focus = null }: { taskRef: Tas
       ) : (
         <div className="flex flex-wrap gap-2">
           {!hintOpen && (
-            <button type="button" onClick={() => setHintOpen(true)} className="rounded-xl px-3 py-2 font-medium text-amber-800 hover:bg-amber-50">
+            <button type="button" onClick={() => setHintOpen(true)} className="rounded-xl px-3 py-2.5 font-medium text-amber-800 hover:bg-amber-50">
               Tipp anzeigen
             </button>
           )}
@@ -137,7 +137,7 @@ export default function FreeTaskScreen({ taskRef, focus = null }: { taskRef: Tas
                 tally.current.helped = true
                 setRevealed(1)
               }}
-              className="rounded-xl px-3 py-2 font-medium text-accent-700 hover:bg-accent-50"
+              className="rounded-xl px-3 py-2.5 font-medium text-accent-700 hover:bg-accent-50"
             >
               Lösungsweg aufdecken
             </button>
@@ -145,7 +145,7 @@ export default function FreeTaskScreen({ taskRef, focus = null }: { taskRef: Tas
           <CardSheetButton ids={plan.cards} title={plan.cards.length === 1 ? 'Lernkarte zu dieser Aufgabe' : 'Lernkarten zu dieser Aufgabe'}
             task={plan.expr}
           />
-          <a href={taskHref(taskRef, 'guided', focus)} className="rounded-xl px-3 py-2 font-medium text-accent-700 hover:bg-accent-50">
+          <a href={taskHref(taskRef, 'guided', focus)} className="rounded-xl px-3 py-2.5 font-medium text-accent-700 hover:bg-accent-50">
             Geführt lösen
           </a>
         </div>
@@ -159,7 +159,7 @@ export default function FreeTaskScreen({ taskRef, focus = null }: { taskRef: Tas
       )}
 
       {solved && revealed === 0 && (
-        <button type="button" onClick={() => setRevealed(1)} className="rounded-xl px-3 py-2 font-medium text-accent-700 hover:bg-accent-50">
+        <button type="button" onClick={() => setRevealed(1)} className="rounded-xl px-3 py-2.5 font-medium text-accent-700 hover:bg-accent-50">
           Lösungsweg ansehen
         </button>
       )}
@@ -210,7 +210,7 @@ function Feedback({ verdict, resultLatex, detail, mode }: { verdict: Verdict; re
             <button
               type="button"
               onClick={() => setWhyOpen(true)}
-              className="rounded-xl border border-red-200 bg-white px-4 py-2 font-medium text-red-800 hover:bg-red-100"
+              className="rounded-xl border border-red-200 bg-white px-4 py-2.5 font-medium text-red-800 hover:bg-red-100"
             >
               Warum ist das falsch?
             </button>
@@ -267,7 +267,10 @@ const TONES = {
 function Box({ tone, title, children }: { tone: keyof typeof TONES; title: string; children: ReactNode }) {
   return (
     <div className={`animate-step-in space-y-3 rounded-2xl p-4 ${TONES[tone].box}`}>
-      <p className={`text-lg font-semibold ${TONES[tone].title}`}>{title}</p>
+      <p className={`text-lg font-semibold ${TONES[tone].title}`}>
+        {tone === 'green' && <CheckBadge />}
+        {title}
+      </p>
       {children}
     </div>
   )

@@ -41,7 +41,9 @@ body {
   font-size: 1.15em;
 }
 
-/* Dezentes Einblenden neuer Schritte und Rückmeldungen */
+/* Dezente Bewegungen. Wer am Gerät „Bewegung reduzieren" eingestellt hat, bekommt keine. */
+
+/* Neue Schritte und Rückmeldungen gleiten ein */
 @keyframes step-in {
   from {
     opacity: 0;
@@ -55,8 +57,75 @@ body {
 .animate-step-in {
   animation: step-in 220ms ease-out both;
 }
+
+/* Seitenwechsel: nur Deckkraft, denn eine Verschiebung würde Fenster mit position: fixed
+   (Lernkarten, Tastatur) während der Bewegung mitnehmen */
+@keyframes page-in {
+  from {
+    opacity: 0;
+  }
+}
+.animate-page-in {
+  animation: page-in 160ms ease-out;
+}
+
+/* Haken und Kreuz springen kurz auf */
+@keyframes pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+  100% {
+    transform: none;
+  }
+}
+.animate-pop {
+  display: inline-block;
+  animation: pop 320ms ease-out both;
+}
+
+/* Richtige Antwort leuchtet kurz grün auf */
+@keyframes glow {
+  from {
+    box-shadow: 0 0 0 0 rgb(22 163 74 / 0.45);
+  }
+  to {
+    box-shadow: 0 0 0 12px rgb(22 163 74 / 0);
+  }
+}
+.animate-glow {
+  animation: glow 600ms ease-out;
+}
+
+/* Falsche Antwort wackelt kurz */
+@keyframes shake {
+  20% {
+    transform: translateX(-5px);
+  }
+  40% {
+    transform: translateX(5px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+.animate-shake {
+  animation: shake 320ms ease-in-out;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .animate-step-in {
+  .animate-step-in,
+  .animate-page-in,
+  .animate-pop,
+  .animate-glow,
+  .animate-shake {
     animation: none;
   }
 }

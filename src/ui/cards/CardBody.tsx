@@ -81,7 +81,7 @@ function CardExample({ examples, heading: H, headingClass }: { examples: readonl
         <button
           type="button"
           onClick={() => setIndex((i) => (i + 1) % examples.length)}
-          className="rounded-xl border border-accent-600 px-4 py-2 font-medium text-accent-800 hover:bg-accent-50"
+          className="rounded-xl border border-accent-600 px-4 py-2.5 font-medium text-accent-800 hover:bg-accent-50"
         >
           Anderes Beispiel
         </button>
@@ -115,7 +115,7 @@ function CardErrors({ card, heading: H, headingClass, practice }: Props & { head
               {practice && (
                 <a
                   href={practiceHref(derivativeLevel, practiceMode, id)}
-                  className="-ml-3 inline-block rounded-xl px-3 py-2 font-medium text-accent-700 hover:bg-accent-50"
+                  className="-ml-3 inline-block rounded-xl px-3 py-2.5 font-medium text-accent-700 hover:bg-accent-50"
                 >
                   Gezielt üben
                 </a>

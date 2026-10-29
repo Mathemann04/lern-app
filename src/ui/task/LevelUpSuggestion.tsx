@@ -22,11 +22,11 @@ export function LevelUpSuggestion({ level, mode }: { level: Level; mode: Practic
         <a
           href={practiceHref(next, mode)}
           onClick={() => updateSettings({ derivativeLevel: next })}
-          className="rounded-xl bg-accent-700 px-4 py-2 font-medium text-white hover:bg-accent-800"
+          className="rounded-xl bg-accent-700 px-4 py-2.5 font-medium text-white hover:bg-accent-800"
         >
           Stufe {next} probieren
         </a>
-        <button type="button" onClick={() => dismissSuggestion(level)} className="rounded-xl px-4 py-2 font-medium text-accent-800 hover:bg-accent-100">
+        <button type="button" onClick={() => dismissSuggestion(level)} className="rounded-xl px-4 py-2.5 font-medium text-accent-800 hover:bg-accent-100">
           Später
         </button>
       </div>

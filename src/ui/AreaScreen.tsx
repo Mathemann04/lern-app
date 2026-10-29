@@ -36,7 +36,7 @@ export function AreaScreen({ id }: { id: string }) {
                 <span className="block text-lg font-semibold">{course.title}</span>
                 <span className="block text-zinc-600 text-pretty">{course.description}</span>
                 <span className="block text-sm text-zinc-500">
-                  {derivativeLevels.length} Stufen{solved > 0 && ` · ${solved} Aufgaben gelöst`}
+                  {derivativeLevels.length} Stufen{solved > 0 && ` · ${solved} ${solved === 1 ? 'Aufgabe' : 'Aufgaben'} gelöst`}
                 </span>
               </span>
               <span aria-hidden className="text-accent-700">

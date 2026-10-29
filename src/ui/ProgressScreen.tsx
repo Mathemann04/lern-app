@@ -87,7 +87,7 @@ export function ProgressScreen() {
                   </div>
                   <a
                     href={practiceHref(derivativeLevel, practiceMode, id)}
-                    className="inline-block rounded-xl bg-accent-700 px-4 py-2 font-medium text-white hover:bg-accent-800"
+                    className="inline-block rounded-xl bg-accent-700 px-4 py-2.5 font-medium text-white hover:bg-accent-800"
                   >
                     Gezielt üben
                   </a>
@@ -110,17 +110,17 @@ export function ProgressScreen() {
                     resetProgress()
                     setConfirmReset(false)
                   }}
-                  className="rounded-xl bg-red-700 px-4 py-2 font-medium text-white hover:bg-red-800"
+                  className="rounded-xl bg-red-700 px-4 py-2.5 font-medium text-white hover:bg-red-800"
                 >
                   Ja, löschen
                 </button>
-                <button type="button" onClick={() => setConfirmReset(false)} className="rounded-xl px-4 py-2 font-medium hover:bg-red-100">
+                <button type="button" onClick={() => setConfirmReset(false)} className="rounded-xl px-4 py-2.5 font-medium hover:bg-red-100">
                   Abbrechen
                 </button>
               </div>
             </div>
           ) : (
-            <button type="button" onClick={() => setConfirmReset(true)} className="rounded-xl px-3 py-2 text-sm text-zinc-500 hover:bg-zinc-100">
+            <button type="button" onClick={() => setConfirmReset(true)} className="rounded-xl px-3 py-3 text-sm text-zinc-500 hover:bg-zinc-100">
               Fortschritt löschen
             </button>
           )}

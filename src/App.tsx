@@ -42,18 +42,18 @@ export function App() {
       }`}
     >
       <header className="flex items-center justify-between py-2">
-        <a href="#/" className="inline-flex items-center gap-3">
+        <a href="#/" className="-my-1.5 inline-flex items-center gap-3 py-1.5">
           <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" className="size-8" />
           <span className="text-lg font-semibold tracking-tight">Rechenweg</span>
         </a>
         {showNav && <MainNav active={sectionOf(route)} />}
       </header>
 
-      <div className="flex-1 py-8">
+      <div key={path} className="animate-page-in flex-1 py-8">
         <Page route={route} />
       </div>
 
-      <footer className="space-y-1 pt-6 text-center text-sm text-zinc-400">
+      <footer className="space-y-1 pt-6 text-center text-sm text-zinc-500">
         <p data-testid="offline-status">
           {pwa.isOfflineReady ? 'Offline nutzbar ✓' : 'Wird für die Offline-Nutzung vorbereitet …'}
         </p>
