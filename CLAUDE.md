@@ -7,7 +7,8 @@ den Nutzer zugeschnitten: Maschinenbau, 1. Semester, THU, „Mathematik MB1".
 
 - Vision und Anforderungen: [docs/VISION.md](docs/VISION.md)
 - Meilensteine und aktueller Stand: [docs/ROADMAP.md](docs/ROADMAP.md)
-- Plan für den laufenden Meilenstein: [docs/PLAN-M1.md](docs/PLAN-M1.md)
+- Plan für den laufenden Meilenstein: [docs/PLAN-M2.md](docs/PLAN-M2.md)
+  (abgeschlossen: [docs/PLAN-M1.md](docs/PLAN-M1.md))
 
 Vor jeder Arbeit ROADMAP und den laufenden Plan lesen.
 

@@ -5,12 +5,25 @@ Stand: 29.10.2026
 | Meilenstein | Inhalt | Status |
 | --- | --- | --- |
 | M1 | Grundgerüst + Ableitungsregeln (beide Modi, 5 Stufen, Erklärungen, Lernkarten, Fortschritt) | fertig |
-| M2 | Brüche und Formeln umstellen (Bruchrechnung, Doppelbrüche, nach einer Variablen auflösen) | offen |
-| M3 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
-| M4 | weitere Themen aus Mathematik MB1 | offen |
-| M5 | Physik: Formeln umstellen, mit Einheiten | offen |
-| M6 | Technische Mechanik: Freischnitt, Gleichgewicht, Lagerkräfte, statische Bestimmtheit | offen |
+| M2 | Brüche (Bruchrechnung, Bruchterme kürzen und zusammenfassen, Doppelbrüche); App für mehrere Themen | Plan: Entwurf |
+| M3 | Formeln umstellen (nach einer Variablen auflösen, auch mit Brüchen) | offen |
+| M4 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
+| M5 | weitere Themen aus Mathematik MB1 | offen |
+| M6 | Physik: Formeln umstellen, mit Einheiten | offen |
+| M7 | Technische Mechanik: Freischnitt, Gleichgewicht, Lagerkräfte, statische Bestimmtheit | offen |
 | Später | Konto und Sync, Teilen mit Kommilitonen, App-Store-Version, optional KI-Hilfe | offen |
+
+## M2: Schritte
+
+Details: [PLAN-M2.md](PLAN-M2.md)
+
+- [x] Plan M2 (Entwurf)
+- [ ] 1. Mathe-Engine für Brüche
+- [ ] 2. Mehrere Themen, Brüche Stufe 1 und 2 geführt
+- [ ] 3. Stufen 3 und 4 geführt
+- [ ] 4. Freier Modus für Brüche
+- [ ] 5. Stufe 5 geführt und frei
+- [ ] 6. Gezieltes Üben, Feinschliff, Abschluss von M2
 
 ## M1: Schritte
 
@@ -107,3 +120,7 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   kommen in `src/ui/catalog.ts` dazu.
 - 29.10.2026: Meilenstein 1 abgeschlossen (Schritt 12: Animationen,
   Tippflächen, Ladezeit).
+- 29.10.2026: Brüche und Formeln umstellen getrennt (Wunsch des Nutzers):
+  zwei Themen im Gebiet „Grundlagen" und zwei Meilensteine (M2 Brüche,
+  M3 Formeln umstellen); die späteren Meilensteine rücken eine Nummer
+  weiter.
