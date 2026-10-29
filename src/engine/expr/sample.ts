@@ -27,3 +27,14 @@ export function samplePoints(exprs: readonly Expr[], rng: Rng, count: number, va
   }
   return points
 }
+
+// Zufällige Stellen für mehrere voneinander unabhängige Variablen, z. B. x, y und y' beim
+// impliziten Ableiten. Werte zwischen −4 und 4; nur Stellen, an denen alle Terme definiert sind.
+export function sampleEnvs(exprs: readonly Expr[], rng: Rng, count: number, variables: readonly string[]): Env[] {
+  const points: Env[] = []
+  for (let attempt = 0; attempt < count * 50 && points.length < count; attempt++) {
+    const env: Env = Object.fromEntries(variables.map((name) => [name, (rng.next() * 2 - 1) * 4]))
+    if (exprs.every((e) => !Number.isNaN(evaluate(e, env)))) points.push(env)
+  }
+  return points
+}

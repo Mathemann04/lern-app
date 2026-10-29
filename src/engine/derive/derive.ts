@@ -57,6 +57,8 @@ export type Derivation = {
   // abgeleiteter Teilterm (Aufgabenform)
   readonly input: Expr
   readonly variable: string
+  // implizites Ableiten: Variable, die von `variable` abhängt (y = y(x)); ihre Ableitung heißt y'
+  readonly dependent?: string
   readonly parts: DerivationParts
   readonly children: readonly Derivation[]
   // Regel mit eingesetzten Teilen, vor dem Zusammenfassen, z. B. 2x · e^x + x² · e^x
@@ -72,17 +74,21 @@ export type Derivation = {
 // Ersetzt an einem Knoten das richtige Ergebnis durch ein falsches (für Fehlerregeln)
 export type Override = (node: Derivation) => { formula: Expr; errorId: string } | null
 
-export function derive(expr: Expr, variableName = 'x', override?: Override): Derivation {
-  return deriveAt(expr, variableName, [], override)
+// dependent: beim impliziten Ableiten die Variable, die von variableName abhängt, z. B. y
+export function derive(expr: Expr, variableName = 'x', override?: Override, dependent?: string): Derivation {
+  return deriveAt(expr, variableName, [], override, dependent)
 }
+
+// Name der Ableitung einer abhängigen Variablen: y → y'
+export const primeOf = (name: string) => `${name}'`
 
 // Alle Knoten des Baums, Wurzel zuerst
 export function allNodes(d: Derivation): Derivation[] {
   return [d, ...d.children.flatMap(allNodes)]
 }
 
-function deriveAt(e: Expr, v: string, path: readonly number[], override?: Override): Derivation {
-  const node = build(e, v, path, override)
+function deriveAt(e: Expr, v: string, path: readonly number[], override?: Override, dependent?: string): Derivation {
+  const node = build(e, v, path, override, dependent)
   const wrong = override?.(node)
   if (!wrong) return node
   return { ...node, formula: wrong.formula, result: finalForm(wrong.formula), errorId: wrong.errorId }
@@ -149,13 +155,18 @@ function basicDerivative(name: FnName, X: Expr): Expr {
   }
 }
 
-function build(e: Expr, v: string, path: readonly number[], override?: Override): Derivation {
+function build(e: Expr, v: string, path: readonly number[], override?: Override, dependent?: string): Derivation {
   const X = variable(v)
-  const child = (expr: Expr, index: number, name = v) => deriveAt(expr, name, [...path, index], override)
+  // Die abhängige Variable gilt nur beim Ableiten nach v, nicht in der äußeren Funktion (nach u)
+  const child = (expr: Expr, index: number, name = v) => deriveAt(expr, name, [...path, index], override, name === v ? dependent : undefined)
+  // Hängt der Term von v ab (auch über y = y(x))?
+  const depends = (t: Expr) => contains(t, v) || (dependent !== undefined && contains(t, dependent))
+  const isMainVar = (t: Expr) => t.kind === 'var' && t.name === v
   const node = (rule: RuleId, parts: DerivationParts, children: Derivation[], formula: Expr): Derivation => ({
     rule,
     input: e,
     variable: v,
+    ...(dependent ? { dependent } : {}),
     parts,
     children,
     formula,
@@ -176,10 +187,12 @@ function build(e: Expr, v: string, path: readonly number[], override?: Override)
     return node('rewrite', { rewritten }, [inner], inner.result)
   }
 
-  if (!contains(e, v)) return node('constant', {}, [], num(0))
+  if (!depends(e)) return node('constant', {}, [], num(0))
 
   switch (e.kind) {
     case 'var':
+      // y hängt von x ab: (y)' = y'
+      if (e.name === dependent) return node('dependent', {}, [], variable(primeOf(e.name)))
       return node('power', { base: e, exponent: num(1) }, [], num(1))
 
     case 'add': {
@@ -190,8 +203,8 @@ function build(e: Expr, v: string, path: readonly number[], override?: Override)
     case 'neg': {
       // −(3 · u) wird als ein Faktor −3 behandelt, nicht als −1 und 3
       if (e.arg.kind === 'mul') {
-        const constants = e.arg.factors.filter((f) => !contains(f, v))
-        const dependents = e.arg.factors.filter((f) => contains(f, v))
+        const constants = e.arg.factors.filter((f) => !depends(f))
+        const dependents = e.arg.factors.filter((f) => depends(f))
         const constant = constants.length === 1 ? constants[0] : mul(...constants)
         if (constants.length > 0 && constant.kind === 'num') {
           const rest = dependents.length === 1 ? dependents[0] : mul(...dependents)
@@ -205,8 +218,8 @@ function build(e: Expr, v: string, path: readonly number[], override?: Override)
     }
 
     case 'mul': {
-      const constants = e.factors.filter((f) => !contains(f, v))
-      const dependents = e.factors.filter((f) => contains(f, v))
+      const constants = e.factors.filter((f) => !depends(f))
+      const dependents = e.factors.filter((f) => depends(f))
       const rest = dependents.length === 1 ? dependents[0] : mul(...dependents)
       if (constants.length > 0) {
         const factor = constants.length === 1 ? constants[0] : mul(...constants)
@@ -222,11 +235,11 @@ function build(e: Expr, v: string, path: readonly number[], override?: Override)
     }
 
     case 'div': {
-      if (!contains(e.den, v)) {
+      if (!depends(e.den)) {
         const inner = child(e.num, 0)
         return node('constantFactor', { factor: e.den, rest: e.num, divisor: true }, [inner], div(inner.result, e.den))
       }
-      const r = contains(e.num, v) ? null : variablePower(e.den, v)
+      const r = depends(e.num) ? null : variablePower(e.den, v)
       if (r) {
         const power = pow(X, num(ratNeg(r)))
         return rewrite(e.num.kind === 'num' && isOne(e.num.value) ? power : mul(e.num, power))
@@ -238,15 +251,15 @@ function build(e: Expr, v: string, path: readonly number[], override?: Override)
     }
 
     case 'pow': {
-      const baseDepends = contains(e.base, v)
-      const expDepends = contains(e.exp, v)
+      const baseDepends = depends(e.base)
+      const expDepends = depends(e.exp)
       if (baseDepends && !expDepends) {
-        if (e.base.kind === 'var') return node('power', { base: e.base, exponent: e.exp }, [], powerFormula(e.base, e.exp))
+        if (isMainVar(e.base)) return node('power', { base: e.base, exponent: e.exp }, [], powerFormula(e.base, e.exp))
         return chain(pow(U, e.exp), e.base)
       }
       if (!baseDepends) {
         const isE = e.base.kind === 'const' && e.base.name === 'e'
-        if (e.exp.kind === 'var') {
+        if (isMainVar(e.exp)) {
           return isE
             ? node('exp', { base: e.base }, [], pow(E, X))
             : node('expBase', { base: e.base }, [], mulDot(pow(e.base, X), ln(e.base)))
@@ -265,12 +278,12 @@ function build(e: Expr, v: string, path: readonly number[], override?: Override)
     }
 
     case 'fn':
-      if (e.arg.kind === 'var' && e.arg.name === v) return node(e.name, {}, [], basicDerivative(e.name, X))
+      if (isMainVar(e.arg)) return node(e.name, {}, [], basicDerivative(e.name, X))
       return chain(fn(e.name, U), e.arg)
 
     case 'log':
-      if (contains(e.base, v)) return rewrite(div(ln(e.arg), ln(e.base)))
-      if (e.arg.kind === 'var' && e.arg.name === v) {
+      if (depends(e.base)) return rewrite(div(ln(e.arg), ln(e.base)))
+      if (isMainVar(e.arg)) {
         return node('logBase', { base: e.base }, [], div(num(1), mulDot(X, ln(e.base))))
       }
       return chain(log(e.base, U), e.arg)

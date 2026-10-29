@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { errorRule } from '../../engine/derive/errorRules.ts'
 import { type Card, examplesFor } from '../../engine/explain/cards.ts'
 import { workedExample } from '../../engine/explain/example.ts'
-import type { Expr } from '../../engine/expr/types.ts'
+import type { Equation, Expr } from '../../engine/expr/types.ts'
 import { useProgress } from '../../state/progress.ts'
 import { useSettings } from '../../state/settings.ts'
 import { FitWidth } from '../FitWidth.tsx'
@@ -51,7 +51,7 @@ export function CardBody({ card, heading: H, practice, task }: Props) {
   )
 }
 
-function CardExample({ examples, heading: H, headingClass }: { examples: readonly Expr[]; heading: Heading; headingClass: string }) {
+function CardExample({ examples, heading: H, headingClass }: { examples: readonly (Expr | Equation)[]; heading: Heading; headingClass: string }) {
   const [index, setIndex] = useState(0)
   const example = useMemo(() => workedExample(examples[index]), [examples, index])
   return (

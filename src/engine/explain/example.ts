@@ -1,7 +1,8 @@
 import { type Derivation, PLACEHOLDER, derive } from '../derive/derive.ts'
+import { deriveImplicit, implicitResult, sortedEquation } from '../derive/implicit.ts'
 import { RULES } from '../derive/rules.ts'
-import { toLatex } from '../expr/print.ts'
-import { type Expr, asRational } from '../expr/types.ts'
+import { equationToLatex, toLatex } from '../expr/print.ts'
+import { type Equation, type Expr, asRational, isEquation } from '../expr/types.ts'
 import { chain, m, prime } from './format.ts'
 import { BASIC_SENTENCE, exponentOf, powerRuleWithNumbers } from './texts.ts'
 
@@ -22,9 +23,26 @@ export type WorkedExample = {
   readonly result: Expr
 }
 
-export function workedExample(f: Expr): WorkedExample {
+export function workedExample(f: Expr | Equation): WorkedExample {
+  if (isEquation(f)) return implicitExample(f)
   const root = derive(f)
   return { functionLatex: `f(x) = ${toLatex(f)}`, lines: detailed(root, "f'(x)"), result: root.result }
+}
+
+// Implizites Ableiten: beide Seiten ableiten, y' ausklammern, teilen
+function implicitExample(equation: Equation): WorkedExample {
+  const d = deriveImplicit(equation)
+  const result = implicitResult(d)
+  const [differentiated, sorted] = [equationToLatex(d.differentiated), equationToLatex(sortedEquation(d))]
+  return {
+    functionLatex: equationToLatex(equation),
+    lines: [
+      { label: "Beide Seiten nach $x$ ableiten, jeder Term mit $y$ bekommt den Faktor $y'$:", latex: differentiated },
+      ...(sorted === differentiated ? [] : [{ label: "Alle Terme mit $y'$ auf eine Seite, $y'$ ausklammern:", latex: sorted }]),
+      { label: "Durch den Faktor vor $y'$ teilen:", latex: `y' = ${toLatex(result)}` },
+    ],
+    result,
+  }
 }
 
 const isMinusOne = (e: Expr) => {

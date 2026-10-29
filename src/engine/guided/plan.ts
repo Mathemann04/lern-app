@@ -1,5 +1,14 @@
 import { type Derivation, PLACEHOLDER, allNodes, derive } from '../derive/derive.ts'
 import { type WrongAnswer, wrongAnswers } from '../derive/errorRules.ts'
+import {
+  DEPENDENT,
+  type ImplicitDerivation,
+  deriveImplicit,
+  implicitCurvePoints,
+  implicitResult,
+  implicitWrongAnswers,
+  solveMistakes,
+} from '../derive/implicit.ts'
 import { RULES, type RuleId } from '../derive/rules.ts'
 import { cardIdsFor } from '../explain/cards.ts'
 import {
@@ -17,15 +26,21 @@ import {
   explainWrongRuleChoice,
   hintFor,
   hintForAssembly,
+  HINT_DIFFERENTIATE_SIDES,
+  HINT_SOLVE,
+  IMPLICIT_RULE_HINT,
+  explainDifferentiateSides,
+  explainSolve,
+  explainSolveMistake,
   keepFactorNote,
   type LogLawMistake,
 } from '../explain/texts.ts'
 import { m, prime, tex } from '../explain/format.ts'
 import { clearlyDifferent } from '../check/numeric.ts'
-import { key } from '../expr/compare.ts'
-import { toLatex } from '../expr/print.ts'
+import { contains, key } from '../expr/compare.ts'
+import { equationToLatex, toLatex } from '../expr/print.ts'
 import { samplePoints } from '../expr/sample.ts'
-import { type Expr, add, asRational, div, ln, mulDot, neg, num, pow, variable } from '../expr/types.ts'
+import { type Equation, type Expr, add, asRational, div, ln, mulDot, neg, num, pow, sub, variable } from '../expr/types.ts'
 import { type Rng, createRng } from '../random/rng.ts'
 import { isInteger } from '../rational.ts'
 import { generateDerivativeTask } from '../tasks/derivativeTerms.ts'
@@ -81,9 +96,14 @@ export type GuidedStep = {
 
 export type GuidedTask = {
   readonly ref: TaskRef
-  // abzuleitende Funktion (Aufgabenform)
+  // abzuleitende Funktion (Aufgabenform); beim impliziten Ableiten linke minus rechte Seite
   readonly expr: Expr
+  // Aufgabe als LaTeX: f(x) = … bzw. die Gleichung
   readonly functionLatex: string
+  // Arbeitsauftrag, z. B. „Leite ab"
+  readonly instruction: string
+  // Name der gesuchten Ableitung: f'(x) bzw. y'
+  readonly answerLabel: string
   readonly steps: readonly GuidedStep[]
   // Welche Regel ganz außen? (auch, wenn die Frage danach entfällt; Tipp im freien Modus)
   readonly ruleHint: Explanation
@@ -99,8 +119,7 @@ const MAX_WRONG_CHOICES = 3
 // wo er passieren kann
 export function planGuidedTask(ref: TaskRef, focus?: string): GuidedTask {
   const { task } = generateDerivativeTask(ref)
-  if (task.kind !== 'function') throw new Error('Implizites Ableiten kommt in Schritt 11.')
-  return planForExpression(task.expr, ref, focus)
+  return task.kind === 'implicit' ? planImplicit(task.equation, ref, focus) : planForExpression(task.expr, ref, focus)
 }
 
 // Feste Faktoren vor der Hauptregel (−3 bei −3x² sin x) und der Knoten dahinter
@@ -133,6 +152,8 @@ export function planForExpression(f: Expr, ref: TaskRef, focus?: string): Guided
     ref,
     expr: f,
     functionLatex: `f(x) = ${toLatex(f)}`,
+    instruction: 'Leite ab',
+    answerLabel: "f'(x)",
     steps,
     ruleHint: explainRuleChoice(core.rule, factors),
     result: root.result,
@@ -322,7 +343,7 @@ type StepText = {
 
 // Ein Teilterm wird in einem Schritt abgeleitet; die Antworten sind fertig zusammengefasst
 function derivativeStep(node: Derivation, { title, question, name, resultOnly }: StepText, { rng, focus }: StepContext): GuidedStep {
-  const local = derive(node.input, node.variable)
+  const local = derive(node.input, node.variable, undefined, node.dependent)
   const correct: Choice = { id: 'richtig', content: m(local.result), correct: true, expr: local.result }
   let wrongChoices: Choice[]
   if (local.rule === 'constant') {
@@ -459,5 +480,101 @@ function assembleStep(root: Derivation, title: string, question: string, { rng, 
       ...(withOuter && core.rule === 'chain' ? allNodes(core.children[0]).map((n) => n.rule) : []),
       ...factors.map((f) => f.rule),
     ]),
+  }
+}
+
+// --- Implizites Ableiten ---
+// 1. ein Term mit y (die neue Idee: y hängt von x ab, Faktor y'), 2. beide Seiten ableiten,
+// 3. nach y' auflösen. Die abgeleitete Gleichung und y' stehen danach unter „Bisher".
+
+export function planImplicit(equation: Equation, ref: TaskRef, focus?: string): GuidedTask {
+  const d = deriveImplicit(equation)
+  const result = implicitResult(d)
+  const rngFor = (step: number) => createRng(`implizit:${ref.level}:${ref.seed}:${step}`)
+  const sides = [d.left, d.right]
+  // erster Term mit y; ein einzelnes y wäre zu leicht, dann der ganze Teil
+  const terms = sides.flatMap((side) => (side.rule === 'sum' ? side.children : [side]))
+  const term = terms.find((t) => contains(t.input, DEPENDENT) && t.input.kind !== 'var') ?? terms.find((t) => contains(t.input, DEPENDENT))!
+  const steps = [
+    derivativeStep(
+      term,
+      {
+        title: 'Term ableiten',
+        question: `In der Gleichung hängt $y$ von $x$ ab. Was ist die Ableitung von ${m(term.input)} nach $x$?`,
+      },
+      { rng: rngFor(1), focus },
+    ),
+    sidesStep(d, { rng: rngFor(2), focus }),
+    solveStep(d, rngFor(3)),
+  ]
+  return {
+    ref,
+    expr: sub(equation.lhs, equation.rhs),
+    functionLatex: equationToLatex(equation),
+    instruction: 'Leite implizit ab',
+    answerLabel: "y'",
+    steps,
+    ruleHint: IMPLICIT_RULE_HINT,
+    result,
+    resultLatex: `y' = ${toLatex(result)}`,
+    cards: cardIdsFor(sides.flatMap((side) => allNodes(side).map((n) => n.rule))),
+  }
+}
+
+const equationDifference = (e: Equation) => sub(e.lhs, e.rhs)
+
+// Beide Seiten ableiten: Antworten sind abgeleitete Gleichungen, die falschen aus Fehlerregeln
+function sidesStep(d: ImplicitDerivation, { rng, focus }: StepContext): GuidedStep {
+  const candidates = implicitWrongAnswers(d.equation, d).map((answer) => ({ answer }))
+  const correct: Choice = {
+    id: 'richtig',
+    content: tex(equationToLatex(d.differentiated)),
+    correct: true,
+    expr: equationDifference(d.differentiated),
+  }
+  const wrongChoices = pickWrong(candidates, rng, focus).map(({ answer }, i) => ({
+    id: `falsch-${i + 1}`,
+    content: tex(equationToLatex(answer.differentiated)),
+    correct: false,
+    expr: equationDifference(answer.differentiated),
+    errorRuleId: answer.errorRule.id,
+    whyWrong: explainError(answer),
+  }))
+  return {
+    id: 'beide-seiten',
+    title: 'Beide Seiten ableiten',
+    question: `Leite beide Seiten von ${tex(equationToLatex(d.equation))} nach $x$ ab.`,
+    choices: rng.shuffle([correct, ...wrongChoices]),
+    hint: HINT_DIFFERENTIATE_SIDES,
+    variable: 'x',
+    explanation: explainDifferentiateSides(d),
+    established: equationToLatex(d.differentiated),
+    cards: cardIdsFor([d.left, d.right].flatMap((side) => allNodes(side).map((n) => n.rule))),
+  }
+}
+
+// Nach y' auflösen: falsche Antworten aus typischen Fehlern beim Umstellen
+function solveStep(d: ImplicitDerivation, rng: Rng): GuidedStep {
+  const result = implicitResult(d)
+  const points = implicitCurvePoints(d.equation, 'auflösen')
+  const choices: Choice[] = [
+    { id: 'richtig', content: m(result), correct: true, expr: result },
+    ...solveMistakes(d, points).map(({ mistake, result: wrong }, i) => ({
+      id: `falsch-${i + 1}`,
+      content: m(wrong),
+      correct: false,
+      expr: wrong,
+      whyWrong: explainSolveMistake(mistake),
+    })),
+  ]
+  return {
+    id: 'aufloesen',
+    title: "Nach y' auflösen",
+    question: `Löse ${tex(equationToLatex(d.differentiated))} nach $y'$ auf. Was ist $y'$?`,
+    choices: rng.shuffle(choices),
+    hint: HINT_SOLVE,
+    explanation: explainSolve(d),
+    established: `y' = ${toLatex(result)}`,
+    cards: cardIdsFor(['dependent']),
   }
 }

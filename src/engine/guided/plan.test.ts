@@ -7,12 +7,14 @@ import { FALLBACK_MARKER } from '../explain/texts.ts'
 import { parseRichText } from '../explain/richText.ts'
 import { isStableAt } from '../expr/arbitraries.ts'
 import { evaluate } from '../expr/evaluate.ts'
-import { samplePoints } from '../expr/sample.ts'
+import { sampleEnvs, samplePoints } from '../expr/sample.ts'
 import { substitute } from '../expr/substitute.ts'
-import { type Expr, add, div, exp, fn, ln, mul, neg, num, pow, sin, sqrt, x } from '../expr/types.ts'
+import { type Equation, type Expr, add, div, eq, exp, fn, ln, mul, neg, num, pow, sin, sqrt, x, y } from '../expr/types.ts'
 import { createRng } from '../random/rng.ts'
 import { generateDerivativeTask } from '../tasks/derivativeTerms.ts'
-import { type GuidedStep, type GuidedTask, planForExpression, planGuidedTask } from './plan.ts'
+import { numericImplicitDerivative } from '../check/curve.ts'
+import { implicitCurvePoints } from '../derive/implicit.ts'
+import { type GuidedStep, type GuidedTask, planForExpression, planGuidedTask, planImplicit } from './plan.ts'
 
 const correctChoice = (step: GuidedStep) => step.choices.find((c) => c.correct)!
 
@@ -192,16 +194,17 @@ describe('Stufe 4: gröberer Rechenweg', () => {
 // Ableitung von subject nach variable, an einer Stelle; als x geschrieben für die Prüfhilfen
 const asX = (e: Expr, variable: string) => substitute(e, variable, x)
 
+const isImplicit = (plan: GuidedTask) => plan.answerLabel === "y'"
+
 describe.each([1, 2, 3, 4, 5] as const)('alle Aufgaben der Stufe %i', (level) => {
-  // implizites Ableiten (Stufe 5) kommt in Schritt 11
-  const plans: GuidedTask[] = Array.from({ length: 200 }, (_, i) => ({ level, seed: i + 1 }))
-    .filter((ref) => generateDerivativeTask(ref).task.kind === 'function')
-    .map((ref) => planGuidedTask(ref))
+  const plans: GuidedTask[] = Array.from({ length: 200 }, (_, i) => planGuidedTask({ level, seed: i + 1 }))
 
   it('beginnen (fast immer) mit der Regelwahl', () => {
-    const withRule = plans.filter((p) => p.steps[0].title === 'Regel wählen').length
+    // implizites Ableiten (Stufe 5) hat keine Regelwahl
+    const explicit = plans.filter((p) => !isImplicit(p))
+    const withRule = explicit.filter((p) => p.steps[0].title === 'Regel wählen').length
     // Ab Stufe 4 kann sie fehlen, wenn jede Regel irgendwo im Term gebraucht wird
-    expect(withRule / plans.length).toBeGreaterThanOrEqual(level < 4 ? 1 : 0.9)
+    expect(withRule / explicit.length).toBeGreaterThanOrEqual(level < 4 ? 1 : 0.9)
   })
 
   it('haben in jedem Schritt eine richtige und 1 bis 3 falsche Antworten', () => {
@@ -221,7 +224,8 @@ describe.each([1, 2, 3, 4, 5] as const)('alle Aufgaben der Stufe %i', (level) =>
     let checked = 0
     for (const plan of plans) {
       // Ableitungsschritte; das Logarithmieren prüft ein eigener Test
-      for (const step of plan.steps.filter((s) => s.subject)) {
+      // implizit prüft ein eigener Test (dort hängt y von x ab)
+      for (const step of plan.steps.filter((s) => s.subject && !isImplicit(plan))) {
         const context = `${level}-${plan.ref.seed} ${step.title}`
         const variable = step.variable ?? 'x'
         const subject = asX(step.subject!, variable)
@@ -289,7 +293,7 @@ describe.each([1, 2, 3, 4, 5] as const)('alle Aufgaben der Stufe %i', (level) =>
           // jede angebotene Regel hat ihre Karte, nicht nur die richtige
           expect(step.cards, context).toEqual(step.choices.map((c) => cardForRule(c.rule!)!.id))
         } else if (step.subject) {
-          const rule = derive(step.subject!, step.variable).rule
+          const rule = derive(step.subject!, step.variable, undefined, isImplicit(plan) ? 'y' : undefined).rule
           expect(step.cards, context).toContain(cardForRule(rule)!.id)
           // Die Aufgabe kennt alle Karten ihrer Schritte (außer den falschen Regeln der Regelwahl)
           expect(plan.cards, context).toEqual(expect.arrayContaining([...step.cards]))
@@ -361,6 +365,74 @@ describe('Stufe 5: logarithmisches Ableiten', () => {
       for (const wrong of step.choices.filter((c) => !c.correct)) {
         const { compared, differing } = compareValues(lnF, wrong.expr!, points)
         expect(differing / compared, `5-${seed} ${wrong.content}`).toBeGreaterThanOrEqual(0.25)
+      }
+    }
+  })
+})
+
+describe('Stufe 5: implizites Ableiten', () => {
+  const circle = planImplicit(eq(add(pow(x, num(2)), pow(y, num(2))), num(25)), { level: 5, seed: 1 })
+
+  it('fragt nach einem Term mit y, der Ableitung beider Seiten und y\'', () => {
+    expect(circle.steps.map((s) => s.title)).toEqual(['Term ableiten', 'Beide Seiten ableiten', "Nach y' auflösen"])
+    expect(circle.steps.map((s) => correctChoice(s).content)).toEqual(["$2yy'$", "$2x + 2yy' = 0$", '$-\\frac{x}{y}$'])
+    expect(circle.steps.map((s) => s.established)).toEqual(["\\left(y^{2}\\right)' = 2yy'", "2x + 2yy' = 0", "y' = -\\frac{x}{y}"])
+    expect(circle.resultLatex).toBe("y' = -\\frac{x}{y}")
+    expect(circle.instruction).toBe('Leite implizit ab')
+  })
+
+  it('zeigt typische Fehler beim Ableiten und beim Auflösen', () => {
+    const [term, sides, solve] = circle.steps
+    expect(term.choices.map((c) => c.errorRuleId)).toEqual(expect.arrayContaining(['implicit-y-constant']))
+    expect(sides.choices.filter((c) => !c.correct).length).toBe(3)
+    expect(solve.choices.filter((c) => !c.correct).map((c) => c.content).sort()).toEqual(['$-\\frac{y}{x}$', '$\\frac{x}{y}$'])
+  })
+
+  const plans = Array.from({ length: 300 }, (_, i) => ({ level: 5 as const, seed: i + 1 }))
+    .filter((ref) => generateDerivativeTask(ref).task.kind === 'implicit')
+    .map((ref) => ({ plan: planGuidedTask(ref), equation: (generateDerivativeTask(ref).task as { equation: Equation }).equation }))
+
+  it('Term ableiten: richtig ist die Ableitung mit y = y(x), numerisch geprüft', () => {
+    // d/dt Term(x + t, y + t·y') bei t = 0 ist die Ableitung nach x, wenn y von x abhängt
+    let checked = 0
+    for (const { plan } of plans) {
+      const step = plan.steps[0]
+      const term = step.subject!
+      const right = correctChoice(step).expr!
+      const points = sampleEnvs([term, right], createRng(`term:${plan.ref.seed}`), 20, ['x', 'y', "y'"])
+      for (const p of points) {
+        const along = (t: number) => evaluate(term, { x: p.x + t, y: p.y + t * p["y'"] })
+        const quotient = (h: number) => (along(h) - along(-h)) / (2 * h)
+        const approx = (4 * quotient(5e-5) - quotient(1e-4)) / 3
+        const exact = evaluate(right, p)
+        if (!Number.isFinite(approx) || !Number.isFinite(exact) || Math.abs(exact) > 1e4) continue
+        expect(Math.abs(exact - approx), `5-${plan.ref.seed}`).toBeLessThanOrEqual(1e-5 * Math.max(1, Math.abs(exact)))
+        checked++
+      }
+      for (const wrong of step.choices.filter((c) => !c.correct)) {
+        const { compared, differing } = compareValues(right, wrong.expr!, points)
+        expect(differing / compared, `5-${plan.ref.seed} ${wrong.content}`).toBeGreaterThanOrEqual(0.25)
+      }
+    }
+    expect(checked).toBeGreaterThan(plans.length * 10)
+  })
+
+  it('y\' auflösen: richtig stimmt auf der Kurve mit der Steigung überein, falsch nicht', () => {
+    for (const { plan, equation } of plans) {
+      const step = plan.steps[2]
+      const points = implicitCurvePoints(equation, `plan:${plan.ref.seed}`, 20)
+      let compared = 0
+      for (const p of points) {
+        const slope = numericImplicitDerivative(equation, p.x, p.y)
+        if (slope === null) continue
+        const exact = evaluate(correctChoice(step).expr!, p)
+        expect(Math.abs(exact - slope), `5-${plan.ref.seed}`).toBeLessThanOrEqual(1e-5 * Math.max(1, Math.abs(exact)))
+        compared++
+      }
+      expect(compared, `5-${plan.ref.seed}`).toBeGreaterThanOrEqual(8)
+      for (const wrong of step.choices.filter((c) => !c.correct)) {
+        const result = compareValues(correctChoice(step).expr!, wrong.expr!, points)
+        expect(result.differing / result.compared, `5-${plan.ref.seed} ${wrong.content}`).toBeGreaterThanOrEqual(0.25)
       }
     }
   })

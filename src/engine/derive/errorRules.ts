@@ -1,7 +1,7 @@
 import { clearlyDifferent } from '../check/numeric.ts'
-import { key } from '../expr/compare.ts'
+import { contains, key } from '../expr/compare.ts'
 import { evaluate } from '../expr/evaluate.ts'
-import { samplePoints } from '../expr/sample.ts'
+import { sampleEnvs, samplePoints } from '../expr/sample.ts'
 import { substitute } from '../expr/substitute.ts'
 import {
   type Expr,
@@ -24,7 +24,7 @@ import {
 } from '../expr/types.ts'
 import { createRng } from '../random/rng.ts'
 import { isInteger, isOne, rat, ratAbs, ratAdd, ratSign, ratSub, ONE } from '../rational.ts'
-import { type Derivation, PLACEHOLDER, allNodes, derive } from './derive.ts'
+import { type Derivation, PLACEHOLDER, allNodes, derive, primeOf } from './derive.ts'
 import type { RuleId } from './rules.ts'
 
 // Fehlerregeln: typische Denkfehler als falsche Anwendung einer Regel an genau einer
@@ -397,6 +397,45 @@ export const ERROR_RULES: readonly ErrorRule[] = [
     apply: (node) => div(num(1), sqrt(add(pow(X(node), num(2)), num(1)))),
   },
   {
+    id: 'implicit-y-constant',
+    rule: 'dependent',
+    name: 'y wie eine feste Zahl abgeleitet',
+    wrongFormula: "(y^2)' = 0",
+    apply: () => num(0),
+  },
+  {
+    id: 'implicit-y-prime-forgotten',
+    rule: 'dependent',
+    name: 'Innere Ableitung von y vergessen',
+    wrongFormula: "(y^2)' = 2y",
+    // y abgeleitet, als wäre es x
+    apply: () => num(1),
+  },
+  {
+    id: 'implicit-x-as-constant',
+    rule: 'product',
+    name: 'x wie eine feste Zahl behandelt',
+    wrongFormula: "(x \\cdot y)' = x \\cdot y'",
+    apply(node) {
+      // nur beim impliziten Ableiten: Ein Faktor enthält nur x, der andere y
+      const dependent = node.dependent
+      if (!dependent) return null
+      const { u, v } = node.parts
+      const [uHasY, vHasY] = [contains(u!, dependent), contains(v!, dependent)]
+      if (!uHasY && vHasY) return mulDot(u!, node.children[1].result)
+      if (uHasY && !vHasY) return mulDot(node.children[0].result, v!)
+      return null
+    },
+  },
+  {
+    id: 'implicit-constant-side-kept',
+    rule: 'constant',
+    name: 'Zahl auf der anderen Seite nicht abgeleitet',
+    wrongFormula: "(25)' = 25",
+    // nur beim impliziten Ableiten, wenn eine ganze Seite der Gleichung eine Zahl ist
+    apply: (node) => (node.dependent && node.path.length === 0 ? node.input : null),
+  },
+  {
     id: 'artanh-arctan',
     rule: 'artanh',
     name: 'Mit dem Arkustangens verwechselt',
@@ -427,7 +466,12 @@ export type WrongAnswer = {
 // Behalten werden nur Ergebnisse, die sich deutlich von der Lösung und voneinander
 // unterscheiden. Eine falsche Option ist also nie zufällig doch richtig.
 export function wrongAnswers(expr: Expr, correct: Derivation = derive(expr)): WrongAnswer[] {
-  const points = samplePoints([expr, correct.result], createRng(`fehler:${key(expr)}`), 60, correct.variable)
+  const rng = createRng(`fehler:${key(expr)}`)
+  // Beim impliziten Ableiten hängen die Terme von x, y und y' ab
+  const { variable: v, dependent } = correct
+  const points = dependent
+    ? sampleEnvs([expr, correct.result], rng, 60, [v, dependent, primeOf(dependent)])
+    : samplePoints([expr, correct.result], rng, 60, v)
   const kept: Array<WrongAnswer & { alsoMatches: ErrorRule[] }> = []
 
   for (const node of allNodes(correct)) {
@@ -435,13 +479,18 @@ export function wrongAnswers(expr: Expr, correct: Derivation = derive(expr)): Wr
       if (rule.rule !== node.rule) continue
       const target = node.path.join(',')
       let applied = false
-      const derivation = derive(expr, correct.variable, (candidate) => {
-        if (candidate.path.join(',') !== target) return null
-        const formula = rule.apply(candidate)
-        if (!formula) return null
-        applied = true
-        return { formula, errorId: rule.id }
-      })
+      const derivation = derive(
+        expr,
+        v,
+        (candidate) => {
+          if (candidate.path.join(',') !== target) return null
+          const formula = rule.apply(candidate)
+          if (!formula) return null
+          applied = true
+          return { formula, errorId: rule.id }
+        },
+        dependent,
+      )
       if (!applied) continue
 
       const result = derivation.result

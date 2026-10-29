@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { compareValues } from '../check/numeric.ts'
 import { latexProblem } from '../expr/latexChecks.ts'
-import { toLatex } from '../expr/print.ts'
-import { samplePoints } from '../expr/sample.ts'
+import { equationToLatex, toLatex } from '../expr/print.ts'
+import { sampleEnvs, samplePoints } from '../expr/sample.ts'
 import {
+  type Equation,
   type Expr,
   add,
+  eq,
   cos,
   div,
   exp,
@@ -17,13 +19,16 @@ import {
   pow,
   sin,
   sqrt,
+  sub,
   tan,
   x,
+  y,
 } from '../expr/types.ts'
 import { createRng } from '../random/rng.ts'
 import { generateDerivativeTask } from '../tasks/derivativeTerms.ts'
 import { LEVELS } from '../tasks/taskNumber.ts'
 import { allNodes, derive } from './derive.ts'
+import { deriveImplicit, implicitWrongAnswers } from './implicit.ts'
 import { ERROR_RULES, wrongAnswers } from './errorRules.ts'
 
 const x2 = pow(x, num(2))
@@ -79,9 +84,20 @@ describe('Fehlerkatalog: Beispiele', () => {
     expect(answers.map((w) => toLatex(w.result))).toContain(expected)
   })
 
+  // Implizites Ableiten: die abgeleitete Gleichung mit dem Fehler
+  it.each<[string, Equation, string]>([
+    ['implicit-y-constant', eq(add(x2, pow(y, num(2))), num(4)), '2x = 0'],
+    ['implicit-y-prime-forgotten', eq(add(mul(x, y), exp(y)), num(5)), "x + y + y'e^{y} = 0"],
+    ['implicit-x-as-constant', eq(add(mul(x, y), exp(y)), num(5)), "xy' + y'e^{y} = 0"],
+    ['implicit-constant-side-kept', eq(add(x2, pow(y, num(2))), num(4)), "2x + 2yy' = 4"],
+  ])('%s', (id, equation, expected) => {
+    const answers = implicitWrongAnswers(equation).filter((w) => w.errorRule.id === id || w.alsoMatches.some((r) => r.id === id))
+    expect(answers.map((w) => equationToLatex(w.differentiated))).toContain(expected)
+  })
+
   it('deckt jede Fehlerregel mit einem Beispiel ab', () => {
     // Schutz davor, eine neue Regel ohne Beispiel hinzuzufügen
-    expect(ERROR_RULES.length).toBe(43)
+    expect(ERROR_RULES.length).toBe(47)
   })
 })
 
@@ -123,6 +139,26 @@ describe('falsche Ergebnisse aller Aufgaben', () => {
       }
       expect(withTwoOrMore / tasks).toBeGreaterThanOrEqual(0.9)
     })
+  })
+
+  it('implizites Ableiten: falsche abgeleitete Gleichungen unterscheiden sich von der richtigen', () => {
+    for (let seed = 1; seed <= 300; seed++) {
+      const { task } = generateDerivativeTask({ level: 5, seed })
+      if (task.kind !== 'implicit') continue
+      const correct = deriveImplicit(task.equation)
+      const answers = implicitWrongAnswers(task.equation, correct)
+      expect(answers.length, `5-${seed}`).toBeGreaterThanOrEqual(3)
+      const points = sampleEnvs([task.equation.lhs, task.equation.rhs], createRng(`gegenprobe:${seed}`), 40, ['x', 'y', "y'"])
+      const difference = (e: Equation) => sub(e.lhs, e.rhs)
+      for (const w of answers) {
+        seen.add(w.errorRule.id)
+        for (const r of w.alsoMatches) seen.add(r.id)
+        const context = `5-${seed}: ${equationToLatex(w.differentiated)} (${w.errorRule.id})`
+        expect(latexProblem(equationToLatex(w.differentiated), { checkUgly: false }), context).toBeNull()
+        const vsCorrect = compareValues(difference(correct.differentiated), difference(w.differentiated), points)
+        expect(vsCorrect.differing / vsCorrect.compared, context).toBeGreaterThanOrEqual(0.25)
+      }
+    }
   })
 
   it('nutzt jede Fehlerregel in mindestens einer Aufgabe', () => {

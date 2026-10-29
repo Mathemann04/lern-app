@@ -524,7 +524,8 @@ const level5Implicit: TermTemplate = {
     const equation = rng.pick<() => Equation>([
       () => eq(add(xPow(2), pow(y, num(2))), num(r * r)),
       () => eq(add(times(rng.int(2, 5), xPow(2)), times(rng.int(2, 5), pow(y, num(2)))), num(c * 10)),
-      () => eq(add(times(rng.int(1, 4), mul(x, y)), exp(y)), num(rng.int(1, 5))),
+      // rechts nicht 1: sonst liegt die ganze Gerade y = 0 auf der Kurve (dort ist y' überall 0)
+      () => eq(add(times(rng.int(1, 4), mul(x, y)), exp(y)), num(rng.int(2, 5))),
       () => eq(add(mul(xPow(2), y), pow(y, num(3))), num(c)),
       () => eq(add(xPow(3), pow(y, num(3))), times(k, mul(x, y))),
       () => eq(add(xPow(2), times(rng.int(1, 3), mul(x, y)), pow(y, num(2))), num(c)),
