@@ -66,18 +66,24 @@ function linear(rng: Rng, { allowOne = false } = {}): Expr {
   return b === 0 ? kx : add(kx, num(b))
 }
 
-// Nichtlineare innere Funktion, z. B. x², x² + 1, x² − 3x, 2x² + 1, x³ − 2x
-function nonlinear(rng: Rng): Expr {
+// Nichtlineare innere Funktion, z. B. x², x² + 1, x² − 3x, 2x² + 1, x³ − 2x.
+// sumOnly: keine reine Potenz, denn (x³)⁵ rechnet man besser direkt als x¹⁵
+function nonlinear(rng: Rng, { sumOnly = false } = {}): Expr {
   const k = rng.int(2, 5)
   const c = rng.int(1, 9)
-  return rng.pick<() => Expr>([
-    () => xPow(2),
-    () => xPow(3),
+  const sums: Array<() => Expr> = [
     () => add(xPow(2), num(signed(rng, c))),
     () => add(xPow(2), times(-k, x)),
     () => add(times(k, xPow(2)), num(c)),
     () => add(xPow(3), times(signed(rng, k), x)),
-  ])()
+  ]
+  return rng.pick(sumOnly ? sums : [() => xPow(2), () => xPow(3), ...sums])()
+}
+
+// kx + b mit b ≠ 0 und k > 0, z. B. x − 3 oder 2x + 1 (für Potenzen wie (2x + 1)⁵;
+// ohne b wäre (2x)⁵ einfacher direkt als 32x⁵ zu rechnen)
+function linearWithOffset(rng: Rng): Expr {
+  return add(times(rng.int(1, 5), x), num(signed(rng, rng.int(1, 9))))
 }
 
 // x² + c mit c > 0 (überall positiv, z. B. für Nenner und Wurzeln)
@@ -223,8 +229,8 @@ const level3ProductChain: TermTemplate = {
     const chained = rng.pick<() => Expr>([
       () => exp(rng.chance(0.5) ? xPow(2) : neg(xPow(2))),
       () => exp(times(k, x)),
-      () => sin(times(k, x)),
-      () => cos(times(k, x)),
+      () => sin(times(Math.abs(k), x)),
+      () => cos(times(Math.abs(k), x)),
       () => ln(positiveQuadratic(rng)),
     ])()
     const isExp = chained.kind === 'pow'
@@ -284,8 +290,8 @@ const level3Chain: TermTemplate = {
         () => exp(nonlinear(rng)),
         () => ln(positiveQuadratic(rng)),
         () => sqrt(positiveQuadratic(rng)),
-        () => pow(linear(rng), num(rng.int(3, 6))),
-        () => pow(nonlinear(rng), num(rng.int(2, 5))),
+        () => pow(linearWithOffset(rng), num(rng.int(3, 6))),
+        () => pow(nonlinear(rng, { sumOnly: true }), num(rng.int(2, 5))),
       ])(),
     )
   },

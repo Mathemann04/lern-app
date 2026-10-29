@@ -4,6 +4,7 @@ import { GalleryScreen } from './ui/GalleryScreen.tsx'
 import { HomeScreen } from './ui/HomeScreen.tsx'
 import { SettingsScreen } from './ui/SettingsScreen.tsx'
 import { buildInfoLabel } from './ui/buildInfo.ts'
+import { isLevelAvailable } from './ui/samples.ts'
 import { TaskScreen } from './ui/guided/TaskScreen.tsx'
 import { type Route, parseRoute, taskHref } from './ui/routes.ts'
 import { useHashRoute } from './ui/useHashRoute.ts'
@@ -96,11 +97,11 @@ function PracticePage({ level, seed }: { level: Level; seed: number | null }) {
     if (seed === null) window.location.replace(taskHref({ level, seed: randomSeed() }))
   }, [level, seed])
   if (seed === null) return null
-  if (level !== 1) {
+  if (!isLevelAvailable(level)) {
     return (
       <main className="space-y-4">
         <h1 className="text-2xl font-semibold">Stufe {level} kommt bald</h1>
-        <p className="text-zinc-600">Im geführten Modus gibt es bisher Stufe 1. Die Stufen 2 und 3 folgen im nächsten Schritt.</p>
+        <p className="text-zinc-600">Im geführten Modus gibt es bisher die Stufen 1 bis 3. Die Stufen 4 und 5 folgen bald.</p>
         <a href="#/" className="inline-block rounded-xl border border-zinc-300 px-4 py-2 font-medium hover:bg-zinc-50">
           Zur Startseite
         </a>

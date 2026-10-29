@@ -76,7 +76,9 @@ function TaskHeader({ task, stepIndex }: { task: GuidedTask; stepIndex: number }
   const established = task.steps.slice(0, stepIndex).flatMap((s) => (s.established ? [s.established] : []))
   return (
     <section className="space-y-3">
-      <p className="text-sm text-zinc-500">Aufgabe {formatTaskNumber(task.ref)} · Leite ab</p>
+      <p className="text-sm text-zinc-500">
+        Stufe {task.ref.level} · Aufgabe {formatTaskNumber(task.ref)} · Leite ab
+      </p>
       <div className="overflow-x-auto text-2xl">
         <Formula tex={task.functionLatex} />
       </div>

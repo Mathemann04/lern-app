@@ -1,26 +1,37 @@
-import { type Derivation, allNodes, derive } from '../derive/derive.ts'
+import { type Derivation, PLACEHOLDER, allNodes, derive } from '../derive/derive.ts'
 import { type WrongAnswer, wrongAnswers } from '../derive/errorRules.ts'
 import { RULES, type RuleId } from '../derive/rules.ts'
 import {
   type Explanation,
   RULE_OPTIONS,
+  explainAssembly,
   explainCalculation,
   explainConstantKept,
   explainError,
   explainRuleChoice,
   explainWrongRuleChoice,
   hintFor,
+  hintForAssembly,
+  keepFactorNote,
 } from '../explain/texts.ts'
 import { m, prime, tex } from '../explain/format.ts'
 import { toLatex } from '../expr/print.ts'
-import type { Expr } from '../expr/types.ts'
+import { type Expr, add, asRational, div, mulDot, neg, num, pow, variable } from '../expr/types.ts'
 import { type Rng, createRng } from '../random/rng.ts'
+import { isInteger } from '../rational.ts'
 import { generateDerivativeTask } from '../tasks/derivativeTerms.ts'
 import type { TaskRef } from '../tasks/taskNumber.ts'
 
 // Schrittplaner für den geführten Modus: macht aus dem Rechenweg der Engine eine Folge
 // von Bildschirm-Schritten mit Auswahl-Antworten. Falsche Antworten stammen aus den
 // Fehlerregeln, jede mit eigener Erklärung. Texte mit Formeln im Format von richText.ts.
+//
+// Ablauf: zuerst „Welche Regel?", dann je nach Hauptregel
+// - Summe: je Summand ein Schritt
+// - Produkt, Quotient: u' und v' einzeln, dann in die Regel einsetzen
+// - Kette: äußere Ableitung (nach u), innere Ableitung, dann zusammensetzen
+// Die Ableitung eines Teils ist immer ein einzelner Schritt, auch wenn darin selbst
+// wieder eine Regel steckt (z. B. u = e^{x^2} bei der Produktregel).
 
 export type Choice = {
   readonly id: string
@@ -43,8 +54,9 @@ export type GuidedStep = {
   readonly question: string
   readonly choices: readonly Choice[]
   readonly hint: string
-  // der Term, um den es in diesem Schritt geht (bei Ableitungsschritten)
+  // bei Ableitungsschritten: Die richtige Antwort ist die Ableitung von subject nach variable
   readonly subject?: Expr
+  readonly variable?: string
   // warum die richtige Antwort stimmt
   readonly explanation: Explanation
   // was nach dem Schritt feststeht, als LaTeX-Zeile, z. B. (4x^3)' = 12x^2
@@ -67,22 +79,27 @@ export function planGuidedTask(ref: TaskRef): GuidedTask {
   return planForExpression(task.expr, ref)
 }
 
+// Feste Faktoren vor der Hauptregel (−3 bei −3x² sin x) und der Knoten dahinter
+export function splitFactors(d: Derivation): { factors: Derivation[]; core: Derivation } {
+  const factors: Derivation[] = []
+  let core = d
+  while (core.rule === 'constantFactor') {
+    factors.push(core)
+    core = core.children[0]
+  }
+  return { factors, core }
+}
+
 // Hauptregel: die äußerste Regel, Faktoren davor zählen nicht (−3x² sin x → Produktregel)
 export function mainRule(d: Derivation): RuleId {
-  return d.rule === 'constantFactor' ? mainRule(d.children[0]) : d.rule
+  return splitFactors(d).core.rule
 }
 
 export function planForExpression(f: Expr, ref: TaskRef): GuidedTask {
   const root = derive(f)
   const rngFor = (step: number) => createRng(`geführt:${ref.level}:${ref.seed}:${step}`)
-  const steps: GuidedStep[] = [ruleStep(root, rngFor(0))]
-  if (root.rule === 'sum') {
-    root.children.forEach((child, i) => {
-      steps.push(derivativeStep(child, `Summand ${i + 1} von ${root.children.length}`, `Leite den Summanden ${m(child.input)} ab.`, rngFor(i + 1)))
-    })
-  } else {
-    steps.push(derivativeStep(root, 'Ableitung', `Leite ${m(f)} ab.`, rngFor(1)))
-  }
+  const rule = ruleStep(root, rngFor(0))
+  const steps = [...(rule ? [rule] : []), ...partSteps(root).map((build, i) => build(rngFor(i + 1)))]
   return {
     ref,
     functionLatex: `f(x) = ${toLatex(f)}`,
@@ -92,11 +109,81 @@ export function planForExpression(f: Expr, ref: TaskRef): GuidedTask {
   }
 }
 
-function ruleStep(root: Derivation, rng: Rng): GuidedStep {
-  const correct = mainRule(root)
+// Die Schritte nach der Regelwahl, je Hauptregel
+function partSteps(root: Derivation): Array<(rng: Rng) => GuidedStep> {
+  const { factors, core } = splitFactors(root)
+
+  if (root.rule === 'sum') {
+    return root.children.map((child, i) => (rng: Rng) =>
+      derivativeStep(child, { title: `Summand ${i + 1} von ${root.children.length}`, question: `Leite den Summanden ${m(child.input)} ab.` }, rng),
+    )
+  }
+
+  if (core.rule === 'product' || core.rule === 'quotient') {
+    const [du, dv] = core.children
+    const u = toLatex(core.parts.u!)
+    const v = toLatex(core.parts.v!)
+    const isQuotient = core.rule === 'quotient'
+    const names = isQuotient ? `Oben steht $u = ${u}$, unten $v = ${v}$.` : `Die Faktoren sind $u = ${u}$ und $v = ${v}$.`
+    // Regel mit Platzhaltern und den Faktoren davor, z. B. -3 \cdot (u' \cdot v + u \cdot v')
+    const [U, V, dU, dV] = ['u', 'v', "u'", "v'"].map(variable)
+    const pattern = isQuotient ? div(add(mulDot(dU, V), neg(mulDot(U, dV))), pow(V, num(2))) : add(mulDot(dU, V), mulDot(U, dV))
+    return [
+      (rng) => derivativeStep(du, { title: isQuotient ? 'Zähler ableiten' : 'Ersten Faktor ableiten', question: `${names} Was ist $u'$?`, name: "u'" }, rng),
+      (rng) => derivativeStep(dv, { title: isQuotient ? 'Nenner ableiten' : 'Zweiten Faktor ableiten', question: `Was ist $v'$ für $v = ${v}$?`, name: "v'" }, rng),
+      (rng) =>
+        assembleStep(root, 'Einsetzen', `Setze in die ${RULES[core.rule].name} ein: $f'(x) = ${toLatex(withFactors(factors, pattern))}$`, rng),
+    ]
+  }
+
+  if (core.rule === 'chain') {
+    const [outer, inner] = core.children
+    const innerLatex = toLatex(core.parts.inner!)
+    const factorNote = keepFactorNote(factors)
+    return [
+      (rng) =>
+        derivativeStep(
+          outer,
+          {
+            title: 'Äußere Ableitung',
+            question: `Setze $${PLACEHOLDER} = ${innerLatex}$. Die äußere Funktion ist dann ${m(core.parts.outer!)}. Leite sie nach $${PLACEHOLDER}$ ab.`,
+          },
+          rng,
+        ),
+      (rng) => derivativeStep(inner, { title: 'Innere Ableitung', question: `Leite die innere Funktion $${PLACEHOLDER} = ${innerLatex}$ ab.`, name: `${PLACEHOLDER}'` }, rng),
+      (rng) =>
+        assembleStep(
+          root,
+          'Zusammensetzen',
+          `Kettenregel: äußere Ableitung mal innere Ableitung, dabei $${PLACEHOLDER} = ${innerLatex}$ wieder einsetzen.${factorNote ? ` ${factorNote}` : ''} Was ist $f'(x)$?`,
+          rng,
+        ),
+    ]
+  }
+
+  return [(rng) => derivativeStep(root, { title: 'Ableitung', question: `Leite ${m(root.input)} ab.` }, rng)]
+}
+
+// Regeln, die nach einem Umschreiben ebenfalls zum Ziel führen und deshalb nie als falsch gelten:
+// u/v = u · v⁻¹ und sin² x = sin x · sin x gehen auch mit der Produktregel
+function equivalentRules(core: Derivation): RuleId[] {
+  if (core.rule === 'quotient') return ['product']
+  const outer = core.parts.outer
+  if (core.rule === 'chain' && outer?.kind === 'pow' && outer.base.kind === 'var') {
+    const n = asRational(outer.exp)
+    if (n && isInteger(n) && n.n >= 2n) return ['product']
+  }
+  return []
+}
+
+// „Welche Regel?" Ohne passende falsche Optionen entfällt der Schritt (null).
+function ruleStep(root: Derivation, rng: Rng): GuidedStep | null {
+  const { factors, core } = splitFactors(root)
+  const correct = core.rule
   // Falsche Optionen nur aus Regeln, die im ganzen Rechenweg nirgends gebraucht werden
-  const used = new Set(allNodes(root).map((n) => n.rule))
-  const wrong = RULE_OPTIONS.filter((r) => r !== correct && !used.has(r))
+  const excluded = new Set<RuleId>([...allNodes(root).map((n) => n.rule), ...equivalentRules(core)])
+  const wrong = RULE_OPTIONS.filter((r) => r !== correct && !excluded.has(r))
+  if (wrong.length === 0) return null
   const choices: Choice[] = [
     { id: 'regel-richtig', content: RULES[correct].name, caption: tex(RULES[correct].formula), correct: true },
     ...wrong.map((r) => ({
@@ -113,21 +200,29 @@ function ruleStep(root: Derivation, rng: Rng): GuidedStep {
     question: 'Welche Regel wendest du als Erstes an?',
     choices: rng.shuffle(choices),
     hint: 'Schau, wie die Teile des ganzen Terms verbunden sind: mit $+$ oder $-$, mit $\\cdot$, als Bruch oder ineinander eingesetzt.',
-    explanation: explainRuleChoice(correct),
+    explanation: explainRuleChoice(correct, factors),
   }
 }
 
-// Wählt bis zu MAX_WRONG_CHOICES falsche Ergebnisse, möglichst aus verschiedenen Fehlerregeln
-function pickWrongAnswers(answers: readonly WrongAnswer[], rng: Rng): WrongAnswer[] {
-  const byRule = new Map<string, WrongAnswer>()
-  for (const w of answers) if (!byRule.has(w.errorRule.id)) byRule.set(w.errorRule.id, w)
+// Wählt bis zu MAX_WRONG_CHOICES falsche Antworten, möglichst aus verschiedenen Fehlerregeln
+function pickWrong<T extends { readonly answer: WrongAnswer }>(candidates: readonly T[], rng: Rng): T[] {
+  const byRule = new Map<string, T>()
+  for (const c of candidates) if (!byRule.has(c.answer.errorRule.id)) byRule.set(c.answer.errorRule.id, c)
   const distinct = rng.shuffle([...byRule.values()])
-  const rest = rng.shuffle(answers.filter((w) => !distinct.includes(w)))
+  const rest = rng.shuffle(candidates.filter((c) => !distinct.includes(c)))
   return [...distinct, ...rest].slice(0, MAX_WRONG_CHOICES)
 }
 
-function derivativeStep(node: Derivation, title: string, question: string, rng: Rng): GuidedStep {
-  const local = derive(node.input)
+type StepText = {
+  readonly title: string
+  readonly question: string
+  // Name des Ergebnisses für „Bisher", z. B. u'
+  readonly name?: string
+}
+
+// Ein Teilterm wird in einem Schritt abgeleitet; die Antworten sind fertig zusammengefasst
+function derivativeStep(node: Derivation, { title, question, name }: StepText, rng: Rng): GuidedStep {
+  const local = derive(node.input, node.variable)
   const correct: Choice = { id: 'richtig', content: m(local.result), correct: true, expr: local.result }
   let wrongChoices: Choice[]
   if (local.rule === 'constant') {
@@ -142,15 +237,17 @@ function derivativeStep(node: Derivation, title: string, question: string, rng: 
       },
     ]
   } else {
-    wrongChoices = pickWrongAnswers(wrongAnswers(node.input, local), rng).map((w, i) => ({
+    const candidates = wrongAnswers(node.input, local).map((answer) => ({ answer }))
+    wrongChoices = pickWrong(candidates, rng).map(({ answer }, i) => ({
       id: `falsch-${i + 1}`,
-      content: m(w.result),
+      content: m(answer.result),
       correct: false,
-      expr: w.result,
-      errorRuleId: w.errorRule.id,
-      whyWrong: explainError(w),
+      expr: answer.result,
+      errorRuleId: answer.errorRule.id,
+      whyWrong: explainError(answer),
     }))
   }
+  const calculation = `${prime(node.input)} = ${toLatex(local.result)}`
   return {
     id: `ableitung-${title}`,
     title,
@@ -158,8 +255,56 @@ function derivativeStep(node: Derivation, title: string, question: string, rng: 
     choices: rng.shuffle([correct, ...wrongChoices]),
     hint: hintFor(local),
     subject: node.input,
+    variable: node.variable,
     explanation: explainCalculation(local),
-    established: `${prime(node.input)} = ${toLatex(local.result)}`,
+    established: name ? `${name} = ${calculation}` : calculation,
   }
 }
 
+// Setzt die festen Faktoren wieder vor eine eingesetzte Formel, so wie derive es tut
+function withFactors(factors: readonly Derivation[], formula: Expr): Expr {
+  return factors.reduceRight((inner, node) => {
+    const factor = node.parts.factor!
+    if (node.parts.divisor) return div(inner, factor)
+    const c = asRational(factor)
+    return c && c.n === -1n && c.d === 1n ? neg(inner) : mulDot(factor, inner)
+  }, formula)
+}
+
+const nodeAt = (d: Derivation, path: readonly number[]): Derivation => path.reduce((n, i) => n.children[i], d)
+
+// Einsetzen in Produkt-, Quotienten- oder Kettenregel. Die Antworten zeigen die eingesetzte
+// Formel vor dem Zusammenfassen; die falschen entstehen aus Fehlern an genau dieser Regel.
+function assembleStep(root: Derivation, title: string, question: string, rng: Rng): GuidedStep {
+  const { factors, core } = splitFactors(root)
+  const formula = withFactors(factors, core.formula)
+  const candidates = wrongAnswers(root.input, root).flatMap((answer) => {
+    if (answer.node === core) {
+      return [{ answer, formula: withFactors(factors, nodeAt(answer.derivation, core.path).formula) }]
+    }
+    if (factors.includes(answer.node) && answer.errorRule.id === 'factor-forgotten') {
+      return [{ answer, formula: withFactors(factors.filter((f) => f !== answer.node), core.formula) }]
+    }
+    return []
+  })
+  const correct: Choice = { id: 'richtig', content: m(formula), correct: true, expr: formula }
+  const wrongChoices = pickWrong(candidates, rng).map(({ answer, formula: wrongFormula }, i) => ({
+    id: `falsch-${i + 1}`,
+    content: m(wrongFormula),
+    correct: false,
+    expr: wrongFormula,
+    errorRuleId: answer.errorRule.id,
+    whyWrong: explainError(answer),
+  }))
+  return {
+    id: `einsetzen-${title}`,
+    title,
+    question,
+    choices: rng.shuffle([correct, ...wrongChoices]),
+    hint: hintForAssembly(core),
+    subject: root.input,
+    variable: root.variable,
+    explanation: explainAssembly(root, factors, core, formula),
+    established: `f'(x) = ${toLatex(formula)}`,
+  }
+}
