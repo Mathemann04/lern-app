@@ -65,6 +65,15 @@ describe('Fehlerkatalog: Beispiele', () => {
     ['logarithmic-as-exponential', pow(x, x), 'x^{x}\\ln x'],
     ['arccos-sign', fn('arccos', x), '\\frac{1}{\\sqrt{1 - x^{2}}}'],
     ['cosh-sign', fn('cosh', x), '-\\sinh x'],
+    ['logarithmic-factor-forgotten', pow(x, x), '\\ln x + 1'],
+    ['sinh-sign', fn('sinh', x), '-\\cosh x'],
+    ['tanh-like-tan', fn('tanh', x), '\\frac{1}{\\cos^{2} x}'],
+    ['tanh-sinh-cosh-swapped', fn('tanh', x), '\\frac{1}{\\sinh^{2} x}'],
+    ['arcsin-arccos', fn('arcsin', x), '-\\frac{1}{\\sqrt{1 - x^{2}}}'],
+    ['arcsin-root-sign', fn('arcsin', x), '\\frac{1}{\\sqrt{x^{2} + 1}}'],
+    ['arsinh-arcosh', fn('arsinh', x), '\\frac{1}{\\sqrt{x^{2} - 1}}'],
+    ['arcosh-arsinh', fn('arcosh', x), '\\frac{1}{\\sqrt{x^{2} + 1}}'],
+    ['artanh-arctan', fn('artanh', x), '\\frac{1}{x^{2} + 1}'],
   ])('%s', (id, expr, expected) => {
     const answers = wrongAnswers(expr).filter((w) => w.errorRule.id === id || w.alsoMatches.some((r) => r.id === id))
     expect(answers.map((w) => toLatex(w.result))).toContain(expected)
@@ -72,7 +81,7 @@ describe('Fehlerkatalog: Beispiele', () => {
 
   it('deckt jede Fehlerregel mit einem Beispiel ab', () => {
     // Schutz davor, eine neue Regel ohne Beispiel hinzuzufügen
-    expect(ERROR_RULES.length).toBe(34)
+    expect(ERROR_RULES.length).toBe(43)
   })
 })
 

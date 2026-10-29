@@ -11,22 +11,34 @@ import { type Level, MAX_SEED, type TaskRef } from './taskNumber.ts'
 // Dann zeigt der geführte Modus es sicher als Antwort (siehe focus im Schrittplaner).
 
 export function errorPossible(expr: Expr, errorId: string): boolean {
-  const { rule } = errorRule(errorId)
-  const root = derive(expr)
-  // schnelle Vorprüfung: Die Regel, zu der der Fehler gehört, muss vorkommen
-  if (!allNodes(root).some((n) => n.rule === rule)) return false
-  return wrongAnswers(expr, root).some((w) => w.errorRule.id === errorId)
+  return check(expr, errorId) === 'possible'
 }
 
-const TRIES_PER_LEVEL = 40
+// 'rule-missing': schnelle Vorprüfung gescheitert, die Regel des Fehlers kommt nicht vor
+function check(expr: Expr, errorId: string): 'possible' | 'impossible' | 'rule-missing' {
+  const { rule } = errorRule(errorId)
+  const root = derive(expr)
+  if (!allNodes(root).some((n) => n.rule === rule)) return 'rule-missing'
+  return wrongAnswers(expr, root).some((w) => w.errorRule.id === errorId) ? 'possible' : 'impossible'
+}
+
+// Je Stufe viele Aufgaben würfeln (Ableiten ist schnell), aber nur wenige genau prüfen
+// (alle falschen Ergebnisse ausrechnen dauert einige Millisekunden). So finden sich auch
+// seltene Fehler wie beim Areakosinus, ohne dass die Suche spürbar dauert.
+const TRIES_PER_LEVEL = 400
+const CHECKS_PER_LEVEL = 40
 
 // Sucht eine passende Aufgabe, zuerst in der ersten der genannten Stufen
 export function findTaskWithError(errorId: string, levels: readonly Level[], rng: Rng): TaskRef | null {
   for (const level of levels) {
-    for (let i = 0; i < TRIES_PER_LEVEL; i++) {
+    let checks = 0
+    for (let i = 0; i < TRIES_PER_LEVEL && checks < CHECKS_PER_LEVEL; i++) {
       const ref = { level, seed: rng.int(1, MAX_SEED) }
       const { task } = generateDerivativeTask(ref)
-      if (task.kind === 'function' && errorPossible(task.expr, errorId)) return ref
+      if (task.kind !== 'function') continue
+      const result = check(task.expr, errorId)
+      if (result === 'possible') return ref
+      if (result === 'impossible') checks++
     }
   }
   return null

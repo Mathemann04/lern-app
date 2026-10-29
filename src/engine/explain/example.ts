@@ -127,6 +127,15 @@ function detailed(node: Derivation, lhs: string): ExampleLine[] {
         ...summarized(node, lhs),
       ]
     }
+    case 'logarithmic': {
+      const [inner] = children
+      return [
+        { label: 'Logarithmieren mit $\\ln(a^b) = b \\cdot \\ln a$:', latex: `\\ln f(x) = ${toLatex(inner.input)}` },
+        { label: 'Beide Seiten ableiten, links nach der Kettenregel:', latex: `\\frac{f'(x)}{f(x)} = ${chain(prime(inner.input), inner.result)}` },
+        { label: 'Mit $f(x)$ malnehmen:', latex: chain(lhs, node.formula) },
+        ...summarized(node, lhs),
+      ]
+    }
     default:
       // Grundfunktionen wie e^x, ln x, sin x: eine Zeile
       return [{ label: ruleLabel(node), latex: chain(lhs, node.formula, node.result) }]

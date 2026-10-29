@@ -1,6 +1,7 @@
 import type { VirtualKeyboardKeycap, VirtualKeyboardLayout } from 'mathlive'
 
-// Bildschirm-Tastatur für Ableitungen: alles, was in den Stufen vorkommt, auf einer Seite.
+// Bildschirm-Tastatur für Ableitungen: alles bis Stufe 4 auf der ersten Seite, die
+// Funktionen der Stufe 5 (Hyperbel-, Arkus- und Areafunktionen) auf einer zweiten.
 // Funktionen kommen gleich mit Klammer, damit „sin 3x" nicht mehrdeutig ist.
 
 type Key = string | Partial<VirtualKeyboardKeycap>
@@ -9,6 +10,13 @@ const fnKey = (name: string): Key => ({
   // lange Namen etwas kleiner, damit sie auf die Taste passen
   label: name.length > 4 ? `<span style="font-size:0.8em">${name}</span>` : name,
   insert: `\\${name}\\left(#0\\right)`,
+  class: 'small',
+})
+
+// Areafunktionen haben keinen eigenen LaTeX-Befehl
+const areaKey = (name: string): Key => ({
+  label: `<span style="font-size:0.8em">${name}</span>`,
+  insert: `\\operatorname{${name}}\\left(#0\\right)`,
   class: 'small',
 })
 
@@ -28,9 +36,30 @@ const ROWS: Key[][] = [
   ],
 ]
 
+const MORE_ROWS: Key[][] = [
+  [fnKey('sinh'), fnKey('cosh'), fnKey('tanh'), 'x', { latex: '#@^{2}' }, { latex: '#@^{#?}' }, { latex: 'e^{#?}' }, { latex: '\\frac{#@}{#?}' }, '[backspace]'],
+  [areaKey('arsinh'), areaKey('arcosh'), areaKey('artanh'), { label: '(', key: '(' }, { label: ')', key: ')' }, { latex: '\\sqrt{#0}' }, fnKey('ln'), { latex: '\\cdot' }, '[left]'],
+  [fnKey('arcsin'), fnKey('arccos'), fnKey('arctan'), fnKey('sin'), fnKey('cos'), fnKey('tan'), '+', { label: '−', latex: '-' }, '[right]'],
+  ['1', '2', '3', '4', '5', '0', { label: 'Prüfen', command: 'commit', class: 'action', width: 2 }, '[hide-keyboard]'],
+]
+
 export const DERIVATIVE_KEYBOARD: VirtualKeyboardLayout = {
   id: 'ableitungen',
-  label: 'Ableitungen',
+  label: 'Standard',
   displayEditToolbar: false,
   rows: ROWS,
+}
+
+export const MORE_FUNCTIONS_KEYBOARD: VirtualKeyboardLayout = {
+  id: 'mehr-funktionen',
+  label: 'Mehr Funktionen',
+  displayEditToolbar: false,
+  rows: MORE_ROWS,
+}
+
+// Am Laptop getippt: Die Areafunktionen kennt MathLive nicht von selbst
+export const AREA_SHORTCUTS: Record<string, string> = {
+  arsinh: '\\operatorname{arsinh}',
+  arcosh: '\\operatorname{arcosh}',
+  artanh: '\\operatorname{artanh}',
 }

@@ -10,15 +10,22 @@ import {
   explainCalculation,
   explainConstantKept,
   explainError,
+  explainLogLawMistake,
+  explainLogarithm,
   explainRuleChoice,
+  explainWrongPowerTowerChoice,
   explainWrongRuleChoice,
   hintFor,
   hintForAssembly,
   keepFactorNote,
+  type LogLawMistake,
 } from '../explain/texts.ts'
 import { m, prime, tex } from '../explain/format.ts'
+import { clearlyDifferent } from '../check/numeric.ts'
+import { key } from '../expr/compare.ts'
 import { toLatex } from '../expr/print.ts'
-import { type Expr, add, asRational, div, mulDot, neg, num, pow, variable } from '../expr/types.ts'
+import { samplePoints } from '../expr/sample.ts'
+import { type Expr, add, asRational, div, ln, mulDot, neg, num, pow, variable } from '../expr/types.ts'
 import { type Rng, createRng } from '../random/rng.ts'
 import { isInteger } from '../rational.ts'
 import { generateDerivativeTask } from '../tasks/derivativeTerms.ts'
@@ -33,6 +40,8 @@ import type { TaskRef } from '../tasks/taskNumber.ts'
 // - Produkt, Quotient: u' und v' einzeln, dann in die Regel einsetzen
 // - Kette: äußere Ableitung (nach u), innere Ableitung, dann zusammensetzen;
 //   ab Stufe 4 gröber: innere Ableitung, dann gleich zusammensetzen
+// - u^v (Basis und Exponent mit x, Stufe 5): logarithmieren (ln f = v · ln u), die rechte
+//   Seite ableiten, dann mit f malnehmen
 // Die Ableitung eines Teils ist immer ein einzelner Schritt, auch wenn darin selbst
 // wieder eine Regel steckt (z. B. u = e^{x^2} bei der Produktregel).
 
@@ -45,6 +54,8 @@ export type Choice = {
   readonly correct: boolean
   // bei Formel-Antworten: der Term (für Tests und spätere Auswertungen)
   readonly expr?: Expr
+  // bei der Regelwahl: die Regel dieser Antwort
+  readonly rule?: RuleId
   // bei falschen Antworten: welcher typische Fehler dahintersteckt und warum er falsch ist
   readonly errorRuleId?: string
   readonly whyWrong?: Explanation
@@ -157,6 +168,31 @@ function partSteps(root: Derivation, coarse: boolean): Array<(ctx: StepContext) 
     ]
   }
 
+  if (core.rule === 'logarithmic') {
+    const [inner] = core.children
+    const derivedRight = (ctx: StepContext) =>
+      derivativeStep(
+        inner,
+        {
+          title: 'Ableiten',
+          question: `Leite beide Seiten ab. Links ergibt sich nach der Kettenregel $\\frac{f'(x)}{f(x)}$. Was ist die Ableitung der rechten Seite ${m(inner.input)}?`,
+          name: "\\frac{f'(x)}{f(x)}",
+          // unter „Bisher" nur das Ergebnis, die Zeile wird sonst zu lang
+          resultOnly: true,
+        },
+        ctx,
+      )
+    const assemble = (ctx: StepContext) =>
+      assembleStep(
+        root,
+        'Zusammensetzen',
+        `Es gilt $\\frac{f'(x)}{f(x)} = ${toLatex(inner.result)}$. Multipliziere mit $f(x)$.${factors.length > 0 ? ` ${keepFactorNote(factors)}` : ''} Was ist $f'(x)$?`,
+        ctx,
+      )
+    // Mit einem Faktor davor wäre ln f eine Summe; dann gleich mit v · ln u weiter
+    return factors.length > 0 ? [derivedRight, assemble] : [(ctx) => logarithmStep(core, ctx), derivedRight, assemble]
+  }
+
   if (core.rule === 'chain') {
     const [outer, inner] = core.children
     const innerLatex = toLatex(core.parts.inner!)
@@ -204,6 +240,8 @@ function partSteps(root: Derivation, coarse: boolean): Array<(ctx: StepContext) 
 // u/v = u · v⁻¹ und sin² x = sin x · sin x gehen auch mit der Produktregel
 function equivalentRules(core: Derivation): RuleId[] {
   if (core.rule === 'quotient') return ['product']
+  // u^v = e^(v · ln u) geht auch mit der Kettenregel
+  if (core.rule === 'logarithmic') return ['chain']
   const outer = core.parts.outer
   if (core.rule === 'chain' && outer?.kind === 'pow' && outer.base.kind === 'var') {
     const n = asRational(outer.exp)
@@ -221,19 +259,25 @@ function ruleStep(root: Derivation, rng: Rng): GuidedStep | null {
   const wrong = RULE_OPTIONS.filter((r) => r !== correct && !excluded.has(r))
   // Bei verschachtelten Termen bleiben oft zu wenige: dann auch die Faktorregel, falls sie nirgends vorkommt
   if (wrong.length < 2 && !excluded.has(EXTRA_RULE_OPTION)) wrong.push(EXTRA_RULE_OPTION)
-  if (wrong.length === 0) return null
+  // Bei u^v die zwei typischen Verwechslungen, dazu höchstens eine Regel für den Aufbau
+  const tower = correct === 'logarithmic' ? (['power', 'expBase'] as const) : []
+  if (tower.length > 0) wrong.splice(1)
+  if (wrong.length + tower.length === 0) return null
+  const choice = (rule: RuleId, content: string, whyWrong?: Explanation): Choice => ({
+    id: whyWrong ? `regel-${rule}` : 'regel-richtig',
+    content,
+    caption: tex(RULES[rule].formula),
+    correct: !whyWrong,
+    rule,
+    ...(whyWrong ? { whyWrong } : {}),
+  })
   // Regel und Antwort gemeinsam mischen: Die Karten folgen der Reihenfolge der Antworten
   const options = rng.shuffle<{ rule: RuleId; choice: Choice }>([
-    { rule: correct, choice: { id: 'regel-richtig', content: RULES[correct].name, caption: tex(RULES[correct].formula), correct: true } },
-    ...wrong.map((r) => ({
+    { rule: correct, choice: choice(correct, RULES[correct].name) },
+    ...wrong.map((r) => ({ rule: r, choice: choice(r, RULES[r].name, explainWrongRuleChoice(r, correct, root)) })),
+    ...tower.map((r) => ({
       rule: r,
-      choice: {
-        id: `regel-${r}`,
-        content: RULES[r].name,
-        caption: tex(RULES[r].formula),
-        correct: false,
-        whyWrong: explainWrongRuleChoice(r, correct, root),
-      },
+      choice: choice(r, r === 'power' ? RULES.power.name : 'Regel für $a^x$', explainWrongPowerTowerChoice(r)),
     })),
   ])
   return {
@@ -272,10 +316,12 @@ type StepText = {
   readonly question: string
   // Name des Ergebnisses für „Bisher", z. B. u'
   readonly name?: string
+  // „Bisher" zeigt name = Ergebnis statt name = (Teilterm)' = Ergebnis
+  readonly resultOnly?: boolean
 }
 
 // Ein Teilterm wird in einem Schritt abgeleitet; die Antworten sind fertig zusammengefasst
-function derivativeStep(node: Derivation, { title, question, name }: StepText, { rng, focus }: StepContext): GuidedStep {
+function derivativeStep(node: Derivation, { title, question, name, resultOnly }: StepText, { rng, focus }: StepContext): GuidedStep {
   const local = derive(node.input, node.variable)
   const correct: Choice = { id: 'richtig', content: m(local.result), correct: true, expr: local.result }
   let wrongChoices: Choice[]
@@ -311,8 +357,48 @@ function derivativeStep(node: Derivation, { title, question, name }: StepText, {
     subject: node.input,
     variable: node.variable,
     explanation: explainCalculation(local),
-    established: name ? `${name} = ${calculation}` : calculation,
+    established: name ? `${name} = ${resultOnly ? toLatex(local.result) : calculation}` : calculation,
     cards: cardIdsFor(allNodes(local).map((n) => n.rule)),
+  }
+}
+
+// Logarithmieren von f = u^v: ln f = v · ln u. Falsche Antworten aus typischen Fehlern beim
+// Logarithmengesetz; nur solche, die sich deutlich von der richtigen unterscheiden (bei x^x wäre
+// „vertauscht" dasselbe).
+function logarithmStep(core: Derivation, { rng }: StepContext): GuidedStep {
+  const { u, v } = core.parts as { u: Expr; v: Expr }
+  const right = mulDot(v, ln(u))
+  const candidates: Array<[LogLawMistake, Expr]> = [
+    ['swapped', mulDot(u, ln(v))],
+    ['base-only', pow(ln(u), v)],
+    ['sum', add(ln(u), ln(v))],
+  ]
+  const points = samplePoints([core.input, right], createRng(`logarithmieren:${key(core.input)}`), 40, core.variable)
+  const wrong: Array<[LogLawMistake, Expr]> = []
+  for (const [mistake, e] of candidates) {
+    if (!clearlyDifferent(right, e, points)) continue
+    if (wrong.some(([, other]) => !clearlyDifferent(other, e, points))) continue
+    wrong.push([mistake, e])
+  }
+  const choices: Choice[] = [
+    { id: 'richtig', content: m(right), correct: true, expr: right },
+    ...wrong.map(([mistake, e], i) => ({
+      id: `falsch-${i + 1}`,
+      content: m(e),
+      correct: false,
+      expr: e,
+      whyWrong: explainLogLawMistake(mistake, u, v),
+    })),
+  ]
+  return {
+    id: 'logarithmieren',
+    title: 'Logarithmieren',
+    question: `Logarithmiere $f(x) = ${toLatex(core.input)}$. Was ist $\\ln f(x)$?`,
+    choices: rng.shuffle(choices),
+    hint: 'Logarithmengesetz: $\\ln(a^b) = b \\cdot \\ln a$.',
+    explanation: explainLogarithm(u, v),
+    established: `\\ln f(x) = ${toLatex(right)}`,
+    cards: cardIdsFor(['logarithmic']),
   }
 }
 

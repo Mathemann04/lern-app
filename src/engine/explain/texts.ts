@@ -4,7 +4,7 @@ import { RULES, type RuleId } from '../derive/rules.ts'
 import { finalForm } from '../expr/finalForm.ts'
 import { toLatex } from '../expr/print.ts'
 import { substitute } from '../expr/substitute.ts'
-import { type Expr, asRational, fn, num, pow } from '../expr/types.ts'
+import { type Expr, asRational, fn, ln, mulDot, num, pow } from '../expr/types.ts'
 import { type Rational, ONE, isInteger, ratSign, ratSub } from '../rational.ts'
 import { chain, m, prime, tex } from './format.ts'
 
@@ -47,6 +47,14 @@ export const BASIC_SENTENCE: Partial<Record<RuleId, string>> = {
   logBase: 'Beim Logarithmus zu einer anderen Basis als $e$ kommt $\\ln a$ in den Nenner:',
   tan: 'Die Ableitung des Tangens hat den Kosinus im Quadrat im Nenner:',
   arctan: 'Die Ableitung des Arkustangens ist ein Bruch ohne Winkelfunktion:',
+  arcsin: 'Die Ableitung des Arkussinus ist ein Bruch mit Wurzel:',
+  arccos: 'Die Ableitung des Arkuskosinus ist die des Arkussinus mit Minuszeichen:',
+  sinh: 'Die Ableitung des Sinus hyperbolicus ist der Kosinus hyperbolicus:',
+  cosh: 'Die Ableitung des Kosinus hyperbolicus ist der Sinus hyperbolicus, ohne Minuszeichen:',
+  tanh: 'Die Ableitung des Tangens hyperbolicus hat den Kosinus hyperbolicus im Quadrat im Nenner:',
+  arsinh: 'Die Ableitung des Areasinus hyperbolicus ist ein Bruch mit Wurzel:',
+  arcosh: 'Die Ableitung des Areakosinus hyperbolicus ist ein Bruch mit Wurzel:',
+  artanh: 'Die Ableitung des Areatangens hyperbolicus ist ein Bruch ohne Wurzel:',
 }
 
 function factorSentence(node: Derivation): string {
@@ -101,7 +109,22 @@ function describe(node: Derivation): string[] {
     case 'logBase':
     case 'tan':
     case 'arctan':
+    case 'arcsin':
+    case 'arccos':
+    case 'sinh':
+    case 'cosh':
+    case 'tanh':
+    case 'arsinh':
+    case 'arcosh':
+    case 'artanh':
       return [`${BASIC_SENTENCE[node.rule]} ${tex(chain(prime(node.input), node.result))}.`]
+    case 'logarithmic': {
+      const [inner] = node.children
+      return [
+        `Logarithmisches Ableiten: Basis und Exponent hängen von $${node.variable}$ ab. Mit $\\ln(a^b) = b \\cdot \\ln a$ wird der Exponent zum Faktor: ${m(inner.input)}.`,
+        `Abgeleitet: ${tex(chain(prime(inner.input), inner.result))}. Dann mit ${m(node.input)} malnehmen: ${tex(chain(prime(node.input), node.formula))}.`,
+      ]
+    }
     case 'chain': {
       // Ohne den Platzhalter u: Der steht bei der Produktregel schon für den ersten Faktor
       const inner = parts.inner!
@@ -185,6 +208,9 @@ export function explainAssembly(root: Derivation, factors: readonly Derivation[]
     const [outer, innerDerivative] = core.children
     const inner = core.parts.inner!
     rule = `Kettenregel: äußere Ableitung mal innere Ableitung. In die äußere Ableitung ${m(outer.result)} setzt du $u = ${toLatex(inner)}$ ein: ${m(substitute(outer.result, PLACEHOLDER, inner))}. Dann nimmst du mit der inneren Ableitung ${m(innerDerivative.result)} mal.`
+  } else if (core.rule === 'logarithmic') {
+    const [inner] = core.children
+    rule = `Links steht $\\ln f(x)$, abgeleitet nach der Kettenregel $\\frac{f'(x)}{f(x)}$. Rechts steht die Ableitung von ${m(inner.input)}, also ${m(inner.result)}. Mal $f(x) = ${toLatex(core.input)}$ genommen, steht links nur noch $f'(x)$.`
   } else if (core.rule === 'quotient') {
     rule = `Quotientenregel: ${tex(RULES.quotient.formula)}. Im Zähler steht zuerst $u' \\cdot v$, davon wird $u \\cdot v'$ abgezogen. Der Nenner wird quadriert.`
   } else {
@@ -227,6 +253,20 @@ export function hintFor(node: Derivation): string {
       return `Denk an $\\tan x = \\frac{\\sin x}{\\cos x}$.${factor}`
     case 'arctan':
       return `Die Ableitung des Arkustangens enthält keine Winkelfunktion mehr, sondern einen Bruch.${factor}`
+    case 'arcsin':
+    case 'arccos':
+      return `Die Ableitungen von $\\arcsin$ und $\\arccos$ sind Brüche mit $\\sqrt{1 - ${core.variable}^2}$. Bei einer der beiden steht ein Minus davor.${factor}`
+    case 'sinh':
+    case 'cosh':
+      return `Wie bei Sinus und Kosinus, aber bei den Hyperbelfunktionen entsteht nie ein Minuszeichen.${factor}`
+    case 'tanh':
+      return `Denk an $\\tanh ${core.variable} = \\frac{\\sinh ${core.variable}}{\\cosh ${core.variable}}$.${factor}`
+    case 'arsinh':
+    case 'arcosh':
+    case 'artanh':
+      return `Die Ableitungen der Areafunktionen sind Brüche ohne Hyperbelfunktion. Achte auf das Vorzeichen unter der Wurzel bzw. im Nenner.${factor}`
+    case 'logarithmic':
+      return `Basis und Exponent hängen von $${core.variable}$ ab. Logarithmiere zuerst: $\\ln(a^b) = b \\cdot \\ln a$.${factor}`
     case 'sum': {
       const hasConstant = core.children.some((c) => c.rule === 'constant')
       return `Leite jeden Summanden einzeln ab.${hasConstant ? ' Was passiert mit einer Zahl ohne $x$?' : ''}${factor}`
@@ -241,6 +281,9 @@ export function hintFor(node: Derivation): string {
 // Tipp zum Einsetzen in Produkt-, Quotienten- oder Kettenregel.
 // coarse: Die äußere Ableitung wurde vorher nicht einzeln gefragt (ab Stufe 4).
 export function hintForAssembly(core: Derivation, coarse = false): string {
+  if (core.rule === 'logarithmic') {
+    return `Links steht nach dem Ableiten $\\frac{f'(x)}{f(x)}$. Multipliziere beide Seiten mit $f(x) = ${toLatex(core.input)}$.`
+  }
   if (core.rule === 'chain') {
     const inner = toLatex(core.parts.inner!)
     if (coarse) {
@@ -300,6 +343,12 @@ const isRuleOption = (rule: RuleId): rule is RuleOption => (RULE_OPTIONS as read
 
 export function explainRuleChoice(correct: RuleId, factors: readonly Derivation[] = []): Explanation {
   const rule = RULES[correct]
+  if (correct === 'logarithmic') {
+    return {
+      detailed: `Richtig erkannt: Basis und Exponent hängen beide von $x$ ab. Dann passt weder die Potenzregel noch die Regel für $a^x$. Du logarithmierst zuerst und leitest dann ab: ${tex(rule.formula)}.`,
+      short: `Basis und Exponent mit $x$: ${tex(rule.formula)}.`,
+    }
+  }
   if (!isRuleOption(correct)) return { detailed: `${rule.name}: ${tex(rule.formula)}.`, short: tex(rule.formula) }
   const extra = correct === 'sum' ? ' Du leitest jeden Summanden einzeln ab und zählst die Ergebnisse wieder zusammen.' : ''
   const factor = factors.length > 0 ? `\n${keepFactorNote(factors)} Das regelt die Faktorregel, dafür brauchst du keine eigene Regel.` : ''
@@ -313,8 +362,8 @@ export function explainWrongRuleChoice(chosen: RuleOption, correct: RuleId, root
   const correctName = RULES[correct].name
   if (!isRuleOption(correct)) {
     return {
-      detailed: `${WHEN_NEEDED[chosen]} Hier passt sie nicht; du brauchst zuerst die ${correctName}.`,
-      short: `Hier passt zuerst die ${correctName}.`,
+      detailed: `${WHEN_NEEDED[chosen]} Hier passt sie nicht; zuerst brauchst du die Regel „${correctName}".`,
+      short: `Hier passt zuerst die Regel „${correctName}".`,
     }
   }
   const notes: string[] = []
@@ -333,6 +382,43 @@ export function explainWrongRuleChoice(chosen: RuleOption, correct: RuleId, root
     ].join('\n'),
     short: `Der ganze Term ist ${STRUCTURE_SHORT[correct]}, ${NOT_SHORT[chosen]}.`,
   }
+}
+
+// Regelwahl bei u^v (Basis und Exponent hängen von x ab): die zwei typischen Verwechslungen
+export function explainWrongPowerTowerChoice(chosen: 'power' | 'expBase'): Explanation {
+  if (chosen === 'power') {
+    return {
+      detailed: `Die Potenzregel ${tex(RULES.power.formula)} gilt nur, wenn im Exponenten eine feste Zahl steht. Hier hängt auch der Exponent von $x$ ab.`,
+      short: 'Der Exponent ist keine feste Zahl.',
+    }
+  }
+  return {
+    detailed: `Die Regel ${tex(RULES.expBase.formula)} gilt nur, wenn die Basis eine feste Zahl ist. Hier hängt auch die Basis von $x$ ab.`,
+    short: 'Die Basis ist keine feste Zahl.',
+  }
+}
+
+// Logarithmieren von u^v: welcher Fehler beim Logarithmengesetz ln(a^b) = b · ln a?
+export type LogLawMistake = 'swapped' | 'base-only' | 'sum'
+
+const LOG_LAW = '$\\ln(a^b) = b \\cdot \\ln a$'
+
+export function explainLogarithm(u: Expr, v: Expr): Explanation {
+  const result = tex(`\\ln f(x) = ${toLatex(mulDot(v, ln(u)))}`)
+  return {
+    detailed: `Logarithmengesetz ${LOG_LAW}: Der Exponent ${m(v)} kommt als Faktor vor den Logarithmus der Basis ${m(u)}. ${result}. So steht $x$ nicht mehr im Exponenten.`,
+    short: `${LOG_LAW}: ${result}.`,
+  }
+}
+
+export function explainLogLawMistake(mistake: LogLawMistake, u: Expr, v: Expr): Explanation {
+  const rule = `Logarithmengesetz: ${LOG_LAW}.`
+  const what: Record<LogLawMistake, string> = {
+    swapped: `Basis und Exponent sind vertauscht. Vor den Logarithmus kommt der Exponent ${m(v)}, im Logarithmus bleibt die Basis ${m(u)}.`,
+    'base-only': 'Der Exponent bleibt nicht oben stehen: Beim Logarithmieren wird er zum Faktor vor dem Logarithmus.',
+    sum: 'Das Gesetz $\\ln(a \\cdot b) = \\ln a + \\ln b$ gilt für ein Produkt. Hier steht aber eine Potenz.',
+  }
+  return { detailed: `${what[mistake]} ${rule}`, short: rule }
 }
 
 // --- „Warum ist das falsch?" ---
@@ -505,6 +591,62 @@ const ERROR_TEXTS: Record<string, (c: ErrorContext) => Explanation> = {
   'chain-times-inner-function': ({ node }) => ({
     detailed: `Du hast mit der inneren Funktion ${m(node.parts.inner!)} malgenommen statt mit ihrer Ableitung. Kettenregel: ${CHAIN_RULE}. Am Ende steht $g'(x)$, nicht $g(x)$.`,
     short: `Mal ${tex(prime(node.parts.inner!))}, nicht mal ${m(node.parts.inner!)}.`,
+  }),
+  'logarithmic-power-rule': () => ({
+    detailed: `Die Potenzregel gilt nur für einen festen Exponenten. Hier hängt der Exponent von $x$ ab, deshalb leitest du logarithmisch ab: ${tex(RULES.logarithmic.formula)}.`,
+    short: `Exponent hängt von $x$ ab: ${tex(RULES.logarithmic.formula)}.`,
+  }),
+  'logarithmic-as-exponential': () => ({
+    detailed: `Die Regel $(a^x)' = a^x \\cdot \\ln a$ gilt nur für eine feste Basis. Hier hängt auch die Basis von $x$ ab, deshalb leitest du logarithmisch ab: ${tex(RULES.logarithmic.formula)}.`,
+    short: `Basis hängt von $x$ ab: ${tex(RULES.logarithmic.formula)}.`,
+  }),
+  'logarithmic-factor-forgotten': ({ node }) => ({
+    detailed: `Die Ableitung von ${m(node.children[0].input)} ist erst die Ableitung von $\\ln f(x)$, also $\\frac{f'(x)}{f(x)}$. Für $f'(x)$ musst du noch mit ${m(node.input)} malnehmen: ${tex(RULES.logarithmic.formula)}.`,
+    short: `Noch mit ${m(node.input)} malnehmen.`,
+  }),
+  'arccos-sign': () => ({
+    detailed: "Beim Arkuskosinus steht ein Minuszeichen vor dem Bruch: $(\\arccos x)' = -\\frac{1}{\\sqrt{1 - x^2}}$. Ohne Minus ist es die Ableitung des Arkussinus.",
+    short: "Minus vergessen: $(\\arccos x)' = -\\frac{1}{\\sqrt{1 - x^2}}$.",
+  }),
+  'arcsin-arccos': () => ({
+    detailed: "Das Minuszeichen gehört zum Arkuskosinus. Beim Arkussinus steht keins: $(\\arcsin x)' = \\frac{1}{\\sqrt{1 - x^2}}$.",
+    short: "Ohne Minus: $(\\arcsin x)' = \\frac{1}{\\sqrt{1 - x^2}}$.",
+  }),
+  'arcsin-root-sign': () => ({
+    detailed: "Unter der Wurzel steht $1 - x^2$, nicht $1 + x^2$: $(\\arcsin x)' = \\frac{1}{\\sqrt{1 - x^2}}$. Der Arkussinus ist nur für $-1 < x < 1$ ableitbar, dort ist $1 - x^2$ positiv.",
+    short: "Minus unter der Wurzel: $(\\arcsin x)' = \\frac{1}{\\sqrt{1 - x^2}}$.",
+  }),
+  'sinh-sign': () => ({
+    detailed: "Beim Sinus hyperbolicus entsteht kein Minuszeichen: $(\\sinh x)' = \\cosh x$. Bei den Hyperbelfunktionen gibt es beim Ableiten überhaupt kein Minus.",
+    short: "Ohne Minus: $(\\sinh x)' = \\cosh x$.",
+  }),
+  'cosh-sign': () => ({
+    detailed: "Anders als beim Kosinus entsteht beim Kosinus hyperbolicus kein Minuszeichen: $(\\cosh x)' = \\sinh x$.",
+    short: "Ohne Minus: $(\\cosh x)' = \\sinh x$.",
+  }),
+  'tanh-like-tan': () => ({
+    detailed: "Beim Tangens hyperbolicus steht der Kosinus hyperbolicus im Nenner, nicht der Kosinus: $(\\tanh x)' = \\frac{1}{\\cosh^2 x}$.",
+    short: "$\\cosh$ statt $\\cos$: $(\\tanh x)' = \\frac{1}{\\cosh^2 x}$.",
+  }),
+  'tanh-sinh-cosh-swapped': () => ({
+    detailed:
+      "Im Nenner steht der Kosinus hyperbolicus, nicht der Sinus hyperbolicus: $(\\tanh x)' = \\frac{1}{\\cosh^2 x}$. Das folgt aus $\\tanh x = \\frac{\\sinh x}{\\cosh x}$ mit der Quotientenregel.",
+    short: "$\\cosh$ im Nenner: $(\\tanh x)' = \\frac{1}{\\cosh^2 x}$.",
+  }),
+  'arsinh-arcosh': () => ({
+    detailed:
+      "Beim Areasinus hyperbolicus steht $x^2 + 1$ unter der Wurzel: $(\\operatorname{arsinh} x)' = \\frac{1}{\\sqrt{x^2 + 1}}$. Mit $x^2 - 1$ ist es die Ableitung des Areakosinus hyperbolicus.",
+    short: "Plus unter der Wurzel: $(\\operatorname{arsinh} x)' = \\frac{1}{\\sqrt{x^2 + 1}}$.",
+  }),
+  'arcosh-arsinh': () => ({
+    detailed:
+      "Beim Areakosinus hyperbolicus steht $x^2 - 1$ unter der Wurzel: $(\\operatorname{arcosh} x)' = \\frac{1}{\\sqrt{x^2 - 1}}$. Mit $x^2 + 1$ ist es die Ableitung des Areasinus hyperbolicus.",
+    short: "Minus unter der Wurzel: $(\\operatorname{arcosh} x)' = \\frac{1}{\\sqrt{x^2 - 1}}$.",
+  }),
+  'artanh-arctan': () => ({
+    detailed:
+      "Beim Areatangens hyperbolicus steht $1 - x^2$ im Nenner: $(\\operatorname{artanh} x)' = \\frac{1}{1 - x^2}$. Mit $1 + x^2$ ist es die Ableitung des Arkustangens.",
+    short: "Minus im Nenner: $(\\operatorname{artanh} x)' = \\frac{1}{1 - x^2}$.",
   }),
   'notation-power-on-name': ({ input }) => {
     // \sin^2 x bedeutet (\sin x)^2: außen die Potenz, innen der Sinus

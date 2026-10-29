@@ -72,7 +72,7 @@ test('Eine Aufgabe der Stufe 1 lässt sich geführt komplett lösen', async ({ p
 test('Stufenwahl bleibt gespeichert, Stufe 2 lässt sich komplett lösen', async ({ page }) => {
   const errors = collectErrors(page)
   await page.goto('./')
-  await expect(page.getByRole('radio', { name: /^Stufe 5/ })).toBeDisabled()
+  await expect(page.getByRole('radio', { name: /^Stufe 5/ })).toBeEnabled()
   await page.getByText('Mit e-Funktion, ln, sin und cos').click()
   await expect(page.getByRole('radio', { name: /^Stufe 2/ })).toBeChecked()
   await page.reload()
@@ -100,6 +100,42 @@ for (const [task, established] of [
     expect(errors).toEqual([])
   })
 }
+
+// Stufe 5: logarithmisches Ableiten (x^x), Hyperbel- und Areafunktion
+for (const [task, established] of [
+  ['5-14', 3],
+  ['5-35', 2],
+  ['5-12', 2],
+] as const) {
+  test(`Stufe 5: Aufgabe ${task} lässt sich komplett lösen`, async ({ page }) => {
+    const errors = collectErrors(page)
+    await page.goto(`./#/ueben/${task}`)
+    await expect(page.getByText(/^Stufe 5 · Aufgabe/)).toBeVisible()
+    await solveWholeTask(page)
+    await expect(page.getByLabel('Bisher').locator('.katex')).toHaveCount(established)
+    expect(errors).toEqual([])
+  })
+}
+
+test('Stufe 5: Bei x^x sind Potenzregel und die Regel für a^x falsch, dann wird logarithmiert', async ({ page }) => {
+  await page.goto('./#/ueben/5-14')
+  await answers(page).filter({ hasText: 'Potenzregel' }).click()
+  await page.getByRole('button', { name: 'Warum ist das falsch?' }).click()
+  await expect(page.locator('[aria-live="polite"]')).toContainText('feste Zahl')
+  await answers(page).filter({ hasText: 'Logarithmisches Ableiten' }).click()
+  await page.getByRole('button', { name: 'Weiter' }).click()
+  await expect(page.getByText('Logarithmieren', { exact: true })).toBeVisible()
+  await expectCleanPage(page, 'Logarithmieren')
+})
+
+test('Stufe 5: Aufgaben zum impliziten Ableiten zeigen bis Schritt 11 einen Hinweis', async ({ page }) => {
+  // 5-5 ist eine Gleichung mit x und y
+  await page.goto('./#/ueben/5-5')
+  await expect(page.getByRole('heading', { name: 'Diese Aufgabe kommt bald' })).toBeVisible()
+  await page.getByRole('link', { name: 'Andere Aufgabe' }).click()
+  await expect(page).toHaveURL(/#\/ueben\/5-\d+$/)
+  await expect(page.locator('#question')).toBeVisible()
+})
 
 // Je eine Aufgabe mit Produkt-, Quotienten- und Kettenregel
 for (const task of ['3-2', '3-4', '3-9']) {

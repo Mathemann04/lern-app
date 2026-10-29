@@ -1,6 +1,6 @@
 import { MathfieldElement } from 'mathlive'
 import { useEffect, useRef } from 'react'
-import { DERIVATIVE_KEYBOARD } from './keyboard.ts'
+import { AREA_SHORTCUTS, DERIVATIVE_KEYBOARD, MORE_FUNCTIONS_KEYBOARD } from './keyboard.ts'
 
 // Eingabefeld mit Mathe-Tastatur (MathLive). Die Schriften sind dieselben wie bei KaTeX und
 // kommen schon mit der App, deshalb lädt MathLive keine eigenen (wichtig für offline).
@@ -53,6 +53,7 @@ export function MathInput({ label, readOnly, onInput, onSubmit, onKeyboardHeight
         field.mathVirtualKeyboardPolicy = 'auto'
         field.menuItems = []
         field.smartMode = false
+        field.inlineShortcuts = { ...field.inlineShortcuts, ...AREA_SHORTCUTS }
         field.readOnly = readOnlyRef.current
         field.dataset.ready = 'true'
         // Am Laptop gleich lostippen; am Handy erst beim Antippen, sonst verdeckt die Tastatur die Aufgabe
@@ -64,7 +65,7 @@ export function MathInput({ label, readOnly, onInput, onSubmit, onKeyboardHeight
     fieldRef.current = field
 
     const keyboard = window.mathVirtualKeyboard
-    keyboard.layouts = [DERIVATIVE_KEYBOARD]
+    keyboard.layouts = [DERIVATIVE_KEYBOARD, MORE_FUNCTIONS_KEYBOARD]
     keyboard.editToolbar = 'none'
     const onGeometry = () => callbacks.current.onKeyboardHeight(keyboard.visible ? keyboard.boundingRect.height : 0)
     keyboard.addEventListener('geometrychange', onGeometry)
