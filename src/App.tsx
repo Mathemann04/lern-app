@@ -105,7 +105,7 @@ function PracticePage({ mode, level, seed }: { mode: PracticeMode; level: Level;
     return (
       <main className="space-y-4">
         <h1 className="text-2xl font-semibold">Stufe {level} kommt bald</h1>
-        <p className="text-zinc-600">Im geführten Modus gibt es bisher die Stufen 1 bis 3. Die Stufen 4 und 5 folgen bald.</p>
+        <p className="text-zinc-600">Bisher gibt es die Stufen 1 bis 4. Stufe 5 folgt bald.</p>
         <a href="#/" className="inline-block rounded-xl border border-zinc-300 px-4 py-2 font-medium hover:bg-zinc-50">
           Zur Startseite
         </a>

@@ -43,6 +43,10 @@ const BASIC_SENTENCE: Partial<Record<RuleId, string>> = {
   ln: 'Die Ableitung des natürlichen Logarithmus ist der Kehrwert:',
   sin: 'Die Ableitung des Sinus ist der Kosinus:',
   cos: 'Die Ableitung des Kosinus ist der Sinus mit Minuszeichen:',
+  expBase: 'Bei einer Exponentialfunktion mit einer anderen Basis als $e$ kommt der Faktor $\\ln a$ dazu:',
+  logBase: 'Beim Logarithmus zu einer anderen Basis als $e$ kommt $\\ln a$ in den Nenner:',
+  tan: 'Die Ableitung des Tangens hat den Kosinus im Quadrat im Nenner:',
+  arctan: 'Die Ableitung des Arkustangens ist ein Bruch ohne Winkelfunktion:',
 }
 
 function factorSentence(node: Derivation): string {
@@ -93,6 +97,10 @@ function describe(node: Derivation): string[] {
     case 'ln':
     case 'sin':
     case 'cos':
+    case 'expBase':
+    case 'logBase':
+    case 'tan':
+    case 'arctan':
       return [`${BASIC_SENTENCE[node.rule]} ${tex(chain(prime(node.input), node.result))}.`]
     case 'chain': {
       // Ohne den Platzhalter u: Der steht bei der Produktregel schon für den ersten Faktor
@@ -106,10 +114,20 @@ function describe(node: Derivation): string[] {
     }
     case 'product':
     case 'quotient': {
-      const [du, dv] = node.children
+      // Ohne die Buchstaben u und v: Die sind in verschachtelten Aufgaben oft schon vergeben
+      const [a, b] = [toLatex(parts.u!), toLatex(parts.v!)]
+      const [da, db] = node.children.map((c) => toLatex(c.result))
+      const pattern =
+        node.rule === 'product'
+          ? `\\left(${a}\\right)' \\cdot ${b} + ${a} \\cdot \\left(${b}\\right)'`
+          : `\\frac{\\left(${a}\\right)' \\cdot ${b} - ${a} \\cdot \\left(${b}\\right)'}{\\left(${b}\\right)^2}`
+      const how =
+        node.rule === 'product'
+          ? 'Produktregel: Einmal wird der erste Faktor abgeleitet, einmal der zweite.'
+          : 'Quotientenregel: Ableitung von oben mal unten, minus oben mal Ableitung von unten, geteilt durch unten im Quadrat.'
       return [
-        `${RULES[node.rule].name} mit $u = ${toLatex(parts.u!)}$ und $v = ${toLatex(parts.v!)}$: ${tex(RULES[node.rule].formula)}.`,
-        `Mit $u' = ${toLatex(du.result)}$ und $v' = ${toLatex(dv.result)}$: ${tex(chain(prime(node.input), node.formula))}.`,
+        `${how} ${tex(chain(prime(node.input), pattern))}.`,
+        `Mit ${tex(`\\left(${a}\\right)' = ${da}`)} und ${tex(`\\left(${b}\\right)' = ${db}`)}: ${tex(chain(prime(node.input), node.formula))}.`,
       ]
     }
     default:
@@ -201,6 +219,14 @@ export function hintFor(node: Derivation): string {
     case 'sin':
     case 'cos':
       return `Sinus und Kosinus gehen beim Ableiten ineinander über. Überlege, wo dabei ein Minuszeichen entsteht.${factor}`
+    case 'expBase':
+      return `Hier steht $x$ oben im Exponenten, die Basis ist eine Zahl. Was ist anders als bei der e-Funktion?${factor}`
+    case 'logBase':
+      return `Vergleiche mit $(\\ln x)' = \\frac{1}{x}$. Was kommt bei einer anderen Basis dazu?${factor}`
+    case 'tan':
+      return `Denk an $\\tan x = \\frac{\\sin x}{\\cos x}$.${factor}`
+    case 'arctan':
+      return `Die Ableitung des Arkustangens enthält keine Winkelfunktion mehr, sondern einen Bruch.${factor}`
     case 'sum': {
       const hasConstant = core.children.some((c) => c.rule === 'constant')
       return `Leite jeden Summanden einzeln ab.${hasConstant ? ' Was passiert mit einer Zahl ohne $x$?' : ''}${factor}`
@@ -212,10 +238,15 @@ export function hintFor(node: Derivation): string {
   }
 }
 
-// Tipp zum Einsetzen in Produkt-, Quotienten- oder Kettenregel
-export function hintForAssembly(core: Derivation): string {
+// Tipp zum Einsetzen in Produkt-, Quotienten- oder Kettenregel.
+// coarse: Die äußere Ableitung wurde vorher nicht einzeln gefragt (ab Stufe 4).
+export function hintForAssembly(core: Derivation, coarse = false): string {
   if (core.rule === 'chain') {
-    return `Nimm die äußere Ableitung, setze darin $u = ${toLatex(core.parts.inner!)}$ ein und multipliziere mit der inneren Ableitung. Beide stehen oben unter „Bisher".`
+    const inner = toLatex(core.parts.inner!)
+    if (coarse) {
+      return `Leite die äußere Funktion ${m(core.parts.outer!)} nach $u$ ab, setze darin $u = ${inner}$ ein und multipliziere mit der inneren Ableitung von oben.`
+    }
+    return `Nimm die äußere Ableitung, setze darin $u = ${inner}$ ein und multipliziere mit der inneren Ableitung. Beide stehen oben unter „Bisher".`
   }
   const order = core.rule === 'quotient' ? ' Achte auf die Reihenfolge im Zähler.' : ''
   return `Setze $u$, $u'$, $v$ und $v'$ in die ${RULES[core.rule].name} ein. Die Ableitungen stehen oben unter „Bisher".${order}`
@@ -223,14 +254,18 @@ export function hintForAssembly(core: Derivation): string {
 
 // --- „Welche Regel brauchst du?" ---
 
-export type RuleOption = 'sum' | 'product' | 'quotient' | 'chain'
+export type RuleOption = 'sum' | 'product' | 'quotient' | 'chain' | 'constantFactor'
+// Die vier Regeln, die bestimmen, wie ein Term aufgebaut ist
 export const RULE_OPTIONS: readonly RuleOption[] = ['sum', 'product', 'quotient', 'chain']
+// Ersatz, wenn von den vier zu wenige als falsche Antwort taugen
+export const EXTRA_RULE_OPTION: RuleOption = 'constantFactor'
 
 const STRUCTURE: Record<RuleOption, string> = {
   sum: 'eine Summe: Seine Teile (die Summanden) sind mit $+$ oder $-$ verbunden',
   product: 'ein Produkt: Zwei Teile, die beide $x$ enthalten, werden malgenommen',
   quotient: 'ein Bruch, bei dem oben und unten $x$ vorkommt',
   chain: 'eine Verkettung: Eine Funktion ist in eine andere eingesetzt',
+  constantFactor: 'eine feste Zahl mal einem Term',
 }
 
 const STRUCTURE_SHORT: Record<RuleOption, string> = {
@@ -238,6 +273,7 @@ const STRUCTURE_SHORT: Record<RuleOption, string> = {
   product: 'ein Produkt',
   quotient: 'ein Bruch',
   chain: 'eine Verkettung',
+  constantFactor: 'eine Zahl mal Term',
 }
 
 const NOT_SHORT: Record<RuleOption, string> = {
@@ -245,6 +281,7 @@ const NOT_SHORT: Record<RuleOption, string> = {
   product: 'kein Produkt',
   quotient: 'kein Bruch',
   chain: 'keine Verkettung',
+  constantFactor: 'keine Zahl mal Term',
 }
 
 const WHEN_NEEDED: Record<RuleOption, string> = {
@@ -255,9 +292,11 @@ const WHEN_NEEDED: Record<RuleOption, string> = {
     'Die Quotientenregel brauchst du, wenn der ganze Term ein Bruch ist, bei dem oben und unten $x$ vorkommt, z. B. $\\frac{\\sin x}{x}$.',
   chain:
     'Die Kettenregel brauchst du, wenn eine Funktion in eine andere eingesetzt ist, z. B. $\\sin(3x)$: Dort steckt $3x$ im Sinus.',
+  constantFactor:
+    'Die Faktorregel brauchst du, wenn eine feste Zahl mit einem Term malgenommen wird, z. B. $4x^3$. Die Zahl bleibt dann einfach stehen.',
 }
 
-const isRuleOption = (rule: RuleId): rule is RuleOption => (RULE_OPTIONS as readonly string[]).includes(rule)
+const isRuleOption = (rule: RuleId): rule is RuleOption => (RULE_OPTIONS as readonly string[]).includes(rule) || rule === EXTRA_RULE_OPTION
 
 export function explainRuleChoice(correct: RuleId, factors: readonly Derivation[] = []): Explanation {
   const rule = RULES[correct]
@@ -307,12 +346,20 @@ type ErrorContext = {
   readonly correct: Expr
   readonly wrong: Expr
   readonly n: Rational | null
+  // Rechnet die Fehlerstelle mit derselben Variablen wie der Schritt? Nein, wenn sie in der
+  // äußeren Funktion einer Kettenregel liegt (Platzhalter u), der Schritt aber nach x fragt
+  readonly local: boolean
+  // „ Richtig ist (x³)' = 3x²." bzw. leer, wenn die Fehlerstelle nicht local ist
+  readonly rightIs: string
+  // (x³)' = 3x² bzw. die allgemeine Potenzregel
+  readonly rightShort: string
 }
 
 // Teile von Produkt und Quotient benennen: „Hier ist u = x² und v = eˣ."
+// Ohne die Buchstaben u und v: In verschachtelten Aufgaben stehen sie schon für etwas anderes
 function partsSentence({ parts, rule }: Derivation): string {
-  const [u, v] = [toLatex(parts.u!), toLatex(parts.v!)]
-  return rule === 'quotient' ? `Hier ist $u = ${u}$ (oben) und $v = ${v}$ (unten).` : `Hier ist $u = ${u}$ und $v = ${v}$.`
+  const [a, b] = [toLatex(parts.u!), toLatex(parts.v!)]
+  return rule === 'quotient' ? `Hier steht oben $${a}$ und unten $${b}$.` : `Hier sind die Faktoren $${a}$ und $${b}$.`
 }
 
 const PRODUCT_RULE = tex(RULES.product.formula)
@@ -320,35 +367,35 @@ const QUOTIENT_RULE = tex(RULES.quotient.formula)
 const CHAIN_RULE = tex(RULES.chain.formula)
 
 const ERROR_TEXTS: Record<string, (c: ErrorContext) => Explanation> = {
-  'power-exponent-not-reduced': ({ input, correct, wrong }) => ({
-    detailed: `Du hast den Exponenten stehen lassen. Bei der Potenzregel holst du den Exponenten nach vorne und verringerst ihn danach um $1$. Richtig ist ${tex(chain(prime(input), correct))}, nicht ${m(wrong)}.`,
-    short: `Exponent nicht verringert: ${tex(chain(prime(input), correct))}.`,
+  'power-exponent-not-reduced': ({ rightIs, rightShort }) => ({
+    detailed: `Du hast den Exponenten stehen lassen. Bei der Potenzregel holst du den Exponenten nach vorne und verringerst ihn danach um $1$.${rightIs}`,
+    short: `Exponent nicht verringert: ${rightShort}.`,
   }),
-  'power-negative-wrong-direction': ({ input, correct, n }) => {
+  'power-negative-wrong-direction': ({ n, rightIs }) => {
     const step = tex(`${numLatex(n!)} - 1 = ${numLatex(ratSub(n!, ONE))}`)
     return {
-      detailed: `Bei einem negativen Exponenten heißt „$1$ abziehen", dass er kleiner wird: ${step}. Du hast in die andere Richtung gezählt. Richtig ist ${tex(chain(prime(input), correct))}.`,
-      short: `${step}, also ${tex(chain(prime(input), correct))}.`,
+      detailed: `Bei einem negativen Exponenten heißt „$1$ abziehen", dass er kleiner wird: ${step}. Du hast in die andere Richtung gezählt.${rightIs}`,
+      short: `Der Exponent wird kleiner: ${step}.`,
     }
   },
-  'power-sign-forgotten': ({ input, correct, wrong, n }) => ({
-    detailed: `Der Exponent ${tex(numLatex(n!))} kommt mit seinem Minuszeichen nach vorne. Richtig ist ${tex(chain(prime(input), correct))}, nicht ${m(wrong)}.`,
-    short: `Minuszeichen vergessen: ${tex(chain(prime(input), correct))}.`,
+  'power-sign-forgotten': ({ n, rightIs, rightShort }) => ({
+    detailed: `Der Exponent ${tex(numLatex(n!))} kommt mit seinem Minuszeichen nach vorne.${rightIs}`,
+    short: `Minuszeichen vergessen: ${rightShort}.`,
   }),
-  'power-root-factor-forgotten': ({ node, input, correct, n }) => ({
-    detailed: `Auch ein Bruch als Exponent kommt bei der Potenzregel als Faktor nach vorne. Du hast den Faktor ${tex(numLatex(n!))} weggelassen. Richtig ist ${tex(chain(prime(input), powerRuleWithNumbers(node, n!), correct))}.`,
-    short: `Faktor ${tex(numLatex(n!))} vergessen: ${tex(chain(prime(input), correct))}.`,
+  'power-root-factor-forgotten': ({ node, input, correct, n, local }) => ({
+    detailed: `Auch ein Bruch als Exponent kommt bei der Potenzregel als Faktor nach vorne. Du hast den Faktor ${tex(numLatex(n!))} weggelassen.${local ? ` Richtig ist ${tex(chain(prime(input), powerRuleWithNumbers(node, n!), correct))}.` : ''}`,
+    short: `Faktor ${tex(numLatex(n!))} vergessen.`,
   }),
-  'power-fraction-numerator-only': ({ input, correct, n }) => {
+  'power-fraction-numerator-only': ({ n, rightIs }) => {
     const step = tex(`${numLatex(n!)} - 1 = ${numLatex(ratSub(n!, ONE))}`)
     return {
-      detailed: `Vom Exponenten ziehst du $1$ als ganze Zahl ab: ${step}. Du hast die $1$ nur vom Zähler abgezogen. Richtig ist ${tex(chain(prime(input), correct))}.`,
-      short: `${step}, also ${tex(chain(prime(input), correct))}.`,
+      detailed: `Vom Exponenten ziehst du $1$ als ganze Zahl ab: ${step}. Du hast die $1$ nur vom Zähler abgezogen.${rightIs}`,
+      short: `$1$ ganz abziehen: ${step}.`,
     }
   },
-  'power-exponent-not-multiplied': ({ input, correct, n }) => ({
-    detailed: `Du hast nur $1$ vom Exponenten abgezogen. Bei der Potenzregel kommt der Exponent ${tex(numLatex(n!))} vorher als Faktor nach vorne. Richtig ist ${tex(chain(prime(input), correct))}.`,
-    short: `Exponent ${tex(numLatex(n!))} als Faktor vergessen: ${tex(chain(prime(input), correct))}.`,
+  'power-exponent-not-multiplied': ({ n, rightIs }) => ({
+    detailed: `Du hast nur $1$ vom Exponenten abgezogen. Bei der Potenzregel kommt der Exponent ${tex(numLatex(n!))} vorher als Faktor nach vorne.${rightIs}`,
+    short: `Exponent ${tex(numLatex(n!))} als Faktor vergessen.`,
   }),
   'factor-forgotten': ({ node, input }) => {
     const { factor, rest, divisor } = node.parts
@@ -389,6 +436,35 @@ const ERROR_TEXTS: Record<string, (c: ErrorContext) => Explanation> = {
   'ln-reciprocal-of-ln': () => ({
     detailed: "Die Ableitung des natürlichen Logarithmus ist der Kehrwert von $x$, nicht der Kehrwert von $\\ln x$: $(\\ln x)' = \\frac{1}{x}$.",
     short: "Kehrwert von $x$: $(\\ln x)' = \\frac{1}{x}$.",
+  }),
+  'exp-base-power-rule': () => ({
+    detailed:
+      "Die Potenzregel gilt nur, wenn $x$ unten in der Basis steht, z. B. bei $x^3$. Bei $a^x$ steht $x$ oben im Exponenten. Dafür gilt eine eigene Regel: $(a^x)' = a^x \\cdot \\ln a$.",
+    short: "Potenzregel passt hier nicht: $(a^x)' = a^x \\cdot \\ln a$.",
+  }),
+  'exp-base-ln-forgotten': () => ({
+    detailed:
+      "Nur die e-Funktion bleibt beim Ableiten unverändert. Bei einer anderen Basis kommt der Faktor $\\ln a$ dazu: $(a^x)' = a^x \\cdot \\ln a$.",
+    short: "Faktor $\\ln a$ vergessen: $(a^x)' = a^x \\cdot \\ln a$.",
+  }),
+  'log-base-ln-forgotten': () => ({
+    detailed:
+      "Nur beim natürlichen Logarithmus ist die Ableitung einfach $\\frac{1}{x}$. Bei einer anderen Basis kommt $\\ln a$ in den Nenner: $(\\log_a x)' = \\frac{1}{x \\cdot \\ln a}$.",
+    short: "$\\ln a$ im Nenner vergessen: $(\\log_a x)' = \\frac{1}{x \\cdot \\ln a}$.",
+  }),
+  'tan-sin-cos-swapped': () => ({
+    detailed:
+      "Beim Tangens steht der Kosinus im Nenner, nicht der Sinus: $(\\tan x)' = \\frac{1}{\\cos^2 x}$. Das folgt aus $\\tan x = \\frac{\\sin x}{\\cos x}$ mit der Quotientenregel.",
+    short: "Kosinus im Nenner: $(\\tan x)' = \\frac{1}{\\cos^2 x}$.",
+  }),
+  'arctan-sign': () => ({
+    detailed: "Im Nenner steht ein Plus, kein Minus: $(\\arctan x)' = \\frac{1}{1 + x^2}$.",
+    short: "Plus im Nenner: $(\\arctan x)' = \\frac{1}{1 + x^2}$.",
+  }),
+  'arctan-arcsin': () => ({
+    detailed:
+      "Das ist die Ableitung des Arkussinus: $(\\arcsin x)' = \\frac{1}{\\sqrt{1 - x^2}}$. Beim Arkustangens gibt es keine Wurzel: $(\\arctan x)' = \\frac{1}{1 + x^2}$.",
+    short: "Verwechselt mit $\\arcsin$: $(\\arctan x)' = \\frac{1}{1 + x^2}$.",
   }),
   'product-derivatives-multiplied': ({ node }) => ({
     detailed: `Bei der Produktregel werden nicht einfach die beiden Ableitungen malgenommen. Jeder Summand enthält eine Ableitung und einen unveränderten Faktor: ${PRODUCT_RULE}. ${partsSentence(node)}`,
@@ -448,12 +524,17 @@ const ERROR_TEXTS: Record<string, (c: ErrorContext) => Explanation> = {
 export function explainError(wrongAnswer: WrongAnswer): Explanation {
   const { node, errorRule } = wrongAnswer
   const formula = errorRule.apply(node)
+  const local = node.variable === wrongAnswer.derivation.variable
+  const right = tex(chain(prime(node.input), node.result))
   const context: ErrorContext = {
     node,
     input: node.input,
     correct: node.result,
     wrong: formula ? finalForm(formula) : wrongAnswer.result,
     n: exponentOf(node),
+    local,
+    rightIs: local ? ` Richtig ist ${right}.` : '',
+    rightShort: local ? right : tex(RULES.power.formula),
   }
   const specific = ERROR_TEXTS[errorRule.id]?.(context)
   return (

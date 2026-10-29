@@ -127,3 +127,22 @@ test('Freier Modus funktioniert offline', async ({ page, context }) => {
   await submit(page)
   await expect(feedback(page)).toContainText('Typischer Fehler')
 })
+
+test('Freier Modus in Stufe 4: erkennt den vergessenen Faktor ln a', async ({ page }) => {
+  // Aufgabe 4-8: f(x) = 5^{\sin(4x)}; ohne ln 5 ist es ein typischer Fehler
+  await page.goto('./#/frei/4-8')
+  await expect(field(page)).toBeVisible()
+  await page.evaluate(() => {
+    const mf = document.querySelector('math-field') as HTMLElement & { value: string; executeCommand: (c: string) => void }
+    mf.value = '5^{\\sin\\left(4x\\right)}\\cdot4\\cos\\left(4x\\right)'
+    mf.executeCommand('commit')
+  })
+  await expect(feedback(page)).toContainText('Typischer Fehler: Faktor ln a vergessen.')
+  await page.evaluate(() => {
+    const mf = document.querySelector('math-field') as HTMLElement & { value: string; executeCommand: (c: string) => void }
+    mf.value = '4\\ln5\\cdot5^{\\sin\\left(4x\\right)}\\cos\\left(4x\\right)'
+    mf.executeCommand('commit')
+  })
+  await expect(feedback(page)).toContainText('Richtig!')
+  await expectCleanPage(page, 'Stufe 4 frei')
+})

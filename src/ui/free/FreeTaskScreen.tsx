@@ -5,6 +5,7 @@ import { type GuidedStep, planGuidedTask } from '../../engine/guided/plan.ts'
 import { generateDerivativeTask } from '../../engine/tasks/derivativeTerms.ts'
 import type { TaskRef } from '../../engine/tasks/taskNumber.ts'
 import type { ExplanationDetail } from '../../state/storage.ts'
+import { FitWidth } from '../FitWidth.tsx'
 import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
 import { practiceHref, taskHref } from '../routes.ts'
@@ -113,7 +114,7 @@ export default function FreeTaskScreen({ taskRef }: { taskRef: TaskRef }) {
       {hintOpen && !solved && (
         <div className="rounded-2xl bg-amber-50 px-4 py-3 text-zinc-800">
           <p className="mb-1 text-sm font-semibold text-amber-800">Tipp</p>
-          <RichText text={plan.steps[0].explanation.short} />
+          <RichText text={plan.ruleHint.short} />
         </div>
       )}
 
@@ -149,8 +150,10 @@ function Feedback({ verdict, resultLatex, detail, mode }: { verdict: Verdict; re
       return (
         <Box tone="green" title="Richtig!">
           {mode !== 'off' && <p>Zusammengefasst:</p>}
-          <div className="overflow-x-auto text-xl" data-testid="result">
-            <Formula tex={resultLatex} />
+          <div data-testid="result">
+            <FitWidth className="text-xl">
+              <Formula tex={resultLatex} />
+            </FitWidth>
           </div>
         </Box>
       )
@@ -242,9 +245,11 @@ function SolutionPath({
             <li key={step.id} className="animate-step-in space-y-2 rounded-2xl border border-zinc-200 p-4">
               <p className="text-sm font-medium text-accent-700">{step.title}</p>
               <RichText text={step.question} className="block font-medium" />
-              <div className="overflow-x-auto rounded-xl bg-accent-50 px-3 py-2 text-lg">
-                <RichText text={answer.content} inline />
-                {answer.caption && <RichText text={answer.caption} className="mt-1 block text-sm text-zinc-600" inline />}
+              <div className="rounded-xl bg-accent-50 px-3 py-2">
+                <FitWidth className="text-lg">
+                  <RichText text={answer.content} inline />
+                  {answer.caption && <RichText text={answer.caption} className="mt-1 block text-[0.78em] text-zinc-600" inline />}
+                </FitWidth>
               </div>
               {mode !== 'off' && <RichText text={step.explanation[mode]} className="text-zinc-700" />}
             </li>
@@ -252,8 +257,10 @@ function SolutionPath({
         })}
       </ol>
       {done ? (
-        <div className="overflow-x-auto rounded-2xl bg-accent-50 px-4 py-4 text-xl" aria-label="Ergebnis">
-          <Formula tex={resultLatex} />
+        <div className="rounded-2xl bg-accent-50 px-4 py-4" aria-label="Ergebnis">
+          <FitWidth className="text-xl">
+            <Formula tex={resultLatex} />
+          </FitWidth>
         </div>
       ) : (
         <button

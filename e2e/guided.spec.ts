@@ -72,7 +72,7 @@ test('Eine Aufgabe der Stufe 1 lässt sich geführt komplett lösen', async ({ p
 test('Stufenwahl bleibt gespeichert, Stufe 2 lässt sich komplett lösen', async ({ page }) => {
   const errors = collectErrors(page)
   await page.goto('./')
-  await expect(page.getByRole('radio', { name: /^Stufe 4/ })).toBeDisabled()
+  await expect(page.getByRole('radio', { name: /^Stufe 5/ })).toBeDisabled()
   await page.getByText('Mit e-Funktion, ln, sin und cos').click()
   await expect(page.getByRole('radio', { name: /^Stufe 2/ })).toBeChecked()
   await page.reload()
@@ -84,6 +84,22 @@ test('Stufenwahl bleibt gespeichert, Stufe 2 lässt sich komplett lösen', async
   await solveWholeTask(page)
   expect(errors).toEqual([])
 })
+
+// Stufe 4: Beispiel aus dem Plan (Quotient mit Produkt und Kette: u', v', Einsetzen) und eine
+// Kettenregel ohne eigenen Schritt für die äußere Ableitung (innere Ableitung, Zusammensetzen)
+for (const [task, established] of [
+  ['4-75', 3],
+  ['4-2', 2],
+] as const) {
+  test(`Stufe 4: Aufgabe ${task} lässt sich komplett lösen`, async ({ page }) => {
+    const errors = collectErrors(page)
+    await page.goto(`./#/ueben/${task}`)
+    await expect(page.getByText(/^Stufe 4 · Aufgabe/)).toBeVisible()
+    await solveWholeTask(page)
+    await expect(page.getByLabel('Bisher').locator('.katex')).toHaveCount(established)
+    expect(errors).toEqual([])
+  })
+}
 
 // Je eine Aufgabe mit Produkt-, Quotienten- und Kettenregel
 for (const task of ['3-2', '3-4', '3-9']) {

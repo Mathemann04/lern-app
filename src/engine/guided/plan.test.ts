@@ -7,7 +7,7 @@ import { isStableAt } from '../expr/arbitraries.ts'
 import { evaluate } from '../expr/evaluate.ts'
 import { samplePoints } from '../expr/sample.ts'
 import { substitute } from '../expr/substitute.ts'
-import { type Expr, add, div, exp, ln, mul, neg, num, pow, sin, sqrt, x } from '../expr/types.ts'
+import { type Expr, add, div, exp, fn, ln, mul, neg, num, pow, sin, sqrt, x } from '../expr/types.ts'
 import { createRng } from '../random/rng.ts'
 import { type GuidedStep, type GuidedTask, planForExpression, planGuidedTask } from './plan.ts'
 
@@ -147,15 +147,49 @@ describe('Regelwahl: gleichwertige Wege gelten nie als falsch', () => {
   })
 })
 
+describe('Stufe 4: gröberer Rechenweg', () => {
+  it('fragt bei der Kettenregel nur die innere Ableitung einzeln ab', () => {
+    const task = fn('tan', add(pow(x, num(2)), num(1)))
+    const plan = planForExpression(task, { level: 4, seed: 1 })
+    expect(plan.steps.map((s) => s.title)).toEqual(['Regel wählen', 'Innere Ableitung', 'Zusammensetzen'])
+    expect(plan.steps[2].question).toContain('Die äußere Funktion ist $\\tan u$')
+    // Fehler der äußeren Ableitung erscheinen jetzt beim Zusammensetzen
+    const ids = Array.from({ length: 20 }, (_, i) => planForExpression(task, { level: 4, seed: i + 1 }))
+      .flatMap((p) => p.steps[2].choices.map((c) => c.errorRuleId))
+    expect(ids).toContain('tan-sin-cos-swapped')
+  })
+
+  it('bietet die Faktorregel an, wenn sonst keine falsche Regel bleibt', () => {
+    const plan = planForExpression(div(exp(pow(x, num(2))), add(x, num(3))), { level: 4, seed: 1 })
+    expect(plan.steps[0].choices.map((c) => c.content).sort()).toEqual(['Faktorregel', 'Quotientenregel'])
+  })
+
+  it('verwendet in verschachtelten Schritten u nicht doppelt', () => {
+    // Beispiel aus dem Plan: u ist der Zähler, also darf u im Nenner-Schritt nicht für etwas anderes stehen
+    const f = div(mul(pow(x, num(2)), exp(mul(num(-3), x))), sqrt(add(pow(x, num(2)), num(1))))
+    const plan = planForExpression(f, { level: 4, seed: 1 })
+    const denominator = plan.steps.find((s) => s.title === 'Nenner ableiten')!
+    const formulas = texts(denominator).flatMap((t) => parseRichText(t).flat().flatMap((seg) => (seg.kind === 'math' ? [seg.latex] : [])))
+    for (const latex of formulas) expect(latex).not.toMatch(/(?<![a-zA-Z\\])u(?![a-zA-Z])/)
+    expect(plan.resultLatex).toBe("f'(x) = \\frac{(-3x^{4} + x^{3} - 3x^{2} + 2x)e^{-3x}}{(x^{2} + 1)^{\\frac{3}{2}}}")
+    expect(plan.ruleHint.short).toContain('Ein Bruch')
+  })
+})
+
 // Ableitung von subject nach variable, an einer Stelle; als x geschrieben für die Prüfhilfen
 const asX = (e: Expr, variable: string) => substitute(e, variable, x)
 
-describe.each([1, 2, 3] as const)('alle Aufgaben der Stufe %i', (level) => {
+describe.each([1, 2, 3, 4] as const)('alle Aufgaben der Stufe %i', (level) => {
   const plans: GuidedTask[] = Array.from({ length: 200 }, (_, i) => planGuidedTask({ level, seed: i + 1 }))
 
-  it('beginnen mit der Regelwahl und haben in jedem Schritt eine richtige und 1 bis 3 falsche Antworten', () => {
+  it('beginnen (fast immer) mit der Regelwahl', () => {
+    const withRule = plans.filter((p) => p.steps[0].title === 'Regel wählen').length
+    // Ab Stufe 4 kann sie fehlen, wenn jede Regel irgendwo im Term gebraucht wird
+    expect(withRule / plans.length).toBeGreaterThanOrEqual(level < 4 ? 1 : 0.9)
+  })
+
+  it('haben in jedem Schritt eine richtige und 1 bis 3 falsche Antworten', () => {
     for (const plan of plans) {
-      expect(plan.steps[0].title, `${level}-${plan.ref.seed}`).toBe('Regel wählen')
       for (const step of plan.steps) {
         const context = `${level}-${plan.ref.seed} ${step.title}`
         expect(step.choices.filter((c) => c.correct), context).toHaveLength(1)

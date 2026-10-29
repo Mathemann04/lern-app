@@ -115,7 +115,7 @@ export function HomeScreen() {
             </div>
           </fieldset>
         </div>
-        <p className="px-5 pb-4 text-sm text-zinc-500">Die Stufen 4 und 5 folgen in den nächsten Schritten.</p>
+        <p className="px-5 pb-4 text-sm text-zinc-500">Stufe 5 folgt in den nächsten Schritten.</p>
         <a
           href="#/galerie"
           className="flex items-center justify-between rounded-b-2xl border-t border-zinc-100 px-5 py-4 font-medium text-accent-700 hover:bg-accent-50"

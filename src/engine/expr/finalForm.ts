@@ -10,10 +10,11 @@ import { type Expr, add, fn, log, mul, num, pow } from './types.ts'
 // - dabei gegen x im Nenner kürzen: (x − 2x ln x)/x⁴ → (1 − 2 ln x)/x³
 // - Minus vor die Klammer ziehen, wenn alle Summanden negativ sind
 // - Zahl mal Klammer als ganzes Ergebnis ausmultiplizieren
+// - Doppelbrüche auflösen: (\frac{x^2 + 9}{x} - 2x \ln x)/(x^2 + 9)^2 → \frac{x^2 + 9 - 2x^2 \ln x}{x(x^2 + 9)^2}
 // Reine Polynome werden nicht ausgeklammert (12x² + 4x bleibt so).
 // Jede Umformung ist wertgleich; die Eigenschaftstests in finalForm.test.ts prüfen das.
 export function finalForm(e: Expr): Expr {
-  const n = factorSums(expandPolynomialSums(normalize(e)))
+  const n = resolveDoubleFractions(factorSums(expandPolynomialSums(normalize(e))))
   // Zahl mal Klammer als ganzes Ergebnis wird ausmultipliziert: −3(x² − 1) → 3 − 3x²
   const isNumberTimesSum = n.kind === 'mul' && n.factors.length === 2 && n.factors[0].kind === 'num' && n.factors[1].kind === 'add'
   return toDisplayForm(isNumberTimesSum ? normalize({ kind: 'add', terms: [n] }) : n)
@@ -217,4 +218,58 @@ function factorSums(e: Expr): Expr {
     default:
       return mapChildren(e, factorSums)
   }
+}
+
+// --- Doppelbrüche auflösen ---
+
+const hasNegativePower = (f: Expr) => f.kind === 'pow' && f.exp.kind === 'num' && ratSign(f.exp.value) < 0
+
+// Hauptnenner einer Summe: je Basis die größte negative Potenz, die in einem Summanden vorkommt.
+// Bei \frac{x^2 + 9}{x} - 2x \ln x ist das x, bei a\sqrt{s} - \frac{b}{\sqrt{s}} ist es \sqrt{s}.
+function commonDenominator(terms: readonly Expr[]): Expr[] {
+  const largest = new Map<string, FactorInfo>()
+  for (const term of terms) {
+    for (const [k, info] of factorInfo(term) ?? []) {
+      if (ratSign(info.exponent) >= 0) continue
+      const magnitude = { n: -info.exponent.n, d: info.exponent.d }
+      const known = largest.get(k)
+      if (!known || ratCmp(magnitude, known.exponent) > 0) largest.set(k, { base: info.base, exponent: magnitude })
+    }
+  }
+  return [...largest.values()].map(({ base, exponent }) => (isOne(exponent) ? base : pow(base, num(exponent))))
+}
+
+// Steht in einem Bruch eine Summe mit Brüchen, werden Zähler und Nenner mit deren Hauptnenner
+// erweitert. Wertgleich: Jede Basis des Hauptnenners steht schon im Nenner eines Summanden,
+// ist also dort, wo der Term definiert ist, ungleich 0.
+function resolveDoubleFractions(e: Expr): Expr {
+  const inner = mapChildren(e, resolveDoubleFractions)
+  if (inner.kind !== 'mul' || !inner.factors.some(hasNegativePower)) return inner
+  const extended: Expr[] = []
+  const denominators: Expr[] = []
+  // Summe mit Brüchen, mit dem Hauptnenner multipliziert
+  const extend = (sum: Extract<Expr, { kind: 'add' }>, denominator: readonly Expr[]) =>
+    factorSums(expandPolynomialSums(normalize(add(...sum.terms.map((t) => normalize(mul(t, ...denominator)))))))
+  for (const f of inner.factors) {
+    if (f.kind === 'add') {
+      const denominator = commonDenominator(f.terms)
+      if (denominator.length > 0) {
+        extended.push(extend(f, denominator))
+        denominators.push(...denominator)
+        continue
+      }
+    }
+    // Summe mit Brüchen im Nenner, z. B. \frac{1}{x^2(\frac{1}{x^2} + 1)}: nur bei ganzzahliger
+    // Hochzahl, denn nur dann ist (s/d)^{-k} = s^{-k} \cdot d^k ohne Vorzeichenfragen
+    if (f.kind === 'pow' && f.base.kind === 'add' && f.exp.kind === 'num' && isInteger(f.exp.value) && ratSign(f.exp.value) < 0) {
+      const denominator = commonDenominator(f.base.terms)
+      if (denominator.length > 0) {
+        extended.push(normalize(pow(extend(f.base, denominator), f.exp)))
+        extended.push(normalize(pow(mul(...denominator), num({ n: -f.exp.value.n, d: 1n }))))
+        continue
+      }
+    }
+    extended.push(f)
+  }
+  return normalize(mul(...extended, ...(denominators.length > 0 ? [pow(mul(...denominators), num(-1))] : [])))
 }
