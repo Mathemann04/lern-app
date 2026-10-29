@@ -4,7 +4,7 @@ import { compareValues } from '../check/numeric.ts'
 import { evaluate } from '../expr/evaluate.ts'
 import { latexProblem } from '../expr/latexChecks.ts'
 import { equationToLatex, toLatex } from '../expr/print.ts'
-import { add, eq, exp, mul, num, pow, sin, x, y } from '../expr/types.ts'
+import { add, asRational, eq, exp, mul, num, pow, sin, x, y } from '../expr/types.ts'
 import { generateDerivativeTask } from '../tasks/derivativeTerms.ts'
 import { deriveImplicit, implicitCurvePoints, implicitResult, solveMistakes, sortedEquation } from './implicit.ts'
 
@@ -41,6 +41,8 @@ describe('Implizites Ableiten: alle Aufgaben', () => {
       const result = implicitResult(d)
       const context = `5-${seed}: ${equationToLatex(equation)} → y' = ${toLatex(result)}`
       expect(latexProblem(toLatex(result)), context).toBeNull()
+      // keine ausgearteten Kurven wie (x + y)² = 4 mit y' = −1: y' hängt von x oder y ab
+      expect(asRational(result), context).toBeNull()
       expect(latexProblem(equationToLatex(d.differentiated), { checkUgly: false }), context).toBeNull()
       let compared = 0
       for (const point of implicitCurvePoints(equation, `test:${seed}`, 25)) {

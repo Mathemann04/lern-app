@@ -75,7 +75,7 @@ function TaskHeader({ task, stepIndex }: { task: GuidedTask; stepIndex: number }
   const established = task.steps.slice(0, stepIndex).flatMap((s) => (s.established ? [s.established] : []))
   return (
     <section className="space-y-3">
-      <TaskIntro taskRef={task.ref} functionLatex={task.functionLatex} />
+      <TaskIntro taskRef={task.ref} functionLatex={task.functionLatex} instruction={task.instruction} />
       {established.length > 0 && (
         <div className="space-y-1 rounded-xl bg-zinc-50 px-4 py-3" aria-label="Bisher">
           <p className="text-sm text-zinc-500">Bisher</p>
@@ -135,7 +135,7 @@ function StepView({ step, task, isLast, mode, detail, onMistake, onNext }: StepP
   return (
     <section className="animate-step-in space-y-5" aria-labelledby="question">
       <div className="space-y-1">
-        <p className="text-sm font-medium text-accent-700">{step.title}</p>
+        <RichText text={step.title} className="block text-sm font-medium text-accent-700" inline />
         <h1 id="question" ref={questionRef} tabIndex={-1} className="text-xl font-semibold outline-none">
           <RichText text={step.question} inline />
         </h1>

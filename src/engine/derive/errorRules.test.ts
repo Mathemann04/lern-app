@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { compareValues } from '../check/numeric.ts'
+import { parseRichText } from '../explain/richText.ts'
 import { latexProblem } from '../expr/latexChecks.ts'
 import { equationToLatex, toLatex } from '../expr/print.ts'
 import { sampleEnvs, samplePoints } from '../expr/sample.ts'
@@ -98,6 +99,15 @@ describe('Fehlerkatalog: Beispiele', () => {
   it('deckt jede Fehlerregel mit einem Beispiel ab', () => {
     // Schutz davor, eine neue Regel ohne Beispiel hinzuzufügen
     expect(ERROR_RULES.length).toBe(47)
+  })
+
+  it('setzt Zeichen in den Namen als Formel: kein einzelnes x, y oder „ln a" als Text', () => {
+    for (const rule of ERROR_RULES) {
+      for (const segment of parseRichText(rule.name).flat()) {
+        if (segment.kind === 'math') expect(latexProblem(segment.latex, { checkUgly: false }), rule.id).toBeNull()
+        else expect(segment.text, rule.id).not.toMatch(/(^|\s)([xy]|ln)(\s|$)/)
+      }
+    }
   })
 })
 

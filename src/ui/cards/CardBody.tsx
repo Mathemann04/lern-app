@@ -103,7 +103,7 @@ function CardErrors({ card, heading: H, headingClass, practice }: Props & { head
           return (
             <li key={id} className="space-y-2 rounded-2xl border border-zinc-200 p-4">
               <div className="flex items-baseline justify-between gap-3">
-                <p className="font-medium">{rule.name}</p>
+                <RichText text={rule.name} className="block font-medium" inline />
                 {times > 0 && <p className="shrink-0 text-sm text-amber-800">Dir {times}-mal passiert</p>}
               </div>
               <div className="text-zinc-700">

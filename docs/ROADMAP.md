@@ -27,7 +27,7 @@ Details: [PLAN-M1.md](PLAN-M1.md)
 - [x] 8. Fortschritt und Fehlerstatistik
 - [x] 9. Lernkarten
 - [x] 10. Stufe 5: logarithmisches Ableiten, Umkehr- und Hyperbelfunktionen
-- [ ] 11. Stufe 5: implizites Ableiten
+- [x] 11. Stufe 5: implizites Ableiten
 - [ ] 12. Feinschliff und Abschluss von M1
 
 ## Entscheidungen
@@ -90,5 +90,13 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   $x^x$, $\arcsin$, $\sinh$, $\tanh$ und die Areafunktionen. Die Ableitung
   der Umkehrfunktion steht als Herleitung auf der Lernkarte; eigene
   Aufgaben dazu bei Bedarf später. Mathe-Tastatur mit zweiter Seite „Mehr
-  Funktionen". Aufgaben zum impliziten Ableiten werden bis Schritt 11
+  Funktionen". Aufgaben zum impliziten Ableiten wurden bis Schritt 11
   übersprungen.
+- 29.10.2026: Implizites Ableiten geführt und frei. Geführt in drei
+  Schritten: einen Term mit $y$ ableiten (die neue Idee: Faktor $y'$),
+  beide Seiten ableiten, nach $y'$ auflösen. Ergebnis $y'$ in $x$ und $y$;
+  im freien Modus zählt jede Form, die auf der Kurve denselben Wert hat
+  (mit „$y' =$" davor oder ohne). Wer $y$ durch einen Term mit $x$ ersetzt,
+  bekommt den Hinweis, $y$ stehen zu lassen. Taste $y$ auf der
+  Mathe-Tastatur (statt $\pi$, das in keiner Aufgabe vorkommt). Namen
+  typischer Fehler setzen Zeichen wie $y$ oder $\ln a$ jetzt als Formel.

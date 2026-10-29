@@ -118,7 +118,6 @@ export function HomeScreen() {
             </div>
           </fieldset>
         </div>
-        <p className="px-5 pb-4 text-sm text-zinc-500">In Stufe 5 fehlt noch das implizite Ableiten, es folgt im nächsten Schritt.</p>
         <a
           href={topicHref('ableitungen')}
           className="flex items-center justify-between border-t border-zinc-100 px-5 py-4 font-medium text-accent-700 hover:bg-accent-50"

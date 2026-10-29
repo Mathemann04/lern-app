@@ -374,7 +374,7 @@ describe('Stufe 5: implizites Ableiten', () => {
   const circle = planImplicit(eq(add(pow(x, num(2)), pow(y, num(2))), num(25)), { level: 5, seed: 1 })
 
   it('fragt nach einem Term mit y, der Ableitung beider Seiten und y\'', () => {
-    expect(circle.steps.map((s) => s.title)).toEqual(['Term ableiten', 'Beide Seiten ableiten', "Nach y' auflösen"])
+    expect(circle.steps.map((s) => s.title)).toEqual(['Term ableiten', 'Beide Seiten ableiten', "Nach $y'$ auflösen"])
     expect(circle.steps.map((s) => correctChoice(s).content)).toEqual(["$2yy'$", "$2x + 2yy' = 0$", '$-\\frac{x}{y}$'])
     expect(circle.steps.map((s) => s.established)).toEqual(["\\left(y^{2}\\right)' = 2yy'", "2x + 2yy' = 0", "y' = -\\frac{x}{y}"])
     expect(circle.resultLatex).toBe("y' = -\\frac{x}{y}")

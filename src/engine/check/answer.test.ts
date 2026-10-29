@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { simplify } from '../expr/display.ts'
 import { toLatex } from '../expr/print.ts'
-import { type Expr, exp, fn, mul, num, pow, sin, sqrt, x } from '../expr/types.ts'
+import { type Expr, add, eq, exp, fn, mul, num, pow, sin, sqrt, x, y } from '../expr/types.ts'
 import { generateDerivativeTask } from '../tasks/derivativeTerms.ts'
 import { LEVELS } from '../tasks/taskNumber.ts'
-import { type Verdict, checkAnswer, prepareAnswerCheck } from './answer.ts'
+import { type Verdict, checkAnswer, prepareAnswerCheck, prepareImplicitCheck } from './answer.ts'
 
 function verdict(task: Expr, latex: string): Verdict {
   return checkAnswer(prepareAnswerCheck(task), latex)
@@ -85,11 +85,57 @@ describe('Stufe 5', () => {
   })
 })
 
+describe('Stufe 5: implizites Ableiten (x² + y² = 25)', () => {
+  const context = prepareImplicitCheck(eq(add(pow(x, num(2)), pow(y, num(2))), num(25)))
+  const check = (latex: string) => checkAnswer(context, latex)
+
+  it('zählt richtige Formen als richtig, auch mit „y\' =" davor', () => {
+    for (const latex of ['-\\frac{x}{y}', "y'=-\\frac{x}{y}", '\\frac{-2x}{2y}', '-x\\cdot y^{-1}']) expect(check(latex).kind, latex).toBe('correct')
+  })
+
+  it('benennt Fehler beim Auflösen und beim Ableiten', () => {
+    expect(check('\\frac{x}{y}').kind).toBe('wrongSign')
+    expect(check('-\\frac{y}{x}')).toMatchObject({ kind: 'solveMistake', mistake: 'reciprocal' })
+    expect(check('\\frac{25-2x}{2y}')).toMatchObject({ kind: 'knownError', wrong: { errorRule: { id: 'implicit-constant-side-kept' } } })
+    expect(check('-\\frac{3x}{y}').kind).toBe('wrongFactor')
+  })
+
+  it('verlangt y im Ergebnis und kein y\'', () => {
+    expect(check('-\\frac{x}{\\sqrt{25-x^2}}').kind).toBe('keepY')
+    expect(check("-\\frac{x}{y'}").kind).toBe('unreadable')
+    expect(check('-\\frac{x}{Y}')).toEqual({ kind: 'unreadable', message: 'Schreibe $y$ bitte klein.' })
+    expect(check('-\\frac{x}{z}')).toMatchObject({ kind: 'unreadable', message: expect.stringMatching(/nur \$x\$ und \$y\$/) })
+  })
+})
+
+// Implizite Aufgabe: Lösung in mehreren Formen richtig, jeder typische Fehler erkannt
+function checkImplicitTask(equation: Parameters<typeof prepareImplicitCheck>[0], label: string) {
+  const context = prepareImplicitCheck(equation)
+  for (const form of [context.result, simplify(context.result)]) {
+    const latex = toLatex(form)
+    expect(checkAnswer(context, latex).kind, `${label}: ${latex}`).toBe('correct')
+    expect(checkAnswer(context, `y' = ${latex}`).kind, `${label}: y' = ${latex}`).toBe('correct')
+  }
+  for (const wrong of context.wrongAnswers) {
+    const latex = toLatex(wrong.solved!)
+    expect(checkAnswer(context, latex).kind, `${label}: ${latex} (${wrong.errorRule.id})`).toBe('knownError')
+  }
+  for (const { mistake, result } of context.mistakes) {
+    const latex = toLatex(result)
+    // Kann mit einem Fehler beim Ableiten zusammenfallen, der zuerst genannt wird
+    const expected = ['knownError', mistake === 'sign' ? 'wrongSign' : 'solveMistake']
+    expect(expected, `${label}: ${latex} (${mistake})`).toContain(checkAnswer(context, latex).kind)
+  }
+}
+
 describe.each(LEVELS)('alle Aufgaben der Stufe %i', (level) => {
   it('erkennt die Lösung in mehreren Formen und jedes typische falsche Ergebnis', () => {
     for (let seed = 1; seed <= 80; seed++) {
       const { task } = generateDerivativeTask({ level, seed })
-      if (task.kind !== 'function') continue
+      if (task.kind !== 'function') {
+        checkImplicitTask(task.equation, `${level}-${seed}`)
+        continue
+      }
       const context = prepareAnswerCheck(task.expr)
       const { derivation } = context
       const forms = [derivation.result, derivation.formula, simplify(derivation.result)]

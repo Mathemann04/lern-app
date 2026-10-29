@@ -34,7 +34,7 @@ import type { RuleId } from './rules.ts'
 export type ErrorRule = {
   readonly id: string
   readonly rule: RuleId
-  // kurze Bezeichnung ohne Formel, z. B. „Ableitungen multipliziert"
+  // kurze Bezeichnung, z. B. „Ableitungen multipliziert"; Zeichen wie $y$ als Formel (Text mit $…$)
   readonly name: string
   // der Fehler als Formel (LaTeX), z. B. (u \cdot v)' = u' \cdot v'
   readonly wrongFormula: string
@@ -173,7 +173,7 @@ export const ERROR_RULES: readonly ErrorRule[] = [
   {
     id: 'ln-reciprocal-of-ln',
     rule: 'ln',
-    name: 'Kehrwert des Logarithmus statt Kehrwert von x',
+    name: 'Kehrwert des Logarithmus statt Kehrwert von $x$',
     wrongFormula: "(\\ln x)' = \\frac{1}{\\ln x}",
     apply: (node) => div(num(1), ln(X(node))),
   },
@@ -273,14 +273,14 @@ export const ERROR_RULES: readonly ErrorRule[] = [
   {
     id: 'exp-base-ln-forgotten',
     rule: 'expBase',
-    name: 'Faktor ln a vergessen',
+    name: 'Faktor $\\ln a$ vergessen',
     wrongFormula: "(a^x)' = a^x",
     apply: (node) => pow(node.parts.base!, X(node)),
   },
   {
     id: 'log-base-ln-forgotten',
     rule: 'logBase',
-    name: 'Faktor ln a im Nenner vergessen',
+    name: 'Faktor $\\ln a$ im Nenner vergessen',
     wrongFormula: "(\\log_a x)' = \\frac{1}{x}",
     apply: (node) => div(num(1), X(node)),
   },
@@ -308,7 +308,7 @@ export const ERROR_RULES: readonly ErrorRule[] = [
   {
     id: 'logarithmic-power-rule',
     rule: 'logarithmic',
-    name: 'Potenzregel angewendet, obwohl der Exponent von x abhängt',
+    name: 'Potenzregel angewendet, obwohl der Exponent von $x$ abhängt',
     wrongFormula: "(x^x)' = x \\cdot x^{x-1}",
     apply(node) {
       const { u, v } = node.parts
@@ -399,14 +399,14 @@ export const ERROR_RULES: readonly ErrorRule[] = [
   {
     id: 'implicit-y-constant',
     rule: 'dependent',
-    name: 'y wie eine feste Zahl abgeleitet',
+    name: '$y$ wie eine feste Zahl abgeleitet',
     wrongFormula: "(y^2)' = 0",
     apply: () => num(0),
   },
   {
     id: 'implicit-y-prime-forgotten',
     rule: 'dependent',
-    name: 'Innere Ableitung von y vergessen',
+    name: 'Innere Ableitung von $y$ vergessen',
     wrongFormula: "(y^2)' = 2y",
     // y abgeleitet, als wäre es x
     apply: () => num(1),
@@ -414,7 +414,7 @@ export const ERROR_RULES: readonly ErrorRule[] = [
   {
     id: 'implicit-x-as-constant',
     rule: 'product',
-    name: 'x wie eine feste Zahl behandelt',
+    name: '$x$ wie eine feste Zahl behandelt',
     wrongFormula: "(x \\cdot y)' = x \\cdot y'",
     apply(node) {
       // nur beim impliziten Ableiten: Ein Faktor enthält nur x, der andere y

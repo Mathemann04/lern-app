@@ -569,7 +569,7 @@ function solveStep(d: ImplicitDerivation, rng: Rng): GuidedStep {
   ]
   return {
     id: 'aufloesen',
-    title: "Nach y' auflösen",
+    title: "Nach $y'$ auflösen",
     question: `Löse ${tex(equationToLatex(d.differentiated))} nach $y'$ auf. Was ist $y'$?`,
     choices: rng.shuffle(choices),
     hint: HINT_SOLVE,
