@@ -5,7 +5,7 @@ Stand: 30.10.2026
 | Meilenstein | Inhalt | Status |
 | --- | --- | --- |
 | M1 | Grundgerüst + Ableitungsregeln (beide Modi, 5 Stufen, Erklärungen, Lernkarten, Fortschritt) | fertig |
-| M2 | Brüche (Bruchrechnung, Bruchterme kürzen und zusammenfassen, Doppelbrüche); App für mehrere Themen | in Arbeit |
+| M2 | Brüche (Bruchrechnung, Bruchterme kürzen und zusammenfassen, Doppelbrüche); App für mehrere Themen | fertig |
 | M3 | Formeln umstellen (nach einer Variablen auflösen, auch mit Brüchen) | offen |
 | M4 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
 | M5 | weitere Themen aus Mathematik MB1 | offen |
@@ -24,7 +24,7 @@ Details: [PLAN-M2.md](PLAN-M2.md)
 - [x] 4. Stufen 3 und 4 geführt
 - [x] 5. Freier Modus für Brüche
 - [x] 6. Stufe 5 geführt und frei
-- [ ] 7. Gezieltes Üben, Feinschliff, Abschluss von M2 (gezieltes Üben für
+- [x] 7. Gezieltes Üben, Feinschliff, Abschluss von M2 (gezieltes Üben für
   Brüche schon mit Schritt 3)
 
 ## M1: Schritte
@@ -190,3 +190,7 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   einer Funktion gekürzt" ($\frac{e^{2x}}{e^x} = e^2$; die Variante mit
   $\sin(2x)$ entfällt, weil $\sin(2x)$ in keiner Aufgabe vorkommt). Neue
   Lernkarte „Bausteine mit eigenen Regeln".
+- 30.10.2026: Meilenstein 2 abgeschlossen (Schritt 7: Durchgang durch alle
+  Seiten der Brüche, lange Formeln setzen sich kleiner statt umzubrechen,
+  Doppelbrüche in voller Größe, Tippflächen mindestens 44 px, Offline-Test
+  für Brüche). Als Nächstes: Plan für M3 (Formeln umstellen).

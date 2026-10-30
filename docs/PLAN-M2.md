@@ -1,6 +1,7 @@
 # Plan für Meilenstein 2: Brüche
 
-Status: **freigegeben** (29.10.2026) mit zwei Wünschen des Nutzers:
+Status: **abgeschlossen** (30.10.2026). Freigegeben am 29.10.2026 mit zwei
+Wünschen des Nutzers:
 „fiesere" Bausteine wie Wurzeln und Winkelfunktionen in den hohen Stufen
 und ein neues Aussehen (dunkles Design, Farben je Gebiet, neue Symbole).
 
@@ -413,6 +414,22 @@ Umgesetzt:
 ### Schritt 7: Gezieltes Üben, Feinschliff, Abschluss von M2
 - „Deine häufigsten Fehler" mit „Gezielt üben" auch für Brüche.
 - Letzte Design-Politur, Offline-Test, Doku, M2 abhaken.
+
+Umgesetzt:
+- Gezieltes Üben für Brüche gab es schon seit Schritt 3. Jetzt geprüft
+  auch für die Fehler der Stufe 5: von der Fortschrittsseite und von den
+  Lernkarten aus, z. B. „Quadrat vergessen" auf der Karte „Bausteine mit
+  eigenen Regeln".
+- Durchgang durch alle Seiten der Brüche am Handy und am Laptop, hell und
+  dunkel, mit Aufgaben aller Stufen geführt und frei. Behoben:
+  - Lange Formeln unter „Bisher" brachen nach einem Plus um, statt sich
+    kleiner zu setzen; jetzt bleiben sie in einer Zeile.
+  - Doppelbrüche unter „Bisher", in den Beispielen der Lernkarten und im
+    Fehlerkatalog sind in voller Größe gesetzt; vorher war der innere Bruch
+    am Handy sehr klein.
+  - Die Lernkarten-Knöpfe nach einer gelösten Aufgabe und das Menü am
+    Laptop sind jetzt mindestens 44 px hoch.
+- Neuer Offline-Test: Brüche der Stufe 5 geführt und frei ohne Netz.
 
 Pro Sitzung schaffen wir etwa ein bis zwei Schritte.
 

@@ -51,7 +51,7 @@ export function MainNav({ active }: { active: Section | null }) {
               <a
                 href={item.href}
                 aria-current={current ? 'page' : undefined}
-                className={`flex flex-col items-center gap-0.5 px-1 pt-2 pb-1.5 text-xs font-medium md:flex-row md:gap-1.5 md:rounded-lg md:px-3 md:py-2 md:text-sm md:hover:bg-zinc-100 ${
+                className={`flex flex-col items-center gap-0.5 px-1 pt-2 pb-1.5 text-xs font-medium md:min-h-11 md:flex-row md:gap-1.5 md:rounded-lg md:px-3 md:py-2 md:text-sm md:hover:bg-zinc-100 ${
                   current ? 'text-accent-700' : 'text-zinc-500 hover:text-zinc-900'
                 }`}
               >

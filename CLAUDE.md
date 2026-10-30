@@ -7,8 +7,9 @@ den Nutzer zugeschnitten: Maschinenbau, 1. Semester, THU, „Mathematik MB1".
 
 - Vision und Anforderungen: [docs/VISION.md](docs/VISION.md)
 - Meilensteine und aktueller Stand: [docs/ROADMAP.md](docs/ROADMAP.md)
-- Plan für den laufenden Meilenstein: [docs/PLAN-M2.md](docs/PLAN-M2.md)
-  (abgeschlossen: [docs/PLAN-M1.md](docs/PLAN-M1.md))
+- Plan für den laufenden Meilenstein: noch keiner; als Nächstes M3
+  (Formeln umstellen), Plan folgt in docs/PLAN-M3.md (abgeschlossen:
+  [docs/PLAN-M1.md](docs/PLAN-M1.md), [docs/PLAN-M2.md](docs/PLAN-M2.md))
 
 Vor jeder Arbeit ROADMAP und den laufenden Plan lesen.
 
@@ -71,7 +72,7 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   `src/ui/cards/` (`CardSheet.tsx`: Fenster über der Aufgabe, die
   Zurück-Taste schließt nur das Fenster). Lange Formeln in
   `FitWidth` (`src/ui/FitWidth.tsx`) setzen sich selbst kleiner, bis sie
-  passen. Texte mit Formeln über
+  passen (ohne Umbruch). Texte mit Formeln über
   `RichText` (Formeln zwischen `$…$`).
 - `src/engine/`: Mathe-Engine, reines TypeScript
   - `rational.ts`: exakte Brüche (bigint)
@@ -138,7 +139,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     `task.ts` (Aufgabenformen: kürzen, plus/minus, mal, geteilt,
     Doppelbruch, mehrere Rechenarten `mixed`, verschachtelter Doppelbruch
     `nested`; Zähler wie $(x + h)^2 - x^2$; Regel eines Bausteins `rule`;
-    Aufgaben mit Wurzel durchgehend in $\sqrt{x}$, `withRoots`), `solve.ts`
+    Aufgaben mit Wurzel durchgehend in $\sqrt{x}$, `withRoots`;
+    Doppelbrüche in Zwischenständen in voller Größe, `readableLatex`), `solve.ts`
     (Rechenweg, verbotene Zahlen, Ergebnis mit $\tan x$ bzw. ausmultipliziertem
     Nenner bei Wurzeln), `errorRules.ts` (typische Fehler, Ids `frac-…`;
     `freeOnly`: nur für die Diagnose im freien Modus)

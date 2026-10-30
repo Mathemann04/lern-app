@@ -111,3 +111,48 @@ test('Lernkarten: Ordner Brüche mit Stufe 5', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Bausteine mit eigenen Regeln', level: 1 })).toBeVisible()
   await expectCleanPage(page, 'Karte')
 })
+
+test('Brüche funktionieren offline, geführt und frei', async ({ page, context }) => {
+  await page.goto('./')
+  await expect(page.getByTestId('offline-status')).toHaveText('Offline nutzbar ✓', { timeout: 15_000 })
+  await context.setOffline(true)
+  await page.reload()
+  await page.getByRole('link', { name: /^Grundlagen/ }).click()
+  await page.getByRole('link', { name: /^Brüche/ }).click()
+  await expect(page.getByRole('heading', { name: 'Brüche', level: 1 })).toBeVisible()
+
+  // geführt: 3/(1 − sin x) + 3/(1 + sin x) ganz durch
+  await page.goto('./#/ueben/brueche/5-1')
+  await solveWholeTask(page)
+  await expectCleanPage(page, 'offline geführt')
+
+  // frei: Wurzel
+  await page.goto('./#/frei/brueche/5-2')
+  await expect(field(page)).toBeVisible()
+  await enter(page, '\\sqrt{x}+3')
+  await expect(feedback(page)).toContainText('Richtig!')
+})
+
+test('Gezielt üben: „Quadrat vergessen" von der Lernkarte aus', async ({ page }) => {
+  await page.goto('./#/karten/brueche/fraction-block-rules')
+  const error = page.locator('li, article, section, div').filter({ hasText: /^Quadrat vergessen/ }).first()
+  await error.getByRole('link', { name: 'Gezielt üben' }).click()
+  await expect(page).toHaveURL(/#\/ueben\/brueche\/5-\d+\?fokus=frac-square-forgotten$/)
+  // Der Fehler passiert beim Anwenden der Regel: Diesen Schritt hat die gefundene Aufgabe
+  let seen = false
+  for (let step = 0; step < 8 && !seen; step++) {
+    if (await page.getByRole('heading', { name: 'Geschafft!' }).isVisible()) break
+    await expect(page.locator('#question')).toBeVisible()
+    seen = await page.getByText(/Regel anwenden/).isVisible()
+    const count = await answers(page).count()
+    for (let i = 0; i < count && !seen; i++) {
+      const button = answers(page).nth(i)
+      if (await button.isDisabled()) continue
+      await button.click()
+      await correctFeedback(page).or(wrongFeedback(page)).waitFor()
+      if (await correctFeedback(page).isVisible()) break
+    }
+    if (!seen) await page.getByRole('button', { name: /^(Weiter|Ergebnis ansehen)$/ }).click()
+  }
+  expect(seen).toBe(true)
+})
