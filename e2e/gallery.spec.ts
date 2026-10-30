@@ -157,7 +157,7 @@ test('Galerie zeigt Umstell-Aufgaben der Stufen 1 bis 3 mit Rechenweg und typisc
   const card = page.getByRole('region', { name: 'Aufgerufene Aufgabe' }).getByRole('article')
   await expect(card).toContainText('Aufgabe 3-1')
   await expect(card).toContainText('Löse nach')
-  await expect(card.getByText('ausklammern')).toBeVisible()
+  await expect(card.getByText('ausklammern').first()).toBeVisible()
   await expect(card.getByText('Beim Ausklammern die')).toBeVisible()
   expect(errors).toEqual([])
 })
