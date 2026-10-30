@@ -148,9 +148,18 @@ export function explainFractionError(id: string): Explanation {
 // --- Erklärungen der richtigen Schritte ---
 
 // dens: Nenner der Brüche (ohne ganze Zahlen); numbersOnly: alle Nenner sind Zahlen
-export function explainLcd(dens: readonly Expr[], lcd: Expr, product: Expr | null, numbersOnly: boolean): Explanation {
+// factored: Nenner, die sich zerlegen lassen, mit ihrer Zerlegung
+export function explainLcd(
+  dens: readonly Expr[],
+  lcd: Expr,
+  product: Expr | null,
+  numbersOnly: boolean,
+  factored: ReadonlyArray<readonly [Expr, Expr]> = [],
+): Explanation {
   const list = listing(dens.map(m))
   const productNote = product ? ` Das Produkt ${m(product)} der Nenner geht auch, ist aber unnötig groß.` : ''
+  const factorNote =
+    factored.length > 0 ? `Zerlege zuerst die Nenner: ${listing(factored.map(([before, after]) => `$${toLatex(before)} = ${toLatex(after)}$`))}. ` : ''
   if (numbersOnly) {
     return {
       detailed: `Der Hauptnenner ist das kleinste gemeinsame Vielfache der Nenner ${list}: die kleinste Zahl, die durch jeden Nenner teilbar ist. Das ist ${m(lcd)}.${productNote}`,
@@ -158,8 +167,8 @@ export function explainLcd(dens: readonly Expr[], lcd: Expr, product: Expr | nul
     }
   }
   return {
-    detailed: `Der Hauptnenner muss durch jeden Nenner teilbar sein: durch ${list}. Nimm von den Zahlen das kleinste gemeinsame Vielfache und jeden anderen Faktor mit der höchsten Hochzahl, mit der er in einem Nenner vorkommt. Das ergibt ${m(lcd)}.${productNote}`,
-    short: `Durch ${list} teilbar und so klein wie möglich: ${m(lcd)}.`,
+    detailed: `${factorNote}Der Hauptnenner muss durch jeden Nenner teilbar sein: durch ${list}. Nimm von den Zahlen das kleinste gemeinsame Vielfache und jeden anderen Faktor mit der höchsten Hochzahl, mit der er in einem Nenner vorkommt. Das ergibt ${m(lcd)}.${productNote}`,
+    short: `${factorNote}Durch ${list} teilbar und so klein wie möglich: ${m(lcd)}.`,
   }
 }
 
@@ -189,12 +198,14 @@ export function explainCombine(sum: Expr, numerator: Expr, lcd: Expr, bracket: b
 }
 
 // common: der Faktor, durch den gekürzt wird; powers: Potenzen von Buchstaben werden gekürzt;
-// oneLeft: der ganze Zähler kürzt sich weg
-export function explainCancel(common: Expr, powers: boolean, oneLeft: boolean): Explanation {
+// oneLeft: der ganze Zähler kürzt sich weg; minusKept: ein Minus aus einer vertauschten Differenz
+// bleibt stehen
+export function explainCancel(common: Expr, powers: boolean, oneLeft: boolean, minusKept = false): Explanation {
   const powerNote = powers ? ' Bei Potenzen ziehst du dazu die Hochzahlen ab: $\\frac{x^m}{x^n} = x^{m-n}$.' : ''
   const oneNote = oneLeft ? ' Der ganze Zähler kürzt sich weg, dort bleibt eine $1$.' : ''
+  const minusNote = minusKept ? ' Das Minus aus $b - a = -(a - b)$ bleibt dabei stehen.' : ''
   return {
-    detailed: `Zähler und Nenner haben den gemeinsamen Faktor ${m(common)}. Teile beide dadurch.${powerNote}${oneNote}`,
+    detailed: `Zähler und Nenner haben den gemeinsamen Faktor ${m(common)}. Teile beide dadurch.${powerNote}${oneNote}${minusNote}`,
     short: `Durch den gemeinsamen Faktor ${m(common)} kürzen.`,
   }
 }
@@ -221,9 +232,19 @@ export function explainReciprocal(divisor: Expr, reciprocal: Expr, complex: bool
   }
 }
 
-export function explainFactor(before: Expr, after: Expr, numerator: boolean): Explanation {
+// Wie ein Term zerlegt wird: ausklammern, binomische Formel, x² + px + q
+export type FactorMethod = 'out' | 'binomial' | 'quadratic'
+
+const METHOD_TEXT: Record<FactorMethod, string> = {
+  out: 'ausklammern',
+  binomial: 'binomische Formel',
+  quadratic: 'zwei Zahlen mit dem richtigen Produkt und der richtigen Summe',
+}
+
+export function explainFactor(before: Expr, after: Expr, numerator: boolean, methods: readonly FactorMethod[] = []): Explanation {
+  const how = methods.length > 0 ? ` (${listing(methods.map((k) => METHOD_TEXT[k]))})` : ''
   return {
-    detailed: `Zerlege den ${numerator ? 'Zähler' : 'Nenner'} in Faktoren: $${toLatex(before)} = ${toLatex(after)}$. Nur Faktoren lassen sich kürzen.`,
+    detailed: `Zerlege den ${numerator ? 'Zähler' : 'Nenner'} in Faktoren${how}: $${toLatex(before)} = ${toLatex(after)}$. Nur Faktoren lassen sich kürzen.`,
     short: `$${toLatex(before)} = ${toLatex(after)}$.`,
   }
 }
@@ -243,6 +264,9 @@ export const FRACTION_HINTS = {
   multiply: 'Zähler mal Zähler, Nenner mal Nenner. Kürzen kannst du schon vor dem Ausrechnen, auch über Kreuz.',
   reciprocal: 'Durch einen Bruch teilen heißt: mit dem umgedrehten Bruch malnehmen.',
   factor: 'Klammere aus, was in jedem Summanden steckt, oder nutze eine binomische Formel.',
+  factorOut: 'Was steckt in jedem Summanden? Das kommt vor die Klammer: $ka + kb = k(a + b)$.',
+  factorBinomial: 'Zwei Quadrate mit Minus dazwischen: $a^2 - b^2 = (a + b)(a - b)$. Mit Mittelglied: $a^2 \\pm 2ab + b^2 = (a \\pm b)^2$.',
+  factorQuadratic: 'Suche zwei Zahlen $a$ und $b$ mit $a \\cdot b = q$ und $a + b = p$. Dann ist $x^2 + px + q = (x + a)(x + b)$.',
   inner: 'Fasse diesen Teil wie eine eigene Aufgabe zu einem Bruch zusammen.',
 } as const
 

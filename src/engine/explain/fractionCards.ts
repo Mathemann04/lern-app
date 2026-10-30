@@ -1,4 +1,4 @@
-import { type Expr, mul, num, pow, variable, x } from '../expr/types.ts'
+import { type Expr, add, exp, ln, mul, num, pow, sin, sub, variable, x } from '../expr/types.ts'
 import { toFrac } from '../fraction/frac.ts'
 import { type Poly, polyDivideExact } from '../fraction/poly.ts'
 import { type FractionShape, type FractionTask, type Part, expanded, minus, part, plus } from '../fraction/task.ts'
@@ -15,6 +15,13 @@ export const FRACTION_CARD_IDS = {
   multiply: 'fraction-multiply',
   divide: 'fraction-divide',
   powers: 'fraction-powers',
+  factorOut: 'fraction-factor-out',
+  binomial: 'fraction-binomial',
+  quadratic: 'fraction-quadratic',
+  lcdTerms: 'fraction-lcd-terms',
+  sumCancel: 'fraction-sum-cancel',
+  complex: 'fraction-complex',
+  blocks: 'fraction-blocks',
 } as const
 
 // --- Beispiele bauen ---
@@ -24,8 +31,9 @@ function poly(e: Expr): Poly {
   return polyDivideExact(f.num, f.den)!
 }
 
-// Bruch aus Zähler und Nenner (Terme ohne Bruch)
+// Bruch aus Zähler und Nenner (Terme ohne Bruch); frAscending: Zähler mit der Zahl zuerst (2 − x)
 const fr = (n: Expr, d: Expr = num(1)): Part => part(expanded(poly(n)), expanded(poly(d)))
+const frAscending = (n: Expr, d: Expr): Part => part(expanded(poly(n), true), expanded(poly(d)))
 const task = (s: FractionShape): FractionTask => ({ ...s, hints: [] }) as FractionTask
 const [a, b, y] = ['a', 'b', 'y'].map(variable)
 const n = (value: number) => num(value)
@@ -81,8 +89,7 @@ export const FRACTION_CARD_LIST: readonly Card[] = [
       task({ kind: 'sum', terms: [plus(fr(n(5), n(6))), minus(fr(n(1), n(4)))] }),
       task({ kind: 'sum', terms: [plus(fr(n(2), x)), minus(fr(n(1), pow(x, n(2))))] }),
     ],
-    // Klammer nach dem Minus und Ausmultiplizieren kommen mit Stufe 3 dazu (Summen im Zähler)
-    errors: ['frac-lcd-gcd', 'frac-lcd-sum', 'frac-lcd-factor-missing', 'frac-add-across'],
+    errors: ['frac-lcd-gcd', 'frac-lcd-sum', 'frac-lcd-factor-missing', 'frac-add-across', 'frac-minus-bracket', 'frac-distribute-first-only'],
   },
   {
     id: FRACTION_CARD_IDS.multiply,
@@ -131,5 +138,119 @@ export const FRACTION_CARD_LIST: readonly Card[] = [
       task({ kind: 'reduce', part: fr(pow(x, n(3)), mul(n(2), pow(x, n(4)))) }),
     ],
     errors: ['frac-power-reversed', 'frac-power-divided'],
+  },
+  {
+    id: FRACTION_CARD_IDS.factorOut,
+    topic: 'brueche',
+    title: 'Ausklammern',
+    level: 3,
+    rules: [],
+    formulas: ['k \\cdot a + k \\cdot b = k(a + b)', 'b - a = -(a - b)'],
+    memo: 'Was in jedem Summanden steckt, kommt vor die Klammer. In der Klammer bleibt, was beim Teilen übrig ist.',
+    note: 'Probe: Ausmultiplizieren muss wieder genau den Term von vorher ergeben. Auch ein Minus lässt sich ausklammern, so wird aus $2 - x$ der Term $-(x - 2)$.',
+    when: 'Vor dem Kürzen: Kürzen darfst du nur Faktoren, also muss eine Summe erst zum Produkt werden.',
+    examples: [
+      task({ kind: 'reduce', part: fr(add(mul(n(3), x), n(6)), add(pow(x, n(2)), mul(n(2), x))) }),
+      task({ kind: 'reduce', part: fr(sub(pow(x, n(2)), mul(n(5), x)), sub(mul(n(2), x), n(10))) }),
+      task({ kind: 'reduce', part: fr(add(mul(n(4), x), n(8)), add(mul(n(6), x), n(12))) }),
+    ],
+    errors: ['frac-factor-wrong'],
+  },
+  {
+    id: FRACTION_CARD_IDS.binomial,
+    topic: 'brueche',
+    title: 'Binomische Formeln',
+    level: 3,
+    rules: [],
+    formulas: ['a^2 + 2ab + b^2 = (a + b)^2', 'a^2 - 2ab + b^2 = (a - b)^2', 'a^2 - b^2 = (a + b)(a - b)'],
+    memo: 'Rückwärts gelesen zerlegen die binomischen Formeln: Zwei Quadrate mit Minus dazwischen ergeben $(a + b)(a - b)$, mit passendem Mittelglied ein Quadrat.',
+    note: 'Prüfe das Mittelglied: Bei $x^2 + 10x + 25$ ist $2 \\cdot x \\cdot 5 = 10x$, also ist es $(x + 5)^2$.',
+    when: 'Wenn im Zähler oder Nenner Quadrate stehen, z. B. $x^2 - 9$ oder $x^2 + 6x + 9$.',
+    examples: [
+      task({ kind: 'reduce', part: fr(sub(pow(x, n(2)), n(9)), add(mul(n(2), x), n(6))) }),
+      task({ kind: 'reduce', part: fr(add(pow(x, n(2)), mul(n(6), x), n(9)), sub(pow(x, n(2)), n(9))) }),
+      task({ kind: 'reduce', part: fr(add(pow(x, n(2)), mul(n(-4), x), n(4)), sub(pow(x, n(2)), n(4))) }),
+    ],
+    errors: ['frac-binomial-confused'],
+  },
+  {
+    id: FRACTION_CARD_IDS.lcdTerms,
+    topic: 'brueche',
+    title: 'Hauptnenner mit Termen',
+    level: 3,
+    rules: [],
+    formulas: ['\\frac{a}{u} + \\frac{b}{v} = \\frac{a \\cdot v + b \\cdot u}{u \\cdot v}'],
+    memo: 'Zerlege alle Nenner in Faktoren. Der Hauptnenner enthält jeden Faktor so oft, wie er in einem Nenner höchstens vorkommt.',
+    note: 'Haben die Nenner keinen gemeinsamen Faktor, ist der Hauptnenner ihr Produkt, z. B. $(x - 1)(x + 1)$. Lass ihn in Klammern stehen: So siehst du beim Erweitern, welcher Faktor fehlt, und am Ende, ob sich etwas kürzen lässt. Nach einem Minus gehört der Zähler in Klammern.',
+    examples: [
+      task({ kind: 'sum', terms: [plus(fr(n(3), sub(x, n(1)))), minus(fr(n(2), add(x, n(1))))] }),
+      task({ kind: 'sum', terms: [plus(fr(x, sub(pow(x, n(2)), n(1)))), minus(fr(n(1), add(x, n(1))))] }),
+      task({ kind: 'sum', terms: [plus(fr(n(5), add(pow(x, n(2)), x))), minus(fr(n(2), x))] }),
+    ],
+    errors: ['frac-lcd-sum', 'frac-lcd-factor-missing', 'frac-minus-bracket', 'frac-distribute-first-only'],
+  },
+  {
+    id: FRACTION_CARD_IDS.sumCancel,
+    topic: 'brueche',
+    title: 'Kürzen bei Summen',
+    level: 3,
+    rules: [],
+    formulas: ['\\frac{(a + b) \\cdot c}{(a + b) \\cdot d} = \\frac{c}{d}', '\\frac{a - b}{b - a} = -1'],
+    memo: 'Kürzen darfst du nur Faktoren, nie einzelne Summanden. Zerlege Zähler und Nenner zuerst in Faktoren, dann kürze ganze Klammern.',
+    note: 'Vertauschte Differenzen unterscheiden sich nur im Vorzeichen: $b - a = -(a - b)$. Beim Kürzen bleibt dieses Minus stehen.',
+    examples: [
+      task({ kind: 'reduce', part: frAscending(sub(n(2), x), sub(pow(x, n(2)), n(4))) }),
+      task({ kind: 'reduce', part: fr(add(mul(n(2), x), n(6)), add(pow(x, n(2)), mul(n(3), x))) }),
+      task({ kind: 'reduce', part: fr(sub(pow(x, n(2)), n(1)), add(pow(x, n(2)), mul(n(-2), x), n(1))) }),
+    ],
+    errors: ['frac-cancel-in-sum', 'frac-cancel-one-summand', 'frac-cancel-sign', 'frac-cancel-forgot-one'],
+  },
+  {
+    id: FRACTION_CARD_IDS.quadratic,
+    topic: 'brueche',
+    title: '$x^2 + px + q$ zerlegen',
+    level: 4,
+    rules: [],
+    formulas: ['x^2 + px + q = (x + a)(x + b)', 'a \\cdot b = q, \\quad a + b = p'],
+    memo: 'Suche zwei Zahlen $a$ und $b$, deren Produkt $q$ und deren Summe $p$ ist. Dann ist $x^2 + px + q = (x + a)(x + b)$.',
+    note: 'Findest du keine passenden Zahlen, helfen die Nullstellen: $x_{1,2} = -\\frac{p}{2} \\pm \\sqrt{\\left(\\frac{p}{2}\\right)^2 - q}$, dann ist $x^2 + px + q = (x - x_1)(x - x_2)$.',
+    examples: [
+      task({ kind: 'reduce', part: fr(sub(sub(pow(x, n(2)), x), n(6)), sub(pow(x, n(2)), n(9))) }),
+      task({ kind: 'reduce', part: fr(add(pow(x, n(2)), mul(n(5), x), n(6)), add(pow(x, n(2)), mul(n(3), x))) }),
+      task({ kind: 'reduce', part: fr(sub(sub(pow(x, n(2)), mul(n(2), x)), n(8)), sub(x, n(4))) }),
+    ],
+    errors: ['frac-vieta-sign'],
+  },
+  {
+    id: FRACTION_CARD_IDS.complex,
+    topic: 'brueche',
+    title: 'Doppelbrüche',
+    level: 4,
+    rules: [],
+    formulas: ['\\frac{\\frac{a}{b}}{\\frac{c}{d}} = \\frac{a}{b} \\cdot \\frac{d}{c}', '\\frac{\\frac{a}{b}}{c} = \\frac{a}{b \\cdot c}'],
+    memo: 'Ein Doppelbruch ist eine Division: oberer Bruch geteilt durch unteren Bruch. Also wird mit dem Kehrwert des unteren Bruchs malgenommen.',
+    note: ['So gehst du vor:', '1. Zähler und Nenner je zu einem Bruch zusammenfassen.', '2. Mit dem Kehrwert des unteren Bruchs malnehmen.', '3. Kürzen.'].join('\n'),
+    examples: [
+      task({ kind: 'complex', top: [plus(fr(n(1))), plus(fr(n(1), x))], bottom: [plus(fr(n(1))), minus(fr(n(1), pow(x, n(2))))] }),
+      task({ kind: 'complex', top: [plus(fr(x)), minus(fr(n(9), x))], bottom: [plus(fr(n(1))), plus(fr(n(3), x))] }),
+      task({ kind: 'complex', top: [plus(fr(n(1), x)), plus(fr(n(1), n(4)))], bottom: [plus(fr(add(x, n(4))))] }),
+    ],
+    errors: ['frac-complex-times-denominator', 'frac-complex-number-up'],
+  },
+  {
+    id: FRACTION_CARD_IDS.blocks,
+    topic: 'brueche',
+    title: 'Bausteine wie $e^x$',
+    level: 4,
+    rules: [],
+    formulas: ['e^{2x} = \\left(e^x\\right)^2', '\\sin^2 x = (\\sin x)^2'],
+    memo: 'Behandle $e^x$, $\\ln x$ oder $\\sin x$ wie einen einzigen Buchstaben. Dann rechnest du genau wie mit $x$.',
+    note: 'Es hilft, den Baustein kurz umzubenennen, z. B. $u = e^x$: Aus $e^{2x} - 9$ wird $u^2 - 9 = (u + 3)(u - 3)$.',
+    examples: [
+      task({ kind: 'reduce', part: fr(sub(exp(mul(n(2), x)), n(1)), add(exp(x), n(1))) }),
+      task({ kind: 'sum', terms: [plus(fr(n(2), sin(x))), minus(fr(n(1), pow(sin(x), n(2))))] }),
+      task({ kind: 'reduce', part: fr(sub(pow(ln(x), n(2)), n(4)), add(ln(x), n(2))) }),
+    ],
+    errors: [],
   },
 ]

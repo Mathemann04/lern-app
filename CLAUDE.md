@@ -106,10 +106,13 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     implizit (Stufe 5): Term mit y ableiten, beide Seiten ableiten, nach y'
     auflösen; Antworten aus Fehlerregeln; je Schritt die passenden
     Lernkarten). `guided/fractionPlan.ts`: dasselbe für Brüche (Hauptnenner,
-    erweitern, zusammenfassen, kürzen; Malnehmen und Kürzen in einem
-    Schritt; ein Schritt ohne passenden typischen Fehler geht im nächsten
-    auf, im letzten ist die Antwort das Ergebnis). Gemeinsame Typen in
-    `guided/types.ts`
+    erweitern, zusammenfassen, kürzen; Zähler und Nenner zerlegen mit Tipp
+    je Art; Doppelbruch: erst Zähler, dann Nenner als ein Bruch; Malnehmen
+    und Kürzen in einem Schritt; ab Stufe 4 Erweitern und Zusammenfassen in
+    einem Schritt; ein Schritt ohne passenden typischen Fehler geht im
+    nächsten auf, im letzten ist die Antwort das Ergebnis; falsche
+    Ergebnisse mit Klammern als Produkt, `productFormExpr`). Gemeinsame
+    Typen in `guided/types.ts`
   - `errorCatalog.ts`: typische Fehler aller Themen mit Namen, je Thema
   - `fraction/`: Bruch-Engine (Brüche aus Polynomen, exakt): `poly.ts`
     (Polynome in mehreren Buchstaben), `frac.ts` (Bruch, Termbaum ↔
