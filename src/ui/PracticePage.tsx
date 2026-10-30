@@ -18,7 +18,7 @@ type PracticeProps = { course: string; mode: PracticeMode; level: Level; seed: n
 export default function PracticePage({ course: courseId, mode: wantedMode, level, seed, focus: wanted }: PracticeProps) {
   const { course } = courseById(courseId)!
   const focus = knownFocus(courseId, wanted)
-  // Ohne freien Modus (Brüche bis Schritt 5): geführt mit derselben Aufgabe
+  // Ohne freien Modus: geführt mit derselben Aufgabe
   const mode = course.free ? wantedMode : 'guided'
   const redirect = seed === null || mode !== wantedMode
 
@@ -51,7 +51,7 @@ export default function PracticePage({ course: courseId, mode: wantedMode, level
   if (mode === 'free') {
     return (
       <Suspense fallback={<p className="text-zinc-500">Mathe-Tastatur wird geladen …</p>}>
-        <FreeTaskScreen key={key} course={courseId} taskRef={taskRef} focus={focus} />
+        <FreePractice key={key} course={courseId} taskRef={taskRef} focus={focus} />
       </Suspense>
     )
   }
@@ -62,4 +62,9 @@ export default function PracticePage({ course: courseId, mode: wantedMode, level
 function GuidedPractice({ course, taskRef, focus }: { course: string; taskRef: TaskRef; focus: string | null }) {
   const engine = use(loadCourseEngine(course))
   return <TaskScreen course={course} engine={engine} taskRef={taskRef} focus={focus} />
+}
+
+function FreePractice({ course, taskRef, focus }: { course: string; taskRef: TaskRef; focus: string | null }) {
+  const engine = use(loadCourseEngine(course))
+  return <FreeTaskScreen course={course} engine={engine} taskRef={taskRef} focus={focus} />
 }

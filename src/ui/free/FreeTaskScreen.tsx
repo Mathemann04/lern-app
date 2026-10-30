@@ -1,9 +1,6 @@
 import { type ReactNode, useMemo, useRef, useState } from 'react'
-import { type Verdict, checkAnswer, prepareAnswerCheck, prepareImplicitCheck } from '../../engine/check/answer.ts'
-import { explainError, explainSolveMistake } from '../../engine/explain/texts.ts'
-import { planGuidedTask } from '../../engine/guided/plan.ts'
+import type { FreeVerdict } from '../../engine/check/freeTask.ts'
 import type { GuidedStep } from '../../engine/guided/types.ts'
-import { generateDerivativeTask } from '../../engine/tasks/derivativeTerms.ts'
 import type { TaskRef } from '../../engine/tasks/taskNumber.ts'
 import { recordAttempt, recordError } from '../../state/progress.ts'
 import type { ExplanationDetail } from '../../state/storage.ts'
@@ -11,28 +8,28 @@ import { FitWidth } from '../FitWidth.tsx'
 import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
 import { CardSheetButton, TaskCardLinks } from '../cards/CardSheet.tsx'
+import type { CourseEngine } from '../courseEngines.ts'
 import { courseHref, practiceHref, taskHref } from '../routes.ts'
 import { LevelUpSuggestion } from '../task/LevelUpSuggestion.tsx'
 import { CheckBadge, FocusBanner, TaskIntro, TaskTopBar } from '../task/TaskParts.tsx'
 import { type ExplanationMode, useExplanationMode } from '../task/explanationMode.ts'
 import { MathInput } from './MathInput.tsx'
 
-// Freier Modus: Ableitung selbst eintippen. Die Engine prüft auf Gleichwertigkeit, erkennt
-// typische Fehler und kann den Lösungsweg Schritt für Schritt aufdecken (aus dem geführten Modus).
-// Zurzeit nur für das Thema Ableiten (course), Brüche folgen.
+// Freier Modus: das Ergebnis selbst eintippen. Die Engine des Themas (engine) prüft auf
+// Gleichwertigkeit und ob das Ergebnis fertig ist, erkennt typische Fehler und kann den Lösungsweg
+// Schritt für Schritt aufdecken (aus dem geführten Modus).
 
-type Props = { course: string; taskRef: TaskRef; focus?: string | null }
+type Props = { course: string; engine: CourseEngine; taskRef: TaskRef; focus?: string | null }
 
-export default function FreeTaskScreen({ course, taskRef, focus = null }: Props) {
+export default function FreeTaskScreen({ course, engine, taskRef, focus = null }: Props) {
   const { level, seed } = taskRef
-  const { context, plan } = useMemo(() => {
-    const { task } = generateDerivativeTask({ level, seed })
-    const context = task.kind === 'function' ? prepareAnswerCheck(task.expr) : prepareImplicitCheck(task.equation)
-    return { context, plan: planGuidedTask({ level, seed }) }
-  }, [level, seed])
+  const { free, plan } = useMemo(
+    () => ({ free: engine.prepareFree({ level, seed }), plan: engine.planGuidedTask({ level, seed }) }),
+    [engine, level, seed],
+  )
   const { mode, detail, cycle } = useExplanationMode()
   const [latex, setLatex] = useState('')
-  const [verdict, setVerdict] = useState<Verdict | null>(null)
+  const [verdict, setVerdict] = useState<FreeVerdict | null>(null)
   const [hintOpen, setHintOpen] = useState(false)
   const [revealed, setRevealed] = useState(0)
   const [keyboardHeight, setKeyboardHeight] = useState(0)
@@ -48,7 +45,7 @@ export default function FreeTaskScreen({ course, taskRef, focus = null }: Props)
   function submit(value: string) {
     setLatex(value)
     submittedRef.current = value
-    const result = checkAnswer(context, value)
+    const result = free.check(value)
     setVerdict(result)
     const t = tally.current
     if (result.kind === 'correct') {
@@ -56,9 +53,10 @@ export default function FreeTaskScreen({ course, taskRef, focus = null }: Props)
         t.recorded = true
         recordAttempt({ course, level, mode: 'free', clean: !t.mistake && !t.helped })
       }
-    } else if (result.kind !== 'unreadable') {
+    } else if (result.kind === 'wrong') {
+      // Unlesbares und richtig Gerechnetes, das noch nicht fertig ist, zählen nicht als Fehler
       t.mistake = true
-      const id = result.kind === 'knownError' ? result.wrong.errorRule.id : null
+      const id = result.error?.id
       if (id && !t.errors.has(id)) {
         t.errors.add(id)
         recordError(id)
@@ -81,10 +79,11 @@ export default function FreeTaskScreen({ course, taskRef, focus = null }: Props)
       <section className="space-y-3" aria-label="Deine Antwort">
         <div className="flex items-center gap-2 rounded-2xl border-2 border-zinc-200 bg-surface px-3 py-2 focus-within:border-accent-600">
           <span className="shrink-0 text-2xl">
-            <Formula tex={`${plan.answerLabel} =`} />
+            <Formula tex={free.answerLabel} />
           </span>
           <MathInput
-            label="Deine Ableitung"
+            label={free.inputLabel}
+            keyboard={free.keyboard}
             readOnly={solved}
             onInput={(value) => {
               setLatex(value)
@@ -106,7 +105,7 @@ export default function FreeTaskScreen({ course, taskRef, focus = null }: Props)
       </section>
 
       <div ref={feedbackRef} aria-live="polite">
-        {verdict && <Feedback verdict={verdict} resultLatex={plan.resultLatex} detail={detail} mode={mode} />}
+        {verdict && <Feedback verdict={verdict} resultLatex={plan.resultLatex} resultNote={plan.resultNote} detail={detail} mode={mode} />}
       </div>
 
       {solved && <LevelUpSuggestion course={course} level={level} mode="free" />}
@@ -180,85 +179,45 @@ export default function FreeTaskScreen({ course, taskRef, focus = null }: Props)
   )
 }
 
-function Feedback({ verdict, resultLatex, detail, mode }: { verdict: Verdict; resultLatex: string; detail: ExplanationDetail; mode: ExplanationMode }) {
+type FeedbackProps = { verdict: FreeVerdict; resultLatex: string; resultNote?: string; detail: ExplanationDetail; mode: ExplanationMode }
+
+function Feedback({ verdict, resultLatex, resultNote, detail, mode }: FeedbackProps) {
   const [whyOpen, setWhyOpen] = useState(false)
-  switch (verdict.kind) {
-    case 'unreadable':
-      return (
-        <Box tone="amber" title="Das kann ich noch nicht lesen.">
-          <RichText text={verdict.message} />
-        </Box>
-      )
-    case 'correct':
-      return (
-        <Box tone="green" title="Richtig!">
+  const tone = verdict.kind === 'correct' ? 'green' : verdict.kind === 'wrong' ? 'red' : 'amber'
+  return (
+    <Box tone={tone} title={verdict.title}>
+      {verdict.kind === 'correct' && (
+        <>
           {mode !== 'off' && <p>Zusammengefasst:</p>}
           <div data-testid="result">
             <FitWidth className="text-xl">
               <Formula tex={resultLatex} />
             </FitWidth>
           </div>
-        </Box>
-      )
-    case 'knownError': {
-      const why = explainError(verdict.wrong)
-      return (
-        <Box tone="red" title="Nicht ganz.">
-          <p>
-            Typischer Fehler: <RichText text={`${verdict.wrong.errorRule.name}.`} className="font-medium" inline />
-          </p>
-          {whyOpen ? (
-            <RichText text={why[detail]} className="text-zinc-800" />
-          ) : (
-            <button
-              type="button"
-              onClick={() => setWhyOpen(true)}
-              className="rounded-xl border border-red-200 bg-surface px-4 py-2.5 font-medium text-red-800 hover:bg-red-100"
-            >
-              Warum ist das falsch?
-            </button>
-          )}
-        </Box>
-      )
-    }
-    case 'functionItself':
-      return (
-        <Box tone="red" title="Nicht ganz.">
-          <RichText text="Das ist die Funktion selbst. Gesucht ist ihre Ableitung $f'(x)$." />
-        </Box>
-      )
-    case 'wrongSign':
-      return (
-        <Box tone="red" title="Fast!">
-          <p>Bis auf das Vorzeichen stimmt es. Prüfe, wo ein Minus hingehört.</p>
-        </Box>
-      )
-    case 'wrongFactor':
-      return (
-        <Box tone="red" title="Fast!">
-          <p>Bis auf einen Zahlenfaktor stimmt es. Prüfe die Zahlen vor den Termen.</p>
-        </Box>
-      )
-    case 'solveMistake':
-      return (
-        <Box tone="red" title="Fast!">
-          <p>Abgeleitet hast du richtig, aber beim Auflösen ist etwas schiefgegangen.</p>
-          <RichText text={explainSolveMistake(verdict.mistake)[detail]} className="text-zinc-800" />
-        </Box>
-      )
-    case 'keepY':
-      return (
-        <Box tone="red" title="Nicht ganz.">
-          <RichText text="Lass $y$ im Ergebnis stehen. Beim impliziten Ableiten wird nicht nach $y$ aufgelöst: $y'$ darf $x$ und $y$ enthalten." />
-        </Box>
-      )
-    case 'wrong':
-      return (
-        <Box tone="red" title="Das stimmt noch nicht.">
-          <p>Rechne noch einmal nach. Wenn du nicht weiterkommst, helfen dir der Tipp, der Lösungsweg oder der geführte Modus.</p>
-        </Box>
-      )
-  }
+          {resultNote && <RichText text={resultNote} className="text-zinc-700" />}
+        </>
+      )}
+      {verdict.error && (
+        <p>
+          Typischer Fehler: <RichText text={`${verdict.error.name}.`} className="font-medium" inline />
+        </p>
+      )}
+      {verdict.message && <RichText text={verdict.message} />}
+      {verdict.explanation && <RichText text={verdict.explanation[detail]} className="text-zinc-800" />}
+      {verdict.error &&
+        (whyOpen ? (
+          <RichText text={verdict.error.why[detail]} className="text-zinc-800" />
+        ) : (
+          <button
+            type="button"
+            onClick={() => setWhyOpen(true)}
+            className="rounded-xl border border-red-200 bg-surface px-4 py-2.5 font-medium text-red-800 hover:bg-red-100"
+          >
+            Warum ist das falsch?
+          </button>
+        ))}
+    </Box>
+  )
 }
 
 const TONES = {

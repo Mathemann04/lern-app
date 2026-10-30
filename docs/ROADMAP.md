@@ -1,6 +1,6 @@
 # Roadmap
 
-Stand: 29.10.2026
+Stand: 30.10.2026
 
 | Meilenstein | Inhalt | Status |
 | --- | --- | --- |
@@ -22,7 +22,7 @@ Details: [PLAN-M2.md](PLAN-M2.md)
 - [x] 2. Mathe-Engine für Brüche
 - [x] 3. Mehrere Themen, Brüche Stufe 1 und 2 geführt
 - [x] 4. Stufen 3 und 4 geführt
-- [ ] 5. Freier Modus für Brüche
+- [x] 5. Freier Modus für Brüche
 - [ ] 6. Stufe 5 geführt und frei
 - [ ] 7. Gezieltes Üben, Feinschliff, Abschluss von M2 (gezieltes Üben für
   Brüche schon mit Schritt 3)
@@ -167,3 +167,11 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   Erweitern und Zusammenfassen ein Schritt. Sieben neue Lernkarten, darunter
   „Bausteine wie $e^x$". Falsche Ergebnisse mit Klammern bleiben als
   Produkt stehen.
+- 30.10.2026: Freier Modus für Brüche (Schritt 5 von M2): Richtig ist jede
+  gleichwertige Form, die fertig ist (ein Bruch, zusammengefasst,
+  vollständig gekürzt); der Nenner darf ausmultipliziert oder als Produkt
+  dastehen. Richtig gerechnet, aber nicht fertig gibt einen Hinweis, was
+  fehlt, und zählt nicht als Fehler. Die Mathe-Tastatur zeigt nur die
+  Buchstaben der Aufgabe (bei Bausteinen dazu $e^x$, $\ln$, $\sin$,
+  $\cos$). Der freie Modus ist für alle Themen gleich gebaut; neue Themen
+  liefern nur noch Tastatur und Prüfung.

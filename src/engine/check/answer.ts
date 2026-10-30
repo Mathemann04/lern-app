@@ -143,7 +143,8 @@ function constantRatio(reference: Expr, candidate: Expr, points: readonly Env[])
   return compared >= MIN_COMPARED_CORRECT ? ratio : null
 }
 
-function variablesOf(e: Expr, found = new Set<string>()): Set<string> {
+// Alle Buchstaben (Variablen) in einem Term
+export function variablesOf(e: Expr, found = new Set<string>()): Set<string> {
   switch (e.kind) {
     case 'var':
       found.add(e.name)

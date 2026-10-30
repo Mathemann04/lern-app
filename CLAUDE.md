@@ -39,7 +39,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   Modus da), `focus` (gezieltes Üben da), Lernkarten-Ordner `cards`. Jedes
   Gebiet hat eine Farbe (`tone`) und ein Bild, jedes Thema ein Bild
   (`AreaIcon.tsx`, SVG in der Tonleiter `tone-*`). Die Engine eines Themas
-  für den geführten Modus lädt `courseEngines.ts` erst beim Üben.
+  lädt `courseEngines.ts` erst beim Üben (`planGuidedTask` für geführt,
+  `prepareFree` für frei).
   Seiten über `#/…` (`routes.ts`): Start `#/` („Weitermachen" und die
   Fächer), Gebiet `#/gebiet/grundlagen`, Thema `#/thema/brueche`,
   geführt üben `#/ueben/brueche/1` (neue Aufgabe) bzw.
@@ -60,9 +61,13 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   im Kopf, in Aufgaben ausgeblendet (das X führt zum Thema). Unterseiten
   haben oben `BackLink` („← Ordner", eine Ebene höher).
   Lernbildschirm geführt in `src/ui/guided/`, frei in `src/ui/free/`
-  (MathLive mit eigener Bildschirm-Tastatur `keyboard.ts`, zwei Seiten
-  „Standard" (mit Taste y) und „Mehr Funktionen", wird erst im freien Modus
-  geladen), gemeinsame Teile in `src/ui/task/`. Lernkarten in
+  (für alle Themen gleich: Beschriftung, Tastatur und Prüfung kommen aus
+  der Engine des Themas als `FreeTask`; MathLive mit eigener
+  Bildschirm-Tastatur `keyboard.ts`, je Thema über `keyboardLayouts`:
+  Ableiten mit zwei Seiten „Standard" (mit Taste y) und „Mehr Funktionen",
+  Brüche mit den Buchstaben der Aufgabe und bei Bausteinen $e^x$, ln, sin,
+  cos; wird erst im freien Modus geladen), gemeinsame Teile in
+  `src/ui/task/`. Lernkarten in
   `src/ui/cards/` (`CardSheet.tsx`: Fenster über der Aufgabe, die
   Zurück-Taste schließt nur das Fenster). Lange Formeln in
   `FitWidth` (`src/ui/FitWidth.tsx`) setzen sich selbst kleiner, bis sie
@@ -89,7 +94,13 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     unabhängige Gegenprobe; `check/curve.ts`: Punkte auf einer Kurve
     (Newton) und ihre Steigung als Gegenprobe beim impliziten Ableiten;
     `check/answer.ts`: freie Eingabe prüfen (gleichwertig? welcher typische
-    Fehler? implizit: Vergleich auf der Kurve, `y` muss stehen bleiben)
+    Fehler? implizit: Vergleich auf der Kurve, `y` muss stehen bleiben);
+    `check/freeTask.ts`: gemeinsame Typen des freien Modus (Urteil
+    richtig / noch nicht fertig / unlesbar / falsch, Tastatur);
+    `check/derivativeFree.ts`: freier Modus beim Ableiten;
+    `check/fractionAnswer.ts`: freie Eingabe bei Brüchen (exakter
+    Wertvergleich, dann fertig? ein Bruch, zusammengefasst, gekürzt; sonst
+    typischer Fehler)
   - `parse/latex.ts`: liest die Eingabe der Mathe-Tastatur (LaTeX) ein, mit
     verständlichen Fehlermeldungen
   - `explain/`: Textbausteine für Erklärungen (ausführlich/kurz), Tipps und
