@@ -6,12 +6,24 @@ Stand: 30.10.2026
 | --- | --- | --- |
 | M1 | Grundgerüst + Ableitungsregeln (beide Modi, 5 Stufen, Erklärungen, Lernkarten, Fortschritt) | fertig |
 | M2 | Brüche (Bruchrechnung, Bruchterme kürzen und zusammenfassen, Doppelbrüche); App für mehrere Themen | fertig |
-| M3 | Formeln umstellen (nach einer Variablen auflösen, auch mit Brüchen) | offen |
+| M3 | Formeln umstellen (nach einer Variablen auflösen, auch mit Brüchen) | Plan im Entwurf |
 | M4 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
 | M5 | weitere Themen aus Mathematik MB1 | offen |
 | M6 | Physik: Formeln umstellen, mit Einheiten | offen |
 | M7 | Technische Mechanik: Freischnitt, Gleichgewicht, Lagerkräfte, statische Bestimmtheit | offen |
 | Später | Konto und Sync, Teilen mit Kommilitonen, App-Store-Version, optional KI-Hilfe | offen |
+
+## M3: Schritte
+
+Details: [PLAN-M3.md](PLAN-M3.md)
+
+- [ ] Plan M3 (Entwurf liegt vor, wartet auf Freigabe)
+- [ ] 1. Mathe-Engine fürs Umstellen
+- [ ] 2. Thema freischalten, Stufen 1 und 2 geführt
+- [ ] 3. Stufen 3 und 4 geführt
+- [ ] 4. Freier Modus
+- [ ] 5. Stufe 5 geführt und frei
+- [ ] 6. Gezieltes Üben, Feinschliff, Abschluss von M3
 
 ## M2: Schritte
 
