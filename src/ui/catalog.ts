@@ -127,7 +127,7 @@ const fractionLevels: LevelPreview[] = [
   },
 ]
 
-// Gleichungen umstellen (Plan M3): Stufen 1 und 2 geführt spielbar, die übrigen folgen
+// Gleichungen umstellen (Plan M3): Stufen 1 bis 3 geführt und frei spielbar, die übrigen folgen
 const rearrangeLevels: LevelPreview[] = [
   {
     level: 1,
@@ -143,7 +143,7 @@ const rearrangeLevels: LevelPreview[] = [
   },
   {
     level: 3,
-    available: false,
+    available: true,
     title: 'Brüche und Wurzeln, die Variable kommt mehrfach vor',
     examples: [String.raw`y = \frac{2x + 1}{x - 3}`, String.raw`\frac{1}{x} + \frac{1}{a} = \frac{1}{b}`, String.raw`y = \sqrt{x + a} - \sqrt{x}`],
   },
@@ -190,7 +190,7 @@ export const SUBJECTS: readonly Subject[] = [
             icon: 'rearrange',
             cards: 'umstellen',
             levels: rearrangeLevels,
-            free: false,
+            free: true,
             focus: false,
           },
           {

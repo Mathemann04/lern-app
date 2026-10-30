@@ -73,7 +73,7 @@ export default function FreeTaskScreen({ course, engine, taskRef, focus = null }
       {focus && <FocusBanner focus={focus} />}
 
       <section className="space-y-3">
-        <TaskIntro taskRef={taskRef} functionLatex={plan.functionLatex} instruction={plan.instruction} />
+        <TaskIntro taskRef={taskRef} functionLatex={plan.functionLatex} instruction={plan.instruction} note={plan.note} />
       </section>
 
       <section className="space-y-3" aria-label="Deine Antwort">

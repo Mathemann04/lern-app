@@ -199,28 +199,35 @@ export const EXPAND_MOVES: readonly WrongMove[] = [
   { label: 'Die Zahl vor der Klammer nur mit dem ersten Summanden malnehmen', why: REARRANGE_ERROR_TEXTS['eq-bracket-first-term'] },
 ]
 
-export function collectMoves(target: string): WrongMove[] {
+// unknown: die Unbekannte als LaTeX, x oder \sqrt{x} (dann ist √x die Unbekannte, x = (√x)²)
+export function collectMoves(target: string, unknown = target): WrongMove[] {
+  const rootUnknown = unknown !== target
   return [
     {
-      label: `Durch den Faktor vor dem ersten $${target}$ teilen`,
-      why: { detailed: `Danach steht $${target}$ immer noch auf beiden Seiten. Erst müssen alle Summanden mit $${target}$ auf eine Seite.`, short: `Danach steht $${target}$ immer noch auf beiden Seiten.` },
+      label: rootUnknown ? `Durch den Faktor vor $${unknown}$ teilen` : `Durch den Faktor vor dem ersten $${target}$ teilen`,
+      why: { detailed: `Danach steht $${target}$ immer noch auf beiden Seiten. Erst müssen alle Summanden mit $${unknown}$ auf eine Seite.`, short: `Danach steht $${target}$ immer noch auf beiden Seiten.` },
     },
-    {
-      label: `Die Summanden mit $${target}$ auf beiden Seiten streichen`,
-      why: { detailed: 'Streichen darfst du nur, was auf beiden Seiten genau gleich ist. Bringe die Summanden mit der Variable stattdessen auf eine Seite.', short: 'Nur genau Gleiches darf man auf beiden Seiten streichen.' },
-    },
-    { label: `Alles mit $${target}$ nach links, ohne die Vorzeichen zu ändern`, why: REARRANGE_ERROR_TEXTS['eq-sign-not-flipped'] },
+    rootUnknown
+      ? {
+          label: 'Beide Seiten noch einmal quadrieren',
+          why: { detailed: `Solange neben $${unknown}$ noch andere Summanden stehen, entsteht beim Quadrieren wieder eine Wurzel. Stelle zuerst den Summanden mit $${unknown}$ allein.`, short: `Erst den Summanden mit $${unknown}$ allein stellen.` },
+        }
+      : {
+          label: `Die Summanden mit $${target}$ auf beiden Seiten streichen`,
+          why: { detailed: 'Streichen darfst du nur, was auf beiden Seiten genau gleich ist. Bringe die Summanden mit der Variable stattdessen auf eine Seite.', short: 'Nur genau Gleiches darf man auf beiden Seiten streichen.' },
+        },
+    { label: `Alles mit $${unknown}$ nach links, ohne die Vorzeichen zu ändern`, why: REARRANGE_ERROR_TEXTS['eq-sign-not-flipped'] },
   ]
 }
 
-export function factorMoves(target: string): WrongMove[] {
+export function factorMoves(unknown: string): WrongMove[] {
   return [
     {
-      label: `Die Zahlen und Buchstaben vor $${target}$ malnehmen`,
-      why: { detailed: `Summanden werden nicht malgenommen. Was in jedem Summanden steckt, kommt vor die Klammer: $a${target} + b${target} = ${target}(a + b)$.`, short: `Ausklammern: $a${target} + b${target} = ${target}(a + b)$.` },
+      label: `Die Zahlen und Buchstaben vor $${unknown}$ malnehmen`,
+      why: { detailed: `Summanden werden nicht malgenommen. Was in jedem Summanden steckt, kommt vor die Klammer: $a${unknown} + b${unknown} = ${unknown}(a + b)$.`, short: `Ausklammern: $a${unknown} + b${unknown} = ${unknown}(a + b)$.` },
     },
     {
-      label: `Ein $${target}$ einfach streichen`,
+      label: `Ein $${unknown}$ einfach streichen`,
       why: { detailed: 'Streichen ändert den Wert der Seite, dann stimmt die Gleichung nicht mehr. Klammere die Variable aus.', short: 'Nicht streichen, ausklammern.' },
     },
   ]
@@ -266,7 +273,8 @@ export function rearrangeTaskHint(target: string, several: boolean): Explanation
 
 // --- Erklärungen der richtigen Schritte ---
 
-export function explainMove(kind: string, operation: string, target: string): Explanation {
+// unknown: x oder \sqrt{x} (siehe collectMoves)
+export function explainMove(kind: string, operation: string, target: string, unknown = target): Explanation {
   switch (kind) {
     case 'add':
       return { detailed: `Der Summand steht ganz außen. Mit der Gegenrechnung ${operation.replace(/^Auf beiden Seiten /, '')} auf beiden Seiten verschwindet er dort, und die Gleichung stimmt weiter.`, short: `${operation}: Gegenrechnung auf beiden Seiten.` }
@@ -285,9 +293,12 @@ export function explainMove(kind: string, operation: string, target: string): Ex
     case 'expand':
       return { detailed: 'Die Variable steckt in Klammern. Nach dem Ausmultiplizieren stehen alle Summanden einzeln da und lassen sich sortieren.', short: 'Ausmultiplizieren, dann sortieren.' }
     case 'collect':
+      if (unknown !== target) {
+        return { detailed: `Bringe den Summanden mit $${unknown}$ auf eine Seite und alle anderen auf die andere; was die Seite wechselt, wechselt das Vorzeichen. Steht $${unknown}$ allein, kannst du noch einmal quadrieren.`, short: `Summand mit $${unknown}$ nach links, Rest nach rechts.` }
+      }
       return { detailed: `$${target}$ kommt in mehreren Summanden vor. Bringe alle Summanden mit $${target}$ auf eine Seite und alle anderen auf die andere; was die Seite wechselt, wechselt das Vorzeichen.`, short: `Summanden mit $${target}$ nach links, Rest nach rechts.` }
     case 'factor':
-      return { detailed: `Links steht $${target}$ in mehreren Summanden. Klammerst du $${target}$ aus, steht es nur noch einmal da: $a${target} + b${target} = ${target}(a + b)$.`, short: `$${target}$ ausklammern.` }
+      return { detailed: `Links steht $${unknown}$ in mehreren Summanden. Klammerst du $${unknown}$ aus, steht es nur noch einmal da: $a${unknown} + b${unknown} = ${unknown}(a + b)$.`, short: `$${unknown}$ ausklammern.` }
     case 'square':
       return { detailed: 'Die Gegenrechnung zur Wurzel ist das Quadrieren. Weil beide Seiten positiv sind, bleibt die Lösung dieselbe.', short: 'Gegenrechnung zur Wurzel: quadrieren.' }
     case 'root':

@@ -16,10 +16,12 @@ export type FreeVerdict = {
 }
 
 // Bildschirm-Tastatur: beim Ableiten alle Funktionen, bei Brüchen die Buchstaben der Aufgabe, bei
-// Bausteinen e^x, ln, sin, cos, tan und bei Wurzeln √
+// Bausteinen e^x, ln, sin, cos, tan und bei Wurzeln √; beim Umstellen die Buchstaben der Aufgabe
+// (bis zu sieben) und bei Wurzeln √
 export type KeyboardSpec =
   | { readonly kind: 'derivative' }
   | { readonly kind: 'fraction'; readonly letters: readonly string[]; readonly blocks: boolean; readonly root: boolean }
+  | { readonly kind: 'rearrange'; readonly letters: readonly string[]; readonly root: boolean }
 
 export type FreeTask = {
   // vor dem Eingabefeld, z. B. f'(x) = (LaTeX)

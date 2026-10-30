@@ -84,8 +84,8 @@ describe('Geführt umstellen: Ablauf', () => {
   })
 })
 
-describe('Geführt umstellen: Zufallsaufgaben der Stufen 1 und 2', () => {
-  for (const level of [1, 2] as const) {
+describe('Geführt umstellen: Zufallsaufgaben der Stufen 1 bis 3', () => {
+  for (const level of [1, 2, 3] as const) {
     it(`Stufe ${level}: jede Aufgabe lässt sich sauber durchspielen`, () => {
       for (let seed = 1; seed <= 200; seed++) {
         const task = planRearrangeTask({ level, seed })

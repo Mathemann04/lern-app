@@ -23,14 +23,8 @@ const LOADERS: Readonly<Record<string, () => Promise<CourseEngine>>> = {
     return { planGuidedTask: plan.planFractionTask, prepareFree: free.prepareFractionFree }
   },
   [REARRANGE]: async () => {
-    const plan = await import('../engine/guided/rearrangePlan.ts')
-    return {
-      planGuidedTask: plan.planRearrangeTask,
-      // freier Modus kommt in Schritt 3 von M3; bis dahin führt die Adresse zum geführten Modus
-      prepareFree: () => {
-        throw new Error('Gleichungen umstellen: freier Modus noch nicht da')
-      },
-    }
+    const [plan, free] = await Promise.all([import('../engine/guided/rearrangePlan.ts'), import('../engine/check/rearrangeAnswer.ts')])
+    return { planGuidedTask: plan.planRearrangeTask, prepareFree: free.prepareRearrangeFree }
   },
 }
 
