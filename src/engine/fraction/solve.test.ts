@@ -5,7 +5,7 @@ import { ratToNumber } from '../rational.ts'
 import { toFrac } from './frac.ts'
 import { type Poly, polyDivideExact } from './poly.ts'
 import { STEP_NAMES, solveFraction } from './solve.ts'
-import { type BlockRule, type FractionShape, type FractionTask, type Part, binomialShown, expanded, minus, part, plus, taskLatex, withRoots } from './task.ts'
+import { type BlockRule, type FractionShape, type FractionTask, type Part, binomialShown, expanded, hasNestedFraction, minus, part, plus, readableLatex, taskLatex, withRoots } from './task.ts'
 
 function poly(e: Expr): Poly {
   const f = toFrac(e)!
@@ -158,3 +158,18 @@ describe('Rechenweg Stufe 5', () => {
     expect(solveFraction(t).excluded?.map(ratToNumber)).toEqual([-3, 0, 3])
   })
 })
+
+describe('Doppelbrüche lesbar setzen', () => {
+  it('erkennt Brüche im Zähler oder Nenner eines Bruchs', () => {
+    expect(hasNestedFraction('\\frac{\\frac{x + 1}{x}}{1 - \\frac{1}{x^{2}}}')).toBe(true)
+    expect(hasNestedFraction('\\frac{x^{2}}{1 - \\frac{1}{x}}')).toBe(true)
+    expect(hasNestedFraction('\\frac{3}{4} + \\frac{5}{6}')).toBe(false)
+    expect(hasNestedFraction('\\left(1 - \\frac{3}{x}\\right) \\cdot \\frac{x^{2}}{x^{2} - 9}')).toBe(false)
+  })
+
+  it('setzt nur Doppelbrüche in voller Größe', () => {
+    expect(readableLatex('= \\frac{x}{1 - \\frac{x}{x + 1}}')).toBe('= \\dfrac{x}{1 - \\dfrac{x}{x + 1}}')
+    expect(readableLatex('= \\frac{10}{5} - \\frac{3}{5}')).toBe('= \\frac{10}{5} - \\frac{3}{5}')
+  })
+})
+

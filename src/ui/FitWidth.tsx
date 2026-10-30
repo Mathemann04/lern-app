@@ -2,7 +2,8 @@ import { type ReactNode, useLayoutEffect, useRef } from 'react'
 
 // Setzt den Inhalt kleiner, bis er in die Breite passt (höchstens bis `min` der Grundgröße).
 // Für lange Formeln am Handy, z. B. eingesetzte Quotientenregeln in Stufe 4. Passt es auch
-// dann nicht, bleibt seitliches Wischen. Der Inhalt sollte Größen in em haben, nicht in rem.
+// dann nicht, bleibt seitliches Wischen. Die Formel bricht nicht um (KaTeX würde sonst nach einem
+// Plus umbrechen, statt kleiner zu werden). Der Inhalt sollte Größen in em haben, nicht in rem.
 export function FitWidth({ children, className = '', min = 0.7 }: { children: ReactNode; className?: string; min?: number }) {
   const ref = useRef<HTMLSpanElement>(null)
 
@@ -26,7 +27,7 @@ export function FitWidth({ children, className = '', min = 0.7 }: { children: Re
   })
 
   return (
-    <span ref={ref} className={`block overflow-x-auto ${className}`}>
+    <span ref={ref} className={`block overflow-x-auto whitespace-nowrap ${className}`}>
       {children}
     </span>
   )

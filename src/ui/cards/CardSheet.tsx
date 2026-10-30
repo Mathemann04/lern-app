@@ -139,7 +139,7 @@ export function TaskCardLinks({ ids }: { ids: readonly string[] }) {
       <ul className="flex flex-wrap gap-2">
         {cards.map((card) => (
           <li key={card.id}>
-            <a href={cardHref(card.id)} className="inline-block rounded-full border border-zinc-200 px-3 py-1 hover:border-accent-600 hover:bg-accent-50">
+            <a href={cardHref(card.id)} className="inline-flex min-h-11 items-center rounded-full border border-zinc-200 px-4 py-1 hover:border-accent-600 hover:bg-accent-50">
               <RichText text={card.title} inline />
             </a>
           </li>

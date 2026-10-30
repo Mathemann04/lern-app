@@ -50,6 +50,7 @@ import {
   isWhole,
   partExpr,
   partsOf,
+  readableLatex,
   replaceInner,
   shownExpr,
   shownPoly,
@@ -568,7 +569,8 @@ function buildStep(d: Draft, index: number, facts: Facts, rng: Rng, focus?: stri
     choices: rng.shuffle([correct, ...wrong]),
     hint: hintOf(d.kinds[0], facts),
     explanation: joinExplanations(d.explanations),
-    established: d.lines,
+    // Doppelbrüche in voller Größe, sonst sind die inneren Brüche am Handy zu klein
+    established: d.lines.map(readableLatex),
     cards: [...new Set(d.kinds.flatMap((k) => cardsOf(k, facts)))],
   }
 }

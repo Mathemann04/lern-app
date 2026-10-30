@@ -199,6 +199,35 @@ export function taskLatex(t: FractionShape): string {
   return toLatex(taskExpr(t))
 }
 
+// Steht ein Bruch im Zähler oder Nenner eines anderen? (Hochzahlen kommen bei Brüchen nicht vor)
+export function hasNestedFraction(latex: string): boolean {
+  // je offene Klammer: Argument eines Bruchs? Dazu je Klammertiefe, wie viele Argumente noch folgen
+  const inFraction: boolean[] = []
+  const pending = new Map<number, number>()
+  for (let i = 0; i < latex.length; i++) {
+    const command = /^\\d?frac/.exec(latex.slice(i, i + 6))
+    if (command) {
+      if (inFraction.includes(true)) return true
+      pending.set(inFraction.length, 2)
+      i += command[0].length - 1
+      continue
+    }
+    if (latex[i] === '{') {
+      const depth = inFraction.length
+      const args = pending.get(depth) ?? 0
+      inFraction.push(args > 0)
+      if (args > 0) pending.set(depth, args - 1)
+    } else if (latex[i] === '}') {
+      inFraction.pop()
+    }
+  }
+  return false
+}
+
+// Zwischenstand mit Doppelbruch: alle Brüche in voller Größe, damit die inneren am Handy lesbar
+// bleiben (Bisher-Zeilen, Beispiele auf Lernkarten)
+export const readableLatex = (latex: string) => (hasNestedFraction(latex) ? latex.replace(/\\d?frac/g, '\\dfrac') : latex)
+
 // Kann die Mathe-Tastatur die Aufgabe so lesen? (Geteilt mit „:" nicht)
 export const isReadableTask = (t: FractionShape) => t.kind !== 'quotient' && !(t.kind === 'mixed' && t.op === 'div')
 

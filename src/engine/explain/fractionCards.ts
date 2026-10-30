@@ -230,7 +230,7 @@ export const FRACTION_CARD_LIST: readonly Card[] = [
     title: 'Doppelbrüche',
     level: 4,
     rules: [],
-    formulas: ['\\frac{\\frac{a}{b}}{\\frac{c}{d}} = \\frac{a}{b} \\cdot \\frac{d}{c}', '\\frac{\\frac{a}{b}}{c} = \\frac{a}{b \\cdot c}'],
+    formulas: ['\\dfrac{\\dfrac{a}{b}}{\\dfrac{c}{d}} = \\frac{a}{b} \\cdot \\frac{d}{c}', '\\dfrac{\\dfrac{a}{b}}{c} = \\frac{a}{b \\cdot c}'],
     memo: 'Ein Doppelbruch ist eine Division: oberer Bruch geteilt durch unteren Bruch. Also wird mit dem Kehrwert des unteren Bruchs malgenommen.',
     note: [
       'So gehst du vor:',
