@@ -65,8 +65,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   der Engine des Themas als `FreeTask`; MathLive mit eigener
   Bildschirm-Tastatur `keyboard.ts`, je Thema über `keyboardLayouts`:
   Ableiten mit zwei Seiten „Standard" (mit Taste y) und „Mehr Funktionen",
-  Brüche mit den Buchstaben der Aufgabe und bei Bausteinen $e^x$, ln, sin,
-  cos; wird erst im freien Modus geladen), gemeinsame Teile in
+  Brüche mit den Buchstaben der Aufgabe, bei Bausteinen $e^x$, ln, sin,
+  cos, tan, bei Wurzeln √; wird erst im freien Modus geladen), gemeinsame Teile in
   `src/ui/task/`. Lernkarten in
   `src/ui/cards/` (`CardSheet.tsx`: Fenster über der Aufgabe, die
   Zurück-Taste schließt nur das Fenster). Lange Formeln in
@@ -99,14 +99,15 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     richtig / noch nicht fertig / unlesbar / falsch, Tastatur);
     `check/derivativeFree.ts`: freier Modus beim Ableiten;
     `check/fractionAnswer.ts`: freie Eingabe bei Brüchen (exakter
-    Wertvergleich, dann fertig? ein Bruch, zusammengefasst, gekürzt; sonst
-    typischer Fehler)
+    Wertvergleich, mit Wurzel in √x umgerechnet, dann fertig? ein Bruch,
+    zusammengefasst, gekürzt; sonst typischer Fehler)
   - `parse/latex.ts`: liest die Eingabe der Mathe-Tastatur (LaTeX) ein, mit
     verständlichen Fehlermeldungen
   - `explain/`: Textbausteine für Erklärungen (ausführlich/kurz), Tipps und
     „Warum ist das falsch?" (`texts.ts`); Format Text mit `$…$`-Formeln.
     Lernkarten (`cards.ts`: Ordner `TOPICS`, je Regel Formel, Merksatz,
-    Beispiele, typische Fehler; Ordner „Brüche" in `fractionCards.ts`) und
+    Beispiele, typische Fehler; Ordner „Brüche" in `fractionCards.ts`, bis
+    „Bausteine mit eigenen Regeln" in Stufe 5) und
     durchgerechnete Beispiele (`example.ts` aus `derive`,
     `fractionExample.ts` aus der Bruch-Engine). Texte für Brüche in
     `fractionTexts.ts`
@@ -122,16 +123,24 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     und Kürzen in einem Schritt; ab Stufe 4 Erweitern und Zusammenfassen in
     einem Schritt; ein Schritt ohne passenden typischen Fehler geht im
     nächsten auf, im letzten ist die Antwort das Ergebnis; falsche
-    Ergebnisse mit Klammern als Produkt, `productFormExpr`). Gemeinsame
-    Typen in `guided/types.ts`
+    Ergebnisse mit Klammern als Produkt, `productFormExpr`; Stufe 5: Regel
+    anwenden, Ausmultiplizieren, innerer Doppelbruch zuerst, bei mehreren
+    Rechenarten jede Klammer zu einem Bruch). Gemeinsame Typen in
+    `guided/types.ts`
   - `errorCatalog.ts`: typische Fehler aller Themen mit Namen, je Thema
   - `fraction/`: Bruch-Engine (Brüche aus Polynomen, exakt): `poly.ts`
-    (Polynome in mehreren Buchstaben), `frac.ts` (Bruch, Termbaum ↔
-    Polynom; $e^x$, $\ln x$, $\sin x$, $\cos x$ als eigene Buchstaben),
-    `factor.ts` (zerlegen, Hauptnenner, kürzen; Ergebnis: Zähler
-    ausmultipliziert, Nenner in Faktoren), `task.ts` (Aufgabenformen:
-    kürzen, plus/minus, mal, geteilt, Doppelbruch), `solve.ts` (Rechenweg,
-    verbotene Zahlen), `errorRules.ts` (typische Fehler, Ids `frac-…`;
+    (Polynome in mehreren Buchstaben; $1 \pm \sin x$ mit der 1 vorn),
+    `frac.ts` (Bruch, Termbaum ↔ Polynom; $e^x$, $\ln x$, $\sin x$,
+    $\cos x$, $\sqrt{x}$ als eigene Buchstaben, die Zahl $e$ nur in falschen
+    Ergebnissen; Vergleich `fracEquals` mit $(\sqrt{x})^2 = x$ und
+    $\sin^2 x + \cos^2 x = 1$), `factor.ts` (zerlegen, Hauptnenner,
+    kürzen; Ergebnis: Zähler ausmultipliziert, Nenner in Faktoren),
+    `task.ts` (Aufgabenformen: kürzen, plus/minus, mal, geteilt,
+    Doppelbruch, mehrere Rechenarten `mixed`, verschachtelter Doppelbruch
+    `nested`; Zähler wie $(x + h)^2 - x^2$; Regel eines Bausteins `rule`;
+    Aufgaben mit Wurzel durchgehend in $\sqrt{x}$, `withRoots`), `solve.ts`
+    (Rechenweg, verbotene Zahlen, Ergebnis mit $\tan x$ bzw. ausmultipliziertem
+    Nenner bei Wurzeln), `errorRules.ts` (typische Fehler, Ids `frac-…`;
     `freeOnly`: nur für die Diagnose im freien Modus)
   - `random/rng.ts`: Zufall mit Startwert; `tasks/`: Aufgaben-Nummern
     („3-48213"), Vorlagen je Stufe (`derivativeTerms.ts`,

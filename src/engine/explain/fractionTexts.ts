@@ -137,6 +137,21 @@ export const FRACTION_ERROR_TEXTS: Readonly<Record<string, Explanation>> = {
       'Bei $x^2 + px + q = (x - x_1)(x - x_2)$ stehen in den Klammern die Nullstellen mit umgekehrtem Vorzeichen. Probe: Ausmultiplizieren muss wieder genau den Term ergeben.',
     short: 'Probe durch Ausmultiplizieren; in der Klammer steht die Nullstelle mit umgekehrtem Vorzeichen.',
   },
+  'frac-square-forgotten': {
+    detailed:
+      'Das Quadrat bleibt erhalten: Aus $\\sin^2 x + \\cos^2 x = 1$ folgt $1 - \\cos^2 x = \\sin^2 x$, nicht $\\sin x$. Genauso ist $(\\sqrt{x})^2 = x$, das Quadrat hebt die Wurzel auf.',
+    short: 'Das Quadrat bleibt: $1 - \\cos^2 x = \\sin^2 x$, und $(\\sqrt{x})^2 = x$.',
+  },
+  'frac-binomial-middle': {
+    detailed:
+      'Beim Quadrieren einer Summe fehlt sonst das Mittelglied. Nutze die binomische Formel: $(a + b)^2 = a^2 + 2ab + b^2$, also zum Beispiel $(\\sqrt{x} + 1)^2 = x + 2\\sqrt{x} + 1$.',
+    short: 'Mittelglied nicht vergessen: $(a + b)^2 = a^2 + 2ab + b^2$.',
+  },
+  'frac-cancel-inside': {
+    detailed:
+      'Kürzen darfst du nur ganze Faktoren, nicht etwas im Inneren einer Funktion. Bei Potenzen von $e^x$ werden die Hochzahlen abgezogen: $\\frac{e^{2x}}{e^x} = e^{2x - x} = e^x$.',
+    short: 'Hochzahlen abziehen: $\\frac{e^{2x}}{e^x} = e^{2x - x} = e^x$.',
+  },
 }
 
 export function explainFractionError(id: string): Explanation {
@@ -253,6 +268,43 @@ export function explainInner(numerator: boolean): Explanation {
   return same(`Fasse den ${numerator ? 'Zähler' : 'Nenner'} des Doppelbruchs wie eine eigene Aufgabe zu einem Bruch zusammen: Hauptnenner, erweitern, Zähler zusammenfassen.`)
 }
 
+// Mehrere Rechenarten: eine Klammer zu einem Bruch
+export function explainSide(first: boolean): Explanation {
+  return same(`Fasse die ${first ? 'erste' : 'zweite'} Klammer wie eine eigene Aufgabe zu einem Bruch zusammen: Hauptnenner, erweitern, Zähler zusammenfassen. Danach rechnest du mit zwei einfachen Brüchen weiter.`)
+}
+
+// Verschachtelter Doppelbruch: inner ist der innere Doppelbruch, result sein Ergebnis
+export function explainInnerComplex(inner: Expr, result: Expr): Explanation {
+  return {
+    detailed: `Steckt in einem Doppelbruch noch ein Doppelbruch, fängst du innen an. Löse ${m(inner)} wie eine eigene Aufgabe auf: Zähler und Nenner je zu einem Bruch, dann mit dem Kehrwert des unteren Bruchs malnehmen und kürzen. Das ergibt ${m(result)}. Danach bleibt ein gewöhnlicher Doppelbruch.`,
+    short: `Von innen nach außen: ${m(inner)} ergibt ${m(result)}.`,
+  }
+}
+
+// (u + v)² − w ausmultiplizieren: square ist (u + v)² = u² + 2uv + v² (als Gleichung), before und
+// after der ganze Term vorher und nachher
+export function explainMultiplyOut(square: readonly [Expr, Expr], before: Expr, after: Expr): Explanation {
+  return {
+    detailed: `Multipliziere die Klammer mit der binomischen Formel aus: $${toLatex(square[0])} = ${toLatex(square[1])}$. Dann fasse zusammen: $${toLatex(before)} = ${toLatex(after)}$. Erst danach siehst du, welcher Faktor sich kürzen lässt.`,
+    short: `$${toLatex(square[0])} = ${toLatex(square[1])}$, also $${toLatex(before)} = ${toLatex(after)}$.`,
+  }
+}
+
+// Regel eines Bausteins: trig (sin² x + cos² x = 1) oder root ((√x)² = x)
+export function explainRule(kind: 'trig' | 'root', before: Expr, after: Expr): Explanation {
+  const equation = `$${toLatex(before)} = ${toLatex(after)}$`
+  if (kind === 'root') {
+    return {
+      detailed: `Multipliziere mit der dritten binomischen Formel aus und nutze $(\\sqrt{x})^2 = x$: ${equation}. So steht im Nenner keine Wurzel mehr in Klammern.`,
+      short: `Mit $(\\sqrt{x})^2 = x$: ${equation}.`,
+    }
+  }
+  return {
+    detailed: `Für jedes $x$ gilt $\\sin^2 x + \\cos^2 x = 1$. Umgestellt heißt das $1 - \\cos^2 x = \\sin^2 x$ und $1 - \\sin^2 x = \\cos^2 x$. Damit wird ${equation}.`,
+    short: `Mit $\\sin^2 x + \\cos^2 x = 1$: ${equation}.`,
+  }
+}
+
 // --- Tipps (vor der Antwort, ohne das Ergebnis zu verraten) ---
 
 export const FRACTION_HINTS = {
@@ -268,6 +320,11 @@ export const FRACTION_HINTS = {
   factorBinomial: 'Zwei Quadrate mit Minus dazwischen: $a^2 - b^2 = (a + b)(a - b)$. Mit Mittelglied: $a^2 \\pm 2ab + b^2 = (a \\pm b)^2$.',
   factorQuadratic: 'Suche zwei Zahlen $a$ und $b$ mit $a \\cdot b = q$ und $a + b = p$. Dann ist $x^2 + px + q = (x + a)(x + b)$.',
   inner: 'Fasse diesen Teil wie eine eigene Aufgabe zu einem Bruch zusammen.',
+  innerComplex: 'Beginne innen: Löse den inneren Doppelbruch wie eine eigene Aufgabe auf.',
+  multiplyOut: 'Binomische Formel: $(a + b)^2 = a^2 + 2ab + b^2$. Danach gleichartige Summanden zusammenfassen.',
+  trig: 'Stelle $\\sin^2 x + \\cos^2 x = 1$ passend um, z. B. zu $1 - \\cos^2 x = \\sin^2 x$.',
+  root: 'Dritte binomische Formel mit $(\\sqrt{x})^2 = x$: $(\\sqrt{x} - a)(\\sqrt{x} + a) = x - a^2$.',
+  rootFactor: 'Schreibe $x$ als $(\\sqrt{x})^2$, dann hilft die dritte binomische Formel: $x - a^2 = (\\sqrt{x} - a)(\\sqrt{x} + a)$.',
 } as const
 
 // Tipp für die ganze Aufgabe (im freien Modus)
@@ -283,5 +340,13 @@ export function fractionTaskHint(t: FractionShape): Explanation {
       return same('Nimm mit dem Kehrwert des zweiten Bruchs mal, dann kürzen.')
     case 'complex':
       return same('Fasse Zähler und Nenner je zu einem Bruch zusammen und nimm dann mit dem Kehrwert des unteren Bruchs mal.')
+    case 'nested':
+      return same('Fang innen an: Löse zuerst den inneren Doppelbruch auf. Danach ist es ein gewöhnlicher Doppelbruch.')
+    case 'mixed':
+      return same(
+        t.op === 'div'
+          ? 'Nimm mit dem Kehrwert des Bruchs hinter dem Geteiltzeichen mal, fasse die Klammer zu einem Bruch zusammen, dann malnehmen und kürzen.'
+          : 'Fasse jede Klammer zu einem Bruch zusammen, dann Zähler mal Zähler, Nenner mal Nenner und kürzen.',
+      )
   }
 }

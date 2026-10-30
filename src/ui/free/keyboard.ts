@@ -77,16 +77,17 @@ export const AREA_SHORTCUTS: Record<string, string> = {
 const GAP: Key = { class: 'separator', width: 1 }
 
 // Bildschirm-Tastatur für Brüche: links die Buchstaben der Aufgabe, Hochzahlen und Klammern (bei
-// Bausteinen auch e^x, ln, sin, cos), rechts Ziffern, Rechenzeichen und „Prüfen" wie beim Ableiten
-export function fractionKeyboard(letters: readonly string[], blocks: boolean): VirtualKeyboardLayout {
+// Bausteinen auch e^x, ln, sin, cos, tan, bei Wurzeln √), rechts Ziffern, Rechenzeichen und
+// „Prüfen" wie beim Ableiten
+export function fractionKeyboard(letters: readonly string[], blocks: boolean, root = false): VirtualKeyboardLayout {
   const powers: Key[] = letters.length > 0 || blocks ? [{ latex: '#@^{2}' }, { latex: '#@^{#?}' }] : []
   const brackets: Key[] = [{ label: '(', key: '(' }, { label: ')', key: ')' }]
-  // links je Zeile vier Tasten: Buchstaben und Hochzahlen, Klammern, Bausteine
+  // links je Zeile vier Tasten: Buchstaben und Hochzahlen, Klammern, Bausteine, Wurzel
   const groups: Key[][] = [
     [...letters, ...powers],
     [...brackets, ...(blocks ? [{ latex: 'e^{#?}' }, fnKey('ln')] : [])],
-    blocks ? [fnKey('sin'), fnKey('cos')] : [],
-    [],
+    blocks ? [fnKey('sin'), fnKey('cos'), fnKey('tan')] : [],
+    root ? [{ latex: '\\sqrt{#0}' }] : [],
   ].filter((group, i) => group.length > 0 || i > 0)
   const leftRow = (row: number) => [0, 1, 2, 3].map((column) => groups[row]?.[column] ?? GAP)
   return {
@@ -104,5 +105,5 @@ export function fractionKeyboard(letters: readonly string[], blocks: boolean): V
 
 // Seiten der Tastatur je Thema
 export function keyboardLayouts(spec: KeyboardSpec): VirtualKeyboardLayout[] {
-  return spec.kind === 'derivative' ? [DERIVATIVE_KEYBOARD, MORE_FUNCTIONS_KEYBOARD] : [fractionKeyboard(spec.letters, spec.blocks)]
+  return spec.kind === 'derivative' ? [DERIVATIVE_KEYBOARD, MORE_FUNCTIONS_KEYBOARD] : [fractionKeyboard(spec.letters, spec.blocks, spec.root)]
 }

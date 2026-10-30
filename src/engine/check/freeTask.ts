@@ -15,9 +15,11 @@ export type FreeVerdict = {
   readonly explanation?: Explanation
 }
 
-// Bildschirm-Tastatur: beim Ableiten alle Funktionen, bei Brüchen die Buchstaben der Aufgabe und
-// bei Bausteinen e^x, ln, sin, cos
-export type KeyboardSpec = { readonly kind: 'derivative' } | { readonly kind: 'fraction'; readonly letters: readonly string[]; readonly blocks: boolean }
+// Bildschirm-Tastatur: beim Ableiten alle Funktionen, bei Brüchen die Buchstaben der Aufgabe, bei
+// Bausteinen e^x, ln, sin, cos, tan und bei Wurzeln √
+export type KeyboardSpec =
+  | { readonly kind: 'derivative' }
+  | { readonly kind: 'fraction'; readonly letters: readonly string[]; readonly blocks: boolean; readonly root: boolean }
 
 export type FreeTask = {
   // vor dem Eingabefeld, z. B. f'(x) = (LaTeX)

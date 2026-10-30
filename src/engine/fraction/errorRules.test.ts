@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { latexProblem } from '../expr/latexChecks.ts'
 import { toLatex } from '../expr/print.ts'
-import { type Expr, add, mul, num, pow, sub, variable, x } from '../expr/types.ts'
+import { type Expr, add, cos, exp, mul, num, pow, sin, sqrt, sub, variable, x } from '../expr/types.ts'
 import { FRACTION_ERROR_RULES, fractionWrongAnswers } from './errorRules.ts'
 import { toFrac } from './frac.ts'
 import { type Poly, polyDivideExact } from './poly.ts'
-import { type FractionShape, type FractionTask, type Part, expanded, minus, part, plus } from './task.ts'
+import { type BlockRule, type FractionShape, type FractionTask, type Part, binomialShown, expanded, minus, part, plus } from './task.ts'
 
 const a = variable('a')
 const b = variable('b')
@@ -17,7 +17,7 @@ function poly(e: Expr): Poly {
 
 // Bruch aus zwei Termen ohne Bruch; ascending: Zähler bzw. Nenner mit kleinstem Grad zuerst
 const fr = (n: Expr, d: Expr = num(1), ascendingDen = false): Part => part(expanded(poly(n)), expanded(poly(d), ascendingDen))
-const task = (s: FractionShape): FractionTask => ({ ...s, hints: [] }) as FractionTask
+const task = (s: FractionShape, rule?: BlockRule): FractionTask => ({ ...s, hints: [], ...(rule ? { rule } : {}) }) as FractionTask
 const x2 = pow(x, num(2))
 
 type Case = [id: string, task: FractionTask, what: 'step' | 'result', latex: string]
@@ -80,6 +80,21 @@ const CASES: Case[] = [
   ['frac-vieta-sign', task({ kind: 'reduce', part: fr(sub(sub(x2, x), num(6)), sub(x2, num(9))) }), 'step', '\\frac{(x - 2)(x + 3)}{x^{2} - 9}'],
   ['frac-cancel-one-side', task({ kind: 'reduce', part: fr(num(14), num(12)) }), 'result', '\\frac{7}{12}'],
   ['frac-multiply-reciprocal', task({ kind: 'product', left: fr(num(3), num(4)), right: fr(num(2), num(5)) }), 'step', '\\frac{3 \\cdot 5}{4 \\cdot 2}'],
+  // Stufe 5: 1 − cos² x = sin x statt sin² x
+  [
+    'frac-square-forgotten',
+    task({ kind: 'reduce', part: part(expanded(poly(sub(num(1), pow(cos(x), num(2)))), true), expanded(poly(sin(x)))) }, { kind: 'trig', prefer: 'S', target: 'num' }),
+    'step',
+    '\\frac{\\sin x}{\\sin x}',
+  ],
+  // (√x + 1)² − 1 = x + 1 − 1 = x
+  [
+    'frac-binomial-middle',
+    task({ kind: 'reduce', part: part(binomialShown(poly(add(sqrt(x), num(1))), poly(num(1))), expanded(poly(sqrt(x)))) }),
+    'step',
+    '\\frac{x}{\\sqrt{x}}',
+  ],
+  ['frac-cancel-inside', task({ kind: 'reduce', part: fr(exp(mul(num(2), x)), exp(x)) }), 'result', 'e^{2}'],
 ]
 
 describe('Zähler und Nenner addiert', () => {

@@ -3,7 +3,7 @@ import { toLatex } from '../expr/print.ts'
 import { type Expr, add, mul, num, pow, sub, variable, x } from '../expr/types.ts'
 import { toFrac } from '../fraction/frac.ts'
 import { type Poly, polyDivideExact } from '../fraction/poly.ts'
-import { type FractionShape, type FractionTask, type Part, expanded, minus, part, plus, taskLatex } from '../fraction/task.ts'
+import { type FractionShape, type FractionTask, type Part, expanded, isReadableTask, minus, part, plus, taskLatex } from '../fraction/task.ts'
 import { generateFractionTask } from '../tasks/fractionTerms.ts'
 import type { Level } from '../tasks/taskNumber.ts'
 import { type FractionVerdict, checkFractionAnswer, prepareFractionCheck, prepareFractionFree } from './fractionAnswer.ts'
@@ -96,14 +96,57 @@ describe('weitere Aufgabenformen', () => {
 
   it('Bausteine wie e^x', () => {
     const free = prepareFractionFree({ level: 4, seed: 1 })
-    expect(free.keyboard).toEqual({ kind: 'fraction', letters: ['x'], blocks: true })
+    expect(free.keyboard).toEqual({ kind: 'fraction', letters: ['x'], blocks: true, root: false })
     // 4-1: (cos² x − 4)/(cos x + 2)
     expect(free.check('\\cos x-2').kind).toBe('correct')
     expect(free.check('\\frac{\\cos^2x-4}{\\cos x+2}').kind).toBe('unfinished')
   })
 })
 
-describe.each([1, 2, 3, 4] as Level[])('Zufallsaufgaben, Stufe %i', (level) => {
+describe('Stufe 5: Bausteine mit Regeln', () => {
+  const free = (seedLatex: string) => {
+    for (let seed = 1; seed <= 400; seed++) {
+      const g = generateFractionTask({ level: 5, seed })
+      if (taskLatex(g.task) === seedLatex) return prepareFractionCheck(g.task)
+    }
+    throw new Error(`nicht gefunden: ${seedLatex}`)
+  }
+  const verdict = (context: ReturnType<typeof prepareFractionCheck>, latex: string) => short(checkFractionAnswer(context, latex))
+
+  it('Wurzel: √x und x^{1/2} gelten, x = (√x)² wird verstanden', () => {
+    const context = free('\\frac{x - 9}{\\sqrt{x} - 3}')
+    expect(context.root).toBe(true)
+    expect(verdict(context, '\\sqrt{x}+3')).toBe('correct')
+    expect(verdict(context, 'x^{\\frac{1}{2}}+3')).toBe('correct')
+    expect(verdict(context, '\\frac{x-9}{\\sqrt{x}-3}')).toBe('unfinished:not-reduced')
+    expect(verdict(context, '\\sqrt{x}-3')).toBe('knownError:frac-binomial-confused')
+  })
+
+  it('sin² x + cos² x = 1: jede gleich lange Endform zählt', () => {
+    const context = free('\\frac{3}{1 - \\sin x} + \\frac{3}{1 + \\sin x}')
+    expect(verdict(context, '\\frac{6}{\\cos^2x}')).toBe('correct')
+    expect(verdict(context, '\\frac{6}{1-\\sin^2x}')).toBe('correct')
+    expect(verdict(context, '\\frac{6}{\\cos x}')).toBe('knownError:frac-square-forgotten')
+  })
+
+  it('tan x und sin x / cos x', () => {
+    const context = free('\\frac{\\frac{1}{\\cos x} - \\cos x}{\\sin x}')
+    expect(verdict(context, '\\tan x')).toBe('correct')
+    expect(verdict(context, '\\frac{\\sin x}{\\cos x}')).toBe('correct')
+    expect(verdict(context, '\\frac{\\sin^2x}{\\sin x\\cos x}')).toBe('unfinished:not-reduced')
+  })
+
+  it('e-Funktion und zwei Variablen', () => {
+    expect(verdict(free('\\frac{e^{2x} - 4e^{x}}{e^{x}}'), 'e^2-4')).toBe('knownError:frac-cancel-inside')
+    const quotient = free('\\frac{\\frac{4}{x + h} - \\frac{4}{x}}{h}')
+    expect(quotient.letters).toEqual(['x', 'h'])
+    expect(verdict(quotient, '-\\frac{4}{x(x+h)}')).toBe('correct')
+    expect(verdict(quotient, '-\\frac{4}{x^2+hx}')).toBe('correct')
+    expect(verdict(quotient, '\\frac{-\\frac{4h}{x(x+h)}}{h}')).toBe('unfinished:nested')
+  })
+})
+
+describe.each([1, 2, 3, 4, 5] as Level[])('Zufallsaufgaben, Stufe %i', (level) => {
   const tasks = Array.from({ length: 200 }, (_, i) => ({ seed: i + 1, ...generateFractionTask({ level, seed: i + 1 }) }))
 
   it('nimmt das Ergebnis der Engine an, Zwischenschritte nie als falsch', () => {
@@ -117,7 +160,7 @@ describe.each([1, 2, 3, 4] as Level[])('Zufallsaufgaben, Stufe %i', (level) => {
         expect(['correct', 'unfinished'], `${context0} ${step.kind}: ${toLatex(step.expr)}`).toContain(verdict.kind)
       }
       // die Aufgabe selbst ist noch nicht fertig (geteilt mit „:" liest die Tastatur nicht)
-      if (t.kind !== 'quotient') expect(short(checkFractionAnswer(context, taskLatex(t))), context0).toMatch(/^unfinished/)
+      if (isReadableTask(t)) expect(short(checkFractionAnswer(context, taskLatex(t))), context0).toMatch(/^unfinished/)
     }
   })
 

@@ -2,7 +2,7 @@ import { explainFractionError, listing } from '../explain/fractionTexts.ts'
 import { type Expr, mul } from '../expr/types.ts'
 import { type FracWrong, fractionWrongAnswers } from '../fraction/errorRules.ts'
 import { factoredPoly, reduceFrac } from '../fraction/factor.ts'
-import { type Frac, fracDiv, fracEquals, fracNeg, toFrac } from '../fraction/frac.ts'
+import { type Frac, fracDiv, fracEquals, fracNeg, rootForm, toFrac } from '../fraction/frac.ts'
 import { atomsOf, constValue, isZeroPoly, polyContent, totalDegree } from '../fraction/poly.ts'
 import { type FracSolution, solveFraction } from '../fraction/solve.ts'
 import { type FractionTask, partsOf, shownPoly } from '../fraction/task.ts'
@@ -33,6 +33,8 @@ export type FractionCheckContext = {
   readonly letters: readonly string[]
   // Bausteine wie e^x, ln x, sin x, cos x in der Aufgabe
   readonly blocks: boolean
+  // √x in der Aufgabe: Die Eingabe wird in √x umgerechnet (x = (√x)²)
+  readonly root: boolean
 }
 
 // Warum ein gleichwertiges Ergebnis noch nicht fertig ist
@@ -54,8 +56,9 @@ export function prepareFractionCheck(task: FractionTask): FractionCheckContext {
   const solution = solveFraction(task)
   const atoms = [...new Set(partsOf(task).flatMap((p) => [...atomsOf(shownPoly(p.num)), ...atomsOf(shownPoly(p.den))]))]
   const blocks = atoms.some((a) => BLOCK_ATOMS.includes(a))
-  const letters = LETTERS.filter((l) => atoms.includes(l) || (l === 'x' && blocks))
-  return { task, solution, wrongs: fractionWrongAnswers(task, solution), letters, blocks }
+  const root = atoms.includes('R')
+  const letters = LETTERS.filter((l) => atoms.includes(l) || (l === 'x' && (blocks || root)))
+  return { task, solution, wrongs: fractionWrongAnswers(task, solution), letters, blocks, root }
 }
 
 export function checkFractionAnswer(context: FractionCheckContext, latex: string): FractionVerdict {
@@ -74,9 +77,10 @@ export function checkFractionAnswer(context: FractionCheckContext, latex: string
     return { kind: 'unreadable', message: `In der Aufgabe ${context.letters.length === 1 ? 'kommt nur' : 'kommen nur'} ${which} vor. Was soll $${name}$ bedeuten?` }
   }
 
-  const value = toFrac(answer)
-  // etwas, das die Bruch-Engine nicht kennt (z. B. eine Wurzel), oder geteilt durch null
-  if (!value || isZeroPoly(value.den)) return { kind: 'wrong', answer }
+  const parsedValue = toFrac(answer)
+  // etwas, das die Bruch-Engine nicht kennt (z. B. eine dritte Wurzel), oder geteilt durch null
+  if (!parsedValue || isZeroPoly(parsedValue.den)) return { kind: 'wrong', answer }
+  const value = context.root ? rootForm(parsedValue) : parsedValue
 
   const correct = context.solution.value
   if (fracEquals(value, correct)) {
@@ -98,29 +102,31 @@ function constantRatio(value: Frac, correct: Frac): boolean {
 
 // --- Ist ein gleichwertiges Ergebnis fertig? ---
 
-function containsKind(e: Expr, kind: Expr['kind']): boolean {
+// Kommt die Art im Term vor? Hochzahlen zählen nur mit exponents (x^{\frac{1}{2}} ist kein Bruch)
+function containsKind(e: Expr, kind: Expr['kind'], exponents = true): boolean {
   if (e.kind === kind) return true
+  const inner = (x: Expr) => containsKind(x, kind, exponents)
   switch (e.kind) {
     case 'add':
-      return e.terms.some((t) => containsKind(t, kind))
+      return e.terms.some(inner)
     case 'mul':
-      return e.factors.some((f) => containsKind(f, kind))
+      return e.factors.some(inner)
     case 'neg':
     case 'root':
     case 'fn':
-      return containsKind(e.arg, kind)
+      return inner(e.arg)
     case 'div':
-      return containsKind(e.num, kind) || containsKind(e.den, kind)
+      return inner(e.num) || inner(e.den)
     case 'pow':
-      return containsKind(e.base, kind) || containsKind(e.exp, kind)
+      return inner(e.base) || (exponents && inner(e.exp))
     case 'log':
-      return containsKind(e.base, kind) || containsKind(e.arg, kind)
+      return inner(e.base) || inner(e.arg)
     default:
       return false
   }
 }
 
-const hasFraction = (e: Expr) => containsKind(e, 'div')
+const hasFraction = (e: Expr) => containsKind(e, 'div', false)
 
 // Zähler und Nenner der Eingabe als Terme; sonst, warum es kein einzelner Bruch ist
 function parts(answer: Expr): { num: Expr; den: Expr | null } | Unfinished {
@@ -214,7 +220,7 @@ export function prepareFractionFree(ref: TaskRef): FreeTask {
   return {
     answerLabel: '=',
     inputLabel: 'Dein Ergebnis',
-    keyboard: { kind: 'fraction', letters: context.letters, blocks: context.blocks },
+    keyboard: { kind: 'fraction', letters: context.letters, blocks: context.blocks, root: context.root },
     check: (latex) => fractionFreeVerdict(checkFractionAnswer(context, latex)),
   }
 }

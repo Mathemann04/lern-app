@@ -49,7 +49,10 @@ describe('Aufbau der App (Fächer, Gebiete, Themen)', () => {
   it('übt eine gemerkte Stufe nur, wenn sie spielbar ist', () => {
     const fractions = courseById(FRACTIONS)!.course
     expect(playableLevel(fractions, 2)).toBe(2)
-    expect(playableLevel(fractions, 5)).toBe(1)
+    expect(playableLevel(fractions, 5)).toBe(5)
     expect(playableLevel(fractions, undefined)).toBe(1)
+    // Stufe 5 noch gesperrt: zurück zur ersten spielbaren
+    const withoutFive = { ...fractions, levels: fractions.levels.map((l) => (l.level === 5 ? { ...l, available: false } : l)) }
+    expect(playableLevel(withoutFive, 5)).toBe(1)
   })
 })

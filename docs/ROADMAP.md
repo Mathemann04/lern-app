@@ -23,7 +23,7 @@ Details: [PLAN-M2.md](PLAN-M2.md)
 - [x] 3. Mehrere Themen, Brüche Stufe 1 und 2 geführt
 - [x] 4. Stufen 3 und 4 geführt
 - [x] 5. Freier Modus für Brüche
-- [ ] 6. Stufe 5 geführt und frei
+- [x] 6. Stufe 5 geführt und frei
 - [ ] 7. Gezieltes Üben, Feinschliff, Abschluss von M2 (gezieltes Üben für
   Brüche schon mit Schritt 3)
 
@@ -180,3 +180,13 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   Eingabefeld nimmt seine Farben jetzt aus der App statt vom Browser,
   Cursor und Markierung folgen der Einstellung „Aussehen". Die Spalten der
   Mathe-Tastatur stehen jetzt genau untereinander.
+- 30.10.2026: Stufe 5 bei Brüchen (Schritt 6 von M2): mehrere Rechenarten,
+  verschachtelte Doppelbrüche, zwei Variablen (Differenzenquotient),
+  Wurzeln und Winkelfunktionen mit ihren Regeln, e-Funktion. Ergebnisse wie
+  im Skript ($\frac{6}{\cos^2 x}$, $\tan x$, $\frac{2\sqrt{x}}{x - 25}$);
+  im freien Modus zählt jede gekürzte Form, auch $\frac{6}{1 - \sin^2 x}$.
+  Drei neue typische Fehler: „Quadrat vergessen", „Beim Quadrieren das
+  Mittelglied vergessen" (auch $(x + h)^2 = x^2 + h^2$) und „Im Inneren
+  einer Funktion gekürzt" ($\frac{e^{2x}}{e^x} = e^2$; die Variante mit
+  $\sin(2x)$ entfällt, weil $\sin(2x)$ in keiner Aufgabe vorkommt). Neue
+  Lernkarte „Bausteine mit eigenen Regeln".

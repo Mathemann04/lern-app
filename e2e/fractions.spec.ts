@@ -54,8 +54,7 @@ test('Von der Startseite über Grundlagen zu den Brüchen und eine Aufgabe gefü
   await expect(page.getByRole('radio', { name: /Frei/ })).toBeChecked()
   await page.getByText('Auswahl-Antworten').click()
   await expect(page.getByRole('radio', { name: /^Stufe 1/ })).toBeChecked()
-  await expect(page.getByRole('radio', { name: /^Stufe 4/ })).toBeEnabled()
-  await expect(page.getByRole('radio', { name: /^Stufe 5/ })).toBeDisabled()
+  await expect(page.getByRole('radio', { name: /^Stufe 5/ })).toBeEnabled()
   await expectCleanPage(page, 'Thema Brüche')
 
   await page.getByRole('link', { name: 'Stufe 1 geführt üben' }).click()

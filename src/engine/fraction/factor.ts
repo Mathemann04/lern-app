@@ -7,6 +7,7 @@ import {
   constValue,
   degreeIn,
   gcdUnivariate,
+  isUnitTrigLinear,
   isZeroPoly,
   lcmBig,
   monomialContent,
@@ -181,12 +182,12 @@ export function isMultipleOf(h: Poly, d: Poly): boolean {
 
 // --- Schreibweise ---
 
-// Faktor als Term: x², (x + 3), (e^x − 1)³
+// Faktor als Term: x², (x + 3), (e^x − 1)³, (1 − \sin x)
 function factorExpr({ poly, exp }: Factor): Expr {
   if (poly.length === 1 && poly[0].mono.length === 1 && poly[0].mono[0][1] === 1) {
     return atomPowerExpr(poly[0].mono[0][0], exp)
   }
-  const base = polyExpr(poly)
+  const base = polyExpr(poly, isUnitTrigLinear(poly) ? 'ascending' : 'descending')
   return exp === 1 ? base : pow(base, num(exp))
 }
 
@@ -257,7 +258,7 @@ export const reducedFrac = (r: Reduced): Frac => ({ num: r.num, den: factoredPol
 // Schreibweise des Ergebnisses: \frac{x + 5}{(x - 1)(x + 1)}, -\frac{2x}{3y^2}, e^x - 1. Der Zähler
 // beginnt möglichst mit Plus (\frac{b - a}{ab}); nur wenn alles negativ ist, steht das Minus vorn.
 export function reducedExpr(r: Reduced): Expr {
-  const flipped = r.num.length >= 2 && startsNegative(r.num) && !startsNegative([...r.num].reverse())
+  const flipped = (r.num.length >= 2 && startsNegative(r.num) && !startsNegative([...r.num].reverse())) || isUnitTrigLinear(r.num)
   const numerator = polyExpr(r.num, flipped ? 'ascending' : 'descending')
   if (isOneFactored(r.den)) return numerator
   if (startsNegative(r.num) && !flipped) return neg(div(polyExpr(polyScale(r.num, rat(-1))), factoredExpr(r.den)))

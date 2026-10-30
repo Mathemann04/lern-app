@@ -11,8 +11,9 @@ import { FRACTION_ERROR_RULES } from '../fraction/errorRules.ts'
 import { fracEquals, toFrac } from '../fraction/frac.ts'
 import { isMultipleOf } from '../fraction/factor.ts'
 import { type Poly, polyDivideExact } from '../fraction/poly.ts'
-import { sideOf, solveFraction } from '../fraction/solve.ts'
-import { type FractionShape, type FractionTask, type Part, expanded, minus, part, partsOf, plus, shownPoly, taskExpr } from '../fraction/task.ts'
+import { solveFraction } from '../fraction/solve.ts'
+import { type FractionShape, type FractionTask, type Part, bottomFrac, expanded, innerTask, minus, part, partsOf, plus, shownPoly, signedFrac, taskExpr, taskFrac, topFrac } from '../fraction/task.ts'
+import type { Frac } from '../fraction/frac.ts'
 import { createRng } from '../random/rng.ts'
 import { generateFractionTask } from '../tasks/fractionTerms.ts'
 import type { Level } from '../tasks/taskNumber.ts'
@@ -121,7 +122,19 @@ function isCommonDenominator(t: FractionTask, e: Expr): boolean {
 
 const close = (a: number, b: number) => Math.abs(a - b) <= 1e-9 * Math.max(1, Math.abs(a), Math.abs(b))
 
-describe.each([1, 2, 3, 4] as Level[])('Brüche geführt, Stufe %i', (level) => {
+// Wert der Antwort eines Schritts: bei Teilschritten (Zähler des Doppelbruchs als ein Bruch, eine
+// Klammer, der innere Doppelbruch) der Wert dieses Teils, sonst der Wert der Aufgabe
+function targetOf(t: FractionTask, step: GuidedStep, value: Frac): Frac {
+  const ends = (kind: string) => step.id.endsWith(`-${kind}`)
+  if (ends('inner-num') || (ends('identity') && t.kind === 'complex')) return topFrac(t)!
+  if (ends('inner-den')) return bottomFrac(t)!
+  if (t.kind === 'mixed' && ends('left')) return signedFrac(t.left)
+  if (t.kind === 'mixed' && ends('right')) return signedFrac(t.right)
+  if (t.kind === 'nested' && ends('inner-complex')) return taskFrac(innerTask(t, t.hints))
+  return value
+}
+
+describe.each([1, 2, 3, 4, 5] as Level[])('Brüche geführt, Stufe %i', (level) => {
   const plans: Array<{ plan: GuidedTask; t: FractionTask }> = Array.from({ length: 300 }, (_, i) => ({
     plan: planFractionTask({ level, seed: i + 1 }),
     t: generateFractionTask({ level, seed: i + 1 }).task,
@@ -153,12 +166,7 @@ describe.each([1, 2, 3, 4] as Level[])('Brüche geführt, Stufe %i', (level) => 
           continue
         }
         // Doppelbruch: gefragt ist erst der Zähler bzw. Nenner als ein Bruch
-        const target =
-          t.kind === 'complex' && step.id.endsWith('inner-num')
-            ? sideOf(t.top, t.hints).frac
-            : t.kind === 'complex' && step.id.endsWith('inner-den')
-              ? sideOf(t.bottom, t.hints).frac
-              : value
+        const target = targetOf(t, step, value)
         for (const c of step.choices) {
           const f = toFrac(c.expr!)
           expect(f, `${context} ${c.content}`).not.toBeNull()
@@ -178,7 +186,7 @@ describe.each([1, 2, 3, 4] as Level[])('Brüche geführt, Stufe %i', (level) => 
       const points: Env[] = samplePoints([taskExpr(t), plan.result], createRng(`geführt:${context}`), 12, letter)
       for (const env of points) {
         // bei zwei Buchstaben den zweiten fest wählen
-        const full = { a: 1.7, b: -2.3, x: 1.3, y: 0.6, ...env }
+        const full = { a: 1.7, b: -2.3, x: 1.3, y: 0.6, h: 0.4, ...env }
         expect(close(evaluate(taskExpr(t), full), evaluate(plan.result, full)), `${context} ${JSON.stringify(full)}`).toBe(true)
       }
     }

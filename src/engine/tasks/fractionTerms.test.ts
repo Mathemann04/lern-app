@@ -17,7 +17,7 @@ import { formatTaskNumber, type Level } from './taskNumber.ts'
 
 // Für gründlichere Läufe vorübergehend erhöhen (mit 3000 je Stufe geprüft)
 const SEEDS_PER_LEVEL = 300
-const LEVELS_SO_FAR: Level[] = [1, 2, 3, 4]
+const LEVELS_SO_FAR: Level[] = [1, 2, 3, 4, 5]
 const LETTERS = ['x', 'y', 'a', 'b', 'h']
 
 // Stellen zum Vergleichen: bei x allein (auch e^x, ln x, sin x) wie beim Ableiten, sonst je
@@ -128,7 +128,7 @@ describe.each(LEVELS_SO_FAR)('Brüche Stufe %i', (level) => {
   })
 })
 
-it('jeder typische Fehler kommt in Aufgaben der Stufen 1 bis 4 vor', () => {
+it('jeder typische Fehler kommt in Aufgaben der Stufen 1 bis 5 vor', () => {
   const seen = new Set<string>()
   for (const level of LEVELS_SO_FAR) {
     for (let seed = 1; seed <= SEEDS_PER_LEVEL; seed++) {

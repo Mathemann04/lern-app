@@ -1,7 +1,7 @@
-import { type Expr, add, exp, ln, mul, num, pow, sin, sub, variable, x } from '../expr/types.ts'
+import { type Expr, add, cos, exp, ln, mul, num, pow, sin, sqrt, sub, variable, x } from '../expr/types.ts'
 import { toFrac } from '../fraction/frac.ts'
 import { type Poly, polyDivideExact } from '../fraction/poly.ts'
-import { type FractionShape, type FractionTask, type Part, expanded, minus, part, plus } from '../fraction/task.ts'
+import { type BlockRule, type FractionShape, type FractionTask, type Part, expanded, minus, part, plus, withRoots } from '../fraction/task.ts'
 import type { Card } from './cards.ts'
 
 // Lernkarten im Ordner „Brüche". Die Beispiele sind Aufgaben der Bruch-Engine; den Rechenweg dazu
@@ -22,6 +22,7 @@ export const FRACTION_CARD_IDS = {
   sumCancel: 'fraction-sum-cancel',
   complex: 'fraction-complex',
   blocks: 'fraction-blocks',
+  blockRules: 'fraction-block-rules',
 } as const
 
 // --- Beispiele bauen ---
@@ -34,7 +35,9 @@ function poly(e: Expr): Poly {
 // Bruch aus Zähler und Nenner (Terme ohne Bruch); frAscending: Zähler mit der Zahl zuerst (2 − x)
 const fr = (n: Expr, d: Expr = num(1)): Part => part(expanded(poly(n)), expanded(poly(d)))
 const frAscending = (n: Expr, d: Expr): Part => part(expanded(poly(n), true), expanded(poly(d)))
-const task = (s: FractionShape): FractionTask => ({ ...s, hints: [] }) as FractionTask
+const task = (s: FractionShape, rule?: BlockRule): FractionTask => withRoots({ ...s, hints: [], ...(rule ? { rule } : {}) } as FractionTask)
+// 1 − sin x: die 1 vorn
+const frUnit = (n: Expr, d: Expr): Part => part(expanded(poly(n)), expanded(poly(d), true))
 const [a, b, y] = ['a', 'b', 'y'].map(variable)
 const n = (value: number) => num(value)
 
@@ -164,14 +167,14 @@ export const FRACTION_CARD_LIST: readonly Card[] = [
     rules: [],
     formulas: ['a^2 + 2ab + b^2 = (a + b)^2', 'a^2 - 2ab + b^2 = (a - b)^2', 'a^2 - b^2 = (a + b)(a - b)'],
     memo: 'Rückwärts gelesen zerlegen die binomischen Formeln: Zwei Quadrate mit Minus dazwischen ergeben $(a + b)(a - b)$, mit passendem Mittelglied ein Quadrat.',
-    note: 'Prüfe das Mittelglied: Bei $x^2 + 10x + 25$ ist $2 \\cdot x \\cdot 5 = 10x$, also ist es $(x + 5)^2$.',
+    note: 'Prüfe das Mittelglied: Bei $x^2 + 10x + 25$ ist $2 \\cdot x \\cdot 5 = 10x$, also ist es $(x + 5)^2$. Vorwärts gilt dasselbe: Wer $(x + h)^2$ ausmultipliziert, darf das Mittelglied $2xh$ nicht vergessen.',
     when: 'Wenn im Zähler oder Nenner Quadrate stehen, z. B. $x^2 - 9$ oder $x^2 + 6x + 9$.',
     examples: [
       task({ kind: 'reduce', part: fr(sub(pow(x, n(2)), n(9)), add(mul(n(2), x), n(6))) }),
       task({ kind: 'reduce', part: fr(add(pow(x, n(2)), mul(n(6), x), n(9)), sub(pow(x, n(2)), n(9))) }),
       task({ kind: 'reduce', part: fr(add(pow(x, n(2)), mul(n(-4), x), n(4)), sub(pow(x, n(2)), n(4))) }),
     ],
-    errors: ['frac-binomial-confused'],
+    errors: ['frac-binomial-confused', 'frac-binomial-middle'],
   },
   {
     id: FRACTION_CARD_IDS.lcdTerms,
@@ -229,7 +232,13 @@ export const FRACTION_CARD_LIST: readonly Card[] = [
     rules: [],
     formulas: ['\\frac{\\frac{a}{b}}{\\frac{c}{d}} = \\frac{a}{b} \\cdot \\frac{d}{c}', '\\frac{\\frac{a}{b}}{c} = \\frac{a}{b \\cdot c}'],
     memo: 'Ein Doppelbruch ist eine Division: oberer Bruch geteilt durch unteren Bruch. Also wird mit dem Kehrwert des unteren Bruchs malgenommen.',
-    note: ['So gehst du vor:', '1. Zähler und Nenner je zu einem Bruch zusammenfassen.', '2. Mit dem Kehrwert des unteren Bruchs malnehmen.', '3. Kürzen.'].join('\n'),
+    note: [
+      'So gehst du vor:',
+      '1. Zähler und Nenner je zu einem Bruch zusammenfassen.',
+      '2. Mit dem Kehrwert des unteren Bruchs malnehmen.',
+      '3. Kürzen.',
+      'Steckt im Doppelbruch noch ein Doppelbruch, fängst du innen an und arbeitest dich nach außen vor.',
+    ].join('\n'),
     examples: [
       task({ kind: 'complex', top: [plus(fr(n(1))), plus(fr(n(1), x))], bottom: [plus(fr(n(1))), minus(fr(n(1), pow(x, n(2))))] }),
       task({ kind: 'complex', top: [plus(fr(x)), minus(fr(n(9), x))], bottom: [plus(fr(n(1))), plus(fr(n(3), x))] }),
@@ -252,5 +261,28 @@ export const FRACTION_CARD_LIST: readonly Card[] = [
       task({ kind: 'reduce', part: fr(sub(pow(ln(x), n(2)), n(4)), add(ln(x), n(2))) }),
     ],
     errors: [],
+  },
+  {
+    id: FRACTION_CARD_IDS.blockRules,
+    topic: 'brueche',
+    title: 'Bausteine mit eigenen Regeln',
+    level: 5,
+    rules: [],
+    formulas: ['(\\sqrt{x})^2 = x', '\\sin^2 x + \\cos^2 x = 1', '\\tan x = \\frac{\\sin x}{\\cos x}', '\\frac{e^{2x}}{e^x} = e^{2x - x} = e^x'],
+    memo: 'Manche Bausteine haben eigene Regeln. Mit ihnen lässt sich weiter zerlegen und kürzen, als es mit einem einzelnen Buchstaben ginge.',
+    note: [
+      'Typische Umformungen:',
+      '1. $x - 9 = (\\sqrt{x} - 3)(\\sqrt{x} + 3)$, weil $x = (\\sqrt{x})^2$.',
+      '2. $1 - \\cos^2 x = \\sin^2 x$ und $1 - \\sin^2 x = \\cos^2 x$, umgestellt aus $\\sin^2 x + \\cos^2 x = 1$.',
+      '3. $\\frac{\\sin x}{\\cos x} = \\tan x$.',
+      'Das Quadrat bleibt bei allen Umformungen erhalten.',
+    ].join('\n'),
+    when: 'In Aufgaben mit $\\sqrt{x}$, mit $\\sin x$ und $\\cos x$ oder mit Potenzen von $e^x$.',
+    examples: [
+      task({ kind: 'reduce', part: fr(sub(x, n(9)), sub(sqrt(x), n(3))) }),
+      task({ kind: 'sum', terms: [plus(frUnit(n(1), sub(n(1), sin(x)))), plus(frUnit(n(1), add(n(1), sin(x))))] }, { kind: 'trig', prefer: 'C', target: 'den' }),
+      task({ kind: 'complex', top: [plus(fr(n(1), cos(x))), minus(fr(cos(x)))], bottom: [plus(fr(sin(x)))] }, { kind: 'trig', prefer: 'S', target: 'num' }),
+    ],
+    errors: ['frac-square-forgotten', 'frac-cancel-inside'],
   },
 ]
