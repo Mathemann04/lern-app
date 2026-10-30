@@ -432,6 +432,26 @@ function stripLeftSide(input: string): string | null {
   return /^[fy]'+(\(x\))?$/.test(left) ? parts[1] : null
 }
 
+// Eingabe beim Umstellen: ein Term (die rechte Seite von „x = …") oder eine Gleichung; lhs ist null,
+// wenn kein Gleichheitszeichen dasteht
+export type EquationParseResult = { ok: true; lhs: Expr | null; rhs: Expr } | { ok: false; message: string }
+
+export function parseLatexEquation(input: string): EquationParseResult {
+  const parts = input.split('=')
+  if (parts.length > 2) return { ok: false, message: 'Schreibe höchstens ein Gleichheitszeichen.' }
+  try {
+    const sides = parts.map((part) => {
+      const tokens = tokenize(part)
+      if (tokens.length === 0) throw new ParseError(parts.length === 1 ? 'Gib zuerst dein Ergebnis ein.' : 'Auf einer Seite des Gleichheitszeichens fehlt noch etwas.')
+      return new Parser(tokens).parseAll()
+    })
+    return sides.length === 1 ? { ok: true, lhs: null, rhs: sides[0] } : { ok: true, lhs: sides[0], rhs: sides[1] }
+  } catch (error) {
+    if (error instanceof ParseError) return { ok: false, message: error.message }
+    throw error
+  }
+}
+
 export function parseLatex(input: string): ParseResult {
   try {
     const right = stripLeftSide(input)

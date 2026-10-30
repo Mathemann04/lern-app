@@ -30,7 +30,7 @@ import { readableLatex } from '../fraction/task.ts'
 import { factorize } from '../fraction/factor.ts'
 import { newAtoms, polyToExpr, toRat } from '../rearrange/algebra.ts'
 import { type RearrangeWrong, rearrangeWrongAnswers } from '../rearrange/errorRules.ts'
-import { type RearrangeStep, type Side, type StepKind, isNegative, negated, solveEquation, stepLabel } from '../rearrange/isolate.ts'
+import { type RearrangeStep, type Side, type StepKind, hasTargetRoot, isNegative, negated, solveEquation, stepLabel } from '../rearrange/isolate.ts'
 import { type RearrangeTask, conditionsText, taskLatex } from '../rearrange/task.ts'
 import { type Rng, createRng } from '../random/rng.ts'
 import { ratSign } from '../rational.ts'
@@ -123,6 +123,10 @@ function isJunction(step: RearrangeStep, t: string): boolean {
   }
 }
 
+// Die Unbekannte als LaTeX: √x, wenn sie in der Gleichung vorkommt (dann wird √x sortiert und
+// ausgeklammert, wie in stepLabel), sonst x
+const unknownOf = (step: RearrangeStep, t: string) => (hasTargetRoot(step.after, t) ? `\\sqrt{${t}}` : t)
+
 // Nenner, der beim Malnehmen beseitigt wird (beim Schälen)
 function denominatorOf(step: RearrangeStep): Expr | null {
   if (!step.side) return null
@@ -184,10 +188,15 @@ function moveQuestion(step: RearrangeStep, t: string): MoveQuestion | null {
       return side ? { question: `Bevor du den Kehrwert nimmst: Was machst du mit der ${sideName(other(side))} Seite?`, wrong: COMBINE_MOVES, hint: REARRANGE_HINTS.combine } : null
     case 'expand':
       return { question: 'Was machst du mit den Klammern?', wrong: EXPAND_MOVES, hint: REARRANGE_HINTS.expand }
-    case 'collect':
-      return { question: `$${t}$ steht in mehreren Summanden. Was machst du zuerst?`, wrong: collectMoves(t), hint: REARRANGE_HINTS.collect }
-    case 'factor':
-      return { question: `Wie machst du aus den Summanden mit $${t}$ einen einzigen Faktor $${t}$?`, wrong: factorMoves(t), hint: REARRANGE_HINTS.factor }
+    case 'collect': {
+      const u = unknownOf(step, t)
+      const question = u === t ? `$${t}$ steht in mehreren Summanden. Was machst du zuerst?` : `Wie bekommst du den Summanden mit $${u}$ allein auf eine Seite?`
+      return { question, wrong: collectMoves(t, u), hint: REARRANGE_HINTS.collect }
+    }
+    case 'factor': {
+      const u = unknownOf(step, t)
+      return { question: `Wie machst du aus den Summanden mit $${u}$ einen einzigen Faktor $${u}$?`, wrong: factorMoves(u), hint: REARRANGE_HINTS.factor }
+    }
     case 'square':
       return { question: 'Wie wirst du die Wurzel los?', wrong: SQUARE_MOVES, hint: REARRANGE_HINTS.square }
     case 'root':
@@ -209,7 +218,7 @@ function moveStep(step: RearrangeStep, previous: RearrangeStep | undefined, q: M
     question: q.question,
     choices: rng.shuffle([correct, ...wrong]),
     hint: q.hint,
-    explanation: explainMove(step.kind, label, t),
+    explanation: explainMove(step.kind, label, t, unknownOf(step, t)),
     established,
     cards: cardsOf(step, t, previous),
   }
@@ -272,13 +281,13 @@ const CARDS_BY_KIND: Record<StepKind, readonly string[]> = {
   divide: [REARRANGE_CARD_IDS.inverse],
   multiply: [REARRANGE_CARD_IDS.inverse],
   negate: [REARRANGE_CARD_IDS.inverse],
-  reciprocal: [REARRANGE_CARD_IDS.denominator],
-  combine: [REARRANGE_CARD_IDS.denominator, FRACTION_CARD_IDS.add],
+  reciprocal: [REARRANGE_CARD_IDS.reciprocal],
+  combine: [REARRANGE_CARD_IDS.reciprocal, FRACTION_CARD_IDS.add],
   expand: [REARRANGE_CARD_IDS.collect],
   collect: [REARRANGE_CARD_IDS.collect],
   factor: [REARRANGE_CARD_IDS.collect],
-  square: [REARRANGE_CARD_IDS.inverse],
-  root: [REARRANGE_CARD_IDS.inverse],
+  square: [REARRANGE_CARD_IDS.root],
+  root: [REARRANGE_CARD_IDS.root],
   finish: [FRACTION_CARD_IDS.add, FRACTION_CARD_IDS.expand],
 }
 
@@ -286,8 +295,9 @@ const CARDS_BY_KIND: Record<StepKind, readonly string[]> = {
 function cardsOf(step: RearrangeStep, t: string, previous: RearrangeStep | undefined): string[] {
   if (step.kind === 'multiply') {
     const den = denominatorOf(step)
-    // Variable im Nenner oder alle Nenner beseitigen
-    if (!den || contains(den, t)) return [REARRANGE_CARD_IDS.denominator]
+    // alle Nenner beseitigen bzw. Variable im Nenner
+    if (!den) return [REARRANGE_CARD_IDS.clear]
+    if (contains(den, t)) return [REARRANGE_CARD_IDS.denominator]
   }
   if ((step.kind === 'divide' || step.kind === 'negate') && (previous?.kind === 'factor' || previous?.kind === 'collect')) return [REARRANGE_CARD_IDS.collect]
   return [...CARDS_BY_KIND[step.kind]]

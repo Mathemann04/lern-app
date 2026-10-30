@@ -1,5 +1,5 @@
-import { type Expr, add, div, eq, mul, num, sub, variable } from '../expr/types.ts'
-import type { RearrangeTask } from '../rearrange/task.ts'
+import { type Expr, add, div, eq, mul, num, pow, sqrt, sub, variable } from '../expr/types.ts'
+import type { Condition, RearrangeTask } from '../rearrange/task.ts'
 import type { Card } from './cards.ts'
 
 // Lernkarten im Ordner „Gleichungen umstellen". Die Beispiele sind Aufgaben der Umstell-Engine; den
@@ -11,11 +11,15 @@ export const REARRANGE_CARD_IDS = {
   move: 'rearrange-move',
   denominator: 'rearrange-denominator',
   collect: 'rearrange-collect',
+  clear: 'rearrange-clear',
+  reciprocal: 'rearrange-reciprocal',
+  root: 'rearrange-root',
 } as const
 
 const [a, b, c, d, x, y] = ['a', 'b', 'c', 'd', 'x', 'y'].map(variable)
 const n = (value: number) => num(value)
-const task = (lhs: Expr, rhs: Expr, target = 'x'): RearrangeTask => ({ equation: eq(lhs, rhs), target, conditions: [] })
+const task = (lhs: Expr, rhs: Expr, target = 'x', conditions: readonly Condition[] = []): RearrangeTask => ({ equation: eq(lhs, rhs), target, conditions })
+const sq = (e: Expr) => pow(e, n(2))
 
 export const REARRANGE_CARD_LIST: readonly Card[] = [
   {
@@ -69,5 +73,44 @@ export const REARRANGE_CARD_LIST: readonly Card[] = [
     when: 'Wenn die Variable auf beiden Seiten oder in mehreren Summanden steht.',
     examples: [task(add(mul(a, x), b), add(mul(c, x), d)), task(mul(a, add(x, b)), mul(c, sub(x, d))), task(sub(mul(n(2), x), a), mul(b, sub(c, x)))],
     errors: ['eq-sign-not-flipped', 'eq-bracket-first-term', 'eq-factor-one-lost', 'eq-divide-one-term'],
+  },
+  {
+    id: REARRANGE_CARD_IDS.clear,
+    topic: 'umstellen',
+    title: 'Mit dem Hauptnenner malnehmen',
+    level: 3,
+    rules: [],
+    formulas: ['\\frac{a}{x - b} = \\frac{c}{x + d}', '\\Leftrightarrow\\; a(x + d) = c(x - b)'],
+    memo: 'Steht die Variable in mehreren Nennern oder oben und unten in einem Bruch, nimm beide Seiten mit dem Hauptnenner mal. Dann sind alle Brüche weg.',
+    note: 'Bei je einem Bruch auf jeder Seite heißt das: über Kreuz malnehmen. Nenner, die Summen sind, gehören dabei in Klammern. Danach geht es weiter wie bei „Variable mehrfach": ausmultiplizieren, sortieren, ausklammern, teilen.',
+    when: 'Wenn die Variable in Brüchen auf beiden Seiten oder in Zähler und Nenner steht.',
+    examples: [task(y, div(add(mul(n(2), x), n(1)), sub(x, n(3)))), task(div(a, sub(x, b)), div(c, add(x, b))), task(div(x, add(x, a)), div(b, c))],
+    errors: ['eq-denominator-bracket', 'eq-bracket-first-term'],
+  },
+  {
+    id: REARRANGE_CARD_IDS.reciprocal,
+    topic: 'umstellen',
+    title: 'Kehrwert auf beiden Seiten',
+    level: 3,
+    rules: [],
+    formulas: ['\\frac{1}{x} = \\frac{p}{q} \\;\\Leftrightarrow\\; x = \\frac{q}{p}'],
+    memo: 'Steht die Variable allein unter einem Bruchstrich mit $1$ darüber, nimm auf beiden Seiten den Kehrwert. Vorher muss die andere Seite ein einziger Bruch sein.',
+    note: 'Den Kehrwert einer Summe darfst du nicht Summand für Summand nehmen: Aus $\\frac{1}{x} = \\frac{1}{a} + \\frac{1}{b}$ folgt nicht $x = a + b$. Fasse erst zu einem Bruch zusammen.',
+    when: 'Bei Kehrwert-Formeln wie $\\frac{1}{x} + \\frac{1}{a} = \\frac{1}{b}$.',
+    examples: [task(div(n(1), x), add(div(n(1), a), div(n(1), b))), task(add(div(n(1), x), div(n(1), a)), div(n(1), b), 'a', [{ lhs: x, rel: '>', rhs: b }]), task(div(n(1), add(x, a)), b, 'x', [{ lhs: b, rel: '<', rhs: div(n(1), a) }])],
+    errors: ['eq-reciprocal-termwise'],
+  },
+  {
+    id: REARRANGE_CARD_IDS.root,
+    topic: 'umstellen',
+    title: 'Wurzel und Quadrat',
+    level: 3,
+    rules: [],
+    formulas: ['\\sqrt{A} = B \\;\\Rightarrow\\; A = B^2', 'x^2 = A \\;\\Rightarrow\\; x = \\sqrt{A}', '(u + v)^2 = u^2 + 2uv + v^2'],
+    memo: 'Gegen eine Wurzel hilft Quadrieren, gegen ein Quadrat die Wurzel, immer auf beiden Seiten und immer die ganze Seite. Steht die Wurzel nicht allein, stelle sie zuerst allein.',
+    note: 'Quadrieren kann Scheinlösungen erzeugen: $\\sqrt{A} = B$ geht nur, wenn $B \\geq 0$ ist. Weil hier alle Buchstaben positiv sind, brauchst du beim Wurzelziehen kein $\\pm$.',
+    when: 'Wenn die Variable unter einer Wurzel oder in einem Quadrat steht.',
+    examples: [task(y, mul(a, sqrt(sub(sq(b), sq(x))))), task(y, sqrt(div(add(x, a), sub(x, a))), 'x', [{ lhs: x, rel: '>', rhs: a }]), task(y, sub(sqrt(add(x, a)), sqrt(x)))],
+    errors: ['eq-root-termwise', 'eq-square-one-factor', 'eq-square-middle'],
   },
 ]

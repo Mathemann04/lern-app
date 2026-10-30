@@ -70,7 +70,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   Bildschirm-Tastatur `keyboard.ts`, je Thema über `keyboardLayouts`:
   Ableiten mit zwei Seiten „Standard" (mit Taste y) und „Mehr Funktionen",
   Brüche mit den Buchstaben der Aufgabe, bei Bausteinen $e^x$, ln, sin,
-  cos, tan, bei Wurzeln √; wird erst im freien Modus geladen), gemeinsame Teile in
+  cos, tan, bei Wurzeln √; Umstellen mit allen Buchstaben der Aufgabe
+  (bis zu sieben) und √; wird erst im freien Modus geladen), gemeinsame Teile in
   `src/ui/task/`. Lernkarten in
   `src/ui/cards/` (`CardSheet.tsx`: Fenster über der Aufgabe, die
   Zurück-Taste schließt nur das Fenster). Lange Formeln in
@@ -107,7 +108,12 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     `check/derivativeFree.ts`: freier Modus beim Ableiten;
     `check/fractionAnswer.ts`: freie Eingabe bei Brüchen (exakter
     Wertvergleich, mit Wurzel in √x umgerechnet, dann fertig? ein Bruch,
-    zusammengefasst, gekürzt; sonst typischer Fehler)
+    zusammengefasst, gekürzt; sonst typischer Fehler);
+    `check/rearrangeAnswer.ts`: freie Eingabe beim Umstellen (rechte Seite
+    oder Gleichung, `parseLatexEquation`; $x$ noch nicht allein, aber für
+    die Lösung richtig: „noch nicht aufgelöst"; Vergleich an Prüfstellen;
+    fertig: ein Bruch, auch unter Wurzel oder im Quadrat, zusammengefasst,
+    gekürzt; sonst typischer Fehler)
   - `parse/latex.ts`: liest die Eingabe der Mathe-Tastatur (LaTeX) ein, mit
     verständlichen Fehlermeldungen
   - `explain/`: Textbausteine für Erklärungen (ausführlich/kurz), Tipps und
@@ -120,7 +126,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     `fractionTexts.ts`. Umstellen: Texte, Tipps und falsche Umformungen
     (Irrwege mit eigener Erklärung) in `rearrangeTexts.ts`, Ordner
     „Gleichungen umstellen" in `rearrangeCards.ts` (Beispiele sind
-    Umstell-Aufgaben), durchgerechnete Beispiele in `rearrangeExample.ts`
+    Umstell-Aufgaben; Stufe 3: Hauptnenner, Kehrwert, Wurzel und Quadrat),
+    durchgerechnete Beispiele in `rearrangeExample.ts`
   - `guided/plan.ts`: Schrittplaner für den geführten Modus (Regelwahl, dann je
     Summand ein Schritt; Produkt/Quotient: u', v', Einsetzen; Kette: äußere,
     innere Ableitung, Zusammensetzen, ab Stufe 4 ohne eigenen Außen-Schritt;
@@ -140,7 +147,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     einer Frage zum Ziel und Irrwegen, dann „Was kommt heraus?" mit
     falschen Gleichungen aus den Fehlerregeln; ohne passenden Fehler steht
     die Gleichung gleich unter „Bisher"; ab Stufe 3 die Umformung nur an
-    Weichen, `isJunction`; Bedingung des Ergebnisses wie „Gilt für
+    Weichen, `isJunction`; ist √x die Unbekannte, sprechen Fragen und
+    Antworten von √x, `unknownOf`; Bedingung des Ergebnisses wie „Gilt für
     $a \neq c$."). Gemeinsame Typen in `guided/types.ts`
   - `errorCatalog.ts`: typische Fehler aller Themen mit Namen, je Thema
   - `fraction/`: Bruch-Engine (Brüche aus Polynomen, exakt): `poly.ts`

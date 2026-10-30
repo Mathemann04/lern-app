@@ -314,6 +314,9 @@ Aufgaben, Rechenweg und typischen falschen Ergebnissen.
   Seiten steht oder die rechte Seite noch nicht zusammengefasst ist;
   typische Fehler werden erkannt.
 - Neue Lernkarten: Mit dem Nenner malnehmen, Kehrwert, Wurzel und Quadrat.
+- Umgesetzt: Eingabe als rechte Seite oder ganze Gleichung; ein Bruch unter
+  einer Wurzel oder im Quadrat zählt als fertig, ein Bruch in einer Summe
+  unter der Wurzel nicht ($\sqrt{b^2 - \frac{y^2}{a^2}}$).
 
 **Ausprobieren:** $y = \sqrt{x + a} - \sqrt{x}$ geführt lösen, dann
 $y = \sqrt{\frac{x + a}{x - a}}$ frei, einmal mit „Wurzel gliedweise

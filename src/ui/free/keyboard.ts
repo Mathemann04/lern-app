@@ -103,7 +103,45 @@ export function fractionKeyboard(letters: readonly string[], blocks: boolean, ro
   }
 }
 
+// --- Umstellen ---
+
+// Bildschirm-Tastatur fürs Umstellen: links der Reihe nach die Buchstaben der Aufgabe (oft fünf oder
+// sechs), Hochzahlen, Klammern und bei Wurzeln √, je Zeile vier Tasten; die beiden Hochzahlen und
+// die beiden Klammern bleiben nebeneinander. Rechts wie bei den Brüchen.
+export function rearrangeKeyboard(letters: readonly string[], root: boolean): VirtualKeyboardLayout {
+  const groups: Key[][] = [
+    ...letters.map((l) => [l]),
+    [{ latex: '#@^{2}' }, { latex: '#@^{#?}' }],
+    [{ label: '(', key: '(' }, { label: ')', key: ')' }],
+    ...(root ? [[{ latex: '\\sqrt{#0}' }]] : []),
+  ]
+  const left: Key[][] = [[]]
+  for (const group of groups) {
+    if (left.at(-1)!.length + group.length > 4) left.push([])
+    left.at(-1)!.push(...group)
+  }
+  const leftRow = (row: number) => [0, 1, 2, 3].map((column) => left[row]?.[column] ?? GAP)
+  return {
+    id: 'umstellen',
+    label: 'Umstellen',
+    displayEditToolbar: false,
+    rows: [
+      [...leftRow(0), '7', '8', '9', { latex: '\\frac{#@}{#?}' }, '[backspace]'],
+      [...leftRow(1), '4', '5', '6', { latex: '\\cdot' }, LEFT],
+      [...leftRow(2), '1', '2', '3', { label: '−', latex: '-' }, RIGHT],
+      [...leftRow(3), '0', '+', { label: 'Prüfen', command: 'commit', class: 'action', width: 2 }, '[hide-keyboard]'],
+    ],
+  }
+}
+
 // Seiten der Tastatur je Thema
 export function keyboardLayouts(spec: KeyboardSpec): VirtualKeyboardLayout[] {
-  return spec.kind === 'derivative' ? [DERIVATIVE_KEYBOARD, MORE_FUNCTIONS_KEYBOARD] : [fractionKeyboard(spec.letters, spec.blocks, spec.root)]
+  switch (spec.kind) {
+    case 'derivative':
+      return [DERIVATIVE_KEYBOARD, MORE_FUNCTIONS_KEYBOARD]
+    case 'fraction':
+      return [fractionKeyboard(spec.letters, spec.blocks, spec.root)]
+    case 'rearrange':
+      return [rearrangeKeyboard(spec.letters, spec.root)]
+  }
 }

@@ -1,10 +1,22 @@
 import { type Page, expect, test } from '@playwright/test'
 
-// Thema Gleichungen umstellen im Gebiet Grundlagen: geführt üben (Stufen 1 und 2), Lernkarten, Fortschritt
+// Thema Gleichungen umstellen im Gebiet Grundlagen: geführt üben (Stufen 1 bis 3), frei eintippen,
+// Lernkarten, Fortschritt
 
 const answers = (page: Page) => page.getByRole('group', { name: 'Antworten' }).getByRole('button')
 const correctFeedback = (page: Page) => page.getByText('Richtig!', { exact: true })
 const wrongFeedback = (page: Page) => page.getByText('Nicht ganz. Versuch es noch einmal.')
+const field = (page: Page) => page.locator('math-field[data-ready]')
+const feedback = (page: Page) => page.locator('[aria-live="polite"]')
+
+// Setzt die Eingabe im freien Modus direkt und prüft sie (das Tippen selbst testet free.spec.ts)
+async function enter(page: Page, latex: string) {
+  await page.evaluate((value) => {
+    const element = document.querySelector('math-field') as HTMLElement & { value: string; executeCommand: (c: string) => void }
+    element.value = value
+    element.executeCommand('commit')
+  }, latex)
+}
 
 async function solveWholeTask(page: Page) {
   for (let step = 0; step < 16; step++) {
@@ -35,11 +47,11 @@ test('Von der Startseite zu „Gleichungen umstellen" und eine Aufgabe der Stufe
   await page.getByRole('link', { name: /^Gleichungen umstellen/ }).click()
   await expect(page).toHaveURL(/#\/thema\/umstellen$/)
   await expect(page.getByRole('heading', { name: 'Gleichungen umstellen', level: 1 })).toBeVisible()
-  // Stufen 1 und 2 spielbar, ab Stufe 3 folgt bald; frei eintippen kommt noch
+  // Stufen 1 bis 3 spielbar, geführt und frei; ab Stufe 4 folgt bald
   await expect(page.getByRole('radio', { name: /^Stufe 1/ })).toBeChecked()
-  await expect(page.getByRole('radio', { name: /^Stufe 2/ })).toBeEnabled()
-  await expect(page.getByRole('radio', { name: /^Stufe 3.*folgt bald/ })).toBeDisabled()
-  await expect(page.getByRole('radio', { name: /Frei/ })).toBeDisabled()
+  await expect(page.getByRole('radio', { name: /^Stufe 3/ })).toBeEnabled()
+  await expect(page.getByRole('radio', { name: /^Stufe 4.*folgt bald/ })).toBeDisabled()
+  await expect(page.getByRole('radio', { name: /Frei/ })).toBeEnabled()
   await expectCleanPage(page, 'Thema')
 
   await page.getByText('Die Variable kommt mehrfach vor oder steht im Nenner').click()
@@ -95,7 +107,8 @@ test('Umstellen: Lernkarten-Ordner mit durchgerechneten Beispielen', async ({ pa
   await expect(page).toHaveURL(/#\/karten\/umstellen$/)
   await expect(page.getByRole('heading', { name: 'Stufe 1' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Stufe 2' })).toBeVisible()
-  await expect(page.locator('main li a')).toHaveCount(4)
+  await expect(page.getByRole('heading', { name: 'Stufe 3' })).toBeVisible()
+  await expect(page.locator('main li a')).toHaveCount(7)
   await expectCleanPage(page, 'Ordner')
 
   await page.getByRole('link', { name: /^Variable im Nenner/ }).click()
@@ -104,4 +117,50 @@ test('Umstellen: Lernkarten-Ordner mit durchgerechneten Beispielen', async ({ pa
   // gezielt üben kommt erst später für dieses Thema
   await expect(page.getByRole('link', { name: 'Gezielt üben' })).toHaveCount(0)
   await expectCleanPage(page, 'Lernkarte')
+})
+
+test('Umstellen Stufe 3: zweimal quadrieren geführt, mit Lernkarte „Wurzel und Quadrat"', async ({ page }) => {
+  // y = √(x + 4a) − √x
+  await page.goto('./#/ueben/umstellen/3-19')
+  await expect(page.locator('#question')).toHaveText('Was kommt heraus?')
+  await solveWholeTask(page)
+  await expect(page.getByTestId('result')).toBeVisible()
+  await expect(page.getByRole('navigation', { name: 'Lernkarten zu dieser Aufgabe' }).getByRole('link', { name: 'Wurzel und Quadrat' })).toBeVisible()
+  await expectCleanPage(page, 'Stufe 3')
+})
+
+test('Umstellen frei: noch nicht fertig, Wurzel gliedweise gezogen, dann richtig', async ({ page }) => {
+  // y = a√(b² − x²) nach x
+  await page.goto('./#/frei/umstellen/3-16')
+  await expect(field(page)).toBeVisible()
+  await expect(page.getByLabel('Deine Antwort')).toContainText('x =')
+  await expect(page.getByText('Alle Buchstaben stehen für positive Zahlen.')).toBeVisible()
+  await expectCleanPage(page, 'Start')
+
+  // richtig umgeformt, aber x steht noch nicht allein: zählt nicht als Fehler
+  await enter(page, 'x^2=b^2-\\frac{y^2}{a^2}')
+  await expect(feedback(page)).toContainText('Richtig umgeformt, aber noch nicht fertig.')
+  await expect(feedback(page)).toContainText('muss allein auf einer Seite stehen')
+
+  // richtig gerechnet, aber noch nicht zu einem Bruch zusammengefasst
+  await enter(page, '\\sqrt{b^2-\\frac{y^2}{a^2}}')
+  await expect(feedback(page)).toContainText('Richtig gerechnet, aber noch nicht fertig.')
+  await expect(feedback(page)).toContainText('Fasse noch zu einem einzigen Bruch zusammen.')
+
+  // typischer Fehler mit Erklärung
+  await enter(page, '\\frac{ab-y}{a}')
+  await expect(feedback(page)).toContainText('Wurzel aus jedem Summanden einzeln gezogen')
+  await page.getByRole('button', { name: 'Warum ist das falsch?' }).click()
+  await expectCleanPage(page, 'Fehler')
+
+  await enter(page, '\\frac{\\sqrt{a^2b^2-y^2}}{a}')
+  await expect(feedback(page)).toContainText('Richtig!')
+  await expect(page.getByTestId('result')).toBeVisible()
+  await expectCleanPage(page, 'Richtig')
+
+  // gezählt: gelöst, aber nicht ohne Fehler
+  await page.goto('./#/fortschritt')
+  const progress = page.getByRole('region', { name: 'Gleichungen umstellen', exact: true })
+  await expect(progress.getByRole('listitem', { name: 'Stufe 3' })).toContainText('1 gelöst')
+  await expect(progress.getByRole('region', { name: 'Deine häufigsten Fehler' })).toContainText('Wurzel aus jedem Summanden einzeln gezogen')
 })

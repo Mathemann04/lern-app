@@ -298,7 +298,7 @@ describe('Lernkarten: Gleichungen umstellen', () => {
     const shown = new Set(CARDS.flatMap((c) => c.errors))
     const own = new Set(REARRANGE_CARDS.flatMap((c) => c.errors))
     const used = new Set<string>()
-    for (const level of [1, 2] as const) {
+    for (const level of [1, 2, 3] as const) {
       for (let seed = 1; seed <= 200; seed++) {
         for (const step of planRearrangeTask({ level, seed }).steps) for (const c of step.choices) if (c.errorRuleId) used.add(c.errorRuleId)
       }

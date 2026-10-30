@@ -31,7 +31,7 @@ Details: [PLAN-M3.md](PLAN-M3.md)
 - [x] Plan M3 (3. Fassung, freigegeben)
 - [x] 1. Mathe-Engine fürs Umstellen
 - [x] 2. Thema „Gleichungen umstellen" freischalten, Stufen 1 und 2 geführt
-- [ ] 3. Stufe 3 geführt, freier Modus für die Stufen 1 bis 3
+- [x] 3. Stufe 3 geführt, freier Modus für die Stufen 1 bis 3
 - [ ] 4. Stufe 4 (verschachtelt) geführt und frei
 - [ ] 5. Stufe 5, Teil 1: Ableitungen, Integrale, Reihen, Grenzwerte, Differentialgleichungen
 - [ ] 6. Stufe 5, Teil 2: komplexe Zahlen, Determinanten, Vektoren, Additionstheoreme
@@ -268,3 +268,16 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   Text brechen jetzt in allen Themen um, statt kleiner zu werden; nur
   Formeln setzen sich kleiner. Freier Modus und gezieltes Üben folgen in
   Schritt 3 bzw. 7.
+- 30.10.2026: „Gleichungen umstellen" Stufe 3 geführt und frei für die
+  Stufen 1 bis 3 (Schritt 3 von M3). Frei: Eingabe der rechten Seite oder
+  einer ganzen Gleichung; stimmt sie für die Lösung, aber $x$ steht noch
+  nicht allein, heißt es „Richtig umgeformt, aber noch nicht fertig" (kein
+  Fehler). Fertig heißt: ein Bruch, zusammengefasst, gekürzt; ein Bruch
+  unter einer Wurzel oder im Quadrat zählt wie ein Bruch
+  ($\sqrt{\frac{a - y^2}{6}}$, $\left(\frac{a - y^2}{2y}\right)^2$).
+  Verglichen wird an Prüfstellen im erlaubten Bereich, falsche Ergebnisse
+  der typischen Fehler auch dort, wo sie nur an wenigen Stellen definiert
+  sind. Eigene Tastatur mit allen Buchstaben der Aufgabe. Drei neue
+  Lernkarten: Mit dem Hauptnenner malnehmen, Kehrwert, Wurzel und Quadrat.
+  Ist $\sqrt{x}$ die Unbekannte, sprechen Frage und Antworten beim
+  Sortieren von $\sqrt{x}$ (vorher stach die richtige Antwort heraus).
