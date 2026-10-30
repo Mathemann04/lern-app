@@ -1,6 +1,7 @@
 import { MathfieldElement } from 'mathlive'
 import { useEffect, useRef } from 'react'
-import { AREA_SHORTCUTS, DERIVATIVE_KEYBOARD, MORE_FUNCTIONS_KEYBOARD } from './keyboard.ts'
+import type { KeyboardSpec } from '../../engine/check/freeTask.ts'
+import { AREA_SHORTCUTS, keyboardLayouts } from './keyboard.ts'
 
 // Eingabefeld mit Mathe-Tastatur (MathLive). Die Schriften sind dieselben wie bei KaTeX und
 // kommen schon mit der App, deshalb lädt MathLive keine eigenen (wichtig für offline).
@@ -10,6 +11,8 @@ MathfieldElement.decimalSeparator = ','
 
 type Props = {
   label: string
+  // Tastatur des Themas
+  keyboard: KeyboardSpec
   readOnly: boolean
   onInput: (latex: string) => void
   // Enter oder „Prüfen" auf der Bildschirm-Tastatur
@@ -18,7 +21,7 @@ type Props = {
   onKeyboardHeight: (height: number) => void
 }
 
-export function MathInput({ label, readOnly, onInput, onSubmit, onKeyboardHeight }: Props) {
+export function MathInput({ label, keyboard: spec, readOnly, onInput, onSubmit, onKeyboardHeight }: Props) {
   const hostRef = useRef<HTMLDivElement>(null)
   const fieldRef = useRef<MathfieldElement | null>(null)
   // Aktuelle Rückruffunktionen, ohne das Feld neu anzulegen
@@ -28,6 +31,8 @@ export function MathInput({ label, readOnly, onInput, onSubmit, onKeyboardHeight
   })
 
   const readOnlyRef = useRef(readOnly)
+  // Die Tastatur gehört zur Aufgabe; eine neue Aufgabe legt ohnehin ein neues Feld an
+  const specRef = useRef(spec)
 
   useEffect(() => {
     const field = new MathfieldElement()
@@ -65,7 +70,7 @@ export function MathInput({ label, readOnly, onInput, onSubmit, onKeyboardHeight
     fieldRef.current = field
 
     const keyboard = window.mathVirtualKeyboard
-    keyboard.layouts = [DERIVATIVE_KEYBOARD, MORE_FUNCTIONS_KEYBOARD]
+    keyboard.layouts = keyboardLayouts(specRef.current)
     keyboard.editToolbar = 'none'
     const onGeometry = () => callbacks.current.onKeyboardHeight(keyboard.visible ? keyboard.boundingRect.height : 0)
     keyboard.addEventListener('geometrychange', onGeometry)

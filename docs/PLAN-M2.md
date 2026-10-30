@@ -314,6 +314,44 @@ Umgesetzt:
 - Dann ungekürzt eingeben.
 - Zum Schluss absichtlich die Klammer nach dem Minus vergessen.
 
+Umgesetzt:
+- „Frei" gibt es jetzt auch bei Brüchen, Stufe 1 bis 4. Das Beispiel oben
+  ist die Aufgabe 3-11641, ein Zahlenbeispiel ist 1-949
+  ($\frac{3}{4} + \frac{5}{6}$).
+- Prüfung (`src/engine/check/fractionAnswer.ts`): Erst wird der Wert exakt
+  verglichen (als Bruch aus Polynomen, keine Zahlenstellen). Ist er gleich,
+  wird geprüft, ob die Eingabe fertig ist:
+  - ein einziger Bruch (ein Minus davor und $\frac{2}{3}b$ sind erlaubt),
+    sonst „Fasse noch zu einem einzigen Bruch zusammen"
+  - kein Bruch im Bruch, sonst „Löse den Doppelbruch auf"
+  - Zähler und Nenner zusammengefasst: keine Klammer in einer Summe, keine
+    gleichartigen Summanden; ein Nenner als Produkt wie $(x - 1)(x + 1)$
+    darf stehen bleiben
+  - vollständig gekürzt: Der Nenner hat denselben Grad wie im gekürzten
+    Ergebnis, und die Zahlen oben und unten haben keinen gemeinsamen Teiler
+- Richtig, aber nicht fertig: gelber Kasten mit dem Hinweis, zählt nicht als
+  Fehler.
+- Sonst wird mit den falschen Ergebnissen aller typischen Fehler verglichen,
+  auch der nur für den freien Modus („Zähler plus Zähler, Nenner plus
+  Nenner" ohne Hauptnenner). Dazu „Bis auf das Vorzeichen" und „Bis auf
+  einen Zahlenfaktor". Ein erkannter Fehler zeigt seinen Namen und „Warum
+  ist das falsch?".
+- Mathe-Tastatur je Aufgabe: Ziffern, Bruch, Malpunkt, Minus, Klammern,
+  Hochzahl und die Buchstaben der Aufgabe (z. B. $a$ und $b$); bei
+  Bausteinen auch $e^{\square}$, $\ln$, $\sin$, $\cos$. Fremde Buchstaben
+  meldet die App („In der Aufgabe kommt nur $x$ vor").
+- Lösungsweg aufdecken wie beim Ableiten, mit den Schritten des geführten
+  Modus.
+- Der freie Modus ist jetzt für alle Themen gleich gebaut
+  (`src/engine/check/freeTask.ts`): Jedes Thema liefert Beschriftung,
+  Tastatur und Prüfung, die Oberfläche bleibt dieselbe. Das Ableiten nutzt
+  dafür `check/derivativeFree.ts`, unverändert für dich.
+- Tests: je Stufe 200 Zufallsaufgaben (das Ergebnis der Engine ist richtig,
+  jeder Zwischenschritt richtig oder „noch nicht fertig", die Aufgabe selbst
+  nie fertig, jedes falsche Ergebnis eines typischen Fehlers wird erkannt),
+  Beispiele für jeden Hinweis; Browser-Tests für die Beispiele oben und die
+  Tastatur am Handy.
+
 ### Schritt 6: Stufe 5 geführt und frei
 - Mehrere Rechenarten in einer Aufgabe.
 - Verschachtelte Doppelbrüche.

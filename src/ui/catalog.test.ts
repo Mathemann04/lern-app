@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { TOPICS, topicById } from '../engine/explain/cards.ts'
 import { ERRORS_BY_COURSE } from '../engine/errorCatalog.ts'
+import { toLatex } from '../engine/expr/print.ts'
 import { AVAILABLE_COURSES, DERIVATIVES, FRACTIONS, SUBJECTS, areaById, courseById, courseOfCards, isAreaAvailable, playableLevel } from './catalog.ts'
 import { loadCourseEngine } from './courseEngines.ts'
 
@@ -24,7 +25,10 @@ describe('Aufbau der App (Fächer, Gebiete, Themen)', () => {
       expect(ERRORS_BY_COURSE[course.id]?.length, course.id).toBeGreaterThan(0)
       const engine = await loadCourseEngine(course.id)
       const level = course.levels.find((l) => l.available)!.level
-      expect(engine.planGuidedTask({ level, seed: 1 }).steps.length, course.id).toBeGreaterThan(0)
+      const plan = engine.planGuidedTask({ level, seed: 1 })
+      expect(plan.steps.length, course.id).toBeGreaterThan(0)
+      // freier Modus: das Ergebnis des geführten Modus gilt als richtig
+      if (course.free) expect(engine.prepareFree({ level, seed: 1 }).check(toLatex(plan.result)).kind, course.id).toBe('correct')
     }
   })
 

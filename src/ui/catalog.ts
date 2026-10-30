@@ -142,7 +142,7 @@ export const SUBJECTS: readonly Subject[] = [
             icon: 'fraction',
             cards: 'brueche',
             levels: fractionLevels,
-            free: false,
+            free: true,
             focus: true,
           },
           {

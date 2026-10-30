@@ -50,8 +50,9 @@ test('Von der Startseite über Grundlagen zu den Brüchen und eine Aufgabe gefü
   await page.getByRole('link', { name: /^Brüche/ }).click()
   await expect(page).toHaveURL(/#\/thema\/brueche$/)
   await expect(page.getByRole('heading', { name: 'Brüche', level: 1 })).toBeVisible()
-  // Frei kommt erst später: geübt wird geführt, auch wenn beim Ableiten „Frei" gewählt ist
-  await expect(page.getByRole('radio', { name: /Frei/ })).toBeDisabled()
+  // „Frei" ist beim Ableiten gewählt und gilt für alle Themen; hier wird auf „Geführt" umgestellt
+  await expect(page.getByRole('radio', { name: /Frei/ })).toBeChecked()
+  await page.getByText('Auswahl-Antworten').click()
   await expect(page.getByRole('radio', { name: /^Stufe 1/ })).toBeChecked()
   await expect(page.getByRole('radio', { name: /^Stufe 4/ })).toBeEnabled()
   await expect(page.getByRole('radio', { name: /^Stufe 5/ })).toBeDisabled()
@@ -74,7 +75,7 @@ test('Von der Startseite über Grundlagen zu den Brüchen und eine Aufgabe gefü
   await expect(card.getByRole('link', { name: 'Weiter üben · geführt' })).toHaveAttribute('href', '#/ueben/brueche/1')
   await page.goto('./#/thema/ableiten')
   await expect(page.getByRole('radio', { name: /^Stufe 3/ })).toBeChecked()
-  await expect(page.getByRole('link', { name: 'Stufe 3 frei üben' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Stufe 3 geführt üben' })).toBeVisible()
 
   // Fortschritt getrennt je Thema, der alte Stand beim Ableiten ist noch da
   await page.goto('./#/fortschritt')
@@ -133,11 +134,6 @@ test('Brüche: Potenzen kürzen in Stufe 2, Lernkarten-Ordner und gezieltes Übe
   await expect(page.getByText('Gezielt üben: Hochzahlen falsch herum abgezogen')).toBeVisible()
 })
 
-test('Brüche: Ohne freien Modus geht es geführt weiter', async ({ page }) => {
-  await page.goto('./#/frei/brueche/1-5')
-  await expect(page).toHaveURL(/#\/ueben\/brueche\/1-5$/)
-  await expect(page.locator('#question')).toBeVisible()
-})
 
 test('Brüche Stufe 3: Zähler und Nenner zerlegen, dann kürzen', async ({ page }) => {
   // (x² − 9)/(2x + 6)
