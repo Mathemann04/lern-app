@@ -8,7 +8,7 @@ den Nutzer zugeschnitten: Maschinenbau, 1. Semester, THU, „Mathematik MB1".
 - Vision und Anforderungen: [docs/VISION.md](docs/VISION.md)
 - Meilensteine und aktueller Stand: [docs/ROADMAP.md](docs/ROADMAP.md)
 - Plan für den laufenden Meilenstein: [docs/PLAN-M3.md](docs/PLAN-M3.md)
-  (Gleichungen umstellen, Entwurf; abgeschlossen: [docs/PLAN-M1.md](docs/PLAN-M1.md),
+  (Gleichungen umstellen; abgeschlossen: [docs/PLAN-M1.md](docs/PLAN-M1.md),
   [docs/PLAN-M2.md](docs/PLAN-M2.md))
 
 Vor jeder Arbeit ROADMAP und den laufenden Plan lesen.
@@ -53,7 +53,7 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   Themen `#/karten`, `#/karten/brueche`, `#/karten/ableitungen/product`,
   `#/fortschritt` (je Thema ein Abschnitt),
   `#/einstellungen`, Testseite `#/galerie` (Link in den Einstellungen,
-  Themen Ableiten und Brüche, mit den Schreibweise-Beispielen). Startseite, Gebiet, Einstellungen,
+  Themen Ableiten, Brüche und Umstellen, mit den Schreibweise-Beispielen). Startseite, Gebiet, Einstellungen,
   `routes.ts` und `catalog.ts` kommen ohne Mathe-Engine und KaTeX aus
   (Ladezeit); alle anderen Seiten lädt `App.tsx` erst bei Bedarf. Ob es
   eine Lernkarte oder einen typischen Fehler aus der Adresse gibt, prüfen
@@ -144,9 +144,21 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     (Rechenweg, verbotene Zahlen, Ergebnis mit $\tan x$ bzw. ausmultipliziertem
     Nenner bei Wurzeln), `errorRules.ts` (typische Fehler, Ids `frac-…`;
     `freeOnly`: nur für die Diagnose im freien Modus)
+  - `rearrange/`: Umstell-Engine (Gleichungen nach einer Variablen
+    auflösen): `algebra.ts` (Seiten als Brüche aus Polynomen mit beliebigen
+    Buchstaben, Teile ohne die Variable wie √(b² − y²) als eigene Zeichen
+    `~0`, √x als Unbekannte `~u`; Endform: ein Bruch, gekürzt, Buchstaben-
+    Faktor ausgeklammert), `isolate.ts` (Rechenweg: von außen nach innen
+    schälen; bei mehrfacher Variable Nenner beseitigen, ausmultiplizieren,
+    sortieren, ausklammern, teilen; Wurzel allein stellen und quadrieren mit
+    Bedingung `requires`; Schrittnamen `stepLabel`), `check.ts`
+    (Prüfstellen: Buchstaben zufällig positiv, Variable aus dem Ergebnis,
+    Bedingungen der Aufgabe; Gegenprobe durch Einsetzen), `errorRules.ts`
+    (typische Fehler, Ids `eq-…`, beim Zusammenfassen die aus „Brüche";
+    nie eine Gleichung, die doch stimmt), `task.ts` (Aufgabe, Bedingungen)
   - `random/rng.ts`: Zufall mit Startwert; `tasks/`: Aufgaben-Nummern
     („3-48213"), Vorlagen je Stufe (`derivativeTerms.ts`,
-    `fractionTerms.ts`), `focus.ts` und `fractionFocus.ts` (Aufgaben für
+    `fractionTerms.ts`, `rearrangeTerms.ts`), `focus.ts` und `fractionFocus.ts` (Aufgaben für
     gezieltes Üben)
 - `src/state/`: Speichern auf dem Gerät (`storage.ts`, Version 3, robust
   gegen kaputten Inhalt, alte Versionen werden umgezogen: bis Version 2
@@ -192,7 +204,7 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   stabilen Stellen (Rundungseffekte sonst als Scheinfehler).
 - **Fehlerregeln:** Jede neue Fehlerregel bekommt ein Katalogbeispiel in
   `errorRules.test.ts` und einen Eintrag im Katalog (Ableiten:
-  docs/PLAN-M1.md, Brüche: docs/PLAN-M2.md).
+  docs/PLAN-M1.md, Brüche: docs/PLAN-M2.md, Umstellen: docs/PLAN-M3.md).
 - **Lernkarten:** Jede Regel, die in Aufgaben vorkommt, braucht eine Karte in
   `explain/cards.ts`, und jede ihrer Fehlerregeln steht auf einer Karte
   (`cards.test.ts` prüft das; bei Brüchen: jeder Fehler der spielbaren

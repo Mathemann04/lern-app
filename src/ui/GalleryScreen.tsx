@@ -5,6 +5,7 @@ import { deriveImplicit, implicitResult, implicitWrongAnswers } from '../engine/
 import { equationToLatex, toLatex } from '../engine/expr/print.ts'
 import { type GeneratedTask, generateDerivativeTask } from '../engine/tasks/derivativeTerms.ts'
 import { type GeneratedFractionTask, generateFractionTask, isFractionLevelAvailable } from '../engine/tasks/fractionTerms.ts'
+import { type GeneratedRearrangeTask, generateRearrangeTask, isRearrangeLevelAvailable } from '../engine/tasks/rearrangeTerms.ts'
 import {
   LEVELS,
   type Level,
@@ -19,24 +20,35 @@ import { areaById, courseById } from './catalog.ts'
 import { DerivationView } from './DerivationView.tsx'
 import { FractionGalleryCard } from './FractionGalleryCard.tsx'
 import { Formula } from './Formula.tsx'
+import { RearrangeGalleryCard } from './RearrangeGalleryCard.tsx'
 import { RichText } from './RichText.tsx'
 import { notationSamples } from './samples.ts'
 
 const TASKS_PER_PAGE = 8
 
 // Themen der Testseite, in der Farbe ihres Gebiets
-type Topic = 'ableiten' | 'brueche'
+type Topic = 'ableiten' | 'brueche' | 'umstellen'
 const TOPICS: Array<{ value: Topic; title: string; tone: string | undefined }> = [
   { value: 'ableiten', title: 'Ableiten', tone: courseById('ableiten')?.area.tone },
   { value: 'brueche', title: 'Brüche', tone: areaById('grundlagen')?.area.tone },
+  { value: 'umstellen', title: 'Umstellen', tone: areaById('grundlagen')?.area.tone },
 ]
 
-type Generated = { topic: 'ableiten'; task: GeneratedTask } | { topic: 'brueche'; task: GeneratedFractionTask }
+type Generated =
+  | { topic: 'ableiten'; task: GeneratedTask }
+  | { topic: 'brueche'; task: GeneratedFractionTask }
+  | { topic: 'umstellen'; task: GeneratedRearrangeTask }
 
-const isLevelAvailable = (topic: Topic, level: Level) => topic === 'ableiten' || isFractionLevelAvailable(level)
+function isLevelAvailable(topic: Topic, level: Level): boolean {
+  if (topic === 'brueche') return isFractionLevelAvailable(level)
+  if (topic === 'umstellen') return isRearrangeLevelAvailable(level)
+  return true
+}
 
 function generate(topic: Topic, ref: TaskRef): Generated {
-  return topic === 'ableiten' ? { topic, task: generateDerivativeTask(ref) } : { topic, task: generateFractionTask(ref) }
+  if (topic === 'brueche') return { topic, task: generateFractionTask(ref) }
+  if (topic === 'umstellen') return { topic, task: generateRearrangeTask(ref) }
+  return { topic, task: generateDerivativeTask(ref) }
 }
 
 // Testseite: zeigt zufällige Aufgaben der Mathe-Engine, um Schreibweise und Rechenweg zu prüfen
@@ -214,7 +226,9 @@ export function GalleryScreen() {
 }
 
 function GalleryCard({ generated, ...rest }: { generated: Generated; showSteps: boolean; showErrors: boolean; highlighted?: boolean }) {
-  return generated.topic === 'ableiten' ? <TaskCard generated={generated.task} {...rest} /> : <FractionGalleryCard generated={generated.task} {...rest} />
+  if (generated.topic === 'brueche') return <FractionGalleryCard generated={generated.task} {...rest} />
+  if (generated.topic === 'umstellen') return <RearrangeGalleryCard generated={generated.task} {...rest} />
+  return <TaskCard generated={generated.task} {...rest} />
 }
 
 type CardProps = {

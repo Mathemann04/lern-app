@@ -1,6 +1,6 @@
 # Plan für Meilenstein 3: Gleichungen umstellen
 
-Status: **Entwurf, 3. Fassung** (30.10.2026), wartet auf deine Freigabe.
+Status: **freigegeben** (30.10.2026, 3. Fassung).
 
 Ziel von M3: Du kannst Gleichungen geführt und frei nach einer Variablen
 auflösen, in 5 Stufen von $y = \frac{3(x - a)}{b} + c$ bis
@@ -227,15 +227,14 @@ Aufgabe: Löse $\int_a^x \frac{\mathrm{d}t}{t(t + b)} = y$ nach $x$ auf
 | --- | --- | --- |
 | Rüberbringen | Vorzeichen nicht gewechselt | $y = x + b \Rightarrow x = y + b$ |
 | Gegenoperation | mal statt geteilt | $y = ax \Rightarrow x = ay$ |
-| Teilen | nur einen Summanden geteilt | $y = ax + b \Rightarrow \frac{y}{a} = x + b$ |
+| Teilen | nur einen Summanden geteilt | $ax = y + b \Rightarrow x = \frac{y}{a} + b$ |
 | Bruch | Bruch auf den Kopf gestellt | $y = \frac{a}{x} \Rightarrow x = \frac{y}{a}$ |
 | Mit dem Nenner malnehmen | Klammer um den Nenner vergessen | $y = \frac{2x + 1}{x - 3} \Rightarrow yx - 3 = 2x + 1$ |
 | Klammer | nur den ersten Summanden malgenommen | $a(x + b) \Rightarrow ax + b$ |
-| Ausklammern | Variable steht noch auf beiden Seiten | $ax = b - cx \Rightarrow x = \frac{b - cx}{a}$ |
 | Ausklammern | die 1 vergessen | $xy - x = 3y + 1 \Rightarrow x \cdot y = 3y + 1$ |
 | Kehrwert | Kehrwert gliedweise genommen | $\frac{1}{x} + \frac{1}{a} = \frac{1}{b} \Rightarrow x + a = b$ |
 | Wurzel | Wurzel gliedweise gezogen | $x^2 = b^2 - \frac{y^2}{a^2} \Rightarrow x = b - \frac{y}{a}$ |
-| Quadrieren | nur einen Faktor quadriert | $y = a\sqrt{b^2 - x^2} \Rightarrow y^2 = a(b^2 - x^2)$ |
+| Quadrieren | nur einen Teil quadriert | $\frac{y}{a} = \sqrt{b^2 - x^2} \Rightarrow \frac{y^2}{a} = b^2 - x^2$ |
 | Quadrieren | Mittelglied vergessen | $\left(y + \sqrt{x}\right)^2 = y^2 + x$ |
 | Verschachtelte Wurzel | innere Wurzel gleich mit aufgelöst | $y = \sqrt{a + \sqrt{b + \sqrt{x}}} \Rightarrow y^2 = a + b + \sqrt{x}$ |
 

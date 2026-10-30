@@ -130,3 +130,34 @@ test('Galerie zeigt Bruchaufgaben der Stufen 1 bis 5 mit Rechenweg und typischen
   await expect(card.getByText('Regel des Bausteins anwenden', { exact: true })).toBeVisible()
   expect(errors).toEqual([])
 })
+
+test('Galerie zeigt Umstell-Aufgaben der Stufen 1 bis 3 mit Rechenweg und typischen Fehlern', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./#/galerie')
+  await page.getByRole('button', { name: 'Umstellen' }).click()
+  await expect(page.getByRole('button', { name: 'Umstellen' })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByRole('button', { name: 'Stufe 4' })).toBeDisabled()
+  await page.getByLabel('Rechenweg zeigen').check()
+  await page.getByLabel('Typische Fehler zeigen').check()
+
+  for (const level of [1, 2, 3]) {
+    await page.getByRole('button', { name: `Stufe ${level}` }).click()
+    await expect(randomTasks(page)).toHaveCount(8)
+    await expect(randomTasks(page).first()).toContainText(`Aufgabe ${level}-`)
+    await expect(page.getByTestId('rearrange-result')).toHaveCount(8)
+    await expect(page.getByRole('heading', { name: 'Rechenweg' }).first()).toBeVisible()
+    await expect(page.locator('code.text-red-700')).toHaveCount(0)
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
+    expect(overflow, `Stufe ${level} ragt seitlich heraus`).toBeLessThanOrEqual(0)
+  }
+
+  // Aufgabe über ihre Nummer, z. B. 3-1: \frac{3x + a}{x - a} = b nach x
+  await page.getByLabel('Aufgabe über ihre Nummer aufrufen').fill('3-1')
+  await page.getByRole('button', { name: 'Anzeigen' }).click()
+  const card = page.getByRole('region', { name: 'Aufgerufene Aufgabe' }).getByRole('article')
+  await expect(card).toContainText('Aufgabe 3-1')
+  await expect(card).toContainText('Löse nach')
+  await expect(card.getByText('ausklammern')).toBeVisible()
+  await expect(card.getByText('Beim Ausklammern die')).toBeVisible()
+  expect(errors).toEqual([])
+})

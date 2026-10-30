@@ -6,7 +6,7 @@ Stand: 30.10.2026
 | --- | --- | --- |
 | M1 | Grundgerüst + Ableitungsregeln (beide Modi, 5 Stufen, Erklärungen, Lernkarten, Fortschritt) | fertig |
 | M2 | Brüche (Bruchrechnung, Bruchterme kürzen und zusammenfassen, Doppelbrüche); App für mehrere Themen | fertig |
-| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | Plan im Entwurf |
+| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | in Arbeit |
 | M4 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
 | M5 | weitere Themen aus Mathematik MB1 | offen |
 | M6 | Physik: Formeln mit Einheiten (Formeln umstellen mit Zeichen der Physik; Aufgaben lösen: Formel wählen, umstellen, Werte mit Einheiten einsetzen) | offen |
@@ -17,8 +17,8 @@ Stand: 30.10.2026
 
 Details: [PLAN-M3.md](PLAN-M3.md)
 
-- [ ] Plan M3 (3. Fassung liegt vor, wartet auf Freigabe)
-- [ ] 1. Mathe-Engine fürs Umstellen
+- [x] Plan M3 (3. Fassung, freigegeben)
+- [x] 1. Mathe-Engine fürs Umstellen
 - [ ] 2. Thema „Gleichungen umstellen" freischalten, Stufen 1 und 2 geführt
 - [ ] 3. Stufe 3 geführt, freier Modus für die Stufen 1 bis 3
 - [ ] 4. Stufe 4 (verschachtelt) geführt und frei
@@ -221,3 +221,14 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   Stufe 5 quer durch die Mathematik (Ableitung, Integral, Summe und Reihe,
   Grenzwert, komplexe Zahl, Determinante, Vektor, Differentialgleichung:
   erst ausrechnen, dann umstellen). 7 statt 6 Schritte.
+- 30.10.2026: Plan M3 freigegeben. Schritt 1: Umstell-Engine für die
+  Stufen 1 bis 3 (schälen von außen nach innen; bei mehrfacher Variable
+  Nenner beseitigen, ausmultiplizieren, sortieren, ausklammern, teilen;
+  Wurzeln allein stellen und quadrieren, √x als Unbekannte), Endform über
+  die Bruch-Engine mit beliebigen Buchstaben, elf typische Fehler plus die
+  Fehler aus „Brüche" beim Zusammenfassen, Galerie „Umstellen". Gegenprobe
+  durch Einsetzen; beim Quadrieren merkt sich die Engine, wann es eine
+  Lösung gibt (z. B. $y^2 < a$ bei $y = \sqrt{x + a} - \sqrt{x}$).
+  „Geteilt, obwohl die Variable noch auf beiden Seiten steht" ist keine
+  Fehlerregel: Die Gleichung stimmt ja, sie ist nur nicht fertig (im freien
+  Modus „noch nicht aufgelöst").
