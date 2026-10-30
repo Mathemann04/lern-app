@@ -13,6 +13,17 @@ Stand: 30.10.2026
 | M7 | Technische Mechanik: Freischnitt, Gleichgewicht, Lagerkräfte, statische Bestimmtheit | offen |
 | Später | Konto und Sync, Teilen mit Kommilitonen, App-Store-Version, optional KI-Hilfe | offen |
 
+## Vorgemerkt
+
+- **Stufe 5 überall auf Profi-Niveau** (Wunsch des Nutzers): In jedem Thema
+  heißt Stufe 5 „kaum noch schwerer"; sie deckt fast das ganze Spektrum des
+  Themas ab, so wie Stufe 5 von „Gleichungen umstellen". Für **Ableiten**
+  und **Brüche** wird das nachgeschärft, direkt nach M3 als eigener
+  Meilenstein (dann mit eigenem Plan). Grund: Die Werkzeuge aus Stufe 5 von
+  M3 (Integrale, Reihen, Grenzwerte, Determinanten, komplexe Zahlen) lassen
+  sich dort wiederverwenden. Neue Themen (M4 und später) werden gleich so
+  geplant.
+
 ## M3: Schritte
 
 Details: [PLAN-M3.md](PLAN-M3.md)
@@ -239,3 +250,9 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   Determinante, komplexe Zahlen, Vektor) schon jetzt zum Prüfen. Das Thema
   heißt jetzt „Gleichungen umstellen". Neues App-Symbol: vier Entwürfe
   liegen dem Nutzer zur Auswahl vor.
+- 30.10.2026: Neues App-Symbol „Wurzel-Weg" (Wahl des Nutzers aus vier
+  Entwürfen): Wurzelzeichen, dessen Strich zu einem gelben Ziel-Punkt führt,
+  auf einem Verlauf in Blaugrün (`scripts/generate-icons.ts`).
+- 30.10.2026: Stufe 5 soll in jedem Thema „kaum noch schwerer" sein (Wunsch
+  des Nutzers). Ableiten und Brüche werden direkt nach M3 nachgeschärft
+  (siehe „Vorgemerkt"); neue Themen werden gleich so geplant.

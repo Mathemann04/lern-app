@@ -193,6 +193,10 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   Browser in Handygröße (390×844) und Laptopgröße prüfen, hell und dunkel; committen und
   pushen; ROADMAP abhaken; dem Nutzer in wenigen Sätzen sagen, was sich jetzt
   ausprobieren lässt.
+- **Schwierigkeit:** Stufe 5 heißt in jedem Thema „kaum noch schwerer":
+  verschachtelt und quer durch das ganze Thema (Vorbild: Stufe 5 von
+  „Gleichungen umstellen"). Neue Themen gleich so planen; Ableiten und
+  Brüche werden nach M3 nachgeschärft (docs/ROADMAP.md, „Vorgemerkt").
 - **Mathematische Korrektheit zuerst.** Alle Lösungen, Zwischenschritte und
   Beispiele kommen aus der Engine, nie von Hand. Jede neue Regel,
   Fehlerregel oder Vorlage bekommt Tests: Ergebnis gegen numerische

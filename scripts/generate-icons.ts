@@ -3,20 +3,31 @@
 import { writeFileSync } from 'node:fs'
 import { chromium } from '@playwright/test'
 
-const ACCENT = '#0f766e'
+// Blaugrün der App als Verlauf (hell oben links, dunkel unten rechts)
+const LIGHT = '#2dd4bf'
+const DARK = '#0f766e'
+const GOAL = '#fbbf24'
 
-// Treppe, die in einem Punkt endet: Schritt für Schritt zum Ziel.
-// Mittig und innerhalb der sicheren Zone (Kreis mit 80 % Durchmesser), damit
-// auch zugeschnittene Android-Symbole vollständig sind.
+// „Wurzel-Weg": ein Wurzelzeichen, dessen Strich zu einem gelben Ziel-Punkt führt: Schritt für
+// Schritt zum Ergebnis. Auf 84 % verkleinert und mittig, also innerhalb der sicheren Zone (Kreis mit
+// 80 % Durchmesser), damit auch zugeschnittene Android-Symbole vollständig sind.
 const mark = `
-  <path d="M110 346 H198 V266 H278 V186 H342" fill="none" stroke="#fff"
-        stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="382" cy="186" r="40" fill="#fff"/>`
+  <g transform="translate(256 256) scale(0.84) translate(-256 -256)">
+    <path d="M92 300 L150 270 L214 392 L292 128 H396" fill="none" stroke="#fff"
+          stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="430" cy="128" r="34" fill="${GOAL}"/>
+  </g>`
 
 function svg(rounded: boolean): string {
   const radius = rounded ? 112 : 0
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="${radius}" fill="${ACCENT}"/>${mark}
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="${LIGHT}"/>
+      <stop offset="1" stop-color="${DARK}"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="${radius}" fill="url(#bg)"/>${mark}
 </svg>
 `
 }
