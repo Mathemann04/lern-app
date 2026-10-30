@@ -6,12 +6,25 @@ Stand: 30.10.2026
 | --- | --- | --- |
 | M1 | Grundgerüst + Ableitungsregeln (beide Modi, 5 Stufen, Erklärungen, Lernkarten, Fortschritt) | fertig |
 | M2 | Brüche (Bruchrechnung, Bruchterme kürzen und zusammenfassen, Doppelbrüche); App für mehrere Themen | fertig |
-| M3 | Formeln umstellen (nach einer Variablen auflösen, auch mit Brüchen) | offen |
+| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | in Arbeit |
 | M4 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
 | M5 | weitere Themen aus Mathematik MB1 | offen |
-| M6 | Physik: Formeln umstellen, mit Einheiten | offen |
+| M6 | Physik: Formeln mit Einheiten (Formeln umstellen mit Zeichen der Physik; Aufgaben lösen: Formel wählen, umstellen, Werte mit Einheiten einsetzen) | offen |
 | M7 | Technische Mechanik: Freischnitt, Gleichgewicht, Lagerkräfte, statische Bestimmtheit | offen |
 | Später | Konto und Sync, Teilen mit Kommilitonen, App-Store-Version, optional KI-Hilfe | offen |
+
+## M3: Schritte
+
+Details: [PLAN-M3.md](PLAN-M3.md)
+
+- [x] Plan M3 (3. Fassung, freigegeben)
+- [x] 1. Mathe-Engine fürs Umstellen
+- [ ] 2. Thema „Gleichungen umstellen" freischalten, Stufen 1 und 2 geführt
+- [ ] 3. Stufe 3 geführt, freier Modus für die Stufen 1 bis 3
+- [ ] 4. Stufe 4 (verschachtelt) geführt und frei
+- [ ] 5. Stufe 5, Teil 1: Ableitungen, Integrale, Reihen, Grenzwerte, Differentialgleichungen
+- [ ] 6. Stufe 5, Teil 2: komplexe Zahlen, Determinanten, Vektoren, Additionstheoreme
+- [ ] 7. Gezieltes Üben, Feinschliff, Abschluss von M3
 
 ## M2: Schritte
 
@@ -194,3 +207,28 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   Seiten der Brüche, lange Formeln setzen sich kleiner statt umzubrechen,
   Doppelbrüche in voller Größe, Tippflächen mindestens 44 px, Offline-Test
   für Brüche). Als Nächstes: Plan für M3 (Formeln umstellen).
+- 30.10.2026: Plan M3 überarbeitet (Wunsch des Nutzers): deutlich
+  schwerere Aufgaben, vor allem in Stufe 5 (e-Funktion, $\ln$,
+  Substitution, $pq$-Formel). Mathe und Physik getrennt: M3 heißt
+  „Gleichungen umstellen" (reine Mathematik mit $x$, $y$, $a$, $b$, $c$,
+  $k$); Formeln mit Zeichen der Physik und „Aufgaben lösen" (Formel wählen,
+  umstellen, Werte mit Einheiten einsetzen) kommen in M6 und nutzen
+  dieselbe Engine.
+- 30.10.2026: Plan M3, 3. Fassung (Wunsch des Nutzers: Stufen 4 und 5
+  noch schwerer, „fast alle Themengebiete"): Stufe 3 mit Wurzeln, Stufe 4
+  verschachtelt (e und $\ln$ ineinander, Wurzeln in Wurzeln, Potenz- und
+  Logarithmusgesetze, Winkel- und Hyperbelfunktionen, Scheinlösungen),
+  Stufe 5 quer durch die Mathematik (Ableitung, Integral, Summe und Reihe,
+  Grenzwert, komplexe Zahl, Determinante, Vektor, Differentialgleichung:
+  erst ausrechnen, dann umstellen). 7 statt 6 Schritte.
+- 30.10.2026: Plan M3 freigegeben. Schritt 1: Umstell-Engine für die
+  Stufen 1 bis 3 (schälen von außen nach innen; bei mehrfacher Variable
+  Nenner beseitigen, ausmultiplizieren, sortieren, ausklammern, teilen;
+  Wurzeln allein stellen und quadrieren, √x als Unbekannte), Endform über
+  die Bruch-Engine mit beliebigen Buchstaben, elf typische Fehler plus die
+  Fehler aus „Brüche" beim Zusammenfassen, Galerie „Umstellen". Gegenprobe
+  durch Einsetzen; beim Quadrieren merkt sich die Engine, wann es eine
+  Lösung gibt (z. B. $y^2 < a$ bei $y = \sqrt{x + a} - \sqrt{x}$).
+  „Geteilt, obwohl die Variable noch auf beiden Seiten steht" ist keine
+  Fehlerregel: Die Gleichung stimmt ja, sie ist nur nicht fertig (im freien
+  Modus „noch nicht aufgelöst").
