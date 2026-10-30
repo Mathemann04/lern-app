@@ -53,7 +53,8 @@ test('Von der Startseite über Grundlagen zu den Brüchen und eine Aufgabe gefü
   // Frei kommt erst später: geübt wird geführt, auch wenn beim Ableiten „Frei" gewählt ist
   await expect(page.getByRole('radio', { name: /Frei/ })).toBeDisabled()
   await expect(page.getByRole('radio', { name: /^Stufe 1/ })).toBeChecked()
-  await expect(page.getByRole('radio', { name: /^Stufe 3/ })).toBeDisabled()
+  await expect(page.getByRole('radio', { name: /^Stufe 4/ })).toBeEnabled()
+  await expect(page.getByRole('radio', { name: /^Stufe 5/ })).toBeDisabled()
   await expectCleanPage(page, 'Thema Brüche')
 
   await page.getByRole('link', { name: 'Stufe 1 geführt üben' }).click()
@@ -136,4 +137,32 @@ test('Brüche: Ohne freien Modus geht es geführt weiter', async ({ page }) => {
   await page.goto('./#/frei/brueche/1-5')
   await expect(page).toHaveURL(/#\/ueben\/brueche\/1-5$/)
   await expect(page.locator('#question')).toBeVisible()
+})
+
+test('Brüche Stufe 3: Zähler und Nenner zerlegen, dann kürzen', async ({ page }) => {
+  // (x² − 9)/(2x + 6)
+  await page.goto('./#/ueben/brueche/3-189')
+  await expect(page.locator('#question')).toHaveText('Zerlege den Zähler in Faktoren.')
+  await page.getByRole('button', { name: 'Tipp anzeigen' }).click()
+  await expect(page.getByText('Zwei Quadrate mit Minus dazwischen')).toBeVisible()
+  await solveWholeTask(page)
+  await expect(page.getByTestId('result')).toContainText('Gilt für')
+  const cards = page.getByRole('navigation', { name: 'Lernkarten zu dieser Aufgabe' })
+  await expect(cards.getByRole('link', { name: 'Binomische Formeln' })).toBeVisible()
+  await expect(cards.getByRole('link', { name: 'Ausklammern' })).toBeVisible()
+  await expectCleanPage(page, 'Stufe 3')
+})
+
+test('Brüche Stufe 4: Doppelbruch Schritt für Schritt', async ({ page }) => {
+  // (1 + 1/x)/(1 − 1/x²)
+  await page.goto('./#/ueben/brueche/4-37')
+  await expect(page.locator('#question')).toHaveText('Fasse den Zähler zu einem Bruch zusammen.')
+  await solveWholeTask(page)
+  await expect(page.getByText('Gilt für')).toBeVisible()
+  await expect(page.getByRole('navigation', { name: 'Lernkarten zu dieser Aufgabe' }).getByRole('link', { name: 'Doppelbrüche' })).toBeVisible()
+  await expectCleanPage(page, 'Stufe 4')
+
+  // Der Ordner zeigt jetzt die Karten bis Stufe 4
+  await page.goto('./#/karten/brueche')
+  for (const level of ['Stufe 1', 'Stufe 2', 'Stufe 3', 'Stufe 4']) await expect(page.getByRole('heading', { name: level })).toBeVisible()
 })

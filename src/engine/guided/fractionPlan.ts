@@ -10,17 +10,18 @@ import {
   explainLcd,
   explainMultiply,
   explainReciprocal,
+  type FactorMethod,
   fractionTaskHint,
   listing,
 } from '../explain/fractionTexts.ts'
 import { m } from '../explain/format.ts'
 import type { Explanation } from '../explain/texts.ts'
 import { toLatex } from '../expr/print.ts'
-import { type Expr, num } from '../expr/types.ts'
+import { type Expr, mul, num } from '../expr/types.ts'
 import { type FracWrong, fractionWrongAnswers } from '../fraction/errorRules.ts'
-import { factoredExpr, factoredPoly, isOneFactored } from '../fraction/factor.ts'
-import { polyExpr } from '../fraction/frac.ts'
-import { atomsOf, constValue, polyEquals, polyProduct } from '../fraction/poly.ts'
+import { factoredExpr, factoredPoly, factorize, isOneFactored, productFormExpr, reduceFrac } from '../fraction/factor.ts'
+import { fracAtoms, polyExpr } from '../fraction/frac.ts'
+import { type Poly, atomsOf, constValue, polyAdd, polyEquals, polyNeg, polyProduct, totalDegree } from '../fraction/poly.ts'
 import {
   type FracSolution,
   type FracStep,
@@ -37,7 +38,7 @@ import {
   solveFraction,
   workSum,
 } from '../fraction/solve.ts'
-import { type FractionTask, instructionFor, isWhole, partExpr, shownExpr, shownPoly, taskExpr, taskLatex } from '../fraction/task.ts'
+import { type FractionTask, instructionFor, isWhole, partExpr, partsOf, shownExpr, shownPoly, taskExpr, taskLatex } from '../fraction/task.ts'
 import { type Rng, createRng } from '../random/rng.ts'
 import { isOne, ratAbs } from '../rational.ts'
 import { generateFractionTask } from '../tasks/fractionTerms.ts'
@@ -57,8 +58,10 @@ import type { Choice, GuidedStep, GuidedTask } from './types.ts'
 // Ein Schritt, zu dem kein typischer Fehler passt, wird nicht einzeln abgefragt: Der Hauptnenner
 // steht dann in der Frage zum Erweitern, andere Schritte gehen im nächsten (beim letzten: im
 // vorigen) auf. Im letzten Schritt ist die Antwort immer das fertige Ergebnis.
+// Ab Stufe 4 ist der Weg gröber: Erweitern und Zusammenfassen sind ein Schritt.
 
 const MAX_WRONG_CHOICES = 3
+const COARSE_FROM_LEVEL = 4
 
 export function planFractionTask(ref: TaskRef, focus?: string): GuidedTask {
   return planFraction(generateFractionTask(ref).task, ref, focus)
@@ -81,8 +84,9 @@ type Draft = {
 export function planFraction(t: FractionTask, ref: TaskRef, focus?: string): GuidedTask {
   const solution = solveFraction(t)
   const wrongs = fractionWrongAnswers(t, solution).filter((w) => !w.freeOnly)
-  const facts = factsOf(t, solution)
-  const drafts = arrange(rawDrafts(t, solution, wrongs, facts), solution)
+  const facts = factsOf(t, solution, wrongs)
+  const raw = rawDrafts(t, solution, wrongs, facts)
+  const drafts = arrange(ref.level >= COARSE_FROM_LEVEL ? coarsen(raw, t) : raw, solution, t)
   const steps = drafts.map((d, i) => buildStep(d, i, facts, createRng(`brueche-geführt:${ref.level}:${ref.seed}:${i}`), focus))
   const excluded = solution.excluded ?? []
   return {
@@ -106,15 +110,57 @@ type Facts = {
   readonly task: FractionTask
   readonly work: SumWork | null
   readonly lcd: Expr | null
-  // beim Kürzen: Potenzen von Buchstaben fallen weg
+  // Doppelbruch: Zähler und Nenner je als ein Bruch
+  readonly sides: { readonly top: Expr; readonly bottom: Expr } | null
+  // beim Kürzen: Potenzen von Buchstaben fallen weg, eine Klammer wie (x + 3) fällt weg, ein Minus
+  // aus einer vertauschten Differenz bleibt stehen
   readonly cancelPowers: boolean
+  readonly cancelSums: boolean
+  readonly minusKept: boolean
+  // Nenner aus Summen (Hauptnenner mit Termen) bzw. Bausteine wie e^x
+  readonly termDenominators: boolean
+  readonly blocks: boolean
+  // beim Kürzen: wie sich Zähler und Nenner der Aufgabe zerlegen lassen
+  readonly numMethods: readonly FactorMethod[]
+  readonly denMethods: readonly FactorMethod[]
 }
 
-function factsOf(t: FractionTask, solution: FracSolution): Facts {
+// Bausteine der Bruch-Engine (frac.ts): e^x, ln x, sin x, cos x
+const BLOCK_ATOMS = ['E', 'L', 'S', 'C']
+
+function factsOf(t: FractionTask, solution: FracSolution, wrongs: readonly FracWrong[]): Facts {
   const work = t.kind === 'sum' ? workSum(t.terms, t.hints) : null
   const common = cancelledFactor(solution.beforeCancel, solution.reduced, t.hints)
   const cancelPowers = common !== null && common.factors.some((f) => f.poly.length === 1 && atomsOf(f.poly).length > 0)
-  return { task: t, work, lcd: work ? factoredExpr(work.lcd) : null, cancelPowers }
+  const cancelSums = common !== null && common.factors.some((f) => f.poly.length >= 2)
+  const sides = t.kind === 'complex' ? { top: sideOf(t.top, t.hints).expr, bottom: sideOf(t.bottom, t.hints).expr } : null
+  return {
+    task: t,
+    work,
+    lcd: work ? factoredExpr(work.lcd) : null,
+    sides,
+    cancelPowers,
+    cancelSums,
+    minusKept: wrongs.some((w) => w.rule.id === 'frac-cancel-sign'),
+    termDenominators: partsOf(t).some((p) => factorize(shownPoly(p.den), t.hints).factors.some((f) => f.poly.length >= 2)),
+    blocks: fracAtoms(solution.value).some((atom) => BLOCK_ATOMS.includes(atom)),
+    numMethods: t.kind === 'reduce' ? factorMethods(shownPoly(t.part.num), t.hints) : [],
+    denMethods: t.kind === 'reduce' ? factorMethods(shownPoly(t.part.den), t.hints) : [],
+  }
+}
+
+// Wie sich ein Term zerlegen lässt: ausklammern (Zahl, Buchstabe oder Minus vor der Klammer),
+// binomische Formel ((a + b)(a − b), (a ± b)²) oder zwei verschiedene Klammern wie bei x² + px + q
+export function factorMethods(p: Poly, hints: readonly Poly[]): FactorMethod[] {
+  const f = factorize(p, hints)
+  const linear = f.factors.filter((g) => g.poly.length === 2 && totalDegree(g.poly) === 1)
+  const mirror = (g: Poly) => polyAdd([g[0]], polyNeg([g[1]]))
+  const methods: FactorMethod[] = []
+  if (!isOne(f.coef) || f.factors.some((g) => g.poly.length === 1)) methods.push('out')
+  const binomial = linear.some((g) => g.exp >= 2 || linear.some((h) => h !== g && polyEquals(h.poly, mirror(g.poly))))
+  if (binomial) methods.push('binomial')
+  else if (linear.length >= 2) methods.push('quadratic')
+  return methods
 }
 
 // --- Entwürfe aus dem Rechenweg ---
@@ -128,10 +174,18 @@ function rawDrafts(t: FractionTask, solution: FracSolution, wrongs: readonly Fra
     if (w.step === 'expand' && w.value && facts.work) return fractionExpr(w.value.num, facts.work.lcd)
     return undefined
   }
+  const correctOf = (step: FracStep): Expr => {
+    if (step.kind === 'lcd') return step.detail!
+    // Doppelbruch: gefragt ist nur der Zähler bzw. Nenner als ein Bruch („Bisher" zeigt das Ganze)
+    if (step.kind === 'inner-num') return facts.sides!.top
+    if (step.kind === 'inner-den') return facts.sides!.bottom
+    return step.expr!
+  }
   const draft = (step: FracStep): Draft => ({
     kinds: [step.kind],
-    correct: step.kind === 'lcd' ? step.detail! : step.expr!,
-    wrongs: wrongIn([step.kind]).map((w) => ({ wrong: w, shown: w.stepExpr, final: finalOf(w) })),
+    correct: correctOf(step),
+    // Beim Kürzen ist die Antwort ein Ergebnis: Produkte aus Klammern bleiben stehen
+    wrongs: wrongIn([step.kind]).map((w) => ({ wrong: w, shown: step.kind === 'cancel' ? resultForm(w, t) : w.stepExpr, final: finalOf(w) })),
     lines: [step.kind === 'lcd' ? `\\text{Hauptnenner: } ${toLatex(step.detail!)}` : `= ${toLatex(step.expr!)}`],
     explanations: [explainStep(step, solution, facts)],
   })
@@ -145,18 +199,43 @@ function rawDrafts(t: FractionTask, solution: FracSolution, wrongs: readonly Fra
   const product: Draft = {
     kinds: cancel ? ['multiply', 'cancel'] : ['multiply'],
     correct: solution.result,
-    wrongs: [
-      ...wrongIn(['multiply']).flatMap((w) => (w.result ? [{ wrong: w, shown: w.result }] : [])),
-      ...wrongIn(['cancel']).map((w) => ({ wrong: w, shown: w.stepExpr })),
-    ],
+    wrongs: wrongIn(['multiply', 'cancel']).map((w) => ({ wrong: w, shown: resultForm(w, t) })),
     lines: [`= ${toLatex(multiply.expr!)}`, `= ${toLatex(solution.result)}`],
     explanations: [explainStep(multiply, solution, facts), ...(cancel ? [explainStep(cancel, solution, facts)] : [])],
   }
   return [...reciprocal, product]
 }
 
+// Ab Stufe 4: Erweitern und Zusammenfassen als ein Schritt; die Fehler beim Erweitern erscheinen
+// dann zusammengefasst, so wie man nach ihnen weiterrechnet
+function coarsen(raw: readonly Draft[], task: FractionTask): Draft[] {
+  const i = raw.findIndex((d) => d.kinds.length === 1 && d.kinds[0] === 'expand')
+  const combine = raw[i + 1]
+  if (i < 0 || !combine || combine.kinds[0] !== 'combine') return [...raw]
+  const expand = raw[i]
+  const merged: Draft = {
+    kinds: ['expand', 'combine'],
+    correct: combine.correct,
+    wrongs: [
+      ...expand.wrongs.flatMap((w) => {
+        const shown = w.final ?? (w.wrong.value ? resultForm(w.wrong, task) : null)
+        return shown ? [{ wrong: w.wrong, shown, final: w.final }] : []
+      }),
+      ...combine.wrongs,
+    ],
+    lines: [...expand.lines, ...combine.lines],
+    explanations: [...expand.explanations, ...combine.explanations],
+  }
+  return [...raw.slice(0, i), merged, ...raw.slice(i + 2)]
+}
+
+// Falsches Ergebnis zum Anzeigen: gekürzt, ein Produkt aus Klammern bleibt stehen
+function resultForm(w: FracWrong, t: FractionTask): Expr {
+  return w.value ? productFormExpr(reduceFrac(w.value, t.hints), t.hints) : w.stepExpr
+}
+
 // Legt Schritte ohne falsche Antworten zusammen; im letzten Schritt ist die Antwort das Ergebnis
-function arrange(raw: readonly Draft[], solution: FracSolution): Draft[] {
+function arrange(raw: readonly Draft[], solution: FracSolution, task: FractionTask): Draft[] {
   // Hauptnenner ohne typischen Fehler (z. B. bei ganzer Zahl plus Bruch): steht in der nächsten Frage
   const drafts = raw.filter((d) => !(d.kinds[0] === 'lcd' && d.wrongs.length === 0))
   const merged: Draft[] = []
@@ -176,21 +255,22 @@ function arrange(raw: readonly Draft[], solution: FracSolution): Draft[] {
     merged[merged.length - 1] = finalDraft(
       { ...previous, kinds: [...previous.kinds, ...last.kinds], lines: [...previous.lines, ...last.lines], explanations: [...previous.explanations, ...last.explanations] },
       solution,
+      task,
     )
     return merged
   }
-  return [...merged, finalDraft(last, solution)]
+  return [...merged, finalDraft(last, solution, task)]
 }
 
 // Letzter Schritt: richtige und falsche Antworten als fertige, gekürzte Ergebnisse
-function finalDraft(d: Draft, solution: FracSolution): Draft {
+function finalDraft(d: Draft, solution: FracSolution, task: FractionTask): Draft {
   const result = `= ${toLatex(solution.result)}`
   const lines = d.lines.at(-1) === result ? d.lines : [...d.lines, result]
   return {
     ...d,
     correct: solution.result,
     wrongs: d.wrongs.flatMap((w) => {
-      const shown = w.final ?? w.wrong.result
+      const shown = w.final ?? (w.wrong.value ? resultForm(w.wrong, task) : null)
       return shown ? [{ wrong: w.wrong, shown }] : []
     }),
     lines: lines.filter((line, i) => i === 0 || line !== lines[i - 1]),
@@ -264,33 +344,51 @@ function hintOf(kind: StepKind, facts: Facts): string {
     case 'cancel':
       return facts.cancelPowers ? FRACTION_HINTS.cancelPowers : FRACTION_HINTS.cancel
     case 'factor-num':
-    case 'factor-den':
-      return FRACTION_HINTS.factor
+    case 'factor-den': {
+      const methods = kind === 'factor-num' ? facts.numMethods : facts.denMethods
+      const hints = { out: FRACTION_HINTS.factorOut, binomial: FRACTION_HINTS.factorBinomial, quadratic: FRACTION_HINTS.factorQuadratic }
+      return methods.length > 0 ? methods.map((k) => hints[k]).join(' ') : FRACTION_HINTS.factor
+    }
     case 'inner-num':
     case 'inner-den':
       return FRACTION_HINTS.inner
   }
 }
 
+const METHOD_CARDS: Record<FactorMethod, string> = {
+  out: FRACTION_CARD_IDS.factorOut,
+  binomial: FRACTION_CARD_IDS.binomial,
+  quadratic: FRACTION_CARD_IDS.quadratic,
+}
+
+// Karten zu einem Schritt; bei Bausteinen wie e^x zusätzlich deren Karte
 function cardsOf(kind: StepKind, facts: Facts): string[] {
-  switch (kind) {
-    case 'lcd':
-    case 'combine':
-    case 'inner-num':
-    case 'inner-den':
-      return [FRACTION_CARD_IDS.add]
-    case 'expand':
-      return [FRACTION_CARD_IDS.expand]
-    case 'cancel':
-      return facts.cancelPowers ? [FRACTION_CARD_IDS.reduce, FRACTION_CARD_IDS.powers] : [FRACTION_CARD_IDS.reduce]
-    case 'multiply':
-      return [FRACTION_CARD_IDS.multiply]
-    case 'reciprocal':
-      return [FRACTION_CARD_IDS.divide]
-    case 'factor-num':
-    case 'factor-den':
-      return [FRACTION_CARD_IDS.reduce]
-  }
+  const ids = FRACTION_CARD_IDS
+  const terms = facts.termDenominators ? [ids.lcdTerms] : []
+  const own = ((): string[] => {
+    switch (kind) {
+      case 'lcd':
+      case 'combine':
+        return [ids.add, ...terms]
+      case 'expand':
+        return [ids.expand, ...terms]
+      case 'inner-num':
+      case 'inner-den':
+        return [ids.complex, ids.add]
+      case 'cancel':
+        return [ids.reduce, ...(facts.cancelPowers ? [ids.powers] : []), ...(facts.cancelSums ? [ids.sumCancel] : [])]
+      case 'multiply':
+        return [ids.multiply]
+      case 'reciprocal':
+        return facts.task.kind === 'complex' ? [ids.complex] : [ids.divide]
+      case 'factor-num':
+      case 'factor-den': {
+        const methods = kind === 'factor-num' ? facts.numMethods : facts.denMethods
+        return methods.length > 0 ? methods.map((k) => METHOD_CARDS[k]) : [ids.sumCancel]
+      }
+    }
+  })()
+  return facts.blocks ? [...own, ids.blocks] : own
 }
 
 function explainStep(step: FracStep, solution: FracSolution, facts: Facts): Explanation {
@@ -303,11 +401,19 @@ function explainStep(step: FracStep, solution: FracSolution, facts: Facts): Expl
       const lcdPoly = factoredPoly(w!.lcd)
       const numbersOnly = fractions.every((f) => constValue(f.poly) !== null)
       const showProduct = fractions.length >= 2 && !polyEquals(product, lcdPoly)
+      // Nenner wie x² − 9, die sich zerlegen lassen
+      const factored = w!.terms.flatMap((term, i) => {
+        const d = w!.dens[i]
+        const zerlegt = term.part.den.form === 'expanded' && term.part.den.poly.length >= 2 && (d.factors.length >= 2 || !isOne(d.coef) || d.factors.some((f) => f.exp > 1))
+        return zerlegt ? [[shownExpr(term.part.den), factoredExpr(d)] as const] : []
+      })
       return explainLcd(
         fractions.map((f) => f.den),
         facts.lcd!,
-        showProduct ? polyExpr(product) : null,
+        // Produkt so, wie man es aus den Nennern hinschreibt: (x² − 1)(x + 1), bei Zahlen und Potenzen ausgerechnet
+        showProduct ? (fractions.some((f) => f.poly.length >= 2) ? mul(...fractions.map((f) => f.den)) : polyExpr(product)) : null,
         numbersOnly,
+        factored,
       )
     }
     case 'expand':
@@ -328,7 +434,7 @@ function explainStep(step: FracStep, solution: FracSolution, facts: Facts): Expl
       const before = solution.beforeCancel.num
       const rest = constValue(solution.reduced.num)
       const oneLeft = rest !== null && isOne(ratAbs(rest)) && !(constValue(before) !== null && isOne(ratAbs(constValue(before)!)))
-      return explainCancel(step.detail!, facts.cancelPowers, oneLeft)
+      return explainCancel(step.detail!, facts.cancelPowers, oneLeft, facts.minusKept)
     }
     case 'multiply': {
       if (t.kind === 'product') return explainMultiply(multipliedExpr(t.left, t.right), isWhole(t.left) || isWhole(t.right))
@@ -346,7 +452,7 @@ function explainStep(step: FracStep, solution: FracSolution, facts: Facts): Expl
     case 'factor-den': {
       const isNum = step.kind === 'factor-num'
       const shown = t.kind === 'reduce' ? (isNum ? t.part.num : t.part.den) : null
-      return explainFactor(shown ? polyExpr(shownPoly(shown)) : step.detail!, step.detail!, isNum)
+      return explainFactor(shown ? shownExpr(shown) : step.detail!, step.detail!, isNum, isNum ? facts.numMethods : facts.denMethods)
     }
     case 'inner-num':
     case 'inner-den':

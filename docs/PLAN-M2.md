@@ -268,6 +268,33 @@ Umgesetzt:
 $\frac{x}{x^2-1} - \frac{1}{x+1}$ und
 $\frac{1 + \frac{1}{x}}{1 - \frac{1}{x^2}}$ geführt lösen.
 
+Umgesetzt:
+- Stufe 3 und 4 sind spielbar (die drei Beispiele oben sind die Aufgaben
+  3-189, 4-1998 und 4-37).
+- Zerlegen: Zähler und Nenner je ein Schritt. Tipp, Erklärung und Lernkarte
+  passen zur Art des Zerlegens (ausklammern, binomische Formel,
+  $x^2 + px + q$).
+- Hauptnenner mit Termen: Die Erklärung zerlegt zuerst die Nenner
+  ($x^2 - 1 = (x + 1)(x - 1)$) und nennt das Produkt der Nenner als
+  möglichen, aber unnötig großen gemeinsamen Nenner.
+- Doppelbruch: Gefragt ist erst der Zähler als ein Bruch, dann der Nenner,
+  dann die Malaufgabe mit dem Kehrwert, dann das Kürzen; „Bisher" zeigt den
+  ganzen Doppelbruch. Beim Zusammenfassen im Doppelbruch heißt „Zähler und
+  Nenner addiert" ohne Hauptnenner
+  ($\frac{1}{x} + \frac{1}{4} = \frac{2}{x + 4}$).
+- Ab Stufe 4 sind Erweitern und Zusammenfassen ein Schritt.
+- Falsche Ergebnisse, deren Zähler ein Produkt aus Klammern ist, bleiben als
+  Produkt stehen ($x(x + 3)(x - 3)$ statt $x^3 - 9x$), so wie man sie nach
+  dem Fehler hinschreibt.
+- Nach dem Kürzen einer vertauschten Differenz sagt die Erklärung, dass das
+  Minus stehen bleibt.
+- Neue Lernkarten: Ausklammern, binomische Formeln, Hauptnenner mit Termen,
+  Kürzen bei Summen (ab Stufe 3), $x^2 + px + q$ zerlegen, Doppelbrüche,
+  Bausteine wie $e^x$ (ab Stufe 4).
+- Tests: Schrittplaner für alle vier Stufen mit je 300 Aufgaben, einmal mit
+  3000 geprüft; jeder typische Fehler der Stufen 1 bis 4 steht auf einer
+  Karte und lässt sich gezielt üben; Browser-Tests für Stufe 3 und 4.
+
 ### Schritt 5: Freier Modus für Brüche
 - Du tippst das Ergebnis ein. Die Mathe-Tastatur zeigt die Buchstaben, die
   in der Aufgabe vorkommen.

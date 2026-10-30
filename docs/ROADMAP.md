@@ -21,7 +21,7 @@ Details: [PLAN-M2.md](PLAN-M2.md)
 - [x] 1. Neues Aussehen: dunkles Design, Farben je Gebiet, neue Symbole
 - [x] 2. Mathe-Engine für Brüche
 - [x] 3. Mehrere Themen, Brüche Stufe 1 und 2 geführt
-- [ ] 4. Stufen 3 und 4 geführt
+- [x] 4. Stufen 3 und 4 geführt
 - [ ] 5. Freier Modus für Brüche
 - [ ] 6. Stufe 5 geführt und frei
 - [ ] 7. Gezieltes Üben, Feinschliff, Abschluss von M2 (gezieltes Üben für
@@ -161,3 +161,9 @@ Details: [PLAN-M1.md](PLAN-M1.md)
 - 30.10.2026: Schreibweise der Brüche: Der Zähler beginnt möglichst mit
   Plus ($\frac{b - a}{ab}$ statt $-\frac{a - b}{ab}$); nur wenn alles
   negativ ist, steht das Minus vor dem Bruch.
+- 30.10.2026: Stufen 3 und 4 bei Brüchen (Schritt 4 von M2): Zerlegen mit
+  Tipps je Art (ausklammern, binomische Formel, $x^2 + px + q$),
+  Hauptnenner mit Termen, Doppelbrüche Schritt für Schritt; ab Stufe 4 sind
+  Erweitern und Zusammenfassen ein Schritt. Sieben neue Lernkarten, darunter
+  „Bausteine wie $e^x$". Falsche Ergebnisse mit Klammern bleiben als
+  Produkt stehen.

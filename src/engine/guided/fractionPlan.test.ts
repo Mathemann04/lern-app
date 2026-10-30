@@ -11,7 +11,7 @@ import { FRACTION_ERROR_RULES } from '../fraction/errorRules.ts'
 import { fracEquals, toFrac } from '../fraction/frac.ts'
 import { isMultipleOf } from '../fraction/factor.ts'
 import { type Poly, polyDivideExact } from '../fraction/poly.ts'
-import { solveFraction } from '../fraction/solve.ts'
+import { sideOf, solveFraction } from '../fraction/solve.ts'
 import { type FractionShape, type FractionTask, type Part, expanded, minus, part, partsOf, plus, shownPoly, taskExpr } from '../fraction/task.ts'
 import { createRng } from '../random/rng.ts'
 import { generateFractionTask } from '../tasks/fractionTerms.ts'
@@ -121,7 +121,7 @@ function isCommonDenominator(t: FractionTask, e: Expr): boolean {
 
 const close = (a: number, b: number) => Math.abs(a - b) <= 1e-9 * Math.max(1, Math.abs(a), Math.abs(b))
 
-describe.each([1, 2] as Level[])('Brüche geführt, Stufe %i', (level) => {
+describe.each([1, 2, 3, 4] as Level[])('Brüche geführt, Stufe %i', (level) => {
   const plans: Array<{ plan: GuidedTask; t: FractionTask }> = Array.from({ length: 300 }, (_, i) => ({
     plan: planFractionTask({ level, seed: i + 1 }),
     t: generateFractionTask({ level, seed: i + 1 }).task,
@@ -152,10 +152,17 @@ describe.each([1, 2] as Level[])('Brüche geführt, Stufe %i', (level) => {
           for (const c of step.choices.filter((c) => !c.correct)) expect(isCommonDenominator(t, c.expr!), `${context} ${c.content}`).toBe(false)
           continue
         }
+        // Doppelbruch: gefragt ist erst der Zähler bzw. Nenner als ein Bruch
+        const target =
+          t.kind === 'complex' && step.id.endsWith('inner-num')
+            ? sideOf(t.top, t.hints).frac
+            : t.kind === 'complex' && step.id.endsWith('inner-den')
+              ? sideOf(t.bottom, t.hints).frac
+              : value
         for (const c of step.choices) {
           const f = toFrac(c.expr!)
           expect(f, `${context} ${c.content}`).not.toBeNull()
-          expect(fracEquals(f!, value), `${context} ${c.content}`).toBe(c.correct)
+          expect(fracEquals(f!, target), `${context} ${c.content}`).toBe(c.correct)
         }
       }
     }

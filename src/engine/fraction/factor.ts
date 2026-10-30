@@ -1,5 +1,5 @@
 import { type Expr, div, mul, neg, num, pow } from '../expr/types.ts'
-import { type Rational, isInteger, isOne, isZero, rat, ratAdd, ratDiv, ratMul, ratNeg, ratSign } from '../rational.ts'
+import { type Rational, isInteger, isOne, isZero, rat, ratAbs, ratAdd, ratDiv, ratMul, ratNeg, ratSign } from '../rational.ts'
 import { type Frac, atomPowerExpr, displayRank, polyExpr, startsNegative } from './frac.ts'
 import {
   type Poly,
@@ -262,4 +262,17 @@ export function reducedExpr(r: Reduced): Expr {
   if (isOneFactored(r.den)) return numerator
   if (startsNegative(r.num) && !flipped) return neg(div(polyExpr(polyScale(r.num, rat(-1))), factoredExpr(r.den)))
   return div(numerator, factoredExpr(r.den))
+}
+
+// Schreibweise eines falschen Ergebnisses im geführten Modus: gekürzt wie ein Ergebnis, aber ein
+// Zähler aus mehreren Faktoren mit Klammern bleibt ein Produkt, so wie man ihn nach dem Fehler
+// hinschreibt: \frac{x(x + 3)(x - 3)}{2} statt \frac{x^3 - 9x}{2}
+export function productFormExpr(r: Reduced, hints: readonly Poly[] = []): Expr {
+  const fn = factorize(r.num, [...r.den.factors.map((f) => f.poly), ...hints])
+  const brackets = fn.factors.filter((f) => f.poly.length >= 2)
+  const isProduct = brackets.length > 0 && (fn.factors.length >= 2 || brackets.some((f) => f.exp >= 2))
+  if (!isProduct) return reducedExpr(r)
+  const numerator = factoredExpr({ coef: ratAbs(fn.coef), factors: fn.factors })
+  const body = isOneFactored(r.den) ? numerator : div(numerator, factoredExpr(r.den))
+  return ratSign(fn.coef) < 0 ? neg(body) : body
 }

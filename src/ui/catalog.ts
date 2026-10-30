@@ -105,13 +105,13 @@ const fractionLevels: LevelPreview[] = [
   },
   {
     level: 3,
-    available: false,
+    available: true,
     title: 'Summen in Zähler und Nenner: ausklammern, binomische Formeln',
     examples: [String.raw`\frac{x^2-9}{2x+6}`, String.raw`\frac{1}{x-1} + \frac{2}{x+1}`],
   },
   {
     level: 4,
-    available: false,
+    available: true,
     title: 'Uni-Niveau: Hauptnenner aus Faktoren, Doppelbrüche, e-Funktion, ln, sin',
     examples: [String.raw`\frac{x}{x^2-1} - \frac{1}{x+1}`, String.raw`\frac{1 + \frac{1}{x}}{1 - \frac{1}{x^2}}`, String.raw`\frac{e^{2x}-1}{e^x+1}`],
   },

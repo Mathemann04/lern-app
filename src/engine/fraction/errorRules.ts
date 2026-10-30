@@ -487,8 +487,13 @@ function operationMistakes(t: FractionTask): Candidate[] {
       [bottom, 'inner-den'],
     ] as const) {
       if (!side.work) continue
-      for (const c of sumMistakes(side.work, hints)) {
+      // Zähler bzw. Nenner wird in einem Schritt zusammengefasst: Zähler und Nenner addiert heißt
+      // hier ohne Hauptnenner (\frac{1}{x} + \frac{1}{4} = \frac{2}{x + 4}), wenn es das gibt
+      const candidates = sumMistakes(side.work, hints)
+      const withoutLcd = candidates.some((c) => c.id === 'frac-add-across' && c.freeOnly)
+      for (const c of candidates) {
         if (!c.value || isZeroPoly(c.value.num)) continue
+        if (c.id === 'frac-add-across' && withoutLcd && !c.freeOnly) continue
         const value = side === top ? fracDiv(c.value, bottom.frac) : fracDiv(top.frac, c.value)
         out.push({ id: c.id, step, stepExpr: reduced(c.value, hints), value })
       }
