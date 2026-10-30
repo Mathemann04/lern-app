@@ -52,8 +52,11 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   (`#/ueben/1-4711`) gehören zum Ableiten. Lernkarten in Ordnern nach
   Themen `#/karten`, `#/karten/brueche`, `#/karten/ableitungen/product`,
   `#/fortschritt` (je Thema ein Abschnitt),
-  `#/einstellungen`, Testseite `#/galerie` (Link in den Einstellungen,
-  Themen Ableiten, Brüche und Umstellen, mit den Schreibweise-Beispielen). Startseite, Gebiet, Einstellungen,
+  `#/einstellungen`, Testseite `#/galerie` (Link in den Einstellungen;
+  Übersicht wie die Startseite: Fach, Gebiete, Themen aus `GALLERY_COURSES`
+  in `catalog.ts`, dazu die Schreibweise-Beispiele aus `samples.ts`, auch die
+  für Stufe 5 von „Gleichungen umstellen"; je Thema eine Seite
+  `#/galerie/brueche` mit Stufen und Aufgaben). Startseite, Gebiet, Einstellungen,
   `routes.ts` und `catalog.ts` kommen ohne Mathe-Engine und KaTeX aus
   (Ladezeit); alle anderen Seiten lädt `App.tsx` erst bei Bedarf. Ob es
   eine Lernkarte oder einen typischen Fehler aus der Adresse gibt, prüfen

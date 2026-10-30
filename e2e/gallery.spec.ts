@@ -15,16 +15,29 @@ test('Galerie ist über die Einstellungen erreichbar, mit der Schreibweise der F
   await page.goto('./#/einstellungen')
   await page.getByRole('link', { name: /Formel-Galerie/ }).click()
   await expect(page.getByRole('heading', { name: 'Formel-Galerie' })).toBeVisible()
+  // Aufbau wie die Startseite: Fach, Gebiete, Themen
+  await expect(page.getByRole('heading', { name: 'Mathematik MB1' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Grundlagen' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Differentialrechnung' })).toBeVisible()
+  for (const topic of ['Brüche', 'Gleichungen umstellen', 'Ableiten']) await expect(page.getByRole('link', { name: new RegExp(`^${topic}`) })).toBeVisible()
   const notation = page.getByRole('region', { name: 'Schreibweise' })
-  await expect(notation.locator('.katex')).toHaveCount(6)
+  await expect(notation.locator('.katex')).toHaveCount(14)
+  await expect(notation.getByRole('heading', { name: /Kommt mit Stufe 5/ })).toBeVisible()
   await expect(notation.locator('code.text-red-700')).toHaveCount(0)
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
+  expect(overflow, 'Übersicht ragt seitlich heraus').toBeLessThanOrEqual(0)
+  await page.getByRole('link', { name: /^Ableiten/ }).click()
+  await expect(page).toHaveURL(/#\/galerie\/ableiten$/)
+  await expect(page.getByRole('heading', { name: 'Ableiten', level: 1 })).toBeVisible()
+  await page.getByRole('link', { name: 'Formel-Galerie', exact: true }).click()
+  await expect(page).toHaveURL(/#\/galerie$/)
   await page.getByRole('link', { name: 'Rechenweg' }).click()
   await expect(page.getByRole('heading', { name: 'Mathematik MB1' })).toBeVisible()
 })
 
 test('Galerie zeigt in jeder Stufe sauber gesetzte Aufgaben', async ({ page }) => {
   const errors = collectErrors(page)
-  await page.goto('./#/galerie')
+  await page.goto('./#/galerie/ableiten')
 
   for (const level of [1, 2, 3, 4, 5]) {
     await page.getByRole('button', { name: `Stufe ${level}` }).click()
@@ -41,7 +54,7 @@ test('Galerie zeigt in jeder Stufe sauber gesetzte Aufgaben', async ({ page }) =
 
 test('Neue Aufgaben würfelt neu, Rechenweg und typische Fehler lassen sich einblenden', async ({ page }) => {
   const errors = collectErrors(page)
-  await page.goto('./#/galerie')
+  await page.goto('./#/galerie/ableiten')
   const before = await randomTasks(page).first().textContent()
   await page.getByRole('button', { name: 'Neue Aufgaben' }).click()
   await expect(randomTasks(page).first()).not.toHaveText(before ?? '')
@@ -63,7 +76,7 @@ test('Neue Aufgaben würfelt neu, Rechenweg und typische Fehler lassen sich einb
 })
 
 test('Gleiche Aufgaben-Nummer ergibt immer dieselbe Aufgabe', async ({ page }) => {
-  await page.goto('./#/galerie')
+  await page.goto('./#/galerie/ableiten')
   const field = page.getByLabel('Aufgabe über ihre Nummer aufrufen')
   const card = page.getByRole('region', { name: 'Aufgerufene Aufgabe' }).getByRole('article')
 
@@ -84,7 +97,7 @@ test('Gleiche Aufgaben-Nummer ergibt immer dieselbe Aufgabe', async ({ page }) =
 
 test('Implizite Aufgabe in der Galerie: y\', beide Seiten im Rechenweg, typische Fehler', async ({ page }) => {
   const errors = collectErrors(page)
-  await page.goto('./#/galerie')
+  await page.goto('./#/galerie/ableiten')
   await page.getByLabel('Rechenweg zeigen').check()
   await page.getByLabel('Typische Fehler zeigen').check()
   await page.getByLabel('Aufgabe über ihre Nummer aufrufen').fill('5-43')
@@ -101,8 +114,8 @@ test('Implizite Aufgabe in der Galerie: y\', beide Seiten im Rechenweg, typische
 test('Galerie zeigt Bruchaufgaben der Stufen 1 bis 5 mit Rechenweg und typischen Fehlern', async ({ page }) => {
   const errors = collectErrors(page)
   await page.goto('./#/galerie')
-  await page.getByRole('button', { name: 'Brüche' }).click()
-  await expect(page.getByRole('button', { name: 'Brüche' })).toHaveAttribute('aria-pressed', 'true')
+  await page.getByRole('link', { name: /^Brüche/ }).click()
+  await expect(page.getByRole('heading', { name: 'Brüche', level: 1 })).toBeVisible()
   await page.getByLabel('Rechenweg zeigen').check()
   await page.getByLabel('Typische Fehler zeigen').check()
 
@@ -134,8 +147,8 @@ test('Galerie zeigt Bruchaufgaben der Stufen 1 bis 5 mit Rechenweg und typischen
 test('Galerie zeigt Umstell-Aufgaben der Stufen 1 bis 3 mit Rechenweg und typischen Fehlern', async ({ page }) => {
   const errors = collectErrors(page)
   await page.goto('./#/galerie')
-  await page.getByRole('button', { name: 'Umstellen' }).click()
-  await expect(page.getByRole('button', { name: 'Umstellen' })).toHaveAttribute('aria-pressed', 'true')
+  await page.getByRole('link', { name: /^Gleichungen umstellen/ }).click()
+  await expect(page.getByRole('heading', { name: 'Gleichungen umstellen', level: 1 })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Stufe 4' })).toBeDisabled()
   await page.getByLabel('Rechenweg zeigen').check()
   await page.getByLabel('Typische Fehler zeigen').check()

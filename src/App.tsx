@@ -116,6 +116,8 @@ function toneOf(route: Route): Tone | undefined {
       return courseById(route.course)?.area.tone
     case 'cards':
       return route.folder ? courseOfCards(route.folder)?.area.tone : undefined
+    case 'gallery':
+      return route.course ? courseById(route.course)?.area.tone : undefined
     default:
       return undefined
   }
@@ -124,7 +126,7 @@ function toneOf(route: Route): Tone | undefined {
 function Page({ route }: { route: Route }) {
   switch (route.page) {
     case 'gallery':
-      return <GalleryScreen />
+      return <GalleryScreen key={route.course ?? ''} course={route.course} />
     case 'settings':
       return <SettingsScreen />
     case 'progress':

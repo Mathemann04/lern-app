@@ -43,7 +43,7 @@ const ART: Record<Kind, (id: string) => ReactNode> = {
       <path d="M22.5 20.5H10.5A12 12 0 0 1 22.5 8.5Z" className="fill-tone-700" />
     </>
   ),
-  // Formeln umstellen: Waage im Gleichgewicht
+  // Gleichungen umstellen: Waage im Gleichgewicht
   rearrange: () => (
     <>
       <path d="M24 13 18 39h12z" className="fill-tone-700" />

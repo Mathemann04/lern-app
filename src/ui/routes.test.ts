@@ -4,7 +4,10 @@ import { areaHref, cardFolderHref, courseHref, parseRoute, practiceHref, section
 describe('parseRoute', () => {
   it('erkennt die Seiten', () => {
     expect(parseRoute('/')).toEqual({ page: 'home' })
-    expect(parseRoute('/galerie')).toEqual({ page: 'gallery' })
+    expect(parseRoute('/galerie')).toEqual({ page: 'gallery', course: null })
+    expect(parseRoute('/galerie/brueche')).toEqual({ page: 'gallery', course: 'brueche' })
+    expect(parseRoute('/galerie/umstellen')).toEqual({ page: 'gallery', course: 'umstellen' })
+    expect(parseRoute('/galerie/gibtsnicht')).toEqual({ page: 'gallery', course: null })
     expect(parseRoute('/einstellungen')).toEqual({ page: 'settings' })
     expect(parseRoute('/fortschritt')).toEqual({ page: 'progress' })
     expect(parseRoute('/unbekannt')).toEqual({ page: 'home' })
@@ -15,7 +18,7 @@ describe('parseRoute', () => {
     expect(parseRoute('/gebiet/grundlagen')).toEqual({ page: 'area', id: 'grundlagen' })
     expect(parseRoute('/thema/ableiten')).toEqual({ page: 'course', id: 'ableiten' })
     expect(parseRoute('/thema/brueche')).toEqual({ page: 'course', id: 'brueche' })
-    // Formeln umstellen kommt bald
+    // Gleichungen umstellen kommt bald
     expect(parseRoute('/thema/umstellen')).toEqual({ page: 'home' })
     // Integralrechnung kommt bald
     expect(parseRoute('/gebiet/integralrechnung')).toEqual({ page: 'home' })

@@ -15,45 +15,142 @@ import {
   parseTaskNumber,
   randomSeed,
 } from '../engine/tasks/taskNumber.ts'
+import { AreaIcon } from './AreaIcon.tsx'
 import { BackLink } from './BackLink.tsx'
-import { areaById, courseById } from './catalog.ts'
+import { type Course, DERIVATIVES, FRACTIONS, GALLERY_COURSES, REARRANGE, SUBJECTS, courseById, isCourseAvailable } from './catalog.ts'
 import { DerivationView } from './DerivationView.tsx'
 import { FractionGalleryCard } from './FractionGalleryCard.tsx'
 import { Formula } from './Formula.tsx'
 import { RearrangeGalleryCard } from './RearrangeGalleryCard.tsx'
 import { RichText } from './RichText.tsx'
-import { notationSamples } from './samples.ts'
+import { galleryHref } from './routes.ts'
+import { notationGroups } from './samples.ts'
 
 const TASKS_PER_PAGE = 8
-
-// Themen der Testseite, in der Farbe ihres Gebiets
-type Topic = 'ableiten' | 'brueche' | 'umstellen'
-const TOPICS: Array<{ value: Topic; title: string; tone: string | undefined }> = [
-  { value: 'ableiten', title: 'Ableiten', tone: courseById('ableiten')?.area.tone },
-  { value: 'brueche', title: 'Brüche', tone: areaById('grundlagen')?.area.tone },
-  { value: 'umstellen', title: 'Umstellen', tone: areaById('grundlagen')?.area.tone },
-]
 
 type Generated =
   | { topic: 'ableiten'; task: GeneratedTask }
   | { topic: 'brueche'; task: GeneratedFractionTask }
   | { topic: 'umstellen'; task: GeneratedRearrangeTask }
 
-function isLevelAvailable(topic: Topic, level: Level): boolean {
-  if (topic === 'brueche') return isFractionLevelAvailable(level)
-  if (topic === 'umstellen') return isRearrangeLevelAvailable(level)
-  return true
+// Themen der Testseite: welche Stufen es schon gibt und wie eine Aufgabe entsteht
+type GalleryTopic = { isLevelAvailable(level: Level): boolean; generate(ref: TaskRef): Generated }
+
+const TOPICS: Record<string, GalleryTopic> = {
+  [DERIVATIVES]: { isLevelAvailable: () => true, generate: (ref) => ({ topic: 'ableiten', task: generateDerivativeTask(ref) }) },
+  [FRACTIONS]: { isLevelAvailable: isFractionLevelAvailable, generate: (ref) => ({ topic: 'brueche', task: generateFractionTask(ref) }) },
+  [REARRANGE]: { isLevelAvailable: isRearrangeLevelAvailable, generate: (ref) => ({ topic: 'umstellen', task: generateRearrangeTask(ref) }) },
 }
 
-function generate(topic: Topic, ref: TaskRef): Generated {
-  if (topic === 'brueche') return { topic, task: generateFractionTask(ref) }
-  if (topic === 'umstellen') return { topic, task: generateRearrangeTask(ref) }
-  return { topic, task: generateDerivativeTask(ref) }
+// Testseite: Übersicht wie die Startseite (Fächer, Gebiete, Themen), je Thema eine eigene Seite mit
+// zufälligen Aufgaben der Mathe-Engine, um Schreibweise und Rechenweg zu prüfen
+export function GalleryScreen({ course }: { course: string | null }) {
+  return course ? <TopicGallery id={course} /> : <GalleryOverview />
 }
 
-// Testseite: zeigt zufällige Aufgaben der Mathe-Engine, um Schreibweise und Rechenweg zu prüfen
-export function GalleryScreen() {
-  const [topic, setTopic] = useState<Topic>('ableiten')
+function GalleryOverview() {
+  return (
+    <main className="space-y-10">
+      <section className="space-y-2">
+        <BackLink href="#/einstellungen" label="Einstellungen" />
+        <h1 className="text-3xl font-semibold tracking-tight">Formel-Galerie</h1>
+        <p className="text-zinc-600 text-pretty">
+          Testseite: Hier zeigt die Mathe-Engine zufällige Aufgaben mit Lösung, Rechenweg und typischen Fehlern. Wähle
+          ein Thema und prüfe, ob alles aussieht wie in deinem Skript.
+        </p>
+      </section>
+
+      {SUBJECTS.map((subject) => {
+        const areas = subject.areas
+          .map((area) => ({ area, courses: area.courses.filter((c) => GALLERY_COURSES.includes(c.id)) }))
+          .filter(({ courses }) => courses.length > 0)
+        if (areas.length === 0) return null
+        return (
+          <section key={subject.id} aria-labelledby={`gallery-${subject.id}`} className="space-y-5">
+            <h2 id={`gallery-${subject.id}`} className="text-xl font-semibold">
+              {subject.title}
+            </h2>
+            {areas.map(({ area, courses }) => (
+              <div key={area.id} data-tone={area.tone} className="space-y-2">
+                <h3 className="flex items-center gap-2 text-sm font-semibold tracking-wide text-accent-700 uppercase">
+                  <AreaIcon kind={area.icon} className="size-7 shrink-0" />
+                  {area.title}
+                </h3>
+                <ul className="space-y-3">
+                  {courses.map((c) => (
+                    <li key={c.id}>
+                      <TopicTile course={c} />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </section>
+        )
+      })}
+
+      <section aria-labelledby="notation" className="space-y-6 border-t border-zinc-100 pt-8">
+        <div>
+          <h2 id="notation" className="text-xl font-semibold">
+            Schreibweise
+          </h2>
+          <p className="mt-1 text-zinc-600">So werden Formeln in der App gesetzt. Sieht das aus wie in deinem Skript?</p>
+        </div>
+        {notationGroups.map((group) => (
+          <div key={group.title} className="space-y-3">
+            <div>
+              <h3 className="font-semibold">{group.title}</h3>
+              {group.note && <p className="text-sm text-zinc-500 text-pretty">{group.note}</p>}
+            </div>
+            <dl className="grid gap-3 sm:grid-cols-2">
+              {group.samples.map((sample) => (
+                <div key={sample.label} className="rounded-xl bg-zinc-50 px-4 py-3">
+                  <dt className="text-sm text-zinc-500">{sample.label}</dt>
+                  <dd className="mt-1 overflow-x-auto text-xl">
+                    <Formula tex={sample.tex} />
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        ))}
+      </section>
+    </main>
+  )
+}
+
+// Stufen mit Aufgaben in der Galerie, z. B. „Stufen 1 bis 3"
+function levelRange(levels: readonly Level[]): string {
+  if (levels.length === 1) return `Stufe ${levels[0]}`
+  return `Stufen ${levels[0]} bis ${levels[levels.length - 1]}`
+}
+
+function TopicTile({ course }: { course: Course }) {
+  const levels = LEVELS.filter((l) => TOPICS[course.id].isLevelAvailable(l))
+  return (
+    <a
+      href={galleryHref(course.id)}
+      className="flex items-center gap-4 rounded-2xl border border-zinc-200 px-4 py-4 transition-colors hover:border-accent-600 hover:bg-accent-50"
+    >
+      <AreaIcon kind={course.icon} className="size-14 shrink-0" />
+      <span className="min-w-0 flex-1 space-y-1">
+        <span className="block text-lg font-semibold">{course.title}</span>
+        <span className="block text-sm text-zinc-500">
+          {levelRange(levels)}
+          {!isCourseAvailable(course) && ' · zum Üben noch nicht freigeschaltet'}
+        </span>
+      </span>
+      <span aria-hidden className="text-accent-700">
+        →
+      </span>
+    </a>
+  )
+}
+
+// Ein Thema der Galerie: Stufe wählen, zufällige Aufgaben, Aufgabe über ihre Nummer
+function TopicGallery({ id }: { id: string }) {
+  const { area, course } = courseById(id)!
+  const topic = TOPICS[id]
   const [level, setLevel] = useState<Level>(1)
   const [baseSeed, setBaseSeed] = useState(randomSeed)
   const [showSteps, setShowSteps] = useState(false)
@@ -62,17 +159,11 @@ export function GalleryScreen() {
   const [lookup, setLookup] = useState<TaskRef | 'invalid' | null>(null)
 
   const tasks = useMemo(
-    () => Array.from({ length: TASKS_PER_PAGE }, (_, i) => generate(topic, { level, seed: ((baseSeed + i * 7919) % MAX_SEED) + 1 })),
+    () => Array.from({ length: TASKS_PER_PAGE }, (_, i) => topic.generate({ level, seed: ((baseSeed + i * 7919) % MAX_SEED) + 1 })),
     [topic, level, baseSeed],
   )
-  const lookupUnavailable = lookup && lookup !== 'invalid' && !isLevelAvailable(topic, lookup.level)
-  const lookedUp = lookup && lookup !== 'invalid' && !lookupUnavailable ? generate(topic, lookup) : null
-
-  function chooseTopic(next: Topic) {
-    setTopic(next)
-    if (!isLevelAvailable(next, level)) setLevel(1)
-    setLookup(null)
-  }
+  const lookupUnavailable = lookup && lookup !== 'invalid' && !topic.isLevelAvailable(lookup.level)
+  const lookedUp = lookup && lookup !== 'invalid' && !lookupUnavailable ? topic.generate(lookup) : null
 
   function handleLookup(event: FormEvent) {
     event.preventDefault()
@@ -81,35 +172,21 @@ export function GalleryScreen() {
 
   return (
     <main className="space-y-8">
-      <section className="space-y-2">
-        <BackLink href="#/einstellungen" label="Einstellungen" />
-        <h1 className="text-3xl font-semibold tracking-tight">Formel-Galerie</h1>
+      <section className="space-y-3">
+        <BackLink href={galleryHref()} label="Formel-Galerie" />
+        <div className="flex items-center gap-4">
+          <AreaIcon kind={course.icon} className="size-16 shrink-0" />
+          <div className="min-w-0">
+            <p className="text-sm text-zinc-500">{area.title} · Testseite</p>
+            <h1 className="text-3xl font-semibold tracking-tight hyphens-auto">{course.title}</h1>
+          </div>
+        </div>
         <p className="text-zinc-600 text-pretty">
-          Testseite: Hier zeigt die Mathe-Engine zufällige Aufgaben aus allen Stufen mit Lösung,
-          Rechenweg und typischen Fehlern. Prüfe, ob alles aussieht wie in deinem Skript.
+          Zufällige Aufgaben mit Lösung, Rechenweg und typischen Fehlern. Prüfe, ob alles aussieht wie in deinem Skript.
         </p>
       </section>
 
-      <section className="space-y-4" data-tone={TOPICS.find((t) => t.value === topic)?.tone}>
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-medium text-zinc-500">Thema</span>
-          <div className="flex flex-1 gap-1 rounded-xl bg-zinc-100 p-1">
-            {TOPICS.map((t) => (
-              <button
-                key={t.value}
-                type="button"
-                aria-pressed={t.value === topic}
-                onClick={() => chooseTopic(t.value)}
-                className={`min-h-11 flex-1 rounded-lg py-2 font-medium transition-colors ${
-                  t.value === topic ? 'bg-raised text-accent-700 shadow-sm' : 'text-zinc-600 hover:text-zinc-900'
-                }`}
-              >
-                {t.title}
-              </button>
-            ))}
-          </div>
-        </div>
-
+      <section className="space-y-4">
         <div className="flex items-center gap-3">
           <span className="text-sm font-medium text-zinc-500">Stufe</span>
           <div className="flex flex-1 gap-1 rounded-xl bg-zinc-100 p-1">
@@ -119,10 +196,10 @@ export function GalleryScreen() {
                 type="button"
                 aria-label={`Stufe ${l}`}
                 aria-pressed={l === level}
-                disabled={!isLevelAvailable(topic, l)}
-                title={isLevelAvailable(topic, l) ? undefined : 'folgt bald'}
+                disabled={!topic.isLevelAvailable(l)}
+                title={topic.isLevelAvailable(l) ? undefined : 'folgt bald'}
                 onClick={() => setLevel(l)}
-                className={`flex-1 rounded-lg py-2 font-medium transition-colors disabled:opacity-40 ${
+                className={`min-h-11 flex-1 rounded-lg py-2 font-medium transition-colors disabled:opacity-40 ${
                   l === level ? 'bg-raised text-accent-700 shadow-sm' : 'text-zinc-600 enabled:hover:text-zinc-900'
                 }`}
               >
@@ -136,12 +213,12 @@ export function GalleryScreen() {
           <button
             type="button"
             onClick={() => setBaseSeed(randomSeed())}
-            className="rounded-xl bg-accent-700 px-4 py-2.5 font-medium text-on-accent hover:bg-accent-800"
+            className="min-h-11 rounded-xl bg-accent-700 px-4 py-2.5 font-medium text-on-accent hover:bg-accent-800"
           >
             Neue Aufgaben
           </button>
           <div className="flex flex-wrap gap-x-5 gap-y-2">
-            <label className="flex items-center gap-2 text-zinc-700">
+            <label className="flex min-h-11 items-center gap-2 text-zinc-700">
               <input
                 type="checkbox"
                 checked={showSteps}
@@ -150,7 +227,7 @@ export function GalleryScreen() {
               />
               Rechenweg zeigen
             </label>
-            <label className="flex items-center gap-2 text-zinc-700">
+            <label className="flex min-h-11 items-center gap-2 text-zinc-700">
               <input
                 type="checkbox"
                 checked={showErrors}
@@ -173,11 +250,11 @@ export function GalleryScreen() {
               onChange={(event) => setLookupText(event.target.value)}
               placeholder="z. B. 3-48213"
               inputMode="numeric"
-              className="min-w-0 flex-1 rounded-xl border border-zinc-300 px-3 py-2.5 focus:border-accent-600 focus:outline-none"
+              className="min-h-11 min-w-0 flex-1 rounded-xl border border-zinc-300 px-3 py-2.5 focus:border-accent-600 focus:outline-none"
             />
             <button
               type="submit"
-              className="rounded-xl border border-zinc-300 px-4 py-2.5 font-medium hover:bg-zinc-50"
+              className="min-h-11 rounded-xl border border-zinc-300 px-4 py-2.5 font-medium hover:bg-zinc-50"
             >
               Anzeigen
             </button>
@@ -189,7 +266,7 @@ export function GalleryScreen() {
         </form>
       </section>
 
-      <div data-tone={TOPICS.find((t) => t.value === topic)?.tone} className="space-y-8">
+      <div className="space-y-8">
         {lookedUp && (
           <section aria-label="Aufgerufene Aufgabe">
             <GalleryCard generated={lookedUp} showSteps={showSteps} showErrors={showErrors} highlighted />
@@ -202,25 +279,6 @@ export function GalleryScreen() {
           ))}
         </section>
       </div>
-
-      <section aria-labelledby="notation" className="space-y-4 border-t border-zinc-100 pt-8">
-        <div>
-          <h2 id="notation" className="text-xl font-semibold">
-            Schreibweise
-          </h2>
-          <p className="mt-1 text-zinc-600">So werden Formeln in der App gesetzt. Sieht das aus wie in deinem Skript?</p>
-        </div>
-        <dl className="grid gap-3 sm:grid-cols-2">
-          {notationSamples.map((sample) => (
-            <div key={sample.label} className="rounded-xl bg-zinc-50 px-4 py-3">
-              <dt className="text-sm text-zinc-500">{sample.label}</dt>
-              <dd className="mt-1 text-xl">
-                <Formula tex={sample.tex} />
-              </dd>
-            </div>
-          ))}
-        </dl>
-      </section>
     </main>
   )
 }
