@@ -175,3 +175,8 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   Buchstaben der Aufgabe (bei Bausteinen dazu $e^x$, $\ln$, $\sin$,
   $\cos$). Der freie Modus ist für alle Themen gleich gebaut; neue Themen
   liefern nur noch Tastatur und Prüfung.
+- 30.10.2026: Fehler behoben (vom Nutzer gemeldet): Im dunklen Design war
+  die Eingabe im freien Modus auf manchen Handys schwarz auf schwarz. Das
+  Eingabefeld nimmt seine Farben jetzt aus der App statt vom Browser,
+  Cursor und Markierung folgen der Einstellung „Aussehen". Die Spalten der
+  Mathe-Tastatur stehen jetzt genau untereinander.

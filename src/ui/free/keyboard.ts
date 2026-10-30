@@ -22,10 +22,15 @@ const areaKey = (name: string): Key => ({
   class: 'small',
 })
 
+// Pfeiltasten so breit wie Löschen und „Tastatur zu" (1,5), damit alle Zeilen gleich lang sind und
+// die Spalten untereinander stehen
+const LEFT: Key = { label: '[left]', width: 1.5 }
+const RIGHT: Key = { label: '[right]', width: 1.5 }
+
 const ROWS: Key[][] = [
   ['x', { latex: '#@^{2}' }, { latex: '#@^{#?}' }, { latex: 'e^{#?}' }, '7', '8', '9', { latex: '\\frac{#@}{#?}' }, '[backspace]'],
-  [{ label: '(', key: '(' }, { label: ')', key: ')' }, { latex: '\\sqrt{#0}' }, { latex: '\\sqrt[#?]{#0}' }, '4', '5', '6', { latex: '\\cdot' }, '[left]'],
-  [fnKey('sin'), fnKey('cos'), fnKey('tan'), fnKey('ln'), '1', '2', '3', { label: '−', latex: '-' }, '[right]'],
+  [{ label: '(', key: '(' }, { label: ')', key: ')' }, { latex: '\\sqrt{#0}' }, { latex: '\\sqrt[#?]{#0}' }, '4', '5', '6', { latex: '\\cdot' }, LEFT],
+  [fnKey('sin'), fnKey('cos'), fnKey('tan'), fnKey('ln'), '1', '2', '3', { label: '−', latex: '-' }, RIGHT],
   [
     fnKey('arctan'),
     { label: 'log<sub>a</sub>', insert: '\\log_{#?}\\left(#?\\right)', class: 'small' },
@@ -40,8 +45,8 @@ const ROWS: Key[][] = [
 
 const MORE_ROWS: Key[][] = [
   [fnKey('sinh'), fnKey('cosh'), fnKey('tanh'), 'x', { latex: '#@^{2}' }, { latex: '#@^{#?}' }, { latex: 'e^{#?}' }, { latex: '\\frac{#@}{#?}' }, '[backspace]'],
-  [areaKey('arsinh'), areaKey('arcosh'), areaKey('artanh'), { label: '(', key: '(' }, { label: ')', key: ')' }, { latex: '\\sqrt{#0}' }, fnKey('ln'), { latex: '\\cdot' }, '[left]'],
-  [fnKey('arcsin'), fnKey('arccos'), fnKey('arctan'), fnKey('sin'), fnKey('cos'), fnKey('tan'), '+', { label: '−', latex: '-' }, '[right]'],
+  [areaKey('arsinh'), areaKey('arcosh'), areaKey('artanh'), { label: '(', key: '(' }, { label: ')', key: ')' }, { latex: '\\sqrt{#0}' }, fnKey('ln'), { latex: '\\cdot' }, LEFT],
+  [fnKey('arcsin'), fnKey('arccos'), fnKey('arctan'), fnKey('sin'), fnKey('cos'), fnKey('tan'), '+', { label: '−', latex: '-' }, RIGHT],
   ['1', '2', '3', '4', '5', '0', { label: 'Prüfen', command: 'commit', class: 'action', width: 2 }, '[hide-keyboard]'],
 ]
 
@@ -90,8 +95,8 @@ export function fractionKeyboard(letters: readonly string[], blocks: boolean): V
     displayEditToolbar: false,
     rows: [
       [...leftRow(0), '7', '8', '9', { latex: '\\frac{#@}{#?}' }, '[backspace]'],
-      [...leftRow(1), '4', '5', '6', { latex: '\\cdot' }, '[left]'],
-      [...leftRow(2), '1', '2', '3', { label: '−', latex: '-' }, '[right]'],
+      [...leftRow(1), '4', '5', '6', { latex: '\\cdot' }, LEFT],
+      [...leftRow(2), '1', '2', '3', { label: '−', latex: '-' }, RIGHT],
       [...leftRow(3), '0', '+', { label: 'Prüfen', command: 'commit', class: 'action', width: 2 }, '[hide-keyboard]'],
     ],
   }

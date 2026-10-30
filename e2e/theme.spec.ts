@@ -21,6 +21,23 @@ test('Dunkles Design: automatisch wie das Gerät oder fest gewählt', async ({ p
   await expect(page.locator('body')).toHaveAttribute('theme', 'dark')
 })
 
+test('Dunkles Design: Eingabe im freien Modus ist lesbar', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'dark' })
+  await page.goto('./#/frei/brueche/1-949')
+  const field = page.locator('math-field[data-ready]')
+  await expect(field).toBeVisible()
+  // Wie auf manchen Handys: Die Schriftfarbe des Browsers für Eingabefelder bleibt schwarz
+  await page.addStyleTag({ content: 'math-field { color-scheme: light; }' })
+  await field.evaluate((el) => {
+    ;(el as HTMLElement & { value: string }).value = '\\frac{19}{12}'
+  })
+  const colors = await field.evaluate((el) => ({
+    text: getComputedStyle(el).color,
+    page: getComputedStyle(document.body).color,
+  }))
+  expect(colors.text).toBe(colors.page)
+})
+
 test('Gebiete zeigen sich in ihrer eigenen Farbe', async ({ page }) => {
   // Hintergrund des Übungsknopfs: Blau der Differentialrechnung
   await page.goto('./#/thema/ableiten')
