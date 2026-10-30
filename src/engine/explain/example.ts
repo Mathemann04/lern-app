@@ -3,9 +3,10 @@ import { deriveImplicit, implicitResult, sortedEquation } from '../derive/implic
 import { RULES } from '../derive/rules.ts'
 import { equationToLatex, toLatex } from '../expr/print.ts'
 import { type Equation, type Expr, asRational, isEquation } from '../expr/types.ts'
-import { type CardExample, isFractionExample } from './cards.ts'
+import { type CardExample, isFractionExample, isRearrangeExample } from './cards.ts'
 import { chain, m, prime } from './format.ts'
 import { fractionExample } from './fractionExample.ts'
+import { rearrangeExample } from './rearrangeExample.ts'
 import { BASIC_SENTENCE, exponentOf, powerRuleWithNumbers } from './texts.ts'
 
 // Durchgerechnete Beispiele für die Lernkarten: der Rechenweg der Engine als Folge von Zeilen.
@@ -25,8 +26,9 @@ export type WorkedExample = {
   readonly result: Expr
 }
 
-// Beispiel einer Lernkarte, beim Ableiten wie bei Brüchen
+// Beispiel einer Lernkarte, beim Ableiten, bei Brüchen und beim Umstellen
 export function cardExample(e: CardExample): WorkedExample {
+  if (isRearrangeExample(e)) return rearrangeExample(e)
   return isFractionExample(e) ? fractionExample(e) : workedExample(e)
 }
 

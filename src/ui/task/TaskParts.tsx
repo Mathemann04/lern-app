@@ -46,16 +46,19 @@ export function CheckBadge({ large = false }: { large?: boolean }) {
   )
 }
 
-// „Stufe 2 · Aufgabe 2-4711 · Leite ab" und die Funktion
-export function TaskIntro({ taskRef, functionLatex, instruction }: { taskRef: TaskRef; functionLatex: string; instruction: string }) {
+// „Stufe 2 · Aufgabe 2-4711 · Leite ab" und die Funktion; note: Zusatz darunter, z. B. Bedingungen
+type IntroProps = { taskRef: TaskRef; functionLatex: string; instruction: string; note?: string }
+
+export function TaskIntro({ taskRef, functionLatex, instruction, note }: IntroProps) {
   return (
     <>
       <p className="text-sm text-zinc-500">
-        Stufe {taskRef.level} · Aufgabe {formatTaskNumber(taskRef)} · {instruction}
+        Stufe {taskRef.level} · Aufgabe {formatTaskNumber(taskRef)} · <RichText text={instruction} inline />
       </p>
       <div className="overflow-x-auto text-2xl">
         <Formula tex={functionLatex} />
       </div>
+      {note && <RichText text={note} className="text-sm text-zinc-500" />}
     </>
   )
 }

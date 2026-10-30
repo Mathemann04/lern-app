@@ -49,8 +49,10 @@ export type GuidedTask = {
   readonly expr: Expr
   // Aufgabe als LaTeX: f(x) = …, die Gleichung oder der Bruchterm
   readonly functionLatex: string
-  // Arbeitsauftrag, z. B. „Leite ab"
+  // Arbeitsauftrag, z. B. „Leite ab" (Text mit Formeln)
   readonly instruction: string
+  // Zusatz unter der Aufgabe (Text mit Formeln), z. B. „Alle Buchstaben stehen für positive Zahlen."
+  readonly note?: string
   // Name des gesuchten Ergebnisses im freien Modus: f'(x) bzw. y'
   readonly answerLabel: string
   readonly steps: readonly GuidedStep[]

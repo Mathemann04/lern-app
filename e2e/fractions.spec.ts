@@ -42,9 +42,9 @@ test('Von der Startseite über Grundlagen zu den Brüchen und eine Aufgabe gefü
   await page.getByRole('link', { name: /^Grundlagen/ }).click()
   await expect(page).toHaveURL(/#\/gebiet\/grundlagen$/)
   await expect(page.getByRole('heading', { name: 'Grundlagen', level: 1 })).toBeVisible()
-  // Gleichungen umstellen und Potenzen kommen bald
-  await expect(page.getByText('kommt bald')).toHaveCount(2)
-  await expect(page.getByRole('link', { name: /Gleichungen umstellen/ })).toHaveCount(0)
+  // nur Potenzen kommen bald
+  await expect(page.getByText('kommt bald')).toHaveCount(1)
+  await expect(page.getByRole('link', { name: /Gleichungen umstellen/ })).toBeVisible()
   await expectCleanPage(page, 'Grundlagen')
 
   await page.getByRole('link', { name: /^Brüche/ }).click()

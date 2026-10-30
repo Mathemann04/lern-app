@@ -160,6 +160,8 @@ lassen (z. B. $x e^x = y$).
     ausklammern". Falsche Antworten sind typische Irrwege.
   - „Was kommt heraus?" Die Antworten sind die Gleichung nach der
     Umformung. Die falschen entstehen aus typischen Fehlern.
+    Gibt es für eine Umformung keinen typischen Fehler, entfällt die
+    Frage und die Gleichung steht gleich unter „Bisher".
 - **Ab Stufe 3:** Routine-Umformungen fragt die App nur noch als „Was kommt
   heraus?". „Was machst du als Nächstes?" kommt nur noch an den Weichen:
   mit dem Nenner malnehmen, alles mit $x$ auf eine Seite, ausklammern,
@@ -458,8 +460,10 @@ Gegenprobe:
   Üben (`planGuidedTask`, `prepareFree`).
 - **Geführt:** Schrittplaner `guided/rearrangePlan.ts` mit den gemeinsamen
   Typen aus `guided/types.ts`, sonst wie bei den Brüchen.
-  „Was machst du als Nächstes?" zeigt die Umformung als Formel, z. B.
-  $\left| \cdot (x - 3)\right.$.
+  „Was machst du als Nächstes?" fragt nach dem Ziel („Wie wirst du den
+  Nenner $b$ los?") und zeigt die Umformung in Worten mit Formel, z. B.
+  „Beide Seiten mal $(x - 3)$"; Texte und Irrwege in
+  `explain/rearrangeTexts.ts`.
 - **Lange Aufgaben am Handy:** Determinanten, Integrale und verschachtelte
   Wurzeln setzen sich über `FitWidth` kleiner; wo das zu klein würde, steht
   die Aufgabe in zwei Zeilen (Werkzeug oben, „$= y$" darunter).

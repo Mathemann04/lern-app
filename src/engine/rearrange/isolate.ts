@@ -95,6 +95,10 @@ export function stepLabel(step: RearrangeStep, target: string): string {
       return `${unknown} ausklammern`
     case 'finish':
       return step.swapOnly ? 'Seiten tauschen' : 'Zu einem Bruch zusammenfassen'
+    case 'expand':
+      return 'Die Klammern ausmultiplizieren'
+    case 'combine':
+      return `Die ${step.side === 'rhs' ? 'linke' : 'rechte'} Seite zu einem Bruch zusammenfassen`
     default:
       return STEP_NAMES[step.kind]
   }
@@ -134,7 +138,7 @@ const isZeroExpr = (e: Expr) => e.kind === 'num' && isZero(e.value)
 const isOneExpr = (e: Expr) => e.kind === 'num' && isOne(e.value)
 
 // Beginnt der Term mit einem Minus?
-function isNegative(e: Expr): boolean {
+export function isNegative(e: Expr): boolean {
   if (e.kind === 'neg') return true
   if (e.kind === 'num') return ratSign(e.value) < 0
   return e.kind === 'mul' && e.factors[0]?.kind === 'num' && ratSign(e.factors[0].value) < 0

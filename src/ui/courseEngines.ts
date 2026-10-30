@@ -1,7 +1,7 @@
 import type { FreeTask } from '../engine/check/freeTask.ts'
 import type { GuidedTask } from '../engine/guided/types.ts'
 import type { TaskRef } from '../engine/tasks/taskNumber.ts'
-import { DERIVATIVES, FRACTIONS } from './catalog.ts'
+import { DERIVATIVES, FRACTIONS, REARRANGE } from './catalog.ts'
 
 // Mathe-Engine je Thema für den geführten und den freien Modus, erst bei Bedarf geladen (Ladezeit;
 // offline liegt sie ohnehin schon auf dem Gerät)
@@ -21,6 +21,16 @@ const LOADERS: Readonly<Record<string, () => Promise<CourseEngine>>> = {
   [FRACTIONS]: async () => {
     const [plan, free] = await Promise.all([import('../engine/guided/fractionPlan.ts'), import('../engine/check/fractionAnswer.ts')])
     return { planGuidedTask: plan.planFractionTask, prepareFree: free.prepareFractionFree }
+  },
+  [REARRANGE]: async () => {
+    const plan = await import('../engine/guided/rearrangePlan.ts')
+    return {
+      planGuidedTask: plan.planRearrangeTask,
+      // freier Modus kommt in Schritt 3 von M3; bis dahin führt die Adresse zum geführten Modus
+      prepareFree: () => {
+        throw new Error('Gleichungen umstellen: freier Modus noch nicht da')
+      },
+    }
   },
 }
 
