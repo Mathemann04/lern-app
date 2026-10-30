@@ -30,7 +30,7 @@ Details: [PLAN-M3.md](PLAN-M3.md)
 
 - [x] Plan M3 (3. Fassung, freigegeben)
 - [x] 1. Mathe-Engine fürs Umstellen
-- [ ] 2. Thema „Gleichungen umstellen" freischalten, Stufen 1 und 2 geführt
+- [x] 2. Thema „Gleichungen umstellen" freischalten, Stufen 1 und 2 geführt
 - [ ] 3. Stufe 3 geführt, freier Modus für die Stufen 1 bis 3
 - [ ] 4. Stufe 4 (verschachtelt) geführt und frei
 - [ ] 5. Stufe 5, Teil 1: Ableitungen, Integrale, Reihen, Grenzwerte, Differentialgleichungen
@@ -256,3 +256,15 @@ Details: [PLAN-M1.md](PLAN-M1.md)
 - 30.10.2026: Stufe 5 soll in jedem Thema „kaum noch schwerer" sein (Wunsch
   des Nutzers). Ableiten und Brüche werden direkt nach M3 nachgeschärft
   (siehe „Vorgemerkt"); neue Themen werden gleich so geplant.
+- 30.10.2026: Thema „Gleichungen umstellen" freigeschaltet (Schritt 2 von
+  M3), Stufen 1 und 2 geführt. Je Umformung erst „Was machst du als
+  Nächstes?" mit einer Frage zum Ziel (z. B. „Wie wirst du $+c$ auf der
+  rechten Seite los?"; falsche Antworten sind Irrwege wie „nur auf der
+  linken Seite" mit eigener Erklärung), dann „Was kommt heraus?" mit
+  falschen Gleichungen aus den typischen Fehlern. Gibt es für eine
+  Umformung keinen typischen Fehler, steht ihr Ergebnis gleich unter
+  „Bisher". Die Bedingung des Ergebnisses steht dabei (z. B. „Gilt für
+  $a \neq c$."). Neuer Lernkarten-Ordner mit vier Karten. Antworten aus
+  Text brechen jetzt in allen Themen um, statt kleiner zu werden; nur
+  Formeln setzen sich kleiner. Freier Modus und gezieltes Üben folgen in
+  Schritt 3 bzw. 7.

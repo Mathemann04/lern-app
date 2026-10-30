@@ -18,8 +18,9 @@ describe('parseRoute', () => {
     expect(parseRoute('/gebiet/grundlagen')).toEqual({ page: 'area', id: 'grundlagen' })
     expect(parseRoute('/thema/ableiten')).toEqual({ page: 'course', id: 'ableiten' })
     expect(parseRoute('/thema/brueche')).toEqual({ page: 'course', id: 'brueche' })
-    // Gleichungen umstellen kommt bald
-    expect(parseRoute('/thema/umstellen')).toEqual({ page: 'home' })
+    expect(parseRoute('/thema/umstellen')).toEqual({ page: 'course', id: 'umstellen' })
+    // Potenzen kommen bald
+    expect(parseRoute('/thema/potenzen')).toEqual({ page: 'home' })
     // Integralrechnung kommt bald
     expect(parseRoute('/gebiet/integralrechnung')).toEqual({ page: 'home' })
     expect(parseRoute('/gebiet/gibt-es-nicht')).toEqual({ page: 'home' })
@@ -42,7 +43,8 @@ describe('parseRoute', () => {
     expect(parseRoute('/ueben/ableiten/3-17')).toEqual({ page: 'practice', course: 'ableiten', mode: 'guided', level: 3, seed: 17, focus: null })
     expect(parseRoute('/ueben/brueche/9')).toEqual({ page: 'home' })
     expect(parseRoute('/ueben/gibt-es-nicht/1')).toEqual({ page: 'home' })
-    expect(parseRoute('/ueben/umstellen/1')).toEqual({ page: 'home' })
+    expect(parseRoute('/ueben/umstellen/2-5')).toEqual({ page: 'practice', course: 'umstellen', mode: 'guided', level: 2, seed: 5, focus: null })
+    expect(parseRoute('/ueben/potenzen/1')).toEqual({ page: 'home' })
     expect(taskHref('brueche', { level: 1, seed: 4711 })).toBe('#/ueben/brueche/1-4711')
     expect(practiceHref('brueche', 2)).toBe('#/ueben/brueche/2')
   })

@@ -26,13 +26,16 @@ import {
 } from '../expr/types.ts'
 import { type FractionTask, taskExpr } from '../fraction/task.ts'
 import type { Level } from '../tasks/taskNumber.ts'
+import type { RearrangeTask } from '../rearrange/task.ts'
 import { FRACTION_CARD_LIST } from './fractionCards.ts'
+import { REARRANGE_CARD_LIST } from './rearrangeCards.ts'
 import { WHEN_NEEDED } from './texts.ts'
 
 // Lernkarten: je Regel die Formel, ein Merksatz, wann man sie braucht, Beispiele und die
 // typischen Fehler dazu. Die Beispiele rechnet die Engine (example.ts), nicht die Karte.
 // Texte mit Formeln im Format von richText.ts. Die Karten liegen in Ordnern nach Themen
-// (Ableiten hier, Brüche in fractionCards.ts); spätere Themen bekommen eigene Ordner.
+// (Ableiten hier, Brüche in fractionCards.ts, Gleichungen umstellen in rearrangeCards.ts); spätere
+// Themen bekommen eigene Ordner.
 
 export type Topic = {
   // Teil der Adresse, z. B. #/karten/ableitungen
@@ -44,13 +47,15 @@ export type Topic = {
 export const TOPICS: readonly Topic[] = [
   { id: 'ableitungen', title: 'Ableiten', description: 'Von der Potenzregel bis zum impliziten Ableiten' },
   { id: 'brueche', title: 'Brüche', description: 'Kürzen, erweitern, Hauptnenner, mal und geteilt' },
+  { id: 'umstellen', title: 'Gleichungen umstellen', description: 'Gegenrechnung, Rüberbringen, Variable im Nenner, Ausklammern' },
 ]
 
 // Beispiel einer Karte: beim Ableiten eine Funktion (beim impliziten Ableiten eine Gleichung), bei
-// Brüchen eine Aufgabe der Bruch-Engine
-export type CardExample = Expr | Equation | FractionTask
+// Brüchen eine Aufgabe der Bruch-Engine, beim Umstellen eine Umstell-Aufgabe
+export type CardExample = Expr | Equation | FractionTask | RearrangeTask
 
 export const isFractionExample = (e: CardExample): e is FractionTask => 'hints' in e
+export const isRearrangeExample = (e: CardExample): e is RearrangeTask => 'target' in e
 
 export type Card = {
   readonly id: string
@@ -342,6 +347,7 @@ export const CARDS: readonly Card[] = [
     errors: ['implicit-y-constant', 'implicit-y-prime-forgotten', 'implicit-x-as-constant', 'implicit-constant-side-kept'],
   },
   ...FRACTION_CARD_LIST,
+  ...REARRANGE_CARD_LIST,
 ]
 
 export function topicById(id: string): Topic | undefined {
@@ -360,6 +366,7 @@ export function cardForRule(rule: RuleId): Card | undefined {
 
 // Beispiel als ein Term: Gleichung als linke minus rechte Seite, Bruchaufgabe als ihr Term
 function exampleTerm(e: CardExample): Expr {
+  if (isRearrangeExample(e)) return sub(e.equation.lhs, e.equation.rhs)
   if (isFractionExample(e)) return taskExpr(e)
   return isEquation(e) ? sub(e.lhs, e.rhs) : e
 }

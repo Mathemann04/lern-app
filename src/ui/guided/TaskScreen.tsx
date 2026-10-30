@@ -78,9 +78,9 @@ function TaskHeader({ task, stepIndex }: { task: GuidedTask; stepIndex: number }
   const established = task.steps.slice(0, stepIndex).flatMap((s) => s.established ?? [])
   return (
     <section className="space-y-3">
-      <TaskIntro taskRef={task.ref} functionLatex={task.functionLatex} instruction={task.instruction} />
+      <TaskIntro taskRef={task.ref} functionLatex={task.functionLatex} instruction={task.instruction} note={task.note} />
       {established.length > 0 && (
-        <div className="space-y-1 rounded-xl bg-zinc-50 px-4 py-3" aria-label="Bisher">
+        <div className="space-y-2 rounded-xl bg-zinc-50 px-4 py-3" aria-label="Bisher">
           <p className="text-sm text-zinc-500">Bisher</p>
           {established.map((line, i) => (
             <FitWidth key={i}>
@@ -165,10 +165,7 @@ function StepView({ step, task, isLast, mode, detail, onMistake, onNext }: StepP
                       : 'border-zinc-200 bg-surface hover:border-accent-600 active:bg-accent-50'
               }`}
             >
-              <FitWidth className="min-w-0 flex-1 text-lg">
-                <RichText text={choice.content} className="block font-medium" inline />
-                {choice.caption && <RichText text={choice.caption} className="mt-1 block text-[0.78em] text-zinc-500" inline />}
-              </FitWidth>
+              <ChoiceContent choice={choice} />
               {isRight && <span className="animate-pop text-xl text-green-700" aria-hidden>✓</span>}
               {isWrong && <span className="animate-pop text-xl text-red-700" aria-hidden>✗</span>}
             </button>
@@ -234,6 +231,18 @@ function StepView({ step, task, isLast, mode, detail, onMistake, onNext }: StepP
       </div>
     </section>
   )
+}
+
+// Eine Formel als Antwort setzt sich kleiner, bis sie passt; Text mit Formeln bricht um wie ein Satz
+function ChoiceContent({ choice }: { choice: Choice }) {
+  const content = (
+    <>
+      <RichText text={choice.content} className="block font-medium" inline />
+      {choice.caption && <RichText text={choice.caption} className="mt-1 block text-[0.78em] text-zinc-500" inline />}
+    </>
+  )
+  if (/^\$[^$]+\$$/.test(choice.content)) return <FitWidth className="min-w-0 flex-1 text-lg">{content}</FitWidth>
+  return <span className="block min-w-0 flex-1 text-lg">{content}</span>
 }
 
 // Bei der Regelwahl zeigen die Karten alle angebotenen Regeln, nicht nur die richtige

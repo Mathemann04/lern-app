@@ -12,21 +12,28 @@ import { equationToLatex, toLatex } from '../expr/print.ts'
 import { type Equation, type Expr, E, add, cos, div, exp, fn, isEquation, ln, log, mul, neg, num, pow, sin, sqrt, sub, tan, x } from '../expr/types.ts'
 import { generateDerivativeTask } from '../tasks/derivativeTerms.ts'
 import { FRACTION_ERROR_RULES } from '../fraction/errorRules.ts'
+import { REARRANGE_ERROR_RULES } from '../rearrange/errorRules.ts'
 import { fracEquals, toFrac } from '../fraction/frac.ts'
 import { solveFraction } from '../fraction/solve.ts'
 import { taskExpr as toExprOf, taskLatex } from '../fraction/task.ts'
 import { planFractionTask } from '../guided/fractionPlan.ts'
-import { CARDS, type CardExample, TOPICS, cardById, cardForRule, cardIdsFor, cardsInTopic, examplesFor, isFractionExample, topicById } from './cards.ts'
+import { planRearrangeTask } from '../guided/rearrangePlan.ts'
+import { createRng } from '../random/rng.ts'
+import { holds, samplePoints } from '../rearrange/check.ts'
+import { solveEquation } from '../rearrange/isolate.ts'
+import { CARDS, type CardExample, TOPICS, cardById, cardForRule, cardIdsFor, cardsInTopic, examplesFor, isFractionExample, isRearrangeExample, topicById } from './cards.ts'
 import { cardExample, workedExample } from './example.ts'
 import { parseRichText } from './richText.ts'
 
-const latexOf = (e: CardExample) => (isFractionExample(e) ? taskLatex(e) : isEquation(e) ? equationToLatex(e) : toLatex(e))
+const latexOf = (e: CardExample) =>
+  isRearrangeExample(e) ? equationToLatex(e.equation) : isFractionExample(e) ? taskLatex(e) : isEquation(e) ? equationToLatex(e) : toLatex(e)
 
 // Karten zum Ableiten (Beispiele sind Funktionen bzw. Gleichungen) und zu Brüchen
 const DERIVATIVE_CARDS = cardsInTopic('ableitungen')
 const FRACTION_CARDS = cardsInTopic('brueche')
+const REARRANGE_CARDS = cardsInTopic('umstellen')
 const derivativeExample = (e: CardExample): Expr | Equation => {
-  if (isFractionExample(e)) throw new Error('Bruchaufgabe auf einer Karte zum Ableiten')
+  if (isFractionExample(e) || isRearrangeExample(e)) throw new Error('Keine Ableitungsaufgabe auf einer Karte zum Ableiten')
   return e
 }
 
@@ -65,7 +72,7 @@ describe('Lernkarten: Katalog', () => {
       expect(cardsInTopic(topic.id).length, topic.id).toBeGreaterThan(0)
       expect(cardById(topic.id)).toBeUndefined()
     }
-    expect(DERIVATIVE_CARDS.length + FRACTION_CARDS.length).toBe(CARDS.length)
+    expect(DERIVATIVE_CARDS.length + FRACTION_CARDS.length + REARRANGE_CARDS.length).toBe(CARDS.length)
   })
 
   it.each(CARDS.map((c) => [c.id, c] as const))('%s: alle Texte und Formeln lassen sich setzen', (id, card) => {
@@ -75,7 +82,7 @@ describe('Lernkarten: Katalog', () => {
   })
 
   it('kennt nur bestehende typische Fehler', () => {
-    const known = new Set([...ERROR_RULES, ...FRACTION_ERROR_RULES].map((r) => r.id))
+    const known = new Set([...ERROR_RULES, ...FRACTION_ERROR_RULES, ...REARRANGE_ERROR_RULES].map((r) => r.id))
     for (const card of CARDS) for (const id of card.errors) expect(known.has(id), `${card.id}: ${id}`).toBe(true)
   })
 
@@ -258,5 +265,46 @@ describe('Lernkarten: Brüche', () => {
     const [first] = card.examples
     if (!isFractionExample(first)) throw new Error('kein Bruch')
     expect(examplesFor(card, toExprOf(first)).map(latexOf)).not.toContain(latexOf(first))
+  })
+})
+
+describe('Lernkarten: Gleichungen umstellen', () => {
+  const examples = REARRANGE_CARDS.flatMap((card) => card.examples.map((e) => [card.id, latexOf(e), e] as const))
+
+  it('nutzt nur Umstell-Aufgaben als Beispiele', () => {
+    expect(REARRANGE_CARDS.length).toBeGreaterThan(0)
+    for (const card of REARRANGE_CARDS) for (const e of card.examples) expect(isRearrangeExample(e), card.id).toBe(true)
+    for (const card of [...DERIVATIVE_CARDS, ...FRACTION_CARDS]) for (const e of card.examples) expect(isRearrangeExample(e), card.id).toBe(false)
+  })
+
+  it.each(examples)('%s: %s', (id, _latex, e) => {
+    if (!isRearrangeExample(e)) throw new Error(id)
+    const example = cardExample(e)
+    const solution = solveEquation(e.equation, e.target)!
+    expect(example.result).toEqual(solution.result)
+    expect(example.lines.length).toBe(solution.steps.length)
+    expect(latexProblem(example.functionLatex, { checkUgly: false })).toBeNull()
+    for (const line of example.lines) {
+      expect(latexProblem(line.latex), line.latex).toBeNull()
+      expectRenderable(line.label, id)
+    }
+    // Gegenprobe durch Einsetzen: jede Zeile hat dieselbe Lösung
+    const points = samplePoints(e, solution.result, createRng(id), 12, solution.requires)
+    expect(points.length).toBeGreaterThanOrEqual(8)
+    for (const step of solution.steps) for (const p of points) expect(holds(step.after, p), id).toBe(true)
+  })
+
+  it('zeigt jeden typischen Fehler aus den spielbaren Stufen auf einer Karte', () => {
+    const shown = new Set(CARDS.flatMap((c) => c.errors))
+    const own = new Set(REARRANGE_CARDS.flatMap((c) => c.errors))
+    const used = new Set<string>()
+    for (const level of [1, 2] as const) {
+      for (let seed = 1; seed <= 200; seed++) {
+        for (const step of planRearrangeTask({ level, seed }).steps) for (const c of step.choices) if (c.errorRuleId) used.add(c.errorRuleId)
+      }
+    }
+    expect([...used].filter((id) => !shown.has(id))).toEqual([])
+    // Fehler des Umstellens stehen im eigenen Ordner, die aus „Brüche" in deren Ordner
+    expect([...used].filter((id) => id.startsWith('eq-') && !own.has(id))).toEqual([])
   })
 })

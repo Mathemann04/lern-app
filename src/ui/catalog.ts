@@ -127,6 +127,40 @@ const fractionLevels: LevelPreview[] = [
   },
 ]
 
+// Gleichungen umstellen (Plan M3): Stufen 1 und 2 geführt spielbar, die übrigen folgen
+const rearrangeLevels: LevelPreview[] = [
+  {
+    level: 1,
+    available: true,
+    title: 'Mehrere Schritte, die Variable kommt einmal vor',
+    examples: [String.raw`y = \frac{3(x - a)}{b} + c`, String.raw`y = m(x - a) + b \;\text{ nach } m`, String.raw`\frac{x}{a} - \frac{b}{c} = d`],
+  },
+  {
+    level: 2,
+    available: true,
+    title: 'Die Variable kommt mehrfach vor oder steht im Nenner',
+    examples: [String.raw`a(x + b) = c(x - d)`, String.raw`\frac{a}{x} + b = c`, String.raw`y = \frac{a}{b - x}`],
+  },
+  {
+    level: 3,
+    available: false,
+    title: 'Brüche und Wurzeln, die Variable kommt mehrfach vor',
+    examples: [String.raw`y = \frac{2x + 1}{x - 3}`, String.raw`\frac{1}{x} + \frac{1}{a} = \frac{1}{b}`, String.raw`y = \sqrt{x + a} - \sqrt{x}`],
+  },
+  {
+    level: 4,
+    available: false,
+    title: 'Verschachtelt: e-Funktion, ln, Wurzeln in Wurzeln, Winkelfunktionen',
+    examples: [String.raw`y = \ln\left(1 + \sqrt{1 + e^{2x}}\right)`, String.raw`\log_a x + \log_a(x + b) = c`, String.raw`y = \frac{e^x - e^{-x}}{2}`],
+  },
+  {
+    level: 5,
+    available: false,
+    title: 'Quer durch die Mathematik: Ableitung, Integral, Reihe, Grenzwert, Determinante',
+    examples: [String.raw`\int_a^x \frac{\mathrm{d}t}{t(t + b)} = y`, String.raw`\sum_{k=1}^{\infty} k x^k = y`, String.raw`\det\begin{pmatrix} e^{x} & e^{-x} \\ a & b \end{pmatrix} = y`],
+  },
+]
+
 export const SUBJECTS: readonly Subject[] = [
   {
     id: 'mathe',
@@ -154,8 +188,8 @@ export const SUBJECTS: readonly Subject[] = [
             title: 'Gleichungen umstellen',
             description: 'Nach einer Variablen auflösen, von Brüchen und Wurzeln bis quer durch die Mathematik',
             icon: 'rearrange',
-            cards: null,
-            levels: [],
+            cards: 'umstellen',
+            levels: rearrangeLevels,
             free: false,
             focus: false,
           },

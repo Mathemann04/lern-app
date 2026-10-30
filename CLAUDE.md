@@ -75,8 +75,11 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   `src/ui/cards/` (`CardSheet.tsx`: Fenster über der Aufgabe, die
   Zurück-Taste schließt nur das Fenster). Lange Formeln in
   `FitWidth` (`src/ui/FitWidth.tsx`) setzen sich selbst kleiner, bis sie
-  passen (ohne Umbruch). Texte mit Formeln über
-  `RichText` (Formeln zwischen `$…$`).
+  passen (ohne Umbruch); im geführten Modus nur Antworten, die eine
+  einzige Formel sind, Antworten mit Text brechen um. Texte mit Formeln
+  über `RichText` (Formeln zwischen `$…$`). Arbeitsauftrag und Hinweis
+  unter der Aufgabe (z. B. „Alle Buchstaben stehen für positive Zahlen.",
+  `note`) zeigt `TaskIntro` in `src/ui/task/TaskParts.tsx`.
 - `src/engine/`: Mathe-Engine, reines TypeScript
   - `rational.ts`: exakte Brüche (bigint)
   - `expr/types.ts`: Termbaum in *Aufgabenform* (Bruch, Wurzel, Minus bleiben,
@@ -114,7 +117,10 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     „Bausteine mit eigenen Regeln" in Stufe 5) und
     durchgerechnete Beispiele (`example.ts` aus `derive`,
     `fractionExample.ts` aus der Bruch-Engine). Texte für Brüche in
-    `fractionTexts.ts`
+    `fractionTexts.ts`. Umstellen: Texte, Tipps und falsche Umformungen
+    (Irrwege mit eigener Erklärung) in `rearrangeTexts.ts`, Ordner
+    „Gleichungen umstellen" in `rearrangeCards.ts` (Beispiele sind
+    Umstell-Aufgaben), durchgerechnete Beispiele in `rearrangeExample.ts`
   - `guided/plan.ts`: Schrittplaner für den geführten Modus (Regelwahl, dann je
     Summand ein Schritt; Produkt/Quotient: u', v', Einsetzen; Kette: äußere,
     innere Ableitung, Zusammensetzen, ab Stufe 4 ohne eigenen Außen-Schritt;
@@ -129,8 +135,13 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     nächsten auf, im letzten ist die Antwort das Ergebnis; falsche
     Ergebnisse mit Klammern als Produkt, `productFormExpr`; Stufe 5: Regel
     anwenden, Ausmultiplizieren, innerer Doppelbruch zuerst, bei mehreren
-    Rechenarten jede Klammer zu einem Bruch). Gemeinsame Typen in
-    `guided/types.ts`
+    Rechenarten jede Klammer zu einem Bruch). `guided/rearrangePlan.ts`:
+    dasselbe fürs Umstellen (je Umformung „Was machst du als Nächstes?" mit
+    einer Frage zum Ziel und Irrwegen, dann „Was kommt heraus?" mit
+    falschen Gleichungen aus den Fehlerregeln; ohne passenden Fehler steht
+    die Gleichung gleich unter „Bisher"; ab Stufe 3 die Umformung nur an
+    Weichen, `isJunction`; Bedingung des Ergebnisses wie „Gilt für
+    $a \neq c$."). Gemeinsame Typen in `guided/types.ts`
   - `errorCatalog.ts`: typische Fehler aller Themen mit Namen, je Thema
   - `fraction/`: Bruch-Engine (Brüche aus Polynomen, exakt): `poly.ts`
     (Polynome in mehreren Buchstaben; $1 \pm \sin x$ mit der 1 vorn),
@@ -216,12 +227,13 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   `explain/cards.ts`, und jede ihrer Fehlerregeln steht auf einer Karte
   (`cards.test.ts` prüft das; bei Brüchen: jeder Fehler der spielbaren
   Stufen steht auf einer Karte, und jeder Fehler auf einer Karte lässt sich
-  dort gezielt üben). Beispiele nur als Term bzw. Bruchaufgabe; den
+  dort gezielt üben). Beispiele nur als Term, Bruch- oder Umstell-Aufgabe; den
   Rechenweg rechnet die Engine.
 - **Texte:** „Warum ist das falsch?" benennt den Fehler und zeigt die Regel,
   verrät aber nicht das Endergebnis des Schritts. Jede Fehlerregel, die in einer
   Stufe vorkommt, braucht einen eigenen Text in `explain/texts.ts` bzw.
-  `explain/fractionTexts.ts` (Tests verbieten den Rückfalltext). Beim Bearbeiten mit Skripten auf Backslashes
+  `explain/fractionTexts.ts` bzw. `explain/rearrangeTexts.ts` (Tests
+  verbieten den Rückfalltext). Beim Bearbeiten mit Skripten auf Backslashes
   achten (`\f` in `\frac` wird sonst zum Steuerzeichen).
 - **Bedienbarkeit:** Knöpfe und Links mindestens 44 px hoch; Text nicht
   heller als `zinc-500`.

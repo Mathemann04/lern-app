@@ -2,7 +2,8 @@ import { type Segment, parseRichText } from '../engine/explain/richText.ts'
 import { Formula } from './Formula.tsx'
 
 // Text mit eingebetteten Formeln ($…$), ein Absatz pro Zeile.
-// `inline`: ohne Absatz-Blöcke, für Überschriften und Knöpfe.
+// `inline`: ohne Absatz-Blöcke, für Überschriften, Knöpfe und mitten im Satz (ein einzelner Absatz
+// bleibt in der Zeile, mehrere stehen untereinander).
 export function RichText({ text, className = '', inline = false }: { text: string; className?: string; inline?: boolean }) {
   const paragraphs = parseRichText(text)
   const content = (segments: (typeof paragraphs)[number]) =>
@@ -23,6 +24,7 @@ export function RichText({ text, className = '', inline = false }: { text: strin
       )
     })
   if (inline) {
+    if (paragraphs.length === 1) return <span className={className}>{content(paragraphs[0])}</span>
     return (
       <span className={className}>
         {paragraphs.map((segments, i) => (
