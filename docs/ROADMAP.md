@@ -6,7 +6,7 @@ Stand: 30.10.2026
 | --- | --- | --- |
 | M1 | Grundgerüst + Ableitungsregeln (beide Modi, 5 Stufen, Erklärungen, Lernkarten, Fortschritt) | fertig |
 | M2 | Brüche (Bruchrechnung, Bruchterme kürzen und zusammenfassen, Doppelbrüche); App für mehrere Themen | fertig |
-| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, Umkehrfunktionen, e und ln, Substitution) | Plan im Entwurf |
+| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | Plan im Entwurf |
 | M4 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
 | M5 | weitere Themen aus Mathematik MB1 | offen |
 | M6 | Physik: Formeln mit Einheiten (Formeln umstellen mit Zeichen der Physik; Aufgaben lösen: Formel wählen, umstellen, Werte mit Einheiten einsetzen) | offen |
@@ -17,13 +17,14 @@ Stand: 30.10.2026
 
 Details: [PLAN-M3.md](PLAN-M3.md)
 
-- [ ] Plan M3 (2. Fassung liegt vor, wartet auf Freigabe)
+- [ ] Plan M3 (3. Fassung liegt vor, wartet auf Freigabe)
 - [ ] 1. Mathe-Engine fürs Umstellen
 - [ ] 2. Thema „Gleichungen umstellen" freischalten, Stufen 1 und 2 geführt
-- [ ] 3. Stufen 3 und 4 geführt
-- [ ] 4. Freier Modus
-- [ ] 5. Stufe 5 geführt und frei
-- [ ] 6. Gezieltes Üben, Feinschliff, Abschluss von M3
+- [ ] 3. Stufe 3 geführt, freier Modus für die Stufen 1 bis 3
+- [ ] 4. Stufe 4 (verschachtelt) geführt und frei
+- [ ] 5. Stufe 5, Teil 1: Ableitungen, Integrale, Reihen, Grenzwerte, Differentialgleichungen
+- [ ] 6. Stufe 5, Teil 2: komplexe Zahlen, Determinanten, Vektoren, Additionstheoreme
+- [ ] 7. Gezieltes Üben, Feinschliff, Abschluss von M3
 
 ## M2: Schritte
 
@@ -213,3 +214,10 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   $k$); Formeln mit Zeichen der Physik und „Aufgaben lösen" (Formel wählen,
   umstellen, Werte mit Einheiten einsetzen) kommen in M6 und nutzen
   dieselbe Engine.
+- 30.10.2026: Plan M3, 3. Fassung (Wunsch des Nutzers: Stufen 4 und 5
+  noch schwerer, „fast alle Themengebiete"): Stufe 3 mit Wurzeln, Stufe 4
+  verschachtelt (e und $\ln$ ineinander, Wurzeln in Wurzeln, Potenz- und
+  Logarithmusgesetze, Winkel- und Hyperbelfunktionen, Scheinlösungen),
+  Stufe 5 quer durch die Mathematik (Ableitung, Integral, Summe und Reihe,
+  Grenzwert, komplexe Zahl, Determinante, Vektor, Differentialgleichung:
+  erst ausrechnen, dann umstellen). 7 statt 6 Schritte.
