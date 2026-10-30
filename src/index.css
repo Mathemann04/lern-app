@@ -297,11 +297,20 @@ body .katex {
   }
 }
 
-/* Eingabefeld der Mathe-Tastatur: Rahmen und Fokus kommen vom umgebenden Kasten, kein Menü */
+/* Eingabefeld der Mathe-Tastatur: Rahmen und Fokus kommen vom umgebenden Kasten, kein Menü.
+   Farben aus der App: MathLive nimmt sonst die Schriftfarbe des Browsers für Eingabefelder, die
+   manche Handys im dunklen Design schwarz lassen (schwarz auf schwarz), und richtet Cursor und
+   Markierung nach dem Gerät statt nach der Einstellung „Aussehen". */
 math-field {
   border: none;
   outline: none;
   background: transparent;
+  color: inherit;
+  --caret-color: var(--accent-700);
+  --selection-color: currentColor;
+  --selection-background-color: var(--accent-200);
+  --contains-highlight-background-color: var(--accent-50);
+  --placeholder-color: var(--accent-700);
 }
 math-field::part(menu-toggle) {
   display: none;
