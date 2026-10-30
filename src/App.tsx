@@ -1,12 +1,14 @@
 import { Suspense, lazy, useEffect } from 'react'
 import { AreaScreen } from './ui/AreaScreen.tsx'
 import { HomeScreen } from './ui/HomeScreen.tsx'
-import { DERIVATIVES, type Tone, areaById, areaOfCards, courseById } from './ui/catalog.ts'
+import { type Tone, areaById, courseById, courseOfCards } from './ui/catalog.ts'
+import { loadCourseEngine } from './ui/courseEngines.ts'
 import { SettingsScreen } from './ui/SettingsScreen.tsx'
 import { buildInfoLabel } from './ui/buildInfo.ts'
 import { type Route, parseRoute, sectionOf } from './ui/routes.ts'
 import { MainNav } from './ui/MainNav.tsx'
 import { useHashRoute } from './ui/useHashRoute.ts'
+import { getAppState } from './state/store.ts'
 import { usePwa } from './ui/usePwa.ts'
 import { useTheme } from './ui/useTheme.ts'
 
@@ -28,11 +30,14 @@ export function App() {
   // In Aufgaben kein Hauptmenü: dort beendet das X die Aufgabe
   const showNav = route.page !== 'practice'
 
-  // Kurz nach dem Start schon die Teile für Aufgaben holen, damit „Weiter üben" sofort reagiert
+  // Kurz nach dem Start schon die Teile für Aufgaben holen (auch die Engine des zuletzt geübten
+  // Themas), damit „Weiter üben" sofort reagiert
   useEffect(() => {
     const timer = setTimeout(() => {
       void loadPractice()
       void loadCourse()
+      const { lastCourse } = getAppState().settings
+      if (courseById(lastCourse)) void loadCourseEngine(lastCourse).catch(() => {})
     }, 1500)
     return () => clearTimeout(timer)
   }, [])
@@ -108,9 +113,9 @@ function toneOf(route: Route): Tone | undefined {
     case 'course':
       return courseById(route.id)?.area.tone
     case 'practice':
-      return courseById(DERIVATIVES)?.area.tone
+      return courseById(route.course)?.area.tone
     case 'cards':
-      return route.folder ? areaOfCards(route.folder)?.tone : undefined
+      return route.folder ? courseOfCards(route.folder)?.area.tone : undefined
     default:
       return undefined
   }
@@ -131,7 +136,7 @@ function Page({ route }: { route: Route }) {
     case 'cards':
       return <CardsPage folder={route.folder} card={route.card} />
     case 'practice':
-      return <PracticePage mode={route.mode} level={route.level} seed={route.seed} focus={route.focus} />
+      return <PracticePage course={route.course} mode={route.mode} level={route.level} seed={route.seed} focus={route.focus} />
     case 'home':
       return <HomeScreen />
   }

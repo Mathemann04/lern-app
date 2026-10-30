@@ -14,7 +14,8 @@ import { createRng } from '../random/rng.ts'
 import { generateDerivativeTask } from '../tasks/derivativeTerms.ts'
 import { numericImplicitDerivative } from '../check/curve.ts'
 import { implicitCurvePoints } from '../derive/implicit.ts'
-import { type GuidedStep, type GuidedTask, planForExpression, planGuidedTask, planImplicit } from './plan.ts'
+import { planForExpression, planGuidedTask, planImplicit } from './plan.ts'
+import type { GuidedStep, GuidedTask } from './types.ts'
 
 const correctChoice = (step: GuidedStep) => step.choices.find((c) => c.correct)!
 

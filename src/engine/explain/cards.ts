@@ -24,13 +24,15 @@ import {
   x,
   y,
 } from '../expr/types.ts'
+import { type FractionTask, taskExpr } from '../fraction/task.ts'
 import type { Level } from '../tasks/taskNumber.ts'
+import { FRACTION_CARD_LIST } from './fractionCards.ts'
 import { WHEN_NEEDED } from './texts.ts'
 
 // Lernkarten: je Regel die Formel, ein Merksatz, wann man sie braucht, Beispiele und die
 // typischen Fehler dazu. Die Beispiele rechnet die Engine (example.ts), nicht die Karte.
-// Texte mit Formeln im Format von richText.ts. Die Karten liegen in Ordnern nach Themen;
-// spätere Themen (z. B. Formeln umstellen) bekommen eigene Ordner.
+// Texte mit Formeln im Format von richText.ts. Die Karten liegen in Ordnern nach Themen
+// (Ableiten hier, Brüche in fractionCards.ts); spätere Themen bekommen eigene Ordner.
 
 export type Topic = {
   // Teil der Adresse, z. B. #/karten/ableitungen
@@ -41,7 +43,14 @@ export type Topic = {
 
 export const TOPICS: readonly Topic[] = [
   { id: 'ableitungen', title: 'Ableiten', description: 'Von der Potenzregel bis zum impliziten Ableiten' },
+  { id: 'brueche', title: 'Brüche', description: 'Kürzen, erweitern, Hauptnenner, mal und geteilt' },
 ]
+
+// Beispiel einer Karte: beim Ableiten eine Funktion (beim impliziten Ableiten eine Gleichung), bei
+// Brüchen eine Aufgabe der Bruch-Engine
+export type CardExample = Expr | Equation | FractionTask
+
+export const isFractionExample = (e: CardExample): e is FractionTask => 'hints' in e
 
 export type Card = {
   readonly id: string
@@ -51,7 +60,7 @@ export type Card = {
   readonly title: string
   // ab dieser Stufe kommt die Regel in Aufgaben vor
   readonly level: Level
-  // Regeln der Engine, die die Karte erklärt
+  // Regeln der Engine, die die Karte erklärt (beim Ableiten; Bruchkarten wählt der Schrittplaner)
   readonly rules: readonly RuleId[]
   // Formeln (LaTeX)
   readonly formulas: readonly string[]
@@ -61,9 +70,8 @@ export type Card = {
   readonly note?: string
   // wann man die Regel braucht (bei Regeln für den Aufbau eines Terms)
   readonly when?: string
-  // Beispielfunktionen in Aufgabenform (beim impliziten Ableiten Gleichungen); die erste ist
-  // die einfachste
-  readonly examples: readonly (Expr | Equation)[]
+  // Beispiele in Aufgabenform; das erste ist das einfachste
+  readonly examples: readonly CardExample[]
   // Ids der typischen Fehler (Fehlerregeln)
   readonly errors: readonly string[]
 }
@@ -333,6 +341,7 @@ export const CARDS: readonly Card[] = [
     ],
     errors: ['implicit-y-constant', 'implicit-y-prime-forgotten', 'implicit-x-as-constant', 'implicit-constant-side-kept'],
   },
+  ...FRACTION_CARD_LIST,
 ]
 
 export function topicById(id: string): Topic | undefined {
@@ -349,13 +358,19 @@ export function cardForRule(rule: RuleId): Card | undefined {
   return CARDS.find((card) => card.rules.includes(rule))
 }
 
+// Beispiel als ein Term: Gleichung als linke minus rechte Seite, Bruchaufgabe als ihr Term
+function exampleTerm(e: CardExample): Expr {
+  if (isFractionExample(e)) return taskExpr(e)
+  return isEquation(e) ? sub(e.lhs, e.rhs) : e
+}
+
 // Beispiele einer Karte. In einer Aufgabe ohne die, die dort als Teil vorkommen: Sonst verriete
 // die Karte das Ergebnis eines Schritts (z. B. 4x³ in 4x³ − 2/x + √x).
 // (Bei Gleichungen ist task linke minus rechte Seite.)
-export function examplesFor(card: Card, task?: Expr): readonly (Expr | Equation)[] {
+export function examplesFor(card: Card, task?: Expr): readonly CardExample[] {
   if (!task) return card.examples
   const parts = new Set(subterms(task).map(key))
-  const fresh = card.examples.filter((e) => !parts.has(key(isEquation(e) ? sub(e.lhs, e.rhs) : e)))
+  const fresh = card.examples.filter((e) => !parts.has(key(exampleTerm(e))))
   return fresh.length > 0 ? fresh : card.examples
 }
 

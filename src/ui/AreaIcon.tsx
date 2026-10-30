@@ -33,6 +33,36 @@ const ART: Record<Kind, (id: string) => ReactNode> = {
       <circle cx="28" cy="31.5" r="2.8" className="fill-white stroke-tone-700" strokeWidth="2.2" />
     </>
   ),
+  // Brüche: Kreis in Vierteln, ein Viertel herausgezogen
+  fraction: () => (
+    <>
+      <Card />
+      <path d="M25.5 23.5V11.5A12 12 0 1 1 13.5 23.5Z" className="fill-tone-500" />
+      <path d="M25.5 23.5V11.5A12 12 0 0 1 37.5 23.5Z" className="fill-tone-400" />
+      <path d="M25.5 23.5H37.5A12 12 0 0 1 25.5 35.5Z" className="fill-tone-600" />
+      <path d="M22.5 20.5H10.5A12 12 0 0 1 22.5 8.5Z" className="fill-tone-700" />
+    </>
+  ),
+  // Formeln umstellen: Waage im Gleichgewicht
+  rearrange: () => (
+    <>
+      <path d="M24 13 18 39h12z" className="fill-tone-700" />
+      <rect x="6" y="11" width="36" height="4" rx="2" className="fill-tone-600" />
+      <path d="M5 27h14a7 5 0 0 1-14 0zM29 27h14a7 5 0 0 1-14 0z" className="fill-tone-300" />
+      <path d="M12 15v12M36 15v12" className="stroke-tone-500" strokeWidth="1.5" />
+      <rect x="8" y="20" width="8" height="7" rx="1.5" className="fill-tone-500" />
+      <rect x="33" y="22" width="6" height="5" rx="1.5" className="fill-tone-400" />
+      <circle cx="24" cy="13" r="3" className="fill-tone-800" />
+    </>
+  ),
+  // Potenzen, Wurzeln, Logarithmen: Quadrate, die immer größer werden
+  powers: () => (
+    <>
+      <rect x="4" y="34" width="6" height="6" rx="1.5" className="fill-tone-300" />
+      <rect x="12" y="28" width="12" height="12" rx="2" className="fill-tone-500" />
+      <rect x="26" y="22" width="18" height="18" rx="2.5" className="fill-tone-700" />
+    </>
+  ),
   // Integralrechnung: Fläche unter einer Kurve mit Rechteckstreifen
   integral: (id) => (
     <>

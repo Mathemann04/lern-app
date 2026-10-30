@@ -16,6 +16,9 @@ async function seedStorage(page: Page, progress: object, settings: object = {}) 
 
 const clean = (level: number, count: number) => Array.from({ length: count }, (_, i) => ({ level, mode: 'guided', clean: true, at: i }))
 
+// Abschnitt eines Themas auf der Fortschrittsseite
+const derivatives = (page: Page) => page.getByRole('region', { name: 'Ableiten', exact: true })
+
 const answers = (page: Page) => page.getByRole('group', { name: 'Antworten' }).getByRole('button')
 const correctFeedback = (page: Page) => page.getByText('Richtig!', { exact: true })
 const wrongFeedback = (page: Page) => page.getByText('Nicht ganz. Versuch es noch einmal.')
@@ -44,7 +47,7 @@ test('Nach 8 von 10 ohne Fehler schlägt die App eine Stufe höher vor', async (
   const suggestion = page.getByRole('region', { name: 'Eine Stufe höher?' })
   await expect(suggestion).toContainText('Lust auf Stufe 2?')
   await suggestion.getByRole('link', { name: 'Stufe 2 probieren' }).click()
-  await expect(page).toHaveURL(/#\/ueben\/2-\d+$/)
+  await expect(page).toHaveURL(/#\/ueben\/ableiten\/2-\d+$/)
 
   // Gewechselt wird nur auf Knopfdruck; jetzt ist Stufe 2 gewählt
   await page.goto('./#/thema/ableiten')
@@ -68,16 +71,16 @@ test('Häufigste Fehler mit gezieltem Üben', async ({ page }) => {
   await page.goto('./')
   await page.getByRole('link', { name: 'Fortschritt', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'Dein Fortschritt' })).toBeVisible()
-  await expect(page.getByRole('listitem', { name: 'Stufe 2' })).toContainText('3 gelöst · zuletzt 3 von 3 ohne Fehler')
-  await expect(page.getByRole('listitem', { name: 'Stufe 1' })).toContainText('Noch keine Aufgabe gelöst.')
+  await expect(derivatives(page).getByRole('listitem', { name: 'Stufe 2' })).toContainText('3 gelöst · zuletzt 3 von 3 ohne Fehler')
+  await expect(derivatives(page).getByRole('listitem', { name: 'Stufe 1' })).toContainText('Noch keine Aufgabe gelöst.')
 
-  const errors = page.getByRole('region', { name: 'Deine häufigsten Fehler' })
+  const errors = derivatives(page).getByRole('region', { name: 'Deine häufigsten Fehler' })
   await expect(errors.getByRole('listitem').first()).toContainText('Minuszeichen beim Kosinus vergessen')
   await expect(errors.getByRole('listitem').first()).toContainText('3-mal')
   await errors.getByRole('link', { name: 'Gezielt üben' }).first().click()
 
   // Der Kosinus kommt erst ab Stufe 2 vor: gezielt geübt wird dort
-  await expect(page).toHaveURL(/#\/ueben\/2-\d+\?fokus=cos-sign$/)
+  await expect(page).toHaveURL(/#\/ueben\/ableiten\/2-\d+\?fokus=cos-sign$/)
   await expect(page.getByText('Gezielt üben: Minuszeichen beim Kosinus vergessen')).toBeVisible()
   await solveWholeTask(page)
   await page.getByRole('link', { name: 'Nächste Aufgabe' }).click()
@@ -101,12 +104,12 @@ test('Freier Modus zählt Fehler und gelöste Aufgaben', async ({ page }) => {
   await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
 
   await page.goto('./#/fortschritt')
-  await expect(page.getByRole('listitem', { name: 'Stufe 2' })).toContainText('1 gelöst · zuletzt 0 von 1 ohne Fehler')
-  await expect(page.getByRole('region', { name: 'Deine häufigsten Fehler' })).toContainText('Ableitungen der Faktoren multipliziert')
+  await expect(derivatives(page).getByRole('listitem', { name: 'Stufe 2' })).toContainText('1 gelöst · zuletzt 0 von 1 ohne Fehler')
+  await expect(derivatives(page).getByRole('region', { name: 'Deine häufigsten Fehler' })).toContainText('Ableitungen der Faktoren multipliziert')
 
   // Löschen nur nach Rückfrage
   await page.getByRole('button', { name: 'Fortschritt löschen' }).click()
   await page.getByRole('button', { name: 'Ja, löschen' }).click()
-  await expect(page.getByRole('listitem', { name: 'Stufe 2' })).toContainText('Noch keine Aufgabe gelöst.')
-  await expect(page.getByText('Noch keine Fehler gesammelt.')).toBeVisible()
+  await expect(derivatives(page).getByRole('listitem', { name: 'Stufe 2' })).toContainText('Noch keine Aufgabe gelöst.')
+  await expect(derivatives(page).getByText('Noch keine Fehler gesammelt.')).toBeVisible()
 })

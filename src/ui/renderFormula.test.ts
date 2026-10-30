@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { renderFormula } from './renderFormula.ts'
-import { derivativeLevels, notationSamples } from './samples.ts'
+import { SUBJECTS } from './catalog.ts'
+import { notationSamples } from './samples.ts'
 
+// Vorschau-Formeln aller Stufen aller Themen und die Schreibweise-Beispiele der Galerie
 const allSamples = [
-  ...derivativeLevels.flatMap((level) => level.examples),
+  ...SUBJECTS.flatMap((s) => s.areas.flatMap((a) => a.courses.flatMap((c) => c.levels.flatMap((level) => level.examples)))),
   ...notationSamples.map((sample) => sample.tex),
 ]
 

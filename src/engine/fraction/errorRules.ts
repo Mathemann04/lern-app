@@ -1,6 +1,6 @@
 import { toLatex } from '../expr/print.ts'
 import { type Expr, div, mulDot, num } from '../expr/types.ts'
-import { isInteger, isOne, rat, ratAbs, ratDiv } from '../rational.ts'
+import { isInteger, isOne, rat, ratAbs, ratDiv, ratMul } from '../rational.ts'
 import { type Factored, factorize, factoredExpr, factoredPoly, isMultipleOf, reduceFrac, reducedExpr } from './factor.ts'
 import { type Frac, fracDiv, fracEquals, fracMul, fracNeg } from './frac.ts'
 import {
@@ -13,6 +13,7 @@ import {
   polyAdd,
   polyContent,
   polyConst,
+  polyDivideExact,
   polyEquals,
   polyMul,
   polyNeg,
@@ -25,7 +26,9 @@ import {
   type FracSolution,
   type StepKind,
   type SumWork,
+  cancelledFactor,
   fractionExpr,
+  multipliedExpr,
   nicePolyExpr,
   productExpr,
   reciprocalPart,
@@ -35,7 +38,7 @@ import {
   timesExpr,
   workSum,
 } from './solve.ts'
-import { type FractionTask, type Part, type Shown, expanded, isWhole, partExpr, shownExpr, shownPoly, taskFrac } from './task.ts'
+import { type FractionTask, type Part, type Shown, expanded, isWhole, partExpr, partFrac, shownExpr, shownPoly, taskFrac } from './task.ts'
 
 // Typische Fehler beim Bruchrechnen (Katalog in docs/PLAN-M2.md). Jeder Fehler steckt in genau
 // einem Schritt des Rechenwegs; der Rest wird richtig gerechnet. Daraus entstehen die falschen
@@ -74,6 +77,8 @@ export const FRACTION_ERROR_RULES: readonly FracErrorRule[] = [
   { id: 'frac-factor-wrong', step: 'factor-num', name: 'Falsch ausgeklammert', wrongFormula: '2x + 6 = 2(x + 6)' },
   { id: 'frac-binomial-confused', step: 'factor-num', name: 'Binomische Formeln verwechselt', wrongFormula: 'x^2 - 9 = (x - 3)^2' },
   { id: 'frac-vieta-sign', step: 'factor-num', name: 'Vorzeichen beim Zerlegen vertauscht', wrongFormula: 'x^2 - x - 6 = (x + 3)(x - 2)' },
+  { id: 'frac-cancel-one-side', step: 'cancel', name: 'Nur den Zähler oder nur den Nenner gekürzt', wrongFormula: '\\frac{14}{12} = \\frac{7}{12}' },
+  { id: 'frac-multiply-reciprocal', step: 'multiply', name: 'Beim Malnehmen den Kehrwert genommen', wrongFormula: '\\frac{3}{4} \\cdot \\frac{2}{5} = \\frac{3 \\cdot 5}{4 \\cdot 2}' },
 ]
 
 export function fractionErrorRule(id: string): FracErrorRule {
@@ -92,9 +97,19 @@ export type FracWrong = {
   readonly value: Frac | null
   // daraus vollständig gekürzt
   readonly result: Expr | null
+  // nur für die Diagnose im freien Modus: Im geführten Modus passt die Antwort nicht zum
+  // Zwischenstand davor (z. B. Zähler und Nenner der ursprünglichen Brüche addiert, obwohl schon
+  // erweitert ist)
+  readonly freeOnly?: boolean
 }
 
-type Candidate = { readonly id: string; readonly step?: StepKind; readonly stepExpr: Expr; readonly value: Frac | null }
+type Candidate = {
+  readonly id: string
+  readonly step?: StepKind
+  readonly stepExpr: Expr
+  readonly value: Frac | null
+  readonly freeOnly?: boolean
+}
 
 // --- Hilfen ---
 
@@ -142,12 +157,19 @@ function sumMistakes(w: SumWork, hints: readonly Poly[]): Candidate[] {
   const lcdExpr = factoredExpr(w.lcd)
   const lcdPoly = factoredPoly(w.lcd)
 
-  if (wholes.length === 0 && w.terms.length >= 2) {
+  // Nach dem Erweitern auch die gleichen Nenner addiert: \frac{9}{12} + \frac{10}{12} = \frac{19}{24}
+  if (w.terms.length >= 2 && w.terms.every((t) => t.sign > 0)) {
+    const doubled: Factored = { coef: ratMul(w.lcd.coef, rat(w.terms.length)), factors: w.lcd.factors }
+    out.push({ id: 'frac-add-across', stepExpr: fractionExpr(w.numerator, doubled), value: { num: w.numerator, den: factoredPoly(doubled) } })
+  }
+
+  // Ohne Hauptnenner Zähler und Nenner der Brüche addiert: \frac{1}{2} + \frac{1}{3} = \frac{2}{5}
+  if (wholes.length === 0 && w.terms.length >= 2 && !w.sameDenominator) {
     const n = polySum(w.terms.map((t) => signed(t.sign, shownPoly(t.part.num))))
     const d = polySum(w.terms.map((t) => signed(t.sign, shownPoly(t.part.den))))
     if (!isZeroPoly(d) && !isZeroPoly(n)) {
       const value = { num: n, den: d }
-      out.push({ id: 'frac-add-across', stepExpr: reduced(value, hints), value })
+      out.push({ id: 'frac-add-across', stepExpr: reduced(value, hints), value, freeOnly: true })
     }
   }
 
@@ -308,6 +330,22 @@ function cancelMistakes(t: FractionTask, solution: FracSolution): Candidate[] {
       out.push({ id: 'frac-power-divided', stepExpr: reduced(value, hints), value })
     }
   }
+  // Nur Zähler oder nur Nenner durch den gemeinsamen Faktor geteilt; steckt darin eine Zahl, nur
+  // durch die Zahl (die Buchstaben richtig gekürzt): \frac{6x^2}{9x} = \frac{2x}{9}
+  const common = cancelledFactor(raw, solution.reduced, hints)
+  if (common) {
+    const g = ratAbs(common.coef).n > 1n && isInteger(common.coef) ? polyConst(ratAbs(common.coef)) : factoredPoly(common)
+    const [numDiv, denDiv] = [polyDivideExact(raw.num, g), polyDivideExact(raw.den, g)]
+    if (numDiv && denDiv) {
+      for (const value of [
+        { num: numDiv, den: raw.den },
+        { num: raw.num, den: denDiv },
+      ]) {
+        out.push({ id: 'frac-cancel-one-side', stepExpr: reduced(value, hints), value })
+      }
+    }
+  }
+
   // Nach dem Kürzen bleibt im Zähler 1 stehen, nicht nichts
   const rest = constValue(n)
   if (rest && isOne(ratAbs(rest)) && totalDegree(raw.num) > 0 && totalDegree(d) > 0) {
@@ -419,6 +457,11 @@ function operationMistakes(t: FractionTask): Candidate[] {
       out.push({ id: 'frac-number-times-both', stepExpr, value })
     }
   }
+  // Wie beim Teilen den zweiten Bruch umgedreht
+  if (t.kind === 'product' && !isWhole(t.left) && !isWhole(t.right)) {
+    const value = fracMul(partFrac(t.left), partFrac(reciprocalPart(t.right)))
+    out.push({ id: 'frac-multiply-reciprocal', stepExpr: multipliedExpr(t.left, reciprocalPart(t.right)), value })
+  }
   if (t.kind === 'quotient') {
     const l = { num: shownPoly(t.left.num), den: shownPoly(t.left.den) }
     const r = { num: shownPoly(t.right.num), den: shownPoly(t.right.den) }
@@ -471,7 +514,7 @@ export function fractionWrongAnswers(t: FractionTask, solution: FracSolution = s
       if (isZeroPoly(c.value.den) || fracEquals(c.value, solution.value)) continue
       // im selben Schritt jede falsche Antwort nur einmal (im freien Modus zählt die erste)
       if (result.some((r) => r.step === step && r.value && fracEquals(r.value, c.value!))) continue
-      result.push({ rule, step, stepExpr: c.stepExpr, value: c.value, result: reduced(c.value, t.hints) })
+      result.push({ rule, step, stepExpr: c.stepExpr, value: c.value, result: reduced(c.value, t.hints), ...(c.freeOnly ? { freeOnly: true } : {}) })
     } else {
       const latex = toLatex(c.stepExpr)
       if (result.some((r) => r.step === step && toLatex(r.stepExpr) === latex)) continue

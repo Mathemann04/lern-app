@@ -11,11 +11,24 @@ import { latexProblem } from '../expr/latexChecks.ts'
 import { equationToLatex, toLatex } from '../expr/print.ts'
 import { type Equation, type Expr, E, add, cos, div, exp, fn, isEquation, ln, log, mul, neg, num, pow, sin, sqrt, sub, tan, x } from '../expr/types.ts'
 import { generateDerivativeTask } from '../tasks/derivativeTerms.ts'
-import { CARDS, TOPICS, cardById, cardForRule, cardIdsFor, cardsInTopic, examplesFor, topicById } from './cards.ts'
-import { workedExample } from './example.ts'
+import { FRACTION_ERROR_RULES } from '../fraction/errorRules.ts'
+import { fracEquals, toFrac } from '../fraction/frac.ts'
+import { solveFraction } from '../fraction/solve.ts'
+import { taskExpr as toExprOf, taskLatex } from '../fraction/task.ts'
+import { planFractionTask } from '../guided/fractionPlan.ts'
+import { CARDS, type CardExample, TOPICS, cardById, cardForRule, cardIdsFor, cardsInTopic, examplesFor, isFractionExample, topicById } from './cards.ts'
+import { cardExample, workedExample } from './example.ts'
 import { parseRichText } from './richText.ts'
 
-const latexOf = (e: Expr | Equation) => (isEquation(e) ? equationToLatex(e) : toLatex(e))
+const latexOf = (e: CardExample) => (isFractionExample(e) ? taskLatex(e) : isEquation(e) ? equationToLatex(e) : toLatex(e))
+
+// Karten zum Ableiten (Beispiele sind Funktionen bzw. Gleichungen) und zu Brüchen
+const DERIVATIVE_CARDS = cardsInTopic('ableitungen')
+const FRACTION_CARDS = cardsInTopic('brueche')
+const derivativeExample = (e: CardExample): Expr | Equation => {
+  if (isFractionExample(e)) throw new Error('Bruchaufgabe auf einer Karte zum Ableiten')
+  return e
+}
 
 function expectRenderable(text: string, context: string) {
   expect(text, context).not.toMatch(/undefined|NaN|\[object|null/)
@@ -52,7 +65,7 @@ describe('Lernkarten: Katalog', () => {
       expect(cardsInTopic(topic.id).length, topic.id).toBeGreaterThan(0)
       expect(cardById(topic.id)).toBeUndefined()
     }
-    expect(cardsInTopic('ableitungen')).toHaveLength(CARDS.length)
+    expect(DERIVATIVE_CARDS.length + FRACTION_CARDS.length).toBe(CARDS.length)
   })
 
   it.each(CARDS.map((c) => [c.id, c] as const))('%s: alle Texte und Formeln lassen sich setzen', (id, card) => {
@@ -62,7 +75,7 @@ describe('Lernkarten: Katalog', () => {
   })
 
   it('kennt nur bestehende typische Fehler', () => {
-    const known = new Set(ERROR_RULES.map((r) => r.id))
+    const known = new Set([...ERROR_RULES, ...FRACTION_ERROR_RULES].map((r) => r.id))
     for (const card of CARDS) for (const id of card.errors) expect(known.has(id), `${card.id}: ${id}`).toBe(true)
   })
 
@@ -103,7 +116,7 @@ describe('Lernkarten: Katalog', () => {
 })
 
 describe('Lernkarten: durchgerechnete Beispiele', () => {
-  const examples = CARDS.flatMap((card) => card.examples.map((f) => [card.id, latexOf(f), card, f] as const))
+  const examples = DERIVATIVE_CARDS.flatMap((card) => card.examples.map((e) => [card.id, latexOf(e), card, derivativeExample(e)] as const))
 
   it('hat je Karte mindestens zwei verschiedene Beispiele', () => {
     for (const card of CARDS) {
@@ -201,5 +214,49 @@ describe('Lernkarten: Zusätze stimmen', () => {
 
   it('Arkustangens: Die Ableitung enthält keine Winkelfunktion', () => {
     expect(toLatex(derive(fn('arctan', x)).result)).not.toMatch(/\\(sin|cos|tan)/)
+  })
+})
+
+describe('Lernkarten: Brüche', () => {
+  const examples = FRACTION_CARDS.flatMap((card) => card.examples.map((e) => [card.id, latexOf(e), card, e] as const))
+
+  it('nutzt nur Bruchaufgaben als Beispiele', () => {
+    for (const card of FRACTION_CARDS) for (const e of card.examples) expect(isFractionExample(e), card.id).toBe(true)
+    for (const card of DERIVATIVE_CARDS) for (const e of card.examples) expect(isFractionExample(e), card.id).toBe(false)
+  })
+
+  it.each(examples)('%s: %s', (id, _latex, _card, e) => {
+    const example = cardExample(e)
+    if (!isFractionExample(e)) throw new Error(id)
+    const solution = solveFraction(e)
+    expect(example.result).toEqual(solution.result)
+    expect(example.lines.at(-1)!.latex).toBe(`= ${toLatex(solution.result)}`)
+    // jede Zeile hat den Wert der Aufgabe (außer dem Hauptnenner)
+    for (const line of example.lines.filter((l) => l.latex.startsWith('= '))) {
+      expect(latexProblem(line.latex, { checkUgly: false }), line.latex).toBeNull()
+      expectRenderable(line.label, id)
+    }
+    expect(latexProblem(example.functionLatex, { checkUgly: false })).toBeNull()
+    for (const step of solution.steps) if (step.expr) expect(fracEquals(toFrac(step.expr)!, solution.value), id).toBe(true)
+  })
+
+  it('zeigt jeden typischen Fehler aus den spielbaren Stufen auf einer Karte im Ordner Brüche', () => {
+    const shown = new Set(FRACTION_CARDS.flatMap((c) => c.errors))
+    const used = new Set<string>()
+    for (const level of [1, 2] as const) {
+      for (let seed = 1; seed <= 300; seed++) {
+        for (const step of planFractionTask({ level, seed }).steps) for (const c of step.choices) if (c.errorRuleId) used.add(c.errorRuleId)
+      }
+    }
+    expect([...used].filter((id) => !shown.has(id))).toEqual([])
+    // und umgekehrt: Jeder Fehler auf einer Karte lässt sich dort gezielt üben
+    expect([...shown].filter((id) => !used.has(id))).toEqual([])
+  })
+
+  it('verrät in einer Aufgabe kein Ergebnis: dieselbe Aufgabe kommt nicht als Beispiel', () => {
+    const card = cardById('fraction-add')!
+    const [first] = card.examples
+    if (!isFractionExample(first)) throw new Error('kein Bruch')
+    expect(examplesFor(card, toExprOf(first)).map(latexOf)).not.toContain(latexOf(first))
   })
 })

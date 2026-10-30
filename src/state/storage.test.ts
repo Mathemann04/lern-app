@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { DEFAULT_STATE, EMPTY_PROGRESS, type KeyValueStore, STORAGE_KEY, loadState, saveState } from './storage.ts'
+import { DEFAULT_SETTINGS, DEFAULT_STATE, EMPTY_PROGRESS, type KeyValueStore, STORAGE_KEY, loadState, saveState } from './storage.ts'
 
 function memoryStore(initial?: string): KeyValueStore & { data: Map<string, string> } {
   const data = new Map<string, string>()
@@ -19,7 +19,14 @@ describe('Speicher', () => {
 
   it('speichert und lädt Einstellungen', () => {
     const store = memoryStore()
-    const settings = { explanations: false, detail: 'short', derivativeLevel: 3, practiceMode: 'free', theme: 'dark' } as const
+    const settings = {
+      explanations: false,
+      detail: 'short',
+      levels: { ableiten: 3, brueche: 2 },
+      lastCourse: 'brueche',
+      practiceMode: 'free',
+      theme: 'dark',
+    } as const
     saveState({ ...DEFAULT_STATE, settings }, store)
     expect(loadState(store).settings).toEqual(settings)
   })
@@ -27,18 +34,18 @@ describe('Speicher', () => {
   it('übersteht kaputten oder fremden Inhalt', () => {
     expect(loadState(memoryStore('{kaputt'))).toEqual(DEFAULT_STATE)
     expect(loadState(memoryStore('42'))).toEqual(DEFAULT_STATE)
-    expect(loadState(memoryStore('{"settings":{"detail":"riesig","explanations":"ja","derivativeLevel":7,"practiceMode":"schnell","theme":"lila"}}')).settings).toEqual(
-      DEFAULT_STATE.settings,
-    )
+    const broken = {
+      version: 3,
+      settings: { detail: 'riesig', explanations: 'ja', levels: { ableiten: 7, 'B R': 2 }, lastCourse: 42, practiceMode: 'schnell', theme: 'lila' },
+    }
+    expect(loadState(memoryStore(JSON.stringify(broken))).settings).toEqual(DEFAULT_SETTINGS)
   })
 
   it('behält gültige Teile, wenn andere fehlen', () => {
-    expect(loadState(memoryStore('{"settings":{"detail":"short"}}')).settings).toEqual({
-      explanations: true,
+    expect(loadState(memoryStore('{"version":3,"settings":{"detail":"short","levels":{"brueche":2}}}')).settings).toEqual({
+      ...DEFAULT_SETTINGS,
       detail: 'short',
-      derivativeLevel: 1,
-      practiceMode: 'guided',
-      theme: 'system',
+      levels: { brueche: 2 },
     })
   })
 
@@ -57,21 +64,15 @@ describe('Speicher', () => {
 })
 
 describe('Fortschritt im Speicher', () => {
-  it('übernimmt Einstellungen aus Version 1 und beginnt mit leerem Fortschritt', () => {
-    const old = memoryStore('{"version":1,"settings":{"detail":"short","derivativeLevel":2}}')
-    const state = loadState(old)
-    expect(state.version).toBe(2)
-    expect(state.settings.detail).toBe('short')
-    expect(state.settings.derivativeLevel).toBe(2)
-    expect(state.progress).toEqual(EMPTY_PROGRESS)
-  })
-
   it('speichert und lädt gelöste Aufgaben und Fehler', () => {
     const store = memoryStore()
     const progress = {
-      attempts: [{ level: 2, mode: 'free', clean: true, at: 1000 }],
-      errors: { 'cos-sign': 3 },
-      suggestionDismissed: { 2: 10 },
+      attempts: [
+        { course: 'ableiten', level: 2, mode: 'free', clean: true, at: 1000 },
+        { course: 'brueche', level: 1, mode: 'guided', clean: false, at: 2000 },
+      ],
+      errors: { 'cos-sign': 3, 'frac-add-across': 1 },
+      suggestionDismissed: { ableiten: { 2: 10 }, brueche: { 1: 20 } },
     } as const
     saveState({ ...DEFAULT_STATE, progress }, store)
     expect(loadState(store).progress).toEqual(progress)
@@ -79,17 +80,67 @@ describe('Fortschritt im Speicher', () => {
 
   it('lässt kaputte Einträge einzeln weg', () => {
     const text = JSON.stringify({
-      version: 2,
+      version: 3,
       progress: {
-        attempts: [{ level: 9, clean: true, at: 1 }, { level: 1, clean: 'ja', at: 2 }, { level: 1, mode: 'guided', clean: false, at: 3 }, 42],
+        attempts: [
+          { course: 'brueche', level: 9, clean: true, at: 1 },
+          { course: 'brueche', level: 1, clean: 'ja', at: 2 },
+          { level: 1, mode: 'guided', clean: true, at: 3 },
+          { course: 'brueche', level: 1, mode: 'guided', clean: false, at: 4 },
+          42,
+        ],
         errors: { 'cos-sign': 2, kaputt: -1, auchKaputt: 'viel' },
-        suggestionDismissed: { 1: 10, 7: 3, 2: 'x' },
+        suggestionDismissed: { brueche: { 1: 10, 7: 3, 2: 'x' }, ableiten: 'kaputt' },
       },
     })
     expect(loadState(memoryStore(text)).progress).toEqual({
-      attempts: [{ level: 1, mode: 'guided', clean: false, at: 3 }],
+      attempts: [{ course: 'brueche', level: 1, mode: 'guided', clean: false, at: 4 }],
       errors: { 'cos-sign': 2 },
-      suggestionDismissed: { 1: 10 },
+      suggestionDismissed: { brueche: { 1: 10 }, ableiten: {} },
     })
+  })
+})
+
+describe('Umzug alter Speicherstände', () => {
+  it('übernimmt Einstellungen aus Version 1 und beginnt mit leerem Fortschritt', () => {
+    const state = loadState(memoryStore('{"version":1,"settings":{"detail":"short","derivativeLevel":2}}'))
+    expect(state.version).toBe(3)
+    expect(state.settings).toEqual({ ...DEFAULT_SETTINGS, detail: 'short', levels: { ableiten: 2 } })
+    expect(state.progress).toEqual(EMPTY_PROGRESS)
+  })
+
+  it('ordnet in Version 2 alles dem Ableiten zu, ohne etwas zu verlieren', () => {
+    const v2 = {
+      version: 2,
+      settings: { explanations: false, detail: 'short', derivativeLevel: 4, practiceMode: 'free', theme: 'dark' },
+      progress: {
+        attempts: [
+          { level: 4, mode: 'free', clean: true, at: 1 },
+          { level: 3, mode: 'guided', clean: false, at: 2 },
+        ],
+        errors: { 'cos-sign': 2, 'chain-inner-forgotten': 1 },
+        suggestionDismissed: { 3: 10 },
+      },
+    }
+    expect(loadState(memoryStore(JSON.stringify(v2)))).toEqual({
+      version: 3,
+      settings: { explanations: false, detail: 'short', levels: { ableiten: 4 }, lastCourse: 'ableiten', practiceMode: 'free', theme: 'dark' },
+      progress: {
+        attempts: [
+          { course: 'ableiten', level: 4, mode: 'free', clean: true, at: 1 },
+          { course: 'ableiten', level: 3, mode: 'guided', clean: false, at: 2 },
+        ],
+        errors: { 'cos-sign': 2, 'chain-inner-forgotten': 1 },
+        suggestionDismissed: { ableiten: { 3: 10 } },
+      },
+    })
+  })
+
+  it('übersteht kaputte Teile auch in Version 2', () => {
+    const v2 = { version: 2, settings: { derivativeLevel: 9 }, progress: { attempts: [{ level: 2, clean: true, at: 5 }, 'x'], suggestionDismissed: 'x' } }
+    const state = loadState(memoryStore(JSON.stringify(v2)))
+    expect(state.settings.levels).toEqual({})
+    expect(state.progress.attempts).toEqual([{ course: 'ableiten', level: 2, mode: 'guided', clean: true, at: 5 }])
+    expect(state.progress.suggestionDismissed).toEqual({ ableiten: {} })
   })
 })

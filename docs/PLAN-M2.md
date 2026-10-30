@@ -161,7 +161,9 @@ Umgesetzt:
 - Schreibweise der Ergebnisse:
   - Zähler ausmultipliziert, Nenner in Faktoren in der Reihenfolge der
     Aufgabe
-  - ein Minus vor den Bruch, z. B. $-\frac{2x + 9}{(x + 3)(x - 3)}$
+  - ein Minus vor den Bruch, wenn der ganze Zähler negativ ist, z. B.
+    $-\frac{2x + 9}{(x + 3)(x - 3)}$; sonst beginnt der Zähler mit Plus,
+    z. B. $\frac{b - a}{ab}$ (geändert in Schritt 3)
   - Produkte alphabetisch ($ax$, $2xy$)
 - Rechenweg mit dem ganzen Zwischenstand je Schritt. Beim Kürzen steht, durch
   welchen Faktor gekürzt wird.
@@ -195,6 +197,60 @@ Umgesetzt:
 - Danach prüfen:
   - Die Karte „Weitermachen" führt zu den Brüchen.
   - Beim Ableiten ist noch deine alte Stufe eingestellt.
+
+Umgesetzt:
+- Katalog (`src/ui/catalog.ts`): Jedes Thema hat seine Stufen mit Vorschau,
+  dazu die Angaben, ob es den freien Modus und gezieltes Üben schon gibt.
+  Grundlagen zeigt „Brüche", „Formeln umstellen" (kommt bald) und
+  „Potenzen, Wurzeln, Logarithmen" (kommt bald), je mit eigenem Bild.
+- Adressen mit Thema: `#/ueben/brueche/1-88`, `#/frei/ableiten/2-4`; alte
+  Adressen ohne Thema führen zum Ableiten. Bei Brüchen führt `#/frei/…`
+  zum geführten Modus mit derselben Aufgabe, bis Schritt 5 fertig ist.
+- Speicher Version 3: Stufe je Thema, zuletzt geübtes Thema, jede gelöste
+  Aufgabe mit ihrem Thema, „Eine Stufe höher?" je Thema. Version 2 wird
+  umgezogen, alles Bisherige gehört zum Ableiten (Tests für den Umzug,
+  Browser-Test mit altem Speicherstand).
+- Gemeinsame Typen des geführten Modus in `src/engine/guided/types.ts`;
+  `src/ui/courseEngines.ts` lädt die Engine eines Themas erst beim Üben.
+  Typische Fehler aller Themen mit Namen in `src/engine/errorCatalog.ts`.
+- Schrittplaner für Brüche (`src/engine/guided/fractionPlan.ts`):
+  - plus, minus: Hauptnenner, erweitern, Zähler zusammenfassen, kürzen
+  - mal: Malnehmen und Kürzen in einem Schritt (die Antwort ist das
+    fertige Ergebnis)
+  - geteilt: Kehrwert, dann Malnehmen und Kürzen
+  - kürzen: Zähler und Nenner zerlegen (wenn nötig), kürzen
+  - Ein Schritt ohne passenden typischen Fehler wird nicht einzeln
+    abgefragt: Der Hauptnenner steht dann in der Frage zum Erweitern (z. B.
+    bei $2 - \frac{3}{5}$), andere Schritte gehen im nächsten oder im
+    vorigen auf. Im letzten Schritt ist die Antwort das fertige Ergebnis.
+  - Unter „Bisher" steht jeder Zwischenstand, am Ende „Gilt für
+    $x \neq \dots$".
+- Texte (`src/engine/explain/fractionTexts.ts`): Erklärung je Schritt mit
+  den Zahlen der Aufgabe (z. B. welcher Bruch mit welchem Faktor erweitert
+  wird), Tipps und zu jedem typischen Fehler ein eigener Text für „Warum
+  ist das falsch?".
+- Zwei neue typische Fehler, damit jede Frage mindestens eine passende
+  falsche Antwort hat (Katalog unten): „Nur den Zähler oder nur den Nenner
+  gekürzt" und „Beim Malnehmen den Kehrwert genommen". „Zähler plus
+  Zähler, Nenner plus Nenner" gibt es im geführten Modus jetzt nach dem
+  Erweitern ($\frac{9}{12} + \frac{10}{12} = \frac{19}{24}$); die Form
+  ohne Hauptnenner ($\frac{1}{2} + \frac{1}{3} = \frac{2}{5}$) bleibt für
+  den freien Modus.
+- Lernkarten-Ordner „Brüche" (`src/engine/explain/fractionCards.ts`):
+  Kürzen, Erweitern, Plus und minus, Malnehmen, Teilen (ab Stufe 1),
+  Potenzen kürzen (ab Stufe 2). Die durchgerechneten Beispiele rechnet die
+  Bruch-Engine (`fractionExample.ts`).
+- Fortschrittsseite mit einem Abschnitt je Thema (Stufen und häufigste
+  Fehler).
+- Vorgezogen aus Schritt 7: Gezieltes Üben auch für Brüche
+  (`src/engine/tasks/fractionFocus.ts`), auf der Fortschrittsseite und auf
+  den Lernkarten.
+- Tests: je Stufe 300 Aufgaben geführt (1 bis 3 falsche Antworten je Frage,
+  richtige mit dem Wert der Aufgabe, falsche nie; ein anderer gemeinsamer
+  Nenner wird nie als falsch angeboten; Ergebnis numerisch gegengeprüft;
+  alle Texte setzbar, „Warum ist das falsch?" verrät die Antwort nicht),
+  Lernkarten, Speicher-Umzug, Adressen; Browser-Tests für Brüche, alte
+  Adressen und „Weitermachen" mit zwei Themen.
 
 ### Schritt 4: Stufen 3 und 4 geführt
 - Neu: in Faktoren zerlegen, Hauptnenner aus Faktoren, Doppelbrüche.
@@ -320,6 +376,8 @@ weiterrechnen). Die Fehler zu Bausteinen kommen mit Stufe 5 (Schritt 6).
 | Doppelbruch | mit dem Nenner statt mit seinem Kehrwert malgenommen | $\frac{\frac{1}{2}}{\frac{3}{4}} = \frac{1}{2} \cdot \frac{3}{4}$ |
 | Doppelbruch | Term im Nenner in den Zähler geholt | $\frac{\frac{a}{b}}{x} = \frac{ax}{b}$ |
 | Potenzen | Exponenten geteilt statt abgezogen | $\frac{x^6}{x^2} = x^3$ |
+| Kürzen | nur den Zähler oder nur den Nenner gekürzt (neu in Schritt 3) | $\frac{14}{12} = \frac{7}{12}$ |
+| Mal | beim Malnehmen den Kehrwert genommen (neu in Schritt 3) | $\frac{3}{4} \cdot \frac{2}{5} = \frac{3 \cdot 5}{4 \cdot 2}$ |
 | Bausteine | im Inneren einer Funktion gekürzt | $\frac{\sin(2x)}{2} = \sin x$, $\frac{e^{2x}}{e^x} = e^2$ |
 | Bausteine | binomische Formel bei der Wurzel vergessen | $(\sqrt{x}+1)^2 = x + 1$ |
 | Bausteine | Quadrat vergessen | $1 - \cos^2 x = \sin x$ |

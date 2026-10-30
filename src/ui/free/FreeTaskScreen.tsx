@@ -1,7 +1,8 @@
 import { type ReactNode, useMemo, useRef, useState } from 'react'
 import { type Verdict, checkAnswer, prepareAnswerCheck, prepareImplicitCheck } from '../../engine/check/answer.ts'
 import { explainError, explainSolveMistake } from '../../engine/explain/texts.ts'
-import { type GuidedStep, planGuidedTask } from '../../engine/guided/plan.ts'
+import { planGuidedTask } from '../../engine/guided/plan.ts'
+import type { GuidedStep } from '../../engine/guided/types.ts'
 import { generateDerivativeTask } from '../../engine/tasks/derivativeTerms.ts'
 import type { TaskRef } from '../../engine/tasks/taskNumber.ts'
 import { recordAttempt, recordError } from '../../state/progress.ts'
@@ -10,7 +11,6 @@ import { FitWidth } from '../FitWidth.tsx'
 import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
 import { CardSheetButton, TaskCardLinks } from '../cards/CardSheet.tsx'
-import { DERIVATIVES } from '../catalog.ts'
 import { courseHref, practiceHref, taskHref } from '../routes.ts'
 import { LevelUpSuggestion } from '../task/LevelUpSuggestion.tsx'
 import { CheckBadge, FocusBanner, TaskIntro, TaskTopBar } from '../task/TaskParts.tsx'
@@ -19,8 +19,11 @@ import { MathInput } from './MathInput.tsx'
 
 // Freier Modus: Ableitung selbst eintippen. Die Engine prüft auf Gleichwertigkeit, erkennt
 // typische Fehler und kann den Lösungsweg Schritt für Schritt aufdecken (aus dem geführten Modus).
+// Zurzeit nur für das Thema Ableiten (course), Brüche folgen.
 
-export default function FreeTaskScreen({ taskRef, focus = null }: { taskRef: TaskRef; focus?: string | null }) {
+type Props = { course: string; taskRef: TaskRef; focus?: string | null }
+
+export default function FreeTaskScreen({ course, taskRef, focus = null }: Props) {
   const { level, seed } = taskRef
   const { context, plan } = useMemo(() => {
     const { task } = generateDerivativeTask({ level, seed })
@@ -51,7 +54,7 @@ export default function FreeTaskScreen({ taskRef, focus = null }: { taskRef: Tas
     if (result.kind === 'correct') {
       if (!t.recorded) {
         t.recorded = true
-        recordAttempt({ level, mode: 'free', clean: !t.mistake && !t.helped })
+        recordAttempt({ course, level, mode: 'free', clean: !t.mistake && !t.helped })
       }
     } else if (result.kind !== 'unreadable') {
       t.mistake = true
@@ -67,7 +70,7 @@ export default function FreeTaskScreen({ taskRef, focus = null }: { taskRef: Tas
 
   return (
     <main className="space-y-6" style={{ paddingBottom: keyboardHeight }}>
-      <TaskTopBar mode={mode} onCycleMode={cycle} />
+      <TaskTopBar course={course} mode={mode} onCycleMode={cycle} />
 
       {focus && <FocusBanner focus={focus} />}
 
@@ -106,18 +109,18 @@ export default function FreeTaskScreen({ taskRef, focus = null }: { taskRef: Tas
         {verdict && <Feedback verdict={verdict} resultLatex={plan.resultLatex} detail={detail} mode={mode} />}
       </div>
 
-      {solved && <LevelUpSuggestion level={level} mode="free" />}
+      {solved && <LevelUpSuggestion course={course} level={level} mode="free" />}
 
       {solved ? (
         <div className="space-y-5">
           <div className="flex flex-col gap-3 sm:flex-row">
             <a
-              href={practiceHref(level, 'free', focus)}
+              href={practiceHref(course, level, 'free', focus)}
               className="flex-1 rounded-xl bg-accent-700 px-4 py-3 text-center text-lg font-medium text-on-accent hover:bg-accent-800"
             >
               Nächste Aufgabe
             </a>
-            <a href={courseHref(DERIVATIVES)} className="flex-1 rounded-xl border border-zinc-300 px-4 py-3 text-center text-lg font-medium hover:bg-zinc-50">
+            <a href={courseHref(course)} className="flex-1 rounded-xl border border-zinc-300 px-4 py-3 text-center text-lg font-medium hover:bg-zinc-50">
               Zur Übersicht
             </a>
           </div>
@@ -145,7 +148,7 @@ export default function FreeTaskScreen({ taskRef, focus = null }: { taskRef: Tas
           <CardSheetButton ids={plan.cards} title={plan.cards.length === 1 ? 'Lernkarte zu dieser Aufgabe' : 'Lernkarten zu dieser Aufgabe'}
             task={plan.expr}
           />
-          <a href={taskHref(taskRef, 'guided', focus)} className="rounded-xl px-3 py-2.5 font-medium text-accent-700 hover:bg-accent-50">
+          <a href={taskHref(course, taskRef, 'guided', focus)} className="rounded-xl px-3 py-2.5 font-medium text-accent-700 hover:bg-accent-50">
             Geführt lösen
           </a>
         </div>

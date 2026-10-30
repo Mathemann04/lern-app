@@ -23,11 +23,12 @@ test('Startseite zeigt Fächer mit Gebieten, Kommendes blass, und „Los geht’
 
   await expect(page.getByRole('heading', { name: 'Mathe Schritt für Schritt selbst lösen' })).toBeVisible()
   await expect(page.getByRole('heading', { level: 2 })).toHaveText(['Los geht’s', 'Mathematik MB1', 'Physik', 'Technische Mechanik'])
-  // Nur die Differentialrechnung lässt sich öffnen; Grundlagen, Integralrechnung, Physik und Statik kommen bald
+  // Grundlagen und Differentialrechnung lassen sich öffnen; Integralrechnung, Physik und Statik kommen bald
+  await expect(page.getByRole('link', { name: /^Grundlagen/ })).toBeVisible()
   await expect(page.getByRole('link', { name: /^Differentialrechnung/ })).toBeVisible()
-  await expect(page.getByText('kommt bald')).toHaveCount(4)
+  await expect(page.getByText('kommt bald')).toHaveCount(3)
   await expect(page.getByRole('link', { name: /Integralrechnung/ })).toHaveCount(0)
-  await expect(page.getByRole('link', { name: 'Erste Aufgabe · geführt' })).toHaveAttribute('href', '#/ueben/1')
+  await expect(page.getByRole('link', { name: 'Erste Aufgabe · geführt' })).toHaveAttribute('href', '#/ueben/ableiten/1')
   await expectCleanPage(page, 'Startseite')
   expect(errors).toEqual([])
 })
@@ -49,7 +50,7 @@ test('Von der Startseite über Gebiet und Thema zur Aufgabe und zurück', async 
 
   await page.getByText('Zwei Regeln kombiniert').click()
   await page.getByRole('link', { name: 'Stufe 3 geführt üben' }).click()
-  await expect(page).toHaveURL(/#\/ueben\/3-\d+$/)
+  await expect(page).toHaveURL(/#\/ueben\/ableiten\/3-\d+$/)
   // Das X führt zurück zum Thema
   await page.getByRole('link', { name: 'Aufgabe beenden' }).click()
   await expect(page).toHaveURL(/#\/thema\/ableiten$/)
@@ -58,7 +59,7 @@ test('Von der Startseite über Gebiet und Thema zur Aufgabe und zurück', async 
   await page.goto('./')
   await expect(page.getByText('Stufe 3: Zwei Regeln kombiniert')).toBeVisible()
   await page.getByRole('link', { name: 'Erste Aufgabe · geführt' }).click()
-  await expect(page).toHaveURL(/#\/ueben\/3-\d+$/)
+  await expect(page).toHaveURL(/#\/ueben\/ableiten\/3-\d+$/)
   expect(errors).toEqual([])
 })
 
@@ -72,7 +73,7 @@ test('Gelöste Aufgaben: „Weitermachen" mit Fortschritt', async ({ page }) => 
   const card = page.getByRole('region', { name: 'Weitermachen' })
   await expect(card).toContainText('Stufe 4: Uni-Niveau')
   await expect(card).toContainText('3 gelöst · zuletzt 2 von 3 ohne Fehler')
-  await expect(card.getByRole('link', { name: 'Weiter üben · frei' })).toHaveAttribute('href', '#/frei/4')
+  await expect(card.getByRole('link', { name: 'Weiter üben · frei' })).toHaveAttribute('href', '#/frei/ableiten/4')
   await card.getByRole('link', { name: 'Stufe oder Art ändern' }).click()
   await expect(page).toHaveURL(/#\/thema\/ableiten$/)
   await expect(page.getByRole('radio', { name: /^Stufe 4/ })).toBeChecked()

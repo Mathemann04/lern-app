@@ -1,25 +1,27 @@
 import type { Level } from '../engine/tasks/taskNumber.ts'
 import { levelSummary, useProgress } from '../state/progress.ts'
-import { updateSettings, useSettings } from '../state/settings.ts'
+import { setCourseLevel, updateSettings, useSettings } from '../state/settings.ts'
 import type { PracticeMode } from '../state/storage.ts'
 import { AreaIcon } from './AreaIcon.tsx'
 import { BackLink } from './BackLink.tsx'
-import { courseById } from './catalog.ts'
+import { courseById, playableLevel } from './catalog.ts'
 import { Formula } from './Formula.tsx'
 import { areaHref, cardFolderHref, practiceHref } from './routes.ts'
-import { derivativeLevels, isLevelAvailable } from './samples.ts'
 
 const MODES: Array<{ value: PracticeMode; title: string; description: string }> = [
   { value: 'guided', title: 'Geführt', description: 'Auswahl-Antworten' },
   { value: 'free', title: 'Frei', description: 'Selbst eintippen' },
 ]
 
-// Ein Thema, zurzeit nur „Ableiten": Art und Stufe wählen, dann üben
+// Ein Thema, z. B. „Brüche": Art und Stufe wählen, dann üben. Die Stufe merkt sich jedes Thema
+// selbst, die Art (geführt oder frei) gilt für alle.
 export function CourseScreen({ id }: { id: string }) {
   const { area, course } = courseById(id)!
-  const { derivativeLevel, practiceMode } = useSettings()
-  // Eine gespeicherte Stufe, die (noch) nicht spielbar ist, zählt als Stufe 1
-  const selected = isLevelAvailable(derivativeLevel) ? derivativeLevel : 1
+  const settings = useSettings()
+  // Eine gespeicherte Stufe, die (noch) nicht spielbar ist, zählt als erste spielbare
+  const selected = playableLevel(course, settings.levels[id])
+  // Ohne freien Modus wird geführt geübt
+  const practiceMode: PracticeMode = course.free ? settings.practiceMode : 'guided'
   return (
     <main className="space-y-6">
       <div className="space-y-3">
@@ -38,28 +40,33 @@ export function CourseScreen({ id }: { id: string }) {
           <fieldset>
             <legend className="sr-only">Wie willst du üben?</legend>
             <div className="flex gap-1 rounded-xl bg-zinc-100 p-1">
-              {MODES.map((option) => (
-                <label
-                  key={option.value}
-                  className={`flex-1 cursor-pointer rounded-lg px-3 py-2 text-center transition-colors has-focus-visible:ring-2 has-focus-visible:ring-accent-600 ${
-                    practiceMode === option.value ? 'bg-raised shadow-sm' : 'text-zinc-600 hover:text-zinc-900'
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="art"
-                    className="sr-only"
-                    checked={practiceMode === option.value}
-                    onChange={() => updateSettings({ practiceMode: option.value })}
-                  />
-                  <span className={`block font-medium ${practiceMode === option.value ? 'text-accent-700' : ''}`}>{option.title}</span>
-                  <span className="block text-sm text-zinc-500">{option.description}</span>
-                </label>
-              ))}
+              {MODES.map((option) => {
+                const disabled = option.value === 'free' && !course.free
+                const checked = practiceMode === option.value
+                return (
+                  <label
+                    key={option.value}
+                    className={`flex-1 rounded-lg px-3 py-2 text-center transition-colors has-focus-visible:ring-2 has-focus-visible:ring-accent-600 ${
+                      checked ? 'bg-raised shadow-sm' : disabled ? 'text-zinc-500' : 'cursor-pointer text-zinc-600 hover:text-zinc-900'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="art"
+                      className="sr-only"
+                      checked={checked}
+                      disabled={disabled}
+                      onChange={() => updateSettings({ practiceMode: option.value })}
+                    />
+                    <span className={`block font-medium ${checked ? 'text-accent-700' : ''}`}>{option.title}</span>
+                    <span className="block text-sm text-zinc-500">{disabled ? 'kommt bald' : option.description}</span>
+                  </label>
+                )
+              })}
             </div>
           </fieldset>
           <a
-            href={practiceHref(selected, practiceMode)}
+            href={practiceHref(id, selected, practiceMode)}
             className="block rounded-xl bg-accent-700 px-4 py-3 text-center text-lg font-medium text-on-accent hover:bg-accent-800"
           >
             Stufe {selected} {practiceMode === 'free' ? 'frei' : 'geführt'} üben
@@ -70,7 +77,7 @@ export function CourseScreen({ id }: { id: string }) {
           <fieldset>
             <legend className="px-5 pt-4 text-sm font-medium text-zinc-500">Stufe wählen</legend>
             <div className="space-y-2 p-3 pt-2">
-              {derivativeLevels.map((level) => {
+              {course.levels.map((level) => {
                 const isSelected = level.level === selected
                 return (
                   <label
@@ -89,7 +96,7 @@ export function CourseScreen({ id }: { id: string }) {
                       className="sr-only"
                       checked={isSelected}
                       disabled={!level.available}
-                      onChange={() => updateSettings({ derivativeLevel: level.level })}
+                      onChange={() => setCourseLevel(id, level.level)}
                       aria-label={`Stufe ${level.level}: ${level.title}${level.available ? '' : ' (folgt bald)'}`}
                     />
                     <span
@@ -105,7 +112,7 @@ export function CourseScreen({ id }: { id: string }) {
                         {level.title}
                         {!level.available && <span className="font-normal text-zinc-500"> · folgt bald</span>}
                       </span>
-                      <LevelProgressLine level={level.level} />
+                      <LevelProgressLine course={id} level={level.level} />
                       <span className="flex flex-wrap items-center gap-x-6 gap-y-2 text-lg">
                         {level.examples.map((tex) => (
                           <Formula key={tex} tex={tex} />
@@ -118,13 +125,15 @@ export function CourseScreen({ id }: { id: string }) {
             </div>
           </fieldset>
         </div>
-        <a
-          href={cardFolderHref(course.cards)}
-          className="flex items-center justify-between border-t border-zinc-100 px-5 py-4 font-medium text-accent-700 hover:bg-accent-50"
-        >
-          Lernkarten: alle Regeln zum Ableiten
-          <span aria-hidden>→</span>
-        </a>
+        {course.cards && (
+          <a
+            href={cardFolderHref(course.cards)}
+            className="flex items-center justify-between border-t border-zinc-100 px-5 py-4 font-medium text-accent-700 hover:bg-accent-50"
+          >
+            Lernkarten: alle Regeln im Überblick
+            <span aria-hidden>→</span>
+          </a>
+        )}
         <a
           href="#/fortschritt"
           className="flex items-center justify-between rounded-b-2xl border-t border-zinc-100 px-5 py-4 font-medium text-accent-700 hover:bg-accent-50"
@@ -138,8 +147,8 @@ export function CourseScreen({ id }: { id: string }) {
 }
 
 // „12 gelöst · zuletzt 8 von 10 ohne Fehler"; nichts, solange noch keine Aufgabe gelöst ist
-function LevelProgressLine({ level }: { level: Level }) {
-  const { solved, recent, recentClean } = levelSummary(useProgress(), level)
+function LevelProgressLine({ course, level }: { course: string; level: Level }) {
+  const { solved, recent, recentClean } = levelSummary(useProgress(), course, level)
   if (solved === 0) return null
   return (
     <span className="block text-sm text-zinc-500">

@@ -1,18 +1,26 @@
 import { describe, expect, it } from 'vitest'
-import { addAttempt, addError, levelSummary, shouldSuggestLevelUp, topErrors } from './progress.ts'
+import { addAttempt, addError, levelSummary, shouldSuggestLevelUp, solvedInCourse, topErrors } from './progress.ts'
 import { type Attempt, EMPTY_PROGRESS, MAX_ATTEMPTS, type Progress } from './storage.ts'
 
-const attempt = (level: Attempt['level'], clean: boolean): Attempt => ({ level, mode: 'guided', clean, at: 0 })
+const attempt = (level: Attempt['level'], clean: boolean, course = 'ableiten'): Attempt => ({ course, level, mode: 'guided', clean, at: 0 })
 const withAttempts = (list: Attempt[], base: Progress = EMPTY_PROGRESS) => list.reduce(addAttempt, base)
 
 describe('Fortschritt je Stufe', () => {
   it('zählt gelöste Aufgaben und die letzten 10', () => {
     const p = withAttempts([...Array.from({ length: 12 }, () => attempt(1, true)), attempt(2, false), attempt(1, false)])
-    const s = levelSummary(p, 1)
+    const s = levelSummary(p, 'ableiten', 1)
     expect(s.solved).toBe(13)
     expect(s.recent).toHaveLength(10)
     expect(s.recentClean).toBe(9)
-    expect(levelSummary(p, 2)).toMatchObject({ solved: 1, recentClean: 0 })
+    expect(levelSummary(p, 'ableiten', 2)).toMatchObject({ solved: 1, recentClean: 0 })
+  })
+
+  it('trennt die Themen', () => {
+    const p = withAttempts([attempt(1, true), attempt(1, false, 'brueche'), attempt(1, true, 'brueche'), attempt(2, true, 'brueche')])
+    expect(levelSummary(p, 'ableiten', 1)).toMatchObject({ solved: 1, recentClean: 1 })
+    expect(levelSummary(p, 'brueche', 1)).toMatchObject({ solved: 2, recentClean: 1 })
+    expect(solvedInCourse(p, 'brueche')).toBe(3)
+    expect(solvedInCourse(p, 'umstellen')).toBe(0)
   })
 
   it('behält höchstens die letzten Aufgaben', () => {
@@ -25,24 +33,26 @@ describe('Vorschlag „Eine Stufe höher?"', () => {
   it('kommt erst bei 8 von 10 ohne Fehler', () => {
     // Die älteste Aufgabe fällt beim nächsten Lösen aus dem Fenster der letzten 10
     const seven = withAttempts([...Array.from({ length: 3 }, () => attempt(2, false)), ...Array.from({ length: 7 }, () => attempt(2, true))])
-    expect(shouldSuggestLevelUp(seven, 2)).toBe(false)
+    expect(shouldSuggestLevelUp(seven, 'ableiten', 2)).toBe(false)
     const eight = addAttempt(seven, attempt(2, true))
-    expect(shouldSuggestLevelUp(eight, 2)).toBe(true)
-    expect(shouldSuggestLevelUp(eight, 3)).toBe(false)
+    expect(shouldSuggestLevelUp(eight, 'ableiten', 2)).toBe(true)
+    expect(shouldSuggestLevelUp(eight, 'ableiten', 3)).toBe(false)
+    // gilt nur für das Thema, in dem geübt wurde
+    expect(shouldSuggestLevelUp(eight, 'brueche', 2)).toBe(false)
   })
 
   it('braucht mindestens 10 Aufgaben', () => {
-    expect(shouldSuggestLevelUp(withAttempts(Array.from({ length: 9 }, () => attempt(1, true))), 1)).toBe(false)
+    expect(shouldSuggestLevelUp(withAttempts(Array.from({ length: 9 }, () => attempt(1, true))), 'ableiten', 1)).toBe(false)
   })
 
   it('meldet sich nach „Später" erst nach 10 weiteren Aufgaben wieder', () => {
-    let p = withAttempts(Array.from({ length: 10 }, () => attempt(1, true)))
-    p = { ...p, suggestionDismissed: { 1: 10 } }
-    expect(shouldSuggestLevelUp(p, 1)).toBe(false)
-    p = withAttempts(Array.from({ length: 9 }, () => attempt(1, true)), p)
-    expect(shouldSuggestLevelUp(p, 1)).toBe(false)
-    p = addAttempt(p, attempt(1, true))
-    expect(shouldSuggestLevelUp(p, 1)).toBe(true)
+    let p = withAttempts(Array.from({ length: 10 }, () => attempt(1, true, 'brueche')))
+    p = { ...p, suggestionDismissed: { brueche: { 1: 10 } } }
+    expect(shouldSuggestLevelUp(p, 'brueche', 1)).toBe(false)
+    p = withAttempts(Array.from({ length: 9 }, () => attempt(1, true, 'brueche')), p)
+    expect(shouldSuggestLevelUp(p, 'brueche', 1)).toBe(false)
+    p = addAttempt(p, attempt(1, true, 'brueche'))
+    expect(shouldSuggestLevelUp(p, 'brueche', 1)).toBe(true)
   })
 })
 
@@ -58,8 +68,8 @@ describe('Häufigste Fehler', () => {
     ])
   })
 
-  it('lässt Fehler weg, die es nicht mehr gibt', () => {
-    const p = addError(addError(addError(EMPTY_PROGRESS, 'alter-fehler'), 'alter-fehler'), 'cos-sign')
-    expect(topErrors(p, 5, (id) => id !== 'alter-fehler')).toEqual([{ id: 'cos-sign', times: 1 }])
+  it('lässt Fehler weg, die es nicht mehr gibt oder die zu einem anderen Thema gehören', () => {
+    const p = addError(addError(addError(addError(EMPTY_PROGRESS, 'alter-fehler'), 'alter-fehler'), 'cos-sign'), 'frac-add-across')
+    expect(topErrors(p, 5, (id) => id !== 'alter-fehler' && !id.startsWith('frac-'))).toEqual([{ id: 'cos-sign', times: 1 }])
   })
 })
