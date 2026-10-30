@@ -240,10 +240,10 @@ describe('Lernkarten: Brüche', () => {
     for (const step of solution.steps) if (step.expr) expect(fracEquals(toFrac(step.expr)!, solution.value), id).toBe(true)
   })
 
-  it('zeigt jeden typischen Fehler aus den spielbaren Stufen 1 bis 4 auf einer Karte im Ordner Brüche', () => {
+  it('zeigt jeden typischen Fehler aus den spielbaren Stufen 1 bis 5 auf einer Karte im Ordner Brüche', () => {
     const shown = new Set(FRACTION_CARDS.flatMap((c) => c.errors))
     const used = new Set<string>()
-    for (const level of [1, 2, 3, 4] as const) {
+    for (const level of [1, 2, 3, 4, 5] as const) {
       for (let seed = 1; seed <= 300; seed++) {
         for (const step of planFractionTask({ level, seed }).steps) for (const c of step.choices) if (c.errorRuleId) used.add(c.errorRuleId)
       }

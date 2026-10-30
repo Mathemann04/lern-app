@@ -364,6 +364,52 @@ Umgesetzt:
 
 **Ausprobieren:** Stufe 5 in beiden Modi.
 
+Umgesetzt:
+- Stufe 5 ist spielbar, geführt und frei. Sechs Arten von Aufgaben, zum
+  Beispiel:
+  - Winkelfunktionen: $\frac{3}{1 - \sin x} + \frac{3}{1 + \sin x}$
+    (Aufgabe 5-1), $\frac{\frac{1}{\cos x} - \cos x}{\sin x} = \tan x$
+    (5-84), $\frac{1}{\sin^2 x} - 1$ (5-12)
+  - Wurzeln: $\frac{x - 9}{\sqrt{x} - 3}$ (5-2),
+    $\frac{1}{\sqrt{x} - 5} + \frac{1}{\sqrt{x} + 5}$ (5-19)
+  - zwei Variablen: $\frac{\frac{4}{x + h} - \frac{4}{x}}{h}$ (5-9),
+    $\frac{(a + 3b)^2 - a^2}{b}$ (5-3)
+  - mehrere Rechenarten:
+    $\left(\frac{x}{y} - \frac{y}{x}\right) : \frac{x - y}{xy}$ (5-15),
+    $\left(1 + \frac{1}{x - 1}\right) \cdot \frac{x^2 - 1}{2x}$ (5-6)
+  - verschachtelte Doppelbrüche:
+    $\frac{x}{1 - \frac{1}{1 + \frac{1}{x}}}$ (5-17)
+  - e-Funktion: $\frac{e^{2x} - 4e^x}{e^x}$ (5-8)
+- Neue Schritte im geführten Modus:
+  - „Regel anwenden": $\sin^2 x + \cos^2 x = 1$ im Zähler oder Nenner,
+    bei Wurzeln $(\sqrt{x} - 5)(\sqrt{x} + 5) = x - 25$
+  - „Ausmultiplizieren": $(x + h)^2$ mit binomischer Formel
+  - „Innerer Doppelbruch": erst der innere, dann wie gewohnt
+  - „Erste Klammer": bei mehreren Rechenarten jede Klammer zu einem
+    Bruch; bei „geteilt" zuerst mit dem Kehrwert malnehmen
+- Die Engine kennt die Regeln der Bausteine: Mit $\sqrt{x}$ rechnet sie
+  durchgehend in $\sqrt{x}$ ($x = (\sqrt{x})^2$), beim Vergleichen gilt
+  $\sin^2 x + \cos^2 x = 1$, und $\tan x = \frac{\sin x}{\cos x}$. Die
+  Ergebnisse stehen wie im Skript: $\frac{6}{\cos^2 x}$, $\tan x$,
+  $\frac{2\sqrt{x}}{x - 25}$. Faktoren wie $1 - \sin x$ behalten die $1$
+  vorn.
+- Freier Modus: Jede gekürzte Form zählt, auch
+  $\frac{6}{1 - \sin^2 x}$ statt $\frac{6}{\cos^2 x}$ oder
+  $\frac{\sin x}{\cos x}$ statt $\tan x$. $\sqrt{x}$ darf auch als
+  $x^{\frac{1}{2}}$ eingegeben werden. Die Tastatur hat bei Wurzeln eine
+  Wurzeltaste und bei Winkelfunktionen zusätzlich $\tan$.
+- Drei neue typische Fehler (Katalog unten): „Quadrat vergessen", „Beim
+  Quadrieren das Mittelglied vergessen", „Im Inneren einer Funktion
+  gekürzt".
+- Neue Lernkarte „Bausteine mit eigenen Regeln" (ab Stufe 5); die Karten
+  „Binomische Formeln" und „Doppelbrüche" erklären zusätzlich das
+  Ausmultiplizieren und Doppelbrüche im Doppelbruch.
+- Tests: je Stufe 300 Aufgaben (einmal mit 2000 geprüft), wie bei den
+  anderen Stufen exakt und an Zahlenstellen gegengeprüft; jeder neue Fehler
+  mit Katalogbeispiel, auf einer Karte und gezielt übbar; freie Eingabe mit
+  Beispielen für Wurzel, Winkelfunktionen und zwei Variablen;
+  Browser-Tests für Stufe 5 geführt und frei.
+
 ### Schritt 7: Gezieltes Üben, Feinschliff, Abschluss von M2
 - „Deine häufigsten Fehler" mit „Gezielt üben" auch für Brüche.
 - Letzte Design-Politur, Offline-Test, Doku, M2 abhaken.
@@ -414,7 +460,7 @@ erkennt die App den Fehler in beiden.
 Umgesetzt in `src/engine/fraction/errorRules.ts` (Ids mit `frac-`), je mit
 Katalogbeispiel in `errorRules.test.ts`. Die Fehler beim Hauptnenner gibt es
 nur im geführten Modus (mit einem falschen Hauptnenner kann man nicht
-weiterrechnen). Die Fehler zu Bausteinen kommen mit Stufe 5 (Schritt 6).
+weiterrechnen). Die Fehler zu Bausteinen gibt es seit Schritt 6 (Stufe 5).
 
 | Rechenart | Typischer Fehler | Beispiel (falsch) |
 | --- | --- | --- |
@@ -443,9 +489,9 @@ weiterrechnen). Die Fehler zu Bausteinen kommen mit Stufe 5 (Schritt 6).
 | Potenzen | Exponenten geteilt statt abgezogen | $\frac{x^6}{x^2} = x^3$ |
 | Kürzen | nur den Zähler oder nur den Nenner gekürzt (neu in Schritt 3) | $\frac{14}{12} = \frac{7}{12}$ |
 | Mal | beim Malnehmen den Kehrwert genommen (neu in Schritt 3) | $\frac{3}{4} \cdot \frac{2}{5} = \frac{3 \cdot 5}{4 \cdot 2}$ |
-| Bausteine | im Inneren einer Funktion gekürzt | $\frac{\sin(2x)}{2} = \sin x$, $\frac{e^{2x}}{e^x} = e^2$ |
-| Bausteine | binomische Formel bei der Wurzel vergessen | $(\sqrt{x}+1)^2 = x + 1$ |
-| Bausteine | Quadrat vergessen | $1 - \cos^2 x = \sin x$ |
+| Bausteine | im Inneren einer Funktion gekürzt (neu in Schritt 6) | $\frac{e^{2x}}{e^x} = e^2$ |
+| Quadrieren | beim Quadrieren das Mittelglied vergessen (neu in Schritt 6) | $(\sqrt{x}+1)^2 = x + 1$, $(x + h)^2 = x^2 + h^2$ |
+| Bausteine | Quadrat vergessen (neu in Schritt 6) | $1 - \cos^2 x = \sin x$, $(\sqrt{x})^2 = \sqrt{x}$ |
 
 Wenn dir typische Fehler aus deinen Übungen fehlen, sag es. Die sind Gold
 wert.

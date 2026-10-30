@@ -1,7 +1,7 @@
 import { toLatex } from '../expr/print.ts'
 import { type Expr, div, mulDot, num } from '../expr/types.ts'
 import { isInteger, isOne, rat, ratAbs, ratDiv, ratMul } from '../rational.ts'
-import { type Factored, factorize, factoredExpr, factoredPoly, isMultipleOf, reduceFrac, reducedExpr } from './factor.ts'
+import { type Factored, factorize, factoredExpr, factoredPoly, isMultipleOf, reduceFrac } from './factor.ts'
 import { type Frac, fracDiv, fracEquals, fracMul, fracNeg } from './frac.ts'
 import {
   type Poly,
@@ -26,19 +26,41 @@ import {
   type FracSolution,
   type StepKind,
   type SumWork,
+  applyRule,
   cancelledFactor,
+  expandedDenExpr,
   fractionExpr,
+  innerResultPart,
   multipliedExpr,
   nicePolyExpr,
   productExpr,
   reciprocalPart,
+  resultExpr,
+  ruleExpr,
+  ruledTop,
   sideOf,
   signedSum,
   solveFraction,
   timesExpr,
   workSum,
 } from './solve.ts'
-import { type FractionTask, type Part, type Shown, expanded, isWhole, partExpr, partFrac, shownExpr, shownPoly, taskFrac } from './task.ts'
+import {
+  type BlockRule,
+  type FractionTask,
+  type Part,
+  type Shown,
+  expanded,
+  innerTask,
+  isWhole,
+  partExpr,
+  partFrac,
+  partsOf,
+  replaceInner,
+  shownExpr,
+  shownPoly,
+  signedFrac,
+  taskFrac,
+} from './task.ts'
 
 // Typische Fehler beim Bruchrechnen (Katalog in docs/PLAN-M2.md). Jeder Fehler steckt in genau
 // einem Schritt des Rechenwegs; der Rest wird richtig gerechnet. Daraus entstehen die falschen
@@ -79,6 +101,9 @@ export const FRACTION_ERROR_RULES: readonly FracErrorRule[] = [
   { id: 'frac-vieta-sign', step: 'factor-num', name: 'Vorzeichen beim Zerlegen vertauscht', wrongFormula: 'x^2 - x - 6 = (x + 3)(x - 2)' },
   { id: 'frac-cancel-one-side', step: 'cancel', name: 'Nur den Zähler oder nur den Nenner gekürzt', wrongFormula: '\\frac{14}{12} = \\frac{7}{12}' },
   { id: 'frac-multiply-reciprocal', step: 'multiply', name: 'Beim Malnehmen den Kehrwert genommen', wrongFormula: '\\frac{3}{4} \\cdot \\frac{2}{5} = \\frac{3 \\cdot 5}{4 \\cdot 2}' },
+  { id: 'frac-square-forgotten', step: 'identity', name: 'Quadrat vergessen', wrongFormula: '1 - \\cos^2 x = \\sin x' },
+  { id: 'frac-binomial-middle', step: 'multiply-out', name: 'Beim Quadrieren das Mittelglied vergessen', wrongFormula: '(\\sqrt{x} + 1)^2 = x + 1' },
+  { id: 'frac-cancel-inside', step: 'cancel', name: 'Im Inneren einer Funktion gekürzt', wrongFormula: '\\frac{e^{2x}}{e^x} = e^2' },
 ]
 
 export function fractionErrorRule(id: string): FracErrorRule {
@@ -125,27 +150,23 @@ function firstOnly(c: Poly, q: Poly): Poly {
 }
 
 function reduced(value: Frac, hints: readonly Poly[]): Expr {
-  return reducedExpr(reduceFrac(value, hints))
+  return resultExpr(reduceFrac(value, hints), {})
 }
 
-// Wert der Aufgabe, wenn ein Teil anders geschrieben (falsch umgeformt) wäre
+// Wert nach der Regel des Bausteins (wie im Rechenweg): sin² x + cos² x = 1 im Zähler bzw. Nenner
+export function ruledFrac(value: Frac, rule: BlockRule | undefined): Frac {
+  if (rule?.kind !== 'trig') return value
+  return rule.target === 'num' ? { num: applyRule(value.num, rule), den: value.den } : { num: value.num, den: applyRule(value.den, rule) }
+}
+
+// Falsches Ergebnis so geschrieben wie das richtige: gekürzt, mit der Regel des Bausteins
+function resultOf(value: Frac, t: FractionTask): Expr {
+  return resultExpr(reduceFrac(ruledFrac(value, t.rule), t.hints), t)
+}
+
+// Wert der Aufgabe, wenn ein Teil anders geschrieben (falsch umgeformt) wäre (nur Kürzen)
 function withPart(t: FractionTask, target: Part, replaced: Part): Frac {
-  const swap = (p: Part) => (p === target ? replaced : p)
-  switch (t.kind) {
-    case 'reduce':
-      return taskFrac({ kind: 'reduce', part: swap(t.part) })
-    case 'sum':
-      return taskFrac({ kind: 'sum', terms: t.terms.map((s) => ({ sign: s.sign, part: swap(s.part) })) })
-    case 'product':
-    case 'quotient':
-      return taskFrac({ kind: t.kind, left: swap(t.left), right: swap(t.right) })
-    case 'complex':
-      return taskFrac({
-        kind: 'complex',
-        top: t.top.map((s) => ({ sign: s.sign, part: swap(s.part) })),
-        bottom: t.bottom.map((s) => ({ sign: s.sign, part: swap(s.part) })),
-      })
-  }
+  return t.kind === 'reduce' && t.part === target ? taskFrac({ kind: 'reduce', part: replaced }) : taskFrac(t)
 }
 
 // --- Plus und minus ---
@@ -293,8 +314,8 @@ function cancelMistakes(t: FractionTask, solution: FracSolution): Candidate[] {
   }
 
   // Vertauschte Differenz (3 − x) gegen (x − 3) gekürzt, ohne das Minus
-  const shown: Shown[] = partsOfTask(t).flatMap((p) => [p.num, p.den])
-  if (t.kind === 'reduce' && shown.some((s) => s.form === 'expanded' && s.ascending && s.poly.length >= 2 && polyContent(s.poly).n < 0n)) {
+  const shown: Shown[] = partsOf(t).flatMap((p) => [p.num, p.den])
+  if (t.kind === 'reduce' && !t.rule && shown.some((s) => s.form === 'expanded' && s.ascending && s.poly.length >= 2 && polyContent(s.poly).n < 0n)) {
     const value = fracNeg(solution.value)
     out.push({ id: 'frac-cancel-sign', stepExpr: reduced(value, hints), value })
   }
@@ -346,6 +367,22 @@ function cancelMistakes(t: FractionTask, solution: FracSolution): Candidate[] {
     }
   }
 
+  // e^{2x} : e^x im Exponenten gekürzt: \frac{e^{2x} - 3e^x}{e^x} = e^2 - 3
+  if (raw.den.length === 1 && raw.den[0].mono.length === 1 && raw.den[0].mono[0][0] === 'E' && raw.den[0].mono[0][1] === 1) {
+    const [d0] = raw.den
+    const highE = (term: Term) => (term.mono.find(([atom]) => atom === 'E')?.[1] ?? 0) >= 2
+    if (raw.num.some(highE) && raw.num.every((term) => (term.mono.find(([atom]) => atom === 'E')?.[1] ?? 0) >= 1)) {
+      const parts = raw.num.map((term): Term => {
+        const k = term.mono.find(([atom]) => atom === 'E')![1]
+        const rest = term.mono.filter(([atom]) => atom !== 'E')
+        const mono = highE(term) ? monomial([...rest, ['e', k] as const]) : monomial([...rest, ['E', k - 1] as const])
+        return { mono, coef: ratDiv(term.coef, d0.coef) }
+      })
+      const value = { num: polySum(parts.map((q) => [q])), den: polyConst(1) }
+      out.push({ id: 'frac-cancel-inside', stepExpr: reduced(value, hints), value })
+    }
+  }
+
   // Nach dem Kürzen bleibt im Zähler 1 stehen, nicht nichts
   const rest = constValue(n)
   if (rest && isOne(ratAbs(rest)) && totalDegree(raw.num) > 0 && totalDegree(d) > 0) {
@@ -354,20 +391,6 @@ function cancelMistakes(t: FractionTask, solution: FracSolution): Candidate[] {
   }
 
   return out
-}
-
-function partsOfTask(t: FractionTask): Part[] {
-  switch (t.kind) {
-    case 'reduce':
-      return [t.part]
-    case 'sum':
-      return t.terms.map((s) => s.part)
-    case 'product':
-    case 'quotient':
-      return [t.left, t.right]
-    case 'complex':
-      return [...t.top, ...t.bottom].map((s) => s.part)
-  }
 }
 
 // --- Zerlegen ---
@@ -473,7 +496,7 @@ function operationMistakes(t: FractionTask): Candidate[] {
     })
   }
   if (t.kind === 'complex') {
-    const top = sideOf(t.top, hints)
+    const top = ruledTop(sideOf(t.top, hints), t.rule)
     const bottom = sideOf(t.bottom, hints)
     const bottomWhole = !bottom.combined && isWhole(t.bottom[0].part)
     out.push({
@@ -499,18 +522,127 @@ function operationMistakes(t: FractionTask): Candidate[] {
       }
     }
   }
+  if (t.kind === 'mixed') out.push(...mixedMistakes(t))
+  return out
+}
+
+// Mehrere Rechenarten: Fehler beim Zusammenfassen einer Klammer, beim Teilen der Kehrwert vergessen
+function mixedMistakes(t: Extract<FractionTask, { kind: 'mixed' }>): Candidate[] {
+  const out: Candidate[] = []
+  const { hints } = t
+  const left = sideOf(t.left, hints)
+  const right = t.op === 'div' ? { frac: partFrac(reciprocalPart(t.right[0].part)), work: undefined } : sideOf(t.right, hints)
+  if (t.op === 'div') {
+    const rightPart = t.right[0].part
+    const stepExpr = mulDot(signedSum(t.left.map((s) => ({ sign: s.sign, expr: partExpr(s.part) }))), partExpr(rightPart))
+    out.push({ id: 'frac-reciprocal-forgotten', stepExpr, value: fracMul(signedFrac(t.left), partFrac(rightPart)) })
+  }
+  for (const [side, other, step] of [
+    [left, right, 'left'],
+    [right, left, 'right'],
+  ] as const) {
+    if (!side.work) continue
+    const candidates = sumMistakes(side.work, hints)
+    const withoutLcd = candidates.some((c) => c.id === 'frac-add-across' && c.freeOnly)
+    for (const c of candidates) {
+      if (!c.value || isZeroPoly(c.value.num)) continue
+      if (c.id === 'frac-add-across' && withoutLcd && !c.freeOnly) continue
+      out.push({ id: c.id, step, stepExpr: reduced(c.value, hints), value: fracMul(c.value, other.frac) })
+    }
+  }
+  return out
+}
+
+// --- Stufe 5: Ausmultiplizieren und Regeln der Bausteine ---
+
+// (u + v)² als u² + v²: \frac{(x + h)^2 - x^2}{h} = \frac{h^2}{h}
+function multiplyOutMistakes(t: FractionTask): Candidate[] {
+  if (t.kind !== 'reduce' || t.part.num.form !== 'binomial' || t.part.num.base.length !== 2) return []
+  const { base, minus } = t.part.num
+  const squares = polySum(base.map((term) => polyMul([term], [term])))
+  const n = polySub(squares, minus)
+  if (isZeroPoly(n)) return []
+  return [{ id: 'frac-binomial-middle', stepExpr: div(nicePolyExpr(n), shownExpr(t.part.den)), value: { num: n, den: shownPoly(t.part.den) } }]
+}
+
+// Quadrat des Bausteins vergessen: sin² x → sin x, (√x)² → √x
+function dropSquare(p: Poly, atom: string): Poly | null {
+  if (!p.some((term) => (term.mono.find(([a]) => a === atom)?.[1] ?? 0) >= 2)) return null
+  return polySum(p.map((term) => [{ mono: monomial(term.mono.map(([a, e]) => [a, a === atom && e >= 2 ? e - 1 : e] as const)), coef: term.coef }]))
+}
+
+function ruleMistakes(t: FractionTask, solution: FracSolution): Candidate[] {
+  const rule = t.rule
+  const step = solution.steps.find((s) => s.kind === 'identity')
+  if (!rule || !step) return []
+  const atom = rule.kind === 'root' ? 'R' : rule.prefer
+  if (t.kind === 'sum') {
+    const w = workSum(t.terms, t.hints)
+    const lcdPoly = factoredPoly(w.lcd)
+    if (rule.kind === 'root') {
+      const den = dropSquare(lcdPoly, atom)
+      return den ? [{ id: 'frac-square-forgotten', stepExpr: expandedDenExpr(w.numerator, den), value: { num: w.numerator, den } }] : []
+    }
+    if (rule.target === 'num') {
+      const n = dropSquare(applyRule(w.numerator, rule), atom)
+      return n ? [{ id: 'frac-square-forgotten', stepExpr: fractionExpr(n, w.lcd), value: { num: n, den: lcdPoly } }] : []
+    }
+    const den = dropSquare(applyRule(lcdPoly, rule), atom)
+    return den ? [{ id: 'frac-square-forgotten', stepExpr: fractionExpr(w.numerator, factorize(den, t.hints)), value: { num: w.numerator, den } }] : []
+  }
+  if (t.kind === 'reduce' && rule.kind === 'trig') {
+    const n = dropSquare(applyRule(shownPoly(t.part.num), rule), atom)
+    return n ? [{ id: 'frac-square-forgotten', stepExpr: div(ruleExpr(n), shownExpr(t.part.den)), value: { num: n, den: shownPoly(t.part.den) } }] : []
+  }
+  if (t.kind === 'complex' && rule.kind === 'trig') {
+    const top = sideOf(t.top, t.hints)
+    if (!top.work) return []
+    const n = dropSquare(applyRule(top.work.numerator, rule), atom)
+    if (!n) return []
+    const wrongTop = { num: n, den: top.frac.den }
+    return [{ id: 'frac-square-forgotten', stepExpr: fractionExpr(n, top.work.lcd), value: fracDiv(wrongTop, signedFrac(t.bottom)) }]
+  }
+  return []
+}
+
+// --- Verschachtelter Doppelbruch ---
+
+// Fehler im inneren Doppelbruch (als dessen Ergebnis) und danach wie beim Doppelbruch
+function nestedMistakes(t: Extract<FractionTask, { kind: 'nested' }>): Candidate[] {
+  const inner = innerTask(t, t.hints)
+  const innerSolution = solveFraction(inner)
+  const out: Candidate[] = []
+  for (const w of fractionWrongAnswers(inner, innerSolution)) {
+    if (!w.value || isZeroPoly(w.value.num)) continue
+    let value: Frac
+    try {
+      value = taskFrac(replaceInner(t, { num: expanded(w.value.num), den: expanded(w.value.den) }, t.hints))
+    } catch {
+      continue
+    }
+    out.push({ id: w.rule.id, step: 'inner-complex', stepExpr: w.result!, value, ...(w.freeOnly ? { freeOnly: true } : {}) })
+  }
+  const replaced = replaceInner(t, innerResultPart(innerSolution), t.hints)
+  for (const w of fractionWrongAnswers(replaced)) {
+    out.push({ id: w.rule.id, step: w.step, stepExpr: w.stepExpr, value: w.value, ...(w.freeOnly ? { freeOnly: true } : {}) })
+  }
   return out
 }
 
 // --- Alle falschen Antworten einer Aufgabe ---
 
 export function fractionWrongAnswers(t: FractionTask, solution: FracSolution = solveFraction(t)): FracWrong[] {
-  const candidates: Candidate[] = [
-    ...(t.kind === 'sum' ? sumMistakes(workSum(t.terms, t.hints), t.hints) : []),
-    ...operationMistakes(t),
-    ...factorStepMistakes(t, solution),
-    ...cancelMistakes(t, solution),
-  ]
+  const candidates: Candidate[] =
+    t.kind === 'nested'
+      ? nestedMistakes(t)
+      : [
+          ...(t.kind === 'sum' ? sumMistakes(workSum(t.terms, t.hints), t.hints) : []),
+          ...operationMistakes(t),
+          ...multiplyOutMistakes(t),
+          ...factorStepMistakes(t, solution),
+          ...ruleMistakes(t, solution),
+          ...cancelMistakes(t, solution),
+        ]
   const result: FracWrong[] = []
   for (const c of candidates) {
     const rule = fractionErrorRule(c.id)
@@ -519,7 +651,7 @@ export function fractionWrongAnswers(t: FractionTask, solution: FracSolution = s
       if (isZeroPoly(c.value.den) || fracEquals(c.value, solution.value)) continue
       // im selben Schritt jede falsche Antwort nur einmal (im freien Modus zählt die erste)
       if (result.some((r) => r.step === step && r.value && fracEquals(r.value, c.value!))) continue
-      result.push({ rule, step, stepExpr: c.stepExpr, value: c.value, result: reduced(c.value, t.hints), ...(c.freeOnly ? { freeOnly: true } : {}) })
+      result.push({ rule, step, stepExpr: c.stepExpr, value: c.value, result: resultOf(c.value, t), ...(c.freeOnly ? { freeOnly: true } : {}) })
     } else {
       const latex = toLatex(c.stepExpr)
       if (result.some((r) => r.step === step && toLatex(r.stepExpr) === latex)) continue

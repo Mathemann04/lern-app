@@ -1,11 +1,12 @@
-import { type Rational, ONE, isInteger, isZero, rat, ratAdd, ratDiv, ratMul, ratNeg, ratSign } from '../rational.ts'
+import { type Rational, ONE, isInteger, isOne, isZero, rat, ratAbs, ratAdd, ratDiv, ratMul, ratNeg, ratSign } from '../rational.ts'
 
 // Polynome in mehreren Größen mit exakten Bruchzahlen als Vorzahlen, z. B. 3x² − 2xy + 1/2.
-// Die Größen („Atome") sind Buchstaben wie x oder Bausteine wie e^x (siehe atoms.ts); hier zählt
+// Die Größen („Atome") sind Buchstaben wie x oder Bausteine wie e^x (siehe frac.ts); hier zählt
 // nur ihr Name. Damit rechnet die Bruch-Engine exakt: gleichwertig, kürzen, Hauptnenner.
 
-// Reihenfolge der Atome beim Sortieren und Schreiben: x vor y vor a …, Bausteine danach
-const ATOM_ORDER = ['x', 'y', 'a', 'b', 'h', 'E', 'L', 'S', 'C', 'T']
+// Reihenfolge der Atome beim Sortieren und Schreiben: x vor y vor a …, Bausteine danach.
+// R = √x, e = die Eulersche Zahl (nur in falschen Ergebnissen wie e^2)
+const ATOM_ORDER = ['x', 'y', 'a', 'b', 'h', 'E', 'L', 'S', 'C', 'T', 'R', 'e']
 
 const rank = (atom: string) => {
   const i = ATOM_ORDER.indexOf(atom)
@@ -117,6 +118,17 @@ export function polyPow(p: Poly, k: number): Poly {
 
 export const polySum = (ps: readonly Poly[]): Poly => fromTerms(ps.flat())
 
+// Setzt für ein Atom ein Polynom ein, z. B. x → (√x)²: jede Potenz atom^k wird zu q^k
+export function polySubstitute(p: Poly, atom: string, q: Poly): Poly {
+  return polySum(
+    p.map((t) => {
+      const k = exponentOf(t.mono, atom)
+      const rest: Term = { mono: t.mono.filter(([a]) => a !== atom), coef: t.coef }
+      return k === 0 ? [rest] : polyMul([rest], polyPow(q, k))
+    }),
+  )
+}
+
 export const polyProduct = (ps: readonly Poly[]): Poly => ps.reduce(polyMul, polyConst(1))
 
 // --- Eigenschaften ---
@@ -200,14 +212,24 @@ function gcdBig(a: bigint, b: bigint): bigint {
 
 export const lcmBig = (a: bigint, b: bigint): bigint => (a === 0n || b === 0n ? 0n : (a / gcdBig(a, b)) * b)
 
-// Zahl c mit dem Vorzeichen des ersten Summanden, sodass p / c ganzzahlige, teilerfremde Vorzahlen
-// hat, z. B. 4x + 6 → 2, −x/2 + 1 → −1/2
+// 1 ± sin x bzw. 1 ± cos x: Hier steht die 1 vorn (1 − sin x statt −(sin x − 1)), wie im Skript
+// bei 1 − sin² x = (1 − sin x)(1 + sin x)
+export function isUnitTrigLinear(p: Poly): boolean {
+  if (p.length !== 2) return false
+  const [first, last] = p
+  const block = first.mono.length === 1 && first.mono[0][1] === 1 && (first.mono[0][0] === 'S' || first.mono[0][0] === 'C')
+  return block && last.mono.length === 0 && isOne(ratAbs(first.coef)) && isOne(ratAbs(last.coef))
+}
+
+// Zahl c mit dem Vorzeichen des ersten Summanden (bei 1 ± sin x: der 1), sodass p / c
+// ganzzahlige, teilerfremde Vorzahlen hat, z. B. 4x + 6 → 2, −x/2 + 1 → −1/2, 1 − sin x → 1
 export function polyContent(p: Poly): Rational {
   if (p.length === 0) return rat(1)
   const numerators = p.reduce((g, t) => gcdBig(g, t.coef.n), 0n)
   const denominators = p.reduce((l, t) => lcmBig(l, t.coef.d), 1n)
   const c = rat(numerators, denominators)
-  return ratSign(leadingCoef(p)) < 0 ? ratNeg(c) : c
+  const lead = isUnitTrigLinear(p) ? p[1].coef : leadingCoef(p)
+  return ratSign(lead) < 0 ? ratNeg(c) : c
 }
 
 // p ohne Inhalt: ganzzahlig, teilerfremd, erster Summand positiv

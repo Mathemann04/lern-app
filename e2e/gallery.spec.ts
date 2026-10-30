@@ -98,17 +98,15 @@ test('Implizite Aufgabe in der Galerie: y\', beide Seiten im Rechenweg, typische
   expect(errors).toEqual([])
 })
 
-test('Galerie zeigt Bruchaufgaben der Stufen 1 bis 4 mit Rechenweg und typischen Fehlern', async ({ page }) => {
+test('Galerie zeigt Bruchaufgaben der Stufen 1 bis 5 mit Rechenweg und typischen Fehlern', async ({ page }) => {
   const errors = collectErrors(page)
   await page.goto('./#/galerie')
   await page.getByRole('button', { name: 'Brüche' }).click()
   await expect(page.getByRole('button', { name: 'Brüche' })).toHaveAttribute('aria-pressed', 'true')
-  // Stufe 5 der Brüche folgt erst später
-  await expect(page.getByRole('button', { name: 'Stufe 5' })).toBeDisabled()
   await page.getByLabel('Rechenweg zeigen').check()
   await page.getByLabel('Typische Fehler zeigen').check()
 
-  for (const level of [1, 2, 3, 4]) {
+  for (const level of [1, 2, 3, 4, 5]) {
     await page.getByRole('button', { name: `Stufe ${level}` }).click()
     await expect(randomTasks(page)).toHaveCount(8)
     await expect(randomTasks(page).first()).toContainText(`Aufgabe ${level}-`)
@@ -125,8 +123,10 @@ test('Galerie zeigt Bruchaufgaben der Stufen 1 bis 4 mit Rechenweg und typischen
   const card = page.getByRole('region', { name: 'Aufgerufene Aufgabe' }).getByRole('article')
   await expect(card).toContainText('Aufgabe 3-2')
   await expect(card.getByText('Hauptnenner', { exact: true })).toBeVisible()
+  // Stufe 5, z. B. 5-1: \frac{3}{1 - \sin x} + \frac{3}{1 + \sin x} mit sin² x + cos² x = 1
   await page.getByLabel('Aufgabe über ihre Nummer aufrufen').fill('5-1')
   await page.getByRole('button', { name: 'Anzeigen' }).click()
-  await expect(page.getByText('Diese Stufe gibt es hier noch nicht.')).toBeVisible()
+  await expect(card).toContainText('Aufgabe 5-1')
+  await expect(card.getByText('Regel des Bausteins anwenden', { exact: true })).toBeVisible()
   expect(errors).toEqual([])
 })
