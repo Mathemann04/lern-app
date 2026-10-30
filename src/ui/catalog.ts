@@ -56,6 +56,10 @@ export type Subject = {
 
 export const DERIVATIVES = 'ableiten'
 export const FRACTIONS = 'brueche'
+export const REARRANGE = 'umstellen'
+
+// Themen mit Testseite in der Formel-Galerie (auch solche, die noch nicht spielbar sind)
+export const GALLERY_COURSES: readonly string[] = [DERIVATIVES, FRACTIONS, REARRANGE]
 
 const derivativeLevels: LevelPreview[] = [
   {
@@ -131,7 +135,7 @@ export const SUBJECTS: readonly Subject[] = [
       {
         id: 'grundlagen',
         title: 'Grundlagen',
-        description: 'Brüche, Formeln umstellen, Potenzen und Logarithmen',
+        description: 'Brüche, Gleichungen umstellen, Potenzen und Logarithmen',
         icon: 'basics',
         tone: 'orange',
         courses: [
@@ -146,9 +150,9 @@ export const SUBJECTS: readonly Subject[] = [
             focus: true,
           },
           {
-            id: 'umstellen',
-            title: 'Formeln umstellen',
-            description: 'Nach einer Größe auflösen, auch mit Brüchen und Wurzeln',
+            id: REARRANGE,
+            title: 'Gleichungen umstellen',
+            description: 'Nach einer Variablen auflösen, von Brüchen und Wurzeln bis quer durch die Mathematik',
             icon: 'rearrange',
             cards: null,
             levels: [],

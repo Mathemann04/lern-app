@@ -44,10 +44,10 @@ test('Gebiete zeigen sich in ihrer eigenen Farbe', async ({ page }) => {
   const button = page.getByRole('link', { name: 'Stufe 1 geführt üben' })
   const blue = await button.evaluate((el) => getComputedStyle(el).backgroundColor)
   // In der Galerie: Ableiten blau wie die Differentialrechnung, Brüche orange wie die Grundlagen
-  await page.goto('./#/galerie')
+  await page.goto('./#/galerie/ableiten')
   const newTasks = page.getByRole('button', { name: 'Neue Aufgaben' })
   expect(await newTasks.evaluate((el) => getComputedStyle(el).backgroundColor)).toEqual(blue)
-  await page.getByRole('button', { name: 'Brüche' }).click()
+  await page.goto('./#/galerie/brueche')
   await expect.poll(() => newTasks.evaluate((el) => getComputedStyle(el).backgroundColor)).not.toEqual(blue)
   await page.goto('./')
   await expect(page.getByRole('link', { name: /^Differentialrechnung/ })).toHaveAttribute('data-tone', 'blue')

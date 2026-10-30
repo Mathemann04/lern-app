@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { renderFormula } from './renderFormula.ts'
 import { SUBJECTS } from './catalog.ts'
-import { notationSamples } from './samples.ts'
+import { notationGroups } from './samples.ts'
 
 // Vorschau-Formeln aller Stufen aller Themen und die Schreibweise-Beispiele der Galerie
 const allSamples = [
   ...SUBJECTS.flatMap((s) => s.areas.flatMap((a) => a.courses.flatMap((c) => c.levels.flatMap((level) => level.examples)))),
-  ...notationSamples.map((sample) => sample.tex),
+  ...notationGroups.flatMap((group) => group.samples.map((sample) => sample.tex)),
 ]
 
 describe('renderFormula', () => {

@@ -232,3 +232,10 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   „Geteilt, obwohl die Variable noch auf beiden Seiten steht" ist keine
   Fehlerregel: Die Gleichung stimmt ja, sie ist nur nicht fertig (im freien
   Modus „noch nicht aufgelöst").
+- 30.10.2026: Formel-Galerie aufgebaut wie die Startseite (Wunsch des
+  Nutzers): Übersicht mit Fach, Gebieten und Themen als Kacheln, je Thema
+  eine eigene Seite (`#/galerie/brueche`). Schreibweise-Beispiele für
+  Stufe 5 von „Gleichungen umstellen" (Integral, Summe, Grenzwert,
+  Determinante, komplexe Zahlen, Vektor) schon jetzt zum Prüfen. Das Thema
+  heißt jetzt „Gleichungen umstellen". Neues App-Symbol: vier Entwürfe
+  liegen dem Nutzer zur Auswahl vor.

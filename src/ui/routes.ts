@@ -1,13 +1,14 @@
 import { type Level, type TaskRef, formatTaskNumber, parseTaskNumber } from '../engine/tasks/taskNumber.ts'
 import type { PracticeMode } from '../state/storage.ts'
-import { DERIVATIVES, areaById, courseById, isAreaAvailable, isCourseAvailable } from './catalog.ts'
+import { DERIVATIVES, GALLERY_COURSES, areaById, courseById, isAreaAvailable, isCourseAvailable } from './catalog.ts'
 
 // Seiten der App und ihre Adressen (Teil nach „#"). Absichtlich ohne Mathe-Engine, damit die
 // Startseite schnell lädt: Ob es eine Lernkarte oder einen typischen Fehler gibt, prüfen erst die
 // Seiten selbst (cards/cardRoute.ts, PracticePage.tsx).
 export type Route =
   | { readonly page: 'home' }
-  | { readonly page: 'gallery' }
+  // Formel-Galerie: Übersicht #/galerie, ein Thema #/galerie/brueche
+  | { readonly page: 'gallery'; readonly course: string | null }
   | { readonly page: 'settings' }
   | { readonly page: 'progress' }
   // Gebiet #/gebiet/grundlagen, Thema #/thema/brueche (Aufbau in catalog.ts)
@@ -33,7 +34,8 @@ const PREFIX: Record<PracticeMode, string> = { guided: 'ueben', free: 'frei' }
 
 export function parseRoute(fullPath: string): Route {
   const [path, query = ''] = fullPath.split('?')
-  if (path === '/galerie') return { page: 'gallery' }
+  const gallery = /^\/galerie(?:\/([^/]+))?$/.exec(path)
+  if (gallery) return { page: 'gallery', course: gallery[1] && GALLERY_COURSES.includes(gallery[1]) ? gallery[1] : null }
   if (path === '/einstellungen') return { page: 'settings' }
   if (path === '/fortschritt') return { page: 'progress' }
   const catalog = /^\/(gebiet|thema)\/([^/]+)$/.exec(path)
@@ -70,6 +72,7 @@ export const taskHref = (course: string, ref: TaskRef, mode: PracticeMode = 'gui
   `#/${PREFIX[mode]}/${course}/${formatTaskNumber(ref)}${focusQuery(focus)}`
 
 export const areaHref = (id: string) => `#/gebiet/${id}`
+export const galleryHref = (course?: string) => (course ? `#/galerie/${course}` : '#/galerie')
 export const courseHref = (id: string) => `#/thema/${id}`
 
 // Ordner der Lernkarten (in explain/cards.ts „topic"); eine Karte: cardHref in cards/cardRoute.ts
