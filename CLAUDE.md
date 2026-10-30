@@ -32,17 +32,24 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
 - `src/ui/`: Oberfläche (React). Formeln nur über `Formula`
   (`src/ui/Formula.tsx`), das setzt alles in voller Größe (`\displaystyle`).
   Aufbau wie bei Brilliant in `catalog.ts`: Fächer (Überschriften auf der
-  Startseite) → Gebiete (Kacheln, ohne Thema blass mit „kommt bald") →
-  Themen (Stufe und Art wählen, üben); neue Inhalte dort eintragen. Jedes
+  Startseite) → Gebiete (Kacheln, ohne spielbares Thema blass mit „kommt
+  bald") → Themen (Stufe und Art wählen, üben; ohne spielbare Stufe blass
+  mit „kommt bald"); neue Inhalte dort eintragen. Je Thema: Stufen mit
+  Vorschau-Formeln und `available` (geführt spielbar), `free` (freier
+  Modus da), `focus` (gezieltes Üben da), Lernkarten-Ordner `cards`. Jedes
   Gebiet hat eine Farbe (`tone`) und ein Bild, jedes Thema ein Bild
-  (`AreaIcon.tsx`, SVG in der Tonleiter `tone-*`).
+  (`AreaIcon.tsx`, SVG in der Tonleiter `tone-*`). Die Engine eines Themas
+  für den geführten Modus lädt `courseEngines.ts` erst beim Üben.
   Seiten über `#/…` (`routes.ts`): Start `#/` („Weitermachen" und die
-  Fächer), Gebiet `#/gebiet/differentialrechnung`, Thema `#/thema/ableiten`,
-  geführt üben `#/ueben/1` (neue
-  Aufgabe) bzw. `#/ueben/1-4711` (bestimmte Aufgabe), frei üben `#/frei/1`
-  bzw. `#/frei/1-4711`, gezielt üben mit `?fokus=<Fehlerregel>` (z. B.
-  `#/ueben/2?fokus=cos-sign`), Lernkarten in Ordnern nach Themen `#/karten`,
-  `#/karten/ableitungen`, `#/karten/ableitungen/product`, `#/fortschritt`,
+  Fächer), Gebiet `#/gebiet/grundlagen`, Thema `#/thema/brueche`,
+  geführt üben `#/ueben/brueche/1` (neue Aufgabe) bzw.
+  `#/ueben/brueche/1-4711` (bestimmte Aufgabe), frei üben
+  `#/frei/ableiten/1-4711` (ohne freien Modus geht es geführt weiter),
+  gezielt üben mit `?fokus=<Fehlerregel>` (z. B.
+  `#/ueben/ableiten/2?fokus=cos-sign`); alte Adressen ohne Thema
+  (`#/ueben/1-4711`) gehören zum Ableiten. Lernkarten in Ordnern nach
+  Themen `#/karten`, `#/karten/brueche`, `#/karten/ableitungen/product`,
+  `#/fortschritt` (je Thema ein Abschnitt),
   `#/einstellungen`, Testseite `#/galerie` (Link in den Einstellungen,
   Themen Ableiten und Brüche, mit den Schreibweise-Beispielen). Startseite, Gebiet, Einstellungen,
   `routes.ts` und `catalog.ts` kommen ohne Mathe-Engine und KaTeX aus
@@ -57,8 +64,7 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   „Standard" (mit Taste y) und „Mehr Funktionen", wird erst im freien Modus
   geladen), gemeinsame Teile in `src/ui/task/`. Lernkarten in
   `src/ui/cards/` (`CardSheet.tsx`: Fenster über der Aufgabe, die
-  Zurück-Taste schließt nur das Fenster). Welche Stufen
-  schon spielbar sind: `available` in `src/ui/samples.ts`. Lange Formeln in
+  Zurück-Taste schließt nur das Fenster). Lange Formeln in
   `FitWidth` (`src/ui/FitWidth.tsx`) setzen sich selbst kleiner, bis sie
   passen. Texte mit Formeln über
   `RichText` (Formeln zwischen `$…$`).
@@ -89,30 +95,40 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   - `explain/`: Textbausteine für Erklärungen (ausführlich/kurz), Tipps und
     „Warum ist das falsch?" (`texts.ts`); Format Text mit `$…$`-Formeln.
     Lernkarten (`cards.ts`: Ordner `TOPICS`, je Regel Formel, Merksatz,
-    Beispiele, typische Fehler) und durchgerechnete Beispiele (`example.ts`,
-    aus `derive`)
+    Beispiele, typische Fehler; Ordner „Brüche" in `fractionCards.ts`) und
+    durchgerechnete Beispiele (`example.ts` aus `derive`,
+    `fractionExample.ts` aus der Bruch-Engine). Texte für Brüche in
+    `fractionTexts.ts`
   - `guided/plan.ts`: Schrittplaner für den geführten Modus (Regelwahl, dann je
     Summand ein Schritt; Produkt/Quotient: u', v', Einsetzen; Kette: äußere,
     innere Ableitung, Zusammensetzen, ab Stufe 4 ohne eigenen Außen-Schritt;
     u^v (Stufe 5): Logarithmieren, rechte Seite ableiten, mit f malnehmen;
     implizit (Stufe 5): Term mit y ableiten, beide Seiten ableiten, nach y'
     auflösen; Antworten aus Fehlerregeln; je Schritt die passenden
-    Lernkarten)
+    Lernkarten). `guided/fractionPlan.ts`: dasselbe für Brüche (Hauptnenner,
+    erweitern, zusammenfassen, kürzen; Malnehmen und Kürzen in einem
+    Schritt; ein Schritt ohne passenden typischen Fehler geht im nächsten
+    auf, im letzten ist die Antwort das Ergebnis). Gemeinsame Typen in
+    `guided/types.ts`
+  - `errorCatalog.ts`: typische Fehler aller Themen mit Namen, je Thema
   - `fraction/`: Bruch-Engine (Brüche aus Polynomen, exakt): `poly.ts`
     (Polynome in mehreren Buchstaben), `frac.ts` (Bruch, Termbaum ↔
     Polynom; $e^x$, $\ln x$, $\sin x$, $\cos x$ als eigene Buchstaben),
     `factor.ts` (zerlegen, Hauptnenner, kürzen; Ergebnis: Zähler
     ausmultipliziert, Nenner in Faktoren), `task.ts` (Aufgabenformen:
     kürzen, plus/minus, mal, geteilt, Doppelbruch), `solve.ts` (Rechenweg,
-    verbotene Zahlen), `errorRules.ts` (typische Fehler, Ids `frac-…`)
+    verbotene Zahlen), `errorRules.ts` (typische Fehler, Ids `frac-…`;
+    `freeOnly`: nur für die Diagnose im freien Modus)
   - `random/rng.ts`: Zufall mit Startwert; `tasks/`: Aufgaben-Nummern
     („3-48213"), Vorlagen je Stufe (`derivativeTerms.ts`,
-    `fractionTerms.ts`), `focus.ts` (Aufgaben für gezieltes Üben)
-- `src/state/`: Speichern auf dem Gerät (`storage.ts`, Version 2, robust
-  gegen kaputten Inhalt, alte Versionen werden umgezogen), gemeinsamer
-  Zustand (`store.ts`), Einstellungen (`settings.ts`, auch die gewählte Stufe,
-  „Geführt"/„Frei" und hell/dunkel) und Fortschritt mit Fehlerstatistik und
-  8-von-10-Vorschlag (`progress.ts`)
+    `fractionTerms.ts`), `focus.ts` und `fractionFocus.ts` (Aufgaben für
+    gezieltes Üben)
+- `src/state/`: Speichern auf dem Gerät (`storage.ts`, Version 3, robust
+  gegen kaputten Inhalt, alte Versionen werden umgezogen: bis Version 2
+  gehört alles zum Ableiten), gemeinsamer Zustand (`store.ts`),
+  Einstellungen (`settings.ts`: Stufe je Thema, zuletzt geübtes Thema,
+  „Geführt"/„Frei" für alle, hell/dunkel) und Fortschritt je Thema mit
+  Fehlerstatistik und 8-von-10-Vorschlag (`progress.ts`)
 - `e2e/`: Browser-Tests (Playwright). Im freien Modus vor dem Tippen warten,
   bis das Feld bereit ist und den Fokus hat (`math-field[data-ready]`,
   `toBeFocused`): MathLive setzt den Fokus leicht verzögert.
@@ -154,12 +170,14 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   docs/PLAN-M1.md, Brüche: docs/PLAN-M2.md).
 - **Lernkarten:** Jede Regel, die in Aufgaben vorkommt, braucht eine Karte in
   `explain/cards.ts`, und jede ihrer Fehlerregeln steht auf einer Karte
-  (`cards.test.ts` prüft das). Beispiele nur als Term; den Rechenweg rechnet
-  die Engine.
+  (`cards.test.ts` prüft das; bei Brüchen: jeder Fehler der spielbaren
+  Stufen steht auf einer Karte, und jeder Fehler auf einer Karte lässt sich
+  dort gezielt üben). Beispiele nur als Term bzw. Bruchaufgabe; den
+  Rechenweg rechnet die Engine.
 - **Texte:** „Warum ist das falsch?" benennt den Fehler und zeigt die Regel,
   verrät aber nicht das Endergebnis des Schritts. Jede Fehlerregel, die in einer
-  Stufe vorkommt, braucht einen eigenen Text in `explain/texts.ts` (Tests
-  verbieten den Rückfalltext). Beim Bearbeiten mit Skripten auf Backslashes
+  Stufe vorkommt, braucht einen eigenen Text in `explain/texts.ts` bzw.
+  `explain/fractionTexts.ts` (Tests verbieten den Rückfalltext). Beim Bearbeiten mit Skripten auf Backslashes
   achten (`\f` in `\frac` wird sonst zum Steuerzeichen).
 - **Bedienbarkeit:** Knöpfe und Links mindestens 44 px hoch; Text nicht
   heller als `zinc-500`.

@@ -1,10 +1,9 @@
 import { levelSummary, useProgress } from '../state/progress.ts'
 import { useSettings } from '../state/settings.ts'
 import { AreaIcon } from './AreaIcon.tsx'
-import { type Area, DERIVATIVES, SUBJECTS, courseById, isAreaAvailable } from './catalog.ts'
+import { AVAILABLE_COURSES, type Area, SUBJECTS, courseById, isAreaAvailable, isCourseAvailable, playableLevel } from './catalog.ts'
 import { RecentDots } from './RecentDots.tsx'
 import { areaHref, courseHref, practiceHref } from './routes.ts'
-import { derivativeLevels, isLevelAvailable } from './samples.ts'
 
 // Startseite: „Weitermachen" und darunter die Fächer mit ihren Gebieten (Aufbau in catalog.ts)
 export function HomeScreen() {
@@ -37,14 +36,16 @@ export function HomeScreen() {
   )
 }
 
-// Zuletzt gewähltes Thema mit Stufe und Art, ein Tippen bis zur nächsten Aufgabe
+// Zuletzt geübtes Thema mit Stufe und Art, ein Tippen bis zur nächsten Aufgabe
 function ContinueCard() {
-  const { derivativeLevel, practiceMode } = useSettings()
+  const { levels, lastCourse, practiceMode: chosenMode } = useSettings()
   const progress = useProgress()
-  const level = isLevelAvailable(derivativeLevel) ? derivativeLevel : 1
-  const levelTitle = derivativeLevels.find((l) => l.level === level)!.title
-  const { area, course } = courseById(DERIVATIVES)!
-  const { solved, recent, recentClean } = levelSummary(progress, level)
+  const found = courseById(lastCourse)
+  const { area, course } = found && isCourseAvailable(found.course) ? found : courseById(AVAILABLE_COURSES[0].id)!
+  const level = playableLevel(course, levels[course.id])
+  const levelTitle = course.levels.find((l) => l.level === level)!.title
+  const practiceMode = course.free ? chosenMode : 'guided'
+  const { solved, recent, recentClean } = levelSummary(progress, course.id, level)
   const started = progress.attempts.length > 0
   return (
     <section aria-labelledby="continue" data-tone={area.tone} className="space-y-4 rounded-2xl bg-accent-50 p-5">
@@ -70,12 +71,12 @@ function ContinueCard() {
       )}
       <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
         <a
-          href={practiceHref(level, practiceMode)}
+          href={practiceHref(course.id, level, practiceMode)}
           className="rounded-xl bg-accent-700 px-5 py-3 text-lg font-medium text-on-accent hover:bg-accent-800"
         >
           {started ? 'Weiter üben' : 'Erste Aufgabe'} · {practiceMode === 'free' ? 'frei' : 'geführt'}
         </a>
-        <a href={courseHref(DERIVATIVES)} className="-mx-2 rounded-lg px-2 py-3 font-medium text-accent-700 hover:bg-accent-100">
+        <a href={courseHref(course.id)} className="-mx-2 rounded-lg px-2 py-3 font-medium text-accent-700 hover:bg-accent-100">
           Stufe oder Art ändern
         </a>
       </div>

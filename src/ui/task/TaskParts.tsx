@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
-import { errorRule } from '../../engine/derive/errorRules.ts'
+import { findError } from '../../engine/errorCatalog.ts'
 import { type TaskRef, formatTaskNumber } from '../../engine/tasks/taskNumber.ts'
-import { DERIVATIVES } from '../catalog.ts'
 import { Formula } from '../Formula.tsx'
 import { type ExplanationMode, MODE_LABEL } from './explanationMode.ts'
 import { RichText } from '../RichText.tsx'
@@ -9,11 +8,13 @@ import { courseHref } from '../routes.ts'
 
 // Teile, die geführter und freier Modus gemeinsam haben
 
-// Obere Leiste: Schließen, Mitte (z. B. Fortschritt), Umschalter für Erklärungen
-export function TaskTopBar({ mode, onCycleMode, children }: { mode: ExplanationMode; onCycleMode: () => void; children?: ReactNode }) {
+// Obere Leiste: Schließen (zurück zum Thema), Mitte (z. B. Fortschritt), Umschalter für Erklärungen
+type TopBarProps = { course: string; mode: ExplanationMode; onCycleMode: () => void; children?: ReactNode }
+
+export function TaskTopBar({ course, mode, onCycleMode, children }: TopBarProps) {
   return (
     <div className="flex items-center gap-3">
-      <a href={courseHref(DERIVATIVES)} aria-label="Aufgabe beenden" className="-my-1 -ml-3 rounded-lg p-3 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
+      <a href={courseHref(course)} aria-label="Aufgabe beenden" className="-my-1 -ml-3 rounded-lg p-3 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
         <svg aria-hidden viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
           <path d="M6 6l12 12M18 6L6 18" />
         </svg>
@@ -64,7 +65,7 @@ export function FocusBanner({ focus }: { focus: string }) {
   return (
     <div className="flex items-center gap-3 rounded-xl bg-amber-50 px-4 py-2 text-sm">
       <p className="flex-1 text-amber-900">
-        Gezielt üben: <RichText text={errorRule(focus).name} className="font-medium" inline />
+        Gezielt üben: <RichText text={findError(focus)?.name ?? ''} className="font-medium" inline />
       </p>
       <a href="#/fortschritt" className="-my-2 -mr-2 shrink-0 rounded-lg px-3 py-3 font-medium text-amber-900 hover:bg-amber-100">
         Beenden

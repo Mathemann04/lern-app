@@ -3,10 +3,9 @@ import { BackLink } from '../BackLink.tsx'
 import { FitWidth } from '../FitWidth.tsx'
 import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
-import { SUBJECTS } from '../catalog.ts'
+import { SUBJECTS, courseOfCards, isCourseAvailable } from '../catalog.ts'
 import { cardFolderHref } from '../routes.ts'
 import { cardHref, resolveCardPage } from './cardRoute.ts'
-import { derivativeLevels } from '../samples.ts'
 import { CardBody } from './CardBody.tsx'
 
 // Lernkarten-Seite zur Adresse: alle Ordner, ein Ordner oder eine Karte
@@ -22,10 +21,10 @@ export function CardsPage({ folder, card }: { folder: string | null; card: strin
   }
 }
 
-// Ordner der Lernkarten nach Fach und Gebiet wie auf der Startseite (je Thema ein Ordner)
+// Ordner der Lernkarten nach Fach und Gebiet wie auf der Startseite (je spielbarem Thema ein Ordner)
 const FOLDER_GROUPS = SUBJECTS.flatMap((subject) =>
   subject.areas.flatMap((area) => {
-    const topics = area.courses.map((course) => topicById(course.cards)!)
+    const topics = area.courses.flatMap((course) => (isCourseAvailable(course) && course.cards ? [topicById(course.cards)!] : []))
     return topics.length > 0 ? [{ subject, area, topics }] : []
   }),
 )
@@ -81,7 +80,7 @@ export function CardsScreen() {
 export function CardTopicScreen({ topic: id }: { topic: string }) {
   const topic = topicById(id)!
   const cards = cardsInTopic(id)
-  const levels = derivativeLevels.filter((l) => cards.some((c) => c.level === l.level))
+  const levels = (courseOfCards(id)?.course.levels ?? []).filter((l) => cards.some((c) => c.level === l.level))
   return (
     <main className="space-y-8">
       <div className="space-y-3">

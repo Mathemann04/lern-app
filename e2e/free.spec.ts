@@ -79,7 +79,7 @@ test('Freier Modus: richtige Antwort, dann Lösungsweg aufdecken', async ({ page
   expect(errors).toEqual([])
 
   await page.getByRole('link', { name: 'Nächste Aufgabe' }).click()
-  await expect(page).toHaveURL(/#\/frei\/2-\d+$/)
+  await expect(page).toHaveURL(/#\/frei\/ableiten\/2-\d+$/)
   await expect(field(page)).toBeVisible()
 })
 
@@ -104,7 +104,7 @@ test('Freier Modus: meldet Unlesbares verständlich und hilft weiter', async ({ 
   await expect(page.getByText('Ein Produkt')).toBeVisible()
 
   await page.getByRole('link', { name: 'Geführt lösen' }).click()
-  await expect(page).toHaveURL(/#\/ueben\/2-4$/)
+  await expect(page).toHaveURL(/#\/ueben\/ableiten\/2-4$/)
   await expect(page.locator('#question')).toBeVisible()
 })
 
@@ -117,7 +117,7 @@ test('Moduswahl bleibt gespeichert, auch für „Weitermachen" auf der Startseit
   await page.goto('./#/thema/ableiten')
   await page.reload()
   await page.getByRole('link', { name: 'Stufe 1 frei üben' }).click()
-  await expect(page).toHaveURL(/#\/frei\/1-\d+$/)
+  await expect(page).toHaveURL(/#\/frei\/ableiten\/1-\d+$/)
   await expect(field(page)).toBeVisible()
 })
 

@@ -59,7 +59,7 @@ test('Eine Aufgabe der Stufe 1 lässt sich geführt komplett lösen', async ({ p
   const errors = collectErrors(page)
   await page.goto('./#/thema/ableiten')
   await page.getByRole('link', { name: 'Stufe 1 geführt üben' }).click()
-  await expect(page).toHaveURL(/#\/ueben\/1-\d+$/)
+  await expect(page).toHaveURL(/#\/ueben\/ableiten\/1-\d+$/)
 
   await solveWholeTask(page)
   await expect(page.getByRole('progressbar')).toHaveAttribute('aria-valuenow', /\d+/)
@@ -79,7 +79,7 @@ test('Stufenwahl bleibt gespeichert, Stufe 2 lässt sich komplett lösen', async
   await expect(page.getByRole('radio', { name: /^Stufe 2/ })).toBeChecked()
 
   await page.getByRole('link', { name: 'Stufe 2 geführt üben' }).click()
-  await expect(page).toHaveURL(/#\/ueben\/2-\d+$/)
+  await expect(page).toHaveURL(/#\/ueben\/ableiten\/2-\d+$/)
   await expect(page.getByText(/^Stufe 2 · Aufgabe 2-\d+/)).toBeVisible()
   await solveWholeTask(page)
   expect(errors).toEqual([])
@@ -172,7 +172,7 @@ test('Tipp lässt sich vor dem Antworten aufrufen', async ({ page }) => {
 
 test('Gleiche Adresse zeigt nach dem Neuladen dieselbe Aufgabe', async ({ page }) => {
   await page.goto('./#/ueben/1')
-  await expect(page).toHaveURL(/#\/ueben\/1-\d+$/)
+  await expect(page).toHaveURL(/#\/ueben\/ableiten\/1-\d+$/)
   const url = page.url()
   const task = await page.getByText(/Aufgabe 1-\d+/).textContent()
   await page.reload()

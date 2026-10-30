@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'react'
-import { errorRule } from '../../engine/derive/errorRules.ts'
-import { type Card, examplesFor } from '../../engine/explain/cards.ts'
-import { workedExample } from '../../engine/explain/example.ts'
-import type { Equation, Expr } from '../../engine/expr/types.ts'
+import { findError } from '../../engine/errorCatalog.ts'
+import { type Card, type CardExample as Example, examplesFor } from '../../engine/explain/cards.ts'
+import { cardExample } from '../../engine/explain/example.ts'
+import type { Expr } from '../../engine/expr/types.ts'
 import { useProgress } from '../../state/progress.ts'
 import { useSettings } from '../../state/settings.ts'
 import { FitWidth } from '../FitWidth.tsx'
 import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
+import { courseOfCards, playableLevel } from '../catalog.ts'
 import { practiceHref } from '../routes.ts'
 
 // Inhalt einer Lernkarte: Formel, Merksatz, wann man die Regel braucht, ein durchgerechnetes
@@ -51,9 +52,9 @@ export function CardBody({ card, heading: H, practice, task }: Props) {
   )
 }
 
-function CardExample({ examples, heading: H, headingClass }: { examples: readonly (Expr | Equation)[]; heading: Heading; headingClass: string }) {
+function CardExample({ examples, heading: H, headingClass }: { examples: readonly Example[]; heading: Heading; headingClass: string }) {
   const [index, setIndex] = useState(0)
-  const example = useMemo(() => workedExample(examples[index]), [examples, index])
+  const example = useMemo(() => cardExample(examples[index]), [examples, index])
   return (
     <section className="space-y-3" aria-label="Beispiel">
       <div className="flex items-baseline justify-between gap-3">
@@ -92,13 +93,16 @@ function CardExample({ examples, heading: H, headingClass }: { examples: readonl
 
 function CardErrors({ card, heading: H, headingClass, practice }: Props & { headingClass: string }) {
   const { errors } = useProgress()
-  const { derivativeLevel, practiceMode } = useSettings()
+  const settings = useSettings()
+  // Gezielt üben im Thema der Karte, wenn es das dort gibt
+  const course = courseOfCards(card.topic)?.course
+  const canPractice = practice && course?.focus === true
   return (
     <section className="space-y-3">
       <H className={headingClass}>Typische Fehler</H>
       <ul className="space-y-3">
         {card.errors.map((id) => {
-          const rule = errorRule(id)
+          const rule = findError(id)!
           const times = errors[id] ?? 0
           return (
             <li key={id} className="space-y-2 rounded-2xl border border-zinc-200 p-4">
@@ -112,9 +116,9 @@ function CardErrors({ card, heading: H, headingClass, practice }: Props & { head
                   <Formula tex={rule.wrongFormula} />
                 </FitWidth>
               </div>
-              {practice && (
+              {canPractice && (
                 <a
-                  href={practiceHref(derivativeLevel, practiceMode, id)}
+                  href={practiceHref(course.id, playableLevel(course, settings.levels[course.id]), course.free ? settings.practiceMode : 'guided', id)}
                   className="-ml-3 inline-block rounded-xl px-3 py-2.5 font-medium text-accent-700 hover:bg-accent-50"
                 >
                   Gezielt üben

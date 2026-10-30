@@ -78,7 +78,19 @@ const CASES: Case[] = [
   ],
   ['frac-binomial-confused', task({ kind: 'reduce', part: fr(sub(x2, num(9)), add(mul(num(2), x), num(6))) }), 'step', '\\frac{(x - 3)^{2}}{2x + 6}'],
   ['frac-vieta-sign', task({ kind: 'reduce', part: fr(sub(sub(x2, x), num(6)), sub(x2, num(9))) }), 'step', '\\frac{(x - 2)(x + 3)}{x^{2} - 9}'],
+  ['frac-cancel-one-side', task({ kind: 'reduce', part: fr(num(14), num(12)) }), 'result', '\\frac{7}{12}'],
+  ['frac-multiply-reciprocal', task({ kind: 'product', left: fr(num(3), num(4)), right: fr(num(2), num(5)) }), 'step', '\\frac{3 \\cdot 5}{4 \\cdot 2}'],
 ]
+
+describe('Zähler und Nenner addiert', () => {
+  it('im geführten Modus nach dem Erweitern, im freien Modus auch ohne Hauptnenner', () => {
+    const wrong = fractionWrongAnswers(task({ kind: 'sum', terms: [plus(fr(num(3), num(4))), plus(fr(num(5), num(6)))] })).filter((w) => w.rule.id === 'frac-add-across')
+    expect(wrong.map((w) => [toLatex(w.stepExpr), w.freeOnly ?? false])).toEqual([
+      ['\\frac{19}{24}', false],
+      ['\\frac{4}{5}', true],
+    ])
+  })
+})
 
 describe('Fehlerkatalog Brüche: Beispiele', () => {
   it.each(CASES)('%s', (id, t, what, latex) => {

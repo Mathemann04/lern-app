@@ -89,9 +89,12 @@ export function nicePolyExpr(p: Poly): Expr {
   return polyExpr(p)
 }
 
-// Bruch aus Zähler (ausmultipliziert) und Nenner in Faktoren; Nenner 1 → nur der Zähler
+// Bruch aus Zähler (ausmultipliziert) und Nenner in Faktoren; Nenner 1 → nur der Zähler. Ist der
+// Zähler ganz negativ, steht das Minus vor dem Bruch: -\frac{3}{10}
 export function fractionExpr(numerator: Poly, den: Factored): Expr {
   if (isOneFactored(den) || numerator.length === 0) return nicePolyExpr(numerator)
+  const allNegative = startsNegative(numerator) && (numerator.length < 2 || startsNegative([...numerator].reverse()))
+  if (allNegative) return neg(div(nicePolyExpr(polyNeg(numerator)), factoredExpr(den)))
   return div(nicePolyExpr(numerator), factoredExpr(den))
 }
 
@@ -184,10 +187,15 @@ const splits = (f: Factored) => f.factors.length >= 2 || !isOne(f.coef) || f.fac
 
 // --- Rechenweg ---
 
-function productSteps(left: Part, right: Part, hints: readonly Poly[]): { steps: FracStep[]; raw: Frac } {
+// Zähler mal Zähler, Nenner mal Nenner, noch nicht ausgerechnet: \frac{3 \cdot 2}{10 \cdot 3}
+export function multipliedExpr(left: Part, right: Part): Expr {
   const nums = [left.num, right.num].map(shownExpr)
   const dens = [left, right].filter((p) => !isWhole(p)).map((p) => shownExpr(p.den))
-  const multiplied = dens.length === 0 ? productExpr(nums) : div(productExpr(nums), productExpr(dens))
+  return dens.length === 0 ? productExpr(nums) : div(productExpr(nums), productExpr(dens))
+}
+
+function productSteps(left: Part, right: Part, hints: readonly Poly[]): { steps: FracStep[]; raw: Frac } {
+  const multiplied = multipliedExpr(left, right)
   const l = partFrac(left)
   const r = partFrac(right)
   const raw = { num: polyMul(l.num, r.num), den: polyMul(l.den, r.den) }

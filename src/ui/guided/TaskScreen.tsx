@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { Choice, GuidedStep, GuidedTask } from '../../engine/guided/plan.ts'
-import { planGuidedTask } from '../../engine/guided/plan.ts'
+import type { Choice, GuidedStep, GuidedTask } from '../../engine/guided/types.ts'
 import type { Expr } from '../../engine/expr/types.ts'
 import type { TaskRef } from '../../engine/tasks/taskNumber.ts'
 import { recordAttempt, recordError } from '../../state/progress.ts'
@@ -9,16 +8,19 @@ import { FitWidth } from '../FitWidth.tsx'
 import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
 import { CardSheetButton, TaskCardLinks } from '../cards/CardSheet.tsx'
-import { DERIVATIVES } from '../catalog.ts'
+import type { CourseEngine } from '../courseEngines.ts'
 import { courseHref, practiceHref } from '../routes.ts'
 import { LevelUpSuggestion } from '../task/LevelUpSuggestion.tsx'
 import { CheckBadge, FocusBanner, TaskIntro, TaskTopBar } from '../task/TaskParts.tsx'
 import { type ExplanationMode, useExplanationMode } from '../task/explanationMode.ts'
 
-// focus: gezielt einen typischen Fehler üben (der Fehler erscheint sicher als Antwort)
-export function TaskScreen({ taskRef, focus = null }: { taskRef: TaskRef; focus?: string | null }) {
+type Props = { course: string; engine: CourseEngine; taskRef: TaskRef; focus?: string | null }
+
+// course: Id des Themas, engine: seine Mathe-Engine; focus: gezielt einen typischen Fehler üben
+// (der Fehler erscheint sicher als Antwort)
+export function TaskScreen({ course, engine, taskRef, focus = null }: Props) {
   const { level, seed } = taskRef
-  const task = useMemo(() => planGuidedTask({ level, seed }, focus ?? undefined), [level, seed, focus])
+  const task = useMemo(() => engine.planGuidedTask({ level, seed }, focus ?? undefined), [engine, level, seed, focus])
   const { mode, detail, cycle } = useExplanationMode()
   const [stepIndex, setStepIndex] = useState(0)
   const [mistakes, setMistakes] = useState(0)
@@ -29,12 +31,12 @@ export function TaskScreen({ taskRef, focus = null }: { taskRef: TaskRef; focus?
   useEffect(() => {
     if (!finished || recorded.current) return
     recorded.current = true
-    recordAttempt({ level, mode: 'guided', clean: mistakes === 0 })
-  }, [finished, level, mistakes])
+    recordAttempt({ course, level, mode: 'guided', clean: mistakes === 0 })
+  }, [finished, course, level, mistakes])
 
   return (
     <main className="space-y-6">
-      <TaskTopBar mode={mode} onCycleMode={cycle}>
+      <TaskTopBar course={course} mode={mode} onCycleMode={cycle}>
         <div
           className="h-2 overflow-hidden rounded-full bg-zinc-100"
           role="progressbar"
@@ -55,7 +57,7 @@ export function TaskScreen({ taskRef, focus = null }: { taskRef: TaskRef; focus?
       <TaskHeader task={task} stepIndex={stepIndex} />
 
       {finished ? (
-        <FinishView task={task} mistakes={mistakes} focus={focus} />
+        <FinishView course={course} task={task} mistakes={mistakes} focus={focus} />
       ) : (
         <StepView
           key={stepIndex}
@@ -73,15 +75,15 @@ export function TaskScreen({ taskRef, focus = null }: { taskRef: TaskRef; focus?
 }
 
 function TaskHeader({ task, stepIndex }: { task: GuidedTask; stepIndex: number }) {
-  const established = task.steps.slice(0, stepIndex).flatMap((s) => (s.established ? [s.established] : []))
+  const established = task.steps.slice(0, stepIndex).flatMap((s) => s.established ?? [])
   return (
     <section className="space-y-3">
       <TaskIntro taskRef={task.ref} functionLatex={task.functionLatex} instruction={task.instruction} />
       {established.length > 0 && (
         <div className="space-y-1 rounded-xl bg-zinc-50 px-4 py-3" aria-label="Bisher">
           <p className="text-sm text-zinc-500">Bisher</p>
-          {established.map((line) => (
-            <FitWidth key={line}>
+          {established.map((line, i) => (
+            <FitWidth key={i}>
               <Formula tex={line} />
             </FitWidth>
           ))}
@@ -240,7 +242,7 @@ function cardSheetTitle(step: GuidedStep): string {
   return step.cards.length === 1 ? 'Lernkarte zu diesem Schritt' : 'Lernkarten zu diesem Schritt'
 }
 
-function FinishView({ task, mistakes, focus }: { task: GuidedTask; mistakes: number; focus: string | null }) {
+function FinishView({ course, task, mistakes, focus }: { course: string; task: GuidedTask; mistakes: number; focus: string | null }) {
   const headingRef = useRef<HTMLHeadingElement>(null)
   useEffect(() => {
     headingRef.current?.focus({ preventScroll: true })
@@ -258,20 +260,21 @@ function FinishView({ task, mistakes, focus }: { task: GuidedTask; mistakes: num
             : `Gelöst mit ${mistakes} ${mistakes === 1 ? 'Fehlversuch' : 'Fehlversuchen'}.`}
         </p>
       </div>
-      <div className="rounded-2xl bg-accent-50 px-4 py-4" data-testid="result">
+      <div className="space-y-2 rounded-2xl bg-accent-50 px-4 py-4" data-testid="result">
         <FitWidth className="text-2xl">
           <Formula tex={task.resultLatex} />
         </FitWidth>
+        {task.resultNote && <RichText text={task.resultNote} className="text-zinc-600" />}
       </div>
-      <LevelUpSuggestion level={task.ref.level} mode="guided" />
+      <LevelUpSuggestion course={course} level={task.ref.level} mode="guided" />
       <div className="flex flex-col gap-3 sm:flex-row">
         <a
-          href={practiceHref(task.ref.level, 'guided', focus)}
+          href={practiceHref(course, task.ref.level, 'guided', focus)}
           className="flex-1 rounded-xl bg-accent-700 px-4 py-3 text-center text-lg font-medium text-on-accent hover:bg-accent-800"
         >
           Nächste Aufgabe
         </a>
-        <a href={courseHref(DERIVATIVES)} className="flex-1 rounded-xl border border-zinc-300 px-4 py-3 text-center text-lg font-medium hover:bg-zinc-50">
+        <a href={courseHref(course)} className="flex-1 rounded-xl border border-zinc-300 px-4 py-3 text-center text-lg font-medium hover:bg-zinc-50">
           Zur Übersicht
         </a>
       </div>

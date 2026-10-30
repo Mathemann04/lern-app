@@ -60,7 +60,7 @@ test('Lernkarten über das Menü: Ordner, Karte, anderes Beispiel, zurück, gezi
   await page.goto('./#/karten/ableitungen/chain')
 
   await page.getByRole('link', { name: 'Gezielt üben' }).first().click()
-  await expect(page).toHaveURL(/#\/ueben\/2-\d+\?fokus=chain-inner-forgotten$/)
+  await expect(page).toHaveURL(/#\/ueben\/ableiten\/2-\d+\?fokus=chain-inner-forgotten$/)
   await expect(page.locator('#question')).toBeVisible()
   expect(errors).toEqual([])
 })

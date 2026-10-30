@@ -45,6 +45,7 @@ import { type Rng, createRng } from '../random/rng.ts'
 import { isInteger } from '../rational.ts'
 import { generateDerivativeTask } from '../tasks/derivativeTerms.ts'
 import type { TaskRef } from '../tasks/taskNumber.ts'
+import type { Choice, GuidedStep, GuidedTask } from './types.ts'
 
 // Schrittplaner für den geführten Modus: macht aus dem Rechenweg der Engine eine Folge
 // von Bildschirm-Schritten mit Auswahl-Antworten. Falsche Antworten stammen aus den
@@ -59,59 +60,6 @@ import type { TaskRef } from '../tasks/taskNumber.ts'
 //   Seite ableiten, dann mit f malnehmen
 // Die Ableitung eines Teils ist immer ein einzelner Schritt, auch wenn darin selbst
 // wieder eine Regel steckt (z. B. u = e^{x^2} bei der Produktregel).
-
-export type Choice = {
-  readonly id: string
-  // Inhalt der Antwort (Text mit Formeln), z. B. "$12x^{2}$" oder "Summenregel"
-  readonly content: string
-  // kleine Zusatzzeile, z. B. die Formel einer Regel
-  readonly caption?: string
-  readonly correct: boolean
-  // bei Formel-Antworten: der Term (für Tests und spätere Auswertungen)
-  readonly expr?: Expr
-  // bei der Regelwahl: die Regel dieser Antwort
-  readonly rule?: RuleId
-  // bei falschen Antworten: welcher typische Fehler dahintersteckt und warum er falsch ist
-  readonly errorRuleId?: string
-  readonly whyWrong?: Explanation
-}
-
-export type GuidedStep = {
-  readonly id: string
-  // kurze Überschrift, z. B. „Summand 2 von 3"
-  readonly title: string
-  readonly question: string
-  readonly choices: readonly Choice[]
-  readonly hint: string
-  // bei Ableitungsschritten: Die richtige Antwort ist die Ableitung von subject nach variable
-  readonly subject?: Expr
-  readonly variable?: string
-  // warum die richtige Antwort stimmt
-  readonly explanation: Explanation
-  // was nach dem Schritt feststeht, als LaTeX-Zeile, z. B. (4x^3)' = 12x^2
-  readonly established?: string
-  // passende Lernkarten (Ids aus cards.ts); bei der Regelwahl die Karten aller angebotenen Regeln
-  readonly cards: readonly string[]
-}
-
-export type GuidedTask = {
-  readonly ref: TaskRef
-  // abzuleitende Funktion (Aufgabenform); beim impliziten Ableiten linke minus rechte Seite
-  readonly expr: Expr
-  // Aufgabe als LaTeX: f(x) = … bzw. die Gleichung
-  readonly functionLatex: string
-  // Arbeitsauftrag, z. B. „Leite ab"
-  readonly instruction: string
-  // Name der gesuchten Ableitung: f'(x) bzw. y'
-  readonly answerLabel: string
-  readonly steps: readonly GuidedStep[]
-  // Welche Regel ganz außen? (auch, wenn die Frage danach entfällt; Tipp im freien Modus)
-  readonly ruleHint: Explanation
-  readonly result: Expr
-  readonly resultLatex: string
-  // Lernkarten zu allen Regeln der Aufgabe, außen zuerst
-  readonly cards: readonly string[]
-}
 
 const MAX_WRONG_CHOICES = 3
 

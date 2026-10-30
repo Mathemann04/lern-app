@@ -3,8 +3,9 @@ import { type Attempt, EMPTY_PROGRESS, MAX_ATTEMPTS, type Progress } from './sto
 import { updateAppState, useAppState } from './store.ts'
 
 // Fortschritt und Fehlerstatistik: was gelöst wurde, wie oft welcher typische Fehler passiert ist
-// und wann „Eine Stufe höher?" vorgeschlagen wird. Die Rechnungen sind reine Funktionen (testbar),
-// die Hooks und update-Funktionen verbinden sie mit dem gespeicherten Zustand.
+// und wann „Eine Stufe höher?" vorgeschlagen wird, je Thema (Id aus ui/catalog.ts). Die Rechnungen
+// sind reine Funktionen (testbar), die Hooks und update-Funktionen verbinden sie mit dem
+// gespeicherten Zustand.
 
 // „8 von 10": Vorschlag, wenn von den letzten 10 Aufgaben einer Stufe mindestens 8 ohne Fehler waren
 export const SUGGEST_WINDOW = 10
@@ -25,22 +26,26 @@ export type LevelSummary = {
   readonly recentClean: number
 }
 
-export function levelSummary(progress: Progress, level: Level): LevelSummary {
-  const all = progress.attempts.filter((a) => a.level === level)
+export function levelSummary(progress: Progress, course: string, level: Level): LevelSummary {
+  const all = progress.attempts.filter((a) => a.course === course && a.level === level)
   const recent = all.slice(-SUGGEST_WINDOW)
   return { solved: all.length, recent, recentClean: recent.filter((a) => a.clean).length }
 }
 
+// Alle gelösten Aufgaben eines Themas
+export const solvedInCourse = (progress: Progress, course: string) => progress.attempts.filter((a) => a.course === course).length
+
 // Nie automatisch wechseln, nur vorschlagen; nach „Später" erst wieder nach 10 weiteren Aufgaben
-export function shouldSuggestLevelUp(progress: Progress, level: Level): boolean {
-  const { solved, recent, recentClean } = levelSummary(progress, level)
+export function shouldSuggestLevelUp(progress: Progress, course: string, level: Level): boolean {
+  const { solved, recent, recentClean } = levelSummary(progress, course, level)
   if (recent.length < SUGGEST_WINDOW || recentClean < SUGGEST_MIN_CLEAN) return false
-  const dismissedAt = progress.suggestionDismissed[level]
+  const dismissedAt = progress.suggestionDismissed[course]?.[level]
   return dismissedAt === undefined || solved >= dismissedAt + SUGGEST_WINDOW
 }
 
 // Häufigste Fehler zuerst; bei Gleichstand in fester Reihenfolge (nach Id). known: nur Fehler, die
-// es (noch) gibt; gespeichert sein kann auch eine Id aus einer älteren Version.
+// es (noch) gibt bzw. die zu einem Thema gehören; gespeichert sein kann auch eine Id aus einer
+// älteren Version.
 export function topErrors(
   progress: Progress,
   count: number,
@@ -60,8 +65,11 @@ const updateProgress = (change: (progress: Progress) => Progress) =>
 
 export const recordAttempt = (attempt: Omit<Attempt, 'at'>) => updateProgress((p) => addAttempt(p, { ...attempt, at: Date.now() }))
 export const recordError = (errorId: string) => updateProgress((p) => addError(p, errorId))
-export const dismissSuggestion = (level: Level) =>
-  updateProgress((p) => ({ ...p, suggestionDismissed: { ...p.suggestionDismissed, [level]: levelSummary(p, level).solved } }))
+export const dismissSuggestion = (course: string, level: Level) =>
+  updateProgress((p) => ({
+    ...p,
+    suggestionDismissed: { ...p.suggestionDismissed, [course]: { ...p.suggestionDismissed[course], [level]: levelSummary(p, course, level).solved } },
+  }))
 export const resetProgress = () => updateProgress(() => EMPTY_PROGRESS)
 
 export function useProgress(): Progress {

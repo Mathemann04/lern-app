@@ -20,11 +20,12 @@ Details: [PLAN-M2.md](PLAN-M2.md)
 - [x] Plan M2
 - [x] 1. Neues Aussehen: dunkles Design, Farben je Gebiet, neue Symbole
 - [x] 2. Mathe-Engine für Brüche
-- [ ] 3. Mehrere Themen, Brüche Stufe 1 und 2 geführt
+- [x] 3. Mehrere Themen, Brüche Stufe 1 und 2 geführt
 - [ ] 4. Stufen 3 und 4 geführt
 - [ ] 5. Freier Modus für Brüche
 - [ ] 6. Stufe 5 geführt und frei
-- [ ] 7. Gezieltes Üben, Feinschliff, Abschluss von M2
+- [ ] 7. Gezieltes Üben, Feinschliff, Abschluss von M2 (gezieltes Üben für
+  Brüche schon mit Schritt 3)
 
 ## M1: Schritte
 
@@ -141,3 +142,22 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   Formeln, $x^2 + px + q$), Ergebnis mit ausmultipliziertem Zähler und
   Nenner in Faktoren; „gilt für $x \neq \dots$" bei Aufgaben mit $x$. 23
   typische Fehler, Bruchaufgaben in der Formel-Galerie.
+- 30.10.2026: Mehrere Themen (Schritt 3 von M2): Das Gebiet „Grundlagen"
+  ist offen mit „Brüche" (Stufe 1 und 2 geführt), „Formeln umstellen" und
+  „Potenzen, Wurzeln, Logarithmen" kommen bald. Jedes Thema merkt sich
+  seine Stufe, „Weitermachen" führt zum zuletzt geübten Thema, Fortschritt
+  und häufigste Fehler stehen je Thema. Speicher Version 3; der alte Stand
+  gehört zum Ableiten. Adressen mit Thema (`#/ueben/brueche/1-88`), alte
+  Adressen führen zum Ableiten. Der freie Modus fehlt bei Brüchen noch
+  (Schritt 5), deshalb steht „Frei" dort auf „kommt bald".
+- 30.10.2026: Geführter Modus für Brüche: Ein Schritt ohne passenden
+  typischen Fehler wird nicht einzeln abgefragt (z. B. der Hauptnenner bei
+  $2 - \frac{3}{5}$), Malnehmen und Kürzen sind ein Schritt. Zwei neue
+  typische Fehler: „Nur den Zähler oder nur den Nenner gekürzt" und „Beim
+  Malnehmen den Kehrwert genommen". „Zähler plus Zähler, Nenner plus
+  Nenner" gibt es im geführten Modus nach dem Erweitern
+  ($\frac{9}{12} + \frac{10}{12} = \frac{19}{24}$). Gezieltes Üben
+  funktioniert für Brüche schon (vorgezogen aus Schritt 7).
+- 30.10.2026: Schreibweise der Brüche: Der Zähler beginnt möglichst mit
+  Plus ($\frac{b - a}{ab}$ statt $-\frac{a - b}{ab}$); nur wenn alles
+  negativ ist, steht das Minus vor dem Bruch.

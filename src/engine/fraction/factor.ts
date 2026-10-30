@@ -254,9 +254,12 @@ export function reduceFrac(f: Frac, hints: readonly Poly[] = []): Reduced {
 
 export const reducedFrac = (r: Reduced): Frac => ({ num: r.num, den: factoredPoly(r.den) })
 
-// Schreibweise des Ergebnisses: \frac{x + 5}{(x - 1)(x + 1)}, -\frac{2x}{3y^2}, e^x - 1
+// Schreibweise des Ergebnisses: \frac{x + 5}{(x - 1)(x + 1)}, -\frac{2x}{3y^2}, e^x - 1. Der Zähler
+// beginnt möglichst mit Plus (\frac{b - a}{ab}); nur wenn alles negativ ist, steht das Minus vorn.
 export function reducedExpr(r: Reduced): Expr {
-  if (isOneFactored(r.den)) return polyExpr(r.num)
-  if (startsNegative(r.num)) return neg(div(polyExpr(polyScale(r.num, rat(-1))), factoredExpr(r.den)))
-  return div(polyExpr(r.num), factoredExpr(r.den))
+  const flipped = r.num.length >= 2 && startsNegative(r.num) && !startsNegative([...r.num].reverse())
+  const numerator = polyExpr(r.num, flipped ? 'ascending' : 'descending')
+  if (isOneFactored(r.den)) return numerator
+  if (startsNegative(r.num) && !flipped) return neg(div(polyExpr(polyScale(r.num, rat(-1))), factoredExpr(r.den)))
+  return div(numerator, factoredExpr(r.den))
 }
