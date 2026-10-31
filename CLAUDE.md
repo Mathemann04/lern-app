@@ -6,10 +6,11 @@ oder frei (Eingabe über Mathe-Tastatur, mathematische Prüfung). Zuerst für
 den Nutzer zugeschnitten: Maschinenbau, 1. Semester, THU, „Mathematik MB1".
 
 - Vision und Anforderungen: [docs/VISION.md](docs/VISION.md)
+- Maßstab fürs Niveau: das Buch des Nutzers „Mathe für Ingenieure",
+  Kapitel und ihre Themen in der App: [docs/LEHRBUCH.md](docs/LEHRBUCH.md)
 - Meilensteine und aktueller Stand: [docs/ROADMAP.md](docs/ROADMAP.md)
 - Plan für den laufenden Meilenstein: [docs/PLAN-M2b.md](docs/PLAN-M2b.md)
-  (Brüche nachschärfen: Abwechslung und Profi-Niveau; Entwurf, wartet auf
-  OK). Pausiert nach Schritt 3: [docs/PLAN-M3.md](docs/PLAN-M3.md)
+  (Brüche nachschärfen: Abwechslung und Profi-Niveau). Pausiert nach Schritt 3: [docs/PLAN-M3.md](docs/PLAN-M3.md)
   (Gleichungen umstellen). Abgeschlossen: [docs/PLAN-M1.md](docs/PLAN-M1.md),
   [docs/PLAN-M2.md](docs/PLAN-M2.md)
 

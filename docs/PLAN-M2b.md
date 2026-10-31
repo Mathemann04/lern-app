@@ -1,6 +1,14 @@
 # Plan für M2b: Brüche nachschärfen
 
-Status: **Entwurf** (31.10.2026), wartet auf dein OK.
+Status: **freigegeben** (31.10.2026) mit deinen Änderungen:
+- mindestens **100 Formen je Stufe** (statt 80)
+- Partialbruchzerlegung in Stufe 5, **dazu Themen aus späteren Kapiteln**
+  deines Buchs, in denen Brüche vorkommen (Schritt 5)
+- Dezimalzahlen in Stufe 1: ja (habe ich entschieden; „Rechnen mit reellen
+  Zahlen" gehört zu Kapitel 1 deines Buchs)
+
+Maßstab für das Niveau ist dein Buch „Mathe für Ingenieure" (Übersicht:
+[LEHRBUCH.md](LEHRBUCH.md)).
 
 Ziel: Die Bruch-Aufgaben werden **abwechslungsreich** und **deutlich
 schwerer**. Keine Stufe soll sich anfühlen wie „dieselbe Aufgabe mit anderen
@@ -53,8 +61,7 @@ Die Gründe:
    letzten zehn Aufgaben je Thema und Stufe. Eine neue Aufgabe hat eine
    andere Form.
 3. **Messen statt hoffen.** Ein Test prüft die Abwechslung bei jeder Änderung:
-   - Je Stufe gibt es unter 200 Aufgaben mindestens 80 verschiedene Formen,
-     in Stufe 1 mindestens 40.
+   - Je Stufe gibt es unter 200 Aufgaben mindestens 100 verschiedene Formen.
    - Keine Form kommt in mehr als 3 von 100 Aufgaben vor.
    - In zehn Aufgaben nacheinander kommt keine Form doppelt.
 
@@ -133,6 +140,16 @@ $\frac{e^{2x} - 1}{e^{2x} + 2e^x + 1}$
   Brüche zerlegen, z. B. $\frac{5x - 1}{x^2 - x - 2}$ in
   $\frac{A}{x - 2} + \frac{B}{x + 1}$. Auch mit doppeltem Faktor im Nenner
   und mit Polynomdivision vorweg. Das brauchst du später beim Integrieren.
+- **Brüche aus späteren Kapiteln** deines Buchs:
+  - komplexe Zahlen teilen, mit dem konjugiert Komplexen erweitern:
+    $\frac{3 + 4\mathrm{i}}{1 - 2\mathrm{i}}$, $\frac{1}{a + b\,\mathrm{i}}$ (Kapitel 3)
+  - Grenzwerte von Brüchen: durch die höchste Potenz kürzen,
+    $\lim_{n \to \infty} \frac{3n^2 - n}{2n^2 + 5}$, oder erst zerlegen und
+    kürzen, $\lim_{x \to 2} \frac{x^2 - 4}{x^2 - 3x + 2}$ (Kapitel 4 und 5)
+  - Teleskopsummen mit Partialbrüchen:
+    $\sum_{k=1}^{n} \frac{1}{k(k + 1)}$ (Kapitel 4)
+  - Hyperbelfunktionen mit $\cosh^2 x - \sinh^2 x = 1$:
+    $\frac{1}{\cosh x - \sinh x}$ (Kapitel 2)
 
 $\left(\frac{a}{a - b} - \frac{b}{a + b}\right) : \frac{a^2 + b^2}{a^2 - b^2} + \frac{2b}{a - b}$ ·
 $\frac{\frac{1}{(x + h)^2} - \frac{1}{x^2}}{h}$ ·
@@ -140,7 +157,9 @@ $\frac{a^3 - b^3}{a^2 - b^2}$ ·
 $\frac{x - a}{\sqrt{x} - \sqrt{a}}$ ·
 $\frac{1}{1 - \frac{1}{1 - \frac{1}{x}}}$ ·
 $\frac{\sin x}{1 - \cos x} + \frac{1 - \cos x}{\sin x}$ ·
-$\frac{5x - 1}{x^2 - x - 2}$ zerlegen
+$\frac{5x - 1}{x^2 - x - 2}$ zerlegen ·
+$\frac{2 - \mathrm{i}}{3 + 4\mathrm{i}}$ ·
+$\lim_{x \to 3} \frac{x^2 - 9}{x^2 - 2x - 3}$
 
 ### Neue typische Fehler (Vorschlag)
 
@@ -214,7 +233,18 @@ Differenzenquotient in beiden Arten (geführt und frei).
 **Ausprobieren:** $\frac{5x - 1}{x^2 - x - 2}$ geführt, dann
 $\frac{x^2 + 1}{(x - 1)^2(x + 2)}$ frei.
 
-#### Schritt 5: Gezieltes Üben, Feinschliff, Abschluss
+#### Schritt 5: Stufe 5, Teil 3: Brüche aus späteren Kapiteln
+- komplexe Zahlen teilen
+- Grenzwerte von Brüchen
+- Teleskopsummen
+- Hyperbelfunktionen
+- neue Lernkarten (kurz): „Komplexe Zahlen teilen", „Grenzwerte von
+  Brüchen", „Teleskopsummen", „Hyperbelfunktionen"
+
+**Ausprobieren:** $\frac{3 + 4\mathrm{i}}{1 - 2\mathrm{i}}$ und
+$\lim_{n \to \infty} \frac{3n^2 - n}{2n^2 + 5}$ in beiden Arten.
+
+#### Schritt 6: Gezieltes Üben, Feinschliff, Abschluss
 - Jeder neue Fehler lässt sich aus der Lernkarte und dem Fortschritt gezielt
   üben.
 - Die Formel-Galerie zeigt je Stufe, wie viele Formen es gibt.
@@ -228,11 +258,10 @@ $\frac{x^2 + 1}{(x - 1)^2(x + 2)}$ frei.
    Schritt 4 nutzt dort das Integral in Stufe 5.
 2. **Ableiten:** Abwechslung und Stufe 5 auf Profi-Niveau (eigener Plan).
 
-### Offene Fragen an dich
-1. **Partialbruchzerlegung und Polynomdivision** gehören an der Uni oft zur
-   Integralrechnung. Ich würde sie hier als Teil von Stufe 5 aufnehmen
-   („Brüche rückwärts"). Einverstanden?
-2. **Dezimalzahlen** wie $0{,}75$ in Stufe 1: ja oder lieber weglassen?
+### Deine Antworten
+1. Partialbruchzerlegung und Polynomdivision in Stufe 5: ja, dazu Themen aus
+   späteren Kapiteln (Schritt 5).
+2. Mindestens 100 Formen je Stufe.
 
 ---
 
@@ -280,6 +309,18 @@ $\frac{x^2 + 1}{(x - 1)^2(x + 2)}$ frei.
   feste Aufgaben-Nummern, damit der Test stabil ist.
 - Später für alle Themen: dieselbe Kennzahl (`formOf` je Engine) und
   dasselbe Ziehen, deshalb gemeinsam in `src/engine/tasks/variety.ts`.
+
+### Brüche aus späteren Kapiteln (Schritt 5)
+- **Komplexe Zahlen:** $\mathrm{i}$ als eigenes Zeichen der Bruch-Engine mit
+  $\mathrm{i}^2 = -1$ (wie $(\sqrt{x})^2 = x$); Endform $a + b\,\mathrm{i}$,
+  Gegenprobe mit komplexen Zahlen.
+- **Grenzwerte:** $n \to \infty$ über die höchsten Potenzen von Zähler und
+  Nenner; $x \to a$ mit $\frac{0}{0}$: zerlegen, kürzen, einsetzen.
+  Gegenprobe: großes $n$ bzw. $x$ nahe $a$ einsetzen.
+- **Teleskopsummen:** Partialbrüche, dann heben sich die Summanden bis auf
+  den ersten und den letzten weg. Gegenprobe: Teilsummen ausrechnen.
+- **Hyperbelfunktionen:** Bausteine $\sinh x$, $\cosh x$ mit
+  $\cosh^2 x - \sinh^2 x = 1$, wie bei $\sin$ und $\cos$.
 
 ### Partialbruchzerlegung (`src/engine/fraction/partial.ts`)
 - Eingabe: Bruch aus Polynomen in $x$ mit Nenner aus Linearfaktoren (auch
