@@ -1,12 +1,13 @@
 # Roadmap
 
-Stand: 30.10.2026
+Stand: 31.10.2026
 
 | Meilenstein | Inhalt | Status |
 | --- | --- | --- |
 | M1 | Grundgerüst + Ableitungsregeln (beide Modi, 5 Stufen, Erklärungen, Lernkarten, Fortschritt) | fertig |
 | M2 | Brüche (Bruchrechnung, Bruchterme kürzen und zusammenfassen, Doppelbrüche); App für mehrere Themen | fertig |
-| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | in Arbeit |
+| M2b | Brüche nachschärfen: viel mehr Abwechslung (Baukasten statt fester Vorlagen, keine Form doppelt), deutlich schwerer, Stufe 5 auf Profi-Niveau mit Partialbruchzerlegung | Plan wartet auf OK |
+| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | pausiert nach Schritt 3, weiter nach M2b |
 | M4 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
 | M5 | weitere Themen aus Mathematik MB1 | offen |
 | M6 | Physik: Formeln mit Einheiten (Formeln umstellen mit Zeichen der Physik; Aufgaben lösen: Formel wählen, umstellen, Werte mit Einheiten einsetzen) | offen |
@@ -15,18 +16,37 @@ Stand: 30.10.2026
 
 ## Vorgemerkt
 
+- **Abwechslung in allen Themen** (Wunsch des Nutzers, 31.10.2026): Die
+  Aufgaben sind viel zu ähnlich, fast jede zweite ist dieselbe Form mit
+  anderen Zahlen, und es werden zu wenige Gebiete abgedeckt. Gemessen bei
+  den Brüchen: Stufe 1 hat 5 Formen, Stufe 3 nur 9 (je 200 Aufgaben). Für
+  jedes Thema gilt deshalb: Baukasten statt fester Vorlagen, die App merkt
+  sich die letzten Formen und wechselt ab, ein Test misst die Abwechslung
+  (siehe [PLAN-M2b.md](PLAN-M2b.md)). Reihenfolge (Wunsch des Nutzers):
+  erst Brüche (M2b), dann die anderen Themen.
 - **Stufe 5 überall auf Profi-Niveau** (Wunsch des Nutzers): In jedem Thema
   heißt Stufe 5 „kaum noch schwerer"; sie deckt fast das ganze Spektrum des
-  Themas ab, so wie Stufe 5 von „Gleichungen umstellen". Für **Ableiten**
-  und **Brüche** wird das nachgeschärft, direkt nach M3 als eigener
-  Meilenstein (dann mit eigenem Plan). Grund: Die Werkzeuge aus Stufe 5 von
-  M3 (Integrale, Reihen, Grenzwerte, Determinanten, komplexe Zahlen) lassen
-  sich dort wiederverwenden. Neue Themen (M4 und später) werden gleich so
-  geplant.
+  Themas ab, so wie Stufe 5 von „Gleichungen umstellen". Zusammen mit der
+  Abwechslung: **Brüche** jetzt in M2b, danach **Gleichungen umstellen**
+  (Stufen 1 bis 3 mit Baukasten, dann M3 ab Schritt 4), danach **Ableiten**
+  (eigener Plan; die Werkzeuge aus Stufe 5 von M3 wie Integrale und Reihen
+  lassen sich dort wiederverwenden). Neue Themen (M4 und später) werden
+  gleich so geplant.
+
+## M2b: Schritte
+
+Details: [PLAN-M2b.md](PLAN-M2b.md)
+
+- [ ] Plan M2b (Entwurf, wartet auf OK)
+- [ ] 1. Baukasten, Abwechslung, Stufen 1 und 2
+- [ ] 2. Stufen 3 und 4
+- [ ] 3. Stufe 5, Teil 1: alles ineinander
+- [ ] 4. Stufe 5, Teil 2: Partialbruchzerlegung
+- [ ] 5. Gezieltes Üben, Feinschliff, Abschluss
 
 ## M3: Schritte
 
-Details: [PLAN-M3.md](PLAN-M3.md)
+Details: [PLAN-M3.md](PLAN-M3.md) (pausiert nach Schritt 3, weiter nach M2b)
 
 - [x] Plan M3 (3. Fassung, freigegeben)
 - [x] 1. Mathe-Engine fürs Umstellen
@@ -281,3 +301,10 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   Lernkarten: Mit dem Hauptnenner malnehmen, Kehrwert, Wurzel und Quadrat.
   Ist $\sqrt{x}$ die Unbekannte, sprechen Frage und Antworten beim
   Sortieren von $\sqrt{x}$ (vorher stach die richtige Antwort heraus).
+- 31.10.2026: Rückmeldung des Nutzers nach Schritt 3 von M3: Die Art gefällt,
+  aber die Aufgaben sind viel zu ähnlich (gilt für alle Themen). Gemessen
+  bei den Brüchen: Stufe 1 hat 5 Formen, Stufe 3 nur 9; bei 127 von 200
+  Aufgaben der Stufe 1 kam dieselbe Form schon unter den vier davor. M3
+  pausiert nach Schritt 3; zuerst M2b „Brüche nachschärfen" (Plan:
+  [PLAN-M2b.md](PLAN-M2b.md)), dann die anderen Themen. Neue Arbeitsregel
+  „Abwechslung" in CLAUDE.md.

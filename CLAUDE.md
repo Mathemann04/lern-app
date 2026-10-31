@@ -7,9 +7,11 @@ den Nutzer zugeschnitten: Maschinenbau, 1. Semester, THU, „Mathematik MB1".
 
 - Vision und Anforderungen: [docs/VISION.md](docs/VISION.md)
 - Meilensteine und aktueller Stand: [docs/ROADMAP.md](docs/ROADMAP.md)
-- Plan für den laufenden Meilenstein: [docs/PLAN-M3.md](docs/PLAN-M3.md)
-  (Gleichungen umstellen; abgeschlossen: [docs/PLAN-M1.md](docs/PLAN-M1.md),
-  [docs/PLAN-M2.md](docs/PLAN-M2.md))
+- Plan für den laufenden Meilenstein: [docs/PLAN-M2b.md](docs/PLAN-M2b.md)
+  (Brüche nachschärfen: Abwechslung und Profi-Niveau; Entwurf, wartet auf
+  OK). Pausiert nach Schritt 3: [docs/PLAN-M3.md](docs/PLAN-M3.md)
+  (Gleichungen umstellen). Abgeschlossen: [docs/PLAN-M1.md](docs/PLAN-M1.md),
+  [docs/PLAN-M2.md](docs/PLAN-M2.md)
 
 Vor jeder Arbeit ROADMAP und den laufenden Plan lesen.
 
@@ -214,8 +216,15 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   ausprobieren lässt.
 - **Schwierigkeit:** Stufe 5 heißt in jedem Thema „kaum noch schwerer":
   verschachtelt und quer durch das ganze Thema (Vorbild: Stufe 5 von
-  „Gleichungen umstellen"). Neue Themen gleich so planen; Ableiten und
-  Brüche werden nach M3 nachgeschärft (docs/ROADMAP.md, „Vorgemerkt").
+  „Gleichungen umstellen"). Neue Themen gleich so planen; Brüche werden in
+  M2b nachgeschärft, danach Umstellen und Ableiten (docs/ROADMAP.md,
+  „Vorgemerkt").
+- **Abwechslung:** Aufgaben einer Stufe dürfen sich nicht nur in den Zahlen
+  unterscheiden. Aufgaben aus einem Baukasten zusammensetzen (Anzahl der
+  Teile, Rechenarten, Arten von Termen, Buchstaben), nicht aus wenigen
+  festen Vorlagen. Die App merkt sich die Formen der letzten Aufgaben und
+  wechselt ab. Ein Test misst die Abwechslung je Stufe (Kennzahlen in
+  docs/PLAN-M2b.md); gilt für jedes Thema, auch für neue.
 - **Mathematische Korrektheit zuerst.** Alle Lösungen, Zwischenschritte und
   Beispiele kommen aus der Engine, nie von Hand. Jede neue Regel,
   Fehlerregel oder Vorlage bekommt Tests: Ergebnis gegen numerische
