@@ -223,8 +223,27 @@ export const LEVEL1_KIT: Kit = {
   accept: (root, rng) => {
     const plain = (n: TreeNode) => n.kind === 'leaf' && !n.decimal && !isWhole(n.part)
     if (root.kind === 'sum' && root.terms.length === 3 && root.terms.every((t) => plain(t.node)) && rng.chance(0.5)) return false
-    return treeLeaves(root).some(plain)
+    return treeLeaves(root).some(plain) && !hasTrivialPart(root)
   },
+}
+
+// Zu einfache Teile: zwei ganze Zahlen mal, geteilt oder als Bruch (2 · 5), oder dieselbe Zahl mit
+// Plus und Minus nebeneinander (5 − 5)
+function hasTrivialPart(n: TreeNode): boolean {
+  const whole = (m: TreeNode) => m.kind === 'leaf' && !m.decimal && isWhole(m.part)
+  if (n.kind === 'leaf') return false
+  if (n.kind === 'sum') {
+    const cancels = n.terms.some((a, i) =>
+      n.terms.some((b, j) => i !== j && a.sign !== b.sign && a.node.kind === 'leaf' && b.node.kind === 'leaf' && fracEqualsPart(a.node.part, b.node.part)),
+    )
+    return cancels || n.terms.some((t) => hasTrivialPart(t.node))
+  }
+  return (whole(n.left) && whole(n.right)) || hasTrivialPart(n.left) || hasTrivialPart(n.right)
+}
+
+const fracEqualsPart = (a: Part, b: Part) => {
+  const [fa, fb] = [partFrac(a), partFrac(b)]
+  return polyEquals(polyMul(fa.num, fb.den), polyMul(fb.num, fa.den))
 }
 
 // Großen Bruch kürzen: 84/126

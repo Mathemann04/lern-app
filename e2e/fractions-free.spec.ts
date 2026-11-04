@@ -57,12 +57,12 @@ test('Beispiel aus dem Plan: 3/(x − 1) − 2/(x + 1) frei lösen', async ({ pa
 })
 
 test('Zahlenbrüche: noch nicht gekürzt, dann richtig', async ({ page }) => {
-  // 3/4 + 5/6
-  await page.goto('./#/frei/brueche/1-949')
+  // 4/7 + 1/4
+  await page.goto('./#/frei/brueche/1-24')
   await expect(field(page)).toBeVisible()
-  await enter(page, '\\frac{38}{24}')
+  await enter(page, '\\frac{46}{56}')
   await expect(feedback(page)).toContainText('Noch nicht vollständig gekürzt.')
-  await enter(page, '\\frac{19}{12}')
+  await enter(page, '\\frac{23}{28}')
   await expect(feedback(page)).toContainText('Richtig!')
   // ohne Fehler gelöst
   await page.goto('./#/fortschritt')
@@ -72,12 +72,12 @@ test('Zahlenbrüche: noch nicht gekürzt, dann richtig', async ({ page }) => {
 test('Die Tastatur zeigt die Buchstaben der Aufgabe', async ({ page }) => {
   test.skip(!isPhone(), 'Bildschirm-Tastatur nur am Handy')
   const keys = () => page.locator('.MLK__keycap').filter({ visible: true })
-  // (6x²y)/(9xy³) o. ä.: Stufe 2 mit x und y bzw. a und b
-  await page.goto('./#/frei/brueche/2-2')
+  // (21qx³)/(35q³x⁴): Stufe 2 mit q und x
+  await page.goto('./#/frei/brueche/2-27')
   await field(page).tap()
   await expect(page.locator('.ML__keyboard')).toBeVisible()
-  await expect(keys().filter({ hasText: /^a$/ })).toHaveCount(1)
-  await expect(keys().filter({ hasText: /^b$/ })).toHaveCount(1)
+  await expect(keys().filter({ hasText: /^q$/ })).toHaveCount(1)
+  await expect(keys().filter({ hasText: /^x$/ })).toHaveCount(1)
   await expect(keys().filter({ hasText: /^sin$/ })).toHaveCount(0)
 
   // Stufe 4 mit Bausteinen: auch sin, cos, ln

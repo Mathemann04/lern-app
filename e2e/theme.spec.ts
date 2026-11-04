@@ -23,7 +23,7 @@ test('Dunkles Design: automatisch wie das Gerät oder fest gewählt', async ({ p
 
 test('Dunkles Design: Eingabe im freien Modus ist lesbar', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'dark' })
-  await page.goto('./#/frei/brueche/1-949')
+  await page.goto('./#/frei/brueche/1-24')
   const field = page.locator('math-field[data-ready]')
   await expect(field).toBeVisible()
   // Wie auf manchen Handys: Die Schriftfarbe des Browsers für Eingabefelder bleibt schwarz
