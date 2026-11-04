@@ -241,7 +241,7 @@ function ChoiceContent({ choice }: { choice: Choice }) {
       {choice.caption && <RichText text={choice.caption} className="mt-1 block text-[0.78em] text-zinc-500" inline />}
     </>
   )
-  if (/^\$[^$]+\$$/.test(choice.content)) return <FitWidth className="min-w-0 flex-1 text-lg">{content}</FitWidth>
+  if (/^\$[^$]+\$$/.test(choice.content)) return <FitWidth className="min-w-0 flex-1 py-1 text-lg">{content}</FitWidth>
   return <span className="block min-w-0 flex-1 text-lg">{content}</span>
 }
 

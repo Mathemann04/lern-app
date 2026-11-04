@@ -45,7 +45,7 @@ Details: [PLAN-M2b.md](PLAN-M2b.md)
 
 - [x] Plan M2b (freigegeben mit Änderungen: 100 Formen je Stufe, Themen
   aus späteren Kapiteln)
-- [ ] 1. Baukasten, Abwechslung, Stufen 1 und 2
+- [x] 1. Baukasten, Abwechslung, Stufen 1 und 2
 - [ ] 2. Stufen 3 und 4
 - [ ] 3. Stufe 5, Teil 1: alles ineinander
 - [ ] 4. Stufe 5, Teil 2: Partialbruchzerlegung
@@ -322,3 +322,20 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   Hyperbelfunktionen) als eigener Schritt 5. Dezimalzahlen in Stufe 1: ja.
   Das Inhaltsverzeichnis seines Buchs „Mathe für Ingenieure" ist der
   Maßstab fürs Niveau (docs/LEHRBUCH.md).
+- 04.11.2026: M2b Schritt 1 fertig. Brüche der Stufen 1 und 2 kommen aus
+  einem Baukasten: zwei bis vier Brüche, Plus, Minus, Mal, Geteilt,
+  Klammern, Doppelbrüche, in Stufe 1 auch Dezimalzahlen, in Stufe 2
+  Buchstaben aus dem ganzen Alphabet (außer $e$ und $i$). Gemessen in je
+  200 Aufgaben: Stufe 1 rund 160 Formen, Stufe 2 rund 200 (vorher 5 bzw.
+  ähnlich wenige); keine Form öfter als 3 %. Die App merkt sich die letzten
+  zehn Formen je Thema und Stufe und zieht bei „Nächste Aufgabe" eine
+  andere (für alle Themen, auch Umstellen und Ableiten, dort mit den
+  bisherigen Vorlagen). Gerechnet wird Teil für Teil („Teilrechnung"),
+  vorher fragt die App „Was rechnest du zuerst?", wenn Punkt vor Strich oder
+  eine Klammer zählt. Vier neue typische Fehler (von links nach rechts,
+  Klammer übersehen, Minus vor der Klammer, Stellen der Dezimalzahl) und
+  zwei Lernkarten. Frei: „noch nicht fertig", wenn noch ein Produkt wie
+  $3 \cdot 3b^2$ oder eine Dezimalzahl dasteht. Zu einfache Teile
+  ($2 \cdot 5$, $5 - 5$) und Zwischenergebnisse $0$ oder $1$ werden
+  aussortiert. Alte Links auf einzelne Aufgaben der Stufen 1 und 2 zeigen
+  jetzt andere Aufgaben.

@@ -509,6 +509,10 @@ weiterrechnen). Die Fehler zu Bausteinen gibt es seit Schritt 6 (Stufe 5).
 | Bausteine | im Inneren einer Funktion gekürzt (neu in Schritt 6) | $\frac{e^{2x}}{e^x} = e^2$ |
 | Quadrieren | beim Quadrieren das Mittelglied vergessen (neu in Schritt 6) | $(\sqrt{x}+1)^2 = x + 1$, $(x + h)^2 = x^2 + h^2$ |
 | Bausteine | Quadrat vergessen (neu in Schritt 6) | $1 - \cos^2 x = \sin x$, $(\sqrt{x})^2 = \sqrt{x}$ |
+| Punkt vor Strich | von links nach rechts gerechnet (neu in M2b) | $\frac{1}{2} + \frac{1}{2} \cdot \frac{2}{3} = \frac{2}{3}$ |
+| Klammer | Klammer übersehen (neu in M2b) | $\left(\frac{1}{2} - \frac{1}{3}\right) : 2 = \frac{1}{2} - \frac{1}{3} : 2$ |
+| Klammer mit Minus | Minus nur auf den ersten Bruch (neu in M2b) | $\frac{1}{2} - \left(\frac{1}{3} - \frac{1}{4}\right) = \frac{1}{2} - \frac{1}{3} - \frac{1}{4}$ |
+| Dezimalzahl | Stellen falsch gezählt (neu in M2b) | $0{,}75 = \frac{75}{10}$ |
 
 Wenn dir typische Fehler aus deinen Übungen fehlen, sag es. Die sind Gold
 wert.

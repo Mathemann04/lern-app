@@ -169,6 +169,7 @@ Dazu kommen die bisherigen Fehler aus M2 (Liste in
 | Wo | Typischer Fehler | Beispiel (falsch) |
 | --- | --- | --- |
 | Punkt vor Strich | von links nach rechts gerechnet | $\frac{1}{2} + \frac{1}{2} \cdot \frac{2}{3} = \frac{2}{3}$ |
+| Klammer | Klammer übersehen | $\left(\frac{1}{2} - \frac{1}{3}\right) : 2 = \frac{1}{2} - \frac{1}{3} : 2$ |
 | Klammer mit Minus | Minus nur auf den ersten Bruch | $\frac{1}{2} - \left(\frac{1}{3} - \frac{1}{4}\right) = \frac{1}{2} - \frac{1}{3} - \frac{1}{4}$ |
 | Dezimalzahl | Stellen falsch gezählt | $0{,}75 = \frac{75}{10}$ |
 | Zerlegen mit Zahl vorn | Zahl vorn vergessen | $2x^2 - x - 3 = (x + 1)\left(x - \frac{3}{2}\right)$ |
@@ -180,7 +181,10 @@ Dazu kommen die bisherigen Fehler aus M2 (Liste in
 | Partialbrüche | Polynomdivision vergessen | Zähler mit höherem Grad direkt zerlegt |
 
 Die genaue Liste kommt im jeweiligen Schritt; jede Regel bekommt wie immer
-eine Erklärung, eine Lernkarte und Tests.
+eine Erklärung, eine Lernkarte und Tests. In Schritt 1 umgesetzt: die ersten
+vier Zeilen (`frac-order`, `frac-bracket-ignored`,
+`frac-minus-before-bracket`, `frac-decimal-places`), mit den Lernkarten
+„Punkt vor Strich und Klammern" und „Dezimalzahlen als Brüche".
 
 ### Schritte
 
@@ -267,10 +271,12 @@ $\lim_{n \to \infty} \frac{3n^2 - n}{2n^2 + 5}$ in beiden Arten.
 
 ## Teil B: Technischer Bauplan
 
-### Baukasten (`src/engine/fraction/build/`)
+### Baukasten (`src/engine/fraction/tree.ts`, `src/engine/tasks/fractionKit.ts`)
 - **Rechenbaum statt fester Formen:** Eine neue Aufgabenform `tree` mit
   Knoten für Plus/Minus (beliebig viele Summanden), Mal, Geteilt, Klammer
-  und Doppelbruch; Blätter sind Bruchteile (`Part`). Die bisherigen Formen
+  und Doppelbruch; Blätter sind Bruchteile (`Part`), auch als Dezimalzahl
+  geschrieben. Gerechnet wird Stufe für Stufe (`treeStages` in `tree.ts`):
+  jede Stufe ist eine der bisherigen Formen. Die bisherigen Formen
   (`sum`, `product`, `quotient`, `complex`, `mixed`, `nested`) werden zu
   Sonderfällen und bleiben für alte Vorlagen lesbar, bis Schritt 3 sie
   ablöst.
@@ -302,9 +308,10 @@ $\lim_{n \to \infty} \frac{3n^2 - n}{2n^2 + 5}$ in beiden Arten.
   die Form nicht unter den letzten zehn Formen dieser Stufe ist (höchstens
   50 Versuche). Das geschieht auf der Übungsseite, wenn die Engine ohnehin
   geladen ist.
-- **Speicher:** Liste der letzten Formen je Thema und Stufe im
-  Fortschritt. Ältere Speicherstände ohne diese Liste funktionieren weiter
-  (Version 3 bleibt, das Feld ist optional).
+- **Speicher:** Liste der letzten zehn Formen je Thema und Stufe unter
+  einem eigenen Schlüssel `rechenweg-formen` (`src/ui/recentForms.ts`),
+  getrennt vom Fortschritt. Der Speicherstand (Version 3) bleibt unverändert;
+  fehlt die Liste oder ist sie kaputt, zieht die App einfach ohne sie.
 - **Test** (`fractionTerms.test.ts`): Kennzahlen aus Teil A je Stufe, über
   feste Aufgaben-Nummern, damit der Test stabil ist.
 - Später für alle Themen: dieselbe Kennzahl (`formOf` je Engine) und
