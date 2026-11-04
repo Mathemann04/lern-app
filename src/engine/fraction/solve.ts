@@ -438,6 +438,11 @@ export function solveTree(t: Extract<FractionTask, { kind: 'tree' }>): TreeSolut
     steps.push(...stage.solution.steps)
     if (i < stages.length - 1) steps.push({ kind: 'part', expr: treeExpr(stage.after), latex: treeLatex(stage.after) })
   })
+  // Ergebnis wie im letzten Teil geschrieben (dort wird der ganze Rest gerechnet); sonst gekürzt
+  const last = stages.at(-1)
+  if (last && last.node === last.before) {
+    return { value, steps, reduced: last.solution.reduced, result: last.solution.result, excluded: excludedValues(t), beforeCancel: value, stages }
+  }
   const hints = [...partsOf(t).flatMap((p) => factorize(shownPoly(p.den), t.hints).factors.map((f) => f.poly)), ...t.hints]
   const reduced = reduceFrac(value, hints)
   return { value, steps, reduced, result: resultExpr(reduced, t), excluded: excludedValues(t), beforeCancel: value, stages }
@@ -510,10 +515,18 @@ function tanExpr(r: Reduced): Expr | null {
 
 // --- Definitionsbereich ---
 
-// Nullstellen eines Polynoms in x; null, wenn es andere Buchstaben enthält oder sich nicht
-// in Linearfaktoren zerlegen lässt, aber Nullstellen hat
-function zerosInX(p: Poly, hints: readonly Poly[]): Rational[] | null {
-  if (atomsOf(p).some((a) => a !== 'x')) return null
+// Der eine Buchstabe der Aufgabe (x, a, t …), nach dem sich die verbotenen Zahlen richten; null bei
+// mehreren Buchstaben oder Bausteinen wie e^x
+export function taskLetter(t: FractionTask): string | null {
+  const atoms = [...new Set(partsOf(t).flatMap((p) => [...atomsOf(shownPoly(p.num)), ...atomsOf(shownPoly(p.den))]))]
+  if (atoms.length === 0) return 'x'
+  return atoms.length === 1 && /^[a-z]$/.test(atoms[0]) && atoms[0] !== 'e' ? atoms[0] : null
+}
+
+// Nullstellen eines Polynoms im Buchstaben der Aufgabe; null, wenn es andere Buchstaben enthält
+// oder sich nicht in Linearfaktoren zerlegen lässt, aber Nullstellen hat
+function zerosIn(p: Poly, letter: string, hints: readonly Poly[]): Rational[] | null {
+  if (atomsOf(p).some((a) => a !== letter)) return null
   if (constValue(p) !== null) return []
   const zeros: Rational[] = []
   for (const { poly } of factorize(p, hints).factors) {
@@ -559,9 +572,11 @@ export function excludedValues(t: FractionTask): Rational[] | null {
   if (t.kind === 'nested') polys.push(signedFrac(t.inner.bottom).num)
   const bottom = bottomFrac(t)
   if (bottom) polys.push(bottom.num)
+  const letter = taskLetter(t)
+  if (!letter) return null
   const all: Rational[] = []
   for (const p of polys) {
-    const zeros = zerosInX(p, t.hints)
+    const zeros = zerosIn(p, letter, t.hints)
     if (zeros === null) return null
     all.push(...zeros)
   }

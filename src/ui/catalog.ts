@@ -110,14 +110,14 @@ const fractionLevels: LevelPreview[] = [
   {
     level: 3,
     available: true,
-    title: 'Summen in Zähler und Nenner: ausklammern, binomische Formeln',
-    examples: [String.raw`\frac{x^2-9}{2x+6}`, String.raw`\frac{1}{x-1} + \frac{2}{x+1}`],
+    title: 'Summen in Zähler und Nenner: ausklammern, binomische Formeln, vertauschte Differenzen',
+    examples: [String.raw`\frac{a^2 - b^2}{ab - b^2}`, String.raw`\frac{3}{2x - 6} - \frac{x}{x^2 - 9}`, String.raw`\frac{x^2 - 4}{3x} \cdot \frac{6x^2}{x^2 + 4x + 4}`],
   },
   {
     level: 4,
     available: true,
-    title: 'Uni-Niveau: Hauptnenner aus Faktoren, Doppelbrüche, e-Funktion, ln, sin',
-    examples: [String.raw`\frac{x}{x^2-1} - \frac{1}{x+1}`, String.raw`\frac{1 + \frac{1}{x}}{1 - \frac{1}{x^2}}`, String.raw`\frac{e^{2x}-1}{e^x+1}`],
+    title: 'Zerlegen: Zahl vorn, zwei Buchstaben, in Gruppen; Doppelbrüche, e-Funktion, ln, sin',
+    examples: [String.raw`\frac{2x^2 - x - 3}{x^2 - 1}`, String.raw`\frac{ax - ay + bx - by}{x^2 - y^2}`, String.raw`\frac{\frac{1}{a} - \frac{1}{b}}{\frac{1}{a^2} - \frac{1}{b^2}}`],
   },
   {
     level: 5,

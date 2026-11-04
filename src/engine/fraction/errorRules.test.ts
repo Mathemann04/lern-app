@@ -93,6 +93,18 @@ const CASES: Case[] = [
   ],
   ['frac-binomial-confused', task({ kind: 'reduce', part: fr(sub(x2, num(9)), add(mul(num(2), x), num(6))) }), 'step', '\\frac{(x - 3)^{2}}{2x + 6}'],
   ['frac-vieta-sign', task({ kind: 'reduce', part: fr(sub(sub(x2, x), num(6)), sub(x2, num(9))) }), 'step', '\\frac{(x - 2)(x + 3)}{x^{2} - 9}'],
+  [
+    'frac-leading-forgotten',
+    task({ kind: 'reduce', part: fr(sub(sub(mul(num(2), x2), x), num(3)), sub(x2, num(1))) }),
+    'step',
+    '\\frac{(x + 1)\\left(x - \\frac{3}{2}\\right)}{x^{2} - 1}',
+  ],
+  [
+    'frac-group-sign',
+    task({ kind: 'reduce', part: fr(add(sub(sub(mul(a, x), mul(a, variable('y'))), mul(b, x)), mul(b, variable('y'))), sub(x2, pow(variable('y'), num(2)))) }),
+    'step',
+    '\\frac{(a - b)(x + y)}{x^{2} - y^{2}}',
+  ],
   ['frac-cancel-one-side', task({ kind: 'reduce', part: fr(num(14), num(12)) }), 'result', '\\frac{7}{12}'],
   ['frac-multiply-reciprocal', task({ kind: 'product', left: fr(num(3), num(4)), right: fr(num(2), num(5)) }), 'step', '\\frac{3 \\cdot 5}{4 \\cdot 2}'],
   // Stufe 5: 1 − cos² x = sin x statt sin² x

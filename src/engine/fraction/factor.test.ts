@@ -3,7 +3,7 @@ import { toLatex } from '../expr/print.ts'
 import { type Expr, add, div, exp, mul, neg, num, pow, sin, sub, variable, x } from '../expr/types.ts'
 import { rat } from '../rational.ts'
 import { type Frac, fracEquals, polyExpr, toFrac } from './frac.ts'
-import { factorize, factoredExpr, factoredLcm, isMultipleOf, reduceFrac, reducedExpr, reducedFrac } from './factor.ts'
+import { factorize, factoredExpr, factoredLcm, factoredPoly, isMultipleOf, reduceFrac, reducedExpr, reducedFrac } from './factor.ts'
 import { type Poly, gcdUnivariate, polyAtom, polyConst, polyDivideExact, polyEquals, polyMul, polySub } from './poly.ts'
 
 const a = variable('a')
@@ -59,6 +59,24 @@ describe('Zerlegen', () => {
     expect(toLatex(factoredExpr(f))).toBe('(a + b)(a - b)')
   })
 
+  const y = variable('y')
+  it.each<[string, Expr, string]>([
+    ['Zahl vor x²', sub(sub(mul(num(2), pow(x, num(2))), x), num(3)), '(x + 1)(2x - 3)'],
+    ['zwei Buchstaben, dritte binomische Formel', sub(pow(a, num(2)), pow(b, num(2))), '(a + b)(a - b)'],
+    ['zwei Buchstaben wie x² + px + q', sub(sub(pow(a, num(2)), mul(a, b)), mul(num(2), pow(b, num(2)))), '(a + b)(a - 2b)'],
+    ['zwei Buchstaben, Quadrat', add(sub(mul(num(4), pow(x, num(2))), mul(num(12), x, y)), mul(num(9), pow(y, num(2)))), '(2x - 3y)^{2}'],
+    ['ausklammern, dann zwei Buchstaben', sub(mul(a, b), pow(b, num(2))), 'b(a - b)'],
+    ['in Gruppen', sub(add(sub(mul(a, x), mul(a, y)), mul(b, x)), mul(b, y)), '(a + b)(x - y)'],
+    ['in Gruppen mit Zahl', sub(add(sub(mul(num(2), a, x), mul(num(6), a)), mul(num(3), x)), num(9)), '(2a + 3)(x - 3)'],
+    ['in Gruppen, dann binomisch', sub(add(sub(mul(a, pow(x, num(2))), mul(a, pow(y, num(2)))), mul(b, pow(x, num(2)))), mul(b, pow(y, num(2)))), '(x + y)(x - y)(a + b)'],
+    ['zwei Buchstaben, nicht zerlegbar', add(pow(a, num(2)), pow(b, num(2))), 'a^{2} + b^{2}'],
+  ])('%s', (_, e, expected) => {
+    const p = poly(e)
+    const f = factorize(p)
+    expect(toLatex(factoredExpr(f))).toBe(expected)
+    expect(polyEquals(factoredPoly(f), p)).toBe(true)
+  })
+
   it('bildet den Hauptnenner', () => {
     const lcm = factoredLcm([factorize(poly(sub(pow(x, num(2)), num(1)))), factorize(poly(add(x, num(1)))), factorize(polyConst(4))])
     expect(toLatex(factoredExpr(lcm))).toBe('4(x + 1)(x - 1)')
@@ -83,6 +101,8 @@ describe('Kürzen', () => {
     ['vertauschte Differenz', div(sub(num(3), x), sub(pow(x, num(2)), num(9))), '-\\frac{1}{x + 3}'],
     ['Baustein', div(sub(exp(mul(num(2), x)), num(1)), add(exp(x), num(1))), 'e^{x} - 1'],
     ['Minus vorne', div(neg(mul(num(2), x)), num(4)), '-\\frac{x}{2}'],
+    ['in Gruppen, ohne bekannte Faktoren', div(sub(add(sub(mul(a, x), mul(a, variable('y'))), mul(b, x)), mul(b, variable('y'))), sub(pow(x, num(2)), pow(variable('y'), num(2)))), '\\frac{a + b}{x + y}'],
+    ['zwei Buchstaben, ohne bekannte Faktoren', div(sub(pow(a, num(2)), pow(b, num(2))), sub(mul(a, b), pow(b, num(2)))), '\\frac{a + b}{b}'],
   ])('%s', (_, e, expected) => {
     const f = frac(e)
     const reduced = reduceFrac(f, [poly(add(a, b))])

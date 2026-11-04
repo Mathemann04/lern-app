@@ -25,7 +25,7 @@ import type { Explanation } from '../explain/texts.ts'
 import { toLatex } from '../expr/print.ts'
 import { type Expr, mul, num, pow } from '../expr/types.ts'
 import { type FracWrong, fractionWrongAnswers } from '../fraction/errorRules.ts'
-import { factoredExpr, factoredPoly, factorize, isOneFactored, productFormExpr, reduceFrac } from '../fraction/factor.ts'
+import { factoredExpr, factoredPoly, factorize, groupFactor, isOneFactored, productFormExpr, reduceFrac } from '../fraction/factor.ts'
 import { fracAtoms, polyExpr } from '../fraction/frac.ts'
 import { type Poly, atomsOf, constValue, polyAdd, polyEquals, polyMul, polyNeg, polyProduct, totalDegree } from '../fraction/poly.ts'
 import {
@@ -45,6 +45,7 @@ import {
   signedSum,
   solveFraction,
   solveTree,
+  taskLetter,
   workSum,
 } from '../fraction/solve.ts'
 import { type TreeStage, decimalLeaves, decimalMistakes, withoutDecimals } from '../fraction/tree.ts'
@@ -118,7 +119,6 @@ export function planFraction(t: FractionTask, ref: TaskRef, focus?: string): Gui
   const raw = rawDrafts(t, solution, wrongs, facts)
   const drafts = arrange(ref.level >= COARSE_FROM_LEVEL ? coarsen(raw, t) : raw, solution, t)
   const steps = drafts.map((d, i) => buildStep(d, i, facts, createRng(`brueche-geführt:${ref.level}:${ref.seed}:${i}`), focus))
-  const excluded = solution.excluded ?? []
   return {
     ref,
     expr: taskExpr(t),
@@ -129,9 +129,16 @@ export function planFraction(t: FractionTask, ref: TaskRef, focus?: string): Gui
     ruleHint: fractionTaskHint(t),
     result: solution.result,
     resultLatex: `${taskLatex(t)} = ${toLatex(solution.result)}`,
-    ...(excluded.length > 0 ? { resultNote: `Gilt für ${listing(excluded.map((r) => `$x \\neq ${toLatex(num(r))}$`))}.` } : {}),
+    ...excludedNote(t, solution),
     cards: [...new Set(steps.flatMap((s) => s.cards))],
   }
+}
+
+// „Gilt für $x \neq 3$." mit dem Buchstaben der Aufgabe
+function excludedNote(t: FractionTask, solution: FracSolution): { resultNote?: string } {
+  const excluded = solution.excluded ?? []
+  const letter = taskLetter(t) ?? 'x'
+  return excluded.length > 0 ? { resultNote: `Gilt für ${listing(excluded.map((r) => `$${letter} \\neq ${toLatex(num(r))}$`))}.` } : {}
 }
 
 // --- Rechenbaum (M2b): Teil für Teil ---
@@ -217,7 +224,6 @@ function planTree(t: Extract<FractionTask, { kind: 'tree' }>, ref: TaskRef, focu
     })
   })
 
-  const excluded = solution.excluded ?? []
   return {
     ref,
     expr: taskExpr(t),
@@ -228,7 +234,7 @@ function planTree(t: Extract<FractionTask, { kind: 'tree' }>, ref: TaskRef, focu
     ruleHint: fractionTaskHint(t),
     result: solution.result,
     resultLatex: `${taskLatex(t)} = ${toLatex(solution.result)}`,
-    ...(excluded.length > 0 ? { resultNote: `Gilt für ${listing(excluded.map((r) => `$x \\neq ${toLatex(num(r))}$`))}.` } : {}),
+    ...excludedNote(t, solution),
     cards: [...new Set(steps.flatMap((s) => s.cards))],
   }
 }
@@ -320,6 +326,8 @@ type Facts = {
   // beim Kürzen: wie sich Zähler und Nenner der Aufgabe zerlegen lassen
   readonly numMethods: readonly FactorMethod[]
   readonly denMethods: readonly FactorMethod[]
+  // wie sich die Zähler und Nenner aller Brüche der Aufgabe zerlegen lassen
+  readonly partMethods: readonly FactorMethod[]
 }
 
 // Bausteine der Bruch-Engine (frac.ts): e^x, ln x, sin x, cos x, √x
@@ -345,21 +353,38 @@ function factsOf(original: FractionTask, solution: FracSolution, wrongs: readonl
     blockRules: original.rule !== undefined || fracAtoms(solution.value).includes('R') || wrongs.some((w) => w.rule.id === 'frac-cancel-inside'),
     numMethods: t.kind === 'reduce' ? factorMethods(shownPoly(t.part.num), t.hints) : [],
     denMethods: t.kind === 'reduce' ? factorMethods(shownPoly(t.part.den), t.hints) : [],
+    partMethods: partMethods(t),
   }
 }
 
 // Wie sich ein Term zerlegen lässt: ausklammern (Zahl, Buchstabe oder Minus vor der Klammer),
-// binomische Formel ((a + b)(a − b), (a ± b)²) oder zwei verschiedene Klammern wie bei x² + px + q
+// in Gruppen ausklammern, binomische Formel ((a + b)(a − b), (a ± b)²) oder zwei verschiedene
+// Klammern wie bei x² + px + q (mit Zahl vor x² bzw. mit zwei Buchstaben eigene Art)
 export function factorMethods(p: Poly, hints: readonly Poly[]): FactorMethod[] {
   const f = factorize(p, hints)
   const linear = f.factors.filter((g) => g.poly.length === 2 && totalDegree(g.poly) === 1)
   const mirror = (g: Poly) => polyAdd([g[0]], polyNeg([g[1]]))
   const methods: FactorMethod[] = []
   if (!isOne(f.coef) || f.factors.some((g) => g.poly.length === 1)) methods.push('out')
+  const grouped = groupFactor(p) !== null
+  if (grouped) methods.push('grouping')
   const binomial = linear.some((g) => g.exp >= 2 || linear.some((h) => h !== g && polyEquals(h.poly, mirror(g.poly))))
   if (binomial) methods.push('binomial')
-  else if (linear.length >= 2) methods.push('quadratic')
+  else if (!grouped && linear.length >= 2) {
+    if (linear.some((g) => !isOne(g.poly[0].coef))) methods.push('leading')
+    else if (linear.some((g) => atomsOf(g.poly).length === 2)) methods.push('twoLetters')
+    else methods.push('quadratic')
+  }
   return methods
+}
+
+// Zerlege-Arten aller Zähler und Nenner der Aufgabe, die als Summe dastehen (für die Lernkarten
+// beim Hauptnenner und beim Kürzen nach dem Malnehmen)
+function partMethods(t: FractionTask): FactorMethod[] {
+  const sums = partsOf(t)
+    .flatMap((p) => [p.num, p.den])
+    .flatMap((s) => (s.form === 'expanded' && s.poly.length >= 2 ? [s.poly] : []))
+  return [...new Set(sums.flatMap((p) => factorMethods(p, t.hints)))]
 }
 
 // --- Entwürfe aus dem Rechenweg ---
@@ -578,7 +603,14 @@ function hintOf(kind: StepKind, facts: Facts): string {
     case 'factor-den': {
       if (facts.root) return FRACTION_HINTS.rootFactor
       const methods = kind === 'factor-num' ? facts.numMethods : facts.denMethods
-      const hints = { out: FRACTION_HINTS.factorOut, binomial: FRACTION_HINTS.factorBinomial, quadratic: FRACTION_HINTS.factorQuadratic }
+      const hints: Record<FactorMethod, string> = {
+        out: FRACTION_HINTS.factorOut,
+        binomial: FRACTION_HINTS.factorBinomial,
+        quadratic: FRACTION_HINTS.factorQuadratic,
+        leading: FRACTION_HINTS.factorLeading,
+        twoLetters: FRACTION_HINTS.factorTwoLetters,
+        grouping: FRACTION_HINTS.factorGrouping,
+      }
       return methods.length > 0 ? methods.map((k) => hints[k]).join(' ') : FRACTION_HINTS.factor
     }
     case 'inner-num':
@@ -603,7 +635,14 @@ const METHOD_CARDS: Record<FactorMethod, string> = {
   out: FRACTION_CARD_IDS.factorOut,
   binomial: FRACTION_CARD_IDS.binomial,
   quadratic: FRACTION_CARD_IDS.quadratic,
+  leading: FRACTION_CARD_IDS.leading,
+  twoLetters: FRACTION_CARD_IDS.quadratic,
+  grouping: FRACTION_CARD_IDS.grouping,
 }
+
+// Karten der besonderen Zerlege-Arten (die einfachen Arten stehen schon auf den Karten zum Kürzen)
+const SPECIAL_METHODS: readonly FactorMethod[] = ['binomial', 'quadratic', 'leading', 'twoLetters', 'grouping']
+const specialCards = (methods: readonly FactorMethod[]) => methods.filter((k) => SPECIAL_METHODS.includes(k)).map((k) => METHOD_CARDS[k])
 
 // Karten zu einem Schritt; bei Bausteinen wie e^x zusätzlich deren Karte
 function cardsOf(kind: StepKind, facts: Facts): string[] {
@@ -612,6 +651,7 @@ function cardsOf(kind: StepKind, facts: Facts): string[] {
   const own = ((): string[] => {
     switch (kind) {
       case 'lcd':
+        return [ids.add, ...terms, ...specialCards(facts.partMethods)]
       case 'combine':
         return [ids.add, ...terms]
       case 'expand':
@@ -628,8 +668,11 @@ function cardsOf(kind: StepKind, facts: Facts): string[] {
         return [ids.binomial]
       case 'identity':
         return [ids.blockRules]
-      case 'cancel':
-        return [ids.reduce, ...(facts.cancelPowers ? [ids.powers] : []), ...(facts.cancelSums ? [ids.sumCancel] : [])]
+      case 'cancel': {
+        // nach dem Malnehmen wird beim Kürzen auch zerlegt
+        const factored = facts.task.kind === 'reduce' ? [] : specialCards(facts.partMethods)
+        return [ids.reduce, ...(facts.cancelPowers ? [ids.powers] : []), ...(facts.cancelSums ? [ids.sumCancel] : []), ...factored]
+      }
       case 'multiply':
         return [ids.multiply]
       case 'reciprocal':

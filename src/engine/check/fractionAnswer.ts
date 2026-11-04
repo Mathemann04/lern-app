@@ -181,6 +181,8 @@ function hasOpenProduct(e: Expr): boolean {
     const factors = factorsOf(e)
     // Zahlen, auch ein Bruch mit einer Zahl oben (\frac{1}{6b} \cdot 5 ist noch \frac{5}{6b})
     if (factors.filter((f) => f.kind === 'num' || (f.kind === 'div' && f.num.kind === 'num')).length >= 2) return true
+    // Bruch mal Zahl: \frac{s}{(r + s)^2} \cdot 2 ist noch \frac{2s}{(r + s)^2}
+    if (factors.some((f) => f.kind === 'div') && factors.some((f) => f.kind === 'num')) return true
     const letters = factors.map((f) => (f.kind === 'var' ? f.name : f.kind === 'pow' && f.base.kind === 'var' ? f.base.name : null)).filter((l) => l !== null)
     if (new Set(letters).size < letters.length) return true
     return factors.some(hasOpenProduct)

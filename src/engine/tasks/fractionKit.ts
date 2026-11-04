@@ -1,9 +1,10 @@
 import { factoredPoly, reduceFrac } from '../fraction/factor.ts'
 import type { Frac } from '../fraction/frac.ts'
-import { type Poly, atomsOf, polyAtom, polyConst, polyEquals, polyMul, totalDegree } from '../fraction/poly.ts'
-import { ratAbs, ratDiv } from '../rational.ts'
+import { type Poly, atomsOf, constValue, polyAdd, polyAtom, polyConst, polyEquals, polyMul, polyNeg, polyProduct, polyScale, totalDegree } from '../fraction/poly.ts'
+import { rat, ratAbs, ratDiv } from '../rational.ts'
 import { fractionWrongAnswers } from '../fraction/errorRules.ts'
-import { isPlayableTree, solveTree } from '../fraction/solve.ts'
+import { type FracSolution, cancelledFactor, isPlayableTree, solveFraction, solveTree } from '../fraction/solve.ts'
+import { toLatex } from '../expr/print.ts'
 import {
   type FractionTask,
   type Part,
@@ -47,6 +48,10 @@ type Kit = {
   readonly maxLatex: number
   // zusätzliche Bedingung an den Baum, z. B. mindestens ein echter Bruch
   readonly accept?: (root: TreeNode, rng: Rng) => boolean
+  // bekannte Faktoren der Aufgabe (Klammern der Welt, Stufen 3 und 4)
+  readonly hints?: readonly Poly[]
+  // zusätzliche Bedingung an das Ergebnis, z. B. nicht zu lang
+  readonly result?: (solution: FracSolution) => boolean
 }
 
 const weighted = <T>(rng: Rng, items: ReadonlyArray<readonly [T, number]>): T => {
@@ -122,8 +127,8 @@ const biggest = (f: Frac): number => Math.max(...[...f.num, ...f.den].map((t) =>
 
 // Aufgabe aus einem Baum: brauchbar? (Wert nicht 0, Zahlen klein, spielbar, nicht zu lang); einteilige
 // Bäume ohne Dezimalzahl werden zur gewohnten Aufgabenform (Summe, mal, geteilt, Doppelbruch)
-export function taskFromTree(root: TreeNode, kit: Pick<Kit, 'maxNumber' | 'maxLatex'>, level: Level): FractionTask | null {
-  const t: Extract<FractionTask, { kind: 'tree' }> = { kind: 'tree', root, hints: [] }
+export function taskFromTree(root: TreeNode, kit: Pick<Kit, 'maxNumber' | 'maxLatex' | 'hints' | 'result'>, level: Level): FractionTask | null {
+  const t: Extract<FractionTask, { kind: 'tree' }> = { kind: 'tree', root, hints: kit.hints ?? [] }
   let solution
   try {
     const value = treeFrac(root)
@@ -133,7 +138,7 @@ export function taskFromTree(root: TreeNode, kit: Pick<Kit, 'maxNumber' | 'maxLa
     return null
   }
   if (!isPlayableTree(t)) return null
-  const reduced = reduceFrac(solution.value)
+  const reduced = reduceFrac(solution.value, t.hints)
   if (biggest({ num: reduced.num, den: factoredPoly(reduced.den) }) > kit.maxNumber) return null
   // Teilergebnisse klein und nicht ±1 (sonst folgt „mal 1" oder „geteilt durch 1"); kein Blatt ist 1
   for (const [i, stage] of solution.stages.entries()) {
@@ -146,6 +151,7 @@ export function taskFromTree(root: TreeNode, kit: Pick<Kit, 'maxNumber' | 'maxLa
   if (treeLeaves(root).some((l) => { const v = partFrac(l.part); return polyEquals(v.num, v.den) })) return null
   if (level >= 2 && atomsOf(reduced.num).length === 0 && reduced.den.factors.length === 0) return null
   if (totalDegree(reduced.num) > 6) return null
+  if (kit.result && !kit.result(solution)) return null
   const simple = solution.stages.length === 1 && solution.steps[0]?.kind !== 'decimal' ? solution.stages[0].task : t
   if (taskLatex(simple).length > kit.maxLatex) return null
   // geführt braucht die letzte Frage falsche Ergebnisse aus typischen Fehlern
@@ -321,4 +327,263 @@ export function monomialReduce(rng: Rng): FractionTask {
   const top = mono(g * rng.pick([1, 2, 3, 5]) * (rng.chance(0.3) ? -1 : 1), letters.map((l) => [l, rng.int(0, 4)] as const))
   const bottom = mono(g * rng.pick([1, 2, 3, 4, 5]), letters.map((l) => [l, rng.int(0, 4)] as const))
   return { kind: 'reduce', part: polyPart(top, bottom), hints: [] }
+}
+
+// --- Stufen 3 und 4: Summen in Zähler und Nenner ---
+
+// Welt einer Aufgabe: Buchstaben (bzw. Bausteine wie e^x) und Klammern, aus denen Zähler und Nenner
+// gebaut werden. So haben die Brüche einer Aufgabe gemeinsame Faktoren: Hauptnenner, Kürzen über
+// Kreuz, Kürzen nach dem Zerlegen.
+export type World = {
+  readonly letters: readonly string[]
+  readonly factors: readonly Poly[]
+}
+
+// a · u + b (bzw. a · u + b · v)
+const linearIn = (a: number, u: string, b: number, v?: string): Poly =>
+  polyAdd(polyScale(polyAtom(u), rat(a)), v ? polyScale(polyAtom(v), rat(b)) : polyConst(b))
+
+const call = <T>(rng: Rng, items: ReadonlyArray<readonly [() => T, number]>): T => weighted(rng, items)()
+
+const LETTER_PAIRS: ReadonlyArray<readonly [string, string]> = [
+  ['a', 'b'],
+  ['x', 'y'],
+  ['m', 'n'],
+  ['r', 's'],
+  ['u', 'v'],
+  ['p', 'q'],
+]
+
+// x meistens, sonst ein anderer Buchstabe
+const oneLetter = (rng: Rng) => rng.pick(['x', 'x', 'x', 'a', 'b', 't', 'z', 'u', 'y', 'n'])
+
+const distinctNonZero = (rng: Rng, count: number, max: number): number[] => {
+  const values: number[] = []
+  while (values.length < count) {
+    const v = (rng.chance(0.5) ? 1 : -1) * rng.int(1, max)
+    if (!values.includes(v)) values.push(v)
+  }
+  return values
+}
+
+// Stufe 3: x ± p (auch 2x ± 3 für Quadrate wie (2x − 3)²) oder zwei Buchstaben a ± b
+export function level3World(rng: Rng): World {
+  if (rng.chance(0.3)) {
+    const [u, v] = rng.pick(LETTER_PAIRS)
+    return { letters: [u, v], factors: [linearIn(1, u, 1, v), linearIn(1, u, -1, v)] }
+  }
+  const u = oneLetter(rng)
+  if (rng.chance(0.25)) {
+    const k = rng.int(2, 3)
+    const q = rng.pick([1, 2, 4, 5].filter((n) => gcd(n, k) === 1))
+    return { letters: [u], factors: [linearIn(k, u, q), linearIn(k, u, -q)] }
+  }
+  const p = rng.int(1, 6)
+  return { letters: [u], factors: [linearIn(1, u, p), linearIn(1, u, -p)] }
+}
+
+// Stufe 4: drei Klammern x − r (auch mit Zahl vorn wie 2x − 3), zwei Buchstaben wie a − 2b, Gruppen
+// wie (a + b)(x − y), Bausteine e^x, ln x, sin x, cos x
+export function level4World(rng: Rng): World {
+  const kind = weighted(rng, [
+    ['one', 5],
+    ['two', 2],
+    ['group', 2],
+    ['block', 1.5],
+  ] as const)
+  if (kind === 'two') {
+    const [u, v] = rng.pick(LETTER_PAIRS)
+    return { letters: [u, v], factors: distinctNonZero(rng, 3, 3).map((c) => linearIn(1, u, c, v)) }
+  }
+  if (kind === 'group') {
+    const [[s, s2], [t, t2]] = rng.shuffle([...LETTER_PAIRS]).slice(0, 2)
+    // (a + b) bzw. (a + 2): erster Faktor; (x − y) und (x + y) bzw. (x − 3) und (x + 3): zweiter
+    const first = rng.chance(0.5) ? linearIn(1, s, rng.pick([1, -1]), s2) : linearIn(1, s, (rng.chance(0.5) ? 1 : -1) * rng.int(1, 4))
+    const twoLetters = rng.chance(0.5)
+    const m = twoLetters ? 1 : rng.int(1, 4)
+    const second = (sign: number) => (twoLetters ? linearIn(1, t, sign * m, t2) : linearIn(1, t, sign * m))
+    return { letters: [s, t], factors: [first, second(1), second(-1)] }
+  }
+  if (kind === 'block') {
+    const u = rng.pick(['E', 'L', 'S', 'C'])
+    // bei sin und cos nicht 1: 1 − sin² x wäre schon eine Regel der Winkelfunktionen
+    const min = u === 'S' || u === 'C' ? 2 : 1
+    const p = rng.int(min, 4)
+    return { letters: [u], factors: [linearIn(1, u, p), linearIn(1, u, -p)] }
+  }
+  const u = oneLetter(rng)
+  const roots = distinctNonZero(rng, 3, 6)
+  const factors = roots.map((r) => linearIn(1, u, -r))
+  // Zahl vorn: 2x − 3, 3x + 1
+  if (rng.chance(0.4)) {
+    const k = rng.int(2, 3)
+    factors[2] = linearIn(k, u, rng.pick([1, 2, 4, 5].filter((n) => gcd(n, k) === 1)) * (rng.chance(0.5) ? 1 : -1))
+  }
+  return { letters: [u], factors }
+}
+
+// Zähler oder Nenner aus der Welt: eine oder zwei Klammern (eine auch im Quadrat), dazu manchmal
+// eine Zahl oder ein Buchstabe davor, z. B. 2x − 6, x² + 3x, x² − 9, x² + 6x + 9
+function worldPoly(rng: Rng, w: World, brackets: number): Poly {
+  const chosen = rng.shuffle([...w.factors]).slice(0, brackets)
+  let p = polyProduct(chosen)
+  if (brackets === 1 && rng.chance(0.2)) p = polyMul(p, chosen[0])
+  if (rng.chance(0.25)) p = polyScale(p, rat(rng.int(2, 4)))
+  else if (brackets === 1 && rng.chance(0.3)) p = polyMul(p, polyAtom(rng.pick(w.letters)))
+  return p
+}
+
+function worldNumerator(rng: Rng, w: World): Poly {
+  return call(rng, [
+    [() => polyConst(rng.int(1, 6)), 4],
+    [() => polyAtom(rng.pick(w.letters)), 2],
+    [() => polyScale(polyAtom(rng.pick(w.letters)), rat(rng.int(2, 5))), 1],
+    [() => rng.pick(w.factors), 3],
+    [() => polyScale(rng.pick(w.factors), rat(rng.int(2, 3))), 1],
+  ])
+}
+
+// Bruch mit Summen: Nenner aus der Welt, Zähler klein; der einzelne Bruch ist schon gekürzt (gekürzt
+// wird erst in der Aufgabe, z. B. über Kreuz). Manchmal steht eine Klammer vertauscht da: b − a.
+function termLeaf(rng: Rng, w: World): TreeNode {
+  for (;;) {
+    const den = worldPoly(rng, w, rng.chance(0.45) ? 2 : 1)
+    const num = worldNumerator(rng, w)
+    const f = { num, den }
+    if (cancelledFactor(f, reduceFrac(f, w.factors), w.factors)) continue
+    if (isDifference(den) && rng.chance(0.3)) return leaf(part(expanded(num), expanded(polyNeg(den), true)))
+    return leaf(polyPart(num, den))
+  }
+}
+
+// Einfacher Bruch: 3/x, 1/x², eine ganze Zahl, x, a/b
+function simpleLeaf(rng: Rng, w: World): TreeNode {
+  const [u, v] = rng.shuffle([...w.letters])
+  return call(rng, [
+    [() => leaf(polyPart(polyConst(rng.int(1, 5)), polyAtom(u, rng.int(1, 2)))), 4],
+    [() => leaf(numberPart(rng.int(1, 4))), 2],
+    [() => leaf(polyPart(polyAtom(u), polyConst(1))), 1],
+    [() => (v ? leaf(polyPart(polyAtom(u), polyAtom(v))) : leaf(polyPart(polyConst(rng.int(1, 3)), polyAtom(u)))), 1],
+  ])
+}
+
+// Kürzen: Zähler und Nenner mit gemeinsamem Faktor, ausmultipliziert, z. B. \frac{x^2 - 9}{2x + 6},
+// \frac{a^2 - b^2}{ab - b^2}, \frac{2x^2 - x - 3}{x^2 - 1}, \frac{3 - x}{x^2 - 9}
+export function worldReduce(rng: Rng, w: World, level: Level): FractionTask {
+  // Stufe 4: Klammer mit Zahl vorn (2x − 3) oft im Zähler, damit 2x² − x − 3 zu zerlegen ist
+  const lead = level >= 4 ? w.factors.find((f) => f[0].coef.n !== 1n) : undefined
+  for (;;) {
+    const useLead = lead !== undefined && rng.chance(0.6)
+    const common = useLead ? rng.pick(w.factors.filter((f) => f !== lead)) : rng.pick(w.factors)
+    const cofactor = () =>
+      call(rng, [
+        [() => polyConst(1), 2],
+        [() => polyConst(rng.int(2, 6)), 2],
+        [() => polyAtom(rng.pick(w.letters)), 2],
+        [() => polyScale(polyAtom(rng.pick(w.letters)), rat(rng.int(2, 4))), 1],
+        [() => rng.pick(w.factors.filter((f) => f !== common)), 3],
+        [() => common, 1],
+      ])
+    const [a, b] = [useLead ? lead : cofactor(), cofactor()]
+    if (constValue(a) && constValue(b)) continue
+    const num = polyMul(common, a)
+    const den = polyMul(common, b)
+    // vertauschte Differenz im Zähler: 3 − x statt x − 3
+    const flip = isDifference(num) && rng.chance(0.4)
+    const task: FractionTask = { kind: 'reduce', part: part(expanded(flip ? polyNeg(num) : num, flip), expanded(den)), hints: w.factors }
+    if (isUsable(task, level, 110)) return task
+  }
+}
+
+// Differenz aus zwei Summanden (x − 3, a − b): vertauscht geschrieben 3 − x, b − a
+const isDifference = (p: Poly) => p.length === 2 && (p[0].coef.n < 0n) !== (p[1].coef.n < 0n)
+
+// Ergebnis nicht zu lang: Zähler mit höchstens drei Summanden und Grad 3
+const shortResult = (solution: FracSolution) =>
+  solution.reduced.num.length <= 3 && totalDegree(solution.reduced.num) <= 3 && toLatex(solution.result).length <= 70
+
+// Brauchbar: Zahlen klein, Ergebnis mit Buchstabe und kurz, falsche Antworten aus typischen Fehlern,
+// nicht zu lang
+function isUsable(task: FractionTask, level: Level, maxLatex: number): boolean {
+  const solution = solveFraction(task)
+  const reduced = solution.reduced
+  if (!shortResult(solution)) return false
+  if (biggest({ num: reduced.num, den: factoredPoly(reduced.den) }) > 200) return false
+  if (level >= 2 && atomsOf(reduced.num).length === 0 && reduced.den.factors.length === 0) return false
+  if (taskLatex(task).length > maxLatex) return false
+  return fractionWrongAnswers(task, solution).some((wr) => wr.value && !wr.freeOnly)
+}
+
+function worldKit(w: World, level: Level): Kit {
+  const four = level >= 4
+  return {
+    sizes: four
+      ? [
+          [2, 5],
+          [3, 3],
+          [4, 1],
+        ]
+      : [
+          [2, 5],
+          [3, 2],
+        ],
+    ops: [
+      ['sum', 5],
+      ['product', 2],
+      ['quotient', 2],
+      ...(four ? ([['over', 2]] as const) : []),
+    ],
+    leaves: [
+      [(rng) => termLeaf(rng, w), 5],
+      [(rng) => simpleLeaf(rng, w), four ? 2.5 : 1.5],
+    ],
+    maxNumber: 200,
+    maxLatex: four ? 130 : 115,
+    hints: w.factors,
+    result: shortResult,
+    // mindestens ein Bruch mit einer Summe im Zähler oder Nenner
+    accept: (root) => treeLeaves(root).some((l) => partFrac(l.part).den.length >= 2 || partFrac(l.part).num.length >= 2),
+  }
+}
+
+export function buildLevel3(rng: Rng): FractionTask {
+  const w = level3World(rng)
+  return rng.chance(0.3) ? worldReduce(rng, w, 3) : buildFromKit(rng, worldKit(w, 3), 3)
+}
+
+// Doppelbruch: oben und unten je ein Bruch oder eine Summe aus zwei Brüchen, z. B.
+// \frac{\frac{1}{a} - \frac{1}{b}}{\frac{1}{a^2} - \frac{1}{b^2}}, \frac{1 + \frac{2}{x}}{1 - \frac{4}{x^2}}
+function worldComplex(rng: Rng, w: World, level: Level): FractionTask {
+  const one = (simple: number) => (rng.chance(simple) ? simpleLeaf(rng, w) : termLeaf(rng, w))
+  // zwei Brüche mit verschiedenen Nennern (nicht \frac{5}{x} + \frac{5}{x})
+  const pair = (): TreeNode => {
+    for (;;) {
+      const [a, b] = [one(0.8), one(0.6)]
+      if (a.kind === 'leaf' && b.kind === 'leaf' && polyEquals(partFrac(a.part).den, partFrac(b.part).den)) continue
+      return sumNode(term(1, a), term(rng.chance(0.5) ? -1 : 1, b))
+    }
+  }
+  const side = (size: number) => (size === 1 ? one(0.4) : pair())
+  for (;;) {
+    const [top, bottom] = rng.pick([
+      [2, 2],
+      [2, 2],
+      [2, 1],
+      [1, 2],
+    ])
+    const task = taskFromTree(overNode(side(top), side(bottom)), { maxNumber: 200, maxLatex: 130, hints: w.factors, result: shortResult }, level)
+    if (task) return task
+  }
+}
+
+export function buildLevel4(rng: Rng): FractionTask {
+  const w = level4World(rng)
+  const kind = weighted(rng, [
+    ['reduce', 3],
+    ['complex', 1.5],
+    ['kit', 5.5],
+  ] as const)
+  if (kind === 'reduce') return worldReduce(rng, w, 4)
+  if (kind === 'complex') return worldComplex(rng, w, 4)
+  return buildFromKit(rng, worldKit(w, 4), 4)
 }
