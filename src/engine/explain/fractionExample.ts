@@ -1,9 +1,13 @@
 import { toLatex } from '../expr/print.ts'
-import { type FracSolution, STEP_NAMES, solveFraction, solveTree } from '../fraction/solve.ts'
-import { type FractionTask, readableLatex, taskLatex, treeLatex } from '../fraction/task.ts'
+import { num } from '../expr/types.ts'
+import { factoredExpr } from '../fraction/factor.ts'
+import { ansatzExpr, dividedExpr, findingEquation } from '../fraction/partial.ts'
+import { type FracSolution, STEP_NAMES, nicePolyExpr, partialFactorStep, partialWork, solveFraction, solveTree } from '../fraction/solve.ts'
+import { type FractionTask, readableLatex, shownExpr, taskLatex, treeLatex } from '../fraction/task.ts'
 import { withoutDecimals } from '../fraction/tree.ts'
 import type { WorkedExample } from './example.ts'
 import { m } from './format.ts'
+import { compareWhere } from './fractionTexts.ts'
 
 // Durchgerechnetes Beispiel für eine Lernkarte zu Brüchen: der Rechenweg der Bruch-Engine, je
 // Schritt eine Zeile mit dem ganzen Zwischenstand
@@ -14,6 +18,24 @@ const stepLines = (solution: FracSolution) =>
     const label = step.kind === 'cancel' && step.detail ? `Kürzen durch ${m(step.detail)}:` : `${STEP_NAMES[step.kind]}:`
     return { label, latex: readableLatex(`= ${step.latex ?? toLatex(step.expr!)}`) }
   })
+
+// Partialbrüche: Polynomdivision, Nenner zerlegen, Ansatz, mal den Nenner, je Zahl die Gleichung,
+// aus der sie folgt
+function partialLines(t: Extract<FractionTask, { kind: 'partial' }>) {
+  const w = partialWork(t)
+  const lines: Array<{ label: string; latex: string }> = []
+  if (w.divided) lines.push({ label: `${STEP_NAMES.divide}:`, latex: `= ${toLatex(dividedExpr(w, shownExpr(t.part.den)))}` })
+  if (partialFactorStep(t)) lines.push({ label: `${STEP_NAMES['factor-den']}:`, latex: `= ${toLatex(dividedExpr(w, factoredExpr(w.factored)))}` })
+  lines.push({ label: `${STEP_NAMES.ansatz}:`, latex: `= ${toLatex(ansatzExpr(w.quotient, w.terms))}` })
+  lines.push({ label: 'Mal den Nenner:', latex: `${toLatex(nicePolyExpr(w.rest))} = ${toLatex(w.equationRight)}` })
+  for (const f of w.findings) {
+    const [left, right] = findingEquation(f)
+    const label = f.kind === 'insert' ? `$${w.letter} = ${toLatex(num(f.at))}$ einsetzen:` : `Zahlen ${compareWhere(w.letter, f.power)} vergleichen:`
+    const equation = toLatex(right) === f.letter ? '' : `${toLatex(left)} = ${toLatex(right)} \\;\\Rightarrow\\; `
+    lines.push({ label, latex: `${equation}${f.letter} = ${toLatex(num(f.value))}` })
+  }
+  return lines
+}
 
 export function fractionExample(t: FractionTask): WorkedExample {
   const solution = solveFraction(t)
@@ -30,9 +52,11 @@ export function fractionExample(t: FractionTask): WorkedExample {
           })
           return out
         })()
-      : stepLines(solution)
-  // z. B. nach dem Malnehmen ohne Kürzen: noch ausrechnen
+      : t.kind === 'partial'
+        ? partialLines(t)
+        : stepLines(solution)
+  // z. B. nach dem Malnehmen ohne Kürzen: noch ausrechnen; Partialbrüche: die Zahlen einsetzen
   const result = `= ${toLatex(solution.result)}`
-  if (lines.at(-1)?.latex !== result) lines.push({ label: 'Ausrechnen:', latex: result })
+  if (lines.at(-1)?.latex !== result) lines.push({ label: t.kind === 'partial' ? 'Eingesetzt:' : 'Ausrechnen:', latex: result })
   return { functionLatex: taskLatex(t), lines, result: solution.result }
 }

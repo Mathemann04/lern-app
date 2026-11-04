@@ -14,7 +14,11 @@ export function derivativeForm(ref: TaskRef): string {
   return formOfLatex(task.kind === 'function' ? toLatex(task.expr) : equationToLatex(task.equation))
 }
 
-export const fractionForm = (ref: TaskRef): string => formOfLatex(fractionLatex(generateFractionTask(ref).task))
+// Partialbrüche sehen aus wie ein Bruch zum Kürzen, sind aber eine eigene Form
+export function fractionForm(ref: TaskRef): string {
+  const { task } = generateFractionTask(ref)
+  return `${task.kind === 'partial' ? 'zerlegen: ' : ''}${formOfLatex(fractionLatex(task))}`
+}
 
 export function rearrangeForm(ref: TaskRef): string {
   const { task } = generateRearrangeTask(ref)

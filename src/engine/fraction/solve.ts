@@ -42,13 +42,15 @@ import {
   treeLatex,
 } from './task.ts'
 import { type TreeStage, hasDecimal, treeStages, withoutDecimals } from './tree.ts'
+import { type PartialWork, ansatzExpr, dividedExpr, partialExpr, partialWorkOf } from './partial.ts'
 
 // Rechenweg einer Bruchaufgabe wie im Skript: Hauptnenner, erweitern, Zähler zusammenfassen,
 // zerlegen, kürzen, mit dem Kehrwert malnehmen, Doppelbruch auflösen. Jeder Schritt zeigt den
 // ganzen Zwischenstand; alle Schritte haben denselben Wert wie die Aufgabe (Tests prüfen das).
 // Stufe 5: Klammern wie (x + h)² ausmultiplizieren, Regeln der Bausteine anwenden
 // (sin² x + cos² x = 1, (√x)² = x), verschachtelte Doppelbrüche von innen nach außen, mehrere
-// Rechenarten (erst jede Klammer zu einem Bruch).
+// Rechenarten (erst jede Klammer zu einem Bruch), Partialbruchzerlegung (Polynomdivision, Nenner
+// zerlegen, Ansatz und Zahlen: Ansatz und Zahlen haben keinen Zwischenstand, expr ist dort null).
 
 export type StepKind =
   | 'lcd'
@@ -70,6 +72,9 @@ export type StepKind =
   | 'order'
   | 'part'
   | 'conjugate'
+  | 'divide'
+  | 'ansatz'
+  | 'coef'
 
 export const STEP_NAMES: Record<StepKind, string> = {
   lcd: 'Hauptnenner',
@@ -91,6 +96,9 @@ export const STEP_NAMES: Record<StepKind, string> = {
   order: 'Was zuerst?',
   part: 'Teilergebnis einsetzen',
   conjugate: 'Mit dem Gegenstück erweitern',
+  divide: 'Polynomdivision',
+  ansatz: 'Ansatz',
+  coef: 'Zahl bestimmen',
 }
 
 export type FracStep = {
@@ -108,6 +116,8 @@ export type FracStep = {
   readonly answer?: Expr
   // Zwischenstand als LaTeX, wenn er sich nicht als Term schreiben lässt (Rechenbaum mit „:")
   readonly latex?: string
+  // Partialbrüche: die Zahl, die dieser Schritt bestimmt (detail: ihr Wert)
+  readonly letter?: string
 }
 
 export type FracSolution = {
@@ -297,6 +307,7 @@ export function solveFraction(t: FractionTask): FracSolution {
   if (t.kind === 'nested') return solveNested(t)
   if (t.kind === 'tree') return solveTree(t)
   if (t.kind === 'reduce' && t.rule?.kind === 'conjugate') return solveConjugate(t, t.rule.target)
+  if (t.kind === 'partial') return solvePartial(t)
   const { hints } = t
   const value = taskFrac(t)
   const steps: FracStep[] = []
@@ -570,6 +581,35 @@ function solveConjugate(t: Extract<FractionTask, { kind: 'reduce' }>, target: 'n
   steps.push({ kind: 'multiply-out', expr: after, from, detail: nicePolyExpr(product) })
   steps.push({ kind: 'cancel', expr: result, detail: shownExpr(t.part.den), before: after })
   return { value, steps, reduced, result, excluded, beforeCancel: { num: product, den: polyMul(denP, conj) } }
+}
+
+// --- Partialbruchzerlegung (Stufe 5) ---
+
+export function partialWork(t: Extract<FractionTask, { kind: 'partial' }>): PartialWork {
+  const w = partialWorkOf(shownPoly(t.part.num), shownPoly(t.part.den), t.hints)
+  if (!w) throw new Error('Der Nenner zerfällt nicht in Linearfaktoren')
+  return w
+}
+
+// Wird der Nenner im Rechenweg zerlegt? (steht er als Summe da, die sich zerlegen lässt; x − 1 nicht)
+export const partialFactorStep = (t: Extract<FractionTask, { kind: 'partial' }>) =>
+  t.part.den.form === 'expanded' && t.part.den.poly.length >= 2 && splits(factorize(t.part.den.poly, t.hints))
+
+// Polynomdivision, Nenner zerlegen, Ansatz, je Zahl ein Schritt; Ergebnis die Zerlegung
+function solvePartial(t: Extract<FractionTask, { kind: 'partial' }>): FracSolution {
+  const value = taskFrac(t)
+  const w = partialWork(t)
+  const steps: FracStep[] = []
+  const denShown = shownExpr(t.part.den)
+  if (w.divided) steps.push({ kind: 'divide', expr: dividedExpr(w, denShown), detail: nicePolyExpr(w.quotient) })
+  if (partialFactorStep(t)) {
+    const factoredDen = factoredExpr(w.factored)
+    steps.push({ kind: 'factor-den', expr: dividedExpr(w, factoredDen), detail: factoredDen })
+  }
+  steps.push({ kind: 'ansatz', expr: null, detail: ansatzExpr(w.quotient, w.terms) })
+  for (const f of w.findings) steps.push({ kind: 'coef', expr: null, detail: num(f.value), letter: f.letter })
+  const reduced = reduceFrac(value, t.hints)
+  return { value, steps, reduced, result: partialExpr(w.quotient, w.terms), excluded: excludedValues(t), beforeCancel: value }
 }
 
 // k \sin^n x / \cos^n x als k \tan^n x; sonst null

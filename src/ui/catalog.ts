@@ -122,8 +122,8 @@ const fractionLevels: LevelPreview[] = [
   {
     level: 5,
     available: true,
-    title: 'Profi: alles ineinander, Differenzenquotienten, dritte Potenzen, Wurzeln, Winkelfunktionen, e und ln',
-    examples: [String.raw`\frac{\sqrt{x+h} - \sqrt{x}}{h}`, String.raw`\frac{x-a}{\sqrt{x}-\sqrt{a}}`, String.raw`\frac{a^3 - b^3}{a^2 - b^2}`],
+    title: 'Profi: alles ineinander, Differenzenquotienten, dritte Potenzen, Wurzeln, Winkelfunktionen, e und ln, Partialbruchzerlegung',
+    examples: [String.raw`\frac{\sqrt{x+h} - \sqrt{x}}{h}`, String.raw`\frac{x-a}{\sqrt{x}-\sqrt{a}}`, String.raw`{\frac{2}{x^2 - 1} = \frac{1}{x - 1} - \frac{1}{x + 1}}`],
   },
 ]
 

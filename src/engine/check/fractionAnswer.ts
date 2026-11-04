@@ -1,7 +1,7 @@
 import { explainFractionError, listing } from '../explain/fractionTexts.ts'
 import { type Expr, mul } from '../expr/types.ts'
 import { type FracWrong, fractionWrongAnswers } from '../fraction/errorRules.ts'
-import { factoredPoly, reduceFrac } from '../fraction/factor.ts'
+import { factoredPoly, factorize, reduceFrac } from '../fraction/factor.ts'
 import { type Frac, fracDiv, fracEquals, fracNeg, isRootAtom, radicandLetters, rootForm, toFrac } from '../fraction/frac.ts'
 import { atomsOf, constValue, isZeroPoly, polyContent, totalDegree } from '../fraction/poly.ts'
 import { type FracSolution, rationalizedFrac, solveFraction } from '../fraction/solve.ts'
@@ -23,6 +23,8 @@ import type { FreeTask, FreeVerdict } from './freeTask.ts'
 //   gleichwertige Eingabe N/D ist also genau dann gekürzt, wenn D denselben Grad hat wie Q und die
 //   Zahlen vor Zähler und Nenner keinen gemeinsamen Teiler haben.
 // Ist der Wert ein anderer, wird mit den falschen Ergebnissen der typischen Fehler verglichen.
+// Partialbruchzerlegung: fertig ist eine Summe aus dem ganzen Teil und einfachen Brüchen, je Bruch
+// eine Zahl im Zähler und ein Linearfaktor (oder sein Quadrat) im Nenner, keiner doppelt.
 
 export type FractionCheckContext = {
   readonly task: FractionTask
@@ -40,7 +42,7 @@ export type FractionCheckContext = {
 }
 
 // Warum ein gleichwertiges Ergebnis noch nicht fertig ist
-export type Unfinished = 'several' | 'nested' | 'numerator' | 'denominator' | 'not-reduced' | 'product' | 'decimal' | 'conjugate'
+export type Unfinished = 'several' | 'nested' | 'numerator' | 'denominator' | 'not-reduced' | 'product' | 'decimal' | 'conjugate' | 'partial' | 'partial-combine'
 
 export type FractionVerdict =
   | { readonly kind: 'unreadable'; readonly message: string }
@@ -90,7 +92,7 @@ export function checkFractionAnswer(context: FractionCheckContext, latex: string
 
   const correct = context.solution.value
   if (fracEquals(value, correct)) {
-    const reason = unfinished(answer, value, context.solution, context.task)
+    const reason = context.task.kind === 'partial' ? partialUnfinished(answer) : unfinished(answer, value, context.solution, context.task)
     return reason ? { kind: 'unfinished', answer, reason } : { kind: 'correct', answer }
   }
   const wrong = context.wrongs.find((w) => w.value && fracEquals(value, w.value))
@@ -271,6 +273,34 @@ function unfinished(answer: Expr, value: Frac, solution: FracSolution, task: Fra
   return g === 1n ? null : 'not-reduced'
 }
 
+// Partialbrüche: Summe aus dem ganzen Teil und einfachen Brüchen \frac{A}{(x - a)^k}
+function partialUnfinished(answer: Expr): Unfinished | null {
+  if (hasDecimal(answer)) return 'decimal'
+  if (hasOpenProduct(answer)) return 'product'
+  const summands = (e: Expr): Expr[] => (e.kind === 'add' ? e.terms.flatMap(summands) : e.kind === 'neg' ? summands(e.arg) : [e])
+  const pieces = new Set<string>()
+  const whole: Expr[] = []
+  for (const s of summands(answer)) {
+    const f = toFrac(s)
+    if (!f) return 'partial'
+    const den = constValue(f.den) === null ? factorize(f.den) : null
+    if (!den) {
+      if (hasBracketSum(s)) return 'partial-combine'
+      whole.push(s)
+      continue
+    }
+    // Zähler eine Zahl, Nenner eine Zahl mal eine Potenz eines Linearfaktors
+    const [g] = den.factors
+    if (constValue(f.num) === null || den.factors.length !== 1 || totalDegree(g.poly) !== 1) return 'partial'
+    const key = `${g.poly.map((t) => `${t.coef.n}/${t.coef.d}${JSON.stringify(t.mono)}`).join(' ')}^${g.exp}`
+    if (pieces.has(key)) return 'partial-combine'
+    pieces.add(key)
+  }
+  // der ganze Teil zusammengefasst: keine zwei gleichartigen Summanden
+  const like = whole.flatMap((e) => toFrac(e)?.num ?? []).map((term) => JSON.stringify(term.mono))
+  return new Set(like).size < like.length ? 'partial-combine' : null
+}
+
 // --- Für die Oberfläche ---
 
 export const UNFINISHED_TEXTS: Readonly<Record<Unfinished, string>> = {
@@ -281,6 +311,9 @@ export const UNFINISHED_TEXTS: Readonly<Record<Unfinished, string>> = {
   'not-reduced': 'Noch nicht vollständig gekürzt. Zerlege Zähler und Nenner in Faktoren und kürze, was oben und unten steht.',
   product: 'Rechne das Produkt noch aus: Zahlen malnehmen und gleiche Buchstaben zusammenfassen, z. B. $3 \\cdot 4a \\cdot a = 12a^2$.',
   decimal: 'Schreibe das Ergebnis als Bruch, ohne Dezimalzahl.',
+  partial:
+    'Noch nicht fertig: Zerlege in einfache Brüche. Je Faktor des Nenners ein Bruch mit einer Zahl im Zähler, ein doppelter Faktor auch mit seinem Quadrat, davor der ganze Teil aus der Polynomdivision.',
+  'partial-combine': 'Fasse noch zusammen: Jeder Nenner kommt nur einmal vor, und der ganze Teil hat keine gleichartigen Summanden und keine Klammern.',
   conjugate:
     'Noch nicht fertig: Erweitere mit dem Gegenstück der Summe mit Wurzel (dieselben Teile, anderes Vorzeichen). Mit der dritten binomischen Formel verschwindet die Wurzel aus dem Nenner, beim Differenzenquotienten kürzt sich danach $h$.',
 }

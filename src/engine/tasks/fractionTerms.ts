@@ -34,6 +34,7 @@ import {
   cubeTask,
   differenceQuotient,
   level2Kit as level2Kit_,
+  partialTask,
   monomialReduce,
   rootTask,
   worldNested,
@@ -50,6 +51,9 @@ export type FractionTemplate = {
   readonly label: string
   // Anteil unter den Vorlagen der Stufe (ohne Angabe gleich oft)
   readonly weight?: number
+  // fester Anteil, vorweg mit eigenem Zufall gewählt: für Vorlagen, die später dazukamen, damit die
+  // übrigen Aufgaben-Nummern ihre bisherige Aufgabe behalten
+  readonly share?: number
   // seltene typische Fehler, die vor allem in dieser Vorlage vorkommen (gezieltes Üben sucht hier)
   readonly focus?: readonly string[]
   build(rng: Rng): FractionTask
@@ -220,6 +224,15 @@ const level5Exp: FractionTemplate = {
   },
 }
 
+const level5Partial: FractionTemplate = {
+  id: 'partialbrueche',
+  level: 5,
+  share: 0.15,
+  label: 'Partialbruchzerlegung, auch mit doppeltem Faktor und mit Polynomdivision vorweg',
+  focus: ['frac-division-sign', 'frac-division-remainder', 'frac-partial-no-division', 'frac-partial-double-once', 'frac-partial-insert-sign', 'frac-partial-compare'],
+  build: partialTask,
+}
+
 export const FRACTION_TEMPLATES: readonly FractionTemplate[] = [
   level1Kit,
   level2Kit,
@@ -232,6 +245,7 @@ export const FRACTION_TEMPLATES: readonly FractionTemplate[] = [
   level5Roots,
   level5Trig,
   level5Exp,
+  level5Partial,
 ]
 
 export function fractionTemplatesForLevel(level: Level): FractionTemplate[] {
@@ -269,11 +283,18 @@ export const isFractionLevelAvailable = (level: Level) => fractionTemplatesForLe
 const firstPick = (rng: Rng, templates: readonly FractionTemplate[]) =>
   templates.some((t) => t.weight !== undefined) ? pickWeighted(rng, templates) : rng.pick(templates)
 
+// Vorlage mit festem Anteil (share), vorweg mit eigenem Zufall gewählt; sonst null
+function sharedPick(ref: TaskRef, templates: readonly FractionTemplate[]): FractionTemplate | null {
+  const rng = createRng(`brueche-anteil:${ref.level}:${ref.seed}`)
+  return templates.find((t) => t.share !== undefined && rng.next() < t.share) ?? null
+}
+
 // Die Vorlage, die eine Aufgaben-Nummer zuerst wählt, ohne die Aufgabe zu bauen (schnell). Meist
 // kommt die Aufgabe aus ihr; nur wenn die erste Aufgabe aussortiert wird, aus einer anderen.
 export function likelyFractionTemplate(ref: TaskRef): FractionTemplate | null {
   const templates = fractionTemplatesForLevel(ref.level)
-  return templates.length === 0 ? null : firstPick(createRng(`brueche:${ref.level}:${ref.seed}`), templates)
+  if (templates.length === 0) return null
+  return sharedPick(ref, templates) ?? firstPick(createRng(`brueche:${ref.level}:${ref.seed}`), templates.filter((t) => t.share === undefined))
 }
 
 // Erzeugt die Aufgabe zu einer Aufgaben-Nummer. Gleiche Nummer → gleiche Aufgabe.
@@ -281,8 +302,10 @@ export function generateFractionTask(ref: TaskRef): GeneratedFractionTask {
   const rng = createRng(`brueche:${ref.level}:${ref.seed}`)
   const templates = fractionTemplatesForLevel(ref.level)
   if (templates.length === 0) throw new Error(`Für Stufe ${ref.level} gibt es noch keine Bruchaufgaben`)
+  const shared = sharedPick(ref, templates)
+  const regular = templates.filter((t) => t.share === undefined)
   for (;;) {
-    const template = firstPick(rng, templates)
+    const template = shared ?? firstPick(rng, regular)
     const task = template.build(rng)
     if (isGood(task, ref.level)) return { ref, template, task }
   }

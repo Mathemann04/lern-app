@@ -179,8 +179,8 @@ export function polyDivideExact(f: Poly, g: Poly): Poly | null {
   return fromTerms(quotient)
 }
 
-// Division mit Rest bei Polynomen in (höchstens) einem Atom
-function divRem(f: Poly, g: Poly, atom: string): { q: Poly; r: Poly } {
+// Division mit Rest bei Polynomen in (höchstens) einem Atom (Polynomdivision)
+export function divRem(f: Poly, g: Poly, atom: string): { q: Poly; r: Poly } {
   let r = f
   let q: Poly = []
   const dg = degreeIn(g, atom)

@@ -1,8 +1,8 @@
 import { type Page, expect, test } from '@playwright/test'
 
-// Brüche Stufe 5 (M2b Schritt 3): alles ineinander, Doppelbruch im Doppelbruch, Differenzenquotienten,
-// dritte Potenzen, Wurzeln (auch mit zwei Buchstaben, Wurzel im Nenner beseitigen), Winkelfunktionen;
-// geführt und frei
+// Brüche Stufe 5 (M2b Schritte 3 und 4): alles ineinander, Doppelbruch im Doppelbruch,
+// Differenzenquotienten, dritte Potenzen, Wurzeln (auch mit zwei Buchstaben, Wurzel im Nenner
+// beseitigen), Winkelfunktionen, Partialbruchzerlegung (mit Polynomdivision); geführt und frei
 
 const answers = (page: Page) => page.getByRole('group', { name: 'Antworten' }).getByRole('button')
 const correctFeedback = (page: Page) => page.getByText('Richtig!', { exact: true })
@@ -53,10 +53,13 @@ for (const [ref, what, question] of [
   ['5-82', 'Doppelbruch im Doppelbruch', 'Was rechnest du zuerst?'],
   ['5-59', 'alles ineinander', 'Was rechnest du zuerst?'],
   ['5-56', 'Differenzenquotient von x³', 'Multipliziere die Klammer im Zähler aus'],
-  ['5-123', 'Differenzenquotient von √x', 'Erweitere mit dem Gegenstück des Zählers'],
+  ['5-139', 'Differenzenquotient von √x', 'Erweitere mit dem Gegenstück des Zählers'],
   ['5-3326', 'zwei Wurzeln', 'Zerlege den Zähler in Faktoren'],
   ['5-1537', 'Wurzel im Nenner', 'Erweitere mit dem Gegenstück des Nenners'],
   ['5-1289', 'dritte Potenz', 'Zerlege den Zähler in Faktoren'],
+  ['5-202', 'Partialbrüche', 'Wie lautet die Zerlegung?'],
+  ['5-80', 'Partialbrüche mit Polynomdivision', 'Teile deshalb zuerst (Polynomdivision)'],
+  ['5-293', 'Partialbrüche mit doppeltem Faktor', 'Welcher Ansatz passt?'],
 ] as const) {
   test(`Stufe 5 geführt: ${what} (${ref})`, async ({ page }) => {
     await page.goto(`./#/ueben/brueche/${ref}`)
@@ -110,7 +113,7 @@ test('Stufe 5 frei: zwei Wurzeln, Wurzel im Nenner, Differenzenquotient, Winkelf
   await expectCleanPage(page, 'Wurzel im Nenner')
 
   // (√(x + h) − √x)/h
-  await page.goto('./#/frei/brueche/5-123')
+  await page.goto('./#/frei/brueche/5-139')
   await expect(field(page)).toBeVisible()
   await enter(page, '\\frac{\\sqrt{x+h}-\\sqrt{x}}{h}')
   await expect(feedback(page)).toContainText('kürzt sich danach')
@@ -128,6 +131,28 @@ test('Stufe 5 frei: zwei Wurzeln, Wurzel im Nenner, Differenzenquotient, Winkelf
   await expectCleanPage(page, 'Winkelfunktionen')
 })
 
+test('Stufe 5 frei: Partialbrüche, mit doppeltem Faktor und mit Polynomdivision', async ({ page }) => {
+  // (5x² + 24x + 23) / ((x + 1)(x + 3)²)
+  await page.goto('./#/frei/brueche/5-293')
+  await expect(field(page)).toBeVisible()
+  await enter(page, '\\frac{5x^2+24x+23}{(x+1)(x+3)^2}')
+  await expect(feedback(page)).toContainText('Zerlege in einfache Brüche')
+  await enter(page, '\\frac{1}{x+1}+\\frac{5}{x+3}+\\frac{2}{(x+3)^2}')
+  await expect(feedback(page)).toContainText('Typischer Fehler: Beim Koeffizientenvergleich einen Summanden vergessen.')
+  await enter(page, '\\frac{1}{x+1}+\\frac{4}{x+3}+\\frac{2}{(x+3)^2}')
+  await expect(feedback(page)).toContainText('Richtig!')
+  await expectCleanPage(page, 'Partialbrüche doppelt')
+
+  // (2x² − 2x + 6) / (x² − 2x − 8)
+  await page.goto('./#/frei/brueche/5-80')
+  await expect(field(page)).toBeVisible()
+  await enter(page, '\\frac{5}{x-4}-\\frac{3}{x+2}')
+  await expect(feedback(page)).toContainText('Typischer Fehler: Polynomdivision vor der Partialbruchzerlegung vergessen.')
+  await enter(page, '2+\\frac{5}{x-4}-\\frac{3}{x+2}')
+  await expect(feedback(page)).toContainText('Richtig!')
+  await expectCleanPage(page, 'Partialbrüche Polynomdivision')
+})
+
 test('Stufe 5 frei: Tastatur mit Wurzel, Buchstaben der Aufgabe und tan', async ({ page }) => {
   test.skip(!isPhone(), 'Bildschirm-Tastatur nur am Handy')
   const keys = () => page.locator('.MLK__keycap').filter({ visible: true })
@@ -143,10 +168,10 @@ test('Stufe 5 frei: Tastatur mit Wurzel, Buchstaben der Aufgabe und tan', async 
   await expectCleanPage(page, 'Tastatur')
 })
 
-test('Lernkarten: Ordner Brüche mit Stufe 5, dritte Potenzen und Wurzeln im Nenner', async ({ page }) => {
+test('Lernkarten: Ordner Brüche mit Stufe 5, dritte Potenzen, Wurzeln im Nenner und Partialbrüchen', async ({ page }) => {
   await page.goto('./#/karten/brueche')
   await expect(page.getByRole('heading', { name: 'Stufe 5' })).toBeVisible()
-  for (const title of ['Bausteine mit eigenen Regeln', 'Dritte Potenzen', 'Wurzeln im Nenner beseitigen']) {
+  for (const title of ['Bausteine mit eigenen Regeln', 'Dritte Potenzen', 'Wurzeln im Nenner beseitigen', 'Polynomdivision', 'Partialbruchzerlegung']) {
     await page.goto('./#/karten/brueche')
     await page.getByRole('link', { name: new RegExp(title) }).click()
     await expect(page.getByRole('heading', { name: title, level: 1 })).toBeVisible()
@@ -207,6 +232,15 @@ test('Gezielt üben: „Zahl nicht quadriert" von der Lernkarte aus', async ({ p
   await expect(page).toHaveURL(/#\/ueben\/brueche\/5-\d+\?fokus=frac-conjugate-square$/)
   await expect(page.locator('#question')).toBeVisible()
   await expectCleanPage(page, 'gezielt Wurzel')
+})
+
+test('Gezielt üben: „Doppelten Faktor nur einmal angesetzt" von der Lernkarte aus', async ({ page }) => {
+  await page.goto('./#/karten/brueche/fraction-partial')
+  const error = page.locator('li, article, section, div').filter({ hasText: /^Doppelten Faktor im Ansatz nur einmal angesetzt/ }).first()
+  await error.getByRole('link', { name: 'Gezielt üben' }).click()
+  await expect(page).toHaveURL(/#\/ueben\/brueche\/5-\d+\?fokus=frac-partial-double-once$/)
+  await expect(page.locator('#question')).toBeVisible()
+  await expectCleanPage(page, 'gezielt Partialbrüche')
 })
 
 test('Stufe 5: zehn neue Aufgaben nacheinander mit verschiedener Form', async ({ page }) => {

@@ -519,6 +519,12 @@ weiterrechnen). Die Fehler zu Bausteinen gibt es seit Schritt 6 (Stufe 5).
 | Wurzel im Nenner | beim Erweitern mit dem Gegenstück nur Zähler oder nur Nenner malgenommen (neu in M2b) | $\frac{1}{\sqrt{x} - 2} = \frac{1}{(\sqrt{x} - 2)(\sqrt{x} + 2)}$ |
 | Wurzel im Nenner | mit derselben Summe statt mit dem Gegenstück erweitert (neu in M2b) | $\frac{1}{\sqrt{x} - 2} = \frac{\sqrt{x} - 2}{x - 4}$ |
 | Wurzel im Nenner | beim Erweitern die Zahl nicht quadriert (neu in M2b) | $\frac{1}{\sqrt{x} - 2} = \frac{\sqrt{x} + 2}{x - 2}$ |
+| Polynomdivision | beim Abziehen das Vorzeichen falsch (neu in M2b) | $(x^2 + 3x + 1) - (x^2 - x) = 2x + 1$ |
+| Polynomdivision | den Rest vergessen (neu in M2b) | $\frac{x^2 + 1}{x - 1} = x + 1$ |
+| Partialbrüche | Polynomdivision vergessen (neu in M2b) | $\frac{x^3 + 1}{x^2 - 4} = \frac{A}{x - 2} + \frac{B}{x + 2}$ |
+| Partialbrüche | doppelten Faktor nur einmal angesetzt (neu in M2b) | $\frac{1}{(x - 1)^2(x + 1)} = \frac{A}{x - 1} + \frac{B}{x + 1}$ |
+| Partialbrüche | beim Einsetzen der Nullstelle das Vorzeichen verloren (neu in M2b) | $5x - 1 = A(x + 1) + B(x - 2)$, $x = 2$: $A = \frac{9}{2 - 1}$ |
+| Partialbrüche | beim Koeffizientenvergleich einen Summanden vergessen (neu in M2b) | $x^2 + 1 = A(x - 1)(x + 2) + B(x + 2) + C(x - 1)^2$: $A = 1$ |
 
 Wenn dir typische Fehler aus deinen Übungen fehlen, sag es. Die sind Gold
 wert.

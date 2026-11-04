@@ -26,7 +26,9 @@ function stepLatex(step: FracStep): string {
   if (step.latex) return step.latex
   if (step.kind === 'lcd') return toLatex(step.detail!)
   if (step.kind === 'cancel' && step.before) return `${toLatex(step.before)} = ${toLatex(step.expr!)}`
-  return toLatex(step.expr!)
+  // Partialbrüche: Ansatz und Zahlen haben keinen ganzen Zwischenstand
+  if (!step.expr) return step.letter ? `${step.letter} = ${toLatex(step.detail!)}` : toLatex(step.detail!)
+  return toLatex(step.expr)
 }
 
 export function FractionGalleryCard({ generated, showSteps, showErrors, highlighted = false }: Props) {

@@ -44,6 +44,9 @@ export type FractionShape =
   // Rechenbaum aus dem Baukasten (M2b): beliebig viele Brüche, Punkt vor Strich, Klammern,
   // Doppelbrüche; gerechnet wird Stück für Stück mit den Formen oben (fraction/tree.ts)
   | { readonly kind: 'tree'; readonly root: TreeNode }
+  // Partialbruchzerlegung (Stufe 5): den Bruch in einfache Brüche zerlegen, bei Bedarf mit
+  // Polynomdivision vorweg (fraction/partial.ts)
+  | { readonly kind: 'partial'; readonly part: Part }
 
 // Knoten eines Rechenbaums. Blätter sind Brüche, ganze Zahlen oder Terme ohne Bruch; eine
 // Dezimalzahl wird als solche gezeigt (decimal, z. B. „0,75") und hat den Wert ihres Bruchs.
@@ -173,6 +176,7 @@ export function bottomFrac(t: FractionShape): Frac | null {
 export function taskFrac(t: FractionShape): Frac {
   switch (t.kind) {
     case 'reduce':
+    case 'partial':
       return partFrac(t.part)
     case 'sum':
       return signedFrac(t.terms)
@@ -274,6 +278,7 @@ export function treeLeaves(n: TreeNode): Array<Extract<TreeNode, { kind: 'leaf' 
 export function taskExpr(t: FractionShape): Expr {
   switch (t.kind) {
     case 'reduce':
+    case 'partial':
       return partExpr(t.part)
     case 'sum':
       return signedExpr(t.terms)
@@ -355,6 +360,8 @@ export function instructionFor(t: FractionShape): string {
     case 'complex':
     case 'nested':
       return 'Vereinfache den Doppelbruch so weit wie möglich.'
+    case 'partial':
+      return 'Zerlege in Partialbrüche.'
   }
 }
 
@@ -380,6 +387,7 @@ export function withRoots(t: FractionTask): FractionTask {
   const hints = t.hints.map(toRoot)
   switch (t.kind) {
     case 'reduce':
+    case 'partial':
       return { ...t, part: mapPart(t.part), hints }
     case 'sum':
       return { ...t, terms: mapSigned(t.terms), hints }
@@ -412,6 +420,7 @@ export function mapTree(n: TreeNode, f: (p: Part) => Part): TreeNode {
 export function partsOf(t: FractionShape): Part[] {
   switch (t.kind) {
     case 'reduce':
+    case 'partial':
       return [t.part]
     case 'sum':
       return t.terms.map((s) => s.part)
