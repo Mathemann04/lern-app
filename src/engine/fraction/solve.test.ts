@@ -173,3 +173,34 @@ describe('Doppelbrüche lesbar setzen', () => {
   })
 })
 
+
+describe('Partialbruchzerlegung', () => {
+  const x2 = pow(x, num(2))
+
+  it('Beispiel aus dem Plan: Nenner zerlegen, Ansatz, Zahlen durch Einsetzen', () => {
+    const t = task({ kind: 'partial', part: fr(sub(mul(num(5), x), num(1)), sub(sub(x2, x), num(2))) })
+    expect(taskLatex(t)).toBe('\\frac{5x - 1}{x^{2} - x - 2}')
+    expect(lines(t)).toEqual([
+      'Nenner zerlegen: \\frac{5x - 1}{(x + 1)(x - 2)}',
+      'Ansatz: \\frac{A}{x + 1} + \\frac{B}{x - 2}',
+      'Zahl bestimmen: 2',
+      'Zahl bestimmen: 3',
+    ])
+    const solution = solveFraction(t)
+    expect(toLatex(solution.result)).toBe('\\frac{2}{x + 1} + \\frac{3}{x - 2}')
+    expect(solution.excluded?.map(ratToNumber)).toEqual([-1, 2])
+  })
+
+  it('doppelter Faktor: Einsetzen, dann Koeffizientenvergleich', () => {
+    const t = task({ kind: 'partial', part: fr(add(x2, num(1)), mul(pow(sub(x, num(1)), num(2)), add(x, num(2)))) })
+    const steps = solveFraction(t).steps
+    expect(steps.filter((s) => s.kind === 'coef').map((s) => `${s.letter} = ${toLatex(s.detail!)}`)).toEqual(['B = \\frac{2}{3}', 'C = \\frac{5}{9}', 'A = \\frac{4}{9}'])
+    expect(toLatex(solveFraction(t).result)).toBe('\\frac{4}{9(x - 1)} + \\frac{2}{3(x - 1)^{2}} + \\frac{5}{9(x + 2)}')
+  })
+
+  it('mit Polynomdivision vorweg', () => {
+    const t = task({ kind: 'partial', part: fr(add(x2, num(1)), sub(x, num(1))) })
+    expect(lines(t)).toEqual(['Polynomdivision: x + 1 + \\frac{2}{x - 1}', 'Ansatz: x + 1 + \\frac{A}{x - 1}', 'Zahl bestimmen: 2'])
+    expect(toLatex(solveFraction(t).result)).toBe('x + 1 + \\frac{2}{x - 1}')
+  })
+})

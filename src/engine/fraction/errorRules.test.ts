@@ -147,6 +147,16 @@ const CASES: Case[] = [
   ['frac-conjugate-sign', withRoots(task({ kind: 'reduce', part: fr(num(1), sub(sqrt(x), num(2))) }, { kind: 'conjugate', target: 'den' })), 'step', '\\frac{\\sqrt{x} - 2}{x - 4}'],
   ['frac-conjugate-sign', withRoots(task({ kind: 'reduce', part: fr(sub(sqrt(add(x, h)), sqrt(x)), h) }, { kind: 'conjugate', target: 'num' })), 'result', '\\frac{1}{\\sqrt{x + h} - \\sqrt{x}}'],
   ['frac-conjugate-square', withRoots(task({ kind: 'reduce', part: fr(num(1), sub(sqrt(x), num(2))) }, { kind: 'conjugate', target: 'den' })), 'step', '\\frac{\\sqrt{x} + 2}{x - 2}'],
+  // Stufe 5 (M2b Schritt 4): Polynomdivision und Partialbrüche
+  // (x² + 3x + 1) − (x² + x) = 2x + 1, dann 2x + 1 − (2x + 2) = −1: wie geteilt durch x + 1
+  ['frac-division-sign', task({ kind: 'partial', part: fr(add(add(x2, mul(num(3), x)), num(1)), sub(x, num(1))) }), 'step', 'x + 2 - \\frac{1}{x - 1}'],
+  ['frac-division-remainder', task({ kind: 'partial', part: fr(add(x2, num(1)), sub(x, num(1))) }), 'step', 'x + 1'],
+  ['frac-partial-no-division', task({ kind: 'partial', part: fr(add(pow(x, num(3)), num(1)), sub(x2, num(4))) }), 'step', '\\frac{A}{x + 2} + \\frac{B}{x - 2}'],
+  ['frac-partial-double-once', task({ kind: 'partial', part: fr(num(1), mul(pow(sub(x, num(1)), num(2)), add(x, num(1)))) }), 'step', '\\frac{A}{x + 1} + \\frac{B}{x - 1}'],
+  // 5x − 1 = A(x − 2) + B(x + 1): bei x = 2 die Klammer x + 1 als 2 − 1 gerechnet, B = 9 statt 3
+  ['frac-partial-insert-sign', task({ kind: 'partial', part: fr(sub(mul(num(5), x), num(1)), sub(sub(x2, x), num(2))) }), 'result', '\\frac{2}{x + 1} + \\frac{9}{x - 2}'],
+  // x² + 1 = A(x − 1)(x + 2) + B(x + 2) + C(x − 1)²: vor x² steht A + C, nicht nur A
+  ['frac-partial-compare', task({ kind: 'partial', part: fr(add(x2, num(1)), mul(pow(sub(x, num(1)), num(2)), add(x, num(2)))) }), 'result', '\\frac{1}{x - 1} + \\frac{2}{3(x - 1)^{2}} + \\frac{5}{9(x + 2)}'],
 ]
 
 describe('Zähler und Nenner addiert', () => {
@@ -163,7 +173,7 @@ describe('Fehlerkatalog Brüche: Beispiele', () => {
   it.each(CASES)('%s', (id, t, what, latex) => {
     const wrong = fractionWrongAnswers(t).filter((w) => w.rule.id === id)
     const shown = wrong.map((w) => (what === 'step' ? toLatex(w.stepExpr) : w.result && toLatex(w.result)))
-    expect(shown).toContain(latex)
+    expect(shown, JSON.stringify(shown)).toContain(latex)
   })
 
   it('hat für jede Fehlerregel ein Beispiel', () => {

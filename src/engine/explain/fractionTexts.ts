@@ -202,6 +202,36 @@ export const FRACTION_ERROR_TEXTS: Readonly<Record<string, Explanation>> = {
       'Jede Stelle nach dem Komma ist eine Zehnerpotenz mehr im Nenner: eine Stelle Zehntel, zwei Stellen Hundertstel, drei Stellen Tausendstel. Zähle die Stellen nach dem Komma, dann kürze.',
     short: 'Stellen nach dem Komma zählen: zwei Stellen heißt Hundertstel.',
   },
+  'frac-division-sign': {
+    detailed:
+      'Bei jedem Schritt der Polynomdivision ziehst du das ganze Produkt ab, also jeden seiner Summanden. Das Minus davor dreht alle Vorzeichen in der Klammer um: $-(x^2 - x) = -x^2 + x$. Schreib das Produkt in Klammern, bevor du abziehst.',
+    short: 'Das ganze Produkt abziehen: $-(x^2 - x) = -x^2 + x$.',
+  },
+  'frac-division-remainder': {
+    detailed:
+      'Die Division geht nicht auf, es bleibt ein Rest. Er gehört als Bruch mit dem Nenner dazu: $\\frac{Z}{N} = q + \\frac{r}{N}$, genau wie $\\frac{7}{2} = 3 + \\frac{1}{2}$.',
+    short: 'Den Rest als Bruch dazuschreiben: $\\frac{Z}{N} = q + \\frac{r}{N}$.',
+  },
+  'frac-partial-no-division': {
+    detailed:
+      'Einfache Brüche wie $\\frac{A}{x - a}$ reichen nur, wenn der Zähler einen kleineren Grad hat als der Nenner. Ist er gleich groß oder größer, teilst du zuerst (Polynomdivision). Der ganze Teil, der dabei herauskommt, steht vor den Partialbrüchen.',
+    short: 'Zähler mit gleichem oder höherem Grad: zuerst teilen, der ganze Teil steht vorn.',
+  },
+  'frac-partial-double-once': {
+    detailed:
+      'Ein doppelter Faktor im Nenner braucht zwei Brüche: $\\frac{A}{x - a} + \\frac{B}{(x - a)^2}$. Mit nur einem davon gibt es keine Zahlen, die für jedes $x$ passen.',
+    short: 'Doppelter Faktor, zwei Brüche: $\\frac{A}{x - a} + \\frac{B}{(x - a)^2}$.',
+  },
+  'frac-partial-insert-sign': {
+    detailed:
+      'Beim Einsetzen rechnest du jede Klammer mit ihrem eigenen Vorzeichen aus: Bei $x = 2$ ist $x + 1 = 3$ und $x - 1 = 1$. Hier wurde eine Klammer mit dem falschen Vorzeichen ausgerechnet.',
+    short: 'Jede Klammer mit ihrem Vorzeichen ausrechnen: bei $x = 2$ ist $x + 1 = 3$.',
+  },
+  'frac-partial-compare': {
+    detailed:
+      'Beim Koeffizientenvergleich zählt jeder Summand rechts, der diese Potenz von $x$ enthält. Multipliziere alle Klammern aus, sammle die Zahlen vor der Potenz und setze erst dann gleich. Zahlen, die du schon kennst, setzt du ein.',
+    short: 'Alle Summanden mit dieser Potenz von $x$ mitzählen.',
+  },
 }
 
 export function explainFractionError(id: string): Explanation {
@@ -362,6 +392,62 @@ export function explainConjugateProduct(product: Expr, after: Expr, inNumerator:
   }
 }
 
+// --- Partialbruchzerlegung ---
+
+// Polynomdivision: task ist der Bruch, quotient der ganze Teil, rest der Rest, after q + \frac{r}{N}
+export function explainDivide(task: Expr, quotient: Expr, rest: Expr, after: Expr): Explanation {
+  const equation = `$${toLatex(task)} = ${toLatex(after)}$`
+  return {
+    detailed: `Teile wie bei der schriftlichen Division: die höchste Potenz des Zählers durch die höchste Potenz des Nenners, das Ergebnis mal den Nenner, abziehen, und das so lange, bis der Rest einen kleineren Grad hat als der Nenner. Heraus kommt ${m(quotient)} mit dem Rest ${m(rest)}, also ${equation}. Zerlegt wird nur noch der Bruch mit dem Rest.`,
+    short: `${equation}.`,
+  }
+}
+
+// Ansatz: je Faktor ein Bruch, beim doppelten zwei; equation ist der Ansatz mal den Nenner
+export function explainAnsatz(ansatz: Expr, equation: readonly [Expr, Expr], double: boolean, divided: boolean): Explanation {
+  const extra = [double ? ' Der doppelte Faktor bekommt zwei Brüche, einen mit dem Faktor und einen mit seinem Quadrat.' : '', divided ? ' Der ganze Teil aus der Polynomdivision steht davor.' : ''].join('')
+  const eq = `$${toLatex(equation[0])} = ${toLatex(equation[1])}$`
+  return {
+    detailed: `Je Faktor des Nenners ein einfacher Bruch mit einer unbekannten Zahl im Zähler.${extra} So entsteht ${m(ansatz)}. Nimm den Bruch und den Ansatz mal den Nenner, dann stehen keine Brüche mehr da: ${eq}.`,
+    short: `${m(ansatz)}, mal den Nenner: ${eq}.`,
+  }
+}
+
+// Zahl durch Einsetzen der Nullstelle: equation ist z. B. 9 = 3A
+export function explainInsert(at: string, factor: Expr, equation: readonly [Expr, Expr], letter: string, value: Expr): Explanation {
+  const eq = `$${toLatex(equation[0])} = ${toLatex(equation[1])}$`
+  const result = `$${letter} = ${toLatex(value)}$`
+  return {
+    detailed: `Setze $${at}$ ein, die Nullstelle von ${m(factor)}. Dann fallen alle Summanden weg, in denen ${m(factor)} steckt, und es bleibt ${eq}. Also ist ${result}.`,
+    short: `Mit $${at}$: ${eq}, also ${result}.`,
+  }
+}
+
+// Wo verglichen wird: „vor $x^2$", „vor $x$", „ohne $x$"
+export function compareWhere(letter: string, power: number): string {
+  if (power === 0) return `ohne $${letter}$`
+  return `vor $${power === 1 ? letter : `${letter}^{${power}}`}$`
+}
+
+// Zahl über den Koeffizientenvergleich: where z. B. „vor $x^2$", equation die Zahl links = die
+// Buchstaben rechts, known die schon bekannten Zahlen
+export function explainCompare(where: string, equation: readonly [Expr, Expr], known: readonly string[], letter: string, value: Expr): Explanation {
+  const eq = `$${toLatex(equation[0])} = ${toLatex(equation[1])}$`
+  const result = `$${letter} = ${toLatex(value)}$`
+  const withKnown = known.length > 0 ? `, mit ${listing(known.map((k) => `$${k}$`))}` : ''
+  // rechts steht nur die gesuchte Zahl: gleich das Ergebnis
+  if (toLatex(equation[1]) === letter) {
+    return {
+      detailed: `Multipliziere rechts aus und vergleiche die Zahlen ${where} auf beiden Seiten: Rechts steht dort nur $${letter}$, also ist ${result}.`,
+      short: `Zahlen ${where}: ${result}.`,
+    }
+  }
+  return {
+    detailed: `Multipliziere rechts aus und vergleiche die Zahlen ${where} auf beiden Seiten: ${eq}${withKnown}. Also ist ${result}.`,
+    short: `Zahlen ${where}: ${eq}${withKnown}, also ${result}.`,
+  }
+}
+
 // Regel eines Bausteins: trig (sin² x + cos² x = 1) oder root ((√x)² = x)
 export function explainRule(kind: 'trig' | 'root', before: Expr, after: Expr): Explanation {
   const equation = `$${toLatex(before)} = ${toLatex(after)}$`
@@ -406,6 +492,10 @@ export const FRACTION_HINTS = {
   rootFactor: 'Schreibe $x$ als $(\\sqrt{x})^2$, dann hilft die dritte binomische Formel: $x - a^2 = (\\sqrt{x} - a)(\\sqrt{x} + a)$, ebenso $x - a = (\\sqrt{x} - \\sqrt{a})(\\sqrt{x} + \\sqrt{a})$.',
   decimal: 'Zähle die Stellen nach dem Komma: eine Stelle sind Zehntel, zwei Hundertstel, drei Tausendstel. Schreibe die Ziffern über die passende Zehnerpotenz und kürze.',
   order: 'Klammern zuerst, dann Punkt vor Strich (mal und geteilt vor plus und minus).',
+  divide: 'Höchste Potenz durch höchste Potenz teilen, mit dem Nenner malnehmen und abziehen. Das wiederholst du, bis der Rest einen kleineren Grad hat als der Nenner.',
+  ansatz: 'Je Faktor des Nenners ein Bruch mit einer unbekannten Zahl im Zähler. Ein doppelter Faktor wie $(x - a)^2$ bekommt zwei: $\\frac{A}{x - a} + \\frac{B}{(x - a)^2}$.',
+  insert: 'Setze die Nullstelle ein: Alle Summanden, in denen dieser Faktor steckt, fallen weg.',
+  compare: 'Multipliziere rechts aus. Die Zahlen vor derselben Potenz von $x$ müssen links und rechts gleich sein.',
   part: 'Rechne diesen Teil wie eine eigene Aufgabe.',
 } as const
 
@@ -452,5 +542,9 @@ export function fractionTaskHint(t: FractionShape): Explanation {
       )
     case 'tree':
       return same('Klammern zuerst, dann Punkt vor Strich. Rechne jeden Teil wie eine eigene Aufgabe und kürze die Teilergebnisse gleich.')
+    case 'partial':
+      return same(
+        'Hat der Zähler keinen kleineren Grad als der Nenner, teile zuerst (Polynomdivision). Zerlege dann den Nenner, setze je Faktor einen einfachen Bruch an (einen doppelten Faktor zweimal) und bestimme die Zahlen: Nullstellen einsetzen, was übrig bleibt über einen Koeffizientenvergleich.',
+      )
   }
 }

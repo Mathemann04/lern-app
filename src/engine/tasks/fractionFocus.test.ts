@@ -20,7 +20,19 @@ describe('Gezieltes Üben bei Brüchen', () => {
   })
 
   // Seltene Fehler der Stufe 5 sucht die Engine in ihrer Vorlage: Das klappt mit jedem Zufall
-  it.each(['frac-conjugate-square', 'frac-conjugate-sign', 'frac-cube-as-square', 'frac-cancel-inside', 'frac-binomial-middle'])(
+  it.each([
+    'frac-conjugate-square',
+    'frac-conjugate-sign',
+    'frac-cube-as-square',
+    'frac-cancel-inside',
+    'frac-binomial-middle',
+    'frac-division-sign',
+    'frac-division-remainder',
+    'frac-partial-no-division',
+    'frac-partial-double-once',
+    'frac-partial-insert-sign',
+    'frac-partial-compare',
+  ])(
     '%s: findet ihn in Stufe 5 mit jedem Zufall',
     (id) => {
       for (let run = 0; run < 15; run++) expect(findFractionTaskWithError(id, [5], createRng(`zuverlässig:${id}:${run}`)), `${id} Lauf ${run}`).not.toBeNull()

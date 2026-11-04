@@ -1,6 +1,6 @@
 # Roadmap
 
-Stand: 31.10.2026
+Stand: 04.11.2026
 
 | Meilenstein | Inhalt | Status |
 | --- | --- | --- |
@@ -48,7 +48,7 @@ Details: [PLAN-M2b.md](PLAN-M2b.md)
 - [x] 1. Baukasten, Abwechslung, Stufen 1 und 2
 - [x] 2. Stufen 3 und 4
 - [x] 3. Stufe 5, Teil 1: alles ineinander
-- [ ] 4. Stufe 5, Teil 2: Partialbruchzerlegung
+- [x] 4. Stufe 5, Teil 2: Partialbruchzerlegung
 - [ ] 5. Stufe 5, Teil 3: Brüche aus späteren Kapiteln
 - [ ] 6. Gezieltes Üben, Feinschliff, Abschluss
 
@@ -374,3 +374,16 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   $-1 + \cos x$. Gezieltes Üben sucht seltene Fehler in ihrer Vorlage (`focus`, z. B. „Wurzeln“) und findet sie so zuverlässig.
   Alte Links auf einzelne Aufgaben der Stufe 5 zeigen jetzt andere
   Aufgaben.
+- 04.11.2026: M2b Schritt 4 fertig. Stufe 5 hat die Partialbruchzerlegung
+  als eigene Aufgabenart („Zerlege in Partialbrüche"): Nenner aus zwei oder
+  drei Linearfaktoren, mit doppeltem Faktor, oft mit Polynomdivision vorweg.
+  Neue Engine `fraction/partial.ts` (Polynomdivision, Ansatz, Zahlen durch
+  Einsetzen der Nullstellen und Koeffizientenvergleich, exakt; die Probe
+  fasst die Zerlegung wieder zusammen). Geführt: Polynomdivision, Nenner
+  zerlegen, Ansatz, je Zahl eine Frage, zuletzt die ganze Zerlegung. Frei:
+  Summe einfacher Brüche, jede Reihenfolge, Zahlen auch als Bruch wie
+  $\frac{4}{9(x - 1)}$. Sechs neue typische Fehler, zwei Lernkarten
+  („Polynomdivision", „Partialbruchzerlegung"). Die neue Vorlage wird mit
+  eigenem Zufall gewählt (etwa 15 % der Nummern); die übrigen Nummern der
+  Stufe 5 behalten ihre Aufgabe, 5-123 ist jetzt eine Partialbruchaufgabe.
+  Abwechslung weiter mindestens 100 Formen in 200 Aufgaben.

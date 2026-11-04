@@ -178,6 +178,42 @@ describe('Stufe 5: Bausteine mit Regeln', () => {
   })
 })
 
+describe('Stufe 5: Partialbrüche', () => {
+  const x2 = pow(x, num(2))
+  const checker = (t: FractionTask) => {
+    const context = prepareFractionCheck(t)
+    return (latex: string) => short(checkFractionAnswer(context, latex))
+  }
+
+  it('Beispiel aus dem Plan: jede Reihenfolge und Schreibweise der Zerlegung', () => {
+    const check = checker(task({ kind: 'partial', part: fr(sub(mul(num(5), x), num(1)), sub(sub(x2, x), num(2))) }))
+    expect(check('\\frac{3}{x-2}+\\frac{2}{x+1}')).toBe('correct')
+    expect(check('\\frac{2}{x+1}+\\frac{3}{x-2}')).toBe('correct')
+    expect(check('\\frac{-3}{2-x}+\\frac{2}{x+1}')).toBe('correct')
+    // noch nicht zerlegt bzw. ein Nenner doppelt
+    expect(check('\\frac{5x-1}{(x-2)(x+1)}')).toBe('unfinished:partial')
+    expect(check('\\frac{1}{x-2}+\\frac{2}{x-2}+\\frac{2}{x+1}')).toBe('unfinished:partial-combine')
+    // bei x = 2 die Klammer x + 1 als 2 − 1 gerechnet
+    expect(check('\\frac{9}{x-2}+\\frac{2}{x+1}')).toBe('knownError:frac-partial-insert-sign')
+    expect(check('\\frac{3}{x-2}-\\frac{2}{x+1}')).toBe('wrong')
+  })
+
+  it('doppelter Faktor, Zahlen als Brüche', () => {
+    const check = checker(task({ kind: 'partial', part: fr(add(x2, num(1)), mul(pow(sub(x, num(1)), num(2)), add(x, num(2)))) }))
+    expect(check('\\frac{4}{9(x-1)}+\\frac{2}{3(x-1)^2}+\\frac{5}{9(x+2)}')).toBe('correct')
+    expect(check('\\frac{1}{x-1}+\\frac{2}{3(x-1)^2}+\\frac{5}{9(x+2)}')).toBe('knownError:frac-partial-compare')
+  })
+
+  it('mit Polynomdivision: ganzer Teil und Rest', () => {
+    const check = checker(task({ kind: 'partial', part: fr(add(x2, num(1)), sub(x, num(1))) }))
+    expect(check('x+1+\\frac{2}{x-1}')).toBe('correct')
+    expect(check('\\frac{2}{x-1}+x+1')).toBe('correct')
+    expect(check('x+3-2+\\frac{2}{x-1}')).toBe('unfinished:partial-combine')
+    expect(check('\\frac{2}{x-1}')).toBe('knownError:frac-partial-no-division')
+    expect(check('x+1')).toBe('knownError:frac-division-remainder')
+  })
+})
+
 describe.each([1, 2, 3, 4, 5] as Level[])('Zufallsaufgaben, Stufe %i', (level) => {
   const tasks = Array.from({ length: 200 }, (_, i) => ({ seed: i + 1, ...generateFractionTask({ level, seed: i + 1 }) }))
 

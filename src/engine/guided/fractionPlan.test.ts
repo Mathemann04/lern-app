@@ -6,12 +6,12 @@ import { parseRichText } from '../explain/richText.ts'
 import { type Env, evaluate } from '../expr/evaluate.ts'
 import { toLatex } from '../expr/print.ts'
 import { samplePoints } from '../expr/sample.ts'
-import { type Expr, add, num, sub, x } from '../expr/types.ts'
+import { type Expr, add, mul, num, pow, sub, x } from '../expr/types.ts'
 import { FRACTION_ERROR_RULES } from '../fraction/errorRules.ts'
 import { fracEquals, toFrac } from '../fraction/frac.ts'
 import { isMultipleOf } from '../fraction/factor.ts'
-import { type Poly, polyDivideExact } from '../fraction/poly.ts'
-import { solveFraction, solveTree } from '../fraction/solve.ts'
+import { type Poly, polyConst, polyDivideExact } from '../fraction/poly.ts'
+import { partialWork, solveFraction, solveTree } from '../fraction/solve.ts'
 import { type FractionShape, type FractionTask, type Part, bottomFrac, expanded, innerTask, minus, part, partsOf, plus, shownPoly, signedFrac, taskExpr, taskFrac, topFrac } from '../fraction/task.ts'
 import type { Frac } from '../fraction/frac.ts'
 import { createRng } from '../random/rng.ts'
@@ -114,6 +114,41 @@ describe('Zahlenbrüche', () => {
   })
 })
 
+describe('Partialbrüche', () => {
+  const x2 = pow(x, num(2))
+
+  it('Beispiel aus dem Plan: Nenner zerlegen, dann je Zahl eine Frage', () => {
+    const plan = planFraction(task({ kind: 'partial', part: fr(sub(mul(num(5), x), num(1)), sub(sub(x2, x), num(2))) }), ref)
+    expect(plan.instruction).toBe('Zerlege in Partialbrüche')
+    expect(plan.steps.map((s) => s.title)).toEqual(['Nenner zerlegen', '$A$ bestimmen', '$B$ bestimmen'])
+    const [factor, a, b] = plan.steps
+    expect(correctOf(factor).content).toBe('$(x + 1)(x - 2)$')
+    expect(factor.choices.find((c) => c.errorRuleId === 'frac-vieta-sign')?.content).toBe('$(x - 1)(x + 2)$')
+    // Ansatz ohne typischen Fehler: steht unter „Bisher", mit der Gleichung nach dem Malnehmen
+    expect(a.established).toEqual(['= \\frac{A}{x + 1} + \\frac{B}{x - 2}', '5x - 1 = A(x - 2) + B(x + 1)', 'A = 2'])
+    expect(a.question).toBe('Setze $x = -1$ ein. Was ist $A$?')
+    expect(correctOf(a).content).toBe('$A = 2$')
+    expect(a.choices.find((c) => c.errorRuleId === 'frac-partial-insert-sign')?.content).toBe('$A = -6$')
+    expect(a.explanation.short).toContain('$-6 = -3A$')
+    expect(correctOf(b).content).toBe('$\\frac{2}{x + 1} + \\frac{3}{x - 2}$')
+    expect(contents(b, false)).toContain('$\\frac{2}{x + 1} + \\frac{9}{x - 2}$')
+    expect(plan.resultNote).toBe('Gilt für $x \\neq -1$ und $x \\neq 2$.')
+  })
+
+  it('Polynomdivision und doppelter Faktor: alle Schritte mit typischen Fehlern', () => {
+    const plan = planFraction(task({ kind: 'partial', part: fr(sub(sub(mul(num(2), x2), mul(num(3), x)), num(2)), add(sub(x2, mul(num(2), x)), num(1))) }), ref)
+    expect(plan.steps.map((s) => s.title)).toEqual(['Polynomdivision', 'Nenner zerlegen', 'Ansatz', '$B$ bestimmen'])
+    const [divide, , ansatz, last] = plan.steps
+    expect(correctOf(divide).content).toBe('$2 + \\frac{x - 4}{x^{2} - 2x + 1}$')
+    expect(divide.choices.map((c) => c.errorRuleId).filter(Boolean).sort()).toEqual(['frac-division-remainder', 'frac-division-sign'])
+    expect(correctOf(ansatz).content).toBe('$2 + \\frac{A}{x - 1} + \\frac{B}{(x - 1)^{2}}$')
+    expect(ansatz.choices.find((c) => c.errorRuleId === 'frac-partial-no-division')?.content).toBe('$\\frac{A}{x - 1} + \\frac{B}{(x - 1)^{2}}$')
+    expect(last.question).toBe('Vergleiche die Zahlen ohne $x$ und bestimme $B$. Wie lautet die Zerlegung?')
+    expect(correctOf(last).content).toBe('$2 + \\frac{1}{x - 1} - \\frac{3}{(x - 1)^{2}}$')
+    expect(last.choices.find((c) => c.errorRuleId === 'frac-partial-compare')?.content).toBe('$2 + \\frac{1}{x - 1} - \\frac{4}{(x - 1)^{2}}$')
+  })
+})
+
 // Hauptnenner der Aufgabe: Vielfaches jedes Nenners eines Bruchs?
 function isCommonDenominator(t: FractionTask, e: Expr): boolean {
   const p = poly(e)
@@ -126,6 +161,10 @@ const close = (a: number, b: number) => Math.abs(a - b) <= 1e-9 * Math.max(1, Ma
 // Klammer, der innere Doppelbruch) der Wert dieses Teils, sonst der Wert der Aufgabe
 function targetOf(t: FractionTask, step: GuidedStep, value: Frac): Frac {
   const ends = (kind: string) => step.id.endsWith(`-${kind}`)
+  // Partialbrüche: beim Zerlegen der Nenner, bei einer Zahl ihr Wert (der Ansatz hat noch keinen)
+  if (t.kind === 'partial' && ends('factor-den')) return { num: shownPoly(t.part.den), den: polyConst(1) }
+  const letter = /-coef-([A-D])$/.exec(step.id)?.[1]
+  if (t.kind === 'partial' && letter) return { num: polyConst(partialWork(t).terms.find((x) => x.letter === letter)!.value), den: polyConst(1) }
   if (ends('inner-num') || (ends('identity') && t.kind === 'complex')) return topFrac(t)!
   if (ends('inner-den')) return bottomFrac(t)!
   if (t.kind === 'mixed' && ends('left')) return signedFrac(t.left)
@@ -169,6 +208,8 @@ describe.each([1, 2, 3, 4, 5] as Level[])('Brüche geführt, Stufe %i', (level) 
           for (const c of step.choices.filter((c) => !c.correct)) expect(isCommonDenominator(t, c.expr!), `${context} ${c.content}`).toBe(false)
           continue
         }
+        // Ansatz: mit den unbekannten Zahlen, noch ohne Wert
+        if (step.id.endsWith('-ansatz')) continue
         // Doppelbruch: gefragt ist erst der Zähler bzw. Nenner als ein Bruch
         const target = targetOf(t, step, value)
         for (const c of step.choices) {

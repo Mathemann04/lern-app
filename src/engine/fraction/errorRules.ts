@@ -1,12 +1,13 @@
 import { toLatex } from '../expr/print.ts'
 import { type Expr, div, mul, mulDot, num } from '../expr/types.ts'
-import { isInteger, isOne, rat, ratAbs, ratDiv, ratMul } from '../rational.ts'
+import { type Rational, isInteger, isOne, rat, ratAbs, ratDiv, ratEq, ratMul, ratNeg, ratSign } from '../rational.ts'
 import { type Factored, factorize, factoredExpr, factoredPoly, groupFactor, isMultipleOf, reduceFrac } from './factor.ts'
-import { type Frac, fracDiv, fracEquals, fracMul, fracNeg } from './frac.ts'
+import { type Frac, fracAdd, fracDiv, fracEquals, fracMul, fracNeg, fracOf } from './frac.ts'
 import {
   type Poly,
   type Term,
   constValue,
+  divRem,
   isZeroPoly,
   monoDivide,
   monomial,
@@ -37,6 +38,8 @@ import {
   innerResultPart,
   multipliedExpr,
   nicePolyExpr,
+  partialFactorStep,
+  partialWork,
   plainFractionExpr,
   productExpr,
   reciprocalPart,
@@ -68,6 +71,7 @@ import {
   type TreeNode,
   treeFrac,
 } from './task.ts'
+import { type PartialWork, PARTIAL_LETTERS, ansatzExpr, cofactor, dividedExpr, multiplicityOf, partialExpr, partialFrac, partialResultOf, polyValueAt, termsWith } from './partial.ts'
 import { bracketIgnoredMistakes, decimalMistakes, leafOfFrac, leftToRight, minusBracketMistakes, normalize, replaceNode, withoutDecimals } from './tree.ts'
 
 // Typische Fehler beim Bruchrechnen (Katalog in docs/PLAN-M2.md). Jeder Fehler steckt in genau
@@ -122,6 +126,12 @@ export const FRACTION_ERROR_RULES: readonly FracErrorRule[] = [
   { id: 'frac-conjugate-one-side', step: 'conjugate', name: 'Beim Erweitern mit dem Gegenstück nur Zähler oder nur Nenner malgenommen', wrongFormula: '\\frac{1}{\\sqrt{x} - 2} = \\frac{1}{(\\sqrt{x} - 2)(\\sqrt{x} + 2)}' },
   { id: 'frac-conjugate-sign', step: 'multiply-out', name: 'Mit derselben Summe statt mit dem Gegenstück erweitert', wrongFormula: '\\frac{1}{\\sqrt{x} - 2} = \\frac{\\sqrt{x} - 2}{x - 4}' },
   { id: 'frac-conjugate-square', step: 'multiply-out', name: 'Beim Erweitern mit dem Gegenstück die Zahl nicht quadriert', wrongFormula: '\\frac{1}{\\sqrt{x} - 2} = \\frac{\\sqrt{x} + 2}{x - 2}' },
+  { id: 'frac-division-sign', step: 'divide', name: 'Bei der Polynomdivision beim Abziehen das Vorzeichen falsch', wrongFormula: '(x^2 + 3x + 1) - (x^2 - x) = 2x + 1' },
+  { id: 'frac-division-remainder', step: 'divide', name: 'Den Rest der Polynomdivision vergessen', wrongFormula: '\\frac{x^2 + 1}{x - 1} = x + 1' },
+  { id: 'frac-partial-no-division', step: 'ansatz', name: 'Polynomdivision vor der Partialbruchzerlegung vergessen', wrongFormula: '\\frac{x^3 + 1}{x^2 - 4} = \\frac{A}{x - 2} + \\frac{B}{x + 2}' },
+  { id: 'frac-partial-double-once', step: 'ansatz', name: 'Doppelten Faktor im Ansatz nur einmal angesetzt', wrongFormula: '\\frac{1}{(x - 1)^2(x + 1)} = \\frac{A}{x - 1} + \\frac{B}{x + 1}' },
+  { id: 'frac-partial-insert-sign', step: 'coef', name: 'Beim Einsetzen der Nullstelle das Vorzeichen verloren', wrongFormula: '5x - 1 = A(x + 1) + B(x - 2),\\; x = 2\\text{: } A = \\frac{9}{2 - 1}' },
+  { id: 'frac-partial-compare', step: 'coef', name: 'Beim Koeffizientenvergleich einen Summanden vergessen', wrongFormula: 'x^2 + 1 = A(x - 1)(x + 2) + B(x + 2) + C(x - 1)^2\\text{: } A = 1' },
 ]
 
 export function fractionErrorRule(id: string): FracErrorRule {
@@ -177,8 +187,10 @@ export function ruledFrac(value: Frac, rule: BlockRule | undefined): Frac {
   return rule.target === 'num' ? { num: applyRule(value.num, rule), den: value.den } : { num: value.num, den: applyRule(value.den, rule) }
 }
 
-// Falsches Ergebnis so geschrieben wie das richtige: gekürzt, mit der Regel des Bausteins
+// Falsches Ergebnis so geschrieben wie das richtige: gekürzt, mit der Regel des Bausteins;
+// bei Partialbrüchen zerlegt
 function resultOf(value: Frac, t: FractionTask): Expr {
+  if (t.kind === 'partial') return partialResultOf(value, t.hints) ?? reduced(value, t.hints)
   return resultExpr(reduceFrac(ruledFrac(value, t.rule), t.hints), t)
 }
 
@@ -701,6 +713,99 @@ function conjugateMistakes(t: FractionTask, solution: FracSolution): Candidate[]
   return out
 }
 
+// --- Partialbruchzerlegung (Stufe 5) ---
+
+export type PartialWrong = {
+  readonly id: string
+  readonly step: 'divide' | 'factor-den' | 'ansatz' | 'coef'
+  // die falsche Antwort in diesem Schritt (bei einer Zahl: ihr Wert)
+  readonly shown: Expr
+  // bei einer Zahl: welche
+  readonly letter?: string
+  // Wert, mit dem man richtig weiterrechnet; null, wenn es damit nicht weitergeht (falscher Ansatz)
+  readonly value: Frac | null
+  // daraus die Zerlegung, so wie man sie am Ende hinschreibt
+  readonly result: Expr | null
+}
+
+// Klammer mit umgedrehtem Vorzeichen der Zahl: x + 1 → x − 1, 2x − 1 → 2x + 1 (x bleibt)
+const flipConstant = (f: Poly): Poly => f.map((t) => (t.mono.length === 0 ? { mono: t.mono, coef: ratNeg(t.coef) } : t))
+
+export function partialWrongs(t: Extract<FractionTask, { kind: 'partial' }>, w: PartialWork = partialWork(t)): PartialWrong[] {
+  const out: PartialWrong[] = []
+  const value = taskFrac(t)
+  const denShown = shownExpr(t.part.den)
+  const decomposed = (v: Frac) => partialResultOf(v, t.hints)
+
+  // Polynomdivision
+  if (w.divided) {
+    // Beim Abziehen das Vorzeichen falsch: Nur die höchste Potenz wird richtig abgezogen, die
+    // übrigen Summanden des Produkts mit dem falschen Vorzeichen, als würde man durch x² + x + 2 statt
+    // durch x² − x − 2 teilen
+    const flipped = polyAdd([w.den[0]], polyNeg(w.den.slice(1)))
+    const { q, r } = divRem(w.num, flipped, w.letter)
+    const wrong = fracAdd(fracOf(q), { num: r, den: w.den })
+    if (!fracEquals(wrong, value)) {
+      const shown = isZeroPoly(r) ? nicePolyExpr(q) : dividedExpr({ ...w, quotient: q, rest: r }, denShown)
+      out.push({ id: 'frac-division-sign', step: 'divide', shown, value: wrong, result: decomposed(wrong) })
+    }
+    // Rest vergessen: nur der ganze Teil
+    out.push({ id: 'frac-division-remainder', step: 'divide', shown: nicePolyExpr(w.quotient), value: fracOf(w.quotient), result: nicePolyExpr(w.quotient) })
+  }
+
+  // Nenner zerlegen: falsch zerlegt und damit weitergerechnet
+  if (partialFactorStep(t)) {
+    for (const m of factorMistakes(w.den, t.hints)) {
+      const wrong = fracAdd(fracOf(w.quotient), { num: w.rest, den: m.poly })
+      out.push({ id: m.id, step: 'factor-den', shown: m.expr, value: wrong, result: decomposed(wrong) })
+    }
+  }
+
+  // Ansatz: ohne den ganzen Teil aus der Polynomdivision
+  if (w.divided) {
+    out.push({ id: 'frac-partial-no-division', step: 'ansatz', shown: ansatzExpr([], w.terms), value: { num: w.rest, den: w.den }, result: partialExpr([], w.terms) })
+  }
+  // Doppelter Faktor nur einmal: nur mit (x − a) oder nur mit (x − a)²
+  for (const d of w.factored.factors.filter((f) => f.exp === 2)) {
+    for (const drop of [2, 1]) {
+      const kept = w.terms.filter((x) => !(polyEquals(x.factor, d.poly) && x.power === drop)).map((x, i) => ({ ...x, letter: PARTIAL_LETTERS[i] }))
+      out.push({ id: 'frac-partial-double-once', step: 'ansatz', shown: ansatzExpr(w.quotient, kept), value: null, result: null })
+    }
+  }
+
+  // Zahlen bestimmen
+  for (const f of w.findings) {
+    let wrong: Rational | null = null
+    let id = ''
+    if (f.kind === 'insert') {
+      // Vorzeichen verloren: in den übrigen Klammern mit dem falschen Vorzeichen gerechnet, z. B. bei
+      // x = 2 die Klammer x + 1 als 2 − 1
+      const co = cofactor(w.factored, f.factor, multiplicityOf(w, f.factor))
+      const flippedCo = factoredPoly({ coef: co.coef, factors: co.factors.map((g) => ({ poly: flipConstant(g.poly), exp: g.exp })) })
+      const others = polyValueAt(flippedCo, w.letter, f.at)
+      if (ratSign(others) !== 0 && !ratEq(others, f.others)) {
+        wrong = ratDiv(f.restAt, others)
+        id = 'frac-partial-insert-sign'
+      }
+    } else if (f.others.length > 0) {
+      // Koeffizientenvergleich: die Beiträge der anderen Zahlen vergessen
+      wrong = ratDiv(f.restCoef, f.own)
+      id = 'frac-partial-compare'
+    }
+    if (!wrong || ratEq(wrong, f.value)) continue
+    const terms = termsWith(w, f.letter, wrong)
+    const wrongValue = partialFrac(w.quotient, terms)
+    if (fracEquals(wrongValue, value)) continue
+    out.push({ id, step: 'coef', shown: num(wrong), letter: f.letter, value: wrongValue, result: partialExpr(w.quotient, terms) })
+  }
+  return out
+}
+
+function partialCandidates(t: Extract<FractionTask, { kind: 'partial' }>): Candidate[] {
+  // Bei einer Zahl unterscheidet erst die ganze Zerlegung (A = 1 und B = 1 sind verschiedene Fehler)
+  return partialWrongs(t).map((w) => ({ id: w.id, step: w.step, stepExpr: w.step === 'coef' && w.result ? w.result : w.shown, value: w.value }))
+}
+
 // --- Verschachtelter Doppelbruch ---
 
 // Fehler im inneren Doppelbruch (als dessen Ergebnis) und danach wie beim Doppelbruch
@@ -768,6 +873,8 @@ export function fractionWrongAnswers(t: FractionTask, solution: FracSolution = s
   const candidates: Candidate[] =
     t.kind === 'tree'
       ? treeMistakes(t, solution as TreeSolution)
+      : t.kind === 'partial'
+      ? partialCandidates(t)
       : t.kind === 'nested'
       ? nestedMistakes(t)
       : [

@@ -1,6 +1,6 @@
 import { factoredPoly, reduceFrac } from '../fraction/factor.ts'
 import type { Frac } from '../fraction/frac.ts'
-import { type Poly, atomsOf, constValue, polyAdd, polyAtom, polyConst, polyDivideExact, polyEquals, polyMul, polyNeg, polyProduct, polyScale, polySub, polySum, primitivePart, totalDegree } from '../fraction/poly.ts'
+import { type Poly, atomsOf, constValue, polyAdd, polyAtom, polyConst, polyDivideExact, polyEquals, polyMul, polyNeg, polyPow, polyProduct, polyScale, polySub, polySum, primitivePart, totalDegree } from '../fraction/poly.ts'
 import { rootOf, sumRootOf } from '../fraction/frac.ts'
 import { rat, ratAbs, ratDiv } from '../rational.ts'
 import { fractionWrongAnswers } from '../fraction/errorRules.ts'
@@ -881,4 +881,75 @@ function rootSum(rng: Rng, w: World): FractionTask {
 export function blockPairTask(rng: Rng): FractionTask {
   const w = blockPairWorld(rng)
   return rng.chance(0.6) ? worldReduce(rng, w, 5) : buildFromKit(rng, { ...worldKit(w, 4), result: profiResult, accept: (root) => hasSumLeaf(root) && isPlain(root) }, 5)
+}
+
+// --- Partialbruchzerlegung (M2b Schritt 4) ---
+//
+// Nenner aus Linearfaktoren: zwei oder drei verschiedene (auch x und 2x − 1), ein doppelter, oder ein
+// doppelter und ein einfacher. Die Zahlen des Ergebnisses (A, B, C) sind ganz und nicht 0, damit sich
+// nichts kürzt. Manchmal mit ganzem Teil (Polynomdivision vorweg); der Nenner steht meist
+// ausmultipliziert da, sonst in Faktoren. Jede Aufgabe hat mindestens einen typischen Fehler beim
+// Bestimmen der Zahlen.
+type PartialShape = 'two' | 'three' | 'double' | 'doubleOne'
+
+export function partialTask(rng: Rng): FractionTask {
+  const x = polyAtom('x')
+  const lin = (r: number) => polyAdd(x, polyConst(-r))
+  for (;;) {
+    const shape = weighted<PartialShape>(rng, [
+      ['two', 3],
+      ['three', 1.2],
+      ['double', 1.1],
+      ['doubleOne', 1.7],
+    ])
+    const roots = rng.shuffle([-4, -3, -2, -1, 0, 1, 2, 3, 4])
+    let factors: Array<{ poly: Poly; exp: number }>
+    switch (shape) {
+      case 'two': {
+        // manchmal ein Faktor mit Zahl vor x: 2x − 1, 3x + 1
+        const leading = rng.chance(0.25) ? polyAdd(polyScale(x, rat(rng.int(2, 3))), polyConst(rng.pick([-1, 1]))) : lin(roots[0])
+        factors = [
+          { poly: leading, exp: 1 },
+          { poly: lin(roots[1]), exp: 1 },
+        ]
+        break
+      }
+      case 'three':
+        factors = roots.slice(0, 3).map((r) => ({ poly: lin(r), exp: 1 }))
+        break
+      case 'double':
+        factors = [{ poly: lin(roots.find((r) => r !== 0)!), exp: 2 }]
+        break
+      case 'doubleOne':
+        factors = [
+          { poly: lin(roots[0]), exp: 2 },
+          { poly: lin(roots[1]), exp: 1 },
+        ]
+        break
+    }
+    if (rng.chance(0.5)) factors.reverse()
+    const den = polyProduct(factors.map((f) => polyPow(f.poly, f.exp)))
+    const degree = factors.reduce((s, f) => s + f.exp, 0)
+    // Zähler aus den Zahlen des Ergebnisses: Summe von Zahl mal Nenner ohne den Faktor
+    const rest = polySum(
+      factors.flatMap((f) =>
+        Array.from({ length: f.exp }, (_, k) => polyScale(polyDivideExact(den, polyPow(f.poly, k + 1))!, rat(rng.pick([-5, -4, -3, -2, -1, 1, 2, 3, 4, 5])))),
+      ),
+    )
+    if (rest.length === 0) continue
+    // ganzer Teil: bei Nennern vom Grad 2 auch mit x
+    const whole = rng.chance(degree === 2 ? 0.4 : 0.2)
+    const quotient = !whole ? [] : degree === 2 && rng.chance(0.6) ? polyAdd(polyScale(x, rat(rng.pick([-2, -1, 1, 2]))), polyConst(rng.int(-3, 3))) : polyConst(rng.pick([-2, -1, 1, 2, 3]))
+    const numerator = polyAdd(polyMul(quotient, den), rest)
+    // in Faktoren nur ohne Polynomdivision (geteilt wird durch den ausmultiplizierten Nenner)
+    const factoredDen = quotient.length === 0 && rng.chance(degree === 3 && !factors.some((f) => f.poly.length === 1) ? 0.5 : 0.2)
+    const task: FractionTask = {
+      kind: 'partial',
+      part: part(expanded(numerator), factoredDen ? factoredShown({ coef: rat(1), factors }) : expanded(den)),
+      hints: factors.map((f) => f.poly),
+    }
+    if (numerator.some((t) => Math.abs(Number(t.coef.n)) > 60 || t.coef.d !== 1n)) continue
+    if (taskLatex(task).length > 90) continue
+    if (fractionWrongAnswers(task).some((w) => w.rule.step === 'coef')) return task
+  }
 }

@@ -1,4 +1,5 @@
 import { type Expr, add, cos, exp, ln, mul, num, pow, sin, sqrt, sub, variable, x } from '../expr/types.ts'
+import { factorize } from '../fraction/factor.ts'
 import { toFrac } from '../fraction/frac.ts'
 import { type Poly, polyDivideExact } from '../fraction/poly.ts'
 import {
@@ -8,6 +9,7 @@ import {
   type Part,
   type TreeNode,
   expanded,
+  factoredShown,
   leaf,
   minus,
   part,
@@ -45,6 +47,8 @@ export const FRACTION_CARD_IDS = {
   decimal: 'fraction-decimal',
   cubes: 'fraction-cubes',
   rootDenominator: 'fraction-root-denominator',
+  polyDivision: 'fraction-poly-division',
+  partial: 'fraction-partial',
 } as const
 
 // --- Beispiele bauen ---
@@ -418,5 +422,56 @@ export const FRACTION_CARD_LIST: readonly Card[] = [
       task({ kind: 'reduce', part: fr(sub(sqrt(add(x, h)), sqrt(x)), h) }, { kind: 'conjugate', target: 'num' }),
     ],
     errors: ['frac-conjugate-one-side', 'frac-conjugate-sign', 'frac-conjugate-square'],
+  },
+  {
+    id: FRACTION_CARD_IDS.polyDivision,
+    topic: 'brueche',
+    title: 'Polynomdivision',
+    level: 5,
+    rules: [],
+    formulas: ['\\frac{Z}{N} = q + \\frac{r}{N}', '(x^2 + 3x + 1) : (x - 1) = x + 4 \\text{ Rest } 5'],
+    memo: 'Hat der Zähler keinen kleineren Grad als der Nenner, teilst du zuerst, wie bei der schriftlichen Division. Heraus kommen ein ganzer Teil und ein Rest; der Rest gehört als Bruch mit dem Nenner dazu.',
+    note: [
+      'So gehst du vor, z. B. bei $(x^2 + 3x + 1) : (x - 1)$:',
+      '1. Höchste Potenz durch höchste Potenz: $x^2 : x = x$.',
+      '2. Das Ergebnis mal den Nenner: $x(x - 1) = x^2 - x$.',
+      '3. Abziehen, mit Klammer: $(x^2 + 3x + 1) - (x^2 - x) = 4x + 1$.',
+      '4. Wiederholen, bis der Rest einen kleineren Grad hat als der Nenner: $(4x + 1) - 4(x - 1) = 5$.',
+      'Also ist $\\frac{x^2 + 3x + 1}{x - 1} = x + 4 + \\frac{5}{x - 1}$.',
+    ].join('\n'),
+    when: 'Vor der Partialbruchzerlegung, wenn der Grad des Zählers mindestens so groß ist wie der des Nenners, z. B. bei $\\frac{x^3 + 1}{x^2 - 4}$.',
+    examples: [
+      task({ kind: 'partial', part: fr(add(pow(x, n(2)), n(1)), sub(x, n(1))) }),
+      task({ kind: 'partial', part: fr(add(pow(x, n(2)), mul(n(3), x)), sub(pow(x, n(2)), n(1))) }),
+      task({ kind: 'partial', part: fr(add(sub(mul(n(2), pow(x, n(3))), mul(n(4), pow(x, n(2)))), n(4)), sub(pow(x, n(2)), mul(n(2), x))) }),
+    ],
+    errors: ['frac-division-sign', 'frac-division-remainder', 'frac-partial-no-division'],
+  },
+  {
+    id: FRACTION_CARD_IDS.partial,
+    topic: 'brueche',
+    title: 'Partialbruchzerlegung',
+    level: 5,
+    rules: [],
+    formulas: [
+      '\\frac{5x - 1}{(x - 2)(x + 1)} = \\frac{A}{x - 2} + \\frac{B}{x + 1}',
+      '\\frac{r(x)}{(x - a)^2(x - b)} = \\frac{A}{x - a} + \\frac{B}{(x - a)^2} + \\frac{C}{x - b}',
+    ],
+    memo: 'Zerfällt der Nenner in Linearfaktoren, ist der Bruch eine Summe einfacher Brüche: je Faktor ein Bruch mit einer Zahl im Zähler. Ein doppelter Faktor bekommt zwei Brüche, mit dem Faktor und mit seinem Quadrat.',
+    note: [
+      'So gehst du vor:',
+      '1. Hat der Zähler keinen kleineren Grad als der Nenner: zuerst die Polynomdivision.',
+      '2. Den Nenner in Faktoren zerlegen und den Ansatz aufschreiben.',
+      '3. Mit dem Nenner malnehmen: $5x - 1 = A(x + 1) + B(x - 2)$.',
+      '4. Nullstellen einsetzen: Bei $x = 2$ fällt $B$ weg, $9 = 3A$, also $A = 3$. Bei $x = -1$: $-6 = -3B$, also $B = 2$.',
+      '5. Beim doppelten Faktor bleibt eine Zahl übrig. Die bekommst du über einen Koeffizientenvergleich: Die Zahlen vor derselben Potenz von $x$ sind links und rechts gleich.',
+    ].join('\n'),
+    when: 'Beim Integrieren von Brüchen und bei Teleskopsummen: Einfache Brüche wie $\\frac{3}{x - 2}$ lassen sich viel leichter weiterverarbeiten als der ganze Bruch.',
+    examples: [
+      task({ kind: 'partial', part: fr(sub(mul(n(5), x), n(1)), sub(sub(pow(x, n(2)), x), n(2))) }),
+      task({ kind: 'partial', part: fr(sub(mul(n(3), x), n(1)), add(sub(pow(x, n(2)), mul(n(2), x)), n(1))) }),
+      task({ kind: 'partial', part: part(expanded(poly(add(mul(n(5), x), n(1)))), factoredShown(factorize(poly(mul(pow(sub(x, n(1)), n(2)), add(x, n(2))))))) }),
+    ],
+    errors: ['frac-partial-double-once', 'frac-partial-insert-sign', 'frac-partial-compare'],
   },
 ]

@@ -179,6 +179,9 @@ Dazu kommen die bisherigen Fehler aus M2 (Liste in
 | Partialbrüche | doppelten Faktor nur einmal angesetzt | $\frac{1}{(x - 1)^2(x + 1)} = \frac{A}{x - 1} + \frac{B}{x + 1}$ |
 | Partialbrüche | beim Einsetzen das Vorzeichen verloren | $A = \frac{5 \cdot 2 - 1}{2 - 1}$ statt $\frac{5 \cdot 2 - 1}{2 + 1}$ |
 | Partialbrüche | Polynomdivision vergessen | Zähler mit höherem Grad direkt zerlegt |
+| Polynomdivision | beim Abziehen das Vorzeichen falsch | $(x^2 + 3x + 1) - (x^2 - x) = 2x + 1$ |
+| Polynomdivision | Rest vergessen | $\frac{x^2 + 1}{x - 1} = x + 1$ |
+| Partialbrüche | beim Koeffizientenvergleich einen Summanden vergessen | $A + C = 1$, aber $A = 1$ gesetzt |
 
 Die genaue Liste kommt im jeweiligen Schritt; jede Regel bekommt wie immer
 eine Erklärung, eine Lernkarte und Tests. In Schritt 1 umgesetzt: die ersten
@@ -195,7 +198,11 @@ und zur Wurzel im Nenner drei Fehler: „Zahl nicht quadriert"
 erweitert" (`frac-conjugate-sign`) und „nur Zähler oder nur Nenner
 malgenommen" (`frac-conjugate-one-side`), mit den Lernkarten „Dritte
 Potenzen" und „Wurzeln im Nenner beseitigen". „Mittelglied vergessen" gilt
-jetzt auch für $(x + h)^3$.
+jetzt auch für $(x + h)^3$. In Schritt 4: die letzten sechs Zeilen
+(`frac-partial-double-once`, `frac-partial-insert-sign`,
+`frac-partial-no-division`, `frac-division-sign`, `frac-division-remainder`,
+`frac-partial-compare`), mit den Lernkarten „Polynomdivision" und
+„Partialbruchzerlegung".
 
 ### Schritte
 
@@ -259,6 +266,22 @@ Schritten „mit dem Gegenstück erweitern" und „ausmultiplizieren".
 
 **Ausprobieren:** $\frac{5x - 1}{x^2 - x - 2}$ geführt, dann
 $\frac{x^2 + 1}{(x - 1)^2(x + 2)}$ frei.
+
+**Umgesetzt:** Neue Vorlage „Partialbrüche" in Stufe 5 (etwa jede siebte
+Aufgabe): zwei oder drei Linearfaktoren (auch $x$ und $2x - 1$), ein
+doppelter Faktor, oder ein doppelter und ein einfacher; manchmal mit ganzem
+Teil (Polynomdivision vorweg); der Nenner meist ausmultipliziert. Die Zahlen
+des Ergebnisses sind ganz. Geführt: Polynomdivision, Nenner zerlegen,
+Ansatz, je Zahl eine Frage (Nullstelle einsetzen oder Koeffizienten
+vergleichen), bei der letzten Zahl die ganze Zerlegung; ein Schritt ohne
+typischen Fehler steht unter „Bisher". Frei: fertig ist eine Summe aus
+ganzem Teil und einfachen Brüchen mit einer Zahl im Zähler, jeder Nenner
+einmal. Sechs neue typische Fehler (die letzten zwei Zeilen der Tabelle oben
+und vier dazu: Vorzeichen beim Abziehen und Rest vergessen bei der
+Polynomdivision, Koeffizientenvergleich mit vergessenem Summanden), Karten
+„Polynomdivision" und „Partialbruchzerlegung". Die neue Vorlage wird mit
+eigenem Zufall vorweg gewählt (`share`): Die übrigen Aufgaben-Nummern der
+Stufe 5 behalten ihre Aufgabe.
 
 #### Schritt 5: Stufe 5, Teil 3: Brüche aus späteren Kapiteln
 - komplexe Zahlen teilen

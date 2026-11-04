@@ -5,6 +5,11 @@ import {
   explainCombine,
   explainConjugate,
   explainConjugateProduct,
+  compareWhere,
+  explainAnsatz,
+  explainCompare,
+  explainDivide,
+  explainInsert,
   explainDecimal,
   explainOrder,
   explainExpand,
@@ -26,7 +31,8 @@ import { m } from '../explain/format.ts'
 import type { Explanation } from '../explain/texts.ts'
 import { toLatex } from '../expr/print.ts'
 import { type Expr, mul, num, pow } from '../expr/types.ts'
-import { type FracWrong, fractionWrongAnswers } from '../fraction/errorRules.ts'
+import { type FracWrong, type PartialWrong, fractionErrorRule, fractionWrongAnswers, partialWrongs } from '../fraction/errorRules.ts'
+import { ansatzExpr, dividedExpr, factorPowerExpr, findingEquation } from '../fraction/partial.ts'
 import { factoredExpr, factoredPoly, factorize, groupFactor, isOneFactored, productFormExpr, reduceFrac } from '../fraction/factor.ts'
 import { fracAtoms, isRootAtom, polyExpr } from '../fraction/frac.ts'
 import { type Poly, atomsOf, constValue, polyAdd, polyEquals, polyNeg, polyPow, polyProduct, totalDegree } from '../fraction/poly.ts'
@@ -41,6 +47,8 @@ import {
   multipliedExpr,
   nicePolyExpr,
   innerResultPart,
+  partialFactorStep,
+  partialWork,
   reciprocalExpr,
   reciprocalPart,
   sideOf,
@@ -115,6 +123,7 @@ type Draft = {
 
 export function planFraction(t: FractionTask, ref: TaskRef, focus?: string): GuidedTask {
   if (t.kind === 'tree') return planTree(t, ref, focus)
+  if (t.kind === 'partial') return planPartial(t, ref, focus)
   const solution = solveFraction(t)
   const wrongs = fractionWrongAnswers(t, solution).filter((w) => !w.freeOnly)
   const facts = factsOf(t, solution, wrongs)
@@ -304,6 +313,177 @@ function withOrderWrongs(step: GuidedStep, wrongs: readonly FracWrong[], t: Frac
   const wrong = [...step.choices.filter((c) => !c.correct), ...extra]
   const chosen = [...wrong.filter((c) => c.errorRuleId === focus), ...wrong.filter((c) => c.errorRuleId !== focus)].slice(0, MAX_WRONG_CHOICES)
   return { ...step, choices: rng.shuffle([...step.choices.filter((c) => c.correct), ...chosen]) }
+}
+
+// --- Partialbruchzerlegung (Stufe 5) ---
+//
+// Polynomdivision (wenn nötig), Nenner zerlegen (wenn er als Summe dasteht), Ansatz, dann je Zahl
+// eine Frage; bei der letzten Zahl ist die Antwort die ganze Zerlegung. Ein Schritt ohne typischen
+// Fehler wird nicht gefragt: Seine Zeilen und seine Erklärung kommen zum nächsten Schritt.
+
+type PartialCandidate = { readonly wrong: FracWrong; readonly shown: Expr; readonly content: string }
+
+function planPartial(t: Extract<FractionTask, { kind: 'partial' }>, ref: TaskRef, focus?: string): GuidedTask {
+  const solution = solveFraction(t)
+  const w = partialWork(t)
+  const wrongs = partialWrongs(t, w)
+  const ids = FRACTION_CARD_IDS
+  const steps: GuidedStep[] = []
+  let pending: { lines: string[]; explanations: Explanation[] } = { lines: [], explanations: [] }
+  const asWrong = (pw: PartialWrong): FracWrong => ({ rule: fractionErrorRule(pw.id), step: pw.step, stepExpr: pw.shown, value: pw.value, result: pw.result })
+  const candidate = (pw: PartialWrong, shown: Expr, content = m(shown)): PartialCandidate => ({ wrong: asWrong(pw), shown, content })
+
+  type Ask = {
+    readonly key: string
+    readonly title: string
+    readonly question: string
+    readonly correct: { readonly content: string; readonly expr: Expr; readonly key: string }
+    readonly candidates: readonly PartialCandidate[]
+    readonly hint: string
+    readonly explanation: Explanation
+    readonly lines: readonly string[]
+    readonly cards: readonly string[]
+    readonly final?: boolean
+  }
+  const ask = (a: Ask) => {
+    const rng = createRng(`brueche-geführt:${ref.level}:${ref.seed}:${a.key}`)
+    const picked = pickWrong(a.candidates, a.correct.key, rng, focus)
+    if (picked.length === 0 && !a.final) {
+      pending = { lines: [...pending.lines, ...a.lines], explanations: [...pending.explanations, a.explanation] }
+      return
+    }
+    const choices: Choice[] = [
+      { id: 'richtig', content: a.correct.content, correct: true, expr: a.correct.expr },
+      ...picked.map((c, i): Choice => ({ id: `falsch-${i + 1}`, content: c.content, correct: false, expr: c.shown, errorRuleId: c.wrong.rule.id, whyWrong: explainFractionError(c.wrong.rule.id) })),
+    ]
+    steps.push({
+      id: `${steps.length + 1}-${a.key}`,
+      title: a.title,
+      question: a.question,
+      choices: rng.shuffle(choices),
+      hint: a.hint,
+      explanation: joinExplanations([...pending.explanations, a.explanation]),
+      established: [...pending.lines, ...a.lines].map(readableLatex),
+      cards: [...a.cards],
+    })
+    pending = { lines: [], explanations: [] }
+  }
+
+  // Polynomdivision
+  const denShown = shownExpr(t.part.den)
+  if (w.divided) {
+    const after = dividedExpr(w, denShown)
+    ask({
+      key: 'divide',
+      title: 'Polynomdivision',
+      question: 'Der Zähler hat keinen kleineren Grad als der Nenner. Teile deshalb zuerst (Polynomdivision): Was kommt heraus?',
+      correct: { content: m(after), expr: after, key: toLatex(after) },
+      candidates: wrongs.filter((x) => x.step === 'divide').map((x) => candidate(x, x.shown)),
+      hint: FRACTION_HINTS.divide,
+      explanation: explainDivide(taskExpr(t), nicePolyExpr(w.quotient), nicePolyExpr(w.rest), after),
+      lines: [`= ${toLatex(after)}`],
+      cards: [ids.polyDivision],
+    })
+  }
+
+  // Nenner zerlegen
+  if (partialFactorStep(t)) {
+    const factored = factoredExpr(w.factored)
+    const methods = factorMethods(w.den, t.hints)
+    ask({
+      key: 'factor-den',
+      title: 'Nenner zerlegen',
+      question: `Zerlege den Nenner ${m(denShown)} in Faktoren.`,
+      correct: { content: m(factored), expr: factored, key: toLatex(factored) },
+      candidates: wrongs.filter((x) => x.step === 'factor-den').map((x) => candidate(x, x.shown)),
+      hint: methods.length > 0 ? methodHint(methods) : FRACTION_HINTS.factor,
+      explanation: explainFactor(denShown, factored, false, methods),
+      lines: [`= ${toLatex(dividedExpr(w, factored))}`],
+      cards: methods.length > 0 ? [...new Set(methods.map((k) => METHOD_CARDS[k]))] : [ids.sumCancel],
+    })
+  }
+
+  // Ansatz
+  const ansatz = ansatzExpr(w.quotient, w.terms)
+  const equation: [Expr, Expr] = [nicePolyExpr(w.rest), w.equationRight]
+  ask({
+    key: 'ansatz',
+    title: 'Ansatz',
+    question: 'Welcher Ansatz passt?',
+    correct: { content: m(ansatz), expr: ansatz, key: toLatex(ansatz) },
+    candidates: wrongs.filter((x) => x.step === 'ansatz').map((x) => candidate(x, x.shown)),
+    hint: FRACTION_HINTS.ansatz,
+    explanation: explainAnsatz(ansatz, equation, w.factored.factors.some((f) => f.exp >= 2), w.divided),
+    lines: [`= ${toLatex(ansatz)}`, `${toLatex(equation[0])} = ${toLatex(equation[1])}`],
+    cards: [ids.partial],
+  })
+
+  // Zahlen bestimmen; bei der letzten die ganze Zerlegung
+  const letter = w.letter
+  const coefWrongs = wrongs.filter((x) => x.step === 'coef')
+  w.findings.forEach((f, i) => {
+    const final = i === w.findings.length - 1
+    const value = num(f.value)
+    const insertAt = f.kind === 'insert' ? `${letter} = ${toLatex(num(f.at))}` : ''
+    const where = f.kind === 'compare' ? compareWhere(letter, f.power) : ''
+    const equation = findingEquation(f)
+    const explanation =
+      f.kind === 'insert'
+        ? explainInsert(insertAt, factorPowerExpr(f.factor, 1), equation, f.letter, value)
+        : explainCompare(
+            where,
+            equation,
+            f.others.map((o) => `${o.letter} = ${toLatex(num(o.value))}`),
+            f.letter,
+            value,
+          )
+    const how = f.kind === 'insert' ? `Setze $${insertAt}$ ein` : `Vergleiche die Zahlen ${where}`
+    const own = coefWrongs.filter((x) => x.letter === f.letter)
+    if (!final) {
+      ask({
+        key: `coef-${f.letter}`,
+        title: `$${f.letter}$ bestimmen`,
+        question: `${how}. Was ist $${f.letter}$?`,
+        correct: { content: `$${f.letter} = ${toLatex(value)}$`, expr: value, key: toLatex(value) },
+        candidates: own.map((x) => candidate(x, x.shown, `$${f.letter} = ${toLatex(x.shown)}$`)),
+        hint: f.kind === 'insert' ? FRACTION_HINTS.insert : FRACTION_HINTS.compare,
+        explanation,
+        lines: [`${f.letter} = ${toLatex(value)}`],
+        cards: [ids.partial],
+      })
+      return
+    }
+    // Letzte Zahl: falsche Zerlegungen aus Fehlern bei dieser Zahl; reicht das nicht, auch aus
+    // früheren Fehlern, mit dem Rest richtig weitergerechnet
+    const others = wrongs.filter((x) => x.result && !own.includes(x))
+    const extra = others.filter((x, j) => x.id === focus || own.length + j < 2)
+    ask({
+      key: 'ergebnis',
+      title: `$${f.letter}$ bestimmen`,
+      question: `${how} und bestimme $${f.letter}$. Wie lautet die Zerlegung?`,
+      correct: { content: m(solution.result), expr: solution.result, key: toLatex(solution.result) },
+      candidates: [...own, ...extra].map((x) => candidate(x, x.result!)),
+      hint: f.kind === 'insert' ? FRACTION_HINTS.insert : FRACTION_HINTS.compare,
+      explanation,
+      lines: [`${f.letter} = ${toLatex(value)}`],
+      cards: [ids.partial],
+      final: true,
+    })
+  })
+
+  return {
+    ref,
+    expr: taskExpr(t),
+    functionLatex: taskLatex(t),
+    instruction: instructionFor(t).replace(/\.$/, ''),
+    answerLabel: taskLatex(t),
+    steps,
+    ruleHint: fractionTaskHint(t),
+    result: solution.result,
+    resultLatex: `${taskLatex(t)} = ${toLatex(solution.result)}`,
+    ...excludedNote(t, solution),
+    cards: [...new Set(steps.flatMap((s) => s.cards))],
+  }
 }
 
 // --- Was die Texte über die Aufgabe wissen müssen ---
@@ -534,6 +714,9 @@ const TITLES: Record<StepKind, readonly [first: string, later: string]> = {
   order: ['Reihenfolge', 'Reihenfolge'],
   part: ['Teilergebnis', 'Teilergebnis'],
   conjugate: ['Mit dem Gegenstück erweitern', 'mit dem Gegenstück erweitern'],
+  divide: ['Polynomdivision', 'Polynomdivision'],
+  ansatz: ['Ansatz', 'Ansatz'],
+  coef: ['Zahl bestimmen', 'Zahl bestimmen'],
 }
 
 function titleOf(kinds: readonly StepKind[]): string {
@@ -593,6 +776,12 @@ function phrase(kind: StepKind, facts: Facts): string {
       return 'entscheide, was du zuerst rechnest'
     case 'part':
       return 'setze das Teilergebnis ein'
+    case 'divide':
+      return 'teile mit der Polynomdivision'
+    case 'ansatz':
+      return 'wähle den Ansatz'
+    case 'coef':
+      return 'bestimme die Zahl'
   }
 }
 
@@ -616,16 +805,7 @@ function hintOf(kind: StepKind, facts: Facts): string {
     case 'factor-den': {
       const methods = kind === 'factor-num' ? facts.numMethods : facts.denMethods
       if (facts.root && !methods.includes('cubes')) return FRACTION_HINTS.rootFactor
-      const hints: Record<FactorMethod, string> = {
-        out: FRACTION_HINTS.factorOut,
-        binomial: FRACTION_HINTS.factorBinomial,
-        quadratic: FRACTION_HINTS.factorQuadratic,
-        leading: FRACTION_HINTS.factorLeading,
-        twoLetters: FRACTION_HINTS.factorTwoLetters,
-        grouping: FRACTION_HINTS.factorGrouping,
-        cubes: FRACTION_HINTS.factorCubes,
-      }
-      return methods.length > 0 ? methods.map((k) => hints[k]).join(' ') : FRACTION_HINTS.factor
+      return methods.length > 0 ? methodHint(methods) : FRACTION_HINTS.factor
     }
     case 'inner-num':
     case 'inner-den':
@@ -643,9 +823,25 @@ function hintOf(kind: StepKind, facts: Facts): string {
     case 'decimal':
     case 'order':
     case 'part':
+    case 'divide':
+    case 'ansatz':
       return FRACTION_HINTS[kind]
+    case 'coef':
+      return FRACTION_HINTS.insert
   }
 }
+
+const METHOD_HINTS: Record<FactorMethod, string> = {
+  out: FRACTION_HINTS.factorOut,
+  binomial: FRACTION_HINTS.factorBinomial,
+  quadratic: FRACTION_HINTS.factorQuadratic,
+  leading: FRACTION_HINTS.factorLeading,
+  twoLetters: FRACTION_HINTS.factorTwoLetters,
+  grouping: FRACTION_HINTS.factorGrouping,
+  cubes: FRACTION_HINTS.factorCubes,
+}
+
+const methodHint = (methods: readonly FactorMethod[]) => methods.map((k) => METHOD_HINTS[k]).join(' ')
 
 const METHOD_CARDS: Record<FactorMethod, string> = {
   out: FRACTION_CARD_IDS.factorOut,
@@ -708,6 +904,11 @@ function cardsOf(kind: StepKind, facts: Facts): string[] {
         return [ids.order]
       case 'part':
         return []
+      case 'divide':
+        return [ids.polyDivision]
+      case 'ansatz':
+      case 'coef':
+        return [ids.partial]
     }
   })()
   // Bausteine wie e^x; mit eigenen Regeln (√x, sin² x + cos² x = 1, e^{2x} : e^x) deren Karte
@@ -806,7 +1007,10 @@ function explainStep(step: FracStep, solution: FracSolution, facts: Facts): Expl
     case 'decimal':
     case 'order':
     case 'part':
-      // Rechenbäume plant planTree; diese Schritte kommen hier nicht vor
+    case 'divide':
+    case 'ansatz':
+    case 'coef':
+      // Rechenbäume plant planTree, Partialbrüche planPartial; diese Schritte kommen hier nicht vor
       return { detailed: STEP_NAMES[step.kind], short: STEP_NAMES[step.kind] }
   }
 }
