@@ -44,7 +44,7 @@ Auf Wunsch des Nutzers:
 | 2 | Buchstaben in Produkten: Potenzen kürzen, gleichnamig machen, mal und geteilt | $\frac{6x^2y}{9xy^3}$, $\frac{2}{x} - \frac{1}{x^2}$, $\frac{3a}{4b} \cdot \frac{8b^2}{9a}$ |
 | 3 | Summen in Zähler und Nenner: ausklammern, binomische Formeln, kürzen; Nenner wie $x+1$ und $x-1$ | $\frac{x^2-9}{2x+6}$, $\frac{1}{x-1} + \frac{2}{x+1}$ |
 | 4 | Uni-Niveau: Hauptnenner aus Faktoren, $x^2 + px + q$ zerlegen, Doppelbrüche; statt $x$ auch Bausteine wie $e^x$, $\ln x$, $\sin x$ | $\frac{x}{x^2-1} - \frac{1}{x+1}$, $\frac{1 + \frac{1}{x}}{1 - \frac{1}{x^2}}$, $\frac{e^{2x}-1}{e^x+1}$, $\frac{2}{\sin x} - \frac{1}{\sin^2 x}$ |
-| 5 | Profi: mehrere Rechenarten in einer Aufgabe, verschachtelte Doppelbrüche, zwei Variablen; Wurzeln und Winkelfunktionen mit ihren Regeln | $\frac{\frac{1}{x+h} - \frac{1}{x}}{h}$, $\frac{x-1}{\sqrt{x}-1}$, $\frac{1}{1-\sin x} + \frac{1}{1+\sin x}$, $\frac{\frac{1}{\cos x} - \cos x}{\sin x}$ |
+| 5 | Profi: mehrere Rechenarten in einer Aufgabe, verschachtelte Doppelbrüche, zwei Variablen; Wurzeln und Winkelfunktionen mit ihren Regeln (seit M2b Schritt 3: alles ineinander, Differenzenquotienten, dritte Potenzen, Wurzeln mit mehreren Buchstaben, siehe [PLAN-M2b.md](PLAN-M2b.md)) | $\frac{\frac{1}{x+h} - \frac{1}{x}}{h}$, $\frac{x-1}{\sqrt{x}-1}$, $\frac{1}{1-\sin x} + \frac{1}{1+\sin x}$, $\frac{\frac{1}{\cos x} - \cos x}{\sin x}$ |
 
 „Fiesere" Bausteine (Wunsch des Nutzers), damit die hohen Stufen
 fordernder werden:
@@ -507,7 +507,7 @@ weiterrechnen). Die Fehler zu Bausteinen gibt es seit Schritt 6 (Stufe 5).
 | Kürzen | nur den Zähler oder nur den Nenner gekürzt (neu in Schritt 3) | $\frac{14}{12} = \frac{7}{12}$ |
 | Mal | beim Malnehmen den Kehrwert genommen (neu in Schritt 3) | $\frac{3}{4} \cdot \frac{2}{5} = \frac{3 \cdot 5}{4 \cdot 2}$ |
 | Bausteine | im Inneren einer Funktion gekürzt (neu in Schritt 6) | $\frac{e^{2x}}{e^x} = e^2$ |
-| Quadrieren | beim Quadrieren das Mittelglied vergessen (neu in Schritt 6) | $(\sqrt{x}+1)^2 = x + 1$, $(x + h)^2 = x^2 + h^2$ |
+| Quadrieren | beim Ausmultiplizieren einer Potenz die Mittelglieder vergessen (neu in Schritt 6, in M2b auch dritte Potenz) | $(\sqrt{x}+1)^2 = x + 1$, $(x + h)^2 = x^2 + h^2$, $(x + h)^3 = x^3 + h^3$ |
 | Bausteine | Quadrat vergessen (neu in Schritt 6) | $1 - \cos^2 x = \sin x$, $(\sqrt{x})^2 = \sqrt{x}$ |
 | Punkt vor Strich | von links nach rechts gerechnet (neu in M2b) | $\frac{1}{2} + \frac{1}{2} \cdot \frac{2}{3} = \frac{2}{3}$ |
 | Klammer | Klammer übersehen (neu in M2b) | $\left(\frac{1}{2} - \frac{1}{3}\right) : 2 = \frac{1}{2} - \frac{1}{3} : 2$ |
@@ -515,6 +515,10 @@ weiterrechnen). Die Fehler zu Bausteinen gibt es seit Schritt 6 (Stufe 5).
 | Dezimalzahl | Stellen falsch gezählt (neu in M2b) | $0{,}75 = \frac{75}{10}$ |
 | Zerlegen | Zahl vor $x^2$ vergessen (neu in M2b) | $2x^2 - x - 3 = (x + 1)\left(x - \frac{3}{2}\right)$ |
 | Zerlegen | Vorzeichen beim Ausklammern in Gruppen (neu in M2b) | $ax - ay - bx + by = (a - b)(x + y)$ |
+| Zerlegen | dritte Potenz wie ein Quadrat zerlegt (neu in M2b) | $a^3 - b^3 = (a - b)(a^2 + b^2)$ |
+| Wurzel im Nenner | beim Erweitern mit dem Gegenstück nur Zähler oder nur Nenner malgenommen (neu in M2b) | $\frac{1}{\sqrt{x} - 2} = \frac{1}{(\sqrt{x} - 2)(\sqrt{x} + 2)}$ |
+| Wurzel im Nenner | mit derselben Summe statt mit dem Gegenstück erweitert (neu in M2b) | $\frac{1}{\sqrt{x} - 2} = \frac{\sqrt{x} - 2}{x - 4}$ |
+| Wurzel im Nenner | beim Erweitern die Zahl nicht quadriert (neu in M2b) | $\frac{1}{\sqrt{x} - 2} = \frac{\sqrt{x} + 2}{x - 2}$ |
 
 Wenn dir typische Fehler aus deinen Übungen fehlen, sag es. Die sind Gold
 wert.

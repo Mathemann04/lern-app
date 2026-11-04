@@ -1,7 +1,8 @@
 import { type Page, expect, test } from '@playwright/test'
 
-// Brüche Stufe 5: Bausteine mit Regeln, verschachtelte Doppelbrüche, mehrere Rechenarten, zwei
-// Variablen; geführt und frei
+// Brüche Stufe 5 (M2b Schritt 3): alles ineinander, Doppelbruch im Doppelbruch, Differenzenquotienten,
+// dritte Potenzen, Wurzeln (auch mit zwei Buchstaben, Wurzel im Nenner beseitigen), Winkelfunktionen;
+// geführt und frei
 
 const answers = (page: Page) => page.getByRole('group', { name: 'Antworten' }).getByRole('button')
 const correctFeedback = (page: Page) => page.getByText('Richtig!', { exact: true })
@@ -14,7 +15,7 @@ const isPhone = () => test.info().project.name === 'handy'
 // liefert die Fragen
 async function solveWholeTask(page: Page): Promise<string[]> {
   const questions: string[] = []
-  for (let step = 0; step < 8; step++) {
+  for (let step = 0; step < 16; step++) {
     if (await page.getByRole('heading', { name: 'Geschafft!' }).isVisible()) return questions
     await expect(page.locator('#question')).toBeVisible()
     questions.push((await page.locator('#question').textContent()) ?? '')
@@ -48,10 +49,14 @@ async function enter(page: Page, latex: string) {
 }
 
 for (const [ref, what, question] of [
-  ['5-1', 'sin² x + cos² x = 1', 'Vereinfache den Nenner mit'],
-  ['5-17', 'verschachtelter Doppelbruch', 'Löse zuerst den inneren Doppelbruch'],
-  ['5-15', 'mehrere Rechenarten', 'Fasse die erste Klammer zu einem Bruch zusammen.'],
-  ['5-3', 'Klammer quadrieren', 'Multipliziere die Klammer im Zähler aus'],
+  ['5-204', 'sin² x + cos² x = 1', 'Vereinfache den Nenner mit'],
+  ['5-82', 'Doppelbruch im Doppelbruch', 'Was rechnest du zuerst?'],
+  ['5-59', 'alles ineinander', 'Was rechnest du zuerst?'],
+  ['5-56', 'Differenzenquotient von x³', 'Multipliziere die Klammer im Zähler aus'],
+  ['5-123', 'Differenzenquotient von √x', 'Erweitere mit dem Gegenstück des Zählers'],
+  ['5-3326', 'zwei Wurzeln', 'Zerlege den Zähler in Faktoren'],
+  ['5-1537', 'Wurzel im Nenner', 'Erweitere mit dem Gegenstück des Nenners'],
+  ['5-1289', 'dritte Potenz', 'Zerlege den Zähler in Faktoren'],
 ] as const) {
   test(`Stufe 5 geführt: ${what} (${ref})`, async ({ page }) => {
     await page.goto(`./#/ueben/brueche/${ref}`)
@@ -63,7 +68,7 @@ for (const [ref, what, question] of [
 
 test('Stufe 5 geführt: Karte „Bausteine mit eigenen Regeln" aus der Aufgabe', async ({ page }) => {
   // 3/(1 − sin x) + 3/(1 + sin x)
-  await page.goto('./#/ueben/brueche/5-1')
+  await page.goto('./#/ueben/brueche/5-204')
   await page.getByRole('button', { name: 'Lernkarten' }).click()
   const sheet = page.getByRole('dialog')
   await sheet.locator('summary', { hasText: 'Bausteine mit eigenen Regeln' }).click()
@@ -71,18 +76,50 @@ test('Stufe 5 geführt: Karte „Bausteine mit eigenen Regeln" aus der Aufgabe',
   await expectCleanPage(page, 'Karte')
 })
 
-test('Stufe 5 frei: Wurzel und Winkelfunktionen', async ({ page }) => {
-  // (x − 9)/(√x − 3)
-  await page.goto('./#/frei/brueche/5-2')
+test('Stufe 5 geführt: Wurzel im Nenner, Tipp und Karte', async ({ page }) => {
+  // 2/(√x − 2)
+  await page.goto('./#/ueben/brueche/5-1537')
+  await page.getByRole('button', { name: 'Tipp anzeigen' }).click()
+  await expect(page.getByText('Erweitere mit dem Gegenstück der Summe mit Wurzel')).toBeVisible()
+  await page.getByRole('button', { name: 'Lernkarten' }).click()
+  const sheet = page.getByRole('dialog')
+  await sheet.locator('summary', { hasText: 'Wurzeln im Nenner beseitigen' }).click()
+  await expect(sheet.getByText('Mit derselben Summe statt mit dem Gegenstück erweitert')).toBeVisible()
+  await expectCleanPage(page, 'Karte Wurzel')
+})
+
+test('Stufe 5 frei: zwei Wurzeln, Wurzel im Nenner, Differenzenquotient, Winkelfunktionen', async ({ page }) => {
+  // (p − q)/(√p − √q)
+  await page.goto('./#/frei/brueche/5-3326')
   await expect(field(page)).toBeVisible()
-  await enter(page, '\\frac{x-9}{\\sqrt{x}-3}')
+  await enter(page, '\\frac{p-q}{\\sqrt{p}-\\sqrt{q}}')
   await expect(feedback(page)).toContainText('Noch nicht vollständig gekürzt.')
-  await enter(page, '\\sqrt{x}+3')
+  await enter(page, '\\sqrt{p}+\\sqrt{q}')
   await expect(feedback(page)).toContainText('Richtig!')
-  await expectCleanPage(page, 'Wurzel')
+  await expectCleanPage(page, 'zwei Wurzeln')
+
+  // 2/(√x − 2)
+  await page.goto('./#/frei/brueche/5-1537')
+  await expect(field(page)).toBeVisible()
+  await enter(page, '\\frac{2}{\\sqrt{x}-2}')
+  await expect(feedback(page)).toContainText('Erweitere mit dem Gegenstück')
+  await enter(page, '\\frac{2\\sqrt{x}+4}{x-2}')
+  await expect(feedback(page)).toContainText('Typischer Fehler: Beim Erweitern mit dem Gegenstück die Zahl nicht quadriert.')
+  await enter(page, '\\frac{2\\sqrt{x}+4}{x-4}')
+  await expect(feedback(page)).toContainText('Richtig!')
+  await expectCleanPage(page, 'Wurzel im Nenner')
+
+  // (√(x + h) − √x)/h
+  await page.goto('./#/frei/brueche/5-123')
+  await expect(field(page)).toBeVisible()
+  await enter(page, '\\frac{\\sqrt{x+h}-\\sqrt{x}}{h}')
+  await expect(feedback(page)).toContainText('kürzt sich danach')
+  await enter(page, '\\frac{1}{\\sqrt{x+h}+\\sqrt{x}}')
+  await expect(feedback(page)).toContainText('Richtig!')
+  await expectCleanPage(page, 'Differenzenquotient')
 
   // 3/(1 − sin x) + 3/(1 + sin x)
-  await page.goto('./#/frei/brueche/5-1')
+  await page.goto('./#/frei/brueche/5-204')
   await expect(field(page)).toBeVisible()
   await enter(page, '\\frac{6}{\\cos x}')
   await expect(feedback(page)).toContainText('Typischer Fehler: Quadrat vergessen.')
@@ -91,25 +128,31 @@ test('Stufe 5 frei: Wurzel und Winkelfunktionen', async ({ page }) => {
   await expectCleanPage(page, 'Winkelfunktionen')
 })
 
-test('Stufe 5 frei: Tastatur mit Wurzel und tan', async ({ page }) => {
+test('Stufe 5 frei: Tastatur mit Wurzel, Buchstaben der Aufgabe und tan', async ({ page }) => {
   test.skip(!isPhone(), 'Bildschirm-Tastatur nur am Handy')
   const keys = () => page.locator('.MLK__keycap').filter({ visible: true })
-  await page.goto('./#/frei/brueche/5-2')
+  await page.goto('./#/frei/brueche/5-3326')
   await field(page).tap()
   await expect(page.locator('.ML__keyboard')).toBeVisible()
   await expect(page.locator('.MLK__keycap[data-keycap-value="\\\\sqrt{#0}"]').filter({ visible: true })).toHaveCount(1)
-  await page.goto('./#/frei/brueche/5-1')
+  await expect(keys().filter({ hasText: /^p$/ })).toHaveCount(1)
+  await expect(keys().filter({ hasText: /^q$/ })).toHaveCount(1)
+  await page.goto('./#/frei/brueche/5-204')
   await field(page).tap()
   await expect(keys().filter({ hasText: /^tan$/ })).toHaveCount(1)
   await expectCleanPage(page, 'Tastatur')
 })
 
-test('Lernkarten: Ordner Brüche mit Stufe 5', async ({ page }) => {
+test('Lernkarten: Ordner Brüche mit Stufe 5, dritte Potenzen und Wurzeln im Nenner', async ({ page }) => {
   await page.goto('./#/karten/brueche')
   await expect(page.getByRole('heading', { name: 'Stufe 5' })).toBeVisible()
-  await page.getByRole('link', { name: /Bausteine mit eigenen Regeln/ }).click()
-  await expect(page.getByRole('heading', { name: 'Bausteine mit eigenen Regeln', level: 1 })).toBeVisible()
-  await expectCleanPage(page, 'Karte')
+  for (const title of ['Bausteine mit eigenen Regeln', 'Dritte Potenzen', 'Wurzeln im Nenner beseitigen']) {
+    await page.goto('./#/karten/brueche')
+    await page.getByRole('link', { name: new RegExp(title) }).click()
+    await expect(page.getByRole('heading', { name: title, level: 1 })).toBeVisible()
+    await expect(page.getByRole('region', { name: 'Beispiel' })).toBeVisible()
+    await expectCleanPage(page, title)
+  }
 })
 
 test('Brüche funktionieren offline, geführt und frei', async ({ page, context }) => {
@@ -122,14 +165,14 @@ test('Brüche funktionieren offline, geführt und frei', async ({ page, context 
   await expect(page.getByRole('heading', { name: 'Brüche', level: 1 })).toBeVisible()
 
   // geführt: 3/(1 − sin x) + 3/(1 + sin x) ganz durch
-  await page.goto('./#/ueben/brueche/5-1')
+  await page.goto('./#/ueben/brueche/5-204')
   await solveWholeTask(page)
   await expectCleanPage(page, 'offline geführt')
 
-  // frei: Wurzel
-  await page.goto('./#/frei/brueche/5-2')
+  // frei: zwei Wurzeln
+  await page.goto('./#/frei/brueche/5-3326')
   await expect(field(page)).toBeVisible()
-  await enter(page, '\\sqrt{x}+3')
+  await enter(page, '\\sqrt{p}+\\sqrt{q}')
   await expect(feedback(page)).toContainText('Richtig!')
 })
 
@@ -140,7 +183,7 @@ test('Gezielt üben: „Quadrat vergessen" von der Lernkarte aus', async ({ page
   await expect(page).toHaveURL(/#\/ueben\/brueche\/5-\d+\?fokus=frac-square-forgotten$/)
   // Der Fehler passiert beim Anwenden der Regel: Diesen Schritt hat die gefundene Aufgabe
   let seen = false
-  for (let step = 0; step < 8 && !seen; step++) {
+  for (let step = 0; step < 16 && !seen; step++) {
     if (await page.getByRole('heading', { name: 'Geschafft!' }).isVisible()) break
     await expect(page.locator('#question')).toBeVisible()
     seen = await page.getByText(/Regel anwenden/).isVisible()
@@ -155,4 +198,25 @@ test('Gezielt üben: „Quadrat vergessen" von der Lernkarte aus', async ({ page
     if (!seen) await page.getByRole('button', { name: /^(Weiter|Ergebnis ansehen)$/ }).click()
   }
   expect(seen).toBe(true)
+})
+
+test('Gezielt üben: „Zahl nicht quadriert" von der Lernkarte aus', async ({ page }) => {
+  await page.goto('./#/karten/brueche/fraction-root-denominator')
+  const error = page.locator('li, article, section, div').filter({ hasText: /^Beim Erweitern mit dem Gegenstück die Zahl nicht quadriert/ }).first()
+  await error.getByRole('link', { name: 'Gezielt üben' }).click()
+  await expect(page).toHaveURL(/#\/ueben\/brueche\/5-\d+\?fokus=frac-conjugate-square$/)
+  await expect(page.locator('#question')).toBeVisible()
+  await expectCleanPage(page, 'gezielt Wurzel')
+})
+
+test('Stufe 5: zehn neue Aufgaben nacheinander mit verschiedener Form', async ({ page }) => {
+  for (let i = 0; i < 10; i++) {
+    await page.goto('./#/ueben/brueche/5')
+    await expect(page).toHaveURL(/#\/ueben\/brueche\/5-\d+$/)
+    await expect(page.locator('#question')).toBeVisible()
+    await expectCleanPage(page, `Aufgabe ${i + 1}`)
+  }
+  const forms = await page.evaluate(() => (JSON.parse(localStorage.getItem('rechenweg-formen') ?? '{}') as Record<string, string[]>)['brueche:5'] ?? [])
+  expect(forms).toHaveLength(10)
+  expect(new Set(forms).size).toBe(10)
 })

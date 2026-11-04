@@ -43,6 +43,8 @@ export const FRACTION_CARD_IDS = {
   blockRules: 'fraction-block-rules',
   order: 'fraction-order',
   decimal: 'fraction-decimal',
+  cubes: 'fraction-cubes',
+  rootDenominator: 'fraction-root-denominator',
 } as const
 
 // --- Beispiele bauen ---
@@ -58,7 +60,7 @@ const frAscending = (n: Expr, d: Expr): Part => part(expanded(poly(n), true), ex
 const task = (s: FractionShape, rule?: BlockRule): FractionTask => withRoots({ ...s, hints: [], ...(rule ? { rule } : {}) } as FractionTask)
 // 1 − sin x: die 1 vorn
 const frUnit = (n: Expr, d: Expr): Part => part(expanded(poly(n)), expanded(poly(d), true))
-const [a, b, y] = ['a', 'b', 'y'].map(variable)
+const [a, b, y, h] = ['a', 'b', 'y', 'h'].map(variable)
 // Rechenbaum aus dem Baukasten (M2b)
 const tree = (root: TreeNode): FractionTask => ({ kind: 'tree', root, hints: [] })
 const lf = (nu: number, de = 1) => leaf(fr(num(nu), num(de)))
@@ -376,5 +378,45 @@ export const FRACTION_CARD_LIST: readonly Card[] = [
       task({ kind: 'complex', top: [plus(fr(n(1), cos(x))), minus(fr(cos(x)))], bottom: [plus(fr(sin(x)))] }, { kind: 'trig', prefer: 'S', target: 'num' }),
     ],
     errors: ['frac-square-forgotten', 'frac-cancel-inside'],
+  },
+  {
+    id: FRACTION_CARD_IDS.cubes,
+    topic: 'brueche',
+    title: 'Dritte Potenzen',
+    level: 5,
+    rules: [],
+    formulas: ['a^3 - b^3 = (a - b)(a^2 + ab + b^2)', 'a^3 + b^3 = (a + b)(a^2 - ab + b^2)'],
+    memo: 'Zwei dritte Potenzen lassen sich zerlegen: in eine Klammer mit $a - b$ bzw. $a + b$ und eine mit drei Summanden. In der zweiten Klammer steht das Mittelglied $ab$ mit dem anderen Vorzeichen.',
+    note: 'Die zweite Klammer lässt sich nicht weiter zerlegen. Typisch ist sie in Aufgaben wie $x^3 - 8 = (x - 2)(x^2 + 2x + 4)$, denn $8 = 2^3$. Probe durch Ausmultiplizieren.',
+    when: 'Bei zwei dritten Potenzen mit Plus oder Minus dazwischen, z. B. $a^3 - b^3$, $x^3 + 27$ oder $8x^3 - 1$.',
+    examples: [
+      task({ kind: 'reduce', part: fr(sub(pow(a, n(3)), pow(b, n(3))), sub(pow(a, n(2)), pow(b, n(2)))) }),
+      task({ kind: 'reduce', part: fr(add(pow(x, n(3)), n(8)), sub(pow(x, n(2)), n(4))) }),
+      task({ kind: 'reduce', part: fr(sub(mul(n(8), pow(x, n(3))), n(27)), sub(mul(n(4), pow(x, n(2))), n(9))) }),
+    ],
+    errors: ['frac-cube-as-square'],
+  },
+  {
+    id: FRACTION_CARD_IDS.rootDenominator,
+    topic: 'brueche',
+    title: 'Wurzeln im Nenner beseitigen',
+    level: 5,
+    rules: [],
+    formulas: ['(\\sqrt{x} - a)(\\sqrt{x} + a) = x - a^2', '\\frac{1}{\\sqrt{x} - a} = \\frac{\\sqrt{x} + a}{x - a^2}', '(\\sqrt{x} - \\sqrt{a})(\\sqrt{x} + \\sqrt{a}) = x - a'],
+    memo: 'Steht im Nenner eine Summe mit Wurzel, erweitere mit ihrem Gegenstück: dieselben Teile, das Vorzeichen in der Mitte umgedreht. Mit der dritten binomischen Formel verschwindet die Wurzel aus dem Nenner.',
+    note: [
+      'So gehst du vor:',
+      '1. Gegenstück bilden: zu $\\sqrt{x} - 2$ gehört $\\sqrt{x} + 2$.',
+      '2. Zähler und Nenner damit malnehmen.',
+      '3. Den Nenner mit $(a - b)(a + b) = a^2 - b^2$ ausmultiplizieren, jeden Teil ganz quadrieren: $(2\\sqrt{x})^2 = 4x$.',
+      'Beim Differenzenquotienten von $\\sqrt{x}$ steht die Wurzel oben. Du erweiterst genauso, dann kürzt sich $h$.',
+    ].join('\n'),
+    when: 'Wenn im Nenner eine Summe mit Wurzel steht oder wenn sich eine Differenz von Wurzeln sonst nicht vereinfachen lässt.',
+    examples: [
+      task({ kind: 'reduce', part: fr(n(3), sub(sqrt(x), n(2))) }, { kind: 'conjugate', target: 'den' }),
+      task({ kind: 'reduce', part: fr(n(1), add(sqrt(a), sqrt(b))) }, { kind: 'conjugate', target: 'den' }),
+      task({ kind: 'reduce', part: fr(sub(sqrt(add(x, h)), sqrt(x)), h) }, { kind: 'conjugate', target: 'num' }),
+    ],
+    errors: ['frac-conjugate-one-side', 'frac-conjugate-sign', 'frac-conjugate-square'],
   },
 ]

@@ -20,10 +20,12 @@ import {
   quotientNode,
   sumNode,
   term,
+  withRoots,
 } from './task.ts'
 
 const a = variable('a')
 const b = variable('b')
+const h = variable('h')
 
 function poly(e: Expr): Poly {
   const f = toFrac(e)!
@@ -137,6 +139,14 @@ const CASES: Case[] = [
     '-\\frac{1}{12}',
   ],
   ['frac-decimal-places', task({ kind: 'tree', root: sumNode(term(1, leaf(fr(num(3), num(4)), '0,75')), term(1, leaf(fr(num(1), num(4))))) }), 'step', '\\frac{75}{10}'],
+  // Stufe 5 (M2b Schritt 3): dritte Potenzen, Wurzel beseitigen
+  ['frac-cube-as-square', task({ kind: 'reduce', part: fr(sub(pow(a, num(3)), pow(b, num(3))), sub(pow(a, num(2)), pow(b, num(2)))) }), 'step', '\\frac{(a - b)(a^{2} + b^{2})}{a^{2} - b^{2}}'],
+  ['frac-binomial-middle', task({ kind: 'reduce', part: part(binomialShown(poly(add(x, h)), poly(pow(x, num(3))), 3), expanded(poly(h))) }), 'step', '\\frac{h^{3}}{h}'],
+  ['frac-conjugate-one-side', withRoots(task({ kind: 'reduce', part: fr(num(1), sub(sqrt(x), num(2))) }, { kind: 'conjugate', target: 'den' })), 'step', '\\frac{1}{(\\sqrt{x} - 2)(\\sqrt{x} + 2)}'],
+  ['frac-conjugate-one-side', withRoots(task({ kind: 'reduce', part: fr(sub(sqrt(add(x, h)), sqrt(x)), h) }, { kind: 'conjugate', target: 'num' })), 'result', '1'],
+  ['frac-conjugate-sign', withRoots(task({ kind: 'reduce', part: fr(num(1), sub(sqrt(x), num(2))) }, { kind: 'conjugate', target: 'den' })), 'step', '\\frac{\\sqrt{x} - 2}{x - 4}'],
+  ['frac-conjugate-sign', withRoots(task({ kind: 'reduce', part: fr(sub(sqrt(add(x, h)), sqrt(x)), h) }, { kind: 'conjugate', target: 'num' })), 'result', '\\frac{1}{\\sqrt{x + h} - \\sqrt{x}}'],
+  ['frac-conjugate-square', withRoots(task({ kind: 'reduce', part: fr(num(1), sub(sqrt(x), num(2))) }, { kind: 'conjugate', target: 'den' })), 'step', '\\frac{\\sqrt{x} + 2}{x - 2}'],
 ]
 
 describe('Zähler und Nenner addiert', () => {

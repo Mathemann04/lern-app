@@ -1,6 +1,6 @@
 import { type Expr, div, mul, neg, num, pow } from '../expr/types.ts'
 import { type Rational, isInteger, isOne, isZero, rat, ratAbs, ratAdd, ratDiv, ratMul, ratNeg, ratSign } from '../rational.ts'
-import { type Frac, atomPowerExpr, displayRank, polyExpr, startsNegative } from './frac.ts'
+import { type Frac, atomPowerExpr, displayRank, isRootAtom, isSumRoot, polyExpr, radicandLetters, rootOf, startsNegative } from './frac.ts'
 import {
   type Poly,
   atomsOf,
@@ -8,6 +8,7 @@ import {
   degreeIn,
   gcdUnivariate,
   hasIntegerCoefficients,
+  isOneFirst,
   isUnitTrigLinear,
   isZeroPoly,
   lcmBig,
@@ -33,7 +34,9 @@ import {
 // Buchstaben über rationale Nullstellen (x² − 9 = (x − 3)(x + 3), x² − x − 6 = (x − 3)(x + 2),
 // 2x² − x − 3 = (x + 1)(2x − 3)), bei mehreren Buchstaben in Gruppen (ax − ay + bx − by =
 // (x − y)(a + b)) und bei zwei Buchstaben mit gleichem Grad wie bei einem (a² − ab − 2b² =
-// (a + b)(a − 2b)). Was übrig bleibt (z. B. x² + 1), gilt als nicht weiter zerlegbar.
+// (a + b)(a − 2b)). Dritte Potenzen zerfallen so ebenfalls (x³ − 8 = (x − 2)(x² + 2x + 4),
+// a³ − b³ = (a − b)(a² + ab + b²)); Wurzeln wie √x und √a zählen dabei wie Buchstaben
+// (x − a = (√x − √a)(√x + √a)). Was übrig bleibt (z. B. x² + 1), gilt als nicht weiter zerlegbar.
 
 export type Factor = { readonly poly: Poly; readonly exp: number }
 // coef · f₁^e₁ · f₂^e₂ …; jedes fᵢ ganzzahlig, teilerfremd, erster Summand positiv, verschieden
@@ -160,8 +163,9 @@ export function factorize(p: Poly, hints: readonly Poly[] = []): Factored {
   return { coef: ratMul(unit, constValue(rest)!), factors }
 }
 
-// Nur echte Buchstaben, keine Bausteine wie e^x oder sin x (dort gelten eigene Regeln)
-const isPlainLetter = (atom: string) => /^[a-z]$/.test(atom) && atom !== 'e'
+// Buchstaben, Wurzeln wie √a und die Bausteine e^x und ln x; nicht sin x und cos x (dort gilt
+// sin² x + cos² x = 1)
+const isPlainLetter = (atom: string) => (/^[a-z]$/.test(atom) && atom !== 'e') || isRootAtom(atom) || atom === 'E' || atom === 'L'
 
 // In Gruppen ausklammern: Kommt ein Buchstabe t nur einfach vor, ist p = t · A + B. Geht A in p auf,
 // ist A ein Faktor: ax − ay + bx − by = a(x − y) + b(x − y) = (x − y)(a + b). A muss eine Summe sein.
@@ -252,13 +256,31 @@ function factorExpr({ poly, exp }: Factor): Expr {
 
 const atomOf = (f: Factor) => (f.poly.length === 1 && f.poly[0].mono.length === 1 ? f.poly[0].mono[0][0] : null)
 
-// Die Faktoren ohne Zahl davor, je als Term: einzelne Buchstaben zuerst und alphabetisch (ab, x(x + 1))
+// Bei √(x + h): (√(x + h) − √x)(√(x + h) + √x) ist h und wird so geschrieben
+function withSumRootPairs(factors: readonly Factor[]): Factor[] {
+  let out = [...factors]
+  for (const f of factors) {
+    const [a, b] = f.poly
+    if (f.poly.length !== 2 || a.mono.length !== 1 || b.mono.length !== 1 || !isSumRoot(a.mono[0][0]) || b.coef.n > 0n) continue
+    const plus = out.find((g) => polyEquals(g.poly, [a, { mono: b.mono, coef: ratNeg(b.coef) }]))
+    const minus = out.find((g) => g.poly === f.poly)
+    if (!plus || !minus || b.mono[0][0] !== rootOf(radicandLetters(a.mono[0][0])[0])) continue
+    const k = Math.min(plus.exp, minus.exp)
+    const h = polyMul(minus.poly, plus.poly)
+    out = out.map((g) => (g === plus || g === minus ? { poly: g.poly, exp: g.exp - k } : g)).filter((g) => g.exp > 0)
+    out.unshift({ poly: h, exp: k })
+  }
+  return out
+}
+
+// Die Faktoren ohne Zahl davor, je als Term: einzelne Buchstaben zuerst und alphabetisch (ab, x(x + 1)),
+// Klammern mit kleinerem Grad vor größeren ((x − 2)(x² + 2x + 4))
 export const factorExprs = (f: Factored): Expr[] =>
-  [...f.factors]
+  withSumRootPairs(f.factors)
     .sort((a, b) => {
       const [x, y] = [atomOf(a), atomOf(b)]
       if (x !== null && y !== null) return displayRank(x) - displayRank(y)
-      return (x === null ? 1 : 0) - (y === null ? 1 : 0)
+      return (x === null ? 1 : 0) - (y === null ? 1 : 0) || totalDegree(a.poly) - totalDegree(b.poly)
     })
     .map(factorExpr)
 
@@ -317,7 +339,7 @@ export const reducedFrac = (r: Reduced): Frac => ({ num: r.num, den: factoredPol
 // Schreibweise des Ergebnisses: \frac{x + 5}{(x - 1)(x + 1)}, -\frac{2x}{3y^2}, e^x - 1. Der Zähler
 // beginnt möglichst mit Plus (\frac{b - a}{ab}); nur wenn alles negativ ist, steht das Minus vorn.
 export function reducedExpr(r: Reduced): Expr {
-  const flipped = (r.num.length >= 2 && startsNegative(r.num) && !startsNegative([...r.num].reverse())) || isUnitTrigLinear(r.num)
+  const flipped = (r.num.length >= 2 && startsNegative(r.num) && !startsNegative([...r.num].reverse())) || isOneFirst(r.num)
   const numerator = polyExpr(r.num, flipped ? 'ascending' : 'descending')
   if (isOneFactored(r.den)) return numerator
   if (startsNegative(r.num) && !flipped) return neg(div(polyExpr(polyScale(r.num, rat(-1))), factoredExpr(r.den)))

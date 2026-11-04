@@ -1,6 +1,7 @@
 import { factoredPoly, reduceFrac } from '../fraction/factor.ts'
 import type { Frac } from '../fraction/frac.ts'
-import { type Poly, atomsOf, constValue, polyAdd, polyAtom, polyConst, polyEquals, polyMul, polyNeg, polyProduct, polyScale, totalDegree } from '../fraction/poly.ts'
+import { type Poly, atomsOf, constValue, polyAdd, polyAtom, polyConst, polyDivideExact, polyEquals, polyMul, polyNeg, polyProduct, polyScale, polySub, polySum, primitivePart, totalDegree } from '../fraction/poly.ts'
+import { rootOf, sumRootOf } from '../fraction/frac.ts'
 import { rat, ratAbs, ratDiv } from '../rational.ts'
 import { fractionWrongAnswers } from '../fraction/errorRules.ts'
 import { type FracSolution, cancelledFactor, isPlayableTree, solveFraction, solveTree } from '../fraction/solve.ts'
@@ -10,10 +11,15 @@ import {
   type Part,
   type TreeNode,
   type TreeTerm,
+  binomialShown,
   expanded,
+  factoredShown,
   leaf,
+  minus,
+  plus,
   overNode,
   part,
+  partExpr,
   partFrac,
   productNode,
   quotientNode,
@@ -52,6 +58,10 @@ type Kit = {
   readonly hints?: readonly Poly[]
   // zusätzliche Bedingung an das Ergebnis, z. B. nicht zu lang
   readonly result?: (solution: FracSolution) => boolean
+  // Doppelbruch auch im Inneren (Stufe 5: Doppelbruch im Doppelbruch)
+  readonly nestedOver?: boolean
+  // Blätter mit dem Wert 1 erlaubt (Kettenbrüche wie \frac{1}{1 + \frac{1}{x}})
+  readonly ones?: boolean
 }
 
 const weighted = <T>(rng: Rng, items: ReadonlyArray<readonly [T, number]>): T => {
@@ -91,8 +101,8 @@ function randomNode(rng: Rng, kit: Kit, size: number, depth: number, state: { de
     }
     return weighted(rng, kit.leaves)(rng)
   }
-  // Doppelbruch nicht im Doppelbruch, Tiefe begrenzt
-  const ops = kit.ops.filter(([op]) => !(op === 'over' && depth > 0))
+  // Doppelbruch nicht im Doppelbruch (Stufe 5: eine Ebene tiefer), Tiefe begrenzt
+  const ops = kit.ops.filter(([op]) => !(op === 'over' && depth > (kit.nestedOver ? 1 : 0)))
   const op = depth >= 2 ? 'sum' : weighted(rng, ops)
   if (op === 'sum') {
     // meist zwei Summanden (darin weitere Rechenarten), seltener drei nebeneinander
@@ -127,7 +137,7 @@ const biggest = (f: Frac): number => Math.max(...[...f.num, ...f.den].map((t) =>
 
 // Aufgabe aus einem Baum: brauchbar? (Wert nicht 0, Zahlen klein, spielbar, nicht zu lang); einteilige
 // Bäume ohne Dezimalzahl werden zur gewohnten Aufgabenform (Summe, mal, geteilt, Doppelbruch)
-export function taskFromTree(root: TreeNode, kit: Pick<Kit, 'maxNumber' | 'maxLatex' | 'hints' | 'result'>, level: Level): FractionTask | null {
+export function taskFromTree(root: TreeNode, kit: Pick<Kit, 'maxNumber' | 'maxLatex' | 'hints' | 'result' | 'ones'>, level: Level): FractionTask | null {
   const t: Extract<FractionTask, { kind: 'tree' }> = { kind: 'tree', root, hints: kit.hints ?? [] }
   let solution
   try {
@@ -148,7 +158,7 @@ export function taskFromTree(root: TreeNode, kit: Pick<Kit, 'maxNumber' | 'maxLa
     const one = r.den.factors.length === 0 && r.num.length === 1 && r.num[0].mono.length === 0 && ratAbs(ratDiv(r.num[0].coef, r.den.coef)).n === 1n && ratAbs(ratDiv(r.num[0].coef, r.den.coef)).d === 1n
     if ((one || r.num.length === 0) && i < solution.stages.length - 1) return null
   }
-  if (treeLeaves(root).some((l) => { const v = partFrac(l.part); return polyEquals(v.num, v.den) })) return null
+  if (!kit.ones && treeLeaves(root).some((l) => { const v = partFrac(l.part); return polyEquals(v.num, v.den) })) return null
   if (level >= 2 && atomsOf(reduced.num).length === 0 && reduced.den.factors.length === 0) return null
   if (totalDegree(reduced.num) > 6) return null
   if (kit.result && !kit.result(solution)) return null
@@ -337,6 +347,8 @@ export function monomialReduce(rng: Rng): FractionTask {
 export type World = {
   readonly letters: readonly string[]
   readonly factors: readonly Poly[]
+  // nur diese Zähler und Nenner (statt beliebiger Produkte der Klammern), z. B. bei dritten Potenzen
+  readonly products?: readonly Poly[]
 }
 
 // a · u + b (bzw. a · u + b · v)
@@ -425,6 +437,7 @@ export function level4World(rng: Rng): World {
 // Zähler oder Nenner aus der Welt: eine oder zwei Klammern (eine auch im Quadrat), dazu manchmal
 // eine Zahl oder ein Buchstabe davor, z. B. 2x − 6, x² + 3x, x² − 9, x² + 6x + 9
 function worldPoly(rng: Rng, w: World, brackets: number): Poly {
+  if (w.products) return rng.chance(0.2) ? polyScale(rng.pick(w.products), rat(rng.int(2, 3))) : rng.pick(w.products)
   const chosen = rng.shuffle([...w.factors]).slice(0, brackets)
   let p = polyProduct(chosen)
   if (brackets === 1 && rng.chance(0.2)) p = polyMul(p, chosen[0])
@@ -586,4 +599,286 @@ export function buildLevel4(rng: Rng): FractionTask {
   if (kind === 'reduce') return worldReduce(rng, w, 4)
   if (kind === 'complex') return worldComplex(rng, w, 4)
   return buildFromKit(rng, worldKit(w, 4), 4)
+}
+
+// --- Stufe 5: Profi, quer durch das ganze Thema (M2b Schritt 3) ---
+
+// Dritte Potenzen: u − c und u² + cu + c² (zusammen u³ − c³), dazu u + c für u² − c²; ebenso
+// u³ + c³, mit Zahl vorn (8x³ − 27) oder mit zwei Buchstaben (a³ − b³). Zähler und Nenner nur aus
+// diesen Teilen, damit jede dritte Potenz als solche zu erkennen ist.
+export function cubeWorld(rng: Rng): World {
+  const s = rng.pick([1, -1])
+  let letters: string[]
+  let lin: Poly
+  let mirror: Poly
+  let quad: Poly
+  if (rng.chance(0.35)) {
+    const [a, b] = rng.pick(LETTER_PAIRS)
+    const ab = polyMul(polyAtom(a), polyAtom(b))
+    letters = [a, b]
+    lin = linearIn(1, a, -s, b)
+    mirror = linearIn(1, a, s, b)
+    quad = polySum([polyAtom(a, 2), polyScale(ab, rat(s)), polyAtom(b, 2)])
+  } else {
+    const u = oneLetter(rng)
+    const k = rng.chance(0.25) ? 2 : 1
+    const c = k === 2 ? rng.pick([1, 3]) : rng.int(1, 3)
+    letters = [u]
+    lin = linearIn(k, u, -s * c)
+    mirror = linearIn(k, u, s * c)
+    quad = polySum([polyScale(polyAtom(u, 2), rat(k * k)), polyScale(polyAtom(u), rat(s * k * c)), polyConst(c * c)])
+  }
+  const cube = polyMul(lin, quad)
+  return { letters, factors: [lin, quad, mirror], products: [lin, mirror, polyMul(lin, mirror), cube, cube, quad, polyMul(polyAtom(letters[0]), lin)] }
+}
+
+// Zwei Bausteine gemischt, z. B. e^x und ln x: (e^x + 2) und (\ln x − 3)(\ln x + 3)
+const BLOCK_PAIRS: ReadonlyArray<readonly [string, string]> = [
+  ['E', 'L'],
+  ['E', 'L'],
+  ['E', 'S'],
+  ['L', 'S'],
+  ['E', 'C'],
+  ['L', 'C'],
+]
+
+export function blockPairWorld(rng: Rng): World {
+  const [a, b] = rng.shuffle([...rng.pick(BLOCK_PAIRS)])
+  const p = (rng.chance(0.5) ? 1 : -1) * rng.int(1, 3)
+  // bei sin und cos nicht 1: 1 − sin² x wäre eine Regel der Winkelfunktionen
+  const q = rng.int(b === 'S' || b === 'C' ? 2 : 1, 3)
+  return { letters: [a, b], factors: [linearIn(1, a, p), linearIn(1, b, -q), linearIn(1, b, q)] }
+}
+
+export function level5World(rng: Rng): World {
+  return call(rng, [
+    [() => level4World(rng), 6],
+    [() => cubeWorld(rng), 1.5],
+    [() => blockPairWorld(rng), 1.5],
+  ])
+}
+
+// Rechenarten im Baum (Plus/Minus, mal, geteilt, Bruchstrich)
+function opKinds(n: TreeNode): Set<string> {
+  if (n.kind === 'leaf') return new Set()
+  const inner = n.kind === 'sum' ? n.terms.map((t) => opKinds(t.node)) : [opKinds(n.left), opKinds(n.right)]
+  return new Set([n.kind, ...inner.flatMap((k) => [...k])])
+}
+
+const hasSumLeaf = (root: TreeNode) => treeLeaves(root).some((l) => partFrac(l.part).den.length >= 2 || partFrac(l.part).num.length >= 2)
+
+// Zu einfach oder doppelt: zwei ganze Zahlen in einer Summe (3 + 3), zwei gleiche Brüche
+function isPlain(root: TreeNode): boolean {
+  const latex = treeLeaves(root).map((l) => toLatex(partExpr(l.part)))
+  if (new Set(latex).size < latex.length) return false
+  const numbers = (n: TreeNode): boolean => {
+    if (n.kind === 'leaf') return false
+    if (n.kind === 'sum') return n.terms.filter((t) => t.node.kind === 'leaf' && constValue(partFrac(t.node.part).num) !== null && constValue(partFrac(t.node.part).den) !== null).length >= 2 || n.terms.some((t) => numbers(t.node))
+    return numbers(n.left) || numbers(n.right)
+  }
+  return !numbers(root)
+}
+
+// Ergebnis der Stufe 5: kurz, im Nenner höchstens eine Klammer mit drei Summanden, keine längere
+const profiResult = (solution: FracSolution) => {
+  const sizes = solution.reduced.den.factors.map((f) => f.poly.length)
+  return shortResult(solution) && sizes.every((n) => n <= 3) && sizes.filter((n) => n === 3).length <= 1
+}
+
+// Alles ineinander: drei oder vier Brüche, mindestens zwei Rechenarten (oft drei), Doppelbruch auch
+// im Inneren
+function level5Kit(w: World): Kit {
+  return {
+    sizes: [
+      [3, 5],
+      [4, 3],
+    ],
+    ops: [
+      ['sum', 4],
+      ['product', 2],
+      ['quotient', 2],
+      ['over', 2.5],
+    ],
+    leaves: [
+      [(rng) => termLeaf(rng, w), 5],
+      [(rng) => simpleLeaf(rng, w), 2.5],
+    ],
+    maxNumber: 200,
+    maxLatex: 140,
+    hints: w.factors,
+    result: profiResult,
+    nestedOver: true,
+    accept: (root, rng) => {
+      const kinds = opKinds(root)
+      return hasSumLeaf(root) && isPlain(root) && kinds.size >= 2 && (kinds.size >= 3 || rng.chance(0.5))
+    },
+  }
+}
+
+export const buildLevel5Kit = (rng: Rng): FractionTask => buildFromKit(rng, level5Kit(level5World(rng)), 5)
+
+// Doppelbruch im Doppelbruch: \frac{1}{1 - \frac{1}{1 + \frac{2}{x}}}, \frac{a - \frac{b}{1 + \frac{b}{a}}}{a + b}
+export function worldNested(rng: Rng): FractionTask {
+  const w = rng.chance(0.7) ? level3World(rng) : level4World(rng)
+  const sign = (): 1 | -1 => (rng.chance(0.5) ? -1 : 1)
+  const small = () =>
+    call(rng, [
+      [() => leaf(numberPart(rng.int(1, 3))), 3],
+      [() => leaf(polyPart(polyAtom(rng.pick(w.letters)), polyConst(1))), 2],
+      [() => simpleLeaf(rng, w), 2],
+    ])
+  for (;;) {
+    const inner = overNode(small(), sumNode(term(1, small()), term(sign(), rng.chance(0.7) ? simpleLeaf(rng, w) : termLeaf(rng, w))))
+    const withInner = sumNode(term(1, small()), term(sign(), inner))
+    const other = rng.chance(0.6) ? small() : termLeaf(rng, w)
+    const root = rng.chance(0.7) ? overNode(other, withInner) : overNode(withInner, other)
+    if (!isPlain(root)) continue
+    const task = taskFromTree(root, { maxNumber: 200, maxLatex: 140, hints: w.factors, result: profiResult, ones: true }, 5)
+    if (task) return task
+  }
+}
+
+// Differenzenquotienten \frac{f(x + h) - f(x)}{h} für f(x) = x², x³, \frac{k}{x}, \frac{k}{x^2},
+// \frac{k}{x + c}, \frac{x}{x + c} und \sqrt{x} (mit dem Gegenstück erweitern)
+export function differenceQuotient(rng: Rng): FractionTask {
+  // x vor h: x + h (bei t stünde h vorn)
+  const u = 'x'
+  const [U, H] = [polyAtom(u), polyAtom('h')]
+  const uh = polyAdd(U, H)
+  const k = rng.chance(0.5) ? 1 : rng.int(2, 4)
+  const c = (rng.chance(0.5) ? 1 : -1) * rng.int(1, 4)
+  const shift = (p: Poly) => polyAdd(p, polyConst(c))
+  const reduce = (num: Part['num'], den: Poly): FractionTask => ({ kind: 'reduce', part: part(num, expanded(den)), hints: [] })
+  const complex = (top: Part, bottom: Part, hints: readonly Poly[]): FractionTask => ({
+    kind: 'complex',
+    top: [plus(top), minus(bottom)],
+    bottom: [plus(part(expanded(H)))],
+    hints,
+  })
+  return call(rng, [
+    // \frac{(x + h)^2 - x^2}{h}, \frac{(x + 2h)^2 - x^2}{h}
+    [() => reduce(binomialShown(polyAdd(U, polyScale(H, rat(rng.chance(0.3) ? 1 : rng.int(2, 3)))), polyAtom(u, 2)), H), 1],
+    // \frac{(x + h)^3 - x^3}{h}
+    [() => reduce(binomialShown(uh, polyAtom(u, 3), 3), H), 1],
+    // \frac{\frac{k}{x + h} - \frac{k}{x}}{h}
+    [() => complex(polyPart(polyConst(k), uh), polyPart(polyConst(k), U), [uh]), 1],
+    // \frac{\frac{k}{(x + h)^2} - \frac{k}{x^2}}{h}
+    [() => complex(part(expanded(polyConst(k)), factoredShown({ coef: rat(1), factors: [{ poly: uh, exp: 2 }] })), polyPart(polyConst(k), polyAtom(u, 2)), [uh]), 1.2],
+    // \frac{\frac{k}{x + h + c} - \frac{k}{x + c}}{h}
+    [() => complex(polyPart(polyConst(k), shift(uh)), polyPart(polyConst(k), shift(U)), [shift(uh), shift(U)]), 1],
+    // \frac{\frac{x + h}{x + h + c} - \frac{x}{x + c}}{h}, auch mit Zahl: \frac{2x + 2h}{x + h + c}
+    [() => complex(polyPart(polyScale(uh, rat(k)), shift(uh)), polyPart(polyScale(U, rat(k)), shift(U)), [shift(uh), shift(U)]), 1.2],
+    // \frac{\frac{x + h + c}{x + h} - \frac{x + c}{x}}{h}
+    [() => complex(polyPart(shift(uh), uh), polyPart(shift(U), U), [uh]), 1],
+    // \frac{\sqrt{x + h} - \sqrt{x}}{h}: h = (\sqrt{x + h})^2 - (\sqrt{x})^2
+    [
+      () => {
+        const [r, rh] = [polyAtom(rootOf(u)), polyAtom(sumRootOf(u))]
+        const den = polySub(polyAtom(sumRootOf(u), 2), polyAtom(rootOf(u), 2))
+        return { kind: 'reduce', part: part(expanded(polyScale(polySub(rh, r), rat(k))), expanded(den)), hints: [], rule: { kind: 'conjugate', target: 'num' } }
+      },
+      1.3,
+    ],
+  ])
+}
+
+// Dritte Potenzen: kürzen wie \frac{x^3 - 8}{x^2 - 4}, \frac{a^2 - b^2}{a^3 - b^3}, oder im Baukasten
+// mit Nennern wie x^3 + 27
+export function cubeTask(rng: Rng): FractionTask {
+  const w = cubeWorld(rng)
+  const [lin, quad, mirror] = w.factors
+  const cube = polyMul(lin, quad)
+  if (rng.chance(0.4)) {
+    const kit = worldKit(w, 4)
+    // mindestens ein Bruch mit einer dritten Potenz
+    const withCube = (root: TreeNode) => treeLeaves(root).some((l) => [partFrac(l.part).num, partFrac(l.part).den].some((q) => polyDivideExact(q, cube) !== null))
+    return buildFromKit(rng, { ...kit, result: profiResult, accept: (root) => withCube(root) && isPlain(root) }, 5)
+  }
+  for (;;) {
+    const other = call(rng, [
+      [() => polyMul(lin, mirror), 3],
+      [() => lin, 1],
+      [() => polyMul(lin, polyAtom(rng.pick(w.letters))), 1],
+      [() => polyScale(lin, rat(rng.int(2, 4))), 1],
+      [() => polyMul(lin, lin), 1],
+      [() => polyScale(quad, rat(rng.int(1, 3))), 0.7],
+    ])
+    const scaled = rng.chance(0.25) ? polyScale(cube, rat(rng.int(2, 3))) : cube
+    const [num, den] = rng.chance(0.65) ? [scaled, other] : [other, scaled]
+    const task: FractionTask = { kind: 'reduce', part: part(expanded(num), expanded(den)), hints: w.factors }
+    if (isUsable(task, 5, 110)) return task
+  }
+}
+
+// Wurzeln: √x mit einer Zahl (auch 2√x − 3) oder zwei Wurzeln wie √x und √a. Kürzen
+// (\frac{x - a}{\sqrt{x} - \sqrt{a}}), Wurzel im Nenner beseitigen (\frac{3}{\sqrt{x} - 2}) und Summen
+// (\frac{1}{\sqrt{a} - \sqrt{b}} + \frac{1}{\sqrt{a} + \sqrt{b}})
+const ROOT_PAIRS: ReadonlyArray<readonly [string, string]> = [
+  ['x', 'a'],
+  ['x', 'y'],
+  ['a', 'b'],
+  ['m', 'n'],
+  ['u', 'v'],
+  ['p', 'q'],
+]
+
+export function rootTask(rng: Rng): FractionTask {
+  let w: World
+  let first: Poly
+  let second: Poly
+  if (rng.chance(0.5)) {
+    const [u, v] = rng.pick(ROOT_PAIRS)
+    first = polyAtom(rootOf(u))
+    second = polyAtom(rootOf(v))
+    w = { letters: [rootOf(u), rootOf(v)], factors: [polySub(first, second), polyAdd(first, second)] }
+  } else {
+    const u = rng.pick(['x', 'x', 'x', 'a', 't'])
+    const k = rng.chance(0.25) ? rng.int(2, 3) : 1
+    first = polyScale(polyAtom(rootOf(u)), rat(k))
+    second = polyConst(rng.pick([1, 2, 3, 4, 5].filter((n) => gcd(n, k) === 1)))
+    w = { letters: [rootOf(u)], factors: [polySub(first, second), polyAdd(first, second)] }
+  }
+  return call(rng, [
+    [() => worldReduce(rng, w, 5), 3],
+    [() => conjugateTask(rng, w), 2.5],
+    [() => rootSum(rng, w), 1.5],
+  ])
+}
+
+// Wurzel im Nenner beseitigen: \frac{3}{\sqrt{x} - 2}, \frac{\sqrt{x} + 1}{\sqrt{x} - 1}, \frac{\sqrt{a}}{\sqrt{a} + \sqrt{b}}
+function conjugateTask(rng: Rng, w: World): FractionTask {
+  const root = polyAtom(w.letters[0])
+  for (;;) {
+    const den = rng.pick(w.factors)
+    const num = call(rng, [
+      [() => polyConst(rng.int(1, 6)), 1.5],
+      [() => polyScale(root, rat(rng.int(1, 3))), 2],
+      [() => polyAtom(rng.pick(w.letters)), 1],
+      [() => rng.pick(w.factors), 1.5],
+      // \frac{\sqrt{x} + 1}{\sqrt{x} - 2}
+      [() => polyAdd(root, polyConst((rng.chance(0.5) ? 1 : -1) * rng.int(1, 4))), w.letters.length === 1 ? 1.5 : 0],
+    ])
+    const task: FractionTask = { kind: 'reduce', part: part(expanded(num), expanded(den)), hints: [], rule: { kind: 'conjugate', target: 'den' } }
+    // es kürzt sich nichts: Der Nenner bleibt, wie er ist
+    const reduced = reduceFrac({ num, den })
+    if (reduced.den.factors.length !== 1 || !polyEquals(reduced.den.factors[0].poly, primitivePart(den))) continue
+    if (isUsable(task, 5, 110)) return task
+  }
+}
+
+// Summe mit Wurzeln im Nenner: Hauptnenner (√x − 3)(√x + 3) = x − 9
+function rootSum(rng: Rng, w: World): FractionTask {
+  const [minusP, plusP] = w.factors
+  const numer = () => (rng.chance(0.7) ? polyConst(rng.int(1, 4)) : polyAtom(rng.pick(w.letters)))
+  for (;;) {
+    const [a, b] = rng.shuffle([polyPart(numer(), minusP), polyPart(numer(), plusP)])
+    const task: FractionTask = { kind: 'sum', terms: [plus(a), rng.chance(0.5) ? minus(b) : plus(b)], hints: w.factors, rule: { kind: 'root' } }
+    if (isUsable(task, 5, 110)) return task
+  }
+}
+
+// e^x, ln x, sin x und cos x gemischt: kürzen wie \frac{e^x \ln x - 2e^x + \ln x - 2}{\ln^2 x - 4} oder im Baukasten
+export function blockPairTask(rng: Rng): FractionTask {
+  const w = blockPairWorld(rng)
+  return rng.chance(0.6) ? worldReduce(rng, w, 5) : buildFromKit(rng, { ...worldKit(w, 4), result: profiResult, accept: (root) => hasSumLeaf(root) && isPlain(root) }, 5)
 }

@@ -15,6 +15,7 @@ import {
   polyScale,
   polySub,
   polySubstitute,
+  polySum,
 } from './poly.ts'
 
 // Brüche aus zwei Polynomen (Zähler, Nenner) und die Übersetzung zwischen Termbaum und Polynom.
@@ -25,6 +26,7 @@ import {
 //
 // Bausteine mit eigenen Regeln (Stufe 5):
 // - R = √x mit R² = x: In Aufgaben mit Wurzel wird nur mit R gerechnet (x als R², rootForm).
+//   Ebenso √a (Ra) und √(x + h) (Rx+h, mit h = (√(x + h))² − x), siehe „Wurzeln“ unten.
 // - S² + C² = 1: Beim Vergleichen wird C² durch 1 − S² ersetzt, bis höchstens C¹ übrig bleibt
 //   (trigRewrite, isZeroValue).
 // - tan x = S / C
@@ -54,12 +56,59 @@ export function fracDiv(a: Frac, b: Frac): Frac {
   return { num: polyMul(a.num, b.den), den: polyMul(a.den, b.num) }
 }
 
-// x → (√x)², wenn eine Wurzel vorkommt; sonst unverändert
-export function rootPoly(p: Poly): Poly {
-  return atomsOf(p).includes('R') ? polySubstitute(p, 'x', polyAtom('R', 2)) : p
+// --- Wurzeln ---
+
+// Wurzeln als Bausteine: R = √x, Ra = √a (je Buchstabe), Rx+h = √(x + h) (beim
+// Differenzenquotienten). Gerechnet wird mit der Wurzel: Der Buchstabe darunter wird zu ihrem
+// Quadrat (x = R², a = Ra²), bei √(x + h) wird h zu (√(x + h))² − x.
+export const isRootAtom = (atom: string) => atom === 'R' || /^R[a-z]/.test(atom)
+export const rootOf = (letter: string) => (letter === 'x' ? 'R' : `R${letter}`)
+export const sumRootOf = (letter: string) => `R${letter}+h`
+export const isSumRoot = (atom: string) => isRootAtom(atom) && atom.includes('+')
+
+// Buchstaben unter der Wurzel: R → [x], Ra → [a], Rx+h → [x, h]
+export const radicandLetters = (atom: string): string[] => (atom === 'R' ? ['x'] : atom.slice(1).split('+'))
+
+export const rootAtomsOf = (p: Poly) => atomsOf(p).filter(isRootAtom)
+
+// Buchstaben unter den Wurzeln durch die Wurzeln ausdrücken (erst h bei √(x + h), dann x = (√x)²)
+export function rootFormWith(p: Poly, roots: readonly string[]): Poly {
+  let q = p
+  for (const r of roots.filter(isSumRoot)) {
+    const [u, v] = radicandLetters(r)
+    q = polySubstitute(q, v, polySub(polyAtom(r, 2), polyAtom(u)))
+  }
+  for (const r of roots.filter((a) => !isSumRoot(a))) q = polySubstitute(q, radicandLetters(r)[0], polyAtom(r, 2))
+  return q
 }
 
-export const rootForm = (f: Frac): Frac => ({ num: polySubstitute(f.num, 'x', polyAtom('R', 2)), den: polySubstitute(f.den, 'x', polyAtom('R', 2)) })
+// Mit den Wurzeln, die vorkommen, umgeschrieben; ohne Wurzel unverändert
+export function rootPoly(p: Poly): Poly {
+  const roots = rootAtomsOf(p)
+  return roots.length > 0 ? rootFormWith(p, roots) : p
+}
+
+// Ein Bruch mit den Wurzeln einer Aufgabe umgeschrieben (Eingabe im freien Modus)
+export const rootForm = (f: Frac, roots: readonly string[] = ['R']): Frac => ({ num: rootFormWith(f.num, roots), den: rootFormWith(f.den, roots) })
+
+// Zum Schreiben: (√(x + h))² als x + h, zusammengefasst; so wird (√(x + h))² − x wieder zu h
+function displayRoots(p: Poly): Poly {
+  const sums = atomsOf(p).filter((a) => isSumRoot(a) && p.some((t) => (t.mono.find(([b]) => b === a)?.[1] ?? 0) >= 2))
+  let q = p
+  for (const r of sums) {
+    const [u, v] = radicandLetters(r)
+    const radicand = polyAdd(polyAtom(rootOf(u), 2), polyAtom(v))
+    q = polySum(
+      q.map((t) => {
+        const k = t.mono.find(([a]) => a === r)?.[1] ?? 0
+        if (k < 2) return [t]
+        const rest = { mono: [...t.mono.filter(([a]) => a !== r), ...(k % 2 === 1 ? [[r, 1] as const] : [])], coef: t.coef }
+        return polyMul([rest], polyPow(radicand, Math.floor(k / 2)))
+      }),
+    )
+  }
+  return q
+}
 
 // sin² x + cos² x = 1 anwenden: Potenzen ab 2 des einen Bausteins (atom, S oder C) ersetzen,
 // z. B. atom C: cos² x → 1 − sin² x, cos³ x → cos x (1 − sin² x)
@@ -128,8 +177,14 @@ export function toFrac(e: Expr): Frac | null {
       return LETTERS.has(e.name) ? fracOf(polyAtom(e.name)) : null
     case 'const':
       return e.name === 'e' ? fracOf(polyAtom('e')) : null
-    case 'root':
-      return e.index === 2 && e.arg.kind === 'var' && e.arg.name === 'x' ? fracOf(polyAtom('R')) : null
+    case 'root': {
+      if (e.index !== 2) return null
+      if (e.arg.kind === 'var' && LETTERS.has(e.arg.name)) return fracOf(polyAtom(rootOf(e.arg.name)))
+      // √(x + h)
+      const names = e.arg.kind === 'add' && e.arg.terms.every((t) => t.kind === 'var') ? e.arg.terms.map((t) => (t.kind === 'var' ? t.name : '')) : []
+      const other = names.find((n) => n !== 'h')
+      return names.length === 2 && names.includes('h') && other && LETTERS.has(other) ? fracOf(polyAtom(sumRootOf(other))) : null
+    }
     case 'add': {
       let sum = fracOf(polyConst(0))
       for (const t of e.terms) {
@@ -165,9 +220,9 @@ export function toFrac(e: Expr): Frac | null {
         const c = integerExponent(e.exp)
         return c === null ? null : power(fracOf(polyAtom('e')), c)
       }
-      // x^{1/2} = √x, x^{3/2} = x√x
-      const half = e.base.kind === 'var' && e.base.name === 'x' ? halfExponent(e.exp) : null
-      if (half !== null) return power(fracOf(polyAtom('R')), half)
+      // x^{1/2} = √x, x^{3/2} = x√x (auch bei anderen Buchstaben)
+      const half = e.base.kind === 'var' && LETTERS.has(e.base.name) ? halfExponent(e.exp) : null
+      if (half !== null && e.base.kind === 'var') return power(fracOf(polyAtom(rootOf(e.base.name))), half)
       const k = integerExponent(e.exp)
       const base = toFrac(e.base)
       if (k === null || !base || (k < 0 && isZeroPoly(base.num))) return null
@@ -193,15 +248,23 @@ export function atomPowerExpr(atom: string, k: number): Expr {
   const base = atomExpr(atom)
   if (k === 1) return base
   if (atom === 'E') return exp(mul(num(k), x))
-  if (atom === 'R') {
+  if (isRootAtom(atom)) {
+    const radicand = radicandExpr(atom)
     const whole = Math.floor(k / 2)
-    const xPart = whole === 1 ? x : pow(x, num(whole))
-    return k % 2 === 0 ? xPart : mul(xPart, sqrt(x))
+    const plain = whole === 1 ? radicand : pow(radicand, num(whole))
+    return k % 2 === 0 ? plain : mul(plain, sqrt(radicand))
   }
   return pow(base, num(k))
 }
 
+// Term unter der Wurzel: x, a, x + h
+function radicandExpr(atom: string): Expr {
+  const letters = radicandLetters(atom).map((l) => variable(l))
+  return letters.length === 1 ? letters[0] : add(...letters)
+}
+
 function atomExpr(atom: string): Expr {
+  if (isRootAtom(atom)) return sqrt(radicandExpr(atom))
   switch (atom) {
     case 'E':
       return exp(x)
@@ -211,8 +274,6 @@ function atomExpr(atom: string): Expr {
       return sin(x)
     case 'C':
       return cos(x)
-    case 'R':
-      return sqrt(x)
     case 'e':
       return EULER
     default:
@@ -224,7 +285,13 @@ function atomExpr(atom: string): Expr {
 // (ax, 2xy), Bausteine in fester Reihenfolge (\sin x \cos x)
 const BLOCK_ORDER = ['E', 'L', 'S', 'C', 'T', 'R']
 export const displayRank = (atom: string) =>
-  atom === 'e' ? 0 : BLOCK_ORDER.includes(atom) ? 100 + BLOCK_ORDER.indexOf(atom) : atom.charCodeAt(0)
+  atom === 'e'
+    ? 0
+    : BLOCK_ORDER.includes(atom)
+      ? 100 + BLOCK_ORDER.indexOf(atom)
+      : isRootAtom(atom)
+        ? 100 + BLOCK_ORDER.indexOf('R') + (isSumRoot(atom) ? -0.5 : 0.5)
+        : atom.charCodeAt(0)
 
 export const monoExpr = (m: Monomial): Expr[] =>
   [...m].sort(([a], [b]) => displayRank(a) - displayRank(b)).map(([atom, k]) => atomPowerExpr(atom, k))
@@ -245,8 +312,9 @@ function termExpr(coef: Rational, mono: Monomial): Expr {
 
 // Polynom als Summe; ascending: kleinster Grad zuerst (9 − x² statt −x² + 9)
 export function polyExpr(p: Poly, order: 'descending' | 'ascending' = 'descending'): Expr {
-  if (p.length === 0) return num(0)
-  const terms = order === 'ascending' ? [...p].reverse() : p
+  const shown = displayRoots(p)
+  if (shown.length === 0) return num(0)
+  const terms = order === 'ascending' ? [...shown].reverse() : shown
   return add(...terms.map((t) => termExpr(t.coef, t.mono)))
 }
 

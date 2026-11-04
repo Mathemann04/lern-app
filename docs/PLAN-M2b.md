@@ -189,6 +189,13 @@ vier Zeilen (`frac-order`, `frac-bracket-ignored`,
 Ausklammern in Gruppen" (`frac-group-sign`), mit den Lernkarten „Zerlegen mit
 Zahl vorn" und „In Gruppen ausklammern"; „Vorzeichen beim Zerlegen vertauscht"
 und „binomische Formeln verwechselt" gibt es jetzt auch mit zwei Buchstaben.
+In Schritt 3: „Dritte Potenz wie ein Quadrat zerlegt" (`frac-cube-as-square`)
+und zur Wurzel im Nenner drei Fehler: „Zahl nicht quadriert"
+(`frac-conjugate-square`), „mit derselben Summe statt mit dem Gegenstück
+erweitert" (`frac-conjugate-sign`) und „nur Zähler oder nur Nenner
+malgenommen" (`frac-conjugate-one-side`), mit den Lernkarten „Dritte
+Potenzen" und „Wurzeln im Nenner beseitigen". „Mittelglied vergessen" gilt
+jetzt auch für $(x + h)^3$.
 
 ### Schritte
 
@@ -225,6 +232,18 @@ der Stufe 4 frei.
 
 **Ausprobieren:** $\frac{x - a}{\sqrt{x} - \sqrt{a}}$ und ein
 Differenzenquotient in beiden Arten (geführt und frei).
+
+**Umgesetzt:** Stufe 5 hat sieben Vorlagen mit Anteilen: alles ineinander
+(Baukasten mit drei oder vier Brüchen, mindestens zwei Rechenarten, oft
+drei, Doppelbruch auch im Inneren), Doppelbruch im Doppelbruch,
+Differenzenquotienten ($x^2$, $x^3$, $\frac{k}{x}$, $\frac{k}{x^2}$,
+$\frac{k}{x + c}$, $\frac{x}{x + c}$, $\frac{x + c}{x}$, $\sqrt{x}$),
+dritte Potenzen, Wurzeln (kürzen, Wurzel im Nenner beseitigen, Summen; auch
+$\sqrt{x}$ und $\sqrt{a}$ zusammen), Winkelfunktionen sowie $e^x$, $\ln x$,
+$\sin x$, $\cos x$ gemischt. Gemessen in 200 Aufgaben: 161 Formen, keine
+öfter als 2,5 %. Die Engine rechnet mit Wurzeln aus jedem Buchstaben und mit
+$\sqrt{x + h}$; „Wurzel beseitigen" ist eine eigene Regel mit den
+Schritten „mit dem Gegenstück erweitern" und „ausmultiplizieren".
 
 #### Schritt 4: Stufe 5, Teil 2: Partialbruchzerlegung
 - **Geführt:**

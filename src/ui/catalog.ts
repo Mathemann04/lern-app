@@ -122,8 +122,8 @@ const fractionLevels: LevelPreview[] = [
   {
     level: 5,
     available: true,
-    title: 'Profi: mehrere Rechenarten, zwei Variablen, Wurzeln und Winkelfunktionen',
-    examples: [String.raw`\frac{\frac{1}{x+h} - \frac{1}{x}}{h}`, String.raw`\frac{x-1}{\sqrt{x}-1}`, String.raw`\frac{1}{1-\sin x} + \frac{1}{1+\sin x}`],
+    title: 'Profi: alles ineinander, Differenzenquotienten, dritte Potenzen, Wurzeln, Winkelfunktionen, e und ln',
+    examples: [String.raw`\frac{\sqrt{x+h} - \sqrt{x}}{h}`, String.raw`\frac{x-a}{\sqrt{x}-\sqrt{a}}`, String.raw`\frac{a^3 - b^3}{a^2 - b^2}`],
   },
 ]
 

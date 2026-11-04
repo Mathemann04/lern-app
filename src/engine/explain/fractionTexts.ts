@@ -154,8 +154,28 @@ export const FRACTION_ERROR_TEXTS: Readonly<Record<string, Explanation>> = {
   },
   'frac-binomial-middle': {
     detailed:
-      'Beim Quadrieren einer Summe fehlt sonst das Mittelglied. Nutze die binomische Formel: $(a + b)^2 = a^2 + 2ab + b^2$, also zum Beispiel $(\\sqrt{x} + 1)^2 = x + 2\\sqrt{x} + 1$.',
-    short: 'Mittelglied nicht vergessen: $(a + b)^2 = a^2 + 2ab + b^2$.',
+      'Beim Quadrieren einer Summe fehlt sonst das Mittelglied. Nutze die binomische Formel: $(a + b)^2 = a^2 + 2ab + b^2$, also zum Beispiel $(\\sqrt{x} + 1)^2 = x + 2\\sqrt{x} + 1$. Bei der dritten Potenz gibt es zwei Mittelglieder: $(a + b)^3 = a^3 + 3a^2b + 3ab^2 + b^3$.',
+    short: 'Mittelglieder nicht vergessen: $(a + b)^2 = a^2 + 2ab + b^2$.',
+  },
+  'frac-cube-as-square': {
+    detailed:
+      'Für dritte Potenzen gibt es eine eigene Formel: $a^3 - b^3 = (a - b)(a^2 + ab + b^2)$ und $a^3 + b^3 = (a + b)(a^2 - ab + b^2)$. In der zweiten Klammer steht ein Mittelglied $ab$. Probe: Ausmultiplizieren muss wieder genau den Term ergeben.',
+    short: 'Mit Mittelglied: $a^3 - b^3 = (a - b)(a^2 + ab + b^2)$.',
+  },
+  'frac-conjugate-one-side': {
+    detailed:
+      'Erweitern heißt: Zähler und Nenner mit demselben Term malnehmen. Nur dann bleibt der Wert des Bruchs gleich. Nimmst du nur eine Seite mit dem Gegenstück mal, ändert sich der Wert.',
+    short: 'Erweitern: Zähler und Nenner mit dem Gegenstück malnehmen.',
+  },
+  'frac-conjugate-sign': {
+    detailed:
+      'Das Gegenstück hat in der Mitte das andere Vorzeichen: zu $\\sqrt{x} - 2$ gehört $\\sqrt{x} + 2$. Nur dann gilt die dritte binomische Formel $(a - b)(a + b) = a^2 - b^2$. Mit derselben Summe entsteht ein Quadrat, $(\\sqrt{x} - 2)^2 = x - 4\\sqrt{x} + 4$, und die Wurzel bleibt.',
+    short: 'Vorzeichen in der Mitte umdrehen: zu $\\sqrt{x} - 2$ gehört $\\sqrt{x} + 2$.',
+  },
+  'frac-conjugate-square': {
+    detailed:
+      'Mit der dritten binomischen Formel $(a - b)(a + b) = a^2 - b^2$ wird jeder Teil ganz quadriert, auch die Zahl: $(\\sqrt{x} - 2)(\\sqrt{x} + 2) = (\\sqrt{x})^2 - 2^2 = x - 4$, und $(2\\sqrt{x})^2 = 4x$.',
+    short: 'Beide Teile ganz quadrieren: $(\\sqrt{x} - 2)(\\sqrt{x} + 2) = x - 4$.',
   },
   'frac-cancel-inside': {
     detailed:
@@ -278,8 +298,8 @@ export function explainReciprocal(divisor: Expr, reciprocal: Expr, complex: bool
 }
 
 // Wie ein Term zerlegt wird: ausklammern, binomische Formel, x² + px + q, mit Zahl vor x², mit zwei
-// Buchstaben (a² − ab − 2b²), in Gruppen ausklammern
-export type FactorMethod = 'out' | 'binomial' | 'quadratic' | 'leading' | 'twoLetters' | 'grouping'
+// Buchstaben (a² − ab − 2b²), in Gruppen ausklammern, dritte Potenzen (a³ − b³)
+export type FactorMethod = 'out' | 'binomial' | 'quadratic' | 'leading' | 'twoLetters' | 'grouping' | 'cubes'
 
 const METHOD_TEXT: Record<FactorMethod, string> = {
   out: 'ausklammern',
@@ -288,6 +308,7 @@ const METHOD_TEXT: Record<FactorMethod, string> = {
   leading: 'Nullstellen, dabei die Zahl vor dem Quadrat mitnehmen',
   twoLetters: 'wie $x^2 + px + q$, nur mit dem zweiten Buchstaben hinter jeder Zahl',
   grouping: 'in Gruppen ausklammern',
+  cubes: 'Formel für dritte Potenzen',
 }
 
 export function explainFactor(before: Expr, after: Expr, numerator: boolean, methods: readonly FactorMethod[] = []): Explanation {
@@ -316,11 +337,28 @@ export function explainInnerComplex(inner: Expr, result: Expr): Explanation {
 }
 
 // (u + v)² − w ausmultiplizieren: square ist (u + v)² = u² + 2uv + v² (als Gleichung), before und
-// after der ganze Term vorher und nachher
-export function explainMultiplyOut(square: readonly [Expr, Expr], before: Expr, after: Expr): Explanation {
+// after der ganze Term vorher und nachher; bei (u + v)³ mit der Formel für die dritte Potenz
+export function explainMultiplyOut(square: readonly [Expr, Expr], before: Expr, after: Expr, cube = false): Explanation {
   return {
-    detailed: `Multipliziere die Klammer mit der binomischen Formel aus: $${toLatex(square[0])} = ${toLatex(square[1])}$. Dann fasse zusammen: $${toLatex(before)} = ${toLatex(after)}$. Erst danach siehst du, welcher Faktor sich kürzen lässt.`,
+    detailed: `Multipliziere die Klammer ${cube ? 'mit $(a + b)^3 = a^3 + 3a^2b + 3ab^2 + b^3$' : 'mit der binomischen Formel'} aus: $${toLatex(square[0])} = ${toLatex(square[1])}$. Dann fasse zusammen: $${toLatex(before)} = ${toLatex(after)}$. Erst danach siehst du, welcher Faktor sich kürzen lässt.`,
     short: `$${toLatex(square[0])} = ${toLatex(square[1])}$, also $${toLatex(before)} = ${toLatex(after)}$.`,
+  }
+}
+
+// Wurzel beseitigen: side ist die Summe mit Wurzel, conj ihr Gegenstück
+export function explainConjugate(side: Expr, conj: Expr, inNumerator: boolean): Explanation {
+  return {
+    detailed: `Im ${inNumerator ? 'Zähler' : 'Nenner'} steht die Summe mit Wurzel ${m(side)}. Ihr Gegenstück ${m(conj)} hat dieselben Teile, nur das Vorzeichen in der Mitte ist umgedreht. Erweitere damit: Zähler und Nenner mal ${m(conj)}. Mit der dritten binomischen Formel verschwindet dann die Wurzel.`,
+    short: `Zähler und Nenner mal ${m(conj)}.`,
+  }
+}
+
+// Dritte binomische Formel mit Wurzeln: product ist (a − b)(a + b), after a² − b² ausgerechnet
+export function explainConjugateProduct(product: Expr, after: Expr, inNumerator: boolean): Explanation {
+  const equation = `$${toLatex(product)} = ${toLatex(after)}$`
+  return {
+    detailed: `Dritte binomische Formel $(a - b)(a + b) = a^2 - b^2$, jeder Teil wird ganz quadriert, und das Quadrat hebt die Wurzel auf: ${equation}. ${inNumerator ? 'Jetzt steht im Zähler keine Wurzel mehr, und du kannst kürzen.' : 'Jetzt steht im Nenner keine Wurzel mehr.'}`,
+    short: `${equation}.`,
   }
 }
 
@@ -357,12 +395,15 @@ export const FRACTION_HINTS = {
     'Steht eine Zahl $a$ vor dem Quadrat, bestimme die Nullstellen $x_1$ und $x_2$. Dann ist $ax^2 + bx + c = a(x - x_1)(x - x_2)$; die Zahl $a$ kann in eine Klammer wandern.',
   factorTwoLetters: 'Rechne wie bei $x^2 + px + q$, nur steht hinter jeder Zahl der zweite Buchstabe: $a^2 + pab + qb^2 = (a + cb)(a + db)$ mit $c \\cdot d = q$ und $c + d = p$.',
   factorGrouping: 'Fasse je zwei Summanden zu einer Gruppe zusammen und klammere aus jeder Gruppe aus. Steht danach in beiden Klammern dasselbe, klammere es noch einmal aus.',
+  factorCubes: 'Zwei dritte Potenzen: $a^3 - b^3 = (a - b)(a^2 + ab + b^2)$ und $a^3 + b^3 = (a + b)(a^2 - ab + b^2)$.',
+  conjugate: 'Erweitere mit dem Gegenstück der Summe mit Wurzel: dieselben Teile, das Vorzeichen in der Mitte umgedreht. Zähler und Nenner werden damit malgenommen.',
+  conjugateProduct: 'Dritte binomische Formel: $(a - b)(a + b) = a^2 - b^2$. Quadriere jeden Teil ganz, auch die Zahl davor.',
   inner: 'Fasse diesen Teil wie eine eigene Aufgabe zu einem Bruch zusammen.',
   innerComplex: 'Beginne innen: Löse den inneren Doppelbruch wie eine eigene Aufgabe auf.',
-  multiplyOut: 'Binomische Formel: $(a + b)^2 = a^2 + 2ab + b^2$. Danach gleichartige Summanden zusammenfassen.',
+  multiplyOut: 'Binomische Formel: $(a + b)^2 = a^2 + 2ab + b^2$, bei der dritten Potenz $(a + b)^3 = a^3 + 3a^2b + 3ab^2 + b^3$. Danach gleichartige Summanden zusammenfassen.',
   trig: 'Stelle $\\sin^2 x + \\cos^2 x = 1$ passend um, z. B. zu $1 - \\cos^2 x = \\sin^2 x$.',
   root: 'Dritte binomische Formel mit $(\\sqrt{x})^2 = x$: $(\\sqrt{x} - a)(\\sqrt{x} + a) = x - a^2$.',
-  rootFactor: 'Schreibe $x$ als $(\\sqrt{x})^2$, dann hilft die dritte binomische Formel: $x - a^2 = (\\sqrt{x} - a)(\\sqrt{x} + a)$.',
+  rootFactor: 'Schreibe $x$ als $(\\sqrt{x})^2$, dann hilft die dritte binomische Formel: $x - a^2 = (\\sqrt{x} - a)(\\sqrt{x} + a)$, ebenso $x - a = (\\sqrt{x} - \\sqrt{a})(\\sqrt{x} + \\sqrt{a})$.',
   decimal: 'Zähle die Stellen nach dem Komma: eine Stelle sind Zehntel, zwei Hundertstel, drei Tausendstel. Schreibe die Ziffern über die passende Zehnerpotenz und kürze.',
   order: 'Klammern zuerst, dann Punkt vor Strich (mal und geteilt vor plus und minus).',
   part: 'Rechne diesen Teil wie eine eigene Aufgabe.',

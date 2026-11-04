@@ -2,9 +2,9 @@ import { explainFractionError, listing } from '../explain/fractionTexts.ts'
 import { type Expr, mul } from '../expr/types.ts'
 import { type FracWrong, fractionWrongAnswers } from '../fraction/errorRules.ts'
 import { factoredPoly, reduceFrac } from '../fraction/factor.ts'
-import { type Frac, fracDiv, fracEquals, fracNeg, rootForm, toFrac } from '../fraction/frac.ts'
+import { type Frac, fracDiv, fracEquals, fracNeg, isRootAtom, radicandLetters, rootForm, toFrac } from '../fraction/frac.ts'
 import { atomsOf, constValue, isZeroPoly, polyContent, totalDegree } from '../fraction/poly.ts'
-import { type FracSolution, solveFraction } from '../fraction/solve.ts'
+import { type FracSolution, rationalizedFrac, solveFraction } from '../fraction/solve.ts'
 import { type FractionTask, partsOf, shownPoly } from '../fraction/task.ts'
 import { parseLatex } from '../parse/latex.ts'
 import { isInteger, ratAbs } from '../rational.ts'
@@ -35,10 +35,12 @@ export type FractionCheckContext = {
   readonly blocks: boolean
   // √x in der Aufgabe: Die Eingabe wird in √x umgerechnet (x = (√x)²)
   readonly root: boolean
+  // die Wurzeln der Aufgabe (R = √x, Ra = √a, Rx+h = √(x + h)), in die umgerechnet wird
+  readonly roots: readonly string[]
 }
 
 // Warum ein gleichwertiges Ergebnis noch nicht fertig ist
-export type Unfinished = 'several' | 'nested' | 'numerator' | 'denominator' | 'not-reduced' | 'product' | 'decimal'
+export type Unfinished = 'several' | 'nested' | 'numerator' | 'denominator' | 'not-reduced' | 'product' | 'decimal' | 'conjugate'
 
 export type FractionVerdict =
   | { readonly kind: 'unreadable'; readonly message: string }
@@ -57,11 +59,12 @@ export function prepareFractionCheck(task: FractionTask): FractionCheckContext {
   const solution = solveFraction(task)
   const atoms = [...new Set(partsOf(task).flatMap((p) => [...atomsOf(shownPoly(p.num)), ...atomsOf(shownPoly(p.den))]))]
   const blocks = atoms.some((a) => BLOCK_ATOMS.includes(a))
-  const root = atoms.includes('R')
-  // x und y zuerst, dann alphabetisch
+  const roots = atoms.filter(isRootAtom)
+  const root = roots.length > 0
+  // x und y zuerst, dann alphabetisch; bei √a auch a
   const rank = (l: string) => (l === 'x' ? 0 : l === 'y' ? 1 : 2)
-  const letters = [...new Set([...atoms.filter(isLetter), ...(blocks || root ? ['x'] : [])])].sort((a, b) => rank(a) - rank(b) || a.localeCompare(b))
-  return { task, solution, wrongs: fractionWrongAnswers(task, solution), letters, blocks, root }
+  const letters = [...new Set([...atoms.filter(isLetter), ...roots.flatMap(radicandLetters), ...(blocks ? ['x'] : [])])].sort((a, b) => rank(a) - rank(b) || a.localeCompare(b))
+  return { task, solution, wrongs: fractionWrongAnswers(task, solution), letters, blocks, root, roots }
 }
 
 export function checkFractionAnswer(context: FractionCheckContext, latex: string): FractionVerdict {
@@ -83,11 +86,11 @@ export function checkFractionAnswer(context: FractionCheckContext, latex: string
   const parsedValue = toFrac(answer)
   // etwas, das die Bruch-Engine nicht kennt (z. B. eine dritte Wurzel), oder geteilt durch null
   if (!parsedValue || isZeroPoly(parsedValue.den)) return { kind: 'wrong', answer }
-  const value = context.root ? rootForm(parsedValue) : parsedValue
+  const value = context.root ? rootForm(parsedValue, context.roots) : parsedValue
 
   const correct = context.solution.value
   if (fracEquals(value, correct)) {
-    const reason = unfinished(answer, value, context.solution)
+    const reason = unfinished(answer, value, context.solution, context.task)
     return reason ? { kind: 'unfinished', answer, reason } : { kind: 'correct', answer }
   }
   const wrong = context.wrongs.find((w) => w.value && fracEquals(value, w.value))
@@ -149,13 +152,34 @@ function parts(answer: Expr): { num: Expr; den: Expr | null } | Unfinished {
   return 'several'
 }
 
+// Eine Summe außerhalb einer Wurzel (√(x + h) zählt nicht)
+function hasBracketSum(e: Expr): boolean {
+  switch (e.kind) {
+    case 'add':
+      return true
+    case 'mul':
+      return e.factors.some(hasBracketSum)
+    case 'neg':
+    case 'fn':
+      return hasBracketSum(e.arg)
+    case 'div':
+      return hasBracketSum(e.num) || hasBracketSum(e.den)
+    case 'pow':
+      return hasBracketSum(e.base) || hasBracketSum(e.exp)
+    case 'log':
+      return hasBracketSum(e.base) || hasBracketSum(e.arg)
+    default:
+      return false
+  }
+}
+
 // Eine Summe ist zusammengefasst, wenn keiner ihrer Summanden eine Klammer mit Summe enthält und
 // keine zwei gleichartig sind (3x + 2x, 4 + 1). In Produkten zählt jede Klammer für sich.
 function isCombined(e: Expr): boolean {
   let core = e
   while (core.kind === 'neg') core = core.arg
   if (core.kind === 'add') {
-    if (core.terms.some((t) => containsKind(t, 'add'))) return false
+    if (core.terms.some(hasBracketSum)) return false
     const seen = new Set<string>()
     for (const t of core.terms) {
       const f = toFrac(t)
@@ -201,6 +225,13 @@ function hasOpenProduct(e: Expr): boolean {
   }
 }
 
+// Steht eine Wurzel im Term (√x oder x^{1/2})?
+function hasRoot(e: Expr): boolean {
+  if (containsKind(e, 'root')) return true
+  const f = toFrac(e)
+  return f !== null && [...f.num, ...f.den].some((t) => t.mono.some(([a, k]) => isRootAtom(a) && k % 2 === 1))
+}
+
 // Kommt eine Dezimalzahl vor (0,75)?
 function hasDecimal(e: Expr): boolean {
   if (e.kind === 'num') return e.value.d !== 1n
@@ -220,15 +251,19 @@ function hasDecimal(e: Expr): boolean {
   }
 }
 
-function unfinished(answer: Expr, value: Frac, solution: FracSolution): Unfinished | null {
+function unfinished(answer: Expr, value: Frac, solution: FracSolution, task: FractionTask): Unfinished | null {
   if (hasDecimal(answer)) return 'decimal'
   if (hasOpenProduct(answer)) return 'product'
   const shape = parts(answer)
   if (typeof shape === 'string') return shape
   if (!isCombined(shape.num)) return 'numerator'
   if (shape.den && !isCombined(shape.den)) return 'denominator'
+  // Wurzel beseitigen: Im Nenner steht keine Wurzel mehr (bzw. beim Differenzenquotienten ist h gekürzt)
+  const conjugate = task.rule?.kind === 'conjugate' ? task.rule.target : null
+  if (conjugate === 'den' && shape.den && hasRoot(shape.den)) return 'conjugate'
+  const target = conjugate === 'den' ? rationalizedFrac(solution.reduced) : null
   // Gekürzt: Nenner vom selben Grad wie im gekürzten Ergebnis, Zahlen ohne gemeinsamen Teiler
-  if (totalDegree(value.den) > totalDegree(factoredPoly(solution.reduced.den))) return 'not-reduced'
+  if (totalDegree(value.den) > (target ? totalDegree(target.den) : totalDegree(factoredPoly(solution.reduced.den)))) return conjugate === 'num' ? 'conjugate' : 'not-reduced'
   const [cn, cd] = [polyContent(value.num), polyContent(value.den)]
   if (!isInteger(cn) || !isInteger(cd)) return 'not-reduced'
   let g = ratAbs(cn).n
@@ -246,6 +281,8 @@ export const UNFINISHED_TEXTS: Readonly<Record<Unfinished, string>> = {
   'not-reduced': 'Noch nicht vollständig gekürzt. Zerlege Zähler und Nenner in Faktoren und kürze, was oben und unten steht.',
   product: 'Rechne das Produkt noch aus: Zahlen malnehmen und gleiche Buchstaben zusammenfassen, z. B. $3 \\cdot 4a \\cdot a = 12a^2$.',
   decimal: 'Schreibe das Ergebnis als Bruch, ohne Dezimalzahl.',
+  conjugate:
+    'Noch nicht fertig: Erweitere mit dem Gegenstück der Summe mit Wurzel (dieselben Teile, anderes Vorzeichen). Mit der dritten binomischen Formel verschwindet die Wurzel aus dem Nenner, beim Differenzenquotienten kürzt sich danach $h$.',
 }
 
 export function fractionFreeVerdict(v: FractionVerdict): FreeVerdict {
