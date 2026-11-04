@@ -7,9 +7,11 @@ import {
   constValue,
   degreeIn,
   gcdUnivariate,
+  hasIntegerCoefficients,
   isUnitTrigLinear,
   isZeroPoly,
   lcmBig,
+  monoDegree,
   monomialContent,
   polyConst,
   polyContent,
@@ -18,6 +20,8 @@ import {
   polyMul,
   polyPow,
   polyScale,
+  polySubstitute,
+  polySum,
   primitivePart,
   totalDegree,
 } from './poly.ts'
@@ -25,9 +29,11 @@ import {
 // Zerlegen in Faktoren wie im Skript, kleinstes gemeinsames Vielfaches (Hauptnenner) und Kürzen.
 //
 // Zerlegt wird: Zahl ausklammern, gemeinsame Potenzen ausklammern (3x² + 6x = 3x(x + 2)), durch
-// bekannte Faktoren der Aufgabe teilen (hints, auch bei mehreren Buchstaben) und bei einem
-// Buchstaben über rationale Nullstellen (x² − 9 = (x − 3)(x + 3), x² − x − 6 = (x − 3)(x + 2)).
-// Was übrig bleibt (z. B. x² + 1), gilt als nicht weiter zerlegbar.
+// bekannte Faktoren der Aufgabe teilen (hints, auch bei mehreren Buchstaben), bei einem
+// Buchstaben über rationale Nullstellen (x² − 9 = (x − 3)(x + 3), x² − x − 6 = (x − 3)(x + 2),
+// 2x² − x − 3 = (x + 1)(2x − 3)), bei mehreren Buchstaben in Gruppen (ax − ay + bx − by =
+// (x − y)(a + b)) und bei zwei Buchstaben mit gleichem Grad wie bei einem (a² − ab − 2b² =
+// (a + b)(a − 2b)). Was übrig bleibt (z. B. x² + 1), gilt als nicht weiter zerlegbar.
 
 export type Factor = { readonly poly: Poly; readonly exp: number }
 // coef · f₁^e₁ · f₂^e₂ …; jedes fᵢ ganzzahlig, teilerfremd, erster Summand positiv, verschieden
@@ -131,12 +137,65 @@ export function factorize(p: Poly, hints: readonly Poly[] = []): Factored {
     for (const f of split.linear) factors = withFactor(factors, f, 1)
     rest = split.rest
   }
+  // Mehrere Buchstaben: in Gruppen ausklammern, dann beide Teile weiter zerlegen
+  const group = atoms.length >= 2 && constValue(rest) === null ? groupFactor(rest) : null
+  if (group) {
+    const parts = [factorize(group, hints), factorize(polyDivideExact(rest, group)!, hints)]
+    for (const part of parts) for (const f of part.factors) factors = withFactor(factors, f.poly, f.exp)
+    return { coef: ratMul(unit, ratMul(parts[0].coef, parts[1].coef)), factors }
+  }
+  // Zwei Buchstaben, jeder Summand vom selben Grad: wie bei einem Buchstaben, z. B. a² − ab − 2b²
+  if (atoms.length === 2 && constValue(rest) === null) {
+    const split = splitHomogeneous(rest)
+    if (split) {
+      for (const f of split.linear) factors = withFactor(factors, f, 1)
+      rest = split.rest
+    }
+  }
   if (constValue(rest) === null) {
     const restUnit = polyContent(rest)
     factors = withFactor(factors, polyScale(rest, ratDiv(rat(1), restUnit)), 1)
     return { coef: ratMul(unit, restUnit), factors }
   }
   return { coef: ratMul(unit, constValue(rest)!), factors }
+}
+
+// Nur echte Buchstaben, keine Bausteine wie e^x oder sin x (dort gelten eigene Regeln)
+const isPlainLetter = (atom: string) => /^[a-z]$/.test(atom) && atom !== 'e'
+
+// In Gruppen ausklammern: Kommt ein Buchstabe t nur einfach vor, ist p = t · A + B. Geht A in p auf,
+// ist A ein Faktor: ax − ay + bx − by = a(x − y) + b(x − y) = (x − y)(a + b). A muss eine Summe sein.
+export function groupFactor(p: Poly): Poly | null {
+  const atoms = atomsOf(p)
+  if (!atoms.every(isPlainLetter)) return null
+  for (const t of atoms) {
+    if (degreeIn(p, t) !== 1) continue
+    const coefficient = polySum(p.filter((term) => term.mono.some(([a]) => a === t)).map((term) => [{ mono: term.mono.filter(([a]) => a !== t), coef: term.coef }]))
+    if (coefficient.length < 2) continue
+    const candidate = primitivePart(coefficient)
+    const quotient = polyDivideExact(p, candidate)
+    if (quotient && constValue(quotient) === null && hasIntegerCoefficients(quotient)) return candidate
+  }
+  return null
+}
+
+// Zwei Buchstaben u, v, alle Summanden vom selben Grad: für v = 1 wie bei einem Buchstaben zerlegen,
+// dann jeden Faktor wieder auf den Grad bringen: a² − ab − 2b² → a² − a − 2 = (a + 1)(a − 2) →
+// (a + b)(a − 2b). null, wenn das nicht passt oder nichts zerfällt.
+function splitHomogeneous(p: Poly): { linear: Poly[]; rest: Poly } | null {
+  const atoms = atomsOf(p)
+  if (atoms.length !== 2 || !atoms.every(isPlainLetter)) return null
+  const degree = totalDegree(p)
+  if (p.some((t) => monoDegree(t.mono) !== degree)) return null
+  const [u, v] = atoms
+  const split = splitLinear(polySubstitute(p, v, polyConst(1)), u)
+  if (split.linear.length === 0) return null
+  // Jeder Summand c · u^i bekommt v^(Grad − i)
+  const homogenize = (q: Poly): Poly => {
+    const d = degreeIn(q, u)
+    return polySum(q.map((t) => [{ mono: [...t.mono, ...(d - degreeIn([t], u) > 0 ? [[v, d - degreeIn([t], u)] as const] : [])], coef: t.coef }]))
+  }
+  return { linear: split.linear.map((f) => primitivePart(homogenize(f))), rest: homogenize(split.rest) }
 }
 
 export const factoredPoly = (f: Factored): Poly =>

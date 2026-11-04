@@ -97,9 +97,9 @@ describe('weitere Aufgabenformen', () => {
   it('Bausteine wie e^x', () => {
     const free = prepareFractionFree({ level: 4, seed: 1 })
     expect(free.keyboard).toEqual({ kind: 'fraction', letters: ['x'], blocks: true, root: false })
-    // 4-1: (cos² x − 4)/(cos x + 2)
-    expect(free.check('\\cos x-2').kind).toBe('correct')
-    expect(free.check('\\frac{\\cos^2x-4}{\\cos x+2}').kind).toBe('unfinished')
+    // 4-1: (e^{2x} − 4)/(4e^{2x} + 8e^x)
+    expect(free.check('\\frac{e^x-2}{4e^x}').kind).toBe('correct')
+    expect(free.check('\\frac{e^{2x}-4}{4e^{2x}+8e^x}').kind).toBe('unfinished')
   })
 })
 

@@ -136,8 +136,8 @@ test('Brüche: Potenzen kürzen in Stufe 2, Lernkarten-Ordner und gezieltes Übe
 
 
 test('Brüche Stufe 3: Zähler und Nenner zerlegen, dann kürzen', async ({ page }) => {
-  // (x² − 9)/(2x + 6)
-  await page.goto('./#/ueben/brueche/3-189')
+  // (x² − 25)/(5x − 25)
+  await page.goto('./#/ueben/brueche/3-36')
   await expect(page.locator('#question')).toHaveText('Zerlege den Zähler in Faktoren.')
   await page.getByRole('button', { name: 'Tipp anzeigen' }).click()
   await expect(page.getByText('Zwei Quadrate mit Minus dazwischen')).toBeVisible()
@@ -150,8 +150,8 @@ test('Brüche Stufe 3: Zähler und Nenner zerlegen, dann kürzen', async ({ page
 })
 
 test('Brüche Stufe 4: Doppelbruch Schritt für Schritt', async ({ page }) => {
-  // (1 + 1/x)/(1 − 1/x²)
-  await page.goto('./#/ueben/brueche/4-37')
+  // (2 + 3/x²)/(2/x − 3)
+  await page.goto('./#/ueben/brueche/4-85')
   await expect(page.locator('#question')).toHaveText('Fasse den Zähler zu einem Bruch zusammen.')
   await solveWholeTask(page)
   await expect(page.getByText('Gilt für')).toBeVisible()

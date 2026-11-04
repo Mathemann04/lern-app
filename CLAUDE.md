@@ -144,7 +144,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     auflösen; Antworten aus Fehlerregeln; je Schritt die passenden
     Lernkarten). `guided/fractionPlan.ts`: dasselbe für Brüche (Hauptnenner,
     erweitern, zusammenfassen, kürzen; Zähler und Nenner zerlegen mit Tipp
-    je Art; Doppelbruch: erst Zähler, dann Nenner als ein Bruch; Malnehmen
+    je Art, `factorMethods`: ausklammern, binomisch, $x^2 + px + q$, Zahl vorn,
+    zwei Buchstaben, in Gruppen; Doppelbruch: erst Zähler, dann Nenner als ein Bruch; Malnehmen
     und Kürzen in einem Schritt; ab Stufe 4 Erweitern und Zusammenfassen in
     einem Schritt; ein Schritt ohne passenden typischen Fehler geht im
     nächsten auf, im letzten ist die Antwort das Ergebnis; falsche
@@ -169,7 +170,9 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     $\cos x$, $\sqrt{x}$ als eigene Buchstaben, die Zahl $e$ nur in falschen
     Ergebnissen; Vergleich `fracEquals` mit $(\sqrt{x})^2 = x$ und
     $\sin^2 x + \cos^2 x = 1$), `factor.ts` (zerlegen, Hauptnenner,
-    kürzen; Ergebnis: Zähler ausmultipliziert, Nenner in Faktoren),
+    kürzen; Ergebnis: Zähler ausmultipliziert, Nenner in Faktoren; auch
+    mit Zahl vor $x^2$, mit zwei Buchstaben gleichen Grads wie
+    $a^2 - ab - 2b^2$ und in Gruppen wie $ax - ay + bx - by$, `groupFactor`),
     `task.ts` (Aufgabenformen: kürzen, plus/minus, mal, geteilt,
     Doppelbruch, mehrere Rechenarten `mixed`, verschachtelter Doppelbruch
     `nested`; Zähler wie $(x + h)^2 - x^2$; Regel eines Bausteins `rule`;
@@ -201,7 +204,10 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     `fractionTerms.ts`, `rearrangeTerms.ts`), `focus.ts` und `fractionFocus.ts` (Aufgaben für
     gezieltes Üben); Baukasten der Brüche `fractionKit.ts` (Stufen 1 und 2:
     Rechenbaum zufällig aus Teilen, Rechenarten und Bruchteilen, mit
-    Filtern gegen zu einfache oder zu lange Aufgaben); Abwechslung
+    Filtern gegen zu einfache oder zu lange Aufgaben; Stufen 3 und 4: je
+    Aufgabe eine „Welt" aus Klammern, `level3World`/`level4World`, daraus
+    Zähler und Nenner, dazu Kürzen `worldReduce` und Doppelbrüche
+    `worldComplex`); Abwechslung
     `variety.ts` (Form einer Aufgabe `formOfLatex`: Zahlen und Vorzeichen
     zusammengefasst, Buchstaben der Reihe nach benannt; Kennzahlen
     `varietyStats`; `pickFresh`) und `forms.ts` (Form je Thema)

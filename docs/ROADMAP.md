@@ -46,7 +46,7 @@ Details: [PLAN-M2b.md](PLAN-M2b.md)
 - [x] Plan M2b (freigegeben mit Änderungen: 100 Formen je Stufe, Themen
   aus späteren Kapiteln)
 - [x] 1. Baukasten, Abwechslung, Stufen 1 und 2
-- [ ] 2. Stufen 3 und 4
+- [x] 2. Stufen 3 und 4
 - [ ] 3. Stufe 5, Teil 1: alles ineinander
 - [ ] 4. Stufe 5, Teil 2: Partialbruchzerlegung
 - [ ] 5. Stufe 5, Teil 3: Brüche aus späteren Kapiteln
@@ -338,4 +338,20 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   $3 \cdot 3b^2$ oder eine Dezimalzahl dasteht. Zu einfache Teile
   ($2 \cdot 5$, $5 - 5$) und Zwischenergebnisse $0$ oder $1$ werden
   aussortiert. Alte Links auf einzelne Aufgaben der Stufen 1 und 2 zeigen
+  jetzt andere Aufgaben.
+- 04.11.2026: M2b Schritt 2 fertig. Stufen 3 und 4 kommen aus dem Baukasten:
+  Jede Aufgabe hat eine „Welt" aus Klammern (z. B. $x - 3$, $x + 3$; $a - 2b$,
+  $a + b$; $2x - 3$; $(a + b)$ und $(x - y)$; $e^x \pm 2$), aus der Zähler
+  und Nenner gebaut werden; so haben die Brüche gemeinsame Faktoren.
+  Stufe 3: ausklammern (auch Buchstaben), alle binomischen Formeln, zwei
+  Buchstaben, vertauschte Differenzen, bis zu drei Brüche, Mal und Geteilt.
+  Stufe 4: zerlegen mit Zahl vorn, mit zwei Buchstaben ($a^2 - ab - 2b^2$),
+  in Gruppen ($ax - ay + bx - by$), Doppelbrüche mit Buchstaben, Bausteine.
+  Gemessen in je 200 Aufgaben: rund 190 Formen je Stufe (vorher 9 bzw. 31),
+  keine Form öfter als 2 %. Die Engine zerlegt jetzt auch mit zwei Buchstaben
+  und in Gruppen, ohne dass die Aufgabe die Faktoren vorgibt. Neu: „Gilt
+  für …" auch bei anderen Buchstaben als $x$, Tipps je Zerlege-Art, zwei
+  neue typische Fehler und zwei Lernkarten; frei zählt „Bruch mal Zahl" als
+  noch nicht fertig. Zu lange Ergebnisse und Nenner wie $-6 - b$ werden
+  aussortiert. Alte Links auf einzelne Aufgaben der Stufen 3 und 4 zeigen
   jetzt andere Aufgaben.

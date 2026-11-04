@@ -7,7 +7,6 @@ import {
   polyAtom,
   polyConst,
   polyMul,
-  polyPow,
   polyScale,
   totalDegree,
 } from '../fraction/poly.ts'
@@ -25,7 +24,7 @@ import {
   taskFrac,
 } from '../fraction/task.ts'
 import { type Rng, createRng } from '../random/rng.ts'
-import { LEVEL1_KIT, bigReduce, buildFromKit, level2Kit as level2Kit_, monomialReduce } from './fractionKit.ts'
+import { LEVEL1_KIT, bigReduce, buildFromKit, buildLevel3, buildLevel4, level2Kit as level2Kit_, monomialReduce } from './fractionKit.ts'
 import { rat } from '../rational.ts'
 import type { Level, TaskRef } from './taskNumber.ts'
 
@@ -84,183 +83,20 @@ const LETTER_PAIRS = [
   ['a', 'b'],
 ] as const
 
-// --- Stufe 3: Summen in Zähler und Nenner ---
+// --- Stufen 3 und 4: Baukasten mit Summen (M2b, tasks/fractionKit.ts) ---
 
-const level3Reduce: FractionTemplate = {
-  id: 'summen-kuerzen',
+const level3Kit: FractionTemplate = {
+  id: 'baukasten-summen',
   level: 3,
-  label: 'Ausklammern und binomische Formeln, dann kürzen',
-  build(rng) {
-    const p = rng.int(1, 6)
-    const k = rng.int(2, 5)
-    const s = rng.chance(0.5) ? 1 : -1
-    const plusP = lin(1, p)
-    const minusP = lin(1, -p)
-    const hints = [plusP, minusP]
-    const squares = polyMul(plusP, minusP)
-    switch (rng.int(1, 5)) {
-      case 1:
-        // \frac{x^2 - 9}{2x + 6}
-        return shape({ kind: 'reduce', part: polyPart(squares, polyScale(lin(1, s * p), rat(k))) }, hints)
-      case 2:
-        // \frac{x^2 + 6x + 9}{x^2 - 9}
-        return shape({ kind: 'reduce', part: polyPart(polyPow(lin(1, s * p), 2), squares) }, hints)
-      case 3:
-        // \frac{3x + 9}{x^2 + 6x + 9}
-        return shape({ kind: 'reduce', part: polyPart(polyScale(lin(1, s * p), rat(k)), polyPow(lin(1, s * p), 2)) }, hints)
-      case 4: {
-        // \frac{3x^2 + 6x}{3x} bzw. mit einer Zahl im Nenner
-        const r = rng.pick([1, 2, 3])
-        return shape({ kind: 'reduce', part: polyPart(polyMul(mono(k, ['x', 1]), lin(1, s * p)), mono(k * r, ['x', 1])) }, hints)
-      }
-      default:
-        // \frac{3 - x}{x^2 - 9}: vertauschte Differenz
-        return shape({ kind: 'reduce', part: part(expanded(lin(-1, p), true), expanded(squares)) }, hints)
-    }
-  },
+  label: 'Baukasten: Summen in Zähler und Nenner, ausklammern, binomische Formeln, vertauschte Differenzen',
+  build: buildLevel3,
 }
 
-const level3Sum: FractionTemplate = {
-  id: 'summen-im-nenner',
-  level: 3,
-  label: 'Brüche mit Nennern wie $x + 1$ und $x - 1$',
-  build(rng) {
-    const sign = anySign(rng)
-    const p = nonZero(rng, 5)
-    let q = nonZero(rng, 5)
-    while (q === p) q = nonZero(rng, 5)
-    switch (rng.int(1, 4)) {
-      case 1:
-        return shape({ kind: 'sum', terms: [plus(polyPart(c(rng.int(1, 5)), lin(1, p))), signed(sign, polyPart(c(rng.int(1, 5)), lin(1, q)))] }, [lin(1, p), lin(1, q)])
-      case 2:
-        return shape({ kind: 'sum', terms: [plus(polyPart(c(rng.int(1, 5)), lin(1, 0))), signed(sign, polyPart(c(rng.int(1, 5)), lin(1, p)))] }, [lin(1, p)])
-      case 3:
-        return shape({ kind: 'sum', terms: [plus(numberPart(rng.int(1, 3))), signed(sign, polyPart(c(rng.int(1, 5)), lin(1, p)))] }, [lin(1, p)])
-      default: {
-        // gleicher Nenner, Summen im Zähler: \frac{2x + 1}{x + 3} - \frac{x - 2}{x + 3}
-        const den = lin(1, p)
-        return shape({ kind: 'sum', terms: [plus(polyPart(lin(rng.int(2, 4), nonZero(rng, 5)), den)), minus(polyPart(lin(1, nonZero(rng, 5)), den))] }, [den])
-      }
-    }
-  },
-}
-
-// --- Stufe 4: Uni-Niveau ---
-
-// Zwei verschiedene ganze Zahlen ≠ 0 zwischen −6 und 6, nicht Gegenzahlen voneinander
-function twoRoots(rng: Rng): [number, number] {
-  for (;;) {
-    const a = nonZero(rng, 6)
-    const b = nonZero(rng, 6)
-    if (a !== b && a !== -b) return [a, b]
-  }
-}
-
-const level4Reduce: FractionTemplate = {
-  id: 'quadratisch-kuerzen',
+const level4Kit: FractionTemplate = {
+  id: 'baukasten-zerlegen',
   level: 4,
-  label: '$x^2 + px + q$ zerlegen und kürzen',
-  build(rng) {
-    const [r1, r2] = twoRoots(rng)
-    let r3 = nonZero(rng, 6)
-    while (r3 === r2 || r3 === r1) r3 = nonZero(rng, 6)
-    const [f1, f2, f3] = [lin(1, r1), lin(1, r2), lin(1, r3)]
-    const hints = [f1, f2, f3]
-    switch (rng.int(1, 3)) {
-      case 1:
-        // \frac{x^2 - x - 6}{x^2 - 9}
-        return shape({ kind: 'reduce', part: polyPart(polyMul(f1, f2), polyMul(f1, f3)) }, hints)
-      case 2: {
-        // \frac{x^2 - x - 6}{2x - 6}
-        const k = rng.int(2, 4)
-        return shape({ kind: 'reduce', part: polyPart(polyMul(f1, f2), polyScale(f1, rat(k))) }, hints)
-      }
-      default: {
-        // \frac{x^3 - 4x}{x^2 + 2x}
-        const p = Math.abs(r1)
-        return shape({ kind: 'reduce', part: polyPart(polyMul(polyAtom('x'), polyMul(lin(1, p), lin(1, -p))), polyMul(polyAtom('x'), lin(1, rng.chance(0.5) ? p : -p))) }, [lin(1, p), lin(1, -p)])
-      }
-    }
-  },
-}
-
-const level4Sum: FractionTemplate = {
-  id: 'hauptnenner-zerlegen',
-  level: 4,
-  label: 'Hauptnenner aus zerlegten Nennern',
-  build(rng) {
-    const p = rng.int(1, 5)
-    const sign = anySign(rng)
-    const [plusP, minusP] = [lin(1, p), lin(1, -p)]
-    const hints = [plusP, minusP]
-    if (rng.chance(0.5)) {
-      // \frac{x}{x^2 - 1} - \frac{1}{x + 1}
-      const top = rng.chance(0.5) ? lin(1, 0) : c(rng.int(1, 5))
-      return shape({ kind: 'sum', terms: [plus(polyPart(top, polyMul(plusP, minusP))), signed(sign, polyPart(c(rng.int(1, 4)), rng.chance(0.5) ? plusP : minusP))] }, hints)
-    }
-    // \frac{3}{x^2 + 2x} - \frac{1}{x}
-    const shifted = rng.chance(0.5) ? plusP : minusP
-    return shape({ kind: 'sum', terms: [plus(polyPart(c(rng.int(1, 5)), polyMul(polyAtom('x'), shifted))), signed(sign, polyPart(c(rng.int(1, 4)), polyAtom('x')))] }, hints)
-  },
-}
-
-const level4Complex: FractionTemplate = {
-  id: 'doppelbruch',
-  level: 4,
-  label: 'Doppelbrüche',
-  build(rng) {
-    const p = rng.int(1, 4)
-    const hints = [lin(1, p), lin(1, -p)]
-    const one = numberPart(1)
-    const over = (n: Poly, d: Poly) => polyPart(n, d)
-    switch (rng.int(1, 4)) {
-      case 1:
-        // \frac{1 + \frac{2}{x}}{1 - \frac{4}{x^2}}
-        return shape({ kind: 'complex', top: [plus(one), plus(over(c(p), polyAtom('x')))], bottom: [plus(one), minus(over(c(p * p), polyAtom('x', 2)))] }, hints)
-      case 2:
-        // \frac{1 - \frac{2}{x}}{x - 2}
-        return shape({ kind: 'complex', top: [plus(one), minus(over(c(p), polyAtom('x')))], bottom: [plus(polyPart(lin(1, -p)))] }, hints)
-      case 3:
-        // \frac{x - \frac{4}{x}}{1 + \frac{2}{x}}
-        return shape({ kind: 'complex', top: [plus(polyPart(polyAtom('x'))), minus(over(c(p * p), polyAtom('x')))], bottom: [plus(one), plus(over(c(p), polyAtom('x')))] }, hints)
-      default:
-        // \frac{\frac{1}{x} + \frac{1}{2}}{x + 2}
-        return shape({ kind: 'complex', top: [plus(over(c(1), polyAtom('x'))), plus(numberPart(1, p + 1))], bottom: [plus(polyPart(lin(1, p + 1)))] }, [lin(1, p + 1)])
-    }
-  },
-}
-
-// Bausteine statt x: e^x, ln x, sin x, cos x
-const BLOCKS = ['E', 'L', 'S', 'C'] as const
-
-const level4Blocks: FractionTemplate = {
-  id: 'bausteine',
-  level: 4,
-  label: 'Bausteine wie $e^x$, $\\ln x$, $\\sin x$ statt $x$',
-  build(rng) {
-    const b = rng.pick(BLOCKS)
-    // bei sin und cos nicht 1: 1 − sin² x wäre schon eine Regel der Winkelfunktionen
-    const p = b === 'S' || b === 'C' ? rng.int(2, 4) : rng.int(1, 4)
-    const [plusP, minusP] = [lin(1, p, b), lin(1, -p, b)]
-    const hints = [plusP, minusP]
-    const sign = anySign(rng)
-    switch (rng.int(1, 4)) {
-      case 1:
-        // \frac{e^{2x} - 4}{e^x + 2}
-        return shape({ kind: 'reduce', part: polyPart(polyMul(plusP, minusP), rng.chance(0.5) ? plusP : minusP) }, hints)
-      case 2: {
-        // \frac{3\sin x + 6}{\sin^2 x - 4}
-        const k = rng.int(2, 4)
-        return shape({ kind: 'reduce', part: polyPart(polyScale(plusP, rat(k)), polyMul(plusP, minusP)) }, hints)
-      }
-      case 3:
-        // \frac{2}{\sin x} - \frac{1}{\sin^2 x}
-        return shape({ kind: 'sum', terms: [plus(polyPart(c(rng.int(1, 4)), polyAtom(b))), signed(sign, polyPart(c(rng.int(1, 4)), polyAtom(b, 2)))] }, hints)
-      default:
-        // \frac{1}{e^x - 2} + \frac{1}{e^x + 2}
-        return shape({ kind: 'sum', terms: [plus(polyPart(c(rng.int(1, 3)), minusP)), signed(sign, polyPart(c(rng.int(1, 3)), plusP))] }, hints)
-    }
-  },
+  label: 'Baukasten: zerlegen (Zahl vorn, zwei Buchstaben, in Gruppen), drei Nenner, Doppelbrüche, Bausteine',
+  build: buildLevel4,
 }
 
 // --- Stufe 5: Profi ---
@@ -452,12 +288,8 @@ const level5Exp: FractionTemplate = {
 export const FRACTION_TEMPLATES: readonly FractionTemplate[] = [
   level1Kit,
   level2Kit,
-  level3Reduce,
-  level3Sum,
-  level4Reduce,
-  level4Sum,
-  level4Complex,
-  level4Blocks,
+  level3Kit,
+  level4Kit,
   level5TwoLetters,
   level5Mixed,
   level5Nested,

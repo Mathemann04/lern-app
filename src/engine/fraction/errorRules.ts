@@ -1,7 +1,7 @@
 import { toLatex } from '../expr/print.ts'
 import { type Expr, div, mulDot, num } from '../expr/types.ts'
 import { isInteger, isOne, rat, ratAbs, ratDiv, ratMul } from '../rational.ts'
-import { type Factored, factorize, factoredExpr, factoredPoly, isMultipleOf, reduceFrac } from './factor.ts'
+import { type Factored, factorize, factoredExpr, factoredPoly, groupFactor, isMultipleOf, reduceFrac } from './factor.ts'
 import { type Frac, fracDiv, fracEquals, fracMul, fracNeg } from './frac.ts'
 import {
   type Poly,
@@ -103,6 +103,8 @@ export const FRACTION_ERROR_RULES: readonly FracErrorRule[] = [
   { id: 'frac-factor-wrong', step: 'factor-num', name: 'Falsch ausgeklammert', wrongFormula: '2x + 6 = 2(x + 6)' },
   { id: 'frac-binomial-confused', step: 'factor-num', name: 'Binomische Formeln verwechselt', wrongFormula: 'x^2 - 9 = (x - 3)^2' },
   { id: 'frac-vieta-sign', step: 'factor-num', name: 'Vorzeichen beim Zerlegen vertauscht', wrongFormula: 'x^2 - x - 6 = (x + 3)(x - 2)' },
+  { id: 'frac-leading-forgotten', step: 'factor-num', name: 'Zahl vor $x^2$ beim Zerlegen vergessen', wrongFormula: '2x^2 - x - 3 = (x + 1)\\left(x - \\frac{3}{2}\\right)' },
+  { id: 'frac-group-sign', step: 'factor-num', name: 'Vorzeichen beim Ausklammern in Gruppen vertauscht', wrongFormula: 'ax - ay - bx + by = (a - b)(x + y)' },
   { id: 'frac-cancel-one-side', step: 'cancel', name: 'Nur den Zähler oder nur den Nenner gekürzt', wrongFormula: '\\frac{14}{12} = \\frac{7}{12}' },
   { id: 'frac-multiply-reciprocal', step: 'multiply', name: 'Beim Malnehmen den Kehrwert genommen', wrongFormula: '\\frac{3}{4} \\cdot \\frac{2}{5} = \\frac{3 \\cdot 5}{4 \\cdot 2}' },
   { id: 'frac-square-forgotten', step: 'identity', name: 'Quadrat vergessen', wrongFormula: '1 - \\cos^2 x = \\sin x' },
@@ -407,7 +409,8 @@ function cancelMistakes(t: FractionTask, solution: FracSolution): Candidate[] {
 function factorMistakes(p: Poly, hints: readonly Poly[]): Array<{ id: string; expr: Expr; poly: Poly }> {
   const out: Array<{ id: string; expr: Expr; poly: Poly }> = []
   const f = factorize(p, hints)
-  const linear = f.factors.filter((g) => g.poly.length === 2 && totalDegree(g.poly) === 1 && constValue([g.poly[1]]) !== null)
+  // Klammern wie (x + 3), (2x − 3) oder (a − 2b)
+  const linear = f.factors.filter((g) => g.poly.length === 2 && totalDegree(g.poly) === 1)
   const asFactored = (factors: Factored['factors']): { expr: Expr; poly: Poly } => {
     const wrong: Factored = { coef: f.coef, factors }
     return { expr: factoredExpr(wrong), poly: factoredPoly(wrong) }
@@ -435,13 +438,38 @@ function factorMistakes(p: Poly, hints: readonly Poly[]): Array<{ id: string; ex
     out.push({ id: 'frac-binomial-confused', ...asFactored(factors) })
   }
 
-  // (x + a)(x + b) mit vertauschten Vorzeichen: (x − a)(x − b)
-  if (!negative && linear.length === 2 && linear.every((g) => g.exp === 1)) {
+  // (x + a)(x + b) mit vertauschten Vorzeichen: (x − a)(x − b); beide Klammern beginnen mit
+  // demselben Buchstaben (nicht bei Gruppen wie (x − y)(a + b))
+  const sameStart = linear.length === 2 && monoKeyOf(linear[0].poly[0].mono) === monoKeyOf(linear[1].poly[0].mono)
+  if (!negative && sameStart && linear.every((g) => g.exp === 1)) {
     const factors = f.factors.map((g) => (linear.includes(g) ? { poly: mirror(g.poly), exp: 1 } : g))
     out.push({ id: 'frac-vieta-sign', ...asFactored(factors) })
   }
+
+  // Zahl vor x² vergessen: Nullstellen gefunden, aber (2x − 3) als (x − 3/2) geschrieben
+  if (sameStart && !negative && !squared && isOne(ratAbs(f.coef))) {
+    const leading = linear.find((g) => !isOne(g.poly[0].coef))
+    if (leading) {
+      const factors = f.factors.map((g) => (g === leading ? { poly: polyScale(g.poly, ratDiv(rat(1), g.poly[0].coef)), exp: g.exp } : g))
+      out.push({ id: 'frac-leading-forgotten', ...asFactored(factors) })
+    }
+  }
+
+  // In Gruppen: beim Ausklammern aus der zweiten Gruppe das Vorzeichen in der Klammer vertauscht,
+  // ax − ay − bx + by = (x − y)(a + b) statt (x − y)(a − b)
+  const group = groupFactor(p)
+  if (group) {
+    const quotient = polyDivideExact(p, group)!
+    const flipped = [quotient[0], ...polyNeg(quotient.slice(1))]
+    if (quotient.length >= 2 && !polyEquals(flipped, polyNeg(quotient))) {
+      const wrong = polyMul(group, flipped)
+      out.push({ id: 'frac-group-sign', expr: factoredExpr(factorize(wrong, [group])), poly: wrong })
+    }
+  }
   return out
 }
+
+const monoKeyOf = (m: Term['mono']) => m.map(([atom]) => atom).join('.')
 
 function factorStepMistakes(t: FractionTask, solution: FracSolution): Candidate[] {
   if (t.kind !== 'reduce') return []

@@ -137,6 +137,16 @@ export const FRACTION_ERROR_TEXTS: Readonly<Record<string, Explanation>> = {
       'Bei $x^2 + px + q = (x - x_1)(x - x_2)$ stehen in den Klammern die Nullstellen mit umgekehrtem Vorzeichen. Probe: Ausmultiplizieren muss wieder genau den Term ergeben.',
     short: 'Probe durch Ausmultiplizieren; in der Klammer steht die Nullstelle mit umgekehrtem Vorzeichen.',
   },
+  'frac-leading-forgotten': {
+    detailed:
+      'Steht vor $x^2$ eine Zahl $a$, gehört sie mit in die Zerlegung: $ax^2 + bx + c = a(x - x_1)(x - x_2)$. Nimmt man sie in eine Klammer, verschwindet der Bruch, z. B. $2\\left(x - \\frac{1}{2}\\right) = 2x - 1$. Probe: Ausmultiplizieren muss wieder genau den Term ergeben.',
+    short: 'Die Zahl vor $x^2$ gehört dazu: $ax^2 + bx + c = a(x - x_1)(x - x_2)$.',
+  },
+  'frac-group-sign': {
+    detailed:
+      'Klammerst du aus einer Gruppe ein Minus aus, drehen sich in der Klammer alle Vorzeichen um: $-bx + by = -b(x - y)$. Erst dann steht in beiden Klammern dasselbe. Probe: Ausmultiplizieren muss wieder genau den Term ergeben.',
+    short: 'Minus ausklammern dreht alle Vorzeichen in der Klammer um: $-bx + by = -b(x - y)$.',
+  },
   'frac-square-forgotten': {
     detailed:
       'Das Quadrat bleibt erhalten: Aus $\\sin^2 x + \\cos^2 x = 1$ folgt $1 - \\cos^2 x = \\sin^2 x$, nicht $\\sin x$. Genauso ist $(\\sqrt{x})^2 = x$, das Quadrat hebt die Wurzel auf.',
@@ -267,13 +277,17 @@ export function explainReciprocal(divisor: Expr, reciprocal: Expr, complex: bool
   }
 }
 
-// Wie ein Term zerlegt wird: ausklammern, binomische Formel, x² + px + q
-export type FactorMethod = 'out' | 'binomial' | 'quadratic'
+// Wie ein Term zerlegt wird: ausklammern, binomische Formel, x² + px + q, mit Zahl vor x², mit zwei
+// Buchstaben (a² − ab − 2b²), in Gruppen ausklammern
+export type FactorMethod = 'out' | 'binomial' | 'quadratic' | 'leading' | 'twoLetters' | 'grouping'
 
 const METHOD_TEXT: Record<FactorMethod, string> = {
   out: 'ausklammern',
   binomial: 'binomische Formel',
   quadratic: 'zwei Zahlen mit dem richtigen Produkt und der richtigen Summe',
+  leading: 'Nullstellen, dabei die Zahl vor dem Quadrat mitnehmen',
+  twoLetters: 'wie $x^2 + px + q$, nur mit dem zweiten Buchstaben hinter jeder Zahl',
+  grouping: 'in Gruppen ausklammern',
 }
 
 export function explainFactor(before: Expr, after: Expr, numerator: boolean, methods: readonly FactorMethod[] = []): Explanation {
@@ -339,6 +353,10 @@ export const FRACTION_HINTS = {
   factorOut: 'Was steckt in jedem Summanden? Das kommt vor die Klammer: $ka + kb = k(a + b)$.',
   factorBinomial: 'Zwei Quadrate mit Minus dazwischen: $a^2 - b^2 = (a + b)(a - b)$. Mit Mittelglied: $a^2 \\pm 2ab + b^2 = (a \\pm b)^2$.',
   factorQuadratic: 'Suche zwei Zahlen $a$ und $b$ mit $a \\cdot b = q$ und $a + b = p$. Dann ist $x^2 + px + q = (x + a)(x + b)$.',
+  factorLeading:
+    'Steht eine Zahl $a$ vor dem Quadrat, bestimme die Nullstellen $x_1$ und $x_2$. Dann ist $ax^2 + bx + c = a(x - x_1)(x - x_2)$; die Zahl $a$ kann in eine Klammer wandern.',
+  factorTwoLetters: 'Rechne wie bei $x^2 + px + q$, nur steht hinter jeder Zahl der zweite Buchstabe: $a^2 + pab + qb^2 = (a + cb)(a + db)$ mit $c \\cdot d = q$ und $c + d = p$.',
+  factorGrouping: 'Fasse je zwei Summanden zu einer Gruppe zusammen und klammere aus jeder Gruppe aus. Steht danach in beiden Klammern dasselbe, klammere es noch einmal aus.',
   inner: 'Fasse diesen Teil wie eine eigene Aufgabe zu einem Bruch zusammen.',
   innerComplex: 'Beginne innen: Löse den inneren Doppelbruch wie eine eigene Aufgabe auf.',
   multiplyOut: 'Binomische Formel: $(a + b)^2 = a^2 + 2ab + b^2$. Danach gleichartige Summanden zusammenfassen.',

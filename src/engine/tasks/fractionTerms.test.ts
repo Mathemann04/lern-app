@@ -7,9 +7,9 @@ import type { Expr } from '../expr/types.ts'
 import { FRACTION_ERROR_RULES, fractionWrongAnswers } from '../fraction/errorRules.ts'
 import { factoredPoly, reducedFrac } from '../fraction/factor.ts'
 import { fracAtoms, fracEquals, toFrac } from '../fraction/frac.ts'
-import { atomsOf, gcdUnivariate, polyContent, polyDivideExact, totalDegree } from '../fraction/poly.ts'
-import { solveFraction, solveTree } from '../fraction/solve.ts'
-import { taskExpr, taskLatex } from '../fraction/task.ts'
+import { atomsOf, constValue, gcdUnivariate, polyConst, polyContent, polyDivideExact, polySubstitute, totalDegree } from '../fraction/poly.ts'
+import { solveFraction, solveTree, taskLetter } from '../fraction/solve.ts'
+import { partsOf, shownPoly, taskExpr, taskLatex } from '../fraction/task.ts'
 import { createRng } from '../random/rng.ts'
 import { ratToNumber } from '../rational.ts'
 import { fractionTemplatesForLevel, generateFractionTask } from './fractionTerms.ts'
@@ -136,7 +136,12 @@ describe.each(LEVELS_SO_FAR)('Brüche Stufe %i', (level) => {
     for (const { task, solution, ref } of solved) {
       if (!solution.excluded) continue
       for (const r of solution.excluded) {
-        expect(Number.isNaN(evaluate(taskExpr(task), { x: ratToNumber(r) })), `${formatTaskNumber(ref)}: x = ${ratToNumber(r)}`).toBe(true)
+        // Ein Nenner wird genau 0, oder es wird durch 0 geteilt. Bei Zahlen wie 7/6 rechnet der Computer
+        // nicht genau 0, der Wert ist dann riesig.
+        const letter = taskLetter(task) ?? 'x'
+        const zeroDen = partsOf(task).some((p) => constValue(polySubstitute(shownPoly(p.den), letter, polyConst(r)))?.n === 0n)
+        const value = evaluate(taskExpr(task), { [letter]: ratToNumber(r) })
+        expect(zeroDen || Number.isNaN(value) || Math.abs(value) > 1e8, `${formatTaskNumber(ref)}: ${letter} = ${ratToNumber(r)}`).toBe(true)
       }
     }
   })
@@ -154,7 +159,7 @@ it('jeder typische Fehler kommt in Aufgaben der Stufen 1 bis 5 vor', () => {
 })
 
 // Abwechslung (docs/PLAN-M2b.md): je Stufe viele Formen, keine zu häufig, beim Ziehen keine Wiederholung
-const VARIED_LEVELS: Level[] = [1, 2]
+const VARIED_LEVELS: Level[] = [1, 2, 3, 4]
 
 describe.each(VARIED_LEVELS)('Abwechslung Stufe %i', (level) => {
   it('mindestens 100 Formen unter 200 Aufgaben, keine öfter als 3 von 100', () => {

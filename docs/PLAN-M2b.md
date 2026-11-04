@@ -173,7 +173,7 @@ Dazu kommen die bisherigen Fehler aus M2 (Liste in
 | Klammer mit Minus | Minus nur auf den ersten Bruch | $\frac{1}{2} - \left(\frac{1}{3} - \frac{1}{4}\right) = \frac{1}{2} - \frac{1}{3} - \frac{1}{4}$ |
 | Dezimalzahl | Stellen falsch gezählt | $0{,}75 = \frac{75}{10}$ |
 | Zerlegen mit Zahl vorn | Zahl vorn vergessen | $2x^2 - x - 3 = (x + 1)\left(x - \frac{3}{2}\right)$ |
-| In Gruppen ausklammern | Vorzeichen in der zweiten Gruppe | $ax - ay - bx + by = a(x - y) - b(x + y)$ |
+| In Gruppen ausklammern | Vorzeichen in der zweiten Klammer | $ax - ay - bx + by = (a - b)(x + y)$ |
 | Dritte Potenz | wie ein Quadrat zerlegt | $a^3 - b^3 = (a - b)(a^2 + b^2)$ |
 | Wurzel im Nenner | die Zahl beim Erweitern nicht quadriert | $\frac{1}{\sqrt{x} - 2} = \frac{\sqrt{x} + 2}{x - 2}$ |
 | Partialbrüche | doppelten Faktor nur einmal angesetzt | $\frac{1}{(x - 1)^2(x + 1)} = \frac{A}{x - 1} + \frac{B}{x + 1}$ |
@@ -184,7 +184,11 @@ Die genaue Liste kommt im jeweiligen Schritt; jede Regel bekommt wie immer
 eine Erklärung, eine Lernkarte und Tests. In Schritt 1 umgesetzt: die ersten
 vier Zeilen (`frac-order`, `frac-bracket-ignored`,
 `frac-minus-before-bracket`, `frac-decimal-places`), mit den Lernkarten
-„Punkt vor Strich und Klammern" und „Dezimalzahlen als Brüche".
+„Punkt vor Strich und Klammern" und „Dezimalzahlen als Brüche". In Schritt 2:
+„Zahl vorn vergessen" (`frac-leading-forgotten`) und „Vorzeichen beim
+Ausklammern in Gruppen" (`frac-group-sign`), mit den Lernkarten „Zerlegen mit
+Zahl vorn" und „In Gruppen ausklammern"; „Vorzeichen beim Zerlegen vertauscht"
+und „binomische Formeln verwechselt" gibt es jetzt auch mit zwei Buchstaben.
 
 ### Schritte
 

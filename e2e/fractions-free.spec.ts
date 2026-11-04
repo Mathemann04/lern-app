@@ -21,24 +21,24 @@ async function expectCleanPage(page: Page, context: string) {
   expect(overflow, `${context}: ragt seitlich heraus`).toBeLessThanOrEqual(0)
 }
 
-test('Beispiel aus dem Plan: 3/(x − 1) − 2/(x + 1) frei lösen', async ({ page }) => {
-  await page.goto('./#/frei/brueche/3-11641')
+test('Stufe 3: 1/(x − 6) − 3/(x + 6) frei lösen', async ({ page }) => {
+  await page.goto('./#/frei/brueche/3-471')
   await expect(field(page)).toBeVisible()
   await expect(page.getByLabel('Deine Antwort')).toContainText('=')
   await expectCleanPage(page, 'Start')
 
   // richtig gerechnet, aber noch nicht fertig: zählt nicht als Fehler
-  await enter(page, '\\frac{3x+3-2x+2}{x^2-1}')
+  await enter(page, '\\frac{x+6-3x+18}{x^2-36}')
   await expect(feedback(page)).toContainText('Richtig gerechnet, aber noch nicht fertig.')
   await expect(feedback(page)).toContainText('Fasse den Zähler noch zusammen')
 
   // Klammer nach dem Minus vergessen, auch weitergekürzt erkannt
-  await enter(page, '\\frac{1}{x-1}')
+  await enter(page, '-\\frac{2}{x-6}')
   await expect(feedback(page)).toContainText('Typischer Fehler: Klammer nach dem Minus vergessen.')
   await page.getByRole('button', { name: 'Warum ist das falsch?' }).click()
   await expect(feedback(page)).toContainText('Das Minus vor einem Bruch gilt für seinen ganzen Zähler')
 
-  await enter(page, '\\frac{x+5}{x^2-1}')
+  await enter(page, '\\frac{24-2x}{x^2-36}')
   await expect(feedback(page)).toContainText('Richtig!')
   await expect(page.getByTestId('result')).toBeVisible()
   await expect(feedback(page)).toContainText('Gilt für')
