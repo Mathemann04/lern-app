@@ -1,7 +1,23 @@
 import { type Expr, add, cos, exp, ln, mul, num, pow, sin, sqrt, sub, variable, x } from '../expr/types.ts'
 import { toFrac } from '../fraction/frac.ts'
 import { type Poly, polyDivideExact } from '../fraction/poly.ts'
-import { type BlockRule, type FractionShape, type FractionTask, type Part, expanded, minus, part, plus, withRoots } from '../fraction/task.ts'
+import {
+  type BlockRule,
+  type FractionShape,
+  type FractionTask,
+  type Part,
+  type TreeNode,
+  expanded,
+  leaf,
+  minus,
+  part,
+  plus,
+  productNode,
+  quotientNode,
+  sumNode,
+  term,
+  withRoots,
+} from '../fraction/task.ts'
 import type { Card } from './cards.ts'
 
 // Lernkarten im Ordner „Brüche". Die Beispiele sind Aufgaben der Bruch-Engine; den Rechenweg dazu
@@ -23,6 +39,8 @@ export const FRACTION_CARD_IDS = {
   complex: 'fraction-complex',
   blocks: 'fraction-blocks',
   blockRules: 'fraction-block-rules',
+  order: 'fraction-order',
+  decimal: 'fraction-decimal',
 } as const
 
 // --- Beispiele bauen ---
@@ -39,6 +57,10 @@ const task = (s: FractionShape, rule?: BlockRule): FractionTask => withRoots({ .
 // 1 − sin x: die 1 vorn
 const frUnit = (n: Expr, d: Expr): Part => part(expanded(poly(n)), expanded(poly(d), true))
 const [a, b, y] = ['a', 'b', 'y'].map(variable)
+// Rechenbaum aus dem Baukasten (M2b)
+const tree = (root: TreeNode): FractionTask => ({ kind: 'tree', root, hints: [] })
+const lf = (nu: number, de = 1) => leaf(fr(num(nu), num(de)))
+const dec = (decimal: string, nu: number, de: number) => leaf(fr(num(nu), num(de)), decimal)
 const n = (value: number) => num(value)
 
 export const FRACTION_CARD_LIST: readonly Card[] = [
@@ -125,6 +147,40 @@ export const FRACTION_CARD_LIST: readonly Card[] = [
       task({ kind: 'quotient', left: fr(n(2), n(3)), right: fr(n(4)) }),
     ],
     errors: ['frac-reciprocal-forgotten', 'frac-reciprocal-first'],
+  },
+  {
+    id: FRACTION_CARD_IDS.order,
+    topic: 'brueche',
+    title: 'Punkt vor Strich und Klammern',
+    level: 1,
+    rules: [],
+    formulas: ['a + b \\cdot c = a + (b \\cdot c)', 'a - (b - c) = a - b + c'],
+    memo: 'Klammern zuerst, dann mal und geteilt, zuletzt plus und minus. Auf derselben Stufe von links nach rechts.',
+    note: 'Ein Minus vor der Klammer gilt für alles in der Klammer. Rechne jeden Teil wie eine eigene Aufgabe und kürze das Teilergebnis gleich, dann bleiben die Zahlen klein.',
+    when: 'Wenn in einer Aufgabe verschiedene Rechenarten oder Klammern vorkommen.',
+    examples: [
+      tree(sumNode(term(1, lf(5, 6)), term(-1, productNode(lf(2, 3), lf(9, 8))))),
+      tree(quotientNode(sumNode(term(1, lf(5, 6)), term(-1, lf(3, 4))), lf(7, 12))),
+      tree(sumNode(term(1, lf(1, 2)), term(-1, sumNode(term(1, lf(1, 3)), term(-1, lf(1, 4)))))),
+    ],
+    errors: ['frac-order', 'frac-bracket-ignored', 'frac-minus-before-bracket'],
+  },
+  {
+    id: FRACTION_CARD_IDS.decimal,
+    topic: 'brueche',
+    title: 'Dezimalzahlen als Brüche',
+    level: 1,
+    rules: [],
+    formulas: ['0{,}75 = \\frac{75}{100} = \\frac{3}{4}', '1{,}2 = \\frac{12}{10} = \\frac{6}{5}'],
+    memo: 'Die Ziffern kommen in den Zähler, in den Nenner eine $1$ mit so vielen Nullen, wie es Stellen nach dem Komma gibt. Dann kürzen.',
+    note: 'Eine Stelle nach dem Komma sind Zehntel, zwei Hundertstel, drei Tausendstel.',
+    when: 'Wenn Brüche und Dezimalzahlen in einer Aufgabe zusammenkommen.',
+    examples: [
+      tree(sumNode(term(1, dec('0,75', 3, 4)), term(1, lf(5, 6)))),
+      tree(productNode(lf(2, 3), dec('0,6', 3, 5))),
+      tree(sumNode(term(1, dec('1,25', 5, 4)), term(-1, lf(1, 6)))),
+    ],
+    errors: ['frac-decimal-places'],
   },
   {
     id: FRACTION_CARD_IDS.powers,

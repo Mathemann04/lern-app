@@ -152,6 +152,26 @@ export const FRACTION_ERROR_TEXTS: Readonly<Record<string, Explanation>> = {
       'Kürzen darfst du nur ganze Faktoren, nicht etwas im Inneren einer Funktion. Bei Potenzen von $e^x$ werden die Hochzahlen abgezogen: $\\frac{e^{2x}}{e^x} = e^{2x - x} = e^x$.',
     short: 'Hochzahlen abziehen: $\\frac{e^{2x}}{e^x} = e^{2x - x} = e^x$.',
   },
+  'frac-order': {
+    detailed:
+      'Punkt vor Strich gilt auch bei Brüchen: Mal und Geteilt kommen vor Plus und Minus. Von links nach rechts rechnest du nur, wenn alles dieselbe Stufe hat: $a + b \\cdot c = a + (b \\cdot c)$.',
+    short: 'Punkt vor Strich: $a + b \\cdot c = a + (b \\cdot c)$.',
+  },
+  'frac-bracket-ignored': {
+    detailed:
+      'Was in Klammern steht, rechnest du zuerst. Die Klammer bindet die Summe zusammen: $(a - b) : c$ heißt, die ganze Differenz wird geteilt, nicht nur $b$.',
+    short: 'Klammern zuerst: $(a - b) : c$ teilt die ganze Differenz.',
+  },
+  'frac-minus-before-bracket': {
+    detailed:
+      'Ein Minus vor der Klammer gilt für alles in der Klammer. Löst du die Klammer auf, drehen sich alle Vorzeichen darin um: $a - (b - c) = a - b + c$.',
+    short: 'Minus vor der Klammer dreht alle Vorzeichen um: $a - (b - c) = a - b + c$.',
+  },
+  'frac-decimal-places': {
+    detailed:
+      'Jede Stelle nach dem Komma ist eine Zehnerpotenz mehr im Nenner: eine Stelle Zehntel, zwei Stellen Hundertstel, drei Stellen Tausendstel. Zähle die Stellen nach dem Komma, dann kürze.',
+    short: 'Stellen nach dem Komma zählen: zwei Stellen heißt Hundertstel.',
+  },
 }
 
 export function explainFractionError(id: string): Explanation {
@@ -325,7 +345,30 @@ export const FRACTION_HINTS = {
   trig: 'Stelle $\\sin^2 x + \\cos^2 x = 1$ passend um, z. B. zu $1 - \\cos^2 x = \\sin^2 x$.',
   root: 'Dritte binomische Formel mit $(\\sqrt{x})^2 = x$: $(\\sqrt{x} - a)(\\sqrt{x} + a) = x - a^2$.',
   rootFactor: 'Schreibe $x$ als $(\\sqrt{x})^2$, dann hilft die dritte binomische Formel: $x - a^2 = (\\sqrt{x} - a)(\\sqrt{x} + a)$.',
+  decimal: 'Zähle die Stellen nach dem Komma: eine Stelle sind Zehntel, zwei Hundertstel, drei Tausendstel. Schreibe die Ziffern über die passende Zehnerpotenz und kürze.',
+  order: 'Klammern zuerst, dann Punkt vor Strich (mal und geteilt vor plus und minus).',
+  part: 'Rechne diesen Teil wie eine eigene Aufgabe.',
 } as const
+
+// Erklärung zur Dezimalzahl: 0,75 = 75/100 = 3/4
+export function explainDecimal(decimal: string, fractionLatex: string): Explanation {
+  const [whole, fraction = ''] = decimal.split(',')
+  const digits = String(Number(`${whole}${fraction}`))
+  const power = `1${'0'.repeat(fraction.length)}`
+  const raw = `\\frac{${digits}}{${power}}`
+  const steps = raw === fractionLatex ? `$${decimal.replace(',', '{,}')} = ${raw}$` : `$${decimal.replace(',', '{,}')} = ${raw} = ${fractionLatex}$`
+  return {
+    detailed: `${fraction.length === 1 ? 'Eine Stelle' : `${fraction.length} Stellen`} nach dem Komma, also ${fraction.length === 1 ? 'Zehntel' : fraction.length === 2 ? 'Hundertstel' : 'Tausendstel'}: ${steps}.`,
+    short: steps,
+  }
+}
+
+// Erklärung zur Reihenfolge: Klammer bzw. Punkt vor Strich
+export function explainOrder(kind: 'bracket' | 'dot', partLatex: string): Explanation {
+  return kind === 'bracket'
+    ? { detailed: `Was in Klammern steht, kommt zuerst: $${partLatex}$.`, short: `Klammer zuerst: $${partLatex}$.` }
+    : { detailed: `Punkt vor Strich: Mal und Geteilt kommen vor Plus und Minus. Zuerst also $${partLatex}$.`, short: `Punkt vor Strich: zuerst $${partLatex}$.` }
+}
 
 // Tipp für die ganze Aufgabe (im freien Modus)
 export function fractionTaskHint(t: FractionShape): Explanation {
@@ -348,5 +391,7 @@ export function fractionTaskHint(t: FractionShape): Explanation {
           ? 'Nimm mit dem Kehrwert des Bruchs hinter dem Geteiltzeichen mal, fasse die Klammer zu einem Bruch zusammen, dann malnehmen und kürzen.'
           : 'Fasse jede Klammer zu einem Bruch zusammen, dann Zähler mal Zähler, Nenner mal Nenner und kürzen.',
       )
+    case 'tree':
+      return same('Klammern zuerst, dann Punkt vor Strich. Rechne jeden Teil wie eine eigene Aufgabe und kürze die Teilergebnisse gleich.')
   }
 }

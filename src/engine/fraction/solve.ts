@@ -21,6 +21,7 @@ import {
   type Part,
   type Shown,
   type Signed,
+  type TreeNode,
   bottomFrac,
   expanded,
   factoredShown,
@@ -36,7 +37,11 @@ import {
   signedFrac,
   taskExpr,
   taskFrac,
+  treeExpr,
+  treeFrac,
+  treeLatex,
 } from './task.ts'
+import { type TreeStage, hasDecimal, treeStages, withoutDecimals } from './tree.ts'
 
 // Rechenweg einer Bruchaufgabe wie im Skript: Hauptnenner, erweitern, Zähler zusammenfassen,
 // zerlegen, kürzen, mit dem Kehrwert malnehmen, Doppelbruch auflösen. Jeder Schritt zeigt den
@@ -61,6 +66,9 @@ export type StepKind =
   | 'inner-complex'
   | 'left'
   | 'right'
+  | 'decimal'
+  | 'order'
+  | 'part'
 
 export const STEP_NAMES: Record<StepKind, string> = {
   lcd: 'Hauptnenner',
@@ -78,6 +86,9 @@ export const STEP_NAMES: Record<StepKind, string> = {
   'inner-complex': 'Inneren Doppelbruch auflösen',
   left: 'Erste Klammer zu einem Bruch',
   right: 'Zweite Klammer zu einem Bruch',
+  decimal: 'Dezimalzahl als Bruch',
+  order: 'Was zuerst?',
+  part: 'Teilergebnis einsetzen',
 }
 
 export type FracStep = {
@@ -93,6 +104,8 @@ export type FracStep = {
   // gefragt ist nur ein Teil, z. B. der Zähler des Doppelbruchs als ein Bruch oder der innere
   // Doppelbruch; sonst der ganze Zwischenstand
   readonly answer?: Expr
+  // Zwischenstand als LaTeX, wenn er sich nicht als Term schreiben lässt (Rechenbaum mit „:")
+  readonly latex?: string
 }
 
 export type FracSolution = {
@@ -278,6 +291,7 @@ export function ruledTop(top: Side, rule: BlockRule | undefined): RuledSide {
 
 export function solveFraction(t: FractionTask): FracSolution {
   if (t.kind === 'nested') return solveNested(t)
+  if (t.kind === 'tree') return solveTree(t)
   const { hints } = t
   const value = taskFrac(t)
   const steps: FracStep[] = []
@@ -401,6 +415,39 @@ export function sidePart(side: Side, terms: readonly Signed[]): Part {
   return part(expanded(side.work.numerator), factoredShown(side.work.lcd))
 }
 
+// Rechenbaum: Dezimalzahlen als Brüche, dann Teil für Teil wie eine gewohnte Aufgabe (fraction/tree.ts);
+// nach jedem Teil steht der ganze Zwischenstand da
+export type TreeSolution = FracSolution & { readonly stages: ReadonlyArray<TreeStage & { readonly solution: FracSolution }> }
+
+export function solveTree(t: Extract<FractionTask, { kind: 'tree' }>): TreeSolution {
+  const value = taskFrac(t)
+  const steps: FracStep[] = []
+  if (hasDecimal(t.root)) {
+    const plain = withoutDecimals(t.root)
+    steps.push({ kind: 'decimal', expr: treeExpr(plain), latex: treeLatex(plain) })
+  }
+  const solved = new Map<FractionTask, FracSolution>()
+  const stages = treeStages(t.root, t.hints, (task) => {
+    const solution = solveFraction(task)
+    solved.set(task, solution)
+    return solution.reduced
+  }).map((stage) => ({ ...stage, solution: solved.get(stage.task)! }))
+  stages.forEach((stage, i) => {
+    steps.push(...stage.solution.steps)
+    if (i < stages.length - 1) steps.push({ kind: 'part', expr: treeExpr(stage.after), latex: treeLatex(stage.after) })
+  })
+  const hints = [...partsOf(t).flatMap((p) => factorize(shownPoly(p.den), t.hints).factors.map((f) => f.poly)), ...t.hints]
+  const reduced = reduceFrac(value, hints)
+  return { value, steps, reduced, result: resultExpr(reduced, t), excluded: excludedValues(t), beforeCancel: value, stages }
+}
+
+// Spielbar: Im letzten Teil wird der ganze Rest gerechnet. Sonst käme z. B. bei −(a − b) · c das
+// Minus erst nach dem letzten Teil dazu, und die letzte Antwort wäre nicht das Ergebnis.
+export function isPlayableTree(t: Extract<FractionTask, { kind: 'tree' }>): boolean {
+  const last = solveTree(t).stages.at(-1)
+  return last !== undefined && last.node === last.before
+}
+
 // Verschachtelter Doppelbruch: erst den inneren auflösen, dann weiter wie beim Doppelbruch
 function solveNested(t: Extract<FractionTask, { kind: 'nested' }>): FracSolution {
   const inner = solveFraction(innerTask(t, t.hints))
@@ -488,8 +535,23 @@ function zerosInX(p: Poly, hints: readonly Poly[]): Rational[] | null {
   return zeros
 }
 
+// Nenner, die durch etwas geteilt werden (Rechenbaum): ihr Wert darf nicht 0 sein
+function divisorsOf(n: TreeNode): Poly[] {
+  switch (n.kind) {
+    case 'leaf':
+      return []
+    case 'sum':
+      return n.terms.flatMap((t) => divisorsOf(t.node))
+    case 'product':
+      return [...divisorsOf(n.left), ...divisorsOf(n.right)]
+    default:
+      return [treeFrac(n.right).num, ...divisorsOf(n.left), ...divisorsOf(n.right)]
+  }
+}
+
 export function excludedValues(t: FractionTask): Rational[] | null {
   const polys = partsOf(t).map((p) => shownPoly(p.den))
+  if (t.kind === 'tree') polys.push(...divisorsOf(t.root))
   if (t.kind === 'quotient') polys.push(shownPoly(t.right.num))
   if (t.kind === 'mixed' && t.op === 'div') polys.push(signedFrac(t.right).num)
   if (t.kind === 'nested') polys.push(signedFrac(t.inner.bottom).num)

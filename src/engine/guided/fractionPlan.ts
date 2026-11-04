@@ -3,6 +3,8 @@ import {
   FRACTION_HINTS,
   explainCancel,
   explainCombine,
+  explainDecimal,
+  explainOrder,
   explainExpand,
   explainFactor,
   explainFractionError,
@@ -29,6 +31,7 @@ import { type Poly, atomsOf, constValue, polyAdd, polyEquals, polyMul, polyNeg, 
 import {
   type FracSolution,
   type FracStep,
+  STEP_NAMES,
   type StepKind,
   type SumWork,
   cancelledFactor,
@@ -41,10 +44,13 @@ import {
   sideOf,
   signedSum,
   solveFraction,
+  solveTree,
   workSum,
 } from '../fraction/solve.ts'
+import { type TreeStage, decimalLeaves, decimalMistakes, withoutDecimals } from '../fraction/tree.ts'
 import {
   type FractionTask,
+  type TreeNode,
   innerTask,
   instructionFor,
   isWhole,
@@ -54,8 +60,11 @@ import {
   replaceInner,
   shownExpr,
   shownPoly,
+  sumNode,
   taskExpr,
   taskLatex,
+  term,
+  treeLatex,
 } from '../fraction/task.ts'
 import { type Rng, createRng } from '../random/rng.ts'
 import { isOne, ratAbs } from '../rational.ts'
@@ -102,6 +111,7 @@ type Draft = {
 }
 
 export function planFraction(t: FractionTask, ref: TaskRef, focus?: string): GuidedTask {
+  if (t.kind === 'tree') return planTree(t, ref, focus)
   const solution = solveFraction(t)
   const wrongs = fractionWrongAnswers(t, solution).filter((w) => !w.freeOnly)
   const facts = factsOf(t, solution, wrongs)
@@ -122,6 +132,156 @@ export function planFraction(t: FractionTask, ref: TaskRef, focus?: string): Gui
     ...(excluded.length > 0 ? { resultNote: `Gilt für ${listing(excluded.map((r) => `$x \\neq ${toLatex(num(r))}$`))}.` } : {}),
     cards: [...new Set(steps.flatMap((s) => s.cards))],
   }
+}
+
+// --- Rechenbaum (M2b): Teil für Teil ---
+//
+// Erst Dezimalzahlen als Brüche, dann je Teil (fraction/tree.ts): „Was rechnest du zuerst?", wenn
+// Punkt vor Strich oder eine Klammer zählt, danach der Teil wie eine eigene Aufgabe. Beim letzten
+// Teil ist die Antwort das Ergebnis; Fehler in der Reihenfolge stehen dort als falsche Ergebnisse.
+
+const ORDER_ERRORS = ['frac-order', 'frac-bracket-ignored', 'frac-minus-before-bracket']
+
+function planTree(t: Extract<FractionTask, { kind: 'tree' }>, ref: TaskRef, focus?: string): GuidedTask {
+  const solution = solveTree(t)
+  const last = solution.stages.at(-1)
+  if (!last || last.node !== last.before) throw new Error(`Rechenbaum nicht spielbar: ${taskLatex(t)}`)
+  const steps: GuidedStep[] = []
+  const rngOf = (key: string) => createRng(`brueche-geführt:${ref.level}:${ref.seed}:${key}`)
+
+  // Dezimalzahlen
+  const decimals = decimalLeaves(t.root)
+  const mistakes = decimalMistakes(t.root)
+  decimals.forEach((d, i) => {
+    const latex = toLatex(partExpr(d.part))
+    const wrongs = mistakes
+      .filter((mm) => mm.leaf === d)
+      .map((mm, j): Choice => ({ id: `falsch-${j + 1}`, content: m(partExpr(mm.wrong)), correct: false, expr: partExpr(mm.wrong), errorRuleId: 'frac-decimal-places', whyWrong: explainFractionError('frac-decimal-places') }))
+      .filter((c, j, all) => c.content !== `$${latex}$` && all.findIndex((o) => o.content === c.content) === j)
+    steps.push({
+      id: `${steps.length + 1}-decimal`,
+      title: 'Dezimalzahl',
+      question: `Schreibe $${d.decimal!.replace(',', '{,}')}$ als gekürzten Bruch.`,
+      choices: rngOf(`d${i}`).shuffle([{ id: 'richtig', content: `$${latex}$`, correct: true, expr: partExpr(d.part) }, ...wrongs]),
+      hint: FRACTION_HINTS.decimal,
+      explanation: explainDecimal(d.decimal!, latex),
+      established: i === decimals.length - 1 ? [readableLatex(`= ${treeLatex(withoutDecimals(t.root))}`)] : [],
+      cards: [FRACTION_CARD_IDS.decimal],
+    })
+  })
+
+  // Fehler in der Reihenfolge als falsche Ergebnisse der letzten Frage
+  const orderWrongs = fractionWrongAnswers(t, solution).filter((w) => ORDER_ERRORS.includes(w.rule.id) && w.value)
+
+  solution.stages.forEach((stage, i) => {
+    const last = i === solution.stages.length - 1
+    const order = orderChoices(stage)
+    if (order.length > 0) {
+      const correctLatex = treeLatex(stage.node)
+      steps.push({
+        id: `${steps.length + 1}-order`,
+        title: 'Reihenfolge',
+        question: 'Was rechnest du zuerst?',
+        choices: rngOf(`o${i}`).shuffle([
+          { id: 'richtig', content: `$${correctLatex}$`, correct: true },
+          ...order.map((o, j): Choice => ({ id: `falsch-${j + 1}`, content: `$${o.latex}$`, correct: false, errorRuleId: o.rule, whyWrong: explainFractionError(o.rule) })),
+        ]),
+        hint: FRACTION_HINTS.order,
+        explanation: explainOrder(stage.node.kind === 'sum' ? 'bracket' : 'dot', correctLatex),
+        established: [],
+        cards: [FRACTION_CARD_IDS.order],
+      })
+    }
+    const sub = planFraction(stage.task, { level: ref.level, seed: ref.seed * 31 + i + 1 }, focus)
+    const nodeLatex = treeLatex(stage.node)
+    sub.steps.forEach((s, j) => {
+      const lastSub = j === sub.steps.length - 1
+      let step: GuidedStep = {
+        ...s,
+        id: `${steps.length + 1}-${s.id}`,
+        title: last ? s.title : `Teilrechnung: $${nodeLatex}$`,
+        established: last ? s.established : lastSub ? [readableLatex(`= ${treeLatex(stage.after)}`)] : [],
+      }
+      if (last && lastSub) step = withOrderWrongs(step, orderWrongs, t, rngOf('ende'), focus)
+      steps.push(step)
+    })
+  })
+
+  const excluded = solution.excluded ?? []
+  return {
+    ref,
+    expr: taskExpr(t),
+    functionLatex: taskLatex(t),
+    instruction: instructionFor(t).replace(/\.$/, ''),
+    answerLabel: taskLatex(t),
+    steps,
+    ruleHint: fractionTaskHint(t),
+    result: solution.result,
+    resultLatex: `${taskLatex(t)} = ${toLatex(solution.result)}`,
+    ...(excluded.length > 0 ? { resultNote: `Gilt für ${listing(excluded.map((r) => `$x \\neq ${toLatex(num(r))}$`))}.` } : {}),
+    cards: [...new Set(steps.flatMap((s) => s.cards))],
+  }
+}
+
+type OrderChoice = { readonly latex: string; readonly rule: string }
+
+// Falsche Antworten auf „Was rechnest du zuerst?": was man ohne Punkt vor Strich bzw. ohne die
+// Klammer zuerst rechnen würde (der Summand davor mit dem ersten Teil des Knotens, oder der Teil
+// des Knotens mit dem Summanden danach)
+function orderChoices(stage: TreeStage): OrderChoice[] {
+  const parent = parentOf(stage.before, stage.node)
+  if (!parent || parent.kind !== 'sum') return []
+  const i = parent.terms.findIndex((x) => x.node === stage.node)
+  const rule = stage.node.kind === 'sum' ? 'frac-bracket-ignored' : 'frac-order'
+  const firstOf = (n: TreeNode): TreeNode => {
+    if (n.kind === 'product' || n.kind === 'quotient') return firstOf(n.left)
+    if (n.kind === 'sum' && n.terms.length >= 2 && n.terms[0].sign > 0) return n.terms[0].node
+    return n
+  }
+  const lastOf = (n: TreeNode): TreeNode => {
+    if (n.kind === 'product' || n.kind === 'quotient') return n.right
+    if (n.kind === 'sum' && n.terms.length >= 2) return n.terms[n.terms.length - 1].node
+    return n
+  }
+  const out: OrderChoice[] = []
+  const pair = (a: TreeNode, sign: 1 | -1, b: TreeNode, aSign: 1 | -1 = 1) => treeLatex(sumNode(term(aSign, a), term(sign, b)))
+  const nodeSign = parent.terms[i].sign
+  if (i > 0) {
+    const before = parent.terms[i - 1]
+    out.push({ latex: pair(lastOf(before.node), nodeSign, firstOf(stage.node), i - 1 === 0 ? before.sign : 1), rule })
+  }
+  const after = parent.terms[i + 1]
+  if (after && stage.node.kind !== 'sum') out.push({ latex: pair(lastOf(stage.node), after.sign, firstOf(after.node)), rule })
+  const correct = treeLatex(stage.node)
+  return out.filter((o, j) => o.latex !== correct && out.findIndex((x) => x.latex === o.latex) === j)
+}
+
+function parentOf(n: TreeNode, target: TreeNode): TreeNode | null {
+  const children = n.kind === 'leaf' ? [] : n.kind === 'sum' ? n.terms.map((x) => x.node) : [n.left, n.right]
+  if (children.includes(target)) return n
+  for (const c of children) {
+    const found = parentOf(c, target)
+    if (found) return found
+  }
+  return null
+}
+
+// Fehler in der Reihenfolge zusätzlich als falsche Ergebnisse, wenn Platz ist (gezieltes Üben: der
+// gesuchte Fehler sicher)
+function withOrderWrongs(step: GuidedStep, wrongs: readonly FracWrong[], t: FractionTask, rng: Rng, focus?: string): GuidedStep {
+  const shown = new Set(step.choices.map((c) => c.content))
+  const extra: Choice[] = []
+  for (const w of wrongs) {
+    const e = resultForm(w, t)
+    const content = m(e)
+    if (shown.has(content)) continue
+    shown.add(content)
+    extra.push({ id: `falsch-r${extra.length + 1}`, content, correct: false, expr: e, errorRuleId: w.rule.id, whyWrong: explainFractionError(w.rule.id) })
+  }
+  if (extra.length === 0) return step
+  const wrong = [...step.choices.filter((c) => !c.correct), ...extra]
+  const chosen = [...wrong.filter((c) => c.errorRuleId === focus), ...wrong.filter((c) => c.errorRuleId !== focus)].slice(0, MAX_WRONG_CHOICES)
+  return { ...step, choices: rng.shuffle([...step.choices.filter((c) => c.correct), ...chosen]) }
 }
 
 // --- Was die Texte über die Aufgabe wissen müssen ---
@@ -322,6 +482,9 @@ const TITLES: Record<StepKind, readonly [first: string, later: string]> = {
   'inner-complex': ['Innerer Doppelbruch', 'innerer Doppelbruch'],
   left: ['Erste Klammer', 'erste Klammer'],
   right: ['Zweite Klammer', 'zweite Klammer'],
+  decimal: ['Dezimalzahl', 'Dezimalzahl'],
+  order: ['Reihenfolge', 'Reihenfolge'],
+  part: ['Teilergebnis', 'Teilergebnis'],
 }
 
 function titleOf(kinds: readonly StepKind[]): string {
@@ -372,6 +535,12 @@ function phrase(kind: StepKind, facts: Facts): string {
       return 'fasse die erste Klammer zu einem Bruch zusammen'
     case 'right':
       return 'fasse die zweite Klammer zu einem Bruch zusammen'
+    case 'decimal':
+      return 'schreibe die Dezimalzahl als Bruch'
+    case 'order':
+      return 'entscheide, was du zuerst rechnest'
+    case 'part':
+      return 'setze das Teilergebnis ein'
   }
 }
 
@@ -409,6 +578,10 @@ function hintOf(kind: StepKind, facts: Facts): string {
       return facts.original.rule?.kind === 'root' ? FRACTION_HINTS.root : FRACTION_HINTS.trig
     case 'inner-complex':
       return FRACTION_HINTS.innerComplex
+    case 'decimal':
+    case 'order':
+    case 'part':
+      return FRACTION_HINTS[kind]
   }
 }
 
@@ -453,6 +626,12 @@ function cardsOf(kind: StepKind, facts: Facts): string[] {
         const byMethod = methods.length > 0 ? methods.map((k) => METHOD_CARDS[k]) : [ids.sumCancel]
         return facts.root ? [...byMethod, ids.blockRules] : byMethod
       }
+      case 'decimal':
+        return [ids.decimal]
+      case 'order':
+        return [ids.order]
+      case 'part':
+        return []
     }
   })()
   // Bausteine wie e^x; mit eigenen Regeln (√x, sin² x + cos² x = 1, e^{2x} : e^x) deren Karte
@@ -541,6 +720,11 @@ function explainStep(step: FracStep, solution: FracSolution, facts: Facts): Expl
     }
     case 'identity':
       return explainRule(facts.original.rule?.kind === 'root' ? 'root' : 'trig', step.from!, step.detail!)
+    case 'decimal':
+    case 'order':
+    case 'part':
+      // Rechenbäume plant planTree; diese Schritte kommen hier nicht vor
+      return { detailed: STEP_NAMES[step.kind], short: STEP_NAMES[step.kind] }
   }
 }
 

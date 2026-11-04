@@ -25,6 +25,7 @@ import {
   taskFrac,
 } from '../fraction/task.ts'
 import { type Rng, createRng } from '../random/rng.ts'
+import { LEVEL1_KIT, bigReduce, buildFromKit, level2Kit as level2Kit_, monomialReduce } from './fractionKit.ts'
 import { rat } from '../rational.ts'
 import type { Level, TaskRef } from './taskNumber.ts'
 
@@ -60,223 +61,28 @@ const signed = (sign: 1 | -1, p: Part): Signed => (sign > 0 ? plus(p) : minus(p)
 const anySign = (rng: Rng): 1 | -1 => (rng.chance(0.5) ? 1 : -1)
 const nonZero = (rng: Rng, max: number) => (rng.chance(0.5) ? 1 : -1) * rng.int(1, max)
 
-function gcd(a: number, b: number): number {
-  a = Math.abs(a)
-  b = Math.abs(b)
-  while (b !== 0) [a, b] = [b, a % b]
-  return a
-}
-
-// Zahl zwischen 1 und 7, teilerfremd zu d
-function coprimeTo(rng: Rng, d: number): number {
-  return rng.pick([1, 2, 3, 4, 5, 6, 7].filter((n) => gcd(n, d) === 1))
-}
-
-// Zähler zwischen 1 und d − 1, teilerfremd zu d (echter, gekürzter Bruch)
-function properNumerator(rng: Rng, d: number): number {
-  const options = Array.from({ length: d - 1 }, (_, i) => i + 1).filter((n) => gcd(n, d) === 1)
-  return rng.pick(options)
-}
-
 const shape = (s: FractionShape, hints: readonly Poly[] = [], rule?: BlockRule): FractionTask => ({ ...s, hints, ...(rule ? { rule } : {}) }) as FractionTask
 
-// Nenner-Paare mit gemeinsamem Teiler (Hauptnenner kleiner als das Produkt) und teilerfremde
-const SHARED_PAIRS: ReadonlyArray<readonly [number, number]> = [
-  [4, 6],
-  [6, 8],
-  [6, 9],
-  [4, 10],
-  [8, 12],
-  [6, 10],
-  [9, 12],
-  [10, 15],
-  [3, 6],
-  [4, 8],
-  [6, 4],
-  [12, 8],
-]
-const COPRIME_PAIRS: ReadonlyArray<readonly [number, number]> = [
-  [2, 3],
-  [3, 4],
-  [2, 5],
-  [3, 5],
-  [4, 5],
-  [5, 6],
-  [3, 7],
-  [4, 7],
-  [5, 8],
-]
+// --- Stufen 1 und 2: Baukasten (M2b, tasks/fractionKit.ts) ---
 
-// --- Stufe 1: Zahlenbrüche ---
-
-const level1Sum: FractionTemplate = {
-  id: 'zahlen-plus-minus',
+const level1Kit: FractionTemplate = {
+  id: 'baukasten-zahlen',
   level: 1,
-  label: 'Zwei Zahlenbrüche plus oder minus',
-  build(rng) {
-    const [b, d] = rng.pick(rng.chance(0.6) ? SHARED_PAIRS : COPRIME_PAIRS)
-    let first = [properNumerator(rng, b), b]
-    let second = [properNumerator(rng, d), d]
-    const sign = anySign(rng)
-    // Ergebnis positiv: den größeren Bruch nach vorn
-    if (sign < 0 && first[0] * second[1] < second[0] * first[1]) [first, second] = [second, first]
-    return shape({ kind: 'sum', terms: [plus(numberPart(first[0], first[1])), signed(sign, numberPart(second[0], second[1]))] })
-  },
+  label: 'Baukasten: bis zu vier Zahlenbrüche, Punkt vor Strich, Klammern, Dezimalzahlen',
+  build: (rng) => (rng.chance(0.08) ? bigReduce(rng) : buildFromKit(rng, LEVEL1_KIT, 1)),
 }
 
-const level1Whole: FractionTemplate = {
-  id: 'zahl-und-bruch',
-  level: 1,
-  label: 'Ganze Zahl plus oder minus Bruch',
-  build(rng) {
-    const d = rng.int(2, 9)
-    const fraction = numberPart(properNumerator(rng, d), d)
-    return shape({ kind: 'sum', terms: [plus(numberPart(rng.int(1, 4))), signed(anySign(rng), fraction)] })
-  },
+const level2Kit: FractionTemplate = {
+  id: 'baukasten-buchstaben',
+  level: 2,
+  label: 'Baukasten: Brüche mit Buchstaben in Produkten',
+  build: (rng) => (rng.chance(0.1) ? monomialReduce(rng) : buildFromKit(rng, level2Kit_(rng), 2)),
 }
-
-const level1Product: FractionTemplate = {
-  id: 'zahlen-mal',
-  level: 1,
-  label: 'Zahlenbrüche malnehmen (mit Kürzen über Kreuz)',
-  build(rng) {
-    if (rng.chance(0.3)) {
-      // Zahl mal Bruch, Zahl und Nenner haben einen gemeinsamen Teiler
-      const d = rng.pick([4, 6, 8, 9, 10, 12])
-      const n = rng.pick([2, 3, 4, 5, 6].filter((k) => gcd(k, d) > 1 && k !== d))
-      return shape({ kind: 'product', left: numberPart(n), right: numberPart(properNumerator(rng, d), d) })
-    }
-    for (;;) {
-      const [b, d] = [rng.int(2, 12), rng.int(2, 12)]
-      const [a, e] = [properNumerator(rng, b), properNumerator(rng, d)]
-      if (gcd(a, d) > 1 || gcd(e, b) > 1) return shape({ kind: 'product', left: numberPart(a, b), right: numberPart(e, d) })
-    }
-  },
-}
-
-const level1Quotient: FractionTemplate = {
-  id: 'zahlen-geteilt',
-  level: 1,
-  label: 'Zahlenbrüche teilen',
-  build(rng) {
-    for (;;) {
-      const [b, d] = [rng.int(2, 10), rng.int(2, 10)]
-      const [a, e] = [properNumerator(rng, b), properNumerator(rng, d)]
-      if (a * d !== e * b) return shape({ kind: 'quotient', left: numberPart(a, b), right: numberPart(e, d) })
-    }
-  },
-}
-
-// --- Stufe 2: Buchstaben in Produkten ---
 
 const LETTER_PAIRS = [
   ['x', 'y'],
   ['a', 'b'],
 ] as const
-
-const level2Reduce: FractionTemplate = {
-  id: 'potenzen-kuerzen',
-  level: 2,
-  label: 'Produkte mit Potenzen kürzen',
-  build(rng) {
-    const [s, t] = rng.pick(LETTER_PAIRS)
-    const g = rng.pick([2, 3, 4, 5, 6])
-    const [p, q] = rng.pick([
-      [1, 2],
-      [2, 3],
-      [3, 2],
-      [1, 3],
-      [3, 4],
-      [2, 1],
-      [4, 3],
-      [5, 2],
-    ])
-    // erstes Atom oben höher, zweites unten höher (so wird in beide Richtungen gekürzt)
-    const [n1, d1] = [rng.int(2, 6), rng.int(1, 2)]
-    const [n2, d2] = [rng.int(0, 1), rng.int(2, 4)]
-    const num = mono(g * p, [s, n1], [t, n2])
-    const den = mono(g * q, [s, d1], [t, d2])
-    return shape({ kind: 'reduce', part: polyPart(num, den) })
-  },
-}
-
-const level2Sum: FractionTemplate = {
-  id: 'buchstaben-plus-minus',
-  level: 2,
-  label: 'Brüche mit Buchstaben im Nenner plus oder minus',
-  build(rng) {
-    const sign = anySign(rng)
-    const variant = rng.int(1, 4)
-    if (variant === 1) {
-      // \frac{2}{x} - \frac{1}{x^2}
-      const t = rng.pick(['x', 'a'])
-      const [p, q] = rng.pick([
-        [1, 2],
-        [1, 3],
-        [2, 3],
-        [2, 1],
-      ])
-      return shape({ kind: 'sum', terms: [plus(polyPart(c(rng.int(1, 5)), mono(1, [t, p]))), signed(sign, polyPart(c(rng.int(1, 5)), mono(1, [t, q])))] })
-    }
-    if (variant === 2) {
-      // \frac{3}{2x} + \frac{5}{6x}
-      const t = rng.pick(['x', 'a'])
-      const [m1, m2] = rng.pick([
-        [2, 6],
-        [3, 6],
-        [2, 3],
-        [4, 6],
-        [2, 4],
-        [3, 4],
-      ])
-      return shape({
-        kind: 'sum',
-        terms: [plus(polyPart(c(coprimeTo(rng, m1)), mono(m1, [t, 1]))), signed(sign, polyPart(c(coprimeTo(rng, m2)), mono(m2, [t, 1])))],
-      })
-    }
-    if (variant === 3) {
-      // 1 + \frac{2}{x}
-      const t = rng.pick(['x', 'a'])
-      return shape({ kind: 'sum', terms: [plus(numberPart(rng.int(1, 3))), signed(sign, polyPart(c(rng.int(1, 5)), mono(1, [t, rng.int(1, 2)])))] })
-    }
-    // \frac{a}{b} - \frac{b}{a} oder \frac{1}{a} + \frac{1}{b}
-    const [s, t] = rng.pick(LETTER_PAIRS)
-    if (rng.chance(0.5)) {
-      return shape({ kind: 'sum', terms: [plus(polyPart(mono(1, [s, 1]), mono(1, [t, 1]))), signed(sign, polyPart(mono(1, [t, 1]), mono(1, [s, 1])))] })
-    }
-    return shape({ kind: 'sum', terms: [plus(polyPart(c(rng.int(1, 3)), mono(1, [s, 1]))), signed(sign, polyPart(c(rng.int(1, 3)), mono(1, [t, 1])))] })
-  },
-}
-
-// Zwei Bruchteile aus Produkten, die sich über Kreuz kürzen lassen
-function monomialParts(rng: Rng): [Part, Part] {
-  const [s, t] = rng.pick(LETTER_PAIRS)
-  const k = rng.pick([2, 3, 4])
-  const left = polyPart(mono(rng.pick([1, 2, 3]) * k, [s, rng.int(1, 2)]), mono(rng.pick([2, 3, 4, 5]), [t, rng.int(1, 2)]))
-  const right = polyPart(mono(rng.pick([2, 3, 4, 5]), [t, rng.int(1, 3)]), mono(rng.pick([1, 2, 3]) * k, [s, rng.int(1, 3)]))
-  return [left, right]
-}
-
-const level2Product: FractionTemplate = {
-  id: 'buchstaben-mal',
-  level: 2,
-  label: 'Brüche mit Buchstaben malnehmen',
-  build(rng) {
-    const [left, right] = monomialParts(rng)
-    return shape({ kind: 'product', left, right })
-  },
-}
-
-const level2Quotient: FractionTemplate = {
-  id: 'buchstaben-geteilt',
-  level: 2,
-  label: 'Brüche mit Buchstaben teilen',
-  build(rng) {
-    const [left, right] = monomialParts(rng)
-    // Für „geteilt" den zweiten Bruch umdrehen, damit nach dem Kehrwert gekürzt werden kann
-    return shape({ kind: 'quotient', left, right: part(right.den, right.num) })
-  },
-}
 
 // --- Stufe 3: Summen in Zähler und Nenner ---
 
@@ -644,14 +450,8 @@ const level5Exp: FractionTemplate = {
 }
 
 export const FRACTION_TEMPLATES: readonly FractionTemplate[] = [
-  level1Sum,
-  level1Whole,
-  level1Product,
-  level1Quotient,
-  level2Reduce,
-  level2Sum,
-  level2Product,
-  level2Quotient,
+  level1Kit,
+  level2Kit,
   level3Reduce,
   level3Sum,
   level4Reduce,

@@ -40,6 +40,20 @@ export type FractionShape =
   | { readonly kind: 'mixed'; readonly op: 'mul' | 'div'; readonly left: readonly Signed[]; readonly right: readonly Signed[] }
   // Verschachtelter Doppelbruch: im Zähler oder Nenner steckt noch ein Doppelbruch
   | { readonly kind: 'nested'; readonly top: readonly Signed[]; readonly bottom: readonly Signed[]; readonly inner: Inner }
+  // Rechenbaum aus dem Baukasten (M2b): beliebig viele Brüche, Punkt vor Strich, Klammern,
+  // Doppelbrüche; gerechnet wird Stück für Stück mit den Formen oben (fraction/tree.ts)
+  | { readonly kind: 'tree'; readonly root: TreeNode }
+
+// Knoten eines Rechenbaums. Blätter sind Brüche, ganze Zahlen oder Terme ohne Bruch; eine
+// Dezimalzahl wird als solche gezeigt (decimal, z. B. „0,75") und hat den Wert ihres Bruchs.
+// Summen haben beliebig viele Summanden; eine Summe mit einem Summanden mit Minus ist ein Minus
+// davor (−a). Mal, geteilt und Bruchstrich haben zwei Teile (left oben, right unten).
+export type TreeNode =
+  | { readonly kind: 'leaf'; readonly part: Part; readonly decimal?: string }
+  | { readonly kind: 'sum'; readonly terms: readonly TreeTerm[] }
+  | { readonly kind: 'product' | 'quotient' | 'over'; readonly left: TreeNode; readonly right: TreeNode }
+
+export type TreeTerm = { readonly sign: 1 | -1; readonly node: TreeNode }
 
 // Regel eines Bausteins, die der Rechenweg in einem eigenen Schritt anwendet (Stufe 5):
 // - trig: sin² x + cos² x = 1; prefer: welcher Baustein übrig bleibt (S: 1 − cos² x → sin² x),
@@ -58,6 +72,13 @@ export const binomialShown = (base: Poly, minus: Poly): Shown => ({ form: 'binom
 export const part = (num: Shown, den: Shown = expanded(polyConst(1))): Part => ({ num, den })
 export const plus = (p: Part): Signed => ({ sign: 1, part: p })
 export const minus = (p: Part): Signed => ({ sign: -1, part: p })
+
+export const leaf = (p: Part, decimal?: string): TreeNode => ({ kind: 'leaf', part: p, ...(decimal ? { decimal } : {}) })
+export const sumNode = (...terms: TreeTerm[]): TreeNode => ({ kind: 'sum', terms })
+export const term = (sign: 1 | -1, node: TreeNode): TreeTerm => ({ sign, node })
+export const productNode = (left: TreeNode, right: TreeNode): TreeNode => ({ kind: 'product', left, right })
+export const quotientNode = (left: TreeNode, right: TreeNode): TreeNode => ({ kind: 'quotient', left, right })
+export const overNode = (left: TreeNode, right: TreeNode): TreeNode => ({ kind: 'over', left, right })
 
 // --- Werte und Schreibweise ---
 
@@ -160,6 +181,85 @@ export function taskFrac(t: FractionShape): Frac {
       const inner = innerFrac(t.inner)
       return fracDiv(withInner(t.top, t.inner, 'top', inner), withInner(t.bottom, t.inner, 'bottom', inner))
     }
+    case 'tree':
+      return treeFrac(t.root)
+  }
+}
+
+// --- Rechenbaum ---
+
+export function treeFrac(n: TreeNode): Frac {
+  switch (n.kind) {
+    case 'leaf':
+      return partFrac(n.part)
+    case 'sum':
+      return n.terms.reduce((sum, t) => fracAdd(sum, t.sign < 0 ? fracNeg(treeFrac(t.node)) : treeFrac(t.node)), fracOf([]))
+    case 'product':
+      return fracMul(treeFrac(n.left), treeFrac(n.right))
+    case 'quotient':
+    case 'over':
+      return fracDiv(treeFrac(n.left), treeFrac(n.right))
+  }
+}
+
+// Als Term (geteilt als Bruch, gleicher Wert); für Werte und Prüfstellen
+export function treeExpr(n: TreeNode): Expr {
+  switch (n.kind) {
+    case 'leaf':
+      return partExpr(n.part)
+    case 'sum':
+      return add(...n.terms.map((t) => (t.sign < 0 ? neg(treeExpr(t.node)) : treeExpr(t.node))))
+    case 'product':
+      return mulDot(treeExpr(n.left), treeExpr(n.right))
+    case 'quotient':
+    case 'over':
+      return div(treeExpr(n.left), treeExpr(n.right))
+  }
+}
+
+export const isUnaryMinus = (n: TreeNode) => n.kind === 'sum' && n.terms.length === 1 && n.terms[0].sign < 0
+
+const bracket = (latex: string) => (latex.includes('\\frac') ? `\\left(${latex}\\right)` : `(${latex})`)
+
+// Als LaTeX, wie gestellt: geteilt mit Doppelpunkt, Klammern nur wo nötig, Dezimalzahlen mit Komma
+export function treeLatex(n: TreeNode): string {
+  switch (n.kind) {
+    case 'leaf':
+      return n.decimal ? n.decimal.replace(',', '{,}') : toLatex(partExpr(n.part))
+    case 'sum':
+      return n.terms
+        .map((t, i) => {
+          const body = t.node.kind === 'sum' ? bracket(treeLatex(t.node)) : treeLatex(t.node)
+          if (i === 0) return t.sign < 0 ? `-${body}` : body
+          return `${t.sign < 0 ? ' - ' : ' + '}${body}`
+        })
+        .join('')
+    case 'product':
+    case 'quotient': {
+      const op = n.kind === 'product' ? ' \\cdot ' : ' : '
+      return `${operandLatex(n.left, true)}${op}${operandLatex(n.right, false)}`
+    }
+    case 'over':
+      return `\\frac{${treeLatex(n.left)}}{${treeLatex(n.right)}}`
+  }
+}
+
+// Teil von mal bzw. geteilt: Summen in Klammern (ein Minus vorn nur beim ersten Teil ohne),
+// rechts auch mal und geteilt
+function operandLatex(n: TreeNode, first: boolean): string {
+  if (n.kind === 'sum' && !(first && isUnaryMinus(n))) return bracket(treeLatex(n))
+  if (!first && (n.kind === 'product' || n.kind === 'quotient')) return bracket(treeLatex(n))
+  return treeLatex(n)
+}
+
+export function treeLeaves(n: TreeNode): Array<Extract<TreeNode, { kind: 'leaf' }>> {
+  switch (n.kind) {
+    case 'leaf':
+      return [n]
+    case 'sum':
+      return n.terms.flatMap((t) => treeLeaves(t.node))
+    default:
+      return [...treeLeaves(n.left), ...treeLeaves(n.right)]
   }
 }
 
@@ -180,6 +280,8 @@ export function taskExpr(t: FractionShape): Expr {
       return t.op === 'mul' ? mulDot(signedExpr(t.left), signedExpr(t.right)) : div(signedExpr(t.left), signedExpr(t.right))
     case 'nested':
       return div(withInnerExpr(t.top, t.inner, 'top'), withInnerExpr(t.bottom, t.inner, 'bottom'))
+    case 'tree':
+      return treeExpr(t.root)
   }
 }
 
@@ -196,6 +298,7 @@ export function taskLatex(t: FractionShape): string {
   if (t.kind === 'quotient') return `${toLatex(partExpr(t.left))} : ${toLatex(partExpr(t.right))}`
   if (t.kind === 'mixed' && t.op === 'div') return `${sideLatex(t.left)} : ${sideLatex(t.right)}`
   if (t.kind === 'nested') return toLatex(taskExpr(t)).replaceAll('\\frac', '\\dfrac')
+  if (t.kind === 'tree') return readableLatex(treeLatex(t.root))
   return toLatex(taskExpr(t))
 }
 
@@ -229,7 +332,7 @@ export function hasNestedFraction(latex: string): boolean {
 export const readableLatex = (latex: string) => (hasNestedFraction(latex) ? latex.replace(/\\d?frac/g, '\\dfrac') : latex)
 
 // Kann die Mathe-Tastatur die Aufgabe so lesen? (Geteilt mit „:" nicht)
-export const isReadableTask = (t: FractionShape) => t.kind !== 'quotient' && !(t.kind === 'mixed' && t.op === 'div')
+export const isReadableTask = (t: FractionShape) => t.kind !== 'quotient' && !(t.kind === 'mixed' && t.op === 'div') && !(t.kind === 'tree' && taskLatex(t).includes(' : '))
 
 export function instructionFor(t: FractionShape): string {
   switch (t.kind) {
@@ -240,6 +343,7 @@ export function instructionFor(t: FractionShape): string {
     case 'product':
     case 'quotient':
     case 'mixed':
+    case 'tree':
       return 'Berechne und kürze so weit wie möglich.'
     case 'complex':
     case 'nested':
@@ -279,6 +383,19 @@ export function withRoots(t: FractionTask): FractionTask {
       return { ...t, left: mapSigned(t.left), right: mapSigned(t.right), hints }
     case 'nested':
       return { ...t, top: mapSigned(t.top), bottom: mapSigned(t.bottom), inner: { ...t.inner, top: mapSigned(t.inner.top), bottom: mapSigned(t.inner.bottom) }, hints }
+    case 'tree':
+      return { ...t, root: mapTree(t.root, mapPart), hints }
+  }
+}
+
+export function mapTree(n: TreeNode, f: (p: Part) => Part): TreeNode {
+  switch (n.kind) {
+    case 'leaf':
+      return { ...n, part: f(n.part) }
+    case 'sum':
+      return { kind: 'sum', terms: n.terms.map((t) => ({ sign: t.sign, node: mapTree(t.node, f) })) }
+    default:
+      return { kind: n.kind, left: mapTree(n.left, f), right: mapTree(n.right, f) }
   }
 }
 
@@ -298,5 +415,7 @@ export function partsOf(t: FractionShape): Part[] {
       return [...t.left, ...t.right].map((s) => s.part)
     case 'nested':
       return [...t.top, ...t.bottom, ...t.inner.top, ...t.inner.bottom].map((s) => s.part)
+    case 'tree':
+      return treeLeaves(t.root).map((l) => l.part)
   }
 }

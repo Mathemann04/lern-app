@@ -14,7 +14,7 @@ import { generateDerivativeTask } from '../tasks/derivativeTerms.ts'
 import { FRACTION_ERROR_RULES } from '../fraction/errorRules.ts'
 import { REARRANGE_ERROR_RULES } from '../rearrange/errorRules.ts'
 import { fracEquals, toFrac } from '../fraction/frac.ts'
-import { solveFraction } from '../fraction/solve.ts'
+import { solveFraction, solveTree } from '../fraction/solve.ts'
 import { taskExpr as toExprOf, taskLatex } from '../fraction/task.ts'
 import { planFractionTask } from '../guided/fractionPlan.ts'
 import { planRearrangeTask } from '../guided/rearrangePlan.ts'
@@ -244,6 +244,13 @@ describe('Lernkarten: Brüche', () => {
       expectRenderable(line.label, id)
     }
     expect(latexProblem(example.functionLatex, { checkUgly: false })).toBeNull()
+    // Rechenbaum: ganze Zwischenstände mit dem Wert der Aufgabe, Schritte eines Teils mit dem Wert des Teils
+    if (e.kind === 'tree') {
+      const tree = solveTree(e)
+      for (const step of tree.steps.filter((s) => s.kind === 'decimal' || s.kind === 'part')) expect(fracEquals(toFrac(step.expr!)!, tree.value), id).toBe(true)
+      for (const stage of tree.stages) for (const step of stage.solution.steps) if (step.expr) expect(fracEquals(toFrac(step.expr)!, stage.solution.value), id).toBe(true)
+      return
+    }
     for (const step of solution.steps) if (step.expr) expect(fracEquals(toFrac(step.expr)!, solution.value), id).toBe(true)
   })
 
