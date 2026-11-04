@@ -25,6 +25,7 @@ import {
 import {
   type FracSolution,
   type StepKind,
+  type TreeSolution,
   type SumWork,
   applyRule,
   cancelledFactor,
@@ -60,7 +61,10 @@ import {
   shownPoly,
   signedFrac,
   taskFrac,
+  type TreeNode,
+  treeFrac,
 } from './task.ts'
+import { bracketIgnoredMistakes, decimalMistakes, leafOfFrac, leftToRight, minusBracketMistakes, normalize, replaceNode, withoutDecimals } from './tree.ts'
 
 // Typische Fehler beim Bruchrechnen (Katalog in docs/PLAN-M2.md). Jeder Fehler steckt in genau
 // einem Schritt des Rechenwegs; der Rest wird richtig gerechnet. Daraus entstehen die falschen
@@ -104,6 +108,10 @@ export const FRACTION_ERROR_RULES: readonly FracErrorRule[] = [
   { id: 'frac-square-forgotten', step: 'identity', name: 'Quadrat vergessen', wrongFormula: '1 - \\cos^2 x = \\sin x' },
   { id: 'frac-binomial-middle', step: 'multiply-out', name: 'Beim Quadrieren das Mittelglied vergessen', wrongFormula: '(\\sqrt{x} + 1)^2 = x + 1' },
   { id: 'frac-cancel-inside', step: 'cancel', name: 'Im Inneren einer Funktion gekürzt', wrongFormula: '\\frac{e^{2x}}{e^x} = e^2' },
+  { id: 'frac-order', step: 'order', name: 'Punkt vor Strich nicht beachtet', wrongFormula: '\\frac{1}{2} + \\frac{1}{2} \\cdot \\frac{2}{3} = 1 \\cdot \\frac{2}{3}' },
+  { id: 'frac-bracket-ignored', step: 'order', name: 'Klammer übersehen', wrongFormula: '\\left(\\frac{1}{2} - \\frac{1}{3}\\right) : 2 = \\frac{1}{2} - \\frac{1}{3} : 2' },
+  { id: 'frac-minus-before-bracket', step: 'order', name: 'Minus vor der Klammer nur auf den ersten Bruch angewandt', wrongFormula: '\\frac{1}{2} - \\left(\\frac{1}{3} - \\frac{1}{4}\\right) = \\frac{1}{2} - \\frac{1}{3} - \\frac{1}{4}' },
+  { id: 'frac-decimal-places', step: 'decimal', name: 'Dezimalzahl mit falsch gezählten Stellen umgewandelt', wrongFormula: '0{,}75 = \\frac{75}{10}' },
 ]
 
 export function fractionErrorRule(id: string): FracErrorRule {
@@ -629,11 +637,50 @@ function nestedMistakes(t: Extract<FractionTask, { kind: 'nested' }>): Candidate
   return out
 }
 
+// --- Rechenbaum ---
+
+// Fehler in der Reihenfolge (Punkt vor Strich, Klammern), bei Dezimalzahlen und in jedem Teil;
+// ein Fehler in einem Teil wird mit dem Rest richtig weitergerechnet
+function treeMistakes(t: Extract<FractionTask, { kind: 'tree' }>, solution: TreeSolution): Candidate[] {
+  const out: Candidate[] = []
+  // Wert eines falsch gerechneten Baums; 0 und Teilen durch 0 zählen nicht als Antwort
+  const value = (tree: TreeNode): Frac | null => {
+    try {
+      const v = treeFrac(tree)
+      return isZeroPoly(v.num) || isZeroPoly(v.den) ? null : v
+    } catch {
+      return null
+    }
+  }
+  for (const m of decimalMistakes(t.root)) out.push({ id: 'frac-decimal-places', stepExpr: partExpr(m.wrong), value: value(m.tree) })
+  const start = normalize(withoutDecimals(t.root))
+  const order = leftToRight(start)
+  if (order && !isZeroPoly(order.num)) out.push({ id: 'frac-order', stepExpr: reduced(order, t.hints), value: order })
+  for (const tree of bracketIgnoredMistakes(start)) {
+    const v = value(tree)
+    if (v) out.push({ id: 'frac-bracket-ignored', stepExpr: reduced(v, t.hints), value: v })
+  }
+  for (const tree of minusBracketMistakes(start)) {
+    const v = value(tree)
+    if (v) out.push({ id: 'frac-minus-before-bracket', stepExpr: reduced(v, t.hints), value: v })
+  }
+  for (const stage of solution.stages) {
+    for (const w of fractionWrongAnswers(stage.task, stage.solution)) {
+      if (!w.value) continue
+      const v = isZeroPoly(w.value.den) ? null : value(normalize(replaceNode(stage.before, stage.node, leafOfFrac(w.value, t.hints))))
+      if (v) out.push({ id: w.rule.id, step: w.step, stepExpr: w.stepExpr, value: v, ...(w.freeOnly ? { freeOnly: true } : {}) })
+    }
+  }
+  return out
+}
+
 // --- Alle falschen Antworten einer Aufgabe ---
 
 export function fractionWrongAnswers(t: FractionTask, solution: FracSolution = solveFraction(t)): FracWrong[] {
   const candidates: Candidate[] =
-    t.kind === 'nested'
+    t.kind === 'tree'
+      ? treeMistakes(t, solution as TreeSolution)
+      : t.kind === 'nested'
       ? nestedMistakes(t)
       : [
           ...(t.kind === 'sum' ? sumMistakes(workSum(t.terms, t.hints), t.hints) : []),

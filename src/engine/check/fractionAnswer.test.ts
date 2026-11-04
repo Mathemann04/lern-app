@@ -155,7 +155,8 @@ describe.each([1, 2, 3, 4, 5] as Level[])('Zufallsaufgaben, Stufe %i', (level) =
       const context0 = `${level}-${seed}: ${taskLatex(t)}`
       expect(short(checkFractionAnswer(context, toLatex(context.solution.result))), context0).toBe('correct')
       for (const step of context.solution.steps) {
-        if (!step.expr) continue
+        // beim Rechenbaum zeigen nur diese Schritte den ganzen Zwischenstand (die anderen einen Teil)
+        if (!step.expr || (t.kind === 'tree' && step.kind !== 'decimal' && step.kind !== 'part')) continue
         const verdict = checkFractionAnswer(context, toLatex(step.expr))
         expect(['correct', 'unfinished'], `${context0} ${step.kind}: ${toLatex(step.expr)}`).toContain(verdict.kind)
       }

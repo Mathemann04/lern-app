@@ -23,6 +23,7 @@ type Props = {
 const excludedLatex = (values: readonly Rational[]) => values.map((r) => `x \\neq ${toLatex(num(r))}`).join(',\\ ')
 
 function stepLatex(step: FracStep): string {
+  if (step.latex) return step.latex
   if (step.kind === 'lcd') return toLatex(step.detail!)
   if (step.kind === 'cancel' && step.before) return `${toLatex(step.before)} = ${toLatex(step.expr!)}`
   return toLatex(step.expr!)

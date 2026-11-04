@@ -8,22 +8,25 @@ import { FRACTION_ERROR_RULES, fractionWrongAnswers } from '../fraction/errorRul
 import { factoredPoly, reducedFrac } from '../fraction/factor.ts'
 import { fracAtoms, fracEquals, toFrac } from '../fraction/frac.ts'
 import { atomsOf, gcdUnivariate, polyContent, polyDivideExact, totalDegree } from '../fraction/poly.ts'
-import { solveFraction } from '../fraction/solve.ts'
+import { solveFraction, solveTree } from '../fraction/solve.ts'
 import { taskExpr, taskLatex } from '../fraction/task.ts'
 import { createRng } from '../random/rng.ts'
 import { ratToNumber } from '../rational.ts'
 import { fractionTemplatesForLevel, generateFractionTask } from './fractionTerms.ts'
-import { formatTaskNumber, type Level } from './taskNumber.ts'
+import { fractionForm } from './forms.ts'
+import { MAX_SEED, formatTaskNumber, type Level } from './taskNumber.ts'
+import { pickFresh, varietyStats } from './variety.ts'
 
 // Für gründlichere Läufe vorübergehend erhöhen (mit 3000 je Stufe geprüft)
 const SEEDS_PER_LEVEL = 300
 const LEVELS_SO_FAR: Level[] = [1, 2, 3, 4, 5]
-const LETTERS = ['x', 'y', 'a', 'b', 'h']
+// Buchstaben sind Kleinbuchstaben; Bausteine (E, L, S, C, R) hängen von x ab
+const isLetter = (atom: string) => /^[a-z]$/.test(atom) && atom !== 'e'
 
 // Stellen zum Vergleichen: bei x allein (auch e^x, ln x, sin x) wie beim Ableiten, sonst je
 // Buchstabe eine Zufallszahl
 function pointsFor(exprs: Expr[], atoms: string[], seed: string): Env[] {
-  const letters = [...new Set(atoms.map((a) => (LETTERS.includes(a) ? a : 'x')))]
+  const letters = [...new Set(atoms.map((a) => (isLetter(a) ? a : 'x')))]
   if (letters.length <= 1) return samplePoints(exprs, createRng(seed), 20, letters[0] ?? 'x')
   return sampleEnvs(exprs, createRng(seed), 20, letters)
 }
@@ -69,7 +72,18 @@ describe.each(LEVELS_SO_FAR)('Brüche Stufe %i', (level) => {
   })
 
   it('jeder Schritt hat denselben Wert wie die Aufgabe', () => {
-    for (const { solution, ref } of solved) {
+    for (const { task, solution, ref } of solved) {
+      // Rechenbaum: ganze Zwischenstände mit dem Wert der Aufgabe, Schritte eines Teils mit dem Wert des Teils
+      if (task.kind === 'tree') {
+        const tree = solveTree(task)
+        for (const step of tree.steps.filter((x) => x.kind === 'decimal' || x.kind === 'part')) {
+          expect(fracEquals(toFrac(step.expr!)!, tree.value), `${formatTaskNumber(ref)} ${step.kind}: ${step.latex}`).toBe(true)
+        }
+        for (const stage of tree.stages) {
+          for (const step of stage.solution.steps) if (step.expr) expect(fracEquals(toFrac(step.expr)!, stage.solution.value), `${formatTaskNumber(ref)} ${step.kind}`).toBe(true)
+        }
+        continue
+      }
       for (const step of solution.steps) {
         for (const e of [step.expr, step.before]) {
           if (!e) continue
@@ -112,8 +126,8 @@ describe.each(LEVELS_SO_FAR)('Brüche Stufe %i', (level) => {
         const differs = points.some((env) => !close(evaluate(taskExpr(task), env), evaluate(w.result!, env)))
         expect(differs, `${context} ${w.rule.id}: ${toLatex(w.result)}`).toBe(true)
       }
-      // im selben Schritt keine doppelten Antworten
-      const keys = wrong.map((w) => `${w.step}|${toLatex(w.stepExpr)}`)
+      // im selben Schritt keine doppelten Antworten (Rechenbaum: im selben Teil, erkennbar am Ergebnis)
+      const keys = wrong.map((w) => `${w.step}|${toLatex(w.stepExpr)}${task.kind === 'tree' && w.result ? `|${toLatex(w.result)}` : ''}`)
       expect(new Set(keys).size, context).toBe(keys.length)
     }
   })
@@ -137,4 +151,25 @@ it('jeder typische Fehler kommt in Aufgaben der Stufen 1 bis 5 vor', () => {
     }
   }
   expect(FRACTION_ERROR_RULES.map((r) => r.id).filter((id) => !seen.has(id))).toEqual([])
+})
+
+// Abwechslung (docs/PLAN-M2b.md): je Stufe viele Formen, keine zu häufig, beim Ziehen keine Wiederholung
+const VARIED_LEVELS: Level[] = [1, 2]
+
+describe.each(VARIED_LEVELS)('Abwechslung Stufe %i', (level) => {
+  it('mindestens 100 Formen unter 200 Aufgaben, keine öfter als 3 von 100', () => {
+    const stats = varietyStats(Array.from({ length: 200 }, (_, i) => fractionForm({ level, seed: i + 1 })))
+    expect(stats.distinct).toBeGreaterThanOrEqual(100)
+    expect(stats.maxShare).toBeLessThanOrEqual(0.03)
+  })
+
+  it('zehn neue Aufgaben nacheinander ohne doppelte Form', () => {
+    const rng = createRng(`ziehen:${level}`)
+    const recent: string[] = []
+    for (let i = 0; i < 10; i++) {
+      const seed = pickFresh((s) => fractionForm({ level, seed: s }), recent, () => rng.int(1, MAX_SEED))
+      recent.push(fractionForm({ level, seed }))
+    }
+    expect(new Set(recent).size).toBe(10)
+  })
 })

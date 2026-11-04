@@ -6,7 +6,7 @@ Stand: 31.10.2026
 | --- | --- | --- |
 | M1 | Grundgerüst + Ableitungsregeln (beide Modi, 5 Stufen, Erklärungen, Lernkarten, Fortschritt) | fertig |
 | M2 | Brüche (Bruchrechnung, Bruchterme kürzen und zusammenfassen, Doppelbrüche); App für mehrere Themen | fertig |
-| M2b | Brüche nachschärfen: viel mehr Abwechslung (Baukasten statt fester Vorlagen, keine Form doppelt), deutlich schwerer, Stufe 5 auf Profi-Niveau mit Partialbruchzerlegung | Plan wartet auf OK |
+| M2b | Brüche nachschärfen: viel mehr Abwechslung (Baukasten statt fester Vorlagen, keine Form doppelt), deutlich schwerer, Stufe 5 auf Profi-Niveau mit Partialbruchzerlegung und Brüchen aus späteren Kapiteln (komplexe Zahlen, Grenzwerte, Teleskopsummen) | in Arbeit |
 | M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | pausiert nach Schritt 3, weiter nach M2b |
 | M4 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
 | M5 | weitere Themen aus Mathematik MB1 | offen |
@@ -15,6 +15,12 @@ Stand: 31.10.2026
 | Später | Konto und Sync, Teilen mit Kommilitonen, App-Store-Version, optional KI-Hilfe | offen |
 
 ## Vorgemerkt
+
+- **Niveau wie im Lehrbuch** (Wunsch des Nutzers, 31.10.2026): Maßstab für
+  alle Themen ist das Buch „Mathe für Ingenieure" des Nutzers
+  ([LEHRBUCH.md](LEHRBUCH.md): Kapitel und wo sie in der App vorkommen).
+  Neue Themen und Stufen daran ausrichten; der Nutzer kann bei Bedarf
+  Aufgaben aus dem Buch zeigen (nur zur Orientierung, nicht abschreiben).
 
 - **Abwechslung in allen Themen** (Wunsch des Nutzers, 31.10.2026): Die
   Aufgaben sind viel zu ähnlich, fast jede zweite ist dieselbe Form mit
@@ -37,12 +43,14 @@ Stand: 31.10.2026
 
 Details: [PLAN-M2b.md](PLAN-M2b.md)
 
-- [ ] Plan M2b (Entwurf, wartet auf OK)
-- [ ] 1. Baukasten, Abwechslung, Stufen 1 und 2
+- [x] Plan M2b (freigegeben mit Änderungen: 100 Formen je Stufe, Themen
+  aus späteren Kapiteln)
+- [x] 1. Baukasten, Abwechslung, Stufen 1 und 2
 - [ ] 2. Stufen 3 und 4
 - [ ] 3. Stufe 5, Teil 1: alles ineinander
 - [ ] 4. Stufe 5, Teil 2: Partialbruchzerlegung
-- [ ] 5. Gezieltes Üben, Feinschliff, Abschluss
+- [ ] 5. Stufe 5, Teil 3: Brüche aus späteren Kapiteln
+- [ ] 6. Gezieltes Üben, Feinschliff, Abschluss
 
 ## M3: Schritte
 
@@ -308,3 +316,26 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   pausiert nach Schritt 3; zuerst M2b „Brüche nachschärfen" (Plan:
   [PLAN-M2b.md](PLAN-M2b.md)), dann die anderen Themen. Neue Arbeitsregel
   „Abwechslung" in CLAUDE.md.
+- 31.10.2026: Plan M2b freigegeben mit Änderungen des Nutzers: mindestens
+  100 Formen je Stufe; Stufe 5 zusätzlich mit Brüchen aus späteren Kapiteln
+  (komplexe Zahlen teilen, Grenzwerte von Brüchen, Teleskopsummen,
+  Hyperbelfunktionen) als eigener Schritt 5. Dezimalzahlen in Stufe 1: ja.
+  Das Inhaltsverzeichnis seines Buchs „Mathe für Ingenieure" ist der
+  Maßstab fürs Niveau (docs/LEHRBUCH.md).
+- 04.11.2026: M2b Schritt 1 fertig. Brüche der Stufen 1 und 2 kommen aus
+  einem Baukasten: zwei bis vier Brüche, Plus, Minus, Mal, Geteilt,
+  Klammern, Doppelbrüche, in Stufe 1 auch Dezimalzahlen, in Stufe 2
+  Buchstaben aus dem ganzen Alphabet (außer $e$ und $i$). Gemessen in je
+  200 Aufgaben: Stufe 1 rund 160 Formen, Stufe 2 rund 200 (vorher 5 bzw.
+  ähnlich wenige); keine Form öfter als 3 %. Die App merkt sich die letzten
+  zehn Formen je Thema und Stufe und zieht bei „Nächste Aufgabe" eine
+  andere (für alle Themen, auch Umstellen und Ableiten, dort mit den
+  bisherigen Vorlagen). Gerechnet wird Teil für Teil („Teilrechnung"),
+  vorher fragt die App „Was rechnest du zuerst?", wenn Punkt vor Strich oder
+  eine Klammer zählt. Vier neue typische Fehler (von links nach rechts,
+  Klammer übersehen, Minus vor der Klammer, Stellen der Dezimalzahl) und
+  zwei Lernkarten. Frei: „noch nicht fertig", wenn noch ein Produkt wie
+  $3 \cdot 3b^2$ oder eine Dezimalzahl dasteht. Zu einfache Teile
+  ($2 \cdot 5$, $5 - 5$) und Zwischenergebnisse $0$ oder $1$ werden
+  aussortiert. Alte Links auf einzelne Aufgaben der Stufen 1 und 2 zeigen
+  jetzt andere Aufgaben.

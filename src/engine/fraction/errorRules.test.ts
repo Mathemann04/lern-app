@@ -5,7 +5,22 @@ import { type Expr, add, cos, exp, mul, num, pow, sin, sqrt, sub, variable, x } 
 import { FRACTION_ERROR_RULES, fractionWrongAnswers } from './errorRules.ts'
 import { toFrac } from './frac.ts'
 import { type Poly, polyDivideExact } from './poly.ts'
-import { type BlockRule, type FractionShape, type FractionTask, type Part, binomialShown, expanded, minus, part, plus } from './task.ts'
+import {
+  type BlockRule,
+  type FractionShape,
+  type FractionTask,
+  type Part,
+  binomialShown,
+  expanded,
+  leaf,
+  minus,
+  part,
+  plus,
+  productNode,
+  quotientNode,
+  sumNode,
+  term,
+} from './task.ts'
 
 const a = variable('a')
 const b = variable('b')
@@ -95,6 +110,21 @@ const CASES: Case[] = [
     '\\frac{x}{\\sqrt{x}}',
   ],
   ['frac-cancel-inside', task({ kind: 'reduce', part: fr(exp(mul(num(2), x)), exp(x)) }), 'result', 'e^{2}'],
+  // Rechenbäume (M2b, Katalog in docs/PLAN-M2b.md)
+  ['frac-order', task({ kind: 'tree', root: sumNode(term(1, leaf(fr(num(1), num(2)))), term(1, productNode(leaf(fr(num(1), num(2))), leaf(fr(num(2), num(3)))))) }), 'result', '\\frac{2}{3}'],
+  [
+    'frac-bracket-ignored',
+    task({ kind: 'tree', root: quotientNode(sumNode(term(1, leaf(fr(num(1), num(2)))), term(-1, leaf(fr(num(1), num(3))))), leaf(fr(num(2)))) }),
+    'result',
+    '\\frac{1}{3}',
+  ],
+  [
+    'frac-minus-before-bracket',
+    task({ kind: 'tree', root: sumNode(term(1, leaf(fr(num(1), num(2)))), term(-1, sumNode(term(1, leaf(fr(num(1), num(3)))), term(-1, leaf(fr(num(1), num(4))))))) }),
+    'result',
+    '-\\frac{1}{12}',
+  ],
+  ['frac-decimal-places', task({ kind: 'tree', root: sumNode(term(1, leaf(fr(num(3), num(4)), '0,75')), term(1, leaf(fr(num(1), num(4))))) }), 'step', '\\frac{75}{10}'],
 ]
 
 describe('Zähler und Nenner addiert', () => {

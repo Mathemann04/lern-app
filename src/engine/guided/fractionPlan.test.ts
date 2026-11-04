@@ -11,7 +11,7 @@ import { FRACTION_ERROR_RULES } from '../fraction/errorRules.ts'
 import { fracEquals, toFrac } from '../fraction/frac.ts'
 import { isMultipleOf } from '../fraction/factor.ts'
 import { type Poly, polyDivideExact } from '../fraction/poly.ts'
-import { solveFraction } from '../fraction/solve.ts'
+import { solveFraction, solveTree } from '../fraction/solve.ts'
 import { type FractionShape, type FractionTask, type Part, bottomFrac, expanded, innerTask, minus, part, partsOf, plus, shownPoly, signedFrac, taskExpr, taskFrac, topFrac } from '../fraction/task.ts'
 import type { Frac } from '../fraction/frac.ts'
 import { createRng } from '../random/rng.ts'
@@ -155,7 +155,11 @@ describe.each([1, 2, 3, 4, 5] as Level[])('Brüche geführt, Stufe %i', (level) 
   })
 
   it('richtige Antworten haben den Wert der Aufgabe, falsche nie', () => {
-    for (const { plan, t } of plans) {
+    // Rechenbaum: je Teil wie eine eigene Aufgabe (die Schritte dazwischen prüft tree.test.ts)
+    const parts = plans.flatMap(({ plan, t }) =>
+      t.kind === 'tree' ? solveTree(t).stages.map((stage, i) => ({ plan: planFraction(stage.task, { level, seed: plan.ref.seed * 31 + i + 1 }), t: stage.task })) : [{ plan, t }],
+    )
+    for (const { plan, t } of parts) {
       const value = solveFraction(t).value
       for (const step of plan.steps) {
         const context = `${level}-${plan.ref.seed} ${step.title}`

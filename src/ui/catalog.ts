@@ -98,14 +98,14 @@ const fractionLevels: LevelPreview[] = [
   {
     level: 1,
     available: true,
-    title: 'Zahlenbrüche: erweitern, kürzen, plus, minus, mal, geteilt',
-    examples: [String.raw`\frac{3}{4} + \frac{5}{6}`, String.raw`2 - \frac{3}{5}`, String.raw`\frac{3}{4} : \frac{2}{5}`],
+    title: 'Zahlenbrüche: bis zu vier Brüche, Punkt vor Strich, Klammern, Dezimalzahlen',
+    examples: [String.raw`\frac{3}{4} - \frac{2}{3} \cdot \frac{9}{8}`, String.raw`\left(\frac{5}{6} - 0{,}75\right) : \frac{7}{12}`, String.raw`\frac{\frac{3}{4} - \frac{1}{6}}{\frac{7}{8}}`],
   },
   {
     level: 2,
     available: true,
-    title: 'Buchstaben in Produkten: Potenzen kürzen, Hauptnenner',
-    examples: [String.raw`\frac{6x^2y}{9xy^3}`, String.raw`\frac{2}{x} - \frac{1}{x^2}`, String.raw`\frac{3a}{4b} \cdot \frac{8b^2}{9a}`],
+    title: 'Buchstaben in Produkten: Hauptnenner, über Kreuz kürzen, viele Buchstaben',
+    examples: [String.raw`\frac{5}{6a^2b} - \frac{3}{4ab^3} + \frac{1}{3b}`, String.raw`\frac{12m^3n}{18mn^4} \cdot \frac{9n^2}{4m}`, String.raw`\frac{3x}{4y} : \frac{9x^2}{8y^3} - \frac{2}{3x}`],
   },
   {
     level: 3,

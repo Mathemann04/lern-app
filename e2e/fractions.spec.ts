@@ -7,7 +7,7 @@ const correctFeedback = (page: Page) => page.getByText('Richtig!', { exact: true
 const wrongFeedback = (page: Page) => page.getByText('Nicht ganz. Versuch es noch einmal.')
 
 async function solveWholeTask(page: Page) {
-  for (let step = 0; step < 8; step++) {
+  for (let step = 0; step < 16; step++) {
     if (await page.getByRole('heading', { name: 'Geschafft!' }).isVisible()) return
     await expect(page.locator('#question')).toBeVisible()
     const count = await answers(page).count()
@@ -87,14 +87,14 @@ test('Von der Startseite über Grundlagen zu den Brüchen und eine Aufgabe gefü
 })
 
 test('Brüche: falsche Antwort mit Erklärung, Lernkarte und Ergebnis mit Hauptnenner', async ({ page }) => {
-  // 5/6 + 1/10: Hauptnenner 30
-  await page.goto('./#/ueben/brueche/1-88')
+  // 4/7 + 1/4: Hauptnenner 28
+  await page.goto('./#/ueben/brueche/1-24')
   await expect(page.locator('#question')).toHaveText('Was ist der Hauptnenner?')
-  await answers(page).filter({ hasText: '16' }).click()
+  await answers(page).filter({ hasText: '11' }).click()
   await expect(wrongFeedback(page)).toBeVisible()
   await page.getByRole('button', { name: 'Warum ist das falsch?' }).click()
   await expect(page.getByText('Für den Hauptnenner werden die Nenner nicht addiert.')).toBeVisible()
-  await answers(page).filter({ hasText: '30' }).click()
+  await answers(page).filter({ hasText: '28' }).click()
   await expect(correctFeedback(page)).toBeVisible()
 
   // Lernkarte zum Schritt als Fenster über der Aufgabe
@@ -112,7 +112,8 @@ test('Brüche: falsche Antwort mit Erklärung, Lernkarte und Ergebnis mit Hauptn
 })
 
 test('Brüche: Potenzen kürzen in Stufe 2, Lernkarten-Ordner und gezieltes Üben', async ({ page }) => {
-  await page.goto('./#/ueben/brueche/2-2')
+  // (21qx³)/(35q³x⁴)
+  await page.goto('./#/ueben/brueche/2-27')
   await expect(page.locator('#question')).toHaveText('Kürze so weit wie möglich.')
   await solveWholeTask(page)
   await expect(page.getByRole('navigation', { name: 'Lernkarten zu dieser Aufgabe' }).getByRole('link', { name: 'Potenzen kürzen' })).toBeVisible()

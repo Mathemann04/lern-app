@@ -76,23 +76,24 @@ export const AREA_SHORTCUTS: Record<string, string> = {
 // Leere Taste, damit die Spalten der Ziffern an derselben Stelle bleiben
 const GAP: Key = { class: 'separator', width: 1 }
 
-// Bildschirm-Tastatur für Brüche: links die Buchstaben der Aufgabe, Hochzahlen und Klammern (bei
-// Bausteinen auch e^x, ln, sin, cos, tan, bei Wurzeln √), rechts Ziffern, Rechenzeichen und
-// „Prüfen" wie beim Ableiten
-export function fractionKeyboard(letters: readonly string[], blocks: boolean, root = false): VirtualKeyboardLayout {
-  const powers: Key[] = letters.length > 0 || blocks ? [{ latex: '#@^{2}' }, { latex: '#@^{#?}' }] : []
-  const brackets: Key[] = [{ label: '(', key: '(' }, { label: ')', key: ')' }]
-  // links je Zeile vier Tasten: Buchstaben und Hochzahlen, Klammern, Bausteine, Wurzel
-  const groups: Key[][] = [
-    [...letters, ...powers],
-    [...brackets, ...(blocks ? [{ latex: 'e^{#?}' }, fnKey('ln')] : [])],
-    blocks ? [fnKey('sin'), fnKey('cos'), fnKey('tan')] : [],
-    root ? [{ latex: '\\sqrt{#0}' }] : [],
-  ].filter((group, i) => group.length > 0 || i > 0)
-  const leftRow = (row: number) => [0, 1, 2, 3].map((column) => groups[row]?.[column] ?? GAP)
+// Linker Block der Tastatur: Gruppen von Tasten der Reihe nach, je Zeile vier Tasten; eine Gruppe
+// (z. B. die beiden Klammern) bleibt in einer Zeile zusammen
+function flowKeys(groups: readonly Key[][]): Key[][] {
+  const rows: Key[][] = [[]]
+  for (const group of groups) {
+    if (group.length === 0) continue
+    if (rows.at(-1)!.length + group.length > 4) rows.push([])
+    rows.at(-1)!.push(...group)
+  }
+  return rows
+}
+
+// Vier Zeilen: links der Block aus flowKeys, rechts Ziffern, Rechenzeichen und „Prüfen" wie beim Ableiten
+function withNumberPad(id: string, label: string, left: Key[][]): VirtualKeyboardLayout {
+  const leftRow = (row: number) => [0, 1, 2, 3].map((column) => left[row]?.[column] ?? GAP)
   return {
-    id: 'brueche',
-    label: 'Brüche',
+    id,
+    label,
     displayEditToolbar: false,
     rows: [
       [...leftRow(0), '7', '8', '9', { latex: '\\frac{#@}{#?}' }, '[backspace]'],
@@ -103,35 +104,33 @@ export function fractionKeyboard(letters: readonly string[], blocks: boolean, ro
   }
 }
 
+const POWERS: Key[] = [{ latex: '#@^{2}' }, { latex: '#@^{#?}' }]
+const BRACKETS: Key[] = [{ label: '(', key: '(' }, { label: ')', key: ')' }]
+const ROOT: Key = { latex: '\\sqrt{#0}' }
+
+// Bildschirm-Tastatur für Brüche: links die Buchstaben der Aufgabe, Hochzahlen und Klammern (bei
+// Bausteinen auch e^x, ln, sin, cos, tan, bei Wurzeln √)
+export function fractionKeyboard(letters: readonly string[], blocks: boolean, root = false): VirtualKeyboardLayout {
+  return withNumberPad(
+    'brueche',
+    'Brüche',
+    flowKeys([
+      ...letters.map((l) => [l]),
+      letters.length > 0 || blocks ? POWERS : [],
+      BRACKETS,
+      blocks ? [{ latex: 'e^{#?}' }, fnKey('ln')] : [],
+      blocks ? [fnKey('sin'), fnKey('cos'), fnKey('tan')] : [],
+      root ? [ROOT] : [],
+    ]),
+  )
+}
+
 // --- Umstellen ---
 
 // Bildschirm-Tastatur fürs Umstellen: links der Reihe nach die Buchstaben der Aufgabe (oft fünf oder
-// sechs), Hochzahlen, Klammern und bei Wurzeln √, je Zeile vier Tasten; die beiden Hochzahlen und
-// die beiden Klammern bleiben nebeneinander. Rechts wie bei den Brüchen.
+// sechs), Hochzahlen, Klammern und bei Wurzeln √
 export function rearrangeKeyboard(letters: readonly string[], root: boolean): VirtualKeyboardLayout {
-  const groups: Key[][] = [
-    ...letters.map((l) => [l]),
-    [{ latex: '#@^{2}' }, { latex: '#@^{#?}' }],
-    [{ label: '(', key: '(' }, { label: ')', key: ')' }],
-    ...(root ? [[{ latex: '\\sqrt{#0}' }]] : []),
-  ]
-  const left: Key[][] = [[]]
-  for (const group of groups) {
-    if (left.at(-1)!.length + group.length > 4) left.push([])
-    left.at(-1)!.push(...group)
-  }
-  const leftRow = (row: number) => [0, 1, 2, 3].map((column) => left[row]?.[column] ?? GAP)
-  return {
-    id: 'umstellen',
-    label: 'Umstellen',
-    displayEditToolbar: false,
-    rows: [
-      [...leftRow(0), '7', '8', '9', { latex: '\\frac{#@}{#?}' }, '[backspace]'],
-      [...leftRow(1), '4', '5', '6', { latex: '\\cdot' }, LEFT],
-      [...leftRow(2), '1', '2', '3', { label: '−', latex: '-' }, RIGHT],
-      [...leftRow(3), '0', '+', { label: 'Prüfen', command: 'commit', class: 'action', width: 2 }, '[hide-keyboard]'],
-    ],
-  }
+  return withNumberPad('umstellen', 'Umstellen', flowKeys([...letters.map((l) => [l]), POWERS, BRACKETS, root ? [ROOT] : []]))
 }
 
 // Seiten der Tastatur je Thema

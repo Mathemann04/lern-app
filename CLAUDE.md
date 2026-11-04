@@ -6,10 +6,11 @@ oder frei (Eingabe über Mathe-Tastatur, mathematische Prüfung). Zuerst für
 den Nutzer zugeschnitten: Maschinenbau, 1. Semester, THU, „Mathematik MB1".
 
 - Vision und Anforderungen: [docs/VISION.md](docs/VISION.md)
+- Maßstab fürs Niveau: das Buch des Nutzers „Mathe für Ingenieure",
+  Kapitel und ihre Themen in der App: [docs/LEHRBUCH.md](docs/LEHRBUCH.md)
 - Meilensteine und aktueller Stand: [docs/ROADMAP.md](docs/ROADMAP.md)
 - Plan für den laufenden Meilenstein: [docs/PLAN-M2b.md](docs/PLAN-M2b.md)
-  (Brüche nachschärfen: Abwechslung und Profi-Niveau; Entwurf, wartet auf
-  OK). Pausiert nach Schritt 3: [docs/PLAN-M3.md](docs/PLAN-M3.md)
+  (Brüche nachschärfen: Abwechslung und Profi-Niveau). Pausiert nach Schritt 3: [docs/PLAN-M3.md](docs/PLAN-M3.md)
   (Gleichungen umstellen). Abgeschlossen: [docs/PLAN-M1.md](docs/PLAN-M1.md),
   [docs/PLAN-M2.md](docs/PLAN-M2.md)
 
@@ -43,7 +44,10 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   Gebiet hat eine Farbe (`tone`) und ein Bild, jedes Thema ein Bild
   (`AreaIcon.tsx`, SVG in der Tonleiter `tone-*`). Die Engine eines Themas
   lädt `courseEngines.ts` erst beim Üben (`planGuidedTask` für geführt,
-  `prepareFree` für frei).
+  `prepareFree` für frei, `formOf` für die Form einer Aufgabe). Bei einer
+  neuen Aufgabe zieht `PracticePage.tsx` (`PickNewTask`) eine Nummer, deren
+  Form nicht unter den letzten zehn dieser Stufe ist (`src/ui/recentForms.ts`,
+  eigener Speicherschlüssel `rechenweg-formen`).
   Seiten über `#/…` (`routes.ts`): Start `#/` („Weitermachen" und die
   Fächer), Gebiet `#/gebiet/grundlagen`, Thema `#/thema/brueche`,
   geführt üben `#/ueben/brueche/1` (neue Aufgabe) bzw.
@@ -110,7 +114,9 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     `check/derivativeFree.ts`: freier Modus beim Ableiten;
     `check/fractionAnswer.ts`: freie Eingabe bei Brüchen (exakter
     Wertvergleich, mit Wurzel in √x umgerechnet, dann fertig? ein Bruch,
-    zusammengefasst, gekürzt; sonst typischer Fehler);
+    zusammengefasst, gekürzt, kein offenes Produkt wie $3 \cdot 3b^2$,
+    keine Dezimalzahl; sonst typischer Fehler, bei Rechenbäumen auch Fehler
+    einer Teilrechnung bis zum Ergebnis weitergerechnet);
     `check/rearrangeAnswer.ts`: freie Eingabe beim Umstellen (rechte Seite
     oder Gleichung, `parseLatexEquation`; $x$ noch nicht allein, aber für
     die Lösung richtig: „noch nicht aufgelöst"; Vergleich an Prüfstellen;
@@ -144,7 +150,11 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     nächsten auf, im letzten ist die Antwort das Ergebnis; falsche
     Ergebnisse mit Klammern als Produkt, `productFormExpr`; Stufe 5: Regel
     anwenden, Ausmultiplizieren, innerer Doppelbruch zuerst, bei mehreren
-    Rechenarten jede Klammer zu einem Bruch). `guided/rearrangePlan.ts`:
+    Rechenarten jede Klammer zu einem Bruch; Rechenbaum `planTree`: erst
+    Dezimalzahlen, dann „Was rechnest du zuerst?", wenn Punkt vor Strich
+    oder eine Klammer zählt, dann je Teilrechnung die Schritte der passenden
+    Form, im letzten Schritt auch falsche Ergebnisse aus falscher
+    Reihenfolge). `guided/rearrangePlan.ts`:
     dasselbe fürs Umstellen (je Umformung „Was machst du als Nächstes?" mit
     einer Frage zum Ziel und Irrwegen, dann „Was kommt heraus?" mit
     falschen Gleichungen aus den Fehlerregeln; ohne passenden Fehler steht
@@ -163,11 +173,17 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     `task.ts` (Aufgabenformen: kürzen, plus/minus, mal, geteilt,
     Doppelbruch, mehrere Rechenarten `mixed`, verschachtelter Doppelbruch
     `nested`; Zähler wie $(x + h)^2 - x^2$; Regel eines Bausteins `rule`;
+    Rechenbaum `tree` aus Plus/Minus, Mal, Geteilt, Klammern, Doppelbruch,
+    Blätter auch als Dezimalzahl;
     Aufgaben mit Wurzel durchgehend in $\sqrt{x}$, `withRoots`;
     Doppelbrüche in Zwischenständen in voller Größe, `readableLatex`), `solve.ts`
     (Rechenweg, verbotene Zahlen, Ergebnis mit $\tan x$ bzw. ausmultipliziertem
-    Nenner bei Wurzeln), `errorRules.ts` (typische Fehler, Ids `frac-…`;
-    `freeOnly`: nur für die Diagnose im freien Modus)
+    Nenner bei Wurzeln; Rechenbaum `solveTree` Teilrechnung für
+    Teilrechnung), `tree.ts` (Rechenbaum: Stufen `treeStages`, jede Stufe
+    eine der Formen oben, von innen nach außen, Punkt vor Strich;
+    falsche Reihenfolgen für die Fehler), `errorRules.ts` (typische Fehler,
+    Ids `frac-…`; `freeOnly`: nur für die Diagnose im freien Modus).
+    Buchstaben: alle Kleinbuchstaben außer $e$ und $i$
   - `rearrange/`: Umstell-Engine (Gleichungen nach einer Variablen
     auflösen): `algebra.ts` (Seiten als Brüche aus Polynomen mit beliebigen
     Buchstaben, Teile ohne die Variable wie √(b² − y²) als eigene Zeichen
@@ -183,7 +199,12 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   - `random/rng.ts`: Zufall mit Startwert; `tasks/`: Aufgaben-Nummern
     („3-48213"), Vorlagen je Stufe (`derivativeTerms.ts`,
     `fractionTerms.ts`, `rearrangeTerms.ts`), `focus.ts` und `fractionFocus.ts` (Aufgaben für
-    gezieltes Üben)
+    gezieltes Üben); Baukasten der Brüche `fractionKit.ts` (Stufen 1 und 2:
+    Rechenbaum zufällig aus Teilen, Rechenarten und Bruchteilen, mit
+    Filtern gegen zu einfache oder zu lange Aufgaben); Abwechslung
+    `variety.ts` (Form einer Aufgabe `formOfLatex`: Zahlen und Vorzeichen
+    zusammengefasst, Buchstaben der Reihe nach benannt; Kennzahlen
+    `varietyStats`; `pickFresh`) und `forms.ts` (Form je Thema)
 - `src/state/`: Speichern auf dem Gerät (`storage.ts`, Version 3, robust
   gegen kaputten Inhalt, alte Versionen werden umgezogen: bis Version 2
   gehört alles zum Ableiten), gemeinsamer Zustand (`store.ts`),
