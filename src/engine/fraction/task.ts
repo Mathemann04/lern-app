@@ -1,19 +1,20 @@
 import { toLatex } from '../expr/print.ts'
 import { type Expr, add, div, mul, mulDot, neg, num, pow, sub } from '../expr/types.ts'
 import { type Factored, factoredExpr, factoredPoly } from './factor.ts'
-import { type Frac, fracAdd, fracDiv, fracMul, fracNeg, fracOf, polyExpr, rootPoly } from './frac.ts'
+import { type Frac, fracAdd, fracDiv, fracMul, fracNeg, fracOf, isRootAtom, polyExpr, rootFormWith } from './frac.ts'
 import { isOne } from '../rational.ts'
-import { type Poly, atomsOf, constValue, polyAtom, polyConst, polyMul, polySub, polySubstitute } from './poly.ts'
+import { type Poly, atomsOf, constValue, polyConst, polyPow, polySub } from './poly.ts'
 
 // Bruchaufgaben in Aufgabenform: welche Rechnung, und wie Zähler und Nenner geschrieben sind
 // (ausmultipliziert wie x² − 9 oder in Faktoren wie 2(x + 3)).
 
 // Ein Term der Aufgabe, so geschrieben wie gezeigt. ascending: kleinster Grad zuerst (3 − x).
-// binomial: Quadrat einer Summe minus ein Term, z. B. (x + h)² − x² (Stufe 5: erst ausmultiplizieren)
+// binomial: Quadrat (power 3: dritte Potenz) einer Summe minus ein Term, z. B. (x + h)² − x² oder
+// (x + h)³ − x³ (Stufe 5: erst ausmultiplizieren)
 export type Shown =
   | { readonly form: 'expanded'; readonly poly: Poly; readonly ascending?: boolean }
   | { readonly form: 'factored'; readonly factored: Factored }
-  | { readonly form: 'binomial'; readonly base: Poly; readonly minus: Poly }
+  | { readonly form: 'binomial'; readonly base: Poly; readonly minus: Poly; readonly power?: 3 }
 
 // Ein Bruch; mit Nenner 1 eine ganze Zahl oder ein Term ohne Bruch
 export type Part = { readonly num: Shown; readonly den: Shown }
@@ -59,7 +60,13 @@ export type TreeTerm = { readonly sign: 1 | -1; readonly node: TreeNode }
 // - trig: sin² x + cos² x = 1; prefer: welcher Baustein übrig bleibt (S: 1 − cos² x → sin² x),
 //   target: im Zähler (bei Doppelbrüchen im oberen Bruch) oder im Nenner
 // - root: (√x)² = x; der Nenner (√x − a)(√x + a) wird zu x − a²
-export type BlockRule = { readonly kind: 'trig'; readonly prefer: 'S' | 'C'; readonly target: 'num' | 'den' } | { readonly kind: 'root' }
+// - conjugate: Wurzel beseitigen (nur beim Kürzen): mit dem Gegenstück erweitern, dritte
+//   binomische Formel; target: die Summe mit Wurzel steht im Nenner (\frac{1}{\sqrt{x} - 2}) oder im
+//   Zähler (Differenzenquotient \frac{\sqrt{x + h} - \sqrt{x}}{h})
+export type BlockRule =
+  | { readonly kind: 'trig'; readonly prefer: 'S' | 'C'; readonly target: 'num' | 'den' }
+  | { readonly kind: 'root' }
+  | { readonly kind: 'conjugate'; readonly target: 'num' | 'den' }
 
 // hints: Faktoren, aus denen die Vorlage Zähler und Nenner gebaut hat (fürs Zerlegen)
 export type FractionTask = FractionShape & { readonly hints: readonly Poly[]; readonly rule?: BlockRule }
@@ -68,7 +75,7 @@ export type FractionTask = FractionShape & { readonly hints: readonly Poly[]; re
 
 export const expanded = (poly: Poly, ascending = false): Shown => ({ form: 'expanded', poly, ascending })
 export const factoredShown = (factored: Factored): Shown => ({ form: 'factored', factored })
-export const binomialShown = (base: Poly, minus: Poly): Shown => ({ form: 'binomial', base, minus })
+export const binomialShown = (base: Poly, minus: Poly, power?: 3): Shown => ({ form: 'binomial', base, minus, ...(power ? { power } : {}) })
 export const part = (num: Shown, den: Shown = expanded(polyConst(1))): Part => ({ num, den })
 export const plus = (p: Part): Signed => ({ sign: 1, part: p })
 export const minus = (p: Part): Signed => ({ sign: -1, part: p })
@@ -89,7 +96,7 @@ export function shownPoly(s: Shown): Poly {
     case 'factored':
       return factoredPoly(s.factored)
     case 'binomial':
-      return polySub(polyMul(s.base, s.base), s.minus)
+      return polySub(polyPow(s.base, s.power ?? 2), s.minus)
   }
 }
 
@@ -100,7 +107,7 @@ export function shownExpr(s: Shown): Expr {
     case 'factored':
       return factoredExpr(s.factored)
     case 'binomial':
-      return sub(pow(polyExpr(s.base), num(2)), polyExpr(s.minus))
+      return sub(pow(polyExpr(s.base), num(s.power ?? 2)), polyExpr(s.minus))
   }
 }
 
@@ -351,11 +358,13 @@ export function instructionFor(t: FractionShape): string {
   }
 }
 
-// Aufgabe mit Wurzel durchgehend in √x geschrieben: x wird zu (√x)², damit die Engine nur mit
-// einem Baustein rechnet (für Aufgaben, die aus Termen gebaut werden, z. B. auf Lernkarten)
+// Aufgabe mit Wurzel durchgehend in √x geschrieben: x wird zu (√x)² (ebenso a zu (√a)²), damit die
+// Engine nur mit einem Baustein rechnet (für Aufgaben, die aus Termen gebaut werden, z. B. auf
+// Lernkarten)
 export function withRoots(t: FractionTask): FractionTask {
-  if (!partsOf(t).some((p) => [shownPoly(p.num), shownPoly(p.den)].some((q) => atomsOf(q).includes('R')))) return t
-  const toRoot = (q: Poly) => polySubstitute(q, 'x', polyAtom('R', 2))
+  const roots = [...new Set(partsOf(t).flatMap((p) => [shownPoly(p.num), shownPoly(p.den)].flatMap((q) => atomsOf(q).filter(isRootAtom))))]
+  if (roots.length === 0) return t
+  const toRoot = (q: Poly) => rootFormWith(q, roots)
   const shown = (s: Shown): Shown => {
     switch (s.form) {
       case 'expanded':
@@ -368,7 +377,7 @@ export function withRoots(t: FractionTask): FractionTask {
   }
   const mapPart = (p: Part): Part => ({ num: shown(p.num), den: shown(p.den) })
   const mapSigned = (terms: readonly Signed[]) => terms.map((x) => ({ sign: x.sign, part: mapPart(x.part) }))
-  const hints = t.hints.map(rootPoly)
+  const hints = t.hints.map(toRoot)
   switch (t.kind) {
     case 'reduce':
       return { ...t, part: mapPart(t.part), hints }

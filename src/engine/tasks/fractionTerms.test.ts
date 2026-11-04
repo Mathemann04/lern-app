@@ -6,7 +6,7 @@ import { sampleEnvs, samplePoints } from '../expr/sample.ts'
 import type { Expr } from '../expr/types.ts'
 import { FRACTION_ERROR_RULES, fractionWrongAnswers } from '../fraction/errorRules.ts'
 import { factoredPoly, reducedFrac } from '../fraction/factor.ts'
-import { fracAtoms, fracEquals, toFrac } from '../fraction/frac.ts'
+import { fracAtoms, fracEquals, isRootAtom, radicandLetters, toFrac } from '../fraction/frac.ts'
 import { atomsOf, constValue, gcdUnivariate, polyConst, polyContent, polyDivideExact, polySubstitute, totalDegree } from '../fraction/poly.ts'
 import { solveFraction, solveTree, taskLetter } from '../fraction/solve.ts'
 import { partsOf, shownPoly, taskExpr, taskLatex } from '../fraction/task.ts'
@@ -24,9 +24,9 @@ const LEVELS_SO_FAR: Level[] = [1, 2, 3, 4, 5]
 const isLetter = (atom: string) => /^[a-z]$/.test(atom) && atom !== 'e'
 
 // Stellen zum Vergleichen: bei x allein (auch e^x, ln x, sin x) wie beim Ableiten, sonst je
-// Buchstabe eine Zufallszahl
+// Buchstabe eine Zufallszahl (bei Wurzeln wie √a der Buchstabe darunter)
 function pointsFor(exprs: Expr[], atoms: string[], seed: string): Env[] {
-  const letters = [...new Set(atoms.map((a) => (isLetter(a) ? a : 'x')))]
+  const letters = [...new Set(atoms.flatMap((a) => (isRootAtom(a) ? radicandLetters(a) : [isLetter(a) ? a : 'x'])))]
   if (letters.length <= 1) return samplePoints(exprs, createRng(seed), 20, letters[0] ?? 'x')
   return sampleEnvs(exprs, createRng(seed), 20, letters)
 }
@@ -159,7 +159,7 @@ it('jeder typische Fehler kommt in Aufgaben der Stufen 1 bis 5 vor', () => {
 })
 
 // Abwechslung (docs/PLAN-M2b.md): je Stufe viele Formen, keine zu häufig, beim Ziehen keine Wiederholung
-const VARIED_LEVELS: Level[] = [1, 2, 3, 4]
+const VARIED_LEVELS: Level[] = [1, 2, 3, 4, 5]
 
 describe.each(VARIED_LEVELS)('Abwechslung Stufe %i', (level) => {
   it('mindestens 100 Formen unter 200 Aufgaben, keine öfter als 3 von 100', () => {

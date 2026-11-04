@@ -136,10 +136,10 @@ test('Galerie zeigt Bruchaufgaben der Stufen 1 bis 5 mit Rechenweg und typischen
   const card = page.getByRole('region', { name: 'Aufgerufene Aufgabe' }).getByRole('article')
   await expect(card).toContainText('Aufgabe 3-471')
   await expect(card.getByText('Hauptnenner', { exact: true })).toBeVisible()
-  // Stufe 5, z. B. 5-1: \frac{3}{1 - \sin x} + \frac{3}{1 + \sin x} mit sin² x + cos² x = 1
-  await page.getByLabel('Aufgabe über ihre Nummer aufrufen').fill('5-1')
+  // Stufe 5, z. B. 5-204: \frac{3}{1 - \sin x} + \frac{3}{1 + \sin x} mit sin² x + cos² x = 1
+  await page.getByLabel('Aufgabe über ihre Nummer aufrufen').fill('5-204')
   await page.getByRole('button', { name: 'Anzeigen' }).click()
-  await expect(card).toContainText('Aufgabe 5-1')
+  await expect(card).toContainText('Aufgabe 5-204')
   await expect(card.getByText('Regel des Bausteins anwenden', { exact: true })).toBeVisible()
   expect(errors).toEqual([])
 })

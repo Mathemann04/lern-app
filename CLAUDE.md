@@ -115,7 +115,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     `check/fractionAnswer.ts`: freie Eingabe bei Brüchen (exakter
     Wertvergleich, mit Wurzel in √x umgerechnet, dann fertig? ein Bruch,
     zusammengefasst, gekürzt, kein offenes Produkt wie $3 \cdot 3b^2$,
-    keine Dezimalzahl; sonst typischer Fehler, bei Rechenbäumen auch Fehler
+    keine Dezimalzahl, bei „Wurzel beseitigen" keine Wurzel im Nenner;
+    sonst typischer Fehler, bei Rechenbäumen auch Fehler
     einer Teilrechnung bis zum Ergebnis weitergerechnet);
     `check/rearrangeAnswer.ts`: freie Eingabe beim Umstellen (rechte Seite
     oder Gleichung, `parseLatexEquation`; $x$ noch nicht allein, aber für
@@ -127,8 +128,9 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   - `explain/`: Textbausteine für Erklärungen (ausführlich/kurz), Tipps und
     „Warum ist das falsch?" (`texts.ts`); Format Text mit `$…$`-Formeln.
     Lernkarten (`cards.ts`: Ordner `TOPICS`, je Regel Formel, Merksatz,
-    Beispiele, typische Fehler; Ordner „Brüche" in `fractionCards.ts`, bis
-    „Bausteine mit eigenen Regeln" in Stufe 5) und
+    Beispiele, typische Fehler; Ordner „Brüche" in `fractionCards.ts`, in
+    Stufe 5 „Bausteine mit eigenen Regeln", „Dritte Potenzen" und „Wurzeln
+    im Nenner beseitigen") und
     durchgerechnete Beispiele (`example.ts` aus `derive`,
     `fractionExample.ts` aus der Bruch-Engine). Texte für Brüche in
     `fractionTexts.ts`. Umstellen: Texte, Tipps und falsche Umformungen
@@ -145,12 +147,13 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     Lernkarten). `guided/fractionPlan.ts`: dasselbe für Brüche (Hauptnenner,
     erweitern, zusammenfassen, kürzen; Zähler und Nenner zerlegen mit Tipp
     je Art, `factorMethods`: ausklammern, binomisch, $x^2 + px + q$, Zahl vorn,
-    zwei Buchstaben, in Gruppen; Doppelbruch: erst Zähler, dann Nenner als ein Bruch; Malnehmen
+    zwei Buchstaben, in Gruppen, dritte Potenzen; Doppelbruch: erst Zähler, dann Nenner als ein Bruch; Malnehmen
     und Kürzen in einem Schritt; ab Stufe 4 Erweitern und Zusammenfassen in
     einem Schritt; ein Schritt ohne passenden typischen Fehler geht im
     nächsten auf, im letzten ist die Antwort das Ergebnis; falsche
     Ergebnisse mit Klammern als Produkt, `productFormExpr`; Stufe 5: Regel
-    anwenden, Ausmultiplizieren, innerer Doppelbruch zuerst, bei mehreren
+    anwenden, Ausmultiplizieren, Wurzel beseitigen (mit dem Gegenstück
+    erweitern, dann ausmultiplizieren), innerer Doppelbruch zuerst, bei mehreren
     Rechenarten jede Klammer zu einem Bruch; Rechenbaum `planTree`: erst
     Dezimalzahlen, dann „Was rechnest du zuerst?", wenn Punkt vor Strich
     oder eine Klammer zählt, dann je Teilrechnung die Schritte der passenden
@@ -167,21 +170,27 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   - `fraction/`: Bruch-Engine (Brüche aus Polynomen, exakt): `poly.ts`
     (Polynome in mehreren Buchstaben; $1 \pm \sin x$ mit der 1 vorn),
     `frac.ts` (Bruch, Termbaum ↔ Polynom; $e^x$, $\ln x$, $\sin x$,
-    $\cos x$, $\sqrt{x}$ als eigene Buchstaben, die Zahl $e$ nur in falschen
-    Ergebnissen; Vergleich `fracEquals` mit $(\sqrt{x})^2 = x$ und
+    $\cos x$, $\sqrt{x}$ als eigene Buchstaben, ebenso Wurzeln aus jedem
+    Buchstaben wie $\sqrt{a}$ (`Ra`) und $\sqrt{x + h}$ (`Rx+h`, gerechnet
+    mit $h = (\sqrt{x + h})^2 - x$, geschrieben wieder als $h$), die Zahl $e$
+    nur in falschen Ergebnissen; Vergleich `fracEquals` mit $(\sqrt{x})^2 = x$ und
     $\sin^2 x + \cos^2 x = 1$), `factor.ts` (zerlegen, Hauptnenner,
-    kürzen; Ergebnis: Zähler ausmultipliziert, Nenner in Faktoren; auch
-    mit Zahl vor $x^2$, mit zwei Buchstaben gleichen Grads wie
-    $a^2 - ab - 2b^2$ und in Gruppen wie $ax - ay + bx - by$, `groupFactor`),
+    kürzen; Ergebnis: Zähler ausmultipliziert, Nenner in Faktoren, kleinerer
+    Grad zuerst; auch mit Zahl vor $x^2$, mit zwei Buchstaben gleichen Grads wie
+    $a^2 - ab - 2b^2$ (auch $\sqrt{x}$ und $\sqrt{a}$), dritte Potenzen
+    wie $a^3 - b^3$ und in Gruppen wie $ax - ay + bx - by$, `groupFactor`),
     `task.ts` (Aufgabenformen: kürzen, plus/minus, mal, geteilt,
     Doppelbruch, mehrere Rechenarten `mixed`, verschachtelter Doppelbruch
-    `nested`; Zähler wie $(x + h)^2 - x^2$; Regel eines Bausteins `rule`;
+    `nested`; Zähler wie $(x + h)^2 - x^2$ oder $(x + h)^3 - x^3$; Regel eines
+    Bausteins `rule`, auch „Wurzel beseitigen" `conjugate`;
     Rechenbaum `tree` aus Plus/Minus, Mal, Geteilt, Klammern, Doppelbruch,
     Blätter auch als Dezimalzahl;
     Aufgaben mit Wurzel durchgehend in $\sqrt{x}$, `withRoots`;
     Doppelbrüche in Zwischenständen in voller Größe, `readableLatex`), `solve.ts`
     (Rechenweg, verbotene Zahlen, Ergebnis mit $\tan x$ bzw. ausmultipliziertem
-    Nenner bei Wurzeln; Rechenbaum `solveTree` Teilrechnung für
+    Nenner bei Wurzeln; Wurzel beseitigen `solveConjugate` mit dem Gegenstück
+    `conjugateOf`, Ergebnis ohne Wurzel im Nenner `rationalizedFrac`;
+    Rechenbaum `solveTree` Teilrechnung für
     Teilrechnung), `tree.ts` (Rechenbaum: Stufen `treeStages`, jede Stufe
     eine der Formen oben, von innen nach außen, Punkt vor Strich;
     falsche Reihenfolgen für die Fehler), `errorRules.ts` (typische Fehler,
@@ -207,7 +216,11 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     Filtern gegen zu einfache oder zu lange Aufgaben; Stufen 3 und 4: je
     Aufgabe eine „Welt" aus Klammern, `level3World`/`level4World`, daraus
     Zähler und Nenner, dazu Kürzen `worldReduce` und Doppelbrüche
-    `worldComplex`); Abwechslung
+    `worldComplex`; Stufe 5: alles ineinander `buildLevel5Kit` mit Doppelbruch
+    auch im Inneren, Doppelbruch im Doppelbruch `worldNested`,
+    Differenzenquotienten `differenceQuotient`, dritte Potenzen `cubeTask`,
+    Wurzeln `rootTask`, Bausteine gemischt `blockPairTask`; die Vorlagen der
+    Stufe 5 haben Anteile `weight`); Abwechslung
     `variety.ts` (Form einer Aufgabe `formOfLatex`: Zahlen und Vorzeichen
     zusammengefasst, Buchstaben der Reihe nach benannt; Kennzahlen
     `varietyStats`; `pickFresh`) und `forms.ts` (Form je Thema)

@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { toLatex } from '../expr/print.ts'
-import { type Expr, add, mul, num, pow, sub, variable, x } from '../expr/types.ts'
+import { type Expr, add, cos, exp, mul, num, pow, sin, sqrt, sub, variable, x } from '../expr/types.ts'
 import { toFrac } from '../fraction/frac.ts'
 import { type Poly, polyDivideExact } from '../fraction/poly.ts'
-import { type FractionShape, type FractionTask, type Part, expanded, isReadableTask, minus, part, plus, taskLatex } from '../fraction/task.ts'
+import { type BlockRule, type FractionShape, type FractionTask, type Part, expanded, isReadableTask, minus, part, plus, taskLatex, withRoots } from '../fraction/task.ts'
 import { generateFractionTask } from '../tasks/fractionTerms.ts'
 import type { Level } from '../tasks/taskNumber.ts'
 import { type FractionVerdict, checkFractionAnswer, prepareFractionCheck, prepareFractionFree } from './fractionAnswer.ts'
@@ -15,6 +15,7 @@ function poly(e: Expr): Poly {
 
 const fr = (n: Expr, d: Expr = num(1)): Part => part(expanded(poly(n)), expanded(poly(d)))
 const task = (s: FractionShape): FractionTask => ({ ...s, hints: [] }) as FractionTask
+const [a, b, h] = ['a', 'b', 'h'].map(variable)
 
 // Kurzform eines Urteils: „correct", „unfinished:numerator", „knownError:frac-minus-bracket" …
 function short(v: FractionVerdict): string {
@@ -104,17 +105,11 @@ describe('weitere Aufgabenformen', () => {
 })
 
 describe('Stufe 5: Bausteine mit Regeln', () => {
-  const free = (seedLatex: string) => {
-    for (let seed = 1; seed <= 400; seed++) {
-      const g = generateFractionTask({ level: 5, seed })
-      if (taskLatex(g.task) === seedLatex) return prepareFractionCheck(g.task)
-    }
-    throw new Error(`nicht gefunden: ${seedLatex}`)
-  }
+  const free = (s: FractionShape, rule?: BlockRule) => prepareFractionCheck(withRoots({ ...s, hints: [], ...(rule ? { rule } : {}) } as FractionTask))
   const verdict = (context: ReturnType<typeof prepareFractionCheck>, latex: string) => short(checkFractionAnswer(context, latex))
 
   it('Wurzel: √x und x^{1/2} gelten, x = (√x)² wird verstanden', () => {
-    const context = free('\\frac{x - 9}{\\sqrt{x} - 3}')
+    const context = free({ kind: 'reduce', part: fr(sub(x, num(9)), sub(sqrt(x), num(3))) })
     expect(context.root).toBe(true)
     expect(verdict(context, '\\sqrt{x}+3')).toBe('correct')
     expect(verdict(context, 'x^{\\frac{1}{2}}+3')).toBe('correct')
@@ -122,23 +117,60 @@ describe('Stufe 5: Bausteine mit Regeln', () => {
     expect(verdict(context, '\\sqrt{x}-3')).toBe('knownError:frac-binomial-confused')
   })
 
+  it('zwei Wurzeln: x − a = (√x − √a)(√x + √a)', () => {
+    const context = free({ kind: 'reduce', part: fr(sub(x, a), sub(sqrt(x), sqrt(a))) })
+    expect(context.letters).toEqual(['x', 'a'])
+    expect(verdict(context, '\\sqrt{x}+\\sqrt{a}')).toBe('correct')
+    expect(verdict(context, '\\sqrt{a}+\\sqrt{x}')).toBe('correct')
+    expect(verdict(context, '\\frac{x-a}{\\sqrt{x}-\\sqrt{a}}')).toBe('unfinished:not-reduced')
+  })
+
+  it('Wurzel im Nenner beseitigen: erst fertig ohne Wurzel unten', () => {
+    const context = free({ kind: 'reduce', part: fr(num(3), sub(sqrt(x), num(2))) }, { kind: 'conjugate', target: 'den' })
+    expect(verdict(context, '\\frac{3\\sqrt{x}+6}{x-4}')).toBe('correct')
+    expect(verdict(context, '\\frac{3}{\\sqrt{x}-2}')).toBe('unfinished:conjugate')
+    expect(verdict(context, '\\frac{6\\sqrt{x}+12}{2x-8}')).toBe('unfinished:not-reduced')
+    expect(verdict(context, '\\frac{3\\sqrt{x}+6}{x-2}')).toBe('knownError:frac-conjugate-square')
+    expect(verdict(context, '\\frac{3}{x-4}')).toBe('knownError:frac-conjugate-one-side')
+    const two = free({ kind: 'reduce', part: fr(num(1), add(sqrt(a), sqrt(b))) }, { kind: 'conjugate', target: 'den' })
+    expect(verdict(two, '\\frac{\\sqrt{a}-\\sqrt{b}}{a-b}')).toBe('correct')
+  })
+
+  it('Differenzenquotient von √x: mit dem Gegenstück erweitern, h kürzen', () => {
+    const context = free({ kind: 'reduce', part: fr(sub(sqrt(add(x, h)), sqrt(x)), h) }, { kind: 'conjugate', target: 'num' })
+    expect(context.letters).toEqual(['x', 'h'])
+    expect(verdict(context, '\\frac{1}{\\sqrt{x+h}+\\sqrt{x}}')).toBe('correct')
+    expect(verdict(context, '\\frac{1}{\\sqrt{x}+\\sqrt{h+x}}')).toBe('correct')
+    expect(verdict(context, '\\frac{\\sqrt{x+h}-\\sqrt{x}}{h}')).toBe('unfinished:conjugate')
+    expect(verdict(context, '\\sqrt{x+h}+\\sqrt{x}')).toBe('knownError:frac-cancel-forgot-one')
+  })
+
+  it('dritte Potenzen: mit Mittelglied', () => {
+    const context = free({ kind: 'reduce', part: fr(sub(pow(a, num(3)), pow(b, num(3))), sub(pow(a, num(2)), pow(b, num(2)))) })
+    expect(verdict(context, '\\frac{a^2+ab+b^2}{a+b}')).toBe('correct')
+    expect(verdict(context, '\\frac{a^2+b^2}{a+b}')).toBe('knownError:frac-cube-as-square')
+  })
+
   it('sin² x + cos² x = 1: jede gleich lange Endform zählt', () => {
-    const context = free('\\frac{3}{1 - \\sin x} + \\frac{3}{1 + \\sin x}')
+    const context = free(
+      { kind: 'sum', terms: [plus(part(expanded(poly(num(3))), expanded(poly(sub(num(1), sin(x))), true))), plus(part(expanded(poly(num(3))), expanded(poly(add(num(1), sin(x))), true)))] },
+      { kind: 'trig', prefer: 'C', target: 'den' },
+    )
     expect(verdict(context, '\\frac{6}{\\cos^2x}')).toBe('correct')
     expect(verdict(context, '\\frac{6}{1-\\sin^2x}')).toBe('correct')
     expect(verdict(context, '\\frac{6}{\\cos x}')).toBe('knownError:frac-square-forgotten')
   })
 
   it('tan x und sin x / cos x', () => {
-    const context = free('\\frac{\\frac{1}{\\cos x} - \\cos x}{\\sin x}')
+    const context = free({ kind: 'complex', top: [plus(fr(num(1), cos(x))), minus(fr(cos(x)))], bottom: [plus(fr(sin(x)))] }, { kind: 'trig', prefer: 'S', target: 'num' })
     expect(verdict(context, '\\tan x')).toBe('correct')
     expect(verdict(context, '\\frac{\\sin x}{\\cos x}')).toBe('correct')
     expect(verdict(context, '\\frac{\\sin^2x}{\\sin x\\cos x}')).toBe('unfinished:not-reduced')
   })
 
   it('e-Funktion und zwei Variablen', () => {
-    expect(verdict(free('\\frac{e^{2x} - 4e^{x}}{e^{x}}'), 'e^2-4')).toBe('knownError:frac-cancel-inside')
-    const quotient = free('\\frac{\\frac{4}{x + h} - \\frac{4}{x}}{h}')
+    expect(verdict(free({ kind: 'reduce', part: fr(sub(exp(mul(num(2), x)), mul(num(4), exp(x))), exp(x)) }), 'e^2-4')).toBe('knownError:frac-cancel-inside')
+    const quotient = free({ kind: 'complex', top: [plus(fr(num(4), add(x, h))), minus(fr(num(4), x))], bottom: [plus(fr(h))] })
     expect(quotient.letters).toEqual(['x', 'h'])
     expect(verdict(quotient, '-\\frac{4}{x(x+h)}')).toBe('correct')
     expect(verdict(quotient, '-\\frac{4}{x^2+hx}')).toBe('correct')

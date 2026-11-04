@@ -13,8 +13,8 @@ import {
   reduceFrac,
   reducedExpr,
 } from './factor.ts'
-import { type Frac, polyExpr, startsNegative, trigRewrite } from './frac.ts'
-import { type Poly, atomsOf, constValue, isUnitTrigLinear, polyDivideExact, polyMul, polyNeg, polySum } from './poly.ts'
+import { type Frac, isRootAtom, polyExpr, startsNegative, trigRewrite } from './frac.ts'
+import { type Poly, atomsOf, constValue, isOneFirst, polyAdd, polyContent, polyDivideExact, polyEquals, polyMul, polyNeg, polyScale, polySum, primitivePart } from './poly.ts'
 import {
   type BlockRule,
   type FractionTask,
@@ -69,6 +69,7 @@ export type StepKind =
   | 'decimal'
   | 'order'
   | 'part'
+  | 'conjugate'
 
 export const STEP_NAMES: Record<StepKind, string> = {
   lcd: 'Hauptnenner',
@@ -89,6 +90,7 @@ export const STEP_NAMES: Record<StepKind, string> = {
   decimal: 'Dezimalzahl als Bruch',
   order: 'Was zuerst?',
   part: 'Teilergebnis einsetzen',
+  conjugate: 'Mit dem Gegenstück erweitern',
 }
 
 export type FracStep = {
@@ -124,7 +126,7 @@ export type FracSolution = {
 // Summe so, dass sie möglichst mit Plus beginnt: 3 − x statt −x + 3; 1 + \sin x mit der 1 vorn
 export function nicePolyExpr(p: Poly): Expr {
   if (p.length >= 2 && startsNegative(p) && !startsNegative([...p].reverse())) return polyExpr(p, 'ascending')
-  if (isUnitTrigLinear(p)) return polyExpr(p, 'ascending')
+  if (isOneFirst(p)) return polyExpr(p, 'ascending')
   return polyExpr(p)
 }
 
@@ -294,6 +296,7 @@ export function ruledTop(top: Side, rule: BlockRule | undefined): RuledSide {
 export function solveFraction(t: FractionTask): FracSolution {
   if (t.kind === 'nested') return solveNested(t)
   if (t.kind === 'tree') return solveTree(t)
+  if (t.kind === 'reduce' && t.rule?.kind === 'conjugate') return solveConjugate(t, t.rule.target)
   const { hints } = t
   const value = taskFrac(t)
   const steps: FracStep[] = []
@@ -494,10 +497,79 @@ function finish(t: FractionTask, value: Frac, steps: FracStep[], beforeCancel: F
 }
 
 // Schreibweise des Ergebnisses; bei √x mit ausmultipliziertem Nenner (x − 9 statt (√x − 3)(√x + 3)),
-// sin x / cos x als tan x
+// sin x / cos x als tan x; Wurzel im Nenner beseitigt: \frac{\sqrt{x} + 2}{x - 4}
 export function resultExpr(reduced: Reduced, t: { readonly rule?: BlockRule }): Expr {
-  if (t.rule?.kind === 'root' && reduced.den.factors.length >= 2) return expandedDenExpr(reduced.num, factoredPoly(reduced.den))
+  if (t.rule?.kind === 'conjugate' && t.rule.target === 'den') {
+    const f = rationalizedFrac(reduced)
+    if (f) return plainFractionExpr(f.num, f.den)
+  }
+  const expandDen = t.rule?.kind === 'root' || (t.rule?.kind === 'conjugate' && t.rule.target === 'den')
+  if (expandDen && reduced.den.factors.length >= 2) return expandedDenExpr(reduced.num, factoredPoly(reduced.den))
   return tanExpr(reduced) ?? reducedExpr(reduced)
+}
+
+// --- Wurzel beseitigen: mit dem Gegenstück erweitern (Stufe 5) ---
+
+// Gegenstück einer Summe aus zwei Teilen mit Wurzel (dritte binomische Formel): √x − 2 → √x + 2,
+// √a + √b → √a − √b, √(x + h) − √x → √(x + h) + √x. Das Produkt hat keine Wurzel mehr. null, wenn
+// die Summe keine Wurzel enthält oder nicht aus zwei Teilen besteht.
+export function conjugateOf(p: Poly): Poly | null {
+  if (p.length !== 2 || !atomsOf(p).some(isRootAtom)) return null
+  if (p.some((term) => term.mono.some(([a, e]) => isRootAtom(a) && e > 1))) return null
+  return primitivePart(polyAdd([p[0]], polyNeg([p[1]])))
+}
+
+// Gekürzter Bruch mit dem Gegenstück seines Nenners erweitert (Nenner ohne Wurzel), eine gemeinsame
+// Zahl gekürzt; null, wenn der Nenner keine Summe mit Wurzel ist
+export function rationalizedFrac(r: Reduced): Frac | null {
+  const [f] = r.den.factors
+  if (r.den.factors.length !== 1 || f.exp !== 1) return null
+  const conj = conjugateOf(f.poly)
+  if (!conj) return null
+  const num = polyMul(r.num, conj)
+  const den = polyScale(polyMul(f.poly, conj), r.den.coef)
+  const [cn, cd] = [polyContent(num), polyContent(den)]
+  if (cn.d !== 1n || cd.d !== 1n) return { num, den }
+  let g = cn.n < 0n ? -cn.n : cn.n
+  for (let b = cd.n < 0n ? -cd.n : cd.n; b !== 0n; ) [g, b] = [b, g % b]
+  const c = rat(cd.n < 0n ? -g : g)
+  return { num: polyScale(num, ratDiv(rat(1), c)), den: polyScale(den, ratDiv(rat(1), c)) }
+}
+
+// Bruch aus zwei ausmultiplizierten Polynomen; ein Minus, das überall im Zähler steht, vor dem Bruch
+export function plainFractionExpr(numerator: Poly, den: Poly): Expr {
+  const d = constValue(den)
+  if (d && isOne(d)) return nicePolyExpr(numerator)
+  const allNegative = numerator.length > 0 && startsNegative(numerator) && (numerator.length < 2 || startsNegative([...numerator].reverse()))
+  if (allNegative) return neg(div(nicePolyExpr(polyNeg(numerator)), nicePolyExpr(den)))
+  return div(nicePolyExpr(numerator), nicePolyExpr(den))
+}
+
+// Erweitern mit dem Gegenstück: Nenner \frac{3}{\sqrt{x} - 2} = \frac{3(\sqrt{x} + 2)}{(\sqrt{x} - 2)(\sqrt{x} + 2)} =
+// \frac{3\sqrt{x} + 6}{x - 4}; Zähler \frac{\sqrt{x + h} - \sqrt{x}}{h} = \frac{h}{h(\sqrt{x + h} + \sqrt{x})}, dann h kürzen
+function solveConjugate(t: Extract<FractionTask, { kind: 'reduce' }>, target: 'num' | 'den'): FracSolution {
+  const value = taskFrac(t)
+  const [numP, denP] = [shownPoly(t.part.num), shownPoly(t.part.den)]
+  const side = target === 'den' ? t.part.den : t.part.num
+  const conj = conjugateOf(shownPoly(side))
+  if (!conj) throw new Error('Keine Summe mit Wurzel zum Erweitern')
+  const conjExpr = nicePolyExpr(conj)
+  const up = (s: Shown) => (polyEquals(shownPoly(s), conj) ? pow(conjExpr, num(2)) : timesExpr(s, { coef: rat(1), factors: [{ poly: conj, exp: 1 }] }))
+  const product = polyMul(shownPoly(side), conj)
+  const steps: FracStep[] = [{ kind: 'conjugate', expr: div(up(t.part.num), up(t.part.den)), detail: conjExpr }]
+  const from = mul(shownExpr(side), conjExpr)
+  const reduced = reduceFrac(value, t.hints)
+  const result = resultExpr(reduced, t)
+  const excluded = excludedValues(t)
+  if (target === 'den') {
+    steps.push({ kind: 'multiply-out', expr: result, from, detail: nicePolyExpr(product) })
+    return { value, steps, reduced, result, excluded, beforeCancel: { num: polyMul(numP, conj), den: product } }
+  }
+  // Zähler ohne Wurzel; der Nenner der Aufgabe (beim Differenzenquotienten h) kürzt sich
+  const after = div(nicePolyExpr(product), up(t.part.den))
+  steps.push({ kind: 'multiply-out', expr: after, from, detail: nicePolyExpr(product) })
+  steps.push({ kind: 'cancel', expr: result, detail: shownExpr(t.part.den), before: after })
+  return { value, steps, reduced, result, excluded, beforeCancel: { num: product, den: polyMul(denP, conj) } }
 }
 
 // k \sin^n x / \cos^n x als k \tan^n x; sonst null

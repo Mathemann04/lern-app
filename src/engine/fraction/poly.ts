@@ -6,13 +6,15 @@ import { type Rational, ONE, isInteger, isOne, isZero, rat, ratAbs, ratAdd, ratD
 
 // Reihenfolge der Atome beim Sortieren und Schreiben: x vor y vor den übrigen Kleinbuchstaben
 // (alphabetisch: a, b, c …), Bausteine danach. R = √x, e = die Eulersche Zahl (nur in falschen
-// Ergebnissen wie e^2). Andere Namen (z. B. Teile, mit denen nur als Ganzes gerechnet wird) zuletzt.
+// Ergebnissen wie e^2). Wurzeln aus anderen Buchstaben (Ra = √a) stehen hinter √x, √(x + h)
+// (Rx+h) davor. Andere Namen (z. B. Teile, mit denen nur als Ganzes gerechnet wird) zuletzt.
 const ATOM_ORDER = ['x', 'y', 'E', 'L', 'S', 'C', 'T', 'R', 'e']
 const isLetter = (atom: string) => /^[a-z]$/.test(atom) && atom !== 'e'
 
 const rank = (atom: string) => {
   if (atom === 'x' || atom === 'y') return ATOM_ORDER.indexOf(atom)
   if (isLetter(atom)) return 1.5
+  if (/^R[a-z]/.test(atom)) return ATOM_ORDER.indexOf('R') + (atom.includes('+') ? -0.5 : 0.5)
   const i = ATOM_ORDER.indexOf(atom)
   return i === -1 ? ATOM_ORDER.length : i
 }
@@ -224,6 +226,9 @@ export function isUnitTrigLinear(p: Poly): boolean {
   const block = first.mono.length === 1 && first.mono[0][1] === 1 && (first.mono[0][0] === 'S' || first.mono[0][0] === 'C')
   return block && last.mono.length === 0 && isOne(ratAbs(first.coef)) && isOne(ratAbs(last.coef))
 }
+
+// 1 ± sin x mit der 1 vorn schreiben (nicht bei sin x − 1)
+export const isOneFirst = (p: Poly) => isUnitTrigLinear(p) && ratSign(p[1].coef) > 0
 
 // Zahl c mit dem Vorzeichen des ersten Summanden (bei 1 ± sin x: der 1), sodass p / c
 // ganzzahlige, teilerfremde Vorzahlen hat, z. B. 4x + 6 → 2, −x/2 + 1 → −1/2, 1 − sin x → 1

@@ -1,5 +1,5 @@
 import { toLatex } from '../expr/print.ts'
-import { type Expr, div, mulDot, num } from '../expr/types.ts'
+import { type Expr, div, mul, mulDot, num } from '../expr/types.ts'
 import { isInteger, isOne, rat, ratAbs, ratDiv, ratMul } from '../rational.ts'
 import { type Factored, factorize, factoredExpr, factoredPoly, groupFactor, isMultipleOf, reduceFrac } from './factor.ts'
 import { type Frac, fracDiv, fracEquals, fracMul, fracNeg } from './frac.ts'
@@ -17,6 +17,8 @@ import {
   polyEquals,
   polyMul,
   polyNeg,
+  polyPow,
+  primitivePart,
   polyScale,
   polySub,
   polySum,
@@ -29,11 +31,13 @@ import {
   type SumWork,
   applyRule,
   cancelledFactor,
+  conjugateOf,
   expandedDenExpr,
   fractionExpr,
   innerResultPart,
   multipliedExpr,
   nicePolyExpr,
+  plainFractionExpr,
   productExpr,
   reciprocalPart,
   resultExpr,
@@ -108,12 +112,16 @@ export const FRACTION_ERROR_RULES: readonly FracErrorRule[] = [
   { id: 'frac-cancel-one-side', step: 'cancel', name: 'Nur den Zähler oder nur den Nenner gekürzt', wrongFormula: '\\frac{14}{12} = \\frac{7}{12}' },
   { id: 'frac-multiply-reciprocal', step: 'multiply', name: 'Beim Malnehmen den Kehrwert genommen', wrongFormula: '\\frac{3}{4} \\cdot \\frac{2}{5} = \\frac{3 \\cdot 5}{4 \\cdot 2}' },
   { id: 'frac-square-forgotten', step: 'identity', name: 'Quadrat vergessen', wrongFormula: '1 - \\cos^2 x = \\sin x' },
-  { id: 'frac-binomial-middle', step: 'multiply-out', name: 'Beim Quadrieren das Mittelglied vergessen', wrongFormula: '(\\sqrt{x} + 1)^2 = x + 1' },
+  { id: 'frac-binomial-middle', step: 'multiply-out', name: 'Beim Ausmultiplizieren einer Potenz die Mittelglieder vergessen', wrongFormula: '(\\sqrt{x} + 1)^2 = x + 1' },
   { id: 'frac-cancel-inside', step: 'cancel', name: 'Im Inneren einer Funktion gekürzt', wrongFormula: '\\frac{e^{2x}}{e^x} = e^2' },
   { id: 'frac-order', step: 'order', name: 'Punkt vor Strich nicht beachtet', wrongFormula: '\\frac{1}{2} + \\frac{1}{2} \\cdot \\frac{2}{3} = 1 \\cdot \\frac{2}{3}' },
   { id: 'frac-bracket-ignored', step: 'order', name: 'Klammer übersehen', wrongFormula: '\\left(\\frac{1}{2} - \\frac{1}{3}\\right) : 2 = \\frac{1}{2} - \\frac{1}{3} : 2' },
   { id: 'frac-minus-before-bracket', step: 'order', name: 'Minus vor der Klammer nur auf den ersten Bruch angewandt', wrongFormula: '\\frac{1}{2} - \\left(\\frac{1}{3} - \\frac{1}{4}\\right) = \\frac{1}{2} - \\frac{1}{3} - \\frac{1}{4}' },
   { id: 'frac-decimal-places', step: 'decimal', name: 'Dezimalzahl mit falsch gezählten Stellen umgewandelt', wrongFormula: '0{,}75 = \\frac{75}{10}' },
+  { id: 'frac-cube-as-square', step: 'factor-num', name: 'Dritte Potenz wie ein Quadrat zerlegt', wrongFormula: 'a^3 - b^3 = (a - b)(a^2 + b^2)' },
+  { id: 'frac-conjugate-one-side', step: 'conjugate', name: 'Beim Erweitern mit dem Gegenstück nur Zähler oder nur Nenner malgenommen', wrongFormula: '\\frac{1}{\\sqrt{x} - 2} = \\frac{1}{(\\sqrt{x} - 2)(\\sqrt{x} + 2)}' },
+  { id: 'frac-conjugate-sign', step: 'multiply-out', name: 'Mit derselben Summe statt mit dem Gegenstück erweitert', wrongFormula: '\\frac{1}{\\sqrt{x} - 2} = \\frac{\\sqrt{x} - 2}{x - 4}' },
+  { id: 'frac-conjugate-square', step: 'multiply-out', name: 'Beim Erweitern mit dem Gegenstück die Zahl nicht quadriert', wrongFormula: '\\frac{1}{\\sqrt{x} - 2} = \\frac{\\sqrt{x} + 2}{x - 2}' },
 ]
 
 export function fractionErrorRule(id: string): FracErrorRule {
@@ -455,6 +463,13 @@ function factorMistakes(p: Poly, hints: readonly Poly[]): Array<{ id: string; ex
     }
   }
 
+  // Dritte Potenz wie ein Quadrat zerlegt: a³ − b³ = (a − b)(a² + b²) statt (a − b)(a² + ab + b²)
+  const companion = f.factors.find((g) => g.poly.length === 3 && totalDegree(g.poly) === 2 && g.exp === 1)
+  if (p.length === 2 && linear.length >= 1 && companion) {
+    const factors = f.factors.map((g) => (g === companion ? { poly: polyAdd([g.poly[0]], [g.poly[2]]), exp: 1 } : g))
+    out.push({ id: 'frac-cube-as-square', ...asFactored(factors) })
+  }
+
   // In Gruppen: beim Ausklammern aus der zweiten Gruppe das Vorzeichen in der Klammer vertauscht,
   // ax − ay − bx + by = (x − y)(a + b) statt (x − y)(a − b)
   const group = groupFactor(p)
@@ -591,11 +606,11 @@ function mixedMistakes(t: Extract<FractionTask, { kind: 'mixed' }>): Candidate[]
 
 // --- Stufe 5: Ausmultiplizieren und Regeln der Bausteine ---
 
-// (u + v)² als u² + v²: \frac{(x + h)^2 - x^2}{h} = \frac{h^2}{h}
+// (u + v)² als u² + v²: \frac{(x + h)^2 - x^2}{h} = \frac{h^2}{h}; ebenso (u + v)³ als u³ + v³
 function multiplyOutMistakes(t: FractionTask): Candidate[] {
   if (t.kind !== 'reduce' || t.part.num.form !== 'binomial' || t.part.num.base.length !== 2) return []
-  const { base, minus } = t.part.num
-  const squares = polySum(base.map((term) => polyMul([term], [term])))
+  const { base, minus, power = 2 } = t.part.num
+  const squares = polySum(base.map((term) => polyPow([term], power)))
   const n = polySub(squares, minus)
   if (isZeroPoly(n)) return []
   return [{ id: 'frac-binomial-middle', stepExpr: div(nicePolyExpr(n), shownExpr(t.part.den)), value: { num: n, den: shownPoly(t.part.den) } }]
@@ -611,6 +626,7 @@ function ruleMistakes(t: FractionTask, solution: FracSolution): Candidate[] {
   const rule = t.rule
   const step = solution.steps.find((s) => s.kind === 'identity')
   if (!rule || !step) return []
+  if (rule.kind === 'conjugate') return []
   const atom = rule.kind === 'root' ? 'R' : rule.prefer
   if (t.kind === 'sum') {
     const w = workSum(t.terms, t.hints)
@@ -639,6 +655,50 @@ function ruleMistakes(t: FractionTask, solution: FracSolution): Candidate[] {
     return [{ id: 'frac-square-forgotten', stepExpr: fractionExpr(n, top.work.lcd), value: fracDiv(wrongTop, signedFrac(t.bottom)) }]
   }
   return []
+}
+
+// --- Wurzel beseitigen: mit dem Gegenstück erweitern ---
+
+function conjugateMistakes(t: FractionTask, solution: FracSolution): Candidate[] {
+  if (t.kind !== 'reduce' || t.rule?.kind !== 'conjugate') return []
+  const target = t.rule.target
+  const [numP, denP] = [shownPoly(t.part.num), shownPoly(t.part.den)]
+  const sideP = target === 'den' ? denP : numP
+  const conj = conjugateOf(sideP)
+  const up = solution.steps.find((s) => s.kind === 'conjugate')?.expr
+  if (!conj || up?.kind !== 'div') return []
+  const out: Candidate[] = []
+  // Nur Nenner bzw. nur Zähler malgenommen: \frac{1}{(\sqrt{x} - 2)(\sqrt{x} + 2)}
+  if (target === 'den') out.push({ id: 'frac-conjugate-one-side', stepExpr: div(shownExpr(t.part.num), up.den), value: { num: numP, den: polyMul(denP, conj) } })
+  else out.push({ id: 'frac-conjugate-one-side', stepExpr: div(up.num, shownExpr(t.part.den)), value: { num: polyMul(numP, conj), den: denP } })
+  // Mit derselben Summe statt mit dem Gegenstück erweitert und trotzdem a² − b² gerechnet:
+  // \frac{1}{\sqrt{x} - 2} = \frac{\sqrt{x} - 2}{x - 4}
+  const product = polyMul(sideP, conj)
+  const same = primitivePart(sideP)
+  if (target === 'den') {
+    const n = polyMul(numP, same)
+    out.push({ id: 'frac-conjugate-sign', stepExpr: plainFractionExpr(n, product), value: { num: n, den: product } })
+  } else {
+    out.push({ id: 'frac-conjugate-sign', stepExpr: div(nicePolyExpr(product), mul(shownExpr(t.part.den), nicePolyExpr(same))), value: { num: product, den: polyMul(denP, same) } })
+  }
+  // Zahl nicht quadriert: (a\sqrt{x} + b)(a\sqrt{x} - b) = a^2x - b^2, aber mit b statt b² bzw. a statt a²
+  // (nur wenn das Gegenstück genau die Summe mit anderem Vorzeichen ist)
+  if (!polyEquals(conj, polyAdd([sideP[0]], polyNeg([sideP[1]])))) return out
+  sideP.forEach((term, i) => {
+    const c = ratAbs(term.coef)
+    if (!isInteger(c) || isOne(c)) return
+    const square = polyMul([term], [term])
+    const wrongSquare = polyScale(square, ratDiv(rat(1), c))
+    const wrong = polyAdd(product, i === 0 ? polySub(wrongSquare, square) : polySub(square, wrongSquare))
+    if (isZeroPoly(wrong)) return
+    if (target === 'den') {
+      const n = polyMul(numP, conj)
+      out.push({ id: 'frac-conjugate-square', stepExpr: plainFractionExpr(n, wrong), value: { num: n, den: wrong } })
+    } else {
+      out.push({ id: 'frac-conjugate-square', stepExpr: div(nicePolyExpr(wrong), up.den), value: { num: wrong, den: polyMul(denP, conj) } })
+    }
+  })
+  return out
 }
 
 // --- Verschachtelter Doppelbruch ---
@@ -716,7 +776,9 @@ export function fractionWrongAnswers(t: FractionTask, solution: FracSolution = s
           ...multiplyOutMistakes(t),
           ...factorStepMistakes(t, solution),
           ...ruleMistakes(t, solution),
-          ...cancelMistakes(t, solution),
+          ...conjugateMistakes(t, solution),
+          // Nenner ohne Wurzel: danach wird nicht mehr gekürzt
+          ...(t.rule?.kind === 'conjugate' && t.rule.target === 'den' ? [] : cancelMistakes(t, solution)),
         ]
   const result: FracWrong[] = []
   for (const c of candidates) {

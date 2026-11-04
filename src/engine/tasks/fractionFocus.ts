@@ -5,7 +5,7 @@ import { type Level, MAX_SEED, type TaskRef } from './taskNumber.ts'
 // Gezieltes Üben bei Brüchen: eine Aufgabe, in der ein bestimmter typischer Fehler im geführten
 // Modus als Antwort erscheint (der Schrittplaner zeigt ihn mit focus sicher, wo er passieren kann)
 
-const TRIES_PER_LEVEL = 60
+const TRIES_PER_LEVEL = 80
 
 export function findFractionTaskWithError(errorId: string, levels: readonly Level[], rng: Rng): TaskRef | null {
   for (const level of levels) {

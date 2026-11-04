@@ -47,7 +47,7 @@ Details: [PLAN-M2b.md](PLAN-M2b.md)
   aus späteren Kapiteln)
 - [x] 1. Baukasten, Abwechslung, Stufen 1 und 2
 - [x] 2. Stufen 3 und 4
-- [ ] 3. Stufe 5, Teil 1: alles ineinander
+- [x] 3. Stufe 5, Teil 1: alles ineinander
 - [ ] 4. Stufe 5, Teil 2: Partialbruchzerlegung
 - [ ] 5. Stufe 5, Teil 3: Brüche aus späteren Kapiteln
 - [ ] 6. Gezieltes Üben, Feinschliff, Abschluss
@@ -355,3 +355,22 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   noch nicht fertig. Zu lange Ergebnisse und Nenner wie $-6 - b$ werden
   aussortiert. Alte Links auf einzelne Aufgaben der Stufen 3 und 4 zeigen
   jetzt andere Aufgaben.
+- 04.11.2026: M2b Schritt 3 fertig. Stufe 5 hat sieben Vorlagen mit
+  Anteilen: alles ineinander (drei oder vier Brüche, mindestens zwei
+  Rechenarten, Doppelbruch auch im Inneren), Doppelbruch im Doppelbruch,
+  Differenzenquotienten (auch $(x + h)^3$, $\frac{1}{(x + h)^2}$,
+  $\frac{x}{x + c}$ und $\sqrt{x}$), dritte Potenzen ($a^3 - b^3$,
+  $8x^3 - 27$), Wurzeln mit einem oder zwei Buchstaben (kürzen wie
+  $\frac{x - a}{\sqrt{x} - \sqrt{a}}$, Wurzel im Nenner beseitigen,
+  Summen), Winkelfunktionen und $e^x$, $\ln x$, $\sin x$, $\cos x$
+  gemischt. Gemessen: 161 Formen in 200 Aufgaben, keine öfter als 2,5 %.
+  Die Engine kennt Wurzeln aus jedem Buchstaben und $\sqrt{x + h}$
+  (gerechnet mit $h = (\sqrt{x + h})^2 - x$, geschrieben wieder als $h$);
+  „Wurzel beseitigen" ist eine eigene Regel (geführt: mit dem Gegenstück
+  erweitern, dann ausmultiplizieren; frei: fertig erst ohne Wurzel im
+  Nenner). Vier neue typische Fehler und zwei Lernkarten („Dritte
+  Potenzen", „Wurzeln im Nenner beseitigen"). Zerlegungen schreiben die
+  Klammer mit kleinerem Grad zuerst, $\cos x - 1$ nicht mehr als
+  $-1 + \cos x$. Gezieltes Üben probiert bis zu 80 Aufgaben je Stufe.
+  Alte Links auf einzelne Aufgaben der Stufe 5 zeigen jetzt andere
+  Aufgaben.

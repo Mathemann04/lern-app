@@ -3,6 +3,8 @@ import {
   FRACTION_HINTS,
   explainCancel,
   explainCombine,
+  explainConjugate,
+  explainConjugateProduct,
   explainDecimal,
   explainOrder,
   explainExpand,
@@ -26,8 +28,8 @@ import { toLatex } from '../expr/print.ts'
 import { type Expr, mul, num, pow } from '../expr/types.ts'
 import { type FracWrong, fractionWrongAnswers } from '../fraction/errorRules.ts'
 import { factoredExpr, factoredPoly, factorize, groupFactor, isOneFactored, productFormExpr, reduceFrac } from '../fraction/factor.ts'
-import { fracAtoms, polyExpr } from '../fraction/frac.ts'
-import { type Poly, atomsOf, constValue, polyAdd, polyEquals, polyMul, polyNeg, polyProduct, totalDegree } from '../fraction/poly.ts'
+import { fracAtoms, isRootAtom, polyExpr } from '../fraction/frac.ts'
+import { type Poly, atomsOf, constValue, polyAdd, polyEquals, polyNeg, polyPow, polyProduct, totalDegree } from '../fraction/poly.ts'
 import {
   type FracSolution,
   type FracStep,
@@ -199,8 +201,9 @@ function planTree(t: Extract<FractionTask, { kind: 'tree' }>, ref: TaskRef, focu
         title: 'Reihenfolge',
         question: 'Was rechnest du zuerst?',
         choices: rngOf(`o${i}`).shuffle([
-          { id: 'richtig', content: `$${correctLatex}$`, correct: true },
-          ...order.map((o, j): Choice => ({ id: `falsch-${j + 1}`, content: `$${o.latex}$`, correct: false, errorRuleId: o.rule, whyWrong: explainFractionError(o.rule) })),
+          // Doppelbrüche in voller Größe, sonst sind die inneren Brüche am Handy zu klein
+          { id: 'richtig', content: `$${readableLatex(correctLatex)}$`, correct: true },
+          ...order.map((o, j): Choice => ({ id: `falsch-${j + 1}`, content: `$${readableLatex(o.latex)}$`, correct: false, errorRuleId: o.rule, whyWrong: explainFractionError(o.rule) })),
         ]),
         hint: FRACTION_HINTS.order,
         explanation: explainOrder(stage.node.kind === 'sum' ? 'bracket' : 'dot', correctLatex),
@@ -319,8 +322,10 @@ type Facts = {
   // Nenner aus Summen (Hauptnenner mit Termen) bzw. Bausteine wie e^x
   readonly termDenominators: boolean
   readonly blocks: boolean
-  // Wurzel √x in der Aufgabe
+  // Wurzel √x (auch √a, √(x + h)) in der Aufgabe
   readonly root: boolean
+  // Wurzel beseitigen: Die Summe mit Wurzel steht im Zähler oder im Nenner (sonst null)
+  readonly conjugate: 'num' | 'den' | null
   // Bausteine mit eigenen Regeln: √x, sin² x + cos² x = 1, Potenzen von e^x
   readonly blockRules: boolean
   // beim Kürzen: wie sich Zähler und Nenner der Aufgabe zerlegen lassen
@@ -331,7 +336,8 @@ type Facts = {
 }
 
 // Bausteine der Bruch-Engine (frac.ts): e^x, ln x, sin x, cos x, √x
-const BLOCK_ATOMS = ['E', 'L', 'S', 'C', 'R']
+const BLOCK_ATOMS = ['E', 'L', 'S', 'C']
+const isBlock = (atom: string) => BLOCK_ATOMS.includes(atom) || isRootAtom(atom)
 
 function factsOf(original: FractionTask, solution: FracSolution, wrongs: readonly FracWrong[]): Facts {
   const t = original.kind === 'nested' ? replaceInner(original, innerResultPart(solveFraction(innerTask(original, original.hints))), original.hints) : original
@@ -348,9 +354,10 @@ function factsOf(original: FractionTask, solution: FracSolution, wrongs: readonl
     cancelSums,
     minusKept: wrongs.some((w) => w.rule.id === 'frac-cancel-sign'),
     termDenominators: partsOf(t).some((p) => factorize(shownPoly(p.den), t.hints).factors.some((f) => f.poly.length >= 2)),
-    blocks: fracAtoms(solution.value).some((atom) => BLOCK_ATOMS.includes(atom)),
-    root: fracAtoms(solution.value).includes('R'),
-    blockRules: original.rule !== undefined || fracAtoms(solution.value).includes('R') || wrongs.some((w) => w.rule.id === 'frac-cancel-inside'),
+    blocks: fracAtoms(solution.value).some(isBlock),
+    root: fracAtoms(solution.value).some(isRootAtom),
+    conjugate: original.rule?.kind === 'conjugate' ? original.rule.target : null,
+    blockRules: original.rule !== undefined || fracAtoms(solution.value).some(isRootAtom) || wrongs.some((w) => w.rule.id === 'frac-cancel-inside'),
     numMethods: t.kind === 'reduce' ? factorMethods(shownPoly(t.part.num), t.hints) : [],
     denMethods: t.kind === 'reduce' ? factorMethods(shownPoly(t.part.den), t.hints) : [],
     partMethods: partMethods(t),
@@ -359,13 +366,15 @@ function factsOf(original: FractionTask, solution: FracSolution, wrongs: readonl
 
 // Wie sich ein Term zerlegen lässt: ausklammern (Zahl, Buchstabe oder Minus vor der Klammer),
 // in Gruppen ausklammern, binomische Formel ((a + b)(a − b), (a ± b)²) oder zwei verschiedene
-// Klammern wie bei x² + px + q (mit Zahl vor x² bzw. mit zwei Buchstaben eigene Art)
+// Klammern wie bei x² + px + q (mit Zahl vor x² bzw. mit zwei Buchstaben eigene Art), dritte
+// Potenzen (a³ − b³ = (a − b)(a² + ab + b²))
 export function factorMethods(p: Poly, hints: readonly Poly[]): FactorMethod[] {
   const f = factorize(p, hints)
   const linear = f.factors.filter((g) => g.poly.length === 2 && totalDegree(g.poly) === 1)
   const mirror = (g: Poly) => polyAdd([g[0]], polyNeg([g[1]]))
   const methods: FactorMethod[] = []
   if (!isOne(f.coef) || f.factors.some((g) => g.poly.length === 1)) methods.push('out')
+  if (p.length === 2 && linear.length >= 1 && f.factors.some((g) => g.poly.length === 3 && totalDegree(g.poly) === 2)) methods.push('cubes')
   const grouped = groupFactor(p) !== null
   if (grouped) methods.push('grouping')
   const binomial = linear.some((g) => g.exp >= 2 || linear.some((h) => h !== g && polyEquals(h.poly, mirror(g.poly))))
@@ -524,6 +533,7 @@ const TITLES: Record<StepKind, readonly [first: string, later: string]> = {
   decimal: ['Dezimalzahl', 'Dezimalzahl'],
   order: ['Reihenfolge', 'Reihenfolge'],
   part: ['Teilergebnis', 'Teilergebnis'],
+  conjugate: ['Mit dem Gegenstück erweitern', 'mit dem Gegenstück erweitern'],
 }
 
 function titleOf(kinds: readonly StepKind[]): string {
@@ -559,7 +569,10 @@ function phrase(kind: StepKind, facts: Facts): string {
     case 'inner-den':
       return 'fasse den Nenner zu einem Bruch zusammen'
     case 'multiply-out':
+      if (facts.conjugate) return `multipliziere den ${facts.conjugate === 'den' ? 'Nenner' : 'Zähler'} mit der dritten binomischen Formel aus`
       return 'multipliziere die Klammer im Zähler aus und fasse zusammen'
+    case 'conjugate':
+      return `erweitere mit dem Gegenstück ${facts.conjugate === 'num' ? 'des Zählers' : 'des Nenners'}, damit die Wurzel verschwindet`
     case 'identity': {
       const rule = facts.original.rule
       if (rule?.kind === 'root') return 'multipliziere den Nenner mit $(\\sqrt{x})^2 = x$ aus'
@@ -601,8 +614,8 @@ function hintOf(kind: StepKind, facts: Facts): string {
       return facts.cancelPowers ? FRACTION_HINTS.cancelPowers : FRACTION_HINTS.cancel
     case 'factor-num':
     case 'factor-den': {
-      if (facts.root) return FRACTION_HINTS.rootFactor
       const methods = kind === 'factor-num' ? facts.numMethods : facts.denMethods
+      if (facts.root && !methods.includes('cubes')) return FRACTION_HINTS.rootFactor
       const hints: Record<FactorMethod, string> = {
         out: FRACTION_HINTS.factorOut,
         binomial: FRACTION_HINTS.factorBinomial,
@@ -610,6 +623,7 @@ function hintOf(kind: StepKind, facts: Facts): string {
         leading: FRACTION_HINTS.factorLeading,
         twoLetters: FRACTION_HINTS.factorTwoLetters,
         grouping: FRACTION_HINTS.factorGrouping,
+        cubes: FRACTION_HINTS.factorCubes,
       }
       return methods.length > 0 ? methods.map((k) => hints[k]).join(' ') : FRACTION_HINTS.factor
     }
@@ -619,7 +633,9 @@ function hintOf(kind: StepKind, facts: Facts): string {
     case 'right':
       return FRACTION_HINTS.inner
     case 'multiply-out':
-      return FRACTION_HINTS.multiplyOut
+      return facts.conjugate ? FRACTION_HINTS.conjugateProduct : FRACTION_HINTS.multiplyOut
+    case 'conjugate':
+      return FRACTION_HINTS.conjugate
     case 'identity':
       return facts.original.rule?.kind === 'root' ? FRACTION_HINTS.root : FRACTION_HINTS.trig
     case 'inner-complex':
@@ -638,10 +654,11 @@ const METHOD_CARDS: Record<FactorMethod, string> = {
   leading: FRACTION_CARD_IDS.leading,
   twoLetters: FRACTION_CARD_IDS.quadratic,
   grouping: FRACTION_CARD_IDS.grouping,
+  cubes: FRACTION_CARD_IDS.cubes,
 }
 
 // Karten der besonderen Zerlege-Arten (die einfachen Arten stehen schon auf den Karten zum Kürzen)
-const SPECIAL_METHODS: readonly FactorMethod[] = ['binomial', 'quadratic', 'leading', 'twoLetters', 'grouping']
+const SPECIAL_METHODS: readonly FactorMethod[] = ['binomial', 'quadratic', 'leading', 'twoLetters', 'grouping', 'cubes']
 const specialCards = (methods: readonly FactorMethod[]) => methods.filter((k) => SPECIAL_METHODS.includes(k)).map((k) => METHOD_CARDS[k])
 
 // Karten zu einem Schritt; bei Bausteinen wie e^x zusätzlich deren Karte
@@ -665,7 +682,9 @@ function cardsOf(kind: StepKind, facts: Facts): string[] {
       case 'right':
         return [ids.add]
       case 'multiply-out':
-        return [ids.binomial]
+        return facts.conjugate ? [ids.rootDenominator] : [ids.binomial]
+      case 'conjugate':
+        return [ids.rootDenominator]
       case 'identity':
         return [ids.blockRules]
       case 'cancel': {
@@ -770,10 +789,17 @@ function explainStep(step: FracStep, solution: FracSolution, facts: Facts): Expl
       return explainInnerComplex(o.kind === 'nested' ? taskExpr(innerTask(o, o.hints)) : step.expr!, step.answer!)
     }
     case 'multiply-out': {
+      if (facts.conjugate) return explainConjugateProduct(step.from!, step.detail!, facts.conjugate === 'num')
       const o = facts.original
-      const base = o.kind === 'reduce' && o.part.num.form === 'binomial' ? o.part.num.base : null
-      const square: [Expr, Expr] = base ? [pow(polyExpr(base), num(2)), nicePolyExpr(polyMul(base, base))] : [step.from!, step.detail!]
-      return explainMultiplyOut(square, step.from!, step.detail!)
+      const shown = o.kind === 'reduce' && o.part.num.form === 'binomial' ? o.part.num : null
+      const power = shown?.power ?? 2
+      const square: [Expr, Expr] = shown ? [pow(polyExpr(shown.base), num(power)), nicePolyExpr(polyPow(shown.base, power))] : [step.from!, step.detail!]
+      return explainMultiplyOut(square, step.from!, step.detail!, power === 3)
+    }
+    case 'conjugate': {
+      const o = facts.original
+      const side = o.kind === 'reduce' ? (facts.conjugate === 'num' ? o.part.num : o.part.den) : null
+      return explainConjugate(side ? shownExpr(side) : step.detail!, step.detail!, facts.conjugate === 'num')
     }
     case 'identity':
       return explainRule(facts.original.rule?.kind === 'root' ? 'root' : 'trig', step.from!, step.detail!)
