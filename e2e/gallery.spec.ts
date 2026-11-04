@@ -130,11 +130,11 @@ test('Galerie zeigt Bruchaufgaben der Stufen 1 bis 5 mit Rechenweg und typischen
     expect(overflow, `Stufe ${level} ragt seitlich heraus`).toBeLessThanOrEqual(0)
   }
 
-  // Aufgabe über ihre Nummer, z. B. 3-2: \frac{4}{x + 1} - \frac{3}{x - 3}
-  await page.getByLabel('Aufgabe über ihre Nummer aufrufen').fill('3-2')
+  // Aufgabe über ihre Nummer, z. B. 3-471: \frac{1}{x - 6} - \frac{3}{x + 6}
+  await page.getByLabel('Aufgabe über ihre Nummer aufrufen').fill('3-471')
   await page.getByRole('button', { name: 'Anzeigen' }).click()
   const card = page.getByRole('region', { name: 'Aufgerufene Aufgabe' }).getByRole('article')
-  await expect(card).toContainText('Aufgabe 3-2')
+  await expect(card).toContainText('Aufgabe 3-471')
   await expect(card.getByText('Hauptnenner', { exact: true })).toBeVisible()
   // Stufe 5, z. B. 5-1: \frac{3}{1 - \sin x} + \frac{3}{1 + \sin x} mit sin² x + cos² x = 1
   await page.getByLabel('Aufgabe über ihre Nummer aufrufen').fill('5-1')

@@ -513,6 +513,8 @@ weiterrechnen). Die Fehler zu Bausteinen gibt es seit Schritt 6 (Stufe 5).
 | Klammer | Klammer übersehen (neu in M2b) | $\left(\frac{1}{2} - \frac{1}{3}\right) : 2 = \frac{1}{2} - \frac{1}{3} : 2$ |
 | Klammer mit Minus | Minus nur auf den ersten Bruch (neu in M2b) | $\frac{1}{2} - \left(\frac{1}{3} - \frac{1}{4}\right) = \frac{1}{2} - \frac{1}{3} - \frac{1}{4}$ |
 | Dezimalzahl | Stellen falsch gezählt (neu in M2b) | $0{,}75 = \frac{75}{10}$ |
+| Zerlegen | Zahl vor $x^2$ vergessen (neu in M2b) | $2x^2 - x - 3 = (x + 1)\left(x - \frac{3}{2}\right)$ |
+| Zerlegen | Vorzeichen beim Ausklammern in Gruppen (neu in M2b) | $ax - ay - bx + by = (a - b)(x + y)$ |
 
 Wenn dir typische Fehler aus deinen Übungen fehlen, sag es. Die sind Gold
 wert.
