@@ -211,7 +211,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   - `random/rng.ts`: Zufall mit Startwert; `tasks/`: Aufgaben-Nummern
     („3-48213"), Vorlagen je Stufe (`derivativeTerms.ts`,
     `fractionTerms.ts`, `rearrangeTerms.ts`), `focus.ts` und `fractionFocus.ts` (Aufgaben für
-    gezieltes Üben); Baukasten der Brüche `fractionKit.ts` (Stufen 1 und 2:
+    gezieltes Üben; Brüche: seltene Fehler in ihrer Vorlage `focus`,
+    `likelyFractionTemplate`); Baukasten der Brüche `fractionKit.ts` (Stufen 1 und 2:
     Rechenbaum zufällig aus Teilen, Rechenarten und Bruchteilen, mit
     Filtern gegen zu einfache oder zu lange Aufgaben; Stufen 3 und 4: je
     Aufgabe eine „Welt" aus Klammern, `level3World`/`level4World`, daraus

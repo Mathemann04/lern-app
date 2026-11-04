@@ -50,6 +50,8 @@ export type FractionTemplate = {
   readonly label: string
   // Anteil unter den Vorlagen der Stufe (ohne Angabe gleich oft)
   readonly weight?: number
+  // seltene typische Fehler, die vor allem in dieser Vorlage vorkommen (gezieltes Üben sucht hier)
+  readonly focus?: readonly string[]
   build(rng: Rng): FractionTask
 }
 
@@ -127,6 +129,7 @@ const level5Difference: FractionTemplate = {
   level: 5,
   weight: 1.1,
   label: 'Differenzenquotienten $\\frac{f(x + h) - f(x)}{h}$',
+  focus: ['frac-binomial-middle'],
   build: differenceQuotient,
 }
 
@@ -135,6 +138,7 @@ const level5Cubes: FractionTemplate = {
   level: 5,
   weight: 1,
   label: 'Dritte Potenzen: $a^3 - b^3 = (a - b)(a^2 + ab + b^2)$',
+  focus: ['frac-cube-as-square'],
   build: cubeTask,
 }
 
@@ -143,6 +147,7 @@ const level5Roots: FractionTemplate = {
   level: 5,
   weight: 1.5,
   label: 'Wurzeln: kürzen, Wurzel im Nenner beseitigen, auch mit zwei Wurzeln',
+  focus: ['frac-conjugate-one-side', 'frac-conjugate-sign', 'frac-conjugate-square'],
   build: rootTask,
 }
 
@@ -203,6 +208,7 @@ const level5Exp: FractionTemplate = {
   level: 5,
   weight: 0.9,
   label: '$e^x$, $\\ln x$, $\\sin x$ und $\\cos x$ gemischt, $\\frac{e^{2x}}{e^x} = e^x$',
+  focus: ['frac-cancel-inside'],
   build(rng) {
     if (rng.chance(0.5)) return blockPairTask(rng)
     const k = nonZero(rng, 5)
@@ -260,14 +266,23 @@ function pickWeighted(rng: Rng, templates: readonly FractionTemplate[]): Fractio
 
 export const isFractionLevelAvailable = (level: Level) => fractionTemplatesForLevel(level).length > 0
 
+const firstPick = (rng: Rng, templates: readonly FractionTemplate[]) =>
+  templates.some((t) => t.weight !== undefined) ? pickWeighted(rng, templates) : rng.pick(templates)
+
+// Die Vorlage, die eine Aufgaben-Nummer zuerst wählt, ohne die Aufgabe zu bauen (schnell). Meist
+// kommt die Aufgabe aus ihr; nur wenn die erste Aufgabe aussortiert wird, aus einer anderen.
+export function likelyFractionTemplate(ref: TaskRef): FractionTemplate | null {
+  const templates = fractionTemplatesForLevel(ref.level)
+  return templates.length === 0 ? null : firstPick(createRng(`brueche:${ref.level}:${ref.seed}`), templates)
+}
+
 // Erzeugt die Aufgabe zu einer Aufgaben-Nummer. Gleiche Nummer → gleiche Aufgabe.
 export function generateFractionTask(ref: TaskRef): GeneratedFractionTask {
   const rng = createRng(`brueche:${ref.level}:${ref.seed}`)
   const templates = fractionTemplatesForLevel(ref.level)
   if (templates.length === 0) throw new Error(`Für Stufe ${ref.level} gibt es noch keine Bruchaufgaben`)
-  const weighted = templates.some((t) => t.weight !== undefined)
   for (;;) {
-    const template = weighted ? pickWeighted(rng, templates) : rng.pick(templates)
+    const template = firstPick(rng, templates)
     const task = template.build(rng)
     if (isGood(task, ref.level)) return { ref, template, task }
   }

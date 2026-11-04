@@ -371,6 +371,6 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   Nenner). Vier neue typische Fehler und zwei Lernkarten („Dritte
   Potenzen", „Wurzeln im Nenner beseitigen"). Zerlegungen schreiben die
   Klammer mit kleinerem Grad zuerst, $\cos x - 1$ nicht mehr als
-  $-1 + \cos x$. Gezieltes Üben probiert bis zu 80 Aufgaben je Stufe.
+  $-1 + \cos x$. Gezieltes Üben sucht seltene Fehler in ihrer Vorlage (`focus`, z. B. „Wurzeln“) und findet sie so zuverlässig.
   Alte Links auf einzelne Aufgaben der Stufe 5 zeigen jetzt andere
   Aufgaben.

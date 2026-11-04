@@ -19,6 +19,15 @@ describe('Gezieltes Üben bei Brüchen', () => {
     expect(plan.steps.some((s) => s.choices.some((c) => c.errorRuleId === id)), `${id} in ${ref!.level}-${ref!.seed}`).toBe(true)
   })
 
+  // Seltene Fehler der Stufe 5 sucht die Engine in ihrer Vorlage: Das klappt mit jedem Zufall
+  it.each(['frac-conjugate-square', 'frac-conjugate-sign', 'frac-cube-as-square', 'frac-cancel-inside', 'frac-binomial-middle'])(
+    '%s: findet ihn in Stufe 5 mit jedem Zufall',
+    (id) => {
+      for (let run = 0; run < 15; run++) expect(findFractionTaskWithError(id, [5], createRng(`zuverlässig:${id}:${run}`)), `${id} Lauf ${run}`).not.toBeNull()
+    },
+    120_000,
+  )
+
   it('findet nichts zu Fehlern, die es in diesen Stufen nicht gibt', () => {
     expect(findFractionTaskWithError('frac-vieta-sign', [1], createRng('test'))).toBeNull()
   })
