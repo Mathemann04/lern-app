@@ -69,14 +69,14 @@ const level1Kit: FractionTemplate = {
   id: 'baukasten-zahlen',
   level: 1,
   label: 'Baukasten: bis zu vier Zahlenbrüche, Punkt vor Strich, Klammern, Dezimalzahlen',
-  build: (rng) => (rng.chance(0.08) ? bigReduce(rng) : buildFromKit(rng, LEVEL1_KIT, 1)),
+  build: (rng) => (rng.chance(0.025) ? bigReduce(rng) : buildFromKit(rng, LEVEL1_KIT, 1)),
 }
 
 const level2Kit: FractionTemplate = {
   id: 'baukasten-buchstaben',
   level: 2,
   label: 'Baukasten: Brüche mit Buchstaben in Produkten',
-  build: (rng) => (rng.chance(0.1) ? monomialReduce(rng) : buildFromKit(rng, level2Kit_(rng), 2)),
+  build: (rng) => (rng.chance(0.06) ? monomialReduce(rng) : buildFromKit(rng, level2Kit_(rng), 2)),
 }
 
 const LETTER_PAIRS = [

@@ -38,7 +38,7 @@ export type FractionCheckContext = {
 }
 
 // Warum ein gleichwertiges Ergebnis noch nicht fertig ist
-export type Unfinished = 'several' | 'nested' | 'numerator' | 'denominator' | 'not-reduced'
+export type Unfinished = 'several' | 'nested' | 'numerator' | 'denominator' | 'not-reduced' | 'product' | 'decimal'
 
 export type FractionVerdict =
   | { readonly kind: 'unreadable'; readonly message: string }
@@ -49,7 +49,8 @@ export type FractionVerdict =
   | { readonly kind: 'wrongFactor'; readonly answer: Expr }
   | { readonly kind: 'wrong'; readonly answer: Expr }
 
-const LETTERS = ['x', 'y', 'a', 'b', 'h']
+// Buchstaben sind Kleinbuchstaben (außer e, der Eulerschen Zahl); Bausteine heißen E, L, S, C, R
+const isLetter = (atom: string) => /^[a-z]$/.test(atom) && atom !== 'e'
 const BLOCK_ATOMS = ['E', 'L', 'S', 'C']
 
 export function prepareFractionCheck(task: FractionTask): FractionCheckContext {
@@ -57,7 +58,9 @@ export function prepareFractionCheck(task: FractionTask): FractionCheckContext {
   const atoms = [...new Set(partsOf(task).flatMap((p) => [...atomsOf(shownPoly(p.num)), ...atomsOf(shownPoly(p.den))]))]
   const blocks = atoms.some((a) => BLOCK_ATOMS.includes(a))
   const root = atoms.includes('R')
-  const letters = LETTERS.filter((l) => atoms.includes(l) || (l === 'x' && (blocks || root)))
+  // x und y zuerst, dann alphabetisch
+  const rank = (l: string) => (l === 'x' ? 0 : l === 'y' ? 1 : 2)
+  const letters = [...new Set([...atoms.filter(isLetter), ...(blocks || root ? ['x'] : [])])].sort((a, b) => rank(a) - rank(b) || a.localeCompare(b))
   return { task, solution, wrongs: fractionWrongAnswers(task, solution), letters, blocks, root }
 }
 
@@ -168,7 +171,56 @@ function isCombined(e: Expr): boolean {
   return true
 }
 
+// Faktoren eines Produkts, verschachtelte Produkte aufgelöst
+const factorsOf = (e: Expr): Expr[] => (e.kind === 'mul' ? e.factors.flatMap(factorsOf) : [e])
+
+// Steht noch ein Produkt zum Ausrechnen da? Zwei Zahlen (3 · 4) oder zweimal derselbe Buchstabe
+// (a · a²) in einem Produkt
+function hasOpenProduct(e: Expr): boolean {
+  if (e.kind === 'mul') {
+    const factors = factorsOf(e)
+    // Zahlen, auch ein Bruch mit einer Zahl oben (\frac{1}{6b} \cdot 5 ist noch \frac{5}{6b})
+    if (factors.filter((f) => f.kind === 'num' || (f.kind === 'div' && f.num.kind === 'num')).length >= 2) return true
+    const letters = factors.map((f) => (f.kind === 'var' ? f.name : f.kind === 'pow' && f.base.kind === 'var' ? f.base.name : null)).filter((l) => l !== null)
+    if (new Set(letters).size < letters.length) return true
+    return factors.some(hasOpenProduct)
+  }
+  switch (e.kind) {
+    case 'add':
+      return e.terms.some(hasOpenProduct)
+    case 'neg':
+      return hasOpenProduct(e.arg)
+    case 'div':
+      return hasOpenProduct(e.num) || hasOpenProduct(e.den)
+    case 'pow':
+      return hasOpenProduct(e.base)
+    default:
+      return false
+  }
+}
+
+// Kommt eine Dezimalzahl vor (0,75)?
+function hasDecimal(e: Expr): boolean {
+  if (e.kind === 'num') return e.value.d !== 1n
+  switch (e.kind) {
+    case 'add':
+      return e.terms.some(hasDecimal)
+    case 'mul':
+      return e.factors.some(hasDecimal)
+    case 'neg':
+      return hasDecimal(e.arg)
+    case 'div':
+      return hasDecimal(e.num) || hasDecimal(e.den)
+    case 'pow':
+      return hasDecimal(e.base)
+    default:
+      return false
+  }
+}
+
 function unfinished(answer: Expr, value: Frac, solution: FracSolution): Unfinished | null {
+  if (hasDecimal(answer)) return 'decimal'
+  if (hasOpenProduct(answer)) return 'product'
   const shape = parts(answer)
   if (typeof shape === 'string') return shape
   if (!isCombined(shape.num)) return 'numerator'
@@ -190,6 +242,8 @@ export const UNFINISHED_TEXTS: Readonly<Record<Unfinished, string>> = {
   numerator: 'Fasse den Zähler noch zusammen: Klammern ausmultiplizieren und gleichartige Summanden zusammenrechnen.',
   denominator: 'Fasse den Nenner noch zusammen: Klammern in einer Summe ausmultiplizieren und gleichartige Summanden zusammenrechnen. Als Produkt wie $(x - 1)(x + 1)$ darf er stehen bleiben.',
   'not-reduced': 'Noch nicht vollständig gekürzt. Zerlege Zähler und Nenner in Faktoren und kürze, was oben und unten steht.',
+  product: 'Rechne das Produkt noch aus: Zahlen malnehmen und gleiche Buchstaben zusammenfassen, z. B. $3 \\cdot 4a \\cdot a = 12a^2$.',
+  decimal: 'Schreibe das Ergebnis als Bruch, ohne Dezimalzahl.',
 }
 
 export function fractionFreeVerdict(v: FractionVerdict): FreeVerdict {

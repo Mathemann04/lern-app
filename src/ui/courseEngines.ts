@@ -11,20 +11,22 @@ export type CourseEngine = {
   planGuidedTask(ref: TaskRef, focus?: string): GuidedTask
   // Aufgabe im freien Modus: Eingabe prüfen, Tastatur
   prepareFree(ref: TaskRef): FreeTask
+  // Form der Aufgabe ohne Zahlen (Abwechslung, engine/tasks/variety.ts)
+  formOf(ref: TaskRef): string
 }
 
 const LOADERS: Readonly<Record<string, () => Promise<CourseEngine>>> = {
   [DERIVATIVES]: async () => {
-    const [plan, free] = await Promise.all([import('../engine/guided/plan.ts'), import('../engine/check/derivativeFree.ts')])
-    return { planGuidedTask: plan.planGuidedTask, prepareFree: free.prepareDerivativeFree }
+    const [plan, free, forms] = await Promise.all([import('../engine/guided/plan.ts'), import('../engine/check/derivativeFree.ts'), import('../engine/tasks/forms.ts')])
+    return { planGuidedTask: plan.planGuidedTask, prepareFree: free.prepareDerivativeFree, formOf: forms.derivativeForm }
   },
   [FRACTIONS]: async () => {
-    const [plan, free] = await Promise.all([import('../engine/guided/fractionPlan.ts'), import('../engine/check/fractionAnswer.ts')])
-    return { planGuidedTask: plan.planFractionTask, prepareFree: free.prepareFractionFree }
+    const [plan, free, forms] = await Promise.all([import('../engine/guided/fractionPlan.ts'), import('../engine/check/fractionAnswer.ts'), import('../engine/tasks/forms.ts')])
+    return { planGuidedTask: plan.planFractionTask, prepareFree: free.prepareFractionFree, formOf: forms.fractionForm }
   },
   [REARRANGE]: async () => {
-    const [plan, free] = await Promise.all([import('../engine/guided/rearrangePlan.ts'), import('../engine/check/rearrangeAnswer.ts')])
-    return { planGuidedTask: plan.planRearrangeTask, prepareFree: free.prepareRearrangeFree }
+    const [plan, free, forms] = await Promise.all([import('../engine/guided/rearrangePlan.ts'), import('../engine/check/rearrangeAnswer.ts'), import('../engine/tasks/forms.ts')])
+    return { planGuidedTask: plan.planRearrangeTask, prepareFree: free.prepareRearrangeFree, formOf: forms.rearrangeForm }
   },
 }
 

@@ -126,11 +126,12 @@ export function asTask(n: TreeNode, hints: readonly Poly[]): FractionTask | null
       return n.terms.length >= 2 && n.terms.every((t) => isLeaf(t.node)) ? { kind: 'sum', terms: sideOf(n)!, hints } : null
     case 'product':
     case 'quotient': {
+      // Klammer mal bzw. geteilt durch einen Bruch als Ganzes (mixed); steht rechts eine Klammer,
+      // wird sie vorher als eigener Teil gerechnet
       const left = sideOf(n.left)
-      const right = sideOf(n.right)
-      if (!left || !right) return null
-      if (isLeaf(n.left) && isLeaf(n.right)) return { kind: n.kind, left: n.left.part, right: n.right.part, hints }
-      return { kind: 'mixed', op: n.kind === 'product' ? 'mul' : 'div', left, right, hints }
+      if (!left || !isLeaf(n.right)) return null
+      if (isLeaf(n.left)) return { kind: n.kind, left: n.left.part, right: n.right.part, hints }
+      return { kind: 'mixed', op: n.kind === 'product' ? 'mul' : 'div', left, right: [plus(n.right.part)], hints }
     }
     case 'over': {
       const top = sideOf(n.left)

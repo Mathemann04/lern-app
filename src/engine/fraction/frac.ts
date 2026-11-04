@@ -19,7 +19,7 @@ import {
 
 // Brüche aus zwei Polynomen (Zähler, Nenner) und die Übersetzung zwischen Termbaum und Polynom.
 //
-// Atome: Buchstaben x, y, a, b, h und Bausteine, mit denen man rechnet wie mit einem Buchstaben:
+// Atome: Buchstaben (alle Kleinbuchstaben außer e und i) und Bausteine, mit denen man rechnet wie mit einem Buchstaben:
 // E = e^x (E² = e^{2x}), L = ln x, S = sin x, C = cos x, R = √x. Dazu e, die Eulersche Zahl, für
 // falsche Ergebnisse wie e^2.
 //
@@ -31,7 +31,8 @@ import {
 
 export type Frac = { readonly num: Poly; readonly den: Poly }
 
-const LETTERS = new Set(['x', 'y', 'a', 'b', 'h'])
+// alle Kleinbuchstaben außer e (Eulersche Zahl) und i (imaginäre Einheit)
+const LETTERS = new Set([...'abcdfghjklmnopqrstuvwxyz'])
 
 // --- Rechnen ---
 

@@ -38,7 +38,7 @@ describe('Rechenbaum: Schreibweise, Wert, Teile', () => {
       [bracketDivided, '\\frac{1}{7}', 1, 0],
       [minusBracket, '\\frac{5}{12}', 2, 0],
       [decimal, '-\\frac{5}{12}', 1, 1],
-      [minusFront, '\\frac{3}{2}', 2, 0],
+      [minusFront, '\\frac{3}{2}', 3, 0],
     ]
     for (const [t, result, stages, decimals] of cases) {
       const s = solveTree(t)

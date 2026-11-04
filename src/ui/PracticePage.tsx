@@ -1,10 +1,12 @@
 import { Suspense, lazy, use, useEffect } from 'react'
-import type { Level, TaskRef } from '../engine/tasks/taskNumber.ts'
+import { type Level, type TaskRef, randomSeed } from '../engine/tasks/taskNumber.ts'
+import { pickFresh } from '../engine/tasks/variety.ts'
 import { updateSettings, useSettings } from '../state/settings.ts'
 import type { PracticeMode } from '../state/storage.ts'
 import { TaskScreen } from './guided/TaskScreen.tsx'
 import { courseById, isLevelAvailable } from './catalog.ts'
-import { loadCourseEngine } from './courseEngines.ts'
+import { type CourseEngine, loadCourseEngine } from './courseEngines.ts'
+import { recentForms, rememberForm } from './recentForms.ts'
 import { knownFocus, newTaskHref } from './practice.ts'
 import { courseHref, taskHref } from './routes.ts'
 
@@ -22,12 +24,14 @@ export default function PracticePage({ course: courseId, mode: wantedMode, level
   const mode = course.free ? wantedMode : 'guided'
   const redirect = seed === null || mode !== wantedMode
 
-  // Ohne Nummer: neue Aufgabe würfeln und ihre Nummer in die Adresse schreiben,
-  // damit Neuladen dieselbe Aufgabe zeigt
+  // Ohne Nummer: neue Aufgabe würfeln und ihre Nummer in die Adresse schreiben, damit Neuladen
+  // dieselbe Aufgabe zeigt. Gezielt üben sucht eine passende Aufgabe; sonst wählt PickNewTask eine
+  // mit anderer Form als die letzten (dafür braucht es die Engine).
+  const pick = seed === null && !focus && isLevelAvailable(course, level)
   useEffect(() => {
-    if (seed === null) window.location.replace(newTaskHref(courseId, mode, level, focus))
-    else if (mode !== wantedMode) window.location.replace(taskHref(courseId, { level, seed }, mode, focus))
-  }, [courseId, mode, wantedMode, level, seed, focus])
+    if (seed === null && !pick) window.location.replace(newTaskHref(courseId, mode, level, focus))
+    else if (seed !== null && mode !== wantedMode) window.location.replace(taskHref(courseId, { level, seed }, mode, focus))
+  }, [courseId, mode, wantedMode, level, seed, focus, pick])
 
   // „Weitermachen" auf der Startseite führt zum zuletzt geübten Thema
   const { lastCourse } = useSettings()
@@ -35,6 +39,7 @@ export default function PracticePage({ course: courseId, mode: wantedMode, level
     if (lastCourse !== courseId) updateSettings({ lastCourse: courseId })
   }, [lastCourse, courseId])
 
+  if (pick) return <PickNewTask course={courseId} level={level} mode={mode} />
   if (redirect) return null
   if (!isLevelAvailable(course, level)) {
     return (
@@ -58,13 +63,31 @@ export default function PracticePage({ course: courseId, mode: wantedMode, level
   return <GuidedPractice key={key} course={courseId} taskRef={taskRef} focus={focus} />
 }
 
+// Neue Aufgabe, deren Form nicht unter den letzten dieser Stufe ist
+function PickNewTask({ course, level, mode }: { course: string; level: Level; mode: PracticeMode }) {
+  const engine = use(loadCourseEngine(course))
+  useEffect(() => {
+    const seed = pickFresh((s) => engine.formOf({ level, seed: s }), recentForms(course, level), randomSeed)
+    window.location.replace(taskHref(course, { level, seed }, mode, null))
+  }, [engine, course, level, mode])
+  return null
+}
+
+// Merkt sich die Form der gezeigten Aufgabe
+function useRememberForm(course: string, engine: CourseEngine, taskRef: TaskRef) {
+  const { level, seed } = taskRef
+  useEffect(() => rememberForm(course, level, engine.formOf({ level, seed })), [course, engine, level, seed])
+}
+
 // Wartet auf die Engine des Themas (App.tsx zeigt so lange „Wird geladen …")
 function GuidedPractice({ course, taskRef, focus }: { course: string; taskRef: TaskRef; focus: string | null }) {
   const engine = use(loadCourseEngine(course))
+  useRememberForm(course, engine, taskRef)
   return <TaskScreen course={course} engine={engine} taskRef={taskRef} focus={focus} />
 }
 
 function FreePractice({ course, taskRef, focus }: { course: string; taskRef: TaskRef; focus: string | null }) {
   const engine = use(loadCourseEngine(course))
+  useRememberForm(course, engine, taskRef)
   return <FreeTaskScreen course={course} engine={engine} taskRef={taskRef} focus={focus} />
 }

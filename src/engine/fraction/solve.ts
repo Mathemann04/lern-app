@@ -264,6 +264,8 @@ export function reciprocalExpr(side: Side): Expr {
   }
   const den = constValue(side.frac.den)
   if (den && isOne(den)) return div(num(1), side.expr)
+  // \frac{1}{2} umgedreht ist 2, nicht \frac{2}{1}
+  if (side.expr.kind === 'div' && side.expr.num.kind === 'num' && isOne(side.expr.num.value)) return side.expr.den
   return side.expr.kind === 'div' ? div(side.expr.den, side.expr.num) : div(num(1), side.expr)
 }
 

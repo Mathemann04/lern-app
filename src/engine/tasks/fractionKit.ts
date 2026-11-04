@@ -1,6 +1,8 @@
 import { factoredPoly, reduceFrac } from '../fraction/factor.ts'
 import type { Frac } from '../fraction/frac.ts'
-import { type Poly, atomsOf, polyAtom, polyConst, polyMul, totalDegree } from '../fraction/poly.ts'
+import { type Poly, atomsOf, polyAtom, polyConst, polyEquals, polyMul, totalDegree } from '../fraction/poly.ts'
+import { ratAbs, ratDiv } from '../rational.ts'
+import { fractionWrongAnswers } from '../fraction/errorRules.ts'
 import { isPlayableTree, solveTree } from '../fraction/solve.ts'
 import {
   type FractionTask,
@@ -11,12 +13,15 @@ import {
   leaf,
   overNode,
   part,
+  partFrac,
   productNode,
   quotientNode,
   sumNode,
+  isWhole,
   taskLatex,
   term,
   treeFrac,
+  treeLeaves,
 } from '../fraction/task.ts'
 import { type Rng } from '../random/rng.ts'
 import type { Level } from './taskNumber.ts'
@@ -40,6 +45,8 @@ type Kit = {
   // Grenzen: größter Betrag von Zahlen in Teil- und Endergebnissen, Länge der Aufgabe
   readonly maxNumber: number
   readonly maxLatex: number
+  // zusätzliche Bedingung an den Baum, z. B. mindestens ein echter Bruch
+  readonly accept?: (root: TreeNode, rng: Rng) => boolean
 }
 
 const weighted = <T>(rng: Rng, items: ReadonlyArray<readonly [T, number]>): T => {
@@ -73,7 +80,7 @@ function split(rng: Rng, n: number, k: number): number[] {
 
 function randomNode(rng: Rng, kit: Kit, size: number, depth: number, state: { decimals: number }): TreeNode {
   if (size === 1) {
-    if (kit.decimal && state.decimals === 0 && rng.chance(0.3)) {
+    if (kit.decimal && state.decimals === 0 && rng.chance(0.15)) {
       state.decimals++
       return kit.decimal(rng)
     }
@@ -83,7 +90,8 @@ function randomNode(rng: Rng, kit: Kit, size: number, depth: number, state: { de
   const ops = kit.ops.filter(([op]) => !(op === 'over' && depth > 0))
   const op = depth >= 2 ? 'sum' : weighted(rng, ops)
   if (op === 'sum') {
-    const k = size === 2 ? 2 : rng.int(2, Math.min(size, 3))
+    // meist zwei Summanden (darin weitere Rechenarten), seltener drei nebeneinander
+    const k = size === 2 || rng.chance(0.65) ? 2 : Math.min(size, 3)
     const terms: TreeTerm[] = []
     split(rng, size, k).forEach((s, i) => {
       const node = randomNode(rng, kit, s, depth + 1, state)
@@ -127,21 +135,30 @@ export function taskFromTree(root: TreeNode, kit: Pick<Kit, 'maxNumber' | 'maxLa
   if (!isPlayableTree(t)) return null
   const reduced = reduceFrac(solution.value)
   if (biggest({ num: reduced.num, den: factoredPoly(reduced.den) }) > kit.maxNumber) return null
-  // Teilergebnisse klein
-  for (const stage of solution.stages) {
+  // Teilergebnisse klein und nicht ±1 (sonst folgt „mal 1" oder „geteilt durch 1"); kein Blatt ist 1
+  for (const [i, stage] of solution.stages.entries()) {
     if (biggest(stage.solution.value) > kit.maxNumber * 4) return null
     if (stage.solution.reduced.num.length > 4) return null
+    const r = stage.solution.reduced
+    const one = r.den.factors.length === 0 && r.num.length === 1 && r.num[0].mono.length === 0 && ratAbs(ratDiv(r.num[0].coef, r.den.coef)).n === 1n && ratAbs(ratDiv(r.num[0].coef, r.den.coef)).d === 1n
+    if ((one || r.num.length === 0) && i < solution.stages.length - 1) return null
   }
+  if (treeLeaves(root).some((l) => { const v = partFrac(l.part); return polyEquals(v.num, v.den) })) return null
   if (level >= 2 && atomsOf(reduced.num).length === 0 && reduced.den.factors.length === 0) return null
   if (totalDegree(reduced.num) > 6) return null
   const simple = solution.stages.length === 1 && solution.steps[0]?.kind !== 'decimal' ? solution.stages[0].task : t
-  return taskLatex(simple).length <= kit.maxLatex ? simple : null
+  if (taskLatex(simple).length > kit.maxLatex) return null
+  // geführt braucht die letzte Frage falsche Ergebnisse aus typischen Fehlern
+  if (!fractionWrongAnswers(simple).some((w) => w.value && !w.freeOnly)) return null
+  return simple
 }
 
 export function buildFromKit(rng: Rng, kit: Kit, level: Level): FractionTask {
   for (;;) {
     const size = weighted(rng, kit.sizes)
-    const task = taskFromTree(randomNode(rng, kit, size, 0, { decimals: 0 }), kit, level)
+    const root = randomNode(rng, kit, size, 0, { decimals: 0 })
+    if (kit.accept && !kit.accept(root, rng)) continue
+    const task = taskFromTree(root, kit, level)
     if (task) return task
   }
 }
@@ -184,23 +201,30 @@ function decimalLeaf(rng: Rng): TreeNode {
 
 export const LEVEL1_KIT: Kit = {
   sizes: [
-    [2, 2],
-    [3, 5],
-    [4, 3],
+    [2, 1],
+    [3, 4],
+    [4, 4],
   ],
   ops: [
-    ['sum', 5],
+    ['sum', 3.5],
     ['product', 2],
     ['quotient', 2],
-    ['over', 1],
+    ['over', 1.5],
   ],
   leaves: [
-    [numberFraction, 6],
-    [wholeNumber, 1],
+    [numberFraction, 5],
+    [wholeNumber, 2],
   ],
   decimal: decimalLeaf,
   maxNumber: 150,
   maxLatex: 110,
+  // mindestens ein echter Bruch (nicht nur ganze Zahlen und Dezimalzahlen); drei Brüche nur mit Plus
+  // und Minus seltener, damit diese Grundform nicht überwiegt
+  accept: (root, rng) => {
+    const plain = (n: TreeNode) => n.kind === 'leaf' && !n.decimal && !isWhole(n.part)
+    if (root.kind === 'sum' && root.terms.length === 3 && root.terms.every((t) => plain(t.node)) && rng.chance(0.5)) return false
+    return treeLeaves(root).some(plain)
+  },
 }
 
 // Großen Bruch kürzen: 84/126

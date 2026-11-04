@@ -643,9 +643,11 @@ function nestedMistakes(t: Extract<FractionTask, { kind: 'nested' }>): Candidate
 // ein Fehler in einem Teil wird mit dem Rest richtig weitergerechnet
 function treeMistakes(t: Extract<FractionTask, { kind: 'tree' }>, solution: TreeSolution): Candidate[] {
   const out: Candidate[] = []
+  // Wert eines falsch gerechneten Baums; 0 und Teilen durch 0 zählen nicht als Antwort
   const value = (tree: TreeNode): Frac | null => {
     try {
-      return treeFrac(tree)
+      const v = treeFrac(tree)
+      return isZeroPoly(v.num) || isZeroPoly(v.den) ? null : v
     } catch {
       return null
     }
@@ -653,7 +655,7 @@ function treeMistakes(t: Extract<FractionTask, { kind: 'tree' }>, solution: Tree
   for (const m of decimalMistakes(t.root)) out.push({ id: 'frac-decimal-places', stepExpr: partExpr(m.wrong), value: value(m.tree) })
   const start = normalize(withoutDecimals(t.root))
   const order = leftToRight(start)
-  if (order) out.push({ id: 'frac-order', stepExpr: reduced(order, t.hints), value: order })
+  if (order && !isZeroPoly(order.num)) out.push({ id: 'frac-order', stepExpr: reduced(order, t.hints), value: order })
   for (const tree of bracketIgnoredMistakes(start)) {
     const v = value(tree)
     if (v) out.push({ id: 'frac-bracket-ignored', stepExpr: reduced(v, t.hints), value: v })

@@ -148,6 +148,13 @@ function planTree(t: Extract<FractionTask, { kind: 'tree' }>, ref: TaskRef, focu
   if (!last || last.node !== last.before) throw new Error(`Rechenbaum nicht spielbar: ${taskLatex(t)}`)
   const steps: GuidedStep[] = []
   const rngOf = (key: string) => createRng(`brueche-geführt:${ref.level}:${ref.seed}:${key}`)
+  // Zeilen für „Bisher" von Schritten, die wegfallen
+  let pending: string[] = []
+  const push = (step: GuidedStep) => {
+    const lines = [...pending, ...[step.established ?? []].flat()]
+    pending = []
+    steps.push({ ...step, id: `${steps.length + 1}-${step.id}`, established: lines })
+  }
 
   // Dezimalzahlen
   const decimals = decimalLeaves(t.root)
@@ -158,8 +165,8 @@ function planTree(t: Extract<FractionTask, { kind: 'tree' }>, ref: TaskRef, focu
       .filter((mm) => mm.leaf === d)
       .map((mm, j): Choice => ({ id: `falsch-${j + 1}`, content: m(partExpr(mm.wrong)), correct: false, expr: partExpr(mm.wrong), errorRuleId: 'frac-decimal-places', whyWrong: explainFractionError('frac-decimal-places') }))
       .filter((c, j, all) => c.content !== `$${latex}$` && all.findIndex((o) => o.content === c.content) === j)
-    steps.push({
-      id: `${steps.length + 1}-decimal`,
+    push({
+      id: 'decimal',
       title: 'Dezimalzahl',
       question: `Schreibe $${d.decimal!.replace(',', '{,}')}$ als gekürzten Bruch.`,
       choices: rngOf(`d${i}`).shuffle([{ id: 'richtig', content: `$${latex}$`, correct: true, expr: partExpr(d.part) }, ...wrongs]),
@@ -170,16 +177,18 @@ function planTree(t: Extract<FractionTask, { kind: 'tree' }>, ref: TaskRef, focu
     })
   })
 
-  // Fehler in der Reihenfolge als falsche Ergebnisse der letzten Frage
-  const orderWrongs = fractionWrongAnswers(t, solution).filter((w) => ORDER_ERRORS.includes(w.rule.id) && w.value)
+  // Fehler in der Reihenfolge als falsche Ergebnisse der letzten Frage; reicht das nicht, auch Fehler
+  // aus früheren Teilen, mit dem Rest richtig weitergerechnet
+  const treeWrongs = fractionWrongAnswers(t, solution).filter((w) => w.value && !w.freeOnly)
+  const finalWrongs = [...treeWrongs.filter((w) => ORDER_ERRORS.includes(w.rule.id)), ...treeWrongs.filter((w) => !ORDER_ERRORS.includes(w.rule.id))]
 
   solution.stages.forEach((stage, i) => {
     const last = i === solution.stages.length - 1
     const order = orderChoices(stage)
     if (order.length > 0) {
       const correctLatex = treeLatex(stage.node)
-      steps.push({
-        id: `${steps.length + 1}-order`,
+      push({
+        id: 'order',
         title: 'Reihenfolge',
         question: 'Was rechnest du zuerst?',
         choices: rngOf(`o${i}`).shuffle([
@@ -198,12 +207,13 @@ function planTree(t: Extract<FractionTask, { kind: 'tree' }>, ref: TaskRef, focu
       const lastSub = j === sub.steps.length - 1
       let step: GuidedStep = {
         ...s,
-        id: `${steps.length + 1}-${s.id}`,
         title: last ? s.title : `Teilrechnung: $${nodeLatex}$`,
         established: last ? s.established : lastSub ? [readableLatex(`= ${treeLatex(stage.after)}`)] : [],
       }
-      if (last && lastSub) step = withOrderWrongs(step, orderWrongs, t, rngOf('ende'), focus)
-      steps.push(step)
+      if (last && lastSub) step = withOrderWrongs(step, finalWrongs, t, rngOf('ende'), focus)
+      // ohne falsche Antwort keine Frage: Die Zeilen stehen beim nächsten Schritt unter „Bisher"
+      if (step.choices.length < 2 && !(last && lastSub)) pending.push(...[step.established ?? []].flat())
+      else push(step)
     })
   })
 
@@ -266,12 +276,15 @@ function parentOf(n: TreeNode, target: TreeNode): TreeNode | null {
   return null
 }
 
-// Fehler in der Reihenfolge zusätzlich als falsche Ergebnisse, wenn Platz ist (gezieltes Üben: der
-// gesuchte Fehler sicher)
+// Fehler in der Reihenfolge (und notfalls weitergerechnete Fehler früherer Teile) zusätzlich als
+// falsche Ergebnisse, wenn Platz ist (gezieltes Üben: der gesuchte Fehler sicher). Weitergerechnete
+// Fehler nur, solange die Frage sonst weniger als zwei falsche Antworten hätte.
 function withOrderWrongs(step: GuidedStep, wrongs: readonly FracWrong[], t: FractionTask, rng: Rng, focus?: string): GuidedStep {
   const shown = new Set(step.choices.map((c) => c.content))
   const extra: Choice[] = []
+  const own = step.choices.filter((c) => !c.correct).length
   for (const w of wrongs) {
+    if (!ORDER_ERRORS.includes(w.rule.id) && w.rule.id !== focus && own + extra.length >= 2) continue
     const e = resultForm(w, t)
     const content = m(e)
     if (shown.has(content)) continue
@@ -417,6 +430,7 @@ function coarsen(raw: readonly Draft[], task: FractionTask): Draft[] {
 // Regel wie sin² x + cos² x = 1 so umgeschrieben wie das richtige Ergebnis; mit der Zahl e wie
 // gerechnet (e^2 - 4, nicht zerlegt)
 function resultForm(w: FracWrong, t: FractionTask): Expr {
+  if (w.value && w.value.num.length === 0) return num(0)
   if (t.rule || (w.value && fracAtoms(w.value).includes('e'))) return w.result ?? w.stepExpr
   return w.value ? productFormExpr(reduceFrac(w.value, t.hints), t.hints) : w.stepExpr
 }
