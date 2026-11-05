@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { toLatex } from '../expr/print.ts'
-import { type Expr, IMAG, add, cos, exp, mul, num, pow, sin, sqrt, sub, variable, x } from '../expr/types.ts'
+import { type Expr, IMAG, add, cos, exp, fn, mul, num, pow, sin, sqrt, sub, variable, x } from '../expr/types.ts'
 import { toFrac } from '../fraction/frac.ts'
 import { type Poly, polyDivideExact } from '../fraction/poly.ts'
 import { type BlockRule, type FractionShape, type FractionTask, type Part, expanded, isReadableTask, minus, part, plus, taskLatex, withRoots } from '../fraction/task.ts'
@@ -280,6 +280,46 @@ describe('Stufe 5: Teleskopsummen', () => {
     expect(check('\\frac{99}{100}')).toBe('correct')
     expect(check('1-\\frac{1}{100}')).toBe('unfinished:several')
     expect(check('\\frac{98}{99}')).toBe('knownError:frac-tele-last')
+  })
+})
+
+describe('Stufe 5: Hyperbelfunktionen', () => {
+  const [sinh, cosh] = [fn('sinh', x), fn('cosh', x)]
+  const checker = (t: FractionTask) => {
+    const context = prepareFractionCheck(t)
+    return (latex: string) => short(checkFractionAnswer(context, latex))
+  }
+
+  it('1/(cosh x − sinh x): cosh x + sinh x, auch e^x; im Nenner bleibt nur eine Zahl', () => {
+    const t = { ...task({ kind: 'reduce', part: fr(num(2), sub(cosh, sinh)) }), rule: { kind: 'conjugate', target: 'den' } } as FractionTask
+    const context = prepareFractionCheck(t)
+    expect(context.hyperbolic).toBe(true)
+    const check = checker(t)
+    expect(check('2\\cosh x+2\\sinh x')).toBe('correct')
+    expect(check('2(\\cosh x+\\sinh x)')).toBe('correct')
+    expect(check('2e^x')).toBe('correct')
+    expect(check('\\frac{2}{\\cosh x-\\sinh x}')).toBe('unfinished:hyperbolic')
+    expect(check('\\frac{2\\cosh x+2\\sinh x}{\\cosh^2x-\\sinh^2x}')).toBe('unfinished:hyperbolic')
+    expect(check('-2\\cosh x-2\\sinh x')).toBe('knownError:frac-hyp-swapped')
+    expect(check('2\\cosh x-2\\sinh x')).toBe('knownError:frac-conjugate-sign')
+    expect(check('2')).toBe('knownError:frac-conjugate-one-side')
+  })
+
+  it('cosh² x − sinh² x = 1 im Zähler', () => {
+    const t = { ...task({ kind: 'reduce', part: fr(pow(sinh, num(2)), sub(cosh, num(1))) }), rule: { kind: 'trig', prefer: 'CH', target: 'num' } } as FractionTask
+    const check = checker(t)
+    expect(check('\\cosh x+1')).toBe('correct')
+    expect(check('-\\cosh x-1')).toBe('knownError:frac-hyp-trig-sign')
+    expect(check('\\frac{\\cosh^2x+1}{\\cosh x-1}')).toBe('knownError:frac-hyp-swapped')
+    expect(check('1')).toBe('knownError:frac-square-forgotten')
+  })
+
+  it('1 − 1/cosh² x = tanh² x, auch als Bruch', () => {
+    const t = { ...task({ kind: 'sum', terms: [plus(fr(num(1))), minus(fr(num(1), pow(cosh, num(2))))] }), rule: { kind: 'trig', prefer: 'SH', target: 'num' } } as FractionTask
+    const check = checker(t)
+    expect(check('\\tanh^2x')).toBe('correct')
+    expect(check('\\frac{\\sinh^2x}{\\cosh^2x}')).toBe('correct')
+    expect(check('-\\tanh^2x')).toBe('knownError:frac-hyp-trig-sign')
   })
 })
 

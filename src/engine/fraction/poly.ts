@@ -7,8 +7,9 @@ import { type Rational, ONE, isInteger, isOne, isZero, rat, ratAbs, ratAdd, ratD
 // Reihenfolge der Atome beim Sortieren und Schreiben: x vor y vor den übrigen Kleinbuchstaben
 // (alphabetisch: a, b, c …), Bausteine danach. R = √x, e = die Eulersche Zahl (nur in falschen
 // Ergebnissen wie e^2). Wurzeln aus anderen Buchstaben (Ra = √a) stehen hinter √x, √(x + h)
-// (Rx+h) davor. Andere Namen (z. B. Teile, mit denen nur als Ganzes gerechnet wird) zuletzt.
-const ATOM_ORDER = ['x', 'y', 'E', 'L', 'S', 'C', 'T', 'R', 'e']
+// (Rx+h) davor. CH = cosh x vor SH = sinh x (\cosh x - \sinh x). Andere Namen (z. B. Teile, mit
+// denen nur als Ganzes gerechnet wird) zuletzt.
+const ATOM_ORDER = ['x', 'y', 'E', 'L', 'S', 'C', 'CH', 'SH', 'T', 'R', 'e']
 const isLetter = (atom: string) => /^[a-z]$/.test(atom) && atom !== 'e'
 
 const rank = (atom: string) => {

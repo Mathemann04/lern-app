@@ -1,7 +1,7 @@
 import { toLatex } from '../expr/print.ts'
 import { type Expr, add, div, mul, mulDot, neg, num, pow, sub } from '../expr/types.ts'
 import { type Factored, factoredExpr, factoredPoly } from './factor.ts'
-import { type Frac, fracAdd, fracDiv, fracMul, fracNeg, fracOf, isRootAtom, polyExpr, rootFormWith } from './frac.ts'
+import { type Frac, type SquareAtom, fracAdd, isHyperbolicAtom, fracDiv, fracMul, fracNeg, fracOf, isRootAtom, polyExpr, rootFormWith } from './frac.ts'
 import { type Rational, isOne } from '../rational.ts'
 import { type Poly, atomsOf, constValue, polyConst, polyPow, polySub } from './poly.ts'
 
@@ -77,14 +77,16 @@ export type TreeNode =
 export type TreeTerm = { readonly sign: 1 | -1; readonly node: TreeNode }
 
 // Regel eines Bausteins, die der Rechenweg in einem eigenen Schritt anwendet (Stufe 5):
-// - trig: sin² x + cos² x = 1; prefer: welcher Baustein übrig bleibt (S: 1 − cos² x → sin² x),
-//   target: im Zähler (bei Doppelbrüchen im oberen Bruch) oder im Nenner
+// - trig: sin² x + cos² x = 1 bzw. cosh² x − sinh² x = 1; prefer: welcher Baustein übrig bleibt
+//   (S: 1 − cos² x → sin² x, SH: cosh² x − 1 → sinh² x), target: im Zähler (bei Doppelbrüchen im
+//   oberen Bruch) oder im Nenner
 // - root: (√x)² = x; der Nenner (√x − a)(√x + a) wird zu x − a²
 // - conjugate: Wurzel beseitigen (nur beim Kürzen): mit dem Gegenstück erweitern, dritte
 //   binomische Formel; target: die Summe mit Wurzel steht im Nenner (\frac{1}{\sqrt{x} - 2}) oder im
-//   Zähler (Differenzenquotient \frac{\sqrt{x + h} - \sqrt{x}}{h})
+//   Zähler (Differenzenquotient \frac{\sqrt{x + h} - \sqrt{x}}{h}). Ebenso \frac{1}{\cosh x - \sinh x}
+//   (Nenner), danach cosh² x − sinh² x = 1
 export type BlockRule =
-  | { readonly kind: 'trig'; readonly prefer: 'S' | 'C'; readonly target: 'num' | 'den' }
+  | { readonly kind: 'trig'; readonly prefer: SquareAtom; readonly target: 'num' | 'den' }
   | { readonly kind: 'root' }
   | { readonly kind: 'conjugate'; readonly target: 'num' | 'den' }
 
@@ -380,8 +382,12 @@ export const isReadableTask = (t: FractionShape) =>
 
 export function instructionFor(t: FractionShape): string {
   switch (t.kind) {
-    case 'reduce':
-      return 'Kürze so weit wie möglich.'
+    case 'reduce': {
+      // \frac{2}{\cosh x - \sinh x}: Hier wird nicht gekürzt, sondern mit dem Gegenstück erweitert
+      const atoms = atomsOf(shownPoly(t.part.den))
+      const hyperbolicPair = constValue(shownPoly(t.part.num)) !== null && atoms.length === 2 && atoms.every(isHyperbolicAtom)
+      return hyperbolicPair ? 'Vereinfache so weit wie möglich.' : 'Kürze so weit wie möglich.'
+    }
     case 'sum':
       return 'Fasse zu einem Bruch zusammen und kürze so weit wie möglich.'
     case 'product':

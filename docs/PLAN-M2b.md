@@ -202,6 +202,8 @@ Dazu kommen die bisherigen Fehler aus M2 (Liste in
 | Teleskopsummen | am Ende den falschen Bruch | $1 - \frac{1}{n}$ statt $1 - \frac{1}{n + 1}$ |
 | Teleskopsummen | bei $k = 1$ angefangen | Start bei $k = 2$ übersehen |
 | Teleskopsummen | vordere Brüche weggestrichen | $-\frac{1}{n + 1}$ statt $1 - \frac{1}{n + 1}$ |
+| Hyperbelfunktionen | Vorzeichen wie bei $\sin$ und $\cos$ | $\cosh^2 x - 1 = -\sinh^2 x$ |
+| Hyperbelfunktionen | Regel verdreht | $\cosh^2 x - \sinh^2 x = -1$ |
 
 Die genaue Liste kommt im jeweiligen Schritt; jede Regel bekommt wie immer
 eine Erklärung, eine Lernkarte und Tests. In Schritt 1 umgesetzt: die ersten
@@ -238,7 +240,11 @@ weitergerechnet. In Schritt 5c: die sechs Zeilen zu Teleskopsummen
 `frac-tele-last`, `frac-tele-start`, `frac-tele-head`), mit der Lernkarte
 „Teleskopsummen"; dazu beim Zerlegen „Vorzeichen beim Einsetzen der
 Nullstelle verloren" und die Fehler beim Zerlegen des Nenners, beim
-Zusammenfassen die Fehler beim Bruchrechnen.
+Zusammenfassen die Fehler beim Bruchrechnen. In Schritt 5d: die zwei Zeilen
+zu Hyperbelfunktionen (`frac-hyp-trig-sign`, `frac-hyp-swapped`), mit der
+Lernkarte „Hyperbelfunktionen"; dazu „Quadrat vergessen", beim Erweitern mit
+dem Gegenstück „nur Zähler oder nur Nenner malgenommen" und „mit derselben
+Summe erweitert" sowie die Fehler beim Bruchrechnen.
 
 ### Schritte
 
@@ -375,6 +381,24 @@ Frei: bis $n$ ein gekürzter Bruch in $n$, sonst eine Zahl; bei der Reihe ist
 ein Term in $n$ mit dem richtigen Grenzwert „noch nicht fertig". Sechs neue
 typische Fehler, Lernkarte „Teleskopsummen".
 
+**Umgesetzt (5d, Hyperbelfunktionen):** Neue Vorlage „Hyperbelfunktionen" in
+Stufe 5 (etwa jede 25. Aufgabe, mit eigenem Zufall gewählt). $\sinh x$ und
+$\cosh x$ sind Bausteine wie $\sin x$ und $\cos x$, mit der Regel
+$\cosh^2 x - \sinh^2 x = 1$. Aufgaben: $\frac{2}{\cosh x - \sinh x}$ (mit dem
+Gegenstück erweitern, ausmultiplizieren, Regel), Summen wie
+$\frac{1}{\cosh x - 1} + \frac{1}{\cosh x + 1}$ und
+$\frac{1}{\cosh x - \sinh x} - \frac{1}{\cosh x + \sinh x}$ (Regel im
+Hauptnenner), $\frac{\cosh x}{\sinh x} - \frac{\sinh x}{\cosh x}$ und
+$1 - \frac{1}{\cosh^2 x} = \tanh^2 x$ (Regel im Zähler), Doppelbrüche wie
+$\frac{\cosh x - \frac{1}{\cosh x}}{\sinh x} = \tanh x$, Kürzen wie
+$\frac{\sinh^2 x}{\cosh x - 1} = \cosh x + 1$. Geführt wie bei den
+Winkelfunktionen, mit „Vereinfache … mit $\cosh^2 x - \sinh^2 x = 1$". Frei:
+Beim Vergleichen werden $\sinh x$ und $\cosh x$ durch $e^x$ ausgedrückt, so
+ist auch $e^x$ als Antwort auf $\frac{1}{\cosh x - \sinh x}$ richtig; steht
+im Nenner noch $\cosh x$ oder $\sinh x$, ist die Antwort „noch nicht fertig".
+Tastatur mit $e^x$, $\sinh$, $\cosh$, $\tanh$. Zwei neue typische Fehler,
+Lernkarte „Hyperbelfunktionen".
+
 #### Schritt 6: Gezieltes Üben, Feinschliff, Abschluss
 - Jeder neue Fehler lässt sich aus der Lernkarte und dem Fortschritt gezielt
   üben.
@@ -470,6 +494,14 @@ typische Fehler, Lernkarte „Teleskopsummen".
   $n$ für mehrere $n$, bei der Reihe eine lange Teilsumme).
 - **Hyperbelfunktionen:** Bausteine $\sinh x$, $\cosh x$ mit
   $\cosh^2 x - \sinh^2 x = 1$, wie bei $\sin$ und $\cos$.
+  Umgesetzt in `fraction/frac.ts`: Atome `SH` und `CH`, die Regel über
+  `trigRewrite` (je Baustein $\text{Quadrat} = \text{Zahl} \pm \text{Partner}^2$,
+  auch mit falschen Regeln für die typischen Fehler), beim Vergleichen
+  `hyperbolicToExp` ($\sinh x = \frac{e^{2x} - 1}{2e^x}$,
+  $\cosh x = \frac{e^{2x} + 1}{2e^x}$). Erweitern mit dem Gegenstück über die
+  Regel `conjugate` wie bei Wurzeln, danach die Regel im Nenner. Die Tests
+  rechnen unabhängig mit `Math.sinh` und `Math.cosh`, nur bei $|x| \le 5$
+  (für große $x$ ist $\cosh x - \sinh x$ am Rechner ungenau).
 
 ### Partialbruchzerlegung (`src/engine/fraction/partial.ts`)
 - Eingabe: Bruch aus Polynomen in $x$ mit Nenner aus Linearfaktoren (auch

@@ -169,8 +169,8 @@ export const FRACTION_ERROR_TEXTS: Readonly<Record<string, Explanation>> = {
   },
   'frac-conjugate-sign': {
     detailed:
-      'Das Gegenstück hat in der Mitte das andere Vorzeichen: zu $\\sqrt{x} - 2$ gehört $\\sqrt{x} + 2$. Nur dann gilt die dritte binomische Formel $(a - b)(a + b) = a^2 - b^2$. Mit derselben Summe entsteht ein Quadrat, $(\\sqrt{x} - 2)^2 = x - 4\\sqrt{x} + 4$, und die Wurzel bleibt.',
-    short: 'Vorzeichen in der Mitte umdrehen: zu $\\sqrt{x} - 2$ gehört $\\sqrt{x} + 2$.',
+      'Das Gegenstück hat in der Mitte das andere Vorzeichen: zu $\\sqrt{x} - 2$ gehört $\\sqrt{x} + 2$, zu $\\cosh x - \\sinh x$ gehört $\\cosh x + \\sinh x$. Nur dann gilt die dritte binomische Formel $(a - b)(a + b) = a^2 - b^2$. Mit derselben Summe entsteht ein Quadrat mit Mittelglied, z. B. $(\\sqrt{x} - 2)^2 = x - 4\\sqrt{x} + 4$, und die Wurzel bleibt.',
+    short: 'Vorzeichen in der Mitte umdrehen: zu $a - b$ gehört $a + b$.',
   },
   'frac-conjugate-square': {
     detailed:
@@ -327,6 +327,16 @@ export const FRACTION_ERROR_TEXTS: Readonly<Record<string, Explanation>> = {
       'Die Summe beginnt beim Startwert unter dem Summenzeichen. Schreib den ersten Summanden mit genau diesem $k$ aus, nicht mit $k = 1$.',
     short: 'Beim Startwert unter dem Summenzeichen beginnen.',
   },
+  'frac-hyp-trig-sign': {
+    detailed:
+      'Bei den Hyperbelfunktionen steht ein Minus: $\\cosh^2 x - \\sinh^2 x = 1$, nicht ein Plus wie bei $\\sin^2 x + \\cos^2 x = 1$. Umgestellt heißt das $\\cosh^2 x - 1 = \\sinh^2 x$ und $1 + \\sinh^2 x = \\cosh^2 x$.',
+    short: 'Mit Minus: $\\cosh^2 x - \\sinh^2 x = 1$, also $\\cosh^2 x - 1 = \\sinh^2 x$.',
+  },
+  'frac-hyp-swapped': {
+    detailed:
+      'Der Kosinus hyperbolicus steht vorn: $\\cosh^2 x - \\sinh^2 x = 1$. Probe bei $x = 0$: $\\cosh 0 = 1$ und $\\sinh 0 = 0$, also $1^2 - 0^2 = 1$. Andersherum käme $-1$ heraus.',
+    short: '$\\cosh^2 x - \\sinh^2 x = 1$; Probe bei $x = 0$: $1 - 0 = 1$.',
+  },
   'frac-tele-head': {
     detailed:
       'Die vorderen Brüche werden nie abgezogen, denn davor steht kein Summand mehr. Sie heben sich also nicht weg und bleiben stehen.',
@@ -476,7 +486,13 @@ export function explainMultiplyOut(square: readonly [Expr, Expr], before: Expr, 
 }
 
 // Wurzel beseitigen: side ist die Summe mit Wurzel, conj ihr Gegenstück
-export function explainConjugate(side: Expr, conj: Expr, inNumerator: boolean): Explanation {
+export function explainConjugate(side: Expr, conj: Expr, inNumerator: boolean, hyperbolic = false): Explanation {
+  if (hyperbolic) {
+    return {
+      detailed: `Im Nenner steht ${m(side)}. Das Gegenstück ${m(conj)} hat dieselben Teile, nur das Vorzeichen in der Mitte ist umgedreht. Erweitere damit: Zähler und Nenner mal ${m(conj)}. Mit der dritten binomischen Formel entsteht im Nenner $\\cosh^2 x - \\sinh^2 x$, und das ist $1$.`,
+      short: `Zähler und Nenner mal ${m(conj)}.`,
+    }
+  }
   return {
     detailed: `Im ${inNumerator ? 'Zähler' : 'Nenner'} steht die Summe mit Wurzel ${m(side)}. Ihr Gegenstück ${m(conj)} hat dieselben Teile, nur das Vorzeichen in der Mitte ist umgedreht. Erweitere damit: Zähler und Nenner mal ${m(conj)}. Mit der dritten binomischen Formel verschwindet dann die Wurzel.`,
     short: `Zähler und Nenner mal ${m(conj)}.`,
@@ -484,8 +500,14 @@ export function explainConjugate(side: Expr, conj: Expr, inNumerator: boolean): 
 }
 
 // Dritte binomische Formel mit Wurzeln: product ist (a − b)(a + b), after a² − b² ausgerechnet
-export function explainConjugateProduct(product: Expr, after: Expr, inNumerator: boolean): Explanation {
+export function explainConjugateProduct(product: Expr, after: Expr, inNumerator: boolean, hyperbolic = false): Explanation {
   const equation = `$${toLatex(product)} = ${toLatex(after)}$`
+  if (hyperbolic) {
+    return {
+      detailed: `Dritte binomische Formel $(a - b)(a + b) = a^2 - b^2$: ${equation}. Den Zähler multiplizierst du ebenfalls aus. Im Nenner hilft danach $\\cosh^2 x - \\sinh^2 x = 1$.`,
+      short: `${equation}.`,
+    }
+  }
   return {
     detailed: `Dritte binomische Formel $(a - b)(a + b) = a^2 - b^2$, jeder Teil wird ganz quadriert, und das Quadrat hebt die Wurzel auf: ${equation}. ${inNumerator ? 'Jetzt steht im Zähler keine Wurzel mehr, und du kannst kürzen.' : 'Jetzt steht im Nenner keine Wurzel mehr.'}`,
     short: `${equation}.`,
@@ -674,9 +696,15 @@ export function explainTeleLimit(letter: string, remaining: Expr, value: Expr): 
   }
 }
 
-// Regel eines Bausteins: trig (sin² x + cos² x = 1) oder root ((√x)² = x)
-export function explainRule(kind: 'trig' | 'root', before: Expr, after: Expr): Explanation {
+// Regel eines Bausteins: trig (sin² x + cos² x = 1), hyperbolic (cosh² x − sinh² x = 1) oder root ((√x)² = x)
+export function explainRule(kind: 'trig' | 'hyperbolic' | 'root', before: Expr, after: Expr): Explanation {
   const equation = `$${toLatex(before)} = ${toLatex(after)}$`
+  if (kind === 'hyperbolic') {
+    return {
+      detailed: `Für jedes $x$ gilt $\\cosh^2 x - \\sinh^2 x = 1$. Umgestellt heißt das $\\cosh^2 x - 1 = \\sinh^2 x$ und $1 + \\sinh^2 x = \\cosh^2 x$. Damit wird ${equation}.`,
+      short: `Mit $\\cosh^2 x - \\sinh^2 x = 1$: ${equation}.`,
+    }
+  }
   if (kind === 'root') {
     return {
       detailed: `Multipliziere mit der dritten binomischen Formel aus und nutze $(\\sqrt{x})^2 = x$: ${equation}. So steht im Nenner keine Wurzel mehr in Klammern.`,
@@ -714,6 +742,9 @@ export const FRACTION_HINTS = {
   innerComplex: 'Beginne innen: Löse den inneren Doppelbruch wie eine eigene Aufgabe auf.',
   multiplyOut: 'Binomische Formel: $(a + b)^2 = a^2 + 2ab + b^2$, bei der dritten Potenz $(a + b)^3 = a^3 + 3a^2b + 3ab^2 + b^3$. Danach gleichartige Summanden zusammenfassen.',
   trig: 'Stelle $\\sin^2 x + \\cos^2 x = 1$ passend um, z. B. zu $1 - \\cos^2 x = \\sin^2 x$.',
+  hyperbolic: 'Stelle $\\cosh^2 x - \\sinh^2 x = 1$ passend um, z. B. zu $\\cosh^2 x - 1 = \\sinh^2 x$ oder $1 + \\sinh^2 x = \\cosh^2 x$. Achtung: Hier steht ein Minus.',
+  hyperbolicConjugate:
+    'Zu $\\cosh x - \\sinh x$ gehört das Gegenstück $\\cosh x + \\sinh x$: dieselben Teile, das Vorzeichen in der Mitte umgedreht. Zähler und Nenner werden damit malgenommen.',
   root: 'Dritte binomische Formel mit $(\\sqrt{x})^2 = x$: $(\\sqrt{x} - a)(\\sqrt{x} + a) = x - a^2$.',
   rootFactor: 'Schreibe $x$ als $(\\sqrt{x})^2$, dann hilft die dritte binomische Formel: $x - a^2 = (\\sqrt{x} - a)(\\sqrt{x} + a)$, ebenso $x - a = (\\sqrt{x} - \\sqrt{a})(\\sqrt{x} + \\sqrt{a})$.',
   decimal: 'Zähle die Stellen nach dem Komma: eine Stelle sind Zehntel, zwei Hundertstel, drei Tausendstel. Schreibe die Ziffern über die passende Zehnerpotenz und kürze.',

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { latexProblem } from '../expr/latexChecks.ts'
 import { toLatex } from '../expr/print.ts'
-import { type Expr, IMAG, add, cos, exp, mul, num, pow, sin, sqrt, sub, variable, x } from '../expr/types.ts'
+import { type Expr, IMAG, add, cos, exp, fn, mul, num, pow, sin, sqrt, sub, variable, x } from '../expr/types.ts'
 import { FRACTION_ERROR_RULES, fractionWrongAnswers } from './errorRules.ts'
 import { toFrac } from './frac.ts'
 import { type Poly, polyDivideExact } from './poly.ts'
@@ -37,6 +37,8 @@ function poly(e: Expr): Poly {
 const fr = (n: Expr, d: Expr = num(1), ascendingDen = false): Part => part(expanded(poly(n)), expanded(poly(d), ascendingDen))
 const task = (s: FractionShape, rule?: BlockRule): FractionTask => ({ ...s, hints: [], ...(rule ? { rule } : {}) }) as FractionTask
 const x2 = pow(x, num(2))
+const sinh = fn('sinh', x)
+const cosh = fn('cosh', x)
 // Grenzwerte: x → a bzw. n → ∞
 const nn = variable('n')
 const limitAt = (to: number, n: Expr, d: Expr): FractionTask => task({ kind: 'limit', inner: task({ kind: 'reduce', part: fr(n, d) }), letter: 'x', to: rat(to) })
@@ -194,6 +196,15 @@ const CASES: Case[] = [
   ['frac-tele-start', tele(1, 1, 2), 'step', '1 - \\frac{1}{n + 1}'],
   ['frac-tele-head', tele(1, 1), 'step', '-\\frac{1}{n + 1}'],
   ['frac-imag-minus', task({ kind: 'imaginary', terms: [plus(fr(add(num(1), IMAG), sub(num(1), IMAG))), minus(fr(add(num(1), mul(num(3), IMAG))))] }), 'result', '-1 + 4\\mathrm{i}'],
+  // Stufe 5 (M2b Schritt 5d): Hyperbelfunktionen. cosh² x − 1 = −sinh² x wie bei sin und cos
+  ['frac-hyp-trig-sign', task({ kind: 'reduce', part: fr(sub(pow(cosh, num(2)), num(1)), sinh) }, { kind: 'trig', prefer: 'SH', target: 'num' }), 'step', '-\\frac{\\sinh^{2} x}{\\sinh x}'],
+  ['frac-hyp-trig-sign', task({ kind: 'reduce', part: fr(pow(sinh, num(2)), sub(cosh, num(1))) }, { kind: 'trig', prefer: 'CH', target: 'num' }), 'result', '-\\cosh x - 1'],
+  // (cosh x − sinh x)(cosh x + sinh x) = −1
+  ['frac-hyp-swapped', task({ kind: 'reduce', part: fr(num(1), sub(cosh, sinh)) }, { kind: 'conjugate', target: 'den' }), 'step', '-\\cosh x - \\sinh x'],
+  ['frac-hyp-swapped', task({ kind: 'sum', terms: [plus(fr(cosh, sinh)), minus(fr(sinh, cosh))] }, { kind: 'trig', prefer: 'SH', target: 'num' }), 'result', '-\\frac{1}{\\sinh x \\cdot \\cosh x}'],
+  // \frac{1}{\cosh x - \sinh x}: nur den Nenner mit dem Gegenstück malgenommen, mit derselben Summe erweitert
+  ['frac-conjugate-one-side', task({ kind: 'reduce', part: fr(num(1), sub(cosh, sinh)) }, { kind: 'conjugate', target: 'den' }), 'result', '1'],
+  ['frac-conjugate-sign', task({ kind: 'reduce', part: fr(num(2), sub(cosh, sinh)) }, { kind: 'conjugate', target: 'den' }), 'result', '2\\cosh x - 2\\sinh x'],
 ]
 
 describe('Zähler und Nenner addiert', () => {

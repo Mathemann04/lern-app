@@ -2,11 +2,11 @@ import { explainFractionError, listing } from '../explain/fractionTexts.ts'
 import { type Expr, mul } from '../expr/types.ts'
 import { type FracWrong, fractionWrongAnswers } from '../fraction/errorRules.ts'
 import { factoredPoly, factorize, reduceFrac } from '../fraction/factor.ts'
-import { type Frac, fracDiv, fracEquals, fracNeg, isRootAtom, radicandLetters, reduceImag, rootForm, toFrac } from '../fraction/frac.ts'
+import { type Frac, fracDiv, fracEquals, fracNeg, isHyperbolicAtom, isRootAtom, radicandLetters, reduceImag, rootForm, toFrac } from '../fraction/frac.ts'
 import { hasImag, imagParts } from '../fraction/complex.ts'
 import { limitOf } from '../fraction/limit.ts'
 import { atomsOf, constValue, isZeroPoly, polyConst, polyContent, totalDegree } from '../fraction/poly.ts'
-import { type FracSolution, rationalizedFrac, solveFraction } from '../fraction/solve.ts'
+import { type FracSolution, isHyperbolicPair, rationalizedFrac, solveFraction } from '../fraction/solve.ts'
 import { type FractionTask, partsOf, shownPoly } from '../fraction/task.ts'
 import { parseLatex } from '../parse/latex.ts'
 import { isInteger, ratAbs } from '../rational.ts'
@@ -42,6 +42,8 @@ export type FractionCheckContext = {
   readonly letters: readonly string[]
   // Bausteine wie e^x, ln x, sin x, cos x in der Aufgabe
   readonly blocks: boolean
+  // Hyperbelfunktionen sinh x, cosh x in der Aufgabe (Tastatur mit sinh, cosh, tanh)
+  readonly hyperbolic: boolean
   // komplexe Zahlen: i in der Aufgabe
   readonly imag: boolean
   // √x in der Aufgabe: Die Eingabe wird in √x umgerechnet (x = (√x)²)
@@ -67,6 +69,7 @@ export type Unfinished =
   | 'imag-combine'
   | 'limit-insert'
   | 'limit-infinity'
+  | 'hyperbolic'
 
 export type FractionVerdict =
   | { readonly kind: 'unreadable'; readonly message: string }
@@ -77,9 +80,10 @@ export type FractionVerdict =
   | { readonly kind: 'wrongFactor'; readonly answer: Expr }
   | { readonly kind: 'wrong'; readonly answer: Expr }
 
-// Buchstaben sind Kleinbuchstaben (außer e, der Eulerschen Zahl, und i); Bausteine heißen E, L, S, C, R
+// Buchstaben sind Kleinbuchstaben (außer e, der Eulerschen Zahl, und i); Bausteine heißen E, L, S, C,
+// SH, CH, R
 const isLetter = (atom: string) => /^[a-z]$/.test(atom) && atom !== 'e' && atom !== 'i'
-const BLOCK_ATOMS = ['E', 'L', 'S', 'C']
+const BLOCK_ATOMS = ['E', 'L', 'S', 'C', 'SH', 'CH']
 
 export function prepareFractionCheck(task: FractionTask): FractionCheckContext {
   const solution = solveFraction(task)
@@ -92,7 +96,7 @@ export function prepareFractionCheck(task: FractionTask): FractionCheckContext {
   const letters = [...new Set([...atoms.filter(isLetter), ...roots.flatMap(radicandLetters), ...(blocks ? ['x'] : [])])].sort((a, b) => rank(a) - rank(b) || a.localeCompare(b))
   // Teleskopsumme: Im Ergebnis steht nicht k, sondern höchstens n
   const own = task.kind === 'telescope' ? (task.upper.kind === 'number' ? [] : [task.upper.letter]) : letters
-  return { task, solution, wrongs: fractionWrongAnswers(task, solution), letters: own, blocks, imag: atoms.includes('i'), root, roots }
+  return { task, solution, wrongs: fractionWrongAnswers(task, solution), letters: own, blocks, hyperbolic: atoms.some(isHyperbolicAtom), imag: atoms.includes('i'), root, roots }
 }
 
 export function checkFractionAnswer(context: FractionCheckContext, latex: string): FractionVerdict {
@@ -305,6 +309,8 @@ function unfinished(answer: Expr, value: Frac, solution: FracSolution, task: Fra
   // Wurzel beseitigen: Im Nenner steht keine Wurzel mehr (bzw. beim Differenzenquotienten ist h gekürzt)
   const conjugate = task.rule?.kind === 'conjugate' ? task.rule.target : null
   if (conjugate === 'den' && shape.den && hasRoot(shape.den)) return 'conjugate'
+  // \frac{1}{\cosh x - \sinh x}: Im Nenner steht am Ende nur eine Zahl
+  if (conjugate === 'den' && task.kind === 'reduce' && isHyperbolicPair(shownPoly(task.part.den)) && atomsOf(value.den).length > 0) return 'hyperbolic'
   const target = conjugate === 'den' ? rationalizedFrac(solution.reduced) : null
   // Gekürzt: Nenner vom selben Grad wie im gekürzten Ergebnis, Zahlen ohne gemeinsamen Teiler
   if (totalDegree(value.den) > (target ? totalDegree(target.den) : totalDegree(factoredPoly(solution.reduced.den)))) return conjugate === 'num' ? 'conjugate' : 'not-reduced'
@@ -487,6 +493,8 @@ export const UNFINISHED_TEXTS: Readonly<Record<Unfinished, string>> = {
   'limit-insert': 'Gesucht ist eine Zahl. Setze die Stelle noch ein, nachdem du gekürzt hast.',
   'limit-infinity': 'Gesucht ist eine Zahl. Lass $n$ noch gegen unendlich gehen: Brüche wie $\\frac{1}{n}$ gehen gegen $0$.',
   'imag-combine': 'Fasse noch zusammen: Schreibe das Ergebnis als $a + b\\,\\mathrm{i}$, mit einem Realteil und einem Imaginärteil.',
+  hyperbolic:
+    'Noch nicht fertig: Im Nenner steht noch $\\cosh x$ oder $\\sinh x$. Erweitere mit dem Gegenstück (dieselben Teile, anderes Vorzeichen); mit $\\cosh^2 x - \\sinh^2 x = 1$ bleibt im Nenner nur eine Zahl.',
   conjugate:
     'Noch nicht fertig: Erweitere mit dem Gegenstück der Summe mit Wurzel (dieselben Teile, anderes Vorzeichen). Mit der dritten binomischen Formel verschwindet die Wurzel aus dem Nenner, beim Differenzenquotienten kürzt sich danach $h$.',
 }
@@ -519,7 +527,14 @@ export function prepareFractionFree(ref: TaskRef): FreeTask {
   return {
     answerLabel: '=',
     inputLabel: 'Dein Ergebnis',
-    keyboard: { kind: 'fraction', letters: context.letters, blocks: context.blocks, root: context.root, ...(context.imag ? { imag: true } : {}) },
+    keyboard: {
+      kind: 'fraction',
+      letters: context.letters,
+      blocks: context.blocks,
+      root: context.root,
+      ...(context.imag ? { imag: true } : {}),
+      ...(context.hyperbolic ? { hyperbolic: true } : {}),
+    },
     check: (latex) => fractionFreeVerdict(checkFractionAnswer(context, latex)),
   }
 }

@@ -76,7 +76,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   Bildschirm-Tastatur `keyboard.ts`, je Thema über `keyboardLayouts`:
   Ableiten mit zwei Seiten „Standard" (mit Taste y) und „Mehr Funktionen",
   Brüche mit den Buchstaben der Aufgabe, bei Bausteinen $e^x$, ln, sin,
-  cos, tan, bei Wurzeln √, bei komplexen Zahlen $\mathrm{i}$; Umstellen mit allen Buchstaben der Aufgabe
+  cos, tan, bei Hyperbelfunktionen $e^x$, sinh, cosh, tanh, bei Wurzeln √,
+  bei komplexen Zahlen $\mathrm{i}$; Umstellen mit allen Buchstaben der Aufgabe
   (bis zu sieben) und √; wird erst im freien Modus geladen), gemeinsame Teile in
   `src/ui/task/`. Lernkarten in
   `src/ui/cards/` (`CardSheet.tsx`: Fenster über der Aufgabe, die
@@ -123,7 +124,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     $\mathrm{i}$ im Nenner und ohne Potenz von $\mathrm{i}$, bei Grenzwerten
     eine Zahl (ein Term mit dem richtigen Grenzwert ist noch nicht fertig),
     bei Teleskopsummen bis $n$ ein Bruch in $n$, sonst eine Zahl (bei der
-    Reihe ist ein Term in $n$ mit dem richtigen Grenzwert noch nicht fertig);
+    Reihe ist ein Term in $n$ mit dem richtigen Grenzwert noch nicht fertig),
+    bei $\frac{1}{\cosh x - \sinh x}$ kein $\cosh x$ oder $\sinh x$ im Nenner;
     sonst typischer Fehler, bei Rechenbäumen auch Fehler
     einer Teilrechnung bis zum Ergebnis weitergerechnet);
     `check/rearrangeAnswer.ts`: freie Eingabe beim Umstellen (rechte Seite
@@ -139,7 +141,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     Beispiele, typische Fehler; Ordner „Brüche" in `fractionCards.ts`, in
     Stufe 5 „Bausteine mit eigenen Regeln", „Dritte Potenzen", „Wurzeln
     im Nenner beseitigen", „Polynomdivision", „Partialbruchzerlegung" und
-    „Komplexe Zahlen teilen", „Grenzwerte von Brüchen", „Teleskopsummen") und
+    „Komplexe Zahlen teilen", „Grenzwerte von Brüchen", „Teleskopsummen",
+    „Hyperbelfunktionen") und
     durchgerechnete Beispiele (`example.ts` aus `derive`,
     `fractionExample.ts` aus der Bruch-Engine, bei Partialbrüchen mit den
     Gleichungen für die Zahlen). Texte für Brüche in
@@ -167,7 +170,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     (Polynomdivision, Nenner zerlegen, Ansatz, je Zahl eine Frage, zuletzt
     die Zerlegung), komplexe Zahlen (Potenzen von $\mathrm{i}$, mit dem
     konjugiert Komplexen erweitern, ausmultiplizieren, aufteilen; Schritte
-    `imag-…`), Grenzwerte `planLimit` ($x \to a$: die Schritte des Bruchs
+    `imag-…`), Hyperbelfunktionen wie Winkelfunktionen ($\frac{1}{\cosh x - \sinh x}$:
+    mit dem Gegenstück erweitern, ausmultiplizieren, Regel), Grenzwerte `planLimit` ($x \to a$: die Schritte des Bruchs
     selbst mit dem Limes in „Bisher", dann einsetzen; $n \to \infty$: durch
     die höchste Potenz teilen, dann der Grenzwert), Teleskopsummen
     `planTelescope` (Nenner zerlegen, Summand in Partialbrüche zerlegen, danach
@@ -189,11 +193,12 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   - `fraction/`: Bruch-Engine (Brüche aus Polynomen, exakt): `poly.ts`
     (Polynome in mehreren Buchstaben; $1 \pm \sin x$ mit der 1 vorn),
     `frac.ts` (Bruch, Termbaum ↔ Polynom; $e^x$, $\ln x$, $\sin x$,
-    $\cos x$, $\sqrt{x}$ als eigene Buchstaben, ebenso Wurzeln aus jedem
+    $\cos x$, $\sinh x$, $\cosh x$ (`SH`, `CH`), $\sqrt{x}$ als eigene Buchstaben, ebenso Wurzeln aus jedem
     Buchstaben wie $\sqrt{a}$ (`Ra`) und $\sqrt{x + h}$ (`Rx+h`, gerechnet
     mit $h = (\sqrt{x + h})^2 - x$, geschrieben wieder als $h$), die Zahl $e$
-    nur in falschen Ergebnissen; Vergleich `fracEquals` mit $(\sqrt{x})^2 = x$ und
-    $\sin^2 x + \cos^2 x = 1$), `factor.ts` (zerlegen, Hauptnenner,
+    nur in falschen Ergebnissen; Vergleich `fracEquals` mit $(\sqrt{x})^2 = x$,
+    $\sin^2 x + \cos^2 x = 1$ und $\sinh$, $\cosh$ über $e^x$ (`hyperbolicToExp`);
+    Regeln der Quadrate `trigRewrite`, auch $\cosh^2 x - \sinh^2 x = 1$), `factor.ts` (zerlegen, Hauptnenner,
     kürzen; Ergebnis: Zähler ausmultipliziert, Nenner in Faktoren, kleinerer
     Grad zuerst; auch mit Zahl vor $x^2$, mit zwei Buchstaben gleichen Grads wie
     $a^2 - ab - 2b^2$ (auch $\sqrt{x}$ und $\sqrt{a}$), dritte Potenzen
@@ -260,7 +265,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     Differenzenquotienten `differenceQuotient`, dritte Potenzen `cubeTask`,
     Wurzeln `rootTask`, Bausteine gemischt `blockPairTask`,
     Partialbrüche `partialTask`, komplexe Zahlen `imaginaryTask`,
-    Grenzwerte `limitTask`, Teleskopsummen `telescopeTask`; die
+    Grenzwerte `limitTask`, Teleskopsummen `telescopeTask`; Hyperbelfunktionen
+    `hyperbolicTask` in `fractionTerms.ts`; die
     Vorlagen der Stufe 5 haben Anteile
     `weight`, später dazugekommene Vorlagen einen festen Anteil `share`,
     vorweg mit eigenem Zufall gewählt, damit die übrigen Nummern ihre

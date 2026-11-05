@@ -1,8 +1,24 @@
 import { toLatex } from '../expr/print.ts'
-import { type Expr, div, mul, mulDot, num } from '../expr/types.ts'
+import { type Expr, div, mul, mulDot, neg, num } from '../expr/types.ts'
 import { type Rational, isInteger, isOne, isZero, rat, ratAbs, ratDiv, ratEq, ratMul, ratNeg, ratSign } from '../rational.ts'
 import { type Factored, factorize, factoredExpr, factoredPoly, groupFactor, isMultipleOf, reduceFrac } from './factor.ts'
-import { type Frac, fracAdd, fracDiv, fracEquals, fracMul, fracNeg, fracOf, fracScale, reduceImag } from './frac.ts'
+import {
+  type Frac,
+  type SquareAtom,
+  type SquareRule,
+  fracAdd,
+  fracDiv,
+  fracEquals,
+  fracMul,
+  fracNeg,
+  fracOf,
+  fracScale,
+  isHyperbolicAtom,
+  partnerAtom,
+  reduceImag,
+  startsNegative,
+  trigRewrite,
+} from './frac.ts'
 import {
   type Poly,
   type Term,
@@ -36,6 +52,8 @@ import {
   cancelledFactor,
   conjugateOf,
   expandedDenExpr,
+  hyperbolicIdentity,
+  isHyperbolicPair,
   fractionExpr,
   imagStage,
   imagTimesExpr,
@@ -167,6 +185,8 @@ export const FRACTION_ERROR_RULES: readonly FracErrorRule[] = [
   { id: 'frac-tele-last', step: 'tele-cancel', name: 'Am Ende den falschen Bruch behalten', wrongFormula: '\\sum_{k=1}^{n} \\left(\\frac{1}{k} - \\frac{1}{k + 1}\\right) = 1 - \\frac{1}{n}' },
   { id: 'frac-tele-start', step: 'tele-cancel', name: 'Bei $k = 1$ angefangen, obwohl die Summe später beginnt', wrongFormula: '\\sum_{k=2}^{n} \\left(\\frac{1}{k} - \\frac{1}{k + 1}\\right) = 1 - \\frac{1}{n + 1}' },
   { id: 'frac-tele-head', step: 'tele-cancel', name: 'Die vorderen Brüche mit weggestrichen', wrongFormula: '\\sum_{k=1}^{n} \\left(\\frac{1}{k} - \\frac{1}{k + 1}\\right) = -\\frac{1}{n + 1}' },
+  { id: 'frac-hyp-trig-sign', step: 'identity', name: 'Mit $\\cosh^2 x + \\sinh^2 x = 1$ gerechnet, wie bei $\\sin$ und $\\cos$', wrongFormula: '\\cosh^2 x - 1 = -\\sinh^2 x' },
+  { id: 'frac-hyp-swapped', step: 'identity', name: 'Die Regel verdreht: $\\sinh^2 x - \\cosh^2 x = 1$', wrongFormula: '\\cosh^2 x - \\sinh^2 x = -1' },
 ]
 
 export function fractionErrorRule(id: string): FracErrorRule {
@@ -216,8 +236,10 @@ function reduced(value: Frac, hints: readonly Poly[]): Expr {
   return resultExpr(reduceFrac(value, hints), {})
 }
 
-// Wert nach der Regel des Bausteins (wie im Rechenweg): sin² x + cos² x = 1 im Zähler bzw. Nenner
+// Wert nach der Regel des Bausteins (wie im Rechenweg): sin² x + cos² x = 1 im Zähler bzw. Nenner;
+// nach dem Erweitern von \frac{1}{\cosh x - \sinh x} cosh² x − sinh² x = 1 im Nenner
 export function ruledFrac(value: Frac, rule: BlockRule | undefined): Frac {
+  if (rule?.kind === 'conjugate' && rule.target === 'den') return { num: value.num, den: hyperbolicIdentity(value.den) }
   if (rule?.kind !== 'trig') return value
   return rule.target === 'num' ? { num: applyRule(value.num, rule), den: value.den } : { num: value.num, den: applyRule(value.den, rule) }
 }
@@ -671,37 +693,83 @@ function dropSquare(p: Poly, atom: string): Poly | null {
   return polySum(p.map((term) => [{ mono: monomial(term.mono.map(([a, e]) => [a, a === atom && e >= 2 ? e - 1 : e] as const)), coef: term.coef }]))
 }
 
+// Falsche Regeln bei den Hyperbelfunktionen, je Baustein, der ersetzt wird:
+// - frac-hyp-trig-sign: cosh² x + sinh² x = 1 wie bei sin und cos (cosh² x → 1 − sinh² x, sinh² x → 1 − cosh² x)
+// - frac-hyp-swapped: sinh² x − cosh² x = 1 (cosh² x → sinh² x − 1, sinh² x → cosh² x + 1)
+const WRONG_HYPERBOLIC: readonly { readonly id: string; readonly rules: Readonly<Record<'SH' | 'CH', SquareRule>> }[] = [
+  { id: 'frac-hyp-trig-sign', rules: { CH: { unit: 1, sign: -1 }, SH: { unit: 1, sign: -1 } } },
+  { id: 'frac-hyp-swapped', rules: { CH: { unit: -1, sign: 1 }, SH: { unit: 1, sign: 1 } } },
+]
+
+// Ein Polynom mit einer falschen Regel der Hyperbelfunktionen umgeschrieben (atom wird ersetzt).
+// Nur, wenn dabei genauso viele Summanden entstehen wie mit der richtigen Regel (so sieht die
+// falsche Antwort aus wie eine richtige, z. B. −sinh² x statt sinh² x); sonst null.
+function wrongHyperbolic(p: Poly, atom: SquareAtom, rule: SquareRule): Poly | null {
+  const right = trigRewrite(p, atom)
+  const wrong = trigRewrite(p, atom, rule)
+  return wrong.length === right.length && !polyEquals(wrong, right) ? wrong : null
+}
+
+// Bruch mit dem Minus vorn statt im Nenner: \frac{4\cosh x}{-\sinh^2 x} → -\frac{4\cosh x}{\sinh^2 x},
+// \frac{2\sinh x}{-1} → -2\sinh x
+function minusFirst(numerator: Poly, den: Poly, hints: readonly Poly[]): Expr {
+  const flip = startsNegative(den)
+  return fractionExpr(flip ? polyNeg(numerator) : numerator, factorize(flip ? polyNeg(den) : den, hints))
+}
+
+// Zähler (ein Produkt oder eine Summe) über dem Nenner der Aufgabe, ein Minus vor dem ganzen Bruch:
+// -\frac{\sinh^2 x}{\sinh x}
+function ruledOver(n: Poly, den: Expr): Expr {
+  return n.length === 1 && startsNegative(n) ? neg(div(ruleExpr(polyNeg(n)), den)) : div(ruleExpr(n), den)
+}
+
+// Falsch umgeschriebene Teile beim Anwenden der Regel: Quadrat vergessen (sin² x → sin x), bei den
+// Hyperbelfunktionen die falschen Regeln
+function ruleVariants(rule: Extract<BlockRule, { kind: 'trig' }>): { readonly id: string; readonly rewrite: (p: Poly) => Poly | null }[] {
+  const square = { id: 'frac-square-forgotten', rewrite: (p: Poly) => dropSquare(applyRule(p, rule), rule.prefer) }
+  if (!isHyperbolicAtom(rule.prefer)) return [square]
+  const atom = partnerAtom(rule.prefer)
+  return [square, ...WRONG_HYPERBOLIC.map((w) => ({ id: w.id, rewrite: (p: Poly) => wrongHyperbolic(p, atom, w.rules[atom as 'SH' | 'CH']) }))]
+}
+
 function ruleMistakes(t: FractionTask, solution: FracSolution): Candidate[] {
   const rule = t.rule
   const step = solution.steps.find((s) => s.kind === 'identity')
   if (!rule || !step) return []
   if (rule.kind === 'conjugate') return []
-  const atom = rule.kind === 'root' ? 'R' : rule.prefer
   if (t.kind === 'sum') {
     const w = workSum(t.terms, t.hints)
     const lcdPoly = factoredPoly(w.lcd)
     if (rule.kind === 'root') {
-      const den = dropSquare(lcdPoly, atom)
+      const den = dropSquare(lcdPoly, 'R')
       return den ? [{ id: 'frac-square-forgotten', stepExpr: expandedDenExpr(w.numerator, den), value: { num: w.numerator, den } }] : []
     }
-    if (rule.target === 'num') {
-      const n = dropSquare(applyRule(w.numerator, rule), atom)
-      return n ? [{ id: 'frac-square-forgotten', stepExpr: fractionExpr(n, w.lcd), value: { num: n, den: lcdPoly } }] : []
-    }
-    const den = dropSquare(applyRule(lcdPoly, rule), atom)
-    return den ? [{ id: 'frac-square-forgotten', stepExpr: fractionExpr(w.numerator, factorize(den, t.hints)), value: { num: w.numerator, den } }] : []
+    return ruleVariants(rule).flatMap(({ id, rewrite }): Candidate[] => {
+      if (rule.target === 'num') {
+        const n = rewrite(w.numerator)
+        return n ? [{ id, stepExpr: fractionExpr(n, w.lcd), value: { num: n, den: lcdPoly } }] : []
+      }
+      const den = rewrite(lcdPoly)
+      return den ? [{ id, stepExpr: minusFirst(w.numerator, den, t.hints), value: { num: w.numerator, den } }] : []
+    })
   }
-  if (t.kind === 'reduce' && rule.kind === 'trig') {
-    const n = dropSquare(applyRule(shownPoly(t.part.num), rule), atom)
-    return n ? [{ id: 'frac-square-forgotten', stepExpr: div(ruleExpr(n), shownExpr(t.part.den)), value: { num: n, den: shownPoly(t.part.den) } }] : []
+  if (rule.kind !== 'trig') return []
+  if (t.kind === 'reduce') {
+    return ruleVariants(rule).flatMap(({ id, rewrite }): Candidate[] => {
+      const n = rewrite(shownPoly(t.part.num))
+      return n ? [{ id, stepExpr: ruledOver(n, shownExpr(t.part.den)), value: { num: n, den: shownPoly(t.part.den) } }] : []
+    })
   }
-  if (t.kind === 'complex' && rule.kind === 'trig') {
+  if (t.kind === 'complex') {
     const top = sideOf(t.top, t.hints)
     if (!top.work) return []
-    const n = dropSquare(applyRule(top.work.numerator, rule), atom)
-    if (!n) return []
-    const wrongTop = { num: n, den: top.frac.den }
-    return [{ id: 'frac-square-forgotten', stepExpr: fractionExpr(n, top.work.lcd), value: fracDiv(wrongTop, signedFrac(t.bottom)) }]
+    const work = top.work
+    return ruleVariants(rule).flatMap(({ id, rewrite }): Candidate[] => {
+      const n = rewrite(work.numerator)
+      if (!n) return []
+      const wrongTop = { num: n, den: top.frac.den }
+      return [{ id, stepExpr: fractionExpr(n, work.lcd), value: fracDiv(wrongTop, signedFrac(t.bottom)) }]
+    })
   }
   return []
 }
@@ -717,6 +785,14 @@ function conjugateMistakes(t: FractionTask, solution: FracSolution): Candidate[]
   const up = solution.steps.find((s) => s.kind === 'conjugate')?.expr
   if (!conj || up?.kind !== 'div') return []
   const out: Candidate[] = []
+  // \frac{1}{\cosh x - \sinh x}: Nenner (cosh x − sinh x)(cosh x + sinh x) mit einer falschen Regel
+  if (target === 'den' && isHyperbolicPair(denP)) {
+    const n = polyMul(numP, conj)
+    for (const w of WRONG_HYPERBOLIC) {
+      const den = wrongHyperbolic(polyMul(denP, conj), 'CH', w.rules.CH)
+      if (den) out.push({ id: w.id, step: 'identity', stepExpr: minusFirst(n, den, t.hints), value: { num: n, den } })
+    }
+  }
   // Nur Nenner bzw. nur Zähler malgenommen: \frac{1}{(\sqrt{x} - 2)(\sqrt{x} + 2)}
   if (target === 'den') out.push({ id: 'frac-conjugate-one-side', stepExpr: div(shownExpr(t.part.num), up.den), value: { num: numP, den: polyMul(denP, conj) } })
   else out.push({ id: 'frac-conjugate-one-side', stepExpr: div(up.num, shownExpr(t.part.den)), value: { num: polyMul(numP, conj), den: denP } })

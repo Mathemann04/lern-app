@@ -52,6 +52,8 @@ describe('Gezieltes Üben bei Brüchen', () => {
     'frac-tele-last',
     'frac-tele-start',
     'frac-tele-head',
+    'frac-hyp-trig-sign',
+    'frac-hyp-swapped',
   ])(
     '%s: findet ihn in Stufe 5 mit jedem Zufall',
     (id) => {

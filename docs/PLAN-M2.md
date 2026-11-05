@@ -545,6 +545,8 @@ weiterrechnen). Die Fehler zu Bausteinen gibt es seit Schritt 6 (Stufe 5).
 | Teleskopsummen | am Ende den falschen Bruch behalten (neu in M2b) | $\sum_{k=1}^{n} \left(\frac{1}{k} - \frac{1}{k + 1}\right) = 1 - \frac{1}{n}$ |
 | Teleskopsummen | bei $k = 1$ angefangen, obwohl die Summe später beginnt (neu in M2b) | $\sum_{k=2}^{n} \left(\frac{1}{k} - \frac{1}{k + 1}\right) = 1 - \frac{1}{n + 1}$ |
 | Teleskopsummen | die vorderen Brüche mit weggestrichen (neu in M2b) | $\sum_{k=1}^{n} \left(\frac{1}{k} - \frac{1}{k + 1}\right) = -\frac{1}{n + 1}$ |
+| Hyperbelfunktionen | mit $\cosh^2 x + \sinh^2 x = 1$ gerechnet, wie bei $\sin$ und $\cos$ (neu in M2b) | $\cosh^2 x - 1 = -\sinh^2 x$ |
+| Hyperbelfunktionen | die Regel verdreht: $\sinh^2 x - \cosh^2 x = 1$ (neu in M2b) | $\cosh^2 x - \sinh^2 x = -1$ |
 
 Wenn dir typische Fehler aus deinen Übungen fehlen, sag es. Die sind Gold
 wert.

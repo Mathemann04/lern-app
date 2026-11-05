@@ -1,5 +1,5 @@
 import { toLatex } from '../expr/print.ts'
-import { type Expr, add, div, mul, mulDot, neg, num, pow, tan, variable, x } from '../expr/types.ts'
+import { type Expr, add, div, fn, mul, mulDot, neg, num, pow, tan, variable, x } from '../expr/types.ts'
 import { type Rational, isOne, ratAbs, ratCmp, ratEq, ratNeg, rat, ratDiv, ratSign } from '../rational.ts'
 import {
   type Factored,
@@ -15,7 +15,7 @@ import {
   reducedExpr,
   reducedFrac,
 } from './factor.ts'
-import { type Frac, fracOf, isRootAtom, polyExpr, reduceImag, startsNegative, trigRewrite } from './frac.ts'
+import { type Frac, fracOf, isHyperbolicAtom, isRootAtom, partnerAtom, polyExpr, reduceImag, startsNegative, trigRewrite } from './frac.ts'
 import { type Poly, atomsOf, constValue, isOneFirst, polyAdd, polyConst, polyContent, polyDivideExact, polyEquals, polyMul, polyNeg, polyScale, polySum, primitivePart } from './poly.ts'
 import {
   type BlockRule,
@@ -319,11 +319,15 @@ export function reciprocalExpr(side: Side): Expr {
 
 // --- Regeln der Bausteine (Stufe 5) ---
 
-// Ein Polynom nach der Regel umgeschrieben: sin² x + cos² x = 1 (es bleibt der bevorzugte
-// Baustein, z. B. 1 − cos² x → sin² x); bei √x ändert sich nur die Schreibweise
+// Ein Polynom nach der Regel umgeschrieben: sin² x + cos² x = 1 bzw. cosh² x − sinh² x = 1 (es
+// bleibt der bevorzugte Baustein, z. B. 1 − cos² x → sin² x, cosh² x − 1 → sinh² x); bei √x ändert
+// sich nur die Schreibweise
 export function applyRule(p: Poly, rule: BlockRule): Poly {
-  return rule.kind === 'trig' ? trigRewrite(p, rule.prefer === 'S' ? 'C' : 'S') : p
+  return rule.kind === 'trig' ? trigRewrite(p, partnerAtom(rule.prefer)) : p
 }
+
+// cosh² x − sinh² x = 1 angewandt (cosh² x → 1 + sinh² x): (cosh x − sinh x)(cosh x + sinh x) → 1
+export const hyperbolicIdentity = (p: Poly): Poly => trigRewrite(p, 'CH')
 
 // Polynom als Faktoren, wenn es eins ist (\cos^2 x), sonst ausmultipliziert (1 - \cos^2 x)
 export const ruleExpr = (p: Poly): Expr => (p.length === 1 ? factoredExpr(factorize(p)) : nicePolyExpr(p))
@@ -560,10 +564,25 @@ export function resultExpr(reduced: Reduced, t: { readonly rule?: BlockRule }): 
 
 // --- Wurzel beseitigen: mit dem Gegenstück erweitern (Stufe 5) ---
 
+// cosh x ± sinh x (auch mit einer Zahl davor): Das Produkt mit dem Gegenstück ist mit
+// cosh² x − sinh² x = 1 eine Zahl
+export function isHyperbolicPair(p: Poly): boolean {
+  if (p.length !== 2 || !p.every((t) => t.mono.length === 1 && t.mono[0][1] === 1 && isHyperbolicAtom(t.mono[0][0]))) return false
+  return p[0].mono[0][0] !== p[1].mono[0][0] && ratEq(ratAbs(p[0].coef), ratAbs(p[1].coef))
+}
+
+// Produkt einer Summe mit ihrem Gegenstück, bei cosh x ± sinh x schon mit cosh² x − sinh² x = 1
+export function conjugateProduct(p: Poly, conj: Poly): Poly {
+  const product = polyMul(p, conj)
+  return isHyperbolicPair(p) ? hyperbolicIdentity(product) : product
+}
+
 // Gegenstück einer Summe aus zwei Teilen mit Wurzel (dritte binomische Formel): √x − 2 → √x + 2,
-// √a + √b → √a − √b, √(x + h) − √x → √(x + h) + √x. Das Produkt hat keine Wurzel mehr. null, wenn
-// die Summe keine Wurzel enthält oder nicht aus zwei Teilen besteht.
+// √a + √b → √a − √b, √(x + h) − √x → √(x + h) + √x. Das Produkt hat keine Wurzel mehr. Ebenso
+// cosh x − sinh x → cosh x + sinh x. null, wenn die Summe keine Wurzel enthält oder nicht aus zwei
+// Teilen besteht.
 export function conjugateOf(p: Poly): Poly | null {
+  if (isHyperbolicPair(p)) return primitivePart(polyAdd([p[0]], polyNeg([p[1]])))
   if (p.length !== 2 || !atomsOf(p).some(isRootAtom)) return null
   if (p.some((term) => term.mono.some(([a, e]) => isRootAtom(a) && e > 1))) return null
   return primitivePart(polyAdd([p[0]], polyNeg([p[1]])))
@@ -577,7 +596,7 @@ export function rationalizedFrac(r: Reduced): Frac | null {
   const conj = conjugateOf(f.poly)
   if (!conj) return null
   const num = polyMul(r.num, conj)
-  const den = polyScale(polyMul(f.poly, conj), r.den.coef)
+  const den = polyScale(conjugateProduct(f.poly, conj), r.den.coef)
   const [cn, cd] = [polyContent(num), polyContent(den)]
   if (cn.d !== 1n || cd.d !== 1n) return { num, den }
   let g = cn.n < 0n ? -cn.n : cn.n
@@ -611,6 +630,12 @@ function solveConjugate(t: Extract<FractionTask, { kind: 'reduce' }>, target: 'n
   const reduced = reduceFrac(value, t.hints)
   const result = resultExpr(reduced, t)
   const excluded = excludedValues(t)
+  if (target === 'den' && isHyperbolicPair(denP)) {
+    // \frac{1}{\cosh x - \sinh x} = \frac{\cosh x + \sinh x}{\cosh^2 x - \sinh^2 x}, dann cosh² x − sinh² x = 1
+    steps.push({ kind: 'multiply-out', expr: plainFractionExpr(polyMul(numP, conj), product), from, detail: nicePolyExpr(product) })
+    steps.push({ kind: 'identity', expr: result, from: nicePolyExpr(product), detail: nicePolyExpr(hyperbolicIdentity(product)) })
+    return { value, steps, reduced, result, excluded, beforeCancel: { num: polyMul(numP, conj), den: hyperbolicIdentity(product) } }
+  }
   if (target === 'den') {
     steps.push({ kind: 'multiply-out', expr: result, from, detail: nicePolyExpr(product) })
     return { value, steps, reduced, result, excluded, beforeCancel: { num: polyMul(numP, conj), den: product } }
@@ -826,9 +851,11 @@ function tanExpr(r: Reduced): Expr | null {
   if (r.num.length !== 1 || r.den.factors.length !== 1 || !isOne(r.den.coef)) return null
   const [{ mono, coef }] = r.num
   const [{ poly, exp }] = r.den.factors
-  const isCos = poly.length === 1 && poly[0].mono.length === 1 && poly[0].mono[0][0] === 'C' && poly[0].mono[0][1] === 1
-  if (!isCos || mono.length !== 1 || mono[0][0] !== 'S' || mono[0][1] !== exp) return null
-  const t = exp === 1 ? tan(x) : pow(tan(x), num(exp))
+  // sin x / cos x = tan x, sinh x / cosh x = tanh x
+  const den = poly.length === 1 && poly[0].mono.length === 1 && poly[0].mono[0][1] === 1 ? poly[0].mono[0][0] : null
+  const pair = den === 'C' ? { top: 'S', name: tan(x) } : den === 'CH' ? { top: 'SH', name: fn('tanh', x) } : null
+  if (!pair || mono.length !== 1 || mono[0][0] !== pair.top || mono[0][1] !== exp) return null
+  const t = exp === 1 ? pair.name : pow(pair.name, num(exp))
   if (isOne(coef)) return t
   if (isOne(ratNeg(coef))) return neg(t)
   return ratSign(coef) < 0 ? neg(mul(num(ratNeg(coef)), t)) : mul(num(coef), t)
