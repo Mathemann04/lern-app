@@ -20,7 +20,8 @@ export function fractionForm(ref: TaskRef): string {
   return `${task.kind === 'partial' ? 'zerlegen: ' : ''}${formOfLatex(fractionLatex(task))}`
 }
 
+// mit der gesuchten Variable, benannt wie die übrigen Buchstaben
 export function rearrangeForm(ref: TaskRef): string {
   const { task } = generateRearrangeTask(ref)
-  return `${formOfLatex(rearrangeLatex(task))} nach ${task.target}`
+  return formOfLatex(`${rearrangeLatex(task)} \\to ${task.target}`)
 }

@@ -18,7 +18,7 @@ type Props = {
 }
 
 export function RearrangeGalleryCard({ generated, showSteps, showErrors, highlighted = false }: Props) {
-  const { task, template, ref } = generated
+  const { task, label, ref } = generated
   const solution = useMemo(() => solveEquation(task.equation, task.target)!, [task])
   const wrong = useMemo(() => (showErrors ? rearrangeWrongAnswers(task, solution) : []), [showErrors, task, solution])
 
@@ -75,7 +75,7 @@ export function RearrangeGalleryCard({ generated, showSteps, showErrors, highlig
       )}
 
       <p className="text-sm text-zinc-500">
-        Aufgabe {formatTaskNumber(ref)} · <RichText text={template.label} inline />
+        Aufgabe {formatTaskNumber(ref)} · <RichText text={label} inline />
       </p>
     </article>
   )

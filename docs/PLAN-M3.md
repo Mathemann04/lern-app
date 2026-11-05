@@ -416,9 +416,9 @@ Aufgabe: Löse $\int_a^x \frac{\mathrm{d}t}{t(t + b)} = y$ nach $x$ auf
 | Quadrieren | nur einen Teil quadriert | $\frac{y}{a} = \sqrt{b^2 - x^2} \Rightarrow \frac{y^2}{a} = b^2 - x^2$ |
 | Quadrieren | Mittelglied vergessen | $\left(y + \sqrt{x}\right)^2 = y^2 + x$ |
 | Verschachtelte Wurzel | innere Wurzel gleich mit aufgelöst | $y = \sqrt{a + \sqrt{b + \sqrt{x}}} \Rightarrow y^2 = a + b + \sqrt{x}$ |
-| Malnehmen | nicht jeden Summanden malgenommen (neu in der 4. Fassung) | $\frac{x}{a} + b = c \Rightarrow x + b = ac$ |
-| Minus vor Klammer oder Bruch | Vorzeichen nur beim ersten Summanden gewechselt (neu in der 4. Fassung) | $a - \frac{x - b}{4} = c \Rightarrow 4a - x - b = 4c$ |
-| Ausklammern | Vorzeichen in der Klammer falsch (neu in der 4. Fassung) | $ax - bx = c \Rightarrow x(a + b) = c$ |
+| Malnehmen | nicht jeden Summanden malgenommen (neu in der 4. Fassung, `eq-multiply-one-term`) | $\frac{x}{a} = c - b \Rightarrow x = ac - b$, auch $\frac{x + a}{2} - \frac{x - b}{3} = c \Rightarrow 3(x + a) - 2(x - b) = c$ |
+| Minus vor der Klammer | Vorzeichen nur beim ersten Summanden gewechselt (neu in der 4. Fassung, `eq-minus-bracket`) | $a - c(x - d) = a - cx - cd$ |
+| Ausklammern | das Minus verloren (neu in der 4. Fassung, `eq-factor-sign`) | $ax - bx = c \Rightarrow x(a + b) = c$ |
 | Quadrat | halbiert statt die Wurzel gezogen (neu in der 4. Fassung) | $x^2 = c \Rightarrow x = \frac{c}{2}$ |
 
 **e-Funktion, $\ln$, Potenzen, Winkelfunktionen (ab Stufe 4)**
@@ -515,6 +515,37 @@ gezogen".
 
 **Ausprobieren:** In Stufe 1 und 2 je zehnmal „Nächste Aufgabe": keine Form
 doppelt, mal nach $x$, mal nach einem Buchstaben aufgelöst.
+
+**Umgesetzt:** Die Stufen 1 und 2 kommen aus dem Baukasten
+(`tasks/rearrangeKit.ts`). Stufe 1: die Variable allein, darum zwei bis vier
+Schalen (plus, minus, Minus davor, mal, durch; additive und malnehmende
+wechseln sich ab, kein Bruch im Bruch), die andere Seite $y$, ein Buchstabe,
+eine Summe, ein Produkt oder ein Bruch. Stufe 2: $x$ mehrfach (auf beiden
+Seiten, in Klammern auch mit Minus davor, in Brüchen mit Zahlen im Nenner),
+$x$ im Nenner mit bis zu zwei Schalen oder zweimal im selben Nenner. In etwa
+jeder fünften Aufgabe wird nach einem Buchstaben aufgelöst, dann steht $x$
+als gewöhnlicher Buchstabe mit drin. Buchstaben aus Familien wie
+$a, b, c, \dots$ oder $p, q, r, \dots$, höchstens sieben je Aufgabe.
+Gemessen unter den Aufgaben 1 bis 200: Stufe 1 195 Formen, Stufe 2 192
+(vorher 8 und 11), keine öfter als in 2 von 100; im Mittel 4,1 bzw. 4,5
+Umformungen. Die Form zählt Buchstaben in Produkten wie $ax$ jetzt einzeln,
+auch den gesuchten (Brüche danach: 158 bis 194 Formen je Stufe).
+
+Drei neue typische Fehler (Tabelle oben): nicht jeden Summanden
+malgenommen (beim Malnehmen einer Summe und beim Malnehmen mit dem
+Hauptnenner), Minus vor der Klammer nur beim ersten Summanden, beim
+Ausklammern das Minus verloren; mit Texten, auf den Lernkarten „Gegenrechnung
+auf beiden Seiten", „Variable mehrfach" und „Mit dem Hauptnenner malnehmen".
+Beim Ausmultiplizieren gibt es jetzt je Klammer einen Fehler (bisher nur für
+die erste Klammer einer Seite).
+
+Der Rechenweg wurde dabei schöner: Ein Minus vor einem Bruch bleibt beim
+Malnehmen mit dem Hauptnenner als Klammer stehen ($3x - (x - 7a)$, danach
+ausmultiplizieren); steht die Variable im Nenner und auf der anderen Seite
+eine Summe mit Brüchen, wird diese zuerst zu einem Bruch zusammengefasst
+(„Bevor du mit dem Nenner malnimmst …"), so entsteht kein Doppelbruch; ein
+Ergebnis hat nie $-1$ im Nenner. Bei falschen Umformungen heißt es „Nur die
+linke Seite …" und Summen stehen in Klammern („mal $(b - 2)$").
 
 #### Schritt 5: Stufe 3 aus dem Baukasten (neu)
 - Kerne: $x$ in Zähler und Nenner, mehrere Brüche mit $x$ im Nenner,

@@ -52,15 +52,17 @@ describe('Geführt umstellen: Ablauf', () => {
       '$x$ steht in mehreren Summanden. Was machst du zuerst? → Alles mit $x$ nach links, den Rest nach rechts',
       'Was kommt heraus? → $cx - ax = ab + cd$',
       'Wie machst du aus den Summanden mit $x$ einen einzigen Faktor $x$? → $x$ ausklammern',
+      'Was kommt heraus? → $x(c - a) = ab + cd$',
       'Wie bekommst du $x$ allein? → Beide Seiten durch $(c - a)$',
       'Was kommt heraus? → $x = \\frac{ab + cd}{c - a}$',
     ])
   })
 
   it('ohne typischen Fehler steht die Gleichung gleich unter „Bisher"', () => {
-    const task = plan('a(x+b)', 'c(x-d)', 2)
+    // x(a + b): kein Minus, das beim Ausklammern verloren gehen kann, keine 1
+    const task = plan('ax+bx', 'c', 2)
     const factor = task.steps.find((s) => s.question.startsWith('Wie machst du aus den Summanden'))!
-    expect(factor.established).toEqual(['x(c - a) = ab + cd'])
+    expect(factor.established).toEqual(['x(a + b) = c'])
   })
 
   it('Ergebnis mit Bedingung für den Nenner', () => {

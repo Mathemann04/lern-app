@@ -1,5 +1,6 @@
 // Abwechslung (M2b, für alle Themen): Die Form einer Aufgabe ist ihr LaTeX ohne die Zahlen, mit
-// Plus und Minus zusammengefasst und Buchstaben in der Reihenfolge ihres Auftretens benannt.
+// Plus und Minus zusammengefasst und Buchstaben in der Reihenfolge ihres Auftretens benannt, auch
+// in Produkten wie ax (Befehle wie \frac bleiben stehen).
 // \frac{3}{4} - \frac{2}{x} und \frac{5}{6} + \frac{1}{a} haben dieselbe Form, \frac{3}{4} \cdot \frac{2}{x}
 // eine andere. Ein Test misst je Stufe, wie viele Formen es gibt; beim Ziehen einer neuen Aufgabe
 // meidet die App die Formen der letzten Aufgaben.
@@ -9,9 +10,10 @@ export function formOfLatex(latex: string): string {
   return latex
     .replace(/\d+/g, '#')
     .replace(/[+-]/g, '±')
-    .replace(/(?<![\\a-zA-Z])([a-z])(?![a-zA-Z])/g, (letter) => {
-      if (!names.has(letter)) names.set(letter, `L${names.size + 1}`)
-      return names.get(letter)!
+    .replace(/\\[a-zA-Z]+|[a-z]/g, (token) => {
+      if (token.startsWith('\\')) return token
+      if (!names.has(token)) names.set(token, `L${names.size + 1}`)
+      return names.get(token)!
     })
 }
 

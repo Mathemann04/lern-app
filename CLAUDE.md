@@ -256,10 +256,14 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     (Prüfstellen: Buchstaben zufällig positiv, Variable aus dem Ergebnis,
     Bedingungen der Aufgabe; Gegenprobe durch Einsetzen), `errorRules.ts`
     (typische Fehler, Ids `eq-…`, beim Zusammenfassen die aus „Brüche";
-    nie eine Gleichung, die doch stimmt), `task.ts` (Aufgabe, Bedingungen)
+    je Klammer ein Fehler beim Ausmultiplizieren; nie eine Gleichung, die doch
+    stimmt), `task.ts` (Aufgabe, Bedingungen)
   - `random/rng.ts`: Zufall mit Startwert; `tasks/`: Aufgaben-Nummern
     („3-48213"), Vorlagen je Stufe (`derivativeTerms.ts`,
-    `fractionTerms.ts`, `rearrangeTerms.ts`), `focus.ts` und `fractionFocus.ts` (Aufgaben für
+    `fractionTerms.ts`, `rearrangeTerms.ts`; Umstellen Stufen 1 und 2 aus dem
+    Baukasten `rearrangeKit.ts`: Kern mit der Variable, Schalen drumherum, andere
+    Seite, manchmal nach einem Buchstaben aufgelöst; Filter in
+    `rearrangeTerms.ts`), `focus.ts` und `fractionFocus.ts` (Aufgaben für
     gezieltes Üben; Brüche: reihum durch die Stufen, je Runde zwölf Versuche,
     seltene Fehler in ihrer Vorlage `focus`, `likelyFractionTemplate`;
     `PracticePage.tsx` zeigt während der Suche einen Hinweis); Baukasten der Brüche `fractionKit.ts` (Stufen 1 und 2:
@@ -279,7 +283,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     vorweg mit eigenem Zufall gewählt, damit die übrigen Nummern ihre
     Aufgabe behalten); Abwechslung
     `variety.ts` (Form einer Aufgabe `formOfLatex`: Zahlen und Vorzeichen
-    zusammengefasst, Buchstaben der Reihe nach benannt; Kennzahlen
+    zusammengefasst, Buchstaben der Reihe nach benannt, auch in Produkten wie
+    $ax$; Kennzahlen
     `varietyStats`; `pickFresh`) und `forms.ts` (Form je Thema;
     Partialbrüche mit eigenem Vorsatz „zerlegen:")
 - `src/state/`: Speichern auf dem Gerät (`storage.ts`, Version 3, robust

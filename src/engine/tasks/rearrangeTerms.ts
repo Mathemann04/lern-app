@@ -1,31 +1,37 @@
 import { toLatex } from '../expr/print.ts'
 import { type Expr, add, div, eq, mul, num, pow, sqrt, sub, variable } from '../expr/types.ts'
-import { contains } from '../expr/compare.ts'
+import { contains, subterms } from '../expr/compare.ts'
 import { samplePoints } from '../rearrange/check.ts'
 import { solveEquation } from '../rearrange/isolate.ts'
-import type { Condition, RearrangeTask } from '../rearrange/task.ts'
+import { type Condition, type RearrangeTask, taskLatex, taskVariables } from '../rearrange/task.ts'
 import { type Rng, createRng } from '../random/rng.ts'
+import { type KitTask, buildLevel1, buildLevel2 } from './rearrangeKit.ts'
 import type { Level, TaskRef } from './taskNumber.ts'
 
 // Vorlagen für Umstell-Aufgaben je Stufe (siehe docs/PLAN-M3.md, „Stufen"). Jede Vorlage baut aus
-// Zufallszahlen eine Gleichung; Rechenweg und Lösung berechnet die Umstell-Engine.
+// Zufallszahlen eine Gleichung; Rechenweg und Lösung berechnet die Umstell-Engine. Die Stufen 1 und
+// 2 kommen aus dem Baukasten (rearrangeKit.ts, Kern und Schalen).
 
 export type RearrangeTemplate = {
   readonly id: string
   readonly level: Level
   readonly label: string
   build(rng: Rng): RearrangeTask
+  // Baukasten: Aufgabe mit eigener Beschreibung (Art des Kerns, Zahl der Schalen)
+  buildLabeled?(rng: Rng): KitTask
 }
 
 export type GeneratedRearrangeTask = {
   readonly ref: TaskRef
   readonly template: RearrangeTemplate
   readonly task: RearrangeTask
+  // Beschreibung für die Galerie
+  readonly label: string
 }
 
 // --- kleine Bausteine ---
 
-const [a, b, c, d, m, x, y] = ['a', 'b', 'c', 'd', 'm', 'x', 'y'].map(variable)
+const [a, b, c, d, x, y] = ['a', 'b', 'c', 'd', 'x', 'y'].map(variable)
 const n = (k: number) => num(k)
 const sign = (rng: Rng): 1 | -1 => (rng.chance(0.5) ? 1 : -1)
 // e ± f
@@ -36,102 +42,22 @@ const sq = (e: Expr) => pow(e, n(2))
 
 const task = (lhs: Expr, rhs: Expr, target = 'x', conditions: Condition[] = []): RearrangeTask => ({ equation: eq(lhs, rhs), target, conditions })
 
-// --- Stufe 1: mehrere Schritte, die Variable kommt einmal vor ---
+// --- Stufen 1 und 2: aus dem Baukasten (rearrangeKit.ts) ---
 
-const level1Scaled: RearrangeTemplate = {
-  id: 'scaled',
+const level1Kit: RearrangeTemplate = {
+  id: 'baukasten-1',
   level: 1,
-  label: 'Bruch mit Klammer und Summand',
-  build: (rng) => task(y, pm(div(times(rng.int(2, 9), pm(x, a, sign(rng))), b), c, sign(rng))),
+  label: 'Baukasten: Variable einmal, Schalen drumherum',
+  build: (rng) => buildLevel1(rng).task,
+  buildLabeled: buildLevel1,
 }
 
-const level1PointSlope: RearrangeTemplate = {
-  id: 'point-slope',
-  level: 1,
-  label: 'Punkt-Steigungs-Form, nach $m$, $x$ oder $a$',
-  build: (rng) => task(y, pm(mul(m, pm(x, a, sign(rng))), b, sign(rng)), rng.pick(['m', 'x', 'a'])),
-}
-
-const level1Fractions: RearrangeTemplate = {
-  id: 'fractions',
-  level: 1,
-  label: 'Zwei Brüche, einer mit $x$',
-  build: (rng) => task(pm(div(times(rng.int(1, 9), x), a), div(b, c), sign(rng)), d),
-}
-
-const level1MinusFraction: RearrangeTemplate = {
-  id: 'minus-fraction',
-  level: 1,
-  label: 'Bruch mit Minus davor',
-  build: (rng) => task(y, sub(a, div(pm(x, b, sign(rng)), n(rng.int(2, 9))))),
-}
-
-const level1Nested: RearrangeTemplate = {
-  id: 'nested',
-  level: 1,
-  label: 'Klammer in der Klammer',
-  build: (rng) => task(pm(mul(a, pm(times(rng.int(2, 9), x), b, sign(rng))), c, sign(rng)), d),
-}
-
-// --- Stufe 2: die Variable kommt mehrfach vor oder steht im Nenner ---
-
-const level2BothSides: RearrangeTemplate = {
-  id: 'both-sides',
+const level2Kit: RearrangeTemplate = {
+  id: 'baukasten-2',
   level: 2,
-  label: '$x$ auf beiden Seiten',
-  build: (rng) =>
-    rng.chance(0.5)
-      ? task(pm(mul(a, x), b, sign(rng)), pm(mul(c, x), d, sign(rng)))
-      : task(pm(times(rng.int(2, 9), x), a, sign(rng)), pm(mul(b, x), c, sign(rng))),
-}
-
-const level2Brackets: RearrangeTemplate = {
-  id: 'brackets',
-  level: 2,
-  label: 'Klammern auf beiden Seiten',
-  build: (rng) =>
-    rng.chance(0.5)
-      ? task(mul(a, pm(x, b, sign(rng))), mul(c, pm(x, d, sign(rng))))
-      : task(mul(n(rng.int(2, 9)), pm(x, a, sign(rng))), mul(b, pm(x, c, sign(rng)))),
-}
-
-const level2Reciprocal: RearrangeTemplate = {
-  id: 'reciprocal',
-  level: 2,
-  label: '$x$ im Nenner',
-  build: (rng) => {
-    switch (rng.int(0, 2)) {
-      case 0:
-        return task(pm(div(a, x), b, sign(rng)), c)
-      case 1:
-        return task(pm(div(n(rng.int(2, 9)), x), a, sign(rng)), b)
-      default:
-        return task(div(a, pm(x, b, sign(rng))), c)
-    }
-  },
-}
-
-const level2Hyperbola: RearrangeTemplate = {
-  id: 'hyperbola',
-  level: 2,
-  label: '$y$ als Bruch mit $x$ im Nenner',
-  build: (rng) => {
-    switch (rng.int(0, 2)) {
-      case 0:
-        return task(y, div(a, pm(b, x, sign(rng))))
-      case 1:
-        return task(y, pm(div(a, pm(x, b, sign(rng))), c, sign(rng)))
-      default:
-        return task(y, add(div(n(rng.int(2, 9)), sub(x, a)), b))
-    }
-  },
-}
-
-const level2MinusBracket: RearrangeTemplate = {
-  id: 'minus-bracket',
-  level: 2,
-  label: 'Klammer mit $x$ hinten',
-  build: (rng) => task(pm(times(rng.int(2, 9), x), a, sign(rng)), mul(b, sub(c, x))),
+  label: 'Baukasten: Variable mehrfach oder im Nenner',
+  build: (rng) => buildLevel2(rng).task,
+  buildLabeled: buildLevel2,
 }
 
 // --- Stufe 3: Brüche und Wurzeln, die Variable kommt mehrfach vor ---
@@ -238,16 +164,8 @@ const level3RootDiff: RearrangeTemplate = {
 }
 
 export const REARRANGE_TEMPLATES: readonly RearrangeTemplate[] = [
-  level1Scaled,
-  level1PointSlope,
-  level1Fractions,
-  level1MinusFraction,
-  level1Nested,
-  level2BothSides,
-  level2Brackets,
-  level2Reciprocal,
-  level2Hyperbola,
-  level2MinusBracket,
+  level1Kit,
+  level2Kit,
   level3Mobius,
   level3Reciprocals,
   level3Ratio,
@@ -264,11 +182,29 @@ export function rearrangeTemplatesForLevel(level: Level): RearrangeTemplate[] {
 
 export const isRearrangeLevelAvailable = (level: Level) => rearrangeTemplatesForLevel(level).length > 0
 
+// Längste Aufgabe (LaTeX), damit sie am Handy lesbar bleibt
+const MAX_TASK_LATEX = 64
+
+// Wie oft kommt die gesuchte Variable vor, und steht sie in einem Nenner?
+function occurrences(t: RearrangeTask): { count: number; inDenominator: boolean } {
+  const count = [t.equation.lhs, t.equation.rhs].flatMap((side) => subterms(side)).filter((s) => s.kind === 'var' && s.name === t.target).length
+  const inDenominator = [t.equation.lhs, t.equation.rhs].flatMap((side) => subterms(side)).some((s) => s.kind === 'div' && contains(s.den, t.target))
+  return { count, inDenominator }
+}
+
 // Brauchbar: lösbar, das Ergebnis ohne die gesuchte Variable, an genug erlaubten Stellen
-// prüfbar, nicht zu lang
-function isGood(t: RearrangeTask): boolean {
+// prüfbar, nicht zu lang; im Baukasten außerdem nicht zu leicht, höchstens sieben Buchstaben
+function isGood(t: RearrangeTask, level: Level, kit: boolean): boolean {
+  if (kit) {
+    const letters = taskVariables(t).length
+    if (taskLatex(t).length > MAX_TASK_LATEX || letters > 7 || letters < 2) return false
+    const { count, inDenominator } = occurrences(t)
+    if (level === 1 && count !== 1) return false
+    if (level === 2 && count < 2 && !inDenominator) return false
+  }
   const solution = solveEquation(t.equation, t.target)
   if (!solution || contains(solution.result, t.target)) return false
+  if (kit && solution.steps.length < 3) return false
   if (toLatex(solution.result).length > 90) return false
   return samplePoints(t, solution.result, createRng('brauchbar'), 8, solution.requires).length >= 8
 }
@@ -280,7 +216,8 @@ export function generateRearrangeTask(ref: TaskRef): GeneratedRearrangeTask {
   if (templates.length === 0) throw new Error(`Für Stufe ${ref.level} gibt es noch keine Umstell-Aufgaben`)
   for (;;) {
     const template = rng.pick(templates)
-    const t = template.build(rng)
-    if (isGood(t)) return { ref, template, task: t }
+    const kit = template.buildLabeled?.(rng)
+    const t = kit ? kit.task : template.build(rng)
+    if (isGood(t, ref.level, kit !== undefined)) return { ref, template, task: t, label: kit?.label ?? template.label }
   }
 }

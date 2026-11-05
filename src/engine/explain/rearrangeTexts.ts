@@ -67,6 +67,21 @@ export const REARRANGE_ERROR_TEXTS: Readonly<Record<string, Explanation>> = {
       'Eine Summe quadrierst du mit der binomischen Formel, mit Mittelglied: $(a + b)^2 = a^2 + 2ab + b^2$. Ohne das Mittelglied $2ab$ stimmt es nicht.',
     short: 'Binomische Formel: $(a + b)^2 = a^2 + 2ab + b^2$.',
   },
+  'eq-multiply-one-term': {
+    detailed:
+      'Nimmst du eine Seite mal, wird jeder Summand malgenommen, nicht nur der erste, auch einer ohne Bruch. Setze die Seite in Gedanken in Klammern: $(c - b) \\cdot a = ac - ab$.',
+    short: 'Jeden Summanden malnehmen: $(c - b) \\cdot a = ac - ab$.',
+  },
+  'eq-minus-bracket': {
+    detailed:
+      'Ein Minus vor einer Klammer dreht das Vorzeichen jedes Summanden in der Klammer um, nicht nur das des ersten: $-c(x - d) = -cx + cd$.',
+    short: 'Das Minus gilt für die ganze Klammer: $-c(x - d) = -cx + cd$.',
+  },
+  'eq-factor-sign': {
+    detailed:
+      'Beim Ausklammern bleibt jedes Vorzeichen in der Klammer stehen: $ax - bx = x(a - b)$. Prüfe es, indem du die Klammer wieder ausmultiplizierst.',
+    short: 'Vorzeichen bleiben: $ax - bx = x(a - b)$.',
+  },
 }
 
 export function explainRearrangeError(id: string): Explanation {
@@ -86,7 +101,11 @@ const ONE_SIDED: Explanation = {
   short: 'Immer auf beiden Seiten dasselbe rechnen.',
 }
 
+// „auf der linken Seite", „nur die linke Seite"
 const sideName = (side: 'lhs' | 'rhs') => (side === 'lhs' ? 'linken' : 'rechten')
+const sideAccusative = (side: 'lhs' | 'rhs') => (side === 'lhs' ? 'linke' : 'rechte')
+// Faktor in einer Umformung, Summen in Klammern: „mal $(b - 2)$"
+const factorText = (e: Expr) => (e.kind === 'add' || e.kind === 'neg' ? `$(${toLatex(e)})$` : m(e))
 
 // Summand mit Vorzeichen als Text: „$+c$", „$-\frac{b}{c}$"
 export const signed = (term: Expr, negative: boolean) => `$${negative ? '-' : '+'}${toLatex(term)}$`
@@ -134,14 +153,14 @@ export function divideMoves(divisor: Expr, side: 'lhs' | 'rhs' | null): WrongMov
   const d = m(divisor)
   return [
     {
-      label: `Beide Seiten mal ${d}`,
+      label: `Beide Seiten mal ${factorText(divisor)}`,
       why: { detailed: `Malnehmen macht den Faktor ${d} nur größer. Die Gegenrechnung zum Malnehmen ist das Teilen.`, short: 'Gegenrechnung zum Malnehmen ist das Teilen.' },
     },
     {
       label: `Auf beiden Seiten ${divisor.kind === 'add' ? `$-(${toLatex(divisor)})$` : `$-${toLatex(divisor)}$`}`,
       why: { detailed: `Abziehen hilft gegen einen Summanden, nicht gegen einen Faktor. ${d} bleibt danach als Faktor stehen.`, short: 'Abziehen hilft nur gegen Summanden.' },
     },
-    ...(side ? [{ label: `Nur die ${sideName(side)} Seite durch ${d}`, why: ONE_SIDED }] : []),
+    ...(side ? [{ label: `Nur die ${sideAccusative(side)} Seite durch ${factorText(divisor)}`, why: ONE_SIDED }] : []),
   ]
 }
 
@@ -149,10 +168,10 @@ export function multiplyMoves(denominator: Expr, side: 'lhs' | 'rhs' | null, can
   const d = m(denominator)
   return [
     {
-      label: `Beide Seiten durch ${d}`,
+      label: `Beide Seiten durch ${factorText(denominator)}`,
       why: { detailed: `Teilen macht den Nenner nur größer, ${d} steht dann zweimal unten. Gegen einen Nenner hilft das Malnehmen.`, short: 'Gegen einen Nenner hilft das Malnehmen.' },
     },
-    ...(side ? [{ label: `Nur die ${sideName(side)} Seite mal ${d}`, why: ONE_SIDED }] : []),
+    ...(side ? [{ label: `Nur die ${sideAccusative(side)} Seite mal ${factorText(denominator)}`, why: ONE_SIDED }] : []),
     ...(cancelInside
       ? [
           {
@@ -172,7 +191,7 @@ export function multiplyMoves(denominator: Expr, side: 'lhs' | 'rhs' | null, can
 export function negateMoves(side: 'lhs' | 'rhs'): WrongMove[] {
   return [
     { label: 'Das Minus einfach weglassen', why: { detailed: 'Ein Minus darfst du nicht einfach weglassen, dann stimmt die Gleichung nicht mehr. Nimm beide Seiten mal $(-1)$.', short: 'Nicht weglassen: beide Seiten mal $(-1)$.' } },
-    { label: `Nur die ${sideName(side)} Seite mal $(-1)$`, why: ONE_SIDED },
+    { label: `Nur die ${sideAccusative(side)} Seite mal $(-1)$`, why: ONE_SIDED },
   ]
 }
 
@@ -191,6 +210,18 @@ export const COMBINE_MOVES: readonly WrongMove[] = [
   {
     label: 'Zähler minus Zähler und Nenner minus Nenner rechnen',
     why: { detailed: 'Brüche fasst du über den Hauptnenner zusammen: erweitern, dann nur die Zähler zusammenrechnen. Die Nenner werden nicht abgezogen.', short: 'Über den Hauptnenner zusammenfassen, Nenner nicht abziehen.' },
+  },
+]
+
+// Zusammenfassen, bevor mit dem Nenner (mit der Variable) malgenommen wird
+export const COMBINE_BEFORE_MULTIPLY_MOVES: readonly WrongMove[] = [
+  COMBINE_MOVES[1],
+  {
+    label: 'Die Nenner auf dieser Seite einfach weglassen',
+    why: {
+      detailed: 'Einen Nenner darfst du nicht einfach weglassen, dann ändert sich der Wert der Seite. Fasse die Seite über den Hauptnenner zu einem Bruch zusammen.',
+      short: 'Nenner nicht weglassen, sondern zusammenfassen.',
+    },
   },
 ]
 
@@ -255,6 +286,7 @@ export const REARRANGE_HINTS = {
   negate: 'Mal $(-1)$ dreht auf beiden Seiten alle Vorzeichen um.',
   reciprocal: 'Steht auf beiden Seiten genau ein Bruch, darfst du beide umdrehen.',
   combine: 'Den Kehrwert darfst du nur von einem einzigen Bruch nehmen.',
+  combineBeforeMultiply: 'Fasse die Seite zuerst zu einem Bruch zusammen. Sonst entsteht beim Malnehmen und Teilen ein Doppelbruch.',
   expand: 'Jeder Summand in der Klammer wird malgenommen: $a(b + c) = ab + ac$.',
   collect: 'Alle Summanden mit der Variable auf eine Seite, alle anderen auf die andere. Was die Seite wechselt, wechselt das Vorzeichen.',
   factor: 'Klammere die Variable aus: $ax + bx = x(a + b)$. Steht ein Summand nur als $x$ da, bleibt in der Klammer eine $1$.',
@@ -290,6 +322,8 @@ export function explainMove(kind: string, operation: string, target: string, unk
       return { detailed: 'Auf beiden Seiten steht genau ein Bruch. Sind zwei Brüche gleich, sind es auch ihre Kehrwerte. So kommt die Variable aus dem Nenner.', short: 'Gleiche Brüche haben gleiche Kehrwerte.' }
     case 'combine':
       return { detailed: 'Bevor du den Kehrwert nimmst, muss auf der Seite genau ein Bruch stehen. Fasse sie deshalb über den Hauptnenner zusammen.', short: 'Erst zu einem Bruch, dann Kehrwert.' }
+    case 'combine-multiply':
+      return { detailed: 'Auf der anderen Seite steht eine Summe mit Brüchen. Fasse sie erst über den Hauptnenner zu einem Bruch zusammen; dann bleibt nach dem Malnehmen mit dem Nenner kein Doppelbruch übrig.', short: 'Erst zu einem Bruch, dann mit dem Nenner malnehmen.' }
     case 'expand':
       return { detailed: 'Die Variable steckt in Klammern. Nach dem Ausmultiplizieren stehen alle Summanden einzeln da und lassen sich sortieren.', short: 'Ausmultiplizieren, dann sortieren.' }
     case 'collect':

@@ -19,7 +19,7 @@ async function enter(page: Page, latex: string) {
 }
 
 async function solveWholeTask(page: Page) {
-  for (let step = 0; step < 16; step++) {
+  for (let step = 0; step < 30; step++) {
     if (await page.getByRole('heading', { name: 'Geschafft!' }).isVisible()) return
     await expect(page.locator('#question')).toBeVisible()
     const count = await answers(page).count()
@@ -74,8 +74,8 @@ test('Von der Startseite zu „Gleichungen umstellen" und eine Aufgabe der Stufe
 })
 
 test('Umstellen Stufe 1: falsche Umformung mit Erklärung, Lernkarte, ganze Aufgabe', async ({ page }) => {
-  // a(5x − b) − c = d nach x
-  await page.goto('./#/ueben/umstellen/1-1')
+  // b(x + a) + c = d nach x
+  await page.goto('./#/ueben/umstellen/1-31')
   await expect(page.locator('#question')).toContainText('auf der linken Seite los?')
   await answers(page).filter({ hasText: 'Nur auf der linken Seite' }).click()
   await expect(wrongFeedback(page)).toBeVisible()
@@ -127,6 +127,18 @@ test('Umstellen Stufe 3: zweimal quadrieren geführt, mit Lernkarte „Wurzel un
   await expect(page.getByTestId('result')).toBeVisible()
   await expect(page.getByRole('navigation', { name: 'Lernkarten zu dieser Aufgabe' }).getByRole('link', { name: 'Wurzel und Quadrat' })).toBeVisible()
   await expectCleanPage(page, 'Stufe 3')
+})
+
+test('Umstellen Stufe 2 frei: Aufgabe aus dem Baukasten, Minus beim Ausklammern verloren, dann richtig', async ({ page }) => {
+  // ax − c = bx − dg nach x
+  await page.goto('./#/frei/umstellen/2-37')
+  await expect(field(page)).toBeVisible()
+  await expectCleanPage(page, 'Start Stufe 2')
+  await enter(page, '\\frac{c-dg}{a+b}')
+  await expect(feedback(page)).toContainText('Beim Ausklammern das Minus verloren')
+  await enter(page, '\\frac{c-dg}{a-b}')
+  await expect(feedback(page)).toContainText('Richtig!')
+  await expectCleanPage(page, 'Richtig Stufe 2')
 })
 
 test('Umstellen frei: noch nicht fertig, Wurzel gliedweise gezogen, dann richtig', async ({ page }) => {
