@@ -13,6 +13,8 @@ const isLetter = (atom: string) => /^[a-z]$/.test(atom) && atom !== 'e'
 
 const rank = (atom: string) => {
   if (atom === 'x' || atom === 'y') return ATOM_ORDER.indexOf(atom)
+  // i (imaginäre Einheit) hinter den Buchstaben: a + bi
+  if (atom === 'i') return 1.75
   if (isLetter(atom)) return 1.5
   if (/^R[a-z]/.test(atom)) return ATOM_ORDER.indexOf('R') + (atom.includes('+') ? -0.5 : 0.5)
   const i = ATOM_ORDER.indexOf(atom)

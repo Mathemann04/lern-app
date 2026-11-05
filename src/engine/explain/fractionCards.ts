@@ -1,4 +1,4 @@
-import { type Expr, add, cos, exp, ln, mul, num, pow, sin, sqrt, sub, variable, x } from '../expr/types.ts'
+import { type Expr, IMAG, add, cos, exp, ln, mul, num, pow, sin, sqrt, sub, variable, x } from '../expr/types.ts'
 import { factorize } from '../fraction/factor.ts'
 import { toFrac } from '../fraction/frac.ts'
 import { type Poly, polyDivideExact } from '../fraction/poly.ts'
@@ -49,6 +49,7 @@ export const FRACTION_CARD_IDS = {
   rootDenominator: 'fraction-root-denominator',
   polyDivision: 'fraction-poly-division',
   partial: 'fraction-partial',
+  imaginary: 'fraction-imaginary',
 } as const
 
 // --- Beispiele bauen ---
@@ -473,5 +474,29 @@ export const FRACTION_CARD_LIST: readonly Card[] = [
       task({ kind: 'partial', part: part(expanded(poly(add(mul(n(5), x), n(1)))), factoredShown(factorize(poly(mul(pow(sub(x, n(1)), n(2)), add(x, n(2))))))) }),
     ],
     errors: ['frac-partial-double-once', 'frac-partial-insert-sign', 'frac-partial-compare'],
+  },
+  {
+    id: FRACTION_CARD_IDS.imaginary,
+    topic: 'brueche',
+    title: 'Komplexe Zahlen teilen',
+    level: 5,
+    rules: [],
+    formulas: ['\\frac{a + b\\mathrm{i}}{c + d\\mathrm{i}} = \\frac{(a + b\\mathrm{i})(c - d\\mathrm{i})}{(c + d\\mathrm{i})(c - d\\mathrm{i})}', '(c + d\\mathrm{i})(c - d\\mathrm{i}) = c^2 + d^2', '\\mathrm{i}^2 = -1'],
+    memo: 'Erweitere mit dem konjugiert Komplexen des Nenners: gleicher Realteil, Imaginärteil mit umgedrehtem Vorzeichen. Dann ist der Nenner eine reelle Zahl, und du teilst Realteil und Imaginärteil einzeln durch ihn.',
+    note: [
+      'So gehst du vor, z. B. bei $\\frac{3 + 4\\mathrm{i}}{1 - 2\\mathrm{i}}$:',
+      '1. Potenzen von $\\mathrm{i}$ ausrechnen: $\\mathrm{i}^2 = -1$, $\\mathrm{i}^3 = -\\mathrm{i}$, $\\mathrm{i}^4 = 1$.',
+      '2. Mit dem konjugiert Komplexen des Nenners erweitern, hier $1 + 2\\mathrm{i}$. Bei einem Nenner wie $2\\mathrm{i}$ ist es $-\\mathrm{i}$.',
+      '3. Ausmultiplizieren, jeder Summand mit jedem, und $\\mathrm{i}^2 = -1$ einsetzen: $\\frac{-5 + 10\\mathrm{i}}{5}$.',
+      '4. Beide Teile durch den Nenner teilen: $-1 + 2\\mathrm{i}$.',
+      'Mit Buchstaben geht es genauso; sie stehen für reelle Zahlen: $\\frac{1}{a + b\\mathrm{i}} = \\frac{a}{a^2 + b^2} - \\frac{b}{a^2 + b^2}\\mathrm{i}$.',
+    ].join('\n'),
+    when: 'Immer wenn eine komplexe Zahl im Nenner steht, etwa beim Kehrwert $\\frac{1}{z}$ oder bei Wechselstrom in der Elektrotechnik. Das Ergebnis schreibst du in der Form $a + b\\,\\mathrm{i}$.',
+    examples: [
+      task({ kind: 'imaginary', terms: [plus(fr(add(n(3), mul(n(4), IMAG)), sub(n(1), mul(n(2), IMAG))))] }),
+      task({ kind: 'imaginary', terms: [plus(fr(n(1), add(a, mul(b, IMAG))))] }),
+      task({ kind: 'imaginary', terms: [plus(fr(add(n(2), pow(IMAG, n(3))), add(n(1), IMAG))), minus(fr(add(n(1), mul(n(2), IMAG))))] }),
+    ],
+    errors: ['frac-imag-power', 'frac-imag-squared', 'frac-imag-cross', 'frac-imag-den', 'frac-imag-split', 'frac-imag-direct', 'frac-imag-minus'],
   },
 ]

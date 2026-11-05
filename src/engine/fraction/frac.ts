@@ -1,4 +1,4 @@
-import { E as EULER, asRational, type Expr, add, div, exp, ln, mul, neg, num, pow, sin, cos, sqrt, variable, x } from '../expr/types.ts'
+import { E as EULER, IMAG, asRational, type Expr, add, div, exp, ln, mul, neg, num, pow, sin, cos, sqrt, variable, x } from '../expr/types.ts'
 import { type Rational, isInteger, isOne, rat, ratNeg, ratSign } from '../rational.ts'
 import {
   type Monomial,
@@ -30,6 +30,7 @@ import {
 // - S² + C² = 1: Beim Vergleichen wird C² durch 1 − S² ersetzt, bis höchstens C¹ übrig bleibt
 //   (trigRewrite, isZeroValue).
 // - tan x = S / C
+// - i, die imaginäre Einheit, mit i² = −1 (komplexe Zahlen, siehe complex.ts)
 
 export type Frac = { readonly num: Poly; readonly den: Poly }
 
@@ -125,9 +126,29 @@ export function trigRewrite(p: Poly, atom: 'S' | 'C'): Poly {
   return result
 }
 
+// --- Komplexe Zahlen ---
+
+// i als eigenes Zeichen; i² = −1 wendet reduceImag an (i³ = −i, i⁴ = 1)
+export const IMAG_ATOM = 'i'
+const imagPowerOf = (t: Poly[number]) => t.mono.find(([a]) => a === IMAG_ATOM)?.[1] ?? 0
+export const isImagTerm = (t: Poly[number]) => imagPowerOf(t) > 0
+
+export function reduceImag(p: Poly): Poly {
+  if (!p.some((t) => imagPowerOf(t) >= 2)) return p
+  return polySum(
+    p.map((t) => {
+      const k = imagPowerOf(t)
+      if (k < 2) return [t]
+      const mono = [...t.mono.filter(([a]) => a !== IMAG_ATOM), ...(k % 2 === 1 ? [[IMAG_ATOM, 1] as const] : [])]
+      return [{ mono, coef: Math.floor(k / 2) % 2 === 1 ? ratNeg(t.coef) : t.coef }]
+    }),
+  )
+}
+
 // Hat ein Polynom überall den Wert 0 (auch mit den Regeln der Bausteine)? Mit cos² x → 1 − sin² x
-// bleibt eine eindeutige Form übrig: genau dann 0, wenn das Polynom auf dem Einheitskreis 0 ist.
-export const isZeroValue = (p: Poly) => isZeroPoly(trigRewrite(rootPoly(p), 'C'))
+// und i² = −1 bleibt eine eindeutige Form übrig: genau dann 0, wenn das Polynom auf dem
+// Einheitskreis 0 ist (Real- und Imaginärteil je 0).
+export const isZeroValue = (p: Poly) => isZeroPoly(trigRewrite(reduceImag(rootPoly(p)), 'C'))
 
 // Gleichwertig: Überkreuz-Malnehmen ergibt dasselbe Polynom (exakt, ohne Zahlenstellen), mit den
 // Regeln der Bausteine: (√x)² = x und sin² x + cos² x = 1
@@ -176,7 +197,7 @@ export function toFrac(e: Expr): Frac | null {
     case 'var':
       return LETTERS.has(e.name) ? fracOf(polyAtom(e.name)) : null
     case 'const':
-      return e.name === 'e' ? fracOf(polyAtom('e')) : null
+      return e.name === 'e' ? fracOf(polyAtom('e')) : e.name === 'i' ? fracOf(polyAtom(IMAG_ATOM)) : null
     case 'root': {
       if (e.index !== 2) return null
       if (e.arg.kind === 'var' && LETTERS.has(e.arg.name)) return fracOf(polyAtom(rootOf(e.arg.name)))
@@ -276,17 +297,21 @@ function atomExpr(atom: string): Expr {
       return cos(x)
     case 'e':
       return EULER
+    case IMAG_ATOM:
+      return IMAG
     default:
       return variable(atom)
   }
 }
 
 // Reihenfolge beim Schreiben eines Produkts: die Zahl e zuerst, dann Buchstaben alphabetisch
-// (ax, 2xy), Bausteine in fester Reihenfolge (\sin x \cos x)
+// (ax, 2xy), i hinter den Buchstaben (2b\mathrm{i}), Bausteine in fester Reihenfolge (\sin x \cos x)
 const BLOCK_ORDER = ['E', 'L', 'S', 'C', 'T', 'R']
 export const displayRank = (atom: string) =>
   atom === 'e'
     ? 0
+    : atom === IMAG_ATOM
+      ? 122.5
     : BLOCK_ORDER.includes(atom)
       ? 100 + BLOCK_ORDER.indexOf(atom)
       : isRootAtom(atom)
@@ -310,11 +335,13 @@ function termExpr(coef: Rational, mono: Monomial): Expr {
   return mul(num(coef), ...factors)
 }
 
-// Polynom als Summe; ascending: kleinster Grad zuerst (9 − x² statt −x² + 9)
+// Polynom als Summe; ascending: kleinster Grad zuerst (9 − x² statt −x² + 9). Mit i steht der
+// Realteil vor dem Imaginärteil: 3 + 4\mathrm{i}, a - b\mathrm{i}
 export function polyExpr(p: Poly, order: 'descending' | 'ascending' = 'descending'): Expr {
   const shown = displayRoots(p)
   if (shown.length === 0) return num(0)
-  const terms = order === 'ascending' ? [...shown].reverse() : shown
+  const ordered = order === 'ascending' ? [...shown].reverse() : shown
+  const terms = ordered.some(isImagTerm) ? [...ordered.filter((t) => !isImagTerm(t)), ...ordered.filter(isImagTerm)] : ordered
   return add(...terms.map((t) => termExpr(t.coef, t.mono)))
 }
 

@@ -24,7 +24,8 @@ export type FnName =
   | 'artanh'
 
 export type Num = { readonly kind: 'num'; readonly value: Rational; readonly decimal?: boolean }
-export type Const = { readonly kind: 'const'; readonly name: 'e' | 'pi' }
+// e: Eulersche Zahl, pi: Kreiszahl, i: imaginäre Einheit (i² = −1, nur in der Bruch-Engine gerechnet)
+export type Const = { readonly kind: 'const'; readonly name: 'e' | 'pi' | 'i' }
 export type Var = { readonly kind: 'var'; readonly name: string }
 export type Add = { readonly kind: 'add'; readonly terms: readonly Expr[] }
 // explicit: beim Ausgeben überall Malpunkt setzen (für eingesetzte Formeln wie u' · v)
@@ -55,6 +56,7 @@ export function dec(value: Rational): Num {
 
 export const E: Const = { kind: 'const', name: 'e' }
 export const PI: Const = { kind: 'const', name: 'pi' }
+export const IMAG: Const = { kind: 'const', name: 'i' }
 export const variable = (name: string): Var => ({ kind: 'var', name })
 export const x: Var = variable('x')
 export const y: Var = variable('y')

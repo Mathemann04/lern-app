@@ -2,7 +2,8 @@ import { explainFractionError, listing } from '../explain/fractionTexts.ts'
 import { type Expr, mul } from '../expr/types.ts'
 import { type FracWrong, fractionWrongAnswers } from '../fraction/errorRules.ts'
 import { factoredPoly, factorize, reduceFrac } from '../fraction/factor.ts'
-import { type Frac, fracDiv, fracEquals, fracNeg, isRootAtom, radicandLetters, rootForm, toFrac } from '../fraction/frac.ts'
+import { type Frac, fracDiv, fracEquals, fracNeg, isRootAtom, radicandLetters, reduceImag, rootForm, toFrac } from '../fraction/frac.ts'
+import { hasImag, imagParts } from '../fraction/complex.ts'
 import { atomsOf, constValue, isZeroPoly, polyContent, totalDegree } from '../fraction/poly.ts'
 import { type FracSolution, rationalizedFrac, solveFraction } from '../fraction/solve.ts'
 import { type FractionTask, partsOf, shownPoly } from '../fraction/task.ts'
@@ -25,6 +26,8 @@ import type { FreeTask, FreeVerdict } from './freeTask.ts'
 // Ist der Wert ein anderer, wird mit den falschen Ergebnissen der typischen Fehler verglichen.
 // Partialbruchzerlegung: fertig ist eine Summe aus dem ganzen Teil und einfachen Brüchen, je Bruch
 // eine Zahl im Zähler und ein Linearfaktor (oder sein Quadrat) im Nenner, keiner doppelt.
+// Komplexe Zahlen: fertig ist a + bi (Realteil und Imaginärteil je gekürzt, jeder einmal) oder ein
+// gekürzter Bruch \frac{p + qi}{r} mit reellem Nenner; kein i im Nenner, keine Potenz von i.
 
 export type FractionCheckContext = {
   readonly task: FractionTask
@@ -35,6 +38,8 @@ export type FractionCheckContext = {
   readonly letters: readonly string[]
   // Bausteine wie e^x, ln x, sin x, cos x in der Aufgabe
   readonly blocks: boolean
+  // komplexe Zahlen: i in der Aufgabe
+  readonly imag: boolean
   // √x in der Aufgabe: Die Eingabe wird in √x umgerechnet (x = (√x)²)
   readonly root: boolean
   // die Wurzeln der Aufgabe (R = √x, Ra = √a, Rx+h = √(x + h)), in die umgerechnet wird
@@ -42,7 +47,20 @@ export type FractionCheckContext = {
 }
 
 // Warum ein gleichwertiges Ergebnis noch nicht fertig ist
-export type Unfinished = 'several' | 'nested' | 'numerator' | 'denominator' | 'not-reduced' | 'product' | 'decimal' | 'conjugate' | 'partial' | 'partial-combine'
+export type Unfinished =
+  | 'several'
+  | 'nested'
+  | 'numerator'
+  | 'denominator'
+  | 'not-reduced'
+  | 'product'
+  | 'decimal'
+  | 'conjugate'
+  | 'partial'
+  | 'partial-combine'
+  | 'imag-den'
+  | 'imag-power'
+  | 'imag-combine'
 
 export type FractionVerdict =
   | { readonly kind: 'unreadable'; readonly message: string }
@@ -53,8 +71,8 @@ export type FractionVerdict =
   | { readonly kind: 'wrongFactor'; readonly answer: Expr }
   | { readonly kind: 'wrong'; readonly answer: Expr }
 
-// Buchstaben sind Kleinbuchstaben (außer e, der Eulerschen Zahl); Bausteine heißen E, L, S, C, R
-const isLetter = (atom: string) => /^[a-z]$/.test(atom) && atom !== 'e'
+// Buchstaben sind Kleinbuchstaben (außer e, der Eulerschen Zahl, und i); Bausteine heißen E, L, S, C, R
+const isLetter = (atom: string) => /^[a-z]$/.test(atom) && atom !== 'e' && atom !== 'i'
 const BLOCK_ATOMS = ['E', 'L', 'S', 'C']
 
 export function prepareFractionCheck(task: FractionTask): FractionCheckContext {
@@ -66,7 +84,7 @@ export function prepareFractionCheck(task: FractionTask): FractionCheckContext {
   // x und y zuerst, dann alphabetisch; bei √a auch a
   const rank = (l: string) => (l === 'x' ? 0 : l === 'y' ? 1 : 2)
   const letters = [...new Set([...atoms.filter(isLetter), ...roots.flatMap(radicandLetters), ...(blocks ? ['x'] : [])])].sort((a, b) => rank(a) - rank(b) || a.localeCompare(b))
-  return { task, solution, wrongs: fractionWrongAnswers(task, solution), letters, blocks, root, roots }
+  return { task, solution, wrongs: fractionWrongAnswers(task, solution), letters, blocks, imag: atoms.includes('i'), root, roots }
 }
 
 export function checkFractionAnswer(context: FractionCheckContext, latex: string): FractionVerdict {
@@ -92,7 +110,8 @@ export function checkFractionAnswer(context: FractionCheckContext, latex: string
 
   const correct = context.solution.value
   if (fracEquals(value, correct)) {
-    const reason = context.task.kind === 'partial' ? partialUnfinished(answer) : unfinished(answer, value, context.solution, context.task)
+    const reason =
+      context.task.kind === 'partial' ? partialUnfinished(answer) : context.task.kind === 'imaginary' ? imagUnfinished(answer) : unfinished(answer, value, context.solution, context.task)
     return reason ? { kind: 'unfinished', answer, reason } : { kind: 'correct', answer }
   }
   const wrong = context.wrongs.find((w) => w.value && fracEquals(value, w.value))
@@ -301,6 +320,132 @@ function partialUnfinished(answer: Expr): Unfinished | null {
   return new Set(like).size < like.length ? 'partial-combine' : null
 }
 
+// --- Komplexe Zahlen ---
+
+// Kommt i im Term vor?
+function containsImag(e: Expr): boolean {
+  if (e.kind === 'const') return e.name === 'i'
+  switch (e.kind) {
+    case 'add':
+      return e.terms.some(containsImag)
+    case 'mul':
+      return e.factors.some(containsImag)
+    case 'neg':
+    case 'root':
+    case 'fn':
+      return containsImag(e.arg)
+    case 'div':
+      return containsImag(e.num) || containsImag(e.den)
+    case 'pow':
+      return containsImag(e.base) || containsImag(e.exp)
+    case 'log':
+      return containsImag(e.base) || containsImag(e.arg)
+    default:
+      return false
+  }
+}
+
+// Steht i im Nenner (auch als Hochzahl mit Minus)?
+function imagInDen(e: Expr): boolean {
+  switch (e.kind) {
+    case 'div':
+      return containsImag(e.den) || imagInDen(e.num)
+    case 'pow': {
+      const k = toFrac(e.exp)
+      const negative = k !== null && k.num.length === 1 && k.num[0].coef.n < 0n
+      return (negative && containsImag(e.base)) || imagInDen(e.base)
+    }
+    case 'add':
+      return e.terms.some(imagInDen)
+    case 'mul':
+      return e.factors.some(imagInDen)
+    case 'neg':
+      return imagInDen(e.arg)
+    default:
+      return false
+  }
+}
+
+// Ein Faktor ohne Summe, in dem i steckt: i, 2i, i²
+const isBareImag = (e: Expr): boolean => containsImag(e) && !hasBracketSum(e)
+
+// Noch eine Potenz von i (i², (2i)³) oder i mal i?
+function hasImagPowerExpr(e: Expr): boolean {
+  switch (e.kind) {
+    case 'pow':
+      return isBareImag(e.base) || hasImagPowerExpr(e.base)
+    case 'mul':
+      return factorsOf(e).filter(isBareImag).length >= 2 || e.factors.some(hasImagPowerExpr)
+    case 'add':
+      return e.terms.some(hasImagPowerExpr)
+    case 'neg':
+      return hasImagPowerExpr(e.arg)
+    case 'div':
+      return hasImagPowerExpr(e.num) || hasImagPowerExpr(e.den)
+    default:
+      return false
+  }
+}
+
+// Eine Klammer mit i, die noch ausmultipliziert werden muss: (1 + i) \cdot 2, (2 - i)(3 - 4i)
+function hasImagBracket(e: Expr): boolean {
+  switch (e.kind) {
+    case 'add':
+      return containsImag(e)
+    case 'mul':
+      return e.factors.some(hasImagBracket)
+    case 'neg':
+      return hasImagBracket(e.arg)
+    case 'div':
+      return hasImagBracket(e.num) || hasImagBracket(e.den)
+    case 'pow':
+      return hasImagBracket(e.base)
+    default:
+      return false
+  }
+}
+
+// Ein Bruch mit reellem Nenner ist gekürzt: Nenner vom kleinsten Grad, Zahlen ohne gemeinsamen Teiler
+function isReducedFrac(f: Frac): boolean {
+  const r = reduceFrac(f)
+  if (totalDegree(f.den) > totalDegree(factoredPoly(r.den))) return false
+  const [cn, cd] = [polyContent(f.num), polyContent(f.den)]
+  if (!isInteger(cn) || !isInteger(cd)) return false
+  let g = ratAbs(cn).n
+  for (let b = ratAbs(cd).n; b !== 0n; ) [g, b] = [b, g % b]
+  return g === 1n
+}
+
+function imagUnfinished(answer: Expr): Unfinished | null {
+  if (hasDecimal(answer)) return 'decimal'
+  if (hasImagPowerExpr(answer)) return 'imag-power'
+  if (imagInDen(answer)) return 'imag-den'
+  if (hasOpenProduct(answer)) return 'product'
+  const summands = (e: Expr): Expr[] => (e.kind === 'add' ? e.terms.flatMap(summands) : e.kind === 'neg' ? summands(e.arg) : [e])
+  const all = summands(answer)
+  // ein Bruch \frac{p + qi}{r}: der Zähler darf eine Summe mit i sein
+  const single = all.length === 1 && all[0].kind === 'div' ? all[0] : null
+  if (single ? hasImagBracket(single.den) || (single.num.kind !== 'add' && hasImagBracket(single.num)) || (single.num.kind === 'add' && single.num.terms.some(hasImagBracket)) : all.some(hasImagBracket)) return 'imag-combine'
+  let [real, imaginary] = [0, 0]
+  for (const s of all) {
+    const f = toFrac(s)
+    if (!f) return 'imag-combine'
+    const value = { num: reduceImag(f.num), den: reduceImag(f.den) }
+    if (hasImag(value.den)) return 'imag-den'
+    const { re, im } = imagParts(value.num)
+    if (re.length > 0 && im.length > 0) {
+      // ein Bruch \frac{p + qi}{r}: nur allein und mit zusammengefasstem Zähler
+      const core = s.kind === 'neg' ? s.arg : s
+      if (all.length > 1 || core.kind !== 'div' || !isCombined(core.num)) return 'imag-combine'
+      real++
+      imaginary++
+    } else if (im.length > 0) imaginary++
+    else real++
+    if (!isReducedFrac(value)) return 'not-reduced'
+  }
+  return real > 1 || imaginary > 1 ? 'imag-combine' : null
+}
+
 // --- Für die Oberfläche ---
 
 export const UNFINISHED_TEXTS: Readonly<Record<Unfinished, string>> = {
@@ -314,6 +459,9 @@ export const UNFINISHED_TEXTS: Readonly<Record<Unfinished, string>> = {
   partial:
     'Noch nicht fertig: Zerlege in einfache Brüche. Je Faktor des Nenners ein Bruch mit einer Zahl im Zähler, ein doppelter Faktor auch mit seinem Quadrat, davor der ganze Teil aus der Polynomdivision.',
   'partial-combine': 'Fasse noch zusammen: Jeder Nenner kommt nur einmal vor, und der ganze Teil hat keine gleichartigen Summanden und keine Klammern.',
+  'imag-den': 'Im Nenner steht noch $\\mathrm{i}$. Erweitere mit dem konjugiert Komplexen des Nenners, dann ist der Nenner reell.',
+  'imag-power': 'Rechne die Potenzen von $\\mathrm{i}$ noch aus: $\\mathrm{i}^2 = -1$.',
+  'imag-combine': 'Fasse noch zusammen: Schreibe das Ergebnis als $a + b\\,\\mathrm{i}$, mit einem Realteil und einem Imaginärteil.',
   conjugate:
     'Noch nicht fertig: Erweitere mit dem Gegenstück der Summe mit Wurzel (dieselben Teile, anderes Vorzeichen). Mit der dritten binomischen Formel verschwindet die Wurzel aus dem Nenner, beim Differenzenquotienten kürzt sich danach $h$.',
 }
@@ -346,7 +494,7 @@ export function prepareFractionFree(ref: TaskRef): FreeTask {
   return {
     answerLabel: '=',
     inputLabel: 'Dein Ergebnis',
-    keyboard: { kind: 'fraction', letters: context.letters, blocks: context.blocks, root: context.root },
+    keyboard: { kind: 'fraction', letters: context.letters, blocks: context.blocks, root: context.root, ...(context.imag ? { imag: true } : {}) },
     check: (latex) => fractionFreeVerdict(checkFractionAnswer(context, latex)),
   }
 }

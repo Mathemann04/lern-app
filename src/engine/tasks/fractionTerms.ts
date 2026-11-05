@@ -35,6 +35,7 @@ import {
   differenceQuotient,
   level2Kit as level2Kit_,
   partialTask,
+  imaginaryTask,
   monomialReduce,
   rootTask,
   worldNested,
@@ -233,6 +234,15 @@ const level5Partial: FractionTemplate = {
   build: partialTask,
 }
 
+const level5Imaginary: FractionTemplate = {
+  id: 'komplexe-zahlen',
+  level: 5,
+  share: 0.1,
+  label: 'Komplexe Zahlen teilen: mit dem konjugiert Komplexen erweitern, Ergebnis $a + b\\,\\mathrm{i}$',
+  focus: ['frac-imag-power', 'frac-imag-squared', 'frac-imag-cross', 'frac-imag-den', 'frac-imag-split', 'frac-imag-direct', 'frac-imag-minus'],
+  build: imaginaryTask,
+}
+
 export const FRACTION_TEMPLATES: readonly FractionTemplate[] = [
   level1Kit,
   level2Kit,
@@ -246,6 +256,7 @@ export const FRACTION_TEMPLATES: readonly FractionTemplate[] = [
   level5Trig,
   level5Exp,
   level5Partial,
+  level5Imaginary,
 ]
 
 export function fractionTemplatesForLevel(level: Level): FractionTemplate[] {

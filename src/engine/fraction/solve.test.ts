@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { toLatex } from '../expr/print.ts'
-import { type Expr, add, cos, exp, mul, num, pow, sin, sqrt, sub, variable, x } from '../expr/types.ts'
+import { type Expr, IMAG, add, cos, exp, mul, num, pow, sin, sqrt, sub, variable, x } from '../expr/types.ts'
 import { ratToNumber } from '../rational.ts'
 import { toFrac } from './frac.ts'
 import { type Poly, polyDivideExact } from './poly.ts'
@@ -202,5 +202,41 @@ describe('Partialbruchzerlegung', () => {
     const t = task({ kind: 'partial', part: fr(add(x2, num(1)), sub(x, num(1))) })
     expect(lines(t)).toEqual(['Polynomdivision: x + 1 + \\frac{2}{x - 1}', 'Ansatz: x + 1 + \\frac{A}{x - 1}', 'Zahl bestimmen: 2'])
     expect(toLatex(solveFraction(t).result)).toBe('x + 1 + \\frac{2}{x - 1}')
+  })
+})
+
+describe('Komplexe Zahlen teilen', () => {
+  const z = (re: number, im: number) => add(num(re), mul(num(im), IMAG))
+
+  it('Beispiel aus dem Plan: erweitern, ausmultiplizieren, aufteilen', () => {
+    const t = task({ kind: 'imaginary', terms: [plus(fr(z(3, 4), z(1, -2)))] })
+    expect(taskLatex(t)).toBe('\\frac{3 + 4\\mathrm{i}}{1 - 2\\mathrm{i}}')
+    expect(lines(t)).toEqual([
+      'Mit dem konjugiert Komplexen erweitern: \\frac{(3 + 4\\mathrm{i})(1 + 2\\mathrm{i})}{(1 - 2\\mathrm{i})(1 + 2\\mathrm{i})}',
+      'Ausmultiplizieren: \\frac{-5 + 10\\mathrm{i}}{5}',
+      'In Realteil und Imaginärteil aufteilen: -1 + 2\\mathrm{i}',
+    ])
+    expect(solveFraction(t).excluded).toBeNull()
+  })
+
+  it('Potenzen von i zuerst, Ergebnis mit Brüchen', () => {
+    const t = task({ kind: 'imaginary', terms: [plus(fr(add(num(2), pow(IMAG, num(3))), z(1, 1)))] })
+    expect(lines(t)[0]).toBe('Potenzen ausrechnen: \\frac{2 - \\mathrm{i}}{1 + \\mathrm{i}}')
+    expect(toLatex(solveFraction(t).result)).toBe('\\frac{1}{2} - \\frac{3}{2}\\mathrm{i}')
+  })
+
+  it('Nenner nur mit i: mit −i erweitern; dazu minus eine komplexe Zahl', () => {
+    const t = task({ kind: 'imaginary', terms: [plus(fr(z(3, 2), mul(num(2), IMAG))), minus(fr(z(1, 1)))] })
+    expect(taskLatex(t)).toBe('\\frac{3 + 2\\mathrm{i}}{2\\mathrm{i}} - (1 + \\mathrm{i})')
+    expect(lines(t)).toEqual([
+      'Mit dem konjugiert Komplexen erweitern: \\frac{(3 + 2\\mathrm{i}) \\cdot (-\\mathrm{i})}{2\\mathrm{i} \\cdot (-\\mathrm{i})} - (1 + \\mathrm{i})',
+      'Ausmultiplizieren: \\frac{2 - 3\\mathrm{i}}{2} - (1 + \\mathrm{i})',
+      'Realteile und Imaginärteile zusammenfassen: -\\frac{5}{2}\\mathrm{i}',
+    ])
+  })
+
+  it('mit Buchstaben: Realteil und Imaginärteil je ein Bruch', () => {
+    const t = task({ kind: 'imaginary', terms: [plus(fr(num(1), add(variable('a'), mul(variable('b'), IMAG))))] })
+    expect(toLatex(solveFraction(t).result)).toBe('\\frac{a}{a^{2} + b^{2}} - \\frac{b}{a^{2} + b^{2}}\\mathrm{i}')
   })
 })

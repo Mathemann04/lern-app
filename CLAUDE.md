@@ -76,7 +76,7 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   Bildschirm-Tastatur `keyboard.ts`, je Thema über `keyboardLayouts`:
   Ableiten mit zwei Seiten „Standard" (mit Taste y) und „Mehr Funktionen",
   Brüche mit den Buchstaben der Aufgabe, bei Bausteinen $e^x$, ln, sin,
-  cos, tan, bei Wurzeln √; Umstellen mit allen Buchstaben der Aufgabe
+  cos, tan, bei Wurzeln √, bei komplexen Zahlen $\mathrm{i}$; Umstellen mit allen Buchstaben der Aufgabe
   (bis zu sieben) und √; wird erst im freien Modus geladen), gemeinsame Teile in
   `src/ui/task/`. Lernkarten in
   `src/ui/cards/` (`CardSheet.tsx`: Fenster über der Aufgabe, die
@@ -90,7 +90,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
 - `src/engine/`: Mathe-Engine, reines TypeScript
   - `rational.ts`: exakte Brüche (bigint)
   - `expr/types.ts`: Termbaum in *Aufgabenform* (Bruch, Wurzel, Minus bleiben,
-    wie geschrieben) mit Bauhelfern
+    wie geschrieben) mit Bauhelfern; Konstanten $e$, $\pi$ und $\mathrm{i}$
+    (`IMAG`, gerechnet nur in der Bruch-Engine, reell ausgewertet `NaN`)
   - `expr/normalize.ts`: *Normalform* zum Vergleichen; `expr/display.ts`:
     `simplify` = Normalform als *Anzeigeform* (schöne Schreibweise)
   - `expr/print.ts`: LaTeX in deutscher Schreibweise; `expr/evaluate.ts`,
@@ -117,7 +118,9 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     zusammengefasst, gekürzt, kein offenes Produkt wie $3 \cdot 3b^2$,
     keine Dezimalzahl, bei „Wurzel beseitigen" keine Wurzel im Nenner, bei
     Partialbrüchen eine Summe aus ganzem Teil und einfachen Brüchen mit
-    einer Zahl im Zähler, jeder Nenner einmal;
+    einer Zahl im Zähler, jeder Nenner einmal, bei komplexen Zahlen
+    $a + b\,\mathrm{i}$ oder ein gekürzter Bruch mit reellem Nenner, ohne
+    $\mathrm{i}$ im Nenner und ohne Potenz von $\mathrm{i}$;
     sonst typischer Fehler, bei Rechenbäumen auch Fehler
     einer Teilrechnung bis zum Ergebnis weitergerechnet);
     `check/rearrangeAnswer.ts`: freie Eingabe beim Umstellen (rechte Seite
@@ -132,7 +135,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     Lernkarten (`cards.ts`: Ordner `TOPICS`, je Regel Formel, Merksatz,
     Beispiele, typische Fehler; Ordner „Brüche" in `fractionCards.ts`, in
     Stufe 5 „Bausteine mit eigenen Regeln", „Dritte Potenzen", „Wurzeln
-    im Nenner beseitigen", „Polynomdivision" und „Partialbruchzerlegung") und
+    im Nenner beseitigen", „Polynomdivision", „Partialbruchzerlegung" und
+    „Komplexe Zahlen teilen") und
     durchgerechnete Beispiele (`example.ts` aus `derive`,
     `fractionExample.ts` aus der Bruch-Engine, bei Partialbrüchen mit den
     Gleichungen für die Zahlen). Texte für Brüche in
@@ -158,7 +162,9 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     anwenden, Ausmultiplizieren, Wurzel beseitigen (mit dem Gegenstück
     erweitern, dann ausmultiplizieren), Partialbrüche `planPartial`
     (Polynomdivision, Nenner zerlegen, Ansatz, je Zahl eine Frage, zuletzt
-    die Zerlegung), innerer Doppelbruch zuerst, bei mehreren
+    die Zerlegung), komplexe Zahlen (Potenzen von $\mathrm{i}$, mit dem
+    konjugiert Komplexen erweitern, ausmultiplizieren, aufteilen; Schritte
+    `imag-…`), innerer Doppelbruch zuerst, bei mehreren
     Rechenarten jede Klammer zu einem Bruch; Rechenbaum `planTree`: erst
     Dezimalzahlen, dann „Was rechnest du zuerst?", wenn Punkt vor Strich
     oder eine Klammer zählt, dann je Teilrechnung die Schritte der passenden
@@ -186,7 +192,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     wie $a^3 - b^3$ und in Gruppen wie $ax - ay + bx - by$, `groupFactor`),
     `task.ts` (Aufgabenformen: kürzen, plus/minus, mal, geteilt,
     Doppelbruch, mehrere Rechenarten `mixed`, verschachtelter Doppelbruch
-    `nested`; Partialbruchzerlegung `partial`; Zähler wie $(x + h)^2 - x^2$ oder $(x + h)^3 - x^3$; Regel eines
+    `nested`; Partialbruchzerlegung `partial`; komplexe Zahlen teilen
+    `imaginary`; Zähler wie $(x + h)^2 - x^2$ oder $(x + h)^3 - x^3$; Regel eines
     Bausteins `rule`, auch „Wurzel beseitigen" `conjugate`;
     Rechenbaum `tree` aus Plus/Minus, Mal, Geteilt, Klammern, Doppelbruch,
     Blätter auch als Dezimalzahl;
@@ -200,7 +207,11 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     (Partialbruchzerlegung: Polynomdivision, Nenner in Linearfaktoren, auch
     doppelt, Ansatz mit $A$, $B$, $C$, Zahlen durch Einsetzen der
     Nullstellen und Koeffizientenvergleich, `partialWorkOf`; falsche
-    Zahlen weitergerechnet `termsWith`), `tree.ts` (Rechenbaum: Stufen `treeStages`, jede Stufe
+    Zahlen weitergerechnet `termsWith`), `complex.ts` (komplexe Zahlen:
+    $\mathrm{i}$ als Atom `i` mit $\mathrm{i}^2 = -1$, `reduceImag` in
+    `frac.ts`, auch beim Vergleich; Real- und Imaginärteil `imagParts`,
+    konjugiert Komplexes `conjugateFactor`, Ergebnis $a + b\,\mathrm{i}$
+    `complexExpr`; Buchstaben gelten als reell), `tree.ts` (Rechenbaum: Stufen `treeStages`, jede Stufe
     eine der Formen oben, von innen nach außen, Punkt vor Strich;
     falsche Reihenfolgen für die Fehler), `errorRules.ts` (typische Fehler,
     Ids `frac-…`; `freeOnly`: nur für die Diagnose im freien Modus).
@@ -230,7 +241,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     auch im Inneren, Doppelbruch im Doppelbruch `worldNested`,
     Differenzenquotienten `differenceQuotient`, dritte Potenzen `cubeTask`,
     Wurzeln `rootTask`, Bausteine gemischt `blockPairTask`,
-    Partialbrüche `partialTask`; die Vorlagen der Stufe 5 haben Anteile
+    Partialbrüche `partialTask`, komplexe Zahlen `imaginaryTask`; die
+    Vorlagen der Stufe 5 haben Anteile
     `weight`, später dazugekommene Vorlagen einen festen Anteil `share`,
     vorweg mit eigenem Zufall gewählt, damit die übrigen Nummern ihre
     Aufgabe behalten); Abwechslung

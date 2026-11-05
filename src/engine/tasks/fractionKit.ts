@@ -1,7 +1,8 @@
 import { factoredPoly, reduceFrac } from '../fraction/factor.ts'
 import type { Frac } from '../fraction/frac.ts'
-import { type Poly, atomsOf, constValue, polyAdd, polyAtom, polyConst, polyDivideExact, polyEquals, polyMul, polyNeg, polyPow, polyProduct, polyScale, polySub, polySum, primitivePart, totalDegree } from '../fraction/poly.ts'
-import { rootOf, sumRootOf } from '../fraction/frac.ts'
+import { type Poly, atomsOf, constValue, polyAdd, polyContent, polyAtom, polyConst, polyDivideExact, polyEquals, polyMul, polyNeg, polyPow, polyProduct, polyScale, polySub, polySum, primitivePart, totalDegree } from '../fraction/poly.ts'
+import { reduceImag, rootOf, sumRootOf } from '../fraction/frac.ts'
+import { complexParts, imagParts } from '../fraction/complex.ts'
 import { rat, ratAbs, ratDiv } from '../rational.ts'
 import { fractionWrongAnswers } from '../fraction/errorRules.ts'
 import { type FracSolution, cancelledFactor, isPlayableTree, solveFraction, solveTree } from '../fraction/solve.ts'
@@ -9,6 +10,8 @@ import { toLatex } from '../expr/print.ts'
 import {
   type FractionTask,
   type Part,
+  type Shown,
+  type Signed,
   type TreeNode,
   type TreeTerm,
   binomialShown,
@@ -25,12 +28,14 @@ import {
   quotientNode,
   sumNode,
   isWhole,
+  shownPoly,
+  taskFrac,
   taskLatex,
   term,
   treeFrac,
   treeLeaves,
 } from '../fraction/task.ts'
-import { type Rng } from '../random/rng.ts'
+import { type Rng, createRng } from '../random/rng.ts'
 import type { Level } from './taskNumber.ts'
 
 // Baukasten für Bruchaufgaben (M2b): Statt weniger fester Vorlagen wird jede Aufgabe aus Teilen
@@ -953,3 +958,143 @@ export function partialTask(rng: Rng): FractionTask {
     if (fractionWrongAnswers(task).some((w) => w.rule.step === 'coef')) return task
   }
 }
+
+// --- Komplexe Zahlen teilen (M2b Schritt 5) ---
+//
+// Ein Bruch mit i im Nenner. Zähler: a + bi, nur a, nur bi, ein Produkt (a + bi)(c + di), ein
+// Quadrat (a + bi)² oder mit einer Potenz wie a + b\mathrm{i}^3; Nenner: c + di, nur di oder mit
+// Potenz. Manchmal mit Buchstaben (\frac{1}{a + b\mathrm{i}}, \frac{x + \mathrm{i}}{x - \mathrm{i}}),
+// manchmal plus oder minus eine komplexe Zahl. Die Zahlen bleiben klein, das Ergebnis hat einen
+// Imaginärteil, und es gibt mindestens drei typische Fehler.
+type ImagNum = 'complex' | 'real' | 'imag' | 'product' | 'square' | 'power'
+type ImagDen = 'complex' | 'imag' | 'power'
+
+const IMAG_LETTER_PAIRS = [
+  ['a', 'b'],
+  ['x', 'y'],
+  ['u', 'v'],
+  ['p', 'q'],
+  ['r', 's'],
+] as const
+
+export function imaginaryTask(source: Rng): FractionTask {
+  // eigener Zufall: Die Nummern, für die diese Vorlage gewählt wird, haben sonst einen Zufall mit
+  // ähnlichem Anfang, und Minus käme bei den ersten Nummern kaum vor
+  const rng = createRng(`komplex:${source.int(0, 999_999_999)}`)
+  const unit = (k = 1) => polyAtom('i', k)
+  // re + im·i^k
+  const z = (re: number | Poly, im: number | Poly, k = 1): Poly =>
+    polyAdd(typeof re === 'number' ? polyConst(re) : re, polyMul(typeof im === 'number' ? polyConst(im) : im, unit(k)))
+  const small = () => rng.pick([-4, -3, -2, -1, 1, 2, 3, 4])
+  const gcd = (a: number, b: number): number => (b === 0 ? Math.abs(a) : gcd(b, a % b))
+  // c + di mit teilerfremden Zahlen und kleinem c² + d²
+  const denPair = (): [number, number] => {
+    for (;;) {
+      const [c, d] = [small(), small()]
+      if (gcd(c, d) === 1 && c * c + d * d <= 25) return [c, d]
+    }
+  }
+  for (;;) {
+    let num: Shown
+    let den: Shown
+    if (rng.chance(0.2)) {
+      // Buchstaben: zwei Buchstaben (a + bi) oder ein Buchstabe mit Zahl (x + 2i)
+      const [p, q] = rng.pick(IMAG_LETTER_PAIRS)
+      const [a, b] = [polyAtom(p), polyAtom(q)]
+      const two = rng.chance(0.6)
+      const second = two ? b : polyConst(rng.int(1, 3))
+      const d = z(a, rng.chance(0.5) ? second : polyNeg(second))
+      // Zähler: eine Zahl, das konjugiert Komplexe des Nenners, die Teile vertauscht (b + ai) bzw.
+      // mit anderer Zahl (x + 3i), nur der Buchstabe oder nur i
+      const numerators = [
+        () => polyConst(rng.pick([1, 1, 2, 3])),
+        () => z(a, polyNeg(imagPartOf(d))),
+        () => (two ? z(imagPartOf(d), a) : z(a, small())),
+        () => a,
+        () => polyMul(polyConst(rng.pick([1, 1, 2, -1])), unit()),
+      ]
+      num = expanded(rng.pick(numerators)())
+      den = expanded(d)
+      if (polyEquals(shownPolyOf(num), shownPolyOf(den))) continue
+    } else {
+      const nk = weighted<ImagNum>(rng, [
+        ['complex', 3],
+        ['real', 1.2],
+        ['imag', 0.8],
+        ['product', 1],
+        ['square', 0.7],
+        ['power', 1],
+      ])
+      const dk = weighted<ImagDen>(rng, [
+        ['complex', 4],
+        ['imag', 1],
+        ['power', 0.8],
+      ])
+      const re = () => rng.int(1, 6) * (rng.chance(0.75) ? 1 : -1)
+      switch (nk) {
+        case 'complex':
+          num = expanded(z(re(), small()))
+          break
+        case 'real':
+          num = expanded(polyConst(rng.pick([1, 2, 3, 4, 5, 6, 10])))
+          break
+        case 'imag':
+          num = expanded(polyMul(polyConst(small()), unit()))
+          break
+        case 'product': {
+          const [f, g] = [z(rng.int(1, 3), small()), z(rng.int(1, 3), small())]
+          if (polyEquals(f, g) || ratAbs(polyContent(f)).n !== 1n || ratAbs(polyContent(g)).n !== 1n) continue
+          num = factoredShown({ coef: rat(1), factors: [{ poly: f, exp: 1 }, { poly: g, exp: 1 }] })
+          break
+        }
+        case 'square': {
+          const f = z(rng.int(1, 3), small())
+          if (ratAbs(polyContent(f)).n !== 1n) continue
+          num = factoredShown({ coef: rat(1), factors: [{ poly: f, exp: 2 }] })
+          break
+        }
+        case 'power':
+          num = expanded(z(re(), small(), rng.pick([2, 3, 3, 4, 5, 7])))
+          break
+      }
+      if (dk === 'imag') den = expanded(polyMul(polyConst(rng.pick([1, 2, 3, 4, -1, -2])), unit()))
+      else if (dk === 'power') den = expanded(z(rng.int(1, 3), rng.pick([1, -1, 2]), rng.pick([3, 3, 5, 7])))
+      else den = expanded(z(...denPair()))
+      // kein Faktor oben, der sich gegen den Nenner kürzt: \frac{(1 - 3i)(3 + i)}{3 + i}
+      const d = primitivePart(reduceImag(shownPoly(den)))
+      if (num.form === 'factored' && num.factored.factors.some((f) => polyEquals(primitivePart(f.poly), d))) continue
+    }
+    const terms: Signed[] = [plus(part(num, den))]
+    // plus oder minus eine komplexe Zahl, meist dahinter (nur ohne Buchstaben, sonst wird es unübersichtlich)
+    const letters = atomsOf(shownPoly(den)).some((atom) => atom !== 'i')
+    // minus: meist eine komplexe Zahl mit Real- und Imaginärteil (das Minus gilt für beide Teile)
+    const sign = rng.chance(0.75) ? -1 : 1
+    if (!letters && rng.chance(0.6)) {
+      const extra =
+        sign < 0 && rng.chance(0.8)
+          ? z(rng.int(1, 4), small())
+          : weighted<() => Poly>(rng, [
+              [() => z(rng.int(1, 4), small()), 3],
+              [() => polyMul(polyConst(rng.int(1, 4)), unit()), 1],
+              [() => polyConst(rng.int(1, 5)), 1],
+            ])()
+      const whole = part(expanded(extra))
+      if (rng.chance(0.8)) terms.push(sign > 0 ? plus(whole) : minus(whole))
+      else terms.splice(0, 1, plus(whole), sign > 0 ? plus(terms[0].part) : minus(terms[0].part))
+    }
+    const task: FractionTask = { kind: 'imaginary', terms, hints: [] }
+    if (taskLatex(task).length > 110) continue
+    // nichts, was sich vorher kürzen lässt: \frac{4}{4\mathrm{i}}, \frac{6 - 4\mathrm{i}}{2 + 2\mathrm{i}}
+    const [cn, cd] = [polyContent(reduceImag(shownPoly(num))), polyContent(reduceImag(shownPoly(den)))]
+    if (gcd(Number(cn.n), Number(cd.n)) > 1 || (atomsOf(shownPoly(num)).length === 1 && polyEquals(primitivePart(shownPoly(num)), primitivePart(shownPoly(den))))) continue
+    const value = complexParts(taskFrac(task))
+    // Ergebnis mit Imaginärteil und kleinen Zahlen
+    if (value.im.num.length === 0) continue
+    const sizes = [value.re, value.im].map((f) => reduceFrac(f))
+    if (sizes.some((r) => r.num.some((t) => Math.abs(Number(t.coef.n)) > 40) || Number(r.den.coef.n) > 60)) continue
+    if (fractionWrongAnswers(task).length >= 3) return task
+  }
+}
+
+const shownPolyOf = (s: Shown) => shownPoly(s)
+const imagPartOf = (p: Poly) => imagParts(p).im

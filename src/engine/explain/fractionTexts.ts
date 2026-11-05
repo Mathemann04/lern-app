@@ -232,6 +232,41 @@ export const FRACTION_ERROR_TEXTS: Readonly<Record<string, Explanation>> = {
       'Beim Koeffizientenvergleich zählt jeder Summand rechts, der diese Potenz von $x$ enthält. Multipliziere alle Klammern aus, sammle die Zahlen vor der Potenz und setze erst dann gleich. Zahlen, die du schon kennst, setzt du ein.',
     short: 'Alle Summanden mit dieser Potenz von $x$ mitzählen.',
   },
+  'frac-imag-power': {
+    detailed:
+      'Die Potenzen von $\\mathrm{i}$ wiederholen sich in Viererschritten: $\\mathrm{i}^2 = -1$, $\\mathrm{i}^3 = \\mathrm{i}^2 \\cdot \\mathrm{i} = -\\mathrm{i}$, $\\mathrm{i}^4 = 1$, dann wieder von vorn. Hier ist das Vorzeichen falsch.',
+    short: '$\\mathrm{i}^2 = -1$, $\\mathrm{i}^3 = -\\mathrm{i}$, $\\mathrm{i}^4 = 1$.',
+  },
+  'frac-imag-squared': {
+    detailed:
+      'Beim Ausmultiplizieren entsteht ein Summand mit $\\mathrm{i}^2$. Er ist reell, aber negativ: $\\mathrm{i}^2 = -1$. Aus $8\\mathrm{i}^2$ wird also $-8$, nicht $8$. Fasse danach Realteile und Imaginärteile getrennt zusammen.',
+    short: '$\\mathrm{i}^2 = -1$: aus $b\\mathrm{i} \\cdot d\\mathrm{i}$ wird $-bd$.',
+  },
+  'frac-imag-cross': {
+    detailed:
+      'Zwei Klammern malnehmen heißt: jeder Summand der ersten mit jedem der zweiten. Bei $(a + b\\mathrm{i})(c + d\\mathrm{i})$ sind das vier Produkte, $ac + ad\\mathrm{i} + bc\\mathrm{i} + bd\\mathrm{i}^2$. Die beiden gemischten mit $\\mathrm{i}$ fehlen hier.',
+    short: 'Jeder mit jedem: $(a + b\\mathrm{i})(c + d\\mathrm{i}) = ac + ad\\mathrm{i} + bc\\mathrm{i} + bd\\mathrm{i}^2$.',
+  },
+  'frac-imag-den': {
+    detailed:
+      'Dritte binomische Formel: $(c + d\\mathrm{i})(c - d\\mathrm{i}) = c^2 - (d\\mathrm{i})^2$. Mit $(d\\mathrm{i})^2 = d^2\\mathrm{i}^2 = -d^2$ wird daraus $c^2 + d^2$. Der Nenner ist also immer positiv.',
+    short: '$(c + d\\mathrm{i})(c - d\\mathrm{i}) = c^2 + d^2$, wegen $\\mathrm{i}^2 = -1$.',
+  },
+  'frac-imag-split': {
+    detailed:
+      'Der Nenner gilt für den ganzen Zähler. Teile deshalb den Realteil und den Imaginärteil durch den Nenner: $\\frac{p + q\\mathrm{i}}{r} = \\frac{p}{r} + \\frac{q}{r}\\mathrm{i}$.',
+    short: 'Beide Teile teilen: $\\frac{p + q\\mathrm{i}}{r} = \\frac{p}{r} + \\frac{q}{r}\\mathrm{i}$.',
+  },
+  'frac-imag-direct': {
+    detailed:
+      'Komplexe Zahlen lassen sich nicht teilweise teilen: $\\frac{a + b\\mathrm{i}}{c + d\\mathrm{i}}$ ist nicht $\\frac{a}{c} + \\frac{b}{d}\\mathrm{i}$. Erweitere stattdessen mit dem konjugiert Komplexen des Nenners, dann ist der Nenner eine reelle Zahl.',
+    short: 'Nicht teilweise teilen: erst mit dem konjugiert Komplexen erweitern.',
+  },
+  'frac-imag-minus': {
+    detailed:
+      'Ein Minus vor einer komplexen Zahl gilt für beide Teile: $-(a + b\\mathrm{i}) = -a - b\\mathrm{i}$. Hier wurde nur der Realteil abgezogen.',
+    short: 'Das Minus gilt für beide Teile: $-(a + b\\mathrm{i}) = -a - b\\mathrm{i}$.',
+  },
 }
 
 export function explainFractionError(id: string): Explanation {
@@ -448,6 +483,52 @@ export function explainCompare(where: string, equation: readonly [Expr, Expr], k
   }
 }
 
+// --- Komplexe Zahlen ---
+
+// Potenzen von i: before und after sind der Bruch vor und nach dem Ausrechnen
+export function explainImagPower(before: Expr, after: Expr): Explanation {
+  const equation = `$${toLatex(before)} = ${toLatex(after)}$`
+  return {
+    detailed: `Rechne zuerst die Potenzen von $\\mathrm{i}$ aus: $\\mathrm{i}^2 = -1$, $\\mathrm{i}^3 = -\\mathrm{i}$, $\\mathrm{i}^4 = 1$. Damit wird ${equation}.`,
+    short: `${equation}.`,
+  }
+}
+
+// Erweitern mit dem konjugiert Komplexen: den ist der Nenner, conj sein konjugiert Komplexes
+export function explainImagConjugate(den: Expr, conj: Expr): Explanation {
+  return {
+    detailed: `Im Nenner steht ${m(den)}. Das konjugiert Komplexe ${m(conj)} hat ${den.kind === 'add' ? 'denselben Realteil und den Imaginärteil mit umgedrehtem Vorzeichen' : 'das umgedrehte Vorzeichen'}. Erweitere damit: Zähler und Nenner mal ${m(conj)}. Dann ist der Nenner eine reelle Zahl.`,
+    short: `Zähler und Nenner mal ${m(conj)}.`,
+  }
+}
+
+// Ausmultiplizieren mit i² = −1: from ist der erweiterte Bruch, after das Ergebnis
+export function explainImagMultiply(from: Expr, after: Expr): Explanation {
+  const equation = `$${toLatex(from)} = ${toLatex(after)}$`
+  return {
+    detailed: `Multipliziere im Zähler jeden Summanden mit jedem. Im Nenner hilft die dritte binomische Formel: $(c + d\\mathrm{i})(c - d\\mathrm{i}) = c^2 + d^2$. Ersetze jedes $\\mathrm{i}^2$ durch $-1$ und fasse Realteile und Imaginärteile zusammen: ${equation}.`,
+    short: `Mit $\\mathrm{i}^2 = -1$: ${equation}.`,
+  }
+}
+
+// Aufteilen in Realteil und Imaginärteil: from ist der Bruch mit reellem Nenner, after a + bi
+export function explainImagSplit(from: Expr, after: Expr): Explanation {
+  const equation = `$${toLatex(from)} = ${toLatex(after)}$`
+  return {
+    detailed: `Teile den Realteil und den Imaginärteil einzeln durch den Nenner und kürze: ${equation}. So steht die Zahl in der Form $a + b\\,\\mathrm{i}$.`,
+    short: `${equation}.`,
+  }
+}
+
+// Zusammenfassen: Realteile und Imaginärteile getrennt
+export function explainImagSum(before: Expr, after: Expr): Explanation {
+  const equation = `$${toLatex(before)} = ${toLatex(after)}$`
+  return {
+    detailed: `Teile den Bruch in Realteil und Imaginärteil auf, dann fasse die Realteile und die Imaginärteile getrennt zusammen. Ein Minus vor einer Klammer gilt für beide Teile: ${equation}.`,
+    short: `${equation}.`,
+  }
+}
+
 // Regel eines Bausteins: trig (sin² x + cos² x = 1) oder root ((√x)² = x)
 export function explainRule(kind: 'trig' | 'root', before: Expr, after: Expr): Explanation {
   const equation = `$${toLatex(before)} = ${toLatex(after)}$`
@@ -497,6 +578,11 @@ export const FRACTION_HINTS = {
   insert: 'Setze die Nullstelle ein: Alle Summanden, in denen dieser Faktor steckt, fallen weg.',
   compare: 'Multipliziere rechts aus. Die Zahlen vor derselben Potenz von $x$ müssen links und rechts gleich sein.',
   part: 'Rechne diesen Teil wie eine eigene Aufgabe.',
+  imagPower: 'Es gilt $\\mathrm{i}^2 = -1$. Daraus folgen $\\mathrm{i}^3 = -\\mathrm{i}$ und $\\mathrm{i}^4 = 1$.',
+  imagConjugate: 'Zum Nenner $c + d\\mathrm{i}$ gehört das konjugiert Komplexe $c - d\\mathrm{i}$: Realteil gleich, Imaginärteil mit umgedrehtem Vorzeichen. Zähler und Nenner werden damit malgenommen.',
+  imagMultiply: 'Jeden Summanden mit jedem malnehmen, $\\mathrm{i}^2 = -1$ einsetzen. Im Nenner gilt $(c + d\\mathrm{i})(c - d\\mathrm{i}) = c^2 + d^2$.',
+  imagSplit: 'Teile beide Teile durch den Nenner: $\\frac{p + q\\mathrm{i}}{r} = \\frac{p}{r} + \\frac{q}{r}\\mathrm{i}$, dann kürzen.',
+  imagSum: 'Teile den Bruch auf: $\\frac{p + q\\mathrm{i}}{r} = \\frac{p}{r} + \\frac{q}{r}\\mathrm{i}$. Dann Realteile und Imaginärteile getrennt zusammenfassen; ein Minus vor einer Klammer gilt für beide Teile.',
 } as const
 
 // Erklärung zur Dezimalzahl: 0,75 = 75/100 = 3/4
@@ -542,6 +628,10 @@ export function fractionTaskHint(t: FractionShape): Explanation {
       )
     case 'tree':
       return same('Klammern zuerst, dann Punkt vor Strich. Rechne jeden Teil wie eine eigene Aufgabe und kürze die Teilergebnisse gleich.')
+    case 'imaginary':
+      return same(
+        'Rechne zuerst Potenzen wie $\\mathrm{i}^3$ aus. Erweitere den Bruch dann mit dem konjugiert Komplexen des Nenners, multipliziere aus ($\\mathrm{i}^2 = -1$) und teile Realteil und Imaginärteil durch den reellen Nenner.',
+      )
     case 'partial':
       return same(
         'Hat der Zähler keinen kleineren Grad als der Nenner, teile zuerst (Polynomdivision). Zerlege dann den Nenner, setze je Faktor einen einfachen Bruch an (einen doppelten Faktor zweimal) und bestimme die Zahlen: Nullstellen einsetzen, was übrig bleibt über einen Koeffizientenvergleich.',

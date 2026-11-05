@@ -20,7 +20,7 @@ export type FreeVerdict = {
 // (bis zu sieben) und bei Wurzeln √
 export type KeyboardSpec =
   | { readonly kind: 'derivative' }
-  | { readonly kind: 'fraction'; readonly letters: readonly string[]; readonly blocks: boolean; readonly root: boolean }
+  | { readonly kind: 'fraction'; readonly letters: readonly string[]; readonly blocks: boolean; readonly root: boolean; readonly imag?: boolean }
   | { readonly kind: 'rearrange'; readonly letters: readonly string[]; readonly root: boolean }
 
 export type FreeTask = {

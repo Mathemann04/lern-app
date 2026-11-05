@@ -2,7 +2,7 @@ import { toLatex } from '../expr/print.ts'
 import { type Expr, div, mul, mulDot, num } from '../expr/types.ts'
 import { type Rational, isInteger, isOne, rat, ratAbs, ratDiv, ratEq, ratMul, ratNeg, ratSign } from '../rational.ts'
 import { type Factored, factorize, factoredExpr, factoredPoly, groupFactor, isMultipleOf, reduceFrac } from './factor.ts'
-import { type Frac, fracAdd, fracDiv, fracEquals, fracMul, fracNeg, fracOf } from './frac.ts'
+import { type Frac, fracAdd, fracDiv, fracEquals, fracMul, fracNeg, fracOf, reduceImag } from './frac.ts'
 import {
   type Poly,
   type Term,
@@ -35,6 +35,9 @@ import {
   conjugateOf,
   expandedDenExpr,
   fractionExpr,
+  imagStage,
+  imagTimesExpr,
+  imagWork,
   innerResultPart,
   multipliedExpr,
   nicePolyExpr,
@@ -57,9 +60,11 @@ import {
   type FractionTask,
   type Part,
   type Shown,
+  type Signed,
   expanded,
   innerTask,
   isWhole,
+  part,
   partExpr,
   partFrac,
   partsOf,
@@ -71,6 +76,7 @@ import {
   type TreeNode,
   treeFrac,
 } from './task.ts'
+import { complexExpr, complexValueExpr, imagParts, reduceImagWrong } from './complex.ts'
 import { type PartialWork, PARTIAL_LETTERS, ansatzExpr, cofactor, dividedExpr, multiplicityOf, partialExpr, partialFrac, partialResultOf, polyValueAt, termsWith } from './partial.ts'
 import { bracketIgnoredMistakes, decimalMistakes, leafOfFrac, leftToRight, minusBracketMistakes, normalize, replaceNode, withoutDecimals } from './tree.ts'
 
@@ -132,6 +138,13 @@ export const FRACTION_ERROR_RULES: readonly FracErrorRule[] = [
   { id: 'frac-partial-double-once', step: 'ansatz', name: 'Doppelten Faktor im Ansatz nur einmal angesetzt', wrongFormula: '\\frac{1}{(x - 1)^2(x + 1)} = \\frac{A}{x - 1} + \\frac{B}{x + 1}' },
   { id: 'frac-partial-insert-sign', step: 'coef', name: 'Beim Einsetzen der Nullstelle das Vorzeichen verloren', wrongFormula: '5x - 1 = A(x + 1) + B(x - 2),\\; x = 2\\text{: } A = \\frac{9}{2 - 1}' },
   { id: 'frac-partial-compare', step: 'coef', name: 'Beim Koeffizientenvergleich einen Summanden vergessen', wrongFormula: 'x^2 + 1 = A(x - 1)(x + 2) + B(x + 2) + C(x - 1)^2\\text{: } A = 1' },
+  { id: 'frac-imag-power', step: 'imag-power', name: 'Potenz von $\\mathrm{i}$ mit falschem Vorzeichen', wrongFormula: '\\mathrm{i}^3 = \\mathrm{i}' },
+  { id: 'frac-imag-squared', step: 'imag-multiply', name: 'Beim Ausmultiplizieren $\\mathrm{i}^2 = 1$ statt $-1$ gerechnet', wrongFormula: '(3 + 4\\mathrm{i})(1 + 2\\mathrm{i}) = 3 + 10\\mathrm{i} + 8' },
+  { id: 'frac-imag-cross', step: 'imag-multiply', name: 'Beim Ausmultiplizieren die gemischten Summanden vergessen', wrongFormula: '(3 + 4\\mathrm{i})(1 + 2\\mathrm{i}) = 3 + 8\\mathrm{i}^2' },
+  { id: 'frac-imag-den', step: 'imag-multiply', name: 'Im Nenner $c^2 - d^2$ statt $c^2 + d^2$ gerechnet', wrongFormula: '(1 - 2\\mathrm{i})(1 + 2\\mathrm{i}) = 1 - 4' },
+  { id: 'frac-imag-split', step: 'imag-split', name: 'Beim Aufteilen nur den Realteil durch den Nenner geteilt', wrongFormula: '\\frac{-5 + 10\\mathrm{i}}{5} = -1 + 10\\mathrm{i}' },
+  { id: 'frac-imag-direct', step: 'imag-split', name: 'Realteil durch Realteil und Imaginärteil durch Imaginärteil geteilt', wrongFormula: '\\frac{3 + 4\\mathrm{i}}{1 - 2\\mathrm{i}} = 3 - 2\\mathrm{i}' },
+  { id: 'frac-imag-minus', step: 'imag-sum', name: 'Minus vor der Klammer nur auf den Realteil angewandt', wrongFormula: '2 - (1 + 3\\mathrm{i}) = 1 + 3\\mathrm{i}' },
 ]
 
 export function fractionErrorRule(id: string): FracErrorRule {
@@ -188,9 +201,10 @@ export function ruledFrac(value: Frac, rule: BlockRule | undefined): Frac {
 }
 
 // Falsches Ergebnis so geschrieben wie das richtige: gekürzt, mit der Regel des Bausteins;
-// bei Partialbrüchen zerlegt
+// bei Partialbrüchen zerlegt, bei komplexen Zahlen in der Form a + bi
 function resultOf(value: Frac, t: FractionTask): Expr {
   if (t.kind === 'partial') return partialResultOf(value, t.hints) ?? reduced(value, t.hints)
+  if (t.kind === 'imaginary') return complexValueExpr(value, t.hints)
   return resultExpr(reduceFrac(ruledFrac(value, t.rule), t.hints), t)
 }
 
@@ -806,6 +820,88 @@ function partialCandidates(t: Extract<FractionTask, { kind: 'partial' }>): Candi
   return partialWrongs(t).map((w) => ({ id: w.id, step: w.step, stepExpr: w.step === 'coef' && w.result ? w.result : w.shown, value: w.value }))
 }
 
+// --- Komplexe Zahlen ---
+
+// Hat ein Polynom mit i den Wert 0?
+const isZeroImag = (p: Poly) => isZeroPoly(reduceImag(p))
+
+// Fehler bei den Potenzen von i: jede Potenz ab i² als −1 gerechnet (i³ = −1, i⁴ = −1)
+const minusOnePowers = (p: Poly): Poly =>
+  polySum(p.map((term) => ((term.mono.find(([a]) => a === 'i')?.[1] ?? 0) < 2 ? [term] : [{ mono: term.mono.filter(([a]) => a !== 'i'), coef: ratNeg(term.coef) }])))
+
+// Wert einer komplexen Zahl als Bruch: re + im·i
+const imagFrac = (re: Frac, im: Frac): Frac => fracAdd(re, fracMul(im, fracOf(polyAtomI)))
+const polyAtomI: Poly = [{ mono: [['i', 1]], coef: rat(1) }]
+
+function imaginaryMistakes(t: Extract<FractionTask, { kind: 'imaginary' }>): Candidate[] {
+  const w = imagWork(t)
+  const out: Candidate[] = []
+  const sign = w.terms[w.index].sign
+  const others = signedFrac(w.terms.filter((_, i) => i !== w.index))
+  // Wert der ganzen Aufgabe, wenn der Bruch den Wert f hätte
+  const whole = (f: Frac): Frac => fracAdd(others, sign < 0 ? fracNeg(f) : f)
+  const [n, d] = [shownPoly(w.num), shownPoly(w.den)]
+  const { num: pn, den: pd } = w.product
+
+  // Potenzen von i falsch: mit falschem Vorzeichen (i² = 1, i³ = i) oder jede als −1 (i³ = −1)
+  if (w.powered) {
+    for (const wrong of [reduceImagWrong, minusOnePowers]) {
+      const shown = (s: Shown): Shown => (s.form === 'factored' ? s : expanded(wrong(shownPoly(s))))
+      const terms: Signed[] = t.terms.map((s) => ({ sign: s.sign, part: part(shown(s.part.num), shown(s.part.den)) }))
+      if (terms.some((s) => isZeroImag(shownPoly(s.part.den)))) continue
+      out.push({ id: 'frac-imag-power', step: 'imag-power', stepExpr: signedSum(terms.map((s) => ({ sign: s.sign, expr: partExpr(s.part) }))), value: signedFrac(terms) })
+    }
+  }
+  // nur den Nenner bzw. nur den Zähler mit dem konjugiert Komplexen malgenommen
+  out.push({ id: 'frac-conjugate-one-side', step: 'imag-conjugate', stepExpr: imagStage(w, div(shownExpr(w.num), imagTimesExpr(w.den, w.conj))), value: whole({ num: n, den: polyMul(d, w.conj) }) })
+  out.push({ id: 'frac-conjugate-one-side', step: 'imag-conjugate', stepExpr: imagStage(w, div(imagTimesExpr(w.num, w.conj), shownExpr(w.den))), value: whole({ num: polyMul(n, w.conj), den: d }) })
+  // i² = 1 im Zähler
+  const squared = reduceImagWrong(polyMul(n, w.conj))
+  if (!polyEquals(squared, pn)) out.push({ id: 'frac-imag-squared', step: 'imag-multiply', stepExpr: imagStage(w, plainFractionExpr(squared, pd)), value: whole({ num: squared, den: pd }) })
+  // im Zähler nur Realteil mal Realteil und Imaginärteil mal Imaginärteil (die gemischten fehlen)
+  if (w.num.form === 'expanded' && n.length === 2) {
+    const [a, b] = [imagParts(n), imagParts(w.conj)]
+    const cross = reduceImag(polyAdd(polyMul(a.re, b.re), polyMul(polyMul(a.im, b.im), polyConst(-1))))
+    if (a.re.length > 0 && a.im.length > 0 && !isZeroPoly(cross)) out.push({ id: 'frac-imag-cross', step: 'imag-multiply', stepExpr: imagStage(w, plainFractionExpr(cross, pd)), value: whole({ num: cross, den: pd }) })
+  }
+  // Nenner c² − d²
+  const den = reduceImagWrong(polyMul(d, w.conj))
+  if (!polyEquals(den, pd) && !isZeroPoly(den)) out.push({ id: 'frac-imag-den', step: 'imag-multiply', stepExpr: imagStage(w, plainFractionExpr(pn, den)), value: whole({ num: pn, den }) })
+  // Aufteilen: nur der Realteil durch den Nenner. Mit weiteren Summanden geschieht das Aufteilen im
+  // letzten Schritt beim Zusammenfassen; die Antwort ist dann das Ergebnis.
+  const last: StepKind = w.terms.length > 1 ? 'imag-sum' : 'imag-split'
+  const lastExpr = (value: Frac, own: Expr) => (last === 'imag-sum' ? complexValueExpr(value, t.hints) : imagStage(w, own))
+  const parts = imagParts(pn)
+  const denOne = constValue(pd)
+  if (parts.re.length > 0 && parts.im.length > 0 && !(denOne !== null && isOne(ratAbs(denOne)))) {
+    const re = { num: parts.re, den: pd }
+    const im = fracOf(parts.im)
+    const value = whole(imagFrac(re, im))
+    out.push({ id: 'frac-imag-split', step: last, stepExpr: lastExpr(value, complexExpr({ re, im }, t.hints)), value })
+  }
+  // Realteil durch Realteil, Imaginärteil durch Imaginärteil
+  const [top, bottom] = [imagParts(n), imagParts(d)]
+  if ([top.re, top.im, bottom.re, bottom.im].every((p) => p.length > 0)) {
+    const re = { num: top.re, den: bottom.re }
+    const im = { num: top.im, den: bottom.im }
+    const value = whole(imagFrac(re, im))
+    out.push({ id: 'frac-imag-direct', step: last, stepExpr: lastExpr(value, complexExpr({ re, im }, t.hints)), value })
+  }
+  // Minus vor einer komplexen Zahl nur auf den Realteil
+  if (w.terms.length > 1) {
+    w.terms.forEach((s, i) => {
+      if (s.sign > 0) return
+      const v = i === w.index ? { num: pn, den: pd } : partFrac(s.part)
+      const p = imagParts(v.num)
+      if (p.re.length === 0 || p.im.length === 0) return
+      // −(a + bi) als −a + bi gerechnet: das Minus fehlt beim Imaginärteil
+      const value = fracAdd(signedFrac(w.terms), fracMul({ num: polyMul(p.im, polyAtomI), den: v.den }, fracOf(polyConst(2))))
+      out.push({ id: 'frac-imag-minus', step: 'imag-sum', stepExpr: complexValueExpr(value, t.hints), value })
+    })
+  }
+  return out
+}
+
 // --- Verschachtelter Doppelbruch ---
 
 // Fehler im inneren Doppelbruch (als dessen Ergebnis) und danach wie beim Doppelbruch
@@ -875,6 +971,8 @@ export function fractionWrongAnswers(t: FractionTask, solution: FracSolution = s
       ? treeMistakes(t, solution as TreeSolution)
       : t.kind === 'partial'
       ? partialCandidates(t)
+      : t.kind === 'imaginary'
+      ? imaginaryMistakes(t)
       : t.kind === 'nested'
       ? nestedMistakes(t)
       : [

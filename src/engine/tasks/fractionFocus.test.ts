@@ -32,6 +32,13 @@ describe('Gezieltes Üben bei Brüchen', () => {
     'frac-partial-double-once',
     'frac-partial-insert-sign',
     'frac-partial-compare',
+    'frac-imag-power',
+    'frac-imag-squared',
+    'frac-imag-cross',
+    'frac-imag-den',
+    'frac-imag-split',
+    'frac-imag-direct',
+    'frac-imag-minus',
   ])(
     '%s: findet ihn in Stufe 5 mit jedem Zufall',
     (id) => {

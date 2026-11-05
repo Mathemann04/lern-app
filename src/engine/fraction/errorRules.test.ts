@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { latexProblem } from '../expr/latexChecks.ts'
 import { toLatex } from '../expr/print.ts'
-import { type Expr, add, cos, exp, mul, num, pow, sin, sqrt, sub, variable, x } from '../expr/types.ts'
+import { type Expr, IMAG, add, cos, exp, mul, num, pow, sin, sqrt, sub, variable, x } from '../expr/types.ts'
 import { FRACTION_ERROR_RULES, fractionWrongAnswers } from './errorRules.ts'
 import { toFrac } from './frac.ts'
 import { type Poly, polyDivideExact } from './poly.ts'
@@ -36,6 +36,8 @@ function poly(e: Expr): Poly {
 const fr = (n: Expr, d: Expr = num(1), ascendingDen = false): Part => part(expanded(poly(n)), expanded(poly(d), ascendingDen))
 const task = (s: FractionShape, rule?: BlockRule): FractionTask => ({ ...s, hints: [], ...(rule ? { rule } : {}) }) as FractionTask
 const x2 = pow(x, num(2))
+// komplexe Zahlen: ein Bruch mit i im Nenner
+const imag = (n: Expr, d: Expr): FractionTask => task({ kind: 'imaginary', terms: [plus(fr(n, d))] })
 
 type Case = [id: string, task: FractionTask, what: 'step' | 'result', latex: string]
 
@@ -157,6 +159,16 @@ const CASES: Case[] = [
   ['frac-partial-insert-sign', task({ kind: 'partial', part: fr(sub(mul(num(5), x), num(1)), sub(sub(x2, x), num(2))) }), 'result', '\\frac{2}{x + 1} + \\frac{9}{x - 2}'],
   // x² + 1 = A(x − 1)(x + 2) + B(x + 2) + C(x − 1)²: vor x² steht A + C, nicht nur A
   ['frac-partial-compare', task({ kind: 'partial', part: fr(add(x2, num(1)), mul(pow(sub(x, num(1)), num(2)), add(x, num(2)))) }), 'result', '\\frac{1}{x - 1} + \\frac{2}{3(x - 1)^{2}} + \\frac{5}{9(x + 2)}'],
+  // Stufe 5 (M2b Schritt 5): komplexe Zahlen; \frac{3 + 4i}{1 - 2i} = -1 + 2i
+  ['frac-imag-power', imag(add(num(2), pow(IMAG, num(3))), add(num(1), IMAG)), 'step', '\\frac{2 + \\mathrm{i}}{1 + \\mathrm{i}}'],
+  ['frac-imag-squared', imag(add(num(3), mul(num(4), IMAG)), sub(num(1), mul(num(2), IMAG))), 'step', '\\frac{11 + 10\\mathrm{i}}{5}'],
+  // nur 3 · 1 + 4i · 2i = 3 − 8 = −5, also −1
+  ['frac-imag-cross', imag(add(num(3), mul(num(4), IMAG)), sub(num(1), mul(num(2), IMAG))), 'result', '-1'],
+  ['frac-imag-den', imag(add(num(3), mul(num(4), IMAG)), sub(num(1), mul(num(2), IMAG))), 'step', '\\frac{-5 + 10\\mathrm{i}}{-3}'],
+  ['frac-imag-split', imag(add(num(3), mul(num(4), IMAG)), sub(num(1), mul(num(2), IMAG))), 'result', '-1 + 10\\mathrm{i}'],
+  ['frac-imag-direct', imag(add(num(3), mul(num(4), IMAG)), sub(num(1), mul(num(2), IMAG))), 'result', '3 - 2\\mathrm{i}'],
+  // \frac{1 + i}{1 - i} = i, also i − (1 + 3i) = −1 − 2i; falsch: i − 1 + 3i
+  ['frac-imag-minus', task({ kind: 'imaginary', terms: [plus(fr(add(num(1), IMAG), sub(num(1), IMAG))), minus(fr(add(num(1), mul(num(3), IMAG))))] }), 'result', '-1 + 4\\mathrm{i}'],
 ]
 
 describe('Zähler und Nenner addiert', () => {

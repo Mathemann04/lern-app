@@ -525,6 +525,13 @@ weiterrechnen). Die Fehler zu Bausteinen gibt es seit Schritt 6 (Stufe 5).
 | Partialbrüche | doppelten Faktor nur einmal angesetzt (neu in M2b) | $\frac{1}{(x - 1)^2(x + 1)} = \frac{A}{x - 1} + \frac{B}{x + 1}$ |
 | Partialbrüche | beim Einsetzen der Nullstelle das Vorzeichen verloren (neu in M2b) | $5x - 1 = A(x + 1) + B(x - 2)$, $x = 2$: $A = \frac{9}{2 - 1}$ |
 | Partialbrüche | beim Koeffizientenvergleich einen Summanden vergessen (neu in M2b) | $x^2 + 1 = A(x - 1)(x + 2) + B(x + 2) + C(x - 1)^2$: $A = 1$ |
+| Komplexe Zahlen | Potenz von $\mathrm{i}$ mit falschem Vorzeichen (neu in M2b) | $\mathrm{i}^3 = \mathrm{i}$ |
+| Komplexe Zahlen | beim Ausmultiplizieren $\mathrm{i}^2 = 1$ gerechnet (neu in M2b) | $(3 + 4\mathrm{i})(1 + 2\mathrm{i}) = 3 + 10\mathrm{i} + 8$ |
+| Komplexe Zahlen | beim Ausmultiplizieren die gemischten Summanden vergessen (neu in M2b) | $(3 + 4\mathrm{i})(1 + 2\mathrm{i}) = 3 + 8\mathrm{i}^2$ |
+| Komplexe Zahlen | im Nenner $c^2 - d^2$ statt $c^2 + d^2$ (neu in M2b) | $(1 - 2\mathrm{i})(1 + 2\mathrm{i}) = 1 - 4$ |
+| Komplexe Zahlen | beim Aufteilen nur den Realteil geteilt (neu in M2b) | $\frac{-5 + 10\mathrm{i}}{5} = -1 + 10\mathrm{i}$ |
+| Komplexe Zahlen | Realteil durch Realteil, Imaginärteil durch Imaginärteil (neu in M2b) | $\frac{3 + 4\mathrm{i}}{1 - 2\mathrm{i}} = 3 - 2\mathrm{i}$ |
+| Komplexe Zahlen | Minus vor der Klammer nur auf den Realteil (neu in M2b) | $2 - (1 + 3\mathrm{i}) = 1 + 3\mathrm{i}$ |
 
 Wenn dir typische Fehler aus deinen Übungen fehlen, sag es. Die sind Gold
 wert.

@@ -1,5 +1,5 @@
 import { parseDecimal } from '../rational.ts'
-import { type Expr, type FnName, E, PI, add, dec, div, fn, log, mul, neg, num, pow, root, variable } from '../expr/types.ts'
+import { type Expr, type FnName, E, IMAG, PI, add, dec, div, fn, log, mul, neg, num, pow, root, variable } from '../expr/types.ts'
 
 // Liest die LaTeX-Ausgabe der Mathe-Tastatur (MathLive) und der eigenen Ausgabe (print.ts)
 // in einen Termbaum ein. Bewusst klein gehalten: genau die Schreibweisen, die beim Ableiten
@@ -11,7 +11,8 @@ import { type Expr, type FnName, E, PI, add, dec, div, fn, log, mul, neg, num, p
 // - Klammern: (…), [ ], \left( … \right), \mleft( … \mright)
 // - Funktionen mit Klammer \sin(3x) oder ohne: \sin 3x = \sin(3x), \sin x^2 = \sin(x^2),
 //   \sin^2 x = (\sin x)^2; \ln, \log_2, \lg, \operatorname{arsinh} …
-// - e ist immer die eulersche Zahl, \pi die Kreiszahl
+// - e ist immer die eulersche Zahl, \pi die Kreiszahl, i die imaginäre Einheit (auch \mathrm{i},
+//   \imaginaryI)
 // - davor darf „f'(x) =" stehen
 
 export type ParseResult = { readonly ok: true; readonly expr: Expr } | { readonly ok: false; readonly message: string }
@@ -271,7 +272,7 @@ class Parser {
     if (t.kind === 'digit') return this.parseNumber()
     if (t.kind === 'letter') {
       this.pos++
-      return t.value === 'e' ? E : variable(t.value)
+      return t.value === 'e' ? E : t.value === 'i' ? IMAG : variable(t.value)
     }
     if (t.kind === 'command') return this.parseCommand()
 
@@ -333,6 +334,8 @@ class Parser {
         return PI
       case 'exponentialE':
         return E
+      case 'imaginaryI':
+        return IMAG
       case 'log': {
         if (!isSymbol(this.peek(), '_')) {
           throw new ParseError('Schreibe $\\ln$ für den natürlichen Logarithmus oder $\\log_a$ mit einer Basis $a$.')
@@ -355,6 +358,7 @@ class Parser {
   private parseText(): Expr {
     const word = this.readTextWord()
     if (word === 'e') return E
+    if (word === 'i') return IMAG
     if (word in FUNCTIONS) return this.parseFunction(FUNCTIONS[word], `\\operatorname{${word}}`)
     if (word === 'lg') return this.parseFunctionArgument((arg) => log(num(10), arg), '\\lg')
     if (word.length === 1) return variable(word)
@@ -416,7 +420,7 @@ class Parser {
   private startsBareFactor(t: Token | undefined): boolean {
     if (!t) return false
     if (t.kind === 'digit' || t.kind === 'letter') return true
-    return t.kind === 'command' && ['pi', 'exponentialE', 'frac', 'dfrac', 'tfrac', 'sqrt'].includes(t.value)
+    return t.kind === 'command' && ['pi', 'exponentialE', 'imaginaryI', 'frac', 'dfrac', 'tfrac', 'sqrt'].includes(t.value)
   }
 }
 

@@ -2,7 +2,8 @@ import { type Page, expect, test } from '@playwright/test'
 
 // Brüche Stufe 5 (M2b Schritte 3 und 4): alles ineinander, Doppelbruch im Doppelbruch,
 // Differenzenquotienten, dritte Potenzen, Wurzeln (auch mit zwei Buchstaben, Wurzel im Nenner
-// beseitigen), Winkelfunktionen, Partialbruchzerlegung (mit Polynomdivision); geführt und frei
+// beseitigen), Winkelfunktionen, Partialbruchzerlegung (mit Polynomdivision), komplexe Zahlen
+// teilen; geführt und frei
 
 const answers = (page: Page) => page.getByRole('group', { name: 'Antworten' }).getByRole('button')
 const correctFeedback = (page: Page) => page.getByText('Richtig!', { exact: true })
@@ -60,6 +61,9 @@ for (const [ref, what, question] of [
   ['5-202', 'Partialbrüche', 'Wie lautet die Zerlegung?'],
   ['5-80', 'Partialbrüche mit Polynomdivision', 'Teile deshalb zuerst (Polynomdivision)'],
   ['5-293', 'Partialbrüche mit doppeltem Faktor', 'Welcher Ansatz passt?'],
+  ['5-224', 'komplexe Zahlen teilen', 'Erweitere mit dem konjugiert Komplexen des Nenners'],
+  ['5-492', 'komplexe Zahlen mit Potenz von i und Minus', 'Rechne die Potenzen von'],
+  ['5-134', 'komplexe Zahlen mit Buchstaben', 'Teile in Realteil und Imaginärteil auf'],
 ] as const) {
   test(`Stufe 5 geführt: ${what} (${ref})`, async ({ page }) => {
     await page.goto(`./#/ueben/brueche/${ref}`)
@@ -153,6 +157,34 @@ test('Stufe 5 frei: Partialbrüche, mit doppeltem Faktor und mit Polynomdivision
   await expectCleanPage(page, 'Partialbrüche Polynomdivision')
 })
 
+test('Stufe 5 frei: komplexe Zahlen teilen', async ({ page }) => {
+  // (6 + i) / (−2 − i) = −13/5 + 4/5 i
+  await page.goto('./#/frei/brueche/5-501')
+  await expect(field(page)).toBeVisible()
+  await expect(page.getByText(/Berechne und schreibe das Ergebnis in der Form/)).toBeVisible()
+  await enter(page, '\\frac{6+\\mathrm{i}}{-2-\\mathrm{i}}')
+  await expect(feedback(page)).toContainText('Im Nenner steht noch')
+  await enter(page, '\\frac{-26+8i}{10}')
+  await expect(feedback(page)).toContainText('Noch nicht vollständig gekürzt')
+  await enter(page, '-3-i')
+  await expect(feedback(page)).toContainText('Typischer Fehler: Realteil durch Realteil und Imaginärteil durch Imaginärteil geteilt.')
+  await enter(page, '-\\frac{13}{5}+\\frac{4}{5}\\mathrm{i}')
+  await expect(feedback(page)).toContainText('Richtig!')
+  await expectCleanPage(page, 'komplexe Zahlen frei')
+})
+
+test('Stufe 5 frei: Tastatur mit i bei komplexen Zahlen', async ({ page }) => {
+  test.skip(!isPhone(), 'Bildschirm-Tastatur nur am Handy')
+  await page.goto('./#/frei/brueche/5-134')
+  await field(page).tap()
+  await expect(page.locator('.ML__keyboard')).toBeVisible()
+  await expect(page.locator('.MLK__keycap[data-keycap-value="\\\\mathrm{i}"]').filter({ visible: true })).toHaveCount(1)
+  const keys = () => page.locator('.MLK__keycap').filter({ visible: true })
+  await expect(keys().filter({ hasText: /^a$/ })).toHaveCount(1)
+  await expect(keys().filter({ hasText: /^b$/ })).toHaveCount(1)
+  await expectCleanPage(page, 'Tastatur i')
+})
+
 test('Stufe 5 frei: Tastatur mit Wurzel, Buchstaben der Aufgabe und tan', async ({ page }) => {
   test.skip(!isPhone(), 'Bildschirm-Tastatur nur am Handy')
   const keys = () => page.locator('.MLK__keycap').filter({ visible: true })
@@ -168,10 +200,10 @@ test('Stufe 5 frei: Tastatur mit Wurzel, Buchstaben der Aufgabe und tan', async 
   await expectCleanPage(page, 'Tastatur')
 })
 
-test('Lernkarten: Ordner Brüche mit Stufe 5, dritte Potenzen, Wurzeln im Nenner und Partialbrüchen', async ({ page }) => {
+test('Lernkarten: Ordner Brüche mit Stufe 5, dritte Potenzen, Wurzeln im Nenner, Partialbrüchen und komplexen Zahlen', async ({ page }) => {
   await page.goto('./#/karten/brueche')
   await expect(page.getByRole('heading', { name: 'Stufe 5' })).toBeVisible()
-  for (const title of ['Bausteine mit eigenen Regeln', 'Dritte Potenzen', 'Wurzeln im Nenner beseitigen', 'Polynomdivision', 'Partialbruchzerlegung']) {
+  for (const title of ['Bausteine mit eigenen Regeln', 'Dritte Potenzen', 'Wurzeln im Nenner beseitigen', 'Polynomdivision', 'Partialbruchzerlegung', 'Komplexe Zahlen teilen']) {
     await page.goto('./#/karten/brueche')
     await page.getByRole('link', { name: new RegExp(title) }).click()
     await expect(page.getByRole('heading', { name: title, level: 1 })).toBeVisible()
@@ -241,6 +273,15 @@ test('Gezielt üben: „Doppelten Faktor nur einmal angesetzt" von der Lernkarte
   await expect(page).toHaveURL(/#\/ueben\/brueche\/5-\d+\?fokus=frac-partial-double-once$/)
   await expect(page.locator('#question')).toBeVisible()
   await expectCleanPage(page, 'gezielt Partialbrüche')
+})
+
+test('Gezielt üben: „Realteil durch Realteil geteilt" von der Lernkarte aus', async ({ page }) => {
+  await page.goto('./#/karten/brueche/fraction-imaginary')
+  const error = page.locator('li, article, section, div').filter({ hasText: /^Realteil durch Realteil und Imaginärteil durch Imaginärteil geteilt/ }).first()
+  await error.getByRole('link', { name: 'Gezielt üben' }).click()
+  await expect(page).toHaveURL(/#\/ueben\/brueche\/5-\d+\?fokus=frac-imag-direct$/)
+  await expect(page.locator('#question')).toBeVisible()
+  await expectCleanPage(page, 'gezielt komplexe Zahlen')
 })
 
 test('Stufe 5: zehn neue Aufgaben nacheinander mit verschiedener Form', async ({ page }) => {

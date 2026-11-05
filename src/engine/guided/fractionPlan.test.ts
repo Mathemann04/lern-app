@@ -6,7 +6,7 @@ import { parseRichText } from '../explain/richText.ts'
 import { type Env, evaluate } from '../expr/evaluate.ts'
 import { toLatex } from '../expr/print.ts'
 import { samplePoints } from '../expr/sample.ts'
-import { type Expr, add, mul, num, pow, sub, x } from '../expr/types.ts'
+import { type Expr, IMAG, add, mul, num, pow, sub, x } from '../expr/types.ts'
 import { FRACTION_ERROR_RULES } from '../fraction/errorRules.ts'
 import { fracEquals, toFrac } from '../fraction/frac.ts'
 import { isMultipleOf } from '../fraction/factor.ts'
@@ -111,6 +111,22 @@ describe('Zahlenbrüche', () => {
     expect(plan.steps.map((s) => s.title)).toEqual(['Kehrwert', 'Malnehmen und kürzen'])
     expect(correctOf(plan.steps[0]).content).toBe('$\\frac{3}{4} \\cdot 6$')
     expect(correctOf(plan.steps[1]).content).toBe('$\\frac{9}{2}$')
+  })
+})
+
+describe('Komplexe Zahlen', () => {
+  it('Beispiel aus dem Plan: erweitern, ausmultiplizieren, aufteilen', () => {
+    const z = (re: number, im: number) => add(num(re), mul(num(im), IMAG))
+    const plan = planFraction(task({ kind: 'imaginary', terms: [plus(fr(z(3, 4), z(1, -2)))] }), ref)
+    expect(plan.instruction).toBe('Berechne und schreibe das Ergebnis in der Form $a + b\\,\\mathrm{i}$')
+    expect(plan.steps.map((s) => s.title)).toEqual(['Erweitern', 'Ausmultiplizieren', 'Aufteilen'])
+    const [expand, multiply, split] = plan.steps
+    expect(correctOf(expand).content).toBe('$\\frac{(3 + 4\\mathrm{i})(1 + 2\\mathrm{i})}{(1 - 2\\mathrm{i})(1 + 2\\mathrm{i})}$')
+    expect(multiply.choices.map((c) => c.errorRuleId).filter(Boolean).sort()).toEqual(['frac-imag-cross', 'frac-imag-den', 'frac-imag-squared'])
+    expect(correctOf(split).content).toBe('$-1 + 2\\mathrm{i}$')
+    expect(split.choices.find((c) => c.errorRuleId === 'frac-imag-direct')?.content).toBe('$3 - 2\\mathrm{i}$')
+    expect(plan.cards).toEqual(['fraction-imaginary'])
+    expect(plan.resultNote).toBeUndefined()
   })
 })
 
