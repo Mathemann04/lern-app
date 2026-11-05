@@ -9,10 +9,10 @@ den Nutzer zugeschnitten: Maschinenbau, 1. Semester, THU, „Mathematik MB1".
 - Maßstab fürs Niveau: das Buch des Nutzers „Mathe für Ingenieure",
   Kapitel und ihre Themen in der App: [docs/LEHRBUCH.md](docs/LEHRBUCH.md)
 - Meilensteine und aktueller Stand: [docs/ROADMAP.md](docs/ROADMAP.md)
-- Als Nächstes: [docs/PLAN-M3.md](docs/PLAN-M3.md) (Gleichungen umstellen,
-  pausiert nach Schritt 3); zuerst ein Plan für Baukasten und Abwechslung in
-  den Stufen 1 bis 3 wie bei den Brüchen (siehe „Und danach" in
-  [docs/PLAN-M2b.md](docs/PLAN-M2b.md)), dann M3 ab Schritt 4. Abgeschlossen:
+- Laufender Plan: [docs/PLAN-M3.md](docs/PLAN-M3.md) (Gleichungen umstellen,
+  4. Fassung, wartet auf Freigabe): erst Baukasten und Abwechslung in den
+  Stufen 1 bis 3 wie bei den Brüchen (Schritte 4 und 5), dann die Stufen 4
+  und 5 (Schritte 6 bis 9). Abgeschlossen:
   [docs/PLAN-M1.md](docs/PLAN-M1.md), [docs/PLAN-M2.md](docs/PLAN-M2.md),
   [docs/PLAN-M2b.md](docs/PLAN-M2b.md) (Brüche nachschärfen: Abwechslung und
   Profi-Niveau)

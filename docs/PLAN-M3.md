@@ -1,6 +1,8 @@
 # Plan für Meilenstein 3: Gleichungen umstellen
 
-Status: **freigegeben** (30.10.2026, 3. Fassung).
+Status: **4. Fassung, wartet auf deine Freigabe** (05.11.2026). Die
+3. Fassung war freigegeben (30.10.2026); danach sind die Schritte 1 bis 3
+entstanden.
 
 Ziel von M3: Du kannst Gleichungen geführt und frei nach einer Variablen
 auflösen, in 5 Stufen von $y = \frac{3(x - a)}{b} + c$ bis
@@ -10,6 +12,17 @@ Fortschritt und gezieltem Üben. Das Thema „Gleichungen umstellen" im Gebiet
 
 Teil A beschreibt in einfachen Worten, was in welcher Reihenfolge entsteht.
 Teil B ist der technische Bauplan.
+
+Neu in der 4. Fassung (nach den Brüchen in M2b):
+- **Baukasten und Abwechslung auch hier.** Die Stufen 1 bis 3 werden neu
+  aus einem Baukasten gebaut, wie bei den Brüchen (neue Schritte 4 und 5).
+  Ziel: mindestens 100 verschiedene Formen je Stufe statt bisher 8 bis 26.
+- **Die Stufen 4 und 5 entstehen gleich mit dem Baukasten**, mit demselben
+  Ziel.
+- **Stufe 4 in drei Teilen** (6a bis 6c), jeder für sich zum Ausprobieren.
+- **Vier neue typische Fehler** für die Stufen 1 bis 3.
+- **Schritte neu gezählt:** Die bisherigen Schritte 4 bis 7 heißen jetzt 6
+  bis 9.
 
 Geändert gegenüber den ersten Fassungen (deine Rückmeldungen):
 - **Mathe und Physik getrennt:** M3 ist reine Mathematik mit $x$, $y$ und
@@ -69,7 +82,112 @@ So passt es zusammen:
   in denen du sie von Grund auf übst. Hier brauchst du sie als Werkzeug.
   Für jedes Werkzeug gibt es eine kurze Lernkarte.
 
-### Stufen (Vorschlag)
+### Abwechslung: Baukasten statt fester Vorlagen (neu in der 4. Fassung)
+
+Ich habe nachgemessen wie bei den Brüchen: je Stufe die Aufgaben 1 bis 200,
+ohne die Zahlen verglichen und mit den Buchstaben der Reihe nach benannt.
+Übrig bleibt die **Form** der Aufgabe.
+
+| Stufe | Verschiedene Formen | Häufigste Form | Dieselbe Form schon unter den 4 Aufgaben davor |
+| --- | --- | --- | --- |
+| 1 | 8 | 46-mal | bei 100 von 200 Aufgaben |
+| 2 | 11 | 33-mal | bei 68 von 200 |
+| 3 | 26 | 24-mal | bei 29 von 200 |
+
+Ziel wie bei den Brüchen: mindestens **100 Formen** je Stufe, keine Form
+öfter als in 3 von 100 Aufgaben. Die Brüche haben jetzt 158 bis 196 Formen
+je Stufe.
+
+Der Grund: Jede Stufe hat nur fünf bis acht feste Vorlagen mit wenigen
+Unterarten, darin ändern sich nur Zahlen und Buchstaben. In Stufe 1 ist fast
+jede vierte Aufgabe $y = \frac{k(x \pm a)}{b} \pm c$. Die App meidet zwar
+schon die Formen deiner letzten zehn Aufgaben, aber bei acht Formen geht
+das nicht.
+
+**Der Baukasten: Kern und Schalen.** Jede Gleichung entsteht aus zwei Teilen:
+- **Kern:** die Stelle, an der die gesuchte Variable steckt. In Stufe 1
+  steht sie einmal da, in Stufe 2 mehrfach oder im Nenner, in Stufe 3 in
+  Zähler und Nenner, unter einer Wurzel oder im Quadrat.
+- **Schalen:** Rechnungen, die um den Kern gelegt werden: plus oder minus
+  etwas, mal oder durch etwas, eine Klammer mit Zahl oder Buchstabe davor,
+  ein Minus davor, ein Bruchstrich mit einer Summe darunter.
+
+Dazu wechseln:
+- die **andere Seite:** $y$, ein Buchstabe, eine Summe, ein Bruch, oder
+  ebenfalls Teile mit der Variable;
+- **wonach** aufgelöst wird: meist $x$, oft auch ein Buchstabe mittendrin
+  (z. B. nach $a$, $m$ oder $k$);
+- die **Buchstaben:** viele verschiedene, höchstens sieben je Aufgabe (so
+  viele passen auf die Tastatur); Zahlen auch als Bruch wie $\frac{1}{2}$.
+
+Gelöst wird von außen nach innen: erst die Schalen abtragen, dann den Kern
+lösen. Das übst du in jeder Aufgabe, aber in immer anderer Zusammenstellung.
+
+**Stufe 1 neu: Die Variable kommt einmal vor, zwei bis vier Schalen**
+- plus und minus, mal und durch, Klammern auch ineinander
+- Minus vor einer Klammer oder einem Bruch
+- Brüche mit Buchstaben oder Summen im Nenner
+- gesucht ist $x$ oder ein Buchstabe mittendrin
+
+$y = \frac{3(x - a)}{b} + c$ ·
+$a - \frac{x - b}{4} = c$ ·
+$k - 2\left(a - \frac{x}{b}\right) = c$ ·
+$\frac{a(bx + c)}{d} = y$ ·
+$\frac{x + 2a}{b + c} - d = y$ ·
+$y = m(x - a) + b$ nach $a$ ·
+$y = \frac{a + b}{c} - d$ nach $b$
+
+**Stufe 2 neu: Die Variable kommt mehrfach vor oder steht im Nenner**
+- $x$ auf beiden Seiten, in Klammern, auch mit Minus davor
+- Brüche mit Zahlen im Nenner, in denen $x$ steht (Hauptnenner aus Zahlen)
+- $x$ im Nenner, mit Schalen drumherum
+- gesucht ist auch ein Buchstabe, der zweimal vorkommt
+
+$ax + b = cx + d$ ·
+$\frac{x + a}{2} - \frac{x - b}{3} = c$ ·
+$a(x - b) - c(x + d) = x$ ·
+$5x - a(3 - x) = bx$ ·
+$\frac{a}{x} + b = \frac{c}{x}$ ·
+$y = \frac{a}{b - x} + c$ ·
+$ax + b = a + c$ nach $a$
+
+**Stufe 3 neu: Brüche und Wurzeln, die Variable kommt mehrfach vor**
+- $x$ in Zähler und Nenner, Bruch gleich Bruch, mehrere Brüche mit $x$ im
+  Nenner
+- Kehrwerte addieren, aufgelöst nach jedem Buchstaben
+- Wurzeln: auch aus einem Bruch, zwei Wurzeln (zweimal quadrieren), Wurzel
+  im Nenner
+- Quadrate: $x^2$ und Klammern im Quadrat (mit Bedingung wie $x > b$)
+- Schalen aus Stufe 1 drumherum
+
+$y = \frac{ax - 2}{x + b}$ ·
+$\frac{2}{x} - \frac{1}{a} = \frac{3}{b}$ ·
+$\frac{x + a}{x - a} - b = \frac{c}{x - a}$ ·
+$\frac{a}{x - b} = \frac{c}{x + d}$ ·
+$y = c + \sqrt{a - 2x^2}$ ·
+$\frac{a}{\sqrt{x} + b} = c$ ·
+$a\left(\frac{x}{b} - 1\right)^2 = y$ mit $x > b$ ·
+$\sqrt{x + a} - \sqrt{x} = y$
+
+**Stufen 4 und 5 gleich mit Baukasten.** Der Kern ist dort das Neue der
+Stufe: in Stufe 4 z. B. $e^{-kx}$, $\ln(ax + b)$, $a^x b^{2x - 1}$, $\sin x$,
+$\cosh x$ oder $e^x - e^{-x}$, in Stufe 5 ein Werkzeug wie ein Integral oder
+eine Determinante. Die Schalen aus den Stufen 1 bis 3 kommen dazu, z. B.
+$\frac{a}{1 + b e^{-kx}} - c = y$. Auch hier gilt das Ziel von 100 Formen.
+
+**Messen statt hoffen** (wie bei den Brüchen):
+- Ein Test prüft bei jeder Änderung: je Stufe unter 200 Aufgaben mindestens
+  100 Formen, keine öfter als in 3 von 100.
+- Die Formel-Galerie zeigt die Zahlen unter „Abwechslung je Stufe".
+- Die Rechnungen und Lösungen kommen wie immer aus der Engine; die
+  Beispiele oben zeigen nur die Art der Aufgaben.
+- Die alten Aufgaben-Nummern der Stufen 1 bis 3 zeigen danach andere
+  Aufgaben. Dein Fortschritt bleibt.
+
+### Stufen: Beispiele mit Lösung
+
+Die Tabellen zeigen typische Aufgaben jeder Stufe mit Lösung. In den Stufen
+1 bis 3 kommen sie jetzt aus dem Baukasten (oben).
 
 **Stufe 1: Mehrere Schritte, die Variable kommt einmal vor**
 
@@ -239,6 +357,10 @@ Aufgabe: Löse $\int_a^x \frac{\mathrm{d}t}{t(t + b)} = y$ nach $x$ auf
 | Quadrieren | nur einen Teil quadriert | $\frac{y}{a} = \sqrt{b^2 - x^2} \Rightarrow \frac{y^2}{a} = b^2 - x^2$ |
 | Quadrieren | Mittelglied vergessen | $\left(y + \sqrt{x}\right)^2 = y^2 + x$ |
 | Verschachtelte Wurzel | innere Wurzel gleich mit aufgelöst | $y = \sqrt{a + \sqrt{b + \sqrt{x}}} \Rightarrow y^2 = a + b + \sqrt{x}$ |
+| Malnehmen | nicht jeden Summanden malgenommen (neu in der 4. Fassung) | $\frac{x}{a} + b = c \Rightarrow x + b = ac$ |
+| Minus vor Klammer oder Bruch | Vorzeichen nur beim ersten Summanden gewechselt (neu in der 4. Fassung) | $a - \frac{x - b}{4} = c \Rightarrow 4a - x - b = 4c$ |
+| Ausklammern | Vorzeichen in der Klammer falsch (neu in der 4. Fassung) | $ax - bx = c \Rightarrow x(a + b) = c$ |
+| Quadrat | halbiert statt die Wurzel gezogen (neu in der 4. Fassung) | $x^2 = c \Rightarrow x = \frac{c}{2}$ |
 
 **e-Funktion, $\ln$, Potenzen, Winkelfunktionen (ab Stufe 4)**
 
@@ -322,17 +444,44 @@ Aufgaben, Rechenweg und typischen falschen Ergebnissen.
 $y = \sqrt{\frac{x + a}{x - a}}$ frei, einmal mit „Wurzel gliedweise
 gezogen".
 
-#### Schritt 4: Stufe 4 geführt und frei
-- Verschachtelte e-Funktionen, $\ln$ und Wurzeln, Potenz- und
-  Logarithmusgesetze, Winkel- und Hyperbelfunktionen, Substitution,
-  $pq$-Formel mit Scheinlösungen.
+#### Schritt 4: Baukasten und Abwechslung, Stufen 1 und 2 (neu)
+- Baukasten aus Kern und Schalen; die Stufen 1 und 2 kommen daraus.
+- Geführt und frei für alle neuen Formen, auch nach einem Buchstaben
+  aufgelöst.
+- Drei neue typische Fehler: nicht jeden Summanden malgenommen, Minus vor
+  Klammer oder Bruch, Vorzeichen beim Ausklammern; mit Texten und auf den
+  Lernkarten. Gezielt üben lassen sie sich ab Schritt 9 (wie alle Fehler
+  beim Umstellen).
+- Test für die Abwechslung (100 Formen) für die Stufen 1 und 2.
+
+**Ausprobieren:** In Stufe 1 und 2 je zehnmal „Nächste Aufgabe": keine Form
+doppelt, mal nach $x$, mal nach einem Buchstaben aufgelöst.
+
+#### Schritt 5: Stufe 3 aus dem Baukasten (neu)
+- Kerne: $x$ in Zähler und Nenner, mehrere Brüche mit $x$ im Nenner,
+  Kehrwerte, Wurzeln, Quadrate; Schalen wie in Stufe 1.
+- Neuer typischer Fehler: halbiert statt die Wurzel gezogen.
+- Die Lernkarte „Wurzel und Quadrat" bekommt Klammern im Quadrat.
+- Test für die Abwechslung auch für Stufe 3.
+
+**Ausprobieren:** $a\left(\frac{x}{b} - 1\right)^2 = y$ geführt, dann zehn
+Aufgaben der Stufe 3 frei.
+
+#### Schritt 6: Stufe 4 (verschachtelt), in drei Teilen
+Gleich mit dem Baukasten gebaut. Stufe 4 wird nach Teil 6a spielbar und
+wächst mit 6b und 6c.
+- **6a:** e-Funktion und $\ln$ ineinander, Wurzeln in Wurzeln, Potenz- und
+  Logarithmusgesetze
+- **6b:** Winkel- und Hyperbelfunktionen, Umkehrfunktionen ($\arcsin$,
+  $\arctan$)
+- **6c:** Substitution und $pq$-Formel mit Scheinlösungen
 - Neue Lernkarten: e-Funktion und $\ln$, Logarithmus- und Potenzgesetze
   (kurz), Substitution, $pq$-Formel, Umkehrfunktionen.
 
 **Ausprobieren:** $\log_a x + \log_a(x + b) = c$ und
 $y = \ln\left(1 + \sqrt{1 + e^{2x}}\right)$ in beiden Modi.
 
-#### Schritt 5: Stufe 5, Teil 1: Analysis
+#### Schritt 7: Stufe 5, Teil 1: Analysis
 - Ableitungen (mit der Engine aus „Ableiten"), Integrale mit
   Partialbrüchen, Summen und Reihen, Grenzwerte, Differentialgleichungen.
 - Neue Lernkarten (kurz): Stammfunktionen und Partialbrüche, geometrische
@@ -341,7 +490,7 @@ $y = \ln\left(1 + \sqrt{1 + e^{2x}}\right)$ in beiden Modi.
 
 **Ausprobieren:** $\int_a^x \frac{\mathrm{d}t}{t(t + b)} = y$ geführt.
 
-#### Schritt 6: Stufe 5, Teil 2: Algebra und Geometrie
+#### Schritt 8: Stufe 5, Teil 2: Algebra und Geometrie
 - Komplexe Zahlen (Betrag, Winkel), Determinanten, Winkel zwischen
   Vektoren, Additionstheoreme.
 - Neue Lernkarten (kurz): Betrag und Winkel komplexer Zahlen,
@@ -350,8 +499,9 @@ $y = \ln\left(1 + \sqrt{1 + e^{2x}}\right)$ in beiden Modi.
 **Ausprobieren:** $\det\begin{pmatrix} e^{x} & e^{-x} \\ a & b \end{pmatrix} = y$
 in beiden Modi.
 
-#### Schritt 7: Gezieltes Üben, Feinschliff, Abschluss von M3
-- „Deine häufigsten Fehler" mit „Gezielt üben" auch fürs Umstellen.
+#### Schritt 9: Gezieltes Üben, Feinschliff, Abschluss von M3
+- „Deine häufigsten Fehler" mit „Gezielt üben" auch fürs Umstellen, für
+  jeden typischen Fehler (ein Test prüft alle).
 - Design-Durchgang, Offline-Test, Doku, M3 abhaken.
 
 Pro Sitzung schaffen wir etwa ein bis zwei Schritte.
@@ -404,6 +554,44 @@ Pro Sitzung schaffen wir etwa ein bis zwei Schritte.
    selben Schritt nicht doppelt.
 5. **Vorlagen** (`tasks/rearrangeTerms.ts`): Gleichungsformen je Stufe mit
    Zufallszahlen und Bedingungen, Aufgaben-Nummern wie gehabt („2-4711").
+
+### Baukasten und Abwechslung (`src/engine/tasks/rearrangeKit.ts`, neu in der 4. Fassung)
+- **Kern** als kleine Erzeuger mit Art-Kennung, je Stufe eine Auswahl:
+  - Stufe 1: die Variable allein, auch mit Faktor ($3x$, $bx$, $\frac{x}{a}$)
+  - Stufe 2: Summen mit der Variable mehrfach, Klammern (auch mit Minus
+    davor), Brüche mit Zahlen im Nenner, die Variable einmal im Nenner
+  - Stufe 3: Variable in Zähler und Nenner, Bruch gleich Bruch, mehrere
+    Brüche mit der Variable im Nenner, Kehrwertsummen, Wurzeln (auch aus
+    einem Bruch, zwei Wurzeln, Wurzel im Nenner), Quadrate
+- **Schalen:** `plus`, `minus`, `times`, `divide`, `bracket` (Faktor vor
+  einer Klammer), `minus-before` (Minus vor Klammer oder Bruch), `over-sum`
+  (durch eine Summe). Stufe 1: zwei bis vier, Stufen 2 und 3: null bis zwei.
+- **Andere Seite und Gesucht** zufällig; Buchstaben aus einem Vorrat (alle
+  Kleinbuchstaben außer $e$ und $i$), höchstens sieben je Aufgabe.
+- **Filter:** lösbar mit der Engine, das Ergebnis ohne die gesuchte
+  Variable, an mindestens acht erlaubten Stellen prüfbar, Ergebnis
+  höchstens 90 Zeichen LaTeX, Aufgabe am Handy nicht zu breit (`FitWidth`
+  nicht unter 70 %), nicht zu leicht (Stufe 1: mindestens zwei Umformungen;
+  Stufe 2: Variable mehrfach oder im Nenner), keine Gleichung, die für
+  jedes $x$ gilt.
+- **Rechenweg:** die vorhandene Umstell-Engine (`isolate.ts`). Neu, falls
+  nötig: Minus vor einer Klammer, Klammern im Quadrat mit Bedingung
+  (`requires`), Zahlenbrüche als Faktor. Wie immer hat jede Gleichung des
+  Rechenwegs an den Prüfstellen dieselbe Lösung.
+- **Form** (`rearrangeForm` in `tasks/forms.ts`): Buchstaben in Produkten
+  wie $ax$ zählen künftig einzeln, auch der gesuchte (bisher blieb $ax$ als
+  Ganzes stehen). Bei den Brüchen ändert das wenig (gemessen: 158 bis 194
+  Formen je Stufe statt 158 bis 196).
+- **Test** (`rearrangeTerms.test.ts`): Kennzahlen je Stufe über die
+  Aufgaben 1 bis 200; dazu wie bisher tausende Zufallsaufgaben je Stufe mit
+  Gegenprobe durch Einsetzen, falsche Antworten nie richtig.
+- **Stufen 4 und 5:** derselbe Baukasten mit eigenen Kernen. Später
+  dazukommende Vorlagen bekommen einen festen Anteil (`share`), vorweg mit
+  eigenem Zufall gewählt wie bei den Brüchen, damit die übrigen Nummern
+  ihre Aufgabe behalten.
+- **Geführt:** `guided/rearrangePlan.ts` bleibt im Aufbau gleich; Texte
+  und Irrwege für neue Umformungen (Minus vor einer Klammer) in
+  `explain/rearrangeTexts.ts`.
 
 ### Stufe 5: erst ausrechnen, dann umstellen (`src/engine/rearrange/tools/`)
 Jede Aufgabe der Stufe 5 enthält ein Werkzeug aus einem anderen Gebiet. Die
@@ -531,6 +719,12 @@ Nicht Teil von M3, aber so geplant, dass M3 dafür passt:
 ---
 
 ## Bekannte Risiken
+- **Alte Aufgaben-Nummern ändern sich** (4. Fassung): Eine gespeicherte
+  Nummer der Stufen 1 bis 3 zeigt danach eine andere Aufgabe. Der
+  Fortschritt zählt weiter; die Browser-Tests bekommen neue Nummern.
+- **Lange geführte Aufgaben:** Jede Schale ist eine Umformung mit bis zu
+  zwei Fragen. Deshalb in Stufe 1 höchstens vier Schalen, in den Stufen 2
+  und 3 höchstens zwei.
 - **Viel neuer Stoff in Stufe 5:** acht Werkzeuge mit eigener Rechnung und
   eigenen Fehlern. Deshalb zwei eigene Schritte (5 und 6) und je Werkzeug
   eine unabhängige Gegenprobe.
