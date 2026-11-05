@@ -1,5 +1,6 @@
 // Zufällige Terme für Eigenschaftstests (fast-check). Nur in Tests verwendet.
 import fc from 'fast-check'
+import { subterms } from './compare.ts'
 import { evaluate } from './evaluate.ts'
 import { type Expr, type FnName, E, PI, add, div, fn, log, mul, neg, num, pow, root, x } from './types.ts'
 
@@ -52,8 +53,20 @@ export function closeEnough(a: number, b: number): boolean {
 // Stelle sprunghaft ändert. Sie sind für Vergleiche wertlos und werden übersprungen.
 export function reliableValue(e: Expr, at: number): number | null {
   const value = evaluate(e, { x: at })
-  if (!Number.isFinite(value) || Math.abs(value) > 1e10 || !isStableAt(e, at)) return null
+  if (!Number.isFinite(value) || Math.abs(value) > 1e10 || !isStableAt(e, at) || hasCancellation(e, at)) return null
   return value
+}
+
+// Auslöschung: Eine Summe, deren Wert winzig gegen ihre Summanden ist (−x + sin π + x ist
+// mathematisch 0, am Rechner etwa 2 · 10⁻¹⁶), ist nur Rundungsrauschen. Ein Logarithmus oder Bruch
+// davon wäre ein Scheinwert, der sich beim Verschieben der Stelle nicht einmal ändert.
+function hasCancellation(e: Expr, at: number): boolean {
+  return subterms(e).some((s) => {
+    if (s.kind !== 'add') return false
+    const total = evaluate(s, { x: at })
+    const scale = s.terms.reduce((acc, t) => acc + Math.abs(evaluate(t, { x: at })), 0)
+    return total !== 0 && Number.isFinite(scale) && Math.abs(total) < 1e-9 * scale
+  })
 }
 
 // Ändert sich der Wert bei winziger Verschiebung der Stelle kaum? (ohne Größengrenze,
