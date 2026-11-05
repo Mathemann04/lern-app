@@ -7,7 +7,7 @@ Stand: 05.11.2026
 | M1 | Grundgerüst + Ableitungsregeln (beide Modi, 5 Stufen, Erklärungen, Lernkarten, Fortschritt) | fertig |
 | M2 | Brüche (Bruchrechnung, Bruchterme kürzen und zusammenfassen, Doppelbrüche); App für mehrere Themen | fertig |
 | M2b | Brüche nachschärfen: viel mehr Abwechslung (Baukasten statt fester Vorlagen, keine Form doppelt), deutlich schwerer, Stufe 5 auf Profi-Niveau mit Partialbruchzerlegung und Brüchen aus späteren Kapiteln (komplexe Zahlen, Grenzwerte, Teleskopsummen, Hyperbelfunktionen) | fertig |
-| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | pausiert nach Schritt 3; Plan, 4. Fassung (Baukasten und Abwechslung für die Stufen 1 bis 3), wartet auf Freigabe |
+| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | in Arbeit: 4. Fassung des Plans (Baukasten und Abwechslung, ab Stufe 3 verschachtelter), Schritt 4 |
 | M4 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
 | M5 | weitere Themen aus Mathematik MB1 | offen |
 | M6 | Physik: Formeln mit Einheiten (Formeln umstellen mit Zeichen der Physik; Aufgaben lösen: Formel wählen, umstellen, Werte mit Einheiten einsetzen) | offen |
@@ -58,13 +58,14 @@ Details: [PLAN-M2b.md](PLAN-M2b.md)
 
 ## M3: Schritte
 
-Details: [PLAN-M3.md](PLAN-M3.md) (pausiert nach Schritt 3; Plan, 4. Fassung, wartet auf Freigabe)
+Details: [PLAN-M3.md](PLAN-M3.md) (4. Fassung, freigegeben am 05.11.2026 mit deiner Änderung: ab Stufe 3 Kerne ineinander)
 
 - [x] Plan M3 (3. Fassung, freigegeben)
 - [x] 1. Mathe-Engine fürs Umstellen
 - [x] 2. Thema „Gleichungen umstellen" freischalten, Stufen 1 und 2 geführt
 - [x] 3. Stufe 3 geführt, freier Modus für die Stufen 1 bis 3
-- [ ] Plan M3, 4. Fassung: Baukasten und Abwechslung wie bei den Brüchen
+- [x] Plan M3, 4. Fassung: Baukasten und Abwechslung wie bei den Brüchen
+  (freigegeben mit Änderung: ab Stufe 3 Kerne ineinander und gegeneinander)
 - [ ] 4. Baukasten und Abwechslung, Stufen 1 und 2 (neu)
 - [ ] 5. Stufe 3 aus dem Baukasten (neu)
 - [ ] 6. Stufe 4 (verschachtelt) geführt und frei, in drei Teilen

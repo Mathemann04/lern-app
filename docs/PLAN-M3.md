@@ -1,8 +1,8 @@
 # Plan für Meilenstein 3: Gleichungen umstellen
 
-Status: **4. Fassung, wartet auf deine Freigabe** (05.11.2026). Die
-3. Fassung war freigegeben (30.10.2026); danach sind die Schritte 1 bis 3
-entstanden.
+Status: **freigegeben** (05.11.2026, 4. Fassung mit deiner Änderung: ab
+Stufe 3 auch im Aufbau schwerer). Die 3. Fassung war am 30.10.2026
+freigegeben; danach sind die Schritte 1 bis 3 entstanden.
 
 Ziel von M3: Du kannst Gleichungen geführt und frei nach einer Variablen
 auflösen, in 5 Stufen von $y = \frac{3(x - a)}{b} + c$ bis
@@ -20,6 +20,10 @@ Neu in der 4. Fassung (nach den Brüchen in M2b):
 - **Die Stufen 4 und 5 entstehen gleich mit dem Baukasten**, mit demselben
   Ziel.
 - **Stufe 4 in drei Teilen** (6a bis 6c), jeder für sich zum Ausprobieren.
+- **Deine Änderung: ab Stufe 3 schwerer im Aufbau.** Die Kerne werden
+  ineinander gesetzt und gegeneinander gestellt, nicht nur Schalen
+  drumherum gelegt. Ein Test misst die Länge der Rechenwege (siehe
+  „Ab Stufe 3: Kerne ineinander").
 - **Vier neue typische Fehler** für die Stufen 1 bis 3.
 - **Schritte neu gezählt:** Die bisherigen Schritte 4 bis 7 heißen jetzt 6
   bis 9.
@@ -123,6 +127,31 @@ Dazu wechseln:
 Gelöst wird von außen nach innen: erst die Schalen abtragen, dann den Kern
 lösen. Das übst du in jeder Aufgabe, aber in immer anderer Zusammenstellung.
 
+**So entstehen die Aufgaben.** Feste Gleichungen braucht es nicht. Ich lege
+nur die Bausteine fest (welche Kerne und Schalen es gibt und wie sie sich
+verbinden lassen). Ein Zufallsgenerator setzt daraus je Aufgaben-Nummer eine
+Gleichung zusammen. Die Engine löst sie selbst Schritt für Schritt und prüft
+die Lösung durch Einsetzen. Was nicht eindeutig lösbar ist, zu lang wird
+oder sich nicht sauber lösen lässt, wird verworfen und neu gezogen.
+
+**Ab Stufe 3: Kerne ineinander (dein Wunsch).** Damit die Gleichungen nicht
+nur länger, sondern im Aufbau schwerer werden, verbindet der Baukasten ab
+Stufe 3 mehrere Kerne:
+- **Kern im Kern:** z. B. eine Wurzel aus einem Bruch, in dem $x$ oben und
+  unten steht; ein Doppelbruch mit $x$ im inneren Bruch; in Stufe 4 der
+  $\ln$ eines solchen Bruchs oder ein Bruch aus $e^x$.
+- **Kern gegen Kern:** auf beiden Seiten etwas mit $x$, z. B. Bruch gleich
+  Bruch, Klammer mal Klammer gleich Klammer im Quadrat, Potenz gleich
+  Potenz.
+- **Mehrere Kerne in einer Summe:** mehrere Brüche mit $x$ in
+  verschiedenen Nennern, zwei Wurzeln, zwei Potenzen mit $x$ im Exponenten.
+
+Dazu kommen die Schalen. So hat jede Aufgabe ab Stufe 3 mindestens zwei
+verbundene Kerne. Ein Test misst die Länge der Rechenwege: heute brauchen
+die Aufgaben der Stufe 3 im Mittel 4,6 Umformungen. Neu sollen es im Mittel
+mindestens 6 sein, in Stufe 4 mindestens 7 und in Stufe 5 mindestens 8, dort
+dazu das Ausrechnen des Werkzeugs.
+
 **Stufe 1 neu: Die Variable kommt einmal vor, zwei bis vier Schalen**
 - plus und minus, mal und durch, Klammern auch ineinander
 - Minus vor einer Klammer oder einem Bruch
@@ -151,33 +180,63 @@ $\frac{a}{x} + b = \frac{c}{x}$ ·
 $y = \frac{a}{b - x} + c$ ·
 $ax + b = a + c$ nach $a$
 
-**Stufe 3 neu: Brüche und Wurzeln, die Variable kommt mehrfach vor**
-- $x$ in Zähler und Nenner, Bruch gleich Bruch, mehrere Brüche mit $x$ im
-  Nenner
-- Kehrwerte addieren, aufgelöst nach jedem Buchstaben
-- Wurzeln: auch aus einem Bruch, zwei Wurzeln (zweimal quadrieren), Wurzel
-  im Nenner
+**Stufe 3 neu: Brüche und Wurzeln, Kerne ineinander**
+- $x$ in Zähler und Nenner, Bruch gleich Bruch, mehrere Brüche mit $x$ in
+  verschiedenen Nennern (Hauptnenner wie $x^2 - b^2$)
+- Doppelbrüche mit $x$ im inneren Bruch
+- Klammern, bei denen sich $x^2$ weghebt, z. B. $(x + a)(x - b) = (x + c)^2$
+- Kehrwerte addieren, auch drei, aufgelöst nach jedem Buchstaben
+- Wurzeln: aus einem Bruch mit $x$ oben und unten, Summe oder Differenz
+  zweier Wurzeln (zweimal quadrieren), $\sqrt{x}$ in Zähler und Nenner
 - Quadrate: $x^2$ und Klammern im Quadrat (mit Bedingung wie $x > b$)
 - Schalen aus Stufe 1 drumherum
 
-$y = \frac{ax - 2}{x + b}$ ·
-$\frac{2}{x} - \frac{1}{a} = \frac{3}{b}$ ·
-$\frac{x + a}{x - a} - b = \frac{c}{x - a}$ ·
-$\frac{a}{x - b} = \frac{c}{x + d}$ ·
-$y = c + \sqrt{a - 2x^2}$ ·
-$\frac{a}{\sqrt{x} + b} = c$ ·
-$a\left(\frac{x}{b} - 1\right)^2 = y$ mit $x > b$ ·
-$\sqrt{x + a} - \sqrt{x} = y$
+$\frac{a}{x - b} - \frac{c}{x + b} = \frac{d}{x^2 - b^2}$ ·
+$\frac{a}{1 + \frac{b}{x}} = c$ ·
+$(x + a)(x - b) = (x + c)^2$ ·
+$b\sqrt{\frac{x + a}{x - a}} - c = y$ ·
+$\frac{\sqrt{x} + a}{\sqrt{x} - b} = y$ ·
+$\sqrt{x + a} + \sqrt{x - a} = y$ ·
+$\frac{1}{a} = \frac{1}{x} + \frac{1}{b} + \frac{1}{c}$ nach $b$ ·
+$y = \frac{a + x}{a - x}$ nach $a$ ·
+$a\left(\frac{x}{b} - 1\right)^2 = y$ mit $x > b$
 
-**Stufen 4 und 5 gleich mit Baukasten.** Der Kern ist dort das Neue der
-Stufe: in Stufe 4 z. B. $e^{-kx}$, $\ln(ax + b)$, $a^x b^{2x - 1}$, $\sin x$,
-$\cosh x$ oder $e^x - e^{-x}$, in Stufe 5 ein Werkzeug wie ein Integral oder
-eine Determinante. Die Schalen aus den Stufen 1 bis 3 kommen dazu, z. B.
-$\frac{a}{1 + b e^{-kx}} - c = y$. Auch hier gilt das Ziel von 100 Formen.
+**Stufe 4 neu: Verschachtelt, in beide Richtungen.** Die Bausteine $e^x$,
+$a^x$, $\ln$, $\sin$, $\cos$, $\tan$, $\sinh$, $\cosh$ stecken um einen Kern
+aus Stufe 3 herum ($\ln$ eines Bruchs, $e$ hoch einen Bruch, Wurzel aus
+einem $\ln$) und in einem solchen Kern drin (Bruch aus $e^x$, Bruch aus
+$\sin x$). Dazu $x$ mehrfach im Exponenten, Logarithmusgesetze, Substitution
+und $pq$-Formel mit Scheinlösungen. Bis zu drei Ebenen tief, dazu Schalen.
+
+$\ln\frac{x + a}{x - a} = b$ ·
+$\frac{a e^{x} + b}{e^{x} - c} = y$ ·
+$a \cdot 2^{x + 1} - b \cdot 2^{x} = c$ ·
+$3^{2x - 1} = a \cdot 5^{x}$ ·
+$\ln(x + a) + \ln(x - a) = b$ ·
+$e^{2x} - a e^{x} = b$ ·
+$\sqrt{a + \ln\frac{x}{b}} = y$ ·
+$\frac{a + \sin x}{a - \sin x} = y$ ·
+$\cosh x = a \sinh x$ ·
+$y = \frac{a}{1 + b e^{-k(x - c)}}$
+
+**Stufe 5 neu: Werkzeug und Kern verbunden.** Das Werkzeug (Ableitung,
+Integral, Reihe, Grenzwert, komplexe Zahl, Determinante, Vektor,
+Differentialgleichung) liefert nicht nur eine einfache Seite, sondern steckt
+selbst in einem Kern aus Stufe 3 oder 4 (Werkzeug im Bruch, Bruch im
+Werkzeug). Manchmal steht auf beiden Seiten etwas zum Ausrechnen.
+
+$\frac{\int_0^x e^{t}\,\mathrm{d}t}{e^{x} + a} = y$ ·
+$\det\begin{pmatrix} e^{x} & a \\ e^{-x} & b \end{pmatrix} = y$ ·
+$\sum_{k=1}^{\infty}\left(\frac{a}{x}\right)^k = y$ ·
+$\int_0^x e^{t}\,\mathrm{d}t = \det\begin{pmatrix} a & e^{x} \\ 1 & b \end{pmatrix}$
+
+In beiden Stufen gilt auch das Ziel von 100 Formen. Die Beispiele aus der
+Tabelle „Stufen: Beispiele mit Lösung" (unten) bleiben drin.
 
 **Messen statt hoffen** (wie bei den Brüchen):
 - Ein Test prüft bei jeder Änderung: je Stufe unter 200 Aufgaben mindestens
   100 Formen, keine öfter als in 3 von 100.
+- Ab Stufe 3 misst er auch die Länge der Rechenwege (siehe oben).
 - Die Formel-Galerie zeigt die Zahlen unter „Abwechslung je Stufe".
 - Die Rechnungen und Lösungen kommen wie immer aus der Engine; die
   Beispiele oben zeigen nur die Art der Aufgaben.
@@ -459,7 +518,14 @@ doppelt, mal nach $x$, mal nach einem Buchstaben aufgelöst.
 
 #### Schritt 5: Stufe 3 aus dem Baukasten (neu)
 - Kerne: $x$ in Zähler und Nenner, mehrere Brüche mit $x$ im Nenner,
-  Kehrwerte, Wurzeln, Quadrate; Schalen wie in Stufe 1.
+  Doppelbrüche, Klammern mit $x^2$, das sich weghebt, Kehrwerte, Wurzeln,
+  Quadrate; immer mindestens zwei Kerne ineinander oder gegeneinander,
+  Schalen wie in Stufe 1.
+- Die Engine lernt dazu: Summe zweier verschiedener Wurzeln, Doppelbrüche
+  mit $x$ im inneren Bruch, Wurzel aus einem Bruch mit Schalen drumherum,
+  schönere Endformen wie $\left(\frac{by + a}{y - 1}\right)^2$ statt
+  ausmultipliziert.
+- Test: im Mittel mindestens 6 Umformungen.
 - Neuer typischer Fehler: halbiert statt die Wurzel gezogen.
 - Die Lernkarte „Wurzel und Quadrat" bekommt Klammern im Quadrat.
 - Test für die Abwechslung auch für Stufe 3.
@@ -468,8 +534,9 @@ doppelt, mal nach $x$, mal nach einem Buchstaben aufgelöst.
 Aufgaben der Stufe 3 frei.
 
 #### Schritt 6: Stufe 4 (verschachtelt), in drei Teilen
-Gleich mit dem Baukasten gebaut. Stufe 4 wird nach Teil 6a spielbar und
-wächst mit 6b und 6c.
+Gleich mit dem Baukasten gebaut, Kerne ineinander in beide Richtungen (siehe
+„Stufe 4 neu"), im Mittel mindestens 7 Umformungen. Stufe 4 wird nach Teil
+6a spielbar und wächst mit 6b und 6c.
 - **6a:** e-Funktion und $\ln$ ineinander, Wurzeln in Wurzeln, Potenz- und
   Logarithmusgesetze
 - **6b:** Winkel- und Hyperbelfunktionen, Umkehrfunktionen ($\arcsin$,
@@ -566,6 +633,11 @@ Pro Sitzung schaffen wir etwa ein bis zwei Schritte.
 - **Schalen:** `plus`, `minus`, `times`, `divide`, `bracket` (Faktor vor
   einer Klammer), `minus-before` (Minus vor Klammer oder Bruch), `over-sum`
   (durch eine Summe). Stufe 1: zwei bis vier, Stufen 2 und 3: null bis zwei.
+- **Kerne verbinden (ab Stufe 3):** `nest` (Kern im Kern: ein Kern
+  ersetzt die Variable in einem anderen), `versus` (Kern gegen Kern auf
+  beiden Seiten), `sum` (mehrere Kerne in einer Summe). Jede Aufgabe ab
+  Stufe 3 hat mindestens eine solche Verbindung; Stufe 4 und 5 bis zu drei
+  Ebenen tief.
 - **Andere Seite und Gesucht** zufällig; Buchstaben aus einem Vorrat (alle
   Kleinbuchstaben außer $e$ und $i$), höchstens sieben je Aufgabe.
 - **Filter:** lösbar mit der Engine, das Ergebnis ohne die gesuchte
@@ -583,8 +655,11 @@ Pro Sitzung schaffen wir etwa ein bis zwei Schritte.
   Ganzes stehen). Bei den Brüchen ändert das wenig (gemessen: 158 bis 194
   Formen je Stufe statt 158 bis 196).
 - **Test** (`rearrangeTerms.test.ts`): Kennzahlen je Stufe über die
-  Aufgaben 1 bis 200; dazu wie bisher tausende Zufallsaufgaben je Stufe mit
-  Gegenprobe durch Einsetzen, falsche Antworten nie richtig.
+  Aufgaben 1 bis 200 (Formen; ab Stufe 3 auch die mittlere Zahl der
+  Umformungen: 6, 7, 8); dazu wie bisher tausende Zufallsaufgaben je Stufe
+  mit Gegenprobe durch Einsetzen, falsche Antworten nie richtig.
+- **Länge:** Ergebnis höchstens 90 Zeichen LaTeX in den Stufen 1 bis 3,
+  höchstens 120 in den Stufen 4 und 5; die Aufgabe am Handy wie oben.
 - **Stufen 4 und 5:** derselbe Baukasten mit eigenen Kernen. Später
   dazukommende Vorlagen bekommen einen festen Anteil (`share`), vorweg mit
   eigenem Zufall gewählt wie bei den Brüchen, damit die übrigen Nummern
@@ -724,7 +799,12 @@ Nicht Teil von M3, aber so geplant, dass M3 dafür passt:
   Fortschritt zählt weiter; die Browser-Tests bekommen neue Nummern.
 - **Lange geführte Aufgaben:** Jede Schale ist eine Umformung mit bis zu
   zwei Fragen. Deshalb in Stufe 1 höchstens vier Schalen, in den Stufen 2
-  und 3 höchstens zwei.
+  und 3 höchstens zwei. Ab Stufe 3 fragt die App „Was machst du als
+  Nächstes?" ohnehin nur an den Weichen.
+- **Schwerere Aufgaben in Stufe 3 bis 5** brauchen mehr von der Engine
+  (z. B. zwei verschiedene Wurzeln). Was sie noch nicht sauber lösen kann,
+  verwirft der Generator; der Test der Umformungen zeigt, ob trotzdem genug
+  schwere Aufgaben übrig bleiben.
 - **Viel neuer Stoff in Stufe 5:** acht Werkzeuge mit eigener Rechnung und
   eigenen Fehlern. Deshalb zwei eigene Schritte (5 und 6) und je Werkzeug
   eine unabhängige Gegenprobe.

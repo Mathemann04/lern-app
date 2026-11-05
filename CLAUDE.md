@@ -10,9 +10,10 @@ den Nutzer zugeschnitten: Maschinenbau, 1. Semester, THU, „Mathematik MB1".
   Kapitel und ihre Themen in der App: [docs/LEHRBUCH.md](docs/LEHRBUCH.md)
 - Meilensteine und aktueller Stand: [docs/ROADMAP.md](docs/ROADMAP.md)
 - Laufender Plan: [docs/PLAN-M3.md](docs/PLAN-M3.md) (Gleichungen umstellen,
-  4. Fassung, wartet auf Freigabe): erst Baukasten und Abwechslung in den
-  Stufen 1 bis 3 wie bei den Brüchen (Schritte 4 und 5), dann die Stufen 4
-  und 5 (Schritte 6 bis 9). Abgeschlossen:
+  4. Fassung, freigegeben): erst Baukasten und Abwechslung in den Stufen 1
+  bis 3 wie bei den Brüchen (Schritte 4 und 5; ab Stufe 3 Kerne ineinander,
+  Test der Umformungen), dann die Stufen 4 und 5 (Schritte 6 bis 9).
+  Abgeschlossen:
   [docs/PLAN-M1.md](docs/PLAN-M1.md), [docs/PLAN-M2.md](docs/PLAN-M2.md),
   [docs/PLAN-M2b.md](docs/PLAN-M2b.md) (Brüche nachschärfen: Abwechslung und
   Profi-Niveau)
