@@ -182,11 +182,11 @@ test('Galerie zeigt Umstell-Aufgaben der Stufen 1 bis 3 mit Rechenweg und typisc
     expect(overflow, `Stufe ${level} ragt seitlich heraus`).toBeLessThanOrEqual(0)
   }
 
-  // Aufgabe über ihre Nummer, z. B. 3-1: \frac{3x + a}{x - a} = b nach x
-  await page.getByLabel('Aufgabe über ihre Nummer aufrufen').fill('3-1')
+  // Aufgabe über ihre Nummer, z. B. 3-9: y = \sqrt{\frac{x + p}{x - q}} nach x
+  await page.getByLabel('Aufgabe über ihre Nummer aufrufen').fill('3-9')
   await page.getByRole('button', { name: 'Anzeigen' }).click()
   const card = page.getByRole('region', { name: 'Aufgerufene Aufgabe' }).getByRole('article')
-  await expect(card).toContainText('Aufgabe 3-1')
+  await expect(card).toContainText('Aufgabe 3-9')
   await expect(card).toContainText('Löse nach')
   await expect(card.getByText('ausklammern').first()).toBeVisible()
   await expect(card.getByText('Beim Ausklammern die')).toBeVisible()

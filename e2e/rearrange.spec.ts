@@ -119,9 +119,9 @@ test('Umstellen: Lernkarten-Ordner mit durchgerechneten Beispielen', async ({ pa
   await expectCleanPage(page, 'Lernkarte')
 })
 
-test('Umstellen Stufe 3: zweimal quadrieren geführt, mit Lernkarte „Wurzel und Quadrat"', async ({ page }) => {
-  // y = √(x + 4a) − √x
-  await page.goto('./#/ueben/umstellen/3-19')
+test('Umstellen Stufe 3: zwei Wurzeln, zweimal quadrieren geführt, mit Lernkarte „Wurzel und Quadrat"', async ({ page }) => {
+  // √(x + a) + √(x + b) = y
+  await page.goto('./#/ueben/umstellen/3-29')
   await expect(page.locator('#question')).toHaveText('Was kommt heraus?')
   await solveWholeTask(page)
   await expect(page.getByTestId('result')).toBeVisible()
@@ -142,30 +142,30 @@ test('Umstellen Stufe 2 frei: Aufgabe aus dem Baukasten, Minus beim Ausklammern 
 })
 
 test('Umstellen frei: noch nicht fertig, Wurzel gliedweise gezogen, dann richtig', async ({ page }) => {
-  // y = a√(b² − x²) nach x
-  await page.goto('./#/frei/umstellen/3-16')
+  // y = b√(a² − x²) nach x
+  await page.goto('./#/frei/umstellen/3-2047')
   await expect(field(page)).toBeVisible()
   await expect(page.getByLabel('Deine Antwort')).toContainText('x =')
   await expect(page.getByText('Alle Buchstaben stehen für positive Zahlen.')).toBeVisible()
   await expectCleanPage(page, 'Start')
 
   // richtig umgeformt, aber x steht noch nicht allein: zählt nicht als Fehler
-  await enter(page, 'x^2=b^2-\\frac{y^2}{a^2}')
+  await enter(page, 'x^2=a^2-\\frac{y^2}{b^2}')
   await expect(feedback(page)).toContainText('Richtig umgeformt, aber noch nicht fertig.')
   await expect(feedback(page)).toContainText('muss allein auf einer Seite stehen')
 
   // richtig gerechnet, aber noch nicht zu einem Bruch zusammengefasst
-  await enter(page, '\\sqrt{b^2-\\frac{y^2}{a^2}}')
+  await enter(page, '\\sqrt{a^2-\\frac{y^2}{b^2}}')
   await expect(feedback(page)).toContainText('Richtig gerechnet, aber noch nicht fertig.')
   await expect(feedback(page)).toContainText('Fasse noch zu einem einzigen Bruch zusammen.')
 
   // typischer Fehler mit Erklärung
-  await enter(page, '\\frac{ab-y}{a}')
+  await enter(page, '\\frac{ab-y}{b}')
   await expect(feedback(page)).toContainText('Wurzel aus jedem Summanden einzeln gezogen')
   await page.getByRole('button', { name: 'Warum ist das falsch?' }).click()
   await expectCleanPage(page, 'Fehler')
 
-  await enter(page, '\\frac{\\sqrt{a^2b^2-y^2}}{a}')
+  await enter(page, '\\frac{\\sqrt{a^2b^2-y^2}}{b}')
   await expect(feedback(page)).toContainText('Richtig!')
   await expect(page.getByTestId('result')).toBeVisible()
   await expectCleanPage(page, 'Richtig')

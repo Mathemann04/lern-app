@@ -77,6 +77,11 @@ export const REARRANGE_ERROR_TEXTS: Readonly<Record<string, Explanation>> = {
       'Ein Minus vor einer Klammer dreht das Vorzeichen jedes Summanden in der Klammer um, nicht nur das des ersten: $-c(x - d) = -cx + cd$.',
     short: 'Das Minus gilt für die ganze Klammer: $-c(x - d) = -cx + cd$.',
   },
+  'eq-square-halved': {
+    detailed:
+      'Die Hochzahl $2$ ist kein Faktor: Aus $x^2 = c$ wird nicht $x = \\frac{c}{2}$. Die Gegenrechnung zum Quadrat ist die Wurzel, auf beiden Seiten: $x = \\sqrt{c}$.',
+    short: 'Gegen das Quadrat hilft die Wurzel, nicht das Halbieren.',
+  },
   'eq-factor-sign': {
     detailed:
       'Beim Ausklammern bleibt jedes Vorzeichen in der Klammer stehen: $ax - bx = x(a - b)$. Prüfe es, indem du die Klammer wieder ausmultiplizierst.',
@@ -225,9 +230,36 @@ export const COMBINE_BEFORE_MULTIPLY_MOVES: readonly WrongMove[] = [
   },
 ]
 
+// Zusammenfassen, bevor die Wurzel gezogen wird
+export const COMBINE_BEFORE_ROOT_MOVES: readonly WrongMove[] = [
+  { label: 'Die Wurzel aus jedem Summanden einzeln ziehen', why: REARRANGE_ERROR_TEXTS['eq-root-termwise'] },
+  COMBINE_BEFORE_MULTIPLY_MOVES[1],
+]
+
+// Zusammenfassen, bevor quadriert wird
+export const COMBINE_BEFORE_SQUARE_MOVES: readonly WrongMove[] = [
+  {
+    label: 'Jeden Summanden einzeln quadrieren',
+    why: { detailed: 'Eine Summe quadrierst du nicht Summand für Summand: $(a + b)^2 = a^2 + 2ab + b^2$. Fasse die Seite zuerst zu einem Bruch zusammen, dann quadrierst du Zähler und Nenner.', short: 'Nicht Summand für Summand quadrieren.' },
+  },
+  COMBINE_BEFORE_MULTIPLY_MOVES[1],
+]
+
 export const EXPAND_MOVES: readonly WrongMove[] = [
   { label: 'Die Klammern einfach weglassen', why: { detailed: 'Ohne Klammer gehört der Faktor nur noch zum ersten Summanden. Jeder Summand in der Klammer muss malgenommen werden.', short: 'Klammern nicht weglassen, ausmultiplizieren.' } },
   { label: 'Die Zahl vor der Klammer nur mit dem ersten Summanden malnehmen', why: REARRANGE_ERROR_TEXTS['eq-bracket-first-term'] },
+]
+
+// Doppelbruch mit Brüchen im Nenner
+export const EXTEND_MOVES: readonly WrongMove[] = [
+  {
+    label: 'Nur den Zähler mit dem inneren Nenner malnehmen',
+    why: { detailed: 'Nimmst du nur den Zähler mal, ändert sich der Wert des Bruchs. Beim Erweitern nimmst du Zähler und Nenner mit demselben Term mal.', short: 'Erweitern: Zähler und Nenner mit demselben Term mal.' },
+  },
+  {
+    label: 'Die inneren Nenner einfach weglassen',
+    why: { detailed: 'Einen Nenner darfst du nicht einfach weglassen, dann ändert sich der Wert. Erweitere den Doppelbruch mit dem Hauptnenner der inneren Brüche.', short: 'Nicht weglassen, mit dem inneren Hauptnenner erweitern.' },
+  },
 ]
 
 // unknown: die Unbekannte als LaTeX, x oder \sqrt{x} (dann ist √x die Unbekannte, x = (√x)²)
@@ -287,6 +319,9 @@ export const REARRANGE_HINTS = {
   reciprocal: 'Steht auf beiden Seiten genau ein Bruch, darfst du beide umdrehen.',
   combine: 'Den Kehrwert darfst du nur von einem einzigen Bruch nehmen.',
   combineBeforeMultiply: 'Fasse die Seite zuerst zu einem Bruch zusammen. Sonst entsteht beim Malnehmen und Teilen ein Doppelbruch.',
+  combineBeforeRoot: 'Fasse die Seite zuerst zu einem Bruch zusammen. Dann ziehst du die Wurzel aus einem einzigen Bruch.',
+  combineBeforeSquare: 'Fasse die Seite zuerst zu einem Bruch zusammen. Dann quadrierst du Zähler und Nenner.',
+  extend: 'Erweitere den Doppelbruch: Zähler und Nenner mal den Hauptnenner der inneren Brüche. Dann kürzen sich die inneren Nenner weg.',
   expand: 'Jeder Summand in der Klammer wird malgenommen: $a(b + c) = ab + ac$.',
   collect: 'Alle Summanden mit der Variable auf eine Seite, alle anderen auf die andere. Was die Seite wechselt, wechselt das Vorzeichen.',
   factor: 'Klammere die Variable aus: $ax + bx = x(a + b)$. Steht ein Summand nur als $x$ da, bleibt in der Klammer eine $1$.',
@@ -324,8 +359,14 @@ export function explainMove(kind: string, operation: string, target: string, unk
       return { detailed: 'Bevor du den Kehrwert nimmst, muss auf der Seite genau ein Bruch stehen. Fasse sie deshalb über den Hauptnenner zusammen.', short: 'Erst zu einem Bruch, dann Kehrwert.' }
     case 'combine-multiply':
       return { detailed: 'Auf der anderen Seite steht eine Summe mit Brüchen. Fasse sie erst über den Hauptnenner zu einem Bruch zusammen; dann bleibt nach dem Malnehmen mit dem Nenner kein Doppelbruch übrig.', short: 'Erst zu einem Bruch, dann mit dem Nenner malnehmen.' }
+    case 'combine-root':
+      return { detailed: 'Auf der anderen Seite steht eine Summe mit Brüchen. Fasse sie erst über den Hauptnenner zu einem Bruch zusammen; dann ziehst du die Wurzel aus einem einzigen Bruch.', short: 'Erst zu einem Bruch, dann die Wurzel ziehen.' }
+    case 'combine-square':
+      return { detailed: 'Auf der anderen Seite steht eine Summe mit Brüchen. Fasse sie erst über den Hauptnenner zu einem Bruch zusammen; dann quadrierst du einfach Zähler und Nenner.', short: 'Erst zu einem Bruch, dann quadrieren.' }
     case 'expand':
       return { detailed: 'Die Variable steckt in Klammern. Nach dem Ausmultiplizieren stehen alle Summanden einzeln da und lassen sich sortieren.', short: 'Ausmultiplizieren, dann sortieren.' }
+    case 'extend':
+      return { detailed: 'Im Zähler und Nenner stehen weitere Brüche. Nimmst du Zähler und Nenner mit dem Hauptnenner der inneren Brüche mal, kürzen sich die inneren Nenner weg, und der Wert bleibt gleich.', short: `${operation}: Die inneren Nenner kürzen sich weg.` }
     case 'collect':
       if (unknown !== target) {
         return { detailed: `Bringe den Summanden mit $${unknown}$ auf eine Seite und alle anderen auf die andere; was die Seite wechselt, wechselt das Vorzeichen. Steht $${unknown}$ allein, kannst du noch einmal quadrieren.`, short: `Summand mit $${unknown}$ nach links, Rest nach rechts.` }

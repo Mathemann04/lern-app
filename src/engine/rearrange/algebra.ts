@@ -8,13 +8,16 @@ import {
   type Term,
   constValue,
   isZeroPoly,
+  monomial,
   monomialContent,
   polyAtom,
   polyConst,
   polyContent,
   polyDivideExact,
+  polyMul,
   polyPow,
   polyScale,
+  polySum,
 } from '../fraction/poly.ts'
 import { type Rational, isInteger, isOne, rat, ratAbs, ratDiv, ratNeg, ratSign } from '../rational.ts'
 
@@ -34,9 +37,41 @@ export type Atoms = {
   // Name → Teil, Schlüssel des Teils → Name
   readonly opaque: Map<string, Expr>
   readonly names: Map<string, string>
+  // Wurzel mit der gesuchten Variable, mit der gerechnet wird wie mit einem Buchstaben, ihr Quadrat
+  // ist der Term darunter: (y − √(x − a))² = y² − 2y√(x − a) + x − a
+  readonly radical?: { readonly key: string; readonly square: Poly }
 }
 
+export const RADICAL_ATOM = '~r'
+
 export const newAtoms = (target: string, rootUnknown = false): Atoms => ({ target, rootUnknown, opaque: new Map(), names: new Map() })
+
+// Atome mit einer Wurzel wie √(x − a) als eigenem Zeichen; null, wenn unter der Wurzel kein Polynom steht
+export function radicalAtoms(target: string, r: Expr): Atoms | null {
+  if (r.kind !== 'root' || r.index !== 2) return null
+  const square = toPoly(r.arg, newAtoms(target))
+  if (!square) return null
+  const atoms: Atoms = { ...newAtoms(target), radical: { key: key(r), square } }
+  atoms.opaque.set(RADICAL_ATOM, r)
+  atoms.names.set(key(r), RADICAL_ATOM)
+  return atoms
+}
+
+// Potenzen der Wurzel ab 2 durch den Term darunter ersetzen
+function reduceRadical(p: Poly, atoms: Atoms): Poly {
+  const radical = atoms.radical
+  if (!radical || !p.some((t) => t.mono.some(([a, k]) => a === RADICAL_ATOM && k >= 2))) return p
+  return polySum(
+    p.map((t) => {
+      const k = t.mono.find(([a]) => a === RADICAL_ATOM)?.[1] ?? 0
+      if (k < 2) return [t]
+      const mono = t.mono.filter(([a]) => a !== RADICAL_ATOM).concat(k % 2 === 1 ? [[RADICAL_ATOM, 1] as const] : [])
+      return polyMul([{ mono: monomial(mono), coef: t.coef }], polyPow(radical.square, Math.floor(k / 2)))
+    }),
+  )
+}
+
+const reduceFracRadical = (f: Frac, atoms: Atoms): Frac => (atoms.radical ? { num: reduceRadical(f.num, atoms), den: reduceRadical(f.den, atoms) } : f)
 
 function opaqueAtom(e: Expr, atoms: Atoms): Frac {
   const k = key(e)
@@ -81,7 +116,7 @@ export function toRat(e: Expr, atoms: Atoms): Frac | null {
         if (!f) return null
         product = fracMul(product, f)
       }
-      return product
+      return reduceFracRadical(product, atoms)
     }
     case 'neg': {
       const f = toRat(e.arg, atoms)
@@ -96,12 +131,14 @@ export function toRat(e: Expr, atoms: Atoms): Frac | null {
       const k = asRational(e.exp)
       if (k && isInteger(k)) {
         const base = toRat(e.base, atoms)
-        return base && power(base, Number(k.n))
+        const p = base && power(base, Number(k.n))
+        return p && reduceFracRadical(p, atoms)
       }
       break
     }
     case 'root':
       if (atoms.rootUnknown && isTargetRoot(e, atoms)) return fracOf(polyAtom(ROOT_ATOM))
+      if (atoms.radical && key(e) === atoms.radical.key) return fracOf(polyAtom(RADICAL_ATOM))
       break
   }
   return contains(e, atoms.target) ? null : opaqueAtom(e, atoms)

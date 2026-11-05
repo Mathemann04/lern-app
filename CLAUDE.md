@@ -138,7 +138,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     oder Gleichung, `parseLatexEquation`; $x$ noch nicht allein, aber für
     die Lösung richtig: „noch nicht aufgelöst"; Vergleich an Prüfstellen;
     fertig: ein Bruch, auch unter Wurzel oder im Quadrat, zusammengefasst,
-    gekürzt; sonst typischer Fehler)
+    gekürzt; eine Wurzel aus einem Bruch zählt wie ein Buchstabe, z. B.
+    $b + \sqrt{\frac{y}{a}}$; sonst typischer Fehler)
   - `parse/latex.ts`: liest die Eingabe der Mathe-Tastatur (LaTeX) ein, mit
     verständlichen Fehlermeldungen
   - `explain/`: Textbausteine für Erklärungen (ausführlich/kurz), Tipps und
@@ -155,7 +156,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     `fractionTexts.ts`. Umstellen: Texte, Tipps und falsche Umformungen
     (Irrwege mit eigener Erklärung) in `rearrangeTexts.ts`, Ordner
     „Gleichungen umstellen" in `rearrangeCards.ts` (Beispiele sind
-    Umstell-Aufgaben; Stufe 3: Hauptnenner, Kehrwert, Wurzel und Quadrat),
+    Umstell-Aufgaben; Stufe 3: Hauptnenner, Kehrwert, Wurzel und Quadrat
+    mit Klammer im Quadrat und zwei Wurzeln),
     durchgerechnete Beispiele in `rearrangeExample.ts`
   - `guided/plan.ts`: Schrittplaner für den geführten Modus (Regelwahl, dann je
     Summand ein Schritt; Produkt/Quotient: u', v', Einsetzen; Kette: äußere,
@@ -248,11 +250,19 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   - `rearrange/`: Umstell-Engine (Gleichungen nach einer Variablen
     auflösen): `algebra.ts` (Seiten als Brüche aus Polynomen mit beliebigen
     Buchstaben, Teile ohne die Variable wie √(b² − y²) als eigene Zeichen
-    `~0`, √x als Unbekannte `~u`; Endform: ein Bruch, gekürzt, Buchstaben-
-    Faktor ausgeklammert), `isolate.ts` (Rechenweg: von außen nach innen
-    schälen; bei mehrfacher Variable Nenner beseitigen, ausmultiplizieren,
-    sortieren, ausklammern, teilen; Wurzel allein stellen und quadrieren mit
-    Bedingung `requires`; Schrittnamen `stepLabel`), `check.ts`
+    `~0`, √x als Unbekannte `~u`, bei zwei Wurzeln die zweite wie √(x − a)
+    als eigenes Zeichen `~r` mit (~r)² = x − a, `radicalAtoms`; Endform: ein
+    Bruch, gekürzt, Buchstaben-Faktor ausgeklammert), `isolate.ts`
+    (Rechenweg: von außen nach innen schälen; vor dem Wurzelziehen oder
+    Quadrieren eine Summe mit Brüchen zuerst zu einem Bruch; bei mehrfacher
+    Variable Doppelbruch mit Brüchen im Nenner erweitern (Schritt `extend`),
+    Nenner beseitigen (Klammern wie in der Aufgabe geschrieben),
+    ausmultiplizieren, sortieren, ausklammern, teilen; Wurzel allein stellen
+    und quadrieren mit Bedingung `requires`, steht danach noch eine Wurzel in
+    einer Klammer: ausmultiplizieren, die Wurzel allein stellen, ausklammern,
+    teilen, noch einmal quadrieren; Endform des Quadrats eines Bruchs mit
+    Summe im Nenner als $\left(\frac{by + a}{y - 1}\right)^2$; Schrittnamen
+    `stepLabel`), `check.ts`
     (Prüfstellen: Buchstaben zufällig positiv, Variable aus dem Ergebnis,
     Bedingungen der Aufgabe; Gegenprobe durch Einsetzen), `errorRules.ts`
     (typische Fehler, Ids `eq-…`, beim Zusammenfassen die aus „Brüche";
@@ -260,10 +270,16 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     stimmt), `task.ts` (Aufgabe, Bedingungen)
   - `random/rng.ts`: Zufall mit Startwert; `tasks/`: Aufgaben-Nummern
     („3-48213"), Vorlagen je Stufe (`derivativeTerms.ts`,
-    `fractionTerms.ts`, `rearrangeTerms.ts`; Umstellen Stufen 1 und 2 aus dem
+    `fractionTerms.ts`, `rearrangeTerms.ts`; Umstellen Stufen 1 bis 3 aus dem
     Baukasten `rearrangeKit.ts`: Kern mit der Variable, Schalen drumherum, andere
-    Seite, manchmal nach einem Buchstaben aufgelöst; Filter in
-    `rearrangeTerms.ts`), `focus.ts` und `fractionFocus.ts` (Aufgaben für
+    Seite, manchmal nach einem Buchstaben aufgelöst; Stufe 3 mit Kernen
+    ineinander, gegeneinander oder in einer Summe (`LEVEL3_CORES`: $x$ in
+    Zähler und Nenner, Bruch gleich Bruch, Brüche mit verschiedenen Nennern,
+    Klammern mit $x^2$, das sich weghebt, Kehrwerte, Wurzel aus einem Bruch,
+    $x^2$ unter der Wurzel, zwei Wurzeln, $\sqrt{x}$ in Zähler und Nenner,
+    Klammer oder Bruch im Quadrat mit Bedingung, Doppelbrüche); Filter in
+    `rearrangeTerms.ts`: Mindestzahl der Umformungen je Stufe, Doppelbrüche
+    erst ab Stufe 3, Gegenprobe der Aufgabe an den Prüfstellen), `focus.ts` und `fractionFocus.ts` (Aufgaben für
     gezieltes Üben; Brüche: reihum durch die Stufen, je Runde zwölf Versuche,
     seltene Fehler in ihrer Vorlage `focus`, `likelyFractionTemplate`;
     `PracticePage.tsx` zeigt während der Suche einen Hinweis); Baukasten der Brüche `fractionKit.ts` (Stufen 1 und 2:
