@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { toLatex } from '../expr/print.ts'
-import { type Expr, add, cos, exp, mul, num, pow, sin, sqrt, sub, variable, x } from '../expr/types.ts'
+import { type Expr, IMAG, add, cos, exp, mul, num, pow, sin, sqrt, sub, variable, x } from '../expr/types.ts'
 import { toFrac } from '../fraction/frac.ts'
 import { type Poly, polyDivideExact } from '../fraction/poly.ts'
 import { type BlockRule, type FractionShape, type FractionTask, type Part, expanded, isReadableTask, minus, part, plus, taskLatex, withRoots } from '../fraction/task.ts'
@@ -211,6 +211,48 @@ describe('Stufe 5: Partialbrüche', () => {
     expect(check('x+3-2+\\frac{2}{x-1}')).toBe('unfinished:partial-combine')
     expect(check('\\frac{2}{x-1}')).toBe('knownError:frac-partial-no-division')
     expect(check('x+1')).toBe('knownError:frac-division-remainder')
+  })
+})
+
+describe('Stufe 5: komplexe Zahlen', () => {
+  const z = (re: number, im: number) => add(num(re), mul(num(im), IMAG))
+  const checker = (t: FractionTask) => {
+    const context = prepareFractionCheck(t)
+    return (latex: string) => short(checkFractionAnswer(context, latex))
+  }
+
+  it('fertig ist a + bi oder ein Bruch mit reellem Nenner', () => {
+    const check = checker(task({ kind: 'imaginary', terms: [plus(fr(z(2, -1), z(3, 4)))] }))
+    expect(check('\\frac{2}{25}-\\frac{11}{25}\\mathrm{i}')).toBe('correct')
+    expect(check('\\frac{2}{25}-\\frac{11}{25}i')).toBe('correct')
+    expect(check('\\frac{2-11i}{25}')).toBe('correct')
+    expect(check('\\frac{2}{25}-\\frac{11i}{25}')).toBe('correct')
+    // noch nicht fertig
+    expect(check('\\frac{2-i}{3+4i}')).toBe('unfinished:imag-den')
+    expect(check('\\frac{6-8i-3i+4i^2}{25}')).toBe('unfinished:imag-power')
+    expect(check('\\frac{(2-i)(3-4i)}{25}')).toBe('unfinished:imag-combine')
+    expect(check('\\frac{1}{25}+\\frac{1}{25}-\\frac{11}{25}i')).toBe('unfinished:imag-combine')
+    expect(check('\\frac{4-22i}{50}')).toBe('unfinished:not-reduced')
+    expect(check('0.08-0.44i')).toBe('unfinished:decimal')
+    // Nenner mit c² − d²
+    expect(check('-\\frac{2}{7}+\\frac{11}{7}i')).toBe('knownError:frac-imag-den')
+  })
+
+  it('typische Fehler beim Teilen', () => {
+    const check = checker(task({ kind: 'imaginary', terms: [plus(fr(z(3, 4), z(1, -2)))] }))
+    expect(check('-1+2i')).toBe('correct')
+    expect(check('3-2i')).toBe('knownError:frac-imag-direct')
+    expect(check('-1+10i')).toBe('knownError:frac-imag-split')
+    expect(check('\\frac{11}{5}+2i')).toBe('knownError:frac-imag-squared')
+  })
+
+  it('mit Buchstaben: die Tastatur hat i, Buchstaben ohne i', () => {
+    const t = task({ kind: 'imaginary', terms: [plus(fr(num(1), add(a, mul(b, IMAG))))] })
+    expect(prepareFractionCheck(t).letters).toEqual(['a', 'b'])
+    expect(prepareFractionCheck(t).imag).toBe(true)
+    const check = checker(t)
+    expect(check('\\frac{a}{a^2+b^2}-\\frac{b}{a^2+b^2}i')).toBe('correct')
+    expect(check('\\frac{a-bi}{a^2+b^2}')).toBe('correct')
   })
 })
 

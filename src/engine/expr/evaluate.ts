@@ -19,7 +19,8 @@ function evaluateRaw(e: Expr, env: Env): number {
     case 'num':
       return ratToNumber(e.value)
     case 'const':
-      return e.name === 'e' ? Math.E : Math.PI
+      // i ist keine reelle Zahl: Werte mit i rechnet nur die Bruch-Engine (exakt)
+      return e.name === 'e' ? Math.E : e.name === 'pi' ? Math.PI : NaN
     case 'var':
       return env[e.name] ?? NaN
     case 'add':

@@ -30,7 +30,7 @@ export function toLatex(e: Expr): string {
     case 'num':
       return printNum(e)
     case 'const':
-      return e.name === 'e' ? 'e' : '\\pi'
+      return e.name === 'e' ? 'e' : e.name === 'i' ? '\\mathrm{i}' : '\\pi'
     case 'var':
       return e.name
     case 'add':

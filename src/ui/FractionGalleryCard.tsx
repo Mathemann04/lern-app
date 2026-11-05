@@ -38,7 +38,9 @@ export function FractionGalleryCard({ generated, showSteps, showErrors, highligh
 
   return (
     <article className={`space-y-3 rounded-2xl border p-4 ${highlighted ? 'border-accent-600 bg-accent-50' : 'border-zinc-200'}`}>
-      <p className="text-sm text-zinc-500">{instructionFor(task)}</p>
+      <p className="text-sm text-zinc-500">
+        <RichText text={instructionFor(task)} inline />
+      </p>
       <div className="overflow-x-auto py-1 text-xl">
         <Formula tex={taskLatex(task)} />
       </div>

@@ -9,6 +9,11 @@ import {
   explainAnsatz,
   explainCompare,
   explainDivide,
+  explainImagConjugate,
+  explainImagMultiply,
+  explainImagPower,
+  explainImagSplit,
+  explainImagSum,
   explainInsert,
   explainDecimal,
   explainOrder,
@@ -44,6 +49,7 @@ import {
   type SumWork,
   cancelledFactor,
   fractionExpr,
+  imagWork,
   multipliedExpr,
   nicePolyExpr,
   innerResultPart,
@@ -504,6 +510,8 @@ type Facts = {
   readonly blocks: boolean
   // Wurzel √x (auch √a, √(x + h)) in der Aufgabe
   readonly root: boolean
+  // komplexe Zahlen: Nenner des Bruchs mit i (nach den Potenzen von i), sonst null
+  readonly imagDen: Expr | null
   // Wurzel beseitigen: Die Summe mit Wurzel steht im Zähler oder im Nenner (sonst null)
   readonly conjugate: 'num' | 'den' | null
   // Bausteine mit eigenen Regeln: √x, sin² x + cos² x = 1, Potenzen von e^x
@@ -537,6 +545,7 @@ function factsOf(original: FractionTask, solution: FracSolution, wrongs: readonl
     blocks: fracAtoms(solution.value).some(isBlock),
     root: fracAtoms(solution.value).some(isRootAtom),
     conjugate: original.rule?.kind === 'conjugate' ? original.rule.target : null,
+    imagDen: t.kind === 'imaginary' ? shownExpr(imagWork(t).den) : null,
     blockRules: original.rule !== undefined || fracAtoms(solution.value).some(isRootAtom) || wrongs.some((w) => w.rule.id === 'frac-cancel-inside'),
     numMethods: t.kind === 'reduce' ? factorMethods(shownPoly(t.part.num), t.hints) : [],
     denMethods: t.kind === 'reduce' ? factorMethods(shownPoly(t.part.den), t.hints) : [],
@@ -645,6 +654,7 @@ function coarsen(raw: readonly Draft[], task: FractionTask): Draft[] {
 // gerechnet (e^2 - 4, nicht zerlegt)
 function resultForm(w: FracWrong, t: FractionTask): Expr {
   if (w.value && w.value.num.length === 0) return num(0)
+  if (t.kind === 'imaginary') return w.result ?? w.stepExpr
   if (t.rule || (w.value && fracAtoms(w.value).includes('e'))) return w.result ?? w.stepExpr
   return w.value ? productFormExpr(reduceFrac(w.value, t.hints), t.hints) : w.stepExpr
 }
@@ -717,6 +727,11 @@ const TITLES: Record<StepKind, readonly [first: string, later: string]> = {
   divide: ['Polynomdivision', 'Polynomdivision'],
   ansatz: ['Ansatz', 'Ansatz'],
   coef: ['Zahl bestimmen', 'Zahl bestimmen'],
+  'imag-power': ['Potenzen von $\\mathrm{i}$', 'Potenzen von $\\mathrm{i}$'],
+  'imag-conjugate': ['Erweitern', 'erweitern'],
+  'imag-multiply': ['Ausmultiplizieren', 'ausmultiplizieren'],
+  'imag-split': ['Aufteilen', 'aufteilen'],
+  'imag-sum': ['Zusammenfassen', 'zusammenfassen'],
 }
 
 function titleOf(kinds: readonly StepKind[]): string {
@@ -782,6 +797,16 @@ function phrase(kind: StepKind, facts: Facts): string {
       return 'wähle den Ansatz'
     case 'coef':
       return 'bestimme die Zahl'
+    case 'imag-power':
+      return 'rechne die Potenzen von $\\mathrm{i}$ aus'
+    case 'imag-conjugate':
+      return 'erweitere mit dem konjugiert Komplexen des Nenners'
+    case 'imag-multiply':
+      return 'multipliziere aus und fasse zusammen'
+    case 'imag-split':
+      return 'teile in Realteil und Imaginärteil auf'
+    case 'imag-sum':
+      return 'teile auf und fasse Realteile und Imaginärteile zusammen'
   }
 }
 
@@ -828,6 +853,16 @@ function hintOf(kind: StepKind, facts: Facts): string {
       return FRACTION_HINTS[kind]
     case 'coef':
       return FRACTION_HINTS.insert
+    case 'imag-power':
+      return FRACTION_HINTS.imagPower
+    case 'imag-conjugate':
+      return FRACTION_HINTS.imagConjugate
+    case 'imag-multiply':
+      return FRACTION_HINTS.imagMultiply
+    case 'imag-split':
+      return FRACTION_HINTS.imagSplit
+    case 'imag-sum':
+      return FRACTION_HINTS.imagSum
   }
 }
 
@@ -909,6 +944,12 @@ function cardsOf(kind: StepKind, facts: Facts): string[] {
       case 'ansatz':
       case 'coef':
         return [ids.partial]
+      case 'imag-power':
+      case 'imag-conjugate':
+      case 'imag-multiply':
+      case 'imag-split':
+      case 'imag-sum':
+        return [ids.imaginary]
     }
   })()
   // Bausteine wie e^x; mit eigenen Regeln (√x, sin² x + cos² x = 1, e^{2x} : e^x) deren Karte
@@ -1004,6 +1045,16 @@ function explainStep(step: FracStep, solution: FracSolution, facts: Facts): Expl
     }
     case 'identity':
       return explainRule(facts.original.rule?.kind === 'root' ? 'root' : 'trig', step.from!, step.detail!)
+    case 'imag-power':
+      return explainImagPower(taskExpr(facts.original), step.expr!)
+    case 'imag-conjugate':
+      return explainImagConjugate(facts.imagDen ?? step.detail!, step.detail!)
+    case 'imag-multiply':
+      return explainImagMultiply(step.from!, step.detail!)
+    case 'imag-split':
+      return explainImagSplit(step.from!, step.detail!)
+    case 'imag-sum':
+      return explainImagSum(step.from!, step.expr!)
     case 'decimal':
     case 'order':
     case 'part':

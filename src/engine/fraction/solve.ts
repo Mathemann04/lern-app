@@ -13,7 +13,7 @@ import {
   reduceFrac,
   reducedExpr,
 } from './factor.ts'
-import { type Frac, isRootAtom, polyExpr, startsNegative, trigRewrite } from './frac.ts'
+import { type Frac, isRootAtom, polyExpr, reduceImag, startsNegative, trigRewrite } from './frac.ts'
 import { type Poly, atomsOf, constValue, isOneFirst, polyAdd, polyContent, polyDivideExact, polyEquals, polyMul, polyNeg, polyScale, polySum, primitivePart } from './poly.ts'
 import {
   type BlockRule,
@@ -43,6 +43,7 @@ import {
 } from './task.ts'
 import { type TreeStage, hasDecimal, treeStages, withoutDecimals } from './tree.ts'
 import { type PartialWork, ansatzExpr, dividedExpr, partialExpr, partialWorkOf } from './partial.ts'
+import { type ComplexParts, complexExpr, complexParts, complexReduced, complexValueExpr, conjugateFactor, hasImag, hasImagPower } from './complex.ts'
 
 // Rechenweg einer Bruchaufgabe wie im Skript: Hauptnenner, erweitern, Zähler zusammenfassen,
 // zerlegen, kürzen, mit dem Kehrwert malnehmen, Doppelbruch auflösen. Jeder Schritt zeigt den
@@ -50,7 +51,9 @@ import { type PartialWork, ansatzExpr, dividedExpr, partialExpr, partialWorkOf }
 // Stufe 5: Klammern wie (x + h)² ausmultiplizieren, Regeln der Bausteine anwenden
 // (sin² x + cos² x = 1, (√x)² = x), verschachtelte Doppelbrüche von innen nach außen, mehrere
 // Rechenarten (erst jede Klammer zu einem Bruch), Partialbruchzerlegung (Polynomdivision, Nenner
-// zerlegen, Ansatz und Zahlen: Ansatz und Zahlen haben keinen Zwischenstand, expr ist dort null).
+// zerlegen, Ansatz und Zahlen: Ansatz und Zahlen haben keinen Zwischenstand, expr ist dort null),
+// komplexe Zahlen teilen (Potenzen von i, mit dem konjugiert Komplexen erweitern,
+// ausmultiplizieren, aufteilen).
 
 export type StepKind =
   | 'lcd'
@@ -75,6 +78,11 @@ export type StepKind =
   | 'divide'
   | 'ansatz'
   | 'coef'
+  | 'imag-power'
+  | 'imag-conjugate'
+  | 'imag-multiply'
+  | 'imag-split'
+  | 'imag-sum'
 
 export const STEP_NAMES: Record<StepKind, string> = {
   lcd: 'Hauptnenner',
@@ -99,6 +107,11 @@ export const STEP_NAMES: Record<StepKind, string> = {
   divide: 'Polynomdivision',
   ansatz: 'Ansatz',
   coef: 'Zahl bestimmen',
+  'imag-power': 'Potenzen ausrechnen',
+  'imag-conjugate': 'Mit dem konjugiert Komplexen erweitern',
+  'imag-multiply': 'Ausmultiplizieren',
+  'imag-split': 'In Realteil und Imaginärteil aufteilen',
+  'imag-sum': 'Realteile und Imaginärteile zusammenfassen',
 }
 
 export type FracStep = {
@@ -308,6 +321,7 @@ export function solveFraction(t: FractionTask): FracSolution {
   if (t.kind === 'tree') return solveTree(t)
   if (t.kind === 'reduce' && t.rule?.kind === 'conjugate') return solveConjugate(t, t.rule.target)
   if (t.kind === 'partial') return solvePartial(t)
+  if (t.kind === 'imaginary') return solveImaginary(t)
   const { hints } = t
   const value = taskFrac(t)
   const steps: FracStep[] = []
@@ -610,6 +624,72 @@ function solvePartial(t: Extract<FractionTask, { kind: 'partial' }>): FracSoluti
   for (const f of w.findings) steps.push({ kind: 'coef', expr: null, detail: num(f.value), letter: f.letter })
   const reduced = reduceFrac(value, t.hints)
   return { value, steps, reduced, result: partialExpr(w.quotient, w.terms), excluded: excludedValues(t), beforeCancel: value }
+}
+
+// --- Komplexe Zahlen teilen (Stufe 5) ---
+
+// Rechnung zu einer Aufgabe mit komplexen Zahlen: der Bruch mit i im Nenner (index), nach den
+// Potenzen von i (num, den), erweitert mit dem konjugiert Komplexen conj, ausmultipliziert
+// (product: Zähler und reeller Nenner) und sein Wert in der Form a + bi
+export type ImagWork = {
+  readonly index: number
+  readonly terms: readonly Signed[]
+  readonly powered: boolean
+  readonly num: Shown
+  readonly den: Shown
+  readonly conj: Poly
+  readonly product: { readonly num: Poly; readonly den: Poly }
+  readonly parts: ComplexParts
+}
+
+// Steht im Term eine Potenz von i wie i² oder i³? (bei Faktoren je Faktor)
+const shownHasImagPower = (s: Shown) => (s.form === 'factored' ? s.factored.factors.some((f) => hasImagPower(f.poly)) : hasImagPower(shownPoly(s)))
+const withoutImagPowers = (s: Shown): Shown => (shownHasImagPower(s) && s.form !== 'factored' ? expanded(reduceImag(shownPoly(s))) : s)
+
+export function imagWork(t: Extract<FractionTask, { kind: 'imaginary' }>): ImagWork {
+  const index = t.terms.findIndex((s) => hasImag(reduceImag(shownPoly(s.part.den))))
+  if (index < 0) throw new Error('Kein Bruch mit i im Nenner')
+  const powered = t.terms.some((s) => shownHasImagPower(s.part.num) || shownHasImagPower(s.part.den))
+  const terms = t.terms.map((s) => ({ sign: s.sign, part: part(withoutImagPowers(s.part.num), withoutImagPowers(s.part.den)) }))
+  const { num: n, den: d } = terms[index].part
+  const denPoly = shownPoly(d)
+  const conj = conjugateFactor(denPoly)
+  const product = { num: reduceImag(polyMul(shownPoly(n), conj)), den: reduceImag(polyMul(denPoly, conj)) }
+  return { index, terms, powered, num: n, den: d, conj, product, parts: complexParts({ num: shownPoly(n), den: denPoly }) }
+}
+
+// Zähler bzw. Nenner mal das konjugiert Komplexe, so wie man es hinschreibt: (3 + 4i)(1 + 2i),
+// 5(1 + 2i), 2i \cdot (-i); bei 1 nur der Faktor
+export function imagTimesExpr(s: Shown, conj: Poly): Expr {
+  const c = polyExpr(conj)
+  const one = constValue(shownPoly(s))
+  if (one !== null && isOne(one)) return c
+  return mul(shownExpr(s), c)
+}
+
+// Ganzer Zwischenstand: der Bruch (index) ersetzt durch e, die übrigen Summanden wie gezeigt
+export function imagStage(w: ImagWork, e: Expr): Expr {
+  return signedSum(w.terms.map((s, i) => ({ sign: s.sign, expr: i === w.index ? e : partExpr(s.part) })))
+}
+
+// Potenzen von i, erweitern, ausmultiplizieren, aufteilen, bei mehreren Summanden zusammenfassen
+function solveImaginary(t: Extract<FractionTask, { kind: 'imaginary' }>): FracSolution {
+  const value = taskFrac(t)
+  const w = imagWork(t)
+  const steps: FracStep[] = []
+  if (w.powered) steps.push({ kind: 'imag-power', expr: imagStage(w, partExpr(w.terms[w.index].part)) })
+  const expandedFrac = div(imagTimesExpr(w.num, w.conj), imagTimesExpr(w.den, w.conj))
+  steps.push({ kind: 'imag-conjugate', expr: imagStage(w, expandedFrac), detail: polyExpr(w.conj) })
+  const multiplied = plainFractionExpr(w.product.num, w.product.den)
+  steps.push({ kind: 'imag-multiply', expr: imagStage(w, multiplied), from: expandedFrac, detail: multiplied })
+  const result = complexValueExpr(value, t.hints)
+  const own = complexExpr(w.parts, t.hints)
+  const denOne = constValue(w.product.den)
+  // mit weiteren Summanden: aufteilen und zusammenfassen in einem Schritt; Nenner 1 (z. B. nach
+  // i \cdot (-i)): nichts mehr aufzuteilen
+  if (w.terms.length > 1) steps.push({ kind: 'imag-sum', expr: result, from: imagStage(w, multiplied), detail: own })
+  else if (!(denOne !== null && isOne(denOne))) steps.push({ kind: 'imag-split', expr: result, from: multiplied, detail: own })
+  return { value, steps, reduced: complexReduced(value, t.hints), result, excluded: null, beforeCancel: value }
 }
 
 // k \sin^n x / \cos^n x als k \tan^n x; sonst null

@@ -47,6 +47,9 @@ export type FractionShape =
   // Partialbruchzerlegung (Stufe 5): den Bruch in einfache Brüche zerlegen, bei Bedarf mit
   // Polynomdivision vorweg (fraction/partial.ts)
   | { readonly kind: 'partial'; readonly part: Part }
+  // Komplexe Zahlen (Stufe 5): ein Bruch mit i im Nenner (auch mit Potenzen wie i³), dazu
+  // höchstens eine komplexe Zahl plus oder minus; Ergebnis in der Form a + bi (fraction/complex.ts)
+  | { readonly kind: 'imaginary'; readonly terms: readonly Signed[] }
 
 // Knoten eines Rechenbaums. Blätter sind Brüche, ganze Zahlen oder Terme ohne Bruch; eine
 // Dezimalzahl wird als solche gezeigt (decimal, z. B. „0,75") und hat den Wert ihres Bruchs.
@@ -179,6 +182,7 @@ export function taskFrac(t: FractionShape): Frac {
     case 'partial':
       return partFrac(t.part)
     case 'sum':
+    case 'imaginary':
       return signedFrac(t.terms)
     case 'product':
       return fracMul(partFrac(t.left), partFrac(t.right))
@@ -281,6 +285,7 @@ export function taskExpr(t: FractionShape): Expr {
     case 'partial':
       return partExpr(t.part)
     case 'sum':
+    case 'imaginary':
       return signedExpr(t.terms)
     case 'product':
       return mul(partExpr(t.left), partExpr(t.right))
@@ -362,6 +367,8 @@ export function instructionFor(t: FractionShape): string {
       return 'Vereinfache den Doppelbruch so weit wie möglich.'
     case 'partial':
       return 'Zerlege in Partialbrüche.'
+    case 'imaginary':
+      return 'Berechne und schreibe das Ergebnis in der Form $a + b\\,\\mathrm{i}$.'
   }
 }
 
@@ -390,6 +397,7 @@ export function withRoots(t: FractionTask): FractionTask {
     case 'partial':
       return { ...t, part: mapPart(t.part), hints }
     case 'sum':
+    case 'imaginary':
       return { ...t, terms: mapSigned(t.terms), hints }
     case 'product':
     case 'quotient':
@@ -423,6 +431,7 @@ export function partsOf(t: FractionShape): Part[] {
     case 'partial':
       return [t.part]
     case 'sum':
+    case 'imaginary':
       return t.terms.map((s) => s.part)
     case 'product':
     case 'quotient':

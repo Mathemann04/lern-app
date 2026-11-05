@@ -5,7 +5,7 @@ import { closeEnough } from '../expr/arbitraries.ts'
 import { evaluate } from '../expr/evaluate.ts'
 import { toLatex } from '../expr/print.ts'
 import { samplePoints } from '../expr/sample.ts'
-import { type Expr, E, PI, add, cos, div, exp, fn, ln, log, mul, neg, num, pow, root, sin, sqrt, x } from '../expr/types.ts'
+import { type Expr, E, IMAG, PI, add, cos, div, exp, fn, ln, log, mul, neg, num, pow, root, sin, sqrt, x } from '../expr/types.ts'
 import { createRng } from '../random/rng.ts'
 import { generateDerivativeTask } from '../tasks/derivativeTerms.ts'
 import { LEVELS } from '../tasks/taskNumber.ts'
@@ -122,6 +122,16 @@ describe('Leser für die Mathe-Tastatur', () => {
     const result = parseLatex(latex)
     expect(result.ok, latex).toBe(false)
     if (!result.ok) expect(result.message).toMatch(message)
+  })
+})
+
+describe('imaginäre Einheit', () => {
+  it('liest i, \\mathrm{i} und \\imaginaryI als i', () => {
+    expect(parsed('i')).toEqual(IMAG)
+    expect(parsed('\\mathrm{i}')).toEqual(IMAG)
+    expect(parsed('\\imaginaryI')).toEqual(IMAG)
+    expect(parsed('2i')).toEqual(mul(num(2), IMAG))
+    expect(toLatex(parsed('3-4\\mathrm{i}'))).toBe('3 - 4\\mathrm{i}')
   })
 })
 

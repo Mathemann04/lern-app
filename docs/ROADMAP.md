@@ -1,6 +1,6 @@
 # Roadmap
 
-Stand: 04.11.2026
+Stand: 05.11.2026
 
 | Meilenstein | Inhalt | Status |
 | --- | --- | --- |
@@ -49,7 +49,11 @@ Details: [PLAN-M2b.md](PLAN-M2b.md)
 - [x] 2. Stufen 3 und 4
 - [x] 3. Stufe 5, Teil 1: alles ineinander
 - [x] 4. Stufe 5, Teil 2: Partialbruchzerlegung
-- [ ] 5. Stufe 5, Teil 3: Brüche aus späteren Kapiteln
+- [ ] 5. Stufe 5, Teil 3: Brüche aus späteren Kapiteln (in vier Teilen)
+  - [x] 5a. Komplexe Zahlen teilen
+  - [ ] 5b. Grenzwerte von Brüchen
+  - [ ] 5c. Teleskopsummen
+  - [ ] 5d. Hyperbelfunktionen
 - [ ] 6. Gezieltes Üben, Feinschliff, Abschluss
 
 ## M3: Schritte
@@ -387,3 +391,14 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   eigenem Zufall gewählt (etwa 15 % der Nummern); die übrigen Nummern der
   Stufe 5 behalten ihre Aufgabe, 5-123 ist jetzt eine Partialbruchaufgabe.
   Abwechslung weiter mindestens 100 Formen in 200 Aufgaben.
+- 05.11.2026: M2b Schritt 5 in vier Teile aufgeteilt (komplexe Zahlen,
+  Grenzwerte, Teleskopsummen, Hyperbelfunktionen), jeder für sich zum
+  Ausprobieren. Teil 5a fertig: Stufe 5 hat „Komplexe Zahlen teilen" als
+  eigene Aufgabenart. Die Bruch-Engine rechnet mit $\mathrm{i}$ und
+  $\mathrm{i}^2 = -1$ (`fraction/complex.ts`); geführt: Potenzen von
+  $\mathrm{i}$, mit dem konjugiert Komplexen erweitern, ausmultiplizieren,
+  aufteilen; frei: Ergebnis als $a + b\,\mathrm{i}$, Taste $\mathrm{i}$ auf der
+  Tastatur. Sieben neue typische Fehler, Lernkarte „Komplexe Zahlen teilen".
+  Die Vorlage wird mit eigenem Zufall gewählt (etwa 8 % der Nummern); die
+  Partialbruch-Nummern bleiben, von den übrigen Nummern der Stufe 5 zeigen
+  einige jetzt eine Aufgabe mit komplexen Zahlen.

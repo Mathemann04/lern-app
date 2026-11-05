@@ -182,6 +182,13 @@ Dazu kommen die bisherigen Fehler aus M2 (Liste in
 | Polynomdivision | beim Abziehen das Vorzeichen falsch | $(x^2 + 3x + 1) - (x^2 - x) = 2x + 1$ |
 | Polynomdivision | Rest vergessen | $\frac{x^2 + 1}{x - 1} = x + 1$ |
 | Partialbrüche | beim Koeffizientenvergleich einen Summanden vergessen | $A + C = 1$, aber $A = 1$ gesetzt |
+| Komplexe Zahlen | Potenz von $\mathrm{i}$ mit falschem Vorzeichen | $\mathrm{i}^3 = \mathrm{i}$ |
+| Komplexe Zahlen | $\mathrm{i}^2 = 1$ gerechnet | $(3 + 4\mathrm{i})(1 + 2\mathrm{i}) = 3 + 10\mathrm{i} + 8$ |
+| Komplexe Zahlen | gemischte Summanden vergessen | $(3 + 4\mathrm{i})(1 + 2\mathrm{i}) = 3 + 8\mathrm{i}^2$ |
+| Komplexe Zahlen | Nenner $c^2 - d^2$ | $(1 - 2\mathrm{i})(1 + 2\mathrm{i}) = 1 - 4$ |
+| Komplexe Zahlen | nur den Realteil geteilt | $\frac{-5 + 10\mathrm{i}}{5} = -1 + 10\mathrm{i}$ |
+| Komplexe Zahlen | teilweise geteilt | $\frac{3 + 4\mathrm{i}}{1 - 2\mathrm{i}} = 3 - 2\mathrm{i}$ |
+| Komplexe Zahlen | Minus nur auf den Realteil | $2 - (1 + 3\mathrm{i}) = 1 + 3\mathrm{i}$ |
 
 Die genaue Liste kommt im jeweiligen Schritt; jede Regel bekommt wie immer
 eine Erklärung, eine Lernkarte und Tests. In Schritt 1 umgesetzt: die ersten
@@ -202,7 +209,12 @@ jetzt auch für $(x + h)^3$. In Schritt 4: die letzten sechs Zeilen
 (`frac-partial-double-once`, `frac-partial-insert-sign`,
 `frac-partial-no-division`, `frac-division-sign`, `frac-division-remainder`,
 `frac-partial-compare`), mit den Lernkarten „Polynomdivision" und
-„Partialbruchzerlegung".
+„Partialbruchzerlegung". In Schritt 5a: die sieben Zeilen zu komplexen Zahlen
+(`frac-imag-power`, `frac-imag-squared`, `frac-imag-cross`, `frac-imag-den`,
+`frac-imag-split`, `frac-imag-direct`, `frac-imag-minus`), mit der Lernkarte
+„Komplexe Zahlen teilen"; „nur Zähler oder nur Nenner malgenommen"
+(`frac-conjugate-one-side`) gilt auch beim Erweitern mit dem konjugiert
+Komplexen.
 
 ### Schritte
 
@@ -294,6 +306,22 @@ Stufe 5 behalten ihre Aufgabe.
 **Ausprobieren:** $\frac{3 + 4\mathrm{i}}{1 - 2\mathrm{i}}$ und
 $\lim_{n \to \infty} \frac{3n^2 - n}{2n^2 + 5}$ in beiden Arten.
 
+**Aufgeteilt** in vier Teile, jeder für sich zum Ausprobieren: 5a komplexe
+Zahlen, 5b Grenzwerte, 5c Teleskopsummen, 5d Hyperbelfunktionen.
+
+**Umgesetzt (5a, komplexe Zahlen):** Neue Vorlage „Komplexe Zahlen teilen" in
+Stufe 5 (etwa jede zwölfte Aufgabe, mit eigenem Zufall gewählt wie die
+Partialbrüche). Ein Bruch mit $\mathrm{i}$ im Nenner: Zähler $a + b\mathrm{i}$,
+nur $a$, nur $b\mathrm{i}$, ein Produkt, ein Quadrat oder mit einer Potenz wie
+$\mathrm{i}^3$; Nenner $c + d\mathrm{i}$, nur $d\mathrm{i}$ oder mit Potenz;
+manchmal mit Buchstaben ($\frac{1}{a + b\mathrm{i}}$), manchmal plus oder
+minus eine komplexe Zahl. Geführt: Potenzen von $\mathrm{i}$, erweitern,
+ausmultiplizieren, aufteilen (mit weiterer Zahl: aufteilen und
+zusammenfassen). Frei: fertig ist $a + b\,\mathrm{i}$ oder ein gekürzter Bruch
+wie $\frac{2 - 11\mathrm{i}}{25}$; kein $\mathrm{i}$ im Nenner, keine Potenz
+von $\mathrm{i}$. Die Tastatur hat eine Taste $\mathrm{i}$. Sieben neue
+typische Fehler, Lernkarte „Komplexe Zahlen teilen".
+
 #### Schritt 6: Gezieltes Üben, Feinschliff, Abschluss
 - Jeder neue Fehler lässt sich aus der Lernkarte und dem Fortschritt gezielt
   üben.
@@ -366,7 +394,12 @@ $\lim_{n \to \infty} \frac{3n^2 - n}{2n^2 + 5}$ in beiden Arten.
 ### Brüche aus späteren Kapiteln (Schritt 5)
 - **Komplexe Zahlen:** $\mathrm{i}$ als eigenes Zeichen der Bruch-Engine mit
   $\mathrm{i}^2 = -1$ (wie $(\sqrt{x})^2 = x$); Endform $a + b\,\mathrm{i}$,
-  Gegenprobe mit komplexen Zahlen.
+  Gegenprobe mit komplexen Zahlen. Umgesetzt in `fraction/complex.ts`
+  (Real- und Imaginärteil, konjugiert Komplexes, Ergebnis $a + b\,\mathrm{i}$),
+  Aufgabenart `imaginary`; im Termbaum ist $\mathrm{i}$ eine Konstante
+  (`IMAG`), der Leser versteht `i`, `\mathrm{i}` und `\imaginaryI`. Die
+  Gegenprobe in den Tests rechnet mit komplexen Zahlen, unabhängig von der
+  Bruch-Engine.
 - **Grenzwerte:** $n \to \infty$ über die höchsten Potenzen von Zähler und
   Nenner; $x \to a$ mit $\frac{0}{0}$: zerlegen, kürzen, einsetzen.
   Gegenprobe: großes $n$ bzw. $x$ nahe $a$ einsetzen.

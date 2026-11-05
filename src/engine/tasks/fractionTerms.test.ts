@@ -33,6 +33,50 @@ function pointsFor(exprs: Expr[], atoms: string[], seed: string): Env[] {
 
 const close = (a: number, b: number) => Math.abs(a - b) <= 1e-9 * Math.max(1, Math.abs(a), Math.abs(b))
 
+// Komplexe Zahlen: unabhängige Gegenprobe mit komplexer Rechnung (nicht mit der Bruch-Engine)
+type Complex = readonly [re: number, im: number]
+const cmul = ([a, b]: Complex, [c, d]: Complex): Complex => [a * c - b * d, a * d + b * c]
+const cdiv = ([a, b]: Complex, [c, d]: Complex): Complex => {
+  const n = c * c + d * d
+  return n === 0 ? [NaN, NaN] : [(a * c + b * d) / n, (b * c - a * d) / n]
+}
+function evaluateComplex(e: Expr, env: Env): Complex {
+  switch (e.kind) {
+    case 'num':
+      return [ratToNumber(e.value), 0]
+    case 'const':
+      return e.name === 'i' ? [0, 1] : [e.name === 'e' ? Math.E : Math.PI, 0]
+    case 'var':
+      return [env[e.name] ?? NaN, 0]
+    case 'add':
+      return e.terms.map((t) => evaluateComplex(t, env)).reduce(([a, b], [c, d]) => [a + c, b + d], [0, 0])
+    case 'mul':
+      return e.factors.map((f) => evaluateComplex(f, env)).reduce(cmul, [1, 0])
+    case 'neg': {
+      const [a, b] = evaluateComplex(e.arg, env)
+      return [-a, -b]
+    }
+    case 'div':
+      return cdiv(evaluateComplex(e.num, env), evaluateComplex(e.den, env))
+    case 'pow': {
+      const k = evaluate(e.exp, env)
+      const base = evaluateComplex(e.base, env)
+      let r: Complex = [1, 0]
+      for (let j = 0; j < Math.abs(k); j++) r = cmul(r, base)
+      return k < 0 ? cdiv([1, 0], r) : r
+    }
+    default:
+      return [NaN, NaN]
+  }
+}
+const closeComplex = (a: Complex, b: Complex) => close(a[0], b[0]) && close(a[1], b[1])
+// Stellen für Aufgaben mit i: je Buchstabe eine Zufallszahl (Buchstaben sind reell)
+function complexPoints(atoms: string[], seed: string): Env[] {
+  const rng = createRng(seed)
+  const letters = atoms.filter((a) => isLetter(a) && a !== 'i')
+  return Array.from({ length: 12 }, () => Object.fromEntries(letters.map((l) => [l, (rng.chance(0.5) ? 1 : -1) * (0.3 + 3 * rng.next())])))
+}
+
 describe.each(LEVELS_SO_FAR)('Brüche Stufe %i', (level) => {
   const generated = Array.from({ length: SEEDS_PER_LEVEL }, (_, i) => generateFractionTask({ level, seed: i + 1 }))
   const solved = generated.map((g) => ({ ...g, solution: solveFraction(g.task) }))
@@ -65,6 +109,12 @@ describe.each(LEVELS_SO_FAR)('Brüche Stufe %i', (level) => {
       expect(fracEquals(reducedFrac(solution.reduced), solution.value), context).toBe(true)
       // unabhängige Gegenprobe: Werte des Aufgabenterms gegen Werte des Ergebnisses
       const expr = taskExpr(task)
+      if (task.kind === 'imaginary') {
+        for (const env of complexPoints(fracAtoms(solution.value), `prüfen:${ref.seed}`)) {
+          expect(closeComplex(evaluateComplex(expr, env), evaluateComplex(solution.result, env)), `${context} bei ${JSON.stringify(env)}`).toBe(true)
+        }
+        continue
+      }
       const points = pointsFor([expr, solution.result], fracAtoms(solution.value), `prüfen:${ref.seed}`)
       expect(points.length, context).toBeGreaterThan(5)
       for (const env of points) expect(close(evaluate(expr, env), evaluate(solution.result, env)), `${context} bei ${JSON.stringify(env)}`).toBe(true)
@@ -122,6 +172,11 @@ describe.each(LEVELS_SO_FAR)('Brüche Stufe %i', (level) => {
         expect(fracEquals(w.value, solution.value), `${context} ${w.rule.id}`).toBe(false)
         expect(latexProblem(toLatex(w.result)), `${context} ${w.rule.id}`).toBeNull()
         // unabhängige Gegenprobe: an mindestens einer Stelle verschieden
+        if (task.kind === 'imaginary') {
+          const differs = complexPoints(fracAtoms(solution.value), `falsch:${ref.seed}`).some((env) => !closeComplex(evaluateComplex(taskExpr(task), env), evaluateComplex(w.result!, env)))
+          expect(differs, `${context} ${w.rule.id}: ${toLatex(w.result)}`).toBe(true)
+          continue
+        }
         const points = pointsFor([taskExpr(task), w.result], fracAtoms(solution.value), `falsch:${ref.seed}`)
         const differs = points.some((env) => !close(evaluate(taskExpr(task), env), evaluate(w.result!, env)))
         expect(differs, `${context} ${w.rule.id}: ${toLatex(w.result)}`).toBe(true)

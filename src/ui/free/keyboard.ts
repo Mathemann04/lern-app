@@ -107,16 +107,19 @@ function withNumberPad(id: string, label: string, left: Key[][]): VirtualKeyboar
 const POWERS: Key[] = [{ latex: '#@^{2}' }, { latex: '#@^{#?}' }]
 const BRACKETS: Key[] = [{ label: '(', key: '(' }, { label: ')', key: ')' }]
 const ROOT: Key = { latex: '\\sqrt{#0}' }
+// imaginäre Einheit, aufrecht wie im Lehrbuch
+const IMAG: Key = { latex: '\\mathrm{i}', label: '<i>i</i>' }
 
 // Bildschirm-Tastatur für Brüche: links die Buchstaben der Aufgabe, Hochzahlen und Klammern (bei
-// Bausteinen auch e^x, ln, sin, cos, tan, bei Wurzeln √)
-export function fractionKeyboard(letters: readonly string[], blocks: boolean, root = false): VirtualKeyboardLayout {
+// Bausteinen auch e^x, ln, sin, cos, tan, bei Wurzeln √, bei komplexen Zahlen i)
+export function fractionKeyboard(letters: readonly string[], blocks: boolean, root = false, imag = false): VirtualKeyboardLayout {
   return withNumberPad(
     'brueche',
     'Brüche',
     flowKeys([
+      imag ? [IMAG] : [],
       ...letters.map((l) => [l]),
-      letters.length > 0 || blocks ? POWERS : [],
+      letters.length > 0 || blocks || imag ? POWERS : [],
       BRACKETS,
       blocks ? [{ latex: 'e^{#?}' }, fnKey('ln')] : [],
       blocks ? [fnKey('sin'), fnKey('cos'), fnKey('tan')] : [],
@@ -139,7 +142,7 @@ export function keyboardLayouts(spec: KeyboardSpec): VirtualKeyboardLayout[] {
     case 'derivative':
       return [DERIVATIVE_KEYBOARD, MORE_FUNCTIONS_KEYBOARD]
     case 'fraction':
-      return [fractionKeyboard(spec.letters, spec.blocks, spec.root)]
+      return [fractionKeyboard(spec.letters, spec.blocks, spec.root, spec.imag)]
     case 'rearrange':
       return [rearrangeKeyboard(spec.letters, spec.root)]
   }
