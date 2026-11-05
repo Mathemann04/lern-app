@@ -17,6 +17,7 @@ import {
   SQUARE_MOVES,
   type WrongMove,
   addMoves,
+  arcMoves,
   collectMoves,
   divideMoves,
   explainMove,
@@ -28,19 +29,22 @@ import {
   moveMoves,
   multiplyMoves,
   negateMoves,
+  pythagorasMoves,
   reciprocalMoves,
   rearrangeTaskHint,
   signed,
+  tanQuotientMoves,
+  trigMoves,
 } from '../explain/rearrangeTexts.ts'
 import type { Explanation } from '../explain/texts.ts'
 import { contains, subterms } from '../expr/compare.ts'
-import { equationToLatex, toLatex } from '../expr/print.ts'
-import { type Equation, type Expr, asRational, sub } from '../expr/types.ts'
+import { FN_LATEX, equationToLatex, toLatex } from '../expr/print.ts'
+import { type Equation, type Expr, asRational, fn, sub } from '../expr/types.ts'
 import { readableLatex } from '../fraction/task.ts'
 import { factorize } from '../fraction/factor.ts'
 import { newAtoms, polyToExpr, toRat } from '../rearrange/algebra.ts'
 import { type RearrangeWrong, rearrangeWrongAnswers } from '../rearrange/errorRules.ts'
-import { type RearrangeStep, type Side, type StepKind, hasTargetRoot, isNegative, negated, solveEquation, stepLabel } from '../rearrange/isolate.ts'
+import { ARC_OF, type RearrangeStep, type Side, type StepKind, TRIG_OF, hasTargetRoot, isNegative, negated, solveEquation, stepLabel } from '../rearrange/isolate.ts'
 import { type RearrangeTask, conditionsText, taskLatex } from '../rearrange/task.ts'
 import { type Rng, createRng } from '../random/rng.ts'
 import { ratSign } from '../rational.ts'
@@ -131,6 +135,10 @@ function isJunction(step: RearrangeStep, t: string): boolean {
     case 'logCombine':
     case 'logLaw':
     case 'powerLaw':
+    case 'arc':
+    case 'trig':
+    case 'pythagoras':
+    case 'tanQuotient':
       return true
     case 'multiply':
       return !step.side || contains(denominatorOf(step) ?? step.operand!, t)
@@ -258,6 +266,45 @@ function moveQuestion(step: RearrangeStep, t: string): MoveQuestion | null {
         wrong: POWER_LAW_MOVES,
         hint: REARRANGE_HINTS.powerLaw,
       }
+    case 'arc': {
+      // \sin u = w: der \sin soll weg, mit \arcsin
+      const original = step.fn && TRIG_OF[step.fn]
+      if (!side || !step.fn || !original) return null
+      return { question: `Wie wirst du den $${FN_LATEX[original]}$ los?`, wrong: arcMoves(FN_LATEX[original], FN_LATEX[step.fn], side), hint: REARRANGE_HINTS.arc }
+    }
+    case 'trig': {
+      // \arctan u = w: der \arctan soll weg, mit \tan
+      const arc = step.fn && ARC_OF[step.fn]
+      if (!side || !step.fn || !arc) return null
+      return { question: `Wie wirst du den $${FN_LATEX[arc]}$ los?`, wrong: trigMoves(FN_LATEX[arc], FN_LATEX[step.fn], side), hint: REARRANGE_HINTS.trig }
+    }
+    case 'pythagoras': {
+      const square = step.operand
+      if (square?.kind !== 'pow' || square.base.kind !== 'fn') return null
+      const f = square.base
+      const hyperbolic = f.name === 'sinh' || f.name === 'cosh'
+      const partnerName = f.name === 'sin' ? 'cos' : f.name === 'cos' ? 'sin' : f.name === 'sinh' ? 'cosh' : 'sinh'
+      const partner = toLatex(fn(partnerName, f.arg))
+      const partnerSquare = toLatex({ ...square, base: fn(partnerName, f.arg) })
+      return {
+        question: `In der Gleichung stehen $${partnerSquare}$ und $${toLatex(square)}$. Wie bleibt nur eine Funktion übrig?`,
+        wrong: pythagorasMoves(toLatex(square), partner, hyperbolic),
+        hint: REARRANGE_HINTS.pythagoras,
+      }
+    }
+    case 'tanQuotient': {
+      const cos = step.operand
+      if (cos?.kind !== 'fn') return null
+      const hyperbolic = cos.name === 'cosh'
+      const sin = toLatex(fn(hyperbolic ? 'sinh' : 'sin', cos.arg))
+      const tan = toLatex(fn(hyperbolic ? 'tanh' : 'tan', cos.arg))
+      const where = side ? 'Im Zähler und Nenner' : 'Auf beiden Seiten'
+      return {
+        question: `${where} stehen $${sin}$ und $${toLatex(cos)}$. Wie bleibt nur eine Funktion übrig?`,
+        wrong: tanQuotientMoves(sin, toLatex(cos), tan, side !== undefined),
+        hint: REARRANGE_HINTS.tanQuotient,
+      }
+    }
     case 'expand':
       return { question: 'Was machst du mit den Klammern?', wrong: EXPAND_MOVES, hint: REARRANGE_HINTS.expand }
     case 'extend':
@@ -368,6 +415,10 @@ const CARDS_BY_KIND: Record<StepKind, readonly string[]> = {
   logCombine: [REARRANGE_CARD_IDS.laws],
   logLaw: [REARRANGE_CARD_IDS.laws],
   powerLaw: [REARRANGE_CARD_IDS.laws],
+  arc: [REARRANGE_CARD_IDS.arc],
+  trig: [REARRANGE_CARD_IDS.arc],
+  pythagoras: [REARRANGE_CARD_IDS.trig],
+  tanQuotient: [REARRANGE_CARD_IDS.trig],
   finish: [FRACTION_CARD_IDS.add, FRACTION_CARD_IDS.expand],
 }
 

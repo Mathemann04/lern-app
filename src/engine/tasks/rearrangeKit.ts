@@ -1,5 +1,5 @@
 import { subterms } from '../expr/compare.ts'
-import { type Expr, E, add, div, eq, ln, log, mul, neg, num, pow, sqrt, variable } from '../expr/types.ts'
+import { type Expr, E, PI, add, div, eq, fn, ln, log, mul, neg, num, pow, sqrt, variable } from '../expr/types.ts'
 import type { Condition, RearrangeTask } from '../rearrange/task.ts'
 import type { Rng } from '../random/rng.ts'
 
@@ -709,4 +709,180 @@ const LEVEL4_CORES: readonly Core[] = [
 
 export function buildLevel4(rng: Rng): KitTask {
   return buildFrom(rng, LEVEL4_CORES, 0.15)
+}
+
+// --- Stufe 4, Teil 6b: Winkel- und Hyperbelfunktionen, Umkehrfunktionen ---
+//
+// \sin, \cos, \tan, \sinh, \cosh, \tanh als Baustein in einem Kern (Bruch, Summe auf beiden Seiten,
+// Quadrate mit \sin^2 x + \cos^2 x = 1, Quotient mit \tan x = \frac{\sin x}{\cos x}) und Umkehrfunktionen
+// um einen Kern (\arctan\frac{x + a}{x - b} = c). Damit die Lösung eindeutig ist, nennt die Aufgabe den
+// Bereich des Winkels, z. B. x < \frac{\pi}{2} (x ist positiv wie alle Buchstaben).
+
+type TrigName = 'sin' | 'cos' | 'tan' | 'sinh' | 'cosh' | 'tanh'
+
+// Funktion: meist Winkelfunktionen, seltener Hyperbelfunktionen
+function trigName(rng: Rng, allowed: readonly TrigName[] = ['sin', 'sin', 'cos', 'cos', 'tan', 'tan', 'sinh', 'cosh', 'tanh']): TrigName {
+  return rng.pick(allowed)
+}
+
+// Winkel mit der Variable: x, 2x, bx, \frac{x}{b}
+function angleIn(rng: Rng, n: Names, u: Expr): Expr {
+  const r = rng.next()
+  if (r < 0.45) return u
+  if (r < 0.7) return mul(k(rng, 2, 3), u)
+  if (r < 0.85) return letters(n.letter(), u)
+  return div(u, n.letter())
+}
+
+// Bereich, in dem die Funktion umkehrbar ist: \sin und \tan bis \frac{\pi}{2}, \cos bis \pi (im Quadrat
+// oder unter einer Wurzel bis \frac{\pi}{2}); Hyperbelfunktionen brauchen nur x > 0.
+// Winkel kx: \frac{\pi}{2k}, bx: \frac{\pi}{2b}, \frac{x}{b}: \frac{b\pi}{2}
+function angleConditions(name: TrigName, angle: Expr, u: Expr, half = false): Condition[] {
+  if (name === 'sinh' || name === 'cosh' || name === 'tanh') return []
+  const quarter = half || name !== 'cos'
+  let bound: Expr
+  if (angle.kind === 'mul') {
+    const f = angle.factors[0]
+    bound = quarter ? div(PI, f.kind === 'num' ? num(f.value.n * 2n) : mul(num(2), f)) : div(PI, f)
+  } else if (angle.kind === 'div') {
+    bound = quarter ? div(mul(angle.den, PI), num(2)) : mul(angle.den, PI)
+  } else bound = quarter ? div(PI, num(2)) : PI
+  return [{ lhs: u, rel: '<', rhs: bound }]
+}
+
+const trigOf = (name: TrigName, angle: Expr) => fn(name, angle)
+
+// Bruch aus \sin x oder \tanh x: \frac{a + \sin x}{a - \sin x} = y, \frac{a}{b + c\tan x} = y,
+// a\cos(2x) + b = c\cos(2x) + d
+function trigFraction(rng: Rng, n: Names): Built {
+  const u = n.unknown
+  const name = trigName(rng)
+  const angle = angleIn(rng, n, u)
+  const block = trigOf(name, angle)
+  const conditions = angleConditions(name, angle, u)
+  const r = rng.next()
+  if (r < 0.3) {
+    const den = plus(rng.chance(0.5) ? num(1) : constant(rng, n), letters(n.letter(), block))
+    const { e, count } = someShells(rng, div(n.letter(), den), n, 1)
+    return { side: e, conditions, label: `Baukasten: Bruch mit $\\${name}$ im Nenner, ${count} Schalen` }
+  }
+  if (r < 0.75) {
+    const top = rng.chance(0.3) ? block : bracketIn(rng, n, block).expr
+    const { e, count } = someShells(rng, div(top, bracketIn(rng, n, block).expr), n, 1)
+    return { side: e, conditions, label: `Baukasten: Bruch aus $\\${name}$, ${count} Schalen` }
+  }
+  const term = () => (rng.chance(0.5) ? plus(head(rng, n, block), constant(rng, n)) : minus(head(rng, n, block), constant(rng, n)))
+  return { side: term(), other: term(), conditions, label: `Baukasten: $\\${name}$ auf beiden Seiten` }
+}
+
+// Winkelfunktion mit Schalen, auch unter einer Wurzel: a\sin(2x) + b = y, y = \sqrt{a - \cos x}
+function trigShells(rng: Rng, n: Names): Built {
+  const u = n.unknown
+  const name = trigName(rng)
+  const angle = angleIn(rng, n, u)
+  const block = trigOf(name, angle)
+  if (rng.chance(0.35)) {
+    const arg = rng.chance(0.5) ? plus(constant(rng, n), letters(n.letter(), block)) : minus(constant(rng, n), block)
+    const { e, count } = someShells(rng, sqrt(arg), n, 2, 1)
+    return { side: e, conditions: angleConditions(name, angle, u), label: `Baukasten: Wurzel aus $\\${name}$, ${count} Schalen` }
+  }
+  const { e, count } = someShells(rng, block, n, 4, 3)
+  return { side: e, conditions: angleConditions(name, angle, u), label: `Baukasten: $\\${name}$ mit Schalen, ${count} Schalen` }
+}
+
+// Umkehrfunktion um einen Kern: y = a\arctan\frac{x}{b} + c, \arcsin\frac{x - a}{b} = y,
+// \arctan\frac{x + a}{x - b} = c, \arctan\left(e^{x} - a\right) = y
+function arcOfCore(rng: Rng, n: Names): Built {
+  const u = n.unknown
+  const arc = rng.pick(['arcsin', 'arccos', 'arctan', 'arctan'] as const)
+  const r = rng.next()
+  if (r < 0.35) {
+    const inner = rng.chance(0.5) ? div(u, n.letter()) : div(bracketIn(rng, n, u, false).expr, n.letter())
+    const { e, count } = someShells(rng, fn(arc, inner), n, 3, 1)
+    return { side: e, label: `Baukasten: $\\${arc}$ um einen Bruch, ${count} Schalen` }
+  }
+  if (r < 0.65) {
+    // x in Zähler und Nenner in der Umkehrfunktion
+    const top = rng.chance(0.4) ? head(rng, n, u) : bracketIn(rng, n, u).expr
+    const bottom = bracketIn(rng, n, u)
+    const condition = positiveCondition(bottom, u)
+    const { e, count } = someShells(rng, fn('arctan', div(top, bottom.expr)), n, 2)
+    return { side: e, conditions: condition ? [condition] : [], label: `Baukasten: $\\arctan$ eines Bruchs mit $x$ oben und unten, ${count} Schalen` }
+  }
+  if (r < 0.85) {
+    // e-Funktion oder Wurzel in der Umkehrfunktion
+    const inner = rng.chance(0.5) ? minus(pow(E, exponentIn(rng, n, u)), constant(rng, n)) : plus(sqrt(u), constant(rng, n))
+    const { e, count } = someShells(rng, fn('arctan', inner), n, 2, 1)
+    return { side: e, label: `Baukasten: $\\arctan$ um $e^x$ oder $\\sqrt{x}$, ${count} Schalen` }
+  }
+  // Areafunktion
+  const area = rng.pick(['arsinh', 'artanh'] as const)
+  const { e, count } = someShells(rng, fn(area, div(u, n.letter())), n, 3, 2)
+  return { side: e, label: `Baukasten: $\\operatorname{${area}}$ mit Schalen, ${count} Schalen` }
+}
+
+// Quadrate: y = a\cos^2 x + b\sin^2 x, a\sin^2 x = b\cos^2 x + c, a\cosh^2 x - b\sinh^2 x = y
+function trigSquares(rng: Rng, n: Names): Built {
+  const u = n.unknown
+  const hyperbolic = rng.chance(0.3)
+  const [s, c] = hyperbolic ? (['sinh', 'cosh'] as const) : (['sin', 'cos'] as const)
+  const angle = rng.chance(0.6) ? u : angleIn(rng, n, u)
+  const sq = (name: TrigName) => pow(trigOf(name, angle), num(2))
+  const [first, second] = rng.shuffle([s, c])
+  const conditions = angleConditions(s, angle, u, true)
+  const coefficient = () => (rng.chance(0.75) ? n.letter() : k(rng, 2, 5))
+  if (rng.chance(0.4)) {
+    const term = mul(coefficient(), sq(second))
+    const other = rng.chance(0.6) ? plus(term, constant(rng, n)) : rng.chance(0.5) ? minus(term, constant(rng, n)) : minus(constant(rng, n), term)
+    return { side: mul(coefficient(), sq(first)), other, conditions, label: `Baukasten: $\\${first}^2$ gegen $\\${second}^2$` }
+  }
+  const sum = rng.chance(0.6) ? plus(mul(coefficient(), sq(first)), mul(coefficient(), sq(second))) : minus(mul(coefficient(), sq(first)), mul(coefficient(), sq(second)))
+  const { e, count } = someShells(rng, sum, n, 2)
+  return { side: e, conditions, label: `Baukasten: $\\${first}^2$ und $\\${second}^2$, ${count} Schalen` }
+}
+
+// Sinus und Kosinus in jedem Summanden: \frac{a\sin x + b\cos x}{\sin x - c\cos x} = y, a\sin x = b\cos x + c\sin x
+function trigQuotient(rng: Rng, n: Names): Built {
+  const u = n.unknown
+  const hyperbolic = rng.chance(0.25)
+  const [s, c] = hyperbolic ? (['sinh', 'cosh'] as const) : (['sin', 'cos'] as const)
+  const angle = rng.chance(0.6) ? u : angleIn(rng, n, u)
+  const conditions = angleConditions(s === 'sin' ? 'tan' : 'tanh', angle, u)
+  const term = (name: TrigName) => (rng.chance(0.4) ? trigOf(name, angle) : mul(rng.chance(0.75) ? n.letter() : k(rng, 2, 5), trigOf(name, angle)))
+  const pairSum = () => {
+    const [p, q] = rng.shuffle([term(s), term(c)])
+    return rng.chance(0.55) ? plus(p, q) : minus(p, q)
+  }
+  if (rng.chance(0.6)) {
+    const { e, count } = someShells(rng, div(pairSum(), pairSum()), n, 1)
+    return { side: e, conditions, label: `Baukasten: Bruch aus $\\${s}$ und $\\${c}$, ${count} Schalen` }
+  }
+  const [left, right] = rng.chance(0.5) ? [term(s), rng.chance(0.5) ? pairSum() : term(c)] : [pairSum(), term(s === 'sin' ? 'cos' : 'cosh')]
+  return { side: left, other: right, conditions, label: `Baukasten: $\\${s}$ gegen $\\${c}$` }
+}
+
+// e-Funktion und Logarithmus um eine Winkelfunktion: b\,e^{a\sin x} = y, \ln(a + \tan x) = y
+function trigInExp(rng: Rng, n: Names): Built {
+  const u = n.unknown
+  const name = trigName(rng, ['sin', 'cos', 'tan', 'tan', 'sinh', 'tanh'])
+  const angle = rng.chance(0.6) ? u : angleIn(rng, n, u)
+  const block = trigOf(name, angle)
+  const conditions = angleConditions(name, angle, u)
+  const core = rng.chance(0.5) ? pow(powerBase(rng, n), rng.chance(0.5) ? block : letters(n.letter(), block)) : logOf(rng, n, plus(constant(rng, n), block))
+  const { e, count } = someShells(rng, core, n, 2, 1)
+  return { side: e, conditions, label: `Baukasten: $\\${name}$ in $e$ hoch oder $\\ln$, ${count} Schalen` }
+}
+
+const LEVEL4_TRIG_CORES: readonly Core[] = [
+  [16, trigFraction],
+  [10, trigShells],
+  [16, arcOfCore],
+  [14, trigSquares],
+  [14, trigQuotient],
+  [10, trigInExp],
+]
+
+// Gesucht ist hier immer x: in den Funktionen steckt das Neue
+export function buildLevel4Trig(rng: Rng): KitTask {
+  return buildFrom(rng, LEVEL4_TRIG_CORES, 0)
 }

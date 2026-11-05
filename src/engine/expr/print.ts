@@ -5,7 +5,7 @@ import type { Equation, Expr, FnName } from './types.ts'
 // echte Brüche, Dezimalkomma, Malpunkt nur wo nötig, \sin^2 x, ln, Klammern nur wo nötig.
 // Der Baum wird genau so ausgegeben, wie er gebaut ist (keine Umformung).
 
-const FN_LATEX: Record<FnName, string> = {
+export const FN_LATEX: Record<FnName, string> = {
   sin: '\\sin',
   cos: '\\cos',
   tan: '\\tan',

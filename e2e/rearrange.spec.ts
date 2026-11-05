@@ -109,7 +109,7 @@ test('Umstellen: Lernkarten-Ordner mit durchgerechneten Beispielen', async ({ pa
   await expect(page.getByRole('heading', { name: 'Stufe 2' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Stufe 3' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Stufe 4' })).toBeVisible()
-  await expect(page.locator('main li a')).toHaveCount(9)
+  await expect(page.locator('main li a')).toHaveCount(11)
   await expectCleanPage(page, 'Ordner')
 
   await page.getByRole('link', { name: /^Variable im Nenner/ }).click()
@@ -131,8 +131,8 @@ test('Umstellen Stufe 3: zwei Wurzeln, zweimal quadrieren geführt, mit Lernkart
 })
 
 test('Umstellen Stufe 4: Logarithmen zusammenfassen, e hoch beide Seiten, mit beiden neuen Lernkarten', async ({ page }) => {
-  // \ln(x + 7k) + \ln(x - 7k) - m = n - p
-  await page.goto('./#/ueben/umstellen/4-8')
+  // s + \log_{10}(x + 9) - \log_{10}(x - r) = y
+  await page.goto('./#/ueben/umstellen/4-13')
   await expect(page.locator('#question')).toContainText('steht in mehreren Logarithmen. Was machst du zuerst?')
   await solveWholeTask(page)
   await expect(page.getByTestId('result')).toBeVisible()
@@ -142,17 +142,49 @@ test('Umstellen Stufe 4: Logarithmen zusammenfassen, e hoch beide Seiten, mit be
   await expectCleanPage(page, 'Stufe 4')
 })
 
-test('Umstellen Stufe 4 frei: Bruch aus e^x, im ln geteilt, dann richtig mit Logarithmusgesetz', async ({ page }) => {
-  // \frac{e^{px} + q}{e^{px} - 8} = r + s
-  await page.goto('./#/frei/umstellen/4-33')
+test('Umstellen Stufe 4 frei: e^x unter der Wurzel, im ln geteilt, dann richtig mit Logarithmusgesetz', async ({ page }) => {
+  // 2\sqrt{e^{mx} - 7} + n = p
+  await page.goto('./#/frei/umstellen/4-27')
   await expect(field(page)).toBeVisible()
   await expectCleanPage(page, 'Start Stufe 4')
-  await enter(page, '\\ln\\left(\\frac{q+8r+8s}{p(r+s-1)}\\right)')
+  await enter(page, '\\ln\\left(\\frac{n^2-2np+p^2+28}{4m}\\right)')
   await expect(feedback(page)).toContainText('geteilt statt den ganzen')
   // jede gleichwertige Form zählt, auch mit dem Logarithmusgesetz auseinandergezogen
-  await enter(page, '\\frac{\\ln(q+8r+8s)-\\ln(r+s-1)}{p}')
+  await enter(page, '\\frac{\\ln\\left((p-n)^2+28\\right)-\\ln4}{m}')
   await expect(feedback(page)).toContainText('Richtig!')
   await expectCleanPage(page, 'Richtig Stufe 4')
+})
+
+test('Umstellen Stufe 4: sin² und cos², ein Quadrat ersetzen, Umkehrfunktion, mit beiden Lernkarten aus Teil 6b', async ({ page }) => {
+  // n\cos^2 x = m - k\sin^2 x mit x < \frac{\pi}{2}
+  await page.goto('./#/ueben/umstellen/4-16')
+  await expect(page.locator('#question')).toContainText('Wie bleibt nur eine Funktion übrig?')
+  await expect(page.getByText(/dazu/).first()).toBeVisible()
+  await solveWholeTask(page)
+  await expect(page.getByTestId('result')).toBeVisible()
+  const cards = page.getByRole('navigation', { name: 'Lernkarten zu dieser Aufgabe' })
+  await expect(cards.getByRole('link', { name: 'Winkel- und Hyperbelfunktionen' })).toBeVisible()
+  await expect(cards.getByRole('link', { name: 'Umkehrfunktionen' })).toBeVisible()
+  await expectCleanPage(page, 'Stufe 4 Winkel')
+})
+
+test('Umstellen Stufe 4 frei: sin und cos im Bruch, Kehrwert statt Umkehrfunktion, dann richtig', async ({ page }) => {
+  // \frac{p\sin x + 3\cos x}{q\sin x + \cos x} = y
+  await page.goto('./#/frei/umstellen/4-73')
+  await expect(field(page)).toBeVisible()
+  await expectCleanPage(page, 'Start Stufe 4 Winkel')
+  if (test.info().project.name === 'handy') {
+    // zweite Tastaturseite mit den Winkel- und Umkehrfunktionen
+    await field(page).tap()
+    await expect(field(page)).toBeFocused()
+    await page.getByText('Funktionen', { exact: true }).first().tap()
+    await expect(page.locator('.MLK__keycap', { hasText: /^arctan$/ }).filter({ visible: true }).first()).toBeVisible()
+  }
+  await enter(page, '\\frac{1}{\\tan\\left(\\frac{3-y}{qy-p}\\right)}')
+  await expect(feedback(page)).toContainText('Kehrwert verwechselt')
+  await enter(page, '\\arctan\\left(\\frac{3-y}{qy-p}\\right)')
+  await expect(feedback(page)).toContainText('Richtig!')
+  await expectCleanPage(page, 'Richtig Stufe 4 Winkel')
 })
 
 test('Umstellen Stufe 2 frei: Aufgabe aus dem Baukasten, Minus beim Ausklammern verloren, dann richtig', async ({ page }) => {

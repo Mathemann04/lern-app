@@ -79,6 +79,24 @@ describe('Baukasten der Stufen 1 bis 4', () => {
     }
   })
 
+  it('Stufe 4, Teil 6b: gut ein Drittel mit Winkel-, Hyperbel- oder Umkehrfunktion, die übrigen Nummern behalten ihre Aufgabe', () => {
+    const generated = Array.from({ length: 200 }, (_, i) => generateRearrangeTask({ level: 4, seed: i + 1 }))
+    const trig = generated.filter((g) => g.template.id === 'baukasten-4-winkel')
+    expect(trig.length).toBeGreaterThanOrEqual(50)
+    expect(trig.length).toBeLessThanOrEqual(90)
+    // Aufgaben aus Teil 6a unter ihren alten Nummern
+    expect(taskLatex(generated[0].task)).toBe('y = \\frac{\\sqrt{t + \\sqrt{s + \\sqrt{x}}}}{u}')
+    expect(taskLatex(generated[24].task)).toBe('\\frac{sr^{x} - r^{x - 2}}{t + u} = v + w')
+    expect(taskLatex(generated[84].task)).toBe('y = b + \\ln\\left(\\frac{x - a}{x + 6}\\right)')
+    for (const { task: t } of trig) {
+      const fns = [t.equation.lhs, t.equation.rhs].flatMap((side) => subterms(side)).filter((s) => s.kind === 'fn' && s.name !== 'ln')
+      expect(fns.length, taskLatex(t)).toBeGreaterThan(0)
+      // Winkelfunktionen nur mit Bereich, damit die Umkehrfunktion die Lösung liefert
+      const angle = fns.some((s) => s.kind === 'fn' && (s.name === 'sin' || s.name === 'cos' || s.name === 'tan'))
+      if (angle) expect(t.conditions.some((c) => c.rel === '<' && subterms(c.rhs).some((s) => s.kind === 'const' && s.name === 'pi')), taskLatex(t)).toBe(true)
+    }
+  })
+
   it.each([1, 2, 3, 4] as Level[])('Stufe %i: meist nach x, manchmal nach einem anderen Buchstaben', (level) => {
     const letters = tasks(level).filter((t) => t.target !== 'x').length
     expect(letters).toBeGreaterThanOrEqual(20)

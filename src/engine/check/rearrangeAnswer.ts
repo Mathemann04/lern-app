@@ -299,6 +299,8 @@ const hasRoot = (...exprs: readonly Expr[]) => exprs.some((e) => subterms(e).som
 // Hochzahl oder ein Logarithmus steht
 const hasExp = (...exprs: readonly Expr[]) =>
   exprs.some((e) => subterms(e).some((s) => s.kind === 'fn' || s.kind === 'log' || (s.kind === 'pow' && variablesOf(s.exp).size > 0)))
+// zweite Seite mit Winkel-, Hyperbel- und Umkehrfunktionen, wenn eine davon vorkommt
+const hasTrig = (...exprs: readonly Expr[]) => exprs.some((e) => subterms(e).some((s) => s.kind === 'fn' && s.name !== 'ln'))
 
 export function prepareRearrangeFree(ref: TaskRef): FreeTask {
   const context = prepareRearrangeCheck(generateRearrangeTask(ref).task, ref.level >= 4)
@@ -307,7 +309,7 @@ export function prepareRearrangeFree(ref: TaskRef): FreeTask {
   return {
     answerLabel: `${target} =`,
     inputLabel: 'Dein Ergebnis',
-    keyboard: { kind: 'rearrange', letters: context.letters, root: hasRoot(...all), exp: hasExp(...all) },
+    keyboard: { kind: 'rearrange', letters: context.letters, root: hasRoot(...all), exp: hasExp(...all), trig: hasTrig(...all) },
     check: (latex) => rearrangeFreeVerdict(checkRearrangeAnswer(context, latex), target),
   }
 }

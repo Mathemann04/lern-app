@@ -1,6 +1,6 @@
 import { contains, key, subterms } from '../expr/compare.ts'
-import { toLatex } from '../expr/print.ts'
-import { type Equation, type Expr, E, add, asRational, div, eq, fn, log, mul, neg, num, pow, root, sqrt, variable } from '../expr/types.ts'
+import { FN_LATEX, toLatex } from '../expr/print.ts'
+import { type Equation, type Expr, type FnName, E, PI, add, asRational, div, eq, fn, log, mul, neg, num, pow, root, sqrt, variable } from '../expr/types.ts'
 import { type Factored, factoredDivide, factoredLcm, factoredPoly, factorize, reduceFrac } from '../fraction/factor.ts'
 import type { Frac } from '../fraction/frac.ts'
 import {
@@ -62,6 +62,10 @@ export type StepKind =
   | 'logCombine'
   | 'logLaw'
   | 'powerLaw'
+  | 'arc'
+  | 'trig'
+  | 'pythagoras'
+  | 'tanQuotient'
   | 'finish'
 
 export const STEP_NAMES: Record<StepKind, string> = {
@@ -83,6 +87,10 @@ export const STEP_NAMES: Record<StepKind, string> = {
   logCombine: 'Logarithmen zusammenfassen',
   logLaw: 'Logarithmusgesetze anwenden',
   powerLaw: 'Potenzgesetz anwenden',
+  arc: 'Umkehrfunktion auf beiden Seiten',
+  trig: 'Funktion auf beiden Seiten',
+  pythagoras: 'Quadrat ersetzen',
+  tanQuotient: 'Durch den Kosinus teilen',
   finish: 'Ergebnis',
 }
 
@@ -130,6 +138,13 @@ export function stepLabel(step: RearrangeStep, target: string): string {
       return 'Logarithmusgesetze anwenden'
     case 'powerLaw':
       return 'Potenzgesetz $a^{m + n} = a^m \\cdot a^n$ anwenden'
+    case 'arc':
+    case 'trig':
+      return `$${FN_LATEX[step.fn!]}$ auf beiden Seiten`
+    case 'pythagoras':
+      return `$${operand} = ${toLatex(pythagorasOf(step.operand as PowerNode))}$ einsetzen`
+    case 'tanQuotient':
+      return `${step.side ? 'Zähler und Nenner' : 'Beide Seiten'} durch $${operand}$ teilen`
     case 'combine':
       return `Die ${step.side === 'rhs' ? 'linke' : 'rechte'} Seite zu einem Bruch zusammenfassen`
     default:
@@ -151,8 +166,10 @@ export type RearrangeStep = {
   // nur die Seiten getauscht (Ergebnis stand schon fertig da)
   readonly swapOnly?: boolean
   // beim Quadrieren einer Wurzel: Die andere Seite muss ≥ 0 sein, sonst gibt es keine Lösung; beim
-  // Logarithmieren > 0
+  // Logarithmieren > 0; bei Umkehrfunktionen im Wertebereich (z. B. 1 - w^2 bei \arcsin w)
   readonly requires?: Expr
+  // Funktion, die auf beide Seiten angewandt wird (\arcsin bei sin x = w, \tan bei \arctan u = w)
+  readonly fn?: FnName
 }
 
 export type RearrangeSolution = {
@@ -334,6 +351,13 @@ export function squared(e: Expr): Expr {
     const d = toPoly(e.den, atoms)!
     return div(squared(e.num), polyToExpr(polyMul(d, d), atoms))
   }
+  // Zahl oder Buchstaben mal Klammer: (3(y + m))^2 → 9(y + m)^2
+  if (e.kind === 'mul' && e.factors.every((f) => isMonomial(f) || f.kind === 'add') && e.factors.some((f) => f.kind === 'add')) {
+    const monos = e.factors.filter(isMonomial)
+    const front = monos.length > 0 ? squared(mul(...monos)) : num(1)
+    const brackets = e.factors.filter((f) => f.kind === 'add').map((f) => pow(f, num(2)))
+    return isOneExpr(front) ? mul(...brackets) : mul(front, ...brackets)
+  }
   return pow(e, num(2))
 }
 
@@ -443,7 +467,10 @@ function peel(s: Expr, o: Expr, side: Side, t: string): Draft | null {
   const tPart = draft.after[draft.side]
   const other = draft.side === 'lhs' ? draft.after.rhs : draft.after.lhs
   const squareOfFraction = other.kind === 'pow' && isSingleFraction(other.base)
-  if (tPart.kind !== 'var' || tPart.name !== t || !(isSingleFraction(other) || squareOfFraction)) return draft
+  // auch mit einem Baustein wie \tan(2x) als Unbekannter: \tan(2x) = \frac{m - pq}{nq + 1}
+  const block = draft.kind === 'divide' ? blockOf(draft.after, t) : null
+  const unknown = (tPart.kind === 'var' && tPart.name === t) || (block !== null && key(block) === key(tPart))
+  if (!unknown || !(isSingleFraction(other) || squareOfFraction)) return draft
   return { ...draft, after: at(draft.side, tPart, finalForm(other)) }
 }
 
@@ -510,10 +537,24 @@ function peelRaw(s: Expr, o: Expr, side: Side, t: string): Draft | null {
       if (s.index !== 2) return null
       if (isSumWithFraction(o) && !isVar(s.arg, t)) return { kind: 'combine', side, after: at(side, s, finalForm(o)) }
       return { kind: 'square', side, after: at(side, s.arg, squared(o)), requires: o }
-    case 'fn':
+    case 'fn': {
       // \ln u = w → u = e^w
-      if (s.name !== 'ln') return null
-      return { kind: 'exp', operand: E, side, after: at(side, s.arg, powerOf(E, o)) }
+      if (s.name === 'ln') return { kind: 'exp', operand: E, side, after: at(side, s.arg, powerOf(E, o)) }
+      // \sin u = w → u = \arcsin w (erst zu einem Bruch: \arcsin\frac{y - ab}{a})
+      const arc = ARC_OF[s.name]
+      if (arc) {
+        if (isSumWithFraction(o)) return { kind: 'combine', side, after: at(side, s, finalForm(o)) }
+        const requires = arcRequires(arc, o)
+        return { kind: 'arc', fn: arc, side, after: at(side, s.arg, fn(arc, o)), ...(requires ? { requires } : {}) }
+      }
+      // \arctan u = w → u = \tan w
+      const trig = TRIG_OF[s.name]
+      if (trig) {
+        const requires = trigRequires(s.name, o)
+        return { kind: 'trig', fn: trig, side, after: at(side, s.arg, fn(trig, o)), ...(requires ? { requires } : {}) }
+      }
+      return null
+    }
     case 'log':
       // \log_a u = w → u = a^w
       if (has(s.base)) return null
@@ -536,6 +577,65 @@ export function powerOf(base: Expr, o: Expr): Expr {
   if (isE(base) && o.kind === 'fn' && o.name === 'ln') return o.arg
   if (o.kind === 'log' && key(o.base) === key(base)) return o.arg
   return pow(base, o)
+}
+
+// --- Winkel- und Hyperbelfunktionen, Umkehrfunktionen (Stufe 4, Schritt 6b) ---
+
+// Umkehrfunktion: \sin u = w → u = \arcsin w. Die Aufgabe sorgt mit ihren Bedingungen dafür, dass u
+// im Hauptwert liegt (z. B. 0 < x < \frac{\pi}{2}).
+export const ARC_OF: Partial<Record<FnName, FnName>> = {
+  sin: 'arcsin',
+  cos: 'arccos',
+  tan: 'arctan',
+  sinh: 'arsinh',
+  cosh: 'arcosh',
+  tanh: 'artanh',
+}
+
+// und umgekehrt: \arctan u = w → u = \tan w
+export const TRIG_OF: Partial<Record<FnName, FnName>> = {
+  arcsin: 'sin',
+  arccos: 'cos',
+  arctan: 'tan',
+  arsinh: 'sinh',
+  arcosh: 'cosh',
+  artanh: 'tanh',
+}
+
+const squareOf = (e: Expr) => pow(e, num(2))
+
+// Damit es eine Lösung gibt, muss w im Definitionsbereich der Umkehrfunktion liegen (> 0 an den
+// Prüfstellen): 1 - w^2 bei \arcsin, \arccos, \operatorname{artanh}; w - 1 bei \operatorname{arcosh}
+function arcRequires(arc: FnName, w: Expr): Expr | null {
+  if (arc === 'arcsin' || arc === 'arccos' || arc === 'artanh') return add(num(1), neg(squareOf(w)))
+  if (arc === 'arcosh') return add(w, neg(num(1)))
+  return null
+}
+
+// … bzw. im Wertebereich der Umkehrfunktion: |w| < \frac{\pi}{2} bei \arcsin und \arctan,
+// 0 < w < \pi bei \arccos, w > 0 bei \operatorname{arcosh}
+function trigRequires(arc: FnName, w: Expr): Expr | null {
+  if (arc === 'arcsin' || arc === 'arctan') return add(div(squareOf(PI), num(4)), neg(squareOf(w)))
+  if (arc === 'arccos') return mul(w, add(PI, neg(w)))
+  if (arc === 'arcosh') return w
+  return null
+}
+
+// Paare mit \sin^2 u + \cos^2 u = 1 bzw. \cosh^2 u - \sinh^2 u = 1, und ihr Quotient
+const PAIRS: readonly { readonly sin: FnName; readonly cos: FnName; readonly tan: FnName }[] = [
+  { sin: 'sin', cos: 'cos', tan: 'tan' },
+  { sin: 'sinh', cos: 'cosh', tan: 'tanh' },
+]
+
+// Ersatz für ein Quadrat: \sin^2 u = 1 - \cos^2 u, \cos^2 u = 1 - \sin^2 u, \sinh^2 u = \cosh^2 u - 1,
+// \cosh^2 u = 1 + \sinh^2 u. wrong: typische Fehler (Quadrat vergessen bzw. Vorzeichen wie bei sin)
+export function pythagorasOf(square: PowerNode, wrong: 'square' | 'sign' | null = null): Expr {
+  const f = square.base as Extract<Expr, { kind: 'fn' }>
+  const pair = PAIRS.find((p) => p.sin === f.name || p.cos === f.name)!
+  const partner = fn(f.name === pair.sin ? pair.cos : pair.sin, f.arg)
+  const sq = wrong === 'square' ? partner : squareOf(partner)
+  if (pair.sin === 'sin' || wrong === 'sign') return add(num(1), neg(sq))
+  return f.name === 'sinh' ? add(sq, neg(num(1))) : add(num(1), sq)
 }
 
 // \ln(a^F) = F \ln a, \ln(e^F) = F
@@ -580,7 +680,7 @@ function peelable(s: Expr, t: string): boolean {
     case 'pow':
       return !has(s.exp) || !has(s.base)
     case 'fn':
-      return s.name === 'ln'
+      return s.name === 'ln' || ARC_OF[s.name] !== undefined || TRIG_OF[s.name] !== undefined
     case 'log':
       return !has(s.base)
     default:
@@ -791,10 +891,19 @@ function children(e: Expr): readonly Expr[] {
 export function blockOf(e: Equation, t: string): Expr | null {
   const found = new Map<string, Expr>()
   let outside = false
+  // Winkelfunktion nur im Quadrat (\sin^2 x): dann ist das Quadrat der Baustein
+  let squared = false
+  let plain = false
   const walk = (x: Expr): void => {
     if (!contains(x, t)) return
-    if (isTPower(x, t) || logParts(x, t)) {
+    if (x.kind === 'pow' && isTrigBlock(x.base, t) && isSquare(x)) {
+      found.set(key(x.base), x.base)
+      squared = true
+      return
+    }
+    if (isTPower(x, t) || logParts(x, t) || isTrigBlock(x, t)) {
       found.set(key(x), x)
+      if (isTrigBlock(x, t)) plain = true
       return
     }
     if (x.kind === 'var') outside = true
@@ -802,7 +911,90 @@ export function blockOf(e: Equation, t: string): Expr | null {
   }
   walk(e.lhs)
   walk(e.rhs)
-  return !outside && found.size === 1 ? [...found.values()][0] : null
+  if (outside || found.size !== 1) return null
+  const block = [...found.values()][0]
+  return squared && !plain ? squareOf(block) : block
+}
+
+// Winkel- oder Hyperbelfunktion mit der Variable: \sin x, \tan(2x), \cosh\frac{x}{a}
+const isTrigBlock = (s: Expr, t: string) => s.kind === 'fn' && ARC_OF[s.name] !== undefined && contains(s.arg, t)
+
+// \sin^2 u und \cos^2 u (bzw. \sinh^2 u und \cosh^2 u) in einer Gleichung: das zweite mit
+// \sin^2 u + \cos^2 u = 1 ersetzen, damit nur noch eine Funktion übrig bleibt.
+// y = a\cos^2 x + b\sin^2 x → y = a\cos^2 x + b\left(1 - \cos^2 x\right)
+function pythagorasStep(e: Equation, t: string, wrong: 'square' | 'sign' | null = null): Draft | null {
+  const squares = [e.lhs, e.rhs].flatMap((side) => subterms(side)).filter((s): s is PowerNode => s.kind === 'pow' && isSquare(s) && isTrigBlock(s.base, t))
+  for (const first of squares) {
+    const f = first.base as Extract<Expr, { kind: 'fn' }>
+    const pair = PAIRS.find((p) => p.sin === f.name || p.cos === f.name)
+    if (!pair) continue
+    const partnerName = f.name === pair.sin ? pair.cos : pair.sin
+    const second = squares.find((s) => s.base.kind === 'fn' && s.base.name === partnerName && key(s.base.arg) === key(f.arg))
+    if (!second) continue
+    const replace = new Map([[key(second), pythagorasOf(second, wrong)]])
+    return { kind: 'pythagoras', operand: second, after: eq(substitute(e.lhs, replace), substitute(e.rhs, replace)) }
+  }
+  return null
+}
+
+// Typischer Fehler beim Ersetzen (Gleichung danach; null, wenn es nicht passt)
+export function pythagorasWrong(e: Equation, t: string, wrong: 'square' | 'sign'): Equation | null {
+  return pythagorasStep(e, t, wrong)?.after ?? null
+}
+
+// \sin u und \cos u (bzw. \sinh u und \cosh u) in jedem Summanden genau einmal, im Zähler und Nenner
+// eines Bruchs oder auf beiden Seiten: durch \cos u teilen, dann steht nur noch \tan u da.
+// \frac{\sin x + \cos x}{\sin x - \cos x} = y → \frac{\tan x + 1}{\tan x - 1} = y
+// wrong: typische Fehler (durch \sin u geteilt und \tan u statt \cot u geschrieben; nur einen Teil geteilt)
+function tanQuotientStep(e: Equation, t: string, wrong: 'flipped' | 'partly' | null = null): Draft | null {
+  const fns = [e.lhs, e.rhs].flatMap((side) => subterms(side)).filter((s): s is Extract<Expr, { kind: 'fn' }> => isTrigBlock(s, t))
+  for (const pair of PAIRS) {
+    const sinF = fns.find((s) => s.name === pair.sin)
+    const cosF = sinF && fns.find((s) => s.name === pair.cos && key(s.arg) === key(sinF.arg))
+    if (!sinF || !cosF) continue
+    const tanF = fn(pair.tan, sinF.arg)
+    const [byF, keepF] = wrong === 'flipped' ? [sinF, cosF] : [cosF, sinF]
+    const homogeneous = (x: Expr): boolean => {
+      if (x.kind === 'neg') return homogeneous(x.arg)
+      if (key(x) === key(sinF) || key(x) === key(cosF)) return true
+      if (x.kind === 'add') return x.terms.every(homogeneous)
+      if (x.kind === 'mul') {
+        const withT = x.factors.filter((g) => contains(g, t))
+        return withT.length === 1 && homogeneous(withT[0])
+      }
+      if (x.kind === 'div') return homogeneous(x.num) && !contains(x.den, t)
+      return false
+    }
+    // geteilt durch \cos u (bei wrong = 'flipped' durch \sin u, aber \tan u geschrieben)
+    const over = (x: Expr): Expr => {
+      if (x.kind === 'neg') return neg(over(x.arg))
+      if (key(x) === key(byF)) return num(1)
+      if (key(x) === key(keepF)) return tanF
+      if (x.kind === 'add') return add(...x.terms.map(over))
+      if (x.kind === 'mul') {
+        const factors = x.factors.map((g) => (contains(g, t) ? over(g) : g)).filter((g) => !isOneExpr(g))
+        return factors.length === 0 ? num(1) : mul(...factors)
+      }
+      if (x.kind === 'div') return div(over(x.num), x.den)
+      return x
+    }
+    for (const side of ['lhs', 'rhs'] as const) {
+      const s = e[side]
+      const o = side === 'lhs' ? e.rhs : e.lhs
+      if (s.kind !== 'div' || contains(o, t) || !contains(s.num, t) || !contains(s.den, t) || !homogeneous(s.num) || !homogeneous(s.den)) continue
+      const den = wrong === 'partly' ? s.den : over(s.den)
+      return { kind: 'tanQuotient', operand: cosF, side, after: at(side, isOneExpr(den) ? over(s.num) : div(over(s.num), den), o) }
+    }
+    if (contains(e.lhs, t) && contains(e.rhs, t) && homogeneous(e.lhs) && homogeneous(e.rhs)) {
+      return { kind: 'tanQuotient', operand: cosF, after: eq(over(e.lhs), wrong === 'partly' ? e.rhs : over(e.rhs)) }
+    }
+  }
+  return null
+}
+
+// Typischer Fehler beim Teilen durch \cos u (Gleichung danach; null, wenn es nicht passt)
+export function tanQuotientWrong(e: Equation, t: string, wrong: 'flipped' | 'partly'): Equation | null {
+  return tanQuotientStep(e, t, wrong)?.after ?? null
 }
 
 // Unbekannte beim Sortieren, Ausklammern und Teilen: x, √x (mit x = (√x)²) oder ein Baustein wie e^x
@@ -1004,6 +1196,12 @@ function rational(e: Equation, t: string): Draft | null {
   const r = complexRoot(e, t)
   if (r) return radicalStep(e, t, r)
 
+  // \sin^2 und \cos^2, \sin und \cos: erst nur noch eine Funktion
+  const replaced = pythagorasStep(e, t)
+  if (replaced) return replaced
+  const quotient = tanQuotientStep(e, t)
+  if (quotient) return quotient
+
   const extended = extendStep(e, t)
   if (extended) return extended
 
@@ -1078,14 +1276,18 @@ function rational(e: Equation, t: string): Draft | null {
   }
 }
 
-// Ausgeklammerte Unbekannte: x(a - c), e^{x}(y - a), aber (a - c)\ln x
-export const factoredOut = (u: Expr, coefficient: Expr): Expr => (u.kind === 'fn' || u.kind === 'log' ? mul(coefficient, u) : mul(u, coefficient))
+// Ausgeklammerte Unbekannte: x(a - c), e^{x}(y - a), aber (a - c)\ln x, (a - b)\sin^2 x
+export const factoredOut = (u: Expr, coefficient: Expr): Expr =>
+  u.kind === 'fn' || u.kind === 'log' || (u.kind === 'pow' && u.base.kind === 'fn') ? mul(coefficient, u) : mul(u, coefficient)
 
 const hasFraction = (e: Equation) => subterms(e.lhs).concat(subterms(e.rhs)).some((s) => s.kind === 'div')
 
-// Vorzeichen beim Sortieren: rechts möglichst ohne Minus, sonst links mit Plus vorn
+// Vorzeichen beim Sortieren: links nicht lauter Minus (-ax - bx), sonst rechts möglichst ohne Minus,
+// sonst links mit Plus vorn
 function collectSign(coefficient: Poly, rest: Poly): 1 | -1 {
   const negatives = (p: Poly) => p.filter((term) => ratSign(term.coef) < 0).length
+  const leftNegative = negatives(coefficient)
+  if (coefficient.length >= 2 && (leftNegative === 0 || leftNegative === coefficient.length)) return leftNegative === 0 ? 1 : -1
   const plus = negatives(polyScale(rest, rat(-1)))
   const minus = negatives(rest)
   if (plus !== minus) return plus < minus ? 1 : -1

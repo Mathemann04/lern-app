@@ -149,6 +149,25 @@ describe('Umstellen frei ab Stufe 4: jede gleichwertige Form ohne Doppelbruch', 
     expect(prepareRearrangeFree({ level: 4, seed: 33 }).keyboard).toMatchObject({ kind: 'rearrange', exp: true })
     expect(prepareRearrangeFree({ level: 3, seed: 3 }).keyboard).toMatchObject({ kind: 'rearrange', exp: false })
   })
+
+  it('Winkelfunktionen: Umkehrfunktion richtig, Kehrwert als typischer Fehler', () => {
+    const t = task('\\frac{\\sin x+\\cos x}{\\sin x-\\cos x}', 'y', 'x', [{ lhs: p('x'), rel: '<', rhs: p('\\frac{\\pi}{2}') }])
+    expect(lenient(t, '\\arctan\\left(\\frac{y+1}{y-1}\\right)')).toEqual({ kind: 'correct' })
+    expect(lenient(t, '\\frac{1}{\\tan\\left(\\frac{y+1}{y-1}\\right)}')).toEqual(expect.objectContaining({ kind: 'knownError' }))
+    // Bruch in der Umkehrfunktion zählt wie ein Buchstabe
+    expect(lenient(t, '\\arctan\\left(\\frac{\\frac{1}{y}+1}{1-\\frac{1}{y}}\\right)')).toEqual({ kind: 'unfinished', reason: 'nested' })
+  })
+
+  it('Areafunktionen: als arsinh oder als ln geschrieben', () => {
+    const t = task('a\\sinh x+b', 'y')
+    expect(lenient(t, '\\operatorname{arsinh}\\left(\\frac{y-b}{a}\\right)')).toEqual({ kind: 'correct' })
+    expect(lenient(t, '\\ln\\left(\\frac{y-b}{a}+\\sqrt{\\left(\\frac{y-b}{a}\\right)^2+1}\\right)')).toEqual({ kind: 'correct' })
+  })
+
+  it('Tastatur mit zweiter Seite „Funktionen" bei Winkel- und Hyperbelfunktionen', () => {
+    expect(prepareRearrangeFree({ level: 4, seed: 33 }).keyboard).toMatchObject({ kind: 'rearrange', trig: true })
+    expect(prepareRearrangeFree({ level: 4, seed: 25 }).keyboard).toMatchObject({ kind: 'rearrange', trig: false })
+  })
 })
 
 describe('Umstellen frei: Zufallsaufgaben der Stufen 1 bis 4', () => {
