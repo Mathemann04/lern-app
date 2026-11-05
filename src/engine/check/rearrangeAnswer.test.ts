@@ -113,12 +113,50 @@ describe('Umstellen frei: Fehler', () => {
   })
 })
 
-describe('Umstellen frei: Zufallsaufgaben der Stufen 1 bis 3', () => {
-  for (const level of [1, 2, 3] as const) {
+describe('Umstellen frei ab Stufe 4: jede gleichwertige Form ohne Doppelbruch', () => {
+  const lenient = (t: RearrangeTask, input: string) => checkRearrangeAnswer(prepareRearrangeCheck(t, true), input)
+
+  it('e-Funktion: verschiedene Schreibweisen des Logarithmus', () => {
+    const t = task('e^{2x}', 'y')
+    expect(lenient(t, '\\frac{\\ln y}{2}')).toEqual({ kind: 'correct' })
+    expect(lenient(t, '\\frac{1}{2}\\ln y')).toEqual({ kind: 'correct' })
+    expect(lenient(t, '\\ln\\sqrt{y}')).toEqual({ kind: 'correct' })
+    // \ln auf der anderen Seite vergessen: 2x = y
+    expect(lenient(t, '\\frac{y}{2}')).toEqual(expect.objectContaining({ kind: 'knownError' }))
+  })
+
+  it('Bruch im Logarithmus zählt wie ein Buchstabe, ein Doppelbruch auch dort nicht', () => {
+    const t = task('\\frac{ae^{x}+b}{e^{x}-c}', 'y', 'x', [{ lhs: p('y'), rel: '>', rhs: p('a') }])
+    expect(lenient(t, '\\ln\\left(\\frac{b+cy}{y-a}\\right)')).toEqual({ kind: 'correct' })
+    expect(lenient(t, '\\ln(b+cy)-\\ln(y-a)')).toEqual({ kind: 'correct' })
+    expect(lenient(t, '\\ln\\left(\\frac{\\frac{b}{y}+c}{1-\\frac{a}{y}}\\right)')).toEqual({ kind: 'unfinished', reason: 'nested' })
+  })
+
+  it('Wurzeln in Wurzeln: ausmultipliziert oder ineinander', () => {
+    const t = task('y', '\\sqrt{a+\\sqrt{b+\\sqrt{x}}}')
+    expect(lenient(t, '((y^2-a)^2-b)^2')).toEqual({ kind: 'correct' })
+    expect(lenient(t, '(y^4-2ay^2+a^2-b)^2')).toEqual({ kind: 'correct' })
+    expect(lenient(t, '(y^2-a-b)^2')).toEqual(expect.objectContaining({ kind: 'knownError' }))
+  })
+
+  it('Doppelbruch im Ergebnis ist noch nicht fertig', () => {
+    const t = task('\\ln(x+a)-\\ln x', 'b')
+    expect(lenient(t, '\\frac{a}{e^b-1}')).toEqual({ kind: 'correct' })
+    expect(lenient(t, '\\frac{1}{\\frac{e^b-1}{a}}')).toEqual({ kind: 'unfinished', reason: 'nested' })
+  })
+
+  it('Tastatur mit e^x, ln und log_a in Stufe 4', () => {
+    expect(prepareRearrangeFree({ level: 4, seed: 33 }).keyboard).toMatchObject({ kind: 'rearrange', exp: true })
+    expect(prepareRearrangeFree({ level: 3, seed: 3 }).keyboard).toMatchObject({ kind: 'rearrange', exp: false })
+  })
+})
+
+describe('Umstellen frei: Zufallsaufgaben der Stufen 1 bis 4', () => {
+  for (const level of [1, 2, 3, 4] as const) {
     it(`Stufe ${level}: Lösung richtig, falsche Ergebnisse als Fehler erkannt`, () => {
       for (let seed = 1; seed <= 80; seed++) {
         const t = generateRearrangeTask({ level, seed }).task
-        const context = prepareRearrangeCheck(t)
+        const context = prepareRearrangeCheck(t, level >= 4)
         const label = `${level}-${seed}: ${toLatex(t.equation.lhs)} = ${toLatex(t.equation.rhs)}`
         const result = toLatex(context.solution.result)
         expect(context.points.length, label).toBeGreaterThanOrEqual(12)

@@ -131,10 +131,17 @@ export function fractionKeyboard(letters: readonly string[], blocks: boolean, ro
 
 // --- Umstellen ---
 
+// Logarithmus zu einer Basis: \log_{□}(□)
+const LOG_KEY: Key = { label: 'log<sub>a</sub>', insert: '\\log_{#?}\\left(#?\\right)', class: 'small' }
+
 // Bildschirm-Tastatur fürs Umstellen: links der Reihe nach die Buchstaben der Aufgabe (oft fünf oder
-// sechs), Hochzahlen, Klammern und bei Wurzeln √
-export function rearrangeKeyboard(letters: readonly string[], root: boolean): VirtualKeyboardLayout {
-  return withNumberPad('umstellen', 'Umstellen', flowKeys([...letters.map((l) => [l]), POWERS, BRACKETS, root ? [ROOT] : []]))
+// sechs), Hochzahlen, Klammern, bei Wurzeln √, bei e-Funktion und Logarithmus (Stufe 4) e^□, ln und log_a
+export function rearrangeKeyboard(letters: readonly string[], root: boolean, exp = false): VirtualKeyboardLayout {
+  return withNumberPad(
+    'umstellen',
+    'Umstellen',
+    flowKeys([...letters.map((l) => [l]), POWERS, BRACKETS, root ? [ROOT] : [], exp ? [{ latex: 'e^{#?}' }, fnKey('ln'), LOG_KEY] : []]),
+  )
 }
 
 // Seiten der Tastatur je Thema
@@ -145,6 +152,6 @@ export function keyboardLayouts(spec: KeyboardSpec): VirtualKeyboardLayout[] {
     case 'fraction':
       return [fractionKeyboard(spec.letters, spec.blocks, spec.root, spec.imag, spec.hyperbolic)]
     case 'rearrange':
-      return [rearrangeKeyboard(spec.letters, spec.root)]
+      return [rearrangeKeyboard(spec.letters, spec.root, spec.exp)]
   }
 }

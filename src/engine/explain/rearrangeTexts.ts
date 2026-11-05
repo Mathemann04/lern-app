@@ -87,6 +87,59 @@ export const REARRANGE_ERROR_TEXTS: Readonly<Record<string, Explanation>> = {
       'Beim Ausklammern bleibt jedes Vorzeichen in der Klammer stehen: $ax - bx = x(a - b)$. Prüfe es, indem du die Klammer wieder ausmultiplizierst.',
     short: 'Vorzeichen bleiben: $ax - bx = x(a - b)$.',
   },
+  'eq-nested-root': {
+    detailed:
+      'Beim Quadrieren fällt nur die äußere Wurzel weg, die innere bleibt stehen: Aus $\\sqrt{a + \\sqrt{u}} = y$ wird $a + \\sqrt{u} = y^2$. Die innere Wurzel stellst du danach allein und quadrierst noch einmal.',
+    short: 'Quadrieren entfernt nur die äußere Wurzel.',
+  },
+  'eq-ln-forgotten': {
+    detailed:
+      'Logarithmieren heißt: auf beiden Seiten den $\\ln$ nehmen. Auf der Seite mit der Potenz holt er die Hochzahl herunter, auf der anderen Seite bleibt er stehen: aus $e^{kx} = w$ wird $kx = \\ln w$.',
+    short: 'Auf beiden Seiten den $\\ln$: $e^{kx} = w \\Leftrightarrow kx = \\ln w$.',
+  },
+  'eq-exp-forgotten': {
+    detailed:
+      'Gegen einen Logarithmus hilft seine Basis hoch, auf beiden Seiten: aus $\\ln u = b$ wird $u = e^b$, aus $\\log_a u = b$ wird $u = a^b$. Lässt du den Logarithmus nur weg, stimmt die Gleichung nicht mehr.',
+    short: 'Beide Seiten hoch: $\\ln u = b \\Leftrightarrow u = e^b$.',
+  },
+  'eq-exp-minus-lost': {
+    detailed: 'Das Minus gehört zur Hochzahl und bleibt beim Logarithmieren stehen: aus $e^{-kx} = w$ wird $-kx = \\ln w$.',
+    short: 'Das Minus bleibt: $e^{-kx} = w \\Leftrightarrow -kx = \\ln w$.',
+  },
+  'eq-ln-of-sum': {
+    detailed:
+      'Für den Logarithmus einer Summe gibt es kein Gesetz: $\\ln(a + b) \\neq \\ln a + \\ln b$. Nur Produkte und Quotienten lassen sich auseinanderziehen. Lass $\\ln(a + b)$ so stehen.',
+    short: '$\\ln(a + b) \\neq \\ln a + \\ln b$.',
+  },
+  'eq-exp-of-sum': {
+    detailed: 'Eine Summe in der Hochzahl wird zu einem Produkt, nicht zu einer Summe: $e^{a + b} = e^a \\cdot e^b \\neq e^a + e^b$. Schreibe einfach $e^{a + b}$.',
+    short: '$e^{a + b} = e^a \\cdot e^b$, nicht $e^a + e^b$.',
+  },
+  'eq-log-base-forgotten': {
+    detailed:
+      'Nur bei der Basis $e$ hebt der $\\ln$ die Potenz ganz auf. Bei einer anderen Basis bleibt ein Faktor stehen: $\\ln\\left(a^x\\right) = x \\ln a$.',
+    short: '$\\ln\\left(a^x\\right) = x\\ln a$: der Faktor $\\ln a$ bleibt.',
+  },
+  'eq-divide-inside-ln': {
+    detailed: 'Teilst du beide Seiten durch $k$, wird der ganze $\\ln$ geteilt, nicht das, was in ihm steht: $\\frac{\\ln w}{k} \\neq \\ln\\frac{w}{k}$.',
+    short: 'Den ganzen $\\ln$ teilen: $\\frac{\\ln w}{k} \\neq \\ln\\frac{w}{k}$.',
+  },
+  'eq-log-product': {
+    detailed: 'Der Logarithmus macht aus einem Produkt eine Summe: $\\ln(u \\cdot v) = \\ln u + \\ln v$. Ein Produkt von Logarithmen entsteht dabei nicht.',
+    short: '$\\ln(u \\cdot v) = \\ln u + \\ln v$.',
+  },
+  'eq-log-sum': {
+    detailed: 'Eine Summe von Logarithmen wird zum Logarithmus eines Produkts: $\\ln u + \\ln v = \\ln(u \\cdot v)$, nicht $\\ln(u + v)$.',
+    short: '$\\ln u + \\ln v = \\ln(u \\cdot v)$.',
+  },
+  'eq-log-quotient': {
+    detailed: 'Eine Differenz von Logarithmen wird zum Logarithmus eines Quotienten: $\\ln u - \\ln v = \\ln\\frac{u}{v}$. Der Bruch steht im $\\ln$, nicht zwischen zwei Logarithmen.',
+    short: '$\\ln u - \\ln v = \\ln\\frac{u}{v}$.',
+  },
+  'eq-power-sum': {
+    detailed: 'Eine Summe in der Hochzahl wird zu einem Produkt: $a^{x + 1} = a^x \\cdot a^1 = a \\cdot a^x$. Als Summe $a^x + a$ stimmt es nicht.',
+    short: '$a^{x + 1} = a \\cdot a^x$, nicht $a^x + a$.',
+  },
 }
 
 export function explainRearrangeError(id: string): Explanation {
@@ -245,6 +298,69 @@ export const COMBINE_BEFORE_SQUARE_MOVES: readonly WrongMove[] = [
   COMBINE_BEFORE_MULTIPLY_MOVES[1],
 ]
 
+// Zusammenfassen, bevor logarithmiert wird
+export const COMBINE_BEFORE_LOG_MOVES: readonly WrongMove[] = [
+  { label: 'Von jedem Summanden einzeln den $\\ln$ nehmen', why: REARRANGE_ERROR_TEXTS['eq-ln-of-sum'] },
+  COMBINE_BEFORE_MULTIPLY_MOVES[1],
+]
+
+// e hoch beide Seiten (log: \ln bzw. \log_a als LaTeX, base: e bzw. a)
+export function expMoves(logLatex: string, base: string, side: 'lhs' | 'rhs'): WrongMove[] {
+  return [
+    { label: `Den $${logLatex}$ einfach weglassen`, why: REARRANGE_ERROR_TEXTS['eq-exp-forgotten'] },
+    {
+      label: `Beide Seiten durch $${logLatex}$ teilen`,
+      why: {
+        detailed: `$${logLatex}$ ist keine Zahl, sondern eine Rechenvorschrift; durch sie kannst du nicht teilen. Gegen den Logarithmus hilft $${base}$ hoch.`,
+        short: `Gegen den Logarithmus hilft $${base}$ hoch.`,
+      },
+    },
+    { label: `Nur die ${sideAccusative(side)} Seite als Hochzahl von $${base}$ schreiben`, why: ONE_SIDED },
+  ]
+}
+
+// Logarithmieren
+export function logMoves(side: 'lhs' | 'rhs' | null): WrongMove[] {
+  return [
+    { label: 'Die Hochzahl einfach herunterholen', why: REARRANGE_ERROR_TEXTS['eq-ln-forgotten'] },
+    {
+      label: 'Auf beiden Seiten die Wurzel ziehen',
+      why: { detailed: 'Die Wurzel hilft gegen ein Quadrat. Steht die Variable in der Hochzahl, hilft der Logarithmus.', short: 'Gegen die Variable in der Hochzahl hilft der $\\ln$.' },
+    },
+    ...(side ? [{ label: `Nur die ${sideAccusative(side)} Seite logarithmieren`, why: ONE_SIDED }] : []),
+  ]
+}
+
+// Logarithmen zusammenfassen
+export const LOG_COMBINE_MOVES: readonly WrongMove[] = [
+  { label: 'Zum $\\ln$ der Summe der beiden Terme zusammenfassen', why: REARRANGE_ERROR_TEXTS['eq-log-sum'] },
+  { label: 'Durch den zweiten Logarithmus teilen', why: REARRANGE_ERROR_TEXTS['eq-log-quotient'] },
+  {
+    label: 'Jeden Logarithmus einzeln mit $e$ hoch auflösen',
+    why: { detailed: '$e$ hoch eine Summe ist ein Produkt: $e^{\\ln u + \\ln v} = u \\cdot v$, nicht $u + v$. Fasse die Logarithmen zuerst zu einem einzigen zusammen.', short: 'Erst zu einem einzigen Logarithmus zusammenfassen.' },
+  },
+]
+
+// Logarithmusgesetze anwenden
+export const LOG_LAW_MOVES: readonly WrongMove[] = [
+  { label: 'Den $\\ln$ des Produkts als Produkt der Logarithmen schreiben', why: REARRANGE_ERROR_TEXTS['eq-log-product'] },
+  { label: 'Die Hochzahl herunterholen und den Faktor $\\ln a$ weglassen', why: REARRANGE_ERROR_TEXTS['eq-log-base-forgotten'] },
+  {
+    label: 'Den $\\ln$ auf beiden Seiten einfach weglassen',
+    why: { detailed: 'Der $\\ln$ steht auf beiden Seiten, weil du gerade logarithmiert hast. Weglassen würde das rückgängig machen. Ziehe ihn mit den Logarithmusgesetzen auseinander, dann kommt die Hochzahl als Faktor herunter.', short: 'Nicht weglassen, mit den Gesetzen auseinanderziehen.' },
+  },
+]
+
+// Potenzgesetz
+export const POWER_LAW_MOVES: readonly WrongMove[] = [
+  { label: '$a^{x + 1}$ als $a^x + a$ schreiben', why: REARRANGE_ERROR_TEXTS['eq-power-sum'] },
+  { label: 'Von jedem Summanden einzeln den $\\ln$ nehmen', why: REARRANGE_ERROR_TEXTS['eq-ln-of-sum'] },
+  {
+    label: 'Die Hochzahlen einfach weglassen',
+    why: { detailed: 'Ohne die Hochzahlen ändert sich der Wert. Zerlege die Potenzen mit $a^{m + n} = a^m \\cdot a^n$, bis überall dieselbe Potenz steht.', short: 'Hochzahlen nicht weglassen.' },
+  },
+]
+
 export const EXPAND_MOVES: readonly WrongMove[] = [
   { label: 'Die Klammern einfach weglassen', why: { detailed: 'Ohne Klammer gehört der Faktor nur noch zum ersten Summanden. Jeder Summand in der Klammer muss malgenommen werden.', short: 'Klammern nicht weglassen, ausmultiplizieren.' } },
   { label: 'Die Zahl vor der Klammer nur mit dem ersten Summanden malnehmen', why: REARRANGE_ERROR_TEXTS['eq-bracket-first-term'] },
@@ -321,6 +437,12 @@ export const REARRANGE_HINTS = {
   combineBeforeMultiply: 'Fasse die Seite zuerst zu einem Bruch zusammen. Sonst entsteht beim Malnehmen und Teilen ein Doppelbruch.',
   combineBeforeRoot: 'Fasse die Seite zuerst zu einem Bruch zusammen. Dann ziehst du die Wurzel aus einem einzigen Bruch.',
   combineBeforeSquare: 'Fasse die Seite zuerst zu einem Bruch zusammen. Dann quadrierst du Zähler und Nenner.',
+  combineBeforeLog: 'Fasse die Seite zuerst zu einem Bruch zusammen. Den $\\ln$ einer Summe kannst du nicht auseinanderziehen.',
+  exp: 'Gegen einen Logarithmus hilft seine Basis hoch, auf beiden Seiten: $e^{\\ln u} = u$.',
+  log: 'Steht die Variable in der Hochzahl, nimm auf beiden Seiten den $\\ln$: $\\ln\\left(e^u\\right) = u$, $\\ln\\left(a^u\\right) = u\\ln a$.',
+  logLaw: 'Ziehe den $\\ln$ mit den Gesetzen auseinander: $\\ln(u \\cdot v) = \\ln u + \\ln v$, $\\ln\\left(a^u\\right) = u\\ln a$.',
+  logCombine: 'Fasse die Logarithmen mit den Gesetzen zusammen: $\\ln u + \\ln v = \\ln(uv)$, $\\ln u - \\ln v = \\ln\\frac{u}{v}$.',
+  powerLaw: 'Zerlege die Potenzen mit $a^{m + n} = a^m \\cdot a^n$, bis überall dieselbe Potenz steht.',
   extend: 'Erweitere den Doppelbruch: Zähler und Nenner mal den Hauptnenner der inneren Brüche. Dann kürzen sich die inneren Nenner weg.',
   expand: 'Jeder Summand in der Klammer wird malgenommen: $a(b + c) = ab + ac$.',
   collect: 'Alle Summanden mit der Variable auf eine Seite, alle anderen auf die andere. Was die Seite wechselt, wechselt das Vorzeichen.',
@@ -363,6 +485,18 @@ export function explainMove(kind: string, operation: string, target: string, unk
       return { detailed: 'Auf der anderen Seite steht eine Summe mit Brüchen. Fasse sie erst über den Hauptnenner zu einem Bruch zusammen; dann ziehst du die Wurzel aus einem einzigen Bruch.', short: 'Erst zu einem Bruch, dann die Wurzel ziehen.' }
     case 'combine-square':
       return { detailed: 'Auf der anderen Seite steht eine Summe mit Brüchen. Fasse sie erst über den Hauptnenner zu einem Bruch zusammen; dann quadrierst du einfach Zähler und Nenner.', short: 'Erst zu einem Bruch, dann quadrieren.' }
+    case 'combine-log':
+      return { detailed: 'Auf der anderen Seite steht eine Summe mit Brüchen. Fasse sie erst über den Hauptnenner zu einem Bruch zusammen; den $\\ln$ einer Summe kannst du nämlich nicht auseinanderziehen.', short: 'Erst zu einem Bruch, dann logarithmieren.' }
+    case 'exp':
+      return { detailed: 'Die Variable steckt in einem Logarithmus. Die Potenz zu seiner Basis hebt ihn auf: $e^{\\ln u} = u$, $a^{\\log_a u} = u$. Also schreibst du beide Seiten als Hochzahl dieser Basis.', short: `${operation}: hebt den Logarithmus auf.` }
+    case 'log':
+      return { detailed: 'Die Variable steckt in einer Hochzahl. Nimm auf beiden Seiten den $\\ln$: Er hebt die e-Funktion auf, $\\ln\\left(e^u\\right) = u$. Bei einer anderen Basis oder einem Produkt holen ihn danach die Logarithmusgesetze herunter.', short: 'Logarithmieren: $\\ln$ auf beiden Seiten.' }
+    case 'logLaw':
+      return { detailed: 'Im $\\ln$ steht ein Produkt oder eine Potenz mit der Variable in der Hochzahl. Mit den Logarithmusgesetzen wird daraus eine Summe, und die Hochzahl kommt als Faktor herunter: $\\ln(u \\cdot v) = \\ln u + \\ln v$, $\\ln\\left(a^u\\right) = u\\ln a$.', short: 'Logarithmusgesetze: die Hochzahl kommt herunter.' }
+    case 'logCombine':
+      return { detailed: 'Die Variable steckt in mehreren Logarithmen. Mit den Logarithmusgesetzen wird daraus einer: $\\ln u + \\ln v = \\ln(uv)$, $\\ln u - \\ln v = \\ln\\frac{u}{v}$. Den löst du dann mit der Basis hoch auf.', short: 'Logarithmusgesetze: aus mehreren Logarithmen wird einer.' }
+    case 'powerLaw':
+      return { detailed: 'Die Variable steht in mehreren Hochzahlen, die sich nur um einen festen Teil unterscheiden. Mit $a^{m + n} = a^m \\cdot a^n$ steht danach überall dieselbe Potenz, die du ausklammern kannst.', short: 'Potenzgesetz: überall dieselbe Potenz.' }
     case 'expand':
       return { detailed: 'Die Variable steckt in Klammern. Nach dem Ausmultiplizieren stehen alle Summanden einzeln da und lassen sich sortieren.', short: 'Ausmultiplizieren, dann sortieren.' }
     case 'extend':

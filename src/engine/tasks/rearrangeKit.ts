@@ -1,5 +1,5 @@
 import { subterms } from '../expr/compare.ts'
-import { type Expr, add, div, eq, mul, neg, num, pow, sqrt, variable } from '../expr/types.ts'
+import { type Expr, E, add, div, eq, ln, log, mul, neg, num, pow, sqrt, variable } from '../expr/types.ts'
 import type { Condition, RearrangeTask } from '../rearrange/task.ts'
 import type { Rng } from '../random/rng.ts'
 
@@ -462,7 +462,7 @@ function doubleFraction(rng: Rng, n: Names): Built {
   return { side, label: 'Baukasten: Doppelbruch mit Brüchen oben und unten' }
 }
 
-const LEVEL3_CORES: ReadonlyArray<readonly [number, (rng: Rng, n: Names) => Built]> = [
+const LEVEL3_CORES: readonly Core[] = [
   [14, moebius],
   [6, crossFractions],
   [6, fractionSum],
@@ -477,13 +477,236 @@ const LEVEL3_CORES: ReadonlyArray<readonly [number, (rng: Rng, n: Names) => Buil
   [13, doubleFraction],
 ]
 
-export function buildLevel3(rng: Rng): KitTask {
-  const n = names(rng, rng.chance(0.2))
-  const total = LEVEL3_CORES.reduce((s, [w]) => s + w, 0)
+type Core = readonly [number, (rng: Rng, n: Names) => Built]
+
+// Kern nach Anteilen wählen, bauen, andere Seite dazu
+function buildFrom(rng: Rng, cores: readonly Core[], letterTarget: number): KitTask {
+  const n = names(rng, rng.chance(letterTarget))
+  const total = cores.reduce((s, [w]) => s + w, 0)
   let r = rng.next() * total
-  const [, build] = LEVEL3_CORES.find(([w]) => (r -= w) < 0) ?? LEVEL3_CORES[0]
+  const [, build] = cores.find(([w]) => (r -= w) < 0) ?? cores[0]
   const built = build(rng, n)
   const other = built.other ?? otherSide(rng, n)
   const equationFor = built.other ? (rng.chance(0.75) ? eq(built.side, other) : eq(other, built.side)) : equation(rng, built.side, other)
   return { task: { equation: equationFor, target: n.target, conditions: built.conditions ?? [] }, label: built.label }
+}
+
+export function buildLevel3(rng: Rng): KitTask {
+  return buildFrom(rng, LEVEL3_CORES, 0.2)
+}
+
+// --- Stufe 4: verschachtelt mit e-Funktion, Logarithmus, Wurzeln in Wurzeln, Potenz- und
+// Logarithmusgesetzen (Schritt 6a; docs/PLAN-M3.md, „Stufe 4 neu") ---
+//
+// Die Bausteine e^x, a^x und \ln stecken um einen Kern aus Stufe 3 herum (\ln eines Bruchs, e hoch
+// einen Bruch, Wurzel aus einem \ln) oder in einem Kern drin (Bruch aus e^x oder \ln x); dazu Wurzeln
+// in Wurzeln, Potenzen mit verschiedenen Hochzahlen oder Basen und mehrere Logarithmen. Schalen
+// wie in Stufe 1.
+
+// Hochzahl mit der Variable: x, kx, -kx, 2x, \frac{x}{k}, -\frac{x}{k}, x - c, -k(x - c)
+function exponentIn(rng: Rng, n: Names, u: Expr): Expr {
+  const r = rng.next()
+  if (r < 0.15) return u
+  if (r < 0.35) return letters(n.letter(), u)
+  if (r < 0.5) return neg(letters(n.letter(), u))
+  if (r < 0.6) return mul(k(rng, 2, 4), u)
+  if (r < 0.7) return div(u, n.letter())
+  if (r < 0.8) return neg(div(u, n.letter()))
+  if (r < 0.9) return bracketIn(rng, n, u, true).expr
+  return neg(mul(n.letter(), minus(u, n.letter())))
+}
+
+// Basis einer Potenz: meist e, sonst 2, 3, 10 oder ein Buchstabe
+function powerBase(rng: Rng, n: Names): Expr {
+  const r = rng.next()
+  if (r < 0.7) return E
+  if (r < 0.9) return num(rng.pick([2, 3, 10]))
+  return n.letter()
+}
+
+// Logarithmus: meist \ln, sonst \log_2, \log_{10} oder \log_a
+function logOf(rng: Rng, n: Names, arg: Expr): Expr {
+  const r = rng.next()
+  if (r < 0.75) return ln(arg)
+  if (r < 0.9) return log(num(rng.pick([2, 10])), arg)
+  return log(n.letter(), arg)
+}
+
+// Logarithmus um einen Kern: \ln\frac{x + a}{x - b} = c, b\ln(2x - a) + c = y, \log_2\left(\sqrt{x} + a\right) = y
+function logOfCore(rng: Rng, n: Names): Built {
+  const u = n.unknown
+  const r = rng.next()
+  if (r < 0.45) {
+    const top = bracketIn(rng, n, u)
+    const bottom = bracketIn(rng, n, u)
+    const condition = positiveCondition(bottom, u)
+    const { e, count } = someShells(rng, logOf(rng, n, div(top.expr, bottom.expr)), n, 2)
+    return { side: e, conditions: condition ? [condition] : [], label: `Baukasten: Logarithmus eines Bruchs, ${count} Schalen` }
+  }
+  if (r < 0.75) {
+    const l = bracketIn(rng, n, u, false)
+    const condition = positiveCondition(l, u)
+    const { e, count } = someShells(rng, logOf(rng, n, l.expr), n, 3, 2)
+    return { side: e, conditions: condition ? [condition] : [], label: `Baukasten: Logarithmus einer Klammer, ${count} Schalen` }
+  }
+  const { e, count } = someShells(rng, logOf(rng, n, plus(sqrt(u), constant(rng, n))), n, 2, 1)
+  return { side: e, label: `Baukasten: Logarithmus von $\\sqrt{x}$ plus Zahl, ${count} Schalen` }
+}
+
+// e hoch einen Kern: ae^{-kx} + b = y, y = a\left(1 - e^{-\frac{x}{k}}\right), e^{\frac{x}{x + a}} = b
+function expOfCore(rng: Rng, n: Names): Built {
+  const u = n.unknown
+  const b = powerBase(rng, n)
+  const r = rng.next()
+  if (r < 0.25) {
+    // Bruch in der Hochzahl
+    const top = rng.chance(0.4) ? head(rng, n, u) : bracketIn(rng, n, u).expr
+    const bottom = bracketIn(rng, n, u)
+    const condition = positiveCondition(bottom, u)
+    const { e, count } = someShells(rng, pow(b, div(top, bottom.expr)), n, 2)
+    return { side: e, conditions: condition ? [condition] : [], label: `Baukasten: Bruch in der Hochzahl, ${count} Schalen` }
+  }
+  if (r < 0.45) {
+    // Sättigung: a\left(1 - e^{-kx}\right)
+    const p = pow(b, exponentIn(rng, n, u))
+    const inner = rng.chance(0.7) ? minus(num(1), p) : minus(p, num(1))
+    const { e, count } = someShells(rng, letters(n.letter(), inner), n, 1)
+    return { side: e, label: `Baukasten: Sättigung mit e-Funktion, ${count} Schalen` }
+  }
+  const { e, count } = someShells(rng, pow(b, exponentIn(rng, n, u)), n, 3, 2)
+  return { side: e, label: `Baukasten: e-Funktion mit Schalen, ${count} Schalen` }
+}
+
+// Bruch aus e^x oder \ln x: \frac{ae^x + b}{e^x - c} = y, \frac{a}{1 + be^{-kx}} = y,
+// \frac{a + \ln x}{b - \ln x} = y, a\ln x + b = c\ln x + d
+function blockFraction(rng: Rng, n: Names): Built {
+  const u = n.unknown
+  const block = rng.chance(0.65) ? pow(powerBase(rng, n), exponentIn(rng, n, u)) : logOf(rng, n, rng.chance(0.7) ? u : letters(n.letter(), u))
+  const r = rng.next()
+  if (r < 0.3) {
+    // logistisches Wachstum: \frac{a}{1 + be^{-kx}}
+    const den = plus(rng.chance(0.6) ? num(1) : constant(rng, n), letters(n.letter(), block))
+    const { e, count } = someShells(rng, div(n.letter(), den), n, 1)
+    return { side: e, label: `Baukasten: logistisch, ${count} Schalen` }
+  }
+  if (r < 0.75) {
+    const top = rng.chance(0.3) ? block : bracketIn(rng, n, block).expr
+    const { e, count } = someShells(rng, div(top, bracketIn(rng, n, block).expr), n, 1)
+    return { side: e, label: `Baukasten: Bruch aus $e^x$ oder $\\ln x$, ${count} Schalen` }
+  }
+  // Baustein auf beiden Seiten
+  const term = () => (rng.chance(0.5) ? plus(head(rng, n, block), constant(rng, n)) : minus(head(rng, n, block), constant(rng, n)))
+  return { side: term(), other: term(), label: 'Baukasten: $e^x$ oder $\\ln x$ auf beiden Seiten' }
+}
+
+// Wurzel aus einem Logarithmus oder einer e-Funktion: \sqrt{a + \ln\frac{x}{b}} = y, b\sqrt{e^{kx} - a} = y
+function rootOfBlock(rng: Rng, n: Names): Built {
+  const u = n.unknown
+  const inner = rng.chance(0.5)
+    ? logOf(rng, n, rng.chance(0.5) ? div(u, n.letter()) : bracketIn(rng, n, u, false).expr)
+    : pow(powerBase(rng, n), exponentIn(rng, n, u))
+  const arg = rng.chance(0.6) ? plus(constant(rng, n), inner) : minus(inner, constant(rng, n))
+  const { e, count } = someShells(rng, sqrt(arg), n, 2, 1)
+  return { side: e, label: `Baukasten: Wurzel aus $\\ln$ oder $e^x$, ${count} Schalen` }
+}
+
+// Logarithmus einer Summe mit Wurzel: y = \ln\left(a + \sqrt{x + b}\right), y = \ln\left(1 + \sqrt{1 + e^{2x}}\right)
+function logOfRoot(rng: Rng, n: Names): Built {
+  const u = n.unknown
+  const under = rng.chance(0.5) ? plus(constant(rng, n), pow(E, exponentIn(rng, n, u))) : bracketIn(rng, n, u).expr
+  const arg = plus(rng.chance(0.4) ? num(1) : constant(rng, n), sqrt(under))
+  const { e, count } = someShells(rng, logOf(rng, n, arg), n, 2, 1)
+  return { side: e, label: `Baukasten: Logarithmus einer Summe mit Wurzel, ${count} Schalen` }
+}
+
+// Wurzeln in Wurzeln: \sqrt{a + \sqrt{b + \sqrt{x}}} = y, \sqrt{a + b\sqrt{x - c}} = y
+function nestedRoots(rng: Rng, n: Names): Built {
+  const u = n.unknown
+  const l = bracketIn(rng, n, u)
+  const plain = rng.chance(0.5)
+  const innermost = plain ? sqrt(u) : sqrt(l.expr)
+  const condition = plain ? null : positiveCondition(l, u)
+  const middle = sqrt(plus(constant(rng, n), rng.chance(0.3) ? letters(n.letter(), innermost) : innermost))
+  const deep = rng.chance(0.5)
+  const outer = deep ? sqrt(plus(constant(rng, n), middle)) : middle
+  const { e, count } = someShells(rng, outer, n, 2, 1)
+  return { side: e, conditions: condition ? [condition] : [], label: `Baukasten: Wurzeln in Wurzeln, ${count} Schalen` }
+}
+
+// Potenzen derselben Basis mit verschiedenen Hochzahlen: a \cdot 2^{x + 1} - b \cdot 2^x = c
+function powerSums(rng: Rng, n: Names): Built {
+  const u = n.unknown
+  const b = rng.chance(0.6) ? num(rng.pick([2, 3, 5, 10])) : rng.chance(0.5) ? E : n.letter()
+  const g = rng.chance(0.75) ? u : mul(k(rng, 2, 3), u)
+  const shift = rng.int(1, 2)
+  const shifted = pow(b, rng.chance(0.7) ? plus(g, num(shift)) : minus(g, num(shift)))
+  const coefficient = (e: Expr) => (rng.chance(0.6) ? mul(rng.chance(0.7) ? n.letter() : k(rng, 2, 5), e) : e)
+  const [first, second] = rng.shuffle([coefficient(shifted), coefficient(pow(b, g))])
+  const sum = rng.chance(0.6) ? minus(first, second) : plus(first, second)
+  const { e, count } = someShells(rng, sum, n, 2, 1)
+  return { side: e, label: `Baukasten: Potenzen derselben Basis, ${count} Schalen` }
+}
+
+// Potenzen verschiedener Basen: 3^{2x - 1} = a \cdot 5^x, a^x \cdot b^{2x - 1} = c, \frac{2^{x + 1}}{3^x} = y
+function powerVsPower(rng: Rng, n: Names): Built {
+  const u = n.unknown
+  const pool: Expr[] = [num(2), num(3), num(5), E, n.letter(), n.letter()]
+  const [b1, b2] = rng.shuffle(pool).slice(0, 2)
+  const exponent = (): Expr => {
+    const r = rng.next()
+    if (r < 0.4) return u
+    if (r < 0.7) return rng.chance(0.5) ? plus(mul(k(rng, 2, 3), u), num(1)) : minus(mul(k(rng, 2, 3), u), num(1))
+    return rng.chance(0.5) ? plus(u, num(rng.int(1, 2))) : minus(u, num(rng.int(1, 2)))
+  }
+  const p1 = pow(b1, exponent())
+  const p2 = pow(b2, exponent())
+  if (rng.chance(0.4)) {
+    // mit Faktor oder Bruch auf beiden Seiten: \frac{a \cdot 3^{2x - 1}}{b} = c \cdot 5^x
+    const side = rng.chance(0.5) ? div(mul(n.letter(), p1), n.letter()) : mul(n.letter(), p1)
+    return { side, other: mul(n.letter(), p2), label: 'Baukasten: Potenz gegen Potenz' }
+  }
+  const side = rng.chance(0.65) ? mul(p1, p2) : div(p1, p2)
+  const { e, count } = someShells(rng, side, n, 1)
+  return { side: e, label: `Baukasten: Produkt von Potenzen, ${count} Schalen` }
+}
+
+// Mehrere Logarithmen: \ln(x + a) + \ln(x - a) = b, \log_2(x + a) - \log_2 x = b
+function logSums(rng: Rng, n: Names): Built {
+  const u = n.unknown
+  const r0 = rng.next()
+  const base = r0 < 0.7 ? E : r0 < 0.85 ? num(rng.pick([2, 10])) : n.letter()
+  const L = (arg: Expr) => (base === E ? ln(arg) : log(base, arg))
+  const a = constant(rng, n)
+  const r = rng.next()
+  let sum: Expr
+  let conditions: Condition[] = []
+  if (r < 0.35) {
+    sum = plus(L(plus(u, a)), L(minus(u, a)))
+    conditions = [{ lhs: u, rel: '>', rhs: a }]
+  } else if (r < 0.7) {
+    const top = rng.chance(0.6) ? plus(u, a) : plus(head(rng, n, u), a)
+    sum = rng.chance(0.7) ? minus(L(top), L(u)) : minus(L(u), L(top))
+  } else {
+    const b = constant(rng, n)
+    sum = minus(L(plus(u, a)), L(minus(u, b)))
+    conditions = [{ lhs: u, rel: '>', rhs: b }]
+  }
+  const { e, count } = someShells(rng, sum, n, 2, 1)
+  return { side: e, conditions, label: `Baukasten: mehrere Logarithmen, ${count} Schalen` }
+}
+
+const LEVEL4_CORES: readonly Core[] = [
+  [12, logOfCore],
+  [12, expOfCore],
+  [14, blockFraction],
+  [8, rootOfBlock],
+  [8, logOfRoot],
+  [10, nestedRoots],
+  [10, powerSums],
+  [10, powerVsPower],
+  [10, logSums],
+]
+
+export function buildLevel4(rng: Rng): KitTask {
+  return buildFrom(rng, LEVEL4_CORES, 0.15)
 }

@@ -1,6 +1,6 @@
 import { contains, key, subterms } from '../expr/compare.ts'
 import { toLatex } from '../expr/print.ts'
-import { type Equation, type Expr, add, asRational, div, eq, mul, neg, num, pow, root, sqrt, variable } from '../expr/types.ts'
+import { type Equation, type Expr, E, add, asRational, div, eq, fn, log, mul, neg, num, pow, root, sqrt, variable } from '../expr/types.ts'
 import { type Factored, factoredDivide, factoredLcm, factoredPoly, factorize, reduceFrac } from '../fraction/factor.ts'
 import type { Frac } from '../fraction/frac.ts'
 import {
@@ -18,8 +18,10 @@ import {
 import { isInteger, isOne, isZero, rat, ratEq, ratNeg, ratSign } from '../rational.ts'
 import {
   type Atoms,
+  BLOCK_ATOM,
   RADICAL_ATOM,
   ROOT_ATOM,
+  blockAtoms,
   contentExpr,
   monomialSqrt,
   newAtoms,
@@ -55,6 +57,11 @@ export type StepKind =
   | 'expand'
   | 'collect'
   | 'factor'
+  | 'exp'
+  | 'log'
+  | 'logCombine'
+  | 'logLaw'
+  | 'powerLaw'
   | 'finish'
 
 export const STEP_NAMES: Record<StepKind, string> = {
@@ -71,6 +78,11 @@ export const STEP_NAMES: Record<StepKind, string> = {
   expand: 'Ausmultiplizieren',
   collect: 'Variable nach links, Rest nach rechts',
   factor: 'Ausklammern',
+  exp: 'e hoch beide Seiten',
+  log: 'Logarithmieren',
+  logCombine: 'Logarithmen zusammenfassen',
+  logLaw: 'Logarithmusgesetze anwenden',
+  powerLaw: 'Potenzgesetz anwenden',
   finish: 'Ergebnis',
 }
 
@@ -101,11 +113,23 @@ export function stepLabel(step: RearrangeStep, target: string): string {
       // mit einer Wurzel wie √(x − a): die Wurzel ausklammern
       return `${step.operand ? `$${operand}$` : unknown} ausklammern`
     case 'finish':
-      return step.swapOnly ? 'Seiten tauschen' : 'Zu einem Bruch zusammenfassen'
+      // ohne Bruch im Ergebnis (\sqrt{a^2 + e^b}) wird nur zusammengefasst und geordnet
+      if (step.swapOnly) return 'Seiten tauschen'
+      return subterms(step.after.rhs).some((x) => x.kind === 'div') ? 'Zu einem Bruch zusammenfassen' : 'Zusammenfassen und ordnen'
     case 'expand':
       return 'Die Klammern ausmultiplizieren'
     case 'extend':
       return `Den Doppelbruch mit $${operand}$ erweitern`
+    case 'exp':
+      return `$${operand}$ hoch beide Seiten`
+    case 'log':
+      return '$\\ln$ auf beiden Seiten'
+    case 'logCombine':
+      return `Die Logarithmen zu einem $${step.operand && !isE(step.operand) ? `\\log_{${operand}}` : '\\ln'}$ zusammenfassen`
+    case 'logLaw':
+      return 'Logarithmusgesetze anwenden'
+    case 'powerLaw':
+      return 'Potenzgesetz $a^{m + n} = a^m \\cdot a^n$ anwenden'
     case 'combine':
       return `Die ${step.side === 'rhs' ? 'linke' : 'rechte'} Seite zu einem Bruch zusammenfassen`
     default:
@@ -126,7 +150,8 @@ export type RearrangeStep = {
   readonly side?: Side
   // nur die Seiten getauscht (Ergebnis stand schon fertig da)
   readonly swapOnly?: boolean
-  // beim Quadrieren einer Wurzel: Die andere Seite muss ≥ 0 sein, sonst gibt es keine Lösung
+  // beim Quadrieren einer Wurzel: Die andere Seite muss ≥ 0 sein, sonst gibt es keine Lösung; beim
+  // Logarithmieren > 0
   readonly requires?: Expr
 }
 
@@ -283,7 +308,8 @@ export function dividedBy(side: Expr, d: Expr): Expr {
   }
   // Summe mit Brüchen: jeden Summanden teilen (\frac{d + c}{5a} + \frac{b}{5})
   if (side.kind === 'add' && side.terms.some((x) => x.kind === 'div' || (x.kind === 'neg' && x.arg.kind === 'div'))) {
-    return add(...side.terms.map((x) => dividedBy(x, d)))
+    // Minus vor dem Bruch: -\frac{1}{b} statt \frac{-1}{b}
+    return add(...side.terms.map((x) => (isNegative(x) ? negated(dividedBy(negated(x), d)) : dividedBy(x, d))))
   }
   if (isMonomial(side) && isMonomial(d)) {
     const atoms = anyAtoms()
@@ -316,7 +342,7 @@ export function squared(e: Expr): Expr {
 // Endform einer Seite ohne die gesuchte Variable: ein Bruch, gekürzt; Wurzel aus einem Bruch mit
 // Quadrat im Nenner als \frac{\sqrt{…}}{a}; Quadrat eines Bruchs als \frac{(…)^2}{4y^2}
 export function finalForm(e: Expr): Expr {
-  if (alreadyFinal(e)) return e
+  if (alreadyFinal(e) || nestedSquare(e)) return e
   const atoms = anyAtoms()
   if (e.kind === 'root' && e.index === 2) {
     const f = toRat(e.arg, atoms)
@@ -336,21 +362,44 @@ export function finalForm(e: Expr): Expr {
   return f ? niceFrac(f, atoms) : e
 }
 
+// Quadrat einer Summe, in der wieder ein Quadrat einer Summe steht, ohne Bruch (Wurzeln in Wurzeln):
+// ((y^2 - a)^2 - b)^2 bleibt so stehen
+function nestedSquare(e: Expr): boolean {
+  return e.kind === 'pow' && isSquare(e) && e.base.kind === 'add' && nestedSum(e.base)
+}
+
+function nestedSum(e: Expr): boolean {
+  if (e.kind !== 'add') return false
+  const squareOfSum = (x: Expr) => x.kind === 'pow' && isSquare(x) && x.base.kind === 'add'
+  const plain = (x: Expr) => isMonomial(x) || (isNegative(x) && isMonomial(negated(x)))
+  return (
+    e.terms.some(squareOfSum) &&
+    e.terms.every((x) => plain(x) || (squareOfSum(x) && (nestedSum((x as Extract<Expr, { kind: 'pow' }>).base) || plainSum((x as Extract<Expr, { kind: 'pow' }>).base))))
+  )
+}
+
+// Summe aus Monomen ohne gleichartige Summanden (y^2 - a)
+function plainSum(e: Expr): boolean {
+  if (e.kind !== 'add' || !e.terms.every((x) => isMonomial(x) || (isNegative(x) && isMonomial(negated(x))))) return false
+  const p = toPoly(e, anyAtoms())
+  return p !== null && p.length === e.terms.length
+}
+
 const isSquare = (e: Extract<Expr, { kind: 'pow' }>) => {
   const k = asRational(e.exp)
   return k !== null && k.n === 2n && k.d === 1n
 }
 const isSquareOfSum = (e: Expr) => e.kind === 'pow' && e.base.kind === 'add' && isSquare(e)
 
-function reduced(f: Frac): { n: Poly; d: Poly } {
-  const atoms = anyAtoms()
+// Gekürzt, mit denselben Atomen wie f (Teile wie e^b bleiben dieselben Zeichen)
+function reduced(f: Frac, atoms: Atoms): { n: Poly; d: Poly } {
   const nice = niceFrac(f, atoms)
   const back = toRat(nice, atoms)!
   return { n: back.num, d: back.den }
 }
 
 function rootForm(f: Frac, atoms: Atoms): Expr {
-  const { n, d } = reduced(f)
+  const { n, d } = reduced(f, atoms)
   const rn = monomialSqrt(n)
   const rd = monomialSqrt(d)
   const dOne = constValue(d) !== null && isOne(constValue(d)!)
@@ -368,7 +417,7 @@ function squarePart(p: Poly, atoms: Atoms): Expr {
 // Quadrat eines Bruchs: \frac{(a - y^2)^2}{4y^2}, mit einer Summe im Nenner als Ganzes:
 // \left(\frac{by + a}{y - 1}\right)^2
 function squareForm(f: Frac, atoms: Atoms): Expr {
-  const { n, d } = reduced(f)
+  const { n, d } = reduced(f, atoms)
   const dConst = constValue(d)
   if (dConst && isOne(dConst)) return squarePart(n, atoms)
   if (d.length > 1) return pow(niceFrac(f, atoms), num(2))
@@ -443,8 +492,15 @@ function peelRaw(s: Expr, o: Expr, side: Side, t: string): Draft | null {
       return { kind: 'multiply', operand: s.den, side, after: at(side, s.num, timesFactor(o, s.den)) }
     }
     case 'pow': {
+      if (has(s.exp)) {
+        if (has(s.base)) return null
+        // erst zu einem Bruch, dann logarithmieren: \ln\frac{a - y}{by} statt \ln\left(\frac{a}{by} - \frac{1}{b}\right)
+        if (isSumWithFraction(o)) return { kind: 'combine', side, after: at(side, s, finalForm(o)) }
+        // \ln(e^F) = F gleich; bei einer anderen Basis folgt das Logarithmusgesetz als eigener Schritt
+        return { kind: 'log', side, after: at(side, isE(s.base) ? s.exp : fn('ln', s), lnOf(o)), requires: o }
+      }
       const k = asRational(s.exp)
-      if (has(s.exp) || !k || !isInteger(k) || (k.n !== 2n && k.n !== 3n)) return null
+      if (!k || !isInteger(k) || (k.n !== 2n && k.n !== 3n)) return null
       // erst zu einem Bruch, wenn danach noch weiter umgeformt wird: \sqrt{\frac{qr - s}{r}} statt
       // \sqrt{q - \frac{s}{r}} (bei x^2 = … macht das das Ergebnis)
       if (isSumWithFraction(o) && !isVar(s.base, t)) return { kind: 'combine', side, after: at(side, s, finalForm(o)) }
@@ -454,9 +510,45 @@ function peelRaw(s: Expr, o: Expr, side: Side, t: string): Draft | null {
       if (s.index !== 2) return null
       if (isSumWithFraction(o) && !isVar(s.arg, t)) return { kind: 'combine', side, after: at(side, s, finalForm(o)) }
       return { kind: 'square', side, after: at(side, s.arg, squared(o)), requires: o }
+    case 'fn':
+      // \ln u = w → u = e^w
+      if (s.name !== 'ln') return null
+      return { kind: 'exp', operand: E, side, after: at(side, s.arg, powerOf(E, o)) }
+    case 'log':
+      // \log_a u = w → u = a^w
+      if (has(s.base)) return null
+      return { kind: 'exp', operand: s.base, side, after: at(side, s.arg, powerOf(s.base, o)) }
     default:
       return null
   }
+}
+
+export const isE = (e: Expr) => e.kind === 'const' && e.name === 'e'
+
+// \ln w; \ln e^w = w
+export function lnOf(o: Expr): Expr {
+  if (o.kind === 'pow' && isE(o.base)) return o.exp
+  return fn('ln', o)
+}
+
+// a^w; e^{\ln u} = u
+export function powerOf(base: Expr, o: Expr): Expr {
+  if (isE(base) && o.kind === 'fn' && o.name === 'ln') return o.arg
+  if (o.kind === 'log' && key(o.base) === key(base)) return o.arg
+  return pow(base, o)
+}
+
+// \ln(a^F) = F \ln a, \ln(e^F) = F
+function lnOfPower(s: Extract<Expr, { kind: 'pow' }>): Expr {
+  if (isE(s.base)) return s.exp
+  return timesLn(s.exp, s.base)
+}
+
+// F · \ln a: x\ln 2, (2x - 1)\ln 3, -x\ln 2
+export function timesLn(f: Expr, base: Expr): Expr {
+  const l = fn('ln', base)
+  if (isNegative(f)) return neg(timesLn(negated(f), base))
+  return f.kind === 'mul' ? mul(...f.factors, l) : mul(f, l)
 }
 
 const isSumWithFraction = (o: Expr) => o.kind === 'add' && subterms(o).some((x) => x.kind === 'div')
@@ -486,7 +578,11 @@ function peelable(s: Expr, t: string): boolean {
     case 'root':
       return true
     case 'pow':
-      return !has(s.exp)
+      return !has(s.exp) || !has(s.base)
+    case 'fn':
+      return s.name === 'ln'
+    case 'log':
+      return !has(s.base)
     default:
       return false
   }
@@ -655,6 +751,253 @@ function oriented(lcd: Factored, e: Equation, atoms: Atoms): Factored {
   }
 }
 
+// --- e-Funktion, Logarithmen und Potenzen mit der Variable in der Hochzahl (Stufe 4) ---
+
+type PowerNode = Extract<Expr, { kind: 'pow' }>
+
+// Potenz mit der Variable in der Hochzahl und ohne sie in der Basis: e^{2x}, 3^{x - 1}
+const isTPower = (s: Expr, t: string): s is PowerNode => s.kind === 'pow' && contains(s.exp, t) && !contains(s.base, t)
+
+// Logarithmus mit der Variable: \ln u (Basis e) oder \log_a u
+function logParts(s: Expr, t: string): { base: Expr; arg: Expr } | null {
+  if (s.kind === 'fn' && s.name === 'ln' && contains(s.arg, t)) return { base: E, arg: s.arg }
+  if (s.kind === 'log' && contains(s.arg, t) && !contains(s.base, t)) return { base: s.base, arg: s.arg }
+  return null
+}
+
+function children(e: Expr): readonly Expr[] {
+  switch (e.kind) {
+    case 'add':
+      return e.terms
+    case 'mul':
+      return e.factors
+    case 'neg':
+    case 'root':
+    case 'fn':
+      return [e.arg]
+    case 'div':
+      return [e.num, e.den]
+    case 'pow':
+      return [e.base, e.exp]
+    case 'log':
+      return [e.base, e.arg]
+    default:
+      return []
+  }
+}
+
+// Baustein, in dem die Variable steckt (e^x, 2^x, \ln x), wenn sie nur in Kopien davon vorkommt;
+// sonst null. Mit ihm als Unbekannter wird sortiert, ausgeklammert und geteilt.
+export function blockOf(e: Equation, t: string): Expr | null {
+  const found = new Map<string, Expr>()
+  let outside = false
+  const walk = (x: Expr): void => {
+    if (!contains(x, t)) return
+    if (isTPower(x, t) || logParts(x, t)) {
+      found.set(key(x), x)
+      return
+    }
+    if (x.kind === 'var') outside = true
+    for (const c of children(x)) walk(c)
+  }
+  walk(e.lhs)
+  walk(e.rhs)
+  return !outside && found.size === 1 ? [...found.values()][0] : null
+}
+
+// Unbekannte beim Sortieren, Ausklammern und Teilen: x, √x (mit x = (√x)²) oder ein Baustein wie e^x
+export function unknownAtoms(e: Equation, t: string): { atoms: Atoms; u: string; uExpr: Expr; block: Expr | null } {
+  const block = blockOf(e, t)
+  if (block) return { atoms: blockAtoms(t, block), u: BLOCK_ATOM, uExpr: block, block }
+  const rootUnknown = hasTargetRoot(e, t)
+  return { atoms: newAtoms(t, rootUnknown), u: rootUnknown ? ROOT_ATOM : t, uExpr: rootUnknown ? sqrt(variable(t)) : variable(t), block: null }
+}
+
+// ±k · \ln u als Summand: Vorzeichen, Basis und u^k
+export function signedLog(term: Expr, t: string): { sign: 1 | -1; base: Expr; arg: Expr } | null {
+  let sign: 1 | -1 = 1
+  let x = term
+  if (x.kind === 'neg') {
+    sign = -1
+    x = x.arg
+  }
+  let k = 1n
+  if (x.kind === 'mul' && x.factors.length === 2 && x.factors[0].kind === 'num' && isInteger(x.factors[0].value)) {
+    k = x.factors[0].value.n
+    x = x.factors[1]
+    if (k < 0n) {
+      sign = sign === 1 ? -1 : 1
+      k = -k
+    }
+  }
+  const p = logParts(x, t)
+  if (!p) return null
+  return { sign, base: p.base, arg: k === 1n ? p.arg : pow(p.arg, num(k)) }
+}
+
+// Mehrere Logarithmen mit der Variable in einer Summe zu einem zusammenfassen (Logarithmusgesetze):
+// \ln(x + a) + \ln(x - a) = b → \ln((x + a)(x - a)) = b, \ln(x + a) - \ln x = b → \ln\frac{x + a}{x} = b
+function logCombineStep(e: Equation, t: string): Draft | null {
+  for (const side of ['lhs', 'rhs'] as const) {
+    const s = e[side]
+    if (s.kind !== 'add') continue
+    const parsed = s.terms.map((term) => signedLog(term, t))
+    const logs = parsed.filter((p) => p !== null)
+    if (logs.length < 2 || logs.some((p) => key(p.base) !== key(logs[0].base))) continue
+    const ups = logs.filter((p) => p.sign > 0).map((p) => p.arg)
+    const downs = logs.filter((p) => p.sign < 0).map((p) => p.arg)
+    if (ups.length === 0) continue
+    const product = (xs: Expr[]) => (xs.length === 1 ? xs[0] : mul(...xs))
+    const arg = downs.length > 0 ? div(product(ups), product(downs)) : product(ups)
+    const combined = isE(logs[0].base) ? fn('ln', arg) : log(logs[0].base, arg)
+    const first = parsed.findIndex((p) => p !== null)
+    const terms = s.terms.flatMap((term, i) => (i === first ? [combined] : parsed[i] ? [] : [term]))
+    return { kind: 'logCombine', operand: logs[0].base, side, after: at(side, sumOf(terms), side === 'lhs' ? e.rhs : e.lhs) }
+  }
+  return null
+}
+
+// Potenzen derselben Basis mit verschiedenen Hochzahlen auf eine gemeinsame Potenz bringen
+// (a^{m + n} = a^m \cdot a^n): a \cdot 2^{x + 1} - b \cdot 2^x = c → 2a \cdot 2^x - b \cdot 2^x = c
+function powerLawStep(e: Equation, t: string, asSum = false): Draft | null {
+  const powers = [e.lhs, e.rhs].flatMap((side) => subterms(side)).filter((s): s is PowerNode => isTPower(s, t))
+  const byBase = new Map<string, PowerNode[]>()
+  for (const p of powers) byBase.set(key(p.base), [...(byBase.get(key(p.base)) ?? []), p])
+  const atoms = newAtoms(t)
+  const withT = (term: Poly[number]) => term.mono.some(([a]) => a === t)
+  for (const group of byBase.values()) {
+    const distinct = [...new Map(group.map((p) => [key(p.exp), p])).values()]
+    if (distinct.length < 2) continue
+    const parts = distinct.map((p) => {
+      const q = toPoly(p.exp, atoms)
+      return q && { p, tPart: q.filter(withT), rest: q.filter((term) => !withT(term)) }
+    })
+    if (parts.some((x) => x === null)) continue
+    const split = parts as { p: PowerNode; tPart: Poly; rest: Poly }[]
+    const tPart = split[0].tPart
+    if (!split.every((x) => polyEquals(x.tPart, tPart))) continue
+    const base = group[0].base
+    const block = pow(base, polyToExpr(tPart, atoms))
+    const replace = new Map<string, Expr>()
+    for (const { p, rest } of split) {
+      if (rest.length === 0) continue
+      const r = rewrittenPower(base, rest, block, atoms, asSum)
+      if (!r) return null
+      replace.set(key(p), r)
+    }
+    const bAtoms = blockAtoms(t, block)
+    const rewrite = (x: Expr) => tidy(substitute(x, replace), bAtoms)
+    return { kind: 'powerLaw', operand: block, after: eq(rewrite(e.lhs), rewrite(e.rhs)) }
+  }
+  return null
+}
+
+// Typischer Fehler beim Potenzgesetz: 2^{x + 1} als 2^x + 2 (Gleichung danach; null, wenn es nicht passt)
+export function powerLawSum(e: Equation, t: string): Equation | null {
+  return powerLawStep(e, t, true)?.after ?? null
+}
+
+// a^{G + k} als a^k \cdot a^G (k > 0) bzw. \frac{a^G}{a^k}; e^{x + b} als e^b e^x. asSum: falsch als
+// Summe a^G + a^k bzw. a^G - a^k
+function rewrittenPower(base: Expr, rest: Poly, block: Expr, atoms: Atoms, asSum = false): Expr | null {
+  const c = constValue(rest)
+  if (c && !isInteger(c)) return null
+  if (c) {
+    const k = c.n < 0n ? -c.n : c.n
+    const factor = base.kind === 'num' && isInteger(base.value) ? num(base.value.n ** k) : k === 1n ? base : pow(base, num(k))
+    if (asSum) return c.n > 0n ? add(block, factor) : add(block, neg(factor))
+    return c.n > 0n ? mul(factor, block) : div(block, factor)
+  }
+  const factor = pow(base, polyToExpr(rest, atoms))
+  return asSum ? add(block, factor) : mul(factor, block)
+}
+
+// Teile ersetzen (nach Schlüssel)
+function substitute(e: Expr, replace: ReadonlyMap<string, Expr>): Expr {
+  const r = replace.get(key(e))
+  if (r) return r
+  switch (e.kind) {
+    case 'add':
+      return add(...e.terms.map((x) => substitute(x, replace)))
+    case 'mul':
+      return mul(...e.factors.map((x) => substitute(x, replace)))
+    case 'neg':
+      return neg(substitute(e.arg, replace))
+    case 'div':
+      return div(substitute(e.num, replace), substitute(e.den, replace))
+    default:
+      return e
+  }
+}
+
+// Summanden aus Zahlen, Buchstaben und dem Baustein zusammenrechnen: a \cdot 2 \cdot 2^x → 2a \cdot 2^x
+function tidy(e: Expr, atoms: Atoms): Expr {
+  if (e.kind === 'add') return add(...e.terms.map((x) => tidy(x, atoms)))
+  if (e.kind === 'div') return div(tidy(e.num, atoms), tidy(e.den, atoms))
+  const p = toPoly(e, atoms)
+  return p && p.length === 1 ? polyToExpr(p, atoms) : e
+}
+
+// Kommt die Variable nur in Hochzahlen vor (2^x, a \cdot 5^{x - 1})?
+function onlyInExponents(e: Expr, t: string): boolean {
+  if (!contains(e, t)) return true
+  if (isTPower(e, t)) return true
+  if (e.kind === 'var') return false
+  return children(e).every((c) => onlyInExponents(c, t))
+}
+
+// Logarithmus eines Produkts aus Potenzen, nach den Logarithmusgesetzen auseinandergezogen:
+// \ln\left(a \cdot 5^x\right) = \ln a + x\ln 5; null, wenn das nicht geht (z. B. bei einer Summe)
+// forgetBase: typischer Fehler \ln\left(a^x\right) = x statt x\ln a
+export function lnTerms(e: Expr, t: string, forgetBase = false): Expr[] | null {
+  switch (e.kind) {
+    case 'mul': {
+      const parts = e.factors.map((f) => lnTerms(f, t, forgetBase))
+      return parts.some((p) => p === null) ? null : (parts as Expr[][]).flat()
+    }
+    case 'div': {
+      const n = lnTerms(e.num, t, forgetBase)
+      const d = lnTerms(e.den, t, forgetBase)
+      return n && d ? [...n, ...d.map(negated)] : null
+    }
+    case 'pow':
+      if (contains(e.base, t)) return null
+      return forgetBase && contains(e.exp, t) ? [e.exp] : [lnOfPower(e)]
+    case 'num':
+      if (ratSign(e.value) <= 0) return null
+      return isOne(e.value) ? [] : [fn('ln', e)]
+    case 'neg':
+      return null
+    default:
+      return contains(e, t) ? null : [fn('ln', e)]
+  }
+}
+
+// Potenzen verschiedener Basen mit der Variable in der Hochzahl, als Produkte: beide Seiten
+// logarithmieren, 3^{2x - 1} = a \cdot 5^x → (2x - 1)\ln 3 = \ln a + x\ln 5
+function logBothStep(e: Equation, t: string): Draft | null {
+  if (!onlyInExponents(e.lhs, t) || !onlyInExponents(e.rhs, t)) return null
+  const powers = new Set([e.lhs, e.rhs].flatMap((side) => subterms(side)).filter((s) => isTPower(s, t)).map(key))
+  if (powers.size < 2) return null
+  if ([e.lhs, e.rhs].some((side) => contains(side, t) && !lnTerms(side, t))) return null
+  const free = [e.lhs, e.rhs].find((side) => !contains(side, t))
+  return { kind: 'log', after: eq(lnOf(e.lhs), lnOf(e.rhs)), ...(free ? { requires: free } : {}) }
+}
+
+// Logarithmus eines Produkts aus Potenzen mit der Variable auseinanderziehen:
+// \ln\left(a \cdot 5^x\right) = \ln a + x\ln 5, \ln\left(2^x\right) = x\ln 2
+function logLawStep(e: Equation, t: string): Draft | null {
+  const expanded = (side: Expr): Expr | null => {
+    if (side.kind !== 'fn' || side.name !== 'ln' || !contains(side, t)) return null
+    const terms = lnTerms(side.arg, t)
+    return terms && !(terms.length === 1 && key(terms[0]) === key(side)) ? sumOf(terms) : null
+  }
+  const l = expanded(e.lhs)
+  const r = expanded(e.rhs)
+  if (!l && !r) return null
+  return { kind: 'logLaw', after: eq(l ?? e.lhs, r ?? e.rhs) }
+}
+
 // Variable mehrfach: Wurzel allein stellen und quadrieren, Doppelbruch erweitern, Nenner beseitigen,
 // ausmultiplizieren, sortieren, ausklammern, teilen
 function rational(e: Equation, t: string): Draft | null {
@@ -664,10 +1007,14 @@ function rational(e: Equation, t: string): Draft | null {
   const extended = extendStep(e, t)
   if (extended) return extended
 
-  const rootUnknown = hasTargetRoot(e, t)
-  const atoms = newAtoms(t, rootUnknown)
-  const u = rootUnknown ? ROOT_ATOM : t
-  const uExpr = rootUnknown ? sqrt(variable(t)) : variable(t)
+  const powered = powerLawStep(e, t)
+  if (powered) return powered
+  const logged = logBothStep(e, t)
+  if (logged) return logged
+
+  const { atoms, u, uExpr, block } = unknownAtoms(e, t)
+  // mit einem Baustein wie e^x: „Alles mit $e^x$ nach links", „$e^x$ ausklammern"
+  const named = block ? { operand: block } : {}
   const raw = [toRat(e.lhs, atoms), toRat(e.rhs, atoms)]
   if (!raw[0] || !raw[1]) return null
   // gekürzt: b\left(x - \frac{a}{b}\right) hat keinen Nenner mehr
@@ -709,13 +1056,14 @@ function rational(e: Equation, t: string): Draft | null {
     const sign = collectSign(coefficient, rest)
     return {
       kind: 'collect',
+      ...named,
       after: eq(polyToExpr(polyScale(uTerms, rat(sign)), atoms), polyToExpr(polyScale(rest, rat(-sign)), atoms)),
     }
   }
 
   // ausklammern
   if (coefficient.length >= 2 && !(e.lhs.kind === 'mul' && e.lhs.factors.some((f) => key(f) === key(uExpr)))) {
-    return { kind: 'factor', after: eq(mul(uExpr, polyToExpr(coefficient, atoms)), e.rhs) }
+    return { kind: 'factor', ...named, after: eq(factoredOut(uExpr, polyToExpr(coefficient, atoms)), e.rhs) }
   }
 
   // teilen
@@ -729,6 +1077,9 @@ function rational(e: Equation, t: string): Draft | null {
     after: eq(uExpr, niceFrac({ num: pr, den: coefficient }, atoms)),
   }
 }
+
+// Ausgeklammerte Unbekannte: x(a - c), e^{x}(y - a), aber (a - c)\ln x
+export const factoredOut = (u: Expr, coefficient: Expr): Expr => (u.kind === 'fn' || u.kind === 'log' ? mul(coefficient, u) : mul(u, coefficient))
 
 const hasFraction = (e: Equation) => subterms(e.lhs).concat(subterms(e.rhs)).some((s) => s.kind === 'div')
 
@@ -745,6 +1096,10 @@ function collectSign(coefficient: Poly, rest: Poly): 1 | -1 {
 function nextStep(e: Equation, t: string): Draft | null {
   const parts = split(e, t)
   if (parts === null) throw new Error('Die gesuchte Variable kommt nicht vor')
+  const combinedLogs = logCombineStep(e, t)
+  if (combinedLogs) return combinedLogs
+  const law = logLawStep(e, t)
+  if (law) return law
   if (parts === 'both') return mustStep(rational(e, t))
   const { s, o, side } = parts
   if (s.kind === 'var') {

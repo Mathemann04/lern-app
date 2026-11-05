@@ -1,7 +1,7 @@
 import { contains, key, subterms } from '../expr/compare.ts'
 import { evaluate } from '../expr/evaluate.ts'
 import { equationToLatex } from '../expr/print.ts'
-import { type Equation, type Expr, add, div, eq, mul, num, pow, variable } from '../expr/types.ts'
+import { type Equation, type Expr, add, div, eq, fn, log, mul, num, pow, variable } from '../expr/types.ts'
 import { FRACTION_ERROR_RULES, fractionWrongAnswers } from '../fraction/errorRules.ts'
 import { type Signed, expanded, minus, part, plus } from '../fraction/task.ts'
 import {
@@ -15,7 +15,7 @@ import {
 } from '../fraction/poly.ts'
 import { createRng } from '../random/rng.ts'
 import { isOne, rat, ratAbs, ratSign } from '../rational.ts'
-import { type Atoms, RADICAL_ATOM, ROOT_ATOM, monomialSqrt, newAtoms, niceFrac, polyToExpr, radicalAtoms, toPoly, toRat } from './algebra.ts'
+import { type Atoms, RADICAL_ATOM, monomialSqrt, newAtoms, niceFrac, polyToExpr, radicalAtoms, toPoly, toRat } from './algebra.ts'
 import { clearlyFails, differsFromTarget, samplePoints } from './check.ts'
 import {
   type RearrangeSolution,
@@ -23,12 +23,19 @@ import {
   type Side,
   complexRoot,
   dividedBy,
-  hasTargetRoot,
+  factoredOut,
+  isE,
+  lnOf,
+  lnTerms,
   negated,
   plusTerm,
+  powerLawSum,
+  powerOf,
+  signedLog,
   solveEquation,
   squared,
   timesFactor,
+  unknownAtoms,
 } from './isolate.ts'
 import type { RearrangeTask } from './task.ts'
 
@@ -61,6 +68,19 @@ export const REARRANGE_ERROR_RULES: readonly EqErrorRule[] = [
   { id: 'eq-minus-bracket', name: 'Minus vor der Klammer nur beim ersten Summanden beachtet', wrongFormula: 'a - c(x - d) = a - cx - cd' },
   { id: 'eq-factor-sign', name: 'Beim Ausklammern das Minus verloren', wrongFormula: 'ax - bx = c \\Rightarrow x(a + b) = c' },
   { id: 'eq-square-halved', name: 'Beim Quadrat halbiert statt die Wurzel gezogen', wrongFormula: 'x^2 = c \\Rightarrow x = \\frac{c}{2}' },
+  { id: 'eq-nested-root', name: 'Die innere Wurzel gleich mit aufgelöst', wrongFormula: 'y = \\sqrt{a + \\sqrt{b + \\sqrt{x}}} \\Rightarrow y^2 = a + b + \\sqrt{x}' },
+  // e-Funktion, Logarithmen, Potenzen (ab Stufe 4)
+  { id: 'eq-ln-forgotten', name: 'Beim Logarithmieren den $\\ln$ auf der anderen Seite vergessen', wrongFormula: 'e^{kx} = w \\Rightarrow kx = w' },
+  { id: 'eq-exp-forgotten', name: 'Beim $e$ hoch die andere Seite nicht hochgenommen', wrongFormula: '\\ln u = b \\Rightarrow u = b' },
+  { id: 'eq-exp-minus-lost', name: 'Das Minus in der Hochzahl verloren', wrongFormula: 'e^{-kx} = w \\Rightarrow kx = \\ln w' },
+  { id: 'eq-ln-of-sum', name: '$\\ln$ einer Summe gliedweise genommen', wrongFormula: 'e^{2x} = a + b \\Rightarrow 2x = \\ln a + \\ln b' },
+  { id: 'eq-exp-of-sum', name: '$e$ hoch eine Summe gliedweise genommen', wrongFormula: '\\ln u = a + b \\Rightarrow u = e^a + e^b' },
+  { id: 'eq-log-base-forgotten', name: 'Beim Logarithmieren den Faktor $\\ln a$ vergessen', wrongFormula: '2^x = c \\Rightarrow x = \\ln c' },
+  { id: 'eq-divide-inside-ln', name: 'Im $\\ln$ geteilt statt den ganzen $\\ln$', wrongFormula: 'kx = \\ln w \\Rightarrow x = \\ln\\frac{w}{k}' },
+  { id: 'eq-log-product', name: 'Logarithmus eines Produkts als Produkt der Logarithmen', wrongFormula: '\\ln\\left(a \\cdot 5^x\\right) = \\ln a \\cdot x\\ln 5' },
+  { id: 'eq-log-sum', name: 'Summe der Logarithmen als Logarithmus der Summe', wrongFormula: '\\ln u + \\ln v = \\ln(u + v)' },
+  { id: 'eq-log-quotient', name: 'Differenz der Logarithmen als Quotient', wrongFormula: '\\ln u - \\ln v = \\frac{\\ln u}{\\ln v}' },
+  { id: 'eq-power-sum', name: 'Potenz mit Summe in der Hochzahl als Summe geschrieben', wrongFormula: '2^{x + 1} = 2^x + 2' },
 ]
 
 export function rearrangeErrorRule(id: string): EqErrorRule {
@@ -109,9 +129,10 @@ function polys(e: Equation, atoms: Atoms): { l: Poly; r: Poly } | null {
 
 const hasAtom = (u: string) => (term: Poly[number]) => term.mono.some(([a]) => a === u)
 
+// x, √x oder ein Baustein wie e^x
 function unknownOf(e: Equation, t: string): { atoms: Atoms; u: string } {
-  const rootUnknown = hasTargetRoot(e, t)
-  return { atoms: newAtoms(t, rootUnknown), u: rootUnknown ? ROOT_ATOM : t }
+  const { atoms, u } = unknownAtoms(e, t)
+  return { atoms, u }
 }
 
 // Mit einer Wurzel wie √(x − a) als eigenem Zeichen (zwei Wurzeln: nach dem ersten Quadrieren)
@@ -304,8 +325,7 @@ function factorSign(step: RearrangeStep, t: string): Candidate[] {
   const coefficient = l && polyDivideExact(l, polyAtom(u))
   if (!coefficient || coefficient.length < 2 || !coefficient.some((term) => ratSign(term.coef) < 0)) return []
   const wrong = coefficient.map((term) => ({ ...term, coef: ratAbs(term.coef) }))
-  const uExpr = step.after.lhs.kind === 'mul' ? step.after.lhs.factors[0] : variable(t)
-  return [{ id: 'eq-factor-sign', after: eq(mul(uExpr, polyToExpr(wrong, atoms)), step.before.rhs) }]
+  return [{ id: 'eq-factor-sign', after: eq(factoredOut(unknownAtoms(step.before, t).uExpr, polyToExpr(wrong, atoms)), step.before.rhs) }]
 }
 
 function reciprocalTermwise(step: RearrangeStep, previous: RearrangeStep | undefined): Candidate[] {
@@ -354,6 +374,109 @@ function squareOneFactor(step: RearrangeStep, t: string): Candidate[] {
   return wrong ? [{ id: 'eq-square-one-factor', after: withSide(step.after, other(step.side), wrong) }] : []
 }
 
+// y = \sqrt{a + \sqrt{b + \sqrt{x}}} → y^2 = a + b + \sqrt{x}: die innere Wurzel gleich mit weggelassen
+function nestedRoot(step: RearrangeStep, t: string): Candidate[] {
+  if (step.kind !== 'square' || !step.side) return []
+  const s = step.after[step.side]
+  if (s.kind !== 'add') return []
+  const i = s.terms.findIndex((x) => x.kind === 'root' && x.index === 2 && contains(x, t))
+  if (i < 0) return []
+  const inner = (s.terms[i] as Extract<Expr, { kind: 'root' }>).arg
+  const wrong = sum(s.terms.flatMap((x, j) => (j === i ? termsOf(inner) : [x])))
+  return [{ id: 'eq-nested-root', after: withSide(step.after, step.side, wrong) }]
+}
+
+// e hoch beide Seiten und logarithmieren: Gegenrechnung nur auf einer Seite, gliedweise, Minus vergessen
+function expLogMistakes(step: RearrangeStep): Candidate[] {
+  const { before, side } = step
+  const out: Candidate[] = []
+  if (step.kind === 'exp' && side && step.operand) {
+    const base = step.operand
+    const o = before[other(side)]
+    out.push({ id: 'eq-exp-forgotten', after: withSide(step.after, other(side), o) })
+    if (o.kind === 'add') {
+      const powers = o.terms.map((x) => (isNegative(x) ? negated(powerOf(base, negated(x))) : powerOf(base, x)))
+      out.push({ id: 'eq-exp-of-sum', after: withSide(step.after, other(side), sum(powers)) })
+    }
+  }
+  if (step.kind === 'log' && side) {
+    const o = before[other(side)]
+    const tPart = step.after[side]
+    out.push({ id: 'eq-ln-forgotten', after: withSide(step.after, other(side), o) })
+    if (isNegative(tPart)) out.push({ id: 'eq-exp-minus-lost', after: withSide(step.after, side, negated(tPart)) })
+    if (o.kind === 'add') {
+      const lns = o.terms.map((x) => (isNegative(x) ? negated(lnOf(negated(x))) : lnOf(x)))
+      out.push({ id: 'eq-ln-of-sum', after: withSide(step.after, other(side), sum(lns)) })
+    }
+  }
+  return out
+}
+
+// Logarithmusgesetze: \ln(u \cdot v) = \ln u \cdot \ln v, \ln\frac{u}{v} = \frac{\ln u}{\ln v}, \ln\left(a^x\right) = x
+function logLawMistakes(step: RearrangeStep, t: string): Candidate[] {
+  if (step.kind !== 'logLaw') return []
+  const out: Candidate[] = []
+  for (const sd of ['lhs', 'rhs'] as const) {
+    const s = step.before[sd]
+    if (s.kind !== 'fn' || s.name !== 'ln' || !contains(s, t)) continue
+    const arg = s.arg
+    const terms = lnTerms(arg, t)
+    if (arg.kind === 'mul' && terms && terms.length >= 2) out.push({ id: 'eq-log-product', after: withSide(step.after, sd, mul(...terms)) })
+    if (arg.kind === 'div') {
+      const n = lnTerms(arg.num, t)
+      const d = lnTerms(arg.den, t)
+      if (n && d && n.length > 0 && d.length > 0) out.push({ id: 'eq-log-quotient', after: withSide(step.after, sd, div(sum(n), sum(d))) })
+    }
+    const forgotten = lnTerms(arg, t, true)
+    if (forgotten && subterms(arg).some((x) => x.kind === 'pow' && contains(x.exp, t) && !isE(x.base))) {
+      out.push({ id: 'eq-log-base-forgotten', after: withSide(step.after, sd, sum(forgotten.length > 0 ? forgotten.flatMap(termsOf) : [num(0)])) })
+    }
+  }
+  return out
+}
+
+// kx = \ln w → x = \ln\frac{w}{k}: nur im \ln geteilt
+function divideInsideLn(step: RearrangeStep): Candidate[] {
+  if (step.kind !== 'divide' || !step.side || !step.operand) return []
+  const o = step.before[other(step.side)]
+  const inner = o.kind === 'neg' ? o.arg : o
+  if (inner.kind !== 'fn' || inner.name !== 'ln') return []
+  const wrong = fn('ln', dividedBy(inner.arg, step.operand))
+  return [{ id: 'eq-divide-inside-ln', after: withSide(step.after, other(step.side), o.kind === 'neg' ? negated(wrong) : wrong) }]
+}
+
+// Logarithmen zusammenfassen: \ln u + \ln v = \ln(u + v), \ln u - \ln v = \frac{\ln u}{\ln v}
+function logCombineMistakes(step: RearrangeStep, t: string): Candidate[] {
+  if (step.kind !== 'logCombine' || !step.side || !step.operand) return []
+  const base = step.operand
+  const s = step.before[step.side]
+  if (s.kind !== 'add') return []
+  const parsed = s.terms.map((x) => signedLog(x, t))
+  const ups = parsed.filter((p) => p !== null && p.sign > 0).map((p) => p!.arg)
+  const downs = parsed.filter((p) => p !== null && p.sign < 0).map((p) => p!.arg)
+  const logOf = (arg: Expr) => (isE(base) ? fn('ln', arg) : log(base, arg))
+  const product = (xs: Expr[]) => (xs.length === 1 ? xs[0] : mul(...xs))
+  const first = parsed.findIndex((p) => p !== null)
+  const rebuild = (combined: Expr) => sum(s.terms.flatMap((x, i) => (i === first ? [combined] : parsed[i] ? [] : [x])))
+  const out: Candidate[] = []
+  if (downs.length === 0 && ups.length >= 2) {
+    const atoms = newAtoms(t)
+    const p = toPoly(add(...ups), atoms)
+    out.push({ id: 'eq-log-sum', after: withSide(step.after, step.side, rebuild(logOf(p ? polyToExpr(p, atoms) : add(...ups)))) })
+  }
+  if (downs.length > 0 && ups.length > 0) {
+    out.push({ id: 'eq-log-quotient', after: withSide(step.after, step.side, rebuild(div(logOf(product(ups)), logOf(product(downs))))) })
+  }
+  return out
+}
+
+// 2^{x + 1} als 2^x + 2
+function powerSum(step: RearrangeStep, t: string): Candidate[] {
+  if (step.kind !== 'powerLaw') return []
+  const wrong = powerLawSum(step.before, t)
+  return wrong ? [{ id: 'eq-power-sum', after: wrong }] : []
+}
+
 // Zusammenfassen zu einem Bruch (auch im Ergebnis-Schritt): Fehler aus „Brüche"
 function fractionMistakes(step: RearrangeStep, t: string): Candidate[] {
   if (step.kind !== 'combine' && step.kind !== 'finish') return []
@@ -399,6 +522,12 @@ function candidatesFor(steps: readonly RearrangeStep[], i: number, t: string): C
     ...rootTermwise(step, t),
     ...squareHalved(step),
     ...squareOneFactor(step, t),
+    ...nestedRoot(step, t),
+    ...expLogMistakes(step),
+    ...logLawMistakes(step, t),
+    ...divideInsideLn(step),
+    ...logCombineMistakes(step, t),
+    ...powerSum(step, t),
     ...fractionMistakes(step, t),
   ]
 }
