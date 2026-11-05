@@ -176,7 +176,7 @@ export const SUBJECTS: readonly Subject[] = [
           {
             id: FRACTIONS,
             title: 'Brüche',
-            description: 'Fünf Stufen, vom Zahlenbruch bis zum Doppelbruch mit Winkelfunktionen',
+            description: 'Fünf Stufen, vom Zahlenbruch bis zu Partialbrüchen, Grenzwerten und komplexen Zahlen',
             icon: 'fraction',
             cards: 'brueche',
             levels: fractionLevels,

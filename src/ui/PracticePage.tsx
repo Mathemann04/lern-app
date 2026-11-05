@@ -29,8 +29,12 @@ export default function PracticePage({ course: courseId, mode: wantedMode, level
   // mit anderer Form als die letzten (dafür braucht es die Engine).
   const pick = seed === null && !focus && isLevelAvailable(course, level)
   useEffect(() => {
-    if (seed === null && !pick) window.location.replace(newTaskHref(courseId, mode, level, focus))
-    else if (seed !== null && mode !== wantedMode) window.location.replace(taskHref(courseId, { level, seed }, mode, focus))
+    if (seed === null && !pick) {
+      // Die Suche beim gezielten Üben kann ein paar Sekunden dauern: erst den Hinweis zeigen
+      const timer = window.setTimeout(() => window.location.replace(newTaskHref(courseId, mode, level, focus)), 30)
+      return () => window.clearTimeout(timer)
+    }
+    if (seed !== null && mode !== wantedMode) window.location.replace(taskHref(courseId, { level, seed }, mode, focus))
   }, [courseId, mode, wantedMode, level, seed, focus, pick])
 
   // „Weitermachen" auf der Startseite führt zum zuletzt geübten Thema
@@ -40,6 +44,7 @@ export default function PracticePage({ course: courseId, mode: wantedMode, level
   }, [lastCourse, courseId])
 
   if (pick) return <PickNewTask course={courseId} level={level} mode={mode} />
+  if (seed === null && focus) return <p className="text-zinc-500">Suche eine Aufgabe, in der dieser Fehler passieren kann …</p>
   if (redirect) return null
   if (!isLevelAvailable(course, level)) {
     return (
