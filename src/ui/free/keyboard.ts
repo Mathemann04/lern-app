@@ -111,8 +111,9 @@ const ROOT: Key = { latex: '\\sqrt{#0}' }
 const IMAG: Key = { latex: '\\mathrm{i}', label: '<i>i</i>' }
 
 // Bildschirm-Tastatur für Brüche: links die Buchstaben der Aufgabe, Hochzahlen und Klammern (bei
-// Bausteinen auch e^x, ln, sin, cos, tan, bei Wurzeln √, bei komplexen Zahlen i)
-export function fractionKeyboard(letters: readonly string[], blocks: boolean, root = false, imag = false): VirtualKeyboardLayout {
+// Bausteinen auch e^x, ln, sin, cos, tan, bei Hyperbelfunktionen e^x, sinh, cosh, tanh, bei Wurzeln √,
+// bei komplexen Zahlen i)
+export function fractionKeyboard(letters: readonly string[], blocks: boolean, root = false, imag = false, hyperbolic = false): VirtualKeyboardLayout {
   return withNumberPad(
     'brueche',
     'Brüche',
@@ -121,8 +122,8 @@ export function fractionKeyboard(letters: readonly string[], blocks: boolean, ro
       ...letters.map((l) => [l]),
       letters.length > 0 || blocks || imag ? POWERS : [],
       BRACKETS,
-      blocks ? [{ latex: 'e^{#?}' }, fnKey('ln')] : [],
-      blocks ? [fnKey('sin'), fnKey('cos'), fnKey('tan')] : [],
+      hyperbolic ? [{ latex: 'e^{#?}' }] : blocks ? [{ latex: 'e^{#?}' }, fnKey('ln')] : [],
+      hyperbolic ? [fnKey('sinh'), fnKey('cosh'), fnKey('tanh')] : blocks ? [fnKey('sin'), fnKey('cos'), fnKey('tan')] : [],
       root ? [ROOT] : [],
     ]),
   )
@@ -142,7 +143,7 @@ export function keyboardLayouts(spec: KeyboardSpec): VirtualKeyboardLayout[] {
     case 'derivative':
       return [DERIVATIVE_KEYBOARD, MORE_FUNCTIONS_KEYBOARD]
     case 'fraction':
-      return [fractionKeyboard(spec.letters, spec.blocks, spec.root, spec.imag)]
+      return [fractionKeyboard(spec.letters, spec.blocks, spec.root, spec.imag, spec.hyperbolic)]
     case 'rearrange':
       return [rearrangeKeyboard(spec.letters, spec.root)]
   }

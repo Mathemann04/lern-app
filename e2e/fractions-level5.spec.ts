@@ -3,7 +3,7 @@ import { type Page, expect, test } from '@playwright/test'
 // Brüche Stufe 5 (M2b Schritte 3 und 4): alles ineinander, Doppelbruch im Doppelbruch,
 // Differenzenquotienten, dritte Potenzen, Wurzeln (auch mit zwei Buchstaben, Wurzel im Nenner
 // beseitigen), Winkelfunktionen, Partialbruchzerlegung (mit Polynomdivision), komplexe Zahlen
-// teilen, Grenzwerte, Teleskopsummen; geführt und frei
+// teilen, Grenzwerte, Teleskopsummen, Hyperbelfunktionen; geführt und frei
 
 const answers = (page: Page) => page.getByRole('group', { name: 'Antworten' }).getByRole('button')
 const correctFeedback = (page: Page) => page.getByText('Richtig!', { exact: true })
@@ -70,6 +70,9 @@ for (const [ref, what, question] of [
   ['5-76', 'Teleskopsumme bis n', 'Zerlege den Summanden'],
   ['5-39', 'Teleskopreihe mit Abstand 2', 'Teilsummen'],
   ['5-82', 'Teleskopsumme mit Nenner als Summe', 'Zerlege den Nenner von'],
+  ['5-60', 'Hyperbelfunktionen mit dem Gegenstück erweitert', 'Erweitere mit dem Gegenstück des Nenners'],
+  ['5-329', 'Hyperbelfunktionen im Zähler', 'Vereinfache den Zähler mit'],
+  ['5-289', 'Hyperbelfunktionen im Hauptnenner', 'Vereinfache den Nenner mit'],
 ] as const) {
   test(`Stufe 5 geführt: ${what} (${ref})`, async ({ page }) => {
     await page.goto(`./#/ueben/brueche/${ref}`)
@@ -230,6 +233,33 @@ test('Stufe 5 frei: Teleskopsummen, bis n ein Bruch, bei der Reihe eine Zahl', a
   await expectCleanPage(page, 'Teleskopreihe')
 })
 
+test('Stufe 5 frei: Hyperbelfunktionen, auch e^x ist richtig', async ({ page }) => {
+  // 1/(cosh x − sinh x) = cosh x + sinh x = e^x
+  await page.goto('./#/frei/brueche/5-60')
+  await expect(field(page)).toBeVisible()
+  await expect(page.getByText(/Vereinfache so weit wie möglich/)).toBeVisible()
+  await enter(page, '\\frac{\\cosh x+\\sinh x}{\\cosh^2x-\\sinh^2x}')
+  await expect(feedback(page)).toContainText('Im Nenner steht noch')
+  await enter(page, '-\\cosh x-\\sinh x')
+  await expect(feedback(page)).toContainText('Typischer Fehler: Die Regel verdreht')
+  await enter(page, 'e^x')
+  await expect(feedback(page)).toContainText('Richtig!')
+  await expectCleanPage(page, 'Hyperbelfunktionen frei')
+})
+
+test('Stufe 5 frei: Tastatur mit sinh, cosh und tanh bei Hyperbelfunktionen', async ({ page }) => {
+  test.skip(!isPhone(), 'Bildschirm-Tastatur nur am Handy')
+  const keys = () => page.locator('.MLK__keycap').filter({ visible: true })
+  await page.goto('./#/frei/brueche/5-60')
+  await field(page).tap()
+  await expect(page.locator('.ML__keyboard')).toBeVisible()
+  await expect(keys().filter({ hasText: /^sinh$/ })).toHaveCount(1)
+  await expect(keys().filter({ hasText: /^cosh$/ })).toHaveCount(1)
+  await expect(keys().filter({ hasText: /^tanh$/ })).toHaveCount(1)
+  await expect(keys().filter({ hasText: /^sin$/ })).toHaveCount(0)
+  await expectCleanPage(page, 'Tastatur sinh')
+})
+
 test('Stufe 5 frei: Tastatur mit i bei komplexen Zahlen', async ({ page }) => {
   test.skip(!isPhone(), 'Bildschirm-Tastatur nur am Handy')
   await page.goto('./#/frei/brueche/5-134')
@@ -260,7 +290,7 @@ test('Stufe 5 frei: Tastatur mit Wurzel, Buchstaben der Aufgabe und tan', async 
 test('Lernkarten: Ordner Brüche mit Stufe 5, dritte Potenzen, Wurzeln im Nenner, Partialbrüchen und komplexen Zahlen', async ({ page }) => {
   await page.goto('./#/karten/brueche')
   await expect(page.getByRole('heading', { name: 'Stufe 5' })).toBeVisible()
-  for (const title of ['Bausteine mit eigenen Regeln', 'Dritte Potenzen', 'Wurzeln im Nenner beseitigen', 'Polynomdivision', 'Partialbruchzerlegung', 'Komplexe Zahlen teilen', 'Grenzwerte von Brüchen', 'Teleskopsummen']) {
+  for (const title of ['Bausteine mit eigenen Regeln', 'Dritte Potenzen', 'Wurzeln im Nenner beseitigen', 'Polynomdivision', 'Partialbruchzerlegung', 'Komplexe Zahlen teilen', 'Grenzwerte von Brüchen', 'Teleskopsummen', 'Hyperbelfunktionen']) {
     await page.goto('./#/karten/brueche')
     await page.getByRole('link', { name: new RegExp(title) }).click()
     await expect(page.getByRole('heading', { name: title, level: 1 })).toBeVisible()
@@ -348,6 +378,17 @@ test('Gezielt üben: „Unendlich durch unendlich als 1" von der Lernkarte aus',
   await expect(page).toHaveURL(/#\/ueben\/brueche\/5-\d+\?fokus=frac-limit-degree$/)
   await expect(page.locator('#question')).toBeVisible()
   await expectCleanPage(page, 'gezielt Grenzwerte')
+})
+
+test('Gezielt üben: „Die Regel verdreht" von der Lernkarte „Hyperbelfunktionen" aus', async ({ page }) => {
+  await page.goto('./#/karten/brueche/fraction-hyperbolic')
+  const error = page.locator('li, article, section, div').filter({ hasText: /^Die Regel verdreht/ }).first()
+  await error.getByRole('link', { name: 'Gezielt üben' }).click()
+  await expect(page).toHaveURL(/#\/ueben\/brueche\/5-\d+\?fokus=frac-hyp-swapped$/)
+  await expect(page.locator('#question')).toBeVisible()
+  // die Aufgabe selbst enthält sinh oder cosh
+  await expect(page.locator('main')).toContainText(/sinh|cosh/)
+  await expectCleanPage(page, 'gezielt Hyperbelfunktionen')
 })
 
 test('Gezielt üben: „Die vorderen Brüche mit weggestrichen" von der Lernkarte aus', async ({ page }) => {

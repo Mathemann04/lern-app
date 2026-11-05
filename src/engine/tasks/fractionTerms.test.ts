@@ -6,7 +6,7 @@ import { sampleEnvs, samplePoints } from '../expr/sample.ts'
 import type { Expr } from '../expr/types.ts'
 import { FRACTION_ERROR_RULES, fractionWrongAnswers } from '../fraction/errorRules.ts'
 import { factoredPoly, reducedFrac } from '../fraction/factor.ts'
-import { fracAtoms, fracEquals, isRootAtom, radicandLetters, toFrac } from '../fraction/frac.ts'
+import { fracAtoms, fracEquals, isHyperbolicAtom, isRootAtom, radicandLetters, toFrac } from '../fraction/frac.ts'
 import { atomsOf, constValue, gcdUnivariate, polyConst, polyContent, polyDivideExact, polySubstitute, totalDegree } from '../fraction/poly.ts'
 import { solveFraction, solveTree, taskLetter } from '../fraction/solve.ts'
 import { type FractionTask, partsOf, shownPoly, taskExpr, taskFrac, taskLatex } from '../fraction/task.ts'
@@ -27,6 +27,9 @@ const isLetter = (atom: string) => /^[a-z]$/.test(atom) && atom !== 'e'
 // Buchstabe eine Zufallszahl (bei Wurzeln wie √a der Buchstabe darunter)
 function pointsFor(exprs: Expr[], atoms: string[], seed: string): Env[] {
   const letters = [...new Set(atoms.flatMap((a) => (isRootAtom(a) ? radicandLetters(a) : [isLetter(a) ? a : 'x'])))]
+  // sinh und cosh nur bei |x| ≤ 5: Für große x ist cosh x − sinh x = e^{−x} eine Differenz zweier
+  // fast gleich großer Zahlen und am Rechner ungenau
+  if (atoms.some(isHyperbolicAtom)) return samplePoints(exprs, createRng(seed), 80, 'x').filter((env) => Math.abs(env.x) <= 5).slice(0, 20)
   if (letters.length <= 1) return samplePoints(exprs, createRng(seed), 20, letters[0] ?? 'x')
   return sampleEnvs(exprs, createRng(seed), 20, letters)
 }

@@ -1,4 +1,4 @@
-import { E as EULER, IMAG, asRational, type Expr, add, div, exp, ln, mul, neg, num, pow, sin, cos, sqrt, variable, x } from '../expr/types.ts'
+import { E as EULER, IMAG, asRational, type Expr, add, div, exp, fn, ln, mul, neg, num, pow, sin, cos, sqrt, variable, x } from '../expr/types.ts'
 import { type Rational, isInteger, isOne, rat, ratNeg, ratSign } from '../rational.ts'
 import {
   type Monomial,
@@ -30,6 +30,9 @@ import {
 // - S² + C² = 1: Beim Vergleichen wird C² durch 1 − S² ersetzt, bis höchstens C¹ übrig bleibt
 //   (trigRewrite, isZeroValue).
 // - tan x = S / C
+// - Hyperbelfunktionen SH = sinh x, CH = cosh x mit CH² − SH² = 1 (trigRewrite); tanh x = SH / CH.
+//   Beim Vergleichen werden sie durch e^x ausgedrückt (hyperbolicToExp), so ist auch
+//   cosh x + sinh x = e^x gleichwertig.
 // - i, die imaginäre Einheit, mit i² = −1 (komplexe Zahlen, siehe complex.ts)
 
 export type Frac = { readonly num: Poly; readonly den: Poly }
@@ -111,19 +114,58 @@ function displayRoots(p: Poly): Poly {
   return q
 }
 
-// sin² x + cos² x = 1 anwenden: Potenzen ab 2 des einen Bausteins (atom, S oder C) ersetzen,
-// z. B. atom C: cos² x → 1 − sin² x, cos³ x → cos x (1 − sin² x)
-export function trigRewrite(p: Poly, atom: 'S' | 'C'): Poly {
-  const other = atom === 'S' ? 'C' : 'S'
+// Bausteine mit einer Regel für die Quadrate: sin² x + cos² x = 1 und cosh² x − sinh² x = 1
+export type SquareAtom = 'S' | 'C' | 'SH' | 'CH'
+export const isHyperbolicAtom = (atom: string) => atom === 'SH' || atom === 'CH'
+export const partnerAtom = (atom: SquareAtom): SquareAtom => ({ S: 'C', C: 'S', SH: 'CH', CH: 'SH' } as const)[atom]
+
+// Quadrat eines Bausteins durch den anderen: atom² = unit + sign · other²
+export type SquareRule = { readonly unit: number; readonly sign: 1 | -1 }
+
+// Die richtigen Regeln: cos² x = 1 − sin² x, sin² x = 1 − cos² x, cosh² x = 1 + sinh² x,
+// sinh² x = cosh² x − 1
+export const SQUARE_RULES: Readonly<Record<SquareAtom, SquareRule>> = {
+  S: { unit: 1, sign: -1 },
+  C: { unit: 1, sign: -1 },
+  CH: { unit: 1, sign: 1 },
+  SH: { unit: -1, sign: 1 },
+}
+
+// Regel anwenden: Potenzen ab 2 des einen Bausteins (atom) ersetzen, z. B. atom C: cos² x → 1 − sin² x,
+// cos³ x → cos x (1 − sin² x); atom CH: cosh² x → 1 + sinh² x. Mit rule eine andere (falsche) Regel.
+export function trigRewrite(p: Poly, atom: SquareAtom, rule: SquareRule = SQUARE_RULES[atom]): Poly {
+  const other = partnerAtom(atom)
   const power = (t: Poly[number]) => t.mono.find(([a]) => a === atom)?.[1] ?? 0
+  const square = polyAdd(polyConst(rule.unit), polyScale(polyAtom(other, 2), rat(rule.sign)))
   let result = p
   for (let k = Math.max(0, ...p.map(power)); k >= 2; k--) {
     const high = result.filter((t) => power(t) === k)
     if (high.length === 0) continue
     const lowered = high.map((t) => ({ mono: t.mono.map(([a, e]) => [a, a === atom ? e - 2 : e] as const), coef: t.coef }))
-    result = polyAdd(polySub(result, high), polyMul(lowered, polyAdd(polyConst(1), polyNeg(polyAtom(other, 2)))))
+    result = polyAdd(polySub(result, high), polyMul(lowered, square))
   }
   return result
+}
+
+// sinh x = (e^{2x} − 1) / (2e^x), cosh x = (e^{2x} + 1) / (2e^x): ein Polynom mit sinh und cosh,
+// mal (2e^x)^M genommen (M die höchste Summe der Hochzahlen), als Polynom in e^x. Hat genau dann
+// überall den Wert 0, wenn p es hat. Ohne sinh und cosh unverändert.
+export function hyperbolicToExp(p: Poly): Poly {
+  const hyp = (t: Poly[number]) => t.mono.filter(([a]) => isHyperbolicAtom(a)).reduce((s, [, e]) => s + e, 0)
+  const top = Math.max(0, ...p.map(hyp))
+  if (top === 0) return p
+  const E2 = polyAtom('E', 2)
+  return polySum(
+    p.map((t) => {
+      const rest: Poly = [{ mono: t.mono.filter(([a]) => !isHyperbolicAtom(a)), coef: t.coef }]
+      const sinh = polyPow(polyAdd(E2, polyConst(-1)), t.mono.find(([a]) => a === 'SH')?.[1] ?? 0)
+      const cosh = polyPow(polyAdd(E2, polyConst(1)), t.mono.find(([a]) => a === 'CH')?.[1] ?? 0)
+      const k = hyp(t)
+      // (2e^x)^(M − k) für die übrigen Faktoren
+      const filler = polyScale(polyAtom('E', top - k), rat(2 ** (top - k)))
+      return polyMul(polyMul(rest, polyMul(sinh, cosh)), top === k ? polyConst(1) : filler)
+    }),
+  )
 }
 
 // --- Komplexe Zahlen ---
@@ -148,7 +190,7 @@ export function reduceImag(p: Poly): Poly {
 // Hat ein Polynom überall den Wert 0 (auch mit den Regeln der Bausteine)? Mit cos² x → 1 − sin² x
 // und i² = −1 bleibt eine eindeutige Form übrig: genau dann 0, wenn das Polynom auf dem
 // Einheitskreis 0 ist (Real- und Imaginärteil je 0).
-export const isZeroValue = (p: Poly) => isZeroPoly(trigRewrite(reduceImag(rootPoly(p)), 'C'))
+export const isZeroValue = (p: Poly) => isZeroPoly(trigRewrite(reduceImag(rootPoly(hyperbolicToExp(p))), 'C'))
 
 // Gleichwertig: Überkreuz-Malnehmen ergibt dasselbe Polynom (exakt, ohne Zahlenstellen), mit den
 // Regeln der Bausteine: (√x)² = x und sin² x + cos² x = 1
@@ -255,6 +297,9 @@ export function toFrac(e: Expr): Frac | null {
       if (e.name === 'sin') return fracOf(polyAtom('S'))
       if (e.name === 'cos') return fracOf(polyAtom('C'))
       if (e.name === 'tan') return { num: polyAtom('S'), den: polyAtom('C') }
+      if (e.name === 'sinh') return fracOf(polyAtom('SH'))
+      if (e.name === 'cosh') return fracOf(polyAtom('CH'))
+      if (e.name === 'tanh') return { num: polyAtom('SH'), den: polyAtom('CH') }
       return null
     }
     default:
@@ -295,6 +340,10 @@ function atomExpr(atom: string): Expr {
       return sin(x)
     case 'C':
       return cos(x)
+    case 'SH':
+      return fn('sinh', x)
+    case 'CH':
+      return fn('cosh', x)
     case 'e':
       return EULER
     case IMAG_ATOM:
@@ -305,8 +354,9 @@ function atomExpr(atom: string): Expr {
 }
 
 // Reihenfolge beim Schreiben eines Produkts: die Zahl e zuerst, dann Buchstaben alphabetisch
-// (ax, 2xy), i hinter den Buchstaben (2b\mathrm{i}), Bausteine in fester Reihenfolge (\sin x \cos x)
-const BLOCK_ORDER = ['E', 'L', 'S', 'C', 'T', 'R']
+// (ax, 2xy), i hinter den Buchstaben (2b\mathrm{i}), Bausteine in fester Reihenfolge (\sin x \cos x,
+// \sinh x \cosh x)
+const BLOCK_ORDER = ['E', 'L', 'S', 'C', 'SH', 'CH', 'T', 'R']
 export const displayRank = (atom: string) =>
   atom === 'e'
     ? 0

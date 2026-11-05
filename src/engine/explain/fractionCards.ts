@@ -1,4 +1,4 @@
-import { type Expr, IMAG, add, cos, exp, ln, mul, num, pow, sin, sqrt, sub, variable, x } from '../expr/types.ts'
+import { type Expr, IMAG, add, cos, exp, fn, ln, mul, num, pow, sin, sqrt, sub, variable, x } from '../expr/types.ts'
 import { factorize } from '../fraction/factor.ts'
 import { toFrac } from '../fraction/frac.ts'
 import { rat } from '../rational.ts'
@@ -53,6 +53,7 @@ export const FRACTION_CARD_IDS = {
   imaginary: 'fraction-imaginary',
   limit: 'fraction-limit',
   telescope: 'fraction-telescope',
+  hyperbolic: 'fraction-hyperbolic',
 } as const
 
 // --- Beispiele bauen ---
@@ -558,5 +559,28 @@ export const FRACTION_CARD_LIST: readonly Card[] = [
       task({ kind: 'telescope', summand: fr(n(1), sub(mul(n(4), pow(k, n(2))), n(1))), index: 'k', from: 1, upper: { kind: 'number', value: 9 } }),
     ],
     errors: ['frac-tele-factor', 'frac-tele-swap', 'frac-tele-only-ends', 'frac-tele-last', 'frac-tele-start', 'frac-tele-head'],
+  },
+  {
+    id: FRACTION_CARD_IDS.hyperbolic,
+    topic: 'brueche',
+    title: 'Hyperbelfunktionen',
+    level: 5,
+    rules: [],
+    formulas: ['\\cosh^2 x - \\sinh^2 x = 1', '\\tanh x = \\frac{\\sinh x}{\\cosh x}', '\\cosh x + \\sinh x = e^x'],
+    memo: 'Mit $\\sinh x$ und $\\cosh x$ rechnest du wie mit $\\sin x$ und $\\cos x$, nur mit der Regel $\\cosh^2 x - \\sinh^2 x = 1$. Achtung: Hier steht ein Minus, kein Plus wie bei $\\sin^2 x + \\cos^2 x = 1$.',
+    note: [
+      'Typische Umformungen:',
+      '1. $\\cosh^2 x - 1 = \\sinh^2 x$ und $1 + \\sinh^2 x = \\cosh^2 x$.',
+      '2. $(\\cosh x - \\sinh x)(\\cosh x + \\sinh x) = \\cosh^2 x - \\sinh^2 x = 1$: Mit dem Gegenstück erweitert, steht im Nenner nur noch $1$.',
+      '3. $\\frac{\\sinh x}{\\cosh x} = \\tanh x$.',
+      'Probe bei $x = 0$: $\\cosh 0 = 1$ und $\\sinh 0 = 0$. Aus $\\sinh x = \\frac{e^x - e^{-x}}{2}$ und $\\cosh x = \\frac{e^x + e^{-x}}{2}$ folgt auch $\\cosh x + \\sinh x = e^x$.',
+    ].join('\n'),
+    when: 'In Aufgaben mit $\\sinh x$ und $\\cosh x$ (Kapitel 2 deines Buchs).',
+    examples: [
+      task({ kind: 'reduce', part: fr(n(1), sub(fn('cosh', x), fn('sinh', x))) }, { kind: 'conjugate', target: 'den' }),
+      task({ kind: 'sum', terms: [plus(fr(n(1))), minus(fr(n(1), pow(fn('cosh', x), n(2))))] }, { kind: 'trig', prefer: 'SH', target: 'num' }),
+      task({ kind: 'reduce', part: fr(pow(fn('sinh', x), n(2)), sub(fn('cosh', x), n(1))) }, { kind: 'trig', prefer: 'CH', target: 'num' }),
+    ],
+    errors: ['frac-hyp-trig-sign', 'frac-hyp-swapped', 'frac-square-forgotten'],
   },
 ]

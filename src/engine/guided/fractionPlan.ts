@@ -48,7 +48,7 @@ import { type FracWrong, type PartialWrong, type TeleMistake, fractionErrorRule,
 import { remainingExpr, splitExpr, teleValue, writtenLines } from '../fraction/telescope.ts'
 import { ansatzExpr, dividedExpr, factorPowerExpr, findingEquation } from '../fraction/partial.ts'
 import { factoredExpr, factoredPoly, factorize, groupFactor, isOneFactored, productFormExpr, reduceFrac } from '../fraction/factor.ts'
-import { fracAtoms, isRootAtom, polyExpr } from '../fraction/frac.ts'
+import { fracAtoms, isHyperbolicAtom, isRootAtom, polyExpr } from '../fraction/frac.ts'
 import { type Poly, atomsOf, constValue, polyAdd, polyEquals, polyNeg, polyPow, polyProduct, totalDegree } from '../fraction/poly.ts'
 import {
   type FracSolution,
@@ -811,6 +811,8 @@ type Facts = {
   readonly imagDen: Expr | null
   // Wurzel beseitigen: Die Summe mit Wurzel steht im Zähler oder im Nenner (sonst null)
   readonly conjugate: 'num' | 'den' | null
+  // Hyperbelfunktionen sinh x und cosh x (Regel cosh² x − sinh² x = 1)
+  readonly hyperbolic: boolean
   // Bausteine mit eigenen Regeln: √x, sin² x + cos² x = 1, Potenzen von e^x
   readonly blockRules: boolean
   // beim Kürzen: wie sich Zähler und Nenner der Aufgabe zerlegen lassen
@@ -820,8 +822,8 @@ type Facts = {
   readonly partMethods: readonly FactorMethod[]
 }
 
-// Bausteine der Bruch-Engine (frac.ts): e^x, ln x, sin x, cos x, √x
-const BLOCK_ATOMS = ['E', 'L', 'S', 'C']
+// Bausteine der Bruch-Engine (frac.ts): e^x, ln x, sin x, cos x, sinh x, cosh x, √x
+const BLOCK_ATOMS = ['E', 'L', 'S', 'C', 'SH', 'CH']
 const isBlock = (atom: string) => BLOCK_ATOMS.includes(atom) || isRootAtom(atom)
 
 function factsOf(original: FractionTask, solution: FracSolution, wrongs: readonly FracWrong[]): Facts {
@@ -842,6 +844,7 @@ function factsOf(original: FractionTask, solution: FracSolution, wrongs: readonl
     blocks: fracAtoms(solution.value).some(isBlock),
     root: fracAtoms(solution.value).some(isRootAtom),
     conjugate: original.rule?.kind === 'conjugate' ? original.rule.target : null,
+    hyperbolic: fracAtoms(solution.value).some(isHyperbolicAtom),
     imagDen: t.kind === 'imaginary' ? shownExpr(imagWork(t).den) : null,
     blockRules: original.rule !== undefined || fracAtoms(solution.value).some(isRootAtom) || wrongs.some((w) => w.rule.id === 'frac-cancel-inside'),
     numMethods: t.kind === 'reduce' ? factorMethods(shownPoly(t.part.num), t.hints) : [],
@@ -1074,12 +1077,14 @@ function phrase(kind: StepKind, facts: Facts): string {
       if (facts.conjugate) return `multipliziere den ${facts.conjugate === 'den' ? 'Nenner' : 'Zähler'} mit der dritten binomischen Formel aus`
       return 'multipliziere die Klammer im Zähler aus und fasse zusammen'
     case 'conjugate':
+      if (facts.hyperbolic) return 'erweitere mit dem Gegenstück des Nenners'
       return `erweitere mit dem Gegenstück ${facts.conjugate === 'num' ? 'des Zählers' : 'des Nenners'}, damit die Wurzel verschwindet`
     case 'identity': {
       const rule = facts.original.rule
       if (rule?.kind === 'root') return 'multipliziere den Nenner mit $(\\sqrt{x})^2 = x$ aus'
-      const where = rule?.kind === 'trig' && rule.target === 'den' ? 'den Nenner' : t.kind === 'complex' ? 'den Zähler des Doppelbruchs' : 'den Zähler'
-      return `vereinfache ${where} mit $\\sin^2 x + \\cos^2 x = 1$`
+      const where =
+        (rule?.kind === 'trig' && rule.target === 'den') || rule?.kind === 'conjugate' ? 'den Nenner' : t.kind === 'complex' ? 'den Zähler des Doppelbruchs' : 'den Zähler'
+      return `vereinfache ${where} mit ${facts.hyperbolic ? '$\\cosh^2 x - \\sinh^2 x = 1$' : '$\\sin^2 x + \\cos^2 x = 1$'}`
     }
     case 'inner-complex': {
       const o = facts.original
@@ -1157,9 +1162,9 @@ function hintOf(kind: StepKind, facts: Facts): string {
     case 'multiply-out':
       return facts.conjugate ? FRACTION_HINTS.conjugateProduct : FRACTION_HINTS.multiplyOut
     case 'conjugate':
-      return FRACTION_HINTS.conjugate
+      return facts.hyperbolic ? FRACTION_HINTS.hyperbolicConjugate : FRACTION_HINTS.conjugate
     case 'identity':
-      return facts.original.rule?.kind === 'root' ? FRACTION_HINTS.root : FRACTION_HINTS.trig
+      return facts.original.rule?.kind === 'root' ? FRACTION_HINTS.root : facts.hyperbolic ? FRACTION_HINTS.hyperbolic : FRACTION_HINTS.trig
     case 'inner-complex':
       return FRACTION_HINTS.innerComplex
     case 'decimal':
@@ -1244,11 +1249,11 @@ function cardsOf(kind: StepKind, facts: Facts): string[] {
       case 'right':
         return [ids.add]
       case 'multiply-out':
-        return facts.conjugate ? [ids.rootDenominator] : [ids.binomial]
+        return facts.conjugate ? [facts.hyperbolic ? ids.hyperbolic : ids.rootDenominator] : [ids.binomial]
       case 'conjugate':
-        return [ids.rootDenominator]
+        return [facts.hyperbolic ? ids.hyperbolic : ids.rootDenominator]
       case 'identity':
-        return [ids.blockRules]
+        return [facts.hyperbolic ? ids.hyperbolic : ids.blockRules]
       case 'cancel': {
         // nach dem Malnehmen wird beim Kürzen auch zerlegt
         const factored = facts.task.kind === 'reduce' ? [] : specialCards(facts.partMethods)
@@ -1292,9 +1297,10 @@ function cardsOf(kind: StepKind, facts: Facts): string[] {
         return [ids.telescope]
     }
   })()
-  // Bausteine wie e^x; mit eigenen Regeln (√x, sin² x + cos² x = 1, e^{2x} : e^x) deren Karte
+  // Bausteine wie e^x; mit eigenen Regeln (√x, sin² x + cos² x = 1, e^{2x} : e^x) deren Karte; bei
+  // sinh x und cosh x die Karte „Hyperbelfunktionen"
   if (!facts.blocks) return own
-  return [...new Set([...own, facts.blockRules ? ids.blockRules : ids.blocks])]
+  return [...new Set([...own, facts.hyperbolic ? ids.hyperbolic : facts.blockRules ? ids.blockRules : ids.blocks])]
 }
 
 function explainStep(step: FracStep, solution: FracSolution, facts: Facts): Explanation {
@@ -1371,7 +1377,7 @@ function explainStep(step: FracStep, solution: FracSolution, facts: Facts): Expl
       return explainInnerComplex(o.kind === 'nested' ? taskExpr(innerTask(o, o.hints)) : step.expr!, step.answer!)
     }
     case 'multiply-out': {
-      if (facts.conjugate) return explainConjugateProduct(step.from!, step.detail!, facts.conjugate === 'num')
+      if (facts.conjugate) return explainConjugateProduct(step.from!, step.detail!, facts.conjugate === 'num', facts.hyperbolic)
       const o = facts.original
       const shown = o.kind === 'reduce' && o.part.num.form === 'binomial' ? o.part.num : null
       const power = shown?.power ?? 2
@@ -1381,10 +1387,10 @@ function explainStep(step: FracStep, solution: FracSolution, facts: Facts): Expl
     case 'conjugate': {
       const o = facts.original
       const side = o.kind === 'reduce' ? (facts.conjugate === 'num' ? o.part.num : o.part.den) : null
-      return explainConjugate(side ? shownExpr(side) : step.detail!, step.detail!, facts.conjugate === 'num')
+      return explainConjugate(side ? shownExpr(side) : step.detail!, step.detail!, facts.conjugate === 'num', facts.hyperbolic)
     }
     case 'identity':
-      return explainRule(facts.original.rule?.kind === 'root' ? 'root' : 'trig', step.from!, step.detail!)
+      return explainRule(facts.original.rule?.kind === 'root' ? 'root' : facts.hyperbolic ? 'hyperbolic' : 'trig', step.from!, step.detail!)
     case 'imag-power':
       return explainImagPower(taskExpr(facts.original), step.expr!)
     case 'imag-conjugate':

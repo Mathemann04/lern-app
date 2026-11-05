@@ -6,7 +6,7 @@ Stand: 05.11.2026
 | --- | --- | --- |
 | M1 | Grundgerüst + Ableitungsregeln (beide Modi, 5 Stufen, Erklärungen, Lernkarten, Fortschritt) | fertig |
 | M2 | Brüche (Bruchrechnung, Bruchterme kürzen und zusammenfassen, Doppelbrüche); App für mehrere Themen | fertig |
-| M2b | Brüche nachschärfen: viel mehr Abwechslung (Baukasten statt fester Vorlagen, keine Form doppelt), deutlich schwerer, Stufe 5 auf Profi-Niveau mit Partialbruchzerlegung und Brüchen aus späteren Kapiteln (komplexe Zahlen, Grenzwerte, Teleskopsummen) | in Arbeit |
+| M2b | Brüche nachschärfen: viel mehr Abwechslung (Baukasten statt fester Vorlagen, keine Form doppelt), deutlich schwerer, Stufe 5 auf Profi-Niveau mit Partialbruchzerlegung und Brüchen aus späteren Kapiteln (komplexe Zahlen, Grenzwerte, Teleskopsummen, Hyperbelfunktionen) | in Arbeit |
 | M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | pausiert nach Schritt 3, weiter nach M2b |
 | M4 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
 | M5 | weitere Themen aus Mathematik MB1 | offen |
@@ -49,11 +49,11 @@ Details: [PLAN-M2b.md](PLAN-M2b.md)
 - [x] 2. Stufen 3 und 4
 - [x] 3. Stufe 5, Teil 1: alles ineinander
 - [x] 4. Stufe 5, Teil 2: Partialbruchzerlegung
-- [ ] 5. Stufe 5, Teil 3: Brüche aus späteren Kapiteln (in vier Teilen)
+- [x] 5. Stufe 5, Teil 3: Brüche aus späteren Kapiteln (in vier Teilen)
   - [x] 5a. Komplexe Zahlen teilen
   - [x] 5b. Grenzwerte von Brüchen
   - [x] 5c. Teleskopsummen
-  - [ ] 5d. Hyperbelfunktionen
+  - [x] 5d. Hyperbelfunktionen
 - [ ] 6. Gezieltes Üben, Feinschliff, Abschluss
 
 ## M3: Schritte
@@ -418,3 +418,11 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   „Teleskopsummen". Etwa 8 % der übrigen Nummern der Stufe 5 zeigen jetzt eine
   Teleskopsumme (in den Browser-Tests ersetzt: 5-82 durch 5-25, 5-139 durch
   5-51).
+- 05.11.2026: M2b Teil 5d fertig, damit Schritt 5 komplett: Stufe 5 hat
+  „Hyperbelfunktionen" als eigene Aufgabenart. $\sinh x$ und $\cosh x$ sind
+  Bausteine wie $\sin x$ und $\cos x$, mit $\cosh^2 x - \sinh^2 x = 1$; dazu
+  $\frac{1}{\cosh x - \sinh x}$ mit dem Gegenstück erweitern. Frei zählt auch
+  $e^x = \cosh x + \sinh x$; Tastatur mit $\sinh$, $\cosh$, $\tanh$. Zwei neue
+  typische Fehler, Lernkarte „Hyperbelfunktionen". Etwa 6 % der übrigen
+  Nummern der Stufe 5 zeigen jetzt Hyperbelfunktionen (die Nummern in den
+  Browser-Tests sind gleich geblieben).

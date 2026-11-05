@@ -328,7 +328,11 @@ describe.each([1, 2, 3, 4, 5] as Level[])('Brüche geführt, Stufe %i', (level) 
       // Grenzwerte prüft fractionTerms.test.ts mit Zahlen nah an der Stelle, Teleskopsummen mit Teilsummen
       if (t.kind === 'limit' || t.kind === 'telescope') continue
       const letter = ['x', 'a', 'y', 'b'].find((v) => plan.functionLatex.includes(v)) ?? 'x'
-      const points: Env[] = samplePoints([taskExpr(t), plan.result], createRng(`geführt:${context}`), 12, letter)
+      // bei sinh und cosh nur |x| ≤ 5 (für große x sind cosh x − sinh x und cosh x + sinh x am Rechner ungenau)
+      const hyperbolic = plan.functionLatex.includes('\\sinh') || plan.functionLatex.includes('\\cosh')
+      const points: Env[] = hyperbolic
+        ? samplePoints([taskExpr(t), plan.result], createRng(`geführt:${context}`), 48, 'x').filter((env) => Math.abs(env.x) <= 5).slice(0, 12)
+        : samplePoints([taskExpr(t), plan.result], createRng(`geführt:${context}`), 12, letter)
       for (const env of points) {
         // bei zwei Buchstaben den zweiten fest wählen
         const full = { a: 1.7, b: -2.3, x: 1.3, y: 0.6, h: 0.4, ...env }

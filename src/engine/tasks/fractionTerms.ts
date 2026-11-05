@@ -263,6 +263,92 @@ const level5Telescope: FractionTemplate = {
   build: telescopeTask,
 }
 
+// --- Hyperbelfunktionen (M2b Schritt 5d) ---
+//
+// Bausteine sinh x und cosh x mit cosh² x − sinh² x = 1, wie bei sin und cos: mit dem Gegenstück
+// erweitern (\frac{1}{\cosh x - \sinh x} = \cosh x + \sinh x), Hauptnenner wie
+// (\cosh x - 1)(\cosh x + 1) = \sinh^2 x, Zähler wie \cosh^2 x - \sinh^2 x = 1,
+// 1 - \frac{1}{\cosh^2 x} = \tanh^2 x, Doppelbrüche und Kürzen wie \frac{\sinh^2 x}{\cosh x - 1} = \cosh x + 1.
+// Mit eigenem Zufall, damit die Aufgaben nicht vom Zufall der Vorlagenwahl abhängen.
+const HYPERBOLIC_SHAPES = [
+  ['conjugate', 2],
+  ['unit-sum', 1.2],
+  ['pair-sum', 1.2],
+  ['quotients', 0.8],
+  ['one', 1],
+  ['complex', 1],
+  ['square', 1],
+  ['reduce', 1.2],
+] as const
+
+export function hyperbolicTask(source: Rng): FractionTask {
+  const rng = createRng(`hyperbel:${source.int(0, 999_999_999)}`)
+  const C = polyAtom('CH')
+  const S = polyAtom('SH')
+  // cosh x ± 1 und cosh x ± sinh x
+  const unit = (sign: 1 | -1) => polyAdd(C, c(sign))
+  const pair = (sign: 1 | -1) => polyAdd(C, polyScale(S, rat(sign)))
+  const k = rng.pick([1, 1, 2, 3])
+  let r = rng.next() * HYPERBOLIC_SHAPES.reduce((sum, [, w]) => sum + w, 0)
+  const kind = HYPERBOLIC_SHAPES.find(([, w]) => (r -= w) < 0)?.[0] ?? 'reduce'
+  const [first, second]: [1 | -1, 1 | -1] = rng.chance(0.5) ? [-1, 1] : [1, -1]
+  switch (kind) {
+    case 'conjugate':
+      // \frac{2}{\cosh x - \sinh x} = 2\cosh x + 2\sinh x
+      return shape({ kind: 'reduce', part: polyPart(c(k), pair(anySign(rng))) }, [], { kind: 'conjugate', target: 'den' })
+    case 'unit-sum':
+      // \frac{1}{\cosh x - 1} + \frac{1}{\cosh x + 1} = \frac{2\cosh x}{\sinh^2 x}
+      return shape(
+        { kind: 'sum', terms: [plus(polyPart(c(k), unit(first))), signed(anySign(rng), polyPart(c(k), unit(second)))] },
+        [unit(-1), unit(1)],
+        { kind: 'trig', prefer: 'SH', target: 'den' },
+      )
+    case 'pair-sum':
+      // \frac{1}{\cosh x - \sinh x} - \frac{1}{\cosh x + \sinh x} = 2\sinh x
+      return shape(
+        { kind: 'sum', terms: [plus(polyPart(c(k), pair(first))), signed(anySign(rng), polyPart(c(k), pair(second)))] },
+        [pair(-1), pair(1)],
+        { kind: 'trig', prefer: 'SH', target: 'den' },
+      )
+    case 'quotients': {
+      // \frac{\cosh x}{\sinh x} - \frac{\sinh x}{\cosh x} = \frac{1}{\sinh x \cosh x}
+      const [a, b] = rng.chance(0.5) ? [C, S] : [S, C]
+      return shape({ kind: 'sum', terms: [plus(polyPart(a, b)), minus(polyPart(b, a))] }, [], { kind: 'trig', prefer: 'SH', target: 'num' })
+    }
+    case 'one':
+      // 1 - \frac{1}{\cosh^2 x} = \tanh^2 x bzw. \frac{1}{\sinh^2 x} + 1 = \frac{\cosh^2 x}{\sinh^2 x}
+      if (rng.chance(0.5)) return shape({ kind: 'sum', terms: [plus(numberPart(1)), minus(polyPart(c(1), polyAtom('CH', 2)))] }, [], { kind: 'trig', prefer: 'SH', target: 'num' })
+      return shape({ kind: 'sum', terms: [plus(polyPart(c(1), polyAtom('SH', 2))), plus(numberPart(1))] }, [], { kind: 'trig', prefer: 'CH', target: 'num' })
+    case 'complex':
+      // \frac{\cosh x - \frac{1}{\cosh x}}{\sinh x} = \tanh x (auch umgekehrt) bzw.
+      // \frac{\sinh x + \frac{1}{\sinh x}}{\cosh x} = \frac{\cosh x}{\sinh x}
+      if (rng.chance(0.6)) {
+        const top = first > 0 ? [plus(polyPart(C)), minus(polyPart(c(1), C))] : [plus(polyPart(c(1), C)), minus(polyPart(C))]
+        return shape({ kind: 'complex', top, bottom: [plus(polyPart(S))] }, [], { kind: 'trig', prefer: 'SH', target: 'num' })
+      }
+      return shape({ kind: 'complex', top: [plus(polyPart(S)), plus(polyPart(c(1), S))], bottom: [plus(polyPart(C))] }, [], { kind: 'trig', prefer: 'CH', target: 'num' })
+    case 'square':
+      // \frac{\sinh^2 x}{\cosh x - 1} = \cosh x + 1
+      return shape({ kind: 'reduce', part: polyPart(polyAtom('SH', 2), unit(first)) }, [unit(-1), unit(1)], { kind: 'trig', prefer: 'CH', target: 'num' })
+    default:
+      // \frac{\cosh^2 x - 1}{\sinh x} = \sinh x, \frac{\cosh^2 x - 1}{\sinh x \cosh x} = \tanh x,
+      // \frac{1 + \sinh^2 x}{\cosh x} = \cosh x
+      if (rng.chance(0.6)) {
+        return shape({ kind: 'reduce', part: polyPart(polyAdd(polyAtom('CH', 2), c(-1)), rng.chance(0.5) ? S : polyMul(S, C)) }, [], { kind: 'trig', prefer: 'SH', target: 'num' })
+      }
+      return shape({ kind: 'reduce', part: part(expanded(polyAdd(c(1), polyAtom('SH', 2)), true), expanded(rng.chance(0.5) ? C : polyMul(S, C))) }, [], { kind: 'trig', prefer: 'CH', target: 'num' })
+  }
+}
+
+const level5Hyperbolic: FractionTemplate = {
+  id: 'hyperbelfunktionen',
+  level: 5,
+  share: 0.06,
+  label: 'Hyperbelfunktionen: $\\cosh^2 x - \\sinh^2 x = 1$, $\\frac{1}{\\cosh x - \\sinh x}$ mit dem Gegenstück erweitern',
+  focus: ['frac-hyp-trig-sign', 'frac-hyp-swapped'],
+  build: hyperbolicTask,
+}
+
 export const FRACTION_TEMPLATES: readonly FractionTemplate[] = [
   level1Kit,
   level2Kit,
@@ -279,6 +365,7 @@ export const FRACTION_TEMPLATES: readonly FractionTemplate[] = [
   level5Imaginary,
   level5Limits,
   level5Telescope,
+  level5Hyperbolic,
 ]
 
 export function fractionTemplatesForLevel(level: Level): FractionTemplate[] {
