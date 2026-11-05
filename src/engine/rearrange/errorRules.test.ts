@@ -34,6 +34,18 @@ const CATALOG: Array<{ id: string; lhs: string; rhs: string; target?: string; af
   { id: 'eq-minus-bracket', lhs: 'a-c(x-d)', rhs: 'x', after: 'a - cx - cd = x' },
   { id: 'eq-factor-sign', lhs: 'ax-bx', rhs: 'c', after: 'x(a + b) = c' },
   { id: 'eq-square-halved', lhs: 'x^2', rhs: 'c', after: 'x = \\frac{c}{2}' },
+  { id: 'eq-nested-root', lhs: 'y', rhs: '\\sqrt{a+\\sqrt{b+\\sqrt{x}}}', after: 'y^{2} = a + b + \\sqrt{x}' },
+  { id: 'eq-ln-forgotten', lhs: 'e^{kx}', rhs: 'w', after: 'kx = w' },
+  { id: 'eq-exp-forgotten', lhs: '\\ln(x+a)', rhs: 'b', after: 'x + a = b' },
+  { id: 'eq-exp-minus-lost', lhs: 'e^{-kx}', rhs: 'w', after: 'kx = \\ln w' },
+  { id: 'eq-ln-of-sum', lhs: 'e^{2x}', rhs: 'a+b', after: '2x = \\ln a + \\ln b' },
+  { id: 'eq-exp-of-sum', lhs: '\\ln(x+a)', rhs: 'b+c', after: 'x + a = e^{b} + e^{c}' },
+  { id: 'eq-log-base-forgotten', lhs: '2^{x}', rhs: 'c', after: 'x = \\ln c' },
+  { id: 'eq-divide-inside-ln', lhs: 'e^{kx}', rhs: 'w', after: 'x = \\ln\\left(\\frac{w}{k}\\right)' },
+  { id: 'eq-log-product', lhs: '3^{2x-1}', rhs: 'a\\cdot5^{x}', after: '(2x - 1)\\ln 3 = \\ln a \\cdot x\\ln 5' },
+  { id: 'eq-log-sum', lhs: '\\ln(x+a)+\\ln(x-a)', rhs: 'b', after: '\\ln(2x) = b' },
+  { id: 'eq-log-quotient', lhs: '\\ln(x+a)-\\ln x', rhs: 'b', after: '\\frac{\\ln(x + a)}{\\ln x} = b' },
+  { id: 'eq-power-sum', lhs: 'a\\cdot2^{x+1}-b\\cdot2^{x}', rhs: 'c', after: 'a(2^{x} + 2) - b \\cdot 2^{x} = c' },
 ]
 
 describe('Katalog der Fehlerregeln', () => {

@@ -4,7 +4,7 @@ import { holds, samplePoints } from '../rearrange/check.ts'
 import { solveEquation } from '../rearrange/isolate.ts'
 import { type RearrangeTask, taskLatex, taskVariables } from '../rearrange/task.ts'
 import { type Rng, createRng } from '../random/rng.ts'
-import { type KitTask, buildLevel1, buildLevel2, buildLevel3 } from './rearrangeKit.ts'
+import { type KitTask, buildLevel1, buildLevel2, buildLevel3, buildLevel4 } from './rearrangeKit.ts'
 import type { Level, TaskRef } from './taskNumber.ts'
 
 // Vorlagen für Umstell-Aufgaben je Stufe (siehe docs/PLAN-M3.md, „Stufen"). Jede Vorlage baut aus
@@ -56,7 +56,17 @@ const level3Kit: RearrangeTemplate = {
   buildLabeled: buildLevel3,
 }
 
-export const REARRANGE_TEMPLATES: readonly RearrangeTemplate[] = [level1Kit, level2Kit, level3Kit]
+// --- Stufe 4: verschachtelt mit e-Funktion, Logarithmus, Wurzeln in Wurzeln (Baukasten, Teil 6a) ---
+
+const level4Kit: RearrangeTemplate = {
+  id: 'baukasten-4',
+  level: 4,
+  label: 'Baukasten: e-Funktion, Logarithmus, Wurzeln in Wurzeln, Potenz- und Logarithmusgesetze',
+  build: (rng) => buildLevel4(rng).task,
+  buildLabeled: buildLevel4,
+}
+
+export const REARRANGE_TEMPLATES: readonly RearrangeTemplate[] = [level1Kit, level2Kit, level3Kit, level4Kit]
 
 export function rearrangeTemplatesForLevel(level: Level): RearrangeTemplate[] {
   return REARRANGE_TEMPLATES.filter((t) => t.level === level)
@@ -92,14 +102,17 @@ function isGood(t: RearrangeTask, level: Level, kit: boolean): boolean {
   const solution = solveEquation(t.equation, t.target)
   if (!solution || contains(solution.result, t.target)) return false
   if (kit && solution.steps.length < MIN_STEPS[level]) return false
-  if (toLatex(solution.result).length > 90) return false
+  if (toLatex(solution.result).length > MAX_RESULT_LATEX[level]) return false
   const points = samplePoints(t, solution.result, createRng('brauchbar'), 8, solution.requires)
   // Gegenprobe: Die Lösung erfüllt die Aufgabe an allen Prüfstellen
   return points.length >= 8 && points.every((p) => holds(t.equation, p) === true)
 }
 
 // Mindestzahl der Umformungen je Stufe im Baukasten
-const MIN_STEPS: Record<Level, number> = { 1: 3, 2: 3, 3: 5, 4: 5, 5: 5 }
+const MIN_STEPS: Record<Level, number> = { 1: 3, 2: 3, 3: 5, 4: 6, 5: 6 }
+
+// Längstes Ergebnis (LaTeX) je Stufe
+const MAX_RESULT_LATEX: Record<Level, number> = { 1: 90, 2: 90, 3: 90, 4: 120, 5: 120 }
 
 // Erzeugt die Aufgabe zu einer Aufgaben-Nummer. Gleiche Nummer → gleiche Aufgabe.
 export function generateRearrangeTask(ref: TaskRef): GeneratedRearrangeTask {

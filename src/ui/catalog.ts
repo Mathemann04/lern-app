@@ -127,7 +127,8 @@ const fractionLevels: LevelPreview[] = [
   },
 ]
 
-// Gleichungen umstellen (Plan M3): Stufen 1 bis 3 geführt und frei spielbar, die übrigen folgen
+// Gleichungen umstellen (Plan M3): Stufen 1 bis 4 geführt und frei spielbar (Stufe 4 wächst mit den
+// Schritten 6b und 6c), Stufe 5 folgt
 const rearrangeLevels: LevelPreview[] = [
   {
     level: 1,
@@ -149,9 +150,9 @@ const rearrangeLevels: LevelPreview[] = [
   },
   {
     level: 4,
-    available: false,
-    title: 'Verschachtelt: e-Funktion, ln, Wurzeln in Wurzeln, Winkelfunktionen',
-    examples: [String.raw`y = \ln\left(1 + \sqrt{1 + e^{2x}}\right)`, String.raw`\log_a x + \log_a(x + b) = c`, String.raw`y = \frac{e^x - e^{-x}}{2}`],
+    available: true,
+    title: 'Verschachtelt: e-Funktion, ln, Wurzeln in Wurzeln, Potenz- und Logarithmusgesetze',
+    examples: [String.raw`y = \ln\left(1 + \sqrt{1 + e^{2x}}\right)`, String.raw`\frac{a e^{x} + b}{e^{x} - c} = y`, String.raw`3^{2x - 1} = a \cdot 5^{x}`],
   },
   {
     level: 5,

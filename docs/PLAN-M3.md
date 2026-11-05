@@ -415,7 +415,7 @@ Aufgabe: Löse $\int_a^x \frac{\mathrm{d}t}{t(t + b)} = y$ nach $x$ auf
 | Wurzel | Wurzel gliedweise gezogen | $x^2 = b^2 - \frac{y^2}{a^2} \Rightarrow x = b - \frac{y}{a}$ |
 | Quadrieren | nur einen Teil quadriert | $\frac{y}{a} = \sqrt{b^2 - x^2} \Rightarrow \frac{y^2}{a} = b^2 - x^2$ |
 | Quadrieren | Mittelglied vergessen | $\left(y + \sqrt{x}\right)^2 = y^2 + x$ |
-| Verschachtelte Wurzel | innere Wurzel gleich mit aufgelöst | $y = \sqrt{a + \sqrt{b + \sqrt{x}}} \Rightarrow y^2 = a + b + \sqrt{x}$ |
+| Verschachtelte Wurzel | innere Wurzel gleich mit aufgelöst (`eq-nested-root`) | $y = \sqrt{a + \sqrt{b + \sqrt{x}}} \Rightarrow y^2 = a + b + \sqrt{x}$ |
 | Malnehmen | nicht jeden Summanden malgenommen (neu in der 4. Fassung, `eq-multiply-one-term`) | $\frac{x}{a} = c - b \Rightarrow x = ac - b$, auch $\frac{x + a}{2} - \frac{x - b}{3} = c \Rightarrow 3(x + a) - 2(x - b) = c$ |
 | Minus vor der Klammer | Vorzeichen nur beim ersten Summanden gewechselt (neu in der 4. Fassung, `eq-minus-bracket`) | $a - c(x - d) = a - cx - cd$ |
 | Ausklammern | das Minus verloren (neu in der 4. Fassung, `eq-factor-sign`) | $ax - bx = c \Rightarrow x(a + b) = c$ |
@@ -425,13 +425,17 @@ Aufgabe: Löse $\int_a^x \frac{\mathrm{d}t}{t(t + b)} = y$ nach $x$ auf
 
 | Umformung | Typischer Fehler | Beispiel (falsch) |
 | --- | --- | --- |
-| e-Funktion | $\ln$ vergessen | $e^{kx} = w \Rightarrow kx = w$ |
-| e-Funktion | Minus im Exponenten verloren | $e^{-kx} = w \Rightarrow kx = \ln w$ |
-| $\ln$ | durch $k$ im $\ln$ geteilt | $kx = \ln w \Rightarrow x = \ln\frac{w}{k}$ |
-| $\ln$ | $\ln$ einer Summe auseinandergezogen | $\ln\left(1 + e^{2x}\right) = \ln 1 + 2x$ |
-| Logarithmusgesetz | Produkt der Logarithmen statt Summe | $\ln\left(a^x b^{2x - 1}\right) = x\ln a \cdot (2x - 1)\ln b$ |
-| Logarithmusgesetz | Differenz der $\ln$ als Quotient | $\ln u - \ln v = \frac{\ln u}{\ln v}$ |
-| Potenzgesetz | Exponent nur auf einen Faktor | $\left(ab^2\right)^x = a\,b^{2x}$ |
+| e-Funktion | $\ln$ vergessen (`eq-ln-forgotten`) | $e^{kx} = w \Rightarrow kx = w$ |
+| $\ln$ | $e$ hoch vergessen (`eq-exp-forgotten`, neu in 6a) | $\ln u = b \Rightarrow u = b$ |
+| e-Funktion | Minus im Exponenten verloren (`eq-exp-minus-lost`) | $e^{-kx} = w \Rightarrow kx = \ln w$ |
+| $\ln$ | durch $k$ im $\ln$ geteilt (`eq-divide-inside-ln`) | $kx = \ln w \Rightarrow x = \ln\frac{w}{k}$ |
+| $\ln$ | $\ln$ einer Summe auseinandergezogen (`eq-ln-of-sum`) | $e^{2x} = a + b \Rightarrow 2x = \ln a + \ln b$ |
+| $\ln$ | $e$ hoch eine Summe gliedweise (`eq-exp-of-sum`, neu in 6a) | $\ln u = a + b \Rightarrow u = e^a + e^b$ |
+| Logarithmieren | Faktor $\ln a$ vergessen (`eq-log-base-forgotten`, neu in 6a) | $2^x = c \Rightarrow x = \ln c$ |
+| Logarithmusgesetz | Produkt der Logarithmen statt Summe (`eq-log-product`) | $\ln\left(a \cdot 5^x\right) = \ln a \cdot x\ln 5$ |
+| Logarithmusgesetz | Summe der $\ln$ als $\ln$ der Summe (`eq-log-sum`, neu in 6a) | $\ln u + \ln v = \ln(u + v)$ |
+| Logarithmusgesetz | Differenz der $\ln$ als Quotient (`eq-log-quotient`) | $\ln u - \ln v = \frac{\ln u}{\ln v}$ |
+| Potenzgesetz | Summe in der Hochzahl als Summe (`eq-power-sum`, neu in 6a; ersetzt „Exponent nur auf einen Faktor", der in den Aufgaben von 6a nicht vorkommt) | $2^{x + 1} = 2^x + 2$ |
 | $pq$-Formel | Vorzeichen von $p$ nicht gewechselt | $u^2 - 2yu - 1 = 0 \Rightarrow u = -y \pm \sqrt{y^2 + 1}$ |
 | Lösung wählen | Scheinlösung nicht verworfen | $\log_a x$ mit negativem $x$, oder $u = e^x$ negativ |
 | Substitution | nicht zurückgerechnet | $x = y + \sqrt{y^2 + 1}$ statt $\ln\left(\ldots\right)$ |
@@ -613,6 +617,48 @@ Gleich mit dem Baukasten gebaut, Kerne ineinander in beide Richtungen (siehe
 
 **Ausprobieren:** $\log_a x + \log_a(x + b) = c$ und
 $y = \ln\left(1 + \sqrt{1 + e^{2x}}\right)$ in beiden Modi.
+
+**Umgesetzt (6a):** Stufe 4 ist spielbar, geführt und frei. Sie kommt aus dem
+Baukasten (`buildLevel4` in `tasks/rearrangeKit.ts`) mit neun Arten von
+Kernen, jede mit eigenen Varianten und Schalen: Logarithmus um einen Kern
+($\ln\frac{x + a}{x - b}$, $\ln(2x - a)$, $\log_2\left(\sqrt{x} + a\right)$),
+$e$ hoch einen Kern (Bruch in der Hochzahl, Sättigung
+$a\left(1 - e^{-kx}\right)$, mit zwei bis drei Schalen), Bruch aus $e^x$ oder
+$\ln x$ ($\frac{ae^x + b}{e^x - c}$, logistisch $\frac{a}{1 + be^{-kx}}$,
+$e^x$ oder $\ln x$ auf beiden Seiten), Wurzel aus $\ln$ oder $e^x$,
+Logarithmus einer Summe mit Wurzel ($\ln\left(1 + \sqrt{1 + e^{2x}}\right)$),
+Wurzeln in Wurzeln, Potenzen derselben Basis mit verschiedenen Hochzahlen,
+Potenzen verschiedener Basen ($3^{2x - 1} = a \cdot 5^x$, $a^x b^{2x - 1} = c$)
+und mehrere Logarithmen ($\ln(x + a) + \ln(x - a) = b$). Basen sind meist $e$,
+sonst $2$, $3$, $10$ oder ein Buchstabe; Logarithmen meist $\ln$, sonst
+$\log_2$, $\log_{10}$ oder $\log_a$. Gemessen unter den Aufgaben 1 bis 200:
+198 Formen, keine öfter als in 1 von 100, im Mittel 7,3 Umformungen, jede
+mindestens 6; Ergebnis höchstens 120 Zeichen.
+
+Die Engine kann dazu: $e$ hoch beide Seiten (Schritt `exp`), $\ln$ auf beiden
+Seiten (`log`; bei $e^F$ gleich $F$, sonst danach „Logarithmusgesetze
+anwenden", `logLaw`), mehrere Logarithmen zu einem zusammenfassen
+(`logCombine`), Potenzen derselben Basis mit $a^{m + n} = a^m \cdot a^n$ auf
+eine gemeinsame Potenz bringen (`powerLaw`), einen Baustein wie $e^x$, $2^x$
+oder $\ln x$ als Unbekannte (sortieren, ausklammern, teilen, dann
+logarithmieren bzw. $e$ hoch), Potenzen verschiedener Basen über beide Seiten
+logarithmieren. Vor dem Logarithmieren wird eine Summe mit Brüchen zu einem
+Bruch zusammengefasst. Wurzeln in Wurzeln bleiben im Ergebnis ineinander
+stehen: $\left(\left(y^2 - a\right)^2 - b\right)^2$.
+
+Neue typische Fehler (Tabelle oben, mit Texten und auf den Lernkarten):
+innere Wurzel gleich mit aufgelöst, $\ln$ bzw. $e$ hoch auf der anderen Seite
+vergessen, Minus in der Hochzahl verloren, $\ln$ einer Summe gliedweise, $e$
+hoch eine Summe gliedweise, Faktor $\ln a$ vergessen, im $\ln$ geteilt,
+Produkt der Logarithmen, Summe der Logarithmen als $\ln$ der Summe, Differenz
+als Quotient, Summe in der Hochzahl als Summe. Neue Lernkarten „e-Funktion und
+Logarithmus" und „Logarithmus- und Potenzgesetze".
+
+Frei: Ab Stufe 4 ist jede gleichwertige Form ohne Doppelbruch fertig (z. B.
+$\frac{\ln y}{2}$, $\frac{1}{2}\ln y$ und $\ln\sqrt{y}$); $\ln$ und $e^{…}$
+zählen wie Buchstaben. Die Tastatur hat dann $e^{\square}$, $\ln$ und
+$\log_a$. Prüfstellen, an denen Zwischenwerte riesig werden (z. B. $e^{64}$),
+zählen nicht mehr, sonst verschluckt die Rundung kleine Unterschiede.
 
 #### Schritt 7: Stufe 5, Teil 1: Analysis
 - Ableitungen (mit der Engine aus „Ableiten"), Integrale mit

@@ -12,7 +12,8 @@ den Nutzer zugeschnitten: Maschinenbau, 1. Semester, THU, „Mathematik MB1".
 - Laufender Plan: [docs/PLAN-M3.md](docs/PLAN-M3.md) (Gleichungen umstellen,
   4. Fassung, freigegeben): erst Baukasten und Abwechslung in den Stufen 1
   bis 3 wie bei den Brüchen (Schritte 4 und 5; ab Stufe 3 Kerne ineinander,
-  Test der Umformungen), dann die Stufen 4 und 5 (Schritte 6 bis 9).
+  Test der Umformungen), dann die Stufen 4 und 5 (Schritte 6 bis 9; Stufe 4
+  in drei Teilen, 6a fertig).
   Abgeschlossen:
   [docs/PLAN-M1.md](docs/PLAN-M1.md), [docs/PLAN-M2.md](docs/PLAN-M2.md),
   [docs/PLAN-M2b.md](docs/PLAN-M2b.md) (Brüche nachschärfen: Abwechslung und
@@ -84,7 +85,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   Brüche mit den Buchstaben der Aufgabe, bei Bausteinen $e^x$, ln, sin,
   cos, tan, bei Hyperbelfunktionen $e^x$, sinh, cosh, tanh, bei Wurzeln √,
   bei komplexen Zahlen $\mathrm{i}$; Umstellen mit allen Buchstaben der Aufgabe
-  (bis zu sieben) und √; wird erst im freien Modus geladen), gemeinsame Teile in
+  (bis zu sieben) und √, ab Stufe 4 mit $e^x$, ln und $\log_a$; wird erst im
+  freien Modus geladen), gemeinsame Teile in
   `src/ui/task/`. Lernkarten in
   `src/ui/cards/` (`CardSheet.tsx`: Fenster über der Aufgabe, die
   Zurück-Taste schließt nur das Fenster). Lange Formeln in
@@ -139,7 +141,9 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     die Lösung richtig: „noch nicht aufgelöst"; Vergleich an Prüfstellen;
     fertig: ein Bruch, auch unter Wurzel oder im Quadrat, zusammengefasst,
     gekürzt; eine Wurzel aus einem Bruch zählt wie ein Buchstabe, z. B.
-    $b + \sqrt{\frac{y}{a}}$; sonst typischer Fehler)
+    $b + \sqrt{\frac{y}{a}}$; ab Stufe 4 (`lenient`) jede gleichwertige Form
+    ohne Doppelbruch, $\ln$ und $e^{…}$ zählen wie Buchstaben; sonst
+    typischer Fehler)
   - `parse/latex.ts`: liest die Eingabe der Mathe-Tastatur (LaTeX) ein, mit
     verständlichen Fehlermeldungen
   - `explain/`: Textbausteine für Erklärungen (ausführlich/kurz), Tipps und
@@ -157,7 +161,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     (Irrwege mit eigener Erklärung) in `rearrangeTexts.ts`, Ordner
     „Gleichungen umstellen" in `rearrangeCards.ts` (Beispiele sind
     Umstell-Aufgaben; Stufe 3: Hauptnenner, Kehrwert, Wurzel und Quadrat
-    mit Klammer im Quadrat und zwei Wurzeln),
+    mit Klammer im Quadrat und zwei Wurzeln; Stufe 4: „e-Funktion und
+    Logarithmus", „Logarithmus- und Potenzgesetze"),
     durchgerechnete Beispiele in `rearrangeExample.ts`
   - `guided/plan.ts`: Schrittplaner für den geführten Modus (Regelwahl, dann je
     Summand ein Schritt; Produkt/Quotient: u', v', Einsetzen; Kette: äußere,
@@ -194,8 +199,9 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     einer Frage zum Ziel und Irrwegen, dann „Was kommt heraus?" mit
     falschen Gleichungen aus den Fehlerregeln; ohne passenden Fehler steht
     die Gleichung gleich unter „Bisher"; ab Stufe 3 die Umformung nur an
-    Weichen, `isJunction`; ist √x die Unbekannte, sprechen Fragen und
-    Antworten von √x, `unknownOf`; Bedingung des Ergebnisses wie „Gilt für
+    Weichen, `isJunction`, auch $e$ hoch, logarithmieren, Logarithmus- und
+    Potenzgesetze; ist √x oder ein Baustein wie $e^x$ die Unbekannte, sprechen
+    Fragen und Antworten davon, `unknownOf`; Bedingung des Ergebnisses wie „Gilt für
     $a \neq c$."). Gemeinsame Typen in `guided/types.ts`
   - `errorCatalog.ts`: typische Fehler aller Themen mit Namen, je Thema
   - `fraction/`: Bruch-Engine (Brüche aus Polynomen, exakt): `poly.ts`
@@ -251,8 +257,10 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     auflösen): `algebra.ts` (Seiten als Brüche aus Polynomen mit beliebigen
     Buchstaben, Teile ohne die Variable wie √(b² − y²) als eigene Zeichen
     `~0`, √x als Unbekannte `~u`, bei zwei Wurzeln die zweite wie √(x − a)
-    als eigenes Zeichen `~r` mit (~r)² = x − a, `radicalAtoms`; Endform: ein
-    Bruch, gekürzt, Buchstaben-Faktor ausgeklammert), `isolate.ts`
+    als eigenes Zeichen `~r` mit (~r)² = x − a, `radicalAtoms`; ein Baustein
+    wie $e^x$, $2^x$ oder $\ln x$, in dem allein die Variable steckt, als
+    Unbekannte `~b`, `blockAtoms`; Endform: ein Bruch, gekürzt,
+    Buchstaben-Faktor ausgeklammert), `isolate.ts`
     (Rechenweg: von außen nach innen schälen; vor dem Wurzelziehen oder
     Quadrieren eine Summe mit Brüchen zuerst zu einem Bruch; bei mehrfacher
     Variable Doppelbruch mit Brüchen im Nenner erweitern (Schritt `extend`),
@@ -261,25 +269,36 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     und quadrieren mit Bedingung `requires`, steht danach noch eine Wurzel in
     einer Klammer: ausmultiplizieren, die Wurzel allein stellen, ausklammern,
     teilen, noch einmal quadrieren; Endform des Quadrats eines Bruchs mit
-    Summe im Nenner als $\left(\frac{by + a}{y - 1}\right)^2$; Schrittnamen
-    `stepLabel`), `check.ts`
+    Summe im Nenner als $\left(\frac{by + a}{y - 1}\right)^2$; Stufe 4: $e$
+    hoch beide Seiten `exp`, $\ln$ auf beiden Seiten `log` (vorher eine Summe
+    mit Brüchen zu einem Bruch), Logarithmusgesetze `logLaw`, Logarithmen
+    zusammenfassen `logCombine`, Potenzgesetz $a^{m + n} = a^m a^n$
+    `powerLaw`, Baustein als Unbekannte `unknownAtoms`, verschiedene Basen
+    über beide Seiten logarithmieren; Wurzeln in Wurzeln bleiben im Ergebnis
+    ineinander; Schrittnamen `stepLabel`), `check.ts`
     (Prüfstellen: Buchstaben zufällig positiv, Variable aus dem Ergebnis,
-    Bedingungen der Aufgabe; Gegenprobe durch Einsetzen), `errorRules.ts`
+    Bedingungen der Aufgabe, Zwischenwerte aus `requires` nicht riesig;
+    Gegenprobe durch Einsetzen), `errorRules.ts`
     (typische Fehler, Ids `eq-…`, beim Zusammenfassen die aus „Brüche";
     je Klammer ein Fehler beim Ausmultiplizieren; nie eine Gleichung, die doch
     stimmt), `task.ts` (Aufgabe, Bedingungen)
   - `random/rng.ts`: Zufall mit Startwert; `tasks/`: Aufgaben-Nummern
     („3-48213"), Vorlagen je Stufe (`derivativeTerms.ts`,
-    `fractionTerms.ts`, `rearrangeTerms.ts`; Umstellen Stufen 1 bis 3 aus dem
+    `fractionTerms.ts`, `rearrangeTerms.ts`; Umstellen Stufen 1 bis 4 aus dem
     Baukasten `rearrangeKit.ts`: Kern mit der Variable, Schalen drumherum, andere
     Seite, manchmal nach einem Buchstaben aufgelöst; Stufe 3 mit Kernen
     ineinander, gegeneinander oder in einer Summe (`LEVEL3_CORES`: $x$ in
     Zähler und Nenner, Bruch gleich Bruch, Brüche mit verschiedenen Nennern,
     Klammern mit $x^2$, das sich weghebt, Kehrwerte, Wurzel aus einem Bruch,
     $x^2$ unter der Wurzel, zwei Wurzeln, $\sqrt{x}$ in Zähler und Nenner,
-    Klammer oder Bruch im Quadrat mit Bedingung, Doppelbrüche); Filter in
+    Klammer oder Bruch im Quadrat mit Bedingung, Doppelbrüche); Stufe 4
+    verschachtelt (`LEVEL4_CORES`: $\ln$ um einen Kern, $e$ hoch einen Kern,
+    Bruch aus $e^x$ oder $\ln x$, Wurzel aus $\ln$ oder $e^x$, $\ln$ einer
+    Summe mit Wurzel, Wurzeln in Wurzeln, Potenzen derselben bzw.
+    verschiedener Basen, mehrere Logarithmen); Filter in
     `rearrangeTerms.ts`: Mindestzahl der Umformungen je Stufe, Doppelbrüche
-    erst ab Stufe 3, Gegenprobe der Aufgabe an den Prüfstellen), `focus.ts` und `fractionFocus.ts` (Aufgaben für
+    erst ab Stufe 3, Ergebnis höchstens 90 bzw. ab Stufe 4 120 Zeichen,
+    Gegenprobe der Aufgabe an den Prüfstellen), `focus.ts` und `fractionFocus.ts` (Aufgaben für
     gezieltes Üben; Brüche: reihum durch die Stufen, je Runde zwölf Versuche,
     seltene Fehler in ihrer Vorlage `focus`, `likelyFractionTemplate`;
     `PracticePage.tsx` zeigt während der Suche einen Hinweis); Baukasten der Brüche `fractionKit.ts` (Stufen 1 und 2:

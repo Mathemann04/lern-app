@@ -2,12 +2,16 @@ import { FRACTION_CARD_IDS } from '../explain/fractionCards.ts'
 import { explainFractionError } from '../explain/fractionTexts.ts'
 import { REARRANGE_CARD_IDS } from '../explain/rearrangeCards.ts'
 import {
+  COMBINE_BEFORE_LOG_MOVES,
   COMBINE_BEFORE_MULTIPLY_MOVES,
   COMBINE_BEFORE_ROOT_MOVES,
   COMBINE_BEFORE_SQUARE_MOVES,
   COMBINE_MOVES,
   EXPAND_MOVES,
   EXTEND_MOVES,
+  LOG_COMBINE_MOVES,
+  LOG_LAW_MOVES,
+  POWER_LAW_MOVES,
   REARRANGE_HINTS,
   ROOT_MOVES,
   SQUARE_MOVES,
@@ -18,7 +22,9 @@ import {
   explainMove,
   explainRearrangeError,
   explainResult,
+  expMoves,
   factorMoves,
+  logMoves,
   moveMoves,
   multiplyMoves,
   negateMoves,
@@ -29,7 +35,7 @@ import {
 import type { Explanation } from '../explain/texts.ts'
 import { contains, subterms } from '../expr/compare.ts'
 import { equationToLatex, toLatex } from '../expr/print.ts'
-import { type Equation, type Expr, sub } from '../expr/types.ts'
+import { type Equation, type Expr, asRational, sub } from '../expr/types.ts'
 import { readableLatex } from '../fraction/task.ts'
 import { factorize } from '../fraction/factor.ts'
 import { newAtoms, polyToExpr, toRat } from '../rearrange/algebra.ts'
@@ -120,6 +126,11 @@ function isJunction(step: RearrangeStep, t: string): boolean {
     case 'combine':
     case 'extend':
     case 'square':
+    case 'exp':
+    case 'log':
+    case 'logCombine':
+    case 'logLaw':
+    case 'powerLaw':
       return true
     case 'multiply':
       return !step.side || contains(denominatorOf(step) ?? step.operand!, t)
@@ -139,12 +150,13 @@ function combinesBeforeReciprocal(step: RearrangeStep): boolean {
   return s !== null && s.kind === 'div' && s.num.kind === 'num' && ratSign(s.num.value) > 0 && s.num.value.n === s.num.value.d
 }
 
-// Wozu wird zusammengefasst? Vor dem Kehrwert, dem Malnehmen mit dem Nenner, dem Wurzelziehen oder dem Quadrieren
-type CombineContext = 'reciprocal' | 'multiply' | 'root' | 'square'
+// Wozu wird zusammengefasst? Vor dem Kehrwert, dem Malnehmen mit dem Nenner, dem Wurzelziehen, dem
+// Quadrieren oder dem Logarithmieren
+type CombineContext = 'reciprocal' | 'multiply' | 'root' | 'square' | 'log'
 
 function combineContext(step: RearrangeStep): CombineContext {
   const s = step.side ? step.before[step.side] : null
-  if (s?.kind === 'pow') return 'root'
+  if (s?.kind === 'pow') return asRational(s.exp) ? 'root' : 'log'
   if (s?.kind === 'root') return 'square'
   return combinesBeforeReciprocal(step) ? 'reciprocal' : 'multiply'
 }
@@ -154,6 +166,7 @@ const COMBINE_EXPLANATION: Record<CombineContext, string> = {
   multiply: 'combine-multiply',
   root: 'combine-root',
   square: 'combine-square',
+  log: 'combine-log',
 }
 
 // Nenner, der beim Malnehmen beseitigt wird (beim Schälen)
@@ -224,6 +237,26 @@ function moveQuestion(step: RearrangeStep, t: string): MoveQuestion | null {
           return { question: `Bevor du die Wurzel ziehst: Was machst du mit der ${sideName(other(side))} Seite?`, wrong: COMBINE_BEFORE_ROOT_MOVES, hint: REARRANGE_HINTS.combineBeforeRoot }
         case 'square':
           return { question: `Bevor du quadrierst: Was machst du mit der ${sideName(other(side))} Seite?`, wrong: COMBINE_BEFORE_SQUARE_MOVES, hint: REARRANGE_HINTS.combineBeforeSquare }
+        case 'log':
+          return { question: `Bevor du logarithmierst: Was machst du mit der ${sideName(other(side))} Seite?`, wrong: COMBINE_BEFORE_LOG_MOVES, hint: REARRANGE_HINTS.combineBeforeLog }
+      }
+    case 'exp': {
+      if (!side || !step.operand) return null
+      const base = toLatex(step.operand)
+      const logLatex = base === 'e' ? '\\ln' : `\\log_{${base}}`
+      return { question: `Wie wirst du den $${logLatex}$ los?`, wrong: expMoves(logLatex, base, side), hint: REARRANGE_HINTS.exp }
+    }
+    case 'log':
+      return { question: `Wie holst du $${t}$ aus der Hochzahl?`, wrong: logMoves(side ?? null), hint: REARRANGE_HINTS.log }
+    case 'logCombine':
+      return { question: `$${t}$ steht in mehreren Logarithmen. Was machst du zuerst?`, wrong: LOG_COMBINE_MOVES, hint: REARRANGE_HINTS.logCombine }
+    case 'logLaw':
+      return { question: `Wie holst du die Hochzahl mit $${t}$ aus dem $\\ln$ heraus?`, wrong: LOG_LAW_MOVES, hint: REARRANGE_HINTS.logLaw }
+    case 'powerLaw':
+      return {
+        question: step.operand ? `Wie bekommst du überall dieselbe Potenz $${toLatex(step.operand)}$?` : 'Wie bekommst du überall dieselbe Potenz?',
+        wrong: POWER_LAW_MOVES,
+        hint: REARRANGE_HINTS.powerLaw,
       }
     case 'expand':
       return { question: 'Was machst du mit den Klammern?', wrong: EXPAND_MOVES, hint: REARRANGE_HINTS.expand }
@@ -330,6 +363,11 @@ const CARDS_BY_KIND: Record<StepKind, readonly string[]> = {
   factor: [REARRANGE_CARD_IDS.collect],
   square: [REARRANGE_CARD_IDS.root],
   root: [REARRANGE_CARD_IDS.root],
+  exp: [REARRANGE_CARD_IDS.exp],
+  log: [REARRANGE_CARD_IDS.exp],
+  logCombine: [REARRANGE_CARD_IDS.laws],
+  logLaw: [REARRANGE_CARD_IDS.laws],
+  powerLaw: [REARRANGE_CARD_IDS.laws],
   finish: [FRACTION_CARD_IDS.add, FRACTION_CARD_IDS.expand],
 }
 
@@ -345,6 +383,7 @@ function cardsOf(step: RearrangeStep, t: string, previous: RearrangeStep | undef
   if (step.kind === 'combine') {
     const context = combineContext(step)
     if (context === 'multiply') return [REARRANGE_CARD_IDS.denominator, FRACTION_CARD_IDS.add]
+    if (context === 'log') return [REARRANGE_CARD_IDS.exp, FRACTION_CARD_IDS.add]
     if (context !== 'reciprocal') return [REARRANGE_CARD_IDS.root, FRACTION_CARD_IDS.add]
   }
   return [...CARDS_BY_KIND[step.kind]]

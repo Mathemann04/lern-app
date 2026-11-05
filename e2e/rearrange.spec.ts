@@ -1,6 +1,6 @@
 import { type Page, expect, test } from '@playwright/test'
 
-// Thema Gleichungen umstellen im Gebiet Grundlagen: geführt üben (Stufen 1 bis 3), frei eintippen,
+// Thema Gleichungen umstellen im Gebiet Grundlagen: geführt üben (Stufen 1 bis 4), frei eintippen,
 // Lernkarten, Fortschritt
 
 const answers = (page: Page) => page.getByRole('group', { name: 'Antworten' }).getByRole('button')
@@ -47,10 +47,10 @@ test('Von der Startseite zu „Gleichungen umstellen" und eine Aufgabe der Stufe
   await page.getByRole('link', { name: /^Gleichungen umstellen/ }).click()
   await expect(page).toHaveURL(/#\/thema\/umstellen$/)
   await expect(page.getByRole('heading', { name: 'Gleichungen umstellen', level: 1 })).toBeVisible()
-  // Stufen 1 bis 3 spielbar, geführt und frei; ab Stufe 4 folgt bald
+  // Stufen 1 bis 4 spielbar, geführt und frei; Stufe 5 folgt bald
   await expect(page.getByRole('radio', { name: /^Stufe 1/ })).toBeChecked()
-  await expect(page.getByRole('radio', { name: /^Stufe 3/ })).toBeEnabled()
-  await expect(page.getByRole('radio', { name: /^Stufe 4.*folgt bald/ })).toBeDisabled()
+  await expect(page.getByRole('radio', { name: /^Stufe 4/ })).toBeEnabled()
+  await expect(page.getByRole('radio', { name: /^Stufe 5.*folgt bald/ })).toBeDisabled()
   await expect(page.getByRole('radio', { name: /Frei/ })).toBeEnabled()
   await expectCleanPage(page, 'Thema')
 
@@ -108,7 +108,8 @@ test('Umstellen: Lernkarten-Ordner mit durchgerechneten Beispielen', async ({ pa
   await expect(page.getByRole('heading', { name: 'Stufe 1' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Stufe 2' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Stufe 3' })).toBeVisible()
-  await expect(page.locator('main li a')).toHaveCount(7)
+  await expect(page.getByRole('heading', { name: 'Stufe 4' })).toBeVisible()
+  await expect(page.locator('main li a')).toHaveCount(9)
   await expectCleanPage(page, 'Ordner')
 
   await page.getByRole('link', { name: /^Variable im Nenner/ }).click()
@@ -127,6 +128,31 @@ test('Umstellen Stufe 3: zwei Wurzeln, zweimal quadrieren geführt, mit Lernkart
   await expect(page.getByTestId('result')).toBeVisible()
   await expect(page.getByRole('navigation', { name: 'Lernkarten zu dieser Aufgabe' }).getByRole('link', { name: 'Wurzel und Quadrat' })).toBeVisible()
   await expectCleanPage(page, 'Stufe 3')
+})
+
+test('Umstellen Stufe 4: Logarithmen zusammenfassen, e hoch beide Seiten, mit beiden neuen Lernkarten', async ({ page }) => {
+  // \ln(x + 7k) + \ln(x - 7k) - m = n - p
+  await page.goto('./#/ueben/umstellen/4-8')
+  await expect(page.locator('#question')).toContainText('steht in mehreren Logarithmen. Was machst du zuerst?')
+  await solveWholeTask(page)
+  await expect(page.getByTestId('result')).toBeVisible()
+  const cards = page.getByRole('navigation', { name: 'Lernkarten zu dieser Aufgabe' })
+  await expect(cards.getByRole('link', { name: 'Logarithmus- und Potenzgesetze' })).toBeVisible()
+  await expect(cards.getByRole('link', { name: 'e-Funktion und Logarithmus' })).toBeVisible()
+  await expectCleanPage(page, 'Stufe 4')
+})
+
+test('Umstellen Stufe 4 frei: Bruch aus e^x, im ln geteilt, dann richtig mit Logarithmusgesetz', async ({ page }) => {
+  // \frac{e^{px} + q}{e^{px} - 8} = r + s
+  await page.goto('./#/frei/umstellen/4-33')
+  await expect(field(page)).toBeVisible()
+  await expectCleanPage(page, 'Start Stufe 4')
+  await enter(page, '\\ln\\left(\\frac{q+8r+8s}{p(r+s-1)}\\right)')
+  await expect(feedback(page)).toContainText('geteilt statt den ganzen')
+  // jede gleichwertige Form zählt, auch mit dem Logarithmusgesetz auseinandergezogen
+  await enter(page, '\\frac{\\ln(q+8r+8s)-\\ln(r+s-1)}{p}')
+  await expect(feedback(page)).toContainText('Richtig!')
+  await expectCleanPage(page, 'Richtig Stufe 4')
 })
 
 test('Umstellen Stufe 2 frei: Aufgabe aus dem Baukasten, Minus beim Ausklammern verloren, dann richtig', async ({ page }) => {

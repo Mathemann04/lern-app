@@ -13,7 +13,8 @@ const LARGEST = 8
 const MAX_VALUE = 1e6
 
 // requires: Terme, die ≥ 0 sein müssen, damit es eine Lösung gibt (aus dem Rechenweg, z. B. beim
-// Quadrieren von Wurzeln); sie schränken nur ein, wo geprüft wird
+// Quadrieren von Wurzeln); sie schränken nur ein, wo geprüft wird. Auch sie dürfen nicht riesig sein
+// (e^{uy} mit großen Buchstaben), sonst verschluckt die Rundung kleine Unterschiede.
 export function samplePoints(task: RearrangeTask, result: Expr, rng: Rng, count: number, requires: readonly Expr[] = []): Env[] {
   const letters = [...new Set([...taskVariables(task), ...variablesOf(result)])].filter((name) => name !== task.target)
   const points: Env[] = []
@@ -25,7 +26,10 @@ export function samplePoints(task: RearrangeTask, result: Expr, rng: Rng, count:
     if (!(value > 1e-3) || value > MAX_VALUE) continue
     env[task.target] = value
     if (!task.conditions.every((c) => satisfied(evaluate(c.lhs, env), c.rel, evaluate(c.rhs, env)))) continue
-    if (requires.every((r) => evaluate(r, env) > 1e-9)) points.push(env)
+    if (requires.every((r) => {
+      const v = evaluate(r, env)
+      return v > 1e-9 && v < MAX_VALUE
+    })) points.push(env)
   }
   return points
 }

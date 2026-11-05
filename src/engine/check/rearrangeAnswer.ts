@@ -26,7 +26,8 @@ import type { FreeTask, FreeVerdict } from './freeTask.ts'
 //   für die Lösung: noch nicht aufgelöst (zählt nicht als Fehler).
 // - Gleicher Wert wie die Lösung (an Prüfstellen im erlaubten Bereich): fertig? Ein Bruch ohne Bruch
 //   im Zähler oder Nenner (auch unter einer Wurzel oder in einem Quadrat), Zähler und Nenner
-//   zusammengefasst, gekürzt.
+//   zusammengefasst, gekürzt. Ab Stufe 4 (lenient) zählt jede gleichwertige Form ohne Doppelbruch,
+//   z. B. \frac{1}{2}\ln y und \ln\sqrt{y}; \ln, e^{…} und Wurzeln aus Brüchen zählen wie Buchstaben.
 // - Sonst Vergleich mit den falschen Ergebnissen der typischen Fehler.
 
 export type RearrangeCheckContext = {
@@ -37,6 +38,8 @@ export type RearrangeCheckContext = {
   readonly letters: readonly string[]
   // Prüfstellen: Buchstaben positiv, die gesuchte Variable aus der Lösung, Bedingungen erfüllt
   readonly points: readonly Env[]
+  // ab Stufe 4: fertig ist jede gleichwertige Form ohne Doppelbruch
+  readonly lenient: boolean
 }
 
 // Warum ein Ergebnis noch nicht fertig ist
@@ -52,11 +55,11 @@ export type RearrangeVerdict =
 
 const POINTS = 24
 
-export function prepareRearrangeCheck(task: RearrangeTask): RearrangeCheckContext {
+export function prepareRearrangeCheck(task: RearrangeTask, lenient = false): RearrangeCheckContext {
   const solution = solveEquation(task.equation, task.target)
   if (!solution) throw new Error(`Die Aufgabe ${equationToLatex(task.equation)} lässt sich nicht auflösen`)
   const points = samplePoints(task, solution.result, createRng(`umstellen-frei:${equationToLatex(task.equation)}`), POINTS, solution.requires)
-  return { task, solution, wrongs: rearrangeWrongAnswers(task, solution), letters: taskVariables(task), points }
+  return { task, solution, wrongs: rearrangeWrongAnswers(task, solution), letters: taskVariables(task), points, lenient }
 }
 
 export function checkRearrangeAnswer(context: RearrangeCheckContext, latex: string): RearrangeVerdict {
@@ -84,7 +87,7 @@ export function checkRearrangeAnswer(context: RearrangeCheckContext, latex: stri
 
   const { points } = context
   if (agrees(answer, (p) => p[t], points)) {
-    const reason = notDone(answer, context.solution.result)
+    const reason = context.lenient ? (hasNestedFraction(answer) ? 'nested' : null) : notDone(answer, context.solution.result)
     return reason ? { kind: 'unfinished', reason } : { kind: 'correct' }
   }
   // falsche Ergebnisse sind oft nur an wenigen Stellen definiert (z. B. \sqrt{a^2 - 4y^2})
@@ -144,10 +147,15 @@ function hasFraction(e: Expr): boolean {
 
 const stripMinus = (e: Expr): Expr => (e.kind === 'neg' ? stripMinus(e.arg) : e)
 
+// Doppelbruch irgendwo (außerhalb von Wurzeln, Logarithmen und Hochzahlen)?
+function hasNestedFraction(e: Expr): boolean {
+  return subterms(e).some((s) => s.kind === 'div' && (hasLooseFraction(s.num) || hasLooseFraction(s.den)))
+}
+
 // Bruch außerhalb von Wurzeln? Eine Wurzel aus einem Bruch zählt in einer Summe wie ein Buchstabe:
-// b + \sqrt{\frac{y}{a}} ist fertig
+// b + \sqrt{\frac{y}{a}} ist fertig; ebenso \ln\frac{a}{b} und e^{\frac{a}{b}}
 function hasLooseFraction(e: Expr): boolean {
-  if (e.kind === 'root') return false
+  if (e.kind === 'root' || e.kind === 'fn' || e.kind === 'log') return false
   if (e.kind === 'add') return e.terms.some(hasLooseFraction)
   if (e.kind === 'mul') return e.factors.some(hasLooseFraction)
   if (e.kind === 'neg') return hasLooseFraction(e.arg)
@@ -287,14 +295,19 @@ export function rearrangeFreeVerdict(v: RearrangeVerdict, target: string): FreeV
 
 // Wurzel-Taste, wenn in der Aufgabe oder im Ergebnis eine Wurzel steht
 const hasRoot = (...exprs: readonly Expr[]) => exprs.some((e) => subterms(e).some((s) => s.kind === 'root'))
+// Tasten e^□, \ln und \log_a, wenn in der Aufgabe oder im Ergebnis eine Potenz mit Buchstaben in der
+// Hochzahl oder ein Logarithmus steht
+const hasExp = (...exprs: readonly Expr[]) =>
+  exprs.some((e) => subterms(e).some((s) => s.kind === 'fn' || s.kind === 'log' || (s.kind === 'pow' && variablesOf(s.exp).size > 0)))
 
 export function prepareRearrangeFree(ref: TaskRef): FreeTask {
-  const context = prepareRearrangeCheck(generateRearrangeTask(ref).task)
+  const context = prepareRearrangeCheck(generateRearrangeTask(ref).task, ref.level >= 4)
   const { equation, target } = context.task
+  const all = [equation.lhs, equation.rhs, context.solution.result]
   return {
     answerLabel: `${target} =`,
     inputLabel: 'Dein Ergebnis',
-    keyboard: { kind: 'rearrange', letters: context.letters, root: hasRoot(equation.lhs, equation.rhs, context.solution.result) },
+    keyboard: { kind: 'rearrange', letters: context.letters, root: hasRoot(...all), exp: hasExp(...all) },
     check: (latex) => rearrangeFreeVerdict(checkRearrangeAnswer(context, latex), target),
   }
 }

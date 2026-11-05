@@ -167,6 +167,8 @@ function printFactor(f: Expr, index: number): string {
 function needsDot(left: Expr, right: Expr, rightLatex: string): boolean {
   if (/^[\d-]/.test(rightLatex) || isNegative(right)) return true
   if (right.kind === 'div') return true
+  // e \cdot e^{x} statt ee^{x}
+  if (left.kind === 'const' && left.name === 'e' && rightLatex.startsWith('e')) return true
   return endsWithBareArgument(left)
 }
 

@@ -40,9 +40,21 @@ export type Atoms = {
   // Wurzel mit der gesuchten Variable, mit der gerechnet wird wie mit einem Buchstaben, ihr Quadrat
   // ist der Term darunter: (y − √(x − a))² = y² − 2y√(x − a) + x − a
   readonly radical?: { readonly key: string; readonly square: Poly }
+  // Baustein mit der gesuchten Variable wie e^x, 2^x oder ln x, der als Unbekannte gilt (die Variable
+  // kommt nur in ihm vor): \frac{ae^x + b}{e^x - c} = y wird nach e^x aufgelöst
+  readonly block?: { readonly key: string }
 }
 
 export const RADICAL_ATOM = '~r'
+export const BLOCK_ATOM = '~b'
+
+// Atome mit einem Baustein wie e^x als Unbekannter
+export function blockAtoms(target: string, block: Expr): Atoms {
+  const atoms: Atoms = { ...newAtoms(target), block: { key: key(block) } }
+  atoms.opaque.set(BLOCK_ATOM, block)
+  atoms.names.set(key(block), BLOCK_ATOM)
+  return atoms
+}
 
 export const newAtoms = (target: string, rootUnknown = false): Atoms => ({ target, rootUnknown, opaque: new Map(), names: new Map() })
 
@@ -95,10 +107,13 @@ function power(base: Frac, k: number): Frac | null {
 // Wert eines Terms als Bruch aus Polynomen; null, wenn die gesuchte Variable in einem Teil steckt,
 // mit dem sich nicht rechnen lässt (z. B. √(x + a)), oder wenn durch 0 geteilt wird
 export function toRat(e: Expr, atoms: Atoms): Frac | null {
+  if (atoms.block && (e.kind === 'pow' || e.kind === 'fn' || e.kind === 'log') && key(e) === atoms.block.key) return fracOf(polyAtom(BLOCK_ATOM))
   switch (e.kind) {
     case 'num':
       return fracOf(polyConst(e.value))
     case 'var':
+      // mit einem Baustein als Unbekannter darf die Variable nicht außerhalb vorkommen
+      if (atoms.block && e.name === atoms.target) return null
       return e.name === atoms.target && atoms.rootUnknown ? fracOf(polyAtom(ROOT_ATOM, 2)) : fracOf(polyAtom(e.name))
     case 'add': {
       let sum = fracOf(polyConst(0))
@@ -169,12 +184,24 @@ function monoFactors(m: Monomial, atoms: Atoms): Expr[] {
   }
   letters.sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
   others.sort(([a], [b]) => (a < b ? -1 : 1))
-  const asPower = (base: Expr, k: number) => (k === 1 ? base : pow(base, num(k)))
+  // (e^y)^2 als e^{2y}, (p^{8y})^2 als p^{16y}
+  const asPower = (base: Expr, k: number) => (k === 1 ? base : isVariablePower(base) ? pow(base.base, timesNumber(k, base.exp)) : pow(base, num(k)))
   return [
     ...letters.map(([name, k]) => asPower(variable(name), k)),
     ...(rootPart ? [sqrt(variable(atoms.target))] : []),
     ...others.map(([name, k]) => asPower(atoms.opaque.get(name)!, k)),
   ]
+}
+
+// Potenz mit einer Hochzahl, die keine Zahl ist (e^y, 10^{2y})
+const isVariablePower = (e: Expr): e is Extract<Expr, { kind: 'pow' }> => e.kind === 'pow' && asRational(e.exp) === null
+
+// k · Hochzahl: 2 · y → 2y, 2 · 3y → 6y, 2 · (y + 1) → 2(y + 1)
+function timesNumber(k: number, e: Expr): Expr {
+  if (e.kind === 'neg') return neg(timesNumber(k, e.arg))
+  if (e.kind === 'num') return num(e.value.n * BigInt(k), e.value.d)
+  if (e.kind === 'mul' && e.factors[0].kind === 'num') return mul(num(e.factors[0].value.n * BigInt(k), e.factors[0].value.d), ...e.factors.slice(1))
+  return mul(num(k), e)
 }
 
 // c · Monom, Minus außen; Bruch als Vorzahl über den Term: \frac{x}{2}

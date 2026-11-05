@@ -1,4 +1,4 @@
-import { type Expr, add, div, eq, mul, num, pow, sqrt, sub, variable } from '../expr/types.ts'
+import { type Expr, add, div, eq, exp, ln, mul, neg, num, pow, sqrt, sub, variable } from '../expr/types.ts'
 import type { Condition, RearrangeTask } from '../rearrange/task.ts'
 import type { Card } from './cards.ts'
 
@@ -14,9 +14,11 @@ export const REARRANGE_CARD_IDS = {
   clear: 'rearrange-clear',
   reciprocal: 'rearrange-reciprocal',
   root: 'rearrange-root',
+  exp: 'rearrange-exp',
+  laws: 'rearrange-laws',
 } as const
 
-const [a, b, c, d, x, y] = ['a', 'b', 'c', 'd', 'x', 'y'].map(variable)
+const [a, b, c, d, k, x, y] = ['a', 'b', 'c', 'd', 'k', 'x', 'y'].map(variable)
 const n = (value: number) => num(value)
 const task = (lhs: Expr, rhs: Expr, target = 'x', conditions: readonly Condition[] = []): RearrangeTask => ({ equation: eq(lhs, rhs), target, conditions })
 const sq = (e: Expr) => pow(e, n(2))
@@ -121,6 +123,51 @@ export const REARRANGE_CARD_LIST: readonly Card[] = [
       task(y, sqrt(div(add(x, a), sub(x, a))), 'x', [{ lhs: x, rel: '>', rhs: a }]),
       task(add(sqrt(add(x, a)), sqrt(sub(x, a))), y, 'x', [{ lhs: x, rel: '>', rhs: a }]),
     ],
-    errors: ['eq-root-termwise', 'eq-square-halved', 'eq-square-one-factor', 'eq-square-middle'],
+    errors: ['eq-root-termwise', 'eq-square-halved', 'eq-square-one-factor', 'eq-square-middle', 'eq-nested-root'],
+  },
+  {
+    id: REARRANGE_CARD_IDS.exp,
+    topic: 'umstellen',
+    title: 'e-Funktion und Logarithmus',
+    level: 4,
+    rules: [],
+    formulas: [
+      'e^{u} = w \\;\\Leftrightarrow\\; u = \\ln w',
+      '\\ln u = w \\;\\Leftrightarrow\\; u = e^{w}',
+      'a^{u} = w \\;\\Leftrightarrow\\; u \\ln a = \\ln w',
+      '\\log_a u = w \\;\\Leftrightarrow\\; u = a^{w}',
+    ],
+    memo: 'Gegen $e$ hoch hilft der $\\ln$, gegen den $\\ln$ hilft $e$ hoch, immer auf beiden Seiten und immer auf die ganze Seite. Steht die Variable in der Hochzahl einer anderen Basis $a$, bleibt nach dem Logarithmieren der Faktor $\\ln a$.',
+    note: 'Logarithmieren geht nur, wenn die andere Seite positiv ist, denn $e^u$ ist immer größer als $0$. Ein Minus in der Hochzahl bleibt stehen. Teilst du danach durch eine Zahl, wird der ganze $\\ln$ geteilt: $\\frac{\\ln w}{k}$. Steht eine Summe auf der anderen Seite, nimmst du den $\\ln$ der ganzen Summe.',
+    when: 'Wenn die Variable in einer Hochzahl oder in einem Logarithmus steht.',
+    examples: [
+      task(y, mul(a, exp(neg(mul(k, x))))),
+      task(ln(div(add(x, a), sub(x, a))), b, 'x', [{ lhs: x, rel: '>', rhs: a }]),
+      task(div(add(mul(a, exp(x)), b), sub(exp(x), c)), y, 'x', [{ lhs: y, rel: '>', rhs: a }]),
+      task(sqrt(add(a, ln(div(x, b)))), y),
+    ],
+    errors: ['eq-ln-forgotten', 'eq-exp-forgotten', 'eq-exp-minus-lost', 'eq-ln-of-sum', 'eq-exp-of-sum', 'eq-log-base-forgotten', 'eq-divide-inside-ln'],
+  },
+  {
+    id: REARRANGE_CARD_IDS.laws,
+    topic: 'umstellen',
+    title: 'Logarithmus- und Potenzgesetze',
+    level: 4,
+    rules: [],
+    formulas: [
+      '\\ln(u \\cdot v) = \\ln u + \\ln v',
+      '\\ln\\frac{u}{v} = \\ln u - \\ln v',
+      '\\ln\\left(u^{k}\\right) = k \\ln u',
+      'a^{m + n} = a^{m} \\cdot a^{n}',
+    ],
+    memo: 'Der Logarithmus macht aus Produkten Summen, aus Quotienten Differenzen und aus Hochzahlen Faktoren. Umgekehrt werden mehrere Logarithmen so zu einem einzigen.',
+    note: 'Für Summen gibt es kein Gesetz: $\\ln(u + v) \\neq \\ln u + \\ln v$ und $a^{x + 1} \\neq a^x + a$. Stehen Potenzen mit verschiedenen Basen da wie in $3^{2x - 1} = a \\cdot 5^x$, logarithmierst du beide Seiten und löst dann wie bei „Variable mehrfach".',
+    when: 'Wenn die Variable in mehreren Logarithmen oder Potenzen steckt.',
+    examples: [
+      task(add(ln(add(x, a)), ln(sub(x, a))), b, 'x', [{ lhs: x, rel: '>', rhs: a }]),
+      task(sub(mul(a, pow(num(2), add(x, num(1)))), mul(b, pow(num(2), x))), c, 'x', [{ lhs: b, rel: '<', rhs: mul(num(2), a) }]),
+      task(pow(num(3), sub(mul(num(2), x), num(1))), mul(a, pow(num(5), x))),
+    ],
+    errors: ['eq-log-product', 'eq-log-sum', 'eq-log-quotient', 'eq-power-sum', 'eq-log-base-forgotten'],
   },
 ]

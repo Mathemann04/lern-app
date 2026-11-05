@@ -10,7 +10,7 @@ import { pickFresh, varietyStats } from './variety.ts'
 
 // Abwechslung beim Umstellen (docs/PLAN-M3.md, 4. Fassung): Die Stufen aus dem Baukasten haben je
 // Stufe viele Formen, keine zu häufig, und beim Ziehen keine Wiederholung.
-const KIT_LEVELS: Level[] = [1, 2, 3]
+const KIT_LEVELS: Level[] = [1, 2, 3, 4]
 
 describe.each(KIT_LEVELS)('Abwechslung Stufe %i', (level) => {
   it('mindestens 100 Formen unter 200 Aufgaben, keine öfter als 3 von 100', () => {
@@ -30,7 +30,7 @@ describe.each(KIT_LEVELS)('Abwechslung Stufe %i', (level) => {
   })
 })
 
-describe('Baukasten der Stufen 1 bis 3', () => {
+describe('Baukasten der Stufen 1 bis 4', () => {
   const tasks = (level: Level) => Array.from({ length: 200 }, (_, i) => generateRearrangeTask({ level, seed: i + 1 }).task)
   const count = (side: Parameters<typeof subterms>[0], t: string) => subterms(side).filter((s) => s.kind === 'var' && s.name === t).length
 
@@ -64,7 +64,22 @@ describe('Baukasten der Stufen 1 bis 3', () => {
     }
   })
 
-  it.each([1, 2, 3] as Level[])('Stufe %i: meist nach x, manchmal nach einem anderen Buchstaben', (level) => {
+  it('Stufe 4: verschachtelt, im Mittel mindestens 7 Umformungen, jede mindestens 6', () => {
+    const lengths = tasks(4).map((t) => solveEquation(t.equation, t.target)!.steps.length)
+    expect(Math.min(...lengths)).toBeGreaterThanOrEqual(6)
+    expect(lengths.reduce((a, b) => a + b, 0) / lengths.length).toBeGreaterThanOrEqual(7)
+  })
+
+  it('Stufe 4: in jeder Aufgabe e-Funktion, Logarithmus oder Wurzeln in Wurzeln', () => {
+    for (const t of tasks(4)) {
+      const parts = [t.equation.lhs, t.equation.rhs].flatMap((side) => subterms(side))
+      const blocks = parts.some((s) => s.kind === 'fn' || s.kind === 'log' || (s.kind === 'pow' && contains(s.exp, t.target)))
+      const nested = parts.some((s) => s.kind === 'root' && subterms(s.arg).some((r) => r.kind === 'root'))
+      expect(blocks || nested, taskLatex(t)).toBe(true)
+    }
+  })
+
+  it.each([1, 2, 3, 4] as Level[])('Stufe %i: meist nach x, manchmal nach einem anderen Buchstaben', (level) => {
     const letters = tasks(level).filter((t) => t.target !== 'x').length
     expect(letters).toBeGreaterThanOrEqual(20)
     expect(letters).toBeLessThanOrEqual(80)
