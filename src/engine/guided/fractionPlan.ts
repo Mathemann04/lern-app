@@ -14,6 +14,10 @@ import {
   explainImagPower,
   explainImagSplit,
   explainImagSum,
+  explainLimitDivide,
+  explainLimitInsert,
+  explainLimitValue,
+  explainLimitZeroZero,
   explainInsert,
   explainDecimal,
   explainOrder,
@@ -35,7 +39,7 @@ import {
 import { m } from '../explain/format.ts'
 import type { Explanation } from '../explain/texts.ts'
 import { toLatex } from '../expr/print.ts'
-import { type Expr, mul, num, pow } from '../expr/types.ts'
+import { type Expr, mul, num, pow, variable } from '../expr/types.ts'
 import { type FracWrong, type PartialWrong, fractionErrorRule, fractionWrongAnswers, partialWrongs } from '../fraction/errorRules.ts'
 import { ansatzExpr, dividedExpr, factorPowerExpr, findingEquation } from '../fraction/partial.ts'
 import { factoredExpr, factoredPoly, factorize, groupFactor, isOneFactored, productFormExpr, reduceFrac } from '../fraction/factor.ts'
@@ -50,6 +54,8 @@ import {
   cancelledFactor,
   fractionExpr,
   imagWork,
+  limitDividedExpr,
+  limitWork,
   multipliedExpr,
   nicePolyExpr,
   innerResultPart,
@@ -71,6 +77,8 @@ import {
   innerTask,
   instructionFor,
   isWhole,
+  limitPrefix,
+  limitedLatex,
   partExpr,
   partsOf,
   readableLatex,
@@ -130,6 +138,7 @@ type Draft = {
 export function planFraction(t: FractionTask, ref: TaskRef, focus?: string): GuidedTask {
   if (t.kind === 'tree') return planTree(t, ref, focus)
   if (t.kind === 'partial') return planPartial(t, ref, focus)
+  if (t.kind === 'limit') return planLimit(t, ref, focus)
   const solution = solveFraction(t)
   const wrongs = fractionWrongAnswers(t, solution).filter((w) => !w.freeOnly)
   const facts = factsOf(t, solution, wrongs)
@@ -327,30 +336,27 @@ function withOrderWrongs(step: GuidedStep, wrongs: readonly FracWrong[], t: Frac
 // eine Frage; bei der letzten Zahl ist die Antwort die ganze Zerlegung. Ein Schritt ohne typischen
 // Fehler wird nicht gefragt: Seine Zeilen und seine Erklärung kommen zum nächsten Schritt.
 
-type PartialCandidate = { readonly wrong: FracWrong; readonly shown: Expr; readonly content: string }
+type AskCandidate = { readonly wrong: FracWrong; readonly shown: Expr; readonly content: string }
 
-function planPartial(t: Extract<FractionTask, { kind: 'partial' }>, ref: TaskRef, focus?: string): GuidedTask {
-  const solution = solveFraction(t)
-  const w = partialWork(t)
-  const wrongs = partialWrongs(t, w)
-  const ids = FRACTION_CARD_IDS
+// Eine Frage mit selbst gebauten Antworten (Partialbrüche, Grenzwerte)
+type Ask = {
+  readonly key: string
+  readonly title: string
+  readonly question: string
+  readonly correct: { readonly content: string; readonly expr: Expr; readonly key: string }
+  readonly candidates: readonly AskCandidate[]
+  readonly hint: string
+  readonly explanation: Explanation
+  readonly lines: readonly string[]
+  readonly cards: readonly string[]
+  readonly final?: boolean
+}
+
+// Sammelt Schritte: Eine Frage ohne falsche Antwort wird nicht gestellt, ihre Zeilen und ihre
+// Erklärung kommen zur nächsten Frage
+function createAsker(ref: TaskRef, focus?: string) {
   const steps: GuidedStep[] = []
   let pending: { lines: string[]; explanations: Explanation[] } = { lines: [], explanations: [] }
-  const asWrong = (pw: PartialWrong): FracWrong => ({ rule: fractionErrorRule(pw.id), step: pw.step, stepExpr: pw.shown, value: pw.value, result: pw.result })
-  const candidate = (pw: PartialWrong, shown: Expr, content = m(shown)): PartialCandidate => ({ wrong: asWrong(pw), shown, content })
-
-  type Ask = {
-    readonly key: string
-    readonly title: string
-    readonly question: string
-    readonly correct: { readonly content: string; readonly expr: Expr; readonly key: string }
-    readonly candidates: readonly PartialCandidate[]
-    readonly hint: string
-    readonly explanation: Explanation
-    readonly lines: readonly string[]
-    readonly cards: readonly string[]
-    readonly final?: boolean
-  }
   const ask = (a: Ask) => {
     const rng = createRng(`brueche-geführt:${ref.level}:${ref.seed}:${a.key}`)
     const picked = pickWrong(a.candidates, a.correct.key, rng, focus)
@@ -374,6 +380,17 @@ function planPartial(t: Extract<FractionTask, { kind: 'partial' }>, ref: TaskRef
     })
     pending = { lines: [], explanations: [] }
   }
+  return { steps, ask }
+}
+
+function planPartial(t: Extract<FractionTask, { kind: 'partial' }>, ref: TaskRef, focus?: string): GuidedTask {
+  const solution = solveFraction(t)
+  const w = partialWork(t)
+  const wrongs = partialWrongs(t, w)
+  const ids = FRACTION_CARD_IDS
+  const { steps, ask } = createAsker(ref, focus)
+  const asWrong = (pw: PartialWrong): FracWrong => ({ rule: fractionErrorRule(pw.id), step: pw.step, stepExpr: pw.shown, value: pw.value, result: pw.result })
+  const candidate = (pw: PartialWrong, shown: Expr, content = m(shown)): AskCandidate => ({ wrong: asWrong(pw), shown, content })
 
   // Polynomdivision
   const denShown = shownExpr(t.part.den)
@@ -491,6 +508,121 @@ function planPartial(t: Extract<FractionTask, { kind: 'partial' }>, ref: TaskRef
     cards: [...new Set(steps.flatMap((s) => s.cards))],
   }
 }
+
+// --- Grenzwerte (Stufe 5) ---
+//
+// x → a: Einsetzen ergibt 0/0. Der Bruch wird wie eine eigene Aufgabe umgeformt (zerlegen und kürzen
+// bzw. zusammenfassen), in „Bisher" mit dem Limes davor; zuletzt „Setze x = a ein". n → ∞: eine
+// Summe erst zusammenfassen, Faktoren ausmultiplizieren, durch die höchste Potenz des Nenners
+// teilen, zuletzt der Grenzwert.
+
+function planLimit(t: Extract<FractionTask, { kind: 'limit' }>, ref: TaskRef, focus?: string): GuidedTask {
+  const solution = solveFraction(t)
+  const w = limitWork(t)
+  const wrongs = fractionWrongAnswers(t, solution).filter((x) => !x.freeOnly)
+  const ids = FRACTION_CARD_IDS
+  const prefix = limitPrefix(t.letter, t.to)
+  const withLimit = (line: string) => (line.startsWith('= ') ? `= ${limitedLatex(t.letter, t.to, line.slice(2))}` : line)
+  const { steps, ask } = createAsker(ref, focus)
+  const candidate = (x: FracWrong, shown: Expr): AskCandidate => ({ wrong: x, shown, content: m(shown) })
+  const at = t.to === 'infinity' ? '' : `${t.letter} = ${toLatex(num(t.to))}`
+
+  // Der Bruch selbst: Schritte wie bei der eigenen Aufgabe (bei n → ∞ nur eine Summe)
+  if (w.inner) {
+    const inner = planFraction(t.inner, ref, focus)
+    inner.steps.forEach((s, i) => {
+      const first = i === 0 && t.to !== 'infinity'
+      steps.push({
+        ...s,
+        id: `${steps.length + 1}-${s.id.replace(/^\d+-/, '')}`,
+        question: first ? `${limitStart(t, at)} ${s.question}` : s.question,
+        explanation: first ? joinExplanations([explainLimitZeroZero(at, t.inner.kind === 'sum'), s.explanation]) : s.explanation,
+        established: (s.established === undefined ? [] : typeof s.established === 'string' ? [s.established] : s.established).map(withLimit),
+        cards: [...new Set([...s.cards, ids.limit])],
+      })
+    })
+  }
+  const result = solution.result
+  const resultKey = toLatex(result)
+  const innerWrongs = wrongs.filter((x) => !x.step.startsWith('limit-') && x.result)
+
+  if (t.to !== 'infinity') {
+    const own = wrongs.filter((x) => x.step === 'limit-insert')
+    // reicht das nicht: falsche Grenzwerte nach einem Fehler beim Umformen
+    const extra = innerWrongs.filter((x, j) => x.rule.id === focus || own.length + j < 3)
+    ask({
+      key: 'einsetzen',
+      title: 'Einsetzen',
+      question: `Setze $${at}$ ein. Was ist der Grenzwert?`,
+      correct: { content: m(result), expr: result, key: resultKey },
+      candidates: [...own, ...extra].map((x) => candidate(x, x.result ?? x.stepExpr)),
+      hint: FRACTION_HINTS.limitInsert,
+      explanation: explainLimitInsert(at, w.fracExpr, result),
+      lines: [`= ${resultKey}`],
+      cards: [ids.limit],
+      final: true,
+    })
+  } else {
+    const n = t.letter
+    if (w.expanded) {
+      ask({
+        key: 'ausmultiplizieren',
+        title: 'Ausmultiplizieren',
+        question: 'Multipliziere Zähler und Nenner aus.',
+        correct: { content: m(w.fracExpr), expr: w.fracExpr, key: toLatex(w.fracExpr) },
+        candidates: [],
+        hint: FRACTION_HINTS.multiplyOut,
+        explanation: { detailed: `Erst ausmultiplizieren, dann siehst du die höchsten Potenzen: $${toLatex(w.fracExpr)}$.`, short: `$${toLatex(w.fracExpr)}$` },
+        lines: [`= ${prefix} ${toLatex(w.fracExpr)}`],
+        cards: [ids.limit],
+      })
+    }
+    const power = w.power === 1 ? variable(n) : pow(variable(n), num(w.power))
+    const divided = limitDividedExpr(w)
+    ask({
+      key: 'teilen',
+      title: 'Durch die höchste Potenz teilen',
+      question: `Teile Zähler und Nenner durch die höchste Potenz $${toLatex(power)}$ des Nenners.`,
+      correct: { content: m(divided), expr: divided, key: toLatex(divided) },
+      candidates: wrongs.filter((x) => x.step === 'limit-divide').map((x) => candidate(x, x.stepExpr)),
+      hint: FRACTION_HINTS.limitDivide,
+      explanation: explainLimitDivide(power, w.fracExpr, divided),
+      lines: [`= ${prefix} ${toLatex(divided)}`],
+      cards: [ids.limit],
+    })
+    const own = wrongs.filter((x) => x.step === 'limit-value')
+    const extra = innerWrongs.filter((x, j) => x.rule.id === focus || own.length + j < 3)
+    ask({
+      key: 'grenzwert',
+      title: 'Grenzwert',
+      question: `Was ist der Grenzwert für $${n} \\to \\infty$?`,
+      correct: { content: m(result), expr: result, key: resultKey },
+      candidates: [...own, ...extra].map((x) => candidate(x, x.result ?? x.stepExpr)),
+      hint: FRACTION_HINTS.limitValue,
+      explanation: explainLimitValue(n, divided, result),
+      lines: [`= ${resultKey}`],
+      cards: [ids.limit],
+      final: true,
+    })
+  }
+
+  return {
+    ref,
+    expr: taskExpr(t),
+    functionLatex: taskLatex(t),
+    instruction: instructionFor(t).replace(/\.$/, ''),
+    answerLabel: taskLatex(t),
+    steps,
+    ruleHint: fractionTaskHint(t),
+    result,
+    resultLatex: `${taskLatex(t)} = ${resultKey}`,
+    cards: [...new Set(steps.flatMap((s) => s.cards))],
+  }
+}
+
+// Satz vor der ersten Frage: Einsetzen geht noch nicht
+const limitStart = (t: Extract<FractionTask, { kind: 'limit' }>, at: string) =>
+  t.inner.kind === 'sum' ? `Bei $${at}$ werden die Nenner $0$, einsetzen geht noch nicht.` : `Einsetzen von $${at}$ ergibt $\\frac{0}{0}$.`
 
 // --- Was die Texte über die Aufgabe wissen müssen ---
 
@@ -732,6 +864,9 @@ const TITLES: Record<StepKind, readonly [first: string, later: string]> = {
   'imag-multiply': ['Ausmultiplizieren', 'ausmultiplizieren'],
   'imag-split': ['Aufteilen', 'aufteilen'],
   'imag-sum': ['Zusammenfassen', 'zusammenfassen'],
+  'limit-insert': ['Einsetzen', 'einsetzen'],
+  'limit-divide': ['Durch die höchste Potenz teilen', 'durch die höchste Potenz teilen'],
+  'limit-value': ['Grenzwert', 'Grenzwert'],
 }
 
 function titleOf(kinds: readonly StepKind[]): string {
@@ -807,6 +942,12 @@ function phrase(kind: StepKind, facts: Facts): string {
       return 'teile in Realteil und Imaginärteil auf'
     case 'imag-sum':
       return 'teile auf und fasse Realteile und Imaginärteile zusammen'
+    case 'limit-insert':
+      return 'setze ein'
+    case 'limit-divide':
+      return 'teile Zähler und Nenner durch die höchste Potenz des Nenners'
+    case 'limit-value':
+      return 'bestimme den Grenzwert'
   }
 }
 
@@ -863,6 +1004,12 @@ function hintOf(kind: StepKind, facts: Facts): string {
       return FRACTION_HINTS.imagSplit
     case 'imag-sum':
       return FRACTION_HINTS.imagSum
+    case 'limit-insert':
+      return FRACTION_HINTS.limitInsert
+    case 'limit-divide':
+      return FRACTION_HINTS.limitDivide
+    case 'limit-value':
+      return FRACTION_HINTS.limitValue
   }
 }
 
@@ -950,6 +1097,10 @@ function cardsOf(kind: StepKind, facts: Facts): string[] {
       case 'imag-split':
       case 'imag-sum':
         return [ids.imaginary]
+      case 'limit-insert':
+      case 'limit-divide':
+      case 'limit-value':
+        return [ids.limit]
     }
   })()
   // Bausteine wie e^x; mit eigenen Regeln (√x, sin² x + cos² x = 1, e^{2x} : e^x) deren Karte
@@ -1061,6 +1212,9 @@ function explainStep(step: FracStep, solution: FracSolution, facts: Facts): Expl
     case 'divide':
     case 'ansatz':
     case 'coef':
+    case 'limit-insert':
+    case 'limit-divide':
+    case 'limit-value':
       // Rechenbäume plant planTree, Partialbrüche planPartial; diese Schritte kommen hier nicht vor
       return { detailed: STEP_NAMES[step.kind], short: STEP_NAMES[step.kind] }
   }

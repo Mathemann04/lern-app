@@ -5,6 +5,7 @@ import { type Expr, IMAG, add, cos, exp, mul, num, pow, sin, sqrt, sub, variable
 import { FRACTION_ERROR_RULES, fractionWrongAnswers } from './errorRules.ts'
 import { toFrac } from './frac.ts'
 import { type Poly, polyDivideExact } from './poly.ts'
+import { rat } from '../rational.ts'
 import {
   type BlockRule,
   type FractionShape,
@@ -36,6 +37,11 @@ function poly(e: Expr): Poly {
 const fr = (n: Expr, d: Expr = num(1), ascendingDen = false): Part => part(expanded(poly(n)), expanded(poly(d), ascendingDen))
 const task = (s: FractionShape, rule?: BlockRule): FractionTask => ({ ...s, hints: [], ...(rule ? { rule } : {}) }) as FractionTask
 const x2 = pow(x, num(2))
+// Grenzwerte: x → a bzw. n → ∞
+const nn = variable('n')
+const limitAt = (to: number, n: Expr, d: Expr): FractionTask => task({ kind: 'limit', inner: task({ kind: 'reduce', part: fr(n, d) }), letter: 'x', to: rat(to) })
+const limitInf = (p: Part): FractionTask => task({ kind: 'limit', inner: task({ kind: 'reduce', part: p }), letter: 'n', to: 'infinity' })
+const n2 = pow(nn, num(2))
 // komplexe Zahlen: ein Bruch mit i im Nenner
 const imag = (n: Expr, d: Expr): FractionTask => task({ kind: 'imaginary', terms: [plus(fr(n, d))] })
 
@@ -168,6 +174,15 @@ const CASES: Case[] = [
   ['frac-imag-split', imag(add(num(3), mul(num(4), IMAG)), sub(num(1), mul(num(2), IMAG))), 'result', '-1 + 10\\mathrm{i}'],
   ['frac-imag-direct', imag(add(num(3), mul(num(4), IMAG)), sub(num(1), mul(num(2), IMAG))), 'result', '3 - 2\\mathrm{i}'],
   // \frac{1 + i}{1 - i} = i, also i − (1 + 3i) = −1 − 2i; falsch: i − 1 + 3i
+  // Grenzwerte: \lim_{x \to 2} \frac{x^2 - 4}{x - 2} = 4, falsch 0
+  ['frac-limit-zero-zero', limitAt(2, sub(x2, num(4)), sub(x, num(2))), 'result', '0'],
+  // \lim_{x \to -1} \frac{x^2 + 4x + 3}{x + 1} = \lim (x + 3) = 2; mit x = 1 eingesetzt: 4
+  ['frac-limit-insert-sign', limitAt(-1, add(add(x2, mul(num(4), x)), num(3)), add(x, num(1))), 'result', '4'],
+  ['frac-limit-divide-one-side', limitInf(fr(sub(mul(num(3), n2), nn), add(mul(num(2), n2), num(5)))), 'step', '\\frac{3 - \\frac{1}{n}}{2n^{2} + 5}'],
+  ['frac-limit-infinity-one', limitInf(fr(sub(mul(num(3), n2), nn), add(mul(num(2), n2), num(5)))), 'result', '1'],
+  ['frac-limit-n-zero', limitInf(fr(add(sub(mul(num(3), n2), nn), num(2)), add(mul(num(2), n2), num(5)))), 'result', '\\frac{2}{5}'],
+  ['frac-limit-degree', limitInf(fr(add(mul(num(2), nn), num(1)), add(n2, num(3)))), 'result', '2'],
+  ['frac-limit-first-terms', limitInf(part(expanded(poly(sub(num(3), mul(num(2), n2))), true), expanded(poly(add(mul(num(4), n2), num(1)))))), 'result', '\\frac{3}{4}'],
   ['frac-imag-minus', task({ kind: 'imaginary', terms: [plus(fr(add(num(1), IMAG), sub(num(1), IMAG))), minus(fr(add(num(1), mul(num(3), IMAG))))] }), 'result', '-1 + 4\\mathrm{i}'],
 ]
 

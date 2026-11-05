@@ -262,6 +262,41 @@ export const FRACTION_ERROR_TEXTS: Readonly<Record<string, Explanation>> = {
       'Komplexe Zahlen lassen sich nicht teilweise teilen: $\\frac{a + b\\mathrm{i}}{c + d\\mathrm{i}}$ ist nicht $\\frac{a}{c} + \\frac{b}{d}\\mathrm{i}$. Erweitere stattdessen mit dem konjugiert Komplexen des Nenners, dann ist der Nenner eine reelle Zahl.',
     short: 'Nicht teilweise teilen: erst mit dem konjugiert Komplexen erweitern.',
   },
+  'frac-limit-zero-zero': {
+    detailed:
+      'Ergibt das Einsetzen $\\frac{0}{0}$, ist das noch kein Ergebnis: Zähler und Nenner haben dann einen gemeinsamen Faktor wie $(x - a)$. Zerlege beide, kürze diesen Faktor und setze erst danach ein.',
+    short: '$\\frac{0}{0}$ ist kein Wert: erst zerlegen und kürzen, dann einsetzen.',
+  },
+  'frac-limit-insert-sign': {
+    detailed:
+      'Bei $x \\to a$ setzt du genau die Zahl $a$ ein, mit ihrem Vorzeichen. Bei $x \\to -2$ also $x = -2$, nicht $x = 2$.',
+    short: 'Die Zahl mit ihrem Vorzeichen einsetzen: bei $x \\to -2$ ist $x = -2$.',
+  },
+  'frac-limit-divide-one-side': {
+    detailed:
+      'Damit der Wert gleich bleibt, teilst du Zähler und Nenner durch dieselbe Potenz, so wie beim Kürzen. Nur den Zähler zu teilen ändert den Bruch.',
+    short: 'Zähler und Nenner durch dieselbe Potenz teilen.',
+  },
+  'frac-limit-infinity-one': {
+    detailed:
+      'Gehen Zähler und Nenner beide gegen unendlich, ist das Ergebnis noch offen: $\\frac{\\infty}{\\infty}$ ist kein Wert. Teile Zähler und Nenner durch die höchste Potenz des Nenners, dann siehst du den Grenzwert.',
+    short: '$\\frac{\\infty}{\\infty}$ ist kein Wert: durch die höchste Potenz teilen.',
+  },
+  'frac-limit-n-zero': {
+    detailed:
+      'Bei $n \\to \\infty$ wird $n$ immer größer. Die Zahlen ohne $n$ spielen dann keine Rolle mehr, entscheidend sind die höchsten Potenzen. Wer $n = 0$ einsetzt, rechnet den Wert am Anfang, nicht den Grenzwert.',
+    short: 'Für große $n$ zählen die höchsten Potenzen, nicht die Zahlen ohne $n$.',
+  },
+  'frac-limit-degree': {
+    detailed:
+      'Die Zahlen vor den höchsten Potenzen darfst du nur teilen, wenn Zähler und Nenner denselben Grad haben. Ist der Grad im Zähler kleiner, wächst der Nenner schneller und der Bruch geht gegen $0$.',
+    short: 'Kleinerer Grad im Zähler: Der Grenzwert ist $0$.',
+  },
+  'frac-limit-first-terms': {
+    detailed:
+      'Entscheidend ist nicht, welche Zahl vorne steht, sondern welche vor der höchsten Potenz steht. Bei $\\frac{3 - 2n^2}{4n^2 + 1}$ sind das $-2$ und $4$.',
+    short: 'Die Zahlen vor der höchsten Potenz nehmen, egal wo sie stehen.',
+  },
   'frac-imag-minus': {
     detailed:
       'Ein Minus vor einer komplexen Zahl gilt für beide Teile: $-(a + b\\mathrm{i}) = -a - b\\mathrm{i}$. Hier wurde nur der Realteil abgezogen.',
@@ -529,6 +564,48 @@ export function explainImagSum(before: Expr, after: Expr): Explanation {
   }
 }
 
+// --- Grenzwerte ---
+
+// x → a: in den gekürzten Bruch from einsetzen
+export function explainLimitInsert(at: string, from: Expr, value: Expr): Explanation {
+  const equation = `$${toLatex(from)}$ bei $${at}$`
+  return {
+    detailed: `Nach dem Kürzen ist der Nenner bei $${at}$ nicht mehr $0$. Setze ein: ${equation} ergibt $${toLatex(value)}$. Das ist der Grenzwert.`,
+    short: `Einsetzen: $${toLatex(value)}$.`,
+  }
+}
+
+// Vor dem Umformen: Einsetzen ergibt 0/0 (bei einer Summe: die Nenner werden 0)
+export function explainLimitZeroZero(at: string, sum = false): Explanation {
+  if (sum) {
+    return {
+      detailed: `Bei $${at}$ werden die Nenner $0$, du kannst noch nicht einsetzen. Fasse deshalb erst zu einem Bruch zusammen und kürze, dann geht es.`,
+      short: `Erst zusammenfassen und kürzen, dann einsetzen.`,
+    }
+  }
+  return {
+    detailed: `Setzt du gleich $${at}$ ein, ergibt sich $\\frac{0}{0}$. Das ist noch kein Wert: Zähler und Nenner haben einen gemeinsamen Faktor. Forme deshalb erst um.`,
+    short: `Einsetzen ergibt $\\frac{0}{0}$, also erst umformen.`,
+  }
+}
+
+// n → ∞: Zähler und Nenner durch die höchste Potenz power teilen
+export function explainLimitDivide(power: Expr, from: Expr, after: Expr): Explanation {
+  const equation = `$${toLatex(from)} = ${toLatex(after)}$`
+  return {
+    detailed: `Teile Zähler und Nenner durch die höchste Potenz des Nenners, $${toLatex(power)}$, und zwar jeden Summanden. Der Wert bleibt gleich, wie beim Kürzen: ${equation}.`,
+    short: `${equation}.`,
+  }
+}
+
+// n → ∞: die Brüche mit n im Nenner gehen gegen 0
+export function explainLimitValue(letter: string, divided: Expr, value: Expr): Explanation {
+  return {
+    detailed: `Für $${letter} \\to \\infty$ gehen alle Brüche mit $${letter}$ im Nenner gegen $0$, zum Beispiel $\\frac{1}{${letter}} \\to 0$. In $${toLatex(divided)}$ bleiben nur die Zahlen ohne $${letter}$ übrig. Der Grenzwert ist $${toLatex(value)}$.`,
+    short: `Brüche mit $${letter}$ im Nenner gehen gegen $0$: Grenzwert $${toLatex(value)}$.`,
+  }
+}
+
 // Regel eines Bausteins: trig (sin² x + cos² x = 1) oder root ((√x)² = x)
 export function explainRule(kind: 'trig' | 'root', before: Expr, after: Expr): Explanation {
   const equation = `$${toLatex(before)} = ${toLatex(after)}$`
@@ -582,6 +659,9 @@ export const FRACTION_HINTS = {
   imagConjugate: 'Zum Nenner $c + d\\mathrm{i}$ gehört das konjugiert Komplexe $c - d\\mathrm{i}$: Realteil gleich, Imaginärteil mit umgedrehtem Vorzeichen. Zähler und Nenner werden damit malgenommen.',
   imagMultiply: 'Jeden Summanden mit jedem malnehmen, $\\mathrm{i}^2 = -1$ einsetzen. Im Nenner gilt $(c + d\\mathrm{i})(c - d\\mathrm{i}) = c^2 + d^2$.',
   imagSplit: 'Teile beide Teile durch den Nenner: $\\frac{p + q\\mathrm{i}}{r} = \\frac{p}{r} + \\frac{q}{r}\\mathrm{i}$, dann kürzen.',
+  limitInsert: 'Nach dem Kürzen ist der Nenner an dieser Stelle nicht mehr $0$. Setze die Zahl ein und rechne aus.',
+  limitDivide: 'Teile jeden Summanden in Zähler und Nenner durch die höchste Potenz des Nenners, z. B. $\\frac{3n^2}{n^2} = 3$ und $\\frac{n}{n^2} = \\frac{1}{n}$.',
+  limitValue: 'Für $n \\to \\infty$ gehen Brüche wie $\\frac{1}{n}$ und $\\frac{5}{n^2}$ gegen $0$. Was bleibt übrig?',
   imagSum: 'Teile den Bruch auf: $\\frac{p + q\\mathrm{i}}{r} = \\frac{p}{r} + \\frac{q}{r}\\mathrm{i}$. Dann Realteile und Imaginärteile getrennt zusammenfassen; ein Minus vor einer Klammer gilt für beide Teile.',
 } as const
 
@@ -628,6 +708,12 @@ export function fractionTaskHint(t: FractionShape): Explanation {
       )
     case 'tree':
       return same('Klammern zuerst, dann Punkt vor Strich. Rechne jeden Teil wie eine eigene Aufgabe und kürze die Teilergebnisse gleich.')
+    case 'limit':
+      return same(
+        t.to === 'infinity'
+          ? 'Fasse zuerst zu einem Bruch zusammen und multipliziere aus. Teile dann Zähler und Nenner durch die höchste Potenz des Nenners: Brüche mit $n$ im Nenner gehen gegen $0$.'
+          : 'Einsetzen ergibt $\\frac{0}{0}$. Forme deshalb erst um: zerlegen und kürzen (bei einer Summe erst zusammenfassen). Danach kannst du einsetzen.',
+      )
     case 'imaginary':
       return same(
         'Rechne zuerst Potenzen wie $\\mathrm{i}^3$ aus. Erweitere den Bruch dann mit dem konjugiert Komplexen des Nenners, multipliziere aus ($\\mathrm{i}^2 = -1$) und teile Realteil und Imaginärteil durch den reellen Nenner.',

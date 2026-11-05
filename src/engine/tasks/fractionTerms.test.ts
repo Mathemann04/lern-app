@@ -9,7 +9,7 @@ import { factoredPoly, reducedFrac } from '../fraction/factor.ts'
 import { fracAtoms, fracEquals, isRootAtom, radicandLetters, toFrac } from '../fraction/frac.ts'
 import { atomsOf, constValue, gcdUnivariate, polyConst, polyContent, polyDivideExact, polySubstitute, totalDegree } from '../fraction/poly.ts'
 import { solveFraction, solveTree, taskLetter } from '../fraction/solve.ts'
-import { partsOf, shownPoly, taskExpr, taskLatex } from '../fraction/task.ts'
+import { type FractionTask, partsOf, shownPoly, taskExpr, taskFrac, taskLatex } from '../fraction/task.ts'
 import { createRng } from '../random/rng.ts'
 import { ratToNumber } from '../rational.ts'
 import { fractionTemplatesForLevel, generateFractionTask } from './fractionTerms.ts'
@@ -70,6 +70,16 @@ function evaluateComplex(e: Expr, env: Env): Complex {
   }
 }
 const closeComplex = (a: Complex, b: Complex) => close(a[0], b[0]) && close(a[1], b[1])
+
+// Grenzwerte: unabhängige Gegenprobe mit Zahlen ganz nah an a bzw. einem sehr großen n
+function numericLimit(t: Extract<FractionTask, { kind: 'limit' }>): number {
+  const e = taskExpr(t)
+  if (t.to === 'infinity') return evaluate(e, { [t.letter]: 1e7 })
+  const a = ratToNumber(t.to)
+  // links und rechts von a gemittelt: Der Fehler ist dann sehr klein, ohne dass sich Rundungsfehler aufschaukeln
+  return (evaluate(e, { [t.letter]: a + 1e-4 }) + evaluate(e, { [t.letter]: a - 1e-4 })) / 2
+}
+const nearly = (a: number, b: number) => Math.abs(a - b) <= 1e-4 * Math.max(1, Math.abs(b))
 // Stellen für Aufgaben mit i: je Buchstabe eine Zufallszahl (Buchstaben sind reell)
 function complexPoints(atoms: string[], seed: string): Env[] {
   const rng = createRng(seed)
@@ -109,6 +119,10 @@ describe.each(LEVELS_SO_FAR)('Brüche Stufe %i', (level) => {
       expect(fracEquals(reducedFrac(solution.reduced), solution.value), context).toBe(true)
       // unabhängige Gegenprobe: Werte des Aufgabenterms gegen Werte des Ergebnisses
       const expr = taskExpr(task)
+      if (task.kind === 'limit') {
+        expect(nearly(numericLimit(task), evaluate(solution.result, {})), context).toBe(true)
+        continue
+      }
       if (task.kind === 'imaginary') {
         for (const env of complexPoints(fracAtoms(solution.value), `prüfen:${ref.seed}`)) {
           expect(closeComplex(evaluateComplex(expr, env), evaluateComplex(solution.result, env)), `${context} bei ${JSON.stringify(env)}`).toBe(true)
@@ -135,10 +149,12 @@ describe.each(LEVELS_SO_FAR)('Brüche Stufe %i', (level) => {
         continue
       }
       for (const step of solution.steps) {
+        // Grenzwert: die Umformungen haben den Wert des Bruchs, erst der letzte Schritt den Grenzwert
+        const target = task.kind === 'limit' && step.kind !== 'limit-insert' && step.kind !== 'limit-value' ? taskFrac(task) : solution.value
         for (const e of [step.expr, step.before]) {
           if (!e) continue
           const f = toFrac(e)
-          expect(f && fracEquals(f, solution.value), `${formatTaskNumber(ref)} ${step.kind}: ${toLatex(e)}`).toBe(true)
+          expect(f && fracEquals(f, target), `${formatTaskNumber(ref)} ${step.kind}: ${toLatex(e)}`).toBe(true)
         }
       }
     }
@@ -172,6 +188,10 @@ describe.each(LEVELS_SO_FAR)('Brüche Stufe %i', (level) => {
         expect(fracEquals(w.value, solution.value), `${context} ${w.rule.id}`).toBe(false)
         expect(latexProblem(toLatex(w.result)), `${context} ${w.rule.id}`).toBeNull()
         // unabhängige Gegenprobe: an mindestens einer Stelle verschieden
+        if (task.kind === 'limit') {
+          expect(nearly(numericLimit(task), evaluate(w.result, {})), `${context} ${w.rule.id}: ${toLatex(w.result)}`).toBe(false)
+          continue
+        }
         if (task.kind === 'imaginary') {
           const differs = complexPoints(fracAtoms(solution.value), `falsch:${ref.seed}`).some((env) => !closeComplex(evaluateComplex(taskExpr(task), env), evaluateComplex(w.result!, env)))
           expect(differs, `${context} ${w.rule.id}: ${toLatex(w.result)}`).toBe(true)

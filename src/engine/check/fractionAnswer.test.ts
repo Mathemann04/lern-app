@@ -6,6 +6,7 @@ import { type Poly, polyDivideExact } from '../fraction/poly.ts'
 import { type BlockRule, type FractionShape, type FractionTask, type Part, expanded, isReadableTask, minus, part, plus, taskLatex, withRoots } from '../fraction/task.ts'
 import { generateFractionTask } from '../tasks/fractionTerms.ts'
 import type { Level } from '../tasks/taskNumber.ts'
+import { rat } from '../rational.ts'
 import { type FractionVerdict, checkFractionAnswer, prepareFractionCheck, prepareFractionFree } from './fractionAnswer.ts'
 
 function poly(e: Expr): Poly {
@@ -211,6 +212,34 @@ describe('Stufe 5: Partialbrüche', () => {
     expect(check('x+3-2+\\frac{2}{x-1}')).toBe('unfinished:partial-combine')
     expect(check('\\frac{2}{x-1}')).toBe('knownError:frac-partial-no-division')
     expect(check('x+1')).toBe('knownError:frac-division-remainder')
+  })
+})
+
+describe('Stufe 5: Grenzwerte', () => {
+  const checker = (t: FractionTask) => {
+    const context = prepareFractionCheck(t)
+    return (latex: string) => short(checkFractionAnswer(context, latex))
+  }
+
+  it('x gegen 2: eine Zahl, gekürzt; ein Term ist noch nicht fertig', () => {
+    const x2 = pow(x, num(2))
+    const check = checker(task({ kind: 'limit', inner: task({ kind: 'reduce', part: fr(sub(x2, num(4)), add(sub(x2, mul(num(3), x)), num(2))) }), letter: 'x', to: rat(2) }))
+    expect(check('4')).toBe('correct')
+    expect(check('\\frac{8}{2}')).toBe('unfinished:not-reduced')
+    expect(check('\\frac{x+2}{x-1}')).toBe('unfinished:limit-insert')
+    expect(check('\\frac{x+1}{x-1}')).toBe('wrong')
+    expect(check('0')).toBe('knownError:frac-limit-zero-zero')
+    expect(check('5')).toBe('wrong')
+  })
+
+  it('n gegen unendlich', () => {
+    const n = variable('n')
+    const check = checker(task({ kind: 'limit', inner: task({ kind: 'reduce', part: fr(sub(mul(num(3), pow(n, num(2))), n), add(mul(num(2), pow(n, num(2))), num(5))) }), letter: 'n', to: 'infinity' }))
+    expect(check('\\frac{3}{2}')).toBe('correct')
+    expect(check('1{,}5')).toBe('unfinished:decimal')
+    expect(check('\\frac{3-\\frac{1}{n}}{2+\\frac{5}{n^2}}')).toBe('unfinished:limit-infinity')
+    expect(check('1')).toBe('knownError:frac-limit-infinity-one')
+    expect(check('-\\frac{3}{2}')).toBe('wrongSign')
   })
 })
 

@@ -6,7 +6,7 @@ import { parseRichText } from '../explain/richText.ts'
 import { type Env, evaluate } from '../expr/evaluate.ts'
 import { toLatex } from '../expr/print.ts'
 import { samplePoints } from '../expr/sample.ts'
-import { type Expr, IMAG, add, mul, num, pow, sub, x } from '../expr/types.ts'
+import { type Expr, IMAG, add, mul, num, pow, sub, variable, x } from '../expr/types.ts'
 import { FRACTION_ERROR_RULES } from '../fraction/errorRules.ts'
 import { fracEquals, toFrac } from '../fraction/frac.ts'
 import { isMultipleOf } from '../fraction/factor.ts'
@@ -17,6 +17,7 @@ import type { Frac } from '../fraction/frac.ts'
 import { createRng } from '../random/rng.ts'
 import { generateFractionTask } from '../tasks/fractionTerms.ts'
 import type { Level } from '../tasks/taskNumber.ts'
+import { rat } from '../rational.ts'
 import { planFraction, planFractionTask } from './fractionPlan.ts'
 import type { GuidedStep, GuidedTask } from './types.ts'
 
@@ -114,6 +115,29 @@ describe('Zahlenbrüche', () => {
   })
 })
 
+describe('Grenzwerte', () => {
+  it('x gegen 2: Satz zu 0/0, Bisher mit Limes, zuletzt einsetzen', () => {
+    const x2 = pow(x, num(2))
+    const plan = planFraction(task({ kind: 'limit', inner: task({ kind: 'reduce', part: fr(sub(x2, num(4)), add(sub(x2, mul(num(3), x)), num(2))) }), letter: 'x', to: rat(2) }), ref)
+    expect(plan.instruction).toBe('Bestimme den Grenzwert')
+    expect(plan.steps[0].question).toMatch(/^Einsetzen von \$x = 2\$ ergibt \$\\frac\{0\}\{0\}\$\./)
+    expect(plan.steps[0].established).toEqual(['= \\lim_{x \\to 2} \\frac{(x - 2)(x + 2)}{x^{2} - 3x + 2}'])
+    const last = plan.steps.at(-1)!
+    expect(last.title).toBe('Einsetzen')
+    expect(correctOf(last).content).toBe('$4$')
+    expect(contents(last, false)).toContain('$0$')
+    expect(plan.cards).toContain('fraction-limit')
+  })
+
+  it('n gegen unendlich: teilen, dann der Grenzwert', () => {
+    const n = variable('n')
+    const plan = planFraction(task({ kind: 'limit', inner: task({ kind: 'reduce', part: fr(sub(mul(num(3), pow(n, num(2))), n), add(mul(num(2), pow(n, num(2))), num(5))) }), letter: 'n', to: 'infinity' }), ref)
+    expect(plan.steps.map((s) => s.title)).toEqual(['Durch die höchste Potenz teilen', 'Grenzwert'])
+    expect(correctOf(plan.steps[1]).content).toBe('$\\frac{3}{2}$')
+    expect(plan.steps[1].choices.map((c) => c.errorRuleId).filter(Boolean).sort()).toEqual(['frac-limit-infinity-one', 'frac-limit-n-zero'])
+  })
+})
+
 describe('Komplexe Zahlen', () => {
   it('Beispiel aus dem Plan: erweitern, ausmultiplizieren, aufteilen', () => {
     const z = (re: number, im: number) => add(num(re), mul(num(im), IMAG))
@@ -177,6 +201,8 @@ const close = (a: number, b: number) => Math.abs(a - b) <= 1e-9 * Math.max(1, Ma
 // Klammer, der innere Doppelbruch) der Wert dieses Teils, sonst der Wert der Aufgabe
 function targetOf(t: FractionTask, step: GuidedStep, value: Frac): Frac {
   const ends = (kind: string) => step.id.endsWith(`-${kind}`)
+  // Grenzwert: die Umformungen wie beim Bruch selbst, zuletzt der Grenzwert
+  if (t.kind === 'limit') return ends('einsetzen') || ends('grenzwert') ? value : targetOf(t.inner, step, taskFrac(t.inner))
   // Partialbrüche: beim Zerlegen der Nenner, bei einer Zahl ihr Wert (der Ansatz hat noch keinen)
   if (t.kind === 'partial' && ends('factor-den')) return { num: shownPoly(t.part.den), den: polyConst(1) }
   const letter = /-coef-([A-D])$/.exec(step.id)?.[1]
@@ -243,6 +269,8 @@ describe.each([1, 2, 3, 4, 5] as Level[])('Brüche geführt, Stufe %i', (level) 
       const last = correctOf(plan.steps.at(-1)!)
       expect(last.content, context).toBe(`$${toLatex(solveFraction(t).result)}$`)
       expect(plan.resultLatex.endsWith(`= ${toLatex(plan.result)}`), context).toBe(true)
+      // Grenzwerte prüft fractionTerms.test.ts mit Zahlen nah an der Stelle
+      if (t.kind === 'limit') continue
       const letter = ['x', 'a', 'y', 'b'].find((v) => plan.functionLatex.includes(v)) ?? 'x'
       const points: Env[] = samplePoints([taskExpr(t), plan.result], createRng(`geführt:${context}`), 12, letter)
       for (const env of points) {

@@ -7,6 +7,7 @@ import {
   type Poly,
   type Term,
   constValue,
+  degreeIn,
   divRem,
   isZeroPoly,
   monoDivide,
@@ -39,6 +40,8 @@ import {
   imagTimesExpr,
   imagWork,
   innerResultPart,
+  limitDividedExpr,
+  limitWork,
   multipliedExpr,
   nicePolyExpr,
   partialFactorStep,
@@ -77,6 +80,7 @@ import {
   treeFrac,
 } from './task.ts'
 import { complexExpr, complexValueExpr, imagParts, reduceImagWrong } from './complex.ts'
+import { constantOf, fracValueAt, leadingOf, limitOf } from './limit.ts'
 import { type PartialWork, PARTIAL_LETTERS, ansatzExpr, cofactor, dividedExpr, multiplicityOf, partialExpr, partialFrac, partialResultOf, polyValueAt, termsWith } from './partial.ts'
 import { bracketIgnoredMistakes, decimalMistakes, leafOfFrac, leftToRight, minusBracketMistakes, normalize, replaceNode, withoutDecimals } from './tree.ts'
 
@@ -144,6 +148,13 @@ export const FRACTION_ERROR_RULES: readonly FracErrorRule[] = [
   { id: 'frac-imag-den', step: 'imag-multiply', name: 'Im Nenner $c^2 - d^2$ statt $c^2 + d^2$ gerechnet', wrongFormula: '(1 - 2\\mathrm{i})(1 + 2\\mathrm{i}) = 1 - 4' },
   { id: 'frac-imag-split', step: 'imag-split', name: 'Beim Aufteilen nur den Realteil durch den Nenner geteilt', wrongFormula: '\\frac{-5 + 10\\mathrm{i}}{5} = -1 + 10\\mathrm{i}' },
   { id: 'frac-imag-direct', step: 'imag-split', name: 'Realteil durch Realteil und Imaginärteil durch Imaginärteil geteilt', wrongFormula: '\\frac{3 + 4\\mathrm{i}}{1 - 2\\mathrm{i}} = 3 - 2\\mathrm{i}' },
+  { id: 'frac-limit-zero-zero', step: 'limit-insert', name: 'Den Ausdruck $\\frac{0}{0}$ als Zahl genommen', wrongFormula: '\\lim_{x \\to 2} \\frac{x^2 - 4}{x - 2} = \\frac{0}{0} = 0' },
+  { id: 'frac-limit-insert-sign', step: 'limit-insert', name: 'Beim Einsetzen das Vorzeichen der Stelle verwechselt', wrongFormula: '\\lim_{x \\to -2} (x - 1) = 1' },
+  { id: 'frac-limit-divide-one-side', step: 'limit-divide', name: 'Nur den Zähler durch die höchste Potenz geteilt', wrongFormula: '\\frac{3n^2 - n}{2n^2 + 5} = \\frac{3 - \\frac{1}{n}}{2n^2 + 5}' },
+  { id: 'frac-limit-infinity-one', step: 'limit-value', name: '$\\frac{\\infty}{\\infty}$ als $1$ genommen', wrongFormula: '\\lim_{n \\to \\infty} \\frac{3n^2 - n}{2n^2 + 5} = 1' },
+  { id: 'frac-limit-n-zero', step: 'limit-value', name: '$n = 0$ eingesetzt statt $n$ gegen unendlich', wrongFormula: '\\lim_{n \\to \\infty} \\frac{3n^2 - n + 2}{2n^2 + 5} = \\frac{2}{5}' },
+  { id: 'frac-limit-degree', step: 'limit-value', name: 'Die Zahlen vor den höchsten Potenzen geteilt, obwohl der Grad verschieden ist', wrongFormula: '\\lim_{n \\to \\infty} \\frac{2n + 1}{n^2 + 3} = 2' },
+  { id: 'frac-limit-first-terms', step: 'limit-value', name: 'Die vorderen Zahlen statt der Zahlen vor der höchsten Potenz genommen', wrongFormula: '\\lim_{n \\to \\infty} \\frac{3 - 2n^2}{4n^2 + 1} = \\frac{3}{4}' },
   { id: 'frac-imag-minus', step: 'imag-sum', name: 'Minus vor der Klammer nur auf den Realteil angewandt', wrongFormula: '2 - (1 + 3\\mathrm{i}) = 1 + 3\\mathrm{i}' },
 ]
 
@@ -203,6 +214,7 @@ export function ruledFrac(value: Frac, rule: BlockRule | undefined): Frac {
 // Falsches Ergebnis so geschrieben wie das richtige: gekürzt, mit der Regel des Bausteins;
 // bei Partialbrüchen zerlegt, bei komplexen Zahlen in der Form a + bi
 function resultOf(value: Frac, t: FractionTask): Expr {
+  if (t.kind === 'limit') return reduced(value, [])
   if (t.kind === 'partial') return partialResultOf(value, t.hints) ?? reduced(value, t.hints)
   if (t.kind === 'imaginary') return complexValueExpr(value, t.hints)
   return resultExpr(reduceFrac(ruledFrac(value, t.rule), t.hints), t)
@@ -902,6 +914,58 @@ function imaginaryMistakes(t: Extract<FractionTask, { kind: 'imaginary' }>): Can
   return out
 }
 
+// --- Grenzwerte ---
+
+const numberFrac = (r: Rational): Frac => fracOf(polyConst(r))
+
+function limitMistakes(t: Extract<FractionTask, { kind: 'limit' }>): Candidate[] {
+  const w = limitWork(t)
+  const out: Candidate[] = []
+  // Fehler beim Umformen des Bruchs (zerlegen, kürzen, zusammenfassen), richtig weitergerechnet;
+  // sie kommen nach den eigenen Fehlern des Grenzwerts (im freien Modus zählt der erste passende)
+  const inner: Candidate[] = []
+  if (w.inner) {
+    for (const wrong of fractionWrongAnswers(t.inner, w.inner)) {
+      if (!wrong.value) continue
+      const v = limitOf(wrong.value, t.letter, t.to)
+      if (v !== null) inner.push({ id: wrong.rule.id, step: wrong.step, stepExpr: wrong.stepExpr, value: numberFrac(v), ...(wrong.freeOnly ? { freeOnly: true } : {}) })
+    }
+  }
+  if (t.to !== 'infinity') {
+    // 0/0 als 0 oder als 1
+    for (const r of [rat(0), rat(1)]) out.push({ id: 'frac-limit-zero-zero', step: 'limit-insert', stepExpr: num(r), value: numberFrac(r) })
+    // −a statt a eingesetzt
+    if (ratSign(t.to) !== 0) {
+      const v = fracValueAt(w.frac, t.letter, ratNeg(t.to))
+      if (v !== null) out.push({ id: 'frac-limit-insert-sign', step: 'limit-insert', stepExpr: num(v), value: numberFrac(v) })
+    }
+    return [...out, ...inner]
+  }
+  const { num: p, den: q } = w.frac
+  const letter = t.letter
+  // nur der Zähler geteilt: Der Nenner wächst weiter, der Bruch geht gegen 0
+  out.push({ id: 'frac-limit-divide-one-side', step: 'limit-divide', stepExpr: limitDividedExpr(w, 'num'), value: numberFrac(rat(0)) })
+  out.push({ id: 'frac-limit-infinity-one', step: 'limit-value', stepExpr: num(1), value: numberFrac(rat(1)) })
+  // n = 0 eingesetzt
+  const c = constantOf(q, letter)
+  if (ratSign(c) !== 0) {
+    const v = ratDiv(constantOf(p, letter), c)
+    out.push({ id: 'frac-limit-n-zero', step: 'limit-value', stepExpr: num(v), value: numberFrac(v) })
+  }
+  // kleinerer Grad im Zähler, aber die höchsten Zahlen geteilt
+  if (degreeIn(p, letter) < degreeIn(q, letter)) {
+    const v = ratDiv(leadingOf(p, letter), leadingOf(q, letter))
+    out.push({ id: 'frac-limit-degree', step: 'limit-value', stepExpr: num(v), value: numberFrac(v) })
+  }
+  // vorne geschriebene Zahlen statt der Zahlen vor der höchsten Potenz
+  if (w.order.num || w.order.den) {
+    const first = (poly: Poly, ascending: boolean) => (ascending ? poly[poly.length - 1].coef : poly[0].coef)
+    const v = ratDiv(first(p, w.order.num), first(q, w.order.den))
+    out.push({ id: 'frac-limit-first-terms', step: 'limit-value', stepExpr: num(v), value: numberFrac(v) })
+  }
+  return [...out, ...inner]
+}
+
 // --- Verschachtelter Doppelbruch ---
 
 // Fehler im inneren Doppelbruch (als dessen Ergebnis) und danach wie beim Doppelbruch
@@ -973,6 +1037,8 @@ export function fractionWrongAnswers(t: FractionTask, solution: FracSolution = s
       ? partialCandidates(t)
       : t.kind === 'imaginary'
       ? imaginaryMistakes(t)
+      : t.kind === 'limit'
+      ? limitMistakes(t)
       : t.kind === 'nested'
       ? nestedMistakes(t)
       : [

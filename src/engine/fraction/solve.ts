@@ -1,4 +1,4 @@
-import { type Expr, add, div, mul, mulDot, neg, num, pow, tan, x } from '../expr/types.ts'
+import { type Expr, add, div, mul, mulDot, neg, num, pow, tan, variable, x } from '../expr/types.ts'
 import { type Rational, isOne, ratAbs, ratCmp, ratEq, ratNeg, rat, ratDiv, ratSign } from '../rational.ts'
 import {
   type Factored,
@@ -12,9 +12,10 @@ import {
   isOneFactored,
   reduceFrac,
   reducedExpr,
+  reducedFrac,
 } from './factor.ts'
-import { type Frac, isRootAtom, polyExpr, reduceImag, startsNegative, trigRewrite } from './frac.ts'
-import { type Poly, atomsOf, constValue, isOneFirst, polyAdd, polyContent, polyDivideExact, polyEquals, polyMul, polyNeg, polyScale, polySum, primitivePart } from './poly.ts'
+import { type Frac, fracOf, isRootAtom, polyExpr, reduceImag, startsNegative, trigRewrite } from './frac.ts'
+import { type Poly, atomsOf, constValue, isOneFirst, polyAdd, polyConst, polyContent, polyDivideExact, polyEquals, polyMul, polyNeg, polyScale, polySum, primitivePart } from './poly.ts'
 import {
   type BlockRule,
   type FractionTask,
@@ -43,6 +44,7 @@ import {
 } from './task.ts'
 import { type TreeStage, hasDecimal, treeStages, withoutDecimals } from './tree.ts'
 import { type PartialWork, ansatzExpr, dividedExpr, partialExpr, partialWorkOf } from './partial.ts'
+import { type LimitTarget, dividedFracExpr, fracValueAt, highestPower, limitAtInfinity } from './limit.ts'
 import { type ComplexParts, complexExpr, complexParts, complexReduced, complexValueExpr, conjugateFactor, hasImag, hasImagPower } from './complex.ts'
 
 // Rechenweg einer Bruchaufgabe wie im Skript: Hauptnenner, erweitern, Zähler zusammenfassen,
@@ -53,7 +55,8 @@ import { type ComplexParts, complexExpr, complexParts, complexReduced, complexVa
 // Rechenarten (erst jede Klammer zu einem Bruch), Partialbruchzerlegung (Polynomdivision, Nenner
 // zerlegen, Ansatz und Zahlen: Ansatz und Zahlen haben keinen Zwischenstand, expr ist dort null),
 // komplexe Zahlen teilen (Potenzen von i, mit dem konjugiert Komplexen erweitern,
-// ausmultiplizieren, aufteilen).
+// ausmultiplizieren, aufteilen), Grenzwerte (x → a: umformen wie beim Kürzen bzw. Zusammenfassen,
+// dann einsetzen; n → ∞: durch die höchste Potenz teilen).
 
 export type StepKind =
   | 'lcd'
@@ -83,6 +86,9 @@ export type StepKind =
   | 'imag-multiply'
   | 'imag-split'
   | 'imag-sum'
+  | 'limit-insert'
+  | 'limit-divide'
+  | 'limit-value'
 
 export const STEP_NAMES: Record<StepKind, string> = {
   lcd: 'Hauptnenner',
@@ -112,6 +118,9 @@ export const STEP_NAMES: Record<StepKind, string> = {
   'imag-multiply': 'Ausmultiplizieren',
   'imag-split': 'In Realteil und Imaginärteil aufteilen',
   'imag-sum': 'Realteile und Imaginärteile zusammenfassen',
+  'limit-insert': 'Einsetzen',
+  'limit-divide': 'Durch die höchste Potenz teilen',
+  'limit-value': 'Grenzwert bestimmen',
 }
 
 export type FracStep = {
@@ -322,6 +331,7 @@ export function solveFraction(t: FractionTask): FracSolution {
   if (t.kind === 'reduce' && t.rule?.kind === 'conjugate') return solveConjugate(t, t.rule.target)
   if (t.kind === 'partial') return solvePartial(t)
   if (t.kind === 'imaginary') return solveImaginary(t)
+  if (t.kind === 'limit') return solveLimit(t)
   const { hints } = t
   const value = taskFrac(t)
   const steps: FracStep[] = []
@@ -690,6 +700,67 @@ function solveImaginary(t: Extract<FractionTask, { kind: 'imaginary' }>): FracSo
   if (w.terms.length > 1) steps.push({ kind: 'imag-sum', expr: result, from: imagStage(w, multiplied), detail: own })
   else if (!(denOne !== null && isOne(denOne))) steps.push({ kind: 'imag-split', expr: result, from: multiplied, detail: own })
   return { value, steps, reduced: complexReduced(value, t.hints), result, excluded: null, beforeCancel: value }
+}
+
+// --- Grenzwerte (Stufe 5) ---
+
+// Rechnung zu einem Grenzwert: der Rechenweg des Bruchs (x → a: bis er gekürzt ist; n → ∞: bis er
+// ein Bruch ist), der Bruch frac, in den eingesetzt bzw. dessen höchste Potenzen verglichen werden,
+// bei n → ∞ ausmultipliziert (expanded: aus Faktoren ausmultipliziert) und die Potenz power, durch die
+// geteilt wird; value ist der Grenzwert
+export type LimitWork = {
+  readonly letter: string
+  readonly to: LimitTarget
+  readonly inner: FracSolution | null
+  readonly frac: Frac
+  readonly fracExpr: Expr
+  readonly expanded: boolean
+  readonly power: number
+  readonly order: { readonly num: boolean; readonly den: boolean }
+  readonly value: Rational
+}
+
+export function limitWork(t: Extract<FractionTask, { kind: 'limit' }>): LimitWork {
+  const { inner, letter, to } = t
+  if (to !== 'infinity') {
+    const solution = solveFraction(inner)
+    const frac = reducedFrac(solution.reduced)
+    const value = fracValueAt(frac, letter, to)
+    if (value === null) throw new Error('Kein Grenzwert: Der Nenner bleibt 0')
+    return { letter, to, inner: solution, frac, fracExpr: solution.result, expanded: false, power: 0, order: { num: false, den: false }, value }
+  }
+  // n → ∞: eine Summe erst zu einem Bruch zusammenfassen, Faktoren ausmultiplizieren
+  const solution = inner.kind === 'reduce' ? null : solveFraction(inner)
+  const frac = solution ? { num: solution.reduced.num, den: factoredPoly(solution.reduced.den) } : taskFrac(inner)
+  const shownForm = inner.kind === 'reduce' ? [inner.part.num, inner.part.den] : []
+  const expandedNeeded = shownForm.some((s) => s.form !== 'expanded')
+  const order = { num: shownForm[0]?.form === 'expanded' && !!shownForm[0].ascending, den: shownForm[1]?.form === 'expanded' && !!shownForm[1].ascending }
+  const value = limitAtInfinity(frac, letter)
+  if (value === null) throw new Error('Kein endlicher Grenzwert')
+  const fracExpr = div(polyExpr(frac.num, order.num ? 'ascending' : 'descending'), polyExpr(frac.den, order.den ? 'ascending' : 'descending'))
+  return { letter, to, inner: solution, frac, fracExpr, expanded: expandedNeeded, power: highestPower(frac.den, letter), order, value }
+}
+
+// Zähler und Nenner durch die höchste Potenz geteilt: \frac{3 - \frac{1}{n}}{2 + \frac{5}{n^2}}
+export const limitDividedExpr = (w: LimitWork, side: 'both' | 'num' = 'both') => dividedFracExpr(w.frac, w.letter, w.power, w.order, side)
+
+function solveLimit(t: Extract<FractionTask, { kind: 'limit' }>): FracSolution {
+  const w = limitWork(t)
+  const value = fracOf(polyConst(w.value))
+  const result = num(w.value)
+  const steps: FracStep[] = [...(w.inner?.steps ?? [])]
+  if (t.to !== 'infinity') {
+    steps.push({ kind: 'limit-insert', expr: result, from: w.fracExpr })
+  } else {
+    if (w.expanded) {
+      const inner = t.inner as Extract<FractionTask, { kind: 'reduce' }>
+      steps.push({ kind: 'multiply-out', expr: w.fracExpr, from: partExpr(inner.part), detail: w.fracExpr })
+    }
+    const power = w.power === 1 ? variable(w.letter) : pow(variable(w.letter), num(w.power))
+    steps.push({ kind: 'limit-divide', expr: limitDividedExpr(w), from: w.fracExpr, detail: power })
+    steps.push({ kind: 'limit-value', expr: result, from: limitDividedExpr(w) })
+  }
+  return { value, steps, reduced: reduceFrac(value), result, excluded: null, beforeCancel: value }
 }
 
 // k \sin^n x / \cos^n x als k \tan^n x; sonst null

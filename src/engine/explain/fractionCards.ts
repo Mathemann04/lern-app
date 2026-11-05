@@ -1,6 +1,7 @@
 import { type Expr, IMAG, add, cos, exp, ln, mul, num, pow, sin, sqrt, sub, variable, x } from '../expr/types.ts'
 import { factorize } from '../fraction/factor.ts'
 import { toFrac } from '../fraction/frac.ts'
+import { rat } from '../rational.ts'
 import { type Poly, polyDivideExact } from '../fraction/poly.ts'
 import {
   type BlockRule,
@@ -50,6 +51,7 @@ export const FRACTION_CARD_IDS = {
   polyDivision: 'fraction-poly-division',
   partial: 'fraction-partial',
   imaginary: 'fraction-imaginary',
+  limit: 'fraction-limit',
 } as const
 
 // --- Beispiele bauen ---
@@ -65,7 +67,7 @@ const frAscending = (n: Expr, d: Expr): Part => part(expanded(poly(n), true), ex
 const task = (s: FractionShape, rule?: BlockRule): FractionTask => withRoots({ ...s, hints: [], ...(rule ? { rule } : {}) } as FractionTask)
 // 1 − sin x: die 1 vorn
 const frUnit = (n: Expr, d: Expr): Part => part(expanded(poly(n)), expanded(poly(d), true))
-const [a, b, y, h] = ['a', 'b', 'y', 'h'].map(variable)
+const [a, b, y, h, m] = ['a', 'b', 'y', 'h', 'n'].map(variable)
 // Rechenbaum aus dem Baukasten (M2b)
 const tree = (root: TreeNode): FractionTask => ({ kind: 'tree', root, hints: [] })
 const lf = (nu: number, de = 1) => leaf(fr(num(nu), num(de)))
@@ -498,5 +500,35 @@ export const FRACTION_CARD_LIST: readonly Card[] = [
       task({ kind: 'imaginary', terms: [plus(fr(add(n(2), pow(IMAG, n(3))), add(n(1), IMAG))), minus(fr(add(n(1), mul(n(2), IMAG))))] }),
     ],
     errors: ['frac-imag-power', 'frac-imag-squared', 'frac-imag-cross', 'frac-imag-den', 'frac-imag-split', 'frac-imag-direct', 'frac-imag-minus'],
+  },
+  {
+    id: FRACTION_CARD_IDS.limit,
+    topic: 'brueche',
+    title: 'Grenzwerte von Brüchen',
+    level: 5,
+    rules: [],
+    formulas: [
+      '\\lim_{x \\to a} \\frac{(x - a)\\,g(x)}{(x - a)\\,h(x)} = \\frac{g(a)}{h(a)}',
+      '\\lim_{n \\to \\infty} \\frac{a n^k + \\dots}{b n^k + \\dots} = \\frac{a}{b}',
+      '\\lim_{n \\to \\infty} \\frac{1}{n} = 0',
+    ],
+    memo: 'Ergibt Einsetzen $\\frac{0}{0}$, haben Zähler und Nenner einen gemeinsamen Faktor: zerlegen, kürzen, dann einsetzen. Für $n \\to \\infty$ teilst du Zähler und Nenner durch die höchste Potenz des Nenners; Brüche mit $n$ im Nenner gehen gegen $0$.',
+    note: [
+      'Bei $x \\to a$:',
+      '1. Einsetzen ergibt $\\frac{0}{0}$? Dann steckt $(x - a)$ in Zähler und Nenner.',
+      '2. Zerlegen und kürzen, bei einer Summe erst auf den Hauptnenner bringen.',
+      '3. Jetzt $x = a$ einsetzen.',
+      'Bei $n \\to \\infty$:',
+      '1. Erst zu einem Bruch zusammenfassen und ausmultiplizieren.',
+      '2. Zähler und Nenner durch die höchste Potenz des Nenners teilen, jeden Summanden.',
+      '3. Gleicher Grad: das Verhältnis der Zahlen vor der höchsten Potenz. Kleinerer Grad im Zähler: $0$.',
+    ].join('\n'),
+    when: 'Bei Folgen und Funktionen (Kapitel 4 und 5 deines Buchs) und später beim Ableiten über den Differenzenquotienten.',
+    examples: [
+      task({ kind: 'limit', inner: task({ kind: 'reduce', part: fr(sub(pow(x, n(2)), n(4)), add(sub(pow(x, n(2)), mul(n(3), x)), n(2))) }), letter: 'x', to: rat(2) }),
+      task({ kind: 'limit', inner: task({ kind: 'reduce', part: fr(sub(mul(n(3), pow(m, n(2))), m), add(mul(n(2), pow(m, n(2))), n(5))) }), letter: 'n', to: 'infinity' }),
+      task({ kind: 'limit', inner: task({ kind: 'sum', terms: [plus(fr(pow(m, n(2)), add(m, n(1)))), minus(fr(m))] }), letter: 'n', to: 'infinity' }),
+    ],
+    errors: ['frac-limit-zero-zero', 'frac-limit-insert-sign', 'frac-limit-divide-one-side', 'frac-limit-infinity-one', 'frac-limit-n-zero', 'frac-limit-degree', 'frac-limit-first-terms'],
   },
 ]

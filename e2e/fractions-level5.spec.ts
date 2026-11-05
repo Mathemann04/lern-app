@@ -3,7 +3,7 @@ import { type Page, expect, test } from '@playwright/test'
 // Brüche Stufe 5 (M2b Schritte 3 und 4): alles ineinander, Doppelbruch im Doppelbruch,
 // Differenzenquotienten, dritte Potenzen, Wurzeln (auch mit zwei Buchstaben, Wurzel im Nenner
 // beseitigen), Winkelfunktionen, Partialbruchzerlegung (mit Polynomdivision), komplexe Zahlen
-// teilen; geführt und frei
+// teilen, Grenzwerte; geführt und frei
 
 const answers = (page: Page) => page.getByRole('group', { name: 'Antworten' }).getByRole('button')
 const correctFeedback = (page: Page) => page.getByText('Richtig!', { exact: true })
@@ -50,13 +50,13 @@ async function enter(page: Page, latex: string) {
 }
 
 for (const [ref, what, question] of [
-  ['5-204', 'sin² x + cos² x = 1', 'Vereinfache den Nenner mit'],
+  ['5-101', 'sin² x + cos² x = 1', 'Vereinfache den Nenner mit'],
   ['5-82', 'Doppelbruch im Doppelbruch', 'Was rechnest du zuerst?'],
   ['5-59', 'alles ineinander', 'Was rechnest du zuerst?'],
   ['5-56', 'Differenzenquotient von x³', 'Multipliziere die Klammer im Zähler aus'],
   ['5-139', 'Differenzenquotient von √x', 'Erweitere mit dem Gegenstück des Zählers'],
-  ['5-3326', 'zwei Wurzeln', 'Zerlege den Zähler in Faktoren'],
-  ['5-1537', 'Wurzel im Nenner', 'Erweitere mit dem Gegenstück des Nenners'],
+  ['5-3734', 'zwei Wurzeln', 'Zerlege den Zähler in Faktoren'],
+  ['5-4778', 'Wurzel im Nenner', 'Erweitere mit dem Gegenstück des Nenners'],
   ['5-1289', 'dritte Potenz', 'Zerlege den Zähler in Faktoren'],
   ['5-202', 'Partialbrüche', 'Wie lautet die Zerlegung?'],
   ['5-80', 'Partialbrüche mit Polynomdivision', 'Teile deshalb zuerst (Polynomdivision)'],
@@ -64,6 +64,9 @@ for (const [ref, what, question] of [
   ['5-224', 'komplexe Zahlen teilen', 'Erweitere mit dem konjugiert Komplexen des Nenners'],
   ['5-492', 'komplexe Zahlen mit Potenz von i und Minus', 'Rechne die Potenzen von'],
   ['5-134', 'komplexe Zahlen mit Buchstaben', 'Teile in Realteil und Imaginärteil auf'],
+  ['5-89', 'Grenzwert x gegen 2', 'Was ist der Grenzwert?'],
+  ['5-135', 'Grenzwert einer Summe', 'werden die Nenner'],
+  ['5-157', 'Grenzwert unendlich minus unendlich', 'Teile Zähler und Nenner durch die höchste Potenz'],
 ] as const) {
   test(`Stufe 5 geführt: ${what} (${ref})`, async ({ page }) => {
     await page.goto(`./#/ueben/brueche/${ref}`)
@@ -75,7 +78,7 @@ for (const [ref, what, question] of [
 
 test('Stufe 5 geführt: Karte „Bausteine mit eigenen Regeln" aus der Aufgabe', async ({ page }) => {
   // 3/(1 − sin x) + 3/(1 + sin x)
-  await page.goto('./#/ueben/brueche/5-204')
+  await page.goto('./#/ueben/brueche/5-101')
   await page.getByRole('button', { name: 'Lernkarten' }).click()
   const sheet = page.getByRole('dialog')
   await sheet.locator('summary', { hasText: 'Bausteine mit eigenen Regeln' }).click()
@@ -84,8 +87,8 @@ test('Stufe 5 geführt: Karte „Bausteine mit eigenen Regeln" aus der Aufgabe',
 })
 
 test('Stufe 5 geführt: Wurzel im Nenner, Tipp und Karte', async ({ page }) => {
-  // 2/(√x − 2)
-  await page.goto('./#/ueben/brueche/5-1537')
+  // 6/(√x − 2)
+  await page.goto('./#/ueben/brueche/5-4778')
   await page.getByRole('button', { name: 'Tipp anzeigen' }).click()
   await expect(page.getByText('Erweitere mit dem Gegenstück der Summe mit Wurzel')).toBeVisible()
   await page.getByRole('button', { name: 'Lernkarten' }).click()
@@ -96,23 +99,23 @@ test('Stufe 5 geführt: Wurzel im Nenner, Tipp und Karte', async ({ page }) => {
 })
 
 test('Stufe 5 frei: zwei Wurzeln, Wurzel im Nenner, Differenzenquotient, Winkelfunktionen', async ({ page }) => {
-  // (p − q)/(√p − √q)
-  await page.goto('./#/frei/brueche/5-3326')
+  // (v − u)/(√u − √v)
+  await page.goto('./#/frei/brueche/5-3734')
   await expect(field(page)).toBeVisible()
-  await enter(page, '\\frac{p-q}{\\sqrt{p}-\\sqrt{q}}')
+  await enter(page, '\\frac{v-u}{\\sqrt{u}-\\sqrt{v}}')
   await expect(feedback(page)).toContainText('Noch nicht vollständig gekürzt.')
-  await enter(page, '\\sqrt{p}+\\sqrt{q}')
+  await enter(page, '-\\sqrt{u}-\\sqrt{v}')
   await expect(feedback(page)).toContainText('Richtig!')
   await expectCleanPage(page, 'zwei Wurzeln')
 
-  // 2/(√x − 2)
-  await page.goto('./#/frei/brueche/5-1537')
+  // 6/(√x − 2)
+  await page.goto('./#/frei/brueche/5-4778')
   await expect(field(page)).toBeVisible()
-  await enter(page, '\\frac{2}{\\sqrt{x}-2}')
+  await enter(page, '\\frac{6}{\\sqrt{x}-2}')
   await expect(feedback(page)).toContainText('Erweitere mit dem Gegenstück')
-  await enter(page, '\\frac{2\\sqrt{x}+4}{x-2}')
+  await enter(page, '\\frac{6\\sqrt{x}+12}{x-2}')
   await expect(feedback(page)).toContainText('Typischer Fehler: Beim Erweitern mit dem Gegenstück die Zahl nicht quadriert.')
-  await enter(page, '\\frac{2\\sqrt{x}+4}{x-4}')
+  await enter(page, '\\frac{6\\sqrt{x}+12}{x-4}')
   await expect(feedback(page)).toContainText('Richtig!')
   await expectCleanPage(page, 'Wurzel im Nenner')
 
@@ -126,11 +129,11 @@ test('Stufe 5 frei: zwei Wurzeln, Wurzel im Nenner, Differenzenquotient, Winkelf
   await expectCleanPage(page, 'Differenzenquotient')
 
   // 3/(1 − sin x) + 3/(1 + sin x)
-  await page.goto('./#/frei/brueche/5-204')
+  await page.goto('./#/frei/brueche/5-101')
   await expect(field(page)).toBeVisible()
-  await enter(page, '\\frac{6}{\\cos x}')
+  await enter(page, '\\frac{4}{\\cos x}')
   await expect(feedback(page)).toContainText('Typischer Fehler: Quadrat vergessen.')
-  await enter(page, '\\frac{6}{1-\\sin^2x}')
+  await enter(page, '\\frac{4}{1-\\sin^2x}')
   await expect(feedback(page)).toContainText('Richtig!')
   await expectCleanPage(page, 'Winkelfunktionen')
 })
@@ -173,6 +176,31 @@ test('Stufe 5 frei: komplexe Zahlen teilen', async ({ page }) => {
   await expectCleanPage(page, 'komplexe Zahlen frei')
 })
 
+test('Stufe 5 frei: Grenzwerte, gesucht ist eine Zahl', async ({ page }) => {
+  // lim n → ∞ 3n² / (2n² − 2n + 2) = 3/2
+  await page.goto('./#/frei/brueche/5-5')
+  await expect(field(page)).toBeVisible()
+  await expect(page.getByText(/Bestimme den Grenzwert/)).toBeVisible()
+  await enter(page, '\\frac{3}{2-\\frac{2}{n}+\\frac{2}{n^2}}')
+  await expect(feedback(page)).toContainText('Gesucht ist eine Zahl')
+  await enter(page, '1')
+  await expect(feedback(page)).toContainText('Typischer Fehler')
+  await enter(page, '\\frac{3}{2}')
+  await expect(feedback(page)).toContainText('Richtig!')
+  await expectCleanPage(page, 'Grenzwert unendlich')
+
+  // lim x → 2 (x² − 2x)/(x² + 2x − 8) = 1/3
+  await page.goto('./#/frei/brueche/5-89')
+  await expect(field(page)).toBeVisible()
+  await enter(page, '\\frac{x}{x+4}')
+  await expect(feedback(page)).toContainText('Setze die Stelle noch ein')
+  await enter(page, '0')
+  await expect(feedback(page)).toContainText('Typischer Fehler')
+  await enter(page, '\\frac{1}{3}')
+  await expect(feedback(page)).toContainText('Richtig!')
+  await expectCleanPage(page, 'Grenzwert x gegen 2')
+})
+
 test('Stufe 5 frei: Tastatur mit i bei komplexen Zahlen', async ({ page }) => {
   test.skip(!isPhone(), 'Bildschirm-Tastatur nur am Handy')
   await page.goto('./#/frei/brueche/5-134')
@@ -188,13 +216,13 @@ test('Stufe 5 frei: Tastatur mit i bei komplexen Zahlen', async ({ page }) => {
 test('Stufe 5 frei: Tastatur mit Wurzel, Buchstaben der Aufgabe und tan', async ({ page }) => {
   test.skip(!isPhone(), 'Bildschirm-Tastatur nur am Handy')
   const keys = () => page.locator('.MLK__keycap').filter({ visible: true })
-  await page.goto('./#/frei/brueche/5-3326')
+  await page.goto('./#/frei/brueche/5-3734')
   await field(page).tap()
   await expect(page.locator('.ML__keyboard')).toBeVisible()
   await expect(page.locator('.MLK__keycap[data-keycap-value="\\\\sqrt{#0}"]').filter({ visible: true })).toHaveCount(1)
-  await expect(keys().filter({ hasText: /^p$/ })).toHaveCount(1)
-  await expect(keys().filter({ hasText: /^q$/ })).toHaveCount(1)
-  await page.goto('./#/frei/brueche/5-204')
+  await expect(keys().filter({ hasText: /^u$/ })).toHaveCount(1)
+  await expect(keys().filter({ hasText: /^v$/ })).toHaveCount(1)
+  await page.goto('./#/frei/brueche/5-101')
   await field(page).tap()
   await expect(keys().filter({ hasText: /^tan$/ })).toHaveCount(1)
   await expectCleanPage(page, 'Tastatur')
@@ -203,7 +231,7 @@ test('Stufe 5 frei: Tastatur mit Wurzel, Buchstaben der Aufgabe und tan', async 
 test('Lernkarten: Ordner Brüche mit Stufe 5, dritte Potenzen, Wurzeln im Nenner, Partialbrüchen und komplexen Zahlen', async ({ page }) => {
   await page.goto('./#/karten/brueche')
   await expect(page.getByRole('heading', { name: 'Stufe 5' })).toBeVisible()
-  for (const title of ['Bausteine mit eigenen Regeln', 'Dritte Potenzen', 'Wurzeln im Nenner beseitigen', 'Polynomdivision', 'Partialbruchzerlegung', 'Komplexe Zahlen teilen']) {
+  for (const title of ['Bausteine mit eigenen Regeln', 'Dritte Potenzen', 'Wurzeln im Nenner beseitigen', 'Polynomdivision', 'Partialbruchzerlegung', 'Komplexe Zahlen teilen', 'Grenzwerte von Brüchen']) {
     await page.goto('./#/karten/brueche')
     await page.getByRole('link', { name: new RegExp(title) }).click()
     await expect(page.getByRole('heading', { name: title, level: 1 })).toBeVisible()
@@ -221,15 +249,15 @@ test('Brüche funktionieren offline, geführt und frei', async ({ page, context 
   await page.getByRole('link', { name: /^Brüche/ }).click()
   await expect(page.getByRole('heading', { name: 'Brüche', level: 1 })).toBeVisible()
 
-  // geführt: 3/(1 − sin x) + 3/(1 + sin x) ganz durch
-  await page.goto('./#/ueben/brueche/5-204')
+  // geführt: 2/(1 − sin x) + 2/(1 + sin x) ganz durch
+  await page.goto('./#/ueben/brueche/5-101')
   await solveWholeTask(page)
   await expectCleanPage(page, 'offline geführt')
 
   // frei: zwei Wurzeln
-  await page.goto('./#/frei/brueche/5-3326')
+  await page.goto('./#/frei/brueche/5-3734')
   await expect(field(page)).toBeVisible()
-  await enter(page, '\\sqrt{p}+\\sqrt{q}')
+  await enter(page, '-\\sqrt{u}-\\sqrt{v}')
   await expect(feedback(page)).toContainText('Richtig!')
 })
 
@@ -282,6 +310,15 @@ test('Gezielt üben: „Realteil durch Realteil geteilt" von der Lernkarte aus',
   await expect(page).toHaveURL(/#\/ueben\/brueche\/5-\d+\?fokus=frac-imag-direct$/)
   await expect(page.locator('#question')).toBeVisible()
   await expectCleanPage(page, 'gezielt komplexe Zahlen')
+})
+
+test('Gezielt üben: „Unendlich durch unendlich als 1" von der Lernkarte aus', async ({ page }) => {
+  await page.goto('./#/karten/brueche/fraction-limit')
+  const error = page.locator('li, article, section, div').filter({ hasText: /^Die Zahlen vor den höchsten Potenzen geteilt/ }).first()
+  await error.getByRole('link', { name: 'Gezielt üben' }).click()
+  await expect(page).toHaveURL(/#\/ueben\/brueche\/5-\d+\?fokus=frac-limit-degree$/)
+  await expect(page.locator('#question')).toBeVisible()
+  await expectCleanPage(page, 'gezielt Grenzwerte')
 })
 
 test('Stufe 5: zehn neue Aufgaben nacheinander mit verschiedener Form', async ({ page }) => {

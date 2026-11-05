@@ -1098,3 +1098,129 @@ export function imaginaryTask(source: Rng): FractionTask {
 
 const shownPolyOf = (s: Shown) => shownPoly(s)
 const imagPartOf = (p: Poly) => imagParts(p).im
+
+// --- Grenzwerte (M2b Schritt 5) ---
+//
+// x → a mit „0/0": Zähler und Nenner haben den Faktor (x − a), auch x³ − a³; eine Summe wie
+// \frac{1}{x - 1} - \frac{2}{x^2 - 1}; mit Wurzel \frac{\sqrt{x} - 2}{x - 4}. n → ∞: Bruch aus
+// Polynomen (Zählergrad höchstens Nennergrad), manchmal mit dem Kleinsten vorn oder dem Zähler in
+// Faktoren; „∞ − ∞" wie \frac{n^2}{n + 1} - n. Der Grenzwert ist eine Zahl, die Zahlen bleiben klein.
+type LimitShape = 'zero' | 'cube' | 'sum' | 'root' | 'infinity' | 'infinitySum'
+
+export function limitTask(source: Rng): FractionTask {
+  const rng = createRng(`grenzwert:${source.int(0, 999_999_999)}`)
+  const xs = polyAtom('x')
+  const n = polyAtom('n')
+  const lin = (v: Poly, root: number) => polyAdd(v, polyConst(-root))
+  const reduceTask = (num: Poly, den: Poly, hints: Poly[], ascending = { num: false, den: false }): FractionTask => ({
+    kind: 'reduce',
+    part: part(expanded(num, ascending.num), expanded(den, ascending.den)),
+    hints,
+  })
+  const small = () => rng.pick([-3, -2, -1, 1, 2, 3])
+  for (;;) {
+    const shape = weighted<LimitShape>(rng, [
+      ['zero', 3],
+      ['cube', 0.7],
+      ['sum', 1.2],
+      ['root', 0.8],
+      ['infinity', 3],
+      ['infinitySum', 1.2],
+    ])
+    let task: FractionTask
+    switch (shape) {
+      case 'zero': {
+        // (x − a)·g / ((x − a)·h), g und h linear oder eine Zahl
+        const a = rng.int(-3, 3)
+        const factor = lin(xs, a)
+        const other = () =>
+          rng.pick([() => lin(xs, rng.int(-4, 4)), () => polyConst(rng.pick([2, 3, -2])), () => polyAdd(polyScale(xs, rat(2)), polyConst(small()))])()
+        const [g, h] = [other(), other()]
+        if (polyEquals(g, h) || (constValue(g) !== null && constValue(h) !== null)) continue
+        task = { kind: 'limit', inner: reduceTask(polyMul(factor, g), polyMul(factor, h), [factor, g, h]), letter: 'x', to: rat(a), hints: [] }
+        break
+      }
+      case 'cube': {
+        // x³ ∓ a³ über (x ∓ a)·h
+        const a = rng.pick([-2, -1, 1, 2])
+        const factor = lin(xs, a)
+        const cube = polyAdd(polyPow(xs, 3), polyConst(-(a ** 3)))
+        const h = rng.chance(0.5) ? polyConst(1) : lin(xs, rng.int(-3, 3))
+        const den = polyMul(factor, h)
+        const [num, d] = rng.chance(0.7) ? [cube, den] : [den, cube]
+        task = { kind: 'limit', inner: reduceTask(num, d, [factor, h]), letter: 'x', to: rat(a), hints: [] }
+        break
+      }
+      case 'sum': {
+        // \frac{c}{x - a} - \frac{c(a - b)}{(x - a)(x - b)} = \frac{c}{x - b}
+        const [a, b] = rng.shuffle([-3, -2, -1, 0, 1, 2, 3]).slice(0, 2)
+        const c = rng.int(1, 3)
+        const d = c * (a - b)
+        const first = part(expanded(polyConst(c)), expanded(lin(xs, a)))
+        const second = part(expanded(polyConst(Math.abs(d))), expanded(polyMul(lin(xs, a), lin(xs, b))))
+        const terms = [plus(first), d > 0 ? minus(second) : plus(second)]
+        task = { kind: 'limit', inner: { kind: 'sum', terms: rng.chance(0.3) && d < 0 ? [terms[1], terms[0]] : terms, hints: [lin(xs, a), lin(xs, b)] }, letter: 'x', to: rat(a), hints: [] }
+        break
+      }
+      case 'root': {
+        // \frac{\sqrt{x} - r}{x - r^2} bzw. umgekehrt, x = R²
+        const r = rng.int(1, 3)
+        const root = polyAtom('R')
+        const top = polyAdd(root, polyConst(-r))
+        const bottom = polyAdd(polyAtom('R', 2), polyConst(-(r * r)))
+        const k = rng.pick([1, 1, 2, 3])
+        const [num, den] = rng.chance(0.6) ? [polyScale(top, rat(k)), bottom] : [bottom, polyScale(top, rat(k))]
+        task = { kind: 'limit', inner: reduceTask(num, den, [top, polyAdd(root, polyConst(r))]), letter: 'x', to: rat(r * r), hints: [] }
+        break
+      }
+      case 'infinity': {
+        const degDen = rng.pick([1, 2, 2, 3])
+        const degNum = rng.chance(0.7) ? degDen : degDen - 1
+        const polyOf = (deg: number) =>
+          polySum(Array.from({ length: deg + 1 }, (_, j) => polyScale(polyPow(n, j), rat(j === deg ? small() * rng.int(1, 2) : rng.chance(0.55) ? rng.int(-5, 5) : 0))))
+        let num = polyOf(degNum)
+        const den = polyOf(degDen)
+        // manchmal der Zähler als Produkt (2n + 1)(n - 3)
+        const factored = degNum === 2 && rng.chance(0.3)
+        let inner: FractionTask
+        if (factored) {
+          const [f, g] = [polyAdd(polyScale(n, rat(rng.int(1, 3))), polyConst(small())), polyAdd(n, polyConst(small()))]
+          num = polyMul(f, g)
+          inner = { kind: 'reduce', part: part(factoredShown({ coef: rat(1), factors: [{ poly: f, exp: 1 }, { poly: g, exp: 1 }] }), expanded(den)), hints: [] }
+        } else {
+          const ascending = { num: rng.chance(0.25) && num.length > 1, den: rng.chance(0.2) && den.length > 1 }
+          inner = reduceTask(num, den, [], ascending)
+        }
+        if (num.length === 0 || den.length < 2) continue
+        task = { kind: 'limit', inner, letter: 'n', to: 'infinity', hints: [] }
+        break
+      }
+      case 'infinitySum': {
+        // \frac{P}{n + c} - (an + e) mit P = (an + e)(n + c) + kn + m: zusammengefasst \frac{kn + m}{n + c}
+        const [a, c, k] = [rng.int(1, 3), small(), small()]
+        const e = rng.chance(0.5) ? 0 : small()
+        const m = rng.chance(0.5) ? 0 : rng.int(-4, 4)
+        if (m - k * c === 0) continue
+        const linear = polyAdd(polyScale(n, rat(a)), polyConst(e))
+        const den = polyAdd(n, polyConst(c))
+        const top = polyAdd(polyMul(linear, den), polyAdd(polyScale(n, rat(k)), polyConst(m)))
+        const terms = [plus(part(expanded(top), expanded(den))), minus(part(expanded(linear)))]
+        task = { kind: 'limit', inner: { kind: 'sum', terms, hints: [den] }, letter: 'n', to: 'infinity', hints: [] }
+        break
+      }
+    }
+    if (taskLatex(task).length > 95) continue
+    let wrongs
+    try {
+      solveFraction(task)
+      wrongs = fractionWrongAnswers(task)
+    } catch {
+      continue
+    }
+    const value = solveFraction(task).reduced
+    if (value.num.some((t) => Math.abs(Number(t.coef.n)) > 30) || Number(value.den.coef.n) > 30) continue
+    // mindestens zwei falsche Grenzwerte zum Auswählen
+    if (wrongs.filter((w) => w.step === 'limit-insert' || w.step === 'limit-value').length >= 2) return task
+  }
+}
+

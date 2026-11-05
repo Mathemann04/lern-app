@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { toLatex } from '../expr/print.ts'
 import { type Expr, IMAG, add, cos, exp, mul, num, pow, sin, sqrt, sub, variable, x } from '../expr/types.ts'
-import { ratToNumber } from '../rational.ts'
+import { rat, ratToNumber } from '../rational.ts'
 import { toFrac } from './frac.ts'
 import { type Poly, polyDivideExact } from './poly.ts'
 import { STEP_NAMES, solveFraction } from './solve.ts'
@@ -202,6 +202,39 @@ describe('Partialbruchzerlegung', () => {
     const t = task({ kind: 'partial', part: fr(add(x2, num(1)), sub(x, num(1))) })
     expect(lines(t)).toEqual(['Polynomdivision: x + 1 + \\frac{2}{x - 1}', 'Ansatz: x + 1 + \\frac{A}{x - 1}', 'Zahl bestimmen: 2'])
     expect(toLatex(solveFraction(t).result)).toBe('x + 1 + \\frac{2}{x - 1}')
+  })
+})
+
+describe('Grenzwerte', () => {
+  const x2 = pow(x, num(2))
+  const n = variable('n')
+
+  it('x gegen 2 mit 0/0: zerlegen, kürzen, einsetzen', () => {
+    const t = task({ kind: 'limit', inner: task({ kind: 'reduce', part: fr(sub(x2, num(4)), add(sub(x2, mul(num(3), x)), num(2))) }), letter: 'x', to: rat(2) })
+    expect(taskLatex(t)).toBe('\\lim_{x \\to 2} \\frac{x^{2} - 4}{x^{2} - 3x + 2}')
+    expect(lines(t)).toEqual([
+      'Zähler zerlegen: \\frac{(x - 2)(x + 2)}{x^{2} - 3x + 2}',
+      'Nenner zerlegen: \\frac{(x - 2)(x + 2)}{(x - 1)(x - 2)}',
+      'Kürzen: \\frac{x + 2}{x - 1}',
+      'Einsetzen: 4',
+    ])
+  })
+
+  it('n gegen unendlich: durch die höchste Potenz teilen', () => {
+    const t = task({ kind: 'limit', inner: task({ kind: 'reduce', part: fr(sub(mul(num(3), pow(n, num(2))), n), add(mul(num(2), pow(n, num(2))), num(5))) }), letter: 'n', to: 'infinity' })
+    expect(taskLatex(t)).toBe('\\lim_{n \\to \\infty} \\frac{3n^{2} - n}{2n^{2} + 5}')
+    expect(lines(t)).toEqual(['Durch die höchste Potenz teilen: \\frac{3 - \\frac{1}{n}}{2 + \\frac{5}{n^{2}}}', 'Grenzwert bestimmen: \\frac{3}{2}'])
+  })
+
+  it('unendlich minus unendlich: erst zusammenfassen', () => {
+    const t = task({ kind: 'limit', inner: task({ kind: 'sum', terms: [plus(fr(pow(n, num(2)), add(n, num(1)))), minus(fr(n))] }), letter: 'n', to: 'infinity' })
+    expect(taskLatex(t)).toBe('\\lim_{n \\to \\infty} \\left(\\frac{n^{2}}{n + 1} - n\\right)')
+    expect(toLatex(solveFraction(t).result)).toBe('-1')
+  })
+
+  it('mit Wurzel: x gegen 4', () => {
+    const t = task({ kind: 'limit', inner: task({ kind: 'reduce', part: fr(sub(sqrt(x), num(2)), sub(x, num(4))) }), letter: 'x', to: rat(4) })
+    expect(toLatex(solveFraction(t).result)).toBe('\\frac{1}{4}')
   })
 })
 

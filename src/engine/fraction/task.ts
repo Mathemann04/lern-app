@@ -2,7 +2,7 @@ import { toLatex } from '../expr/print.ts'
 import { type Expr, add, div, mul, mulDot, neg, num, pow, sub } from '../expr/types.ts'
 import { type Factored, factoredExpr, factoredPoly } from './factor.ts'
 import { type Frac, fracAdd, fracDiv, fracMul, fracNeg, fracOf, isRootAtom, polyExpr, rootFormWith } from './frac.ts'
-import { isOne } from '../rational.ts'
+import { type Rational, isOne } from '../rational.ts'
 import { type Poly, atomsOf, constValue, polyConst, polyPow, polySub } from './poly.ts'
 
 // Bruchaufgaben in Aufgabenform: welche Rechnung, und wie Zähler und Nenner geschrieben sind
@@ -50,6 +50,10 @@ export type FractionShape =
   // Komplexe Zahlen (Stufe 5): ein Bruch mit i im Nenner (auch mit Potenzen wie i³), dazu
   // höchstens eine komplexe Zahl plus oder minus; Ergebnis in der Form a + bi (fraction/complex.ts)
   | { readonly kind: 'imaginary'; readonly terms: readonly Signed[] }
+  // Grenzwert (Stufe 5): der Bruch inner (kürzen, Summe) für letter gegen to; eine Zahl: x → a mit
+  // „0/0", zerlegen, kürzen, einsetzen; 'infinity': n → ∞, durch die höchste Potenz teilen
+  // (fraction/limit.ts)
+  | { readonly kind: 'limit'; readonly inner: FractionTask; readonly letter: string; readonly to: Rational | 'infinity' }
 
 // Knoten eines Rechenbaums. Blätter sind Brüche, ganze Zahlen oder Terme ohne Bruch; eine
 // Dezimalzahl wird als solche gezeigt (decimal, z. B. „0,75") und hat den Wert ihres Bruchs.
@@ -198,6 +202,9 @@ export function taskFrac(t: FractionShape): Frac {
     }
     case 'tree':
       return treeFrac(t.root)
+    // der Term unter dem Limes; den Grenzwert rechnet limit.ts
+    case 'limit':
+      return taskFrac(t.inner)
   }
 }
 
@@ -299,6 +306,8 @@ export function taskExpr(t: FractionShape): Expr {
       return div(withInnerExpr(t.top, t.inner, 'top'), withInnerExpr(t.bottom, t.inner, 'bottom'))
     case 'tree':
       return treeExpr(t.root)
+    case 'limit':
+      return taskExpr(t.inner)
   }
 }
 
@@ -316,6 +325,7 @@ export function taskLatex(t: FractionShape): string {
   if (t.kind === 'mixed' && t.op === 'div') return `${sideLatex(t.left)} : ${sideLatex(t.right)}`
   if (t.kind === 'nested') return toLatex(taskExpr(t)).replaceAll('\\frac', '\\dfrac')
   if (t.kind === 'tree') return readableLatex(treeLatex(t.root))
+  if (t.kind === 'limit') return limitLatex(t.letter, t.to, t.inner)
   return toLatex(taskExpr(t))
 }
 
@@ -349,7 +359,8 @@ export function hasNestedFraction(latex: string): boolean {
 export const readableLatex = (latex: string) => (hasNestedFraction(latex) ? latex.replace(/\\d?frac/g, '\\dfrac') : latex)
 
 // Kann die Mathe-Tastatur die Aufgabe so lesen? (Geteilt mit „:" nicht)
-export const isReadableTask = (t: FractionShape) => t.kind !== 'quotient' && !(t.kind === 'mixed' && t.op === 'div') && !(t.kind === 'tree' && taskLatex(t).includes(' : '))
+export const isReadableTask = (t: FractionShape) =>
+  t.kind !== 'quotient' && t.kind !== 'limit' && !(t.kind === 'mixed' && t.op === 'div') && !(t.kind === 'tree' && taskLatex(t).includes(' : '))
 
 export function instructionFor(t: FractionShape): string {
   switch (t.kind) {
@@ -369,6 +380,8 @@ export function instructionFor(t: FractionShape): string {
       return 'Zerlege in Partialbrüche.'
     case 'imaginary':
       return 'Berechne und schreibe das Ergebnis in der Form $a + b\\,\\mathrm{i}$.'
+    case 'limit':
+      return 'Bestimme den Grenzwert.'
   }
 }
 
@@ -410,6 +423,8 @@ export function withRoots(t: FractionTask): FractionTask {
       return { ...t, top: mapSigned(t.top), bottom: mapSigned(t.bottom), inner: { ...t.inner, top: mapSigned(t.inner.top), bottom: mapSigned(t.inner.bottom) }, hints }
     case 'tree':
       return { ...t, root: mapTree(t.root, mapPart), hints }
+    case 'limit':
+      return { ...t, inner: withRoots(t.inner) }
   }
 }
 
@@ -444,5 +459,36 @@ export function partsOf(t: FractionShape): Part[] {
       return [...t.top, ...t.bottom, ...t.inner.top, ...t.inner.bottom].map((s) => s.part)
     case 'tree':
       return treeLeaves(t.root).map((l) => l.part)
+    case 'limit':
+      return partsOf(t.inner)
   }
+}
+
+// \lim_{x \to 2} vor dem Bruch; eine Summe in Klammern
+export function limitPrefix(letter: string, to: Rational | 'infinity'): string {
+  return `\\lim_{${letter} \\to ${to === 'infinity' ? '\\infty' : toLatex(num(to))}}`
+}
+
+// Steht eine Summe (oder ein Minus vorn) hinter dem Limes? Dann gehört sie in Klammern
+function needsBracket(latex: string): boolean {
+  if (latex.startsWith('-')) return true
+  let depth = 0
+  for (let i = 0; i < latex.length; i++) {
+    const c = latex[i]
+    if (c === '{' || c === '(') depth++
+    else if (c === '}' || c === ')') depth--
+    else if (depth === 0 && (c === '+' || c === '-') && latex[i - 1] === ' ') return true
+  }
+  return false
+}
+
+// Zwischenstand mit dem Limes davor: \lim_{x \to 1} \left(\frac{1}{x - 1} - \dots\right)
+export function limitedLatex(letter: string, to: Rational | 'infinity', body: string): string {
+  return `${limitPrefix(letter, to)} ${needsBracket(body) ? `\\left(${body}\\right)` : body}`
+}
+
+export function limitLatex(letter: string, to: Rational | 'infinity', inner: FractionTask): string {
+  const body = taskLatex(inner)
+  const bracket = inner.kind === 'sum' && inner.terms.length > 1
+  return `${limitPrefix(letter, to)} ${bracket ? `\\left(${body}\\right)` : body}`
 }

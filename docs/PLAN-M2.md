@@ -532,6 +532,13 @@ weiterrechnen). Die Fehler zu Bausteinen gibt es seit Schritt 6 (Stufe 5).
 | Komplexe Zahlen | beim Aufteilen nur den Realteil geteilt (neu in M2b) | $\frac{-5 + 10\mathrm{i}}{5} = -1 + 10\mathrm{i}$ |
 | Komplexe Zahlen | Realteil durch Realteil, Imaginärteil durch Imaginärteil (neu in M2b) | $\frac{3 + 4\mathrm{i}}{1 - 2\mathrm{i}} = 3 - 2\mathrm{i}$ |
 | Komplexe Zahlen | Minus vor der Klammer nur auf den Realteil (neu in M2b) | $2 - (1 + 3\mathrm{i}) = 1 + 3\mathrm{i}$ |
+| Grenzwerte | $\frac{0}{0}$ als Zahl genommen (neu in M2b) | $\lim_{x \to 2} \frac{x^2 - 4}{x - 2} = \frac{0}{0} = 0$ |
+| Grenzwerte | beim Einsetzen das Vorzeichen der Stelle verwechselt (neu in M2b) | $\lim_{x \to -2} (x - 1) = 1$ |
+| Grenzwerte | nur den Zähler durch die höchste Potenz geteilt (neu in M2b) | $\frac{3n^2 - n}{2n^2 + 5} = \frac{3 - \frac{1}{n}}{2n^2 + 5}$ |
+| Grenzwerte | $\frac{\infty}{\infty}$ als $1$ genommen (neu in M2b) | $\lim_{n \to \infty} \frac{3n^2 - n}{2n^2 + 5} = 1$ |
+| Grenzwerte | $n = 0$ eingesetzt statt $n \to \infty$ (neu in M2b) | $\lim_{n \to \infty} \frac{3n^2 - n + 2}{2n^2 + 5} = \frac{2}{5}$ |
+| Grenzwerte | höchste Zahlen geteilt, obwohl der Grad verschieden ist (neu in M2b) | $\lim_{n \to \infty} \frac{2n + 1}{n^2 + 3} = 2$ |
+| Grenzwerte | die vorderen Zahlen statt der Zahlen vor der höchsten Potenz (neu in M2b) | $\lim_{n \to \infty} \frac{3 - 2n^2}{4n^2 + 1} = \frac{3}{4}$ |
 
 Wenn dir typische Fehler aus deinen Übungen fehlen, sag es. Die sind Gold
 wert.

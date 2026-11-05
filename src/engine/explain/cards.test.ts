@@ -15,7 +15,7 @@ import { FRACTION_ERROR_RULES } from '../fraction/errorRules.ts'
 import { REARRANGE_ERROR_RULES } from '../rearrange/errorRules.ts'
 import { fracEquals, toFrac } from '../fraction/frac.ts'
 import { solveFraction, solveTree } from '../fraction/solve.ts'
-import { taskExpr as toExprOf, taskLatex } from '../fraction/task.ts'
+import { taskExpr as toExprOf, taskFrac, taskLatex } from '../fraction/task.ts'
 import { planFractionTask } from '../guided/fractionPlan.ts'
 import { planRearrangeTask } from '../guided/rearrangePlan.ts'
 import { createRng } from '../random/rng.ts'
@@ -251,7 +251,9 @@ describe('Lernkarten: Brüche', () => {
       for (const stage of tree.stages) for (const step of stage.solution.steps) if (step.expr) expect(fracEquals(toFrac(step.expr)!, stage.solution.value), id).toBe(true)
       return
     }
-    for (const step of solution.steps) if (step.expr) expect(fracEquals(toFrac(step.expr)!, solution.value), id).toBe(true)
+    // Grenzwert: die Umformungen haben den Wert des Bruchs, erst der letzte Schritt den Grenzwert
+    const valueOf = (kind: string) => (e.kind === 'limit' && kind !== 'limit-insert' && kind !== 'limit-value' ? taskFrac(e) : solution.value)
+    for (const step of solution.steps) if (step.expr) expect(fracEquals(toFrac(step.expr)!, valueOf(step.kind)), id).toBe(true)
   })
 
   it('zeigt jeden typischen Fehler aus den spielbaren Stufen 1 bis 5 auf einer Karte im Ordner Brüche', () => {

@@ -36,6 +36,7 @@ import {
   level2Kit as level2Kit_,
   partialTask,
   imaginaryTask,
+  limitTask,
   monomialReduce,
   rootTask,
   worldNested,
@@ -243,6 +244,15 @@ const level5Imaginary: FractionTemplate = {
   build: imaginaryTask,
 }
 
+const level5Limits: FractionTemplate = {
+  id: 'grenzwerte',
+  level: 5,
+  share: 0.1,
+  label: 'Grenzwerte: $x \\to a$ mit $\\frac{0}{0}$ (zerlegen, kürzen, einsetzen) und $n \\to \\infty$ (durch die höchste Potenz teilen)',
+  focus: ['frac-limit-zero-zero', 'frac-limit-insert-sign', 'frac-limit-divide-one-side', 'frac-limit-infinity-one', 'frac-limit-n-zero', 'frac-limit-degree', 'frac-limit-first-terms'],
+  build: limitTask,
+}
+
 export const FRACTION_TEMPLATES: readonly FractionTemplate[] = [
   level1Kit,
   level2Kit,
@@ -257,6 +267,7 @@ export const FRACTION_TEMPLATES: readonly FractionTemplate[] = [
   level5Exp,
   level5Partial,
   level5Imaginary,
+  level5Limits,
 ]
 
 export function fractionTemplatesForLevel(level: Level): FractionTemplate[] {

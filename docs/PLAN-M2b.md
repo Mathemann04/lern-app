@@ -189,6 +189,13 @@ Dazu kommen die bisherigen Fehler aus M2 (Liste in
 | Komplexe Zahlen | nur den Realteil geteilt | $\frac{-5 + 10\mathrm{i}}{5} = -1 + 10\mathrm{i}$ |
 | Komplexe Zahlen | teilweise geteilt | $\frac{3 + 4\mathrm{i}}{1 - 2\mathrm{i}} = 3 - 2\mathrm{i}$ |
 | Komplexe Zahlen | Minus nur auf den Realteil | $2 - (1 + 3\mathrm{i}) = 1 + 3\mathrm{i}$ |
+| Grenzwerte | $\frac{0}{0}$ als Zahl | $\lim_{x \to 2} \frac{x^2 - 4}{x - 2} = 0$ |
+| Grenzwerte | Vorzeichen der Stelle verwechselt | bei $x \to -2$ mit $x = 2$ eingesetzt |
+| Grenzwerte | nur den Zähler geteilt | $\frac{3 - \frac{1}{n}}{2n^2 + 5}$ |
+| Grenzwerte | $\frac{\infty}{\infty} = 1$ | $\lim_{n \to \infty} \frac{3n^2 - n}{2n^2 + 5} = 1$ |
+| Grenzwerte | $n = 0$ eingesetzt | $\frac{2}{5}$ statt $\frac{3}{2}$ |
+| Grenzwerte | Grad nicht beachtet | $\lim_{n \to \infty} \frac{2n + 1}{n^2 + 3} = 2$ |
+| Grenzwerte | vordere Zahlen genommen | $\lim_{n \to \infty} \frac{3 - 2n^2}{4n^2 + 1} = \frac{3}{4}$ |
 
 Die genaue Liste kommt im jeweiligen Schritt; jede Regel bekommt wie immer
 eine Erklärung, eine Lernkarte und Tests. In Schritt 1 umgesetzt: die ersten
@@ -214,7 +221,13 @@ jetzt auch für $(x + h)^3$. In Schritt 4: die letzten sechs Zeilen
 `frac-imag-split`, `frac-imag-direct`, `frac-imag-minus`), mit der Lernkarte
 „Komplexe Zahlen teilen"; „nur Zähler oder nur Nenner malgenommen"
 (`frac-conjugate-one-side`) gilt auch beim Erweitern mit dem konjugiert
-Komplexen.
+Komplexen. In Schritt 5b: die sieben Zeilen zu Grenzwerten
+(`frac-limit-zero-zero`, `frac-limit-insert-sign`,
+`frac-limit-divide-one-side`, `frac-limit-infinity-one`,
+`frac-limit-n-zero`, `frac-limit-degree`, `frac-limit-first-terms`), mit der
+Lernkarte „Grenzwerte von Brüchen"; dazu alle Fehler beim Zerlegen, Kürzen
+und Zusammenfassen, mit dem falschen Bruch bis zum Grenzwert
+weitergerechnet.
 
 ### Schritte
 
@@ -322,6 +335,21 @@ wie $\frac{2 - 11\mathrm{i}}{25}$; kein $\mathrm{i}$ im Nenner, keine Potenz
 von $\mathrm{i}$. Die Tastatur hat eine Taste $\mathrm{i}$. Sieben neue
 typische Fehler, Lernkarte „Komplexe Zahlen teilen".
 
+**Umgesetzt (5b, Grenzwerte):** Neue Vorlage „Grenzwerte" in Stufe 5 (etwa
+jede dreizehnte Aufgabe, mit eigenem Zufall gewählt). $x \to a$ mit
+$\frac{0}{0}$: Zähler und Nenner mit dem Faktor $(x - a)$, auch
+$x^3 - a^3$, eine Summe wie $\frac{1}{x - 1} - \frac{2}{x^2 - 1}$ oder mit
+Wurzel wie $\frac{\sqrt{x} - 2}{x - 4}$. $n \to \infty$: Bruch aus Polynomen
+(Zählergrad höchstens Nennergrad), manchmal mit dem Kleinsten vorn oder dem
+Zähler als Produkt, und „$\infty - \infty$" wie $\frac{n^2}{n + 1} - n$.
+Geführt: bei $x \to a$ die Schritte des Bruchs selbst (zerlegen, kürzen
+bzw. Hauptnenner, zusammenfassen), in „Bisher" mit dem Limes davor, zuletzt
+„Setze ein"; bei $n \to \infty$ erst zusammenfassen bzw. ausmultiplizieren,
+dann durch die höchste Potenz des Nenners teilen, zuletzt der Grenzwert.
+Frei: gesucht ist eine Zahl; ein Term mit dem richtigen Grenzwert ist „noch
+nicht fertig". Sieben neue typische Fehler, Lernkarte „Grenzwerte von
+Brüchen".
+
 #### Schritt 6: Gezieltes Üben, Feinschliff, Abschluss
 - Jeder neue Fehler lässt sich aus der Lernkarte und dem Fortschritt gezielt
   üben.
@@ -400,6 +428,11 @@ typische Fehler, Lernkarte „Komplexe Zahlen teilen".
   (`IMAG`), der Leser versteht `i`, `\mathrm{i}` und `\imaginaryI`. Die
   Gegenprobe in den Tests rechnet mit komplexen Zahlen, unabhängig von der
   Bruch-Engine.
+- Grenzwerte umgesetzt in `fraction/limit.ts` (Wert an einer Stelle, auch mit
+  $\sqrt{x}$; Grenzwert für $n \to \infty$ über die höchsten Potenzen; Zähler
+  und Nenner durch die höchste Potenz geteilt), Aufgabenart `limit` mit dem
+  Bruch als eigener Aufgabe (`inner`). Gegenprobe in den Tests: Zahlen nah an
+  $a$ bzw. ein sehr großes $n$ einsetzen.
 - **Grenzwerte:** $n \to \infty$ über die höchsten Potenzen von Zähler und
   Nenner; $x \to a$ mit $\frac{0}{0}$: zerlegen, kürzen, einsetzen.
   Gegenprobe: großes $n$ bzw. $x$ nahe $a$ einsetzen.
