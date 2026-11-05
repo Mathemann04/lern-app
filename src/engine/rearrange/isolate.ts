@@ -113,7 +113,9 @@ export function stepLabel(step: RearrangeStep, target: string): string {
       // mit einer Wurzel wie √(x − a): die Wurzel ausklammern
       return `${step.operand ? `$${operand}$` : unknown} ausklammern`
     case 'finish':
-      return step.swapOnly ? 'Seiten tauschen' : 'Zu einem Bruch zusammenfassen'
+      // ohne Bruch im Ergebnis (\sqrt{a^2 + e^b}) wird nur zusammengefasst und geordnet
+      if (step.swapOnly) return 'Seiten tauschen'
+      return subterms(step.after.rhs).some((x) => x.kind === 'div') ? 'Zu einem Bruch zusammenfassen' : 'Zusammenfassen und ordnen'
     case 'expand':
       return 'Die Klammern ausmultiplizieren'
     case 'extend':
