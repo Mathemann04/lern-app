@@ -439,8 +439,13 @@ Aufgabe: Löse $\int_a^x \frac{\mathrm{d}t}{t(t + b)} = y$ nach $x$ auf
 | $pq$-Formel | Vorzeichen von $p$ nicht gewechselt | $u^2 - 2yu - 1 = 0 \Rightarrow u = -y \pm \sqrt{y^2 + 1}$ |
 | Lösung wählen | Scheinlösung nicht verworfen | $\log_a x$ mit negativem $x$, oder $u = e^x$ negativ |
 | Substitution | nicht zurückgerechnet | $x = y + \sqrt{y^2 + 1}$ statt $\ln\left(\ldots\right)$ |
-| Winkelfunktion | Quadrat vergessen | $\cos^2 x = 1 - \sin x$ |
-| Umkehrfunktion | falsche Umkehrfunktion | $\tan x = w \Rightarrow x = \frac{1}{\tan w}$ |
+| Winkelfunktion | beim Ersetzen mit $\sin^2 x + \cos^2 x = 1$ das Quadrat vergessen (`eq-pythagoras-square`, neu in 6b) | $\sin^2 x = 1 - \cos x$ |
+| Hyperbelfunktion | $\sinh^2 x$ wie $\sin^2 x$ ersetzt, falsches Vorzeichen (`eq-hyperbolic-sign`, neu in 6b) | $\sinh^2 x = 1 - \cosh^2 x$ |
+| Winkelfunktion | $\frac{\cos x}{\sin x}$ als $\tan x$ geschrieben (`eq-tan-flipped`, neu in 6b) | $\frac{\sin x + \cos x}{\sin x - \cos x} \Rightarrow \frac{1 + \tan x}{1 - \tan x}$ |
+| Winkelfunktion | nur einen Teil durch $\cos x$ geteilt (`eq-divide-cos-partly`, neu in 6b) | $\frac{\sin x + \cos x}{\sin x - \cos x} \Rightarrow \frac{\tan x + 1}{\sin x - \cos x}$ |
+| Umkehrfunktion | mit dem Kehrwert verwechselt (`eq-inverse-reciprocal`, neu in 6b) | $\tan x = w \Rightarrow x = \frac{1}{\tan w}$ |
+| Umkehrfunktion | auf der anderen Seite vergessen (`eq-inverse-forgotten`, neu in 6b) | $\sin(kx) = w \Rightarrow kx = w$ |
+| Umkehrfunktion | in der Umkehrfunktion geteilt (`eq-divide-inside-arc`, neu in 6b) | $kx = \arcsin w \Rightarrow x = \arcsin\frac{w}{k}$ |
 
 **Werkzeuge aus anderen Gebieten (Stufe 5)**
 
@@ -659,6 +664,49 @@ $\frac{\ln y}{2}$, $\frac{1}{2}\ln y$ und $\ln\sqrt{y}$); $\ln$ und $e^{…}$
 zählen wie Buchstaben. Die Tastatur hat dann $e^{\square}$, $\ln$ und
 $\log_a$. Prüfstellen, an denen Zwischenwerte riesig werden (z. B. $e^{64}$),
 zählen nicht mehr, sonst verschluckt die Rundung kleine Unterschiede.
+
+**Umgesetzt (6b):** Gut ein Drittel der Aufgaben der Stufe 4 (fester Anteil
+35 %, vorweg mit eigenem Zufall gewählt) kommt jetzt aus einem zweiten
+Baukasten (`buildLevel4Trig`) mit sechs Arten von Kernen: Bruch aus $\sin x$,
+$\cos x$, $\tan x$, $\sinh x$, $\cosh x$ oder $\tanh x$ (auch im Nenner, auf
+beiden Seiten), Winkelfunktion mit Schalen oder unter einer Wurzel,
+Umkehrfunktion um einen Kern ($y = a\arctan\frac{x}{b} + c$,
+$\arctan\frac{x + a}{x - b} = c$, $\arctan\left(e^x - a\right) = y$,
+$\operatorname{arsinh}$, $\operatorname{artanh}$), Quadrate
+($y = a\cos^2 x + b\sin^2 x$, $a\sin^2 x = b\cos^2 x + c$,
+$a\cosh^2 x - b\sinh^2 x = y$), Sinus und Kosinus in jedem Summanden
+($\frac{a\sin x + b\cos x}{\sin x - c\cos x} = y$, $a\sin x = b\cos x + c\sin x$,
+auch mit $\sinh$ und $\cosh$) sowie $e$ hoch oder $\ln$ um eine Winkelfunktion.
+Winkel sind $x$, $2x$, $bx$ oder $\frac{x}{b}$; jede Aufgabe mit $\sin$, $\cos$
+oder $\tan$ nennt den Bereich, z. B. $x < \frac{\pi}{2}$ (bei $\cos$ ohne
+Quadrat $x < \pi$), damit die Umkehrfunktion die Lösung liefert. Die übrigen
+Nummern behalten ihre Aufgabe aus 6a. Gemessen unter den Aufgaben 1 bis 200
+der Stufe 4: 196 Formen, keine öfter als in 1 von 100, im Mittel 7,2
+Umformungen, jede mindestens 6.
+
+Die Engine kann dazu: Winkel- und Hyperbelfunktionen als Baustein (sortieren,
+ausklammern, teilen wie bei $e^x$; steht die Funktion nur im Quadrat, ist das
+Quadrat der Baustein), Umkehrfunktion auf beiden Seiten (Schritt `arc`,
+$\sin u = w \Rightarrow u = \arcsin w$, vorher eine Summe mit Brüchen zu einem
+Bruch), Funktion auf beiden Seiten gegen eine Umkehrfunktion (`trig`,
+$\arctan u = w \Rightarrow u = \tan w$), ein Quadrat mit
+$\sin^2 u + \cos^2 u = 1$ bzw. $\cosh^2 u - \sinh^2 u = 1$ ersetzen
+(`pythagoras`, das zuerst geschriebene bleibt), Zähler und Nenner bzw. beide
+Seiten durch $\cos u$ teilen (`tanQuotient`). Beim Sortieren steht links nicht
+mehr lauter Minus ($-ax - bx$), und nach dem Teilen durch den Faktor vor einem
+Baustein wird der Bruch gleich gekürzt; das ändert einige Rechenwege der
+Stufen 3 und 4 (gleiche Ergebnisse, schönere Zwischenschritte). Quadrate von
+Produkten werden ausgerechnet: $9(y + m)^2$ statt $(3(y + m))^2$.
+
+Neue typische Fehler (Tabelle oben, mit Texten und auf den Lernkarten):
+Umkehrfunktion vergessen, mit dem Kehrwert verwechselt, in der Umkehrfunktion
+geteilt, beim Ersetzen das Quadrat vergessen, $\sinh^2$ wie $\sin^2$ ersetzt,
+$\frac{\cos x}{\sin x}$ als $\tan x$, nur einen Teil durch $\cos x$ geteilt. Neue
+Lernkarten „Umkehrfunktionen" und „Winkel- und Hyperbelfunktionen". Frei: Die
+Tastatur hat bei solchen Aufgaben eine zweite Seite „Funktionen" mit $\sin$,
+$\cos$, $\tan$, ihren Umkehrfunktionen, den Hyperbel- und Areafunktionen;
+$\operatorname{arsinh} w$ darf auch als $\ln\left(w + \sqrt{w^2 + 1}\right)$
+stehen.
 
 #### Schritt 7: Stufe 5, Teil 1: Analysis
 - Ableitungen (mit der Engine aus „Ableiten"), Integrale mit

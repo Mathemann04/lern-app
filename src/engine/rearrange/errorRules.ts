@@ -29,11 +29,14 @@ import {
   lnTerms,
   negated,
   plusTerm,
+  TRIG_OF,
   powerLawSum,
   powerOf,
+  pythagorasWrong,
   signedLog,
   solveEquation,
   squared,
+  tanQuotientWrong,
   timesFactor,
   unknownAtoms,
 } from './isolate.ts'
@@ -81,6 +84,14 @@ export const REARRANGE_ERROR_RULES: readonly EqErrorRule[] = [
   { id: 'eq-log-sum', name: 'Summe der Logarithmen als Logarithmus der Summe', wrongFormula: '\\ln u + \\ln v = \\ln(u + v)' },
   { id: 'eq-log-quotient', name: 'Differenz der Logarithmen als Quotient', wrongFormula: '\\ln u - \\ln v = \\frac{\\ln u}{\\ln v}' },
   { id: 'eq-power-sum', name: 'Potenz mit Summe in der Hochzahl als Summe geschrieben', wrongFormula: '2^{x + 1} = 2^x + 2' },
+  // Winkel- und Hyperbelfunktionen, Umkehrfunktionen (ab Stufe 4, Schritt 6b)
+  { id: 'eq-inverse-forgotten', name: 'Die Umkehrfunktion auf der anderen Seite vergessen', wrongFormula: '\\sin(kx) = w \\Rightarrow kx = w' },
+  { id: 'eq-inverse-reciprocal', name: 'Umkehrfunktion mit dem Kehrwert verwechselt', wrongFormula: '\\tan x = w \\Rightarrow x = \\frac{1}{\\tan w}' },
+  { id: 'eq-divide-inside-arc', name: 'In der Umkehrfunktion geteilt statt die ganze Umkehrfunktion', wrongFormula: 'kx = \\arcsin w \\Rightarrow x = \\arcsin\\frac{w}{k}' },
+  { id: 'eq-pythagoras-square', name: 'Beim Ersetzen mit $\\sin^2 x + \\cos^2 x = 1$ das Quadrat vergessen', wrongFormula: '\\sin^2 x = 1 - \\cos x' },
+  { id: 'eq-hyperbolic-sign', name: '$\\sinh^2 x$ wie $\\sin^2 x$ ersetzt (falsches Vorzeichen)', wrongFormula: '\\sinh^2 x = 1 - \\cosh^2 x' },
+  { id: 'eq-tan-flipped', name: '$\\frac{\\cos x}{\\sin x}$ als $\\tan x$ geschrieben', wrongFormula: '\\frac{\\cos x}{\\sin x} = \\tan x' },
+  { id: 'eq-divide-cos-partly', name: 'Nur einen Teil durch $\\cos x$ geteilt', wrongFormula: '\\frac{\\sin x + \\cos x}{\\sin x - \\cos x} = \\frac{\\tan x + 1}{\\sin x - \\cos x}' },
 ]
 
 export function rearrangeErrorRule(id: string): EqErrorRule {
@@ -477,6 +488,52 @@ function powerSum(step: RearrangeStep, t: string): Candidate[] {
   return wrong ? [{ id: 'eq-power-sum', after: wrong }] : []
 }
 
+// Umkehrfunktionen: auf der anderen Seite vergessen (\sin u = w → u = w), \arcsin mit
+// \frac{1}{\sin} verwechselt (\tan x = w → x = \frac{1}{\tan w})
+function inverseMistakes(step: RearrangeStep): Candidate[] {
+  const { before, side } = step
+  if ((step.kind !== 'arc' && step.kind !== 'trig') || !side || !step.fn) return []
+  const o = before[other(side)]
+  const out: Candidate[] = [{ id: 'eq-inverse-forgotten', after: withSide(step.after, other(side), o) }]
+  const original = TRIG_OF[step.fn]
+  if (step.kind === 'arc' && original) out.push({ id: 'eq-inverse-reciprocal', after: withSide(step.after, other(side), div(num(1), fn(original, o))) })
+  return out
+}
+
+// kx = \arcsin w → x = \arcsin\frac{w}{k}: nur in der Umkehrfunktion geteilt
+function divideInsideArc(step: RearrangeStep): Candidate[] {
+  if (step.kind !== 'divide' || !step.side || !step.operand) return []
+  const o = step.before[other(step.side)]
+  const inner = o.kind === 'neg' ? o.arg : o
+  if (inner.kind !== 'fn' || !TRIG_OF[inner.name]) return []
+  const wrong = fn(inner.name, dividedBy(inner.arg, step.operand))
+  return [{ id: 'eq-divide-inside-arc', after: withSide(step.after, other(step.side), o.kind === 'neg' ? negated(wrong) : wrong) }]
+}
+
+// \sin^2 x + \cos^2 x = 1: Quadrat vergessen (\sin^2 x = 1 - \cos x); bei \sinh und \cosh auch das
+// Vorzeichen wie bei \sin und \cos (\sinh^2 x = 1 - \cosh^2 x)
+function pythagorasMistakes(step: RearrangeStep, t: string): Candidate[] {
+  if (step.kind !== 'pythagoras' || step.operand?.kind !== 'pow' || step.operand.base.kind !== 'fn') return []
+  const hyperbolic = step.operand.base.name === 'sinh' || step.operand.base.name === 'cosh'
+  const out: Candidate[] = []
+  const square = pythagorasWrong(step.before, t, 'square')
+  if (square) out.push({ id: 'eq-pythagoras-square', after: square })
+  const sign = hyperbolic ? pythagorasWrong(step.before, t, 'sign') : null
+  if (sign) out.push({ id: 'eq-hyperbolic-sign', after: sign })
+  return out
+}
+
+// Durch \cos x teilen: durch \sin x geteilt und \tan x statt \cot x geschrieben, nur einen Teil geteilt
+function tanQuotientMistakes(step: RearrangeStep, t: string): Candidate[] {
+  if (step.kind !== 'tanQuotient') return []
+  const out: Candidate[] = []
+  const flipped = tanQuotientWrong(step.before, t, 'flipped')
+  if (flipped) out.push({ id: 'eq-tan-flipped', after: flipped })
+  const partly = tanQuotientWrong(step.before, t, 'partly')
+  if (partly) out.push({ id: 'eq-divide-cos-partly', after: partly })
+  return out
+}
+
 // Zusammenfassen zu einem Bruch (auch im Ergebnis-Schritt): Fehler aus „Brüche"
 function fractionMistakes(step: RearrangeStep, t: string): Candidate[] {
   if (step.kind !== 'combine' && step.kind !== 'finish') return []
@@ -528,6 +585,10 @@ function candidatesFor(steps: readonly RearrangeStep[], i: number, t: string): C
     ...divideInsideLn(step),
     ...logCombineMistakes(step, t),
     ...powerSum(step, t),
+    ...inverseMistakes(step),
+    ...divideInsideArc(step),
+    ...pythagorasMistakes(step, t),
+    ...tanQuotientMistakes(step, t),
     ...fractionMistakes(step, t),
   ]
 }

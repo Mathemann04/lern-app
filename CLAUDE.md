@@ -13,7 +13,7 @@ den Nutzer zugeschnitten: Maschinenbau, 1. Semester, THU, „Mathematik MB1".
   4. Fassung, freigegeben): erst Baukasten und Abwechslung in den Stufen 1
   bis 3 wie bei den Brüchen (Schritte 4 und 5; ab Stufe 3 Kerne ineinander,
   Test der Umformungen), dann die Stufen 4 und 5 (Schritte 6 bis 9; Stufe 4
-  in drei Teilen, 6a fertig).
+  in drei Teilen, 6a und 6b fertig).
   Abgeschlossen:
   [docs/PLAN-M1.md](docs/PLAN-M1.md), [docs/PLAN-M2.md](docs/PLAN-M2.md),
   [docs/PLAN-M2b.md](docs/PLAN-M2b.md) (Brüche nachschärfen: Abwechslung und
@@ -85,7 +85,9 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   Brüche mit den Buchstaben der Aufgabe, bei Bausteinen $e^x$, ln, sin,
   cos, tan, bei Hyperbelfunktionen $e^x$, sinh, cosh, tanh, bei Wurzeln √,
   bei komplexen Zahlen $\mathrm{i}$; Umstellen mit allen Buchstaben der Aufgabe
-  (bis zu sieben) und √, ab Stufe 4 mit $e^x$, ln und $\log_a$; wird erst im
+  (bis zu sieben) und √, ab Stufe 4 mit $e^x$, ln und $\log_a$, bei Winkel- und
+  Hyperbelfunktionen mit zweiter Seite „Funktionen" (sin, cos, tan, ihre
+  Umkehrfunktionen, sinh, cosh, tanh, Areafunktionen); wird erst im
   freien Modus geladen), gemeinsame Teile in
   `src/ui/task/`. Lernkarten in
   `src/ui/cards/` (`CardSheet.tsx`: Fenster über der Aufgabe, die
@@ -142,7 +144,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     fertig: ein Bruch, auch unter Wurzel oder im Quadrat, zusammengefasst,
     gekürzt; eine Wurzel aus einem Bruch zählt wie ein Buchstabe, z. B.
     $b + \sqrt{\frac{y}{a}}$; ab Stufe 4 (`lenient`) jede gleichwertige Form
-    ohne Doppelbruch, $\ln$ und $e^{…}$ zählen wie Buchstaben; sonst
+    ohne Doppelbruch, $\ln$, $e^{…}$, Winkel- und Umkehrfunktionen zählen wie
+    Buchstaben; sonst
     typischer Fehler)
   - `parse/latex.ts`: liest die Eingabe der Mathe-Tastatur (LaTeX) ein, mit
     verständlichen Fehlermeldungen
@@ -162,7 +165,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     „Gleichungen umstellen" in `rearrangeCards.ts` (Beispiele sind
     Umstell-Aufgaben; Stufe 3: Hauptnenner, Kehrwert, Wurzel und Quadrat
     mit Klammer im Quadrat und zwei Wurzeln; Stufe 4: „e-Funktion und
-    Logarithmus", „Logarithmus- und Potenzgesetze"),
+    Logarithmus", „Logarithmus- und Potenzgesetze", „Umkehrfunktionen",
+    „Winkel- und Hyperbelfunktionen"),
     durchgerechnete Beispiele in `rearrangeExample.ts`
   - `guided/plan.ts`: Schrittplaner für den geführten Modus (Regelwahl, dann je
     Summand ein Schritt; Produkt/Quotient: u', v', Einsetzen; Kette: äußere,
@@ -200,7 +204,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     falschen Gleichungen aus den Fehlerregeln; ohne passenden Fehler steht
     die Gleichung gleich unter „Bisher"; ab Stufe 3 die Umformung nur an
     Weichen, `isJunction`, auch $e$ hoch, logarithmieren, Logarithmus- und
-    Potenzgesetze; ist √x oder ein Baustein wie $e^x$ die Unbekannte, sprechen
+    Potenzgesetze, Umkehrfunktionen, Quadrat ersetzen, durch $\cos x$ teilen;
+    ist √x oder ein Baustein wie $e^x$ die Unbekannte, sprechen
     Fragen und Antworten davon, `unknownOf`; Bedingung des Ergebnisses wie „Gilt für
     $a \neq c$."). Gemeinsame Typen in `guided/types.ts`
   - `errorCatalog.ts`: typische Fehler aller Themen mit Namen, je Thema
@@ -258,8 +263,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     Buchstaben, Teile ohne die Variable wie √(b² − y²) als eigene Zeichen
     `~0`, √x als Unbekannte `~u`, bei zwei Wurzeln die zweite wie √(x − a)
     als eigenes Zeichen `~r` mit (~r)² = x − a, `radicalAtoms`; ein Baustein
-    wie $e^x$, $2^x$ oder $\ln x$, in dem allein die Variable steckt, als
-    Unbekannte `~b`, `blockAtoms`; Endform: ein Bruch, gekürzt,
+    wie $e^x$, $2^x$, $\ln x$ oder $\sin(2x)$ (nur im Quadrat: $\sin^2 x$), in dem
+    allein die Variable steckt, als Unbekannte `~b`, `blockAtoms`; Endform: ein Bruch, gekürzt,
     Buchstaben-Faktor ausgeklammert), `isolate.ts`
     (Rechenweg: von außen nach innen schälen; vor dem Wurzelziehen oder
     Quadrieren eine Summe mit Brüchen zuerst zu einem Bruch; bei mehrfacher
@@ -275,7 +280,12 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     zusammenfassen `logCombine`, Potenzgesetz $a^{m + n} = a^m a^n$
     `powerLaw`, Baustein als Unbekannte `unknownAtoms`, verschiedene Basen
     über beide Seiten logarithmieren; Wurzeln in Wurzeln bleiben im Ergebnis
-    ineinander; Schrittnamen `stepLabel`), `check.ts`
+    ineinander; Teil 6b: Umkehrfunktion auf beiden Seiten `arc` (Bereich der
+    Aufgabe sorgt für den Hauptwert, `requires` für den Definitionsbereich),
+    Funktion gegen eine Umkehrfunktion `trig`, ein Quadrat mit
+    $\sin^2 u + \cos^2 u = 1$ bzw. $\cosh^2 u - \sinh^2 u = 1$ ersetzen
+    `pythagoras`, durch $\cos u$ teilen `tanQuotient`; beim Sortieren links nicht
+    lauter Minus; Schrittnamen `stepLabel`), `check.ts`
     (Prüfstellen: Buchstaben zufällig positiv, Variable aus dem Ergebnis,
     Bedingungen der Aufgabe, Zwischenwerte aus `requires` nicht riesig;
     Gegenprobe durch Einsetzen), `errorRules.ts`
@@ -295,7 +305,12 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     verschachtelt (`LEVEL4_CORES`: $\ln$ um einen Kern, $e$ hoch einen Kern,
     Bruch aus $e^x$ oder $\ln x$, Wurzel aus $\ln$ oder $e^x$, $\ln$ einer
     Summe mit Wurzel, Wurzeln in Wurzeln, Potenzen derselben bzw.
-    verschiedener Basen, mehrere Logarithmen); Filter in
+    verschiedener Basen, mehrere Logarithmen), dazu mit festem Anteil
+    (`share`, 35 %, die übrigen Nummern behalten ihre Aufgabe)
+    `LEVEL4_TRIG_CORES`: Bruch aus $\sin x$ oder $\tanh x$, Winkelfunktion mit
+    Schalen oder unter einer Wurzel, Umkehrfunktion um einen Kern, Quadrate mit
+    $\sin^2 x + \cos^2 x = 1$, Sinus und Kosinus in jedem Summanden, $e$ hoch oder
+    $\ln$ um eine Winkelfunktion, mit Bereich wie $x < \frac{\pi}{2}$; Filter in
     `rearrangeTerms.ts`: Mindestzahl der Umformungen je Stufe, Doppelbrüche
     erst ab Stufe 3, Ergebnis höchstens 90 bzw. ab Stufe 4 120 Zeichen,
     Gegenprobe der Aufgabe an den Prüfstellen), `focus.ts` und `fractionFocus.ts` (Aufgaben für

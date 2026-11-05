@@ -140,6 +140,40 @@ export const REARRANGE_ERROR_TEXTS: Readonly<Record<string, Explanation>> = {
     detailed: 'Eine Summe in der Hochzahl wird zu einem Produkt: $a^{x + 1} = a^x \\cdot a^1 = a \\cdot a^x$. Als Summe $a^x + a$ stimmt es nicht.',
     short: '$a^{x + 1} = a \\cdot a^x$, nicht $a^x + a$.',
   },
+  'eq-inverse-forgotten': {
+    detailed:
+      'Gegen eine Funktion hilft ihre Umkehrfunktion, auf beiden Seiten: aus $\\sin u = w$ wird $u = \\arcsin w$, aus $\\arctan u = w$ wird $u = \\tan w$. Lässt du die Funktion nur weg, stimmt die Gleichung nicht mehr.',
+    short: 'Auf beiden Seiten die Umkehrfunktion: $\\sin u = w \\Leftrightarrow u = \\arcsin w$.',
+  },
+  'eq-inverse-reciprocal': {
+    detailed:
+      'Die Umkehrfunktion ist nicht der Kehrwert: $\\arcsin w \\neq \\frac{1}{\\sin w}$. Die Taste $\\sin^{-1}$ auf dem Taschenrechner meint die Umkehrfunktion $\\arcsin$. Gegen $\\tan$ hilft $\\arctan$, gegen $\\sinh$ hilft $\\operatorname{arsinh}$.',
+    short: 'Umkehrfunktion, nicht Kehrwert: $\\arctan w \\neq \\frac{1}{\\tan w}$.',
+  },
+  'eq-divide-inside-arc': {
+    detailed: 'Teilst du beide Seiten durch $k$, wird die ganze Umkehrfunktion geteilt, nicht das, was in ihr steht: $\\frac{\\arcsin w}{k} \\neq \\arcsin\\frac{w}{k}$.',
+    short: 'Die ganze Umkehrfunktion teilen: $\\frac{\\arcsin w}{k} \\neq \\arcsin\\frac{w}{k}$.',
+  },
+  'eq-pythagoras-square': {
+    detailed:
+      'Aus $\\sin^2 u + \\cos^2 u = 1$ folgt $\\sin^2 u = 1 - \\cos^2 u$: Das Quadrat bleibt stehen. $1 - \\cos u$ ist etwas anderes. Bei Hyperbelfunktionen gilt dasselbe: $\\sinh^2 u = \\cosh^2 u - 1$.',
+    short: '$\\sin^2 u = 1 - \\cos^2 u$, mit Quadrat.',
+  },
+  'eq-hyperbolic-sign': {
+    detailed:
+      'Bei den Hyperbelfunktionen gilt $\\cosh^2 u - \\sinh^2 u = 1$, mit Minus, nicht eine Summe wie bei $\\sin$ und $\\cos$. Also ist $\\sinh^2 u = \\cosh^2 u - 1$ und $\\cosh^2 u = 1 + \\sinh^2 u$.',
+    short: '$\\cosh^2 u - \\sinh^2 u = 1$, also $\\sinh^2 u = \\cosh^2 u - 1$.',
+  },
+  'eq-tan-flipped': {
+    detailed:
+      '$\\tan u = \\frac{\\sin u}{\\cos u}$: Der Sinus steht oben. Teilst du durch $\\cos u$, wird aus $\\sin u$ der $\\tan u$ und aus $\\cos u$ die $1$. Teilst du durch $\\sin u$, entsteht $\\frac{\\cos u}{\\sin u} = \\frac{1}{\\tan u}$, nicht $\\tan u$. Bei $\\sinh$ und $\\cosh$ genauso mit $\\tanh u = \\frac{\\sinh u}{\\cosh u}$.',
+    short: '$\\tan u = \\frac{\\sin u}{\\cos u}$, nicht $\\frac{\\cos u}{\\sin u}$.',
+  },
+  'eq-divide-cos-partly': {
+    detailed:
+      'Ein Bruch behält seinen Wert nur, wenn du Zähler und Nenner durch dasselbe teilst; bei einer Gleichung teilst du beide Seiten. Teilst du nur einen Teil durch $\\cos u$, ändert sich der Wert.',
+    short: 'Zähler und Nenner (bzw. beide Seiten) durch $\\cos u$ teilen.',
+  },
 }
 
 export function explainRearrangeError(id: string): Explanation {
@@ -361,6 +395,75 @@ export const POWER_LAW_MOVES: readonly WrongMove[] = [
   },
 ]
 
+// Umkehrfunktion auf beiden Seiten (fn: \sin, arc: \arcsin, als LaTeX)
+export function arcMoves(fnLatex: string, arcLatex: string, side: 'lhs' | 'rhs'): WrongMove[] {
+  return [
+    { label: `Den $${fnLatex}$ einfach weglassen`, why: REARRANGE_ERROR_TEXTS['eq-inverse-forgotten'] },
+    { label: `Auf beiden Seiten den Kehrwert $\\frac{1}{${fnLatex}}$ nehmen`, why: REARRANGE_ERROR_TEXTS['eq-inverse-reciprocal'] },
+    {
+      label: `Beide Seiten durch $${fnLatex}$ teilen`,
+      why: {
+        detailed: `$${fnLatex}$ ist keine Zahl, sondern eine Rechenvorschrift; durch sie kannst du nicht teilen. Gegen $${fnLatex}$ hilft die Umkehrfunktion $${arcLatex}$.`,
+        short: `Gegen $${fnLatex}$ hilft $${arcLatex}$.`,
+      },
+    },
+    { label: `Nur auf der ${sideName(side)} Seite $${arcLatex}$`, why: ONE_SIDED },
+  ]
+}
+
+// Funktion auf beiden Seiten gegen eine Umkehrfunktion (arc: \arctan, fn: \tan, als LaTeX)
+export function trigMoves(arcLatex: string, fnLatex: string, side: 'lhs' | 'rhs'): WrongMove[] {
+  return [
+    { label: `Den $${arcLatex}$ einfach weglassen`, why: REARRANGE_ERROR_TEXTS['eq-inverse-forgotten'] },
+    {
+      label: `Beide Seiten durch $${arcLatex}$ teilen`,
+      why: {
+        detailed: `$${arcLatex}$ ist keine Zahl, sondern eine Rechenvorschrift; durch sie kannst du nicht teilen. Gegen die Umkehrfunktion hilft die Funktion selbst: $${fnLatex}$.`,
+        short: `Gegen $${arcLatex}$ hilft $${fnLatex}$.`,
+      },
+    },
+    { label: `Nur auf der ${sideName(side)} Seite $${fnLatex}$`, why: ONE_SIDED },
+  ]
+}
+
+// Quadrat ersetzen (square: das ersetzte Quadrat, partner: die andere Funktion ohne Quadrat, als LaTeX)
+export function pythagorasMoves(square: string, partner: string, hyperbolic: boolean): WrongMove[] {
+  return [
+    hyperbolic
+      ? { label: `$${square}$ durch $1 - ${partner}^2$ ersetzen`, why: REARRANGE_ERROR_TEXTS['eq-hyperbolic-sign'] }
+      : { label: `$${square}$ durch $1 - ${partner}$ ersetzen`, why: REARRANGE_ERROR_TEXTS['eq-pythagoras-square'] },
+    {
+      label: 'Die beiden Quadrate einfach zu $1$ zusammenfassen',
+      why: {
+        detailed: 'Zu $1$ zusammenfassen darfst du nur, wenn beide Quadrate genau so dastehen wie in der Formel, mit demselben Faktor. Ersetze stattdessen ein Quadrat durch das andere.',
+        short: 'Nur bei gleichen Faktoren; besser ein Quadrat ersetzen.',
+      },
+    },
+    {
+      label: 'Auf beiden Seiten die Wurzel ziehen',
+      why: {
+        detailed: 'Die Wurzel aus einer Summe lässt sich nicht Summand für Summand ziehen. Sorge zuerst dafür, dass nur noch eine Funktion in der Gleichung steht.',
+        short: 'Erst nur noch eine Funktion, dann weiter.',
+      },
+    },
+  ]
+}
+
+// Durch \cos u teilen (sin, cos, tan: als LaTeX, z. B. \sin x, \cos x und \tan x)
+export function tanQuotientMoves(sin: string, cos: string, tan: string, fraction: boolean): WrongMove[] {
+  return [
+    { label: fraction ? `Nur den Zähler durch $${cos}$ teilen` : `Nur die linke Seite durch $${cos}$ teilen`, why: REARRANGE_ERROR_TEXTS['eq-divide-cos-partly'] },
+    { label: `Durch $${sin}$ teilen und $\\frac{${cos}}{${sin}}$ als $${tan}$ schreiben`, why: REARRANGE_ERROR_TEXTS['eq-tan-flipped'] },
+    {
+      label: `$${sin}$ und $${cos}$ gegeneinander kürzen`,
+      why: {
+        detailed: 'Kürzen darfst du nur gleiche Faktoren. $\\sin$ und $\\cos$ sind verschiedene Funktionen, und es stehen Summen da.',
+        short: 'Verschiedene Funktionen lassen sich nicht kürzen.',
+      },
+    },
+  ]
+}
+
 export const EXPAND_MOVES: readonly WrongMove[] = [
   { label: 'Die Klammern einfach weglassen', why: { detailed: 'Ohne Klammer gehört der Faktor nur noch zum ersten Summanden. Jeder Summand in der Klammer muss malgenommen werden.', short: 'Klammern nicht weglassen, ausmultiplizieren.' } },
   { label: 'Die Zahl vor der Klammer nur mit dem ersten Summanden malnehmen', why: REARRANGE_ERROR_TEXTS['eq-bracket-first-term'] },
@@ -443,6 +546,10 @@ export const REARRANGE_HINTS = {
   logLaw: 'Ziehe den $\\ln$ mit den Gesetzen auseinander: $\\ln(u \\cdot v) = \\ln u + \\ln v$, $\\ln\\left(a^u\\right) = u\\ln a$.',
   logCombine: 'Fasse die Logarithmen mit den Gesetzen zusammen: $\\ln u + \\ln v = \\ln(uv)$, $\\ln u - \\ln v = \\ln\\frac{u}{v}$.',
   powerLaw: 'Zerlege die Potenzen mit $a^{m + n} = a^m \\cdot a^n$, bis überall dieselbe Potenz steht.',
+  arc: 'Gegen eine Winkel- oder Hyperbelfunktion hilft ihre Umkehrfunktion, auf beiden Seiten: $\\sin u = w \\Leftrightarrow u = \\arcsin w$.',
+  trig: 'Gegen eine Umkehrfunktion hilft die Funktion selbst, auf beiden Seiten: $\\arctan u = w \\Leftrightarrow u = \\tan w$.',
+  pythagoras: 'Mit $\\sin^2 u + \\cos^2 u = 1$ (bei Hyperbelfunktionen $\\cosh^2 u - \\sinh^2 u = 1$) ersetzt du ein Quadrat durch das andere.',
+  tanQuotient: 'Teile durch $\\cos u$: Aus $\\frac{\\sin u}{\\cos u}$ wird $\\tan u$, aus $\\frac{\\cos u}{\\cos u}$ wird $1$. Bei Hyperbelfunktionen genauso mit $\\tanh u$.',
   extend: 'Erweitere den Doppelbruch: Zähler und Nenner mal den Hauptnenner der inneren Brüche. Dann kürzen sich die inneren Nenner weg.',
   expand: 'Jeder Summand in der Klammer wird malgenommen: $a(b + c) = ab + ac$.',
   collect: 'Alle Summanden mit der Variable auf eine Seite, alle anderen auf die andere. Was die Seite wechselt, wechselt das Vorzeichen.',
@@ -497,6 +604,14 @@ export function explainMove(kind: string, operation: string, target: string, unk
       return { detailed: 'Die Variable steckt in mehreren Logarithmen. Mit den Logarithmusgesetzen wird daraus einer: $\\ln u + \\ln v = \\ln(uv)$, $\\ln u - \\ln v = \\ln\\frac{u}{v}$. Den löst du dann mit der Basis hoch auf.', short: 'Logarithmusgesetze: aus mehreren Logarithmen wird einer.' }
     case 'powerLaw':
       return { detailed: 'Die Variable steht in mehreren Hochzahlen, die sich nur um einen festen Teil unterscheiden. Mit $a^{m + n} = a^m \\cdot a^n$ steht danach überall dieselbe Potenz, die du ausklammern kannst.', short: 'Potenzgesetz: überall dieselbe Potenz.' }
+    case 'arc':
+      return { detailed: 'Die Variable steckt in einer Winkel- oder Hyperbelfunktion. Ihre Umkehrfunktion hebt sie auf: $\\arcsin(\\sin u) = u$, solange $u$ im Bereich der Aufgabe liegt. Also nimmst du auf beiden Seiten die Umkehrfunktion.', short: `${operation}: hebt die Funktion auf.` }
+    case 'trig':
+      return { detailed: 'Die Variable steckt in einer Umkehrfunktion. Die Funktion selbst hebt sie auf: $\\tan(\\arctan u) = u$. Also nimmst du auf beiden Seiten diese Funktion.', short: `${operation}: hebt die Umkehrfunktion auf.` }
+    case 'pythagoras':
+      return { detailed: 'In der Gleichung stehen zwei verschiedene Quadrate. Mit $\\sin^2 u + \\cos^2 u = 1$ (bei Hyperbelfunktionen $\\cosh^2 u - \\sinh^2 u = 1$) ersetzt du eines durch das andere. Dann steht nur noch eine Funktion da, nach der du auflöst wie nach $x$.', short: 'Ein Quadrat durch das andere ersetzen.' }
+    case 'tanQuotient':
+      return { detailed: 'In jedem Summanden steht genau ein $\\sin u$ oder $\\cos u$. Teilst du durch $\\cos u$, wird aus $\\sin u$ der $\\tan u$ und aus $\\cos u$ die $1$; bei einem Bruch teilst du Zähler und Nenner, dann bleibt sein Wert gleich. Danach steht nur noch $\\tan u$ da (bei Hyperbelfunktionen $\\tanh u$).', short: `${operation}: nur noch der Tangens.` }
     case 'expand':
       return { detailed: 'Die Variable steckt in Klammern. Nach dem Ausmultiplizieren stehen alle Summanden einzeln da und lassen sich sortieren.', short: 'Ausmultiplizieren, dann sortieren.' }
     case 'extend':

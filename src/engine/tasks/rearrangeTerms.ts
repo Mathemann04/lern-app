@@ -4,7 +4,7 @@ import { holds, samplePoints } from '../rearrange/check.ts'
 import { solveEquation } from '../rearrange/isolate.ts'
 import { type RearrangeTask, taskLatex, taskVariables } from '../rearrange/task.ts'
 import { type Rng, createRng } from '../random/rng.ts'
-import { type KitTask, buildLevel1, buildLevel2, buildLevel3, buildLevel4 } from './rearrangeKit.ts'
+import { type KitTask, buildLevel1, buildLevel2, buildLevel3, buildLevel4, buildLevel4Trig } from './rearrangeKit.ts'
 import type { Level, TaskRef } from './taskNumber.ts'
 
 // Vorlagen für Umstell-Aufgaben je Stufe (siehe docs/PLAN-M3.md, „Stufen"). Jede Vorlage baut aus
@@ -18,6 +18,9 @@ export type RearrangeTemplate = {
   build(rng: Rng): RearrangeTask
   // Baukasten: Aufgabe mit eigener Beschreibung (Art des Kerns, Zahl der Schalen)
   buildLabeled?(rng: Rng): KitTask
+  // später dazugekommene Vorlage: fester Anteil, vorweg mit eigenem Zufall gewählt, damit die
+  // übrigen Nummern ihre Aufgabe behalten (wie bei den Brüchen)
+  readonly share?: number
 }
 
 export type GeneratedRearrangeTask = {
@@ -66,7 +69,17 @@ const level4Kit: RearrangeTemplate = {
   buildLabeled: buildLevel4,
 }
 
-export const REARRANGE_TEMPLATES: readonly RearrangeTemplate[] = [level1Kit, level2Kit, level3Kit, level4Kit]
+// Teil 6b: Winkel- und Hyperbelfunktionen, Umkehrfunktionen
+const level4Trig: RearrangeTemplate = {
+  id: 'baukasten-4-winkel',
+  level: 4,
+  label: 'Baukasten: Winkel- und Hyperbelfunktionen, Umkehrfunktionen',
+  build: (rng) => buildLevel4Trig(rng).task,
+  buildLabeled: buildLevel4Trig,
+  share: 0.35,
+}
+
+export const REARRANGE_TEMPLATES: readonly RearrangeTemplate[] = [level1Kit, level2Kit, level3Kit, level4Kit, level4Trig]
 
 export function rearrangeTemplatesForLevel(level: Level): RearrangeTemplate[] {
   return REARRANGE_TEMPLATES.filter((t) => t.level === level)
@@ -114,13 +127,21 @@ const MIN_STEPS: Record<Level, number> = { 1: 3, 2: 3, 3: 5, 4: 6, 5: 6 }
 // Längstes Ergebnis (LaTeX) je Stufe
 const MAX_RESULT_LATEX: Record<Level, number> = { 1: 90, 2: 90, 3: 90, 4: 120, 5: 120 }
 
+// Vorlage mit festem Anteil (share), vorweg mit eigenem Zufall gewählt; sonst null
+function sharedPick(ref: TaskRef, templates: readonly RearrangeTemplate[]): RearrangeTemplate | null {
+  const rng = createRng(`umstellen-anteil:${ref.level}:${ref.seed}`)
+  return templates.find((t) => t.share !== undefined && rng.next() < t.share) ?? null
+}
+
 // Erzeugt die Aufgabe zu einer Aufgaben-Nummer. Gleiche Nummer → gleiche Aufgabe.
 export function generateRearrangeTask(ref: TaskRef): GeneratedRearrangeTask {
   const rng = createRng(`umstellen:${ref.level}:${ref.seed}`)
   const templates = rearrangeTemplatesForLevel(ref.level)
   if (templates.length === 0) throw new Error(`Für Stufe ${ref.level} gibt es noch keine Umstell-Aufgaben`)
+  const shared = sharedPick(ref, templates)
+  const regular = templates.filter((t) => t.share === undefined)
   for (;;) {
-    const template = rng.pick(templates)
+    const template = shared ?? rng.pick(regular)
     const kit = template.buildLabeled?.(rng)
     const t = kit ? kit.task : template.build(rng)
     if (isGood(t, ref.level, kit !== undefined)) return { ref, template, task: t, label: kit?.label ?? template.label }

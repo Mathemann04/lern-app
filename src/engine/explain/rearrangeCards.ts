@@ -1,4 +1,4 @@
-import { type Expr, add, div, eq, exp, ln, mul, neg, num, pow, sqrt, sub, variable } from '../expr/types.ts'
+import { type Expr, PI, add, cos, div, eq, exp, fn, ln, mul, neg, num, pow, sin, sqrt, sub, variable } from '../expr/types.ts'
 import type { Condition, RearrangeTask } from '../rearrange/task.ts'
 import type { Card } from './cards.ts'
 
@@ -16,6 +16,8 @@ export const REARRANGE_CARD_IDS = {
   root: 'rearrange-root',
   exp: 'rearrange-exp',
   laws: 'rearrange-laws',
+  arc: 'rearrange-arc',
+  trig: 'rearrange-trig',
 } as const
 
 const [a, b, c, d, k, x, y] = ['a', 'b', 'c', 'd', 'k', 'x', 'y'].map(variable)
@@ -169,5 +171,45 @@ export const REARRANGE_CARD_LIST: readonly Card[] = [
       task(pow(num(3), sub(mul(num(2), x), num(1))), mul(a, pow(num(5), x))),
     ],
     errors: ['eq-log-product', 'eq-log-sum', 'eq-log-quotient', 'eq-power-sum', 'eq-log-base-forgotten'],
+  },
+  {
+    id: REARRANGE_CARD_IDS.arc,
+    topic: 'umstellen',
+    title: 'Umkehrfunktionen',
+    level: 4,
+    rules: [],
+    formulas: [
+      '\\sin u = w \\;\\Leftrightarrow\\; u = \\arcsin w',
+      '\\cos u = w \\;\\Leftrightarrow\\; u = \\arccos w',
+      '\\tan u = w \\;\\Leftrightarrow\\; u = \\arctan w',
+      '\\sinh u = w \\;\\Leftrightarrow\\; u = \\operatorname{arsinh} w = \\ln\\left(w + \\sqrt{w^2 + 1}\\right)',
+    ],
+    memo: 'Gegen eine Funktion hilft ihre Umkehrfunktion, gegen eine Umkehrfunktion die Funktion selbst, immer auf beiden Seiten und auf die ganze Seite. Die Umkehrfunktion ist nicht der Kehrwert: $\\arcsin w \\neq \\frac{1}{\\sin w}$.',
+    note: 'Winkelfunktionen sind nur auf einem Bereich umkehrbar: $\\arcsin$ und $\\arctan$ liefern Winkel zwischen $-\\frac{\\pi}{2}$ und $\\frac{\\pi}{2}$, $\\arccos$ zwischen $0$ und $\\pi$. Deshalb nennt jede Aufgabe einen Bereich wie $x < \\frac{\\pi}{2}$. Bei den Hyperbelfunktionen heißen die Umkehrfunktionen Areafunktionen: $\\operatorname{arsinh}$, $\\operatorname{arcosh}$, $\\operatorname{artanh}$. Teilst du danach durch eine Zahl, wird die ganze Umkehrfunktion geteilt.',
+    when: 'Wenn die Variable in einer Winkel- oder Hyperbelfunktion oder in einer Umkehrfunktion steckt.',
+    examples: [
+      task(div(add(a, sin(x)), sub(a, sin(x))), y, 'x', [{ lhs: x, rel: '<', rhs: div(PI, n(2)) }]),
+      task(y, add(mul(a, fn('arctan', div(x, b))), c)),
+      task(fn('arctan', div(add(x, a), sub(x, b))), c, 'x', [{ lhs: x, rel: '>', rhs: b }]),
+      task(div(a, add(n(1), mul(b, fn('tanh', mul(k, x))))), y),
+    ],
+    errors: ['eq-inverse-forgotten', 'eq-inverse-reciprocal', 'eq-divide-inside-arc'],
+  },
+  {
+    id: REARRANGE_CARD_IDS.trig,
+    topic: 'umstellen',
+    title: 'Winkel- und Hyperbelfunktionen',
+    level: 4,
+    rules: [],
+    formulas: ['\\sin^2 u + \\cos^2 u = 1', '\\tan u = \\frac{\\sin u}{\\cos u}', '\\cosh^2 u - \\sinh^2 u = 1', '\\tanh u = \\frac{\\sinh u}{\\cosh u}'],
+    memo: 'Stehen zwei verschiedene Funktionen in der Gleichung, mach daraus eine: Ein Quadrat tauschst du mit $\\sin^2 u + \\cos^2 u = 1$ gegen das andere aus. Stehen $\\sin u$ und $\\cos u$ in jedem Summanden, teilst du durch $\\cos u$, dann bleibt nur $\\tan u$. Danach löst du nach dieser einen Funktion auf wie nach $x$.',
+    note: 'Bei den Hyperbelfunktionen steht ein Minus: $\\cosh^2 u - \\sinh^2 u = 1$. Teilst du bei einem Bruch, teilst du Zähler und Nenner, sonst ändert sich sein Wert. Das Quadrat bleibt beim Ersetzen stehen: $\\sin^2 u = 1 - \\cos^2 u$.',
+    when: 'Wenn $\\sin$ und $\\cos$ (oder $\\sinh$ und $\\cosh$) zusammen in einer Gleichung stehen.',
+    examples: [
+      task(y, add(mul(a, sq(cos(x))), mul(b, sq(sin(x)))), 'x', [{ lhs: x, rel: '<', rhs: div(PI, n(2)) }]),
+      task(div(add(sin(x), cos(x)), sub(sin(x), cos(x))), y, 'x', [{ lhs: x, rel: '<', rhs: div(PI, n(2)) }]),
+      task(sub(mul(a, sq(fn('cosh', x))), mul(b, sq(fn('sinh', x)))), y),
+    ],
+    errors: ['eq-pythagoras-square', 'eq-hyperbolic-sign', 'eq-tan-flipped', 'eq-divide-cos-partly'],
   },
 ]

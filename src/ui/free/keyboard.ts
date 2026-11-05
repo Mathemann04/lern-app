@@ -144,6 +144,14 @@ export function rearrangeKeyboard(letters: readonly string[], root: boolean, exp
   )
 }
 
+// Zweite Seite fürs Umstellen mit Winkel-, Hyperbel- und Umkehrfunktionen (Stufe 4, Teil 6b)
+export const REARRANGE_FUNCTIONS_KEYBOARD: VirtualKeyboardLayout = withNumberPad('umstellen-funktionen', 'Funktionen', [
+  [fnKey('sin'), fnKey('cos'), fnKey('tan'), fnKey('ln')],
+  [fnKey('arcsin'), fnKey('arccos'), fnKey('arctan'), { latex: 'e^{#?}' }],
+  [fnKey('sinh'), fnKey('cosh'), fnKey('tanh'), ROOT],
+  [areaKey('arsinh'), areaKey('arcosh'), areaKey('artanh'), LOG_KEY],
+])
+
 // Seiten der Tastatur je Thema
 export function keyboardLayouts(spec: KeyboardSpec): VirtualKeyboardLayout[] {
   switch (spec.kind) {
@@ -151,7 +159,9 @@ export function keyboardLayouts(spec: KeyboardSpec): VirtualKeyboardLayout[] {
       return [DERIVATIVE_KEYBOARD, MORE_FUNCTIONS_KEYBOARD]
     case 'fraction':
       return [fractionKeyboard(spec.letters, spec.blocks, spec.root, spec.imag, spec.hyperbolic)]
-    case 'rearrange':
-      return [rearrangeKeyboard(spec.letters, spec.root, spec.exp)]
+    case 'rearrange': {
+      const main = rearrangeKeyboard(spec.letters, spec.root, spec.exp)
+      return spec.trig ? [main, REARRANGE_FUNCTIONS_KEYBOARD] : [main]
+    }
   }
 }

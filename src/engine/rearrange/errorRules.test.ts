@@ -46,6 +46,13 @@ const CATALOG: Array<{ id: string; lhs: string; rhs: string; target?: string; af
   { id: 'eq-log-sum', lhs: '\\ln(x+a)+\\ln(x-a)', rhs: 'b', after: '\\ln(2x) = b' },
   { id: 'eq-log-quotient', lhs: '\\ln(x+a)-\\ln x', rhs: 'b', after: '\\frac{\\ln(x + a)}{\\ln x} = b' },
   { id: 'eq-power-sum', lhs: 'a\\cdot2^{x+1}-b\\cdot2^{x}', rhs: 'c', after: 'a(2^{x} + 2) - b \\cdot 2^{x} = c' },
+  { id: 'eq-inverse-forgotten', lhs: '\\sin(kx)', rhs: 'w', after: 'kx = w' },
+  { id: 'eq-inverse-reciprocal', lhs: '\\tan x', rhs: 'w', after: 'x = \\frac{1}{\\tan w}' },
+  { id: 'eq-divide-inside-arc', lhs: '\\sin(kx)', rhs: 'w', after: 'x = \\arcsin\\left(\\frac{w}{k}\\right)' },
+  { id: 'eq-pythagoras-square', lhs: 'y', rhs: 'a\\cos^2x+b\\sin^2x', after: 'y = a\\cos^{2} x + b(1 - \\cos x)' },
+  { id: 'eq-hyperbolic-sign', lhs: 'a\\cosh^2x-b\\sinh^2x', rhs: 'y', after: 'a\\cosh^{2} x - b(1 - \\cosh^{2} x) = y' },
+  { id: 'eq-tan-flipped', lhs: '\\frac{\\sin x+\\cos x}{\\sin x-\\cos x}', rhs: 'y', after: '\\frac{1 + \\tan x}{1 - \\tan x} = y' },
+  { id: 'eq-divide-cos-partly', lhs: '\\frac{\\sin x+\\cos x}{\\sin x-\\cos x}', rhs: 'y', after: '\\frac{\\tan x + 1}{\\sin x - \\cos x} = y' },
 ]
 
 describe('Katalog der Fehlerregeln', () => {

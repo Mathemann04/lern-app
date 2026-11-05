@@ -7,7 +7,7 @@ Stand: 05.11.2026
 | M1 | Grundgerüst + Ableitungsregeln (beide Modi, 5 Stufen, Erklärungen, Lernkarten, Fortschritt) | fertig |
 | M2 | Brüche (Bruchrechnung, Bruchterme kürzen und zusammenfassen, Doppelbrüche); App für mehrere Themen | fertig |
 | M2b | Brüche nachschärfen: viel mehr Abwechslung (Baukasten statt fester Vorlagen, keine Form doppelt), deutlich schwerer, Stufe 5 auf Profi-Niveau mit Partialbruchzerlegung und Brüchen aus späteren Kapiteln (komplexe Zahlen, Grenzwerte, Teleskopsummen, Hyperbelfunktionen) | fertig |
-| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | in Arbeit: 4. Fassung des Plans (Baukasten und Abwechslung, ab Stufe 3 verschachtelter); Schritte 4, 5 und 6a fertig (Stufe 4 spielbar), als Nächstes Schritt 6b |
+| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | in Arbeit: 4. Fassung des Plans (Baukasten und Abwechslung, ab Stufe 3 verschachtelter); Schritte 4, 5, 6a und 6b fertig (Stufe 4 spielbar), als Nächstes Schritt 6c |
 | M4 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
 | M5 | weitere Themen aus Mathematik MB1 | offen |
 | M6 | Physik: Formeln mit Einheiten (Formeln umstellen mit Zeichen der Physik; Aufgaben lösen: Formel wählen, umstellen, Werte mit Einheiten einsetzen) | offen |
@@ -70,7 +70,7 @@ Details: [PLAN-M3.md](PLAN-M3.md) (4. Fassung, freigegeben am 05.11.2026 mit dei
 - [x] 5. Stufe 3 aus dem Baukasten (neu)
 - [ ] 6. Stufe 4 (verschachtelt) geführt und frei, in drei Teilen
   - [x] 6a. e-Funktion und $\ln$, Wurzeln in Wurzeln, Potenz- und Logarithmusgesetze
-  - [ ] 6b. Winkel- und Hyperbelfunktionen, Umkehrfunktionen
+  - [x] 6b. Winkel- und Hyperbelfunktionen, Umkehrfunktionen
   - [ ] 6c. Substitution und $pq$-Formel mit Scheinlösungen
 - [ ] 7. Stufe 5, Teil 1: Ableitungen, Integrale, Reihen, Grenzwerte, Differentialgleichungen
 - [ ] 8. Stufe 5, Teil 2: komplexe Zahlen, Determinanten, Vektoren, Additionstheoreme
@@ -472,3 +472,19 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   neue typische Fehler, zwei neue Lernkarten, Tastatur mit $e^{\square}$, $\ln$
   und $\log_a$. Frei zählt ab Stufe 4 jede gleichwertige Form ohne Doppelbruch.
   Browser-Tests 4-8 (geführt) und 4-33 (frei).
+- 05.11.2026: M3 Schritt 6b fertig: Stufe 4 hat jetzt auch Winkel- und
+  Hyperbelfunktionen und Umkehrfunktionen (gut ein Drittel der Aufgaben, sechs
+  Arten von Kernen: Bruch aus $\sin x$ oder $\tanh x$, Winkelfunktion mit
+  Schalen oder unter einer Wurzel, Umkehrfunktion um einen Kern, Quadrate mit
+  $\sin^2 x + \cos^2 x = 1$, Sinus und Kosinus in jedem Summanden, $e$ hoch oder
+  $\ln$ um eine Winkelfunktion). Aufgaben mit $\sin$, $\cos$, $\tan$ nennen den
+  Bereich wie $x < \frac{\pi}{2}$. Die übrigen Nummern behalten ihre Aufgabe;
+  4-8 und 4-33 zeigen jetzt Winkelfunktionen, die Browser-Tests der Stufe 4
+  laufen mit 4-13 und 4-27 (6a) sowie 4-16 und 4-73 (6b). 196 Formen unter 200
+  Aufgaben, im Mittel 7,2 Umformungen. Neue Umformungen: Umkehrfunktion auf
+  beiden Seiten, Funktion gegen eine Umkehrfunktion, Quadrat ersetzen, durch
+  $\cos x$ teilen. Sieben neue typische Fehler, zwei neue Lernkarten
+  („Umkehrfunktionen", „Winkel- und Hyperbelfunktionen"), zweite
+  Tastaturseite „Funktionen". Nebenbei schönere Zwischenschritte: links beim
+  Sortieren nicht lauter Minus, gekürzter Bruch nach dem Teilen durch den
+  Faktor vor $e^x$ oder $\tan x$, $9(y + m)^2$ statt $(3(y + m))^2$.

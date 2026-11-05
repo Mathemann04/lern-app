@@ -115,6 +115,54 @@ describe('Rechenweg', () => {
   })
 })
 
+describe('Rechenweg Stufe 4, Teil 6b: Winkel- und Hyperbelfunktionen, Umkehrfunktionen', () => {
+  it('sin x und cos x in Zähler und Nenner: durch cos x teilen, nach tan x auflösen', () => {
+    expect(lines('\\frac{\\sin x+\\cos x}{\\sin x-\\cos x}', 'y')).toEqual([
+      'Durch den Kosinus teilen: \\frac{\\tan x + 1}{\\tan x - 1} = y',
+      'Beide Seiten malnehmen: \\tan x + 1 = y(\\tan x - 1)',
+      'Ausmultiplizieren: \\tan x + 1 = y\\tan x - y',
+      'Variable nach links, Rest nach rechts: y\\tan x - \\tan x = y + 1',
+      'Ausklammern: (y - 1)\\tan x = y + 1',
+      'Beide Seiten teilen: \\tan x = \\frac{y + 1}{y - 1}',
+      'Umkehrfunktion auf beiden Seiten: x = \\arctan\\left(\\frac{y + 1}{y - 1}\\right)',
+    ])
+  })
+
+  it('sin² x und cos² x: ein Quadrat mit sin² x + cos² x = 1 ersetzen, dann Wurzel und Umkehrfunktion', () => {
+    const steps = lines('y', 'a\\cos^2x+b\\sin^2x')
+    expect(steps[0]).toBe('Quadrat ersetzen: y = a\\cos^{2} x + b(1 - \\cos^{2} x)')
+    expect(steps.slice(-3)).toEqual([
+      'Beide Seiten teilen: \\cos^{2} x = \\frac{y - b}{a - b}',
+      'Wurzel ziehen: \\cos x = \\sqrt{\\frac{y - b}{a - b}}',
+      'Umkehrfunktion auf beiden Seiten: x = \\arccos\\left(\\sqrt{\\frac{y - b}{a - b}}\\right)',
+    ])
+  })
+
+  it('Hyperbelfunktionen: cosh² x = 1 + sinh² x, cosh x = a sinh x wird tanh x', () => {
+    expect(lines('a\\cosh^2x-b\\sinh^2x', 'y')[0]).toBe('Quadrat ersetzen: a\\cosh^{2} x - b(\\cosh^{2} x - 1) = y')
+    expect(lines('\\cosh x', 'a\\sinh x')).toEqual([
+      'Durch den Kosinus teilen: 1 = a\\tanh x',
+      'Beide Seiten teilen: \\frac{1}{a} = \\tanh x',
+      'Umkehrfunktion auf beiden Seiten: \\operatorname{artanh}\\left(\\frac{1}{a}\\right) = x',
+      'Ergebnis: x = \\operatorname{artanh}\\left(\\frac{1}{a}\\right)',
+    ])
+  })
+
+  it('Umkehrfunktion um einen Kern: tan auf beiden Seiten, dann x in Zähler und Nenner', () => {
+    const steps = lines('\\arctan\\left(\\frac{x+a}{x-b}\\right)', 'c')
+    expect(steps[0]).toBe('Funktion auf beiden Seiten: \\frac{x + a}{x - b} = \\tan c')
+    expect(steps.at(-1)).toBe('Beide Seiten teilen: x = \\frac{b\\tan c + a}{\\tan c - 1}')
+  })
+
+  it('kx in der Funktion: erst die Umkehrfunktion, dann teilen; die andere Seite vorher zu einem Bruch', () => {
+    expect(lines('\\sin(2x)', '\\frac{y}{a}-b')).toEqual([
+      'Zu einem Bruch zusammenfassen: \\sin(2x) = \\frac{y - ab}{a}',
+      'Umkehrfunktion auf beiden Seiten: 2x = \\arcsin\\left(\\frac{y - ab}{a}\\right)',
+      'Beide Seiten teilen: x = \\frac{\\arcsin\\left(\\frac{y - ab}{a}\\right)}{2}',
+    ])
+  })
+})
+
 describe('Endform', () => {
   const form = (latex: string) => toLatex(finalForm(p(latex)))
 

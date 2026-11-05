@@ -151,8 +151,8 @@ const rearrangeLevels: LevelPreview[] = [
   {
     level: 4,
     available: true,
-    title: 'Verschachtelt: e-Funktion, ln, Wurzeln in Wurzeln, Potenz- und Logarithmusgesetze',
-    examples: [String.raw`y = \ln\left(1 + \sqrt{1 + e^{2x}}\right)`, String.raw`\frac{a e^{x} + b}{e^{x} - c} = y`, String.raw`3^{2x - 1} = a \cdot 5^{x}`],
+    title: 'Verschachtelt: e-Funktion, ln, Wurzeln in Wurzeln, Potenz- und Logarithmusgesetze, Winkel- und Umkehrfunktionen',
+    examples: [String.raw`y = \ln\left(1 + \sqrt{1 + e^{2x}}\right)`, String.raw`3^{2x - 1} = a \cdot 5^{x}`, String.raw`\frac{\sin x + \cos x}{\sin x - \cos x} = y`],
   },
   {
     level: 5,
