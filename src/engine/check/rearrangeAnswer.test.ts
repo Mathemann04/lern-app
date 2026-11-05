@@ -83,6 +83,16 @@ describe('Umstellen frei: Fehler', () => {
     expect(root.kind === 'knownError' && root.wrong.rule.id).toBe('eq-root-termwise')
   })
 
+  it('erkennt die Fehler aus dem Baukasten: Ausklammern, Minus vor der Klammer, Malnehmen', () => {
+    const id = (t: RearrangeTask, input: string) => {
+      const v = check(t, input)
+      return v.kind === 'knownError' ? v.wrong.rule.id : v.kind
+    }
+    expect(id(task('ax-bx', 'c'), '\\frac{c}{a+b}')).toBe('eq-factor-sign')
+    expect(id(task('a-c(x-d)', 'x'), '\\frac{a-cd}{c+1}')).toBe('eq-minus-bracket')
+    expect(id(task('\\frac{x}{a}', 'c-b'), 'ac-b')).toBe('eq-multiply-one-term')
+  })
+
   it('falsches Vorzeichen', () => {
     expect(check(task('ax+b', 'cx+d'), '\\frac{d-b}{c-a}')).toEqual({ kind: 'wrongSign' })
   })

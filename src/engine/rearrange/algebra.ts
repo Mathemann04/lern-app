@@ -197,7 +197,9 @@ export function niceFrac(f: Frac, atoms: Atoms, hints: readonly Poly[] = []): Ex
   const r = reduceFrac(f, hints)
   let n = r.num
   let d = factoredPoly(r.den)
-  if (chooseSign(n, d) < 0) {
+  // Zahl im Nenner immer positiv (nie \frac{…}{-1}), sonst möglichst wenige Minus
+  const den = constValue(d)
+  if (den ? ratSign(den) < 0 : chooseSign(n, d) < 0) {
     n = polyScale(n, rat(-1))
     d = polyScale(d, rat(-1))
   }

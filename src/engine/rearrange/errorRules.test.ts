@@ -30,6 +30,9 @@ const CATALOG: Array<{ id: string; lhs: string; rhs: string; target?: string; af
   { id: 'eq-root-termwise', lhs: 'x^2', rhs: 'b^2-\\frac{y^2}{a^2}', after: 'x = b - \\frac{y}{a}' },
   { id: 'eq-square-one-factor', lhs: '\\frac{y}{a}', rhs: '\\sqrt{b^2-x^2}', after: '\\frac{y^{2}}{a} = b^{2} - x^{2}' },
   { id: 'eq-square-middle', lhs: '\\left(y+\\sqrt{x}\\right)^2', rhs: 'x+a', after: 'y^{2} + x = x + a' },
+  { id: 'eq-multiply-one-term', lhs: '\\frac{x}{a}', rhs: 'c-b', after: 'x = ac - b' },
+  { id: 'eq-minus-bracket', lhs: 'a-c(x-d)', rhs: 'x', after: 'a - cx - cd = x' },
+  { id: 'eq-factor-sign', lhs: 'ax-bx', rhs: 'c', after: 'x(a + b) = c' },
 ]
 
 describe('Katalog der Fehlerregeln', () => {
@@ -45,6 +48,17 @@ describe('Katalog der Fehlerregeln', () => {
       if (c.result) expect(found.map((w) => (w.result ? toLatex(w.result) : null))).toContain(c.result)
     })
   }
+
+  it('mit dem Hauptnenner malgenommen, einen Summanden ohne Bruch vergessen', () => {
+    const found = wrongs('\\frac{x+a}{2}-\\frac{x-b}{3}', 'c').filter((w) => w.rule.id === 'eq-multiply-one-term')
+    expect(found.map((w) => equationToLatex(w.after))).toContain('3(x + a) - 2(x - b) = c')
+  })
+
+  it('beide Klammern einer Seite können falsch ausmultipliziert werden', () => {
+    const ids = wrongs('a(x-b)-c(x+d)', 'x').map((w) => w.rule.id)
+    expect(ids).toContain('eq-bracket-first-term')
+    expect(ids).toContain('eq-minus-bracket')
+  })
 
   it('Fehler beim Zusammenfassen kommen aus „Brüche"', () => {
     const ids = wrongs('y', '\\frac{3(x-a)}{b}+c').map((w) => w.rule.id)

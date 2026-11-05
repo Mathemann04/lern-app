@@ -1,4 +1,4 @@
-import { contains, key } from '../expr/compare.ts'
+import { contains, key, subterms } from '../expr/compare.ts'
 import { evaluate } from '../expr/evaluate.ts'
 import { equationToLatex } from '../expr/print.ts'
 import { type Equation, type Expr, add, div, eq, mul, variable } from '../expr/types.ts'
@@ -11,6 +11,7 @@ import {
   polyConst,
   polyDivideExact,
   polyMul,
+  polyScale,
 } from '../fraction/poly.ts'
 import { createRng } from '../random/rng.ts'
 import { isOne, rat, ratAbs, ratSign } from '../rational.ts'
@@ -55,6 +56,9 @@ export const REARRANGE_ERROR_RULES: readonly EqErrorRule[] = [
   { id: 'eq-root-termwise', name: 'Wurzel aus jedem Summanden einzeln gezogen', wrongFormula: 'x^2 = b^2 - \\frac{y^2}{a^2} \\Rightarrow x = b - \\frac{y}{a}' },
   { id: 'eq-square-one-factor', name: 'Nur einen Teil quadriert', wrongFormula: '\\frac{y}{a} = \\sqrt{b^2 - x^2} \\Rightarrow \\frac{y^2}{a} = b^2 - x^2' },
   { id: 'eq-square-middle', name: 'Beim Quadrieren das Mittelglied vergessen', wrongFormula: '\\left(y + \\sqrt{x}\\right)^2 = y^2 + x' },
+  { id: 'eq-multiply-one-term', name: 'Beim Malnehmen nicht jeden Summanden malgenommen', wrongFormula: '\\frac{x}{a} = c - b \\Rightarrow x = ac - b' },
+  { id: 'eq-minus-bracket', name: 'Minus vor der Klammer nur beim ersten Summanden beachtet', wrongFormula: 'a - c(x - d) = a - cx - cd' },
+  { id: 'eq-factor-sign', name: 'Beim Ausklammern das Minus verloren', wrongFormula: 'ax - bx = c \\Rightarrow x(a + b) = c' },
 ]
 
 export function rearrangeErrorRule(id: string): EqErrorRule {
@@ -152,8 +156,30 @@ function divideMistakes(step: RearrangeStep): Candidate[] {
   }
   if (step.kind === 'multiply') {
     out.push({ id: 'eq-inverse-op', after: withSide(step.after, other(side), dividedBy(o, operand)) })
+    // nur den ersten Summanden der anderen Seite malgenommen: \frac{x}{a} = c - b → x = ac - b
+    if (o.kind === 'add') {
+      const [first, ...rest] = o.terms
+      out.push({ id: 'eq-multiply-one-term', after: withSide(step.after, other(side), add(timesFactor(first, operand), ...rest)) })
+    }
   }
   return out
+}
+
+// Mit dem Hauptnenner malgenommen, aber einen Summanden ohne Bruch vergessen:
+// \frac{x + a}{2} - \frac{x - b}{3} = c → 3(x + a) - 2(x - b) = c
+function multiplyNotAll(step: RearrangeStep): Candidate[] {
+  if (step.kind !== 'multiply' || step.side) return []
+  for (const side of ['lhs', 'rhs'] as const) {
+    const before = termsOf(step.before[side])
+    const after = termsOf(step.after[side])
+    if (before.length !== after.length) continue
+    const plain = (x: Expr) => !subterms(isNegative(x) ? negated(x) : x).some((s) => s.kind === 'div')
+    const i = before.findIndex((x) => plain(x) && !(x.kind === 'num' && x.value.n === 0n))
+    if (i < 0 || key(before[i]) === key(after[i])) continue
+    const wrong = sum(after.map((x, j) => (j === i ? before[i] : x)))
+    return [{ id: 'eq-multiply-one-term', after: withSide(step.after, side, wrong) }]
+  }
+  return []
 }
 
 // w · (d₁ + d₂) als w·d₁ + d₂
@@ -177,6 +203,24 @@ function denominatorBracket(step: RearrangeStep, t: string): Candidate[] {
   return []
 }
 
+// −c · (d₁ + d₂ + …) als Summand: c·d₁ und c·(d₂ + …), sonst null
+function minusBracketParts(term: Expr, atoms: Atoms): { first: Poly; rest: Poly } | null {
+  let inner: Expr
+  if (term.kind === 'neg') inner = term.arg
+  else if (term.kind === 'mul' && isNegative(term)) inner = negated(term)
+  else return null
+  const factors = inner.kind === 'mul' ? inner.factors : [inner]
+  const brackets = factors.filter((f) => f.kind === 'add')
+  if (brackets.length !== 1) return null
+  const bracket = brackets[0] as Extract<Expr, { kind: 'add' }>
+  const c = toPoly(mul(...factors.filter((f) => f !== bracket).concat(factors.length === 1 ? [{ kind: 'num', value: rat(1) }] : [])), atoms)
+  const [first, ...rest] = bracket.terms
+  const fp = toPoly(first, atoms)
+  const rp = toPoly(sum(rest), atoms)
+  if (!c || !fp || !rp || rest.length === 0) return null
+  return { first: polyMul(c, fp), rest: polyMul(c, rp) }
+}
+
 // Klammern ausmultiplizieren: nur den ersten Summanden malgenommen, Mittelglied vergessen
 function expandMistakes(step: RearrangeStep, t: string): Candidate[] {
   if (step.kind !== 'expand') return []
@@ -191,7 +235,12 @@ function expandMistakes(step: RearrangeStep, t: string): Candidate[] {
       if (!restPoly) continue
       let wrong: Poly | null = null
       let id = ''
-      if (term.kind === 'mul' && term.factors.filter((f) => f.kind === 'add').length === 1) {
+      // −c(x − d) als −cx − cd: das Minus nur beim ersten Summanden der Klammer
+      const minusBracket = minusBracketParts(term, atoms)
+      if (minusBracket) {
+        wrong = polyAdd(polyScale(minusBracket.first, rat(-1)), minusBracket.rest)
+        id = 'eq-minus-bracket'
+      } else if (term.kind === 'mul' && term.factors.filter((f) => f.kind === 'add').length === 1) {
         const bracket = term.factors.find((f) => f.kind === 'add')!
         const c = toPoly(mul(...term.factors.filter((f) => f !== bracket)), atoms)
         const b = toPoly(bracket, atoms)
@@ -216,8 +265,8 @@ function expandMistakes(step: RearrangeStep, t: string): Candidate[] {
         const otherSide = toPoly(step.before[other(side)], atoms)
         if (!otherSide) continue
         const wrongSide = polyToExpr(polyAdd(wrong, restPoly), atoms)
+        // je Klammer ein Fehler (z. B. bei a(x − b) − c(x + d) beide)
         out.push({ id, after: side === 'lhs' ? eq(wrongSide, polyToExpr(otherSide, atoms)) : eq(polyToExpr(otherSide, atoms), wrongSide) })
-        break
       }
     }
   }
@@ -234,6 +283,18 @@ function factorOneLost(step: RearrangeStep, t: string): Candidate[] {
   if (!one || coefficient.length < 2) return []
   const wrong = polyMul(coefficient.filter((term) => term !== one), polyAtom(u))
   return [{ id: 'eq-factor-one-lost', after: eq(polyToExpr(wrong, atoms), step.before.rhs) }]
+}
+
+// ax − bx = c → x(a + b) = c: die Minus in der Klammer verloren
+function factorSign(step: RearrangeStep, t: string): Candidate[] {
+  if (step.kind !== 'factor') return []
+  const { atoms, u } = unknownOf(step.before, t)
+  const l = toPoly(step.before.lhs, atoms)
+  const coefficient = l && polyDivideExact(l, polyAtom(u))
+  if (!coefficient || coefficient.length < 2 || !coefficient.some((term) => ratSign(term.coef) < 0)) return []
+  const wrong = coefficient.map((term) => ({ ...term, coef: ratAbs(term.coef) }))
+  const uExpr = step.after.lhs.kind === 'mul' ? step.after.lhs.factors[0] : variable(t)
+  return [{ id: 'eq-factor-sign', after: eq(mul(uExpr, polyToExpr(wrong, atoms)), step.before.rhs) }]
 }
 
 function reciprocalTermwise(step: RearrangeStep, previous: RearrangeStep | undefined): Candidate[] {
@@ -310,9 +371,11 @@ function candidatesFor(steps: readonly RearrangeStep[], i: number, t: string): C
   return [
     ...signNotFlipped(step, t),
     ...divideMistakes(step),
+    ...multiplyNotAll(step),
     ...denominatorBracket(step, t),
     ...expandMistakes(step, t),
     ...factorOneLost(step, t),
+    ...factorSign(step, t),
     ...reciprocalTermwise(step, steps[i - 1]),
     ...rootTermwise(step, t),
     ...squareOneFactor(step, t),

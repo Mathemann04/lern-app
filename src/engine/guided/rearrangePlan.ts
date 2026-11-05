@@ -2,6 +2,7 @@ import { FRACTION_CARD_IDS } from '../explain/fractionCards.ts'
 import { explainFractionError } from '../explain/fractionTexts.ts'
 import { REARRANGE_CARD_IDS } from '../explain/rearrangeCards.ts'
 import {
+  COMBINE_BEFORE_MULTIPLY_MOVES,
   COMBINE_MOVES,
   EXPAND_MOVES,
   REARRANGE_HINTS,
@@ -127,6 +128,12 @@ function isJunction(step: RearrangeStep, t: string): boolean {
 // ausgeklammert, wie in stepLabel), sonst x
 const unknownOf = (step: RearrangeStep, t: string) => (hasTargetRoot(step.after, t) ? `\\sqrt{${t}}` : t)
 
+// Zusammenfassen vor dem Kehrwert (\frac{1}{x} = …) oder vor dem Malnehmen mit dem Nenner (\frac{b}{x - a} = …)
+function combinesBeforeReciprocal(step: RearrangeStep): boolean {
+  const s = step.side ? step.before[step.side] : null
+  return s !== null && s.kind === 'div' && s.num.kind === 'num' && ratSign(s.num.value) > 0 && s.num.value.n === s.num.value.d
+}
+
 // Nenner, der beim Malnehmen beseitigt wird (beim Schälen)
 function denominatorOf(step: RearrangeStep): Expr | null {
   if (!step.side) return null
@@ -185,7 +192,10 @@ function moveQuestion(step: RearrangeStep, t: string): MoveQuestion | null {
     case 'reciprocal':
       return side ? { question: `Wie holst du $${t}$ aus dem Nenner?`, wrong: reciprocalMoves(t, side), hint: REARRANGE_HINTS.reciprocal } : null
     case 'combine':
-      return side ? { question: `Bevor du den Kehrwert nimmst: Was machst du mit der ${sideName(other(side))} Seite?`, wrong: COMBINE_MOVES, hint: REARRANGE_HINTS.combine } : null
+      if (!side) return null
+      return combinesBeforeReciprocal(step)
+        ? { question: `Bevor du den Kehrwert nimmst: Was machst du mit der ${sideName(other(side))} Seite?`, wrong: COMBINE_MOVES, hint: REARRANGE_HINTS.combine }
+        : { question: `Bevor du mit dem Nenner malnimmst: Was machst du mit der ${sideName(other(side))} Seite?`, wrong: COMBINE_BEFORE_MULTIPLY_MOVES, hint: REARRANGE_HINTS.combineBeforeMultiply }
     case 'expand':
       return { question: 'Was machst du mit den Klammern?', wrong: EXPAND_MOVES, hint: REARRANGE_HINTS.expand }
     case 'collect': {
@@ -218,7 +228,7 @@ function moveStep(step: RearrangeStep, previous: RearrangeStep | undefined, q: M
     question: q.question,
     choices: rng.shuffle([correct, ...wrong]),
     hint: q.hint,
-    explanation: explainMove(step.kind, label, t, unknownOf(step, t)),
+    explanation: explainMove(step.kind === 'combine' && !combinesBeforeReciprocal(step) ? 'combine-multiply' : step.kind, label, t, unknownOf(step, t)),
     established,
     cards: cardsOf(step, t, previous),
   }
@@ -300,6 +310,7 @@ function cardsOf(step: RearrangeStep, t: string, previous: RearrangeStep | undef
     if (contains(den, t)) return [REARRANGE_CARD_IDS.denominator]
   }
   if ((step.kind === 'divide' || step.kind === 'negate') && (previous?.kind === 'factor' || previous?.kind === 'collect')) return [REARRANGE_CARD_IDS.collect]
+  if (step.kind === 'combine' && !combinesBeforeReciprocal(step)) return [REARRANGE_CARD_IDS.denominator, FRACTION_CARD_IDS.add]
   return [...CARDS_BY_KIND[step.kind]]
 }
 

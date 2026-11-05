@@ -363,7 +363,7 @@ function peel(s: Expr, o: Expr, side: Side, t: string): Draft | null {
   if (!draft || !draft.side || draft.kind === 'move') return draft
   const tPart = draft.after[draft.side]
   const other = draft.side === 'lhs' ? draft.after.rhs : draft.after.lhs
-  if (tPart.kind !== 'var' || !isSingleFraction(other)) return draft
+  if (tPart.kind !== 'var' || tPart.name !== t || !isSingleFraction(other)) return draft
   return { ...draft, after: at(draft.side, tPart, finalForm(other)) }
 }
 
@@ -407,6 +407,8 @@ function peelRaw(s: Expr, o: Expr, side: Side, t: string): Draft | null {
         if (o.kind === 'add') return { kind: 'combine', side, after: at(side, s, finalForm(o)) }
         return { kind: 'reciprocal', side, after: at(side, s.den, reciprocal(o)) }
       }
+      // N/D = O mit Brüchen in O: erst O zu einem Bruch, sonst entsteht später ein Doppelbruch
+      if (o.kind === 'add' && subterms(o).some((x) => x.kind === 'div')) return { kind: 'combine', side, after: at(side, s, finalForm(o)) }
       return { kind: 'multiply', operand: s.den, side, after: at(side, s.num, timesFactor(o, s.den)) }
     }
     case 'pow': {
@@ -463,11 +465,17 @@ function complexRoot(e: Equation, t: string): Expr | null {
 }
 
 const hasBracket = (e: Expr): boolean =>
-  subterms(e).some((s) => (s.kind === 'mul' && s.factors.some((f) => f.kind === 'add')) || (s.kind === 'pow' && s.base.kind === 'add'))
+  subterms(e).some(
+    (s) => (s.kind === 'mul' && s.factors.some((f) => f.kind === 'add')) || (s.kind === 'pow' && s.base.kind === 'add') || (s.kind === 'neg' && s.arg.kind === 'add'),
+  )
 
 // (N/D) · lcd, wie man es hinschreibt: N mal den Rest des Hauptnenners
 function termTimes(term: Expr, lcd: Factored, atoms: Atoms): Expr {
-  if (term.kind === 'neg') return negated(termTimes(term.arg, lcd, atoms))
+  // −\frac{x - b}{3} · 6 → −2(x - b), bei einer Summe mit Klammer: −(x - b)
+  if (term.kind === 'neg') {
+    const inner = termTimes(term.arg, lcd, atoms)
+    return inner.kind === 'add' ? neg(inner) : negated(inner)
+  }
   if (term.kind === 'div') {
     const d = toPoly(term.den, atoms)
     const k = d && factoredDivide(lcd, factorize(d, lcd.factors.map((f) => f.poly)))
