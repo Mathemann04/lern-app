@@ -80,6 +80,20 @@ function numericLimit(t: Extract<FractionTask, { kind: 'limit' }>): number {
   return (evaluate(e, { [t.letter]: a + 1e-4 }) + evaluate(e, { [t.letter]: a - 1e-4 })) / 2
 }
 const nearly = (a: number, b: number) => Math.abs(a - b) <= 1e-4 * Math.max(1, Math.abs(b))
+// Teleskopsummen: unabhängige Gegenprobe, die Summanden einzeln addiert (bis n für mehrere n, bis zur
+// Zahl, bei der Reihe eine lange Teilsumme)
+function teleMatches(t: Extract<FractionTask, { kind: 'telescope' }>, result: Expr): boolean {
+  const summand = taskExpr(t)
+  const sum = (to: number) => {
+    let s = 0
+    for (let k = t.from; k <= to; k++) s += evaluate(summand, { [t.index]: k })
+    return s
+  }
+  if (t.upper.kind === 'number') return close(sum(t.upper.value), evaluate(result, {}))
+  if (t.upper.kind === 'infinity') return Math.abs(sum(20000) - evaluate(result, {})) < 1e-3
+  const letter = t.upper.letter
+  return [0, 1, 2, 3, 4, 5].every((j) => close(sum(t.from + j), evaluate(result, { [letter]: t.from + j })))
+}
 // Stellen für Aufgaben mit i: je Buchstabe eine Zufallszahl (Buchstaben sind reell)
 function complexPoints(atoms: string[], seed: string): Env[] {
   const rng = createRng(seed)
@@ -123,6 +137,10 @@ describe.each(LEVELS_SO_FAR)('Brüche Stufe %i', (level) => {
         expect(nearly(numericLimit(task), evaluate(solution.result, {})), context).toBe(true)
         continue
       }
+      if (task.kind === 'telescope') {
+        expect(teleMatches(task, solution.result), context).toBe(true)
+        continue
+      }
       if (task.kind === 'imaginary') {
         for (const env of complexPoints(fracAtoms(solution.value), `prüfen:${ref.seed}`)) {
           expect(closeComplex(evaluateComplex(expr, env), evaluateComplex(solution.result, env)), `${context} bei ${JSON.stringify(env)}`).toBe(true)
@@ -149,8 +167,12 @@ describe.each(LEVELS_SO_FAR)('Brüche Stufe %i', (level) => {
         continue
       }
       for (const step of solution.steps) {
-        // Grenzwert: die Umformungen haben den Wert des Bruchs, erst der letzte Schritt den Grenzwert
-        const target = task.kind === 'limit' && step.kind !== 'limit-insert' && step.kind !== 'limit-value' ? taskFrac(task) : solution.value
+        // Grenzwert: die Umformungen haben den Wert des Bruchs, erst der letzte Schritt den Grenzwert.
+        // Teleskopsumme: Zerlegen hat den Wert des Summanden, was übrig bleibt den Wert der Summe (bei
+        // der Reihe die Teilsumme mit n)
+        if (task.kind === 'telescope' && step.kind === 'tele-cancel' && task.upper.kind === 'infinity') continue
+        const ofSummand = task.kind === 'telescope' && (step.kind === 'factor-den' || step.kind === 'tele-split')
+        const target = (task.kind === 'limit' && step.kind !== 'limit-insert' && step.kind !== 'limit-value') || ofSummand ? taskFrac(task) : solution.value
         for (const e of [step.expr, step.before]) {
           if (!e) continue
           const f = toFrac(e)
@@ -190,6 +212,10 @@ describe.each(LEVELS_SO_FAR)('Brüche Stufe %i', (level) => {
         // unabhängige Gegenprobe: an mindestens einer Stelle verschieden
         if (task.kind === 'limit') {
           expect(nearly(numericLimit(task), evaluate(w.result, {})), `${context} ${w.rule.id}: ${toLatex(w.result)}`).toBe(false)
+          continue
+        }
+        if (task.kind === 'telescope') {
+          expect(teleMatches(task, w.result), `${context} ${w.rule.id}: ${toLatex(w.result)}`).toBe(false)
           continue
         }
         if (task.kind === 'imaginary') {

@@ -3,7 +3,7 @@ import { type Page, expect, test } from '@playwright/test'
 // Brüche Stufe 5 (M2b Schritte 3 und 4): alles ineinander, Doppelbruch im Doppelbruch,
 // Differenzenquotienten, dritte Potenzen, Wurzeln (auch mit zwei Buchstaben, Wurzel im Nenner
 // beseitigen), Winkelfunktionen, Partialbruchzerlegung (mit Polynomdivision), komplexe Zahlen
-// teilen, Grenzwerte; geführt und frei
+// teilen, Grenzwerte, Teleskopsummen; geführt und frei
 
 const answers = (page: Page) => page.getByRole('group', { name: 'Antworten' }).getByRole('button')
 const correctFeedback = (page: Page) => page.getByText('Richtig!', { exact: true })
@@ -51,10 +51,10 @@ async function enter(page: Page, latex: string) {
 
 for (const [ref, what, question] of [
   ['5-101', 'sin² x + cos² x = 1', 'Vereinfache den Nenner mit'],
-  ['5-82', 'Doppelbruch im Doppelbruch', 'Was rechnest du zuerst?'],
+  ['5-25', 'Doppelbruch im Doppelbruch', 'Was rechnest du zuerst?'],
   ['5-59', 'alles ineinander', 'Was rechnest du zuerst?'],
   ['5-56', 'Differenzenquotient von x³', 'Multipliziere die Klammer im Zähler aus'],
-  ['5-139', 'Differenzenquotient von √x', 'Erweitere mit dem Gegenstück des Zählers'],
+  ['5-51', 'Differenzenquotient von √x', 'Erweitere mit dem Gegenstück des Zählers'],
   ['5-3734', 'zwei Wurzeln', 'Zerlege den Zähler in Faktoren'],
   ['5-4778', 'Wurzel im Nenner', 'Erweitere mit dem Gegenstück des Nenners'],
   ['5-1289', 'dritte Potenz', 'Zerlege den Zähler in Faktoren'],
@@ -67,6 +67,9 @@ for (const [ref, what, question] of [
   ['5-89', 'Grenzwert x gegen 2', 'Was ist der Grenzwert?'],
   ['5-135', 'Grenzwert einer Summe', 'werden die Nenner'],
   ['5-157', 'Grenzwert unendlich minus unendlich', 'Teile Zähler und Nenner durch die höchste Potenz'],
+  ['5-76', 'Teleskopsumme bis n', 'Zerlege den Summanden'],
+  ['5-39', 'Teleskopreihe mit Abstand 2', 'Teilsummen'],
+  ['5-82', 'Teleskopsumme mit Nenner als Summe', 'Zerlege den Nenner von'],
 ] as const) {
   test(`Stufe 5 geführt: ${what} (${ref})`, async ({ page }) => {
     await page.goto(`./#/ueben/brueche/${ref}`)
@@ -119,12 +122,12 @@ test('Stufe 5 frei: zwei Wurzeln, Wurzel im Nenner, Differenzenquotient, Winkelf
   await expect(feedback(page)).toContainText('Richtig!')
   await expectCleanPage(page, 'Wurzel im Nenner')
 
-  // (√(x + h) − √x)/h
-  await page.goto('./#/frei/brueche/5-139')
+  // (3√(x + h) − 3√x)/h
+  await page.goto('./#/frei/brueche/5-51')
   await expect(field(page)).toBeVisible()
-  await enter(page, '\\frac{\\sqrt{x+h}-\\sqrt{x}}{h}')
+  await enter(page, '\\frac{3\\sqrt{x+h}-3\\sqrt{x}}{h}')
   await expect(feedback(page)).toContainText('kürzt sich danach')
-  await enter(page, '\\frac{1}{\\sqrt{x+h}+\\sqrt{x}}')
+  await enter(page, '\\frac{3}{\\sqrt{x+h}+\\sqrt{x}}')
   await expect(feedback(page)).toContainText('Richtig!')
   await expectCleanPage(page, 'Differenzenquotient')
 
@@ -201,6 +204,32 @@ test('Stufe 5 frei: Grenzwerte, gesucht ist eine Zahl', async ({ page }) => {
   await expectCleanPage(page, 'Grenzwert x gegen 2')
 })
 
+test('Stufe 5 frei: Teleskopsummen, bis n ein Bruch, bei der Reihe eine Zahl', async ({ page }) => {
+  // Summe bis n von 3/((k + 1)(k + 2)) = 3n/(2(n + 2))
+  await page.goto('./#/frei/brueche/5-76')
+  await expect(field(page)).toBeVisible()
+  await expect(page.getByText(/Berechne die Summe und schreibe sie als einen Bruch/)).toBeVisible()
+  await enter(page, '3\\left(\\frac{1}{2}-\\frac{1}{n+2}\\right)')
+  await expect(feedback(page)).toContainText('einzigen Bruch')
+  await enter(page, '\\frac{3n-3}{2(n+1)}')
+  await expect(feedback(page)).toContainText('Typischer Fehler: Am Ende den falschen Bruch behalten.')
+  await enter(page, '\\frac{3n}{2(n+2)}')
+  await expect(feedback(page)).toContainText('Richtig!')
+  await expectCleanPage(page, 'Teleskopsumme bis n')
+
+  // Reihe von 1/((k + 1)(k + 3)) ab k = 2: 7/24
+  await page.goto('./#/frei/brueche/5-39')
+  await expect(field(page)).toBeVisible()
+  await expect(page.getByText(/Berechne den Wert der Reihe/)).toBeVisible()
+  await enter(page, '\\frac{7}{24}-\\frac{1}{2n+4}-\\frac{1}{2n+6}')
+  await expect(feedback(page)).toContainText('Gesucht ist eine Zahl')
+  await enter(page, '\\frac{1}{6}')
+  await expect(feedback(page)).toContainText('Typischer Fehler: Vorn und hinten nur je einen Bruch behalten')
+  await enter(page, '\\frac{7}{24}')
+  await expect(feedback(page)).toContainText('Richtig!')
+  await expectCleanPage(page, 'Teleskopreihe')
+})
+
 test('Stufe 5 frei: Tastatur mit i bei komplexen Zahlen', async ({ page }) => {
   test.skip(!isPhone(), 'Bildschirm-Tastatur nur am Handy')
   await page.goto('./#/frei/brueche/5-134')
@@ -231,7 +260,7 @@ test('Stufe 5 frei: Tastatur mit Wurzel, Buchstaben der Aufgabe und tan', async 
 test('Lernkarten: Ordner Brüche mit Stufe 5, dritte Potenzen, Wurzeln im Nenner, Partialbrüchen und komplexen Zahlen', async ({ page }) => {
   await page.goto('./#/karten/brueche')
   await expect(page.getByRole('heading', { name: 'Stufe 5' })).toBeVisible()
-  for (const title of ['Bausteine mit eigenen Regeln', 'Dritte Potenzen', 'Wurzeln im Nenner beseitigen', 'Polynomdivision', 'Partialbruchzerlegung', 'Komplexe Zahlen teilen', 'Grenzwerte von Brüchen']) {
+  for (const title of ['Bausteine mit eigenen Regeln', 'Dritte Potenzen', 'Wurzeln im Nenner beseitigen', 'Polynomdivision', 'Partialbruchzerlegung', 'Komplexe Zahlen teilen', 'Grenzwerte von Brüchen', 'Teleskopsummen']) {
     await page.goto('./#/karten/brueche')
     await page.getByRole('link', { name: new RegExp(title) }).click()
     await expect(page.getByRole('heading', { name: title, level: 1 })).toBeVisible()
@@ -319,6 +348,15 @@ test('Gezielt üben: „Unendlich durch unendlich als 1" von der Lernkarte aus',
   await expect(page).toHaveURL(/#\/ueben\/brueche\/5-\d+\?fokus=frac-limit-degree$/)
   await expect(page.locator('#question')).toBeVisible()
   await expectCleanPage(page, 'gezielt Grenzwerte')
+})
+
+test('Gezielt üben: „Die vorderen Brüche mit weggestrichen" von der Lernkarte aus', async ({ page }) => {
+  await page.goto('./#/karten/brueche/fraction-telescope')
+  const error = page.locator('li, article, section, div').filter({ hasText: /^Die vorderen Brüche mit weggestrichen/ }).first()
+  await error.getByRole('link', { name: 'Gezielt üben' }).click()
+  await expect(page).toHaveURL(/#\/ueben\/brueche\/5-\d+\?fokus=frac-tele-head$/)
+  await expect(page.locator('#question')).toBeVisible()
+  await expectCleanPage(page, 'gezielt Teleskopsummen')
 })
 
 test('Stufe 5: zehn neue Aufgaben nacheinander mit verschiedener Form', async ({ page }) => {

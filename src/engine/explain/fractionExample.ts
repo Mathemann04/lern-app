@@ -2,8 +2,21 @@ import { toLatex } from '../expr/print.ts'
 import { num } from '../expr/types.ts'
 import { factoredExpr } from '../fraction/factor.ts'
 import { ansatzExpr, dividedExpr, findingEquation } from '../fraction/partial.ts'
-import { type FracSolution, STEP_NAMES, nicePolyExpr, partialFactorStep, partialWork, solveFraction, solveTree } from '../fraction/solve.ts'
-import { type FractionTask, limitedLatex, readableLatex, shownExpr, taskLatex, treeLatex } from '../fraction/task.ts'
+import {
+  type FracSolution,
+  STEP_NAMES,
+  nicePolyExpr,
+  partialFactorStep,
+  partialWork,
+  solveFraction,
+  solveTree,
+  teleFactorStep,
+  teleFactoredExpr,
+  teleSplitLatex,
+  teleWork,
+} from '../fraction/solve.ts'
+import { type FractionTask, limitedLatex, readableLatex, shownExpr, taskLatex, telescopePrefix, treeLatex } from '../fraction/task.ts'
+import { remainingExpr, writtenLines } from '../fraction/telescope.ts'
 import { withoutDecimals } from '../fraction/tree.ts'
 import type { WorkedExample } from './example.ts'
 import { m } from './format.ts'
@@ -47,6 +60,24 @@ function limitLines(t: Extract<FractionTask, { kind: 'limit' }>, solution: FracS
   })
 }
 
+// Teleskopsumme: zerlegen, ausschreiben, wegheben, zusammenfassen bzw. Grenzwert der Teilsumme
+function telescopeLines(t: Extract<FractionTask, { kind: 'telescope' }>, solution: FracSolution) {
+  const w = teleWork(t)
+  const series = t.upper.kind === 'infinity'
+  const s = series ? `s_${t.upper.letter} = ` : '= '
+  const lines: Array<{ label: string; latex: string }> = []
+  if (teleFactorStep(t)) lines.push({ label: `${STEP_NAMES['factor-den']}:`, latex: `= ${telescopePrefix(t.index, t.from, t.upper)} ${toLatex(teleFactoredExpr(w))}` })
+  lines.push({ label: `${STEP_NAMES['tele-split']}:`, latex: `= ${teleSplitLatex(w)}` })
+  writtenLines(w).forEach((line, i) =>
+    lines.push(i === 0 ? { label: series ? 'Teilsumme ausschreiben:' : 'Ausschreiben:', latex: `${s}${line}` } : { label: '', latex: line }),
+  )
+  lines.push({ label: 'Wegheben:', latex: `${s}${toLatex(remainingExpr(w))}` })
+  const result = toLatex(solution.result)
+  if (series) lines.push({ label: `Grenzwert für $${t.upper.letter} \\to \\infty$:`, latex: `= ${result}` })
+  else lines.push({ label: `${STEP_NAMES['tele-sum']}:`, latex: `= ${result}` })
+  return lines
+}
+
 export function fractionExample(t: FractionTask): WorkedExample {
   const solution = solveFraction(t)
   // Rechenbaum: je Teil eine Zeile mit dem Teilergebnis und dem ganzen Zwischenstand, der letzte
@@ -66,9 +97,11 @@ export function fractionExample(t: FractionTask): WorkedExample {
         ? partialLines(t)
         : t.kind === 'limit'
           ? limitLines(t, solution)
-          : stepLines(solution)
+          : t.kind === 'telescope'
+            ? telescopeLines(t, solution)
+            : stepLines(solution)
   // z. B. nach dem Malnehmen ohne Kürzen: noch ausrechnen; Partialbrüche: die Zahlen einsetzen
   const result = `= ${toLatex(solution.result)}`
-  if (lines.at(-1)?.latex !== result) lines.push({ label: t.kind === 'partial' ? 'Eingesetzt:' : 'Ausrechnen:', latex: result })
+  if (lines.at(-1)?.latex !== result && t.kind !== 'telescope') lines.push({ label: t.kind === 'partial' ? 'Eingesetzt:' : 'Ausrechnen:', latex: result })
   return { functionLatex: taskLatex(t), lines, result: solution.result }
 }

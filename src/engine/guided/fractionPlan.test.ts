@@ -11,8 +11,10 @@ import { FRACTION_ERROR_RULES } from '../fraction/errorRules.ts'
 import { fracEquals, toFrac } from '../fraction/frac.ts'
 import { isMultipleOf } from '../fraction/factor.ts'
 import { type Poly, polyConst, polyDivideExact } from '../fraction/poly.ts'
-import { partialWork, solveFraction, solveTree } from '../fraction/solve.ts'
-import { type FractionShape, type FractionTask, type Part, bottomFrac, expanded, innerTask, minus, part, partsOf, plus, shownPoly, signedFrac, taskExpr, taskFrac, topFrac } from '../fraction/task.ts'
+import { partialWork, solveFraction, solveTree, teleWork } from '../fraction/solve.ts'
+import { remainingFrac } from '../fraction/telescope.ts'
+import { factorize } from '../fraction/factor.ts'
+import { type FractionShape, type FractionTask, type Part, bottomFrac, expanded, factoredShown, innerTask, minus, part, partsOf, plus, shownPoly, signedFrac, taskExpr, taskFrac, topFrac } from '../fraction/task.ts'
 import type { Frac } from '../fraction/frac.ts'
 import { createRng } from '../random/rng.ts'
 import { generateFractionTask } from '../tasks/fractionTerms.ts'
@@ -138,6 +140,53 @@ describe('Grenzwerte', () => {
   })
 })
 
+describe('Teleskopsummen', () => {
+  const k = variable('k')
+  const summand = (c: number, den: Expr) => part(expanded(poly(num(c))), factoredShown(factorize(poly(den))))
+
+  it('bis n: zerlegen, die Summe steht ausgeschrieben da, wegheben, zusammenfassen', () => {
+    const plan = planFraction(task({ kind: 'telescope', summand: summand(1, mul(k, add(k, num(1)))), index: 'k', from: 1, upper: { kind: 'letter', letter: 'n' } }), ref)
+    expect(plan.instruction).toBe('Berechne die Summe und schreibe sie als einen Bruch')
+    expect(plan.steps.map((s) => s.title)).toEqual(['In Partialbrüche zerlegen', 'Wegheben', 'Zusammenfassen'])
+    const [split, cancel, sum] = plan.steps
+    expect(correctOf(split).content).toBe('$\\frac{1}{k} - \\frac{1}{k + 1}$')
+    expect(contents(split, false)).toContain('$\\frac{1}{k + 1} - \\frac{1}{k}$')
+    expect(split.established).toEqual([
+      '= \\sum_{k=1}^{n} \\left(\\frac{1}{k} - \\frac{1}{k + 1}\\right)',
+      '= \\left(1 - \\frac{1}{2}\\right) + \\left(\\frac{1}{2} - \\frac{1}{3}\\right) + \\dots',
+      '+ \\left(\\frac{1}{n} - \\frac{1}{n + 1}\\right)',
+    ])
+    expect(correctOf(cancel).content).toBe('$1 - \\frac{1}{n + 1}$')
+    expect(cancel.choices.map((c) => c.errorRuleId).filter(Boolean)).toEqual(expect.arrayContaining(['frac-tele-last', 'frac-tele-head']))
+    expect(correctOf(sum).content).toBe('$\\frac{n}{n + 1}$')
+    expect(plan.cards).toContain('fraction-telescope')
+  })
+
+  it('Reihe mit Abstand 2: Zahl davor, Teilsumme, Grenzwert', () => {
+    const plan = planFraction(task({ kind: 'telescope', summand: summand(1, mul(k, add(k, num(2)))), index: 'k', from: 1, upper: { kind: 'infinity', letter: 'n' } }), ref)
+    expect(plan.instruction).toBe('Berechne den Wert der Reihe')
+    const [split, cancel, limit] = plan.steps
+    expect(correctOf(split).content).toBe('$\\frac{1}{2}\\left(\\frac{1}{k} - \\frac{1}{k + 2}\\right)$')
+    expect(split.choices.find((c) => c.errorRuleId === 'frac-tele-factor')?.content).toBe('$\\frac{1}{k} - \\frac{1}{k + 2}$')
+    expect(cancel.question).toMatch(/Teilsummen \$s_n\$/)
+    expect(correctOf(cancel).content).toBe('$\\frac{1}{2}\\left(1 + \\frac{1}{2} - \\frac{1}{n + 1} - \\frac{1}{n + 2}\\right)$')
+    expect(cancel.choices.find((c) => c.errorRuleId === 'frac-tele-only-ends')?.content).toBe('$\\frac{1}{2}\\left(1 - \\frac{1}{n + 2}\\right)$')
+    expect(limit.title).toBe('Grenzwert')
+    expect(correctOf(limit).content).toBe('$\\frac{3}{4}$')
+    expect(contents(limit, false)).toEqual(expect.arrayContaining(['$\\frac{1}{2}$', '$0$']))
+  })
+
+  it('Nenner als Summe: erst zerlegen, Start bei k = 2', () => {
+    const plan = planFraction(task({ kind: 'telescope', summand: fr(num(1), add(add(pow(k, num(2)), mul(num(3), k)), num(2))), index: 'k', from: 2, upper: { kind: 'number', value: 9 } }), ref)
+    expect(plan.steps[0].title).toBe('Nenner zerlegen')
+    expect(correctOf(plan.steps[0]).content).toBe('$(k + 1)(k + 2)$')
+    const cancel = plan.steps.find((s) => s.title === 'Wegheben')!
+    expect(correctOf(cancel).content).toBe('$\\frac{1}{3} - \\frac{1}{11}$')
+    expect(cancel.choices.find((c) => c.errorRuleId === 'frac-tele-start')?.content).toBe('$\\frac{1}{2} - \\frac{1}{11}$')
+    expect(correctOf(plan.steps.at(-1)!).content).toBe('$\\frac{8}{33}$')
+  })
+})
+
 describe('Komplexe Zahlen', () => {
   it('Beispiel aus dem Plan: erweitern, ausmultiplizieren, aufteilen', () => {
     const z = (re: number, im: number) => add(num(re), mul(num(im), IMAG))
@@ -203,6 +252,13 @@ function targetOf(t: FractionTask, step: GuidedStep, value: Frac): Frac {
   const ends = (kind: string) => step.id.endsWith(`-${kind}`)
   // Grenzwert: die Umformungen wie beim Bruch selbst, zuletzt der Grenzwert
   if (t.kind === 'limit') return ends('einsetzen') || ends('grenzwert') ? value : targetOf(t.inner, step, taskFrac(t.inner))
+  // Teleskopsumme: Nenner des Summanden, der Summand, was übrig bleibt (bei der Reihe die Teilsumme)
+  if (t.kind === 'telescope') {
+    if (ends('factor-den')) return { num: shownPoly(t.summand.den), den: polyConst(1) }
+    if (ends('zerlegen')) return taskFrac(t)
+    if (ends('wegheben') && t.upper.kind === 'infinity') return remainingFrac(teleWork(t))!
+    return value
+  }
   // Partialbrüche: beim Zerlegen der Nenner, bei einer Zahl ihr Wert (der Ansatz hat noch keinen)
   if (t.kind === 'partial' && ends('factor-den')) return { num: shownPoly(t.part.den), den: polyConst(1) }
   const letter = /-coef-([A-D])$/.exec(step.id)?.[1]
@@ -269,8 +325,8 @@ describe.each([1, 2, 3, 4, 5] as Level[])('Brüche geführt, Stufe %i', (level) 
       const last = correctOf(plan.steps.at(-1)!)
       expect(last.content, context).toBe(`$${toLatex(solveFraction(t).result)}$`)
       expect(plan.resultLatex.endsWith(`= ${toLatex(plan.result)}`), context).toBe(true)
-      // Grenzwerte prüft fractionTerms.test.ts mit Zahlen nah an der Stelle
-      if (t.kind === 'limit') continue
+      // Grenzwerte prüft fractionTerms.test.ts mit Zahlen nah an der Stelle, Teleskopsummen mit Teilsummen
+      if (t.kind === 'limit' || t.kind === 'telescope') continue
       const letter = ['x', 'a', 'y', 'b'].find((v) => plan.functionLatex.includes(v)) ?? 'x'
       const points: Env[] = samplePoints([taskExpr(t), plan.result], createRng(`geführt:${context}`), 12, letter)
       for (const env of points) {

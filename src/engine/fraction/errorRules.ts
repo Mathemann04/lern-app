@@ -1,8 +1,8 @@
 import { toLatex } from '../expr/print.ts'
 import { type Expr, div, mul, mulDot, num } from '../expr/types.ts'
-import { type Rational, isInteger, isOne, rat, ratAbs, ratDiv, ratEq, ratMul, ratNeg, ratSign } from '../rational.ts'
+import { type Rational, isInteger, isOne, isZero, rat, ratAbs, ratDiv, ratEq, ratMul, ratNeg, ratSign } from '../rational.ts'
 import { type Factored, factorize, factoredExpr, factoredPoly, groupFactor, isMultipleOf, reduceFrac } from './factor.ts'
-import { type Frac, fracAdd, fracDiv, fracEquals, fracMul, fracNeg, fracOf, reduceImag } from './frac.ts'
+import { type Frac, fracAdd, fracDiv, fracEquals, fracMul, fracNeg, fracOf, fracScale, reduceImag } from './frac.ts'
 import {
   type Poly,
   type Term,
@@ -13,6 +13,7 @@ import {
   monoDivide,
   monomial,
   polyAdd,
+  polyAtom,
   polyContent,
   polyConst,
   polyDivideExact,
@@ -55,6 +56,8 @@ import {
   sideOf,
   signedSum,
   solveFraction,
+  teleFactorStep,
+  teleWork,
   timesExpr,
   workSum,
 } from './solve.ts'
@@ -65,6 +68,7 @@ import {
   type Shown,
   type Signed,
   expanded,
+  factoredShown,
   innerTask,
   isWhole,
   part,
@@ -81,7 +85,8 @@ import {
 } from './task.ts'
 import { complexExpr, complexValueExpr, imagParts, reduceImagWrong } from './complex.ts'
 import { constantOf, fracValueAt, leadingOf, limitOf } from './limit.ts'
-import { type PartialWork, PARTIAL_LETTERS, ansatzExpr, cofactor, dividedExpr, multiplicityOf, partialExpr, partialFrac, partialResultOf, polyValueAt, termsWith } from './partial.ts'
+import { type TeleVariant, type TeleWork, baseAt, gValue, pairExpr, remainingExpr, remainingFrac, splitExpr, teleValue, upperPoly } from './telescope.ts'
+import { type PartialTerm, type PartialWork, PARTIAL_LETTERS, ansatzExpr, cofactor, dividedExpr, multiplicityOf, partialExpr, partialFrac, partialResultOf, polyValueAt, termsWith } from './partial.ts'
 import { bracketIgnoredMistakes, decimalMistakes, leafOfFrac, leftToRight, minusBracketMistakes, normalize, replaceNode, withoutDecimals } from './tree.ts'
 
 // Typische Fehler beim Bruchrechnen (Katalog in docs/PLAN-M2.md). Jeder Fehler steckt in genau
@@ -156,6 +161,12 @@ export const FRACTION_ERROR_RULES: readonly FracErrorRule[] = [
   { id: 'frac-limit-degree', step: 'limit-value', name: 'Die Zahlen vor den höchsten Potenzen geteilt, obwohl der Grad verschieden ist', wrongFormula: '\\lim_{n \\to \\infty} \\frac{2n + 1}{n^2 + 3} = 2' },
   { id: 'frac-limit-first-terms', step: 'limit-value', name: 'Die vorderen Zahlen statt der Zahlen vor der höchsten Potenz genommen', wrongFormula: '\\lim_{n \\to \\infty} \\frac{3 - 2n^2}{4n^2 + 1} = \\frac{3}{4}' },
   { id: 'frac-imag-minus', step: 'imag-sum', name: 'Minus vor der Klammer nur auf den Realteil angewandt', wrongFormula: '2 - (1 + 3\\mathrm{i}) = 1 + 3\\mathrm{i}' },
+  { id: 'frac-tele-factor', step: 'tele-split', name: 'Beim Zerlegen die Zahl vor der Klammer vergessen', wrongFormula: '\\frac{1}{k(k + 2)} = \\frac{1}{k} - \\frac{1}{k + 2}' },
+  { id: 'frac-tele-swap', step: 'tele-split', name: 'Beim Zerlegen die beiden Brüche vertauscht', wrongFormula: '\\frac{1}{k(k + 1)} = \\frac{1}{k + 1} - \\frac{1}{k}' },
+  { id: 'frac-tele-only-ends', step: 'tele-cancel', name: 'Vorn und hinten nur je einen Bruch behalten, obwohl sich die Brüche erst mit Abstand $2$ wegheben', wrongFormula: '\\sum_{k=1}^{n} \\left(\\frac{1}{k} - \\frac{1}{k + 2}\\right) = 1 - \\frac{1}{n + 2}' },
+  { id: 'frac-tele-last', step: 'tele-cancel', name: 'Am Ende den falschen Bruch behalten', wrongFormula: '\\sum_{k=1}^{n} \\left(\\frac{1}{k} - \\frac{1}{k + 1}\\right) = 1 - \\frac{1}{n}' },
+  { id: 'frac-tele-start', step: 'tele-cancel', name: 'Bei $k = 1$ angefangen, obwohl die Summe später beginnt', wrongFormula: '\\sum_{k=2}^{n} \\left(\\frac{1}{k} - \\frac{1}{k + 1}\\right) = 1 - \\frac{1}{n + 1}' },
+  { id: 'frac-tele-head', step: 'tele-cancel', name: 'Die vorderen Brüche mit weggestrichen', wrongFormula: '\\sum_{k=1}^{n} \\left(\\frac{1}{k} - \\frac{1}{k + 1}\\right) = -\\frac{1}{n + 1}' },
 ]
 
 export function fractionErrorRule(id: string): FracErrorRule {
@@ -214,7 +225,7 @@ export function ruledFrac(value: Frac, rule: BlockRule | undefined): Frac {
 // Falsches Ergebnis so geschrieben wie das richtige: gekürzt, mit der Regel des Bausteins;
 // bei Partialbrüchen zerlegt, bei komplexen Zahlen in der Form a + bi
 function resultOf(value: Frac, t: FractionTask): Expr {
-  if (t.kind === 'limit') return reduced(value, [])
+  if (t.kind === 'limit' || t.kind === 'telescope') return reduced(value, [])
   if (t.kind === 'partial') return partialResultOf(value, t.hints) ?? reduced(value, t.hints)
   if (t.kind === 'imaginary') return complexValueExpr(value, t.hints)
   return resultExpr(reduceFrac(ruledFrac(value, t.rule), t.hints), t)
@@ -752,6 +763,8 @@ export type PartialWrong = {
   readonly value: Frac | null
   // daraus die Zerlegung, so wie man sie am Ende hinschreibt
   readonly result: Expr | null
+  // bei einer Zahl: alle Zahlen der Zerlegung mit dem Fehler
+  readonly terms?: readonly PartialTerm[]
 }
 
 // Klammer mit umgedrehtem Vorzeichen der Zahl: x + 1 → x − 1, 2x − 1 → 2x + 1 (x bleibt)
@@ -822,7 +835,7 @@ export function partialWrongs(t: Extract<FractionTask, { kind: 'partial' }>, w: 
     const terms = termsWith(w, f.letter, wrong)
     const wrongValue = partialFrac(w.quotient, terms)
     if (fracEquals(wrongValue, value)) continue
-    out.push({ id, step: 'coef', shown: num(wrong), letter: f.letter, value: wrongValue, result: partialExpr(w.quotient, terms) })
+    out.push({ id, step: 'coef', shown: num(wrong), letter: f.letter, value: wrongValue, result: partialExpr(w.quotient, terms), terms })
   }
   return out
 }
@@ -966,6 +979,75 @@ function limitMistakes(t: Extract<FractionTask, { kind: 'limit' }>): Candidate[]
   return [...out, ...inner]
 }
 
+// --- Teleskopsummen ---
+
+// Fehler beim Zerlegen und beim Wegheben als abgewandelte Rechnung (telescope.ts)
+export type TeleMistake = { readonly id: string; readonly step: 'tele-split' | 'tele-cancel'; readonly variant: TeleVariant }
+
+export function teleMistakes(t: Extract<FractionTask, { kind: 'telescope' }>, w: TeleWork = teleWork(t)): TeleMistake[] {
+  const out: TeleMistake[] = []
+  // Zahl vor der Klammer vergessen: 1/(f(f + αd)) = 1/f − 1/(f + αd) statt 1/(αd) · (…)
+  if (w.power === 1) {
+    const gap = ratMul(w.base.find((term) => term.mono.length > 0)?.coef ?? rat(1), rat(w.shift))
+    if (!isOne(ratAbs(gap))) out.push({ id: 'frac-tele-factor', step: 'tele-split', variant: { factor: ratMul(w.factor, gap) } })
+  }
+  out.push({ id: 'frac-tele-swap', step: 'tele-split', variant: { swap: true } })
+  if (w.shift >= 2) out.push({ id: 'frac-tele-only-ends', step: 'tele-cancel', variant: { headCount: 1, tailOffset: w.shift, tailCount: 1 } })
+  out.push({ id: 'frac-tele-last', step: 'tele-cancel', variant: { tailOffset: 0 } })
+  if (t.from >= 2) out.push({ id: 'frac-tele-start', step: 'tele-cancel', variant: { headFrom: 1 } })
+  out.push({ id: 'frac-tele-head', step: 'tele-cancel', variant: { headCount: 0 } })
+  // nur, wenn sich damit rechnen lässt (bei k = 1 ist der Nenner nicht 0)
+  return out.filter((x) => remainingFrac(w, x.variant) !== null)
+}
+
+// Was übrig bleibt, als Summe von Brüchen (ohne die Zahl davor): fürs Zusammenfassen
+export function teleRemainingTask(w: TeleWork): Extract<FractionTask, { kind: 'sum' }> {
+  const n = upperPoly(w.upper)
+  const numberPart = (r: Rational) => part(expanded(polyConst(rat(r.n))), expanded(polyConst(rat(r.d))))
+  const heads = Array.from({ length: w.shift }, (_, i) => ({ sign: 1 as const, part: numberPart(gValue(w, w.from + i)!) }))
+  const tailBases = Array.from({ length: w.shift }, (_, i) => baseAt(w, polyAdd(n, polyConst(i + 1))))
+  const tails = tailBases.map((f, i) => {
+    if (w.upper.kind === 'number') return { sign: -1 as const, part: numberPart(gValue(w, w.upper.value + i + 1)!) }
+    const den = w.power === 1 ? expanded(f) : factoredShown({ coef: rat(1), factors: [{ poly: f, exp: w.power }] })
+    return { sign: -1 as const, part: part(expanded(polyConst(1)), den) }
+  })
+  return { kind: 'sum', terms: [...heads, ...tails], hints: w.upper.kind === 'number' ? [] : tailBases }
+}
+
+function telescopeCandidates(t: Extract<FractionTask, { kind: 'telescope' }>): Candidate[] {
+  const w = teleWork(t)
+  const out: Candidate[] = []
+  const summandTask = { kind: 'partial' as const, part: t.summand, hints: t.hints }
+  // Nenner des Summanden falsch zerlegt (damit lässt sich nicht weiterrechnen)
+  if (teleFactorStep(t)) {
+    for (const m of factorMistakes(w.partial.den, t.hints)) out.push({ id: m.id, step: 'factor-den', stepExpr: m.expr, value: null })
+  }
+  // Beim Zerlegen und Wegheben
+  for (const x of teleMistakes(t, w)) {
+    const stepExpr = x.step === 'tele-split' ? splitExpr(w, x.variant) : remainingExpr(w, x.variant)
+    out.push({ id: x.id, step: x.step, stepExpr, value: teleValue(w, x.variant) })
+  }
+  // Partialbrüche: beim Einsetzen der Nullstelle das Vorzeichen verloren (dann hebt sich nichts weg)
+  for (const pw of partialWrongs(summandTask, w.partial)) {
+    if (pw.step !== 'coef' || !pw.terms) continue
+    const nonzero = pw.terms.filter((x) => !isZero(x.value))
+    const on = (f: Poly) => nonzero.find((x) => x.power === w.power && polyEquals(x.factor, f))?.value
+    const [a, b] = [on(w.base), on(baseAt(w, polyAdd(polyAtom(t.index), polyConst(w.shift))))]
+    // nur, wenn die falsche Zerlegung aus denselben zwei Brüchen besteht (bei Quadraten nicht)
+    if (nonzero.length === 2 && a && b) out.push({ id: pw.id, step: 'tele-split', stepExpr: pairExpr(w, a, b), value: null })
+  }
+  // Beim Zusammenfassen (nicht bei der Reihe): Fehler der Summe, mal die Zahl davor
+  if (t.upper.kind !== 'infinity') {
+    const sum = teleRemainingTask(w)
+    for (const wrong of fractionWrongAnswers(sum)) {
+      if (!wrong.value || isZeroPoly(wrong.value.num) || wrong.step === 'lcd') continue
+      const value = fracScale(wrong.value, w.factor)
+      out.push({ id: wrong.rule.id, step: 'tele-sum', stepExpr: reduced(value, []), value, ...(wrong.freeOnly ? { freeOnly: true } : {}) })
+    }
+  }
+  return out
+}
+
 // --- Verschachtelter Doppelbruch ---
 
 // Fehler im inneren Doppelbruch (als dessen Ergebnis) und danach wie beim Doppelbruch
@@ -1039,6 +1121,8 @@ export function fractionWrongAnswers(t: FractionTask, solution: FracSolution = s
       ? imaginaryMistakes(t)
       : t.kind === 'limit'
       ? limitMistakes(t)
+      : t.kind === 'telescope'
+      ? telescopeCandidates(t)
       : t.kind === 'nested'
       ? nestedMistakes(t)
       : [

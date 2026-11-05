@@ -18,6 +18,10 @@ import {
   explainLimitInsert,
   explainLimitValue,
   explainLimitZeroZero,
+  explainTeleCancel,
+  explainTeleLimit,
+  explainTeleSplit,
+  explainTeleSum,
   explainInsert,
   explainDecimal,
   explainOrder,
@@ -40,7 +44,8 @@ import { m } from '../explain/format.ts'
 import type { Explanation } from '../explain/texts.ts'
 import { toLatex } from '../expr/print.ts'
 import { type Expr, mul, num, pow, variable } from '../expr/types.ts'
-import { type FracWrong, type PartialWrong, fractionErrorRule, fractionWrongAnswers, partialWrongs } from '../fraction/errorRules.ts'
+import { type FracWrong, type PartialWrong, type TeleMistake, fractionErrorRule, fractionWrongAnswers, partialWrongs, teleMistakes, teleRemainingTask } from '../fraction/errorRules.ts'
+import { remainingExpr, splitExpr, teleValue, writtenLines } from '../fraction/telescope.ts'
 import { ansatzExpr, dividedExpr, factorPowerExpr, findingEquation } from '../fraction/partial.ts'
 import { factoredExpr, factoredPoly, factorize, groupFactor, isOneFactored, productFormExpr, reduceFrac } from '../fraction/factor.ts'
 import { fracAtoms, isRootAtom, polyExpr } from '../fraction/frac.ts'
@@ -68,6 +73,10 @@ import {
   solveFraction,
   solveTree,
   taskLetter,
+  teleFactorStep,
+  teleFactoredExpr,
+  teleSplitLatex,
+  teleWork,
   workSum,
 } from '../fraction/solve.ts'
 import { type TreeStage, decimalLeaves, decimalMistakes, withoutDecimals } from '../fraction/tree.ts'
@@ -88,6 +97,7 @@ import {
   sumNode,
   taskExpr,
   taskLatex,
+  telescopePrefix,
   term,
   treeLatex,
 } from '../fraction/task.ts'
@@ -139,6 +149,7 @@ export function planFraction(t: FractionTask, ref: TaskRef, focus?: string): Gui
   if (t.kind === 'tree') return planTree(t, ref, focus)
   if (t.kind === 'partial') return planPartial(t, ref, focus)
   if (t.kind === 'limit') return planLimit(t, ref, focus)
+  if (t.kind === 'telescope') return planTelescope(t, ref, focus)
   const solution = solveFraction(t)
   const wrongs = fractionWrongAnswers(t, solution).filter((w) => !w.freeOnly)
   const facts = factsOf(t, solution, wrongs)
@@ -620,6 +631,160 @@ function planLimit(t: Extract<FractionTask, { kind: 'limit' }>, ref: TaskRef, fo
   }
 }
 
+// --- Teleskopsummen (Stufe 5) ---
+//
+// Nenner des Summanden zerlegen (wenn er als Summe dasteht), den Summanden in Partialbrüche zerlegen
+// (danach steht die Summe ausgeschrieben in „Bisher"), was nach dem Wegheben übrig bleibt, zuletzt
+// zusammenfassen bzw. bei einer Reihe der Grenzwert der Teilsumme s_n.
+
+function planTelescope(t: Extract<FractionTask, { kind: 'telescope' }>, ref: TaskRef, focus?: string): GuidedTask {
+  const solution = solveFraction(t)
+  const w = teleWork(t)
+  const ids = FRACTION_CARD_IDS
+  const all = fractionWrongAnswers(t, solution).filter((x) => !x.freeOnly)
+  const mistakes = teleMistakes(t, w)
+  const { steps, ask } = createAsker(ref, focus)
+  const candidate = (x: FracWrong, shown: Expr): AskCandidate => ({ wrong: x, shown, content: m(shown) })
+  const fromMistake = (x: TeleMistake, shown: Expr): AskCandidate =>
+    candidate({ rule: fractionErrorRule(x.id), step: x.step, stepExpr: shown, value: teleValue(w, x.variant), result: null }, shown)
+  const series = t.upper.kind === 'infinity'
+  const n = t.upper.kind === 'number' ? '' : t.upper.letter
+  const prefix = telescopePrefix(t.index, t.from, t.upper)
+  // Fehler beim Zerlegen bzw. Wegheben, mit dem Rest richtig weitergerechnet
+  const splitMistakes = mistakes.filter((x) => x.step === 'tele-split')
+  const cancelMistakes = mistakes.filter((x) => x.step === 'tele-cancel')
+  const fill = <T,>(own: readonly unknown[], extra: readonly T[], idOf: (x: T) => string) => extra.filter((x, j) => idOf(x) === focus || own.length + j < 3)
+  // falsche Ergebnisse: erst die eigenen Fehler des Schritts, dann weitergerechnete, jedes Ergebnis einmal
+  const finalCandidates = (own: readonly FracWrong[], others: readonly FracWrong[]) => {
+    const seen = new Set<string>()
+    const unique = (xs: readonly FracWrong[]) =>
+      xs.filter((x) => {
+        const key = toLatex(x.result!)
+        if (seen.has(key)) return false
+        seen.add(key)
+        return true
+      })
+    const mine = unique(own)
+    return [...mine, ...fill(mine, unique(others), (x) => x.rule.id)].map((x) => candidate(x, x.result!))
+  }
+
+  // Nenner des Summanden zerlegen
+  let summandExpr = partExpr(t.summand)
+  // Nenner zerlegen ohne eigene Frage (kein typischer Fehler): dann gehört es zur Frage danach
+  const factorMerged = teleFactorStep(t) && !all.some((x) => x.step === 'factor-den')
+  if (teleFactorStep(t)) {
+    const factoredDen = factoredExpr(w.partial.factored)
+    const denShown = shownExpr(t.summand.den)
+    const methods = factorMethods(w.partial.den, t.hints)
+    summandExpr = teleFactoredExpr(w)
+    ask({
+      key: 'factor-den',
+      title: 'Nenner zerlegen',
+      question: `Zerlege den Nenner ${m(denShown)} des Summanden in Faktoren.`,
+      correct: { content: m(factoredDen), expr: factoredDen, key: toLatex(factoredDen) },
+      candidates: all.filter((x) => x.step === 'factor-den').map((x) => candidate(x, x.stepExpr)),
+      hint: methods.length > 0 ? methodHint(methods) : FRACTION_HINTS.factor,
+      explanation: explainFactor(denShown, factoredDen, false, methods),
+      lines: [`= ${prefix} ${toLatex(summandExpr)}`],
+      cards: methods.length > 0 ? [...new Set(methods.map((k) => METHOD_CARDS[k]))] : [ids.sumCancel],
+    })
+  }
+
+  // In Partialbrüche zerlegen; danach steht die Summe ausgeschrieben da (bei einer Reihe die Teilsumme)
+  const split = splitExpr(w)
+  const alpha = w.base.find((x) => x.mono.length > 0)?.coef
+  const gap = w.power === 1 && alpha ? alpha.n * BigInt(w.shift) : 1n
+  ask({
+    key: 'zerlegen',
+    title: 'In Partialbrüche zerlegen',
+    question: factorMerged
+      ? `Zerlege den Nenner von ${m(partExpr(t.summand))} in Faktoren und den Summanden in Partialbrüche.`
+      : `Zerlege den Summanden ${m(summandExpr)} in Partialbrüche.`,
+    correct: { content: m(split), expr: split, key: toLatex(split) },
+    candidates: [
+      ...splitMistakes.map((x) => fromMistake(x, splitExpr(w, x.variant))),
+      ...all.filter((x) => x.step === 'tele-split' && x.value === null).map((x) => candidate(x, x.stepExpr)),
+    ],
+    hint: FRACTION_HINTS.teleSplit,
+    explanation: explainTeleSplit(summandExpr, split, gap === 1n || gap === -1n ? null : String(gap < 0n ? -gap : gap)),
+    lines: [`= ${teleSplitLatex(w)}`, ...writtenLines(w).map((line, i) => (i === 0 ? `${series ? `s_${n} = ` : '= '}${line}` : line))],
+    cards: [ids.telescope, ids.partial],
+  })
+
+  // Wegheben: was bleibt übrig?
+  const remaining = remainingExpr(w)
+  const ownCancel = cancelMistakes.map((x) => fromMistake(x, remainingExpr(w, x.variant)))
+  const extraCancel = fill(ownCancel, splitMistakes, (x) => x.id).map((x) => fromMistake(x, remainingExpr(w, x.variant)))
+  ask({
+    key: 'wegheben',
+    title: 'Wegheben',
+    question: series
+      ? `Die Reihe ist der Grenzwert der Teilsummen $s_${n}$ (bis $${t.index} = ${n}$). Welche Brüche heben sich in $s_${n}$ weg, was bleibt übrig?`
+      : 'Welche Brüche heben sich in der ausgeschriebenen Summe weg, was bleibt übrig?',
+    correct: { content: m(remaining), expr: remaining, key: toLatex(remaining) },
+    candidates: [...ownCancel, ...extraCancel],
+    hint: FRACTION_HINTS.teleCancel,
+    explanation: explainTeleCancel(remaining, w.shift),
+    lines: [`${series ? `s_${n} = ` : '= '}${toLatex(remaining)}`],
+    cards: [ids.telescope],
+  })
+
+  // Zuletzt zusammenfassen bzw. der Grenzwert
+  const result = solution.result
+  const resultKey = toLatex(result)
+  const propagated = all.filter((x) => x.result && (x.step === 'tele-split' || x.step === 'tele-cancel'))
+  if (series) {
+    const candidates = finalCandidates(
+      propagated.filter((x) => x.step === 'tele-cancel'),
+      propagated.filter((x) => x.step === 'tele-split'),
+    )
+    ask({
+      key: 'grenzwert',
+      title: 'Grenzwert',
+      question: `Was ist der Grenzwert für $${n} \\to \\infty$?`,
+      correct: { content: m(result), expr: result, key: resultKey },
+      candidates,
+      hint: FRACTION_HINTS.teleLimit,
+      explanation: explainTeleLimit(n, remaining, result),
+      lines: [`= \\lim_{${n} \\to \\infty} s_${n} = ${resultKey}`],
+      cards: [ids.telescope, ids.limit],
+      final: true,
+    })
+  } else {
+    const candidates = finalCandidates(
+      all.filter((x) => x.step === 'tele-sum' && x.result),
+      propagated,
+    )
+    const sum = teleRemainingTask(w)
+    const work = workSum(sum.terms, sum.hints)
+    ask({
+      key: 'zusammenfassen',
+      title: 'Zusammenfassen',
+      question: t.upper.kind === 'number' ? 'Fasse zusammen. Was ist die Summe?' : 'Fasse zu einem Bruch zusammen und kürze.',
+      correct: { content: m(result), expr: result, key: resultKey },
+      candidates,
+      hint: FRACTION_HINTS.teleSum,
+      explanation: explainTeleSum(remaining, result, work.sameDenominator ? null : factoredExpr(work.lcd)),
+      lines: [`= ${resultKey}`],
+      cards: [ids.telescope, ids.add],
+      final: true,
+    })
+  }
+
+  return {
+    ref,
+    expr: taskExpr(t),
+    functionLatex: taskLatex(t),
+    instruction: instructionFor(t).replace(/\.$/, ''),
+    answerLabel: taskLatex(t),
+    steps,
+    ruleHint: fractionTaskHint(t),
+    result,
+    resultLatex: `${taskLatex(t)} = ${resultKey}`,
+    cards: [...new Set(steps.flatMap((s) => s.cards))],
+  }
+}
+
 // Satz vor der ersten Frage: Einsetzen geht noch nicht
 const limitStart = (t: Extract<FractionTask, { kind: 'limit' }>, at: string) =>
   t.inner.kind === 'sum' ? `Bei $${at}$ werden die Nenner $0$, einsetzen geht noch nicht.` : `Einsetzen von $${at}$ ergibt $\\frac{0}{0}$.`
@@ -867,6 +1032,10 @@ const TITLES: Record<StepKind, readonly [first: string, later: string]> = {
   'limit-insert': ['Einsetzen', 'einsetzen'],
   'limit-divide': ['Durch die höchste Potenz teilen', 'durch die höchste Potenz teilen'],
   'limit-value': ['Grenzwert', 'Grenzwert'],
+  'tele-split': ['In Partialbrüche zerlegen', 'in Partialbrüche zerlegen'],
+  'tele-cancel': ['Wegheben', 'wegheben'],
+  'tele-sum': ['Zusammenfassen', 'zusammenfassen'],
+  'tele-limit': ['Grenzwert', 'Grenzwert'],
 }
 
 function titleOf(kinds: readonly StepKind[]): string {
@@ -947,7 +1116,14 @@ function phrase(kind: StepKind, facts: Facts): string {
     case 'limit-divide':
       return 'teile Zähler und Nenner durch die höchste Potenz des Nenners'
     case 'limit-value':
+    case 'tele-limit':
       return 'bestimme den Grenzwert'
+    case 'tele-split':
+      return 'zerlege den Summanden in Partialbrüche'
+    case 'tele-cancel':
+      return 'schreibe die Summe aus und hebe weg'
+    case 'tele-sum':
+      return 'fasse zusammen'
   }
 }
 
@@ -1010,6 +1186,14 @@ function hintOf(kind: StepKind, facts: Facts): string {
       return FRACTION_HINTS.limitDivide
     case 'limit-value':
       return FRACTION_HINTS.limitValue
+    case 'tele-split':
+      return FRACTION_HINTS.teleSplit
+    case 'tele-cancel':
+      return FRACTION_HINTS.teleCancel
+    case 'tele-sum':
+      return FRACTION_HINTS.teleSum
+    case 'tele-limit':
+      return FRACTION_HINTS.teleLimit
   }
 }
 
@@ -1101,6 +1285,11 @@ function cardsOf(kind: StepKind, facts: Facts): string[] {
       case 'limit-divide':
       case 'limit-value':
         return [ids.limit]
+      case 'tele-split':
+      case 'tele-cancel':
+      case 'tele-sum':
+      case 'tele-limit':
+        return [ids.telescope]
     }
   })()
   // Bausteine wie e^x; mit eigenen Regeln (√x, sin² x + cos² x = 1, e^{2x} : e^x) deren Karte
@@ -1215,7 +1404,12 @@ function explainStep(step: FracStep, solution: FracSolution, facts: Facts): Expl
     case 'limit-insert':
     case 'limit-divide':
     case 'limit-value':
-      // Rechenbäume plant planTree, Partialbrüche planPartial; diese Schritte kommen hier nicht vor
+    case 'tele-split':
+    case 'tele-cancel':
+    case 'tele-sum':
+    case 'tele-limit':
+      // Rechenbäume plant planTree, Partialbrüche planPartial, Grenzwerte planLimit, Teleskopsummen
+      // planTelescope; diese Schritte kommen hier nicht vor
       return { detailed: STEP_NAMES[step.kind], short: STEP_NAMES[step.kind] }
   }
 }

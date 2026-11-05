@@ -122,7 +122,7 @@ const fractionLevels: LevelPreview[] = [
   {
     level: 5,
     available: true,
-    title: 'Profi: alles ineinander, Differenzenquotienten, dritte Potenzen, Wurzeln, Winkelfunktionen, e und ln, Partialbruchzerlegung, komplexe Zahlen, Grenzwerte',
+    title: 'Profi: alles ineinander, Differenzenquotienten, dritte Potenzen, Wurzeln, Winkelfunktionen, e und ln, Partialbruchzerlegung, komplexe Zahlen, Grenzwerte, Teleskopsummen',
     examples: [String.raw`\frac{\sqrt{x+h} - \sqrt{x}}{h}`, String.raw`\frac{3 + 4\mathrm{i}}{1 - 2\mathrm{i}}`, String.raw`{\frac{2}{x^2 - 1} = \frac{1}{x - 1} - \frac{1}{x + 1}}`],
   },
 ]

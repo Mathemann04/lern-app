@@ -1,3 +1,4 @@
+import { toLatex } from '../expr/print.ts'
 import { type Expr, add, div, mul, mulDot, neg, num, pow, tan, variable, x } from '../expr/types.ts'
 import { type Rational, isOne, ratAbs, ratCmp, ratEq, ratNeg, rat, ratDiv, ratSign } from '../rational.ts'
 import {
@@ -36,8 +37,11 @@ import {
   shownExpr,
   shownPoly,
   signedFrac,
+  limitedLatex,
   taskExpr,
   taskFrac,
+  telescopePrefix,
+  type TeleUpper,
   treeExpr,
   treeFrac,
   treeLatex,
@@ -45,6 +49,7 @@ import {
 import { type TreeStage, hasDecimal, treeStages, withoutDecimals } from './tree.ts'
 import { type PartialWork, ansatzExpr, dividedExpr, partialExpr, partialWorkOf } from './partial.ts'
 import { type LimitTarget, dividedFracExpr, fracValueAt, highestPower, limitAtInfinity } from './limit.ts'
+import { type TeleWork, bracketExpr, remainingExpr, splitExpr, teleValue, teleWorkOf } from './telescope.ts'
 import { type ComplexParts, complexExpr, complexParts, complexReduced, complexValueExpr, conjugateFactor, hasImag, hasImagPower } from './complex.ts'
 
 // Rechenweg einer Bruchaufgabe wie im Skript: Hauptnenner, erweitern, Zähler zusammenfassen,
@@ -56,7 +61,8 @@ import { type ComplexParts, complexExpr, complexParts, complexReduced, complexVa
 // zerlegen, Ansatz und Zahlen: Ansatz und Zahlen haben keinen Zwischenstand, expr ist dort null),
 // komplexe Zahlen teilen (Potenzen von i, mit dem konjugiert Komplexen erweitern,
 // ausmultiplizieren, aufteilen), Grenzwerte (x → a: umformen wie beim Kürzen bzw. Zusammenfassen,
-// dann einsetzen; n → ∞: durch die höchste Potenz teilen).
+// dann einsetzen; n → ∞: durch die höchste Potenz teilen), Teleskopsummen (Summand in Partialbrüche
+// zerlegen, ausschreiben, was übrig bleibt, zusammenfassen bzw. Grenzwert).
 
 export type StepKind =
   | 'lcd'
@@ -89,6 +95,10 @@ export type StepKind =
   | 'limit-insert'
   | 'limit-divide'
   | 'limit-value'
+  | 'tele-split'
+  | 'tele-cancel'
+  | 'tele-sum'
+  | 'tele-limit'
 
 export const STEP_NAMES: Record<StepKind, string> = {
   lcd: 'Hauptnenner',
@@ -121,6 +131,10 @@ export const STEP_NAMES: Record<StepKind, string> = {
   'limit-insert': 'Einsetzen',
   'limit-divide': 'Durch die höchste Potenz teilen',
   'limit-value': 'Grenzwert bestimmen',
+  'tele-split': 'In Partialbrüche zerlegen',
+  'tele-cancel': 'Ausschreiben und wegheben',
+  'tele-sum': 'Zusammenfassen',
+  'tele-limit': 'Grenzwert bestimmen',
 }
 
 export type FracStep = {
@@ -332,6 +346,7 @@ export function solveFraction(t: FractionTask): FracSolution {
   if (t.kind === 'partial') return solvePartial(t)
   if (t.kind === 'imaginary') return solveImaginary(t)
   if (t.kind === 'limit') return solveLimit(t)
+  if (t.kind === 'telescope') return solveTelescope(t)
   const { hints } = t
   const value = taskFrac(t)
   const steps: FracStep[] = []
@@ -761,6 +776,49 @@ function solveLimit(t: Extract<FractionTask, { kind: 'limit' }>): FracSolution {
     steps.push({ kind: 'limit-value', expr: result, from: limitDividedExpr(w) })
   }
   return { value, steps, reduced: reduceFrac(value), result, excluded: null, beforeCancel: value }
+}
+
+// --- Teleskopsummen (Stufe 5) ---
+
+export function teleWork(t: Extract<FractionTask, { kind: 'telescope' }>): TeleWork {
+  const w = teleWorkOf(partFrac(t.summand), t.index, t.from, t.upper, t.hints)
+  if (!w) throw new Error('Der Summand ist keine Teleskopsumme')
+  return w
+}
+
+// Steht der Nenner des Summanden als Summe da, die erst zerlegt wird?
+export const teleFactorStep = (t: Extract<FractionTask, { kind: 'telescope' }>) => partialFactorStep({ kind: 'partial', part: t.summand, hints: t.hints })
+
+// Summand mit dem Nenner in Faktoren
+export const teleFactoredExpr = (w: TeleWork): Expr => dividedExpr(w.partial, factoredExpr(w.partial.factored))
+
+// Zerlegt, mit der Zahl vor dem Summenzeichen: \frac{1}{2} \sum_{k=1}^{n} \left(\frac{1}{k} - \frac{1}{k + 2}\right)
+export function teleSplitLatex(w: TeleWork, upper: TeleUpper = w.upper): string {
+  const prefix = telescopePrefix(w.index, w.from, upper)
+  const bracket = `\\left(${toLatex(bracketExpr(w))}\\right)`
+  return isOne(w.factor) ? `${prefix} ${bracket}` : `${toLatex(num(w.factor))} ${prefix} ${bracket}`
+}
+
+// Zerlegen, ausschreiben und wegheben, dann zusammenfassen bzw. (Reihe) der Grenzwert der Teilsumme
+function solveTelescope(t: Extract<FractionTask, { kind: 'telescope' }>): FracSolution {
+  const w = teleWork(t)
+  const prefix = telescopePrefix(t.index, t.from, t.upper)
+  const steps: FracStep[] = []
+  if (teleFactorStep(t)) {
+    const factored = teleFactoredExpr(w)
+    steps.push({ kind: 'factor-den', expr: factored, detail: factoredExpr(w.partial.factored), latex: `${prefix} ${toLatex(factored)}` })
+  }
+  steps.push({ kind: 'tele-split', expr: splitExpr(w), latex: teleSplitLatex(w) })
+  const remaining = remainingExpr(w)
+  // Reihe: der Grenzwert der Teilsumme
+  const limited = t.upper.kind === 'infinity' ? { latex: limitedLatex(t.upper.letter, 'infinity', toLatex(remaining)) } : {}
+  steps.push({ kind: 'tele-cancel', expr: remaining, ...limited })
+  const value = teleValue(w)
+  if (!value) throw new Error('Teleskopsumme ohne Wert')
+  const reduced = reduceFrac(value)
+  const result = resultExpr(reduced, {})
+  steps.push({ kind: t.upper.kind === 'infinity' ? 'tele-limit' : 'tele-sum', expr: result })
+  return { value, steps, reduced, result, excluded: null, beforeCancel: value }
 }
 
 // k \sin^n x / \cos^n x als k \tan^n x; sonst null

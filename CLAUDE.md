@@ -121,7 +121,9 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     einer Zahl im Zähler, jeder Nenner einmal, bei komplexen Zahlen
     $a + b\,\mathrm{i}$ oder ein gekürzter Bruch mit reellem Nenner, ohne
     $\mathrm{i}$ im Nenner und ohne Potenz von $\mathrm{i}$, bei Grenzwerten
-    eine Zahl (ein Term mit dem richtigen Grenzwert ist noch nicht fertig);
+    eine Zahl (ein Term mit dem richtigen Grenzwert ist noch nicht fertig),
+    bei Teleskopsummen bis $n$ ein Bruch in $n$, sonst eine Zahl (bei der
+    Reihe ist ein Term in $n$ mit dem richtigen Grenzwert noch nicht fertig);
     sonst typischer Fehler, bei Rechenbäumen auch Fehler
     einer Teilrechnung bis zum Ergebnis weitergerechnet);
     `check/rearrangeAnswer.ts`: freie Eingabe beim Umstellen (rechte Seite
@@ -137,7 +139,7 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     Beispiele, typische Fehler; Ordner „Brüche" in `fractionCards.ts`, in
     Stufe 5 „Bausteine mit eigenen Regeln", „Dritte Potenzen", „Wurzeln
     im Nenner beseitigen", „Polynomdivision", „Partialbruchzerlegung" und
-    „Komplexe Zahlen teilen", „Grenzwerte von Brüchen") und
+    „Komplexe Zahlen teilen", „Grenzwerte von Brüchen", „Teleskopsummen") und
     durchgerechnete Beispiele (`example.ts` aus `derive`,
     `fractionExample.ts` aus der Bruch-Engine, bei Partialbrüchen mit den
     Gleichungen für die Zahlen). Texte für Brüche in
@@ -167,7 +169,10 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     konjugiert Komplexen erweitern, ausmultiplizieren, aufteilen; Schritte
     `imag-…`), Grenzwerte `planLimit` ($x \to a$: die Schritte des Bruchs
     selbst mit dem Limes in „Bisher", dann einsetzen; $n \to \infty$: durch
-    die höchste Potenz teilen, dann der Grenzwert), innerer Doppelbruch zuerst, bei mehreren
+    die höchste Potenz teilen, dann der Grenzwert), Teleskopsummen
+    `planTelescope` (Nenner zerlegen, Summand in Partialbrüche zerlegen, danach
+    die Summe ausgeschrieben in „Bisher", was übrig bleibt, zusammenfassen bzw.
+    Grenzwert der Teilsumme $s_n$), innerer Doppelbruch zuerst, bei mehreren
     Rechenarten jede Klammer zu einem Bruch; Rechenbaum `planTree`: erst
     Dezimalzahlen, dann „Was rechnest du zuerst?", wenn Punkt vor Strich
     oder eine Klammer zählt, dann je Teilrechnung die Schritte der passenden
@@ -197,7 +202,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     Doppelbruch, mehrere Rechenarten `mixed`, verschachtelter Doppelbruch
     `nested`; Partialbruchzerlegung `partial`; komplexe Zahlen teilen
     `imaginary`; Grenzwert `limit` mit dem Bruch als `inner`, Limes davor
-    `limitedLatex`; Zähler wie $(x + h)^2 - x^2$ oder $(x + h)^3 - x^3$; Regel eines
+    `limitedLatex`; Teleskopsumme `telescope` mit Summand, Startwert und oberer
+    Grenze $n$, Zahl oder $\infty$; Zähler wie $(x + h)^2 - x^2$ oder $(x + h)^3 - x^3$; Regel eines
     Bausteins `rule`, auch „Wurzel beseitigen" `conjugate`;
     Rechenbaum `tree` aus Plus/Minus, Mal, Geteilt, Klammern, Doppelbruch,
     Blätter auch als Dezimalzahl;
@@ -218,7 +224,12 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     `complexExpr`; Buchstaben gelten als reell), `limit.ts` (Grenzwerte:
     Wert an der Stelle `fracValueAt`, auch mit $\sqrt{x}$; $n \to \infty$ über
     die höchsten Potenzen `limitAtInfinity`; durch die höchste Potenz geteilt
-    `dividedFracExpr`; Rechenweg `limitWork`/`solveLimit` in `solve.ts`), `tree.ts` (Rechenbaum: Stufen `treeStages`, jede Stufe
+    `dividedFracExpr`; Rechenweg `limitWork`/`solveLimit` in `solve.ts`),
+    `telescope.ts` (Teleskopsummen: Summand über die Partialbruchzerlegung als
+    $A(g(k) - g(k + d))$, was übrig bleibt `remainingFrac`/`remainingExpr`, die
+    ausgeschriebene Summe `writtenLatex`, typische Fehler als abgewandelte
+    Rechnung `TeleVariant`; Rechenweg `teleWork`/`solveTelescope` in
+    `solve.ts`), `tree.ts` (Rechenbaum: Stufen `treeStages`, jede Stufe
     eine der Formen oben, von innen nach außen, Punkt vor Strich;
     falsche Reihenfolgen für die Fehler), `errorRules.ts` (typische Fehler,
     Ids `frac-…`; `freeOnly`: nur für die Diagnose im freien Modus).
@@ -249,7 +260,7 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     Differenzenquotienten `differenceQuotient`, dritte Potenzen `cubeTask`,
     Wurzeln `rootTask`, Bausteine gemischt `blockPairTask`,
     Partialbrüche `partialTask`, komplexe Zahlen `imaginaryTask`,
-    Grenzwerte `limitTask`; die
+    Grenzwerte `limitTask`, Teleskopsummen `telescopeTask`; die
     Vorlagen der Stufe 5 haben Anteile
     `weight`, später dazugekommene Vorlagen einen festen Anteil `share`,
     vorweg mit eigenem Zufall gewählt, damit die übrigen Nummern ihre

@@ -196,6 +196,12 @@ Dazu kommen die bisherigen Fehler aus M2 (Liste in
 | Grenzwerte | $n = 0$ eingesetzt | $\frac{2}{5}$ statt $\frac{3}{2}$ |
 | Grenzwerte | Grad nicht beachtet | $\lim_{n \to \infty} \frac{2n + 1}{n^2 + 3} = 2$ |
 | Grenzwerte | vordere Zahlen genommen | $\lim_{n \to \infty} \frac{3 - 2n^2}{4n^2 + 1} = \frac{3}{4}$ |
+| Teleskopsummen | Zahl vor der Klammer vergessen | $\frac{1}{k(k + 2)} = \frac{1}{k} - \frac{1}{k + 2}$ |
+| Teleskopsummen | Brüche vertauscht | $\frac{1}{k(k + 1)} = \frac{1}{k + 1} - \frac{1}{k}$ |
+| Teleskopsummen | nur je ein Bruch vorn und hinten | bei Abstand $2$: $1 - \frac{1}{n + 2}$ |
+| Teleskopsummen | am Ende den falschen Bruch | $1 - \frac{1}{n}$ statt $1 - \frac{1}{n + 1}$ |
+| Teleskopsummen | bei $k = 1$ angefangen | Start bei $k = 2$ übersehen |
+| Teleskopsummen | vordere Brüche weggestrichen | $-\frac{1}{n + 1}$ statt $1 - \frac{1}{n + 1}$ |
 
 Die genaue Liste kommt im jeweiligen Schritt; jede Regel bekommt wie immer
 eine Erklärung, eine Lernkarte und Tests. In Schritt 1 umgesetzt: die ersten
@@ -227,7 +233,12 @@ Komplexen. In Schritt 5b: die sieben Zeilen zu Grenzwerten
 `frac-limit-n-zero`, `frac-limit-degree`, `frac-limit-first-terms`), mit der
 Lernkarte „Grenzwerte von Brüchen"; dazu alle Fehler beim Zerlegen, Kürzen
 und Zusammenfassen, mit dem falschen Bruch bis zum Grenzwert
-weitergerechnet.
+weitergerechnet. In Schritt 5c: die sechs Zeilen zu Teleskopsummen
+(`frac-tele-factor`, `frac-tele-swap`, `frac-tele-only-ends`,
+`frac-tele-last`, `frac-tele-start`, `frac-tele-head`), mit der Lernkarte
+„Teleskopsummen"; dazu beim Zerlegen „Vorzeichen beim Einsetzen der
+Nullstelle verloren" und die Fehler beim Zerlegen des Nenners, beim
+Zusammenfassen die Fehler beim Bruchrechnen.
 
 ### Schritte
 
@@ -350,6 +361,20 @@ Frei: gesucht ist eine Zahl; ein Term mit dem richtigen Grenzwert ist „noch
 nicht fertig". Sieben neue typische Fehler, Lernkarte „Grenzwerte von
 Brüchen".
 
+**Umgesetzt (5c, Teleskopsummen):** Neue Vorlage „Teleskopsummen" in Stufe 5
+(etwa jede sechzehnte Aufgabe, mit eigenem Zufall gewählt). Summand
+$\frac{c}{f(k) \cdot f(k + d)}$ mit $f(k) = k + b$ (Abstand $d = 1$ oder $2$)
+oder $f(k) = 2k \pm 1$, der Nenner manchmal ausmultipliziert wie
+$k^2 + 3k + 2$, oder mit Quadraten wie $\frac{2k + 1}{k^2(k + 1)^2}$. Obere
+Grenze $n$ (gesucht die Summe als Bruch in $n$), eine Zahl wie $99$ oder
+$\infty$ (Reihe); Start beim kleinsten passenden $k$, manchmal eins später.
+Geführt: Nenner zerlegen (wenn nötig), Summand in Partialbrüche zerlegen
+(danach steht die Summe ausgeschrieben in „Bisher"), „Was bleibt übrig?",
+zuletzt zusammenfassen bzw. bei der Reihe der Grenzwert der Teilsumme $s_n$.
+Frei: bis $n$ ein gekürzter Bruch in $n$, sonst eine Zahl; bei der Reihe ist
+ein Term in $n$ mit dem richtigen Grenzwert „noch nicht fertig". Sechs neue
+typische Fehler, Lernkarte „Teleskopsummen".
+
 #### Schritt 6: Gezieltes Üben, Feinschliff, Abschluss
 - Jeder neue Fehler lässt sich aus der Lernkarte und dem Fortschritt gezielt
   üben.
@@ -438,6 +463,11 @@ Brüchen".
   Gegenprobe: großes $n$ bzw. $x$ nahe $a$ einsetzen.
 - **Teleskopsummen:** Partialbrüche, dann heben sich die Summanden bis auf
   den ersten und den letzten weg. Gegenprobe: Teilsummen ausrechnen.
+  Umgesetzt in `fraction/telescope.ts`: Der Summand wird mit der
+  Partialbruchzerlegung als $A\left(g(k) - g(k + d)\right)$ erkannt, übrig
+  bleiben $A\left(g(m) + \dots + g(m + d - 1) - g(n + 1) - \dots - g(n + d)\right)$;
+  Aufgabenart `telescope`. Die Tests addieren die Summanden einzeln (exakt bis
+  $n$ für mehrere $n$, bei der Reihe eine lange Teilsumme).
 - **Hyperbelfunktionen:** Bausteine $\sinh x$, $\cosh x$ mit
   $\cosh^2 x - \sinh^2 x = 1$, wie bei $\sin$ und $\cos$.
 

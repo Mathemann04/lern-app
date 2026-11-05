@@ -52,6 +52,7 @@ export const FRACTION_CARD_IDS = {
   partial: 'fraction-partial',
   imaginary: 'fraction-imaginary',
   limit: 'fraction-limit',
+  telescope: 'fraction-telescope',
 } as const
 
 // --- Beispiele bauen ---
@@ -67,7 +68,7 @@ const frAscending = (n: Expr, d: Expr): Part => part(expanded(poly(n), true), ex
 const task = (s: FractionShape, rule?: BlockRule): FractionTask => withRoots({ ...s, hints: [], ...(rule ? { rule } : {}) } as FractionTask)
 // 1 − sin x: die 1 vorn
 const frUnit = (n: Expr, d: Expr): Part => part(expanded(poly(n)), expanded(poly(d), true))
-const [a, b, y, h, m] = ['a', 'b', 'y', 'h', 'n'].map(variable)
+const [a, b, y, h, m, k] = ['a', 'b', 'y', 'h', 'n', 'k'].map(variable)
 // Rechenbaum aus dem Baukasten (M2b)
 const tree = (root: TreeNode): FractionTask => ({ kind: 'tree', root, hints: [] })
 const lf = (nu: number, de = 1) => leaf(fr(num(nu), num(de)))
@@ -530,5 +531,32 @@ export const FRACTION_CARD_LIST: readonly Card[] = [
       task({ kind: 'limit', inner: task({ kind: 'sum', terms: [plus(fr(pow(m, n(2)), add(m, n(1)))), minus(fr(m))] }), letter: 'n', to: 'infinity' }),
     ],
     errors: ['frac-limit-zero-zero', 'frac-limit-insert-sign', 'frac-limit-divide-one-side', 'frac-limit-infinity-one', 'frac-limit-n-zero', 'frac-limit-degree', 'frac-limit-first-terms'],
+  },
+  {
+    id: FRACTION_CARD_IDS.telescope,
+    topic: 'brueche',
+    title: 'Teleskopsummen',
+    level: 5,
+    rules: [],
+    formulas: [
+      '\\frac{1}{k(k + 1)} = \\frac{1}{k} - \\frac{1}{k + 1}',
+      '\\sum_{k=1}^{n} \\left(\\frac{1}{k} - \\frac{1}{k + 1}\\right) = 1 - \\frac{1}{n + 1}',
+      '\\sum_{k=1}^{\\infty} a_k = \\lim_{n \\to \\infty} s_n',
+    ],
+    memo: 'Zerlege den Summanden in Partialbrüche. Schreibst du die Summe aus, hebt sich fast alles weg: Übrig bleiben die vorderen und die hinteren Brüche. Bei einer Reihe lässt du dann $n$ gegen unendlich gehen.',
+    note: [
+      'So gehst du vor:',
+      '1. Den Summanden in Partialbrüche zerlegen: $\\frac{1}{f(f + d)} = \\frac{1}{d}\\left(\\frac{1}{f} - \\frac{1}{f + d}\\right)$.',
+      '2. Die ersten und die letzten Summanden ausschreiben.',
+      '3. Wegheben: Bei Abstand $d$ bleiben vorn und hinten je $d$ Brüche übrig.',
+      '4. Zusammenfassen. Bei einer Reihe gehen die hinteren Brüche gegen $0$.',
+    ].join('\n'),
+    when: 'Bei Summen und Reihen (Kapitel 4 deines Buchs), wenn du den Wert genau bestimmen sollst.',
+    examples: [
+      task({ kind: 'telescope', summand: part(expanded(poly(n(1))), factoredShown(factorize(poly(mul(k, add(k, n(1))))))), index: 'k', from: 1, upper: { kind: 'letter', letter: 'n' } }),
+      task({ kind: 'telescope', summand: part(expanded(poly(n(1))), factoredShown(factorize(poly(mul(k, add(k, n(2))))))), index: 'k', from: 1, upper: { kind: 'infinity', letter: 'n' } }),
+      task({ kind: 'telescope', summand: fr(n(1), sub(mul(n(4), pow(k, n(2))), n(1))), index: 'k', from: 1, upper: { kind: 'number', value: 9 } }),
+    ],
+    errors: ['frac-tele-factor', 'frac-tele-swap', 'frac-tele-only-ends', 'frac-tele-last', 'frac-tele-start', 'frac-tele-head'],
   },
 ]

@@ -11,6 +11,7 @@ import {
   type FractionTask,
   type Part,
   type Shown,
+  type TeleUpper,
   type Signed,
   type TreeNode,
   type TreeTerm,
@@ -1224,3 +1225,61 @@ export function limitTask(source: Rng): FractionTask {
   }
 }
 
+// --- Teleskopsummen (M2b Schritt 5) ---
+//
+// Summand c/(f(k) · f(k + d)) mit f(k) = αk + β (α = 1 mit Abstand d = 1 oder 2, α = 2 mit d = 1 wie
+// (2k − 1)(2k + 1)), der Nenner manchmal ausmultipliziert (erst zerlegen); oder mit Quadraten
+// c(2f + 1)/(f²(f + 1)²) = c(1/f² − 1/(f + 1)²). Obere Grenze n (gesucht die Summe als Bruch), eine
+// Zahl oder ∞ (Reihe). Beginn beim kleinsten k mit f(k) > 0, manchmal eins später. Die Zahlen des
+// Ergebnisses bleiben klein.
+type TeleShape = 'linear' | 'odd' | 'square'
+
+export function telescopeTask(source: Rng): FractionTask {
+  const rng = createRng(`teleskop:${source.int(0, 999_999_999)}`)
+  const k = polyAtom('k')
+  for (;;) {
+    const shape = weighted<TeleShape>(rng, [
+      ['linear', 5],
+      ['odd', 1.5],
+      ['square', 1],
+    ])
+    const alpha = shape === 'odd' ? 2 : 1
+    const beta = shape === 'odd' ? rng.pick([-1, 1]) : rng.pick([0, 0, 1, 2, -1])
+    const d = shape === 'linear' ? rng.pick([1, 1, 2]) : 1
+    const f = polyAdd(polyScale(k, rat(alpha)), polyConst(beta))
+    const g = polyAdd(f, polyConst(alpha * d))
+    const c = shape === 'odd' ? rng.pick([1, 1, 2, 4]) : rng.pick([1, 1, 2, 3, 4, 6])
+    let summand: Part
+    if (shape === 'square') {
+      const num = polyScale(polyAdd(polyScale(f, rat(2)), polyConst(1)), rat(c))
+      summand = part(expanded(num), factoredShown({ coef: rat(1), factors: [{ poly: f, exp: 2 }, { poly: g, exp: 2 }] }))
+    } else {
+      const den = rng.chance(0.45) ? expanded(polyMul(f, g)) : factoredShown({ coef: rat(1), factors: [{ poly: f, exp: 1 }, { poly: g, exp: 1 }] })
+      summand = part(expanded(polyConst(c)), den)
+    }
+    // kleinster Start mit f(k) > 0, manchmal eins später
+    const first = Math.max(1, Math.ceil((1 - beta) / alpha))
+    const from = first + (rng.chance(0.25) ? 1 : 0)
+    const kind = weighted<TeleUpper['kind']>(rng, [
+      ['letter', 4.5],
+      ['number', 2],
+      ['infinity', 3.5],
+    ])
+    const upper: TeleUpper =
+      kind === 'number' ? { kind: 'number', value: rng.pick([9, 10, 19, 20, 49, 99]) } : kind === 'infinity' ? { kind: 'infinity', letter: 'n' } : { kind: 'letter', letter: 'n' }
+    const task: FractionTask = { kind: 'telescope', summand, index: 'k', from, upper, hints: [f, g] }
+    if (taskLatex(task).length > 95) continue
+    let solution: FracSolution
+    let wrongs
+    try {
+      solution = solveFraction(task)
+      wrongs = fractionWrongAnswers(task, solution)
+    } catch {
+      continue
+    }
+    const r = solution.reduced
+    if (r.num.some((t) => Math.abs(Number(t.coef.n)) > 300) || Math.abs(Number(r.den.coef.n)) > 300) continue
+    // mindestens zwei falsche Ergebnisse zum Auswählen
+    if (wrongs.filter((w) => w.result && w.step.startsWith('tele-')).length >= 2) return task
+  }
+}
