@@ -46,6 +46,12 @@ describe('Gezieltes Üben bei Brüchen', () => {
     'frac-limit-n-zero',
     'frac-limit-degree',
     'frac-limit-first-terms',
+    'frac-tele-factor',
+    'frac-tele-swap',
+    'frac-tele-only-ends',
+    'frac-tele-last',
+    'frac-tele-start',
+    'frac-tele-head',
   ])(
     '%s: findet ihn in Stufe 5 mit jedem Zufall',
     (id) => {

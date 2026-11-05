@@ -539,6 +539,12 @@ weiterrechnen). Die Fehler zu Bausteinen gibt es seit Schritt 6 (Stufe 5).
 | Grenzwerte | $n = 0$ eingesetzt statt $n \to \infty$ (neu in M2b) | $\lim_{n \to \infty} \frac{3n^2 - n + 2}{2n^2 + 5} = \frac{2}{5}$ |
 | Grenzwerte | höchste Zahlen geteilt, obwohl der Grad verschieden ist (neu in M2b) | $\lim_{n \to \infty} \frac{2n + 1}{n^2 + 3} = 2$ |
 | Grenzwerte | die vorderen Zahlen statt der Zahlen vor der höchsten Potenz (neu in M2b) | $\lim_{n \to \infty} \frac{3 - 2n^2}{4n^2 + 1} = \frac{3}{4}$ |
+| Teleskopsummen | beim Zerlegen die Zahl vor der Klammer vergessen (neu in M2b) | $\frac{1}{k(k + 2)} = \frac{1}{k} - \frac{1}{k + 2}$ |
+| Teleskopsummen | beim Zerlegen die beiden Brüche vertauscht (neu in M2b) | $\frac{1}{k(k + 1)} = \frac{1}{k + 1} - \frac{1}{k}$ |
+| Teleskopsummen | vorn und hinten nur je einen Bruch behalten, obwohl der Abstand $2$ ist (neu in M2b) | $\sum_{k=1}^{n} \left(\frac{1}{k} - \frac{1}{k + 2}\right) = 1 - \frac{1}{n + 2}$ |
+| Teleskopsummen | am Ende den falschen Bruch behalten (neu in M2b) | $\sum_{k=1}^{n} \left(\frac{1}{k} - \frac{1}{k + 1}\right) = 1 - \frac{1}{n}$ |
+| Teleskopsummen | bei $k = 1$ angefangen, obwohl die Summe später beginnt (neu in M2b) | $\sum_{k=2}^{n} \left(\frac{1}{k} - \frac{1}{k + 1}\right) = 1 - \frac{1}{n + 1}$ |
+| Teleskopsummen | die vorderen Brüche mit weggestrichen (neu in M2b) | $\sum_{k=1}^{n} \left(\frac{1}{k} - \frac{1}{k + 1}\right) = -\frac{1}{n + 1}$ |
 
 Wenn dir typische Fehler aus deinen Übungen fehlen, sag es. Die sind Gold
 wert.

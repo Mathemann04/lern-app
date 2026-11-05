@@ -37,6 +37,7 @@ import {
   partialTask,
   imaginaryTask,
   limitTask,
+  telescopeTask,
   monomialReduce,
   rootTask,
   worldNested,
@@ -253,6 +254,15 @@ const level5Limits: FractionTemplate = {
   build: limitTask,
 }
 
+const level5Telescope: FractionTemplate = {
+  id: 'teleskopsummen',
+  level: 5,
+  share: 0.08,
+  label: 'Teleskopsummen: Summand in Partialbrüche zerlegen, ausschreiben, wegheben; bis $n$, bis zu einer Zahl oder als Reihe',
+  focus: ['frac-tele-factor', 'frac-tele-swap', 'frac-tele-only-ends', 'frac-tele-last', 'frac-tele-start', 'frac-tele-head'],
+  build: telescopeTask,
+}
+
 export const FRACTION_TEMPLATES: readonly FractionTemplate[] = [
   level1Kit,
   level2Kit,
@@ -268,6 +278,7 @@ export const FRACTION_TEMPLATES: readonly FractionTemplate[] = [
   level5Partial,
   level5Imaginary,
   level5Limits,
+  level5Telescope,
 ]
 
 export function fractionTemplatesForLevel(level: Level): FractionTemplate[] {

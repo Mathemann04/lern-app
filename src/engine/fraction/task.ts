@@ -54,6 +54,16 @@ export type FractionShape =
   // „0/0", zerlegen, kürzen, einsetzen; 'infinity': n → ∞, durch die höchste Potenz teilen
   // (fraction/limit.ts)
   | { readonly kind: 'limit'; readonly inner: FractionTask; readonly letter: string; readonly to: Rational | 'infinity' }
+  // Teleskopsumme (Stufe 5): Summe des Bruchs summand (im Buchstaben index) von index = from bis upper;
+  // zerlegen, ausschreiben, wegheben, zusammenfassen bzw. Grenzwert (fraction/telescope.ts)
+  | { readonly kind: 'telescope'; readonly summand: Part; readonly index: string; readonly from: number; readonly upper: TeleUpper }
+
+// Obere Grenze einer Teleskopsumme: ein Buchstabe (gesucht ist die Summe als Bruch in n), eine Zahl
+// oder unendlich (Reihe: Grenzwert der Teilsumme bis letter)
+export type TeleUpper =
+  | { readonly kind: 'letter'; readonly letter: string }
+  | { readonly kind: 'number'; readonly value: number }
+  | { readonly kind: 'infinity'; readonly letter: string }
 
 // Knoten eines Rechenbaums. Blätter sind Brüche, ganze Zahlen oder Terme ohne Bruch; eine
 // Dezimalzahl wird als solche gezeigt (decimal, z. B. „0,75") und hat den Wert ihres Bruchs.
@@ -185,6 +195,9 @@ export function taskFrac(t: FractionShape): Frac {
     case 'reduce':
     case 'partial':
       return partFrac(t.part)
+    // der Summand; die Summe rechnet telescope.ts
+    case 'telescope':
+      return partFrac(t.summand)
     case 'sum':
     case 'imaginary':
       return signedFrac(t.terms)
@@ -291,6 +304,8 @@ export function taskExpr(t: FractionShape): Expr {
     case 'reduce':
     case 'partial':
       return partExpr(t.part)
+    case 'telescope':
+      return partExpr(t.summand)
     case 'sum':
     case 'imaginary':
       return signedExpr(t.terms)
@@ -326,6 +341,7 @@ export function taskLatex(t: FractionShape): string {
   if (t.kind === 'nested') return toLatex(taskExpr(t)).replaceAll('\\frac', '\\dfrac')
   if (t.kind === 'tree') return readableLatex(treeLatex(t.root))
   if (t.kind === 'limit') return limitLatex(t.letter, t.to, t.inner)
+  if (t.kind === 'telescope') return `${telescopePrefix(t.index, t.from, t.upper)} ${toLatex(partExpr(t.summand))}`
   return toLatex(taskExpr(t))
 }
 
@@ -360,7 +376,7 @@ export const readableLatex = (latex: string) => (hasNestedFraction(latex) ? late
 
 // Kann die Mathe-Tastatur die Aufgabe so lesen? (Geteilt mit „:" nicht)
 export const isReadableTask = (t: FractionShape) =>
-  t.kind !== 'quotient' && t.kind !== 'limit' && !(t.kind === 'mixed' && t.op === 'div') && !(t.kind === 'tree' && taskLatex(t).includes(' : '))
+  t.kind !== 'quotient' && t.kind !== 'limit' && t.kind !== 'telescope' && !(t.kind === 'mixed' && t.op === 'div') && !(t.kind === 'tree' && taskLatex(t).includes(' : '))
 
 export function instructionFor(t: FractionShape): string {
   switch (t.kind) {
@@ -382,6 +398,12 @@ export function instructionFor(t: FractionShape): string {
       return 'Berechne und schreibe das Ergebnis in der Form $a + b\\,\\mathrm{i}$.'
     case 'limit':
       return 'Bestimme den Grenzwert.'
+    case 'telescope':
+      return t.upper.kind === 'letter'
+        ? 'Berechne die Summe und schreibe sie als einen Bruch.'
+        : t.upper.kind === 'number'
+          ? 'Berechne die Summe.'
+          : 'Berechne den Wert der Reihe.'
   }
 }
 
@@ -409,6 +431,8 @@ export function withRoots(t: FractionTask): FractionTask {
     case 'reduce':
     case 'partial':
       return { ...t, part: mapPart(t.part), hints }
+    case 'telescope':
+      return { ...t, summand: mapPart(t.summand), hints }
     case 'sum':
     case 'imaginary':
       return { ...t, terms: mapSigned(t.terms), hints }
@@ -445,6 +469,8 @@ export function partsOf(t: FractionShape): Part[] {
     case 'reduce':
     case 'partial':
       return [t.part]
+    case 'telescope':
+      return [t.summand]
     case 'sum':
     case 'imaginary':
       return t.terms.map((s) => s.part)
@@ -462,6 +488,12 @@ export function partsOf(t: FractionShape): Part[] {
     case 'limit':
       return partsOf(t.inner)
   }
+}
+
+// Summenzeichen: \sum_{k=1}^{n}, \sum_{k=2}^{99}, \sum_{k=1}^{\infty}
+export function telescopePrefix(index: string, from: number, upper: TeleUpper): string {
+  const top = upper.kind === 'number' ? String(upper.value) : upper.kind === 'infinity' ? '\\infty' : upper.letter
+  return `\\sum_{${index}=${from}}^{${top}}`
 }
 
 // \lim_{x \to 2} vor dem Bruch; eine Summe in Klammern

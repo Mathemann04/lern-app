@@ -251,9 +251,13 @@ describe('Lernkarten: Brüche', () => {
       for (const stage of tree.stages) for (const step of stage.solution.steps) if (step.expr) expect(fracEquals(toFrac(step.expr)!, stage.solution.value), id).toBe(true)
       return
     }
-    // Grenzwert: die Umformungen haben den Wert des Bruchs, erst der letzte Schritt den Grenzwert
-    const valueOf = (kind: string) => (e.kind === 'limit' && kind !== 'limit-insert' && kind !== 'limit-value' ? taskFrac(e) : solution.value)
-    for (const step of solution.steps) if (step.expr) expect(fracEquals(toFrac(step.expr)!, valueOf(step.kind)), id).toBe(true)
+    // Grenzwert: die Umformungen haben den Wert des Bruchs, erst der letzte Schritt den Grenzwert.
+    // Teleskopsumme: Zerlegen hat den Wert des Summanden, dann der Wert der Summe (bei der Reihe ist
+    // das, was übrig bleibt, die Teilsumme mit n)
+    const ofTask = (kind: string) => (e.kind === 'limit' && kind !== 'limit-insert' && kind !== 'limit-value') || (e.kind === 'telescope' && (kind === 'factor-den' || kind === 'tele-split'))
+    const valueOf = (kind: string) => (ofTask(kind) ? taskFrac(e) : solution.value)
+    const partialSum = (kind: string) => e.kind === 'telescope' && e.upper.kind === 'infinity' && kind === 'tele-cancel'
+    for (const step of solution.steps) if (step.expr && !partialSum(step.kind)) expect(fracEquals(toFrac(step.expr)!, valueOf(step.kind)), id).toBe(true)
   })
 
   it('zeigt jeden typischen Fehler aus den spielbaren Stufen 1 bis 5 auf einer Karte im Ordner Brüche', () => {

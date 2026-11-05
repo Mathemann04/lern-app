@@ -42,6 +42,10 @@ const nn = variable('n')
 const limitAt = (to: number, n: Expr, d: Expr): FractionTask => task({ kind: 'limit', inner: task({ kind: 'reduce', part: fr(n, d) }), letter: 'x', to: rat(to) })
 const limitInf = (p: Part): FractionTask => task({ kind: 'limit', inner: task({ kind: 'reduce', part: p }), letter: 'n', to: 'infinity' })
 const n2 = pow(nn, num(2))
+// Teleskopsummen: c / (k(k + d)) bis n
+const kk = variable('k')
+const tele = (c: number, d: number, from = 1): FractionTask =>
+  task({ kind: 'telescope', summand: fr(num(c), mul(kk, add(kk, num(d)))), index: 'k', from, upper: { kind: 'letter', letter: 'n' } })
 // komplexe Zahlen: ein Bruch mit i im Nenner
 const imag = (n: Expr, d: Expr): FractionTask => task({ kind: 'imaginary', terms: [plus(fr(n, d))] })
 
@@ -183,6 +187,12 @@ const CASES: Case[] = [
   ['frac-limit-n-zero', limitInf(fr(add(sub(mul(num(3), n2), nn), num(2)), add(mul(num(2), n2), num(5)))), 'result', '\\frac{2}{5}'],
   ['frac-limit-degree', limitInf(fr(add(mul(num(2), nn), num(1)), add(n2, num(3)))), 'result', '2'],
   ['frac-limit-first-terms', limitInf(part(expanded(poly(sub(num(3), mul(num(2), n2))), true), expanded(poly(add(mul(num(4), n2), num(1)))))), 'result', '\\frac{3}{4}'],
+  ['frac-tele-factor', tele(1, 2), 'step', '\\frac{1}{k} - \\frac{1}{k + 2}'],
+  ['frac-tele-swap', tele(1, 1), 'step', '\\frac{1}{k + 1} - \\frac{1}{k}'],
+  ['frac-tele-only-ends', tele(2, 2), 'step', '1 - \\frac{1}{n + 2}'],
+  ['frac-tele-last', tele(1, 1), 'step', '1 - \\frac{1}{n}'],
+  ['frac-tele-start', tele(1, 1, 2), 'step', '1 - \\frac{1}{n + 1}'],
+  ['frac-tele-head', tele(1, 1), 'step', '-\\frac{1}{n + 1}'],
   ['frac-imag-minus', task({ kind: 'imaginary', terms: [plus(fr(add(num(1), IMAG), sub(num(1), IMAG))), minus(fr(add(num(1), mul(num(3), IMAG))))] }), 'result', '-1 + 4\\mathrm{i}'],
 ]
 

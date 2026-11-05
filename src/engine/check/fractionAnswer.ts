@@ -29,6 +29,9 @@ import type { FreeTask, FreeVerdict } from './freeTask.ts'
 // eine Zahl im Zähler und ein Linearfaktor (oder sein Quadrat) im Nenner, keiner doppelt.
 // Komplexe Zahlen: fertig ist a + bi (Realteil und Imaginärteil je gekürzt, jeder einmal) oder ein
 // gekürzter Bruch \frac{p + qi}{r} mit reellem Nenner; kein i im Nenner, keine Potenz von i.
+// Grenzwerte: gesucht ist eine Zahl. Teleskopsummen: bis n ein Bruch in n (wie oben), bis zu einer
+// Zahl bzw. als Reihe eine Zahl; ein Term in n mit dem richtigen Grenzwert ist bei der Reihe noch
+// nicht fertig.
 
 export type FractionCheckContext = {
   readonly task: FractionTask
@@ -87,7 +90,9 @@ export function prepareFractionCheck(task: FractionTask): FractionCheckContext {
   // x und y zuerst, dann alphabetisch; bei √a auch a
   const rank = (l: string) => (l === 'x' ? 0 : l === 'y' ? 1 : 2)
   const letters = [...new Set([...atoms.filter(isLetter), ...roots.flatMap(radicandLetters), ...(blocks ? ['x'] : [])])].sort((a, b) => rank(a) - rank(b) || a.localeCompare(b))
-  return { task, solution, wrongs: fractionWrongAnswers(task, solution), letters, blocks, imag: atoms.includes('i'), root, roots }
+  // Teleskopsumme: Im Ergebnis steht nicht k, sondern höchstens n
+  const own = task.kind === 'telescope' ? (task.upper.kind === 'number' ? [] : [task.upper.letter]) : letters
+  return { task, solution, wrongs: fractionWrongAnswers(task, solution), letters: own, blocks, imag: atoms.includes('i'), root, roots }
 }
 
 export function checkFractionAnswer(context: FractionCheckContext, latex: string): FractionVerdict {
@@ -119,6 +124,12 @@ export function checkFractionAnswer(context: FractionCheckContext, latex: string
     const same = v !== null && fracEquals({ num: polyConst(v), den: polyConst(1) }, correct)
     return same ? { kind: 'unfinished', answer, reason: task.to === 'infinity' ? 'limit-infinity' : 'limit-insert' } : { kind: 'wrong', answer }
   }
+  // Reihe: gesucht ist eine Zahl; die Teilsumme s_n ist noch nicht fertig
+  if (task.kind === 'telescope' && task.upper.kind === 'infinity' && atomsOf(value.num).length + atomsOf(value.den).length > 0) {
+    const v = limitOf(value, task.upper.letter, 'infinity')
+    const same = v !== null && fracEquals({ num: polyConst(v), den: polyConst(1) }, correct)
+    return same ? { kind: 'unfinished', answer, reason: 'limit-infinity' } : { kind: 'wrong', answer }
+  }
   if (fracEquals(value, correct)) {
     const reason =
       context.task.kind === 'partial' ? partialUnfinished(answer) : context.task.kind === 'imaginary' ? imagUnfinished(answer) : unfinished(answer, value, context.solution, context.task)
@@ -128,7 +139,8 @@ export function checkFractionAnswer(context: FractionCheckContext, latex: string
   if (wrong) return { kind: 'knownError', answer, wrong }
   if (fracEquals(value, fracNeg(correct))) return { kind: 'wrongSign', answer }
   // bei Zahlen (Grenzwerten) unterscheiden sich alle nur um einen Faktor
-  if (task.kind !== 'limit' && constantRatio(value, correct)) return { kind: 'wrongFactor', answer }
+  const numberWanted = task.kind === 'limit' || (task.kind === 'telescope' && task.upper.kind !== 'letter')
+  if (!numberWanted && constantRatio(value, correct)) return { kind: 'wrongFactor', answer }
   return { kind: 'wrong', answer }
 }
 

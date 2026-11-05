@@ -243,6 +243,46 @@ describe('Stufe 5: Grenzwerte', () => {
   })
 })
 
+describe('Stufe 5: Teleskopsummen', () => {
+  const checker = (t: FractionTask) => {
+    const context = prepareFractionCheck(t)
+    return (latex: string) => short(checkFractionAnswer(context, latex))
+  }
+  const k = variable('k')
+  const kk1 = fr(num(1), mul(k, add(k, num(1))))
+
+  it('bis n: ein gekürzter Bruch in n', () => {
+    const t = task({ kind: 'telescope', summand: kk1, index: 'k', from: 1, upper: { kind: 'letter', letter: 'n' } })
+    expect(prepareFractionCheck(t).letters).toEqual(['n'])
+    const check = checker(t)
+    expect(check('\\frac{n}{n+1}')).toBe('correct')
+    expect(check('1-\\frac{1}{n+1}')).toBe('unfinished:several')
+    expect(check('1-\\frac{1}{n}')).toBe('knownError:frac-tele-last')
+    expect(check('-\\frac{1}{n+1}')).toBe('knownError:frac-tele-head')
+    expect(check('\\frac{k}{k+1}')).toBe('unreadable')
+  })
+
+  it('Reihe: gesucht ist eine Zahl, die Teilsumme ist noch nicht fertig', () => {
+    const t = task({ kind: 'telescope', summand: fr(num(1), mul(k, add(k, num(2)))), index: 'k', from: 1, upper: { kind: 'infinity', letter: 'n' } })
+    const check = checker(t)
+    expect(check('\\frac{3}{4}')).toBe('correct')
+    expect(check('\\frac{3}{4}-\\frac{1}{2n+2}-\\frac{1}{2n+4}')).toBe('unfinished:limit-infinity')
+    expect(check('\\frac{1}{2}')).toBe('knownError:frac-tele-only-ends')
+    expect(check('\\frac{3}{2}')).toBe('knownError:frac-tele-factor')
+    expect(check('0')).toBe('knownError:frac-tele-head')
+    expect(check('-\\frac{3}{4}')).toBe('knownError:frac-tele-swap')
+  })
+
+  it('bis zu einer Zahl: eine Zahl', () => {
+    const t = task({ kind: 'telescope', summand: kk1, index: 'k', from: 1, upper: { kind: 'number', value: 99 } })
+    expect(prepareFractionCheck(t).letters).toEqual([])
+    const check = checker(t)
+    expect(check('\\frac{99}{100}')).toBe('correct')
+    expect(check('1-\\frac{1}{100}')).toBe('unfinished:several')
+    expect(check('\\frac{98}{99}')).toBe('knownError:frac-tele-last')
+  })
+})
+
 describe('Stufe 5: komplexe Zahlen', () => {
   const z = (re: number, im: number) => add(num(re), mul(num(im), IMAG))
   const checker = (t: FractionTask) => {
@@ -296,6 +336,8 @@ describe.each([1, 2, 3, 4, 5] as Level[])('Zufallsaufgaben, Stufe %i', (level) =
       for (const step of context.solution.steps) {
         // beim Rechenbaum zeigen nur diese Schritte den ganzen Zwischenstand (die anderen einen Teil)
         if (!step.expr || (t.kind === 'tree' && step.kind !== 'decimal' && step.kind !== 'part')) continue
+        // Teleskopsumme: Zerlegen zeigt nur den Summanden, nicht die Summe
+        if (t.kind === 'telescope' && (step.kind === 'factor-den' || step.kind === 'tele-split')) continue
         const verdict = checkFractionAnswer(context, toLatex(step.expr))
         expect(['correct', 'unfinished'], `${context0} ${step.kind}: ${toLatex(step.expr)}`).toContain(verdict.kind)
       }

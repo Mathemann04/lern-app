@@ -302,6 +302,36 @@ export const FRACTION_ERROR_TEXTS: Readonly<Record<string, Explanation>> = {
       'Ein Minus vor einer komplexen Zahl gilt für beide Teile: $-(a + b\\mathrm{i}) = -a - b\\mathrm{i}$. Hier wurde nur der Realteil abgezogen.',
     short: 'Das Minus gilt für beide Teile: $-(a + b\\mathrm{i}) = -a - b\\mathrm{i}$.',
   },
+  'frac-tele-factor': {
+    detailed:
+      'Mach die Probe: $\\frac{1}{k} - \\frac{1}{k + 2} = \\frac{2}{k(k + 2)}$, also doppelt so viel wie $\\frac{1}{k(k + 2)}$. Unterscheiden sich die beiden Nenner um $d$, steht deshalb $\\frac{1}{d}$ vor der Klammer.',
+    short: 'Probe machen: Der Unterschied der Nenner gehört als $\\frac{1}{d}$ vor die Klammer.',
+  },
+  'frac-tele-swap': {
+    detailed:
+      'Mach die Probe: $\\frac{1}{k + 1} - \\frac{1}{k} = \\frac{k - (k + 1)}{k(k + 1)} = -\\frac{1}{k(k + 1)}$. Das Vorzeichen stimmt nicht: Der Bruch mit dem kleineren Nenner steht vorn.',
+    short: 'Probe machen: Der Bruch mit dem kleineren Nenner steht vorn.',
+  },
+  'frac-tele-only-ends': {
+    detailed:
+      'Bei $\\frac{1}{k} - \\frac{1}{k + 2}$ hebt sich jeder abgezogene Bruch erst zwei Summanden später weg. Vorn bleiben deshalb zwei Brüche stehen, die nie abgezogen werden, und hinten zwei, die nie dazukommen.',
+    short: 'Abstand $2$: Vorn und hinten bleiben je zwei Brüche.',
+  },
+  'frac-tele-last': {
+    detailed:
+      'Schau dir den letzten Summanden an, den mit $k = n$: Sein abgezogener Bruch hat $n$ plus den Abstand im Nenner. Dieser Bruch hebt sich mit nichts mehr weg, er bleibt stehen.',
+    short: 'Der letzte Summand ist der mit $k = n$; sein abgezogener Bruch bleibt stehen.',
+  },
+  'frac-tele-start': {
+    detailed:
+      'Die Summe beginnt beim Startwert unter dem Summenzeichen. Schreib den ersten Summanden mit genau diesem $k$ aus, nicht mit $k = 1$.',
+    short: 'Beim Startwert unter dem Summenzeichen beginnen.',
+  },
+  'frac-tele-head': {
+    detailed:
+      'Die vorderen Brüche werden nie abgezogen, denn davor steht kein Summand mehr. Sie heben sich also nicht weg und bleiben stehen.',
+    short: 'Die vorderen Brüche bleiben stehen: Vor ihnen wird nichts abgezogen.',
+  },
 }
 
 export function explainFractionError(id: string): Explanation {
@@ -606,6 +636,44 @@ export function explainLimitValue(letter: string, divided: Expr, value: Expr): E
   }
 }
 
+// --- Teleskopsummen ---
+
+// Zerlegen: der Summand summand ist split; gap: Unterschied der Nenner (null: keine Zahl davor)
+export function explainTeleSplit(summand: Expr, split: Expr, gap: string | null): Explanation {
+  const equation = `$${toLatex(summand)} = ${toLatex(split)}$`
+  const why = gap ? ` Die beiden Nenner unterscheiden sich um $${gap}$, deshalb steht $\\frac{1}{${gap}}$ davor.` : ''
+  return {
+    detailed: `Zerlege den Summanden in Partialbrüche, so wird jeder Summand zur Differenz zweier Brüche: ${equation}.${why}`,
+    short: `${equation}.`,
+  }
+}
+
+// Ausschreiben und wegheben: übrig bleiben die ersten und die letzten Brüche
+export function explainTeleCancel(remaining: Expr, shift: number): Explanation {
+  const kept = shift === 1 ? 'der erste und der letzte Bruch' : `die ersten ${shift} und die letzten ${shift} Brüche`
+  return {
+    detailed: `In der ausgeschriebenen Summe kommt jeder abgezogene Bruch ${shift === 1 ? 'im nächsten' : `${shift} Summanden später im`} Summanden wieder mit Plus vor und hebt sich weg. Übrig bleiben ${kept}: $${toLatex(remaining)}$.`,
+    short: `Übrig bleiben ${kept}: $${toLatex(remaining)}$.`,
+  }
+}
+
+// Zusammenfassen: aus dem, was übrig bleibt, ein Bruch
+export function explainTeleSum(remaining: Expr, result: Expr, lcd: Expr | null): Explanation {
+  const equation = `$${toLatex(remaining)} = ${toLatex(result)}$`
+  return {
+    detailed: `Fasse zusammen${lcd ? ` (Hauptnenner $${toLatex(lcd)}$)` : ''} und kürze: ${equation}.`,
+    short: `${equation}.`,
+  }
+}
+
+// Reihe: die hinteren Brüche gehen gegen 0
+export function explainTeleLimit(letter: string, remaining: Expr, value: Expr): Explanation {
+  return {
+    detailed: `Für $${letter} \\to \\infty$ gehen die Brüche mit $${letter}$ im Nenner gegen $0$. Von $${toLatex(remaining)}$ bleiben nur die vorderen Brüche. Der Wert der Reihe ist $${toLatex(value)}$.`,
+    short: `Brüche mit $${letter}$ im Nenner gehen gegen $0$: Wert $${toLatex(value)}$.`,
+  }
+}
+
 // Regel eines Bausteins: trig (sin² x + cos² x = 1) oder root ((√x)² = x)
 export function explainRule(kind: 'trig' | 'root', before: Expr, after: Expr): Explanation {
   const equation = `$${toLatex(before)} = ${toLatex(after)}$`
@@ -662,6 +730,10 @@ export const FRACTION_HINTS = {
   limitInsert: 'Nach dem Kürzen ist der Nenner an dieser Stelle nicht mehr $0$. Setze die Zahl ein und rechne aus.',
   limitDivide: 'Teile jeden Summanden in Zähler und Nenner durch die höchste Potenz des Nenners, z. B. $\\frac{3n^2}{n^2} = 3$ und $\\frac{n}{n^2} = \\frac{1}{n}$.',
   limitValue: 'Für $n \\to \\infty$ gehen Brüche wie $\\frac{1}{n}$ und $\\frac{5}{n^2}$ gegen $0$. Was bleibt übrig?',
+  teleSplit: 'Zerlege in zwei Brüche mit den Faktoren des Nenners. Unterscheiden sich die Faktoren um $d$, gilt $\\frac{1}{f(f + d)} = \\frac{1}{d}\\left(\\frac{1}{f} - \\frac{1}{f + d}\\right)$.',
+  teleCancel: 'Schau dir die ausgeschriebene Summe an. Welche Brüche kommen einmal mit Minus und später mit Plus vor? Die heben sich weg.',
+  teleSum: 'Bringe die übrigen Brüche auf den Hauptnenner, fasse zusammen und kürze.',
+  teleLimit: 'Für $n \\to \\infty$ gehen Brüche wie $\\frac{1}{n + 1}$ gegen $0$. Was bleibt übrig?',
   imagSum: 'Teile den Bruch auf: $\\frac{p + q\\mathrm{i}}{r} = \\frac{p}{r} + \\frac{q}{r}\\mathrm{i}$. Dann Realteile und Imaginärteile getrennt zusammenfassen; ein Minus vor einer Klammer gilt für beide Teile.',
 } as const
 
@@ -717,6 +789,10 @@ export function fractionTaskHint(t: FractionShape): Explanation {
     case 'imaginary':
       return same(
         'Rechne zuerst Potenzen wie $\\mathrm{i}^3$ aus. Erweitere den Bruch dann mit dem konjugiert Komplexen des Nenners, multipliziere aus ($\\mathrm{i}^2 = -1$) und teile Realteil und Imaginärteil durch den reellen Nenner.',
+      )
+    case 'telescope':
+      return same(
+        `Zerlege den Summanden in Partialbrüche. Schreib die ersten und die letzten Summanden aus: Fast alle Brüche heben sich weg, übrig bleiben die vorderen und die hinteren. ${t.upper.kind === 'infinity' ? 'Für $n \\to \\infty$ gehen die hinteren gegen $0$.' : 'Fasse sie zu einem Bruch zusammen.'}`,
       )
     case 'partial':
       return same(
