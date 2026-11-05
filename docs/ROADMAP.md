@@ -51,7 +51,7 @@ Details: [PLAN-M2b.md](PLAN-M2b.md)
 - [x] 4. Stufe 5, Teil 2: Partialbruchzerlegung
 - [ ] 5. Stufe 5, Teil 3: Brüche aus späteren Kapiteln (in vier Teilen)
   - [x] 5a. Komplexe Zahlen teilen
-  - [ ] 5b. Grenzwerte von Brüchen
+  - [x] 5b. Grenzwerte von Brüchen
   - [ ] 5c. Teleskopsummen
   - [ ] 5d. Hyperbelfunktionen
 - [ ] 6. Gezieltes Üben, Feinschliff, Abschluss
@@ -402,3 +402,11 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   Die Vorlage wird mit eigenem Zufall gewählt (etwa 8 % der Nummern); die
   Partialbruch-Nummern bleiben, von den übrigen Nummern der Stufe 5 zeigen
   einige jetzt eine Aufgabe mit komplexen Zahlen.
+- 05.11.2026: M2b Teil 5b fertig: Stufe 5 hat „Grenzwerte" als eigene
+  Aufgabenart. $x \to a$ mit $\frac{0}{0}$ (zerlegen, kürzen, einsetzen; auch
+  Summen und Wurzeln) und $n \to \infty$ (durch die höchste Potenz teilen,
+  auch „$\infty - \infty$"). Neue Engine `fraction/limit.ts`; geführt mit dem
+  Limes in „Bisher", frei ist eine Zahl gesucht. Sieben neue typische Fehler,
+  Lernkarte „Grenzwerte von Brüchen". Etwa 8 % der übrigen Nummern der
+  Stufe 5 zeigen jetzt einen Grenzwert (in den Browser-Tests ersetzt: 5-204
+  durch 5-101, 5-1537 durch 5-4778, 5-3326 durch 5-3734).

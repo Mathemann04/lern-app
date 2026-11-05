@@ -120,7 +120,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     Partialbrüchen eine Summe aus ganzem Teil und einfachen Brüchen mit
     einer Zahl im Zähler, jeder Nenner einmal, bei komplexen Zahlen
     $a + b\,\mathrm{i}$ oder ein gekürzter Bruch mit reellem Nenner, ohne
-    $\mathrm{i}$ im Nenner und ohne Potenz von $\mathrm{i}$;
+    $\mathrm{i}$ im Nenner und ohne Potenz von $\mathrm{i}$, bei Grenzwerten
+    eine Zahl (ein Term mit dem richtigen Grenzwert ist noch nicht fertig);
     sonst typischer Fehler, bei Rechenbäumen auch Fehler
     einer Teilrechnung bis zum Ergebnis weitergerechnet);
     `check/rearrangeAnswer.ts`: freie Eingabe beim Umstellen (rechte Seite
@@ -136,7 +137,7 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     Beispiele, typische Fehler; Ordner „Brüche" in `fractionCards.ts`, in
     Stufe 5 „Bausteine mit eigenen Regeln", „Dritte Potenzen", „Wurzeln
     im Nenner beseitigen", „Polynomdivision", „Partialbruchzerlegung" und
-    „Komplexe Zahlen teilen") und
+    „Komplexe Zahlen teilen", „Grenzwerte von Brüchen") und
     durchgerechnete Beispiele (`example.ts` aus `derive`,
     `fractionExample.ts` aus der Bruch-Engine, bei Partialbrüchen mit den
     Gleichungen für die Zahlen). Texte für Brüche in
@@ -164,7 +165,9 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     (Polynomdivision, Nenner zerlegen, Ansatz, je Zahl eine Frage, zuletzt
     die Zerlegung), komplexe Zahlen (Potenzen von $\mathrm{i}$, mit dem
     konjugiert Komplexen erweitern, ausmultiplizieren, aufteilen; Schritte
-    `imag-…`), innerer Doppelbruch zuerst, bei mehreren
+    `imag-…`), Grenzwerte `planLimit` ($x \to a$: die Schritte des Bruchs
+    selbst mit dem Limes in „Bisher", dann einsetzen; $n \to \infty$: durch
+    die höchste Potenz teilen, dann der Grenzwert), innerer Doppelbruch zuerst, bei mehreren
     Rechenarten jede Klammer zu einem Bruch; Rechenbaum `planTree`: erst
     Dezimalzahlen, dann „Was rechnest du zuerst?", wenn Punkt vor Strich
     oder eine Klammer zählt, dann je Teilrechnung die Schritte der passenden
@@ -193,7 +196,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     `task.ts` (Aufgabenformen: kürzen, plus/minus, mal, geteilt,
     Doppelbruch, mehrere Rechenarten `mixed`, verschachtelter Doppelbruch
     `nested`; Partialbruchzerlegung `partial`; komplexe Zahlen teilen
-    `imaginary`; Zähler wie $(x + h)^2 - x^2$ oder $(x + h)^3 - x^3$; Regel eines
+    `imaginary`; Grenzwert `limit` mit dem Bruch als `inner`, Limes davor
+    `limitedLatex`; Zähler wie $(x + h)^2 - x^2$ oder $(x + h)^3 - x^3$; Regel eines
     Bausteins `rule`, auch „Wurzel beseitigen" `conjugate`;
     Rechenbaum `tree` aus Plus/Minus, Mal, Geteilt, Klammern, Doppelbruch,
     Blätter auch als Dezimalzahl;
@@ -211,7 +215,10 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     $\mathrm{i}$ als Atom `i` mit $\mathrm{i}^2 = -1$, `reduceImag` in
     `frac.ts`, auch beim Vergleich; Real- und Imaginärteil `imagParts`,
     konjugiert Komplexes `conjugateFactor`, Ergebnis $a + b\,\mathrm{i}$
-    `complexExpr`; Buchstaben gelten als reell), `tree.ts` (Rechenbaum: Stufen `treeStages`, jede Stufe
+    `complexExpr`; Buchstaben gelten als reell), `limit.ts` (Grenzwerte:
+    Wert an der Stelle `fracValueAt`, auch mit $\sqrt{x}$; $n \to \infty$ über
+    die höchsten Potenzen `limitAtInfinity`; durch die höchste Potenz geteilt
+    `dividedFracExpr`; Rechenweg `limitWork`/`solveLimit` in `solve.ts`), `tree.ts` (Rechenbaum: Stufen `treeStages`, jede Stufe
     eine der Formen oben, von innen nach außen, Punkt vor Strich;
     falsche Reihenfolgen für die Fehler), `errorRules.ts` (typische Fehler,
     Ids `frac-…`; `freeOnly`: nur für die Diagnose im freien Modus).
@@ -241,7 +248,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     auch im Inneren, Doppelbruch im Doppelbruch `worldNested`,
     Differenzenquotienten `differenceQuotient`, dritte Potenzen `cubeTask`,
     Wurzeln `rootTask`, Bausteine gemischt `blockPairTask`,
-    Partialbrüche `partialTask`, komplexe Zahlen `imaginaryTask`; die
+    Partialbrüche `partialTask`, komplexe Zahlen `imaginaryTask`,
+    Grenzwerte `limitTask`; die
     Vorlagen der Stufe 5 haben Anteile
     `weight`, später dazugekommene Vorlagen einen festen Anteil `share`,
     vorweg mit eigenem Zufall gewählt, damit die übrigen Nummern ihre

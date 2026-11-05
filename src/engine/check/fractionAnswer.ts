@@ -4,7 +4,8 @@ import { type FracWrong, fractionWrongAnswers } from '../fraction/errorRules.ts'
 import { factoredPoly, factorize, reduceFrac } from '../fraction/factor.ts'
 import { type Frac, fracDiv, fracEquals, fracNeg, isRootAtom, radicandLetters, reduceImag, rootForm, toFrac } from '../fraction/frac.ts'
 import { hasImag, imagParts } from '../fraction/complex.ts'
-import { atomsOf, constValue, isZeroPoly, polyContent, totalDegree } from '../fraction/poly.ts'
+import { limitOf } from '../fraction/limit.ts'
+import { atomsOf, constValue, isZeroPoly, polyConst, polyContent, totalDegree } from '../fraction/poly.ts'
 import { type FracSolution, rationalizedFrac, solveFraction } from '../fraction/solve.ts'
 import { type FractionTask, partsOf, shownPoly } from '../fraction/task.ts'
 import { parseLatex } from '../parse/latex.ts'
@@ -61,6 +62,8 @@ export type Unfinished =
   | 'imag-den'
   | 'imag-power'
   | 'imag-combine'
+  | 'limit-insert'
+  | 'limit-infinity'
 
 export type FractionVerdict =
   | { readonly kind: 'unreadable'; readonly message: string }
@@ -109,6 +112,13 @@ export function checkFractionAnswer(context: FractionCheckContext, latex: string
   const value = context.root ? rootForm(parsedValue, context.roots) : parsedValue
 
   const correct = context.solution.value
+  // Grenzwert: gesucht ist eine Zahl; mit dem richtigen Grenzwert ist ein Term noch nicht fertig
+  const task = context.task
+  if (task.kind === 'limit' && atomsOf(value.num).length + atomsOf(value.den).length > 0) {
+    const v = limitOf(value, task.letter, task.to)
+    const same = v !== null && fracEquals({ num: polyConst(v), den: polyConst(1) }, correct)
+    return same ? { kind: 'unfinished', answer, reason: task.to === 'infinity' ? 'limit-infinity' : 'limit-insert' } : { kind: 'wrong', answer }
+  }
   if (fracEquals(value, correct)) {
     const reason =
       context.task.kind === 'partial' ? partialUnfinished(answer) : context.task.kind === 'imaginary' ? imagUnfinished(answer) : unfinished(answer, value, context.solution, context.task)
@@ -117,7 +127,8 @@ export function checkFractionAnswer(context: FractionCheckContext, latex: string
   const wrong = context.wrongs.find((w) => w.value && fracEquals(value, w.value))
   if (wrong) return { kind: 'knownError', answer, wrong }
   if (fracEquals(value, fracNeg(correct))) return { kind: 'wrongSign', answer }
-  if (constantRatio(value, correct)) return { kind: 'wrongFactor', answer }
+  // bei Zahlen (Grenzwerten) unterscheiden sich alle nur um einen Faktor
+  if (task.kind !== 'limit' && constantRatio(value, correct)) return { kind: 'wrongFactor', answer }
   return { kind: 'wrong', answer }
 }
 
@@ -461,6 +472,8 @@ export const UNFINISHED_TEXTS: Readonly<Record<Unfinished, string>> = {
   'partial-combine': 'Fasse noch zusammen: Jeder Nenner kommt nur einmal vor, und der ganze Teil hat keine gleichartigen Summanden und keine Klammern.',
   'imag-den': 'Im Nenner steht noch $\\mathrm{i}$. Erweitere mit dem konjugiert Komplexen des Nenners, dann ist der Nenner reell.',
   'imag-power': 'Rechne die Potenzen von $\\mathrm{i}$ noch aus: $\\mathrm{i}^2 = -1$.',
+  'limit-insert': 'Gesucht ist eine Zahl. Setze die Stelle noch ein, nachdem du gekürzt hast.',
+  'limit-infinity': 'Gesucht ist eine Zahl. Lass $n$ noch gegen unendlich gehen: Brüche wie $\\frac{1}{n}$ gehen gegen $0$.',
   'imag-combine': 'Fasse noch zusammen: Schreibe das Ergebnis als $a + b\\,\\mathrm{i}$, mit einem Realteil und einem Imaginärteil.',
   conjugate:
     'Noch nicht fertig: Erweitere mit dem Gegenstück der Summe mit Wurzel (dieselben Teile, anderes Vorzeichen). Mit der dritten binomischen Formel verschwindet die Wurzel aus dem Nenner, beim Differenzenquotienten kürzt sich danach $h$.',

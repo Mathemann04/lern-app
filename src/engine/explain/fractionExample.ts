@@ -3,7 +3,7 @@ import { num } from '../expr/types.ts'
 import { factoredExpr } from '../fraction/factor.ts'
 import { ansatzExpr, dividedExpr, findingEquation } from '../fraction/partial.ts'
 import { type FracSolution, STEP_NAMES, nicePolyExpr, partialFactorStep, partialWork, solveFraction, solveTree } from '../fraction/solve.ts'
-import { type FractionTask, readableLatex, shownExpr, taskLatex, treeLatex } from '../fraction/task.ts'
+import { type FractionTask, limitedLatex, readableLatex, shownExpr, taskLatex, treeLatex } from '../fraction/task.ts'
 import { withoutDecimals } from '../fraction/tree.ts'
 import type { WorkedExample } from './example.ts'
 import { m } from './format.ts'
@@ -37,6 +37,16 @@ function partialLines(t: Extract<FractionTask, { kind: 'partial' }>) {
   return lines
 }
 
+// Grenzwert: jeder Zwischenstand mit dem Limes davor, zuletzt der Grenzwert
+function limitLines(t: Extract<FractionTask, { kind: 'limit' }>, solution: FracSolution) {
+  return solution.steps.map((step) => {
+    if (step.kind === 'lcd') return { label: `${STEP_NAMES.lcd}:`, latex: toLatex(step.detail!) }
+    if (step.kind === 'limit-insert' || step.kind === 'limit-value') return { label: `${STEP_NAMES[step.kind]}:`, latex: `= ${toLatex(step.expr!)}` }
+    const label = step.kind === 'cancel' && step.detail ? `Kürzen durch ${m(step.detail)}:` : `${STEP_NAMES[step.kind]}:`
+    return { label, latex: readableLatex(`= ${limitedLatex(t.letter, t.to, step.latex ?? toLatex(step.expr!))}`) }
+  })
+}
+
 export function fractionExample(t: FractionTask): WorkedExample {
   const solution = solveFraction(t)
   // Rechenbaum: je Teil eine Zeile mit dem Teilergebnis und dem ganzen Zwischenstand, der letzte
@@ -54,7 +64,9 @@ export function fractionExample(t: FractionTask): WorkedExample {
         })()
       : t.kind === 'partial'
         ? partialLines(t)
-        : stepLines(solution)
+        : t.kind === 'limit'
+          ? limitLines(t, solution)
+          : stepLines(solution)
   // z. B. nach dem Malnehmen ohne Kürzen: noch ausrechnen; Partialbrüche: die Zahlen einsetzen
   const result = `= ${toLatex(solution.result)}`
   if (lines.at(-1)?.latex !== result) lines.push({ label: t.kind === 'partial' ? 'Eingesetzt:' : 'Ausrechnen:', latex: result })

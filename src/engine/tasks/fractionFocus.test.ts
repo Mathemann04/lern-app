@@ -39,6 +39,13 @@ describe('Gezieltes Üben bei Brüchen', () => {
     'frac-imag-split',
     'frac-imag-direct',
     'frac-imag-minus',
+    'frac-limit-zero-zero',
+    'frac-limit-insert-sign',
+    'frac-limit-divide-one-side',
+    'frac-limit-infinity-one',
+    'frac-limit-n-zero',
+    'frac-limit-degree',
+    'frac-limit-first-terms',
   ])(
     '%s: findet ihn in Stufe 5 mit jedem Zufall',
     (id) => {
