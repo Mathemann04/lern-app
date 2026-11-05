@@ -182,10 +182,10 @@ export const REARRANGE_CARD_LIST: readonly Card[] = [
       '\\sin u = w \\;\\Leftrightarrow\\; u = \\arcsin w',
       '\\cos u = w \\;\\Leftrightarrow\\; u = \\arccos w',
       '\\tan u = w \\;\\Leftrightarrow\\; u = \\arctan w',
-      '\\sinh u = w \\;\\Leftrightarrow\\; u = \\operatorname{arsinh} w = \\ln\\left(w + \\sqrt{w^2 + 1}\\right)',
+      '\\sinh u = w \\;\\Leftrightarrow\\; u = \\operatorname{arsinh} w',
     ],
     memo: 'Gegen eine Funktion hilft ihre Umkehrfunktion, gegen eine Umkehrfunktion die Funktion selbst, immer auf beiden Seiten und auf die ganze Seite. Die Umkehrfunktion ist nicht der Kehrwert: $\\arcsin w \\neq \\frac{1}{\\sin w}$.',
-    note: 'Winkelfunktionen sind nur auf einem Bereich umkehrbar: $\\arcsin$ und $\\arctan$ liefern Winkel zwischen $-\\frac{\\pi}{2}$ und $\\frac{\\pi}{2}$, $\\arccos$ zwischen $0$ und $\\pi$. Deshalb nennt jede Aufgabe einen Bereich wie $x < \\frac{\\pi}{2}$. Bei den Hyperbelfunktionen heißen die Umkehrfunktionen Areafunktionen: $\\operatorname{arsinh}$, $\\operatorname{arcosh}$, $\\operatorname{artanh}$. Teilst du danach durch eine Zahl, wird die ganze Umkehrfunktion geteilt.',
+    note: 'Winkelfunktionen sind nur auf einem Bereich umkehrbar: $\\arcsin$ und $\\arctan$ liefern Winkel zwischen $-\\frac{\\pi}{2}$ und $\\frac{\\pi}{2}$, $\\arccos$ zwischen $0$ und $\\pi$. Deshalb nennt jede Aufgabe einen Bereich wie $x < \\frac{\\pi}{2}$. Bei den Hyperbelfunktionen heißen die Umkehrfunktionen Areafunktionen: $\\operatorname{arsinh}$, $\\operatorname{arcosh}$, $\\operatorname{artanh}$; zum Beispiel ist $\\operatorname{arsinh} w = \\ln\\left(w + \\sqrt{w^2 + 1}\\right)$. Teilst du danach durch eine Zahl, wird die ganze Umkehrfunktion geteilt.',
     when: 'Wenn die Variable in einer Winkel- oder Hyperbelfunktion oder in einer Umkehrfunktion steckt.',
     examples: [
       task(div(add(a, sin(x)), sub(a, sin(x))), y, 'x', [{ lhs: x, rel: '<', rhs: div(PI, n(2)) }]),
