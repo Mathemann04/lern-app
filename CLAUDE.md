@@ -9,10 +9,13 @@ den Nutzer zugeschnitten: Maschinenbau, 1. Semester, THU, „Mathematik MB1".
 - Maßstab fürs Niveau: das Buch des Nutzers „Mathe für Ingenieure",
   Kapitel und ihre Themen in der App: [docs/LEHRBUCH.md](docs/LEHRBUCH.md)
 - Meilensteine und aktueller Stand: [docs/ROADMAP.md](docs/ROADMAP.md)
-- Plan für den laufenden Meilenstein: [docs/PLAN-M2b.md](docs/PLAN-M2b.md)
-  (Brüche nachschärfen: Abwechslung und Profi-Niveau). Pausiert nach Schritt 3: [docs/PLAN-M3.md](docs/PLAN-M3.md)
-  (Gleichungen umstellen). Abgeschlossen: [docs/PLAN-M1.md](docs/PLAN-M1.md),
-  [docs/PLAN-M2.md](docs/PLAN-M2.md)
+- Als Nächstes: [docs/PLAN-M3.md](docs/PLAN-M3.md) (Gleichungen umstellen,
+  pausiert nach Schritt 3); zuerst ein Plan für Baukasten und Abwechslung in
+  den Stufen 1 bis 3 wie bei den Brüchen (siehe „Und danach" in
+  [docs/PLAN-M2b.md](docs/PLAN-M2b.md)), dann M3 ab Schritt 4. Abgeschlossen:
+  [docs/PLAN-M1.md](docs/PLAN-M1.md), [docs/PLAN-M2.md](docs/PLAN-M2.md),
+  [docs/PLAN-M2b.md](docs/PLAN-M2b.md) (Brüche nachschärfen: Abwechslung und
+  Profi-Niveau)
 
 Vor jeder Arbeit ROADMAP und den laufenden Plan lesen.
 
@@ -62,7 +65,9 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   Übersicht wie die Startseite: Fach, Gebiete, Themen aus `GALLERY_COURSES`
   in `catalog.ts`, dazu die Schreibweise-Beispiele aus `samples.ts`, auch die
   für Stufe 5 von „Gleichungen umstellen"; je Thema eine Seite
-  `#/galerie/brueche` mit Stufen und Aufgaben). Startseite, Gebiet, Einstellungen,
+  `#/galerie/brueche` mit Stufen und Aufgaben und „Abwechslung je Stufe":
+  Formen der Aufgaben 1 bis 200 je Stufe, auf Knopfdruck in kleinen Portionen
+  gezählt). Startseite, Gebiet, Einstellungen,
   `routes.ts` und `catalog.ts` kommen ohne Mathe-Engine und KaTeX aus
   (Ladezeit); alle anderen Seiten lädt `App.tsx` erst bei Bedarf. Ob es
   eine Lernkarte oder einen typischen Fehler aus der Adresse gibt, prüfen
@@ -254,8 +259,9 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   - `random/rng.ts`: Zufall mit Startwert; `tasks/`: Aufgaben-Nummern
     („3-48213"), Vorlagen je Stufe (`derivativeTerms.ts`,
     `fractionTerms.ts`, `rearrangeTerms.ts`), `focus.ts` und `fractionFocus.ts` (Aufgaben für
-    gezieltes Üben; Brüche: seltene Fehler in ihrer Vorlage `focus`,
-    `likelyFractionTemplate`); Baukasten der Brüche `fractionKit.ts` (Stufen 1 und 2:
+    gezieltes Üben; Brüche: reihum durch die Stufen, je Runde zwölf Versuche,
+    seltene Fehler in ihrer Vorlage `focus`, `likelyFractionTemplate`;
+    `PracticePage.tsx` zeigt während der Suche einen Hinweis); Baukasten der Brüche `fractionKit.ts` (Stufen 1 und 2:
     Rechenbaum zufällig aus Teilen, Rechenarten und Bruchteilen, mit
     Filtern gegen zu einfache oder zu lange Aufgaben; Stufen 3 und 4: je
     Aufgabe eine „Welt" aus Klammern, `level3World`/`level4World`, daraus

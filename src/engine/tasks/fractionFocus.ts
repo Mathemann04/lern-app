@@ -9,11 +9,15 @@ import { type Level, MAX_SEED, type TaskRef } from './taskNumber.ts'
 // werden nur Nummern ausprobiert, die diese Vorlage wählen. Das Wählen ist schnell, nur das
 // Durchrechnen kostet Zeit.
 
-const TRIES_PER_LEVEL = 80
+// Versuche reihum in kleinen Portionen, zuerst die gewählte Stufe, dann die nächstgelegenen: Die
+// meisten Fehler finden sich in der ersten Runde. Kommt ein Fehler nur in einer anderen Stufe vor
+// oder ist er selten, geht so keine Zeit in Stufen verloren, in denen er gar nicht vorkommt.
+const TRIES_PER_ROUND = 12
+const TRIES_PER_LEVEL = 200
 const DRAWS_PER_TRY = 200
 
 export function findFractionTaskWithError(errorId: string, levels: readonly Level[], rng: Rng): TaskRef | null {
-  for (const level of levels) {
+  const searches = levels.map((level) => {
     const home = fractionTemplatesForLevel(level).filter((t) => t.focus?.includes(errorId))
     const nextRef = (): TaskRef => {
       for (let draw = 0; draw < DRAWS_PER_TRY; draw++) {
@@ -22,9 +26,14 @@ export function findFractionTaskWithError(errorId: string, levels: readonly Leve
       }
       return { level, seed: rng.int(1, MAX_SEED) }
     }
-    for (let i = 0; i < TRIES_PER_LEVEL; i++) {
-      const ref = nextRef()
-      if (planFractionTask(ref, errorId).steps.some((s) => s.choices.some((c) => c.errorRuleId === errorId))) return ref
+    return nextRef
+  })
+  for (let done = 0; done < TRIES_PER_LEVEL; done += TRIES_PER_ROUND) {
+    for (const nextRef of searches) {
+      for (let i = 0; i < TRIES_PER_ROUND; i++) {
+        const ref = nextRef()
+        if (planFractionTask(ref, errorId).steps.some((s) => s.choices.some((c) => c.errorRuleId === errorId))) return ref
+      }
     }
   }
   return null

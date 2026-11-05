@@ -1,6 +1,6 @@
 # Plan für M2b: Brüche nachschärfen
 
-Status: **freigegeben** (31.10.2026) mit deinen Änderungen:
+Status: **fertig** (05.11.2026); freigegeben am 31.10.2026 mit deinen Änderungen:
 - mindestens **100 Formen je Stufe** (statt 80)
 - Partialbruchzerlegung in Stufe 5, **dazu Themen aus späteren Kapiteln**
   deines Buchs, in denen Brüche vorkommen (Schritt 5)
@@ -404,6 +404,18 @@ Lernkarte „Hyperbelfunktionen".
   üben.
 - Die Formel-Galerie zeigt je Stufe, wie viele Formen es gibt.
 - Design-Durchgang, Offline-Test, Doku, M2b abhaken.
+
+**Umgesetzt:** Jeder typische Fehler der Brüche lässt sich gezielt üben (ein
+Test prüft alle, nicht nur die häufigen). Die Suche nach einer passenden
+Aufgabe geht reihum durch die Stufen, je Runde zwölf Versuche, zuerst die
+gewählte Stufe: im Mittel etwa 0,3 Sekunden, höchstens gut 3 Sekunden; bis
+dahin steht „Suche eine Aufgabe, in der dieser Fehler passieren kann …" da.
+„Quadrat vergessen" sucht in Stufe 5 gleich bei den Winkel- und
+Hyperbelfunktionen. Die Formel-Galerie zählt je Thema auf Knopfdruck die
+Formen der Aufgaben 1 bis 200 jeder Stufe („Abwechslung je Stufe"); bei den
+Brüchen: Stufe 1 158, Stufe 2 196, Stufe 3 188, Stufe 4 189, Stufe 5 161
+Formen, die häufigste Form höchstens 2,5 %. Beschreibung des Themas
+„Brüche" angepasst.
 
 ### Und danach
 

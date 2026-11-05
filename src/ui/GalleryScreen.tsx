@@ -1,4 +1,4 @@
-import { type FormEvent, useMemo, useState } from 'react'
+import { type FormEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { derive } from '../engine/derive/derive.ts'
 import { wrongAnswers } from '../engine/derive/errorRules.ts'
 import { deriveImplicit, implicitResult, implicitWrongAnswers } from '../engine/derive/implicit.ts'
@@ -6,6 +6,8 @@ import { equationToLatex, toLatex } from '../engine/expr/print.ts'
 import { type GeneratedTask, generateDerivativeTask } from '../engine/tasks/derivativeTerms.ts'
 import { type GeneratedFractionTask, generateFractionTask, isFractionLevelAvailable } from '../engine/tasks/fractionTerms.ts'
 import { type GeneratedRearrangeTask, generateRearrangeTask, isRearrangeLevelAvailable } from '../engine/tasks/rearrangeTerms.ts'
+import { derivativeForm, fractionForm, rearrangeForm } from '../engine/tasks/forms.ts'
+import { varietyStats } from '../engine/tasks/variety.ts'
 import {
   LEVELS,
   type Level,
@@ -33,13 +35,14 @@ type Generated =
   | { topic: 'brueche'; task: GeneratedFractionTask }
   | { topic: 'umstellen'; task: GeneratedRearrangeTask }
 
-// Themen der Testseite: welche Stufen es schon gibt und wie eine Aufgabe entsteht
-type GalleryTopic = { isLevelAvailable(level: Level): boolean; generate(ref: TaskRef): Generated }
+// Themen der Testseite: welche Stufen es schon gibt, wie eine Aufgabe entsteht und ihre Form
+// (für die Abwechslung, tasks/forms.ts)
+type GalleryTopic = { isLevelAvailable(level: Level): boolean; generate(ref: TaskRef): Generated; form(ref: TaskRef): string }
 
 const TOPICS: Record<string, GalleryTopic> = {
-  [DERIVATIVES]: { isLevelAvailable: () => true, generate: (ref) => ({ topic: 'ableiten', task: generateDerivativeTask(ref) }) },
-  [FRACTIONS]: { isLevelAvailable: isFractionLevelAvailable, generate: (ref) => ({ topic: 'brueche', task: generateFractionTask(ref) }) },
-  [REARRANGE]: { isLevelAvailable: isRearrangeLevelAvailable, generate: (ref) => ({ topic: 'umstellen', task: generateRearrangeTask(ref) }) },
+  [DERIVATIVES]: { isLevelAvailable: () => true, generate: (ref) => ({ topic: 'ableiten', task: generateDerivativeTask(ref) }), form: derivativeForm },
+  [FRACTIONS]: { isLevelAvailable: isFractionLevelAvailable, generate: (ref) => ({ topic: 'brueche', task: generateFractionTask(ref) }), form: fractionForm },
+  [REARRANGE]: { isLevelAvailable: isRearrangeLevelAvailable, generate: (ref) => ({ topic: 'umstellen', task: generateRearrangeTask(ref) }), form: rearrangeForm },
 }
 
 // Testseite: Übersicht wie die Startseite (Fächer, Gebiete, Themen), je Thema eine eigene Seite mit
@@ -266,6 +269,8 @@ function TopicGallery({ id }: { id: string }) {
         </form>
       </section>
 
+      <VarietyTable key={id} topic={topic} />
+
       <div className="space-y-8">
         {lookedUp && (
           <section aria-label="Aufgerufene Aufgabe">
@@ -280,6 +285,91 @@ function TopicGallery({ id }: { id: string }) {
         </section>
       </div>
     </main>
+  )
+}
+
+// Abwechslung je Stufe: verschiedene Formen unter den Aufgaben 1 bis 200, wie im Test (Ziel aus
+// docs/PLAN-M2b.md: mindestens 100 Formen, keine öfter als in 3 von 100 Aufgaben). Gezählt wird erst
+// auf Knopfdruck und in kleinen Portionen, damit die Seite bedienbar bleibt.
+const VARIETY_TASKS = 200
+const VARIETY_MIN_FORMS = 100
+const VARIETY_MAX_SHARE = 0.03
+
+type VarietyRow = { readonly level: Level; readonly distinct: number | null; readonly maxShare: number | null }
+
+function VarietyTable({ topic }: { topic: GalleryTopic }) {
+  const levels = LEVELS.filter((l) => topic.isLevelAvailable(l))
+  const [rows, setRows] = useState<VarietyRow[] | null>(null)
+  const [counted, setCounted] = useState(0)
+  const run = useRef(0)
+  // beim Verlassen der Seite nicht weiterzählen (beim Wechsel des Themas kommt eine neue Tabelle, key)
+  useEffect(() => () => void (run.current += 1), [])
+
+  async function count() {
+    const id = ++run.current
+    const result: VarietyRow[] = levels.map((level) => ({ level, distinct: null, maxShare: null }))
+    setRows([...result])
+    for (const [i, level] of levels.entries()) {
+      const forms: string[] = []
+      for (let seed = 1; seed <= VARIETY_TASKS; seed++) {
+        forms.push(topic.form({ level, seed }))
+        if (seed % 10 === 0) {
+          setCounted(i * VARIETY_TASKS + seed)
+          await new Promise((resolve) => setTimeout(resolve, 0))
+          if (run.current !== id) return
+        }
+      }
+      const stats = varietyStats(forms)
+      result[i] = { level, distinct: stats.distinct, maxShare: stats.maxShare }
+      setRows([...result])
+    }
+  }
+
+  const busy = rows !== null && rows.some((r) => r.distinct === null)
+  const percent = (share: number) => `${Math.round(share * 1000) / 10} %`.replace('.', ',')
+  return (
+    <section aria-labelledby="variety" className="space-y-3">
+      <h2 id="variety" className="text-xl font-semibold">
+        Abwechslung je Stufe
+      </h2>
+      <p className="text-zinc-600 text-pretty">
+        Wie viele verschiedene Formen haben die Aufgaben 1 bis {VARIETY_TASKS} einer Stufe? Ziel: mindestens {VARIETY_MIN_FORMS}, und keine Form
+        kommt öfter als in 3 von 100 Aufgaben vor.
+      </p>
+      {rows === null || !busy ? (
+        <button type="button" onClick={count} className="min-h-11 rounded-xl border border-zinc-300 px-4 py-2.5 font-medium hover:bg-zinc-50">
+          {rows === null ? 'Formen zählen' : 'Neu zählen'}
+        </button>
+      ) : (
+        <p className="text-sm text-zinc-500" aria-live="polite">
+          Zähle … {counted} von {levels.length * VARIETY_TASKS} Aufgaben
+        </p>
+      )}
+      {rows && (
+        <table className="w-full text-left">
+          <thead className="text-sm text-zinc-500">
+            <tr>
+              <th className="py-1 pr-3 font-medium">Stufe</th>
+              <th className="py-1 pr-3 font-medium">Formen</th>
+              <th className="py-1 font-medium">häufigste Form</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={r.level} className="border-t border-zinc-100">
+                <td className="py-2 pr-3">{r.level}</td>
+                <td className={`py-2 pr-3 ${r.distinct !== null && r.distinct < VARIETY_MIN_FORMS ? 'text-red-700' : ''}`}>
+                  {r.distinct === null ? '…' : `${r.distinct} ${r.distinct >= VARIETY_MIN_FORMS ? '✓' : '✗'}`}
+                </td>
+                <td className={`py-2 ${r.maxShare !== null && r.maxShare > VARIETY_MAX_SHARE ? 'text-red-700' : ''}`}>
+                  {r.maxShare === null ? '…' : `${percent(r.maxShare)} ${r.maxShare <= VARIETY_MAX_SHARE ? '✓' : '✗'}`}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </section>
   )
 }
 

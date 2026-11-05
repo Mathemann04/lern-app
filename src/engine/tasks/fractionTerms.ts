@@ -166,6 +166,7 @@ const level5Trig: FractionTemplate = {
   level: 5,
   weight: 0.7,
   label: 'Winkelfunktionen: $\\sin^2 x + \\cos^2 x = 1$',
+  focus: ['frac-square-forgotten'],
   build(rng) {
     const b = rng.pick(['S', 'C'] as const)
     const other = b === 'S' ? 'C' : 'S'
@@ -345,7 +346,7 @@ const level5Hyperbolic: FractionTemplate = {
   level: 5,
   share: 0.06,
   label: 'Hyperbelfunktionen: $\\cosh^2 x - \\sinh^2 x = 1$, $\\frac{1}{\\cosh x - \\sinh x}$ mit dem Gegenstück erweitern',
-  focus: ['frac-hyp-trig-sign', 'frac-hyp-swapped'],
+  focus: ['frac-hyp-trig-sign', 'frac-hyp-swapped', 'frac-square-forgotten'],
   build: hyperbolicTask,
 }
 

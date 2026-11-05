@@ -144,6 +144,24 @@ test('Galerie zeigt Bruchaufgaben der Stufen 1 bis 5 mit Rechenweg und typischen
   expect(errors).toEqual([])
 })
 
+test('Galerie zählt die Formen je Stufe der Brüche: mindestens 100, keine öfter als in 3 von 100', async ({ page }) => {
+  test.setTimeout(120_000)
+  const errors = collectErrors(page)
+  await page.goto('./#/galerie/brueche')
+  await page.getByRole('button', { name: 'Formen zählen' }).click()
+  await expect(page.getByText(/Zähle … \d+ von 1000 Aufgaben/)).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Neu zählen' })).toBeVisible({ timeout: 100_000 })
+  const rows = page.getByRole('table').getByRole('row')
+  await expect(rows).toHaveCount(6)
+  for (let level = 1; level <= 5; level++) {
+    const cells = rows.nth(level).getByRole('cell')
+    await expect(cells.nth(0)).toHaveText(String(level))
+    await expect(cells.nth(1)).toContainText('✓')
+    await expect(cells.nth(2)).toContainText('✓')
+  }
+  expect(errors).toEqual([])
+})
+
 test('Galerie zeigt Umstell-Aufgaben der Stufen 1 bis 3 mit Rechenweg und typischen Fehlern', async ({ page }) => {
   const errors = collectErrors(page)
   await page.goto('./#/galerie')

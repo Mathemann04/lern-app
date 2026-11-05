@@ -6,8 +6,8 @@ Stand: 05.11.2026
 | --- | --- | --- |
 | M1 | Grundgerüst + Ableitungsregeln (beide Modi, 5 Stufen, Erklärungen, Lernkarten, Fortschritt) | fertig |
 | M2 | Brüche (Bruchrechnung, Bruchterme kürzen und zusammenfassen, Doppelbrüche); App für mehrere Themen | fertig |
-| M2b | Brüche nachschärfen: viel mehr Abwechslung (Baukasten statt fester Vorlagen, keine Form doppelt), deutlich schwerer, Stufe 5 auf Profi-Niveau mit Partialbruchzerlegung und Brüchen aus späteren Kapiteln (komplexe Zahlen, Grenzwerte, Teleskopsummen, Hyperbelfunktionen) | in Arbeit |
-| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | pausiert nach Schritt 3, weiter nach M2b |
+| M2b | Brüche nachschärfen: viel mehr Abwechslung (Baukasten statt fester Vorlagen, keine Form doppelt), deutlich schwerer, Stufe 5 auf Profi-Niveau mit Partialbruchzerlegung und Brüchen aus späteren Kapiteln (komplexe Zahlen, Grenzwerte, Teleskopsummen, Hyperbelfunktionen) | fertig |
+| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | pausiert nach Schritt 3, als Nächstes: erst Baukasten und Abwechslung für die Stufen 1 bis 3 (Plan folgt) |
 | M4 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
 | M5 | weitere Themen aus Mathematik MB1 | offen |
 | M6 | Physik: Formeln mit Einheiten (Formeln umstellen mit Zeichen der Physik; Aufgaben lösen: Formel wählen, umstellen, Werte mit Einheiten einsetzen) | offen |
@@ -54,11 +54,11 @@ Details: [PLAN-M2b.md](PLAN-M2b.md)
   - [x] 5b. Grenzwerte von Brüchen
   - [x] 5c. Teleskopsummen
   - [x] 5d. Hyperbelfunktionen
-- [ ] 6. Gezieltes Üben, Feinschliff, Abschluss
+- [x] 6. Gezieltes Üben, Feinschliff, Abschluss
 
 ## M3: Schritte
 
-Details: [PLAN-M3.md](PLAN-M3.md) (pausiert nach Schritt 3, weiter nach M2b)
+Details: [PLAN-M3.md](PLAN-M3.md) (pausiert nach Schritt 3; als Nächstes erst Baukasten und Abwechslung für die Stufen 1 bis 3, Plan folgt)
 
 - [x] Plan M3 (3. Fassung, freigegeben)
 - [x] 1. Mathe-Engine fürs Umstellen
@@ -426,3 +426,12 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   typische Fehler, Lernkarte „Hyperbelfunktionen". Etwa 6 % der übrigen
   Nummern der Stufe 5 zeigen jetzt Hyperbelfunktionen (die Nummern in den
   Browser-Tests sind gleich geblieben).
+- 05.11.2026: M2b fertig (Schritt 6): Jeder typische Fehler der Brüche lässt
+  sich gezielt üben, von der Lernkarte und vom Fortschritt aus (Test für alle
+  Fehler). Die Suche nach einer passenden Aufgabe geht reihum durch die
+  Stufen und ist im Mittel etwa 0,3 Sekunden schnell; solange steht ein
+  Hinweis da. Die Formel-Galerie zählt je Thema die Formen jeder Stufe
+  („Abwechslung je Stufe"); Brüche: 158 bis 196 Formen je Stufe unter 200
+  Aufgaben, keine öfter als in 2,5 %. Design-Durchgang am Handy und Laptop,
+  hell und dunkel. Als Nächstes: Plan für Baukasten und Abwechslung bei
+  „Gleichungen umstellen" (Stufen 1 bis 3), danach M3 ab Schritt 4.
