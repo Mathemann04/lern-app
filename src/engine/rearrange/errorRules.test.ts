@@ -33,6 +33,7 @@ const CATALOG: Array<{ id: string; lhs: string; rhs: string; target?: string; af
   { id: 'eq-multiply-one-term', lhs: '\\frac{x}{a}', rhs: 'c-b', after: 'x = ac - b' },
   { id: 'eq-minus-bracket', lhs: 'a-c(x-d)', rhs: 'x', after: 'a - cx - cd = x' },
   { id: 'eq-factor-sign', lhs: 'ax-bx', rhs: 'c', after: 'x(a + b) = c' },
+  { id: 'eq-square-halved', lhs: 'x^2', rhs: 'c', after: 'x = \\frac{c}{2}' },
 ]
 
 describe('Katalog der Fehlerregeln', () => {
@@ -63,6 +64,12 @@ describe('Katalog der Fehlerregeln', () => {
   it('Fehler beim Zusammenfassen kommen aus „Brüche"', () => {
     const ids = wrongs('y', '\\frac{3(x-a)}{b}+c').map((w) => w.rule.id)
     expect(ids).toContain('frac-whole-not-expanded')
+  })
+
+  it('zwei Wurzeln: beim zweiten Quadrieren das Mittelglied vergessen, Wurzel ohne Vorzeichenwechsel sortiert', () => {
+    const found = wrongs('\\sqrt{x+a}+\\sqrt{x-a}', 'y')
+    expect(found.filter((w) => w.rule.id === 'eq-square-middle').map((w) => equationToLatex(w.after))).toContain('x + a = y^{2} + x - a')
+    expect(found.some((w) => w.rule.id === 'eq-sign-not-flipped' && w.stepIndex === 3)).toBe(true)
   })
 
   it('keine falsche Antwort, die doch stimmt oder keine Lösung hat', () => {

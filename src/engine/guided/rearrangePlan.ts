@@ -3,8 +3,11 @@ import { explainFractionError } from '../explain/fractionTexts.ts'
 import { REARRANGE_CARD_IDS } from '../explain/rearrangeCards.ts'
 import {
   COMBINE_BEFORE_MULTIPLY_MOVES,
+  COMBINE_BEFORE_ROOT_MOVES,
+  COMBINE_BEFORE_SQUARE_MOVES,
   COMBINE_MOVES,
   EXPAND_MOVES,
+  EXTEND_MOVES,
   REARRANGE_HINTS,
   ROOT_MOVES,
   SQUARE_MOVES,
@@ -102,7 +105,7 @@ export function planRearrange(task: RearrangeTask, ref: TaskRef, focus?: string)
     steps,
     ruleHint: rearrangeTaskHint(t, solution.steps.some((s) => s.kind === 'collect' || s.kind === 'expand')),
     result,
-    resultLatex: `${t} = ${toLatex(result)}`,
+    resultLatex: readableLatex(`${t} = ${toLatex(result)}`),
     ...resultNote(result),
     cards: [...new Set(steps.flatMap((s) => s.cards))],
   }
@@ -115,6 +118,7 @@ function isJunction(step: RearrangeStep, t: string): boolean {
     case 'collect':
     case 'factor':
     case 'combine':
+    case 'extend':
     case 'square':
       return true
     case 'multiply':
@@ -125,13 +129,31 @@ function isJunction(step: RearrangeStep, t: string): boolean {
 }
 
 // Die Unbekannte als LaTeX: √x, wenn sie in der Gleichung vorkommt (dann wird √x sortiert und
-// ausgeklammert, wie in stepLabel), sonst x
-const unknownOf = (step: RearrangeStep, t: string) => (hasTargetRoot(step.after, t) ? `\\sqrt{${t}}` : t)
+// ausgeklammert, wie in stepLabel), beim Sortieren mit einer Wurzel wie √(x − a) diese Wurzel, sonst x
+const unknownOf = (step: RearrangeStep, t: string) =>
+  (step.kind === 'collect' || step.kind === 'factor') && step.operand ? toLatex(step.operand) : hasTargetRoot(step.after, t) ? `\\sqrt{${t}}` : t
 
 // Zusammenfassen vor dem Kehrwert (\frac{1}{x} = …) oder vor dem Malnehmen mit dem Nenner (\frac{b}{x - a} = …)
 function combinesBeforeReciprocal(step: RearrangeStep): boolean {
   const s = step.side ? step.before[step.side] : null
   return s !== null && s.kind === 'div' && s.num.kind === 'num' && ratSign(s.num.value) > 0 && s.num.value.n === s.num.value.d
+}
+
+// Wozu wird zusammengefasst? Vor dem Kehrwert, dem Malnehmen mit dem Nenner, dem Wurzelziehen oder dem Quadrieren
+type CombineContext = 'reciprocal' | 'multiply' | 'root' | 'square'
+
+function combineContext(step: RearrangeStep): CombineContext {
+  const s = step.side ? step.before[step.side] : null
+  if (s?.kind === 'pow') return 'root'
+  if (s?.kind === 'root') return 'square'
+  return combinesBeforeReciprocal(step) ? 'reciprocal' : 'multiply'
+}
+
+const COMBINE_EXPLANATION: Record<CombineContext, string> = {
+  reciprocal: 'combine',
+  multiply: 'combine-multiply',
+  root: 'combine-root',
+  square: 'combine-square',
 }
 
 // Nenner, der beim Malnehmen beseitigt wird (beim Schälen)
@@ -193,11 +215,20 @@ function moveQuestion(step: RearrangeStep, t: string): MoveQuestion | null {
       return side ? { question: `Wie holst du $${t}$ aus dem Nenner?`, wrong: reciprocalMoves(t, side), hint: REARRANGE_HINTS.reciprocal } : null
     case 'combine':
       if (!side) return null
-      return combinesBeforeReciprocal(step)
-        ? { question: `Bevor du den Kehrwert nimmst: Was machst du mit der ${sideName(other(side))} Seite?`, wrong: COMBINE_MOVES, hint: REARRANGE_HINTS.combine }
-        : { question: `Bevor du mit dem Nenner malnimmst: Was machst du mit der ${sideName(other(side))} Seite?`, wrong: COMBINE_BEFORE_MULTIPLY_MOVES, hint: REARRANGE_HINTS.combineBeforeMultiply }
+      switch (combineContext(step)) {
+        case 'reciprocal':
+          return { question: `Bevor du den Kehrwert nimmst: Was machst du mit der ${sideName(other(side))} Seite?`, wrong: COMBINE_MOVES, hint: REARRANGE_HINTS.combine }
+        case 'multiply':
+          return { question: `Bevor du mit dem Nenner malnimmst: Was machst du mit der ${sideName(other(side))} Seite?`, wrong: COMBINE_BEFORE_MULTIPLY_MOVES, hint: REARRANGE_HINTS.combineBeforeMultiply }
+        case 'root':
+          return { question: `Bevor du die Wurzel ziehst: Was machst du mit der ${sideName(other(side))} Seite?`, wrong: COMBINE_BEFORE_ROOT_MOVES, hint: REARRANGE_HINTS.combineBeforeRoot }
+        case 'square':
+          return { question: `Bevor du quadrierst: Was machst du mit der ${sideName(other(side))} Seite?`, wrong: COMBINE_BEFORE_SQUARE_MOVES, hint: REARRANGE_HINTS.combineBeforeSquare }
+      }
     case 'expand':
       return { question: 'Was machst du mit den Klammern?', wrong: EXPAND_MOVES, hint: REARRANGE_HINTS.expand }
+    case 'extend':
+      return { question: 'Wie wirst du die Brüche im Bruch los?', wrong: EXTEND_MOVES, hint: REARRANGE_HINTS.extend }
     case 'collect': {
       const u = unknownOf(step, t)
       const question = u === t ? `$${t}$ steht in mehreren Summanden. Was machst du zuerst?` : `Wie bekommst du den Summanden mit $${u}$ allein auf eine Seite?`
@@ -228,7 +259,7 @@ function moveStep(step: RearrangeStep, previous: RearrangeStep | undefined, q: M
     question: q.question,
     choices: rng.shuffle([correct, ...wrong]),
     hint: q.hint,
-    explanation: explainMove(step.kind === 'combine' && !combinesBeforeReciprocal(step) ? 'combine-multiply' : step.kind, label, t, unknownOf(step, t)),
+    explanation: explainMove(step.kind === 'combine' ? COMBINE_EXPLANATION[combineContext(step)] : step.kind, label, t, unknownOf(step, t)),
     established,
     cards: cardsOf(step, t, previous),
   }
@@ -293,6 +324,7 @@ const CARDS_BY_KIND: Record<StepKind, readonly string[]> = {
   negate: [REARRANGE_CARD_IDS.inverse],
   reciprocal: [REARRANGE_CARD_IDS.reciprocal],
   combine: [REARRANGE_CARD_IDS.reciprocal, FRACTION_CARD_IDS.add],
+  extend: [FRACTION_CARD_IDS.complex],
   expand: [REARRANGE_CARD_IDS.collect],
   collect: [REARRANGE_CARD_IDS.collect],
   factor: [REARRANGE_CARD_IDS.collect],
@@ -310,7 +342,11 @@ function cardsOf(step: RearrangeStep, t: string, previous: RearrangeStep | undef
     if (contains(den, t)) return [REARRANGE_CARD_IDS.denominator]
   }
   if ((step.kind === 'divide' || step.kind === 'negate') && (previous?.kind === 'factor' || previous?.kind === 'collect')) return [REARRANGE_CARD_IDS.collect]
-  if (step.kind === 'combine' && !combinesBeforeReciprocal(step)) return [REARRANGE_CARD_IDS.denominator, FRACTION_CARD_IDS.add]
+  if (step.kind === 'combine') {
+    const context = combineContext(step)
+    if (context === 'multiply') return [REARRANGE_CARD_IDS.denominator, FRACTION_CARD_IDS.add]
+    if (context !== 'reciprocal') return [REARRANGE_CARD_IDS.root, FRACTION_CARD_IDS.add]
+  }
   return [...CARDS_BY_KIND[step.kind]]
 }
 

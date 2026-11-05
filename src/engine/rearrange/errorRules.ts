@@ -1,7 +1,7 @@
 import { contains, key, subterms } from '../expr/compare.ts'
 import { evaluate } from '../expr/evaluate.ts'
 import { equationToLatex } from '../expr/print.ts'
-import { type Equation, type Expr, add, div, eq, mul, variable } from '../expr/types.ts'
+import { type Equation, type Expr, add, div, eq, mul, num, pow, variable } from '../expr/types.ts'
 import { FRACTION_ERROR_RULES, fractionWrongAnswers } from '../fraction/errorRules.ts'
 import { type Signed, expanded, minus, part, plus } from '../fraction/task.ts'
 import {
@@ -15,12 +15,13 @@ import {
 } from '../fraction/poly.ts'
 import { createRng } from '../random/rng.ts'
 import { isOne, rat, ratAbs, ratSign } from '../rational.ts'
-import { type Atoms, ROOT_ATOM, monomialSqrt, newAtoms, niceFrac, polyToExpr, toPoly, toRat } from './algebra.ts'
+import { type Atoms, RADICAL_ATOM, ROOT_ATOM, monomialSqrt, newAtoms, niceFrac, polyToExpr, radicalAtoms, toPoly, toRat } from './algebra.ts'
 import { clearlyFails, differsFromTarget, samplePoints } from './check.ts'
 import {
   type RearrangeSolution,
   type RearrangeStep,
   type Side,
+  complexRoot,
   dividedBy,
   hasTargetRoot,
   negated,
@@ -59,6 +60,7 @@ export const REARRANGE_ERROR_RULES: readonly EqErrorRule[] = [
   { id: 'eq-multiply-one-term', name: 'Beim Malnehmen nicht jeden Summanden malgenommen', wrongFormula: '\\frac{x}{a} = c - b \\Rightarrow x = ac - b' },
   { id: 'eq-minus-bracket', name: 'Minus vor der Klammer nur beim ersten Summanden beachtet', wrongFormula: 'a - c(x - d) = a - cx - cd' },
   { id: 'eq-factor-sign', name: 'Beim Ausklammern das Minus verloren', wrongFormula: 'ax - bx = c \\Rightarrow x(a + b) = c' },
+  { id: 'eq-square-halved', name: 'Beim Quadrat halbiert statt die Wurzel gezogen', wrongFormula: 'x^2 = c \\Rightarrow x = \\frac{c}{2}' },
 ]
 
 export function rearrangeErrorRule(id: string): EqErrorRule {
@@ -112,6 +114,12 @@ function unknownOf(e: Equation, t: string): { atoms: Atoms; u: string } {
   return { atoms: newAtoms(t, rootUnknown), u: rootUnknown ? ROOT_ATOM : t }
 }
 
+// Mit einer Wurzel wie √(x − a) als eigenem Zeichen (zwei Wurzeln: nach dem ersten Quadrieren)
+function radicalOf(e: Equation, t: string): Atoms | null {
+  const r = complexRoot(e, t)
+  return r && radicalAtoms(t, r)
+}
+
 // --- Fehler je Schritt ---
 
 function signNotFlipped(step: RearrangeStep, t: string): Candidate[] {
@@ -129,7 +137,8 @@ function signNotFlipped(step: RearrangeStep, t: string): Candidate[] {
   }
   if (step.kind === 'collect') {
     // Summanden, die die Seite wechseln, behalten ihr Vorzeichen
-    const { atoms, u } = unknownOf(before, t)
+    const radical = step.operand ? radicalOf(before, t) : null
+    const { atoms, u } = radical ? { atoms: radical, u: RADICAL_ATOM } : unknownOf(before, t)
     const p = polys(before, atoms)
     if (!p) return []
     const not = (term: Poly[number]) => !hasAtom(u)(term)
@@ -224,7 +233,7 @@ function minusBracketParts(term: Expr, atoms: Atoms): { first: Poly; rest: Poly 
 // Klammern ausmultiplizieren: nur den ersten Summanden malgenommen, Mittelglied vergessen
 function expandMistakes(step: RearrangeStep, t: string): Candidate[] {
   if (step.kind !== 'expand') return []
-  const { atoms } = unknownOf(step.before, t)
+  const atoms = radicalOf(step.before, t) ?? unknownOf(step.before, t).atoms
   const out: Candidate[] = []
   for (const side of ['lhs', 'rhs'] as const) {
     const terms = termsOf(step.before[side])
@@ -255,9 +264,11 @@ function expandMistakes(step: RearrangeStep, t: string): Candidate[] {
         }
       }
       if (term.kind === 'pow' && term.base.kind === 'add' && term.base.terms.length === 2 && key(term.exp) === key({ kind: 'num', value: rat(2) })) {
-        const [a, b] = term.base.terms.map((x) => toPoly(x, atoms))
-        if (a && b) {
-          wrong = polyAdd(polyMul(a, a), polyMul(b, b))
+        // (y - \sqrt{x - a})^2 = y^2 + x - a: über toPoly, damit (\sqrt{x - a})^2 zu x - a wird
+        const [a, b] = term.base.terms
+        const squares = toPoly(add(pow(a, num(2)), pow(b, num(2))), atoms)
+        if (squares) {
+          wrong = squares
           id = 'eq-square-middle'
         }
       }
@@ -326,6 +337,14 @@ function rootTermwise(step: RearrangeStep, t: string): Candidate[] {
   return [{ id: 'eq-root-termwise', after: withSide(step.after, other(step.side), sum(roots as Expr[])) }]
 }
 
+// x^2 = c → x = \frac{c}{2}: halbiert statt die Wurzel gezogen
+function squareHalved(step: RearrangeStep): Candidate[] {
+  const k = step.operand
+  if (step.kind !== 'root' || !step.side || k?.kind !== 'num' || k.value.n !== 2n || k.value.d !== 1n) return []
+  const o = step.before[other(step.side)]
+  return [{ id: 'eq-square-halved', after: withSide(step.after, other(step.side), dividedBy(o, num(2))) }]
+}
+
 function squareOneFactor(step: RearrangeStep, t: string): Candidate[] {
   if (step.kind !== 'square' || !step.side) return []
   const o = step.before[other(step.side)]
@@ -378,6 +397,7 @@ function candidatesFor(steps: readonly RearrangeStep[], i: number, t: string): C
     ...factorSign(step, t),
     ...reciprocalTermwise(step, steps[i - 1]),
     ...rootTermwise(step, t),
+    ...squareHalved(step),
     ...squareOneFactor(step, t),
     ...fractionMistakes(step, t),
   ]

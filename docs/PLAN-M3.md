@@ -419,7 +419,7 @@ Aufgabe: Löse $\int_a^x \frac{\mathrm{d}t}{t(t + b)} = y$ nach $x$ auf
 | Malnehmen | nicht jeden Summanden malgenommen (neu in der 4. Fassung, `eq-multiply-one-term`) | $\frac{x}{a} = c - b \Rightarrow x = ac - b$, auch $\frac{x + a}{2} - \frac{x - b}{3} = c \Rightarrow 3(x + a) - 2(x - b) = c$ |
 | Minus vor der Klammer | Vorzeichen nur beim ersten Summanden gewechselt (neu in der 4. Fassung, `eq-minus-bracket`) | $a - c(x - d) = a - cx - cd$ |
 | Ausklammern | das Minus verloren (neu in der 4. Fassung, `eq-factor-sign`) | $ax - bx = c \Rightarrow x(a + b) = c$ |
-| Quadrat | halbiert statt die Wurzel gezogen (neu in der 4. Fassung) | $x^2 = c \Rightarrow x = \frac{c}{2}$ |
+| Quadrat | halbiert statt die Wurzel gezogen (neu in der 4. Fassung, `eq-square-halved`) | $x^2 = c \Rightarrow x = \frac{c}{2}$ |
 
 **e-Funktion, $\ln$, Potenzen, Winkelfunktionen (ab Stufe 4)**
 
@@ -564,6 +564,41 @@ linke Seite …" und Summen stehen in Klammern („mal $(b - 2)$").
 **Ausprobieren:** $a\left(\frac{x}{b} - 1\right)^2 = y$ geführt, dann zehn
 Aufgaben der Stufe 3 frei.
 
+**Umgesetzt:** Stufe 3 kommt aus dem Baukasten (`buildLevel3` in
+`tasks/rearrangeKit.ts`) mit zwölf Arten von Kernen, jede mit eigenen
+Varianten, Schalen und anderen Seiten: $x$ in Zähler und Nenner (mit ein bis
+zwei Schalen), Bruch gleich Bruch (auch mit $x$ oben, dann hebt sich $x^2$
+weg), Brüche mit verschiedenen Nennern ($x - b$, $x + b$, $x^2 - b^2$, auch
+$\frac{x + c}{x - b} - 1$), Klammern und Quadrate, bei denen sich $x^2$
+weghebt (mit einem Nenner), Kehrwerte (zwei oder drei, mit Klammer im Nenner,
+nach jedem Buchstaben), Wurzel aus einem Bruch mit Schalen, $x^2$ unter der
+Wurzel mit Schalen, zwei Wurzeln (Summe, Differenz, Wurzel gegen Wurzel, auch
+mit Faktor), $\sqrt{x}$ in Zähler und Nenner, Klammer im Quadrat mit
+Bedingung ($x > b$, $x < b$, $x > \frac{b}{2}$), Bruch im Quadrat
+$\left(\frac{x + a}{x - b}\right)^2$ und Doppelbrüche (Variable im inneren
+Bruch, Bruch im Zähler, Brüche oben und unten). Gemessen unter den Aufgaben 1
+bis 200: 189 Formen (vorher 26), keine öfter als in 2 von 100, im Mittel 6,2
+Umformungen (vorher 4,6), jede mindestens 5. Der Filter prüft jetzt auch die
+Aufgabe selbst an den Prüfstellen; Doppelbrüche gibt es erst ab Stufe 3.
+
+Die Engine kann dazu: zwei verschiedene Wurzeln (die zweite Wurzel wird nach
+dem ersten Quadrieren wie ein Buchstabe behandelt, ausmultipliziert, allein
+gestellt, ausgeklammert und noch einmal quadriert), Doppelbrüche mit Brüchen
+im Nenner erweitern (neuer Schritt „Den Doppelbruch mit $x$ erweitern"), vor
+dem Wurzelziehen und Quadrieren die andere Seite zu einem Bruch
+zusammenfassen, Klammern beim Malnehmen so, wie sie in der Aufgabe stehen
+($\sqrt{x} - b$ statt $b - \sqrt{x}$), Endform
+$\left(\frac{by + a}{y - 1}\right)^2$. Im freien Modus zählt eine Wurzel aus
+einem Bruch wie ein Buchstabe ($b + \sqrt{\frac{y}{a}}$ ist fertig).
+
+Neuer typischer Fehler `eq-square-halved` (halbiert statt die Wurzel
+gezogen), mit Text und auf der Lernkarte „Wurzel und Quadrat"; die Karte
+zeigt jetzt auch $(x - b)^2 = A$ mit Bedingung und zwei Wurzeln. Der Fehler
+„Mittelglied vergessen" und das Sortieren ohne Vorzeichenwechsel gibt es auch
+beim zweiten Quadrieren. Die alten Aufgaben-Nummern der Stufe 3 zeigen andere
+Aufgaben; in Stufe 2 ändern sich einige Nummern, weil Doppelbrüche dort jetzt
+ausdrücklich ausgeschlossen sind.
+
 #### Schritt 6: Stufe 4 (verschachtelt), in drei Teilen
 Gleich mit dem Baukasten gebaut, Kerne ineinander in beide Richtungen (siehe
 „Stufe 4 neu"), im Mittel mindestens 7 Umformungen. Stufe 4 wird nach Teil
@@ -672,7 +707,8 @@ Pro Sitzung schaffen wir etwa ein bis zwei Schritte.
 - **Andere Seite und Gesucht** zufällig; Buchstaben aus einem Vorrat (alle
   Kleinbuchstaben außer $e$ und $i$), höchstens sieben je Aufgabe.
 - **Filter:** lösbar mit der Engine, das Ergebnis ohne die gesuchte
-  Variable, an mindestens acht erlaubten Stellen prüfbar, Ergebnis
+  Variable, an mindestens acht erlaubten Stellen prüfbar (dort erfüllt die
+  Lösung auch die Aufgabe), Ergebnis
   höchstens 90 Zeichen LaTeX, Aufgabe am Handy nicht zu breit (`FitWidth`
   nicht unter 70 %), nicht zu leicht (Stufe 1: mindestens zwei Umformungen;
   Stufe 2: Variable mehrfach oder im Nenner), keine Gleichung, die für

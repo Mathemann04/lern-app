@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { contains, subterms } from '../expr/compare.ts'
 import { solveEquation } from '../rearrange/isolate.ts'
+import { taskLatex } from '../rearrange/task.ts'
 import { createRng } from '../random/rng.ts'
 import { rearrangeForm } from './forms.ts'
 import { generateRearrangeTask } from './rearrangeTerms.ts'
@@ -9,7 +10,7 @@ import { pickFresh, varietyStats } from './variety.ts'
 
 // Abwechslung beim Umstellen (docs/PLAN-M3.md, 4. Fassung): Die Stufen aus dem Baukasten haben je
 // Stufe viele Formen, keine zu häufig, und beim Ziehen keine Wiederholung.
-const KIT_LEVELS: Level[] = [1, 2]
+const KIT_LEVELS: Level[] = [1, 2, 3]
 
 describe.each(KIT_LEVELS)('Abwechslung Stufe %i', (level) => {
   it('mindestens 100 Formen unter 200 Aufgaben, keine öfter als 3 von 100', () => {
@@ -29,7 +30,7 @@ describe.each(KIT_LEVELS)('Abwechslung Stufe %i', (level) => {
   })
 })
 
-describe('Baukasten der Stufen 1 und 2', () => {
+describe('Baukasten der Stufen 1 bis 3', () => {
   const tasks = (level: Level) => Array.from({ length: 200 }, (_, i) => generateRearrangeTask({ level, seed: i + 1 }).task)
   const count = (side: Parameters<typeof subterms>[0], t: string) => subterms(side).filter((s) => s.kind === 'var' && s.name === t).length
 
@@ -48,7 +49,22 @@ describe('Baukasten der Stufen 1 und 2', () => {
     }
   })
 
-  it.each([1, 2] as Level[])('Stufe %i: meist nach x, manchmal nach einem anderen Buchstaben', (level) => {
+  it('Stufe 3: Kerne ineinander, im Mittel mindestens 6 Umformungen, jede mindestens 5', () => {
+    const lengths = tasks(3).map((t) => solveEquation(t.equation, t.target)!.steps.length)
+    expect(Math.min(...lengths)).toBeGreaterThanOrEqual(5)
+    expect(lengths.reduce((a, b) => a + b, 0) / lengths.length).toBeGreaterThanOrEqual(6)
+  })
+
+  it('Stufe 3: Wurzel aus einer Klammer im Quadrat nur mit Bedingung, die das Vorzeichen festlegt', () => {
+    for (const t of tasks(3)) {
+      // (x - b)^2 = … braucht x > b, sonst gibt es zwei Lösungen; (x + b)^2 ist ohnehin positiv
+      const root = solveEquation(t.equation, t.target)!.steps.find((s) => s.kind === 'root')
+      const base = root && (root.after.lhs.kind === 'add' ? root.after.lhs : root.after.rhs)
+      if (base?.kind === 'add' && base.terms.some((x) => x.kind === 'neg')) expect(t.conditions.length, taskLatex(t)).toBeGreaterThan(0)
+    }
+  })
+
+  it.each([1, 2, 3] as Level[])('Stufe %i: meist nach x, manchmal nach einem anderen Buchstaben', (level) => {
     const letters = tasks(level).filter((t) => t.target !== 'x').length
     expect(letters).toBeGreaterThanOrEqual(20)
     expect(letters).toBeLessThanOrEqual(80)

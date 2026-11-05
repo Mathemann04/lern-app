@@ -1,7 +1,7 @@
 import { contains, key, subterms } from '../expr/compare.ts'
 import { toLatex } from '../expr/print.ts'
 import { type Equation, type Expr, add, asRational, div, eq, mul, neg, num, pow, root, sqrt, variable } from '../expr/types.ts'
-import { type Factored, factoredDivide, factoredLcm, factorize } from '../fraction/factor.ts'
+import { type Factored, factoredDivide, factoredLcm, factoredPoly, factorize, reduceFrac } from '../fraction/factor.ts'
 import type { Frac } from '../fraction/frac.ts'
 import {
   type Poly,
@@ -10,6 +10,7 @@ import {
   polyAdd,
   polyAtom,
   polyDivideExact,
+  polyEquals,
   polyMul,
   polyPow,
   polyScale,
@@ -17,12 +18,14 @@ import {
 import { isInteger, isOne, isZero, rat, ratEq, ratNeg, ratSign } from '../rational.ts'
 import {
   type Atoms,
+  RADICAL_ATOM,
   ROOT_ATOM,
   contentExpr,
   monomialSqrt,
   newAtoms,
   niceFrac,
   polyToExpr,
+  radicalAtoms,
   toPoly,
   toRat,
 } from './algebra.ts'
@@ -48,6 +51,7 @@ export type StepKind =
   | 'square'
   | 'root'
   | 'combine'
+  | 'extend'
   | 'expand'
   | 'collect'
   | 'factor'
@@ -63,6 +67,7 @@ export const STEP_NAMES: Record<StepKind, string> = {
   square: 'Beide Seiten quadrieren',
   root: 'Wurzel ziehen',
   combine: 'Zu einem Bruch zusammenfassen',
+  extend: 'Doppelbruch erweitern',
   expand: 'Ausmultiplizieren',
   collect: 'Variable nach links, Rest nach rechts',
   factor: 'Ausklammern',
@@ -78,7 +83,7 @@ export function stepLabel(step: RearrangeStep, target: string): string {
   const unknown = hasTargetRoot(step.after, target) ? `$\\sqrt{${target}}$` : `$${target}$`
   switch (step.kind) {
     case 'add':
-      return `Auf beiden Seiten $${isNegative(step.operand!) ? '' : '+'}${operand}$`
+      return `Auf beiden Seiten $${isNegative(firstTerm(step.operand!)) ? '' : '+'}${operand}$`
     case 'move':
       return `$${operand}$ auf die andere Seite bringen`
     case 'multiply':
@@ -90,13 +95,17 @@ export function stepLabel(step: RearrangeStep, target: string): string {
     case 'root':
       return step.operand && toLatex(step.operand) === '3' ? 'Dritte Wurzel ziehen' : 'Wurzel ziehen'
     case 'collect':
-      return `Alles mit ${unknown} nach links, den Rest nach rechts`
+      // mit einer Wurzel wie √(x − a): die Wurzel nach links
+      return `Alles mit ${step.operand ? `$${operand}$` : unknown} nach links, den Rest nach rechts`
     case 'factor':
-      return `${unknown} ausklammern`
+      // mit einer Wurzel wie √(x − a): die Wurzel ausklammern
+      return `${step.operand ? `$${operand}$` : unknown} ausklammern`
     case 'finish':
       return step.swapOnly ? 'Seiten tauschen' : 'Zu einem Bruch zusammenfassen'
     case 'expand':
       return 'Die Klammern ausmultiplizieren'
+    case 'extend':
+      return `Den Doppelbruch mit $${operand}$ erweitern`
     case 'combine':
       return `Die ${step.side === 'rhs' ? 'linke' : 'rechte'} Seite zu einem Bruch zusammenfassen`
     default:
@@ -145,6 +154,7 @@ export function isNegative(e: Expr): boolean {
 }
 
 const termsOf = (e: Expr): readonly Expr[] => (e.kind === 'add' ? e.terms : [e])
+const firstTerm = (e: Expr): Expr => (e.kind === 'add' ? e.terms[0] : e)
 
 function sumOf(terms: readonly Expr[]): Expr {
   const kept = terms.filter((t) => !isZeroExpr(t))
@@ -236,8 +246,24 @@ export function timesFactor(side: Expr, f: Expr): Expr {
     return div(timesFactor(side.num, f), side.den)
   }
   if (isMonomial(side) && isMonomial(f)) return monomialProduct(side, f)
+  // Produkte aus Buchstaben und Klammern: Buchstaben vorn zusammen, y · b(x + c) → by(x + c)
+  const merged = mergedProduct(side, f)
+  if (merged) return merged
   if (isMonomial(f)) return mul(f, side)
   return mul(side, f)
+}
+
+const factorsOf = (e: Expr): readonly Expr[] => (e.kind === 'mul' ? e.factors : [e])
+const isBracket = (e: Expr) => e.kind === 'add' || (e.kind === 'pow' && e.base.kind === 'add')
+
+function mergedProduct(side: Expr, f: Expr): Expr | null {
+  const all = [...factorsOf(side), ...factorsOf(f)]
+  if (!all.every((g) => isMonomial(g) || isBracket(g))) return null
+  const monos = all.filter(isMonomial)
+  const brackets = all.filter((g) => !isMonomial(g))
+  if (monos.length === 0 || brackets.length === 0) return null
+  const front = monos.reduce((acc, g) => monomialProduct(acc, g))
+  return isOneExpr(front) ? mul(...brackets) : mul(front, ...brackets)
 }
 
 // side / d: Faktor streichen, wenn er dasteht (b(y − c) : b → y − c), sonst als Bruch
@@ -290,6 +316,7 @@ export function squared(e: Expr): Expr {
 // Endform einer Seite ohne die gesuchte Variable: ein Bruch, gekürzt; Wurzel aus einem Bruch mit
 // Quadrat im Nenner als \frac{\sqrt{…}}{a}; Quadrat eines Bruchs als \frac{(…)^2}{4y^2}
 export function finalForm(e: Expr): Expr {
+  if (alreadyFinal(e)) return e
   const atoms = anyAtoms()
   if (e.kind === 'root' && e.index === 2) {
     const f = toRat(e.arg, atoms)
@@ -338,10 +365,13 @@ function squarePart(p: Poly, atoms: Atoms): Expr {
   return pow(polyToExpr(p, atoms), num(2))
 }
 
+// Quadrat eines Bruchs: \frac{(a - y^2)^2}{4y^2}, mit einer Summe im Nenner als Ganzes:
+// \left(\frac{by + a}{y - 1}\right)^2
 function squareForm(f: Frac, atoms: Atoms): Expr {
   const { n, d } = reduced(f)
   const dConst = constValue(d)
   if (dConst && isOne(dConst)) return squarePart(n, atoms)
+  if (d.length > 1) return pow(niceFrac(f, atoms), num(2))
   return div(squarePart(n, atoms), squarePart(d, atoms))
 }
 
@@ -363,7 +393,8 @@ function peel(s: Expr, o: Expr, side: Side, t: string): Draft | null {
   if (!draft || !draft.side || draft.kind === 'move') return draft
   const tPart = draft.after[draft.side]
   const other = draft.side === 'lhs' ? draft.after.rhs : draft.after.lhs
-  if (tPart.kind !== 'var' || tPart.name !== t || !isSingleFraction(other)) return draft
+  const squareOfFraction = other.kind === 'pow' && isSingleFraction(other.base)
+  if (tPart.kind !== 'var' || tPart.name !== t || !(isSingleFraction(other) || squareOfFraction)) return draft
   return { ...draft, after: at(draft.side, tPart, finalForm(other)) }
 }
 
@@ -414,15 +445,22 @@ function peelRaw(s: Expr, o: Expr, side: Side, t: string): Draft | null {
     case 'pow': {
       const k = asRational(s.exp)
       if (has(s.exp) || !k || !isInteger(k) || (k.n !== 2n && k.n !== 3n)) return null
+      // erst zu einem Bruch, wenn danach noch weiter umgeformt wird: \sqrt{\frac{qr - s}{r}} statt
+      // \sqrt{q - \frac{s}{r}} (bei x^2 = … macht das das Ergebnis)
+      if (isSumWithFraction(o) && !isVar(s.base, t)) return { kind: 'combine', side, after: at(side, s, finalForm(o)) }
       return { kind: 'root', operand: num(k), side, after: at(side, s.base, k.n === 2n ? sqrt(o) : root(o, 3)) }
     }
     case 'root':
       if (s.index !== 2) return null
+      if (isSumWithFraction(o) && !isVar(s.arg, t)) return { kind: 'combine', side, after: at(side, s, finalForm(o)) }
       return { kind: 'square', side, after: at(side, s.arg, squared(o)), requires: o }
     default:
       return null
   }
 }
+
+const isSumWithFraction = (o: Expr) => o.kind === 'add' && subterms(o).some((x) => x.kind === 'div')
+const isVar = (e: Expr, t: string) => e.kind === 'var' && e.name === t
 
 // Teilt die Seiten in die mit der Variable (s) und die andere (o)
 function split(e: Equation, t: string): { s: Expr; o: Expr; side: Side } | 'both' | null {
@@ -455,13 +493,10 @@ function peelable(s: Expr, t: string): boolean {
 }
 
 // Wurzel, in der die Variable steckt, außer √x selbst (z. B. √(x + a))
-function complexRoot(e: Equation, t: string): Expr | null {
-  for (const side of [e.lhs, e.rhs]) {
-    for (const s of subterms(side)) {
-      if (s.kind === 'root' && contains(s.arg, t) && !isTargetRoot(s, t)) return s
-    }
-  }
-  return null
+// Bei zwei Wurzeln zuerst die, die schon allein auf einer Seite steht (die wird quadriert)
+export function complexRoot(e: Equation, t: string): Expr | null {
+  const roots = [e.lhs, e.rhs].flatMap((side) => subterms(side)).filter((s) => s.kind === 'root' && contains(s.arg, t) && !isTargetRoot(s, t))
+  return roots.find((r) => key(r) === key(e.lhs) || key(r) === key(e.rhs)) ?? roots[0] ?? null
 }
 
 const hasBracket = (e: Expr): boolean =>
@@ -470,66 +505,187 @@ const hasBracket = (e: Expr): boolean =>
   )
 
 // (N/D) · lcd, wie man es hinschreibt: N mal den Rest des Hauptnenners
-function termTimes(term: Expr, lcd: Factored, atoms: Atoms): Expr {
+function termTimes(term: Expr, lcd: Factored, atoms: Atoms, written: readonly Expr[] = []): Expr {
   // −\frac{x - b}{3} · 6 → −2(x - b), bei einer Summe mit Klammer: −(x - b)
   if (term.kind === 'neg') {
-    const inner = termTimes(term.arg, lcd, atoms)
+    const inner = termTimes(term.arg, lcd, atoms, written)
     return inner.kind === 'add' ? neg(inner) : negated(inner)
   }
   if (term.kind === 'div') {
     const d = toPoly(term.den, atoms)
     const k = d && factoredDivide(lcd, factorize(d, lcd.factors.map((f) => f.poly)))
-    if (k) return timesFactor(term.num, factoredDisplay(k, atoms))
+    if (k) return spread(term.num, factoredDisplay(k, atoms, written))
   }
-  return timesFactor(term, factoredDisplay(lcd, atoms))
+  return spread(term, factoredDisplay(lcd, atoms, written))
 }
 
-// Faktoren als Produkt: Zahl und Buchstaben vorn, Klammern dahinter, z. B. 2b(x + b)(x - b)
-function factoredDisplay(f: Factored, atoms: Atoms): Expr {
+// Faktoren als Produkt: Zahl und Buchstaben vorn, Klammern dahinter, z. B. 2b(x + b)(x - b);
+// Klammern, die so in der Aufgabe stehen (written), wie geschrieben: (\sqrt{x} + a) statt (a + \sqrt{x})
+function factoredDisplay(f: Factored, atoms: Atoms, written: readonly Expr[] = []): Expr {
   const monomials = f.factors.filter((g) => g.poly.length === 1)
   const brackets = f.factors.filter((g) => g.poly.length > 1)
   const front = monomials.reduce<Poly>((acc, g) => polyMul(acc, polyPow(g.poly, g.exp)), [{ mono: [], coef: f.coef }])
-  const parts = brackets.map(({ poly, exp }) => (exp === 1 ? polyToExpr(poly, atoms) : pow(polyToExpr(poly, atoms), num(exp))))
+  const display = (poly: Poly) => written.find((w) => w.kind === 'add' && polyEquals(toPoly(w, atoms) ?? [], poly)) ?? polyToExpr(poly, atoms)
+  const parts = brackets.map(({ poly, exp }) => (exp === 1 ? display(poly) : pow(display(poly), num(exp))))
   const c = constValue(front)
   if (parts.length === 0) return polyToExpr(front, atoms)
   return c && isOne(c) ? mul(...parts) : mul(polyToExpr(front, atoms), ...parts)
 }
 
-// Variable mehrfach: Wurzel allein stellen und quadrieren, Nenner beseitigen, ausmultiplizieren,
-// sortieren, ausklammern, teilen
+// Wurzel mit der Variable (nicht √x): allein stellen und quadrieren. Steckt sie in einer Klammer
+// (nach dem ersten Quadrieren bei zwei Wurzeln), wird mit (√…)² = … ausmultipliziert und die Wurzel
+// allein gestellt.
+function radicalStep(e: Equation, t: string, r: Expr): Draft | null {
+  const inner = r.kind === 'root' ? r.arg : r
+  if (key(e.lhs) === key(r)) return { kind: 'square', side: 'lhs', after: eq(inner, squared(e.rhs)), requires: e.rhs }
+  if (key(e.rhs) === key(r)) return { kind: 'square', side: 'rhs', after: eq(squared(e.lhs), inner), requires: e.lhs }
+  const hasR = (x: Expr) => subterms(x).some((y) => key(y) === key(r))
+  const atoms = radicalAtoms(t, r)
+  const polysOf = () => {
+    const l = atoms && toPoly(e.lhs, atoms)
+    const p = atoms && toPoly(e.rhs, atoms)
+    return l && p ? { l, r: p } : null
+  }
+  // mehrere Summanden mit der Wurzel auf einer Seite, auf der anderen keine Variable: ausklammern,
+  // 2n\sqrt{x + m} + 2p\sqrt{x + m} = … → \sqrt{x + m}(2n + 2p) = …
+  for (const side of ['lhs', 'rhs'] as const) {
+    const s = e[side]
+    const o = side === 'lhs' ? e.rhs : e.lhs
+    if (!atoms || s.kind !== 'add' || !s.terms.every(hasR) || contains(o, t)) continue
+    const p = toPoly(s, atoms)
+    const c = p && polyDivideExact(p, polyAtom(RADICAL_ATOM))
+    if (!c || c.length < 2 || c.some((term) => term.mono.some(([a]) => a === RADICAL_ATOM || a === t))) continue
+    return { kind: 'factor', operand: r, side, after: at(side, mul(r, polyToExpr(c, atoms)), o) }
+  }
+  // Klammer mit der Wurzel ausmultiplizieren: (y - \sqrt{x - a})^2 = y^2 - 2y\sqrt{x - a} + x - a
+  const inBracket = (x: Expr) => x.kind === 'add' && hasR(x)
+  const bracketWithR = (side: Expr) =>
+    subterms(side).some((x) => (x.kind === 'pow' && inBracket(x.base)) || (x.kind === 'mul' && x.factors.some(inBracket)) || (x.kind === 'neg' && inBracket(x.arg)))
+  if (atoms && (bracketWithR(e.lhs) || bracketWithR(e.rhs))) {
+    const p = polysOf()
+    if (p) return { kind: 'expand', after: eq(polyToExpr(p.l, atoms), polyToExpr(p.r, atoms)) }
+  }
+  for (const side of ['lhs', 'rhs'] as const) {
+    const s = e[side]
+    const o = side === 'lhs' ? e.rhs : e.lhs
+    if (s.kind !== 'add' || hasR(o)) continue
+    const withR = s.terms.filter(hasR)
+    if (withR.length !== 1) continue
+    const others = s.terms.filter((x) => !hasR(x))
+    // die Variable auch außerhalb der Wurzel auf beiden Seiten: sortieren (Wurzel nach links, Rest
+    // nach rechts, gleiche Summanden zusammengefasst)
+    const p = contains(o, t) && others.some((x) => contains(x, t)) ? polysOf() : null
+    if (p) {
+      const diff = polyAdd(p.l, polyScale(p.r, rat(-1)))
+      const rTerms = diff.filter((term) => term.mono.some(([a]) => a === RADICAL_ATOM))
+      const rest = diff.filter((term) => !term.mono.some(([a]) => a === RADICAL_ATOM))
+      if (rTerms.length === 0) return null
+      const sign = rat(ratSign(rTerms[0].coef) < 0 ? -1 : 1)
+      return { kind: 'collect', operand: r, after: eq(polyToExpr(polyScale(rTerms, sign), atoms!), polyToExpr(polyScale(rest, ratNeg(sign)), atoms!)) }
+    }
+    const operand = others.length === 1 ? negated(others[0]) : sumOf(others.map(negated))
+    const other = others.reduce((acc, k) => plusTerm(acc, negated(k)), o)
+    return { kind: 'add', operand, side, after: at(side, withR[0], other) }
+  }
+  // auf beiden Seiten etwas mit der Wurzel, oder die Variable auch außerhalb: sortieren
+  if (contains(e.lhs, t) && contains(e.rhs, t)) {
+    const p = polysOf()
+    if (p) {
+      const diff = polyAdd(p.l, polyScale(p.r, rat(-1)))
+      const rTerms = diff.filter((term) => term.mono.some(([a]) => a === RADICAL_ATOM))
+      const rest = diff.filter((term) => !term.mono.some(([a]) => a === RADICAL_ATOM))
+      if (rTerms.length === 0) return null
+      const sign = rat(ratSign(rTerms[0].coef) < 0 ? -1 : 1)
+      return { kind: 'collect', operand: r, after: eq(polyToExpr(polyScale(rTerms, sign), atoms!), polyToExpr(polyScale(rest, ratNeg(sign)), atoms!)) }
+    }
+  }
+  return null
+}
+
+// Doppelbruch mit Brüchen im Nenner: mit dem Hauptnenner der inneren Brüche erweitern,
+// \frac{a + \frac{b}{x}}{c - \frac{d}{x}} → \frac{ax + b}{cx - d}
+function extendStep(e: Equation, t: string): Draft | null {
+  for (const side of ['lhs', 'rhs'] as const) {
+    const s = e[side]
+    if (s.kind !== 'div' || !contains(s, t) || !innerFractions(s.den).length) continue
+    const atoms = newAtoms(t)
+    const dens = [...innerFractions(s.num), ...innerFractions(s.den)].map((d) => toPoly(d, atoms))
+    if (dens.some((d) => !d || constValue(d) !== null)) continue
+    const lcd = factoredDisplay(factoredLcm(dens.map((d) => factorize(d!))), atoms)
+    const n = spread(s.num, lcd)
+    const d = spread(s.den, lcd)
+    if (subterms(n).some((x) => x.kind === 'div') || subterms(d).some((x) => x.kind === 'div')) continue
+    const after = side === 'lhs' ? eq(div(n, d), e.rhs) : eq(e.lhs, div(n, d))
+    return { kind: 'extend', operand: lcd, side, after }
+  }
+  return null
+}
+
+// Nenner der Brüche in einer Summe (oder der Bruch selbst), ohne die Bruchstriche darin
+function innerFractions(e: Expr): Expr[] {
+  const positive = (x: Expr) => (x.kind === 'neg' ? x.arg : x)
+  return termsOf(e)
+    .map(positive)
+    .filter((x) => x.kind === 'div')
+    .map((x) => (x as Extract<Expr, { kind: 'div' }>).den)
+}
+
+// e · f mit f in jeden Summanden, die Brüche haben: (x - \frac{a}{b}) · b → bx - a
+function spread(e: Expr, f: Expr): Expr {
+  if (e.kind === 'add' && e.terms.some((x) => subterms(x).some((y) => y.kind === 'div'))) return sumOf(e.terms.map((x) => spread(x, f)))
+  if (e.kind === 'neg') return negated(spread(e.arg, f))
+  return timesFactor(e, f)
+}
+
+// Nenner, wie sie in der Gleichung stehen
+const writtenDenominators = (e: Equation): Expr[] =>
+  [e.lhs, e.rhs].flatMap((side) => subterms(side)).flatMap((x) => (x.kind === 'div' ? [x.den] : []))
+
+// Hauptnenner mit den Klammern so, wie sie in der Aufgabe stehen: (\sqrt{x} - b) statt (b - \sqrt{x})
+function oriented(lcd: Factored, e: Equation, atoms: Atoms): Factored {
+  const written = writtenDenominators(e)
+    .map((d) => toPoly(d, atoms))
+    .filter((p): p is Poly => p !== null)
+  return {
+    coef: lcd.coef,
+    factors: lcd.factors.map((g) => {
+      const flipped = polyScale(g.poly, rat(-1))
+      return written.some((w) => polyEquals(w, flipped)) && !written.some((w) => polyEquals(w, g.poly)) ? { ...g, poly: flipped } : g
+    }),
+  }
+}
+
+// Variable mehrfach: Wurzel allein stellen und quadrieren, Doppelbruch erweitern, Nenner beseitigen,
+// ausmultiplizieren, sortieren, ausklammern, teilen
 function rational(e: Equation, t: string): Draft | null {
   const r = complexRoot(e, t)
-  if (r) {
-    const inner = r.kind === 'root' ? r.arg : r
-    if (key(e.lhs) === key(r)) return { kind: 'square', side: 'lhs', after: eq(inner, squared(e.rhs)), requires: e.rhs }
-    if (key(e.rhs) === key(r)) return { kind: 'square', side: 'rhs', after: eq(squared(e.lhs), inner), requires: e.lhs }
-    for (const side of ['lhs', 'rhs'] as const) {
-      const s = e[side]
-      const o = side === 'lhs' ? e.rhs : e.lhs
-      if (s.kind !== 'add' || !s.terms.some((x) => key(x) === key(r))) continue
-      const others = s.terms.filter((x) => key(x) !== key(r))
-      const operand = others.length === 1 ? negated(others[0]) : sumOf(others.map(negated))
-      const other = others.reduce((acc, k) => plusTerm(acc, negated(k)), o)
-      return { kind: 'add', operand, side, after: at(side, r, other) }
-    }
-    return null
-  }
+  if (r) return radicalStep(e, t, r)
+
+  const extended = extendStep(e, t)
+  if (extended) return extended
 
   const rootUnknown = hasTargetRoot(e, t)
   const atoms = newAtoms(t, rootUnknown)
   const u = rootUnknown ? ROOT_ATOM : t
   const uExpr = rootUnknown ? sqrt(variable(t)) : variable(t)
-  const left = toRat(e.lhs, atoms)
-  const right = toRat(e.rhs, atoms)
-  if (!left || !right) return null
+  const raw = [toRat(e.lhs, atoms), toRat(e.rhs, atoms)]
+  if (!raw[0] || !raw[1]) return null
+  // gekürzt: b\left(x - \frac{a}{b}\right) hat keinen Nenner mehr
+  const [left, right] = raw.map((f) => {
+    const r = reduceFrac(f!)
+    return { num: r.num, den: factoredPoly(r.den) }
+  })
 
   // Nenner beseitigen: beide Seiten mit dem Hauptnenner malnehmen
   const dl = constValue(left.den)
   const dr = constValue(right.den)
   if (!(dl && isOne(dl) && dr && isOne(dr)) && (e.lhs.kind === 'div' || e.rhs.kind === 'div' || hasFraction(e))) {
-    const lcd = factoredLcm([factorize(left.den), factorize(right.den)])
-    const sideTimes = (side: Expr) => sumOf(termsOf(side).map((x) => termTimes(x, lcd, atoms)))
-    return { kind: 'multiply', operand: factoredDisplay(lcd, atoms), after: eq(sideTimes(e.lhs), sideTimes(e.rhs)) }
+    const lcd = oriented(factoredLcm([factorize(left.den), factorize(right.den)]), e, atoms)
+    const written = writtenDenominators(e)
+    // Seite ohne Bruch als Ganzes malnehmen: (y - b)(\sqrt{x} + a)
+    const sideTimes = (side: Expr) =>
+      subterms(side).some((x) => x.kind === 'div') ? sumOf(termsOf(side).map((x) => termTimes(x, lcd, atoms, written))) : termTimes(side, lcd, atoms, written)
+    return { kind: 'multiply', operand: factoredDisplay(lcd, atoms, written), after: eq(sideTimes(e.lhs), sideTimes(e.rhs)) }
   }
   const pl = polyDivideExact(left.num, left.den)
   const pr = polyDivideExact(right.num, right.den)
@@ -603,6 +759,17 @@ function nextStep(e: Equation, t: string): Draft | null {
   if (peelable(s, t) && !(s.kind === 'add' && complexRoot(e, t))) return mustStep(peel(s, o, side, t))
   return mustStep(rational(e, t))
 }
+
+// Summe ohne Brüche, in der sich nichts zusammenfassen lässt (b + \sqrt{\frac{y}{a}}): schon fertig
+function alreadyFinal(o: Expr): boolean {
+  if (o.kind !== 'add' || !subterms(o).some((x) => x.kind === 'root') || subterms(o).some((x) => x.kind === 'div' && !insideRoot(o, x))) return false
+  const atoms = anyAtoms()
+  const p = toPoly(o, atoms)
+  return p !== null && p.length === o.terms.length
+}
+
+// Steht der Teil unter einer Wurzel (dann zählt er als ein Zeichen)?
+const insideRoot = (e: Expr, part: Expr): boolean => subterms(e).some((x) => x.kind === 'root' && x !== part && subterms(x.arg).includes(part))
 
 function mustStep(d: Draft | null): Draft {
   if (!d) throw new Error('Diese Gleichung lässt sich so nicht auflösen')

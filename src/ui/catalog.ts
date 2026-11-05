@@ -144,8 +144,8 @@ const rearrangeLevels: LevelPreview[] = [
   {
     level: 3,
     available: true,
-    title: 'Brüche und Wurzeln, die Variable kommt mehrfach vor',
-    examples: [String.raw`y = \frac{2x + 1}{x - 3}`, String.raw`\frac{1}{x} + \frac{1}{a} = \frac{1}{b}`, String.raw`y = \sqrt{x + a} - \sqrt{x}`],
+    title: 'Brüche, Wurzeln und Quadrate ineinander',
+    examples: [String.raw`b\sqrt{\frac{x + a}{x - a}} - c = y`, String.raw`\sqrt{x + a} + \sqrt{x - b} = y`, String.raw`\frac{a}{1 + \frac{b}{x}} = c`],
   },
   {
     level: 4,

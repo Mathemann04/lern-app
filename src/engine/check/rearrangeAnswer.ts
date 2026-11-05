@@ -144,6 +144,16 @@ function hasFraction(e: Expr): boolean {
 
 const stripMinus = (e: Expr): Expr => (e.kind === 'neg' ? stripMinus(e.arg) : e)
 
+// Bruch außerhalb von Wurzeln? Eine Wurzel aus einem Bruch zählt in einer Summe wie ein Buchstabe:
+// b + \sqrt{\frac{y}{a}} ist fertig
+function hasLooseFraction(e: Expr): boolean {
+  if (e.kind === 'root') return false
+  if (e.kind === 'add') return e.terms.some(hasLooseFraction)
+  if (e.kind === 'mul') return e.factors.some(hasLooseFraction)
+  if (e.kind === 'neg') return hasLooseFraction(e.arg)
+  return hasFraction(e)
+}
+
 // Zähler und Nenner der Eingabe; sonst, warum es kein einzelner Bruch ist. Eine Wurzel oder ein
 // Quadrat um einen Bruch zählt wie der Bruch: \sqrt{\frac{…}{…}}, \left(\frac{…}{…}\right)^2.
 function parts(answer: Expr): { num: Expr; den: Expr | null } | NotDone {
@@ -151,8 +161,9 @@ function parts(answer: Expr): { num: Expr; den: Expr | null } | NotDone {
   if ((core.kind === 'root' || (core.kind === 'pow' && !hasFraction(core.exp))) && hasFraction(core)) {
     core = stripMinus(core.kind === 'root' ? core.arg : core.base)
   }
-  if (core.kind === 'div') return hasFraction(core.num) || hasFraction(core.den) ? 'nested' : { num: core.num, den: core.den }
-  if (!hasFraction(core)) return { num: core, den: null }
+  // eine Wurzel aus einem Bruch im Zähler oder Nenner zählt wie ein Buchstabe
+  if (core.kind === 'div') return hasLooseFraction(core.num) || hasLooseFraction(core.den) ? 'nested' : { num: core.num, den: core.den }
+  if (!hasLooseFraction(core)) return { num: core, den: null }
   // Bruch mal Term ohne Bruch, z. B. \frac{1}{3}(by - bc + 3a): wie ein Bruch
   if (core.kind === 'mul') {
     const fractions = core.factors.filter((f) => f.kind === 'div')

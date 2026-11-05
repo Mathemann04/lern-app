@@ -7,7 +7,7 @@ Stand: 05.11.2026
 | M1 | Grundgerüst + Ableitungsregeln (beide Modi, 5 Stufen, Erklärungen, Lernkarten, Fortschritt) | fertig |
 | M2 | Brüche (Bruchrechnung, Bruchterme kürzen und zusammenfassen, Doppelbrüche); App für mehrere Themen | fertig |
 | M2b | Brüche nachschärfen: viel mehr Abwechslung (Baukasten statt fester Vorlagen, keine Form doppelt), deutlich schwerer, Stufe 5 auf Profi-Niveau mit Partialbruchzerlegung und Brüchen aus späteren Kapiteln (komplexe Zahlen, Grenzwerte, Teleskopsummen, Hyperbelfunktionen) | fertig |
-| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | in Arbeit: 4. Fassung des Plans (Baukasten und Abwechslung, ab Stufe 3 verschachtelter); Schritt 4 fertig, als Nächstes Schritt 5 |
+| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | in Arbeit: 4. Fassung des Plans (Baukasten und Abwechslung, ab Stufe 3 verschachtelter); Schritte 4 und 5 fertig, als Nächstes Schritt 6a |
 | M4 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
 | M5 | weitere Themen aus Mathematik MB1 | offen |
 | M6 | Physik: Formeln mit Einheiten (Formeln umstellen mit Zeichen der Physik; Aufgaben lösen: Formel wählen, umstellen, Werte mit Einheiten einsetzen) | offen |
@@ -67,7 +67,7 @@ Details: [PLAN-M3.md](PLAN-M3.md) (4. Fassung, freigegeben am 05.11.2026 mit dei
 - [x] Plan M3, 4. Fassung: Baukasten und Abwechslung wie bei den Brüchen
   (freigegeben mit Änderung: ab Stufe 3 Kerne ineinander und gegeneinander)
 - [x] 4. Baukasten und Abwechslung, Stufen 1 und 2 (neu)
-- [ ] 5. Stufe 3 aus dem Baukasten (neu)
+- [x] 5. Stufe 3 aus dem Baukasten (neu)
 - [ ] 6. Stufe 4 (verschachtelt) geführt und frei, in drei Teilen
   - [ ] 6a. e-Funktion und $\ln$, Wurzeln in Wurzeln, Potenz- und Logarithmusgesetze
   - [ ] 6b. Winkel- und Hyperbelfunktionen, Umkehrfunktionen
@@ -454,3 +454,12 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   mehr, wenn die Variable im Nenner steht; Minus vor einem Bruch bleibt als
   Klammer). Die alten Aufgaben-Nummern der Stufen 1 und 2 zeigen andere
   Aufgaben (Browser-Test: 1-1 durch 1-31 ersetzt).
+- 05.11.2026: M3 Schritt 5 fertig: Stufe 3 von „Gleichungen umstellen"
+  kommt aus dem Baukasten, mit Kernen ineinander, gegeneinander oder in einer
+  Summe (zwölf Arten, z. B. Wurzel aus einem Bruch mit Schalen, zwei Wurzeln,
+  Doppelbrüche, Bruch im Quadrat, Klammern mit $x^2$, das sich weghebt). 189
+  Formen unter 200 Aufgaben (vorher 26), im Mittel 6,2 Umformungen (vorher
+  4,6). Die Engine löst jetzt zwei verschiedene Wurzeln, erweitert
+  Doppelbrüche und fasst vor dem Wurzelziehen zu einem Bruch zusammen. Neuer
+  typischer Fehler: halbiert statt die Wurzel gezogen. Browser-Tests der
+  Stufe 3 mit neuen Nummern (3-29 zwei Wurzeln, 3-2047 frei).
