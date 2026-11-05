@@ -53,6 +53,13 @@ const CATALOG: Array<{ id: string; lhs: string; rhs: string; target?: string; af
   { id: 'eq-hyperbolic-sign', lhs: 'a\\cosh^2x-b\\sinh^2x', rhs: 'y', after: 'a\\cosh^{2} x - b(1 - \\cosh^{2} x) = y' },
   { id: 'eq-tan-flipped', lhs: '\\frac{\\sin x+\\cos x}{\\sin x-\\cos x}', rhs: 'y', after: '\\frac{1 + \\tan x}{1 - \\tan x} = y' },
   { id: 'eq-divide-cos-partly', lhs: '\\frac{\\sin x+\\cos x}{\\sin x-\\cos x}', rhs: 'y', after: '\\frac{\\tan x + 1}{\\sin x - \\cos x} = y' },
+  { id: 'eq-substitute-power', lhs: 'e^{2x}-ae^{x}', rhs: 'b', after: '2u - au = b' },
+  { id: 'eq-substitute-reciprocal', lhs: 'e^{x}-e^{-x}', rhs: 'y', after: 'u - (-u) = y' },
+  { id: 'eq-pq-sign', lhs: 'y', rhs: '\\frac{e^{x}-e^{-x}}{2}', after: 'u = -y + \\sqrt{y^{2} + 1}' },
+  { id: 'eq-pq-q-sign', lhs: 'y', rhs: '\\frac{e^{x}-e^{-x}}{2}', after: 'u = y + \\sqrt{y^{2} - 1}' },
+  { id: 'eq-pq-half', lhs: 'e^{2x}-ae^{x}', rhs: 'b', after: 'u = \\frac{a}{2} + \\sqrt{a^{2} + b}' },
+  { id: 'eq-spurious-root', lhs: 'e^{2x}-ae^{x}', rhs: 'b', after: 'u = \\frac{a}{2} - \\sqrt{\\frac{a^{2}}{4} + b}' },
+  { id: 'eq-not-resubstituted', lhs: 'y', rhs: '\\frac{e^{x}-e^{-x}}{2}', after: 'x = y + \\sqrt{y^{2} + 1}', result: 'y + \\sqrt{y^{2} + 1}' },
 ]
 
 describe('Katalog der Fehlerregeln', () => {

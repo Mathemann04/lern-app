@@ -1,8 +1,12 @@
 import { contains, key, subterms } from '../expr/compare.ts'
-import { FN_LATEX, toLatex } from '../expr/print.ts'
+import { type Env, evaluate } from '../expr/evaluate.ts'
+import { FN_LATEX, equationToLatex, toLatex } from '../expr/print.ts'
 import { type Equation, type Expr, type FnName, E, PI, add, asRational, div, eq, fn, log, mul, neg, num, pow, root, sqrt, variable } from '../expr/types.ts'
 import { type Factored, factoredDivide, factoredLcm, factoredPoly, factorize, reduceFrac } from '../fraction/factor.ts'
-import type { Frac } from '../fraction/frac.ts'
+import { type Frac, fracAdd, fracDiv, fracMul, fracNeg, fracOf, fracScale } from '../fraction/frac.ts'
+import { createRng } from '../random/rng.ts'
+import { conditionsHold, holds } from './check.ts'
+import { type Condition, variablesOf } from './task.ts'
 import {
   type Poly,
   constValue,
@@ -15,7 +19,7 @@ import {
   polyPow,
   polyScale,
 } from '../fraction/poly.ts'
-import { isInteger, isOne, isZero, rat, ratEq, ratNeg, ratSign } from '../rational.ts'
+import { type Rational, isInteger, isOne, isZero, rat, ratAbs, ratDiv, ratEq, ratMul, ratNeg, ratSign, ratSub } from '../rational.ts'
 import {
   type Atoms,
   BLOCK_ATOM,
@@ -66,6 +70,12 @@ export type StepKind =
   | 'trig'
   | 'pythagoras'
   | 'tanQuotient'
+  | 'substitute'
+  | 'zero'
+  | 'normalize'
+  | 'pq'
+  | 'choose'
+  | 'resubstitute'
   | 'finish'
 
 export const STEP_NAMES: Record<StepKind, string> = {
@@ -91,12 +101,20 @@ export const STEP_NAMES: Record<StepKind, string> = {
   trig: 'Funktion auf beiden Seiten',
   pythagoras: 'Quadrat ersetzen',
   tanQuotient: 'Durch den Kosinus teilen',
+  substitute: 'Substituieren',
+  zero: 'Alles auf eine Seite',
+  normalize: 'Normalform herstellen',
+  pq: 'pq-Formel anwenden',
+  choose: 'Passende Lösung wählen',
+  resubstitute: 'Zurück einsetzen',
   finish: 'Ergebnis',
 }
 
 // Beschreibung eines Schritts als Text mit Formeln, z. B. „Auf beiden Seiten $-c$", „Beide Seiten
 // durch $(y - 2)$"
-export function stepLabel(step: RearrangeStep, target: string): string {
+export function stepLabel(step: RearrangeStep, taskTarget: string): string {
+  // nach dem Substituieren wird nach u aufgelöst
+  const target = step.unknown ?? taskTarget
   const operand = step.operand ? toLatex(step.operand) : ''
   const factor = step.operand && (step.operand.kind === 'add' || isNegative(step.operand)) ? `(${operand})` : operand
   // mit √x als Unbekannter wird √x sortiert und ausgeklammert
@@ -145,6 +163,19 @@ export function stepLabel(step: RearrangeStep, target: string): string {
       return `$${operand} = ${toLatex(pythagorasOf(step.operand as PowerNode))}$ einsetzen`
     case 'tanQuotient':
       return `${step.side ? 'Zähler und Nenner' : 'Beide Seiten'} durch $${operand}$ teilen`
+    case 'substitute':
+      return `Substituieren: $${step.substitution!.name} = ${toLatex(step.substitution!.expr)}$`
+    case 'zero':
+      return 'Alles auf die linke Seite bringen'
+    case 'normalize':
+      return `Beide Seiten durch $${factor}$ teilen`
+    case 'pq':
+      return '$pq$-Formel anwenden'
+    case 'choose':
+      // u_1 mit Plus vor der Wurzel, u_2 mit Minus
+      return `Die Lösung $${target}_${termsOf(step.operand!).at(-1)?.kind === 'neg' ? 2 : 1} = ${operand}$ verwerfen`
+    case 'resubstitute':
+      return `Zurück einsetzen: $${step.substitution!.name} = ${toLatex(step.substitution!.expr)}$`
     case 'combine':
       return `Die ${step.side === 'rhs' ? 'linke' : 'rechte'} Seite zu einem Bruch zusammenfassen`
     default:
@@ -170,7 +201,20 @@ export type RearrangeStep = {
   readonly requires?: Expr
   // Funktion, die auf beide Seiten angewandt wird (\arcsin bei sin x = w, \tan bei \arctan u = w)
   readonly fn?: FnName
+  // beim Substituieren und Zurück-Einsetzen: u = e^x
+  readonly substitution?: Substitution
+  // nach dem Substituieren: die Unbekannte, nach der gerade aufgelöst wird (u)
+  readonly unknown?: string
+  // bei der pq-Formel und beim Wählen: warum die andere Lösung (operand) wegfällt
+  readonly reason?: RejectReason
 }
+
+// Substitution: u steht für den Baustein expr (e^x, \sqrt{x}, \sin x, \ln x, x^2)
+export type Substitution = { readonly name: string; readonly expr: Expr }
+
+// Warum die zweite Lösung der pq-Formel wegfällt: u₂ ist negativ, kann es aber nicht sein (u = e^x);
+// mit u₂ wird x negativ; u₂ verletzt eine Bedingung der Aufgabe
+export type RejectReason = 'negative' | 'targetNegative' | 'condition'
 
 export type RearrangeSolution = {
   readonly target: string
@@ -179,6 +223,19 @@ export type RearrangeSolution = {
   readonly result: Expr
   // Terme, die ≥ 0 sein müssen, damit es eine Lösung gibt (aus dem Quadrieren von Wurzeln)
   readonly requires: readonly Expr[]
+  // Substitution im Rechenweg (dann stehen Gleichungen in u dazwischen)
+  readonly substitution?: Substitution
+}
+
+// Was das Lösen über die Aufgabe wissen muss: Bedingungen (welche Lösung der pq-Formel passt) und,
+// beim Weiterrechnen ab einer Gleichung in u, die Substitution
+export type SolveOptions = { readonly conditions?: readonly Condition[]; readonly substitution?: Substitution }
+
+type Context = {
+  readonly original: Equation
+  readonly target: string
+  readonly conditions: readonly Condition[]
+  readonly sub?: Substitution
 }
 
 const MAX_STEPS = 30
@@ -366,7 +423,11 @@ export function squared(e: Expr): Expr {
 // Endform einer Seite ohne die gesuchte Variable: ein Bruch, gekürzt; Wurzel aus einem Bruch mit
 // Quadrat im Nenner als \frac{\sqrt{…}}{a}; Quadrat eines Bruchs als \frac{(…)^2}{4y^2}
 export function finalForm(e: Expr): Expr {
-  if (alreadyFinal(e) || nestedSquare(e)) return e
+  if (alreadyFinal(e)) return plusFirst(e)
+  if (nestedSquare(e)) return e
+  // \sqrt{\frac{a^2}{4} + b} als \frac{\sqrt{a^2 + 4b}}{2} (nach der pq-Formel)
+  const roots = simplerRoots(e)
+  if (roots !== e) return finalForm(roots)
   const atoms = anyAtoms()
   if (e.kind === 'root' && e.index === 2) {
     const f = toRat(e.arg, atoms)
@@ -384,6 +445,62 @@ export function finalForm(e: Expr): Expr {
   }
   const f = toRat(e, atoms)
   return f ? niceFrac(f, atoms) : e
+}
+
+// Wurzel aus einer Summe mit Brüchen, deren Hauptnenner ein Quadrat ist, als Bruch:
+// \sqrt{\frac{a^2}{4} + b} = \frac{\sqrt{a^2 + 4b}}{2}; sonst derselbe Term
+// Ganz außen nur, wenn der Nenner schon ein Quadrat ist (\sqrt{\frac{k}{5} - …} bleibt so), innen auch
+// mit Erweitern (nach der pq-Formel: -\frac{7}{2} + \sqrt{\frac{49}{4} + \frac{y}{3}})
+function simplerRoots(e: Expr, outside = true): Expr {
+  if (e.kind === 'root') {
+    // innen zuerst: \sqrt{\frac{a}{2} + \sqrt{\frac{a^2}{4} + b}}
+    const arg = simplerRoots(e.arg, false)
+    const same = arg === e.arg ? e : { ...e, arg }
+    if (e.index !== 2 || arg.kind !== 'add' || !subterms(arg).some((x) => x.kind === 'div')) return same
+    const atoms = anyAtoms()
+    const f = toRat(arg, atoms)
+    const form = f && squareDenominatorRoot(f, atoms, !outside)
+    return form ?? same
+  }
+  if (e.kind !== 'add' && e.kind !== 'mul' && e.kind !== 'neg' && e.kind !== 'div' && e.kind !== 'pow') return e
+  const parts = e.kind === 'pow' ? [e.base] : children(e)
+  const changed = parts.map((x) => simplerRoots(x, false))
+  if (changed.every((x, i) => x === parts[i])) return e
+  return e.kind === 'pow' ? pow(changed[0], e.exp) : rebuilt(e, (x) => changed[parts.indexOf(x)])!
+}
+
+// Wurzel aus einem Bruch mit einem Monom im Nenner als \frac{\sqrt{…}}{…}: Zähler und Nenner so
+// erweitert, dass der Nenner ein Quadrat ist (\sqrt{\frac{147 + 4y}{12}} = \frac{\sqrt{441 + 12y}}{6});
+// null, wenn der Nenner 1 oder kein Monom ist
+function squareDenominatorRoot(f: Frac, atoms: Atoms, extend: boolean): Expr | null {
+  const r = reduceFrac(f)
+  const d = factoredPoly(r.den)
+  if (d.length !== 1 || constValue(d) !== null && isOne(constValue(d)!)) return null
+  const [{ mono, coef }] = d
+  if (ratSign(coef) <= 0 || coef.d !== 1n) return null
+  // fehlender Faktor zum Quadrat: Primzahlen und Buchstaben mit ungerader Hochzahl
+  let rest = coef.n
+  let missing = 1n
+  for (let p = 2n; p * p <= rest; p++) {
+    let k = 0
+    while (rest % p === 0n) {
+      rest /= p
+      k++
+    }
+    if (k % 2 === 1) missing *= p
+  }
+  missing *= rest
+  if (!extend && (missing !== 1n || mono.some(([, k]) => k % 2 === 1))) return null
+  const m: Poly = [{ mono: mono.filter(([, k]) => k % 2 === 1).map(([a]) => [a, 1] as const), coef: rat(missing) }]
+  const rd = monomialSqrt(polyMul(d, m))
+  if (!rd) return null
+  return div(sqrt(polyToExpr(polyMul(r.num, m), atoms)), polyToExpr(rd, atoms))
+}
+
+// Summe, die mit Minus beginnt, mit Plus vorn: -3 + \sqrt{9 + a} → \sqrt{9 + a} - 3
+function plusFirst(e: Expr): Expr {
+  if (e.kind !== 'add' || !isNegative(e.terms[0]) || e.terms.every(isNegative)) return e
+  return add(...e.terms.filter((x) => !isNegative(x)), ...e.terms.filter(isNegative))
 }
 
 // Quadrat einer Summe, in der wieder ein Quadrat einer Summe steht, ohne Bruch (Wurzeln in Wurzeln):
@@ -539,7 +656,11 @@ function peelRaw(s: Expr, o: Expr, side: Side, t: string): Draft | null {
       return { kind: 'square', side, after: at(side, s.arg, squared(o)), requires: o }
     case 'fn': {
       // \ln u = w → u = e^w
-      if (s.name === 'ln') return { kind: 'exp', operand: E, side, after: at(side, s.arg, powerOf(E, o)) }
+      if (s.name === 'ln') {
+        // nach der pq-Formel erst zu einem Bruch: e^{\frac{a + \sqrt{a^2 + 4b}}{2}}
+        if (isSumWithFraction(o) && subterms(o).some((x) => x.kind === 'root')) return { kind: 'combine', side, after: at(side, s, finalForm(o)) }
+        return { kind: 'exp', operand: E, side, after: at(side, s.arg, powerOf(E, o)) }
+      }
       // \sin u = w → u = \arcsin w (erst zu einem Bruch: \arcsin\frac{y - ab}{a})
       const arc = ARC_OF[s.name]
       if (arc) {
@@ -934,6 +1055,18 @@ function pythagorasStep(e: Equation, t: string, wrong: 'square' | 'sign' | null 
     const replace = new Map([[key(second), pythagorasOf(second, wrong)]])
     return { kind: 'pythagoras', operand: second, after: eq(substitute(e.lhs, replace), substitute(e.rhs, replace)) }
   }
+  // \cos^2 u und \sin u: das Quadrat ersetzen, dann steht nur noch \sin u da (quadratisch, Schritt 6c)
+  const all = [e.lhs, e.rhs].flatMap((side) => subterms(side))
+  for (const square of squares) {
+    const f = square.base as Extract<Expr, { kind: 'fn' }>
+    const pair = PAIRS.find((p) => p.sin === f.name || p.cos === f.name)
+    if (!pair) continue
+    const partnerName = f.name === pair.sin ? pair.cos : pair.sin
+    const plain = all.some((s) => s.kind === 'fn' && s.name === partnerName && key(s.arg) === key(f.arg))
+    if (!plain) continue
+    const replace = new Map([[key(square), pythagorasOf(square, wrong)]])
+    return { kind: 'pythagoras', operand: square, after: eq(substitute(e.lhs, replace), substitute(e.rhs, replace)) }
+  }
   return null
 }
 
@@ -1190,9 +1323,440 @@ function logLawStep(e: Equation, t: string): Draft | null {
   return { kind: 'logLaw', after: eq(l ?? e.lhs, r ?? e.rhs) }
 }
 
+// --- Substitution und pq-Formel (Stufe 4, Schritt 6c) ---
+//
+// Kommt die Variable in verschiedenen Formen vor, die Potenzen eines Bausteins sind (e^{2x} und e^x,
+// e^x und e^{-x}, x und √x, \sin^2 x und \sin x), und wird die Gleichung damit quadratisch, steht
+// zuerst u für den Baustein. Die Gleichung in u wird wie gewohnt umgeformt, bis sie quadratisch ist:
+// alles nach links, Normalform u^2 + pu + q = 0, pq-Formel. Von den zwei Lösungen passt eine nicht
+// (Scheinlösung: u = e^x ist nie negativ, x muss positiv sein, eine Bedingung der Aufgabe gilt nicht);
+// die andere wird für u zurück eingesetzt. Ohne Substitution (\ln x + \ln(x + b) = c) gilt dasselbe
+// für x selbst.
+
+// Buchstaben für u: der erste, der in der Gleichung nicht vorkommt
+const SUBSTITUTE_NAMES = ['u', 'z', 'w', 'v']
+
+// Art des Bausteins: Potenz mit der Variable in der Hochzahl (e^x), √x, Winkel- oder
+// Hyperbelfunktion, \ln, x^2
+type BlockKind = 'power' | 'root' | 'trig' | 'ln' | 'square'
+
+// Baustein und, für jeden Teil mit der Variable, die Potenz von u (null: Teil passt nicht)
+type SubPlan = { readonly kind: BlockKind; readonly block: Expr; readonly power: (x: Expr) => number | null }
+
+// Typische Fehler beim Ersetzen: e^{2x} = 2u statt u^2 (bei √x: x = u statt u^2), e^{-x} = -u statt \frac{1}{u}
+export type SubstituteMistake = 'power' | 'reciprocal'
+
+const integerExponent = (x: Expr): number | null => {
+  if (x.kind !== 'pow') return null
+  const k = asRational(x.exp)
+  return k && isInteger(k) && k.n >= 2n ? Number(k.n) : null
+}
+
+// Mögliche Bausteine der Gleichung, in dieser Reihenfolge
+function substitutionPlans(e: Equation, t: string): SubPlan[] {
+  const all = [e.lhs, e.rhs].flatMap((side) => subterms(side))
+  const plans: SubPlan[] = []
+
+  // Potenzen derselben Basis, Hochzahlen Vielfache von einem Teil mit x: e^{2x}, e^{x}, e^{-x}
+  const powers = all.filter((s) => isTPower(s, t))
+  if (powers.length > 0 && new Set(powers.map((s) => key(s.base))).size === 1) {
+    const atoms = newAtoms(t)
+    const parsed = powers.map((s) => {
+      const p = toPoly(s.exp, atoms)
+      if (!p || p.length !== 1 || (p[0].mono.find(([a]) => a === t)?.[1] ?? 0) !== 1) return null
+      return { node: s, coef: p[0].coef, rest: key(polyToExpr([{ mono: p[0].mono, coef: rat(1) }], atoms)) }
+    })
+    if (parsed.every((x) => x !== null) && new Set(parsed.map((x) => x!.rest)).size === 1) {
+      const smallest = parsed.map((x) => x!.coef).reduce((m, c) => (ratLess(ratAbs(c), ratAbs(m)) ? c : m))
+      const g = ratAbs(smallest)
+      const ns = new Map(parsed.map((x) => [key(x!.node), ratDiv(x!.coef, g)] as const))
+      if ([...ns.values()].every(isInteger)) {
+        const first = parsed.find((x) => ratEq(x!.coef, g))
+        const p0 = toPoly(powers[0].exp, atoms)!
+        const exp = first ? first.node.exp : polyToExpr([{ mono: p0[0].mono, coef: g }], atoms)
+        const base = powers[0].base
+        plans.push({
+          kind: 'power',
+          block: pow(base, exp),
+          power: (x) => (isTPower(x, t) && key(x.base) === key(base) && ns.has(key(x)) ? Number(ns.get(key(x))!.n) : null),
+        })
+      }
+    }
+  }
+
+  // Winkel- oder Hyperbelfunktion bzw. \ln, auch im Quadrat: \sin x und \sin^2 x
+  for (const [kind, test] of [
+    ['trig', (s: Expr) => isTrigBlock(s, t)],
+    ['ln', (s: Expr) => s.kind === 'fn' && s.name === 'ln' && contains(s.arg, t)],
+  ] as const) {
+    const fns = all.filter(test)
+    if (fns.length === 0 || new Set(fns.map(key)).size !== 1) continue
+    const block = fns[0]
+    plans.push({
+      kind,
+      block,
+      power: (x) => (key(x) === key(block) ? 1 : x.kind === 'pow' && key(x.base) === key(block) ? integerExponent(x) : null),
+    })
+  }
+
+  // √x und x: x = u^2
+  if (hasTargetRoot(e, t)) {
+    plans.push({
+      kind: 'root',
+      block: sqrt(variable(t)),
+      power: (x) => (isTargetRoot(x, t) ? 1 : isVar(x, t) ? 2 : x.kind === 'pow' && isVar(x.base, t) && integerExponent(x) ? 2 * integerExponent(x)! : null),
+    })
+  }
+
+  // nur gerade Potenzen von x: x^4 und x^2
+  const xs = all.filter((s) => isVar(s, t))
+  const evenPowers = all.filter((s) => s.kind === 'pow' && isVar(s.base, t) && (integerExponent(s) ?? 1) % 2 === 0)
+  if (evenPowers.length > 0 && evenPowers.length === xs.length) {
+    plans.push({
+      kind: 'square',
+      block: pow(variable(t), num(2)),
+      power: (x) => (x.kind === 'pow' && isVar(x.base, t) && integerExponent(x) ? integerExponent(x)! / 2 : null),
+    })
+  }
+  return plans
+}
+
+const ratLess = (a: Rational, b: Rational) => ratSign(ratSub(a, b)) < 0
+
+// u^n, wie es nach dem Ersetzen dasteht
+function uPower(u: Expr, n: number, kind: BlockKind, wrong: SubstituteMistake | null): Expr {
+  if (n === 1) return u
+  if (n === 0) return num(1)
+  if (n >= 2) {
+    if (wrong === 'power') return kind === 'root' && n === 2 ? u : mul(num(n), u)
+    return pow(u, num(n))
+  }
+  const down = n === -1 ? u : pow(u, num(-n))
+  return wrong === 'reciprocal' ? neg(down) : div(num(1), down)
+}
+
+// Teil für Teil ersetzen; null, wenn die Variable auch anders vorkommt
+function replaced(e: Expr, t: string, plan: SubPlan, u: Expr, wrong: SubstituteMistake | null): Expr | null {
+  if (!contains(e, t)) return e
+  const n = plan.power(e)
+  if (n !== null) return uPower(u, n, plan.kind, wrong)
+  const f = (x: Expr) => replaced(x, t, plan, u, wrong)
+  return rebuilt(e, f)
+}
+
+// Knoten mit neuen Kindern; null, wenn ein Kind null ist
+function rebuilt(e: Expr, f: (x: Expr) => Expr | null): Expr | null {
+  const all = (xs: readonly Expr[]) => {
+    const out = xs.map(f)
+    return out.some((x) => x === null) ? null : (out as Expr[])
+  }
+  switch (e.kind) {
+    case 'add': {
+      const terms = all(e.terms)
+      return terms && add(...terms)
+    }
+    case 'mul': {
+      const factors = all(e.factors)
+      return factors && { ...e, factors }
+    }
+    case 'neg': {
+      const arg = f(e.arg)
+      return arg && neg(arg)
+    }
+    case 'div': {
+      const parts = all([e.num, e.den])
+      return parts && div(parts[0], parts[1])
+    }
+    case 'pow': {
+      const parts = all([e.base, e.exp])
+      return parts && pow(parts[0], parts[1])
+    }
+    case 'root': {
+      const arg = f(e.arg)
+      return arg && { ...e, arg }
+    }
+    case 'fn': {
+      const arg = f(e.arg)
+      return arg && fn(e.name, arg)
+    }
+    case 'log': {
+      const parts = all([e.base, e.arg])
+      return parts && log(parts[0], parts[1])
+    }
+    default:
+      return null
+  }
+}
+
+// Koeffizient von u^k (Polynom in den übrigen Buchstaben)
+function coefficientOf(p: Poly, u: string, k: number): Poly {
+  return p.filter((term) => (term.mono.find(([a]) => a === u)?.[1] ?? 0) === k).map((term) => ({ mono: term.mono.filter(([a]) => a !== u), coef: term.coef }))
+}
+
+// Zähler von Seite minus Seite als Polynom in u (gekürzt); null, wenn das nicht geht
+function zeroPoly(e: Equation, u: string): { n: Poly; atoms: Atoms } | null {
+  const atoms = newAtoms(u)
+  const l = toRat(e.lhs, atoms)
+  const r = toRat(e.rhs, atoms)
+  if (!l || !r) return null
+  return { n: reduceFrac(fracAdd(l, fracNeg(r))).num, atoms }
+}
+
+// Ist die Gleichung quadratisch in u, mit u und einer Zahl bzw. einem Teil ohne u (u^2 - au - b)?
+function isQuadratic(e: Equation, u: string): boolean {
+  const z = zeroPoly(e, u)
+  return z !== null && degreeIn(z.n, u) === 2 && coefficientOf(z.n, u, 1).length > 0 && coefficientOf(z.n, u, 0).length > 0
+}
+
+function substituteDraft(e: Equation, t: string, wrong: SubstituteMistake | null): Draft | null {
+  const used = variablesOf(e.lhs, e.rhs)
+  const name = SUBSTITUTE_NAMES.find((n) => n !== t && !used.includes(n))
+  if (!name) return null
+  const u = variable(name)
+  for (const plan of substitutionPlans(e, t)) {
+    const l = replaced(e.lhs, t, plan, u, null)
+    const r = replaced(e.rhs, t, plan, u, null)
+    if (!l || !r || !isQuadratic(eq(l, r), name)) continue
+    const substitution = { name, expr: plan.block }
+    if (!wrong) return { kind: 'substitute', substitution, operand: plan.block, after: eq(l, r) }
+    const wl = replaced(e.lhs, t, plan, u, wrong)
+    const wr = replaced(e.rhs, t, plan, u, wrong)
+    if (!wl || !wr || (key(wl) === key(l) && key(wr) === key(r))) return null
+    return { kind: 'substitute', substitution, operand: plan.block, after: eq(mergedNumbers(wl), mergedNumbers(wr)) }
+  }
+  return null
+}
+
+// Zahlen in Produkten zusammenfassen: 2 \cdot 2u → 4u (nach einem Fehler beim Ersetzen)
+function mergedNumbers(e: Expr): Expr {
+  const r = rebuilt(e, mergedNumbers) ?? e
+  if (r.kind !== 'mul') return r
+  const flat = r.factors.flatMap((f) => (f.kind === 'mul' ? f.factors : [f]))
+  const numbers = flat.filter((f): f is Extract<Expr, { kind: 'num' }> => f.kind === 'num')
+  if (numbers.length < 2) return flat.length === r.factors.length ? r : mul(...flat)
+  const product = numbers.reduce((acc, f) => ratMul(acc, f.value), rat(1))
+  return mul(num(product), ...flat.filter((f) => f.kind !== 'num'))
+}
+
+// Typischer Fehler beim Substituieren (Gleichung danach; null, wenn es nicht passt)
+export function substituteWrong(e: Equation, t: string, wrong: SubstituteMistake): Equation | null {
+  return substituteDraft(e, t, wrong)?.after ?? null
+}
+
+// u = … nach der pq-Formel: zurück einsetzen, e^x = …
+function resubstituteDraft(e: Equation, sub: Substitution): Draft | null {
+  const isU = (x: Expr) => isVar(x, sub.name)
+  if (isU(e.lhs) && !contains(e.rhs, sub.name)) return { kind: 'resubstitute', substitution: sub, after: eq(sub.expr, e.rhs) }
+  if (isU(e.rhs) && !contains(e.lhs, sub.name)) return { kind: 'resubstitute', substitution: sub, after: eq(sub.expr, e.lhs) }
+  return null
+}
+
+// Koeffizient mal Potenz der Unbekannten: 2yu, -\frac{b}{a}u, (a + b)x
+function timesUnknown(c: Expr, power: Expr): Expr {
+  if (isOneExpr(c)) return power
+  if (c.kind === 'neg') return neg(timesUnknown(c.arg, power))
+  if (c.kind === 'num' && ratSign(c.value) < 0) return neg(timesUnknown(num(ratNeg(c.value)), power))
+  if (c.kind === 'add' && c.terms.every(isNegative)) return neg(mul(add(...c.terms.map(negated)), power))
+  if (c.kind === 'mul') return mul(...c.factors, power)
+  return mul(c, power)
+}
+
+// a u^2 + b u + c (Summanden mit Vorzeichen)
+function quadraticExpr(a: Expr, b: Expr, c: Expr, u: Expr): Expr {
+  return add(timesUnknown(a, pow(u, num(2))), timesUnknown(b, u), ...termsOf(c))
+}
+
+// Steht die Normalform u^2 + pu + q = 0 schon da (vorn u^2 mit der Zahl 1)?
+function isNormalized(e: Equation, u: string): boolean {
+  return isZeroExpr(e.rhs) && e.lhs.kind === 'add' && key(e.lhs.terms[0]) === key(pow(variable(u), num(2))) && isQuadratic(e, u)
+}
+
+// p und q der Normalform (Gleichung = 0 bzw. irgendeine quadratische Gleichung, durch die Zahl vor u^2 geteilt)
+function pqParts(e: Equation, u: string): { p: Frac; q: Frac; atoms: Atoms } | null {
+  const z = zeroPoly(e, u)
+  if (!z || degreeIn(z.n, u) !== 2) return null
+  const a = fracOf(coefficientOf(z.n, u, 2))
+  const b = coefficientOf(z.n, u, 1)
+  const c = coefficientOf(z.n, u, 0)
+  if (b.length === 0 || c.length === 0) return null
+  return { p: fracDiv(fracOf(b), a), q: fracDiv(fracOf(c), a), atoms: z.atoms }
+}
+
+// Typische Fehler bei der pq-Formel: Vorzeichen von p nicht gewechselt, -q mit falschem Vorzeichen,
+// unter der Wurzel p^2 statt \left(\frac{p}{2}\right)^2
+export type PqMistake = 'sign' | 'q' | 'half'
+
+const isSquareNumber = (n: bigint) => {
+  if (n < 0n) return false
+  const r = BigInt(Math.round(Math.sqrt(Number(n))))
+  return r * r === n
+}
+
+// Ist der Bruch ein Quadrat (dann ist die Wurzel kein Wurzelausdruck mehr)?
+function isPerfectSquare(f: Frac): boolean {
+  const r = reduceFrac(f)
+  const n = factorize(r.num)
+  const even = (x: Factored) => isSquareNumber(x.coef.n < 0n ? -1n : x.coef.n) && isSquareNumber(x.coef.d) && x.factors.every((g) => g.exp % 2 === 0)
+  return ratSign(n.coef) > 0 && even(n) && even(r.den)
+}
+
+// Beide Lösungen -\frac{p}{2} \pm \sqrt{\left(\frac{p}{2}\right)^2 - q}, die Wurzel als Summe
+// \frac{a^2}{4} + b; null, wenn die Wurzel aufgeht
+function pqRoots(parts: { p: Frac; q: Frac; atoms: Atoms }, wrong: PqMistake | null): { plus: Expr; minus: Expr; radicand: Expr } | null {
+  const { p, q, atoms } = parts
+  const h = fracScale(p, rat(1, 2))
+  const center = niceFrac(wrong === 'sign' ? h : fracNeg(h), atoms)
+  const half = wrong === 'half' ? p : h
+  const square = fracMul(half, half)
+  const minusQ = wrong === 'q' ? q : fracNeg(q)
+  if (!wrong && isPerfectSquare(fracAdd(square, minusQ))) return null
+  // \left(\frac{p}{2}\right)^2 ausgerechnet (\frac{a^2}{4}), mit einer Summe als Potenz: \left(\frac{a + b}{2}\right)^2
+  const halfExpr = niceFrac(half, atoms)
+  const sum = subterms(halfExpr).some((x) => x.kind === 'add')
+  const squareExpr = sum ? pow(isNegative(halfExpr) ? negated(halfExpr) : halfExpr, num(2)) : niceFrac(square, atoms)
+  const radicand = add(squareExpr, ...termsOf(niceFrac(minusQ, atoms)))
+  const r = sqrt(radicand)
+  return { plus: add(...termsOf(center), r), minus: add(...termsOf(center), neg(r)), radicand }
+}
+
+// Umgebung mit dem Wert der Variable und, bei einer Substitution, dem von u
+function withValue(env: Env, target: string, value: number, sub: Substitution | undefined): Env {
+  const out: Record<string, number> = { ...env, [target]: value }
+  if (sub) out[sub.name] = evaluate(sub.expr, out)
+  return out
+}
+
+// Welche der beiden Lösungen passt? Zahlen für die Buchstaben zufällig wählen, aus jeder Lösung x
+// ausrechnen (bei einer Substitution zurück eingesetzt) und prüfen: x positiv, Bedingungen der
+// Aufgabe erfüllt, die Gleichung vom Anfang gilt. Passt immer genau eine, ist sie es; sonst null.
+function chooseRoot(roots: readonly [Expr, Expr], u: string, ctx: Context): { index: 0 | 1; reason: RejectReason } | null {
+  const targetOf = (r: Expr): Expr | null => {
+    if (u === ctx.target) return r
+    if (!ctx.sub || u !== ctx.sub.name) return null
+    const back = solveEquation(eq(ctx.sub.expr, r), ctx.target)
+    return back && !contains(back.result, ctx.target) ? back.result : null
+  }
+  const xs = roots.map(targetOf)
+  const letters = variablesOf(ctx.original.lhs, ctx.original.rhs, ...roots).filter((n) => n !== ctx.target && n !== ctx.sub?.name)
+  const rng = createRng(`pq:${equationToLatex(ctx.original)}:${toLatex(roots[0])}`)
+  const valid = [0, 0]
+  const negativeRoot = [0, 0]
+  const negativeTarget = [0, 0]
+  let decisive = 0
+  for (let attempt = 0; attempt < 160 && decisive < 12; attempt++) {
+    const env: Record<string, number> = {}
+    for (const name of letters) env[name] = 0.3 * (8 / 0.3) ** rng.next()
+    const status = roots.map((root, i) => {
+      const r = evaluate(root, env)
+      const x = xs[i] ? evaluate(xs[i]!, env) : Number.NaN
+      const ok =
+        Number.isFinite(x) &&
+        x > 1e-9 &&
+        conditionsHold(ctx.conditions, withValue(env, ctx.target, x, ctx.sub)) &&
+        holds(ctx.original, withValue(env, ctx.target, x, ctx.sub)) === true
+      return { r, x, ok }
+    })
+    // keine reelle Lösung (unter der Wurzel negativ) oder keine passt: sagt nichts
+    if (status.some((s) => !Number.isFinite(s.r)) || !status.some((s) => s.ok)) continue
+    decisive++
+    status.forEach((s, i) => {
+      if (s.ok) valid[i]++
+      if (s.r < 0) negativeRoot[i]++
+      if (Number.isFinite(s.x) && s.x <= 1e-9) negativeTarget[i]++
+    })
+  }
+  if (decisive === 0) return null
+  const index = valid[0] === decisive && valid[1] === 0 ? 0 : valid[1] === decisive && valid[0] === 0 ? 1 : null
+  if (index === null) return null
+  const other = 1 - index
+  const reason: RejectReason =
+    negativeRoot[other] === decisive && negativeRoot[index] === 0 ? 'negative' : negativeTarget[other] === decisive ? 'targetNegative' : 'condition'
+  return { index, reason }
+}
+
+// pq-Formel auf u^2 + pu + q = 0: beide Lösungen, die passende steht in der Gleichung danach, die
+// andere als operand
+function pqDraft(e: Equation, u: string, ctx: Context): Draft | null {
+  const parts = pqParts(e, u)
+  const roots = parts && pqRoots(parts, null)
+  if (!roots) return null
+  const choice = chooseRoot([roots.plus, roots.minus], u, ctx)
+  if (!choice) return null
+  const [chosen, rejected] = choice.index === 0 ? [roots.plus, roots.minus] : [roots.minus, roots.plus]
+  return { kind: 'pq', operand: rejected, reason: choice.reason, after: eq(variable(u), chosen), requires: roots.radicand }
+}
+
+// Typischer Fehler bei der pq-Formel (Gleichung danach, mit demselben Vorzeichen vor der Wurzel wie
+// die passende Lösung; null, wenn es nicht passt)
+export function pqWrong(step: RearrangeStep, wrong: PqMistake): Equation | null {
+  if (step.kind !== 'pq' || step.after.lhs.kind !== 'var') return null
+  const u = step.after.lhs.name
+  const parts = pqParts(step.before, u)
+  const roots = parts && pqRoots(parts, wrong)
+  if (!roots) return null
+  const last = termsOf(step.after.rhs).at(-1)
+  return eq(variable(u), last?.kind === 'neg' ? roots.minus : roots.plus)
+}
+
+// Gleichung nach der pq-Formel als LaTeX: u_{1,2} = \frac{a}{2} \pm \sqrt{…} (die Gleichung selbst
+// enthält die passende Lösung); sonst wie gewohnt
+export function stepEquationLatex(kind: StepKind, e: Equation): string {
+  if (kind !== 'pq' || e.lhs.kind !== 'var' || e.rhs.kind !== 'add') return equationToLatex(e)
+  const terms = e.rhs.terms
+  const last = terms[terms.length - 1]
+  const radical = last.kind === 'neg' ? last.arg : last
+  return `${e.lhs.name}_{1,2} = ${toLatex(add(...terms.slice(0, -1)))} \\pm ${toLatex(radical)}`
+}
+
+// Quadratische Gleichung in der Unbekannten t (keine Wurzel, kein Baustein): alles nach links,
+// durch die Zahl vor t^2 teilen, pq-Formel
+function quadraticStep(e: Equation, t: string, diff: Poly, atoms: Atoms, ctx: Context): Draft | null {
+  const zero = zeroForm(diff, t, atoms)
+  if (!zero) return null
+  const { a, b, c } = zero
+  if (!(isZeroExpr(e.rhs) && key(e.lhs) === key(zero.equation.lhs))) return { kind: 'zero', after: zero.equation }
+  const lead = constValue(a)
+  if (!(lead && isOne(lead))) {
+    const p = fracDiv(fracOf(b), fracOf(a))
+    const q = fracDiv(fracOf(c), fracOf(a))
+    return { kind: 'normalize', operand: polyToExpr(a, atoms), after: eq(quadraticExpr(num(1), niceFrac(p, atoms), niceFrac(q, atoms), variable(t)), num(0)) }
+  }
+  return pqDraft(e, t, ctx)
+}
+
+// au^2 + bu + c = 0 aus dem Polynom (vorn mit Plus); null, wenn es keine solche Gleichung ist
+function zeroForm(diff: Poly, u: string, atoms: Atoms): { a: Poly; b: Poly; c: Poly; equation: Equation } | null {
+  let a = coefficientOf(diff, u, 2)
+  let b = coefficientOf(diff, u, 1)
+  let c = coefficientOf(diff, u, 0)
+  if (degreeIn(diff, u) !== 2 || a.length !== 1 || b.length === 0 || c.length === 0) return null
+  if (ratSign(a[0].coef) < 0) [a, b, c] = [a, b, c].map((p) => polyScale(p, rat(-1)))
+  return { a, b, c, equation: eq(quadraticExpr(polyToExpr(a, atoms), polyToExpr(b, atoms), polyToExpr(c, atoms), variable(u)), num(0)) }
+}
+
+// Typische Fehler auf dem Weg zur Normalform: beim Bringen auf eine Seite das Vorzeichen nicht
+// gewechselt (u^2 - au = b → u^2 - au + b = 0), beim Teilen nur u^2 geteilt
+// (2u^2 - 3yu - 2 = 0 → u^2 - 3yu - 2 = 0); null, wenn es nicht passt
+export function quadraticWrong(step: RearrangeStep, t: string): Equation | null {
+  const u = step.unknown ?? t
+  const atoms = newAtoms(u)
+  if (step.kind === 'zero') {
+    const l = toPoly(step.before.lhs, atoms)
+    const r = toPoly(step.before.rhs, atoms)
+    if (!l || !r || r.length === 0) return null
+    return zeroForm(polyAdd(l, r), u, atoms)?.equation ?? null
+  }
+  if (step.kind === 'normalize') {
+    const z = toPoly(step.before.lhs, atoms)
+    if (!z) return null
+    return eq(quadraticExpr(num(1), polyToExpr(coefficientOf(z, u, 1), atoms), polyToExpr(coefficientOf(z, u, 0), atoms), variable(u)), num(0))
+  }
+  return null
+}
+
 // Variable mehrfach: Wurzel allein stellen und quadrieren, Doppelbruch erweitern, Nenner beseitigen,
 // ausmultiplizieren, sortieren, ausklammern, teilen
-function rational(e: Equation, t: string): Draft | null {
+function rational(e: Equation, t: string, ctx: Context): Draft | null {
   const r = complexRoot(e, t)
   if (r) return radicalStep(e, t, r)
 
@@ -1209,6 +1773,12 @@ function rational(e: Equation, t: string): Draft | null {
   if (powered) return powered
   const logged = logBothStep(e, t)
   if (logged) return logged
+
+  // Normalform u^2 + pu + q = 0 (auch mit Brüchen wie \frac{b}{a}u): pq-Formel
+  if (isNormalized(e, t)) {
+    const pq = pqDraft(e, t, ctx)
+    if (pq) return pq
+  }
 
   const { atoms, u, uExpr, block } = unknownAtoms(e, t)
   // mit einem Baustein wie e^x: „Alles mit $e^x$ nach links", „$e^x$ ausklammern"
@@ -1243,6 +1813,8 @@ function rational(e: Equation, t: string): Draft | null {
   }
 
   const diff = polyAdd(pl, polyScale(pr, rat(-1)))
+  // quadratisch: alles nach links, Normalform, pq-Formel
+  if (degreeIn(diff, u) === 2 && u === t) return quadraticStep(e, t, diff, atoms, ctx)
   if (degreeIn(diff, u) !== 1) return null
   const uTerms = diff.filter((term) => term.mono.some(([a]) => a === u))
   const rest = diff.filter((term) => !term.mono.some(([a]) => a === u))
@@ -1295,14 +1867,19 @@ function collectSign(coefficient: Poly, rest: Poly): 1 | -1 {
 }
 
 // Nächster Schritt; null, wenn fertig. Wirft, wenn sich die Gleichung so nicht auflösen lässt.
-function nextStep(e: Equation, t: string): Draft | null {
+function nextStep(e: Equation, t: string, ctx: Context): Draft | null {
   const parts = split(e, t)
   if (parts === null) throw new Error('Die gesuchte Variable kommt nicht vor')
+  // verschiedene Formen eines Bausteins (e^{2x} und e^x), quadratisch: substituieren (nur einmal)
+  if (!ctx.sub) {
+    const substituted = substituteDraft(e, t, null)
+    if (substituted) return substituted
+  }
   const combinedLogs = logCombineStep(e, t)
   if (combinedLogs) return combinedLogs
   const law = logLawStep(e, t)
   if (law) return law
-  if (parts === 'both') return mustStep(rational(e, t))
+  if (parts === 'both') return mustStep(rational(e, t, ctx))
   const { s, o, side } = parts
   if (s.kind === 'var') {
     const result = finalForm(o)
@@ -1310,11 +1887,11 @@ function nextStep(e: Equation, t: string): Draft | null {
     return { kind: 'finish', after: eq(s, result), swapOnly: key(result) === key(o) }
   }
   if (complexRoot(e, t) && !(s.kind === 'root' && !isTargetRoot(s, t))) {
-    const draft = rational(e, t)
+    const draft = rational(e, t, ctx)
     if (draft) return draft
   }
   if (peelable(s, t) && !(s.kind === 'add' && complexRoot(e, t))) return mustStep(peel(s, o, side, t))
-  return mustStep(rational(e, t))
+  return mustStep(rational(e, t, ctx))
 }
 
 // Summe ohne Brüche, in der sich nichts zusammenfassen lässt (b + \sqrt{\frac{y}{a}}): schon fertig
@@ -1333,15 +1910,39 @@ function mustStep(d: Draft | null): Draft {
   return d
 }
 
-// Löst die Gleichung nach t auf; null, wenn das mit diesen Schritten nicht geht
-export function solveEquation(equation: Equation, target: string): RearrangeSolution | null {
+// Löst eine Aufgabe (mit ihren Bedingungen)
+export const solveTask = (task: { readonly equation: Equation; readonly target: string; readonly conditions: readonly Condition[] }) =>
+  solveEquation(task.equation, task.target, { conditions: task.conditions })
+
+// Löst die Gleichung nach t auf; null, wenn das mit diesen Schritten nicht geht. Mit den Bedingungen
+// der Aufgabe wird die passende Lösung der pq-Formel gewählt; mit einer Substitution geht es ab einer
+// Gleichung in u weiter (beim Weiterrechnen mit einem typischen Fehler).
+export function solveEquation(equation: Equation, target: string, options: SolveOptions = {}): RearrangeSolution | null {
   const steps: RearrangeStep[] = []
   let current = equation
+  let sub = options.substitution
+  const conditions = options.conditions ?? []
   try {
     for (let i = 0; i < MAX_STEPS; i++) {
-      const draft = nextStep(current, target)
-      if (!draft) return { target, steps, result: current.rhs, requires: steps.flatMap((x) => (x.requires ? [x.requires] : [])) }
-      steps.push({ ...draft, before: current })
+      // nach dem Substituieren: nach u auflösen, dann zurück einsetzen
+      const inU = sub !== undefined && (contains(current.lhs, sub.name) || contains(current.rhs, sub.name))
+      const t = inU ? sub!.name : target
+      const ctx: Context = { original: equation, target, conditions, sub }
+      const draft = (inU ? resubstituteDraft(current, sub!) : null) ?? nextStep(current, t, ctx)
+      if (!draft) {
+        return {
+          target,
+          steps,
+          result: current.rhs,
+          requires: steps.flatMap((x) => (x.requires ? [x.requires] : [])),
+          ...(sub ? { substitution: sub } : {}),
+        }
+      }
+      const unknown = inU && draft.kind !== 'resubstitute' ? { unknown: sub!.name } : {}
+      steps.push({ ...draft, ...unknown, before: current })
+      if (draft.kind === 'substitute') sub = draft.substitution
+      // nach der pq-Formel: die passende Lösung wählen
+      if (draft.kind === 'pq') steps.push({ kind: 'choose', operand: draft.operand, reason: draft.reason, ...unknown, before: draft.after, after: draft.after })
       current = draft.after
     }
   } catch {

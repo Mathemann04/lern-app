@@ -1,10 +1,10 @@
 import { toLatex } from '../expr/print.ts'
 import { contains, subterms } from '../expr/compare.ts'
 import { holds, samplePoints } from '../rearrange/check.ts'
-import { solveEquation } from '../rearrange/isolate.ts'
+import { solveTask } from '../rearrange/isolate.ts'
 import { type RearrangeTask, taskLatex, taskVariables } from '../rearrange/task.ts'
 import { type Rng, createRng } from '../random/rng.ts'
-import { type KitTask, buildLevel1, buildLevel2, buildLevel3, buildLevel4, buildLevel4Trig } from './rearrangeKit.ts'
+import { type KitTask, buildLevel1, buildLevel2, buildLevel3, buildLevel4, buildLevel4Quadratic, buildLevel4Trig } from './rearrangeKit.ts'
 import type { Level, TaskRef } from './taskNumber.ts'
 
 // Vorlagen für Umstell-Aufgaben je Stufe (siehe docs/PLAN-M3.md, „Stufen"). Jede Vorlage baut aus
@@ -79,7 +79,17 @@ const level4Trig: RearrangeTemplate = {
   share: 0.35,
 }
 
-export const REARRANGE_TEMPLATES: readonly RearrangeTemplate[] = [level1Kit, level2Kit, level3Kit, level4Kit, level4Trig]
+// Teil 6c: Substitution und pq-Formel; der Anteil gilt unter den Nummern, die nicht schon zu 6b gehören
+const level4Quadratic: RearrangeTemplate = {
+  id: 'baukasten-4-quadratisch',
+  level: 4,
+  label: 'Baukasten: Substitution und pq-Formel',
+  build: (rng) => buildLevel4Quadratic(rng).task,
+  buildLabeled: buildLevel4Quadratic,
+  share: 0.4,
+}
+
+export const REARRANGE_TEMPLATES: readonly RearrangeTemplate[] = [level1Kit, level2Kit, level3Kit, level4Kit, level4Trig, level4Quadratic]
 
 export function rearrangeTemplatesForLevel(level: Level): RearrangeTemplate[] {
   return REARRANGE_TEMPLATES.filter((t) => t.level === level)
@@ -112,7 +122,7 @@ function isGood(t: RearrangeTask, level: Level, kit: boolean): boolean {
     // Doppelbrüche erst ab Stufe 3
     if (level <= 2 && hasNestedFraction(t)) return false
   }
-  const solution = solveEquation(t.equation, t.target)
+  const solution = solveTask(t)
   if (!solution || contains(solution.result, t.target)) return false
   if (kit && solution.steps.length < MIN_STEPS[level]) return false
   if (toLatex(solution.result).length > MAX_RESULT_LATEX[level]) return false
@@ -127,7 +137,8 @@ const MIN_STEPS: Record<Level, number> = { 1: 3, 2: 3, 3: 5, 4: 6, 5: 6 }
 // Längstes Ergebnis (LaTeX) je Stufe
 const MAX_RESULT_LATEX: Record<Level, number> = { 1: 90, 2: 90, 3: 90, 4: 120, 5: 120 }
 
-// Vorlage mit festem Anteil (share), vorweg mit eigenem Zufall gewählt; sonst null
+// Vorlage mit festem Anteil (share), vorweg mit eigenem Zufall gewählt; sonst null. Bei mehreren
+// Vorlagen gilt der Anteil einer späteren unter den Nummern, die keine frühere genommen hat.
 function sharedPick(ref: TaskRef, templates: readonly RearrangeTemplate[]): RearrangeTemplate | null {
   const rng = createRng(`umstellen-anteil:${ref.level}:${ref.seed}`)
   return templates.find((t) => t.share !== undefined && rng.next() < t.share) ?? null

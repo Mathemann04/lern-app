@@ -2,14 +2,15 @@ import { describe, expect, it } from 'vitest'
 import { key } from '../expr/compare.ts'
 import { latexProblem } from '../expr/latexChecks.ts'
 import { equationToLatex, toLatex } from '../expr/print.ts'
-import { type Expr, eq } from '../expr/types.ts'
+import { type Expr, PI, div, eq, num, variable } from '../expr/types.ts'
 import { parseLatex } from '../parse/latex.ts'
 import { createRng } from '../random/rng.ts'
 import { generateRearrangeTask, isRearrangeLevelAvailable } from '../tasks/rearrangeTerms.ts'
 import { LEVELS } from '../tasks/taskNumber.ts'
-import { holds, samplePoints } from './check.ts'
+import { holds, samplePoints, withSubstitution } from './check.ts'
 import { rearrangeWrongAnswers } from './errorRules.ts'
-import { STEP_NAMES, finalForm, solveEquation } from './isolate.ts'
+import { STEP_NAMES, finalForm, solveEquation, solveTask, stepEquationLatex } from './isolate.ts'
+import type { Condition } from './task.ts'
 
 const p = (latex: string): Expr => {
   const r = parseLatex(latex)
@@ -18,10 +19,10 @@ const p = (latex: string): Expr => {
 }
 
 // Rechenweg als lesbare Zeilen „Schritt: Gleichung"
-function lines(lhs: string, rhs: string, target = 'x'): string[] {
-  const solution = solveEquation(eq(p(lhs), p(rhs)), target)
+function lines(lhs: string, rhs: string, target = 'x', conditions: readonly Condition[] = []): string[] {
+  const solution = solveEquation(eq(p(lhs), p(rhs)), target, { conditions })
   if (!solution) throw new Error('nicht gelöst')
-  return solution.steps.map((s) => `${STEP_NAMES[s.kind]}: ${equationToLatex(s.after)}`)
+  return solution.steps.map((s) => `${STEP_NAMES[s.kind]}: ${stepEquationLatex(s.kind, s.after)}`)
 }
 
 describe('Rechenweg', () => {
@@ -110,8 +111,73 @@ describe('Rechenweg', () => {
   })
 
   it('gibt auf, wenn sich die Gleichung so nicht auflösen lässt', () => {
-    expect(solveEquation(eq(p('y'), p('x^2+x')), 'x')).toBeNull()
+    expect(solveEquation(eq(p('y'), p('x^3+x')), 'x')).toBeNull()
     expect(solveEquation(eq(p('y'), p('a')), 'x')).toBeNull()
+  })
+})
+
+const half: Condition[] = [{ lhs: variable('x'), rel: '<', rhs: div(PI, num(2)) }]
+
+describe('Rechenweg Stufe 4, Teil 6c: Substitution und pq-Formel', () => {
+  it('e^{2x} und e^x: substituieren, alles nach links, pq-Formel, Scheinlösung verwerfen, zurück einsetzen', () => {
+    expect(lines('e^{2x}-ae^{x}', 'b')).toEqual([
+      'Substituieren: u^{2} - au = b',
+      'Alles auf eine Seite: u^{2} - au - b = 0',
+      'pq-Formel anwenden: u_{1,2} = \\frac{a}{2} \\pm \\sqrt{\\frac{a^{2}}{4} + b}',
+      'Passende Lösung wählen: u = \\frac{a}{2} + \\sqrt{\\frac{a^{2}}{4} + b}',
+      'Zurück einsetzen: e^{x} = \\frac{a}{2} + \\sqrt{\\frac{a^{2}}{4} + b}',
+      'Zu einem Bruch zusammenfassen: e^{x} = \\frac{a + \\sqrt{a^{2} + 4b}}{2}',
+      'Logarithmieren: x = \\ln\\left(\\frac{a + \\sqrt{a^{2} + 4b}}{2}\\right)',
+    ])
+  })
+
+  it('e^x und e^{-x}: mit u malnehmen; die negative Lösung fällt weg, weil e^x positiv ist', () => {
+    const solution = solveEquation(eq(p('y'), p('\\frac{e^{x}-e^{-x}}{2}')), 'x')!
+    expect(toLatex(solution.result)).toBe('\\ln(y + \\sqrt{y^{2} + 1})')
+    expect(solution.substitution?.name).toBe('u')
+    const choose = solution.steps.find((s) => s.kind === 'choose')!
+    expect(choose.reason).toBe('negative')
+    expect(toLatex(choose.operand!)).toBe('y - \\sqrt{y^{2} + 1}')
+    expect(solution.requires.map(toLatex)).toContain('y^{2} + 1')
+  })
+
+  it('e^x + e^{-x}: beide Lösungen positiv, x > 0 entscheidet', () => {
+    const solution = solveEquation(eq(p('\\frac{e^{x}+e^{-x}}{2}'), p('y')), 'x')!
+    expect(toLatex(solution.result)).toBe('\\ln(y + \\sqrt{y^{2} - 1})')
+    expect(solution.steps.find((s) => s.kind === 'choose')!.reason).toBe('targetNegative')
+  })
+
+  it('zwei Logarithmen: danach quadratisch in x, ohne Substitution', () => {
+    expect(lines('\\log_{a}x+\\log_{a}(x+b)', 'c')).toEqual([
+      'Logarithmen zusammenfassen: \\log_{a}(x(x + b)) = c',
+      'e hoch beide Seiten: x(x + b) = a^{c}',
+      'Ausmultiplizieren: x^{2} + bx = a^{c}',
+      'Alles auf eine Seite: x^{2} + bx - a^{c} = 0',
+      'pq-Formel anwenden: x_{1,2} = -\\frac{b}{2} \\pm \\sqrt{\\frac{b^{2}}{4} + a^{c}}',
+      'Passende Lösung wählen: x = -\\frac{b}{2} + \\sqrt{\\frac{b^{2}}{4} + a^{c}}',
+      'Ergebnis: x = \\frac{\\sqrt{b^{2} + 4a^{c}} - b}{2}',
+    ])
+  })
+
+  it('Zahl vor u^2: erst durch sie teilen (Normalform)', () => {
+    expect(lines('2e^{2x}-3ye^{x}', '2').slice(1, 4)).toEqual([
+      'Alles auf eine Seite: 2u^{2} - 3yu - 2 = 0',
+      'Normalform herstellen: u^{2} - \\frac{3y}{2}u - 1 = 0',
+      'pq-Formel anwenden: u_{1,2} = \\frac{3y}{4} \\pm \\sqrt{\\frac{9y^{2}}{16} + 1}',
+    ])
+  })
+
+  it('x und √x, x^4 und x^2, cos^2 x und sin x', () => {
+    expect(toLatex(solveEquation(eq(p('x-a\\sqrt{x}'), p('b')), 'x')!.result)).toBe('\\frac{(a + \\sqrt{a^{2} + 4b})^{2}}{4}')
+    expect(toLatex(solveEquation(eq(p('x^4-ax^2'), p('b')), 'x')!.result)).toBe('\\sqrt{\\frac{a + \\sqrt{a^{2} + 4b}}{2}}')
+    const trig = lines('\\cos^2x', 'a\\sin x', 'x', half)
+    expect(trig[0]).toBe('Quadrat ersetzen: 1 - \\sin^{2} x = a\\sin x')
+    expect(trig[1]).toBe('Substituieren: 1 - u^{2} = au')
+    expect(trig.at(-1)).toBe('Umkehrfunktion auf beiden Seiten: x = \\arcsin\\left(\\frac{\\sqrt{a^{2} + 4} - a}{2}\\right)')
+  })
+
+  it('Wurzel mit Zahl im Nenner: so erweitert, dass der Nenner ein Quadrat ist', () => {
+    expect(toLatex(solveEquation(eq(p('y'), p('3x(x+7)')), 'x')!.result)).toBe('\\frac{\\sqrt{12y + 441} - 21}{6}')
   })
 })
 
@@ -200,14 +266,15 @@ describe('Zufallsaufgaben je Stufe', () => {
         const { task } = generateRearrangeTask({ level, seed })
         const label = `${level}-${seed}: ${equationToLatex(task.equation)} nach ${task.target}`
         seen.add(label.slice(label.indexOf(':')))
-        const solution = solveEquation(task.equation, task.target)
+        const solution = solveTask(task)
         expect(solution, label).not.toBeNull()
-        const points = samplePoints(task, solution!.result, createRng(`test:${seed}`), 16, solution!.requires)
+        // nach einer Substitution stehen Gleichungen in u dazwischen: Prüfstellen mit u = e^x
+        const points = withSubstitution(samplePoints(task, solution!.result, createRng(`test:${seed}`), 16, solution!.requires), solution!.substitution)
         expect(points.length, label).toBeGreaterThanOrEqual(8)
         for (const point of points) expect(holds(task.equation, point), label).toBe(true)
         for (const step of solution!.steps) {
           for (const point of points) expect(holds(step.after, point), `${label}, ${STEP_NAMES[step.kind]}`).toBe(true)
-          expect(latexProblem(equationToLatex(step.after)), label).toBeNull()
+          expect(latexProblem(stepEquationLatex(step.kind, step.after)), label).toBeNull()
         }
         expect(key(finalForm(solution!.result)), label).toBe(key(solution!.result))
         for (const wrong of rearrangeWrongAnswers(task, solution!)) {

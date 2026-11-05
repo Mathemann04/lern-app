@@ -23,29 +23,49 @@ import {
   explainMove,
   explainRearrangeError,
   explainResult,
+  explainChoose,
   expMoves,
   factorMoves,
   logMoves,
   moveMoves,
   multiplyMoves,
   negateMoves,
+  normalizeMoves,
+  pqMoves,
   pythagorasMoves,
   reciprocalMoves,
   rearrangeTaskHint,
+  resubstituteMoves,
   signed,
+  substituteMoves,
   tanQuotientMoves,
   trigMoves,
+  zeroMoves,
 } from '../explain/rearrangeTexts.ts'
 import type { Explanation } from '../explain/texts.ts'
 import { contains, subterms } from '../expr/compare.ts'
-import { FN_LATEX, equationToLatex, toLatex } from '../expr/print.ts'
+import { FN_LATEX, toLatex } from '../expr/print.ts'
 import { type Equation, type Expr, asRational, fn, sub } from '../expr/types.ts'
 import { readableLatex } from '../fraction/task.ts'
 import { factorize } from '../fraction/factor.ts'
 import { newAtoms, polyToExpr, toRat } from '../rearrange/algebra.ts'
 import { type RearrangeWrong, rearrangeWrongAnswers } from '../rearrange/errorRules.ts'
-import { ARC_OF, type RearrangeStep, type Side, type StepKind, TRIG_OF, hasTargetRoot, isNegative, negated, solveEquation, stepLabel } from '../rearrange/isolate.ts'
-import { type RearrangeTask, conditionsText, taskLatex } from '../rearrange/task.ts'
+import {
+  ARC_OF,
+  type RearrangeStep,
+  type Side,
+  type StepKind,
+  type Substitution,
+  TRIG_OF,
+  hasTargetRoot,
+  isNegative,
+  negated,
+  solveTask,
+  STEP_NAMES,
+  stepEquationLatex,
+  stepLabel,
+} from '../rearrange/isolate.ts'
+import { type RearrangeTask, conditionLatex, conditionsText, taskLatex } from '../rearrange/task.ts'
 import { type Rng, createRng } from '../random/rng.ts'
 import { ratSign } from '../rational.ts'
 import { generateRearrangeTask } from '../tasks/rearrangeTerms.ts'
@@ -71,11 +91,12 @@ export function planRearrangeTask(ref: TaskRef, focus?: string): GuidedTask {
 
 const sideName = (side: Side) => (side === 'lhs' ? 'linken' : 'rechten')
 const other = (side: Side): Side => (side === 'lhs' ? 'rhs' : 'lhs')
-const equationLatex = (e: Equation) => readableLatex(equationToLatex(e))
+// nach der pq-Formel mit beiden Lösungen: u_{1,2} = … \pm …
+const stepLatex = (kind: StepKind, e: Equation) => readableLatex(stepEquationLatex(kind, e))
 
 export function planRearrange(task: RearrangeTask, ref: TaskRef, focus?: string): GuidedTask {
   const t = task.target
-  const solution = solveEquation(task.equation, t)
+  const solution = solveTask(task)
   if (!solution) throw new Error(`Die Aufgabe ${taskLatex(task)} lässt sich nicht nach ${t} auflösen`)
   const wrongs = rearrangeWrongAnswers(task, solution)
   const steps: GuidedStep[] = []
@@ -87,15 +108,17 @@ export function planRearrange(task: RearrangeTask, ref: TaskRef, focus?: string)
   }
 
   solution.steps.forEach((step, i) => {
-    const after = equationLatex(step.after)
+    const after = stepLatex(step.kind, step.after)
     const rng = createRng(`umstellen-geführt:${ref.level}:${ref.seed}:${i}`)
     const resultWrongs = wrongs.filter((w) => w.stepIndex === i)
-    const move = ref.level <= ALL_MOVES_UNTIL_LEVEL || isJunction(step, t) ? moveQuestion(step, t) : null
+    // nach dem Substituieren wird nach u aufgelöst
+    const st = step.unknown ?? t
+    const move = ref.level <= ALL_MOVES_UNTIL_LEVEL || isJunction(step, st) ? moveQuestion(step, st, t) : null
     if (move) {
-      push(moveStep(step, solution.steps[i - 1], move, t, steps.length, rng, resultWrongs.length === 0 ? [after] : []))
+      push(moveStep(step, solution.steps[i - 1], move, st, steps.length, rng, resultWrongs.length === 0 ? [after] : []))
     }
     if (resultWrongs.length > 0) {
-      push(resultStep(step, solution.steps[i - 1], resultWrongs, t, steps.length, rng, focus))
+      push(resultStep(step, solution.steps[i - 1], resultWrongs, st, steps.length, rng, focus, { task, sub: solution.substitution }))
     } else if (!move) {
       // nur Seiten getauscht oder ohne typischen Fehler: steht gleich unter „Bisher"
       const last = steps.at(-1)
@@ -113,7 +136,7 @@ export function planRearrange(task: RearrangeTask, ref: TaskRef, focus?: string)
     note: conditionsText(task),
     answerLabel: t,
     steps,
-    ruleHint: rearrangeTaskHint(t, solution.steps.some((s) => s.kind === 'collect' || s.kind === 'expand')),
+    ruleHint: rearrangeTaskHint(t, solution.steps.some((s) => s.kind === 'collect' || s.kind === 'expand'), solution.substitution ? toLatex(solution.substitution.expr) : null, solution.steps.some((s) => s.kind === 'pq')),
     result,
     resultLatex: readableLatex(`${t} = ${toLatex(result)}`),
     ...resultNote(result),
@@ -139,6 +162,11 @@ function isJunction(step: RearrangeStep, t: string): boolean {
     case 'trig':
     case 'pythagoras':
     case 'tanQuotient':
+    case 'substitute':
+    case 'zero':
+    case 'normalize':
+    case 'pq':
+    case 'resubstitute':
       return true
     case 'multiply':
       return !step.side || contains(denominatorOf(step) ?? step.operand!, t)
@@ -188,9 +216,40 @@ function denominatorOf(step: RearrangeStep): Expr | null {
 
 type MoveQuestion = { readonly question: string; readonly wrong: readonly WrongMove[]; readonly hint: string }
 
-function moveQuestion(step: RearrangeStep, t: string): MoveQuestion | null {
+// t: die Unbekannte des Schritts (nach dem Substituieren u), target: die gesuchte Variable
+function moveQuestion(step: RearrangeStep, t: string, target: string): MoveQuestion | null {
   const side = step.side
   switch (step.kind) {
+    case 'substitute': {
+      const sub = step.substitution
+      if (!sub) return null
+      const block = toLatex(sub.expr)
+      const kind = substitutionKind(sub)
+      const inverse = sub.expr.kind === 'fn' && ARC_OF[sub.expr.name] ? FN_LATEX[ARC_OF[sub.expr.name]!] : sub.expr.kind === 'fn' ? '\\exp' : '\\ln'
+      return {
+        question: `$${target}$ steckt in verschiedenen Potenzen von $${block}$. Was machst du zuerst?`,
+        wrong: substituteMoves(block, kind, kind === 'power' || kind === 'trig' ? inverse : null),
+        hint: REARRANGE_HINTS.substitute,
+      }
+    }
+    case 'zero':
+      return { question: `Die Gleichung ist quadratisch in $${t}$. Was machst du zuerst?`, wrong: zeroMoves(t), hint: REARRANGE_HINTS.zero }
+    case 'normalize':
+      return step.operand
+        ? { question: `Vor $${t}^2$ steht $${toLatex(step.operand)}$. Was machst du vor der $pq$-Formel?`, wrong: normalizeMoves(t, toLatex(step.operand)), hint: REARRANGE_HINTS.normalize }
+        : null
+    case 'pq':
+      return { question: `Die Gleichung hat die Form $${t}^2 + p${t} + q = 0$. Wie geht es weiter?`, wrong: pqMoves(t), hint: REARRANGE_HINTS.pq }
+    case 'resubstitute':
+      return step.substitution
+        ? {
+            question: `$${step.substitution.name}$ ist bekannt, gesucht ist aber $${target}$. Wie geht es weiter?`,
+            wrong: resubstituteMoves(step.substitution.name, toLatex(step.substitution.expr), target),
+            hint: REARRANGE_HINTS.resubstitute,
+          }
+        : null
+    case 'choose':
+      return null
     case 'add': {
       if (!side || !step.operand) return null
       const removed = negated(step.operand)
@@ -286,9 +345,11 @@ function moveQuestion(step: RearrangeStep, t: string): MoveQuestion | null {
       const partnerName = f.name === 'sin' ? 'cos' : f.name === 'cos' ? 'sin' : f.name === 'sinh' ? 'cosh' : 'sinh'
       const partner = toLatex(fn(partnerName, f.arg))
       const partnerSquare = toLatex({ ...square, base: fn(partnerName, f.arg) })
+      // der Partner steht im Quadrat (\cos^2 x und \sin^2 x) oder allein (\cos^2 x und \sin x, Schritt 6c)
+      const squared = [step.before.lhs, step.before.rhs].flatMap((e) => subterms(e)).some((e) => toLatex(e) === partnerSquare)
       return {
-        question: `In der Gleichung stehen $${partnerSquare}$ und $${toLatex(square)}$. Wie bleibt nur eine Funktion übrig?`,
-        wrong: pythagorasMoves(toLatex(square), partner, hyperbolic),
+        question: `In der Gleichung stehen $${squared ? partnerSquare : partner}$ und $${toLatex(square)}$. Wie bleibt nur eine Funktion übrig?`,
+        wrong: pythagorasMoves(toLatex(square), partner, hyperbolic, !squared),
         hint: REARRANGE_HINTS.pythagoras,
       }
     }
@@ -345,28 +406,83 @@ function moveStep(step: RearrangeStep, previous: RearrangeStep | undefined, q: M
   }
 }
 
+// Art des Bausteins einer Substitution (für die Irrwege)
+function substitutionKind(sub: Substitution): 'power' | 'root' | 'trig' | 'ln' | 'square' {
+  const e = sub.expr
+  if (e.kind === 'root') return 'root'
+  if (e.kind === 'fn') return e.name === 'ln' ? 'ln' : 'trig'
+  if (e.kind === 'pow' && e.base.kind === 'var') return 'square'
+  return 'power'
+}
+
+// Warum die andere Lösung der pq-Formel wegfällt, als Satz
+function rejectReason(step: RearrangeStep, t: string, context: ResultContext): string {
+  const sub = context.sub
+  const bound = context.task.conditions.map((c) => `$${conditionLatex(c)}$`).join(' und ')
+  if (step.reason === 'negative') {
+    if (!sub || sub.name !== t) return `Sie ist negativ, $${t}$ ist aber positiv wie alle Buchstaben.`
+    const block = toLatex(sub.expr)
+    switch (substitutionKind(sub)) {
+      case 'power':
+        return `Sie ist negativ, $${t} = ${block}$ ist aber immer positiv.`
+      case 'root':
+      case 'square':
+        return `Sie ist negativ, $${t} = ${block}$ ist aber nie negativ.`
+      default:
+        return `Sie ist negativ, $${t} = ${block}$ ist aber positiv, weil $${context.task.target}$ positiv ist${bound ? ` und ${bound} gilt` : ''}.`
+    }
+  }
+  if (step.reason === 'targetNegative') return `Mit ihr wäre $${context.task.target}$ negativ, alle Buchstaben sind aber positiv.`
+  return bound ? `Mit ihr gilt ${bound} nicht.` : `Sie erfüllt die Gleichung der Aufgabe nicht.`
+}
+
 // --- Was kommt heraus? ---
 
-function resultStep(step: RearrangeStep, previous: RearrangeStep | undefined, wrongs: readonly RearrangeWrong[], t: string, index: number, rng: Rng, focus?: string): GuidedStep {
-  const after = equationLatex(step.after)
+// Tipps zu „Was kommt heraus?" bei Schritten mit eigener Regel
+const RESULT_HINTS: Partial<Record<StepKind, string>> = {
+  substitute: REARRANGE_HINTS.substitute,
+  zero: 'Was die Seite wechselt, wechselt das Vorzeichen; rechts bleibt $0$.',
+  normalize: 'Teile jeden Summanden durch die Zahl vor dem Quadrat.',
+  pq: REARRANGE_HINTS.pq,
+  choose: REARRANGE_HINTS.choose,
+  resubstitute: REARRANGE_HINTS.resubstitute,
+}
+
+const spuriousWhy = (reason: string): Explanation => ({ detailed: `Diese Lösung ist eine Scheinlösung. ${reason}`, short: reason })
+
+type ResultContext = { readonly task: RearrangeTask; readonly sub: Substitution | undefined }
+
+function resultStep(
+  step: RearrangeStep,
+  previous: RearrangeStep | undefined,
+  wrongs: readonly RearrangeWrong[],
+  t: string,
+  index: number,
+  rng: Rng,
+  focus: string | undefined,
+  context: ResultContext,
+): GuidedStep {
+  const after = stepLatex(step.kind, step.after)
   const correct: Choice = { id: 'richtig', content: `$${after}$`, correct: true }
-  const wrong = pickWrong(wrongs, after, rng, focus).map(
+  const wrong = pickWrong(wrongs, after, rng, focus, step.kind).map(
     (w, i): Choice => ({
       id: `falsch-${i + 1}`,
-      content: `$${equationLatex(w.after)}$`,
+      content: `$${stepLatex(step.kind, w.after)}$`,
       correct: false,
       errorRuleId: w.rule.id,
-      whyWrong: whyWrong(w.rule.id),
+      // die Scheinlösung mit dem Grund dieser Aufgabe
+      whyWrong: w.rule.id === 'eq-spurious-root' && step.kind === 'choose' ? spuriousWhy(rejectReason(step, t, context)) : whyWrong(w.rule.id),
     }),
   )
   const finish = step.kind === 'finish'
+  const choose = step.kind === 'choose'
   return {
     id: `${index + 1}-${step.kind}`,
-    title: finish ? 'Zusammenfassen' : stepLabel(step, t),
-    question: finish ? `Fasse zu einem Bruch zusammen: Was ist $${t}$?` : 'Was kommt heraus?',
+    title: finish ? 'Zusammenfassen' : choose ? STEP_NAMES.choose : stepLabel(step, t),
+    question: finish ? `Fasse zu einem Bruch zusammen: Was ist $${t}$?` : choose ? 'Welche der beiden Lösungen passt?' : 'Was kommt heraus?',
     choices: rng.shuffle([correct, ...wrong]),
-    hint: finish ? REARRANGE_HINTS.finish : REARRANGE_HINTS.result,
-    explanation: explainResult(step.kind, equationLatex(step.before), after),
+    hint: finish ? REARRANGE_HINTS.finish : RESULT_HINTS[step.kind] ?? REARRANGE_HINTS.result,
+    explanation: choose && step.operand ? explainChoose(toLatex(step.operand), rejectReason(step, t, context), after) : explainResult(step.kind, stepLatex(step.kind, step.before), after),
     established: [after],
     cards: cardsOf(step, t, previous),
   }
@@ -376,10 +492,10 @@ const whyWrong = (id: string): Explanation => (id.startsWith('frac-') ? explainF
 
 // Bis zu MAX_WRONG_CHOICES falsche Antworten, möglichst aus verschiedenen Fehlern, jede anders
 // geschrieben als die richtige und die übrigen. Gezieltes Üben: der gesuchte Fehler zuerst.
-function pickWrong(candidates: readonly RearrangeWrong[], correct: string, rng: Rng, focus?: string): RearrangeWrong[] {
+function pickWrong(candidates: readonly RearrangeWrong[], correct: string, rng: Rng, focus: string | undefined, kind: StepKind): RearrangeWrong[] {
   const seen = new Set([correct])
   const unique = candidates.filter((c) => {
-    const latex = equationLatex(c.after)
+    const latex = stepLatex(kind, c.after)
     if (seen.has(latex)) return false
     seen.add(latex)
     return true
@@ -419,6 +535,12 @@ const CARDS_BY_KIND: Record<StepKind, readonly string[]> = {
   trig: [REARRANGE_CARD_IDS.arc],
   pythagoras: [REARRANGE_CARD_IDS.trig],
   tanQuotient: [REARRANGE_CARD_IDS.trig],
+  substitute: [REARRANGE_CARD_IDS.substitution],
+  zero: [REARRANGE_CARD_IDS.pq],
+  normalize: [REARRANGE_CARD_IDS.pq],
+  pq: [REARRANGE_CARD_IDS.pq],
+  choose: [REARRANGE_CARD_IDS.pq],
+  resubstitute: [REARRANGE_CARD_IDS.substitution],
   finish: [FRACTION_CARD_IDS.add, FRACTION_CARD_IDS.expand],
 }
 

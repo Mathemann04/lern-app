@@ -19,8 +19,8 @@ import { taskExpr as toExprOf, taskFrac, taskLatex } from '../fraction/task.ts'
 import { planFractionTask } from '../guided/fractionPlan.ts'
 import { planRearrangeTask } from '../guided/rearrangePlan.ts'
 import { createRng } from '../random/rng.ts'
-import { holds, samplePoints } from '../rearrange/check.ts'
-import { solveEquation } from '../rearrange/isolate.ts'
+import { holds, samplePoints, withSubstitution } from '../rearrange/check.ts'
+import { solveTask } from '../rearrange/isolate.ts'
 import { CARDS, type CardExample, TOPICS, cardById, cardForRule, cardIdsFor, cardsInTopic, examplesFor, isFractionExample, isRearrangeExample, topicById } from './cards.ts'
 import { cardExample, workedExample } from './example.ts'
 import { parseRichText } from './richText.ts'
@@ -293,7 +293,7 @@ describe('Lernkarten: Gleichungen umstellen', () => {
   it.each(examples)('%s: %s', (id, _latex, e) => {
     if (!isRearrangeExample(e)) throw new Error(id)
     const example = cardExample(e)
-    const solution = solveEquation(e.equation, e.target)!
+    const solution = solveTask(e)!
     expect(example.result).toEqual(solution.result)
     expect(example.lines.length).toBe(solution.steps.length)
     expect(latexProblem(example.functionLatex, { checkUgly: false })).toBeNull()
@@ -302,7 +302,7 @@ describe('Lernkarten: Gleichungen umstellen', () => {
       expectRenderable(line.label, id)
     }
     // Gegenprobe durch Einsetzen: jede Zeile hat dieselbe Lösung
-    const points = samplePoints(e, solution.result, createRng(id), 12, solution.requires)
+    const points = withSubstitution(samplePoints(e, solution.result, createRng(id), 12, solution.requires), solution.substitution)
     expect(points.length).toBeGreaterThanOrEqual(8)
     for (const step of solution.steps) for (const p of points) expect(holds(step.after, p), id).toBe(true)
   })

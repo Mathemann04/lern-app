@@ -1,7 +1,7 @@
 import { type Env, evaluate } from '../expr/evaluate.ts'
 import type { Equation, Expr } from '../expr/types.ts'
 import type { Rng } from '../random/rng.ts'
-import { type RearrangeTask, taskVariables, variablesOf } from './task.ts'
+import { type Condition, type RearrangeTask, taskVariables, variablesOf } from './task.ts'
 
 // Prüfstellen fürs Umstellen, unabhängig vom Rechenweg: Die Buchstaben (außer der gesuchten
 // Variable) werden zufällig positiv gewählt, die gesuchte Variable kommt aus dem Ergebnis. Nur Stellen,
@@ -25,7 +25,7 @@ export function samplePoints(task: RearrangeTask, result: Expr, rng: Rng, count:
     const value = evaluate(result, env)
     if (!(value > 1e-3) || value > MAX_VALUE) continue
     env[task.target] = value
-    if (!task.conditions.every((c) => satisfied(evaluate(c.lhs, env), c.rel, evaluate(c.rhs, env)))) continue
+    if (!conditionsHold(task.conditions, env)) continue
     if (requires.every((r) => {
       const v = evaluate(r, env)
       return v > 1e-9 && v < MAX_VALUE
@@ -33,6 +33,16 @@ export function samplePoints(task: RearrangeTask, result: Expr, rng: Rng, count:
   }
   return points
 }
+
+// Prüfstellen mit dem Wert von u nach einer Substitution (u = e^x), für Gleichungen in u
+export function withSubstitution(points: readonly Env[], sub: { readonly name: string; readonly expr: Expr } | undefined): Env[] {
+  if (!sub) return [...points]
+  return points.map((p) => ({ ...p, [sub.name]: evaluate(sub.expr, p) }))
+}
+
+// Gelten die Bedingungen der Aufgabe an der Stelle?
+export const conditionsHold = (conditions: readonly Condition[], env: Env) =>
+  conditions.every((c) => satisfied(evaluate(c.lhs, env), c.rel, evaluate(c.rhs, env)))
 
 // Mit Abstand erfüllt, damit Rundung nicht entscheidet
 function satisfied(a: number, rel: '<' | '>', b: number): boolean {

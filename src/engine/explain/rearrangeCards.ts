@@ -18,6 +18,8 @@ export const REARRANGE_CARD_IDS = {
   laws: 'rearrange-laws',
   arc: 'rearrange-arc',
   trig: 'rearrange-trig',
+  substitution: 'rearrange-substitution',
+  pq: 'rearrange-pq',
 } as const
 
 const [a, b, c, d, k, x, y] = ['a', 'b', 'c', 'd', 'k', 'x', 'y'].map(variable)
@@ -211,5 +213,40 @@ export const REARRANGE_CARD_LIST: readonly Card[] = [
       task(sub(mul(a, sq(fn('cosh', x))), mul(b, sq(fn('sinh', x)))), y),
     ],
     errors: ['eq-pythagoras-square', 'eq-hyperbolic-sign', 'eq-tan-flipped', 'eq-divide-cos-partly'],
+  },
+  {
+    id: REARRANGE_CARD_IDS.substitution,
+    topic: 'umstellen',
+    title: 'Substitution',
+    level: 4,
+    rules: [],
+    formulas: ['u = e^{x}:\\quad e^{2x} = u^2,\\; e^{-x} = \\frac{1}{u}', 'u = \\sqrt{x}:\\quad x = u^2', 'u = \\sin x:\\quad \\sin^2 x = u^2'],
+    memo: 'Steckt die Variable in verschiedenen Potenzen desselben Bausteins, setze $u$ für den Baustein. Dann ist die Gleichung quadratisch in $u$, und die $pq$-Formel hilft. Am Ende setzt du zurück ein und löst nach $x$ auf.',
+    note: 'Ersetze jeden Teil mit $x$, sonst stehen $x$ und $u$ gemischt da. Steht $\\cos^2 x$ neben $\\sin x$, ersetzt du erst $\\cos^2 x = 1 - \\sin^2 x$. Nicht jede Lösung für $u$ passt: $u = e^x$ ist immer positiv, $u = \\sqrt{x}$ nie negativ.',
+    when: 'Wenn die Variable in $e^{2x}$ und $e^x$, in $x$ und $\\sqrt{x}$, in $\\sin^2 x$ und $\\sin x$ oder in $x^4$ und $x^2$ steckt.',
+    examples: [
+      task(sub(exp(mul(n(2), x)), mul(a, exp(x))), b),
+      task(y, div(sub(exp(x), exp(neg(x))), n(2))),
+      task(sub(x, mul(a, sqrt(x))), b),
+      task(sq(cos(x)), mul(a, sin(x)), 'x', [{ lhs: x, rel: '<', rhs: div(PI, n(2)) }]),
+    ],
+    errors: ['eq-substitute-power', 'eq-substitute-reciprocal', 'eq-not-resubstituted', 'eq-spurious-root'],
+  },
+  {
+    id: REARRANGE_CARD_IDS.pq,
+    topic: 'umstellen',
+    title: '$pq$-Formel',
+    level: 4,
+    rules: [],
+    formulas: ['x^2 + px + q = 0', 'x_{1,2} = -\\frac{p}{2} \\pm \\sqrt{\\left(\\frac{p}{2}\\right)^2 - q}', 'ax^2 + bx + c = 0 \\;\\Leftrightarrow\\; x^2 + \\frac{b}{a}x + \\frac{c}{a} = 0'],
+    memo: 'Bringe alles auf eine Seite und teile durch die Zahl vor $x^2$. Dann liest du $p$ und $q$ mit ihren Vorzeichen ab und setzt sie ein. Von den beiden Lösungen passt oft nur eine.',
+    note: 'Eine Lösung, die nicht zur Aufgabe passt, ist eine Scheinlösung: Sie ist negativ, obwohl $x$ positiv sein soll, ein Logarithmus wäre für sie nicht definiert, oder sie verletzt eine Bedingung. Steht unter der Wurzel etwas Negatives, gibt es gar keine Lösung.',
+    when: 'Wenn nach dem Umformen $x^2$ und $x$ (oder $u^2$ und $u$) in derselben Gleichung stehen.',
+    examples: [
+      task(add(ln(x), ln(add(x, a))), b),
+      task(sub(x, div(a, x)), y),
+      task(sub(mul(n(2), exp(mul(n(2), x))), mul(n(3), mul(y, exp(x)))), n(2)),
+    ],
+    errors: ['eq-pq-sign', 'eq-pq-q-sign', 'eq-pq-half', 'eq-spurious-root'],
   },
 ]

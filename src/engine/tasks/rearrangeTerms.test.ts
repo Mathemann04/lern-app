@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { contains, subterms } from '../expr/compare.ts'
-import { solveEquation } from '../rearrange/isolate.ts'
+import { solveTask } from '../rearrange/isolate.ts'
 import { taskLatex } from '../rearrange/task.ts'
 import { createRng } from '../random/rng.ts'
 import { rearrangeForm } from './forms.ts'
@@ -37,7 +37,7 @@ describe('Baukasten der Stufen 1 bis 4', () => {
   it('Stufe 1: die gesuchte Variable kommt genau einmal vor, mindestens drei Umformungen', () => {
     for (const t of tasks(1)) {
       expect(count(t.equation.lhs, t.target) + count(t.equation.rhs, t.target)).toBe(1)
-      expect(solveEquation(t.equation, t.target)!.steps.length).toBeGreaterThanOrEqual(3)
+      expect(solveTask(t)!.steps.length).toBeGreaterThanOrEqual(3)
     }
   })
 
@@ -50,7 +50,7 @@ describe('Baukasten der Stufen 1 bis 4', () => {
   })
 
   it('Stufe 3: Kerne ineinander, im Mittel mindestens 6 Umformungen, jede mindestens 5', () => {
-    const lengths = tasks(3).map((t) => solveEquation(t.equation, t.target)!.steps.length)
+    const lengths = tasks(3).map((t) => solveTask(t)!.steps.length)
     expect(Math.min(...lengths)).toBeGreaterThanOrEqual(5)
     expect(lengths.reduce((a, b) => a + b, 0) / lengths.length).toBeGreaterThanOrEqual(6)
   })
@@ -58,20 +58,23 @@ describe('Baukasten der Stufen 1 bis 4', () => {
   it('Stufe 3: Wurzel aus einer Klammer im Quadrat nur mit Bedingung, die das Vorzeichen festlegt', () => {
     for (const t of tasks(3)) {
       // (x - b)^2 = … braucht x > b, sonst gibt es zwei Lösungen; (x + b)^2 ist ohnehin positiv
-      const root = solveEquation(t.equation, t.target)!.steps.find((s) => s.kind === 'root')
+      const root = solveTask(t)!.steps.find((s) => s.kind === 'root')
       const base = root && (root.after.lhs.kind === 'add' ? root.after.lhs : root.after.rhs)
       if (base?.kind === 'add' && base.terms.some((x) => x.kind === 'neg')) expect(t.conditions.length, taskLatex(t)).toBeGreaterThan(0)
     }
   })
 
   it('Stufe 4: verschachtelt, im Mittel mindestens 7 Umformungen, jede mindestens 6', () => {
-    const lengths = tasks(4).map((t) => solveEquation(t.equation, t.target)!.steps.length)
+    const lengths = tasks(4).map((t) => solveTask(t)!.steps.length)
     expect(Math.min(...lengths)).toBeGreaterThanOrEqual(6)
     expect(lengths.reduce((a, b) => a + b, 0) / lengths.length).toBeGreaterThanOrEqual(7)
   })
 
-  it('Stufe 4: in jeder Aufgabe e-Funktion, Logarithmus oder Wurzeln in Wurzeln', () => {
-    for (const t of tasks(4)) {
+  it('Stufe 4: in jeder Aufgabe e-Funktion, Logarithmus oder Wurzeln in Wurzeln (oder die pq-Formel)', () => {
+    for (let seed = 1; seed <= 200; seed++) {
+      const g = generateRearrangeTask({ level: 4, seed })
+      if (g.template.id === 'baukasten-4-quadratisch') continue
+      const t = g.task
       const parts = [t.equation.lhs, t.equation.rhs].flatMap((side) => subterms(side))
       const blocks = parts.some((s) => s.kind === 'fn' || s.kind === 'log' || (s.kind === 'pow' && contains(s.exp, t.target)))
       const nested = parts.some((s) => s.kind === 'root' && subterms(s.arg).some((r) => r.kind === 'root'))
@@ -86,7 +89,7 @@ describe('Baukasten der Stufen 1 bis 4', () => {
     expect(trig.length).toBeLessThanOrEqual(90)
     // Aufgaben aus Teil 6a unter ihren alten Nummern
     expect(taskLatex(generated[0].task)).toBe('y = \\frac{\\sqrt{t + \\sqrt{s + \\sqrt{x}}}}{u}')
-    expect(taskLatex(generated[24].task)).toBe('\\frac{sr^{x} - r^{x - 2}}{t + u} = v + w')
+    expect(taskLatex(generated[12].task)).toBe('s + \\log_{10}(x + 9) - \\log_{10}(x - r) = y')
     expect(taskLatex(generated[84].task)).toBe('y = b + \\ln\\left(\\frac{x - a}{x + 6}\\right)')
     for (const { task: t } of trig) {
       const fns = [t.equation.lhs, t.equation.rhs].flatMap((side) => subterms(side)).filter((s) => s.kind === 'fn' && s.name !== 'ln')
@@ -97,9 +100,31 @@ describe('Baukasten der Stufen 1 bis 4', () => {
     }
   })
 
+  it('Stufe 4, Teil 6c: gut ein Fünftel mit Substitution oder pq-Formel, die Nummern aus 6b behalten ihre Aufgabe', () => {
+    const generated = Array.from({ length: 200 }, (_, i) => generateRearrangeTask({ level: 4, seed: i + 1 }))
+    const quadratic = generated.filter((g) => g.template.id === 'baukasten-4-quadratisch')
+    expect(quadratic.length).toBeGreaterThanOrEqual(25)
+    expect(quadratic.length).toBeLessThanOrEqual(70)
+    // Aufgaben aus Teil 6b unter ihren alten Nummern
+    expect(taskLatex(generated[15].task)).toBe('n\\cos^{2} x = m - k\\sin^{2} x')
+    expect(taskLatex(generated[72].task)).toBe('\\frac{p\\sin x + 3\\cos x}{q\\sin x + \\cos x} = y')
+    for (const { task: t } of quadratic) {
+      const steps = solveTask(t)!.steps
+      expect(steps.some((s) => s.kind === 'pq'), taskLatex(t)).toBe(true)
+      // die andere Lösung fällt weg, mit Begründung
+      expect(steps.find((s) => s.kind === 'choose')?.reason, taskLatex(t)).toBeDefined()
+      const angle = [t.equation.lhs, t.equation.rhs].flatMap((side) => subterms(side)).some((s) => s.kind === 'fn' && (s.name === 'sin' || s.name === 'cos' || s.name === 'tan'))
+      if (angle) expect(t.conditions.some((c) => c.rel === '<' && subterms(c.rhs).some((s) => s.kind === 'const' && s.name === 'pi')), taskLatex(t)).toBe(true)
+    }
+    // Substitution mit e^x, √x, Winkelfunktion, ln und x^2 kommt vor, ebenso die pq-Formel ohne Substitution
+    const blocks = new Set(quadratic.map((g) => solveTask(g.task)!.substitution?.expr.kind ?? 'ohne'))
+    expect([...blocks].sort()).toEqual(['fn', 'ohne', 'pow', 'root'])
+  })
+
   it.each([1, 2, 3, 4] as Level[])('Stufe %i: meist nach x, manchmal nach einem anderen Buchstaben', (level) => {
     const letters = tasks(level).filter((t) => t.target !== 'x').length
-    expect(letters).toBeGreaterThanOrEqual(20)
+    // in Stufe 4 ist bei Winkelfunktionen und der pq-Formel immer x gesucht
+    expect(letters).toBeGreaterThanOrEqual(level === 4 ? 10 : 20)
     expect(letters).toBeLessThanOrEqual(80)
   })
 })

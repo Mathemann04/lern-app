@@ -174,6 +174,38 @@ export const REARRANGE_ERROR_TEXTS: Readonly<Record<string, Explanation>> = {
       'Ein Bruch behält seinen Wert nur, wenn du Zähler und Nenner durch dasselbe teilst; bei einer Gleichung teilst du beide Seiten. Teilst du nur einen Teil durch $\\cos u$, ändert sich der Wert.',
     short: 'Zähler und Nenner (bzw. beide Seiten) durch $\\cos u$ teilen.',
   },
+  'eq-substitute-power': {
+    detailed:
+      'Die Hochzahl $2x$ heißt „zweimal malnehmen", nicht „mal 2": Mit $u = e^x$ ist $e^{2x} = \\left(e^x\\right)^2 = u^2$. Genauso ist mit $u = \\sqrt{x}$ dann $x = \\left(\\sqrt{x}\\right)^2 = u^2$ und mit $u = x^2$ dann $x^4 = u^2$.',
+    short: '$e^{2x} = \\left(e^x\\right)^2 = u^2$, nicht $2u$.',
+  },
+  'eq-substitute-reciprocal': {
+    detailed: 'Ein Minus in der Hochzahl heißt Kehrwert, nicht Minus davor: $e^{-x} = \\frac{1}{e^x} = \\frac{1}{u}$. Mit $-u$ hättest du $-e^x$ eingesetzt.',
+    short: '$e^{-x} = \\frac{1}{e^x} = \\frac{1}{u}$, nicht $-u$.',
+  },
+  'eq-pq-sign': {
+    detailed:
+      'Für $u^2 + pu + q = 0$ gilt $u_{1,2} = -\\frac{p}{2} \\pm \\sqrt{\\left(\\frac{p}{2}\\right)^2 - q}$. Vorn steht $-\\frac{p}{2}$: Lies $p$ mit seinem Vorzeichen ab, dann wechselt es. Bei $u^2 - 2yu - 1 = 0$ ist $p = -2y$, also $-\\frac{p}{2} = y$.',
+    short: 'Vorn steht $-\\frac{p}{2}$: Das Vorzeichen von $p$ wechselt.',
+  },
+  'eq-pq-q-sign': {
+    detailed:
+      'Unter der Wurzel steht $\\left(\\frac{p}{2}\\right)^2 - q$. Lies $q$ mit seinem Vorzeichen ab: Bei $u^2 - 2yu - 1 = 0$ ist $q = -1$, unter der Wurzel steht also $y^2 + 1$.',
+    short: 'Unter der Wurzel $\\left(\\frac{p}{2}\\right)^2 - q$: Das Vorzeichen von $q$ wechselt.',
+  },
+  'eq-pq-half': {
+    detailed: 'Unter der Wurzel steht das Quadrat von $\\frac{p}{2}$, nicht von $p$: $\\left(\\frac{p}{2}\\right)^2 = \\frac{p^2}{4}$.',
+    short: '$\\left(\\frac{p}{2}\\right)^2 = \\frac{p^2}{4}$, nicht $p^2$.',
+  },
+  'eq-spurious-root': {
+    detailed:
+      'Die $pq$-Formel liefert zwei Lösungen, aber nicht jede passt zur Aufgabe. Prüfe, welche Werte möglich sind: $u = e^x$ ist immer positiv, $u = \\sqrt{x}$ und $u = x^2$ sind nie negativ, und $x$ muss positiv sein und die Bedingungen der Aufgabe erfüllen. Die andere Lösung ist eine Scheinlösung.',
+    short: 'Nicht jede Lösung passt: $e^x$ ist zum Beispiel immer positiv.',
+  },
+  'eq-not-resubstituted': {
+    detailed: 'Die $pq$-Formel liefert $u$, gesucht ist aber $x$. Setze für $u$ wieder den Baustein ein, zum Beispiel $e^x$, und löse dann nach $x$ auf.',
+    short: 'Zurück einsetzen: $u$ ist noch nicht $x$.',
+  },
 }
 
 export function explainRearrangeError(id: string): Explanation {
@@ -427,18 +459,27 @@ export function trigMoves(arcLatex: string, fnLatex: string, side: 'lhs' | 'rhs'
 }
 
 // Quadrat ersetzen (square: das ersetzte Quadrat, partner: die andere Funktion ohne Quadrat, als LaTeX)
-export function pythagorasMoves(square: string, partner: string, hyperbolic: boolean): WrongMove[] {
+// plain: der Partner steht ohne Quadrat da (\cos^2 x und \sin x)
+export function pythagorasMoves(square: string, partner: string, hyperbolic: boolean, plain = false): WrongMove[] {
   return [
     hyperbolic
       ? { label: `$${square}$ durch $1 - ${partner}^2$ ersetzen`, why: REARRANGE_ERROR_TEXTS['eq-hyperbolic-sign'] }
       : { label: `$${square}$ durch $1 - ${partner}$ ersetzen`, why: REARRANGE_ERROR_TEXTS['eq-pythagoras-square'] },
-    {
-      label: 'Die beiden Quadrate einfach zu $1$ zusammenfassen',
-      why: {
-        detailed: 'Zu $1$ zusammenfassen darfst du nur, wenn beide Quadrate genau so dastehen wie in der Formel, mit demselben Faktor. Ersetze stattdessen ein Quadrat durch das andere.',
-        short: 'Nur bei gleichen Faktoren; besser ein Quadrat ersetzen.',
-      },
-    },
+    plain
+      ? {
+          label: `Beide Seiten durch $${partner}$ teilen`,
+          why: {
+            detailed: `Dann steht $${square}$ im Zähler und $${partner}$ im Nenner, wieder zwei Funktionen. Ersetze besser das Quadrat, dann steht nur noch $${partner}$ da.`,
+            short: 'Hilft nicht; besser das Quadrat ersetzen.',
+          },
+        }
+      : {
+          label: 'Die beiden Quadrate einfach zu $1$ zusammenfassen',
+          why: {
+            detailed: 'Zu $1$ zusammenfassen darfst du nur, wenn beide Quadrate genau so dastehen wie in der Formel, mit demselben Faktor. Ersetze stattdessen ein Quadrat durch das andere.',
+            short: 'Nur bei gleichen Faktoren; besser ein Quadrat ersetzen.',
+          },
+        },
     {
       label: 'Auf beiden Seiten die Wurzel ziehen',
       why: {
@@ -459,6 +500,134 @@ export function tanQuotientMoves(sin: string, cos: string, tan: string, fraction
       why: {
         detailed: 'Kürzen darfst du nur gleiche Faktoren. $\\sin$ und $\\cos$ sind verschiedene Funktionen, und es stehen Summen da.',
         short: 'Verschiedene Funktionen lassen sich nicht kürzen.',
+      },
+    },
+  ]
+}
+
+// Substituieren (block: der Baustein als LaTeX, z. B. e^{x}; kind: Art des Bausteins)
+export function substituteMoves(block: string, kind: 'power' | 'root' | 'trig' | 'ln' | 'square', inverse: string | null): WrongMove[] {
+  const first: WrongMove =
+    kind === 'root'
+      ? {
+          label: 'Beide Seiten quadrieren',
+          why: {
+            detailed: 'Quadrierst du eine Summe mit $\\sqrt{x}$, entsteht ein Mittelglied, in dem $\\sqrt{x}$ wieder steht. Setze besser $u = \\sqrt{x}$, dann ist $x = u^2$ und die Gleichung quadratisch.',
+            short: 'Die Wurzel bleibt; besser $u = \\sqrt{x}$ setzen.',
+          },
+        }
+      : kind === 'square'
+        ? {
+            label: 'Auf beiden Seiten die Wurzel ziehen',
+            why: {
+              detailed: 'Die Wurzel aus einer Summe lässt sich nicht Summand für Summand ziehen. Setze besser $u = x^2$, dann ist $x^4 = u^2$ und die Gleichung quadratisch.',
+              short: 'Wurzel aus einer Summe geht nicht; besser $u = x^2$ setzen.',
+            },
+          }
+        : {
+            label: `Auf beiden Seiten $${inverse ?? '\\ln'}$ nehmen`,
+            why: {
+              detailed: `$${inverse ?? '\\ln'}$ einer Summe lässt sich nicht Summand für Summand ausrechnen. Setze besser $u = ${block}$; dann wird die Gleichung quadratisch in $u$.`,
+              short: `Nicht von einer Summe; besser $u = ${block}$ setzen.`,
+            },
+          }
+  return [
+    first,
+    {
+      label: 'Die Summanden mit $x$ zu einem zusammenfassen',
+      why: {
+        detailed: `Zusammenfassen kannst du nur gleichartige Summanden. Hier stehen verschiedene Potenzen von $${block}$, etwa $\\left(${block}\\right)^2$ und $${block}$.`,
+        short: 'Verschiedene Potenzen lassen sich nicht zusammenfassen.',
+      },
+    },
+    {
+      label: `Durch $${block}$ teilen`,
+      why: {
+        detailed: `Danach steht $${block}$ immer noch mehrfach da, teils im Nenner. Setze $u = ${block}$, dann siehst du die quadratische Gleichung und kannst die $pq$-Formel nehmen.`,
+        short: `Hilft nicht; besser $u = ${block}$ setzen.`,
+      },
+    },
+  ]
+}
+
+// Quadratische Gleichung in u: alles nach links (u als LaTeX)
+export function zeroMoves(u: string): WrongMove[] {
+  return [
+    {
+      label: 'Auf beiden Seiten die Wurzel ziehen',
+      why: {
+        detailed: `Neben $${u}^2$ steht noch $${u}$ allein; die Wurzel aus einer Summe lässt sich nicht Summand für Summand ziehen. Für die $pq$-Formel muss alles auf einer Seite stehen und rechts $0$.`,
+        short: 'Wurzel aus einer Summe geht nicht; erst alles nach links.',
+      },
+    },
+    {
+      label: `Beide Seiten durch $${u}$ teilen`,
+      why: {
+        detailed: `Dann steht $${u}$ immer noch zweimal da, einmal im Nenner. Bringe alles auf eine Seite, dann hilft die $pq$-Formel.`,
+        short: 'Hilft nicht; erst alles nach links.',
+      },
+    },
+    {
+      label: `$${u}$ ausklammern und durch die Klammer teilen`,
+      why: {
+        detailed: `In der Klammer steht dann wieder $${u}$; so wird $${u}$ nicht allein. Bei $${u}^2$ und $${u}$ zusammen hilft die $pq$-Formel, dafür alles nach links.`,
+        short: 'Die Klammer enthält wieder die Unbekannte.',
+      },
+    },
+  ]
+}
+
+// Normalform: durch die Zahl vor u^2 teilen
+export function normalizeMoves(u: string, lead: string): WrongMove[] {
+  return [
+    {
+      label: 'Gleich die $pq$-Formel anwenden',
+      why: {
+        detailed: `Die $pq$-Formel gilt nur für die Normalform $${u}^2 + p${u} + q = 0$, mit einer $1$ vor $${u}^2$. Teile vorher durch $${lead}$.`,
+        short: `Erst durch $${lead}$ teilen, dann $pq$-Formel.`,
+      },
+    },
+    { label: `Nur den Summanden mit $${u}^2$ durch $${lead}$ teilen`, why: REARRANGE_ERROR_TEXTS['eq-divide-one-term'] },
+    {
+      label: 'Auf beiden Seiten die Wurzel ziehen',
+      why: { detailed: `Neben $${u}^2$ stehen weitere Summanden; die Wurzel aus einer Summe geht nicht Summand für Summand.`, short: 'Wurzel aus einer Summe geht nicht.' },
+    },
+  ]
+}
+
+// pq-Formel
+export function pqMoves(u: string): WrongMove[] {
+  return [
+    {
+      label: 'Auf beiden Seiten die Wurzel ziehen',
+      why: {
+        detailed: `Neben $${u}^2$ stehen $p${u}$ und $q$; die Wurzel aus einer Summe geht nicht Summand für Summand. Die $pq$-Formel liefert die Lösungen direkt.`,
+        short: 'Wurzel aus einer Summe geht nicht; $pq$-Formel.',
+      },
+    },
+    {
+      label: `$${u}$ ausklammern`,
+      why: {
+        detailed: `Ausklammern hilft nur, wenn kein Summand ohne $${u}$ dasteht. Hier bleibt $q$ übrig; nimm die $pq$-Formel.`,
+        short: `Wegen $q$ hilft Ausklammern nicht.`,
+      },
+    },
+    {
+      label: `Beide Seiten durch $${u}$ teilen`,
+      why: { detailed: `Dann steht $${u}$ im Nenner und weiter mehrfach da. Die $pq$-Formel liefert die Lösungen direkt.`, short: 'Hilft nicht; $pq$-Formel.' },
+    },
+  ]
+}
+
+// Zurück einsetzen (u: Buchstabe, block: Baustein, target: gesuchte Variable, als LaTeX)
+export function resubstituteMoves(u: string, block: string, target: string): WrongMove[] {
+  return [
+    { label: `$${target} = ${u}$ setzen, fertig`, why: REARRANGE_ERROR_TEXTS['eq-not-resubstituted'] },
+    {
+      label: `$${u}$ noch einmal in die $pq$-Formel einsetzen`,
+      why: {
+        detailed: `Die $pq$-Formel hat ihre Arbeit getan: $${u}$ steht schon allein. Jetzt muss $${u}$ wieder zu $${block}$ werden, damit du nach $${target}$ auflösen kannst.`,
+        short: `Jetzt zurück: $${u} = ${block}$.`,
       },
     },
   ]
@@ -548,8 +717,14 @@ export const REARRANGE_HINTS = {
   powerLaw: 'Zerlege die Potenzen mit $a^{m + n} = a^m \\cdot a^n$, bis überall dieselbe Potenz steht.',
   arc: 'Gegen eine Winkel- oder Hyperbelfunktion hilft ihre Umkehrfunktion, auf beiden Seiten: $\\sin u = w \\Leftrightarrow u = \\arcsin w$.',
   trig: 'Gegen eine Umkehrfunktion hilft die Funktion selbst, auf beiden Seiten: $\\arctan u = w \\Leftrightarrow u = \\tan w$.',
-  pythagoras: 'Mit $\\sin^2 u + \\cos^2 u = 1$ (bei Hyperbelfunktionen $\\cosh^2 u - \\sinh^2 u = 1$) ersetzt du ein Quadrat durch das andere.',
+  pythagoras: 'Mit $\\sin^2 u + \\cos^2 u = 1$ (bei Hyperbelfunktionen $\\cosh^2 u - \\sinh^2 u = 1$) ersetzt du ein Quadrat durch die andere Funktion.',
   tanQuotient: 'Teile durch $\\cos u$: Aus $\\frac{\\sin u}{\\cos u}$ wird $\\tan u$, aus $\\frac{\\cos u}{\\cos u}$ wird $1$. Bei Hyperbelfunktionen genauso mit $\\tanh u$.',
+  substitute: 'Stehen $e^{2x}$ und $e^x$ da, setze $u = e^x$: Dann ist $e^{2x} = u^2$, und die Gleichung wird quadratisch in $u$. Genauso mit $u = \\sqrt{x}$, $u = \\sin x$ oder $u = x^2$.',
+  zero: 'Für die $pq$-Formel muss rechts $0$ stehen: Bringe alles auf die linke Seite, $u^2$ mit Plus vorn.',
+  normalize: 'Die $pq$-Formel gilt für $u^2 + pu + q = 0$. Teile vorher durch die Zahl vor $u^2$.',
+  pq: '$u^2 + pu + q = 0 \\;\\Rightarrow\\; u_{1,2} = -\\frac{p}{2} \\pm \\sqrt{\\left(\\frac{p}{2}\\right)^2 - q}$, $p$ und $q$ mit Vorzeichen.',
+  choose: 'Prüfe beide Lösungen: $u = e^x$ ist immer positiv, $\\sqrt{x}$ nie negativ, und $x$ muss im Bereich der Aufgabe liegen.',
+  resubstitute: 'Gesucht ist $x$: Setze für $u$ wieder den Baustein ein und löse nach $x$ auf.',
   extend: 'Erweitere den Doppelbruch: Zähler und Nenner mal den Hauptnenner der inneren Brüche. Dann kürzen sich die inneren Nenner weg.',
   expand: 'Jeder Summand in der Klammer wird malgenommen: $a(b + c) = ab + ac$.',
   collect: 'Alle Summanden mit der Variable auf eine Seite, alle anderen auf die andere. Was die Seite wechselt, wechselt das Vorzeichen.',
@@ -561,7 +736,9 @@ export const REARRANGE_HINTS = {
 } as const
 
 // Tipp für die ganze Aufgabe (im freien Modus)
-export function rearrangeTaskHint(target: string, several: boolean): Explanation {
+export function rearrangeTaskHint(target: string, several: boolean, block: string | null = null, quadratic = false): Explanation {
+  if (block) return same(`Setze $u = ${block}$ und löse die quadratische Gleichung in $u$ mit der $pq$-Formel. Wähle die passende Lösung, setze zurück ein und löse nach $${target}$ auf.`)
+  if (quadratic) return same(`Forme um, bis $${target}^2$ und $${target}$ in einer Gleichung stehen. Bringe alles auf eine Seite, nimm die $pq$-Formel und wähle die passende Lösung.`)
   return several
     ? same(`Nenner beseitigen, ausmultiplizieren, alle Summanden mit $${target}$ auf eine Seite, $${target}$ ausklammern und teilen.`)
     : same(`Mache die Rechnungen um $${target}$ von außen nach innen rückgängig, immer auf beiden Seiten.`)
@@ -609,9 +786,25 @@ export function explainMove(kind: string, operation: string, target: string, unk
     case 'trig':
       return { detailed: 'Die Variable steckt in einer Umkehrfunktion. Die Funktion selbst hebt sie auf: $\\tan(\\arctan u) = u$. Also nimmst du auf beiden Seiten diese Funktion.', short: `${operation}: hebt die Umkehrfunktion auf.` }
     case 'pythagoras':
-      return { detailed: 'In der Gleichung stehen zwei verschiedene Quadrate. Mit $\\sin^2 u + \\cos^2 u = 1$ (bei Hyperbelfunktionen $\\cosh^2 u - \\sinh^2 u = 1$) ersetzt du eines durch das andere. Dann steht nur noch eine Funktion da, nach der du auflöst wie nach $x$.', short: 'Ein Quadrat durch das andere ersetzen.' }
+      return { detailed: 'In der Gleichung stehen zwei verschiedene Funktionen, mindestens eine im Quadrat. Mit $\\sin^2 u + \\cos^2 u = 1$ (bei Hyperbelfunktionen $\\cosh^2 u - \\sinh^2 u = 1$) ersetzt du das Quadrat durch die andere Funktion. Dann steht nur noch eine Funktion da, nach der du auflöst wie nach $x$.', short: 'Das Quadrat durch die andere Funktion ersetzen.' }
     case 'tanQuotient':
       return { detailed: 'In jedem Summanden steht genau ein $\\sin u$ oder $\\cos u$. Teilst du durch $\\cos u$, wird aus $\\sin u$ der $\\tan u$ und aus $\\cos u$ die $1$; bei einem Bruch teilst du Zähler und Nenner, dann bleibt sein Wert gleich. Danach steht nur noch $\\tan u$ da (bei Hyperbelfunktionen $\\tanh u$).', short: `${operation}: nur noch der Tangens.` }
+    case 'substitute':
+      return {
+        detailed: 'Die Variable steckt in verschiedenen Potenzen desselben Bausteins, zum Beispiel $e^{2x} = \\left(e^x\\right)^2$ und $e^x$. Mit $u$ für den Baustein wird daraus eine quadratische Gleichung in $u$, die du mit der $pq$-Formel löst.',
+        short: `${operation}: quadratisch in $u$.`,
+      }
+    case 'zero':
+      return { detailed: `Die Gleichung ist quadratisch in $${unknown}$. Für die $pq$-Formel bringst du alles auf die linke Seite; was die Seite wechselt, wechselt das Vorzeichen. Rechts steht dann $0$.`, short: 'Alles nach links, rechts $0$.' }
+    case 'normalize':
+      return { detailed: `Die $pq$-Formel braucht die Normalform $${unknown}^2 + p${unknown} + q = 0$, vor $${unknown}^2$ also eine $1$. Teile dafür jeden Summanden durch die Zahl vor $${unknown}^2$.`, short: `${operation}: vor $${unknown}^2$ eine $1$.` }
+    case 'pq':
+      return {
+        detailed: `Die Gleichung hat die Normalform $${unknown}^2 + p${unknown} + q = 0$. Lies $p$ und $q$ mit ihren Vorzeichen ab und setze sie ein: $${unknown}_{1,2} = -\\frac{p}{2} \\pm \\sqrt{\\left(\\frac{p}{2}\\right)^2 - q}$.`,
+        short: '$pq$-Formel mit $p$ und $q$ samt Vorzeichen.',
+      }
+    case 'resubstitute':
+      return { detailed: `$${unknown}$ war nur ein Platzhalter für den Baustein. Setze ihn zurück ein; dann löst du nach $${target}$ auf wie gewohnt.`, short: `${operation}: zurück zu $${target}$.` }
     case 'expand':
       return { detailed: 'Die Variable steckt in Klammern. Nach dem Ausmultiplizieren stehen alle Summanden einzeln da und lassen sich sortieren.', short: 'Ausmultiplizieren, dann sortieren.' }
     case 'extend':
@@ -641,8 +834,25 @@ export function explainResult(kind: string, before: string, after: string): Expl
     case 'expand':
       return { detailed: `Jeder Summand in der Klammer wird malgenommen:\n${lines}`, short: lines }
     case 'collect':
+    case 'zero':
       return { detailed: `Die Summanden, die die Seite wechseln, wechseln ihr Vorzeichen:\n${lines}`, short: lines }
+    case 'substitute':
+      return { detailed: `Jeder Teil mit der Variable wird durch eine Potenz von $u$ ersetzt:\n${lines}`, short: lines }
+    case 'normalize':
+      return { detailed: `Jeder Summand wird durch die Zahl vor dem Quadrat geteilt:\n${lines}`, short: lines }
+    case 'pq':
+      return { detailed: `$p$ und $q$ mit ihren Vorzeichen in die $pq$-Formel eingesetzt:\n${lines}`, short: lines }
+    case 'resubstitute':
+      return { detailed: `Für $u$ steht wieder der Baustein da:\n${lines}`, short: lines }
     default:
       return { detailed: `Auf beiden Seiten dieselbe Rechnung:\n${lines}`, short: lines }
+  }
+}
+
+// Warum fällt die andere Lösung der pq-Formel weg? rejected: die andere Lösung, why: Grund als Satz
+export function explainChoose(rejected: string, why: string, after: string): Explanation {
+  return {
+    detailed: `Die andere Lösung $${rejected}$ passt nicht: ${why} Also bleibt\n$${after}$`,
+    short: why,
   }
 }
