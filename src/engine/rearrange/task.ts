@@ -13,10 +13,23 @@ export type RearrangeTask = {
   readonly conditions: readonly Condition[]
 }
 
-// Alle Buchstaben eines Terms, alphabetisch
+// Alle Buchstaben eines Terms, alphabetisch; bei einem Werkzeug (Ableitung, Integral) seine freien
+// Buchstaben (ohne die Integrationsvariable)
 export function variablesOf(...exprs: readonly Expr[]): string[] {
   const names = new Set<string>()
-  for (const e of exprs) for (const s of subterms(e)) if (s.kind === 'var') names.add(s.name)
+  const visit = (e: Expr) => {
+    for (const s of subterms(e)) {
+      if (s.kind !== 'var') continue
+      if (!s.tool) {
+        names.add(s.name)
+        continue
+      }
+      const { tool } = s
+      const inner = variablesOf(tool.body).filter((n) => tool.kind === 'derivative' || n !== tool.v)
+      for (const n of [...inner, ...(tool.kind === 'derivative' ? [] : variablesOf(tool.lower, tool.upper))]) names.add(n)
+    }
+  }
+  for (const e of exprs) visit(e)
   return [...names].sort()
 }
 

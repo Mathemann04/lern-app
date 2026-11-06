@@ -162,16 +162,15 @@ test('Galerie zählt die Formen je Stufe der Brüche: mindestens 100, keine öft
   expect(errors).toEqual([])
 })
 
-test('Galerie zeigt Umstell-Aufgaben der Stufen 1 bis 4 mit Rechenweg und typischen Fehlern', async ({ page }) => {
+test('Galerie zeigt Umstell-Aufgaben der Stufen 1 bis 5 mit Rechenweg und typischen Fehlern', async ({ page }) => {
   const errors = collectErrors(page)
   await page.goto('./#/galerie')
   await page.getByRole('link', { name: /^Gleichungen umstellen/ }).click()
   await expect(page.getByRole('heading', { name: 'Gleichungen umstellen', level: 1 })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Stufe 5' })).toBeDisabled()
   await page.getByLabel('Rechenweg zeigen').check()
   await page.getByLabel('Typische Fehler zeigen').check()
 
-  for (const level of [1, 2, 3, 4]) {
+  for (const level of [1, 2, 3, 4, 5]) {
     await page.getByRole('button', { name: `Stufe ${level}` }).click()
     await expect(randomTasks(page)).toHaveCount(8)
     await expect(randomTasks(page).first()).toContainText(`Aufgabe ${level}-`)

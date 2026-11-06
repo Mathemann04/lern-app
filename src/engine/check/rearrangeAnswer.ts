@@ -1,5 +1,6 @@
 import { explainFractionError, listing } from '../explain/fractionTexts.ts'
 import { explainRearrangeError } from '../explain/rearrangeTexts.ts'
+import { explainError } from '../explain/texts.ts'
 import { contains, subterms } from '../expr/compare.ts'
 import { type Env, evaluate } from '../expr/evaluate.ts'
 import { equationToLatex, toLatex } from '../expr/print.ts'
@@ -14,6 +15,7 @@ import { samplePoints } from '../rearrange/check.ts'
 import { type RearrangeWrong, rearrangeWrongAnswers } from '../rearrange/errorRules.ts'
 import { type RearrangeSolution, solveTask } from '../rearrange/isolate.ts'
 import { type RearrangeTask, taskVariables } from '../rearrange/task.ts'
+import { hasTool } from '../rearrange/tools/tool.ts'
 import { isInteger, ratAbs } from '../rational.ts'
 import { generateRearrangeTask } from '../tasks/rearrangeTerms.ts'
 import type { TaskRef } from '../tasks/taskNumber.ts'
@@ -283,7 +285,8 @@ export function rearrangeFreeVerdict(v: RearrangeVerdict, target: string): FreeV
       return { kind: 'unfinished', title: v.reason === 'not-isolated' ? 'Richtig umgeformt, aber noch nicht fertig.' : 'Richtig gerechnet, aber noch nicht fertig.', message: notDoneText(v.reason, target) }
     case 'knownError': {
       const { id, name } = v.wrong.rule
-      return { kind: 'wrong', title: 'Nicht ganz.', error: { id, name, why: id.startsWith('frac-') ? explainFractionError(id) : explainRearrangeError(id) } }
+      const why = v.wrong.derive ? explainError(v.wrong.derive) : id.startsWith('frac-') ? explainFractionError(id) : explainRearrangeError(id)
+      return { kind: 'wrong', title: 'Nicht ganz.', error: { id, name, why } }
     }
     case 'wrongSign':
       return { kind: 'wrong', title: 'Fast!', message: 'Bis auf das Vorzeichen stimmt es. Prüfe, wo ein Minus hingehört.' }
@@ -308,7 +311,9 @@ const hasTrig = (...exprs: readonly Expr[]) => exprs.some((e) => subterms(e).som
 export function prepareRearrangeFree(ref: TaskRef): FreeTask {
   const context = prepareRearrangeCheck(generateRearrangeTask(ref).task, ref.level >= 4)
   const { equation, target } = context.task
-  const all = [equation.lhs, equation.rhs, context.solution.result]
+  // mit einem Werkzeug (Stufe 5) zählt auch, was nach dem Ausrechnen dasteht
+  const evaluated = hasTool(equation) ? context.solution.steps.flatMap((s) => [s.after.lhs, s.after.rhs]) : []
+  const all = [equation.lhs, equation.rhs, context.solution.result, ...evaluated]
   return {
     answerLabel: `${target} =`,
     inputLabel: 'Dein Ergebnis',

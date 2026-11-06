@@ -1,6 +1,6 @@
 import { type Page, expect, test } from '@playwright/test'
 
-// Thema Gleichungen umstellen im Gebiet Grundlagen: geführt üben (Stufen 1 bis 4), frei eintippen,
+// Thema Gleichungen umstellen im Gebiet Grundlagen: geführt üben (Stufen 1 bis 5), frei eintippen,
 // Lernkarten, Fortschritt
 
 const answers = (page: Page) => page.getByRole('group', { name: 'Antworten' }).getByRole('button')
@@ -47,10 +47,10 @@ test('Von der Startseite zu „Gleichungen umstellen" und eine Aufgabe der Stufe
   await page.getByRole('link', { name: /^Gleichungen umstellen/ }).click()
   await expect(page).toHaveURL(/#\/thema\/umstellen$/)
   await expect(page.getByRole('heading', { name: 'Gleichungen umstellen', level: 1 })).toBeVisible()
-  // Stufen 1 bis 4 spielbar, geführt und frei; Stufe 5 folgt bald
+  // Stufen 1 bis 5 spielbar, geführt und frei
   await expect(page.getByRole('radio', { name: /^Stufe 1/ })).toBeChecked()
   await expect(page.getByRole('radio', { name: /^Stufe 4/ })).toBeEnabled()
-  await expect(page.getByRole('radio', { name: /^Stufe 5.*folgt bald/ })).toBeDisabled()
+  await expect(page.getByRole('radio', { name: /^Stufe 5/ })).toBeEnabled()
   await expect(page.getByRole('radio', { name: /Frei/ })).toBeEnabled()
   await expectCleanPage(page, 'Thema')
 
@@ -109,7 +109,8 @@ test('Umstellen: Lernkarten-Ordner mit durchgerechneten Beispielen', async ({ pa
   await expect(page.getByRole('heading', { name: 'Stufe 2' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Stufe 3' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Stufe 4' })).toBeVisible()
-  await expect(page.locator('main li a')).toHaveCount(13)
+  await expect(page.getByRole('heading', { name: 'Stufe 5' })).toBeVisible()
+  await expect(page.locator('main li a')).toHaveCount(14)
   await expectCleanPage(page, 'Ordner')
 
   await page.getByRole('link', { name: /^Variable im Nenner/ }).click()
@@ -181,6 +182,34 @@ test('Umstellen Stufe 4 frei: nach der Substitution nicht zurückgerechnet, dann
   await enter(page, '\\ln\\left(-\\frac{1}{6}+\\sqrt{\\frac{1}{36}+\\frac{r}{3}}\\right)')
   await expect(feedback(page)).toContainText('Richtig!')
   await expectCleanPage(page, 'Richtig Stufe 4 pq-Formel')
+})
+
+test('Umstellen Stufe 5: Integral mit Partialbrüchen geführt, „Was steht da eigentlich?", mit Lernkarte', async ({ page }) => {
+  // \int_a^x \frac{\mathrm{d}t}{t(t + b)} = y mit x > a
+  await page.goto('./#/ueben/umstellen/5-568')
+  await expect(page.getByText('Was steht da eigentlich?')).toBeVisible()
+  await expect(page.locator('#question')).toContainText('Partialbrüche')
+  await expectCleanPage(page, 'Start Stufe 5')
+  // richtig und „Faktor bei den Partialbrüchen vergessen"
+  await expect(answers(page)).toHaveCount(2)
+  await solveWholeTask(page)
+  await expect(page.getByTestId('result')).toBeVisible()
+  const cards = page.getByRole('navigation', { name: 'Lernkarten zu dieser Aufgabe' })
+  await expect(cards.getByRole('link', { name: 'Stammfunktionen und Partialbrüche' })).toBeVisible()
+  await expectCleanPage(page, 'Stufe 5 Integral')
+})
+
+test('Umstellen Stufe 5 frei: Ableitung, Nenner nicht quadriert, dann richtig', async ({ page }) => {
+  // \frac{\mathrm{d}}{\mathrm{d}x}\left(\frac{x^2}{x + a}\right) = y
+  await page.goto('./#/frei/umstellen/5-83')
+  await expect(field(page)).toBeVisible()
+  await expectCleanPage(page, 'Start Stufe 5 frei')
+  await enter(page, '\\frac{y-2a+\\sqrt{y^2+4a^2}}{2}')
+  await expect(feedback(page)).toContainText('Nenner nicht quadriert')
+  // jede gleichwertige Form zählt
+  await enter(page, '\\frac{a}{\\sqrt{1-y}}-a')
+  await expect(feedback(page)).toContainText('Richtig!')
+  await expectCleanPage(page, 'Richtig Stufe 5')
 })
 
 test('Umstellen Stufe 4: sin² und cos², ein Quadrat ersetzen, Umkehrfunktion, mit beiden Lernkarten aus Teil 6b', async ({ page }) => {

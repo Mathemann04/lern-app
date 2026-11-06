@@ -255,8 +255,8 @@ describe('Endform', () => {
 describe('Zufallsaufgaben je Stufe', () => {
   const levels = LEVELS.filter(isRearrangeLevelAvailable)
 
-  it('Stufen 1 bis 4 gibt es', () => {
-    expect(levels).toEqual([1, 2, 3, 4])
+  it('Stufen 1 bis 5 gibt es', () => {
+    expect(levels).toEqual([1, 2, 3, 4, 5])
   })
 
   for (const level of levels) {

@@ -127,8 +127,8 @@ const fractionLevels: LevelPreview[] = [
   },
 ]
 
-// Gleichungen umstellen (Plan M3): Stufen 1 bis 4 geführt und frei spielbar (Stufe 4 wächst mit den
-// Schritten 6b und 6c), Stufe 5 folgt
+// Gleichungen umstellen (Plan M3): Stufen 1 bis 5 geführt und frei spielbar (Stufe 5 wächst mit den
+// Schritten 7a bis 8)
 const rearrangeLevels: LevelPreview[] = [
   {
     level: 1,
@@ -156,9 +156,9 @@ const rearrangeLevels: LevelPreview[] = [
   },
   {
     level: 5,
-    available: false,
-    title: 'Quer durch die Mathematik: Ableitung, Integral, Reihe, Grenzwert, Determinante',
-    examples: [String.raw`\int_a^x \frac{\mathrm{d}t}{t(t + b)} = y`, String.raw`\sum_{k=1}^{\infty} k x^k = y`, String.raw`\det\begin{pmatrix} e^{x} & e^{-x} \\ a & b \end{pmatrix} = y`],
+    available: true,
+    title: 'Quer durch die Mathematik: erst Ableitung oder Integral ausrechnen, dann umstellen (Reihen, Grenzwerte und mehr folgen)',
+    examples: [String.raw`\int_a^x \frac{\mathrm{d}t}{t(t + b)} = y`, String.raw`\frac{\mathrm{d}}{\mathrm{d}x}\left(\frac{x^2}{x + a}\right) = y`, String.raw`\frac{\int_0^x e^{t}\,\mathrm{d}t}{e^{x} + a} = y`],
   },
 ]
 

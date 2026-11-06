@@ -2,6 +2,7 @@ import { contains, key, subterms } from '../expr/compare.ts'
 import { evaluate } from '../expr/evaluate.ts'
 import { equationToLatex } from '../expr/print.ts'
 import { type Equation, type Expr, add, div, eq, fn, log, mul, num, pow, variable } from '../expr/types.ts'
+import { ERROR_RULES, type WrongAnswer } from '../derive/errorRules.ts'
 import { FRACTION_ERROR_RULES, fractionWrongAnswers } from '../fraction/errorRules.ts'
 import { type Signed, expanded, minus, part, plus } from '../fraction/task.ts'
 import {
@@ -45,6 +46,9 @@ import {
   unknownAtoms,
 } from './isolate.ts'
 import type { RearrangeTask } from './task.ts'
+import { type ToolStepKind, toolMistakes } from './tools/steps.ts'
+
+const TOOL_STEPS = new Set<string>(['derive', 'partial', 'antiderivative', 'bounds'])
 
 // Typische Fehler beim Umstellen (Katalog in docs/PLAN-M3.md). Jeder Fehler steckt in genau einem
 // Schritt des Rechenwegs: Dieser Schritt wird falsch ausgeführt, danach wird richtig weitergerechnet.
@@ -104,10 +108,18 @@ export const REARRANGE_ERROR_RULES: readonly EqErrorRule[] = [
   { id: 'eq-pq-half', name: 'Bei der $pq$-Formel unter der Wurzel $p^2$ statt $\\left(\\frac{p}{2}\\right)^2$', wrongFormula: 'u^2 - au - b = 0 \\Rightarrow u_{1,2} = \\frac{a}{2} \\pm \\sqrt{a^2 + b}' },
   { id: 'eq-spurious-root', name: 'Die Lösung genommen, die nicht passt (Scheinlösung)', wrongFormula: 'u = e^x: u = \\frac{a}{2} - \\sqrt{\\frac{a^2}{4} + b}' },
   { id: 'eq-not-resubstituted', name: 'Nach der Substitution nicht zurückgerechnet', wrongFormula: 'u = e^x = y + \\sqrt{y^2 + 1} \\Rightarrow x = y + \\sqrt{y^2 + 1}' },
+  // Werkzeuge der Stufe 5 (Schritt 7a): Integrale; beim Ableiten die Fehler aus „Ableiten"
+  { id: 'eq-partial-factor', name: 'Bei den Partialbrüchen den Faktor vergessen', wrongFormula: '\\frac{1}{t(t + b)} = \\frac{1}{t} - \\frac{1}{t + b}' },
+  { id: 'eq-int-inner-factor', name: 'Beim Integrieren nicht durch die innere Ableitung geteilt', wrongFormula: '\\int \\frac{t}{t^2 + a^2}\\,\\mathrm{d}t = \\ln\\left(t^2 + a^2\\right)' },
+  { id: 'eq-int-derived', name: 'Abgeleitet statt integriert', wrongFormula: '\\int e^{2t}\\,\\mathrm{d}t = 2e^{2t}' },
+  { id: 'eq-int-power', name: 'Bei der Potenzregel nicht durch den neuen Exponenten geteilt', wrongFormula: '\\int t^2\\,\\mathrm{d}t = t^3' },
+  { id: 'eq-int-sign', name: 'Beim Integrieren das Vorzeichen verloren', wrongFormula: '\\int \\sin t\\,\\mathrm{d}t = \\cos t' },
+  { id: 'eq-int-bounds-swapped', name: 'Die Grenzen vertauscht', wrongFormula: '\\int_a^x f(t)\\,\\mathrm{d}t = F(a) - F(x)' },
+  { id: 'eq-int-lower-forgotten', name: 'Die untere Grenze nicht eingesetzt', wrongFormula: '\\int_0^x e^{t}\\,\\mathrm{d}t = e^{x}' },
 ]
 
 export function rearrangeErrorRule(id: string): EqErrorRule {
-  const found = REARRANGE_ERROR_RULES.find((r) => r.id === id) ?? FRACTION_ERROR_RULES.find((r) => r.id === id)
+  const found = REARRANGE_ERROR_RULES.find((r) => r.id === id) ?? FRACTION_ERROR_RULES.find((r) => r.id === id) ?? ERROR_RULES.find((r) => r.id === id)
   if (!found) throw new Error(`Unbekannte Fehlerregel: ${id}`)
   return found
 }
@@ -120,10 +132,12 @@ export type RearrangeWrong = {
   readonly after: Equation
   // falsches Endergebnis (rechte Seite von „x = …"), wenn man damit richtig weiterrechnen kann
   readonly result: Expr | null
+  // beim Ableiten (Stufe 5): der Fehler aus „Ableiten" mit seiner Stelle
+  readonly derive?: WrongAnswer
 }
 
 // zeroForm: Gleichung der Form … = 0 auf dem Weg zur pq-Formel (die 0 ist dort richtig)
-type Candidate = { readonly id: string; readonly after: Equation; readonly zeroForm?: boolean }
+type Candidate = { readonly id: string; readonly after: Equation; readonly zeroForm?: boolean; readonly derive?: WrongAnswer }
 
 // --- Hilfen ---
 
@@ -647,6 +661,8 @@ function candidatesFor(steps: readonly RearrangeStep[], i: number, target: strin
     ...quadraticMistakes(step, t),
     ...pqMistakes(step, target),
     ...fractionMistakes(step, t),
+    // ohne die Variable wäre es keine Gleichung mehr zum Umstellen (\frac{\mathrm{d}}{\mathrm{d}x}(…) falsch als 1)
+    ...(TOOL_STEPS.has(step.kind) ? toolMistakes(step.kind as ToolStepKind, step.before).filter((c) => contains(c.after.lhs, t) || contains(c.after.rhs, t)) : []),
   ]
 }
 
@@ -664,7 +680,7 @@ export function rearrangeWrongAnswers(task: RearrangeTask, solution: RearrangeSo
       if ((!c.zeroForm && isZeroSide(c.after, step.unknown ?? t)) || !clearlyFails(c.after, points)) continue
       const latex = equationToLatex(c.after)
       if (out.some((w) => w.stepIndex === i && equationToLatex(w.after) === latex)) continue
-      out.push({ rule: rearrangeErrorRule(c.id), stepIndex: i, after: c.after, result: wrongResult(c.after, t, points, options) })
+      out.push({ rule: rearrangeErrorRule(c.id), stepIndex: i, after: c.after, result: wrongResult(c.after, t, points, options), ...(c.derive ? { derive: c.derive } : {}) })
     }
   })
   return out
