@@ -19,9 +19,18 @@ export const integralOf = (body: Expr, lower: Expr, upper: Expr, v = 't'): Var =
 // \left[body\right]_{lower}^{upper}
 export const bracketOf = (body: Expr, lower: Expr, upper: Expr, v = 't'): Var => toolExpr({ kind: 'bracket', body, v, lower, upper })
 
+// \sum_{k=lower}^{upper} body
+export const sumOf = (body: Expr, lower: Expr, upper: Expr, v = 'k'): Var => toolExpr({ kind: 'sum', body, v, lower, upper })
+
+// \sum_{k=lower}^{\infty} body
+export const seriesOf = (body: Expr, lower: Expr, v = 'k'): Var => toolExpr({ kind: 'series', body, v, lower })
+
+// \lim_{n \to \infty} body
+export const limitOf = (body: Expr, v = 'n'): Var => toolExpr({ kind: 'limit', body, v })
+
 export type ToolVar = Var & { readonly tool: Tool }
 
-const isToolVar = (e: Expr): e is ToolVar => e.kind === 'var' && e.tool !== undefined
+export const isToolVar = (e: Expr): e is ToolVar => e.kind === 'var' && e.tool !== undefined
 
 // Werkzeuge in einer Gleichung, von links nach rechts
 export function toolsIn(e: Equation): ToolVar[] {
@@ -32,9 +41,27 @@ export const hasTool = (e: Equation) => toolsIn(e).length > 0
 
 // Das Werkzeug in der Gleichung durch value ersetzen; steht es in einer Summe, kommen die Summanden
 // des Werts ohne Klammer hinein: a - (\ln x + 1) → a - \ln x - 1
-export const replaceTool = (e: Equation, tool: ToolVar, value: Expr): Equation => {
-  const r = (side: Expr) => (contains(side, tool.name) ? spliced(substitute(side, tool.name, value), value) : side)
-  return eq(r(e.lhs), r(e.rhs))
+export const replaceTool = (e: Equation, tool: ToolVar, value: Expr): Equation => eq(replaceToolIn(e.lhs, tool, value), replaceToolIn(e.rhs, tool, value))
+
+// dasselbe in einem Term (z. B. im Rumpf eines Werkzeugs drumherum)
+export const replaceToolIn = (side: Expr, tool: ToolVar, value: Expr): Expr => (contains(side, tool.name) ? spliced(substitute(side, tool.name, value), value) : side)
+
+// Das Werkzeug, das als Nächstes ausgerechnet wird: das innerste (\frac{\mathrm{d}}{\mathrm{d}x}\sum … erst die
+// Reihe, dann die Ableitung); put setzt seinen Wert ein, auch im Rumpf der Werkzeuge drumherum
+export type ActiveTool = { readonly tool: ToolVar; readonly put: (value: Expr) => Equation }
+
+export function activeTool(e: Equation): ActiveTool | null {
+  const [outer] = toolsIn(e)
+  if (!outer) return null
+  const inner = innermost(outer)
+  return { tool: inner.tool, put: (value) => replaceTool(e, outer, inner.put(value)) }
+}
+
+function innermost(tool: ToolVar): { tool: ToolVar; put: (value: Expr) => Expr } {
+  const inner = subterms(tool.tool.body).find(isToolVar)
+  if (!inner) return { tool, put: (value) => value }
+  const deeper = innermost(inner)
+  return { tool: deeper.tool, put: (value) => toolExpr({ ...tool.tool, body: replaceToolIn(tool.tool.body, inner, deeper.put(value)) }) }
 }
 
 function negatedTerm(e: Expr): Expr {
@@ -60,9 +87,12 @@ function spliced(e: Expr, value: Expr): Expr {
           }),
         )
       case 'mul': {
-        // mal 1 fällt weg
-        const factors = x.factors.map(visit).filter((f) => !(f.kind === 'num' && f.value.n === 1n && f.value.d === 1n))
-        return factors.length === 0 ? num(1) : factors.length === 1 ? factors[0] : { ...x, factors }
+        // mal 1 fällt weg; ein Minus im Faktor kommt vor das Produkt: b \cdot (-\ln(1 - x)) → -b\ln(1 - x)
+        const visited = x.factors.map(visit).filter((f) => !(f.kind === 'num' && f.value.n === 1n && f.value.d === 1n))
+        const negative = visited.filter((f) => f.kind === 'neg').length % 2 === 1
+        const factors = visited.map((f) => (f.kind === 'neg' ? f.arg : f))
+        const product = factors.length === 0 ? num(1) : factors.length === 1 ? factors[0] : { ...x, factors }
+        return negative ? neg(product) : product
       }
       case 'neg':
       case 'root':

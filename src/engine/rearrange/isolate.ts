@@ -84,6 +84,9 @@ export type StepKind =
   | 'partial'
   | 'antiderivative'
   | 'bounds'
+  | 'sumFormula'
+  | 'series'
+  | 'limit'
   | 'finish'
 
 export const STEP_NAMES: Record<StepKind, string> = {
@@ -119,6 +122,9 @@ export const STEP_NAMES: Record<StepKind, string> = {
   partial: 'In Partialbrüche zerlegen',
   antiderivative: 'Stammfunktion bilden',
   bounds: 'Grenzen einsetzen',
+  sumFormula: 'Summenformel anwenden',
+  series: 'Reihe ausrechnen',
+  limit: 'Grenzwert bilden',
   finish: 'Ergebnis',
 }
 
@@ -237,6 +243,8 @@ export type RearrangeSolution = {
   readonly requires: readonly Expr[]
   // Substitution im Rechenweg (dann stehen Gleichungen in u dazwischen)
   readonly substitution?: Substitution
+  // mit Wegen, die die Engine erst seit Teil 7b geht (siehe novelPaths)
+  readonly novel?: true
 }
 
 // Was das Lösen über die Aufgabe wissen muss: Bedingungen (welche Lösung der pq-Formel passt) und,
@@ -659,18 +667,27 @@ function peelRaw(s: Expr, o: Expr, side: Side, t: string): Draft | null {
       if (inNum) return { kind: 'multiply', operand: s.den, side, after: at(side, s.num, timesFactor(o, s.den)) }
       if (isOneExpr(s.num)) {
         // 1/D = O: erst O zu einem Bruch, dann Kehrwert
-        if (o.kind === 'add') return { kind: 'combine', side, after: at(side, s, finalForm(o)) }
+        if (o.kind === 'add') {
+          const f = combined(o)
+          if (f) return { kind: 'combine', side, after: at(side, s, f) }
+        }
         return { kind: 'reciprocal', side, after: at(side, s.den, reciprocal(o)) }
       }
       // N/D = O mit Brüchen in O: erst O zu einem Bruch, sonst entsteht später ein Doppelbruch
-      if (o.kind === 'add' && subterms(o).some((x) => x.kind === 'div')) return { kind: 'combine', side, after: at(side, s, finalForm(o)) }
+      if (o.kind === 'add' && subterms(o).some((x) => x.kind === 'div')) {
+        const f = combined(o)
+        if (f) return { kind: 'combine', side, after: at(side, s, f) }
+      }
       return { kind: 'multiply', operand: s.den, side, after: at(side, s.num, timesFactor(o, s.den)) }
     }
     case 'pow': {
       if (has(s.exp)) {
         if (has(s.base)) return null
         // erst zu einem Bruch, dann logarithmieren: \ln\frac{a - y}{by} statt \ln\left(\frac{a}{by} - \frac{1}{b}\right)
-        if (isSumWithFraction(o)) return { kind: 'combine', side, after: at(side, s, finalForm(o)) }
+        if (isSumWithFraction(o)) {
+          const f = combined(o)
+          if (f) return { kind: 'combine', side, after: at(side, s, f) }
+        }
         // \ln(e^F) = F gleich; bei einer anderen Basis folgt das Logarithmusgesetz als eigener Schritt
         return { kind: 'log', side, after: at(side, isE(s.base) ? s.exp : fn('ln', s), lnOf(o)), requires: o }
       }
@@ -678,24 +695,36 @@ function peelRaw(s: Expr, o: Expr, side: Side, t: string): Draft | null {
       if (!k || !isInteger(k) || (k.n !== 2n && k.n !== 3n)) return null
       // erst zu einem Bruch, wenn danach noch weiter umgeformt wird: \sqrt{\frac{qr - s}{r}} statt
       // \sqrt{q - \frac{s}{r}} (bei x^2 = … macht das das Ergebnis)
-      if (isSumWithFraction(o) && !isVar(s.base, t)) return { kind: 'combine', side, after: at(side, s, finalForm(o)) }
+      if (isSumWithFraction(o) && !isVar(s.base, t)) {
+        const f = combined(o)
+        if (f) return { kind: 'combine', side, after: at(side, s, f) }
+      }
       return { kind: 'root', operand: num(k), side, after: at(side, s.base, k.n === 2n ? sqrt(o) : root(o, 3)) }
     }
     case 'root':
       if (s.index !== 2) return null
-      if (isSumWithFraction(o) && !isVar(s.arg, t)) return { kind: 'combine', side, after: at(side, s, finalForm(o)) }
+      if (isSumWithFraction(o) && !isVar(s.arg, t)) {
+        const f = combined(o)
+        if (f) return { kind: 'combine', side, after: at(side, s, f) }
+      }
       return { kind: 'square', side, after: at(side, s.arg, squared(o)), requires: o }
     case 'fn': {
       // \ln u = w → u = e^w
       if (s.name === 'ln') {
         // nach der pq-Formel erst zu einem Bruch: e^{\frac{a + \sqrt{a^2 + 4b}}{2}}
-        if (isSumWithFraction(o) && subterms(o).some((x) => x.kind === 'root')) return { kind: 'combine', side, after: at(side, s, finalForm(o)) }
+        if (isSumWithFraction(o) && subterms(o).some((x) => x.kind === 'root')) {
+          const f = combined(o)
+          if (f) return { kind: 'combine', side, after: at(side, s, f) }
+        }
         return { kind: 'exp', operand: E, side, after: at(side, s.arg, powerOf(E, o)) }
       }
       // \sin u = w → u = \arcsin w (erst zu einem Bruch: \arcsin\frac{y - ab}{a})
       const arc = ARC_OF[s.name]
       if (arc) {
-        if (isSumWithFraction(o)) return { kind: 'combine', side, after: at(side, s, finalForm(o)) }
+        if (isSumWithFraction(o)) {
+          const f = combined(o)
+          if (f) return { kind: 'combine', side, after: at(side, s, f) }
+        }
         const requires = arcRequires(arc, o)
         return { kind: 'arc', fn: arc, side, after: at(side, s.arg, fn(arc, o)), ...(requires ? { requires } : {}) }
       }
@@ -1779,9 +1808,23 @@ function quadraticStep(e: Equation, t: string, diff: Poly, atoms: Atoms, ctx: Co
   if (!(lead && isOne(lead))) {
     const p = fracDiv(fracOf(b), fracOf(a))
     const q = fracDiv(fracOf(c), fracOf(a))
-    return { kind: 'normalize', operand: polyToExpr(a, atoms), after: eq(quadraticExpr(num(1), niceFrac(p, atoms), niceFrac(q, atoms), variable(t)), num(0)) }
+    return { kind: 'normalize', operand: polyToExpr(a, atoms), after: eq(quadraticExpr(num(1), minusOutside(niceFrac(p, atoms)), minusOutside(niceFrac(q, atoms)), variable(t)), num(0)) }
   }
   return pqDraft(e, t, ctx)
+}
+
+// Minus aus dem Nenner vor den Bruch: \frac{2y + 1}{-y} → -\frac{2y + 1}{y}
+function minusOutside(e: Expr): Expr {
+  if (e.kind !== 'div') return e
+  const d = e.den
+  if (d.kind === 'neg') return neg(div(e.num, d.arg))
+  if (d.kind === 'mul' && d.factors[0]?.kind === 'num' && ratSign(d.factors[0].value) < 0) {
+    const [first, ...rest] = d.factors
+    const abs = ratNeg((first as Extract<Expr, { kind: 'num' }>).value)
+    const factors = isOne(abs) ? rest : [num(abs), ...rest]
+    return neg(div(e.num, factors.length === 1 ? factors[0] : mul(...factors)))
+  }
+  return e
 }
 
 // au^2 + bu + c = 0 aus dem Polynom (vorn mit Plus); null, wenn es keine solche Gleichung ist
@@ -1869,14 +1912,18 @@ function rational(e: Equation, t: string, ctx: Context): Draft | null {
   const pr = polyDivideExact(right.num, right.den)
   if (!pl || !pr) return null
 
-  // Klammern ausmultiplizieren (nicht in der Gleichung au^2 + bu + c = 0 mit einer Summe vor u^2)
-  const zeroAlready = isZeroExpr(e.rhs) && (() => {
-    const z = zeroForm(polyAdd(pl, polyScale(pr, rat(-1))), t, atoms)
-    return z !== null && z.a.length > 1 && key(z.equation.lhs) === key(e.lhs)
-  })()
-  if ((hasBracket(e.lhs) || hasBracket(e.rhs)) && !zeroAlready) {
-    const after = eq(polyToExpr(pl, atoms), polyToExpr(pr, atoms))
-    if (key(after.lhs) !== key(e.lhs) || key(after.rhs) !== key(e.rhs)) return { kind: 'expand', after }
+  // Klammern ausmultiplizieren (nicht in der Gleichung au^2 + bu + c = 0 mit einer Summe vor u^2 oder u)
+  const zero = isZeroExpr(e.rhs) ? zeroForm(polyAdd(pl, polyScale(pr, rat(-1))), t, atoms) : null
+  const already = zero !== null && key(zero.equation.lhs) === key(e.lhs)
+  const zeroAlready = already && (zero.a.length > 1 || zero.b.length > 1)
+  if (hasBracket(e.lhs) || hasBracket(e.rhs)) {
+    if (zeroAlready) {
+      // nur mit einer Summe vor u: erst seit Teil 7b
+      if (zero.a.length <= 1) novelPaths++
+    } else {
+      const after = eq(polyToExpr(pl, atoms), polyToExpr(pr, atoms))
+      if (key(after.lhs) !== key(e.lhs) || key(after.rhs) !== key(e.rhs)) return { kind: 'expand', after }
+    }
   }
 
   const diff = polyAdd(pl, polyScale(pr, rat(-1)))
@@ -1993,6 +2040,20 @@ function alreadyFinal(o: Expr): boolean {
   return p !== null && p.length === o.terms.length
 }
 
+// Seite zu einem Bruch zusammengefasst; null, wenn sich dabei nichts ändert (b + c, 1 - e^{\frac{a}{b}}),
+// sonst käme der Schritt immer wieder
+function combined(o: Expr): Expr | null {
+  const f = finalForm(o)
+  if (key(f) !== key(o)) return f
+  novelPaths++
+  return null
+}
+
+// Wege, die die Engine erst seit Teil 7b geht (an diesen Gleichungen blieb sie vorher hängen). Der
+// Baukasten nimmt Aufgaben mit solchen Wegen nur in Vorlagen ab 7b, damit die Nummern der älteren
+// Vorlagen dieselbe Aufgabe behalten (rearrangeTerms.ts, solution.novel).
+let novelPaths = 0
+
 // Steht der Teil unter einer Wurzel (dann zählt er als ein Zeichen)?
 const insideRoot = (e: Expr, part: Expr): boolean => subterms(e).some((x) => x.kind === 'root' && x !== part && subterms(x.arg).includes(part))
 
@@ -2009,6 +2070,7 @@ export const solveTask = (task: { readonly equation: Equation; readonly target: 
 // der Aufgabe wird die passende Lösung der pq-Formel gewählt; mit einer Substitution geht es ab einer
 // Gleichung in u weiter (beim Weiterrechnen mit einem typischen Fehler).
 export function solveEquation(equation: Equation, target: string, options: SolveOptions = {}): RearrangeSolution | null {
+  const startPaths = novelPaths
   const steps: RearrangeStep[] = []
   let current = equation
   let sub = options.substitution
@@ -2035,6 +2097,7 @@ export function solveEquation(equation: Equation, target: string, options: Solve
           result: current.rhs,
           requires: steps.flatMap((x) => (x.requires ? [x.requires] : [])),
           ...(sub ? { substitution: sub } : {}),
+          ...(novelPaths > startPaths ? { novel: true as const } : {}),
         }
       }
       const unknown = inU && draft.kind !== 'resubstitute' ? { unknown: sub!.name } : {}

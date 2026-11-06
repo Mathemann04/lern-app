@@ -117,7 +117,89 @@ function evaluateTool(tool: Tool, env: Env): number {
       return numericIntegral(at, evaluate(tool.lower, env), evaluate(tool.upper, env))
     case 'bracket':
       return at(evaluate(tool.upper, env)) - at(evaluate(tool.lower, env))
+    case 'sum':
+      return numericSum(at, evaluate(tool.lower, env), evaluate(tool.upper, env))
+    case 'series':
+      return numericSeries(at, evaluate(tool.lower, env))
+    case 'limit':
+      return numericLimit(at)
   }
+}
+
+// Endliche Summe: bei ganzzahligen Grenzen Summand für Summand. Ist die obere Grenze keine ganze Zahl
+// (sie kommt beim Umstellen nach n aus dem Ergebnis), wird eine geometrische Summe mit ihrem Quotienten
+// q fortgesetzt: s = f(unten) \frac{q^m - 1}{q - 1} mit m = oben - unten + 1 Summanden; q kommt
+// numerisch aus drei Summanden, die Summe muss also geometrisch sein.
+function numericSum(f: (k: number) => number, lower: number, upper: number): number {
+  if (!Number.isInteger(lower) || !Number.isFinite(upper)) return NaN
+  const count = upper - lower + 1
+  if (Number.isInteger(upper)) {
+    if (count > 100000) return NaN
+    let sum = 0
+    for (let k = lower; k <= upper; k++) sum += f(k)
+    return sum
+  }
+  const [f0, f1, f2] = [f(lower), f(lower + 1), f(lower + 2)]
+  if (!(f0 !== 0 && f1 !== 0)) return NaN
+  const q = f1 / f0
+  if (Math.abs(f2 / f1 - q) > 1e-12 * Math.max(1, Math.abs(q)) || !(q > 0) || q === 1) return NaN
+  return (f0 * (q ** count - 1)) / (q - 1)
+}
+
+// Reihe: Teilsummen, bis die Summanden im Rundungsfehler verschwinden; NaN, wenn sie nach 20 000
+// Summanden nicht klein genug sind (keine oder sehr langsame Konvergenz, q nahe 1)
+function numericSeries(f: (k: number) => number, lower: number): number {
+  if (!Number.isInteger(lower)) return NaN
+  let sum = 0
+  let previous = NaN
+  const ratios: number[] = []
+  for (let k = lower; k < lower + 20000; k++) {
+    const term = f(k)
+    if (!Number.isFinite(term)) return NaN
+    // plötzlich genau 0, obwohl der Summand davor noch zählte: Unterlauf (x^k zu klein für den Rechner
+    // bei \frac{x^k}{ka^k}), die Summe wäre zu früh abgebrochen
+    if (term === 0 && Math.abs(previous) > 1e-17 * Math.abs(sum)) return NaN
+    sum += term
+    if (k > lower + 5 && Math.abs(term) <= 1e-17 * Math.max(1e-300, Math.abs(sum))) return sum
+    // rein geometrische Summanden (Quotient zweier Summanden immer gleich, z. B. \left(\frac{t}{a}\right)^k):
+    // der Rest ist f(k) \frac{r}{1 - r}, sonst bräuchte die Reihe im Integral zu viele Summanden
+    if (previous !== 0 && Number.isFinite(previous)) ratios.push(term / previous)
+    const r = ratios[ratios.length - 1]
+    if (ratios.length >= 4 && Math.abs(r) < 1 && ratios.slice(-4).every((s) => Math.abs(s - r) <= 1e-13 * Math.abs(r))) return sum + (term * r) / (1 - r)
+    previous = term
+  }
+  return NaN
+}
+
+// Grenzwert n \to \infty: Werte bei n = 64, 128, 256, … (erst ab einem n, bei dem der Term definiert ist,
+// z. B. n > x bei \frac{n + x}{n - x}), dann mit Neville zu \frac{1}{n} = 0 extrapoliert (die Fehler gehen
+// mit Potenzen von \frac{1}{n} weg, z. B. bei \left(1 + \frac{x}{n}\right)^n); NaN, wenn sich die
+// Schätzungen nicht einig werden
+function numericLimit(f: (n: number) => number): number {
+  let start = 64
+  while (start < 2 ** 24 && !Number.isFinite(f(start))) start *= 2
+  if (!Number.isFinite(f(start))) return NaN
+  const hs: number[] = []
+  const table: number[] = []
+  let previous = NaN
+  let best = { value: NaN, gap: Infinity }
+  for (let j = 0; j < 9; j++) {
+    const n = start * 2 ** j
+    hs.push(1 / n)
+    table.push(f(n))
+    // Neville: Polynom durch alle Punkte, an der Stelle 0
+    for (let m = table.length - 2; m >= 0; m--) {
+      const h0 = hs[m]
+      const h1 = hs[table.length - 1]
+      table[m] = table[m + 1] + ((table[m + 1] - table[m]) * h1) / (h0 - h1)
+    }
+    const estimate = table[0]
+    if (!Number.isFinite(estimate)) return NaN
+    const gap = Math.abs(estimate - previous) / Math.max(1, Math.abs(estimate))
+    if (gap < best.gap) best = { value: estimate, gap }
+    previous = estimate
+  }
+  return best.gap <= 1e-9 ? best.value : NaN
 }
 
 // Zentrale Differenzenquotienten mit Richardson-Extrapolation (Fehler etwa h^6); nah an der 0 kleiner,
@@ -164,7 +246,12 @@ function numericIntegral(f: (t: number) => number, a: number, b: number): number
   const pieces = 8
   const width = (b - a) / pieces
   const parts = Array.from({ length: pieces }, (_, i) => [a + i * width, a + (i + 1) * width] as const)
-  const rough = parts.reduce((sum, [lo, hi]) => sum + gauss(lo, hi), 0)
+  // nicht definiert (z. B. eine Reihe, die dort nicht schnell genug konvergiert): gleich aufhören
+  let rough = 0
+  for (const [lo, hi] of parts) {
+    rough += gauss(lo, hi)
+    if (!Number.isFinite(rough)) return NaN
+  }
   const tolerance = 1e-13 * Math.max(1, Math.abs(rough))
   let budget = 20000
   const refine = (lo: number, hi: number, whole: number, depth: number): number => {

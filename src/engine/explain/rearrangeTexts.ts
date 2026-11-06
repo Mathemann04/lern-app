@@ -242,6 +242,42 @@ export const REARRANGE_ERROR_TEXTS: Readonly<Record<string, Explanation>> = {
       'Auch die untere Grenze wird eingesetzt und abgezogen, selbst wenn sie $0$ ist: $F(0)$ ist oft nicht $0$, z. B. $e^0 = 1$ oder $\\ln a$. Also $\\int_0^x f(t)\\,\\mathrm{d}t = F(x) - F(0)$.',
     short: 'Die untere Grenze nicht vergessen: $F(x) - F(0)$.',
   },
+  // Werkzeuge der Stufe 5 (Schritt 7b): Summen, Reihen, Grenzwerte
+  'eq-sum-count': {
+    detailed:
+      'In der Formel $\\sum_{k=0}^{m-1} q^k = \\frac{q^m - 1}{q - 1}$ steht im Exponenten die Anzahl $m$ der Summanden. Zähle nach: Von $k = 0$ bis $k = n - 1$ sind es $n$ Summanden, von $k = 0$ bis $k = n$ sind es $n + 1$, von $k = 1$ bis $k = n$ wieder $n$.',
+    short: 'Im Exponenten steht die Anzahl der Summanden: von $k = 0$ bis $n - 1$ sind es $n$.',
+  },
+  'eq-series-start': {
+    detailed:
+      'Die Formeln $\\sum_{k=0}^{\\infty} q^k = \\frac{1}{1 - q}$ und $\\sum_{k=0}^{n-1} q^k = \\frac{q^n - 1}{q - 1}$ beginnen mit dem Summanden $q^0 = 1$. Beginnt die Summe bei $k = 1$, ist der erste Summand $q$: Klammere ihn aus, $\\sum_{k=1}^{\\infty} q^k = q\\sum_{k=0}^{\\infty} q^k$. Genauso bei der abgeleiteten Reihe: $\\sum_{k=1}^{\\infty} kq^k = q\\sum_{k=1}^{\\infty} kq^{k-1}$.',
+    short: 'Auf den ersten Summanden achten: Beginnt die Summe mit $q$ statt mit $1$, kommt der Faktor $q$ dazu.',
+  },
+  'eq-series-sign': {
+    detailed:
+      'Für $0 < q < 1$ geht $q^n$ gegen $0$: Aus $\\frac{q^n - 1}{q - 1}$ wird $\\frac{-1}{q - 1} = \\frac{1}{1 - q}$. Die Reihe ist dann positiv, $\\frac{1}{q - 1}$ wäre negativ. Bei der endlichen Summe stehen oben und unten die Summanden in derselben Reihenfolge: $\\frac{q^n - 1}{q - 1}$ oder $\\frac{1 - q^n}{1 - q}$. Und $\\sum_{k=1}^{\\infty} \\frac{q^k}{k} = -\\ln(1 - q)$ hat ein Minus, denn $\\ln(1 - q)$ ist negativ.',
+    short: 'Vorzeichen prüfen: Für $0 < q < 1$ ist $\\sum_{k=0}^{\\infty} q^k = \\frac{1}{1 - q}$ positiv.',
+  },
+  'eq-series-not-geometric': {
+    detailed:
+      'In einer geometrischen Reihe entsteht jeder Summand aus dem vorigen durch Malnehmen mit $q$. Steht $k$ vor oder unter $q^k$, ist das nicht so. $\\sum_{k=1}^{\\infty} kq^{k-1} = \\frac{1}{(1 - q)^2}$ ist die abgeleitete geometrische Reihe, $\\sum_{k=1}^{\\infty} \\frac{q^k}{k} = -\\ln(1 - q)$ die integrierte.',
+    short: 'Mit $k$ im Summanden: abgeleitete bzw. integrierte geometrische Reihe.',
+  },
+  'eq-lim-one': {
+    detailed:
+      '„1 hoch unendlich" hat keinen festen Wert: Die Klammer geht gegen $1$, aber die Hochzahl wächst über alle Grenzen. Beides wirkt gegeneinander, und es gilt $\\lim_{n \\to \\infty}\\left(1 + \\frac{x}{n}\\right)^n = e^x$.',
+    short: '„1 hoch unendlich" ist nicht $1$: $\\left(1 + \\frac{x}{n}\\right)^n \\to e^x$.',
+  },
+  'eq-lim-exponent': {
+    detailed:
+      'Steht in der Hochzahl ein Vielfaches von $n$, nimmst du den Faktor mit: $\\left(1 + \\frac{x}{n}\\right)^{sn} = \\left(\\left(1 + \\frac{x}{n}\\right)^n\\right)^s \\to \\left(e^x\\right)^s = e^{sx}$.',
+    short: 'Der Faktor in der Hochzahl bleibt: $\\left(1 + \\frac{x}{n}\\right)^{sn} \\to e^{sx}$.',
+  },
+  'eq-lim-denominator': {
+    detailed:
+      'Im Bruch wirkt auch der Nenner. Teile Zähler und Nenner durch $n$: $\\left(\\frac{n + p}{n + r}\\right)^n = \\frac{\\left(1 + \\frac{p}{n}\\right)^n}{\\left(1 + \\frac{r}{n}\\right)^n} \\to \\frac{e^p}{e^r} = e^{p - r}$.',
+    short: 'Der Nenner zählt mit: $\\left(\\frac{n + p}{n + r}\\right)^n \\to e^{p - r}$.',
+  },
 }
 
 export function explainRearrangeError(id: string): Explanation {
@@ -737,6 +773,9 @@ export const REARRANGE_HINTS = {
   partial: 'Zerlege den Nenner in Faktoren und setze an: $\\frac{A}{t + p} + \\frac{B}{t + q}$. Die Nullstellen der Faktoren eingesetzt liefern $A$ und $B$.',
   antiderivative: 'Suche eine Funktion, deren Ableitung der Integrand ist. Teile durch die innere Ableitung, z. B. $\\int e^{2t}\\,\\mathrm{d}t = \\frac{1}{2}e^{2t}$.',
   bounds: 'Setze erst die obere, dann die untere Grenze ein und ziehe ab: $F(x) - F(a)$.',
+  sumFormula: 'Geometrische Summe: $\\sum_{k=0}^{m-1} q^k = \\frac{q^m - 1}{q - 1}$ mit der Anzahl $m$ der Summanden. Beginnt die Summe nicht mit $q^0 = 1$, klammere den ersten Summanden aus.',
+  series: 'Geometrische Reihe für $0 < q < 1$: $\\sum_{k=0}^{\\infty} q^k = \\frac{1}{1 - q}$. Abgeleitet: $\\sum_{k=1}^{\\infty} kq^k = \\frac{q}{(1 - q)^2}$, integriert: $\\sum_{k=1}^{\\infty} \\frac{q^k}{k} = -\\ln(1 - q)$.',
+  limit: '$\\lim_{n \\to \\infty}\\left(1 + \\frac{p}{n}\\right)^n = e^p$. Einen Faktor in der Hochzahl nimmst du mit, einen Bruch teilst du oben und unten durch $n$.',
   add: 'Ein Summand verschwindet mit der Gegenrechnung: Aus $+c$ wird auf beiden Seiten $-c$.',
   move: 'Bringe den Summanden mit Minus auf die andere Seite, dort steht er mit Plus. Den Rest bringst du herüber.',
   divide: 'Einen Faktor wirst du los, indem du beide Seiten durch ihn teilst.',
@@ -776,9 +815,13 @@ export const REARRANGE_HINTS = {
 } as const
 
 // Tipp für die ganze Aufgabe (im freien Modus)
-export function rearrangeTaskHint(target: string, several: boolean, block: string | null = null, quadratic = false, tool: 'derivative' | 'integral' | null = null): Explanation {
+export type TaskTool = 'derivative' | 'integral' | 'series' | 'limit'
+
+export function rearrangeTaskHint(target: string, several: boolean, block: string | null = null, quadratic = false, tool: TaskTool | null = null): Explanation {
   if (tool === 'derivative') return same(`Rechne zuerst die Ableitung aus. Dann steht eine gewöhnliche Gleichung da, die du nach $${target}$ auflöst.`)
   if (tool === 'integral') return same(`Rechne zuerst das Integral aus: Stammfunktion, dann die Grenzen einsetzen. Dann löst du nach $${target}$ auf.`)
+  if (tool === 'series') return same(`Rechne zuerst die Summe mit der Formel der geometrischen Summe bzw. Reihe aus. Dann löst du nach $${target}$ auf.`)
+  if (tool === 'limit') return same(`Rechne zuerst den Grenzwert aus, mit $\\left(1 + \\frac{p}{n}\\right)^n \\to e^p$. Dann löst du nach $${target}$ auf.`)
   if (block) return same(`Setze $u = ${block}$ und löse die quadratische Gleichung in $u$ mit der $pq$-Formel. Wähle die passende Lösung, setze zurück ein und löse nach $${target}$ auf.`)
   if (quadratic) return same(`Forme um, bis $${target}^2$ und $${target}$ in einer Gleichung stehen. Bringe alles auf eine Seite, nimm die $pq$-Formel und wähle die passende Lösung.`)
   return several
@@ -894,6 +937,12 @@ export function explainResult(kind: string, before: string, after: string): Expl
       return { detailed: `Eine Stammfunktion, mit den Grenzen in eckigen Klammern (Probe: abgeleitet ergibt sie den Integranden):\n${lines}`, short: lines }
     case 'bounds':
       return { detailed: `Die obere Grenze eingesetzt, minus die untere:\n${lines}`, short: lines }
+    case 'sumFormula':
+      return { detailed: `Die Formel der geometrischen Summe angewandt, im Exponenten die Anzahl der Summanden:\n${lines}`, short: lines }
+    case 'series':
+      return { detailed: `Die Formel der geometrischen Reihe angewandt und zusammengefasst:\n${lines}`, short: lines }
+    case 'limit':
+      return { detailed: `Der Grenzwert mit $\\left(1 + \\frac{p}{n}\\right)^n \\to e^p$:\n${lines}`, short: lines }
     default:
       return { detailed: `Auf beiden Seiten dieselbe Rechnung:\n${lines}`, short: lines }
   }

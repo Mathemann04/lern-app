@@ -51,6 +51,27 @@ export type Tool =
   | { readonly kind: 'integral'; readonly body: Expr; readonly v: string; readonly lower: Expr; readonly upper: Expr }
   // Stammfunktion mit Grenzen: \left[body\right]_{lower}^{upper} = body(upper) - body(lower)
   | { readonly kind: 'bracket'; readonly body: Expr; readonly v: string; readonly lower: Expr; readonly upper: Expr }
+  // endliche Summe \sum_{v=lower}^{upper} body (v ist gebunden, z. B. k)
+  | { readonly kind: 'sum'; readonly body: Expr; readonly v: string; readonly lower: Expr; readonly upper: Expr }
+  // Reihe \sum_{v=lower}^{\infty} body
+  | { readonly kind: 'series'; readonly body: Expr; readonly v: string; readonly lower: Expr }
+  // Grenzwert \lim_{v \to \infty} body (v ist gebunden, z. B. n)
+  | { readonly kind: 'limit'; readonly body: Expr; readonly v: string }
+
+// Gebundene Variable eines Werkzeugs (bei der Ableitung keine: dort ist v die Stelle) und die Teile
+// außerhalb des Rumpfs (Grenzen)
+export const toolBound = (tool: Tool): string | null => (tool.kind === 'derivative' ? null : tool.v)
+export function toolLimits(tool: Tool): Expr[] {
+  switch (tool.kind) {
+    case 'derivative':
+    case 'limit':
+      return []
+    case 'series':
+      return [tool.lower]
+    default:
+      return [tool.lower, tool.upper]
+  }
+}
 
 // Gleichung, z. B. für implizites Ableiten: x² + y² = 25
 export type Equation = { readonly lhs: Expr; readonly rhs: Expr }

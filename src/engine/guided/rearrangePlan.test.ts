@@ -4,8 +4,8 @@ import { parseRichText } from '../explain/richText.ts'
 import { cardById } from '../explain/cards.ts'
 import { latexProblem } from '../expr/latexChecks.ts'
 import { toLatex } from '../expr/print.ts'
-import { type Expr, add, div, eq, mul, num, pow, variable } from '../expr/types.ts'
-import { derivativeOf, integralOf } from '../rearrange/tools/tool.ts'
+import { type Expr, add, div, eq, mul, num, pow, sub, variable } from '../expr/types.ts'
+import { derivativeOf, integralOf, limitOf, seriesOf, sumOf } from '../rearrange/tools/tool.ts'
 import { parseLatex } from '../parse/latex.ts'
 import { REARRANGE_ERROR_RULES } from '../rearrange/errorRules.ts'
 import type { Level } from '../tasks/taskNumber.ts'
@@ -142,6 +142,34 @@ describe('Geführt umstellen: Stufe 5 (Werkzeuge)', () => {
     expect(wrong.length).toBeGreaterThan(0)
     for (const c of wrong) expect(c.whyWrong?.detailed.length).toBeGreaterThan(0)
     expect(first.cards).toContain('quotient')
+  })
+
+  it('Summe, Reihe, Grenzwert (Teil 7b): Formel als erster Schritt, mit den typischen Fehlern und der Lernkarte', () => {
+    const [k, n, q, x, y] = ['k', 'n', 'q', 'x', 'y'].map(variable)
+    const sum = planRearrange({ equation: eq(sumOf(pow(q, k), num(0), sub(n, num(1))), y), target: 'n', conditions: [{ lhs: q, rel: '>', rhs: num(1) }] }, { level: 5, seed: 1 })
+    expect(sum.steps[0].title).toBe('Was steht da eigentlich?')
+    expect(sum.steps[0].question).toContain('geometrischen Summe')
+    expect(sum.steps[0].choices.map((c) => c.errorRuleId)).toContain('eq-sum-count')
+    expect(sum.steps[0].cards).toEqual(['rearrange-series'])
+    expect(sum.instruction).toBe('Löse nach $n$ auf')
+
+    const series = planRearrange({ equation: eq(seriesOf(mul(k, pow(x, k)), num(1)), y), target: 'x', conditions: [{ lhs: x, rel: '<', rhs: num(1) }] }, { level: 5, seed: 1 })
+    const ids = series.steps[0].choices.map((c) => c.errorRuleId)
+    expect(ids).toContain('eq-series-start')
+    expect(ids).toContain('eq-series-not-geometric')
+    expect(series.ruleHint.detailed).toContain('geometrischen')
+
+    // „1 hoch unendlich": die falsche Gleichung ohne x ist hier gerade der typische Fehler
+    const limit = planRearrange({ equation: eq(limitOf(pow(add(num(1), div(x, n)), mul(num(2), n))), y), target: 'x', conditions: [] }, { level: 5, seed: 1 })
+    const choices = limit.steps[0].choices
+    expect(choices.find((c) => c.correct)?.content).toBe('$e^{2x} = y$')
+    expect(choices.map((c) => c.errorRuleId).sort()).toEqual([undefined, 'eq-lim-exponent', 'eq-lim-one'].sort())
+    expect(limit.steps[0].cards).toEqual(['rearrange-limit'])
+
+    // Reihe in einer Ableitung: erst die Reihe, dann ableiten
+    const nested = planRearrange({ equation: eq(derivativeOf(seriesOf(div(pow(x, k), k), num(1))), y), target: 'x', conditions: [{ lhs: x, rel: '<', rhs: num(1) }] }, { level: 5, seed: 1 })
+    expect(nested.steps.slice(0, 2).map((s) => s.id.replace(/^\d+-/, ''))).toEqual(['series', 'derive'])
+    expect(nested.steps[1].title).toBe('Ableiten')
   })
 })
 

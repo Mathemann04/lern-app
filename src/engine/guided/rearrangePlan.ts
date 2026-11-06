@@ -35,6 +35,7 @@ import {
   pythagorasMoves,
   reciprocalMoves,
   rearrangeTaskHint,
+  type TaskTool,
   resubstituteMoves,
   signed,
   substituteMoves,
@@ -144,7 +145,7 @@ export function planRearrange(task: RearrangeTask, ref: TaskRef, focus?: string)
       solution.steps.some((s) => s.kind === 'collect' || s.kind === 'expand'),
       solution.substitution ? toLatex(solution.substitution.expr) : null,
       solution.steps.some((s) => s.kind === 'pq'),
-      solution.steps[0]?.kind === 'derive' ? 'derivative' : TOOL_KINDS.has(solution.steps[0]?.kind) ? 'integral' : null,
+      TASK_TOOL[solution.steps[0]?.kind ?? 'finish'] ?? null,
     ),
     result,
     resultLatex: readableLatex(`${t} = ${toLatex(result)}`),
@@ -153,15 +154,29 @@ export function planRearrange(task: RearrangeTask, ref: TaskRef, focus?: string)
   }
 }
 
-// Stufe 5: Schritte, die ein Werkzeug ausrechnen (Ableitung, Integral). Sie werden nur als „Was kommt
-// heraus?" gefragt, der erste als „Was steht da eigentlich?"
-const TOOL_KINDS = new Set<StepKind | undefined>(['derive', 'partial', 'antiderivative', 'bounds'])
+// Stufe 5: Schritte, die ein Werkzeug ausrechnen (Ableitung, Integral, Summe, Grenzwert). Sie werden nur
+// als „Was kommt heraus?" gefragt, der erste als „Was steht da eigentlich?"
+const TOOL_KINDS = new Set<StepKind | undefined>(['derive', 'partial', 'antiderivative', 'bounds', 'sumFormula', 'series', 'limit'])
 
 const TOOL_QUESTIONS: Partial<Record<StepKind, string>> = {
   derive: 'Rechne die Ableitung aus: Was kommt heraus?',
   partial: 'Zerlege den Bruch im Integral in Partialbrüche: Was kommt heraus?',
   antiderivative: 'Welche Stammfunktion gehört zum Integranden?',
   bounds: 'Setze die Grenzen ein: Was kommt heraus?',
+  sumFormula: 'Rechne die Summe mit der Formel der geometrischen Summe aus: Was kommt heraus?',
+  series: 'Rechne die Reihe aus: Was kommt heraus?',
+  limit: 'Rechne den Grenzwert aus: Was kommt heraus?',
+}
+
+// Tipp zur ganzen Aufgabe nach dem ersten Werkzeug-Schritt
+const TASK_TOOL: Partial<Record<StepKind, TaskTool>> = {
+  derive: 'derivative',
+  partial: 'integral',
+  antiderivative: 'integral',
+  bounds: 'integral',
+  sumFormula: 'series',
+  series: 'series',
+  limit: 'limit',
 }
 
 // --- Weichen: Schritte, bei denen man wissen muss, was als Nächstes kommt ---
@@ -273,6 +288,9 @@ function moveQuestion(step: RearrangeStep, t: string, target: string): MoveQuest
     case 'partial':
     case 'antiderivative':
     case 'bounds':
+    case 'sumFormula':
+    case 'series':
+    case 'limit':
       return null
     case 'add': {
       if (!side || !step.operand) return null
@@ -474,6 +492,9 @@ const RESULT_HINTS: Partial<Record<StepKind, string>> = {
   partial: REARRANGE_HINTS.partial,
   antiderivative: REARRANGE_HINTS.antiderivative,
   bounds: REARRANGE_HINTS.bounds,
+  sumFormula: REARRANGE_HINTS.sumFormula,
+  series: REARRANGE_HINTS.series,
+  limit: REARRANGE_HINTS.limit,
 }
 
 const spuriousWhy = (reason: string): Explanation => ({ detailed: `Diese Lösung ist eine Scheinlösung. ${reason}`, short: reason })
@@ -576,6 +597,9 @@ const CARDS_BY_KIND: Record<StepKind, readonly string[]> = {
   partial: [REARRANGE_CARD_IDS.integral],
   antiderivative: [REARRANGE_CARD_IDS.integral],
   bounds: [REARRANGE_CARD_IDS.integral],
+  sumFormula: [REARRANGE_CARD_IDS.series],
+  series: [REARRANGE_CARD_IDS.series],
+  limit: [REARRANGE_CARD_IDS.limit],
   finish: [FRACTION_CARD_IDS.add, FRACTION_CARD_IDS.expand],
 }
 

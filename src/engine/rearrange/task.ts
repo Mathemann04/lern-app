@@ -1,6 +1,6 @@
 import { subterms } from '../expr/compare.ts'
 import { equationToLatex, toLatex } from '../expr/print.ts'
-import type { Equation, Expr } from '../expr/types.ts'
+import { type Equation, type Expr, toolBound, toolLimits } from '../expr/types.ts'
 
 // Eine Umstell-Aufgabe: Gleichung, gesuchte Variable und Bedingungen. Alle Buchstaben stehen für
 // positive Zahlen; dazu kommen Bedingungen der Aufgabe wie x > a, damit die Lösung eindeutig ist.
@@ -25,8 +25,8 @@ export function variablesOf(...exprs: readonly Expr[]): string[] {
         continue
       }
       const { tool } = s
-      const inner = variablesOf(tool.body).filter((n) => tool.kind === 'derivative' || n !== tool.v)
-      for (const n of [...inner, ...(tool.kind === 'derivative' ? [] : variablesOf(tool.lower, tool.upper))]) names.add(n)
+      const inner = variablesOf(tool.body).filter((n) => n !== toolBound(tool))
+      for (const n of [...inner, ...variablesOf(...toolLimits(tool))]) names.add(n)
     }
   }
   for (const e of exprs) visit(e)

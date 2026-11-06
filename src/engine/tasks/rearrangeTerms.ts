@@ -4,7 +4,7 @@ import { holds, samplePoints } from '../rearrange/check.ts'
 import { solveTask } from '../rearrange/isolate.ts'
 import { type RearrangeTask, taskLatex, taskVariables } from '../rearrange/task.ts'
 import { type Rng, createRng } from '../random/rng.ts'
-import { type KitTask, buildLevel1, buildLevel2, buildLevel3, buildLevel4, buildLevel4Quadratic, buildLevel4Trig, buildLevel5Tools } from './rearrangeKit.ts'
+import { type KitTask, buildLevel1, buildLevel2, buildLevel3, buildLevel4, buildLevel4Quadratic, buildLevel4Trig, buildLevel5Series, buildLevel5Tools } from './rearrangeKit.ts'
 import type { Level, TaskRef } from './taskNumber.ts'
 
 // Vorlagen für Umstell-Aufgaben je Stufe (siehe docs/PLAN-M3.md, „Stufen"). Jede Vorlage baut aus
@@ -21,6 +21,9 @@ export type RearrangeTemplate = {
   // später dazugekommene Vorlage: fester Anteil, vorweg mit eigenem Zufall gewählt, damit die
   // übrigen Nummern ihre Aufgabe behalten (wie bei den Brüchen)
   readonly share?: number
+  // darf Wege der Engine nutzen, die erst seit Teil 7b dazugekommen sind (ältere Vorlagen nicht, damit ihre
+  // Nummern dieselbe Aufgabe behalten)
+  readonly novel?: boolean
 }
 
 export type GeneratedRearrangeTask = {
@@ -99,7 +102,18 @@ const level5Tools: RearrangeTemplate = {
   buildLabeled: buildLevel5Tools,
 }
 
-export const REARRANGE_TEMPLATES: readonly RearrangeTemplate[] = [level1Kit, level2Kit, level3Kit, level4Kit, level4Trig, level4Quadratic, level5Tools]
+// Teil 7b: Summen, Reihen und Grenzwerte, mit festem Anteil (die übrigen Nummern behalten ihre Aufgabe)
+const level5Series: RearrangeTemplate = {
+  id: 'baukasten-5-reihen',
+  level: 5,
+  label: 'Baukasten: Summen, Reihen und Grenzwerte',
+  build: (rng) => buildLevel5Series(rng).task,
+  buildLabeled: buildLevel5Series,
+  share: 0.4,
+  novel: true,
+}
+
+export const REARRANGE_TEMPLATES: readonly RearrangeTemplate[] = [level1Kit, level2Kit, level3Kit, level4Kit, level4Trig, level4Quadratic, level5Tools, level5Series]
 
 export function rearrangeTemplatesForLevel(level: Level): RearrangeTemplate[] {
   return REARRANGE_TEMPLATES.filter((t) => t.level === level)
@@ -108,10 +122,16 @@ export function rearrangeTemplatesForLevel(level: Level): RearrangeTemplate[] {
 export const isRearrangeLevelAvailable = (level: Level) => rearrangeTemplatesForLevel(level).length > 0
 
 // Längste Aufgabe (LaTeX), damit sie am Handy lesbar bleibt; in Stufe 5 ohne die Schreibweise der
-// Werkzeuge gezählt (\mathrm{d}, \left, \right)
+// Werkzeuge gezählt (\mathrm{d}, \left, \right), Summen- und Grenzwertzeichen so breit wie drei Zeichen
+// (ihre Grenzen stehen klein darüber und darunter)
 const MAX_TASK_LATEX = 64
 const MAX_TOOL_TASK = 64
-const visibleLatex = (latex: string) => latex.replace(/\\mathrm\{d\}/g, 'd').replace(/\\left|\\right|\\,/g, '')
+const visibleLatex = (latex: string) =>
+  latex
+    .replace(/\\mathrm\{d\}/g, 'd')
+    .replace(/\\left|\\right|\\,/g, '')
+    .replace(/\\sum_\{[^}]*\}\^\{[^}]*\}/g, 'Sum')
+    .replace(/\\lim_\{[^}]*\}/g, 'lim')
 
 // Wie oft kommt die gesuchte Variable vor, und steht sie in einem Nenner?
 function occurrences(t: RearrangeTask): { count: number; inDenominator: boolean } {
@@ -125,7 +145,7 @@ const hasNestedFraction = (t: RearrangeTask) =>
 
 // Brauchbar: lösbar, das Ergebnis ohne die gesuchte Variable, an genug erlaubten Stellen
 // prüfbar, nicht zu lang; im Baukasten außerdem nicht zu leicht, höchstens sieben Buchstaben
-function isGood(t: RearrangeTask, level: Level, kit: boolean): boolean {
+function isGood(t: RearrangeTask, level: Level, kit: boolean, novel = false): boolean {
   if (kit) {
     const letters = taskVariables(t).length
     const long = level === 5 ? visibleLatex(taskLatex(t)).length > MAX_TOOL_TASK : taskLatex(t).length > MAX_TASK_LATEX
@@ -138,6 +158,8 @@ function isGood(t: RearrangeTask, level: Level, kit: boolean): boolean {
   }
   const solution = solveTask(t)
   if (!solution || contains(solution.result, t.target)) return false
+  // Wege der Engine ab Teil 7b nur in Vorlagen ab 7b (die älteren behalten ihre Aufgaben)
+  if (solution.novel && !novel) return false
   if (kit && solution.steps.length < MIN_STEPS[level]) return false
   if (toLatex(solution.result).length > MAX_RESULT_LATEX[level]) return false
   // Stufe 5: Buchstaben im Ergebnis (sie heben sich nicht alle weg)
@@ -173,6 +195,6 @@ export function generateRearrangeTask(ref: TaskRef): GeneratedRearrangeTask {
     const template = shared ?? rng.pick(regular)
     const kit = template.buildLabeled?.(rng)
     const t = kit ? kit.task : template.build(rng)
-    if (isGood(t, ref.level, kit !== undefined)) return { ref, template, task: t, label: kit?.label ?? template.label }
+    if (isGood(t, ref.level, kit !== undefined, template.novel)) return { ref, template, task: t, label: kit?.label ?? template.label }
   }
 }

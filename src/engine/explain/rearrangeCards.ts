@@ -1,6 +1,6 @@
 import { type Expr, PI, add, cos, div, eq, exp, fn, ln, mul, neg, num, pow, sin, sqrt, sub, variable } from '../expr/types.ts'
 import type { Condition, RearrangeTask } from '../rearrange/task.ts'
-import { integralOf } from '../rearrange/tools/tool.ts'
+import { derivativeOf, integralOf, limitOf, seriesOf, sumOf } from '../rearrange/tools/tool.ts'
 import type { Card } from './cards.ts'
 
 // Lernkarten im Ordner „Gleichungen umstellen". Die Beispiele sind Aufgaben der Umstell-Engine; den
@@ -22,9 +22,12 @@ export const REARRANGE_CARD_IDS = {
   substitution: 'rearrange-substitution',
   pq: 'rearrange-pq',
   integral: 'rearrange-integral',
+  series: 'rearrange-series',
+  limit: 'rearrange-limit',
 } as const
 
 const [a, b, c, d, k, t, x, y] = ['a', 'b', 'c', 'd', 'k', 't', 'x', 'y'].map(variable)
+const [m, q] = ['n', 'q'].map(variable)
 const n = (value: number) => num(value)
 const task = (lhs: Expr, rhs: Expr, target = 'x', conditions: readonly Condition[] = []): RearrangeTask => ({ equation: eq(lhs, rhs), target, conditions })
 const sq = (e: Expr) => pow(e, n(2))
@@ -273,5 +276,48 @@ export const REARRANGE_CARD_LIST: readonly Card[] = [
       task(integralOf(div(t, add(sq(t), sq(a))), n(0), x), y),
     ],
     errors: ['eq-partial-factor', 'eq-int-inner-factor', 'eq-int-derived', 'eq-int-power', 'eq-int-sign', 'eq-int-bounds-swapped', 'eq-int-lower-forgotten'],
+  },
+  {
+    id: REARRANGE_CARD_IDS.series,
+    topic: 'umstellen',
+    title: 'Geometrische Summe und Reihe',
+    level: 5,
+    rules: [],
+    formulas: [
+      '\\sum_{k=0}^{n-1} q^k = \\frac{q^n - 1}{q - 1}',
+      '\\sum_{k=0}^{\\infty} q^k = \\frac{1}{1 - q}',
+      '\\sum_{k=1}^{\\infty} kq^k = \\frac{q}{(1 - q)^2}',
+      '\\sum_{k=1}^{\\infty} \\frac{q^k}{k} = -\\ln(1 - q)',
+    ],
+    memo: 'Im Exponenten der Summenformel steht die Anzahl der Summanden. Die Reihe gilt für $0 < q < 1$, dann geht $q^n$ gegen $0$. Beginnt die Summe nicht mit $q^0 = 1$, klammerst du den ersten Summanden aus.',
+    note: 'Mit $k$ vor $q^k$ ist es die abgeleitete Reihe, mit $k$ darunter die integrierte. Ist die Anzahl $n$ gesucht, stellst du nach $q^n$ um und logarithmierst.',
+    when: 'Wenn in der Gleichung eine Summe oder Reihe mit $q^k$ steht: erst mit der Formel ausrechnen, dann umstellen.',
+    examples: [
+      task(sumOf(mul(a, pow(q, k)), n(0), sub(m, n(1))), y, 'n', [{ lhs: q, rel: '>', rhs: n(1) }]),
+      task(seriesOf(mul(k, pow(x, k)), n(1)), y, 'x', [{ lhs: x, rel: '<', rhs: n(1) }]),
+      task(derivativeOf(seriesOf(div(pow(x, k), k), n(1))), y, 'x', [{ lhs: x, rel: '<', rhs: n(1) }]),
+    ],
+    errors: ['eq-sum-count', 'eq-series-start', 'eq-series-sign', 'eq-series-not-geometric'],
+  },
+  {
+    id: REARRANGE_CARD_IDS.limit,
+    topic: 'umstellen',
+    title: 'Grenzwert $\\left(1 + \\frac{x}{n}\\right)^n \\to e^x$',
+    level: 5,
+    rules: [],
+    formulas: [
+      '\\lim_{n \\to \\infty}\\left(1 + \\frac{x}{n}\\right)^n = e^x',
+      '\\lim_{n \\to \\infty}\\left(1 + \\frac{x}{n}\\right)^{sn} = e^{sx}',
+      '\\lim_{n \\to \\infty}\\left(\\frac{n + p}{n + r}\\right)^n = e^{p - r}',
+    ],
+    memo: '„1 hoch unendlich" ist nicht $1$: Die Klammer geht gegen $1$, die Hochzahl wächst, zusammen ergibt das $e^x$. Ein Faktor in der Hochzahl kommt in den Exponenten.',
+    note: 'Einen Bruch teilst du oben und unten durch $n$: Zähler und Nenner werden zu $\\left(1 + \\frac{p}{n}\\right)^n \\to e^p$ und $\\left(1 + \\frac{r}{n}\\right)^n \\to e^r$.',
+    when: 'Wenn in der Gleichung ein Grenzwert der Form „Klammer gegen $1$ hoch $n$" steht: erst ausrechnen, dann umstellen.',
+    examples: [
+      task(limitOf(pow(add(n(1), div(x, m)), m)), y),
+      task(limitOf(pow(add(n(1), div(x, m)), mul(n(2), m))), y),
+      task(limitOf(pow(div(add(m, x), sub(m, x)), m)), y),
+    ],
+    errors: ['eq-lim-one', 'eq-lim-exponent', 'eq-lim-denominator'],
   },
 ]

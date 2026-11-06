@@ -48,7 +48,7 @@ import {
 import type { RearrangeTask } from './task.ts'
 import { type ToolStepKind, toolMistakes } from './tools/steps.ts'
 
-const TOOL_STEPS = new Set<string>(['derive', 'partial', 'antiderivative', 'bounds'])
+const TOOL_STEPS = new Set<string>(['derive', 'partial', 'antiderivative', 'bounds', 'sumFormula', 'series', 'limit'])
 
 // Typische Fehler beim Umstellen (Katalog in docs/PLAN-M3.md). Jeder Fehler steckt in genau einem
 // Schritt des Rechenwegs: Dieser Schritt wird falsch ausgeführt, danach wird richtig weitergerechnet.
@@ -116,6 +116,14 @@ export const REARRANGE_ERROR_RULES: readonly EqErrorRule[] = [
   { id: 'eq-int-sign', name: 'Beim Integrieren das Vorzeichen verloren', wrongFormula: '\\int \\sin t\\,\\mathrm{d}t = \\cos t' },
   { id: 'eq-int-bounds-swapped', name: 'Die Grenzen vertauscht', wrongFormula: '\\int_a^x f(t)\\,\\mathrm{d}t = F(a) - F(x)' },
   { id: 'eq-int-lower-forgotten', name: 'Die untere Grenze nicht eingesetzt', wrongFormula: '\\int_0^x e^{t}\\,\\mathrm{d}t = e^{x}' },
+  // Werkzeuge der Stufe 5 (Schritt 7b): Summen, Reihen, Grenzwerte
+  { id: 'eq-sum-count', name: 'Bei der geometrischen Summe die Anzahl der Summanden um eins verschoben', wrongFormula: '\\sum_{k=0}^{n-1} q^k = \\frac{q^{n+1} - 1}{q - 1}' },
+  { id: 'eq-series-start', name: 'Nicht beachtet, mit welchem Summanden die Summe beginnt', wrongFormula: '\\sum_{k=1}^{\\infty} kx^k = \\frac{1}{(1 - x)^2}' },
+  { id: 'eq-series-sign', name: 'Bei der geometrischen Reihe das Vorzeichen im Nenner vertauscht', wrongFormula: '\\sum_{k=0}^{\\infty} q^k = \\frac{1}{q - 1}' },
+  { id: 'eq-series-not-geometric', name: 'Wie eine geometrische Reihe gerechnet, obwohl $k$ im Summanden steht', wrongFormula: '\\sum_{k=1}^{\\infty} kx^k = \\frac{x}{1 - x}' },
+  { id: 'eq-lim-one', name: '„1 hoch unendlich ist 1" gerechnet', wrongFormula: '\\lim_{n \\to \\infty}\\left(1 + \\frac{x}{n}\\right)^n = 1' },
+  { id: 'eq-lim-exponent', name: 'Beim Grenzwert den Faktor in der Hochzahl vergessen', wrongFormula: '\\lim_{n \\to \\infty}\\left(1 + \\frac{x}{n}\\right)^{2n} = e^{x}' },
+  { id: 'eq-lim-denominator', name: 'Beim Grenzwert den Nenner nicht beachtet', wrongFormula: '\\lim_{n \\to \\infty}\\left(\\frac{n + x}{n - x}\\right)^n = e^{x}' },
 ]
 
 export function rearrangeErrorRule(id: string): EqErrorRule {
@@ -661,8 +669,11 @@ function candidatesFor(steps: readonly RearrangeStep[], i: number, target: strin
     ...quadraticMistakes(step, t),
     ...pqMistakes(step, target),
     ...fractionMistakes(step, t),
-    // ohne die Variable wäre es keine Gleichung mehr zum Umstellen (\frac{\mathrm{d}}{\mathrm{d}x}(…) falsch als 1)
-    ...(TOOL_STEPS.has(step.kind) ? toolMistakes(step.kind as ToolStepKind, step.before).filter((c) => contains(c.after.lhs, t) || contains(c.after.rhs, t)) : []),
+    // ohne die Variable wäre es keine Gleichung mehr zum Umstellen (\frac{\mathrm{d}}{\mathrm{d}x}(…) falsch als 1);
+    // nur beim Grenzwert ist gerade das der typische Fehler („1 hoch unendlich ist 1")
+    ...(TOOL_STEPS.has(step.kind)
+      ? toolMistakes(step.kind as ToolStepKind, step.before).filter((c) => step.kind === 'limit' || contains(c.after.lhs, t) || contains(c.after.rhs, t))
+      : []),
   ]
 }
 

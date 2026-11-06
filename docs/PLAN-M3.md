@@ -466,9 +466,13 @@ Aufgabe: Löse $\int_a^x \frac{\mathrm{d}t}{t(t + b)} = y$ nach $x$ auf
 | Integral | Vorzeichen verloren (`eq-int-sign`, neu in 7a) | $\int \sin t\,\mathrm{d}t = \cos t$, $\int\left(\frac{1}{t} - \frac{1}{t + b}\right)\mathrm{d}t = \ln t + \ln(t + b)$ |
 | Integral | Grenzen vertauscht (`eq-int-bounds-swapped`, neu in 7a) | $F(a) - F(x)$ statt $F(x) - F(a)$ |
 | Integral | untere Grenze nicht eingesetzt (`eq-int-lower-forgotten`, neu in 7a) | $\int_0^x e^{t}\,\mathrm{d}t = e^{x}$ |
-| Summe | Anzahl der Summanden um eins verschoben | $\sum_{k=0}^{n-1} q^k = \frac{q^{n+1} - 1}{q - 1}$ |
-| Reihe | Faktor $x$ vergessen | $\sum_{k=1}^{\infty} k x^k = \frac{1}{(1 - x)^2}$ |
-| Grenzwert | „1 hoch unendlich ist 1" | $\lim_{n \to \infty}\left(\frac{n + x}{n - x}\right)^n = 1$ |
+| Summe | Anzahl der Summanden um eins verschoben (`eq-sum-count`, neu in 7b) | $\sum_{k=0}^{n-1} q^k = \frac{q^{n+1} - 1}{q - 1}$ |
+| Summe, Reihe | nicht beachtet, mit welchem Summanden die Summe beginnt, z. B. Faktor $x$ vergessen (`eq-series-start`, neu in 7b) | $\sum_{k=1}^{\infty} k x^k = \frac{1}{(1 - x)^2}$ |
+| Summe, Reihe | Vorzeichen im Nenner vertauscht, beim $\ln$ das Minus vergessen (`eq-series-sign`, neu in 7b) | $\sum_{k=0}^{\infty} q^k = \frac{1}{q - 1}$, $\sum_{k=1}^{\infty} \frac{q^k}{k} = \ln(1 - q)$ |
+| Reihe | wie eine geometrische Reihe gerechnet, obwohl $k$ im Summanden steht (`eq-series-not-geometric`, neu in 7b) | $\sum_{k=1}^{\infty} k x^k = \frac{x}{1 - x}$ |
+| Grenzwert | „1 hoch unendlich ist 1" (`eq-lim-one`, neu in 7b) | $\lim_{n \to \infty}\left(\frac{n + x}{n - x}\right)^n = 1$ |
+| Grenzwert | Faktor in der Hochzahl vergessen (`eq-lim-exponent`, neu in 7b) | $\lim_{n \to \infty}\left(1 + \frac{x}{n}\right)^{2n} = e^{x}$ |
+| Grenzwert | den Nenner nicht beachtet (`eq-lim-denominator`, neu in 7b) | $\lim_{n \to \infty}\left(\frac{n + x}{n - x}\right)^n = e^{x}$ |
 | Komplexe Zahlen | Betrag gliedweise | $\lvert x + a\,\mathrm{i}\rvert = x + a$ |
 | Komplexe Zahlen | Winkel beim Quadrieren nicht verdoppelt | $\arg\left(z^2\right) = \arg z$ |
 | Determinante | Plus statt Minus | $\det\begin{pmatrix} p & q \\ r & s \end{pmatrix} = ps + qr$ |
@@ -800,6 +804,48 @@ Lernkarten zu den Regeln, die vorkommen; beim Integrieren sieben neue Fehler
 (Tabelle oben) und die neue Lernkarte „Stammfunktionen und Partialbrüche".
 Frei wird nur das Ergebnis eingetippt; Fehler beim Ableiten oder Integrieren
 werden erkannt und benannt.
+
+**Umgesetzt (7b):** In Stufe 5 kommen Summen, Reihen und Grenzwerte dazu, als
+eigene Vorlage mit festem Anteil (40 von 100 Nummern; die übrigen Nummern
+behalten ihre Aufgabe aus 7a). Der Baukasten `buildLevel5Series` setzt
+zusammen:
+- **geometrische Reihen** in $x$ mit $q = \frac{x}{a}$, $\frac{a}{x}$, $e^{-x}$,
+  $\frac{x}{x + a}$, $\frac{a}{x + a}$, ab $k = 0$ oder $k = 1$, auch mit Faktor;
+  **abgeleitet** ($\sum_{k=1}^{\infty} kq^k$, danach oft quadratisch) und
+  **integriert** ($\sum_{k=1}^{\infty} \frac{q^k}{k} = -\ln(1 - q)$);
+- **Grenzwerte**, die auf $e^{\square}$ führen: $\left(1 \pm \frac{x}{n}\right)^{sn}$,
+  $\left(1 + \frac{ax}{n}\right)^n$, $\left(1 + \frac{x}{an}\right)^n$, $x$ in der
+  Hochzahl, $\left(\frac{n + x}{n - x}\right)^n$, $\left(\frac{n + a}{n + x}\right)^n$,
+  $\left(\frac{n}{n + x}\right)^n$;
+- **endliche geometrische Summen**, gesucht ist die Anzahl $n$ der Summanden
+  ($\sum_{k=0}^{n-1} aq^k = y$ mit $q > 1$, auch mit $2^k$, $3^k$, $e^{ak}$);
+- alles mit Schalen (das Werkzeug bleibt hinten: $b + \sum …$), im Bruch mit
+  einem Baustein derselben Art, unter einer Wurzel, im $\ln$, als Reihe in einer
+  Ableitung oder einem Integral
+  ($\frac{\mathrm{d}}{\mathrm{d}x}\sum_{k=1}^{\infty}\frac{x^k}{k} = y$,
+  $\int_0^x \sum_{k=0}^{\infty} t^k\,\mathrm{d}t = y$, das innere Werkzeug zuerst),
+  und Grenzwert gleich Ableitung, danach quadratisch in $e^x$.
+
+Gemessen unter den Aufgaben 1 bis 200 der Stufe 5 (7a und 7b zusammen): 193
+Formen, keine öfter als in 1,5 von 100, im Mittel 8,5 Umformungen, jede
+mindestens 6. Die Rechnung steht in `rearrange/tools/series.ts`: Summand als
+$c \cdot q^k$ (auch mal $k$ oder durch $k$), Formel der Summe bzw. Reihe, mit
+einem Bruch für $q$ über die Bruch-Engine zusammengefasst; Grenzwert über
+$\left(\frac{n + p}{n + r}\right)^{sn} \to e^{s(p - r)}$. Die Gegenprobe in
+`evaluate.ts` rechnet unabhängig: Summen Summand für Summand (ist $n$ keine ganze
+Zahl, geometrisch fortgesetzt), Reihen über Teilsummen, Grenzwerte mit großen $n$
+und Extrapolation; die Tests vergleichen jede Formel zusätzlich mit Teilsummen.
+Dabei verbessert, ohne die Aufgaben der Stufen 1 bis 4 und aus 7a zu ändern:
+Die Engine hing an Gleichungen wie $\frac{1}{1 - x} = b + c$ (Zusammenfassen
+ohne Änderung) und $yx^2 - (2y + 1)x + y = 0$ (Ausmultiplizieren im Kreis);
+Aufgaben mit diesen Wegen nimmt der Baukasten nur ab 7b. Bei der Normalform
+steht das Minus vor dem Bruch: $-\frac{c + d}{a}$ statt $\frac{c + d}{-a}$.
+
+Geführt kommt zuerst „Was steht da eigentlich?" mit sieben neuen Fehlern
+(Tabelle oben) und den neuen Lernkarten „Geometrische Summe und Reihe" und
+„Grenzwert $\left(1 + \frac{x}{n}\right)^n \to e^x$"; beim Grenzwert darf die
+falsche Antwort auch ohne $x$ dastehen („1 hoch unendlich ist 1"). Frei wird das
+Ergebnis eingetippt, auch nach $n$; die neuen Fehler werden erkannt.
 
 #### Schritt 8: Stufe 5, Teil 2: Algebra und Geometrie
 - Komplexe Zahlen (Betrag, Winkel), Determinanten, Winkel zwischen
