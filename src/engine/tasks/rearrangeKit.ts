@@ -1,6 +1,7 @@
 import { subterms } from '../expr/compare.ts'
 import { type Expr, E, PI, add, div, eq, fn, ln, log, mul, neg, num, pow, sqrt, variable } from '../expr/types.ts'
 import type { Condition, RearrangeTask } from '../rearrange/task.ts'
+import { derivativeOf, integralOf } from '../rearrange/tools/tool.ts'
 import type { Rng } from '../random/rng.ts'
 
 // Baukasten für Umstell-Aufgaben (M3, 4. Fassung; docs/PLAN-M3.md, „Abwechslung"). Jede Gleichung
@@ -1125,4 +1126,212 @@ const LEVEL4_QUADRATIC_CORES: readonly Core[] = [
 // Gesucht ist hier immer x
 export function buildLevel4Quadratic(rng: Rng): KitTask {
   return buildFrom(rng, LEVEL4_QUADRATIC_CORES, 0)
+}
+
+// --- Stufe 5, Teil 7a: Ableitungen und Integrale (docs/PLAN-M3.md, „Stufe 5 neu") ---
+//
+// In jeder Gleichung steckt ein Werkzeug: eine Ableitung oder ein Integral (auch eins mit
+// Partialbrüchen). Erst wird es ausgerechnet, dann umgestellt. Das Werkzeug steht allein, mit
+// Schalen, in einem Bruch mit einem Baustein derselben Art (\frac{\int_0^x e^t\,\mathrm{d}t}{e^x + a} = y),
+// unter einer Wurzel oder im \ln; manchmal stehen zwei Werkzeuge in der Gleichung.
+
+// Buchstaben ohne t (das ist die Integrationsvariable); reset: ab einer Stelle neu vergeben (wenn ein
+// Kern noch einmal gewählt wird)
+type ToolNames = Names & { readonly mark: () => number; readonly reset: (at: number) => void }
+
+function toolNames(rng: Rng): ToolNames {
+  const family = rng.pick(FAMILIES.filter((f) => !f.includes('t')))
+  const queue = [...family]
+  let i = 0
+  return {
+    unknown: variable('x'),
+    target: 'x',
+    letter: () => variable(queue[Math.min(i++, queue.length - 1)]),
+    mark: () => i,
+    reset: (at) => {
+      i = at
+    },
+  }
+}
+
+const T = variable('t')
+const square = (e: Expr) => pow(e, num(2))
+
+// Werkzeug mit Bedingungen und einem Baustein derselben Art (für den Bruch: e^{kx} zu \int e^{kt})
+type ToolCore = { readonly tool: Expr; readonly conditions?: readonly Condition[]; readonly partner?: Expr; readonly label: string }
+
+// Zahl k ≠ 0 vor t bzw. x: 2, 3, -2
+const rate = (rng: Rng, negative = true) => num(rng.int(1, 3) * (negative && rng.chance(0.3) ? -1 : 1))
+const timesRate = (r: Expr, v: Expr) => (r.kind === 'num' && r.value.n === 1n ? v : r.kind === 'num' && r.value.n === -1n ? neg(v) : mul(r, v))
+
+// Ableitungen, deren Ergebnis sich nach x auflösen lässt
+function derivativeCore(rng: Rng, n: Names): ToolCore {
+  const x = n.unknown
+  const a = n.letter()
+  const r = rng.next()
+  const d = (body: Expr, label: string, extra: Partial<ToolCore> = {}): ToolCore => ({ tool: derivativeOf(body), label: `Ableitung: ${label}`, ...extra })
+  if (r < 0.08) return d(div(square(x), plus(x, rng.chance(0.7) ? a : k(rng, 1, 5))), 'Quotientenregel, danach quadratisch')
+  if (r < 0.16) return d(div(maybeTimes(rng, n, x, 0.3), plus(x, a)), 'Quotientenregel')
+  if (r < 0.24) return d(sqrt(plus(square(x), rng.chance(0.6) ? a : square(a))), 'Kettenregel mit Wurzel')
+  if (r < 0.3) return d(fn('arctan', div(x, a)), '$\\arctan$')
+  if (r < 0.38) {
+    const kx = timesRate(rate(rng, false), x)
+    return d(ln(plus(pow(E, kx), a)), '$\\ln$ einer Summe mit $e^x$', { partner: pow(E, kx) })
+  }
+  if (r < 0.46) {
+    const kx = timesRate(rate(rng), x)
+    return d(plus(maybeTimes(rng, n, pow(E, kx), 0.4), letters(n.letter(), x)), '$e^{kx}$ und $x$', { partner: pow(E, kx) })
+  }
+  if (r < 0.52) {
+    const angle = rng.chance(0.6) ? x : mul(k(rng, 2, 3), x)
+    return d(fn('tan', angle), '$\\tan$', { conditions: angleConditions('tan', angle, x) })
+  }
+  if (r < 0.6) return d(ln(div(x, plus(x, a))), '$\\ln$ eines Bruchs, danach quadratisch')
+  if (r < 0.67) return d(rng.chance(0.5) ? div(plus(square(x), a), x) : plus(x, div(a, x)), '$x$ plus Bruch')
+  if (r < 0.72) return d(fn('arcsin', div(x, a)), '$\\arcsin$', { conditions: [{ lhs: x, rel: '<', rhs: a }] })
+  if (r < 0.78) {
+    const kx = timesRate(rate(rng, false), x)
+    return d(rng.chance(0.5) ? fn('cosh', kx) : maybeTimes(rng, n, fn('sinh', kx), 0.3), 'Hyperbelfunktion')
+  }
+  if (r < 0.84) return d(rng.chance(0.5) ? mul(a, sqrt(x)) : sqrt(plus(maybeTimes(rng, n, x, 0.4), a)), 'Wurzel', { partner: sqrt(x) })
+  if (r < 0.9) return d(maybeTimes(rng, n, mul(x, ln(x)), 0.3), 'Produktregel mit $\\ln$', { partner: ln(x) })
+  if (r < 0.95) return d(minus(div(pow(x, num(3)), num(3)), letters(a, x)), 'Potenzen')
+  return d(plus(div(num(1), plus(x, a)), letters(n.letter(), x)), 'Bruch plus $bx$')
+}
+
+// Bestimmte Integrale \int_{unten}^{x}, deren Ergebnis sich nach x auflösen lässt
+function integralCore(rng: Rng, n: Names): ToolCore {
+  const x = n.unknown
+  const a = n.letter()
+  const r = rng.next()
+  const zero = num(0)
+  const i = (body: Expr, lower: Expr, label: string, extra: Partial<ToolCore> = {}): ToolCore => ({ tool: integralOf(body, lower, x), label: `Integral: ${label}`, ...extra })
+  if (r < 0.1) {
+    const kr = rate(rng)
+    return i(maybeTimes(rng, n, pow(E, timesRate(kr, T)), 0.3), zero, '$e^{kt}$', { partner: pow(E, timesRate(kr, x)) })
+  }
+  if (r < 0.18) return i(div(T, plus(square(T), rng.chance(0.6) ? square(a) : a)), zero, 'Zähler ist fast die Ableitung des Nenners')
+  if (r < 0.28) {
+    const b = n.letter()
+    return i(div(num(1), mul(T, plus(T, b))), a, 'Partialbrüche', { conditions: [{ lhs: x, rel: '>', rhs: a }] })
+  }
+  if (r < 0.34) {
+    const lower = mul(num(2), a)
+    return i(div(num(1), minus(square(T), square(a))), lower, 'Partialbrüche mit $t^2 - a^2$', { conditions: [{ lhs: x, rel: '>', rhs: lower }] })
+  }
+  if (r < 0.4) {
+    const b = n.letter()
+    return i(div(plus(mul(num(2), T), a, b), mul(plus(T, a), plus(T, b))), zero, 'Partialbrüche, danach quadratisch')
+  }
+  if (r < 0.46) {
+    const p = rng.int(1, 3)
+    const q = p + rng.int(1, 4)
+    return i(div(num((q - p) * rng.int(1, 3)), mul(plus(T, num(p)), plus(T, num(q)))), zero, 'Partialbrüche mit Zahlen')
+  }
+  if (r < 0.53) {
+    const kr = rng.int(1, 3)
+    const body = rng.chance(0.5) ? div(num(1), plus(T, a)) : div(n.letter(), plus(kr === 1 ? T : mul(num(kr), T), a))
+    return i(body, zero, '$\\ln$ als Stammfunktion', { partner: ln(plus(x, a)) })
+  }
+  if (r < 0.58) return i(div(a, T), num(1), '$\\frac{1}{t}$', { partner: ln(x) })
+  if (r < 0.64) return i(div(num(1), sqrt(plus(T, square(a)))), zero, 'Wurzel im Nenner')
+  if (r < 0.7) return i(div(T, sqrt(plus(square(T), square(a)))), zero, 'Wurzel im Nenner, Kettenregel rückwärts')
+  if (r < 0.75) return i(mul(T, pow(E, square(T))), zero, '$te^{t^2}$')
+  if (r < 0.8) return i(div(num(1), plus(square(T), square(a))), zero, '$\\arctan$ als Stammfunktion')
+  if (r < 0.88) {
+    const name = rng.pick(['sin', 'cos', 'cosh'] as const)
+    const kr = rng.int(1, 3)
+    const angleT = kr === 1 ? T : mul(num(kr), T)
+    const angleX = kr === 1 ? x : mul(num(kr), x)
+    const conditions = name === 'cosh' ? [] : angleConditions(name === 'sin' ? 'cos' : 'sin', angleX, x)
+    return i(fn(name, angleT), zero, `$\\${name}$`, { conditions, partner: fn(name === 'sin' ? 'cos' : name === 'cos' ? 'sin' : 'sinh', angleX) })
+  }
+  const body = rng.pick([plus(T, a), plus(mul(num(2), T), a), mul(k(rng, 2, 4), square(T)), plus(mul(num(3), square(T)), a)])
+  return i(body, zero, 'Potenzen')
+}
+
+const toolCore = (rng: Rng, n: Names): ToolCore => (rng.chance(0.45) ? derivativeCore(rng, n) : integralCore(rng, n))
+
+// Werkzeug allein, mit Schalen
+function toolShells(rng: Rng, n: Names): Built {
+  const c = toolCore(rng, n)
+  const { e, count } = someShells(rng, c.tool, n, 1)
+  return { side: e, conditions: c.conditions, label: `${c.label}, ${count} Schalen` }
+}
+
+// Werkzeug im Bruch mit einem Baustein derselben Art: \frac{\int_0^x e^t\,\mathrm{d}t}{e^x + a} = y
+function toolFraction(rng: Rng, n: ToolNames): Built {
+  const start = n.mark()
+  let c = toolCore(rng, n)
+  for (let i = 0; i < 6 && !c.partner; i++) {
+    n.reset(start)
+    c = toolCore(rng, n)
+  }
+  const partner = c.partner ?? n.unknown
+  const other = plus(maybeTimes(rng, n, partner, 0.3), constant(rng, n))
+  const side = rng.chance(0.7) ? div(c.tool, other) : div(other, c.tool)
+  return { side, conditions: c.conditions, label: `${c.label}, im Bruch` }
+}
+
+// Werkzeug unter einer Wurzel oder im \ln
+function toolInside(rng: Rng, n: Names): Built {
+  const c = toolCore(rng, n)
+  const inner = rng.chance(0.5) ? plus(c.tool, n.letter()) : c.tool
+  const side = rng.chance(0.5) ? sqrt(inner) : ln(inner)
+  return { side, conditions: c.conditions, label: `${c.label}, ${side.kind === 'root' ? 'unter der Wurzel' : 'im $\\ln$'}` }
+}
+
+// Ableitung, die denselben Baustein liefert wie das Integral: e^{kx} aus be^{kx} + cx, \ln x aus x\ln x,
+// \cos(kx) aus \sin(kx), \sinh(kx) aus \cosh(kx); null bei anderen Bausteinen
+function matchingDerivative(rng: Rng, n: Names, partner: Expr): Expr | null {
+  const x = n.unknown
+  if (partner.kind === 'pow') return derivativeOf(rng.chance(0.5) ? maybeTimes(rng, n, partner, 0.6) : plus(maybeTimes(rng, n, partner, 0.5), letters(n.letter(), x)))
+  if (partner.kind === 'fn' && partner.name === 'ln') return derivativeOf(mul(partner.arg.kind === 'add' ? partner.arg : x, partner))
+  if (partner.kind === 'fn' && partner.name === 'cos') return derivativeOf(fn('sin', partner.arg))
+  if (partner.kind === 'fn' && partner.name === 'sinh') return derivativeOf(fn('cosh', partner.arg))
+  return null
+}
+
+// Zwei Werkzeuge mit demselben Baustein: auf jeder Seite eins oder beide in einer Summe,
+// \int_0^x e^{2t}\,\mathrm{d}t = \frac{\mathrm{d}}{\mathrm{d}x}\left(be^{2x}\right) - c
+function twoTools(rng: Rng, n: ToolNames): Built {
+  const start = n.mark()
+  let c = integralCore(rng, n)
+  let d = c.partner ? matchingDerivative(rng, n, c.partner) : null
+  for (let i = 0; i < 12 && !d; i++) {
+    n.reset(start)
+    c = integralCore(rng, n)
+    d = c.partner ? matchingDerivative(rng, n, c.partner) : null
+  }
+  if (!d) {
+    n.reset(start)
+    return toolShells(rng, n)
+  }
+  const conditions = c.conditions ?? []
+  if (rng.chance(0.5)) {
+    const other = rng.chance(0.5) ? d : minus(d, n.letter())
+    return { side: c.tool, other, conditions, label: 'Integral gleich Ableitung' }
+  }
+  return { side: rng.chance(0.5) ? plus(d, c.tool) : minus(d, c.tool), conditions, label: 'Ableitung und Integral in einer Summe' }
+}
+
+type ToolBuild = readonly [number, (rng: Rng, n: ToolNames) => Built]
+
+const LEVEL5_TOOL_CORES: readonly ToolBuild[] = [
+  [40, toolShells],
+  [22, toolFraction],
+  [18, toolInside],
+  [12, twoTools],
+]
+
+// Gesucht ist hier immer x
+export function buildLevel5Tools(rng: Rng): KitTask {
+  const n = toolNames(rng)
+  const total = LEVEL5_TOOL_CORES.reduce((s, [w]) => s + w, 0)
+  let r = rng.next() * total
+  const [, build] = LEVEL5_TOOL_CORES.find(([w]) => (r -= w) < 0) ?? LEVEL5_TOOL_CORES[0]
+  const built = build(rng, n)
+  const other = built.other ?? otherSide(rng, n)
+  const equationFor = built.other ? (rng.chance(0.75) ? eq(built.side, other) : eq(other, built.side)) : equation(rng, built.side, other)
+  return { task: { equation: equationFor, target: 'x', conditions: built.conditions ?? [] }, label: built.label }
 }

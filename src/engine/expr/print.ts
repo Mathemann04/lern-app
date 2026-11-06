@@ -1,5 +1,5 @@
 import { isInteger, ratAbs, ratSign, toDecimalString } from '../rational.ts'
-import type { Equation, Expr, FnName } from './types.ts'
+import type { Equation, Expr, FnName, Tool } from './types.ts'
 
 // Gibt einen Term als LaTeX aus, in deutscher Schreibweise wie im Skript:
 // echte Brüche, Dezimalkomma, Malpunkt nur wo nötig, \sin^2 x, ln, Klammern nur wo nötig.
@@ -32,7 +32,7 @@ export function toLatex(e: Expr): string {
     case 'const':
       return e.name === 'e' ? 'e' : e.name === 'i' ? '\\mathrm{i}' : '\\pi'
     case 'var':
-      return e.name
+      return e.tool ? toolLatex(e.tool) : e.name
     case 'add':
       return printSum(e.terms)
     case 'mul':
@@ -49,6 +49,28 @@ export function toLatex(e: Expr): string {
       return FN_LATEX[e.name] + printArg(e.arg)
     case 'log':
       return `\\log_{${toLatex(e.base)}}` + printArg(e.arg)
+  }
+}
+
+// Werkzeug der Stufe 5: \frac{\mathrm{d}}{\mathrm{d}x}\left(…\right), \int_a^x \frac{\mathrm{d}t}{t(t + b)},
+// \left[…\right]_a^x
+export function toolLatex(tool: Tool): string {
+  const d = `\\mathrm{d}${tool.v}`
+  switch (tool.kind) {
+    case 'derivative':
+      return `\\frac{\\mathrm{d}}{${d}}\\left(${toLatex(tool.body)}\\right)`
+    case 'integral': {
+      const body = tool.body
+      const integrand =
+        body.kind === 'div' && body.num.kind === 'num' && body.num.value.n === 1n && body.num.value.d === 1n
+          ? `\\frac{${d}}{${toLatex(body.den)}}`
+          : body.kind === 'add' || isNegative(body)
+            ? `${paren(toLatex(body))}\\,${d}`
+            : `${toLatex(body)}\\,${d}`
+      return `\\int_{${toLatex(tool.lower)}}^{${toLatex(tool.upper)}} ${integrand}`
+    }
+    case 'bracket':
+      return `\\left[${toLatex(tool.body)}\\right]_{${toLatex(tool.lower)}}^{${toLatex(tool.upper)}}`
   }
 }
 
@@ -188,7 +210,7 @@ function endsWithBareArgument(e: Expr): boolean {
 
 // Funktionsargumente ohne Klammer: \sin x, \ln 2, \cos \pi
 function isBareArgument(arg: Expr): boolean {
-  if (arg.kind === 'var' || arg.kind === 'const') return true
+  if ((arg.kind === 'var' && !arg.tool) || arg.kind === 'const') return true
   return arg.kind === 'num' && !arg.decimal && isInteger(arg.value) && ratSign(arg.value) >= 0
 }
 
@@ -206,7 +228,7 @@ function printPow(base: Expr, exponent: Expr): string {
     return `${FN_LATEX[base.name]}^{${exp}}${printArg(base.arg)}`
   }
   const simpleBase =
-    base.kind === 'var' ||
+    (base.kind === 'var' && !base.tool) ||
     base.kind === 'const' ||
     (base.kind === 'num' && !base.decimal && isInteger(base.value) && ratSign(base.value) >= 0)
   const b = toLatex(base)

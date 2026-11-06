@@ -4,7 +4,7 @@ import { holds, samplePoints } from '../rearrange/check.ts'
 import { solveTask } from '../rearrange/isolate.ts'
 import { type RearrangeTask, taskLatex, taskVariables } from '../rearrange/task.ts'
 import { type Rng, createRng } from '../random/rng.ts'
-import { type KitTask, buildLevel1, buildLevel2, buildLevel3, buildLevel4, buildLevel4Quadratic, buildLevel4Trig } from './rearrangeKit.ts'
+import { type KitTask, buildLevel1, buildLevel2, buildLevel3, buildLevel4, buildLevel4Quadratic, buildLevel4Trig, buildLevel5Tools } from './rearrangeKit.ts'
 import type { Level, TaskRef } from './taskNumber.ts'
 
 // Vorlagen für Umstell-Aufgaben je Stufe (siehe docs/PLAN-M3.md, „Stufen"). Jede Vorlage baut aus
@@ -89,7 +89,17 @@ const level4Quadratic: RearrangeTemplate = {
   share: 0.4,
 }
 
-export const REARRANGE_TEMPLATES: readonly RearrangeTemplate[] = [level1Kit, level2Kit, level3Kit, level4Kit, level4Trig, level4Quadratic]
+// --- Stufe 5: quer durch die Mathematik, erst das Werkzeug ausrechnen (Teil 7a: Ableitungen, Integrale) ---
+
+const level5Tools: RearrangeTemplate = {
+  id: 'baukasten-5-analysis',
+  level: 5,
+  label: 'Baukasten: Ableitungen und Integrale',
+  build: (rng) => buildLevel5Tools(rng).task,
+  buildLabeled: buildLevel5Tools,
+}
+
+export const REARRANGE_TEMPLATES: readonly RearrangeTemplate[] = [level1Kit, level2Kit, level3Kit, level4Kit, level4Trig, level4Quadratic, level5Tools]
 
 export function rearrangeTemplatesForLevel(level: Level): RearrangeTemplate[] {
   return REARRANGE_TEMPLATES.filter((t) => t.level === level)
@@ -97,8 +107,11 @@ export function rearrangeTemplatesForLevel(level: Level): RearrangeTemplate[] {
 
 export const isRearrangeLevelAvailable = (level: Level) => rearrangeTemplatesForLevel(level).length > 0
 
-// Längste Aufgabe (LaTeX), damit sie am Handy lesbar bleibt
+// Längste Aufgabe (LaTeX), damit sie am Handy lesbar bleibt; in Stufe 5 ohne die Schreibweise der
+// Werkzeuge gezählt (\mathrm{d}, \left, \right)
 const MAX_TASK_LATEX = 64
+const MAX_TOOL_TASK = 64
+const visibleLatex = (latex: string) => latex.replace(/\\mathrm\{d\}/g, 'd').replace(/\\left|\\right|\\,/g, '')
 
 // Wie oft kommt die gesuchte Variable vor, und steht sie in einem Nenner?
 function occurrences(t: RearrangeTask): { count: number; inDenominator: boolean } {
@@ -115,7 +128,8 @@ const hasNestedFraction = (t: RearrangeTask) =>
 function isGood(t: RearrangeTask, level: Level, kit: boolean): boolean {
   if (kit) {
     const letters = taskVariables(t).length
-    if (taskLatex(t).length > MAX_TASK_LATEX || letters > 7 || letters < 2) return false
+    const long = level === 5 ? visibleLatex(taskLatex(t)).length > MAX_TOOL_TASK : taskLatex(t).length > MAX_TASK_LATEX
+    if (long || letters > 7 || letters < 2) return false
     const { count, inDenominator } = occurrences(t)
     if (level === 1 && count !== 1) return false
     if (level === 2 && count < 2 && !inDenominator) return false
@@ -126,6 +140,10 @@ function isGood(t: RearrangeTask, level: Level, kit: boolean): boolean {
   if (!solution || contains(solution.result, t.target)) return false
   if (kit && solution.steps.length < MIN_STEPS[level]) return false
   if (toLatex(solution.result).length > MAX_RESULT_LATEX[level]) return false
+  // Stufe 5: Buchstaben im Ergebnis (sie heben sich nicht alle weg)
+  if (level === 5 && taskVariables({ ...t, equation: { lhs: solution.result, rhs: solution.result } }).length === 0) return false
+  // Stufe 5: keine Wurzel aus einer Summe mit Brüchen im Ergebnis (\sqrt{\frac{k^2}{4} + \frac{k}{b - c}})
+  if (level === 5 && subterms(solution.result).some((s) => s.kind === 'root' && s.arg.kind === 'add' && subterms(s.arg).some((p) => p.kind === 'div'))) return false
   const points = samplePoints(t, solution.result, createRng('brauchbar'), 8, solution.requires)
   // Gegenprobe: Die Lösung erfüllt die Aufgabe an allen Prüfstellen
   return points.length >= 8 && points.every((p) => holds(t.equation, p) === true)
@@ -135,7 +153,7 @@ function isGood(t: RearrangeTask, level: Level, kit: boolean): boolean {
 const MIN_STEPS: Record<Level, number> = { 1: 3, 2: 3, 3: 5, 4: 6, 5: 6 }
 
 // Längstes Ergebnis (LaTeX) je Stufe
-const MAX_RESULT_LATEX: Record<Level, number> = { 1: 90, 2: 90, 3: 90, 4: 120, 5: 120 }
+const MAX_RESULT_LATEX: Record<Level, number> = { 1: 90, 2: 90, 3: 90, 4: 120, 5: 100 }
 
 // Vorlage mit festem Anteil (share), vorweg mit eigenem Zufall gewählt; sonst null. Bei mehreren
 // Vorlagen gilt der Anteil einer späteren unter den Nummern, die keine frühere genommen hat.

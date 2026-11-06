@@ -19,7 +19,8 @@ Neu in der 4. Fassung (nach den Brüchen in M2b):
   Ziel: mindestens 100 verschiedene Formen je Stufe statt bisher 8 bis 26.
 - **Die Stufen 4 und 5 entstehen gleich mit dem Baukasten**, mit demselben
   Ziel.
-- **Stufe 4 in drei Teilen** (6a bis 6c), jeder für sich zum Ausprobieren.
+- **Stufe 4 in drei Teilen** (6a bis 6c), jeder für sich zum Ausprobieren;
+  ebenso Schritt 7 (7a bis 7c).
 - **Deine Änderung: ab Stufe 3 schwerer im Aufbau.** Die Kerne werden
   ineinander gesetzt und gegeneinander gestellt, nicht nur Schalen
   drumherum gelegt. Ein Test misst die Länge der Rechenwege (siehe
@@ -457,9 +458,14 @@ Aufgabe: Löse $\int_a^x \frac{\mathrm{d}t}{t(t + b)} = y$ nach $x$ auf
 | --- | --- | --- |
 | Ableitung | Quotientenregel mit falschem Vorzeichen (wie bei „Ableiten") | $\left(\frac{x^2}{x + a}\right)' = \frac{x^2 - 2x(x + a)}{(x + a)^2}$ |
 | Ableitung | innere Ableitung vergessen (wie bei „Ableiten") | $\left(\sqrt{x^2 + a^2}\right)' = \frac{1}{2\sqrt{x^2 + a^2}}$ |
-| Integral | Faktor bei den Partialbrüchen vergessen | $\frac{1}{t(t + b)} = \frac{1}{t} - \frac{1}{t + b}$ |
-| Integral | Faktor $\frac{1}{2}$ vergessen | $\int \frac{t}{t^2 + a^2}\,\mathrm{d}t = \ln\left(t^2 + a^2\right)$ |
-| Integral | Grenzen vertauscht | $F(a) - F(x)$ statt $F(x) - F(a)$ |
+| Ableitung | alle Fehler aus „Ableiten" an ihrer Stelle, z. B. Nenner nicht quadriert (umgesetzt in 7a, Ids und Texte aus „Ableiten") | $\left(\frac{x^2}{x + a}\right)' = \frac{x^2 + 2ax}{x + a}$ |
+| Integral | Faktor bei den Partialbrüchen vergessen (`eq-partial-factor`, neu in 7a) | $\frac{1}{t(t + b)} = \frac{1}{t} - \frac{1}{t + b}$ |
+| Integral | nicht durch die innere Ableitung geteilt, z. B. Faktor $\frac{1}{2}$ vergessen (`eq-int-inner-factor`, neu in 7a) | $\int \frac{t}{t^2 + a^2}\,\mathrm{d}t = \ln\left(t^2 + a^2\right)$ |
+| Integral | abgeleitet statt integriert (`eq-int-derived`, neu in 7a) | $\int e^{2t}\,\mathrm{d}t = 2e^{2t}$ |
+| Integral | bei der Potenzregel nicht durch den neuen Exponenten geteilt (`eq-int-power`, neu in 7a) | $\int t^2\,\mathrm{d}t = t^3$ |
+| Integral | Vorzeichen verloren (`eq-int-sign`, neu in 7a) | $\int \sin t\,\mathrm{d}t = \cos t$, $\int\left(\frac{1}{t} - \frac{1}{t + b}\right)\mathrm{d}t = \ln t + \ln(t + b)$ |
+| Integral | Grenzen vertauscht (`eq-int-bounds-swapped`, neu in 7a) | $F(a) - F(x)$ statt $F(x) - F(a)$ |
+| Integral | untere Grenze nicht eingesetzt (`eq-int-lower-forgotten`, neu in 7a) | $\int_0^x e^{t}\,\mathrm{d}t = e^{x}$ |
 | Summe | Anzahl der Summanden um eins verschoben | $\sum_{k=0}^{n-1} q^k = \frac{q^{n+1} - 1}{q - 1}$ |
 | Reihe | Faktor $x$ vergessen | $\sum_{k=1}^{\infty} k x^k = \frac{1}{(1 - x)^2}$ |
 | Grenzwert | „1 hoch unendlich ist 1" | $\lim_{n \to \infty}\left(\frac{n + x}{n - x}\right)^n = 1$ |
@@ -752,6 +758,48 @@ stehen.
   $f'' = k^2 f$.
 
 **Ausprobieren:** $\int_a^x \frac{\mathrm{d}t}{t(t + b)} = y$ geführt.
+
+Schritt 7 kommt wie Schritt 6 in Teilen, jeder für sich zum Ausprobieren:
+7a Ableitungen und Integrale (mit Partialbrüchen), 7b Summen, Reihen und
+Grenzwerte, 7c Differentialgleichungen.
+
+**Umgesetzt (7a):** Stufe 5 ist spielbar, geführt und frei. Jede Aufgabe kommt
+aus dem Baukasten `buildLevel5Tools` und enthält eine Ableitung oder ein
+bestimmtes Integral: allein mit Schalen, in einem Bruch mit einem Baustein
+derselben Art ($\frac{\int_0^x e^{2t}\,\mathrm{d}t}{e^{2x} + a} = y$), unter einer
+Wurzel oder im $\ln$, oder zwei Werkzeuge mit demselben Baustein (Integral
+gleich Ableitung, beide in einer Summe). 15 Arten von Ableitungen (Quotienten-,
+Produkt- und Kettenregel, $\arctan$, $\arcsin$, $\tan$, Hyperbelfunktionen, $\ln$
+eines Bruchs, danach oft quadratisch) und 16 Arten von Integralen ($e^{kt}$,
+$\frac{t}{t^2 + a^2}$, Partialbrüche mit $t(t + b)$, $t^2 - a^2$, Zahlen oder
+danach quadratisch, $\frac{1}{\sqrt{t + a^2}}$, $te^{t^2}$, $\arctan$, $\sin$,
+$\cos$, $\cosh$, Potenzen). Gemessen unter den Aufgaben 1 bis 200: 185 Formen,
+keine öfter als in 2 von 100, im Mittel 8,6 Umformungen, jede mindestens 6.
+
+Die Engine: Werkzeuge stehen im Termbaum als Buchstabe mit eigenem Namen und
+dem Werkzeug dazu (`Var.tool`, gesetzt als Ableitung, Integral, eckige Klammer
+mit Grenzen); `evaluate` rechnet sie numerisch aus (Ableitung mit
+Richardson-Extrapolation, Integral adaptiv mit Gauß-Legendre), das ist die
+unabhängige Gegenprobe. Die ersten Schritte rechnen das Werkzeug aus
+(`rearrange/tools/`): ableiten (`derive` aus „Ableiten", zusammengefasst), in
+Partialbrüche zerlegen (Bruch-Engine), Stammfunktion aus einer Tafel mit den
+Grenzen in eckigen Klammern, Grenzen einsetzen ($F(x) - F(a)$, der Faktor als
+Nenner). Danach wird umgestellt wie in Stufe 4. Neu dafür in der Engine:
+Logarithmen mit und ohne die Variable zusammenfassen
+($\ln x - \ln(x + b) - \ln a + \ln(a + b) = \ln\frac{x(a + b)}{a(x + b)}$),
+mal $b$ statt durch $\frac{1}{b}$, eine Summe vor $x^2$ bei der $pq$-Formel
+($(1 - y)x^2 + 2a(1 - y)x - a^2 y = 0$), nach $x^2$ auflösen, wenn $x$ nur als
+$x^2$ vorkommt, eine Wurzel im Nenner mit dem Nenner malnehmen und dann
+quadrieren, $\sqrt{a^2 + \frac{a^2 y}{1 - y}} = \frac{a}{\sqrt{1 - y}}$. Die
+Rechenwege der Stufen 1 bis 4 bleiben gleich (zwei Zwischenschritte der Stufe
+3 sind schöner geschrieben: $2\sqrt{y}(2r - 1)$ statt $\sqrt{y} \cdot 2(2r - 1)$).
+
+Geführt kommt zuerst „Was steht da eigentlich?" mit den typischen Fehlern des
+Werkzeugs: beim Ableiten alle Fehler aus „Ableiten" mit ihrem Text und den
+Lernkarten zu den Regeln, die vorkommen; beim Integrieren sieben neue Fehler
+(Tabelle oben) und die neue Lernkarte „Stammfunktionen und Partialbrüche".
+Frei wird nur das Ergebnis eingetippt; Fehler beim Ableiten oder Integrieren
+werden erkannt und benannt.
 
 #### Schritt 8: Stufe 5, Teil 2: Algebra und Geometrie
 - Komplexe Zahlen (Betrag, Winkel), Determinanten, Winkel zwischen

@@ -42,7 +42,10 @@ import {
   trigMoves,
   zeroMoves,
 } from '../explain/rearrangeTexts.ts'
-import type { Explanation } from '../explain/texts.ts'
+import { type Explanation, explainError } from '../explain/texts.ts'
+import { cardIdsFor } from '../explain/cards.ts'
+import { allNodes, derive } from '../derive/derive.ts'
+import type { RuleId } from '../derive/rules.ts'
 import { contains, subterms } from '../expr/compare.ts'
 import { FN_LATEX, toLatex } from '../expr/print.ts'
 import { type Equation, type Expr, asRational, fn, sub } from '../expr/types.ts'
@@ -136,12 +139,29 @@ export function planRearrange(task: RearrangeTask, ref: TaskRef, focus?: string)
     note: conditionsText(task),
     answerLabel: t,
     steps,
-    ruleHint: rearrangeTaskHint(t, solution.steps.some((s) => s.kind === 'collect' || s.kind === 'expand'), solution.substitution ? toLatex(solution.substitution.expr) : null, solution.steps.some((s) => s.kind === 'pq')),
+    ruleHint: rearrangeTaskHint(
+      t,
+      solution.steps.some((s) => s.kind === 'collect' || s.kind === 'expand'),
+      solution.substitution ? toLatex(solution.substitution.expr) : null,
+      solution.steps.some((s) => s.kind === 'pq'),
+      solution.steps[0]?.kind === 'derive' ? 'derivative' : TOOL_KINDS.has(solution.steps[0]?.kind) ? 'integral' : null,
+    ),
     result,
     resultLatex: readableLatex(`${t} = ${toLatex(result)}`),
     ...resultNote(result),
     cards: [...new Set(steps.flatMap((s) => s.cards))],
   }
+}
+
+// Stufe 5: Schritte, die ein Werkzeug ausrechnen (Ableitung, Integral). Sie werden nur als „Was kommt
+// heraus?" gefragt, der erste als „Was steht da eigentlich?"
+const TOOL_KINDS = new Set<StepKind | undefined>(['derive', 'partial', 'antiderivative', 'bounds'])
+
+const TOOL_QUESTIONS: Partial<Record<StepKind, string>> = {
+  derive: 'Rechne die Ableitung aus: Was kommt heraus?',
+  partial: 'Zerlege den Bruch im Integral in Partialbrüche: Was kommt heraus?',
+  antiderivative: 'Welche Stammfunktion gehört zum Integranden?',
+  bounds: 'Setze die Grenzen ein: Was kommt heraus?',
 }
 
 // --- Weichen: Schritte, bei denen man wissen muss, was als Nächstes kommt ---
@@ -249,6 +269,10 @@ function moveQuestion(step: RearrangeStep, t: string, target: string): MoveQuest
           }
         : null
     case 'choose':
+    case 'derive':
+    case 'partial':
+    case 'antiderivative':
+    case 'bounds':
       return null
     case 'add': {
       if (!side || !step.operand) return null
@@ -446,6 +470,10 @@ const RESULT_HINTS: Partial<Record<StepKind, string>> = {
   pq: REARRANGE_HINTS.pq,
   choose: REARRANGE_HINTS.choose,
   resubstitute: REARRANGE_HINTS.resubstitute,
+  derive: REARRANGE_HINTS.derive,
+  partial: REARRANGE_HINTS.partial,
+  antiderivative: REARRANGE_HINTS.antiderivative,
+  bounds: REARRANGE_HINTS.bounds,
 }
 
 const spuriousWhy = (reason: string): Explanation => ({ detailed: `Diese Lösung ist eine Scheinlösung. ${reason}`, short: reason })
@@ -470,16 +498,19 @@ function resultStep(
       content: `$${stepLatex(step.kind, w.after)}$`,
       correct: false,
       errorRuleId: w.rule.id,
-      // die Scheinlösung mit dem Grund dieser Aufgabe
-      whyWrong: w.rule.id === 'eq-spurious-root' && step.kind === 'choose' ? spuriousWhy(rejectReason(step, t, context)) : whyWrong(w.rule.id),
+      // die Scheinlösung mit dem Grund dieser Aufgabe; beim Ableiten der Text aus „Ableiten"
+      whyWrong: w.derive ? explainError(w.derive) : w.rule.id === 'eq-spurious-root' && step.kind === 'choose' ? spuriousWhy(rejectReason(step, t, context)) : whyWrong(w.rule.id),
     }),
   )
   const finish = step.kind === 'finish'
   const choose = step.kind === 'choose'
+  // das erste Werkzeug: „Was steht da eigentlich?"
+  const tool = TOOL_QUESTIONS[step.kind]
+  const firstTool = tool !== undefined && !TOOL_KINDS.has(previous?.kind)
   return {
     id: `${index + 1}-${step.kind}`,
-    title: finish ? 'Zusammenfassen' : choose ? STEP_NAMES.choose : stepLabel(step, t),
-    question: finish ? `Fasse zu einem Bruch zusammen: Was ist $${t}$?` : choose ? 'Welche der beiden Lösungen passt?' : 'Was kommt heraus?',
+    title: finish ? 'Zusammenfassen' : choose ? STEP_NAMES.choose : firstTool ? 'Was steht da eigentlich?' : stepLabel(step, t),
+    question: finish ? `Fasse zu einem Bruch zusammen: Was ist $${t}$?` : choose ? 'Welche der beiden Lösungen passt?' : (tool ?? 'Was kommt heraus?'),
     choices: rng.shuffle([correct, ...wrong]),
     hint: finish ? REARRANGE_HINTS.finish : RESULT_HINTS[step.kind] ?? REARRANGE_HINTS.result,
     explanation: choose && step.operand ? explainChoose(toLatex(step.operand), rejectReason(step, t, context), after) : explainResult(step.kind, stepLatex(step.kind, step.before), after),
@@ -541,11 +572,17 @@ const CARDS_BY_KIND: Record<StepKind, readonly string[]> = {
   pq: [REARRANGE_CARD_IDS.pq],
   choose: [REARRANGE_CARD_IDS.pq],
   resubstitute: [REARRANGE_CARD_IDS.substitution],
+  derive: [],
+  partial: [REARRANGE_CARD_IDS.integral],
+  antiderivative: [REARRANGE_CARD_IDS.integral],
+  bounds: [REARRANGE_CARD_IDS.integral],
   finish: [FRACTION_CARD_IDS.add, FRACTION_CARD_IDS.expand],
 }
 
 // previous: der Schritt davor (Teilen nach dem Ausklammern gehört zur Karte „Variable mehrfach")
 function cardsOf(step: RearrangeStep, t: string, previous: RearrangeStep | undefined): string[] {
+  // Ableiten: die Karten aus „Ableiten" zu den Regeln, die vorkommen
+  if (step.kind === 'derive' && step.operand) return derivativeCards(step.operand)
   if (step.kind === 'multiply') {
     const den = denominatorOf(step)
     // alle Nenner beseitigen bzw. Variable im Nenner
@@ -560,6 +597,14 @@ function cardsOf(step: RearrangeStep, t: string, previous: RearrangeStep | undef
     if (context !== 'reciprocal') return [REARRANGE_CARD_IDS.root, FRACTION_CARD_IDS.add]
   }
   return [...CARDS_BY_KIND[step.kind]]
+}
+
+// Karten aus „Ableiten" zu den Regeln einer Ableitung (Produkt-, Quotienten-, Kettenregel, …), ohne die
+// Grundregeln (Potenz, Faktor, Summe)
+const BASIC_RULES = new Set<RuleId>(['constant', 'constantFactor', 'sum', 'power', 'rewrite'])
+
+function derivativeCards(body: Expr): string[] {
+  return cardIdsFor(allNodes(derive(body)).map((n) => n.rule).filter((rule) => !BASIC_RULES.has(rule)))
 }
 
 // --- Ergebnis ---

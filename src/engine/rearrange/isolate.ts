@@ -6,6 +6,8 @@ import { type Factored, factoredDivide, factoredLcm, factoredPoly, factorize, re
 import { type Frac, fracAdd, fracDiv, fracMul, fracNeg, fracOf, fracScale } from '../fraction/frac.ts'
 import { createRng } from '../random/rng.ts'
 import { conditionsHold, holds } from './check.ts'
+import { nextToolStep } from './tools/steps.ts'
+import { hasTool } from './tools/tool.ts'
 import { type Condition, variablesOf } from './task.ts'
 import {
   type Poly,
@@ -18,6 +20,7 @@ import {
   polyMul,
   polyPow,
   polyScale,
+  totalDegree,
 } from '../fraction/poly.ts'
 import { type Rational, isInteger, isOne, isZero, rat, ratAbs, ratDiv, ratEq, ratMul, ratNeg, ratSign, ratSub } from '../rational.ts'
 import {
@@ -76,6 +79,11 @@ export type StepKind =
   | 'pq'
   | 'choose'
   | 'resubstitute'
+  // Stufe 5: Werkzeug ausrechnen (tools/steps.ts)
+  | 'derive'
+  | 'partial'
+  | 'antiderivative'
+  | 'bounds'
   | 'finish'
 
 export const STEP_NAMES: Record<StepKind, string> = {
@@ -107,6 +115,10 @@ export const STEP_NAMES: Record<StepKind, string> = {
   pq: 'pq-Formel anwenden',
   choose: 'Passende Lösung wählen',
   resubstitute: 'Zurück einsetzen',
+  derive: 'Ableiten',
+  partial: 'In Partialbrüche zerlegen',
+  antiderivative: 'Stammfunktion bilden',
+  bounds: 'Grenzen einsetzen',
   finish: 'Ergebnis',
 }
 
@@ -349,6 +361,11 @@ export function timesFactor(side: Expr, f: Expr): Expr {
   const merged = mergedProduct(side, f)
   if (merged) return merged
   if (isMonomial(f)) return mul(f, side)
+  // Buchstaben vorn: e^{y} · a(x + b) → ae^{y}(x + b)
+  if (f.kind === 'mul' && isMonomial(f.factors[0]) && (side.kind === 'pow' || side.kind === 'fn' || side.kind === 'root' || side.kind === 'log') && !isMonomial(side)) {
+    const monos = f.factors.filter(isMonomial)
+    return mul(...monos, side, ...f.factors.filter((g) => !isMonomial(g)))
+  }
   return mul(side, f)
 }
 
@@ -423,11 +440,11 @@ export function squared(e: Expr): Expr {
 // Endform einer Seite ohne die gesuchte Variable: ein Bruch, gekürzt; Wurzel aus einem Bruch mit
 // Quadrat im Nenner als \frac{\sqrt{…}}{a}; Quadrat eines Bruchs als \frac{(…)^2}{4y^2}
 export function finalForm(e: Expr): Expr {
-  if (alreadyFinal(e)) return plusFirst(e)
-  if (nestedSquare(e)) return e
   // \sqrt{\frac{a^2}{4} + b} als \frac{\sqrt{a^2 + 4b}}{2} (nach der pq-Formel)
   const roots = simplerRoots(e)
   if (roots !== e) return finalForm(roots)
+  if (alreadyFinal(e)) return plusFirst(e)
+  if (nestedSquare(e)) return e
   const atoms = anyAtoms()
   if (e.kind === 'root' && e.index === 2) {
     const f = toRat(e.arg, atoms)
@@ -459,6 +476,15 @@ function simplerRoots(e: Expr, outside = true): Expr {
     if (e.index !== 2 || arg.kind !== 'add' || !subterms(arg).some((x) => x.kind === 'div')) return same
     const atoms = anyAtoms()
     const f = toRat(arg, atoms)
+    // Zähler ein Quadrat, Nenner eine Summe: \sqrt{a^2 + \frac{a^2y}{1 - y}} = \frac{a}{\sqrt{1 - y}}
+    const r = f && reduceFrac(f)
+    if (r && factoredPoly(r.den).length > 1) {
+      const den = factoredPoly(r.den)
+      // Vorzeichen so, dass der Zähler ein Quadrat ist: \frac{-a^2}{y - 1} = \frac{a^2}{1 - y}
+      const flip = r.num.length === 1 && ratSign(r.num[0].coef) < 0
+      const top = monomialSqrt(flip ? polyScale(r.num, rat(-1)) : r.num)
+      if (top) return div(polyToExpr(top, atoms), sqrt(polyToExpr(flip ? polyScale(den, rat(-1)) : den, atoms)))
+    }
     const form = f && squareDenominatorRoot(f, atoms, !outside)
     return form ?? same
   }
@@ -619,6 +645,11 @@ function peelRaw(s: Expr, o: Expr, side: Side, t: string): Draft | null {
       if (withT.length !== 1) return null
       const rest = s.factors.filter((f) => !has(f))
       const d = mul(...rest)
+      // \frac{1}{b}(…) = w: mal b statt durch \frac{1}{b} (bei \frac{2}{b} bleibt die 2 stehen)
+      if (d.kind === 'div') {
+        const kept = isOneExpr(d.num) ? withT[0] : timesFactor(withT[0], d.num)
+        return { kind: 'multiply', operand: d.den, side, after: at(side, kept, timesFactor(o, d.den)) }
+      }
       return { kind: 'divide', operand: d, side, after: at(side, withT[0], dividedBy(o, d)) }
     }
     case 'div': {
@@ -695,6 +726,7 @@ export function lnOf(o: Expr): Expr {
 
 // a^w; e^{\ln u} = u
 export function powerOf(base: Expr, o: Expr): Expr {
+  if (isOneExpr(o)) return base
   if (isE(base) && o.kind === 'fn' && o.name === 'ln') return o.arg
   if (o.kind === 'log' && key(o.base) === key(base)) return o.arg
   return pow(base, o)
@@ -857,6 +889,24 @@ function radicalStep(e: Equation, t: string, r: Expr): Draft | null {
   if (key(e.lhs) === key(r)) return { kind: 'square', side: 'lhs', after: eq(inner, squared(e.rhs)), requires: e.rhs }
   if (key(e.rhs) === key(r)) return { kind: 'square', side: 'rhs', after: eq(squared(e.lhs), inner), requires: e.lhs }
   const hasR = (x: Expr) => subterms(x).some((y) => key(y) === key(r))
+  // Faktor mal Wurzel, auf der anderen Seite keine Wurzel: gleich quadrieren, x = y\sqrt{x^2 + a} →
+  // x^2 = y^2(x^2 + a)
+  for (const side of ['lhs', 'rhs'] as const) {
+    const s = e[side]
+    const o = side === 'lhs' ? e.rhs : e.lhs
+    if (s.kind !== 'mul' || hasR(o) || o.kind === 'add' || !contains(o, t)) continue
+    const rest = s.factors.filter((f) => key(f) !== key(r))
+    if (rest.length !== s.factors.length - 1 || rest.some((f) => contains(f, t))) continue
+    return { kind: 'square', side, after: at(side, mul(squared(mul(...rest)), inner), squared(o)), requires: o }
+  }
+  // Bruch mit der Variable im Nenner, die andere Seite ohne sie: mit dem Nenner malnehmen,
+  // \frac{x}{\sqrt{x^2 + a}} = y → x = y\sqrt{x^2 + a}
+  for (const side of ['lhs', 'rhs'] as const) {
+    const s = e[side]
+    const o = side === 'lhs' ? e.rhs : e.lhs
+    if (s.kind !== 'div' || !contains(s.den, t) || contains(o, t)) continue
+    return { kind: 'multiply', operand: s.den, side, after: at(side, s.num, timesFactor(o, s.den)) }
+  }
   const atoms = radicalAtoms(t, r)
   const polysOf = () => {
     const l = atoms && toPoly(e.lhs, atoms)
@@ -980,9 +1030,10 @@ type PowerNode = Extract<Expr, { kind: 'pow' }>
 const isTPower = (s: Expr, t: string): s is PowerNode => s.kind === 'pow' && contains(s.exp, t) && !contains(s.base, t)
 
 // Logarithmus mit der Variable: \ln u (Basis e) oder \log_a u
-function logParts(s: Expr, t: string): { base: Expr; arg: Expr } | null {
-  if (s.kind === 'fn' && s.name === 'ln' && contains(s.arg, t)) return { base: E, arg: s.arg }
-  if (s.kind === 'log' && contains(s.arg, t) && !contains(s.base, t)) return { base: s.base, arg: s.arg }
+// constant: auch Logarithmen ohne die Variable (\ln a)
+function logParts(s: Expr, t: string, constant = false): { base: Expr; arg: Expr } | null {
+  if (s.kind === 'fn' && s.name === 'ln' && (constant || contains(s.arg, t))) return { base: E, arg: s.arg }
+  if (s.kind === 'log' && (constant || contains(s.arg, t)) && !contains(s.base, t)) return { base: s.base, arg: s.arg }
   return null
 }
 
@@ -1139,7 +1190,7 @@ export function unknownAtoms(e: Equation, t: string): { atoms: Atoms; u: string;
 }
 
 // ±k · \ln u als Summand: Vorzeichen, Basis und u^k
-export function signedLog(term: Expr, t: string): { sign: 1 | -1; base: Expr; arg: Expr } | null {
+export function signedLog(term: Expr, t: string, constant = false): { sign: 1 | -1; base: Expr; arg: Expr } | null {
   let sign: 1 | -1 = 1
   let x = term
   if (x.kind === 'neg') {
@@ -1155,7 +1206,7 @@ export function signedLog(term: Expr, t: string): { sign: 1 | -1; base: Expr; ar
       k = -k
     }
   }
-  const p = logParts(x, t)
+  const p = logParts(x, t, constant)
   if (!p) return null
   return { sign, base: p.base, arg: k === 1n ? p.arg : pow(p.arg, num(k)) }
 }
@@ -1166,14 +1217,23 @@ function logCombineStep(e: Equation, t: string): Draft | null {
   for (const side of ['lhs', 'rhs'] as const) {
     const s = e[side]
     if (s.kind !== 'add') continue
-    const parsed = s.terms.map((term) => signedLog(term, t))
+    // nur Logarithmen (auch ohne die Variable, z. B. nach dem Einsetzen der Grenzen eines Integrals):
+    // alle zusammen, \ln x - \ln(x + b) - \ln a + \ln(a + b) → \ln\frac{x(a + b)}{a(x + b)}
+    const all = s.terms.map((term) => signedLog(term, t, true))
+    const onlyLogs = all.every((p) => p !== null) && s.terms.some((term) => !contains(term, t)) && s.terms.some((term) => contains(term, t))
+    const parsed = onlyLogs ? all : s.terms.map((term) => signedLog(term, t))
     const logs = parsed.filter((p) => p !== null)
     if (logs.length < 2 || logs.some((p) => key(p.base) !== key(logs[0].base))) continue
     const ups = logs.filter((p) => p.sign > 0).map((p) => p.arg)
     const downs = logs.filter((p) => p.sign < 0).map((p) => p.arg)
     if (ups.length === 0) continue
-    const product = (xs: Expr[]) => (xs.length === 1 ? xs[0] : mul(...xs))
-    const arg = downs.length > 0 ? div(product(ups), product(downs)) : product(ups)
+    // Buchstaben vor Klammern: a(x + b)
+    const product = (xs: Expr[]) => (xs.length === 1 ? xs[0] : mul(...[...xs.filter(isMonomial), ...xs.filter((x) => !isMonomial(x))]))
+    const written = downs.length > 0 ? div(product(ups), product(downs)) : product(ups)
+    // mit Logarithmen ohne die Variable gekürzt: \frac{3a(x - a)}{a(x + a)} → \frac{3(x - a)}{x + a}
+    const raw = onlyLogs ? toRat(written, newAtoms(t)) : null
+    const cancels = raw !== null && totalDegree(factoredPoly(reduceFrac(raw).den)) < totalDegree(raw.den)
+    const arg = raw && cancels ? niceFrac(raw, newAtoms(t)) : written
     const combined = isE(logs[0].base) ? fn('ln', arg) : log(logs[0].base, arg)
     const first = parsed.findIndex((p) => p !== null)
     const terms = s.terms.flatMap((term, i) => (i === first ? [combined] : parsed[i] ? [] : [term]))
@@ -1729,9 +1789,13 @@ function zeroForm(diff: Poly, u: string, atoms: Atoms): { a: Poly; b: Poly; c: P
   let a = coefficientOf(diff, u, 2)
   let b = coefficientOf(diff, u, 1)
   let c = coefficientOf(diff, u, 0)
-  if (degreeIn(diff, u) !== 2 || a.length !== 1 || b.length === 0 || c.length === 0) return null
-  if (ratSign(a[0].coef) < 0) [a, b, c] = [a, b, c].map((p) => polyScale(p, rat(-1)))
-  return { a, b, c, equation: eq(quadraticExpr(polyToExpr(a, atoms), polyToExpr(b, atoms), polyToExpr(c, atoms), variable(u)), num(0)) }
+  if (degreeIn(diff, u) !== 2 || b.length === 0 || c.length === 0) return null
+  // vor u^2 ein Monom mit Plus, eine Summe mit Plus vor der Zahl: (1 - y)x^2
+  const constant = a.find((term) => term.mono.length === 0)
+  if (ratSign((a.length === 1 ? a[0] : (constant ?? a[0])).coef) < 0) [a, b, c] = [a, b, c].map((p) => polyScale(p, rat(-1)))
+  // Summen vor u^2 und u mit ausgeklammertem Faktor: 2a(1 - y)u
+  const coefficient = (p: Poly) => (a.length > 1 ? contentExpr(p, atoms) : polyToExpr(p, atoms))
+  return { a, b, c, equation: eq(quadraticExpr(coefficient(a), coefficient(b), polyToExpr(c, atoms), variable(u)), num(0)) }
 }
 
 // Typische Fehler auf dem Weg zur Normalform: beim Bringen auf eine Seite das Vorzeichen nicht
@@ -1775,10 +1839,9 @@ function rational(e: Equation, t: string, ctx: Context): Draft | null {
   if (logged) return logged
 
   // Normalform u^2 + pu + q = 0 (auch mit Brüchen wie \frac{b}{a}u): pq-Formel
-  if (isNormalized(e, t)) {
-    const pq = pqDraft(e, t, ctx)
-    if (pq) return pq
-  }
+  // Normalform u^2 + pu + q = 0: pq-Formel; passt keine Lösung eindeutig, geht es nicht weiter (sonst
+  // würde wieder mit dem Nenner malgenommen und von vorn begonnen)
+  if (isNormalized(e, t)) return pqDraft(e, t, ctx)
 
   const { atoms, u, uExpr, block } = unknownAtoms(e, t)
   // mit einem Baustein wie e^x: „Alles mit $e^x$ nach links", „$e^x$ ausklammern"
@@ -1806,15 +1869,43 @@ function rational(e: Equation, t: string, ctx: Context): Draft | null {
   const pr = polyDivideExact(right.num, right.den)
   if (!pl || !pr) return null
 
-  // Klammern ausmultiplizieren
-  if (hasBracket(e.lhs) || hasBracket(e.rhs)) {
+  // Klammern ausmultiplizieren (nicht in der Gleichung au^2 + bu + c = 0 mit einer Summe vor u^2)
+  const zeroAlready = isZeroExpr(e.rhs) && (() => {
+    const z = zeroForm(polyAdd(pl, polyScale(pr, rat(-1))), t, atoms)
+    return z !== null && z.a.length > 1 && key(z.equation.lhs) === key(e.lhs)
+  })()
+  if ((hasBracket(e.lhs) || hasBracket(e.rhs)) && !zeroAlready) {
     const after = eq(polyToExpr(pl, atoms), polyToExpr(pr, atoms))
     if (key(after.lhs) !== key(e.lhs) || key(after.rhs) !== key(e.rhs)) return { kind: 'expand', after }
   }
 
   const diff = polyAdd(pl, polyScale(pr, rat(-1)))
-  // quadratisch: alles nach links, Normalform, pq-Formel
-  if (degreeIn(diff, u) === 2 && u === t) return quadraticStep(e, t, diff, atoms, ctx)
+  if (degreeIn(diff, u) === 2 && u === t) {
+    // nur x^2, kein x: nach x^2 auflösen wie nach einer Unbekannten (x^2 - yx^2 = a → x^2(1 - y) = a)
+    const square = coefficientOf(diff, t, 1).length === 0 ? squareUnknown(pl, pr, t, atoms) : null
+    if (square) return linearSteps(e, t, square.pl, square.pr, square.atoms, SQUARE_ATOM, pow(variable(t), num(2)), { operand: pow(variable(t), num(2)) })
+    // quadratisch: alles nach links, Normalform, pq-Formel
+    return quadraticStep(e, t, diff, atoms, ctx)
+  }
+  return linearSteps(e, t, pl, pr, atoms, u, uExpr, named)
+}
+
+const SQUARE_ATOM = '~q'
+
+// Polynome in x^2 statt x (x kommt nur als x^2 vor); null sonst
+function squareUnknown(pl: Poly, pr: Poly, t: string, atoms: Atoms): { pl: Poly; pr: Poly; atoms: Atoms } | null {
+  const ok = (p: Poly) => p.every((term) => term.mono.every(([a, k]) => a !== t || k === 2))
+  if (!ok(pl) || !ok(pr)) return null
+  const swap = (p: Poly): Poly =>
+    p.map((term) => ({ coef: term.coef, mono: term.mono.map(([a, k]) => (a === t ? ([SQUARE_ATOM, 1] as const) : ([a, k] as const))).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)) }))
+  const square: Atoms = { ...atoms, opaque: new Map(atoms.opaque), names: new Map(atoms.names) }
+  square.opaque.set(SQUARE_ATOM, pow(variable(t), num(2)))
+  return { pl: swap(pl), pr: swap(pr), atoms: square }
+}
+
+// Gleichung, linear in der Unbekannten u (uExpr): alles mit u nach links, ausklammern, teilen
+function linearSteps(e: Equation, t: string, pl: Poly, pr: Poly, atoms: Atoms, u: string, uExpr: Expr, named: { operand?: Expr }): Draft | null {
+  const diff = polyAdd(pl, polyScale(pr, rat(-1)))
   if (degreeIn(diff, u) !== 1) return null
   const uTerms = diff.filter((term) => term.mono.some(([a]) => a === u))
   const rest = diff.filter((term) => !term.mono.some(([a]) => a === u))
@@ -1923,11 +2014,19 @@ export function solveEquation(equation: Equation, target: string, options: Solve
   let sub = options.substitution
   const conditions = options.conditions ?? []
   try {
+    // Stufe 5: erst die Werkzeuge ausrechnen (Ableitung, Integral, …), dann umstellen
+    for (let i = 0; hasTool(current); i++) {
+      const draft = i < MAX_STEPS ? nextToolStep(current) : null
+      if (!draft) return null
+      steps.push({ ...draft, before: current })
+      current = draft.after
+    }
+    const original = current
     for (let i = 0; i < MAX_STEPS; i++) {
       // nach dem Substituieren: nach u auflösen, dann zurück einsetzen
       const inU = sub !== undefined && (contains(current.lhs, sub.name) || contains(current.rhs, sub.name))
       const t = inU ? sub!.name : target
-      const ctx: Context = { original: equation, target, conditions, sub }
+      const ctx: Context = { original, target, conditions, sub }
       const draft = (inU ? resubstituteDraft(current, sub!) : null) ?? nextStep(current, t, ctx)
       if (!draft) {
         return {

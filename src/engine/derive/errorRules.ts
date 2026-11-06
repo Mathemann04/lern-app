@@ -1,6 +1,6 @@
 import { clearlyDifferent } from '../check/numeric.ts'
 import { contains, key } from '../expr/compare.ts'
-import { evaluate } from '../expr/evaluate.ts'
+import { type Env, evaluate } from '../expr/evaluate.ts'
 import { sampleEnvs, samplePoints } from '../expr/sample.ts'
 import { substitute } from '../expr/substitute.ts'
 import {
@@ -465,13 +465,16 @@ export type WrongAnswer = {
 // Alle typischen falschen Ergebnisse einer Aufgabe: je Fehlerregel und Stelle eins.
 // Behalten werden nur Ergebnisse, die sich deutlich von der Lösung und voneinander
 // unterscheiden. Eine falsche Option ist also nie zufällig doch richtig.
-export function wrongAnswers(expr: Expr, correct: Derivation = derive(expr)): WrongAnswer[] {
+// envs: eigene Prüfstellen, z. B. mit weiteren Buchstaben (Ableitungen beim Umstellen, Stufe 5)
+export function wrongAnswers(expr: Expr, correct: Derivation = derive(expr), envs?: readonly Env[]): WrongAnswer[] {
   const rng = createRng(`fehler:${key(expr)}`)
   // Beim impliziten Ableiten hängen die Terme von x, y und y' ab
   const { variable: v, dependent } = correct
-  const points = dependent
-    ? sampleEnvs([expr, correct.result], rng, 60, [v, dependent, primeOf(dependent)])
-    : samplePoints([expr, correct.result], rng, 60, v)
+  const points = envs
+    ? [...envs]
+    : dependent
+      ? sampleEnvs([expr, correct.result], rng, 60, [v, dependent, primeOf(dependent)])
+      : samplePoints([expr, correct.result], rng, 60, v)
   const kept: Array<WrongAnswer & { alsoMatches: ErrorRule[] }> = []
 
   for (const node of allNodes(correct)) {

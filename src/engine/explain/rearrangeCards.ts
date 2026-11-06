@@ -1,5 +1,6 @@
 import { type Expr, PI, add, cos, div, eq, exp, fn, ln, mul, neg, num, pow, sin, sqrt, sub, variable } from '../expr/types.ts'
 import type { Condition, RearrangeTask } from '../rearrange/task.ts'
+import { integralOf } from '../rearrange/tools/tool.ts'
 import type { Card } from './cards.ts'
 
 // Lernkarten im Ordner „Gleichungen umstellen". Die Beispiele sind Aufgaben der Umstell-Engine; den
@@ -20,9 +21,10 @@ export const REARRANGE_CARD_IDS = {
   trig: 'rearrange-trig',
   substitution: 'rearrange-substitution',
   pq: 'rearrange-pq',
+  integral: 'rearrange-integral',
 } as const
 
-const [a, b, c, d, k, x, y] = ['a', 'b', 'c', 'd', 'k', 'x', 'y'].map(variable)
+const [a, b, c, d, k, t, x, y] = ['a', 'b', 'c', 'd', 'k', 't', 'x', 'y'].map(variable)
 const n = (value: number) => num(value)
 const task = (lhs: Expr, rhs: Expr, target = 'x', conditions: readonly Condition[] = []): RearrangeTask => ({ equation: eq(lhs, rhs), target, conditions })
 const sq = (e: Expr) => pow(e, n(2))
@@ -248,5 +250,28 @@ export const REARRANGE_CARD_LIST: readonly Card[] = [
       task(sub(mul(n(2), exp(mul(n(2), x))), mul(n(3), mul(y, exp(x)))), n(2)),
     ],
     errors: ['eq-pq-sign', 'eq-pq-q-sign', 'eq-pq-half', 'eq-spurious-root'],
+  },
+  {
+    id: REARRANGE_CARD_IDS.integral,
+    topic: 'umstellen',
+    title: 'Stammfunktionen und Partialbrüche',
+    level: 5,
+    rules: [],
+    formulas: [
+      '\\int_a^x f(t)\\,\\mathrm{d}t = F(x) - F(a)',
+      '\\int t^n\\,\\mathrm{d}t = \\frac{t^{n + 1}}{n + 1}',
+      '\\int e^{kt}\\,\\mathrm{d}t = \\frac{1}{k}e^{kt}',
+      '\\int \\frac{t}{t^2 + a^2}\\,\\mathrm{d}t = \\frac{1}{2}\\ln\\left(t^2 + a^2\\right)',
+      '\\frac{1}{t(t + b)} = \\frac{1}{b}\\left(\\frac{1}{t} - \\frac{1}{t + b}\\right)',
+    ],
+    memo: 'Erst eine Stammfunktion $F$ suchen (Probe: $F\' = f$), dann obere minus untere Grenze einsetzen. Steht ein Bruch mit zwei Faktoren im Nenner da, zerlegst du ihn vorher in Partialbrüche.',
+    note: 'Steckt eine innere Funktion wie $2t$ oder $t^2 + a^2$ drin, teilst du beim Integrieren durch ihre Ableitung. Die untere Grenze wird immer eingesetzt, auch $0$: $e^0 = 1$. Danach steht eine gewöhnliche Gleichung da, die du wie in Stufe 4 umstellst.',
+    when: 'Wenn in der Gleichung ein Integral steht: erst ausrechnen, dann umstellen.',
+    examples: [
+      task(integralOf(div(n(1), mul(t, add(t, b))), a, x), y, 'x', [{ lhs: x, rel: '>', rhs: a }]),
+      task(integralOf(exp(mul(n(2), t)), n(0), x), y),
+      task(integralOf(div(t, add(sq(t), sq(a))), n(0), x), y),
+    ],
+    errors: ['eq-partial-factor', 'eq-int-inner-factor', 'eq-int-derived', 'eq-int-power', 'eq-int-sign', 'eq-int-bounds-swapped', 'eq-int-lower-forgotten'],
   },
 ]

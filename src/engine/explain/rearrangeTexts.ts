@@ -206,6 +206,42 @@ export const REARRANGE_ERROR_TEXTS: Readonly<Record<string, Explanation>> = {
     detailed: 'Die $pq$-Formel liefert $u$, gesucht ist aber $x$. Setze für $u$ wieder den Baustein ein, zum Beispiel $e^x$, und löse dann nach $x$ auf.',
     short: 'Zurück einsetzen: $u$ ist noch nicht $x$.',
   },
+  // Werkzeuge der Stufe 5 (Schritt 7a): Integrale
+  'eq-partial-factor': {
+    detailed:
+      'Die Partialbrüche müssen zusammen wieder den Bruch ergeben. Rechne zur Probe zurück: $\\frac{1}{t} - \\frac{1}{t + b} = \\frac{b}{t(t + b)}$, also fehlt noch der Faktor $\\frac{1}{b}$. Die Zahlen vor den Partialbrüchen bekommst du, indem du die Nullstellen der Nennerfaktoren einsetzt.',
+    short: 'Probe: Die Partialbrüche zusammen müssen den Bruch ergeben, oft fehlt ein Faktor.',
+  },
+  'eq-int-inner-factor': {
+    detailed:
+      'Leite deine Stammfunktion zur Probe ab: Bei $\\ln\\left(t^2 + a^2\\right)$ oder $e^{2t}$ kommt mit der Kettenregel die innere Ableitung als Faktor dazu. Damit die Ableitung genau den Integranden ergibt, musst du beim Integrieren durch diesen Faktor teilen, z. B. $\\int e^{2t}\\,\\mathrm{d}t = \\frac{1}{2}e^{2t}$.',
+    short: 'Probe durch Ableiten: Durch die innere Ableitung teilen.',
+  },
+  'eq-int-derived': {
+    detailed:
+      'Integrieren ist die Umkehrung des Ableitens. Hier wurde abgeleitet: Bei $e^{kt}$ kommt der Faktor $k$ beim Ableiten dazu, beim Integrieren wird durch $k$ geteilt. Probe: Die Ableitung der Stammfunktion muss wieder der Integrand sein.',
+    short: 'Integrieren ist die Umkehrung des Ableitens: durch $k$ teilen, nicht malnehmen.',
+  },
+  'eq-int-power': {
+    detailed:
+      'Bei der Potenzregel fürs Integrieren steigt der Exponent um $1$, und du teilst durch den neuen Exponenten: $\\int t^n\\,\\mathrm{d}t = \\frac{t^{n + 1}}{n + 1}$. Probe: Leite das Ergebnis ab, dann muss wieder $t^n$ herauskommen.',
+    short: 'Durch den neuen Exponenten teilen: $\\frac{t^{n + 1}}{n + 1}$.',
+  },
+  'eq-int-sign': {
+    detailed:
+      "Achte auf die Vorzeichen: $\\int \\sin t\\,\\mathrm{d}t = -\\cos t$, weil $(\\cos t)' = -\\sin t$. Und ein Minus vor einem Partialbruch bleibt auch vor seinem $\\ln$ stehen: $\\int \\left(\\frac{1}{t} - \\frac{1}{t + b}\\right)\\mathrm{d}t = \\ln t - \\ln(t + b)$.",
+    short: 'Vorzeichen prüfen: $\\int \\sin t\\,\\mathrm{d}t = -\\cos t$.',
+  },
+  'eq-int-bounds-swapped': {
+    detailed:
+      'Beim Einsetzen der Grenzen kommt die obere Grenze zuerst: $\\int_a^x f(t)\\,\\mathrm{d}t = F(x) - F(a)$. Mit vertauschten Grenzen ändert sich das Vorzeichen des Ergebnisses.',
+    short: 'Obere minus untere Grenze: $F(x) - F(a)$.',
+  },
+  'eq-int-lower-forgotten': {
+    detailed:
+      'Auch die untere Grenze wird eingesetzt und abgezogen, selbst wenn sie $0$ ist: $F(0)$ ist oft nicht $0$, z. B. $e^0 = 1$ oder $\\ln a$. Also $\\int_0^x f(t)\\,\\mathrm{d}t = F(x) - F(0)$.',
+    short: 'Die untere Grenze nicht vergessen: $F(x) - F(0)$.',
+  },
 }
 
 export function explainRearrangeError(id: string): Explanation {
@@ -697,6 +733,10 @@ export const ROOT_MOVES: readonly WrongMove[] = [
 // --- Tipps ---
 
 export const REARRANGE_HINTS = {
+  derive: 'Leite den Term in der Klammer nach $x$ ab, mit den Regeln aus „Ableiten" (Quotienten-, Produkt- und Kettenregel), und fasse zusammen.',
+  partial: 'Zerlege den Nenner in Faktoren und setze an: $\\frac{A}{t + p} + \\frac{B}{t + q}$. Die Nullstellen der Faktoren eingesetzt liefern $A$ und $B$.',
+  antiderivative: 'Suche eine Funktion, deren Ableitung der Integrand ist. Teile durch die innere Ableitung, z. B. $\\int e^{2t}\\,\\mathrm{d}t = \\frac{1}{2}e^{2t}$.',
+  bounds: 'Setze erst die obere, dann die untere Grenze ein und ziehe ab: $F(x) - F(a)$.',
   add: 'Ein Summand verschwindet mit der Gegenrechnung: Aus $+c$ wird auf beiden Seiten $-c$.',
   move: 'Bringe den Summanden mit Minus auf die andere Seite, dort steht er mit Plus. Den Rest bringst du herüber.',
   divide: 'Einen Faktor wirst du los, indem du beide Seiten durch ihn teilst.',
@@ -736,7 +776,9 @@ export const REARRANGE_HINTS = {
 } as const
 
 // Tipp für die ganze Aufgabe (im freien Modus)
-export function rearrangeTaskHint(target: string, several: boolean, block: string | null = null, quadratic = false): Explanation {
+export function rearrangeTaskHint(target: string, several: boolean, block: string | null = null, quadratic = false, tool: 'derivative' | 'integral' | null = null): Explanation {
+  if (tool === 'derivative') return same(`Rechne zuerst die Ableitung aus. Dann steht eine gewöhnliche Gleichung da, die du nach $${target}$ auflöst.`)
+  if (tool === 'integral') return same(`Rechne zuerst das Integral aus: Stammfunktion, dann die Grenzen einsetzen. Dann löst du nach $${target}$ auf.`)
   if (block) return same(`Setze $u = ${block}$ und löse die quadratische Gleichung in $u$ mit der $pq$-Formel. Wähle die passende Lösung, setze zurück ein und löse nach $${target}$ auf.`)
   if (quadratic) return same(`Forme um, bis $${target}^2$ und $${target}$ in einer Gleichung stehen. Bringe alles auf eine Seite, nimm die $pq$-Formel und wähle die passende Lösung.`)
   return several
@@ -844,6 +886,14 @@ export function explainResult(kind: string, before: string, after: string): Expl
       return { detailed: `$p$ und $q$ mit ihren Vorzeichen in die $pq$-Formel eingesetzt:\n${lines}`, short: lines }
     case 'resubstitute':
       return { detailed: `Für $u$ steht wieder der Baustein da:\n${lines}`, short: lines }
+    case 'derive':
+      return { detailed: `Die Ableitung ausgerechnet (mit den Regeln aus „Ableiten") und zusammengefasst:\n${lines}`, short: lines }
+    case 'partial':
+      return { detailed: `Der Bruch im Integral in Partialbrüche zerlegt (Probe: zusammen ergeben sie wieder den Bruch):\n${lines}`, short: lines }
+    case 'antiderivative':
+      return { detailed: `Eine Stammfunktion, mit den Grenzen in eckigen Klammern (Probe: abgeleitet ergibt sie den Integranden):\n${lines}`, short: lines }
+    case 'bounds':
+      return { detailed: `Die obere Grenze eingesetzt, minus die untere:\n${lines}`, short: lines }
     default:
       return { detailed: `Auf beiden Seiten dieselbe Rechnung:\n${lines}`, short: lines }
   }

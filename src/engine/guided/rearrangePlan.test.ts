@@ -4,7 +4,8 @@ import { parseRichText } from '../explain/richText.ts'
 import { cardById } from '../explain/cards.ts'
 import { latexProblem } from '../expr/latexChecks.ts'
 import { toLatex } from '../expr/print.ts'
-import { type Expr, eq } from '../expr/types.ts'
+import { type Expr, add, div, eq, mul, num, pow, variable } from '../expr/types.ts'
+import { derivativeOf, integralOf } from '../rearrange/tools/tool.ts'
 import { parseLatex } from '../parse/latex.ts'
 import { REARRANGE_ERROR_RULES } from '../rearrange/errorRules.ts'
 import type { Level } from '../tasks/taskNumber.ts'
@@ -86,8 +87,8 @@ describe('Geführt umstellen: Ablauf', () => {
   })
 })
 
-describe('Geführt umstellen: Zufallsaufgaben der Stufen 1 bis 4', () => {
-  for (const level of [1, 2, 3, 4] as const) {
+describe('Geführt umstellen: Zufallsaufgaben der Stufen 1 bis 5', () => {
+  for (const level of [1, 2, 3, 4, 5] as const) {
     it(`Stufe ${level}: jede Aufgabe lässt sich sauber durchspielen`, () => {
       for (let seed = 1; seed <= 200; seed++) {
         const task = planRearrangeTask({ level, seed })
@@ -118,6 +119,30 @@ describe('Geführt umstellen: Zufallsaufgaben der Stufen 1 bis 4', () => {
       }
     }, 60_000)
   }
+})
+
+describe('Geführt umstellen: Stufe 5 (Werkzeuge)', () => {
+  it('das Werkzeug zuerst: „Was steht da eigentlich?", mit den typischen Fehlern des Gebiets', () => {
+    const integral = planRearrange(
+      { equation: eq(integralOf(div(num(1), mul(variable('t'), add(variable('t'), variable('b')))), variable('a'), variable('x')), variable('y')), target: 'x', conditions: [{ lhs: variable('x'), rel: '>', rhs: variable('a') }] },
+      { level: 5, seed: 1 },
+    )
+    expect(integral.steps[0].title).toBe('Was steht da eigentlich?')
+    expect(integral.steps.slice(0, 3).map((s) => s.id.replace(/^\d+-/, ''))).toEqual(['partial', 'antiderivative', 'bounds'])
+    const ids = integral.steps.slice(0, 3).flatMap((s) => s.choices.map((c) => c.errorRuleId))
+    for (const id of ['eq-partial-factor', 'eq-int-sign', 'eq-int-bounds-swapped']) expect(ids).toContain(id)
+    expect(integral.steps[0].cards).toContain('rearrange-integral')
+    expect(integral.ruleHint.detailed).toContain('Integral')
+
+    const derivative = planRearrange({ equation: eq(derivativeOf(div(pow(variable('x'), num(2)), add(variable('x'), variable('a')))), variable('y')), target: 'x', conditions: [] }, { level: 5, seed: 1 })
+    const first = derivative.steps[0]
+    expect(first.title).toBe('Was steht da eigentlich?')
+    // die Fehler aus „Ableiten" mit ihrem Text, die Karte zur Quotientenregel
+    const wrong = first.choices.filter((c) => !c.correct)
+    expect(wrong.length).toBeGreaterThan(0)
+    for (const c of wrong) expect(c.whyWrong?.detailed.length).toBeGreaterThan(0)
+    expect(first.cards).toContain('quotient')
+  })
 })
 
 describe('Geführt umstellen: Texte', () => {

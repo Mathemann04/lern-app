@@ -45,6 +45,12 @@ export function contains(e: Expr, name: string): boolean {
     case 'const':
       return false
     case 'var':
+      // Werkzeug (Ableitung, Integral): enthält seine freien Buchstaben
+      if (e.tool) {
+        const { tool } = e
+        if (tool.kind === 'derivative') return contains(tool.body, name)
+        return (tool.v !== name && contains(tool.body, name)) || contains(tool.lower, name) || contains(tool.upper, name)
+      }
       return e.name === name
     case 'add':
       return e.terms.some((t) => contains(t, name))

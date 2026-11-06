@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { contains, subterms } from '../expr/compare.ts'
 import { solveTask } from '../rearrange/isolate.ts'
 import { taskLatex } from '../rearrange/task.ts'
+import { hasTool } from '../rearrange/tools/tool.ts'
 import { createRng } from '../random/rng.ts'
 import { rearrangeForm } from './forms.ts'
 import { generateRearrangeTask } from './rearrangeTerms.ts'
@@ -10,7 +11,7 @@ import { pickFresh, varietyStats } from './variety.ts'
 
 // Abwechslung beim Umstellen (docs/PLAN-M3.md, 4. Fassung): Die Stufen aus dem Baukasten haben je
 // Stufe viele Formen, keine zu häufig, und beim Ziehen keine Wiederholung.
-const KIT_LEVELS: Level[] = [1, 2, 3, 4]
+const KIT_LEVELS: Level[] = [1, 2, 3, 4, 5]
 
 describe.each(KIT_LEVELS)('Abwechslung Stufe %i', (level) => {
   it('mindestens 100 Formen unter 200 Aufgaben, keine öfter als 3 von 100', () => {
@@ -30,7 +31,9 @@ describe.each(KIT_LEVELS)('Abwechslung Stufe %i', (level) => {
   })
 })
 
-describe('Baukasten der Stufen 1 bis 4', () => {
+const TOOL_STEPS = new Set(['derive', 'partial', 'antiderivative'])
+
+describe('Baukasten der Stufen 1 bis 5', () => {
   const tasks = (level: Level) => Array.from({ length: 200 }, (_, i) => generateRearrangeTask({ level, seed: i + 1 }).task)
   const count = (side: Parameters<typeof subterms>[0], t: string) => subterms(side).filter((s) => s.kind === 'var' && s.name === t).length
 
@@ -119,6 +122,27 @@ describe('Baukasten der Stufen 1 bis 4', () => {
     // Substitution mit e^x, √x, Winkelfunktion, ln und x^2 kommt vor, ebenso die pq-Formel ohne Substitution
     const blocks = new Set(quadratic.map((g) => solveTask(g.task)!.substitution?.expr.kind ?? 'ohne'))
     expect([...blocks].sort()).toEqual(['fn', 'ohne', 'pow', 'root'])
+  })
+
+  it('Stufe 5, Teil 7a: in jeder Aufgabe eine Ableitung oder ein Integral, im Mittel mindestens 8 Umformungen', () => {
+    const all = tasks(5)
+    const solutions = all.map((t) => solveTask(t)!)
+    const lengths = solutions.map((s) => s.steps.length)
+    expect(Math.min(...lengths)).toBeGreaterThanOrEqual(6)
+    expect(lengths.reduce((a, b) => a + b, 0) / lengths.length).toBeGreaterThanOrEqual(8)
+    for (const [i, t] of all.entries()) {
+      expect(hasTool(t.equation), taskLatex(t)).toBe(true)
+      expect(t.target).toBe('x')
+      // erst das Werkzeug ausrechnen
+      expect(TOOL_STEPS.has(solutions[i].steps[0].kind), taskLatex(t)).toBe(true)
+    }
+    const kinds = new Set(solutions.flatMap((s) => s.steps.map((step) => step.kind)))
+    for (const kind of ['derive', 'partial', 'antiderivative', 'bounds', 'pq', 'logCombine']) expect(kinds.has(kind as never), kind).toBe(true)
+    // auch zwei Werkzeuge in einer Aufgabe, Werkzeug im Bruch, unter der Wurzel und im \ln
+    const labels = Array.from({ length: 200 }, (_, i) => generateRearrangeTask({ level: 5, seed: i + 1 }).label)
+    for (const part of ['Integral gleich Ableitung', 'in einer Summe', 'im Bruch', 'unter der Wurzel', 'im $\\ln$']) {
+      expect(labels.some((l) => l.includes(part)), part).toBe(true)
+    }
   })
 
   it.each([1, 2, 3, 4] as Level[])('Stufe %i: meist nach x, manchmal nach einem anderen Buchstaben', (level) => {

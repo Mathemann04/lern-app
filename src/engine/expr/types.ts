@@ -26,7 +26,8 @@ export type FnName =
 export type Num = { readonly kind: 'num'; readonly value: Rational; readonly decimal?: boolean }
 // e: Eulersche Zahl, pi: Kreiszahl, i: imaginäre Einheit (i² = −1, nur in der Bruch-Engine gerechnet)
 export type Const = { readonly kind: 'const'; readonly name: 'e' | 'pi' | 'i' }
-export type Var = { readonly kind: 'var'; readonly name: string }
+// tool: Werkzeug der Stufe 5 beim Umstellen (Ableitung, Integral, …), siehe Tool
+export type Var = { readonly kind: 'var'; readonly name: string; readonly tool?: Tool }
 export type Add = { readonly kind: 'add'; readonly terms: readonly Expr[] }
 // explicit: beim Ausgeben überall Malpunkt setzen (für eingesetzte Formeln wie u' · v)
 export type Mul = { readonly kind: 'mul'; readonly factors: readonly Expr[]; readonly explicit?: boolean }
@@ -38,6 +39,18 @@ export type Fn = { readonly kind: 'fn'; readonly name: FnName; readonly arg: Exp
 export type Log = { readonly kind: 'log'; readonly base: Expr; readonly arg: Expr }
 
 export type Expr = Num | Const | Var | Add | Mul | Neg | Div | Pow | Root | Fn | Log
+
+// Werkzeug der Stufe 5 beim Umstellen (docs/PLAN-M3.md): steht im Termbaum als Buchstabe mit eigenem
+// Namen (Var mit tool), damit Vergleichen und Umformen es wie ein Zeichen behandeln. Gesetzt wird es als
+// Ableitung, Integral usw. (print.ts), ausgewertet numerisch als Gegenprobe (evaluate.ts). Gerechnet
+// wird erst, wenn es ausgerechnet ist (rearrange/tools/).
+export type Tool =
+  // Ableitung nach v an der Stelle v: \frac{\mathrm{d}}{\mathrm{d}x}\left(body\right)
+  | { readonly kind: 'derivative'; readonly body: Expr; readonly v: string }
+  // bestimmtes Integral \int_{lower}^{upper} body \,\mathrm{d}v (v ist gebunden)
+  | { readonly kind: 'integral'; readonly body: Expr; readonly v: string; readonly lower: Expr; readonly upper: Expr }
+  // Stammfunktion mit Grenzen: \left[body\right]_{lower}^{upper} = body(upper) - body(lower)
+  | { readonly kind: 'bracket'; readonly body: Expr; readonly v: string; readonly lower: Expr; readonly upper: Expr }
 
 // Gleichung, z. B. für implizites Ableiten: x² + y² = 25
 export type Equation = { readonly lhs: Expr; readonly rhs: Expr }

@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { equationToLatex, toLatex } from '../expr/print.ts'
-import { type Expr, eq } from '../expr/types.ts'
+import { type Expr, PI, add, div, eq, exp, mul, num, pow, sin, variable } from '../expr/types.ts'
 import { parseLatex } from '../parse/latex.ts'
 import { REARRANGE_ERROR_RULES, rearrangeWrongAnswers } from './errorRules.ts'
-import { solveEquation } from './isolate.ts'
+import { solveEquation, solveTask } from './isolate.ts'
+import type { Condition } from './task.ts'
+import { derivativeOf, integralOf } from './tools/tool.ts'
 
 const p = (latex: string): Expr => {
   const r = parseLatex(latex)
@@ -62,9 +64,46 @@ const CATALOG: Array<{ id: string; lhs: string; rhs: string; target?: string; af
   { id: 'eq-not-resubstituted', lhs: 'y', rhs: '\\frac{e^{x}-e^{-x}}{2}', after: 'x = y + \\sqrt{y^{2} + 1}', result: 'y + \\sqrt{y^{2} + 1}' },
 ]
 
+// Werkzeuge der Stufe 5 (Schritt 7a): Aufgaben mit Integral, falsche Gleichung nach dem Werkzeug-Schritt
+const t = variable('t')
+const TOOL_CATALOG: Array<{ id: string; lhs: Expr; conditions?: Condition[]; after: string }> = [
+  {
+    id: 'eq-partial-factor',
+    lhs: integralOf(div(num(1), mul(t, add(t, variable('b')))), variable('a'), variable('x')),
+    conditions: [{ lhs: variable('x'), rel: '>', rhs: variable('a') }],
+    after: '\\int_{a}^{x} \\left(\\frac{1}{t} - \\frac{1}{t + b}\\right)\\,\\mathrm{d}t = y',
+  },
+  { id: 'eq-int-inner-factor', lhs: integralOf(div(t, add(pow(t, num(2)), pow(variable('a'), num(2)))), num(0), variable('x')), after: '\\left[\\ln(t^{2} + a^{2})\\right]_{0}^{x} = y' },
+  { id: 'eq-int-derived', lhs: integralOf(exp(mul(num(2), t)), num(0), variable('x')), after: '\\left[2e^{2t}\\right]_{0}^{x} = y' },
+  { id: 'eq-int-power', lhs: integralOf(pow(t, num(2)), num(0), variable('x')), after: '\\left[t^{3}\\right]_{0}^{x} = y' },
+  { id: 'eq-int-sign', lhs: integralOf(sin(t), num(0), variable('x')), conditions: [{ lhs: variable('x'), rel: '<', rhs: PI }], after: '\\left[\\cos t\\right]_{0}^{x} = y' },
+  {
+    id: 'eq-int-bounds-swapped',
+    lhs: integralOf(div(num(1), mul(t, add(t, variable('b')))), variable('a'), variable('x')),
+    conditions: [{ lhs: variable('x'), rel: '>', rhs: variable('a') }],
+    after: '\\frac{\\ln a - \\ln(a + b) - \\ln x + \\ln(x + b)}{b} = y',
+  },
+  { id: 'eq-int-lower-forgotten', lhs: integralOf(exp(t), num(0), variable('x')), after: 'e^{x} = y' },
+]
+
 describe('Katalog der Fehlerregeln', () => {
   it('jede Regel hat ein Katalogbeispiel', () => {
-    expect(CATALOG.map((c) => c.id).sort()).toEqual(REARRANGE_ERROR_RULES.map((r) => r.id).sort())
+    expect([...CATALOG, ...TOOL_CATALOG].map((c) => c.id).sort()).toEqual(REARRANGE_ERROR_RULES.map((r) => r.id).sort())
+  })
+
+  for (const c of TOOL_CATALOG) {
+    it(`${c.id}: ${equationToLatex(eq(c.lhs, variable('y')))}`, () => {
+      const task = { equation: eq(c.lhs, variable('y')), target: 'x', conditions: c.conditions ?? [] }
+      const found = rearrangeWrongAnswers(task, solveTask(task)!).filter((w) => w.rule.id === c.id)
+      expect(found.map((w) => equationToLatex(w.after))).toContain(c.after)
+    })
+  }
+
+  it('beim Ableiten die Fehler aus „Ableiten" mit ihrer Stelle', () => {
+    const task = { equation: eq(derivativeOf(div(pow(variable('x'), num(2)), add(variable('x'), variable('a')))), variable('y')), target: 'x', conditions: [] }
+    const found = rearrangeWrongAnswers(task, solveTask(task)!).filter((w) => w.derive)
+    expect(found.map((w) => w.rule.id)).toContain('quotient-denominator-not-squared')
+    for (const w of found) expect(w.stepIndex).toBe(0)
   })
 
   for (const c of CATALOG) {

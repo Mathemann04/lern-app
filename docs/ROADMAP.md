@@ -1,13 +1,13 @@
 # Roadmap
 
-Stand: 05.11.2026
+Stand: 06.11.2026
 
 | Meilenstein | Inhalt | Status |
 | --- | --- | --- |
 | M1 | Grundgerüst + Ableitungsregeln (beide Modi, 5 Stufen, Erklärungen, Lernkarten, Fortschritt) | fertig |
 | M2 | Brüche (Bruchrechnung, Bruchterme kürzen und zusammenfassen, Doppelbrüche); App für mehrere Themen | fertig |
 | M2b | Brüche nachschärfen: viel mehr Abwechslung (Baukasten statt fester Vorlagen, keine Form doppelt), deutlich schwerer, Stufe 5 auf Profi-Niveau mit Partialbruchzerlegung und Brüchen aus späteren Kapiteln (komplexe Zahlen, Grenzwerte, Teleskopsummen, Hyperbelfunktionen) | fertig |
-| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | in Arbeit: 4. Fassung des Plans (Baukasten und Abwechslung, ab Stufe 3 verschachtelter); Schritte 4, 5 und 6 fertig (Stufe 4 komplett), als Nächstes Schritt 7 |
+| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | in Arbeit: 4. Fassung des Plans (Baukasten und Abwechslung, ab Stufe 3 verschachtelter); Schritte 4, 5 und 6 fertig (Stufe 4 komplett), Schritt 7a fertig (Stufe 5 mit Ableitungen und Integralen spielbar), als Nächstes 7b |
 | M4 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
 | M5 | weitere Themen aus Mathematik MB1 | offen |
 | M6 | Physik: Formeln mit Einheiten (Formeln umstellen mit Zeichen der Physik; Aufgaben lösen: Formel wählen, umstellen, Werte mit Einheiten einsetzen) | offen |
@@ -72,7 +72,10 @@ Details: [PLAN-M3.md](PLAN-M3.md) (4. Fassung, freigegeben am 05.11.2026 mit dei
   - [x] 6a. e-Funktion und $\ln$, Wurzeln in Wurzeln, Potenz- und Logarithmusgesetze
   - [x] 6b. Winkel- und Hyperbelfunktionen, Umkehrfunktionen
   - [x] 6c. Substitution und $pq$-Formel mit Scheinlösungen
-- [ ] 7. Stufe 5, Teil 1: Ableitungen, Integrale, Reihen, Grenzwerte, Differentialgleichungen
+- [ ] 7. Stufe 5, Teil 1: Ableitungen, Integrale, Reihen, Grenzwerte, Differentialgleichungen, in drei Teilen
+  - [x] 7a. Ableitungen und Integrale (mit Partialbrüchen)
+  - [ ] 7b. Summen, Reihen und Grenzwerte
+  - [ ] 7c. Differentialgleichungen
 - [ ] 8. Stufe 5, Teil 2: komplexe Zahlen, Determinanten, Vektoren, Additionstheoreme
 - [ ] 9. Gezieltes Üben, Feinschliff, Abschluss von M3
 
@@ -503,3 +506,15 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   Fehler, zwei neue Lernkarten („Substitution", „$pq$-Formel"). Nebenbei:
   Wurzeln aus Brüchen in Ergebnissen ohne Bruch unter der Wurzel
   ($\frac{\sqrt{a^2 + 4b}}{2}$), das korrigiert auch ein Ergebnis der Stufe 3.
+- 06.11.2026: M3 Schritt 7a fertig, Stufe 5 von „Gleichungen umstellen" ist
+  spielbar (geführt und frei): In jeder Aufgabe steckt eine Ableitung oder ein
+  Integral, das erst ausgerechnet wird („Was steht da eigentlich?"), dann wird
+  umgestellt. Das Werkzeug steht allein, mit Schalen, in einem Bruch, unter
+  einer Wurzel, im $\ln$, oder zwei Werkzeuge stehen in einer Gleichung. 185
+  Formen unter 200 Aufgaben, im Mittel 8,6 Umformungen. Die Engine rechnet
+  Ableitungen mit „Ableiten", Integrale über Partialbrüche, eine Tafel von
+  Stammfunktionen und das Einsetzen der Grenzen; zur Gegenprobe rechnet sie
+  jedes Werkzeug numerisch aus. Sieben neue typische Fehler beim Integrieren,
+  dazu alle Fehler aus „Ableiten"; neue Lernkarte „Stammfunktionen und
+  Partialbrüche". Browser-Tests mit 5-568 (das Integral aus dem Plan, geführt)
+  und 5-83 (Ableitung, frei). Die Aufgaben der Stufen 1 bis 4 bleiben gleich.
