@@ -7,7 +7,7 @@ Stand: 06.11.2026
 | M1 | Grundgerüst + Ableitungsregeln (beide Modi, 5 Stufen, Erklärungen, Lernkarten, Fortschritt) | fertig |
 | M2 | Brüche (Bruchrechnung, Bruchterme kürzen und zusammenfassen, Doppelbrüche); App für mehrere Themen | fertig |
 | M2b | Brüche nachschärfen: viel mehr Abwechslung (Baukasten statt fester Vorlagen, keine Form doppelt), deutlich schwerer, Stufe 5 auf Profi-Niveau mit Partialbruchzerlegung und Brüchen aus späteren Kapiteln (komplexe Zahlen, Grenzwerte, Teleskopsummen, Hyperbelfunktionen) | fertig |
-| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | in Arbeit: 4. Fassung des Plans (Baukasten und Abwechslung, ab Stufe 3 verschachtelter); Schritte 4, 5 und 6 fertig (Stufe 4 komplett), Schritt 7a fertig (Stufe 5 mit Ableitungen und Integralen spielbar), als Nächstes 7b |
+| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | in Arbeit: 4. Fassung des Plans (Baukasten und Abwechslung, ab Stufe 3 verschachtelter); Schritte 4, 5 und 6 fertig (Stufe 4 komplett), Schritte 7a und 7b fertig (Stufe 5 mit Ableitungen, Integralen, Summen, Reihen und Grenzwerten), als Nächstes 7c |
 | M4 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
 | M5 | weitere Themen aus Mathematik MB1 | offen |
 | M6 | Physik: Formeln mit Einheiten (Formeln umstellen mit Zeichen der Physik; Aufgaben lösen: Formel wählen, umstellen, Werte mit Einheiten einsetzen) | offen |
@@ -74,7 +74,7 @@ Details: [PLAN-M3.md](PLAN-M3.md) (4. Fassung, freigegeben am 05.11.2026 mit dei
   - [x] 6c. Substitution und $pq$-Formel mit Scheinlösungen
 - [ ] 7. Stufe 5, Teil 1: Ableitungen, Integrale, Reihen, Grenzwerte, Differentialgleichungen, in drei Teilen
   - [x] 7a. Ableitungen und Integrale (mit Partialbrüchen)
-  - [ ] 7b. Summen, Reihen und Grenzwerte
+  - [x] 7b. Summen, Reihen und Grenzwerte
   - [ ] 7c. Differentialgleichungen
 - [ ] 8. Stufe 5, Teil 2: komplexe Zahlen, Determinanten, Vektoren, Additionstheoreme
 - [ ] 9. Gezieltes Üben, Feinschliff, Abschluss von M3
@@ -518,3 +518,15 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   dazu alle Fehler aus „Ableiten"; neue Lernkarte „Stammfunktionen und
   Partialbrüche". Browser-Tests mit 5-568 (das Integral aus dem Plan, geführt)
   und 5-83 (Ableitung, frei). Die Aufgaben der Stufen 1 bis 4 bleiben gleich.
+- 06.11.2026: M3 Schritt 7b fertig: In Stufe 5 von „Gleichungen umstellen"
+  stecken jetzt auch geometrische Summen (gesucht ist dann die Anzahl $n$),
+  geometrische Reihen (auch abgeleitet und integriert) und Grenzwerte, die auf
+  $e^{\square}$ führen; eine Reihe kann in einer Ableitung oder einem Integral
+  stecken, ein Grenzwert einer Ableitung gegenüberstehen. 40 von 100 Nummern der
+  Stufe 5, die übrigen behalten ihre Aufgabe. 193 Formen unter 200 Aufgaben, im
+  Mittel 8,5 Umformungen. Sieben neue typische Fehler, zwei neue Lernkarten
+  („Geometrische Summe und Reihe", „Grenzwert $\left(1 + \frac{x}{n}\right)^n \to
+  e^x$"). Zur Gegenprobe rechnet die Engine Summen, Reihen und Grenzwerte
+  numerisch. Die Aufgaben der Stufen 1 bis 4 bleiben gleich (bei der Normalform
+  steht das Minus jetzt vor dem Bruch). Browser-Tests mit 5-120 (Grenzwert,
+  geführt) und 5-484 (Summe nach $n$, frei).

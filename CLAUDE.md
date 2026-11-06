@@ -13,7 +13,7 @@ den Nutzer zugeschnitten: Maschinenbau, 1. Semester, THU, „Mathematik MB1".
   4. Fassung, freigegeben): erst Baukasten und Abwechslung in den Stufen 1
   bis 3 wie bei den Brüchen (Schritte 4 und 5; ab Stufe 3 Kerne ineinander,
   Test der Umformungen), dann die Stufen 4 und 5 (Schritte 6 bis 9; Stufe 4
-  in drei Teilen, 6a bis 6c fertig; Schritt 7 in drei Teilen, 7a fertig).
+  in drei Teilen, 6a bis 6c fertig; Schritt 7 in drei Teilen, 7a und 7b fertig).
   Abgeschlossen:
   [docs/PLAN-M1.md](docs/PLAN-M1.md), [docs/PLAN-M2.md](docs/PLAN-M2.md),
   [docs/PLAN-M2b.md](docs/PLAN-M2b.md) (Brüche nachschärfen: Abwechslung und
@@ -104,11 +104,15 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     wie geschrieben) mit Bauhelfern; Konstanten $e$, $\pi$ und $\mathrm{i}$
     (`IMAG`, gerechnet nur in der Bruch-Engine, reell ausgewertet `NaN`);
     Werkzeuge der Stufe 5 beim Umstellen (`Tool`: Ableitung, bestimmtes
-    Integral, Stammfunktion mit Grenzen) als Buchstabe mit eigenem Namen und
-    `tool` (`Var.tool`): gesetzt von `print.ts` (`toolLatex`), numerisch
+    Integral, Stammfunktion mit Grenzen, endliche Summe, Reihe, Grenzwert
+    $n \to \infty$) als Buchstabe mit eigenem Namen und
+    `tool` (`Var.tool`): gesetzt von `print.ts` (`toolLatex`; Summe, Reihe und
+    Grenzwert in Klammern, wenn danach noch etwas steht), numerisch
     ausgewertet von `evaluate.ts` (Ableitung mit Richardson-Extrapolation,
-    Integral adaptiv mit Gauß-Legendre, als Gegenprobe), `contains` und
-    `variablesOf` sehen ihre freien Buchstaben
+    Integral adaptiv mit Gauß-Legendre, Summe Summand für Summand bzw.
+    geometrisch fortgesetzt, Reihe über Teilsummen, Grenzwert mit großen $n$
+    und Neville-Extrapolation, als Gegenprobe), `contains` und
+    `variablesOf` sehen ihre freien Buchstaben (`toolBound`, `toolLimits`)
   - `expr/normalize.ts`: *Normalform* zum Vergleichen; `expr/display.ts`:
     `simplify` = Normalform als *Anzeigeform* (schöne Schreibweise)
   - `expr/print.ts`: LaTeX in deutscher Schreibweise; `expr/evaluate.ts`,
@@ -174,7 +178,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     mit Klammer im Quadrat und zwei Wurzeln; Stufe 4: „e-Funktion und
     Logarithmus", „Logarithmus- und Potenzgesetze", „Umkehrfunktionen",
     „Winkel- und Hyperbelfunktionen", „Substitution", „$pq$-Formel"; Stufe 5:
-    „Stammfunktionen und Partialbrüche"),
+    „Stammfunktionen und Partialbrüche", „Geometrische Summe und Reihe",
+    „Grenzwert $\left(1 + \frac{x}{n}\right)^n \to e^x$"),
     durchgerechnete Beispiele in `rearrangeExample.ts`
   - `guided/plan.ts`: Schrittplaner für den geführten Modus (Regelwahl, dann je
     Summand ein Schritt; Produkt/Quotient: u', v', Einsetzen; Kette: äußere,
@@ -216,7 +221,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     substituieren, alles nach links, Normalform, $pq$-Formel, zurück einsetzen;
     Stufe 5: erst „Was steht da eigentlich?" mit den Werkzeug-Schritten als
     „Was kommt heraus?" (beim Ableiten die Fehler und Lernkarten aus
-    „Ableiten");
+    „Ableiten"; beim Grenzwert darf die falsche Gleichung ohne $x$ sein, „1 hoch
+    unendlich ist 1");
     nach der $pq$-Formel „Welche der beiden Lösungen passt?" mit der
     Scheinlösung als falscher Antwort und dem Grund (`rejectReason`); nach dem
     Substituieren sprechen Fragen von $u$ (`step.unknown`);
@@ -317,15 +323,25 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     ausrechnen, dann umstellen, dazu Logarithmen mit und ohne Variable
     zusammenfassen, mal $b$ statt durch $\frac{1}{b}$, Summe vor $x^2$ bei der
     $pq$-Formel, nach $x^2$ auflösen, wenn $x$ nur als $x^2$ vorkommt, Wurzel im
-    Nenner wegmultiplizieren und quadrieren), `tools/` (Stufe 5:
-    `tool.ts` Werkzeuge bauen (`derivativeOf`, `integralOf`, `bracketOf`) und
-    ersetzen, `integrate.ts` Stammfunktionen aus einer Tafel als Faktor mal
-    Term mit typischen Fehlern, Partialbrüche über die Bruch-Engine, Grenzen
-    einsetzen; `steps.ts` Werkzeug-Schritte `derive`, `partial`,
-    `antiderivative`, `bounds` und ihre typischen Fehler, beim Ableiten die
-    aus „Ableiten" mit ihrer Stelle), `check.ts`
+    Nenner wegmultiplizieren und quadrieren; Wege, an denen die Engine vor
+    Teil 7b hängen blieb (Zusammenfassen ohne Änderung, Ausmultiplizieren im
+    Kreis), markiert `solution.novel`, damit ältere Vorlagen ihre Aufgaben
+    behalten; bei der Normalform das Minus vor dem Bruch), `tools/` (Stufe 5:
+    `tool.ts` Werkzeuge bauen (`derivativeOf`, `integralOf`, `bracketOf`,
+    `sumOf`, `seriesOf`, `limitOf`) und ersetzen, das innerste zuerst
+    (`activeTool`: Reihe in einer Ableitung), `integrate.ts` Stammfunktionen
+    aus einer Tafel als Faktor mal Term mit typischen Fehlern, Partialbrüche
+    über die Bruch-Engine, Grenzen einsetzen; `series.ts` Summand als
+    $c \cdot q^k$ (auch $k q^k$, $\frac{q^k}{k}$), geometrische Summe und Reihe,
+    Grenzwert $\left(\frac{n + p}{n + r}\right)^{sn} \to e^{s(p - r)}$, mit
+    typischen Fehlern; `steps.ts` Werkzeug-Schritte `derive`, `partial`,
+    `antiderivative`, `bounds`, `sumFormula`, `series`, `limit` und ihre
+    typischen Fehler, beim Ableiten die aus „Ableiten" mit ihrer Stelle),
+    `check.ts`
     (Prüfstellen: Buchstaben zufällig positiv, Variable aus dem Ergebnis,
     Bedingungen der Aufgabe, Zwischenwerte aus `requires` nicht riesig;
+    mit Summe, Reihe oder Grenzwert nur Stellen, an denen sich die Aufgabe
+    numerisch ausrechnen lässt;
     mit $u$ nach einer Substitution `withSubstitution`;
     Gegenprobe durch Einsetzen), `errorRules.ts`
     (typische Fehler, Ids `eq-…`, beim Zusammenfassen die aus „Brüche";
@@ -359,10 +375,16 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     `buildLevel5Tools` (Teil 7a): eine Ableitung oder ein Integral (auch mit
     Partialbrüchen) allein mit Schalen, im Bruch mit einem Baustein derselben
     Art, unter einer Wurzel oder im $\ln$, oder zwei Werkzeuge mit demselben
-    Baustein, Integrationsvariable $t$; Filter in
+    Baustein, Integrationsvariable $t$; Teil 7b `buildLevel5Series` (eigene
+    Vorlage mit Anteil 40 %): geometrische Reihen in $x$, auch abgeleitet und
+    integriert, Grenzwerte auf $e^{\square}$, endliche Summen nach der Anzahl
+    $n$, mit Schalen (Werkzeug hinten), im Bruch, unter Wurzel oder $\ln$, Reihe
+    in einer Ableitung oder einem Integral, Grenzwert gleich Ableitung;
+    Summenindex $k$, Grenzwert über $n$; Filter in
     `rearrangeTerms.ts`: Mindestzahl der Umformungen je Stufe, Doppelbrüche
     erst ab Stufe 3, Ergebnis höchstens 90 bzw. ab Stufe 4 120 Zeichen (Stufe
-    5: 100, ohne Wurzel aus einer Summe mit Brüchen, mit Buchstaben),
+    5: 100, ohne Wurzel aus einer Summe mit Brüchen, mit Buchstaben; Länge der
+    Aufgabe mit $\sum$ und $\lim$ so breit wie drei Zeichen),
     Gegenprobe der Aufgabe an den Prüfstellen), `focus.ts` und `fractionFocus.ts` (Aufgaben für
     gezieltes Üben; Brüche: reihum durch die Stufen, je Runde zwölf Versuche,
     seltene Fehler in ihrer Vorlage `focus`, `likelyFractionTemplate`;

@@ -1,7 +1,8 @@
 import { subterms } from '../expr/compare.ts'
 import { type Expr, E, PI, add, div, eq, fn, ln, log, mul, neg, num, pow, sqrt, variable } from '../expr/types.ts'
 import type { Condition, RearrangeTask } from '../rearrange/task.ts'
-import { derivativeOf, integralOf } from '../rearrange/tools/tool.ts'
+import { limitParts, limitValue } from '../rearrange/tools/series.ts'
+import { derivativeOf, integralOf, limitOf, seriesOf, sumOf } from '../rearrange/tools/tool.ts'
 import type { Rng } from '../random/rng.ts'
 
 // Baukasten für Umstell-Aufgaben (M3, 4. Fassung; docs/PLAN-M3.md, „Abwechslung"). Jede Gleichung
@@ -1330,6 +1331,244 @@ export function buildLevel5Tools(rng: Rng): KitTask {
   const total = LEVEL5_TOOL_CORES.reduce((s, [w]) => s + w, 0)
   let r = rng.next() * total
   const [, build] = LEVEL5_TOOL_CORES.find(([w]) => (r -= w) < 0) ?? LEVEL5_TOOL_CORES[0]
+  const built = build(rng, n)
+  const other = built.other ?? otherSide(rng, n)
+  const equationFor = built.other ? (rng.chance(0.75) ? eq(built.side, other) : eq(other, built.side)) : equation(rng, built.side, other)
+  return { task: { equation: equationFor, target: 'x', conditions: built.conditions ?? [] }, label: built.label }
+}
+
+// --- Stufe 5, Teil 7b: Summen, Reihen und Grenzwerte (docs/PLAN-M3.md, „Stufe 5 neu") ---
+//
+// Die Summe läuft über k, der Grenzwert über n; beide Buchstaben kommen sonst nicht vor. Bei der
+// endlichen geometrischen Summe ist die Anzahl n der Summanden gesucht, sonst x. Wie in Teil 7a steht
+// das Werkzeug allein mit Schalen, in einem Bruch mit einem Baustein derselben Art, unter einer Wurzel
+// oder im \ln, steckt in einer Ableitung oder einem Integral (Reihe abgeleitet, Reihe integriert), oder
+// ein Grenzwert steht einer Reihe gegenüber.
+
+const K = variable('k')
+const NN = variable('n')
+
+// Buchstaben ohne k, n und t (Summe, Grenzwert, Integral)
+function seriesNames(rng: Rng, target = 'x'): ToolNames {
+  const family = rng.pick(FAMILIES.filter((f) => !f.includes('t'))).filter((l) => l !== 'k' && l !== 'n')
+  let i = 0
+  return {
+    unknown: variable(target),
+    target,
+    letter: () => variable(family[Math.min(i++, family.length - 1)]),
+    mark: () => i,
+    reset: (at) => {
+      i = at
+    },
+  }
+}
+
+const below = (x: Expr, bound: Expr): Condition => ({ lhs: x, rel: '<', rhs: bound })
+const above = (x: Expr, bound: Expr): Condition => ({ lhs: x, rel: '>', rhs: bound })
+
+// Faktor vor dem Summanden: manchmal ein Buchstabe oder eine Zahl (aq^k, 3q^k)
+const seriesFactor = (rng: Rng, n: Names, e: Expr): Expr => {
+  const r = rng.next()
+  if (r < 0.2) return mul(n.letter(), e)
+  if (r < 0.3) return mul(k(rng, 2, 5), e)
+  return e
+}
+
+// Geometrische Reihen in x, auch abgeleitet (k q^k) und integriert (\frac{q^k}{k}), mit 0 < q < 1
+function seriesCore(rng: Rng, n: Names): ToolCore {
+  const x = n.unknown
+  const a = n.letter()
+  const r = rng.next()
+  const start = num(rng.chance(0.5) ? 0 : 1)
+  const s = (body: Expr, label: string, extra: Partial<ToolCore> = {}, from: Expr = start): ToolCore => ({ tool: seriesOf(body, from), label: `Reihe: ${label}`, ...extra })
+  const ekx = (m: number) => pow(E, neg(m === 1 ? mul(K, x) : mul(num(m), K, x)))
+  if (r < 0.15) return s(seriesFactor(rng, n, pow(div(x, a), K)), '$\\left(\\frac{x}{a}\\right)^k$', { conditions: [below(x, a)] })
+  if (r < 0.28) return s(seriesFactor(rng, n, pow(div(a, x), K)), '$\\left(\\frac{a}{x}\\right)^k$', { conditions: [above(x, a)] })
+  if (r < 0.42) {
+    const m = rng.chance(0.7) ? 1 : 2
+    return s(seriesFactor(rng, n, ekx(m)), '$e^{-kx}$', { partner: pow(E, m === 1 ? x : mul(num(m), x)) })
+  }
+  if (r < 0.52) return s(seriesFactor(rng, n, pow(div(x, plus(x, a)), K)), '$\\left(\\frac{x}{x + a}\\right)^k$')
+  if (r < 0.6) return s(seriesFactor(rng, n, pow(div(a, plus(x, a)), K)), '$\\left(\\frac{a}{x + a}\\right)^k$')
+  if (r < 0.8) {
+    // abgeleitet: \sum_{k=1}^{\infty} kq^k = \frac{q}{(1 - q)^2}, danach quadratisch
+    const pick = rng.next()
+    if (pick < 0.4) return s(mul(K, pow(x, K)), 'abgeleitet, danach quadratisch', { conditions: [below(x, num(1))] }, num(1))
+    if (pick < 0.75) return s(mul(K, pow(div(x, a), K)), 'abgeleitet mit $\\frac{x}{a}$, danach quadratisch', { conditions: [below(x, a)] }, num(1))
+    return s(mul(K, ekx(1)), 'abgeleitet mit $e^{-x}$, danach quadratisch', {}, num(1))
+  }
+  // integriert: \sum_{k=1}^{\infty} \frac{q^k}{k} = -\ln(1 - q)
+  const pick = rng.next()
+  if (pick < 0.35) return s(div(pow(x, K), K), 'integriert', { conditions: [below(x, num(1))] }, num(1))
+  if (pick < 0.7) return s(div(pow(x, K), mul(K, pow(a, K))), 'integriert mit $\\frac{x}{a}$', { conditions: [below(x, a)] }, num(1))
+  return s(div(ekx(1), K), 'integriert mit $e^{-x}$', {}, num(1))
+}
+
+// Grenzwerte, die auf e^{□} führen: \left(1 + \frac{x}{n}\right)^{sn}, \left(\frac{n + x}{n - x}\right)^n, …;
+// Partner: e^{…} mit derselben Hochzahl wie der Grenzwert
+function limitCore(rng: Rng, n: Names): ToolCore {
+  const x = n.unknown
+  const r = rng.next()
+  const exponent = () => (rng.chance(0.6) ? NN : rng.chance(0.6) ? mul(k(rng, 2, 3), NN) : letters(n.letter(), NN))
+  const l = (base: Expr, exp: Expr, label: string): ToolCore => {
+    const tool = limitOf(pow(base, exp))
+    const parts = limitParts(pow(base, exp), 'n')
+    const value = parts && limitValue(parts)
+    return { tool, label: `Grenzwert: ${label}`, ...(value && value.kind === 'pow' ? { partner: value } : {}) }
+  }
+  if (r < 0.28) return l(plus(num(1), div(x, NN)), exponent(), '$\\left(1 + \\frac{x}{n}\\right)^{sn}$')
+  if (r < 0.38) return l(minus(num(1), div(x, NN)), exponent(), '$\\left(1 - \\frac{x}{n}\\right)^{sn}$')
+  if (r < 0.47) return l(plus(num(1), div(letters(n.letter(), x), NN)), NN, '$\\left(1 + \\frac{ax}{n}\\right)^n$')
+  if (r < 0.55) return l(plus(num(1), div(x, letters(n.letter(), NN))), NN, '$\\left(1 + \\frac{x}{an}\\right)^n$')
+  if (r < 0.65) return l(plus(num(1), div(rng.chance(0.6) ? n.letter() : num(1), NN)), mul(x, NN), '$x$ in der Hochzahl')
+  if (r < 0.82) return l(div(plus(NN, x), minus(NN, x)), exponent(), '$\\left(\\frac{n + x}{n - x}\\right)^n$')
+  if (r < 0.92) return l(div(plus(NN, n.letter()), plus(NN, x)), exponent(), '$\\left(\\frac{n + a}{n + x}\\right)^n$')
+  return l(div(NN, plus(NN, x)), exponent(), '$\\left(\\frac{n}{n + x}\\right)^n$')
+}
+
+// Endliche geometrische Summe, gesucht ist die Anzahl n: \sum_{k=0}^{n-1} aq^k = y mit q > 1
+function sumCore(rng: Rng, n: Names): ToolCore {
+  const N = n.unknown
+  const [lower, upper] = rng.pick([
+    [0, minus(N, num(1))],
+    [1, N],
+    [0, N],
+  ] as const)
+  const r = rng.next()
+  let body: Expr
+  let conditions: Condition[] = []
+  let label: string
+  if (r < 0.45) {
+    const q = n.letter()
+    body = pow(q, K)
+    conditions = [above(q, num(1))]
+    label = '$q^k$'
+  } else if (r < 0.75) {
+    body = pow(num(rng.pick([2, 3])), K)
+    label = '$2^k$, $3^k$'
+  } else {
+    body = pow(E, letters(n.letter(), K))
+    label = '$e^{ak}$'
+  }
+  const c = rng.next()
+  const withFactor = c < 0.35 ? mul(n.letter(), body) : c < 0.55 ? mul(k(rng, 2, 5), body) : body
+  return { tool: sumOf(withFactor, num(lower), upper), conditions, label: `Summe: ${label}, gesucht $n$` }
+}
+
+const seriesOrLimit = (rng: Rng, n: Names): ToolCore => (rng.chance(0.55) ? seriesCore(rng, n) : limitCore(rng, n))
+
+// Schalen um eine Summe oder einen Grenzwert, das Werkzeug bleibt hinten (b + \sum …, nicht \sum … + b:
+// dort wäre unklar, ob b noch zum Summanden gehört)
+function trailingShells(rng: Rng, core: Expr, n: Names, max: number, min = 0): { e: Expr; count: number } {
+  const count = rng.int(min, max)
+  let e = core
+  let additive = rng.chance(0.5)
+  for (let i = 0; i < count; i++) {
+    let kind = rng.pick(additive ? ADDITIVE : MULTIPLICATIVE)
+    if (kind === 'divide' && hasFraction(e)) kind = 'times'
+    e = kind === 'plus' ? plus(summand(rng, n), e) : kind === 'minus' ? minus(summand(rng, n), e) : shell(rng, e, n, kind)
+    additive = !additive
+  }
+  return { e, count }
+}
+
+// Werkzeug allein, mit Schalen
+function seriesShells(rng: Rng, n: ToolNames): Built {
+  const c = seriesOrLimit(rng, n)
+  const { e, count } = trailingShells(rng, c.tool, n, 3, 1)
+  return { side: e, conditions: c.conditions, label: `${c.label}, ${count} Schalen` }
+}
+
+// Werkzeug im Bruch mit einem Baustein derselben Art: \frac{\lim_{n \to \infty}(1 + \frac{x}{n})^{2n}}{e^{2x} + a} = y
+function seriesFraction(rng: Rng, n: ToolNames): Built {
+  const start = n.mark()
+  let c = seriesOrLimit(rng, n)
+  for (let i = 0; i < 6 && !c.partner; i++) {
+    n.reset(start)
+    c = seriesOrLimit(rng, n)
+  }
+  const partner = c.partner ?? n.unknown
+  const other = plus(maybeTimes(rng, n, partner, 0.3), constant(rng, n))
+  const side = rng.chance(0.7) ? div(c.tool, other) : div(other, c.tool)
+  return { side, conditions: c.conditions, label: `${c.label}, im Bruch` }
+}
+
+// Werkzeug unter einer Wurzel oder im \ln
+function seriesInside(rng: Rng, n: ToolNames): Built {
+  const c = seriesOrLimit(rng, n)
+  const inner = rng.chance(0.4) ? plus(n.letter(), c.tool) : c.tool
+  const side = rng.chance(0.5) ? sqrt(inner) : ln(inner)
+  return { side, conditions: c.conditions, label: `${c.label}, ${side.kind === 'root' ? 'unter der Wurzel' : 'im $\\ln$'}` }
+}
+
+// Reihe in einer Ableitung oder einem Integral: \frac{\mathrm{d}}{\mathrm{d}x}\sum_{k=1}^{\infty} \frac{x^k}{k},
+// \int_0^x \sum_{k=0}^{\infty} t^k\,\mathrm{d}t
+function nestedSeries(rng: Rng, n: ToolNames): Built {
+  const x = n.unknown
+  const a = n.letter()
+  const r = rng.next()
+  let tool: Expr
+  let conditions: Condition[]
+  let label: string
+  if (r < 0.5) {
+    const pick = rng.next()
+    const inner =
+      pick < 0.4 ? seriesOf(div(pow(x, K), K), num(1)) : pick < 0.7 ? seriesOf(div(pow(x, K), mul(K, pow(a, K))), num(1)) : seriesOf(pow(div(x, a), K), num(rng.chance(0.5) ? 0 : 1))
+    tool = derivativeOf(inner)
+    conditions = [below(x, pick < 0.4 ? num(1) : a)]
+    label = 'Reihe abgeleitet'
+  } else {
+    const pick = rng.next()
+    const body = pick < 0.4 ? pow(T, K) : pick < 0.75 ? pow(div(T, a), K) : div(pow(T, K), pow(a, K))
+    tool = integralOf(seriesOf(body, num(0)), num(0), x)
+    conditions = [below(x, pick < 0.4 ? num(1) : a)]
+    label = 'Reihe integriert'
+  }
+  const { e, count } = someShells(rng, tool, n, 2)
+  return { side: e, conditions, label: `${label}, ${count} Schalen` }
+}
+
+// Grenzwert gegen Ableitung, danach quadratisch in e^x:
+// \lim_{n \to \infty}\left(1 + \frac{x}{n}\right)^{2n} = \frac{\mathrm{d}}{\mathrm{d}x}\left(ae^x + bx\right)
+function limitAndDerivative(rng: Rng, n: ToolNames): Built {
+  const x = n.unknown
+  const r = rng.next()
+  const body =
+    r < 0.4 ? pow(plus(num(1), div(x, NN)), mul(num(2), NN)) : r < 0.7 ? pow(plus(num(1), div(mul(num(2), x), NN)), NN) : pow(div(plus(NN, x), minus(NN, x)), NN)
+  const a = n.letter()
+  const ex = pow(E, x)
+  const derivative = rng.chance(0.6) ? derivativeOf(plus(mul(a, ex), letters(n.letter(), x))) : plus(derivativeOf(mul(a, ex)), n.letter())
+  return { side: limitOf(body), other: derivative, label: 'Grenzwert gleich Ableitung, danach quadratisch' }
+}
+
+// Endliche Summe nach n, mit Schalen, unter einer Wurzel oder im \ln
+function sumShells(rng: Rng, n: ToolNames): Built {
+  const c = sumCore(rng, n)
+  if (rng.chance(0.2)) return { side: ln(c.tool), conditions: c.conditions, label: `${c.label}, im $\\ln$` }
+  const { e, count } = trailingShells(rng, c.tool, n, 2)
+  return { side: e, conditions: c.conditions, label: `${c.label}, ${count} Schalen` }
+}
+
+const LEVEL5_SERIES_CORES: readonly ToolBuild[] = [
+  [30, seriesShells],
+  [14, seriesFraction],
+  [12, seriesInside],
+  [12, nestedSeries],
+  [6, limitAndDerivative],
+]
+
+// Gesucht ist x, bei der endlichen Summe (Anteil 15 %) die Anzahl n
+export function buildLevel5Series(rng: Rng): KitTask {
+  if (rng.chance(0.15)) {
+    const n = seriesNames(rng, 'n')
+    const built = sumShells(rng, n)
+    const other = otherSide(rng, n)
+    return { task: { equation: equation(rng, built.side, other), target: 'n', conditions: built.conditions ?? [] }, label: built.label }
+  }
+  const n = seriesNames(rng)
+  const total = LEVEL5_SERIES_CORES.reduce((s, [w]) => s + w, 0)
+  let r = rng.next() * total
+  const [, build] = LEVEL5_SERIES_CORES.find(([w]) => (r -= w) < 0) ?? LEVEL5_SERIES_CORES[0]
   const built = build(rng, n)
   const other = built.other ?? otherSide(rng, n)
   const equationFor = built.other ? (rng.chance(0.75) ? eq(built.side, other) : eq(other, built.side)) : equation(rng, built.side, other)

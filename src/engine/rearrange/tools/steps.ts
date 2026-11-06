@@ -7,14 +7,18 @@ import { type WrongAnswer, wrongAnswers } from '../../derive/errorRules.ts'
 import { type Equation, type Expr, add, div, mul, neg, num } from '../../expr/types.ts'
 import { isOne, ratNeg, ratSign } from '../../rational.ts'
 import { type IntegralMistake, antiderivative, antiderivativeExpr, antiderivativeTerms, atBound, partialFractions } from './integrate.ts'
-import { type ToolVar, bracketOf, integralOf, replaceTool, toolsIn } from './tool.ts'
+import { type LimitMistake, type SeriesMistake, geometricParts, limitParts, limitValue, seriesValue, sumValue } from './series.ts'
+import { type ActiveTool, type ToolVar, activeTool, bracketOf, integralOf } from './tool.ts'
 
 // Werkzeug-Schritte der Stufe 5: Bevor umgestellt wird, wird das Werkzeug ausgerechnet, Schritt für
 // Schritt und jeweils mit der ganzen Gleichung danach:
 // - Ableitung: ableiten (Engine aus „Ableiten", zusammengefasst)
 // - Integral: in Partialbrüche zerlegen (wenn nötig), Stammfunktion mit Grenzen, Grenzen einsetzen
+// - Summe, Reihe: Formel der geometrischen Summe bzw. Reihe (auch abgeleitet und integriert)
+// - Grenzwert: \lim_{n \to \infty}\left(1 + \frac{p}{n}\right)^{sn} = e^{sp}
+// Steckt ein Werkzeug in einem anderen (Reihe in einer Ableitung), kommt das innere zuerst.
 
-export type ToolStepKind = 'derive' | 'partial' | 'antiderivative' | 'bounds'
+export type ToolStepKind = 'derive' | 'partial' | 'antiderivative' | 'bounds' | 'sumFormula' | 'series' | 'limit'
 
 export type ToolDraft = { readonly kind: ToolStepKind; readonly operand?: Expr; readonly after: Equation }
 
@@ -24,26 +28,48 @@ export type ToolCandidate = { readonly id: string; readonly after: Equation; rea
 
 // Nächster Werkzeug-Schritt; null, wenn kein Werkzeug mehr dasteht oder es sich nicht ausrechnen lässt
 export function nextToolStep(e: Equation): ToolDraft | null {
-  const [tool] = toolsIn(e)
-  if (!tool) return null
-  return toolDraft(e, tool)
+  const active = activeTool(e)
+  return active && toolDraft(active)
 }
 
-function toolDraft(e: Equation, tool: ToolVar): ToolDraft | null {
+function toolDraft({ tool, put }: ActiveTool): ToolDraft | null {
   const t = tool.tool
+  const value = (kind: ToolStepKind, v: Expr | null): ToolDraft | null => (v ? { kind, operand: t.body, after: put(v) } : null)
   switch (t.kind) {
     case 'derivative':
-      return { kind: 'derive', operand: t.body, after: replaceTool(e, tool, derive(t.body, t.v).result) }
+      return value('derive', derive(t.body, t.v).result)
     case 'integral': {
       const decomposed = partialFractions(t.body, t.v)
-      if (decomposed) return { kind: 'partial', operand: t.body, after: replaceTool(e, tool, integralOf(decomposed, t.lower, t.upper, t.v)) }
+      if (decomposed) return value('partial', integralOf(decomposed, t.lower, t.upper, t.v))
       const f = antiderivative(t.body, t.v)
-      if (!f) return null
-      return { kind: 'antiderivative', operand: t.body, after: replaceTool(e, tool, bracketOf(antiderivativeExpr(f, t.v), t.lower, t.upper, t.v)) }
+      return value('antiderivative', f && bracketOf(antiderivativeExpr(f, t.v), t.lower, t.upper, t.v))
     }
     case 'bracket':
-      return { kind: 'bounds', operand: t.body, after: replaceTool(e, tool, boundsValue(t.body, t.v, t.lower, t.upper, null)) }
+      return value('bounds', boundsValue(t.body, t.v, t.lower, t.upper, null))
+    case 'sum':
+    case 'series':
+    case 'limit':
+      return value(SERIES_KIND[t.kind], seriesToolValue(tool.tool, null))
   }
+}
+
+const SERIES_KIND = { sum: 'sumFormula', series: 'series', limit: 'limit' } as const
+
+// Untere Grenze als ganze Zahl
+const integerOf = (e: Expr): number | null => (e.kind === 'num' && e.value.d === 1n ? Number(e.value.n) : null)
+
+// Wert einer Summe, Reihe oder eines Grenzwerts, mit einem typischen Fehler (shift: Anzahl der Summanden
+// um +1 oder -1 verschoben); null, wenn er sich so nicht ausrechnen lässt oder der Fehler hier nicht passt
+function seriesToolValue(t: ToolVar['tool'], mistake: SeriesMistake | LimitMistake | null, shift = 1): Expr | null {
+  if (t.kind === 'limit') {
+    const parts = limitParts(t.body, t.v)
+    return parts && limitValue(parts, mistake as LimitMistake | null)
+  }
+  if (t.kind !== 'sum' && t.kind !== 'series') return null
+  const g = geometricParts(t.body, t.v)
+  const lower = integerOf(t.lower)
+  if (!g || lower === null) return null
+  return t.kind === 'sum' ? sumValue(g, lower, t.upper, mistake as SeriesMistake | null, shift) : seriesValue(g, lower, mistake as SeriesMistake | null)
 }
 
 // --- Grenzen einsetzen ---
@@ -124,34 +150,52 @@ function positiveEnvs(exprs: readonly Expr[], seed: string, count = 40): Env[] {
 const INTEGRAL_MISTAKES: readonly IntegralMistake[] = ['eq-int-inner-factor', 'eq-int-derived', 'eq-int-power', 'eq-int-sign']
 
 // Falsche Gleichungen nach einem Werkzeug-Schritt (before: Gleichung davor)
+const SERIES_MISTAKES: readonly SeriesMistake[] = ['eq-sum-count', 'eq-series-start', 'eq-series-sign', 'eq-series-not-geometric']
+const LIMIT_MISTAKES: readonly LimitMistake[] = ['eq-lim-one', 'eq-lim-exponent', 'eq-lim-denominator']
+
 export function toolMistakes(kind: ToolStepKind, before: Equation): ToolCandidate[] {
-  const [tool] = toolsIn(before)
-  if (!tool) return []
+  const active = activeTool(before)
+  if (!active) return []
+  const { tool, put } = active
   const t = tool.tool
   const out: ToolCandidate[] = []
   if (kind === 'derive' && t.kind === 'derivative') {
     const correct = derive(t.body, t.v)
     for (const w of wrongAnswers(t.body, correct, positiveEnvs([t.body, correct.result], `ableiten:${key(t.body)}`))) {
-      out.push({ id: w.errorRule.id, after: replaceTool(before, tool, w.result), derive: w })
+      out.push({ id: w.errorRule.id, after: put(w.result), derive: w })
     }
   }
   if (kind === 'partial' && t.kind === 'integral') {
     const wrong = partialFractions(t.body, t.v, true)
-    if (wrong) out.push({ id: 'eq-partial-factor', after: replaceTool(before, tool, integralOf(wrong, t.lower, t.upper, t.v)) })
+    if (wrong) out.push({ id: 'eq-partial-factor', after: put(integralOf(wrong, t.lower, t.upper, t.v)) })
   }
   if (kind === 'antiderivative' && t.kind === 'integral') {
     const count = antiderivativeTerms(t.body, t.v)
     for (const id of INTEGRAL_MISTAKES) {
       for (let index = 0; index < count; index++) {
         const f = antiderivative(t.body, t.v, { id, index })
-        if (f) out.push({ id, after: replaceTool(before, tool, bracketOf(antiderivativeExpr(f, t.v), t.lower, t.upper, t.v)) })
+        if (f) out.push({ id, after: put(bracketOf(antiderivativeExpr(f, t.v), t.lower, t.upper, t.v)) })
       }
     }
   }
   if (kind === 'bounds' && t.kind === 'bracket') {
-    out.push({ id: 'eq-int-bounds-swapped', after: replaceTool(before, tool, boundsValue(t.body, t.v, t.lower, t.upper, 'eq-int-bounds-swapped')) })
+    out.push({ id: 'eq-int-bounds-swapped', after: put(boundsValue(t.body, t.v, t.lower, t.upper, 'eq-int-bounds-swapped')) })
     if (!lowerIsZero(t.body, t.v, t.lower)) {
-      out.push({ id: 'eq-int-lower-forgotten', after: replaceTool(before, tool, boundsValue(t.body, t.v, t.lower, t.upper, 'eq-int-lower-forgotten')) })
+      out.push({ id: 'eq-int-lower-forgotten', after: put(boundsValue(t.body, t.v, t.lower, t.upper, 'eq-int-lower-forgotten')) })
+    }
+  }
+  if ((kind === 'sumFormula' && t.kind === 'sum') || (kind === 'series' && t.kind === 'series')) {
+    for (const id of SERIES_MISTAKES) {
+      for (const shift of id === 'eq-sum-count' ? [1, -1] : [1]) {
+        const v = seriesToolValue(t, id, shift)
+        if (v) out.push({ id, after: put(v) })
+      }
+    }
+  }
+  if (kind === 'limit' && t.kind === 'limit') {
+    for (const id of LIMIT_MISTAKES) {
+      const v = seriesToolValue(t, id)
+      if (v) out.push({ id, after: put(v) })
     }
   }
   return out

@@ -71,7 +71,25 @@ export function toolLatex(tool: Tool): string {
     }
     case 'bracket':
       return `\\left[${toLatex(tool.body)}\\right]_{${toLatex(tool.lower)}}^{${toLatex(tool.upper)}}`
+    case 'sum':
+      return `\\sum_{${tool.v}=${toLatex(tool.lower)}}^{${toLatex(tool.upper)}} ${summandLatex(tool.body)}`
+    case 'series':
+      return `\\sum_{${tool.v}=${toLatex(tool.lower)}}^{\\infty} ${summandLatex(tool.body)}`
+    case 'limit':
+      return `\\lim_{${tool.v} \\to \\infty} ${summandLatex(tool.body)}`
   }
+}
+
+// Rumpf einer Summe oder eines Grenzwerts: eine Summe oder ein Minus vorn in Klammern
+const summandLatex = (body: Expr) => (body.kind === 'add' || isNegative(body) ? `\\left(${toLatex(body)}\\right)` : toLatex(body))
+
+// Summe, Reihe und Grenzwert sind nach rechts offen: \sum_{k=0}^{\infty} q^k + b ließe sich auch als
+// \sum (q^k + b) lesen. Steht danach noch etwas, kommen sie in Klammern.
+function endsOpen(e: Expr): boolean {
+  if (e.kind === 'var') return e.tool !== undefined && (e.tool.kind === 'sum' || e.tool.kind === 'series' || e.tool.kind === 'limit')
+  if (e.kind === 'neg') return endsOpen(e.arg)
+  if (e.kind === 'mul') return e.factors.length > 0 && endsOpen(e.factors[e.factors.length - 1])
+  return false
 }
 
 export function equationToLatex(equation: Equation): string {
@@ -91,9 +109,9 @@ function printNum(e: Extract<Expr, { kind: 'num' }>): string {
   return `${sign}\\frac{${abs.n}}{${abs.d}}`
 }
 
-// Große Klammern nur, wenn ein Bruch darin steht
+// Große Klammern nur, wenn ein Bruch, eine Summe, ein Integral oder ein Grenzwert darin steht
 function paren(latex: string): string {
-  return latex.includes('\\frac') ? `\\left(${latex}\\right)` : `(${latex})`
+  return /\\frac|\\sum|\\int|\\lim/.test(latex) ? `\\left(${latex}\\right)` : `(${latex})`
 }
 
 // Beginnt der Term mit einem Minus?
@@ -131,15 +149,18 @@ function withoutMinus(e: Expr): Expr {
 function printSum(terms: readonly Expr[]): string {
   return terms
     .map((term, i) => {
+      const last = i === terms.length - 1
       if (isNegative(term)) {
-        const abs = printSummand(withoutMinus(term))
+        const abs = closed(printSummand(withoutMinus(term)), last || !endsOpen(withoutMinus(term)))
         return i === 0 ? `-${abs}` : ` - ${abs}`
       }
-      const text = printSummand(term)
+      const text = closed(printSummand(term), last || !endsOpen(term))
       return i === 0 ? text : ` + ${text}`
     })
     .join('')
 }
+
+const closed = (latex: string, ok: boolean) => (ok ? latex : `\\left(${latex}\\right)`)
 
 function printSummand(term: Expr): string {
   return term.kind === 'add' || isNegative(term) ? paren(toLatex(term)) : toLatex(term)
@@ -157,7 +178,7 @@ function printProduct(rawFactors: readonly Expr[]): string {
     return '-' + printProduct([{ ...first, value: abs }, ...rest])
   }
 
-  const parts = factors.map((f, i) => printFactor(f, i))
+  const parts = factors.map((f, i) => closed(printFactor(f, i), i === factors.length - 1 || !endsOpen(f)))
   let out = parts[0]
   for (let i = 1; i < factors.length; i++) {
     if (needsDot(factors[i - 1], factors[i], parts[i])) out += ' \\cdot '

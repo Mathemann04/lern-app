@@ -27,7 +27,7 @@ export const notationGroups: NotationGroup[] = [
   },
   {
     title: 'Kommt mit Stufe 5 von „Gleichungen umstellen“',
-    note: 'Diese Zeichen gibt es in Aufgaben erst ab Schritt 5 und 6 von Meilenstein 3. So werden sie dann gesetzt.',
+    note: 'Ableitungen, Integrale, Summen, Reihen und Grenzwerte stehen schon in Aufgaben, die übrigen Zeichen kommen mit Schritt 8 von Meilenstein 3. So werden sie gesetzt.',
     samples: [
       { label: 'Ableitung als Rechenzeichen', tex: String.raw`\frac{\mathrm{d}}{\mathrm{d}x}\left(x\sqrt{x^2 + a^2}\right)` },
       { label: 'Integral', tex: String.raw`\int_a^x \frac{\mathrm{d}t}{t(t + b)}` },

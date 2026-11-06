@@ -110,7 +110,8 @@ test('Umstellen: Lernkarten-Ordner mit durchgerechneten Beispielen', async ({ pa
   await expect(page.getByRole('heading', { name: 'Stufe 3' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Stufe 4' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Stufe 5' })).toBeVisible()
-  await expect(page.locator('main li a')).toHaveCount(14)
+  await expect(page.locator('main li a')).toHaveCount(16)
+  await expect(page.getByRole('link', { name: /^Geometrische Summe und Reihe/ })).toBeVisible()
   await expectCleanPage(page, 'Ordner')
 
   await page.getByRole('link', { name: /^Variable im Nenner/ }).click()
@@ -200,8 +201,8 @@ test('Umstellen Stufe 5: Integral mit Partialbrüchen geführt, „Was steht da 
 })
 
 test('Umstellen Stufe 5 frei: Ableitung, Nenner nicht quadriert, dann richtig', async ({ page }) => {
-  // \frac{\mathrm{d}}{\mathrm{d}x}\left(\frac{x^2}{x + a}\right) = y
-  await page.goto('./#/frei/umstellen/5-83')
+  // y = \frac{\mathrm{d}}{\mathrm{d}x}\left(\frac{x^2}{x + a}\right)
+  await page.goto('./#/frei/umstellen/5-6')
   await expect(field(page)).toBeVisible()
   await expectCleanPage(page, 'Start Stufe 5 frei')
   await enter(page, '\\frac{y-2a+\\sqrt{y^2+4a^2}}{2}')
@@ -210,6 +211,33 @@ test('Umstellen Stufe 5 frei: Ableitung, Nenner nicht quadriert, dann richtig', 
   await enter(page, '\\frac{a}{\\sqrt{1-y}}-a')
   await expect(feedback(page)).toContainText('Richtig!')
   await expectCleanPage(page, 'Richtig Stufe 5')
+})
+
+test('Umstellen Stufe 5: Grenzwert geführt, „1 hoch unendlich" als falsche Antwort, mit Lernkarte aus Teil 7b', async ({ page }) => {
+  // m - \lim_{n \to \infty}\left(\frac{n}{n + x}\right)^{3n} = p
+  await page.goto('./#/ueben/umstellen/5-120')
+  await expect(page.getByText('Was steht da eigentlich?')).toBeVisible()
+  await expect(page.locator('#question')).toContainText('Grenzwert')
+  await expectCleanPage(page, 'Start Stufe 5 Grenzwert')
+  // richtig, „1 hoch unendlich ist 1" und „Faktor in der Hochzahl vergessen"
+  await expect(answers(page)).toHaveCount(3)
+  await solveWholeTask(page)
+  await expect(page.getByTestId('result')).toBeVisible()
+  const cards = page.getByRole('navigation', { name: 'Lernkarten zu dieser Aufgabe' })
+  await expect(cards.getByRole('link', { name: /^Grenzwert/ })).toBeVisible()
+  await expectCleanPage(page, 'Stufe 5 Grenzwert')
+})
+
+test('Umstellen Stufe 5 frei: geometrische Summe nach n, Anzahl der Summanden verschoben, dann richtig', async ({ page }) => {
+  // y = \sum_{k=0}^{n - 1} 2^k
+  await page.goto('./#/frei/umstellen/5-484')
+  await expect(field(page)).toBeVisible()
+  await expectCleanPage(page, 'Start Stufe 5 Summe frei')
+  await enter(page, '\\frac{\\ln(y+1)}{\\ln 2}+1')
+  await expect(feedback(page)).toContainText('Anzahl der Summanden')
+  await enter(page, 'n=\\frac{\\ln(y+1)}{\\ln 2}')
+  await expect(feedback(page)).toContainText('Richtig!')
+  await expectCleanPage(page, 'Richtig Stufe 5 Summe')
 })
 
 test('Umstellen Stufe 4: sin² und cos², ein Quadrat ersetzen, Umkehrfunktion, mit beiden Lernkarten aus Teil 6b', async ({ page }) => {

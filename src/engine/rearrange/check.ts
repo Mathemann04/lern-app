@@ -1,3 +1,4 @@
+import { subterms } from '../expr/compare.ts'
 import { type Env, evaluate } from '../expr/evaluate.ts'
 import type { Equation, Expr } from '../expr/types.ts'
 import type { Rng } from '../random/rng.ts'
@@ -15,8 +16,11 @@ const MAX_VALUE = 1e6
 // requires: Terme, die ≥ 0 sein müssen, damit es eine Lösung gibt (aus dem Rechenweg, z. B. beim
 // Quadrieren von Wurzeln); sie schränken nur ein, wo geprüft wird. Auch sie dürfen nicht riesig sein
 // (e^{uy} mit großen Buchstaben), sonst verschluckt die Rundung kleine Unterschiede.
+// Mit einer Summe, Reihe oder einem Grenzwert in der Aufgabe zählen nur Stellen, an denen sich die
+// Aufgabe numerisch ausrechnen lässt (eine Reihe mit q nahe 1 bräuchte zu viele Summanden).
 export function samplePoints(task: RearrangeTask, result: Expr, rng: Rng, count: number, requires: readonly Expr[] = []): Env[] {
   const letters = [...new Set([...taskVariables(task), ...variablesOf(result)])].filter((name) => name !== task.target)
+  const slow = hasSlowTool(task.equation.lhs) || hasSlowTool(task.equation.rhs)
   const points: Env[] = []
   for (let attempt = 0; attempt < count * 80 && points.length < count; attempt++) {
     // gleichmäßig auf logarithmischer Skala: kleine und große Werte gleich oft
@@ -26,6 +30,7 @@ export function samplePoints(task: RearrangeTask, result: Expr, rng: Rng, count:
     if (!(value > 1e-3) || value > MAX_VALUE) continue
     env[task.target] = value
     if (!conditionsHold(task.conditions, env)) continue
+    if (slow && [task.equation.lhs, task.equation.rhs].some((side) => Number.isNaN(evaluate(side, env)))) continue
     if (requires.every((r) => {
       const v = evaluate(r, env)
       return v > 1e-9 && v < MAX_VALUE
@@ -33,6 +38,11 @@ export function samplePoints(task: RearrangeTask, result: Expr, rng: Rng, count:
   }
   return points
 }
+
+// Steckt eine Summe, Reihe oder ein Grenzwert im Term (auch in einem anderen Werkzeug)?
+const SLOW_TOOLS = new Set(['sum', 'series', 'limit'])
+const hasSlowTool = (e: Expr): boolean =>
+  subterms(e).some((s) => s.kind === 'var' && s.tool !== undefined && (SLOW_TOOLS.has(s.tool.kind) || hasSlowTool(s.tool.body)))
 
 // Prüfstellen mit dem Wert von u nach einer Substitution (u = e^x), für Gleichungen in u
 export function withSubstitution(points: readonly Env[], sub: { readonly name: string; readonly expr: Expr } | undefined): Env[] {

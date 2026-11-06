@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { equationToLatex, toLatex } from '../expr/print.ts'
-import { type Expr, PI, add, div, eq, exp, mul, num, pow, sin, variable } from '../expr/types.ts'
+import { type Expr, PI, add, div, eq, exp, mul, num, pow, sin, sub, variable } from '../expr/types.ts'
 import { parseLatex } from '../parse/latex.ts'
 import { REARRANGE_ERROR_RULES, rearrangeWrongAnswers } from './errorRules.ts'
 import { solveEquation, solveTask } from './isolate.ts'
 import type { Condition } from './task.ts'
-import { derivativeOf, integralOf } from './tools/tool.ts'
+import { derivativeOf, integralOf, limitOf, seriesOf, sumOf } from './tools/tool.ts'
 
 const p = (latex: string): Expr => {
   const r = parseLatex(latex)
@@ -66,7 +66,10 @@ const CATALOG: Array<{ id: string; lhs: string; rhs: string; target?: string; af
 
 // Werkzeuge der Stufe 5 (Schritt 7a): Aufgaben mit Integral, falsche Gleichung nach dem Werkzeug-Schritt
 const t = variable('t')
-const TOOL_CATALOG: Array<{ id: string; lhs: Expr; conditions?: Condition[]; after: string }> = [
+const [k, n, q, x] = ['k', 'n', 'q', 'x'].map(variable)
+const below1: Condition[] = [{ lhs: x, rel: '<', rhs: num(1) }]
+
+const TOOL_CATALOG: Array<{ id: string; lhs: Expr; target?: string; conditions?: Condition[]; after: string }> = [
   {
     id: 'eq-partial-factor',
     lhs: integralOf(div(num(1), mul(t, add(t, variable('b')))), variable('a'), variable('x')),
@@ -84,6 +87,14 @@ const TOOL_CATALOG: Array<{ id: string; lhs: Expr; conditions?: Condition[]; aft
     after: '\\frac{\\ln a - \\ln(a + b) - \\ln x + \\ln(x + b)}{b} = y',
   },
   { id: 'eq-int-lower-forgotten', lhs: integralOf(exp(t), num(0), variable('x')), after: 'e^{x} = y' },
+  // Schritt 7b: Summen, Reihen, Grenzwerte
+  { id: 'eq-sum-count', lhs: sumOf(pow(q, k), num(0), sub(n, num(1))), target: 'n', conditions: [{ lhs: q, rel: '>', rhs: num(1) }], after: '\\frac{q^{n + 1} - 1}{q - 1} = y' },
+  { id: 'eq-series-start', lhs: seriesOf(mul(k, pow(x, k)), num(1)), conditions: below1, after: '\\frac{1}{(1 - x)^{2}} = y' },
+  { id: 'eq-series-sign', lhs: seriesOf(pow(x, k), num(0)), conditions: below1, after: '\\frac{1}{x - 1} = y' },
+  { id: 'eq-series-not-geometric', lhs: seriesOf(mul(k, pow(x, k)), num(1)), conditions: below1, after: '\\frac{x}{1 - x} = y' },
+  { id: 'eq-lim-one', lhs: limitOf(pow(add(num(1), div(x, n)), n)), after: '1 = y' },
+  { id: 'eq-lim-exponent', lhs: limitOf(pow(add(num(1), div(x, n)), mul(num(2), n))), after: 'e^{x} = y' },
+  { id: 'eq-lim-denominator', lhs: limitOf(pow(div(add(n, x), sub(n, x)), n)), after: 'e^{x} = y' },
 ]
 
 describe('Katalog der Fehlerregeln', () => {
@@ -93,7 +104,7 @@ describe('Katalog der Fehlerregeln', () => {
 
   for (const c of TOOL_CATALOG) {
     it(`${c.id}: ${equationToLatex(eq(c.lhs, variable('y')))}`, () => {
-      const task = { equation: eq(c.lhs, variable('y')), target: 'x', conditions: c.conditions ?? [] }
+      const task = { equation: eq(c.lhs, variable('y')), target: c.target ?? 'x', conditions: c.conditions ?? [] }
       const found = rearrangeWrongAnswers(task, solveTask(task)!).filter((w) => w.rule.id === c.id)
       expect(found.map((w) => equationToLatex(w.after))).toContain(c.after)
     })

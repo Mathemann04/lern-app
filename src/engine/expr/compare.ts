@@ -1,4 +1,4 @@
-import type { Expr } from './types.ts'
+import { type Expr, toolBound, toolLimits } from './types.ts'
 
 // Eindeutiger Schlüssel eines Terms: gleicher Baum ⇔ gleicher Schlüssel.
 // Die Schreibweise einer Zahl (Bruch oder Dezimalkomma) zählt nicht.
@@ -45,11 +45,10 @@ export function contains(e: Expr, name: string): boolean {
     case 'const':
       return false
     case 'var':
-      // Werkzeug (Ableitung, Integral): enthält seine freien Buchstaben
+      // Werkzeug (Ableitung, Integral, Summe, Grenzwert): enthält seine freien Buchstaben
       if (e.tool) {
         const { tool } = e
-        if (tool.kind === 'derivative') return contains(tool.body, name)
-        return (tool.v !== name && contains(tool.body, name)) || contains(tool.lower, name) || contains(tool.upper, name)
+        return (toolBound(tool) !== name && contains(tool.body, name)) || toolLimits(tool).some((part) => contains(part, name))
       }
       return e.name === name
     case 'add':

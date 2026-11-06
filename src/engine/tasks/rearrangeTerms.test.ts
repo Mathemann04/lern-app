@@ -31,7 +31,7 @@ describe.each(KIT_LEVELS)('Abwechslung Stufe %i', (level) => {
   })
 })
 
-const TOOL_STEPS = new Set(['derive', 'partial', 'antiderivative'])
+const TOOL_STEPS = new Set(['derive', 'partial', 'antiderivative', 'sumFormula', 'series', 'limit'])
 
 describe('Baukasten der Stufen 1 bis 5', () => {
   const tasks = (level: Level) => Array.from({ length: 200 }, (_, i) => generateRearrangeTask({ level, seed: i + 1 }).task)
@@ -124,7 +124,7 @@ describe('Baukasten der Stufen 1 bis 5', () => {
     expect([...blocks].sort()).toEqual(['fn', 'ohne', 'pow', 'root'])
   })
 
-  it('Stufe 5, Teil 7a: in jeder Aufgabe eine Ableitung oder ein Integral, im Mittel mindestens 8 Umformungen', () => {
+  it('Stufe 5, Teile 7a und 7b: in jeder Aufgabe ein Werkzeug, im Mittel mindestens 8 Umformungen', () => {
     const all = tasks(5)
     const solutions = all.map((t) => solveTask(t)!)
     const lengths = solutions.map((s) => s.steps.length)
@@ -132,17 +132,24 @@ describe('Baukasten der Stufen 1 bis 5', () => {
     expect(lengths.reduce((a, b) => a + b, 0) / lengths.length).toBeGreaterThanOrEqual(8)
     for (const [i, t] of all.entries()) {
       expect(hasTool(t.equation), taskLatex(t)).toBe(true)
-      expect(t.target).toBe('x')
+      // nach n nur bei der endlichen Summe (die Anzahl der Summanden)
+      expect(t.target === 'x' || (t.target === 'n' && solutions[i].steps[0].kind === 'sumFormula'), taskLatex(t)).toBe(true)
       // erst das Werkzeug ausrechnen
       expect(TOOL_STEPS.has(solutions[i].steps[0].kind), taskLatex(t)).toBe(true)
     }
     const kinds = new Set(solutions.flatMap((s) => s.steps.map((step) => step.kind)))
-    for (const kind of ['derive', 'partial', 'antiderivative', 'bounds', 'pq', 'logCombine']) expect(kinds.has(kind as never), kind).toBe(true)
-    // auch zwei Werkzeuge in einer Aufgabe, Werkzeug im Bruch, unter der Wurzel und im \ln
-    const labels = Array.from({ length: 200 }, (_, i) => generateRearrangeTask({ level: 5, seed: i + 1 }).label)
-    for (const part of ['Integral gleich Ableitung', 'in einer Summe', 'im Bruch', 'unter der Wurzel', 'im $\\ln$']) {
+    for (const kind of ['derive', 'partial', 'antiderivative', 'bounds', 'pq', 'logCombine', 'sumFormula', 'series', 'limit']) expect(kinds.has(kind as never), kind).toBe(true)
+    // auch zwei Werkzeuge in einer Aufgabe, Werkzeug im Bruch, unter der Wurzel und im \ln, Reihe in
+    // einer Ableitung bzw. einem Integral
+    const generated = Array.from({ length: 200 }, (_, i) => generateRearrangeTask({ level: 5, seed: i + 1 }))
+    const labels = generated.map((g) => g.label)
+    for (const part of ['Integral gleich Ableitung', 'in einer Summe', 'im Bruch', 'unter der Wurzel', 'im $\\ln$', 'Reihe abgeleitet', 'Reihe integriert', 'Grenzwert gleich Ableitung']) {
       expect(labels.some((l) => l.includes(part)), part).toBe(true)
     }
+    // Teil 7b mit festem Anteil: etwa 40 von 100 Nummern
+    const series = generated.filter((g) => g.template.id === 'baukasten-5-reihen').length
+    expect(series).toBeGreaterThanOrEqual(60)
+    expect(series).toBeLessThanOrEqual(100)
   })
 
   it.each([1, 2, 3, 4] as Level[])('Stufe %i: meist nach x, manchmal nach einem anderen Buchstaben', (level) => {
