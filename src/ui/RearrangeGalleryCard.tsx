@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { equationToLatex, toLatex } from '../engine/expr/print.ts'
 import { rearrangeWrongAnswers } from '../engine/rearrange/errorRules.ts'
-import { solveEquation, stepLabel } from '../engine/rearrange/isolate.ts'
+import { solveTask, stepEquationLatex, stepLabel } from '../engine/rearrange/isolate.ts'
 import { conditionsText, instructionFor, taskLatex } from '../engine/rearrange/task.ts'
 import type { GeneratedRearrangeTask } from '../engine/tasks/rearrangeTerms.ts'
 import { formatTaskNumber } from '../engine/tasks/taskNumber.ts'
@@ -19,7 +19,7 @@ type Props = {
 
 export function RearrangeGalleryCard({ generated, showSteps, showErrors, highlighted = false }: Props) {
   const { task, label, ref } = generated
-  const solution = useMemo(() => solveEquation(task.equation, task.target)!, [task])
+  const solution = useMemo(() => solveTask(task)!, [task])
   const wrong = useMemo(() => (showErrors ? rearrangeWrongAnswers(task, solution) : []), [showErrors, task, solution])
 
   return (
@@ -44,7 +44,7 @@ export function RearrangeGalleryCard({ generated, showSteps, showErrors, highlig
                   <RichText text={stepLabel(step, task.target)} inline />
                 </p>
                 <div className="overflow-x-auto py-0.5">
-                  <Formula tex={equationToLatex(step.after)} />
+                  <Formula tex={stepEquationLatex(step.kind, step.after)} />
                 </div>
               </li>
             ))}
@@ -61,7 +61,7 @@ export function RearrangeGalleryCard({ generated, showSteps, showErrors, highlig
                 <RichText text={w.rule.name} className="block text-sm text-red-800" inline />
                 <RichText text={`im Schritt: ${stepLabel(solution.steps[w.stepIndex], task.target)}`} className="block text-sm text-zinc-500" inline />
                 <div className="overflow-x-auto">
-                  <Formula tex={equationToLatex(w.after)} />
+                  <Formula tex={stepEquationLatex(solution.steps[w.stepIndex].kind, w.after)} />
                 </div>
                 {w.result && equationToLatex(w.after) !== `${task.target} = ${toLatex(w.result)}` && (
                   <div className="overflow-x-auto text-sm text-zinc-500">

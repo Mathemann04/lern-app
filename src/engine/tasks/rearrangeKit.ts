@@ -886,3 +886,243 @@ const LEVEL4_TRIG_CORES: readonly Core[] = [
 export function buildLevel4Trig(rng: Rng): KitTask {
   return buildFrom(rng, LEVEL4_TRIG_CORES, 0)
 }
+
+// --- Stufe 4, Teil 6c: Substitution und pq-Formel mit Scheinlösungen ---
+//
+// Gleichungen, die nach einer Substitution (u = e^x, u = \sqrt{x}, u = \sin x, u = \ln x, u = x^2) oder
+// gleich in x quadratisch werden. Die Kerne sind so gebaut, dass von den beiden Lösungen der
+// pq-Formel genau eine passt: q < 0 (Lösungen mit verschiedenen Vorzeichen) oder, bei
+// \frac{e^x + e^{-x}}{2}, das Produkt der Lösungen 1 (nur eine gibt x > 0). Schalen, die das
+// Vorzeichen von q ändern könnten, gibt es bei diesen Kernen nicht (positiveShells).
+
+// Andere Seite, sicher positiv: y, b, 3b, \frac{b}{c}, b + c
+function positiveSide(rng: Rng, n: Names): Expr {
+  const r = rng.next()
+  if (r < 0.45) return variable('y')
+  if (r < 0.7) return n.letter()
+  if (r < 0.82) return mul(k(rng), n.letter())
+  if (r < 0.92) return div(n.letter(), n.letter())
+  return plus(n.letter(), n.letter())
+}
+
+// Schalen, die q < 0 erhalten: mal, geteilt, minus eine positive Zahl
+function positiveShells(rng: Rng, core: Expr, n: Names, max: number, min = 0): { e: Expr; count: number } {
+  const count = rng.int(min, max)
+  let e = core
+  for (let i = 0; i < count; i++) {
+    const r = rng.next()
+    if (r < 0.4 && !hasFraction(e)) e = div(e, denominator(rng, n))
+    else if (r < 0.75 || e.kind === 'div') e = letters(factor(rng, n), e)
+    else e = minus(e, summand(rng, n))
+  }
+  return { e, count }
+}
+
+// Schalen, die nur malnehmen oder teilen (die andere Seite steckt später in p, dort keine Summen)
+function scaleShells(rng: Rng, core: Expr, n: Names, max: number, min = 0): { e: Expr; count: number } {
+  const count = rng.int(min, max)
+  let e = core
+  for (let i = 0; i < count; i++) e = rng.chance(0.5) && !hasFraction(e) ? div(e, denominator(rng, n)) : letters(factor(rng, n), e)
+  return { e, count }
+}
+
+// Andere Seite ohne Summe: y, b, 3b, \frac{b}{c}
+function simpleSide(rng: Rng, n: Names): Expr {
+  const r = rng.next()
+  if (r < 0.5) return variable('y')
+  if (r < 0.75) return n.letter()
+  if (r < 0.88) return mul(k(rng), n.letter())
+  return div(n.letter(), n.letter())
+}
+
+// Koeffizient vor einem Baustein: b oder 3
+const coefficient = (rng: Rng, n: Names): Expr => (rng.chance(0.65) ? n.letter() : k(rng, 2, 5))
+
+// Baustein mal Koeffizient, manchmal ohne: e^{x}, be^{x}
+const maybeTimes = (rng: Rng, n: Names, e: Expr, p = 0.5): Expr => (rng.chance(p) ? mul(coefficient(rng, n), e) : e)
+
+// Potenzen eines Bausteins B = b^{kx}: power(m) = b^{mkx}, z. B. e^{x}, e^{2x}, e^{-x}; e^{3x}, e^{6x};
+// a^{x}, a^{2x}; e^{kx}, e^{2kx}
+function expPowers(rng: Rng, n: Names, u: Expr): (m: number) => Expr {
+  const r0 = rng.next()
+  const base = r0 < 0.72 ? E : r0 < 0.86 ? num(rng.pick([2, 3])) : n.letter()
+  const r = rng.next()
+  const factorOf: Expr | null = r < 0.62 ? null : r < 0.78 ? k(rng, 2, 3) : n.letter()
+  const exponent = (m: number): Expr => {
+    const sign = m < 0 ? -1 : 1
+    const a = Math.abs(m)
+    let e: Expr
+    if (!factorOf) e = a === 1 ? u : mul(num(a), u)
+    else if (factorOf.kind === 'num') e = mul(num(factorOf.value.n * BigInt(a)), u)
+    else e = a === 1 ? letters(factorOf, u) : mul(num(a), factorOf, u)
+    return sign < 0 ? neg(e) : e
+  }
+  return (m) => pow(base, exponent(m))
+}
+
+// e^{2x} und e^{x}: e^{2x} - ae^{x} = b, ae^{2x} = be^{x} + c, e^{x}\left(e^{x} + a\right) = b,
+// e^{x} - ae^{-x} = y, \frac{e^{x} - e^{-x}}{2} = y, a\left(e^{x} + e^{-x}\right) = y, \ln\left(e^{2x} + ae^{x}\right) = b
+function expQuadratic(rng: Rng, n: Names): Built {
+  const power = expPowers(rng, n, n.unknown)
+  const [b1, b2, bInv] = [power(1), power(2), power(-1)]
+  const r = rng.next()
+  if (r < 0.45) {
+    const lead = maybeTimes(rng, n, b2, 0.35)
+    const mid = maybeTimes(rng, n, b1, 0.8)
+    const v = rng.next()
+    let side: Expr
+    let other: Expr | undefined
+    if (v < 0.5) side = rng.chance(0.5) ? plus(lead, mid) : minus(lead, mid)
+    else if (v < 0.8) {
+      side = lead
+      other = rng.chance(0.6) ? plus(mid, positiveSide(rng, n)) : minus(positiveSide(rng, n), mid)
+    } else side = mul(b1, rng.chance(0.5) ? plus(b1, coefficient(rng, n)) : minus(b1, coefficient(rng, n)))
+    if (!other && rng.chance(0.3)) {
+      // außen \ln oder Wurzel
+      const outer = rng.chance(0.5) ? logOf(rng, n, side) : sqrt(side)
+      return { side: outer, label: 'Baukasten: $e^{2x}$ und $e^x$ in $\\ln$ oder Wurzel' }
+    }
+    const { e, count } = other ? { e: side, count: 0 } : positiveShells(rng, side, n, 1)
+    return { side: e, ...(other ? { other } : { other: positiveSide(rng, n) }), label: `Baukasten: $e^{2x}$ und $e^x$, ${count} Schalen` }
+  }
+  if (r < 0.75) {
+    // e^x und e^{-x} mit Minus: genau eine Lösung positiv
+    const core = rng.chance(0.4) ? div(minus(b1, bInv), num(2)) : minus(maybeTimes(rng, n, b1, 0.3), maybeTimes(rng, n, bInv, 0.75))
+    const { e, count } = scaleShells(rng, core, n, 1)
+    return { side: e, other: simpleSide(rng, n), label: `Baukasten: $e^x$ und $e^{-x}$ mit Minus, ${count} Schalen` }
+  }
+  // e^x + e^{-x}: Produkt der Lösungen 1, x > 0 nimmt die größere
+  const core = rng.chance(0.5) ? div(plus(b1, bInv), num(2)) : plus(b1, bInv)
+  const { e, count } = scaleShells(rng, core, n, 1, core.kind === 'div' ? 0 : 1)
+  return { side: e, other: simpleSide(rng, n), label: `Baukasten: $e^x$ und $e^{-x}$ mit Plus, ${count} Schalen` }
+}
+
+// x und \sqrt{x}: x - a\sqrt{x} = b, ax + b\sqrt{x} = c, \frac{x - a}{\sqrt{x}} = y, \sqrt{x}\left(\sqrt{x} + a\right) = b
+function sqrtQuadratic(rng: Rng, n: Names): Built {
+  const u = n.unknown
+  const root = sqrt(u)
+  const r = rng.next()
+  if (r < 0.55) {
+    const lead = maybeTimes(rng, n, u, 0.35)
+    const mid = maybeTimes(rng, n, root, 0.85)
+    const side = rng.chance(0.5) ? plus(lead, mid) : minus(lead, mid)
+    const { e, count } = positiveShells(rng, side, n, 2)
+    return { side: e, other: positiveSide(rng, n), label: `Baukasten: $x$ und $\\sqrt{x}$, ${count} Schalen` }
+  }
+  if (r < 0.8) {
+    const { e, count } = scaleShells(rng, div(minus(u, constant(rng, n)), root), n, 1)
+    return { side: e, other: simpleSide(rng, n), label: `Baukasten: $\\frac{x - a}{\\sqrt{x}}$, ${count} Schalen` }
+  }
+  const { e, count } = positiveShells(rng, mul(root, plus(root, constant(rng, n))), n, 1)
+  return { side: e, other: positiveSide(rng, n), label: `Baukasten: $\\sqrt{x}$ mal Klammer, ${count} Schalen` }
+}
+
+// \sin^2 x und \sin x: \sin^2 x + a\sin x = b, \cos^2 x = a\sin x, \tan^2 x - a\tan x = b,
+// \sinh x\left(\sinh x + a\right) = y
+function trigQuadratic(rng: Rng, n: Names): Built {
+  const u = n.unknown
+  const name = trigName(rng, ['sin', 'sin', 'sin', 'cos', 'cos', 'tan', 'tan', 'sinh', 'sinh'])
+  const angle = rng.chance(0.65) ? u : angleIn(rng, n, u)
+  const conditions = angleConditions(name, angle, u, true)
+  const f = trigOf(name, angle)
+  const square = pow(f, num(2))
+  const r = rng.next()
+  if (r < 0.3 && (name === 'sin' || name === 'cos')) {
+    // \cos^2 x = a\sin x: erst mit \sin^2 x + \cos^2 x = 1 ersetzen
+    const partner = pow(trigOf(name === 'sin' ? 'cos' : 'sin', angle), num(2))
+    const side = maybeTimes(rng, n, partner, 0.4)
+    return { side, other: mul(coefficient(rng, n), f), conditions, label: `Baukasten: $\\${name === 'sin' ? 'cos' : 'sin'}^2$ gegen $\\${name}$` }
+  }
+  if (r < 0.75) {
+    const lead = maybeTimes(rng, n, square, 0.3)
+    const mid = maybeTimes(rng, n, f, 0.8)
+    const side = rng.chance(0.55) ? plus(lead, mid) : minus(lead, mid)
+    const { e, count } = positiveShells(rng, side, n, 1)
+    return { side: e, other: positiveSide(rng, n), conditions, label: `Baukasten: $\\${name}^2$ und $\\${name}$, ${count} Schalen` }
+  }
+  const { e, count } = positiveShells(rng, mul(f, plus(f, constant(rng, n))), n, 1)
+  return { side: e, other: positiveSide(rng, n), conditions, label: `Baukasten: $\\${name}$ mal Klammer, ${count} Schalen` }
+}
+
+// Logarithmen, danach quadratisch in x: \ln x + \ln(x + a) = b, \log_2 x + \log_2(x - a) = b,
+// 2\ln x - \ln(x + a) = b, (\ln x)^2 - a\ln x = b
+function logQuadratic(rng: Rng, n: Names): Built {
+  const u = n.unknown
+  const r0 = rng.next()
+  const base = r0 < 0.7 ? E : r0 < 0.85 ? num(rng.pick([2, 10])) : n.letter()
+  const L = (arg: Expr) => (base === E ? ln(arg) : log(base, arg))
+  const r = rng.next()
+  if (r < 0.2) {
+    // \ln x als Unbekannte, x > 1
+    const lnx = ln(u)
+    const side = rng.chance(0.5) ? minus(pow(lnx, num(2)), maybeTimes(rng, n, lnx, 0.8)) : plus(pow(lnx, num(2)), maybeTimes(rng, n, lnx, 0.8))
+    const { e, count } = positiveShells(rng, side, n, 1)
+    return { side: e, other: positiveSide(rng, n), conditions: [{ lhs: u, rel: '>', rhs: num(1) }], label: `Baukasten: $\\ln^2 x$ und $\\ln x$, ${count} Schalen` }
+  }
+  const a = constant(rng, n)
+  let sum: Expr
+  let conditions: Condition[] = []
+  if (r < 0.45) sum = plus(L(u), L(plus(u, a)))
+  else if (r < 0.65) {
+    sum = plus(L(u), L(minus(u, a)))
+    conditions = [{ lhs: u, rel: '>', rhs: a }]
+  } else sum = minus(mul(num(2), L(u)), L(plus(u, a)))
+  const { e, count } = someShells(rng, sum, n, 1)
+  return { side: e, conditions, label: `Baukasten: Logarithmen, danach quadratisch, ${count} Schalen` }
+}
+
+// x^4 und x^2: x^4 - ax^2 = b, ax^4 = bx^2 + c, \frac{x^4 - a}{x^2} = y
+function biquadratic(rng: Rng, n: Names): Built {
+  const u = n.unknown
+  const [x2, x4] = [pow(u, num(2)), pow(u, num(4))]
+  const r = rng.next()
+  if (r < 0.55) {
+    const side = rng.chance(0.5) ? plus(maybeTimes(rng, n, x4, 0.3), maybeTimes(rng, n, x2, 0.8)) : minus(maybeTimes(rng, n, x4, 0.3), maybeTimes(rng, n, x2, 0.8))
+    const { e, count } = positiveShells(rng, side, n, 1)
+    return { side: e, other: positiveSide(rng, n), label: `Baukasten: $x^4$ und $x^2$, ${count} Schalen` }
+  }
+  if (r < 0.75) {
+    const other = rng.chance(0.6) ? plus(maybeTimes(rng, n, x2, 0.8), positiveSide(rng, n)) : minus(positiveSide(rng, n), maybeTimes(rng, n, x2, 0.8))
+    return { side: maybeTimes(rng, n, x4, 0.4), other, label: 'Baukasten: $x^4$ gegen $x^2$' }
+  }
+  const { e, count } = scaleShells(rng, div(minus(x4, constant(rng, n)), x2), n, 1)
+  return { side: e, other: simpleSide(rng, n), label: `Baukasten: $\\frac{x^4 - a}{x^2}$, ${count} Schalen` }
+}
+
+// Bruch, danach quadratisch in x: x - \frac{a}{x} = y, \frac{a}{x + b} = x, x(x + a) = b,
+// (x + a)(x - b) = c
+function rationalQuadratic(rng: Rng, n: Names): Built {
+  const u = n.unknown
+  const r = rng.next()
+  if (r < 0.35) {
+    const core = rng.chance(0.6) ? minus(maybeTimes(rng, n, u, 0.3), div(constant(rng, n), u)) : div(minus(pow(u, num(2)), constant(rng, n)), u)
+    const { e, count } = scaleShells(rng, core, n, 1, 1)
+    return { side: e, other: simpleSide(rng, n), label: `Baukasten: $x$ minus Bruch mit $x$ im Nenner, ${count} Schalen` }
+  }
+  if (r < 0.6) {
+    const { e, count } = scaleShells(rng, div(n.letter(), plus(u, constant(rng, n))), n, 1)
+    return { side: e, other: maybeTimes(rng, n, u, 0.3), label: `Baukasten: Bruch gleich $x$, ${count} Schalen` }
+  }
+  const b = bracketIn(rng, n, u)
+  if (b.sign === 1 && rng.chance(0.6)) {
+    const condition = positiveCondition(b, u)
+    const { e, count } = positiveShells(rng, mul(plus(u, constant(rng, n)), b.expr), n, 1, 1)
+    return { side: e, other: positiveSide(rng, n), conditions: condition ? [condition] : [], label: `Baukasten: Klammer mal Klammer, ${count} Schalen` }
+  }
+  const { e, count } = positiveShells(rng, mul(u, plus(u, constant(rng, n))), n, 2, 1)
+  return { side: e, other: positiveSide(rng, n), label: `Baukasten: $x$ mal Klammer, ${count} Schalen` }
+}
+
+const LEVEL4_QUADRATIC_CORES: readonly Core[] = [
+  [22, expQuadratic],
+  [14, sqrtQuadratic],
+  [18, trigQuadratic],
+  [18, logQuadratic],
+  [10, biquadratic],
+  [18, rationalQuadratic],
+]
+
+// Gesucht ist hier immer x
+export function buildLevel4Quadratic(rng: Rng): KitTask {
+  return buildFrom(rng, LEVEL4_QUADRATIC_CORES, 0)
+}

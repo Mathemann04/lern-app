@@ -2,7 +2,7 @@ import { explainFractionError, listing } from '../explain/fractionTexts.ts'
 import { explainRearrangeError } from '../explain/rearrangeTexts.ts'
 import { contains, subterms } from '../expr/compare.ts'
 import { type Env, evaluate } from '../expr/evaluate.ts'
-import { equationToLatex } from '../expr/print.ts'
+import { equationToLatex, toLatex } from '../expr/print.ts'
 import { type Equation, type Expr, eq, mul, variable } from '../expr/types.ts'
 import { factoredPoly, reduceFrac } from '../fraction/factor.ts'
 import type { Frac } from '../fraction/frac.ts'
@@ -12,7 +12,7 @@ import { createRng } from '../random/rng.ts'
 import { newAtoms, toRat } from '../rearrange/algebra.ts'
 import { samplePoints } from '../rearrange/check.ts'
 import { type RearrangeWrong, rearrangeWrongAnswers } from '../rearrange/errorRules.ts'
-import { type RearrangeSolution, solveEquation } from '../rearrange/isolate.ts'
+import { type RearrangeSolution, solveTask } from '../rearrange/isolate.ts'
 import { type RearrangeTask, taskVariables } from '../rearrange/task.ts'
 import { isInteger, ratAbs } from '../rational.ts'
 import { generateRearrangeTask } from '../tasks/rearrangeTerms.ts'
@@ -56,7 +56,7 @@ export type RearrangeVerdict =
 const POINTS = 24
 
 export function prepareRearrangeCheck(task: RearrangeTask, lenient = false): RearrangeCheckContext {
-  const solution = solveEquation(task.equation, task.target)
+  const solution = solveTask(task)
   if (!solution) throw new Error(`Die Aufgabe ${equationToLatex(task.equation)} lässt sich nicht auflösen`)
   const points = samplePoints(task, solution.result, createRng(`umstellen-frei:${equationToLatex(task.equation)}`), POINTS, solution.requires)
   return { task, solution, wrongs: rearrangeWrongAnswers(task, solution), letters: taskVariables(task), points, lenient }
@@ -71,6 +71,9 @@ export function checkRearrangeAnswer(context: RearrangeCheckContext, latex: stri
   const unknown = [...new Set(sides.flatMap((s) => [...variablesOf(s)]))].filter((name) => !context.letters.includes(name))
   if (unknown.length > 0) {
     const name = unknown[0]
+    // u aus der Substitution: noch nicht zurück eingesetzt
+    const sub = context.solution.substitution
+    if (sub && name === sub.name) return { kind: 'unreadable', message: `Gesucht ist $${t}$, nicht $${name}$: Setze $${name} = ${toLatex(sub.expr)}$ zurück ein und löse nach $${t}$ auf.` }
     const capital = context.letters.find((l) => l.toUpperCase() === name)
     if (capital) return { kind: 'unreadable', message: `Schreibe $${capital}$ bitte klein.` }
     const which = listing(context.letters.map((l) => `$${l}$`))

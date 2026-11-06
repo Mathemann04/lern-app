@@ -13,7 +13,7 @@ den Nutzer zugeschnitten: Maschinenbau, 1. Semester, THU, „Mathematik MB1".
   4. Fassung, freigegeben): erst Baukasten und Abwechslung in den Stufen 1
   bis 3 wie bei den Brüchen (Schritte 4 und 5; ab Stufe 3 Kerne ineinander,
   Test der Umformungen), dann die Stufen 4 und 5 (Schritte 6 bis 9; Stufe 4
-  in drei Teilen, 6a und 6b fertig).
+  in drei Teilen, 6a bis 6c fertig).
   Abgeschlossen:
   [docs/PLAN-M1.md](docs/PLAN-M1.md), [docs/PLAN-M2.md](docs/PLAN-M2.md),
   [docs/PLAN-M2b.md](docs/PLAN-M2b.md) (Brüche nachschärfen: Abwechslung und
@@ -145,7 +145,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     gekürzt; eine Wurzel aus einem Bruch zählt wie ein Buchstabe, z. B.
     $b + \sqrt{\frac{y}{a}}$; ab Stufe 4 (`lenient`) jede gleichwertige Form
     ohne Doppelbruch, $\ln$, $e^{…}$, Winkel- und Umkehrfunktionen zählen wie
-    Buchstaben; sonst
+    Buchstaben; steht noch $u$ aus der Substitution da: Hinweis, zurück
+    einzusetzen; sonst
     typischer Fehler)
   - `parse/latex.ts`: liest die Eingabe der Mathe-Tastatur (LaTeX) ein, mit
     verständlichen Fehlermeldungen
@@ -166,7 +167,7 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     Umstell-Aufgaben; Stufe 3: Hauptnenner, Kehrwert, Wurzel und Quadrat
     mit Klammer im Quadrat und zwei Wurzeln; Stufe 4: „e-Funktion und
     Logarithmus", „Logarithmus- und Potenzgesetze", „Umkehrfunktionen",
-    „Winkel- und Hyperbelfunktionen"),
+    „Winkel- und Hyperbelfunktionen", „Substitution", „$pq$-Formel"),
     durchgerechnete Beispiele in `rearrangeExample.ts`
   - `guided/plan.ts`: Schrittplaner für den geführten Modus (Regelwahl, dann je
     Summand ein Schritt; Produkt/Quotient: u', v', Einsetzen; Kette: äußere,
@@ -204,7 +205,11 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     falschen Gleichungen aus den Fehlerregeln; ohne passenden Fehler steht
     die Gleichung gleich unter „Bisher"; ab Stufe 3 die Umformung nur an
     Weichen, `isJunction`, auch $e$ hoch, logarithmieren, Logarithmus- und
-    Potenzgesetze, Umkehrfunktionen, Quadrat ersetzen, durch $\cos x$ teilen;
+    Potenzgesetze, Umkehrfunktionen, Quadrat ersetzen, durch $\cos x$ teilen,
+    substituieren, alles nach links, Normalform, $pq$-Formel, zurück einsetzen;
+    nach der $pq$-Formel „Welche der beiden Lösungen passt?" mit der
+    Scheinlösung als falscher Antwort und dem Grund (`rejectReason`); nach dem
+    Substituieren sprechen Fragen von $u$ (`step.unknown`);
     ist √x oder ein Baustein wie $e^x$ die Unbekannte, sprechen
     Fragen und Antworten davon, `unknownOf`; Bedingung des Ergebnisses wie „Gilt für
     $a \neq c$."). Gemeinsame Typen in `guided/types.ts`
@@ -284,10 +289,24 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     Aufgabe sorgt für den Hauptwert, `requires` für den Definitionsbereich),
     Funktion gegen eine Umkehrfunktion `trig`, ein Quadrat mit
     $\sin^2 u + \cos^2 u = 1$ bzw. $\cosh^2 u - \sinh^2 u = 1$ ersetzen
-    `pythagoras`, durch $\cos u$ teilen `tanQuotient`; beim Sortieren links nicht
+    `pythagoras` (auch $\cos^2 u$ neben $\sin u$), durch $\cos u$ teilen
+    `tanQuotient`; Teil 6c: kommt die Variable in verschiedenen Potenzen eines
+    Bausteins vor ($e^{2x}$ und $e^x$ bzw. $e^{-x}$, $x$ und $\sqrt{x}$,
+    $\sin^2 x$ und $\sin x$, $\ln^2 x$, $x^4$ und $x^2$) und wird die Gleichung
+    damit quadratisch, substituieren `substitute` (danach wird nach $u$
+    aufgelöst, `unknown`), quadratisch in $u$ oder $x$: alles nach links
+    `zero`, Normalform `normalize`, $pq$-Formel `pq` (die Gleichung danach
+    enthält die passende Lösung, angezeigt mit $\pm$ über `stepEquationLatex`),
+    passende Lösung wählen `choose` (beide Lösungen an Zufallsstellen geprüft:
+    $x$ positiv, Bedingungen der Aufgabe, Gleichung vom Anfang; passt nicht
+    genau eine, gilt die Aufgabe als nicht lösbar; Grund `reason`), zurück
+    einsetzen `resubstitute`; `solveTask` löst mit den Bedingungen der Aufgabe;
+    Wurzeln aus Brüchen in Summen im Ergebnis als
+    $\frac{\sqrt{a^2 + 4b}}{2}$; beim Sortieren links nicht
     lauter Minus; Schrittnamen `stepLabel`), `check.ts`
     (Prüfstellen: Buchstaben zufällig positiv, Variable aus dem Ergebnis,
     Bedingungen der Aufgabe, Zwischenwerte aus `requires` nicht riesig;
+    mit $u$ nach einer Substitution `withSubstitution`;
     Gegenprobe durch Einsetzen), `errorRules.ts`
     (typische Fehler, Ids `eq-…`, beim Zusammenfassen die aus „Brüche";
     je Klammer ein Fehler beim Ausmultiplizieren; nie eine Gleichung, die doch
@@ -310,7 +329,13 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     `LEVEL4_TRIG_CORES`: Bruch aus $\sin x$ oder $\tanh x$, Winkelfunktion mit
     Schalen oder unter einer Wurzel, Umkehrfunktion um einen Kern, Quadrate mit
     $\sin^2 x + \cos^2 x = 1$, Sinus und Kosinus in jedem Summanden, $e$ hoch oder
-    $\ln$ um eine Winkelfunktion, mit Bereich wie $x < \frac{\pi}{2}$; Filter in
+    $\ln$ um eine Winkelfunktion, mit Bereich wie $x < \frac{\pi}{2}$; Teil 6c
+    `LEVEL4_QUADRATIC_CORES` (Anteil 40 % der Nummern, die nicht schon zu 6b
+    gehören): $e^{2x}$ und $e^x$, $e^x$ und $e^{-x}$, $x$ und $\sqrt{x}$,
+    $\sin^2 x$ und $\sin x$ (auch $\cos^2 x = a\sin x$), Logarithmen, die danach
+    quadratisch werden, $\ln^2 x$, $x^4$ und $x^2$, Bruch oder Produkt, danach
+    quadratisch; so gebaut, dass genau eine Lösung der $pq$-Formel passt (nur
+    Schalen, die das Vorzeichen von $q$ nicht ändern); Filter in
     `rearrangeTerms.ts`: Mindestzahl der Umformungen je Stufe, Doppelbrüche
     erst ab Stufe 3, Ergebnis höchstens 90 bzw. ab Stufe 4 120 Zeichen,
     Gegenprobe der Aufgabe an den Prüfstellen), `focus.ts` und `fractionFocus.ts` (Aufgaben für

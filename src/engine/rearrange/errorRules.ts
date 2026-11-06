@@ -16,10 +16,11 @@ import {
 import { createRng } from '../random/rng.ts'
 import { isOne, rat, ratAbs, ratSign } from '../rational.ts'
 import { type Atoms, RADICAL_ATOM, monomialSqrt, newAtoms, niceFrac, polyToExpr, radicalAtoms, toPoly, toRat } from './algebra.ts'
-import { clearlyFails, differsFromTarget, samplePoints } from './check.ts'
+import { clearlyFails, differsFromTarget, samplePoints, withSubstitution } from './check.ts'
 import {
   type RearrangeSolution,
   type RearrangeStep,
+  type SolveOptions,
   type Side,
   complexRoot,
   dividedBy,
@@ -32,8 +33,11 @@ import {
   TRIG_OF,
   powerLawSum,
   powerOf,
+  pqWrong,
   pythagorasWrong,
+  quadraticWrong,
   signedLog,
+  substituteWrong,
   solveEquation,
   squared,
   tanQuotientWrong,
@@ -92,6 +96,14 @@ export const REARRANGE_ERROR_RULES: readonly EqErrorRule[] = [
   { id: 'eq-hyperbolic-sign', name: '$\\sinh^2 x$ wie $\\sin^2 x$ ersetzt (falsches Vorzeichen)', wrongFormula: '\\sinh^2 x = 1 - \\cosh^2 x' },
   { id: 'eq-tan-flipped', name: '$\\frac{\\cos x}{\\sin x}$ als $\\tan x$ geschrieben', wrongFormula: '\\frac{\\cos x}{\\sin x} = \\tan x' },
   { id: 'eq-divide-cos-partly', name: 'Nur einen Teil durch $\\cos x$ geteilt', wrongFormula: '\\frac{\\sin x + \\cos x}{\\sin x - \\cos x} = \\frac{\\tan x + 1}{\\sin x - \\cos x}' },
+  // Substitution und pq-Formel (ab Stufe 4, Schritt 6c)
+  { id: 'eq-substitute-power', name: 'Beim Substituieren die Potenz falsch übersetzt', wrongFormula: 'u = e^x: e^{2x} = 2u' },
+  { id: 'eq-substitute-reciprocal', name: 'Beim Substituieren $e^{-x}$ als $-u$ geschrieben', wrongFormula: 'u = e^x: e^{-x} = -u' },
+  { id: 'eq-pq-sign', name: 'Bei der $pq$-Formel das Vorzeichen von $p$ nicht gewechselt', wrongFormula: 'u^2 - 2yu - 1 = 0 \\Rightarrow u_{1,2} = -y \\pm \\sqrt{y^2 + 1}' },
+  { id: 'eq-pq-q-sign', name: 'Bei der $pq$-Formel unter der Wurzel $+q$ statt $-q$', wrongFormula: 'u^2 - 2yu - 1 = 0 \\Rightarrow u_{1,2} = y \\pm \\sqrt{y^2 - 1}' },
+  { id: 'eq-pq-half', name: 'Bei der $pq$-Formel unter der Wurzel $p^2$ statt $\\left(\\frac{p}{2}\\right)^2$', wrongFormula: 'u^2 - au - b = 0 \\Rightarrow u_{1,2} = \\frac{a}{2} \\pm \\sqrt{a^2 + b}' },
+  { id: 'eq-spurious-root', name: 'Die Lösung genommen, die nicht passt (Scheinlösung)', wrongFormula: 'u = e^x: u = \\frac{a}{2} - \\sqrt{\\frac{a^2}{4} + b}' },
+  { id: 'eq-not-resubstituted', name: 'Nach der Substitution nicht zurückgerechnet', wrongFormula: 'u = e^x = y + \\sqrt{y^2 + 1} \\Rightarrow x = y + \\sqrt{y^2 + 1}' },
 ]
 
 export function rearrangeErrorRule(id: string): EqErrorRule {
@@ -110,7 +122,8 @@ export type RearrangeWrong = {
   readonly result: Expr | null
 }
 
-type Candidate = { readonly id: string; readonly after: Equation }
+// zeroForm: Gleichung der Form … = 0 auf dem Weg zur pq-Formel (die 0 ist dort richtig)
+type Candidate = { readonly id: string; readonly after: Equation; readonly zeroForm?: boolean }
 
 // --- Hilfen ---
 
@@ -534,6 +547,45 @@ function tanQuotientMistakes(step: RearrangeStep, t: string): Candidate[] {
   return out
 }
 
+// Substituieren: e^{2x} = 2u statt u^2, e^{-x} = -u statt \frac{1}{u}
+function substituteMistakes(step: RearrangeStep, t: string): Candidate[] {
+  if (step.kind !== 'substitute') return []
+  const out: Candidate[] = []
+  const power = substituteWrong(step.before, t, 'power')
+  if (power) out.push({ id: 'eq-substitute-power', after: power })
+  const reciprocal = substituteWrong(step.before, t, 'reciprocal')
+  if (reciprocal) out.push({ id: 'eq-substitute-reciprocal', after: reciprocal })
+  return out
+}
+
+// Auf die Normalform bringen: Vorzeichen nicht gewechselt, nur u^2 geteilt
+function quadraticMistakes(step: RearrangeStep, t: string): Candidate[] {
+  if (step.kind !== 'zero' && step.kind !== 'normalize') return []
+  const wrong = quadraticWrong(step, t)
+  return wrong ? [{ id: step.kind === 'zero' ? 'eq-sign-not-flipped' : 'eq-divide-one-term', after: wrong, zeroForm: true }] : []
+}
+
+// pq-Formel: Vorzeichen von p, -q, \left(\frac{p}{2}\right)^2; die falsche Lösung gewählt; nicht zurückgerechnet
+function pqMistakes(step: RearrangeStep, t: string): Candidate[] {
+  const out: Candidate[] = []
+  if (step.kind === 'pq') {
+    for (const [mistake, id] of [
+      ['sign', 'eq-pq-sign'],
+      ['q', 'eq-pq-q-sign'],
+      ['half', 'eq-pq-half'],
+    ] as const) {
+      const wrong = pqWrong(step, mistake)
+      if (wrong) out.push({ id, after: wrong })
+    }
+  }
+  if (step.kind === 'choose' && step.operand) out.push({ id: 'eq-spurious-root', after: eq(step.after.lhs, step.operand) })
+  if (step.kind === 'resubstitute' && step.substitution) {
+    const value = key(step.after.lhs) === key(step.substitution.expr) ? step.after.rhs : step.after.lhs
+    out.push({ id: 'eq-not-resubstituted', after: eq(variable(t), value) })
+  }
+  return out
+}
+
 // Zusammenfassen zu einem Bruch (auch im Ergebnis-Schritt): Fehler aus „Brüche"
 function fractionMistakes(step: RearrangeStep, t: string): Candidate[] {
   if (step.kind !== 'combine' && step.kind !== 'finish') return []
@@ -565,8 +617,10 @@ function fractionMistakes(step: RearrangeStep, t: string): Candidate[] {
     })
 }
 
-function candidatesFor(steps: readonly RearrangeStep[], i: number, t: string): Candidate[] {
+function candidatesFor(steps: readonly RearrangeStep[], i: number, target: string): Candidate[] {
   const step = steps[i]
+  // nach dem Substituieren wird nach u aufgelöst
+  const t = step.unknown ?? target
   return [
     ...signNotFlipped(step, t),
     ...divideMistakes(step),
@@ -589,6 +643,9 @@ function candidatesFor(steps: readonly RearrangeStep[], i: number, t: string): C
     ...divideInsideArc(step),
     ...pythagorasMistakes(step, t),
     ...tanQuotientMistakes(step, t),
+    ...substituteMistakes(step, t),
+    ...quadraticMistakes(step, t),
+    ...pqMistakes(step, target),
     ...fractionMistakes(step, t),
   ]
 }
@@ -597,15 +654,17 @@ function candidatesFor(steps: readonly RearrangeStep[], i: number, t: string): C
 
 export function rearrangeWrongAnswers(task: RearrangeTask, solution: RearrangeSolution): RearrangeWrong[] {
   const t = task.target
-  const points = samplePoints(task, solution.result, createRng(`umstellen:${equationToLatex(task.equation)}`), 24, solution.requires)
+  const sub = solution.substitution
+  const points = withSubstitution(samplePoints(task, solution.result, createRng(`umstellen:${equationToLatex(task.equation)}`), 24, solution.requires), sub)
+  const options = { conditions: task.conditions, ...(sub ? { substitution: sub } : {}) }
   const out: RearrangeWrong[] = []
-  solution.steps.forEach((_, i) => {
+  solution.steps.forEach((step, i) => {
     for (const c of candidatesFor(solution.steps, i, t)) {
       // keine Gleichung ohne Lösung (z. B. \frac{1}{a} = 0) und keine, die doch stimmt
-      if (isZeroSide(c.after, t) || !clearlyFails(c.after, points)) continue
+      if ((!c.zeroForm && isZeroSide(c.after, step.unknown ?? t)) || !clearlyFails(c.after, points)) continue
       const latex = equationToLatex(c.after)
       if (out.some((w) => w.stepIndex === i && equationToLatex(w.after) === latex)) continue
-      out.push({ rule: rearrangeErrorRule(c.id), stepIndex: i, after: c.after, result: wrongResult(c.after, t, points) })
+      out.push({ rule: rearrangeErrorRule(c.id), stepIndex: i, after: c.after, result: wrongResult(c.after, t, points, options) })
     }
   })
   return out
@@ -616,8 +675,8 @@ const isZeroSide = (e: Equation, t: string) =>
 
 // Mit der falschen Gleichung richtig weitergerechnet; null, wenn das nicht geht, das Ergebnis an den
 // Prüfstellen nicht definiert ist oder doch das richtige Ergebnis herauskommt
-function wrongResult(after: Equation, t: string, points: Parameters<typeof differsFromTarget>[2]): Expr | null {
-  const continued = solveEquation(after, t)
+function wrongResult(after: Equation, t: string, points: Parameters<typeof differsFromTarget>[2], options: SolveOptions): Expr | null {
+  const continued = solveEquation(after, t, options)
   if (!continued || contains(continued.result, t)) return null
   const defined = points.filter((p) => !Number.isNaN(evaluate(continued.result, p))).length
   if (defined < points.length / 2) return null

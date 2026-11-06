@@ -7,7 +7,7 @@ Stand: 05.11.2026
 | M1 | Grundgerüst + Ableitungsregeln (beide Modi, 5 Stufen, Erklärungen, Lernkarten, Fortschritt) | fertig |
 | M2 | Brüche (Bruchrechnung, Bruchterme kürzen und zusammenfassen, Doppelbrüche); App für mehrere Themen | fertig |
 | M2b | Brüche nachschärfen: viel mehr Abwechslung (Baukasten statt fester Vorlagen, keine Form doppelt), deutlich schwerer, Stufe 5 auf Profi-Niveau mit Partialbruchzerlegung und Brüchen aus späteren Kapiteln (komplexe Zahlen, Grenzwerte, Teleskopsummen, Hyperbelfunktionen) | fertig |
-| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | in Arbeit: 4. Fassung des Plans (Baukasten und Abwechslung, ab Stufe 3 verschachtelter); Schritte 4, 5, 6a und 6b fertig (Stufe 4 spielbar), als Nächstes Schritt 6c |
+| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | in Arbeit: 4. Fassung des Plans (Baukasten und Abwechslung, ab Stufe 3 verschachtelter); Schritte 4, 5 und 6 fertig (Stufe 4 komplett), als Nächstes Schritt 7 |
 | M4 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
 | M5 | weitere Themen aus Mathematik MB1 | offen |
 | M6 | Physik: Formeln mit Einheiten (Formeln umstellen mit Zeichen der Physik; Aufgaben lösen: Formel wählen, umstellen, Werte mit Einheiten einsetzen) | offen |
@@ -68,10 +68,10 @@ Details: [PLAN-M3.md](PLAN-M3.md) (4. Fassung, freigegeben am 05.11.2026 mit dei
   (freigegeben mit Änderung: ab Stufe 3 Kerne ineinander und gegeneinander)
 - [x] 4. Baukasten und Abwechslung, Stufen 1 und 2 (neu)
 - [x] 5. Stufe 3 aus dem Baukasten (neu)
-- [ ] 6. Stufe 4 (verschachtelt) geführt und frei, in drei Teilen
+- [x] 6. Stufe 4 (verschachtelt) geführt und frei, in drei Teilen
   - [x] 6a. e-Funktion und $\ln$, Wurzeln in Wurzeln, Potenz- und Logarithmusgesetze
   - [x] 6b. Winkel- und Hyperbelfunktionen, Umkehrfunktionen
-  - [ ] 6c. Substitution und $pq$-Formel mit Scheinlösungen
+  - [x] 6c. Substitution und $pq$-Formel mit Scheinlösungen
 - [ ] 7. Stufe 5, Teil 1: Ableitungen, Integrale, Reihen, Grenzwerte, Differentialgleichungen
 - [ ] 8. Stufe 5, Teil 2: komplexe Zahlen, Determinanten, Vektoren, Additionstheoreme
 - [ ] 9. Gezieltes Üben, Feinschliff, Abschluss von M3
@@ -488,3 +488,18 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   Tastaturseite „Funktionen". Nebenbei schönere Zwischenschritte: links beim
   Sortieren nicht lauter Minus, gekürzter Bruch nach dem Teilen durch den
   Faktor vor $e^x$ oder $\tan x$, $9(y + m)^2$ statt $(3(y + m))^2$.
+- 05.11.2026: M3 Schritt 6c fertig, damit ist Stufe 4 komplett: Etwa jede
+  fünfte Aufgabe wird quadratisch. Sechs Arten von Kernen: $e^{2x}$ und $e^x$
+  (auch $e^x$ und $e^{-x}$ wie bei $\sinh$ und $\cosh$), $x$ und $\sqrt{x}$,
+  $\sin^2 x$ und $\sin x$ (auch $\cos^2 x = a\sin x$), Logarithmen, die danach
+  quadratisch werden ($\ln x + \ln(x + a) = b$), $x^4$ und $x^2$, Bruch oder
+  Produkt, danach quadratisch. Neue Umformungen: substituieren ($u = e^x$),
+  alles auf eine Seite, Normalform, $pq$-Formel (beide Lösungen mit $\pm$),
+  passende Lösung wählen (die Scheinlösung fällt mit Begründung weg),
+  zurück einsetzen. Die Nummern aus 6b behalten ihre Aufgabe, einige aus 6a
+  zeigen jetzt quadratische Aufgaben; der Browser-Test „im ln geteilt" läuft
+  jetzt mit 4-54, neu sind 4-9 geführt und frei. 196 Formen unter 200
+  Aufgaben der Stufe 4, im Mittel 7,4 Umformungen. Sieben neue typische
+  Fehler, zwei neue Lernkarten („Substitution", „$pq$-Formel"). Nebenbei:
+  Wurzeln aus Brüchen in Ergebnissen ohne Bruch unter der Wurzel
+  ($\frac{\sqrt{a^2 + 4b}}{2}$), das korrigiert auch ein Ergebnis der Stufe 3.

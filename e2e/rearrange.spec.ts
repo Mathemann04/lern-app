@@ -109,7 +109,7 @@ test('Umstellen: Lernkarten-Ordner mit durchgerechneten Beispielen', async ({ pa
   await expect(page.getByRole('heading', { name: 'Stufe 2' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Stufe 3' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Stufe 4' })).toBeVisible()
-  await expect(page.locator('main li a')).toHaveCount(11)
+  await expect(page.locator('main li a')).toHaveCount(13)
   await expectCleanPage(page, 'Ordner')
 
   await page.getByRole('link', { name: /^Variable im Nenner/ }).click()
@@ -142,17 +142,45 @@ test('Umstellen Stufe 4: Logarithmen zusammenfassen, e hoch beide Seiten, mit be
   await expectCleanPage(page, 'Stufe 4')
 })
 
-test('Umstellen Stufe 4 frei: e^x unter der Wurzel, im ln geteilt, dann richtig mit Logarithmusgesetz', async ({ page }) => {
-  // 2\sqrt{e^{mx} - 7} + n = p
-  await page.goto('./#/frei/umstellen/4-27')
+test('Umstellen Stufe 4 frei: Bruch aus e^{3x}, im ln geteilt, dann richtig mit Logarithmusgesetz', async ({ page }) => {
+  // y = \frac{4p(ke^{3x} - m)}{5e^{3x} + n}
+  await page.goto('./#/frei/umstellen/4-54')
   await expect(field(page)).toBeVisible()
   await expectCleanPage(page, 'Start Stufe 4')
-  await enter(page, '\\ln\\left(\\frac{n^2-2np+p^2+28}{4m}\\right)')
+  await enter(page, '\\ln\\left(\\frac{ny+4mp}{3(4kp-5y)}\\right)')
   await expect(feedback(page)).toContainText('geteilt statt den ganzen')
   // jede gleichwertige Form zählt, auch mit dem Logarithmusgesetz auseinandergezogen
-  await enter(page, '\\frac{\\ln\\left((p-n)^2+28\\right)-\\ln4}{m}')
+  await enter(page, '\\frac{\\ln(ny+4mp)-\\ln(4kp-5y)}{3}')
   await expect(feedback(page)).toContainText('Richtig!')
   await expectCleanPage(page, 'Richtig Stufe 4')
+})
+
+test('Umstellen Stufe 4: e^{2x} und e^x, substituieren, pq-Formel, Scheinlösung verwerfen, mit beiden Lernkarten aus Teil 6c', async ({ page }) => {
+  // 3e^{2x} + e^{x} = r
+  await page.goto('./#/ueben/umstellen/4-9')
+  await expect(page.locator('#question')).toContainText('steckt in verschiedenen Potenzen von')
+  await solveWholeTask(page)
+  await expect(page.getByTestId('result')).toBeVisible()
+  // nach der pq-Formel stehen beide Lösungen mit ± unter „Bisher"
+  await expect(page.locator('.katex-html', { hasText: '±' }).first()).toBeVisible()
+  const cards = page.getByRole('navigation', { name: 'Lernkarten zu dieser Aufgabe' })
+  await expect(cards.getByRole('link', { name: 'Substitution' })).toBeVisible()
+  await expect(cards.getByRole('link', { name: /Formel/ })).toBeVisible()
+  await expectCleanPage(page, 'Stufe 4 pq-Formel')
+})
+
+test('Umstellen Stufe 4 frei: nach der Substitution nicht zurückgerechnet, dann richtig', async ({ page }) => {
+  // 3e^{2x} + e^{x} = r
+  await page.goto('./#/frei/umstellen/4-9')
+  await expect(field(page)).toBeVisible()
+  await enter(page, '\\frac{\\sqrt{12r+1}-1}{6}')
+  await expect(feedback(page)).toContainText('nicht zurückgerechnet')
+  await enter(page, 'u=\\frac{\\sqrt{12r+1}-1}{6}')
+  await expect(feedback(page)).toContainText('Gesucht ist')
+  // auch die Form direkt aus der pq-Formel zählt
+  await enter(page, '\\ln\\left(-\\frac{1}{6}+\\sqrt{\\frac{1}{36}+\\frac{r}{3}}\\right)')
+  await expect(feedback(page)).toContainText('Richtig!')
+  await expectCleanPage(page, 'Richtig Stufe 4 pq-Formel')
 })
 
 test('Umstellen Stufe 4: sin² und cos², ein Quadrat ersetzen, Umkehrfunktion, mit beiden Lernkarten aus Teil 6b', async ({ page }) => {

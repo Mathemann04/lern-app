@@ -436,9 +436,13 @@ Aufgabe: Löse $\int_a^x \frac{\mathrm{d}t}{t(t + b)} = y$ nach $x$ auf
 | Logarithmusgesetz | Summe der $\ln$ als $\ln$ der Summe (`eq-log-sum`, neu in 6a) | $\ln u + \ln v = \ln(u + v)$ |
 | Logarithmusgesetz | Differenz der $\ln$ als Quotient (`eq-log-quotient`) | $\ln u - \ln v = \frac{\ln u}{\ln v}$ |
 | Potenzgesetz | Summe in der Hochzahl als Summe (`eq-power-sum`, neu in 6a; ersetzt „Exponent nur auf einen Faktor", der in den Aufgaben von 6a nicht vorkommt) | $2^{x + 1} = 2^x + 2$ |
-| $pq$-Formel | Vorzeichen von $p$ nicht gewechselt | $u^2 - 2yu - 1 = 0 \Rightarrow u = -y \pm \sqrt{y^2 + 1}$ |
-| Lösung wählen | Scheinlösung nicht verworfen | $\log_a x$ mit negativem $x$, oder $u = e^x$ negativ |
-| Substitution | nicht zurückgerechnet | $x = y + \sqrt{y^2 + 1}$ statt $\ln\left(\ldots\right)$ |
+| Substitution | Potenz falsch übersetzt (`eq-substitute-power`, neu in 6c) | $u = e^x$: $e^{2x} = 2u$ (bei $u = \sqrt{x}$: $x = u$) |
+| Substitution | $e^{-x}$ als $-u$ statt $\frac{1}{u}$ (`eq-substitute-reciprocal`, neu in 6c) | $e^x - e^{-x} = y \Rightarrow u - (-u) = y$ |
+| $pq$-Formel | Vorzeichen von $p$ nicht gewechselt (`eq-pq-sign`, neu in 6c) | $u^2 - 2yu - 1 = 0 \Rightarrow u_{1,2} = -y \pm \sqrt{y^2 + 1}$ |
+| $pq$-Formel | unter der Wurzel $+q$ statt $-q$ (`eq-pq-q-sign`, neu in 6c) | $u^2 - 2yu - 1 = 0 \Rightarrow u_{1,2} = y \pm \sqrt{y^2 - 1}$ |
+| $pq$-Formel | $p^2$ statt $\left(\frac{p}{2}\right)^2$ (`eq-pq-half`, neu in 6c) | $u^2 - au - b = 0 \Rightarrow u_{1,2} = \frac{a}{2} \pm \sqrt{a^2 + b}$ |
+| Lösung wählen | Scheinlösung nicht verworfen (`eq-spurious-root`, neu in 6c) | $u = e^x = \frac{a}{2} - \sqrt{\frac{a^2}{4} + b}$ (negativ) |
+| Substitution | nicht zurückgerechnet (`eq-not-resubstituted`, neu in 6c) | $x = y + \sqrt{y^2 + 1}$ statt $\ln\left(y + \sqrt{y^2 + 1}\right)$ |
 | Winkelfunktion | beim Ersetzen mit $\sin^2 x + \cos^2 x = 1$ das Quadrat vergessen (`eq-pythagoras-square`, neu in 6b) | $\sin^2 x = 1 - \cos x$ |
 | Hyperbelfunktion | $\sinh^2 x$ wie $\sin^2 x$ ersetzt, falsches Vorzeichen (`eq-hyperbolic-sign`, neu in 6b) | $\sinh^2 x = 1 - \cosh^2 x$ |
 | Winkelfunktion | $\frac{\cos x}{\sin x}$ als $\tan x$ geschrieben (`eq-tan-flipped`, neu in 6b) | $\frac{\sin x + \cos x}{\sin x - \cos x} \Rightarrow \frac{1 + \tan x}{1 - \tan x}$ |
@@ -697,6 +701,38 @@ mehr lauter Minus ($-ax - bx$), und nach dem Teilen durch den Faktor vor einem
 Baustein wird der Bruch gleich gekürzt; das ändert einige Rechenwege der
 Stufen 3 und 4 (gleiche Ergebnisse, schönere Zwischenschritte). Quadrate von
 Produkten werden ausgerechnet: $9(y + m)^2$ statt $(3(y + m))^2$.
+
+**Umgesetzt (6c):** Etwa jede fünfte Aufgabe der Stufe 4 (Anteil 40 % unter
+den Nummern, die nicht schon zu 6b gehören) kommt aus einem dritten Baukasten
+(`buildLevel4Quadratic`) mit sechs Arten von Kernen: $e^{2x}$ und $e^x$
+($e^{2x} - ae^x = b$, $ae^{2x} = be^x + c$, $e^x\left(e^x + a\right) = b$, auch
+in $\ln$ oder Wurzel), $e^x$ und $e^{-x}$ ($\frac{e^x - e^{-x}}{2} = y$,
+$\frac{e^x + e^{-x}}{2} = y$), $x$ und $\sqrt{x}$, $\sin^2 x$ und $\sin x$
+(auch $\cos^2 x = a\sin x$, $\tan^2 x$, $\sinh^2 x$), Logarithmen, die danach
+quadratisch werden ($\ln x + \ln(x + a) = b$, $2\ln x - \ln(x + a) = b$,
+$\ln^2 x - a\ln x = b$ mit $x > 1$), $x^4$ und $x^2$ sowie Brüche und
+Produkte, die quadratisch werden ($x - \frac{a}{x} = y$, $\frac{a}{x + b} = x$).
+Die Kerne sind so gebaut, dass genau eine Lösung der $pq$-Formel passt
+($q < 0$, bzw. bei $\frac{e^x + e^{-x}}{2}$ entscheidet $x > 0$); Schalen, die
+das Vorzeichen von $q$ ändern könnten, gibt es dort nicht. Die Nummern aus 6b
+behalten ihre Aufgabe. Gemessen unter den Aufgaben 1 bis 200 der Stufe 4: 196
+Formen, keine öfter als in 1 von 100, im Mittel 7,4 Umformungen, jede
+mindestens 6.
+
+Die Engine kann dazu: substituieren (Schritt `substitute`, $u$ für $e^x$,
+$\sqrt{x}$, $\sin x$, $\ln x$ oder $x^2$; danach wird nach $u$ aufgelöst),
+quadratische Gleichungen in $u$ oder $x$ (alles nach links `zero`, Normalform
+`normalize`, $pq$-Formel `pq` mit beiden Lösungen, passende Lösung wählen
+`choose`, zurück einsetzen `resubstitute`). Welche Lösung passt, prüft sie an
+Zufallsstellen: $x$ positiv, Bedingungen der Aufgabe erfüllt, die Gleichung vom
+Anfang gilt; der Grund steht dabei (negativ, obwohl $u = e^x$ positiv ist; mit
+ihr wäre $x$ negativ; eine Bedingung gilt nicht). Steht $\cos^2 x$ neben
+$\sin x$, wird erst das Quadrat ersetzt. Wurzeln aus Brüchen in Summen kommen
+ins Ergebnis als $\frac{\sqrt{a^2 + 4b}}{2}$ (mit ganzen Zahlen im Nenner so
+erweitert, dass er ein Quadrat ist). Geführt fragt „Welche der beiden
+Lösungen passt?" mit der Scheinlösung und ihrem Grund; frei gibt es einen
+Hinweis, wenn noch $u$ dasteht. Sieben neue typische Fehler (Tabelle oben),
+neue Lernkarten „Substitution" und „$pq$-Formel".
 
 Neue typische Fehler (Tabelle oben, mit Texten und auf den Lernkarten):
 Umkehrfunktion vergessen, mit dem Kehrwert verwechselt, in der Umkehrfunktion
