@@ -27,7 +27,7 @@ export const notationGroups: NotationGroup[] = [
   },
   {
     title: 'Kommt mit Stufe 5 von „Gleichungen umstellen“',
-    note: 'Ableitungen, Integrale, Summen, Reihen, Grenzwerte und Differentialgleichungen stehen schon in Aufgaben, die übrigen Zeichen kommen mit Schritt 8 von Meilenstein 3. So werden sie gesetzt.',
+    note: 'Ableitungen, Integrale, Summen, Reihen, Grenzwerte, Differentialgleichungen und Determinanten stehen schon in Aufgaben, die übrigen Zeichen kommen mit Schritt 8 von Meilenstein 3. So werden sie gesetzt.',
     samples: [
       { label: 'Ableitung als Rechenzeichen', tex: String.raw`\frac{\mathrm{d}}{\mathrm{d}x}\left(x\sqrt{x^2 + a^2}\right)` },
       { label: 'Integral', tex: String.raw`\int_a^x \frac{\mathrm{d}t}{t(t + b)}` },
@@ -36,6 +36,7 @@ export const notationGroups: NotationGroup[] = [
       { label: 'Differentialgleichung', tex: String.raw`\begin{gathered}f'' = k^{2}f \\ f(0) = a,\; f'(0) = 0 \\ f(x) = y\end{gathered}` },
       { label: 'Komplexe Zahlen', tex: String.raw`\left\lvert x + a\,\mathrm{i} \right\rvert, \quad \arg z` },
       { label: 'Determinante', tex: String.raw`\det\begin{pmatrix} e^{x} & e^{-x} \\ a & b \end{pmatrix}` },
+      { label: 'Determinante 3 × 3', tex: String.raw`\det\begin{pmatrix} 1 & x & x^{2} \\ 1 & 0 & 0 \\ 1 & a & a^{2} \end{pmatrix}` },
       { label: 'Vektor', tex: String.raw`\vec{u} = \begin{pmatrix} x \\ a \\ b \end{pmatrix}` },
       { label: 'Umkehrfunktionen', tex: String.raw`\arcsin x, \quad \arctan\frac{y + 1}{y - 1}` },
     ],

@@ -107,6 +107,7 @@ function evaluateFn(name: FnName, a: number): number {
 // --- Werkzeuge der Stufe 5 (Umstellen): numerisch, als Gegenprobe unabhängig vom Rechenweg ---
 
 function evaluateTool(tool: Tool, env: Env): number {
+  if (tool.kind === 'det') return numericDeterminant(tool.rows.map((row) => row.map((e) => evaluate(e, env))))
   const at = (value: number) => evaluate(tool.body, { ...env, [tool.v]: value })
   switch (tool.kind) {
     case 'derivative': {
@@ -317,4 +318,29 @@ function numericIntegral(f: (t: number) => number, a: number, b: number): number
     return refine(lo, mid, left, depth + 1) + refine(mid, hi, right, depth + 1)
   }
   return parts.reduce((sum, [lo, hi]) => sum + refine(lo, hi, gauss(lo, hi), 0), 0)
+}
+
+// Determinante numerisch: Gauß-Verfahren mit Spaltenpivotsuche (Dreiecksform: Produkt der Diagonale, je
+// Zeilentausch ein Minus); unabhängig von der Regel für 2 × 2 und vom Entwickeln im Rechenweg. NaN, sobald
+// ein Eintrag nicht definiert ist (auch neben einer Spalte aus Nullen)
+function numericDeterminant(rows: readonly (readonly number[])[]): number {
+  if (!rows.every((row) => row.length === rows.length && row.every(Number.isFinite))) return NaN
+  const a = rows.map((row) => [...row])
+  const n = a.length
+  let det = 1
+  for (let j = 0; j < n; j++) {
+    let p = j
+    for (let i = j + 1; i < n; i++) if (Math.abs(a[i][j]) > Math.abs(a[p][j])) p = i
+    if (a[p][j] === 0) return 0
+    if (p !== j) {
+      ;[a[p], a[j]] = [a[j], a[p]]
+      det = -det
+    }
+    det *= a[j][j]
+    for (let i = j + 1; i < n; i++) {
+      const l = a[i][j] / a[j][j]
+      for (let k = j + 1; k < n; k++) a[i][k] -= l * a[j][k]
+    }
+  }
+  return det
 }

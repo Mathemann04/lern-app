@@ -5,7 +5,20 @@ import { holds, samplePoints } from '../rearrange/check.ts'
 import { solveTask } from '../rearrange/isolate.ts'
 import { type RearrangeTask, givenLatex, taskVariables } from '../rearrange/task.ts'
 import { type Rng, createRng } from '../random/rng.ts'
-import { type KitTask, buildLevel1, buildLevel2, buildLevel3, buildLevel4, buildLevel4Quadratic, buildLevel4Trig, buildLevel5Ode, buildLevel5Series, buildLevel5Tools } from './rearrangeKit.ts'
+import { latexWidthEm } from './latexWidth.ts'
+import {
+  type KitTask,
+  buildLevel1,
+  buildLevel2,
+  buildLevel3,
+  buildLevel4,
+  buildLevel4Quadratic,
+  buildLevel4Trig,
+  buildLevel5Det,
+  buildLevel5Ode,
+  buildLevel5Series,
+  buildLevel5Tools,
+} from './rearrangeKit.ts'
 import type { Level, TaskRef } from './taskNumber.ts'
 
 // Vorlagen für Umstell-Aufgaben je Stufe (siehe docs/PLAN-M3.md, „Stufen"). Jede Vorlage baut aus
@@ -129,6 +142,18 @@ const level5Ode: RearrangeTemplate = {
   narrow: true,
 }
 
+// Teil 8a: Determinanten; der Anteil gilt unter den Nummern, die weder zu 7b noch zu 7c gehören
+const level5Det: RearrangeTemplate = {
+  id: 'baukasten-5-determinante',
+  level: 5,
+  label: 'Baukasten: Determinanten',
+  build: (rng) => buildLevel5Det(rng).task,
+  buildLabeled: buildLevel5Det,
+  share: 0.25,
+  novel: true,
+  narrow: true,
+}
+
 export const REARRANGE_TEMPLATES: readonly RearrangeTemplate[] = [
   level1Kit,
   level2Kit,
@@ -139,6 +164,7 @@ export const REARRANGE_TEMPLATES: readonly RearrangeTemplate[] = [
   level5Tools,
   level5Series,
   level5Ode,
+  level5Det,
 ]
 
 export function rearrangeTemplatesForLevel(level: Level): RearrangeTemplate[] {
@@ -161,6 +187,12 @@ const visibleLatex = (latex: string) =>
     .replace(/\\sum_\{[^}]*\}\^\{[^}]*\}/g, 'Sum')
     .replace(/\\lim_\{[^}]*\}/g, 'lim')
 
+// Mit Determinante: Breite in em geschätzt (latexWidth.ts), denn eine Matrix ist nur so breit wie ihre
+// breiteste Zeile; 12 em passen in der Aufgabe (text-2xl) am Handy in eine Zeile
+const MAX_DET_WIDTH = 12
+const hasDet = (t: RearrangeTask) =>
+  [t.equation.lhs, t.equation.rhs].flatMap((side) => subterms(side)).some((s) => s.kind === 'var' && s.tool?.kind === 'det')
+
 // Wie oft kommt die gesuchte Variable vor, und steht sie in einem Nenner?
 function occurrences(t: RearrangeTask): { count: number; inDenominator: boolean } {
   const count = [t.equation.lhs, t.equation.rhs].flatMap((side) => subterms(side)).filter((s) => s.kind === 'var' && s.name === t.target).length
@@ -177,7 +209,8 @@ function isGood(t: RearrangeTask, level: Level, kit: boolean, novel = false, nar
   if (kit) {
     const letters = taskVariables(t).length
     const latex = equationToLatex(t.equation)
-    const long = level === 5 ? visibleLatex(latex).length > MAX_TOOL_TASK || givenLatex(t).some((g) => g.length > MAX_ODE_LATEX) : latex.length > MAX_TASK_LATEX
+    const width = level === 5 && hasDet(t) ? latexWidthEm(latex) > MAX_DET_WIDTH : visibleLatex(latex).length > MAX_TOOL_TASK
+    const long = level === 5 ? width || givenLatex(t).some((g) => g.length > MAX_ODE_LATEX) : latex.length > MAX_TASK_LATEX
     if (long || letters > 7 || letters < 2) return false
     const { count, inDenominator } = occurrences(t)
     if (level === 1 && count !== 1) return false

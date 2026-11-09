@@ -18,10 +18,12 @@ async function enter(page: Page, latex: string) {
   }, latex)
 }
 
-async function solveWholeTask(page: Page) {
+// each: Prüfung bei jeder Frage
+async function solveWholeTask(page: Page, each?: (step: number) => Promise<void>) {
   for (let step = 0; step < 30; step++) {
     if (await page.getByRole('heading', { name: 'Geschafft!' }).isVisible()) return
     await expect(page.locator('#question')).toBeVisible()
+    await each?.(step)
     const count = await answers(page).count()
     for (let i = 0; i < count; i++) {
       const button = answers(page).nth(i)
@@ -39,6 +41,12 @@ async function expectCleanPage(page: Page, context: string) {
   await expect(page.locator('code.text-red-700'), context).toHaveCount(0)
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
   expect(overflow, `${context}: ragt seitlich heraus`).toBeLessThanOrEqual(0)
+}
+
+// Aufgabe oben und Antworten wischen nicht seitlich (eine angeschnittene Matrix wäre nicht zu lesen)
+async function expectNoInnerScroll(page: Page, context: string) {
+  const wide = await page.evaluate(() => [...document.querySelectorAll('main .overflow-x-auto')].filter((e) => e.scrollWidth > e.clientWidth + 1).length)
+  expect(wide, `${context}: wischt seitlich`).toBe(0)
 }
 
 test('Von der Startseite zu „Gleichungen umstellen" und eine Aufgabe der Stufe 2 geführt lösen', async ({ page }) => {
@@ -110,9 +118,10 @@ test('Umstellen: Lernkarten-Ordner mit durchgerechneten Beispielen', async ({ pa
   await expect(page.getByRole('heading', { name: 'Stufe 3' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Stufe 4' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Stufe 5' })).toBeVisible()
-  await expect(page.locator('main li a')).toHaveCount(17)
+  await expect(page.locator('main li a')).toHaveCount(18)
   await expect(page.getByRole('link', { name: /^Geometrische Summe und Reihe/ })).toBeVisible()
   await expect(page.getByRole('link', { name: /^Differentialgleichungen/ })).toBeVisible()
+  await expect(page.getByRole('link', { name: /^Determinanten/ })).toBeVisible()
   await expectCleanPage(page, 'Ordner')
 
   await page.getByRole('link', { name: /^Variable im Nenner/ }).click()
@@ -266,6 +275,50 @@ test('Umstellen Stufe 5 frei: Differentialgleichung, Anfangswert nicht genutzt, 
   await enter(page, 'x=\\frac{1}{k}\\ln\\left(\\frac{y+\\sqrt{y^2-a^2}}{a}\\right)')
   await expect(feedback(page)).toContainText('Richtig!')
   await expectCleanPage(page, 'Richtig Stufe 5 DGL')
+})
+
+test('Umstellen Stufe 5: Determinante geführt (Beispiel aus dem Plan), mit Lernkarte aus Teil 8a', async ({ page }) => {
+  // \det\begin{pmatrix} e^{x} & e^{-x} \\ a & b \end{pmatrix} = y
+  await page.goto('./#/ueben/umstellen/5-1460')
+  await expect(page.getByText('Was steht da eigentlich?')).toBeVisible()
+  await expect(page.locator('#question')).toContainText('Determinante')
+  await expectCleanPage(page, 'Start Stufe 5 Determinante')
+  await expectNoInnerScroll(page, 'Start Stufe 5 Determinante')
+  // richtig und drei der vier Fehler: Plus statt Minus, vertauscht, in Zeilen oder Spalten, nur die Hauptdiagonale
+  await expect(answers(page)).toHaveCount(4)
+  await solveWholeTask(page)
+  await expect(page.getByTestId('result')).toBeVisible()
+  const cards = page.getByRole('navigation', { name: 'Lernkarten zu dieser Aufgabe' })
+  await expect(cards.getByRole('link', { name: /^Determinanten/ })).toBeVisible()
+  await expectCleanPage(page, 'Stufe 5 Determinante')
+
+  // die Lernkarte mit durchgerechnetem Beispiel
+  await cards.getByRole('link', { name: /^Determinanten/ }).click()
+  await expect(page.getByRole('heading', { name: 'Determinanten', level: 1 })).toBeVisible()
+  await expect(page.getByText(/^Hauptdiagonale minus Nebendiagonale/).first()).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Beispiel' })).toBeVisible()
+  await expectCleanPage(page, 'Lernkarte Determinanten')
+})
+
+test('Umstellen Stufe 5: Determinante 3 × 3 geführt, erst entwickeln, nichts wischt seitlich', async ({ page }) => {
+  // \det\begin{pmatrix} 3 & 1 & c \\ x & a & 0 \\ 2 & x + b & 0 \end{pmatrix} = d
+  await page.goto('./#/ueben/umstellen/5-9')
+  await expect(page.locator('#question')).toContainText('Entwickle nach der Zeile oder Spalte mit zwei Nullen')
+  await solveWholeTask(page, (step) => expectNoInnerScroll(page, `Frage ${step + 1}`))
+  await expectCleanPage(page, 'Stufe 5 Determinante 3 × 3')
+})
+
+test('Umstellen Stufe 5 frei: Determinante, Diagonalen vertauscht, dann richtig', async ({ page }) => {
+  // \det\begin{pmatrix} e^{x} & e^{-x} \\ a & b \end{pmatrix} = y
+  await page.goto('./#/frei/umstellen/5-1460')
+  await expect(field(page)).toBeVisible()
+  await expectCleanPage(page, 'Start Stufe 5 Determinante frei')
+  await expectNoInnerScroll(page, 'Start Stufe 5 Determinante frei')
+  await enter(page, '\\ln\\left(\\frac{\\sqrt{y^2+4ab}-y}{2b}\\right)')
+  await expect(feedback(page)).toContainText('vertauscht')
+  await enter(page, 'x=\\ln\\left(\\frac{y+\\sqrt{y^2+4ab}}{2b}\\right)')
+  await expect(feedback(page)).toContainText('Richtig!')
+  await expectCleanPage(page, 'Richtig Stufe 5 Determinante')
 })
 
 test('Umstellen Stufe 4: sin² und cos², ein Quadrat ersetzen, Umkehrfunktion, mit beiden Lernkarten aus Teil 6b', async ({ page }) => {

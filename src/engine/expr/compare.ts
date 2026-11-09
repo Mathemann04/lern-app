@@ -1,4 +1,4 @@
-import { type Expr, toolBound, toolLimits } from './types.ts'
+import { type Expr, toolBodies, toolBound, toolLimits } from './types.ts'
 
 // Eindeutiger Schlüssel eines Terms: gleicher Baum ⇔ gleicher Schlüssel.
 // Die Schreibweise einer Zahl (Bruch oder Dezimalkomma) zählt nicht.
@@ -48,7 +48,7 @@ export function contains(e: Expr, name: string): boolean {
       // Werkzeug (Ableitung, Integral, Summe, Grenzwert): enthält seine freien Buchstaben
       if (e.tool) {
         const { tool } = e
-        return (toolBound(tool) !== name && contains(tool.body, name)) || toolLimits(tool).some((part) => contains(part, name))
+        return (toolBound(tool) !== name && toolBodies(tool).some((body) => contains(body, name))) || toolLimits(tool).some((part) => contains(part, name))
       }
       return e.name === name
     case 'add':

@@ -31,7 +31,7 @@ describe.each(KIT_LEVELS)('Abwechslung Stufe %i', (level) => {
   })
 })
 
-const TOOL_STEPS = new Set(['derive', 'partial', 'antiderivative', 'sumFormula', 'series', 'limit', 'ode'])
+const TOOL_STEPS = new Set(['derive', 'partial', 'antiderivative', 'sumFormula', 'series', 'limit', 'ode', 'det', 'detExpand'])
 
 describe('Baukasten der Stufen 1 bis 5', () => {
   const tasks = (level: Level) => Array.from({ length: 200 }, (_, i) => generateRearrangeTask({ level, seed: i + 1 }).task)
@@ -124,7 +124,7 @@ describe('Baukasten der Stufen 1 bis 5', () => {
     expect([...blocks].sort()).toEqual(['fn', 'ohne', 'pow', 'root'])
   })
 
-  it('Stufe 5, Teile 7a bis 7c: in jeder Aufgabe ein Werkzeug, im Mittel mindestens 8 Umformungen', () => {
+  it('Stufe 5, Teile 7a bis 8a: in jeder Aufgabe ein Werkzeug, im Mittel mindestens 8 Umformungen', () => {
     const all = tasks(5)
     const solutions = all.map((t) => solveTask(t)!)
     const lengths = solutions.map((s) => s.steps.length)
@@ -138,7 +138,7 @@ describe('Baukasten der Stufen 1 bis 5', () => {
       expect(TOOL_STEPS.has(solutions[i].steps[0].kind), taskLatex(t)).toBe(true)
     }
     const kinds = new Set(solutions.flatMap((s) => s.steps.map((step) => step.kind)))
-    for (const kind of ['derive', 'partial', 'antiderivative', 'bounds', 'pq', 'logCombine', 'sumFormula', 'series', 'limit', 'ode', 'substitute', 'choose'])
+    for (const kind of ['derive', 'partial', 'antiderivative', 'bounds', 'pq', 'logCombine', 'sumFormula', 'series', 'limit', 'ode', 'det', 'detExpand', 'substitute', 'choose'])
       expect(kinds.has(kind as never), kind).toBe(true)
     // auch zwei Werkzeuge in einer Aufgabe, Werkzeug im Bruch, unter der Wurzel und im \ln, Reihe in
     // einer Ableitung bzw. einem Integral
@@ -156,6 +156,8 @@ describe('Baukasten der Stufen 1 bis 5', () => {
       "DGL: $f'' = k^2 f$",
       'DGL: Abkühlen',
       "$g' = -kg$",
+      'Determinante $3 \\times 3$',
+      'Integral gleich Determinante',
     ]) {
       expect(labels.some((l) => l.includes(part)), part).toBe(true)
     }
@@ -167,6 +169,10 @@ describe('Baukasten der Stufen 1 bis 5', () => {
     const odes = generated.filter((g) => g.template.id === 'baukasten-5-dgl').length
     expect(odes).toBeGreaterThanOrEqual(15)
     expect(odes).toBeLessThanOrEqual(45)
+    // Teil 8a: 25 % der Nummern, die weder zu 7b noch zu 7c gehören
+    const dets = generated.filter((g) => g.template.id === 'baukasten-5-determinante').length
+    expect(dets).toBeGreaterThanOrEqual(10)
+    expect(dets).toBeLessThanOrEqual(35)
     expect(taskLatex(generated[5].task)).toBe('y = \\frac{\\mathrm{d}}{\\mathrm{d}x}\\left(\\frac{x^{2}}{x + a}\\right)')
     expect(taskLatex(generated[6].task)).toBe('\\frac{\\int_{0}^{x} be^{-3t}\\,\\mathrm{d}t}{ce^{-3x} + d} = g - h')
     expect(taskLatex(generated[119].task)).toBe('m - \\lim_{n \\to \\infty} \\left(\\frac{n}{n + x}\\right)^{3n} = p')

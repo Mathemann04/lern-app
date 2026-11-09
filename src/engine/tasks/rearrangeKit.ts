@@ -2,7 +2,7 @@ import { subterms } from '../expr/compare.ts'
 import { type Expr, E, PI, add, div, eq, fn, ln, log, mul, neg, num, pow, sqrt, variable } from '../expr/types.ts'
 import type { Condition, RearrangeTask } from '../rearrange/task.ts'
 import { limitParts, limitValue } from '../rearrange/tools/series.ts'
-import { derivativeOf, integralOf, limitOf, odeOf, seriesOf, sumOf } from '../rearrange/tools/tool.ts'
+import { derivativeOf, detOf, integralOf, limitOf, odeOf, seriesOf, sumOf } from '../rearrange/tools/tool.ts'
 import type { Rng } from '../random/rng.ts'
 
 // Baukasten für Umstell-Aufgaben (M3, 4. Fassung; docs/PLAN-M3.md, „Abwechslung"). Jede Gleichung
@@ -1325,16 +1325,24 @@ const LEVEL5_TOOL_CORES: readonly ToolBuild[] = [
   [12, twoTools],
 ]
 
-// Gesucht ist hier immer x
-export function buildLevel5Tools(rng: Rng): KitTask {
-  const n = toolNames(rng)
-  const total = LEVEL5_TOOL_CORES.reduce((s, [w]) => s + w, 0)
+// Eintrag nach Anteilen
+function weighted<T extends readonly [number, ...unknown[]]>(rng: Rng, items: readonly T[]): T {
+  const total = items.reduce((s, [w]) => s + w, 0)
   let r = rng.next() * total
-  const [, build] = LEVEL5_TOOL_CORES.find(([w]) => (r -= w) < 0) ?? LEVEL5_TOOL_CORES[0]
-  const built = build(rng, n)
+  return items.find(([w]) => (r -= w) < 0) ?? items[0]
+}
+
+// Kern nach Anteilen wählen und bauen, andere Seite dazu; gesucht ist x
+function buildTools(rng: Rng, n: ToolNames, cores: readonly ToolBuild[]): KitTask {
+  const built = weighted(rng, cores)[1](rng, n)
   const other = built.other ?? otherSide(rng, n)
   const equationFor = built.other ? (rng.chance(0.75) ? eq(built.side, other) : eq(other, built.side)) : equation(rng, built.side, other)
   return { task: { equation: equationFor, target: 'x', conditions: built.conditions ?? [] }, label: built.label }
+}
+
+// Gesucht ist hier immer x
+export function buildLevel5Tools(rng: Rng): KitTask {
+  return buildTools(rng, toolNames(rng), LEVEL5_TOOL_CORES)
 }
 
 // --- Stufe 5, Teil 7b: Summen, Reihen und Grenzwerte (docs/PLAN-M3.md, „Stufe 5 neu") ---
@@ -1565,14 +1573,7 @@ export function buildLevel5Series(rng: Rng): KitTask {
     const other = otherSide(rng, n)
     return { task: { equation: equation(rng, built.side, other), target: 'n', conditions: built.conditions ?? [] }, label: built.label }
   }
-  const n = seriesNames(rng)
-  const total = LEVEL5_SERIES_CORES.reduce((s, [w]) => s + w, 0)
-  let r = rng.next() * total
-  const [, build] = LEVEL5_SERIES_CORES.find(([w]) => (r -= w) < 0) ?? LEVEL5_SERIES_CORES[0]
-  const built = build(rng, n)
-  const other = built.other ?? otherSide(rng, n)
-  const equationFor = built.other ? (rng.chance(0.75) ? eq(built.side, other) : eq(other, built.side)) : equation(rng, built.side, other)
-  return { task: { equation: equationFor, target: 'x', conditions: built.conditions ?? [] }, label: built.label }
+  return buildTools(rng, seriesNames(rng), LEVEL5_SERIES_CORES)
 }
 
 // --- Stufe 5, Teil 7c: Differentialgleichungen (docs/PLAN-M3.md, „Stufe 5 neu") ---
@@ -1718,12 +1719,241 @@ const LEVEL5_ODE_CORES: readonly ToolBuild[] = [
 
 // Gesucht ist x
 export function buildLevel5Ode(rng: Rng): KitTask {
-  const n = odeNames(rng)
-  const total = LEVEL5_ODE_CORES.reduce((s, [w]) => s + w, 0)
-  let r = rng.next() * total
-  const [, build] = LEVEL5_ODE_CORES.find(([w]) => (r -= w) < 0) ?? LEVEL5_ODE_CORES[0]
-  const built = build(rng, n)
-  const other = built.other ?? otherSide(rng, n)
-  const equationFor = built.other ? (rng.chance(0.75) ? eq(built.side, other) : eq(other, built.side)) : equation(rng, built.side, other)
-  return { task: { equation: equationFor, target: 'x', conditions: built.conditions ?? [] }, label: built.label }
+  return buildTools(rng, odeNames(rng), LEVEL5_ODE_CORES)
+}
+
+// --- Stufe 5, Teil 8a: Determinanten (docs/PLAN-M3.md, „Stufe 5 neu") ---
+//
+// In der Gleichung steht eine Determinante, in deren Einträgen x steckt: 2 × 2 (Hauptdiagonale minus
+// Nebendiagonale) oder 3 × 3 mit einer Zeile oder Spalte, in der zwei Nullen stehen (erst nach ihr entwickeln,
+// dann die 2 × 2-Unterdeterminante ausrechnen). Danach ist die Gleichung meist quadratisch in e^{x}, x, \sqrt{x}
+// oder \ln x (Substitution, pq-Formel) oder hat \sin^2 x und \cos^2 x. Dazu Schalen, eine Wurzel oder ein \ln,
+// ein Bruch oder ein Integral auf der anderen Seite. Damit kein typischer Fehler zufällig die richtige
+// Gleichung ergibt: in einer 2 × 2-Determinante keine 0 und kein Minus vor einem Eintrag, nie zweimal
+// derselbe Eintrag in einer Spalte.
+
+// 2 × 2-Kern, Einträge zeilenweise
+type DetCore = {
+  readonly rows: readonly (readonly Expr[])[]
+  // danach quadratisch (pq-Formel): nur Schalen und andere Seiten, die q < 0 erhalten
+  readonly quadratic: boolean
+  // Substitution u = e^{x}: die andere Seite steckt später in p, darum nur malnehmen oder teilen
+  readonly scale?: boolean
+  // Wert zwischen -1 und 1 (\sin^2 x - \cos^2 x): nicht unter eine Wurzel oder in einen \ln
+  readonly bounded?: boolean
+  readonly conditions?: readonly Condition[]
+  // Baustein für den Bruch \frac{D}{e^{x} + c}
+  readonly partner?: Expr
+  // so viele Schalen mindestens (danach linear: sonst zu wenige Umformungen)
+  readonly minShells?: number
+  readonly label: string
+}
+
+// Anteil, als Unterdeterminante einer 3 × 3-Determinante geeignet, Bauplan. Nicht geeignet: Kerne mit
+// Winkelfunktionen oder vielen Umformungen und solche, die danach nur ein Polynom in x, \sqrt{x} oder e^{x}
+// sind: c\left(bx^2 - ax\right) = y löst die Engine nicht (sie teilt durch c und nimmt wieder mit c mal).
+type DetKind = readonly [number, boolean, (rng: Rng, n: Names) => DetCore]
+
+// e^{x}, e^{-x}, e^{2x}
+const expOf = (x: Expr, m: 1 | -1 | 2): Expr => pow(E, m === 1 ? x : m === -1 ? neg(x) : mul(num(2), x))
+
+// e^{x} und e^{-x}, auch gespiegelt: be^{x} - ae^{-x}
+function detExpPair(rng: Rng, n: Names): DetCore {
+  const x = n.unknown
+  const a = n.letter()
+  const b = coefficient(rng, n)
+  const rows = rng.chance(0.5) ? [[expOf(x, 1), expOf(x, -1)], [a, b]] : [[expOf(x, 1), a], [expOf(x, -1), b]]
+  return { rows, quadratic: true, scale: true, label: '$e^{x}$ und $e^{-x}$' }
+}
+
+// e^{x} und e^{x} + c: e^{x}\left(e^{x} + c\right) - ab
+function detExpShifted(rng: Rng, n: Names): DetCore {
+  const x = n.unknown
+  const a = n.letter()
+  const b = coefficient(rng, n)
+  return { rows: [[expOf(x, 1), a], [b, plus(expOf(x, 1), constant(rng, n))]], quadratic: true, scale: true, label: '$e^{x}$ und $e^{x} + c$' }
+}
+
+// e^{2x} und e^{x}: be^{2x} - ae^{x}
+function detExpSquare(rng: Rng, n: Names): DetCore {
+  const x = n.unknown
+  const a = coefficient(rng, n)
+  const b = n.letter()
+  const rows = rng.chance(0.5) ? [[expOf(x, 2), a], [expOf(x, 1), b]] : [[expOf(x, 2), expOf(x, 1)], [a, b]]
+  return { rows, quadratic: true, scale: true, label: '$e^{2x}$ und $e^{x}$' }
+}
+
+// lauter e-Potenzen: e^{2x} - e^{-2x}
+function detExpOnly(_rng: Rng, n: Names): DetCore {
+  const x = n.unknown
+  return { rows: [[expOf(x, 1), expOf(x, -1)], [expOf(x, -1), expOf(x, 1)]], quadratic: true, scale: true, label: 'nur $e^{x}$ und $e^{-x}$' }
+}
+
+// x und x + c: x(x + c) - ab
+function detXShifted(rng: Rng, n: Names): DetCore {
+  const x = n.unknown
+  const a = n.letter()
+  const b = coefficient(rng, n)
+  return { rows: [[x, a], [b, plus(x, constant(rng, n))]], quadratic: true, label: '$x$ und $x + c$' }
+}
+
+// x^2 und x: bx^2 - ax
+function detXSquare(rng: Rng, n: Names): DetCore {
+  const x = n.unknown
+  const a = coefficient(rng, n)
+  const b = n.letter()
+  return { rows: rng.chance(0.5) ? [[square(x), a], [x, b]] : [[square(x), x], [a, b]], quadratic: true, label: '$x^2$ und $x$' }
+}
+
+// x und \frac{1}{x}: bx - \frac{a}{x}
+function detXReciprocal(rng: Rng, n: Names): DetCore {
+  const x = n.unknown
+  const a = n.letter()
+  const b = coefficient(rng, n)
+  const rows = rng.chance(0.5) ? [[x, a], [div(num(1), x), b]] : [[x, div(num(1), x)], [a, b]]
+  return { rows, quadratic: true, label: '$x$ und $\\frac{1}{x}$' }
+}
+
+// x + a und x - a: (x + a)(x - a) - bc, danach steht nur noch x^2 da
+function detXPlusMinus(rng: Rng, n: Names): DetCore {
+  const x = n.unknown
+  const a = constant(rng, n)
+  const b = n.letter()
+  return { rows: [[plus(x, a), b], [coefficient(rng, n), minus(x, a)]], quadratic: false, label: '$x + a$ und $x - a$' }
+}
+
+// x und \sqrt{x}: bx - a\sqrt{x}
+function detXRoot(rng: Rng, n: Names): DetCore {
+  const x = n.unknown
+  const a = coefficient(rng, n)
+  const b = n.letter()
+  return { rows: rng.chance(0.5) ? [[x, sqrt(x)], [a, b]] : [[x, a], [sqrt(x), b]], quadratic: true, label: '$x$ und $\\sqrt{x}$' }
+}
+
+// \sqrt{x} und \sqrt{x} + b: \sqrt{x}\left(\sqrt{x} + b\right) - a
+function detRootShifted(rng: Rng, n: Names): DetCore {
+  const x = n.unknown
+  const a = n.letter()
+  const r = rng.chance(0.5) ? num(1) : n.letter()
+  return { rows: [[sqrt(x), a], [r, plus(sqrt(x), constant(rng, n))]], quadratic: true, label: '$\\sqrt{x}$ und $\\sqrt{x} + b$' }
+}
+
+// \ln x und \ln x + b: \ln x\left(\ln x + b\right) - a, mit x > 1 (sonst passen beide Lösungen der pq-Formel)
+function detLnShifted(rng: Rng, n: Names): DetCore {
+  const x = n.unknown
+  const a = n.letter()
+  const r = rng.chance(0.5) ? num(1) : n.letter()
+  return { rows: [[ln(x), a], [r, plus(ln(x), constant(rng, n))]], quadratic: true, conditions: [above(x, num(1))], label: '$\\ln x$ und $\\ln x + b$' }
+}
+
+// \sin x und \cos x über Kreuz: \sin^2 x - \cos^2 x oder umgekehrt, mit x < \frac{\pi}{2}
+function detTrig(rng: Rng, n: Names): DetCore {
+  const x = n.unknown
+  const [p, q] = rng.chance(0.6) ? [fn('sin', x), fn('cos', x)] : [fn('cos', x), fn('sin', x)]
+  return { rows: [[p, q], [q, p]], quadratic: true, bounded: true, conditions: angleConditions('sin', x, x), label: '$\\sin x$ und $\\cos x$' }
+}
+
+const DET_QUADRATIC: readonly DetKind[] = [
+  [14, true, detExpPair],
+  [7, false, detExpShifted],
+  [8, false, detExpSquare],
+  [3, true, detExpOnly],
+  [8, true, detXShifted],
+  [6, false, detXSquare],
+  [6, true, detXReciprocal],
+  [5, true, detXPlusMinus],
+  [5, false, detXRoot],
+  [4, false, detRootShifted],
+  [5, false, detLnShifted],
+  [4, false, detTrig],
+]
+
+// Danach linear in einem Baustein: be^{x} - a, e^{2x} - ab, x^2 - ab, b\ln x - a, b\tan x - a, b\sinh x - a,
+// b\cosh x - a
+const DET_LINEAR: readonly DetKind[] = [
+  [22, true, (rng, n) => ({ rows: [[expOf(n.unknown, 1), n.letter()], [num(1), coefficient(rng, n)]], quadratic: false, partner: expOf(n.unknown, 1), label: '$e^{x}$, linear' })],
+  [16, true, (rng, n) => ({ rows: [[expOf(n.unknown, 1), n.letter()], [coefficient(rng, n), expOf(n.unknown, 1)]], quadratic: false, label: '$e^{x}$ auf der Diagonale' })],
+  [16, true, (rng, n) => ({ rows: [[n.unknown, n.letter()], [coefficient(rng, n), n.unknown]], quadratic: false, minShells: 2, label: '$x$ auf der Diagonale' })],
+  [18, true, (rng, n) => ({ rows: [[ln(n.unknown), n.letter()], [num(1), coefficient(rng, n)]], quadratic: false, partner: ln(n.unknown), label: '$\\ln x$, linear' })],
+  [10, false, (rng, n) => ({ rows: [[fn('tan', n.unknown), n.letter()], [num(1), coefficient(rng, n)]], quadratic: false, conditions: angleConditions('tan', n.unknown, n.unknown), minShells: 2, label: '$\\tan x$, linear' })],
+  [8, false, (rng, n) => ({ rows: [[fn('sinh', n.unknown), n.letter()], [num(1), coefficient(rng, n)]], quadratic: false, minShells: 2, label: '$\\sinh x$, linear' })],
+  [8, false, (rng, n) => ({ rows: [[fn('cosh', n.unknown), n.letter()], [num(1), coefficient(rng, n)]], quadratic: false, minShells: 2, label: '$\\cosh x$, linear' })],
+]
+
+// 2 × 2, danach meist quadratisch: allein, mit einer Schale, unter einer Wurzel oder im \ln
+function detQuadratic(rng: Rng, n: ToolNames): Built {
+  const c = weighted(rng, DET_QUADRATIC)[2](rng, n)
+  const d = detOf(c.rows)
+  const other = c.scale ? simpleSide(rng, n) : positiveSide(rng, n)
+  if (!c.bounded && rng.chance(0.25)) {
+    const side = rng.chance(0.5) ? sqrt(d) : ln(d)
+    return { side, other, conditions: c.conditions, label: `Determinante ${c.label}, ${side.kind === 'root' ? 'unter der Wurzel' : 'im $\\ln$'}` }
+  }
+  // (x + a)(x - a) - bc: eine Schale (die Einträge sind schon breit)
+  const { e, count } = c.scale ? scaleShells(rng, d, n, 1) : c.quadratic ? positiveShells(rng, d, n, 1) : someShells(rng, d, n, 1, 1)
+  return { side: e, other, conditions: c.conditions, label: `Determinante ${c.label}, ${count} Schalen` }
+}
+
+// 2 × 2, danach linear: mit Schalen oder im Bruch mit seinem Baustein, \frac{D}{e^{x} + c} = y
+function detLinear(rng: Rng, n: ToolNames): Built {
+  const c = weighted(rng, DET_LINEAR)[2](rng, n)
+  const d = detOf(c.rows)
+  if (c.partner && rng.chance(0.4)) {
+    const other = plus(maybeTimes(rng, n, c.partner, 0.3), constant(rng, n))
+    return { side: rng.chance(0.7) ? div(d, other) : div(other, d), conditions: c.conditions, label: `Determinante ${c.label}, im Bruch` }
+  }
+  const { e, count } = someShells(rng, d, n, 2, c.minShells ?? 1)
+  return { side: e, conditions: c.conditions, label: `Determinante ${c.label}, ${count} Schalen` }
+}
+
+// 3 × 3 um einen 2 × 2-Kern (er wird die Unterdeterminante): Eintrag c an der Stelle (i, j), nie 1, der Rest
+// seiner Zeile oder Spalte 0, die übrigen gestrichenen Felder Zahlen von 1 bis 3. Steht c auf einem
+// Minus-Feld des Schachbretts, tauschen die Spalten des Kerns, damit c mal die Determinante des Kerns
+// herauskommt (sonst hätte die Gleichung meist keine Lösung). Ohne Schalen: Entwickeln und Ausrechnen
+// sind schon zwei Umformungen. Der Kern ist meist einer, nach dem die Gleichung quadratisch wird.
+function detThree(rng: Rng, n: ToolNames): Built {
+  const kinds = (rng.chance(0.6) ? DET_QUADRATIC : DET_LINEAR).filter(([, minor]) => minor)
+  const c = weighted(rng, kinds)[2](rng, n)
+  const entry = rng.chance(0.75) ? n.letter() : k(rng, 2, 3)
+  const i = rng.int(0, 2)
+  const j = rng.int(0, 2)
+  const byRow = rng.chance(0.5)
+  const core = (i + j) % 2 === 1 ? c.rows.map(([p, q]) => [q, p]) : c.rows
+  const rows = [0, 1, 2].map((r) =>
+    [0, 1, 2].map((s) => {
+      if (r === i && s === j) return entry
+      if (byRow ? r === i : s === j) return num(0)
+      if (r === i || s === j) return k(rng, 1, 3)
+      return core[r < i ? r : r - 1][s < j ? s : s - 1]
+    }),
+  )
+  const other = c.scale ? simpleSide(rng, n) : positiveSide(rng, n)
+  return { side: detOf(rows), other, conditions: c.conditions, label: `Determinante $3 \\times 3$ um ${c.label}` }
+}
+
+// Integral gleich Determinante: \int_0^x e^t\,\mathrm{d}t = \det\begin{pmatrix} a & e^{x} \\ 1 & b \end{pmatrix}
+function detVersusIntegral(rng: Rng, n: ToolNames): Built {
+  const x = n.unknown
+  const a = n.letter()
+  const b = coefficient(rng, n)
+  const diagonal = detOf([[expOf(x, 1), a], [b, expOf(x, 1)]])
+  const r = rng.next()
+  if (r < 0.3) return { side: integralOf(pow(E, T), num(0), x), other: detOf([[a, expOf(x, 1)], [num(1), b]]), label: 'Integral gleich Determinante, linear' }
+  if (r < 0.55) return { side: integralOf(pow(E, T), num(0), x), other: diagonal, label: 'Integral gleich Determinante, danach quadratisch' }
+  if (r < 0.8) return { side: integralOf(pow(E, mul(num(2), T)), num(0), x), other: diagonal, label: 'Integral gleich Determinante, $e^{2t}$' }
+  const logs = detOf([[ln(x), a], [b, ln(x)]])
+  return { side: integralOf(div(num(1), T), num(1), x), other: logs, conditions: [above(x, num(1))], label: 'Integral gleich Determinante, $\\ln x$' }
+}
+
+// 3 × 3 wird fast nie verworfen, 2 × 2 öfter: Mit diesen Anteilen ist etwa jede vierte Aufgabe 3 × 3
+const LEVEL5_DET_CORES: readonly ToolBuild[] = [
+  [55, detQuadratic],
+  [15, detLinear],
+  [18, detThree],
+  [5, detVersusIntegral],
+]
+
+// Gesucht ist x
+export function buildLevel5Det(rng: Rng): KitTask {
+  return buildTools(rng, toolNames(rng), LEVEL5_DET_CORES)
 }

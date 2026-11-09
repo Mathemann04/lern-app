@@ -48,7 +48,7 @@ import {
 import type { RearrangeTask } from './task.ts'
 import { type ToolStepKind, toolMistakes } from './tools/steps.ts'
 
-const TOOL_STEPS = new Set<string>(['derive', 'partial', 'antiderivative', 'bounds', 'sumFormula', 'series', 'limit', 'ode'])
+const TOOL_STEPS = new Set<string>(['derive', 'partial', 'antiderivative', 'bounds', 'sumFormula', 'series', 'limit', 'ode', 'det', 'detExpand'])
 
 // Typische Fehler beim Umstellen (Katalog in docs/PLAN-M3.md). Jeder Fehler steckt in genau einem
 // Schritt des Rechenwegs: Dieser Schritt wird falsch ausgeführt, danach wird richtig weitergerechnet.
@@ -133,6 +133,13 @@ export const REARRANGE_ERROR_RULES: readonly EqErrorRule[] = [
   { id: 'eq-ode-constant-added', name: 'Die Konstante addiert statt malgenommen', wrongFormula: "f' = kf,\\; f(0) = a: f(x) = e^{kx} + a - 1" },
   { id: 'eq-ode-exp-sign', name: 'Das Vorzeichen in der Hochzahl vertauscht', wrongFormula: "f' = -kf,\\; f(0) = a: f(x) = ae^{kx}" },
   { id: 'eq-ode-constant-start', name: 'Beim Abkühlen die Konstante gleich dem Anfangswert gesetzt', wrongFormula: "f' = k(b - f),\\; f(0) = a: f(x) = b + ae^{-kx}" },
+  // Werkzeuge der Stufe 5 (Schritt 8a): Determinanten
+  { id: 'eq-det-plus', name: 'Bei der Determinante Plus statt Minus gerechnet', wrongFormula: '\\det\\begin{pmatrix} p & q \\\\ r & s \\end{pmatrix} = ps + qr' },
+  { id: 'eq-det-swapped', name: 'Haupt- und Nebendiagonale vertauscht', wrongFormula: '\\det\\begin{pmatrix} p & q \\\\ r & s \\end{pmatrix} = qr - ps' },
+  { id: 'eq-det-rows', name: 'In Zeilen oder Spalten statt über Kreuz malgenommen', wrongFormula: '\\det\\begin{pmatrix} p & q \\\\ r & s \\end{pmatrix} = pq - rs' },
+  { id: 'eq-det-main', name: 'Nur die Hauptdiagonale malgenommen', wrongFormula: '\\det\\begin{pmatrix} p & q \\\\ r & s \\end{pmatrix} = ps' },
+  { id: 'eq-det-checkerboard', name: 'Beim Entwickeln das Vorzeichen aus dem Schachbrett vertauscht', wrongFormula: '\\det\\begin{pmatrix} 0 & p & q \\\\ a & 1 & 2 \\\\ 0 & r & s \\end{pmatrix} = a\\det\\begin{pmatrix} p & q \\\\ r & s \\end{pmatrix}' },
+  { id: 'eq-det-entry', name: 'Beim Entwickeln den Eintrag vor der Unterdeterminante vergessen', wrongFormula: '\\det\\begin{pmatrix} 0 & p & q \\\\ a & 1 & 2 \\\\ 0 & r & s \\end{pmatrix} = -\\det\\begin{pmatrix} p & q \\\\ r & s \\end{pmatrix}' },
 ]
 
 export function rearrangeErrorRule(id: string): EqErrorRule {

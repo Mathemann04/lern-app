@@ -1,7 +1,7 @@
 import { subterms } from '../../expr/compare.ts'
 import { odeLatex, toolLatex } from '../../expr/print.ts'
 import { substitute } from '../../expr/substitute.ts'
-import { type Equation, type Expr, type Tool, type Var, add, eq, neg, num, variable } from '../../expr/types.ts'
+import { type Equation, type Expr, type Tool, type Var, add, eq, mapToolBodies, neg, num, toolBodies, variable } from '../../expr/types.ts'
 import { ratNeg } from '../../rational.ts'
 
 // Werkzeuge der Stufe 5 im Termbaum: ein Buchstabe mit eigenem Namen (aus der Schreibweise, also
@@ -33,6 +33,9 @@ export const limitOf = (body: Expr, v = 'n'): Var => toolExpr({ kind: 'limit', b
 export const odeOf = (body: Expr, order: 1 | 2, initial: readonly Expr[], v = 'f', point: Expr = variable('x')): Var =>
   toolExpr({ kind: 'ode', order, body, v, initial, point })
 
+// \det\begin{pmatrix} … \end{pmatrix}, Einträge zeilenweise (2 × 2 oder 3 × 3)
+export const detOf = (rows: readonly (readonly Expr[])[]): Var => toolExpr({ kind: 'det', rows })
+
 export type ToolVar = Var & { readonly tool: Tool }
 
 export const isToolVar = (e: Expr): e is ToolVar => e.kind === 'var' && e.tool !== undefined
@@ -63,10 +66,10 @@ export function activeTool(e: Equation): ActiveTool | null {
 }
 
 function innermost(tool: ToolVar): { tool: ToolVar; put: (value: Expr) => Expr } {
-  const inner = subterms(tool.tool.body).find(isToolVar)
+  const inner = toolBodies(tool.tool).flatMap(subterms).find(isToolVar)
   if (!inner) return { tool, put: (value) => value }
   const deeper = innermost(inner)
-  return { tool: deeper.tool, put: (value) => toolExpr({ ...tool.tool, body: replaceToolIn(tool.tool.body, inner, deeper.put(value)) }) }
+  return { tool: deeper.tool, put: (value) => toolExpr(mapToolBodies(tool.tool, (body) => replaceToolIn(body, inner, deeper.put(value)))) }
 }
 
 function negatedTerm(e: Expr): Expr {
@@ -116,5 +119,3 @@ function spliced(e: Expr, value: Expr): Expr {
   return visit(e)
 }
 
-// Integrationsvariable als Term
-export const boundVariable = (tool: Tool) => variable(tool.v)

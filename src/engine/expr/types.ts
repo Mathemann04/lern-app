@@ -61,14 +61,18 @@ export type Tool =
   // Funktion (gebunden), body die rechte Seite in v (f' = body bzw. f'' = body, z. B. k^2 f oder
   // k(b - f)), initial die Anfangswerte f(0) bzw. f(0), f'(0)
   | { readonly kind: 'ode'; readonly order: 1 | 2; readonly body: Expr; readonly v: string; readonly initial: readonly Expr[]; readonly point: Expr }
+  // Determinante \det\begin{pmatrix} … \end{pmatrix} (2 × 2 oder 3 × 3), Einträge zeilenweise; ohne Rumpf und
+  // ohne gebundene Variable
+  | { readonly kind: 'det'; readonly rows: readonly (readonly Expr[])[] }
 
 // Gebundene Variable eines Werkzeugs (bei der Ableitung keine: dort ist v die Stelle) und die Teile
 // außerhalb des Rumpfs (Grenzen)
-export const toolBound = (tool: Tool): string | null => (tool.kind === 'derivative' ? null : tool.v)
+export const toolBound = (tool: Tool): string | null => (tool.kind === 'derivative' || tool.kind === 'det' ? null : tool.v)
 export function toolLimits(tool: Tool): Expr[] {
   switch (tool.kind) {
     case 'derivative':
     case 'limit':
+    case 'det':
       return []
     case 'series':
       return [tool.lower]
@@ -78,6 +82,12 @@ export function toolLimits(tool: Tool): Expr[] {
       return [tool.lower, tool.upper]
   }
 }
+
+// Rumpf eines Werkzeugs (bei der Determinante die Einträge, zeilenweise): Darin steht die gebundene
+// Variable, und darin kann ein weiteres Werkzeug stecken, das zuerst ausgerechnet wird (tools/tool.ts)
+export const toolBodies = (tool: Tool): readonly Expr[] => (tool.kind === 'det' ? tool.rows.flat() : [tool.body])
+export const mapToolBodies = (tool: Tool, f: (e: Expr) => Expr): Tool =>
+  tool.kind === 'det' ? { ...tool, rows: tool.rows.map((row) => row.map(f)) } : { ...tool, body: f(tool.body) }
 
 // Gleichung, z. B. für implizites Ableiten: x² + y² = 25
 export type Equation = { readonly lhs: Expr; readonly rhs: Expr }

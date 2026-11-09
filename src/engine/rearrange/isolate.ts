@@ -88,6 +88,8 @@ export type StepKind =
   | 'series'
   | 'limit'
   | 'ode'
+  | 'det'
+  | 'detExpand'
   | 'finish'
 
 export const STEP_NAMES: Record<StepKind, string> = {
@@ -127,6 +129,8 @@ export const STEP_NAMES: Record<StepKind, string> = {
   series: 'Reihe ausrechnen',
   limit: 'Grenzwert bilden',
   ode: 'Differentialgleichung lösen',
+  det: 'Determinante ausrechnen',
+  detExpand: 'Determinante entwickeln',
   finish: 'Ergebnis',
 }
 

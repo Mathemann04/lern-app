@@ -1,6 +1,6 @@
 import { subterms } from '../expr/compare.ts'
 import { type Env, evaluate } from '../expr/evaluate.ts'
-import type { Equation, Expr } from '../expr/types.ts'
+import { type Equation, type Expr, toolBodies } from '../expr/types.ts'
 import type { Rng } from '../random/rng.ts'
 import { type Condition, type RearrangeTask, taskVariables, variablesOf } from './task.ts'
 
@@ -44,7 +44,7 @@ export function samplePoints(task: RearrangeTask, result: Expr, rng: Rng, count:
 // Differentialgleichung z. B. nur bis kx = 50, sonst wären die Werte riesig)
 const SLOW_TOOLS = new Set(['sum', 'series', 'limit', 'ode'])
 const hasSlowTool = (e: Expr): boolean =>
-  subterms(e).some((s) => s.kind === 'var' && s.tool !== undefined && (SLOW_TOOLS.has(s.tool.kind) || hasSlowTool(s.tool.body)))
+  subterms(e).some((s) => s.kind === 'var' && s.tool !== undefined && (SLOW_TOOLS.has(s.tool.kind) || toolBodies(s.tool).some(hasSlowTool)))
 
 // Prüfstellen mit dem Wert von u nach einer Substitution (u = e^x), für Gleichungen in u
 export function withSubstitution(points: readonly Env[], sub: { readonly name: string; readonly expr: Expr } | undefined): Env[] {

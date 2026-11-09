@@ -231,3 +231,41 @@ describe('Umstellen frei: Differentialgleichungen (Stufe 5, Teil 7c)', () => {
     expect(checked).toBeGreaterThan(40)
   }, 60_000)
 })
+
+describe('Umstellen frei: Determinanten (Stufe 5, Teil 8a)', () => {
+  // \det\begin{pmatrix} e^{x} & e^{-x} \\ a & b \end{pmatrix} = y, das Beispiel aus dem Plan
+  const plan = generateRearrangeTask({ level: 5, seed: 1460 }).task
+  const context = prepareRearrangeCheck(plan, true)
+  const verdict = (input: string) => {
+    const v = checkRearrangeAnswer(context, input)
+    return v.kind === 'knownError' ? v.wrong.rule.id : v.kind
+  }
+
+  it('Ergebnis aus dem Plan; Tastatur mit den Buchstaben der Einträge und e^x', () => {
+    expect(verdict('\\ln\\left(\\frac{y+\\sqrt{y^2+4ab}}{2b}\\right)')).toBe('correct')
+    expect(prepareRearrangeFree({ level: 5, seed: 1460 }).keyboard).toMatchObject({ kind: 'rearrange', letters: ['a', 'b', 'x', 'y'], exp: true })
+  })
+
+  it('typische Fehler bei der Determinante werden erkannt', () => {
+    expect(verdict('\\ln\\left(\\frac{\\sqrt{y^2+4ab}-y}{2b}\\right)')).toBe('eq-det-swapped')
+    expect(verdict('\\ln\\left(\\frac{y+\\sqrt{y^2+4ab}}{2a}\\right)')).toBe('eq-det-rows')
+    expect(verdict('\\ln\\frac{y}{b}')).toBe('eq-det-main')
+  })
+
+  it('Stufe 5: Lösung richtig, falsche Ergebnisse der Determinanten als Fehler erkannt', () => {
+    let checked = 0
+    for (let seed = 1; seed <= 400; seed++) {
+      const g = generateRearrangeTask({ level: 5, seed })
+      if (g.template.id !== 'baukasten-5-determinante') continue
+      const c = prepareRearrangeCheck(g.task, true)
+      const label = `5-${seed}`
+      expect(checkRearrangeAnswer(c, toLatex(c.solution.result)), label).toEqual({ kind: 'correct' })
+      for (const w of c.wrongs) {
+        if (!w.result || !w.rule.id.startsWith('eq-det')) continue
+        expect(checkRearrangeAnswer(c, toLatex(w.result)).kind, `${label}: ${w.rule.id} ${toLatex(w.result)}`).toBe('knownError')
+        checked++
+      }
+    }
+    expect(checked).toBeGreaterThan(60)
+  }, 60_000)
+})

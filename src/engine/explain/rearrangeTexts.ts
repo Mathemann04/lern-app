@@ -319,6 +319,37 @@ export const REARRANGE_ERROR_TEXTS: Readonly<Record<string, Explanation>> = {
       "Bei $f' = k(b - f)$ ist $f(x) = b + Ce^{-kx}$: $b$ ist der Endwert, $Ce^{-kx}$ der Abstand dazu. Setze $x = 0$ ein: $f(0) = b + C$. Die Konstante ist also nicht der Anfangswert selbst, sondern sein Abstand zum Endwert.",
     short: "Probe bei $x = 0$: $f(0) = b + C$, die Konstante ist der Abstand zum Endwert.",
   },
+  // Werkzeuge der Stufe 5 (Schritt 8a): Determinanten
+  'eq-det-plus': {
+    detailed:
+      'Bei der $2 \\times 2$-Determinante wird das Produkt der Nebendiagonale abgezogen, nicht addiert: $\\det\\begin{pmatrix} p & q \\\\ r & s \\end{pmatrix} = ps - qr$. Merke: Hauptdiagonale minus Nebendiagonale.',
+    short: 'Hauptdiagonale minus Nebendiagonale: $ps - qr$.',
+  },
+  'eq-det-swapped': {
+    detailed:
+      'Zuerst kommt das Produkt der Hauptdiagonale (von links oben nach rechts unten), davon wird das Produkt der Nebendiagonale abgezogen: $ps - qr$. Andersherum hat die ganze Determinante das falsche Vorzeichen.',
+    short: 'Erst die Hauptdiagonale (links oben nach rechts unten), dann minus die Nebendiagonale.',
+  },
+  'eq-det-rows': {
+    detailed:
+      'Bei der Determinante wird über Kreuz malgenommen, entlang der Diagonalen: links oben mal rechts unten, minus rechts oben mal links unten. Die Einträge einer Zeile oder einer Spalte werden nicht miteinander malgenommen.',
+    short: 'Über Kreuz: $ps - qr$, nicht innerhalb einer Zeile oder Spalte.',
+  },
+  'eq-det-main': {
+    detailed:
+      'Nur bei einer Dreiecksmatrix (auf einer Seite der Diagonale stehen nur Nullen) ist die Determinante das Produkt der Diagonale. Sonst wird das Produkt der Nebendiagonale abgezogen: $ps - qr$.',
+    short: 'Die Nebendiagonale gehört dazu: $ps - qr$.',
+  },
+  'eq-det-checkerboard': {
+    detailed:
+      'Beim Entwickeln bekommt jeder Eintrag ein Vorzeichen aus dem Schachbrett $\\begin{pmatrix} + & - & + \\\\ - & + & - \\\\ + & - & + \\end{pmatrix}$: In Zeile $i$ und Spalte $j$ ist es $(-1)^{i + j}$. Zähle die Stelle des Eintrags ab.',
+    short: 'Vorzeichen aus dem Schachbrett: $(-1)^{i + j}$ für Zeile $i$, Spalte $j$.',
+  },
+  'eq-det-entry': {
+    detailed:
+      'Beim Entwickeln steht vor der Unterdeterminante ihr Eintrag: Vorzeichen aus dem Schachbrett mal Eintrag mal Determinante der Matrix ohne seine Zeile und Spalte.',
+    short: 'Vorzeichen mal Eintrag mal Unterdeterminante.',
+  },
 }
 
 export function explainRearrangeError(id: string): Explanation {
@@ -818,6 +849,8 @@ export const REARRANGE_HINTS = {
   series: 'Geometrische Reihe für $0 < q < 1$: $\\sum_{k=0}^{\\infty} q^k = \\frac{1}{1 - q}$. Abgeleitet: $\\sum_{k=1}^{\\infty} kq^k = \\frac{q}{(1 - q)^2}$, integriert: $\\sum_{k=1}^{\\infty} \\frac{q^k}{k} = -\\ln(1 - q)$.',
   limit: '$\\lim_{n \\to \\infty}\\left(1 + \\frac{p}{n}\\right)^n = e^p$. Einen Faktor in der Hochzahl nimmst du mit, einen Bruch teilst du oben und unten durch $n$.',
   ode: "Ansatz $e^{\\lambda x}$: Bei $f' = kf$ ist $f(x) = f(0) \\cdot e^{kx}$, bei $f' = k(b - f)$ ist $f(x) = b + Ce^{-kx}$. Bei $f'' = k^2 f$ ist $f(x) = C_1e^{kx} + C_2e^{-kx}$ mit $C_1 + C_2 = f(0)$ und $k(C_1 - C_2) = f'(0)$.",
+  det: 'Hauptdiagonale minus Nebendiagonale: $\\det\\begin{pmatrix} p & q \\\\ r & s \\end{pmatrix} = ps - qr$.',
+  detExpand: 'Entwickle nach der Zeile oder Spalte mit zwei Nullen: Vorzeichen aus dem Schachbrett mal Eintrag mal Unterdeterminante (die Matrix ohne seine Zeile und Spalte).',
   add: 'Ein Summand verschwindet mit der Gegenrechnung: Aus $+c$ wird auf beiden Seiten $-c$.',
   move: 'Bringe den Summanden mit Minus auf die andere Seite, dort steht er mit Plus. Den Rest bringst du herüber.',
   divide: 'Einen Faktor wirst du los, indem du beide Seiten durch ihn teilst.',
@@ -857,13 +890,15 @@ export const REARRANGE_HINTS = {
 } as const
 
 // Tipp für die ganze Aufgabe (im freien Modus)
-export type TaskTool = 'derivative' | 'integral' | 'series' | 'limit' | 'ode'
+export type TaskTool = 'derivative' | 'integral' | 'series' | 'limit' | 'ode' | 'det'
 
 export function rearrangeTaskHint(target: string, several: boolean, block: string | null = null, quadratic = false, tool: TaskTool | null = null): Explanation {
   if (tool === 'derivative') return same(`Rechne zuerst die Ableitung aus. Dann steht eine gewöhnliche Gleichung da, die du nach $${target}$ auflöst.`)
   if (tool === 'integral') return same(`Rechne zuerst das Integral aus: Stammfunktion, dann die Grenzen einsetzen. Dann löst du nach $${target}$ auf.`)
   if (tool === 'series') return same(`Rechne zuerst die Summe mit der Formel der geometrischen Summe bzw. Reihe aus. Dann löst du nach $${target}$ auf.`)
   if (tool === 'limit') return same(`Rechne zuerst den Grenzwert aus, mit $\\left(1 + \\frac{p}{n}\\right)^n \\to e^p$. Dann löst du nach $${target}$ auf.`)
+  if (tool === 'det')
+    return same(`Rechne zuerst die Determinante aus: Hauptdiagonale minus Nebendiagonale, bei $3 \\times 3$ vorher nach der Zeile oder Spalte mit zwei Nullen entwickeln. Dann löst du nach $${target}$ auf.`)
   if (tool === 'ode') return same(`Löse zuerst die Differentialgleichung mit den Anfangswerten (Ansatz $e^{\\lambda x}$). Dann steht eine Gleichung mit e-Funktionen da, die du nach $${target}$ auflöst.`)
   if (block) return same(`Setze $u = ${block}$ und löse die quadratische Gleichung in $u$ mit der $pq$-Formel. Wähle die passende Lösung, setze zurück ein und löse nach $${target}$ auf.`)
   if (quadratic) return same(`Forme um, bis $${target}^2$ und $${target}$ in einer Gleichung stehen. Bringe alles auf eine Seite, nimm die $pq$-Formel und wähle die passende Lösung.`)
@@ -988,6 +1023,10 @@ export function explainResult(kind: string, before: string, after: string): Expl
       return { detailed: `Der Grenzwert mit $\\left(1 + \\frac{p}{n}\\right)^n \\to e^p$:\n${lines}`, short: lines }
     case 'ode':
       return { detailed: `Die Differentialgleichung mit den Anfangswerten gelöst:\n${lines}`, short: lines }
+    case 'det':
+      return { detailed: `Hauptdiagonale minus Nebendiagonale, die Produkte zusammengefasst:\n${lines}`, short: lines }
+    case 'detExpand':
+      return { detailed: `Nach der Zeile oder Spalte mit zwei Nullen entwickelt: Vorzeichen mal Eintrag mal Unterdeterminante:\n${lines}`, short: lines }
     default:
       return { detailed: `Auf beiden Seiten dieselbe Rechnung:\n${lines}`, short: lines }
   }
@@ -1003,6 +1042,21 @@ export function explainOde(ode: string, approach: string, constants: string, bef
   return {
     detailed: `${start} Die Anfangswerte bei $x = 0$ liefern $${constants}$. Eingesetzt:\n${lines}`,
     short: `$${approach}$ mit $${constants}$:\n${lines}`,
+  }
+}
+
+// Determinante ausrechnen (2 × 2): die Produkte mit Malpunkt (tools/determinant.ts, detWorkLatex)
+export function explainDet(work: string, before: string, after: string): Explanation {
+  const lines = `$${before}$\n$${after}$`
+  return { detailed: `Hauptdiagonale minus Nebendiagonale: $${work}$. Zusammengefasst:\n${lines}`, short: `$${work}$:\n${lines}` }
+}
+
+// Determinante entwickeln (3 × 3): Linie, Eintrag und Vorzeichen aus dem Schachbrett (expandWork)
+export function explainExpand(line: string, entry: string, sign: '+' | '-', before: string, after: string): Explanation {
+  const lines = `$${before}$\n$${after}$`
+  return {
+    detailed: `In der ${line} steht nur $${entry}$, die anderen Einträge sind $0$. Entwickelt nach ihr: Vorzeichen aus dem Schachbrett ($${sign}$) mal $${entry}$ mal die Determinante ohne seine Zeile und Spalte:\n${lines}`,
+    short: `Nach der ${line} entwickelt, Vorzeichen $${sign}$:\n${lines}`,
   }
 }
 
