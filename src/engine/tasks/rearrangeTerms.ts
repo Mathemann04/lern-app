@@ -1,10 +1,11 @@
-import { toLatex } from '../expr/print.ts'
+import { equationToLatex, toLatex } from '../expr/print.ts'
 import { contains, subterms } from '../expr/compare.ts'
+import type { Expr } from '../expr/types.ts'
 import { holds, samplePoints } from '../rearrange/check.ts'
 import { solveTask } from '../rearrange/isolate.ts'
-import { type RearrangeTask, taskLatex, taskVariables } from '../rearrange/task.ts'
+import { type RearrangeTask, givenLatex, taskVariables } from '../rearrange/task.ts'
 import { type Rng, createRng } from '../random/rng.ts'
-import { type KitTask, buildLevel1, buildLevel2, buildLevel3, buildLevel4, buildLevel4Quadratic, buildLevel4Trig, buildLevel5Series, buildLevel5Tools } from './rearrangeKit.ts'
+import { type KitTask, buildLevel1, buildLevel2, buildLevel3, buildLevel4, buildLevel4Quadratic, buildLevel4Trig, buildLevel5Ode, buildLevel5Series, buildLevel5Tools } from './rearrangeKit.ts'
 import type { Level, TaskRef } from './taskNumber.ts'
 
 // Vorlagen für Umstell-Aufgaben je Stufe (siehe docs/PLAN-M3.md, „Stufen"). Jede Vorlage baut aus
@@ -24,6 +25,9 @@ export type RearrangeTemplate = {
   // darf Wege der Engine nutzen, die erst seit Teil 7b dazugekommen sind (ältere Vorlagen nicht, damit ihre
   // Nummern dieselbe Aufgabe behalten)
   readonly novel?: boolean
+  // das Ergebnis muss am Handy in eine Zeile passen (Teil 7c: nach der pq-Formel stehen sonst lange
+  // Wurzeln da); ältere Vorlagen ohne diese Prüfung behalten ihre Aufgaben
+  readonly narrow?: boolean
 }
 
 export type GeneratedRearrangeTask = {
@@ -113,7 +117,29 @@ const level5Series: RearrangeTemplate = {
   novel: true,
 }
 
-export const REARRANGE_TEMPLATES: readonly RearrangeTemplate[] = [level1Kit, level2Kit, level3Kit, level4Kit, level4Trig, level4Quadratic, level5Tools, level5Series]
+// Teil 7c: Differentialgleichungen; der Anteil gilt unter den Nummern, die nicht schon zu 7b gehören
+const level5Ode: RearrangeTemplate = {
+  id: 'baukasten-5-dgl',
+  level: 5,
+  label: 'Baukasten: Differentialgleichungen',
+  build: (rng) => buildLevel5Ode(rng).task,
+  buildLabeled: buildLevel5Ode,
+  share: 0.3,
+  novel: true,
+  narrow: true,
+}
+
+export const REARRANGE_TEMPLATES: readonly RearrangeTemplate[] = [
+  level1Kit,
+  level2Kit,
+  level3Kit,
+  level4Kit,
+  level4Trig,
+  level4Quadratic,
+  level5Tools,
+  level5Series,
+  level5Ode,
+]
 
 export function rearrangeTemplatesForLevel(level: Level): RearrangeTemplate[] {
   return REARRANGE_TEMPLATES.filter((t) => t.level === level)
@@ -126,6 +152,8 @@ export const isRearrangeLevelAvailable = (level: Level) => rearrangeTemplatesFor
 // (ihre Grenzen stehen klein darüber und darunter)
 const MAX_TASK_LATEX = 64
 const MAX_TOOL_TASK = 64
+// Zeile einer Differentialgleichung mit Anfangswerten
+const MAX_ODE_LATEX = 64
 const visibleLatex = (latex: string) =>
   latex
     .replace(/\\mathrm\{d\}/g, 'd')
@@ -145,10 +173,11 @@ const hasNestedFraction = (t: RearrangeTask) =>
 
 // Brauchbar: lösbar, das Ergebnis ohne die gesuchte Variable, an genug erlaubten Stellen
 // prüfbar, nicht zu lang; im Baukasten außerdem nicht zu leicht, höchstens sieben Buchstaben
-function isGood(t: RearrangeTask, level: Level, kit: boolean, novel = false): boolean {
+function isGood(t: RearrangeTask, level: Level, kit: boolean, novel = false, narrow = false): boolean {
   if (kit) {
     const letters = taskVariables(t).length
-    const long = level === 5 ? visibleLatex(taskLatex(t)).length > MAX_TOOL_TASK : taskLatex(t).length > MAX_TASK_LATEX
+    const latex = equationToLatex(t.equation)
+    const long = level === 5 ? visibleLatex(latex).length > MAX_TOOL_TASK || givenLatex(t).some((g) => g.length > MAX_ODE_LATEX) : latex.length > MAX_TASK_LATEX
     if (long || letters > 7 || letters < 2) return false
     const { count, inDenominator } = occurrences(t)
     if (level === 1 && count !== 1) return false
@@ -162,6 +191,7 @@ function isGood(t: RearrangeTask, level: Level, kit: boolean, novel = false): bo
   if (solution.novel && !novel) return false
   if (kit && solution.steps.length < MIN_STEPS[level]) return false
   if (toLatex(solution.result).length > MAX_RESULT_LATEX[level]) return false
+  if (narrow && !fitsOneLine(solution.result)) return false
   // Stufe 5: Buchstaben im Ergebnis (sie heben sich nicht alle weg)
   if (level === 5 && taskVariables({ ...t, equation: { lhs: solution.result, rhs: solution.result } }).length === 0) return false
   // Stufe 5: keine Wurzel aus einer Summe mit Brüchen im Ergebnis (\sqrt{\frac{k^2}{4} + \frac{k}{b - c}})
@@ -170,6 +200,11 @@ function isGood(t: RearrangeTask, level: Level, kit: boolean, novel = false): bo
   // Gegenprobe: Die Lösung erfüllt die Aufgabe an allen Prüfstellen
   return points.length >= 8 && points.every((p) => holds(t.equation, p) === true)
 }
+
+// Ergebnis, das am Handy (390 Pixel breit, kleinste Schrift) in eine Zeile passt: höchstens 90 Zeichen
+// LaTeX, keine Wurzel aus mehr als drei Summanden (gemessen an den Ergebnissen der Stufe 5)
+const fitsOneLine = (result: Expr) =>
+  toLatex(result).length <= 90 && !subterms(result).some((s) => s.kind === 'root' && s.arg.kind === 'add' && s.arg.terms.length > 3)
 
 // Mindestzahl der Umformungen je Stufe im Baukasten
 const MIN_STEPS: Record<Level, number> = { 1: 3, 2: 3, 3: 5, 4: 6, 5: 6 }
@@ -195,6 +230,6 @@ export function generateRearrangeTask(ref: TaskRef): GeneratedRearrangeTask {
     const template = shared ?? rng.pick(regular)
     const kit = template.buildLabeled?.(rng)
     const t = kit ? kit.task : template.build(rng)
-    if (isGood(t, ref.level, kit !== undefined, template.novel)) return { ref, template, task: t, label: kit?.label ?? template.label }
+    if (isGood(t, ref.level, kit !== undefined, template.novel, template.narrow)) return { ref, template, task: t, label: kit?.label ?? template.label }
   }
 }

@@ -110,8 +110,9 @@ test('Umstellen: Lernkarten-Ordner mit durchgerechneten Beispielen', async ({ pa
   await expect(page.getByRole('heading', { name: 'Stufe 3' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Stufe 4' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Stufe 5' })).toBeVisible()
-  await expect(page.locator('main li a')).toHaveCount(16)
+  await expect(page.locator('main li a')).toHaveCount(17)
   await expect(page.getByRole('link', { name: /^Geometrische Summe und Reihe/ })).toBeVisible()
+  await expect(page.getByRole('link', { name: /^Differentialgleichungen/ })).toBeVisible()
   await expectCleanPage(page, 'Ordner')
 
   await page.getByRole('link', { name: /^Variable im Nenner/ }).click()
@@ -238,6 +239,33 @@ test('Umstellen Stufe 5 frei: geometrische Summe nach n, Anzahl der Summanden ve
   await enter(page, 'n=\\frac{\\ln(y+1)}{\\ln 2}')
   await expect(feedback(page)).toContainText('Richtig!')
   await expectCleanPage(page, 'Richtig Stufe 5 Summe')
+})
+
+test('Umstellen Stufe 5: Differentialgleichung geführt (Beispiel aus dem Plan), zwei Konstanten, mit Lernkarte aus Teil 7c', async ({ page }) => {
+  // f'' = k^2 f, f(0) = a, f'(0) = 0 und y = f(x)
+  await page.goto('./#/ueben/umstellen/5-427')
+  await expect(page.getByText('Was steht da eigentlich?')).toBeVisible()
+  await expect(page.locator('#question')).toContainText('Differentialgleichung')
+  await expectCleanPage(page, 'Start Stufe 5 DGL')
+  // richtig, nur e^{kx} angesetzt, Konstanten nicht halbiert, mit der Schwingung verwechselt
+  await expect(answers(page)).toHaveCount(4)
+  await solveWholeTask(page)
+  await expect(page.getByTestId('result')).toBeVisible()
+  const cards = page.getByRole('navigation', { name: 'Lernkarten zu dieser Aufgabe' })
+  await expect(cards.getByRole('link', { name: /^Differentialgleichungen/ })).toBeVisible()
+  await expectCleanPage(page, 'Stufe 5 DGL')
+})
+
+test('Umstellen Stufe 5 frei: Differentialgleichung, Anfangswert nicht genutzt, dann richtig', async ({ page }) => {
+  // f'' = k^2 f, f(0) = a, f'(0) = 0 und y = f(x)
+  await page.goto('./#/frei/umstellen/5-427')
+  await expect(field(page)).toBeVisible()
+  await expectCleanPage(page, 'Start Stufe 5 DGL frei')
+  await enter(page, '\\frac{\\ln\\frac{y}{a}}{k}')
+  await expect(feedback(page)).toContainText('Anfangswert')
+  await enter(page, 'x=\\frac{1}{k}\\ln\\left(\\frac{y+\\sqrt{y^2-a^2}}{a}\\right)')
+  await expect(feedback(page)).toContainText('Richtig!')
+  await expectCleanPage(page, 'Richtig Stufe 5 DGL')
 })
 
 test('Umstellen Stufe 4: sin² und cos², ein Quadrat ersetzen, Umkehrfunktion, mit beiden Lernkarten aus Teil 6b', async ({ page }) => {

@@ -39,8 +39,10 @@ export function samplePoints(task: RearrangeTask, result: Expr, rng: Rng, count:
   return points
 }
 
-// Steckt eine Summe, Reihe oder ein Grenzwert im Term (auch in einem anderen Werkzeug)?
-const SLOW_TOOLS = new Set(['sum', 'series', 'limit'])
+// Steckt eine Summe, Reihe, ein Grenzwert oder eine Differentialgleichung im Term (auch in einem anderen
+// Werkzeug)? Dann nur Stellen, an denen sich die Aufgabe numerisch ausrechnen lässt (die
+// Differentialgleichung z. B. nur bis kx = 50, sonst wären die Werte riesig)
+const SLOW_TOOLS = new Set(['sum', 'series', 'limit', 'ode'])
 const hasSlowTool = (e: Expr): boolean =>
   subterms(e).some((s) => s.kind === 'var' && s.tool !== undefined && (SLOW_TOOLS.has(s.tool.kind) || hasSlowTool(s.tool.body)))
 

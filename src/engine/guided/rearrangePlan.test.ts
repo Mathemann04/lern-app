@@ -5,7 +5,7 @@ import { cardById } from '../explain/cards.ts'
 import { latexProblem } from '../expr/latexChecks.ts'
 import { toLatex } from '../expr/print.ts'
 import { type Expr, add, div, eq, mul, num, pow, sub, variable } from '../expr/types.ts'
-import { derivativeOf, integralOf, limitOf, seriesOf, sumOf } from '../rearrange/tools/tool.ts'
+import { derivativeOf, integralOf, limitOf, odeOf, seriesOf, sumOf } from '../rearrange/tools/tool.ts'
 import { parseLatex } from '../parse/latex.ts'
 import { REARRANGE_ERROR_RULES } from '../rearrange/errorRules.ts'
 import type { Level } from '../tasks/taskNumber.ts'
@@ -170,6 +170,37 @@ describe('Geführt umstellen: Stufe 5 (Werkzeuge)', () => {
     const nested = planRearrange({ equation: eq(derivativeOf(seriesOf(div(pow(x, k), k), num(1))), y), target: 'x', conditions: [{ lhs: x, rel: '<', rhs: num(1) }] }, { level: 5, seed: 1 })
     expect(nested.steps.slice(0, 2).map((s) => s.id.replace(/^\d+-/, ''))).toEqual(['series', 'derive'])
     expect(nested.steps[1].title).toBe('Ableiten')
+  })
+
+  it('Differentialgleichung (Teil 7c): Lösung als erster Schritt, Ansatz und Konstanten in der Erklärung, dann pq-Formel', () => {
+    const [a, b, f, g, k, x, y] = ['a', 'b', 'f', 'g', 'k', 'x', 'y'].map(variable)
+    const plan = planRearrange({ equation: eq(odeOf(mul(pow(k, num(2)), f), 2, [a, num(0)]), y), target: 'x', conditions: [] }, { level: 5, seed: 1 })
+    expect(plan.functionLatex).toBe("\\begin{gathered}f'' = k^{2}f \\\\ f(0) = a,\\; f'(0) = 0 \\\\ f(x) = y\\end{gathered}")
+    const first = plan.steps[0]
+    expect(first.title).toBe('Was steht da eigentlich?')
+    expect(first.question).toBe('Löse die Differentialgleichung für $f$ mit den Anfangswerten: Was kommt heraus?')
+    expect(first.choices.find((c) => c.correct)?.content).toBe('$\\frac{a}{2}e^{kx} + \\frac{a}{2}e^{-kx} = y$')
+    // drei der vier typischen Fehler: nur e^{kx}, nicht halbiert, Schwingung, Wurzel nicht gezogen
+    const ids = first.choices.map((c) => c.errorRuleId).filter(Boolean)
+    expect(ids).toHaveLength(3)
+    for (const id of ids) expect(['eq-ode-initial-unused', 'eq-ode-not-halved', 'eq-ode-oscillation', 'eq-ode-root']).toContain(id)
+    expect(first.explanation.detailed).toContain('C_1 + C_2 = a')
+    expect(first.explanation.detailed).toContain('\\lambda^2 = k^{2} \\Rightarrow \\lambda = \\pm k')
+    expect(first.cards).toEqual(['rearrange-ode'])
+    expect(plan.ruleHint.detailed).toContain('Differentialgleichung')
+    expect(plan.steps.map((s) => s.id.replace(/^\d+-/, ''))).toContain('pq')
+    expectRenderable(first.explanation.detailed, 'Erklärung')
+
+    // zwei Funktionen: die zweite ohne „Was steht da eigentlich?"
+    const two = planRearrange(
+      { equation: eq(sub(odeOf(mul(k, f), 1, [a]), odeOf(mul(num(-1), mul(k, g)), 1, [b], 'g')), y), target: 'x', conditions: [] },
+      { level: 5, seed: 1 },
+    )
+    expect(two.functionLatex).toContain("g' = ")
+    expect(two.steps[0].title).toBe('Was steht da eigentlich?')
+    expect(two.steps[1].title).toBe('Differentialgleichung lösen')
+    expect(two.steps[1].question).toContain('für $g$')
+    expect(x.name).toBe('x')
   })
 })
 

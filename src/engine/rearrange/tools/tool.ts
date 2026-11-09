@@ -1,5 +1,5 @@
 import { subterms } from '../../expr/compare.ts'
-import { toolLatex } from '../../expr/print.ts'
+import { odeLatex, toolLatex } from '../../expr/print.ts'
 import { substitute } from '../../expr/substitute.ts'
 import { type Equation, type Expr, type Tool, type Var, add, eq, neg, num, variable } from '../../expr/types.ts'
 import { ratNeg } from '../../rational.ts'
@@ -8,7 +8,8 @@ import { ratNeg } from '../../rational.ts'
 // eindeutig) und dem Werkzeug dazu. So lassen sich Aufgaben wie \frac{\int_0^x e^t\,\mathrm{d}t}{e^x + a} = y
 // mit den gewohnten Bauhelfern zusammensetzen.
 
-export const toolExpr = (tool: Tool): Var => ({ kind: 'var', name: `§${toolLatex(tool)}`, tool })
+// (bei der Differentialgleichung mit der Gleichung und den Anfangswerten, gesetzt wird nur f(x))
+export const toolExpr = (tool: Tool): Var => ({ kind: 'var', name: `§${tool.kind === 'ode' ? `${odeLatex(tool)}|` : ''}${toolLatex(tool)}`, tool })
 
 // \frac{\mathrm{d}}{\mathrm{d}x}\left(body\right)
 export const derivativeOf = (body: Expr, v = 'x'): Var => toolExpr({ kind: 'derivative', body, v })
@@ -27,6 +28,10 @@ export const seriesOf = (body: Expr, lower: Expr, v = 'k'): Var => toolExpr({ ki
 
 // \lim_{n \to \infty} body
 export const limitOf = (body: Expr, v = 'n'): Var => toolExpr({ kind: 'limit', body, v })
+
+// f(x) mit f' = body bzw. f'' = body (body in f, z. B. k^2 f) und den Anfangswerten f(0), f'(0)
+export const odeOf = (body: Expr, order: 1 | 2, initial: readonly Expr[], v = 'f', point: Expr = variable('x')): Var =>
+  toolExpr({ kind: 'ode', order, body, v, initial, point })
 
 export type ToolVar = Var & { readonly tool: Tool }
 

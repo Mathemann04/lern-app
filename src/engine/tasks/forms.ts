@@ -1,6 +1,6 @@
 import { equationToLatex, toLatex } from '../expr/print.ts'
 import { taskLatex as fractionLatex } from '../fraction/task.ts'
-import { taskLatex as rearrangeLatex } from '../rearrange/task.ts'
+import { taskFormLatex as rearrangeLatex } from '../rearrange/task.ts'
 import { generateDerivativeTask } from './derivativeTerms.ts'
 import { generateFractionTask } from './fractionTerms.ts'
 import { generateRearrangeTask } from './rearrangeTerms.ts'
@@ -20,7 +20,7 @@ export function fractionForm(ref: TaskRef): string {
   return `${task.kind === 'partial' ? 'zerlegen: ' : ''}${formOfLatex(fractionLatex(task))}`
 }
 
-// mit der gesuchten Variable, benannt wie die übrigen Buchstaben
+// mit der gesuchten Variable, benannt wie die übrigen Buchstaben; mit Differentialgleichung samt dieser
 export function rearrangeForm(ref: TaskRef): string {
   const { task } = generateRearrangeTask(ref)
   return formOfLatex(`${rearrangeLatex(task)} \\to ${task.target}`)

@@ -190,3 +190,44 @@ describe('Umstellen frei: Zufallsaufgaben der Stufen 1 bis 4', () => {
     }, 60_000)
   }
 })
+
+describe('Umstellen frei: Differentialgleichungen (Stufe 5, Teil 7c)', () => {
+  // f'' = k^2 f, f(0) = a, f'(0) = 0 und y = f(x), das Beispiel aus dem Plan
+  const plan = generateRearrangeTask({ level: 5, seed: 427 }).task
+  const context = prepareRearrangeCheck(plan, true)
+  const verdict = (input: string) => {
+    const v = checkRearrangeAnswer(context, input)
+    return v.kind === 'knownError' ? v.wrong.rule.id : v.kind
+  }
+
+  it('Tastatur mit der Seite „Funktionen“ (arcosh) bei f\'\' = k^2 f', () => {
+    expect(prepareRearrangeFree({ level: 5, seed: 427 }).keyboard).toMatchObject({ kind: 'rearrange', trig: true })
+  })
+
+  it('Ergebnis aus dem Plan, auch als arcosh', () => {
+    expect(verdict('\\frac{1}{k}\\ln\\left(\\frac{y+\\sqrt{y^2-a^2}}{a}\\right)')).toBe('correct')
+    expect(verdict('\\frac{1}{k}\\operatorname{arcosh}\\left(\\frac{y}{a}\\right)')).toBe('correct')
+  })
+
+  it('typische Fehler beim Lösen der Differentialgleichung werden erkannt, auch vor der Substitution', () => {
+    expect(verdict('\\frac{1}{k}\\ln\\frac{y}{a}')).toBe('eq-ode-initial-unused')
+    expect(verdict('\\frac{1}{k}\\ln\\left(\\frac{y+\\sqrt{y^2-4a^2}}{2a}\\right)')).toBe('eq-ode-not-halved')
+  })
+
+  it('Stufe 5: Lösung richtig, falsche Ergebnisse der Differentialgleichungen als Fehler erkannt', () => {
+    let checked = 0
+    for (let seed = 1; seed <= 300; seed++) {
+      const g = generateRearrangeTask({ level: 5, seed })
+      if (g.template.id !== 'baukasten-5-dgl') continue
+      const c = prepareRearrangeCheck(g.task, true)
+      const label = `5-${seed}`
+      expect(checkRearrangeAnswer(c, toLatex(c.solution.result)), label).toEqual({ kind: 'correct' })
+      for (const w of c.wrongs) {
+        if (!w.result || !w.rule.id.startsWith('eq-ode')) continue
+        expect(checkRearrangeAnswer(c, toLatex(w.result)).kind, `${label}: ${w.rule.id} ${toLatex(w.result)}`).toBe('knownError')
+        checked++
+      }
+    }
+    expect(checked).toBeGreaterThan(40)
+  }, 60_000)
+})

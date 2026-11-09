@@ -278,6 +278,47 @@ export const REARRANGE_ERROR_TEXTS: Readonly<Record<string, Explanation>> = {
       'Im Bruch wirkt auch der Nenner. Teile Zähler und Nenner durch $n$: $\\left(\\frac{n + p}{n + r}\\right)^n = \\frac{\\left(1 + \\frac{p}{n}\\right)^n}{\\left(1 + \\frac{r}{n}\\right)^n} \\to \\frac{e^p}{e^r} = e^{p - r}$.',
     short: 'Der Nenner zählt mit: $\\left(\\frac{n + p}{n + r}\\right)^n \\to e^{p - r}$.',
   },
+  // Werkzeuge der Stufe 5 (Schritt 7c): Differentialgleichungen
+  'eq-ode-initial-unused': {
+    detailed:
+      "Prüfe die Anfangswerte, indem du $x = 0$ einsetzt. Bei $f' = kf$ ist $f(x) = Ce^{kx}$, und $f(0) = C$ legt die Konstante fest. Bei $f'' = k^2 f$ gibt es zwei Lösungen, $e^{kx}$ und $e^{-kx}$, also zwei Konstanten: $f(x) = C_1e^{kx} + C_2e^{-kx}$. Beide Anfangswerte werden gebraucht: $C_1 + C_2 = f(0)$ und $k(C_1 - C_2) = f'(0)$.",
+    short: "Setze $x = 0$ ein, dann muss $f(0)$ herauskommen: Bei $f' = kf$ ist $C = f(0)$, bei $f'' = k^2 f$ braucht es beide Anfangswerte.",
+  },
+  'eq-ode-not-halved': {
+    detailed:
+      "Prüfe beide Anfangswerte bei $x = 0$: Mit $e^0 = 1$ ist $f(0) = C_1 + C_2$ und $f'(0) = k(C_1 - C_2)$. Ein Anfangswert verteilt sich auf zwei Konstanten. Nimmst du für jede den ganzen Wert, kommt bei $x = 0$ das Doppelte heraus.",
+    short: "Probe bei $x = 0$: $C_1 + C_2 = f(0)$ und $k(C_1 - C_2) = f'(0)$, sonst kommt das Doppelte heraus.",
+  },
+  'eq-ode-inner-factor': {
+    detailed:
+      "Leite den Ansatz mit der Kettenregel ab: $\\left(e^{kx}\\right)' = ke^{kx}$ und $\\left(e^{-kx}\\right)' = -ke^{-kx}$. Bei $x = 0$ ist also $f'(0) = k(C_1 - C_2)$, mit dem Faktor $k$.",
+    short: "$\\left(e^{kx}\\right)' = ke^{kx}$: In $f'(0) = k(C_1 - C_2)$ steht der Faktor $k$.",
+  },
+  'eq-ode-oscillation': {
+    detailed:
+      "$\\cos(kx)$ und $\\sin(kx)$ lösen $f'' = -k^2 f$, die Schwingung: $\\left(\\cos(kx)\\right)'' = -k^2\\cos(kx)$. Hier steht $f'' = k^2 f$ ohne Minus. Der Ansatz $e^{\\lambda x}$ ergibt $\\lambda^2 = k^2$, also $\\lambda = \\pm k$: Die Lösungen sind $e^{kx}$ und $e^{-kx}$.",
+    short: "$f'' = +k^2 f$ hat die Lösungen $e^{kx}$ und $e^{-kx}$, nicht $\\cos$ und $\\sin$.",
+  },
+  'eq-ode-root': {
+    detailed:
+      "Setze den Ansatz $e^{\\lambda x}$ in $f'' = k^2 f$ ein: $\\lambda^2 e^{\\lambda x} = k^2 e^{\\lambda x}$, also $\\lambda^2 = k^2$. In die Hochzahl kommt $\\lambda = \\pm k$, die Wurzel aus der Zahl vor $f$: Bei $f'' = 4f$ ist $\\lambda^2 = 4$ und $\\lambda = \\pm 2$.",
+    short: "$\\lambda^2 = k^2 \\Rightarrow \\lambda = \\pm k$: Bei $f'' = 4f$ steht $e^{\\pm 2x}$ da.",
+  },
+  'eq-ode-constant-added': {
+    detailed:
+      "Die Konstante steht als Faktor vor der e-Funktion: $e^{kx + C} = e^C \\cdot e^{kx}$, also $f(x) = Ce^{kx}$. Probe: Mit $f(x) = e^{kx} + C$ wäre $f' = ke^{kx}$, aber $kf = ke^{kx} + kC$. Die Differentialgleichung stimmt dann nicht.",
+    short: "$f(x) = Ce^{kx}$: Die Konstante ist ein Faktor, denn $e^{kx + C} = e^C \\cdot e^{kx}$.",
+  },
+  'eq-ode-exp-sign': {
+    detailed:
+      "Das Vorzeichen in der Gleichung bestimmt die Hochzahl: $f' = kf$ hat $e^{kx}$ (Wachstum), $f' = -kf$ hat $e^{-kx}$ (Abnahme). Beim Abkühlen $f' = k(b - f)$ nähert sich $f$ dem Endwert $b$, der Abstand nimmt ab wie $e^{-kx}$. Probe: Leite ab und vergleiche mit der rechten Seite.",
+    short: "$f' = -kf$ gibt $e^{-kx}$, $f' = kf$ gibt $e^{kx}$; beim Abkühlen $e^{-kx}$.",
+  },
+  'eq-ode-constant-start': {
+    detailed:
+      "Bei $f' = k(b - f)$ ist $f(x) = b + Ce^{-kx}$: $b$ ist der Endwert, $Ce^{-kx}$ der Abstand dazu. Setze $x = 0$ ein: $f(0) = b + C$. Die Konstante ist also nicht der Anfangswert selbst, sondern sein Abstand zum Endwert.",
+    short: "Probe bei $x = 0$: $f(0) = b + C$, die Konstante ist der Abstand zum Endwert.",
+  },
 }
 
 export function explainRearrangeError(id: string): Explanation {
@@ -776,6 +817,7 @@ export const REARRANGE_HINTS = {
   sumFormula: 'Geometrische Summe: $\\sum_{k=0}^{m-1} q^k = \\frac{q^m - 1}{q - 1}$ mit der Anzahl $m$ der Summanden. Beginnt die Summe nicht mit $q^0 = 1$, klammere den ersten Summanden aus.',
   series: 'Geometrische Reihe für $0 < q < 1$: $\\sum_{k=0}^{\\infty} q^k = \\frac{1}{1 - q}$. Abgeleitet: $\\sum_{k=1}^{\\infty} kq^k = \\frac{q}{(1 - q)^2}$, integriert: $\\sum_{k=1}^{\\infty} \\frac{q^k}{k} = -\\ln(1 - q)$.',
   limit: '$\\lim_{n \\to \\infty}\\left(1 + \\frac{p}{n}\\right)^n = e^p$. Einen Faktor in der Hochzahl nimmst du mit, einen Bruch teilst du oben und unten durch $n$.',
+  ode: "Ansatz $e^{\\lambda x}$: Bei $f' = kf$ ist $f(x) = f(0) \\cdot e^{kx}$, bei $f' = k(b - f)$ ist $f(x) = b + Ce^{-kx}$. Bei $f'' = k^2 f$ ist $f(x) = C_1e^{kx} + C_2e^{-kx}$ mit $C_1 + C_2 = f(0)$ und $k(C_1 - C_2) = f'(0)$.",
   add: 'Ein Summand verschwindet mit der Gegenrechnung: Aus $+c$ wird auf beiden Seiten $-c$.',
   move: 'Bringe den Summanden mit Minus auf die andere Seite, dort steht er mit Plus. Den Rest bringst du herüber.',
   divide: 'Einen Faktor wirst du los, indem du beide Seiten durch ihn teilst.',
@@ -815,13 +857,14 @@ export const REARRANGE_HINTS = {
 } as const
 
 // Tipp für die ganze Aufgabe (im freien Modus)
-export type TaskTool = 'derivative' | 'integral' | 'series' | 'limit'
+export type TaskTool = 'derivative' | 'integral' | 'series' | 'limit' | 'ode'
 
 export function rearrangeTaskHint(target: string, several: boolean, block: string | null = null, quadratic = false, tool: TaskTool | null = null): Explanation {
   if (tool === 'derivative') return same(`Rechne zuerst die Ableitung aus. Dann steht eine gewöhnliche Gleichung da, die du nach $${target}$ auflöst.`)
   if (tool === 'integral') return same(`Rechne zuerst das Integral aus: Stammfunktion, dann die Grenzen einsetzen. Dann löst du nach $${target}$ auf.`)
   if (tool === 'series') return same(`Rechne zuerst die Summe mit der Formel der geometrischen Summe bzw. Reihe aus. Dann löst du nach $${target}$ auf.`)
   if (tool === 'limit') return same(`Rechne zuerst den Grenzwert aus, mit $\\left(1 + \\frac{p}{n}\\right)^n \\to e^p$. Dann löst du nach $${target}$ auf.`)
+  if (tool === 'ode') return same(`Löse zuerst die Differentialgleichung mit den Anfangswerten (Ansatz $e^{\\lambda x}$). Dann steht eine Gleichung mit e-Funktionen da, die du nach $${target}$ auflöst.`)
   if (block) return same(`Setze $u = ${block}$ und löse die quadratische Gleichung in $u$ mit der $pq$-Formel. Wähle die passende Lösung, setze zurück ein und löse nach $${target}$ auf.`)
   if (quadratic) return same(`Forme um, bis $${target}^2$ und $${target}$ in einer Gleichung stehen. Bringe alles auf eine Seite, nimm die $pq$-Formel und wähle die passende Lösung.`)
   return several
@@ -943,8 +986,23 @@ export function explainResult(kind: string, before: string, after: string): Expl
       return { detailed: `Die Formel der geometrischen Reihe angewandt und zusammengefasst:\n${lines}`, short: lines }
     case 'limit':
       return { detailed: `Der Grenzwert mit $\\left(1 + \\frac{p}{n}\\right)^n \\to e^p$:\n${lines}`, short: lines }
+    case 'ode':
+      return { detailed: `Die Differentialgleichung mit den Anfangswerten gelöst:\n${lines}`, short: lines }
     default:
       return { detailed: `Auf beiden Seiten dieselbe Rechnung:\n${lines}`, short: lines }
+  }
+}
+
+// Lösung einer Differentialgleichung: Ansatz und Konstanten aus den Anfangswerten (tools/ode.ts, odeWork);
+// lambda: was der Ansatz e^{\lambda x} bei zweiter Ordnung ergibt
+export function explainOde(ode: string, approach: string, constants: string, before: string, after: string, lambda?: string): Explanation {
+  const lines = `$${before}$\n$${after}$`
+  const start = lambda
+    ? `Für $${ode}$ ergibt der Ansatz $e^{\\lambda x}$: $${lambda}$, also $${approach}$.`
+    : `Für $${ode}$ setzt du $${approach}$ an.`
+  return {
+    detailed: `${start} Die Anfangswerte bei $x = 0$ liefern $${constants}$. Eingesetzt:\n${lines}`,
+    short: `$${approach}$ mit $${constants}$:\n${lines}`,
   }
 }
 

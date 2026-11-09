@@ -1,6 +1,6 @@
 import { type Expr, PI, add, cos, div, eq, exp, fn, ln, mul, neg, num, pow, sin, sqrt, sub, variable } from '../expr/types.ts'
 import type { Condition, RearrangeTask } from '../rearrange/task.ts'
-import { derivativeOf, integralOf, limitOf, seriesOf, sumOf } from '../rearrange/tools/tool.ts'
+import { derivativeOf, integralOf, limitOf, odeOf, seriesOf, sumOf } from '../rearrange/tools/tool.ts'
 import type { Card } from './cards.ts'
 
 // Lernkarten im Ordner „Gleichungen umstellen". Die Beispiele sind Aufgaben der Umstell-Engine; den
@@ -24,10 +24,11 @@ export const REARRANGE_CARD_IDS = {
   integral: 'rearrange-integral',
   series: 'rearrange-series',
   limit: 'rearrange-limit',
+  ode: 'rearrange-ode',
 } as const
 
 const [a, b, c, d, k, t, x, y] = ['a', 'b', 'c', 'd', 'k', 't', 'x', 'y'].map(variable)
-const [m, q] = ['n', 'q'].map(variable)
+const [m, q, f] = ['n', 'q', 'f'].map(variable)
 const n = (value: number) => num(value)
 const task = (lhs: Expr, rhs: Expr, target = 'x', conditions: readonly Condition[] = []): RearrangeTask => ({ equation: eq(lhs, rhs), target, conditions })
 const sq = (e: Expr) => pow(e, n(2))
@@ -319,5 +320,36 @@ export const REARRANGE_CARD_LIST: readonly Card[] = [
       task(limitOf(pow(div(add(m, x), sub(m, x)), m)), y),
     ],
     errors: ['eq-lim-one', 'eq-lim-exponent', 'eq-lim-denominator'],
+  },
+  {
+    id: REARRANGE_CARD_IDS.ode,
+    topic: 'umstellen',
+    title: "Differentialgleichungen $f' = kf$ und $f'' = k^2 f$",
+    level: 5,
+    rules: [],
+    formulas: [
+      "f' = kf \\;\\Rightarrow\\; f(x) = f(0) \\cdot e^{kx}",
+      "f' = k(b - f) \\;\\Rightarrow\\; f(x) = b + Ce^{-kx}",
+      "f'' = k^2 f \\;\\Rightarrow\\; f(x) = C_1e^{kx} + C_2e^{-kx}",
+      "C_1 + C_2 = f(0), \\quad k(C_1 - C_2) = f'(0)",
+    ],
+    memo: "Ansatz $e^{\\lambda x}$: Die Konstante steht als Faktor vor der e-Funktion. Bei $f'' = k^2 f$ gibt es zwei Lösungen, $e^{kx}$ und $e^{-kx}$, also zwei Konstanten, und beide Anfangswerte zusammen bestimmen sie. Beim Abkühlen ist $b$ der Endwert, die Konstante $C$ der Abstand von $f(0)$ dazu.",
+    note: "Mit $f(0) = a$ und $f'(0) = 0$ ist $C_1 = C_2 = \\frac{a}{2}$, also $f(x) = \\frac{a}{2}e^{kx} + \\frac{a}{2}e^{-kx} = a\\cosh(kx)$. Probe: Leite die Lösung ab, setze sie in die Gleichung ein und rechne $f(0)$ und $f'(0)$ nach. Mit Minus, $f'' = -k^2 f$, wäre es eine Schwingung mit $\\cos$ und $\\sin$. Danach stellst du wie gewohnt um; stehen $e^{kx}$ und $e^{-kx}$ da, mit $u = e^{kx}$ und der $pq$-Formel.",
+    when: 'Wenn eine Funktion durch eine Differentialgleichung mit Anfangswerten gegeben ist: erst die Lösung aufschreiben, dann umstellen.',
+    examples: [
+      task(odeOf(mul(k, f), 1, [a]), y),
+      task(odeOf(mul(sq(k), f), 2, [a, n(0)]), y),
+      task(odeOf(mul(k, sub(b, f)), 1, [a]), y, 'x', [{ lhs: a, rel: '>', rhs: b }]),
+    ],
+    errors: [
+      'eq-ode-initial-unused',
+      'eq-ode-not-halved',
+      'eq-ode-inner-factor',
+      'eq-ode-oscillation',
+      'eq-ode-root',
+      'eq-ode-constant-added',
+      'eq-ode-exp-sign',
+      'eq-ode-constant-start',
+    ],
   },
 ]

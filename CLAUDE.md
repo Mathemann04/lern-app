@@ -13,7 +13,7 @@ den Nutzer zugeschnitten: Maschinenbau, 1. Semester, THU, „Mathematik MB1".
   4. Fassung, freigegeben): erst Baukasten und Abwechslung in den Stufen 1
   bis 3 wie bei den Brüchen (Schritte 4 und 5; ab Stufe 3 Kerne ineinander,
   Test der Umformungen), dann die Stufen 4 und 5 (Schritte 6 bis 9; Stufe 4
-  in drei Teilen, 6a bis 6c fertig; Schritt 7 in drei Teilen, 7a und 7b fertig).
+  in drei Teilen, 6a bis 6c fertig; Schritt 7 in drei Teilen, 7a bis 7c fertig).
   Abgeschlossen:
   [docs/PLAN-M1.md](docs/PLAN-M1.md), [docs/PLAN-M2.md](docs/PLAN-M2.md),
   [docs/PLAN-M2b.md](docs/PLAN-M2b.md) (Brüche nachschärfen: Abwechslung und
@@ -87,7 +87,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   bei komplexen Zahlen $\mathrm{i}$; Umstellen mit allen Buchstaben der Aufgabe
   (bis zu sieben) und √, ab Stufe 4 mit $e^x$, ln und $\log_a$, bei Winkel- und
   Hyperbelfunktionen mit zweiter Seite „Funktionen" (sin, cos, tan, ihre
-  Umkehrfunktionen, sinh, cosh, tanh, Areafunktionen); wird erst im
+  Umkehrfunktionen, sinh, cosh, tanh, Areafunktionen; auch bei $f'' = k^2 f$,
+  für arcosh und arsinh); wird erst im
   freien Modus geladen), gemeinsame Teile in
   `src/ui/task/`. Lernkarten in
   `src/ui/cards/` (`CardSheet.tsx`: Fenster über der Aufgabe, die
@@ -105,13 +106,17 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     (`IMAG`, gerechnet nur in der Bruch-Engine, reell ausgewertet `NaN`);
     Werkzeuge der Stufe 5 beim Umstellen (`Tool`: Ableitung, bestimmtes
     Integral, Stammfunktion mit Grenzen, endliche Summe, Reihe, Grenzwert
-    $n \to \infty$) als Buchstabe mit eigenem Namen und
+    $n \to \infty$, Lösung einer Differentialgleichung mit Anfangswerten) als
+    Buchstabe mit eigenem Namen und
     `tool` (`Var.tool`): gesetzt von `print.ts` (`toolLatex`; Summe, Reihe und
-    Grenzwert in Klammern, wenn danach noch etwas steht), numerisch
+    Grenzwert in Klammern, wenn danach noch etwas steht; die
+    Differentialgleichung als $f(x)$, mit Malpunkt davor, die Gleichung selbst
+    über `odeLatex`), numerisch
     ausgewertet von `evaluate.ts` (Ableitung mit Richardson-Extrapolation,
     Integral adaptiv mit Gauß-Legendre, Summe Summand für Summand bzw.
     geometrisch fortgesetzt, Reihe über Teilsummen, Grenzwert mit großen $n$
-    und Neville-Extrapolation, als Gegenprobe), `contains` und
+    und Neville-Extrapolation, Differentialgleichung mit Runge-Kutta und
+    Richardson-Extrapolation, als Gegenprobe), `contains` und
     `variablesOf` sehen ihre freien Buchstaben (`toolBound`, `toolLimits`)
   - `expr/normalize.ts`: *Normalform* zum Vergleichen; `expr/display.ts`:
     `simplify` = Normalform als *Anzeigeform* (schöne Schreibweise)
@@ -179,7 +184,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     Logarithmus", „Logarithmus- und Potenzgesetze", „Umkehrfunktionen",
     „Winkel- und Hyperbelfunktionen", „Substitution", „$pq$-Formel"; Stufe 5:
     „Stammfunktionen und Partialbrüche", „Geometrische Summe und Reihe",
-    „Grenzwert $\left(1 + \frac{x}{n}\right)^n \to e^x$"),
+    „Grenzwert $\left(1 + \frac{x}{n}\right)^n \to e^x$",
+    „Differentialgleichungen $f' = kf$ und $f'' = k^2 f$"),
     durchgerechnete Beispiele in `rearrangeExample.ts`
   - `guided/plan.ts`: Schrittplaner für den geführten Modus (Regelwahl, dann je
     Summand ein Schritt; Produkt/Quotient: u', v', Einsetzen; Kette: äußere,
@@ -222,7 +228,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     Stufe 5: erst „Was steht da eigentlich?" mit den Werkzeug-Schritten als
     „Was kommt heraus?" (beim Ableiten die Fehler und Lernkarten aus
     „Ableiten"; beim Grenzwert darf die falsche Gleichung ohne $x$ sein, „1 hoch
-    unendlich ist 1");
+    unendlich ist 1"; bei der Differentialgleichung erklärt die Lösung Ansatz und
+    Konstanten aus den Anfangswerten, `odeExplanation`);
     nach der $pq$-Formel „Welche der beiden Lösungen passt?" mit der
     Scheinlösung als falscher Antwort und dem Grund (`rejectReason`); nach dem
     Substituieren sprechen Fragen von $u$ (`step.unknown`);
@@ -328,25 +335,34 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     Kreis), markiert `solution.novel`, damit ältere Vorlagen ihre Aufgaben
     behalten; bei der Normalform das Minus vor dem Bruch), `tools/` (Stufe 5:
     `tool.ts` Werkzeuge bauen (`derivativeOf`, `integralOf`, `bracketOf`,
-    `sumOf`, `seriesOf`, `limitOf`) und ersetzen, das innerste zuerst
+    `sumOf`, `seriesOf`, `limitOf`, `odeOf`; bei der Differentialgleichung steht
+    die Gleichung im Namen) und ersetzen, das innerste zuerst
     (`activeTool`: Reihe in einer Ableitung), `integrate.ts` Stammfunktionen
     aus einer Tafel als Faktor mal Term mit typischen Fehlern, Partialbrüche
     über die Bruch-Engine, Grenzen einsetzen; `series.ts` Summand als
     $c \cdot q^k$ (auch $k q^k$, $\frac{q^k}{k}$), geometrische Summe und Reihe,
     Grenzwert $\left(\frac{n + p}{n + r}\right)^{sn} \to e^{s(p - r)}$, mit
-    typischen Fehlern; `steps.ts` Werkzeug-Schritte `derive`, `partial`,
-    `antiderivative`, `bounds`, `sumFormula`, `series`, `limit` und ihre
+    typischen Fehlern; `ode.ts` Differentialgleichungen $f' = \pm kf$, Abkühlen
+    $f' = k(b - f)$ und $f'' = k^2 f$ mit $f(0) = a$, $f'(0) = 0$ bzw. $f(0) = 0$,
+    $f'(0) = b$: Lösung in Exponentialform ($\frac{a}{2}e^{kx} + \frac{a}{2}e^{-kx}$,
+    danach Substitution und $pq$-Formel), typische Fehler, Ansatz und Konstanten
+    für die Erklärung (`odeWork`); `steps.ts` Werkzeug-Schritte `derive`, `partial`,
+    `antiderivative`, `bounds`, `sumFormula`, `series`, `limit`, `ode` und ihre
     typischen Fehler, beim Ableiten die aus „Ableiten" mit ihrer Stelle),
     `check.ts`
     (Prüfstellen: Buchstaben zufällig positiv, Variable aus dem Ergebnis,
     Bedingungen der Aufgabe, Zwischenwerte aus `requires` nicht riesig;
-    mit Summe, Reihe oder Grenzwert nur Stellen, an denen sich die Aufgabe
-    numerisch ausrechnen lässt;
+    mit Summe, Reihe, Grenzwert oder Differentialgleichung nur Stellen, an
+    denen sich die Aufgabe numerisch ausrechnen lässt;
     mit $u$ nach einer Substitution `withSubstitution`;
     Gegenprobe durch Einsetzen), `errorRules.ts`
     (typische Fehler, Ids `eq-…`, beim Zusammenfassen die aus „Brüche";
+    falsche Gleichungen vor einer Substitution mit eigener Substitution
+    weitergerechnet;
     je Klammer ein Fehler beim Ausmultiplizieren; nie eine Gleichung, die doch
-    stimmt), `task.ts` (Aufgabe, Bedingungen)
+    stimmt), `task.ts` (Aufgabe, Bedingungen; mit Differentialgleichungen
+    stehen sie je Funktion in einer Zeile über der Gleichung, `givenLatex`,
+    `\begin{gathered}`; ohne sie bleibt `taskLatex` wie bisher)
   - `random/rng.ts`: Zufall mit Startwert; `tasks/`: Aufgaben-Nummern
     („3-48213"), Vorlagen je Stufe (`derivativeTerms.ts`,
     `fractionTerms.ts`, `rearrangeTerms.ts`; Umstellen Stufen 1 bis 4 aus dem
@@ -380,11 +396,19 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     integriert, Grenzwerte auf $e^{\square}$, endliche Summen nach der Anzahl
     $n$, mit Schalen (Werkzeug hinten), im Bruch, unter Wurzel oder $\ln$, Reihe
     in einer Ableitung oder einem Integral, Grenzwert gleich Ableitung;
-    Summenindex $k$, Grenzwert über $n$; Filter in
+    Summenindex $k$, Grenzwert über $n$; Teil 7c `buildLevel5Ode` (Anteil 30 %
+    der Nummern, die nicht zu 7b gehören): $f' = \pm kf$, Abkühlen, $f'' = k^2 f$,
+    mit Schalen (erster Ordnung mindestens zwei), im Bruch mit $e^{kx}$, unter
+    Wurzel oder $\ln$, zwei Funktionen $f$ und $g$ mit derselben Rate; Rate $k$
+    oder eine Zahl, Funktionen $f$ und $g$ (diese Buchstaben sonst nicht);
+    Filter in
     `rearrangeTerms.ts`: Mindestzahl der Umformungen je Stufe, Doppelbrüche
     erst ab Stufe 3, Ergebnis höchstens 90 bzw. ab Stufe 4 120 Zeichen (Stufe
     5: 100, ohne Wurzel aus einer Summe mit Brüchen, mit Buchstaben; Länge der
-    Aufgabe mit $\sum$ und $\lim$ so breit wie drei Zeichen),
+    Aufgabe mit $\sum$ und $\lim$ so breit wie drei Zeichen, ohne die Zeilen
+    der Differentialgleichung, die je höchstens 64 Zeichen haben; Vorlagen mit
+    `narrow` (Teil 7c): Ergebnis höchstens 90 Zeichen, keine Wurzel aus mehr
+    als drei Summanden, damit es am Handy in eine Zeile passt),
     Gegenprobe der Aufgabe an den Prüfstellen), `focus.ts` und `fractionFocus.ts` (Aufgaben für
     gezieltes Üben; Brüche: reihum durch die Stufen, je Runde zwölf Versuche,
     seltene Fehler in ihrer Vorlage `focus`, `likelyFractionTemplate`;
@@ -408,7 +432,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     zusammengefasst, Buchstaben der Reihe nach benannt, auch in Produkten wie
     $ax$; Kennzahlen
     `varietyStats`; `pickFresh`) und `forms.ts` (Form je Thema;
-    Partialbrüche mit eigenem Vorsatz „zerlegen:")
+    Partialbrüche mit eigenem Vorsatz „zerlegen:"; beim Umstellen mit der
+    Differentialgleichung, `taskFormLatex`)
 - `src/state/`: Speichern auf dem Gerät (`storage.ts`, Version 3, robust
   gegen kaputten Inhalt, alte Versionen werden umgezogen: bis Version 2
   gehört alles zum Ableiten), gemeinsamer Zustand (`store.ts`),

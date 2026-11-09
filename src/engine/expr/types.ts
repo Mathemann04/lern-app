@@ -57,6 +57,10 @@ export type Tool =
   | { readonly kind: 'series'; readonly body: Expr; readonly v: string; readonly lower: Expr }
   // Grenzwert \lim_{v \to \infty} body (v ist gebunden, z. B. n)
   | { readonly kind: 'limit'; readonly body: Expr; readonly v: string }
+  // Lösung einer linearen Differentialgleichung an der Stelle point, gesetzt als f(x): v ist der Name der
+  // Funktion (gebunden), body die rechte Seite in v (f' = body bzw. f'' = body, z. B. k^2 f oder
+  // k(b - f)), initial die Anfangswerte f(0) bzw. f(0), f'(0)
+  | { readonly kind: 'ode'; readonly order: 1 | 2; readonly body: Expr; readonly v: string; readonly initial: readonly Expr[]; readonly point: Expr }
 
 // Gebundene Variable eines Werkzeugs (bei der Ableitung keine: dort ist v die Stelle) und die Teile
 // außerhalb des Rumpfs (Grenzen)
@@ -68,6 +72,8 @@ export function toolLimits(tool: Tool): Expr[] {
       return []
     case 'series':
       return [tool.lower]
+    case 'ode':
+      return [...tool.initial, tool.point]
     default:
       return [tool.lower, tool.upper]
   }

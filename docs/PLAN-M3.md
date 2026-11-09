@@ -478,7 +478,14 @@ Aufgabe: Löse $\int_a^x \frac{\mathrm{d}t}{t(t + b)} = y$ nach $x$ auf
 | Determinante | Plus statt Minus | $\det\begin{pmatrix} p & q \\ r & s \end{pmatrix} = ps + qr$ |
 | Additionstheorem | gliedweise | $\sin(x + a) = \sin x + \sin a$ |
 | Vektoren | nicht durch die Längen geteilt | $\cos\varphi = \vec{u} \cdot \vec{v}$ |
-| Differentialgleichung | Anfangswert $f'(0) = 0$ nicht genutzt | $f(x) = a\,e^{kx}$ |
+| Differentialgleichung | einen Anfangswert nicht genutzt, z. B. $f'(0) = 0$ (`eq-ode-initial-unused`, neu in 7c) | $f'' = k^2 f$, $f(0) = a$, $f'(0) = 0$: $f(x) = a\,e^{kx}$ |
+| Differentialgleichung | bei $f'' = k^2 f$ die Konstanten nicht halbiert (`eq-ode-not-halved`, neu in 7c) | $f(x) = ae^{kx} + ae^{-kx}$ |
+| Differentialgleichung | bei $f'(0)$ den Faktor $k$ aus $\left(e^{kx}\right)' = ke^{kx}$ vergessen (`eq-ode-inner-factor`, neu in 7c) | $f(0) = 0$, $f'(0) = b$: $f(x) = \frac{b}{2}e^{kx} - \frac{b}{2}e^{-kx}$ |
+| Differentialgleichung | mit der Schwingung $f'' = -k^2 f$ verwechselt (`eq-ode-oscillation`, neu in 7c, nur geführt) | $f(x) = a\cos(kx)$ |
+| Differentialgleichung | aus $\lambda^2 = k^2$ die Wurzel nicht gezogen (`eq-ode-root`, neu in 7c) | $f'' = 4f$, $f(0) = a$, $f'(0) = 0$: $f(x) = \frac{a}{2}e^{4x} + \frac{a}{2}e^{-4x}$ |
+| Differentialgleichung | Konstante addiert statt malgenommen (`eq-ode-constant-added`, neu in 7c) | $f' = kf$, $f(0) = a$: $f(x) = e^{kx} + a - 1$ |
+| Differentialgleichung | Vorzeichen in der Hochzahl vertauscht (`eq-ode-exp-sign`, neu in 7c) | $f' = -kf$: $f(x) = ae^{kx}$ |
+| Differentialgleichung | beim Abkühlen die Konstante gleich dem Anfangswert gesetzt (`eq-ode-constant-start`, neu in 7c) | $f' = k(b - f)$, $f(0) = a$: $f(x) = b + ae^{-kx}$ |
 
 Dazu kommen die bekannten Fehler aus „Brüche", wenn eine Seite zu einem
 Bruch zusammengefasst wird (z. B. Zähler plus Zähler, Nenner plus Nenner).
@@ -846,6 +853,56 @@ Geführt kommt zuerst „Was steht da eigentlich?" mit sieben neuen Fehlern
 „Grenzwert $\left(1 + \frac{x}{n}\right)^n \to e^x$"; beim Grenzwert darf die
 falsche Antwort auch ohne $x$ dastehen („1 hoch unendlich ist 1"). Frei wird das
 Ergebnis eingetippt, auch nach $n$; die neuen Fehler werden erkannt.
+
+**Umgesetzt (7c):** In Stufe 5 kommen Differentialgleichungen dazu, als eigene
+Vorlage mit festem Anteil (30 % der Nummern, die nicht schon zu 7b gehören; alle
+Nummern aus 7b und die übrigen aus 7a behalten ihre Aufgabe). Die Gleichung steht
+mit ihren Anfangswerten über der Aufgabe (bei zweiter Ordnung die Anfangswerte in
+einer eigenen Zeile, damit es am Handy passt), in der Aufgabe selbst steht $f(x)$:
+$$\begin{gathered}f'' = k^{2}f \\ f(0) = a,\; f'(0) = 0 \\ f(x) = y\end{gathered}$$
+Der Baukasten `buildLevel5Ode` setzt zusammen:
+- **Wachstum und Abnahme** $f' = kf$ bzw. $f' = -kf$ (auch mit Zahlen, $f' = -2f$),
+  **Abkühlen** $f' = k(b - f)$ mit $f(0) = a > b$, und **$f'' = k^2 f$** (auch $4f$,
+  $9f$, $f$) mit $f(0) = a$, $f'(0) = 0$ oder $f(0) = 0$, $f'(0) = b$;
+- mit Schalen (erster Ordnung mindestens zwei, bei $f'' = k^2 f$ meist nur
+  malnehmen oder teilen), im Bruch mit $e^{kx}$, unter einer
+  Wurzel oder im $\ln$, oder zwei Funktionen $f' = kf$ und $g' = -kg$ mit
+  $f(x) - g(x) = y$, $f(x) = g(x) + c$ (danach quadratisch, genau eine Lösung passt)
+  oder $f(x) = g(x)$.
+
+Die Lösung steht als Schritt „Differentialgleichung lösen" in Exponentialform da,
+so wie sie mit dem Ansatz $e^{\lambda x}$ und den Anfangswerten herauskommt:
+$\frac{a}{2}e^{kx} + \frac{a}{2}e^{-kx}$ statt $a\cosh(kx)$. Danach rechnet die
+Engine wie gewohnt weiter, bei $f'' = k^2 f$ über $u = e^{kx}$ und die $pq$-Formel;
+das Beispiel aus dem Plan ergibt genau
+$x = \frac{\ln\left(\frac{y + \sqrt{y^2 - a^2}}{a}\right)}{k}$. Die Rechnung steht in
+`rearrange/tools/ode.ts`. Die Gegenprobe in `evaluate.ts` löst die Gleichung
+numerisch, unabhängig von der Lösungsformel (klassisches Runge-Kutta-Verfahren mit
+zwei Schrittweiten und Richardson-Extrapolation, Fehler etwa $10^{-11}$); die Tests
+setzen jede Lösung zusätzlich ein und leiten numerisch ab („einsetzen, numerisch
+ableiten"). Eine Differentialgleichung steht nie in einem anderen Werkzeug.
+
+Das Ergebnis muss am Handy in eine Zeile passen (höchstens 90 Zeichen, keine
+Wurzel aus mehr als drei Summanden; nach der $pq$-Formel entstehen sonst lange
+Wurzeln). Als Prüfstellen zählen nur Stellen, an denen sich die Aufgabe numerisch
+ausrechnen lässt (die Differentialgleichung bis $kx = 50$).
+
+Gemessen unter den Aufgaben 1 bis 200 der Stufe 5 (7a, 7b und 7c zusammen): 193
+Formen, keine öfter als in 1,5 von 100, im Mittel 8,7 Umformungen, jede mindestens
+6; die 30 Aufgaben mit Differentialgleichung im Mittel 9,8 Umformungen, etwa ein
+Drittel davon mit $f'' = k^2 f$.
+
+Geführt kommt zuerst „Was steht da eigentlich?" mit acht neuen Fehlern (Tabelle
+oben); die Frage nennt die Funktion ($f$ oder $g$), die Erklärung zeigt, was der
+Ansatz ergibt ($\lambda^2 = k^2 \Rightarrow \lambda = \pm k$), und die Gleichungen
+für die Konstanten ($C_1 + C_2 = a$, $k(C_1 - C_2) = 0$). Neue Lernkarte
+„Differentialgleichungen $f' = kf$ und $f'' = k^2 f$". Frei wird das Ergebnis
+eingetippt, bei $f'' = k^2 f$ auch als $\operatorname{arcosh}$ bzw.
+$\operatorname{arsinh}$ (Tastatur mit der Seite „Funktionen"); die neuen Fehler
+werden erkannt, „mit der Schwingung verwechselt" nur geführt (mit $\cos$ gibt es
+meist keine Lösung). Dafür rechnet die Engine eine falsche Gleichung vor dem
+Substituieren jetzt mit eigener Substitution weiter (vorher blieben solche Fehler
+im freien Modus ohne Namen).
 
 #### Schritt 8: Stufe 5, Teil 2: Algebra und Geometrie
 - Komplexe Zahlen (Betrag, Winkel), Determinanten, Winkel zwischen
