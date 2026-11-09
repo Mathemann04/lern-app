@@ -83,11 +83,16 @@ export function toolLatex(tool: Tool): string {
 }
 
 // Die Differentialgleichung mit ihren Anfangswerten: f'' = k^{2}f,\; f(0) = a,\; f'(0) = 0
-export function odeLatex(tool: Extract<Tool, { kind: 'ode' }>): string {
+export const odeLatex = (tool: Extract<Tool, { kind: 'ode' }>): string => odeLines(tool).join(',\\; ')
+
+// dasselbe in Zeilen, wie über der Aufgabe: erster Ordnung eine Zeile (f' = kf,\; f(0) = a), zweiter
+// Ordnung die Gleichung und darunter die Anfangswerte (sonst zu breit fürs Handy)
+export function odeLines(tool: Extract<Tool, { kind: 'ode' }>): string[] {
   const f = tool.v
   const primes = (n: number) => "'".repeat(n)
-  const initial = tool.initial.map((value, i) => `${f}${primes(i)}(0) = ${toLatex(value)}`)
-  return [`${f}${primes(tool.order)} = ${toLatex(tool.body)}`, ...initial].join(',\\; ')
+  const equation = `${f}${primes(tool.order)} = ${toLatex(tool.body)}`
+  const initial = tool.initial.map((value, i) => `${f}${primes(i)}(0) = ${toLatex(value)}`).join(',\\; ')
+  return tool.order === 1 ? [`${equation},\\; ${initial}`] : [equation, initial]
 }
 
 // Rumpf einer Summe oder eines Grenzwerts: eine Summe oder ein Minus vorn in Klammern
@@ -220,6 +225,8 @@ function printFactor(f: Expr, index: number): string {
 function needsDot(left: Expr, right: Expr, rightLatex: string): boolean {
   if (/^[\d-]/.test(rightLatex) || isNegative(right)) return true
   if (right.kind === 'div') return true
+  // Zahl als Bruch nach einem Faktor: 2u \cdot \frac{3}{2}, nicht 2u\frac{3}{2} (sähe aus wie eine gemischte Zahl)
+  if (right.kind === 'num' && !isInteger(right.value) && !right.decimal) return true
   // e \cdot e^{x} statt ee^{x}
   if (left.kind === 'const' && left.name === 'e' && rightLatex.startsWith('e')) return true
   // b \cdot f(x) statt bf(x)

@@ -537,7 +537,7 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   gelöst (in Exponentialform), dann umgestellt, bei $f'' = k^2 f$ mit
   Substitution und $pq$-Formel. 30 % der Nummern, die nicht zu 7b gehören; alle
   anderen behalten ihre Aufgabe. 193 Formen unter 200 Aufgaben, im Mittel 8,7
-  Umformungen. Sieben neue typische Fehler, neue Lernkarte „Differentialgleichungen
+  Umformungen. Acht neue typische Fehler, neue Lernkarte „Differentialgleichungen
   $f' = kf$ und $f'' = k^2 f$". Zur Gegenprobe löst die Engine die Gleichung
   numerisch (Runge-Kutta). Browser-Tests mit 5-427 (das Beispiel aus dem Plan,
   geführt und frei). Damit ist Schritt 7 fertig.

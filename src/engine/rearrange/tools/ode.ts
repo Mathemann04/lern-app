@@ -1,6 +1,6 @@
 import { contains } from '../../expr/compare.ts'
 import { toLatex } from '../../expr/print.ts'
-import { type Expr, type Tool, add, cos, div, exp, mul, neg, num, sin } from '../../expr/types.ts'
+import { type Expr, type Tool, add, cos, div, exp, mul, neg, num, pow, sin } from '../../expr/types.ts'
 import { type Rational, isOne, rat, ratDiv, ratSign } from '../../rational.ts'
 
 // Differentialgleichungen der Stufe 5 (docs/PLAN-M3.md, Teil 7c): f' = kf, f' = -kf, Abkühlen
@@ -16,6 +16,7 @@ export type OdeMistake =
   | 'eq-ode-not-halved'
   | 'eq-ode-inner-factor'
   | 'eq-ode-oscillation'
+  | 'eq-ode-root'
   | 'eq-ode-constant-added'
   | 'eq-ode-exp-sign'
   | 'eq-ode-constant-start'
@@ -25,6 +26,7 @@ export const ODE_MISTAKES: readonly OdeMistake[] = [
   'eq-ode-not-halved',
   'eq-ode-inner-factor',
   'eq-ode-oscillation',
+  'eq-ode-root',
   'eq-ode-constant-added',
   'eq-ode-exp-sign',
   'eq-ode-constant-start',
@@ -135,9 +137,13 @@ function minus(a: Expr, b: Expr): Expr {
 
 // --- Rechenweg für die Erklärung ---
 
+// \lambda^2 bei f'' = \lambda^2 f: k^2, 4, 1 (null bei erster Ordnung)
+const squareOf = (rate: Expr): Expr => (rate.kind === 'num' ? num(rate.value.n * rate.value.n) : pow(rate, num(2)))
+
 // Ansatz und Konstanten aus den Anfangswerten als LaTeX: f(x) = C_1e^{kx} + C_2e^{-kx} und
-// C_1 + C_2 = a,\; k(C_1 - C_2) = 0 \Rightarrow C_1 = C_2 = \frac{a}{2}
-export function odeWork(t: OdeTool): { readonly approach: string; readonly constants: string } | null {
+// C_1 + C_2 = a,\; k(C_1 - C_2) = 0 \Rightarrow C_1 = C_2 = \frac{a}{2}; bei zweiter Ordnung dazu, was
+// der Ansatz e^{\lambda x} ergibt: \lambda^2 = 4 \Rightarrow \lambda = \pm 2
+export function odeWork(t: OdeTool): { readonly approach: string; readonly constants: string; readonly lambda?: string } | null {
   const shape = odeShape(t)
   if (!shape) return null
   const f = `${t.v}(${toLatex(t.point)})`
@@ -155,7 +161,8 @@ export function odeWork(t: OdeTool): { readonly approach: string; readonly const
       const k = isNum(shape.rate, 1) ? '' : toLatex(shape.rate)
       const both = `C_1 + C_2 = ${toLatex(f0)},\\; ${k}(C_1 - C_2) = ${toLatex(f1)}`
       const solved = isZero(f1) ? `C_1 = C_2 = ${toLatex(over(f0, rat(2), null))}` : `C_1 = -C_2 = ${toLatex(perRate(f1, shape.rate, 2))}`
-      return { approach: `${f} = C_1${e(1)} + C_2${e(-1)}`, constants: `${both} \\Rightarrow ${solved}` }
+      const lambda = `\\lambda^2 = ${toLatex(squareOf(shape.rate))} \\Rightarrow \\lambda = \\pm ${toLatex(shape.rate)}`
+      return { approach: `${f} = C_1${e(1)} + C_2${e(-1)}`, constants: `${both} \\Rightarrow ${solved}`, lambda }
     }
   }
 }
@@ -207,6 +214,8 @@ export function odeSolution(t: OdeTool, mistake: OdeMistake | null): Expr | null
       // nur f(0) = a, f'(0) = 0 oder f(0) = 0, f'(0) = b
       if (f0 === undefined || f1 === undefined || isZero(f0) === isZero(f1)) return null
       const rate = shape.rate
+      // aus \lambda^2 = k^2 die Wurzel nicht gezogen: e^{\pm k^2 x} (bei f'' = f dasselbe wie richtig)
+      const unrooted = (sign: 1 | -1) => exp(exponent(squareOf(rate), t.point, sign))
       if (isZero(f1)) {
         const a = f0
         const half = over(a, rat(2), null)
@@ -220,6 +229,8 @@ export function odeSolution(t: OdeTool, mistake: OdeMistake | null): Expr | null
             return add(times(a, e(1)), times(a, e(-1)))
           case 'eq-ode-oscillation':
             return times(a, cos(exponent(rate, t.point, 1)))
+          case 'eq-ode-root':
+            return isNum(rate, 1) ? null : add(times(half, unrooted(1)), times(half, unrooted(-1)))
           default:
             return null
         }
@@ -236,14 +247,20 @@ export function odeSolution(t: OdeTool, mistake: OdeMistake | null): Expr | null
           const whole = perRate(b, rate, 1)
           return add(times(whole, e(1)), neg(times(whole, e(-1))))
         }
-        // (e^{kx})' = e^{kx}: der Faktor k fehlt in f'(0)
+        // (e^{kx})' = e^{kx}: der Faktor k fehlt in f'(0); bei k = 1 richtig, bei k = 2 dasselbe wie
+        // „nicht halbiert"
         case 'eq-ode-inner-factor': {
-          if (isNum(rate, 1)) return null
+          if (isNum(rate, 1) || isNum(rate, 2)) return null
           const half = over(b, rat(2), null)
           return add(times(half, e(1)), neg(times(half, e(-1))))
         }
         case 'eq-ode-oscillation':
           return times(perRate(b, rate, 1), sin(exponent(rate, t.point, 1)))
+        case 'eq-ode-root': {
+          if (isNum(rate, 1)) return null
+          const c2 = perRate(b, squareOf(rate), 2)
+          return add(times(c2, unrooted(1)), neg(times(c2, unrooted(-1))))
+        }
         default:
           return null
       }

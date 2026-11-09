@@ -87,7 +87,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   bei komplexen Zahlen $\mathrm{i}$; Umstellen mit allen Buchstaben der Aufgabe
   (bis zu sieben) und √, ab Stufe 4 mit $e^x$, ln und $\log_a$, bei Winkel- und
   Hyperbelfunktionen mit zweiter Seite „Funktionen" (sin, cos, tan, ihre
-  Umkehrfunktionen, sinh, cosh, tanh, Areafunktionen); wird erst im
+  Umkehrfunktionen, sinh, cosh, tanh, Areafunktionen; auch bei $f'' = k^2 f$,
+  für arcosh und arsinh); wird erst im
   freien Modus geladen), gemeinsame Teile in
   `src/ui/task/`. Lernkarten in
   `src/ui/cards/` (`CardSheet.tsx`: Fenster über der Aufgabe, die
@@ -351,11 +352,13 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     `check.ts`
     (Prüfstellen: Buchstaben zufällig positiv, Variable aus dem Ergebnis,
     Bedingungen der Aufgabe, Zwischenwerte aus `requires` nicht riesig;
-    mit Summe, Reihe oder Grenzwert nur Stellen, an denen sich die Aufgabe
-    numerisch ausrechnen lässt;
+    mit Summe, Reihe, Grenzwert oder Differentialgleichung nur Stellen, an
+    denen sich die Aufgabe numerisch ausrechnen lässt;
     mit $u$ nach einer Substitution `withSubstitution`;
     Gegenprobe durch Einsetzen), `errorRules.ts`
     (typische Fehler, Ids `eq-…`, beim Zusammenfassen die aus „Brüche";
+    falsche Gleichungen vor einer Substitution mit eigener Substitution
+    weitergerechnet;
     je Klammer ein Fehler beim Ausmultiplizieren; nie eine Gleichung, die doch
     stimmt), `task.ts` (Aufgabe, Bedingungen; mit Differentialgleichungen
     stehen sie je Funktion in einer Zeile über der Gleichung, `givenLatex`,
@@ -403,7 +406,9 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     erst ab Stufe 3, Ergebnis höchstens 90 bzw. ab Stufe 4 120 Zeichen (Stufe
     5: 100, ohne Wurzel aus einer Summe mit Brüchen, mit Buchstaben; Länge der
     Aufgabe mit $\sum$ und $\lim$ so breit wie drei Zeichen, ohne die Zeilen
-    der Differentialgleichung, die je höchstens 64 Zeichen haben),
+    der Differentialgleichung, die je höchstens 64 Zeichen haben; Vorlagen mit
+    `narrow` (Teil 7c): Ergebnis höchstens 90 Zeichen, keine Wurzel aus mehr
+    als drei Summanden, damit es am Handy in eine Zeile passt),
     Gegenprobe der Aufgabe an den Prüfstellen), `focus.ts` und `fractionFocus.ts` (Aufgaben für
     gezieltes Üben; Brüche: reihum durch die Stufen, je Runde zwölf Versuche,
     seltene Fehler in ihrer Vorlage `focus`, `likelyFractionTemplate`;

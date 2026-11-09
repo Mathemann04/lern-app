@@ -1646,15 +1646,34 @@ function secondCore(rng: Rng, n: Names): ToolCore {
 }
 
 const firstOrderCore = (rng: Rng, n: Names): ToolCore => (rng.chance(0.55) ? growthCore(rng, n) : coolingCore(rng, n))
-const odeCore = (rng: Rng, n: Names): ToolCore => (rng.chance(0.65) ? secondCore(rng, n) : firstOrderCore(rng, n))
+const odeCore = (rng: Rng, n: Names): ToolCore => (rng.chance(0.75) ? secondCore(rng, n) : firstOrderCore(rng, n))
 
-// DGL mit Schalen; erster Ordnung mindestens zwei (sonst zu wenige Umformungen)
+// DGL mit Schalen; erster Ordnung mindestens zwei (sonst zu wenige Umformungen). Bei f'' = k^2 f meist
+// nur malnehmen oder teilen: Mit Plus und Minus steht nach der pq-Formel eine lange Wurzel im Ergebnis.
 function odeShells(rng: Rng, n: ToolNames): Built {
   const c = odeCore(rng, n)
   const second = c.label.includes("f''")
   const cooling = c.label.includes('Abkühlen')
-  const { e, count } = someShells(rng, c.tool, n, second ? 2 : 3, second ? (rng.chance(0.25) ? 0 : 1) : cooling ? 1 : 2)
+  const { e, count } = second
+    ? rng.chance(0.7)
+      ? odeScaleShells(rng, c.tool, n, 2, rng.chance(0.25) ? 0 : 1)
+      : someShells(rng, c.tool, n, 2, 1)
+    : someShells(rng, c.tool, n, 3, cooling ? 1 : 2)
   return { side: e, conditions: c.conditions, label: `${c.label}, ${count} Schalen` }
+}
+
+// Schalen, die nur malnehmen oder teilen; ein Faktor kommt in den Zähler: \frac{4f(x)}{3}
+function odeScaleShells(rng: Rng, core: Expr, n: Names, max: number, min = 0): { e: Expr; count: number } {
+  const count = rng.int(min, max)
+  let e = core
+  for (let i = 0; i < count; i++) {
+    if (rng.chance(0.5) && !hasFraction(e)) e = div(e, denominator(rng, n))
+    else {
+      const f = factor(rng, n)
+      e = e.kind === 'div' ? div(letters(f, e.num), e.den) : letters(f, e)
+    }
+  }
+  return { e, count }
 }
 
 // DGL erster Ordnung im Bruch mit ihrem Baustein: \frac{f(x)}{e^{kx} + b} = y

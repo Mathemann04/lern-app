@@ -15,7 +15,7 @@ import { samplePoints } from '../rearrange/check.ts'
 import { type RearrangeWrong, rearrangeWrongAnswers } from '../rearrange/errorRules.ts'
 import { type RearrangeSolution, solveTask } from '../rearrange/isolate.ts'
 import { type RearrangeTask, taskVariables } from '../rearrange/task.ts'
-import { hasTool } from '../rearrange/tools/tool.ts'
+import { hasTool, toolsIn } from '../rearrange/tools/tool.ts'
 import { isInteger, ratAbs } from '../rational.ts'
 import { generateRearrangeTask } from '../tasks/rearrangeTerms.ts'
 import type { TaskRef } from '../tasks/taskNumber.ts'
@@ -305,6 +305,7 @@ const hasRoot = (...exprs: readonly Expr[]) => exprs.some((e) => subterms(e).som
 // Hochzahl oder ein Logarithmus steht
 const hasExp = (...exprs: readonly Expr[]) =>
   exprs.some((e) => subterms(e).some((s) => s.kind === 'fn' || s.kind === 'log' || (s.kind === 'pow' && variablesOf(s.exp).size > 0)))
+const hasSecondOrderOde = (equation: Equation) => toolsIn(equation).some((v) => v.tool.kind === 'ode' && v.tool.order === 2)
 // zweite Seite mit Winkel-, Hyperbel- und Umkehrfunktionen, wenn eine davon vorkommt
 const hasTrig = (...exprs: readonly Expr[]) => exprs.some((e) => subterms(e).some((s) => s.kind === 'fn' && s.name !== 'ln'))
 
@@ -317,7 +318,8 @@ export function prepareRearrangeFree(ref: TaskRef): FreeTask {
   return {
     answerLabel: `${target} =`,
     inputLabel: 'Dein Ergebnis',
-    keyboard: { kind: 'rearrange', letters: context.letters, root: hasRoot(...all), exp: hasExp(...all), trig: hasTrig(...all) },
+    // bei f'' = k^2 f auch die Seite „Funktionen“: Das Ergebnis lässt sich mit arcosh bzw. arsinh schreiben
+    keyboard: { kind: 'rearrange', letters: context.letters, root: hasRoot(...all), exp: hasExp(...all), trig: hasTrig(...all) || hasSecondOrderOde(equation) },
     check: (latex) => rearrangeFreeVerdict(checkRearrangeAnswer(context, latex), target),
   }
 }

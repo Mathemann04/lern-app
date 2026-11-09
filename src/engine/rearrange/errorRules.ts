@@ -129,6 +129,7 @@ export const REARRANGE_ERROR_RULES: readonly EqErrorRule[] = [
   { id: 'eq-ode-not-halved', name: 'Bei $f\'\' = k^2 f$ die Konstanten nicht halbiert', wrongFormula: "f'' = k^2 f,\\; f(0) = a,\\; f'(0) = 0: f(x) = ae^{kx} + ae^{-kx}" },
   { id: 'eq-ode-inner-factor', name: 'Bei $f\'(0)$ den Faktor $k$ aus der Ableitung von $e^{kx}$ vergessen', wrongFormula: "f'' = k^2 f,\\; f(0) = 0,\\; f'(0) = b: f(x) = \\frac{b}{2}e^{kx} - \\frac{b}{2}e^{-kx}" },
   { id: 'eq-ode-oscillation', name: 'Mit der Schwingung $f\'\' = -k^2 f$ verwechselt', wrongFormula: "f'' = k^2 f,\\; f(0) = a,\\; f'(0) = 0: f(x) = a\\cos(kx)" },
+  { id: 'eq-ode-root', name: 'Aus $\\lambda^2 = k^2$ die Wurzel nicht gezogen', wrongFormula: "f'' = 4f,\\; f(0) = a,\\; f'(0) = 0: f(x) = \\frac{a}{2}e^{4x} + \\frac{a}{2}e^{-4x}" },
   { id: 'eq-ode-constant-added', name: 'Die Konstante addiert statt malgenommen', wrongFormula: "f' = kf,\\; f(0) = a: f(x) = e^{kx} + a - 1" },
   { id: 'eq-ode-exp-sign', name: 'Das Vorzeichen in der Hochzahl vertauscht', wrongFormula: "f' = -kf,\\; f(0) = a: f(x) = ae^{kx}" },
   { id: 'eq-ode-constant-start', name: 'Beim Abkühlen die Konstante gleich dem Anfangswert gesetzt', wrongFormula: "f' = k(b - f),\\; f(0) = a: f(x) = b + ae^{-kx}" },
@@ -692,6 +693,9 @@ export function rearrangeWrongAnswers(task: RearrangeTask, solution: RearrangeSo
   const sub = solution.substitution
   const points = withSubstitution(samplePoints(task, solution.result, createRng(`umstellen:${equationToLatex(task.equation)}`), 24, solution.requires), sub)
   const options = { conditions: task.conditions, ...(sub ? { substitution: sub } : {}) }
+  // weitergerechnet mit der Substitution nur, wo u schon dasteht; ein Fehler davor (z. B. beim Lösen einer
+  // Differentialgleichung) steht noch in x und wird mit eigener Substitution gelöst
+  const optionsFor = (e: Equation) => (sub && (contains(e.lhs, sub.name) || contains(e.rhs, sub.name)) ? options : { conditions: task.conditions })
   const out: RearrangeWrong[] = []
   solution.steps.forEach((step, i) => {
     for (const c of candidatesFor(solution.steps, i, t)) {
@@ -699,7 +703,7 @@ export function rearrangeWrongAnswers(task: RearrangeTask, solution: RearrangeSo
       if ((!c.zeroForm && isZeroSide(c.after, step.unknown ?? t)) || !clearlyFails(c.after, points)) continue
       const latex = equationToLatex(c.after)
       if (out.some((w) => w.stepIndex === i && equationToLatex(w.after) === latex)) continue
-      out.push({ rule: rearrangeErrorRule(c.id), stepIndex: i, after: c.after, result: wrongResult(c.after, t, points, options), ...(c.derive ? { derive: c.derive } : {}) })
+      out.push({ rule: rearrangeErrorRule(c.id), stepIndex: i, after: c.after, result: wrongResult(c.after, t, points, optionsFor(c.after)), ...(c.derive ? { derive: c.derive } : {}) })
     }
   })
   return out

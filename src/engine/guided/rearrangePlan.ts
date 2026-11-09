@@ -538,7 +538,11 @@ function resultStep(
   return {
     id: `${index + 1}-${step.kind}`,
     title: finish ? 'Zusammenfassen' : choose ? STEP_NAMES.choose : firstTool ? 'Was steht da eigentlich?' : stepLabel(step, t),
-    question: finish ? `Fasse zu einem Bruch zusammen: Was ist $${t}$?` : choose ? 'Welche der beiden Lösungen passt?' : (tool ?? 'Was kommt heraus?'),
+    question: finish
+      ? `Fasse zu einem Bruch zusammen: Was ist $${t}$?`
+      : choose
+        ? 'Welche der beiden Lösungen passt?'
+        : (odeQuestion(step) ?? tool ?? 'Was kommt heraus?'),
     choices: rng.shuffle([correct, ...wrong]),
     hint: finish ? REARRANGE_HINTS.finish : RESULT_HINTS[step.kind] ?? REARRANGE_HINTS.result,
     explanation:
@@ -550,12 +554,21 @@ function resultStep(
   }
 }
 
+// Differentialgleichung: die Frage nennt die Funktion (bei f und g in einer Aufgabe wichtig)
+function odeQuestion(step: RearrangeStep): string | null {
+  if (step.kind !== 'ode') return null
+  const tool = activeTool(step.before)?.tool.tool
+  return tool?.kind === 'ode' ? `Löse die Differentialgleichung für $${tool.v}$ mit den Anfangswerten: Was kommt heraus?` : null
+}
+
 // Differentialgleichung: Ansatz und Konstanten aus den Anfangswerten
 function odeExplanation(step: RearrangeStep): Explanation | null {
   if (step.kind !== 'ode') return null
   const tool = activeTool(step.before)?.tool.tool
   const work = tool?.kind === 'ode' ? odeWork(tool) : null
-  return tool?.kind === 'ode' && work ? explainOde(odeLatex(tool), work.approach, work.constants, stepLatex(step.kind, step.before), stepLatex(step.kind, step.after)) : null
+  return tool?.kind === 'ode' && work
+    ? explainOde(odeLatex(tool), work.approach, work.constants, stepLatex(step.kind, step.before), stepLatex(step.kind, step.after), work.lambda)
+    : null
 }
 
 const whyWrong = (id: string): Explanation => (id.startsWith('frac-') ? explainFractionError(id) : explainRearrangeError(id))

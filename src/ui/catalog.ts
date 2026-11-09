@@ -162,7 +162,7 @@ const rearrangeLevels: LevelPreview[] = [
       String.raw`\int_a^x \frac{\mathrm{d}t}{t(t + b)} = y`,
       String.raw`\sum_{k=1}^{\infty} k x^k = y`,
       String.raw`\lim_{n \to \infty}\left(\frac{n + x}{n - x}\right)^n = y`,
-      String.raw`f'' = k^2 f,\; f(0) = a,\; f'(0) = 0: \; f(x) = y`,
+      String.raw`\begin{gathered}f'' = k^2 f \\ f(0) = a,\; f'(0) = 0 \\ f(x) = y\end{gathered}`,
     ],
   },
 ]

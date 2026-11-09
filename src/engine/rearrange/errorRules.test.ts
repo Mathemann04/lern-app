@@ -100,6 +100,7 @@ const TOOL_CATALOG: Array<{ id: string; lhs: Expr; target?: string; conditions?:
   { id: 'eq-ode-not-halved', lhs: odeOf(mul(pow(k, num(2)), f), 2, [a, num(0)]), after: 'ae^{kx} + ae^{-kx} = y' },
   { id: 'eq-ode-inner-factor', lhs: odeOf(mul(pow(k, num(2)), f), 2, [num(0), b]), after: '\\frac{b}{2}e^{kx} - \\frac{b}{2}e^{-kx} = y' },
   { id: 'eq-ode-oscillation', lhs: odeOf(mul(pow(k, num(2)), f), 2, [a, num(0)]), after: 'a\\cos(kx) = y' },
+  { id: 'eq-ode-root', lhs: odeOf(mul(num(4), f), 2, [a, num(0)]), after: '\\frac{a}{2}e^{4x} + \\frac{a}{2}e^{-4x} = y' },
   { id: 'eq-ode-constant-added', lhs: odeOf(mul(k, f), 1, [a]), after: 'e^{kx} + a - 1 = y' },
   { id: 'eq-ode-exp-sign', lhs: odeOf(neg(mul(k, f)), 1, [a]), after: 'ae^{kx} = y' },
   { id: 'eq-ode-constant-start', lhs: odeOf(mul(k, sub(b, f)), 1, [a]), conditions: [{ lhs: a, rel: '>', rhs: b }], after: 'b + ae^{-kx} = y' },

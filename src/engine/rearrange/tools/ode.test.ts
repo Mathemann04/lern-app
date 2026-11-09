@@ -126,6 +126,7 @@ describe('Lösung der Engine: eingesetzt, numerisch abgeleitet', () => {
     ["f'' = k^2 f, (0, b)", odeOf(mul(ksq, f), 2, [num(0), b]), '\\frac{b}{2k}e^{kx} - \\frac{b}{2k}e^{-kx}'],
     ["f'' = 4f, (3, 0)", odeOf(mul(num(4), f), 2, [num(3), num(0)]), '\\frac{3}{2}e^{2x} + \\frac{3}{2}e^{-2x}'],
     ["f'' = f, (0, b)", odeOf(f, 2, [num(0), b]), '\\frac{b}{2}e^{x} - \\frac{b}{2}e^{-x}'],
+    ["f'' = 4f, (0, b)", odeOf(mul(num(4), f), 2, [num(0), b]), '\\frac{b}{4}e^{2x} - \\frac{b}{4}e^{-2x}'],
   ]
 
   it.each(cases)('%s', (_name, e, expected) => {
@@ -140,10 +141,13 @@ describe('Lösung der Engine: eingesetzt, numerisch abgeleitet', () => {
   it.each(cases)('%s: jeder typische Fehler verletzt die Gleichung oder einen Anfangswert', (_name, e) => {
     const tool = toolOf(e)
     const correct = odeSolution(tool, null)!
+    const seen = new Set([toLatex(correct)])
     for (const id of ODE_MISTAKES) {
       const wrong = odeSolution(tool, id)
       if (!wrong) continue
-      expect(toLatex(wrong), id).not.toBe(toLatex(correct))
+      // verschieden von der Lösung und von den anderen Fehlern (sonst trüge er den falschen Namen)
+      expect(seen.has(toLatex(wrong)), id).toBe(false)
+      seen.add(toLatex(wrong))
       const r = check(tool, wrong)
       expect(r.ode && r.initial, id).toBe(false)
     }
@@ -182,7 +186,7 @@ describe('Beispiel aus dem Plan', () => {
   })
 
   it('Die Aufgabe zeigt die Differentialgleichung über der Gleichung', () => {
-    expect(taskLatex(task)).toBe("\\begin{gathered}f'' = k^{2}f,\\; f(0) = a,\\; f'(0) = 0 \\\\ f(x) = y\\end{gathered}")
+    expect(taskLatex(task)).toBe("\\begin{gathered}f'' = k^{2}f \\\\ f(0) = a,\\; f'(0) = 0 \\\\ f(x) = y\\end{gathered}")
   })
 })
 

@@ -33,7 +33,7 @@ export const notationGroups: NotationGroup[] = [
       { label: 'Integral', tex: String.raw`\int_a^x \frac{\mathrm{d}t}{t(t + b)}` },
       { label: 'Summe und Reihe', tex: String.raw`\sum_{k=0}^{n-1} a q^k, \quad \sum_{k=1}^{\infty} k x^k` },
       { label: 'Grenzwert', tex: String.raw`\lim_{n \to \infty}\left(1 + \frac{x}{n}\right)^n` },
-      { label: 'Differentialgleichung', tex: String.raw`\begin{gathered}f'' = k^{2}f,\; f(0) = a,\; f'(0) = 0 \\ f(x) = y\end{gathered}` },
+      { label: 'Differentialgleichung', tex: String.raw`\begin{gathered}f'' = k^{2}f \\ f(0) = a,\; f'(0) = 0 \\ f(x) = y\end{gathered}` },
       { label: 'Komplexe Zahlen', tex: String.raw`\left\lvert x + a\,\mathrm{i} \right\rvert, \quad \arg z` },
       { label: 'Determinante', tex: String.raw`\det\begin{pmatrix} e^{x} & e^{-x} \\ a & b \end{pmatrix}` },
       { label: 'Vektor', tex: String.raw`\vec{u} = \begin{pmatrix} x \\ a \\ b \end{pmatrix}` },

@@ -175,13 +175,17 @@ describe('Geführt umstellen: Stufe 5 (Werkzeuge)', () => {
   it('Differentialgleichung (Teil 7c): Lösung als erster Schritt, Ansatz und Konstanten in der Erklärung, dann pq-Formel', () => {
     const [a, b, f, g, k, x, y] = ['a', 'b', 'f', 'g', 'k', 'x', 'y'].map(variable)
     const plan = planRearrange({ equation: eq(odeOf(mul(pow(k, num(2)), f), 2, [a, num(0)]), y), target: 'x', conditions: [] }, { level: 5, seed: 1 })
-    expect(plan.functionLatex).toBe("\\begin{gathered}f'' = k^{2}f,\\; f(0) = a,\\; f'(0) = 0 \\\\ f(x) = y\\end{gathered}")
+    expect(plan.functionLatex).toBe("\\begin{gathered}f'' = k^{2}f \\\\ f(0) = a,\\; f'(0) = 0 \\\\ f(x) = y\\end{gathered}")
     const first = plan.steps[0]
     expect(first.title).toBe('Was steht da eigentlich?')
-    expect(first.question).toContain('Differentialgleichung')
+    expect(first.question).toBe('Löse die Differentialgleichung für $f$ mit den Anfangswerten: Was kommt heraus?')
     expect(first.choices.find((c) => c.correct)?.content).toBe('$\\frac{a}{2}e^{kx} + \\frac{a}{2}e^{-kx} = y$')
-    expect(first.choices.map((c) => c.errorRuleId).sort()).toEqual([undefined, 'eq-ode-initial-unused', 'eq-ode-not-halved', 'eq-ode-oscillation'].sort())
+    // drei der vier typischen Fehler: nur e^{kx}, nicht halbiert, Schwingung, Wurzel nicht gezogen
+    const ids = first.choices.map((c) => c.errorRuleId).filter(Boolean)
+    expect(ids).toHaveLength(3)
+    for (const id of ids) expect(['eq-ode-initial-unused', 'eq-ode-not-halved', 'eq-ode-oscillation', 'eq-ode-root']).toContain(id)
     expect(first.explanation.detailed).toContain('C_1 + C_2 = a')
+    expect(first.explanation.detailed).toContain('\\lambda^2 = k^{2} \\Rightarrow \\lambda = \\pm k')
     expect(first.cards).toEqual(['rearrange-ode'])
     expect(plan.ruleHint.detailed).toContain('Differentialgleichung')
     expect(plan.steps.map((s) => s.id.replace(/^\d+-/, ''))).toContain('pq')
@@ -195,6 +199,7 @@ describe('Geführt umstellen: Stufe 5 (Werkzeuge)', () => {
     expect(two.functionLatex).toContain("g' = ")
     expect(two.steps[0].title).toBe('Was steht da eigentlich?')
     expect(two.steps[1].title).toBe('Differentialgleichung lösen')
+    expect(two.steps[1].question).toContain('für $g$')
     expect(x.name).toBe('x')
   })
 })

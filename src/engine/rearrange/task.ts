@@ -1,5 +1,5 @@
 import { subterms } from '../expr/compare.ts'
-import { equationToLatex, odeLatex, toLatex } from '../expr/print.ts'
+import { equationToLatex, odeLines, toLatex } from '../expr/print.ts'
 import { type Equation, type Expr, toolBound, toolLimits } from '../expr/types.ts'
 
 // Eine Umstell-Aufgabe: Gleichung, gesuchte Variable und Bedingungen. Alle Buchstaben stehen für
@@ -35,14 +35,14 @@ export function variablesOf(...exprs: readonly Expr[]): string[] {
 
 export const taskVariables = (t: RearrangeTask) => variablesOf(t.equation.lhs, t.equation.rhs)
 
-// Differentialgleichungen der Aufgabe (Stufe 5), je Funktion eine Zeile mit den Anfangswerten, f vor g:
-// f'' = k^{2}f,\; f(0) = a,\; f'(0) = 0
+// Differentialgleichungen der Aufgabe (Stufe 5) als Zeilen, f vor g: f' = kf,\; f(0) = a bzw. bei
+// zweiter Ordnung f'' = k^{2}f und darunter f(0) = a,\; f'(0) = 0
 export function givenLatex(t: RearrangeTask): string[] {
-  const lines = new Map<string, string>()
+  const lines = new Map<string, string[]>()
   for (const s of [...subterms(t.equation.lhs), ...subterms(t.equation.rhs)]) {
-    if (s.kind === 'var' && s.tool?.kind === 'ode') lines.set(s.tool.v, odeLatex(s.tool))
+    if (s.kind === 'var' && s.tool?.kind === 'ode') lines.set(s.tool.v, odeLines(s.tool))
   }
-  return [...lines].sort(([a], [b]) => a.localeCompare(b)).map(([, line]) => line)
+  return [...lines].sort(([a], [b]) => a.localeCompare(b)).flatMap(([, rows]) => rows)
 }
 
 // Die Aufgabe als Formel; mit Differentialgleichungen stehen sie in eigenen Zeilen darüber

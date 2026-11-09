@@ -282,12 +282,12 @@ export const REARRANGE_ERROR_TEXTS: Readonly<Record<string, Explanation>> = {
   'eq-ode-initial-unused': {
     detailed:
       "Prüfe die Anfangswerte, indem du $x = 0$ einsetzt. Bei $f' = kf$ ist $f(x) = Ce^{kx}$, und $f(0) = C$ legt die Konstante fest. Bei $f'' = k^2 f$ gibt es zwei Lösungen, $e^{kx}$ und $e^{-kx}$, also zwei Konstanten: $f(x) = C_1e^{kx} + C_2e^{-kx}$. Beide Anfangswerte werden gebraucht: $C_1 + C_2 = f(0)$ und $k(C_1 - C_2) = f'(0)$.",
-    short: "Jeder Anfangswert zählt: Bei $f'' = k^2 f$ ist $f(x) = C_1e^{kx} + C_2e^{-kx}$ mit zwei Konstanten.",
+    short: "Setze $x = 0$ ein, dann muss $f(0)$ herauskommen: Bei $f' = kf$ ist $C = f(0)$, bei $f'' = k^2 f$ braucht es beide Anfangswerte.",
   },
   'eq-ode-not-halved': {
     detailed:
-      "Setze $x = 0$ ein: Mit $e^0 = 1$ ist $f(0) = C_1 + C_2$. Stehen vor $e^{kx}$ und $e^{-kx}$ zwei gleich große Konstanten, ergeben sie zusammen das Doppelte. Die Anfangswerte verteilen sich auf beide Konstanten: $C_1 + C_2 = f(0)$ und $k(C_1 - C_2) = f'(0)$.",
-    short: "Probe bei $x = 0$: $C_1 + C_2 = f(0)$ und $k(C_1 - C_2) = f'(0)$.",
+      "Prüfe beide Anfangswerte bei $x = 0$: Mit $e^0 = 1$ ist $f(0) = C_1 + C_2$ und $f'(0) = k(C_1 - C_2)$. Ein Anfangswert verteilt sich auf zwei Konstanten. Nimmst du für jede den ganzen Wert, kommt bei $x = 0$ das Doppelte heraus.",
+    short: "Probe bei $x = 0$: $C_1 + C_2 = f(0)$ und $k(C_1 - C_2) = f'(0)$, sonst kommt das Doppelte heraus.",
   },
   'eq-ode-inner-factor': {
     detailed:
@@ -298,6 +298,11 @@ export const REARRANGE_ERROR_TEXTS: Readonly<Record<string, Explanation>> = {
     detailed:
       "$\\cos(kx)$ und $\\sin(kx)$ lösen $f'' = -k^2 f$, die Schwingung: $\\left(\\cos(kx)\\right)'' = -k^2\\cos(kx)$. Hier steht $f'' = k^2 f$ ohne Minus. Der Ansatz $e^{\\lambda x}$ ergibt $\\lambda^2 = k^2$, also $\\lambda = \\pm k$: Die Lösungen sind $e^{kx}$ und $e^{-kx}$.",
     short: "$f'' = +k^2 f$ hat die Lösungen $e^{kx}$ und $e^{-kx}$, nicht $\\cos$ und $\\sin$.",
+  },
+  'eq-ode-root': {
+    detailed:
+      "Setze den Ansatz $e^{\\lambda x}$ in $f'' = k^2 f$ ein: $\\lambda^2 e^{\\lambda x} = k^2 e^{\\lambda x}$, also $\\lambda^2 = k^2$. In die Hochzahl kommt $\\lambda = \\pm k$, die Wurzel aus der Zahl vor $f$: Bei $f'' = 4f$ ist $\\lambda^2 = 4$ und $\\lambda = \\pm 2$.",
+    short: "$\\lambda^2 = k^2 \\Rightarrow \\lambda = \\pm k$: Bei $f'' = 4f$ steht $e^{\\pm 2x}$ da.",
   },
   'eq-ode-constant-added': {
     detailed:
@@ -988,11 +993,15 @@ export function explainResult(kind: string, before: string, after: string): Expl
   }
 }
 
-// Lösung einer Differentialgleichung: Ansatz und Konstanten aus den Anfangswerten (tools/ode.ts, odeWork)
-export function explainOde(ode: string, approach: string, constants: string, before: string, after: string): Explanation {
+// Lösung einer Differentialgleichung: Ansatz und Konstanten aus den Anfangswerten (tools/ode.ts, odeWork);
+// lambda: was der Ansatz e^{\lambda x} bei zweiter Ordnung ergibt
+export function explainOde(ode: string, approach: string, constants: string, before: string, after: string, lambda?: string): Explanation {
   const lines = `$${before}$\n$${after}$`
+  const start = lambda
+    ? `Für $${ode}$ ergibt der Ansatz $e^{\\lambda x}$: $${lambda}$, also $${approach}$.`
+    : `Für $${ode}$ setzt du $${approach}$ an.`
   return {
-    detailed: `Für $${ode}$ setzt du $${approach}$ an. Die Anfangswerte bei $x = 0$ liefern $${constants}$. Eingesetzt:\n${lines}`,
+    detailed: `${start} Die Anfangswerte bei $x = 0$ liefern $${constants}$. Eingesetzt:\n${lines}`,
     short: `$${approach}$ mit $${constants}$:\n${lines}`,
   }
 }
