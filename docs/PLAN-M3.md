@@ -305,7 +305,7 @@ Gesucht ist jeweils $x$.
 | Grenzwert | $\lim_{n \to \infty}\left(\frac{n + x}{n - x}\right)^n = y$ | $x = \frac{1}{2}\ln y$ |
 | Komplexe Zahlen | $\left\lvert\frac{x + a\,\mathrm{i}}{x - b\,\mathrm{i}}\right\rvert = y$ | $x = \sqrt{\frac{a^2 - b^2 y^2}{y^2 - 1}}$ |
 | Komplexe Zahlen | $\arg\left((x + a\,\mathrm{i})^2\right) = y$ | $x = \frac{a}{\tan\frac{y}{2}}$ |
-| Determinante | $\det\begin{pmatrix} 1 & x & x^2 \\ 1 & a & a^2 \\ 1 & b & b^2 \end{pmatrix} = y$ | $x = \frac{a + b}{2} + \sqrt{\frac{(b - a)^2}{4} + \frac{y}{b - a}}$ |
+| Determinante | $\det\begin{pmatrix} 1 & x & x^2 \\ 1 & 0 & 0 \\ 1 & a & a^2 \end{pmatrix} = y$ | $x = \frac{a^2 + \sqrt{a^4 + 4ay}}{2a}$ |
 | Determinante | $\det\begin{pmatrix} e^{x} & e^{-x} \\ a & b \end{pmatrix} = y$ | $x = \ln\frac{y + \sqrt{y^2 + 4ab}}{2b}$ |
 | Additionstheorem | $\sin(x + a) = y\cos x$ | $x = \arctan\frac{y - \sin a}{\cos a}$ |
 | Vektoren | $\begin{pmatrix} x \\ a \\ b \end{pmatrix}$ und $\begin{pmatrix} 1 \\ 0 \\ 0 \end{pmatrix}$ schließen den Winkel $y$ ein | $x = \frac{\sqrt{a^2 + b^2}}{\tan y}$ |
@@ -475,7 +475,12 @@ Aufgabe: Löse $\int_a^x \frac{\mathrm{d}t}{t(t + b)} = y$ nach $x$ auf
 | Grenzwert | den Nenner nicht beachtet (`eq-lim-denominator`, neu in 7b) | $\lim_{n \to \infty}\left(\frac{n + x}{n - x}\right)^n = e^{x}$ |
 | Komplexe Zahlen | Betrag gliedweise | $\lvert x + a\,\mathrm{i}\rvert = x + a$ |
 | Komplexe Zahlen | Winkel beim Quadrieren nicht verdoppelt | $\arg\left(z^2\right) = \arg z$ |
-| Determinante | Plus statt Minus | $\det\begin{pmatrix} p & q \\ r & s \end{pmatrix} = ps + qr$ |
+| Determinante | Plus statt Minus (`eq-det-plus`, neu in 8a) | $\det\begin{pmatrix} p & q \\ r & s \end{pmatrix} = ps + qr$ |
+| Determinante | Haupt- und Nebendiagonale vertauscht (`eq-det-swapped`, neu in 8a) | $\det\begin{pmatrix} p & q \\ r & s \end{pmatrix} = qr - ps$ |
+| Determinante | in Zeilen oder Spalten statt über Kreuz malgenommen (`eq-det-rows`, neu in 8a) | $\det\begin{pmatrix} p & q \\ r & s \end{pmatrix} = pq - rs$ |
+| Determinante | nur die Hauptdiagonale malgenommen, wie bei einer Dreiecksmatrix (`eq-det-main`, neu in 8a) | $\det\begin{pmatrix} p & q \\ r & s \end{pmatrix} = ps$ |
+| Determinante | beim Entwickeln das Vorzeichen aus dem Schachbrett vertauscht (`eq-det-checkerboard`, neu in 8a) | $\det\begin{pmatrix} 0 & p & q \\ a & 1 & 2 \\ 0 & r & s \end{pmatrix} = a\det\begin{pmatrix} p & q \\ r & s \end{pmatrix}$ |
+| Determinante | beim Entwickeln den Eintrag vor der Unterdeterminante vergessen (`eq-det-entry`, neu in 8a) | $\det\begin{pmatrix} 0 & p & q \\ a & 1 & 2 \\ 0 & r & s \end{pmatrix} = -\det\begin{pmatrix} p & q \\ r & s \end{pmatrix}$ |
 | Additionstheorem | gliedweise | $\sin(x + a) = \sin x + \sin a$ |
 | Vektoren | nicht durch die Längen geteilt | $\cos\varphi = \vec{u} \cdot \vec{v}$ |
 | Differentialgleichung | einen Anfangswert nicht genutzt, z. B. $f'(0) = 0$ (`eq-ode-initial-unused`, neu in 7c) | $f'' = k^2 f$, $f(0) = a$, $f'(0) = 0$: $f(x) = a\,e^{kx}$ |
@@ -905,13 +910,90 @@ Substituieren jetzt mit eigener Substitution weiter (vorher blieben solche Fehle
 im freien Modus ohne Namen).
 
 #### Schritt 8: Stufe 5, Teil 2: Algebra und Geometrie
-- Komplexe Zahlen (Betrag, Winkel), Determinanten, Winkel zwischen
-  Vektoren, Additionstheoreme.
-- Neue Lernkarten (kurz): Betrag und Winkel komplexer Zahlen,
-  Determinanten, Winkel zwischen Vektoren, Additionstheoreme.
+In drei Teilen, jeder mit eigener Vorlage und festem Anteil wie 7b und 7c. Jede
+Vorlage nimmt ihren Anteil von den Nummern, die keine frühere genommen hat (also
+von 7a); alle übrigen Nummern behalten ihre Aufgabe.
+- **8a Determinanten** (Anteil 25 %): $2 \times 2$ und $3 \times 3$, neue Lernkarte
+  „Determinanten".
+- **8b Betrag und Winkel** (Anteil 30 %): Betrag und Winkel komplexer Zahlen,
+  Winkel zwischen Vektoren; neue Lernkarten (kurz).
+- **8c Additionstheoreme** (Anteil 35 %); neue Lernkarte (kurz).
+
+Mit diesen Anteilen hat jeder Teil etwa 8 bis 10 % der Aufgaben der Stufe 5,
+Ableitungen und Integrale aus 7a behalten etwa 14 %.
 
 **Ausprobieren:** $\det\begin{pmatrix} e^{x} & e^{-x} \\ a & b \end{pmatrix} = y$
 in beiden Modi.
+
+**Umgesetzt (8a):** In Stufe 5 kommen Determinanten dazu (25 % der Nummern, die
+weder zu 7b noch zu 7c gehören: unter den Aufgaben 1 bis 200 sind es 19; alle
+übrigen Nummern behalten ihre Aufgabe). Geschrieben wird
+$\det\begin{pmatrix} \dots \end{pmatrix}$ mit runden Klammern wie im Plan; die
+Striche bleiben für den Betrag in 8b.
+- **$2 \times 2$** in einem Schritt „Determinante ausrechnen": Hauptdiagonale minus
+  Nebendiagonale, jedes Produkt aufgeräumt (Zahl vorn, Buchstaben sortiert,
+  $e^{x} \cdot e^{x} = e^{2x}$, $e^{x} \cdot e^{-x} = 1$,
+  $a \cdot \frac{1}{x} = \frac{a}{x}$), Klammern bleiben stehen ($x(x + c) - ab$).
+  Die Erklärung zeigt die Produkte mit Malpunkt: $e^{x} \cdot b - e^{-x} \cdot a$.
+- **$3 \times 3$** nur mit einer Zeile oder Spalte, in der zwei Nullen stehen: erst
+  „Determinante entwickeln" (Vorzeichen aus dem Schachbrett mal Eintrag mal
+  Unterdeterminante, z. B. $-b\det\begin{pmatrix} a & x \\ x & a \end{pmatrix} = y$),
+  dann die $2 \times 2$-Determinante ausrechnen. Kein Sarrus (sechs Produkte, zu
+  breit am Handy); die Regel von Sarrus steht auf der Lernkarte.
+- Die Gegenprobe in `evaluate.ts` rechnet mit dem Gauß-Verfahren (mit Zeilentausch),
+  unabhängig vom Rechenweg; die Tests vergleichen sie mit $ps - qr$ und Sarrus und
+  den Rechenweg der Engine mit der Gegenprobe. Die Rechnung steht in
+  `rearrange/tools/determinant.ts`.
+
+Das $3 \times 3$-Beispiel mit $a$ und $b$ aus der ersten Fassung des Plans ist
+ersetzt (Tabelle oben): Es braucht $b > a$ und $x > b$, und sein Ergebnis hat eine
+Wurzel aus einer Summe mit Brüchen, die Stufe 5 ausschließt.
+
+Der Baukasten `buildLevel5Det` setzt zusammen:
+- **$2 \times 2$, danach quadratisch** (etwa die Hälfte): $e^{x}$ und $e^{-x}$ (das
+  Beispiel aus dem Plan, auch gespiegelt), $e^{x}$ und $e^{x} + c$, $e^{2x}$ und
+  $e^{x}$, nur $e^{x}$ und $e^{-x}$, $x$ und $x + c$, $x^2$ und $x$, $x$ und
+  $\frac{1}{x}$, $x$ und $\sqrt{x}$, $\sqrt{x}$ und $\sqrt{x} + b$, $\ln x$ und
+  $\ln x + b$ (mit $x > 1$), $\sin x$ und $\cos x$ (mit $x < \frac{\pi}{2}$), dazu
+  $x + a$ und $x - a$; allein, mit einer Schale, unter einer Wurzel oder im $\ln$;
+- **$2 \times 2$, danach linear** ($e^{x}$, $\ln x$, $\tan x$, $\sinh x$, $\cosh x$,
+  $x$ oder $e^{x}$ auf der Diagonale) mit ein bis zwei Schalen oder im Bruch mit
+  seinem Baustein, z. B. $\frac{\det(\dots)}{e^{x} + c} = y$;
+- **$3 \times 3$** um einen dieser Kerne (gut ein Viertel): Eintrag ein Buchstabe
+  oder 2 bis 3 (nie 1), die übrigen gestrichenen Felder Zahlen von 1 bis 3; steht
+  der Eintrag auf einem Minus-Feld des Schachbretts, sind die Spalten des Kerns
+  getauscht; ohne Schalen;
+- **Integral gleich Determinante**, z. B.
+  $\int_0^x e^t\,\mathrm{d}t = \det\begin{pmatrix} a & e^{x} \\ 1 & b \end{pmatrix}$
+  mit $x = \ln\frac{ab + 1}{2}$.
+
+Damit kein typischer Fehler zufällig die richtige Gleichung ergibt: In einer
+$2 \times 2$-Determinante steht keine 0 und kein Minus vor einem Eintrag, und nie
+steht derselbe Eintrag zweimal in einer Spalte (ein Test prüft das).
+
+Breite: Eine Matrix ist nur so breit wie ihre breiteste Zeile, die Zahl der
+Zeichen taugt dafür nicht. Für Aufgaben mit Determinante schätzt
+`tasks/latexWidth.ts` die Breite in em (am Browser kalibriert, auf etwa 5 %
+genau); höchstens 12 em, dann passt die Aufgabe am Handy in eine Zeile. Wie in 7c
+muss auch das Ergebnis in eine Zeile passen.
+
+Gemessen unter den Aufgaben 1 bis 3000 der Stufe 5: 295 Determinanten-Aufgaben,
+im Mittel 8,9 Umformungen (6 bis 14), 261 Formen, gut ein Viertel davon
+$3 \times 3$; jede hat eine Frage zur Determinante mit drei oder vier Antworten.
+
+Geführt kommt zuerst „Was steht da eigentlich?" mit sechs neuen Fehlern (Tabelle
+oben); beim Fehler „in Zeilen oder Spalten" nimmt die Engine die Variante, in der
+alle Buchstaben bleiben (zeilenweise fiele bei $e^{x} \cdot e^{-x} = 1$ das $x$
+weg). Neue Lernkarte „Determinanten". Frei wird das Ergebnis eingetippt; die
+Fehler werden erkannt, „Plus statt Minus" oft nur geführt (die Gleichung hat dann
+meist zwei positive Lösungen). Bei $3 \times 3$ ergibt „Vorzeichen aus dem
+Schachbrett vertauscht" dasselbe Ergebnis wie „Diagonalen vertauscht" in der
+Unterdeterminante; frei wird dann das Schachbrett genannt.
+
+Bekannt und offen: Gleichungen wie $c\left(bx^2 - ax\right) = y$ löst die Engine
+noch nicht (sie teilt durch $c$ und nimmt danach wieder mit $c$ mal). Solche
+Aufgaben sortiert der Filter aus; darum stehen $x^2$ und $x$, $x$ und $\sqrt{x}$
+sowie $e^{2x}$ und $e^{x}$ nie in einer $3 \times 3$-Determinante.
 
 #### Schritt 9: Gezieltes Üben, Feinschliff, Abschluss von M3
 - „Deine häufigsten Fehler" mit „Gezielt üben" auch fürs Umstellen, für
@@ -1028,7 +1110,7 @@ Gegenprobe:
 | Summe, Reihe | geometrische Summe und Reihe, auch abgeleitet und integriert | Teilsummen |
 | Grenzwert | Formen, die auf $e^{\square}$ führen | großes $n$ einsetzen |
 | Komplexe Zahl | Real- und Imaginärteil als Terme, Betrag, Winkel | mit Zahlen nachrechnen |
-| Determinante | $2 \times 2$, $3 \times 3$ (Entwicklung) | numerisch |
+| Determinante | $2 \times 2$, $3 \times 3$ (Entwicklung nach einer Zeile oder Spalte mit zwei Nullen) | Gauß-Verfahren, numerisch |
 | Vektoren | Skalarprodukt, Länge, Winkel | numerisch |
 | Differentialgleichung | $f' = kf$ und $f'' = k^2 f$ mit Anfangswerten | einsetzen, numerisch ableiten |
 

@@ -1,13 +1,13 @@
 # Roadmap
 
-Stand: 06.11.2026
+Stand: 10.11.2026
 
 | Meilenstein | Inhalt | Status |
 | --- | --- | --- |
 | M1 | Grundgerüst + Ableitungsregeln (beide Modi, 5 Stufen, Erklärungen, Lernkarten, Fortschritt) | fertig |
 | M2 | Brüche (Bruchrechnung, Bruchterme kürzen und zusammenfassen, Doppelbrüche); App für mehrere Themen | fertig |
 | M2b | Brüche nachschärfen: viel mehr Abwechslung (Baukasten statt fester Vorlagen, keine Form doppelt), deutlich schwerer, Stufe 5 auf Profi-Niveau mit Partialbruchzerlegung und Brüchen aus späteren Kapiteln (komplexe Zahlen, Grenzwerte, Teleskopsummen, Hyperbelfunktionen) | fertig |
-| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | in Arbeit: 4. Fassung des Plans (Baukasten und Abwechslung, ab Stufe 3 verschachtelter); Schritte 4, 5 und 6 fertig (Stufe 4 komplett), Schritt 7 fertig (Stufe 5 mit Ableitungen, Integralen, Summen, Reihen, Grenzwerten und Differentialgleichungen), als Nächstes Schritt 8 |
+| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | in Arbeit: 4. Fassung des Plans (Baukasten und Abwechslung, ab Stufe 3 verschachtelter); Schritte 4, 5 und 6 fertig (Stufe 4 komplett), Schritt 7 fertig (Stufe 5 mit Ableitungen, Integralen, Summen, Reihen, Grenzwerten und Differentialgleichungen), Schritt 8a fertig (Determinanten), als Nächstes 8b |
 | M4 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
 | M5 | weitere Themen aus Mathematik MB1 | offen |
 | M6 | Physik: Formeln mit Einheiten (Formeln umstellen mit Zeichen der Physik; Aufgaben lösen: Formel wählen, umstellen, Werte mit Einheiten einsetzen) | offen |
@@ -38,6 +38,11 @@ Stand: 06.11.2026
   (eigener Plan; die Werkzeuge aus Stufe 5 von M3 wie Integrale und Reihen
   lassen sich dort wiederverwenden). Neue Themen (M4 und später) werden
   gleich so geplant.
+- **Anzeige nach dem Substituieren** (gefunden in M3 Schritt 8a): Aus
+  $ae^{-x}$ wird $a \cdot \frac{1}{u}$, nach dem Malnehmen steht
+  $ua \cdot \frac{1}{u}$ da; schöner wäre $\frac{a}{u}$ und danach
+  $bu^2 - a = uy$. Betrifft nur die Anzeige in Stufe 4 und 5 (die Aufgaben
+  bleiben gleich); im Feinschliff von M3 (Schritt 9) angehen.
 
 ## M2b: Schritte
 
@@ -76,7 +81,10 @@ Details: [PLAN-M3.md](PLAN-M3.md) (4. Fassung, freigegeben am 05.11.2026 mit dei
   - [x] 7a. Ableitungen und Integrale (mit Partialbrüchen)
   - [x] 7b. Summen, Reihen und Grenzwerte
   - [x] 7c. Differentialgleichungen
-- [ ] 8. Stufe 5, Teil 2: komplexe Zahlen, Determinanten, Vektoren, Additionstheoreme
+- [ ] 8. Stufe 5, Teil 2: komplexe Zahlen, Determinanten, Vektoren, Additionstheoreme, in drei Teilen
+  - [x] 8a. Determinanten ($2 \times 2$ und $3 \times 3$)
+  - [ ] 8b. Betrag und Winkel: komplexe Zahlen, Winkel zwischen Vektoren
+  - [ ] 8c. Additionstheoreme
 - [ ] 9. Gezieltes Üben, Feinschliff, Abschluss von M3
 
 ## M2: Schritte
@@ -541,3 +549,17 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   $f' = kf$ und $f'' = k^2 f$". Zur Gegenprobe löst die Engine die Gleichung
   numerisch (Runge-Kutta). Browser-Tests mit 5-427 (das Beispiel aus dem Plan,
   geführt und frei). Damit ist Schritt 7 fertig.
+- 10.11.2026: M3 Schritt 8a fertig: In Stufe 5 von „Gleichungen umstellen"
+  stecken jetzt auch Determinanten: $2 \times 2$ (Hauptdiagonale minus
+  Nebendiagonale) und $3 \times 3$ mit einer Zeile oder Spalte mit zwei Nullen
+  (erst danach entwickeln), danach meist quadratisch (Substitution und
+  $pq$-Formel); auch „Integral gleich Determinante". Schritt 8 ist in drei Teile
+  geteilt (8a Determinanten, 8b Betrag und Winkel, 8c Additionstheoreme), mit
+  Anteilen 25 %, 30 % und 35 % der jeweils übrigen Nummern. 25 % der Nummern, die
+  weder zu 7b noch zu 7c gehören, alle anderen behalten ihre Aufgabe. 194 Formen
+  unter 200 Aufgaben, im Mittel 8,6 Umformungen. Sechs neue typische Fehler, neue
+  Lernkarte „Determinanten". Zur Gegenprobe rechnet die Engine die Determinante
+  mit dem Gauß-Verfahren. Aufgaben mit Matrix werden nach ihrer Breite in em
+  gefiltert (am Browser kalibriert), damit sie am Handy in eine Zeile passen.
+  Browser-Tests mit 5-1460 (das Beispiel aus dem Plan, geführt und frei) und
+  5-9 ($3 \times 3$, nichts wischt seitlich).
