@@ -2,7 +2,7 @@ import { subterms } from '../expr/compare.ts'
 import { type Expr, E, PI, add, div, eq, fn, ln, log, mul, neg, num, pow, sqrt, variable } from '../expr/types.ts'
 import type { Condition, RearrangeTask } from '../rearrange/task.ts'
 import { limitParts, limitValue } from '../rearrange/tools/series.ts'
-import { derivativeOf, integralOf, limitOf, seriesOf, sumOf } from '../rearrange/tools/tool.ts'
+import { derivativeOf, integralOf, limitOf, odeOf, seriesOf, sumOf } from '../rearrange/tools/tool.ts'
 import type { Rng } from '../random/rng.ts'
 
 // Baukasten für Umstell-Aufgaben (M3, 4. Fassung; docs/PLAN-M3.md, „Abwechslung"). Jede Gleichung
@@ -1569,6 +1569,140 @@ export function buildLevel5Series(rng: Rng): KitTask {
   const total = LEVEL5_SERIES_CORES.reduce((s, [w]) => s + w, 0)
   let r = rng.next() * total
   const [, build] = LEVEL5_SERIES_CORES.find(([w]) => (r -= w) < 0) ?? LEVEL5_SERIES_CORES[0]
+  const built = build(rng, n)
+  const other = built.other ?? otherSide(rng, n)
+  const equationFor = built.other ? (rng.chance(0.75) ? eq(built.side, other) : eq(other, built.side)) : equation(rng, built.side, other)
+  return { task: { equation: equationFor, target: 'x', conditions: built.conditions ?? [] }, label: built.label }
+}
+
+// --- Stufe 5, Teil 7c: Differentialgleichungen (docs/PLAN-M3.md, „Stufe 5 neu") ---
+//
+// Gegeben ist eine Funktion f durch ihre Differentialgleichung mit Anfangswerten: Wachstum und Abnahme
+// f' = \pm kf, Abkühlen f' = k(b - f) und f'' = k^2 f mit f(0) = a, f'(0) = 0 bzw. f(0) = 0, f'(0) = b.
+// In der Gleichung steht f(x); erst wird die Differentialgleichung gelöst, dann umgestellt (bei
+// f'' = k^2 f über die Substitution u = e^{kx} und die pq-Formel). Dazu Schalen, ein Bruch mit e^{kx},
+// eine Wurzel oder ein \ln, oder zwei Funktionen f und g. Die Rate heißt k (oder ist eine Zahl), die
+// Funktionen f und g; diese Buchstaben kommen sonst nicht vor.
+
+const F = variable('f')
+const G = variable('g')
+
+// Buchstaben ohne f, g und k; reicht die Familie nicht, kommen weitere dazu (kein „h + h")
+const SPARE_LETTERS = ['m', 'n', 'p', 'q', 'r', 's', 'u', 'v', 'w', 'z']
+function odeNames(rng: Rng): ToolNames {
+  const chosen = rng.pick(FAMILIES).filter((l) => l !== 'g' && l !== 'k')
+  const family = [...chosen, ...SPARE_LETTERS.filter((l) => !chosen.includes(l))]
+  let i = 0
+  return {
+    unknown: variable('x'),
+    target: 'x',
+    letter: () => variable(family[Math.min(i++, family.length - 1)]),
+    mark: () => i,
+    reset: (at) => {
+      i = at
+    },
+  }
+}
+
+// Rate: meist k, sonst eine Zahl
+const odeRate = (rng: Rng): Expr => (rng.chance(0.65) ? K : num(rng.pick([2, 3])))
+// Anfangswert: meist ein Buchstabe, sonst eine Zahl von 2 bis 5
+const initialValue = (rng: Rng, n: Names): Expr => (rng.chance(0.8) ? n.letter() : k(rng, 2, 5))
+// rate · f, mit Minus vorn: -kf, -2f
+const rateTimes = (rate: Expr, f: Expr, sign: 1 | -1): Expr => {
+  const e = mul(rate, f)
+  return sign === 1 ? e : rate.kind === 'num' ? mul(num(-rate.value.n), f) : neg(e)
+}
+// e^{\pm rate · x}
+const expOfRate = (rate: Expr, x: Expr, sign: 1 | -1): Expr => {
+  const e = rate.kind === 'num' && rate.value.n === 1n ? x : mul(rate, x)
+  return pow(E, sign === 1 ? e : neg(e))
+}
+
+// Wachstum oder Abnahme: f' = kf bzw. f' = -kf, f(0) = a; Partner e^{\pm kx}
+function growthCore(rng: Rng, n: Names, f = F): ToolCore {
+  const rate = odeRate(rng)
+  const sign = rng.chance(0.5) ? 1 : -1
+  const tool = odeOf(rateTimes(rate, f, sign), 1, [initialValue(rng, n)], f.kind === 'var' ? f.name : 'f')
+  return { tool, partner: expOfRate(rate, n.unknown, sign), label: sign === 1 ? "DGL: $f' = kf$" : "DGL: $f' = -kf$" }
+}
+
+// Abkühlen: f' = k(b - f), f(0) = a mit a > b; Partner e^{-kx}
+function coolingCore(rng: Rng, n: Names): ToolCore {
+  const rate = odeRate(rng)
+  const a = n.letter()
+  const b = n.letter()
+  return { tool: odeOf(mul(rate, minus(b, F)), 1, [a]), conditions: [above(a, b)], partner: expOfRate(rate, n.unknown, -1), label: "DGL: Abkühlen $f' = k(b - f)$" }
+}
+
+// f'' = k^2 f (auch 4f, 9f, f) mit f(0) = a, f'(0) = 0 oder f(0) = 0, f'(0) = b
+function secondCore(rng: Rng, n: Names): ToolCore {
+  const r = rng.next()
+  const square = r < 0.6 ? pow(K, num(2)) : r < 0.75 ? num(4) : r < 0.9 ? num(9) : null
+  const body = square ? mul(square, F) : F
+  const even = rng.chance(0.6)
+  const initial = even ? [initialValue(rng, n), num(0)] : [num(0), initialValue(rng, n)]
+  return { tool: odeOf(body, 2, initial), label: `DGL: $f'' = k^2 f$, ${even ? "$f'(0) = 0$" : '$f(0) = 0$'}` }
+}
+
+const firstOrderCore = (rng: Rng, n: Names): ToolCore => (rng.chance(0.55) ? growthCore(rng, n) : coolingCore(rng, n))
+const odeCore = (rng: Rng, n: Names): ToolCore => (rng.chance(0.65) ? secondCore(rng, n) : firstOrderCore(rng, n))
+
+// DGL mit Schalen; erster Ordnung mindestens zwei (sonst zu wenige Umformungen)
+function odeShells(rng: Rng, n: ToolNames): Built {
+  const c = odeCore(rng, n)
+  const second = c.label.includes("f''")
+  const cooling = c.label.includes('Abkühlen')
+  const { e, count } = someShells(rng, c.tool, n, second ? 2 : 3, second ? (rng.chance(0.25) ? 0 : 1) : cooling ? 1 : 2)
+  return { side: e, conditions: c.conditions, label: `${c.label}, ${count} Schalen` }
+}
+
+// DGL erster Ordnung im Bruch mit ihrem Baustein: \frac{f(x)}{e^{kx} + b} = y
+function odeFraction(rng: Rng, n: ToolNames): Built {
+  const c = firstOrderCore(rng, n)
+  const other = plus(maybeTimes(rng, n, c.partner!, 0.3), constant(rng, n))
+  const side = rng.chance(0.7) ? div(c.tool, other) : div(other, c.tool)
+  const { e } = someShells(rng, side, n, 1)
+  return { side: e, conditions: c.conditions, label: `${c.label}, im Bruch` }
+}
+
+// DGL unter einer Wurzel oder im \ln, mit Schalen
+function odeInside(rng: Rng, n: ToolNames): Built {
+  const c = odeCore(rng, n)
+  const inner = rng.chance(0.4) ? plus(n.letter(), c.tool) : c.tool
+  const outer = rng.chance(0.5) ? sqrt(inner) : ln(inner)
+  const { e } = someShells(rng, outer, n, 2, c.label.includes("f''") ? 0 : 1)
+  return { side: e, conditions: c.conditions, label: `${c.label}, ${outer.kind === 'root' ? 'unter der Wurzel' : 'im $\\ln$'}` }
+}
+
+// Zwei Funktionen: f' = kf und g' = -kg (dieselbe Rate); f(x) - g(x) = y (danach quadratisch, genau eine
+// Lösung passt), f(x) = g(x) + c oder f(x) = g(x) mit g(0) > f(0)
+function twoOdes(rng: Rng, n: ToolNames): Built {
+  const rate = odeRate(rng)
+  const a = initialValue(rng, n)
+  const b = n.letter()
+  const f = odeOf(rateTimes(rate, F, 1), 1, [a])
+  const g = odeOf(rateTimes(rate, G, -1), 1, [b], 'g')
+  const r = rng.next()
+  if (r < 0.5) return { side: minus(f, g), label: "DGL: $f' = kf$ und $g' = -kg$, $f(x) - g(x)$" }
+  if (r < 0.8) return { side: f, other: plus(g, n.letter()), label: "DGL: $f' = kf$ und $g' = -kg$, $f(x) = g(x) + c$" }
+  const { e } = someShells(rng, f, n, 1)
+  return { side: e, other: g, conditions: e === f ? [above(b, a)] : [], label: "DGL: $f' = kf$ und $g' = -kg$, $f(x) = g(x)$" }
+}
+
+const LEVEL5_ODE_CORES: readonly ToolBuild[] = [
+  [40, odeShells],
+  [16, odeFraction],
+  [20, odeInside],
+  [16, twoOdes],
+]
+
+// Gesucht ist x
+export function buildLevel5Ode(rng: Rng): KitTask {
+  const n = odeNames(rng)
+  const total = LEVEL5_ODE_CORES.reduce((s, [w]) => s + w, 0)
+  let r = rng.next() * total
+  const [, build] = LEVEL5_ODE_CORES.find(([w]) => (r -= w) < 0) ?? LEVEL5_ODE_CORES[0]
   const built = build(rng, n)
   const other = built.other ?? otherSide(rng, n)
   const equationFor = built.other ? (rng.chance(0.75) ? eq(built.side, other) : eq(other, built.side)) : equation(rng, built.side, other)

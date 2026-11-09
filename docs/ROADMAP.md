@@ -7,7 +7,7 @@ Stand: 06.11.2026
 | M1 | Grundgerüst + Ableitungsregeln (beide Modi, 5 Stufen, Erklärungen, Lernkarten, Fortschritt) | fertig |
 | M2 | Brüche (Bruchrechnung, Bruchterme kürzen und zusammenfassen, Doppelbrüche); App für mehrere Themen | fertig |
 | M2b | Brüche nachschärfen: viel mehr Abwechslung (Baukasten statt fester Vorlagen, keine Form doppelt), deutlich schwerer, Stufe 5 auf Profi-Niveau mit Partialbruchzerlegung und Brüchen aus späteren Kapiteln (komplexe Zahlen, Grenzwerte, Teleskopsummen, Hyperbelfunktionen) | fertig |
-| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | in Arbeit: 4. Fassung des Plans (Baukasten und Abwechslung, ab Stufe 3 verschachtelter); Schritte 4, 5 und 6 fertig (Stufe 4 komplett), Schritte 7a und 7b fertig (Stufe 5 mit Ableitungen, Integralen, Summen, Reihen und Grenzwerten), als Nächstes 7c |
+| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | in Arbeit: 4. Fassung des Plans (Baukasten und Abwechslung, ab Stufe 3 verschachtelter); Schritte 4, 5 und 6 fertig (Stufe 4 komplett), Schritt 7 fertig (Stufe 5 mit Ableitungen, Integralen, Summen, Reihen, Grenzwerten und Differentialgleichungen), als Nächstes Schritt 8 |
 | M4 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
 | M5 | weitere Themen aus Mathematik MB1 | offen |
 | M6 | Physik: Formeln mit Einheiten (Formeln umstellen mit Zeichen der Physik; Aufgaben lösen: Formel wählen, umstellen, Werte mit Einheiten einsetzen) | offen |
@@ -72,10 +72,10 @@ Details: [PLAN-M3.md](PLAN-M3.md) (4. Fassung, freigegeben am 05.11.2026 mit dei
   - [x] 6a. e-Funktion und $\ln$, Wurzeln in Wurzeln, Potenz- und Logarithmusgesetze
   - [x] 6b. Winkel- und Hyperbelfunktionen, Umkehrfunktionen
   - [x] 6c. Substitution und $pq$-Formel mit Scheinlösungen
-- [ ] 7. Stufe 5, Teil 1: Ableitungen, Integrale, Reihen, Grenzwerte, Differentialgleichungen, in drei Teilen
+- [x] 7. Stufe 5, Teil 1: Ableitungen, Integrale, Reihen, Grenzwerte, Differentialgleichungen, in drei Teilen
   - [x] 7a. Ableitungen und Integrale (mit Partialbrüchen)
   - [x] 7b. Summen, Reihen und Grenzwerte
-  - [ ] 7c. Differentialgleichungen
+  - [x] 7c. Differentialgleichungen
 - [ ] 8. Stufe 5, Teil 2: komplexe Zahlen, Determinanten, Vektoren, Additionstheoreme
 - [ ] 9. Gezieltes Üben, Feinschliff, Abschluss von M3
 
@@ -530,3 +530,14 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   numerisch. Die Aufgaben der Stufen 1 bis 4 bleiben gleich (bei der Normalform
   steht das Minus jetzt vor dem Bruch). Browser-Tests mit 5-120 (Grenzwert,
   geführt) und 5-484 (Summe nach $n$, frei).
+- 09.11.2026: M3 Schritt 7c fertig: In Stufe 5 von „Gleichungen umstellen"
+  stecken jetzt auch Differentialgleichungen mit Anfangswerten: Wachstum und
+  Abnahme $f' = \pm kf$, Abkühlen $f' = k(b - f)$ und $f'' = k^2 f$, auch zwei
+  Funktionen $f$ und $g$. Die Gleichung steht über der Aufgabe; erst wird sie
+  gelöst (in Exponentialform), dann umgestellt, bei $f'' = k^2 f$ mit
+  Substitution und $pq$-Formel. 30 % der Nummern, die nicht zu 7b gehören; alle
+  anderen behalten ihre Aufgabe. 193 Formen unter 200 Aufgaben, im Mittel 8,7
+  Umformungen. Sieben neue typische Fehler, neue Lernkarte „Differentialgleichungen
+  $f' = kf$ und $f'' = k^2 f$". Zur Gegenprobe löst die Engine die Gleichung
+  numerisch (Runge-Kutta). Browser-Tests mit 5-427 (das Beispiel aus dem Plan,
+  geführt und frei). Damit ist Schritt 7 fertig.

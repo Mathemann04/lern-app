@@ -7,6 +7,7 @@ import { type WrongAnswer, wrongAnswers } from '../../derive/errorRules.ts'
 import { type Equation, type Expr, add, div, mul, neg, num } from '../../expr/types.ts'
 import { isOne, ratNeg, ratSign } from '../../rational.ts'
 import { type IntegralMistake, antiderivative, antiderivativeExpr, antiderivativeTerms, atBound, partialFractions } from './integrate.ts'
+import { ODE_MISTAKES, odeSolution } from './ode.ts'
 import { type LimitMistake, type SeriesMistake, geometricParts, limitParts, limitValue, seriesValue, sumValue } from './series.ts'
 import { type ActiveTool, type ToolVar, activeTool, bracketOf, integralOf } from './tool.ts'
 
@@ -16,9 +17,10 @@ import { type ActiveTool, type ToolVar, activeTool, bracketOf, integralOf } from
 // - Integral: in Partialbrüche zerlegen (wenn nötig), Stammfunktion mit Grenzen, Grenzen einsetzen
 // - Summe, Reihe: Formel der geometrischen Summe bzw. Reihe (auch abgeleitet und integriert)
 // - Grenzwert: \lim_{n \to \infty}\left(1 + \frac{p}{n}\right)^{sn} = e^{sp}
+// - Differentialgleichung: Lösung mit den Anfangswerten (ode.ts)
 // Steckt ein Werkzeug in einem anderen (Reihe in einer Ableitung), kommt das innere zuerst.
 
-export type ToolStepKind = 'derive' | 'partial' | 'antiderivative' | 'bounds' | 'sumFormula' | 'series' | 'limit'
+export type ToolStepKind = 'derive' | 'partial' | 'antiderivative' | 'bounds' | 'sumFormula' | 'series' | 'limit' | 'ode'
 
 export type ToolDraft = { readonly kind: ToolStepKind; readonly operand?: Expr; readonly after: Equation }
 
@@ -50,6 +52,8 @@ function toolDraft({ tool, put }: ActiveTool): ToolDraft | null {
     case 'series':
     case 'limit':
       return value(SERIES_KIND[t.kind], seriesToolValue(tool.tool, null))
+    case 'ode':
+      return value('ode', odeSolution(t, null))
   }
 }
 
@@ -195,6 +199,12 @@ export function toolMistakes(kind: ToolStepKind, before: Equation): ToolCandidat
   if (kind === 'limit' && t.kind === 'limit') {
     for (const id of LIMIT_MISTAKES) {
       const v = seriesToolValue(t, id)
+      if (v) out.push({ id, after: put(v) })
+    }
+  }
+  if (kind === 'ode' && t.kind === 'ode') {
+    for (const id of ODE_MISTAKES) {
+      const v = odeSolution(t, id)
       if (v) out.push({ id, after: put(v) })
     }
   }

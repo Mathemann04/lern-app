@@ -157,8 +157,13 @@ const rearrangeLevels: LevelPreview[] = [
   {
     level: 5,
     available: true,
-    title: 'Quer durch die Mathematik: erst Ableitung, Integral, Summe, Reihe oder Grenzwert ausrechnen, dann umstellen (Differentialgleichungen und mehr folgen)',
-    examples: [String.raw`\int_a^x \frac{\mathrm{d}t}{t(t + b)} = y`, String.raw`\sum_{k=1}^{\infty} k x^k = y`, String.raw`\lim_{n \to \infty}\left(\frac{n + x}{n - x}\right)^n = y`],
+    title: 'Quer durch die Mathematik: erst Ableitung, Integral, Summe, Reihe, Grenzwert oder Differentialgleichung ausrechnen, dann umstellen (komplexe Zahlen, Determinanten und Vektoren folgen)',
+    examples: [
+      String.raw`\int_a^x \frac{\mathrm{d}t}{t(t + b)} = y`,
+      String.raw`\sum_{k=1}^{\infty} k x^k = y`,
+      String.raw`\lim_{n \to \infty}\left(\frac{n + x}{n - x}\right)^n = y`,
+      String.raw`f'' = k^2 f,\; f(0) = a,\; f'(0) = 0: \; f(x) = y`,
+    ],
   },
 ]
 

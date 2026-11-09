@@ -123,7 +123,61 @@ function evaluateTool(tool: Tool, env: Env): number {
       return numericSeries(at, evaluate(tool.lower, env))
     case 'limit':
       return numericLimit(at)
+    case 'ode': {
+      // rechte Seite p \cdot f + c, nur lineare (sonst NaN, z. B. f(1 - f))
+      const c = at(0)
+      const p = at(1) - c
+      if (!(Math.abs(at(2) - (c + 2 * p)) <= 1e-12 * Math.max(1, Math.abs(c), Math.abs(p)))) return NaN
+      const [f0, f1 = 0] = tool.initial.map((value) => evaluate(value, env))
+      return numericOde(tool.order, p, c, f0, f1, evaluate(tool.point, env))
+    }
   }
+}
+
+// Lineare Differentialgleichung f' = pf + c bzw. f'' = pf + c von 0 bis x: klassisches Runge-Kutta-Verfahren
+// (4. Ordnung) mit n und 2n Schritten, h \cdot \lambda \le 0{,}025 (\lambda = |p| bzw. \sqrt{|p|}), dann
+// Richardson-Extrapolation (Fehler etwa 10^{-11}); unabhängig von der Lösungsformel, ohne e-Funktion.
+// NaN, wenn \lambda |x| > 50 (Werte jenseits von e^{50} sagen nichts mehr) oder die beiden Rechnungen
+// nicht übereinstimmen. Negatives x geht auch (rückwärts gerechnet).
+function numericOde(order: 1 | 2, p: number, c: number, f0: number, f1: number, x: number): number {
+  if (![p, c, f0, f1, x].every(Number.isFinite)) return NaN
+  if (x === 0) return f0
+  const span = Math.abs(x) * (order === 1 ? Math.abs(p) : Math.sqrt(Math.abs(p)))
+  if (span > 50) return NaN
+  let n = 16
+  while (span / n > 0.025) n *= 2
+  const coarse = rungeKutta(order, p, c, f0, f1, x, n)
+  const fine = rungeKutta(order, p, c, f0, f1, x, 2 * n)
+  if (!Number.isFinite(coarse) || !Number.isFinite(fine) || Math.abs(fine - coarse) > 1e-6 * Math.max(1, Math.abs(fine))) return NaN
+  return (16 * fine - coarse) / 15
+}
+
+function rungeKutta(order: 1 | 2, p: number, c: number, f0: number, f1: number, x: number, n: number): number {
+  const h = x / n
+  let f = f0
+  let g = f1
+  for (let i = 0; i < n; i++) {
+    if (order === 1) {
+      const k1 = p * f + c
+      const k2 = p * (f + (h / 2) * k1) + c
+      const k3 = p * (f + (h / 2) * k2) + c
+      const k4 = p * (f + h * k3) + c
+      f += (h / 6) * (k1 + 2 * k2 + 2 * k3 + k4)
+    } else {
+      // System f' = g, g' = pf + c
+      const a1 = g
+      const b1 = p * f + c
+      const a2 = g + (h / 2) * b1
+      const b2 = p * (f + (h / 2) * a1) + c
+      const a3 = g + (h / 2) * b2
+      const b3 = p * (f + (h / 2) * a2) + c
+      const a4 = g + h * b3
+      const b4 = p * (f + h * a3) + c
+      f += (h / 6) * (a1 + 2 * a2 + 2 * a3 + a4)
+      g += (h / 6) * (b1 + 2 * b2 + 2 * b3 + b4)
+    }
+  }
+  return f
 }
 
 // Endliche Summe: bei ganzzahligen Grenzen Summand für Summand. Ist die obere Grenze keine ganze Zahl

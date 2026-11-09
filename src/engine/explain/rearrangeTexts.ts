@@ -278,6 +278,42 @@ export const REARRANGE_ERROR_TEXTS: Readonly<Record<string, Explanation>> = {
       'Im Bruch wirkt auch der Nenner. Teile Zähler und Nenner durch $n$: $\\left(\\frac{n + p}{n + r}\\right)^n = \\frac{\\left(1 + \\frac{p}{n}\\right)^n}{\\left(1 + \\frac{r}{n}\\right)^n} \\to \\frac{e^p}{e^r} = e^{p - r}$.',
     short: 'Der Nenner zählt mit: $\\left(\\frac{n + p}{n + r}\\right)^n \\to e^{p - r}$.',
   },
+  // Werkzeuge der Stufe 5 (Schritt 7c): Differentialgleichungen
+  'eq-ode-initial-unused': {
+    detailed:
+      "Prüfe die Anfangswerte, indem du $x = 0$ einsetzt. Bei $f' = kf$ ist $f(x) = Ce^{kx}$, und $f(0) = C$ legt die Konstante fest. Bei $f'' = k^2 f$ gibt es zwei Lösungen, $e^{kx}$ und $e^{-kx}$, also zwei Konstanten: $f(x) = C_1e^{kx} + C_2e^{-kx}$. Beide Anfangswerte werden gebraucht: $C_1 + C_2 = f(0)$ und $k(C_1 - C_2) = f'(0)$.",
+    short: "Jeder Anfangswert zählt: Bei $f'' = k^2 f$ ist $f(x) = C_1e^{kx} + C_2e^{-kx}$ mit zwei Konstanten.",
+  },
+  'eq-ode-not-halved': {
+    detailed:
+      "Setze $x = 0$ ein: Mit $e^0 = 1$ ist $f(0) = C_1 + C_2$. Stehen vor $e^{kx}$ und $e^{-kx}$ zwei gleich große Konstanten, ergeben sie zusammen das Doppelte. Die Anfangswerte verteilen sich auf beide Konstanten: $C_1 + C_2 = f(0)$ und $k(C_1 - C_2) = f'(0)$.",
+    short: "Probe bei $x = 0$: $C_1 + C_2 = f(0)$ und $k(C_1 - C_2) = f'(0)$.",
+  },
+  'eq-ode-inner-factor': {
+    detailed:
+      "Leite den Ansatz mit der Kettenregel ab: $\\left(e^{kx}\\right)' = ke^{kx}$ und $\\left(e^{-kx}\\right)' = -ke^{-kx}$. Bei $x = 0$ ist also $f'(0) = k(C_1 - C_2)$, mit dem Faktor $k$.",
+    short: "$\\left(e^{kx}\\right)' = ke^{kx}$: In $f'(0) = k(C_1 - C_2)$ steht der Faktor $k$.",
+  },
+  'eq-ode-oscillation': {
+    detailed:
+      "$\\cos(kx)$ und $\\sin(kx)$ lösen $f'' = -k^2 f$, die Schwingung: $\\left(\\cos(kx)\\right)'' = -k^2\\cos(kx)$. Hier steht $f'' = k^2 f$ ohne Minus. Der Ansatz $e^{\\lambda x}$ ergibt $\\lambda^2 = k^2$, also $\\lambda = \\pm k$: Die Lösungen sind $e^{kx}$ und $e^{-kx}$.",
+    short: "$f'' = +k^2 f$ hat die Lösungen $e^{kx}$ und $e^{-kx}$, nicht $\\cos$ und $\\sin$.",
+  },
+  'eq-ode-constant-added': {
+    detailed:
+      "Die Konstante steht als Faktor vor der e-Funktion: $e^{kx + C} = e^C \\cdot e^{kx}$, also $f(x) = Ce^{kx}$. Probe: Mit $f(x) = e^{kx} + C$ wäre $f' = ke^{kx}$, aber $kf = ke^{kx} + kC$. Die Differentialgleichung stimmt dann nicht.",
+    short: "$f(x) = Ce^{kx}$: Die Konstante ist ein Faktor, denn $e^{kx + C} = e^C \\cdot e^{kx}$.",
+  },
+  'eq-ode-exp-sign': {
+    detailed:
+      "Das Vorzeichen in der Gleichung bestimmt die Hochzahl: $f' = kf$ hat $e^{kx}$ (Wachstum), $f' = -kf$ hat $e^{-kx}$ (Abnahme). Beim Abkühlen $f' = k(b - f)$ nähert sich $f$ dem Endwert $b$, der Abstand nimmt ab wie $e^{-kx}$. Probe: Leite ab und vergleiche mit der rechten Seite.",
+    short: "$f' = -kf$ gibt $e^{-kx}$, $f' = kf$ gibt $e^{kx}$; beim Abkühlen $e^{-kx}$.",
+  },
+  'eq-ode-constant-start': {
+    detailed:
+      "Bei $f' = k(b - f)$ ist $f(x) = b + Ce^{-kx}$: $b$ ist der Endwert, $Ce^{-kx}$ der Abstand dazu. Setze $x = 0$ ein: $f(0) = b + C$. Die Konstante ist also nicht der Anfangswert selbst, sondern sein Abstand zum Endwert.",
+    short: "Probe bei $x = 0$: $f(0) = b + C$, die Konstante ist der Abstand zum Endwert.",
+  },
 }
 
 export function explainRearrangeError(id: string): Explanation {
@@ -776,6 +812,7 @@ export const REARRANGE_HINTS = {
   sumFormula: 'Geometrische Summe: $\\sum_{k=0}^{m-1} q^k = \\frac{q^m - 1}{q - 1}$ mit der Anzahl $m$ der Summanden. Beginnt die Summe nicht mit $q^0 = 1$, klammere den ersten Summanden aus.',
   series: 'Geometrische Reihe für $0 < q < 1$: $\\sum_{k=0}^{\\infty} q^k = \\frac{1}{1 - q}$. Abgeleitet: $\\sum_{k=1}^{\\infty} kq^k = \\frac{q}{(1 - q)^2}$, integriert: $\\sum_{k=1}^{\\infty} \\frac{q^k}{k} = -\\ln(1 - q)$.',
   limit: '$\\lim_{n \\to \\infty}\\left(1 + \\frac{p}{n}\\right)^n = e^p$. Einen Faktor in der Hochzahl nimmst du mit, einen Bruch teilst du oben und unten durch $n$.',
+  ode: "Ansatz $e^{\\lambda x}$: Bei $f' = kf$ ist $f(x) = f(0) \\cdot e^{kx}$, bei $f' = k(b - f)$ ist $f(x) = b + Ce^{-kx}$. Bei $f'' = k^2 f$ ist $f(x) = C_1e^{kx} + C_2e^{-kx}$ mit $C_1 + C_2 = f(0)$ und $k(C_1 - C_2) = f'(0)$.",
   add: 'Ein Summand verschwindet mit der Gegenrechnung: Aus $+c$ wird auf beiden Seiten $-c$.',
   move: 'Bringe den Summanden mit Minus auf die andere Seite, dort steht er mit Plus. Den Rest bringst du herüber.',
   divide: 'Einen Faktor wirst du los, indem du beide Seiten durch ihn teilst.',
@@ -815,13 +852,14 @@ export const REARRANGE_HINTS = {
 } as const
 
 // Tipp für die ganze Aufgabe (im freien Modus)
-export type TaskTool = 'derivative' | 'integral' | 'series' | 'limit'
+export type TaskTool = 'derivative' | 'integral' | 'series' | 'limit' | 'ode'
 
 export function rearrangeTaskHint(target: string, several: boolean, block: string | null = null, quadratic = false, tool: TaskTool | null = null): Explanation {
   if (tool === 'derivative') return same(`Rechne zuerst die Ableitung aus. Dann steht eine gewöhnliche Gleichung da, die du nach $${target}$ auflöst.`)
   if (tool === 'integral') return same(`Rechne zuerst das Integral aus: Stammfunktion, dann die Grenzen einsetzen. Dann löst du nach $${target}$ auf.`)
   if (tool === 'series') return same(`Rechne zuerst die Summe mit der Formel der geometrischen Summe bzw. Reihe aus. Dann löst du nach $${target}$ auf.`)
   if (tool === 'limit') return same(`Rechne zuerst den Grenzwert aus, mit $\\left(1 + \\frac{p}{n}\\right)^n \\to e^p$. Dann löst du nach $${target}$ auf.`)
+  if (tool === 'ode') return same(`Löse zuerst die Differentialgleichung mit den Anfangswerten (Ansatz $e^{\\lambda x}$). Dann steht eine Gleichung mit e-Funktionen da, die du nach $${target}$ auflöst.`)
   if (block) return same(`Setze $u = ${block}$ und löse die quadratische Gleichung in $u$ mit der $pq$-Formel. Wähle die passende Lösung, setze zurück ein und löse nach $${target}$ auf.`)
   if (quadratic) return same(`Forme um, bis $${target}^2$ und $${target}$ in einer Gleichung stehen. Bringe alles auf eine Seite, nimm die $pq$-Formel und wähle die passende Lösung.`)
   return several
@@ -943,8 +981,19 @@ export function explainResult(kind: string, before: string, after: string): Expl
       return { detailed: `Die Formel der geometrischen Reihe angewandt und zusammengefasst:\n${lines}`, short: lines }
     case 'limit':
       return { detailed: `Der Grenzwert mit $\\left(1 + \\frac{p}{n}\\right)^n \\to e^p$:\n${lines}`, short: lines }
+    case 'ode':
+      return { detailed: `Die Differentialgleichung mit den Anfangswerten gelöst:\n${lines}`, short: lines }
     default:
       return { detailed: `Auf beiden Seiten dieselbe Rechnung:\n${lines}`, short: lines }
+  }
+}
+
+// Lösung einer Differentialgleichung: Ansatz und Konstanten aus den Anfangswerten (tools/ode.ts, odeWork)
+export function explainOde(ode: string, approach: string, constants: string, before: string, after: string): Explanation {
+  const lines = `$${before}$\n$${after}$`
+  return {
+    detailed: `Für $${ode}$ setzt du $${approach}$ an. Die Anfangswerte bei $x = 0$ liefern $${constants}$. Eingesetzt:\n${lines}`,
+    short: `$${approach}$ mit $${constants}$:\n${lines}`,
   }
 }
 

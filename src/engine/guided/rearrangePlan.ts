@@ -24,6 +24,7 @@ import {
   explainRearrangeError,
   explainResult,
   explainChoose,
+  explainOde,
   expMoves,
   factorMoves,
   logMoves,
@@ -48,7 +49,7 @@ import { cardIdsFor } from '../explain/cards.ts'
 import { allNodes, derive } from '../derive/derive.ts'
 import type { RuleId } from '../derive/rules.ts'
 import { contains, subterms } from '../expr/compare.ts'
-import { FN_LATEX, toLatex } from '../expr/print.ts'
+import { FN_LATEX, odeLatex, toLatex } from '../expr/print.ts'
 import { type Equation, type Expr, asRational, fn, sub } from '../expr/types.ts'
 import { readableLatex } from '../fraction/task.ts'
 import { factorize } from '../fraction/factor.ts'
@@ -70,6 +71,8 @@ import {
   stepLabel,
 } from '../rearrange/isolate.ts'
 import { type RearrangeTask, conditionLatex, conditionsText, taskLatex } from '../rearrange/task.ts'
+import { odeWork } from '../rearrange/tools/ode.ts'
+import { activeTool } from '../rearrange/tools/tool.ts'
 import { type Rng, createRng } from '../random/rng.ts'
 import { ratSign } from '../rational.ts'
 import { generateRearrangeTask } from '../tasks/rearrangeTerms.ts'
@@ -156,7 +159,7 @@ export function planRearrange(task: RearrangeTask, ref: TaskRef, focus?: string)
 
 // Stufe 5: Schritte, die ein Werkzeug ausrechnen (Ableitung, Integral, Summe, Grenzwert). Sie werden nur
 // als „Was kommt heraus?" gefragt, der erste als „Was steht da eigentlich?"
-const TOOL_KINDS = new Set<StepKind | undefined>(['derive', 'partial', 'antiderivative', 'bounds', 'sumFormula', 'series', 'limit'])
+const TOOL_KINDS = new Set<StepKind | undefined>(['derive', 'partial', 'antiderivative', 'bounds', 'sumFormula', 'series', 'limit', 'ode'])
 
 const TOOL_QUESTIONS: Partial<Record<StepKind, string>> = {
   derive: 'Rechne die Ableitung aus: Was kommt heraus?',
@@ -166,6 +169,7 @@ const TOOL_QUESTIONS: Partial<Record<StepKind, string>> = {
   sumFormula: 'Rechne die Summe mit der Formel der geometrischen Summe aus: Was kommt heraus?',
   series: 'Rechne die Reihe aus: Was kommt heraus?',
   limit: 'Rechne den Grenzwert aus: Was kommt heraus?',
+  ode: 'Löse die Differentialgleichung mit den Anfangswerten: Was kommt heraus?',
 }
 
 // Tipp zur ganzen Aufgabe nach dem ersten Werkzeug-Schritt
@@ -177,6 +181,7 @@ const TASK_TOOL: Partial<Record<StepKind, TaskTool>> = {
   sumFormula: 'series',
   series: 'series',
   limit: 'limit',
+  ode: 'ode',
 }
 
 // --- Weichen: Schritte, bei denen man wissen muss, was als Nächstes kommt ---
@@ -291,6 +296,7 @@ function moveQuestion(step: RearrangeStep, t: string, target: string): MoveQuest
     case 'sumFormula':
     case 'series':
     case 'limit':
+    case 'ode':
       return null
     case 'add': {
       if (!side || !step.operand) return null
@@ -495,6 +501,7 @@ const RESULT_HINTS: Partial<Record<StepKind, string>> = {
   sumFormula: REARRANGE_HINTS.sumFormula,
   series: REARRANGE_HINTS.series,
   limit: REARRANGE_HINTS.limit,
+  ode: REARRANGE_HINTS.ode,
 }
 
 const spuriousWhy = (reason: string): Explanation => ({ detailed: `Diese Lösung ist eine Scheinlösung. ${reason}`, short: reason })
@@ -534,10 +541,21 @@ function resultStep(
     question: finish ? `Fasse zu einem Bruch zusammen: Was ist $${t}$?` : choose ? 'Welche der beiden Lösungen passt?' : (tool ?? 'Was kommt heraus?'),
     choices: rng.shuffle([correct, ...wrong]),
     hint: finish ? REARRANGE_HINTS.finish : RESULT_HINTS[step.kind] ?? REARRANGE_HINTS.result,
-    explanation: choose && step.operand ? explainChoose(toLatex(step.operand), rejectReason(step, t, context), after) : explainResult(step.kind, stepLatex(step.kind, step.before), after),
+    explanation:
+      choose && step.operand
+        ? explainChoose(toLatex(step.operand), rejectReason(step, t, context), after)
+        : (odeExplanation(step) ?? explainResult(step.kind, stepLatex(step.kind, step.before), after)),
     established: [after],
     cards: cardsOf(step, t, previous),
   }
+}
+
+// Differentialgleichung: Ansatz und Konstanten aus den Anfangswerten
+function odeExplanation(step: RearrangeStep): Explanation | null {
+  if (step.kind !== 'ode') return null
+  const tool = activeTool(step.before)?.tool.tool
+  const work = tool?.kind === 'ode' ? odeWork(tool) : null
+  return tool?.kind === 'ode' && work ? explainOde(odeLatex(tool), work.approach, work.constants, stepLatex(step.kind, step.before), stepLatex(step.kind, step.after)) : null
 }
 
 const whyWrong = (id: string): Explanation => (id.startsWith('frac-') ? explainFractionError(id) : explainRearrangeError(id))
@@ -600,6 +618,7 @@ const CARDS_BY_KIND: Record<StepKind, readonly string[]> = {
   sumFormula: [REARRANGE_CARD_IDS.series],
   series: [REARRANGE_CARD_IDS.series],
   limit: [REARRANGE_CARD_IDS.limit],
+  ode: [REARRANGE_CARD_IDS.ode],
   finish: [FRACTION_CARD_IDS.add, FRACTION_CARD_IDS.expand],
 }
 

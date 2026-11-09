@@ -48,7 +48,7 @@ import {
 import type { RearrangeTask } from './task.ts'
 import { type ToolStepKind, toolMistakes } from './tools/steps.ts'
 
-const TOOL_STEPS = new Set<string>(['derive', 'partial', 'antiderivative', 'bounds', 'sumFormula', 'series', 'limit'])
+const TOOL_STEPS = new Set<string>(['derive', 'partial', 'antiderivative', 'bounds', 'sumFormula', 'series', 'limit', 'ode'])
 
 // Typische Fehler beim Umstellen (Katalog in docs/PLAN-M3.md). Jeder Fehler steckt in genau einem
 // Schritt des Rechenwegs: Dieser Schritt wird falsch ausgeführt, danach wird richtig weitergerechnet.
@@ -124,6 +124,14 @@ export const REARRANGE_ERROR_RULES: readonly EqErrorRule[] = [
   { id: 'eq-lim-one', name: '„1 hoch unendlich ist 1" gerechnet', wrongFormula: '\\lim_{n \\to \\infty}\\left(1 + \\frac{x}{n}\\right)^n = 1' },
   { id: 'eq-lim-exponent', name: 'Beim Grenzwert den Faktor in der Hochzahl vergessen', wrongFormula: '\\lim_{n \\to \\infty}\\left(1 + \\frac{x}{n}\\right)^{2n} = e^{x}' },
   { id: 'eq-lim-denominator', name: 'Beim Grenzwert den Nenner nicht beachtet', wrongFormula: '\\lim_{n \\to \\infty}\\left(\\frac{n + x}{n - x}\\right)^n = e^{x}' },
+  // Werkzeuge der Stufe 5 (Schritt 7c): Differentialgleichungen
+  { id: 'eq-ode-initial-unused', name: 'Einen Anfangswert nicht genutzt', wrongFormula: "f'' = k^2 f,\\; f(0) = a,\\; f'(0) = 0: f(x) = ae^{kx}" },
+  { id: 'eq-ode-not-halved', name: 'Bei $f\'\' = k^2 f$ die Konstanten nicht halbiert', wrongFormula: "f'' = k^2 f,\\; f(0) = a,\\; f'(0) = 0: f(x) = ae^{kx} + ae^{-kx}" },
+  { id: 'eq-ode-inner-factor', name: 'Bei $f\'(0)$ den Faktor $k$ aus der Ableitung von $e^{kx}$ vergessen', wrongFormula: "f'' = k^2 f,\\; f(0) = 0,\\; f'(0) = b: f(x) = \\frac{b}{2}e^{kx} - \\frac{b}{2}e^{-kx}" },
+  { id: 'eq-ode-oscillation', name: 'Mit der Schwingung $f\'\' = -k^2 f$ verwechselt', wrongFormula: "f'' = k^2 f,\\; f(0) = a,\\; f'(0) = 0: f(x) = a\\cos(kx)" },
+  { id: 'eq-ode-constant-added', name: 'Die Konstante addiert statt malgenommen', wrongFormula: "f' = kf,\\; f(0) = a: f(x) = e^{kx} + a - 1" },
+  { id: 'eq-ode-exp-sign', name: 'Das Vorzeichen in der Hochzahl vertauscht', wrongFormula: "f' = -kf,\\; f(0) = a: f(x) = ae^{kx}" },
+  { id: 'eq-ode-constant-start', name: 'Beim Abkühlen die Konstante gleich dem Anfangswert gesetzt', wrongFormula: "f' = k(b - f),\\; f(0) = a: f(x) = b + ae^{-kx}" },
 ]
 
 export function rearrangeErrorRule(id: string): EqErrorRule {

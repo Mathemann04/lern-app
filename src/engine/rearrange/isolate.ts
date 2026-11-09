@@ -87,6 +87,7 @@ export type StepKind =
   | 'sumFormula'
   | 'series'
   | 'limit'
+  | 'ode'
   | 'finish'
 
 export const STEP_NAMES: Record<StepKind, string> = {
@@ -125,6 +126,7 @@ export const STEP_NAMES: Record<StepKind, string> = {
   sumFormula: 'Summenformel anwenden',
   series: 'Reihe ausrechnen',
   limit: 'Grenzwert bilden',
+  ode: 'Differentialgleichung lösen',
   finish: 'Ergebnis',
 }
 

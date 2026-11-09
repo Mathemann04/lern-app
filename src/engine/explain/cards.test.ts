@@ -21,12 +21,13 @@ import { planRearrangeTask } from '../guided/rearrangePlan.ts'
 import { createRng } from '../random/rng.ts'
 import { holds, samplePoints, withSubstitution } from '../rearrange/check.ts'
 import { solveTask } from '../rearrange/isolate.ts'
+import { taskLatex as rearrangeTaskLatex } from '../rearrange/task.ts'
 import { CARDS, type CardExample, TOPICS, cardById, cardForRule, cardIdsFor, cardsInTopic, examplesFor, isFractionExample, isRearrangeExample, topicById } from './cards.ts'
 import { cardExample, workedExample } from './example.ts'
 import { parseRichText } from './richText.ts'
 
 const latexOf = (e: CardExample) =>
-  isRearrangeExample(e) ? equationToLatex(e.equation) : isFractionExample(e) ? taskLatex(e) : isEquation(e) ? equationToLatex(e) : toLatex(e)
+  isRearrangeExample(e) ? rearrangeTaskLatex(e) : isFractionExample(e) ? taskLatex(e) : isEquation(e) ? equationToLatex(e) : toLatex(e)
 
 // Karten zum Ableiten (Beispiele sind Funktionen bzw. Gleichungen) und zu Brüchen
 const DERIVATIVE_CARDS = cardsInTopic('ableitungen')

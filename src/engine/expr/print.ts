@@ -77,7 +77,17 @@ export function toolLatex(tool: Tool): string {
       return `\\sum_{${tool.v}=${toLatex(tool.lower)}}^{\\infty} ${summandLatex(tool.body)}`
     case 'limit':
       return `\\lim_{${tool.v} \\to \\infty} ${summandLatex(tool.body)}`
+    case 'ode':
+      return `${tool.v}(${toLatex(tool.point)})`
   }
+}
+
+// Die Differentialgleichung mit ihren Anfangswerten: f'' = k^{2}f,\; f(0) = a,\; f'(0) = 0
+export function odeLatex(tool: Extract<Tool, { kind: 'ode' }>): string {
+  const f = tool.v
+  const primes = (n: number) => "'".repeat(n)
+  const initial = tool.initial.map((value, i) => `${f}${primes(i)}(0) = ${toLatex(value)}`)
+  return [`${f}${primes(tool.order)} = ${toLatex(tool.body)}`, ...initial].join(',\\; ')
 }
 
 // Rumpf einer Summe oder eines Grenzwerts: eine Summe oder ein Minus vorn in Klammern
@@ -212,6 +222,8 @@ function needsDot(left: Expr, right: Expr, rightLatex: string): boolean {
   if (right.kind === 'div') return true
   // e \cdot e^{x} statt ee^{x}
   if (left.kind === 'const' && left.name === 'e' && rightLatex.startsWith('e')) return true
+  // b \cdot f(x) statt bf(x)
+  if (right.kind === 'var' && right.tool?.kind === 'ode' && left.kind !== 'num') return true
   return endsWithBareArgument(left)
 }
 

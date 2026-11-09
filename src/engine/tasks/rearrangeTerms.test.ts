@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { contains, subterms } from '../expr/compare.ts'
 import { solveTask } from '../rearrange/isolate.ts'
-import { taskLatex } from '../rearrange/task.ts'
+import { taskLatex, taskVariables } from '../rearrange/task.ts'
 import { hasTool } from '../rearrange/tools/tool.ts'
 import { createRng } from '../random/rng.ts'
 import { rearrangeForm } from './forms.ts'
@@ -31,7 +31,7 @@ describe.each(KIT_LEVELS)('Abwechslung Stufe %i', (level) => {
   })
 })
 
-const TOOL_STEPS = new Set(['derive', 'partial', 'antiderivative', 'sumFormula', 'series', 'limit'])
+const TOOL_STEPS = new Set(['derive', 'partial', 'antiderivative', 'sumFormula', 'series', 'limit', 'ode'])
 
 describe('Baukasten der Stufen 1 bis 5', () => {
   const tasks = (level: Level) => Array.from({ length: 200 }, (_, i) => generateRearrangeTask({ level, seed: i + 1 }).task)
@@ -124,7 +124,7 @@ describe('Baukasten der Stufen 1 bis 5', () => {
     expect([...blocks].sort()).toEqual(['fn', 'ohne', 'pow', 'root'])
   })
 
-  it('Stufe 5, Teile 7a und 7b: in jeder Aufgabe ein Werkzeug, im Mittel mindestens 8 Umformungen', () => {
+  it('Stufe 5, Teile 7a bis 7c: in jeder Aufgabe ein Werkzeug, im Mittel mindestens 8 Umformungen', () => {
     const all = tasks(5)
     const solutions = all.map((t) => solveTask(t)!)
     const lengths = solutions.map((s) => s.steps.length)
@@ -138,18 +138,44 @@ describe('Baukasten der Stufen 1 bis 5', () => {
       expect(TOOL_STEPS.has(solutions[i].steps[0].kind), taskLatex(t)).toBe(true)
     }
     const kinds = new Set(solutions.flatMap((s) => s.steps.map((step) => step.kind)))
-    for (const kind of ['derive', 'partial', 'antiderivative', 'bounds', 'pq', 'logCombine', 'sumFormula', 'series', 'limit']) expect(kinds.has(kind as never), kind).toBe(true)
+    for (const kind of ['derive', 'partial', 'antiderivative', 'bounds', 'pq', 'logCombine', 'sumFormula', 'series', 'limit', 'ode', 'substitute', 'choose'])
+      expect(kinds.has(kind as never), kind).toBe(true)
     // auch zwei Werkzeuge in einer Aufgabe, Werkzeug im Bruch, unter der Wurzel und im \ln, Reihe in
     // einer Ableitung bzw. einem Integral
     const generated = Array.from({ length: 200 }, (_, i) => generateRearrangeTask({ level: 5, seed: i + 1 }))
     const labels = generated.map((g) => g.label)
-    for (const part of ['Integral gleich Ableitung', 'in einer Summe', 'im Bruch', 'unter der Wurzel', 'im $\\ln$', 'Reihe abgeleitet', 'Reihe integriert', 'Grenzwert gleich Ableitung']) {
+    for (const part of [
+      'Integral gleich Ableitung',
+      'in einer Summe',
+      'im Bruch',
+      'unter der Wurzel',
+      'im $\\ln$',
+      'Reihe abgeleitet',
+      'Reihe integriert',
+      'Grenzwert gleich Ableitung',
+      "DGL: $f'' = k^2 f$",
+      'DGL: Abkühlen',
+      "$g' = -kg$",
+    ]) {
       expect(labels.some((l) => l.includes(part)), part).toBe(true)
     }
     // Teil 7b mit festem Anteil: etwa 40 von 100 Nummern
     const series = generated.filter((g) => g.template.id === 'baukasten-5-reihen').length
     expect(series).toBeGreaterThanOrEqual(60)
     expect(series).toBeLessThanOrEqual(100)
+    // Teil 7c: 30 % der übrigen Nummern, die Nummern aus 7a und 7b behalten ihre Aufgabe
+    const odes = generated.filter((g) => g.template.id === 'baukasten-5-dgl').length
+    expect(odes).toBeGreaterThanOrEqual(15)
+    expect(odes).toBeLessThanOrEqual(45)
+    expect(taskLatex(generated[5].task)).toBe('y = \\frac{\\mathrm{d}}{\\mathrm{d}x}\\left(\\frac{x^{2}}{x + a}\\right)')
+    expect(taskLatex(generated[6].task)).toBe('\\frac{\\int_{0}^{x} be^{-3t}\\,\\mathrm{d}t}{ce^{-3x} + d} = g - h')
+    expect(taskLatex(generated[119].task)).toBe('m - \\lim_{n \\to \\infty} \\left(\\frac{n}{n + x}\\right)^{3n} = p')
+    // die Differentialgleichung steht über der Gleichung, f und g sind keine Buchstaben der Aufgabe
+    for (const g of generated.filter((g) => g.template.id === 'baukasten-5-dgl')) {
+      expect(taskLatex(g.task)).toMatch(/^\\begin\{gathered\}f'/)
+      expect(taskVariables(g.task)).not.toContain('f')
+      expect(taskVariables(g.task)).not.toContain('g')
+    }
   })
 
   it.each([1, 2, 3, 4] as Level[])('Stufe %i: meist nach x, manchmal nach einem anderen Buchstaben', (level) => {

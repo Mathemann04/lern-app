@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { equationToLatex, toLatex } from '../expr/print.ts'
-import { type Expr, PI, add, div, eq, exp, mul, num, pow, sin, sub, variable } from '../expr/types.ts'
+import { type Expr, PI, add, div, eq, exp, mul, neg, num, pow, sin, sub, variable } from '../expr/types.ts'
 import { parseLatex } from '../parse/latex.ts'
 import { REARRANGE_ERROR_RULES, rearrangeWrongAnswers } from './errorRules.ts'
 import { solveEquation, solveTask } from './isolate.ts'
 import type { Condition } from './task.ts'
-import { derivativeOf, integralOf, limitOf, seriesOf, sumOf } from './tools/tool.ts'
+import { derivativeOf, integralOf, limitOf, odeOf, seriesOf, sumOf } from './tools/tool.ts'
 
 const p = (latex: string): Expr => {
   const r = parseLatex(latex)
@@ -66,7 +66,7 @@ const CATALOG: Array<{ id: string; lhs: string; rhs: string; target?: string; af
 
 // Werkzeuge der Stufe 5 (Schritt 7a): Aufgaben mit Integral, falsche Gleichung nach dem Werkzeug-Schritt
 const t = variable('t')
-const [k, n, q, x] = ['k', 'n', 'q', 'x'].map(variable)
+const [a, b, f, k, n, q, x] = ['a', 'b', 'f', 'k', 'n', 'q', 'x'].map(variable)
 const below1: Condition[] = [{ lhs: x, rel: '<', rhs: num(1) }]
 
 const TOOL_CATALOG: Array<{ id: string; lhs: Expr; target?: string; conditions?: Condition[]; after: string }> = [
@@ -95,6 +95,14 @@ const TOOL_CATALOG: Array<{ id: string; lhs: Expr; target?: string; conditions?:
   { id: 'eq-lim-one', lhs: limitOf(pow(add(num(1), div(x, n)), n)), after: '1 = y' },
   { id: 'eq-lim-exponent', lhs: limitOf(pow(add(num(1), div(x, n)), mul(num(2), n))), after: 'e^{x} = y' },
   { id: 'eq-lim-denominator', lhs: limitOf(pow(div(add(n, x), sub(n, x)), n)), after: 'e^{x} = y' },
+  // Schritt 7c: Differentialgleichungen (f'' = k^2 f mit f(0) = a, f'(0) = 0 wie im Plan)
+  { id: 'eq-ode-initial-unused', lhs: odeOf(mul(pow(k, num(2)), f), 2, [a, num(0)]), after: 'ae^{kx} = y' },
+  { id: 'eq-ode-not-halved', lhs: odeOf(mul(pow(k, num(2)), f), 2, [a, num(0)]), after: 'ae^{kx} + ae^{-kx} = y' },
+  { id: 'eq-ode-inner-factor', lhs: odeOf(mul(pow(k, num(2)), f), 2, [num(0), b]), after: '\\frac{b}{2}e^{kx} - \\frac{b}{2}e^{-kx} = y' },
+  { id: 'eq-ode-oscillation', lhs: odeOf(mul(pow(k, num(2)), f), 2, [a, num(0)]), after: 'a\\cos(kx) = y' },
+  { id: 'eq-ode-constant-added', lhs: odeOf(mul(k, f), 1, [a]), after: 'e^{kx} + a - 1 = y' },
+  { id: 'eq-ode-exp-sign', lhs: odeOf(neg(mul(k, f)), 1, [a]), after: 'ae^{kx} = y' },
+  { id: 'eq-ode-constant-start', lhs: odeOf(mul(k, sub(b, f)), 1, [a]), conditions: [{ lhs: a, rel: '>', rhs: b }], after: 'b + ae^{-kx} = y' },
 ]
 
 describe('Katalog der Fehlerregeln', () => {
