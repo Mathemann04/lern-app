@@ -1188,6 +1188,34 @@ auf einer Seite nur $\cos x$).
   jeden typischen Fehler (ein Test prüft alle).
 - Design-Durchgang, Offline-Test, Doku, M3 abhaken.
 
+**Umgesetzt (9):** „Gezielt üben" fürs Umstellen, auf den Lernkarten und unter „Deine
+häufigsten Fehler", für alle 90 typischen Fehler des Themas (auch die aus „Brüche" beim
+Zusammenfassen). `tasks/rearrangeFocus.ts` sucht reihum durch die Stufen (zuerst die
+gewählte, dann die nächstgelegenen, je Runde acht Versuche) eine Aufgabe, in der der Fehler
+im geführten Modus als Antwort erscheint; der Schrittplaner zeigt ihn dann sicher. Fehler,
+die vor allem in einer Aufgabenart vorkommen, stehen bei ihrer Vorlage (`focus`, z. B. die
+Fehler beim Betrag bei „Betrag und Winkel", die der Substitution bei „Stufe 4,
+quadratisch"); gesucht wird dann nur in diesen Vorlagen und ihren Stufen, die Vorlage einer
+Nummer lässt sich schnell vorab bestimmen (`likelyRearrangeTemplate`). Gemessen: meist
+unter einer halben Sekunde, höchstens etwa zwei (am seltensten „beim Teilen die Winkel
+addiert" und „Mehrfachklammer nur beim ersten Summanden ausmultipliziert"). Ein Test findet
+jeden Fehler, die seltensten mit verschiedenem Zufall. Die Suche wird in allen Themen erst
+beim gezielten Üben geladen (vorher lud die Übungsseite die Suche fürs Ableiten und für
+Brüche immer mit).
+
+Anzeige nach dem Substituieren (vorgemerkt seit 8a): $ae^{-x}$ wird $\frac{a}{u}$ statt
+$a \cdot \frac{1}{u}$ ($\frac{a}{2}e^{-x}$ wird $\frac{a}{2u}$, kein Doppelbruch), nach dem
+Malnehmen mit $u$ steht $u^2 - a = uy$ da; beim Malnehmen mit dem Hauptnenner wird ein Bruch
+als Vorzahl gekürzt ($2u \cdot \frac{a}{2}u$ wird $au^2$). Das betrifft die Zwischenschritte
+von 183 Aufgaben der Stufen 4 und 5 (geführt); alle Aufgaben und Ergebnisse bleiben gleich
+(verglichen über die Nummern 1 bis 300 der Stufen 1 bis 4 und 1 bis 1500 der Stufe 5).
+
+Design-Durchgang über alle Seiten des Themas in Handy- und Laptopgröße, hell und dunkel
+(Thema, alle 21 Lernkarten, Fortschritt, Galerie, zwölf Aufgaben aller Stufen geführt bis
+zum Ergebnis, frei, gezielt üben): nichts ragt heraus, keine Formel zu breit, keine
+Formelfehler, keine zu kleinen Knöpfe. Neuer Browser-Test: Umstellen offline, geführt, frei
+und gezielt üben. Damit ist M3 abgeschlossen.
+
 Pro Sitzung schaffen wir etwa ein bis zwei Schritte.
 
 ### Offene Fragen an dich

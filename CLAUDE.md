@@ -9,16 +9,13 @@ den Nutzer zugeschnitten: Maschinenbau, 1. Semester, THU, „Mathematik MB1".
 - Maßstab fürs Niveau: das Buch des Nutzers „Mathe für Ingenieure",
   Kapitel und ihre Themen in der App: [docs/LEHRBUCH.md](docs/LEHRBUCH.md)
 - Meilensteine und aktueller Stand: [docs/ROADMAP.md](docs/ROADMAP.md)
-- Laufender Plan: [docs/PLAN-M3.md](docs/PLAN-M3.md) (Gleichungen umstellen,
-  4. Fassung, freigegeben): erst Baukasten und Abwechslung in den Stufen 1
-  bis 3 wie bei den Brüchen (Schritte 4 und 5; ab Stufe 3 Kerne ineinander,
-  Test der Umformungen), dann die Stufen 4 und 5 (Schritte 6 bis 9; Stufe 4
-  in drei Teilen, 6a bis 6c fertig; Schritt 7 in drei Teilen, 7a bis 7c fertig;
-  Schritt 8 in drei Teilen, 8a bis 8c fertig; als Nächstes Schritt 9).
+- Laufender Plan: keiner. M3 ist abgeschlossen; der Nutzer überarbeitet die
+  ROADMAP, danach kommt der Plan für den nächsten Meilenstein.
   Abgeschlossen:
   [docs/PLAN-M1.md](docs/PLAN-M1.md), [docs/PLAN-M2.md](docs/PLAN-M2.md),
   [docs/PLAN-M2b.md](docs/PLAN-M2b.md) (Brüche nachschärfen: Abwechslung und
-  Profi-Niveau)
+  Profi-Niveau), [docs/PLAN-M3.md](docs/PLAN-M3.md) (Gleichungen umstellen,
+  4. Fassung)
 
 Vor jeder Arbeit ROADMAP und den laufenden Plan lesen.
 
@@ -351,7 +348,9 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     Bausteins vor ($e^{2x}$ und $e^x$ bzw. $e^{-x}$, $x$ und $\sqrt{x}$,
     $\sin^2 x$ und $\sin x$, $\ln^2 x$, $x^4$ und $x^2$) und wird die Gleichung
     damit quadratisch, substituieren `substitute` (danach wird nach $u$
-    aufgelöst, `unknown`), quadratisch in $u$ oder $x$: alles nach links
+    aufgelöst, `unknown`; $ae^{-x}$ wird $\frac{a}{u}$, `reciprocalFolded`, beim
+    Malnehmen mit dem Hauptnenner ein Bruch als Vorzahl gekürzt, `termTimes`),
+    quadratisch in $u$ oder $x$: alles nach links
     `zero`, Normalform `normalize`, $pq$-Formel `pq` (die Gleichung danach
     enthält die passende Lösung, angezeigt mit $\pm$ über `stepEquationLatex`),
     passende Lösung wählen `choose` (beide Lösungen an Zufallsstellen geprüft:
@@ -520,8 +519,11 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     ohne Doppelbruch; mit Additionstheorem jede Gleichung des Rechenwegs und jede
     falsche Antwort höchstens 21 em, im Ergebnis kein Minus direkt unter der Wurzel
     oder in der Klammer wie $\sqrt{-\frac{a}{y - 2a + b}}$),
-    Gegenprobe der Aufgabe an den Prüfstellen), `focus.ts` und `fractionFocus.ts` (Aufgaben für
-    gezieltes Üben; Brüche: reihum durch die Stufen, je Runde zwölf Versuche,
+    Gegenprobe der Aufgabe an den Prüfstellen), `focus.ts`, `fractionFocus.ts` und
+    `rearrangeFocus.ts` (Aufgaben für
+    gezieltes Üben, erst beim gezielten Üben geladen, `practice.ts`; Umstellen: reihum durch
+    die Stufen, je Runde acht Versuche, seltene Fehler nur in ihrer Vorlage `focus`,
+    `likelyRearrangeTemplate`; Brüche: reihum durch die Stufen, je Runde zwölf Versuche,
     seltene Fehler in ihrer Vorlage `focus`, `likelyFractionTemplate`;
     `PracticePage.tsx` zeigt während der Suche einen Hinweis); Baukasten der Brüche `fractionKit.ts` (Stufen 1 und 2:
     Rechenbaum zufällig aus Teilen, Rechenarten und Bruchteilen, mit

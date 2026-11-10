@@ -7,7 +7,7 @@ Stand: 10.11.2026
 | M1 | Grundgerüst + Ableitungsregeln (beide Modi, 5 Stufen, Erklärungen, Lernkarten, Fortschritt) | fertig |
 | M2 | Brüche (Bruchrechnung, Bruchterme kürzen und zusammenfassen, Doppelbrüche); App für mehrere Themen | fertig |
 | M2b | Brüche nachschärfen: viel mehr Abwechslung (Baukasten statt fester Vorlagen, keine Form doppelt), deutlich schwerer, Stufe 5 auf Profi-Niveau mit Partialbruchzerlegung und Brüchen aus späteren Kapiteln (komplexe Zahlen, Grenzwerte, Teleskopsummen, Hyperbelfunktionen) | fertig |
-| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | in Arbeit: 4. Fassung des Plans (Baukasten und Abwechslung, ab Stufe 3 verschachtelter); Schritte 4, 5 und 6 fertig (Stufe 4 komplett), Schritt 7 fertig (Stufe 5 mit Ableitungen, Integralen, Summen, Reihen, Grenzwerten und Differentialgleichungen), Schritt 8 fertig (Determinanten, Betrag und Winkel, Additionstheoreme), als Nächstes Schritt 9 (gezieltes Üben, Feinschliff, Abschluss) |
+| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | in Arbeit: 4. Fassung des Plans (Baukasten und Abwechslung, ab Stufe 3 verschachtelter); Schritte 4, 5 und 6 fertig (Stufe 4 komplett), Schritt 7 fertig (Stufe 5 mit Ableitungen, Integralen, Summen, Reihen, Grenzwerten und Differentialgleichungen), fertig (alle Schritte 1 bis 9, zuletzt gezieltes Üben für jeden typischen Fehler und Feinschliff) |
 | M4 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
 | M5 | weitere Themen aus Mathematik MB1 | offen |
 | M6 | Physik: Formeln mit Einheiten (Formeln umstellen mit Zeichen der Physik; Aufgaben lösen: Formel wählen, umstellen, Werte mit Einheiten einsetzen) | offen |
@@ -38,11 +38,6 @@ Stand: 10.11.2026
   (eigener Plan; die Werkzeuge aus Stufe 5 von M3 wie Integrale und Reihen
   lassen sich dort wiederverwenden). Neue Themen (M4 und später) werden
   gleich so geplant.
-- **Anzeige nach dem Substituieren** (gefunden in M3 Schritt 8a): Aus
-  $ae^{-x}$ wird $a \cdot \frac{1}{u}$, nach dem Malnehmen steht
-  $ua \cdot \frac{1}{u}$ da; schöner wäre $\frac{a}{u}$ und danach
-  $bu^2 - a = uy$. Betrifft nur die Anzeige in Stufe 4 und 5 (die Aufgaben
-  bleiben gleich); im Feinschliff von M3 (Schritt 9) angehen.
 
 ## M2b: Schritte
 
@@ -85,7 +80,7 @@ Details: [PLAN-M3.md](PLAN-M3.md) (4. Fassung, freigegeben am 05.11.2026 mit dei
   - [x] 8a. Determinanten ($2 \times 2$ und $3 \times 3$)
   - [x] 8b. Betrag und Winkel: komplexe Zahlen, Winkel zwischen Vektoren
   - [x] 8c. Additionstheoreme
-- [ ] 9. Gezieltes Üben, Feinschliff, Abschluss von M3
+- [x] 9. Gezieltes Üben, Feinschliff, Abschluss von M3
 
 ## M2: Schritte
 
@@ -601,3 +596,18 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   Platzhalter", „noch einmal quadrieren" ohne Wurzel, „auf beiden Seiten").
   Browser-Tests mit 5-2333 (Beispiel aus dem Plan, geführt, Lernkarte) und 5-1539
   ($\cos(2x) = y\sin x$, frei). Damit ist Schritt 8 fertig.
+- 10.11.2026: M3 Schritt 9 fertig, **M3 abgeschlossen**: „Gezielt üben" gibt es
+  jetzt auch fürs Umstellen, für jeden der 90 typischen Fehler des Themas (auf den
+  Lernkarten und unter „Deine häufigsten Fehler"). Die App sucht eine Aufgabe, in
+  der genau dieser Fehler im geführten Modus als Antwort erscheint, seltene Fehler
+  nur in ihrer Aufgabenart (z. B. die Fehler beim Betrag in „Betrag und Winkel");
+  meist dauert das unter einer halben Sekunde, höchstens etwa zwei. Ein Test prüft
+  alle Fehler. Die Suche wird erst beim gezielten Üben geladen, in allen Themen.
+  Anzeige nach dem Substituieren: $\frac{a}{u}$ statt $a \cdot \frac{1}{u}$, nach dem
+  Malnehmen $u^2 - a = uy$ statt $u^2 - ua \cdot \frac{1}{u} = uy$, mit einem Bruch als
+  Vorzahl $au^2$ statt $2u \cdot \frac{a}{2}u$ (183 Aufgaben der Stufen 4 und 5
+  zeigen schönere Zwischenschritte; Aufgaben und Ergebnisse bleiben gleich, verglichen
+  über die Nummern 1 bis 300 bzw. 1 bis 1500). Design-Durchgang über alle Seiten des
+  Themas (Thema, alle 21 Lernkarten, Fortschritt, Galerie, Aufgaben aller Stufen
+  geführt und frei, gezielt üben) in Handy- und Laptopgröße, hell und dunkel: keine
+  Funde. Neuer Browser-Test: Umstellen offline, geführt, frei und gezielt üben.
