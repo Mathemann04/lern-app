@@ -697,6 +697,10 @@ Wissensfragen keine „Formen“ wie Mathe-Aufgaben haben:
   (beides außer fälligen Wiederholungen). Bei jedem Wiederkommen zeigt eine
   Frage eine andere Fassung: andere falsche Antworten aus dem Vorrat, andere
   Reihenfolge, bei Vorlagen ein anderes Element.
+  Sind nur einige Unterthemen angekreuzt (S1b), gelten beide Regeln innerhalb
+  dieser Auswahl. Ist sie klein (z. B. nur zwei Fragen in einer Stufe oder
+  weniger als zehn Fakten), kommen Fragen früher wieder; das hast du dann
+  selbst so gewählt.
 - **Rechnungen:** Die App merkt sich die Form (Art der Rechnung, Untertyp und
   Stoffe; nicht die Zahlen) und wiederholt keine der letzten zehn. Es gelten
   die Kennzahlen aus M2b: unter 200 erzeugten Aufgaben einer Stufe mindestens
@@ -734,7 +738,7 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   Grundlagen, zehn Fragen.
 - **S1b: Ankreuzen, was drankommt** (Wunsch vom 10.11.2026, Antwort
   „Beides“). Jedes Chemie-Thema hat **Unterthemen** (Atombau: Stoffe,
-  Trennverfahren, Reaktionen; Elementarteilchen und Kernsymbol; Isotope und
+  Trennverfahren, Reaktionen; Kern, Hülle und ihre Teilchen; Isotope und
   Ionen; Atommodelle; Licht und Spektren). Auf der Themenseite kreuzt du an,
   welche Unterthemen drankommen; Unterthemen, die es in der gewählten Stufe
   nicht gibt, stehen blass da („erst ab Vertiefung“). Unter „Chemie 1“ auf
@@ -968,6 +972,22 @@ Format wie bisher „Stufe-Nummer“ mit höchstens sechs Ziffern
   `#/klausur/chemie/aufgabe/<n>` (Klausuraufgabe N üben: würfelt eine
   Nummer und leitet weiter auf `#/klausur/chemie/aufgabe/<n>/<nummer>`,
   damit Neuladen dieselbe Aufgabe zeigt).
+- Ankreuzen, was drankommt (S1b): Katalog mit `parts` je Thema (Id, Titel,
+  Stufen) und `mix` je Fach, jede Frage (ab S2 auch jeder Erzeuger von
+  Rechnungen) mit `part`. Engine: `nextSeed(level, shown, parts)` wählt nur
+  unter den angekreuzten Unterthemen (gibt es dazu in der Stufe nichts: alle),
+  `questionNos(level, parts)` nennt diese Fragen; bei einer neuen Runde leert
+  `startNewRound` nur deren Nummern. Speicher (Hauptspeicher bleibt Version
+  3, fehlende Angaben ergeben die Standardwerte): `skipParts` (je Thema die
+  nicht angekreuzten Unterthemen), `mix` (je Fach Stufe und nicht
+  angekreuzte Themen), `lastMix` (Fach der zuletzt geübten Mischung).
+  Adressen: `#/mischen/<fach>` (Auswahl, `MixScreen.tsx`),
+  `#/mischen/<fach>/<stufe>` (würfelt Thema und Aufgabe, `pickMixed` in
+  `ui/mix.ts`, Thema gewichtet nach der Zahl der Fragen seiner Auswahl,
+  darin reihum mit der Runde des Themas, und leitet weiter), Aufgabe mit
+  `?mischen=<fach>` (X, „Zur Übersicht" und „Nächste Aufgabe" bleiben in der
+  Mischung; `fokus` gewinnt). Auswahl-Logik
+  ohne Engine in `ui/selection.ts`, Kästchen in `ui/PartPicker.tsx`.
 - Startseite: Überschrift und App-Beschreibung (`HomeScreen.tsx`,
   `index.html`, `vite.config.ts`, `e2e/home.spec.ts`) nach deiner Wahl.
 - Neue Farbtöne in `src/index.css` und Bilder in `AreaIcon.tsx` (eigene

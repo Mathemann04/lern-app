@@ -1,6 +1,16 @@
 import { type Level, type TaskRef, formatTaskNumber, parseTaskNumber } from '../engine/tasks/taskNumber.ts'
 import type { PracticeMode } from '../state/storage.ts'
-import { DERIVATIVES, GALLERY_COURSES, areaById, courseById, isAreaAvailable, isCourseAvailable } from './catalog.ts'
+import {
+  DERIVATIVES,
+  GALLERY_COURSES,
+  areaById,
+  courseById,
+  isAreaAvailable,
+  isCourseAvailable,
+  isMixAvailable,
+  subjectById,
+  subjectLevelCount,
+} from './catalog.ts'
 
 // Seiten der App und ihre Adressen (Teil nach „#"). Absichtlich ohne Mathe-Engine, damit die
 // Startseite schnell lädt: Ob es eine Lernkarte oder einen typischen Fehler gibt, prüfen erst die
@@ -17,7 +27,8 @@ export type Route =
   // Lernkarten: Ordner #/karten, ein Ordner #/karten/ableitungen, eine Karte #/karten/ableitungen/product
   | { readonly page: 'cards'; readonly folder: string | null; readonly card: string | null }
   // Üben: ohne Startwert wird eine neue Aufgabe gewürfelt; focus: gezielt einen typischen Fehler üben
-  // (Id einer Fehlerregel, noch ungeprüft)
+  // (Id einer Fehlerregel, noch ungeprüft); mix: Aufgabe aus der Mischung dieses Fachs (Id, geprüft:
+  // Fach mit Mischung, das das Thema enthält; mit focus immer null)
   | {
       readonly page: 'practice'
       readonly course: string
@@ -25,12 +36,25 @@ export type Route =
       readonly level: Level
       readonly seed: number | null
       readonly focus: string | null
+      readonly mix: string | null
     }
+  // Themen mischen (Fächer mit mix im Katalog): Auswahl #/mischen/chemie
+  | { readonly page: 'mix'; readonly subject: string }
+  // neue gemischte Aufgabe #/mischen/chemie/2: würfelt Thema und Aufgabe und leitet zur Aufgabe weiter
+  // (taskHref mit mix), damit Neuladen dieselbe Aufgabe zeigt
+  | { readonly page: 'mixPractice'; readonly subject: string; readonly level: Level }
 
 // Geführt: #/ueben/brueche/2-4711, frei: #/frei/ableiten/2-4711,
-// gezielt: #/ueben/ableiten/2-4711?fokus=cos-sign. Ältere Adressen ohne Thema (#/ueben/2-4711)
+// gezielt: #/ueben/ableiten/2-4711?fokus=cos-sign, in der Mischung:
+// #/ueben/chem-atombau/2-500123?mischen=chemie. Ältere Adressen ohne Thema (#/ueben/2-4711)
 // gehören zu Ableiten, dem ersten Thema.
 const PREFIX: Record<PracticeMode, string> = { guided: 'ueben', free: 'frei' }
+
+// Fach der Mischung aus der Adresse: nur ein Fach mit Mischung, zu dem das Thema gehört
+function mixOf(id: string | null, course: string): string | null {
+  const subject = id ? subjectById(id) : undefined
+  return subject && isMixAvailable(subject) && courseById(course)?.subject.id === subject.id ? subject.id : null
+}
 
 export function parseRoute(fullPath: string): Route {
   const [path, query = ''] = fullPath.split('?')
@@ -48,6 +72,17 @@ export function parseRoute(fullPath: string): Route {
     const found = areaById(id)
     return found && isAreaAvailable(found.area) ? { page: 'area', id } : { page: 'home' }
   }
+  const mix = /^\/mischen\/([^/]+)(?:\/([^/]+))?$/.exec(path)
+  if (mix) {
+    const subject = subjectById(mix[1])
+    if (!subject || !isMixAvailable(subject)) return { page: 'home' }
+    const level = mix[2]
+    if (level !== undefined && /^[1-5]$/.test(level) && Number(level) <= subjectLevelCount(subject)) {
+      return { page: 'mixPractice', subject: subject.id, level: Number(level) as Level }
+    }
+    // ohne oder mit unbekannter Stufe: zur Auswahl
+    return { page: 'mix', subject: subject.id }
+  }
   const cards = /^\/karten(?:\/([^/]+))?(?:\/([^/]+))?$/.exec(path)
   if (cards) return { page: 'cards', folder: cards[1] ?? null, card: cards[2] ?? null }
   const practice = /^\/(ueben|frei)\/(?:([a-z-]+)\/)?([^/]+)$/.exec(path)
@@ -56,20 +91,29 @@ export function parseRoute(fullPath: string): Route {
     const found = courseById(course)
     if (!found || !isCourseAvailable(found.course)) return { page: 'home' }
     const mode: PracticeMode = prefix === 'frei' ? 'free' : 'guided'
-    const focus = new URLSearchParams(query).get('fokus') || null
+    const params = new URLSearchParams(query)
+    const focus = params.get('fokus') || null
+    // gezielt üben und Mischung zusammen: gezielt üben gewinnt
+    const mix = focus ? null : mixOf(params.get('mischen'), course)
     const ref = parseTaskNumber(number)
-    if (ref) return { page: 'practice', course, mode, level: ref.level, seed: ref.seed, focus }
-    if (/^[1-5]$/.test(number)) return { page: 'practice', course, mode, level: Number(number) as Level, seed: null, focus }
+    if (ref) return { page: 'practice', course, mode, level: ref.level, seed: ref.seed, focus, mix }
+    if (/^[1-5]$/.test(number)) return { page: 'practice', course, mode, level: Number(number) as Level, seed: null, focus, mix }
   }
   return { page: 'home' }
 }
 
-const focusQuery = (focus?: string | null) => (focus ? `?fokus=${focus}` : '')
+// Zusatz einer Aufgabenadresse: gezielt üben (?fokus=) oder Mischung (?mischen=); gezielt üben gewinnt
+const practiceQuery = (focus?: string | null, mix?: string | null) => (focus ? `?fokus=${focus}` : mix ? `?mischen=${mix}` : '')
 
-export const practiceHref = (course: string, level: Level, mode: PracticeMode = 'guided', focus?: string | null) =>
-  `#/${PREFIX[mode]}/${course}/${level}${focusQuery(focus)}`
-export const taskHref = (course: string, ref: TaskRef, mode: PracticeMode = 'guided', focus?: string | null) =>
-  `#/${PREFIX[mode]}/${course}/${formatTaskNumber(ref)}${focusQuery(focus)}`
+// mix: Id des Fachs, wenn die Aufgabe aus der Mischung kommt
+export const practiceHref = (course: string, level: Level, mode: PracticeMode = 'guided', focus?: string | null, mix?: string | null) =>
+  `#/${PREFIX[mode]}/${course}/${level}${practiceQuery(focus, mix)}`
+export const taskHref = (course: string, ref: TaskRef, mode: PracticeMode = 'guided', focus?: string | null, mix?: string | null) =>
+  `#/${PREFIX[mode]}/${course}/${formatTaskNumber(ref)}${practiceQuery(focus, mix)}`
+
+// Themen mischen: Auswahl eines Fachs und neue gemischte Aufgabe in einer Stufe
+export const mixHref = (subject: string) => `#/mischen/${subject}`
+export const mixPracticeHref = (subject: string, level: Level) => `#/mischen/${subject}/${level}`
 
 export const areaHref = (id: string) => `#/gebiet/${id}`
 export const galleryHref = (course?: string) => (course ? `#/galerie/${course}` : '#/galerie')
@@ -87,6 +131,7 @@ export function sectionOf(route: Route): Section | null {
     case 'home':
     case 'area':
     case 'course':
+    case 'mix':
       return 'home'
     case 'cards':
       return 'cards'

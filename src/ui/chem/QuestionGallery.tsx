@@ -6,13 +6,14 @@ import { AreaIcon } from '../AreaIcon.tsx'
 import { BackLink } from '../BackLink.tsx'
 import { RichText } from '../RichText.tsx'
 import { cardHref } from '../cards/cardRoute.ts'
-import { courseById, levelName } from '../catalog.ts'
+import { type Course, type CoursePart, courseById, levelName } from '../catalog.ts'
 import { galleryHref, taskHref } from '../routes.ts'
 
 // Testseite „Fragen durchsehen" eines Chemie-Themas (#/galerie/chem-atombau), erst bei Bedarf
 // geladen: je Stufe alle Fragen mit Nummer, richtiger Antwort, allen falschen Antworten samt
-// Denkfehler und „Warum ist das falsch?", Tipp, Erklärung, Karten und Fundstelle; darunter alle
-// Denkfehler des Themas. So lassen sich die Fragen vor dem Üben in Ruhe prüfen.
+// Denkfehler und „Warum ist das falsch?", Tipp, Erklärung, Karten, Fundstelle und Unterthema; oben die
+// Zahl der Fragen je Unterthema und Stufe (so lässt sich die Zuordnung prüfen), unten alle Denkfehler
+// des Themas. So lassen sich die Fragen vor dem Üben in Ruhe prüfen.
 
 export default function QuestionGallery({ course: id }: { course: string }) {
   const { area, course } = courseById(id)!
@@ -38,6 +39,8 @@ export default function QuestionGallery({ course: id }: { course: string }) {
 
       {!topic && <p className="text-zinc-600">Für dieses Thema gibt es noch keine Fragen.</p>}
 
+      {topic && course.parts && <PartCounts course={course} questions={topic.bank.questions.filter((q) => !topic.bank.retired.includes(q.no))} />}
+
       {topic &&
         levels.map((l) => {
           const questions = topic.bank.questions.filter((q) => q.level === l.level).sort((a, b) => a.no - b.no)
@@ -54,7 +57,7 @@ export default function QuestionGallery({ course: id }: { course: string }) {
               <ol className="space-y-4">
                 {questions.map((q) => (
                   <li key={q.id}>
-                    <QuestionCard course={id} question={q} misconceptions={misconceptions} />
+                    <QuestionCard course={id} question={q} part={course.parts?.find((p) => p.id === q.part)} misconceptions={misconceptions} />
                   </li>
                 ))}
               </ol>
@@ -87,12 +90,51 @@ export default function QuestionGallery({ course: id }: { course: string }) {
   )
 }
 
-type CardProps = { course: string; question: Question; misconceptions: ReadonlyMap<string, Misconception> }
+// Zahl der Fragen je Unterthema und Stufe (ohne gelöschte); Fragen mit unbekanntem Unterthema rot
+function PartCounts({ course, questions }: { course: Course; questions: readonly Question[] }) {
+  const parts = course.parts ?? []
+  const levels = course.levels.filter((l) => l.available).map((l) => l.level)
+  const unknown = questions.filter((q) => !parts.some((p) => p.id === q.part))
+  return (
+    <section aria-labelledby="parts" className="space-y-3">
+      <div>
+        <h2 id="parts" className="text-xl font-semibold">
+          Unterthemen
+        </h2>
+        <p className="text-sm text-zinc-500">Zahl der Fragen je Unterthema und Stufe. Auf der Themenseite lassen sie sich ankreuzen.</p>
+      </div>
+      <ul className="divide-y divide-zinc-100 rounded-2xl border border-zinc-200">
+        {parts.map((part) => {
+          const counts = levels
+            .map((level) => ({ level, count: questions.filter((q) => q.part === part.id && q.level === level).length }))
+            .filter(({ count }) => count > 0)
+          const total = counts.reduce((sum, { count }) => sum + count, 0)
+          return (
+            <li key={part.id} data-part={part.id} className="space-y-0.5 px-4 py-3">
+              <p className="font-medium">
+                {part.title} <span className="font-normal text-zinc-500">· {part.id}</span>
+              </p>
+              <p className="text-sm text-zinc-600">
+                {counts.length === 0 ? 'keine Fragen' : counts.map(({ level, count }) => `${levelName(course.id, level)} ${count}`).join(' · ')} · zusammen{' '}
+                {total}
+              </p>
+            </li>
+          )
+        })}
+      </ul>
+      {unknown.length > 0 && (
+        <p className="text-sm text-red-700">Ohne bekanntes Unterthema: {unknown.map((q) => `Nr. ${q.no} (${q.part})`).join(', ')}</p>
+      )}
+    </section>
+  )
+}
 
-function QuestionCard({ course, question: q, misconceptions }: CardProps) {
+type CardProps = { course: string; question: Question; part: CoursePart | undefined; misconceptions: ReadonlyMap<string, Misconception> }
+
+function QuestionCard({ course, question: q, part, misconceptions }: CardProps) {
   const ref = { level: q.level, seed: q.no }
   return (
-    <article data-question-no={q.no} className="space-y-4 rounded-2xl border border-zinc-200 p-4">
+    <article data-question-no={q.no} data-part={q.part} className="space-y-4 rounded-2xl border border-zinc-200 p-4">
       <div className="space-y-1">
         {/* Link vorn in voller Höhe (44 px), Nummer, Id und Fakt daneben bzw. darunter */}
         <p className="flex flex-wrap items-center gap-x-3 text-sm text-zinc-500">
@@ -103,7 +145,12 @@ function QuestionCard({ course, question: q, misconceptions }: CardProps) {
             Nr. {q.no} · {q.id} · Fakt {q.fact}
           </span>
         </p>
-        <RichText text={q.title} className="block text-sm font-medium text-accent-700" inline />
+        <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <RichText text={q.title} className="text-sm font-medium text-accent-700" inline />
+          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${part ? 'bg-zinc-100 text-zinc-600' : 'bg-red-50 text-red-700'}`}>
+            {part ? part.title : `Unterthema unbekannt: ${q.part}`}
+          </span>
+        </p>
         <RichText text={q.prompt} className="text-lg font-semibold" />
       </div>
 

@@ -66,11 +66,15 @@ export function rememberShown(course: string, level: number, no: number, store: 
   save({ ...all, [keyOf(course, level)]: [...round, no].slice(-MAX_ROUND) }, store)
 }
 
-// Alle Fragen der Stufe waren dran: Die Runde beginnt von vorn
-export function startNewRound(course: string, level: number, store: KeyValueStore | null = browserStore()) {
+// Alle Fragen der Stufe waren dran: Die Runde beginnt von vorn. nos: nur diese Nummern aus der Runde
+// nehmen (die Fragen der angekreuzten Unterthemen, engine.questionNos); die übrigen bleiben gemerkt,
+// damit sie nach einer Änderung der Auswahl nicht gleich wiederkommen. Ohne nos: die ganze Runde leeren.
+export function startNewRound(course: string, level: number, nos?: Iterable<number>, store: KeyValueStore | null = browserStore()) {
   const all = load(store)
-  if (!(keyOf(course, level) in all)) return
-  save({ ...all, [keyOf(course, level)]: [] }, store)
+  const key = keyOf(course, level)
+  if (!(key in all)) return
+  const remove = nos ? new Set(nos) : null
+  save({ ...all, [key]: remove ? all[key].filter((no) => !remove.has(no)) : [] }, store)
 }
 
 // Für „Fortschritt löschen": alle Runden aller Themen leeren

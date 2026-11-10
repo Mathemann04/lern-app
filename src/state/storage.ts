@@ -13,6 +13,14 @@ export type ThemeChoice = 'system' | 'light' | 'dark'
 // Bis Version 2 gab es nur das Thema Ableiten (Id in ui/catalog.ts); alter Fortschritt gehört dorthin
 export const FIRST_COURSE = 'ableiten'
 
+// Auswahl der Mischung eines Fachs („Themen mischen", ui/mix.ts)
+export type MixChoice = {
+  // Stufe der Mischung
+  readonly level: Level
+  // Ids der nicht angekreuzten Themen (so sind neue Themen automatisch angekreuzt)
+  readonly skip: readonly string[]
+}
+
 export type Settings = {
   // Erklärungen nach jedem Schritt automatisch zeigen
   readonly explanations: boolean
@@ -23,6 +31,14 @@ export type Settings = {
   readonly lastCourse: string
   readonly practiceMode: PracticeMode
   readonly theme: ThemeChoice
+  // je Thema die nicht angekreuzten Unterthemen (Id des Themas → Ids aus parts in ui/catalog.ts); so
+  // sind neue Unterthemen automatisch angekreuzt. Fehlt ein Thema, ist alles angekreuzt.
+  readonly skipParts: Readonly<Record<string, readonly string[]>>
+  // je Fach die Auswahl der Mischung (Id des Fachs → Stufe und nicht angekreuzte Themen); fehlt ein Fach,
+  // gilt Stufe 1 mit allen Themen
+  readonly mix: Readonly<Record<string, MixChoice>>
+  // Fach der zuletzt geübten Mischung (für „Weitermachen"); null, sobald ein einzelnes Thema geübt wird
+  readonly lastMix: string | null
 }
 
 // Eine fertig gelöste Aufgabe
@@ -80,7 +96,12 @@ export const DEFAULT_SETTINGS: Settings = {
   lastCourse: FIRST_COURSE,
   practiceMode: 'guided',
   theme: 'system',
+  skipParts: {},
+  mix: {},
+  lastMix: null,
 }
+// Auswahl der Mischung eines Fachs, solange nichts gemerkt ist: Stufe 1, alle Themen angekreuzt
+export const DEFAULT_MIX: MixChoice = { level: 1, skip: [] }
 export const EMPTY_PROGRESS: Progress = { attempts: [], errors: {}, suggestionDismissed: {} }
 export const DEFAULT_STATE: AppState = { version: 3, settings: DEFAULT_SETTINGS, progress: EMPTY_PROGRESS }
 
@@ -104,6 +125,30 @@ const isId = (value: unknown): value is string => typeof value === 'string' && /
 const asRecord = (value: unknown): Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value) ? (value as Record<string, unknown>) : {}
 
+// Liste von Ids ohne Unlesbares und ohne doppelte
+const readIds = (value: unknown): string[] => (Array.isArray(value) ? [...new Set(value.filter(isId))] : [])
+
+// Id → Liste von Ids (skipParts); Einträge mit unlesbarer Id oder ohne Liste fallen weg
+function readIdLists(value: unknown): Record<string, string[]> {
+  return Object.fromEntries(
+    Object.entries(asRecord(value))
+      .filter(([id, ids]) => isId(id) && Array.isArray(ids))
+      .map(([id, ids]) => [id, readIds(ids)]),
+  )
+}
+
+// Id des Fachs → Auswahl der Mischung; unlesbare Stufe wird Stufe 1, unlesbare Liste leer
+function readMix(value: unknown): Record<string, MixChoice> {
+  return Object.fromEntries(
+    Object.entries(asRecord(value))
+      .filter(([id, choice]) => isId(id) && typeof choice === 'object' && choice !== null && !Array.isArray(choice))
+      .map(([id, choice]) => {
+        const raw = asRecord(choice)
+        return [id, { level: isLevel(raw.level) ? raw.level : DEFAULT_MIX.level, skip: readIds(raw.skip) }]
+      }),
+  )
+}
+
 // version: gelesene Version; bis Version 2 stand die Stufe in derivativeLevel
 function readSettings(value: unknown, version: number): Settings {
   const raw = asRecord(value)
@@ -120,6 +165,10 @@ function readSettings(value: unknown, version: number): Settings {
     lastCourse: isId(raw.lastCourse) ? raw.lastCourse : DEFAULT_SETTINGS.lastCourse,
     practiceMode: raw.practiceMode === 'free' || raw.practiceMode === 'guided' ? raw.practiceMode : DEFAULT_SETTINGS.practiceMode,
     theme: THEMES.find((t) => t === raw.theme) ?? DEFAULT_SETTINGS.theme,
+    // seit S1b (Version 3 bleibt: fehlende Angaben ergeben die Standardwerte)
+    skipParts: readIdLists(raw.skipParts),
+    mix: readMix(raw.mix),
+    lastMix: isId(raw.lastMix) ? raw.lastMix : null,
   }
 }
 

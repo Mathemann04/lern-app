@@ -9,7 +9,7 @@ import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
 import { CardSheetButton, TaskCardLinks } from '../cards/CardSheet.tsx'
 import type { CourseEngine } from '../courseEngines.ts'
-import { courseHref, practiceHref, taskHref } from '../routes.ts'
+import { courseHref, mixHref, mixPracticeHref, practiceHref, taskHref } from '../routes.ts'
 import { LevelUpSuggestion } from '../task/LevelUpSuggestion.tsx'
 import { CheckBadge, FocusBanner, TaskIntro, TaskTopBar } from '../task/TaskParts.tsx'
 import { type ExplanationMode, useExplanationMode } from '../task/explanationMode.ts'
@@ -19,9 +19,10 @@ import { MathInput } from './MathInput.tsx'
 // Gleichwertigkeit und ob das Ergebnis fertig ist, erkennt typische Fehler und kann den Lösungsweg
 // Schritt für Schritt aufdecken (aus dem geführten Modus).
 
-type Props = { course: string; engine: CourseEngine; taskRef: TaskRef; focus?: string | null }
+// mix: Id des Fachs, wenn die Aufgabe aus „Themen mischen" kommt (weiter geht es dann in der Mischung)
+type Props = { course: string; engine: CourseEngine; taskRef: TaskRef; focus?: string | null; mix?: string | null }
 
-export default function FreeTaskScreen({ course, engine, taskRef, focus = null }: Props) {
+export default function FreeTaskScreen({ course, engine, taskRef, focus = null, mix = null }: Props) {
   const { level, seed } = taskRef
   const { free, plan } = useMemo(() => {
     // Den freien Modus gibt es nur für Aufgaben mit Term und Ergebnis (Mathe)
@@ -70,12 +71,12 @@ export default function FreeTaskScreen({ course, engine, taskRef, focus = null }
 
   return (
     <main className="space-y-6" style={{ paddingBottom: keyboardHeight }}>
-      <TaskTopBar course={course} mode={mode} onCycleMode={cycle} />
+      <TaskTopBar course={course} mix={mix} mode={mode} onCycleMode={cycle} />
 
       {focus && <FocusBanner focus={focus} />}
 
       <section className="space-y-3">
-        <TaskIntro course={course} taskRef={taskRef} functionLatex={plan.functionLatex} instruction={plan.instruction} note={plan.note} />
+        <TaskIntro course={course} mix={mix} taskRef={taskRef} functionLatex={plan.functionLatex} instruction={plan.instruction} note={plan.note} />
       </section>
 
       <section className="space-y-3" aria-label="Deine Antwort">
@@ -110,18 +111,21 @@ export default function FreeTaskScreen({ course, engine, taskRef, focus = null }
         {verdict && <Feedback verdict={verdict} resultLatex={plan.resultLatex} resultNote={plan.resultNote} detail={detail} mode={mode} />}
       </div>
 
-      {solved && <LevelUpSuggestion course={course} level={level} mode="free" />}
+      {solved && !mix && <LevelUpSuggestion course={course} level={level} mode="free" />}
 
       {solved ? (
         <div className="space-y-5">
           <div className="flex flex-col gap-3 sm:flex-row">
             <a
-              href={practiceHref(course, level, 'free', focus)}
+              href={mix ? mixPracticeHref(mix, level) : practiceHref(course, level, 'free', focus)}
               className="flex-1 rounded-xl bg-accent-700 px-4 py-3 text-center text-lg font-medium text-on-accent hover:bg-accent-800"
             >
               Nächste Aufgabe
             </a>
-            <a href={courseHref(course)} className="flex-1 rounded-xl border border-zinc-300 px-4 py-3 text-center text-lg font-medium hover:bg-zinc-50">
+            <a
+              href={mix ? mixHref(mix) : courseHref(course)}
+              className="flex-1 rounded-xl border border-zinc-300 px-4 py-3 text-center text-lg font-medium hover:bg-zinc-50"
+            >
               Zur Übersicht
             </a>
           </div>
@@ -149,7 +153,7 @@ export default function FreeTaskScreen({ course, engine, taskRef, focus = null }
           <CardSheetButton ids={plan.cards} title={plan.cards.length === 1 ? 'Lernkarte zu dieser Aufgabe' : 'Lernkarten zu dieser Aufgabe'}
             task={plan.expr}
           />
-          <a href={taskHref(course, taskRef, 'guided', focus)} className="rounded-xl px-3 py-2.5 font-medium text-accent-700 hover:bg-accent-50">
+          <a href={taskHref(course, taskRef, 'guided', focus, mix)} className="rounded-xl px-3 py-2.5 font-medium text-accent-700 hover:bg-accent-50">
             Geführt lösen
           </a>
         </div>

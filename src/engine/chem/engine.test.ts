@@ -3,13 +3,27 @@ import { createRng } from '../random/rng.ts'
 import { VARIANTS, decodeSeed, questionSeed } from '../quiz/numbers.ts'
 import type { QuestionBank } from '../quiz/types.ts'
 import { LEVELS } from '../tasks/taskNumber.ts'
+import { courseById } from '../../ui/catalog.ts'
 import { CHEM_TOPICS, chemTopic } from './banks.ts'
-import { chemCourseEngine, topicEngine } from './engine.ts'
+import { type ChemCourseEngine, chemCourseEngine, topicEngine } from './engine.ts'
 
 const seeded = (seed: string) => {
   const rng = createRng(seed)
   return () => rng.next()
 }
+
+// Nummern der Fragen, die nextSeed in so vielen Zügen liefert
+function drawNos(engine: ChemCourseEngine, level: 1 | 2 | 3, draws: number, shown?: ReadonlySet<number>, parts?: ReadonlySet<string>): Set<number> {
+  const nos = new Set<number>()
+  for (let i = 0; i < draws; i++) {
+    const decoded = decodeSeed(engine.nextSeed(level, shown, parts))
+    if (decoded?.kind !== 'question') throw new Error('keine Frage')
+    nos.add(decoded.no)
+  }
+  return nos
+}
+
+const sorted = (nos: Iterable<number>) => [...nos].sort((a, b) => a - b)
 
 describe.each(CHEM_TOPICS.map((t) => [t.bank.course, t] as const))('Chemie-Engine: %s', (course, topic) => {
   const engine = chemCourseEngine(course, seeded(course))
@@ -80,6 +94,64 @@ describe.each(CHEM_TOPICS.map((t) => [t.bank.course, t] as const))('Chemie-Engin
     }
   })
 
+  describe('Unterthemen (S1b)', () => {
+    const parts = courseById(course)?.course.parts ?? []
+    const nosOf = (level: number, ids: readonly string[]) => questions.filter((q) => q.level === level && ids.includes(q.part)).map((q) => q.no)
+    const allOf = (level: number) => questions.filter((q) => q.level === level).map((q) => q.no)
+
+    it('zieht nur Fragen der angekreuzten Unterthemen, einzeln und zu zweit', () => {
+      for (const level of [1, 2, 3] as const) {
+        const inLevel = parts.filter((p) => p.levels.includes(level)).map((p) => p.id)
+        for (const id of inLevel) {
+          const drawn = drawNos(engine, level, 300, undefined, new Set([id]))
+          expect(sorted(drawn), `Stufe ${level}, ${id}`).toEqual(sorted(nosOf(level, [id])))
+        }
+        if (inLevel.length < 2) continue
+        const pair = inLevel.slice(0, 2)
+        // eines davon darf es in der Stufe nicht geben: zählt nicht
+        const withMissing = new Set([...pair, ...parts.filter((p) => !p.levels.includes(level)).map((p) => p.id)])
+        expect(sorted(drawNos(engine, level, 400, undefined, withMissing)), `Stufe ${level}, ${pair.join(' + ')}`).toEqual(sorted(nosOf(level, pair)))
+      }
+    })
+
+    it('fällt auf alle Fragen der Stufe zurück, wenn es zur Auswahl dort keine gibt', () => {
+      for (const level of [1, 2, 3] as const) {
+        const missing = parts.filter((p) => !p.levels.includes(level)).map((p) => p.id)
+        for (const selection of [new Set<string>(), new Set(['gibt-es-nicht']), ...(missing.length > 0 ? [new Set(missing)] : [])]) {
+          expect(sorted(drawNos(engine, level, 400, undefined, selection)), `Stufe ${level}, ${[...selection].join(' + ')}`).toEqual(sorted(allOf(level)))
+          expect(sorted(engine.questionNos(level, selection))).toEqual(sorted(allOf(level)))
+        }
+      }
+    })
+
+    it('zieht innerhalb der Auswahl zuerst Fragen, die in der Runde noch nicht dran waren', () => {
+      for (const level of [1, 2, 3] as const) {
+        for (const part of parts.filter((p) => p.levels.includes(level))) {
+          const selection = new Set([part.id])
+          const chosen = nosOf(level, [part.id])
+          // Fragen anderer Unterthemen in der Runde stören nicht; von der Auswahl ist eine offen
+          const shown = new Set([...allOf(level).filter((no) => !chosen.includes(no)), ...chosen.slice(1)])
+          expect(sorted(drawNos(engine, level, 20, shown, selection)), `Stufe ${level}, ${part.id}`).toEqual([chosen[0]])
+          // alle der Auswahl dran: wieder alle der Auswahl, keine anderen
+          const done = new Set([...shown, chosen[0]])
+          expect(sorted(drawNos(engine, level, 300, done, selection)), `Stufe ${level}, ${part.id}`).toEqual(sorted(chosen))
+        }
+      }
+    })
+
+    it('nennt mit questionNos genau die Fragen, unter denen gezogen wird', () => {
+      for (const level of [1, 2, 3] as const) {
+        expect(engine.questionNos(level)).toEqual(allOf(level))
+        const selections = [undefined, ...parts.map((p) => new Set([p.id])), new Set(parts.slice(1, 3).map((p) => p.id))]
+        for (const selection of selections) {
+          const nos = engine.questionNos(level, selection)
+          expect(sorted(drawNos(engine, level, 400, undefined, selection)), `Stufe ${level}`).toEqual(sorted(nos))
+          for (const no of nos) expect(engine.resolve({ level, seed: no })).toBe(level)
+        }
+      }
+    })
+  })
+
   it('nennt als Form den Fakt der Frage, in jeder Fassung gleich', () => {
     for (const q of questions) {
       expect(engine.formOf({ level: q.level, seed: q.no })).toBe(`q:${q.fact}`)
@@ -107,6 +179,15 @@ describe.each(CHEM_TOPICS.map((t) => [t.bank.course, t] as const))('Chemie-Engin
 })
 
 describe('Chemie-Engine: Sonderfälle', () => {
+  it('nennt für eine Stufe ohne Fragen keine Nummern (und stürzt nicht ab)', () => {
+    const [topic] = CHEM_TOPICS
+    const bank: QuestionBank = { ...topic.bank, questions: topic.bank.questions.filter((q) => q.level === 1) }
+    const engine = topicEngine({ bank, misconceptions: topic.misconceptions }, seeded('leer'))
+    expect(engine.questionNos(2)).toEqual([])
+    expect(engine.questionNos(2, new Set(['stoffe']))).toEqual([])
+    expect(() => engine.nextSeed(2)).toThrow()
+  })
+
   it('kennt Themen ohne Fragensammlung nicht', () => {
     expect(chemTopic('chem-gibt-es-nicht')).toBeUndefined()
     expect(() => chemCourseEngine('chem-gibt-es-nicht')).toThrow()
@@ -126,5 +207,8 @@ describe('Chemie-Engine: Sonderfälle', () => {
     const fewSeen = new Set([...seenAllButRetired].slice(0, -1))
     const [last] = [...seenAllButRetired].slice(-1)
     for (let i = 0; i < 20; i++) expect(decodeSeed(engine.nextSeed(first.level, fewSeen))).toMatchObject({ no: last })
+    // auch nicht über ihr Unterthema
+    expect(engine.questionNos(first.level, new Set([first.part]))).not.toContain(first.no)
+    expect(engine.questionNos(first.level)).not.toContain(first.no)
   })
 })

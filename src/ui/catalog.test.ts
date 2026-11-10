@@ -14,9 +14,15 @@ import {
   courseOfCards,
   isAreaAvailable,
   isChemCourse,
+  isMixAvailable,
   levelCount,
   levelName,
+  mixCourses,
+  partsAvailable,
   playableLevel,
+  subjectById,
+  subjectLevelCount,
+  subjectLevelName,
 } from './catalog.ts'
 import { loadCourseEngine } from './courseEngines.ts'
 
@@ -106,5 +112,49 @@ describe('Aufbau der App (Fächer, Gebiete, Themen)', () => {
     // Stufe 5 noch gesperrt: zurück zur ersten spielbaren
     const withoutFive = { ...fractions, levels: fractions.levels.map((l) => (l.level === 5 ? { ...l, available: false } : l)) }
     expect(playableLevel(withoutFive, 5)).toBe(1)
+  })
+})
+
+describe('Unterthemen und Mischung im Katalog (S1b)', () => {
+  it('hat Unterthemen nur mit eindeutigen Ids und Stufen des Themas', () => {
+    for (const course of courses) {
+      if (!course.parts) continue
+      const ids = course.parts.map((p) => p.id)
+      expect(new Set(ids).size, course.id).toBe(ids.length)
+      for (const part of course.parts) {
+        expect(part.id, course.id).toMatch(/^[a-z0-9-]{1,40}$/)
+        expect(part.title.trim(), part.id).not.toBe('')
+        expect(part.levels.length, part.id).toBeGreaterThan(0)
+        expect([...part.levels].sort(), part.id).toEqual([...part.levels])
+        for (const level of part.levels) expect(course.levels.map((l) => l.level), part.id).toContain(level)
+      }
+    }
+    // Mathe-Themen haben (noch) keine Unterthemen
+    expect(courseById(DERIVATIVES)!.course.parts).toBeUndefined()
+  })
+
+  it('kennt die Unterthemen des Atombaus je Stufe', () => {
+    const atombau = courseById(ATOMBAU)!.course
+    expect(partsAvailable(atombau, 1).map((p) => p.id)).toEqual(['stoffe', 'teilchen', 'isotope-ionen'])
+    expect(partsAvailable(atombau, 2).map((p) => p.id)).toEqual(['teilchen', 'isotope-ionen', 'modelle', 'licht'])
+    expect(partsAvailable(atombau, 3)).toHaveLength(5)
+    expect(partsAvailable(courseById(FRACTIONS)!.course, 1)).toEqual([])
+  })
+
+  it('hat die Mischung in Chemie 1 (nicht in Mathe) und findet Fächer und ihre Themen', () => {
+    const chemistry = subjectById('chemie')!
+    expect(chemistry.title).toBe('Chemie 1')
+    expect(isMixAvailable(chemistry)).toBe(true)
+    expect(isMixAvailable(subjectById('mathe')!)).toBe(false)
+    expect(isMixAvailable(subjectById('physik')!)).toBe(false)
+    expect(isMixAvailable({ ...chemistry, areas: chemistry.areas.map((a) => ({ ...a, courses: [] })) })).toBe(false)
+    expect(subjectById('gibt-es-nicht')).toBeUndefined()
+    const all = mixCourses(chemistry)
+    expect(all.map(({ course }) => course.id)).toEqual(chemistry.areas.flatMap((a) => a.courses.map((c) => c.id)))
+    expect(all[0]).toMatchObject({ area: { id: 'chem-materie' }, course: { id: ATOMBAU } })
+    expect(subjectLevelCount(chemistry)).toBe(3)
+    expect(subjectLevelName(chemistry, 2)).toBe('Vertiefung')
+    expect(subjectLevelCount(subjectById('mathe')!)).toBe(5)
+    expect(subjectLevelName(subjectById('mathe')!, 4)).toBe('Stufe 4')
   })
 })

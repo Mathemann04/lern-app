@@ -30,6 +30,9 @@ export type SingleChoice = {
   readonly level: QuestionLevel
   // Fakt-Schlüssel: Fragen zum selben Fakt kommen nicht kurz hintereinander
   readonly fact: string
+  // Unterthema (Id aus parts des Themas in ui/catalog.ts, z. B. „isotope-ionen"); jede Frage gehört zu
+  // genau einem. Auf der Themenseite und in der Mischung lässt sich ankreuzen, welche drankommen.
+  readonly part: string
   // kurze Überschrift im Schritt, z. B. „Isotope"
   readonly title: string
   // die Frage

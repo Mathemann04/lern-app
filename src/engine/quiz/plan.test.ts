@@ -15,6 +15,7 @@ const QUESTION: Question = {
   no: 7,
   level: 2,
   fact: 'test',
+  part: 'teil',
   title: 'Test',
   prompt: 'Welche Antwort stimmt?',
   correct: { id: 'r', text: 'Die richtige.' },

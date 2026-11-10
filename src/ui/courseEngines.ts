@@ -15,8 +15,12 @@ export type CourseEngine = {
   // Form der Aufgabe ohne Zahlen (Abwechslung, engine/tasks/variety.ts)
   formOf(ref: TaskRef): string
   // Nummer einer neuen Aufgabe dieser Stufe; ohne Angabe eine zufällige (randomSeed). Wissensfragen:
-  // shown sind die Fragen, die in der laufenden Runde schon dran waren (state/questionRounds.ts)
-  nextSeed?(level: Level, shown?: ReadonlySet<number>): number
+  // shown sind die Fragen, die in der laufenden Runde schon dran waren (state/questionRounds.ts); parts
+  // die angekreuzten Unterthemen (ohne Angabe alle; kommen sie in der Stufe nicht vor, gelten alle)
+  nextSeed?(level: Level, shown?: ReadonlySet<number>, parts?: ReadonlySet<string>): number
+  // Nur Wissensfragen: Nummern der Fragen, unter denen nextSeed mit diesen Unterthemen wählt (für die
+  // Runde und die Mischung, ui/mix.ts)
+  questionNos?(level: Level, parts?: ReadonlySet<string>): readonly number[]
   // Stufe, zu der eine Nummer gehört, null: Die Aufgabe gibt es nicht (mehr); ohne Angabe passt jede
   // Nummer zu jeder Stufe
   resolve?(ref: TaskRef): Level | null

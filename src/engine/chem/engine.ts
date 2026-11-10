@@ -9,6 +9,9 @@ import { type ChemTopic, chemTopic } from './banks.ts'
 // Engine eines Chemie-Themas für den geführten Modus (dieselbe Form wie die Mathe-Engines in
 // ui/courseEngines.ts). In S1 gibt es nur Wissensfragen: Die Nummer einer Aufgabe nennt die Frage und
 // ihre Fassung (quiz/numbers.ts); erzeugte Rechnungen kommen ab S2 dazu.
+// Unterthemen (S1b): Jede Frage gehört zu einem Unterthema (part, Ids aus parts des Themas in
+// ui/catalog.ts); nextSeed und questionNos wählen nur unter den angekreuzten. Ab S2 bekommt auch jeder
+// Erzeuger von Rechnungen ein Unterthema und zählt hier mit.
 
 export type ChemCourseEngine = {
   planGuidedTask(ref: TaskRef, focus?: string): GuidedTaskBase
@@ -17,8 +20,13 @@ export type ChemCourseEngine = {
   formOf(ref: TaskRef): string
   // zufällige Nummer einer Frage dieser Stufe in zufälliger Fassung. shown: Nummern der Fragen, die in
   // der laufenden Runde schon dran waren (state/questionRounds.ts); gewählt wird nur unter den übrigen,
-  // sind alle durch, wieder unter allen (neue Runde)
-  nextSeed(level: Level, shown?: ReadonlySet<number>): number
+  // sind alle durch, wieder unter allen (neue Runde). parts: erlaubte Unterthemen (ohne Angabe alle);
+  // gibt es dazu in der Stufe keine Frage, gelten alle Fragen der Stufe (nie ein Absturz)
+  nextSeed(level: Level, shown?: ReadonlySet<number>, parts?: ReadonlySet<string>): number
+  // Nummern der Fragen, unter denen nextSeed mit diesen Unterthemen wählt (dieselbe Rückfall-Regel), in
+  // der Reihenfolge der Sammlung: für die Runde (nur sie beginnen von vorn) und für die Mischung; leer,
+  // wenn die Stufe keine Fragen hat
+  questionNos(level: Level, parts?: ReadonlySet<string>): readonly number[]
   // Stufe, zu der die Nummer gehört; null, wenn es dazu keine Aufgabe (mehr) gibt
   resolve(ref: TaskRef): Level | null
 }
@@ -45,6 +53,15 @@ export function topicEngine({ bank, misconceptions }: ChemTopic, random: () => n
 
   const pick = <T>(items: readonly T[]): T => items[Math.floor(random() * items.length)]
 
+  // Fragen, unter denen gewählt wird: die der Stufe (ohne gelöschte) mit erlaubtem Unterthema; gibt es
+  // davon keine (die Auswahl kommt in der Stufe nicht vor), alle der Stufe
+  function candidatesOf(level: Level, parts?: ReadonlySet<string>): readonly Question[] {
+    const inLevel = bank.questions.filter((q) => q.level === level && !retired.has(q.no))
+    if (!parts) return inLevel
+    const chosen = inLevel.filter((q) => parts.has(q.part))
+    return chosen.length > 0 ? chosen : inLevel
+  }
+
   return {
     planGuidedTask(ref, focus) {
       const found = questionOf(ref.seed)
@@ -58,13 +75,16 @@ export function topicEngine({ bank, misconceptions }: ChemTopic, random: () => n
       const found = questionOf(ref.seed)
       return found ? `q:${found.question.fact}` : 'q:?'
     },
-    nextSeed(level, shown) {
-      const inLevel = bank.questions.filter((q) => q.level === level && !retired.has(q.no))
-      if (inLevel.length === 0) throw new Error(`Keine Fragen in Stufe ${level} des Themas ${course}`)
-      // Keine Frage doppelt, bevor alle dran waren
-      const unseen = shown ? inLevel.filter((q) => !shown.has(q.no)) : inLevel
-      const candidates = unseen.length > 0 ? unseen : inLevel
+    nextSeed(level, shown, parts) {
+      const allowed = candidatesOf(level, parts)
+      if (allowed.length === 0) throw new Error(`Keine Fragen in Stufe ${level} des Themas ${course}`)
+      // Keine Frage doppelt, bevor alle (der Auswahl) dran waren
+      const unseen = shown ? allowed.filter((q) => !shown.has(q.no)) : allowed
+      const candidates = unseen.length > 0 ? unseen : allowed
       return questionSeed(pick(candidates).no, Math.floor(random() * VARIANTS))
+    },
+    questionNos(level, parts) {
+      return candidatesOf(level, parts).map((q) => q.no)
     },
     resolve(ref) {
       const level = questionOf(ref.seed)?.question.level

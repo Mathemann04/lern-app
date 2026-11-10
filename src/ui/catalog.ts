@@ -26,6 +26,8 @@ export type AreaIcon =
   | 'equilibrium'
   | 'ph'
   | 'redox'
+  // Kachel „Themen mischen" (kein Gebiet, aber im selben Stil)
+  | 'mix'
 
 // Farbe eines Gebiets (Farbfamilie aus index.css, gesetzt über data-tone). Die App selbst ist Blaugrün.
 // Nicht green, red, amber (richtig, falsch, Tipp) und nicht teal (App-Farbe).
@@ -38,6 +40,18 @@ export type LevelPreview = {
   readonly examples: readonly string[]
   // schon im geführten Modus spielbar
   readonly available: boolean
+}
+
+// Ein Unterthema eines Themas, z. B. „Isotope und Ionen" im Atombau. Auf der Themenseite und in der
+// Mischung lässt sich ankreuzen, welche Unterthemen drankommen (gespeichert als die nicht angekreuzten,
+// skipParts in state/storage.ts). Jede Frage (engine/quiz/types.ts, part) gehört zu genau einem.
+export type CoursePart = {
+  // fest, nie umbenennen: [a-z0-9-], eindeutig im Thema
+  readonly id: string
+  // reiner Text ohne Formeln (die Seiten mit Auswahl kommen ohne KaTeX aus)
+  readonly title: string
+  // Stufen, in denen es dazu Aufgaben gibt (ein Test vergleicht mit der Fragensammlung)
+  readonly levels: readonly Level[]
 }
 
 // Ein Thema, z. B. „Ableiten"
@@ -54,6 +68,9 @@ export type Course = {
   readonly free: boolean
   // gezieltes Üben der häufigsten Fehler schon da
   readonly focus: boolean
+  // Unterthemen zum Ankreuzen, in der Reihenfolge der Anzeige; nur bei Themen, die welche haben
+  // (bisher Chemie), sonst ohne Angabe
+  readonly parts?: readonly CoursePart[]
 }
 
 // Ein Gebiet, z. B. „Differentialrechnung"
@@ -74,6 +91,9 @@ export type Subject = {
   // Namen der Stufen, z. B. „Grundlagen", „Vertiefung", „Klausurniveau"; ihre Zahl ist die Zahl der
   // Stufen. Ohne Angabe: fünf Stufen, genannt „Stufe 1" bis „Stufe 5".
   readonly levelNames?: readonly string[]
+  // Kachel „Themen mischen" auf der Startseite: Themen des Fachs ankreuzen, Fragen kommen gemischt
+  // (#/mischen/<fach>, ui/mix.ts)
+  readonly mix?: boolean
   readonly areas: readonly Area[]
 }
 
@@ -220,6 +240,15 @@ const atombauLevels: LevelPreview[] = [
   },
 ]
 
+// Unterthemen des Atombaus (Zuordnung der Fragen in engine/chem/bank/atombau.ts, part)
+const atombauParts: CoursePart[] = [
+  { id: 'stoffe', title: 'Stoffe, Trennverfahren, Reaktionen', levels: [1, 3] },
+  { id: 'teilchen', title: 'Kern, Hülle und ihre Teilchen', levels: [1, 2, 3] },
+  { id: 'isotope-ionen', title: 'Isotope und Ionen', levels: [1, 2, 3] },
+  { id: 'modelle', title: 'Atommodelle', levels: [2, 3] },
+  { id: 'licht', title: 'Licht und Spektren', levels: [2, 3] },
+]
+
 // Thema, das noch kommt (blass mit „kommt bald")
 const comingSoon = (id: string, title: string, description: string, icon: AreaIcon): Course => ({
   id,
@@ -309,6 +338,7 @@ export const SUBJECTS: readonly Subject[] = [
     id: 'chemie',
     title: 'Chemie 1',
     levelNames: ['Grundlagen', 'Vertiefung', 'Klausurniveau'],
+    mix: true,
     areas: [
       {
         id: 'chem-materie',
@@ -326,6 +356,7 @@ export const SUBJECTS: readonly Subject[] = [
             levels: atombauLevels,
             free: false,
             focus: false,
+            parts: atombauParts,
           },
           comingSoon('chem-elektronen', 'Elektronen', 'Quantenzahlen, Orbitale und Elektronenkonfiguration', 'orbitals'),
         ],
@@ -456,14 +487,22 @@ export function courseOfCards(folder: string): { area: Area; course: Course } | 
   return COURSES.find(({ course }) => course.cards === folder)
 }
 
+// Zahl der Stufen eines Fachs: bei Mathe fünf, bei Chemie drei
+export const subjectLevelCount = (subject: Subject): number => subject.levelNames?.length ?? 5
+
+// Name einer Stufe eines Fachs, z. B. „Stufe 3" in Mathe, „Vertiefung" in Chemie
+export const subjectLevelName = (subject: Subject, level: Level): string => subject.levelNames?.[level - 1] ?? `Stufe ${level}`
+
 // Zahl der Stufen eines Themas (aus seinem Fach): bei Mathe fünf, bei Chemie drei
 export function levelCount(courseId: string): number {
-  return courseById(courseId)?.subject.levelNames?.length ?? 5
+  const found = courseById(courseId)
+  return found ? subjectLevelCount(found.subject) : 5
 }
 
 // Name einer Stufe, z. B. „Stufe 3" in Mathe, „Vertiefung" in Chemie
 export function levelName(courseId: string, level: Level): string {
-  return courseById(courseId)?.subject.levelNames?.[level - 1] ?? `Stufe ${level}`
+  const found = courseById(courseId)
+  return found ? subjectLevelName(found.subject, level) : `Stufe ${level}`
 }
 
 // Hat das Fach des Themas eigene Namen für die Stufen?
@@ -474,3 +513,23 @@ export function playableLevel(course: Course, wanted: Level | undefined): Level 
   if (wanted !== undefined && isLevelAvailable(course, wanted)) return wanted
   return course.levels.find((l) => l.available)?.level ?? 1
 }
+
+// Unterthemen eines Themas, zu denen es in der Stufe Aufgaben gibt (Reihenfolge der Anzeige); leer bei
+// Themen ohne Unterthemen
+export function partsAvailable(course: Course, level: Level): readonly CoursePart[] {
+  return (course.parts ?? []).filter((part) => part.levels.includes(level))
+}
+
+// Fach zu einer Id
+export function subjectById(id: string): Subject | undefined {
+  return SUBJECTS.find((subject) => subject.id === id)
+}
+
+// Alle Themen eines Fachs mit ihrem Gebiet, in der Reihenfolge der Startseite, auch die, die noch kommen
+// (für die Liste der Mischseite)
+export function mixCourses(subject: Subject): readonly { readonly area: Area; readonly course: Course }[] {
+  return subject.areas.flatMap((area) => area.courses.map((course) => ({ area, course })))
+}
+
+// Hat das Fach die Kachel „Themen mischen" (mix) und mindestens ein spielbares Thema?
+export const isMixAvailable = (subject: Subject): boolean => subject.mix === true && subject.areas.some(isAreaAvailable)

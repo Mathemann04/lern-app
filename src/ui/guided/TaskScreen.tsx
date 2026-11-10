@@ -10,16 +10,17 @@ import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
 import { CardSheetButton, TaskCardLinks } from '../cards/CardSheet.tsx'
 import type { CourseEngine } from '../courseEngines.ts'
-import { courseHref, practiceHref } from '../routes.ts'
+import { courseHref, mixHref, mixPracticeHref, practiceHref } from '../routes.ts'
 import { LevelUpSuggestion } from '../task/LevelUpSuggestion.tsx'
 import { CheckBadge, FocusBanner, TaskIntro, TaskTopBar } from '../task/TaskParts.tsx'
 import { type ExplanationMode, useExplanationMode } from '../task/explanationMode.ts'
 
-type Props = { course: string; engine: CourseEngine; taskRef: TaskRef; focus?: string | null }
+type Props = { course: string; engine: CourseEngine; taskRef: TaskRef; focus?: string | null; mix?: string | null }
 
 // course: Id des Themas, engine: seine Engine (Mathe oder Wissensfragen); focus: gezielt einen
-// typischen Fehler üben (der Fehler erscheint sicher als Antwort)
-export function TaskScreen({ course, engine, taskRef, focus = null }: Props) {
+// typischen Fehler üben (der Fehler erscheint sicher als Antwort); mix: Id des Fachs, wenn die Aufgabe
+// aus „Themen mischen" kommt (weiter geht es dann in der Mischung)
+export function TaskScreen({ course, engine, taskRef, focus = null, mix = null }: Props) {
   const { level, seed } = taskRef
   const task = useMemo(() => engine.planGuidedTask({ level, seed }, focus ?? undefined), [engine, level, seed, focus])
   const { mode, detail, cycle } = useExplanationMode()
@@ -37,7 +38,7 @@ export function TaskScreen({ course, engine, taskRef, focus = null }: Props) {
 
   return (
     <main className="space-y-6">
-      <TaskTopBar course={course} mode={mode} onCycleMode={cycle}>
+      <TaskTopBar course={course} mix={mix} mode={mode} onCycleMode={cycle}>
         <div
           className="h-2 overflow-hidden rounded-full bg-zinc-100"
           role="progressbar"
@@ -55,10 +56,10 @@ export function TaskScreen({ course, engine, taskRef, focus = null }: Props) {
 
       {focus && <FocusBanner focus={focus} />}
 
-      <TaskHeader course={course} task={task} stepIndex={stepIndex} />
+      <TaskHeader course={course} mix={mix} task={task} stepIndex={stepIndex} />
 
       {finished ? (
-        <FinishView course={course} task={task} mistakes={mistakes} focus={focus} />
+        <FinishView course={course} mix={mix} task={task} mistakes={mistakes} focus={focus} />
       ) : (
         <StepView
           key={stepIndex}
@@ -76,11 +77,11 @@ export function TaskScreen({ course, engine, taskRef, focus = null }: Props) {
   )
 }
 
-function TaskHeader({ course, task, stepIndex }: { course: string; task: GuidedTaskBase; stepIndex: number }) {
+function TaskHeader({ course, mix, task, stepIndex }: { course: string; mix: string | null; task: GuidedTaskBase; stepIndex: number }) {
   const established = task.steps.slice(0, stepIndex).flatMap((s) => s.established ?? [])
   return (
     <section className="space-y-3">
-      <TaskIntro course={course} taskRef={task.ref} functionLatex={task.functionLatex} instruction={task.instruction} note={task.note} />
+      <TaskIntro course={course} mix={mix} taskRef={task.ref} functionLatex={task.functionLatex} instruction={task.instruction} note={task.note} />
       {established.length > 0 && (
         <div className="space-y-2 rounded-xl bg-zinc-50 px-4 py-3" aria-label="Bisher">
           <p className="text-sm text-zinc-500">Bisher</p>
@@ -287,7 +288,9 @@ function cardSheetTitle(step: GuidedStep): string {
   return step.cards.length === 1 ? 'Lernkarte zu diesem Schritt' : 'Lernkarten zu diesem Schritt'
 }
 
-function FinishView({ course, task, mistakes, focus }: { course: string; task: GuidedTaskBase; mistakes: number; focus: string | null }) {
+type FinishProps = { course: string; mix: string | null; task: GuidedTaskBase; mistakes: number; focus: string | null }
+
+function FinishView({ course, mix, task, mistakes, focus }: FinishProps) {
   const headingRef = useRef<HTMLHeadingElement>(null)
   useEffect(() => {
     headingRef.current?.focus({ preventScroll: true })
@@ -326,15 +329,19 @@ function FinishView({ course, task, mistakes, focus }: { course: string; task: G
           {task.resultNote && <RichText text={task.resultNote} className="text-zinc-600" />}
         </div>
       )}
-      <LevelUpSuggestion course={course} level={task.ref.level} mode="guided" />
+      {/* In der Mischung kein Vorschlag für eine höhere Stufe: Die Stufe gilt dort für alle Themen */}
+      {!mix && <LevelUpSuggestion course={course} level={task.ref.level} mode="guided" />}
       <div className="flex flex-col gap-3 sm:flex-row">
         <a
-          href={practiceHref(course, task.ref.level, 'guided', focus)}
+          href={mix ? mixPracticeHref(mix, task.ref.level) : practiceHref(course, task.ref.level, 'guided', focus)}
           className="flex-1 rounded-xl bg-accent-700 px-4 py-3 text-center text-lg font-medium text-on-accent hover:bg-accent-800"
         >
           Nächste Aufgabe
         </a>
-        <a href={courseHref(course)} className="flex-1 rounded-xl border border-zinc-300 px-4 py-3 text-center text-lg font-medium hover:bg-zinc-50">
+        <a
+          href={mix ? mixHref(mix) : courseHref(course)}
+          className="flex-1 rounded-xl border border-zinc-300 px-4 py-3 text-center text-lg font-medium hover:bg-zinc-50"
+        >
           Zur Übersicht
         </a>
       </div>
