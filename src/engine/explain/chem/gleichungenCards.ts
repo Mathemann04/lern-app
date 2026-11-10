@@ -126,7 +126,7 @@ export const GLEICHUNGEN_CARDS: readonly Card[] = [
     rules: [],
     formulas: [String.raw`\ce{C_nH_{2n+2}}`, String.raw`\ce{C_nH_{2n+1}OH}`],
     memo: 'Alkane sind Kohlenwasserstoffe mit nur Einfachbindungen; zu n Kohlenstoffatomen gehören 2n + 2 Wasserstoffatome. Ein Alkohol hat statt eines H-Atoms eine OH-Gruppe.',
-    note: String.raw`Methan $\ce{CH4}$, Ethan $\ce{C2H6}$, Propan $\ce{C3H8}$, Butan $\ce{C4H10}$, Pentan $\ce{C5H12}$, Hexan $\ce{C6H14}$, Heptan $\ce{C7H16}$, Octan $\ce{C8H18}$, Nonan $\ce{C9H20}$, Decan $\ce{C10H22}$. Alkohole: Methanol $\ce{CH3OH}$, Ethanol $\ce{C2H5OH}$, Propanol $\ce{C3H7OH}$, Butanol $\ce{C4H9OH}$.`,
+    note: String.raw`Methan $\ce{CH4}$, Ethan $\ce{C2H6}$, Propan $\ce{C3H8}$, Butan $\ce{C4H10}$, Pentan $\ce{C5H12}$, Hexan $\ce{C6H14}$, Heptan $\ce{C7H16}$, Octan $\ce{C8H18}$, Nonan $\ce{C9H20}$, Decan $\ce{C10H22}$. Alkohole: Methanol $\ce{CH3OH}$, Ethanol $\ce{C2H5OH}$, Propanol $\ce{C3H7OH}$, Butanol $\ce{C4H9OH}$, Pentanol $\ce{C5H11OH}$.`,
     when: 'Wenn nur der Name eines Alkans oder Alkohols gegeben ist.',
     examples: [
       {

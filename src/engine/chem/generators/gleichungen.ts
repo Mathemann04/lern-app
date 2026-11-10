@@ -23,10 +23,10 @@ import { type ChemCalc, type ChemGenerator, type WrongValue, stepChoices } from 
 // Rechnung „Ausgleichen" (Plan M4, Thema 4.1). Die Engine gleicht über die Atombilanz aus
 // (equation.ts); jede falsche Antwort ist eine Gleichung, die ein typischer Fehler ergibt, und nie eine
 // richtig ausgeglichene Gleichung derselben Reaktion (auch nicht mit Vielfachen oder Brüchen).
-// - Grundlagen und Vertiefung: Welche Gleichung ist richtig ausgeglichen? Dann die Probe: Wie viele
+// - Grundlagen und Vertiefung: Welche Gleichung gleicht die Reaktion richtig aus? Dann die Probe: Wie viele
 //   Atome eines Elements stehen auf jeder Seite?
-// - Verbrennungen (Methan in den Grundlagen, ab Vertiefung Alkane und Alkohole, auf Klausurniveau bis
-//   Decan): Kohlenstoff und Wasserstoff → Sauerstoff → ganzzahlig machen, wie in der Klausur.
+// - Verbrennungen (in den Grundlagen Methan, Propan und Ethanol ohne Bruch, ab Vertiefung weitere Alkane und
+//   Alkohole, auf Klausurniveau bis Decan und Pentanol): Kohlenstoff und Wasserstoff → Sauerstoff → ganzzahlig machen, wie in der Klausur.
 
 const CARD_BALANCE = 'gleichungen-ausgleichen'
 const CARD_READ = 'gleichungen-lesen'
@@ -156,7 +156,7 @@ function simpleTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemC
     {
       id: 'ausgleichen',
       title: 'Ausgleichen',
-      question: 'Welche Gleichung ist richtig ausgeglichen?',
+      question: 'Welche Gleichung gleicht die Reaktion oben richtig aus, ohne die Formeln zu ändern?',
       choices,
       hint: 'Nur die Zahlen vor den Formeln dürfen sich ändern, die Formeln selbst nie. Links und rechts müssen von jedem Element gleich viele Atome stehen.',
       explanation: {
