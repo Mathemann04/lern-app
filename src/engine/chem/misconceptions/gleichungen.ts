@@ -169,6 +169,11 @@ export const GLEICHUNGEN_MISCONCEPTIONS: readonly MisconceptionName[] = [
     wrongText: 'Bei Sauerstoffmangel entstehen dieselben Produkte wie bei der vollständigen Verbrennung, nur weniger davon.',
   },
   {
+    id: 'chem-mis-gl-incomplete-hydrogen',
+    name: 'Wasserstoff bei Sauerstoffmangel für unverbrannt gehalten',
+    wrongText: 'Bei Sauerstoffmangel bleibt der Wasserstoff des Brennstoffs als Gas übrig.',
+  },
+  {
     id: 'chem-mis-gl-alkane-formula',
     name: 'Allgemeine Formel der Alkane falsch',
     wrongText: String.raw`Ein Alkan mit $n$ Kohlenstoffatomen hat $n + 2$ Wasserstoffatome.`,

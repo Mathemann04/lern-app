@@ -62,8 +62,8 @@ export const STOFFMENGE_BANK: QuestionBank = {
           short: "Die Masse eines Mols ist die molare Masse, nicht die Stoffmenge.",
         } },
         { id: 'f4', text: "wie viele Atome ein einzelnes Teilchen des Stoffes hat", misconception: 'chem-mis-st-atoms-molecules', why: {
-          detailed: "Wie viele Atome in einem Teilchen stecken, steht in der Formel des Stoffes, in den Indizes. Die Stoffmenge zählt dagegen die Teilchen der ganzen Portion, also Moleküle, Atome oder Formeleinheiten.",
-          short: "Die Atome eines Teilchens zeigt die Formel; die Stoffmenge zählt Teilchen der Portion.",
+          detailed: "Wie viele Atome in einem Teilchen stecken, zeigt schon die Formel mit ihren Indizes; dafür braucht man keine eigene Größe.",
+          short: "Das zeigt schon die Formel.",
         } },
         { id: 'f5', text: "wie viele Teilchen die Portion enthält, aber nur bei einem Gas", misconception: 'chem-mis-st-mol-only-gas' },
       ],
@@ -87,27 +87,27 @@ export const STOFFMENGE_BANK: QuestionBank = {
       correct: { id: 'r', text: String.raw`$\mathrm{g/mol}$` },
       wrong: [
         { id: 'f1', text: String.raw`$\mathrm{mol/g}$`, misconception: 'chem-mis-st-units', why: {
-          detailed: "Hier sind Zähler und Nenner vertauscht. Die molare Masse sagt, wie schwer ein Mol ist; die Masse steht also im Zähler, die Stoffmenge im Nenner.",
-          short: "Zähler und Nenner sind vertauscht.",
+          detailed: "Mit dieser Einheit gäbe die Zahl an, wie viel Stoffmenge auf ein Gramm kommt. Die molare Masse beschreibt aber eine Masse.",
+          short: "Die molare Masse beschreibt eine Masse.",
         } },
         { id: 'f2', text: String.raw`$\mathrm{g}$`, misconception: 'chem-mis-st-units', why: {
-          detailed: String.raw`Gramm ist die Einheit einer Masse, also zum Beispiel der Masse einer Portion. Die molare Masse bezieht eine Masse auf eine Stoffmenge; deshalb steht in ihrer Einheit ein Bruch mit Mol.`,
-          short: "Gramm ist die Einheit der Masse einer Portion.",
+          detailed: "Gramm allein ist die Einheit einer Masse, etwa der Masse einer Portion. Die molare Masse ist aber keine Masse einer Portion.",
+          short: "Gramm allein ist die Einheit einer Portionsmasse.",
         } },
         { id: 'f3', text: String.raw`$\mathrm{mol}$`, misconception: 'chem-mis-st-units', why: {
-          detailed: String.raw`Mol ist die Einheit der Stoffmenge, die Teilchen zählt. Die molare Masse beschreibt dagegen, wie schwer eine bestimmte Stoffmenge ist; in ihrer Einheit muss deshalb auch eine Masseneinheit vorkommen.`,
-          short: "Mol ist die Einheit der Stoffmenge.",
+          detailed: "Mol ist die Einheit der Stoffmenge, die Teilchen zählt. Die molare Masse beschreibt aber eine Masse, und Mol allein beschreibt keine Masse.",
+          short: "Mol allein beschreibt keine Masse.",
         } },
         { id: 'f4', text: String.raw`$\mathrm{g} \cdot \mathrm{mol}$`, misconception: 'chem-mis-st-units', why: {
-          detailed: "Die molare Masse ist eine Masse je Mol, also ein Quotient. Ein Produkt aus Gramm und Mol hätte keine sinnvolle Bedeutung.",
-          short: "Je Mol heißt teilen, nicht malnehmen.",
+          detailed: "Ein Produkt aus Gramm und Mol würde wachsen, wenn eine Portion größer wird. Die molare Masse eines Stoffes bleibt aber gleich, egal wie groß die Portion ist.",
+          short: "Die molare Masse hängt nicht von der Größe der Portion ab.",
         } },
         { id: 'f5', text: String.raw`$\mathrm{mol^{-1}}$`, misconception: 'chem-mis-st-units', why: {
-          detailed: String.raw`Die Einheit „je Mol“ ohne Masse hat die Avogadro-Konstante: Sie zählt Teilchen je Mol. Die molare Masse sagt, wie viele Gramm auf ein Mol kommen.`,
+          detailed: String.raw`Die Einheit $\mathrm{mol^{-1}}$ hat die Avogadro-Konstante: Sie zählt Teilchen je Mol. Die molare Masse zählt keine Teilchen.`,
           short: String.raw`$\mathrm{mol^{-1}}$ ist die Einheit der Avogadro-Konstante.`,
         } },
       ],
-      hint: "Der Name verrät es: eine Masse, bezogen auf ein Mol.",
+      hint: "Überlege, welche zwei Größen in der molaren Masse stecken.",
       explanation: {
         detailed: String.raw`Die molare Masse sagt, wie viele Gramm ein Mol eines Stoffes wiegt. Ihre Einheit ist also Gramm je Mol, $\mathrm{g/mol}$. Wasser hat zum Beispiel $M = 18\,\mathrm{g/mol}$: Ein Mol Wassermoleküle wiegt $18\,\mathrm{g}$.`,
         short: String.raw`Gramm je Mol: $\mathrm{g/mol}$.`,
@@ -126,16 +126,25 @@ export const STOFFMENGE_BANK: QuestionBank = {
       prompt: String.raw`Wasser hat die molare Masse $M(\ce{H2O}) = 18\,\mathrm{g/mol}$. Was sagt diese Angabe?`,
       correct: { id: 'r', text: String.raw`Ein Mol Wassermoleküle wiegt $18\,\mathrm{g}$.` },
       wrong: [
-        { id: 'f1', text: String.raw`Ein einzelnes Wassermolekül wiegt $18\,\mathrm{g}$.`, misconception: 'chem-mis-st-particle-mass' },
+        { id: 'f1', text: String.raw`Ein einzelnes Wassermolekül wiegt $18\,\mathrm{g}$.`, misconception: 'chem-mis-st-particle-mass', why: {
+          detailed: String.raw`$18\,\mathrm{g}$ sind etwa ein Schluck Wasser, darin stecken unvorstellbar viele Moleküle; ein einzelnes kann nicht so viel wiegen.`,
+          short: "Ein einzelnes Molekül kann nicht so viel wiegen wie ein Schluck Wasser.",
+        } },
         { id: 'f2', text: String.raw`In $1\,\mathrm{g}$ Wasser stecken $18\,\mathrm{mol}$ Wassermoleküle.`, misconception: 'chem-mis-st-n-inverted' },
-        { id: 'f3', text: String.raw`$18\,\mathrm{mol}$ Wasser wiegen zusammen $1\,\mathrm{g}$.`, misconception: 'chem-mis-st-m-divided' },
-        { id: 'f4', text: String.raw`Jede Portion Wasser wiegt $18\,\mathrm{g}$, egal wie groß sie ist.`, misconception: 'chem-mis-st-molar-mass-portion' },
+        { id: 'f3', text: String.raw`$18\,\mathrm{mol}$ Wasser wiegen zusammen $1\,\mathrm{g}$.`, misconception: 'chem-mis-st-m-divided', why: {
+          detailed: String.raw`Mehr Stoffmenge muss mehr wiegen: $18\,\mathrm{mol}$ Wasser sind viel mehr als $1\,\mathrm{g}$.`,
+          short: "Mehr Stoffmenge muss mehr wiegen.",
+        } },
+        { id: 'f4', text: String.raw`Jede Portion Wasser wiegt $18\,\mathrm{g}$, egal wie groß sie ist.`, misconception: 'chem-mis-st-molar-mass-portion', why: {
+          detailed: String.raw`Eine Portion kann ein Tropfen oder ein See sein; ihre Masse hängt von ihrer Größe ab, die Angabe in $\mathrm{g/mol}$ nicht.`,
+          short: "Die Masse einer Portion hängt von ihrer Größe ab.",
+        } },
         { id: 'f5', text: "Ein Wassermolekül enthält 18 Protonen.", misconception: 'chem-mis-st-atomic-number', why: {
           detailed: String.raw`Die molare Masse ist eine Masse, keine Zahl von Kernteilchen. Die Protonen eines Wassermoleküls ergeben sich aus den Ordnungszahlen seiner Atome, und die sind etwas ganz anderes als die molaren Massen.`,
           short: "Die molare Masse zählt keine Protonen.",
         } },
       ],
-      hint: "Lies die Einheit als Satz: so viele Gramm für so viel Stoffmenge.",
+      hint: "Achte auf die Einheit: Worauf bezieht sich das „je“?",
       explanation: {
         detailed: String.raw`$18\,\mathrm{g/mol}$ heißt: $18$ Gramm auf ein Mol. Ein Mol Wassermoleküle, also $6{,}022 \cdot 10^{23}$ Moleküle, wiegt zusammen $18\,\mathrm{g}$. Ein einzelnes Molekül wiegt nur einen winzigen Bruchteil davon.`,
         short: String.raw`Ein Mol Wasser wiegt $18\,\mathrm{g}$.`,
@@ -280,10 +289,13 @@ export const STOFFMENGE_BANK: QuestionBank = {
       wrong: [
         { id: 'f1', text: "Beide sind gleich schwer, weil es jeweils genau ein Mol ist.", misconception: 'chem-mis-st-n-decides-mass' },
         { id: 'f2', text: "Die Kupferportion enthält mehr Teilchen, weil sie schwerer ist.", misconception: 'chem-mis-st-mol-count-varies', why: {
-          detailed: "Ein Mol enthält bei jedem Stoff gleich viele Teilchen. Dass ein Mol Kupfer mehr wiegt, liegt an den schwereren Teilchen, nicht an ihrer Zahl.",
-          short: "Mehr Masse je Mol kommt von schwereren Teilchen, nicht von mehr Teilchen.",
+          detailed: "Schwerere Teilchen sind nicht mehr Teilchen. Überlege, was die Angabe 1 mol bei beiden Portionen festlegt.",
+          short: "Schwerer heißt nicht mehr Teilchen.",
         } },
-        { id: 'f3', text: String.raw`Beide wiegen genau $1\,\mathrm{g}$.`, misconception: 'chem-mis-st-mol-is-mass' },
+        { id: 'f3', text: String.raw`Beide wiegen genau $1\,\mathrm{g}$.`, misconception: 'chem-mis-st-mol-is-mass', why: {
+          detailed: "Ein Mol hat keine feste Masse; wie viel es wiegt, gibt bei jedem Stoff seine molare Masse an.",
+          short: "Ein Mol hat keine feste Masse.",
+        } },
         { id: 'f4', text: "Gleich viele Teilchen enthalten sie nur, wenn beide Stoffe gasförmig sind.", misconception: 'chem-mis-st-mol-only-gas' },
         { id: 'f5', text: "Die Methanportion enthält fünfmal so viele Moleküle, wie die Kupferportion Atome enthält.", misconception: 'chem-mis-st-atoms-molecules', why: {
           detailed: String.raw`Ein Methanmolekül besteht zwar aus fünf Atomen, aber ein Mol Methan enthält $6{,}022 \cdot 10^{23}$ Moleküle, genauso viele wie ein Mol Kupfer Atome. Fünfmal so groß ist nur die Zahl der Atome in der Methanportion.`,
@@ -785,8 +797,8 @@ export const STOFFMENGE_BANK: QuestionBank = {
           short: "Im Kochsalz gibt es keine einzelnen Moleküle.",
         } },
         { id: 'f2', text: String.raw`insgesamt $6{,}022 \cdot 10^{23}$ Ionen, zur Hälfte Natrium- und zur Hälfte Chloridionen`, misconception: 'chem-mis-st-atoms-molecules', why: {
-          detailed: String.raw`Ein Mol zählt die Einheiten der Formel, hier Formeleinheiten $\ce{NaCl}$. Jede davon enthält ein Natrium- und ein Chloridion; zusammen sind es also doppelt so viele Ionen wie Formeleinheiten.`,
-          short: "Jede Formeleinheit enthält zwei Ionen.",
+          detailed: String.raw`Gezählt wird, was die Formel beschreibt, nicht jedes Ion für sich. Zähle, wie viele Ionen in einer Einheit $\ce{NaCl}$ stecken.`,
+          short: "Nicht jedes Ion einzeln zählen.",
         } },
         { id: 'f3', text: String.raw`$2\,\mathrm{mol}$ Formeleinheiten, weil jede aus zwei Ionen besteht`, misconception: 'chem-mis-st-atoms-molecules', why: {
           detailed: "Die Zahl der Formeleinheiten ist die Stoffmenge selbst. Dass jede Formeleinheit zwei Ionen enthält, verdoppelt die Zahl der Ionen, nicht die Zahl der Formeleinheiten.",
@@ -822,9 +834,9 @@ export const STOFFMENGE_BANK: QuestionBank = {
         { id: 'f1', text: String.raw`Kohlenstoffdioxid $\ce{CO2}$`, misconception: 'chem-mis-st-heavier-more' },
         { id: 'f2', text: String.raw`Sauerstoff $\ce{O2}$`, misconception: 'chem-mis-st-heavier-more' },
         { id: 'f3', text: String.raw`Stickstoff $\ce{N2}$`, misconception: 'chem-mis-st-heavier-more' },
-        { id: 'f4', text: String.raw`Ammoniak $\ce{NH3}$`, misconception: 'chem-mis-st-index-ignored', why: {
-          detailed: String.raw`Gleich schwer heißt nicht gleich viele Moleküle; entscheidend ist die molare Masse jedes Gases. Ammoniak hat zwar eine kleine molare Masse, aber nicht die kleinste: Zähle für jedes Gas alle Atome der Formel mit ihren Indizes.`,
-          short: "Vergleiche die molaren Massen und zähle dabei jeden Index mit.",
+        { id: 'f4', text: String.raw`Ammoniak $\ce{NH3}$`, misconception: 'chem-mis-st-atomic-number', why: {
+          detailed: "Mit den Ordnungszahlen statt der molaren Massen kämen Methan und Ammoniak auf denselben Wert, 10. Gerechnet wird mit den molaren Massen aus der Aufgabe.",
+          short: "Mit den angegebenen molaren Massen rechnen.",
         } },
         { id: 'f5', text: "Alle enthalten gleich viele Moleküle, weil alle gleich schwer sind.", misconception: 'chem-mis-st-same-mass-same-n' },
       ],
@@ -906,11 +918,14 @@ export const STOFFMENGE_BANK: QuestionBank = {
       prompt: String.raw`Was bedeutet die 2 in der Formel $\ce{Ca(OH)2}$?`,
       correct: { id: 'r', text: String.raw`Die Gruppe $\ce{OH}$ kommt zweimal vor: zwei Sauerstoff- und zwei Wasserstoffatome je Formeleinheit.` },
       wrong: [
-        { id: 'f1', text: "Nur das Wasserstoffatom kommt zweimal vor, der Sauerstoff einmal.", misconception: 'chem-mis-st-bracket' },
+        { id: 'f1', text: "Nur das Wasserstoffatom kommt zweimal vor, der Sauerstoff einmal.", misconception: 'chem-mis-st-bracket', why: {
+          detailed: "Die 2 steht nicht direkt hinter dem H, sondern hinter der Klammer. Wofür steht eine Klammer in einer Formel?",
+          short: "Die 2 steht hinter der Klammer.",
+        } },
         { id: 'f2', text: "Es liegen zwei Formeleinheiten Calciumhydroxid vor.", misconception: 'chem-mis-st-index-coefficient' },
         { id: 'f3', text: "Alle Atome der Formel kommen zweimal vor, auch das Calcium.", misconception: 'chem-mis-st-bracket', why: {
-          detailed: "Ein Index hinter einer Klammer gilt nur für den Inhalt der Klammer. Das Calcium steht davor und zählt deshalb einmal.",
-          short: "Das Atom vor der Klammer zählt einmal.",
+          detailed: "Das Calcium steht vor der Klammer, die 2 dahinter. Prüfe, welche Atome die Klammer einschließt.",
+          short: "Prüfe, was in der Klammer steht.",
         } },
         { id: 'f4', text: "Die Formeleinheit besteht aus zwei Atomen.", misconception: 'chem-mis-st-index-ignored', why: {
           detailed: "Ein Index zählt das, was direkt davor steht, nicht die Atome der ganzen Formel. Wie viele Atome eine Formeleinheit insgesamt hat, ergibt sich erst, wenn man alle Elemente mit ihren Indizes zusammenzählt.",
@@ -937,13 +952,19 @@ export const STOFFMENGE_BANK: QuestionBank = {
       correct: { id: 'r', text: "Zu jeder Formeleinheit Kupfer(II)-sulfat gehören fünf Wassermoleküle, die fest im Kristall eingebaut sind." },
       wrong: [
         { id: 'f1', text: "Die molare Masse des Salzes wird mit der von fünf Wassermolekülen malgenommen.", misconception: 'chem-mis-st-hydrate-factor' },
-        { id: 'f2', text: "Das Salz ist in Wasser gelöst; das Wasser gehört nicht zur Formeleinheit.", misconception: 'chem-mis-st-hydrate-forgotten' },
+        { id: 'f2', text: "Das Salz ist in Wasser gelöst; das Wasser gehört nicht zur Formeleinheit.", misconception: 'chem-mis-st-hydrate-forgotten', why: {
+          detailed: "Ein gelöstes Salz kennzeichnet man mit (aq), nicht mit einem Malpunkt in der Formel.",
+          short: "Gelöst schreibt man mit (aq).",
+        } },
         { id: 'f3', text: "Die 5 gilt nur für den Wasserstoff: fünf Wasserstoffatome und ein Sauerstoffatom.", misconception: 'chem-mis-st-hydrate-factor' },
-        { id: 'f4', text: "Es ist ein Gemisch aus Kupfersulfat und beliebig viel Wasser.", misconception: 'chem-mis-st-formula-split', why: {
+        { id: 'f4', text: "Es ist ein Gemisch aus Kupfer(II)-sulfat und beliebig viel Wasser.", misconception: 'chem-mis-st-formula-split', why: {
           detailed: "Kristallwasser ist in einem festen Zahlenverhältnis in den Kristall eingebaut. Die Formel nennt dieses Verhältnis; ein Gemisch könnte dagegen beliebige Anteile haben.",
           short: "Kristallwasser hat ein festes Zahlenverhältnis.",
         } },
-        { id: 'f5', text: "Das Wasser ist nur Feuchtigkeit von außen und verdunstet an der Luft.", misconception: 'chem-mis-st-hydrate-forgotten' },
+        { id: 'f5', text: "Das Wasser ist nur Feuchtigkeit von außen und verdunstet an der Luft.", misconception: 'chem-mis-st-hydrate-forgotten', why: {
+          detailed: "Lose Feuchtigkeit hätte keine feste Zahl und stünde nicht in der Formel.",
+          short: "Feuchtigkeit stünde nicht in der Formel.",
+        } },
       ],
       hint: "Der Malpunkt verbindet zwei Teile einer Formeleinheit. Wofür steht die Zahl davor?",
       explanation: {
@@ -1278,8 +1299,8 @@ export const STOFFMENGE_BANK: QuestionBank = {
           short: "Das Molekül erklärt nicht, warum der Wert für ein Atom krumm ist.",
         } },
         { id: 'f5', text: String.raw`Chlor hat 17 Protonen und deshalb $18{,}5$ Neutronen.`, misconception: 'chem-mis-st-mass-number', why: {
-          detailed: String.raw`Neutronen gibt es nur ganz. Ein einzelnes Chloratom hat 18 oder 20 Neutronen, je nach Isotop. Der krumme Wert entsteht erst, wenn man über viele Atome beider Isotope mittelt.`,
-          short: "Ein einzelnes Atom hat nur ganze Neutronenzahlen.",
+          detailed: "Neutronen gibt es nur ganz: Ein einzelnes Chloratom hat je nach Isotop 18 oder 20 Neutronen. Eine halbe Neutronenzahl gibt es bei keinem Atom.",
+          short: "Es gibt keine halben Neutronen.",
         } },
       ],
       hint: "Denk an Isotope: Haben alle Chloratome in einer Probe dieselbe Masse?",
@@ -1490,8 +1511,8 @@ export const STOFFMENGE_BANK: QuestionBank = {
       fact: 'mol-zustand',
       part: 'stoffmenge',
       title: "Verdampfen",
-      prompt: String.raw`$1\,\mathrm{mol}$ flüssiges Wasser wird bei gleichbleibendem Druck vollständig verdampft, ohne dass etwas verloren geht. Was ändert sich?`,
-      correct: { id: 'r', text: "Nur das Volumen wird viel größer; Stoffmenge, Masse und Zahl der Moleküle bleiben gleich." },
+      prompt: String.raw`$1\,\mathrm{mol}$ flüssiges Wasser wird bei gleichbleibendem Druck vollständig verdampft, ohne dass etwas verloren geht. Was trifft zu?`,
+      correct: { id: 'r', text: "Das Volumen wird viel größer; Stoffmenge, Masse und Zahl der Moleküle bleiben gleich." },
       wrong: [
         { id: 'f1', text: "Die Stoffmenge wird größer, weil der Dampf viel mehr Raum einnimmt.", misconception: 'chem-mis-st-n-is-mass', why: {
           detailed: "Die Stoffmenge zählt Teilchen, nicht Raum. Beim Verdampfen rücken die Moleküle nur weiter auseinander; ihre Zahl ändert sich nicht.",
@@ -1509,9 +1530,9 @@ export const STOFFMENGE_BANK: QuestionBank = {
           detailed: "Ein Mol enthält in jedem Aggregatzustand gleich viele Teilchen; das Mol ist nicht an Gase gebunden. Auch flüssiges Wasser wird in Mol gezählt.",
           short: "Das Mol gilt in jedem Zustand.",
         } },
-        { id: 'f5', text: "Die Masse nimmt ab, weil Dampf so gut wie nichts wiegt.", misconception: 'chem-mis-st-n-is-mass', why: {
-          detailed: "Auch Gase haben eine Masse. Wenn nichts verloren geht, bleiben alle Moleküle erhalten, und jedes wiegt als Gas genauso viel wie in der Flüssigkeit.",
-          short: "Auch ein Gas hat Masse.",
+        { id: 'f5', text: "Die Stoffmenge wird kleiner, weil Dampf eine viel kleinere Dichte hat.", misconception: 'chem-mis-st-n-is-mass', why: {
+          detailed: "Die Dichte sagt, wie viel Masse in einem Liter steckt. Die Stoffmenge zählt die Moleküle der ganzen Portion, und keines geht verloren.",
+          short: "Die Dichte ist nicht die Stoffmenge.",
         } },
       ],
       hint: "Was zählt die Stoffmenge, und ändert sich das beim Verdampfen?",

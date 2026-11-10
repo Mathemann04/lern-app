@@ -158,6 +158,7 @@ export const GLEICHUNGEN_CARDS: readonly Card[] = [
       'chem-mis-gl-h-per-water',
       'chem-mis-gl-fuel-oxygen',
       'chem-mis-gl-incomplete',
+      'chem-mis-gl-incomplete-hydrogen',
     ],
   },
   {

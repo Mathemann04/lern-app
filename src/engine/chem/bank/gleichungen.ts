@@ -54,8 +54,8 @@ const LEVEL_1: readonly Question[] = [
         short: String.raw`Für einen vollständigen Ablauf steht der einfache Pfeil $\rightarrow$.`,
       } },
       { id: 'f2', text: 'Die Reaktion läuft nur von rechts nach links.', misconception: 'chem-mis-gl-arrow', why: {
-        detailed: 'Eine Reaktion, die nur in eine Richtung läuft, schreibt man mit einem einfachen Pfeil, die Edukte links. Der Doppelpfeil zeigt in beide Richtungen.',
-        short: 'Der Doppelpfeil zeigt in beide Richtungen, nicht nur in eine.',
+        detailed: 'Läuft eine Reaktion nur in eine Richtung, schreibt man sie mit einem einfachen Pfeil; die Edukte stehen dann links. Der Doppelpfeil meint etwas anderes.',
+        short: 'Eine Reaktion in nur eine Richtung bekommt einen einfachen Pfeil.',
       } },
       { id: 'f3', text: 'Die Gleichung ist noch nicht ausgeglichen.', misconception: 'chem-mis-gl-arrow', why: {
         detailed: 'Ob eine Gleichung ausgeglichen ist, zeigt die Zahl der Atome links und rechts, nicht die Art des Pfeils. Auch eine Gleichung mit Doppelpfeil muss ausgeglichen sein.',
@@ -197,12 +197,21 @@ const LEVEL_1: readonly Question[] = [
     prompt: 'Bei einer chemischen Reaktion haben die Produkte zusammen dieselbe Masse wie die Edukte. Woran liegt das?',
     correct: { id: 'r', text: 'Die Atome werden nur neu verbunden; keines geht verloren, keines kommt hinzu.' },
     wrong: [
-      { id: 'f1', text: 'Links und rechts stehen gleich viele Moleküle.', misconception: 'chem-mis-gl-molecules-conserved' },
-      { id: 'f2', text: 'Die Atome wandeln sich in andere Atome mit derselben Masse um.', misconception: 'chem-mis-gl-atoms-transform' },
-      { id: 'f3', text: 'Die Masse bleibt gar nicht erhalten: Bei jeder Reaktion geht etwas Masse verloren.', misconception: 'chem-mis-gl-mass-changes' },
+      { id: 'f1', text: 'Links und rechts stehen gleich viele Moleküle.', misconception: 'chem-mis-gl-molecules-conserved', why: {
+        detailed: String.raw`Die Zahl der Moleküle ändert sich bei vielen Reaktionen, etwa bei $\ce{2 CO + O2 -> 2 CO2}$ (links 3, rechts 2). Die Masse bleibt trotzdem gleich; daran kann es also nicht liegen.`,
+        short: 'Die Zahl der Moleküle ändert sich oft.',
+      } },
+      { id: 'f2', text: 'Die Atome wandeln sich in andere Atome mit derselben Masse um.', misconception: 'chem-mis-gl-atoms-transform', why: {
+        detailed: 'Bei einer chemischen Reaktion wird kein Atom zu einem Atom eines anderen Elements; links und rechts stehen dieselben Elemente.',
+        short: 'Atome wandeln sich nicht in andere um.',
+      } },
+      { id: 'f3', text: 'Die Masse bleibt gar nicht erhalten: Bei jeder Reaktion geht etwas Masse verloren.', misconception: 'chem-mis-gl-mass-changes', why: {
+        detailed: 'Im geschlossenen Gefäß zeigt die Waage vor und nach jeder Reaktion dasselbe. Gesucht ist der Grund dafür.',
+        short: 'Die Masse bleibt erhalten; gesucht ist der Grund.',
+      } },
       { id: 'f4', text: 'Die Summe der Koeffizienten ist links und rechts gleich groß.', misconception: 'chem-mis-gl-molecules-conserved', why: {
-        detailed: String.raw`Die Summe der Koeffizienten ist oft links und rechts verschieden, etwa bei $\ce{2 CO + O2 -> 2 CO2}$: links 3, rechts 2. Trotzdem bleibt die Masse erhalten, denn es kommt auf die Atome an.`,
-        short: 'Die Summe der Koeffizienten darf sich ändern; es kommt auf die Atome an.',
+        detailed: String.raw`Die Summe der Koeffizienten ist oft links und rechts verschieden, etwa bei $\ce{2 CO + O2 -> 2 CO2}$: links 3, rechts 2. Die Masse bleibt trotzdem gleich; daran kann es also nicht liegen.`,
+        short: 'Die Summe der Koeffizienten ändert sich oft.',
       } },
     ],
     hint: 'Was passiert bei einer Reaktion mit den Bindungen, und was mit den Atomen selbst?',
@@ -224,15 +233,21 @@ const LEVEL_1: readonly Question[] = [
     prompt: String.raw`Was gibt die große 3 in $\ce{3 O2}$ an?`,
     correct: { id: 'r', text: 'Es sind drei Sauerstoffmoleküle beteiligt.' },
     wrong: [
-      { id: 'f1', text: 'Ein Sauerstoffmolekül besteht aus drei Atomen.', misconception: 'chem-mis-gl-coef-index-swap' },
-      { id: 'f2', text: 'Es sind insgesamt drei Sauerstoffatome beteiligt.', misconception: 'chem-mis-gl-count-coef', why: {
-        detailed: String.raw`Die 3 zählt ganze Moleküle $\ce{O2}$, und jedes davon bringt zwei Atome mit. Die Zahl der Atome ist also größer als die Zahl davor.`,
-        short: 'Die Zahl davor zählt Moleküle, nicht Atome.',
+      { id: 'f1', text: 'Ein Sauerstoffmolekül besteht aus drei Atomen.', misconception: 'chem-mis-gl-coef-index-swap', why: {
+        detailed: 'Wie viele Atome ein Sauerstoffmolekül hat, steht klein in der Formel, nicht groß davor.',
+        short: 'Die Atome je Molekül stehen klein in der Formel.',
       } },
-      { id: 'f3', text: 'Es reagieren drei Gramm Sauerstoff.', misconception: 'chem-mis-gl-ratio-mass' },
+      { id: 'f2', text: 'Es sind insgesamt drei Sauerstoffatome beteiligt.', misconception: 'chem-mis-gl-count-coef', why: {
+        detailed: String.raw`In $\ce{O2}$ sind die Atome schon zu Paaren verbunden. Prüfe, ob die große Zahl davor einzelne Atome zählen kann.`,
+        short: 'Die Atome sind schon zu Paaren verbunden.',
+      } },
+      { id: 'f3', text: 'Es reagieren drei Gramm Sauerstoff.', misconception: 'chem-mis-gl-ratio-mass', why: {
+        detailed: 'In einer Gleichung steht keine Einheit Gramm; Massen ergeben sich erst mit der molaren Masse.',
+        short: 'Massen ergeben sich erst mit der molaren Masse.',
+      } },
       { id: 'f4', text: 'Sauerstoff ist dreimal so schwer wie die anderen Stoffe der Reaktion.', misconception: 'chem-mis-gl-ratio-mass', why: {
-        detailed: 'Ein Koeffizient zählt Teilchen; über die Masse eines Stoffes sagt er allein nichts aus.',
-        short: 'Ein Koeffizient zählt Teilchen, er sagt nichts über die Masse.',
+        detailed: 'Über die Masse eines Stoffes sagt die Zahl davor allein nichts.',
+        short: 'Die Zahl davor sagt allein nichts über die Masse.',
       } },
       { id: 'f5', text: 'Es dürfen genau drei Sauerstoffmoleküle reagieren, nie mehr.', misconception: 'chem-mis-gl-ratio-fixed' },
     ],
@@ -255,13 +270,16 @@ const LEVEL_1: readonly Question[] = [
     prompt: String.raw`In $\ce{Fe2O3}$ steht die kleine 2 hinter dem Eisen. Was gibt sie an?`,
     correct: { id: 'r', text: 'Eine Formeleinheit enthält zwei Eisenatome.' },
     wrong: [
-      { id: 'f1', text: 'Es reagieren zwei Formeleinheiten Eisen(III)-oxid.', misconception: 'chem-mis-gl-coef-index-swap' },
+      { id: 'f1', text: 'Es reagieren zwei Formeleinheiten Eisen(III)-oxid.', misconception: 'chem-mis-gl-coef-index-swap', why: {
+        detailed: 'Wie viele Formeleinheiten reagieren, stünde als große Zahl vor der Formel. Diese 2 steht aber klein unten am Eisen.',
+        short: 'Diese 2 steht klein unten, nicht groß davor.',
+      } },
       { id: 'f2', text: 'Auf jedes Eisenatom kommen zwei Sauerstoffatome.', misconception: 'chem-mis-gl-count-index', why: {
-        detailed: 'Ein Index gehört zu dem Symbol, hinter dem er steht, nicht zum Symbol danach. Wie viele Sauerstoffatome dabei sind, sagt die Zahl hinter dem O.',
-        short: 'Der Index gehört zum Symbol davor, nicht zum Symbol danach.',
+        detailed: 'Wie viele Sauerstoffatome dabei sind, sagt die Zahl hinter dem O. Prüfe, zu welchem Symbol die kleine 2 gehört.',
+        short: 'Die Zahl der O-Atome steht hinter dem O.',
       } },
       { id: 'f3', text: 'Die ganze Formel kommt zweimal vor.', misconception: 'chem-mis-gl-count-index', why: {
-        detailed: 'Wie oft die ganze Formel vorkommt, stünde als große Zahl davor, als Koeffizient. Der Index gilt nur für das Symbol direkt davor.',
+        detailed: 'Wie oft die ganze Formel vorkommt, stünde als große Zahl davor. Diese 2 steht aber klein unten an einem Symbol.',
         short: 'Für die ganze Formel stünde die Zahl groß davor.',
       } },
       { id: 'f4', text: 'Die 2 darf man beim Ausgleichen bei Bedarf ändern.', misconception: 'chem-mis-gl-index-changed' },
@@ -356,12 +374,18 @@ const LEVEL_1: readonly Question[] = [
     prompt: 'Beim Ausgleichen einer Gleichung stimmt die Zahl der Sauerstoffatome links und rechts noch nicht. Was darf man ändern?',
     correct: { id: 'r', text: 'nur die Koeffizienten vor den Formeln' },
     wrong: [
-      { id: 'f1', text: 'die Indizes in den Formeln', misconception: 'chem-mis-gl-index-changed' },
+      { id: 'f1', text: 'die Indizes in den Formeln', misconception: 'chem-mis-gl-index-changed', why: {
+        detailed: String.raw`Ein geänderter Index macht einen anderen Stoff daraus, etwa aus $\ce{H2O}$ das Wasserstoffperoxid $\ce{H2O2}$.`,
+        short: 'Ein geänderter Index macht einen anderen Stoff daraus.',
+      } },
       { id: 'f2', text: 'Koeffizienten oder Indizes, je nachdem, was schneller zum Ziel führt', misconception: 'chem-mis-gl-index-changed', why: {
         detailed: 'Auch wenn es schneller ginge: Ein geänderter Index macht aus einem Stoff einen anderen, und die Gleichung beschreibt dann eine andere Reaktion.',
         short: 'Ein geänderter Index macht einen anderen Stoff daraus.',
       } },
-      { id: 'f3', text: String.raw`ein einzelnes $\ce{O}$ auf der Seite mit zu wenig Sauerstoff`, misconception: 'chem-mis-gl-add-species' },
+      { id: 'f3', text: String.raw`ein einzelnes $\ce{O}$ auf der Seite mit zu wenig Sauerstoff`, misconception: 'chem-mis-gl-add-species', why: {
+        detailed: 'Ein einzelnes O-Atom nimmt an der Reaktion nicht teil. In die Gleichung gehören nur Stoffe, die wirklich reagieren oder entstehen.',
+        short: 'Ein einzelnes O-Atom gehört nicht in die Gleichung.',
+      } },
       { id: 'f4', text: 'ein Sauerstoffatom aus einer Formel streichen', misconception: 'chem-mis-gl-index-changed', why: {
         detailed: 'Ein Atom aus einer Formel zu streichen heißt, die Formel und damit den Stoff zu verändern. Die Formeln stehen fest, bevor man mit dem Ausgleichen beginnt.',
         short: 'Wer ein Atom streicht, verändert den Stoff.',
@@ -809,7 +833,10 @@ const LEVEL_2: readonly Question[] = [
     prompt: String.raw`Beim Ausgleichen von $\ce{Na + H2O -> NaOH + H2}$ kommt man zuerst auf $\ce{Na + H2O -> NaOH + 1/2 H2}$. Wie geht es richtig weiter?`,
     correct: { id: 'r', text: 'Alle Koeffizienten mit 2 malnehmen.' },
     wrong: [
-      { id: 'f1', text: String.raw`Nur den Bruch mit 2 malnehmen: $\ce{Na + H2O -> NaOH + H2}$.`, misconception: 'chem-mis-gl-partly-doubled' },
+      { id: 'f1', text: String.raw`Nur den Bruch mit 2 malnehmen: $\ce{Na + H2O -> NaOH + H2}$.`, misconception: 'chem-mis-gl-partly-doubled', why: {
+        detailed: 'Zähle nach dem Malnehmen Natrium, Wasserstoff und Sauerstoff links und rechts. Wird nur ein Koeffizient verändert, verschiebt sich die Atombilanz.',
+        short: 'Nach dem Malnehmen jedes Element neu zählen.',
+      } },
       { id: 'f2', text: 'Den Bruch auf 1 aufrunden.', misconception: 'chem-mis-gl-fraction', why: {
         detailed: 'Runden verändert die Zahl der Atome auf einer Seite; danach stimmt die Bilanz nicht mehr.',
         short: 'Runden zerstört die Atombilanz.',
@@ -841,8 +868,8 @@ const LEVEL_2: readonly Question[] = [
     correct: { id: 'r', text: String.raw`$2 : 1$` },
     wrong: [
       { id: 'f1', text: String.raw`$1 : 2$`, misconception: 'chem-mis-gl-ratio-wrong', why: {
-        detailed: 'Das Verhältnis ist hier vertauscht. Der erste Wert gehört zum ersten Stoff der Frage, also zum Schwefeldioxid.',
-        short: 'Die Reihenfolge der Stoffe in der Frage beachten.',
+        detailed: 'Prüfe die Reihenfolge: Der erste Wert gehört zum ersten Stoff der Frage. Welcher Koeffizient steht vor diesem Stoff?',
+        short: 'Welcher Koeffizient gehört zum ersten Stoff der Frage?',
       } },
       { id: 'f2', text: String.raw`$2 : 2$`, misconception: 'chem-mis-gl-ratio-index' },
       { id: 'f3', text: String.raw`$4 : 1$`, misconception: 'chem-mis-gl-ratio-mass', why: {
@@ -903,11 +930,17 @@ const LEVEL_2: readonly Question[] = [
     prompt: String.raw`Was sagen die Koeffizienten in $\ce{2 H2 + O2 -> 2 H2O}$ aus?`,
     correct: { id: 'r', text: 'Auf zwei Wasserstoffmoleküle kommt ein Sauerstoffmolekül; im selben Verhältnis stehen die Stoffmengen in mol.' },
     wrong: [
-      { id: 'f1', text: 'Zwei Gramm Wasserstoff reagieren mit einem Gramm Sauerstoff.', misconception: 'chem-mis-gl-ratio-mass' },
-      { id: 'f2', text: 'Es reagieren immer genau zwei Wasserstoffmoleküle, nie mehr.', misconception: 'chem-mis-gl-ratio-fixed' },
+      { id: 'f1', text: 'Zwei Gramm Wasserstoff reagieren mit einem Gramm Sauerstoff.', misconception: 'chem-mis-gl-ratio-mass', why: {
+        detailed: 'Wasserstoffmoleküle sind viel leichter als Sauerstoffmoleküle; aus der Gleichung allein liest man kein Verhältnis in Gramm ab.',
+        short: 'Aus der Gleichung allein liest man keine Gramm ab.',
+      } },
+      { id: 'f2', text: 'Es reagieren immer genau zwei Wasserstoffmoleküle, nie mehr.', misconception: 'chem-mis-gl-ratio-fixed', why: {
+        detailed: 'Die Gleichung gilt für jede Menge: Mit mehr Wasserstoff reagiert entsprechend mehr Sauerstoff. Eine Obergrenze geben die Zahlen nicht an.',
+        short: 'Die Zahlen geben keine Obergrenze an.',
+      } },
       { id: 'f3', text: 'Die Masse des Wasserstoffs ist doppelt so groß wie die des Sauerstoffs.', misconception: 'chem-mis-gl-ratio-mass', why: {
-        detailed: 'Wasserstoffmoleküle sind viel leichter als Sauerstoffmoleküle. Die Koeffizienten zählen Teilchen; Massen ergeben sich erst mit den molaren Massen.',
-        short: 'Koeffizienten zählen Teilchen; Wasserstoff ist viel leichter als Sauerstoff.',
+        detailed: 'Wasserstoffmoleküle sind viel leichter als Sauerstoffmoleküle. Dass der Wasserstoff hier mehr wiegen sollte, gibt die Gleichung nicht her.',
+        short: 'Wasserstoff ist viel leichter als Sauerstoff.',
       } },
       { id: 'f4', text: 'Aus drei Molekülen Edukt müssten drei Moleküle Produkt entstehen; die Gleichung stimmt also nicht.', misconception: 'chem-mis-gl-molecules-conserved' },
     ],
@@ -1291,25 +1324,16 @@ const LEVEL_3: readonly Question[] = [
     fact: 'unvollstaendig',
     part: 'verbrennung',
     title: 'Unvollständige Verbrennung',
-    prompt: 'Ein Gasbrenner bekommt zu wenig Luft, sodass Methan unvollständig verbrennt. Was entsteht dabei außer Wasser?',
-    correct: { id: 'r', text: 'Kohlenstoffmonoxid, bei starkem Sauerstoffmangel auch Ruß' },
+    prompt: String.raw`Ein Gasbrenner bekommt zu wenig Luft, sodass Methan $\ce{CH4}$ unvollständig verbrennt. Was entsteht dabei?`,
+    correct: { id: 'r', text: 'Wasser und Kohlenstoffmonoxid, bei starkem Sauerstoffmangel auch Ruß' },
     wrong: [
-      { id: 'f1', text: 'nur Kohlenstoffdioxid; die Reaktion läuft bloß langsamer', misconception: 'chem-mis-gl-incomplete', why: {
-        detailed: 'Fehlt Sauerstoff, reicht er nicht, um jedes C-Atom mit zwei O-Atomen zu verbinden. Es entstehen deshalb andere Kohlenstoffprodukte als bei genug Sauerstoff, nicht nur weniger davon.',
+      { id: 'f1', text: 'Kohlenstoffdioxid und Wasser; die Reaktion läuft bloß langsamer', misconception: 'chem-mis-gl-incomplete', why: {
+        detailed: 'Fehlt Sauerstoff, reicht er nicht, um jedes C-Atom mit zwei O-Atomen zu verbinden. Es entstehen deshalb andere Kohlenstoffprodukte als bei genug Sauerstoff.',
         short: 'Bei Sauerstoffmangel entstehen andere Kohlenstoffprodukte.',
       } },
-      { id: 'f2', text: 'freier Wasserstoff, weil der Sauerstoff nur für den Kohlenstoff reicht', misconception: 'chem-mis-gl-incomplete', why: {
-        detailed: 'Wasserstoff reagiert bereitwillig mit Sauerstoff und landet auch bei Sauerstoffmangel im Wasser. Knapp wird es beim Kohlenstoff.',
-        short: 'Der Wasserstoff wird auch bei Sauerstoffmangel zu Wasser.',
-      } },
-      { id: 'f3', text: 'gar nichts, denn ohne genug Sauerstoff findet keine Verbrennung statt', misconception: 'chem-mis-gl-incomplete', why: {
-        detailed: 'Eine Flamme brennt auch mit zu wenig Luft weiter, nur unvollständig; man erkennt das an der gelben, rußenden Flamme.',
-        short: 'Auch mit zu wenig Luft brennt die Flamme weiter.',
-      } },
-      { id: 'f4', text: 'Methanol, weil ein Teil des Sauerstoffs in den Brennstoff eingebaut wird', misconception: 'chem-mis-gl-incomplete', why: {
-        detailed: 'In einer Flamme entsteht aus Methan kein Alkohol. Bei Sauerstoffmangel bleibt die Oxidation des Kohlenstoffs auf halbem Weg stehen.',
-        short: 'In der Flamme entsteht kein Alkohol.',
-      } },
+      { id: 'f2', text: 'Kohlenstoffmonoxid und freier Wasserstoff, weil der Sauerstoff nur für den Kohlenstoff reicht', misconception: 'chem-mis-gl-incomplete-hydrogen' },
+      { id: 'f3', text: 'Kohlenstoffdioxid und Wasser wie sonst, nur weniger davon', misconception: 'chem-mis-gl-incomplete' },
+      { id: 'f4', text: 'Ruß und Wasserstoff, aber kein Wasser', misconception: 'chem-mis-gl-incomplete-hydrogen' },
     ],
     hint: 'Überlege, was mit dem Kohlenstoff geschieht, wenn nicht genug Sauerstoff für zwei O-Atome je C-Atom da ist.',
     explanation: {
@@ -1326,7 +1350,7 @@ const LEVEL_3: readonly Question[] = [
     fact: 'unvollstaendig-co',
     part: 'verbrennung',
     title: 'Unvollständige Verbrennung',
-    prompt: 'Methan verbrennt unvollständig zu Kohlenstoffmonoxid und Wasser. Welche Gleichung ist mit den kleinsten ganzen Zahlen richtig ausgeglichen?',
+    prompt: String.raw`Methan $\ce{CH4}$ verbrennt unvollständig zu Kohlenstoffmonoxid und Wasser. Welche Gleichung ist mit den kleinsten ganzen Zahlen richtig ausgeglichen?`,
     correct: { id: 'r', text: String.raw`$\ce{2 CH4 + 3 O2 -> 2 CO + 4 H2O}$` },
     wrong: [
       { id: 'f1', text: String.raw`$\ce{CH4 + 2 O2 -> CO + 2 H2O}$`, misconception: 'chem-mis-gl-incomplete', why: {
@@ -1342,7 +1366,7 @@ const LEVEL_3: readonly Question[] = [
         short: 'Falsches Kohlenstoffprodukt, und der Sauerstoff stimmt nicht.',
       } },
       { id: 'f4', text: String.raw`$\ce{CH4 + O2 -> CO + 2 H2O}$`, misconception: 'chem-mis-gl-not-recounted' },
-      { id: 'f5', text: String.raw`$\ce{2 CH4 + 3 O2 -> 2 CO + 4 H2}$`, misconception: 'chem-mis-gl-incomplete', why: {
+      { id: 'f5', text: String.raw`$\ce{2 CH4 + 3 O2 -> 2 CO + 4 H2}$`, misconception: 'chem-mis-gl-incomplete-hydrogen', why: {
         detailed: 'Auch bei unvollständiger Verbrennung wird der Wasserstoff zu Wasser. Hier steht freier Wasserstoff, und der Sauerstoff stimmt nicht mehr.',
         short: 'Der Wasserstoff wird auch hier zu Wasser.',
       } },
@@ -1362,7 +1386,7 @@ const LEVEL_3: readonly Question[] = [
     fact: 'unvollstaendig-russ',
     part: 'verbrennung',
     title: 'Unvollständige Verbrennung',
-    prompt: 'Bei starkem Sauerstoffmangel verbrennt Methan zu Ruß (Kohlenstoff) und Wasser. Welche Gleichung ist richtig ausgeglichen?',
+    prompt: String.raw`Bei starkem Sauerstoffmangel verbrennt Methan $\ce{CH4}$ zu Ruß (Kohlenstoff) und Wasser. Welche Gleichung ist richtig ausgeglichen?`,
     correct: { id: 'r', text: String.raw`$\ce{CH4 + O2 -> C + 2 H2O}$` },
     wrong: [
       { id: 'f1', text: String.raw`$\ce{CH4 + 2 O2 -> C + 2 H2O}$`, misconception: 'chem-mis-gl-incomplete', why: {
@@ -1371,7 +1395,7 @@ const LEVEL_3: readonly Question[] = [
       } },
       { id: 'f2', text: String.raw`$\ce{CH4 + O2 -> C + H2O}$`, misconception: 'chem-mis-gl-skeleton-ok' },
       { id: 'f3', text: String.raw`$\ce{2 CH4 + O2 -> 2 C + 2 H2O}$`, misconception: 'chem-mis-gl-not-recounted' },
-      { id: 'f4', text: String.raw`$\ce{CH4 + O2 -> C + 2 H2}$`, misconception: 'chem-mis-gl-incomplete', why: {
+      { id: 'f4', text: String.raw`$\ce{CH4 + O2 -> C + 2 H2}$`, misconception: 'chem-mis-gl-incomplete-hydrogen', why: {
         detailed: 'Auch bei starkem Sauerstoffmangel wird der Wasserstoff zu Wasser. Hier taucht der Sauerstoff rechts gar nicht mehr auf.',
         short: 'Der Wasserstoff wird zu Wasser; der Sauerstoff fehlt rechts.',
       } },
@@ -1399,14 +1423,17 @@ const LEVEL_3: readonly Question[] = [
         detailed: 'Zähle Wasserstoff und Sauerstoff auf beiden Seiten mit Koeffizient mal Index nach, bevor du die Bilanz verwirfst.',
         short: 'Erst nachzählen, dann urteilen.',
       } },
-      { id: 'f2', text: 'Sie beschreibt eine andere Reaktion als die Gleichung mit den kleinsten ganzen Zahlen.', misconception: 'chem-mis-gl-multiple-wrong' },
+      { id: 'f2', text: 'Sie beschreibt eine andere Reaktion als die Gleichung mit den kleinsten ganzen Zahlen.', misconception: 'chem-mis-gl-multiple-wrong', why: {
+        detailed: 'Links und rechts stehen dieselben Stoffe wie in der bekannten Gleichung, nur mit anderen Zahlen davor. Eine andere Reaktion hätte andere Stoffe.',
+        short: 'Dieselben Stoffe heißt dieselbe Reaktion.',
+      } },
       { id: 'f3', text: 'Durch das Verdoppeln bleibt die Masse nicht mehr erhalten.', misconception: 'chem-mis-gl-multiple-wrong', why: {
-        detailed: 'Werden alle Koeffizienten gleich vervielfacht, ändert sich an der Atombilanz nichts, also auch nichts an der Erhaltung der Masse.',
-        short: 'Gleich vervielfacht heißt: Bilanz und Masse bleiben erhalten.',
+        detailed: 'Beim Verdoppeln kommen links und rechts von jedem Element gleich viele Atome hinzu. Prüfe, ob sich die Masse dann auf einer Seite anders ändern kann als auf der anderen.',
+        short: 'Links und rechts kommt gleich viel hinzu.',
       } },
       { id: 'f4', text: 'Hier entsteht je Sauerstoffmolekül mehr Wasser als in der üblichen Gleichung.', misconception: 'chem-mis-gl-ratio-fixed', why: {
-        detailed: String.raw`Verhältnisse ändern sich beim Vervielfachen nicht: $4 : 2$ ist dasselbe wie $2 : 1$.`,
-        short: 'Beim Vervielfachen bleiben alle Verhältnisse gleich.',
+        detailed: 'Rechne nach: Wie viele Wassermoleküle entstehen hier je Sauerstoffmolekül, und wie viele in der üblichen Gleichung?',
+        short: 'Wasser je Sauerstoffmolekül in beiden Gleichungen nachrechnen.',
       } },
     ],
     hint: 'Zähle die Atome nach und vergleiche die Koeffizienten mit denen der bekannten Gleichung.',
@@ -1462,7 +1489,10 @@ const LEVEL_3: readonly Question[] = [
     prompt: 'Magnesium verbrennt einmal in einem offenen Tiegel und einmal in einem fest verschlossenen Glaskolben voller Luft. Was zeigt die Waage nach der Reaktion?',
     correct: { id: 'r', text: 'Im offenen Tiegel ist die Probe schwerer geworden, der verschlossene Kolben wiegt so viel wie vorher.' },
     wrong: [
-      { id: 'f1', text: 'In beiden Fällen ist die Masse kleiner geworden, weil Magnesium verbrannt ist.', misconception: 'chem-mis-gl-mass-changes' },
+      { id: 'f1', text: 'In beiden Fällen ist die Masse kleiner geworden, weil Magnesium verbrannt ist.', misconception: 'chem-mis-gl-mass-changes', why: {
+        detailed: 'Magnesium verschwindet beim Verbrennen nicht, es wird zu einem Oxid. Überlege für jedes Gefäß, ob dabei Stoff hinein- oder hinausgelangen kann.',
+        short: 'Magnesium verschwindet nicht.',
+      } },
       { id: 'f2', text: 'In beiden Fällen ist die Masse größer geworden, weil Sauerstoff gebunden wurde.', misconception: 'chem-mis-gl-mass-changes', why: {
         detailed: 'Im verschlossenen Kolben war der Sauerstoff schon vor der Reaktion im Gefäß und wurde mitgewogen. Durch die Wand kommt kein Atom hinzu.',
         short: 'Im geschlossenen Gefäß kommt kein Atom hinzu.',
@@ -1495,7 +1525,10 @@ const LEVEL_3: readonly Question[] = [
     prompt: String.raw`Kalk wird in einem offenen Tiegel stark erhitzt: $\ce{CaCO3 -> CaO + CO2}$. Danach ist der Inhalt des Tiegels leichter. Warum widerspricht das nicht der Erhaltung der Masse?`,
     correct: { id: 'r', text: 'Das Kohlenstoffdioxid ist als Gas entwichen; zählt man es mit, ist die Masse gleich geblieben.' },
     wrong: [
-      { id: 'f1', text: 'Bei hoher Temperatur gilt die Erhaltung der Masse nicht.', misconception: 'chem-mis-gl-mass-changes' },
+      { id: 'f1', text: 'Bei hoher Temperatur gilt die Erhaltung der Masse nicht.', misconception: 'chem-mis-gl-mass-changes', why: {
+        detailed: 'Die Erhaltung der Masse gilt bei jeder Temperatur. Prüfe, ob alle Produkte im offenen Tiegel bleiben.',
+        short: 'Die Erhaltung der Masse gilt immer.',
+      } },
       { id: 'f2', text: 'Ein Teil der Atome wird beim Erhitzen zerstört.', misconception: 'chem-mis-gl-atoms-transform' },
       { id: 'f3', text: 'Die Gleichung ist nicht ausgeglichen: Links steht ein Stoff, rechts stehen zwei.', misconception: 'chem-mis-gl-molecules-conserved' },
       { id: 'f4', text: 'Calcium hat sich beim Erhitzen in ein leichteres Element umgewandelt.', misconception: 'chem-mis-gl-atoms-transform' },
@@ -1623,7 +1656,10 @@ const LEVEL_3: readonly Question[] = [
         detailed: 'Die beiden Atome sind nicht lose, sondern durch eine Bindung fest miteinander verbunden.',
         short: 'Die beiden Atome sind fest gebunden.',
       } },
-      { id: 'f4', text: 'Weil man jedes Element in Gleichungen mit einer 2 schreibt.', misconception: 'chem-mis-gl-diatomic-metal' },
+      { id: 'f4', text: 'Weil man jedes Element in Gleichungen mit einer 2 schreibt.', misconception: 'chem-mis-gl-diatomic-metal', why: {
+        detailed: 'Metalle wie Natrium oder Eisen stehen als einzelnes Symbol in Gleichungen; eine 2 bekommen nur wenige Elemente.',
+        short: 'Nur wenige Elemente bekommen eine 2.',
+      } },
     ],
     hint: 'Wie liegt Sauerstoff in der Luft vor: als einzelne Atome oder als Teilchen aus mehreren Atomen?',
     explanation: {

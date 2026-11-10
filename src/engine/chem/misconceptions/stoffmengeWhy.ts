@@ -64,7 +64,7 @@ export const STOFFMENGE_WHY: Readonly<Record<string, Explanation>> = {
     short: "Jedes Element zählt so oft, wie sein Index angibt.",
   },
   'chem-mis-st-atom-for-molecule': {
-    detailed: String.raw`Viele Elemente wie Wasserstoff, Stickstoff, Sauerstoff und Chlor kommen als Moleküle aus zwei Atomen vor. Gefragt ist dann die molare Masse des Moleküls, also beide Atome zusammen. Die Zahl im Periodensystem gilt für ein Mol einzelner Atome.`,
+    detailed: String.raw`Einige Elemente, nämlich Wasserstoff, Stickstoff, Sauerstoff und die Halogene, kommen als Moleküle aus zwei Atomen vor. Gefragt ist dann die molare Masse des Moleküls, also beide Atome zusammen. Die Zahl im Periodensystem gilt für ein Mol einzelner Atome.`,
     short: "Bei zweiatomigen Elementen zählen beide Atome des Moleküls.",
   },
   'chem-mis-st-bracket': {

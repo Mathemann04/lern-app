@@ -131,6 +131,10 @@ export const GLEICHUNGEN_WHY: Readonly<Record<string, Explanation>> = {
     detailed: 'Reicht der Sauerstoff nicht, wird der Kohlenstoff nicht vollständig oxidiert, und es entstehen andere Kohlenstoffverbindungen als bei genug Sauerstoff. Der Wasserstoff reagiert dagegen auch dann noch zu Wasser. Für die Gleichung zählt man den Sauerstoff rechts jedes Mal neu, denn die Produkte enthalten weniger O-Atome als bei der vollständigen Verbrennung.',
     short: 'Bei Sauerstoffmangel entstehen andere Kohlenstoffprodukte; den Sauerstoff neu zählen.',
   },
+  'chem-mis-gl-incomplete-hydrogen': {
+    detailed: 'Wasserstoff reagiert bereitwillig mit Sauerstoff. Auch wenn der Sauerstoff knapp ist, wird der Wasserstoff des Brennstoffs zu Wasser; als Gas bleibt er nicht übrig. Was bei Sauerstoffmangel anders verläuft, betrifft den Kohlenstoff.',
+    short: 'Auch bei Sauerstoffmangel wird der Wasserstoff zu Wasser.',
+  },
   'chem-mis-gl-alkane-formula': {
     detailed: String.raw`Alkane haben die allgemeine Formel $\ce{C_nH_{2n+2}}$: Jedes C-Atom der Kette trägt zwei H-Atome, dazu kommt an jedem Ende noch eines. Methan $\ce{CH4}$ ist das kleinste Beispiel: $2 \cdot 1 + 2 = 4$.`,
     short: String.raw`Alkane: $\ce{C_nH_{2n+2}}$.`,
