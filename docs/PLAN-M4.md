@@ -814,10 +814,17 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   Auswahl, Paare zählen, Typ AXₙEₘ, Gestalt, ΔEN, Polarität, Namen);
   zwischenmolekulare Kräfte; Metallbindung, Hybridisierung und
   Molekülorbitale; „Klausuraufgabe 3 üben“.
+  Bilder (Wunsch des Nutzers, 10.11.2026): Ionengitter (z. B.
+  Natriumchlorid) und die Gestalt der Moleküle als selbst gezeichnete Bilder
+  zu den passenden Fragen, aus den Daten der Aufgabe gezeichnet.
   Ausprobieren: PCl₃ im Klausurformat; Calciumphosphat als Formel.
 - **S6: Elektronen und Periodensystem.** Konfiguration und
   Valenzkonfiguration als Auswahl, Quantenzahlen, Steckbrief, Ionenladung,
   Trends; „Klausuraufgabe 1 üben“ und „Klausuraufgabe 2 üben“.
+  Bilder (Wunsch des Nutzers, 10.11.2026): Konfigurationen auch als Bild mit
+  Orbital-Kästchen; bei Fragen zu Gruppe, Periode, Steckbrief und Trends ein
+  Ausschnitt des Periodensystems mit markiertem Element, bei Trends mit Pfeil
+  in Richtung der Zunahme. Gezeichnet aus der Elementtabelle, nicht von Hand.
   Ausprobieren: Valenzkonfiguration von Schwefel; Na, Mg und Cl nach
   Atomradius.
 - **S7: Gleichgewicht und Energie.** Massenwirkungsgesetz als Auswahl, Le

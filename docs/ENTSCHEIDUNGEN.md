@@ -558,3 +558,7 @@ Neue Entscheidungen unten anfügen.
   Grundlagen Methan, Propan und Ethanol (ohne Bruch). Zwei Fehler mehr als im Plan
   (Koeffizient bzw. Index beim Zählen vergessen). Abwechslung mit eigener Kennzahl, weil
   es nur etwa 15 bis 25 sinnvolle Reaktionen je Stufe gibt.
+- 10.11.2026: Mehr Bilder in Aufgaben (wie bei Brilliant): Chemie in S5 und S6
+  (Gitter, Gestalt, Orbital-Kästchen, Ausschnitt des Periodensystems) und N2,
+  Mathe als M6b direkt nach M6, vor M5. Bilder rechnet die Engine, Tests prüfen
+  sie; Bilder zum Anfassen später.

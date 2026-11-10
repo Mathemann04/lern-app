@@ -9,8 +9,9 @@ Stand: 10.11.2026
 | M2b | Brüche nachschärfen: viel mehr Abwechslung (Baukasten statt fester Vorlagen, keine Form doppelt), deutlich schwerer, Stufe 5 auf Profi-Niveau mit Partialbruchzerlegung und Brüchen aus späteren Kapiteln (komplexe Zahlen, Grenzwerte, Teleskopsummen, Hyperbelfunktionen) | fertig |
 | M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten, Vektoren, Additionstheoremen) | fertig |
 | M4 | **Chemie 1**: neues Fach mit Wissensfragen (Auswahl, Zuordnen, Ordnen) und Rechnungen zu allen Themen der Vorlesung, drei Stufen (Grundlagen, Vertiefung, Klausurniveau), Lernkarten, Wiederholung, Probeklausur wie die echte (45 min, 50 Punkte) | in Arbeit: Plan freigegeben ([PLAN-M4.md](PLAN-M4.md)), Klausur-Sprint bis Teil 1 der Klausur (um den 24.11.2026) |
-| M5 | **Werkstoffkunde**: eigenes Fach nach demselben Muster wie Chemie | offen (nach M6; die Skripte kommen vom Nutzer) |
+| M5 | **Werkstoffkunde**: eigenes Fach nach demselben Muster wie Chemie | offen (nach M6 und M6b; die Skripte kommen vom Nutzer; früher, falls die Werkstoffkunde-Klausur früher ist) |
 | M6 | **Neue Struktur** (ersetzt „Themen einzeln üben“, Idee des Nutzers, 10.11.2026): drei getrennte Fragen – was tust du (Tätigkeit als Kachel: Vereinfachen, Gleichungen umstellen, Ableiten), womit (Bausteine ankreuzen, ein Thema gezielt mit „nur“), wie schwer (Stufe = nur Verschachtelung, nie neuer Stoff); aufgeräumte Startseite, Fortschritt je Baustein, „Meine Schwächen“, Knopf „Überspringen“, ohne Kopfzeile, Startseite nur mit Fächern. Entwurf: [PLAN-M6.md](PLAN-M6.md) | offen: als Nächstes nach M4, vor M5 |
+| M6b | **Bilder in Mathe** (Wunsch des Nutzers, 10.11.2026): gemeinsame Zeichen-Grundlage (Koordinatensystem, Graph, Pfeile, Einheitskreis, Zahlenebene); je Baustein ein Bild in Aufgaben und Lernkarten (Graph bei e-Funktion und Logarithmus, Tangente beim Ableiten, Fläche beim Integral, Einheitskreis bei Winkelfunktionen, Pfeile bei Vektoren, Zahlenebene bei komplexen Zahlen); Aufgaben wie „Welcher Graph gehört zur Funktion?“. Später Bilder zum Anfassen (Punkt verschieben). Ausblick in [PLAN-M6.md](PLAN-M6.md) | offen: direkt nach M6, vor M5 |
 | M7 | **Vektoren** als eigenes Gebiet: Rechnen mit Vektoren, Länge, Skalarprodukt, Winkel, Kreuzprodukt, Projektion (ob Geraden und Ebenen dazukommen, klären wir beim Plan) | offen |
 | M8 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
 | M9 | weitere Themen aus Mathematik MB1, „Ableiten" nachschärfen | offen |
@@ -20,9 +21,16 @@ Stand: 10.11.2026
 
 ## Vorgemerkt
 
+- **Bilder in Aufgaben** (Wunsch des Nutzers, 10.11.2026): wie bei Brilliant in
+  allen Fächern mehr mit Bildern lernen. Chemie in S5 und S6 (Gitter, Gestalt
+  der Moleküle, Orbital-Kästchen, Ausschnitt des Periodensystems) und N2;
+  Mathe in M6b. Bilder rechnet die Engine aus den Daten der Aufgabe, selbst
+  gezeichnet (nie aus den Skripten), am Handy und im dunklen Design lesbar;
+  Tests prüfen, dass Bild und Aufgabe zusammenpassen. Bilder zum Anfassen
+  erst, wenn die festen laufen.
 - **Reihenfolge nach Chemie** (Wunsch des Nutzers, 10.11.2026): Nach M4 kommt
-  zuerst M6 (neue Struktur, Entwurf in [PLAN-M6.md](PLAN-M6.md)), danach M5
-  (Werkstoffkunde), damit Werkstoffkunde gleich in der neuen Struktur entsteht.
+  zuerst M6 (neue Struktur, Entwurf in [PLAN-M6.md](PLAN-M6.md)), dann M6b
+  (Bilder in Mathe), danach M5 (Werkstoffkunde), damit Werkstoffkunde gleich in der neuen Struktur entsteht.
 - **Neue Reihenfolge** (Wunsch des Nutzers, 10.11.2026): Chemie zuerst, weil
   sie für den Nutzer gerade am wichtigsten ist. „Brüche" und „Gleichungen
   umstellen" bekommen vorerst keine neuen Inhalte; stattdessen werden ihre
