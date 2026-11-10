@@ -45,8 +45,9 @@ export type RearrangeCheckContext = {
   readonly points: readonly Env[]
   // ab Stufe 4: fertig ist jede gleichwertige Form ohne Doppelbruch
   readonly lenient: boolean
-  // Endform der Engine, wie sie eingetippt wird: Sie ist immer fertig (so zeigt sie der geführte Modus)
-  readonly resultKey: string
+  // Endform der Engine, wie sie eingetippt wird (ohne Reihenfolge der Summanden und Faktoren): Sie ist immer
+  // fertig, so zeigt sie auch der geführte Modus
+  readonly resultForm: string
 }
 
 // Warum ein Ergebnis noch nicht fertig ist
@@ -69,8 +70,8 @@ export function prepareRearrangeCheck(task: RearrangeTask, lenient = false): Rea
   if (!solution) throw new Error(`Die Aufgabe ${equationToLatex(task.equation)} lässt sich nicht auflösen`)
   const points = samplePoints(task, solution.result, createRng(`umstellen-frei:${equationToLatex(task.equation)}`), POINTS, solution.requires)
   const typed = parseLatex(toLatex(solution.result))
-  const resultKey = key(typed.ok ? typed.expr : solution.result)
-  return { task, solution, wrongs: rearrangeWrongAnswers(task, solution), letters: taskVariables(task), points, lenient, resultKey }
+  const resultForm = formKey(typed.ok ? typed.expr : solution.result)
+  return { task, solution, wrongs: rearrangeWrongAnswers(task, solution), letters: taskVariables(task), points, lenient, resultForm }
 }
 
 export function checkRearrangeAnswer(context: RearrangeCheckContext, latex: string): RearrangeVerdict {
@@ -101,7 +102,7 @@ export function checkRearrangeAnswer(context: RearrangeCheckContext, latex: stri
 
   const { points } = context
   if (agrees(answer, (p) => p[t], points)) {
-    if (key(answer) === context.resultKey) return { kind: 'correct' }
+    if (formKey(answer) === context.resultForm) return { kind: 'correct' }
     const reason = context.lenient ? (hasNestedFraction(answer) ? 'nested' : null) : notDone(answer, context.solution.result)
     return reason ? { kind: 'unfinished', reason } : { kind: 'correct' }
   }
@@ -118,6 +119,31 @@ export function checkRearrangeAnswer(context: RearrangeCheckContext, latex: stri
 }
 
 const close = (a: number, b: number) => Math.abs(a - b) <= 1e-7 * Math.max(1, Math.abs(a), Math.abs(b))
+
+// Schlüssel einer Form ohne die Reihenfolge der Summanden und Faktoren: \sqrt{…} + 5 und 5 + \sqrt{…} sind
+// dieselbe Form
+function formKey(e: Expr): string {
+  switch (e.kind) {
+    case 'add':
+      return `+(${e.terms.map(formKey).sort().join(',')})`
+    case 'mul':
+      return `*(${e.factors.map(formKey).sort().join(',')})`
+    case 'neg':
+      return `-(${formKey(e.arg)})`
+    case 'div':
+      return `/(${formKey(e.num)},${formKey(e.den)})`
+    case 'pow':
+      return `^(${formKey(e.base)},${formKey(e.exp)})`
+    case 'root':
+      return `root${e.index}(${formKey(e.arg)})`
+    case 'fn':
+      return `${e.name}(${formKey(e.arg)})`
+    case 'log':
+      return `log(${formKey(e.base)},${formKey(e.arg)})`
+    default:
+      return key(e)
+  }
+}
 
 const MIN_COMPARED_WRONG = 3
 
@@ -265,15 +291,13 @@ export function rearrangeFreeVerdict(v: RearrangeVerdict, target: string): FreeV
       const { id, name } = v.wrong.rule
       return { kind: 'wrong', title: 'Nicht ganz.', error: { id, name, why: whyOf(v.wrong) } }
     }
-    // kein einzelner Fehler (der Fortschritt zählt keinen davon), dafür die Regel zu jedem
+    // kein einzelner Fehler (der Fortschritt zählt keinen davon), dafür jeder mit seiner Regel
     case 'knownErrors': {
-      const names = v.wrongs.map((w) => `„${w.rule.name}“`)
-      const which = `${names.slice(0, -1).join(', ')} oder ${names.at(-1)}`
       const rules = v.wrongs.map((w) => `${w.rule.name}: ${whyOf(w).short}`).join('\n')
       return {
         kind: 'wrong',
         title: 'Nicht ganz.',
-        message: `Dein Ergebnis passt zu ${v.wrongs.length === 2 ? 'zwei' : 'mehreren'} typischen Fehlern: ${which}. Prüfe diese Stellen in deiner Rechnung.`,
+        message: `Dein Ergebnis passt zu ${v.wrongs.length === 2 ? 'zwei' : 'mehreren'} typischen Fehlern. Prüfe diese Stellen in deiner Rechnung:`,
         explanation: { detailed: rules, short: rules },
       }
     }

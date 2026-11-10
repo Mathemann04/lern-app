@@ -242,6 +242,14 @@ describe('Umstellen frei: die Endform der Engine ist fertig', () => {
     expect(checkRearrangeAnswer(c, toLatex(c.solution.result))).toEqual({ kind: 'correct' })
     expect(checkRearrangeAnswer(c, '-\\frac{1}{2}\\ln\\left(\\frac{2y-\\frac{2q}{r}+p}{2}\\right)')).toEqual({ kind: 'unfinished', reason: 'nested' })
   })
+
+  it('auch mit anderer Reihenfolge der Summanden', () => {
+    const level3 = prepareRearrangeCheck(generateRearrangeTask({ level: 3, seed: 107 }).task)
+    expect(checkRearrangeAnswer(level3, '\\sqrt{c\\left(y-d\\right)-ab}+5')).toEqual({ kind: 'correct' })
+    expect(checkRearrangeAnswer(level3, '5+\\sqrt{c\\left(y-d\\right)-ab}')).toEqual({ kind: 'correct' })
+    const level5 = prepareRearrangeCheck(generateRearrangeTask({ level: 5, seed: 569 }).task, true)
+    expect(checkRearrangeAnswer(level5, '-\\sqrt{\\frac{m}{4p\\left(y-\\frac{q}{r}\\right)}}+m')).toEqual({ kind: 'correct' })
+  })
 })
 
 describe('Umstellen frei: Determinanten (Stufe 5, Teil 8a)', () => {
@@ -270,9 +278,9 @@ describe('Umstellen frei: Determinanten (Stufe 5, Teil 8a)', () => {
     const v = prepareRearrangeFree({ level: 5, seed: 1460 }).check(swapped)
     expect(v.kind).toBe('wrong')
     expect(v.error).toBeUndefined()
-    expect(v.message).toContain('„Haupt- und Nebendiagonale vertauscht“')
-    expect(v.message).toContain('„Beim Rüberbringen das Vorzeichen nicht gewechselt“')
-    expect(v.explanation?.detailed).toContain('Erst die Hauptdiagonale')
+    expect(v.message).toContain('passt zu mehreren typischen Fehlern')
+    expect(v.explanation?.detailed).toContain('Haupt- und Nebendiagonale vertauscht: Erst die Hauptdiagonale')
+    expect(v.explanation?.detailed).toContain('Beim Rüberbringen das Vorzeichen nicht gewechselt: ')
   })
 
   it('Stufe 5: Lösung richtig, falsche Ergebnisse der Determinanten als Fehler erkannt', () => {
