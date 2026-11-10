@@ -19,6 +19,7 @@ export type ChemErrorRule = {
 
 const ATOMBAU = 'chem-atombau'
 const STOFFMENGE = 'chem-stoffmenge'
+const GLEICHUNGEN = 'chem-gleichungen'
 
 export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
   {
@@ -200,6 +201,87 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
     why: {
       detailed: String.raw`$N = n \cdot N_A$ zählt die Teilchen der Formel, also Moleküle oder Formeleinheiten. Enthält jedes davon mehrere Atome des gesuchten Elements, musst du noch mit dieser Zahl malnehmen: dem Index, bei einer Klammer oder bei Kristallwasser malgenommen.`,
       short: 'Noch mit der Zahl der Atome je Molekül bzw. Formeleinheit malnehmen.',
+    },
+  },
+  // Reaktionsgleichungen (S3b)
+  {
+    id: 'chem-balance-index',
+    course: GLEICHUNGEN,
+    name: 'Index statt Koeffizient geändert',
+    wrongFormula: String.raw`\ce{Mg + O2 -> MgO2}`,
+    why: {
+      detailed: String.raw`Ein Index gehört zur Formel des Stoffes: Ändert man ihn, entsteht ein anderer Stoff ($\ce{H2O2}$ ist Wasserstoffperoxid, kein Wasser). Ausgleichen darf man nur mit den Koeffizienten vor den Formeln; sie sagen, wie viele Teilchen eines Stoffes reagieren.`,
+      short: 'Nur die Zahlen vor den Formeln ändern, nie die Indizes.',
+    },
+  },
+  {
+    id: 'chem-balance-single-atom',
+    course: GLEICHUNGEN,
+    name: String.raw`Einzelatom statt $\mathrm{X_2}$`,
+    wrongFormula: String.raw`\ce{H2 + O -> H2O}`,
+    why: {
+      detailed: String.raw`Wasserstoff, Sauerstoff, Stickstoff und die Halogene kommen als Elemente nicht als einzelne Atome vor, sondern als zweiatomige Moleküle: $\ce{H2}$, $\ce{O2}$, $\ce{N2}$, $\ce{F2}$, $\ce{Cl2}$, $\ce{Br2}$, $\ce{I2}$. So stehen sie auch in der Gleichung.`,
+      short: String.raw`Diese Elemente immer als Moleküle: $\ce{H2}$, $\ce{O2}$, $\ce{N2}$, $\ce{Cl2}$ usw.`,
+    },
+  },
+  {
+    id: 'chem-balance-partly-doubled',
+    course: GLEICHUNGEN,
+    name: 'Nur teilweise ausgeglichen',
+    wrongFormula: String.raw`\ce{2 C2H6 + 7 O2 -> 2 CO2 + 6 H2O}`,
+    why: {
+      detailed: 'Ändert sich ein Koeffizient, ändert sich die Zahl der Atome aller Elemente in diesem Stoff. Deshalb muss nach jedem Schritt jedes Element noch einmal gezählt werden; beim Ganzzahlig-Machen werden alle Koeffizienten mit derselben Zahl malgenommen.',
+      short: 'Alle Koeffizienten anpassen und zum Schluss jedes Element zählen.',
+    },
+  },
+  {
+    id: 'chem-balance-oxygen',
+    course: GLEICHUNGEN,
+    name: 'Sauerstoffatome falsch gezählt',
+    wrongFormula: String.raw`\ce{C4H10 + 13 O2 -> 4 CO2 + 5 H2O}`,
+    why: {
+      detailed: String.raw`Jedes $\ce{O2}$ bringt zwei Sauerstoffatome mit. Die Zahl vor $\ce{O2}$ ist deshalb die Hälfte der Sauerstoffatome, die noch fehlen; Sauerstoff, der schon im Brennstoff steckt (bei Alkoholen), wird vorher abgezogen.`,
+      short: String.raw`Fehlende O-Atome zählen, durch 2 teilen: Jedes $\ce{O2}$ bringt zwei mit.`,
+    },
+  },
+  {
+    id: 'chem-balance-water-oxygen',
+    course: GLEICHUNGEN,
+    name: 'Sauerstoff im Wasser vergessen',
+    wrongFormula: String.raw`\ce{C3H8 + 3 O2 -> 3 CO2 + 4 H2O}`,
+    why: {
+      detailed: String.raw`Bei der Verbrennung landet Sauerstoff an zwei Stellen: im $\ce{CO2}$ und im $\ce{H2O}$. Beim Zählen der Sauerstoffatome rechts müssen beide Produkte mitzählen.`,
+      short: String.raw`Auch jedes $\ce{H2O}$ enthält ein Sauerstoffatom.`,
+    },
+  },
+  {
+    id: 'chem-balance-co',
+    course: GLEICHUNGEN,
+    name: String.raw`$\ce{CO}$ statt $\ce{CO2}$`,
+    wrongFormula: String.raw`\ce{2 CH4 + 3 O2 -> 2 CO + 4 H2O}`,
+    why: {
+      detailed: String.raw`Bei einer vollständigen Verbrennung reagiert der Kohlenstoff ganz zu Kohlenstoffdioxid $\ce{CO2}$. Kohlenstoffmonoxid $\ce{CO}$ entsteht nur, wenn zu wenig Sauerstoff da ist (unvollständige Verbrennung).`,
+      short: String.raw`Vollständige Verbrennung: Kohlenstoff wird zu $\ce{CO2}$.`,
+    },
+  },
+  {
+    id: 'chem-balance-count-coefficient',
+    course: GLEICHUNGEN,
+    name: 'Koeffizient beim Zählen vergessen',
+    wrongFormula: String.raw`\ce{4 Fe + 3 O2 -> 2 Fe2O3}\text{: links } 2 \text{ O-Atome}`,
+    why: {
+      detailed: 'Der Koeffizient gilt für die ganze Formel dahinter: Zwei Moleküle bringen doppelt so viele Atome mit wie eines. Die Atome eines Elements in einem Stoff sind deshalb Koeffizient mal Index.',
+      short: 'Atome eines Stoffes: Koeffizient mal Index.',
+    },
+  },
+  {
+    id: 'chem-balance-count-index',
+    course: GLEICHUNGEN,
+    name: 'Index beim Zählen vergessen',
+    wrongFormula: String.raw`\ce{4 Fe + 3 O2 -> 2 Fe2O3}\text{: links } 3 \text{ O-Atome}`,
+    why: {
+      detailed: 'Der Index zählt, wie oft ein Atom in einem einzigen Teilchen vorkommt. Wie viele Atome ein Stoff in die Gleichung bringt, ist deshalb Koeffizient mal Index, nicht der Koeffizient allein.',
+      short: 'Atome eines Stoffes: Koeffizient mal Index, nicht der Koeffizient allein.',
     },
   },
 ]

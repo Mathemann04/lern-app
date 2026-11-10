@@ -564,11 +564,13 @@ kommen mit ihren Schritten dazu. Die Denkfehler der Wissensfragen
 | Dipol | polare Bindung mit Dipolmolekül gleichgesetzt (`chem-polar-bond-dipole`) | CO₂ als Dipol |
 | Formel aus dem Namen | Vorsilbe auf das falsche Element bezogen (`chem-prefix-element`) | Schwefeldioxid als S₂O |
 | Ausgleichen | Index statt Koeffizient geändert (`chem-balance-index`) | Mg + O₂ → MgO₂ statt 2 Mg + O₂ → 2 MgO |
-| Ausgleichen | Sauerstoff nicht ausgeglichen (`chem-balance-oxygen`) | C₄H₁₀ + 6 O₂ → 4 CO₂ + 5 H₂O |
+| Ausgleichen | Sauerstoffatome falsch gezählt (`chem-balance-oxygen`: nicht halbiert oder Sauerstoff im Alkohol nicht abgezogen) | C₄H₁₀ + 13 O₂ → 4 CO₂ + 5 H₂O |
 | Ausgleichen | Sauerstoff im Wasser vergessen (`chem-balance-water-oxygen`) | C₃H₈ + 3 O₂ → 3 CO₂ + 4 H₂O |
-| Ausgleichen | nur teilweise verdoppelt (`chem-balance-partly-doubled`) | 2 C₂H₆ + 7 O₂ → 2 CO₂ + 6 H₂O |
-| Ausgleichen | Einzelatom statt X₂ (`chem-balance-single-atom`) | 2 H + O → H₂O |
+| Ausgleichen | nur teilweise ausgeglichen bzw. verdoppelt (`chem-balance-partly-doubled`) | 2 C₂H₆ + 7 O₂ → 2 CO₂ + 6 H₂O |
+| Ausgleichen | Einzelatom statt X₂ (`chem-balance-single-atom`) | H₂ + O → H₂O |
 | Ausgleichen | CO statt CO₂ (`chem-balance-co`) | 2 CH₄ + 3 O₂ → 2 CO + 4 H₂O |
+| Probe | Koeffizient beim Zählen vergessen (`chem-balance-count-coefficient`, seit S3b) | 4 Fe + 3 O₂: links 2 statt 6 O-Atome |
+| Probe, Verbrennung | Index beim Zählen vergessen (`chem-balance-count-index`, seit S3b) | 4 Fe + 3 O₂: links 3 statt 6 O-Atome; C₄H₁₀: 10 H₂O statt 5 |
 | Molmasse | Index vergessen, auch Atom statt Molekül (`chem-molar-index`; beides ergibt bei Elementen denselben Wert) | M(CO₂) = 28 statt 44 g/mol; M(O₂) = 16 statt 32 g/mol |
 | Molmasse | Ordnungszahlen statt Molmassen (`chem-molar-atomic-number`) | M(C₄H₁₀) = 34 g/mol |
 | Molmasse | Koeffizient mitgerechnet (`chem-molar-coefficient`) | 2 C₄H₁₀: 116 g/mol |
@@ -792,8 +794,16 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   Wissensfragen kommen mit S3b; bis dahin ist das Thema nur mit Rechnungen
   spielbar (in „Themen mischen" zählt es wie ein Thema mit 15 Fragen).
   Der Fehler „Koeffizient mitgerechnet" kommt mit den Reaktionsgleichungen.
-  **S3b**: Reaktionsgleichungen ausgleichen, Verbrennungen, Wissensfragen zu
-  beiden Themen.
+  **S3b** (fertig): Thema „Reaktionsgleichungen" spielbar mit Rechnungen:
+  Ausgleichen über die Atombilanz mit exakten Brüchen (34 Reaktionen), dann
+  die Probe (Atome eines Elements links); vollständige Verbrennung von 15
+  Alkanen und Alkoholen in Schritten (C und H → O₂ → ganzzahlig machen);
+  fünf Lernkarten. Abweichung bei der Abwechslung: Es gibt nur etwa 15 bis 25
+  sinnvolle Reaktionen bzw. Brennstoffe je Stufe; gemessen wird deshalb, dass
+  mindestens 15 verschiedene vorkommen und keine öfter als 12 von 100 (die
+  letzten zehn Formen meidet die App trotzdem).
+  **S3c**: Wissensfragen zu „Reaktionsgleichungen" und „Stoffmenge und
+  Umsatz".
 - **S4: Umsatz, Gase und Lösungen.** Umsatz in drei Schritten, ganze
   Klausuraufgabe 4; Gasgesetz, molares Volumen, Konzentration, Lösung
   ansetzen, Massenanteil, ppm; erste Kachel „Klausuraufgabe 4 üben“ mit

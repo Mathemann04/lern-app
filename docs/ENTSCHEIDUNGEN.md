@@ -550,3 +550,11 @@ Neue Entscheidungen unten anfügen.
   in der Klausur, bei Chlor und Kupfer 35,5 und 63,5. Drei Rechenfehler mehr als im
   Plan: Kristallwasser vergessen, Masse geteilt statt malgenommen, Moleküle statt
   Atome gezählt. Die Skripte des Nutzers liegen nur in der Sitzung, nie im Repo.
+- 10.11.2026: S3b fertig, S3 noch einmal geteilt (S3c: Wissensfragen). Thema
+  „Reaktionsgleichungen“ spielbar mit Rechnungen: Die Engine gleicht über das
+  Gleichungssystem der Atombilanz aus (exakte Brüche, eindeutige Lösung, kleinste
+  ganze Zahlen); falsche Antworten sind nie die richtige Gleichung in anderen Zahlen.
+  Verbrennungen in den Schritten der Klausur (C und H, O₂, ganzzahlig machen), in den
+  Grundlagen Methan, Propan und Ethanol (ohne Bruch). Zwei Fehler mehr als im Plan
+  (Koeffizient bzw. Index beim Zählen vergessen). Abwechslung mit eigener Kennzahl, weil
+  es nur etwa 15 bis 25 sinnvolle Reaktionen je Stufe gibt.

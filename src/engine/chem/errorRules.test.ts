@@ -4,7 +4,10 @@ import { parseRichText } from '../explain/richText.ts'
 import { latexProblem } from '../expr/latexChecks.ts'
 import { formatText } from '../quantity/numberDe.ts'
 import { type Rational, rat, ratDiv, ratMul, toDecimalString } from '../rational.ts'
+import type { Rng } from '../random/rng.ts'
 import { elementBySymbol } from './elements.ts'
+import { balance, coefficientsOf, equationCe, isBalanced, species, withCoefficients } from './equation.ts'
+import { indexChanged, partly, probeStep, singleAtom } from './generators/gleichungen.ts'
 import { parseFormula } from './formula.ts'
 import { atomicNumberSum, molarMass } from './molarMass.ts'
 import { CHEM_ERROR_RULES } from './errorRules.ts'
@@ -109,6 +112,52 @@ describe('Rechenfehler Stoffmenge: Katalogbeispiele', () => {
     expect(m(ratDiv(rat(1, 2), na))).toBe('8,3 · 10⁻²⁵')
     expect(m(ratMul(rat(1, 2), na))).toBe('3,01 · 10²³')
     expect(m(ratMul(rat(1), na))).toBe('6,02 · 10²³')
+  })
+})
+
+describe('Rechenfehler Reaktionsgleichungen: Katalogbeispiele', () => {
+  // Zufall, der immer das erste nimmt (für feste Beispiele)
+  const first: Rng = { next: () => 0, int: (min) => min, pick: (items) => items[0], chance: () => false, shuffle: (items) => [...items] }
+  const fuel = (text: string) => balance([species(text), species('O2')], [species('CO2'), species('H2O')])!
+
+  it('Index statt Koeffizient: Mg + O₂ → MgO₂, H₂ + O₂ → H₂O₂', () => {
+    expect(equationCe(indexChanged({ reactants: [species('Mg'), species('O2')], products: [species('MgO')] })!)).toBe('Mg + O2 -> MgO2')
+    expect(equationCe(indexChanged({ reactants: [species('H2'), species('O2')], products: [species('H2O')] })!)).toBe('H2 + O2 -> H2O2')
+  })
+
+  it('Einzelatom statt X₂: H₂ + O → H₂O bzw. 4 H + O₂ → 2 H₂O', () => {
+    const water = { reactants: [species('H2'), species('O2')], products: [species('H2O')] }
+    expect(equationCe(singleAtom(water, { ...first, pick: (items) => items[1] })!)).toBe('H2 + O -> H2O')
+    expect(equationCe(singleAtom(water, first)!)).toBe('4 H + O2 -> 2 H2O')
+  })
+
+  it('Nur teilweise ausgeglichen: 2 C₂H₆ + 7 O₂ → 2 CO₂ + 6 H₂O', () => {
+    const correct = fuel('C2H6')
+    const cs = coefficientsOf(correct)
+    const eq = withCoefficients(correct, cs.map((c, i) => (i === 2 ? rat(2) : c)))
+    expect(equationCe(eq)).toBe('2 C2H6 + 7 O2 -> 2 CO2 + 6 H2O')
+    expect(isBalanced(eq)).toBe(false)
+    expect(isBalanced(partly(correct, first)!)).toBe(false)
+  })
+
+  it('Sauerstoff falsch gezählt und Sauerstoff im Wasser vergessen', () => {
+    // Butan: rechts 2 · 4 + 5 = 13 Sauerstoffatome; nicht halbiert 13 O₂ statt 13/2 O₂
+    expect(equationCe(fuel('C4H10'))).toBe('2 C4H10 + 13 O2 -> 8 CO2 + 10 H2O')
+    // Propan: nur der Sauerstoff im CO₂ gezählt: 6 Atome, 3 O₂ statt 5 O₂
+    const propane = fuel('C3H8')
+    expect(equationCe(propane)).toBe('C3H8 + 5 O2 -> 3 CO2 + 4 H2O')
+    expect(isBalanced(withCoefficients(propane, coefficientsOf(propane).map((c, i) => (i === 1 ? rat(3) : c))))).toBe(false)
+  })
+
+  it('CO statt CO₂: 2 CH₄ + 3 O₂ → 2 CO + 4 H₂O', () => {
+    expect(equationCe(balance([species('CH4'), species('O2')], [species('CO'), species('H2O')])!)).toBe('2 CH4 + 3 O2 -> 2 CO + 4 H2O')
+  })
+
+  it('Koeffizient bzw. Index beim Zählen vergessen: 4 Fe + 3 O₂ hat links 6, nicht 2 oder 3 O-Atome', () => {
+    const rust = balance([species('Fe'), species('O2')], [species('Fe2O3')])!
+    const step = probeStep(rust, first)!
+    const byRule = Object.fromEntries(step.choices.map((c) => [c.errorRuleId ?? 'richtig', c.content]))
+    expect(byRule).toEqual({ richtig: '$6$', 'chem-balance-count-coefficient': '$2$', 'chem-balance-count-index': '$3$' })
   })
 })
 
