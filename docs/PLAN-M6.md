@@ -121,3 +121,21 @@ neben jedem Baustein). Eigene Themenseiten braucht es dafür nicht.
 - Namen der Stufen (Vorschlag oben).
 - „Integrieren“ als eigene Tätigkeit (heute nur als Werkzeug in Stufe 5 von
   „Gleichungen umstellen“).
+
+## Ausblick: M6b, Bilder in Mathe (direkt nach M6)
+
+Wunsch des Nutzers vom 10.11.2026: wie bei Brilliant mehr mit Bildern lernen.
+Da M6 jedem Baustein leichte Aufgaben gibt, bekommt er in M6b sein Bild:
+
+- Gemeinsame Zeichen-Grundlage in `src/ui/` (SVG, Farben aus der Tonleiter,
+  hell und dunkel): Koordinatensystem, Graph, Tangente, Fläche, Pfeile,
+  Einheitskreis, Zahlenebene.
+- Je Baustein ein Bild in Aufgaben und auf Lernkarten: Graph bei e-Funktion
+  und Logarithmus, Tangente am Graphen beim Ableiten, Fläche beim Integral,
+  Einheitskreis bei Winkelfunktionen, Pfeile bei Vektoren, Zahlenebene bei
+  komplexen Zahlen.
+- Neue Aufgabenart „Welcher Graph gehört zur Funktion?“ (Bilder als
+  Antworten, falsche aus typischen Fehlern).
+- Die Engine rechnet jedes Bild aus der Aufgabe; Tests prüfen, dass Bild und
+  Aufgabe zusammenpassen (z. B. Punkte des Graphen gegen die Funktion).
+- Später: Bilder zum Anfassen (Punkt verschieben, Steigung sehen).

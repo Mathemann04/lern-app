@@ -550,3 +550,7 @@ Neue Entscheidungen unten anfügen.
   in der Klausur, bei Chlor und Kupfer 35,5 und 63,5. Drei Rechenfehler mehr als im
   Plan: Kristallwasser vergessen, Masse geteilt statt malgenommen, Moleküle statt
   Atome gezählt. Die Skripte des Nutzers liegen nur in der Sitzung, nie im Repo.
+- 10.11.2026: Mehr Bilder in Aufgaben (wie bei Brilliant): Chemie in S5 und S6
+  (Gitter, Gestalt, Orbital-Kästchen, Ausschnitt des Periodensystems) und N2,
+  Mathe als M6b direkt nach M6, vor M5. Bilder rechnet die Engine, Tests prüfen
+  sie; Bilder zum Anfassen später.
