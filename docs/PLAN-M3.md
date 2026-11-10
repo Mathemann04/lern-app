@@ -996,7 +996,8 @@ die App den ersten Fehler im Rechenweg, also meist das Werkzeug, auch wenn der
 Fehler später passiert war. Jetzt gilt in Stufe 5: Passt ein Ergebnis zu mehreren
 typischen Fehlern und steckt einer davon im Ausrechnen eines Werkzeugs, nennt die
 App alle mit ihrer Regel und zählt keinen davon im Fortschritt. Außerdem gilt die
-Endform der Engine im freien Modus immer als fertig: Bei wenigen Aufgaben aus 7a bis
+Endform der Engine im freien Modus immer als fertig, auch mit anderer Reihenfolge der
+Summanden und Faktoren: Bei wenigen Aufgaben aus 7a bis
 7c stand im Ergebnis ein Bruch im Bruch, den der freie Modus als „noch nicht
 fertig" ablehnte, obwohl der geführte Modus genau ihn zeigt.
 

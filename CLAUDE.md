@@ -166,7 +166,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     gekürzt; eine Wurzel aus einem Bruch zählt wie ein Buchstabe, z. B.
     $b + \sqrt{\frac{y}{a}}$; ab Stufe 4 (`lenient`) jede gleichwertige Form
     ohne Doppelbruch, $\ln$, $e^{…}$, Winkel- und Umkehrfunktionen zählen wie
-    Buchstaben; die Endform der Engine zählt immer als fertig; steht noch $u$
+    Buchstaben; die Endform der Engine zählt immer als fertig, auch mit anderer
+    Reihenfolge der Summanden und Faktoren; steht noch $u$
     aus der Substitution da: Hinweis, zurück einzusetzen; sonst
     typischer Fehler; passt das Ergebnis zu mehreren und steckt einer davon im
     Ausrechnen eines Werkzeugs (Stufe 5), werden alle genannt und keiner gezählt;
