@@ -61,7 +61,7 @@ feste Regeln: [CHEMIE.md](CHEMIE.md)
 - [x] 0. Plan freigegeben
 - Sprint bis Teil 1 der Klausur (um den 24.11.2026):
   - [x] S1. Fach und Atombau-Fragen (Säure-Base und Redox als „kommt bald“)
-  - [ ] S1b. Ankreuzen: Unterthemen je Thema, Kachel „Themen mischen“
+  - [x] S1b. Ankreuzen: Unterthemen je Thema, Kachel „Themen mischen“
   - [ ] S2. Erste Rechnungen (Protonen, Neutronen, Elektronen; Energie des Lichts)
   - [ ] S3. Molmasse, Stoffmenge, Reaktionsgleichungen
   - [ ] S4. Umsatz, Gase und Lösungen, Klausuraufgabe 4 üben
@@ -674,3 +674,10 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   jede Frage zeigt bei jedem Wiederkommen andere falsche Antworten. Knopf „Frage
   melden“ mit Liste in den Einstellungen, Galerie „Fragen durchsehen“, neue Farben
   und Bilder. Die Elementtabelle kommt mit S2.
+- 10.11.2026: M4 S1b fertig (Wunsch des Nutzers: wie bei der Mathe-Idee für M6 per
+  Häkchen wählen, was drankommt; Antwort „Beides“). Jedes Chemie-Thema hat Unterthemen
+  (Atombau: Stoffe, Trennverfahren, Reaktionen; Kern, Hülle und ihre Teilchen; Isotope
+  und Ionen; Atommodelle; Licht und Spektren), auf der Themenseite ankreuzbar; die
+  Kachel „Themen mischen“ unter „Chemie 1“ mischt die angekreuzten Themen (gewichtet
+  nach der Zahl ihrer Fragen, Runden je Thema), „Weitermachen“ setzt eine Mischung fort.
+  Ab S2 bringt jeder Schritt seine Unterthemen mit.
