@@ -178,7 +178,7 @@ const LEVEL_1: readonly Question[] = [
         short: 'Die Zeichen stammen nicht aus dem Deutschen; (f) gibt es nicht.',
       } },
     ],
-    hint: 'Das Kürzel stammt vom lateinischen und englischen Wort für flüssig.',
+    hint: 'Die Kürzel stammen aus dem Lateinischen und Englischen, nicht aus dem Deutschen.',
     explanation: {
       detailed: String.raw`(l) kommt von lateinisch liquidus und englisch liquid, flüssig. Flüssiges Wasser schreibt man $\ce{H2O(l)}$, Eis $\ce{H2O(s)}$ und Wasserdampf $\ce{H2O(g)}$.`,
       short: '(l) heißt flüssig.',
@@ -337,7 +337,7 @@ const LEVEL_1: readonly Question[] = [
         short: 'Mit 0 stünde der Stoff gar nicht in der Gleichung.',
       } },
     ],
-    hint: String.raw`Wie schreibt man in der Mathematik $1 \cdot x$ kürzer?`,
+    hint: 'Setze für die fehlende Zahl verschiedene Werte ein und zähle jedes Mal Kupfer und Sauerstoff auf beiden Seiten.',
     explanation: {
       detailed: 'Den Koeffizienten 1 schreibt man nicht hin. Hier reagieren also zwei Kupferatome mit einem Sauerstoffmolekül zu zwei Formeleinheiten Kupfer(II)-oxid. Probe: links und rechts je 2 Cu- und 2 O-Atome.',
       short: 'Ohne Zahl davor ist der Koeffizient 1.',
@@ -444,7 +444,7 @@ const LEVEL_1: readonly Question[] = [
         short: 'Magnesium ist ein Metall und steht als einzelnes Symbol.',
       } },
     ],
-    hint: 'Denk an die Gase, aus denen Luft hauptsächlich besteht.',
+    hint: 'Nur einige Nichtmetalle kommen als Moleküle aus zwei Atomen vor; Metalle gehören nicht dazu.',
     explanation: {
       detailed: String.raw`Stickstoff kommt als Molekül $\ce{N2}$ vor, in dem zwei Atome fest gebunden sind. Ebenso Wasserstoff, Sauerstoff und die Halogene Fluor, Chlor, Brom und Iod. Metalle, Kohlenstoff und Schwefel stehen dagegen als einzelnes Symbol in der Gleichung.`,
       short: 'Stickstoff besteht aus Molekülen mit zwei Atomen.',
@@ -483,7 +483,7 @@ const LEVEL_1: readonly Question[] = [
         short: String.raw`Fluor steht als $\ce{F2}$ in Gleichungen.`,
       } },
     ],
-    hint: 'Zweiatomig sind nur wenige Nichtmetalle. Welches der Elemente ist ein Metall?',
+    hint: 'Sieben Elemente kommen als Moleküle aus zwei Atomen vor. Zu welchen Gruppen des Periodensystems gehören sie?',
     explanation: {
       detailed: String.raw`Kalium ist ein Metall; in Gleichungen steht es als $\ce{K}$, etwa in $\ce{2 K + Br2 -> 2 KBr}$. Als Moleküle aus zwei Atomen stehen nur Wasserstoff, Stickstoff, Sauerstoff und die Halogene in Gleichungen.`,
       short: String.raw`Kalium ist ein Metall und steht als $\ce{K}$ in Gleichungen.`,

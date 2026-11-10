@@ -802,8 +802,10 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   sinnvolle Reaktionen bzw. Brennstoffe je Stufe; gemessen wird deshalb, dass
   mindestens 15 verschiedene vorkommen und keine öfter als 12 von 100 (die
   letzten zehn Formen meidet die App trotzdem).
-  **S3c**: Wissensfragen zu „Reaktionsgleichungen" und „Stoffmenge und
-  Umsatz".
+  **S3c** (fertig): Wissensfragen zu „Reaktionsgleichungen" (53, Unterthemen
+  Lesen, Ausgleichen, Verbrennung) und „Stoffmenge und Umsatz" (52, Unterthemen
+  Molare Masse und Stoffmenge), je 17 bis 18 je Stufe, je 35 Denkfehler;
+  danach mischt die App Fragen und Rechnungen wie beim Atombau.
 - **S4: Umsatz, Gase und Lösungen.** Umsatz in drei Schritten, ganze
   Klausuraufgabe 4; Gasgesetz, molares Volumen, Konzentration, Lösung
   ansetzen, Massenanteil, ppm; erste Kachel „Klausuraufgabe 4 üben“ mit
