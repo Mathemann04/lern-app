@@ -77,6 +77,35 @@ export function holdsAt(e: Equation, points: readonly Env[]): boolean {
   return results.length >= points.length / 2 && results.length > 0 && results.every(Boolean)
 }
 
+// Ist die Gleichung irgendwo definiert, mit allen Buchstaben positiv (auch der gesuchten Variable)? Eine falsche
+// Gleichung, die es nirgends ist, hat keine Lösung, z. B. \sqrt{x^2 - (x + a)^2} = y oder \arccos\left(e^{2x}\right) = y.
+// Gewählt wird wie bei den Prüfstellen auf logarithmischer Skala, aber in einem weiteren Bereich.
+export function definedSomewhere(e: Equation, rng: Rng, count = 60): boolean {
+  const letters = [...new Set([...variablesOf(e.lhs), ...variablesOf(e.rhs)])]
+  for (let i = 0; i < count; i++) {
+    const env: Record<string, number> = {}
+    for (const name of letters) env[name] = 0.01 * 2000 ** rng.next()
+    if (!Number.isNaN(evaluate(e.lhs, env)) && !Number.isNaN(evaluate(e.rhs, env))) return true
+  }
+  return false
+}
+
+// Hängt die Gleichung von t ab? An Zufallsstellen mit zwei Werten für t verglichen: x + a - x = b hängt nicht von x ab,
+// auch wenn x noch dasteht
+export function dependsOn(e: Equation, t: string, rng: Rng, count = 20): boolean {
+  const letters = [...new Set([...variablesOf(e.lhs), ...variablesOf(e.rhs)])].filter((name) => name !== t)
+  const diff = (env: Env) => evaluate(e.lhs, env) - evaluate(e.rhs, env)
+  const value = () => SMALLEST * (LARGEST / SMALLEST) ** rng.next()
+  for (let i = 0; i < count; i++) {
+    const env: Record<string, number> = {}
+    for (const name of letters) env[name] = value()
+    const u = diff({ ...env, [t]: value() })
+    const v = diff({ ...env, [t]: value() })
+    if (Number.isFinite(u) && Number.isFinite(v) && Math.abs(u - v) > 1e-7 * Math.max(1, Math.abs(u), Math.abs(v))) return true
+  }
+  return false
+}
+
 // Gilt die Gleichung an höchstens der Hälfte der definierten Stellen (sicher eine andere Gleichung)?
 export function clearlyFails(e: Equation, points: readonly Env[]): boolean {
   const results = points.map((p) => holds(e, p)).filter((r) => r !== null)

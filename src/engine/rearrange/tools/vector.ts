@@ -16,12 +16,12 @@ export type LengthTool = Extract<Tool, { kind: 'length' }>
 export type DotTool = Extract<Tool, { kind: 'dot' }>
 export type AngleTool = Extract<Tool, { kind: 'angle' }>
 
-export type LengthMistake = 'eq-abs-root' | 'eq-abs-termwise'
-export const LENGTH_MISTAKES: readonly LengthMistake[] = ['eq-abs-root', 'eq-abs-termwise']
+export type LengthMistake = 'eq-vec-length-root' | 'eq-vec-length-termwise'
+export const LENGTH_MISTAKES: readonly LengthMistake[] = ['eq-vec-length-root', 'eq-vec-length-termwise']
 export type DotMistake = 'eq-vec-dot-sign' | 'eq-vec-dot-cross'
 export const DOT_MISTAKES: readonly DotMistake[] = ['eq-vec-dot-sign', 'eq-vec-dot-cross']
-export type AngleMistake = 'eq-vec-not-divided' | 'eq-vec-one-length' | 'eq-vec-sine' | 'eq-abs-root' | DotMistake
-export const ANGLE_MISTAKES: readonly AngleMistake[] = ['eq-vec-not-divided', 'eq-vec-one-length', 'eq-vec-sine', 'eq-abs-root', 'eq-vec-dot-sign', 'eq-vec-dot-cross']
+export type AngleMistake = 'eq-vec-not-divided' | 'eq-vec-one-length' | 'eq-vec-sine' | 'eq-vec-length-root' | DotMistake
+export const ANGLE_MISTAKES: readonly AngleMistake[] = ['eq-vec-not-divided', 'eq-vec-one-length', 'eq-vec-sine', 'eq-vec-length-root', 'eq-vec-dot-sign', 'eq-vec-dot-cross']
 
 const hasLetter = (e: Expr) => subterms(e).some((s) => s.kind === 'var')
 const isZeroExpr = (e: Expr) => e.kind === 'num' && e.value.n === 0n
@@ -45,7 +45,7 @@ const squares = (vector: readonly Expr[]) => tidySum(vector.map(squareOf))
 
 // \lvert\vec u\rvert mit einem typischen Fehler (Wurzel vergessen, Einträge addiert); null, wenn er nichts ändert
 export function lengthValue(vector: readonly Expr[], mistake: LengthMistake | null): Expr | null {
-  if (mistake === 'eq-abs-termwise') {
+  if (mistake === 'eq-vec-length-termwise') {
     // nur ein Eintrag: \lvert\vec u\rvert ist dieser Eintrag, gliedweise ändert nichts
     if (vector.filter((e) => !(e.kind === 'num' && e.value.n === 0n)).length < 2) return null
     return tidySum(vector.map((e) => signedPart(e).magnitude))
@@ -53,7 +53,7 @@ export function lengthValue(vector: readonly Expr[], mistake: LengthMistake | nu
   const s = squares(vector)
   const r = asRational(s)
   const root = r && squareRootOf(r)
-  if (mistake === 'eq-abs-root') return root === 1n ? null : s
+  if (mistake === 'eq-vec-length-root') return root === 1n ? null : s
   return root !== null ? num(root) : sqrt(s)
 }
 
@@ -79,7 +79,7 @@ function lengthProduct(lu: Expr, lv: Expr): Expr {
 // nichts ändert oder danach kein x mehr dasteht
 export function cosineValue(left: readonly Expr[], right: readonly Expr[], mistake: AngleMistake | null): Expr | null {
   const dot = dotValue(left, right, mistake === 'eq-vec-dot-sign' || mistake === 'eq-vec-dot-cross' ? mistake : null)
-  const root = mistake === 'eq-abs-root'
+  const root = mistake === 'eq-vec-length-root'
   const lu = lengthValue(left, null)
   const lv = lengthValue(right, null)
   if (!dot || !lu || !lv) return null
@@ -92,8 +92,8 @@ export function cosineValue(left: readonly Expr[], right: readonly Expr[], mista
   let den: Expr
   if (root) {
     // die Längen ohne Wurzel (also ihre Quadrate)
-    const su = lengthValue(left, 'eq-abs-root')
-    const sv = lengthValue(right, 'eq-abs-root')
+    const su = lengthValue(left, 'eq-vec-length-root')
+    const sv = lengthValue(right, 'eq-vec-length-root')
     if (!su && !sv) return null
     den = lengthProduct(su ?? lu, sv ?? lv)
     if (den.kind === 'root') return null

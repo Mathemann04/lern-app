@@ -1,15 +1,15 @@
 import fc from 'fast-check'
 import { describe, expect, it } from 'vitest'
 import { contains, key } from '../../expr/compare.ts'
-import { evaluate } from '../../expr/evaluate.ts'
+import { type Env, evaluate } from '../../expr/evaluate.ts'
 import { latexProblem } from '../../expr/latexChecks.ts'
 import { equationToLatex, toLatex } from '../../expr/print.ts'
-import { type Expr, E, IMAG, PI, add, div, eq, ln, mul, neg, num, pow, sqrt, sub, variable } from '../../expr/types.ts'
+import { type Equation, type Expr, E, IMAG, PI, add, div, eq, ln, mul, neg, num, pow, sqrt, sub, variable } from '../../expr/types.ts'
 import { checkRearrangeAnswer, prepareRearrangeCheck, prepareRearrangeFree } from '../../check/rearrangeAnswer.ts'
 import { createRng } from '../../random/rng.ts'
 import { latexWidthEm } from '../../tasks/latexWidth.ts'
 import { generateRearrangeTask } from '../../tasks/rearrangeTerms.ts'
-import { holds, samplePoints } from '../check.ts'
+import { definedSomewhere, holds, samplePoints } from '../check.ts'
 import { rearrangeWrongAnswers } from '../errorRules.ts'
 import { hasNestedFraction } from '../finished.ts'
 import { solveTask, stepEquationLatex } from '../isolate.ts'
@@ -253,6 +253,7 @@ describe('Beispiele aus dem Plan', () => {
     expect(toLatex(angleOf([x, a], [one, num(0)]))).toBe('\\sphericalangle\\left(\\begin{pmatrix} x \\\\ a \\end{pmatrix}, \\begin{pmatrix} 1 \\\\ 0 \\end{pmatrix}\\right)')
     expect(toLatex(dotOf([x, a], [b, c]))).toBe('\\begin{pmatrix} x \\\\ a \\end{pmatrix} \\cdot \\begin{pmatrix} b \\\\ c \\end{pmatrix}')
     expect(toLatex(ln(lengthOf([x, a])))).toBe('\\ln \\left\\lvert \\begin{pmatrix} x \\\\ a \\end{pmatrix} \\right\\rvert')
+    expect(toLatex(ln(absOf(z(x, a))))).toBe('\\ln \\left\\lvert x + a\\mathrm{i} \\right\\rvert')
     // die Buchstaben der Einträge gehören zur Aufgabe, \mathrm{i} nicht
     expect(taskVariables({ equation: eq(absOf(z(x, a)), y), target: 'x', conditions: [] })).toEqual(['a', 'x', 'y'])
     expect(taskVariables({ equation: eq(angleOf([x, a], [b, c]), y), target: 'x', conditions: [] })).toEqual(['a', 'b', 'c', 'x', 'y'])
@@ -281,12 +282,13 @@ describe('Baukasten (Nummern 1 bis 1000 der Stufe 5)', () => {
     }
   })
 
-  it('der freie Modus nimmt das Ergebnis der Engine als richtig und fertig an, mit π-Taste, wenn π im Ergebnis steht', () => {
+  it('der freie Modus nimmt das Ergebnis der Engine als richtig und fertig an, mit π-Taste, wenn π im Ergebnis steht oder ein Winkel einer komplexen Zahl in der Aufgabe', () => {
     for (const g of generated) {
       const c = prepareRearrangeCheck(g.task, true)
       expect(checkRearrangeAnswer(c, toLatex(c.solution.result)), taskLatex(g.task)).toEqual({ kind: 'correct' })
       const keyboard = prepareRearrangeFree(g.ref).keyboard
-      expect(keyboard.kind === 'rearrange' && keyboard.pi === toLatex(c.solution.result).includes('\\pi'), taskLatex(g.task)).toBe(true)
+      const pi = toLatex(c.solution.result).includes('\\pi') || toolsIn(g.task.equation).some((t) => t.tool.kind === 'arg')
+      expect(keyboard.kind === 'rearrange' && keyboard.pi === pi, taskLatex(g.task)).toBe(true)
     }
   })
 
@@ -311,13 +313,21 @@ describe('Baukasten (Nummern 1 bis 1000 der Stufe 5)', () => {
     }
   })
 
-  it('in jeder Aufgabe eine Frage zum Werkzeug (mindestens ein typischer Fehler im Schritt), meist mehrere', () => {
+  it('in jeder Aufgabe eine Frage zum Werkzeug (mindestens ein typischer Fehler im Schritt), meist mehrere; keine falsche Gleichung doppelt oder ohne Lösung', () => {
     let several = 0
+    const diff = (e: Equation, env: Env) => evaluate(e.lhs, env) - evaluate(e.rhs, env)
     for (const g of generated) {
       const s = solveTask(g.task)!
       const wrong = rearrangeWrongAnswers(g.task, s).filter((w) => w.stepIndex === 0)
       expect(wrong.length, taskLatex(g.task)).toBeGreaterThan(0)
       if (wrong.length >= 2) several++
+      const points = samplePoints(g.task, s.result, createRng('doppelt'), 8, s.requires)
+      wrong.forEach((w, i) => {
+        const label = `${taskLatex(g.task)}: ${equationToLatex(w.after)}`
+        expect(definedSomewhere(w.after, createRng(`irgendwo:${label}`), 400), label).toBe(true)
+        // anders geschrieben dieselbe Gleichung wie eine davor?
+        for (const other of wrong.slice(0, i)) expect(points.every((p) => close(diff(w.after, p), diff(other.after, p))), `${label} wie ${equationToLatex(other.after)}`).toBe(false)
+      })
     }
     expect(several / generated.length).toBeGreaterThan(0.9)
   })

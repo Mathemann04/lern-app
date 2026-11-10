@@ -246,9 +246,15 @@ export type PolarWork = {
   readonly constants: readonly { readonly z: string; readonly value: string }[]
   readonly power: boolean
   readonly quotient: boolean
+  // beim Betrag eines Bruchs: alles unter einer Wurzel
+  readonly oneRoot: boolean
   readonly product: boolean
   // zwei Faktoren mit Buchstaben, ausmultipliziert: (x + a\mathrm{i})(a - x\mathrm{i}) = 2ax + \left(a^{2} - x^{2}\right)\mathrm{i}
   readonly multiplied: string | null
+  // beim Betrag eines Produkts mit einer Zahl wie \lvert 1 + 2\mathrm{i}\rvert = \sqrt{5}: Wurzeln unter eine
+  readonly merged: boolean
+  // Euler-Form im Rumpf: e^{\mathrm{i}x} = \cos x + \mathrm{i}\sin x
+  readonly euler: string | null
 }
 
 // q\mathrm{i}: \mathrm{i}, -\mathrm{i}, a\mathrm{i}, (x + a)\mathrm{i}; mit einer Funktion, Wurzel oder e-Funktion \mathrm{i} vorn
@@ -262,6 +268,20 @@ function imagTerm(q: Expr): Expr {
 
 // p + q\mathrm{i} in dieser Reihenfolge (3 + 4\mathrm{i}, nicht 4\mathrm{i} + 3)
 const complexLatex = (f: ComplexFactor) => toLatex(isZeroExpr(f.im) ? f.re : isZeroExpr(f.re) ? imagTerm(f.im) : add(f.re, imagTerm(f.im)))
+
+// Ist \lvert p + q\mathrm{i}\rvert eine ganze Zahl (\lvert 3 + 4\mathrm{i}\rvert = 5)?
+function squareModulus(f: ComplexFactor): boolean {
+  const r = asRational(squareSum(f, false))
+  return r !== null && squareRootOf(r) !== null
+}
+
+// Euler-Form im Rumpf als Formel für die Erklärung: e^{\mathrm{i}x} = \cos x + \mathrm{i}\sin x
+function eulerLatex(body: Expr): string | null {
+  const term = subterms(body).find((s) => s.kind === 'pow' && isE(s.base) && hasImag(s.exp))
+  const angle = term?.kind === 'pow' ? imagCoefficient(term.exp) : null
+  if (!term || !angle) return null
+  return `${toLatex(term)} = ${toLatex(fn('cos', angle))} + \\mathrm{i}${toLatex(fn('sin', angle))}`
+}
 
 export function polarWork(t: AbsTool | ArgTool): PolarWork | null {
   const factors = complexFactors(t.body)
@@ -294,12 +314,18 @@ export function polarWork(t: AbsTool | ArgTool): PolarWork | null {
       }
     })
   const multiplied = t.kind === 'arg' && factors.filter((f) => hasLetter(f.re, f.im)).length >= 2 && shown.length === 1
+  // Betrag eines Bruchs: alles unter einer Wurzel (\sqrt{\frac{x^2 + a^2}{x^2 + b^2}}), nicht ohne Wurzel (beim
+  // Quadrat) und nicht mit einer Zahl davor oder darunter (\frac{\sqrt{e^{2x} + a^2}}{13})
+  const value = t.kind === 'abs' ? absValue(t, null) : null
   return {
     parts,
     constants,
     power: factors.some((f) => Math.abs(f.power) > 1),
     quotient: factors.some((f) => f.power < 0),
+    oneRoot: value?.kind === 'root' && value.arg.kind === 'div',
     product: factors.filter((f) => f.power > 0).length > 1 && !multiplied,
     multiplied: multiplied ? `${factors.map((f) => `(${complexLatex(f)})`).join('')} = ${complexLatex(shown[0])}` : null,
+    merged: value?.kind === 'root' && value.arg.kind !== 'div' && factors.some((f) => !hasLetter(f.re, f.im) && !squareModulus(f)),
+    euler: eulerLatex(t.body),
   }
 }

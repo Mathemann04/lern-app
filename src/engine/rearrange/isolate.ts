@@ -180,7 +180,11 @@ export function stepLabel(step: RearrangeStep, taskTarget: string): string {
       // spitzer Winkel als Buchstabe (Teil 8b): mit \tan y geschrieben
       if (step.operand?.kind === 'fn' && step.operand.name === 'tan') {
         const angle = step.operand.arg
-        return `Mit $${operand} = ${toLatex(div(fn('sin', angle), fn('cos', angle)))}$ zusammenfassen`
+        const tan = `$${operand} = ${toLatex(div(fn('sin', angle), fn('cos', angle)))}$`
+        // steht noch kein \sin y da (x nur in der Länge), braucht es auch 1 - \cos^2 y = \sin^2 y
+        const sine = [step.before.lhs, step.before.rhs].some((side) => subterms(side).some((s) => s.kind === 'fn' && s.name === 'sin'))
+        if (sine) return `Mit ${tan} zusammenfassen`
+        return `Mit $${toLatex(add(num(1), neg(pow(fn('cos', angle), num(2)))))} = ${toLatex(pow(fn('sin', angle), num(2)))}$ und ${tan} zusammenfassen`
       }
       return subterms(step.after.rhs).some((x) => x.kind === 'div') ? 'Zu einem Bruch zusammenfassen' : 'Zusammenfassen und ordnen'
     case 'expand':
@@ -1280,8 +1284,9 @@ export function acuteSquare(s: Expr, letters?: ReadonlySet<string>): Expr | null
 }
 
 // Faktor neben der Unbekannten ersetzen, die Vorzahl nach vorn: x^2\left(1 - \cos^2 y\right) = … → x^2\sin^2 y = …,
-// x^2\left(4 - 4\cos^2 y\right) = … → 4x^2\sin^2 y = … (y ein spitzer Winkel)
-function acutePythagorasStep(e: Equation, t: string, acute: ReadonlySet<string>): Draft | null {
+// x^2\left(4 - 4\cos^2 y\right) = … → 4x^2\sin^2 y = … (y ein spitzer Winkel); mit forget der typische Fehler,
+// das Quadrat zu vergessen (x^2\sin y = …)
+function acutePythagorasStep(e: Equation, t: string, acute: ReadonlySet<string>, forget = false): Draft | null {
   if (acute.size === 0) return null
   for (const s of [e.lhs, e.rhs].flatMap((side) => subterms(side))) {
     if (s.kind !== 'mul' || !s.factors.some((f) => contains(f, t))) continue
@@ -1289,12 +1294,71 @@ function acutePythagorasStep(e: Equation, t: string, acute: ReadonlySet<string>)
       const square = contains(f, t) ? null : acuteSquare(f, acute)
       if (!square) continue
       const parts = factorsOf(square)
-      const product = mul(...parts.slice(0, -1), ...s.factors.filter((g) => g !== f), parts[parts.length - 1])
+      const last = parts[parts.length - 1]
+      const product = mul(...parts.slice(0, -1), ...s.factors.filter((g) => g !== f), forget && last.kind === 'pow' ? last.base : last)
       const replace = new Map([[key(s), product]])
       return { kind: 'pythagoras', operand: f, after: eq(substitute(e.lhs, replace), substitute(e.rhs, replace)) }
     }
   }
   return null
+}
+
+// Buchstaben der Winkel in einer Summe wie 1 - \cos^2 y
+const angleLetters = (e: Expr): ReadonlySet<string> =>
+  new Set(subterms(e).flatMap((s) => (s.kind === 'fn' && s.arg.kind === 'var' ? [s.arg.name] : [])))
+
+// Typischer Fehler beim spitzen Winkel: 1 - \cos^2 y durch \sin y ersetzt, das Quadrat vergessen
+export function acutePythagorasWrong(step: RearrangeStep, t: string): Equation | null {
+  if (step.kind !== 'pythagoras' || step.operand?.kind !== 'add') return null
+  return acutePythagorasStep(step.before, t, angleLetters(step.operand), true)?.after ?? null
+}
+
+// Typischer Fehler beim Ergebnis mit \tan y: \frac{\cos y}{\sin y} als \tan y geschrieben, also \tan y und
+// \frac{1}{\tan y} vertauscht: x = \sqrt{a^2 + b^2}\tan y statt \frac{\sqrt{a^2 + b^2}}{\tan y},
+// \frac{\sqrt{a^2 + b^2}\tan y}{2} statt \frac{\sqrt{a^2 + b^2}}{2\tan y}, \frac{a}{\tan y} statt a\tan y
+export function acuteTanWrong(step: RearrangeStep, t: string): Equation | null {
+  const tan = step.operand
+  if (step.kind !== 'finish' || tan?.kind !== 'fn' || tan.name !== 'tan') return null
+  const without = (fs: readonly Expr[]) => {
+    const i = fs.findIndex((f) => key(f) === key(tan))
+    return i < 0 ? null : [...fs.slice(0, i), ...fs.slice(i + 1)]
+  }
+  const r = step.after.rhs
+  let flipped: Expr | null = null
+  if (r.kind === 'div') {
+    const den = without(factorsOf(r.den))
+    const top = den ? null : without(factorsOf(r.num))
+    if (den) flipped = den.length === 0 ? mul(...factorsOf(r.num), tan) : div(mul(...factorsOf(r.num), tan), mul(...den))
+    else if (top) flipped = div(top.length === 0 ? num(1) : mul(...top), mul(...factorsOf(r.den), tan))
+  } else {
+    const rest = without(factorsOf(r))
+    if (rest) flipped = div(rest.length === 0 ? num(1) : mul(...rest), tan)
+  }
+  // \tan y nicht als Faktor, etwa im Quadrat unter der Wurzel: \sqrt{a^2\tan^2 y - b^2} → \sqrt{\frac{a^2}{\tan^2 y} - b^2}
+  if (!flipped) {
+    const flip = (e: Expr): Expr => {
+      if (key(e) === key(tan)) return div(num(1), tan)
+      switch (e.kind) {
+        case 'add':
+          return add(...e.terms.map(flip))
+        case 'mul':
+          return mul(...e.factors.map(flip))
+        case 'neg':
+          return neg(flip(e.arg))
+        case 'div':
+          return div(flip(e.num), flip(e.den))
+        case 'root':
+          return { ...e, arg: flip(e.arg) }
+        case 'pow':
+          return pow(flip(e.base), e.exp)
+        default:
+          return e
+      }
+    }
+    const wrong = finalForm(flip(r))
+    if (key(wrong) !== key(r)) flipped = wrong
+  }
+  return flipped && eq(variable(t), flipped)
 }
 
 // Endform mit spitzen Winkeln: Stehen \sin p und \cos p nur in geraden Potenzen da (auch unter der Wurzel),

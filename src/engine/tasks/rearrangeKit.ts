@@ -1976,13 +1976,14 @@ const conjugateNumber = (re: Expr, im: Expr): Expr => add(re, neg(imagPart(im)))
 const twice = (x: Expr) => mul(num(2), x)
 const lt = (x: Expr, bound: Expr): Condition => ({ lhs: x, rel: '<', rhs: bound })
 
-// Teil mit x im Real- oder Imaginärteil: x, e^{x}, \sqrt{x} (selten \ln x mit x > 1)
-function polarBlock(rng: Rng, x: Expr, withLog = false): { block: Expr; conditions: Condition[]; label: string } {
+// Teil mit x im Real- oder Imaginärteil: x, e^{x}, \sqrt{x} (selten \ln x mit x > 1); ohne Wurzel (withRoot false)
+// e^{x} statt \sqrt{x}
+function polarBlock(rng: Rng, x: Expr, withLog = false, withRoot = true): { block: Expr; conditions: Condition[]; label: string } {
   const r = rng.next()
   if (r < 0.55) return { block: x, conditions: [], label: '$x$' }
-  if (r < 0.8) return { block: pow(E, x), conditions: [], label: '$e^{x}$' }
-  if (r < 0.92 || !withLog) return { block: sqrt(x), conditions: [], label: '$\\sqrt{x}$' }
-  return { block: ln(x), conditions: [above(x, num(1))], label: '$\\ln x$' }
+  if (r >= 0.92 && withLog) return { block: ln(x), conditions: [above(x, num(1))], label: '$\\ln x$' }
+  if (r >= 0.8 && withRoot) return { block: sqrt(x), conditions: [], label: '$\\sqrt{x}$' }
+  return { block: pow(E, x), conditions: [], label: '$e^{x}$' }
 }
 
 // Betrag eines Bruchs mit x oben und unten (Beispiel aus dem Plan): \left\lvert\frac{x + a\mathrm{i}}{x - b\mathrm{i}}\right\rvert = y
@@ -2033,7 +2034,8 @@ function absBlock(rng: Rng, n: ToolNames): Built {
   const [u, conditions, label] = r < 0.45 ? [pow(E, x), [], '$e^{x}$'] : r < 0.85 ? [sqrt(x), [], '$\\sqrt{x}$'] : [ln(x), [above(x, num(1))], '$\\ln x$']
   const a = n.letter()
   const tool = absOf(rng.chance(0.6) ? complexNumber(u, a) : complexNumber(a, u))
-  const { e, count } = u.kind === 'pow' ? scaleShells(rng, tool, n, 2, 1) : someShells(rng, tool, n, 2, 1)
+  // bei e^{x} nur eine Schale: zwei gäben 4 \cdot 7\lvert…\rvert oder 8 \cdot \frac{…}{4}
+  const { e, count } = u.kind === 'pow' ? scaleShells(rng, tool, n, 1, 1) : someShells(rng, tool, n, 2, 1)
   return { side: e, other: simpleSide(rng, n), conditions, label: `Betrag mit ${label}, ${count} Schalen` }
 }
 
@@ -2076,7 +2078,12 @@ function absVersusX(rng: Rng, n: ToolNames): Built {
   const tool = absOf(complexNumber(x, n.letter()))
   const r = rng.next()
   if (r < 0.45) return { side: div(tool, x), other: simpleSide(rng, n), label: 'Betrag durch den Realteil' }
-  if (r < 0.75) return { side: div(x, tool), other: simpleSide(rng, n), label: 'Realteil durch den Betrag' }
+  if (r < 0.75) {
+    // \frac{bx}{\lvert x + a\mathrm{i}\rvert} = y oder \frac{x}{\lvert x + 3\mathrm{i}\rvert} = y
+    const top = rng.chance(0.5) ? x : letters(n.letter(), x)
+    const im = rng.chance(0.7) ? n.letter() : k(rng, 2, 5)
+    return { side: div(top, absOf(complexNumber(x, im))), other: simpleSide(rng, n), label: 'Realteil durch den Betrag' }
+  }
   return { side: minus(tool, x), other: simpleSide(rng, n), label: 'Betrag minus Realteil' }
 }
 
@@ -2086,8 +2093,10 @@ function absEuler(rng: Rng, n: ToolNames): Built {
   const a = n.letter()
   const r = rng.next()
   if (r < 0.15) {
-    // \left\lvert e^{\mathrm{i}x} + a\mathrm{i}\right\rvert = y mit x < \frac{\pi}{2}: danach \arcsin
-    return { side: absOf(add(pow(E, mul(IMAG, x)), mul(a, IMAG))), other: simpleSide(rng, n), conditions: [lt(x, div(PI, num(2)))], label: 'Betrag in Euler-Form, danach $\\arcsin$' }
+    // \left\lvert be^{\mathrm{i}x} \pm a\mathrm{i}\right\rvert = y mit x < \frac{\pi}{2}: danach \arcsin
+    const euler = rng.chance(0.5) ? pow(E, mul(IMAG, x)) : mul(n.letter(), pow(E, mul(IMAG, x)))
+    const body = rng.chance(0.6) ? add(euler, mul(a, IMAG)) : add(euler, neg(mul(a, IMAG)))
+    return { side: absOf(body), other: simpleSide(rng, n), conditions: [lt(x, div(PI, num(2)))], label: 'Betrag in Euler-Form, danach $\\arcsin$' }
   }
   const euler = rng.chance(0.4) ? pow(E, mul(IMAG, x)) : mul(n.letter(), pow(E, mul(IMAG, x)))
   const body = rng.chance(0.5) ? add(euler, neg(a)) : add(a, euler)
@@ -2099,9 +2108,11 @@ function absEuler(rng: Rng, n: ToolNames): Built {
 
 // Winkel eines Quadrats (Beispiel aus dem Plan): \arg\left((x + a\mathrm{i})^2\right) = y, auch mit e^{x}, \sqrt{x}, \ln x
 function argPower(rng: Rng, n: ToolNames): Built {
-  const { block: u, conditions, label } = polarBlock(rng, n.unknown, true)
+  const { block: u, conditions, label } = polarBlock(rng, n.unknown, true, false)
   const a = n.letter()
-  const z = rng.chance(0.85) || u !== n.unknown ? complexNumber(u, a) : complexNumber(u, plus(u, a))
+  // x mit Vorzahl: (2x + a\mathrm{i})^2, (bx + a\mathrm{i})^2
+  const re = u !== n.unknown || rng.chance(0.6) ? u : rng.chance(0.5) ? twice(u) : letters(n.letter(), u)
+  const z = rng.chance(0.85) || u !== n.unknown ? complexNumber(re, a) : complexNumber(u, plus(u, a))
   const tool = argOf(pow(z, num(2)))
   const r = rng.next()
   const side = r < 0.5 ? tool : r < 0.75 ? div(tool, n.letter()) : plus(div(tool, n.letter()), n.letter())
@@ -2154,9 +2165,9 @@ function argBlock(rng: Rng, n: ToolNames): Built {
 // x im Real- und Imaginärteil: \arg\left(x + (x + a)\mathrm{i}\right) = y
 function argBoth(rng: Rng, n: ToolNames): Built {
   const x = n.unknown
-  const a = n.letter()
+  const a = rng.chance(0.75) ? n.letter() : k(rng, 2, 5)
   const r = rng.next()
-  const [re, im] = r < 0.4 ? [x, plus(x, a)] : r < 0.6 ? [x, plus(twice(x), a)] : r < 0.8 ? [plus(x, a), x] : [plus(x, a), minus(x, a)]
+  const [re, im] = r < 0.4 ? [x, plus(x, a)] : r < 0.6 ? [x, plus(twice(x), a)] : r < 0.8 ? [plus(x, a), x] : [plus(twice(x), a), x]
   const tool = argOf(complexNumber(re, im))
   const side = rng.chance(0.6) ? tool : div(tool, n.letter())
   return { side, other: variable('y'), label: 'Winkel, $x$ im Real- und Imaginärteil' }
@@ -2166,7 +2177,10 @@ function argBoth(rng: Rng, n: ToolNames): Built {
 function argProduct(rng: Rng, n: ToolNames): Built {
   const x = n.unknown
   const a = n.letter()
-  const body = rng.chance(0.5) ? mul(complexNumber(x, a), conjugateNumber(a, x)) : mul(conjugateNumber(a, x), complexNumber(x, a))
+  // Realteil des zweiten Faktors: derselbe Buchstabe, ein anderer oder eine Zahl; der Realteil des Produkts bleibt positiv
+  const r = rng.next()
+  const b = r < 0.5 ? a : r < 0.8 ? n.letter() : k(rng, 2, 5)
+  const body = rng.chance(0.5) ? mul(complexNumber(x, a), conjugateNumber(b, x)) : mul(conjugateNumber(b, x), complexNumber(x, a))
   const side = rng.chance(0.6) ? argOf(body) : div(argOf(body), n.letter())
   return { side, other: variable('y'), label: 'Winkel eines Produkts, $x$ in beiden Faktoren' }
 }
@@ -2182,14 +2196,20 @@ function angleAxis(rng: Rng, n: ToolNames): Built {
   const x = n.unknown
   const acute = [lt(variable('y'), div(PI, num(2)))]
   if (rng.chance(0.25)) {
-    const [a, i] = [n.letter(), rng.int(0, 1)]
-    const u = i === 0 ? [a, x] : [x, a]
-    return { side: angleOf(u, axis(2, i)), other: variable('y'), conditions: acute, label: 'Winkel mit einer Achse, $x$ nur in der Länge' }
+    const a = rng.chance(0.7) ? n.letter() : k(rng, 2, 5)
+    const dim = rng.chance(0.6) ? 2 : 3
+    const i = rng.int(0, dim - 1)
+    const rest = dim === 2 ? [x] : rng.chance(0.5) ? [x, n.letter()] : [n.letter(), x]
+    return { side: angleOf(placed(rest, i, a), axis(dim, i)), other: variable('y'), conditions: acute, label: `Winkel mit einer Achse, $x$ nur in der Länge, ${dim} Einträge` }
   }
   const dim = rng.chance(0.6) ? 3 : 2
   const i = rng.int(0, dim - 1)
+  // die übrigen Einträge Buchstaben, der letzte manchmal eine Zahl (nie zwei Zahlen: \sqrt{4 + 16} bliebe als
+  // \sqrt{20} stehen); x auch mit Vorzahl: (bx, a), (x, a, 3)
   const others = Array.from({ length: dim - 1 }, () => n.letter())
-  const head = rng.chance(0.8) ? x : twice(x)
+  if (rng.chance(0.2)) others[others.length - 1] = k(rng, 2, 5)
+  const r = rng.next()
+  const head = r < 0.7 ? x : r < 0.85 ? twice(x) : letters(n.letter(), x)
   return { side: angleOf(placed(others, i, head), axis(dim, i)), other: variable('y'), conditions: acute, label: `Winkel mit einer Achse, ${dim} Einträge` }
 }
 
@@ -2249,7 +2269,8 @@ function lengthShells(rng: Rng, n: ToolNames): Built {
   if (r < 0.6) return { side: div(lengthOf([pow(E, x), n.letter()]), n.letter()), other: simpleSide(rng, n), label: 'Länge mit $e^{x}$' }
   if (r < 0.8) return { side: div(lengthOf([x, n.letter()]), x), other: simpleSide(rng, n), label: 'Länge durch einen Eintrag' }
   const c = n.letter()
-  return { side: lengthOf([x, n.letter(), n.letter()]), other: mul(c, x), label: 'Länge gleich Vielfaches von $x$' }
+  const entries = rng.chance(0.5) ? [x, n.letter()] : [x, n.letter(), n.letter()]
+  return { side: lengthOf(entries), other: mul(c, x), label: `Länge gleich Vielfaches von $x$, ${entries.length} Einträge` }
 }
 
 // Skalarprodukt, danach quadratisch: (x, a) \cdot (x + b, -c) = y, auch unter einer Wurzel oder im \ln
@@ -2273,9 +2294,14 @@ function dotOrthogonal(rng: Rng, n: ToolNames): Built {
   const a = n.letter()
   const b = n.letter()
   const r = rng.next()
-  if (r < 0.4) return { side: dotOf([plus(x, a), num(1)], [minus(x, a), neg(b)]), other: num(0), label: 'Senkrechte Vektoren, $(x + a)(x - a)$' }
-  if (r < 0.75) return { side: dotOf([x, a], [plus(x, b), neg(n.letter())]), other: num(0), label: 'Senkrechte Vektoren, danach quadratisch' }
-  return { side: dotOf([pow(E, x), a], [pow(E, x), neg(b)]), other: num(0), label: 'Senkrechte Vektoren mit $e^{x}$' }
+  const swap = rng.chance(0.35)
+  const pair = (u: Expr[], v: Expr[]) => (swap ? dotOf([u[1], u[0]], [v[1], v[0]]) : dotOf(u, v))
+  if (r < 0.4) {
+    const c = rng.chance(0.4) ? num(1) : rng.chance(0.6) ? n.letter() : k(rng, 2, 5)
+    return { side: pair([plus(x, a), c], [minus(x, a), neg(b)]), other: num(0), label: 'Senkrechte Vektoren, $(x + a)(x - a)$' }
+  }
+  if (r < 0.75) return { side: pair([x, a], [plus(x, b), neg(n.letter())]), other: num(0), label: 'Senkrechte Vektoren, danach quadratisch' }
+  return { side: pair([pow(E, x), a], [plus(pow(E, x), b), neg(n.letter())]), other: num(0), label: 'Senkrechte Vektoren mit $e^{x}$, danach quadratisch' }
 }
 
 // Skalarprodukt mit Bausteinen: (e^{x}, e^{-x}) \cdot (a, -b) = y, (\sqrt{x}, x) \cdot (-a, b) = y

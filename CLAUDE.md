@@ -87,7 +87,7 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   cos, tan, bei Hyperbelfunktionen $e^x$, sinh, cosh, tanh, bei Wurzeln √,
   bei komplexen Zahlen $\mathrm{i}$; Umstellen mit allen Buchstaben der Aufgabe
   (bis zu sieben) und √, ab Stufe 4 mit $e^x$, ln und $\log_a$, mit $\pi$ im
-  Ergebnis (Stufe 5, Winkel komplexer Zahlen) $\pi$, bei Winkel- und
+  Ergebnis oder einem Winkel einer komplexen Zahl in der Aufgabe (Stufe 5) $\pi$, bei Winkel- und
   Hyperbelfunktionen mit zweiter Seite „Funktionen" (sin, cos, tan, ihre
   Umkehrfunktionen, sinh, cosh, tanh, Areafunktionen; auch bei $f'' = k^2 f$,
   für arcosh und arsinh); wird erst im
@@ -176,7 +176,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     aus der Substitution da: Hinweis, zurück einzusetzen; sonst
     typischer Fehler; passt das Ergebnis zu mehreren und steckt einer davon im
     Ausrechnen eines Werkzeugs (Stufe 5), werden alle genannt und keiner gezählt;
-    $\pi$-Taste, wenn $\pi$ im Ergebnis steht;
+    $\pi$-Taste, wenn $\pi$ im Ergebnis steht oder ein Winkel einer komplexen Zahl in
+    der Aufgabe;
     die Doppelbruch-Prüfung, die freie Prüfung und Baukasten gemeinsam nutzen,
     steht in `rearrange/finished.ts`)
   - `parse/latex.ts`: liest die Eingabe der Mathe-Tastatur (LaTeX) ein, mit
@@ -249,8 +250,12 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     Konstanten aus den Anfangswerten, `odeExplanation`; bei der Determinante
     zeigt die Erklärung die Produkte mit Malpunkt bzw. Linie, Eintrag und
     Vorzeichen beim Entwickeln, `detExplanation`; bei Betrag und Winkel Real- und
-    Imaginärteil und die Regel für Produkt, Bruch und Quadrat, bei Vektoren
-    Skalarprodukt und Längen, `polarExplanation`);
+    Imaginärteil (Euler-Form zuerst) und die Regel für Produkt, Bruch und Quadrat, bei
+    Vektoren Skalarprodukt und Längen, `polarExplanation`; eigene Tipps bei der
+    Euler-Form und bei zwei Faktoren mit $x$, `polarHint`; beim spitzen Winkel als
+    Buchstaben „Was machst du als Nächstes?" zu $1 - \cos^2 y = \sin^2 y$ mit Irrwegen,
+    `acuteQuestion`, und am Ende „Schreibe mit $\tan y$" mit Erklärung,
+    `acuteExplanation`);
     nach der $pq$-Formel „Welche der beiden Lösungen passt?" mit der
     Scheinlösung als falscher Antwort und dem Grund (`rejectReason`); nach dem
     Substituieren sprechen Fragen von $u$ (`step.unknown`);
@@ -314,7 +319,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     als eigenes Zeichen `~r` mit (~r)² = x − a, `radicalAtoms`; ein Baustein
     wie $e^x$, $2^x$, $\ln x$ oder $\sin(2x)$ (nur im Quadrat: $\sin^2 x$), in dem
     allein die Variable steckt, als Unbekannte `~b`, `blockAtoms`; Endform: ein Bruch, gekürzt,
-    Buchstaben-Faktor ausgeklammert), `isolate.ts`
+    Buchstaben-Faktor ausgeklammert; steht vor einer Klammer allein der Winkel eines
+    Buchstabens wie $\cos y$, kommt er dahinter: $(a^2 + b^2)\cos y$), `isolate.ts`
     (Rechenweg: von außen nach innen schälen; vor dem Wurzelziehen oder
     Quadrieren eine Summe mit Brüchen zuerst zu einem Bruch; bei mehrfacher
     Variable Doppelbruch mit Brüchen im Nenner erweitern (Schritt `extend`),
@@ -358,8 +364,11 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     spitzen Winkel als Buchstaben, Bedingung wie $y < \frac{\pi}{2}$ an einen
     Buchstaben, nach dem nicht aufgelöst wird (`acuteLetters`), nach dem
     Ausklammern $1 - \cos^2 y$ durch $\sin^2 y$ ersetzen (Schritt `pythagoras` mit
-    der Summe als `operand`) und das Ergebnis mit $\tan y$ schreiben (`acuteForm`);
-    ältere Aufgaben haben keine solche Bedingung), `tools/` (Stufe 5:
+    der Summe als `operand`) und das Ergebnis mit $\tan y$ schreiben (`acuteForm`;
+    steht noch kein $\sin y$ da, nennt die Beschriftung auch $1 - \cos^2 y = \sin^2 y$),
+    typische Fehler dazu `acutePythagorasWrong` (Quadrat vergessen) und `acuteTanWrong`
+    ($\frac{\cos y}{\sin y}$ als $\tan y$); ältere Aufgaben haben keine solche
+    Bedingung), `tools/` (Stufe 5:
     `tool.ts` Werkzeuge bauen (`derivativeOf`, `integralOf`, `bracketOf`,
     `sumOf`, `seriesOf`, `limitOf`, `odeOf`, `detOf`, `absOf`, `argOf`, `lengthOf`,
     `dotOf`, `angleOf`; bei der
@@ -386,11 +395,13 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     vorn, $\lvert 1 + \mathrm{i}\rvert$ unter der Wurzel), Winkel $\arctan\frac{q}{p}$ bei
     positivem Realteil (beim Quadrieren doppelt, Standardwinkel fester Faktoren
     addiert bzw. abgezogen, zwei Faktoren mit $x$ erst ausmultipliziert), typische
-    Fehler, Real- und Imaginärteil für die Erklärung (`polarWork`); `vector.ts`
+    Fehler, Real- und Imaginärteil für die Erklärung (`polarWork`, auch Euler-Form und
+    zusammengefasste Wurzeln); `vector.ts`
     Länge, Skalarprodukt (Produkte wie bei Determinanten aufgeräumt) und Winkel als
     $\arccos\frac{\vec u \cdot \vec v}{\lvert\vec u\rvert \cdot \lvert\vec v\rvert}$ (Länge 1 fällt
-    weg, gleich lange Vektoren ohne Wurzel), typische Fehler (keiner, nach dem kein
-    $x$ mehr dasteht); `tidy.ts` Quadrate, Produkte und Summen aufräumen;
+    weg, gleich lange Vektoren ohne Wurzel), typische Fehler (zur Länge eigene:
+    Einträge addiert, Wurzel vergessen; keiner, nach dem kein $x$ mehr dasteht);
+    `tidy.ts` Quadrate, Produkte und Summen aufräumen;
     `steps.ts` Werkzeug-Schritte `derive`,
     `partial`, `antiderivative`, `bounds`, `sumFormula`, `series`, `limit`, `ode`,
     `det`, `detExpand`, `abs`, `arg`, `length`, `dot`, `angle` und ihre typischen
@@ -402,12 +413,15 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     mit Summe, Reihe, Grenzwert oder Differentialgleichung nur Stellen, an
     denen sich die Aufgabe numerisch ausrechnen lässt;
     mit $u$ nach einer Substitution `withSubstitution`;
-    Gegenprobe durch Einsetzen), `errorRules.ts`
+    Gegenprobe durch Einsetzen; für falsche Gleichungen `definedSomewhere` und
+    `dependsOn`), `errorRules.ts`
     (typische Fehler, Ids `eq-…`, beim Zusammenfassen die aus „Brüche";
     falsche Gleichungen vor einer Substitution mit eigener Substitution
     weitergerechnet;
     je Klammer ein Fehler beim Ausmultiplizieren; nie eine Gleichung, die doch
-    stimmt), `task.ts` (Aufgabe, Bedingungen; mit Differentialgleichungen
+    stimmt; in Aufgaben mit Betrag, Winkel oder Vektoren keine, in der $x$ keine Rolle
+    mehr spielt, keine, die für kein $x$ definiert ist, und keine zwei, die anders
+    geschrieben dieselbe sind), `task.ts` (Aufgabe, Bedingungen; mit Differentialgleichungen
     stehen sie je Funktion in einer Zeile über der Gleichung, `givenLatex`,
     `\begin{gathered}`; ohne sie bleibt `taskLatex` wie bisher; `taskFormLatex`
     ohne gathered und ohne den Namen pmatrix)

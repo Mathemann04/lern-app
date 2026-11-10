@@ -574,9 +574,15 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   $\arg\left((x + a\mathrm{i})^2\right) = y$, auch in Euler-Form) und Vektoren
   (Länge, Skalarprodukt, Winkel zwischen zwei Vektoren). 30 % der Nummern aus 7a,
   alle anderen behalten ihre Aufgabe. 195 Formen unter 200 Aufgaben, im Mittel 8,5
-  Umformungen. Zwölf neue typische Fehler, zwei neue Lernkarten. Beim Winkel mit
+  Umformungen. Vierzehn neue typische Fehler, zwei neue Lernkarten. Beim Winkel mit
   einer Achse rechnet die Engine mit $1 - \cos^2 y = \sin^2 y$ weiter und schreibt
   das Ergebnis mit $\tan y$ (nur bei Aufgaben mit spitzem Winkel $y$, ältere
-  Aufgaben bleiben gleich). Im freien Modus gibt es eine $\pi$-Taste, wenn $\pi$
-  im Ergebnis steht. Browser-Tests mit 5-1899 (Winkel mit der $x$-Achse, geführt),
-  5-381 (Betrag eines Bruchs, frei) und 5-1155 (Winkel mit festem Faktor).
+  Aufgaben bleiben gleich); geführt wird danach gefragt, mit typischen Fehlern.
+  Im freien Modus gibt es eine $\pi$-Taste, wenn $\pi$ im Ergebnis steht oder ein
+  Winkel einer komplexen Zahl in der Aufgabe. Unabhängige Prüfung aus vier
+  Blickwinkeln (Mathematik, Baukasten, Didaktik, Tests): u. a. keine doppelten
+  falschen Antworten mehr, keine ohne Lösung oder ohne $x$, eigene Fehler zur Länge
+  von Vektoren, Euler-Formel in Tipp und Erklärung, mehr Abwechslung im Baukasten.
+  Browser-Tests mit 5-1899 (Winkel mit der $x$-Achse, geführt, mit beiden
+  Lernkarten), 5-465 (Betrag eines Bruchs, frei) und 5-1155 (Winkel mit festem
+  Faktor, Lernkarte, $\pi$-Taste).

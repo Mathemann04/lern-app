@@ -5,7 +5,7 @@ import { parseLatex } from '../parse/latex.ts'
 import { REARRANGE_ERROR_RULES, rearrangeWrongAnswers } from './errorRules.ts'
 import { solveEquation, solveTask } from './isolate.ts'
 import type { Condition } from './task.ts'
-import { absOf, angleOf, argOf, derivativeOf, detOf, dotOf, integralOf, limitOf, odeOf, seriesOf, sumOf } from './tools/tool.ts'
+import { absOf, angleOf, argOf, derivativeOf, detOf, dotOf, integralOf, lengthOf, limitOf, odeOf, seriesOf, sumOf } from './tools/tool.ts'
 
 const p = (latex: string): Expr => {
   const r = parseLatex(latex)
@@ -138,6 +138,8 @@ const TOOL_CATALOG: Array<{ id: string; lhs: Expr; target?: string; conditions?:
   { id: 'eq-vec-sine', lhs: mirror, after: '\\arcsin\\left(\\frac{x^{2} - a^{2}}{x^{2} + a^{2}}\\right) = y' },
   { id: 'eq-vec-dot-sign', lhs: planDot, after: 'x(x + b) + ac = y' },
   { id: 'eq-vec-dot-cross', lhs: planDot, after: 'a(x + b) - cx = y' },
+  { id: 'eq-vec-length-root', lhs: lengthOf([variable('x'), variable('a'), variable('b')]), after: 'x^{2} + a^{2} + b^{2} = y' },
+  { id: 'eq-vec-length-termwise', lhs: lengthOf([variable('x'), variable('a'), variable('b')]), after: 'x + a + b = y' },
 ]
 
 describe('Katalog der Fehlerregeln', () => {
@@ -152,6 +154,57 @@ describe('Katalog der Fehlerregeln', () => {
       expect(found.map((w) => equationToLatex(w.after))).toContain(c.after)
     })
   }
+
+  it('spitzer Winkel als Buchstabe (Teil 8b): beim Ersetzen das Quadrat vergessen, \\frac{\\cos y}{\\sin y} als \\tan y geschrieben', () => {
+    const [a, b, x, y] = ['a', 'b', 'x', 'y'].map(variable)
+    const acute: Condition[] = [{ lhs: y, rel: '<', rhs: div(PI, num(2)) }]
+    const wrongOf = (lhs: Expr, id: string) => {
+      const task = { equation: eq(lhs, y), target: 'x', conditions: acute }
+      return rearrangeWrongAnswers(task, solveTask(task)!).filter((w) => w.rule.id === id).map((w) => equationToLatex(w.after))
+    }
+    const space = angleOf([x, a, b], [num(1), num(0), num(0)])
+    expect(wrongOf(space, 'eq-pythagoras-square')).toEqual(['x^{2}\\sin y = a^{2}\\cos^{2} y + b^{2}\\cos^{2} y'])
+    expect(wrongOf(space, 'eq-tan-flipped')).toEqual(['x = \\sqrt{a^{2} + b^{2}}\\tan y'])
+    // mit einer Vorzahl: 4 - 4\cos^2 y durch 4\sin y ersetzt, \frac{\sqrt{a^2 + b^2}\tan y}{2} statt \frac{\sqrt{a^2 + b^2}}{2\tan y}
+    const twice = angleOf([mul(num(2), x), a, b], [num(1), num(0), num(0)])
+    expect(wrongOf(twice, 'eq-pythagoras-square')).toEqual(['4x^{2}\\sin y = a^{2}\\cos^{2} y + b^{2}\\cos^{2} y'])
+    expect(wrongOf(twice, 'eq-tan-flipped')).toEqual(['x = \\frac{\\sqrt{a^{2} + b^{2}}\\tan y}{2}'])
+    // \sqrt{\left(\frac{a}{\cos y}\right)^2 - a^2} = a\tan y, falsch \frac{a}{\tan y}
+    expect(wrongOf(angleOf([x, a], [num(0), num(1)]), 'eq-tan-flipped')).toEqual(['x = \\frac{a}{\\tan y}'])
+    // ohne Bedingung an y (ältere Aufgaben) weder der Schritt noch die Fehler
+    const old = { equation: eq(space, y), target: 'x', conditions: [] }
+    const ids = rearrangeWrongAnswers(old, solveTask(old)!).map((w) => w.rule.id)
+    expect(ids).not.toContain('eq-pythagoras-square')
+    expect(ids).not.toContain('eq-tan-flipped')
+  })
+
+  it('Betrag, Winkel, Vektoren (Teil 8b): keine falsche Gleichung doppelt und keine, die für kein x definiert ist', () => {
+    const [a, b, x, y] = ['a', 'b', 'x', 'y'].map(variable)
+    const ids = (lhs: Expr, conditions: Condition[] = []) => {
+      const task = { equation: eq(lhs, y), target: 'x', conditions }
+      return rearrangeWrongAnswers(task, solveTask(task)!).filter((w) => w.stepIndex === 0).map((w) => w.rule.id)
+    }
+    // Winkel mit einer Achse in der Ebene: Sinus statt Kosinus und über Kreuz malgenommen ergeben dieselbe Gleichung
+    // (\arcsin\frac{a}{\sqrt{a^2 + x^2}} = \arccos\frac{x}{\sqrt{a^2 + x^2}}), sie steht nur einmal da
+    const axis = ids(angleOf([a, x], [num(1), num(0)]), [{ lhs: y, rel: '<', rhs: div(PI, num(2)) }])
+    expect(axis).toContain('eq-vec-sine')
+    expect(axis).not.toContain('eq-vec-dot-cross')
+    // \sqrt{x^2 - (x + a)^2} ist für kein x definiert, \arccos\left(e^{2x}\right) auch nicht
+    const both = ids(absOf(add(x, mul(add(x, a), IMAG))))
+    expect(both).toContain('eq-abs-root')
+    expect(both).not.toContain('eq-abs-imag-squared')
+    const rotated = ids(angleOf([exp(x), a, b], [exp(x), b, neg(a)]))
+    expect(rotated).toContain('eq-vec-sine')
+    expect(rotated).not.toContain('eq-vec-not-divided')
+    // in keiner falschen Gleichung spielt x keine Rolle mehr: x + a - x = y (gliedweise), y^2 = k^2 + m^2 (beim
+    // Ausmultiplizieren nach der Euler-Form das Mittelglied vergessen)
+    expect(ids(sub(absOf(add(x, mul(a, IMAG))), x))).not.toContain('eq-abs-termwise')
+    const [k, m] = ['k', 'm'].map(variable)
+    const euler = { equation: eq(absOf(add(k, mul(m, exp(mul(IMAG, x))))), y), target: 'x', conditions: [{ lhs: x, rel: '<' as const, rhs: PI }] }
+    const wrong = rearrangeWrongAnswers(euler, solveTask(euler)!)
+    expect(wrong.length).toBeGreaterThan(4)
+    for (const w of wrong) expect(equationToLatex(w.after)).toContain('x')
+  })
 
   it('beim Ableiten die Fehler aus „Ableiten" mit ihrer Stelle', () => {
     const task = { equation: eq(derivativeOf(div(pow(variable('x'), num(2)), add(variable('x'), variable('a')))), variable('y')), target: 'x', conditions: [] }

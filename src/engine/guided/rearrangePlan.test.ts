@@ -278,6 +278,59 @@ describe('Geführt umstellen: Stufe 5 (Werkzeuge)', () => {
     const dot = task(dotOf([x, a], [add(x, b), neg(variable('c'))])).steps[0]
     expect(dot.choices.map((c) => c.errorRuleId).filter(Boolean).sort()).toEqual(['eq-vec-dot-cross', 'eq-vec-dot-sign'])
     expect(dot.explanation.detailed).toContain('x \\cdot (x + b) + a \\cdot (-c)')
+
+    // Euler-Form: Tipp und Erklärung nennen e^{\mathrm{i}x} = \cos x + \mathrm{i}\sin x
+    const [k, m] = ['k', 'm'].map(variable)
+    const euler = task(absOf(add(k, mul(m, exp(mul(IMAG, x))))), [{ lhs: x, rel: '<', rhs: PI }]).steps[0]
+    expect(euler.hint).toContain('e^{\\mathrm{i}x} = \\cos x + \\mathrm{i}\\sin x')
+    expect(euler.explanation.detailed.startsWith('Mit $e^{\\mathrm{i}x} = \\cos x + \\mathrm{i}\\sin x$: Realteil $k + m\\cos x$')).toBe(true)
+    expectRenderable(euler.explanation.detailed, 'Erklärung')
+    // zwei Faktoren mit x: erst ausmultiplizieren (Tipp und Erklärung)
+    const product = task(argOf(mul(add(x, mul(a, IMAG)), sub(a, mul(x, IMAG))))).steps[0]
+    expect(product.hint).toContain('multipliziere erst aus')
+    expect(product.explanation.detailed).toContain('Erst ausmultiplizieren')
+    // fester Faktor mit \lvert 1 + 2\mathrm{i}\rvert = \sqrt{5}: die Wurzeln kommen unter eine
+    const merged = task(absOf(mul(add(num(1), mul(num(2), IMAG)), add(x, mul(a, IMAG))))).steps[0]
+    expect(merged.choices.find((c) => c.correct)?.content).toBe('$\\sqrt{5(x^{2} + a^{2})} = y$')
+    expect(merged.explanation.detailed).toContain('Die Wurzeln kommen unter eine')
+
+    // Betrag eines Bruchs aus Quadraten: ohne Wurzel, also nicht „zusammen unter eine Wurzel“
+    const squares = task(absOf(div(pow(add(x, mul(a, IMAG)), num(2)), pow(sub(x, mul(b, IMAG)), num(2))))).steps[0]
+    expect(squares.choices.find((c) => c.correct)?.content).toBe('$\\frac{x^{2} + a^{2}}{x^{2} + b^{2}} = y$')
+    expect(squares.explanation.detailed).toContain('Betrag oben durch Betrag unten.')
+    expect(squares.explanation.detailed).not.toContain('unter eine Wurzel')
+    expect(first.explanation.detailed).toContain('zusammen unter eine Wurzel')
+  })
+
+  it('spitzer Winkel (Teil 8b): 1 - cos²y = sin²y als Frage mit Irrwegen und typischem Fehler, das Ergebnis mit tan y', () => {
+    const [a, b, x, y] = ['a', 'b', 'x', 'y'].map(variable)
+    const angle = planRearrange(
+      { equation: eq(angleOf([x, a, b], [num(1), num(0), num(0)]), y), target: 'x', conditions: [{ lhs: y, rel: '<', rhs: div(PI, num(2)) }] },
+      { level: 5, seed: 1 },
+    )
+    const move = angle.steps.find((s) => s.id.endsWith('-pythagoras-plan'))
+    expect(move?.question).toBe('In der Klammer steht $1 - \\cos^{2} y$. Wie schreibst du das einfacher?')
+    expect(move?.choices.find((c) => c.correct)?.content).toBe('$1 - \\cos^{2} y = \\sin^{2} y$ einsetzen')
+    expect(move?.choices.find((c) => c.content === '$1 - \\cos^{2} y$ durch $\\sin y$ ersetzen')?.whyWrong).toEqual(REARRANGE_ERROR_TEXTS['eq-pythagoras-square'])
+    expect(move?.choices.map((c) => c.content)).toContain('$1 - \\cos^{2} y$ als $(1 - \\cos y)^{2}$ schreiben')
+    expect(move?.cards).toEqual(['rearrange-trig'])
+    const square = angle.steps.find((s) => s.id.endsWith('-pythagoras'))
+    expect(square?.choices.find((c) => c.errorRuleId === 'eq-pythagoras-square')?.content).toBe('$x^{2}\\sin y = a^{2}\\cos^{2} y + b^{2}\\cos^{2} y$')
+    const finish = angle.steps.at(-1)
+    expect(finish?.question).toBe('Schreibe mit $\\tan y$: Was ist $x$?')
+    expect(finish?.choices.find((c) => c.correct)?.content).toBe('$x = \\frac{\\sqrt{a^{2} + b^{2}}}{\\tan y}$')
+    expect(finish?.choices.find((c) => c.errorRuleId === 'eq-tan-flipped')?.content).toBe('$x = \\sqrt{a^{2} + b^{2}}\\tan y$')
+    expect(finish?.cards).toEqual(['rearrange-trig'])
+    for (const step of [move, square, finish]) {
+      expect(step).toBeDefined()
+      if (!step) continue
+      expectRenderable(step.explanation.detailed, 'Erklärung')
+      expectRenderable(step.hint, 'Tipp')
+      expect(step.hint).not.toContain('\\tan y}')
+      for (const choice of step.choices) if (choice.whyWrong) expectRenderable(choice.whyWrong.detailed, 'Warum falsch')
+    }
+    // die Lernkarte „Winkel- und Hyperbelfunktionen“ gehört jetzt zur Aufgabe
+    expect(angle.steps.flatMap((s) => s.cards)).toContain('rearrange-trig')
   })
 })
 

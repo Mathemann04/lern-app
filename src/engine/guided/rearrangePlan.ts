@@ -32,6 +32,10 @@ import {
   explainLength,
   explainDot,
   explainAngle,
+  explainAcuteFinish,
+  explainAcuteMove,
+  explainAcutePythagoras,
+  acutePythagorasMoves,
   expMoves,
   factorMoves,
   logMoves,
@@ -57,7 +61,7 @@ import { allNodes, derive } from '../derive/derive.ts'
 import type { RuleId } from '../derive/rules.ts'
 import { contains, subterms } from '../expr/compare.ts'
 import { FN_LATEX, odeLatex, toLatex } from '../expr/print.ts'
-import { type Equation, type Expr, asRational, fn, sub } from '../expr/types.ts'
+import { type Equation, type Expr, asRational, fn, mul, num, pow, sub } from '../expr/types.ts'
 import { readableLatex } from '../fraction/task.ts'
 import { factorize } from '../fraction/factor.ts'
 import { newAtoms, polyToExpr, toRat } from '../rearrange/algebra.ts'
@@ -69,6 +73,7 @@ import {
   type StepKind,
   type Substitution,
   TRIG_OF,
+  acuteSquare,
   hasTargetRoot,
   isNegative,
   negated,
@@ -294,7 +299,8 @@ function denominatorOf(step: RearrangeStep): Expr | null {
 
 // --- Was machst du als Nächstes? ---
 
-type MoveQuestion = { readonly question: string; readonly wrong: readonly WrongMove[]; readonly hint: string }
+// explanation: eigene Erklärung statt der Erklärung der Schrittart
+type MoveQuestion = { readonly question: string; readonly wrong: readonly WrongMove[]; readonly hint: string; readonly explanation?: Explanation }
 
 // t: die Unbekannte des Schritts (nach dem Substituieren u), target: die gesuchte Variable
 function moveQuestion(step: RearrangeStep, t: string, target: string): MoveQuestion | null {
@@ -434,6 +440,8 @@ function moveQuestion(step: RearrangeStep, t: string, target: string): MoveQuest
     }
     case 'pythagoras': {
       const square = step.operand
+      // spitzer Winkel als Buchstabe (Teil 8b): x^2\left(1 - \cos^2 y\right) = …
+      if (square?.kind === 'add') return acuteQuestion(square)
       if (square?.kind !== 'pow' || square.base.kind !== 'fn') return null
       const f = square.base
       const hyperbolic = f.name === 'sinh' || f.name === 'cosh'
@@ -483,6 +491,24 @@ function moveQuestion(step: RearrangeStep, t: string, target: string): MoveQuest
   }
 }
 
+// Spitzer Winkel als Buchstabe (Teil 8b): In der Klammer steht c\left(1 - \cos^2 y\right), richtig ist c\sin^2 y;
+// Irrwege: c\sin y (Quadrat vergessen), c(1 - \cos y)^2 (binomische Formel), wieder ausmultiplizieren
+function acuteQuestion(sum: Expr): MoveQuestion | null {
+  const replaced = acuteSquare(sum)
+  if (!replaced) return null
+  const parts = replaced.kind === 'mul' ? replaced.factors : [replaced]
+  const square = parts.at(-1)
+  const f = subterms(sum).find((s) => s.kind === 'fn')
+  if (square?.kind !== 'pow' || !f) return null
+  const front = parts.slice(0, -1)
+  return {
+    question: `In der Klammer steht $${toLatex(sum)}$. Wie schreibst du das einfacher?`,
+    wrong: acutePythagorasMoves(toLatex(sum), toLatex(mul(...front, square.base)), toLatex(mul(...front, pow(sub(num(1), f), num(2))))),
+    hint: REARRANGE_HINTS.acutePythagoras,
+    explanation: explainAcuteMove(toLatex(sum), toLatex(replaced)),
+  }
+}
+
 function moveStep(step: RearrangeStep, previous: RearrangeStep | undefined, q: MoveQuestion, t: string, index: number, rng: Rng, established: string[]): GuidedStep {
   const label = stepLabel(step, t)
   const correct: Choice = { id: 'richtig', content: label, correct: true }
@@ -495,7 +521,7 @@ function moveStep(step: RearrangeStep, previous: RearrangeStep | undefined, q: M
     question: q.question,
     choices: rng.shuffle([correct, ...wrong]),
     hint: q.hint,
-    explanation: explainMove(step.kind === 'combine' ? COMBINE_EXPLANATION[combineContext(step)] : step.kind, label, t, unknownOf(step, t)),
+    explanation: q.explanation ?? explainMove(step.kind === 'combine' ? COMBINE_EXPLANATION[combineContext(step)] : step.kind, label, t, unknownOf(step, t)),
     established,
     cards: cardsOf(step, t, previous),
   }
@@ -585,6 +611,8 @@ function resultStep(
     }),
   )
   const finish = step.kind === 'finish'
+  // spitzer Winkel als Buchstabe (Teil 8b): Ergebnis mit \tan y
+  const tan = finish && step.operand ? toLatex(step.operand) : null
   const choose = step.kind === 'choose'
   // das erste Werkzeug: „Was steht da eigentlich?"
   const tool = TOOL_QUESTIONS[step.kind]
@@ -593,19 +621,36 @@ function resultStep(
     id: `${index + 1}-${step.kind}`,
     title: finish ? 'Zusammenfassen' : choose ? STEP_NAMES.choose : firstTool ? 'Was steht da eigentlich?' : stepLabel(step, t),
     question: finish
-      ? `Fasse zu einem Bruch zusammen: Was ist $${t}$?`
+      ? tan
+        ? `Schreibe mit $${tan}$: Was ist $${t}$?`
+        : `Fasse zu einem Bruch zusammen: Was ist $${t}$?`
       : choose
         ? 'Welche der beiden Lösungen passt?'
         : (odeQuestion(step) ?? tool ?? 'Was kommt heraus?'),
     choices: rng.shuffle([correct, ...wrong]),
-    hint: finish ? REARRANGE_HINTS.finish : RESULT_HINTS[step.kind] ?? REARRANGE_HINTS.result,
+    hint: finish
+      ? tan
+        ? REARRANGE_HINTS.acuteFinish
+        : REARRANGE_HINTS.finish
+      : step.kind === 'pythagoras' && step.operand?.kind === 'add'
+        ? REARRANGE_HINTS.acutePythagoras
+        : (polarHint(step) ?? RESULT_HINTS[step.kind] ?? REARRANGE_HINTS.result),
     explanation:
       choose && step.operand
         ? explainChoose(toLatex(step.operand), rejectReason(step, t, context), after)
-        : (odeExplanation(step) ?? detExplanation(step) ?? polarExplanation(step) ?? explainResult(step.kind, stepLatex(step.kind, step.before), after)),
+        : (odeExplanation(step) ?? detExplanation(step) ?? polarExplanation(step) ?? acuteExplanation(step) ?? explainResult(step.kind, stepLatex(step.kind, step.before), after)),
     established: [after],
     cards: cardsOf(step, t, previous),
   }
+}
+
+// Spitzer Winkel als Buchstabe (Teil 8b): 1 - \cos^2 y = \sin^2 y einsetzen, Ergebnis mit \tan y
+function acuteExplanation(step: RearrangeStep): Explanation | null {
+  const acute = (step.kind === 'pythagoras' && step.operand?.kind === 'add') || (step.kind === 'finish' && step.operand !== undefined)
+  if (!acute) return null
+  const before = stepLatex(step.kind, step.before)
+  const after = stepLatex(step.kind, step.after)
+  return step.kind === 'finish' ? explainAcuteFinish(before, after) : explainAcutePythagoras(before, after)
 }
 
 // Determinante: die Produkte mit Malpunkt bzw. Linie, Eintrag und Vorzeichen beim Entwickeln
@@ -621,6 +666,18 @@ function detExplanation(step: RearrangeStep): Explanation | null {
   }
   const work = expandWork(tool)
   return work ? explainExpand(work.line, work.entry, work.sign, before, after) : null
+}
+
+// Betrag in Euler-Form (e^{\mathrm{i}x} = \cos x + \mathrm{i}\sin x) und Winkel eines Produkts mit x in beiden Faktoren
+// (erst ausmultiplizieren): eigene Tipps
+function polarHint(step: RearrangeStep): string | null {
+  if (step.kind !== 'abs' && step.kind !== 'arg') return null
+  const tool = activeTool(step.before)?.tool.tool
+  if (!tool || tool.kind !== step.kind) return null
+  const work = polarWork(tool)
+  if (tool.kind === 'abs' && work?.euler) return REARRANGE_HINTS.absEuler
+  if (tool.kind === 'arg' && work?.multiplied) return REARRANGE_HINTS.argMultiplied
+  return null
 }
 
 // Betrag und Winkel komplexer Zahlen, Vektoren (Teil 8b): Real- und Imaginärteil, Quadrate, Produkte der Einträge
@@ -747,6 +804,8 @@ function cardsOf(step: RearrangeStep, t: string, previous: RearrangeStep | undef
     if (contains(den, t)) return [REARRANGE_CARD_IDS.denominator]
   }
   if ((step.kind === 'divide' || step.kind === 'negate') && (previous?.kind === 'factor' || previous?.kind === 'collect')) return [REARRANGE_CARD_IDS.collect]
+  // Ergebnis mit \tan y beim spitzen Winkel (Teil 8b)
+  if (step.kind === 'finish' && step.operand) return [REARRANGE_CARD_IDS.trig]
   if (step.kind === 'combine') {
     const context = combineContext(step)
     if (context === 'multiply') return [REARRANGE_CARD_IDS.denominator, FRACTION_CARD_IDS.add]

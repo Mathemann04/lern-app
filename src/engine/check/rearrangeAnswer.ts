@@ -347,7 +347,8 @@ export function prepareRearrangeFree(ref: TaskRef): FreeTask {
       root: hasRoot(...all),
       exp: hasExp(...all),
       trig: hasTrig(...all) || hasSecondOrderOde(equation),
-      pi: hasPi(context.solution.result),
+      // auch bei jedem Winkel einer komplexen Zahl: Wer Winkel addiert, schreibt \pi ins Ergebnis
+      pi: hasPi(context.solution.result) || toolsIn(equation).some((t) => t.tool.kind === 'arg'),
     },
     check: (latex) => rearrangeFreeVerdict(checkRearrangeAnswer(context, latex), target),
   }
