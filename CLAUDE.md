@@ -9,8 +9,9 @@ den Nutzer zugeschnitten: Maschinenbau, 1. Semester, THU, „Mathematik MB1".
 - Maßstab fürs Niveau: das Buch des Nutzers „Mathe für Ingenieure",
   Kapitel und ihre Themen in der App: [docs/LEHRBUCH.md](docs/LEHRBUCH.md)
 - Meilensteine und aktueller Stand: [docs/ROADMAP.md](docs/ROADMAP.md)
-- Laufender Plan: [docs/PLAN-M4.md](docs/PLAN-M4.md) (Chemie 1, Entwurf,
-  wartet auf Freigabe); feste Regeln für alle Chemie-Inhalte:
+- Laufender Plan: [docs/PLAN-M4.md](docs/PLAN-M4.md) (Chemie 1, freigegeben
+  10.11.2026, Klausur-Sprint S1 bis S9 bis Teil 1 der Klausur um den
+  24.11.2026, danach N1 bis N5); feste Regeln für alle Chemie-Inhalte:
   [docs/CHEMIE.md](docs/CHEMIE.md). Abgeschlossen:
   [docs/PLAN-M1.md](docs/PLAN-M1.md), [docs/PLAN-M2.md](docs/PLAN-M2.md),
   [docs/PLAN-M2b.md](docs/PLAN-M2b.md) (Brüche nachschärfen: Abwechslung und
@@ -606,9 +607,21 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   nicht in Testdateien oder Doku. Alle Inhalte in eigenen Worten, keine
   Folien- oder Aufgabentexte, keine kopierten Bilder, keine Namen von
   Lehrenden. Einzelheiten in docs/CHEMIE.md.
+- **Chemie:** Richtig ist, was die Skripte der Vorlesung oder ein frei
+  zugängliches Tabellenwerk sagen; handschriftliche Ergänzungen und
+  Mitschriften liefern nur Ideen und falsche Antworten. Rechnungen,
+  Gleichungen, Formeln, Konfigurationen und Trends rechnet die Engine;
+  Wissensfragen und Beispiele auf Wissenskarten sichern Tests, eine
+  inhaltliche Prüfung je Schritt und „Frage melden“ ab. Jede Rechnung nennt
+  die Werte, mit denen sie rechnet. Abwechslung: Rechnungen mit den
+  Kennzahlen aus M2b, Wissensfragen nach den Regeln in docs/PLAN-M4.md
+  („Abwechslung“). Schreibweise, Daten, Grenzfälle und Toleranzen in
+  docs/CHEMIE.md.
 - **Fehlerregeln:** Jede neue Fehlerregel bekommt ein Katalogbeispiel in
   `errorRules.test.ts` und einen Eintrag im Katalog (Ableiten:
-  docs/PLAN-M1.md, Brüche: docs/PLAN-M2.md, Umstellen: docs/PLAN-M3.md).
+  docs/PLAN-M1.md, Brüche: docs/PLAN-M2.md, Umstellen: docs/PLAN-M3.md,
+  Chemie: Rechenfehler in docs/PLAN-M4.md, Denkfehler der Wissensfragen in
+  der Galerie).
 - **Lernkarten:** Jede Regel, die in Aufgaben vorkommt, braucht eine Karte in
   `explain/cards.ts`, und jede ihrer Fehlerregeln steht auf einer Karte
   (`cards.test.ts` prüft das; bei Brüchen: jeder Fehler der spielbaren
