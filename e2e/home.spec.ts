@@ -28,7 +28,8 @@ test('Startseite zeigt Fächer mit Gebieten, Kommendes blass, und „Los geht’
   await expect(page.getByRole('link', { name: /^Grundlagen/ })).toBeVisible()
   await expect(page.getByRole('link', { name: /^Differentialrechnung/ })).toBeVisible()
   await expect(page.getByRole('link', { name: /^Aufbau der Materie/ })).toBeVisible()
-  await expect(page.getByText('kommt bald')).toHaveCount(9)
+  // seit S3a ist „Stoffmenge und Umsatz“ spielbar
+  await expect(page.getByText('kommt bald')).toHaveCount(8)
   await expect(page.getByRole('link', { name: /Integralrechnung/ })).toHaveCount(0)
   await expect(page.getByRole('link', { name: /Säuren und Basen/ })).toHaveCount(0)
   await expect(page.getByText('Redox und Elektrochemie')).toBeVisible()

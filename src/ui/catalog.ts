@@ -101,13 +101,14 @@ export const DERIVATIVES = 'ableiten'
 export const FRACTIONS = 'brueche'
 export const REARRANGE = 'umstellen'
 export const ATOMBAU = 'chem-atombau'
+export const STOFFMENGE = 'chem-stoffmenge'
 
 // Chemie-Themen: Ids mit „chem-", Engine aus Wissensfragen (engine/chem/)
 export const isChemCourse = (id: string) => id.startsWith('chem-')
 
 // Themen mit Testseite in der Formel-Galerie (auch solche, die noch nicht spielbar sind); bei Chemie
 // die Seite „Fragen durchsehen"
-export const GALLERY_COURSES: readonly string[] = [DERIVATIVES, FRACTIONS, REARRANGE, ATOMBAU]
+export const GALLERY_COURSES: readonly string[] = [DERIVATIVES, FRACTIONS, REARRANGE, ATOMBAU, STOFFMENGE]
 
 const derivativeLevels: LevelPreview[] = [
   {
@@ -247,6 +248,34 @@ const atombauParts: CoursePart[] = [
   { id: 'isotope-ionen', title: 'Isotope und Ionen', levels: [1, 2, 3] },
   { id: 'modelle', title: 'Atommodelle', levels: [2, 3] },
   { id: 'licht', title: 'Licht und Spektren', levels: [2, 3] },
+]
+
+const stoffmengeLevels: LevelPreview[] = [
+  {
+    level: 1,
+    available: true,
+    title: 'Molare Masse einfacher Formeln, Masse, Stoffmenge und Teilchenzahl',
+    examples: [String.raw`M(\ce{CO2})`, String.raw`n = \frac{m}{M}`],
+  },
+  {
+    level: 2,
+    available: true,
+    title: 'Formeln mit Klammern und Kristallwasser, Rechnungen in zwei Schritten',
+    examples: [String.raw`\ce{Ca(OH)2}`, String.raw`\ce{CuSO4 * 5 H2O}`],
+  },
+  {
+    level: 3,
+    available: true,
+    title: 'Masse, Stoffmenge, Teilchen und Atome am Stück, wie in der Klausur',
+    examples: [String.raw`\ce{Al2(SO4)3}`, String.raw`N = n \cdot N_A`],
+  },
+]
+
+// Unterthemen von „Stoffmenge und Umsatz" (Rechnungen in engine/chem/generators/stoffmenge.ts, part);
+// Umsatz kommt mit S4
+const stoffmengeParts: CoursePart[] = [
+  { id: 'molmasse', title: 'Molare Masse', levels: [1, 2, 3] },
+  { id: 'stoffmenge', title: 'Masse, Stoffmenge und Teilchenzahl', levels: [1, 2, 3] },
 ]
 
 // Thema, das noch kommt (blass mit „kommt bald")
@@ -393,7 +422,17 @@ export const SUBJECTS: readonly Subject[] = [
         tone: 'orange',
         courses: [
           comingSoon('chem-gleichungen', 'Reaktionsgleichungen', 'Aufstellen und ausgleichen, auch Verbrennungen', 'flask'),
-          comingSoon('chem-stoffmenge', 'Stoffmenge und Umsatz', 'Molare Masse, Stoffmenge und Umsatzrechnung', 'flask'),
+          {
+            id: STOFFMENGE,
+            title: 'Stoffmenge und Umsatz',
+            description: 'Molare Masse, Stoffmenge, Teilchenzahl; Umsatzrechnung kommt bald',
+            icon: 'flask',
+            cards: 'chem-stoffmenge',
+            levels: stoffmengeLevels,
+            free: false,
+            focus: true,
+            parts: stoffmengeParts,
+          },
           comingSoon('chem-loesungen', 'Gase und Lösungen', 'Gasgesetz, molares Volumen, Konzentration und Anteile', 'flask'),
         ],
       },

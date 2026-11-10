@@ -573,9 +573,12 @@ kommen mit ihren Schritten dazu. Die Denkfehler der Wissensfragen
 | Molmasse | Ordnungszahlen statt Molmassen (`chem-molar-atomic-number`) | M(C₄H₁₀) = 34 g/mol |
 | Molmasse | Koeffizient mitgerechnet (`chem-molar-coefficient`) | 2 C₄H₁₀: 116 g/mol |
 | Molmasse | Klammer nicht malgenommen (`chem-molar-bracket`) | M(Ca(OH)₂) = 58,1 statt 74,1 g/mol |
+| Molmasse | Kristallwasser vergessen (`chem-molar-hydrate`, seit S3a) | M(CuSO₄ · 5 H₂O) = 159,6 statt 249,6 g/mol |
 | Stoffmenge | n = m · M (`chem-n-times`) | 5,8 g Butan: 336 mol |
 | Stoffmenge | n = M : m (`chem-n-inverted`) | 5,8 g Butan: 10 mol |
-| Teilchenzahl | N = n : N_A (`chem-particles-divided`) | 0,5 mol: 8,3 · 10⁻²⁵ |
+| Masse | m = n : M oder M : n (`chem-m-divided`, seit S3a) | 0,5 mol Wasser: 0,0278 g statt 9 g |
+| Teilchenzahl | Avogadro-Konstante falsch herum verrechnet (`chem-particles-divided`; auch n = N · N_A) | 0,5 mol: 8,3 · 10⁻²⁵ |
+| Teilchenzahl | Moleküle statt Atome gezählt (`chem-atoms-molecules`, seit S3a) | 0,5 mol Wasser: 3,01 · 10²³ statt 6,02 · 10²³ H-Atome |
 | Umsatz | Verhältnis 1 : 1 (`chem-ratio-one`) | Butan → CO₂: 0,1 mol statt 0,4 mol |
 | Umsatz | Verhältnis umgedreht (`chem-ratio-swapped`) | 0,025 mol |
 | Umsatz | nur der Koeffizient des Produkts (`chem-ratio-product-only`) | 0,8 mol |
@@ -780,6 +783,17 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   Gleichung wählen, Schritt für Schritt), Verbrennungen von Alkanen und
   Alkoholen; Fragen und Karten dazu.
   Ausprobieren: M(Ca(OH)₂) geführt, einmal die Klammer vergessen.
+  Geteilt (10.11.2026), damit jeder Teil einzeln ausprobierbar ist:
+  **S3a** (fertig): Thema „Stoffmenge und Umsatz" spielbar mit Rechnungen:
+  Summenformeln lesen (Klammern, Kristallwasser), Molmasse (Atome zählen →
+  Summe), Stoffmenge, Masse, Teilchenzahl und Atome eines Elements; 71 Stoffe
+  mit Namen; Grundlagen und Klausurniveau mit ganzen Werten aus der Aufgabe
+  (Cl 35,5, Cu 63,5), Vertiefung mit dem PSE der App; fünf Lernkarten. Die
+  Wissensfragen kommen mit S3b; bis dahin ist das Thema nur mit Rechnungen
+  spielbar (in „Themen mischen" zählt es wie ein Thema mit 15 Fragen).
+  Der Fehler „Koeffizient mitgerechnet" kommt mit den Reaktionsgleichungen.
+  **S3b**: Reaktionsgleichungen ausgleichen, Verbrennungen, Wissensfragen zu
+  beiden Themen.
 - **S4: Umsatz, Gase und Lösungen.** Umsatz in drei Schritten, ganze
   Klausuraufgabe 4; Gasgesetz, molares Volumen, Konzentration, Lösung
   ansetzen, Massenanteil, ppm; erste Kachel „Klausuraufgabe 4 üben“ mit

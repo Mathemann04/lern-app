@@ -8,7 +8,7 @@ import type { Level } from '../engine/tasks/taskNumber.ts'
 import { rememberShown, shownInRound, startNewRound } from '../state/questionRounds.ts'
 import type { KeyValueStore } from '../state/storage.ts'
 import { ATOMBAU, type Course, FRACTIONS, courseById } from './catalog.ts'
-import { type MixEngine, type MixInput, mixWeights, pickMixed } from './mix.ts'
+import { CALC_ONLY_WEIGHT, type MixEngine, type MixInput, mixWeights, pickMixed } from './mix.ts'
 
 // Themen mischen (S1b): Wahl des Themas nach der Zahl der Fragen seiner Auswahl, Runden je Thema,
 // Ausschluss. Neben dem echten
@@ -217,5 +217,32 @@ describe('Themen mischen: Wahl des Themas', () => {
       { course: ATOMBAU, weight: levelCount(topic.bank, 1) },
       { course: FRACTIONS, weight: 1 },
     ])
+  })
+})
+
+describe('Themen mischen: Thema nur mit Rechnungen (S3a)', () => {
+  it('zählt wie ein Thema mit der Mindestzahl an Fragen und kommt mit Rechnungen dran', () => {
+    const stoffmenge = courseById('chem-stoffmenge')!.course
+    const engines: Record<string, MixEngine> = {
+      [ATOMBAU]: topicEngine(chemTopic(ATOMBAU)!, seeded('rechnungen-a')),
+      'chem-stoffmenge': topicEngine(chemTopic('chem-stoffmenge')!, seeded('rechnungen-s')),
+    }
+    const input: MixInput = {
+      courses: [atombau, stoffmenge],
+      level: 1,
+      engineOf: (course) => engines[course],
+      shownOf: () => new Set(),
+      recentOf: () => [],
+      partsOf: () => undefined,
+      random: seeded('rechnungen-zufall'),
+    }
+    expect(mixWeights(input)).toContainEqual({ course: 'chem-stoffmenge', weight: CALC_ONLY_WEIGHT })
+    const picked = Array.from({ length: 200 }, () => pickMixed(input)!)
+    const fromStoffmenge = picked.filter((p) => p.course === 'chem-stoffmenge')
+    expect(fromStoffmenge.length).toBeGreaterThan(20)
+    for (const p of fromStoffmenge) {
+      expect(decodeSeed(p.seed)?.kind).toBe('generated')
+      expect(p.newRound).toBe(false)
+    }
   })
 })

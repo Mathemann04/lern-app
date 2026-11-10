@@ -7,4 +7,6 @@ import { ATOMBAU_MISCONCEPTIONS } from './atombau.ts'
 // eine Zeile.
 export const MISCONCEPTIONS_BY_COURSE: Readonly<Record<string, readonly MisconceptionName[]>> = {
   'chem-atombau': ATOMBAU_MISCONCEPTIONS,
+  // noch ohne Wissensfragen (kommen mit S3b); die Rechenfehler stehen in chem/errorRules.ts
+  'chem-stoffmenge': [],
 }

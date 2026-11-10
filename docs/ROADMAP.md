@@ -67,6 +67,8 @@ feste Regeln: [CHEMIE.md](CHEMIE.md)
   - [x] S1b. Ankreuzen: Unterthemen je Thema, Kachel „Themen mischen“
   - [x] S2. Erste Rechnungen (Protonen, Neutronen, Elektronen; Energie des Lichts)
   - [ ] S3. Molmasse, Stoffmenge, Reaktionsgleichungen
+    - [x] S3a. Summenformeln, Molmasse, Stoffmenge, Masse, Teilchenzahl (Rechnungen und Karten)
+    - [ ] S3b. Reaktionsgleichungen ausgleichen, Verbrennungen, Wissensfragen
   - [ ] S4. Umsatz, Gase und Lösungen, Klausuraufgabe 4 üben
   - [ ] S5. Bindungen (auch Metallbindung und Hybridisierung)
   - [ ] S6. Elektronen und Periodensystem

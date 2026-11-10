@@ -3,7 +3,10 @@ import { findError } from '../errorCatalog.ts'
 import { parseRichText } from '../explain/richText.ts'
 import { latexProblem } from '../expr/latexChecks.ts'
 import { formatText } from '../quantity/numberDe.ts'
+import { type Rational, rat, ratDiv, ratMul, toDecimalString } from '../rational.ts'
 import { elementBySymbol } from './elements.ts'
+import { parseFormula } from './formula.ts'
+import { atomicNumberSum, molarMass } from './molarMass.ts'
 import { CHEM_ERROR_RULES } from './errorRules.ts'
 import { generatorsOf } from './generators/index.ts'
 import { lightValues } from './generators/light.ts'
@@ -63,6 +66,52 @@ describe('Rechenfehler: Katalogbeispiele', () => {
   })
 })
 
+describe('Rechenfehler Stoffmenge: Katalogbeispiele', () => {
+  const f = (text: string) => parseFormula(text)
+  const m = (r: Rational) => formatText(r)
+
+  it('Index vergessen: M(CO₂) = 28 statt 44, M(O₂) = 16 statt 32 g/mol', () => {
+    expect(m(molarMass(f('CO2'), 'rounded', { ignoreIndices: true }))).toBe('28')
+    expect(m(molarMass(f('O2'), 'rounded', { ignoreIndices: true }))).toBe('16')
+  })
+
+  it('Ordnungszahlen statt Molmassen: M(C₄H₁₀) = 34 g/mol', () => {
+    expect(m(atomicNumberSum(f('C4H10')))).toBe('34')
+  })
+
+  it('Klammer nicht malgenommen: M(Ca(OH)₂) = 58,1 statt 74,1 g/mol', () => {
+    expect(m(molarMass(f('Ca(OH)2'), 'pse', { bracketOnLast: true }))).toBe('58,1')
+    expect(m(molarMass(f('Ca(OH)2'), 'pse'))).toBe('74,1')
+  })
+
+  it('Kristallwasser vergessen: M(CuSO₄ · 5 H₂O) = 159,6 statt 249,6 g/mol', () => {
+    expect(m(molarMass(f('CuSO4*5H2O'), 'pse', { withoutAdducts: true }))).toBe('160')
+    expect(toDecimalString(molarMass(f('CuSO4*5H2O'), 'pse', { withoutAdducts: true }))).toBe('159,6')
+    expect(toDecimalString(molarMass(f('CuSO4*5H2O'), 'pse'))).toBe('249,6')
+  })
+
+  it('n = m · M und n = M : m: 5,8 g Butan ergibt 336 mol bzw. 10 mol statt 0,1 mol', () => {
+    const butane = molarMass(f('C4H10'), 'rounded')
+    const mass = rat(58, 10)
+    expect(m(ratMul(mass, butane))).toBe('336')
+    expect(m(ratDiv(butane, mass))).toBe('10')
+    expect(m(ratDiv(mass, butane))).toBe('0,1')
+  })
+
+  it('m = n : M: 0,5 mol Wasser ergibt 0,0278 g statt 9 g', () => {
+    const water = molarMass(f('H2O'), 'rounded')
+    expect(m(ratDiv(rat(1, 2), water))).toBe('0,0278')
+    expect(m(ratMul(rat(1, 2), water))).toBe('9')
+  })
+
+  it('N = n : N_A: 0,5 mol ergibt 8,3 · 10⁻²⁵; Moleküle statt Atome: 3,01 · 10²³ statt 6,02 · 10²³ H-Atome', () => {
+    const na = rat(6022n * 10n ** 20n)
+    expect(m(ratDiv(rat(1, 2), na))).toBe('8,3 · 10⁻²⁵')
+    expect(m(ratMul(rat(1, 2), na))).toBe('3,01 · 10²³')
+    expect(m(ratMul(rat(1), na))).toBe('6,02 · 10²³')
+  })
+})
+
 describe('Rechenfehler: Namen und Texte', () => {
   it('haben eindeutige Ids, stehen in der Fehlerstatistik und haben eigene Texte', () => {
     const ids = CHEM_ERROR_RULES.map((r) => r.id)
@@ -81,7 +130,9 @@ describe('Rechenfehler: Namen und Texte', () => {
   })
 
   it('kommen jeweils in einer Rechnung vor', () => {
-    const used = new Set([1, 2, 3, 4, 5].flatMap((level) => generatorsOf('chem-atombau', level as 1).flatMap((g) => g.errors)))
-    expect(CHEM_ERROR_RULES.map((r) => r.id).filter((id) => !used.has(id))).toEqual([])
+    for (const rule of CHEM_ERROR_RULES) {
+      const used = new Set([1, 2, 3].flatMap((level) => generatorsOf(rule.course, level as 1).flatMap((g) => g.errors)))
+      expect(used.has(rule.id), rule.id).toBe(true)
+    }
   })
 })

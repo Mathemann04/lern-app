@@ -6,6 +6,7 @@ import { latexProblem } from '../expr/latexChecks.ts'
 import { QUESTION_NO_MAX } from '../quiz/numbers.ts'
 import type { Explanation, Question } from '../quiz/types.ts'
 import { CHEM_TOPICS } from './banks.ts'
+import { generatorsOf } from './generators/index.ts'
 
 // Prüfung jeder Fragensammlung (Plan M4, Teil B „Tests"): Ids, Nummern, Zahl der Fragen je Stufe,
 // Antworten, Denkfehler, Karten und Schreibweise (docs/CHEMIE.md §3)
@@ -82,14 +83,18 @@ describe.each(CHEM_TOPICS.map((t) => [t.bank.course, t] as const))('Fragensammlu
     expect(nos.filter((no) => bank.retired.includes(no))).toEqual([])
   })
 
-  it(`hat mindestens ${MIN_PER_LEVEL} Fragen in jeder spielbaren Stufe`, () => {
+  // Plan M4, „Abwechslung": Wissensfragen erst ab 15 je Stufe; bis dahin ist eine Stufe nur mit ihren
+  // Rechnungen spielbar
+  it(`hat in jeder spielbaren Stufe mindestens ${MIN_PER_LEVEL} Fragen oder keine Fragen, aber Rechnungen`, () => {
     const { course: entry } = courseById(course)!
     for (const level of entry.levels.filter((l) => isLevelAvailable(entry, l.level))) {
-      expect(bank.questions.filter((q) => q.level === level.level).length, `Stufe ${level.level}`).toBeGreaterThanOrEqual(MIN_PER_LEVEL)
+      const count = bank.questions.filter((q) => q.level === level.level && !bank.retired.includes(q.no)).length
+      if (count === 0) expect(generatorsOf(course, level.level).length, `Stufe ${level.level} ohne Fragen und Rechnungen`).toBeGreaterThan(0)
+      else expect(count, `Stufe ${level.level}`).toBeGreaterThanOrEqual(MIN_PER_LEVEL)
     }
   })
 
-  it('ordnet jede Frage einem Unterthema des Katalogs zu, mit genau den Stufen, in denen es Fragen dazu gibt', () => {
+  it('ordnet jede Frage und Rechnung einem Unterthema des Katalogs zu, mit genau den Stufen, in denen es dazu Aufgaben gibt', () => {
     const { course: entry } = courseById(course)!
     const parts = entry.parts ?? []
     expect(parts.length, 'Unterthemen im Katalog (parts)').toBeGreaterThan(0)
@@ -101,8 +106,9 @@ describe.each(CHEM_TOPICS.map((t) => [t.bank.course, t] as const))('Fragensammlu
     const live = bank.questions.filter((q) => !bank.retired.includes(q.no))
     for (const q of live) expect(ids, `${q.id}: Unterthema ${q.part}`).toContain(q.part)
     for (const part of parts) {
-      const levels = [...new Set(live.filter((q) => q.part === part.id).map((q) => q.level))].sort((a, b) => a - b)
-      expect(levels.length, `${part.id}: keine Fragen`).toBeGreaterThan(0)
+      const calcLevels = ([1, 2, 3] as const).filter((level) => generatorsOf(course, level).some((g) => g.part === part.id))
+      const levels = [...new Set([...live.filter((q) => q.part === part.id).map((q) => q.level), ...calcLevels])].sort((a, b) => a - b)
+      expect(levels.length, `${part.id}: keine Aufgaben`).toBeGreaterThan(0)
       expect([...part.levels], `${part.id}: Stufen`).toEqual(levels)
     }
     // jede spielbare Stufe hat mindestens ein Unterthema

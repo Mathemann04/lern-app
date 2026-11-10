@@ -542,3 +542,11 @@ Neue Entscheidungen unten anfügen.
 - 10.11.2026: Neue Struktur als M6 festgehalten (Entwurf: [PLAN-M6.md](PLAN-M6.md)):
   Tätigkeit als Kachel, Bausteine ankreuzen, Stufe nur als Verschachtelung. Reihenfolge
   nach Chemie: erst M6, dann M5 (Werkstoffkunde).
+- 10.11.2026: S3 in zwei Teile geteilt. S3a fertig: Thema „Stoffmenge und Umsatz“
+  spielbar mit Rechnungen (Molmasse mit Rechenweg, Stoffmenge, Masse, Teilchenzahl,
+  Atome eines Elements) und fünf Lernkarten, noch ohne Wissensfragen (erlaubt nach
+  der Regel „mindestens 15 je Stufe, sonst nur Rechnungen“). In der Mischung zählt
+  ein Thema nur mit Rechnungen wie eines mit 15 Fragen. Ganze Werte in Aufgaben wie
+  in der Klausur, bei Chlor und Kupfer 35,5 und 63,5. Drei Rechenfehler mehr als im
+  Plan: Kristallwasser vergessen, Masse geteilt statt malgenommen, Moleküle statt
+  Atome gezählt. Die Skripte des Nutzers liegen nur in der Sitzung, nie im Repo.
