@@ -156,7 +156,8 @@ describe('Beispiele aus dem Plan', () => {
     expect(points.length).toBe(12)
     for (const p of points) expect(holds(task.equation, p)).toBe(true)
     const step = planRearrange(task, { level: 5, seed: 1 }).steps[0]
-    expect(step.question).toBe('Schreibe $\\cos(2x)$ so, dass nur $\\sin x$ vorkommt: Was kommt heraus?')
+    // ohne „nur \sin x": das verriete zwei falsche Antworten
+    expect(step.question).toBe('Schreibe $\\cos(2x)$ mit dem einfachen Winkel: Was kommt heraus?')
     // drei der vier Fehler zum doppelten Winkel
     const ids = step.choices.filter((c) => !c.correct).map((c) => c.errorRuleId ?? '')
     expect(ids.length).toBe(3)
@@ -219,7 +220,10 @@ describe('Baukasten (Nummern 1 bis 1000 der Stufe 5)', () => {
       const points = samplePoints(g.task, s.result, createRng('doppelt'), 8, s.requires)
       wrong.forEach((w, i) => {
         const label = `${taskLatex(g.task)}: ${equationToLatex(w.after)}`
-        expect(definedSomewhere(w.after, createRng(`irgendwo:${label}`), 400), label).toBe(true)
+        // definiert im Bereich der Aufgabe (x < \frac{\pi}{2}), nicht nur irgendwo
+        expect(definedSomewhere(w.after, createRng(`irgendwo:${label}`), 400, g.task.conditions), label).toBe(true)
+        // keine Seite, die nur noch 0 ist
+        for (const side of [w.after.lhs, w.after.rhs]) if (side.kind !== 'num') expect(points.every((p) => Math.abs(evaluate(side, p)) < 1e-9), label).toBe(false)
         expect(dependsOn(w.after, 'x', createRng(`abhängig:${label}`)), label).toBe(true)
         for (const other of wrong.slice(0, i)) expect(points.every((p) => close(diff(w.after, p), diff(other.after, p))), `${label} wie ${equationToLatex(other.after)}`).toBe(false)
       })

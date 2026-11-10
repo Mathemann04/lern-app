@@ -438,7 +438,7 @@ export const REARRANGE_CARD_LIST: readonly Card[] = [
     ],
     memo: 'Sinus gemischt, Kosinus gleich: Beim Sinus einer Summe stehen die Produkte Sinus mal Kosinus, beim Kosinus Kosinus mal Kosinus und Sinus mal Sinus. Beim Sinus bleibt das Vorzeichen der Klammer, beim Kosinus wechselt es. Der doppelte Winkel ist der Fall $\\beta = \\alpha$.',
     note: 'Nie gliedweise: $\\sin(\\alpha + \\beta) \\neq \\sin\\alpha + \\sin\\beta$. Probe mit $\\beta = 0$: Es muss $\\sin\\alpha$ bzw. $\\cos\\alpha$ herauskommen. Bei $\\cos(2x)$ nimmst du die Form mit der Funktion, die sonst in der Gleichung steht: neben $\\sin x$ die Form $1 - 2\\sin^2 x$, neben $\\cos x$ die Form $2\\cos^2 x - 1$. Für den Tangens gilt $\\tan(\\alpha \\pm \\beta) = \\frac{\\tan\\alpha \\pm \\tan\\beta}{1 \\mp \\tan\\alpha \\cdot \\tan\\beta}$.',
-    when: 'Wenn $x$ in $\\sin(x + a)$, $\\cos(x - a)$ oder $\\cos(2x)$ steckt und außerdem noch woanders: erst ausschreiben, dann stehen nur $\\sin x$ und $\\cos x$ da. Steht $x$ nur in $\\sin(x + a)$, hilft gleich der $\\arcsin$.',
+    when: 'Wenn $x$ in $\\sin(x + a)$, $\\cos(x - a)$ oder $\\cos(2x)$ steckt und außerdem noch woanders: erst ausschreiben, dann stehen nur $\\sin x$ und $\\cos x$ da. Steht $x$ nur an dieser einen Stelle, brauchst du kein Additionstheorem.',
     examples: [
       task(theoremOf(sin(add(x, a))), mul(y, cos(x)), 'x', [{ lhs: x, rel: '<', rhs: div(PI, n(2)) }]),
       task(theoremOf(cos(add(x, a))), mul(y, sin(x)), 'x', [{ lhs: x, rel: '<', rhs: div(PI, n(2)) }]),

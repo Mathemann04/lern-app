@@ -780,8 +780,12 @@ export function rearrangeWrongAnswers(task: RearrangeTask, solution: RearrangeSo
       // Kosinus und über Kreuz malgenommen dasselbe)
       if (polar && !dependsOn(c.after, step.unknown ?? t, createRng(`abhängig:${latex}`))) continue
       if (theorem && !isZeroSide(c.after, step.unknown ?? t) && !dependsOn(eq(div(c.after.lhs, c.after.rhs), num(1)), step.unknown ?? t, createRng(`gekürzt:${latex}`))) continue
+      // eine Seite, die nur noch 0 ist (\sin x \cdot \cos a - \cos x \cdot \sin a - \sin(x - a)): Rundungsrest im
+      // Bruch oben, darum eigens geprüft
+      if (theorem && [c.after.lhs, c.after.rhs].some((side) => side.kind !== 'num' && vanishes(side, points))) continue
       if (POLAR_STEPS.has(step.kind)) {
-        if (!definedSomewhere(c.after, createRng(`definiert:${latex}`))) continue
+        // mit Additionstheorem im Bereich der Aufgabe (x < \frac{\pi}{2}); 8b wie bisher ohne Bedingungen
+        if (!definedSomewhere(c.after, createRng(`definiert:${latex}`), theorem ? 200 : 60, theorem ? task.conditions : [])) continue
         if (out.some((w) => w.stepIndex === i && sameEquation(w.after, c.after, points))) continue
       }
       out.push({ rule: rearrangeErrorRule(c.id), stepIndex: i, after: c.after, result: wrongResult(c.after, t, points, optionsFor(c.after)), ...(c.derive ? { derive: c.derive } : {}) })
@@ -808,6 +812,12 @@ function sameEquation(a: Equation, b: Equation, points: readonly Env[]): boolean
     compared++
   }
   return compared > 0
+}
+
+// Ist der Term an allen Prüfstellen 0 (bis auf Rundung), obwohl er nicht als 0 dasteht?
+function vanishes(side: Expr, points: readonly Env[]): boolean {
+  const values = points.map((p) => evaluate(side, p)).filter((v) => !Number.isNaN(v))
+  return values.length > 0 && values.every((v) => Math.abs(v) < 1e-9)
 }
 
 const isZeroSide = (e: Equation, t: string) =>

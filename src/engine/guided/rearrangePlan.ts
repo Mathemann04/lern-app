@@ -717,8 +717,9 @@ function polarExplanation(step: RearrangeStep): Explanation | null {
 }
 
 // Differentialgleichung: die Frage nennt die Funktion (bei f und g in einer Aufgabe wichtig)
-// Additionstheorem (Teil 8c): die Frage nennt die Funktion; beim doppelten Winkel des Kosinus auch die Funktion, die
-// danach allein dastehen soll (so ist klar, welche der gleichwertigen Formen gefragt ist)
+// Additionstheorem (Teil 8c): die Frage nennt die Funktion. Beim doppelten Winkel nennt sie nicht die Funktion, die
+// danach allein dastehen soll: Sonst schiede „nur \sin x" zwei falsche Antworten (2\cos x, \cos^2 x + \sin^2 x) ohne
+// jedes Wissen aus. Unter den Antworten steht ohnehin nur eine der gleichwertigen Formen; warum diese, sagt die Erklärung.
 function theoremTool(step: RearrangeStep) {
   if (step.kind !== 'addition' && step.kind !== 'doubleAngle') return null
   const tool = activeTool(step.before)?.tool.tool
@@ -730,7 +731,6 @@ function theoremQuestion(step: RearrangeStep): string | null {
   const work = tool && theoremWork(tool, step.before)
   if (!work) return null
   if (work.kind === 'addition') return `Schreibe $${work.term}$ mit dem Additionstheorem aus: Was kommt heraus?`
-  if (work.other) return `Schreibe $${work.term}$ so, dass nur $${work.other}$ vorkommt: Was kommt heraus?`
   return `Schreibe $${work.term}$ mit dem einfachen Winkel: Was kommt heraus?`
 }
 
