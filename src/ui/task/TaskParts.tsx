@@ -4,6 +4,7 @@ import { type TaskRef, formatTaskNumber } from '../../engine/tasks/taskNumber.ts
 import { Formula } from '../Formula.tsx'
 import { type ExplanationMode, MODE_LABEL } from './explanationMode.ts'
 import { RichText } from '../RichText.tsx'
+import { levelName } from '../catalog.ts'
 import { courseHref } from '../routes.ts'
 
 // Teile, die geführter und freier Modus gemeinsam haben
@@ -46,18 +47,21 @@ export function CheckBadge({ large = false }: { large?: boolean }) {
   )
 }
 
-// „Stufe 2 · Aufgabe 2-4711 · Leite ab" und die Funktion; note: Zusatz darunter, z. B. Bedingungen
-type IntroProps = { taskRef: TaskRef; functionLatex: string; instruction: string; note?: string }
+// „Stufe 2 · Aufgabe 2-4711 · Leite ab" (in Chemie „Vertiefung · …") und die Funktion; ohne
+// functionLatex (Wissensfragen) keine Formel; note: Zusatz darunter, z. B. Bedingungen
+type IntroProps = { course: string; taskRef: TaskRef; functionLatex?: string; instruction: string; note?: string }
 
-export function TaskIntro({ taskRef, functionLatex, instruction, note }: IntroProps) {
+export function TaskIntro({ course, taskRef, functionLatex, instruction, note }: IntroProps) {
   return (
     <>
       <p className="text-sm text-zinc-500">
-        Stufe {taskRef.level} · Aufgabe {formatTaskNumber(taskRef)} · <RichText text={instruction} inline />
+        {levelName(course, taskRef.level)} · Aufgabe {formatTaskNumber(taskRef)} · <RichText text={instruction} inline />
       </p>
-      <div className="overflow-x-auto text-2xl">
-        <Formula tex={functionLatex} />
-      </div>
+      {functionLatex !== undefined && (
+        <div className="overflow-x-auto text-2xl">
+          <Formula tex={functionLatex} />
+        </div>
+      )}
       {note && <RichText text={note} className="text-sm text-zinc-500" />}
     </>
   )

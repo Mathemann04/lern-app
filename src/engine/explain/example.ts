@@ -3,7 +3,7 @@ import { deriveImplicit, implicitResult, sortedEquation } from '../derive/implic
 import { RULES } from '../derive/rules.ts'
 import { equationToLatex, toLatex } from '../expr/print.ts'
 import { type Equation, type Expr, asRational, isEquation } from '../expr/types.ts'
-import { type CardExample, isFractionExample, isRearrangeExample } from './cards.ts'
+import { type MathCardExample, isFractionExample, isRearrangeExample } from './cards.ts'
 import { chain, m, prime } from './format.ts'
 import { fractionExample } from './fractionExample.ts'
 import { rearrangeExample } from './rearrangeExample.ts'
@@ -26,8 +26,9 @@ export type WorkedExample = {
   readonly result: Expr
 }
 
-// Beispiel einer Lernkarte, beim Ableiten, bei Brüchen und beim Umstellen
-export function cardExample(e: CardExample): WorkedExample {
+// Beispiel einer Lernkarte, beim Ableiten, bei Brüchen und beim Umstellen. Chemie-Beispiele
+// (isChemExample) sind schon fertiger Text und kommen nicht hierher.
+export function cardExample(e: MathCardExample): WorkedExample {
   if (isRearrangeExample(e)) return rearrangeExample(e)
   return isFractionExample(e) ? fractionExample(e) : workedExample(e)
 }

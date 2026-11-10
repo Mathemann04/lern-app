@@ -1,7 +1,7 @@
 import { levelSummary, useProgress } from '../state/progress.ts'
 import { useSettings } from '../state/settings.ts'
 import { AreaIcon } from './AreaIcon.tsx'
-import { AVAILABLE_COURSES, type Area, SUBJECTS, courseById, isAreaAvailable, isCourseAvailable, playableLevel } from './catalog.ts'
+import { AVAILABLE_COURSES, type Area, SUBJECTS, courseById, isAreaAvailable, isCourseAvailable, levelName, playableLevel } from './catalog.ts'
 import { RecentDots } from './RecentDots.tsx'
 import { areaHref, courseHref, practiceHref } from './routes.ts'
 
@@ -10,9 +10,9 @@ export function HomeScreen() {
   return (
     <main className="space-y-10">
       <section className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight text-balance">Mathe Schritt für Schritt selbst lösen</h1>
+        <h1 className="text-3xl font-semibold tracking-tight text-balance">Schritt für Schritt selbst lösen</h1>
         <p className="text-zinc-600 text-pretty">
-          Du lernst, indem du Aufgaben selbst rechnest: geführt mit Auswahl-Antworten oder frei mit eigener Eingabe.
+          Du lernst, indem du Aufgaben selbst löst: geführt mit Auswahl-Antworten oder frei mit eigener Eingabe.
         </p>
       </section>
 
@@ -56,7 +56,7 @@ function ContinueCard() {
           </h2>
           <p className="text-2xl font-semibold tracking-tight">{course.title}</p>
           <p className="text-zinc-700">
-            Stufe {level}: {levelTitle}
+            {levelName(course.id, level)}: {levelTitle}
           </p>
         </div>
         <AreaIcon kind={course.icon} className="size-16 shrink-0" />

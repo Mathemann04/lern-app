@@ -2,9 +2,8 @@ import { useState } from 'react'
 import { findError, isErrorOf } from '../engine/errorCatalog.ts'
 import { levelSummary, resetProgress, topErrors, useProgress } from '../state/progress.ts'
 import { useSettings } from '../state/settings.ts'
-import { AVAILABLE_COURSES, type Course, courseById, playableLevel } from './catalog.ts'
-import { FitWidth } from './FitWidth.tsx'
-import { Formula } from './Formula.tsx'
+import { AVAILABLE_COURSES, type Course, courseById, hasLevelNames, levelName, playableLevel } from './catalog.ts'
+import { ErrorShape } from './ErrorShape.tsx'
 import { practiceHref } from './routes.ts'
 import { RecentDots } from './RecentDots.tsx'
 import { RichText } from './RichText.tsx'
@@ -80,11 +79,12 @@ function CourseProgress({ course }: { course: Course }) {
           .map((l) => {
             const { solved, recent, recentClean } = levelSummary(progress, course.id, l.level)
             return (
-              <li key={l.level} className="flex gap-4 px-4 py-4" aria-label={`Stufe ${l.level}`}>
+              <li key={l.level} className="flex gap-4 px-4 py-4" aria-label={levelName(course.id, l.level)}>
                 <span aria-hidden className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent-50 font-semibold text-accent-700">
                   {l.level}
                 </span>
                 <div className="min-w-0 space-y-2">
+                  {hasLevelNames(course.id) && <p className="text-sm font-semibold text-accent-700">{levelName(course.id, l.level)}</p>}
                   <p className="font-medium">{l.title}</p>
                   {solved === 0 ? (
                     <p className="text-sm text-zinc-500">Noch keine Aufgabe gelöst.</p>
@@ -121,12 +121,7 @@ function CourseProgress({ course }: { course: Course }) {
                     <RichText text={rule.name} className="block font-medium" inline />
                     <p className="shrink-0 text-sm text-zinc-500">{times}-mal</p>
                   </div>
-                  <div className="text-zinc-700">
-                    <span className="text-sm text-zinc-500">So sieht der Fehler aus:</span>
-                    <FitWidth>
-                      <Formula tex={rule.wrongFormula} />
-                    </FitWidth>
-                  </div>
+                  <ErrorShape error={rule} />
                   {course.focus && (
                     <a
                       href={practiceHref(course.id, level, mode, id)}

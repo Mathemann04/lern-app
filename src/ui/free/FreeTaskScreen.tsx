@@ -1,6 +1,6 @@
 import { type ReactNode, useMemo, useRef, useState } from 'react'
 import type { FreeVerdict } from '../../engine/check/freeTask.ts'
-import type { GuidedStep } from '../../engine/guided/types.ts'
+import { type GuidedStep, isMathTask } from '../../engine/guided/types.ts'
 import type { TaskRef } from '../../engine/tasks/taskNumber.ts'
 import { recordAttempt, recordError } from '../../state/progress.ts'
 import type { ExplanationDetail } from '../../state/storage.ts'
@@ -23,10 +23,12 @@ type Props = { course: string; engine: CourseEngine; taskRef: TaskRef; focus?: s
 
 export default function FreeTaskScreen({ course, engine, taskRef, focus = null }: Props) {
   const { level, seed } = taskRef
-  const { free, plan } = useMemo(
-    () => ({ free: engine.prepareFree({ level, seed }), plan: engine.planGuidedTask({ level, seed }) }),
-    [engine, level, seed],
-  )
+  const { free, plan } = useMemo(() => {
+    // Den freien Modus gibt es nur für Aufgaben mit Term und Ergebnis (Mathe)
+    const plan = engine.planGuidedTask({ level, seed })
+    if (!isMathTask(plan)) throw new Error(`Aufgabe ${level}-${seed} hat keinen freien Modus`)
+    return { free: engine.prepareFree({ level, seed }), plan }
+  }, [engine, level, seed])
   const { mode, detail, cycle } = useExplanationMode()
   const [latex, setLatex] = useState('')
   const [verdict, setVerdict] = useState<FreeVerdict | null>(null)
@@ -73,7 +75,7 @@ export default function FreeTaskScreen({ course, engine, taskRef, focus = null }
       {focus && <FocusBanner focus={focus} />}
 
       <section className="space-y-3">
-        <TaskIntro taskRef={taskRef} functionLatex={plan.functionLatex} instruction={plan.instruction} note={plan.note} />
+        <TaskIntro course={course} taskRef={taskRef} functionLatex={plan.functionLatex} instruction={plan.instruction} note={plan.note} />
       </section>
 
       <section className="space-y-3" aria-label="Deine Antwort">

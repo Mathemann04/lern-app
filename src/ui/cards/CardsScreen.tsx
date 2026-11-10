@@ -1,12 +1,11 @@
 import { cardById, cardsInTopic, topicById } from '../../engine/explain/cards.ts'
 import { BackLink } from '../BackLink.tsx'
-import { FitWidth } from '../FitWidth.tsx'
-import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
-import { SUBJECTS, courseOfCards, isCourseAvailable } from '../catalog.ts'
+import { SUBJECTS, courseOfCards, isCourseAvailable, levelName } from '../catalog.ts'
 import { cardFolderHref } from '../routes.ts'
 import { cardHref, resolveCardPage } from './cardRoute.ts'
 import { CardBody } from './CardBody.tsx'
+import { CardSummary } from './CardSheet.tsx'
 
 // Lernkarten-Seite zur Adresse: alle Ordner, ein Ordner oder eine Karte
 export function CardsPage({ folder, card }: { folder: string | null; card: string | null }) {
@@ -76,11 +75,13 @@ export function CardsScreen() {
   )
 }
 
-// Ein Ordner: die Namen der Formeln mit den Formeln selbst, nach der Stufe, ab der sie vorkommen
+// Ein Ordner: die Namen der Formeln mit den Formeln selbst (bei Wissenskarten der Merksatz), nach der
+// Stufe, ab der sie vorkommen
 export function CardTopicScreen({ topic: id }: { topic: string }) {
   const topic = topicById(id)!
   const cards = cardsInTopic(id)
-  const levels = (courseOfCards(id)?.course.levels ?? []).filter((l) => cards.some((c) => c.level === l.level))
+  const course = courseOfCards(id)?.course
+  const levels = (course?.levels ?? []).filter((l) => cards.some((c) => c.level === l.level))
   return (
     <main className="space-y-8">
       <div className="space-y-3">
@@ -91,7 +92,7 @@ export function CardTopicScreen({ topic: id }: { topic: string }) {
         <section key={l.level} aria-labelledby={`cards-level-${l.level}`} className="space-y-3">
           <div>
             <h2 id={`cards-level-${l.level}`} className="text-xl font-semibold">
-              Stufe {l.level}
+              {course ? levelName(course.id, l.level) : `Stufe ${l.level}`}
             </h2>
             <p className="text-sm text-zinc-500">{l.title}</p>
           </div>
@@ -103,9 +104,7 @@ export function CardTopicScreen({ topic: id }: { topic: string }) {
                   <a href={cardHref(card.id)} className="flex items-center gap-3 px-4 py-3 hover:bg-zinc-50">
                     <span className="min-w-0 flex-1 space-y-1">
                       <RichText text={card.title} className="block font-medium" inline />
-                      <FitWidth className="text-zinc-600">
-                        <Formula tex={card.formulas[0]} />
-                      </FitWidth>
+                      <CardSummary card={card} />
                     </span>
                     <span aria-hidden className="text-accent-700">
                       →
@@ -127,11 +126,12 @@ export function CardScreen({ id }: { id: string }) {
   const siblings = cardsInTopic(card.topic)
   const index = siblings.indexOf(card)
   const [previous, next] = [siblings[index - 1], siblings[index + 1]]
+  const course = courseOfCards(card.topic)?.course
   return (
     <main className="space-y-6">
       <BackLink href={cardFolderHref(topic.id)} label={topic.title} />
       <div className="space-y-1">
-        <p className="text-sm text-zinc-500">Lernkarte · ab Stufe {card.level}</p>
+        <p className="text-sm text-zinc-500">Lernkarte · ab {course ? levelName(course.id, card.level) : `Stufe ${card.level}`}</p>
         <h1 className="text-3xl font-semibold tracking-tight">
           <RichText text={card.title} inline />
         </h1>

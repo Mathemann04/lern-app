@@ -104,7 +104,103 @@ const ART: Record<Kind, (id: string) => ReactNode> = {
       <rect x="28" y="37.5" width="16" height="2.5" rx="1.25" className="fill-tone-300" />
     </>
   ),
+  // Aufbau der Materie: Kern mit drei Elektronenbahnen (vereinfachtes Bild, wie es Chemiebücher zeigen)
+  atom: () => (
+    <>
+      <ellipse cx="24" cy="24" rx="19" ry="7.5" className="stroke-tone-300" strokeWidth="2.5" fill="none" />
+      <ellipse cx="24" cy="24" rx="19" ry="7.5" transform="rotate(60 24 24)" className="stroke-tone-400" strokeWidth="2.5" fill="none" />
+      <ellipse cx="24" cy="24" rx="19" ry="7.5" transform="rotate(-60 24 24)" className="stroke-tone-500" strokeWidth="2.5" fill="none" />
+      <circle cx="24" cy="24" r="5" className="fill-tone-700" />
+      <circle cx="5" cy="24" r="2.8" className="fill-tone-600" />
+      <circle cx="33.5" cy="40.5" r="2.8" className="fill-tone-600" />
+      <circle cx="33.5" cy="7.5" r="2.8" className="fill-tone-600" />
+    </>
+  ),
+  // Periodensystem: Kästchen in der Form der Tabelle (s-, d- und p-Block)
+  periodic: () => (
+    <>
+      {PERIODIC_CELLS.map(([column, row]) => (
+        <rect
+          key={`${column}-${row}`}
+          x={3 + column * 7.5}
+          y={9 + row * 7.5}
+          width="6.5"
+          height="6.5"
+          rx="1.5"
+          className={column < 2 ? 'fill-tone-700' : column === 2 ? 'fill-tone-300' : 'fill-tone-500'}
+        />
+      ))}
+    </>
+  ),
+  // Chemische Bindung: gewinkeltes Molekül aus drei Atomen
+  bond: () => (
+    <>
+      <path d="M24 19 12 34M24 19l12 15" className="stroke-tone-500" strokeWidth="3.5" strokeLinecap="round" />
+      <circle cx="24" cy="17" r="9" className="fill-tone-700" />
+      <circle cx="11" cy="35" r="6.5" className="fill-tone-400" />
+      <circle cx="37" cy="35" r="6.5" className="fill-tone-400" />
+      <circle cx="21" cy="14" r="2.5" className="fill-tone-500" />
+    </>
+  ),
+  // Stöchiometrie: Erlenmeyerkolben mit Flüssigkeit
+  flask: (id) => (
+    <>
+      <path d="M19 6h10v12.5l11.4 19.8A3.2 3.2 0 0 1 37.6 43H10.4a3.2 3.2 0 0 1-2.8-4.7L19 18.5z" className="fill-tone-200" />
+      <clipPath id={id}>
+        <path d="M19 6h10v12.5l11.4 19.8A3.2 3.2 0 0 1 37.6 43H10.4a3.2 3.2 0 0 1-2.8-4.7L19 18.5z" />
+      </clipPath>
+      <g clipPath={`url(#${id})`}>
+        <rect x="4" y="29" width="40" height="16" className="fill-tone-500" />
+        <circle cx="20" cy="36" r="2" className="fill-tone-300" />
+        <circle cx="27" cy="33" r="1.5" className="fill-tone-300" />
+      </g>
+      <rect x="16.5" y="3.5" width="15" height="4.5" rx="2.25" className="fill-tone-700" />
+    </>
+  ),
+  // Gleichgewicht: zwei halbe Pfeile in beide Richtungen
+  equilibrium: () => (
+    <>
+      <Card />
+      <path d="M10 18.5h27.5l-6.5-6" className="stroke-tone-700" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <path d="M38 27.5H10.5l6.5 6" className="stroke-tone-500" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    </>
+  ),
+  // Säuren und Basen: Tropfen über einer Farbskala
+  ph: () => (
+    <>
+      <path d="M24 4C20.5 9 15 15.5 15 20.5a9 9 0 0 0 18 0C33 15.5 27.5 9 24 4z" className="fill-tone-500" />
+      <rect x="5" y="34" width="7.6" height="8" rx="2" className="fill-tone-200" />
+      <rect x="12.6" y="34" width="7.6" height="8" className="fill-tone-300" />
+      <rect x="20.2" y="34" width="7.6" height="8" className="fill-tone-500" />
+      <rect x="27.8" y="34" width="7.6" height="8" className="fill-tone-600" />
+      <rect x="35.4" y="34" width="7.6" height="8" rx="2" className="fill-tone-800" />
+    </>
+  ),
+  // Redox und Elektrochemie: Batterie mit Plus- und Minuspol
+  redox: () => (
+    <>
+      <rect x="4" y="13" width="36" height="22" rx="5" className="fill-tone-700" />
+      <rect x="7.5" y="16.5" width="29" height="15" rx="2.5" className="fill-tone-100" />
+      <rect x="10.5" y="19.5" width="7" height="9" rx="1.5" className="fill-tone-500" />
+      <rect x="19.5" y="19.5" width="7" height="9" rx="1.5" className="fill-tone-500" />
+      <rect x="40" y="19" width="4.5" height="10" rx="1.5" className="fill-tone-700" />
+      <path d="M31 21v6M28 24h6" className="stroke-tone-700" strokeWidth="2.2" strokeLinecap="round" />
+    </>
+  ),
 }
+
+// Kästchen des Periodensystems als (Spalte, Zeile): zwei Spalten links (s-Block), eine Spalte als
+// Andeutung der Nebengruppen (d-Block), drei Spalten rechts (p-Block)
+const PERIODIC_CELLS: ReadonlyArray<readonly [number, number]> = [
+  [0, 0],
+  [5, 0],
+  [0, 1],
+  [1, 1],
+  [3, 1],
+  [4, 1],
+  [5, 1],
+  ...[0, 1, 2, 3, 4, 5].flatMap((column) => [[column, 2] as const, [column, 3] as const]),
+]
 
 // Würfel in Schrägansicht, (x, y) ist die obere Ecke
 function Cube({ x, y }: { x: number; y: number }) {

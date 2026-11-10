@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { clearReports, reportsText, useReports } from '../state/reports.ts'
 import { updateSettings, useSettings } from '../state/settings.ts'
 import type { ExplanationDetail, ThemeChoice } from '../state/storage.ts'
 
@@ -95,6 +97,8 @@ export function SettingsScreen() {
         <p className="text-sm text-zinc-500">„Automatisch" wechselt mit deinem Gerät zwischen hell und dunkel.</p>
       </section>
 
+      <ReportedQuestions />
+
       <section aria-labelledby="more" className="space-y-3">
         <h2 id="more" className="text-xl font-semibold">
           Für Neugierige
@@ -115,5 +119,92 @@ export function SettingsScreen() {
         </a>
       </section>
     </main>
+  )
+}
+
+// Mit „Frage melden" gemerkte Fragen: Liste kopieren (zum Einfügen in den Chat) oder leeren. Nur da,
+// wenn es welche gibt.
+function ReportedQuestions() {
+  const reports = useReports()
+  const [copy, setCopy] = useState<'idle' | 'done' | 'failed'>('idle')
+  const [confirmClear, setConfirmClear] = useState(false)
+  if (reports.length === 0) return null
+  const text = reportsText(reports)
+
+  async function copyList() {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopy('done')
+    } catch {
+      // ohne Erlaubnis für die Zwischenablage: Text zum selbst Kopieren zeigen
+      setCopy('failed')
+    }
+  }
+
+  return (
+    <section aria-labelledby="reports" className="space-y-3">
+      <h2 id="reports" className="text-xl font-semibold">
+        Gemeldete Fragen
+      </h2>
+      <p className="text-zinc-700">
+        {reports.length === 1 ? '1 Frage gemeldet.' : `${reports.length} Fragen gemeldet.`} Kopiere die Liste und füge sie in der nächsten
+        Sitzung in den Chat ein, dann wird jede dieser Fragen geprüft.
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => void copyList()}
+          className="min-h-11 rounded-xl bg-accent-700 px-4 py-2.5 font-medium text-on-accent hover:bg-accent-800"
+        >
+          Liste kopieren
+        </button>
+        {!confirmClear && (
+          <button
+            type="button"
+            onClick={() => setConfirmClear(true)}
+            className="min-h-11 rounded-xl border border-zinc-300 px-4 py-2.5 font-medium hover:bg-zinc-50"
+          >
+            Liste leeren
+          </button>
+        )}
+      </div>
+      <div aria-live="polite">
+        {copy === 'done' && <p className="text-sm text-green-800">Kopiert. Du kannst die Liste jetzt in den Chat einfügen.</p>}
+        {copy === 'failed' && (
+          <div className="space-y-2">
+            <p className="text-sm text-zinc-600">Kopieren hat nicht geklappt. Markiere den Text und kopiere ihn selbst:</p>
+            <textarea
+              readOnly
+              value={text}
+              rows={Math.min(8, reports.length + 1)}
+              onFocus={(event) => event.target.select()}
+              className="w-full rounded-xl border border-zinc-300 bg-surface p-3 text-sm"
+              aria-label="Liste der gemeldeten Fragen"
+            />
+          </div>
+        )}
+      </div>
+      {confirmClear && (
+        <div className="space-y-3 rounded-2xl bg-red-50 p-4">
+          <p className="font-medium text-red-900">Die Liste der gemeldeten Fragen wirklich leeren?</p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                clearReports()
+                setConfirmClear(false)
+                setCopy('idle')
+              }}
+              className="min-h-11 rounded-xl bg-red-700 px-4 py-2.5 font-medium text-on-accent hover:bg-red-800"
+            >
+              Ja, leeren
+            </button>
+            <button type="button" onClick={() => setConfirmClear(false)} className="min-h-11 rounded-xl px-4 py-2.5 font-medium hover:bg-red-100">
+              Abbrechen
+            </button>
+          </div>
+        </div>
+      )}
+    </section>
   )
 }

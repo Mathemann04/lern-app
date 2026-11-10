@@ -1,7 +1,7 @@
 import { Suspense, lazy, useEffect } from 'react'
 import { AreaScreen } from './ui/AreaScreen.tsx'
 import { HomeScreen } from './ui/HomeScreen.tsx'
-import { type Tone, areaById, courseById, courseOfCards } from './ui/catalog.ts'
+import { type Tone, areaById, courseById, courseOfCards, isChemCourse } from './ui/catalog.ts'
 import { loadCourseEngine } from './ui/courseEngines.ts'
 import { SettingsScreen } from './ui/SettingsScreen.tsx'
 import { buildInfoLabel } from './ui/buildInfo.ts'
@@ -18,6 +18,8 @@ const CourseScreen = lazy(() => loadCourse().then((m) => ({ default: m.CourseScr
 const ProgressScreen = lazy(() => import('./ui/ProgressScreen.tsx').then((m) => ({ default: m.ProgressScreen })))
 const CardsPage = lazy(() => import('./ui/cards/CardsScreen.tsx').then((m) => ({ default: m.CardsPage })))
 const GalleryScreen = lazy(() => import('./ui/GalleryScreen.tsx').then((m) => ({ default: m.GalleryScreen })))
+// „Fragen durchsehen" eines Chemie-Themas: eigener Teil, ohne Mathe-Engine
+const QuestionGallery = lazy(() => import('./ui/chem/QuestionGallery.tsx'))
 const loadPractice = () => import('./ui/PracticePage.tsx')
 const loadCourse = () => import('./ui/CourseScreen.tsx')
 const PracticePage = lazy(loadPractice)
@@ -126,6 +128,7 @@ function toneOf(route: Route): Tone | undefined {
 function Page({ route }: { route: Route }) {
   switch (route.page) {
     case 'gallery':
+      if (route.course && isChemCourse(route.course)) return <QuestionGallery key={route.course} course={route.course} />
       return <GalleryScreen key={route.course ?? ''} course={route.course} />
     case 'settings':
       return <SettingsScreen />

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { cardById } from '../../engine/explain/cards.ts'
+import { type Card, cardById } from '../../engine/explain/cards.ts'
 import type { Expr } from '../../engine/expr/types.ts'
 import { FitWidth } from '../FitWidth.tsx'
 import { Formula } from '../Formula.tsx'
@@ -40,8 +40,9 @@ function useSheetHistory() {
   return { open, show, close }
 }
 
-// Knopf „Lernkarte" mit dem Fenster dazu; title: Überschrift im Fenster, task: die Aufgabe
-export function CardSheetButton({ ids, title, task }: { ids: readonly string[]; title: string; task: Expr }) {
+// Knopf „Lernkarte" mit dem Fenster dazu; title: Überschrift im Fenster, task: die Aufgabe als Term
+// (deren Teile kommen nicht als Beispiel; Wissensfragen haben keinen Term)
+export function CardSheetButton({ ids, title, task }: { ids: readonly string[]; title: string; task?: Expr }) {
   const sheet = useSheetHistory()
   if (ids.length === 0) return null
   return (
@@ -54,7 +55,7 @@ export function CardSheetButton({ ids, title, task }: { ids: readonly string[]; 
   )
 }
 
-type SheetProps = { ids: readonly string[]; title: string; task: Expr; open: boolean; onClose: () => void }
+type SheetProps = { ids: readonly string[]; title: string; task?: Expr; open: boolean; onClose: () => void }
 
 function CardSheet({ ids, title, task, open, onClose }: SheetProps) {
   const ref = useRef<HTMLDialogElement>(null)
@@ -107,9 +108,7 @@ function CardSheet({ ids, title, task, open, onClose }: SheetProps) {
                     <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-3 [&::-webkit-details-marker]:hidden">
                       <span className="min-w-0 flex-1 space-y-1">
                         <RichText text={card.title} className="block font-medium" inline />
-                        <FitWidth className="text-zinc-600">
-                          <Formula tex={card.formulas[0]} />
-                        </FitWidth>
+                        <CardSummary card={card} />
                       </span>
                       <span aria-hidden className="text-accent-700 transition-transform group-open:rotate-90">
                         ›
@@ -126,6 +125,17 @@ function CardSheet({ ids, title, task, open, onClose }: SheetProps) {
         </div>
       )}
     </dialog>
+  )
+}
+
+// Kurzfassung einer Karte in Listen: die erste Formel, bei Wissenskarten ohne Formel der Merksatz
+export function CardSummary({ card }: { card: Card }) {
+  const [formula] = card.formulas
+  if (formula === undefined) return <RichText text={card.memo} className="block text-sm text-zinc-600 text-pretty" inline />
+  return (
+    <FitWidth className="text-zinc-600">
+      <Formula tex={formula} />
+    </FitWidth>
   )
 }
 
