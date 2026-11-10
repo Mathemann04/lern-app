@@ -1,5 +1,6 @@
 import type { Choice, GuidedTaskBase } from '../../guided/types.ts'
 import type { Rng } from '../../random/rng.ts'
+import { type Rational, ratToNumber } from '../../rational.ts'
 import type { Level, TaskRef } from '../../tasks/taskNumber.ts'
 import { chemErrorRule } from '../errorRules.ts'
 
@@ -55,4 +56,16 @@ export function stepChoices(rng: Rng, correct: { key: string; content: string },
     whyWrong: chemErrorRule(w.rule).why,
   }))
   return rng.shuffle([{ id: 'richtig', content: correct.content, correct: true }, ...wrongChoices])
+}
+
+// Liegen zwei Werte mindestens so weit auseinander (relativ)?
+const apart = (a: Rational, b: Rational, share: number) => Math.abs(ratToNumber(a) / ratToNumber(b) - 1) >= share
+
+// Falsche Werte bei Ergebnissen mit Toleranz (docs/CHEMIE.md §7): mindestens 6 % neben der Lösung und 3 %
+// auseinander, sonst fällt der Fehler für diese Aufgabe weg. latex: Wert mit Einheit (ohne $), auch der
+// Schlüssel zum Vergleichen
+export function tolerantWrongs(correct: Rational, wrong: readonly { rule: string; value: Rational }[], latex: (r: Rational) => string): WrongValue[] {
+  const kept: { rule: string; value: Rational }[] = []
+  for (const w of wrong) if (apart(w.value, correct, 0.06) && kept.every((k) => apart(w.value, k.value, 0.03))) kept.push(w)
+  return kept.map((w) => ({ rule: w.rule, key: latex(w.value), content: `$${latex(w.value)}$` }))
 }

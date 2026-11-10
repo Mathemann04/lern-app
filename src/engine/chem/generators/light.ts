@@ -1,8 +1,8 @@
 import type { Rng } from '../../random/rng.ts'
-import { type Rational, rat, ratDiv, ratMul, ratToNumber } from '../../rational.ts'
+import { type Rational, rat, ratDiv, ratMul } from '../../rational.ts'
 import { formatLatex, roundSignificant } from '../../quantity/numberDe.ts'
 import type { Level, TaskRef } from '../../tasks/taskNumber.ts'
-import { type ChemCalc, type ChemGenerator, type WrongValue, stepChoices } from './shared.ts'
+import { type ChemCalc, type ChemGenerator, type WrongValue, stepChoices, tolerantWrongs } from './shared.ts'
 
 // Rechnung „Energie des Lichts" (Plan M4, Thema 1.1, Vertiefung): Energie oder Frequenz eines Photons
 // aus der Wellenlänge, Wellenlänge aus der Energie. Exakt gerechnet mit den Konstanten aus
@@ -43,15 +43,9 @@ const SYMBOL: Readonly<Record<Subtype, string>> = { energy: 'E', frequency: 'f',
 const show = (r: Rational, subtype: Subtype) => formatLatex(r, subtype === 'wavelength' ? {} : { scientific: true })
 const sci = (r: Rational) => formatLatex(r, { scientific: true })
 
-// Liegen zwei Werte mindestens so weit auseinander (relativ)?
-const apart = (a: Rational, b: Rational, share: number) => Math.abs(ratToNumber(a) / ratToNumber(b) - 1) >= share
-
-// Falsche Werte mit Toleranz (docs/CHEMIE.md §7): mindestens 6 % neben der Lösung und 3 % auseinander
-function tolerantWrong(correct: Rational, wrong: readonly { rule: string; value: Rational }[], subtype: Subtype): WrongValue[] {
-  const kept: { rule: string; value: Rational }[] = []
-  for (const w of wrong) if (apart(w.value, correct, 0.06) && kept.every((k) => apart(w.value, k.value, 0.03))) kept.push(w)
-  return kept.map((w) => ({ rule: w.rule, key: show(w.value, subtype), content: `$${show(w.value, subtype)}${UNIT[subtype]}$` }))
-}
+// Falsche Werte mit Toleranz (docs/CHEMIE.md §7, shared.ts)
+const tolerantWrong = (correct: Rational, wrong: readonly { rule: string; value: Rational }[], subtype: Subtype): WrongValue[] =>
+  tolerantWrongs(correct, wrong, (r) => `${show(r, subtype)}${UNIT[subtype]}`)
 
 export type Subtype = 'energy' | 'frequency' | 'wavelength'
 

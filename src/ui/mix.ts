@@ -38,6 +38,10 @@ export type MixPick = {
   readonly nos: readonly number[] | undefined
 }
 
+// Gewicht eines Chemie-Themas ohne Fragen in der Stufe (nur Rechnungen): so viel wie die Mindestzahl an
+// Fragen je Stufe (Plan M4, „Abwechslung")
+export const CALC_ONLY_WEIGHT = 15
+
 // Gewicht eines Themas bei der Wahl
 type Weighted = { readonly course: Course; readonly nos: readonly number[] | undefined; readonly weight: number }
 
@@ -46,7 +50,9 @@ type Weighted = { readonly course: Course; readonly nos: readonly number[] | und
 // gemischt. Die Runden laufen je Thema (pickNewSeed): Im gewählten Thema kommt zuerst eine Frage, die in
 // seiner Runde noch nicht dran war; sind dort alle durch, beginnt seine Runde neu. (Nach den offenen
 // Fragen zu gewichten hieße: Ein Thema, das durch ist, fiele aus der Mischung, bis alle anderen auch
-// durch sind, und danach kämen die Themen am Stück.) Engines ohne Wissensfragen (Mathe) zählen 1.
+// durch sind, und danach kämen die Themen am Stück.) Engines ohne Wissensfragen (Mathe) zählen 1, Chemie-Themen
+// ohne Fragen in der Stufe (nur Rechnungen, z. B. „Stoffmenge und Umsatz" bis S3b) so viel wie ein Thema mit der
+// Mindestzahl an Fragen (CALC_ONLY_WEIGHT).
 export function mixWeights(input: Omit<MixInput, 'shownOf' | 'recentOf' | 'random'>): readonly { readonly course: string; readonly weight: number }[] {
   return weighted(input).map(({ course, weight }) => ({ course: course.id, weight }))
 }
@@ -56,7 +62,7 @@ function weighted({ courses, level, engineOf, partsOf }: Omit<MixInput, 'shownOf
     .filter((course) => isLevelAvailable(course, level))
     .map((course) => {
       const nos = engineOf(course.id).questionNos?.(level, partsOf(course.id))
-      return { course, nos, weight: nos ? nos.length : 1 }
+      return { course, nos, weight: nos ? nos.length || CALC_ONLY_WEIGHT : 1 }
     })
 }
 

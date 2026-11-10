@@ -539,3 +539,11 @@ Neue Entscheidungen unten anfügen.
   Elektronen statt Protonen gezählt, Elektronen zur Massenzahl gezählt. Zahlen werden
   exakt gerechnet und auf drei gültige Ziffern ohne Nullen am Ende gezeigt. Derselbe
   Stoff kommt nie zweimal hintereinander. Der freie Modus der Rechnungen kommt mit S8.
+- 10.11.2026: S3 in zwei Teile geteilt. S3a fertig: Thema „Stoffmenge und Umsatz“
+  spielbar mit Rechnungen (Molmasse mit Rechenweg, Stoffmenge, Masse, Teilchenzahl,
+  Atome eines Elements) und fünf Lernkarten, noch ohne Wissensfragen (erlaubt nach
+  der Regel „mindestens 15 je Stufe, sonst nur Rechnungen“). In der Mischung zählt
+  ein Thema nur mit Rechnungen wie eines mit 15 Fragen. Ganze Werte in Aufgaben wie
+  in der Klausur, bei Chlor und Kupfer 35,5 und 63,5. Drei Rechenfehler mehr als im
+  Plan: Kristallwasser vergessen, Masse geteilt statt malgenommen, Moleküle statt
+  Atome gezählt. Die Skripte des Nutzers liegen nur in der Sitzung, nie im Repo.

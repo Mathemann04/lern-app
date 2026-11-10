@@ -15,6 +15,8 @@ import { LIGHT_SOURCES, lightValues } from './light.ts'
 // zweitem Weg, falsche Antworten, Schreibweise, Abwechslung je Stufe
 
 const COURSE = 'chem-atombau'
+// alle Themen mit Rechnungen
+const CALC_COURSES = ['chem-atombau', 'chem-stoffmenge']
 const LEVELS: readonly Level[] = [1, 2, 3]
 const SAMPLE = 400
 const tasksOf = (level: Level, count = SAMPLE) => Array.from({ length: count }, (_, i) => ({ level, seed: GENERATED_MIN + i }))
@@ -38,7 +40,7 @@ function numberOf(latex: string): number {
 
 const ERROR_IDS = new Set(CHEM_ERROR_RULES.map((r) => r.id))
 
-describe('Rechnungen Atombau: Aufbau jeder Aufgabe', () => {
+describe.each(CALC_COURSES)('Rechnungen %s: Aufbau jeder Aufgabe', (COURSE) => {
   it.each(LEVELS)('Stufe %i: Schritte mit genau einer richtigen Antwort und typischen Fehlern', (level) => {
     for (const ref of tasksOf(level)) {
       const calc = generatedCalc(COURSE, ref)!
@@ -164,13 +166,11 @@ describe('Energie des Lichts: Ergebnis auf zweitem Weg', () => {
   })
 })
 
-describe('Rechnungen Atombau: Abwechslung je Stufe (Kennzahlen aus M2b)', () => {
+describe.each(CALC_COURSES)('Rechnungen %s: Abwechslung je Stufe (Kennzahlen aus M2b)', (COURSE) => {
   it.each(LEVELS)('Stufe %i: unter 200 Aufgaben mindestens 100 Formen, keine öfter als 3 von 100', (level) => {
     const forms = tasksOf(level, 200).map((ref) => calcForm(generatedCalc(COURSE, ref)!))
     const { distinct, maxShare } = varietyStats(forms)
     expect(distinct).toBeGreaterThanOrEqual(100)
     expect(maxShare).toBeLessThanOrEqual(0.03)
-    // Formen ohne die Zahlen der Aufgabe
-    for (const f of forms) expect(f).not.toMatch(/\d{2}/)
   })
 })

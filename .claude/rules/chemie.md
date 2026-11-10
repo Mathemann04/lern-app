@@ -63,3 +63,14 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   zählen nur Fragen. Zahlen: `src/engine/quantity/numberDe.ts` (exakt gerundet
   auf gültige Ziffern, ohne Nullen am Ende, Dezimalkomma, „· 10ⁿ"). Galerie:
   `src/ui/chem/CalcGallery.tsx` (Beispiele je Stufe, Abwechslung, Rechenfehler).
+- Stoffmenge (S3a): `chem/formula.ts` (Summenformeln mit Klammern und Kristallwasser
+  `*`, `atomCounts` auch wie typische Fehler zählen: `ignoreIndices`,
+  `bracketOnLast`, `withoutAdducts`; `formulaCe` für mhchem), `chem/substances.ts`
+  (71 Stoffe mit Namen, `simple`/`bracket`/`hydrate`), `chem/molarMass.ts` (Werte
+  `pse` mit einer Nachkommastelle oder `rounded` ganz, Cl 35,5, Cu 63,5;
+  Ordnungszahlen als Fehler), `generators/stoffmenge.ts` (Rechenarten `molmasse`
+  und `stoffmenge` mit Untertypen n aus m, m aus n, N aus n, N aus m, m aus N,
+  Atome aus m), Toleranz der falschen Antworten in `shared.ts` (`tolerantWrongs`).
+  Thema ohne Wissensfragen: leere Sammlung `bank/stoffmenge.ts`, `nextSeed` zieht
+  nur Rechnungen, in der Mischung Gewicht `CALC_ONLY_WEIGHT` (15, `ui/mix.ts`).
+  Genauere IUPAC-Werte nur in `chem/iupac.testdata.ts`.

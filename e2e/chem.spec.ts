@@ -299,10 +299,13 @@ test('Chemie: Themen mischen, „Nächste Aufgabe" bleibt in der Mischung, X und
   await expect(page).toHaveURL(/#\/mischen\/chemie$/)
   await expect(page.getByRole('heading', { name: 'Themen mischen', level: 1 })).toBeVisible()
   await expect(page.getByRole('checkbox', { name: 'Atombau' })).toBeChecked()
+  await expect(page.getByRole('checkbox', { name: 'Stoffmenge und Umsatz' })).toBeChecked()
   await expectCleanPage(page, 'Mischseite')
+  // Dieser Test mischt nur Atombau (Stoffmenge hat seit S3a nur Rechnungen)
+  await page.getByRole('checkbox', { name: 'Stoffmenge und Umsatz' }).uncheck()
 
-  // Unterthemen aufklappen: dieselben Kästchen wie auf der Themenseite
-  const toggle = page.getByRole('button', { name: /^Unterthemen: alle/ })
+  // Unterthemen aufklappen: dieselben Kästchen wie auf der Themenseite (Atombau steht zuerst)
+  const toggle = page.getByRole('button', { name: /^Unterthemen: alle/ }).first()
   await expect(toggle).toHaveAttribute('aria-expanded', 'false')
   await toggle.click()
   await expect(toggle).toHaveAttribute('aria-expanded', 'true')
@@ -429,5 +432,46 @@ test('Chemie: Rechnung zu ³⁷Cl⁻, Massenzahl als Neutronenzahl, Fehler gezie
   await page.getByRole('button', { name: 'Abwechslung zählen' }).first().click()
   await expect(page.getByText(/Abwechslung: \d+ Formen unter 200 Aufgaben/).first()).toBeVisible()
   await expectCleanPage(page, 'Rechnungen in der Galerie')
+  expect(errors).toEqual([])
+})
+
+// S3a: Thema „Stoffmenge und Umsatz" nur mit Rechnungen
+test('Chemie: Molmasse von Zn(OH)₂ mit Klammer, Thema ohne Fragen, Lernkarten', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./#/thema/chem-stoffmenge')
+  await expect(page.getByRole('heading', { name: 'Stoffmenge und Umsatz', level: 1 })).toBeVisible()
+  await expect(page.getByRole('group', { name: 'Was soll drankommen?' }).getByRole('checkbox')).toHaveCount(2)
+  await expectCleanPage(page, 'Thema Stoffmenge')
+
+  await page.goto('./#/ueben/chem-stoffmenge/2-10002')
+  await expect(page.getByText(/^Vertiefung · Aufgabe 2-10002 · Berechne die molare Masse/)).toBeVisible()
+  await expect(page.getByText(/Werte aus dem PSE/)).toBeVisible()
+  await expectCleanPage(page, 'Molmasse')
+  // absichtlich die Klammer nur auf das H bezogen
+  const texts = (await answers(page).allTextContents()).map((t) => t.replace(/\s+/g, ''))
+  const bracket = texts.findIndex((t) => t.includes('O:1') && t.includes('H:2'))
+  expect(bracket).toBeGreaterThanOrEqual(0)
+  await answers(page).nth(bracket).click()
+  await page.getByRole('button', { name: 'Warum ist das falsch?' }).click()
+  await expect(page.locator('[aria-live="polite"]')).toContainText('hinter einer Klammer')
+  const right = (await answers(page).allTextContents()).map((t) => t.replace(/\s+/g, '')).findIndex((t) => t.includes('O:2') && t.includes('H:2'))
+  await answers(page).nth(right).click()
+  await page.getByRole('button', { name: 'Weiter' }).click()
+  const molar = (await answers(page).allTextContents()).findIndex((t) => t.startsWith('99,4'))
+  expect(molar).toBeGreaterThanOrEqual(0)
+  await answers(page).nth(molar).click()
+  await page.getByRole('button', { name: 'Ergebnis ansehen' }).click()
+  await expect(page.getByTestId('result')).toContainText('99,4')
+  await expectCleanPage(page, 'Ergebnis Molmasse')
+
+  // ohne Wissensfragen kommen beim Üben nur Rechnungen
+  await page.goto('./#/ueben/chem-stoffmenge/1')
+  await expect(page).toHaveURL(/#\/ueben\/chem-stoffmenge\/1-\d+$/)
+  expect(isCalc(page.url())).toBe(true)
+
+  // Lernkarten-Ordner
+  await page.goto('./#/karten/chem-stoffmenge')
+  await expect(page.getByRole('link', { name: /Molare Masse/ })).toBeVisible()
+  await expectCleanPage(page, 'Lernkarten Stoffmenge')
   expect(errors).toEqual([])
 })

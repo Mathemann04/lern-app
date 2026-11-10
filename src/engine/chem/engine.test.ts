@@ -31,7 +31,9 @@ function drawNos(engine: ChemCourseEngine, level: 1 | 2 | 3, draws: number, show
 
 const sorted = (nos: Iterable<number>) => [...nos].sort((a, b) => a - b)
 
-describe.each(CHEM_TOPICS.map((t) => [t.bank.course, t] as const))('Chemie-Engine: %s', (course, topic) => {
+const WITH_QUESTIONS = CHEM_TOPICS.filter((t) => t.bank.questions.length > 0)
+
+describe.each(WITH_QUESTIONS.map((t) => [t.bank.course, t] as const))('Chemie-Engine: %s', (course, topic) => {
   const engine = chemCourseEngine(course, seeded(course))
   const questions = topic.bank.questions
 
@@ -214,5 +216,25 @@ describe('Chemie-Engine: Sonderfälle', () => {
     // auch nicht über ihr Unterthema
     expect(engine.questionNos(first.level, new Set([first.part]))).not.toContain(first.no)
     expect(engine.questionNos(first.level)).not.toContain(first.no)
+  })
+})
+
+describe.each(CHEM_TOPICS.filter((t) => t.bank.questions.length === 0).map((t) => [t.bank.course] as const))('Chemie-Engine ohne Fragen: %s', (course) => {
+  const engine = chemCourseEngine(course, seeded(course))
+
+  it('zieht nur Rechnungen, auch mit angekreuzten Unterthemen, und nennt keine Fragen', () => {
+    const parts = courseById(course)?.course.parts ?? []
+    for (const level of [1, 2, 3] as const) {
+      expect(engine.questionNos(level)).toEqual([])
+      for (const selection of [undefined, ...parts.map((p) => new Set([p.id])), new Set(['gibt-es-nicht'])]) {
+        for (let i = 0; i < 30; i++) {
+          const seed = engine.nextSeed(level, undefined, selection)
+          expect(decodeSeed(seed)?.kind).toBe('generated')
+          expect(engine.resolve({ level, seed })).toBe(level)
+          expect(engine.planGuidedTask({ level, seed }).steps.length).toBeGreaterThan(0)
+        }
+      }
+    }
+    expect(engine.resolve({ level: 1, seed: 101 })).toBeNull()
   })
 })
