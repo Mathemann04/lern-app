@@ -695,9 +695,15 @@ function gasReactionTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): 
   )
 }
 
+// Angaben nebeneinander (mit \qquad getrennt) stehen untereinander, damit sie auch am Handy lesbar bleiben
+function stacked(latex: string): string {
+  const parts = latex.split(' \\qquad ')
+  return parts.length === 1 ? latex : String.raw`\begin{gathered} ${parts.join(' \\\\ ')} \end{gathered}`
+}
+
 function finish(ref: TaskRef, instruction: string, functionLatex: string, note: string, steps: GuidedStep[], resultLatex: string, form: string, substance: string): ChemCalc {
   return {
-    task: { ref, instruction, functionLatex, note, steps, cards: [...new Set(steps.flatMap((s) => s.cards))], resultLatex },
+    task: { ref, instruction, functionLatex: stacked(functionLatex), note, steps, cards: [...new Set(steps.flatMap((s) => s.cards))], resultLatex },
     form,
     substance,
   }
