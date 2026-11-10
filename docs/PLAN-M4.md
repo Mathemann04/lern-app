@@ -72,9 +72,14 @@ Klausuraufgaben geschnitten:
 
 | Stufe | Was das heißt |
 | --- | --- |
-| **Grundlagen** | Begriffe und Definitionen in einem Schritt, wie die Auswahlfragen der Klausur. Rechnungen, die eine Formel oder Regel anwenden (geführt höchstens drei kurze Schritte), mit glatten Zahlen und bekannten Stoffen. |
+| **Grundlagen** | Begriffe und Definitionen in einem Schritt, wie die Auswahlfragen der Klausur. Rechnungen, die eine Formel oder Regel anwenden, mit glatten Zahlen und bekannten Stoffen. |
 | **Vertiefung** | Was die Übungsblätter und die Skripte genauer behandeln: begründen, zuordnen, ordnen. Rechnungen mit zwei bis drei Schritten, Molmassen aus dem PSE der App, unbekanntere Stoffe, krumme Zahlen. |
 | **Klausurniveau** | Form und Umfang wie die Altklausuren, dazu die Tiefe der Übungsblätter. Rechnungen mit drei bis fünf Schritten, alle Fallen der Klausuren (z. B. zwei Stoffe mit gleicher Molmasse). Das ist die Stufe „kaum noch schwerer“: alles, was in der Klausur drankommen kann, gemischt durch das ganze Thema. |
+
+Die Schrittzahlen meinen Rechenschritte (eine Formel anwenden, eine
+Einheit umrechnen, ein Verhältnis bilden), nicht die einzelnen Fragen im
+geführten Modus; dort fragt die App auch Zwischenangaben wie Protonen,
+Neutronen und Elektronen oder die Ladungen eines Salzes einzeln ab.
 
 Die App nennt die Stufen überall mit Namen („Vertiefung“ statt „Stufe 2“).
 Nach 8 von 10 richtig schlägt sie wie bisher die nächste Stufe vor.
@@ -122,7 +127,8 @@ nachgerechnet), geführt und frei wie in Mathe:
   - Formeln über eine eigene Tastatur mit Elementsymbolen, Ziffern,
     Klammern und Ladungen (keine Autokorrektur des Handys).
   - Elektronenkonfigurationen über Knöpfe für die Unterschalen (1s, 2s, 2p
-    usw., auch [Ne] und [Ar]) mit der Zahl der Elektronen.
+    usw., auch [Ne] und [Ar] als Kurzschreibweise für die Elektronen des
+    Edelgases davor) mit der Zahl der Elektronen.
 - Ergebnisse gelten als richtig, wenn sie höchstens 1 % neben dem genauen
   Wert liegen. Liegt die Zahl 1 bis 4 % daneben, sagt die App „Fast: prüfe
   deine Rundung“, das zählt nicht als Fehler. Passt die Zahl zu einem
@@ -174,7 +180,7 @@ schlecht mit dem Scrollen).
 | 2. M(C₄H₁₀) | 58 g/mol | 13 (Indizes vergessen); 34 (Ordnungszahlen statt Molmassen); 116 (Koeffizient mitgerechnet) |
 | 3. n(Butan) | 0,1 mol | 336 mol (m · M statt m : M); 10 mol (M : m statt m : M) |
 | 4. n(CO₂) | 0,4 mol | 0,1 mol (1 : 1); 0,8 mol (nur der Koeffizient des Produkts); 0,025 mol (Verhältnis umgedreht) |
-| 5. m(CO₂) | 17,6 g | 0,0091 g (n : M statt n · M); 23,2 g (Molmasse des Butans statt des CO₂); 11,2 g (Molmasse von CO statt CO₂) |
+| 5. m(CO₂) | 17,6 g | 0,00909 g (n : M statt n · M); 23,2 g (Molmasse des Butans statt des CO₂, oder Massen statt Stoffmengen ins Verhältnis gesetzt: beides ergibt immer denselben Wert); 11,2 g (Molmasse von CO statt CO₂) |
 
 Ausgeglichen wird immer mit den **kleinsten ganzen Zahlen**. Eine Gleichung
 mit 13/2 O₂ oder mit verdoppelten Koeffizienten ist chemisch richtig; sie
@@ -195,9 +201,10 @@ Fehler.
 #### 1.1 Atombau (Klausur Sommer 2025: 1a bis 1d; Winter 2025/26: 1a bis 1c)
 - Grundlagen: Reinstoffe und Gemische, Elemente und Verbindungen;
   Trennverfahren und ihr Prinzip (Dichte, Löslichkeit, Teilchengröße,
-  Siedetemperatur); physikalischer Vorgang oder chemische Reaktion; Ladung
+  Siedetemperatur, Anhaften an einer Oberfläche); physikalischer Vorgang oder chemische Reaktion; Ladung
   und Masse von Proton, Neutron und Elektron; Ordnungszahl und Massenzahl;
-  Isotope; Teilchenzahlen neutraler Atome aus dem Kernsymbol.
+  Isotope; Protonen, Neutronen und Elektronen neutraler Atome aus dem
+  Kernsymbol.
 - Vertiefung: Ionen (wie ³⁷Cl⁻); fehlende Angaben in einer Tabelle
   ergänzen; Größe von Kern und Atom; Atommodelle (Dalton, Thomson,
   Rutherford, Bohr, Orbitalmodell) mit ihren Grenzen; Streuversuch; Energie
@@ -209,16 +216,17 @@ Fehler.
   wechselnden Atomen und Ionen; Begründungsfragen zu den Modellen.
 - Rechnung „Protonen, Neutronen, Elektronen“ (Grundlagen: neutrale Atome;
   ab Vertiefung auch Ionen und fehlende Angaben; geführt: Element aus der
-  Ordnungszahl → Protonen → Neutronen = A − Z → Elektronen mit Ladung). Fehler: Neutronen gleich Massenzahl; Protonen und
-  Neutronen vertauscht; Ionenladung vergessen; Ladung mit falschem
-  Vorzeichen verrechnet; Element über die Massenzahl bestimmt.
+  Ordnungszahl → Protonen → Neutronen = A − Z → Elektronen mit Ladung).
+  Fehler: Neutronen gleich Massenzahl; Protonen und Neutronen vertauscht;
+  Ionenladung vergessen; Ladung mit falschem Vorzeichen verrechnet; Element
+  über die Massenzahl bestimmt.
 - Rechnung „Energie des Lichts“ (Vertiefung). Fehler: nm nicht in m
-  umgerechnet; Formel falsch umgestellt; „längere Wellenlänge, mehr
-  Energie“.
+  umgerechnet; Formel falsch umgestellt. Dazu der Denkfehler „längere
+  Wellenlänge, mehr Energie“ als Wissensfrage.
 - Rechnungen „Übergang im Wasserstoffatom“ und „Welle eines Teilchens“
-  (Vertiefung). Fehler: Quadrate vergessen; Kehrwert vergessen; die beiden
-  Schalen vertauscht; Lichtgeschwindigkeit statt Geschwindigkeit des
-  Teilchens; Masse in g statt kg.
+  (Vertiefung). Fehler: Quadrate vergessen; Kehrwert vergessen;
+  Lichtgeschwindigkeit statt Geschwindigkeit des Teilchens; Masse in g statt
+  kg.
 - Lernkarten: Stoffe einteilen; Trennverfahren; Elementarteilchen;
   Kernsymbol lesen; Isotope; Ionen; Atommodelle; Energie des Lichts;
   Linienspektrum und Rydberg-Formel; Welle und Teilchen.
@@ -240,7 +248,7 @@ Fehler.
   p⁷; Summe ungleich Z; Ausnahme bei Cr oder Cu nicht beachtet; bei Ionen 3d
   statt 4s geleert); Valenzkonfiguration
   (Fehler: Rumpfelektronen mitgezählt, Ion statt Atom, falsche Schale);
-  Quantenzahlen (Fehler: l bis n statt n − 1, m nur positiv); Elektronen je
+  Quantenzahlen (Fehler: l bis n statt n − 1, negative m vergessen); Elektronen je
   Schale (Fehler: 2n statt 2n²).
 - Lernkarten: Quantenzahlen; Orbitale; Pauli; Hund; Besetzungsreihenfolge;
   Ausnahmen; Valenzelektronen; Ionen von Übergangsmetallen.
@@ -258,8 +266,9 @@ Fehler.
   Valenzelektronen“); Ionenladung aus der Folge der Ionisierungsenergien.
 - Rechnungen: Steckbrief in beide Richtungen (Fehler: Periode als Zahl der
   Valenzelektronen; Gruppennummer 13 bis 18 als Zahl der Valenzelektronen
-  (Al mit 13); Fe als VIII. Hauptgruppe); Ionenladung (Fehler: P⁵⁺, Na⁻, Al¹³⁺); Sprung der
-  Ionisierungsenergie (Fehler: größter Wert statt größter Sprung).
+  (Al mit 13); Fe als VIII. Hauptgruppe); Ionenladung (Fehler: P⁵⁺, Na⁻,
+  Al¹³⁺); Sprung der Ionisierungsenergie (Fehler: größter Wert statt größter
+  Sprung).
 - Lernkarten: Aufbau des PSE; Blöcke; Valenzelektronen und Gruppe; Metalle
   und Nichtmetalle; Edelgasregel; Ionen bilden; Ionisierungsenergie.
 
@@ -373,8 +382,8 @@ Werkstoffkunde.
   π-Bindungen; Bindungsordnung.
 
 #### 4.1 Reaktionsgleichungen (Klausur 4a)
-- Grundlagen: Edukte und Produkte; Pfeile → und ⇌; Zustände (s), (l), (g),
-  (aq); Erhaltung der Masse; Koeffizient und Index; zweiatomige Elemente als
+- Grundlagen: Edukte und Produkte; Pfeile → und ⇌; Zustände (s) fest, (l)
+  flüssig, (g) gasförmig, (aq) in Wasser gelöst; Erhaltung der Masse; Koeffizient und Index; zweiatomige Elemente als
   X₂ (H₂, O₂, N₂, Halogene); einfache Gleichungen ausgleichen.
 - Vertiefung: größere Gleichungen (Ammoniaksynthese, Rosten, Salzbildung,
   Metall mit Sauerstoff); „Welche Gleichungen sind ausgeglichen?“.
@@ -383,9 +392,9 @@ Werkstoffkunde.
   Klausur).
 - Rechnung „Ausgleichen“ mit Koeffizienten-Feldern, geprüft über die
   Atombilanz, nicht gegen eine Musterlösung; geführt C → H → O → ganzzahlig
-  machen. Fehler: Index statt Koeffizient geändert (2 MgO₂, H₂O₂); Sauerstoff
-  im Wasser vergessen; nur teilweise verdoppelt; Einzelatom statt X₂; CO
-  statt CO₂.
+  machen. Fehler: Index statt Koeffizient geändert (MgO₂, H₂O₂); Sauerstoff
+  nicht ausgeglichen; Sauerstoff im Wasser vergessen; nur teilweise
+  verdoppelt; Einzelatom statt X₂; CO statt CO₂.
 - Lernkarten: Reaktionsgleichung lesen; Ausgleichen Schritt für Schritt;
   Verbrennung; zweiatomige Elemente; Alkane von Methan bis Decan.
 
@@ -393,18 +402,21 @@ Werkstoffkunde.
 - Grundlagen: 1 mol = 6,022 · 10²³ Teilchen; molare Masse aus dem PSE;
   m = n · M; einfache Verhältnisse aus den Koeffizienten.
 - Vertiefung: Formeln mit Klammern und Kristallwasser (Ca(OH)₂,
-  Al₂(SO₄)₃, CuSO₄ · 5 H₂O); Teilchenzahl N = n · N_A; Masse → Masse mit
+  Al₂(SO₄)₃, CuSO₄ · 5 H₂O); Teilchenzahl einer Stoffportion N = n · N_A
+  (N_A: Avogadro-Konstante, 6,022 · 10²³ Teilchen je mol); Masse → Masse mit
   beliebigen Verhältnissen.
 - Klausurniveau: Klausuraufgabe 4 komplett (Gleichung, alle Molmassen,
   Masse eines Produkts oder Bedarf an einem Edukt) mit wechselnden Stoffen;
   Probe über die Massenerhaltung; Fallen wie gleiche Molmassen.
 - Rechnungen: Molmasse (geführt: Atome zählen → M je Element → Summe).
-  Fehler: Index vergessen (M(H₂O) = 17); Ordnungszahl statt Molmasse;
-  Koeffizient mitgerechnet; M(O) statt M(O₂). Stoffmenge und Teilchenzahl.
-  Fehler: n = m · M oder n = M : m; N = n : N_A. Umsatz in drei Schritten
-  (Gleichung → Tabelle aus n, M, m → Verhältnis). Fehler: 1 : 1;
-  Verhältnis umgedreht; nur der Koeffizient des Produkts; Massen statt
-  Stoffmengen ins Verhältnis; Molmasse des Edukts für das Produkt.
+  Fehler: Index vergessen, auch Atom statt Molekül (M(CO₂) = 28,
+  M(O₂) = 16); Ordnungszahl statt Molmasse; Koeffizient mitgerechnet;
+  Klammer nicht malgenommen. Stoffmenge und Teilchenzahl. Fehler: n = m · M
+  oder n = M : m; N = n : N_A. Umsatz in drei Schritten (Gleichung → Tabelle
+  aus n, M, m → Verhältnis). Fehler: 1 : 1; Verhältnis umgedreht; nur der
+  Koeffizient des Produkts; Molmasse des Edukts für das Produkt oder Massen
+  statt Stoffmengen ins Verhältnis (beides ergibt immer denselben Wert);
+  n : M statt n · M; Molmasse eines ähnlichen Stoffs (CO statt CO₂).
 - Lernkarten: Stoffmenge und Avogadro-Konstante; molare Masse; m = n · M;
   Atome oder Moleküle?; Umsatz in drei Schritten; die typischen Fehler beim
   Umsatz.
@@ -420,14 +432,13 @@ Werkstoffkunde.
 - Klausurniveau: Lösung ansetzen wie Klausur 6c mit wechselnden Stoffen und
   Volumen; Masse → Gasvolumen in einer Reaktion; Bedingungen erkennen (22,4
   L/mol nur für Gase und nur bei 0 °C und 1013 hPa).
-- Rechnungen. Fehler: mL statt L; c = V/n; Molmasse unvollständig (NaOH ohne
-  H); °C statt K; hPa nicht in Pa umgerechnet; Massenanteil durch die Masse
+- Rechnungen. Fehler: mL statt L; c = V/n; Molmasse unvollständig (NH₄Cl
+  ohne die H, NaOH nur mit M(Na)); °C statt K; hPa nicht in Pa umgerechnet; Massenanteil durch die Masse
   des Wassers statt der Lösung; ppb mit 10⁻¹² verwechselt;
   Massenkonzentration als V/m; Vol-% nicht durch 100 geteilt.
 - Lernkarten: Konzentration; Lösung ansetzen; Massenanteil;
   Massenkonzentration und Dichte; Konzentrationsangaben im Vergleich; ppm und
-  ppb;
-  ideales Gasgesetz; molares Volumen; Norm- und Standardbedingungen.
+  ppb; ideales Gasgesetz; molares Volumen; Norm- und Standardbedingungen.
 
 #### 5.1 Gleichgewicht (Klausur 5a bis 5d)
 - Grundlagen: Doppelpfeil; dynamisches Gleichgewicht (Hin- und Rückreaktion
@@ -435,20 +446,24 @@ Werkstoffkunde.
   Allgemeinen nicht gleich groß); Produkte stehen im Zähler; exotherm und
   endotherm; Aktivierungsenergie und Energiediagramm; ein Katalysator senkt
   die Aktivierungsenergie, beschleunigt beide Richtungen, wird nicht
-  verbraucht und ändert weder ΔH noch die Lage des Gleichgewichts.
-- Vertiefung: Massenwirkungsgesetz zu beliebigen Gasgleichgewichten; K aus
-  Konzentrationen; was die Größe von K verrät; die Geschwindigkeit einer
-  Reaktion hängt von den Konzentrationen ab, im Gleichgewicht sind beide
-  Richtungen gleich schnell, daher K = k_hin/k_rück; Le Chatelier für Druck,
-  Temperatur und Konzentration.
+  verbraucht und ändert weder die Reaktionsenthalpie ΔH (Wärme, die frei
+  wird oder gebraucht wird) noch die Lage des Gleichgewichts.
+- Vertiefung: Massenwirkungsgesetz zu beliebigen Gasgleichgewichten; K
+  (Gleichgewichtskonstante) aus Konzentrationen; was die Größe von K
+  verrät; die Geschwindigkeit einer Reaktion hängt von den Konzentrationen
+  ab; bei einer Reaktion, die in einem Schritt abläuft, gilt
+  v_hin = k_hin · cᵃ(A) · cᵇ(B), im Gleichgewicht v_hin = v_rück, daher
+  K = k_hin/k_rück (k: Geschwindigkeitskonstante der Hin- bzw.
+  Rückreaktion; Aufgaben dazu nur mit Reaktionen, die als einstufig
+  angegeben sind; die Lernkarte sagt, dass die Exponenten sonst gemessen
+  werden); Le Chatelier für Druck, Temperatur und Konzentration.
 - Klausurniveau: Massenwirkungsgesetz wie Klausur 5c mit wechselnden
   Reaktionen; „Welche Maßnahmen erhöhen die Ausbeute?“ (der Katalysator als
   Falle).
 - Rechnungen: Massenwirkungsgesetz mit dem Baukasten. Fehler: Exponent passt
   nicht zum Koeffizienten; Zähler und Nenner vertauscht; Koeffizient als
   Faktor; Summe statt Produkt; K = k_rück/k_hin. Le Chatelier: Reaktion mit
-  ΔH (Reaktionsenthalpie: Wärme, die frei wird oder gebraucht wird) und
-  Eingriff → Richtung. Fehler: Druck begünstigt die Seite mit mehr Gasteilchen;
+  ΔH und Eingriff → Richtung. Fehler: Druck begünstigt die Seite mit mehr Gasteilchen;
   Erwärmen hilft immer den Produkten; Koeffizienten beim Zählen vergessen.
 - Lernkarten: dynamisches Gleichgewicht; Massenwirkungsgesetz;
   Geschwindigkeit und K; Le Chatelier; exotherm und endotherm;
@@ -457,18 +472,22 @@ Werkstoffkunde.
 #### 5.2 Energie
 In den Altklausuren nur über 5.1 (Katalysator und Aktivierungsenergie,
 exotherm); deshalb nach den klausurnahen Themen.
-- Grundlagen: Vorzeichen von ΔH; Bildungsenthalpie (Elemente in ihrer
-  stabilsten Form unter Standardbedingungen haben 0, z. B. O₂(g), Br₂(l),
-  I₂(s), Kohlenstoff als Graphit); erster und zweiter Hauptsatz (Energie
-  bleibt erhalten; die Entropie nimmt im abgeschlossenen System zu);
-  Vorzeichen von ΔH und ΔS beim Schmelzen und Verdampfen.
+- Grundlagen: Vorzeichen von ΔH; Bildungsenthalpie (Elemente in ihrem
+  Standardzustand haben 0, meist die stabilste Form unter
+  Standardbedingungen, z. B. O₂(g), Br₂(l), I₂(s), Kohlenstoff als Graphit);
+  erster und zweiter Hauptsatz (Energie bleibt erhalten; die Entropie eines
+  abgeschlossenen Systems nimmt nie ab, bei freiwillig ablaufenden Vorgängen
+  nimmt sie zu); Vorzeichen von ΔH und ΔS (Änderung der Entropie) beim
+  Schmelzen und Verdampfen.
 - Vertiefung: Reaktionsenthalpie aus Bildungsenthalpien; Entropie;
-  ΔG = ΔH − T · ΔS; freiwillig oder nicht.
-- Klausurniveau: Temperatur, ab der eine Reaktion freiwillig abläuft; K aus
+  ΔG = ΔH − T · ΔS (ΔG: freie Enthalpie, ΔG⁰ unter Standardbedingungen);
+  freiwillig oder nicht.
+- Klausurniveau: Temperatur, ab der (ΔH > 0, ΔS > 0) bzw. bis zu der
+  (ΔH < 0, ΔS < 0) eine Reaktion freiwillig abläuft, T = ΔH/ΔS; K aus
   ΔG⁰ = −R · T · ln K.
 - Fehler: Edukte minus Produkte; Koeffizienten vergessen; H₂O(g) statt
   H₂O(l) aus der Tabelle; °C statt K; J und kJ nicht angeglichen; lg statt
-  ln; „exergonisch heißt exotherm“.
+  ln. Dazu der Denkfehler „exergonisch heißt exotherm“ als Wissensfrage.
 - Lernkarten: Bildungsenthalpie; Reaktionsenthalpie; Hauptsätze; Entropie;
   freie Enthalpie; freie Enthalpie und K.
 
@@ -490,11 +509,11 @@ kommen mit ihren Schritten dazu. Die Denkfehler der Wissensfragen
 
 | Rechnung | Typischer Fehler (Id) | Beispiel (falsch) |
 | --- | --- | --- |
-| Teilchenzahlen | Neutronen gleich Massenzahl (`chem-neutrons-mass-number`) | ³⁷Cl⁻: 37 Neutronen statt 20 |
-| Teilchenzahlen | Protonen und Neutronen vertauscht (`chem-protons-neutrons-swapped`) | ³⁷Cl⁻: 20 Protonen, 17 Neutronen |
-| Teilchenzahlen | Ionenladung vergessen (`chem-ion-charge-ignored`) | ³⁷Cl⁻: 17 Elektronen statt 18 |
-| Teilchenzahlen | Ladung mit falschem Vorzeichen (`chem-ion-charge-sign`) | ³⁷Cl⁻: 16 Elektronen |
-| Teilchenzahlen | Element über die Massenzahl bestimmt (`chem-element-from-mass`) | A = 37, Z = 17: Rubidium statt Chlor |
+| Protonen, Neutronen, Elektronen | Neutronen gleich Massenzahl (`chem-neutrons-mass-number`) | ³⁷Cl⁻: 37 Neutronen statt 20 |
+| Protonen, Neutronen, Elektronen | Protonen und Neutronen vertauscht (`chem-protons-neutrons-swapped`) | ³⁷Cl⁻: 20 Protonen, 17 Neutronen |
+| Protonen, Neutronen, Elektronen | Ionenladung vergessen (`chem-ion-charge-ignored`) | ³⁷Cl⁻: 17 Elektronen statt 18 |
+| Protonen, Neutronen, Elektronen | Ladung mit falschem Vorzeichen (`chem-ion-charge-sign`) | ³⁷Cl⁻: 16 Elektronen |
+| Protonen, Neutronen, Elektronen | Element über die Massenzahl bestimmt (`chem-element-from-mass`) | A = 37, Z = 17: Rubidium statt Chlor |
 | Energie des Lichts | nm nicht in m umgerechnet (`chem-light-nm`) | 500 nm: 3,98 · 10⁻²⁸ J statt 3,98 · 10⁻¹⁹ J |
 | Energie des Lichts | Formel falsch umgestellt (`chem-light-formula`) | E = h · λ/c |
 | Übergang im H-Atom | Quadrate vergessen (`chem-rydberg-squares`) | 3 → 2: 547 nm statt 656 nm |
@@ -511,10 +530,10 @@ kommen mit ihren Schritten dazu. Die Denkfehler der Wissensfragen
 | Valenzkonfiguration | Ion statt Atom (`chem-valence-ion`) | O: 2s² 2p⁶ |
 | Valenzkonfiguration | falsche Schale (`chem-valence-shell`) | O: 3s² 3p⁴ |
 | Quantenzahlen | l bis n statt bis n − 1 (`chem-l-up-to-n`) | n = 2, l = 2 „erlaubt“ |
-| Quantenzahlen | m nur positiv (`chem-m-positive`) | l = 1: nur m = 0 und 1 |
+| Quantenzahlen | negative m vergessen (`chem-m-positive`) | l = 1: nur m = 0 und 1 statt −1, 0, 1 |
 | Elektronen je Schale | 2n statt 2n² (`chem-shell-2n`) | n = 3: 6 statt 18 |
 | Steckbrief | Periode als Zahl der Valenzelektronen (`chem-period-as-valence`) | P: 3 statt 5 |
-| Steckbrief | Gruppennummer 13 bis 18 als Zahl der Valenzelektronen (`chem-group-number-as-valence`) | Al: 13 statt 3 |
+| Steckbrief, Ionenladung | Gruppennummer 13 bis 18 als Zahl der Valenzelektronen (`chem-group-number-as-valence`) | Al: 13 Valenzelektronen statt 3, Al¹³⁺ statt Al³⁺ |
 | Steckbrief | Fe als Hauptgruppenelement (`chem-fe-main-group`) | Fe: VIII. Hauptgruppe |
 | Ionenladung | Valenzelektronen abgegeben statt Oktett aufgefüllt (`chem-ion-valence-given`) | P⁵⁺ statt P³⁻ |
 | Ionenladung | Vorzeichen vertauscht (`chem-ion-sign`) | Na⁻ statt Na⁺ |
@@ -539,15 +558,15 @@ kommen mit ihren Schritten dazu. Die Denkfehler der Wissensfragen
 | Teilladungen | vertauscht (`chem-partial-swapped`) | δ− am H und δ+ am Cl in HCl |
 | Dipol | polare Bindung mit Dipolmolekül gleichgesetzt (`chem-polar-bond-dipole`) | CO₂ als Dipol |
 | Formel aus dem Namen | Vorsilbe auf das falsche Element bezogen (`chem-prefix-element`) | Schwefeldioxid als S₂O |
-| Ausgleichen | Index statt Koeffizient geändert (`chem-balance-index`) | 2 Mg + O₂ → 2 MgO₂ |
+| Ausgleichen | Index statt Koeffizient geändert (`chem-balance-index`) | Mg + O₂ → MgO₂ statt 2 Mg + O₂ → 2 MgO |
+| Ausgleichen | Sauerstoff nicht ausgeglichen (`chem-balance-oxygen`) | C₄H₁₀ + 6 O₂ → 4 CO₂ + 5 H₂O |
 | Ausgleichen | Sauerstoff im Wasser vergessen (`chem-balance-water-oxygen`) | C₃H₈ + 3 O₂ → 3 CO₂ + 4 H₂O |
 | Ausgleichen | nur teilweise verdoppelt (`chem-balance-partly-doubled`) | 2 C₂H₆ + 7 O₂ → 2 CO₂ + 6 H₂O |
 | Ausgleichen | Einzelatom statt X₂ (`chem-balance-single-atom`) | 2 H + O → H₂O |
 | Ausgleichen | CO statt CO₂ (`chem-balance-co`) | 2 CH₄ + 3 O₂ → 2 CO + 4 H₂O |
-| Molmasse | Index vergessen (`chem-molar-index`) | M(H₂O) = 17 g/mol |
+| Molmasse | Index vergessen, auch Atom statt Molekül (`chem-molar-index`; beides ergibt bei Elementen denselben Wert) | M(CO₂) = 28 statt 44 g/mol; M(O₂) = 16 statt 32 g/mol |
 | Molmasse | Ordnungszahlen statt Molmassen (`chem-molar-atomic-number`) | M(C₄H₁₀) = 34 g/mol |
 | Molmasse | Koeffizient mitgerechnet (`chem-molar-coefficient`) | 2 C₄H₁₀: 116 g/mol |
-| Molmasse | Atom statt Molekül (`chem-molar-atom`) | M(O₂) = 16 g/mol |
 | Molmasse | Klammer nicht malgenommen (`chem-molar-bracket`) | M(Ca(OH)₂) = 58,1 statt 74,1 g/mol |
 | Stoffmenge | n = m · M (`chem-n-times`) | 5,8 g Butan: 336 mol |
 | Stoffmenge | n = M : m (`chem-n-inverted`) | 5,8 g Butan: 10 mol |
@@ -555,17 +574,18 @@ kommen mit ihren Schritten dazu. Die Denkfehler der Wissensfragen
 | Umsatz | Verhältnis 1 : 1 (`chem-ratio-one`) | Butan → CO₂: 0,1 mol statt 0,4 mol |
 | Umsatz | Verhältnis umgedreht (`chem-ratio-swapped`) | 0,025 mol |
 | Umsatz | nur der Koeffizient des Produkts (`chem-ratio-product-only`) | 0,8 mol |
-| Umsatz | Massen statt Stoffmengen ins Verhältnis (`chem-ratio-masses`) | 1 g H₂ → H₂O: 1 g statt 9 g |
-| Umsatz | Molmasse des Edukts für das Produkt (`chem-ratio-wrong-molar-mass`) | 0,4 mol CO₂ mit 58 g/mol: 23,2 g |
+| Umsatz | Molmasse des Edukts für das Produkt oder Massen statt Stoffmengen ins Verhältnis (`chem-ratio-wrong-molar-mass`; beides ergibt immer m(Edukt) · ν(Produkt)/ν(Edukt)) | 5,8 g Butan → CO₂: 23,2 g statt 17,6 g |
+| Umsatz | n : M statt n · M (`chem-mass-divided`) | 0,4 mol CO₂: 0,00909 g statt 17,6 g |
+| Umsatz | Molmasse eines ähnlichen Stoffs (`chem-similar-molar-mass`) | CO statt CO₂: 11,2 g statt 17,6 g |
 | Einheit | falsche Einheit gewählt (`chem-unit`) | 17,6 kg statt 17,6 g |
 | Konzentration | mL statt L (`chem-ml-not-l`) | 0,1 mol in 200 mL: 0,0005 mol/L statt 0,5 mol/L |
 | Konzentration | c = V/n (`chem-c-inverted`) | 2 L/mol |
-| Lösung ansetzen | Molmasse unvollständig (`chem-molar-incomplete`) | M(NaOH) = 39 g/mol |
+| Lösung ansetzen | Molmasse unvollständig (`chem-molar-incomplete`) | M(NH₄Cl) = 49,5 statt 53,5 g/mol (die H vergessen) |
 | Gasgesetz | °C statt K (`chem-celsius`) | T = 25 statt 298,15 K |
 | Gasgesetz | hPa nicht in Pa umgerechnet (`chem-hpa`) | p = 1013 statt 101 300 Pa |
-| Gasvolumen | 22,4 L/mol nicht bei 0 °C und 1013 hPa (`chem-vm-conditions`) | 1 mol Gas bei 25 °C: 22,4 L statt 24,5 L |
+| Gasvolumen | 22,4 L/mol nicht bei 0 °C und 1013 hPa (`chem-vm-conditions`) | 1 mol Gas bei 25 °C und 1013 hPa: 22,4 L statt 24,5 L |
 | Massenanteil | durch die Masse des Wassers statt der Lösung (`chem-fraction-solvent`) | 10 g Salz in 90 g Wasser: 11,1 % statt 10 % |
-| Massenkonzentration | V/m (`chem-mass-conc-inverted`) | 3 g in 100 mL: 0,033 L/g statt 30 g/L |
+| Massenkonzentration | V/m (`chem-mass-conc-inverted`) | 3 g in 100 mL: 0,0333 L/g statt 30 g/L |
 | ppm, ppb | ppb als 10⁻¹² (`chem-ppb`) | 5 ppb als 5 · 10⁻¹² |
 | Vol-% | nicht durch 100 geteilt (`chem-vol-percent`) | 40 Vol-% von 0,5 L: 20 L statt 0,2 L |
 | Massenwirkungsgesetz | Exponent passt nicht zum Koeffizienten (`chem-mwg-exponent`) | Ammoniaksynthese: c²(H₂) statt c³(H₂) |
@@ -608,7 +628,7 @@ Worten, andere Stoffe und Zahlen):
 
 | Aufgabe | Punkte | Teile |
 | --- | --- | --- |
-| 1 Aufbau der Materie | 5 | Ladungen zuordnen (1); Begriffsfrage, z. B. Massenzahl oder Isotope (1); Teilchenzahlen aus einem Kernsymbol (1); Valenzelektron (1); Valenzkonfiguration (1) |
+| 1 Aufbau der Materie | 5 | Ladungen zuordnen (1); Begriffsfrage, z. B. Massenzahl oder Isotope (1); Protonen, Neutronen und Elektronen aus einem Kernsymbol (1); Valenzelektron (1); Valenzkonfiguration (1) |
 | 2 Periodensystem | 4 | vier Auswahlfragen aus: Ordnungszahl, Periode oder Gruppe, warum ähnliche Eigenschaften, Block, Trend |
 | 3 Bindungen | 6 | Ionen und Formel eines Salzes (2); Lewis-Formel, Paare, Gestalt (3); zwischenmolekulare Kräfte (1) |
 | 4 Stöchiometrie | 10 | Verbrennung eines Alkans oder Alkohols ausgleichen (2); Molmassen aller vier Stoffe (4); Masse eines Produkts (4) |
@@ -695,10 +715,12 @@ ist die Vorlesung gerade woanders, ziehe ich das vor (Frage 1 unten).
   Ausprobieren: Vertiefung, ein Ion wie ³⁷Cl⁻ geführt, einmal absichtlich
   die Massenzahl als Neutronenzahl wählen.
 - **1c: Freier Modus für Zahlen.** Ziffernblock, Toleranz, Rundungshinweis,
-  Fehlererkennung; Teilchenzahlen und „Energie des Lichts“ frei.
+  Fehlererkennung; Protonen, Neutronen und Elektronen frei; Rechnung
+  „Energie des Lichts“ geführt und frei, mit Lernkarte und „Gezielt üben“
+  für ihre Fehler.
   Ausprobieren: Energie des Lichts frei, einmal grob gerundet (Hinweis
-  „Fast“) und einmal ohne nm in m umzurechnen; Teilchenzahlen eines Ions
-  frei, einmal mit falschem Vorzeichen der Ladung.
+  „Fast“) und einmal ohne nm in m umzurechnen; Protonen, Neutronen und
+  Elektronen eines Ions frei, einmal mit falschem Vorzeichen der Ladung.
 - **1d: Weitere Fragearten und Wiederholung.** „Wähle alle richtigen“,
   Zuordnen, Ordnen; Wiederholung falsch beantworteter Fragen; Atombau
   Vertiefung (mit Atommodellen, Spektren, Welle und Teilchen) und
@@ -800,8 +822,16 @@ Stehen am Ende der Nachricht im Chat; deine Antworten trage ich hier ein.
 ### Was allgemein wird (auch für die Werkstoffkunde)
 - `src/engine/quiz/`: Fragen-Typen (`types.ts`), Frage → geführte Aufgabe
   mit gemischten Antworten (`plan.ts`; mit `focus` steht die passende falsche
-  Antwort sicher dabei), Wiederholung (`schedule.ts`: Fächer 0 bis 4,
-  ungesehene Fragen zuerst), Prüfungen für Tests (`validate.ts`).
+  Antwort sicher dabei), Wiederholung (`schedule.ts`: Fächer 0 bis 4;
+  fällige zuerst, dann ungesehene, dann schon richtig beantwortete),
+  Prüfungen für Tests (`validate.ts`).
+- `src/engine/quantity/`: deutsche Zahlen (`numberDe.ts`: Komma, „· 10ⁿ“,
+  gültige Ziffern; Leser für Eingaben wie `0,1`, `0.1`, `1,8·10^-5`,
+  `1,8e-5`), Größen mit Einheiten (`quantity.ts`) und die Urteile mit
+  Toleranz; im freien Modus von Chemie, später auch Werkstoffkunde und
+  Physik.
+- `src/ui/numeric/`: Ziffernblock und freier Bildschirm für Zahlen (ohne
+  MathLive).
 - `src/engine/exam/`: Bauplan-Typen und Bewertung mit Teilpunkten und
   Folgefehlern (`grade.ts`; jeder Teil liefert `compute(eingabenBisher)`, auch
   über Teilaufgaben hinweg).
@@ -836,9 +866,7 @@ Stehen am Ende der Nachricht im Chat; deine Antworten trage ich hier ein.
   Gleichungssystem der Atombilanz mit exakten Brüchen; Vorlagen mit mehr als
   einer unabhängigen Lösung fliegen raus; Koeffizienten positiv und
   teilerfremd.
-- `molarMass.ts`, `numberDe.ts`, `quantity.ts`: Molmasse mit Rechenweg;
-  deutsche Zahlen (Komma, „· 10ⁿ“, gültige Ziffern); Leser für Eingaben
-  (`0,1`, `0.1`, `1,8·10^-5`, `1,8e-5`); Größen mit Einheiten.
+- `molarMass.ts`: Molmasse mit Rechenweg.
 - `electrons.ts`: Konfiguration nach der Besetzungsreihenfolge; Ausnahmen
   aus Daten für alle Elemente der Tabelle (Cr, Cu, Nb, Mo, Ru, Rh, Pd, Ag,
   Pt, Au; ein Test vergleicht mit einer Referenzliste); Aufgaben erzeugt nur
@@ -898,17 +926,18 @@ Format wie bisher „Stufe-Nummer“ mit höchstens sechs Ziffern
   bleibt alles wie heute.
 - `TaskScreen` und `TaskIntro` arbeiten mit `GuidedTaskBase`: die Aufgabe als
   Text mit Formeln (`RichText`) oder als Formel; `expr` und `resultLatex`
-  optional (`CardSheetButton` und `CardBody` mit `task?`, Ergebnis-Kasten
-  nur mit Ergebnis).
+  optional (`CardSheetButton` und `CardSheet` mit `task?`; `CardBody` hat
+  es schon; Ergebnis-Kasten nur mit Ergebnis).
 - Lernkarten: Chemie-Karten in `src/engine/explain/chemCards.ts`, je Thema
   ein Ordner in `TOPICS`. `CardExample` bekommt eine Chemie-Art, die die
   Chemie-Engine durchrechnet (nicht `example.ts`); Wissenskarten haben
-  Beispiele als Text. `formulas` darf leer sein (`CardsScreen.tsx` zeigt dann
-  den Merksatz, `CardBody.tsx` lässt den Formel-Kasten weg).
+  Beispiele als Text. `formulas` darf leer sein (`CardsScreen.tsx` und die
+  Kartenliste in `CardSheet.tsx` zeigen dann den Merksatz statt
+  `formulas[0]`, `CardBody.tsx` lässt den Formel-Kasten weg).
 - Neue Teile in `src/ui/guided/interactions/` und `src/ui/chem/`
   (Abbildungen, Lewis-Formel als SVG mit `currentColor`, Kästchen,
-  Ziffernblock, Koeffizienten, Element-Tastatur, freier Bildschirm für
-  Chemie ohne MathLive), `src/ui/exam/` (erst bei Bedarf geladen).
+  Koeffizienten, Element-Tastatur, Knöpfe für Konfigurationen),
+  `src/ui/exam/` (erst bei Bedarf geladen).
 - `CourseEngine` in `courseEngines.ts` unterscheidet `math` und `chem`.
 - Formelsatz: die KaTeX-Erweiterung mhchem fest in `renderFormula.ts` und
   `latexChecks.ts` (etwa 8 KB mehr, nur im Formel-Teil, nie auf der
@@ -968,16 +997,19 @@ Format wie bisher „Stufe-Nummer“ mit höchstens sechs Ziffern
   Unicode-Indizes (₂, ⁺) außerhalb von `$…$`; kein `$` und kein Umlaut in
   `\ce{…}`.
 - **Verbotene richtige Antworten**: Die Stolperstellen aus CHEMIE.md
-  (z. B. „2 Mg + O₂ → 2 MgO₂“, Ethan „sp²“, CO₂ „gewinkelt“) stehen nie als
+  (z. B. MgO₂ als Produkt aus Magnesium und Sauerstoff, Ethan „sp²“, CO₂
+  „gewinkelt“) stehen nie als
   richtige Antwort oder als Aussage auf einer Lernkarte.
 - **Rechnungen**: jedes Ergebnis auf zweitem Weg geprüft (Umsatz über die
   direkte Formel und die Massenerhaltung, Gasgesetz durch Einsetzen,
   Born-Haber-Kreis schließt sich, Konfiguration gegen eine
   Referenztabelle, Reaktionsenthalpie der Umkehrreaktion = −ΔH);
   Ausgleichen über die Atom- und Ladungsbilanz mit fast-check; falsche
-  Antworten liegen mindestens 6 % neben der Lösung und 3 % auseinander (beim
-  pH 0,2 und 0,15),
-  sonst fallen sie weg; die gerundete Lösung wird im freien Modus
+  Antworten bei Ergebnissen mit Toleranz liegen mindestens 6 % neben der
+  Lösung und 3 % auseinander (beim pH 0,2 und 0,15), bei genauen Werten
+  sind sie nur verschieden von der Lösung und untereinander; sonst fallen
+  sie weg; zwei Fehler, die für jede Aufgabe denselben Wert liefern, haben
+  eine gemeinsame Id; die gerundete Lösung wird im freien Modus
   angenommen, jede falsche Antwort abgelehnt.
 - **Daten**: Molmassen gegen IUPAC; Gruppe und Periode passen zu Z;
   Ionenladung zur Hauptgruppe; Trends nur, wo Regel und Werte
@@ -1001,8 +1033,11 @@ Format wie bisher „Stufe-Nummer“ mit höchstens sechs Ziffern
 - Rechnungen, Gleichungen, Formeln, Konfigurationen und Trends rechnet die
   Engine; Wissensfragen und die Beispiele auf Wissenskarten werden durch
   Tests, eine inhaltliche Prüfung je Schritt und „Frage melden“ abgesichert.
-- Abwechslung: Kennzahlen wie in M2b; Abweichungen je Schritt mit Begründung
-  in diesem Plan.
+- Abwechslung: Rechnungen mit den Kennzahlen aus M2b (Abweichungen je
+  Schritt mit Begründung in diesem Plan); Wissensfragen nach den eigenen
+  Regeln unter „Abwechslung“ in diesem Plan (mindestens 15 je Stufe, keine
+  doppelt, bevor alle dran waren, derselbe Fakt nicht innerhalb von zehn
+  Aufgaben, neue Fassung bei jedem Wiederkommen).
 - Jede Rechnung nennt die Werte, mit denen sie rechnet.
 - Rechenfehler stehen im Katalog in diesem Plan (wie bei Mathe); die
   Denkfehler bei Wissensfragen listet die Galerie aus dem Code, statt sie

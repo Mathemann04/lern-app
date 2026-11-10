@@ -47,7 +47,7 @@ weicht die PDF-Seite von der Foliennummer ab.
 | Skript Zwischenmolekulare Kräfte | Van-der-Waals-Kräfte, Dipol-Dipol-Kräfte, Wasserstoffbrücken, Siedepunkte, Wasser, Löslichkeit | Zwischenmolekulare Kräfte |
 | Skript Stöchiometrie | Reaktionsgleichungen (Folien 1–7, 15); Stoffmenge und molare Masse (8–11); Umsatzrechnung mit typischen Fehlern (12–15); Gase (16, 18); Konzentrationen, Massenkonzentration, Massenanteil, ppm, Vol-% (20–24); Lernzielkontrolle (26) | Reaktionsgleichungen, Stoffmenge und Umsatz, Gase und Lösungen |
 | Skript Gleichgewicht | Gleichgewicht, Reaktionsgeschwindigkeit und Massenwirkungsgesetz (1–4); Le Chatelier (5); Aktivierungsenergie, Katalysator, exotherm und endotherm, Enthalpie (6–8); Entropie, freie Enthalpie, ΔG⁰ und K (9); Hauptsätze (10); Lernzielkontrolle (11) | Gleichgewicht, Energie |
-| Übung Atommodelle | Atommodelle und Streuversuch, Teilchenzahlen und Isotope, Schale und Orbital, Konfigurationen von Atomen und Ionen (auch Fe²⁺ und Cu), Kästchen und Besetzungen beurteilen, Trends und isoelektronische Ionen | Atombau, Elektronen, Trends |
+| Übung Atommodelle | Atommodelle und Streuversuch, Protonen, Neutronen und Elektronen, Isotope, Schale und Orbital, Konfigurationen von Atomen und Ionen (auch Fe²⁺ und Cu), Kästchen und Besetzungen beurteilen, Trends und isoelektronische Ionen | Atombau, Elektronen, Trends |
 | Übung Bindungen | Salze, Gitter, Metalle, Lewis-Formeln, Gestalt, Polarität, Hybridisierung | Bindung |
 | Übung Stöchiometrie | stärkste zwischenmolekulare Kraft, Siedereihen, Gleichungen ausgleichen, Stoffmenge | Zwischenmolekulare Kräfte, Stöchiometrie |
 | Altklausuren | sieben Aufgaben, 45 Minuten, 50 Punkte; dieselben Fragen mit anderen Stoffen | Probeklausur, „Klausuraufgabe N üben“ |
@@ -141,7 +141,7 @@ zweiten, unabhängig eingetragenen Liste.
 | Winkel von H₂O und NH₃ | Abgefragt nur „gewinkelt“ bzw. „trigonal-pyramidal“ und „kleiner als 109,5°“. Die Lernkarte nennt die Messwerte (etwa 104,5° und 107°) als Ergänzung. |
 | Vorzeichen von Energien | ΔH < 0 heißt exotherm. Die Gitterenthalpie ist negativ (beim Bilden des Gitters wird Energie frei). Born-Haber mit Vorzeichen in Richtung des Kreises. Reaktionsenthalpie in kJ für die Gleichung, wie sie dasteht; kJ/mol wird auch angenommen. |
 | Molmasse von Chlor | 35,5 g/mol. |
-| Bildungsenthalpie | 0 für Elemente in ihrer stabilsten Form unter Standardbedingungen (O₂(g), Br₂(l), I₂(s), Kohlenstoff als Graphit); Tabellenwerte für (g) und (l) getrennt. |
+| Bildungsenthalpie | 0 für Elemente in ihrem Standardzustand, meist der stabilsten Form unter Standardbedingungen (O₂(g), Br₂(l), I₂(s), Kohlenstoff als Graphit). Ausnahme Phosphor (Bezug ist weißer Phosphor, obwohl roter stabiler ist); Phosphor deshalb nicht in Enthalpie-Aufgaben. Tabellenwerte für (g) und (l) getrennt. |
 | Pfeil bei Gleichgewichten | immer ⇌. |
 
 ## 6. Grenzfälle, die die App nicht abfragt
@@ -155,14 +155,24 @@ zweiten, unabhängig eingetragenen Liste.
 - Lewis-Formel von SO₂ und anderen Molekülen mit erweitertem Oktett;
   abgefragt werden nur Gestalt und Polarität. BF₃ nur mit dem Hinweis, dass
   Bor sechs Elektronen hat.
-- Trend-Paare, bei denen die Messwerte der Regel widersprechen:
-  Ionisierungsenergie zwischen Gruppe 2 und 13 sowie 15 und 16 derselben
-  Periode (z. B. Mg > Al, N > O) und innerhalb der Gruppen 13 und 14
-  (Ga > Al, Pb > Sn); Elektronenaffinität zwischen 2. und 3. Periode
-  (B < Al, C < Si, O < S, F < Cl) sowie der Gruppen 2, 15 und 18;
-  Elektronegativität innerhalb der Gruppen 13 und 14 und bei schweren
-  Elementen (z. B. Ga > Al). Keine Vergleiche über die Diagonale. Atomradien
-  nur als Kovalenzradien.
+- Trend-Paare, bei denen die Messwerte der Regel widersprechen oder gleich
+  sind:
+  - Ionisierungsenergie zwischen Gruppe 2 und 13 sowie 15 und 16 derselben
+    Periode (z. B. Mg > Al, N > O), Pb > Bi und innerhalb der Gruppen 13 und
+    14 (Ga > Al, Pb > Sn);
+  - Elektronenaffinität zwischen 2. und 3. Periode (B < Al, C < Si, O < S,
+    F < Cl), zwischen Gruppe 1 und 13 derselben Periode (Li > B, Na > Al,
+    K > Ga, Rb > In), Rb < Cs, Ga = In sowie in den Gruppen 2, 15 und 18;
+  - Elektronegativität innerhalb der Gruppen 13 und 14, K = Rb und bei
+    schweren Elementen (z. B. Ga > Al);
+  - Atomradius (Kovalenzradien): nie mit Edelgasen (Ne > F, Ar > Cl,
+    Xe > I), nicht zwischen As, Se und Br, nicht Sn/Sb, Te/I, Pb/Bi.
+
+  Keine Vergleiche über die Diagonale und keine mit Nebengruppenelementen
+  (z. B. Au > Ag bei Ionisierungsenergie, Elektronenaffinität und
+  Elektronegativität; Ag > Au und Pd > Pt beim Radius). Ordnen-Fragen prüft
+  ein Test gegen die Tabelle; von Hand geschriebene Fragen und Lernkarten
+  halten sich an diese Liste.
 - Born-Haber für Bromide und Iodide (Brom ist flüssig, Iod fest; es fehlte ein
   Schritt).
 - Das Gleichgewicht H₂ + I₂ ⇌ 2 HI nur für „Druck ändert nichts“, nie für
@@ -197,12 +207,21 @@ Reihenfolge beurteilt:
    Rundung“, zählt nicht als Fehler.
 4. **Falsch** sonst.
 
-- Werte typischer Fehler liegen mindestens 6 % (beim pH 0,2) neben der
-  Lösung und mindestens 3 % (beim pH 0,15) auseinander; sonst fällt der Fehler für diese Aufgabe weg
+- Bei Ergebnissen mit Toleranz liegen Werte typischer Fehler mindestens 6 %
+  (beim pH 0,2) neben der Lösung und mindestens 3 % (beim pH 0,15)
+  auseinander; sonst fällt der Fehler für diese Aufgabe weg
   (z. B. „Molmasse des Edukts statt des Produkts“, wenn beide gleich sind).
 - Genau stimmen müssen Protonen-, Neutronen- und Elektronenzahlen,
-  Koeffizienten, Indizes, Ladungen und Oxidationszahlen. Teilchenzahlen
-  N = n · N_A gelten wie andere Ergebnisse mit 1 % Toleranz.
+  Koeffizienten, Indizes, Ladungen und Oxidationszahlen. Bei diesen genauen
+  Werten reicht es, dass ein Fehlerwert von der Lösung und von den anderen
+  Fehlerwerten verschieden ist. Die Teilchenzahl einer Stoffportion
+  N = n · N_A gilt wie andere Ergebnisse mit 1 % Toleranz.
+- Zwei Fehler, die für jede Aufgabe denselben Wert liefern (z. B. Molmasse
+  des Edukts für das Produkt und Massen statt Stoffmengen ins Verhältnis),
+  bekommen eine gemeinsame Id.
+- Temperaturen werden in Kelvin verglichen, auch wenn nach °C gefragt ist
+  (1 % des Werts in K); sonst wäre eine relative Toleranz nahe 0 °C
+  sinnlos.
 - Ausgleichen: richtig mit den kleinsten ganzen Zahlen; ausgeglichen, aber
   nicht gekürzt oder mit Bruch: „noch nicht fertig“.
 - Einheiten: in Grundlagen und Vertiefung vorgegeben; auf Klausurniveau
@@ -222,9 +241,11 @@ einer Lernkarte als Tatsache. Ein Test prüft das.
   einer Reaktion im geschlossenen Gefäß gehe Masse verloren; Bor sei ein
   Metall (Halbmetall); λ = h/(m · c) für jedes Teilchen (allgemein
   h/(m · v)).
-- **Elektronen**: Chlor als 4s² 4p⁵ (das wäre Brom; Cl: 3s² 3p⁵); Eisen
-  als VIII. Hauptgruppe (Nebengruppenelement, Gruppe 8) oder mit 3d⁴ (3d⁶);
-  Fe²⁺ als 4s¹ 3d⁵ (3d⁶); Chrom 2, 8, 12, 2 (2, 8, 13, 1); Fluor mit sechs
+- **Elektronen**: Valenzelektronen in der falschen Schale (in Periode 3
+  sind es 3s und 3p, nicht 4s und 4p); Eisen als Hauptgruppenelement
+  (Nebengruppenelement, Gruppe 8); d-Elektronen falsch gezählt (Fe:
+  [Ar] 3d⁶ 4s²); bei Ionen von Übergangsmetallen nicht zuerst die
+  4s-Elektronen abgegeben (Fe²⁺: [Ar] 3d⁶); Chrom 2, 8, 12, 2 (2, 8, 13, 1); Fluor mit sechs
   Außenelektronen (sieben); Orbitale einer Unterschale seien unterschiedlich
   energiereich (sie sind energiegleich).
 - **Periodensystem**: Lithium reagiere heftiger als Natrium (umgekehrt);
@@ -237,7 +258,7 @@ einer Lernkarte als Tatsache. Ein Test prüft das.
   mit falscher Ladung (Phosphat ist PO₄³⁻).
 - **Moleküle**: CO₂ gewinkelt (linear); H₂S tetraedrisch (gewinkelt); Ethan
   sp² (sp³); N₂O als Stickstoffmonoxid (Distickstoffmonoxid); Namen mit
-  falscher Endung („-fluid“ statt „-fluorid“); BI oder BI₂ (BI₃); SH₃ (H₂S);
+  falscher Endung (die Endung ist -id: Fluorid, Chlorid, Oxid); BI oder BI₂ (BI₃); SH₃ (H₂S);
   H₂Cl₂ (HCl); CF₄ sei ein stark polares Molekül (polare Bindungen, aber
   unpolares Molekül); Teilladungen in HBr vertauscht; ΔEN zwischen Atomen,
   die gar nicht verbunden sind (bei HCN zwischen H und N); elektrische mit
@@ -248,17 +269,18 @@ einer Lernkarte als Tatsache. Ein Test prüft das.
   bildeten Wasserstoffbrücken; Alkane als CₙHₙ₊₂ (CₙH₂ₙ₊₂); Formel eines
   Alkans um ein C-Atom verschoben (Pentan ist C₅H₁₂); Pentan sei bei
   Raumtemperatur gasförmig (flüssig).
-- **Stöchiometrie**: 2 Mg + O₂ → 2 MgO₂ (MgO); die Verbrennung von
-  Magnesium sei endotherm (exotherm); Komma in der Molmasse verrutscht
+- **Stöchiometrie**: Formel beim Ausgleichen verändert (MgO₂ statt MgO);
+  Komma in der Molmasse verrutscht
   (M(O₂) ist 32 g/mol); falsche Molmasse für Chlor (35,5 g/mol); eine
   Summenformel in einzelne Elemente zerlegt (C₆H₁₂O₆ ist ein Stoff); falsch ausgeglichen: Sn + 2 O₂ → SnO₂, 2 Al + 3 O₂ → 2 Al₂O₃,
   3 H + N₂ → 2 NH₃ (richtig: Sn + O₂ → SnO₂, 4 Al + 3 O₂ → 2 Al₂O₃,
   3 H₂ + N₂ → 2 NH₃); Cl, N, O, Br als Einzelatome in Gleichungen.
 - **Gleichgewicht und Energie**: im Massenwirkungsgesetz der
   Ammoniaksynthese c²(H₂) statt c³(H₂); im Gleichgewicht laufe keine
-  Reaktion mehr; die Konzentrationen seien im Gleichgewicht gleich groß; ein
+  Reaktion mehr; die Konzentrationen seien im Gleichgewicht immer gleich groß; ein
   Katalysator erhöhe die Ausbeute; endergonisch heiße ΔG < 0 (richtig:
-  ΔG > 0).
+  ΔG > 0); exotherm und endotherm verwechselt (eine Verbrennung gibt Energie
+  ab, ist also exotherm).
 - **Redox**: Mg → Mg²⁺ + e⁻ (2 e⁻).
 
 ## 9. Regeln für Fragen und Texte

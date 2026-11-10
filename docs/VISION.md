@@ -61,7 +61,8 @@ entstehen aber zuerst für mein Uni-Niveau.
 - Fortschritt pro Thema und Stufe. Die App merkt sich meine häufigsten Fehler
   und bietet gezieltes Üben dazu an.
 - Zu jeder Regel eine kurze Lernkarte (Regel, Merksatz, durchgerechnetes
-  Beispiel), jederzeit aufrufbar.
+  Beispiel; bei Wissenskarten in Chemie ein Beispiel in eigenen Worten),
+  jederzeit aufrufbar.
 
 ## Technische Leitplanken
 - Web-App (PWA): auf dem Homescreen installierbar und offline nutzbar. So
@@ -84,6 +85,9 @@ entstehen aber zuerst für mein Uni-Niveau.
   - prüft Gleichwertigkeit symbolisch und numerisch an vielen Zufallsstellen
     im Definitionsbereich.
 - Mathematische Korrektheit hat oberste Priorität: Alle Lösungen und
-  Beispiele kommen aus der Engine, nichts von Hand. Viele automatische Tests
+  Beispiele von Rechnungen kommen aus der Engine, nichts von Hand.
+  Wissensfragen und Wissenskarten (Chemie) sind in eigenen Worten
+  geschrieben und durch Tests, eine inhaltliche Prüfung je Schritt und
+  „Frage melden“ abgesichert. Viele automatische Tests
   pro Regel und Stufe, auch dafür, dass eine falsche Option nie zufällig doch
   richtig ist.
