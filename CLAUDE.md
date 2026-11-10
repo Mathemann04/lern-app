@@ -9,9 +9,9 @@ den Nutzer zugeschnitten: Maschinenbau, 1. Semester, THU, „Mathematik MB1".
 - Maßstab fürs Niveau: das Buch des Nutzers „Mathe für Ingenieure",
   Kapitel und ihre Themen in der App: [docs/LEHRBUCH.md](docs/LEHRBUCH.md)
 - Meilensteine und aktueller Stand: [docs/ROADMAP.md](docs/ROADMAP.md)
-- Laufender Plan: keiner. M3 ist abgeschlossen; der Nutzer überarbeitet die
-  ROADMAP, danach kommt der Plan für den nächsten Meilenstein.
-  Abgeschlossen:
+- Laufender Plan: [docs/PLAN-M4.md](docs/PLAN-M4.md) (Chemie 1, Entwurf,
+  wartet auf Freigabe); feste Regeln für alle Chemie-Inhalte:
+  [docs/CHEMIE.md](docs/CHEMIE.md). Abgeschlossen:
   [docs/PLAN-M1.md](docs/PLAN-M1.md), [docs/PLAN-M2.md](docs/PLAN-M2.md),
   [docs/PLAN-M2b.md](docs/PLAN-M2b.md) (Brüche nachschärfen: Abwechslung und
   Profi-Niveau), [docs/PLAN-M3.md](docs/PLAN-M3.md) (Gleichungen umstellen,
@@ -579,8 +579,9 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   ausprobieren lässt.
 - **Schwierigkeit:** Stufe 5 heißt in jedem Thema „kaum noch schwerer":
   verschachtelt und quer durch das ganze Thema (Vorbild: Stufe 5 von
-  „Gleichungen umstellen"). Neue Themen gleich so planen; Brüche werden in
-  M2b nachgeschärft, danach Umstellen und Ableiten (docs/ROADMAP.md,
+  „Gleichungen umstellen"); in Fächern mit drei Stufen (Chemie) gilt das für
+  die höchste Stufe „Klausurniveau". Neue Themen gleich so planen; Brüche und
+  Umstellen sind nachgeschärft, Ableiten folgt später (docs/ROADMAP.md,
   „Vorgemerkt").
 - **Abwechslung:** Aufgaben einer Stufe dürfen sich nicht nur in den Zahlen
   unterscheiden. Aufgaben aus einem Baukasten zusammensetzen (Anzahl der
@@ -600,6 +601,11 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   `normalize.test.ts` und `finalForm.test.ts` prüfen das; nach Änderungen
   mehrmals laufen lassen. Numerische Vergleiche nur an aussagekräftigen,
   stabilen Stellen (Rundungseffekte sonst als Scheinfehler).
+- **Unterlagen des Nutzers (Urheberrecht):** Skripte, Übungsblätter,
+  Klausuren und Auszüge daraus kommen nie ins Repo (es ist öffentlich), auch
+  nicht in Testdateien oder Doku. Alle Inhalte in eigenen Worten, keine
+  Folien- oder Aufgabentexte, keine kopierten Bilder, keine Namen von
+  Lehrenden. Einzelheiten in docs/CHEMIE.md.
 - **Fehlerregeln:** Jede neue Fehlerregel bekommt ein Katalogbeispiel in
   `errorRules.test.ts` und einen Eintrag im Katalog (Ableiten:
   docs/PLAN-M1.md, Brüche: docs/PLAN-M2.md, Umstellen: docs/PLAN-M3.md).

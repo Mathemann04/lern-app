@@ -7,15 +7,28 @@ Stand: 10.11.2026
 | M1 | Grundgerüst + Ableitungsregeln (beide Modi, 5 Stufen, Erklärungen, Lernkarten, Fortschritt) | fertig |
 | M2 | Brüche (Bruchrechnung, Bruchterme kürzen und zusammenfassen, Doppelbrüche); App für mehrere Themen | fertig |
 | M2b | Brüche nachschärfen: viel mehr Abwechslung (Baukasten statt fester Vorlagen, keine Form doppelt), deutlich schwerer, Stufe 5 auf Profi-Niveau mit Partialbruchzerlegung und Brüchen aus späteren Kapiteln (komplexe Zahlen, Grenzwerte, Teleskopsummen, Hyperbelfunktionen) | fertig |
-| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | in Arbeit: 4. Fassung des Plans (Baukasten und Abwechslung, ab Stufe 3 verschachtelter); Schritte 4, 5 und 6 fertig (Stufe 4 komplett), Schritt 7 fertig (Stufe 5 mit Ableitungen, Integralen, Summen, Reihen, Grenzwerten und Differentialgleichungen), fertig (alle Schritte 1 bis 9, zuletzt gezieltes Üben für jeden typischen Fehler und Feinschliff) |
-| M4 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
-| M5 | weitere Themen aus Mathematik MB1 | offen |
-| M6 | Physik: Formeln mit Einheiten (Formeln umstellen mit Zeichen der Physik; Aufgaben lösen: Formel wählen, umstellen, Werte mit Einheiten einsetzen) | offen |
-| M7 | Technische Mechanik: Freischnitt, Gleichgewicht, Lagerkräfte, statische Bestimmtheit | offen |
+| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten, Vektoren, Additionstheoremen) | fertig |
+| M4 | **Chemie 1**: neues Fach mit Wissensfragen (Auswahl, Zuordnen, Ordnen) und Rechnungen zu allen Themen der Vorlesung, drei Stufen (Grundlagen, Vertiefung, Klausurniveau), Lernkarten, Wiederholung, Probeklausur wie die echte (45 min, 50 Punkte) | Plan als Entwurf ([PLAN-M4.md](PLAN-M4.md)), wartet auf Freigabe |
+| M5 | **Werkstoffkunde**: eigenes Fach nach demselben Muster wie Chemie | offen (Platz in der Reihenfolge klärt der Nutzer; braucht die Skripte) |
+| M6 | **Themen einzeln üben**: was heute nur in Stufe 5 von „Brüche" und „Gleichungen umstellen" steckt, als eigene Themen mit leichtem Einstieg (komplexe Zahlen, Determinanten, Integrale und Partialbrüche, Summen, Reihen und Grenzwerte, Differentialgleichungen, Winkelfunktionen mit Additionstheoremen, Hyperbelfunktionen); die Rechenteile gibt es schon | offen |
+| M7 | **Vektoren** als eigenes Gebiet: Rechnen mit Vektoren, Länge, Skalarprodukt, Winkel, Kreuzprodukt, Projektion (ob Geraden und Ebenen dazukommen, klären wir beim Plan) | offen |
+| M8 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
+| M9 | weitere Themen aus Mathematik MB1, „Ableiten" nachschärfen | offen |
+| M10 | Physik: Formeln mit Einheiten (Formeln umstellen mit Zeichen der Physik; Aufgaben lösen: Formel wählen, umstellen, Werte mit Einheiten einsetzen) | offen |
+| M11 | Technische Mechanik: Freischnitt, Gleichgewicht, Lagerkräfte, statische Bestimmtheit | offen |
 | Später | Konto und Sync, Teilen mit Kommilitonen, App-Store-Version, optional KI-Hilfe | offen |
 
 ## Vorgemerkt
 
+- **Neue Reihenfolge** (Wunsch des Nutzers, 10.11.2026): Chemie zuerst, weil
+  sie für den Nutzer gerade am wichtigsten ist. „Brüche" und „Gleichungen
+  umstellen" bekommen vorerst keine neuen Inhalte; stattdessen werden ihre
+  Teilthemen aus Stufe 5 einzeln übbar (M6), und Vektoren werden ein eigenes
+  Gebiet (M7). Werkstoffkunde kommt später als eigenes Fach nach dem Muster
+  von Chemie (M5).
+- **Unterlagen des Nutzers** (Skripte, Übungsblätter, Klausuren) dürfen nicht
+  veröffentlicht werden. Sie kommen nie ins Repo; alle Inhalte entstehen in
+  eigenen Worten (Regeln in [CHEMIE.md](CHEMIE.md)).
 - **Niveau wie im Lehrbuch** (Wunsch des Nutzers, 31.10.2026): Maßstab für
   alle Themen ist das Buch „Mathe für Ingenieure" des Nutzers
   ([LEHRBUCH.md](LEHRBUCH.md): Kapitel und wo sie in der App vorkommen).
@@ -36,8 +49,41 @@ Stand: 10.11.2026
   Abwechslung: **Brüche** jetzt in M2b, danach **Gleichungen umstellen**
   (Stufen 1 bis 3 mit Baukasten, dann M3 ab Schritt 4), danach **Ableiten**
   (eigener Plan; die Werkzeuge aus Stufe 5 von M3 wie Integrale und Reihen
-  lassen sich dort wiederverwenden). Neue Themen (M4 und später) werden
-  gleich so geplant.
+  lassen sich dort wiederverwenden; jetzt in M9). Neue Themen (ab M4) werden
+  gleich so geplant; in Fächern mit drei Stufen wie Chemie gilt das für die
+  höchste Stufe („Klausurniveau").
+
+## M4: Schritte
+
+Details: [PLAN-M4.md](PLAN-M4.md) (Entwurf, wartet auf Freigabe), feste
+Regeln: [CHEMIE.md](CHEMIE.md)
+
+- [ ] 0. Plan freigeben
+- [ ] 1. Gerüst und erstes Thema „Atombau"
+  - [ ] 1a. Fach und erste Fragen
+  - [ ] 1b. Erste Rechnung
+  - [ ] 1c. Freier Modus für Zahlen
+  - [ ] 1d. Weitere Fragearten und Wiederholung
+- [ ] 2. Stöchiometrie
+  - [ ] 2a. Stoffmenge und Molmasse
+  - [ ] 2b. Reaktionsgleichungen
+  - [ ] 2c. Umsatz und Klausuraufgabe 4
+  - [ ] 2d. Gase und Lösungen
+- [ ] 3. Bindungen
+  - [ ] 3a. Ionenbindung und Salze
+  - [ ] 3b. Moleküle
+  - [ ] 3c. Zwischenmolekulare Kräfte und Klausuraufgabe 3
+- [ ] 4. Elektronen und Periodensystem
+  - [ ] 4a. Elektronen
+  - [ ] 4b. Periodensystem
+- [ ] 5. Gleichgewicht und Energie
+  - [ ] 5a. Gleichgewicht
+  - [ ] 5b. Energie
+- [ ] 6. Probeklausur Teil 1 (Aufgaben 1 bis 5)
+- [ ] 7. Säuren und Basen (sobald das Skript da ist)
+- [ ] 8. Redox und Elektrochemie (sobald das Skript da ist)
+- [ ] 9. Zusatz: Metallbindung, Hybridisierung, Molekülorbitale
+- [ ] 10. Abschluss von M4
 
 ## M2b: Schritte
 
@@ -611,3 +657,11 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   Themas (Thema, alle 21 Lernkarten, Fortschritt, Galerie, Aufgaben aller Stufen
   geführt und frei, gezielt üben) in Handy- und Laptopgröße, hell und dunkel: keine
   Funde. Neuer Browser-Test: Umstellen offline, geführt, frei und gezielt üben.
+- 10.11.2026: Neue Reihenfolge der Roadmap (Wunsch des Nutzers): M4 Chemie 1,
+  M5 Werkstoffkunde (Platz noch offen), M6 Themen einzeln üben, M7 Vektoren,
+  danach die bisherigen Mathe-, Physik- und Mechanik-Meilensteine. Für Chemie
+  (Antworten des Nutzers): Wissensfragen und Rechnungen, drei Stufen
+  (Grundlagen, Vertiefung, Klausurniveau), Probeklausur gleich mit eingeplant.
+  Grundlage sind die Skripte, Übungsblätter und zwei Altklausuren des Nutzers;
+  sie kommen wegen des Urheberrechts nicht ins Repo. Plan als Entwurf in
+  [PLAN-M4.md](PLAN-M4.md), feste Regeln in [CHEMIE.md](CHEMIE.md).

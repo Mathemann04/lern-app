@@ -10,7 +10,10 @@ entstehen aber zuerst für mein Uni-Niveau.
 
 ### Geführt
 - Die Lösung ist in Schritte zerlegt, jeder Schritt ist Multiple Choice.
-- Schritt 1 ist immer „Welche Regel brauchst du?".
+- Schritt 1 ist in Mathe immer „Welche Regel brauchst du?" bzw. „Was
+  machst du als Nächstes?"; in Chemie beginnt eine Rechnung mit ihrem ersten
+  Rechenschritt (z. B. der Reaktionsgleichung), eine Wissensfrage hat meist
+  nur einen Schritt.
 - Die falschen Optionen sind typische Denkfehler, z. B. $(u \cdot v)' = u' \cdot v'$
   oder die vergessene innere Ableitung.
 - Bei einer falschen Antwort kann man sich erklären lassen, warum genau sie
@@ -31,8 +34,9 @@ entstehen aber zuerst für mein Uni-Niveau.
   „Kurz" (nur die Rechnung).
 
 ## Schwierigkeitsstufen
-- Jedes Thema hat 5 Stufen. Ich wähle die Stufe selbst, und sie bleibt, bis
-  ich sie ändere.
+- Jedes Thema hat 5 Stufen (in Chemie drei: Grundlagen, Vertiefung,
+  Klausurniveau; Entscheidung vom 10.11.2026). Ich wähle die Stufe selbst,
+  und sie bleibt, bis ich sie ändere.
 - Die App darf vorschlagen, eine Stufe höher zu gehen (z. B. nach 8 von 10
   richtig), wechselt aber nie automatisch.
 - Stufen am Beispiel Ableitungen:
@@ -57,7 +61,8 @@ entstehen aber zuerst für mein Uni-Niveau.
 - Fortschritt pro Thema und Stufe. Die App merkt sich meine häufigsten Fehler
   und bietet gezieltes Üben dazu an.
 - Zu jeder Regel eine kurze Lernkarte (Regel, Merksatz, durchgerechnetes
-  Beispiel), jederzeit aufrufbar.
+  Beispiel; bei Wissenskarten in Chemie ein Beispiel in eigenen Worten),
+  jederzeit aufrufbar.
 
 ## Technische Leitplanken
 - Web-App (PWA): auf dem Homescreen installierbar und offline nutzbar. So
@@ -80,6 +85,9 @@ entstehen aber zuerst für mein Uni-Niveau.
   - prüft Gleichwertigkeit symbolisch und numerisch an vielen Zufallsstellen
     im Definitionsbereich.
 - Mathematische Korrektheit hat oberste Priorität: Alle Lösungen und
-  Beispiele kommen aus der Engine, nichts von Hand. Viele automatische Tests
+  Beispiele von Rechnungen kommen aus der Engine, nichts von Hand.
+  Wissensfragen und Wissenskarten (Chemie) sind in eigenen Worten
+  geschrieben und durch Tests, eine inhaltliche Prüfung je Schritt und
+  „Frage melden“ abgesichert. Viele automatische Tests
   pro Regel und Stufe, auch dafür, dass eine falsche Option nie zufällig doch
   richtig ist.
