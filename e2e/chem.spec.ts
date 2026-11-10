@@ -39,6 +39,20 @@ async function answersFromGallery(context: BrowserContext, no: number): Promise<
   return { correct, wrong }
 }
 
+// Ab S2 kommen zwischen den Fragen auch erzeugte Rechnungen (Nummern 10000 bis 499999). Tests, die eine
+// Wissensfrage brauchen, ziehen so lange neu, bis eine kommt.
+const isCalc = (url: string) => {
+  const seed = Number(/-(\d+)(?:\?.*)?$/.exec(url)?.[1] ?? 0)
+  return seed >= 10_000 && seed < 500_000
+}
+async function ensureQuestion(page: Page, href: string) {
+  for (let i = 0; i < 30 && isCalc(page.url()); i++) {
+    await page.goto(href)
+    await expect(page).toHaveURL(/-\d+(\?.*)?$/)
+  }
+  expect(isCalc(page.url()), 'nach 30 Versuchen noch keine Frage').toBe(false)
+}
+
 async function indexOfAnswer(page: Page, text: string): Promise<number> {
   return (await answers(page).allTextContents()).findIndex((t) => t.trim() === text)
 }
@@ -65,6 +79,7 @@ test('Chemie: Start → Atombau → Grundlagen, Frage richtig beantworten, melde
 
   await page.getByRole('link', { name: 'Grundlagen geführt üben' }).click()
   await expect(page).toHaveURL(/#\/ueben\/chem-atombau\/1-\d+$/)
+  await ensureQuestion(page, './#/ueben/chem-atombau/1')
   await expect(page.locator('#question')).toBeVisible()
   await expect(page.getByText(/^Grundlagen · Aufgabe 1-\d+ · Wähle die richtige Antwort/)).toBeVisible()
   await expect(answers(page)).toHaveCount(4)
@@ -99,6 +114,7 @@ test('Chemie: Start → Atombau → Grundlagen, Frage richtig beantworten, melde
   // „Nächste Aufgabe" zieht wieder eine Frage der Grundlagen
   await page.getByRole('link', { name: 'Nächste Aufgabe' }).click()
   await expect(page).toHaveURL(/#\/ueben\/chem-atombau\/1-\d+$/)
+  await ensureQuestion(page, './#/ueben/chem-atombau/1')
   await expect(page.locator('#question')).toBeVisible()
 
   // Einstellungen: Liste kopieren und leeren
@@ -130,6 +146,7 @@ test('Chemie: falsche Antwort mit „Warum ist das falsch?", Denkfehler im Forts
   const errors = collectErrors(page)
   await page.goto('./#/ueben/chem-atombau/2')
   await expect(page).toHaveURL(/#\/ueben\/chem-atombau\/2-\d+$/)
+  await ensureQuestion(page, './#/ueben/chem-atombau/2')
   await expect(page.getByText(/^Vertiefung · Aufgabe 2-\d+/)).toBeVisible()
   const { correct, wrong } = await answersFromGallery(context, questionNo(page.url()))
   const texts = (await answers(page).allTextContents()).map((t) => t.trim())
@@ -153,7 +170,8 @@ test('Chemie: falsche Antwort mit „Warum ist das falsch?", Denkfehler im Forts
   const atombau = page.getByRole('region', { name: 'Atombau', exact: true })
   await expect(atombau.getByRole('listitem', { name: 'Vertiefung' })).toContainText('1 gelöst · zuletzt 0 von 1 ohne Fehler')
   await expect(atombau).toContainText('So sieht der Fehler aus:')
-  await expect(atombau.getByRole('link', { name: 'Gezielt üben' })).toHaveCount(0)
+  // ab S2 lässt sich jeder Fehler gezielt üben
+  await expect(atombau.getByRole('link', { name: 'Gezielt üben' }).first()).toBeVisible()
   await expectCleanPage(page, 'Fortschritt')
 
   // Lernkarten: Ordner Atombau nach Stufennamen, Karte ohne Formel-Pflicht
@@ -171,6 +189,7 @@ test('Chemie: falsche Antwort mit „Warum ist das falsch?", Denkfehler im Forts
 test('Chemie: Adressen mit falscher Stufe, zu hoher Stufe und ohne Frage', async ({ page }) => {
   await page.goto('./#/ueben/chem-atombau/1')
   await expect(page).toHaveURL(/#\/ueben\/chem-atombau\/1-\d+$/)
+  await ensureQuestion(page, './#/ueben/chem-atombau/1')
   const seed = /-(\d+)$/.exec(page.url())![1]
   // Die Nummer legt die Stufe fest: falsche Stufe in der Adresse wird berichtigt
   await page.goto(`./#/ueben/chem-atombau/3-${seed}`)
@@ -307,6 +326,7 @@ test('Chemie: Themen mischen, „Nächste Aufgabe" bleibt in der Mischung, X und
   await expect(page.getByText('Fragen aus Atombau (4 von 5 Unterthemen)')).toBeVisible()
   await page.getByRole('link', { name: 'Klausurniveau gemischt üben' }).click()
   await expect(page).toHaveURL(/#\/ueben\/chem-atombau\/3-\d+\?mischen=chemie$/)
+  await ensureQuestion(page, './#/mischen/chemie/3')
   await expect(page.getByText('Themen mischen · Atombau')).toBeVisible()
   await expect(page.getByRole('navigation', { name: 'Hauptmenü' })).toHaveCount(0)
   // Die Auswahl gilt auch hier: keine Frage zu Licht und Spektren
@@ -354,5 +374,60 @@ test('Chemie: Themen mischen, „Nächste Aufgabe" bleibt in der Mischung, X und
   await expect(card).toContainText('Atombau')
   await expect(card).not.toContainText('Unterthemen')
   await expect(card).not.toContainText('Themen mischen')
+  expect(errors).toEqual([])
+})
+
+// S2: erste Rechnungen (Protonen, Neutronen, Elektronen; Energie des Lichts), Fehler gezielt üben
+async function chooseAnswer(page: Page, text: string) {
+  const texts = (await answers(page).allTextContents()).map((t) => t.trim())
+  // KaTeX schreibt die Formel mehrfach in den Text (für Vorlesehilfen und sichtbar): der erste Teil zählt
+  const index = texts.findIndex((t) => t.split('\\displaystyle')[0].trim() === text)
+  expect(index, `„${text}" unter ${texts.join(' | ')}`).toBeGreaterThanOrEqual(0)
+  await answers(page).nth(index).click()
+}
+
+test('Chemie: Rechnung zu ³⁷Cl⁻, Massenzahl als Neutronenzahl, Fehler gezielt üben', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./#/ueben/chem-atombau/2-11309')
+  await expect(page.getByText(/^Vertiefung · Aufgabe 2-11309 · Bestimme Protonen, Neutronen und Elektronen/)).toBeVisible()
+  await expectCleanPage(page, 'Rechnung')
+  await expect(page.locator('#question')).toHaveText('Wie viele Protonen hat das Teilchen?')
+  await chooseAnswer(page, '17')
+  await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
+  await page.getByRole('button', { name: 'Weiter' }).click()
+  await expect(page.locator('#question')).toHaveText('Wie viele Neutronen hat das Teilchen?')
+  // absichtlich die Massenzahl
+  await chooseAnswer(page, '37')
+  await expect(page.getByText('Nicht ganz. Versuch es noch einmal.')).toBeVisible()
+  await page.getByRole('button', { name: 'Warum ist das falsch?' }).click()
+  await expect(page.locator('[aria-live="polite"]')).toContainText('Protonen und Neutronen zusammen')
+  await chooseAnswer(page, '20')
+  await page.getByRole('button', { name: 'Weiter' }).click()
+  await chooseAnswer(page, '18')
+  await page.getByRole('button', { name: 'Ergebnis ansehen' }).click()
+  await expect(page.getByTestId('result')).toContainText('17 Protonen, 20 Neutronen, 18 Elektronen')
+  await expectCleanPage(page, 'Ergebnis der Rechnung')
+
+  // Fortschritt: der Rechenfehler als Formel, gezielt üben führt zu einer Rechnung mit diesem Fehler
+  await page.goto('./#/fortschritt')
+  const atombau = page.getByRole('region', { name: 'Atombau', exact: true })
+  await expect(atombau).toContainText('Massenzahl und Neutronenzahl gleichgesetzt')
+  await atombau.getByRole('link', { name: 'Gezielt üben' }).first().click()
+  await expect(page).toHaveURL(/#\/ueben\/chem-atombau\/[1-3]-\d+\?fokus=chem-neutrons-mass-number$/)
+  await expect(page.getByText(/^Gezielt üben: Massenzahl und Neutronenzahl gleichgesetzt/)).toBeVisible()
+  await expectCleanPage(page, 'Gezielt üben')
+
+  // Energie des Lichts: die Aufgabe nennt die Konstanten
+  await page.goto('./#/ueben/chem-atombau/2-10005')
+  await expect(page.getByText(/Rechne mit/)).toBeVisible()
+  await expect(answers(page)).toHaveCount(3)
+  await expectCleanPage(page, 'Energie des Lichts')
+
+  // Testseite: Rechnungen mit Abwechslung
+  await page.goto('./#/galerie/chem-atombau')
+  await expect(page.getByRole('heading', { name: 'Rechnungen', level: 2 })).toBeVisible()
+  await page.getByRole('button', { name: 'Abwechslung zählen' }).first().click()
+  await expect(page.getByText(/Abwechslung: \d+ Formen unter 200 Aufgaben/).first()).toBeVisible()
+  await expectCleanPage(page, 'Rechnungen in der Galerie')
   expect(errors).toEqual([])
 })

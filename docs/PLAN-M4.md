@@ -512,13 +512,15 @@ kommen mit ihren Schritten dazu. Die Denkfehler der Wissensfragen
 
 | Rechnung | Typischer Fehler (Id) | Beispiel (falsch) |
 | --- | --- | --- |
-| Protonen, Neutronen, Elektronen | Neutronen gleich Massenzahl (`chem-neutrons-mass-number`) | ³⁷Cl⁻: 37 Neutronen statt 20 |
+| Protonen, Neutronen, Elektronen | Massenzahl und Neutronenzahl gleichgesetzt (`chem-neutrons-mass-number`; auch umgekehrt: A = N) | ³⁷Cl⁻: 37 Neutronen statt 20 |
 | Protonen, Neutronen, Elektronen | Protonen und Neutronen vertauscht (`chem-protons-neutrons-swapped`) | ³⁷Cl⁻: 20 Protonen, 17 Neutronen |
 | Protonen, Neutronen, Elektronen | Ionenladung vergessen (`chem-ion-charge-ignored`) | ³⁷Cl⁻: 17 Elektronen statt 18 |
 | Protonen, Neutronen, Elektronen | Ladung mit falschem Vorzeichen (`chem-ion-charge-sign`) | ³⁷Cl⁻: 16 Elektronen |
-| Protonen, Neutronen, Elektronen | Element über die Massenzahl bestimmt (`chem-element-from-mass`) | A = 37, Z = 17: Rubidium statt Chlor |
+| Protonen, Neutronen, Elektronen | Massenzahl als Ordnungszahl genommen (`chem-element-from-mass`; auch als Protonenzahl) | A = 37, Z = 17: Rubidium statt Chlor |
+| Protonen, Neutronen, Elektronen | Elektronen statt Protonen gezählt (`chem-electrons-as-protons`, seit S2) | ³⁷Cl⁻: N = 37 − 18 = 19 |
+| Protonen, Neutronen, Elektronen | Elektronen zur Massenzahl gezählt (`chem-mass-number-electrons`, seit S2) | 17 Protonen, 20 Neutronen: A = 54 |
 | Energie des Lichts | nm nicht in m umgerechnet (`chem-light-nm`) | 500 nm: 3,98 · 10⁻²⁸ J statt 3,98 · 10⁻¹⁹ J |
-| Energie des Lichts | Formel falsch umgestellt (`chem-light-formula`) | E = h · λ/c |
+| Energie des Lichts | Formel falsch umgestellt (`chem-light-formula`) | E = h · λ/c, bei 500 nm 1,1 · 10⁻⁴⁸ J |
 | Übergang im H-Atom | Quadrate vergessen (`chem-rydberg-squares`) | 3 → 2: 547 nm statt 656 nm |
 | Übergang im H-Atom | Kehrwert vergessen (`chem-rydberg-reciprocal`) | 1/λ als λ angegeben |
 | Welle eines Teilchens | Lichtgeschwindigkeit statt Geschwindigkeit des Teilchens (`chem-debroglie-c`) | λ = h/(m · c) |
@@ -758,6 +760,20 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   „Gezielt üben“.
   Ausprobieren: Vertiefung, ein Ion wie ³⁷Cl⁻, einmal absichtlich die
   Massenzahl als Neutronenzahl wählen.
+  Umgesetzt (10.11.2026): Tabelle mit Symbol, Name, Molmasse, Isotopen und
+  typischen Ionenladungen; die übrigen Spalten (Elektronegativität, Radien,
+  Ionisierungsenergie, Elektronenaffinität, Metallcharakter) kommen mit den
+  Schritten, die sie brauchen (S5, S6), damit keine ungeprüften Daten im
+  Repo liegen. „Protonen, Neutronen, Elektronen“ aus dem Kernsymbol oder aus
+  einer Tabelle mit Lücken (fünf Arten, was gegeben ist); Grundlagen nur
+  Atome, Vertiefung auch Ionen, Klausurniveau zwei Teilchen in einer Tabelle
+  wie in Klausuraufgabe 1 (oft Isotope oder Atom und Ion desselben Elements).
+  „Energie des Lichts“ in der Vertiefung: Energie oder Frequenz aus der
+  Wellenlänge, Wellenlänge aus der Energie, mit 13 echten Lichtquellen. Neue
+  Aufgaben: 35 % Rechnungen, wo Fragen und Rechnungen angekreuzt sind.
+  Abwechslung: Die Kennzahlen aus M2b gelten je Stufe für alle Rechnungen
+  zusammen; „Energie des Lichts“ allein hat nur 39 Formen (drei Arten mal 13
+  Lichtquellen), weil es nicht mehr sinnvolle Lichtquellen gibt.
 - **S3: Molmasse, Stoffmenge, Reaktionsgleichungen.** Die App liest
   Summenformeln (Klammern, Kristallwasser) und rechnet Molmassen mit
   Rechenweg; n, m, M, N; Gleichungen ausgleichen (geführt: richtige

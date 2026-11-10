@@ -27,15 +27,31 @@ export function varietyStats(forms: readonly string[]): { readonly distinct: num
 // Aufgaben-Nummer für eine neue Aufgabe: die erste, deren Form nicht unter den letzten ist; gibt
 // es in attempts Versuchen keine, die mit der Form, die am längsten zurückliegt.
 // recent: Formen der letzten Aufgaben, die neueste zuletzt
+// Steht in einer Form „@Stoff" (Chemie-Rechnungen), kommt derselbe Stoff auch nie zweimal hintereinander.
 export function pickFresh(formOf: (seed: number) => string, recent: readonly string[], nextSeed: () => number, attempts = 50): number {
   let best: { seed: number; age: number } | null = null
+  // frische Form, aber derselbe Stoff wie zuletzt: nur, wenn sonst nichts geht
+  let sameSubstanceSeed: number | null = null
+  const lastSubstance = substanceOf(recent.at(-1) ?? '')
   for (let i = 0; i < attempts; i++) {
     const seed = nextSeed()
-    const index = recent.lastIndexOf(formOf(seed))
-    if (index === -1) return seed
+    const form = formOf(seed)
+    const index = recent.lastIndexOf(form)
+    const sameSubstance = lastSubstance !== null && substanceOf(form) === lastSubstance
+    if (index === -1 && !sameSubstance) return seed
+    if (index === -1) {
+      sameSubstanceSeed ??= seed
+      continue
+    }
     // je kleiner der Index, desto länger her
     const age = recent.length - index
     if (!best || age > best.age) best = { seed, age }
   }
-  return best!.seed
+  return best?.seed ?? sameSubstanceSeed!
+}
+
+// Stoff hinter „@" in einer Form; null ohne Stoff (Mathe, Wissensfragen)
+export function substanceOf(form: string): string | null {
+  const at = form.lastIndexOf('@')
+  return at === -1 ? null : form.slice(at + 1)
 }

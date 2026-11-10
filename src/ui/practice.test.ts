@@ -32,6 +32,18 @@ describe('Üben', () => {
 })
 
 describe('Neue Wissensfrage ziehen (wie PickNewTask)', () => {
+  // Rechnungen (ab S2) kommen dazwischen: Sie zählen in den letzten Formen, aber nicht in der Runde
+  const calcEngine = chemCourseEngine(ATOMBAU)
+  function nextQuestion(draw: () => { seed: number; newRound: boolean }, level: 1 | 2 | 3, recent: string[]) {
+    for (let i = 0; i < 100; i++) {
+      const drawn = draw()
+      if (questionNoOf(calcEngine, drawn.seed) !== null) return drawn
+      expect(drawn.newRound).toBe(false)
+      recent.push(calcEngine.formOf({ level, seed: drawn.seed }))
+    }
+    throw new Error('keine Frage')
+  }
+
   it('zeigt jede Frage der Stufe einmal, bevor eine doppelt kommt, und meidet die Fakten der letzten zehn', () => {
     const rng = createRng('runde')
     const engine = chemCourseEngine(ATOMBAU, () => rng.next())
@@ -42,7 +54,7 @@ describe('Neue Wissensfrage ziehen (wie PickNewTask)', () => {
       const seen: number[] = []
       const total = chemTopic(ATOMBAU)!.bank.questions.filter((q) => q.level === level).length
       for (let i = 0; i < 2 * total; i++) {
-        const { seed, newRound } = pickNewSeed(engine, level, recent.slice(-RECENT_FORMS), shownInRound(ATOMBAU, level, store))
+        const { seed, newRound } = nextQuestion(() => pickNewSeed(engine, level, recent.slice(-RECENT_FORMS), shownInRound(ATOMBAU, level, store)), level, recent)
         // Eine neue Runde beginnt genau dann, wenn alle dran waren
         expect(newRound, `Stufe ${level}, Zug ${i + 1}`).toBe(i === total)
         if (newRound) startNewRound(ATOMBAU, level, engine.questionNos(level), store)
@@ -73,7 +85,7 @@ describe('Neue Wissensfrage ziehen (wie PickNewTask)', () => {
     const recent: string[] = []
     const seen = new Set<number>()
     for (let i = 0; i <= chosen.length; i++) {
-      const { seed, newRound } = pickNewSeed(engine, 2, recent.slice(-RECENT_FORMS), shownInRound(ATOMBAU, 2, store), parts)
+      const { seed, newRound } = nextQuestion(() => pickNewSeed(engine, 2, recent.slice(-RECENT_FORMS), shownInRound(ATOMBAU, 2, store), parts), 2, recent)
       expect(newRound, `Zug ${i + 1}`).toBe(i === chosen.length)
       if (newRound) startNewRound(ATOMBAU, 2, engine.questionNos(2, parts), store)
       const no = questionNoOf(engine, seed)!

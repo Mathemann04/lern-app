@@ -4,7 +4,7 @@ import { type Rng, createRng } from '../engine/random/rng.ts'
 import { type Level, type TaskRef, randomSeed } from '../engine/tasks/taskNumber.ts'
 import { pickFresh } from '../engine/tasks/variety.ts'
 import type { PracticeMode } from '../state/storage.ts'
-import { type Course, DERIVATIVES, FRACTIONS, REARRANGE, courseById } from './catalog.ts'
+import { type Course, DERIVATIVES, FRACTIONS, REARRANGE, courseById, isChemCourse } from './catalog.ts'
 import type { CourseEngine } from './courseEngines.ts'
 import { taskHref } from './routes.ts'
 
@@ -31,10 +31,16 @@ const FINDERS: Readonly<Record<string, () => Promise<Finder>>> = {
   [REARRANGE]: async () => (await import('../engine/tasks/rearrangeFocus.ts')).findRearrangeTaskWithError,
 }
 
+// Chemie: dieselbe Suche für alle Themen (Fragen und Rechnungen)
+const chemFinder = (course: string) => async (): Promise<Finder> => {
+  const { findChemTaskWithError } = await import('../engine/chem/focus.ts')
+  return (errorId, levels, rng) => findChemTaskWithError(course, errorId, levels, rng)
+}
+
 // Adresse einer neuen Aufgabe
 export async function newTaskHref(course: string, mode: PracticeMode, level: Level, focus: string | null): Promise<string> {
   // Gezielt üben: eine Aufgabe, in der genau dieser Fehler passieren kann
-  const load = focus ? FINDERS[course] : undefined
+  const load = focus ? (FINDERS[course] ?? (isChemCourse(course) ? chemFinder(course) : undefined)) : undefined
   const find = load && (await load())
   const found = focus && find ? find(focus, levelsNear(courseById(course)!.course, level), createRng(String(Math.random()))) : null
   return taskHref(course, found ?? { level, seed: randomSeed() }, mode, found ? focus : null)
