@@ -732,6 +732,22 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   „Fragen durchsehen“; Knopf „Frage melden“.
   Ausprobieren: Start → Chemie 1 → Aufbau der Materie → Atombau →
   Grundlagen, zehn Fragen.
+- **S1b: Ankreuzen, was drankommt** (Wunsch vom 10.11.2026, Antwort
+  „Beides“). Jedes Chemie-Thema hat **Unterthemen** (Atombau: Stoffe,
+  Trennverfahren, Reaktionen; Elementarteilchen und Kernsymbol; Isotope und
+  Ionen; Atommodelle; Licht und Spektren). Auf der Themenseite kreuzt du an,
+  welche Unterthemen drankommen; Unterthemen, die es in der gewählten Stufe
+  nicht gibt, stehen blass da („erst ab Vertiefung“). Unter „Chemie 1“ auf
+  der Startseite steht die Kachel **„Themen mischen“**: Stufe wählen, ganze
+  Themen ankreuzen (je Thema aufklappbar auch seine Unterthemen, dieselbe
+  Auswahl wie auf der Themenseite), dann kommen die Fragen gemischt.
+  Fortschritt und Fehler zählen beim jeweiligen Thema; „Nächste Aufgabe“
+  bleibt in der Mischung, das X führt zur Mischung zurück; „Weitermachen“
+  setzt eine Mischung fort. Die App merkt sich die Auswahl. Ab hier bringt
+  jeder Schritt seine Unterthemen gleich mit: jede Frage und jede Rechnung
+  gehört zu genau einem Unterthema ihres Themas.
+  Ausprobieren: Atombau → nur „Atommodelle“ ankreuzen → Vertiefung, zehn
+  Fragen; Startseite → Themen mischen → üben, „Nächste Aufgabe“.
 - **S2: Erste Rechnungen.** Tabelle der Elemente mit Tests (aus S1 hierher
   verschoben, weil sie erst für Rechnungen gebraucht wird); „Protonen,
   Neutronen, Elektronen“ und „Energie des Lichts“ geführt, mit Karten und
