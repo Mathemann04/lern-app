@@ -171,6 +171,6 @@ export const STOFFMENGE_CARDS: readonly Card[] = [
         ],
       },
     ],
-    errors: ['chem-ratio-one', 'chem-ratio-swapped', 'chem-ratio-product-only', 'chem-ratio-wrong-molar-mass', 'chem-similar-molar-mass'],
+    errors: ['chem-ratio-one', 'chem-ratio-swapped', 'chem-ratio-product-only', 'chem-ratio-other-coefficient', 'chem-ratio-wrong-molar-mass', 'chem-similar-molar-mass'],
   },
 ]

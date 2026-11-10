@@ -584,6 +584,7 @@ kommen mit ihren Schritten dazu. Die Denkfehler der Wissensfragen
 | Umsatz | Verhältnis 1 : 1 (`chem-ratio-one`) | Butan → CO₂: 0,1 mol statt 0,4 mol |
 | Umsatz | Verhältnis umgedreht (`chem-ratio-swapped`) | 0,025 mol |
 | Umsatz | nur der Koeffizient des Produkts (`chem-ratio-product-only`) | 0,8 mol |
+| Umsatz | Koeffizient eines anderen Stoffs genommen (`chem-ratio-other-coefficient`, seit S4a; so kommen auch Paare im Verhältnis 1 : 1 vor) | CH₄ → CO₂: 0,5 mol statt 0,25 mol |
 | Umsatz | Molmasse des Edukts für das Produkt oder Massen statt Stoffmengen ins Verhältnis (`chem-ratio-wrong-molar-mass`; beides ergibt immer m(Edukt) · ν(Produkt)/ν(Edukt)) | 5,8 g Butan → CO₂: 23,2 g statt 17,6 g |
 | Umsatz | n : M statt n · M (gleicher Denkfehler wie bei der Masse, deshalb `chem-m-divided`) | 0,4 mol CO₂: 0,00909 g statt 17,6 g |
 | Umsatz | Molmasse eines ähnlichen Stoffs (`chem-similar-molar-mass`) | CO statt CO₂: 11,2 g statt 17,6 g |

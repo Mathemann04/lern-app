@@ -1,5 +1,6 @@
 import type { Choice, GuidedTaskBase } from '../../guided/types.ts'
 import type { Rng } from '../../random/rng.ts'
+import { roundSignificant } from '../../quantity/numberDe.ts'
 import { type Rational, ratToNumber } from '../../rational.ts'
 import type { Level, TaskRef } from '../../tasks/taskNumber.ts'
 import { chemErrorRule } from '../errorRules.ts'
@@ -70,7 +71,9 @@ const apart = (a: Rational, b: Rational, share: number) => Math.abs(ratToNumber(
 // auseinander, sonst fällt der Fehler für diese Aufgabe weg. latex: Wert mit Einheit (ohne $), auch der
 // Schlüssel zum Vergleichen
 export function tolerantWrongs(correct: Rational, wrong: readonly { rule: string; value: Rational }[], latex: (r: Rational) => string): WrongValue[] {
+  // verglichen werden die angezeigten Werte (drei gültige Ziffern), nicht die genauen
+  const shown = (r: Rational) => roundSignificant(r).value
   const kept: { rule: string; value: Rational }[] = []
-  for (const w of wrong) if (apart(w.value, correct, 0.06) && kept.every((k) => apart(w.value, k.value, 0.03))) kept.push(w)
+  for (const w of wrong) if (apart(shown(w.value), shown(correct), 0.06) && kept.every((k) => apart(shown(w.value), shown(k.value), 0.03))) kept.push(w)
   return kept.map((w) => ({ rule: w.rule, key: latex(w.value), content: `$${latex(w.value)}$` }))
 }

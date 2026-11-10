@@ -77,3 +77,20 @@ describe('Umsatz: Lernkarte', () => {
     expect(results).toEqual([17.6, 16])
   })
 })
+
+describe('Umsatz: Verhältnis 1 : 1 kommt vor', () => {
+  it('mit dem Koeffizienten eines anderen Stoffs als falscher Antwort', () => {
+    let oneToOne = 0
+    for (const level of [1, 2, 3] as const) {
+      for (let i = 0; i < 1500; i++) {
+        const calc = generatedCalc(COURSE, { level, seed: GENERATED_MIN + i })!
+        const step = calc.task.steps.find((s) => s.id === 'verhaeltnis')
+        if (!step || !/\\frac\{1\}\{1\}|\\frac\{(\d+)\}\{\1\}/.test(String(step.established))) continue
+        oneToOne++
+        expect(step.choices.some((c) => c.errorRuleId === 'chem-ratio-other-coefficient')).toBe(true)
+      }
+    }
+    expect(oneToOne).toBeGreaterThan(20)
+  })
+})
+

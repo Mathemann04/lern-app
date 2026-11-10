@@ -9,7 +9,7 @@ import { type MassValues, elementMolarMass, molarMass } from '../molarMass.ts'
 import { CO2, FUELS, H2O, O2, REACTIONS } from '../reactions.ts'
 import { type Substance, SUBSTANCES } from '../substances.ts'
 import { type ChemCalc, type ChemGenerator, stepChoices, tolerantWrongs, usesExamNumbers } from './shared.ts'
-import { MOLAR_ERRORS, NICE_N, eqSign, given, mLatex, molarLatex, molarSteps, nLatex, nStep, sig, valuesOf } from './stoffmenge.ts'
+import { NICE_N, eqSign, given, mLatex, molarLatex, molarSteps, nLatex, nStep, sig, valuesOf } from './stoffmenge.ts'
 
 // Rechnung „Umsatz" (Plan M4, Thema 4.2, Klausur 4c) in drei Schritten: Stoffmenge des gegebenen Stoffs →
 // Stoffmenge des gesuchten über das Verhältnis der Koeffizienten → Masse des gesuchten Stoffs.
@@ -108,6 +108,10 @@ function generate(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCal
         { rule: 'chem-ratio-one', value: nG },
         { rule: 'chem-ratio-swapped', value: ratMul(nG, ratDiv(nuG, nuT)) },
         { rule: 'chem-ratio-product-only', value: ratMul(nG, nuT) },
+        // Koeffizient eines anderen Stoffs der Gleichung erwischt (wichtig, wenn das Verhältnis 1 : 1 ist)
+        ...[...equation.reactants, ...equation.products]
+          .filter((t) => t.species !== g && t.species !== target)
+          .map((t) => ({ rule: 'chem-ratio-other-coefficient', value: ratMul(nG, ratDiv(t.coefficient, nuG)) })),
       ],
       molLatex,
     ),
@@ -189,7 +193,7 @@ export const UMSATZ_GENERATORS: readonly ChemGenerator[] = [
     kind: 'umsatz',
     part: 'umsatz',
     weights: { 1: 0.3, 2: 0.35, 3: 0.45 },
-    errors: [...MOLAR_ERRORS, 'chem-n-times', 'chem-n-inverted', 'chem-ratio-one', 'chem-ratio-swapped', 'chem-ratio-product-only', 'chem-m-divided', 'chem-ratio-wrong-molar-mass', 'chem-similar-molar-mass'],
+    errors: ['chem-molar-index', 'chem-molar-atomic-number', 'chem-n-times', 'chem-n-inverted', 'chem-ratio-one', 'chem-ratio-swapped', 'chem-ratio-product-only', 'chem-ratio-other-coefficient', 'chem-m-divided', 'chem-ratio-wrong-molar-mass', 'chem-similar-molar-mass'],
     generate,
   },
 ]

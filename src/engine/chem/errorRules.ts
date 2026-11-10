@@ -335,6 +335,16 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
       short: 'Die Formel des gesuchten Stoffs genau aus der Gleichung nehmen.',
     },
   },
+  {
+    id: 'chem-ratio-other-coefficient',
+    course: STOFFMENGE,
+    name: 'Koeffizient eines anderen Stoffs genommen',
+    wrongFormula: String.raw`\ce{CH4 + 2 O2 -> CO2 + 2 H2O}\text{: } n(\ce{CO2}) = n(\ce{CH4}) \cdot 2`,
+    why: {
+      detailed: 'Für das Verhältnis zählen nur die Koeffizienten der beiden Stoffe, um die es geht: des gegebenen und des gesuchten. Die Zahlen vor den übrigen Stoffen der Gleichung spielen dafür keine Rolle.',
+      short: 'Nur die Koeffizienten des gegebenen und des gesuchten Stoffs zählen.',
+    },
+  },
 ]
 
 const BY_ID = new Map(CHEM_ERROR_RULES.map((r) => [r.id, r]))
