@@ -1,9 +1,11 @@
 import type { Explanation, Misconception, QuestionBank } from '../quiz/types.ts'
 import { ATOMBAU_BANK } from './bank/atombau.ts'
 import { GLEICHUNGEN_BANK } from './bank/gleichungen.ts'
+import { LOESUNGEN_BANK } from './bank/loesungen.ts'
 import { STOFFMENGE_BANK } from './bank/stoffmenge.ts'
 import { ATOMBAU_WHY } from './misconceptions/atombauWhy.ts'
 import { GLEICHUNGEN_WHY } from './misconceptions/gleichungenWhy.ts'
+import { LOESUNGEN_WHY } from './misconceptions/loesungenWhy.ts'
 import { STOFFMENGE_WHY } from './misconceptions/stoffmengeWhy.ts'
 import { MISCONCEPTIONS_BY_COURSE } from './misconceptions/index.ts'
 
@@ -13,6 +15,7 @@ const BANKS: readonly { readonly bank: QuestionBank; readonly why: Readonly<Reco
   { bank: ATOMBAU_BANK, why: ATOMBAU_WHY },
   { bank: STOFFMENGE_BANK, why: STOFFMENGE_WHY },
   { bank: GLEICHUNGEN_BANK, why: GLEICHUNGEN_WHY },
+  { bank: LOESUNGEN_BANK, why: LOESUNGEN_WHY },
 ]
 
 export type ChemTopic = { readonly bank: QuestionBank; readonly misconceptions: readonly Misconception[] }

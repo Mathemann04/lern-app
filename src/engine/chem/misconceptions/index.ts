@@ -1,6 +1,7 @@
 import type { MisconceptionName } from '../../quiz/types.ts'
 import { ATOMBAU_MISCONCEPTIONS } from './atombau.ts'
 import { GLEICHUNGEN_MISCONCEPTIONS } from './gleichungen.ts'
+import { LOESUNGEN_MISCONCEPTIONS } from './loesungen.ts'
 import { STOFFMENGE_MISCONCEPTIONS } from './stoffmenge.ts'
 
 // Denkfehler je Chemie-Thema (Id aus ui/catalog.ts), nur Name und falsche Aussage. Eigene kleine Liste,
@@ -11,4 +12,5 @@ export const MISCONCEPTIONS_BY_COURSE: Readonly<Record<string, readonly Misconce
   'chem-atombau': ATOMBAU_MISCONCEPTIONS,
   'chem-stoffmenge': STOFFMENGE_MISCONCEPTIONS,
   'chem-gleichungen': GLEICHUNGEN_MISCONCEPTIONS,
+  'chem-loesungen': LOESUNGEN_MISCONCEPTIONS,
 }

@@ -103,13 +103,14 @@ export const REARRANGE = 'umstellen'
 export const ATOMBAU = 'chem-atombau'
 export const STOFFMENGE = 'chem-stoffmenge'
 export const GLEICHUNGEN = 'chem-gleichungen'
+export const LOESUNGEN = 'chem-loesungen'
 
 // Chemie-Themen: Ids mit „chem-", Engine aus Wissensfragen (engine/chem/)
 export const isChemCourse = (id: string) => id.startsWith('chem-')
 
 // Themen mit Testseite in der Formel-Galerie (auch solche, die noch nicht spielbar sind); bei Chemie
 // die Seite „Fragen durchsehen"
-export const GALLERY_COURSES: readonly string[] = [DERIVATIVES, FRACTIONS, REARRANGE, ATOMBAU, GLEICHUNGEN, STOFFMENGE]
+export const GALLERY_COURSES: readonly string[] = [DERIVATIVES, FRACTIONS, REARRANGE, ATOMBAU, GLEICHUNGEN, STOFFMENGE, LOESUNGEN]
 
 const derivativeLevels: LevelPreview[] = [
   {
@@ -277,6 +278,34 @@ const gleichungenParts: CoursePart[] = [
   { id: 'lesen', title: 'Reaktionsgleichungen lesen', levels: [1, 2, 3] },
   { id: 'ausgleichen', title: 'Gleichungen ausgleichen', levels: [1, 2, 3] },
   { id: 'verbrennung', title: 'Vollständige Verbrennung', levels: [1, 2, 3] },
+]
+
+const loesungenLevels: LevelPreview[] = [
+  {
+    level: 1,
+    available: true,
+    title: 'Konzentration, Massenanteil, molares Volumen bei Normbedingungen',
+    examples: [String.raw`c = \frac{n}{V}`, String.raw`V_m = 22{,}4\,\mathrm{L/mol}`],
+  },
+  {
+    level: 2,
+    available: true,
+    title: 'Lösung ansetzen, Massenkonzentration, ppm und ppb, Vol-%, Gasgesetz mit Einheiten',
+    examples: [String.raw`m = c \cdot V \cdot M`, String.raw`p \cdot V = n \cdot R \cdot T`],
+  },
+  {
+    level: 3,
+    available: true,
+    title: 'Lösung ansetzen wie in der Klausur, Gasvolumen aus einer Reaktion, Bedingungen erkennen',
+    examples: [String.raw`\ce{CaCO3 -> CaO + CO2}`],
+  },
+]
+
+// Unterthemen von „Gase und Lösungen" (Rechnungen in engine/chem/generators/loesungen.ts, part)
+const loesungenParts: CoursePart[] = [
+  { id: 'konzentration', title: 'Konzentration und Lösung ansetzen', levels: [1, 2, 3] },
+  { id: 'anteile', title: 'Massenanteil, Massenkonzentration, ppm und Vol-%', levels: [1, 2, 3] },
+  { id: 'gase', title: 'Molares Volumen und Gasgesetz', levels: [1, 2, 3] },
 ]
 
 const stoffmengeLevels: LevelPreview[] = [
@@ -472,7 +501,17 @@ export const SUBJECTS: readonly Subject[] = [
             focus: true,
             parts: stoffmengeParts,
           },
-          comingSoon('chem-loesungen', 'Gase und Lösungen', 'Gasgesetz, molares Volumen, Konzentration und Anteile', 'flask'),
+          {
+            id: LOESUNGEN,
+            title: 'Gase und Lösungen',
+            description: 'Gasgesetz, molares Volumen, Konzentration und Anteile',
+            icon: 'flask',
+            cards: 'chem-loesungen',
+            levels: loesungenLevels,
+            free: false,
+            focus: true,
+            parts: loesungenParts,
+          },
         ],
       },
       {
