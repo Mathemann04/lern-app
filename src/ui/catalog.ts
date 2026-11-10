@@ -200,7 +200,7 @@ export const SUBJECTS: readonly Subject[] = [
             cards: 'umstellen',
             levels: rearrangeLevels,
             free: true,
-            focus: false,
+            focus: true,
           },
           {
             id: 'potenzen',

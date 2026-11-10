@@ -31,7 +31,7 @@ export default function PracticePage({ course: courseId, mode: wantedMode, level
   useEffect(() => {
     if (seed === null && !pick) {
       // Die Suche beim gezielten Üben kann ein paar Sekunden dauern: erst den Hinweis zeigen
-      const timer = window.setTimeout(() => window.location.replace(newTaskHref(courseId, mode, level, focus)), 30)
+      const timer = window.setTimeout(() => void newTaskHref(courseId, mode, level, focus).then((href) => window.location.replace(href)), 30)
       return () => window.clearTimeout(timer)
     }
     if (seed !== null && mode !== wantedMode) window.location.replace(taskHref(courseId, { level, seed }, mode, focus))

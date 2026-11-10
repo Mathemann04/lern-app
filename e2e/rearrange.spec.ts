@@ -130,9 +130,21 @@ test('Umstellen: Lernkarten-Ordner mit durchgerechneten Beispielen', async ({ pa
   await page.getByRole('link', { name: /^Variable im Nenner/ }).click()
   await expect(page.getByRole('heading', { name: 'Variable im Nenner', level: 1 })).toBeVisible()
   await expect(page.getByRole('region', { name: 'Beispiel' })).toContainText('Beide Seiten mal')
-  // gezielt üben kommt erst später für dieses Thema
-  await expect(page.getByRole('link', { name: 'Gezielt üben' })).toHaveCount(0)
+  // gezielt üben für jeden typischen Fehler der Karte (seit Schritt 9)
+  await expect(page.getByRole('link', { name: 'Gezielt üben' }).first()).toBeVisible()
   await expectCleanPage(page, 'Lernkarte')
+})
+
+test('Umstellen gezielt üben: „Beim Betrag die Wurzel vergessen" von der Lernkarte aus, findet eine Aufgabe der Stufe 5', async ({ page }) => {
+  await page.goto('./#/karten/umstellen/rearrange-complex')
+  const error = page.locator('li').filter({ hasText: /^Beim Betrag die Wurzel vergessen/ }).first()
+  await error.getByRole('link', { name: 'Gezielt üben' }).click()
+  await expect(page).toHaveURL(/#\/ueben\/umstellen\/5-\d+\?fokus=eq-abs-root$/, { timeout: 20_000 })
+  await expect(page.getByText('Gezielt üben:')).toBeVisible()
+  // der Fehler passiert gleich beim Ausrechnen des Betrags: „Was steht da eigentlich?"
+  await expect(page.getByText('Was steht da eigentlich?')).toBeVisible()
+  await expect(page.locator('#question')).toContainText('Betrag')
+  await expectCleanPage(page, 'Gezielt üben Betrag')
 })
 
 test('Umstellen Stufe 3: zwei Wurzeln, zweimal quadrieren geführt, mit Lernkarte „Wurzel und Quadrat"', async ({ page }) => {
