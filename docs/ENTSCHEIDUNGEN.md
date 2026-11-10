@@ -539,3 +539,6 @@ Neue Entscheidungen unten anfügen.
   Elektronen statt Protonen gezählt, Elektronen zur Massenzahl gezählt. Zahlen werden
   exakt gerechnet und auf drei gültige Ziffern ohne Nullen am Ende gezeigt. Derselbe
   Stoff kommt nie zweimal hintereinander. Der freie Modus der Rechnungen kommt mit S8.
+- 10.11.2026: Neue Struktur als M6 festgehalten (Entwurf: [PLAN-M6.md](PLAN-M6.md)):
+  Tätigkeit als Kachel, Bausteine ankreuzen, Stufe nur als Verschachtelung. Reihenfolge
+  nach Chemie: erst M6, dann M5 (Werkstoffkunde).
