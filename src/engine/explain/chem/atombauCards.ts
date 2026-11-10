@@ -90,7 +90,7 @@ Auch Sauerstoff $\ce{O2}$ und Stickstoff $\ce{N2}$ sind Elemente: In ihren Molek
     rules: [],
     formulas: [],
     memo: "Bei einem physikalischen Vorgang bleibt der Stoff derselbe, nur sein Zustand ändert sich. Bei einer chemischen Reaktion entsteht ein neuer Stoff mit neuen Eigenschaften. Die Gesamtmasse bleibt dabei erhalten, denn die Atome werden nur neu verknüpft.",
-    note: "Physikalisch: schmelzen, verdampfen, kondensieren, lösen, ein Draht glüht im Stromkreis.\nChemisch: verbrennen, rosten, eine Brausetablette in Wasser (es entsteht ein Gas, das vorher nicht da war).\nLicht, Wärme oder eine Farbänderung allein beweisen keine Reaktion; entscheidend ist der neue Stoff.",
+    note: "Physikalisch: schmelzen, verdampfen, kondensieren, Zucker in Wasser lösen, ein Draht glüht im Stromkreis.\nChemisch: verbrennen, rosten, eine Brausetablette in Wasser (es entsteht ein Gas, das vorher nicht da war).\nLicht, Wärme oder eine Farbänderung allein beweisen keine Reaktion; entscheidend ist der neue Stoff.",
     examples: [
       {
         chemTask: "Der Draht einer Glühlampe leuchtet hell. Physikalisch oder chemisch?",
@@ -274,9 +274,9 @@ Auch Sauerstoff $\ce{O2}$ und Stickstoff $\ce{N2}$ sind Elemente: In ihren Molek
     title: "Kern und Hülle",
     level: 2,
     rules: [],
-    formulas: [String.raw`d_{\mathrm{Kern}} \approx 10^{-15}\,\mathrm{m}`, String.raw`d_{\mathrm{Atom}} \approx 10^{-10}\,\mathrm{m}`],
-    memo: String.raw`Der Kern ist winzig: rund $10^{-15}\,\mathrm{m}$ gegen $10^{-10}\,\mathrm{m}$ für das ganze Atom, also etwa hunderttausendmal kleiner. Trotzdem steckt in ihm mehr als 99,9 Prozent der Masse. Die Hülle aus den leichten Elektronen nimmt fast den ganzen Raum ein und ist doch nahezu leer.`,
-    note: "Vergleich: Wäre der Kern so groß wie eine Kirsche von einem Zentimeter, hätte das Atom einen Durchmesser von etwa einem Kilometer. Die Protonen im Kern stoßen sich elektrisch ab; zusammengehalten werden Protonen und Neutronen von der starken Kernkraft, die nur über sehr kurze Abstände wirkt.\nAlpha-Teilchen sind Heliumkerne aus zwei Protonen und zwei Neutronen, also zweifach positiv geladen. Eine Goldfolie ist viele hundert Atomlagen dick; jedes Alpha-Teilchen muss durch sehr viele Atome hindurch.",
+    formulas: [String.raw`d_{\mathrm{Kern}} \approx 10^{-15}\ \text{bis}\ 10^{-14}\,\mathrm{m}`, String.raw`d_{\mathrm{Atom}} \approx 10^{-10}\,\mathrm{m}`],
+    memo: String.raw`Der Kern ist winzig: rund $10^{-15}$ bis $10^{-14}\,\mathrm{m}$ gegen $10^{-10}\,\mathrm{m}$ für das ganze Atom, also etwa zehntausend- bis hunderttausendmal kleiner. Trotzdem steckt in ihm mehr als 99,9 Prozent der Masse. Die Hülle aus den leichten Elektronen nimmt fast den ganzen Raum ein und ist doch nahezu leer.`,
+    note: "Vergleich: Wäre der Kern so groß wie eine Kirsche von einem Zentimeter, hätte das Atom einen Durchmesser von einigen hundert Metern bis zu einem Kilometer. Die Protonen im Kern stoßen sich elektrisch ab; zusammengehalten werden Protonen und Neutronen von der starken Kernkraft, die nur über sehr kurze Abstände wirkt.\nAlpha-Teilchen sind Heliumkerne aus zwei Protonen und zwei Neutronen, also zweifach positiv geladen. Eine Goldfolie ist viele hundert Atomlagen dick; jedes Alpha-Teilchen muss durch sehr viele Atome hindurch.",
     examples: [
       {
         chemTask: "Wie viel größer ist ein Atom als sein Kern?",
@@ -312,7 +312,7 @@ Auch Sauerstoff $\ce{O2}$ und Stickstoff $\ce{N2}$ sind Elemente: In ihren Molek
     rules: [],
     formulas: [],
     memo: "Jedes Atommodell erklärt die Versuche seiner Zeit und wurde abgelöst, als neue Beobachtungen nicht mehr dazu passten. Die Reihenfolge: Dalton, Thomson, Rutherford, Bohr, Orbitalmodell.",
-    note: "Dalton (Anfang des 19. Jahrhunderts): Atome sind unteilbare Kugeln, für jedes Element eine eigene Sorte. Grenze: kein innerer Aufbau, keine Ladungen.\nThomson (um 1900): Elektronen stecken in einer gleichmäßig positiv geladenen Kugel. Grenze: kein Kern, die Rückstreuung im Streuversuch bleibt unerklärt.\nRutherford (1911): winziger positiver Kern mit fast der ganzen Masse, um ihn herum eine große, fast leere Hülle mit den Elektronen. Grenze: erklärt weder die Linienspektren noch, warum die kreisenden Elektronen nicht in den Kern fallen.\nBohr (1913): Elektronen auf Bahnen mit festen Energien; beim Sprung zwischen zwei Bahnen wird Energie aufgenommen oder als Licht abgegeben. Grenze: stimmt genau nur für Teilchen mit einem einzigen Elektron wie das Wasserstoffatom und erklärt keine magnetischen Eigenschaften.\nOrbitalmodell (Schrödinger, 1926): Die Elektronen werden als stehende Wellen beschrieben; ein Orbital ist ein Raumbereich, in dem das Elektron wahrscheinlich anzutreffen ist, keine Bahn.",
+    note: "Dalton (Anfang des 19. Jahrhunderts): Atome sind unteilbare Kugeln, für jedes Element eine eigene Sorte. Grenze: kein innerer Aufbau, keine Ladungen.\nThomson (um 1900): Elektronen stecken in einer gleichmäßig positiv geladenen Kugel. Grenze: kein Kern, die Rückstreuung im Streuversuch bleibt unerklärt.\nRutherford (1911): winziger positiver Kern mit fast der ganzen Masse, um ihn herum eine große, fast leere Hülle mit den Elektronen. Grenze: erklärt weder die Linienspektren noch, warum die kreisenden Elektronen nicht in den Kern fallen.\nBohr (1913): Elektronen auf Bahnen mit festen Energien; beim Sprung zwischen zwei Bahnen wird Energie aufgenommen oder als Licht abgegeben. Grenze: stimmt genau nur für Teilchen mit einem einzigen Elektron wie das Wasserstoffatom und erklärt nicht, wie sich Spektrallinien im Magnetfeld aufspalten.\nOrbitalmodell (Schrödinger, 1926): Die Elektronen werden als stehende Wellen beschrieben; ein Orbital ist ein Raumbereich, in dem das Elektron wahrscheinlich anzutreffen ist, keine Bahn.",
     examples: [
       {
         chemTask: "Welche Beobachtung passte nicht mehr zum Modell von Thomson?",
@@ -351,7 +351,7 @@ Auch Sauerstoff $\ce{O2}$ und Stickstoff $\ce{N2}$ sind Elemente: In ihren Molek
     formulas: [String.raw`E = h \cdot f = \frac{h \cdot c}{\lambda}`, String.raw`c = \lambda \cdot f`],
     memo: String.raw`Licht trägt seine Energie in Portionen (Photonen). Die Energie einer Portion wächst mit der Frequenz $f$ und sinkt mit der Wellenlänge $\lambda$: Kurzwelliges violettes Licht ist energiereicher als langwelliges rotes.`,
     note: String.raw`Werte: $h = 6{,}626 \cdot 10^{-34}\,\mathrm{J \cdot s}$ (Planck-Konstante), $c = 3{,}00 \cdot 10^{8}\,\mathrm{m/s}$ (Lichtgeschwindigkeit). Wellenlängen in nm vor dem Einsetzen in m umrechnen: $1\,\mathrm{nm} = 10^{-9}\,\mathrm{m}$. Sichtbares Licht reicht etwa von $400\,\mathrm{nm}$ (violett) bis $750\,\mathrm{nm}$ (rot).
-Licht jeder Farbe ist gleich schnell; die Farben unterscheiden sich in Wellenlänge und Frequenz. Wie hell Licht ist, hängt davon ab, wie viele Photonen je Sekunde ankommen; die Energie eines einzelnen Photons legt allein seine Frequenz fest.`,
+Im Vakuum ist Licht jeder Farbe gleich schnell; die Farben unterscheiden sich in Wellenlänge und Frequenz. Wie hell Licht ist, hängt davon ab, wie viele Photonen je Sekunde ankommen; die Energie eines einzelnen Photons legt allein seine Frequenz fest.`,
     when: "Wenn Energie, Frequenz oder Wellenlänge von Licht gefragt sind, oder welches Licht energiereicher ist.",
     examples: [
       {
@@ -432,7 +432,7 @@ Beim Anregen bleibt das Elektron im Atom; erst wenn es ganz vom Kern gelöst wir
 Kennzeichen einer Welle ist die Interferenz, etwa helle und dunkle Streifen hinter einem Doppelspalt. Masse, Ladung und die Ablenkung im elektrischen Feld zeigen dagegen, dass sich Elektronen auch wie Teilchen verhalten.`,
     examples: [
       {
-        chemTask: String.raw`Welche Wellenlänge hat ein Elektron ($m = 9{,}109 \cdot 10^{-31}\,\mathrm{kg}$) mit $v = 1{,}0 \cdot 10^{6}\,\mathrm{m/s}$?`,
+        chemTask: String.raw`Ein Elektron mit $m = 9{,}109 \cdot 10^{-31}\,\mathrm{kg}$ fliegt mit $v = 1{,}0 \cdot 10^{6}\,\mathrm{m/s}$. Welche Wellenlänge hat es?`,
         lines: [
           { label: "Einsetzen", latex: String.raw`\lambda = \frac{6{,}626 \cdot 10^{-34}\,\mathrm{J \cdot s}}{9{,}109 \cdot 10^{-31}\,\mathrm{kg} \cdot 1{,}0 \cdot 10^{6}\,\mathrm{m/s}}` },
           { label: "Ergebnis", latex: String.raw`\lambda \approx 7{,}3 \cdot 10^{-10}\,\mathrm{m}` },

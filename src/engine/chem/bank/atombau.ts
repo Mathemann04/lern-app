@@ -541,7 +541,10 @@ export const ATOMBAU_BANK: QuestionBank = {
       prompt: "Welche Teilchen zählt die Massenzahl eines Atoms?",
       correct: { id: 'r', text: "die Protonen und die Neutronen zusammen" },
       wrong: [
-        { id: 'f1', text: "nur die Neutronen im Kern", misconception: 'chem-mis-neutrons-equal-a' },
+        { id: 'f1', text: "nur die Neutronen im Kern", misconception: 'chem-mis-neutrons-equal-a', why: {
+          detailed: String.raw`Prüfe das an gewöhnlichem Wasserstoff $\ce{^{1}_{1}H}$: Sein Kern enthält kein einziges Neutron, und trotzdem hat er die Massenzahl 1.`,
+          short: String.raw`$\ce{^{1}_{1}H}$ hat kein Neutron, aber die Massenzahl 1.`,
+        } },
         { id: 'f2', text: "nur die Protonen im Kern", misconception: 'chem-mis-a-without-neutrons' },
         { id: 'f3', text: "nur die Elektronen in der Hülle", misconception: 'chem-mis-a-without-neutrons' },
         { id: 'f4', text: "die Protonen, die Neutronen und die Elektronen zusammen", misconception: 'chem-mis-electron-mass' },
@@ -742,7 +745,7 @@ export const ATOMBAU_BANK: QuestionBank = {
       level: 2,
       fact: 'atom-nucleus-size-ratio',
       title: "Kern und Hülle",
-      prompt: String.raw`Stell dir einen Atomkern vergrößert auf die Größe eines Tischtennisballs vor, etwa $4\,\mathrm{cm}$. Wie groß wäre dann das ganze Atom?`,
+      prompt: String.raw`Ein Atomkern misst etwa $10^{-15}\,\mathrm{m}$, das ganze Atom etwa $10^{-10}\,\mathrm{m}$. Stell dir den Kern vergrößert auf die Größe eines Tischtennisballs vor, etwa $4\,\mathrm{cm}$. Wie groß wäre dann das ganze Atom?`,
       correct: { id: 'r', text: String.raw`etwa $4\,\mathrm{km}$ im Durchmesser` },
       wrong: [
         { id: 'f1', text: String.raw`etwa $40\,\mathrm{cm}$ im Durchmesser`, misconception: 'chem-mis-nucleus-large' },
@@ -771,7 +774,10 @@ export const ATOMBAU_BANK: QuestionBank = {
       prompt: "Welche Aussage über Raum und Masse im Atom stimmt?",
       correct: { id: 'r', text: "Der Kern nimmt kaum Raum ein, trägt aber fast die ganze Masse." },
       wrong: [
-        { id: 'f1', text: "Die Hülle nimmt fast den ganzen Raum ein und trägt auch fast die ganze Masse.", misconception: 'chem-mis-electron-mass' },
+        { id: 'f1', text: "Die Hülle nimmt fast den ganzen Raum ein und trägt auch fast die ganze Masse.", misconception: 'chem-mis-electron-mass', why: {
+          detailed: "Hier wurde aus dem großen Raum der Hülle auf eine große Masse geschlossen. Groß heißt aber nicht schwer: Überlege, welche Teilchen die Hülle bilden und wie schwer sie im Vergleich zu den Teilchen im Kern sind.",
+          short: "Aus viel Raum folgt nicht viel Masse.",
+        } },
         { id: 'f2', text: "Der Kern nimmt fast den ganzen Raum ein und trägt auch fast die ganze Masse.", misconception: 'chem-mis-nucleus-large' },
         { id: 'f3', text: "Der Kern nimmt kaum Raum ein und trägt deshalb auch kaum Masse.", misconception: 'chem-mis-size-means-mass' },
         { id: 'f4', text: "Kern und Hülle tragen gleich viel Masse, denn sie haben gleich viele Ladungen.", misconception: 'chem-mis-electron-mass', why: {
@@ -955,7 +961,7 @@ export const ATOMBAU_BANK: QuestionBank = {
       ],
       hint: "Bohr entwickelte sein Modell am Spektrum des einfachsten Atoms.",
       explanation: {
-        detailed: String.raw`Bohr berechnete die Linien des Wasserstoffs, und dort stimmt sein Modell genau. Hat ein Atom mehrere Elektronen, beeinflussen sie sich gegenseitig, und die Vorhersagen weichen von den Messungen ab; genau gilt es also nur für Teilchen mit einem Elektron wie $\ce{H}$ oder $\ce{He+}$. Außerdem erklärt es keine magnetischen Eigenschaften.`,
+        detailed: String.raw`Bohr berechnete die Linien des Wasserstoffs, und dort stimmt sein Modell genau. Hat ein Atom mehrere Elektronen, beeinflussen sie sich gegenseitig, und die Vorhersagen weichen von den Messungen ab; genau gilt es also nur für Teilchen mit einem Elektron wie $\ce{H}$ oder $\ce{He+}$. Außerdem erklärt es nicht, wie sich Spektrallinien im Magnetfeld aufspalten.`,
         short: "Bohrs Modell stimmt genau nur für Teilchen mit einem Elektron wie das Wasserstoffatom.",
       },
       cards: ['atombau-modelle'],
@@ -1053,7 +1059,7 @@ export const ATOMBAU_BANK: QuestionBank = {
       fact: 'light-frequency-wavelength',
       title: "Energie des Lichts",
       prompt: "Rotes Licht hat eine größere Wellenlänge als blaues. Was folgt daraus für seine Frequenz?",
-      correct: { id: 'r', text: "Sie ist kleiner, denn Wellenlänge mal Frequenz ergibt immer $c$." },
+      correct: { id: 'r', text: "Sie ist kleiner, denn Wellenlänge mal Frequenz ergibt im Vakuum immer $c$." },
       wrong: [
         { id: 'f1', text: "Sie ist größer, denn längere Wellen schwingen öfter in der Sekunde.", misconception: 'chem-mis-wavelength-frequency-same' },
         { id: 'f2', text: "Sie ist gleich, denn alles Licht ist gleich schnell unterwegs.", misconception: 'chem-mis-light-same-energy' },
@@ -1065,7 +1071,7 @@ export const ATOMBAU_BANK: QuestionBank = {
       ],
       hint: "Welche Größe ist für Licht jeder Farbe gleich, und wie hängt sie mit Wellenlänge und Frequenz zusammen?",
       explanation: {
-        detailed: String.raw`Für Licht gilt $c = \lambda \cdot f$, und die Lichtgeschwindigkeit $c$ ist für alle Farben gleich. Ist die Wellenlänge größer, muss die Frequenz im selben Verhältnis kleiner sein. Rotes Licht hat deshalb eine kleinere Frequenz als blaues und nach $E = h \cdot f$ auch weniger Energie je Portion.`,
+        detailed: String.raw`Für Licht gilt $c = \lambda \cdot f$, und die Lichtgeschwindigkeit $c$ ist im Vakuum für alle Farben gleich. Ist die Wellenlänge größer, muss die Frequenz im selben Verhältnis kleiner sein. Rotes Licht hat deshalb eine kleinere Frequenz als blaues und nach $E = h \cdot f$ auch weniger Energie je Portion.`,
         short: String.raw`Weil $c = \lambda \cdot f$ fest ist, gehört zur größeren Wellenlänge die kleinere Frequenz.`,
       },
       cards: ['atombau-licht'],
@@ -1129,7 +1135,7 @@ export const ATOMBAU_BANK: QuestionBank = {
       ],
       hint: "Woher kommt die Energie für den Sprung, und wie viel davon passt genau?",
       explanation: {
-        detailed: "Ein höheres Niveau hat mehr Energie; für den Sprung muss das Atom also Energie aufnehmen (Absorption), hier aus der Flamme. Weil die Niveaus feste Energien haben, passt nur genau ihre Differenz. Erst wenn das Elektron später zurückfällt, gibt das Atom diese Energie als Licht wieder ab (Emission).",
+        detailed: "Ein höheres Niveau hat mehr Energie; für den Sprung muss das Atom also Energie aufnehmen, hier aus der Flamme (Anregung). Weil die Niveaus feste Energien haben, passt nur genau ihre Differenz. Erst wenn das Elektron später zurückfällt, gibt das Atom diese Energie als Licht wieder ab (Emission).",
         short: "Sprung nach oben: Das Atom nimmt genau die Energiedifferenz auf.",
       },
       cards: ['atombau-spektren'],
@@ -1208,9 +1214,9 @@ export const ATOMBAU_BANK: QuestionBank = {
       correct: { id: 'r', text: "Wegen seiner großen Masse ist die Wellenlänge des Balls unmessbar klein." },
       wrong: [
         { id: 'f1', text: "Wegen seiner Größe hat der Ball überhaupt keine Wellenlänge.", misconception: 'chem-mis-matter-wave-only-small' },
-        { id: 'f2', text: "Wegen seiner kleinen Geschwindigkeit hat der Ball keine Wellenlänge.", misconception: 'chem-mis-de-broglie-c', why: {
-          detailed: "Nach de Broglie hat jedes bewegte Teilchen eine Wellenlänge, auch ein langsames; Lichtgeschwindigkeit ist dafür nicht nötig. In die Formel gehört die eigene Geschwindigkeit des Teilchens.",
-          short: "Auch langsame Teilchen haben eine Wellenlänge; es zählt ihre eigene Geschwindigkeit.",
+        { id: 'f2', text: "Wegen seiner kleinen Geschwindigkeit hat der Ball keine Wellenlänge.", misconception: 'chem-mis-matter-wave-only-small', why: {
+          detailed: String.raw`Nach de Broglie hat jedes bewegte Teilchen eine Wellenlänge, auch ein langsames. In $\lambda = \frac{h}{m \cdot v}$ steht $v$ im Nenner: Eine kleinere Geschwindigkeit macht die Wellenlänge sogar größer; sie verschwindet nicht.`,
+          short: String.raw`Auch langsame Teilchen haben eine Wellenlänge; kleineres $v$ heißt größeres $\lambda$.`,
         } },
         { id: 'f3', text: "Wegen seiner großen Masse ist die Wellenlänge des Balls riesig groß.", misconception: 'chem-mis-heavy-long-wave' },
         { id: 'f4', text: "Wegen seiner Größe ist der Ball ein Teilchen, Elektronen sind nur Wellen.", misconception: 'chem-mis-wave-or-particle-only', why: {
@@ -1322,7 +1328,10 @@ export const ATOMBAU_BANK: QuestionBank = {
           short: "Vergleiche auch die Massenzahlen; sie zählen die Teilchen im Kern.",
         } },
         { id: 'f2', text: "nur in der Neutronenzahl, nicht in der Hülle", misconception: 'chem-mis-ion-charge-ignored' },
-        { id: 'f3', text: "in der Protonenzahl und in der Neutronenzahl", misconception: 'chem-mis-ion-changes-nucleus' },
+        { id: 'f3', text: "in der Protonenzahl und in der Neutronenzahl", misconception: 'chem-mis-ion-changes-nucleus', why: {
+          detailed: "Beide Symbole tragen unten links die 29; die Protonenzahl ist also gleich, und beide Teilchen sind Kupfer. Eine Ionenladung wie $2+$ entsteht in der Hülle, nicht durch zusätzliche Protonen im Kern.",
+          short: "Gleiche Ordnungszahl heißt gleiche Protonenzahl; die Ladung entsteht in der Hülle.",
+        } },
         { id: 'f4', text: "in der Protonenzahl und in der Elektronenzahl", misconception: 'chem-mis-isotope-protons' },
       ],
       hint: "Prüfe jede der drei Angaben am Symbol einzeln: unten links, oben links und oben rechts.",
@@ -1343,7 +1352,10 @@ export const ATOMBAU_BANK: QuestionBank = {
       prompt: String.raw`Ein Atom $\ce{^{80}_{34}Se}$ (Selen) nimmt zwei Elektronen auf. Welches Teilchen entsteht?`,
       correct: { id: 'r', text: String.raw`$\ce{^{80}_{34}Se^2-}$` },
       wrong: [
-        { id: 'f1', text: String.raw`$\ce{^{80}_{34}Se^2+}$`, misconception: 'chem-mis-ion-sign-reversed' },
+        { id: 'f1', text: String.raw`$\ce{^{80}_{34}Se^2+}$`, misconception: 'chem-mis-ion-sign-reversed', why: {
+          detailed: "Elektronen tragen negative Ladung, die Protonen im Kern positive. Das Vorzeichen der Ionenladung zeigt, welche der beiden Ladungsarten überwiegt. Prüfe, welche Ladungsart hier dazugekommen ist.",
+          short: "Das Vorzeichen zeigt, welche Ladungsart überwiegt; Elektronen sind negativ.",
+        } },
         { id: 'f2', text: String.raw`$\ce{^{82}_{34}Se^2-}$`, misconception: 'chem-mis-electron-mass', why: {
           detailed: "Die Massenzahl zählt nur die Teilchen im Kern, also Protonen und Neutronen. Elektronen gehören zur Hülle und sind zudem rund 1800-mal leichter als ein Proton; in der Massenzahl zählen sie nie mit.",
           short: "Elektronen zählen in der Massenzahl nicht mit.",
@@ -1401,15 +1413,15 @@ export const ATOMBAU_BANK: QuestionBank = {
           short: "Linienspektren führten erst zum Modell von Bohr.",
         } },
         { id: 'f3', text: "Elektronen bilden hinter einem Doppelspalt helle und dunkle Streifen.", misconception: 'chem-mis-model-mixup', why: {
-          detailed: "Dass sich Elektronen wie Wellen verhalten, zeigte sich erst mehr als zwei Jahrzehnte nach Thomsons Modell. Aus dieser Beobachtung entstand das Orbitalmodell.",
-          short: "Die Wellennatur der Elektronen führte erst zum Orbitalmodell.",
+          detailed: "Dass sich Elektronen wie Wellen verhalten, nahm de Broglie erst rund zwei Jahrzehnte nach Thomsons Modell an; darauf baut das Orbitalmodell auf. Streifen hinter einem Doppelspalt hat man mit Elektronen sogar erst Jahrzehnte später beobachtet.",
+          short: "Die Wellennatur der Elektronen kam erst Jahrzehnte nach Thomsons Modell auf.",
         } },
         { id: 'f4', text: "In einer Verbindung stehen die Atome der Elemente immer in einem festen Zahlenverhältnis.", misconception: 'chem-mis-model-mixup', why: {
           detailed: "Feste Zahlenverhältnisse in Verbindungen erklärt schon Daltons Modell mit unteilbaren Atomen. Über einen inneren Aufbau der Atome sagen sie nichts.",
           short: "Feste Zahlenverhältnisse passen schon zu Daltons unteilbaren Atomen.",
         } },
       ],
-      hint: "Ordne die Beobachtungen zeitlich: Welche lag vor Thomsons Modell?",
+      hint: "Thomson gab das unteilbare Atom auf. Frag bei jeder Beobachtung, ob sie zeigt, dass ein Atom aus noch kleineren Teilen besteht.",
       explanation: {
         detailed: "Thomson untersuchte Strahlen, die in einer luftleeren Röhre unter Hochspannung entstehen. Sie bestehen aus negativ geladenen Teilchen, den Elektronen, die rund 1800-mal leichter sind als das leichteste Atom und sich aus jedem Stoff lösen lassen. Ein Atom, aus dem sich Teile lösen lassen, kann nicht unteilbar sein; Thomson setzte die Elektronen deshalb in eine positiv geladene Kugel.",
         short: "Elektronen lassen sich aus jedem Atom lösen; also ist das Atom nicht unteilbar.",
@@ -1503,7 +1515,10 @@ export const ATOMBAU_BANK: QuestionBank = {
       correct: { id: 'r', text: "Die starke Kernkraft ist auf kurze Abstände stärker als die Abstoßung der Protonen." },
       wrong: [
         { id: 'f1', text: "Die Neutronen heben die Ladung der Protonen auf, so dass gar keine Abstoßung bleibt.", misconception: 'chem-mis-neutron-balances-charge' },
-        { id: 'f2', text: "Elektronen im Kern ziehen die Protonen an und halten sie auf diese Weise zusammen.", misconception: 'chem-mis-particle-place' },
+        { id: 'f2', text: "Elektronen im Kern ziehen die Protonen an und halten sie auf diese Weise zusammen.", misconception: 'chem-mis-particle-place', why: {
+          detailed: "Elektronen sitzen nicht im Kern, sondern bilden die Hülle; bei chemischen Vorgängen werden sie abgegeben und aufgenommen, während der Kern unverändert bleibt. Was die Kernteilchen zusammenhält, muss also ohne Elektronen auskommen.",
+          short: "Im Kern gibt es keine Elektronen.",
+        } },
         { id: 'f3', text: "Auf so kurze Abstände stoßen sich gleich geladene Teilchen überhaupt nicht mehr ab.", misconception: 'chem-mis-nucleus-no-repulsion' },
         { id: 'f4', text: "Der Kern ist so groß, dass die Protonen weit genug voneinander entfernt sitzen.", misconception: 'chem-mis-nucleus-large' },
       ],
@@ -1638,7 +1653,7 @@ export const ATOMBAU_BANK: QuestionBank = {
       ],
       hint: "Prüfe jede Aussage: Gehört sie zu Bohr, zu einem älteren oder zu einem späteren Modell?",
       explanation: {
-        detailed: "Bohr ließ nur Bahnen mit festen Energien zu; damit konnte er die Linien des Wasserstoffs sogar berechnen. Bei Atomen mit mehreren Elektronen stoßen sich die Elektronen gegenseitig ab, und das Modell sagt die Linien nicht mehr richtig voraus. Auch die magnetischen Eigenschaften von Atomen erklärt es nicht.",
+        detailed: "Bohr ließ nur Bahnen mit festen Energien zu; damit konnte er die Linien des Wasserstoffs sogar berechnen. Bei Atomen mit mehreren Elektronen stoßen sich die Elektronen gegenseitig ab, und das Modell sagt die Linien nicht mehr richtig voraus. Auch wie sich Spektrallinien im Magnetfeld aufspalten, erklärt es nicht.",
         short: "Bohr erklärt das Wasserstoffspektrum, versagt aber bei mehreren Elektronen.",
       },
       cards: ['atombau-modelle', 'atombau-spektren'],

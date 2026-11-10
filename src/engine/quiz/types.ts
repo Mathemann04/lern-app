@@ -59,6 +59,10 @@ export type Misconception = {
   readonly why: Explanation
 }
 
+// Denkfehler ohne Erklärung: Name und falsche Aussage (klein, für Fehlerstatistik und Lernkarten, die
+// keine Fragen laden)
+export type MisconceptionName = Pick<Misconception, 'id' | 'name' | 'wrongText'>
+
 // Fragensammlung eines Themas
 export type QuestionBank = {
   // Thema (Id aus ui/catalog.ts)
