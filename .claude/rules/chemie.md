@@ -71,8 +71,10 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   Ordnungszahlen als Fehler), `generators/stoffmenge.ts` (Rechenarten `molmasse`
   und `stoffmenge` mit Untertypen n aus m, m aus n, N aus n, N aus m, m aus N,
   Atome aus m), Toleranz der falschen Antworten in `shared.ts` (`tolerantWrongs`).
-  Thema ohne Wissensfragen: leere Sammlung `bank/stoffmenge.ts`, `nextSeed` zieht
-  nur Rechnungen, in der Mischung Gewicht `CALC_ONLY_WEIGHT` (15, `ui/mix.ts`).
+  Ein Thema ohne Wissensfragen (leere Sammlung, so Stoffmenge bis S3c) zieht mit
+  `nextSeed` nur Rechnungen und zählt in der Mischung `CALC_ONLY_WEIGHT` (15,
+  `ui/mix.ts`). Wissensfragen (S3c): `bank/stoffmenge.ts`, `bank/gleichungen.ts`,
+  Denkfehler `chem-mis-st-…` und `chem-mis-gl-…`.
   Genauere IUPAC-Werte nur in `chem/iupac.testdata.ts`.
 - Reaktionsgleichungen (S3b): `chem/equation.ts` (Stoffe `species`, Gleichung mit
   Koeffizienten, `balance` über die Atombilanz mit exakten Brüchen: eindeutige
