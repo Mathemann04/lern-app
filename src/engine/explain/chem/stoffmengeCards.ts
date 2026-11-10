@@ -30,7 +30,7 @@ export const STOFFMENGE_CARDS: readonly Card[] = [
         ],
       },
     ],
-    errors: ['chem-particles-divided'],
+    errors: ['chem-particles-divided', 'chem-mis-st-avogadro-inverted', 'chem-mis-st-n-is-count', 'chem-mis-st-mol-is-mass', 'chem-mis-st-mol-count-varies', 'chem-mis-st-mol-only-gas', 'chem-mis-st-na-estimate', 'chem-mis-st-power', 'chem-mis-st-n-is-mass'],
   },
   {
     id: 'stoffmenge-molmasse',
@@ -58,7 +58,7 @@ export const STOFFMENGE_CARDS: readonly Card[] = [
         ],
       },
     ],
-    errors: ['chem-molar-index', 'chem-molar-atomic-number'],
+    errors: ['chem-molar-index', 'chem-molar-atomic-number', 'chem-mis-st-units', 'chem-mis-st-atomic-number', 'chem-mis-st-mass-number', 'chem-mis-st-index-ignored', 'chem-mis-st-atom-for-molecule', 'chem-mis-st-decimal', 'chem-mis-st-molar-mass-portion', 'chem-mis-st-particle-mass', 'chem-mis-st-same-m-same-stoff', 'chem-mis-st-formula-split', 'chem-mis-st-formula-reduced'],
   },
   {
     id: 'stoffmenge-n-m-m',
@@ -86,7 +86,7 @@ export const STOFFMENGE_CARDS: readonly Card[] = [
         ],
       },
     ],
-    errors: ['chem-n-times', 'chem-n-inverted', 'chem-m-divided'],
+    errors: ['chem-n-times', 'chem-n-inverted', 'chem-m-divided', 'chem-mis-st-n-times-m', 'chem-mis-st-n-inverted', 'chem-mis-st-m-divided', 'chem-mis-st-same-mass-same-n', 'chem-mis-st-heavier-more', 'chem-mis-st-n-decides-mass', 'chem-mis-st-m-ignores-n', 'chem-mis-st-prefix', 'chem-mis-st-magnitude'],
   },
   {
     id: 'stoffmenge-formeln',
@@ -114,7 +114,7 @@ export const STOFFMENGE_CARDS: readonly Card[] = [
         ],
       },
     ],
-    errors: ['chem-molar-bracket', 'chem-molar-hydrate'],
+    errors: ['chem-molar-bracket', 'chem-molar-hydrate', 'chem-mis-st-bracket', 'chem-mis-st-hydrate-forgotten', 'chem-mis-st-hydrate-factor', 'chem-mis-st-index-coefficient'],
   },
   {
     id: 'stoffmenge-atome',
@@ -141,6 +141,6 @@ export const STOFFMENGE_CARDS: readonly Card[] = [
         ],
       },
     ],
-    errors: ['chem-atoms-molecules'],
+    errors: ['chem-atoms-molecules', 'chem-mis-st-atoms-molecules', 'chem-mis-st-atoms-all', 'chem-mis-st-salt-molecule'],
   },
 ]

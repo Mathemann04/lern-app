@@ -275,7 +275,7 @@ const gleichungenLevels: LevelPreview[] = [
 // Unterthemen von „Reaktionsgleichungen" (Rechnungen in engine/chem/generators/gleichungen.ts, part)
 const gleichungenParts: CoursePart[] = [
   { id: 'lesen', title: 'Reaktionsgleichungen lesen', levels: [1, 2, 3] },
-  { id: 'ausgleichen', title: 'Gleichungen ausgleichen', levels: [1, 2] },
+  { id: 'ausgleichen', title: 'Gleichungen ausgleichen', levels: [1, 2, 3] },
   { id: 'verbrennung', title: 'Vollständige Verbrennung', levels: [1, 2, 3] },
 ]
 

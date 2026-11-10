@@ -225,7 +225,8 @@ describe('Themen mischen: Thema nur mit Rechnungen (S3a)', () => {
     const stoffmenge = courseById('chem-stoffmenge')!.course
     const engines: Record<string, MixEngine> = {
       [ATOMBAU]: topicEngine(chemTopic(ATOMBAU)!, seeded('rechnungen-a')),
-      'chem-stoffmenge': topicEngine(chemTopic('chem-stoffmenge')!, seeded('rechnungen-s')),
+      // Stoffmenge ohne seine Fragen: nur Rechnungen (so war es zwischen S3a und S3c)
+      'chem-stoffmenge': topicEngine({ ...chemTopic('chem-stoffmenge')!, bank: { ...chemTopic('chem-stoffmenge')!.bank, questions: [] } }, seeded('rechnungen-s')),
     }
     const input: MixInput = {
       courses: [atombau, stoffmenge],
