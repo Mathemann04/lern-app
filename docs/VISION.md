@@ -10,7 +10,8 @@ entstehen aber zuerst für mein Uni-Niveau.
 
 ### Geführt
 - Die Lösung ist in Schritte zerlegt, jeder Schritt ist Multiple Choice.
-- Schritt 1 ist immer „Welche Regel brauchst du?".
+- Schritt 1 ist immer „Welche Regel brauchst du?" (bei Rechnungen; eine
+  Wissensfrage in Chemie hat nur einen Schritt).
 - Die falschen Optionen sind typische Denkfehler, z. B. $(u \cdot v)' = u' \cdot v'$
   oder die vergessene innere Ableitung.
 - Bei einer falschen Antwort kann man sich erklären lassen, warum genau sie
@@ -31,8 +32,9 @@ entstehen aber zuerst für mein Uni-Niveau.
   „Kurz" (nur die Rechnung).
 
 ## Schwierigkeitsstufen
-- Jedes Thema hat 5 Stufen. Ich wähle die Stufe selbst, und sie bleibt, bis
-  ich sie ändere.
+- Jedes Thema hat 5 Stufen (in Chemie drei: Grundlagen, Vertiefung,
+  Klausurniveau; Entscheidung vom 10.11.2026). Ich wähle die Stufe selbst,
+  und sie bleibt, bis ich sie ändere.
 - Die App darf vorschlagen, eine Stufe höher zu gehen (z. B. nach 8 von 10
   richtig), wechselt aber nie automatisch.
 - Stufen am Beispiel Ableitungen:
