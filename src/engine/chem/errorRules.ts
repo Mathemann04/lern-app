@@ -198,8 +198,8 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
     name: 'Moleküle statt Atome gezählt',
     wrongFormula: String.raw`0{,}5\,\mathrm{mol}\ \ce{H2O}\text{: } 3{,}01 \cdot 10^{23}\ \ce{H}\text{-Atome}`,
     why: {
-      detailed: String.raw`$N = n \cdot N_A$ zählt die Teilchen der Formel, also Moleküle oder Formeleinheiten. Enthält jedes davon mehrere Atome des gesuchten Elements, musst du noch mit dem Index malnehmen.`,
-      short: 'Je Molekül so viele Atome, wie der Index sagt: noch mit dem Index malnehmen.',
+      detailed: String.raw`$N = n \cdot N_A$ zählt die Teilchen der Formel, also Moleküle oder Formeleinheiten. Enthält jedes davon mehrere Atome des gesuchten Elements, musst du noch mit dieser Zahl malnehmen: dem Index, bei einer Klammer oder bei Kristallwasser malgenommen.`,
+      short: 'Noch mit der Zahl der Atome je Molekül bzw. Formeleinheit malnehmen.',
     },
   },
 ]

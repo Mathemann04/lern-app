@@ -91,7 +91,7 @@ export const SUBSTANCES: readonly Substance[] = [
   s('CaCl2*2H2O', 'Calciumchlorid-Dihydrat', 'hydrate'),
   s('BaCl2*2H2O', 'Bariumchlorid-Dihydrat', 'hydrate'),
   s('CoCl2*6H2O', 'Cobalt(II)-chlorid-Hexahydrat', 'hydrate'),
-  s('Na2CO3*10H2O', 'Natriumcarbonat-Decahydrat (Soda)', 'hydrate'),
+  s('Na2CO3*10H2O', 'Natriumcarbonat-Decahydrat (Kristallsoda)', 'hydrate'),
   s('Na2SO4*10H2O', 'Natriumsulfat-Decahydrat', 'hydrate'),
 ]
 

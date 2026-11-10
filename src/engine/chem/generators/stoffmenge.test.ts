@@ -84,6 +84,35 @@ describe('Stoffmenge, Masse und Teilchenzahl: auf zweitem Weg', () => {
   })
 })
 
+describe('Stoffmenge: Rechenweg aus den angezeigten Zahlen', () => {
+  it.each([1, 2, 3] as const)('Stufe %i: Jeder Folgeschritt rechnet mit dem angezeigten Ergebnis des Schritts davor', (level) => {
+    const chained = ['stoffmenge', 'teilchen', 'masse', 'atome-element']
+    let checked = 0
+    for (const ref of refs(level)) {
+      const steps = generatedCalc(COURSE, ref)!.task.steps.filter((x) => chained.includes(x.id))
+      for (let i = 1; i < steps.length; i++) {
+        const previous = steps[i - 1].choices.find((c) => c.correct)!.content.replace(/^\$|\$$/g, '').replace(/\\,\\mathrm\{[^}]*\}$/, '')
+        const line = [steps[i].established].flat()[0]!
+        expect(line, `${level}-${ref.seed}`).toContain(previous)
+        // das angezeigte Ergebnis ergibt sich aus den angezeigten Zahlen (auf drei Ziffern gerundet)
+        const p = numberOf(previous)
+        const shown = numberOf(steps[i].choices.find((c) => c.correct)!.content)
+        const factor =
+          steps[i].id === 'teilchen'
+            ? NA
+            : steps[i].id === 'atome-element'
+              ? Number(/= (\d+) \\cdot/.exec(line)![1])
+              : steps[i].id === 'masse'
+                ? numberOf(/\\cdot ([\d{},]+)\\,\\mathrm\{g\/mol\}/.exec(line)![1])
+                : null
+        if (factor !== null) expect(shown, line).toBeCloseTo(Number((p * factor * (1 + 1e-12)).toPrecision(3)), -Math.floor(Math.log10(shown)) + 4)
+        checked++
+      }
+    }
+    if (level > 1) expect(checked).toBeGreaterThan(50)
+  })
+})
+
 describe('Lernkarten „Stoffmenge und Umsatz": Zahlen wie die Engine', () => {
   // Ergebniszeile jedes Beispiels, nachgerechnet
   const results = (id: string) =>

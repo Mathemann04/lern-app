@@ -12,7 +12,7 @@ export const STOFFMENGE_CARDS: readonly Card[] = [
     rules: [],
     formulas: [String.raw`N = n \cdot N_A`, String.raw`n = \frac{N}{N_A}`, String.raw`N_A = 6{,}022 \cdot 10^{23}\,\mathrm{mol^{-1}}`],
     memo: 'Die Stoffmenge zählt Teilchen in einer großen Einheit, dem Mol. Ein Mol sind immer gleich viele Teilchen, egal ob Atome, Moleküle oder Formeleinheiten eines Salzes: so viele, wie die Avogadro-Konstante angibt.',
-    note: String.raw`Die Zahl ist so gewählt, dass zwölf Gramm des Kohlenstoffisotops $\ce{^{12}C}$ genau ein Mol Atome enthalten. Weil Teilchen so winzig sind, ist die Teilchenzahl einer Portion, die man wiegen kann, immer eine riesige Zahl.`,
+    note: String.raw`Die Zahl wurde ursprünglich so gewählt, dass zwölf Gramm des Kohlenstoffisotops $\ce{^{12}C}$ ein Mol Atome enthalten; seit 2019 ist sie als feste Zahl festgelegt. Weil Teilchen so winzig sind, ist die Teilchenzahl einer Portion, die man wiegen kann, immer eine riesige Zahl.`,
     when: 'Wenn nach der Zahl der Teilchen gefragt ist oder eine Teilchenzahl gegeben ist.',
     examples: [
       {
@@ -122,8 +122,8 @@ export const STOFFMENGE_CARDS: readonly Card[] = [
     title: 'Atome oder Moleküle?',
     level: 3,
     rules: [],
-    formulas: [String.raw`N(\text{Atome}) = \text{Index} \cdot N(\text{Moleküle})`],
-    memo: 'Die Stoffmenge zählt die Teilchen der Formel, also Moleküle oder Formeleinheiten. Wird nach den Atomen eines Elements gefragt, kommt noch der Index dazu: Jedes Molekül bringt so viele Atome mit, wie der Index sagt.',
+    formulas: [String.raw`N(\text{Atome}) = (\text{Atome je Teilchen}) \cdot N(\text{Teilchen})`],
+    memo: 'Die Stoffmenge zählt die Teilchen der Formel, also Moleküle oder Formeleinheiten. Wird nach den Atomen eines Elements gefragt, kommt noch ein Faktor dazu: so viele Atome des Elements, wie in einem Teilchen stecken. Das ist der Index, bei einer Klammer oder bei Kristallwasser malgenommen.',
     when: 'Wenn nach Atomen eines Elements in einem Stoff gefragt ist.',
     examples: [
       {

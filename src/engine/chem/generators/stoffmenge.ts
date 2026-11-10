@@ -137,7 +137,8 @@ function amountStep(id: string, correct: Quantity, wrong: { rule: string; value:
   return choices.length === 0 ? null : { id, choices, ...parts }
 }
 
-// gerundet wie in einer Aufgabe (drei gültige Ziffern)
+// gerundet wie in einer Aufgabe (drei gültige Ziffern); auch Zwischenwerte: Ein Folgeschritt rechnet mit der
+// angezeigten Zahl weiter, wie man es in der Klausur tut, damit jede gezeigte Rechnung für sich stimmt
 const given = (r: Rational) => roundSignificant(r).value
 
 // „schöne" Stoffmengen in mol, aus denen die gegebenen Werte entstehen
@@ -367,7 +368,7 @@ function amountTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemC
       const m = given(ratMul(nNice, mass))
       const a = nStep(s, m, mass, values, rng, focus)
       if (!a) return null
-      const b = particleStep(s, a.n, rng, focus)
+      const b = particleStep(s, given(a.n), rng, focus)
       if (!b) return null
       steps.push(a.step, b.step)
       instruction = 'Berechne die Zahl der Teilchen'
@@ -379,10 +380,10 @@ function amountTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemC
       const count = given(ratMul(nNice, NA))
       const a = nFromParticlesStep(s, count, rng, focus)
       if (!a) return null
-      const step = mStep(s, a.n, mass, values, rng, focus)
+      const step = mStep(s, given(a.n), mass, values, rng, focus)
       if (!step) return null
       steps.push(a.step, step)
-      const m = ratMul(a.n, mass)
+      const m = ratMul(given(a.n), mass)
       instruction = 'Berechne die Masse'
       givenLatex = `N(${ce(s)}) = ${sig(count)}`
       resultLatex = `${mLatex(s)} ${eqSign(m)} ${sig(m)}\\,\\mathrm{g}`
@@ -393,12 +394,12 @@ function amountTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemC
       const m = given(ratMul(nNice, mass))
       const a = nStep(s, m, mass, values, rng, focus)
       if (!a) return null
-      const b = particleStep(s, a.n, rng, focus)
+      const b = particleStep(s, given(a.n), rng, focus)
       if (!b) return null
-      const c = atomStep(s, symbol, index, b.count, rng, focus)
+      const c = atomStep(s, symbol, index, given(b.count), rng, focus)
       if (!c) return null
       steps.push(a.step, b.step, c)
-      const atoms = ratMul(b.count, rat(index))
+      const atoms = ratMul(given(b.count), rat(index))
       instruction = `Wie viele ${elementBySymbol(symbol)!.name}atome sind enthalten?`
       givenLatex = `${mLatex(s)} = ${sig(m)}\\,\\mathrm{g}`
       resultLatex = `N(\\ce{${symbol}}) ${eqSign(atoms)} ${sig(atoms)}`
