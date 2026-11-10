@@ -437,7 +437,7 @@ test('Chemie: Rechnung zu ³⁷Cl⁻, Massenzahl als Neutronenzahl, Fehler gezie
 })
 
 // S3a: Thema „Stoffmenge und Umsatz" nur mit Rechnungen
-test('Chemie: Molmasse von Zn(OH)₂ mit Klammer, Thema ohne Fragen, Lernkarten', async ({ page }) => {
+test('Chemie: Molmasse von Zn(OH)₂ mit Klammer, Üben, Lernkarten', async ({ page }) => {
   const errors = collectErrors(page)
   await page.goto('./#/thema/chem-stoffmenge')
   await expect(page.getByRole('heading', { name: 'Stoffmenge und Umsatz', level: 1 })).toBeVisible()
@@ -465,10 +465,11 @@ test('Chemie: Molmasse von Zn(OH)₂ mit Klammer, Thema ohne Fragen, Lernkarten'
   await expect(page.getByTestId('result')).toContainText('99,4')
   await expectCleanPage(page, 'Ergebnis Molmasse')
 
-  // ohne Wissensfragen kommen beim Üben nur Rechnungen
+  // seit S3c kommen Fragen und Rechnungen gemischt
   await page.goto('./#/ueben/chem-stoffmenge/1')
   await expect(page).toHaveURL(/#\/ueben\/chem-stoffmenge\/1-\d+$/)
-  expect(isCalc(page.url())).toBe(true)
+  await expect(page.locator('#question')).toBeVisible()
+  await expectCleanPage(page, 'Stoffmenge üben')
 
   // Lernkarten-Ordner
   await page.goto('./#/karten/chem-stoffmenge')
@@ -507,5 +508,22 @@ test('Chemie: Verbrennung von Butan mit 13/2 O₂, ganzzahlig machen, Lernkarten
   await page.goto('./#/karten/chem-gleichungen')
   await expect(page.getByRole('link', { name: /Vollständige Verbrennung/ })).toBeVisible()
   await expectCleanPage(page, 'Lernkarten Gleichungen')
+  expect(errors).toEqual([])
+})
+
+// S3c: Wissensfragen zu Reaktionsgleichungen und Stoffmenge
+test('Chemie: Wissensfragen zu Reaktionsgleichungen und Stoffmenge in der Galerie und beim Üben', async ({ page }) => {
+  const errors = collectErrors(page)
+  for (const course of ['chem-gleichungen', 'chem-stoffmenge']) {
+    await page.goto(`./#/galerie/${course}`)
+    await page.locator('article[data-question-no]').first().waitFor()
+    expect(await page.locator('article[data-question-no]').count(), course).toBeGreaterThanOrEqual(45)
+    await expectCleanPage(page, `Galerie ${course}`)
+    // eine Frage in der Grundform
+    await page.goto(`./#/ueben/${course}/1-101`)
+    await expect(page.getByText(/· Wähle die richtige Antwort/)).toBeVisible()
+    await expect(answers(page)).toHaveCount(4)
+    await expectCleanPage(page, `Frage ${course}`)
+  }
   expect(errors).toEqual([])
 })
