@@ -105,7 +105,7 @@ describe.each(WITH_QUESTIONS.map((t) => [t.bank.course, t] as const))('Chemie-En
 
     it('zieht nur Fragen der angekreuzten Unterthemen, einzeln und zu zweit', () => {
       for (const level of [1, 2, 3] as const) {
-        const inLevel = parts.filter((p) => p.levels.includes(level)).map((p) => p.id)
+        const inLevel = parts.filter((p) => p.levels.includes(level) && nosOf(level, [p.id]).length > 0).map((p) => p.id)
         for (const id of inLevel) {
           const drawn = drawNos(engine, level, 300, undefined, new Set([id]))
           expect(sorted(drawn), `Stufe ${level}, ${id}`).toEqual(sorted(nosOf(level, [id])))
@@ -130,7 +130,7 @@ describe.each(WITH_QUESTIONS.map((t) => [t.bank.course, t] as const))('Chemie-En
 
     it('zieht innerhalb der Auswahl zuerst Fragen, die in der Runde noch nicht dran waren', () => {
       for (const level of [1, 2, 3] as const) {
-        for (const part of parts.filter((p) => p.levels.includes(level))) {
+        for (const part of parts.filter((p) => p.levels.includes(level) && nosOf(level, [p.id]).length > 0)) {
           const selection = new Set([part.id])
           const chosen = nosOf(level, [part.id])
           // Fragen anderer Unterthemen in der Runde stören nicht; von der Auswahl ist eine offen
@@ -146,7 +146,8 @@ describe.each(WITH_QUESTIONS.map((t) => [t.bank.course, t] as const))('Chemie-En
     it('nennt mit questionNos genau die Fragen, unter denen gezogen wird', () => {
       for (const level of [1, 2, 3] as const) {
         expect(engine.questionNos(level)).toEqual(allOf(level))
-        const selections = [undefined, ...parts.map((p) => new Set([p.id])), new Set(parts.slice(1, 3).map((p) => p.id))]
+        const withQuestions = parts.filter((p) => nosOf(level, [p.id]).length > 0)
+        const selections = [undefined, ...withQuestions.map((p) => new Set([p.id])), new Set(withQuestions.slice(1, 3).map((p) => p.id))]
         for (const selection of selections) {
           const nos = engine.questionNos(level, selection)
           expect(sorted(drawNos(engine, level, 400, undefined, selection)), `Stufe ${level}`).toEqual(sorted(nos))
@@ -154,6 +155,17 @@ describe.each(WITH_QUESTIONS.map((t) => [t.bank.course, t] as const))('Chemie-En
         }
       }
     })
+  })
+
+  it('zieht bei einer Auswahl nur mit Rechnungen (z. B. Umsatz) nur Rechnungen und nennt keine Fragen', () => {
+    for (const level of [1, 2, 3] as const) {
+      for (const part of (courseById(course)?.course.parts ?? []).filter((p) => p.levels.includes(level))) {
+        if (questions.some((q) => q.level === level && q.part === part.id)) continue
+        const selection = new Set([part.id])
+        expect(engine.questionNos(level, selection), part.id).toEqual([])
+        for (let i = 0; i < 20; i++) expect(decodeSeed(engine.nextSeed(level, undefined, selection))?.kind, part.id).toBe('generated')
+      }
+    }
   })
 
   it('nennt als Form den Fakt der Frage, in jeder Fassung gleich', () => {

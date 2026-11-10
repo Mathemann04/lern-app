@@ -441,11 +441,11 @@ test('Chemie: Molmasse von Zn(OH)₂ mit Klammer, Üben, Lernkarten', async ({ p
   const errors = collectErrors(page)
   await page.goto('./#/thema/chem-stoffmenge')
   await expect(page.getByRole('heading', { name: 'Stoffmenge und Umsatz', level: 1 })).toBeVisible()
-  await expect(page.getByRole('group', { name: 'Was soll drankommen?' }).getByRole('checkbox')).toHaveCount(2)
+  await expect(page.getByRole('group', { name: 'Was soll drankommen?' }).getByRole('checkbox')).toHaveCount(3)
   await expectCleanPage(page, 'Thema Stoffmenge')
 
-  await page.goto('./#/ueben/chem-stoffmenge/2-10002')
-  await expect(page.getByText(/^Vertiefung · Aufgabe 2-10002 · Berechne die molare Masse/)).toBeVisible()
+  await page.goto('./#/ueben/chem-stoffmenge/2-10078')
+  await expect(page.getByText(/^Vertiefung · Aufgabe 2-10078 · Berechne die molare Masse/)).toBeVisible()
   await expect(page.getByText(/Werte aus dem PSE/)).toBeVisible()
   await expectCleanPage(page, 'Molmasse')
   // absichtlich die Klammer nur auf das H bezogen

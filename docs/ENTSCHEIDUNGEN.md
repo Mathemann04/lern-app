@@ -569,3 +569,10 @@ Neue Entscheidungen unten anfügen.
   geprüft. Neues Unterthema „Reaktionsgleichungen lesen“. Inhalte, die nicht im Skript
   stehen (unvollständige Verbrennung, zweiatomige Elemente, Festlegung von N_A seit
   2019), stützen sich auf Lehrbuchwissen und haben keine Fundstelle.
+- 10.11.2026: S4 in drei Teile geteilt (S4a Umsatz, S4b Gase und Lösungen, S4c
+  Klausuraufgabe 4 üben). S4a fertig: Umsatz in drei Schritten im Thema „Stoffmenge und
+  Umsatz“, Fehler „Verhältnis 1 : 1“, „umgedreht“, „nur Koeffizient des gesuchten
+  Stoffs“, „Molmasse des gegebenen Stoffs“, „ähnlicher Stoff“; n : M statt n · M nutzt den
+  vorhandenen Fehler `chem-m-divided`. Wählt man nur „Umsatz“ an, kommen nur Rechnungen.
+  Die Zahlen der Altklausuren schließen jetzt alle Rechnungen aus (vorher konnte die
+  Stoffmengen-Rechnung 4,4 g Propan erzeugen).

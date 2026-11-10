@@ -161,6 +161,31 @@ describe('Rechenfehler Reaktionsgleichungen: Katalogbeispiele', () => {
   })
 })
 
+describe('Rechenfehler Umsatz: Katalogbeispiele (5,8 g Butan → CO₂)', () => {
+  const butane = molarMass(parseFormula('C4H10'), 'rounded')
+  const co2 = molarMass(parseFormula('CO2'), 'rounded')
+  const n = ratDiv(rat(58, 10), butane)
+  it('richtig 0,4 mol und 17,6 g; Fehler 0,1 / 0,025 / 0,8 mol, 23,2 g, 11,2 g, 0,00909 g', () => {
+    const nCO2 = ratMul(n, rat(8, 2))
+    expect(formatText(nCO2)).toBe('0,4')
+    expect(formatText(ratMul(nCO2, co2))).toBe('17,6')
+    expect(formatText(n)).toBe('0,1')
+    expect(formatText(ratMul(n, rat(2, 8)))).toBe('0,025')
+    expect(formatText(ratMul(n, rat(8)))).toBe('0,8')
+    expect(formatText(ratMul(nCO2, butane))).toBe('23,2')
+    expect(formatText(ratMul(nCO2, molarMass(parseFormula('CO'), 'rounded')))).toBe('11,2')
+    expect(formatText(ratDiv(nCO2, co2))).toBe('9,09 · 10⁻³')
+  })
+})
+
+describe('Rechenfehler Umsatz: Koeffizient eines anderen Stoffs (CH₄ → CO₂, 1 : 1)', () => {
+  it('ergibt 2 · n statt n, weil die 2 vor O₂ bzw. H₂O steht', () => {
+    const n = rat(1, 4)
+    expect(formatText(ratMul(n, rat(2)))).toBe('0,5')
+    expect(formatText(n)).toBe('0,25')
+  })
+})
+
 describe('Rechenfehler: Namen und Texte', () => {
   it('haben eindeutige Ids, stehen in der Fehlerstatistik und haben eigene Texte', () => {
     const ids = CHEM_ERROR_RULES.map((r) => r.id)

@@ -57,19 +57,22 @@ export function topicEngine({ bank, misconceptions }: ChemTopic, random: () => n
 
   const pick = <T>(items: readonly T[]): T => items[Math.floor(random() * items.length)]
 
+  // Rechenarten der Stufe mit erlaubtem Unterthema
+  const generatorsIn = (level: Level, parts?: ReadonlySet<string>) => generatorsOf(course, level).filter((g) => !parts || parts.has(g.part))
+
   // Fragen, unter denen gewählt wird: die der Stufe (ohne gelöschte) mit erlaubtem Unterthema; gibt es
-  // davon keine (die Auswahl kommt in der Stufe nicht vor), alle der Stufe
+  // in der Auswahl weder Fragen noch Rechnungen (sie kommt in der Stufe nicht vor), alle der Stufe. Hat die
+  // Auswahl nur Rechnungen (z. B. nur „Umsatz"), gibt es keine Fragen.
   function candidatesOf(level: Level, parts?: ReadonlySet<string>): readonly Question[] {
     const inLevel = bank.questions.filter((q) => q.level === level && !retired.has(q.no))
     if (!parts) return inLevel
     const chosen = inLevel.filter((q) => parts.has(q.part))
-    return chosen.length > 0 ? chosen : inLevel
+    if (chosen.length > 0 || generatorsIn(level, parts).length > 0) return chosen
+    return inLevel
   }
 
   const isGenerated = (seed: number) => decodeSeed(seed)?.kind === 'generated'
 
-  // Rechenarten der Stufe mit erlaubtem Unterthema
-  const generatorsIn = (level: Level, parts?: ReadonlySet<string>) => generatorsOf(course, level).filter((g) => !parts || parts.has(g.part))
 
   // Nummer einer Rechnung, deren Rechenart erlaubt ist
   const randomCalcSeed = () => GENERATED_MIN + Math.floor(random() * (GENERATED_MAX - GENERATED_MIN + 1))

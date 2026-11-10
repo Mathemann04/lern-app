@@ -8,7 +8,7 @@ import { elementBySymbol } from '../elements.ts'
 import { type CountMode, atomCounts, formulaLatex, hasBracket } from '../formula.ts'
 import { type MassValues, atomicNumberSum, elementMolarMass, molarMass } from '../molarMass.ts'
 import { type Substance, substancesOf } from '../substances.ts'
-import { type ChemCalc, type ChemGenerator, type WrongValue, stepChoices, tolerantWrongs } from './shared.ts'
+import { type ChemCalc, type ChemGenerator, type WrongValue, stepChoices, tolerantWrongs, usesExamNumbers } from './shared.ts'
 
 // Rechnungen zum Thema „Stoffmenge und Umsatz" (Plan M4, Thema 4.2; Umsatz kommt mit S4):
 // - Molmasse (Unterthema „molmasse"): Atome zählen → Molmasse als Summe. Grundlagen einfache Formeln
@@ -30,16 +30,16 @@ function massLatex(r: Rational, values: MassValues): string {
   const padded = values === 'pse' && !text.includes(',') ? `${text},0` : text
   return padded.replace(',', '{,}')
 }
-const molarLatex = (r: Rational, values: MassValues) => String.raw`${massLatex(r, values)}\,\mathrm{g/mol}`
-const sig = (r: Rational) => formatLatex(r)
+export const molarLatex = (r: Rational, values: MassValues) => String.raw`${massLatex(r, values)}\,\mathrm{g/mol}`
+export const sig = (r: Rational) => formatLatex(r)
 // „=" bei genauen Werten, sonst „≈"
-const eqSign = (r: Rational) => (ratEq(roundSignificant(r).value, r) ? '=' : String.raw`\approx`)
-const ce = (s: Substance) => formulaLatex(s.formula)
+export const eqSign = (r: Rational) => (ratEq(roundSignificant(r).value, r) ? '=' : String.raw`\approx`)
+export const ce = (s: Substance) => formulaLatex(s.formula)
 
 const UNITS = { m: String.raw`\,\mathrm{g}`, n: String.raw`\,\mathrm{mol}`, N: '' } as const
 
 // Werte, mit denen die Aufgabe rechnet
-function valuesNote(s: Substance, values: MassValues): string {
+export function valuesNote(s: Substance, values: MassValues): string {
   const list = [...atomCounts(s.formula).keys()].map((symbol) => `$M(\\ce{${symbol}}) = ${molarLatex(elementMolarMass(symbol, values), values)}$`)
   const joined = list.length === 1 ? list[0] : `${list.slice(0, -1).join(', ')} und ${list[list.length - 1]}`
   return values === 'pse' ? `Werte aus dem PSE: ${joined}.` : `Rechne mit ${joined}.`
@@ -66,7 +66,7 @@ const CARD_MOL = 'stoffmenge-mol'
 const CARD_ATOMS = 'stoffmenge-atome'
 
 // Schritte „Atome zählen" (nur, wenn ein Fehler dort etwas ändert) und „Molmasse"; dazu die Molmasse
-function molarSteps(s: Substance, values: MassValues, rng: Rng, focus?: string): { steps: GuidedStep[]; mass: Rational } | null {
+export function molarSteps(s: Substance, values: MassValues, rng: Rng, focus?: string): { steps: GuidedStep[]; mass: Rational } | null {
   const counts = atomCounts(s.formula)
   const mass = molarMass(s.formula, values)
   const steps: GuidedStep[] = []
@@ -131,7 +131,7 @@ function molarSteps(s: Substance, values: MassValues, rng: Rng, focus?: string):
 
 type Quantity = { readonly value: Rational; readonly latex: string }
 
-function amountStep(id: string, correct: Quantity, wrong: { rule: string; value: Rational }[], unit: string, parts: Omit<GuidedStep, 'id' | 'choices'>, rng: Rng, focus?: string): GuidedStep | null {
+export function amountStep(id: string, correct: Quantity, wrong: { rule: string; value: Rational }[], unit: string, parts: Omit<GuidedStep, 'id' | 'choices'>, rng: Rng, focus?: string): GuidedStep | null {
   const latex = (r: Rational) => `${sig(r)}${unit}`
   const choices = stepChoices(rng, { key: latex(correct.value), content: `$${latex(correct.value)}$` }, tolerantWrongs(correct.value, wrong, latex), focus)
   return choices.length === 0 ? null : { id, choices, ...parts }
@@ -139,10 +139,10 @@ function amountStep(id: string, correct: Quantity, wrong: { rule: string; value:
 
 // gerundet wie in einer Aufgabe (drei gültige Ziffern); auch Zwischenwerte: Ein Folgeschritt rechnet mit der
 // angezeigten Zahl weiter, wie man es in der Klausur tut, damit jede gezeigte Rechnung für sich stimmt
-const given = (r: Rational) => roundSignificant(r).value
+export const given = (r: Rational) => roundSignificant(r).value
 
 // „schöne" Stoffmengen in mol, aus denen die gegebenen Werte entstehen
-const NICE_N = ['0.05', '0.1', '0.15', '0.2', '0.25', '0.3', '0.4', '0.5', '0.75', '1.5', '2', '2.5', '3', '4'].map((t) => parseDecimal(t)!)
+export const NICE_N = ['0.05', '0.1', '0.15', '0.2', '0.25', '0.3', '0.4', '0.5', '0.75', '1.5', '2', '2.5', '3', '4'].map((t) => parseDecimal(t)!)
 
 type Subtype = 'n-from-m' | 'm-from-n' | 'N-from-n' | 'N-from-m' | 'm-from-N' | 'atoms-from-m'
 const SUBTYPES: Readonly<Record<1 | 2 | 3, readonly Subtype[]>> = {
@@ -151,10 +151,10 @@ const SUBTYPES: Readonly<Record<1 | 2 | 3, readonly Subtype[]>> = {
   3: ['N-from-m', 'm-from-N', 'atoms-from-m'],
 }
 
-const nLatex = (s: Substance) => `n(${ce(s)})`
-const mLatex = (s: Substance) => `m(${ce(s)})`
+export const nLatex = (s: Substance) => `n(${ce(s)})`
+export const mLatex = (s: Substance) => `m(${ce(s)})`
 
-function nStep(s: Substance, m: Rational, mass: Rational, values: MassValues, rng: Rng, focus?: string): { step: GuidedStep; n: Rational } | null {
+export function nStep(s: Substance, m: Rational, mass: Rational, values: MassValues, rng: Rng, focus?: string): { step: GuidedStep; n: Rational } | null {
   const n = ratDiv(m, mass)
   const line = `${nLatex(s)} = \\frac{m}{M} = \\frac{${sig(m)}\\,\\mathrm{g}}{${molarLatex(mass, values)}} ${eqSign(n)} ${sig(n)}\\,\\mathrm{mol}`
   const step = amountStep(
@@ -275,11 +275,11 @@ function atomStep(s: Substance, symbol: string, index: number, molecules: Ration
   )
 }
 
-const explain = (detailed: string, short: string): Explanation => ({ detailed, short })
+export const explain = (detailed: string, short: string): Explanation => ({ detailed, short })
 
 // --- Erzeuger ---
 
-const valuesOf = (level: Level): MassValues => (level === 2 ? 'pse' : 'rounded')
+export const valuesOf = (level: Level): MassValues => (level === 2 ? 'pse' : 'rounded')
 
 function substancesFor(level: Level, molarOnly: boolean): readonly Substance[] {
   if (level === 1) return substancesOf('simple')
@@ -407,6 +407,7 @@ function amountTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemC
     }
   }
 
+  if (usesExamNumbers(givenLatex)) return null
   const needsNA = subtype !== 'n-from-m' && subtype !== 'm-from-n'
   const massNote = withMolarStep ? valuesNote(s, values) : `$M(${ce(s)}) = ${molarLatex(mass, values)}$.`
   return {
@@ -424,7 +425,7 @@ function amountTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemC
   }
 }
 
-const MOLAR_ERRORS = ['chem-molar-index', 'chem-molar-bracket', 'chem-molar-hydrate', 'chem-molar-atomic-number']
+export const MOLAR_ERRORS = ['chem-molar-index', 'chem-molar-bracket', 'chem-molar-hydrate', 'chem-molar-atomic-number']
 
 export const STOFFMENGE_GENERATORS: readonly ChemGenerator[] = [
   {

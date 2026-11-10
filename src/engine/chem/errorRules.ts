@@ -284,6 +284,67 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
       short: 'Atome eines Stoffes: Koeffizient mal Index, nicht der Koeffizient allein.',
     },
   },
+  // Umsatz (S4a)
+  {
+    id: 'chem-ratio-one',
+    course: STOFFMENGE,
+    name: 'Stoffmengen im Verhältnis 1 : 1 gesetzt',
+    wrongFormula: String.raw`\ce{2 C4H10 + 13 O2 -> 8 CO2 + 10 H2O}\text{: } n(\ce{CO2}) = 0{,}1\,\mathrm{mol}`,
+    why: {
+      detailed: 'Die Koeffizienten der Gleichung sagen, wie viele Teilchen der Stoffe zusammengehören. Nur wenn beide Koeffizienten gleich sind, sind auch die Stoffmengen gleich; sonst muss das Verhältnis der Koeffizienten berücksichtigt werden.',
+      short: 'Die Stoffmengen stehen im Verhältnis der Koeffizienten, nicht 1 : 1.',
+    },
+  },
+  {
+    id: 'chem-ratio-swapped',
+    course: STOFFMENGE,
+    name: 'Verhältnis der Koeffizienten umgedreht',
+    wrongFormula: String.raw`\ce{2 C4H10 + 13 O2 -> 8 CO2 + 10 H2O}\text{: } n(\ce{CO2}) = 0{,}1 \cdot \frac{2}{8}\,\mathrm{mol}`,
+    why: {
+      detailed: String.raw`Gesucht ist die Stoffmenge des anderen Stoffs. Der Koeffizient des gesuchten Stoffs gehört deshalb in den Zähler, der des gegebenen in den Nenner: $n(\text{gesucht}) = n(\text{gegeben}) \cdot \frac{\nu(\text{gesucht})}{\nu(\text{gegeben})}$. Prüfe: Steht vor dem gesuchten Stoff die größere Zahl, muss auch seine Stoffmenge größer sein.`,
+      short: String.raw`$n(\text{gesucht}) = n(\text{gegeben}) \cdot \frac{\nu(\text{gesucht})}{\nu(\text{gegeben})}$`,
+    },
+  },
+  {
+    id: 'chem-ratio-product-only',
+    course: STOFFMENGE,
+    name: 'Nur mit dem Koeffizienten des gesuchten Stoffs malgenommen',
+    wrongFormula: String.raw`\ce{2 C4H10 + 13 O2 -> 8 CO2 + 10 H2O}\text{: } n(\ce{CO2}) = 0{,}1 \cdot 8\,\mathrm{mol}`,
+    why: {
+      detailed: 'Es zählt das Verhältnis beider Koeffizienten. Steht vor dem gegebenen Stoff eine Zahl größer 1, muss durch sie geteilt werden; der Koeffizient des gesuchten Stoffs allein reicht nicht.',
+      short: 'Durch den Koeffizienten des gegebenen Stoffs teilen, nicht nur malnehmen.',
+    },
+  },
+  {
+    id: 'chem-ratio-wrong-molar-mass',
+    course: STOFFMENGE,
+    name: 'Molmasse des gegebenen Stoffs für den gesuchten (oder Massen ins Verhältnis gesetzt)',
+    wrongFormula: String.raw`5{,}8\,\mathrm{g}\ \ce{C4H10} \rightarrow m(\ce{CO2}) = 0{,}4 \cdot 58 = 23{,}2\,\mathrm{g}`,
+    why: {
+      detailed: 'Am Ende wird die Stoffmenge des gesuchten Stoffs mit seiner eigenen molaren Masse malgenommen. Massen selbst stehen nicht im Verhältnis der Koeffizienten, nur Stoffmengen; wer die Massen ins Verhältnis setzt, rechnet versehentlich mit der Molmasse des gegebenen Stoffs.',
+      short: 'Die Masse des gesuchten Stoffs mit seiner eigenen molaren Masse berechnen.',
+    },
+  },
+  {
+    id: 'chem-similar-molar-mass',
+    course: STOFFMENGE,
+    name: 'Molmasse eines ähnlichen Stoffs genommen',
+    wrongFormula: String.raw`m(\ce{CO2}) = 0{,}4 \cdot M(\ce{CO}) = 11{,}2\,\mathrm{g}`,
+    why: {
+      detailed: String.raw`Ähnliche Formeln wie $\ce{CO}$ und $\ce{CO2}$ haben verschiedene molare Massen. Nimm die Formel des gesuchten Stoffs genau so, wie sie in der Gleichung steht.`,
+      short: 'Die Formel des gesuchten Stoffs genau aus der Gleichung nehmen.',
+    },
+  },
+  {
+    id: 'chem-ratio-other-coefficient',
+    course: STOFFMENGE,
+    name: 'Koeffizient eines anderen Stoffs genommen',
+    wrongFormula: String.raw`\ce{CH4 + 2 O2 -> CO2 + 2 H2O}\text{: } n(\ce{CO2}) = n(\ce{CH4}) \cdot 2`,
+    why: {
+      detailed: 'Für das Verhältnis zählen nur die Koeffizienten der beiden Stoffe, um die es geht: des gegebenen und des gesuchten. Die Zahlen vor den übrigen Stoffen der Gleichung spielen dafür keine Rolle.',
+      short: 'Nur die Koeffizienten des gegebenen und des gesuchten Stoffs zählen.',
+    },
+  },
 ]
 
 const BY_ID = new Map(CHEM_ERROR_RULES.map((r) => [r.id, r]))
