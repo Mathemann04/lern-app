@@ -2,8 +2,9 @@ import { equationToLatex, toLatex } from '../expr/print.ts'
 import { contains, subterms } from '../expr/compare.ts'
 import type { Expr } from '../expr/types.ts'
 import { holds, samplePoints } from '../rearrange/check.ts'
+import { rearrangeWrongAnswers } from '../rearrange/errorRules.ts'
 import { hasNestedFraction as hasNestedResult } from '../rearrange/finished.ts'
-import { solveTask } from '../rearrange/isolate.ts'
+import { solveTask, stepEquationLatex } from '../rearrange/isolate.ts'
 import { type RearrangeTask, givenLatex, taskVariables } from '../rearrange/task.ts'
 import { type Rng, createRng } from '../random/rng.ts'
 import { latexWidthEm } from './latexWidth.ts'
@@ -222,9 +223,16 @@ const MAX_DET_WIDTH = 12
 // Ergebnis mit Determinante: Im Kasten am Handy (318 Pixel, kleinste Schrift) passen etwa 17,7 em
 const MAX_DET_RESULT_WIDTH = 16.5
 // Werkzeuge, deren Breite geschätzt wird: Determinante (8a), Betrag, Winkel und Vektoren (8b)
-const WIDE_TOOLS = new Set(['det', 'abs', 'arg', 'length', 'dot', 'angle'])
+// und Additionstheoreme (8c)
+const WIDE_TOOLS = new Set(['det', 'abs', 'arg', 'length', 'dot', 'angle', 'theorem'])
 const hasDet = (t: RearrangeTask) =>
   [t.equation.lhs, t.equation.rhs].flatMap((side) => subterms(side)).some((s) => s.kind === 'var' && s.tool !== undefined && WIDE_TOOLS.has(s.tool.kind))
+// Additionstheoreme (8c): Ausgeschrieben werden die Gleichungen lang (vier Produkte wie \sin x \cdot \cos a). Jede
+// Gleichung des Rechenwegs und jede falsche Antwort muss am Handy in eine Zeile passen; am Browser gemessen passen
+// in den Antworten etwa 23 em, 20 em sicher
+const MAX_THEOREM_STEP_WIDTH = 21
+const hasTheorem = (t: RearrangeTask) =>
+  [t.equation.lhs, t.equation.rhs].flatMap((side) => subterms(side)).some((s) => s.kind === 'var' && s.tool?.kind === 'theorem')
 
 // Wie oft kommt die gesuchte Variable vor, und steht sie in einem Nenner?
 function occurrences(t: RearrangeTask): { count: number; inDenominator: boolean } {
@@ -269,7 +277,16 @@ function isGood(t: RearrangeTask, level: Level, kit: boolean, novel = false, nar
   if (level === 5 && subterms(solution.result).some((s) => s.kind === 'root' && s.arg.kind === 'add' && subterms(s.arg).some((p) => p.kind === 'div'))) return false
   const points = samplePoints(t, solution.result, createRng('brauchbar'), 8, solution.requires)
   // Gegenprobe: Die Lösung erfüllt die Aufgabe an allen Prüfstellen
-  return points.length >= 8 && points.every((p) => holds(t.equation, p) === true)
+  if (points.length < 8 || !points.every((p) => holds(t.equation, p) === true)) return false
+  // mit Additionstheorem: kein Schritt und keine falsche Antwort zu breit fürs Handy; kein Minus, das sich
+  // herausziehen ließe, direkt unter der Wurzel oder in der Klammer (\sqrt{-\frac{a}{y - 2a + b}})
+  if (level === 5 && hasTheorem(t)) {
+    if (/\\sqrt\{-|\\left\(-/.test(toLatex(solution.result))) return false
+    const wide = (latex: string) => latexWidthEm(latex) > MAX_THEOREM_STEP_WIDTH
+    if (solution.steps.some((s) => wide(stepEquationLatex(s.kind, s.after)))) return false
+    if (rearrangeWrongAnswers(t, solution).some((w) => wide(equationToLatex(w.after)))) return false
+  }
+  return true
 }
 
 // Ergebnis, das am Handy (390 Pixel breit, kleinste Schrift) in eine Zeile passt: höchstens 90 Zeichen

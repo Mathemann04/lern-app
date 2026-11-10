@@ -179,7 +179,7 @@ describe('Baukasten (Nummern 1 bis 1000 der Stufe 5)', () => {
     expect(generated.length).toBeGreaterThanOrEqual(60)
     const bodies = generated.flatMap((g) => toolsIn(g.task.equation)).map((t) => theoremParts(toolOf(t).body)!)
     expect(new Set(bodies.map((p) => `${p.kind} ${p.name}`))).toEqual(new Set(['addition sin', 'addition cos', 'double cos']))
-    expect(new Set(generated.map((g) => g.label)).size).toBeGreaterThanOrEqual(10)
+    expect(new Set(generated.map((g) => g.label)).size).toBeGreaterThanOrEqual(8)
   })
 
   it('Gegenprobe an den Prüfstellen, immer mit x < \\frac{\\pi}{2}; x steckt nicht nur in einem einzigen Additionstheorem', () => {
@@ -224,7 +224,7 @@ describe('Baukasten (Nummern 1 bis 1000 der Stufe 5)', () => {
         expect(definedSomewhere(w.after, createRng(`irgendwo:${label}`), 400, g.task.conditions), label).toBe(true)
         // keine Seite, die nur noch 0 ist
         for (const side of [w.after.lhs, w.after.rhs]) if (side.kind !== 'num') expect(points.every((p) => Math.abs(evaluate(side, p)) < 1e-9), label).toBe(false)
-        expect(dependsOn(w.after, 'x', createRng(`abhängig:${label}`)), label).toBe(true)
+        expect(dependsOn(w.after, 'x', createRng(`abhängig:${label}`), 400), label).toBe(true)
         for (const other of wrong.slice(0, i)) expect(points.every((p) => close(diff(w.after, p), diff(other.after, p))), `${label} wie ${equationToLatex(other.after)}`).toBe(false)
       })
     }

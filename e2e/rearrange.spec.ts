@@ -399,7 +399,7 @@ test('Umstellen Stufe 5: Winkel einer komplexen Zahl geführt, frei mit π im Er
 
 test('Umstellen Stufe 5: Additionstheorem geführt (Beispiel aus dem Plan), durch cos x teilen, mit Lernkarte aus Teil 8c', async ({ page }) => {
   // b\sin(x + a) = y\cos x mit x < \frac{\pi}{2}
-  await page.goto('./#/ueben/umstellen/5-1070')
+  await page.goto('./#/ueben/umstellen/5-2333')
   await expect(page.getByText('Was steht da eigentlich?')).toBeVisible()
   await expect(page.locator('#question')).toContainText('mit dem Additionstheorem aus')
   await expectCleanPage(page, 'Start Stufe 5 Additionstheorem')
@@ -420,7 +420,7 @@ test('Umstellen Stufe 5: Additionstheorem geführt (Beispiel aus dem Plan), durc
 
 test('Umstellen Stufe 5 frei: doppelter Winkel (Beispiel aus dem Plan), Plus statt Minus, die 2 vorgezogen, dann richtig', async ({ page }) => {
   // \cos(2x) = y\sin x mit x < \frac{\pi}{2}
-  await page.goto('./#/frei/umstellen/5-416')
+  await page.goto('./#/frei/umstellen/5-1539')
   await expect(field(page)).toBeVisible()
   await expectCleanPage(page, 'Start Stufe 5 doppelter Winkel frei')
   await enter(page, '\\arcsin\\left(\\frac{1}{y}\\right)')

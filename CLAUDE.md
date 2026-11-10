@@ -426,8 +426,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     mit Summe, Reihe, Grenzwert oder Differentialgleichung nur Stellen, an
     denen sich die Aufgabe numerisch ausrechnen lässt;
     mit $u$ nach einer Substitution `withSubstitution`;
-    Gegenprobe durch Einsetzen; für falsche Gleichungen `definedSomewhere` und
-    `dependsOn`), `errorRules.ts`
+    Gegenprobe durch Einsetzen; für falsche Gleichungen `definedSomewhere` (mit
+    Additionstheorem nur im Bereich der Aufgabe) und `dependsOn`), `errorRules.ts`
     (typische Fehler, Ids `eq-…`, beim Zusammenfassen die aus „Brüche";
     falsche Gleichungen vor einer Substitution mit eigener Substitution
     weitergerechnet;
@@ -435,7 +435,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     stimmt; in Aufgaben mit Betrag, Winkel, Vektoren oder Additionstheoremen keine, in
     der $x$ keine Rolle mehr spielt, keine, die für kein $x$ definiert ist, und keine
     zwei, die anders geschrieben dieselbe sind; mit Additionstheoremen auch keine, in der
-    sich $x$ als gemeinsamer Faktor wegkürzt wie $2\cos x = y\cos x$), `task.ts` (Aufgabe, Bedingungen; mit Differentialgleichungen
+    sich $x$ als gemeinsamer Faktor wegkürzt wie $2\cos x = y\cos x$, und keine mit
+    einer Seite, die nur noch 0 ist), `task.ts` (Aufgabe, Bedingungen; mit Differentialgleichungen
     stehen sie je Funktion in einer Zeile über der Gleichung, `givenLatex`,
     `\begin{gathered}`; ohne sie bleibt `taskLatex` wie bisher; `taskFormLatex`
     ohne gathered und ohne den Namen pmatrix)
@@ -499,10 +500,11 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     Teil 8c `buildLevel5Theorem` (Anteil 35 % der Nummern aus 7a, als letzte Vorlage,
     immer mit $x < \frac{\pi}{2}$): Additionstheorem gegen $\sin x$ oder $\cos x$ (Beispiel
     aus dem Plan $b\sin(x + a) = y\cos x$), im Bruch damit, Bruch aus zwei
-    Additionstheoremen mit verschiedenen Winkeln, auf beiden Seiten, Summe zweier,
-    Sinus und Kosinus derselben Summe; $\cos(2x)$ gegen $\sin x$ oder $\cos x$ (danach
-    quadratisch), im Bruch damit, in einer Summe, gegen $\sin^2 x$ oder $\cos^2 x$; $x$
-    steht nie nur in einem einzigen Additionstheorem;
+    Additionstheoremen mit verschiedenen Winkeln; $\cos(2x)$ gegen $\sin x$ oder $\cos x$
+    (danach quadratisch), im Bruch damit, in einer Summe, gegen $\sin^2 x$ oder
+    $\cos^2 x$; $x$ steht nie nur in einem einzigen Additionstheorem; jede Gleichung
+    des Rechenwegs und jede falsche Antwort höchstens 21 em breit (in den Antworten
+    passen am Handy etwa 23 em), darum keine zwei Additionstheoreme nebeneinander;
     Filter in
     `rearrangeTerms.ts`: Mindestzahl der Umformungen je Stufe, Doppelbrüche
     erst ab Stufe 3, Ergebnis höchstens 90 bzw. ab Stufe 4 120 Zeichen (Stufe
@@ -511,10 +513,12 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     der Differentialgleichung, die je höchstens 64 Zeichen haben; Vorlagen mit
     `narrow` (Teil 7c): Ergebnis höchstens 90 Zeichen, keine Wurzel aus mehr
     als drei Summanden, damit es am Handy in eine Zeile passt; Aufgaben mit
-    Determinante, Betrag, Winkel oder Vektoren nach ihrer Breite, höchstens 12 em,
+    Determinante, Betrag, Winkel, Vektoren oder Additionstheorem nach ihrer Breite, höchstens 12 em,
     geschätzt in `latexWidth.ts` und am Browser kalibriert (auch $\arg$,
     $\sphericalangle$, schmale Betragsstriche), ihr Ergebnis höchstens 16,5 em und
-    ohne Doppelbruch),
+    ohne Doppelbruch; mit Additionstheorem jede Gleichung des Rechenwegs und jede
+    falsche Antwort höchstens 21 em, im Ergebnis kein Minus direkt unter der Wurzel
+    oder in der Klammer wie $\sqrt{-\frac{a}{y - 2a + b}}$),
     Gegenprobe der Aufgabe an den Prüfstellen), `focus.ts` und `fractionFocus.ts` (Aufgaben für
     gezieltes Üben; Brüche: reihum durch die Stufen, je Runde zwölf Versuche,
     seltene Fehler in ihrer Vorlage `focus`, `likelyFractionTemplate`;
