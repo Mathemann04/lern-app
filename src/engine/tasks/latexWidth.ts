@@ -1,10 +1,10 @@
 // Breite einer Formel (KaTeX, \displaystyle) in em, aus dem LaTeX geschätzt, ohne Browser. Für Aufgaben mit
 // Matrix (Determinanten, Teil 8a): Ihre Breite lässt sich nicht an der Zahl der Zeichen ablesen, weil die
 // Zeilen untereinander stehen. Gemessen in Chromium (KaTeX wie in der App) an 35 Formeln mit
-// \det\begin{pmatrix} und 600 mit Strichen liegt die echte Breite beim 0,89- bis 1,03-Fachen der Schätzung;
-// Brüche in einer Matrix schätzt sie zu breit (KaTeX setzt sie dort kleiner). Kalibrierung in
-// latexWidth.test.ts. Die Werte folgen grob den Schriftmaßen von KaTeX; Abstände: Rechenzeichen 4/18 em je
-// Seite, Relation 5/18 em.
+// \det\begin{pmatrix} und 600 mit Strichen liegt die echte Breite beim 0,89- bis 1,05-Fachen der Schätzung
+// (am knappsten mit Klammern um eine Matrix); Brüche in einer Matrix schätzt sie zu breit (KaTeX setzt sie
+// dort kleiner). Kalibrierung in latexWidth.test.ts. Die Werte folgen grob den Schriftmaßen von KaTeX;
+// Abstände: Rechenzeichen 4/18 em je Seite, Relation 5/18 em.
 
 const OPERATORS: Record<string, number> = {
   '\\ln': 0.86,

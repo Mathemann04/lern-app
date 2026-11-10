@@ -4,7 +4,7 @@ import { type Expr, eq } from '../expr/types.ts'
 import { parseLatex } from '../parse/latex.ts'
 import type { RearrangeTask } from '../rearrange/task.ts'
 import { generateRearrangeTask } from '../tasks/rearrangeTerms.ts'
-import { checkRearrangeAnswer, prepareRearrangeCheck, prepareRearrangeFree, rearrangeFreeVerdict } from './rearrangeAnswer.ts'
+import { type RearrangeVerdict, checkRearrangeAnswer, prepareRearrangeCheck, prepareRearrangeFree, rearrangeFreeVerdict } from './rearrangeAnswer.ts'
 
 const p = (latex: string): Expr => {
   const r = parseLatex(latex)
@@ -14,6 +14,8 @@ const p = (latex: string): Expr => {
 
 const task = (lhs: string, rhs: string, target = 'x', conditions: RearrangeTask['conditions'] = []): RearrangeTask => ({ equation: eq(p(lhs), p(rhs)), target, conditions })
 const check = (t: RearrangeTask, input: string) => checkRearrangeAnswer(prepareRearrangeCheck(t), input)
+// erkannte typische Fehler: einer, oder alle, zu denen das Ergebnis passt (Stufe 5)
+const ruleIds = (v: RearrangeVerdict) => (v.kind === 'knownError' ? [v.wrong.rule.id] : v.kind === 'knownErrors' ? v.wrongs.map((w) => w.rule.id) : [])
 
 describe('Umstellen frei: richtige und fertige Ergebnisse', () => {
   const t = task('y', '\\frac{3(x-a)}{b}+c')
@@ -224,12 +226,22 @@ describe('Umstellen frei: Differentialgleichungen (Stufe 5, Teil 7c)', () => {
       expect(checkRearrangeAnswer(c, toLatex(c.solution.result)), label).toEqual({ kind: 'correct' })
       for (const w of c.wrongs) {
         if (!w.result || !w.rule.id.startsWith('eq-ode')) continue
-        expect(checkRearrangeAnswer(c, toLatex(w.result)).kind, `${label}: ${w.rule.id} ${toLatex(w.result)}`).toBe('knownError')
+        expect(ruleIds(checkRearrangeAnswer(c, toLatex(w.result))), `${label}: ${w.rule.id} ${toLatex(w.result)}`).toContain(w.rule.id)
         checked++
       }
     }
     expect(checked).toBeGreaterThan(40)
   }, 60_000)
+})
+
+describe('Umstellen frei: die Endform der Engine ist fertig', () => {
+  // 5-1157: f' = k(b - f) … im ln; die Engine lässt einen Bruch im Bruch stehen, so zeigt ihn auch der geführte Modus
+  it('genau die Endform der Engine zählt als fertig, eine andere Form mit Doppelbruch nicht', () => {
+    const c = prepareRearrangeCheck(generateRearrangeTask({ level: 5, seed: 1157 }).task, true)
+    expect(toLatex(c.solution.result)).toBe('-\\frac{\\ln\\left(\\frac{2\\left(y - \\frac{q}{r}\\right) + p}{2}\\right)}{2}')
+    expect(checkRearrangeAnswer(c, toLatex(c.solution.result))).toEqual({ kind: 'correct' })
+    expect(checkRearrangeAnswer(c, '-\\frac{1}{2}\\ln\\left(\\frac{2y-\\frac{2q}{r}+p}{2}\\right)')).toEqual({ kind: 'unfinished', reason: 'nested' })
+  })
 })
 
 describe('Umstellen frei: Determinanten (Stufe 5, Teil 8a)', () => {
@@ -247,9 +259,20 @@ describe('Umstellen frei: Determinanten (Stufe 5, Teil 8a)', () => {
   })
 
   it('typische Fehler bei der Determinante werden erkannt', () => {
-    expect(verdict('\\ln\\left(\\frac{\\sqrt{y^2+4ab}-y}{2b}\\right)')).toBe('eq-det-swapped')
     expect(verdict('\\ln\\left(\\frac{y+\\sqrt{y^2+4ab}}{2a}\\right)')).toBe('eq-det-rows')
     expect(verdict('\\ln\\frac{y}{b}')).toBe('eq-det-main')
+  })
+
+  it('passt das Ergebnis auch zu späteren Fehlern, werden alle genannt und keiner einzeln gezählt', () => {
+    // Diagonalen vertauscht, später beim Rüberbringen das Vorzeichen nicht gewechselt oder bei der pq-Formel
+    const swapped = '\\ln\\left(\\frac{\\sqrt{y^2+4ab}-y}{2b}\\right)'
+    expect(ruleIds(checkRearrangeAnswer(context, swapped))).toEqual(['eq-det-swapped', 'eq-sign-not-flipped', 'eq-pq-sign'])
+    const v = prepareRearrangeFree({ level: 5, seed: 1460 }).check(swapped)
+    expect(v.kind).toBe('wrong')
+    expect(v.error).toBeUndefined()
+    expect(v.message).toContain('„Haupt- und Nebendiagonale vertauscht“')
+    expect(v.message).toContain('„Beim Rüberbringen das Vorzeichen nicht gewechselt“')
+    expect(v.explanation?.detailed).toContain('Erst die Hauptdiagonale')
   })
 
   it('Stufe 5: Lösung richtig, falsche Ergebnisse der Determinanten als Fehler erkannt', () => {
@@ -261,8 +284,14 @@ describe('Umstellen frei: Determinanten (Stufe 5, Teil 8a)', () => {
       const label = `5-${seed}`
       expect(checkRearrangeAnswer(c, toLatex(c.solution.result)), label).toEqual({ kind: 'correct' })
       for (const w of c.wrongs) {
-        if (!w.result || !w.rule.id.startsWith('eq-det')) continue
-        expect(checkRearrangeAnswer(c, toLatex(w.result)).kind, `${label}: ${w.rule.id} ${toLatex(w.result)}`).toBe('knownError')
+        if (!w.result) continue
+        const found = ruleIds(checkRearrangeAnswer(c, toLatex(w.result)))
+        // ein Fehler beim Umstellen wird nie allein der Determinante zugeschrieben
+        if (!w.rule.id.startsWith('eq-det')) {
+          expect(found.some((id) => !id.startsWith('eq-det')), `${label}: ${w.rule.id} ${toLatex(w.result)}`).toBe(true)
+          continue
+        }
+        expect(found, `${label}: ${w.rule.id} ${toLatex(w.result)}`).toContain(w.rule.id)
         checked++
       }
     }

@@ -49,6 +49,8 @@ import type { RearrangeTask } from './task.ts'
 import { type ToolStepKind, toolMistakes } from './tools/steps.ts'
 
 const TOOL_STEPS = new Set<string>(['derive', 'partial', 'antiderivative', 'bounds', 'sumFormula', 'series', 'limit', 'ode', 'det', 'detExpand'])
+// Schritt, der ein Werkzeug der Stufe 5 ausrechnet (Ableitung, Integral, …, Determinante)
+export const isToolStep = (kind: string) => TOOL_STEPS.has(kind)
 
 // Typische Fehler beim Umstellen (Katalog in docs/PLAN-M3.md). Jeder Fehler steckt in genau einem
 // Schritt des Rechenwegs: Dieser Schritt wird falsch ausgeführt, danach wird richtig weitergerechnet.

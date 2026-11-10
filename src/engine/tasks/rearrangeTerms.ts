@@ -2,6 +2,7 @@ import { equationToLatex, toLatex } from '../expr/print.ts'
 import { contains, subterms } from '../expr/compare.ts'
 import type { Expr } from '../expr/types.ts'
 import { holds, samplePoints } from '../rearrange/check.ts'
+import { hasNestedFraction as hasNestedResult } from '../rearrange/finished.ts'
 import { solveTask } from '../rearrange/isolate.ts'
 import { type RearrangeTask, givenLatex, taskVariables } from '../rearrange/task.ts'
 import { type Rng, createRng } from '../random/rng.ts'
@@ -190,6 +191,8 @@ const visibleLatex = (latex: string) =>
 // Mit Determinante: Breite in em geschätzt (latexWidth.ts), denn eine Matrix ist nur so breit wie ihre
 // breiteste Zeile; 12 em passen in der Aufgabe (text-2xl) am Handy in eine Zeile
 const MAX_DET_WIDTH = 12
+// Ergebnis mit Determinante: Im Kasten am Handy (318 Pixel, kleinste Schrift) passen etwa 17,7 em
+const MAX_DET_RESULT_WIDTH = 16.5
 const hasDet = (t: RearrangeTask) =>
   [t.equation.lhs, t.equation.rhs].flatMap((side) => subterms(side)).some((s) => s.kind === 'var' && s.tool?.kind === 'det')
 
@@ -225,6 +228,11 @@ function isGood(t: RearrangeTask, level: Level, kit: boolean, novel = false, nar
   if (kit && solution.steps.length < MIN_STEPS[level]) return false
   if (toLatex(solution.result).length > MAX_RESULT_LATEX[level]) return false
   if (narrow && !fitsOneLine(solution.result)) return false
+  // mit Determinante: Ergebnis am Handy in einer Zeile, ohne Doppelbruch (auch in der Hochzahl, wie im
+  // freien Modus)
+  if (level === 5 && hasDet(t)) {
+    if (latexWidthEm(`${t.target} = ${toLatex(solution.result)}`) > MAX_DET_RESULT_WIDTH || hasNestedResult(solution.result)) return false
+  }
   // Stufe 5: Buchstaben im Ergebnis (sie heben sich nicht alle weg)
   if (level === 5 && taskVariables({ ...t, equation: { lhs: solution.result, rhs: solution.result } }).length === 0) return false
   // Stufe 5: keine Wurzel aus einer Summe mit Brüchen im Ergebnis (\sqrt{\frac{k^2}{4} + \frac{k}{b - c}})

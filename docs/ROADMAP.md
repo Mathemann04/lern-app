@@ -562,4 +562,8 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   mit dem Gauß-Verfahren. Aufgaben mit Matrix werden nach ihrer Breite in em
   gefiltert (am Browser kalibriert), damit sie am Handy in eine Zeile passen.
   Browser-Tests mit 5-1460 (das Beispiel aus dem Plan, geführt und frei) und
-  5-9 ($3 \times 3$, nichts wischt seitlich).
+  5-9 ($3 \times 3$, nichts wischt seitlich). Im freien Modus der Stufe 5 nennt
+  die App jetzt alle typischen Fehler, zu denen ein Ergebnis passt, wenn einer
+  davon im Ausrechnen eines Werkzeugs steckt (vorher bekam oft die Determinante
+  die Schuld für einen späteren Vorzeichenfehler); die Endform der Engine gilt im
+  freien Modus immer als fertig.

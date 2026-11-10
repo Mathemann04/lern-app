@@ -96,6 +96,17 @@ export function product(...factors: Expr[]): Expr {
     if (isZero(total)) merged.splice(i, 1)
     else merged[i] = isOne(total) ? base : pow(base, num(total))
   }
+  // \frac{1}{x} hebt sich gegen x weg (x \cdot \frac{1}{x} = 1, x^2 \cdot \frac{1}{x} = x), wie e^{x} \cdot e^{-x} = 1
+  for (let d = dens.length - 1; d >= 0; d--) {
+    const base = baseOf(dens[d])
+    const i = merged.findIndex((g) => !isE(g) && key(baseOf(g)) === key(base))
+    if (i < 0) continue
+    const total = ratAdd(exponentOf(merged[i]), ratNeg(exponentOf(dens[d])))
+    if (ratSign(total) < 0) continue
+    dens.splice(d, 1)
+    if (isZero(total)) merged.splice(i, 1)
+    else merged[i] = isOne(total) ? base : pow(base, num(total))
+  }
   // feste Reihenfolge, damit gleiche Produkte gleich aussehen (\sin x \cdot \cos x = \cos x \cdot \sin x)
   merged.sort((p, q) => rank(p) - rank(q) || key(baseOf(p)).localeCompare(key(baseOf(q))))
   const negative = ratSign(c) < 0

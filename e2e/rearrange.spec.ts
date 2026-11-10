@@ -308,14 +308,19 @@ test('Umstellen Stufe 5: Determinante 3 × 3 geführt, erst entwickeln, nichts w
   await expectCleanPage(page, 'Stufe 5 Determinante 3 × 3')
 })
 
-test('Umstellen Stufe 5 frei: Determinante, Diagonalen vertauscht, dann richtig', async ({ page }) => {
+test('Umstellen Stufe 5 frei: Determinante, in Zeilen statt über Kreuz, mehrdeutiger Fehler, dann richtig', async ({ page }) => {
   // \det\begin{pmatrix} e^{x} & e^{-x} \\ a & b \end{pmatrix} = y
   await page.goto('./#/frei/umstellen/5-1460')
   await expect(field(page)).toBeVisible()
   await expectCleanPage(page, 'Start Stufe 5 Determinante frei')
   await expectNoInnerScroll(page, 'Start Stufe 5 Determinante frei')
+  await enter(page, '\\ln\\left(\\frac{y+\\sqrt{y^2+4ab}}{2a}\\right)')
+  await expect(feedback(page)).toContainText('In Zeilen oder Spalten statt über Kreuz malgenommen')
+  // Diagonalen vertauscht oder später ein Vorzeichen: Die App nennt alle passenden Fehler
   await enter(page, '\\ln\\left(\\frac{\\sqrt{y^2+4ab}-y}{2b}\\right)')
-  await expect(feedback(page)).toContainText('vertauscht')
+  await expect(feedback(page)).toContainText('passt zu mehreren typischen Fehlern')
+  await expect(feedback(page)).toContainText('Haupt- und Nebendiagonale vertauscht')
+  await expectCleanPage(page, 'Stufe 5 Determinante frei, mehrdeutig')
   await enter(page, 'x=\\ln\\left(\\frac{y+\\sqrt{y^2+4ab}}{2b}\\right)')
   await expect(feedback(page)).toContainText('Richtig!')
   await expectCleanPage(page, 'Richtig Stufe 5 Determinante')

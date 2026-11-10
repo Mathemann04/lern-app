@@ -975,10 +975,11 @@ Breite: Eine Matrix ist nur so breit wie ihre breiteste Zeile, die Zahl der
 Zeichen taugt dafür nicht. Für Aufgaben mit Determinante schätzt
 `tasks/latexWidth.ts` die Breite in em (am Browser kalibriert, auf etwa 5 %
 genau); höchstens 12 em, dann passt die Aufgabe am Handy in eine Zeile. Wie in 7c
-muss auch das Ergebnis in eine Zeile passen.
+muss auch das Ergebnis in eine Zeile passen, bei Determinanten gemessen mit derselben
+Schätzung (höchstens 16,5 em) und ohne Doppelbruch, auch nicht in einer Hochzahl.
 
 Gemessen unter den Aufgaben 1 bis 3000 der Stufe 5: 295 Determinanten-Aufgaben,
-im Mittel 8,9 Umformungen (6 bis 14), 261 Formen, gut ein Viertel davon
+im Mittel 8,9 Umformungen (6 bis 14), 259 Formen, gut ein Viertel davon
 $3 \times 3$; jede hat eine Frage zur Determinante mit drei oder vier Antworten.
 
 Geführt kommt zuerst „Was steht da eigentlich?" mit sechs neuen Fehlern (Tabelle
@@ -986,9 +987,18 @@ oben); beim Fehler „in Zeilen oder Spalten" nimmt die Engine die Variante, in 
 alle Buchstaben bleiben (zeilenweise fiele bei $e^{x} \cdot e^{-x} = 1$ das $x$
 weg). Neue Lernkarte „Determinanten". Frei wird das Ergebnis eingetippt; die
 Fehler werden erkannt, „Plus statt Minus" oft nur geführt (die Gleichung hat dann
-meist zwei positive Lösungen). Bei $3 \times 3$ ergibt „Vorzeichen aus dem
-Schachbrett vertauscht" dasselbe Ergebnis wie „Diagonalen vertauscht" in der
-Unterdeterminante; frei wird dann das Schachbrett genannt.
+meist zwei positive Lösungen).
+
+Im freien Modus ergeben verschiedene Fehler oft dasselbe Ergebnis: „Diagonalen
+vertauscht" und später „beim Rüberbringen das Vorzeichen nicht gewechselt" oder ein
+Vorzeichen in der $pq$-Formel (beim Beispiel aus dem Plan alle drei). Bisher nannte
+die App den ersten Fehler im Rechenweg, also meist das Werkzeug, auch wenn der
+Fehler später passiert war. Jetzt gilt in Stufe 5: Passt ein Ergebnis zu mehreren
+typischen Fehlern und steckt einer davon im Ausrechnen eines Werkzeugs, nennt die
+App alle mit ihrer Regel und zählt keinen davon im Fortschritt. Außerdem gilt die
+Endform der Engine im freien Modus immer als fertig: Bei wenigen Aufgaben aus 7a bis
+7c stand im Ergebnis ein Bruch im Bruch, den der freie Modus als „noch nicht
+fertig" ablehnte, obwohl der geführte Modus genau ihn zeigt.
 
 Bekannt und offen: Gleichungen wie $c\left(bx^2 - ax\right) = y$ löst die Engine
 noch nicht (sie teilt durch $c$ und nimmt danach wieder mit $c$ mal). Solche

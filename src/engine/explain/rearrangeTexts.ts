@@ -337,7 +337,7 @@ export const REARRANGE_ERROR_TEXTS: Readonly<Record<string, Explanation>> = {
   },
   'eq-det-main': {
     detailed:
-      'Nur bei einer Dreiecksmatrix (auf einer Seite der Diagonale stehen nur Nullen) ist die Determinante das Produkt der Diagonale. Sonst wird das Produkt der Nebendiagonale abgezogen: $ps - qr$.',
+      'Bei $2 \\times 2$ ist die Determinante nur dann das Produkt der Diagonale, wenn $q = 0$ oder $r = 0$ ist (Dreiecksmatrix). Sonst wird das Produkt der Nebendiagonale abgezogen: $ps - qr$.',
     short: 'Die Nebendiagonale gehört dazu: $ps - qr$.',
   },
   'eq-det-checkerboard': {
@@ -850,7 +850,7 @@ export const REARRANGE_HINTS = {
   limit: '$\\lim_{n \\to \\infty}\\left(1 + \\frac{p}{n}\\right)^n = e^p$. Einen Faktor in der Hochzahl nimmst du mit, einen Bruch teilst du oben und unten durch $n$.',
   ode: "Ansatz $e^{\\lambda x}$: Bei $f' = kf$ ist $f(x) = f(0) \\cdot e^{kx}$, bei $f' = k(b - f)$ ist $f(x) = b + Ce^{-kx}$. Bei $f'' = k^2 f$ ist $f(x) = C_1e^{kx} + C_2e^{-kx}$ mit $C_1 + C_2 = f(0)$ und $k(C_1 - C_2) = f'(0)$.",
   det: 'Hauptdiagonale minus Nebendiagonale: $\\det\\begin{pmatrix} p & q \\\\ r & s \\end{pmatrix} = ps - qr$.',
-  detExpand: 'Entwickle nach der Zeile oder Spalte mit zwei Nullen: Vorzeichen aus dem Schachbrett mal Eintrag mal Unterdeterminante (die Matrix ohne seine Zeile und Spalte).',
+  detExpand: 'Entwickle nach der Zeile oder Spalte mit zwei Nullen: Vorzeichen aus dem Schachbrett mal Eintrag mal Unterdeterminante (die Determinante der Matrix ohne seine Zeile und Spalte).',
   add: 'Ein Summand verschwindet mit der Gegenrechnung: Aus $+c$ wird auf beiden Seiten $-c$.',
   move: 'Bringe den Summanden mit Minus auf die andere Seite, dort steht er mit Plus. Den Rest bringst du herüber.',
   divide: 'Einen Faktor wirst du los, indem du beide Seiten durch ihn teilst.',
@@ -1055,7 +1055,7 @@ export function explainDet(work: string, before: string, after: string): Explana
 export function explainExpand(line: string, entry: string, sign: '+' | '-', before: string, after: string): Explanation {
   const lines = `$${before}$\n$${after}$`
   return {
-    detailed: `In der ${line} steht nur $${entry}$, die anderen Einträge sind $0$. Entwickelt nach ihr: Vorzeichen aus dem Schachbrett ($${sign}$) mal $${entry}$ mal die Determinante ohne seine Zeile und Spalte:\n${lines}`,
+    detailed: `In der ${line} steht nur $${entry}$, die anderen Einträge sind $0$. Entwickelt nach ihr: Vorzeichen aus dem Schachbrett ($${sign}$) mal $${entry}$ mal die Determinante der Matrix ohne seine Zeile und Spalte:\n${lines}`,
     short: `Nach der ${line} entwickelt, Vorzeichen $${sign}$:\n${lines}`,
   }
 }

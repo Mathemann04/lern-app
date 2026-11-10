@@ -166,9 +166,11 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     gekürzt; eine Wurzel aus einem Bruch zählt wie ein Buchstabe, z. B.
     $b + \sqrt{\frac{y}{a}}$; ab Stufe 4 (`lenient`) jede gleichwertige Form
     ohne Doppelbruch, $\ln$, $e^{…}$, Winkel- und Umkehrfunktionen zählen wie
-    Buchstaben; steht noch $u$ aus der Substitution da: Hinweis, zurück
-    einzusetzen; sonst
-    typischer Fehler)
+    Buchstaben; die Endform der Engine zählt immer als fertig; steht noch $u$
+    aus der Substitution da: Hinweis, zurück einzusetzen; sonst
+    typischer Fehler; passt das Ergebnis zu mehreren und steckt einer davon im
+    Ausrechnen eines Werkzeugs (Stufe 5), werden alle genannt und keiner gezählt;
+    was „fertig" heißt, steht für Prüfung und Baukasten in `rearrange/finished.ts`)
   - `parse/latex.ts`: liest die Eingabe der Mathe-Tastatur (LaTeX) ein, mit
     verständlichen Fehlermeldungen
   - `explain/`: Textbausteine für Erklärungen (ausführlich/kurz), Tipps und
@@ -436,7 +438,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     `narrow` (Teil 7c): Ergebnis höchstens 90 Zeichen, keine Wurzel aus mehr
     als drei Summanden, damit es am Handy in eine Zeile passt; Aufgaben mit
     Determinante nach ihrer Breite, höchstens 12 em, geschätzt in
-    `latexWidth.ts` und am Browser kalibriert),
+    `latexWidth.ts` und am Browser kalibriert, ihr Ergebnis höchstens 16,5 em und
+    ohne Doppelbruch),
     Gegenprobe der Aufgabe an den Prüfstellen), `focus.ts` und `fractionFocus.ts` (Aufgaben für
     gezieltes Üben; Brüche: reihum durch die Stufen, je Runde zwölf Versuche,
     seltene Fehler in ihrer Vorlage `focus`, `likelyFractionTemplate`;

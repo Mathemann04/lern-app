@@ -5,10 +5,12 @@ import { evaluate } from '../../expr/evaluate.ts'
 import { latexProblem } from '../../expr/latexChecks.ts'
 import { equationToLatex, toLatex } from '../../expr/print.ts'
 import { type Expr, add, cos, div, eq, exp, ln, mul, neg, num, pow, sin, sqrt, variable } from '../../expr/types.ts'
+import { checkRearrangeAnswer, prepareRearrangeCheck } from '../../check/rearrangeAnswer.ts'
 import { createRng } from '../../random/rng.ts'
 import { latexWidthEm } from '../../tasks/latexWidth.ts'
 import { generateRearrangeTask } from '../../tasks/rearrangeTerms.ts'
 import { holds, samplePoints } from '../check.ts'
+import { hasNestedFraction } from '../finished.ts'
 import { STEP_NAMES, solveTask, stepEquationLatex } from '../isolate.ts'
 import { taskLatex, taskVariables } from '../task.ts'
 import { DET_MISTAKES, type DetTool, EXPAND_MISTAKES, detValue, expandValue, expansionLine, product } from './determinant.ts'
@@ -101,8 +103,16 @@ describe('Rechenweg', () => {
     expect(toLatex(product(exp(x), exp(x)))).toBe('e^{2x}')
     expect(toLatex(product(sin(x), sin(x)))).toBe('\\sin^{2} x')
     expect(toLatex(product(a, div(num(1), x)))).toBe('\\frac{a}{x}')
+    expect(toLatex(product(x, div(num(1), x)))).toBe('1')
+    expect(toLatex(product(pow(x, num(2)), div(num(1), x), b))).toBe('bx')
     expect(toLatex(product(x, pow(x, num(2)), b))).toBe('bx^{3}')
     expect(key(product(sin(x), cos(x)))).toBe(key(product(cos(x), sin(x))))
+  })
+
+  it('in Zeilen oder Spalten: die Variante, in der x bleibt (zeilenweise wäre x \\cdot \\frac{1}{x} = 1)', () => {
+    const t = toolOf(detOf([[x, div(num(1), x)], [a, b]]))
+    expect(toLatex(detValue(t, 'eq-det-rows')!)).toBe('ax - \\frac{b}{x}')
+    expect(toLatex(detValue(t, null)!)).toBe('bx - \\frac{a}{x}')
   })
 
   it('Entwickeln nach der Zeile oder Spalte mit zwei Nullen: Zeilen vor Spalten, oben vor unten', () => {
@@ -192,7 +202,7 @@ describe('Baukasten (Nummern 1 bis 600 der Stufe 5)', () => {
     expect(generated.some((g) => g.label.startsWith('Integral gleich Determinante'))).toBe(true)
   })
 
-  it('Gegenprobe an den Prüfstellen; die Aufgabe passt am Handy in eine Zeile', () => {
+  it('Gegenprobe an den Prüfstellen; Aufgabe und Ergebnis passen am Handy in eine Zeile, das Ergebnis ohne Doppelbruch', () => {
     for (const g of generated) {
       const s = solveTask(g.task)!
       const points = samplePoints(g.task, s.result, createRng('gegenprobe'), 8, s.requires)
@@ -200,6 +210,15 @@ describe('Baukasten (Nummern 1 bis 600 der Stufe 5)', () => {
       for (const p of points) expect(holds(g.task.equation, p), taskLatex(g.task)).toBe(true)
       expect(latexWidthEm(taskLatex(g.task)), taskLatex(g.task)).toBeLessThanOrEqual(12)
       expect(latexProblem(taskLatex(g.task)), taskLatex(g.task)).toBeNull()
+      expect(latexWidthEm(`x = ${toLatex(s.result)}`), toLatex(s.result)).toBeLessThanOrEqual(16.5)
+      expect(hasNestedFraction(s.result), toLatex(s.result)).toBe(false)
+    }
+  })
+
+  it('der freie Modus nimmt das Ergebnis der Engine als richtig und fertig an', () => {
+    for (const g of generated) {
+      const c = prepareRearrangeCheck(g.task, true)
+      expect(checkRearrangeAnswer(c, toLatex(c.solution.result)), taskLatex(g.task)).toEqual({ kind: 'correct' })
     }
   })
 

@@ -23,7 +23,12 @@ const MEASURED: ReadonlyArray<readonly [string, number]> = [
   ['\\det\\begin{pmatrix} x & a & 0 \\\\ b & x & c \\\\ 0 & d & 1 \\end{pmatrix} = y', 243.1],
   ['\\det\\begin{pmatrix} e^{x} + a & b & 0 \\\\ c & e^{-x} & 1 \\\\ 1 & 0 & d \\end{pmatrix} = y', 326],
   ['\\frac{\\det\\begin{pmatrix} 1 & x & x^{2} \\\\ 1 & a & a^{2} \\\\ 1 & b & b^{2} \\end{pmatrix}}{c} - d = y', 308.8],
-  ['\\ln\\left(\\det\\begin{pmatrix} e^{x} & a & 0 \\\\ b & e^{-x} & c \\\\ 0 & 1 & d \\end{pmatrix}\\right) = y', 353.5],
+  ['\\ln\\left(\\det\\begin{pmatrix} e^{x} & a & 0 \\\\ b & e^{-x} & c \\\\ 0 & 1 & d \\end{pmatrix}\\right) = y', 339],
+  // die breitesten Aufgaben aus dem Baukasten (5-110, 5-47565): Klammer um eine Matrix, Schätzung knapp 5 % zu schmal
+  ['y = 3\\left(c - \\det\\begin{pmatrix} \\tan x & a \\\\ 1 & b \\end{pmatrix}\\right)', 342],
+  ['y = d\\left(\\det\\begin{pmatrix} \\tan x & a \\\\ 1 & b \\end{pmatrix} + c\\right)', 342.6],
+  // zu breit für das Handy
+  ['\\ln\\left(\\det\\begin{pmatrix} e^{x} + a & b & 0 \\\\ c & e^{-x} & 1 \\\\ 1 & 0 & d \\end{pmatrix}\\right) = y', 387.3],
 ]
 // Bruch in der Matrix: KaTeX setzt ihn dort kleiner, die Schätzung ist zu breit (auf der sicheren Seite)
 const FRACTION_IN_MATRIX: ReadonlyArray<readonly [string, number]> = [
@@ -46,7 +51,7 @@ describe('Breite einer Formel mit Matrix', () => {
 
   it('höchstens 12 em heißt: passt am Handy (350 px)', () => {
     for (const [latex, px] of [...MEASURED, ...FRACTION_IN_MATRIX]) if (latexWidthEm(latex) <= 12) expect(px, latex).toBeLessThanOrEqual(350)
-    // die breiteste gemessene Formel fällt durch
+    // die gemessene Formel, die nicht passt, fällt durch
     expect(latexWidthEm(MEASURED[MEASURED.length - 1][0])).toBeGreaterThan(12)
   })
 })

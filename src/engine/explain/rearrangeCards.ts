@@ -364,7 +364,7 @@ export const REARRANGE_CARD_LIST: readonly Card[] = [
       '\\begin{pmatrix} + & - & + \\\\ - & + & - \\\\ + & - & + \\end{pmatrix}',
       '\\begin{gathered}\\det\\begin{pmatrix} p & q & r \\\\ s & 0 & 0 \\\\ u & v & w \\end{pmatrix} \\\\ = -s\\det\\begin{pmatrix} q & r \\\\ v & w \\end{pmatrix}\\end{gathered}',
     ],
-    memo: 'Hauptdiagonale minus Nebendiagonale. Bei $3 \\times 3$ nach der Zeile oder Spalte mit den meisten Nullen entwickeln: Vorzeichen aus dem Schachbrett mal Eintrag mal Unterdeterminante.',
+    memo: 'Hauptdiagonale minus Nebendiagonale. Bei $3 \\times 3$ nach einer Zeile oder Spalte entwickeln: für jeden Eintrag Vorzeichen aus dem Schachbrett mal Eintrag mal Unterdeterminante, alles addiert. Stehen in der Linie zwei Nullen, bleibt nur ein Summand.',
     note: 'Die Unterdeterminante ist die Determinante der Matrix ohne die Zeile und Spalte des Eintrags; das Vorzeichen in Zeile $i$ und Spalte $j$ ist $(-1)^{i + j}$. Bei einer Dreiecksmatrix ist die Determinante das Produkt der Diagonale. Ist sie $0$, lässt sich die Matrix nicht umkehren (invertieren). Für $3 \\times 3$ gibt es auch die Regel von Sarrus.',
     when: 'Wenn in der Gleichung eine Determinante steht: erst ausrechnen, dann umstellen.',
     examples: [
