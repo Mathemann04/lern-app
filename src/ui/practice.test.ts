@@ -13,9 +13,10 @@ describe('Üben', () => {
   it('würfelt eine neue Aufgabe, beim gezielten Üben eine passende Stufe', () => {
     expect(newTaskHref('ableiten', 'free', 3, null)).toMatch(/^#\/frei\/ableiten\/3-\d+$/)
     expect(newTaskHref('brueche', 'guided', 2, null)).toMatch(/^#\/ueben\/brueche\/2-\d+$/)
-    // Der Kosinus kommt erst ab Stufe 2 vor
-    expect(newTaskHref('ableiten', 'guided', 1, 'cos-sign')).toMatch(/^#\/ueben\/ableiten\/2-\d+\?fokus=cos-sign$/)
+    // Der Kosinus kommt erst ab Stufe 2 vor. Gesucht wird reihum mit Zufall (zuerst die nächste Stufe): Meist
+    // kommt Stufe 2 heraus, manchmal eine höhere, in der der Fehler auch vorkommt, nie Stufe 1
+    expect(newTaskHref('ableiten', 'guided', 1, 'cos-sign')).toMatch(/^#\/ueben\/ableiten\/[2-5]-\d+\?fokus=cos-sign$/)
     // Potenzen mit Buchstaben gibt es erst ab Stufe 2
-    expect(newTaskHref('brueche', 'guided', 1, 'frac-power-reversed')).toMatch(/^#\/ueben\/brueche\/2-\d+\?fokus=frac-power-reversed$/)
+    expect(newTaskHref('brueche', 'guided', 1, 'frac-power-reversed')).toMatch(/^#\/ueben\/brueche\/[2-5]-\d+\?fokus=frac-power-reversed$/)
   })
 })

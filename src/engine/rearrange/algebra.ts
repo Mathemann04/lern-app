@@ -234,14 +234,23 @@ export function polyToExpr(p: Poly, atoms: Atoms): Expr {
 
 // Polynom mit ausgeklammertem gemeinsamem Faktor, wenn er einen Buchstaben enthält:
 // ay² + a → a(y² + 1), 2by + 2b → 2b(y + 1); sonst ausmultipliziert (3y + 1)
+const TRIG_NAMES: ReadonlySet<string> = new Set(['sin', 'cos', 'tan'])
+
 export function contentExpr(p: Poly, atoms: Atoms): Expr {
   const mono = monomialContent(p)
   if (p.length < 2 || mono.length === 0) return polyToExpr(p, atoms)
   // Vorzahl positiv, die Klammer beginnt möglichst mit Plus: a(1 − b) statt −a(b − 1)
   const c = ratAbs(polyContent(p))
   const rest = polyScale(polyDivideExact(p, [{ mono, coef: rat(1) }])!, ratDiv(rat(1), c))
-  if (rest.every((t) => ratSign(t.coef) < 0)) return neg(mul(termExpr(c, mono, atoms), polyToExpr(polyScale(rest, rat(-1)), atoms)))
-  return mul(termExpr(c, mono, atoms), polyToExpr(rest, atoms))
+  // steht vor der Klammer allein der Kosinus (Sinus, Tangens) eines Winkels als Buchstabe, kommt er dahinter:
+  // (k^2 + m^2)\cos y statt \cos y \cdot (k^2 + m^2) (Teil 8b; ältere Aufgaben wie 5\ln a \cdot (1 - g) bleiben)
+  const angle = isOne(c) && mono.every(([atom]) => {
+    const f = atoms.opaque.get(atom)
+    return f?.kind === 'fn' && TRIG_NAMES.has(f.name) && f.arg.kind === 'var'
+  })
+  const product = (r: Poly) => (angle ? mul(polyToExpr(r, atoms), termExpr(c, mono, atoms)) : mul(termExpr(c, mono, atoms), polyToExpr(r, atoms)))
+  if (rest.every((t) => ratSign(t.coef) < 0)) return neg(product(polyScale(rest, rat(-1))))
+  return product(rest)
 }
 
 const negativeCount = (p: Poly) => p.filter((t) => ratSign(t.coef) < 0).length

@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { toLatex } from '../expr/print.ts'
-import { type Expr, eq } from '../expr/types.ts'
+import { type Expr, IMAG, add, div, eq, mul, neg, num, pow, sub, variable } from '../expr/types.ts'
 import { parseLatex } from '../parse/latex.ts'
 import type { RearrangeTask } from '../rearrange/task.ts'
+import { absOf, angleOf, argOf, dotOf } from '../rearrange/tools/tool.ts'
 import { generateRearrangeTask } from '../tasks/rearrangeTerms.ts'
 import { type RearrangeVerdict, checkRearrangeAnswer, prepareRearrangeCheck, prepareRearrangeFree, rearrangeFreeVerdict } from './rearrangeAnswer.ts'
 
@@ -305,6 +306,68 @@ describe('Umstellen frei: Determinanten (Stufe 5, Teil 8a)', () => {
         // ein Fehler beim Umstellen wird nie allein der Determinante zugeschrieben
         if (!w.rule.id.startsWith('eq-det')) {
           expect(found.some((id) => !id.startsWith('eq-det')), `${label}: ${w.rule.id} ${toLatex(w.result)}`).toBe(true)
+          continue
+        }
+        expect(found, `${label}: ${w.rule.id} ${toLatex(w.result)}`).toContain(w.rule.id)
+        checked++
+      }
+    }
+    expect(checked).toBeGreaterThan(60)
+  }, 60_000)
+})
+
+describe('Umstellen frei: Betrag und Winkel (Stufe 5, Teil 8b)', () => {
+  const acute: RearrangeTask['conditions'] = [{ lhs: p('y'), rel: '<', rhs: p('\\frac{\\pi}{2}') }]
+  const [a, b, c, x, y] = ['a', 'b', 'c', 'x', 'y'].map(variable)
+  const xai = add(x, mul(a, IMAG))
+  const toolTask = (lhs: Expr, conditions: RearrangeTask['conditions'] = []): RearrangeTask => ({ equation: eq(lhs, y), target: 'x', conditions })
+  const verdictOf = (t: RearrangeTask, input: string) => {
+    const v = checkRearrangeAnswer(prepareRearrangeCheck(t, true), input)
+    return v.kind === 'correct' || v.kind === 'unfinished' ? v.kind : ruleIds(v).join(',') || v.kind
+  }
+
+  it('Betrag eines Bruchs (Beispiel aus dem Plan): richtig, Wurzel vergessen erkannt', () => {
+    const t = toolTask(absOf(div(xai, sub(x, mul(b, IMAG)))))
+    expect(verdictOf(t, '\\sqrt{\\frac{a^2-b^2y^2}{y^2-1}}')).toBe('correct')
+    expect(verdictOf(t, '\\sqrt{\\frac{a^2-b^2y}{y-1}}')).toContain('eq-abs-root')
+  })
+
+  it('Winkel: Quadrat nicht verdoppelt erkannt; mit festem Faktor π im Ergebnis und auf der Tastatur', () => {
+    const square = toolTask(argOf(pow(xai, num(2))))
+    expect(verdictOf(square, '\\frac{a}{\\tan\\left(\\frac{y}{2}\\right)}')).toBe('correct')
+    expect(verdictOf(square, '\\frac{a}{\\tan y}')).toContain('eq-arg-power')
+    const factor = toolTask(argOf(mul(add(num(1), IMAG), xai)))
+    expect(verdictOf(factor, '\\frac{a}{\\tan\\left(y-\\frac{\\pi}{4}\\right)}')).toBe('correct')
+  })
+
+  it('Winkel mit der x-Achse: auch mit \\cos y und \\sin y richtig, ohne Teilen durch die Längen erkannt', () => {
+    const t = toolTask(angleOf([x, a, b], [num(1), num(0), num(0)]), acute)
+    expect(verdictOf(t, '\\frac{\\sqrt{a^2+b^2}}{\\tan y}')).toBe('correct')
+    expect(verdictOf(t, '\\frac{\\sqrt{a^2+b^2}\\cos y}{\\sin y}')).toBe('correct')
+    expect(verdictOf(t, '\\cos y')).toContain('eq-vec-not-divided')
+  })
+
+  it('Skalarprodukt: Minus verloren erkannt', () => {
+    const t = toolTask(dotOf([x, a], [add(x, b), neg(c)]))
+    expect(verdictOf(t, '\\frac{\\sqrt{b^2+4y+4ac}-b}{2}')).toBe('correct')
+    expect(verdictOf(t, '\\frac{\\sqrt{b^2+4y-4ac}-b}{2}')).toContain('eq-vec-dot-sign')
+  })
+
+  it('Baukasten: Lösung richtig, falsche Ergebnisse der Werkzeuge als Fehler erkannt', () => {
+    const TOOL_IDS = /^eq-(abs|arg|vec)-/
+    let checked = 0
+    for (let seed = 1; seed <= 600; seed++) {
+      const g = generateRearrangeTask({ level: 5, seed })
+      if (g.template.id !== 'baukasten-5-betrag-winkel') continue
+      const c = prepareRearrangeCheck(g.task, true)
+      const label = `5-${seed}`
+      expect(checkRearrangeAnswer(c, toLatex(c.solution.result)), label).toEqual({ kind: 'correct' })
+      for (const w of c.wrongs) {
+        if (!w.result) continue
+        const found = ruleIds(checkRearrangeAnswer(c, toLatex(w.result)))
+        // ein Fehler beim Umstellen wird nie allein dem Werkzeug zugeschrieben
+        if (!TOOL_IDS.test(w.rule.id)) {
+          expect(found.some((id) => !TOOL_IDS.test(id)), `${label}: ${w.rule.id} ${toLatex(w.result)}`).toBe(true)
           continue
         }
         expect(found, `${label}: ${w.rule.id} ${toLatex(w.result)}`).toContain(w.rule.id)

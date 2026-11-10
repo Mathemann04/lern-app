@@ -21,7 +21,7 @@ export type FreeVerdict = {
 export type KeyboardSpec =
   | { readonly kind: 'derivative' }
   | { readonly kind: 'fraction'; readonly letters: readonly string[]; readonly blocks: boolean; readonly root: boolean; readonly imag?: boolean; readonly hyperbolic?: boolean }
-  | { readonly kind: 'rearrange'; readonly letters: readonly string[]; readonly root: boolean; readonly exp?: boolean; readonly trig?: boolean }
+  | { readonly kind: 'rearrange'; readonly letters: readonly string[]; readonly root: boolean; readonly exp?: boolean; readonly trig?: boolean; readonly pi?: boolean }
 
 export type FreeTask = {
   // vor dem Eingabefeld, z. B. f'(x) = (LaTeX)

@@ -17,6 +17,7 @@ import {
   buildLevel4Trig,
   buildLevel5Det,
   buildLevel5Ode,
+  buildLevel5Polar,
   buildLevel5Series,
   buildLevel5Tools,
 } from './rearrangeKit.ts'
@@ -155,6 +156,19 @@ const level5Det: RearrangeTemplate = {
   narrow: true,
 }
 
+// Teil 8b: Betrag und Winkel komplexer Zahlen, Vektoren; der Anteil gilt unter den Nummern, die zu keiner
+// späteren Vorlage gehören (also zu 7a)
+const level5Polar: RearrangeTemplate = {
+  id: 'baukasten-5-betrag-winkel',
+  level: 5,
+  label: 'Baukasten: Betrag und Winkel',
+  build: (rng) => buildLevel5Polar(rng).task,
+  buildLabeled: buildLevel5Polar,
+  share: 0.3,
+  novel: true,
+  narrow: true,
+}
+
 export const REARRANGE_TEMPLATES: readonly RearrangeTemplate[] = [
   level1Kit,
   level2Kit,
@@ -166,6 +180,7 @@ export const REARRANGE_TEMPLATES: readonly RearrangeTemplate[] = [
   level5Series,
   level5Ode,
   level5Det,
+  level5Polar,
 ]
 
 export function rearrangeTemplatesForLevel(level: Level): RearrangeTemplate[] {
@@ -193,8 +208,10 @@ const visibleLatex = (latex: string) =>
 const MAX_DET_WIDTH = 12
 // Ergebnis mit Determinante: Im Kasten am Handy (318 Pixel, kleinste Schrift) passen etwa 17,7 em
 const MAX_DET_RESULT_WIDTH = 16.5
+// Werkzeuge, deren Breite geschätzt wird: Determinante (8a), Betrag, Winkel und Vektoren (8b)
+const WIDE_TOOLS = new Set(['det', 'abs', 'arg', 'length', 'dot', 'angle'])
 const hasDet = (t: RearrangeTask) =>
-  [t.equation.lhs, t.equation.rhs].flatMap((side) => subterms(side)).some((s) => s.kind === 'var' && s.tool?.kind === 'det')
+  [t.equation.lhs, t.equation.rhs].flatMap((side) => subterms(side)).some((s) => s.kind === 'var' && s.tool !== undefined && WIDE_TOOLS.has(s.tool.kind))
 
 // Wie oft kommt die gesuchte Variable vor, und steht sie in einem Nenner?
 function occurrences(t: RearrangeTask): { count: number; inDenominator: boolean } {

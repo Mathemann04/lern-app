@@ -350,6 +350,77 @@ export const REARRANGE_ERROR_TEXTS: Readonly<Record<string, Explanation>> = {
       'Beim Entwickeln steht vor der Unterdeterminante ihr Eintrag: Vorzeichen aus dem Schachbrett mal Eintrag mal Determinante der Matrix ohne seine Zeile und Spalte.',
     short: 'Vorzeichen mal Eintrag mal Unterdeterminante.',
   },
+  // Werkzeuge der Stufe 5 (Schritt 8b): Betrag und Winkel komplexer Zahlen, Vektoren
+  'eq-abs-termwise': {
+    detailed:
+      'Der Betrag ist die Länge des Pfeils, nicht die Summe seiner Teile: Realteil und Imaginärteil stehen senkrecht aufeinander, also gilt der Satz des Pythagoras, $\\lvert p + q\\mathrm{i}\\rvert = \\sqrt{p^2 + q^2}$.',
+    short: 'Pythagoras: Wurzel aus der Summe der Quadrate, $\\sqrt{p^2 + q^2}$ statt $p + q$.',
+  },
+  'eq-abs-root': {
+    detailed:
+      '$p^2 + q^2$ ist das Quadrat des Betrags, $\\lvert z\\rvert^2$. Der Betrag selbst ist die Wurzel daraus: $\\lvert p + q\\mathrm{i}\\rvert = \\sqrt{p^2 + q^2}$.',
+    short: 'Die Wurzel gehört dazu: Wurzel aus der Summe der Quadrate, $\\sqrt{p^2 + q^2}$.',
+  },
+  'eq-vec-length-termwise': {
+    detailed:
+      'Die Länge ist nicht die Summe der Einträge. Die Achsen stehen senkrecht aufeinander, also gilt der Satz des Pythagoras: $\\left\\lvert\\begin{pmatrix} u_1 \\\\ u_2 \\end{pmatrix}\\right\\rvert = \\sqrt{u_1^2 + u_2^2}$, mit drei Einträgen $\\sqrt{u_1^2 + u_2^2 + u_3^2}$.',
+    short: 'Pythagoras: Wurzel aus der Summe der Quadrate der Einträge.',
+  },
+  'eq-vec-length-root': {
+    detailed:
+      '$u_1^2 + u_2^2$ ist das Quadrat der Länge, $\\lvert\\vec{u}\\rvert^2$. Die Länge selbst ist die Wurzel daraus: $\\lvert\\vec{u}\\rvert = \\sqrt{u_1^2 + u_2^2}$. Beim Winkel stehen im Nenner die Längen, nicht ihre Quadrate: $\\cos\\varphi = \\frac{\\vec{u} \\cdot \\vec{v}}{\\lvert\\vec{u}\\rvert \\cdot \\lvert\\vec{v}\\rvert}$.',
+    short: 'Die Wurzel gehört dazu: $\\lvert\\vec{u}\\rvert = \\sqrt{u_1^2 + u_2^2}$.',
+  },
+  'eq-abs-imag-squared': {
+    detailed:
+      'In $\\sqrt{p^2 + q^2}$ stehen der Realteil $p$ und der Imaginärteil $q$, beide ohne $\\mathrm{i}$. Quadrierst du $q\\mathrm{i}$ mit, kommt wegen $\\mathrm{i}^2 = -1$ ein Minus hinein; das wäre ein Teil von $z^2$, nicht von $\\lvert z\\rvert^2$.',
+    short: 'Quadriert werden $p$ und $q$ ohne $\\mathrm{i}$: $\\sqrt{p^2 + q^2}$.',
+  },
+  'eq-arg-power': {
+    detailed:
+      'Beim Quadrieren wird der Betrag quadriert und der Winkel verdoppelt: Mit $z = re^{\\mathrm{i}\\varphi}$ ist $z^2 = r^2e^{2\\mathrm{i}\\varphi}$, also $\\arg\\left(z^2\\right) = 2\\arg z$ (bis auf Vielfache von $2\\pi$).',
+    short: '$\\arg\\left(z^2\\right) = 2\\arg z$: Der Winkel verdoppelt sich.',
+  },
+  'eq-arg-swapped': {
+    detailed:
+      'Im $\\arctan$ steht Imaginärteil durch Realteil: $\\tan\\varphi = \\frac{q}{p}$, also $\\arg(p + q\\mathrm{i}) = \\arctan\\frac{q}{p}$ für $p > 0$. Mit $\\frac{p}{q}$ käme der Winkel zur imaginären Achse heraus.',
+    short: '$\\arg(p + q\\mathrm{i}) = \\arctan\\frac{q}{p}$: der Imaginärteil oben.',
+  },
+  'eq-arg-arctan-forgotten': {
+    detailed:
+      '$\\frac{q}{p}$ ist der Tangens des Winkels, nicht der Winkel selbst. Den Winkel liefert erst der $\\arctan$: $\\arg(p + q\\mathrm{i}) = \\arctan\\frac{q}{p}$ für $p > 0$.',
+    short: '$\\tan\\varphi = \\frac{q}{p}$, der Winkel ist $\\arctan\\frac{q}{p}$.',
+  },
+  'eq-arg-quotient-sign': {
+    detailed:
+      'Beim Malnehmen werden die Winkel addiert, beim Teilen abgezogen: $\\arg\\frac{z}{w} = \\arg z - \\arg w$. Der Nenner dreht den Pfeil zurück.',
+    short: '$\\arg\\frac{z}{w} = \\arg z - \\arg w$: Beim Teilen wird abgezogen.',
+  },
+  'eq-vec-not-divided': {
+    detailed:
+      'Das Skalarprodukt hängt auch von den Längen der Vektoren ab. Erst geteilt durch beide Längen ist es der Kosinus des Winkels: $\\cos\\varphi = \\frac{\\vec{u} \\cdot \\vec{v}}{\\lvert\\vec{u}\\rvert \\cdot \\lvert\\vec{v}\\rvert}$. Ungeteilt kann es auch größer als $1$ sein.',
+    short: '$\\cos\\varphi = \\frac{\\vec{u} \\cdot \\vec{v}}{\\lvert\\vec{u}\\rvert \\cdot \\lvert\\vec{v}\\rvert}$: durch beide Längen teilen.',
+  },
+  'eq-vec-one-length': {
+    detailed:
+      'Geteilt wird durch das Produkt beider Längen: $\\cos\\varphi = \\frac{\\vec{u} \\cdot \\vec{v}}{\\lvert\\vec{u}\\rvert \\cdot \\lvert\\vec{v}\\rvert}$. Nur wenn ein Vektor die Länge $1$ hat, wie $\\begin{pmatrix} 1 \\\\ 0 \\end{pmatrix}$, fällt seine Länge weg.',
+    short: 'Durch beide Längen teilen: $\\lvert\\vec{u}\\rvert \\cdot \\lvert\\vec{v}\\rvert$.',
+  },
+  'eq-vec-sine': {
+    detailed:
+      'Das Skalarprodukt geteilt durch beide Längen ist der Kosinus des Winkels: $\\cos\\varphi = \\frac{\\vec{u} \\cdot \\vec{v}}{\\lvert\\vec{u}\\rvert \\cdot \\lvert\\vec{v}\\rvert}$, der Winkel also der $\\arccos$ davon. Den Sinus braucht man beim Kreuzprodukt: $\\lvert\\vec{u} \\times \\vec{v}\\rvert = \\lvert\\vec{u}\\rvert \\cdot \\lvert\\vec{v}\\rvert \\sin\\varphi$.',
+    short: 'Skalarprodukt durch die Längen ist $\\cos\\varphi$, der Winkel also $\\arccos$.',
+  },
+  'eq-vec-dot-sign': {
+    detailed:
+      'Beim Skalarprodukt werden die Einträge paarweise malgenommen, jeder mit seinem Vorzeichen: $q \\cdot (-s) = -qs$. Ein Minus in einem Eintrag bleibt im Produkt stehen.',
+    short: 'Mit Vorzeichen malnehmen: $q \\cdot (-s) = -qs$.',
+  },
+  'eq-vec-dot-cross': {
+    detailed:
+      'Beim Skalarprodukt werden die Einträge in derselben Zeile malgenommen und die Produkte addiert: $\\begin{pmatrix} p \\\\ q \\end{pmatrix} \\cdot \\begin{pmatrix} r \\\\ s \\end{pmatrix} = pr + qs$. Über Kreuz rechnet man bei der Determinante.',
+    short: 'Zeile mal Zeile: $pr + qs$, nicht über Kreuz.',
+  },
 }
 
 export function explainRearrangeError(id: string): Explanation {
@@ -634,6 +705,28 @@ export function pythagorasMoves(square: string, partner: string, hyperbolic: boo
   ]
 }
 
+// Spitzer Winkel als Buchstabe (Teil 8b): In der Klammer steht 1 - \cos^2 y (sum), falsch ersetzt durch \sin y
+// (forgotten) oder als (1 - \cos y)^2 geschrieben (binomial); alles als LaTeX, mit Vorzahl wie 4 - 4\cos^2 y
+export function acutePythagorasMoves(sum: string, forgotten: string, binomial: string): WrongMove[] {
+  return [
+    { label: `$${sum}$ durch $${forgotten}$ ersetzen`, why: REARRANGE_ERROR_TEXTS['eq-pythagoras-square'] },
+    {
+      label: `$${sum}$ als $${binomial}$ schreiben`,
+      why: {
+        detailed: 'Das wäre die binomische Formel, aber $(1 - \\cos u)^2 = 1 - 2\\cos u + \\cos^2 u$, nicht $1 - \\cos^2 u$. Hier hilft $\\sin^2 u + \\cos^2 u = 1$.',
+        short: '$(1 - \\cos u)^2 = 1 - 2\\cos u + \\cos^2 u$; hier hilft $\\sin^2 u + \\cos^2 u = 1$.',
+      },
+    },
+    {
+      label: 'Die Klammer wieder ausmultiplizieren',
+      why: {
+        detailed: 'Dann steht die Variable wieder in zwei Summanden, wie vor dem Ausklammern. Vereinfache lieber, was in der Klammer steht: Dafür gibt es $\\sin^2 u + \\cos^2 u = 1$.',
+        short: 'Das dreht sich im Kreis; vereinfache lieber die Klammer.',
+      },
+    },
+  ]
+}
+
 // Durch \cos u teilen (sin, cos, tan: als LaTeX, z. B. \sin x, \cos x und \tan x)
 export function tanQuotientMoves(sin: string, cos: string, tan: string, fraction: boolean): WrongMove[] {
   return [
@@ -851,6 +944,15 @@ export const REARRANGE_HINTS = {
   ode: "Ansatz $e^{\\lambda x}$: Bei $f' = kf$ ist $f(x) = f(0) \\cdot e^{kx}$, bei $f' = k(b - f)$ ist $f(x) = b + Ce^{-kx}$. Bei $f'' = k^2 f$ ist $f(x) = C_1e^{kx} + C_2e^{-kx}$ mit $C_1 + C_2 = f(0)$ und $k(C_1 - C_2) = f'(0)$.",
   det: 'Hauptdiagonale minus Nebendiagonale: $\\det\\begin{pmatrix} p & q \\\\ r & s \\end{pmatrix} = ps - qr$.',
   detExpand: 'Entwickle nach der Zeile oder Spalte mit zwei Nullen: Vorzeichen aus dem Schachbrett mal Eintrag mal Unterdeterminante (die Determinante der Matrix ohne seine Zeile und Spalte).',
+  abs: 'Lies Realteil und Imaginärteil ab, ohne $\\mathrm{i}$. Der Betrag ist die Wurzel aus der Summe ihrer Quadrate: $\\lvert p + q\\mathrm{i}\\rvert = \\sqrt{p^2 + q^2}$. Bei einem Bruch Betrag oben durch Betrag unten; $\\left\\lvert z^2\\right\\rvert = \\lvert z\\rvert^2$.',
+  arg: 'Ist der Realteil $p$ positiv, ist $\\arg(p + q\\mathrm{i}) = \\arctan\\frac{q}{p}$. Beim Malnehmen werden Winkel addiert, beim Teilen abgezogen, beim Quadrieren verdoppelt; $\\arg(1 + \\mathrm{i}) = \\frac{\\pi}{4}$.',
+  length: 'Die Länge ist die Wurzel aus der Summe der Quadrate der Einträge: $\\left\\lvert\\begin{pmatrix} u_1 \\\\ u_2 \\end{pmatrix}\\right\\rvert = \\sqrt{u_1^2 + u_2^2}$.',
+  dot: 'Nimm die Einträge paarweise mal, jeden mit seinem Vorzeichen, und addiere: $\\begin{pmatrix} p \\\\ q \\end{pmatrix} \\cdot \\begin{pmatrix} r \\\\ s \\end{pmatrix} = pr + qs$.',
+  absEuler:
+    'Schreibe $e^{\\mathrm{i}x} = \\cos x + \\mathrm{i}\\sin x$ und lies Realteil und Imaginärteil ab, beide ohne $\\mathrm{i}$. Der Betrag ist die Wurzel aus der Summe ihrer Quadrate.',
+  argMultiplied:
+    'Stehen in beiden Faktoren Buchstaben, multipliziere erst aus und fasse Realteil und Imaginärteil zusammen. Dann ist $\\arg(p + q\\mathrm{i}) = \\arctan\\frac{q}{p}$ für $p > 0$.',
+  angle: 'Skalarprodukt durch das Produkt der Längen ist der Kosinus des Winkels: $\\cos\\varphi = \\frac{\\vec{u} \\cdot \\vec{v}}{\\lvert\\vec{u}\\rvert \\cdot \\lvert\\vec{v}\\rvert}$. Der Winkel ist der $\\arccos$ davon.',
   add: 'Ein Summand verschwindet mit der Gegenrechnung: Aus $+c$ wird auf beiden Seiten $-c$.',
   move: 'Bringe den Summanden mit Minus auf die andere Seite, dort steht er mit Plus. Den Rest bringst du herüber.',
   divide: 'Einen Faktor wirst du los, indem du beide Seiten durch ihn teilst.',
@@ -887,10 +989,14 @@ export const REARRANGE_HINTS = {
   root: 'Die Gegenrechnung zum Quadrat ist die Wurzel. Alle Buchstaben sind positiv, also brauchst du kein $\\pm$.',
   finish: 'Bringe alles auf einen Hauptnenner und fasse die Zähler zusammen.',
   result: 'Rechne die Umformung auf beiden Seiten aus. Auf der Seite mit der Variable hebt sich etwas weg.',
+  // spitzer Winkel als Buchstabe (Teil 8b)
+  acutePythagoras: 'Denk an $\\sin^2 u + \\cos^2 u = 1$: Was bleibt dann von $1 - \\cos^2 u$?',
+  acuteFinish:
+    'Bei einem spitzen Winkel sind $\\sin u$ und $\\cos u$ positiv, also $\\sqrt{\\sin^2 u} = \\sin u$. Denk an $\\sin^2 u + \\cos^2 u = 1$ und $\\tan u = \\frac{\\sin u}{\\cos u}$.',
 } as const
 
 // Tipp für die ganze Aufgabe (im freien Modus)
-export type TaskTool = 'derivative' | 'integral' | 'series' | 'limit' | 'ode' | 'det'
+export type TaskTool = 'derivative' | 'integral' | 'series' | 'limit' | 'ode' | 'det' | 'complex' | 'vector'
 
 export function rearrangeTaskHint(target: string, several: boolean, block: string | null = null, quadratic = false, tool: TaskTool | null = null): Explanation {
   if (tool === 'derivative') return same(`Rechne zuerst die Ableitung aus. Dann steht eine gewöhnliche Gleichung da, die du nach $${target}$ auflöst.`)
@@ -899,6 +1005,10 @@ export function rearrangeTaskHint(target: string, several: boolean, block: strin
   if (tool === 'limit') return same(`Rechne zuerst den Grenzwert aus, mit $\\left(1 + \\frac{p}{n}\\right)^n \\to e^p$. Dann löst du nach $${target}$ auf.`)
   if (tool === 'det')
     return same(`Rechne zuerst die Determinante aus: Hauptdiagonale minus Nebendiagonale, bei $3 \\times 3$ vorher nach der Zeile oder Spalte mit zwei Nullen entwickeln. Dann löst du nach $${target}$ auf.`)
+  if (tool === 'complex')
+    return same(`Rechne zuerst Betrag bzw. Winkel der komplexen Zahl aus: Realteil und Imaginärteil ablesen, $\\lvert p + q\\mathrm{i}\\rvert = \\sqrt{p^2 + q^2}$, $\\arg(p + q\\mathrm{i}) = \\arctan\\frac{q}{p}$ für $p > 0$. Dann löst du nach $${target}$ auf.`)
+  if (tool === 'vector')
+    return same(`Rechne zuerst Länge, Skalarprodukt bzw. Winkel der Vektoren aus, beim Winkel mit $\\cos\\varphi = \\frac{\\vec{u} \\cdot \\vec{v}}{\\lvert\\vec{u}\\rvert \\cdot \\lvert\\vec{v}\\rvert}$. Dann löst du nach $${target}$ auf.`)
   if (tool === 'ode') return same(`Löse zuerst die Differentialgleichung mit den Anfangswerten (Ansatz $e^{\\lambda x}$). Dann steht eine Gleichung mit e-Funktionen da, die du nach $${target}$ auflöst.`)
   if (block) return same(`Setze $u = ${block}$ und löse die quadratische Gleichung in $u$ mit der $pq$-Formel. Wähle die passende Lösung, setze zurück ein und löse nach $${target}$ auf.`)
   if (quadratic) return same(`Forme um, bis $${target}^2$ und $${target}$ in einer Gleichung stehen. Bringe alles auf eine Seite, nimm die $pq$-Formel und wähle die passende Lösung.`)
@@ -1027,6 +1137,16 @@ export function explainResult(kind: string, before: string, after: string): Expl
       return { detailed: `Hauptdiagonale minus Nebendiagonale, die Produkte zusammengefasst:\n${lines}`, short: lines }
     case 'detExpand':
       return { detailed: `Nach der Zeile oder Spalte mit zwei Nullen entwickelt: Vorzeichen mal Eintrag mal Unterdeterminante:\n${lines}`, short: lines }
+    case 'abs':
+      return { detailed: `Der Betrag ausgerechnet, mit $\\lvert p + q\\mathrm{i}\\rvert = \\sqrt{p^2 + q^2}$:\n${lines}`, short: lines }
+    case 'arg':
+      return { detailed: `Der Winkel ausgerechnet, mit $\\arg(p + q\\mathrm{i}) = \\arctan\\frac{q}{p}$:\n${lines}`, short: lines }
+    case 'length':
+      return { detailed: `Die Länge ausgerechnet: Wurzel aus der Summe der Quadrate der Einträge:\n${lines}`, short: lines }
+    case 'dot':
+      return { detailed: `Das Skalarprodukt ausgerechnet: Einträge paarweise malgenommen und addiert:\n${lines}`, short: lines }
+    case 'angle':
+      return { detailed: `Der Winkel mit $\\cos\\varphi = \\frac{\\vec{u} \\cdot \\vec{v}}{\\lvert\\vec{u}\\rvert \\cdot \\lvert\\vec{v}\\rvert}$ ausgerechnet:\n${lines}`, short: lines }
     default:
       return { detailed: `Auf beiden Seiten dieselbe Rechnung:\n${lines}`, short: lines }
   }
@@ -1057,6 +1177,97 @@ export function explainExpand(line: string, entry: string, sign: '+' | '-', befo
   return {
     detailed: `In der ${line} steht nur $${entry}$, die anderen Einträge sind $0$. Entwickelt nach ihr: Vorzeichen aus dem Schachbrett ($${sign}$) mal $${entry}$ mal die Determinante der Matrix ohne seine Zeile und Spalte:\n${lines}`,
     short: `Nach der ${line} entwickelt, Vorzeichen $${sign}$:\n${lines}`,
+  }
+}
+
+// Spitzer Winkel als Buchstabe (Teil 8b): 1 - \cos^2 y = \sin^2 y einsetzen
+export function explainAcutePythagoras(before: string, after: string): Explanation {
+  const lines = `$${before}$\n$${after}$`
+  return {
+    detailed: `Aus $\\sin^2 u + \\cos^2 u = 1$ folgt $1 - \\cos^2 u = \\sin^2 u$. So wird die Klammer zu einem einzigen Faktor, durch den du danach teilst:\n${lines}`,
+    short: `$1 - \\cos^2 u = \\sin^2 u$:\n${lines}`,
+  }
+}
+
+// Spitzer Winkel als Buchstabe (Teil 8b): warum 1 - \cos^2 y ersetzen (sum und square als LaTeX)
+export function explainAcuteMove(sum: string, square: string): Explanation {
+  return {
+    detailed: `Wegen $\\sin^2 u + \\cos^2 u = 1$ ist $${sum} = ${square}$: ein einziger Faktor statt einer Summe. Durch ihn teilst du danach, und am Ende fasst du mit $\\tan u = \\frac{\\sin u}{\\cos u}$ zusammen.`,
+    short: `$${sum} = ${square}$: ein Faktor statt einer Summe.`,
+  }
+}
+
+// Spitzer Winkel als Buchstabe (Teil 8b): Ergebnis mit \tan y
+export function explainAcuteFinish(before: string, after: string): Explanation {
+  const lines = `$${before}$\n$${after}$`
+  return {
+    detailed: `Unter der Wurzel bleiben mit $\\sin^2 u + \\cos^2 u = 1$ nur Quadrate von $\\sin u$ und $\\cos u$. Bei einem spitzen Winkel sind beide positiv, also $\\sqrt{\\sin^2 u} = \\sin u$ und $\\sqrt{\\cos^2 u} = \\cos u$. Zuletzt wird $\\frac{\\sin u}{\\cos u}$ zu $\\tan u$ und $\\frac{\\cos u}{\\sin u}$ zu $\\frac{1}{\\tan u}$:\n${lines}`,
+    short: `Mit $\\tan u = \\frac{\\sin u}{\\cos u}$:\n${lines}`,
+  }
+}
+
+// Betrag und Winkel einer komplexen Zahl (tools/polar.ts, polarWork): Real- und Imaginärteil je Faktor mit
+// Buchstaben, feste Faktoren mit Betrag bzw. Winkel und die Regeln für Produkt, Bruch und Quadrat
+export type PolarWorkText = {
+  readonly parts: readonly { readonly z: string; readonly re: string; readonly im: string; readonly value: string }[]
+  readonly constants: readonly { readonly z: string; readonly value: string }[]
+  readonly power: boolean
+  readonly quotient: boolean
+  // beim Betrag eines Bruchs: alles unter einer Wurzel
+  readonly oneRoot: boolean
+  readonly product: boolean
+  readonly multiplied: string | null
+  // beim Betrag eines Produkts mit einer Zahl wie \lvert 1 + 2\mathrm{i}\rvert = \sqrt{5}: Wurzeln unter eine
+  readonly merged: boolean
+  // Euler-Form, z. B. e^{\mathrm{i}x} = \cos x + \mathrm{i}\sin x
+  readonly euler: string | null
+}
+
+export function explainAbs(work: PolarWorkText, before: string, after: string): Explanation {
+  const lines = `$${before}$\n$${after}$`
+  const parts = work.parts.map((p) => `Realteil $${p.re}$, Imaginärteil $${p.im}$: $\\lvert ${p.z}\\rvert = ${p.value}$.`)
+  const constants = work.constants.map((c) => `$\\lvert ${c.z}\\rvert = ${c.value}$.`)
+  const rules = [
+    work.power ? 'Beim Quadrat wird der Betrag quadriert: $\\left\\lvert z^2\\right\\rvert = \\lvert z\\rvert^2$, dort fällt die Wurzel weg.' : '',
+    work.quotient ? `Bei einem Bruch: Betrag oben durch Betrag unten${work.oneRoot ? ', zusammen unter eine Wurzel geschrieben' : ''}.` : '',
+    work.product ? 'Bei einem Produkt werden die Beträge malgenommen.' : '',
+    work.merged ? 'Die Wurzeln kommen unter eine: $\\sqrt{p} \\cdot \\sqrt{q} = \\sqrt{pq}$.' : '',
+  ].filter(Boolean)
+  const euler = work.euler ? [`Mit $${work.euler}$:`] : []
+  return { detailed: `${[...euler, ...parts, ...constants, ...rules].join(' ')} Eingesetzt:\n${lines}`, short: `${[...euler, ...parts, ...constants].join(' ')}\n${lines}` }
+}
+
+export function explainArg(work: PolarWorkText, before: string, after: string): Explanation {
+  const lines = `$${before}$\n$${after}$`
+  const multiplied = work.multiplied ? [`Erst ausmultiplizieren: $${work.multiplied}$.`] : []
+  const parts = work.parts.map((p) => `Der Realteil $${p.re}$ ist positiv, also $\\arg(${p.z}) = ${p.value}$.`)
+  const constants = work.constants.map((c) => `$\\arg(${c.z}) = ${c.value}$.`)
+  const rules = [
+    work.power ? 'Beim Quadrieren verdoppelt sich der Winkel.' : '',
+    work.product ? 'Beim Malnehmen werden die Winkel addiert.' : '',
+    work.quotient ? 'Beim Teilen wird der Winkel des Nenners abgezogen.' : '',
+  ].filter(Boolean)
+  return { detailed: `${[...multiplied, ...parts, ...constants, ...rules].join(' ')} Zusammen:\n${lines}`, short: `${[...parts, ...constants].join(' ')}\n${lines}` }
+}
+
+// Länge und Skalarprodukt von Vektoren (tools/vector.ts): die Quadrate bzw. Produkte der Einträge
+export function explainLength(work: string, before: string, after: string): Explanation {
+  const lines = `$${before}$\n$${after}$`
+  return { detailed: `Die Länge ist die Wurzel aus der Summe der Quadrate der Einträge: $${work}$. Eingesetzt:\n${lines}`, short: `$${work}$:\n${lines}` }
+}
+
+export function explainDot(work: string, before: string, after: string): Explanation {
+  const lines = `$${before}$\n$${after}$`
+  return { detailed: `Die Einträge paarweise malgenommen und addiert: $${work}$. Zusammengefasst:\n${lines}`, short: `$${work}$:\n${lines}` }
+}
+
+// Winkel zwischen Vektoren (angleWork): Skalarprodukt, beide Längen und ihr Produkt
+export function explainAngle(work: { readonly dot: string; readonly dotValue: string; readonly lengths: readonly string[]; readonly product: string }, before: string, after: string): Explanation {
+  const lines = `$${before}$\n$${after}$`
+  const dot = work.dot === work.dotValue ? work.dot : `${work.dot} = ${work.dotValue}`
+  return {
+    detailed: `Der Kosinus des Winkels ist $\\frac{\\vec{u} \\cdot \\vec{v}}{\\lvert\\vec{u}\\rvert \\cdot \\lvert\\vec{v}\\rvert}$. Skalarprodukt: $${dot}$. Längen: $${work.lengths[0]}$ und $${work.lengths[1]}$, zusammen $\\lvert\\vec{u}\\rvert \\cdot \\lvert\\vec{v}\\rvert = ${work.product}$. Der Winkel ist der $\\arccos$ davon:\n${lines}`,
+    short: `$\\vec{u} \\cdot \\vec{v} = ${work.dotValue}$, $\\lvert\\vec{u}\\rvert \\cdot \\lvert\\vec{v}\\rvert = ${work.product}$:\n${lines}`,
   }
 }
 

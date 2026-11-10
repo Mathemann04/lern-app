@@ -106,9 +106,116 @@ function evaluateFn(name: FnName, a: number): number {
 
 // --- Werkzeuge der Stufe 5 (Umstellen): numerisch, als Gegenprobe unabhängig vom Rechenweg ---
 
+// Skalarprodukt Komponente für Komponente
+const numericDot = (left: readonly Expr[], right: readonly Expr[], env: Env) =>
+  left.length !== right.length ? NaN : left.reduce((sum, e, i) => sum + evaluate(e, env) * evaluate(right[i], env), 0)
+
+// Wert eines Terms mit \mathrm{i} als komplexe Zahl (Realteil, Imaginärteil), für Betrag und Winkel (Teil 8b):
+// Summen, Produkte, Brüche, ganzzahlige Potenzen und e hoch eine komplexe Zahl (e^{\mathrm{i}x} = \cos x +
+// \mathrm{i}\sin x); alles ohne \mathrm{i} reell wie evaluate. Unabhängig vom Rechenweg (tools/polar.ts).
+type Complex = readonly [number, number]
+const COMPLEX_NAN: Complex = [NaN, NaN]
+const cmul = ([a, b]: Complex, [c, d]: Complex): Complex => [a * c - b * d, a * d + b * c]
+
+function hasImag(e: Expr): boolean {
+  switch (e.kind) {
+    case 'const':
+      return e.name === 'i'
+    case 'add':
+      return e.terms.some(hasImag)
+    case 'mul':
+      return e.factors.some(hasImag)
+    case 'neg':
+    case 'root':
+    case 'fn':
+      return hasImag(e.arg)
+    case 'div':
+      return hasImag(e.num) || hasImag(e.den)
+    case 'pow':
+      return hasImag(e.base) || hasImag(e.exp)
+    case 'log':
+      return hasImag(e.base) || hasImag(e.arg)
+    default:
+      return false
+  }
+}
+
+function complexValue(e: Expr, env: Env): Complex {
+  if (!hasImag(e)) return [evaluate(e, env), 0]
+  switch (e.kind) {
+    case 'const':
+      return [0, 1]
+    case 'add':
+      return e.terms.map((t) => complexValue(t, env)).reduce(([a, b], [c, d]) => [a + c, b + d], [0, 0])
+    case 'mul':
+      return e.factors.map((f) => complexValue(f, env)).reduce(cmul, [1, 0])
+    case 'neg': {
+      const [a, b] = complexValue(e.arg, env)
+      return [-a, -b]
+    }
+    case 'div': {
+      const [a, b] = complexValue(e.num, env)
+      const [c, d] = complexValue(e.den, env)
+      const n = c * c + d * d
+      return n === 0 ? COMPLEX_NAN : [(a * c + b * d) / n, (b * c - a * d) / n]
+    }
+    case 'pow': {
+      if (e.base.kind === 'const' && e.base.name === 'e') {
+        const [a, b] = complexValue(e.exp, env)
+        const r = Math.exp(a)
+        return [r * Math.cos(b), r * Math.sin(b)]
+      }
+      const k = asRational(e.exp)
+      if (!k || !isInteger(k) || hasImag(e.exp)) return COMPLEX_NAN
+      let base = complexValue(e.base, env)
+      let n = Number(k.n)
+      if (n < 0) {
+        const [c, d] = base
+        const m = c * c + d * d
+        if (m === 0) return COMPLEX_NAN
+        base = [c / m, -d / m]
+        n = -n
+      }
+      let out: Complex = [1, 0]
+      for (let i = 0; i < n; i++) out = cmul(out, base)
+      return out
+    }
+    default:
+      // Wurzeln, Funktionen und Logarithmen nur von reellen Zahlen
+      return COMPLEX_NAN
+  }
+}
+
 function evaluateTool(tool: Tool, env: Env): number {
-  if (tool.kind === 'det') return numericDeterminant(tool.rows.map((row) => row.map((e) => evaluate(e, env))))
-  const at = (value: number) => evaluate(tool.body, { ...env, [tool.v]: value })
+  switch (tool.kind) {
+    case 'det':
+      return numericDeterminant(tool.rows.map((row) => row.map((e) => evaluate(e, env))))
+    case 'abs':
+      return Math.hypot(...complexValue(tool.body, env))
+    case 'arg': {
+      // Hauptwert zwischen -\pi und \pi; die 0 hat keinen Winkel
+      const [re, im] = complexValue(tool.body, env)
+      return re === 0 && im === 0 ? NaN : Math.atan2(im, re)
+    }
+    case 'length':
+      return Math.hypot(...tool.vector.map((e) => evaluate(e, env)))
+    case 'dot':
+      return numericDot(tool.left, tool.right, env)
+    case 'angle': {
+      const u = tool.left.map((e) => evaluate(e, env))
+      const v = tool.right.map((e) => evaluate(e, env))
+      const nu = Math.hypot(...u)
+      const nv = Math.hypot(...v)
+      if (u.length !== v.length || !(nu > 0) || !(nv > 0)) return NaN
+      // nach Kahan: 2\arctan\frac{\lvert\lvert\vec v\rvert\vec u - \lvert\vec u\rvert\vec v\rvert}{\lvert\lvert\vec v\rvert\vec u + \lvert\vec u\rvert\vec v\rvert}, genau auch
+      // für fast parallele Vektoren (dort ist \arccos ungenau)
+      const difference = Math.hypot(...u.map((ui, i) => nv * ui - nu * v[i]))
+      const sum = Math.hypot(...u.map((ui, i) => nv * ui + nu * v[i]))
+      return 2 * Math.atan2(difference, sum)
+    }
+  }
+  const { body, v } = tool
+  const at = (value: number) => evaluate(body, { ...env, [v]: value })
   switch (tool.kind) {
     case 'derivative': {
       const x = env[tool.v]

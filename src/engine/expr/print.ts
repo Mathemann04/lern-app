@@ -55,7 +55,21 @@ export function toLatex(e: Expr): string {
 // Werkzeug der Stufe 5: \frac{\mathrm{d}}{\mathrm{d}x}\left(…\right), \int_a^x \frac{\mathrm{d}t}{t(t + b)},
 // \left[…\right]_a^x
 export function toolLatex(tool: Tool): string {
-  if (tool.kind === 'det') return `\\det\\begin{pmatrix} ${tool.rows.map((row) => row.map(toLatex).join(' & ')).join(' \\\\ ')} \\end{pmatrix}`
+  switch (tool.kind) {
+    case 'det':
+      return `\\det\\begin{pmatrix} ${tool.rows.map((row) => row.map(toLatex).join(' & ')).join(' \\\\ ')} \\end{pmatrix}`
+    // Betrag und Winkel einer komplexen Zahl, Vektoren als Spalten (Teil 8b)
+    case 'abs':
+      return `\\left\\lvert ${toLatex(tool.body)} \\right\\rvert`
+    case 'arg':
+      return `\\arg\\left(${toLatex(tool.body)}\\right)`
+    case 'length':
+      return `\\left\\lvert ${columnLatex(tool.vector)} \\right\\rvert`
+    case 'dot':
+      return `${columnLatex(tool.left)} \\cdot ${columnLatex(tool.right)}`
+    case 'angle':
+      return `\\sphericalangle\\left(${columnLatex(tool.left)}, ${columnLatex(tool.right)}\\right)`
+  }
   const d = `\\mathrm{d}${tool.v}`
   switch (tool.kind) {
     case 'derivative':
@@ -82,6 +96,9 @@ export function toolLatex(tool: Tool): string {
       return `${tool.v}(${toLatex(tool.point)})`
   }
 }
+
+// Vektor als Spalte: \begin{pmatrix} x \\ a \\ b \end{pmatrix}
+export const columnLatex = (entries: readonly Expr[]) => `\\begin{pmatrix} ${entries.map(toLatex).join(' \\\\ ')} \\end{pmatrix}`
 
 // Die Differentialgleichung mit ihren Anfangswerten: f'' = k^{2}f,\; f(0) = a,\; f'(0) = 0
 export const odeLatex = (tool: Extract<Tool, { kind: 'ode' }>): string => odeLines(tool).join(',\\; ')
@@ -249,9 +266,9 @@ function endsWithBareArgument(e: Expr): boolean {
   }
 }
 
-// Funktionsargumente ohne Klammer: \sin x, \ln 2, \cos \pi
+// Funktionsargumente ohne Klammer: \sin x, \ln 2, \cos \pi; ein Betrag hat schon Striche: \ln\left\lvert … \right\rvert
 function isBareArgument(arg: Expr): boolean {
-  if ((arg.kind === 'var' && !arg.tool) || arg.kind === 'const') return true
+  if ((arg.kind === 'var' && (!arg.tool || arg.tool.kind === 'abs' || arg.tool.kind === 'length')) || arg.kind === 'const') return true
   return arg.kind === 'num' && !arg.decimal && isInteger(arg.value) && ratSign(arg.value) >= 0
 }
 

@@ -1,5 +1,5 @@
 import { contains, key, subterms } from '../expr/compare.ts'
-import { evaluate } from '../expr/evaluate.ts'
+import { type Env, evaluate } from '../expr/evaluate.ts'
 import { equationToLatex } from '../expr/print.ts'
 import { type Equation, type Expr, add, div, eq, fn, log, mul, num, pow, variable } from '../expr/types.ts'
 import { ERROR_RULES, type WrongAnswer } from '../derive/errorRules.ts'
@@ -17,12 +17,14 @@ import {
 import { createRng } from '../random/rng.ts'
 import { isOne, rat, ratAbs, ratSign } from '../rational.ts'
 import { type Atoms, RADICAL_ATOM, monomialSqrt, newAtoms, niceFrac, polyToExpr, radicalAtoms, toPoly, toRat } from './algebra.ts'
-import { clearlyFails, differsFromTarget, samplePoints, withSubstitution } from './check.ts'
+import { clearlyFails, definedSomewhere, dependsOn, differsFromTarget, samplePoints, withSubstitution } from './check.ts'
 import {
   type RearrangeSolution,
   type RearrangeStep,
   type SolveOptions,
   type Side,
+  acutePythagorasWrong,
+  acuteTanWrong,
   complexRoot,
   dividedBy,
   factoredOut,
@@ -48,7 +50,23 @@ import {
 import type { RearrangeTask } from './task.ts'
 import { type ToolStepKind, toolMistakes } from './tools/steps.ts'
 
-const TOOL_STEPS = new Set<string>(['derive', 'partial', 'antiderivative', 'bounds', 'sumFormula', 'series', 'limit', 'ode', 'det', 'detExpand'])
+const TOOL_STEPS = new Set<string>([
+  'derive',
+  'partial',
+  'antiderivative',
+  'bounds',
+  'sumFormula',
+  'series',
+  'limit',
+  'ode',
+  'det',
+  'detExpand',
+  'abs',
+  'arg',
+  'length',
+  'dot',
+  'angle',
+])
 // Schritt, der ein Werkzeug der Stufe 5 ausrechnet (Ableitung, Integral, …, Determinante)
 export const isToolStep = (kind: string) => TOOL_STEPS.has(kind)
 
@@ -142,6 +160,21 @@ export const REARRANGE_ERROR_RULES: readonly EqErrorRule[] = [
   { id: 'eq-det-main', name: 'Nur die Hauptdiagonale malgenommen', wrongFormula: '\\det\\begin{pmatrix} p & q \\\\ r & s \\end{pmatrix} = ps' },
   { id: 'eq-det-checkerboard', name: 'Beim Entwickeln das Vorzeichen aus dem Schachbrett vertauscht', wrongFormula: '\\det\\begin{pmatrix} 0 & p & q \\\\ a & 1 & 2 \\\\ 0 & r & s \\end{pmatrix} = a\\det\\begin{pmatrix} p & q \\\\ r & s \\end{pmatrix}' },
   { id: 'eq-det-entry', name: 'Beim Entwickeln den Eintrag vor der Unterdeterminante vergessen', wrongFormula: '\\det\\begin{pmatrix} 0 & p & q \\\\ a & 1 & 2 \\\\ 0 & r & s \\end{pmatrix} = -\\det\\begin{pmatrix} p & q \\\\ r & s \\end{pmatrix}' },
+  // Werkzeuge der Stufe 5 (Schritt 8b): Betrag und Winkel komplexer Zahlen, Vektoren (Länge, Skalarprodukt, Winkel)
+  { id: 'eq-abs-termwise', name: 'Den Betrag gliedweise genommen', wrongFormula: '\\lvert p + q\\mathrm{i}\\rvert = p + q' },
+  { id: 'eq-abs-root', name: 'Beim Betrag die Wurzel vergessen', wrongFormula: '\\lvert p + q\\mathrm{i}\\rvert = p^2 + q^2' },
+  { id: 'eq-abs-imag-squared', name: 'Beim Betrag das $\\mathrm{i}$ mitquadriert', wrongFormula: '\\lvert p + q\\mathrm{i}\\rvert = \\sqrt{p^2 - q^2}' },
+  { id: 'eq-arg-power', name: 'Den Winkel beim Quadrieren nicht verdoppelt', wrongFormula: '\\arg\\left(z^2\\right) = \\arg z' },
+  { id: 'eq-arg-swapped', name: 'Real- und Imaginärteil im $\\arctan$ vertauscht', wrongFormula: '\\arg(p + q\\mathrm{i}) = \\arctan\\frac{p}{q}' },
+  { id: 'eq-arg-arctan-forgotten', name: 'Beim Winkel den $\\arctan$ vergessen', wrongFormula: '\\arg(p + q\\mathrm{i}) = \\frac{q}{p}' },
+  { id: 'eq-arg-quotient-sign', name: 'Beim Teilen die Winkel addiert', wrongFormula: '\\arg\\frac{z}{w} = \\arg z + \\arg w' },
+  { id: 'eq-vec-not-divided', name: 'Beim Winkel nicht durch die Längen geteilt', wrongFormula: '\\cos\\varphi = \\vec{u} \\cdot \\vec{v}' },
+  { id: 'eq-vec-one-length', name: 'Beim Winkel nur durch eine der beiden Längen geteilt', wrongFormula: '\\cos\\varphi = \\frac{\\vec{u} \\cdot \\vec{v}}{\\lvert\\vec{u}\\rvert}' },
+  { id: 'eq-vec-sine', name: 'Beim Winkel Sinus statt Kosinus genommen', wrongFormula: '\\sin\\varphi = \\frac{\\vec{u} \\cdot \\vec{v}}{\\lvert\\vec{u}\\rvert \\cdot \\lvert\\vec{v}\\rvert}' },
+  { id: 'eq-vec-dot-sign', name: 'Beim Skalarprodukt ein Minus verloren', wrongFormula: '\\begin{pmatrix} p \\\\ q \\end{pmatrix} \\cdot \\begin{pmatrix} r \\\\ -s \\end{pmatrix} = pr + qs' },
+  { id: 'eq-vec-dot-cross', name: 'Beim Skalarprodukt über Kreuz malgenommen', wrongFormula: '\\begin{pmatrix} p \\\\ q \\end{pmatrix} \\cdot \\begin{pmatrix} r \\\\ s \\end{pmatrix} = ps + qr' },
+  { id: 'eq-vec-length-termwise', name: 'Bei der Länge die Einträge addiert', wrongFormula: '\\left\\lvert\\begin{pmatrix} u_1 \\\\ u_2 \\end{pmatrix}\\right\\rvert = u_1 + u_2' },
+  { id: 'eq-vec-length-root', name: 'Bei der Länge die Wurzel vergessen', wrongFormula: '\\left\\lvert\\begin{pmatrix} u_1 \\\\ u_2 \\end{pmatrix}\\right\\rvert = u_1^2 + u_2^2' },
 ]
 
 export function rearrangeErrorRule(id: string): EqErrorRule {
@@ -564,8 +597,13 @@ function divideInsideArc(step: RearrangeStep): Candidate[] {
 }
 
 // \sin^2 x + \cos^2 x = 1: Quadrat vergessen (\sin^2 x = 1 - \cos x); bei \sinh und \cosh auch das
-// Vorzeichen wie bei \sin und \cos (\sinh^2 x = 1 - \cosh^2 x)
+// Vorzeichen wie bei \sin und \cos (\sinh^2 x = 1 - \cosh^2 x); beim spitzen Winkel als Buchstaben (Teil 8b)
+// 1 - \cos^2 y durch \sin y ersetzt
 function pythagorasMistakes(step: RearrangeStep, t: string): Candidate[] {
+  if (step.kind === 'pythagoras' && step.operand?.kind === 'add') {
+    const acute = acutePythagorasWrong(step, t)
+    return acute ? [{ id: 'eq-pythagoras-square', after: acute }] : []
+  }
   if (step.kind !== 'pythagoras' || step.operand?.kind !== 'pow' || step.operand.base.kind !== 'fn') return []
   const hyperbolic = step.operand.base.name === 'sinh' || step.operand.base.name === 'cosh'
   const out: Candidate[] = []
@@ -585,6 +623,12 @@ function tanQuotientMistakes(step: RearrangeStep, t: string): Candidate[] {
   const partly = tanQuotientWrong(step.before, t, 'partly')
   if (partly) out.push({ id: 'eq-divide-cos-partly', after: partly })
   return out
+}
+
+// Ergebnis mit \tan y beim spitzen Winkel (Teil 8b): \frac{\cos y}{\sin y} als \tan y geschrieben
+function acuteTanMistakes(step: RearrangeStep, t: string): Candidate[] {
+  const wrong = acuteTanWrong(step, t)
+  return wrong ? [{ id: 'eq-tan-flipped', after: wrong }] : []
 }
 
 // Substituieren: e^{2x} = 2u statt u^2, e^{-x} = -u statt \frac{1}{u}
@@ -683,14 +727,18 @@ function candidatesFor(steps: readonly RearrangeStep[], i: number, target: strin
     ...divideInsideArc(step),
     ...pythagorasMistakes(step, t),
     ...tanQuotientMistakes(step, t),
+    ...acuteTanMistakes(step, t),
     ...substituteMistakes(step, t),
     ...quadraticMistakes(step, t),
     ...pqMistakes(step, target),
     ...fractionMistakes(step, t),
     // ohne die Variable wäre es keine Gleichung mehr zum Umstellen (\frac{\mathrm{d}}{\mathrm{d}x}(…) falsch als 1);
     // nur beim Grenzwert ist gerade das der typische Fehler („1 hoch unendlich ist 1")
+    // steht schon in der Aufgabe … = 0 (Vektoren stehen senkrecht), gehört die 0 auch zur falschen Gleichung
     ...(TOOL_STEPS.has(step.kind)
-      ? toolMistakes(step.kind as ToolStepKind, step.before).filter((c) => step.kind === 'limit' || contains(c.after.lhs, t) || contains(c.after.rhs, t))
+      ? toolMistakes(step.kind as ToolStepKind, step.before)
+          .filter((c) => step.kind === 'limit' || contains(c.after.lhs, t) || contains(c.after.rhs, t))
+          .map((c) => (isZeroSide(step.after, t) ? { ...c, zeroForm: true } : c))
       : []),
   ]
 }
@@ -706,16 +754,46 @@ export function rearrangeWrongAnswers(task: RearrangeTask, solution: RearrangeSo
   // Differentialgleichung) steht noch in x und wird mit eigener Substitution gelöst
   const optionsFor = (e: Equation) => (sub && (contains(e.lhs, sub.name) || contains(e.rhs, sub.name)) ? options : { conditions: task.conditions })
   const out: RearrangeWrong[] = []
+  // Aufgaben mit Betrag, Winkel oder Vektoren (Teil 8b): in keiner falschen Gleichung fällt x ganz weg (auch nicht nach dem
+  // Werkzeug, z. B. y^2 = k^2 + m^2 beim Ausmultiplizieren oder x + a - x = 4b)
+  const polar = POLAR_STEPS.has(solution.steps[0]?.kind ?? 'finish')
   solution.steps.forEach((step, i) => {
     for (const c of candidatesFor(solution.steps, i, t)) {
       // keine Gleichung ohne Lösung (z. B. \frac{1}{a} = 0) und keine, die doch stimmt
       if ((!c.zeroForm && isZeroSide(c.after, step.unknown ?? t)) || !clearlyFails(c.after, points)) continue
       const latex = equationToLatex(c.after)
       if (out.some((w) => w.stepIndex === i && equationToLatex(w.after) === latex)) continue
+      // Betrag, Winkel, Vektoren (Teil 8b): keine Gleichung, die für kein x definiert ist, und keine, die anders
+      // geschrieben dieselbe ist wie eine schon da (beim Winkel mit einer Achse in der Ebene sind Sinus statt
+      // Kosinus und über Kreuz malgenommen dasselbe)
+      if (polar && !dependsOn(c.after, step.unknown ?? t, createRng(`abhängig:${latex}`))) continue
+      if (POLAR_STEPS.has(step.kind)) {
+        if (!definedSomewhere(c.after, createRng(`definiert:${latex}`))) continue
+        if (out.some((w) => w.stepIndex === i && sameEquation(w.after, c.after, points))) continue
+      }
       out.push({ rule: rearrangeErrorRule(c.id), stepIndex: i, after: c.after, result: wrongResult(c.after, t, points, optionsFor(c.after)), ...(c.derive ? { derive: c.derive } : {}) })
     }
   })
   return out
+}
+
+const POLAR_STEPS: ReadonlySet<string> = new Set(['abs', 'arg', 'length', 'dot', 'angle'])
+
+// Dieselbe Gleichung, anders geschrieben: Der Unterschied der Seiten ist an allen Prüfstellen gleich
+// (wo eine Gleichung definiert ist, auch die andere)
+function sameEquation(a: Equation, b: Equation, points: readonly Env[]): boolean {
+  let compared = 0
+  for (const p of points) {
+    const u = evaluate(a.lhs, p) - evaluate(a.rhs, p)
+    const v = evaluate(b.lhs, p) - evaluate(b.rhs, p)
+    if (Number.isNaN(u) || Number.isNaN(v)) {
+      if (Number.isNaN(u) !== Number.isNaN(v)) return false
+      continue
+    }
+    if (Math.abs(u - v) > 1e-7 * Math.max(1, Math.abs(u), Math.abs(v))) return false
+    compared++
+  }
+  return compared > 0
 }
 
 const isZeroSide = (e: Equation, t: string) =>

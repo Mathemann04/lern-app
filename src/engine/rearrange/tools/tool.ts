@@ -36,6 +36,15 @@ export const odeOf = (body: Expr, order: 1 | 2, initial: readonly Expr[], v = 'f
 // \det\begin{pmatrix} … \end{pmatrix}, Einträge zeilenweise (2 × 2 oder 3 × 3)
 export const detOf = (rows: readonly (readonly Expr[])[]): Var => toolExpr({ kind: 'det', rows })
 
+// Betrag und Winkel einer komplexen Zahl: \left\lvert x + a\mathrm{i} \right\rvert, \arg\left((x + a\mathrm{i})^{2}\right)
+export const absOf = (body: Expr): Var => toolExpr({ kind: 'abs', body })
+export const argOf = (body: Expr): Var => toolExpr({ kind: 'arg', body })
+
+// Vektoren als Spalten: Länge, Skalarprodukt, Winkel dazwischen
+export const lengthOf = (vector: readonly Expr[]): Var => toolExpr({ kind: 'length', vector })
+export const dotOf = (left: readonly Expr[], right: readonly Expr[]): Var => toolExpr({ kind: 'dot', left, right })
+export const angleOf = (left: readonly Expr[], right: readonly Expr[]): Var => toolExpr({ kind: 'angle', left, right })
+
 export type ToolVar = Var & { readonly tool: Tool }
 
 export const isToolVar = (e: Expr): e is ToolVar => e.kind === 'var' && e.tool !== undefined
