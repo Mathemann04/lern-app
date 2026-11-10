@@ -597,7 +597,8 @@ kommen mit ihren Schritten dazu. Die Denkfehler der Wissensfragen
 | Gasvolumen | 22,4 L/mol nicht bei 0 °C und 1013 hPa (`chem-vm-conditions`) | 1 mol Gas bei 25 °C und 1013 hPa: 22,4 L statt 24,5 L |
 | Massenanteil | durch die Masse des Wassers statt der Lösung (`chem-fraction-solvent`) | 10 g Salz in 90 g Wasser: 11,1 % statt 10 % |
 | Massenkonzentration | V/m (`chem-mass-conc-inverted`) | 3 g in 100 mL: 0,0333 L/g statt 30 g/L |
-| ppm, ppb | ppb als 10⁻¹² (`chem-ppb`) | 5 ppb als 5 · 10⁻¹² |
+| ppm, ppb | ppm, ppb und ppt verwechselt (`chem-ppb`) | 5 ppb als 5 · 10⁻¹² |
+| Molares Volumen | durch V_m geteilt statt malgenommen oder umgekehrt (`chem-vm-inverted`, seit S4b) | 0,5 mol: 0,0223 L statt 11,2 L |
 | Vol-% | nicht durch 100 geteilt (`chem-vol-percent`) | 40 Vol-% von 0,5 L: 20 L statt 0,2 L |
 | Massenwirkungsgesetz | Exponent passt nicht zum Koeffizienten (`chem-mwg-exponent`) | Ammoniaksynthese: c²(H₂) statt c³(H₂) |
 | Massenwirkungsgesetz | Zähler und Nenner vertauscht (`chem-mwg-swapped`) | Edukte im Zähler |
@@ -820,7 +821,13 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   Bedarf an einem Edukt; die Gleichung steht ausgeglichen in der Aufgabe.
   Zahlen der Altklausuren (Ethan 6 g, Propan 4,4 g) schließen alle
   Rechnungen aus. Lange Gleichungen in Chemie-Aufgaben werden am Handy
-  kleiner gesetzt (`FitWidth`). **S4b**: Gase und Lösungen. **S4c**:
+  kleiner gesetzt (`FitWidth`). **S4b** (fertig): Thema „Gase und Lösungen"
+  mit Unterthemen Konzentration und Lösung ansetzen, Anteile (Massenanteil,
+  Massenkonzentration β, ppm/ppb, Vol-%), Gase (molares Volumen, Gasgesetz,
+  Gasvolumen aus einer Reaktion bei Normbedingungen); acht Lernkarten,
+  Wissensfragen; neuer Rechenfehler „durch das molare Volumen geteilt statt
+  malgenommen" (`chem-vm-inverted`). Die Massenkonzentration heißt β (im
+  Skript ρ), damit sie nicht mit der Dichte verwechselt wird. **S4c**:
   „Klausuraufgabe 4 üben" mit Punkten, Teilpunkten und Folgefehlern.
 - **S5: Bindungen.** Ionenbindung und Salze (Formel, Name, Gitter,
   Born-Haber); Moleküle (Lewis-Formeln als selbst gezeichnete Bilder zur

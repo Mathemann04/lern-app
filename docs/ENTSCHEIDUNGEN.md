@@ -576,3 +576,9 @@ Neue Entscheidungen unten anfügen.
   vorhandenen Fehler `chem-m-divided`. Wählt man nur „Umsatz“ an, kommen nur Rechnungen.
   Die Zahlen der Altklausuren schließen jetzt alle Rechnungen aus (vorher konnte die
   Stoffmengen-Rechnung 4,4 g Propan erzeugen).
+- 10.11.2026: S4b fertig. Thema „Gase und Lösungen“ spielbar mit Rechnungen (Konzentration,
+  Lösung ansetzen, Massenanteil, Massenkonzentration, ppm/ppb, Vol-%, molares Volumen,
+  Gasgesetz, Gasvolumen aus einer Reaktion), acht Lernkarten und Wissensfragen. Die
+  Massenkonzentration heißt in der App β (im Skript ρ), damit sie nicht mit der Dichte
+  verwechselt wird. Im Skript steht bei einem Beispiel M(Cl) = 37 g/mol; die App rechnet
+  wie das PSE mit 35,5 g/mol. Angaben mehrerer Größen stehen untereinander (Handy).
