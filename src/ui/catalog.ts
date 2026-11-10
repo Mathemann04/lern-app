@@ -301,10 +301,10 @@ const stoffmengeLevels: LevelPreview[] = [
 ]
 
 // Unterthemen von „Stoffmenge und Umsatz" (Rechnungen in engine/chem/generators/stoffmenge.ts, part);
-// Umsatz kommt mit S4
 const stoffmengeParts: CoursePart[] = [
   { id: 'molmasse', title: 'Molare Masse', levels: [1, 2, 3] },
   { id: 'stoffmenge', title: 'Masse, Stoffmenge und Teilchenzahl', levels: [1, 2, 3] },
+  { id: 'umsatz', title: 'Umsatz', levels: [1, 2, 3] },
 ]
 
 // Thema, das noch kommt (blass mit „kommt bald")
@@ -464,7 +464,7 @@ export const SUBJECTS: readonly Subject[] = [
           {
             id: STOFFMENGE,
             title: 'Stoffmenge und Umsatz',
-            description: 'Molare Masse, Stoffmenge, Teilchenzahl; Umsatzrechnung kommt bald',
+            description: 'Molare Masse, Stoffmenge, Teilchenzahl und Umsatzrechnung',
             icon: 'flask',
             cards: 'chem-stoffmenge',
             levels: stoffmengeLevels,

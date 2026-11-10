@@ -143,4 +143,34 @@ export const STOFFMENGE_CARDS: readonly Card[] = [
     ],
     errors: ['chem-atoms-molecules', 'chem-mis-st-atoms-molecules', 'chem-mis-st-atoms-all', 'chem-mis-st-salt-molecule'],
   },
+  {
+    id: 'stoffmenge-umsatz',
+    topic: 'chem-stoffmenge',
+    title: 'Umsatz in drei Schritten',
+    level: 1,
+    rules: [],
+    formulas: [String.raw`n(\text{gesucht}) = n(\text{gegeben}) \cdot \frac{\nu(\text{gesucht})}{\nu(\text{gegeben})}`],
+    memo: 'Wie viel von einem Stoff entsteht oder gebraucht wird, rechnest du immer über die Stoffmengen: Masse des gegebenen Stoffs in Mol umrechnen, mit dem Verhältnis der Koeffizienten auf den gesuchten Stoff übertragen, zurück in Gramm.',
+    note: String.raw`Die Koeffizienten $\nu$ (sprich „nü“) gelten für Teilchen und damit für Stoffmengen, nie für Massen. Jeder Stoff hat seine eigene molare Masse. Eine Tabelle mit den Zeilen $n$, $M$ und $m$ je Stoff hilft, den Überblick zu behalten.`,
+    when: 'Wenn aus der Masse eines Stoffs die Masse eines anderen Stoffs derselben Reaktion gesucht ist.',
+    examples: [
+      {
+        chemTask: String.raw`Welche Masse $\ce{CO2}$ entsteht aus $5{,}8\,\mathrm{g}$ Butan? $\ce{2 C4H10 + 13 O2 -> 8 CO2 + 10 H2O}$, mit $M(\ce{C4H10}) = 58$ und $M(\ce{CO2}) = 44\,\mathrm{g/mol}$`,
+        lines: [
+          { label: 'Stoffmenge Butan', latex: String.raw`n = \frac{5{,}8\,\mathrm{g}}{58\,\mathrm{g/mol}} = 0{,}1\,\mathrm{mol}` },
+          { label: 'Verhältnis 8 : 2', latex: String.raw`n(\ce{CO2}) = 0{,}1\,\mathrm{mol} \cdot \frac{8}{2} = 0{,}4\,\mathrm{mol}` },
+          { label: 'Ergebnis', latex: String.raw`m(\ce{CO2}) = 0{,}4\,\mathrm{mol} \cdot 44\,\mathrm{g/mol} = 17{,}6\,\mathrm{g}` },
+        ],
+      },
+      {
+        chemTask: String.raw`Wie viel Sauerstoff braucht man für $4\,\mathrm{g}$ Methan? $\ce{CH4 + 2 O2 -> CO2 + 2 H2O}$, mit $M(\ce{CH4}) = 16$ und $M(\ce{O2}) = 32\,\mathrm{g/mol}$`,
+        lines: [
+          { label: 'Stoffmenge Methan', latex: String.raw`n = \frac{4\,\mathrm{g}}{16\,\mathrm{g/mol}} = 0{,}25\,\mathrm{mol}` },
+          { label: 'Verhältnis 2 : 1', latex: String.raw`n(\ce{O2}) = 0{,}25\,\mathrm{mol} \cdot \frac{2}{1} = 0{,}5\,\mathrm{mol}` },
+          { label: 'Ergebnis', latex: String.raw`m(\ce{O2}) = 0{,}5\,\mathrm{mol} \cdot 32\,\mathrm{g/mol} = 16\,\mathrm{g}` },
+        ],
+      },
+    ],
+    errors: ['chem-ratio-one', 'chem-ratio-swapped', 'chem-ratio-product-only', 'chem-ratio-wrong-molar-mass', 'chem-similar-molar-mass'],
+  },
 ]

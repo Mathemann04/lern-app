@@ -585,7 +585,7 @@ kommen mit ihren Schritten dazu. Die Denkfehler der Wissensfragen
 | Umsatz | Verhältnis umgedreht (`chem-ratio-swapped`) | 0,025 mol |
 | Umsatz | nur der Koeffizient des Produkts (`chem-ratio-product-only`) | 0,8 mol |
 | Umsatz | Molmasse des Edukts für das Produkt oder Massen statt Stoffmengen ins Verhältnis (`chem-ratio-wrong-molar-mass`; beides ergibt immer m(Edukt) · ν(Produkt)/ν(Edukt)) | 5,8 g Butan → CO₂: 23,2 g statt 17,6 g |
-| Umsatz | n : M statt n · M (`chem-mass-divided`) | 0,4 mol CO₂: 0,00909 g statt 17,6 g |
+| Umsatz | n : M statt n · M (gleicher Denkfehler wie bei der Masse, deshalb `chem-m-divided`) | 0,4 mol CO₂: 0,00909 g statt 17,6 g |
 | Umsatz | Molmasse eines ähnlichen Stoffs (`chem-similar-molar-mass`) | CO statt CO₂: 11,2 g statt 17,6 g |
 | Einheit | falsche Einheit gewählt (`chem-unit`) | 17,6 kg statt 17,6 g |
 | Konzentration | mL statt L (`chem-ml-not-l`) | 0,1 mol in 200 mL: 0,0005 mol/L statt 0,5 mol/L |
@@ -811,6 +811,16 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   ansetzen, Massenanteil, ppm; erste Kachel „Klausuraufgabe 4 üben“ mit
   Punkten, Teilpunkten und Folgefehlern.
   Ausprobieren: Klausuraufgabe 4 üben, einmal das Verhältnis umdrehen.
+  Geteilt (10.11.2026): **S4a** (fertig): Umsatz als Rechnung im Thema
+  „Stoffmenge und Umsatz" (Unterthema „Umsatz"), drei Schritte (Stoffmenge
+  des gegebenen Stoffs, Verhältnis der Koeffizienten, Masse des gesuchten),
+  ab Vertiefung mit den Molmassen als eigenen Schritten; Reaktionen aus
+  „Reaktionsgleichungen" und Verbrennungen, gesucht ein Produkt oder der
+  Bedarf an einem Edukt; die Gleichung steht ausgeglichen in der Aufgabe.
+  Zahlen der Altklausuren (Ethan 6 g, Propan 4,4 g) schließen alle
+  Rechnungen aus. Lange Gleichungen in Chemie-Aufgaben werden am Handy
+  kleiner gesetzt (`FitWidth`). **S4b**: Gase und Lösungen. **S4c**:
+  „Klausuraufgabe 4 üben" mit Punkten, Teilpunkten und Folgefehlern.
 - **S5: Bindungen.** Ionenbindung und Salze (Formel, Name, Gitter,
   Born-Haber); Moleküle (Lewis-Formeln als selbst gezeichnete Bilder zur
   Auswahl, Paare zählen, Typ AXₙEₘ, Gestalt, ΔEN, Polarität, Namen);

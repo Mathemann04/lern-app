@@ -85,3 +85,10 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   `partly`, dann `probeStep`; `verbrennung`: C und H, O₂, ganzzahlig machen; falsche
   Gleichungen mit denselben Stoffen sind nie ausgeglichen). Abwechslung dort mit
   eigener Kennzahl (`VARIETY` in `generators.test.ts`).
+- Umsatz (S4a): `generators/umsatz.ts` (Rechenart `umsatz`, Unterthema `umsatz` von
+  „Stoffmenge und Umsatz“; Reaktionen aus `reactions.ts`, gegebener Stoff ein Edukt,
+  gesucht Produkt oder Edukt; nutzt `molarSteps`, `nStep` aus `stoffmenge.ts`), Zahlen
+  der Altklausuren in `shared.ts` (`EXAM_GIVEN_MASSES`, `usesExamNumbers`, für alle
+  Rechnungen mit gegebener Masse). Auswahl nur mit Rechnungen: `questionNos` leer,
+  `nextSeed` nur Rechnungen (`candidatesOf` in `engine.ts`). Chemie-Aufgaben setzen
+  ihre große Formel mit `FitWidth` (`TaskIntro` in `ui/task/TaskParts.tsx`).

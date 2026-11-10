@@ -79,6 +79,9 @@ feste Regeln: [CHEMIE.md](CHEMIE.md)
     - [x] S3b. Reaktionsgleichungen ausgleichen, Verbrennungen (Rechnungen und Karten)
     - [x] S3c. Wissensfragen zu Reaktionsgleichungen und Stoffmenge
   - [ ] S4. Umsatz, Gase und Lösungen, Klausuraufgabe 4 üben
+    - [x] S4a. Umsatzrechnung in drei Schritten (Rechnung und Karte)
+    - [ ] S4b. Gase und Lösungen
+    - [ ] S4c. Klausuraufgabe 4 üben (Punkte, Folgefehler)
   - [ ] S5. Bindungen (auch Metallbindung und Hybridisierung)
   - [ ] S6. Elektronen und Periodensystem
   - [ ] S7. Gleichgewicht und Energie

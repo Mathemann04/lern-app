@@ -1,10 +1,11 @@
 import type { ReactNode } from 'react'
 import { findError } from '../../engine/errorCatalog.ts'
 import { type TaskRef, formatTaskNumber } from '../../engine/tasks/taskNumber.ts'
+import { FitWidth } from '../FitWidth.tsx'
 import { Formula } from '../Formula.tsx'
 import { type ExplanationMode, MODE_LABEL } from './explanationMode.ts'
 import { RichText } from '../RichText.tsx'
-import { courseById, levelName } from '../catalog.ts'
+import { courseById, isChemCourse, levelName } from '../catalog.ts'
 import { courseHref, mixHref } from '../routes.ts'
 
 // Teile, die geführter und freier Modus gemeinsam haben
@@ -62,11 +63,17 @@ export function TaskIntro({ course, mix = null, taskRef, functionLatex, instruct
       <p className="text-sm text-zinc-500">
         {levelName(course, taskRef.level)} · Aufgabe {formatTaskNumber(taskRef)} · <RichText text={instruction} inline />
       </p>
-      {functionLatex !== undefined && (
-        <div className="overflow-x-auto text-2xl">
-          <Formula tex={functionLatex} />
-        </div>
-      )}
+      {/* Chemie: lange Gleichungen werden am Handy kleiner statt seitlich zu wischen (Mathe wie bisher) */}
+      {functionLatex !== undefined &&
+        (isChemCourse(course) ? (
+          <FitWidth className="text-2xl">
+            <Formula tex={functionLatex} />
+          </FitWidth>
+        ) : (
+          <div className="overflow-x-auto text-2xl">
+            <Formula tex={functionLatex} />
+          </div>
+        ))}
       {note && <RichText text={note} className="text-sm text-zinc-500" />}
     </>
   )

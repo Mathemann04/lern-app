@@ -32,6 +32,11 @@ export type ChemGenerator = {
 // Falsche Antwort aus einem Rechenfehler: Wert zum Vergleichen (gleiche Werte zählen einmal) und Inhalt
 export type WrongValue = { readonly rule: string; readonly key: string; readonly content: string }
 
+// Zahlen der Altklausuren, die nicht vorkommen dürfen (docs/CHEMIE.md §9): gegebene Masse eines Stoffs,
+// so geschrieben, wie sie in der Aufgabe stünde
+export const EXAM_GIVEN_MASSES: readonly string[] = [String.raw`m(\ce{C2H6}) = 6\,\mathrm{g}`, String.raw`m(\ce{C3H8}) = 4{,}4\,\mathrm{g}`]
+export const usesExamNumbers = (latex: string) => EXAM_GIVEN_MASSES.some((x) => latex.includes(x))
+
 // so viele falsche Antworten stehen höchstens neben der richtigen
 export const MAX_WRONG = 3
 
