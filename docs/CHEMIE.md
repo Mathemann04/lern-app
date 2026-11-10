@@ -32,20 +32,22 @@ Zwischenmolekulare Kräfte, Skript Stöchiometrie, Skript Gleichgewicht,
 ## 2. Inhaltslandkarte (in eigenen Worten)
 
 Welche Unterlage welche Inhalte behandelt und wo sie in der App landen.
-Folienangaben sind ungefähr.
+Folienangaben sind die aufgedruckten Nummern und ungefähr. Im Skript
+Stöchiometrie fehlen im PDF einige Folien (6, 14, 17, 19, 21, 25); dort
+weicht die PDF-Seite von der Foliennummer ab.
 
 | Unterlage | Inhalt | Thema in der App |
 | --- | --- | --- |
-| Skript Einführung | Chemie als Lehre von Stoffen und ihren Umwandlungen; Teilgebiete; Element, Verbindung, Gemisch; Aggregatzustände; Trennverfahren; physikalischer Vorgang oder chemische Reaktion; erste Reaktionsgleichungen (Verbrennung von Magnesium, Gärung, Rosten) | Atombau (Grundlagen), Reaktionsgleichungen |
-| Skript Aufbau der Materie | Elementarteilchen, Kernsymbol, Isotope (Folien 6–9); Atommodelle, Streuversuch, Bohr, Licht und Spektren, Welle und Teilchen (10–21); Quantenzahlen, Orbitale, Pauli, Hund, Besetzungsreihenfolge, Ausnahmen (22–30) | Atombau, Elektronen |
+| Skript Einführung | Chemie als Lehre von Stoffen und ihren Umwandlungen; Teilgebiete der Chemie; Aggregatzustände; physikalischer Vorgang oder chemische Reaktion; erste Reaktionsgleichungen (Verbrennung von Magnesium, Gärung, Rosten, Abgaskatalysator) | Atombau (Grundlagen), Reaktionsgleichungen |
+| Skript Aufbau der Materie | Materie, Reinstoff, Element, Verbindung, Gemisch, Trennverfahren und ihr Prinzip (Folien 2–5); Elementarteilchen, Kernsymbol, Isotope (6–9); Atommodelle, Streuversuch, Bohr, Licht und Spektren mit Rydberg-Formel, Welle und Teilchen (10–21); Quantenzahlen, Orbitale, Pauli, Hund, Besetzungsreihenfolge, Ausnahmen (22–30) | Atombau, Elektronen |
 | Skript Trends | Aufbau und Geschichte des PSE, Valenzelektronen und Valenzkonfiguration (1–10); Edelgasregel, Ionen, Ionisierungsenergie (11–17); Atomradius, Elektronegativität, Elektronenaffinität (6–8, 16–22) | Aufbau des PSE, Trends, Moleküle (Elektronegativität) |
 | Skript Ionenbindung | Ionen, Formeln und Namen von Salzen, Ionengitter und Koordinationszahl, Eigenschaften, Gitterenergie, Lösen von Salzen | Ionenbindung und Salze |
 | Skript Metallbindung | Elektronengas, Metallgitter, Eigenschaften, Bändermodell, Halbleiter und Dotierung, Schmelzflusselektrolyse, Einlagerung | Zusatz 3.4 |
 | Skript Kovalente Bindung | Elektronenpaarbindung, Lewis-Formeln, Namen (2–5); Gestalt, Polarität, Dipol (6–11); Hybridisierung, Molekülorbitale (12–17) | Moleküle, Zusatz 3.4 |
 | Skript Zwischenmolekulare Kräfte | Van-der-Waals-Kräfte, Dipol-Dipol-Kräfte, Wasserstoffbrücken, Siedepunkte, Wasser, Löslichkeit | Zwischenmolekulare Kräfte |
-| Skript Stöchiometrie | Reaktionsgleichungen (1–6, 13); Stoffmenge und molare Masse (7–10); Umsatzrechnung mit typischen Fehlern (11–13); Gase (14–15); Konzentrationen, Massenanteil, ppm (16–19) | Reaktionsgleichungen, Stoffmenge und Umsatz, Gase und Lösungen |
-| Skript Gleichgewicht | Gleichgewicht und Massenwirkungsgesetz (1–4); Le Chatelier, Katalysator (5–6); Enthalpie (6–8); Entropie und freie Enthalpie (9–11) | Gleichgewicht, Energie |
-| Übung Atommodelle | Modelle, Licht, Isotope, Konfiguration, Besetzungen beurteilen, Trends | Atombau, Elektronen, Trends |
+| Skript Stöchiometrie | Reaktionsgleichungen (Folien 1–7, 15); Stoffmenge und molare Masse (8–11); Umsatzrechnung mit typischen Fehlern (12–15); Gase (16, 18); Konzentrationen, Massenkonzentration, Massenanteil, ppm, Vol-% (20–24); Lernzielkontrolle (26) | Reaktionsgleichungen, Stoffmenge und Umsatz, Gase und Lösungen |
+| Skript Gleichgewicht | Gleichgewicht, Reaktionsgeschwindigkeit und Massenwirkungsgesetz (1–4); Le Chatelier (5); Aktivierungsenergie, Katalysator, exotherm und endotherm, Enthalpie (6–8); Entropie, freie Enthalpie, ΔG⁰ und K (9); Hauptsätze (10); Lernzielkontrolle (11) | Gleichgewicht, Energie |
+| Übung Atommodelle | Atommodelle und Streuversuch, Teilchenzahlen und Isotope, Schale und Orbital, Konfigurationen von Atomen und Ionen (auch Fe²⁺ und Cu), Kästchen und Besetzungen beurteilen, Trends und isoelektronische Ionen | Atombau, Elektronen, Trends |
 | Übung Bindungen | Salze, Gitter, Metalle, Lewis-Formeln, Gestalt, Polarität, Hybridisierung | Bindung |
 | Übung Stöchiometrie | stärkste zwischenmolekulare Kraft, Siedereihen, Gleichungen ausgleichen, Stoffmenge | Zwischenmolekulare Kräfte, Stöchiometrie |
 | Altklausuren | sieben Aufgaben, 45 Minuten, 50 Punkte; dieselben Fragen mit anderen Stoffen | Probeklausur, „Klausuraufgabe N üben“ |
@@ -65,9 +67,10 @@ Elektrochemie; in der Nummerierung fehlen die Kapitel 2 und 9; weitere
 - **Pfeile**: → für vollständig ablaufende Reaktionen, ⇌ für Gleichgewichte.
 - **Zustände** (s), (l), (g), (aq) nur, wo sie zählen: Gasgleichgewichte,
   Lösen, Enthalpien.
-- **Elemente**, die als Moleküle vorkommen, immer als X₂: H₂, N₂, O₂, F₂,
-  Cl₂, Br₂, I₂. Einzelatome nur in Teilgleichungen, wenn die Aufgabe es
-  sagt.
+- **Zweiatomige Elemente** immer als X₂: H₂, N₂, O₂, F₂, Cl₂, Br₂, I₂.
+  Einzelatome nur in Teilgleichungen, wenn die Aufgabe es sagt. Phosphor und
+  Schwefel stehen in Gleichungen als P und S (P₄ und S₈ nur, wenn die
+  Aufgabe es sagt).
 - **Ausgleichen** mit den kleinsten ganzen Zahlen. Brüche nur als
   Zwischenschritt im geführten Modus.
 - **Kristallwasser** mit Malpunkt: CuSO₄ · 5 H₂O; ein Koeffizient gilt für
@@ -101,8 +104,9 @@ Elektrochemie; in der Nummerierung fehlen die Kapitel 2 und 9; weitere
   Si 28,1; P 31,0; S 32,1; Cl 35,5; K 39,1; Ca 40,1; Fe 55,8; Cu 63,5; Zn 65,4.
   Genauere Werte (IUPAC) nur in einer Testdatei.
 - **Jede Rechnung nennt ihre Werte**: In Grundlagen und Klausurniveau stehen
-  ganze Werte in der Aufgabe wie in der Klausur („Rechne mit M(C) = 12,
-  M(H) = 1, M(O) = 16 g/mol“); in der Vertiefung gilt das PSE der App.
+  gerundete Werte in der Aufgabe wie in der Klausur (ganze Zahlen, bei Chlor
+  35,5: „Rechne mit M(C) = 12, M(H) = 1, M(O) = 16 g/mol“); in der
+  Vertiefung gilt das PSE der App.
 - **Elektronegativität** nach Pauling mit zwei Nachkommastellen (H 2,20;
   C 2,55; N 3,04; O 3,44; F 3,98; Cl 3,16). Aufgaben zur Elektronegativität
   nennen die Werte, mit denen gerechnet wird.
@@ -110,13 +114,18 @@ Elektrochemie; in der Nummerierung fehlen die Kapitel 2 und 9; weitere
 **Konstanten**: N_A = 6,022 · 10²³ 1/mol; R = 8,314 J/(mol · K);
 V_m = 22,4 L/mol bei 0 °C und 1013 hPa; h = 6,626 · 10⁻³⁴ J · s;
 c = 3,00 · 10⁸ m/s; e = 1,602 · 10⁻¹⁹ C; 1 u = 1,66 · 10⁻²⁴ g;
-F = 96 485 C/mol; T in K = ϑ in °C + 273,15 (mit 273 gerechnet liegt das
-Ergebnis in der Toleranz).
+F = 96 485 C/mol; R_H = 1,097 · 10⁷ 1/m (Rydberg-Konstante);
+T in K = ϑ in °C + 273,15. Die App nimmt auch Ergebnisse an, die mit 273
+gerechnet sind (sie prüft beide; das zählt bei ΔG nahe 0 und bei Ergebnissen
+in °C).
 
 **Quellen der Tabellen** (je Tabelle im Code mit Abrufdatum): IUPAC
-(Atommassen), PubChem (Elektronegativität, Radien, Ionisierungsenergie,
-Elektronenaffinität, Siedepunkte), NIST Chemistry WebBook
-(Bildungsenthalpien, Entropien), CODATA (Konstanten). Werte nie von
+(Atommassen), PubChem (Elektronegativität, Ionisierungsenergie,
+Elektronenaffinität, Siedepunkte), Kovalenzradien nach Cordero u. a. (2008)
+als Atomradien, Ionenradien nach Shannon (1976), NIST Chemistry WebBook
+(Bildungsenthalpien, Entropien), CODATA (Konstanten). Nicht die Spalte
+„AtomicRadius“ von PubChem: Das sind Van-der-Waals-Radien, mit denen der
+Trend in einer Periode oft nicht gilt. Werte nie von
 Folienbildern abschreiben. Ein Test vergleicht Stichproben mit einer
 zweiten, unabhängig eingetragenen Liste.
 
@@ -132,21 +141,28 @@ zweiten, unabhängig eingetragenen Liste.
 | Winkel von H₂O und NH₃ | Abgefragt nur „gewinkelt“ bzw. „trigonal-pyramidal“ und „kleiner als 109,5°“. Die Lernkarte nennt die Messwerte (etwa 104,5° und 107°) als Ergänzung. |
 | Vorzeichen von Energien | ΔH < 0 heißt exotherm. Die Gitterenthalpie ist negativ (beim Bilden des Gitters wird Energie frei). Born-Haber mit Vorzeichen in Richtung des Kreises. Reaktionsenthalpie in kJ für die Gleichung, wie sie dasteht; kJ/mol wird auch angenommen. |
 | Molmasse von Chlor | 35,5 g/mol. |
+| Bildungsenthalpie | 0 für Elemente in ihrer stabilsten Form unter Standardbedingungen (O₂(g), Br₂(l), I₂(s), Kohlenstoff als Graphit); Tabellenwerte für (g) und (l) getrennt. |
 | Pfeil bei Gleichgewichten | immer ⇌. |
 
 ## 6. Grenzfälle, die die App nicht abfragt
 
 - Polarität von Molekülen mit kleiner ΔEN, die trotzdem Dipole sind: H₂S,
   PH₃, NCl₃ (H₂S nur nach der Gestalt).
-- Bindungsart aus ΔEN bei Verbindungen nahe der Grenze 1,8: MgCl₂, Al₂O₃,
-  AlCl₃, BeCl₂ und ähnliche.
-- Lewis-Formel von SO₂ und anderen Molekülen mit erweitertem Oktett; nur ihre
-  Gestalt. BF₃ nur mit dem Hinweis, dass Bor sechs Elektronen hat.
+- Bindungsart aus ΔEN bei Verbindungen aus Metall und Nichtmetall mit ΔEN
+  unter 1,9: nahe der Grenze 1,8 (MgCl₂ 1,85; Al₂O₃ 1,83) oder nach ΔEN
+  polar, obwohl aus Metall und Nichtmetall (AlCl₃ 1,55; BeCl₂ 1,59;
+  FeCl₃ 1,33).
+- Lewis-Formel von SO₂ und anderen Molekülen mit erweitertem Oktett;
+  abgefragt werden nur Gestalt und Polarität. BF₃ nur mit dem Hinweis, dass
+  Bor sechs Elektronen hat.
 - Trend-Paare, bei denen die Messwerte der Regel widersprechen:
   Ionisierungsenergie zwischen Gruppe 2 und 13 sowie 15 und 16 derselben
-  Periode (z. B. Mg > Al, N > O); Elektronenaffinität von F und Cl sowie der
-  Gruppen 2 und 15; Elektronegativität innerhalb der Gruppen 13 und 14 und bei
-  schweren Elementen (z. B. Ga > Al). Keine Vergleiche über die Diagonale.
+  Periode (z. B. Mg > Al, N > O) und innerhalb der Gruppen 13 und 14
+  (Ga > Al, Pb > Sn); Elektronenaffinität zwischen 2. und 3. Periode
+  (B < Al, C < Si, O < S, F < Cl) sowie der Gruppen 2, 15 und 18;
+  Elektronegativität innerhalb der Gruppen 13 und 14 und bei schweren
+  Elementen (z. B. Ga > Al). Keine Vergleiche über die Diagonale. Atomradien
+  nur als Kovalenzradien.
 - Born-Haber für Bromide und Iodide (Brom ist flüssig, Iod fest; es fehlte ein
   Schritt).
 - Das Gleichgewicht H₂ + I₂ ⇌ 2 HI nur für „Druck ändert nichts“, nie für
@@ -155,7 +171,10 @@ zweiten, unabhängig eingetragenen Liste.
 - Wasserdampf nie mit 22,4 L/mol bei 0 °C.
 - Pb, Bi und Po nicht in Erzeugern für Formeln (die einfache Wertigkeitsregel
   liefert dort Unsinn wie Pb₃N₄).
-- Cr, Cu und Pd (Ausnahmen der Besetzung) erst ab Vertiefung.
+- Ausnahmen der Besetzung: in Aufgaben nur Cr und Cu, erst ab Vertiefung;
+  Pd und Ag nur als Wissensfrage. Die übrigen Ausnahmen der Tabelle (Nb, Mo,
+  Ru, Rh, Pt, Au) stehen als Daten in `electrons.ts`, kommen aber in keiner
+  Aufgabe vor. Erzeugte Konfigurationen nur bis Kr.
 - Teilchen mit gebrochener mittlerer Oxidationszahl (Fe₃O₄) nicht in
   Erzeugern.
 - Bei Molekülorbitalen nur die Bindungsordnung, nicht die Reihenfolge der
@@ -164,8 +183,10 @@ zweiten, unabhängig eingetragenen Liste.
 
 ## 7. Runden, Toleranz und Urteile im freien Modus
 
-Die Engine rechnet exakt mit Brüchen. Angezeigt werden 3 gültige Ziffern,
-Molmassen mit einer Nachkommastelle. Eine Eingabe wird in dieser
+Die Engine rechnet exakt mit Brüchen. Angezeigt werden höchstens 3 gültige
+Ziffern ohne Nullen am Ende (0,1 mol; 17,6 g); Molmassen aus dem PSE der App
+mit einer Nachkommastelle, mit ganzen Werten aus der Aufgabe ohne
+(58 g/mol). Eine Eingabe wird in dieser
 Reihenfolge beurteilt:
 
 1. **Richtig**: höchstens 1 % neben dem genauen Wert (mit den in der Aufgabe
@@ -176,11 +197,12 @@ Reihenfolge beurteilt:
    Rundung“, zählt nicht als Fehler.
 4. **Falsch** sonst.
 
-- Werte typischer Fehler liegen mindestens 6 % neben der Lösung und
-  mindestens 3 % auseinander; sonst fällt der Fehler für diese Aufgabe weg
+- Werte typischer Fehler liegen mindestens 6 % (beim pH 0,2) neben der
+  Lösung und mindestens 3 % (beim pH 0,15) auseinander; sonst fällt der Fehler für diese Aufgabe weg
   (z. B. „Molmasse des Edukts statt des Produkts“, wenn beide gleich sind).
-- Genau stimmen müssen Teilchenzahlen, Koeffizienten, Indizes, Ladungen und
-  Oxidationszahlen.
+- Genau stimmen müssen Protonen-, Neutronen- und Elektronenzahlen,
+  Koeffizienten, Indizes, Ladungen und Oxidationszahlen. Teilchenzahlen
+  N = n · N_A gelten wie andere Ergebnisse mit 1 % Toleranz.
 - Ausgleichen: richtig mit den kleinsten ganzen Zahlen; ausgeglichen, aber
   nicht gekürzt oder mit Bruch: „noch nicht fertig“.
 - Einheiten: in Grundlagen und Vertiefung vorgegeben; auf Klausurniveau
@@ -189,7 +211,8 @@ Reihenfolge beurteilt:
 
 ## 8. Typische Denkfehler, die nur als falsche Antwort vorkommen
 
-Diese Aussagen tauchen in Unterlagen und Köpfen auf. In der App stehen sie
+Häufige Denkfehler, allgemein formuliert und ohne Bezug auf bestimmte
+Unterlagen. In der App stehen sie
 nur als falsche Antwort mit Erklärung, nie als richtige Antwort oder auf
 einer Lernkarte als Tatsache. Ein Test prüft das.
 
@@ -210,23 +233,25 @@ einer Lernkarte als Tatsache. Ein Test prüft das.
 - **Ionen und Salze**: Natriumphosphid mit P³⁺ (P³⁻); MgNO₃ (Mg(NO₃)₂);
   Al₂O₃ zerfalle in Al³⁺ + O²⁻ ohne Koeffizienten (2 Al³⁺ + 3 O²⁻); Lösen
   von Ammoniumchlorid wärme (es kühlt); PbO₂ und FeS ohne Ladung benannt
-  (Blei(IV)-oxid, Eisen(II)-sulfid); Gitterenergie sei eine Kraft; PO₄²⁻
-  (PO₄³⁻).
+  (Blei(IV)-oxid, Eisen(II)-sulfid); Gitterenergie sei eine Kraft; Molekül-Ionen
+  mit falscher Ladung (Phosphat ist PO₄³⁻).
 - **Moleküle**: CO₂ gewinkelt (linear); H₂S tetraedrisch (gewinkelt); Ethan
-  sp² (sp³); N₂O als Stickstoffmonoxid (Distickstoffmonoxid); SF₆ als
-  „Schwefelhexafluid“ (Schwefelhexafluorid); BI oder BI₂ (BI₃); SH₃ (H₂S);
+  sp² (sp³); N₂O als Stickstoffmonoxid (Distickstoffmonoxid); Namen mit
+  falscher Endung („-fluid“ statt „-fluorid“); BI oder BI₂ (BI₃); SH₃ (H₂S);
   H₂Cl₂ (HCl); CF₄ sei ein stark polares Molekül (polare Bindungen, aber
   unpolares Molekül); Teilladungen in HBr vertauscht; ΔEN zwischen Atomen,
-  die gar nicht verbunden sind (bei HCN zwischen H und N); Dipole seien für
-  Magnetfelder wichtig (für elektrische Felder).
+  die gar nicht verbunden sind (bei HCN zwischen H und N); elektrische mit
+  magnetischen Feldern verwechselt (Dipole richten sich im elektrischen Feld
+  aus).
 - **Zwischenmolekulare Kräfte**: Beim Verdampfen würden Atombindungen
   gelöst (es werden zwischenmolekulare Kräfte überwunden); CH₄ oder HCl
-  bildeten Wasserstoffbrücken; Alkane als CₙHₙ₊₂ (CₙH₂ₙ₊₂); Pentan als C₆H₁₂
-  (C₅H₁₂); Pentan sei bei Raumtemperatur gasförmig (flüssig).
+  bildeten Wasserstoffbrücken; Alkane als CₙHₙ₊₂ (CₙH₂ₙ₊₂); Formel eines
+  Alkans um ein C-Atom verschoben (Pentan ist C₅H₁₂); Pentan sei bei
+  Raumtemperatur gasförmig (flüssig).
 - **Stöchiometrie**: 2 Mg + O₂ → 2 MgO₂ (MgO); die Verbrennung von
-  Magnesium sei endotherm (exotherm); M(O₂) = 3,2 g/mol (32 g/mol);
-  M(Cl) = 37 g/mol (35,5 g/mol); Glucose als C6 + H12 + O6 geschrieben
-  (C₆H₁₂O₆); falsch ausgeglichen: Sn + 2 O₂ → SnO₂, 2 Al + 3 O₂ → 2 Al₂O₃,
+  Magnesium sei endotherm (exotherm); Komma in der Molmasse verrutscht
+  (M(O₂) ist 32 g/mol); falsche Molmasse für Chlor (35,5 g/mol); eine
+  Summenformel in einzelne Elemente zerlegt (C₆H₁₂O₆ ist ein Stoff); falsch ausgeglichen: Sn + 2 O₂ → SnO₂, 2 Al + 3 O₂ → 2 Al₂O₃,
   3 H + N₂ → 2 NH₃ (richtig: Sn + O₂ → SnO₂, 4 Al + 3 O₂ → 2 Al₂O₃,
   3 H₂ + N₂ → 2 NH₃); Cl, N, O, Br als Einzelatome in Gleichungen.
 - **Gleichgewicht und Energie**: im Massenwirkungsgesetz der
@@ -239,7 +264,10 @@ einer Lernkarte als Tatsache. Ein Test prüft das.
 ## 9. Regeln für Fragen und Texte
 
 - Alles in eigenen Worten. Kein Satz teilt acht oder mehr Wörter am Stück
-  mit einem Skript (Prüfung außerhalb des Repos, vor jedem Pull Request).
+  mit einem Skript (Prüfung außerhalb des Repos, vor jedem Pull Request;
+  Schreibvarianten wie „Wieviel“ und „wie viel“ gelten dabei als gleich).
+  Auch kurze Fragen (unter acht Wörtern) stammen nie wörtlich aus einer
+  Klausur oder einem Übungsblatt.
 - Keine Aufgabentexte oder Antworttexte aus den Altklausuren. Zahlen-
   Kombinationen der Altklausuren (dieselbe Masse desselben Stoffs, dasselbe
   Volumen mit derselben Konzentration desselben Stoffs) schließen die
@@ -248,8 +276,10 @@ einer Lernkarte als Tatsache. Ein Test prüft das.
 - Eine Frage, die sich nur auf die Mitschriften-Mappen stützt, ist höchstens
   Grundlagen; ihre richtige Antwort muss durch ein Skript oder ein
   Tabellenwerk gedeckt sein.
-- Auf Klausurniveau steht die Summenformel in der Aufgabe, wie in der
-  Klausur (keine Formel aus dem Namen erraten).
+- Auf Klausurniveau steht bei Rechnungen die Summenformel in der Aufgabe,
+  wie in der Klausur (keine Formel aus dem Namen erraten). Ausnahme:
+  Aufgaben, in denen Name ↔ Formel selbst gefragt ist (Salze,
+  Molekülverbindungen).
 - „Warum ist das falsch?“ benennt den Denkfehler und die Regel, verrät aber
   nicht die richtige Antwort.
 - Keine Namen von Lehrenden, nirgends.

@@ -59,15 +59,26 @@ Details: [PLAN-M4.md](PLAN-M4.md) (Entwurf, wartet auf Freigabe), feste
 Regeln: [CHEMIE.md](CHEMIE.md)
 
 - [ ] 0. Plan freigeben
-- [ ] 1. Gerüst und erstes Thema „Atombau" (1a Fach und erste Fragen, 1b erste
-      Rechnung, 1c freier Modus für Zahlen, 1d weitere Fragearten und
-      Wiederholung)
-- [ ] 2. Stöchiometrie (2a Stoffmenge und Molmasse, 2b Reaktionsgleichungen,
-      2c Umsatz und Klausuraufgabe 4, 2d Gase und Lösungen)
-- [ ] 3. Bindungen (3a Ionenbindung und Salze, 3b Moleküle, 3c
-      zwischenmolekulare Kräfte und Klausuraufgabe 3)
-- [ ] 4. Elektronen und Periodensystem (4a, 4b)
-- [ ] 5. Gleichgewicht und Energie (5a, 5b)
+- [ ] 1. Gerüst und erstes Thema „Atombau"
+  - [ ] 1a. Fach und erste Fragen
+  - [ ] 1b. Erste Rechnung
+  - [ ] 1c. Freier Modus für Zahlen
+  - [ ] 1d. Weitere Fragearten und Wiederholung
+- [ ] 2. Stöchiometrie
+  - [ ] 2a. Stoffmenge und Molmasse
+  - [ ] 2b. Reaktionsgleichungen
+  - [ ] 2c. Umsatz und Klausuraufgabe 4
+  - [ ] 2d. Gase und Lösungen
+- [ ] 3. Bindungen
+  - [ ] 3a. Ionenbindung und Salze
+  - [ ] 3b. Moleküle
+  - [ ] 3c. Zwischenmolekulare Kräfte und Klausuraufgabe 3
+- [ ] 4. Elektronen und Periodensystem
+  - [ ] 4a. Elektronen
+  - [ ] 4b. Periodensystem
+- [ ] 5. Gleichgewicht und Energie
+  - [ ] 5a. Gleichgewicht
+  - [ ] 5b. Energie
 - [ ] 6. Probeklausur Teil 1 (Aufgaben 1 bis 5)
 - [ ] 7. Säuren und Basen (sobald das Skript da ist)
 - [ ] 8. Redox und Elektrochemie (sobald das Skript da ist)

@@ -10,8 +10,10 @@ entstehen aber zuerst für mein Uni-Niveau.
 
 ### Geführt
 - Die Lösung ist in Schritte zerlegt, jeder Schritt ist Multiple Choice.
-- Schritt 1 ist immer „Welche Regel brauchst du?" (bei Rechnungen; eine
-  Wissensfrage in Chemie hat nur einen Schritt).
+- Schritt 1 ist in Mathe immer „Welche Regel brauchst du?" bzw. „Was
+  machst du als Nächstes?"; in Chemie beginnt eine Rechnung mit ihrem ersten
+  Rechenschritt (z. B. der Reaktionsgleichung), eine Wissensfrage hat meist
+  nur einen Schritt.
 - Die falschen Optionen sind typische Denkfehler, z. B. $(u \cdot v)' = u' \cdot v'$
   oder die vergessene innere Ableitung.
 - Bei einer falschen Antwort kann man sich erklären lassen, warum genau sie
