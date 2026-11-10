@@ -5,7 +5,7 @@
 // kommen, und die typischen Ionenladungen.
 //
 // Quellen (abgerufen 10.11.2026):
-// - Molmassen: IUPAC, Standard-Atomgewichte (Tabelle 2021, gekürzt auf eine Nachkommastelle).
+// - Molmassen: IUPAC, Standard-Atomgewichte (Tabelle 2021, gerundet auf eine Nachkommastelle).
 //   Genauere Werte nur in elements.test.ts zur Gegenprobe.
 // - Isotope: die in der Natur vorkommenden Isotope (IUPAC, Isotopenhäufigkeiten), dazu Tritium (³H)
 //   und ¹⁴C als bekannte Beispiele aus dem Unterricht. Technetium hat kein natürliches Isotop und

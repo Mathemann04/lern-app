@@ -119,7 +119,7 @@ function generate(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCal
     case 'wavelength':
       instruction = 'Berechne die Wellenlänge des Lichts in nm'
       given = String.raw`E = ${sci(givenValue)}\,\mathrm{J}`
-      detailed = String.raw`Aus $E = \frac{h \cdot c}{\lambda}$ folgt $\lambda = \frac{h \cdot c}{E} = \frac{${hcText}}{${sci(givenValue)}\,\mathrm{J}} \approx ${sci(ratMul(correct, NM))}\,\mathrm{m}$, in Nanometer (mal $10^{9}$) $\approx ${show(correct, subtype)}\,\mathrm{nm}$.`
+      detailed = String.raw`Aus $E = \frac{h \cdot c}{\lambda}$ folgt $\lambda = \frac{h \cdot c}{E} = \frac{${hcText}}{${sci(givenValue)}\,\mathrm{J}} \approx ${sci(ratMul(correct, NM))}\,\mathrm{m}$, in Nanometer (mal $10^{9}$) $\approx ${show(correct, subtype)}\,\mathrm{nm}$. Die Energie ist auf drei Ziffern gerundet; deshalb kann das Ergebnis ein wenig von der Wellenlänge abweichen, die für die Lichtquelle sonst angegeben wird (${source.nm} nm).`
       break
   }
 
