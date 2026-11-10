@@ -19,7 +19,18 @@ import {
 } from '../engine/tasks/taskNumber.ts'
 import { AreaIcon } from './AreaIcon.tsx'
 import { BackLink } from './BackLink.tsx'
-import { type Course, DERIVATIVES, FRACTIONS, GALLERY_COURSES, REARRANGE, SUBJECTS, courseById, isCourseAvailable } from './catalog.ts'
+import {
+  type Course,
+  DERIVATIVES,
+  FRACTIONS,
+  GALLERY_COURSES,
+  REARRANGE,
+  SUBJECTS,
+  courseById,
+  isChemCourse,
+  isCourseAvailable,
+  levelName,
+} from './catalog.ts'
 import { DerivationView } from './DerivationView.tsx'
 import { FractionGalleryCard } from './FractionGalleryCard.tsx'
 import { Formula } from './Formula.tsx'
@@ -58,8 +69,8 @@ function GalleryOverview() {
         <BackLink href="#/einstellungen" label="Einstellungen" />
         <h1 className="text-3xl font-semibold tracking-tight">Formel-Galerie</h1>
         <p className="text-zinc-600 text-pretty">
-          Testseite: Hier zeigt die Mathe-Engine zufällige Aufgaben mit Lösung, Rechenweg und typischen Fehlern. Wähle
-          ein Thema und prüfe, ob alles aussieht wie in deinem Skript.
+          Testseite: Hier zeigt die Mathe-Engine zufällige Aufgaben mit Lösung, Rechenweg und typischen Fehlern, in Chemie alle
+          Fragen mit ihren Antworten. Wähle ein Thema und prüfe, ob alles aussieht wie in deinem Skript.
         </p>
       </section>
 
@@ -128,7 +139,30 @@ function levelRange(levels: readonly Level[]): string {
   return `Stufen ${levels[0]} bis ${levels[levels.length - 1]}`
 }
 
+// Stufen mit Namen (Chemie), z. B. „Grundlagen, Vertiefung und Klausurniveau"
+function levelNames(course: Course): string {
+  const names = course.levels.filter((l) => l.available).map((l) => levelName(course.id, l.level))
+  return names.length > 1 ? `${names.slice(0, -1).join(', ')} und ${names.at(-1)}` : (names[0] ?? '')
+}
+
 function TopicTile({ course }: { course: Course }) {
+  if (isChemCourse(course.id)) {
+    return (
+      <a
+        href={galleryHref(course.id)}
+        className="flex items-center gap-4 rounded-2xl border border-zinc-200 px-4 py-4 transition-colors hover:border-accent-600 hover:bg-accent-50"
+      >
+        <AreaIcon kind={course.icon} className="size-14 shrink-0" />
+        <span className="min-w-0 flex-1 space-y-1">
+          <span className="block text-lg font-semibold">{course.title}</span>
+          <span className="block text-sm text-zinc-500">Fragen durchsehen · {levelNames(course)}</span>
+        </span>
+        <span aria-hidden className="text-accent-700">
+          →
+        </span>
+      </a>
+    )
+  }
   const levels = LEVELS.filter((l) => TOPICS[course.id].isLevelAvailable(l))
   return (
     <a

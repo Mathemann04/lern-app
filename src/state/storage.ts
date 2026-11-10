@@ -41,7 +41,7 @@ export type Attempt = {
 export type Dismissed = Readonly<Partial<Record<Level, number>>>
 
 export type Progress = {
-  // gelöste Aufgaben, älteste zuerst (die letzten MAX_ATTEMPTS)
+  // gelöste Aufgaben, älteste zuerst (je Thema die letzten MAX_ATTEMPTS)
   readonly attempts: readonly Attempt[]
   // wie oft welcher typische Fehler passiert ist (Id der Fehlerregel → Anzahl); die Ids sind über
   // alle Themen eindeutig
@@ -57,7 +57,21 @@ export type AppState = {
 }
 
 export const STORAGE_KEY = 'rechenweg'
+// so viele gelöste Aufgaben bleiben je Thema gespeichert (je Thema, damit viele schnelle
+// Wissensfragen den Verlauf anderer Themen nicht verdrängen)
 export const MAX_ATTEMPTS = 1000
+
+// Behält je Thema die letzten MAX_ATTEMPTS gelösten Aufgaben, in der bisherigen Reihenfolge
+export function trimAttempts(attempts: readonly Attempt[]): Attempt[] {
+  const counts = new Map<string, number>()
+  const keep = attempts.map(() => false)
+  for (let i = attempts.length - 1; i >= 0; i--) {
+    const n = (counts.get(attempts[i].course) ?? 0) + 1
+    counts.set(attempts[i].course, n)
+    keep[i] = n <= MAX_ATTEMPTS
+  }
+  return attempts.filter((_, i) => keep[i])
+}
 
 export const DEFAULT_SETTINGS: Settings = {
   explanations: true,
@@ -126,7 +140,7 @@ function readDismissed(value: unknown): Dismissed {
 function readProgress(value: unknown, version: number): Progress {
   if (typeof value !== 'object' || value === null) return EMPTY_PROGRESS
   const raw = value as Record<string, unknown>
-  const attempts = Array.isArray(raw.attempts) ? raw.attempts.flatMap((a) => readAttempt(a, version) ?? []).slice(-MAX_ATTEMPTS) : []
+  const attempts = Array.isArray(raw.attempts) ? trimAttempts(raw.attempts.flatMap((a) => readAttempt(a, version) ?? [])) : []
   const errors = Object.fromEntries(Object.entries(asRecord(raw.errors)).filter(([, n]) => isCount(n) && n > 0)) as Record<string, number>
   const suggestionDismissed =
     version >= 3

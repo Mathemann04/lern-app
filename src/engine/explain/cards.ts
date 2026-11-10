@@ -27,6 +27,7 @@ import {
 import { type FractionTask, taskExpr } from '../fraction/task.ts'
 import type { Level } from '../tasks/taskNumber.ts'
 import type { RearrangeTask } from '../rearrange/task.ts'
+import { ATOMBAU_CARDS } from './chem/atombauCards.ts'
 import { FRACTION_CARD_LIST } from './fractionCards.ts'
 import { REARRANGE_CARD_LIST } from './rearrangeCards.ts'
 import { WHEN_NEEDED } from './texts.ts'
@@ -34,8 +35,9 @@ import { WHEN_NEEDED } from './texts.ts'
 // Lernkarten: je Regel die Formel, ein Merksatz, wann man sie braucht, Beispiele und die
 // typischen Fehler dazu. Die Beispiele rechnet die Engine (example.ts), nicht die Karte.
 // Texte mit Formeln im Format von richText.ts. Die Karten liegen in Ordnern nach Themen
-// (Ableiten hier, Brüche in fractionCards.ts, Gleichungen umstellen in rearrangeCards.ts); spätere
-// Themen bekommen eigene Ordner.
+// (Ableiten hier, Brüche in fractionCards.ts, Gleichungen umstellen in rearrangeCards.ts, Chemie je
+// Thema in chem/); spätere Themen bekommen eigene Ordner. Chemie-Karten sind Wissenskarten: ihre
+// Beispiele stehen als Text da (ChemCardExample), Formeln dürfen fehlen.
 
 export type Topic = {
   // Teil der Adresse, z. B. #/karten/ableitungen
@@ -48,12 +50,25 @@ export const TOPICS: readonly Topic[] = [
   { id: 'ableitungen', title: 'Ableiten', description: 'Von der Potenzregel bis zum impliziten Ableiten' },
   { id: 'brueche', title: 'Brüche', description: 'Kürzen, erweitern, Hauptnenner, mal und geteilt' },
   { id: 'umstellen', title: 'Gleichungen umstellen', description: 'Gegenrechnung, Rüberbringen, Variable im Nenner, Ausklammern' },
+  { id: 'chem-atombau', title: 'Atombau', description: 'Elementarteilchen, Kernsymbol, Isotope, Ionen, Atommodelle und Licht' },
 ]
 
-// Beispiel einer Karte: beim Ableiten eine Funktion (beim impliziten Ableiten eine Gleichung), bei
-// Brüchen eine Aufgabe der Bruch-Engine, beim Umstellen eine Umstell-Aufgabe
-export type CardExample = Expr | Equation | FractionTask | RearrangeTask
+// Beispiel einer Chemie-Karte (Wissenskarte): die Aufgabe als Text mit Formeln und die Lösung in
+// Zeilen, je mit Beschriftung (Text mit Formeln) und optional einer Formel (LaTeX)
+export type ChemCardExample = {
+  readonly chemTask: string
+  readonly lines: readonly { readonly label: string; readonly latex?: string }[]
+}
 
+// Beispiel einer Mathe-Karte, von der Engine durchgerechnet (example.ts)
+export type MathCardExample = Expr | Equation | FractionTask | RearrangeTask
+
+// Beispiel einer Karte: beim Ableiten eine Funktion (beim impliziten Ableiten eine Gleichung), bei
+// Brüchen eine Aufgabe der Bruch-Engine, beim Umstellen eine Umstell-Aufgabe, in Chemie ein Text
+export type CardExample = MathCardExample | ChemCardExample
+
+// Chemie zuerst prüfen: Ein Text-Beispiel hat kein „kind" und sähe sonst aus wie eine Gleichung
+export const isChemExample = (e: CardExample): e is ChemCardExample => 'chemTask' in e
 export const isFractionExample = (e: CardExample): e is FractionTask => 'hints' in e
 export const isRearrangeExample = (e: CardExample): e is RearrangeTask => 'target' in e
 
@@ -67,7 +82,7 @@ export type Card = {
   readonly level: Level
   // Regeln der Engine, die die Karte erklärt (beim Ableiten; Bruchkarten wählt der Schrittplaner)
   readonly rules: readonly RuleId[]
-  // Formeln (LaTeX)
+  // Formeln (LaTeX); bei Wissenskarten (Chemie) darf die Liste leer sein
   readonly formulas: readonly string[]
   // Merksatz in einfachen Worten
   readonly memo: string
@@ -348,6 +363,7 @@ export const CARDS: readonly Card[] = [
   },
   ...FRACTION_CARD_LIST,
   ...REARRANGE_CARD_LIST,
+  ...ATOMBAU_CARDS,
 ]
 
 export function topicById(id: string): Topic | undefined {
@@ -365,7 +381,7 @@ export function cardForRule(rule: RuleId): Card | undefined {
 }
 
 // Beispiel als ein Term: Gleichung als linke minus rechte Seite, Bruchaufgabe als ihr Term
-function exampleTerm(e: CardExample): Expr {
+function exampleTerm(e: MathCardExample): Expr {
   if (isRearrangeExample(e)) return sub(e.equation.lhs, e.equation.rhs)
   if (isFractionExample(e)) return taskExpr(e)
   return isEquation(e) ? sub(e.lhs, e.rhs) : e
@@ -373,11 +389,11 @@ function exampleTerm(e: CardExample): Expr {
 
 // Beispiele einer Karte. In einer Aufgabe ohne die, die dort als Teil vorkommen: Sonst verriete
 // die Karte das Ergebnis eines Schritts (z. B. 4x³ in 4x³ − 2/x + √x).
-// (Bei Gleichungen ist task linke minus rechte Seite.)
+// (Bei Gleichungen ist task linke minus rechte Seite.) Text-Beispiele (Chemie) bleiben immer.
 export function examplesFor(card: Card, task?: Expr): readonly CardExample[] {
   if (!task) return card.examples
   const parts = new Set(subterms(task).map(key))
-  const fresh = card.examples.filter((e) => !parts.has(key(exampleTerm(e))))
+  const fresh = card.examples.filter((e) => isChemExample(e) || !parts.has(key(exampleTerm(e))))
   return fresh.length > 0 ? fresh : card.examples
 }
 

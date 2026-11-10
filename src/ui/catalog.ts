@@ -5,11 +5,31 @@ import type { Level } from '../engine/tasks/taskNumber.ts'
 // ohne spielbare Stufe stehen blass mit „kommt bald" da. Absichtlich ohne Mathe-Engine, damit die
 // Startseite schnell lädt.
 
-// Bild eines Gebiets oder Themas (AreaIcon.tsx)
-export type AreaIcon = 'basics' | 'derivative' | 'integral' | 'units' | 'statics' | 'slope' | 'fraction' | 'rearrange' | 'powers'
+// Bild eines Gebiets oder Themas (AreaIcon.tsx); jedes Thema mit eigenem Bild, Chemie-Themen ohne
+// eigenes (noch „kommt bald") nehmen das Bild ihres Gebiets
+export type AreaIcon =
+  | 'basics'
+  | 'derivative'
+  | 'integral'
+  | 'units'
+  | 'statics'
+  | 'slope'
+  | 'fraction'
+  | 'rearrange'
+  | 'powers'
+  | 'atom'
+  | 'nucleus'
+  | 'orbitals'
+  | 'periodic'
+  | 'bond'
+  | 'flask'
+  | 'equilibrium'
+  | 'ph'
+  | 'redox'
 
 // Farbe eines Gebiets (Farbfamilie aus index.css, gesetzt über data-tone). Die App selbst ist Blaugrün.
-export type Tone = 'orange' | 'blue' | 'violet' | 'pink' | 'cyan'
+// Nicht green, red, amber (richtig, falsch, Tipp) und nicht teal (App-Farbe).
+export type Tone = 'orange' | 'blue' | 'violet' | 'pink' | 'cyan' | 'indigo' | 'sky' | 'fuchsia'
 
 // Eine Stufe eines Themas mit Vorschau-Formeln (nur Aufgabenterme, keine Lösungen)
 export type LevelPreview = {
@@ -51,15 +71,23 @@ export type Area = {
 export type Subject = {
   readonly id: string
   readonly title: string
+  // Namen der Stufen, z. B. „Grundlagen", „Vertiefung", „Klausurniveau"; ihre Zahl ist die Zahl der
+  // Stufen. Ohne Angabe: fünf Stufen, genannt „Stufe 1" bis „Stufe 5".
+  readonly levelNames?: readonly string[]
   readonly areas: readonly Area[]
 }
 
 export const DERIVATIVES = 'ableiten'
 export const FRACTIONS = 'brueche'
 export const REARRANGE = 'umstellen'
+export const ATOMBAU = 'chem-atombau'
 
-// Themen mit Testseite in der Formel-Galerie (auch solche, die noch nicht spielbar sind)
-export const GALLERY_COURSES: readonly string[] = [DERIVATIVES, FRACTIONS, REARRANGE]
+// Chemie-Themen: Ids mit „chem-", Engine aus Wissensfragen (engine/chem/)
+export const isChemCourse = (id: string) => id.startsWith('chem-')
+
+// Themen mit Testseite in der Formel-Galerie (auch solche, die noch nicht spielbar sind); bei Chemie
+// die Seite „Fragen durchsehen"
+export const GALLERY_COURSES: readonly string[] = [DERIVATIVES, FRACTIONS, REARRANGE, ATOMBAU]
 
 const derivativeLevels: LevelPreview[] = [
   {
@@ -170,6 +198,40 @@ const rearrangeLevels: LevelPreview[] = [
   },
 ]
 
+// Chemie 1 (Plan M4): Atombau mit Wissensfragen in drei Stufen (S1)
+const atombauLevels: LevelPreview[] = [
+  {
+    level: 1,
+    available: true,
+    title: 'Stoffe, Elementarteilchen, Kernsymbol und Isotope',
+    examples: [String.raw`\ce{^{12}_{6}C}`, String.raw`\ce{^{14}_{6}C}`],
+  },
+  {
+    level: 2,
+    available: true,
+    title: 'Ionen, Größe von Kern und Atom, Atommodelle, Licht und Spektren',
+    examples: [String.raw`\ce{^{37}_{17}Cl^-}`, String.raw`E = h \cdot f`],
+  },
+  {
+    level: 3,
+    available: true,
+    title: 'Klausuraufgaben zum Atombau mit typischen Fallen',
+    examples: [String.raw`\ce{^{40}_{20}Ca^{2+}}`],
+  },
+]
+
+// Thema, das noch kommt (blass mit „kommt bald")
+const comingSoon = (id: string, title: string, description: string, icon: AreaIcon): Course => ({
+  id,
+  title,
+  description,
+  icon,
+  cards: null,
+  levels: [],
+  free: false,
+  focus: false,
+})
+
 export const SUBJECTS: readonly Subject[] = [
   {
     id: 'mathe',
@@ -244,6 +306,104 @@ export const SUBJECTS: readonly Subject[] = [
     ],
   },
   {
+    id: 'chemie',
+    title: 'Chemie 1',
+    levelNames: ['Grundlagen', 'Vertiefung', 'Klausurniveau'],
+    areas: [
+      {
+        id: 'chem-materie',
+        title: 'Aufbau der Materie',
+        description: 'Atome, Isotope, Atommodelle und Elektronen',
+        icon: 'atom',
+        tone: 'indigo',
+        courses: [
+          {
+            id: ATOMBAU,
+            title: 'Atombau',
+            description: 'Stoffe, Elementarteilchen, Kernsymbol, Isotope, Ionen, Atommodelle und Licht',
+            icon: 'nucleus',
+            cards: 'chem-atombau',
+            levels: atombauLevels,
+            free: false,
+            focus: false,
+          },
+          comingSoon('chem-elektronen', 'Elektronen', 'Quantenzahlen, Orbitale und Elektronenkonfiguration', 'orbitals'),
+        ],
+      },
+      {
+        id: 'chem-periodensystem',
+        title: 'Periodensystem',
+        description: 'Aufbau, Gruppen, Perioden und Trends',
+        icon: 'periodic',
+        tone: 'sky',
+        courses: [
+          comingSoon('chem-pse', 'Aufbau des Periodensystems', 'Perioden, Gruppen, Blöcke, Valenzelektronen und Ionenladung', 'periodic'),
+          comingSoon('chem-trends', 'Trends im Periodensystem', 'Atomradius, Ionisierungsenergie, Elektronegativität und Metallcharakter', 'periodic'),
+        ],
+      },
+      {
+        id: 'chem-bindung',
+        title: 'Chemische Bindung',
+        description: 'Ionen, Moleküle, Metalle und zwischenmolekulare Kräfte',
+        icon: 'bond',
+        tone: 'violet',
+        courses: [
+          comingSoon('chem-ionen', 'Ionenbindung und Salze', 'Formeln und Namen von Salzen, Ionengitter und ihre Eigenschaften', 'bond'),
+          comingSoon('chem-molekuele', 'Moleküle', 'Lewis-Formel, räumlicher Bau, Polarität und Namen', 'bond'),
+          comingSoon('chem-zmk', 'Zwischenmolekulare Kräfte', 'Van-der-Waals-Kräfte, Dipol-Dipol-Kräfte und Wasserstoffbrücken', 'bond'),
+          comingSoon('chem-metalle', 'Metallbindung und Hybridisierung', 'Elektronengas, Bändermodell, Halbleiter und Hybridorbitale', 'bond'),
+        ],
+      },
+      {
+        id: 'chem-stoechiometrie',
+        title: 'Stöchiometrie',
+        description: 'Gleichungen, Stoffmenge, Umsatz und Konzentration',
+        icon: 'flask',
+        tone: 'orange',
+        courses: [
+          comingSoon('chem-gleichungen', 'Reaktionsgleichungen', 'Aufstellen und ausgleichen, auch Verbrennungen', 'flask'),
+          comingSoon('chem-stoffmenge', 'Stoffmenge und Umsatz', 'Molare Masse, Stoffmenge und Umsatzrechnung', 'flask'),
+          comingSoon('chem-loesungen', 'Gase und Lösungen', 'Gasgesetz, molares Volumen, Konzentration und Anteile', 'flask'),
+        ],
+      },
+      {
+        id: 'chem-gleichgewicht',
+        title: 'Gleichgewicht und Energie',
+        description: 'Massenwirkungsgesetz, Le Chatelier, Enthalpie und Entropie',
+        icon: 'equilibrium',
+        tone: 'fuchsia',
+        courses: [
+          comingSoon('chem-mwg', 'Chemisches Gleichgewicht', 'Massenwirkungsgesetz, Le Chatelier und Katalysator', 'equilibrium'),
+          comingSoon('chem-energie', 'Energie bei Reaktionen', 'Exotherm und endotherm, Enthalpie, Entropie und freie Enthalpie', 'equilibrium'),
+        ],
+      },
+      {
+        id: 'chem-saeure-base',
+        title: 'Säuren und Basen',
+        description: 'Brønsted, pH-Wert, Puffer und Titration',
+        icon: 'ph',
+        tone: 'pink',
+        courses: [
+          comingSoon('chem-broensted', 'Säuren und Basen nach Brønsted', 'Protonen abgeben und aufnehmen, korrespondierende Paare', 'ph'),
+          comingSoon('chem-ph', 'pH-Wert', 'pH-Wert von Säuren und Basen berechnen', 'ph'),
+          comingSoon('chem-puffer', 'Puffer und Titration', 'Pufferlösungen, Neutralisation und Äquivalenzpunkt', 'ph'),
+        ],
+      },
+      {
+        id: 'chem-redox',
+        title: 'Redox und Elektrochemie',
+        description: 'Oxidationszahlen, Redoxreaktionen, Zellen und Elektrolyse',
+        icon: 'redox',
+        tone: 'blue',
+        courses: [
+          comingSoon('chem-oxidationszahlen', 'Oxidationszahlen', 'Oxidationszahlen in Teilchen und Reaktionen bestimmen', 'redox'),
+          comingSoon('chem-redoxreaktionen', 'Redoxreaktionen', 'Oxidation und Reduktion erkennen, Gleichungen aufstellen', 'redox'),
+          comingSoon('chem-elektrochemie', 'Galvanische Zelle und Elektrolyse', 'Standardpotentiale, Zellspannung, Anode und Kathode', 'redox'),
+        ],
+      },
+    ],
+  },
+  {
     id: 'physik',
     title: 'Physik',
     areas: [
@@ -295,6 +455,19 @@ export const AVAILABLE_COURSES: readonly Course[] = COURSES.map((entry) => entry
 export function courseOfCards(folder: string): { area: Area; course: Course } | undefined {
   return COURSES.find(({ course }) => course.cards === folder)
 }
+
+// Zahl der Stufen eines Themas (aus seinem Fach): bei Mathe fünf, bei Chemie drei
+export function levelCount(courseId: string): number {
+  return courseById(courseId)?.subject.levelNames?.length ?? 5
+}
+
+// Name einer Stufe, z. B. „Stufe 3" in Mathe, „Vertiefung" in Chemie
+export function levelName(courseId: string, level: Level): string {
+  return courseById(courseId)?.subject.levelNames?.[level - 1] ?? `Stufe ${level}`
+}
+
+// Hat das Fach des Themas eigene Namen für die Stufen?
+export const hasLevelNames = (courseId: string) => courseById(courseId)?.subject.levelNames !== undefined
 
 // Stufe, mit der ein Thema geübt wird: die gemerkte, wenn sie spielbar ist, sonst die erste spielbare
 export function playableLevel(course: Course, wanted: Level | undefined): Level {

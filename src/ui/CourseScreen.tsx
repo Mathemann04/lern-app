@@ -4,7 +4,7 @@ import { setCourseLevel, updateSettings, useSettings } from '../state/settings.t
 import type { PracticeMode } from '../state/storage.ts'
 import { AreaIcon } from './AreaIcon.tsx'
 import { BackLink } from './BackLink.tsx'
-import { courseById, playableLevel } from './catalog.ts'
+import { courseById, hasLevelNames, levelName, playableLevel } from './catalog.ts'
 import { Formula } from './Formula.tsx'
 import { areaHref, cardFolderHref, practiceHref } from './routes.ts'
 
@@ -22,6 +22,8 @@ export function CourseScreen({ id }: { id: string }) {
   const selected = playableLevel(course, settings.levels[id])
   // Ohne freien Modus wird geführt geübt
   const practiceMode: PracticeMode = course.free ? settings.practiceMode : 'guided'
+  // Stufen mit Namen (Chemie): der Name steht über dem Inhalt der Stufe
+  const named = hasLevelNames(id)
   return (
     <main className="space-y-6">
       <div className="space-y-3">
@@ -58,7 +60,8 @@ export function CourseScreen({ id }: { id: string }) {
                       disabled={disabled}
                       onChange={() => updateSettings({ practiceMode: option.value })}
                     />
-                    <span className={`block font-medium ${checked ? 'text-accent-700' : ''}`}>{option.title}</span>
+                    {/* Im Dunkeln eine Stufe heller: auf der grauen Fläche sonst zu wenig Kontrast */}
+                    <span className={`block font-medium ${checked ? 'text-accent-700 dark:text-accent-800' : ''}`}>{option.title}</span>
                     <span className="block text-sm text-zinc-500">{disabled ? 'kommt bald' : option.description}</span>
                   </label>
                 )
@@ -69,7 +72,7 @@ export function CourseScreen({ id }: { id: string }) {
             href={practiceHref(id, selected, practiceMode)}
             className="block rounded-xl bg-accent-700 px-4 py-3 text-center text-lg font-medium text-on-accent hover:bg-accent-800"
           >
-            Stufe {selected} {practiceMode === 'free' ? 'frei' : 'geführt'} üben
+            {levelName(id, selected)} {practiceMode === 'free' ? 'frei' : 'geführt'} üben
           </a>
         </div>
         {/* Linie am umgebenden Element: Bei fieldset würde die Beschriftung sie unterbrechen */}
@@ -97,7 +100,7 @@ export function CourseScreen({ id }: { id: string }) {
                       checked={isSelected}
                       disabled={!level.available}
                       onChange={() => setCourseLevel(id, level.level)}
-                      aria-label={`Stufe ${level.level}: ${level.title}${level.available ? '' : ' (folgt bald)'}`}
+                      aria-label={`${levelName(id, level.level)}: ${level.title}${level.available ? '' : ' (folgt bald)'}`}
                     />
                     <span
                       aria-hidden
@@ -108,6 +111,7 @@ export function CourseScreen({ id }: { id: string }) {
                       {level.level}
                     </span>
                     <span className="min-w-0 space-y-2">
+                      {named && <span className="block text-sm font-semibold text-accent-700">{levelName(id, level.level)}</span>}
                       <span className="block font-medium">
                         {level.title}
                         {!level.available && <span className="font-normal text-zinc-500"> · folgt bald</span>}

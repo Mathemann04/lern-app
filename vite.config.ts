@@ -36,7 +36,7 @@ export default defineConfig({
       manifest: {
         name: 'Rechenweg',
         short_name: 'Rechenweg',
-        description: 'Mathe Schritt für Schritt selbst lösen',
+        description: 'Schritt für Schritt selbst lösen',
         lang: 'de',
         theme_color: '#ffffff',
         background_color: '#ffffff',

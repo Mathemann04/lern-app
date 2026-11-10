@@ -5,8 +5,8 @@ import type { TaskRef } from '../tasks/taskNumber.ts'
 
 // Geführter Modus, für alle Themen gleich: eine Aufgabe als Folge von Bildschirm-Schritten mit
 // Auswahl-Antworten. Die Schrittplaner der Themen (plan.ts fürs Ableiten, fractionPlan.ts für
-// Brüche) bauen sie; die Oberfläche kennt nur diese Typen. Texte mit Formeln im Format von
-// richText.ts.
+// Brüche, quiz/plan.ts für Wissensfragen) bauen sie; die Oberfläche kennt nur diese Typen. Texte
+// mit Formeln im Format von richText.ts.
 
 export type Choice = {
   readonly id: string
@@ -42,26 +42,54 @@ export type GuidedStep = {
   readonly cards: readonly string[]
 }
 
-export type GuidedTask = {
+// Gemeinsame Basis aller geführten Aufgaben: Mathe-Aufgaben mit Term (GuidedTask) und Wissensfragen
+// ohne Term (Chemie, engine/quiz/plan.ts). Die Oberfläche (TaskScreen) kennt nur diese Basis; der
+// freie Modus braucht die Mathe-Felder (isMathTask).
+export type GuidedTaskBase = {
   readonly ref: TaskRef
+  // Arbeitsauftrag, z. B. „Leite ab" oder „Wähle die richtige Antwort" (Text mit Formeln)
+  readonly instruction: string
+  // Zusatz unter der Aufgabe (Text mit Formeln), z. B. „Alle Buchstaben stehen für positive Zahlen."
+  readonly note?: string
+  readonly steps: readonly GuidedStep[]
+  // Lernkarten zu allen Regeln der Aufgabe, außen zuerst
+  readonly cards: readonly string[]
+  // Aufgabe als LaTeX (große Formel über den Schritten); ohne Angabe keine Formel
+  readonly functionLatex?: string
+  // die Aufgabe als Term; Lernkarten zeigen davon keine Teile als Beispiel
+  readonly expr?: Expr
+  // Ergebnis als Formel (LaTeX) …
+  readonly resultLatex?: string
+  // … oder als Text mit Formeln (bei Fragen: die richtige Antwort)
+  readonly resultText?: string
+  // bei Fragen: die Frage selbst (Text mit Formeln), über der richtigen Antwort; ohne sie stünde eine
+  // Antwort, die nur ein Satzteil ist, ohne Zusammenhang da
+  readonly resultQuestion?: string
+  // Zusatz zum Ergebnis (Text mit Formeln), z. B. „Gilt für $x \neq 0$."
+  readonly resultNote?: string
+  // Tipp für die ganze Aufgabe (im freien Modus)
+  readonly ruleHint?: Explanation
+  // Name des gesuchten Ergebnisses im freien Modus
+  readonly answerLabel?: string
+  // bei Wissensfragen: Id der Frage (für „Frage melden")
+  readonly questionId?: string
+}
+
+// Mathe-Aufgabe: mit Term, Formel und Ergebnis
+export type GuidedTask = GuidedTaskBase & {
   // die Aufgabe als Term (Aufgabenform); beim impliziten Ableiten linke minus rechte Seite.
   // Lernkarten zeigen davon keine Teile als Beispiel.
   readonly expr: Expr
   // Aufgabe als LaTeX: f(x) = …, die Gleichung oder der Bruchterm
   readonly functionLatex: string
-  // Arbeitsauftrag, z. B. „Leite ab" (Text mit Formeln)
-  readonly instruction: string
-  // Zusatz unter der Aufgabe (Text mit Formeln), z. B. „Alle Buchstaben stehen für positive Zahlen."
-  readonly note?: string
   // Name des gesuchten Ergebnisses im freien Modus: f'(x) bzw. y'
   readonly answerLabel: string
-  readonly steps: readonly GuidedStep[]
   // Tipp für die ganze Aufgabe (im freien Modus), z. B. welche Regel ganz außen
   readonly ruleHint: Explanation
   readonly result: Expr
   readonly resultLatex: string
-  // Zusatz zum Ergebnis (Text mit Formeln), z. B. „Gilt für $x \neq 0$."
-  readonly resultNote?: string
-  // Lernkarten zu allen Regeln der Aufgabe, außen zuerst
-  readonly cards: readonly string[]
 }
+
+// Hat die Aufgabe alles, was der freie Modus der Mathe-Themen braucht?
+export const isMathTask = (task: GuidedTaskBase): task is GuidedTask =>
+  'result' in task && task.expr !== undefined && task.functionLatex !== undefined && task.resultLatex !== undefined

@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react'
 import { findError } from '../../engine/errorCatalog.ts'
-import { type Card, type CardExample as Example, examplesFor } from '../../engine/explain/cards.ts'
+import { type Card, type CardExample as Example, type ChemCardExample, type MathCardExample, examplesFor, isChemExample } from '../../engine/explain/cards.ts'
 import { cardExample } from '../../engine/explain/example.ts'
 import type { Expr } from '../../engine/expr/types.ts'
 import { useProgress } from '../../state/progress.ts'
 import { useSettings } from '../../state/settings.ts'
+import { ErrorShape } from '../ErrorShape.tsx'
 import { FitWidth } from '../FitWidth.tsx'
 import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
@@ -12,7 +13,8 @@ import { courseOfCards, playableLevel } from '../catalog.ts'
 import { practiceHref } from '../routes.ts'
 
 // Inhalt einer Lernkarte: Formel, Merksatz, wann man die Regel braucht, ein durchgerechnetes
-// Beispiel (von der Engine) und die typischen Fehler.
+// Beispiel (von der Engine; bei Wissenskarten in Chemie als Text) und die typischen Fehler. Karten
+// ohne Formel (Wissenskarten) haben keinen Formel-Kasten.
 // heading: Ebene der Abschnitts-Überschriften; practice: Knöpfe „Gezielt üben" zeigen
 // (nicht innerhalb einer Aufgabe, sonst ginge sie verloren); task: die Aufgabe, aus der die
 // Karte geöffnet wurde (deren Teile kommen nicht als Beispiel)
@@ -24,13 +26,15 @@ export function CardBody({ card, heading: H, practice, task }: Props) {
   const headingClass = 'text-sm font-semibold text-accent-700'
   return (
     <div className="space-y-6">
-      <div className="space-y-2 rounded-2xl bg-accent-50 px-4 py-4" aria-label="Formel">
-        {card.formulas.map((tex) => (
-          <FitWidth key={tex} className="text-xl">
-            <Formula tex={tex} />
-          </FitWidth>
-        ))}
-      </div>
+      {card.formulas.length > 0 && (
+        <div className="space-y-2 rounded-2xl bg-accent-50 px-4 py-4" aria-label="Formel">
+          {card.formulas.map((tex) => (
+            <FitWidth key={tex} className="text-xl">
+              <Formula tex={tex} />
+            </FitWidth>
+          ))}
+        </div>
+      )}
 
       <section className="space-y-2">
         <H className={headingClass}>Merksatz</H>
@@ -54,7 +58,7 @@ export function CardBody({ card, heading: H, practice, task }: Props) {
 
 function CardExample({ examples, heading: H, headingClass }: { examples: readonly Example[]; heading: Heading; headingClass: string }) {
   const [index, setIndex] = useState(0)
-  const example = useMemo(() => cardExample(examples[index]), [examples, index])
+  const current = examples[index]
   return (
     <section className="space-y-3" aria-label="Beispiel">
       <div className="flex items-baseline justify-between gap-3">
@@ -65,19 +69,7 @@ function CardExample({ examples, heading: H, headingClass }: { examples: readonl
           </p>
         )}
       </div>
-      <FitWidth className="text-xl">
-        <Formula tex={example.functionLatex} />
-      </FitWidth>
-      <ol className="space-y-3 border-l-2 border-accent-200 pl-4">
-        {example.lines.map((line, i) => (
-          <li key={`${index}-${i}`} className="space-y-1">
-            <RichText text={line.label} className="text-sm text-zinc-600" inline />
-            <FitWidth className="text-lg">
-              <Formula tex={line.latex} />
-            </FitWidth>
-          </li>
-        ))}
-      </ol>
+      {isChemExample(current) ? <ChemExample key={index} example={current} /> : <WorkedExample key={index} example={current} />}
       {examples.length > 1 && (
         <button
           type="button"
@@ -88,6 +80,50 @@ function CardExample({ examples, heading: H, headingClass }: { examples: readonl
         </button>
       )}
     </section>
+  )
+}
+
+// Von der Engine durchgerechnet (Mathe)
+function WorkedExample({ example: e }: { example: MathCardExample }) {
+  const example = useMemo(() => cardExample(e), [e])
+  return (
+    <>
+      <FitWidth className="text-xl">
+        <Formula tex={example.functionLatex} />
+      </FitWidth>
+      <ol className="space-y-3 border-l-2 border-accent-200 pl-4">
+        {example.lines.map((line, i) => (
+          <li key={i} className="space-y-1">
+            <RichText text={line.label} className="text-sm text-zinc-600" inline />
+            <FitWidth className="text-lg">
+              <Formula tex={line.latex} />
+            </FitWidth>
+          </li>
+        ))}
+      </ol>
+    </>
+  )
+}
+
+// Wissenskarte (Chemie): Aufgabe als Text, Lösung in Zeilen mit Beschriftung und optional einer Formel
+function ChemExample({ example }: { example: ChemCardExample }) {
+  return (
+    <>
+      <RichText text={example.chemTask} className="text-lg font-medium" />
+      <ol className="space-y-3 border-l-2 border-accent-200 pl-4">
+        {example.lines.map((line, i) => (
+          <li key={i} className="space-y-1">
+            {/* Alle Beschriftungen gleich, ob mit Formel darunter oder ohne (in Aufzählungen sonst ungleich) */}
+            <RichText text={line.label} className="block text-zinc-800" inline />
+            {line.latex !== undefined && (
+              <FitWidth className="text-lg">
+                <Formula tex={line.latex} />
+              </FitWidth>
+            )}
+          </li>
+        ))}
+      </ol>
+    </>
   )
 }
 
@@ -110,12 +146,7 @@ function CardErrors({ card, heading: H, headingClass, practice }: Props & { head
                 <RichText text={rule.name} className="block font-medium" inline />
                 {times > 0 && <p className="shrink-0 text-sm text-amber-800">Dir {times}-mal passiert</p>}
               </div>
-              <div className="text-zinc-700">
-                <span className="text-sm text-zinc-500">So sieht der Fehler aus:</span>
-                <FitWidth>
-                  <Formula tex={rule.wrongFormula} />
-                </FitWidth>
-              </div>
+              <ErrorShape error={rule} />
               {canPractice && (
                 <a
                   href={practiceHref(course.id, playableLevel(course, settings.levels[course.id]), course.free ? settings.practiceMode : 'guided', id)}

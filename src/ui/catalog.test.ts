@@ -2,7 +2,22 @@ import { describe, expect, it } from 'vitest'
 import { TOPICS, topicById } from '../engine/explain/cards.ts'
 import { ERRORS_BY_COURSE } from '../engine/errorCatalog.ts'
 import { toLatex } from '../engine/expr/print.ts'
-import { AVAILABLE_COURSES, DERIVATIVES, FRACTIONS, SUBJECTS, areaById, courseById, courseOfCards, isAreaAvailable, playableLevel } from './catalog.ts'
+import { isMathTask } from '../engine/guided/types.ts'
+import {
+  ATOMBAU,
+  AVAILABLE_COURSES,
+  DERIVATIVES,
+  FRACTIONS,
+  SUBJECTS,
+  areaById,
+  courseById,
+  courseOfCards,
+  isAreaAvailable,
+  isChemCourse,
+  levelCount,
+  levelName,
+  playableLevel,
+} from './catalog.ts'
 import { loadCourseEngine } from './courseEngines.ts'
 
 const areas = SUBJECTS.flatMap((s) => s.areas)
@@ -25,15 +40,52 @@ describe('Aufbau der App (Fächer, Gebiete, Themen)', () => {
       expect(ERRORS_BY_COURSE[course.id]?.length, course.id).toBeGreaterThan(0)
       const engine = await loadCourseEngine(course.id)
       const level = course.levels.find((l) => l.available)!.level
-      const plan = engine.planGuidedTask({ level, seed: 1 })
+      // Wissensfragen: eine Nummer, die es in der Stufe gibt
+      const seed = engine.nextSeed ? engine.nextSeed(level) : 1
+      const plan = engine.planGuidedTask({ level, seed })
       expect(plan.steps.length, course.id).toBeGreaterThan(0)
-      // freier Modus: das Ergebnis des geführten Modus gilt als richtig
-      if (course.free) expect(engine.prepareFree({ level, seed: 1 }).check(toLatex(plan.result)).kind, course.id).toBe('correct')
+      // freier Modus: das Ergebnis des geführten Modus (Mathe-Engine) gilt als richtig
+      if (course.free) {
+        if (!isMathTask(plan)) throw new Error(`${course.id}: freier Modus ohne Ergebnis als Term`)
+        expect(engine.prepareFree({ level, seed }).check(toLatex(plan.result)).kind, course.id).toBe('correct')
+      }
     }
   })
 
-  it('hat je Thema fünf Stufen oder keine (kommt bald)', () => {
-    for (const course of courses) expect([0, 5], course.id).toContain(course.levels.length)
+  it('hat je Thema so viele Stufen wie sein Fach (levelNames) oder keine (kommt bald)', () => {
+    for (const subject of SUBJECTS) {
+      const count = subject.levelNames?.length ?? 5
+      for (const course of subject.areas.flatMap((a) => a.courses)) {
+        expect([0, count], course.id).toContain(course.levels.length)
+        expect(course.levels.map((l) => l.level), course.id).toEqual(Array.from({ length: course.levels.length }, (_, i) => i + 1))
+        expect(levelCount(course.id)).toBe(count)
+      }
+    }
+  })
+
+  it('nennt die Stufen in Chemie mit Namen, in Mathe mit Nummer', () => {
+    expect(levelName(DERIVATIVES, 3)).toBe('Stufe 3')
+    expect([1, 2, 3].map((l) => levelName(ATOMBAU, l as 1 | 2 | 3))).toEqual(['Grundlagen', 'Vertiefung', 'Klausurniveau'])
+    expect(levelCount(ATOMBAU)).toBe(3)
+    expect(levelCount(FRACTIONS)).toBe(5)
+  })
+
+  it('hat Chemie als zweites Fach mit Ids nach den Regeln (chem-, a bis z und Bindestriche, höchstens 40 Zeichen)', () => {
+    const chemistry = SUBJECTS[1]
+    expect(chemistry.title).toBe('Chemie 1')
+    const chemIds = chemistry.areas.flatMap((a) => [a.id, ...a.courses.map((c) => c.id)])
+    for (const id of chemIds) {
+      expect(id).toMatch(/^chem-[a-z-]{1,35}$/)
+      expect(isChemCourse(id)).toBe(true)
+    }
+    // Gebiets-Ids sind keine Themen-Ids
+    const areaIds = new Set(chemistry.areas.map((a) => a.id))
+    for (const course of chemistry.areas.flatMap((a) => a.courses)) expect(areaIds.has(course.id), course.id).toBe(false)
+    // Säuren und Basen sowie Redox stehen schon als „kommt bald" da
+    expect(isAreaAvailable(areaById('chem-saeure-base')!.area)).toBe(false)
+    expect(isAreaAvailable(areaById('chem-redox')!.area)).toBe(false)
+    expect(isAreaAvailable(areaById('chem-materie')!.area)).toBe(true)
+    expect(courseById(ATOMBAU)?.area.id).toBe('chem-materie')
   })
 
   it('findet Gebiete und Themen samt Fach', () => {

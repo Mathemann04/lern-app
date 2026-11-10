@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { DEFAULT_SETTINGS, DEFAULT_STATE, EMPTY_PROGRESS, type KeyValueStore, STORAGE_KEY, loadState, saveState } from './storage.ts'
+import { DEFAULT_SETTINGS, DEFAULT_STATE, EMPTY_PROGRESS, type KeyValueStore, MAX_ATTEMPTS, STORAGE_KEY, loadState, saveState } from './storage.ts'
 
 function memoryStore(initial?: string): KeyValueStore & { data: Map<string, string> } {
   const data = new Map<string, string>()
@@ -98,6 +98,15 @@ describe('Fortschritt im Speicher', () => {
       errors: { 'cos-sign': 2 },
       suggestionDismissed: { brueche: { 1: 10 }, ableiten: {} },
     })
+  })
+
+  it('behält je Thema die letzten gelösten Aufgaben', () => {
+    const many = Array.from({ length: MAX_ATTEMPTS + 3 }, (_, i) => ({ course: 'chem-atombau', level: 1, mode: 'guided', clean: true, at: 10 + i }))
+    const text = JSON.stringify({ version: 3, progress: { attempts: [{ course: 'ableiten', level: 2, mode: 'free', clean: true, at: 1 }, ...many] } })
+    const { attempts } = loadState(memoryStore(text)).progress
+    expect(attempts.filter((a) => a.course === 'chem-atombau')).toHaveLength(MAX_ATTEMPTS)
+    expect(attempts[0]).toEqual({ course: 'ableiten', level: 2, mode: 'free', clean: true, at: 1 })
+    expect(attempts[1].at).toBe(13)
   })
 })
 

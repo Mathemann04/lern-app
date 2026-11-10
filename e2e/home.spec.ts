@@ -21,13 +21,17 @@ test('Startseite zeigt Fächer mit Gebieten, Kommendes blass, und „Los geht’
   const errors = collectErrors(page)
   await page.goto('./')
 
-  await expect(page.getByRole('heading', { name: 'Mathe Schritt für Schritt selbst lösen' })).toBeVisible()
-  await expect(page.getByRole('heading', { level: 2 })).toHaveText(['Los geht’s', 'Mathematik MB1', 'Physik', 'Technische Mechanik'])
-  // Grundlagen und Differentialrechnung lassen sich öffnen; Integralrechnung, Physik und Statik kommen bald
+  await expect(page.getByRole('heading', { name: 'Schritt für Schritt selbst lösen' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 2 })).toHaveText(['Los geht’s', 'Mathematik MB1', 'Chemie 1', 'Physik', 'Technische Mechanik'])
+  // Grundlagen, Differentialrechnung und Aufbau der Materie lassen sich öffnen; Integralrechnung, sechs
+  // Chemie-Gebiete (auch Säuren und Basen sowie Redox), Physik und Statik kommen bald
   await expect(page.getByRole('link', { name: /^Grundlagen/ })).toBeVisible()
   await expect(page.getByRole('link', { name: /^Differentialrechnung/ })).toBeVisible()
-  await expect(page.getByText('kommt bald')).toHaveCount(3)
+  await expect(page.getByRole('link', { name: /^Aufbau der Materie/ })).toBeVisible()
+  await expect(page.getByText('kommt bald')).toHaveCount(9)
   await expect(page.getByRole('link', { name: /Integralrechnung/ })).toHaveCount(0)
+  await expect(page.getByRole('link', { name: /Säuren und Basen/ })).toHaveCount(0)
+  await expect(page.getByText('Redox und Elektrochemie')).toBeVisible()
   await expect(page.getByRole('link', { name: 'Erste Aufgabe · geführt' })).toHaveAttribute('href', '#/ueben/ableiten/1')
   await expectCleanPage(page, 'Startseite')
   expect(errors).toEqual([])

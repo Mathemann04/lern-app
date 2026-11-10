@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { numericImplicitDerivative } from '../check/curve.ts'
 import { numericDerivative } from '../check/numeric.ts'
+import { chemTopic } from '../chem/banks.ts'
 import { ERROR_RULES } from '../derive/errorRules.ts'
+import { ERRORS_BY_COURSE } from '../errorCatalog.ts'
 import { allNodes, derive } from '../derive/derive.ts'
 import { deriveImplicit, implicitCurvePoints, implicitResult } from '../derive/implicit.ts'
 import type { RuleId } from '../derive/rules.ts'
@@ -11,8 +13,6 @@ import { latexProblem } from '../expr/latexChecks.ts'
 import { equationToLatex, toLatex } from '../expr/print.ts'
 import { type Equation, type Expr, E, add, cos, div, exp, fn, isEquation, ln, log, mul, neg, num, pow, sin, sqrt, sub, tan, x } from '../expr/types.ts'
 import { generateDerivativeTask } from '../tasks/derivativeTerms.ts'
-import { FRACTION_ERROR_RULES } from '../fraction/errorRules.ts'
-import { REARRANGE_ERROR_RULES } from '../rearrange/errorRules.ts'
 import { fracEquals, toFrac } from '../fraction/frac.ts'
 import { solveFraction, solveTree } from '../fraction/solve.ts'
 import { taskExpr as toExprOf, taskFrac, taskLatex } from '../fraction/task.ts'
@@ -22,19 +22,44 @@ import { createRng } from '../random/rng.ts'
 import { holds, samplePoints, withSubstitution } from '../rearrange/check.ts'
 import { solveTask } from '../rearrange/isolate.ts'
 import { taskLatex as rearrangeTaskLatex } from '../rearrange/task.ts'
-import { CARDS, type CardExample, TOPICS, cardById, cardForRule, cardIdsFor, cardsInTopic, examplesFor, isFractionExample, isRearrangeExample, topicById } from './cards.ts'
+import {
+  CARDS,
+  type CardExample,
+  TOPICS,
+  cardById,
+  cardForRule,
+  cardIdsFor,
+  cardsInTopic,
+  examplesFor,
+  isChemExample,
+  isFractionExample,
+  isRearrangeExample,
+  topicById,
+} from './cards.ts'
 import { cardExample, workedExample } from './example.ts'
 import { parseRichText } from './richText.ts'
 
+// Aufgabe eines Beispiels als Text (Chemie) bzw. als LaTeX (Mathe)
 const latexOf = (e: CardExample) =>
-  isRearrangeExample(e) ? rearrangeTaskLatex(e) : isFractionExample(e) ? taskLatex(e) : isEquation(e) ? equationToLatex(e) : toLatex(e)
+  isChemExample(e)
+    ? e.chemTask
+    : isRearrangeExample(e)
+      ? rearrangeTaskLatex(e)
+      : isFractionExample(e)
+        ? taskLatex(e)
+        : isEquation(e)
+          ? equationToLatex(e)
+          : toLatex(e)
 
-// Karten zum Ableiten (Beispiele sind Funktionen bzw. Gleichungen) und zu Brüchen
+// Karten zum Ableiten (Beispiele sind Funktionen bzw. Gleichungen), zu Brüchen und zum Umstellen
+// (Mathe: Beispiele rechnet die Engine) und Wissenskarten in Chemie (Beispiele als Text)
 const DERIVATIVE_CARDS = cardsInTopic('ableitungen')
 const FRACTION_CARDS = cardsInTopic('brueche')
 const REARRANGE_CARDS = cardsInTopic('umstellen')
+const MATH_CARDS = [...DERIVATIVE_CARDS, ...FRACTION_CARDS, ...REARRANGE_CARDS]
+const CHEM_CARDS = CARDS.filter((c) => c.topic.startsWith('chem-'))
 const derivativeExample = (e: CardExample): Expr | Equation => {
-  if (isFractionExample(e) || isRearrangeExample(e)) throw new Error('Keine Ableitungsaufgabe auf einer Karte zum Ableiten')
+  if (isChemExample(e) || isFractionExample(e) || isRearrangeExample(e)) throw new Error('Keine Ableitungsaufgabe auf einer Karte zum Ableiten')
   return e
 }
 
@@ -73,17 +98,27 @@ describe('Lernkarten: Katalog', () => {
       expect(cardsInTopic(topic.id).length, topic.id).toBeGreaterThan(0)
       expect(cardById(topic.id)).toBeUndefined()
     }
-    expect(DERIVATIVE_CARDS.length + FRACTION_CARDS.length + REARRANGE_CARDS.length).toBe(CARDS.length)
+    expect(MATH_CARDS.length + CHEM_CARDS.length).toBe(CARDS.length)
   })
 
   it.each(CARDS.map((c) => [c.id, c] as const))('%s: alle Texte und Formeln lassen sich setzen', (id, card) => {
     for (const text of [card.title, card.memo, card.note ?? '', card.when ?? '']) expectRenderable(text, id)
     for (const formula of card.formulas) expect(latexProblem(formula, { checkUgly: false }), id).toBeNull()
-    expect(card.formulas.length).toBeGreaterThan(0)
+    // Mathe-Karten haben immer eine Formel, Wissenskarten (Chemie) nicht unbedingt
+    if (MATH_CARDS.includes(card)) expect(card.formulas.length).toBeGreaterThan(0)
+    for (const e of card.examples) {
+      if (!isChemExample(e)) continue
+      expectRenderable(e.chemTask, id)
+      expect(e.lines.length, id).toBeGreaterThan(0)
+      for (const line of e.lines) {
+        expectRenderable(line.label, id)
+        if (line.latex !== undefined) expect(latexProblem(line.latex, { checkUgly: false }), id).toBeNull()
+      }
+    }
   })
 
-  it('kennt nur bestehende typische Fehler', () => {
-    const known = new Set([...ERROR_RULES, ...FRACTION_ERROR_RULES, ...REARRANGE_ERROR_RULES].map((r) => r.id))
+  it('kennt nur bestehende typische Fehler (aller Themen)', () => {
+    const known = new Set(Object.values(ERRORS_BY_COURSE).flatMap((list) => list.map((r) => r.id)))
     for (const card of CARDS) for (const id of card.errors) expect(known.has(id), `${card.id}: ${id}`).toBe(true)
   })
 
@@ -234,8 +269,8 @@ describe('Lernkarten: Brüche', () => {
   })
 
   it.each(examples)('%s: %s', (id, _latex, _card, e) => {
-    const example = cardExample(e)
     if (!isFractionExample(e)) throw new Error(id)
+    const example = cardExample(e)
     const solution = solveFraction(e)
     expect(example.result).toEqual(solution.result)
     expect(example.lines.at(-1)!.latex).toBe(`= ${toLatex(solution.result)}`)
@@ -279,6 +314,35 @@ describe('Lernkarten: Brüche', () => {
     const [first] = card.examples
     if (!isFractionExample(first)) throw new Error('kein Bruch')
     expect(examplesFor(card, toExprOf(first)).map(latexOf)).not.toContain(latexOf(first))
+  })
+})
+
+describe('Lernkarten: Chemie', () => {
+  it('hat Wissenskarten mit Text-Beispielen, je Karte mindestens zwei', () => {
+    expect(CHEM_CARDS.length).toBeGreaterThan(0)
+    for (const card of CHEM_CARDS) {
+      expect(card.examples.length, card.id).toBeGreaterThanOrEqual(2)
+      for (const e of card.examples) expect(isChemExample(e), card.id).toBe(true)
+    }
+    for (const card of MATH_CARDS) for (const e of card.examples) expect(isChemExample(e), card.id).toBe(false)
+  })
+
+  it('zeigt jeden Denkfehler aus den spielbaren Stufen auf einer Karte des Themas', () => {
+    for (const card of CHEM_CARDS) {
+      const topic = chemTopic(card.topic)
+      expect(topic, card.topic).toBeDefined()
+    }
+    for (const topicId of new Set(CHEM_CARDS.map((c) => c.topic))) {
+      const { bank } = chemTopic(topicId)!
+      const shown = new Set(cardsInTopic(topicId).flatMap((c) => c.errors))
+      const used = new Set(bank.questions.flatMap((q) => q.wrong.map((w) => w.misconception)))
+      expect([...used].filter((id) => !shown.has(id)), topicId).toEqual([])
+    }
+  })
+
+  it('lässt Text-Beispiele beim Ausschließen von Aufgabenteilen stehen', () => {
+    const card = CHEM_CARDS[0]
+    expect(examplesFor(card, x)).toEqual(card.examples)
   })
 })
 

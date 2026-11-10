@@ -1,18 +1,25 @@
 import type { FreeTask } from '../engine/check/freeTask.ts'
-import type { GuidedTask } from '../engine/guided/types.ts'
-import type { TaskRef } from '../engine/tasks/taskNumber.ts'
-import { DERIVATIVES, FRACTIONS, REARRANGE } from './catalog.ts'
+import type { GuidedTaskBase } from '../engine/guided/types.ts'
+import type { Level, TaskRef } from '../engine/tasks/taskNumber.ts'
+import { DERIVATIVES, FRACTIONS, REARRANGE, isChemCourse } from './catalog.ts'
 
-// Mathe-Engine je Thema für den geführten und den freien Modus, erst bei Bedarf geladen (Ladezeit;
-// offline liegt sie ohnehin schon auf dem Gerät)
+// Engine je Thema für den geführten und den freien Modus, erst bei Bedarf geladen (Ladezeit;
+// offline liegt sie ohnehin schon auf dem Gerät): Mathe-Engines und für alle Chemie-Themen die
+// Fragen-Engine (engine/chem/engine.ts, eigener Teil)
 
 export type CourseEngine = {
-  // focus: Id einer Fehlerregel für gezieltes Üben
-  planGuidedTask(ref: TaskRef, focus?: string): GuidedTask
-  // Aufgabe im freien Modus: Eingabe prüfen, Tastatur
+  // focus: Id einer Fehlerregel bzw. eines Denkfehlers für gezieltes Üben
+  planGuidedTask(ref: TaskRef, focus?: string): GuidedTaskBase
+  // Aufgabe im freien Modus: Eingabe prüfen, Tastatur (nur Mathe; Aufgaben mit isMathTask)
   prepareFree(ref: TaskRef): FreeTask
   // Form der Aufgabe ohne Zahlen (Abwechslung, engine/tasks/variety.ts)
   formOf(ref: TaskRef): string
+  // Nummer einer neuen Aufgabe dieser Stufe; ohne Angabe eine zufällige (randomSeed). Wissensfragen:
+  // shown sind die Fragen, die in der laufenden Runde schon dran waren (state/questionRounds.ts)
+  nextSeed?(level: Level, shown?: ReadonlySet<number>): number
+  // Stufe, zu der eine Nummer gehört, null: Die Aufgabe gibt es nicht (mehr); ohne Angabe passt jede
+  // Nummer zu jeder Stufe
+  resolve?(ref: TaskRef): Level | null
 }
 
 const LOADERS: Readonly<Record<string, () => Promise<CourseEngine>>> = {
@@ -37,8 +44,10 @@ export function loadCourseEngine(course: string): Promise<CourseEngine> {
   let engine = loaded.get(course)
   if (!engine) {
     const load = LOADERS[course]
-    if (!load) throw new Error(`Keine Engine für das Thema ${course}`)
-    engine = load()
+    const chem = isChemCourse(course) ? async () => (await import('../engine/chem/engine.ts')).chemCourseEngine(course) : undefined
+    const loader = load ?? chem
+    if (!loader) throw new Error(`Keine Engine für das Thema ${course}`)
+    engine = loader()
     loaded.set(course, engine)
   }
   return engine

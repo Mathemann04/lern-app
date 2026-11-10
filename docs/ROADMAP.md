@@ -8,9 +8,9 @@ Stand: 10.11.2026
 | M2 | Brüche (Bruchrechnung, Bruchterme kürzen und zusammenfassen, Doppelbrüche); App für mehrere Themen | fertig |
 | M2b | Brüche nachschärfen: viel mehr Abwechslung (Baukasten statt fester Vorlagen, keine Form doppelt), deutlich schwerer, Stufe 5 auf Profi-Niveau mit Partialbruchzerlegung und Brüchen aus späteren Kapiteln (komplexe Zahlen, Grenzwerte, Teleskopsummen, Hyperbelfunktionen) | fertig |
 | M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten, Vektoren, Additionstheoremen) | fertig |
-| M4 | **Chemie 1**: neues Fach mit Wissensfragen (Auswahl, Zuordnen, Ordnen) und Rechnungen zu allen Themen der Vorlesung, drei Stufen (Grundlagen, Vertiefung, Klausurniveau), Lernkarten, Wiederholung, Probeklausur wie die echte (45 min, 50 Punkte) | Plan als Entwurf ([PLAN-M4.md](PLAN-M4.md)), wartet auf Freigabe |
-| M5 | **Werkstoffkunde**: eigenes Fach nach demselben Muster wie Chemie | offen (Platz in der Reihenfolge klärt der Nutzer; braucht die Skripte) |
-| M6 | **Themen einzeln üben**: was heute nur in Stufe 5 von „Brüche" und „Gleichungen umstellen" steckt, als eigene Themen mit leichtem Einstieg (komplexe Zahlen, Determinanten, Integrale und Partialbrüche, Summen, Reihen und Grenzwerte, Differentialgleichungen, Winkelfunktionen mit Additionstheoremen, Hyperbelfunktionen); die Rechenteile gibt es schon | offen |
+| M4 | **Chemie 1**: neues Fach mit Wissensfragen (Auswahl, Zuordnen, Ordnen) und Rechnungen zu allen Themen der Vorlesung, drei Stufen (Grundlagen, Vertiefung, Klausurniveau), Lernkarten, Wiederholung, Probeklausur wie die echte (45 min, 50 Punkte) | in Arbeit: Plan freigegeben ([PLAN-M4.md](PLAN-M4.md)), Klausur-Sprint bis Teil 1 der Klausur (um den 24.11.2026) |
+| M5 | **Werkstoffkunde**: eigenes Fach nach demselben Muster wie Chemie | offen (direkt nach Chemie; die Skripte kommen vom Nutzer) |
+| M6 | **Themen einzeln üben**: was heute nur in Stufe 5 von „Brüche" und „Gleichungen umstellen" steckt, als eigene Themen mit leichtem Einstieg (komplexe Zahlen, Determinanten, Integrale und Partialbrüche, Summen, Reihen und Grenzwerte, Differentialgleichungen, Winkelfunktionen mit Additionstheoremen, Hyperbelfunktionen); die Rechenteile gibt es schon. Vorschlag (Idee des Nutzers, 10.11.2026): statt vieler Einzelthemen im übergeordneten Thema (z. B. „Gleichungen umstellen“) die Themen per Häkchen wählen (e-Funktion, Vektoren, Determinanten …) und die Schwierigkeit (wie verschachtelt) getrennt davon; dafür Schlagworte je Baustein und leichte Bausteine je Thema | offen |
 | M7 | **Vektoren** als eigenes Gebiet: Rechnen mit Vektoren, Länge, Skalarprodukt, Winkel, Kreuzprodukt, Projektion (ob Geraden und Ebenen dazukommen, klären wir beim Plan) | offen |
 | M8 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
 | M9 | weitere Themen aus Mathematik MB1, „Ableiten" nachschärfen | offen |
@@ -55,35 +55,26 @@ Stand: 10.11.2026
 
 ## M4: Schritte
 
-Details: [PLAN-M4.md](PLAN-M4.md) (Entwurf, wartet auf Freigabe), feste
-Regeln: [CHEMIE.md](CHEMIE.md)
+Details: [PLAN-M4.md](PLAN-M4.md) (freigegeben 10.11.2026, Klausur-Sprint),
+feste Regeln: [CHEMIE.md](CHEMIE.md)
 
-- [ ] 0. Plan freigeben
-- [ ] 1. Gerüst und erstes Thema „Atombau"
-  - [ ] 1a. Fach und erste Fragen
-  - [ ] 1b. Erste Rechnung
-  - [ ] 1c. Freier Modus für Zahlen
-  - [ ] 1d. Weitere Fragearten und Wiederholung
-- [ ] 2. Stöchiometrie
-  - [ ] 2a. Stoffmenge und Molmasse
-  - [ ] 2b. Reaktionsgleichungen
-  - [ ] 2c. Umsatz und Klausuraufgabe 4
-  - [ ] 2d. Gase und Lösungen
-- [ ] 3. Bindungen
-  - [ ] 3a. Ionenbindung und Salze
-  - [ ] 3b. Moleküle
-  - [ ] 3c. Zwischenmolekulare Kräfte und Klausuraufgabe 3
-- [ ] 4. Elektronen und Periodensystem
-  - [ ] 4a. Elektronen
-  - [ ] 4b. Periodensystem
-- [ ] 5. Gleichgewicht und Energie
-  - [ ] 5a. Gleichgewicht
-  - [ ] 5b. Energie
-- [ ] 6. Probeklausur Teil 1 (Aufgaben 1 bis 5)
-- [ ] 7. Säuren und Basen (sobald das Skript da ist)
-- [ ] 8. Redox und Elektrochemie (sobald das Skript da ist)
-- [ ] 9. Zusatz: Metallbindung, Hybridisierung, Molekülorbitale
-- [ ] 10. Abschluss von M4
+- [x] 0. Plan freigegeben
+- Sprint bis Teil 1 der Klausur (um den 24.11.2026):
+  - [x] S1. Fach und Atombau-Fragen (Säure-Base und Redox als „kommt bald“)
+  - [ ] S2. Erste Rechnungen (Protonen, Neutronen, Elektronen; Energie des Lichts)
+  - [ ] S3. Molmasse, Stoffmenge, Reaktionsgleichungen
+  - [ ] S4. Umsatz, Gase und Lösungen, Klausuraufgabe 4 üben
+  - [ ] S5. Bindungen (auch Metallbindung und Hybridisierung)
+  - [ ] S6. Elektronen und Periodensystem
+  - [ ] S7. Gleichgewicht und Energie
+  - [ ] S8. Frei rechnen und Wiederholung
+  - [ ] S9. Probeklausur Teil 1 (50 Punkte)
+- Nach Teil 1:
+  - [ ] N1. Weitere Fragearten (Wähle alle richtigen, Zuordnen, Ordnen)
+  - [ ] N2. Eingaben (Kästchen, Baukästen, Element-Tastatur)
+  - [ ] N3. Säuren und Basen (Skript nötig)
+  - [ ] N4. Redox und Elektrochemie (Skript nötig), Probeklausur Teil 2
+  - [ ] N5. Abschluss von M4
 
 ## M2b: Schritte
 
@@ -314,7 +305,7 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   Substitution, $pq$-Formel). Mathe und Physik getrennt: M3 heißt
   „Gleichungen umstellen" (reine Mathematik mit $x$, $y$, $a$, $b$, $c$,
   $k$); Formeln mit Zeichen der Physik und „Aufgaben lösen" (Formel wählen,
-  umstellen, Werte mit Einheiten einsetzen) kommen in M6 und nutzen
+  umstellen, Werte mit Einheiten einsetzen) kommen in M6 (heute M10) und nutzen
   dieselbe Engine.
 - 30.10.2026: Plan M3, 3. Fassung (Wunsch des Nutzers: Stufen 4 und 5
   noch schwerer, „fast alle Themengebiete"): Stufe 3 mit Wurzeln, Stufe 4
@@ -665,3 +656,20 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   Grundlage sind die Skripte, Übungsblätter und zwei Altklausuren des Nutzers;
   sie kommen wegen des Urheberrechts nicht ins Repo. Plan als Entwurf in
   [PLAN-M4.md](PLAN-M4.md), feste Regeln in [CHEMIE.md](CHEMIE.md).
+- 10.11.2026: Plan M4 freigegeben, mit Klausur-Sprint: Teil 1 der
+  Chemie-Klausur ist in etwa zwei Wochen und prüft alles außer Säure-Base und
+  Redox; die Klausur hat zwei Teile mit je 50 Punkten, bestanden mit zusammen
+  40 von 100. Säure-Base und Redox erscheinen schon als Themen mit „kommt
+  bald“. Skripte lädt der Nutzer je Schritt neu hoch. Farben je Gebiet,
+  Startseite „Schritt für Schritt selbst lösen“, Werkstoffkunde direkt nach
+  Chemie.
+- 10.11.2026: M4 S1 fertig: Fach „Chemie 1“ auf der Startseite mit allen sieben
+  Gebieten und 20 Themen (Säure-Base und Redox als „kommt bald“), Stufennamen
+  Grundlagen, Vertiefung, Klausurniveau statt Zahlen, chemische Formeln mit mhchem.
+  Thema Atombau mit 60 Wissensfragen (je Stufe 20), 68 typischen Denkfehlern mit
+  „Warum ist das falsch?“ und 12 Lernkarten, alles in eigenen Worten, fachlich
+  zweimal geprüft und mit den Skripten Wort für Wort verglichen (keine Folge von 8
+  gleichen Wörtern). Fragen kommen reihum (keine doppelt, bevor alle dran waren),
+  jede Frage zeigt bei jedem Wiederkommen andere falsche Antworten. Knopf „Frage
+  melden“ mit Liste in den Einstellungen, Galerie „Fragen durchsehen“, neue Farben
+  und Bilder. Die Elementtabelle kommt mit S2.

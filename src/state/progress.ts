@@ -1,5 +1,5 @@
 import type { Level } from '../engine/tasks/taskNumber.ts'
-import { type Attempt, EMPTY_PROGRESS, MAX_ATTEMPTS, type Progress } from './storage.ts'
+import { type Attempt, EMPTY_PROGRESS, type Progress, trimAttempts } from './storage.ts'
 import { updateAppState, useAppState } from './store.ts'
 
 // Fortschritt und Fehlerstatistik: was gelöst wurde, wie oft welcher typische Fehler passiert ist
@@ -11,8 +11,9 @@ import { updateAppState, useAppState } from './store.ts'
 export const SUGGEST_WINDOW = 10
 export const SUGGEST_MIN_CLEAN = 8
 
+// Neue gelöste Aufgabe; je Thema bleiben die letzten MAX_ATTEMPTS (storage.ts)
 export function addAttempt(progress: Progress, attempt: Attempt): Progress {
-  return { ...progress, attempts: [...progress.attempts, attempt].slice(-MAX_ATTEMPTS) }
+  return { ...progress, attempts: trimAttempts([...progress.attempts, attempt]) }
 }
 
 export function addError(progress: Progress, errorId: string): Progress {

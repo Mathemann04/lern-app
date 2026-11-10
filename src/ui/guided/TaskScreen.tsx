@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { Choice, GuidedStep, GuidedTask } from '../../engine/guided/types.ts'
+import type { Choice, GuidedStep, GuidedTaskBase } from '../../engine/guided/types.ts'
 import type { Expr } from '../../engine/expr/types.ts'
-import type { TaskRef } from '../../engine/tasks/taskNumber.ts'
+import { type TaskRef, formatTaskNumber } from '../../engine/tasks/taskNumber.ts'
 import { recordAttempt, recordError } from '../../state/progress.ts'
+import { addReport } from '../../state/reports.ts'
 import type { ExplanationDetail } from '../../state/storage.ts'
 import { FitWidth } from '../FitWidth.tsx'
 import { Formula } from '../Formula.tsx'
@@ -16,8 +17,8 @@ import { type ExplanationMode, useExplanationMode } from '../task/explanationMod
 
 type Props = { course: string; engine: CourseEngine; taskRef: TaskRef; focus?: string | null }
 
-// course: Id des Themas, engine: seine Mathe-Engine; focus: gezielt einen typischen Fehler üben
-// (der Fehler erscheint sicher als Antwort)
+// course: Id des Themas, engine: seine Engine (Mathe oder Wissensfragen); focus: gezielt einen
+// typischen Fehler üben (der Fehler erscheint sicher als Antwort)
 export function TaskScreen({ course, engine, taskRef, focus = null }: Props) {
   const { level, seed } = taskRef
   const task = useMemo(() => engine.planGuidedTask({ level, seed }, focus ?? undefined), [engine, level, seed, focus])
@@ -54,7 +55,7 @@ export function TaskScreen({ course, engine, taskRef, focus = null }: Props) {
 
       {focus && <FocusBanner focus={focus} />}
 
-      <TaskHeader task={task} stepIndex={stepIndex} />
+      <TaskHeader course={course} task={task} stepIndex={stepIndex} />
 
       {finished ? (
         <FinishView course={course} task={task} mistakes={mistakes} focus={focus} />
@@ -63,6 +64,7 @@ export function TaskScreen({ course, engine, taskRef, focus = null }: Props) {
           key={stepIndex}
           step={task.steps[stepIndex]}
           task={task.expr}
+          report={task.questionId ? { id: task.questionId, course, ref: formatTaskNumber(task.ref) } : undefined}
           isLast={stepIndex === task.steps.length - 1}
           mode={mode}
           detail={detail}
@@ -74,11 +76,11 @@ export function TaskScreen({ course, engine, taskRef, focus = null }: Props) {
   )
 }
 
-function TaskHeader({ task, stepIndex }: { task: GuidedTask; stepIndex: number }) {
+function TaskHeader({ course, task, stepIndex }: { course: string; task: GuidedTaskBase; stepIndex: number }) {
   const established = task.steps.slice(0, stepIndex).flatMap((s) => s.established ?? [])
   return (
     <section className="space-y-3">
-      <TaskIntro taskRef={task.ref} functionLatex={task.functionLatex} instruction={task.instruction} note={task.note} />
+      <TaskIntro course={course} taskRef={task.ref} functionLatex={task.functionLatex} instruction={task.instruction} note={task.note} />
       {established.length > 0 && (
         <div className="space-y-2 rounded-xl bg-zinc-50 px-4 py-3" aria-label="Bisher">
           <p className="text-sm text-zinc-500">Bisher</p>
@@ -93,9 +95,13 @@ function TaskHeader({ task, stepIndex }: { task: GuidedTask; stepIndex: number }
   )
 }
 
+// Was „Frage melden" speichert (nur bei Wissensfragen); die Frage selbst ist step.question
+type ReportTarget = { id: string; course: string; ref: string }
+
 type StepProps = {
   step: GuidedStep
-  task: Expr
+  task?: Expr
+  report?: ReportTarget
   isLast: boolean
   mode: ExplanationMode
   detail: ExplanationDetail
@@ -103,11 +109,12 @@ type StepProps = {
   onNext: () => void
 }
 
-function StepView({ step, task, isLast, mode, detail, onMistake, onNext }: StepProps) {
+function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext }: StepProps) {
   const [wrongPicks, setWrongPicks] = useState<string[]>([])
   const [solved, setSolved] = useState(false)
   const [hintOpen, setHintOpen] = useState(false)
   const [whyOpen, setWhyOpen] = useState(false)
+  const [reported, setReported] = useState(false)
   const questionRef = useRef<HTMLHeadingElement>(null)
   const feedbackRef = useRef<HTMLDivElement>(null)
 
@@ -180,17 +187,46 @@ function StepView({ step, task, isLast, mode, detail, onMistake, onNext }: StepP
             <RichText text={step.hint} />
           </div>
         )}
-        <div className="flex flex-wrap gap-2">
-          {!solved && !hintOpen && (
-            <button
-              type="button"
-              onClick={() => setHintOpen(true)}
-              className="rounded-xl px-3 py-2.5 font-medium text-amber-800 hover:bg-amber-50"
-            >
-              Tipp anzeigen
-            </button>
+        <div>
+          <div className="flex flex-wrap gap-2">
+            {!solved && !hintOpen && (
+              <button
+                type="button"
+                onClick={() => setHintOpen(true)}
+                className="rounded-xl px-3 py-2.5 font-medium text-amber-800 hover:bg-amber-50"
+              >
+                Tipp anzeigen
+              </button>
+            )}
+            <CardSheetButton ids={step.cards} title={cardSheetTitle(step)} task={task} />
+            {report && (
+              // Bleibt nach dem Melden stehen (so bleibt der Fokus auf dem Knopf), tut dann aber nichts mehr
+              <button
+                type="button"
+                aria-disabled={reported ? 'true' : undefined}
+                onClick={() => {
+                  if (reported) return
+                  addReport({ ...report, prompt: step.question, at: Date.now() })
+                  setReported(true)
+                }}
+                className={`rounded-xl px-3 py-2.5 font-medium ${reported ? 'cursor-default text-zinc-500' : 'text-zinc-600 hover:bg-zinc-100'}`}
+              >
+                {reported ? (
+                  <>
+                    Gemeldet <span aria-hidden>✓</span>
+                  </>
+                ) : (
+                  'Frage melden'
+                )}
+              </button>
+            )}
+          </div>
+          {/* Immer eingebunden (leer ohne Höhe), damit Vorlesehilfen die Bestätigung sicher vorlesen */}
+          {report && (
+            <p role="status" className="text-sm text-zinc-600">
+              {reported ? 'Gemeldet. Die Liste findest du in den Einstellungen.' : ''}
+            </p>
           )}
-          <CardSheetButton ids={step.cards} title={cardSheetTitle(step)} task={task} />
         </div>
       </div>
 
@@ -251,7 +287,7 @@ function cardSheetTitle(step: GuidedStep): string {
   return step.cards.length === 1 ? 'Lernkarte zu diesem Schritt' : 'Lernkarten zu diesem Schritt'
 }
 
-function FinishView({ course, task, mistakes, focus }: { course: string; task: GuidedTask; mistakes: number; focus: string | null }) {
+function FinishView({ course, task, mistakes, focus }: { course: string; task: GuidedTaskBase; mistakes: number; focus: string | null }) {
   const headingRef = useRef<HTMLHeadingElement>(null)
   useEffect(() => {
     headingRef.current?.focus({ preventScroll: true })
@@ -269,12 +305,27 @@ function FinishView({ course, task, mistakes, focus }: { course: string; task: G
             : `Gelöst mit ${mistakes} ${mistakes === 1 ? 'Fehlversuch' : 'Fehlversuchen'}.`}
         </p>
       </div>
-      <div className="space-y-2 rounded-2xl bg-accent-50 px-4 py-4" data-testid="result">
-        <FitWidth className="text-2xl">
-          <Formula tex={task.resultLatex} />
-        </FitWidth>
-        {task.resultNote && <RichText text={task.resultNote} className="text-zinc-600" />}
-      </div>
+      {(task.resultLatex !== undefined || task.resultText !== undefined) && (
+        <div className="space-y-2 rounded-2xl bg-accent-50 px-4 py-4" data-testid="result">
+          {task.resultLatex !== undefined ? (
+            <FitWidth className="text-2xl">
+              <Formula tex={task.resultLatex} />
+            </FitWidth>
+          ) : (
+            <>
+              {task.resultQuestion !== undefined && (
+                <div className="space-y-1 pb-1">
+                  <p className="text-sm text-zinc-600">Frage</p>
+                  <RichText text={task.resultQuestion} className="text-zinc-800" />
+                </div>
+              )}
+              <p className="text-sm text-zinc-600">Richtige Antwort</p>
+              <RichText text={task.resultText!} className="text-xl font-medium" />
+            </>
+          )}
+          {task.resultNote && <RichText text={task.resultNote} className="text-zinc-600" />}
+        </div>
+      )}
       <LevelUpSuggestion course={course} level={task.ref.level} mode="guided" />
       <div className="flex flex-col gap-3 sm:flex-row">
         <a

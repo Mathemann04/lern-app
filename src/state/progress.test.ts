@@ -23,9 +23,13 @@ describe('Fortschritt je Stufe', () => {
     expect(solvedInCourse(p, 'umstellen')).toBe(0)
   })
 
-  it('behält höchstens die letzten Aufgaben', () => {
-    const p = withAttempts(Array.from({ length: MAX_ATTEMPTS + 5 }, () => attempt(1, true)))
-    expect(p.attempts).toHaveLength(MAX_ATTEMPTS)
+  it('behält je Thema höchstens die letzten Aufgaben', () => {
+    const p = withAttempts([attempt(2, true, 'brueche'), ...Array.from({ length: MAX_ATTEMPTS + 5 }, () => attempt(1, true)), attempt(3, false, 'brueche')])
+    expect(solvedInCourse(p, 'ableiten')).toBe(MAX_ATTEMPTS)
+    // Viele Aufgaben in einem Thema verdrängen die eines anderen nicht
+    expect(solvedInCourse(p, 'brueche')).toBe(2)
+    expect(p.attempts.at(-1)).toMatchObject({ course: 'brueche', level: 3 })
+    expect(p.attempts[0]).toMatchObject({ course: 'brueche', level: 2 })
   })
 })
 

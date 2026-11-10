@@ -1,4 +1,6 @@
 import katex from 'katex'
+// Chemische Formeln (\ce, \pu); mhchem hängt sich in dasselbe KaTeX ein
+import 'katex/contrib/mhchem'
 // mit der ersten Formel geladen, nicht schon für die Startseite
 import 'katex/dist/katex.min.css'
 

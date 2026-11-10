@@ -9,8 +9,9 @@ den Nutzer zugeschnitten: Maschinenbau, 1. Semester, THU, „Mathematik MB1".
 - Maßstab fürs Niveau: das Buch des Nutzers „Mathe für Ingenieure",
   Kapitel und ihre Themen in der App: [docs/LEHRBUCH.md](docs/LEHRBUCH.md)
 - Meilensteine und aktueller Stand: [docs/ROADMAP.md](docs/ROADMAP.md)
-- Laufender Plan: [docs/PLAN-M4.md](docs/PLAN-M4.md) (Chemie 1, Entwurf,
-  wartet auf Freigabe); feste Regeln für alle Chemie-Inhalte:
+- Laufender Plan: [docs/PLAN-M4.md](docs/PLAN-M4.md) (Chemie 1, freigegeben
+  10.11.2026, Klausur-Sprint S1 bis S9 bis Teil 1 der Klausur um den
+  24.11.2026, danach N1 bis N5); feste Regeln für alle Chemie-Inhalte:
   [docs/CHEMIE.md](docs/CHEMIE.md). Abgeschlossen:
   [docs/PLAN-M1.md](docs/PLAN-M1.md), [docs/PLAN-M2.md](docs/PLAN-M2.md),
   [docs/PLAN-M2b.md](docs/PLAN-M2b.md) (Brüche nachschärfen: Abwechslung und
@@ -50,7 +51,10 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   `prepareFree` für frei, `formOf` für die Form einer Aufgabe). Bei einer
   neuen Aufgabe zieht `PracticePage.tsx` (`PickNewTask`) eine Nummer, deren
   Form nicht unter den letzten zehn dieser Stufe ist (`src/ui/recentForms.ts`,
-  eigener Speicherschlüssel `rechenweg-formen`).
+  eigener Speicherschlüssel `rechenweg-formen`); Wissensfragen kommen dabei
+  reihum, keine doppelt, bevor alle der Stufe dran waren (`pickNewSeed` in
+  `practice.ts`, Runde je Thema und Stufe in `src/state/questionRounds.ts`,
+  Schlüssel `rechenweg-fragen`, „Fortschritt löschen" leert ihn).
   Seiten über `#/…` (`routes.ts`): Start `#/` („Weitermachen" und die
   Fächer), Gebiet `#/gebiet/grundlagen`, Thema `#/thema/brueche`,
   geführt üben `#/ueben/brueche/1` (neue Aufgabe) bzw.
@@ -98,6 +102,32 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   über `RichText` (Formeln zwischen `$…$`). Arbeitsauftrag und Hinweis
   unter der Aufgabe (z. B. „Alle Buchstaben stehen für positive Zahlen.",
   `note`) zeigt `TaskIntro` in `src/ui/task/TaskParts.tsx`.
+- Chemie (M4, Plan docs/PLAN-M4.md, Regeln docs/CHEMIE.md): Fach „Chemie 1"
+  mit eigenen Stufennamen (`levelNames` am Fach, `levelName()` in
+  `catalog.ts` überall statt „Stufe n": Grundlagen, Vertiefung,
+  Klausurniveau, Stufen 1 bis 3), Themen-Ids `chem-…` (Säure-Base und Redox
+  als „kommt bald"). Wissensfragen im geführten Bildschirm ohne Term
+  (`GuidedTaskBase` in `guided/types.ts`: Aufgabe als Text, Ergebnis
+  `resultText` mit der Frage `resultQuestion`), Knopf „Frage melden"
+  (`src/state/reports.ts`, Schlüssel `rechenweg-meldungen`, Liste zum
+  Kopieren in den Einstellungen, „Fortschritt löschen" lässt sie stehen),
+  Galerie „Fragen durchsehen" `#/galerie/chem-atombau`
+  (`src/ui/chem/QuestionGallery.tsx`), Lernkarten mit Text-Beispielen
+  (`ChemCardExample`, `formulas` darf leer sein), Denkfehler als Aussage
+  statt Formel (`wrongText`, `src/ui/ErrorShape.tsx`). Engine:
+  `src/engine/quiz/` (allgemein, auch für Werkstoffkunde: `types.ts` Format
+  der Fragen und Denkfehler `chem-mis-…`, `plan.ts` Frage → geführte Aufgabe
+  mit vier Antworten aus dem Vorrat, `numbers.ts` Aufgabennummern: 1 bis 9999
+  Frage in Grundform, 10000 bis 499999 erzeugte Rechnungen, 500000 + 50 ·
+  Nummer + Fassung) und `src/engine/chem/` (`engine.ts` für alle
+  `chem-…`-Themen mit `nextSeed` und `resolve` in `CourseEngine`, `banks.ts`,
+  `bank/<thema>.ts` mit Nummern Stufe · 100 + n, `misconceptions/<thema>.ts`
+  nur Name und falsche Aussage für die Fehlerstatistik, `<thema>Why.ts` die
+  Erklärungen, `misconceptions/index.ts`); Lernkarten in
+  `explain/chem/<thema>Cards.ts`. Die Inhaltsdateien entstehen aus geprüften
+  Inhalten (in eigenen Worten, Wortvergleich mit den Skripten außerhalb des
+  Repos). mhchem (`\ce`, `\pu`) fest in `renderFormula.ts` und
+  `expr/latexChecks.ts`.
 - `src/engine/`: Mathe-Engine, reines TypeScript
   - `rational.ts`: exakte Brüche (bigint)
   - `expr/types.ts`: Termbaum in *Aufgabenform* (Bruch, Wurzel, Minus bleiben,
@@ -552,14 +582,16 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   gehört alles zum Ableiten), gemeinsamer Zustand (`store.ts`),
   Einstellungen (`settings.ts`: Stufe je Thema, zuletzt geübtes Thema,
   „Geführt"/„Frei" für alle, hell/dunkel) und Fortschritt je Thema mit
-  Fehlerstatistik und 8-von-10-Vorschlag (`progress.ts`)
+  Fehlerstatistik und 8-von-10-Vorschlag (`progress.ts`; höchstens 1000
+  gelöste Aufgaben je Thema)
 - `e2e/`: Browser-Tests (Playwright). Im freien Modus vor dem Tippen warten,
   bis das Feld bereit ist und den Fokus hat (`math-field[data-ready]`,
   `toBeFocused`): MathLive setzt den Fokus leicht verzögert.
 - `.github/workflows/app.yml`: prüft jeden Pull Request, veröffentlicht `main`
 - Farben zentral in `src/index.css`:
   - `accent-*` ist die Farbe des Gebiets: `data-tone="blue"` an einer Seite
-    oder Kachel färbt alles darin, ohne Angabe Blaugrün (App). `App.tsx`
+    oder Kachel färbt alles darin, ohne Angabe Blaugrün (App); Töne orange,
+    blue, violet, pink, cyan, indigo, sky, fuchsia. `App.tsx`
     setzt den Ton je Seite (`toneOf`).
   - Dunkles Design über die Klasse `dark` am html-Element (Einstellung
     „Aussehen", `useTheme.ts`, Skript in `index.html`). Die Leitern `zinc`,
@@ -606,9 +638,21 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   nicht in Testdateien oder Doku. Alle Inhalte in eigenen Worten, keine
   Folien- oder Aufgabentexte, keine kopierten Bilder, keine Namen von
   Lehrenden. Einzelheiten in docs/CHEMIE.md.
+- **Chemie:** Richtig ist, was die Skripte der Vorlesung oder ein frei
+  zugängliches Tabellenwerk sagen; handschriftliche Ergänzungen und
+  Mitschriften liefern nur Ideen und falsche Antworten. Rechnungen,
+  Gleichungen, Formeln, Konfigurationen und Trends rechnet die Engine;
+  Wissensfragen und Beispiele auf Wissenskarten sichern Tests, eine
+  inhaltliche Prüfung je Schritt und „Frage melden“ ab. Jede Rechnung nennt
+  die Werte, mit denen sie rechnet. Abwechslung: Rechnungen mit den
+  Kennzahlen aus M2b, Wissensfragen nach den Regeln in docs/PLAN-M4.md
+  („Abwechslung“). Schreibweise, Daten, Grenzfälle und Toleranzen in
+  docs/CHEMIE.md.
 - **Fehlerregeln:** Jede neue Fehlerregel bekommt ein Katalogbeispiel in
   `errorRules.test.ts` und einen Eintrag im Katalog (Ableiten:
-  docs/PLAN-M1.md, Brüche: docs/PLAN-M2.md, Umstellen: docs/PLAN-M3.md).
+  docs/PLAN-M1.md, Brüche: docs/PLAN-M2.md, Umstellen: docs/PLAN-M3.md,
+  Chemie: Rechenfehler in docs/PLAN-M4.md, Denkfehler der Wissensfragen in
+  der Galerie).
 - **Lernkarten:** Jede Regel, die in Aufgaben vorkommt, braucht eine Karte in
   `explain/cards.ts`, und jede ihrer Fehlerregeln steht auf einer Karte
   (`cards.test.ts` prüft das; bei Brüchen: jeder Fehler der spielbaren

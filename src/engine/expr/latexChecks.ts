@@ -1,5 +1,7 @@
 // Prüfhilfen für Tests: sauberer Formelsatz. Nur in Tests verwendet.
 import katex from 'katex'
+// chemische Formeln (\ce, \pu) wie in ui/renderFormula.ts
+import 'katex/contrib/mhchem'
 
 // Muster, die in sauber gesetzten Ergebnissen nie vorkommen dürfen
 export const UGLY_PATTERNS: Array<[string, RegExp]> = [

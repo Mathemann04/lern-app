@@ -1,6 +1,8 @@
 # Plan für Meilenstein 4: Chemie 1
 
-Status: **Entwurf, wartet auf deine Freigabe** (10.11.2026). Grundlage sind
+Status: **freigegeben** (10.11.2026) mit Klausur-Sprint: Teil 1 der Klausur
+ist in etwa zwei Wochen, deshalb kommt der Stoff von Teil 1 zuerst
+(„Schritte“). Grundlage sind
 deine Skripte, Übungsblätter und die beiden Altklausuren (Sommer 2025 und
 Winter 2025/26) sowie deine Antworten: Wissensfragen **und** Rechenaufgaben,
 drei Stufen, Probeklausur gleich mit einplanen.
@@ -9,8 +11,8 @@ Ziel von M4: Ein neues Fach „Chemie 1“ auf der Startseite. Du übst jedes
 Thema aus deiner Vorlesung in drei Stufen, mit Wissensfragen (Auswahl,
 Zuordnen, Ordnen) und mit Rechnungen, die die App selbst erzeugt und
 nachrechnet. Dazu Lernkarten, Fortschritt, „Gezielt üben“, Wiederholung
-falsch beantworteter Fragen und eine **Probeklausur** wie die echte (45
-Minuten, 50 Punkte, 7 Aufgaben). Alles funktioniert offline.
+falsch beantworteter Fragen und eine **Probeklausur** wie die echte (je
+Teil 45 Minuten und 50 Punkte). Alles funktioniert offline.
 
 Feste Regeln für alle Chemie-Inhalte (Schreibweise, Datentabellen,
 Grenzfälle, typische Denkfehler) stehen in [CHEMIE.md](CHEMIE.md). Sie gelten
@@ -52,11 +54,11 @@ Klausuraufgaben geschnitten:
 | --- | --- | --- |
 | 1. Aufbau der Materie | Atombau (Stoffe und Trennverfahren, Elementarteilchen, Kernsymbol, Isotope, Ionen, Atommodelle und Licht); Elektronen (Quantenzahlen, Orbitale, Elektronenkonfiguration) | Aufgabe 1, etwa 13 % der Punkte |
 | 2. Periodensystem (kurz PSE) | Aufbau des PSE (Perioden, Gruppen, Blöcke, Valenzelektronen, Ionenladung, Edelgasregel); Trends (Atomradius, Ionisierungsenergie, Elektronegativität, Elektronenaffinität, Metallcharakter) | Aufgabe 2, etwa 8 % |
-| 3. Chemische Bindung | Ionenbindung und Salze; Moleküle (Lewis-Formel, Gestalt, Polarität, Namen); zwischenmolekulare Kräfte; als Zusatz Metallbindung, Hybridisierung und Molekülorbitale | Aufgabe 3, etwa 13 % |
+| 3. Chemische Bindung | Ionenbindung und Salze; Moleküle (Lewis-Formel, Gestalt, Polarität, Namen); zwischenmolekulare Kräfte; Metallbindung und Hybridisierung (auch Molekülorbitale) | Aufgabe 3, etwa 13 % |
 | 4. Stöchiometrie | Reaktionsgleichungen; Stoffmenge und Umsatz; Gase und Lösungen | Aufgabe 4 und 6c, etwa 21 % und mehr |
 | 5. Gleichgewicht und Energie | Gleichgewicht (Massenwirkungsgesetz, Le Chatelier, Katalysator); Energie (exotherm/endotherm, Reaktionsenthalpie, Entropie, freie Enthalpie) | Aufgabe 5, etwa 10 % |
-| 6. Säuren und Basen | wird nach dem Skript zugeschnitten | Aufgabe 6, etwa 19 % |
-| 7. Redox und Elektrochemie | wird nach dem Skript zugeschnitten | Aufgabe 7, etwa 16 % |
+| 6. Säuren und Basen | vorläufig: Säuren und Basen nach Brønsted; pH-Wert; Puffer und Titration (als „kommt bald“, genauer Zuschnitt nach dem Skript) | Aufgabe 6, etwa 19 % (Teil 2) |
+| 7. Redox und Elektrochemie | vorläufig: Oxidationszahlen; Redoxreaktionen; galvanische Zelle und Elektrolyse (als „kommt bald“, genauer Zuschnitt nach dem Skript) | Aufgabe 7, etwa 16 % (Teil 2) |
 
 - Gebiete ohne spielbares Thema sind blass mit „kommt bald“, wie in Mathe.
 - Jede Themenseite zeigt, ob und mit wie vielen Punkten das Thema in den
@@ -365,11 +367,10 @@ Fehler.
 - Lernkarten: die drei Kräfte; Wasserstoffbrücken; Wasser ist besonders;
   Gleiches löst sich in Gleichem.
 
-#### 3.4 Zusatz: Metallbindung, Hybridisierung, Molekülorbitale
-Kam in keiner Altklausur vor, steht aber in den Skripten. Deshalb ganz am
-Ende von M4 und auf der Themenseite als „nicht in den Altklausuren“
-gekennzeichnet. Die Karten zur Metallbindung nutzt später auch die
-Werkstoffkunde.
+#### 3.4 Metallbindung, Hybridisierung, Molekülorbitale
+Kam in keiner Altklausur vor, kommt aber in Teil 1 dran (alles aus den
+Skripten außer Säure-Base und Redox). Die Karten zur Metallbindung nutzt
+später auch die Werkstoffkunde.
 - Grundlagen: Elektronengas; Eigenschaften von Metallen; Leiter,
   Halbleiter, Isolator; sp³, sp², sp mit Gestalt.
 - Vertiefung: Metallgitter mit Koordinationszahl; warum Metalle verformbar
@@ -471,7 +472,8 @@ Werkstoffkunde.
 
 #### 5.2 Energie
 In den Altklausuren nur über 5.1 (Katalysator und Aktivierungsenergie,
-exotherm); deshalb nach den klausurnahen Themen.
+exotherm); in Teil 1 kommt aber das ganze Skript dran, also auch Energie und
+Entropie.
 - Grundlagen: Vorzeichen von ΔH; Bildungsenthalpie (Elemente in ihrem
   Standardzustand haben 0, meist die stabilste Form unter
   Standardbedingungen, z. B. O₂(g), Br₂(l), I₂(s), Kohlenstoff als Graphit);
@@ -496,9 +498,10 @@ Zusammen etwa 35 % der Klausurpunkte, aber noch ohne Skript. Nach den
 Klausuren gehört dazu: Säuren und Basen nach Brønsted, Protolyse mit
 korrespondierenden Paaren, pH, Puffer, Äquivalenzpunkt; Oxidationszahlen,
 Redoxgleichungen, galvanische Zelle mit Standardpotentialen, Anode und
-Kathode, Elektrolyse, ΔG = −z · F · E. Die Themen schneide ich zu, sobald
-du die Skripte schickst. Was davon schon vorher geht, steht unter
-„Probeklausur“.
+Kathode, Elektrolyse, ΔG = −z · F · E. Beides kommt in Teil 2 der
+Klausur. Die Themen stehen schon als Überschriften in der App („kommt
+bald“); genau zugeschnitten und gebaut werden sie, sobald du die Skripte
+schickst.
 
 ### Katalog der Rechenfehler (Vorschlag)
 
@@ -622,7 +625,26 @@ kommen mit ihren Schritten dazu. Die Denkfehler der Wissensfragen
   Stoffe wechseln; was in den letzten drei Probeklausuren vorkam, wird
   gemieden.
 
-**Bauplan** (Punkte wie in der Klausur Winter 2025/26, weil dort die
+**Zwei Teile**: Die Klausur hat zwei Teile mit je 50 Punkten; bestanden
+ist sie mit zusammen 40 von 100 Punkten. Teil 1 (um den 24.11.2026) prüft
+alles außer Säure-Base und Redox, Teil 2 vermutlich den Rest. Die
+Auswertung von Teil 1 zeigt deshalb auch, wie viele Punkte in Teil 2 dann
+noch zum Bestehen fehlen.
+
+**Bauplan Teil 1** (geschätzt: Aufgaben wie in den Altklausuren, dazu der
+Stoff, der dort fehlte; sobald du mehr über Teil 1 weißt, passe ich ihn an;
+Zeit wie in den Altklausuren 45 Minuten):
+
+| Aufgabe | Punkte | Teile |
+| --- | --- | --- |
+| 1 Aufbau der Materie | 8 | Ladungen zuordnen (1); zwei Begriffsfragen (2); Protonen, Neutronen und Elektronen aus einem Kernsymbol (1); Valenzelektron und Valenzkonfiguration (2); Atommodell oder Energie des Lichts (2) |
+| 2 Periodensystem | 6 | drei Auswahlfragen zu Ordnungszahl, Periode, Gruppe oder Block (3); Trend oder Ionenladung (3) |
+| 3 Bindungen | 12 | Ionen und Formel eines Salzes (2); Lewis-Formel, Paare, Gestalt (3); Polarität (1); zwischenmolekulare Kräfte (2); Metallbindung oder Halbleiter (2); Hybridisierung (2) |
+| 4 Stöchiometrie | 14 | Verbrennung ausgleichen (2); Molmassen (4); Masse eines Produkts (4); Lösung ansetzen oder Gasvolumen (4) |
+| 5 Gleichgewicht und Energie | 10 | Gleichgewicht und Katalysator (2); Massenwirkungsgesetz (2); Le Chatelier (1); Reaktionsenthalpie aus Bildungsenthalpien (3); freiwillig oder nicht (2) |
+
+**Bauplan einer ganzen Altklausur** (Grundlage für „Klausuraufgabe N üben“
+und für Teil 2; Punkte wie in der Klausur Winter 2025/26, weil dort die
 Teilpunkte stehen; Teile aus beiden Altklausuren; Aufgabentexte in eigenen
 Worten, andere Stoffe und Zahlen):
 
@@ -660,12 +682,9 @@ Fehlerstatistik; falsch beantwortete Fragen kommen in die Wiederholung. Die
 Ergebnisse bleiben gespeichert (Verlauf). Eine Note zeigt die App erst, wenn
 der Notenschlüssel bekannt ist.
 
-**Solange die Skripte zu Säure-Base und Redox fehlen**: Probeklausur Teil 1
-mit den Aufgaben 1 bis 5 (30 Punkte, 27 Minuten), deutlich gekennzeichnet.
-„Lösung ansetzen“ (6c) ist reine Stöchiometrie und kann schon vorher als
-Übung kommen. Ob ich die Aufgaben 6 und 7 schon vorher nach dem Muster der
-Altklausuren baue (gekennzeichnet als „vorläufig, ohne Skript“),
-entscheidest du (Frage 3 unten).
+**Teil 2**: Sobald Säure-Base und Redox gebaut sind, gibt es die
+Probeklausur Teil 2 nach demselben Muster. „Lösung ansetzen“ (6c) ist reine
+Stöchiometrie und kommt schon in Teil 1.
 
 ### Abwechslung
 
@@ -687,135 +706,108 @@ Wissensfragen keine „Formen“ wie Mathe-Aufgaben haben:
   Abweichung steht dann in diesem Plan.
 - Ein Test misst das je Thema und Stufe; die Galerie zeigt es wie in Mathe.
 
-### Schritte
+### Schritte (Klausur-Sprint)
 
-Jeder Schritt lässt sich einzeln ausprobieren. Danach wie immer: Tests,
-Typprüfung, Build, Browser in Handy- und Laptopgröße, hell und dunkel, eine
-inhaltliche Prüfung der neuen Fragen (fachlich richtig, eindeutig, falsche
-Antworten wirklich falsch, eigene Worte), Pull Request und ein kurzer
-Bericht an dich. Die Reihenfolge richtet sich nach den Klausurpunkten;
-ist die Vorlesung gerade woanders, ziehe ich das vor (Frage 1 unten).
+Teil 1 der Klausur ist in etwa zwei Wochen (um den 24.11.2026) und prüft
+alles außer Säure-Base und Redox. Deshalb kommt zuerst alles, was in Teil 1
+drankommt, in kleinen Schritten, die du sofort zum Lernen nutzen kannst. Was
+nicht dringend ist (weitere Fragearten, Baukästen, Feinschliff), kommt nach
+der Klausur. Jeder Schritt endet wie immer mit Tests, Typprüfung, Build,
+Browser-Check (Handy und Laptop, hell und dunkel), einer inhaltlichen
+Prüfung der neuen Fragen (fachlich richtig, eindeutig, falsche Antworten
+wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
 
-#### Schritt 0: Plan (dieser Entwurf)
-- PLAN-M4.md, CHEMIE.md, neue Reihenfolge in der ROADMAP.
+#### Schritt 0: Plan
+- PLAN-M4.md, CHEMIE.md, neue Reihenfolge in der ROADMAP. Freigegeben am
+  10.11.2026.
 
-#### Schritt 1: Gerüst und erstes Thema „Atombau“, in vier Teilen
-- **1a: Fach und erste Fragen.** Fach „Chemie 1“ auf der Startseite mit
-  allen Gebieten („kommt bald“); Stufennamen statt Zahlen; chemische Formeln
-  im Formelsatz; Tabelle der Elemente mit Tests; Einfachauswahl mit „Warum
-  ist das falsch?“; Atombau Grundlagen mit mindestens 15 Fragen, geführt;
-  Lernkarten-Ordner „Atombau“ mit den Karten der Grundlagen; die Denkfehler
-  in „Deine häufigsten Fehler“ (als Aussage statt Formel); Galerie-Seite
+#### Sprint (vor Teil 1 der Klausur)
+- **S1: Fach und Atombau-Fragen.** Fach „Chemie 1“ auf der Startseite mit
+  allen Gebieten und Themen; Säuren und Basen sowie Redox mit ihren Themen
+  als „kommt bald“; Stufennamen statt Zahlen; chemische Formeln im
+  Formelsatz; Einfachauswahl mit „Warum ist
+  das falsch?“; Atombau mit Wissensfragen in allen drei Stufen (auch
+  Atommodelle und Licht); Lernkarten-Ordner „Atombau“; die Denkfehler in
+  „Deine häufigsten Fehler“ (als Aussage statt Formel); Galerie-Seite
   „Fragen durchsehen“; Knopf „Frage melden“.
   Ausprobieren: Start → Chemie 1 → Aufbau der Materie → Atombau →
   Grundlagen, zehn Fragen.
-- **1b: Erste Rechnung.** „Protonen, Neutronen, Elektronen“ geführt in allen
-  drei Stufen (Vertiefung und Klausurniveau zunächst nur mit Rechnungen);
-  Karten dazu; „Gezielt üben“ für jeden Fehler einer spielbaren Stufe.
-  Ausprobieren: Vertiefung, ein Ion wie ³⁷Cl⁻ geführt, einmal absichtlich
-  die Massenzahl als Neutronenzahl wählen.
-- **1c: Freier Modus für Zahlen.** Ziffernblock, Toleranz, Rundungshinweis,
-  Fehlererkennung; Protonen, Neutronen und Elektronen frei; Rechnung
-  „Energie des Lichts“ geführt und frei, mit Lernkarte und „Gezielt üben“
-  für ihre Fehler.
-  Ausprobieren: Energie des Lichts frei, einmal grob gerundet (Hinweis
-  „Fast“) und einmal ohne nm in m umzurechnen; Protonen, Neutronen und
-  Elektronen eines Ions frei, einmal mit falschem Vorzeichen der Ladung.
-- **1d: Weitere Fragearten und Wiederholung.** „Wähle alle richtigen“,
-  Zuordnen, Ordnen; Wiederholung falsch beantworteter Fragen; Atombau
-  Vertiefung (mit Atommodellen, Spektren, Welle und Teilchen) und
-  Klausurniveau komplett.
-  Ausprobieren: Atommodelle ordnen; eine Frage absichtlich falsch
-  beantworten und sehen, dass sie nach drei Aufgaben wiederkommt.
-
-#### Schritt 2: Stöchiometrie, in vier Teilen (größter Klausurblock)
-- **2a: Stoffmenge und Molmasse.** Die App liest Summenformeln (Klammern,
-  Kristallwasser), rechnet Molmassen mit Rechenweg; n, m, M und N geführt und
-  frei; PSE der App zum Nachschlagen; Gebiet „Stöchiometrie“ öffnet sich.
-  Ausprobieren: M(Ca(OH)₂) frei, einmal die Klammer vergessen.
-- **2b: Reaktionsgleichungen.** Ausgleichen mit Koeffizienten-Feldern,
-  Verbrennungen von Alkanen und Alkoholen, etwa 60 weitere Reaktionen;
-  Wissensfragen zu Pfeilen, Zuständen und Massenerhaltung.
-  Ausprobieren: eine Verbrennung frei ausgleichen, einmal einen Index
-  ändern.
-- **2c: Umsatz und Klausuraufgabe 4.** Umsatzrechnung in drei Schritten,
-  Klausurniveau mit der ganzen Aufgabe 4; erste Kachel „Klausuraufgabe 4
-  üben“; dafür die Bewertung mit Punkten, Teilpunkten und Folgefehlern, auch
-  über Teilaufgaben hinweg (die Probeklausur nutzt sie später).
-  Ausprobieren: Klausuraufgabe 4 üben, einmal absichtlich das Verhältnis
-  umdrehen.
-- **2d: Gase und Lösungen.** Gasgesetz, molares Volumen, Konzentration,
-  Lösung ansetzen, Massenanteil, ppm; Gebiet 4 komplett.
-  Ausprobieren: „Wie viel Gramm Natriumcarbonat für 200 mL Lösung mit 0,1
-  mol/L?“ frei, einmal mit mL statt L.
-
-#### Schritt 3: Bindungen, in drei Teilen
-- **3a: Ionenbindung und Salze.** Salzformel mit Index- und Ladungsfeldern,
-  Namen mit römischen Ziffern und Molekül-Ionen, Gitter, Born-Haber.
-  Ausprobieren: Calciumphosphat frei; Eisen(III)-sulfat benennen.
-- **3b: Moleküle.** Selbst gezeichnete Lewis-Formeln (Auswahl, auf
-  Klausurniveau Baukasten), Paare zählen, Gestalt, ΔEN, Polarität, Namen;
-  Formel aus dem Namen frei über die Element-Tastatur.
-  Ausprobieren: PCl₃ im Klausurformat; „Welche Moleküle sind Dipole?“;
-  Distickstoffmonoxid frei eintippen.
-- **3c: Zwischenmolekulare Kräfte und Klausuraufgabe 3.**
-  Ausprobieren: drei Stoffe nach Siedepunkt ordnen; Klausuraufgabe 3 üben.
-
-#### Schritt 4: Elektronen und Periodensystem, in zwei Teilen
-- **4a: Elektronen.** Orbital-Kästchen, Konfiguration bis Kr mit Ausnahmen
-  (geführt und frei über Knöpfe für die Unterschalen), Valenzkonfiguration,
-  Quantenzahlen; Gebiet 1 komplett, „Klausuraufgabe 1
-  üben“.
-  Ausprobieren: Eisen und Fe²⁺ in Kästchen; Klausuraufgabe 1 üben.
-- **4b: Periodensystem.** Aufbau des PSE und Trends; „Klausuraufgabe 2
-  üben“.
-  Ausprobieren: Na, Mg und Cl nach Atomradius ordnen; Klausuraufgabe 2.
-
-#### Schritt 5: Gleichgewicht und Energie, in zwei Teilen
-- **5a: Gleichgewicht.** Baukasten fürs Massenwirkungsgesetz, Le Chatelier,
-  Katalysator; „Klausuraufgabe 5 üben“.
-  Ausprobieren: Massenwirkungsgesetz einer Gasreaktion bauen; „Welche
-  Maßnahmen erhöhen die Ausbeute?“.
-- **5b: Energie.** Exotherm und endotherm, Reaktionsenthalpie aus
-  Bildungsenthalpien, Entropie, freie Enthalpie.
-  Ausprobieren: Reaktionsenthalpie einer Verbrennung geführt.
-
-#### Schritt 6: Probeklausur Teil 1
-- Aufgaben 1 bis 5 (30 Punkte, 27 Minuten), Uhr, Auswertung, Verlauf, PSE
-  und Formelsammlung in der Klausur (Teilpunkte und Folgefehler gibt es seit
-  2c).
+- **S2: Erste Rechnungen.** Tabelle der Elemente mit Tests (aus S1 hierher
+  verschoben, weil sie erst für Rechnungen gebraucht wird); „Protonen,
+  Neutronen, Elektronen“ und „Energie des Lichts“ geführt, mit Karten und
+  „Gezielt üben“.
+  Ausprobieren: Vertiefung, ein Ion wie ³⁷Cl⁻, einmal absichtlich die
+  Massenzahl als Neutronenzahl wählen.
+- **S3: Molmasse, Stoffmenge, Reaktionsgleichungen.** Die App liest
+  Summenformeln (Klammern, Kristallwasser) und rechnet Molmassen mit
+  Rechenweg; n, m, M, N; Gleichungen ausgleichen (geführt: richtige
+  Gleichung wählen, Schritt für Schritt), Verbrennungen von Alkanen und
+  Alkoholen; Fragen und Karten dazu.
+  Ausprobieren: M(Ca(OH)₂) geführt, einmal die Klammer vergessen.
+- **S4: Umsatz, Gase und Lösungen.** Umsatz in drei Schritten, ganze
+  Klausuraufgabe 4; Gasgesetz, molares Volumen, Konzentration, Lösung
+  ansetzen, Massenanteil, ppm; erste Kachel „Klausuraufgabe 4 üben“ mit
+  Punkten, Teilpunkten und Folgefehlern.
+  Ausprobieren: Klausuraufgabe 4 üben, einmal das Verhältnis umdrehen.
+- **S5: Bindungen.** Ionenbindung und Salze (Formel, Name, Gitter,
+  Born-Haber); Moleküle (Lewis-Formeln als selbst gezeichnete Bilder zur
+  Auswahl, Paare zählen, Typ AXₙEₘ, Gestalt, ΔEN, Polarität, Namen);
+  zwischenmolekulare Kräfte; Metallbindung, Hybridisierung und
+  Molekülorbitale; „Klausuraufgabe 3 üben“.
+  Ausprobieren: PCl₃ im Klausurformat; Calciumphosphat als Formel.
+- **S6: Elektronen und Periodensystem.** Konfiguration und
+  Valenzkonfiguration als Auswahl, Quantenzahlen, Steckbrief, Ionenladung,
+  Trends; „Klausuraufgabe 1 üben“ und „Klausuraufgabe 2 üben“.
+  Ausprobieren: Valenzkonfiguration von Schwefel; Na, Mg und Cl nach
+  Atomradius.
+- **S7: Gleichgewicht und Energie.** Massenwirkungsgesetz als Auswahl, Le
+  Chatelier, Katalysator, K aus Konzentrationen; Reaktionsenthalpie aus
+  Bildungsenthalpien, Entropie, freie Enthalpie; „Klausuraufgabe 5 üben“.
+  Ausprobieren: „Welche Maßnahmen erhöhen die Ausbeute?“; ΔH einer
+  Verbrennung geführt.
+- **S8: Frei rechnen und Wiederholung.** Ziffernblock, Toleranz,
+  Rundungshinweis und Fehlererkennung für alle Rechnungen; falsch
+  beantwortete Fragen kommen wieder.
+  Ausprobieren: Klausuraufgabe 4 frei, einmal grob gerundet; eine Frage
+  absichtlich falsch beantworten und sehen, dass sie wiederkommt.
+- **S9: Probeklausur Teil 1** (50 Punkte, Bauplan unter „Probeklausur“), Uhr,
+  Auswertung mit dem Hinweis auf die 40 Punkte, Verlauf, PSE und
+  Formelsammlung in der Klausur.
   Ausprobieren: Chemie 1 → Probeklausur → schreiben, abgeben, Auswertung
   ansehen; mitten in der Klausur neu laden.
 
-#### Schritt 7: Säuren und Basen (sobald das Skript da ist)
-- Gebiet 6 mit seinen Themen, „Klausuraufgabe 6 üben“, Aufgabe 6 in der
-  Probeklausur.
+#### Nach Teil 1 der Klausur
+Die Reihenfolge richtet sich nach dem Termin von Teil 2: Kommt Teil 2 bald,
+zuerst N3 und N4.
+- **N1: Weitere Fragearten.** „Wähle alle richtigen“, Zuordnen, Ordnen;
+  Fragen damit ergänzen.
+- **N2: Eingaben.** Orbital-Kästchen, Baukasten fürs
+  Massenwirkungsgesetz, Lewis-Baukasten, Koeffizienten-Felder,
+  Element-Tastatur, Knöpfe für Konfigurationen im freien Modus.
+- **N3: Säuren und Basen** (Skript nötig), „Klausuraufgabe 6 üben“.
+- **N4: Redox und Elektrochemie** (Skript nötig), „Klausuraufgabe 7 üben“,
+  Probeklausur Teil 2.
+- **N5: Abschluss.** „Gezielt üben“ für jeden typischen Fehler (ein Test
+  prüft alle); „Abwechslung je Stufe“ in der Galerie; Design-Durchgang über
+  alle Seiten in Handy- und Laptopgröße, hell und dunkel; Offline-Test;
+  Doku; M4 abhaken.
 
-#### Schritt 8: Redox und Elektrochemie (sobald das Skript da ist)
-- Gebiet 7 mit seinen Themen, „Klausuraufgabe 7 üben“; danach ist die
-  Probeklausur vollständig (50 Punkte, 45 Minuten).
-- Kommen die Skripte früher, ziehe ich die Schritte 7 und 8 vor.
+Die Teile 1a bis 5b, die die Themen oben nennen, gehören so zu den
+Schritten: 1a → S1; 1b → S2; 1c → S8; 1d → S1 (Atommodelle), N1 (Fragearten)
+und S8 (Wiederholung); 2a, 2b → S3; 2c, 2d → S4; 3a bis 3c und 3.4 → S5;
+4a, 4b → S6; 5a, 5b → S7.
 
-#### Schritt 9: Zusatz Metallbindung, Hybridisierung, Molekülorbitale
-- Thema 3.4. Kann auch in die Werkstoffkunde wandern, wenn du das lieber
-  willst.
-
-#### Schritt 10: Abschluss
-- „Gezielt üben“ für jeden typischen Fehler (ein Test prüft alle);
-  „Abwechslung je Stufe“ in der Galerie; Design-Durchgang über alle Seiten
-  in Handy- und Laptopgröße, hell und dunkel; Offline-Test; Doku; M4
-  abhaken.
-
-### Offene Fragen an dich
-Stehen am Ende der Nachricht im Chat; deine Antworten trage ich hier ein.
-1. Wann ist deine Chemie-Klausur, und welches Kapitel ist gerade in der
-   Vorlesung dran?
-2. Wie bekomme ich die Skripte in späteren Sitzungen?
-3. Säure-Base und Redox: Skripte schicken; Aufgaben 6 und 7 vorher schon
-   vorläufig bauen?
-4. Notenschlüssel der Klausur bekannt?
-5. Farben und Startseite.
-6. Platz der Werkstoffkunde in der Roadmap.
+### Antworten (10.11.2026)
+1. Teil 1 der Klausur ist in etwa zwei Wochen. In der Vorlesung war alles
+   außer Säure-Base und Redox dran, und Teil 1 prüft alles davon.
+2. Skripte: zu jedem Schritt das passende neu hochladen.
+3. Säure-Base und Redox noch nicht ausbauen, aber ihre Themen als
+   Überschriften („kommt bald“) gleich mit anlegen.
+4. Die Klausur hat zwei Teile mit je 50 Punkten; bestanden mit zusammen 40
+   von 100 Punkten.
+5. Farben: jedes Chemie-Gebiet eine eigene Farbe (2 bis 3 neue Farbtöne);
+   Überschrift der Startseite „Schritt für Schritt selbst lösen“.
+6. Werkstoffkunde direkt nach Chemie (M5); die Skripte kommen vorher.
 
 ## Teil B: Technischer Bauplan
 
@@ -1016,16 +1008,16 @@ Format wie bisher „Stufe-Nummer“ mit höchstens sechs Ziffern
   übereinstimmen; Moleküle: Valenzelektronen = 2 · (Bindungen + freie
   Paare), Oktett außer bei markierten Ausnahmen, Gestalt passt zu den
   Paaren; Stichproben gegen eine zweite, unabhängig eingetragene Liste.
-- **Probeklausur**: jede Nummer ergibt 7 Aufgaben mit 50 Punkten (Teil 1:
-  Aufgaben 1 bis 5 mit 30 Punkten), alles lösbar und gegengeprüft; Folgefehler-Test mit absichtlich
+- **Probeklausur**: jede Nummer ergibt die Aufgaben ihres Bauplans mit 50
+  Punkten (Teil 1: Aufgaben 1 bis 5 nach dem Bauplan Teil 1), alles lösbar und gegengeprüft; Folgefehler-Test mit absichtlich
   falschem Zwischenwert, auch über Teilaufgaben hinweg.
-- **Lernkarten**: ab 1a steht jeder Fehler einer spielbaren Stufe auf einer
-  Karte, ab 1b lässt er sich gezielt üben; Schritt 10 prüft zusätzlich alle
-  Fehler aller Themen.
+- **Lernkarten**: ab S1 steht jeder Fehler einer spielbaren Stufe auf einer
+  Karte, ab S2 lässt er sich gezielt üben; N5 prüft zusätzlich alle Fehler
+  aller Themen.
 - **Browser**: jede Frageart und Eingabe in Handy- und Laptopgröße, hell und
   dunkel; Probeklausur mit vorgespulter Uhr, Neuladen und Abgabe; offline.
 
-### Neue Arbeitsregeln (kommen nach der Freigabe in CLAUDE.md)
+### Neue Arbeitsregeln (seit der Freigabe auch in CLAUDE.md)
 - Richtig ist, was die Skripte der Vorlesung oder ein frei zugängliches
   Tabellenwerk sagen. Handschriftliche Ergänzungen und die
   Mitschriften-Mappen liefern nur Ideen und falsche Antworten, nie den
@@ -1053,8 +1045,10 @@ Format wie bisher „Stufe-Nummer“ mit höchstens sechs Ziffern
   Schritt.
 - **Toleranz gegen Fehlererkennung.** Rundungen liegen nahe an falschen
   Werten. Gegenmittel: feste Reihenfolge der Urteile und Mindestabstände.
-- **Säure-Base und Redox fehlen** (35 % der Punkte). Gegenmittel: so früh wie
-  möglich, wenn die Skripte da sind; bis dahin Probeklausur Teil 1.
+- **Zeit bis Teil 1** (etwa zwei Wochen). Gegenmittel: Klausur-Sprint, der
+  Stoff von Teil 1 zuerst, Fragearten und Baukästen danach.
+- **Säure-Base und Redox fehlen** (in Teil 2). Gegenmittel: bauen, sobald die
+  Skripte da sind; bis dahin stehen sie als „kommt bald“ in der App.
 - **Bedienung am Handy** bei Zuordnen, Ordnen, Kästchen und Lewis-Baukasten.
   Gegenmittel: große Knöpfe, kein Ziehen, Browser-Tests in 390 px.
 - **Teilpunkte geschätzt.** Gegenmittel: offen so gekennzeichnet.
