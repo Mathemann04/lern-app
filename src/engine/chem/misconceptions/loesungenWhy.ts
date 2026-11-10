@@ -124,7 +124,7 @@ export const LOESUNGEN_WHY: Readonly<Record<string, Explanation>> = {
     short: "Ideal heißt: keine Anziehung, vernachlässigbares Eigenvolumen.",
   },
   'chem-mis-lo-celsius': {
-    detailed: String.raw`Das Gasgesetz braucht die absolute Temperatur in Kelvin: $T = \vartheta + 273{,}15$. Die Celsius-Skala hat ihren Nullpunkt willkürlich am Gefrierpunkt des Wassers, deshalb sind Verhältnisse in $^{\circ}\mathrm{C}$ sinnlos: Von $10\,^{\circ}\mathrm{C}$ auf $20\,^{\circ}\mathrm{C}$ steigt die absolute Temperatur nur um wenige Prozent.`,
+    detailed: String.raw`Das Gasgesetz braucht die absolute Temperatur in Kelvin: $T = \vartheta + 273{,}15$. Die Celsius-Skala hat ihren Nullpunkt willkürlich am Gefrierpunkt des Wassers, deshalb sind Verhältnisse in $^{\circ}\mathrm{C}$ sinnlos: Doppelt so viele Grad Celsius heißen nicht doppelt so warm.`,
     short: String.raw`Im Gasgesetz immer Kelvin: $T = \vartheta + 273{,}15$.`,
   },
   'chem-mis-lo-si-units': {
@@ -132,7 +132,7 @@ export const LOESUNGEN_WHY: Readonly<Record<string, Explanation>> = {
     short: String.raw`Mit $R = 8{,}314$: Pa, $\mathrm{m^3}$ und K.`,
   },
   'chem-mis-lo-gas-direction': {
-    detailed: String.raw`Aus $p \cdot V = n \cdot R \cdot T$ folgt: Bei gleicher Temperatur und Stoffmenge ist das Produkt $p \cdot V$ fest, kleineres Volumen heißt also größerer Druck (Boyle). Bei gleichem Druck wächst das Volumen mit der Temperatur in Kelvin (Charles). Anschaulich: Wärmere Teilchen sind schneller und stoßen heftiger gegen die Wände.`,
+    detailed: String.raw`Aus $p \cdot V = n \cdot R \cdot T$ folgt: Bei gleicher Temperatur und Stoffmenge ist das Produkt $p \cdot V$ fest, kleineres Volumen heißt also größerer Druck (Boyle). Bei gleichem Druck wächst das Volumen mit der Temperatur in Kelvin (Charles).`,
     short: "Kleineres Volumen heißt mehr Druck; wärmer heißt mehr Volumen.",
   },
   'chem-mis-lo-gas-fixed': {
@@ -140,7 +140,7 @@ export const LOESUNGEN_WHY: Readonly<Record<string, Explanation>> = {
     short: String.raw`Die Größen hängen zusammen: $p \cdot V = n \cdot R \cdot T$.`,
   },
   'chem-mis-lo-heat-more-particles': {
-    detailed: "Beim Erwärmen entstehen keine neuen Teilchen; die Stoffmenge bleibt gleich. Die Teilchen bewegen sich nur schneller und stoßen heftiger gegen die Wände. Deshalb steigt der Druck, oder das Gas dehnt sich aus, wenn es darf.",
-    short: "Erwärmen macht die Teilchen schneller, nicht zahlreicher.",
+    detailed: "Beim Erwärmen entstehen keine neuen Teilchen; die Stoffmenge bleibt gleich. Ändern sich Druck oder Volumen, liegt das an den vorhandenen Teilchen, nicht an zusätzlichen.",
+    short: "Erwärmen erzeugt keine neuen Teilchen.",
   },
 }

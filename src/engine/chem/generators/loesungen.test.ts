@@ -100,3 +100,47 @@ describe('Lernkarten „Gase und Lösungen": Zahlen wie gerechnet', () => {
     expect(0.05 * 58.5).toBeCloseTo(2.925)
   })
 })
+
+describe('Gase und Lösungen: realistische Aufgaben', () => {
+  const all = [1, 2, 3].flatMap((level) => tasks(level as 1 | 2 | 3, 1500))
+  // Löslichkeit bei 20 °C in g je 100 g Wasser (Tabellenwerte) für die knappsten Stoffe
+  const SCARCE: Record<string, { solubility: number; molar: number }> = {
+    KMnO4: { solubility: 6.4, molar: 158 },
+    NaHCO3: { solubility: 9.6, molar: 84 },
+    'Al2(SO4)3': { solubility: 36.4, molar: 342 },
+    CuSO4: { solubility: 20.5, molar: 159.6 },
+  }
+  it('keine Konzentration über 5 mol/L, keine knapp lösliche Lösung über der Sättigung', () => {
+    for (const calc of all) {
+      const f = calc.task.functionLatex!
+      const r = calc.task.resultLatex!
+      const given = /c(?:\(.*?\))? = ([\d{},]+)\\,\\mathrm\{mol\/L\}/.exec(f)
+      const c = calc.form.endsWith(':c') ? lastNumber(r) : given ? numberOf(given[1]) : null
+      if (calc.form.startsWith('konzentration') || calc.form.startsWith('ansetzen')) expect(c, f).not.toBeNull()
+      if (c !== null) expect(c, f).toBeLessThanOrEqual(5)
+      const scarce = SCARCE[calc.substance.replace(/\*.*/, '')]
+      if (!scarce) continue
+      const wMax = scarce.solubility / (100 + scarce.solubility)
+      if (c !== null) expect(c * scarce.molar, f).toBeLessThan(1000 * wMax * 1.3)
+      if (calc.form.includes(':w')) {
+        const w = calc.form.endsWith(':w') ? lastNumber(r) : numberOf(f.slice(f.indexOf('w =')))
+        expect(w, f).toBeLessThan(100 * wMax)
+      }
+    }
+  })
+  it('nur Gase, die bei den Bedingungen gasförmig sind; keine Zahlen der Altklausuren', () => {
+    for (const calc of all) {
+      const f = calc.task.functionLatex!
+      expect(f).not.toContain(String.raw`\ce{NO2}`)
+      if (calc.form.includes(':vm-')) expect(calc.substance).not.toBe('C4H10')
+      expect(f).not.toMatch(/m\(\\ce\{C2H6\}\) = 6\\,|m\(\\ce\{C3H8\}\) = 4\{,\}4\\,/)
+      const both = `${f} ${calc.task.note}`
+      expect(/KOH/.test(both) && /0\{,\}5\\,\\mathrm\{mol\/L\}/.test(f) && /250\\,\\mathrm\{mL\}/.test(f), f).toBe(false)
+      expect(/NaOH/.test(both) && /= 1\\,\\mathrm\{mol\/L\}/.test(f) && /500\\,\\mathrm\{mL\}/.test(f), f).toBe(false)
+    }
+  })
+  it('Gas aus einer Reaktion: jede Reaktion kommt vor, auch mit Verhältnis 1 : 1', () => {
+    const seen = new Set(all.filter((c) => c.form.includes(':reaktion')).map((c) => c.substance))
+    for (const id of ['kalk', 'chlorat', 'zink', 'magnesium', 'peroxid', 'natron', 'aluminium', 'CH4', 'CH3OH']) expect(seen, id).toContain(id)
+  })
+})

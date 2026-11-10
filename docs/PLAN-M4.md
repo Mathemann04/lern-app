@@ -593,13 +593,14 @@ kommen mit ihren Schritten dazu. Die Denkfehler der Wissensfragen
 | Konzentration | c = V/n (`chem-c-inverted`) | 2 L/mol |
 | Lösung ansetzen | Molmasse unvollständig (`chem-molar-incomplete`) | M(NH₄Cl) = 49,5 statt 53,5 g/mol (die H vergessen) |
 | Gasgesetz | °C statt K (`chem-celsius`) | T = 25 statt 298,15 K |
-| Gasgesetz | hPa nicht in Pa umgerechnet (`chem-hpa`) | p = 1013 statt 101 300 Pa |
-| Gasvolumen | 22,4 L/mol nicht bei 0 °C und 1013 hPa (`chem-vm-conditions`) | 1 mol Gas bei 25 °C und 1013 hPa: 22,4 L statt 24,5 L |
+| Gasgesetz | Druck (hPa, bar) nicht in Pa umgerechnet (`chem-hpa`) | p = 1013 statt 101 300 Pa |
+| Gasvolumen | molares Volumen anderer Bedingungen verwendet (`chem-vm-conditions`) | 1 mol Gas bei 25 °C und 1013 hPa: 22,4 L statt 24,5 L |
 | Massenanteil | durch die Masse des Wassers statt der Lösung (`chem-fraction-solvent`) | 10 g Salz in 90 g Wasser: 11,1 % statt 10 % |
 | Massenkonzentration | V/m (`chem-mass-conc-inverted`) | 3 g in 100 mL: 0,0333 L/g statt 30 g/L |
 | ppm, ppb | ppm, ppb und ppt verwechselt (`chem-ppb`) | 5 ppb als 5 · 10⁻¹² |
 | Molares Volumen | durch V_m geteilt statt malgenommen oder umgekehrt (`chem-vm-inverted`, seit S4b) | 0,5 mol: 0,0223 L statt 11,2 L |
 | Vol-% | nicht durch 100 geteilt (`chem-vol-percent`) | 40 Vol-% von 0,5 L: 20 L statt 0,2 L |
+| Anteile | Bruch nicht mit 100 % malgenommen (`chem-percent-not-times`, seit S4b) | 10 g in 200 g: 0,05 % statt 5 % |
 | Massenwirkungsgesetz | Exponent passt nicht zum Koeffizienten (`chem-mwg-exponent`) | Ammoniaksynthese: c²(H₂) statt c³(H₂) |
 | Massenwirkungsgesetz | Zähler und Nenner vertauscht (`chem-mwg-swapped`) | Edukte im Zähler |
 | Massenwirkungsgesetz | Koeffizient als Faktor (`chem-mwg-factor`) | 2 · c(NH₃) statt c²(NH₃) |

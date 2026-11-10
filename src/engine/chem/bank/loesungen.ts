@@ -311,7 +311,7 @@ export const LOESUNGEN_BANK: QuestionBank = {
       ],
       hint: "Vol steht für Volumen. Auf welches Volumen bezieht sich ein Anteil?",
       explanation: {
-        detailed: String.raw`Der Volumenanteil ist $\varphi = \frac{V(\text{Ethanol})}{V(\text{Mischung})} \cdot 100\,\%$. $70\,\mathrm{Vol}\text{-}\%$ heißt: In $100\,\mathrm{mL}$ der fertigen Mischung stecken $70\,\mathrm{mL}$ Ethanol. Bezogen wird auf die fertige Mischung, weil sich Volumina beim Mischen nicht genau addieren.`,
+        detailed: String.raw`Der Volumenanteil ist $\varphi = \frac{V(\text{Ethanol})}{V(\text{Mischung})} \cdot 100\,\%$. $70\,\mathrm{Vol}\text{-}\%$ heißt: In $100\,\mathrm{mL}$ der fertigen Mischung stecken $70\,\mathrm{mL}$ Ethanol. Bei Vol-% wie beim Alkoholgehalt bezieht man sich auf die fertige Mischung; das ist wichtig, weil sich Volumina beim Mischen nicht genau addieren.`,
         short: String.raw`$70\,\mathrm{mL}$ Ethanol je $100\,\mathrm{mL}$ fertiger Mischung.`,
       },
       cards: ['loesungen-volumenanteil'],
@@ -492,9 +492,15 @@ export const LOESUNGEN_BANK: QuestionBank = {
       prompt: "Ein Gas steckt in einem Zylinder mit leicht beweglichem Kolben, sodass der Druck gleich bleibt. Man erwärmt das Gas. Was passiert mit seinem Volumen?",
       correct: { id: 'r', text: "Es wird größer, weil sich die Teilchen schneller bewegen und den Kolben stärker anstoßen." },
       wrong: [
-        { id: 'f1', text: "Es wird kleiner, weil warme Teilchen weniger Platz brauchen.", misconception: 'chem-mis-lo-gas-direction' },
+        { id: 'f1', text: "Es wird kleiner, weil warme Teilchen weniger Platz brauchen.", misconception: 'chem-mis-lo-gas-direction', why: {
+          detailed: String.raw`Prüfe die Richtung mit $p \cdot V = n \cdot R \cdot T$: Druck und Stoffmenge bleiben gleich. Was muss dann mit $V$ geschehen, wenn $T$ wächst?`,
+          short: String.raw`Prüfe die Richtung mit $p \cdot V = n \cdot R \cdot T$.`,
+        } },
         { id: 'f2', text: "Es bleibt gleich, weil sich die Stoffmenge nicht ändert.", misconception: 'chem-mis-lo-gas-fixed' },
-        { id: 'f3', text: "Es wird größer, weil beim Erwärmen zusätzliche Gasteilchen entstehen.", misconception: 'chem-mis-lo-heat-more-particles' },
+        { id: 'f3', text: "Es wird größer, weil beim Erwärmen zusätzliche Gasteilchen entstehen.", misconception: 'chem-mis-lo-heat-more-particles', why: {
+          detailed: "Im Zylinder bleibt die Zahl der Teilchen gleich; beim Erwärmen entstehen keine neuen. Die Ursache muss also bei den vorhandenen Teilchen liegen.",
+          short: "Beim Erwärmen entstehen keine neuen Teilchen.",
+        } },
         { id: 'f4', text: String.raw`Es verdoppelt sich genau dann, wenn sich die Temperatur in $^{\circ}\mathrm{C}$ verdoppelt.`, misconception: 'chem-mis-lo-celsius' },
       ],
       hint: "Was machen Teilchen, wenn sie wärmer werden?",
@@ -636,7 +642,7 @@ export const LOESUNGEN_BANK: QuestionBank = {
       fact: 'verduennen-rechnen',
       part: 'konzentration',
       title: "Verdünnung berechnen",
-      prompt: String.raw`Aus einer Kupfer(II)-sulfat-Lösung mit $c_1 = 2\,\mathrm{mol/L}$ sollen $500\,\mathrm{mL}$ Lösung mit $c_2 = 0{,}1\,\mathrm{mol/L}$ werden. Wie viel der starken Lösung brauchst du? Rechne mit $c_1 \cdot V_1 = c_2 \cdot V_2$.`,
+      prompt: String.raw`Aus einer Kochsalzlösung ($\ce{NaCl}$) mit $c_1 = 2\,\mathrm{mol/L}$ sollen $500\,\mathrm{mL}$ Lösung mit $c_2 = 0{,}1\,\mathrm{mol/L}$ werden. Wie viel der starken Lösung brauchst du? Rechne mit $c_1 \cdot V_1 = c_2 \cdot V_2$.`,
       correct: { id: 'r', text: String.raw`$25\,\mathrm{mL}$, mit Wasser aufgefüllt auf $500\,\mathrm{mL}$` },
       wrong: [
         { id: 'f1', text: String.raw`$10\,\mathrm{L}$`, misconception: 'chem-mis-lo-dilution-direct' },
@@ -850,8 +856,8 @@ export const LOESUNGEN_BANK: QuestionBank = {
       fact: 'kontraktion',
       part: 'anteile',
       title: "Ethanol und Wasser mischen",
-      prompt: String.raw`Du mischst $60\,\mathrm{mL}$ Ethanol mit $40\,\mathrm{mL}$ Wasser. Welches Volumen hat die Mischung?`,
-      correct: { id: 'r', text: String.raw`etwas weniger als $100\,\mathrm{mL}$` },
+      prompt: String.raw`Du mischst $60\,\mathrm{mL}$ Ethanol mit $40\,\mathrm{mL}$ Wasser. Welches Volumen hat die Mischung, und warum?`,
+      correct: { id: 'r', text: String.raw`etwas weniger als $100\,\mathrm{mL}$, weil sich die Moleküle dichter anordnen` },
       wrong: [
         { id: 'f1', text: String.raw`genau $100\,\mathrm{mL}$`, misconception: 'chem-mis-lo-volume-conserved' },
         { id: 'f2', text: String.raw`etwas mehr als $100\,\mathrm{mL}$, weil die Moleküle sich gegenseitig wegdrücken`, misconception: 'chem-mis-lo-volume-conserved', why: {
@@ -866,7 +872,7 @@ export const LOESUNGEN_BANK: QuestionBank = {
       ],
       hint: "Bleibt beim Mischen außer der Masse noch etwas sicher erhalten?",
       explanation: {
-        detailed: String.raw`Beim Mischen von Ethanol und Wasser tritt eine Volumenkontraktion auf: Die verschieden großen Moleküle ordnen sich dichter an, das Gemisch ist um einige Prozent kleiner als die Summe der Einzelvolumina. Die Masse bleibt gleich. Deshalb bezieht man Vol-% auf das Volumen der fertigen Mischung.`,
+        detailed: String.raw`Beim Mischen von Ethanol und Wasser tritt eine Volumenkontraktion auf: Die verschieden großen Moleküle ordnen sich dichter an, das Gemisch ist um einige Prozent kleiner als die Summe der Einzelvolumina. Die Masse bleibt gleich. Bei Vol-% wie beim Alkoholgehalt bezieht man sich deshalb auf das Volumen der fertigen Mischung.`,
         short: "Volumenkontraktion: etwas weniger als die Summe.",
       },
       cards: ['loesungen-volumenanteil'],
@@ -1179,7 +1185,10 @@ export const LOESUNGEN_BANK: QuestionBank = {
           detailed: String.raw`Prüfe die Richtung mit $n = \frac{m}{M}$: Was passiert mit $n$, wenn bei gleicher Masse $M$ größer wird?`,
           short: String.raw`Prüfe die Richtung mit $n = \frac{m}{M}$.`,
         } },
-        { id: 'f3', text: "die Glucoselösung, weil ein Glucosemolekül viel mehr Atome hat", misconception: 'chem-mis-lo-atoms-count' },
+        { id: 'f3', text: "die Glucoselösung, weil ein Glucosemolekül viel mehr Atome hat", misconception: 'chem-mis-lo-atoms-count', why: {
+          detailed: String.raw`Ein Mol zählt Formeleinheiten oder Moleküle, nicht die Atome darin. Wie viel Mol in $10\,\mathrm{g}$ stecken, entscheidet allein die molare Masse: $n = \frac{m}{M}$.`,
+          short: "Gezählt werden Moleküle oder Formeleinheiten, nicht Atome.",
+        } },
         { id: 'f4', text: "Das lässt sich ohne die Dichten der Lösungen nicht sagen.", misconception: 'chem-mis-lo-beta-density', why: {
           detailed: "Die Dichte braucht man, um zwischen Masse und Volumen der ganzen Lösung umzurechnen. Hier ist schon gegeben, wie viel Gramm gelöster Stoff in einem Liter Lösung stecken.",
           short: "Die Masse je Liter Lösung ist schon gegeben.",
@@ -1357,7 +1366,7 @@ export const LOESUNGEN_BANK: QuestionBank = {
       fact: 'volprozent-falle',
       part: 'anteile',
       title: "Vol-% und Kontraktion",
-      prompt: String.raw`Für eine Mischung mit $40\,\mathrm{Vol}\text{-}\%$ Ethanol mischt jemand $40\,\mathrm{mL}$ Ethanol mit $60\,\mathrm{mL}$ Wasser. Welchen Ethanolgehalt hat die Mischung tatsächlich?`,
+      prompt: String.raw`Für eine Mischung mit $40\,\mathrm{Vol}\text{-}\%$ Ethanol mischt jemand $40\,\mathrm{mL}$ Ethanol mit $60\,\mathrm{mL}$ Wasser. Vol-% bezieht sich hier wie beim Alkoholgehalt von Getränken auf das Volumen der fertigen Mischung. Welchen Ethanolgehalt hat die Mischung tatsächlich?`,
       correct: { id: 'r', text: String.raw`etwas mehr als $40\,\mathrm{Vol}\text{-}\%$, weil die Mischung weniger als $100\,\mathrm{mL}$ hat` },
       wrong: [
         { id: 'f1', text: String.raw`genau $40\,\mathrm{Vol}\text{-}\%$, weil sich die Volumina addieren`, misconception: 'chem-mis-lo-volume-conserved' },
@@ -1365,7 +1374,7 @@ export const LOESUNGEN_BANK: QuestionBank = {
         { id: 'f3', text: String.raw`etwas weniger als $40\,\mathrm{Vol}\text{-}\%$, weil beim Mischen ein Teil des Ethanols verloren geht`, misconception: 'chem-mis-lo-contraction-loss' },
         { id: 'f4', text: String.raw`genau $40\,\%$ der Masse, weil Vol-% und Massenanteil dasselbe sind`, misconception: 'chem-mis-lo-vol-mass' },
       ],
-      hint: "Bezieht sich Vol-% auf die Volumina vor oder nach dem Mischen?",
+      hint: "Hat die fertige Mischung genau so viel Volumen wie beide Flüssigkeiten einzeln zusammen?",
       explanation: {
         detailed: String.raw`Vol-% bezieht sich auf das Volumen der fertigen Mischung. Wegen der Volumenkontraktion ergeben $40\,\mathrm{mL}$ Ethanol und $60\,\mathrm{mL}$ Wasser etwas weniger als $100\,\mathrm{mL}$. Dieselben $40\,\mathrm{mL}$ Ethanol in einem kleineren Gesamtvolumen sind etwas mehr als $40\,\mathrm{Vol}\text{-}\%$. Genau ansetzen: Ethanol abmessen und mit Wasser auf das Endvolumen auffüllen.`,
         short: "Kleineres Gesamtvolumen, gleiches Ethanol: etwas mehr als 40 Vol-%.",

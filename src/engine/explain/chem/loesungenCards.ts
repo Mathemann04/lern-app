@@ -80,7 +80,7 @@ export const LOESUNGEN_CARDS: readonly Card[] = [
         lines: [{ label: 'Ergebnis', latex: String.raw`w = \frac{4\,\mathrm{g}}{200\,\mathrm{g}} \cdot 100\,\% = 2\,\%` }],
       },
     ],
-    errors: ['chem-fraction-solvent', 'chem-mis-lo-share-solvent', 'chem-mis-lo-percent-factor', 'chem-mis-lo-w-volume'],
+    errors: ['chem-fraction-solvent', 'chem-percent-not-times', 'chem-vol-percent', 'chem-mis-lo-share-solvent', 'chem-mis-lo-percent-factor', 'chem-mis-lo-w-volume'],
   },
   {
     id: 'loesungen-massenkonzentration',
@@ -137,7 +137,7 @@ export const LOESUNGEN_CARDS: readonly Card[] = [
     rules: [],
     formulas: [String.raw`\varphi = \frac{V(\text{Stoff})}{V(\text{gesamt})} \cdot 100\,\%`],
     memo: 'Der Volumenanteil in Vol-% sagt, wie viel Prozent des Volumens einer Mischung auf einen Bestandteil entfallen, etwa beim Alkoholgehalt von Getränken.',
-    note: 'Beim Mischen von Flüssigkeiten addieren sich die Volumina oft nicht genau: Ethanol und Wasser zusammen nehmen etwas weniger Platz ein als beide einzeln (Volumenkontraktion). Deshalb bezieht man den Anteil auf das Volumen der fertigen Mischung.',
+    note: 'Beim Mischen von Flüssigkeiten addieren sich die Volumina oft nicht genau: Ethanol und Wasser zusammen nehmen etwas weniger Platz ein als beide einzeln (Volumenkontraktion). Bei Vol-% wie beim Alkoholgehalt von Getränken bezieht man den Anteil deshalb auf das Volumen der fertigen Mischung.',
     when: 'Wenn ein Anteil in Vol-% angegeben ist.',
     examples: [
       {
@@ -149,7 +149,7 @@ export const LOESUNGEN_CARDS: readonly Card[] = [
         lines: [{ label: 'Ergebnis', latex: String.raw`V = \frac{40}{100} \cdot 0{,}5\,\mathrm{L} = 0{,}2\,\mathrm{L}` }],
       },
     ],
-    errors: ['chem-vol-percent', 'chem-mis-lo-vol-mass', 'chem-mis-lo-volume-conserved', 'chem-mis-lo-contraction-loss'],
+    errors: ['chem-vol-percent', 'chem-percent-not-times', 'chem-mis-lo-vol-mass', 'chem-mis-lo-volume-conserved', 'chem-mis-lo-contraction-loss'],
   },
   {
     id: 'loesungen-molvolumen',

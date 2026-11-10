@@ -1,7 +1,7 @@
 import type { Choice, GuidedTaskBase } from '../../guided/types.ts'
 import type { Rng } from '../../random/rng.ts'
 import { roundSignificant } from '../../quantity/numberDe.ts'
-import { type Rational, ratToNumber } from '../../rational.ts'
+import { type Rational, parseDecimal, ratEq, ratToNumber } from '../../rational.ts'
 import type { Level, TaskRef } from '../../tasks/taskNumber.ts'
 import { chemErrorRule } from '../errorRules.ts'
 
@@ -37,6 +37,13 @@ export type WrongValue = { readonly rule: string; readonly key: string; readonly
 // so geschrieben, wie sie in der Aufgabe stünde
 export const EXAM_GIVEN_MASSES: readonly string[] = [String.raw`m(\ce{C2H6}) = 6\,\mathrm{g}`, String.raw`m(\ce{C3H8}) = 4{,}4\,\mathrm{g}`]
 export const usesExamNumbers = (latex: string) => EXAM_GIVEN_MASSES.some((x) => latex.includes(x))
+// Lösungen aus den Altklausuren (Stoff, Konzentration in mol/L, Volumen in mL): so nie erzeugen
+export const EXAM_SOLUTIONS: readonly (readonly [string, string, number])[] = [
+  ['KOH', '0.5', 250],
+  ['NaOH', '1', 500],
+]
+export const usesExamSolution = (id: string, c: Rational, vMl: number) =>
+  EXAM_SOLUTIONS.some(([s, cc, v]) => s === id && v === vMl && ratEq(c, parseDecimal(cc)!))
 
 // so viele falsche Antworten stehen höchstens neben der richtigen
 export const MAX_WRONG = 3

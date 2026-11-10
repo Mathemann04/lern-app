@@ -582,3 +582,9 @@ Neue Entscheidungen unten anfügen.
   Massenkonzentration heißt in der App β (im Skript ρ), damit sie nicht mit der Dichte
   verwechselt wird. Im Skript steht bei einem Beispiel M(Cl) = 37 g/mol; die App rechnet
   wie das PSE mit 35,5 g/mol. Angaben mehrerer Größen stehen untereinander (Handy).
+- 10.11.2026: S4b nach der fachlichen Prüfung: Aufgaben bleiben unter 80 % der Löslichkeit bei 20 °C
+  (Tabellenwerte in `generators/loesungen.ts`) und höchstens 5 mol/L; NO₂ ist kein Gas für Aufgaben
+  (siedet bei 21 °C), Butan nicht bei Normbedingungen, Gase, die sich unter Druck verflüssigen, nur
+  bis zu einem sicheren Druck. Lösungen aus den Altklausuren (Stoff, Konzentration, Volumen) werden
+  nie erzeugt. Vol-% bezieht sich in der App wie beim Alkoholgehalt auf die fertige Mischung (so auch
+  im Skript; DIN 1310 nennt das Volumenkonzentration). Spurenstoffe nur in üblicher Größenordnung.

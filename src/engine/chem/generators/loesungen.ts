@@ -1,13 +1,13 @@
 import type { GuidedStep } from '../../guided/types.ts'
 import type { Rng } from '../../random/rng.ts'
-import { type Rational, parseDecimal, rat, ratAdd, ratDiv, ratMul } from '../../rational.ts'
+import { type Rational, parseDecimal, rat, ratAdd, ratDiv, ratEq, ratMul, ratToNumber, toDecimalString } from '../../rational.ts'
 import type { Level, TaskRef } from '../../tasks/taskNumber.ts'
 import { type Species, balance, equationLatex, species } from '../equation.ts'
 import { type Formula, atomCounts, formulaLatex, parseFormula } from '../formula.ts'
 import { type MassValues, elementMolarMass, molarMass } from '../molarMass.ts'
 import { FUELS, CO2, H2O, O2 } from '../reactions.ts'
 import { SUBSTANCES, type Substance, substanceById } from '../substances.ts'
-import { type ChemCalc, type ChemGenerator, stepChoices, tolerantWrongs } from './shared.ts'
+import { type ChemCalc, type ChemGenerator, stepChoices, tolerantWrongs, usesExamNumbers, usesExamSolution } from './shared.ts'
 import { eqSign, given, molarLatex, nLatex, nStep, sig } from './stoffmenge.ts'
 
 // Rechnungen zum Thema „Gase und Lösungen" (Plan M4, Thema 4.3). Exakt mit Brüchen gerechnet, angezeigt mit
@@ -23,6 +23,13 @@ const KELVIN = d('273.15')
 const ML = rat(1, 1000)
 
 const unit = (r: Rational, u: string) => `${sig(r)}\\,\\mathrm{${u}}`
+// genau angezeigt (ohne Runden), große Zahlen mit schmalem Abstand: 101300 → „101\,300"
+function exact(r: Rational): string {
+  const text = toDecimalString(r)!
+  const [whole, frac] = text.split(',')
+  const grouped = whole.length > 4 ? whole.replace(/\B(?=(\d{3})+$)/g, '\\,') : whole
+  return frac === undefined ? grouped : `${grouped}{,}${frac}`
+}
 const CARD = {
   konz: 'loesungen-konzentration',
   ansetzen: 'loesungen-ansetzen',
@@ -67,7 +74,7 @@ function calcStep(spec: StepSpec, rng: Rng, focus?: string): GuidedStep | null {
 
 const SOLUTE_IDS = ['NaCl', 'KCl', 'NaOH', 'KOH', 'CaCl2', 'MgCl2', 'Na2CO3', 'NaHCO3', 'Na2SO4', 'CuSO4', 'KNO3', 'AgNO3', 'KMnO4', 'NH4Cl', 'C6H12O6', 'HCl', 'H2SO4', 'HNO3', 'H3PO4', 'H2O2', 'CH3OH', 'C2H5OH']
 const SOLUTE_HARD_IDS = ['Ca(NO3)2', 'Mg(NO3)2', 'Al2(SO4)3', '(NH4)2SO4', 'CuSO4*5H2O', 'MgSO4*7H2O', 'FeSO4*7H2O', 'Na2CO3*10H2O', 'CoCl2*6H2O', 'CaCl2*2H2O']
-const GAS_IDS = ['H2', 'O2', 'N2', 'Cl2', 'CO2', 'CO', 'NH3', 'CH4', 'C2H6', 'C3H8', 'C4H10', 'SO2', 'NO2', 'N2O', 'HCl']
+const GAS_IDS = ['H2', 'O2', 'N2', 'Cl2', 'CO2', 'CO', 'NH3', 'CH4', 'C2H6', 'C3H8', 'C4H10', 'SO2', 'N2O', 'HCl']
 const solutes = (ids: readonly string[]) => ids.map((id) => substanceById(id)!)
 // Gase: aus der Stoffliste und die Edelgase
 const NOBLE: readonly Substance[] = [
@@ -95,6 +102,29 @@ function incompleteMass(formula: Formula, values: MassValues): Rational {
 
 const NICE_C = ['0.05', '0.1', '0.2', '0.25', '0.5', '1', '2'].map(d)
 const NICE_N = ['0.1', '0.2', '0.25', '0.5', '0.75', '1.5', '2', '3'].map(d)
+const SMALL_N = ['0.01', '0.02', '0.05'].map(d)
+
+// Löslichkeit in Gramm je 100 g Wasser bei 20 °C (gerundet, frei zugängliche Tabellen; bei Hydraten das
+// wasserfreie Salz), Infinity: mit Wasser mischbar. Aufgaben bleiben unter 80 % der Sättigung; für c wird die
+// Dichte der Lösung mit 1 g/mL angesetzt, das unterschätzt die echte Sättigungskonzentration (sicher).
+const SOLUBILITY: Readonly<Record<string, number>> = {
+  NaCl: 35.9, KCl: 34.2, NaOH: 109, KOH: 112, CaCl2: 74.5, MgCl2: 54.6, Na2CO3: 21.5, NaHCO3: 9.6, Na2SO4: 19.5,
+  CuSO4: 20, KNO3: 31.6, AgNO3: 216, KMnO4: 6.4, NH4Cl: 37.2, C6H12O6: 91, HCl: 72, H2SO4: Infinity, HNO3: Infinity,
+  H3PO4: Infinity, H2O2: Infinity, CH3OH: Infinity, C2H5OH: Infinity,
+  'Ca(NO3)2': 121, 'Mg(NO3)2': 69.5, 'Al2(SO4)3': 36.4, '(NH4)2SO4': 75.4, 'CuSO4*5H2O': 20, 'MgSO4*7H2O': 35.1,
+  'FeSO4*7H2O': 26, 'Na2CO3*10H2O': 21.5, 'CoCl2*6H2O': 52.9, 'CaCl2*2H2O': 74.5,
+}
+// größter Massenanteil (als Bruchteil) bei Sättigung
+function saturation(s: Substance): number {
+  const sol = SOLUBILITY[s.id]
+  if (sol === undefined) throw new Error(`Löslichkeit fehlt: ${s.id}`)
+  return sol === Infinity ? 1 : sol / (100 + sol)
+}
+// Grenzen für Aufgaben: c in mol/L (höchstens 5), w in %, β in g/L
+const maxC = (s: Substance) => Math.min(5, (800 * saturation(s)) / ratToNumber(molarMass(s.formula, 'pse', { withoutAdducts: true })))
+const maxW = (s: Substance) => 80 * saturation(s)
+const maxBeta = (s: Substance) => 800 * saturation(s)
+const within = (r: Rational, limit: number) => ratToNumber(r) <= limit + 1e-9
 const VOLUMES_ML = [50, 100, 150, 200, 250, 500, 750, 1000]
 
 // --- Konzentration ---
@@ -105,8 +135,11 @@ function concTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCal
   const v = ratMul(rat(vMl), ML)
   const askC = rng.chance(0.5)
   if (askC) {
-    const n = rng.pick(NICE_N)
+    const ns = [...SMALL_N, ...NICE_N].filter((x) => within(ratDiv(x, v), maxC(s)))
+    if (ns.length === 0) return null
+    const n = rng.pick(ns)
     const c = ratDiv(n, v)
+    if (usesExamSolution(s.id, c, vMl)) return null
     const step = calcStep(
       {
         id: 'konzentration',
@@ -129,7 +162,9 @@ function concTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCal
     if (!step) return null
     return finish(ref, 'Berechne die Konzentration', `${nLatex(s as Substance)} = ${unit(n, 'mol')} \\qquad V = ${vMl}\\,\\mathrm{mL}`, `${named(s)} in Wasser gelöst.`, [step], `c ${eqSign(c)} ${unit(c, 'mol/L')}`, `konzentration:${level}:c`, s.id)
   }
-  const c = rng.pick(NICE_C)
+  const cs = NICE_C.filter((x) => within(x, maxC(s)))
+  const c = rng.pick(cs)
+  if (usesExamSolution(s.id, c, vMl)) return null
   const n = ratMul(c, v)
   const step = calcStep(
     {
@@ -160,7 +195,8 @@ function prepareTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): Chem
   const s = rng.pick(solutes(level === 3 ? [...SOLUTE_IDS, ...SOLUTE_HARD_IDS, ...SOLUTE_HARD_IDS] : SOLUTE_IDS))
   const vMl = rng.pick(VOLUMES_ML)
   const v = ratMul(rat(vMl), ML)
-  const c = rng.pick(NICE_C)
+  const c = rng.pick(NICE_C.filter((x) => within(x, maxC(s))))
+  if (usesExamSolution(s.id, c, vMl)) return null
   const n = ratMul(c, v)
   const steps: GuidedStep[] = []
   const nStepped = calcStep(
@@ -269,7 +305,7 @@ function fractionTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): Che
   const s = rng.pick(solutes(SOLUTE_IDS))
   if (rng.chance(0.4)) {
     // Masse des gelösten Stoffs in einer Lösung mit gegebenem Massenanteil
-    const w = rng.pick(['0.5', '1', '2', '5', '10', '15', '20', '25'].map(d))
+    const w = rng.pick(['0.5', '1', '2', '5', '10', '15', '20', '25'].map(d).filter((x) => within(x, maxW(s))))
     const total = rng.pick([50, 100, 200, 250, 400, 500, 1000].map((x) => rat(x)))
     const ms = ratMul(ratDiv(w, rat(100)), total)
     const back = calcStep(
@@ -291,8 +327,10 @@ function fractionTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): Che
     if (!back) return null
     return finish(ref, 'Berechne die Masse des gelösten Stoffs', `m(\\text{Lösung}) = ${unit(total, 'g')} \\qquad w = ${unit(w, '\\%')}`, `Lösung von ${named(s)} in Wasser.`, [back], `m ${eqSign(ms)} ${unit(ms, 'g')}`, `anteil:${level}:w-masse`, s.id)
   }
-  const ms = rng.pick([2, 4, 5, 8, 10, 12, 15, 20, 25, 30].map((x) => rat(x)))
-  const mw = rng.pick([45, 60, 75, 90, 100, 120, 150, 180, 200, 250].map((x) => rat(x)))
+  const pairs = [2, 4, 5, 8, 10, 12, 15, 20, 25, 30].flatMap((a) =>
+    [45, 60, 75, 90, 100, 120, 150, 180, 200, 250].map((b) => [rat(a), rat(b)] as const).filter(([x, y]) => within(ratMul(ratDiv(x, ratAdd(x, y)), rat(100)), maxW(s))),
+  )
+  const [ms, mw] = rng.pick(pairs)
   const total = ratAdd(ms, mw)
   const w = ratMul(ratDiv(ms, total), rat(100))
   const step = calcStep(
@@ -303,7 +341,7 @@ function fractionTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): Che
       correct: w,
       wrong: [
         { rule: 'chem-fraction-solvent', value: ratMul(ratDiv(ms, mw), rat(100)) },
-        { rule: 'chem-vol-percent', value: ratDiv(ms, total) },
+        { rule: 'chem-percent-not-times', value: ratDiv(ms, total) },
       ],
       unit: '\\%',
       hint: 'Worauf bezieht sich der Anteil: auf das Wasser oder auf die ganze Lösung?',
@@ -320,8 +358,10 @@ function fractionTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): Che
 
 function betaTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc | null {
   const s = rng.pick(solutes(SOLUTE_IDS))
-  const m = rng.pick(['0.5', '1', '2', '2.5', '4', '5', '7.5', '10', '12', '20'].map(d))
-  const vMl = rng.pick(VOLUMES_ML)
+  const pairs = ['0.5', '1', '2', '2.5', '4', '5', '7.5', '10', '12', '20'].flatMap((a) =>
+    VOLUMES_ML.map((b) => [d(a), b] as const).filter(([x, y]) => within(ratDiv(x, ratMul(rat(y), ML)), maxBeta(s))),
+  )
+  const [m, vMl] = rng.pick(pairs)
   const v = ratMul(rat(vMl), ML)
   const beta = ratDiv(m, v)
   const step = calcStep(
@@ -347,27 +387,30 @@ function betaTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCal
   return finish(ref, 'Berechne die Massenkonzentration', `m(${ce(s)}) = ${unit(m, 'g')} \\qquad V = ${vMl}\\,\\mathrm{mL}`, `${named(s)}, gelöst und aufgefüllt auf das angegebene Volumen.`, [step], `\\beta ${eqSign(beta)} ${unit(beta, 'g/L')}`, `anteil:${level}:beta`, s.id)
 }
 
-const TRACES = [
-  { id: 'blei', text: 'Blei im Trinkwasser' },
-  { id: 'nitrat', text: 'Nitrat im Grundwasser' },
-  { id: 'kupfer', text: 'Kupfer im Leitungswasser' },
-  { id: 'quecksilber', text: 'Quecksilber in Fisch' },
-  { id: 'cadmium', text: 'Cadmium im Boden' },
-  { id: 'arsen', text: 'Arsen im Reis' },
+// Spurenstoffe mit Werten in üblicher Größenordnung (unter oder nahe an gängigen Grenzwerten)
+const TRACES: readonly { id: string; text: string; unit: 'ppm' | 'ppb'; values: readonly string[] }[] = [
+  { id: 'nitrat', text: 'Nitrat im Grundwasser', unit: 'ppm', values: ['5', '10', '20', '25', '40', '50'] },
+  { id: 'kupfer', text: 'Kupfer im Leitungswasser', unit: 'ppm', values: ['0.1', '0.2', '0.5', '1', '1.5'] },
+  { id: 'cadmium', text: 'Cadmium im Boden', unit: 'ppm', values: ['0.2', '0.4', '0.5', '1', '1.5'] },
+  { id: 'fluorid', text: 'Fluorid im Mineralwasser', unit: 'ppm', values: ['0.2', '0.5', '1', '1.5'] },
+  { id: 'blei', text: 'Blei im Trinkwasser', unit: 'ppb', values: ['1', '2', '5', '8', '10'] },
+  { id: 'quecksilber', text: 'Quecksilber in Fisch', unit: 'ppb', values: ['50', '100', '200', '300', '500'] },
+  { id: 'arsen', text: 'Arsen im Reis', unit: 'ppb', values: ['20', '50', '100', '150', '200'] },
+  { id: 'uran', text: 'Uran im Trinkwasser', unit: 'ppb', values: ['0.5', '1', '2', '5', '10'] },
 ]
 
 function ppmTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc | null {
   const trace = rng.pick(TRACES)
   const kg = rng.pick([1, 2, 4, 5, 10, 20, 50].map((x) => rat(x)))
-  const ppb = rng.chance(0.5)
+  const ppb = trace.unit === 'ppb'
+  const value = d(rng.pick(trace.values))
   const unitName = ppb ? 'ppb' : 'ppm'
   const small = ppb ? '\\mu g' : 'mg'
   const factor = ppb ? rat(1, 10 ** 9) : rat(1, 10 ** 6)
   const other = ppb ? rat(1, 10 ** 6) : rat(1, 10 ** 9)
   if (rng.chance(0.5)) {
     // Anteil aus Masse: x mg (µg) in y kg
-    const amount = rng.pick(['0.5', '1', '2', '3', '5', '8', '10', '15', '20', '40'].map(d))
-    const value = ratDiv(amount, kg)
+    const amount = ratMul(value, kg)
     const step = calcStep(
       {
         id: 'anteil',
@@ -391,7 +434,6 @@ function ppmTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc
     return finish(ref, `Gib den Anteil in ${unitName} an`, `${unit(amount, small)}\\ \\text{in}\\ ${unit(kg, 'kg')}`, `${trace.text}.`, [step], `${unit(value, unitName)}`, `ppm:${level}:anteil-${unitName}`, trace.id)
   }
   // Masse aus Anteil
-  const value = rng.pick(['0.5', '2', '5', '10', '25', '50', '100'].map(d))
   const amount = ratMul(value, kg)
   const step = calcStep(
     {
@@ -443,12 +485,12 @@ function volTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc
         question: 'Wie groß ist der Volumenanteil an Ethanol?',
         correct: pct,
         wrong: [
-          { rule: 'chem-vol-percent', value: ratDiv(pct, rat(100)) },
+          { rule: 'chem-percent-not-times', value: ratDiv(pct, rat(100)) },
           { rule: 'chem-ml-not-l', value: ratDiv(ratMul(vsMl, rat(100)), total) },
         ],
         unit: 'Vol\\text{-}\\%',
         hint: 'Beide Volumina in derselben Einheit, dann der Anteil mal 100 %.',
-        line: `\\varphi = \\frac{${unit(vs, 'L')}}{${unit(total, 'L')}} \\cdot 100\\,\\% ${eqSign(pct)} ${unit(pct, 'Vol\\text{-}\\%')}`,
+        line: `\\varphi = \\frac{${exact(vs)}\\,\\mathrm{L}}{${unit(total, 'L')}} \\cdot 100\\,\\% ${eqSign(pct)} ${unit(pct, 'Vol\\text{-}\\%')}`,
         why: 'Volumen des Ethanols geteilt durch das Gesamtvolumen, mal 100 %:',
         card: CARD.vol,
       },
@@ -456,7 +498,7 @@ function volTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc
       focus,
     )
     if (!back) return null
-    return finish(ref, 'Berechne den Volumenanteil', `${unit(vsMl, 'mL')}\\ \\text{Ethanol in}\\ ${unit(total, 'L')}`, `${drink.text}.`, [back], `\\varphi ${eqSign(pct)} ${unit(pct, 'Vol\\text{-}\\%')}`, `anteil:${level}:vol-anteil`, drink.id)
+    return finish(ref, 'Berechne den Volumenanteil', `${exact(vsMl)}\\,\\mathrm{mL}\\ \\text{Ethanol in}\\ ${unit(total, 'L')}`, `${drink.text}.`, [back], `\\varphi ${eqSign(pct)} ${unit(pct, 'Vol\\text{-}\\%')}`, `anteil:${level}:vol-anteil`, drink.id)
   }
   const step = calcStep(
     {
@@ -481,12 +523,14 @@ function volTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc
 // --- Gase ---
 
 function vmTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc | null {
-  const gas = rng.pick(GASES)
+  // Butan siedet knapp unter 0 °C: bei Normbedingungen nicht verlässlich gasförmig
+  const gas = rng.pick(GASES.filter((g) => g.id !== 'C4H10'))
   if (rng.chance(0.35)) {
     // aus der Masse: n = m/M, dann V = n · V_m
     const values: MassValues = level === 2 ? 'pse' : 'rounded'
     const mass = molarMass(gas.formula, values)
     const m = given(ratMul(rng.pick(NICE_N), mass))
+    if (usesExamNumbers(`m(${ce(gas)}) = ${unit(m, 'g')}`)) return null
     const first = nStep(gas, m, mass, values, rng, focus)
     if (!first) return null
     const nShown = given(first.n)
@@ -569,12 +613,16 @@ function vmTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc 
 }
 
 // Gasgesetz: V = nRT/p, Temperatur in °C, Druck in hPa oder bar
+// Gase, die sich unter Druck verflüssigen: höchster Druck in bar, deutlich unter dem Dampfdruck bei 15 °C
+// (NH₃ etwa 7 bar, Cl₂ 6 bar, SO₂ 2,8 bar, Propan 7 bar, Butan 1,8 bar)
+const MAX_BAR: Readonly<Record<string, number>> = { NH3: 3, Cl2: 3, SO2: 1.5, C3H8: 3, C4H10: 1.05 }
 function gasLawTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc | null {
   const gas = rng.pick(GASES)
   const n = rng.pick(NICE_N)
   const celsius = rng.pick([15, 20, 25, 37, 50, 80, 100, 150, 200])
-  const inBar = rng.chance(0.5)
-  const pGiven = inBar ? d(rng.pick(['1.5', '2', '3', '5', '10'])) : rat(rng.pick([950, 1000, 1013, 1050]))
+  const bars = ['1.5', '2', '3', '5', '10'].filter((x) => Number(x) <= (MAX_BAR[gas.id] ?? Infinity))
+  const inBar = bars.length > 0 && rng.chance(0.5)
+  const pGiven = inBar ? d(rng.pick(bars)) : rat(rng.pick([950, 1000, 1013, 1050]))
   const pPa = ratMul(pGiven, rat(inBar ? 100000 : 100))
   const t = ratAdd(rat(celsius), KELVIN)
   const vOf = (tt: Rational, pp: Rational) => ratMul(ratDiv(ratMul(ratMul(n, R), tt), pp), rat(1000))
@@ -593,7 +641,7 @@ function gasLawTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemC
       ],
       unit: 'L',
       hint: 'Rechne erst alles in SI-Einheiten um: Kelvin, Pascal, Kubikmeter.',
-      line: `V = \\frac{n R T}{p} = \\frac{${unit(n, 'mol')} \\cdot 8{,}314\\,\\mathrm{\\tfrac{J}{mol \\cdot K}} \\cdot ${unit(t, 'K')}}{${sig(pPa)}\\,\\mathrm{Pa}} \\cdot 1000\\,\\tfrac{\\mathrm{L}}{\\mathrm{m^3}} ${eqSign(v)} ${unit(v, 'L')}`,
+      line: `V = \\frac{n R T}{p} = \\frac{${unit(n, 'mol')} \\cdot 8{,}314\\,\\mathrm{\\tfrac{J}{mol \\cdot K}} \\cdot ${exact(t)}\\,\\mathrm{K}}{${exact(pPa)}\\,\\mathrm{Pa}} \\cdot 1000\\,\\tfrac{\\mathrm{L}}{\\mathrm{m^3}} ${eqSign(v)} ${unit(v, 'L')}`,
       why: `Temperatur in Kelvin ($${celsius} + 273{,}15$), Druck in Pascal, Ergebnis in $\\mathrm{m^3}$, dann in Liter:`,
       card: CARD.gas,
     },
@@ -604,7 +652,7 @@ function gasLawTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemC
   return finish(
     ref,
     'Berechne das Volumen mit dem Gasgesetz',
-    `${nLatex(gas)} = ${unit(n, 'mol')} \\qquad \\vartheta = ${celsius}\\,^{\\circ}\\mathrm{C} \\qquad p = ${sig(pGiven)}\\,\\mathrm{${pUnit}}`,
+    `${nLatex(gas)} = ${unit(n, 'mol')} \\qquad \\vartheta = ${celsius}\\,^{\\circ}\\mathrm{C} \\qquad p = ${exact(pGiven)}\\,\\mathrm{${pUnit}}`,
     `${named(gas)}, ideales Gas. Rechne mit $R = 8{,}314\\,\\mathrm{J/(mol \\cdot K)}$.`,
     [step],
     `V ${eqSign(v)} ${unit(v, 'L')}`,
@@ -637,6 +685,7 @@ function gasReactionTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): 
   const sg: Substance = { id: givenSp.text, name: fuel?.name ?? SUBSTANCES.find((x) => x.id === givenSp.text)?.name ?? '', kind: 'simple', formula: givenSp.formula }
   const massG = molarMass(givenSp.formula, values)
   const mGiven = given(ratMul(rng.pick(NICE_N), massG))
+  if (usesExamNumbers(`m(${ce(givenSp)}) = ${unit(mGiven, 'g')}`)) return null
   const first = nStep(sg, mGiven, massG, values, rng, focus)
   if (!first) return null
   const nG = given(first.n)
@@ -650,6 +699,9 @@ function gasReactionTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): 
       wrong: [
         { rule: 'chem-ratio-one', value: nG },
         { rule: 'chem-ratio-swapped', value: ratMul(nG, ratDiv(nuG, nuT)) },
+        ...[...eq.reactants, ...eq.products]
+          .filter((t) => t.species !== givenSp && t.species !== gasSp)
+          .map((t) => ({ rule: 'chem-ratio-other-coefficient', value: ratMul(nG, ratDiv(t.coefficient, nuG)) })),
       ],
       unit: 'mol',
       hint: 'Die Koeffizienten der Gleichung geben das Verhältnis der Stoffmengen an.',
@@ -660,7 +712,8 @@ function gasReactionTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): 
     rng,
     focus,
   )
-  if (!ratio) return null
+  // Verhältnis 1 : 1 ohne andere Koeffizienten (Kalk brennen): kein eigener Schritt, n bleibt gleich
+  if (!ratio && !ratEq(nuT, nuG)) return null
   const nTShown = given(nT)
   const v = ratMul(nTShown, VM)
   const vStep = calcStep(
@@ -688,7 +741,7 @@ function gasReactionTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): 
     'Welches Gasvolumen entsteht?',
     String.raw`\begin{gathered} ${equationLatex(eq)} \\ m(${ce(givenSp)}) = ${unit(mGiven, 'g')} \end{gathered}`,
     `${fuel ? `${fuel.name} verbrennt vollständig` : r!.text}; das Gas entsteht bei Normbedingungen ($0\\,^{\\circ}\\mathrm{C}$, $1013\\,\\mathrm{hPa}$, $V_m = 22{,}4\\,\\mathrm{L/mol}$). ${valuesNote(givenSp.formula, values)}`,
-    [{ ...first.step, id: 'stoffmenge-gegeben' }, ratio, vStep],
+    [{ ...first.step, id: 'stoffmenge-gegeben' }, ...(ratio ? [ratio] : []), vStep],
     `V(${ce(gasSp)}) ${eqSign(v)} ${unit(v, 'L')}`,
     `gase:${level}:reaktion`,
     fuel ? fuel.id : r!.id,
@@ -742,14 +795,14 @@ export const LOESUNGEN_GENERATORS: readonly ChemGenerator[] = [
     kind: 'anteile',
     part: 'anteile',
     weights: { 1: 0.3, 2: 0.35, 3: 0.3 },
-    errors: ['chem-fraction-solvent', 'chem-vol-percent', 'chem-ml-not-l', 'chem-mass-conc-inverted', 'chem-ppb'],
+    errors: ['chem-fraction-solvent', 'chem-vol-percent', 'chem-percent-not-times', 'chem-ml-not-l', 'chem-mass-conc-inverted', 'chem-ppb'],
     generate: anteile,
   },
   {
     kind: 'gase',
     part: 'gase',
     weights: { 1: 0.35, 2: 0.3, 3: 0.35 },
-    errors: ['chem-vm-inverted', 'chem-vm-conditions', 'chem-celsius', 'chem-hpa', 'chem-ratio-one', 'chem-ratio-swapped', 'chem-n-times', 'chem-n-inverted'],
+    errors: ['chem-vm-inverted', 'chem-vm-conditions', 'chem-celsius', 'chem-hpa', 'chem-ratio-one', 'chem-ratio-swapped', 'chem-ratio-other-coefficient', 'chem-n-times', 'chem-n-inverted'],
     generate: gase,
   },
 ]

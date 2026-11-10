@@ -390,7 +390,7 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
   {
     id: 'chem-hpa',
     course: LOESUNGEN,
-    name: 'Hektopascal nicht in Pascal umgerechnet',
+    name: 'Druck nicht in Pascal umgerechnet',
     wrongFormula: String.raw`p = 1013\ \text{statt}\ 101\,300\,\mathrm{Pa}`,
     why: {
       detailed: String.raw`Mit $R = 8{,}314\,\mathrm{J/(mol \cdot K)}$ wird in SI-Einheiten gerechnet: Druck in Pascal, Volumen in Kubikmetern. $1\,\mathrm{hPa} = 100\,\mathrm{Pa}$, $1\,\mathrm{bar} = 10^{5}\,\mathrm{Pa}$.`,
@@ -400,11 +400,11 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
   {
     id: 'chem-vm-conditions',
     course: LOESUNGEN,
-    name: String.raw`$22{,}4\,\mathrm{L/mol}$ außerhalb der Normbedingungen`,
+    name: 'Molares Volumen anderer Bedingungen verwendet',
     wrongFormula: String.raw`1\,\mathrm{mol}\ \text{bei}\ 25\,^{\circ}\mathrm{C}\text{: } 22{,}4\ \text{statt}\ 24{,}5\,\mathrm{L}`,
     why: {
-      detailed: String.raw`Das molare Volumen von $22{,}4\,\mathrm{L/mol}$ gilt nur für Gase bei $0\,^{\circ}\mathrm{C}$ und $1013\,\mathrm{hPa}$. Bei anderer Temperatur oder anderem Druck rechnet man mit dem Gasgesetz $p \cdot V = n \cdot R \cdot T$.`,
-      short: String.raw`$22{,}4\,\mathrm{L/mol}$ nur bei $0\,^{\circ}\mathrm{C}$ und $1013\,\mathrm{hPa}$.`,
+      detailed: String.raw`Das molare Volumen hängt von Temperatur und Druck ab: $22{,}4\,\mathrm{L/mol}$ gilt bei $0\,^{\circ}\mathrm{C}$ und $1013\,\mathrm{hPa}$, bei $25\,^{\circ}\mathrm{C}$ sind es etwa $24{,}5\,\mathrm{L/mol}$. Unter anderen Bedingungen rechnet man mit dem Gasgesetz $p \cdot V = n \cdot R \cdot T$.`,
+      short: 'Das molare Volumen gilt nur für seine Temperatur und seinen Druck.',
     },
   },
   {
@@ -453,8 +453,18 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
     name: 'Prozentangabe nicht durch 100 geteilt',
     wrongFormula: String.raw`40\,\mathrm{Vol}\text{-}\%\ \text{von}\ 0{,}5\,\mathrm{L}\text{: } 20\ \text{statt}\ 0{,}2\,\mathrm{L}`,
     why: {
-      detailed: String.raw`Prozent heißt „von hundert“: $40\,\%$ sind $\frac{40}{100} = 0{,}4$. Ein Anteil kann nie mehr sein als das Ganze; ein Ergebnis größer als das Gesamtvolumen ist ein sicheres Zeichen für diesen Fehler.`,
+      detailed: String.raw`Prozent heißt „von hundert“: $40\,\%$ sind $\frac{40}{100} = 0{,}4$. Ein Anteil kann nie mehr sein als das Ganze; ein Ergebnis größer als die ganze Menge ist ein sicheres Zeichen für diesen Fehler.`,
       short: String.raw`$40\,\% = 0{,}4$: durch 100 teilen.`,
+    },
+  },
+  {
+    id: 'chem-percent-not-times',
+    course: LOESUNGEN,
+    name: 'Anteil nicht mit 100 % malgenommen',
+    wrongFormula: String.raw`\frac{10\,\mathrm{g}}{200\,\mathrm{g}} = 0{,}05\,\%\ \text{statt}\ 5\,\%`,
+    why: {
+      detailed: String.raw`Teil geteilt durch Ganzes ergibt eine Dezimalzahl wie $0{,}05$. In Prozent wird daraus erst durch Malnehmen mit $100\,\%$: $0{,}05 = 5\,\%$. Ohne diesen Schritt ist der Anteil hundertmal zu klein.`,
+      short: String.raw`Dezimalzahl mal $100\,\%$ ergibt Prozent.`,
     },
   },
 ]

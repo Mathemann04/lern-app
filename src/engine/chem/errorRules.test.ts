@@ -208,6 +208,8 @@ describe('Rechenfehler Gase und Lösungen: Katalogbeispiele', () => {
     expect(t(ratMul(rat(40), parseDecimal('0.5')!))).toBe('20')
     expect(t(ratMul(rat(40, 100), parseDecimal('0.5')!))).toBe('0,2')
     expect(t(ratDiv(parseDecimal('0.5')!, parseDecimal('22.4')!))).toBe('0,0223')
+    // Anteil nicht mit 100 % malgenommen: 10 g in 200 g
+    expect(t(ratDiv(rat(10), rat(200)))).toBe('0,05')
   })
 })
 
