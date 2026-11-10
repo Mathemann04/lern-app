@@ -102,13 +102,14 @@ export const FRACTIONS = 'brueche'
 export const REARRANGE = 'umstellen'
 export const ATOMBAU = 'chem-atombau'
 export const STOFFMENGE = 'chem-stoffmenge'
+export const GLEICHUNGEN = 'chem-gleichungen'
 
 // Chemie-Themen: Ids mit „chem-", Engine aus Wissensfragen (engine/chem/)
 export const isChemCourse = (id: string) => id.startsWith('chem-')
 
 // Themen mit Testseite in der Formel-Galerie (auch solche, die noch nicht spielbar sind); bei Chemie
 // die Seite „Fragen durchsehen"
-export const GALLERY_COURSES: readonly string[] = [DERIVATIVES, FRACTIONS, REARRANGE, ATOMBAU, STOFFMENGE]
+export const GALLERY_COURSES: readonly string[] = [DERIVATIVES, FRACTIONS, REARRANGE, ATOMBAU, GLEICHUNGEN, STOFFMENGE]
 
 const derivativeLevels: LevelPreview[] = [
   {
@@ -248,6 +249,33 @@ const atombauParts: CoursePart[] = [
   { id: 'isotope-ionen', title: 'Isotope und Ionen', levels: [1, 2, 3] },
   { id: 'modelle', title: 'Atommodelle', levels: [2, 3] },
   { id: 'licht', title: 'Licht und Spektren', levels: [2, 3] },
+]
+
+const gleichungenLevels: LevelPreview[] = [
+  {
+    level: 1,
+    available: true,
+    title: 'Einfache Gleichungen ausgleichen, Koeffizient und Index, Methan, Propan und Ethanol verbrennen',
+    examples: [String.raw`\ce{2 H2 + O2 -> 2 H2O}`],
+  },
+  {
+    level: 2,
+    available: true,
+    title: 'Größere Gleichungen (Ammoniak, Rosten, Metalle mit Säure), Alkane und Alkohole verbrennen',
+    examples: [String.raw`\ce{4 Fe + 3 O2 -> 2 Fe2O3}`],
+  },
+  {
+    level: 3,
+    available: true,
+    title: 'Vollständige Verbrennung von Alkanen bis Decan und von Alkoholen, wie in der Klausur',
+    examples: [String.raw`\ce{C8H18}`, String.raw`\ce{C3H7OH}`],
+  },
+]
+
+// Unterthemen von „Reaktionsgleichungen" (Rechnungen in engine/chem/generators/gleichungen.ts, part)
+const gleichungenParts: CoursePart[] = [
+  { id: 'ausgleichen', title: 'Gleichungen ausgleichen', levels: [1, 2] },
+  { id: 'verbrennung', title: 'Vollständige Verbrennung', levels: [1, 2, 3] },
 ]
 
 const stoffmengeLevels: LevelPreview[] = [
@@ -421,7 +449,17 @@ export const SUBJECTS: readonly Subject[] = [
         icon: 'flask',
         tone: 'orange',
         courses: [
-          comingSoon('chem-gleichungen', 'Reaktionsgleichungen', 'Aufstellen und ausgleichen, auch Verbrennungen', 'flask'),
+          {
+            id: GLEICHUNGEN,
+            title: 'Reaktionsgleichungen',
+            description: 'Aufstellen und ausgleichen, auch Verbrennungen',
+            icon: 'flask',
+            cards: 'chem-gleichungen',
+            levels: gleichungenLevels,
+            free: false,
+            focus: true,
+            parts: gleichungenParts,
+          },
           {
             id: STOFFMENGE,
             title: 'Stoffmenge und Umsatz',

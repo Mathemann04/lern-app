@@ -9,4 +9,5 @@ export const MISCONCEPTIONS_BY_COURSE: Readonly<Record<string, readonly Misconce
   'chem-atombau': ATOMBAU_MISCONCEPTIONS,
   // noch ohne Wissensfragen (kommen mit S3b); die Rechenfehler stehen in chem/errorRules.ts
   'chem-stoffmenge': [],
+  'chem-gleichungen': [],
 }

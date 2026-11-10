@@ -40,7 +40,7 @@ export function CourseScreen({ id }: { id: string }) {
         <div className="flex items-center gap-4">
           <AreaIcon kind={course.icon} className="size-16 shrink-0" />
           <div className="min-w-0 space-y-1">
-            <h1 className="text-3xl font-semibold tracking-tight">{course.title}</h1>
+            <h1 className="text-3xl font-semibold tracking-tight hyphens-auto">{course.title}</h1>
             <p className="text-zinc-600 text-pretty">{course.description}</p>
           </div>
         </div>

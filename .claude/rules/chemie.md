@@ -74,3 +74,12 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   Thema ohne Wissensfragen: leere Sammlung `bank/stoffmenge.ts`, `nextSeed` zieht
   nur Rechnungen, in der Mischung Gewicht `CALC_ONLY_WEIGHT` (15, `ui/mix.ts`).
   Genauere IUPAC-Werte nur in `chem/iupac.testdata.ts`.
+- Reaktionsgleichungen (S3b): `chem/equation.ts` (Stoffe `species`, Gleichung mit
+  Koeffizienten, `balance` über die Atombilanz mit exakten Brüchen: eindeutige
+  Lösung, alle positiv, kleinste ganze Zahlen, sonst `null`; `isBalanced`,
+  `equationCe` für mhchem mit Brüchen als `13/2`), `chem/reactions.ts` (34 Reaktionen
+  mit Stufen, 15 Brennstoffe), `generators/gleichungen.ts` (Rechenarten
+  `ausgleichen`: richtige Gleichung wählen, falsche aus `indexChanged`, `singleAtom`,
+  `partly`, dann `probeStep`; `verbrennung`: C und H, O₂, ganzzahlig machen; falsche
+  Gleichungen mit denselben Stoffen sind nie ausgeglichen). Abwechslung dort mit
+  eigener Kennzahl (`VARIETY` in `generators.test.ts`).
