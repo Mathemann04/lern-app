@@ -28,11 +28,28 @@ describe('Runden der Wissensfragen', () => {
     const store = memoryStore()
     for (const no of [101, 102, 103]) rememberShown('chem-atombau', 1, no, store)
     rememberShown('chem-atombau', 2, 201, store)
-    startNewRound('chem-atombau', 1, store)
+    startNewRound('chem-atombau', 1, undefined, store)
     expect(shownInRound('chem-atombau', 1, store).size).toBe(0)
     expect([...shownInRound('chem-atombau', 2, store)]).toEqual([201])
     rememberShown('chem-atombau', 1, 102, store)
     expect([...shownInRound('chem-atombau', 1, store)]).toEqual([102])
+  })
+
+  it('nimmt mit Nummern nur diese aus der Runde (angekreuzte Unterthemen), die übrigen bleiben gemerkt', () => {
+    const store = memoryStore()
+    for (const no of [101, 102, 103, 104]) rememberShown('chem-atombau', 1, no, store)
+    rememberShown('chem-atombau', 2, 201, store)
+    startNewRound('chem-atombau', 1, [102, 104, 999], store)
+    expect([...shownInRound('chem-atombau', 1, store)]).toEqual([101, 103])
+    expect([...shownInRound('chem-atombau', 2, store)]).toEqual([201])
+    // auch als Menge; leere Nummernliste ändert nichts
+    startNewRound('chem-atombau', 1, new Set([101]), store)
+    expect([...shownInRound('chem-atombau', 1, store)]).toEqual([103])
+    startNewRound('chem-atombau', 1, [], store)
+    expect([...shownInRound('chem-atombau', 1, store)]).toEqual([103])
+    // eine Runde, die es noch nicht gibt, entsteht dabei nicht
+    startNewRound('chem-atombau', 3, [301], store)
+    expect(JSON.parse(store.data.get(ROUNDS_KEY)!)).not.toHaveProperty('chem-atombau:3')
   })
 
   it('leert bei „Fortschritt löschen" alle Runden und lässt andere Einträge stehen', () => {
@@ -65,7 +82,8 @@ describe('Runden der Wissensfragen', () => {
     }
     expect(shownInRound('chem-atombau', 1, locked).size).toBe(0)
     expect(() => rememberShown('chem-atombau', 1, 101, locked)).not.toThrow()
-    expect(() => startNewRound('chem-atombau', 1, locked)).not.toThrow()
+    expect(() => startNewRound('chem-atombau', 1, undefined, locked)).not.toThrow()
+    expect(() => startNewRound('chem-atombau', 1, [101], locked)).not.toThrow()
     expect(() => clearRounds(locked)).not.toThrow()
   })
 

@@ -4,18 +4,19 @@ import { type TaskRef, formatTaskNumber } from '../../engine/tasks/taskNumber.ts
 import { Formula } from '../Formula.tsx'
 import { type ExplanationMode, MODE_LABEL } from './explanationMode.ts'
 import { RichText } from '../RichText.tsx'
-import { levelName } from '../catalog.ts'
-import { courseHref } from '../routes.ts'
+import { courseById, levelName } from '../catalog.ts'
+import { courseHref, mixHref } from '../routes.ts'
 
 // Teile, die geführter und freier Modus gemeinsam haben
 
-// Obere Leiste: Schließen (zurück zum Thema), Mitte (z. B. Fortschritt), Umschalter für Erklärungen
-type TopBarProps = { course: string; mode: ExplanationMode; onCycleMode: () => void; children?: ReactNode }
+// Obere Leiste: Schließen (zurück zum Thema, in der Mischung zur Mischung), Mitte (z. B. Fortschritt),
+// Umschalter für Erklärungen
+type TopBarProps = { course: string; mix?: string | null; mode: ExplanationMode; onCycleMode: () => void; children?: ReactNode }
 
-export function TaskTopBar({ course, mode, onCycleMode, children }: TopBarProps) {
+export function TaskTopBar({ course, mix = null, mode, onCycleMode, children }: TopBarProps) {
   return (
     <div className="flex items-center gap-3">
-      <a href={courseHref(course)} aria-label="Aufgabe beenden" className="-my-1 -ml-3 rounded-lg p-3 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
+      <a href={mix ? mixHref(mix) : courseHref(course)} aria-label="Aufgabe beenden" className="-my-1 -ml-3 rounded-lg p-3 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900">
         <svg aria-hidden viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
           <path d="M6 6l12 12M18 6L6 18" />
         </svg>
@@ -48,12 +49,16 @@ export function CheckBadge({ large = false }: { large?: boolean }) {
 }
 
 // „Stufe 2 · Aufgabe 2-4711 · Leite ab" (in Chemie „Vertiefung · …") und die Funktion; ohne
-// functionLatex (Wissensfragen) keine Formel; note: Zusatz darunter, z. B. Bedingungen
-type IntroProps = { course: string; taskRef: TaskRef; functionLatex?: string; instruction: string; note?: string }
+// functionLatex (Wissensfragen) keine Formel; note: Zusatz darunter, z. B. Bedingungen. In der
+// Mischung (mix) steht darüber, aus welchem Thema die Aufgabe kommt.
+type IntroProps = { course: string; mix?: string | null; taskRef: TaskRef; functionLatex?: string; instruction: string; note?: string }
 
-export function TaskIntro({ course, taskRef, functionLatex, instruction, note }: IntroProps) {
+export function TaskIntro({ course, mix = null, taskRef, functionLatex, instruction, note }: IntroProps) {
   return (
     <>
+      {mix && (
+        <p className="text-sm font-semibold text-accent-700">Themen mischen · {courseById(course)?.course.title}</p>
+      )}
       <p className="text-sm text-zinc-500">
         {levelName(course, taskRef.level)} · Aufgabe {formatTaskNumber(taskRef)} · <RichText text={instruction} inline />
       </p>

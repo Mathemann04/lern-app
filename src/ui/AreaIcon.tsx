@@ -219,7 +219,36 @@ const ART: Record<Kind, (id: string) => ReactNode> = {
       <path d="M31 21v6M28 24h6" className="stroke-tone-700" strokeWidth="2.2" strokeLinecap="round" />
     </>
   ),
+  // Themen mischen: zwei Kärtchen übereinander, das vordere eine Liste mit Kästchen, zwei davon
+  // angekreuzt
+  mix: () => (
+    <>
+      <rect x="3.5" y="9" width="29" height="34" rx="5" transform="rotate(-11 18 26)" className="fill-tone-400" />
+      <rect x="15" y="8" width="29" height="34" rx="5" className="fill-tone-300 dark:fill-tone-800" />
+      <rect x="14" y="5" width="29" height="34" rx="5" className="fill-tone-100" />
+      {MIX_ROWS.map(([y, checked]) => (
+        <g key={y}>
+          {checked ? (
+            <>
+              <rect x="18.5" y={y} width="7" height="7" rx="1.8" className="fill-tone-700" />
+              <path d={`M20.2 ${y + 3.6}l1.6 1.6 2.9-3.2`} className="stroke-tone-50" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+            </>
+          ) : (
+            <rect x="19.2" y={y + 0.7} width="5.6" height="5.6" rx="1.4" className="stroke-tone-500" strokeWidth="1.4" fill="none" />
+          )}
+          <rect x="28.5" y={y + 2.2} width="10" height="2.6" rx="1.3" className={checked ? 'fill-tone-500' : 'fill-tone-300'} />
+        </g>
+      ))}
+    </>
+  ),
 }
+
+// Zeilen der Liste im Bild „Themen mischen" als (y, angekreuzt?)
+const MIX_ROWS: ReadonlyArray<readonly [number, boolean]> = [
+  [10, true],
+  [18.5, false],
+  [27, true],
+]
 
 // Kästchen des Periodensystems als (Spalte, Zeile): zwei Spalten links (s-Block), eine Spalte als
 // Andeutung der Nebengruppen (d-Block), drei Spalten rechts (p-Block)

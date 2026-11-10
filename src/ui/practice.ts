@@ -48,15 +48,18 @@ export function questionNoOf(engine: Pick<CourseEngine, 'nextSeed'>, seed: numbe
 
 // Nummer einer neuen Aufgabe, deren Form nicht unter den letzten dieser Stufe ist (recent, pickFresh).
 // Wissensfragen kommen dabei reihum: shown sind die Fragen, die in der laufenden Runde schon dran
-// waren, die Engine wählt unter den übrigen. newRound: Alle waren dran, die gewählte Frage beginnt eine
-// neue Runde.
+// waren, die Engine wählt unter den übrigen. parts: angekreuzte Unterthemen (ui/selection.ts,
+// selectedParts; ohne Angabe alle). newRound: Alle (der Auswahl) waren dran, die gewählte Frage beginnt
+// eine neue Runde; dann startNewRound(course, level, engine.questionNos(level, parts)) aufrufen, damit nur
+// die Fragen der Auswahl von vorn beginnen.
 export function pickNewSeed(
   engine: Pick<CourseEngine, 'formOf' | 'nextSeed'>,
   level: Level,
   recent: readonly string[],
   shown: ReadonlySet<number>,
+  parts?: ReadonlySet<string>,
 ): { seed: number; newRound: boolean } {
-  const next = engine.nextSeed ? () => engine.nextSeed!(level, shown) : randomSeed
+  const next = engine.nextSeed ? () => engine.nextSeed!(level, shown, parts) : randomSeed
   const seed = pickFresh((s) => engine.formOf({ level, seed: s }), recent, next)
   const no = questionNoOf(engine, seed)
   return { seed, newRound: no !== null && shown.has(no) }

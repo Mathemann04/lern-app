@@ -33,6 +33,8 @@ test('Startseite zeigt Fächer mit Gebieten, Kommendes blass, und „Los geht’
   await expect(page.getByRole('link', { name: /Säuren und Basen/ })).toHaveCount(0)
   await expect(page.getByText('Redox und Elektrochemie')).toBeVisible()
   await expect(page.getByRole('link', { name: 'Erste Aufgabe · geführt' })).toHaveAttribute('href', '#/ueben/ableiten/1')
+  // Unter Chemie 1 die Kachel „Themen mischen" (S1b)
+  await expect(page.getByRole('link', { name: /^Themen mischen/ })).toHaveAttribute('href', '#/mischen/chemie')
   await expectCleanPage(page, 'Startseite')
   expect(errors).toEqual([])
 })

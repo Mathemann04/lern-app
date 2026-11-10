@@ -1,12 +1,14 @@
 import type { Level } from '../engine/tasks/taskNumber.ts'
 import { levelSummary, useProgress } from '../state/progress.ts'
-import { setCourseLevel, updateSettings, useSettings } from '../state/settings.ts'
+import { setCourseLevel, setSkippedParts, updateSettings, useSettings } from '../state/settings.ts'
 import type { PracticeMode } from '../state/storage.ts'
 import { AreaIcon } from './AreaIcon.tsx'
 import { BackLink } from './BackLink.tsx'
 import { courseById, hasLevelNames, levelName, playableLevel } from './catalog.ts'
 import { Formula } from './Formula.tsx'
+import { PartPicker } from './PartPicker.tsx'
 import { areaHref, cardFolderHref, practiceHref } from './routes.ts'
+import { isSelectionPlayable, levelPartCount } from './selection.ts'
 
 const MODES: Array<{ value: PracticeMode; title: string; description: string }> = [
   { value: 'guided', title: 'Geführt', description: 'Auswahl-Antworten' },
@@ -14,9 +16,11 @@ const MODES: Array<{ value: PracticeMode; title: string; description: string }> 
 ]
 
 // Ein Thema, z. B. „Brüche": Art und Stufe wählen, dann üben. Die Stufe merkt sich jedes Thema
-// selbst, die Art (geführt oder frei) gilt für alle.
+// selbst, die Art (geführt oder frei) gilt für alle. Themen mit Unterthemen (Chemie) haben zusätzlich
+// „Was soll drankommen?" mit Kästchen (PartPicker.tsx); gibt es zu den angekreuzten in der Stufe keine
+// Fragen, ist der Üben-Knopf nicht klickbar.
 export function CourseScreen({ id }: { id: string }) {
-  const { area, course } = courseById(id)!
+  const { subject, area, course } = courseById(id)!
   const settings = useSettings()
   // Eine gespeicherte Stufe, die (noch) nicht spielbar ist, zählt als erste spielbare
   const selected = playableLevel(course, settings.levels[id])
@@ -24,6 +28,11 @@ export function CourseScreen({ id }: { id: string }) {
   const practiceMode: PracticeMode = course.free ? settings.practiceMode : 'guided'
   // Stufen mit Namen (Chemie): der Name steht über dem Inhalt der Stufe
   const named = hasLevelNames(id)
+  // Unterthemen: Lässt sich mit der Auswahl in dieser Stufe üben? Wie viele der Unterthemen dieser Stufe
+  // sind angekreuzt? (Nicht angekreuzte anderer Stufen kommen hier ohnehin nicht dran.)
+  const playable = isSelectionPlayable(course, settings, selected)
+  const partCount = levelPartCount(course, settings, selected)
+  const practiceLabel = `${levelName(id, selected)} ${practiceMode === 'free' ? 'frei' : 'geführt'} üben`
   return (
     <main className="space-y-6">
       <div className="space-y-3">
@@ -68,12 +77,41 @@ export function CourseScreen({ id }: { id: string }) {
               })}
             </div>
           </fieldset>
-          <a
-            href={practiceHref(id, selected, practiceMode)}
-            className="block rounded-xl bg-accent-700 px-4 py-3 text-center text-lg font-medium text-on-accent hover:bg-accent-800"
-          >
-            {levelName(id, selected)} {practiceMode === 'free' ? 'frei' : 'geführt'} üben
-          </a>
+          <div className="space-y-2">
+            {playable ? (
+              <a
+                href={practiceHref(id, selected, practiceMode)}
+                className="block rounded-xl bg-accent-700 px-4 py-3 text-center text-lg font-medium text-on-accent hover:bg-accent-800"
+              >
+                {practiceLabel}
+              </a>
+            ) : (
+              <button
+                type="button"
+                disabled
+                aria-describedby="parts-note"
+                className="block w-full cursor-not-allowed rounded-xl bg-zinc-100 px-4 py-3 text-center text-lg font-medium text-zinc-500"
+              >
+                {practiceLabel}
+              </button>
+            )}
+            {partCount && (
+              <div className="flex items-center justify-between gap-3 text-sm">
+                <p id="parts-note" className="text-pretty text-zinc-600">
+                  {playable
+                    ? `In ${levelName(id, selected)}: ${partCount.checked} von ${partCount.total} Unterthemen angekreuzt`
+                    : `Kreuze unten mindestens ein Unterthema an, das es in ${levelName(id, selected)} gibt.`}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setSkippedParts(id, [])}
+                  className="-my-1 -mr-2 min-h-11 shrink-0 rounded-lg px-2 font-medium text-accent-700 hover:bg-accent-50"
+                >
+                  Alle wählen
+                </button>
+              </div>
+            )}
+          </div>
         </div>
         {/* Linie am umgebenden Element: Bei fieldset würde die Beschriftung sie unterbrechen */}
         <div className="border-t border-zinc-100">
@@ -129,6 +167,19 @@ export function CourseScreen({ id }: { id: string }) {
             </div>
           </fieldset>
         </div>
+        {course.parts && (
+          <div className="border-t border-zinc-100">
+            <fieldset aria-describedby="parts-hint">
+              <legend className="px-5 pt-4 text-sm font-medium text-zinc-500">Was soll drankommen?</legend>
+              <p id="parts-hint" className="px-5 text-sm text-pretty text-zinc-500">
+                Deine Auswahl gilt für alle Stufen{subject.mix ? ' und auch beim Mischen' : ''}.
+              </p>
+              <div className="p-3 pt-2">
+                <PartPicker course={course} level={selected} settings={settings} />
+              </div>
+            </fieldset>
+          </div>
+        )}
         {course.cards && (
           <a
             href={cardFolderHref(course.cards)}

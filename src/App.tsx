@@ -1,6 +1,7 @@
 import { Suspense, lazy, useEffect } from 'react'
 import { AreaScreen } from './ui/AreaScreen.tsx'
 import { HomeScreen } from './ui/HomeScreen.tsx'
+import { MixScreen } from './ui/MixScreen.tsx'
 import { type Tone, areaById, courseById, courseOfCards, isChemCourse } from './ui/catalog.ts'
 import { loadCourseEngine } from './ui/courseEngines.ts'
 import { SettingsScreen } from './ui/SettingsScreen.tsx'
@@ -23,6 +24,8 @@ const QuestionGallery = lazy(() => import('./ui/chem/QuestionGallery.tsx'))
 const loadPractice = () => import('./ui/PracticePage.tsx')
 const loadCourse = () => import('./ui/CourseScreen.tsx')
 const PracticePage = lazy(loadPractice)
+// Neue gemischte Aufgabe: im selben Teil wie das Üben (braucht die Engines der Themen)
+const MixPracticePage = lazy(() => loadPractice().then((m) => ({ default: m.MixPracticePage })))
 
 export function App() {
   const pwa = usePwa()
@@ -30,7 +33,7 @@ export function App() {
   const path = useHashRoute()
   const route = parseRoute(path)
   // In Aufgaben kein Hauptmenü: dort beendet das X die Aufgabe
-  const showNav = route.page !== 'practice'
+  const showNav = route.page !== 'practice' && route.page !== 'mixPractice'
 
   // Kurz nach dem Start schon die Teile für Aufgaben holen (auch die Engine des zuletzt geübten
   // Themas), damit „Weiter üben" sofort reagiert
@@ -108,6 +111,7 @@ export function App() {
 }
 
 // Seiten, die zu einem Gebiet gehören, zeigen sich in dessen Farbe; die übrigen im Blaugrün der App
+// (auch die Mischung; eine gemischte Aufgabe in der Farbe ihres Themas)
 function toneOf(route: Route): Tone | undefined {
   switch (route.page) {
     case 'area':
@@ -141,7 +145,11 @@ function Page({ route }: { route: Route }) {
     case 'cards':
       return <CardsPage folder={route.folder} card={route.card} />
     case 'practice':
-      return <PracticePage course={route.course} mode={route.mode} level={route.level} seed={route.seed} focus={route.focus} />
+      return <PracticePage course={route.course} mode={route.mode} level={route.level} seed={route.seed} focus={route.focus} mix={route.mix} />
+    case 'mix':
+      return <MixScreen key={route.subject} id={route.subject} />
+    case 'mixPractice':
+      return <MixPracticePage subject={route.subject} level={route.level} />
     case 'home':
       return <HomeScreen />
   }

@@ -26,9 +26,39 @@ describe('Speicher', () => {
       lastCourse: 'brueche',
       practiceMode: 'free',
       theme: 'dark',
+      skipParts: { 'chem-atombau': ['modelle', 'licht'] },
+      mix: { chemie: { level: 2, skip: ['chem-elektronen'] } },
+      lastMix: 'chemie',
     } as const
     saveState({ ...DEFAULT_STATE, settings }, store)
     expect(loadState(store).settings).toEqual(settings)
+  })
+
+  it('liest die Auswahl (Unterthemen, Mischung, zuletzt gemischt) und lässt Unsinn einzeln weg', () => {
+    const text = JSON.stringify({
+      version: 3,
+      settings: {
+        skipParts: { 'chem-atombau': ['modelle', 'modelle', 'B R', 7, 'licht'], 'chem-x': 'kaputt', 'Kaputt Id': ['a'], 'chem-leer': [] },
+        mix: {
+          chemie: { level: 3, skip: ['chem-atombau', 42, 'chem-atombau'] },
+          physik: { level: 9, skip: 'kaputt' },
+          mathe: 'kaputt',
+          liste: [1],
+          'Kaputt Id': { level: 1, skip: [] },
+        },
+        lastMix: 'Chemie!',
+      },
+    })
+    expect(loadState(memoryStore(text)).settings).toEqual({
+      ...DEFAULT_SETTINGS,
+      skipParts: { 'chem-atombau': ['modelle', 'licht'], 'chem-leer': [] },
+      mix: { chemie: { level: 3, skip: ['chem-atombau'] }, physik: { level: 1, skip: [] } },
+      lastMix: null,
+    })
+    for (const broken of [42, 'X!', [], null, true]) {
+      const read = loadState(memoryStore(JSON.stringify({ version: 3, settings: { skipParts: broken, mix: broken, lastMix: broken } }))).settings
+      expect(read, String(broken)).toEqual(DEFAULT_SETTINGS)
+    }
   })
 
   it('übersteht kaputten oder fremden Inhalt', () => {
@@ -133,7 +163,7 @@ describe('Umzug alter Speicherstände', () => {
     }
     expect(loadState(memoryStore(JSON.stringify(v2)))).toEqual({
       version: 3,
-      settings: { explanations: false, detail: 'short', levels: { ableiten: 4 }, lastCourse: 'ableiten', practiceMode: 'free', theme: 'dark' },
+      settings: { ...DEFAULT_SETTINGS, explanations: false, detail: 'short', levels: { ableiten: 4 }, lastCourse: 'ableiten', practiceMode: 'free', theme: 'dark' },
       progress: {
         attempts: [
           { course: 'ableiten', level: 4, mode: 'free', clean: true, at: 1 },
@@ -142,6 +172,18 @@ describe('Umzug alter Speicherstände', () => {
         errors: { 'cos-sign': 2, 'chain-inner-forgotten': 1 },
         suggestionDismissed: { ableiten: { 3: 10 } },
       },
+    })
+  })
+
+  it('liest Speicherstände von vor S1b (Version 3 ohne Auswahl) unverändert, mit allem angekreuzt', () => {
+    const before = {
+      version: 3,
+      settings: { explanations: true, detail: 'short', levels: { 'chem-atombau': 2 }, lastCourse: 'chem-atombau', practiceMode: 'guided', theme: 'light' },
+      progress: { attempts: [{ course: 'chem-atombau', level: 2, mode: 'guided', clean: true, at: 7 }], errors: {}, suggestionDismissed: {} },
+    }
+    expect(loadState(memoryStore(JSON.stringify(before)))).toEqual({
+      ...before,
+      settings: { ...before.settings, skipParts: {}, mix: {}, lastMix: null },
     })
   })
 

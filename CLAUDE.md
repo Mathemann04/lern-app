@@ -52,7 +52,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   neuen Aufgabe zieht `PracticePage.tsx` (`PickNewTask`) eine Nummer, deren
   Form nicht unter den letzten zehn dieser Stufe ist (`src/ui/recentForms.ts`,
   eigener Speicherschlüssel `rechenweg-formen`); Wissensfragen kommen dabei
-  reihum, keine doppelt, bevor alle der Stufe dran waren (`pickNewSeed` in
+  reihum, keine doppelt, bevor alle der Stufe und der angekreuzten
+  Unterthemen dran waren (`pickNewSeed` in
   `practice.ts`, Runde je Thema und Stufe in `src/state/questionRounds.ts`,
   Schlüssel `rechenweg-fragen`, „Fortschritt löschen" leert ihn).
   Seiten über `#/…` (`routes.ts`): Start `#/` („Weitermachen" und die
@@ -71,7 +72,7 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   für Stufe 5 von „Gleichungen umstellen"; je Thema eine Seite
   `#/galerie/brueche` mit Stufen und Aufgaben und „Abwechslung je Stufe":
   Formen der Aufgaben 1 bis 200 je Stufe, auf Knopfdruck in kleinen Portionen
-  gezählt). Startseite, Gebiet, Einstellungen,
+  gezählt). Startseite, Gebiet, Einstellungen, Mischseite,
   `routes.ts` und `catalog.ts` kommen ohne Mathe-Engine und KaTeX aus
   (Ladezeit); alle anderen Seiten lädt `App.tsx` erst bei Bedarf. Ob es
   eine Lernkarte oder einen typischen Fehler aus der Adresse gibt, prüfen
@@ -112,7 +113,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   (`src/state/reports.ts`, Schlüssel `rechenweg-meldungen`, Liste zum
   Kopieren in den Einstellungen, „Fortschritt löschen" lässt sie stehen),
   Galerie „Fragen durchsehen" `#/galerie/chem-atombau`
-  (`src/ui/chem/QuestionGallery.tsx`), Lernkarten mit Text-Beispielen
+  (`src/ui/chem/QuestionGallery.tsx`, mit Unterthema je Frage und Zählung je
+  Unterthema und Stufe), Lernkarten mit Text-Beispielen
   (`ChemCardExample`, `formulas` darf leer sein), Denkfehler als Aussage
   statt Formel (`wrongText`, `src/ui/ErrorShape.tsx`). Engine:
   `src/engine/quiz/` (allgemein, auch für Werkstoffkunde: `types.ts` Format
@@ -120,7 +122,7 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   mit vier Antworten aus dem Vorrat, `numbers.ts` Aufgabennummern: 1 bis 9999
   Frage in Grundform, 10000 bis 499999 erzeugte Rechnungen, 500000 + 50 ·
   Nummer + Fassung) und `src/engine/chem/` (`engine.ts` für alle
-  `chem-…`-Themen mit `nextSeed` und `resolve` in `CourseEngine`, `banks.ts`,
+  `chem-…`-Themen mit `nextSeed`, `questionNos` und `resolve` in `CourseEngine`, `banks.ts`,
   `bank/<thema>.ts` mit Nummern Stufe · 100 + n, `misconceptions/<thema>.ts`
   nur Name und falsche Aussage für die Fehlerstatistik, `<thema>Why.ts` die
   Erklärungen, `misconceptions/index.ts`); Lernkarten in
@@ -128,6 +130,30 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   Inhalten (in eigenen Worten, Wortvergleich mit den Skripten außerhalb des
   Repos). mhchem (`\ce`, `\pu`) fest in `renderFormula.ts` und
   `expr/latexChecks.ts`.
+- Ankreuzen, was drankommt (S1b, allgemein gebaut, später auch für Mathe):
+  **Unterthemen** als `parts` am Thema in `catalog.ts` (Id, Titel ohne
+  Formeln, Stufen mit Aufgaben; ein Test vergleicht mit der Sammlung), jede
+  Frage mit `part`. Themenseite: „Was soll drankommen?" mit Kästchen
+  (`PartPicker.tsx`, gemeinsam mit der Mischseite; Unterthemen ohne Fragen in
+  der Stufe blass mit „erst ab Vertiefung"), gespeichert als nicht
+  angekreuzte `skipParts` in den Einstellungen; Auswahl, Rückfall auf alle und
+  Texte in `src/ui/selection.ts` (ohne Engine); gibt es zu den angekreuzten in
+  der Stufe keine Fragen, ist der Üben-Knopf nicht klickbar. Die Engine wählt
+  mit `nextSeed(level, shown, parts)`, `questionNos` nennt die Fragen der
+  Auswahl, nur sie beginnen eine neue Runde (`startNewRound` mit Nummern).
+  **Themen mischen** (`mix` am Fach, Chemie 1): Kachel auf der Startseite
+  unter dem letzten spielbaren Gebiet (Bild `mix`), Seite `#/mischen/<fach>`
+  (`MixScreen.tsx`: Stufe, Themen nach Gebieten ankreuzen, Unterthemen
+  aufklappbar; gespeichert in `mix[fach]` mit Stufe und nicht angekreuzten
+  Themen), `#/mischen/<fach>/<stufe>` würfelt (`MixPracticePage` in
+  `PracticePage.tsx`, `pickMixed` in `src/ui/mix.ts`: Thema gewichtet nach der
+  Zahl der Fragen seiner Auswahl, darin reihum wie sonst, Runden je Thema; so
+  bleiben die Themen gemischt) und leitet zur Aufgabe mit
+  `?mischen=<fach>` weiter (`fokus` gewinnt). Dort steht über der Aufgabe das
+  Thema, X, „Zur Übersicht" und „Nächste Aufgabe" führen zur Mischung, kein
+  „Eine Stufe höher?"; Fortschritt, Fehler, Runden und Formen zählen beim
+  Thema; „Weitermachen" setzt über `lastMix` die Mischung fort (`null`, sobald
+  ein Thema allein geübt wird).
 - `src/engine/`: Mathe-Engine, reines TypeScript
   - `rational.ts`: exakte Brüche (bigint)
   - `expr/types.ts`: Termbaum in *Aufgabenform* (Bruch, Wurzel, Minus bleiben,
@@ -581,7 +607,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   gegen kaputten Inhalt, alte Versionen werden umgezogen: bis Version 2
   gehört alles zum Ableiten), gemeinsamer Zustand (`store.ts`),
   Einstellungen (`settings.ts`: Stufe je Thema, zuletzt geübtes Thema,
-  „Geführt"/„Frei" für alle, hell/dunkel) und Fortschritt je Thema mit
+  „Geführt"/„Frei" für alle, hell/dunkel, nicht angekreuzte Unterthemen
+  `skipParts`, Mischung je Fach `mix`, zuletzt geübte Mischung `lastMix`) und Fortschritt je Thema mit
   Fehlerstatistik und 8-von-10-Vorschlag (`progress.ts`; höchstens 1000
   gelöste Aufgaben je Thema)
 - `e2e/`: Browser-Tests (Playwright). Im freien Modus vor dem Tippen warten,

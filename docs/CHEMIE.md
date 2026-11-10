@@ -304,4 +304,8 @@ einer Lernkarte als Tatsache. Ein Test prüft das.
   Molekülverbindungen).
 - „Warum ist das falsch?“ benennt den Denkfehler und die Regel, verrät aber
   nicht die richtige Antwort.
+- Jede Frage und jede Rechnung gehört zu genau einem **Unterthema** ihres
+  Themas (`part`; Liste mit Namen und Stufen je Thema in `ui/catalog.ts`).
+  Die Unterthemen schneiden das Thema so, wie man es lernen würde, nicht
+  nach Stufen; ein Test prüft, dass Katalog und Fragen zusammenpassen.
 - Keine Namen von Lehrenden, nirgends.

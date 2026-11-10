@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { courseById, isLevelAvailable } from '../../ui/catalog.ts'
+import { courseById, isLevelAvailable, partsAvailable } from '../../ui/catalog.ts'
 import { cardById, cardsInTopic } from '../explain/cards.ts'
 import { parseRichText } from '../explain/richText.ts'
 import { latexProblem } from '../expr/latexChecks.ts'
@@ -86,6 +86,28 @@ describe.each(CHEM_TOPICS.map((t) => [t.bank.course, t] as const))('Fragensammlu
     const { course: entry } = courseById(course)!
     for (const level of entry.levels.filter((l) => isLevelAvailable(entry, l.level))) {
       expect(bank.questions.filter((q) => q.level === level.level).length, `Stufe ${level.level}`).toBeGreaterThanOrEqual(MIN_PER_LEVEL)
+    }
+  })
+
+  it('ordnet jede Frage einem Unterthema des Katalogs zu, mit genau den Stufen, in denen es Fragen dazu gibt', () => {
+    const { course: entry } = courseById(course)!
+    const parts = entry.parts ?? []
+    expect(parts.length, 'Unterthemen im Katalog (parts)').toBeGreaterThan(0)
+    const ids = parts.map((p) => p.id)
+    for (const id of ids) expect(id).toMatch(/^[a-z0-9-]{1,40}$/)
+    expect(ids.filter((id, i) => ids.indexOf(id) !== i), 'doppelte Unterthemen').toEqual([])
+    // Titel als reiner Text: Die Seiten mit Auswahl kommen ohne KaTeX aus
+    for (const part of parts) expect(part.title, part.id).toMatch(/^[^$\\]+$/)
+    const live = bank.questions.filter((q) => !bank.retired.includes(q.no))
+    for (const q of live) expect(ids, `${q.id}: Unterthema ${q.part}`).toContain(q.part)
+    for (const part of parts) {
+      const levels = [...new Set(live.filter((q) => q.part === part.id).map((q) => q.level))].sort((a, b) => a - b)
+      expect(levels.length, `${part.id}: keine Fragen`).toBeGreaterThan(0)
+      expect([...part.levels], `${part.id}: Stufen`).toEqual(levels)
+    }
+    // jede spielbare Stufe hat mindestens ein Unterthema
+    for (const level of entry.levels.filter((l) => l.available)) {
+      expect(partsAvailable(entry, level.level).length, `Stufe ${level.level}`).toBeGreaterThan(0)
     }
   })
 

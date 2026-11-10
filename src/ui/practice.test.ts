@@ -45,7 +45,7 @@ describe('Neue Wissensfrage ziehen (wie PickNewTask)', () => {
         const { seed, newRound } = pickNewSeed(engine, level, recent.slice(-RECENT_FORMS), shownInRound(ATOMBAU, level, store))
         // Eine neue Runde beginnt genau dann, wenn alle dran waren
         expect(newRound, `Stufe ${level}, Zug ${i + 1}`).toBe(i === total)
-        if (newRound) startNewRound(ATOMBAU, level, store)
+        if (newRound) startNewRound(ATOMBAU, level, engine.questionNos(level), store)
         const no = questionNoOf(engine, seed)!
         const form = engine.formOf({ level, seed })
         expect(recent.slice(-RECENT_FORMS), `Stufe ${level}, Zug ${i + 1}: Fakt der letzten zehn`).not.toContain(form)
@@ -57,6 +57,34 @@ describe('Neue Wissensfrage ziehen (wie PickNewTask)', () => {
       expect(new Set(seen.slice(0, total)).size).toBe(total)
       expect(new Set(seen.slice(total)).size).toBe(total)
     }
+  })
+
+  it('zieht mit angekreuzten Unterthemen nur deren Fragen und beginnt dann nur deren Runde neu', () => {
+    const rng = createRng('unterthemen')
+    const engine = chemCourseEngine(ATOMBAU, () => rng.next())
+    const data = new Map<string, string>()
+    const store: KeyValueStore = { getItem: (key) => data.get(key) ?? null, setItem: (key, value) => void data.set(key, value) }
+    const questions = chemTopic(ATOMBAU)!.bank.questions.filter((q) => q.level === 2)
+    const parts = new Set(['modelle', 'licht'])
+    const chosen = questions.filter((q) => parts.has(q.part)).map((q) => q.no)
+    // eine Frage eines anderen Unterthemas ist schon in der Runde
+    const other = questions.find((q) => !parts.has(q.part))!.no
+    rememberShown(ATOMBAU, 2, other, store)
+    const recent: string[] = []
+    const seen = new Set<number>()
+    for (let i = 0; i <= chosen.length; i++) {
+      const { seed, newRound } = pickNewSeed(engine, 2, recent.slice(-RECENT_FORMS), shownInRound(ATOMBAU, 2, store), parts)
+      expect(newRound, `Zug ${i + 1}`).toBe(i === chosen.length)
+      if (newRound) startNewRound(ATOMBAU, 2, engine.questionNos(2, parts), store)
+      const no = questionNoOf(engine, seed)!
+      expect(chosen).toContain(no)
+      rememberShown(ATOMBAU, 2, no, store)
+      recent.push(engine.formOf({ level: 2, seed }))
+      seen.add(no)
+    }
+    expect(seen.size).toBe(chosen.length)
+    // Die Frage des anderen Unterthemas bleibt in der Runde gemerkt
+    expect(shownInRound(ATOMBAU, 2, store).has(other)).toBe(true)
   })
 
   it('kennt Fragennummern nur bei Wissensfragen', () => {
