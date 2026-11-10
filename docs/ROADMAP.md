@@ -9,8 +9,8 @@ Stand: 10.11.2026
 | M2b | Brüche nachschärfen: viel mehr Abwechslung (Baukasten statt fester Vorlagen, keine Form doppelt), deutlich schwerer, Stufe 5 auf Profi-Niveau mit Partialbruchzerlegung und Brüchen aus späteren Kapiteln (komplexe Zahlen, Grenzwerte, Teleskopsummen, Hyperbelfunktionen) | fertig |
 | M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten, Vektoren, Additionstheoremen) | fertig |
 | M4 | **Chemie 1**: neues Fach mit Wissensfragen (Auswahl, Zuordnen, Ordnen) und Rechnungen zu allen Themen der Vorlesung, drei Stufen (Grundlagen, Vertiefung, Klausurniveau), Lernkarten, Wiederholung, Probeklausur wie die echte (45 min, 50 Punkte) | in Arbeit: Plan freigegeben ([PLAN-M4.md](PLAN-M4.md)), Klausur-Sprint bis Teil 1 der Klausur (um den 24.11.2026) |
-| M5 | **Werkstoffkunde**: eigenes Fach nach demselben Muster wie Chemie | offen (direkt nach Chemie; die Skripte kommen vom Nutzer) |
-| M6 | **Themen einzeln üben**: was heute nur in Stufe 5 von „Brüche" und „Gleichungen umstellen" steckt, als eigene Themen mit leichtem Einstieg (komplexe Zahlen, Determinanten, Integrale und Partialbrüche, Summen, Reihen und Grenzwerte, Differentialgleichungen, Winkelfunktionen mit Additionstheoremen, Hyperbelfunktionen); die Rechenteile gibt es schon. Vorschlag (Idee des Nutzers, 10.11.2026): statt vieler Einzelthemen im übergeordneten Thema (z. B. „Gleichungen umstellen“) die Themen per Häkchen wählen (e-Funktion, Vektoren, Determinanten …) und die Schwierigkeit (wie verschachtelt) getrennt davon; dafür Schlagworte je Baustein und leichte Bausteine je Thema. Die Mischseite (S1b in M4) ist allgemein gebaut und kann für Mathe wiederverwendet werden | offen |
+| M5 | **Werkstoffkunde**: eigenes Fach nach demselben Muster wie Chemie | offen (nach M6; die Skripte kommen vom Nutzer) |
+| M6 | **Neue Struktur** (ersetzt „Themen einzeln üben“, Idee des Nutzers, 10.11.2026): drei getrennte Fragen – was tust du (Tätigkeit als Kachel: Vereinfachen, Gleichungen umstellen, Ableiten), womit (Bausteine ankreuzen, ein Thema gezielt mit „nur“), wie schwer (Stufe = nur Verschachtelung, nie neuer Stoff); aufgeräumte Startseite, Fortschritt je Baustein, „Meine Schwächen“. Entwurf: [PLAN-M6.md](PLAN-M6.md) | offen: als Nächstes nach M4, vor M5 |
 | M7 | **Vektoren** als eigenes Gebiet: Rechnen mit Vektoren, Länge, Skalarprodukt, Winkel, Kreuzprodukt, Projektion (ob Geraden und Ebenen dazukommen, klären wir beim Plan) | offen |
 | M8 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
 | M9 | weitere Themen aus Mathematik MB1, „Ableiten" nachschärfen | offen |
@@ -20,6 +20,9 @@ Stand: 10.11.2026
 
 ## Vorgemerkt
 
+- **Reihenfolge nach Chemie** (Wunsch des Nutzers, 10.11.2026): Nach M4 kommt
+  zuerst M6 (neue Struktur, Entwurf in [PLAN-M6.md](PLAN-M6.md)), danach M5
+  (Werkstoffkunde), damit Werkstoffkunde gleich in der neuen Struktur entsteht.
 - **Neue Reihenfolge** (Wunsch des Nutzers, 10.11.2026): Chemie zuerst, weil
   sie für den Nutzer gerade am wichtigsten ist. „Brüche" und „Gleichungen
   umstellen" bekommen vorerst keine neuen Inhalte; stattdessen werden ihre
