@@ -197,6 +197,8 @@ function evaluateTool(tool: Tool, env: Env): number {
       const [re, im] = complexValue(tool.body, env)
       return re === 0 && im === 0 ? NaN : Math.atan2(im, re)
     }
+    case 'theorem':
+      return evaluate(tool.body, env)
     case 'length':
       return Math.hypot(...tool.vector.map((e) => evaluate(e, env)))
     case 'dot':

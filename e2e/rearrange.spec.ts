@@ -397,6 +397,42 @@ test('Umstellen Stufe 5: Winkel einer komplexen Zahl geführt, frei mit π im Er
   await expect(feedback(page)).toContainText('Richtig!')
 })
 
+test('Umstellen Stufe 5: Additionstheorem geführt (Beispiel aus dem Plan), durch cos x teilen, mit Lernkarte aus Teil 8c', async ({ page }) => {
+  // b\sin(x + a) = y\cos x mit x < \frac{\pi}{2}
+  await page.goto('./#/ueben/umstellen/5-1070')
+  await expect(page.getByText('Was steht da eigentlich?')).toBeVisible()
+  await expect(page.locator('#question')).toContainText('mit dem Additionstheorem aus')
+  await expectCleanPage(page, 'Start Stufe 5 Additionstheorem')
+  // richtig und drei Fehler: gliedweise, Vorzeichen in der Mitte, Sinus und Kosinus falsch gepaart
+  await expect(answers(page)).toHaveCount(4)
+  await solveWholeTask(page, (step) => expectNoInnerScroll(page, `Frage ${step + 1}`))
+  await expect(page.getByTestId('result')).toBeVisible()
+  const cards = page.getByRole('navigation', { name: 'Lernkarten zu dieser Aufgabe' })
+  await expect(cards.getByRole('link', { name: /^Additionstheoreme/ })).toBeVisible()
+  await expectCleanPage(page, 'Stufe 5 Additionstheorem')
+
+  await cards.getByRole('link', { name: /^Additionstheoreme/ }).click()
+  await expect(page.getByRole('heading', { name: 'Additionstheoreme', level: 1 })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Beispiel' })).toBeVisible()
+  await expectCleanPage(page, 'Lernkarte Additionstheoreme')
+  await expectNoInnerScroll(page, 'Lernkarte Additionstheoreme')
+})
+
+test('Umstellen Stufe 5 frei: doppelter Winkel (Beispiel aus dem Plan), Plus statt Minus, die 2 vorgezogen, dann richtig', async ({ page }) => {
+  // \cos(2x) = y\sin x mit x < \frac{\pi}{2}
+  await page.goto('./#/frei/umstellen/5-416')
+  await expect(field(page)).toBeVisible()
+  await expectCleanPage(page, 'Start Stufe 5 doppelter Winkel frei')
+  await enter(page, '\\arcsin\\left(\\frac{1}{y}\\right)')
+  await expect(feedback(page)).toContainText('Plus statt Minus')
+  await enter(page, '\\arctan\\left(\\frac{2}{y}\\right)')
+  await expect(feedback(page)).toContainText('aus dem Winkel vor die Funktion gezogen')
+  await expectCleanPage(page, 'Stufe 5 doppelter Winkel frei, Fehler')
+  await enter(page, 'x=\\arcsin\\left(\\frac{\\sqrt{y^2+8}-y}{4}\\right)')
+  await expect(feedback(page)).toContainText('Richtig!')
+  await expectCleanPage(page, 'Richtig Stufe 5 doppelter Winkel')
+})
+
 test('Umstellen Stufe 4: sin² und cos², ein Quadrat ersetzen, Umkehrfunktion, mit beiden Lernkarten aus Teil 6b', async ({ page }) => {
   // n\cos^2 x = m - k\sin^2 x mit x < \frac{\pi}{2}
   await page.goto('./#/ueben/umstellen/4-16')

@@ -1,6 +1,6 @@
 import { type Expr, IMAG, PI, add, cos, div, eq, exp, fn, ln, mul, neg, num, pow, sin, sqrt, sub, variable } from '../expr/types.ts'
 import type { Condition, RearrangeTask } from '../rearrange/task.ts'
-import { absOf, angleOf, argOf, derivativeOf, detOf, dotOf, integralOf, lengthOf, limitOf, odeOf, seriesOf, sumOf } from '../rearrange/tools/tool.ts'
+import { absOf, angleOf, argOf, derivativeOf, detOf, dotOf, integralOf, lengthOf, limitOf, odeOf, seriesOf, sumOf, theoremOf } from '../rearrange/tools/tool.ts'
 import type { Card } from './cards.ts'
 
 // Lernkarten im Ordner „Gleichungen umstellen". Die Beispiele sind Aufgaben der Umstell-Engine; den
@@ -28,6 +28,7 @@ export const REARRANGE_CARD_IDS = {
   det: 'rearrange-det',
   complex: 'rearrange-complex',
   vector: 'rearrange-vector',
+  addition: 'rearrange-addition',
 } as const
 
 const [a, b, c, d, k, t, x, y] = ['a', 'b', 'c', 'd', 'k', 't', 'x', 'y'].map(variable)
@@ -422,5 +423,27 @@ export const REARRANGE_CARD_LIST: readonly Card[] = [
       task(dotOf([x, a], [add(x, b), neg(c)]), y),
     ],
     errors: ['eq-vec-not-divided', 'eq-vec-one-length', 'eq-vec-sine', 'eq-vec-dot-sign', 'eq-vec-dot-cross', 'eq-vec-length-root', 'eq-vec-length-termwise'],
+  },
+  {
+    id: REARRANGE_CARD_IDS.addition,
+    topic: 'umstellen',
+    title: 'Additionstheoreme',
+    level: 5,
+    rules: [],
+    formulas: [
+      '\\begin{gathered}\\sin(\\alpha \\pm \\beta) \\\\ = \\sin\\alpha \\cdot \\cos\\beta \\pm \\cos\\alpha \\cdot \\sin\\beta\\end{gathered}',
+      '\\begin{gathered}\\cos(\\alpha \\pm \\beta) \\\\ = \\cos\\alpha \\cdot \\cos\\beta \\mp \\sin\\alpha \\cdot \\sin\\beta\\end{gathered}',
+      '\\sin(2\\alpha) = 2\\sin\\alpha \\cdot \\cos\\alpha',
+      '\\begin{gathered}\\cos(2\\alpha) = \\cos^2\\alpha - \\sin^2\\alpha \\\\ = 1 - 2\\sin^2\\alpha = 2\\cos^2\\alpha - 1\\end{gathered}',
+    ],
+    memo: 'Sinus gemischt, Kosinus gleich: Beim Sinus einer Summe stehen die Produkte Sinus mal Kosinus, beim Kosinus Kosinus mal Kosinus und Sinus mal Sinus. Beim Sinus bleibt das Vorzeichen der Klammer, beim Kosinus wechselt es. Der doppelte Winkel ist der Fall $\\beta = \\alpha$.',
+    note: 'Nie gliedweise: $\\sin(\\alpha + \\beta) \\neq \\sin\\alpha + \\sin\\beta$. Probe mit $\\beta = 0$: Es muss $\\sin\\alpha$ bzw. $\\cos\\alpha$ herauskommen. Bei $\\cos(2x)$ nimmst du die Form mit der Funktion, die sonst in der Gleichung steht: neben $\\sin x$ die Form $1 - 2\\sin^2 x$, neben $\\cos x$ die Form $2\\cos^2 x - 1$. Für den Tangens gilt $\\tan(\\alpha \\pm \\beta) = \\frac{\\tan\\alpha \\pm \\tan\\beta}{1 \\mp \\tan\\alpha \\cdot \\tan\\beta}$.',
+    when: 'Wenn $x$ in $\\sin(x + a)$, $\\cos(x - a)$ oder $\\cos(2x)$ steckt und außerdem noch woanders: erst ausschreiben, dann stehen nur $\\sin x$ und $\\cos x$ da. Steht $x$ nur in $\\sin(x + a)$, hilft gleich der $\\arcsin$.',
+    examples: [
+      task(theoremOf(sin(add(x, a))), mul(y, cos(x)), 'x', [{ lhs: x, rel: '<', rhs: div(PI, n(2)) }]),
+      task(theoremOf(cos(add(x, a))), mul(y, sin(x)), 'x', [{ lhs: x, rel: '<', rhs: div(PI, n(2)) }]),
+      task(theoremOf(cos(mul(n(2), x))), mul(y, sin(x)), 'x', [{ lhs: x, rel: '<', rhs: div(PI, n(2)) }]),
+    ],
+    errors: ['eq-add-termwise', 'eq-add-sign', 'eq-add-partner', 'eq-double-factor', 'eq-double-two', 'eq-double-cos-plus', 'eq-double-cos-sign'],
   },
 ]

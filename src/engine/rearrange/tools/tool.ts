@@ -44,6 +44,8 @@ export const argOf = (body: Expr): Var => toolExpr({ kind: 'arg', body })
 export const lengthOf = (vector: readonly Expr[]): Var => toolExpr({ kind: 'length', vector })
 export const dotOf = (left: readonly Expr[], right: readonly Expr[]): Var => toolExpr({ kind: 'dot', left, right })
 export const angleOf = (left: readonly Expr[], right: readonly Expr[]): Var => toolExpr({ kind: 'angle', left, right })
+// Teil 8c: \sin(x + a), \cos(2x) als Werkzeug (gesetzt wie die Funktion), ausgerechnet mit dem Additionstheorem
+export const theoremOf = (body: Expr): Var => toolExpr({ kind: 'theorem', body })
 
 export type ToolVar = Var & { readonly tool: Tool }
 

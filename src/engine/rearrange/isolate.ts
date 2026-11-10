@@ -97,6 +97,8 @@ export type StepKind =
   | 'length'
   | 'dot'
   | 'angle'
+  | 'addition'
+  | 'doubleAngle'
   | 'finish'
 
 export const STEP_NAMES: Record<StepKind, string> = {
@@ -143,6 +145,8 @@ export const STEP_NAMES: Record<StepKind, string> = {
   length: 'Länge ausrechnen',
   dot: 'Skalarprodukt ausrechnen',
   angle: 'Winkel zwischen den Vektoren ausrechnen',
+  addition: 'Additionstheorem anwenden',
+  doubleAngle: 'Doppelten Winkel auflösen',
   finish: 'Ergebnis',
 }
 
@@ -214,6 +218,11 @@ export function stepLabel(step: RearrangeStep, taskTarget: string): string {
       return `Substituieren: $${step.substitution!.name} = ${toLatex(step.substitution!.expr)}$`
     case 'zero':
       return 'Alles auf die linke Seite bringen'
+    // Teil 8c: ohne das Ergebnis zu verraten (die Beschriftung ist auch Titel einer späteren Frage)
+    case 'addition':
+      return `Additionstheorem für $${operand}$ anwenden`
+    case 'doubleAngle':
+      return `$${operand}$ mit dem einfachen Winkel schreiben`
     case 'normalize':
       return `Beide Seiten durch $${factor}$ teilen`
     case 'pq':

@@ -371,6 +371,42 @@ export const REARRANGE_ERROR_TEXTS: Readonly<Record<string, Explanation>> = {
       '$u_1^2 + u_2^2$ ist das Quadrat der Länge, $\\lvert\\vec{u}\\rvert^2$. Die Länge selbst ist die Wurzel daraus: $\\lvert\\vec{u}\\rvert = \\sqrt{u_1^2 + u_2^2}$. Beim Winkel stehen im Nenner die Längen, nicht ihre Quadrate: $\\cos\\varphi = \\frac{\\vec{u} \\cdot \\vec{v}}{\\lvert\\vec{u}\\rvert \\cdot \\lvert\\vec{v}\\rvert}$.',
     short: 'Die Wurzel gehört dazu: $\\lvert\\vec{u}\\rvert = \\sqrt{u_1^2 + u_2^2}$.',
   },
+  // Werkzeuge der Stufe 5 (Schritt 8c): Additionstheoreme und doppelter Winkel
+  'eq-add-termwise': {
+    detailed:
+      'Eine Winkelfunktion lässt sich nicht Summand für Summand auf eine Summe anwenden. Probe: $\\sin\\left(\\frac{\\pi}{2} + \\frac{\\pi}{2}\\right) = \\sin\\pi = 0$, aber $\\sin\\frac{\\pi}{2} + \\sin\\frac{\\pi}{2} = 2$. Dafür gibt es die Additionstheoreme, etwa $\\sin(\\alpha + \\beta) = \\sin\\alpha \\cdot \\cos\\beta + \\cos\\alpha \\cdot \\sin\\beta$.',
+    short: 'Nicht gliedweise: $\\sin(\\alpha + \\beta) \\neq \\sin\\alpha + \\sin\\beta$. Dafür gibt es das Additionstheorem.',
+  },
+  'eq-add-sign': {
+    detailed:
+      'Beim Sinus steht in der Mitte dasselbe Vorzeichen wie in der Klammer, beim Kosinus das andere: $\\sin(\\alpha \\pm \\beta) = \\sin\\alpha \\cdot \\cos\\beta \\pm \\cos\\alpha \\cdot \\sin\\beta$ und $\\cos(\\alpha \\pm \\beta) = \\cos\\alpha \\cdot \\cos\\beta \\mp \\sin\\alpha \\cdot \\sin\\beta$. Probe mit $\\beta = \\alpha$: $\\cos(\\alpha - \\alpha) = \\cos 0 = 1$, und $1 = \\cos^2\\alpha + \\sin^2\\alpha$, mit Plus.',
+    short: 'Beim Sinus bleibt das Vorzeichen, beim Kosinus wechselt es: $\\cos(\\alpha + \\beta) = \\cos\\alpha \\cdot \\cos\\beta - \\sin\\alpha \\cdot \\sin\\beta$.',
+  },
+  'eq-add-partner': {
+    detailed:
+      'Beim Sinus einer Summe stehen gemischte Produkte, immer Sinus mal Kosinus: $\\sin(\\alpha + \\beta) = \\sin\\alpha \\cdot \\cos\\beta + \\cos\\alpha \\cdot \\sin\\beta$. Beim Kosinus stehen gleiche: $\\cos(\\alpha + \\beta) = \\cos\\alpha \\cdot \\cos\\beta - \\sin\\alpha \\cdot \\sin\\beta$. Probe mit $\\beta = 0$: Dann muss wieder $\\sin\\alpha$ bzw. $\\cos\\alpha$ herauskommen.',
+    short: 'Sinus gemischt, Kosinus gleich: $\\sin\\alpha \\cdot \\cos\\beta + \\cos\\alpha \\cdot \\sin\\beta$ bzw. $\\cos\\alpha \\cdot \\cos\\beta - \\sin\\alpha \\cdot \\sin\\beta$.',
+  },
+  'eq-double-factor': {
+    detailed:
+      'Die $2$ verdoppelt den Winkel, nicht den Wert der Funktion: $\\sin(2\\alpha) \\neq 2\\sin\\alpha$ und $\\cos(2\\alpha) \\neq 2\\cos\\alpha$. Probe mit $\\alpha = \\frac{\\pi}{2}$: $\\sin\\pi = 0$, aber $2\\sin\\frac{\\pi}{2} = 2$. Schreibe $2\\alpha = \\alpha + \\alpha$ und nimm das Additionstheorem.',
+    short: '$\\cos(2\\alpha) \\neq 2\\cos\\alpha$: Schreibe $2\\alpha = \\alpha + \\alpha$ und nimm das Additionstheorem.',
+  },
+  'eq-double-two': {
+    detailed:
+      'Mit $\\beta = \\alpha$ liefert das Additionstheorem $\\cos(2\\alpha) = \\cos^2\\alpha - \\sin^2\\alpha$. Ersetzt du darin mit $\\sin^2\\alpha + \\cos^2\\alpha = 1$, kommt die $2$ dazu: $1 - 2\\sin^2\\alpha$ bzw. $2\\cos^2\\alpha - 1$. Beim Sinus entsteht sie aus zwei gleichen Produkten: $\\sin(2\\alpha) = 2\\sin\\alpha \\cdot \\cos\\alpha$.',
+    short: 'Die $2$ nicht vergessen: $\\cos(2\\alpha) = 1 - 2\\sin^2\\alpha$ bzw. $2\\cos^2\\alpha - 1$.',
+  },
+  'eq-double-cos-plus': {
+    detailed:
+      '$\\cos^2\\alpha + \\sin^2\\alpha$ ist immer $1$, das ist der Satz des Pythagoras am Einheitskreis. Beim doppelten Winkel steht ein Minus, wie im Additionstheorem des Kosinus: $\\cos(\\alpha + \\alpha) = \\cos^2\\alpha - \\sin^2\\alpha$.',
+    short: '$\\cos(2\\alpha) = \\cos^2\\alpha - \\sin^2\\alpha$, mit Minus; mit Plus wäre es immer $1$.',
+  },
+  'eq-double-cos-sign': {
+    detailed:
+      'Aus $\\cos(2\\alpha) = \\cos^2\\alpha - \\sin^2\\alpha$ wird mit $\\cos^2\\alpha = 1 - \\sin^2\\alpha$ die Form $1 - 2\\sin^2\\alpha$, mit $\\sin^2\\alpha = 1 - \\cos^2\\alpha$ die Form $2\\cos^2\\alpha - 1$. Probe mit $\\alpha = 0$: $\\cos 0 = 1$, also muss auch die Form $1$ ergeben.',
+    short: 'Probe mit $\\alpha = 0$: $\\cos 0 = 1$. Richtig sind $1 - 2\\sin^2\\alpha$ und $2\\cos^2\\alpha - 1$.',
+  },
   'eq-abs-imag-squared': {
     detailed:
       'In $\\sqrt{p^2 + q^2}$ stehen der Realteil $p$ und der Imaginärteil $q$, beide ohne $\\mathrm{i}$. Quadrierst du $q\\mathrm{i}$ mit, kommt wegen $\\mathrm{i}^2 = -1$ ein Minus hinein; das wäre ein Teil von $z^2$, nicht von $\\lvert z\\rvert^2$.',
@@ -952,6 +988,13 @@ export const REARRANGE_HINTS = {
     'Schreibe $e^{\\mathrm{i}x} = \\cos x + \\mathrm{i}\\sin x$ und lies Realteil und Imaginärteil ab, beide ohne $\\mathrm{i}$. Der Betrag ist die Wurzel aus der Summe ihrer Quadrate.',
   argMultiplied:
     'Stehen in beiden Faktoren Buchstaben, multipliziere erst aus und fasse Realteil und Imaginärteil zusammen. Dann ist $\\arg(p + q\\mathrm{i}) = \\arctan\\frac{q}{p}$ für $p > 0$.',
+  // Additionstheoreme (Teil 8c)
+  additionSin: 'Beim Sinus stehen gemischte Produkte, das Vorzeichen aus der Klammer bleibt: $\\sin(\\alpha \\pm \\beta) = \\sin\\alpha \\cdot \\cos\\beta \\pm \\cos\\alpha \\cdot \\sin\\beta$.',
+  additionCos: 'Beim Kosinus stehen gleiche Produkte, das Vorzeichen wechselt: $\\cos(\\alpha \\pm \\beta) = \\cos\\alpha \\cdot \\cos\\beta \\mp \\sin\\alpha \\cdot \\sin\\beta$.',
+  additionTan: 'Beim Tangens: $\\tan(\\alpha \\pm \\beta) = \\frac{\\tan\\alpha \\pm \\tan\\beta}{1 \\mp \\tan\\alpha \\cdot \\tan\\beta}$.',
+  doubleSin: 'Schreibe $2\\alpha = \\alpha + \\alpha$ und nimm das Additionstheorem des Sinus: Die beiden Produkte sind gleich.',
+  doubleCos:
+    'Es gilt $\\cos(2\\alpha) = \\cos^2\\alpha - \\sin^2\\alpha$. Ersetze mit $\\sin^2\\alpha + \\cos^2\\alpha = 1$ das Quadrat der Funktion, die sonst nicht in der Gleichung steht.',
   angle: 'Skalarprodukt durch das Produkt der Längen ist der Kosinus des Winkels: $\\cos\\varphi = \\frac{\\vec{u} \\cdot \\vec{v}}{\\lvert\\vec{u}\\rvert \\cdot \\lvert\\vec{v}\\rvert}$. Der Winkel ist der $\\arccos$ davon.',
   add: 'Ein Summand verschwindet mit der Gegenrechnung: Aus $+c$ wird auf beiden Seiten $-c$.',
   move: 'Bringe den Summanden mit Minus auf die andere Seite, dort steht er mit Plus. Den Rest bringst du herüber.',
@@ -996,7 +1039,7 @@ export const REARRANGE_HINTS = {
 } as const
 
 // Tipp für die ganze Aufgabe (im freien Modus)
-export type TaskTool = 'derivative' | 'integral' | 'series' | 'limit' | 'ode' | 'det' | 'complex' | 'vector'
+export type TaskTool = 'derivative' | 'integral' | 'series' | 'limit' | 'ode' | 'det' | 'complex' | 'vector' | 'theorem'
 
 export function rearrangeTaskHint(target: string, several: boolean, block: string | null = null, quadratic = false, tool: TaskTool | null = null): Explanation {
   if (tool === 'derivative') return same(`Rechne zuerst die Ableitung aus. Dann steht eine gewöhnliche Gleichung da, die du nach $${target}$ auflöst.`)
@@ -1007,6 +1050,8 @@ export function rearrangeTaskHint(target: string, several: boolean, block: strin
     return same(`Rechne zuerst die Determinante aus: Hauptdiagonale minus Nebendiagonale, bei $3 \\times 3$ vorher nach der Zeile oder Spalte mit zwei Nullen entwickeln. Dann löst du nach $${target}$ auf.`)
   if (tool === 'complex')
     return same(`Rechne zuerst Betrag bzw. Winkel der komplexen Zahl aus: Realteil und Imaginärteil ablesen, $\\lvert p + q\\mathrm{i}\\rvert = \\sqrt{p^2 + q^2}$, $\\arg(p + q\\mathrm{i}) = \\arctan\\frac{q}{p}$ für $p > 0$. Dann löst du nach $${target}$ auf.`)
+  if (tool === 'theorem')
+    return same(`Schreibe zuerst die Winkelfunktion von $x + a$ bzw. $2x$ mit dem Additionstheorem aus. Dann stehen nur noch $\\sin x$ und $\\cos x$ da: Teile durch $\\cos x$ oder ersetze mit $\\sin^2 x + \\cos^2 x = 1$, bis nur eine Funktion übrig ist, und löse nach $${target}$ auf.`)
   if (tool === 'vector')
     return same(`Rechne zuerst Länge, Skalarprodukt bzw. Winkel der Vektoren aus, beim Winkel mit $\\cos\\varphi = \\frac{\\vec{u} \\cdot \\vec{v}}{\\lvert\\vec{u}\\rvert \\cdot \\lvert\\vec{v}\\rvert}$. Dann löst du nach $${target}$ auf.`)
   if (tool === 'ode') return same(`Löse zuerst die Differentialgleichung mit den Anfangswerten (Ansatz $e^{\\lambda x}$). Dann steht eine Gleichung mit e-Funktionen da, die du nach $${target}$ auflöst.`)
@@ -1203,6 +1248,30 @@ export function explainAcuteFinish(before: string, after: string): Explanation {
   return {
     detailed: `Unter der Wurzel bleiben mit $\\sin^2 u + \\cos^2 u = 1$ nur Quadrate von $\\sin u$ und $\\cos u$. Bei einem spitzen Winkel sind beide positiv, also $\\sqrt{\\sin^2 u} = \\sin u$ und $\\sqrt{\\cos^2 u} = \\cos u$. Zuletzt wird $\\frac{\\sin u}{\\cos u}$ zu $\\tan u$ und $\\frac{\\cos u}{\\sin u}$ zu $\\frac{1}{\\tan u}$:\n${lines}`,
     short: `Mit $\\tan u = \\frac{\\sin u}{\\cos u}$:\n${lines}`,
+  }
+}
+
+// Additionstheorem (Teil 8c): die Regel mit \alpha und \beta, was \alpha und \beta hier sind (alles als LaTeX)
+export function explainAddition(rule: string, alpha: string, beta: string, before: string, after: string): Explanation {
+  const lines = `$${before}$\n$${after}$`
+  return {
+    detailed: `Das Additionstheorem $${rule}$ mit $\\alpha = ${alpha}$ und $\\beta = ${beta}$, eingesetzt:\n${lines}`,
+    short: `$\\alpha = ${alpha}$, $\\beta = ${beta}$:\n${lines}`,
+  }
+}
+
+// Doppelter Winkel (Teil 8c): beim Kosinus die Form, nach der nur die Funktion dasteht, die sonst vorkommt (other)
+export function explainDouble(name: string, form: 'sin' | 'cos' | null, alpha: string, other: string | null, before: string, after: string): Explanation {
+  const lines = `$${before}$\n$${after}$`
+  if (name !== 'cos' || !form || !other) {
+    const rule = name === 'tan' ? '\\tan(2\\alpha) = \\frac{2\\tan\\alpha}{1 - \\tan^2\\alpha}' : '\\sin(2\\alpha) = 2\\sin\\alpha \\cdot \\cos\\alpha'
+    return { detailed: `$2\\alpha = \\alpha + \\alpha$ ins Additionstheorem eingesetzt: $${rule}$, hier mit $\\alpha = ${alpha}$:\n${lines}`, short: `$${rule}$:\n${lines}` }
+  }
+  const rule = form === 'sin' ? '\\cos^2\\alpha = 1 - \\sin^2\\alpha' : '\\sin^2\\alpha = 1 - \\cos^2\\alpha'
+  const result = form === 'sin' ? '1 - 2\\sin^2\\alpha' : '2\\cos^2\\alpha - 1'
+  return {
+    detailed: `$2\\alpha = \\alpha + \\alpha$ ins Additionstheorem eingesetzt gibt $\\cos(2\\alpha) = \\cos^2\\alpha - \\sin^2\\alpha$, mit $${rule}$ also $${result}$. Diese Form passt, weil sonst nur $${other}$ in der Gleichung steht ($\\alpha = ${alpha}$):\n${lines}`,
+    short: `$\\cos(2\\alpha) = ${result}$:\n${lines}`,
   }
 }
 

@@ -308,6 +308,7 @@ Gesucht ist jeweils $x$.
 | Determinante | $\det\begin{pmatrix} 1 & x & x^2 \\ 1 & 0 & 0 \\ 1 & a & a^2 \end{pmatrix} = y$ | $x = \frac{a^2 + \sqrt{a^4 + 4ay}}{2a}$ |
 | Determinante | $\det\begin{pmatrix} e^{x} & e^{-x} \\ a & b \end{pmatrix} = y$ | $x = \ln\frac{y + \sqrt{y^2 + 4ab}}{2b}$ |
 | Additionstheorem | $\sin(x + a) = y\cos x$ | $x = \arctan\frac{y - \sin a}{\cos a}$ |
+| Doppelter Winkel | $\cos(2x) = y\sin x$ | $x = \arcsin\frac{\sqrt{y^2 + 8} - y}{4}$ |
 | Vektoren | $\begin{pmatrix} x \\ a \\ b \end{pmatrix}$ und $\begin{pmatrix} 1 \\ 0 \\ 0 \end{pmatrix}$ schließen den Winkel $y$ ein | $x = \frac{\sqrt{a^2 + b^2}}{\tan y}$ |
 | Differentialgleichung | $f'' = k^2 f$, $f(0) = a$, $f'(0) = 0$ und $f(x) = y$ | $x = \frac{1}{k}\ln\frac{y + \sqrt{y^2 - a^2}}{a}$ |
 | Reihe und Ableitung | $\frac{\mathrm{d}}{\mathrm{d}x}\sum_{k=1}^{\infty}\frac{x^k}{k} = y$ | $x = 1 - \frac{1}{y}$ |
@@ -486,7 +487,13 @@ Aufgabe: Löse $\int_a^x \frac{\mathrm{d}t}{t(t + b)} = y$ nach $x$ auf
 | Determinante | nur die Hauptdiagonale malgenommen, wie bei einer Dreiecksmatrix (`eq-det-main`, neu in 8a) | $\det\begin{pmatrix} p & q \\ r & s \end{pmatrix} = ps$ |
 | Determinante | beim Entwickeln das Vorzeichen aus dem Schachbrett vertauscht (`eq-det-checkerboard`, neu in 8a) | $\det\begin{pmatrix} 0 & p & q \\ a & 1 & 2 \\ 0 & r & s \end{pmatrix} = a\det\begin{pmatrix} p & q \\ r & s \end{pmatrix}$ |
 | Determinante | beim Entwickeln den Eintrag vor der Unterdeterminante vergessen (`eq-det-entry`, neu in 8a) | $\det\begin{pmatrix} 0 & p & q \\ a & 1 & 2 \\ 0 & r & s \end{pmatrix} = -\det\begin{pmatrix} p & q \\ r & s \end{pmatrix}$ |
-| Additionstheorem | gliedweise | $\sin(x + a) = \sin x + \sin a$ |
+| Additionstheorem | die Winkelfunktion gliedweise auf die Summe angewandt (`eq-add-termwise`, neu in 8c) | $\sin(x + a) = \sin x + \sin a$ |
+| Additionstheorem | das Vorzeichen in der Mitte vertauscht (`eq-add-sign`, neu in 8c) | $\cos(x + a) = \cos x \cdot \cos a + \sin x \cdot \sin a$ |
+| Additionstheorem | Sinus und Kosinus falsch gepaart (`eq-add-partner`, neu in 8c, nicht beim Tangens) | $\sin(x + a) = \sin x \cdot \sin a + \cos x \cdot \cos a$ |
+| Doppelter Winkel | die $2$ aus dem Winkel vor die Funktion gezogen (`eq-double-factor`, neu in 8c) | $\cos(2x) = 2\cos x$ |
+| Doppelter Winkel | die $2$ vergessen (`eq-double-two`, neu in 8c) | $\cos(2x) = 1 - \sin^2 x$, $\sin(2x) = \sin x \cdot \cos x$ |
+| Doppelter Winkel | bei $\cos(2x)$ Plus statt Minus, wie bei $\sin^2 x + \cos^2 x = 1$ (`eq-double-cos-plus`, neu in 8c) | $\cos(2x) = \cos^2 x + \sin^2 x$ |
+| Doppelter Winkel | bei $\cos(2x)$ die Formen mit $\sin^2 x$ und $\cos^2 x$ verwechselt (`eq-double-cos-sign`, neu in 8c) | $\cos(2x) = 2\sin^2 x - 1$ |
 | Vektoren | beim Winkel nicht durch die Längen geteilt (`eq-vec-not-divided`, neu in 8b) | $\cos\varphi = \vec{u} \cdot \vec{v}$ |
 | Vektoren | beim Winkel nur durch eine der beiden Längen geteilt (`eq-vec-one-length`, neu in 8b) | $\cos\varphi = \frac{\vec{u} \cdot \vec{v}}{\lvert\vec{u}\rvert}$ |
 | Vektoren | beim Winkel Sinus statt Kosinus genommen (`eq-vec-sine`, neu in 8b) | $\varphi = \arcsin\frac{\vec{u} \cdot \vec{v}}{\lvert\vec{u}\rvert \cdot \lvert\vec{v}\rvert}$ |

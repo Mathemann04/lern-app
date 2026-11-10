@@ -2,7 +2,7 @@ import { subterms } from '../expr/compare.ts'
 import { type Expr, E, IMAG, PI, add, div, eq, fn, ln, log, mul, neg, num, pow, sqrt, variable } from '../expr/types.ts'
 import type { Condition, RearrangeTask } from '../rearrange/task.ts'
 import { limitParts, limitValue } from '../rearrange/tools/series.ts'
-import { absOf, angleOf, argOf, derivativeOf, detOf, dotOf, integralOf, lengthOf, limitOf, odeOf, seriesOf, sumOf } from '../rearrange/tools/tool.ts'
+import { absOf, angleOf, argOf, derivativeOf, detOf, dotOf, integralOf, lengthOf, limitOf, odeOf, seriesOf, sumOf, theoremOf } from '../rearrange/tools/tool.ts'
 import type { Rng } from '../random/rng.ts'
 
 // Baukasten für Umstell-Aufgaben (M3, 4. Fassung; docs/PLAN-M3.md, „Abwechslung"). Jede Gleichung
@@ -2358,4 +2358,161 @@ const LEVEL5_POLAR_CORES: readonly ToolBuild[] = [
 // Gesucht ist x
 export function buildLevel5Polar(rng: Rng): KitTask {
   return buildTools(rng, toolNames(rng), LEVEL5_POLAR_CORES)
+}
+
+// --- Stufe 5, Teil 8c: Additionstheoreme (docs/PLAN-M3.md, Schritt 8c) ---
+//
+// x steckt in \sin(x \pm a), \cos(x \pm a) oder \cos(2x) und außerdem noch woanders (sonst ginge es gleich mit
+// \arcsin): gegen \sin x oder \cos x, im Bruch damit, zwei Additionstheoreme im Bruch, auf beiden Seiten oder in
+// einer Summe, \cos(2x) gegen \sin x oder \cos x (danach quadratisch) oder gegen \sin^2 x. Immer mit x < \frac{\pi}{2}.
+// Beim Teilen durch \cos x nur Schalen, die malnehmen oder teilen (eine Summe daneben ließe sich nicht teilen).
+
+const sinOf = (e: Expr) => fn('sin', e)
+const cosOf = (e: Expr) => fn('cos', e)
+const acuteX = (x: Expr): Condition[] => [lt(x, div(PI, num(2)))]
+// Additionstheorem als Werkzeug: \sin(x + a), \cos(x - a)
+const theorem = (name: 'sin' | 'cos', x: Expr, a: Expr, minus: boolean) => theoremOf(fn(name, minus ? add(x, neg(a)) : add(x, a)))
+const doubleCos = (x: Expr) => theoremOf(cosOf(mul(num(2), x)))
+// andere Seite als Faktor vor \sin x bzw. \cos x: y, b, 3b, \frac{b}{c}, b + c
+function factorSide(rng: Rng, n: ToolNames): Expr {
+  const r = rng.next()
+  if (r < 0.5) return variable('y')
+  if (r < 0.7) return n.letter()
+  if (r < 0.8) return mul(k(rng, 2, 5), n.letter())
+  if (r < 0.9) return div(n.letter(), n.letter())
+  return plus(n.letter(), n.letter())
+}
+// Faktor vor einem Werkzeug: b oder 3
+const theoremFactor = (rng: Rng, n: ToolNames): Expr => (rng.chance(0.7) ? n.letter() : k(rng, 2, 5))
+const fnName = (rng: Rng): 'sin' | 'cos' => (rng.chance(0.5) ? 'sin' : 'cos')
+
+// Beispiel aus dem Plan: \sin(x + a) = y\cos x, mit Faktor b\sin(x + a) = y\cos x oder geteilt
+function theoremAgainst(rng: Rng, n: ToolNames): Built {
+  const x = n.unknown
+  const a = n.letter()
+  const tool = theorem(fnName(rng), x, a, rng.chance(0.4))
+  const r = rng.next()
+  const side = r < 0.35 ? tool : r < 0.7 ? mul(theoremFactor(rng, n), tool) : div(tool, theoremFactor(rng, n))
+  const other = mul(factorSide(rng, n), rng.chance(0.5) ? cosOf(x) : sinOf(x))
+  return { side, other, conditions: acuteX(x), label: 'Additionstheorem gegen $\\sin x$ oder $\\cos x$' }
+}
+
+// Im Bruch mit \sin x oder \cos x: \frac{\sin(x + a)}{\cos x} = y, auch im \ln, unter der Wurzel, mit Schalen
+function theoremFraction(rng: Rng, n: ToolNames): Built {
+  const x = n.unknown
+  const a = n.letter()
+  const tool = theorem(fnName(rng), x, a, rng.chance(0.4))
+  const g = rng.chance(0.5) ? cosOf(x) : sinOf(x)
+  const fraction = rng.chance(0.8) ? div(tool, g) : div(g, tool)
+  const r = rng.next()
+  const side = r < 0.3 ? fraction : r < 0.5 ? ln(fraction) : r < 0.65 ? sqrt(fraction) : r < 0.85 ? plus(fraction, n.letter()) : minus(mul(theoremFactor(rng, n), fraction), n.letter())
+  const other = side.kind === 'root' ? (rng.chance(0.6) ? variable('y') : n.letter()) : simpleSide(rng, n)
+  return { side, other, conditions: acuteX(x), label: 'Additionstheorem im Bruch mit $\\sin x$ oder $\\cos x$' }
+}
+
+// Bruch aus zwei Additionstheoremen (verschiedene Winkel, sonst wäre es \tan(x + a)): \frac{\sin(x + a)}{\sin(x - a)} = y
+function theoremQuotient(rng: Rng, n: ToolNames): Built {
+  const x = n.unknown
+  const a = n.letter()
+  const [top, bottom] = rng.pick([['sin', 'sin'], ['cos', 'cos'], ['sin', 'cos'], ['cos', 'sin']] as const)
+  const minusTop = rng.chance(0.5)
+  const fraction = div(theorem(top, x, a, minusTop), theorem(bottom, x, a, !minusTop))
+  const r = rng.next()
+  const side = r < 0.5 ? fraction : r < 0.7 ? mul(theoremFactor(rng, n), fraction) : r < 0.85 ? ln(fraction) : plus(fraction, n.letter())
+  return { side, other: simpleSide(rng, n), conditions: acuteX(x), label: 'Bruch aus zwei Additionstheoremen' }
+}
+
+// Additionstheorem auf beiden Seiten: \sin(x + a) = y\sin(x - a), b\sin(x + a) = c\cos(x - a)
+function theoremBothSides(rng: Rng, n: ToolNames): Built {
+  const x = n.unknown
+  const a = n.letter()
+  const minus = rng.chance(0.5)
+  const left = theorem(fnName(rng), x, a, minus)
+  const right = theorem(fnName(rng), x, a, !minus)
+  const side = rng.chance(0.5) ? left : mul(theoremFactor(rng, n), left)
+  return { side, other: mul(rng.chance(0.6) ? variable('y') : n.letter(), right), conditions: acuteX(x), label: 'Additionstheorem auf beiden Seiten' }
+}
+
+// Summe zweier Additionstheoreme: \sin(x + a) - \sin(x - a) = y\sin x, \cos(x + a) + \cos(x - a) = y\sin x
+const THEOREM_SUMS = [
+  { name: 'sin', difference: true, g: 'sin' },
+  { name: 'sin', difference: false, g: 'cos' },
+  { name: 'cos', difference: false, g: 'sin' },
+  { name: 'cos', difference: true, g: 'cos' },
+] as const
+function theoremSum(rng: Rng, n: ToolNames): Built {
+  const x = n.unknown
+  const a = n.letter()
+  const { name, difference, g } = rng.pick(THEOREM_SUMS)
+  // beim Kosinus zuerst x - a: \cos(x - a) - \cos(x + a) = 2\sin x \cdot \sin a ist positiv
+  const [first, second] = name === 'cos' && difference ? [true, false] : [false, true]
+  const sum = difference ? plus(theorem(name, x, a, first), neg(theorem(name, x, a, second))) : plus(theorem(name, x, a, first), theorem(name, x, a, second))
+  const other = mul(factorSide(rng, n), g === 'sin' ? sinOf(x) : cosOf(x))
+  return { side: rng.chance(0.7) ? sum : div(sum, theoremFactor(rng, n)), other, conditions: acuteX(x), label: 'Summe zweier Additionstheoreme' }
+}
+
+// Sinus und Kosinus derselben Summe: \sin(x + a) + \cos(x + a) = y\cos x
+function theoremSinCos(rng: Rng, n: ToolNames): Built {
+  const x = n.unknown
+  const a = n.letter()
+  const minus = rng.chance(0.4)
+  const sum = plus(theorem('sin', x, a, minus), theorem('cos', x, a, minus))
+  return { side: sum, other: mul(factorSide(rng, n), cosOf(x)), conditions: acuteX(x), label: 'Sinus und Kosinus derselben Summe' }
+}
+
+// \cos(2x) gegen \sin x oder \cos x, danach quadratisch: \cos(2x) = y\sin x, \frac{\cos(2x)}{\cos x} = y
+function doubleAgainst(rng: Rng, n: ToolNames): Built {
+  const x = n.unknown
+  const g = rng.chance(0.55) ? sinOf(x) : cosOf(x)
+  const tool = doubleCos(x)
+  const r = rng.next()
+  if (r < 0.5) {
+    const side = rng.chance(0.5) ? tool : rng.chance(0.5) ? mul(theoremFactor(rng, n), tool) : div(tool, theoremFactor(rng, n))
+    return { side, other: mul(factorSide(rng, n), g), conditions: acuteX(x), label: '$\\cos(2x)$ gegen $\\sin x$ oder $\\cos x$, danach quadratisch' }
+  }
+  const fraction = div(tool, g)
+  const s = rng.next()
+  const side = s < 0.5 ? fraction : s < 0.7 ? ln(fraction) : s < 0.85 ? sqrt(fraction) : mul(theoremFactor(rng, n), fraction)
+  // unter der Wurzel nur y oder ein Buchstabe als andere Seite (sonst große Zahlen im Ergebnis, 1024a^4)
+  const other = side.kind === 'root' ? (rng.chance(0.6) ? variable('y') : n.letter()) : simpleSide(rng, n)
+  return { side, other, conditions: acuteX(x), label: '$\\cos(2x)$ im Bruch mit $\\sin x$ oder $\\cos x$' }
+}
+
+// \cos(2x) und \sin x bzw. \cos x in einer Summe: b\sin x - \cos(2x) = y, \cos(2x) + b\cos x = y
+function doubleSum(rng: Rng, n: ToolNames): Built {
+  const x = n.unknown
+  const b = theoremFactor(rng, n)
+  const r = rng.next()
+  const side =
+    r < 0.4 ? plus(mul(b, sinOf(x)), neg(doubleCos(x))) : r < 0.7 ? plus(doubleCos(x), mul(b, cosOf(x))) : plus(doubleCos(x), neg(mul(b, cosOf(x))))
+  return { side: rng.chance(0.75) ? side : div(side, n.letter()), other: simpleSide(rng, n), conditions: acuteX(x), label: '$\\cos(2x)$ und $\\sin x$ oder $\\cos x$ in einer Summe' }
+}
+
+// \cos(2x) gegen \sin^2 x oder \cos^2 x: \cos(2x) = y\sin^2 x, \frac{\cos(2x)}{\cos^2 x} = y
+function doubleSquare(rng: Rng, n: ToolNames): Built {
+  const x = n.unknown
+  const g = pow(rng.chance(0.6) ? sinOf(x) : cosOf(x), num(2))
+  const r = rng.next()
+  if (r < 0.4) return { side: doubleCos(x), other: mul(factorSide(rng, n), g), conditions: acuteX(x), label: '$\\cos(2x)$ gegen $\\sin^2 x$ oder $\\cos^2 x$' }
+  const fraction = div(doubleCos(x), g)
+  const s = rng.next()
+  const side = s < 0.4 ? fraction : s < 0.65 ? ln(fraction) : minus(mul(theoremFactor(rng, n), fraction), n.letter())
+  return { side, other: simpleSide(rng, n), conditions: acuteX(x), label: '$\\cos(2x)$ im Bruch mit $\\sin^2 x$ oder $\\cos^2 x$' }
+}
+
+const LEVEL5_THEOREM_CORES: readonly ToolBuild[] = [
+  [16, theoremAgainst],
+  [12, theoremFraction],
+  [14, theoremQuotient],
+  [8, theoremBothSides],
+  [8, theoremSum],
+  [3, theoremSinCos],
+  [18, doubleAgainst],
+  [10, doubleSum],
+  [10, doubleSquare],
+]
+
+// Gesucht ist x
+export function buildLevel5Theorem(rng: Rng): KitTask {
+  return buildTools(rng, toolNames(rng), LEVEL5_THEOREM_CORES)
 }

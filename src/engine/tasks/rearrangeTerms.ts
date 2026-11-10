@@ -17,7 +17,7 @@ import {
   buildLevel4Trig,
   buildLevel5Det,
   buildLevel5Ode,
-  buildLevel5Polar,
+  buildLevel5Polar, buildLevel5Theorem,
   buildLevel5Series,
   buildLevel5Tools,
 } from './rearrangeKit.ts'
@@ -169,6 +169,18 @@ const level5Polar: RearrangeTemplate = {
   narrow: true,
 }
 
+// Teil 8c: Additionstheoreme; der Anteil gilt unter den Nummern, die zu keiner späteren Vorlage gehören (also zu 7a)
+const level5Theorem: RearrangeTemplate = {
+  id: 'baukasten-5-additionstheoreme',
+  level: 5,
+  label: 'Baukasten: Additionstheoreme',
+  build: (rng) => buildLevel5Theorem(rng).task,
+  buildLabeled: buildLevel5Theorem,
+  share: 0.35,
+  novel: true,
+  narrow: true,
+}
+
 export const REARRANGE_TEMPLATES: readonly RearrangeTemplate[] = [
   level1Kit,
   level2Kit,
@@ -181,6 +193,7 @@ export const REARRANGE_TEMPLATES: readonly RearrangeTemplate[] = [
   level5Ode,
   level5Det,
   level5Polar,
+  level5Theorem,
 ]
 
 export function rearrangeTemplatesForLevel(level: Level): RearrangeTemplate[] {

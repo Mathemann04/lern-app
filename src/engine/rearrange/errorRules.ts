@@ -66,6 +66,8 @@ const TOOL_STEPS = new Set<string>([
   'length',
   'dot',
   'angle',
+  'addition',
+  'doubleAngle',
 ])
 // Schritt, der ein Werkzeug der Stufe 5 ausrechnet (Ableitung, Integral, …, Determinante)
 export const isToolStep = (kind: string) => TOOL_STEPS.has(kind)
@@ -175,6 +177,14 @@ export const REARRANGE_ERROR_RULES: readonly EqErrorRule[] = [
   { id: 'eq-vec-dot-cross', name: 'Beim Skalarprodukt über Kreuz malgenommen', wrongFormula: '\\begin{pmatrix} p \\\\ q \\end{pmatrix} \\cdot \\begin{pmatrix} r \\\\ s \\end{pmatrix} = ps + qr' },
   { id: 'eq-vec-length-termwise', name: 'Bei der Länge die Einträge addiert', wrongFormula: '\\left\\lvert\\begin{pmatrix} u_1 \\\\ u_2 \\end{pmatrix}\\right\\rvert = u_1 + u_2' },
   { id: 'eq-vec-length-root', name: 'Bei der Länge die Wurzel vergessen', wrongFormula: '\\left\\lvert\\begin{pmatrix} u_1 \\\\ u_2 \\end{pmatrix}\\right\\rvert = u_1^2 + u_2^2' },
+  // Werkzeuge der Stufe 5 (Schritt 8c): Additionstheoreme und doppelter Winkel
+  { id: 'eq-add-termwise', name: 'Die Winkelfunktion gliedweise auf die Summe angewandt', wrongFormula: '\\sin(x + a) = \\sin x + \\sin a' },
+  { id: 'eq-add-sign', name: 'Im Additionstheorem das Vorzeichen in der Mitte vertauscht', wrongFormula: '\\cos(x + a) = \\cos x \\cdot \\cos a + \\sin x \\cdot \\sin a' },
+  { id: 'eq-add-partner', name: 'Im Additionstheorem Sinus und Kosinus falsch gepaart', wrongFormula: '\\sin(x + a) = \\sin x \\cdot \\sin a + \\cos x \\cdot \\cos a' },
+  { id: 'eq-double-factor', name: 'Die $2$ aus dem Winkel vor die Funktion gezogen', wrongFormula: '\\cos(2x) = 2\\cos x' },
+  { id: 'eq-double-two', name: 'Beim doppelten Winkel die $2$ vergessen', wrongFormula: '\\cos(2x) = 1 - \\sin^2 x' },
+  { id: 'eq-double-cos-plus', name: 'Bei $\\cos(2x)$ Plus statt Minus, wie bei $\\sin^2 x + \\cos^2 x = 1$', wrongFormula: '\\cos(2x) = \\cos^2 x + \\sin^2 x' },
+  { id: 'eq-double-cos-sign', name: 'Bei $\\cos(2x)$ die Formen mit $\\sin^2 x$ und $\\cos^2 x$ verwechselt', wrongFormula: '\\cos(2x) = 2\\sin^2 x - 1' },
 ]
 
 export function rearrangeErrorRule(id: string): EqErrorRule {
@@ -757,6 +767,8 @@ export function rearrangeWrongAnswers(task: RearrangeTask, solution: RearrangeSo
   // Aufgaben mit Betrag, Winkel oder Vektoren (Teil 8b): in keiner falschen Gleichung fällt x ganz weg (auch nicht nach dem
   // Werkzeug, z. B. y^2 = k^2 + m^2 beim Ausmultiplizieren oder x + a - x = 4b)
   const polar = POLAR_STEPS.has(solution.steps[0]?.kind ?? 'finish')
+  // Additionstheoreme (Teil 8c): auch keine, in der sich x als gemeinsamer Faktor wegkürzt (2\cos x = y\cos x)
+  const theorem = THEOREM_STEPS.has(solution.steps[0]?.kind ?? 'finish')
   solution.steps.forEach((step, i) => {
     for (const c of candidatesFor(solution.steps, i, t)) {
       // keine Gleichung ohne Lösung (z. B. \frac{1}{a} = 0) und keine, die doch stimmt
@@ -767,6 +779,7 @@ export function rearrangeWrongAnswers(task: RearrangeTask, solution: RearrangeSo
       // geschrieben dieselbe ist wie eine schon da (beim Winkel mit einer Achse in der Ebene sind Sinus statt
       // Kosinus und über Kreuz malgenommen dasselbe)
       if (polar && !dependsOn(c.after, step.unknown ?? t, createRng(`abhängig:${latex}`))) continue
+      if (theorem && !isZeroSide(c.after, step.unknown ?? t) && !dependsOn(eq(div(c.after.lhs, c.after.rhs), num(1)), step.unknown ?? t, createRng(`gekürzt:${latex}`))) continue
       if (POLAR_STEPS.has(step.kind)) {
         if (!definedSomewhere(c.after, createRng(`definiert:${latex}`))) continue
         if (out.some((w) => w.stepIndex === i && sameEquation(w.after, c.after, points))) continue
@@ -777,7 +790,8 @@ export function rearrangeWrongAnswers(task: RearrangeTask, solution: RearrangeSo
   return out
 }
 
-const POLAR_STEPS: ReadonlySet<string> = new Set(['abs', 'arg', 'length', 'dot', 'angle'])
+const POLAR_STEPS: ReadonlySet<string> = new Set(['abs', 'arg', 'length', 'dot', 'angle', 'addition', 'doubleAngle'])
+const THEOREM_STEPS: ReadonlySet<string> = new Set(['addition', 'doubleAngle'])
 
 // Dieselbe Gleichung, anders geschrieben: Der Unterschied der Seiten ist an allen Prüfstellen gleich
 // (wo eine Gleichung definiert ist, auch die andere)

@@ -33,6 +33,8 @@ import {
   explainDot,
   explainAngle,
   explainAcuteFinish,
+  explainAddition,
+  explainDouble,
   explainAcuteMove,
   explainAcutePythagoras,
   acutePythagorasMoves,
@@ -85,6 +87,7 @@ import {
 import { type RearrangeTask, conditionLatex, conditionsText, taskLatex } from '../rearrange/task.ts'
 import { detWorkLatex, expandWork } from '../rearrange/tools/determinant.ts'
 import { polarWork } from '../rearrange/tools/polar.ts'
+import { theoremWork } from '../rearrange/tools/theorem.ts'
 import { angleWork, dotWorkLatex, lengthWorkLatex } from '../rearrange/tools/vector.ts'
 import { odeWork } from '../rearrange/tools/ode.ts'
 import { activeTool } from '../rearrange/tools/tool.ts'
@@ -190,6 +193,8 @@ const TOOL_KINDS = new Set<StepKind | undefined>([
   'length',
   'dot',
   'angle',
+  'addition',
+  'doubleAngle',
 ])
 
 const TOOL_QUESTIONS: Partial<Record<StepKind, string>> = {
@@ -208,6 +213,8 @@ const TOOL_QUESTIONS: Partial<Record<StepKind, string>> = {
   length: 'Rechne die Länge des Vektors aus: Was kommt heraus?',
   dot: 'Rechne das Skalarprodukt aus: Was kommt heraus?',
   angle: 'Rechne den Winkel zwischen den Vektoren aus: Was kommt heraus?',
+  addition: 'Wende das Additionstheorem an: Was kommt heraus?',
+  doubleAngle: 'Schreibe mit dem einfachen Winkel: Was kommt heraus?',
 }
 
 // Tipp zur ganzen Aufgabe nach dem ersten Werkzeug-Schritt
@@ -227,6 +234,8 @@ const TASK_TOOL: Partial<Record<StepKind, TaskTool>> = {
   length: 'vector',
   dot: 'vector',
   angle: 'vector',
+  addition: 'theorem',
+  doubleAngle: 'theorem',
 }
 
 // --- Weichen: Schritte, bei denen man wissen muss, was als Nächstes kommt ---
@@ -350,6 +359,8 @@ function moveQuestion(step: RearrangeStep, t: string, target: string): MoveQuest
     case 'length':
     case 'dot':
     case 'angle':
+    case 'addition':
+    case 'doubleAngle':
       return null
     case 'add': {
       if (!side || !step.operand) return null
@@ -626,7 +637,7 @@ function resultStep(
         : `Fasse zu einem Bruch zusammen: Was ist $${t}$?`
       : choose
         ? 'Welche der beiden Lösungen passt?'
-        : (odeQuestion(step) ?? tool ?? 'Was kommt heraus?'),
+        : (odeQuestion(step) ?? theoremQuestion(step) ?? tool ?? 'Was kommt heraus?'),
     choices: rng.shuffle([correct, ...wrong]),
     hint: finish
       ? tan
@@ -634,11 +645,11 @@ function resultStep(
         : REARRANGE_HINTS.finish
       : step.kind === 'pythagoras' && step.operand?.kind === 'add'
         ? REARRANGE_HINTS.acutePythagoras
-        : (polarHint(step) ?? RESULT_HINTS[step.kind] ?? REARRANGE_HINTS.result),
+        : (polarHint(step) ?? theoremHint(step) ?? RESULT_HINTS[step.kind] ?? REARRANGE_HINTS.result),
     explanation:
       choose && step.operand
         ? explainChoose(toLatex(step.operand), rejectReason(step, t, context), after)
-        : (odeExplanation(step) ?? detExplanation(step) ?? polarExplanation(step) ?? acuteExplanation(step) ?? explainResult(step.kind, stepLatex(step.kind, step.before), after)),
+        : (odeExplanation(step) ?? detExplanation(step) ?? polarExplanation(step) ?? theoremExplanation(step) ?? acuteExplanation(step) ?? explainResult(step.kind, stepLatex(step.kind, step.before), after)),
     established: [after],
     cards: cardsOf(step, t, previous),
   }
@@ -706,6 +717,40 @@ function polarExplanation(step: RearrangeStep): Explanation | null {
 }
 
 // Differentialgleichung: die Frage nennt die Funktion (bei f und g in einer Aufgabe wichtig)
+// Additionstheorem (Teil 8c): die Frage nennt die Funktion; beim doppelten Winkel des Kosinus auch die Funktion, die
+// danach allein dastehen soll (so ist klar, welche der gleichwertigen Formen gefragt ist)
+function theoremTool(step: RearrangeStep) {
+  if (step.kind !== 'addition' && step.kind !== 'doubleAngle') return null
+  const tool = activeTool(step.before)?.tool.tool
+  return tool?.kind === 'theorem' ? tool : null
+}
+
+function theoremQuestion(step: RearrangeStep): string | null {
+  const tool = theoremTool(step)
+  const work = tool && theoremWork(tool, step.before)
+  if (!work) return null
+  if (work.kind === 'addition') return `Schreibe $${work.term}$ mit dem Additionstheorem aus: Was kommt heraus?`
+  if (work.other) return `Schreibe $${work.term}$ so, dass nur $${work.other}$ vorkommt: Was kommt heraus?`
+  return `Schreibe $${work.term}$ mit dem einfachen Winkel: Was kommt heraus?`
+}
+
+function theoremHint(step: RearrangeStep): string | null {
+  const tool = theoremTool(step)
+  const work = tool && theoremWork(tool, step.before)
+  if (!work) return null
+  if (work.kind === 'addition') return work.name === 'sin' ? REARRANGE_HINTS.additionSin : work.name === 'cos' ? REARRANGE_HINTS.additionCos : REARRANGE_HINTS.additionTan
+  return work.name === 'cos' ? REARRANGE_HINTS.doubleCos : REARRANGE_HINTS.doubleSin
+}
+
+function theoremExplanation(step: RearrangeStep): Explanation | null {
+  const tool = theoremTool(step)
+  const work = tool && theoremWork(tool, step.before)
+  if (!work) return null
+  const before = stepLatex(step.kind, step.before)
+  const after = stepLatex(step.kind, step.after)
+  return work.kind === 'addition' ? explainAddition(work.rule, work.alpha, work.beta, before, after) : explainDouble(work.name, work.form, work.alpha, work.other, before, after)
+}
+
 function odeQuestion(step: RearrangeStep): string | null {
   if (step.kind !== 'ode') return null
   const tool = activeTool(step.before)?.tool.tool
@@ -790,6 +835,8 @@ const CARDS_BY_KIND: Record<StepKind, readonly string[]> = {
   length: [REARRANGE_CARD_IDS.vector],
   dot: [REARRANGE_CARD_IDS.vector],
   angle: [REARRANGE_CARD_IDS.vector],
+  addition: [REARRANGE_CARD_IDS.addition],
+  doubleAngle: [REARRANGE_CARD_IDS.addition],
   finish: [FRACTION_CARD_IDS.add, FRACTION_CARD_IDS.expand],
 }
 
