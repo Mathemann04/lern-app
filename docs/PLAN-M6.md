@@ -7,8 +7,9 @@ aus diesem Entwurf der ausführliche Plan mit Schritten (Teil A und Teil B wie
 bei M1 bis M4); erst nach dem OK des Nutzers wird programmiert.
 
 Der Nutzer hat den Entwurf als Bild (Design-Canvas „Rechenweg – neue Struktur
-(Entwurf)“ mit der Startseite und der Seite „Gleichungen umstellen“). Dieses
-Dokument beschreibt denselben Stand in Worten.
+(Entwurf)“ mit Startseite, Mathe-Seite, der Seite „Gleichungen umstellen“ und
+einer Aufgabe mit „Überspringen“). Dieses Dokument beschreibt denselben Stand
+in Worten.
 
 ## Warum
 
@@ -46,10 +47,22 @@ neben jedem Baustein). Eigene Themenseiten braucht es dafür nicht.
 
 ## Bedienung
 
-- **Startseite:** oben „Weitermachen“ (letzte Auswahl, Stufe, Modus). Je Fach
-  nur, was es schon gibt: Mathe mit den Kacheln der Tätigkeiten und „Mathe
-  mischen“; Chemie wie bisher mit ihren Gebieten und „Themen mischen“. Alles,
-  was noch fehlt, steht in **einer** Zeile „Demnächst“ statt in blassen Kacheln.
+- **Kein Kopf mehr:** Die Zeile mit Logo und „Rechenweg“ entfällt auf allen
+  Seiten, ebenso jede Begrüßung („Was übst du heute?“). Am Laptop bleibt oben
+  nur das Menü.
+- **Startseite:** oben „Weitermachen“ (letzte Auswahl, Stufe, Modus), darunter
+  **nur die Fächer** als große Kacheln mit Bild (Mathematik MB1, Chemie 1).
+  Fächer, die noch fehlen (Werkstoffkunde, Physik, Technische Mechanik),
+  stehen in **einer** Zeile „Demnächst“ statt in blassen Kacheln.
+- **Seite eines Fachs:** erst hier erscheinen die Tätigkeiten. Mathe:
+  „Vereinfachen“, „Gleichungen umstellen“, „Ableiten“ und „Mathe mischen“,
+  darunter „Demnächst: Integrieren“. Chemie: ihre Gebiete wie bisher und
+  „Themen mischen“.
+- **Bilder** im bisherigen Stil (`AreaIcon.tsx`, Tonleiter je Bereich), je
+  Fach und je Tätigkeit ein Bild und eine Farbe. Vorschlag aus dem Entwurf:
+  Mathematik Kurve mit Tangente (blau), Chemie Atom (indigo), Vereinfachen
+  Bruch-Kreis (orange), Gleichungen umstellen Waage (blau), Ableiten
+  Steigungsdreieck (violett), Mischen Kärtchen mit Häkchen (blaugrün).
 - **Seite einer Tätigkeit:**
   - „Was soll drankommen?“ mit Schnellwahl „Alle“, „Keine“, „Meine
     Schwächen“; Bausteine in Gruppen, je Baustein der Fortschritt in Prozent
@@ -63,6 +76,13 @@ neben jedem Baustein). Eigene Themenseiten braucht es dafür nicht.
 - **Fortschritt je Baustein:** Anteil ohne Fehler je Baustein. „Meine
   Schwächen“ kreuzt die Bausteine mit den meisten Fehlern an (aus der
   Fehlerstatistik, Fehlerregeln einem Baustein zugeordnet).
+- **„Überspringen“** in jeder Aufgabe, geführt und frei (Wunsch des Nutzers,
+  10.11.2026): ein Knopf unten im Lernbildschirm, der sofort die nächste
+  Aufgabe zeigt, mit kurzem Hinweis „Aufgabe übersprungen“. Eine übersprungene
+  Aufgabe zählt nicht als Fehler, nicht als gelöst und nicht für „8 von 10“;
+  die Fehlerstatistik bleibt unberührt. Eine übersprungene Wissensfrage kommt
+  später in derselben Runde wieder. Gilt auch beim Mischen und beim gezielten
+  Üben.
 - **Chemie** bleibt wie seit S1b (Thema → Unterthemen ankreuzen → Stufe,
   dazu „Themen mischen“). Die Auswahl-Teile von dort (`PartPicker.tsx`,
   `MixScreen.tsx`, `selection.ts`, `mix.ts`) werden für Mathe
@@ -84,7 +104,8 @@ neben jedem Baustein). Eigene Themenseiten braucht es dafür nicht.
   Fehlerstatistik und Einstellungen ziehen um (Speicher-Version erhöhen, mit
   Umzug wie bisher).
 - Fehlerregeln, Lernkarten und „Gezielt üben“ je Baustein zuordnen.
-- Schritte (Vorschlag, Reihenfolge im Plan festlegen): Startseite aufräumen;
+- Schritte (Vorschlag, Reihenfolge im Plan festlegen): Kopf entfernen,
+  Startseite mit Fächern und Fach-Seiten; „Überspringen“;
   Schlagworte und Auswahl für „Gleichungen umstellen“; dasselbe für
   „Vereinfachen“ und „Ableiten“; leichte Aufgaben je Baustein; Fortschritt je
   Baustein und „Meine Schwächen“.
