@@ -3,14 +3,16 @@ import { ATOMBAU_BANK } from './bank/atombau.ts'
 import { GLEICHUNGEN_BANK } from './bank/gleichungen.ts'
 import { STOFFMENGE_BANK } from './bank/stoffmenge.ts'
 import { ATOMBAU_WHY } from './misconceptions/atombauWhy.ts'
+import { GLEICHUNGEN_WHY } from './misconceptions/gleichungenWhy.ts'
+import { STOFFMENGE_WHY } from './misconceptions/stoffmengeWhy.ts'
 import { MISCONCEPTIONS_BY_COURSE } from './misconceptions/index.ts'
 
 // Fragensammlungen der Chemie-Themen mit den Erklärungen ihrer Denkfehler. Ein neues Thema braucht hier
 // eine Zeile (und eine in misconceptions/index.ts für Name und falsche Aussage seiner Denkfehler).
 const BANKS: readonly { readonly bank: QuestionBank; readonly why: Readonly<Record<string, Explanation>> }[] = [
   { bank: ATOMBAU_BANK, why: ATOMBAU_WHY },
-  { bank: STOFFMENGE_BANK, why: {} },
-  { bank: GLEICHUNGEN_BANK, why: {} },
+  { bank: STOFFMENGE_BANK, why: STOFFMENGE_WHY },
+  { bank: GLEICHUNGEN_BANK, why: GLEICHUNGEN_WHY },
 ]
 
 export type ChemTopic = { readonly bank: QuestionBank; readonly misconceptions: readonly Misconception[] }

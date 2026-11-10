@@ -1,5 +1,7 @@
 import type { MisconceptionName } from '../../quiz/types.ts'
 import { ATOMBAU_MISCONCEPTIONS } from './atombau.ts'
+import { GLEICHUNGEN_MISCONCEPTIONS } from './gleichungen.ts'
+import { STOFFMENGE_MISCONCEPTIONS } from './stoffmenge.ts'
 
 // Denkfehler je Chemie-Thema (Id aus ui/catalog.ts), nur Name und falsche Aussage. Eigene kleine Liste,
 // damit die Fehlerstatistik (errorCatalog.ts) sie kennt, ohne Fragen und Erklärungen zu laden (die stehen
@@ -7,7 +9,6 @@ import { ATOMBAU_MISCONCEPTIONS } from './atombau.ts'
 // eine Zeile.
 export const MISCONCEPTIONS_BY_COURSE: Readonly<Record<string, readonly MisconceptionName[]>> = {
   'chem-atombau': ATOMBAU_MISCONCEPTIONS,
-  // noch ohne Wissensfragen (kommen mit S3b); die Rechenfehler stehen in chem/errorRules.ts
-  'chem-stoffmenge': [],
-  'chem-gleichungen': [],
+  'chem-stoffmenge': STOFFMENGE_MISCONCEPTIONS,
+  'chem-gleichungen': GLEICHUNGEN_MISCONCEPTIONS,
 }
