@@ -18,7 +18,7 @@ Legende: **da** = schon in der App, **M…** = geplant in diesem Meilenstein,
 | 1.2 Aussagen, Gleichungen und Ungleichungen | Gleichungen: M3; Ungleichungen: später |
 | 1.3 Natürliche, ganze, rationale und reelle Zahlen | Brüche Stufe 1 (M2b) |
 | 1.4 Rechnen mit reellen Zahlen | Brüche Stufen 1 bis 2 (M2b): Punkt vor Strich, Klammern, Dezimalzahlen |
-| 1.5 Potenzen, Wurzeln und Logarithmen | M4; als Bausteine schon in Brüche, Ableiten, Umstellen |
+| 1.5 Potenzen, Wurzeln und Logarithmen | M8; als Bausteine schon in Brüche, Ableiten, Umstellen |
 | 1.6 Indexschreibweise und Summenzeichen | Umstellen Stufe 5 (M3), Teleskopsummen (M2b) |
 | 1.7 Fakultät und Binomialkoeffizienten | später |
 | 1.8 Lösen von Gleichungen | Gleichungen umstellen (M3) |
@@ -27,13 +27,13 @@ Legende: **da** = schon in der App, **M…** = geplant in diesem Meilenstein,
 | 2.1 Funktionen: Grundbegriffe und Eigenschaften | später |
 | 2.2 Polynome und rationale Funktionen | Brüche (zerlegen, kürzen; M2b), Polynomdivision (M2b) |
 | 2.3 Partialbruchzerlegung | Brüche Stufe 5 (M2b) |
-| 2.4 Potenz- und Wurzelfunktionen | M4; Wurzeln in Brüche Stufe 5 |
-| 2.5 Exponential- und Logarithmusfunktionen | M4; $e^x$ und $\ln x$ in Brüche, Ableiten, Umstellen Stufe 4 |
+| 2.4 Potenz- und Wurzelfunktionen | M8; Wurzeln in Brüche Stufe 5 |
+| 2.5 Exponential- und Logarithmusfunktionen | M8; $e^x$ und $\ln x$ in Brüche, Ableiten, Umstellen Stufe 4 |
 | 2.6 Trigonometrische Funktionen | Bausteine in Brüche und Ableiten; Umstellen Stufe 4 |
 | 2.7 Hyperbelfunktionen | Ableiten Stufe 5 (da), Brüche Stufe 5 (M2b), Umstellen Stufe 4 |
 | 2.8 Weitere Funktionen | später |
 | 3.1 bis 3.4 Komplexe Zahlen: kartesische Form, Polarform, Exponentialform | Teilen in Brüche Stufe 5 (M2b); Betrag und Winkel in Umstellen Stufe 5 (M3); eigenes Thema später |
-| 3.5 Schwingungen, Zeiger und komplexe Zahlen | später (passt zu Physik, M6) |
+| 3.5 Schwingungen, Zeiger und komplexe Zahlen | später (passt zu Physik, M10) |
 | 3.6 Polynome und algebraische Gleichungen | später |
 
 ## II Analysis in einer Variablen
@@ -74,5 +74,5 @@ Legende: **da** = schon in der App, **M…** = geplant in diesem Meilenstein,
 - Die Stufen 4 und 5 jedes Themas greifen auf spätere Kapitel vor, wo das
   Thema dort gebraucht wird (z. B. Brüche bei Partialbrüchen, Grenzwerten und
   komplexen Zahlen).
-- Neue Gebiete und Themen für M5 und später kommen aus dieser Liste. Was in
+- Neue Gebiete und Themen für die Mathe-Meilensteine ab M6 kommen aus dieser Liste. Was in
   „Mathematik MB1" dran ist, sagt der Nutzer.
