@@ -1,5 +1,6 @@
 import { createRng } from '../../random/rng.ts'
 import type { Level, TaskRef } from '../../tasks/taskNumber.ts'
+import { GLEICHUNGEN_GENERATORS } from './gleichungen.ts'
 import { LIGHT_GENERATORS } from './light.ts'
 import { PARTICLE_GENERATORS } from './particles.ts'
 import { STOFFMENGE_GENERATORS } from './stoffmenge.ts'
@@ -13,6 +14,7 @@ import type { ChemCalc, ChemGenerator } from './shared.ts'
 const GENERATORS: Readonly<Record<string, readonly ChemGenerator[]>> = {
   'chem-atombau': [...PARTICLE_GENERATORS, ...LIGHT_GENERATORS],
   'chem-stoffmenge': STOFFMENGE_GENERATORS,
+  'chem-gleichungen': GLEICHUNGEN_GENERATORS,
 }
 
 // Rechenarten eines Themas in einer Stufe

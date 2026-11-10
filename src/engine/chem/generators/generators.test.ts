@@ -16,7 +16,12 @@ import { LIGHT_SOURCES, lightValues } from './light.ts'
 
 const COURSE = 'chem-atombau'
 // alle Themen mit Rechnungen
-const CALC_COURSES = ['chem-atombau', 'chem-stoffmenge']
+const CALC_COURSES = ['chem-atombau', 'chem-stoffmenge', 'chem-gleichungen']
+// Abweichung mit Begründung (docs/PLAN-M4.md, S3b): Es gibt nur etwa 15 bis 25 sinnvolle Reaktionen bzw.
+// Brennstoffe je Stufe; dort zählt, dass jede vorkommt und keine deutlich öfter als die anderen
+const VARIETY: Readonly<Record<string, { distinct: number; maxShare: number }>> = {
+  'chem-gleichungen': { distinct: 15, maxShare: 0.12 },
+}
 const LEVELS: readonly Level[] = [1, 2, 3]
 const SAMPLE = 400
 const tasksOf = (level: Level, count = SAMPLE) => Array.from({ length: count }, (_, i) => ({ level, seed: GENERATED_MIN + i }))
@@ -170,7 +175,8 @@ describe.each(CALC_COURSES)('Rechnungen %s: Abwechslung je Stufe (Kennzahlen aus
   it.each(LEVELS)('Stufe %i: unter 200 Aufgaben mindestens 100 Formen, keine öfter als 3 von 100', (level) => {
     const forms = tasksOf(level, 200).map((ref) => calcForm(generatedCalc(COURSE, ref)!))
     const { distinct, maxShare } = varietyStats(forms)
-    expect(distinct).toBeGreaterThanOrEqual(100)
-    expect(maxShare).toBeLessThanOrEqual(0.03)
+    const goal = VARIETY[COURSE] ?? { distinct: 100, maxShare: 0.03 }
+    expect(distinct).toBeGreaterThanOrEqual(goal.distinct)
+    expect(maxShare).toBeLessThanOrEqual(goal.maxShare)
   })
 })

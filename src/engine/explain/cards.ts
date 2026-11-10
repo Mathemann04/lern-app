@@ -28,6 +28,7 @@ import { type FractionTask, taskExpr } from '../fraction/task.ts'
 import type { Level } from '../tasks/taskNumber.ts'
 import type { RearrangeTask } from '../rearrange/task.ts'
 import { ATOMBAU_CARDS } from './chem/atombauCards.ts'
+import { GLEICHUNGEN_CARDS } from './chem/gleichungenCards.ts'
 import { STOFFMENGE_CARDS } from './chem/stoffmengeCards.ts'
 import { FRACTION_CARD_LIST } from './fractionCards.ts'
 import { REARRANGE_CARD_LIST } from './rearrangeCards.ts'
@@ -52,6 +53,7 @@ export const TOPICS: readonly Topic[] = [
   { id: 'brueche', title: 'Brüche', description: 'Kürzen, erweitern, Hauptnenner, mal und geteilt' },
   { id: 'umstellen', title: 'Gleichungen umstellen', description: 'Gegenrechnung, Rüberbringen, Variable im Nenner, Ausklammern' },
   { id: 'chem-atombau', title: 'Atombau', description: 'Elementarteilchen, Kernsymbol, Isotope, Ionen, Atommodelle und Licht' },
+  { id: 'chem-gleichungen', title: 'Reaktionsgleichungen', description: 'Koeffizient und Index, Ausgleichen, Verbrennungen' },
   { id: 'chem-stoffmenge', title: 'Stoffmenge und Umsatz', description: 'Stoffmenge, molare Masse, Masse und Teilchenzahl' },
 ]
 
@@ -367,6 +369,7 @@ export const CARDS: readonly Card[] = [
   ...REARRANGE_CARD_LIST,
   ...ATOMBAU_CARDS,
   ...STOFFMENGE_CARDS,
+  ...GLEICHUNGEN_CARDS,
 ]
 
 export function topicById(id: string): Topic | undefined {

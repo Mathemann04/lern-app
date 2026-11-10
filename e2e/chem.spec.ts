@@ -301,8 +301,9 @@ test('Chemie: Themen mischen, „Nächste Aufgabe" bleibt in der Mischung, X und
   await expect(page.getByRole('checkbox', { name: 'Atombau' })).toBeChecked()
   await expect(page.getByRole('checkbox', { name: 'Stoffmenge und Umsatz' })).toBeChecked()
   await expectCleanPage(page, 'Mischseite')
-  // Dieser Test mischt nur Atombau (Stoffmenge hat seit S3a nur Rechnungen)
+  // Dieser Test mischt nur Atombau (Stoffmenge und Reaktionsgleichungen haben seit S3a/S3b nur Rechnungen)
   await page.getByRole('checkbox', { name: 'Stoffmenge und Umsatz' }).uncheck()
+  await page.getByRole('checkbox', { name: 'Reaktionsgleichungen' }).uncheck()
 
   // Unterthemen aufklappen: dieselben Kästchen wie auf der Themenseite (Atombau steht zuerst)
   const toggle = page.getByRole('button', { name: /^Unterthemen: alle/ }).first()
@@ -473,5 +474,38 @@ test('Chemie: Molmasse von Zn(OH)₂ mit Klammer, Thema ohne Fragen, Lernkarten'
   await page.goto('./#/karten/chem-stoffmenge')
   await expect(page.getByRole('link', { name: /Molare Masse/ })).toBeVisible()
   await expectCleanPage(page, 'Lernkarten Stoffmenge')
+  expect(errors).toEqual([])
+})
+
+// S3b: Reaktionsgleichungen ausgleichen, Verbrennung mit Bruch vor O2
+test('Chemie: Verbrennung von Butan mit 13/2 O₂, ganzzahlig machen, Lernkarten', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./#/ueben/chem-gleichungen/3-10000')
+  await expect(page.getByText(/^Klausurniveau · Aufgabe 3-10000 · Stelle die Gleichung der vollständigen Verbrennung auf/)).toBeVisible()
+  await expectCleanPage(page, 'Verbrennung')
+  const pick = async (test: (t: string) => boolean) => {
+    // die mhchem-Formel steht im Text für Vorlesehilfen: \ce{…}
+    const texts = (await answers(page).allTextContents()).map((t) => /\\ce\{([^}]*)\}/.exec(t.replace(/\s+/g, ''))?.[1] ?? t)
+    const index = texts.findIndex(test)
+    expect(index, texts.join(' | ')).toBeGreaterThanOrEqual(0)
+    await answers(page).nth(index).click()
+  }
+  // C und H: 4 CO2 und 5 H2O
+  await pick((t) => t === '4CO2+5H2O')
+  await page.getByRole('button', { name: 'Weiter' }).click()
+  // absichtlich nicht halbiert: 13 O2
+  await pick((t) => t === '13O2')
+  await page.getByRole('button', { name: 'Warum ist das falsch?' }).click()
+  await expect(page.locator('[aria-live="polite"]')).toContainText('zwei Sauerstoffatome')
+  await pick((t) => t === '13/2O2')
+  await expectCleanPage(page, 'Bruch vor O2')
+  await page.getByRole('button', { name: 'Weiter' }).click()
+  await pick((t) => t === '2C4H10+13O2->8CO2+10H2O')
+  await page.getByRole('button', { name: 'Ergebnis ansehen' }).click()
+  await expectCleanPage(page, 'Ergebnis Verbrennung')
+
+  await page.goto('./#/karten/chem-gleichungen')
+  await expect(page.getByRole('link', { name: /Vollständige Verbrennung/ })).toBeVisible()
+  await expectCleanPage(page, 'Lernkarten Gleichungen')
   expect(errors).toEqual([])
 })
