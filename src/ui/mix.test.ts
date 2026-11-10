@@ -60,6 +60,8 @@ function setup(seed: string, parts: Readonly<Record<string, ReadonlySet<string>>
     if (!picked) return null
     if (picked.newRound) startNewRound(picked.course, level, picked.nos, store)
     const decoded = decodeSeed(picked.seed)
+    // Rechnungen (ab S2) kommen dazwischen; sie zählen beim Thema, aber nicht in seiner Runde
+    if (decoded?.kind === 'generated') return { ...picked, no: null }
     if (decoded?.kind !== 'question') throw new Error('keine Frage')
     rememberShown(picked.course, level, decoded.no, store)
     return { ...picked, no: decoded.no }
@@ -96,6 +98,7 @@ describe('Themen mischen: Wahl des Themas', () => {
       let rounds = 0
       for (let i = 0; i < 300; i++) {
         const picked = draw(level)!
+        if (picked.no === null) continue
         const seen = round[picked.course]
         if (picked.newRound) {
           // neue Runde erst, wenn alle Fragen des Themas dran waren, mit den Nummern seiner Auswahl
@@ -146,7 +149,7 @@ describe('Themen mischen: Wahl des Themas', () => {
     const random = seeded('durch-zufall')
     const picked = Array.from({ length: 50 }, () => pickMixed(input(1, undefined, random))!)
     expect(picked.some((p) => p.course === ATOMBAU)).toBe(true)
-    for (const p of picked.filter((p) => p.course === ATOMBAU)) {
+    for (const p of picked.filter((p) => p.course === ATOMBAU && decodeSeed(p.seed)?.kind === 'question')) {
       expect(p.newRound).toBe(true)
       expect(p.nos).toEqual(nosA)
     }
@@ -179,7 +182,7 @@ describe('Themen mischen: Wahl des Themas', () => {
       const picked = draw(2, [atombau])!
       expect(modelle).toContain(picked.no)
       expect(picked.newRound).toBe(false)
-      seen.add(picked.no)
+      seen.add(picked.no!)
     }
     expect(seen.size).toBe(modelle.length)
     const again = draw(2, [atombau])!
@@ -208,7 +211,7 @@ describe('Themen mischen: Wahl des Themas', () => {
     }
     // Atombau ganz durch: Mathe zählt weiter 1, Atombau mit allen Fragen (neue Runde)
     const { input: doneInput, draw } = setup('mathe-durch')
-    for (let i = 0; i < levelCount(topic.bank, 1); i++) draw(1, [atombau])
+    for (let done = 0; done < levelCount(topic.bank, 1); ) if (draw(1, [atombau])!.no !== null) done++
     const done = { ...doneInput(1, [atombau, fractions]), engineOf: (course: string) => (course === FRACTIONS ? math : topicEngine(topic)) }
     expect(mixWeights(done)).toEqual([
       { course: ATOMBAU, weight: levelCount(topic.bank, 1) },

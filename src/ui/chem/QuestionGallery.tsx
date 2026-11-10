@@ -8,10 +8,12 @@ import { RichText } from '../RichText.tsx'
 import { cardHref } from '../cards/cardRoute.ts'
 import { type Course, type CoursePart, courseById, levelName } from '../catalog.ts'
 import { galleryHref, taskHref } from '../routes.ts'
+import { CalcGallery } from './CalcGallery.tsx'
 
 // Testseite „Fragen durchsehen" eines Chemie-Themas (#/galerie/chem-atombau), erst bei Bedarf
 // geladen: je Stufe alle Fragen mit Nummer, richtiger Antwort, allen falschen Antworten samt
-// Denkfehler und „Warum ist das falsch?", Tipp, Erklärung, Karten, Fundstelle und Unterthema; oben die
+// Denkfehler und „Warum ist das falsch?", Tipp, Erklärung, Karten, Fundstelle und Unterthema, danach die
+// Rechnungen (CalcGallery.tsx); oben die
 // Zahl der Fragen je Unterthema und Stufe (so lässt sich die Zuordnung prüfen), unten alle Denkfehler
 // des Themas. So lassen sich die Fragen vor dem Üben in Ruhe prüfen.
 
@@ -64,6 +66,8 @@ export default function QuestionGallery({ course: id }: { course: string }) {
             </section>
           )
         })}
+
+      <CalcGallery course={id} levels={levels.map((l) => l.level)} />
 
       {topic && (
         <section aria-labelledby="misconceptions" className="space-y-4 border-t border-zinc-100 pt-8">

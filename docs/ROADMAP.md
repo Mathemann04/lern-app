@@ -62,7 +62,7 @@ feste Regeln: [CHEMIE.md](CHEMIE.md)
 - Sprint bis Teil 1 der Klausur (um den 24.11.2026):
   - [x] S1. Fach und Atombau-Fragen (Säure-Base und Redox als „kommt bald“)
   - [x] S1b. Ankreuzen: Unterthemen je Thema, Kachel „Themen mischen“
-  - [ ] S2. Erste Rechnungen (Protonen, Neutronen, Elektronen; Energie des Lichts)
+  - [x] S2. Erste Rechnungen (Protonen, Neutronen, Elektronen; Energie des Lichts)
   - [ ] S3. Molmasse, Stoffmenge, Reaktionsgleichungen
   - [ ] S4. Umsatz, Gase und Lösungen, Klausuraufgabe 4 üben
   - [ ] S5. Bindungen (auch Metallbindung und Hybridisierung)

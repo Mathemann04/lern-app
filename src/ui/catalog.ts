@@ -355,7 +355,7 @@ export const SUBJECTS: readonly Subject[] = [
             cards: 'chem-atombau',
             levels: atombauLevels,
             free: false,
-            focus: false,
+            focus: true,
             parts: atombauParts,
           },
           comingSoon('chem-elektronen', 'Elektronen', 'Quantenzahlen, Orbitale und Elektronenkonfiguration', 'orbitals'),

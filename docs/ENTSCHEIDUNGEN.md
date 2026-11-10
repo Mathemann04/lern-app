@@ -530,3 +530,12 @@ Neue Entscheidungen unten anfügen.
   Kachel „Themen mischen“ unter „Chemie 1“ mischt die angekreuzten Themen (gewichtet
   nach der Zahl ihrer Fragen, Runden je Thema), „Weitermachen“ setzt eine Mischung fort.
   Ab S2 bringt jeder Schritt seine Unterthemen mit.
+- 10.11.2026: M4 S2 fertig. Elemente-Tabelle (Z 1 bis 56, Pt, Au, Hg, Pb, Bi) zuerst
+  nur mit den Spalten, die Rechnungen jetzt brauchen (Symbol, Name, Molmasse, Isotope,
+  Ionenladungen); weitere Spalten kommen mit S5 und S6, jede mit Quelle. Rechnungen
+  „Protonen, Neutronen, Elektronen“ (alle drei Stufen) und „Energie des Lichts“
+  (Vertiefung), geführt, mit Lernkarten und „Gezielt üben“ für Rechen- und Denkfehler.
+  Zwei Rechenfehler mehr als im Plan, weil sie in Tabellen mit Lücken typisch sind:
+  Elektronen statt Protonen gezählt, Elektronen zur Massenzahl gezählt. Zahlen werden
+  exakt gerechnet und auf drei gültige Ziffern ohne Nullen am Ende gezeigt. Derselbe
+  Stoff kommt nie zweimal hintereinander. Der freie Modus der Rechnungen kommt mit S8.

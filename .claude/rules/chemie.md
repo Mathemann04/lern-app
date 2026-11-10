@@ -43,3 +43,23 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   Inhalten (in eigenen Worten, Wortvergleich mit den Skripten außerhalb des
   Repos). mhchem (`\ce`, `\pu`) fest in `renderFormula.ts` und
   `expr/latexChecks.ts`.
+- Rechnungen (ab S2, Plan M4 Teil B „Chemie-Engine"): `src/engine/chem/elements.ts`
+  (Tabelle Z 1 bis 56 sowie Pt, Au, Hg, Pb, Bi: Symbol, Name, Molmasse als Text
+  mit einer Nachkommastelle, Isotope für Aufgaben, typische Ionenladungen;
+  weitere Spalten kommen mit S5/S6, Gegenprobe in `elements.test.ts`),
+  `errorRules.ts` (Rechenfehler `chem-…` mit Name, Katalogformel und „Warum ist
+  das falsch?", in `errorCatalog.ts` beim Thema), `generators/` (`shared.ts`
+  Grundform `ChemGenerator` mit Unterthema `part`, Anteil je Stufe `weights`,
+  möglichen Fehlern `errors`; `stepChoices`: richtige und bis zu drei falsche
+  Antworten, gleiche Werte einmal, `focus` sicher dabei; `index.ts` Nummer →
+  Rechenart nach Anteil und Aufgabe, `calcForm` mit „@Stoff": `pickFresh` in
+  `tasks/variety.ts` nimmt denselben Stoff nicht zweimal hintereinander;
+  `particles.ts` Protonen, Neutronen, Elektronen aus Kernsymbol oder Tabelle
+  mit Lücken, Klausurniveau zwei Teilchen; `light.ts` Energie, Frequenz,
+  Wellenlänge mit 13 Lichtquellen, `lightValues` exakt), `focus.ts`
+  (gezieltes Üben: Frage mit dem Denkfehler oder Rechnung mit dem Rechenfehler,
+  über `practice.ts`). `engine.ts`: `nextSeed` zieht mit Anteil `CALC_SHARE`
+  (35 %) eine Rechnung, wo Fragen und Rechnungen der Auswahl da sind; Runden
+  zählen nur Fragen. Zahlen: `src/engine/quantity/numberDe.ts` (exakt gerundet
+  auf gültige Ziffern, ohne Nullen am Ende, Dezimalkomma, „· 10ⁿ"). Galerie:
+  `src/ui/chem/CalcGallery.tsx` (Beispiele je Stufe, Abwechslung, Rechenfehler).

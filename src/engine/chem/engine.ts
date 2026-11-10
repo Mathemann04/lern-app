@@ -1,27 +1,31 @@
 import type { FreeTask } from '../check/freeTask.ts'
 import type { GuidedTaskBase } from '../guided/types.ts'
 import { planQuestion } from '../quiz/plan.ts'
-import { VARIANTS, decodeSeed, questionSeed } from '../quiz/numbers.ts'
+import { GENERATED_MAX, GENERATED_MIN, VARIANTS, decodeSeed, questionSeed } from '../quiz/numbers.ts'
 import type { Question } from '../quiz/types.ts'
 import { LEVELS, type Level, type TaskRef } from '../tasks/taskNumber.ts'
 import { type ChemTopic, chemTopic } from './banks.ts'
+import { calcForm, generatedCalc, generatorOf, generatorsOf } from './generators/index.ts'
 
 // Engine eines Chemie-Themas für den geführten Modus (dieselbe Form wie die Mathe-Engines in
-// ui/courseEngines.ts). In S1 gibt es nur Wissensfragen: Die Nummer einer Aufgabe nennt die Frage und
-// ihre Fassung (quiz/numbers.ts); erzeugte Rechnungen kommen ab S2 dazu.
-// Unterthemen (S1b): Jede Frage gehört zu einem Unterthema (part, Ids aus parts des Themas in
-// ui/catalog.ts); nextSeed und questionNos wählen nur unter den angekreuzten. Ab S2 bekommt auch jeder
-// Erzeuger von Rechnungen ein Unterthema und zählt hier mit.
+// ui/courseEngines.ts). Die Nummer einer Aufgabe nennt eine Wissensfrage und ihre Fassung oder eine
+// erzeugte Rechnung (quiz/numbers.ts, Rechnungen in generators/).
+// Unterthemen (S1b): Jede Frage und jede Rechenart gehört zu einem Unterthema (part, Ids aus parts des
+// Themas in ui/catalog.ts); nextSeed und questionNos wählen nur unter den angekreuzten.
+
+// Anteil der Rechnungen an neuen Aufgaben, wenn eine Stufe (in der Auswahl) Fragen und Rechnungen hat
+export const CALC_SHARE = 0.35
 
 export type ChemCourseEngine = {
   planGuidedTask(ref: TaskRef, focus?: string): GuidedTaskBase
   prepareFree(ref: TaskRef): FreeTask
   // Form für die Abwechslung: Fragen zum selben Fakt zählen als dieselbe Form
   formOf(ref: TaskRef): string
-  // zufällige Nummer einer Frage dieser Stufe in zufälliger Fassung. shown: Nummern der Fragen, die in
+  // zufällige Nummer einer Frage dieser Stufe in zufälliger Fassung oder einer Rechnung (Anteil
+  // CALC_SHARE). shown: Nummern der Fragen, die in
   // der laufenden Runde schon dran waren (state/questionRounds.ts); gewählt wird nur unter den übrigen,
   // sind alle durch, wieder unter allen (neue Runde). parts: erlaubte Unterthemen (ohne Angabe alle);
-  // gibt es dazu in der Stufe keine Frage, gelten alle Fragen der Stufe (nie ein Absturz)
+  // gibt es dazu in der Stufe weder Frage noch Rechnung, gelten alle der Stufe (nie ein Absturz)
   nextSeed(level: Level, shown?: ReadonlySet<number>, parts?: ReadonlySet<string>): number
   // Nummern der Fragen, unter denen nextSeed mit diesen Unterthemen wählt (dieselbe Rückfall-Regel), in
   // der Reihenfolge der Sammlung: für die Runde (nur sie beginnen von vorn) und für die Mischung; leer,
@@ -62,8 +66,28 @@ export function topicEngine({ bank, misconceptions }: ChemTopic, random: () => n
     return chosen.length > 0 ? chosen : inLevel
   }
 
+  const isGenerated = (seed: number) => decodeSeed(seed)?.kind === 'generated'
+
+  // Rechenarten der Stufe mit erlaubtem Unterthema
+  const generatorsIn = (level: Level, parts?: ReadonlySet<string>) => generatorsOf(course, level).filter((g) => !parts || parts.has(g.part))
+
+  // Nummer einer Rechnung, deren Rechenart erlaubt ist
+  const randomCalcSeed = () => GENERATED_MIN + Math.floor(random() * (GENERATED_MAX - GENERATED_MIN + 1))
+  function calcSeed(level: Level, kinds: ReadonlySet<string>): number {
+    for (let attempt = 0; attempt < 200; attempt++) {
+      const seed = randomCalcSeed()
+      if (kinds.has(generatorOf(course, { level, seed })?.kind ?? '')) return seed
+    }
+    return randomCalcSeed()
+  }
+
   return {
     planGuidedTask(ref, focus) {
+      if (isGenerated(ref.seed)) {
+        const calc = generatedCalc(course, ref, focus)
+        if (!calc) throw new Error(`Aufgabe ${ref.level}-${ref.seed} gibt es im Thema ${course} nicht`)
+        return calc.task
+      }
       const found = questionOf(ref.seed)
       if (!found) throw new Error(`Aufgabe ${ref.level}-${ref.seed} gibt es im Thema ${course} nicht`)
       return planQuestion(found.question, misconceptions, ref, found.variant, focus)
@@ -72,11 +96,24 @@ export function topicEngine({ bank, misconceptions }: ChemTopic, random: () => n
       throw new Error(`Das Thema ${course} hat noch keinen freien Modus`)
     },
     formOf(ref) {
+      if (isGenerated(ref.seed)) {
+        const calc = generatedCalc(course, ref)
+        return calc ? calcForm(calc) : 'c:?'
+      }
       const found = questionOf(ref.seed)
       return found ? `q:${found.question.fact}` : 'q:?'
     },
     nextSeed(level, shown, parts) {
-      const allowed = candidatesOf(level, parts)
+      // Auswahl: Fragen und Rechenarten der angekreuzten Unterthemen; gibt es davon keine, alle der Stufe
+      let questions: readonly Question[] = bank.questions.filter((q) => q.level === level && !retired.has(q.no) && (!parts || parts.has(q.part)))
+      let generators = generatorsIn(level, parts)
+      if (questions.length === 0 && generators.length === 0) {
+        questions = candidatesOf(level)
+        generators = generatorsIn(level)
+      }
+      const calc = generators.length > 0 && (questions.length === 0 || random() < CALC_SHARE)
+      if (calc) return calcSeed(level, new Set(generators.map((g) => g.kind)))
+      const allowed = questions
       if (allowed.length === 0) throw new Error(`Keine Fragen in Stufe ${level} des Themas ${course}`)
       // Keine Frage doppelt, bevor alle (der Auswahl) dran waren
       const unseen = shown ? allowed.filter((q) => !shown.has(q.no)) : allowed
@@ -87,6 +124,7 @@ export function topicEngine({ bank, misconceptions }: ChemTopic, random: () => n
       return candidatesOf(level, parts).map((q) => q.no)
     },
     resolve(ref) {
+      if (isGenerated(ref.seed)) return generatorOf(course, ref) ? ref.level : null
       const level = questionOf(ref.seed)?.question.level
       return LEVELS.find((l) => l === level) ?? null
     },

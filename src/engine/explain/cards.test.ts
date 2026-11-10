@@ -2,6 +2,10 @@ import { describe, expect, it } from 'vitest'
 import { numericImplicitDerivative } from '../check/curve.ts'
 import { numericDerivative } from '../check/numeric.ts'
 import { chemTopic } from '../chem/banks.ts'
+import { CHEM_ERROR_RULES } from '../chem/errorRules.ts'
+import { findChemTaskWithError } from '../chem/focus.ts'
+import { lightValues } from '../chem/generators/light.ts'
+import { formatLatex } from '../quantity/numberDe.ts'
 import { ERROR_RULES } from '../derive/errorRules.ts'
 import { ERRORS_BY_COURSE } from '../errorCatalog.ts'
 import { allNodes, derive } from '../derive/derive.ts'
@@ -338,6 +342,26 @@ describe('Lernkarten: Chemie', () => {
       const used = new Set(bank.questions.flatMap((q) => q.wrong.map((w) => w.misconception)))
       expect([...used].filter((id) => !shown.has(id)), topicId).toEqual([])
     }
+  })
+
+  it('zeigt jeden Rechenfehler auf einer Karte des Themas, und jeder lässt sich gezielt üben (ab S2)', () => {
+    for (const rule of CHEM_ERROR_RULES) {
+      const shown = cardsInTopic(rule.course).flatMap((c) => c.errors)
+      expect(shown, rule.id).toContain(rule.id)
+      const found = findChemTaskWithError(rule.course, rule.id, [1, 2, 3], createRng(rule.id))
+      expect(found, rule.id).not.toBeNull()
+    }
+    // auch jeder Denkfehler auf einer Karte führt zu einer Frage
+    for (const card of CHEM_CARDS) {
+      for (const id of card.errors.filter((e) => e.startsWith('chem-mis-'))) expect(findChemTaskWithError(card.topic, id, [1, 2, 3], createRng(id)), id).not.toBeNull()
+    }
+  })
+
+  it('rechnet die Zahlen der Karte „Energie des Lichts" wie die Engine', () => {
+    const card = cardById('atombau-licht')!
+    const text = card.examples.map((e) => (isChemExample(e) ? e.lines.map((l) => l.latex ?? '').join(' ') : '')).join(' ')
+    expect(text).toContain(formatLatex(lightValues('energy', 500).correct))
+    expect(card.errors).toContain('chem-light-nm')
   })
 
   it('lässt Text-Beispiele beim Ausschließen von Aufgabenteilen stehen', () => {

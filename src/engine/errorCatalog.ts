@@ -1,3 +1,4 @@
+import { CHEM_ERROR_RULES } from './chem/errorRules.ts'
 import { MISCONCEPTIONS_BY_COURSE } from './chem/misconceptions/index.ts'
 import { ERROR_RULES } from './derive/errorRules.ts'
 import { FRACTION_ERROR_RULES } from './fraction/errorRules.ts'
@@ -5,7 +6,7 @@ import { REARRANGE_ERROR_RULES } from './rearrange/errorRules.ts'
 
 // Typische Fehler aller Themen, mit Namen und Beispiel (für Fortschritt, Lernkarten und gezieltes
 // Üben). Die Ids sind über alle Themen eindeutig (Brüche mit der Vorsilbe „frac-", Umstellen mit
-// „eq-", Denkfehler bei Wissensfragen mit „chem-mis-"). Beim Umstellen kommen die Fehler beim
+// „eq-", Denkfehler bei Wissensfragen mit „chem-mis-", Rechenfehler in Chemie mit „chem-"). Beim Umstellen kommen die Fehler beim
 // Zusammenfassen zu einem Bruch aus „Brüche" dazu.
 
 export type NamedError = {
@@ -23,8 +24,15 @@ export const ERRORS_BY_COURSE: Readonly<Record<string, readonly NamedError[]>> =
   ableiten: ERROR_RULES,
   brueche: FRACTION_ERROR_RULES,
   umstellen: [...REARRANGE_ERROR_RULES, ...FRACTION_ERROR_RULES.filter((r) => r.step === 'combine' || r.step === 'expand')],
+  // Chemie: Denkfehler der Wissensfragen (als Aussage) und Rechenfehler (als Formel)
   ...Object.fromEntries(
-    Object.entries(MISCONCEPTIONS_BY_COURSE).map(([course, list]) => [course, list.map(({ id, name, wrongText }) => ({ id, name, wrongText }))]),
+    Object.entries(MISCONCEPTIONS_BY_COURSE).map(([course, list]) => [
+      course,
+      [
+        ...list.map(({ id, name, wrongText }) => ({ id, name, wrongText })),
+        ...CHEM_ERROR_RULES.filter((r) => r.course === course).map(({ id, name, wrongFormula }) => ({ id, name, wrongFormula })),
+      ],
+    ]),
   ),
 }
 
