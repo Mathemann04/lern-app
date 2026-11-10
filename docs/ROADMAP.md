@@ -10,7 +10,7 @@ Stand: 10.11.2026
 | M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten, Vektoren, Additionstheoremen) | fertig |
 | M4 | **Chemie 1**: neues Fach mit Wissensfragen (Auswahl, Zuordnen, Ordnen) und Rechnungen zu allen Themen der Vorlesung, drei Stufen (Grundlagen, Vertiefung, Klausurniveau), Lernkarten, Wiederholung, Probeklausur wie die echte (45 min, 50 Punkte) | in Arbeit: Plan freigegeben ([PLAN-M4.md](PLAN-M4.md)), Klausur-Sprint bis Teil 1 der Klausur (um den 24.11.2026) |
 | M5 | **Werkstoffkunde**: eigenes Fach nach demselben Muster wie Chemie | offen (direkt nach Chemie; die Skripte kommen vom Nutzer) |
-| M6 | **Themen einzeln üben**: was heute nur in Stufe 5 von „Brüche" und „Gleichungen umstellen" steckt, als eigene Themen mit leichtem Einstieg (komplexe Zahlen, Determinanten, Integrale und Partialbrüche, Summen, Reihen und Grenzwerte, Differentialgleichungen, Winkelfunktionen mit Additionstheoremen, Hyperbelfunktionen); die Rechenteile gibt es schon | offen |
+| M6 | **Themen einzeln üben**: was heute nur in Stufe 5 von „Brüche" und „Gleichungen umstellen" steckt, als eigene Themen mit leichtem Einstieg (komplexe Zahlen, Determinanten, Integrale und Partialbrüche, Summen, Reihen und Grenzwerte, Differentialgleichungen, Winkelfunktionen mit Additionstheoremen, Hyperbelfunktionen); die Rechenteile gibt es schon. Vorschlag (Idee des Nutzers, 10.11.2026): statt vieler Einzelthemen im übergeordneten Thema (z. B. „Gleichungen umstellen“) die Themen per Häkchen wählen (e-Funktion, Vektoren, Determinanten …) und die Schwierigkeit (wie verschachtelt) getrennt davon; dafür Schlagworte je Baustein und leichte Bausteine je Thema | offen |
 | M7 | **Vektoren** als eigenes Gebiet: Rechnen mit Vektoren, Länge, Skalarprodukt, Winkel, Kreuzprodukt, Projektion (ob Geraden und Ebenen dazukommen, klären wir beim Plan) | offen |
 | M8 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
 | M9 | weitere Themen aus Mathematik MB1, „Ableiten" nachschärfen | offen |
@@ -305,7 +305,7 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   Substitution, $pq$-Formel). Mathe und Physik getrennt: M3 heißt
   „Gleichungen umstellen" (reine Mathematik mit $x$, $y$, $a$, $b$, $c$,
   $k$); Formeln mit Zeichen der Physik und „Aufgaben lösen" (Formel wählen,
-  umstellen, Werte mit Einheiten einsetzen) kommen in M6 und nutzen
+  umstellen, Werte mit Einheiten einsetzen) kommen in M6 (heute M10) und nutzen
   dieselbe Engine.
 - 30.10.2026: Plan M3, 3. Fassung (Wunsch des Nutzers: Stufen 4 und 5
   noch schwerer, „fast alle Themengebiete"): Stufe 3 mit Wurzeln, Stufe 4
