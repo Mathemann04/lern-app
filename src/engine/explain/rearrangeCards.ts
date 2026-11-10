@@ -1,6 +1,6 @@
-import { type Expr, PI, add, cos, div, eq, exp, fn, ln, mul, neg, num, pow, sin, sqrt, sub, variable } from '../expr/types.ts'
+import { type Expr, IMAG, PI, add, cos, div, eq, exp, fn, ln, mul, neg, num, pow, sin, sqrt, sub, variable } from '../expr/types.ts'
 import type { Condition, RearrangeTask } from '../rearrange/task.ts'
-import { derivativeOf, detOf, integralOf, limitOf, odeOf, seriesOf, sumOf } from '../rearrange/tools/tool.ts'
+import { absOf, angleOf, argOf, derivativeOf, detOf, dotOf, integralOf, lengthOf, limitOf, odeOf, seriesOf, sumOf } from '../rearrange/tools/tool.ts'
 import type { Card } from './cards.ts'
 
 // Lernkarten im Ordner „Gleichungen umstellen". Die Beispiele sind Aufgaben der Umstell-Engine; den
@@ -26,6 +26,8 @@ export const REARRANGE_CARD_IDS = {
   limit: 'rearrange-limit',
   ode: 'rearrange-ode',
   det: 'rearrange-det',
+  complex: 'rearrange-complex',
+  vector: 'rearrange-vector',
 } as const
 
 const [a, b, c, d, k, t, x, y] = ['a', 'b', 'c', 'd', 'k', 't', 'x', 'y'].map(variable)
@@ -373,5 +375,50 @@ export const REARRANGE_CARD_LIST: readonly Card[] = [
       task(detOf([[n(1), x, sq(x)], [n(1), n(0), n(0)], [n(1), a, sq(a)]]), y),
     ],
     errors: ['eq-det-plus', 'eq-det-swapped', 'eq-det-rows', 'eq-det-main', 'eq-det-checkerboard', 'eq-det-entry'],
+  },
+  {
+    id: REARRANGE_CARD_IDS.complex,
+    topic: 'umstellen',
+    title: 'Betrag und Winkel komplexer Zahlen',
+    level: 5,
+    rules: [],
+    formulas: [
+      '\\lvert p + q\\mathrm{i}\\rvert = \\sqrt{p^2 + q^2}',
+      '\\arg(p + q\\mathrm{i}) = \\arctan\\frac{q}{p} \\quad (p > 0)',
+      '\\lvert z \\cdot w\\rvert = \\lvert z\\rvert \\cdot \\lvert w\\rvert, \\quad \\left\\lvert\\frac{z}{w}\\right\\rvert = \\frac{\\lvert z\\rvert}{\\lvert w\\rvert}',
+      '\\arg(z \\cdot w) = \\arg z + \\arg w, \\quad \\arg\\frac{z}{w} = \\arg z - \\arg w',
+      '\\arg\\left(z^2\\right) = 2\\arg z, \\quad e^{\\mathrm{i}x} = \\cos x + \\mathrm{i}\\sin x',
+    ],
+    memo: 'Der Betrag ist die Länge des Pfeils: Wurzel aus Realteil zum Quadrat plus Imaginärteil zum Quadrat, beide ohne $\\mathrm{i}$. Der Winkel ist $\\arctan\\frac{q}{p}$, wenn der Realteil $p$ positiv ist. Beim Malnehmen werden die Beträge malgenommen und die Winkel addiert, beim Teilen geteilt und abgezogen.',
+    note: 'Ist der Realteil nicht positiv, kommt zum $\\arctan$ noch $\\pm\\pi$ dazu; der Winkel liegt zwischen $-\\pi$ und $\\pi$. Wichtige Winkel: $\\arg(1 + \\mathrm{i}) = \\frac{\\pi}{4}$, $\\arg\\mathrm{i} = \\frac{\\pi}{2}$, $\\arg\\left(\\sqrt{3} + \\mathrm{i}\\right) = \\frac{\\pi}{6}$. Mit $z = re^{\\mathrm{i}\\varphi}$ ist $z^2 = r^2e^{2\\mathrm{i}\\varphi}$: Betrag quadriert, Winkel verdoppelt.',
+    when: 'Wenn in der Gleichung $\\lvert z\\rvert$ oder $\\arg z$ steht: erst Realteil und Imaginärteil ablesen und ausrechnen, dann umstellen.',
+    examples: [
+      task(absOf(div(add(x, mul(a, IMAG)), sub(x, mul(b, IMAG)))), y),
+      task(argOf(pow(add(x, mul(a, IMAG)), n(2))), y),
+      task(absOf(sub(mul(b, exp(mul(IMAG, x))), a)), y, 'x', [{ lhs: x, rel: '<', rhs: PI }]),
+    ],
+    errors: ['eq-abs-termwise', 'eq-abs-root', 'eq-abs-imag-squared', 'eq-arg-power', 'eq-arg-swapped', 'eq-arg-arctan-forgotten', 'eq-arg-quotient-sign'],
+  },
+  {
+    id: REARRANGE_CARD_IDS.vector,
+    topic: 'umstellen',
+    title: 'Vektoren: Länge, Skalarprodukt, Winkel',
+    level: 5,
+    rules: [],
+    formulas: [
+      '\\lvert\\vec{u}\\rvert = \\sqrt{u_1^2 + u_2^2 + u_3^2}',
+      '\\vec{u} \\cdot \\vec{v} = u_1v_1 + u_2v_2 + u_3v_3',
+      '\\cos\\varphi = \\frac{\\vec{u} \\cdot \\vec{v}}{\\lvert\\vec{u}\\rvert \\cdot \\lvert\\vec{v}\\rvert}, \\quad 0 \\le \\varphi \\le \\pi',
+      '\\vec{u} \\perp \\vec{v} \\iff \\vec{u} \\cdot \\vec{v} = 0',
+    ],
+    memo: 'Länge: Wurzel aus der Summe der Quadrate der Einträge. Skalarprodukt: Einträge paarweise malnehmen und addieren. Winkel: Skalarprodukt durch beide Längen ist der Kosinus, der Winkel der $\\arccos$ davon. Senkrecht heißt: Skalarprodukt $0$.',
+    note: 'Ein Minus fällt beim Quadrieren weg: $(-a)^2 = a^2$. Sind beide Vektoren gleich lang, ist $\\lvert\\vec{u}\\rvert \\cdot \\lvert\\vec{v}\\rvert = \\lvert\\vec{u}\\rvert^2$, ohne Wurzel; $\\begin{pmatrix} 1 \\\\ 0 \\\\ 0 \\end{pmatrix}$ hat die Länge $1$. Bei einem spitzen Winkel $\\varphi < \\frac{\\pi}{2}$ hilft beim Umstellen $1 - \\cos^2\\varphi = \\sin^2\\varphi$ und am Ende $\\tan\\varphi = \\frac{\\sin\\varphi}{\\cos\\varphi}$.',
+    when: 'Wenn in der Gleichung eine Länge, ein Skalarprodukt oder ein Winkel zwischen Vektoren steht: erst ausrechnen, dann umstellen.',
+    examples: [
+      task(angleOf([x, a, b], [n(1), n(0), n(0)]), y, 'x', [{ lhs: y, rel: '<', rhs: div(PI, n(2)) }]),
+      task(lengthOf([x, add(x, a), b]), y),
+      task(dotOf([x, a], [add(x, b), neg(c)]), y),
+    ],
+    errors: ['eq-vec-not-divided', 'eq-vec-one-length', 'eq-vec-sine', 'eq-vec-dot-sign', 'eq-vec-dot-cross', 'eq-abs-root', 'eq-abs-termwise'],
   },
 ]

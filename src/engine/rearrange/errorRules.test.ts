@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { equationToLatex, toLatex } from '../expr/print.ts'
-import { type Expr, PI, add, div, eq, exp, mul, neg, num, pow, sin, sub, variable } from '../expr/types.ts'
+import { type Expr, IMAG, PI, add, div, eq, exp, mul, neg, num, pow, sin, sub, variable } from '../expr/types.ts'
 import { parseLatex } from '../parse/latex.ts'
 import { REARRANGE_ERROR_RULES, rearrangeWrongAnswers } from './errorRules.ts'
 import { solveEquation, solveTask } from './isolate.ts'
 import type { Condition } from './task.ts'
-import { derivativeOf, detOf, integralOf, limitOf, odeOf, seriesOf, sumOf } from './tools/tool.ts'
+import { absOf, angleOf, argOf, derivativeOf, detOf, dotOf, integralOf, limitOf, odeOf, seriesOf, sumOf } from './tools/tool.ts'
 
 const p = (latex: string): Expr => {
   const r = parseLatex(latex)
@@ -77,6 +77,10 @@ const columnDet = detOf([
   [b, num(1), num(2)],
   [num(0), x, a],
 ])
+// Schritt 8b: x + a\mathrm{i}, gespiegelte Vektoren (x, a) und (x, -a)
+const xai = add(x, mul(a, IMAG))
+const mirror = angleOf([x, a], [x, neg(a)])
+const planDot = dotOf([x, a], [add(x, b), neg(variable('c'))])
 
 const TOOL_CATALOG: Array<{ id: string; lhs: Expr; target?: string; conditions?: Condition[]; after: string }> = [
   {
@@ -121,6 +125,19 @@ const TOOL_CATALOG: Array<{ id: string; lhs: Expr; target?: string; conditions?:
   { id: 'eq-det-main', lhs: planDet, after: 'be^{x} = y' },
   { id: 'eq-det-checkerboard', lhs: columnDet, after: 'b\\det\\begin{pmatrix} a & x \\\\ x & a \\end{pmatrix} = y' },
   { id: 'eq-det-entry', lhs: columnDet, after: '-\\det\\begin{pmatrix} a & x \\\\ x & a \\end{pmatrix} = y' },
+  // Schritt 8b: Betrag und Winkel komplexer Zahlen (das Beispiel aus dem Plan), Vektoren
+  { id: 'eq-abs-termwise', lhs: absOf(div(xai, sub(x, mul(b, IMAG)))), after: '\\frac{x + a}{x - b} = y' },
+  { id: 'eq-abs-root', lhs: absOf(div(xai, sub(x, mul(b, IMAG)))), after: '\\frac{x^{2} + a^{2}}{x^{2} + b^{2}} = y' },
+  { id: 'eq-abs-imag-squared', lhs: absOf(xai), after: '\\sqrt{x^{2} - a^{2}} = y' },
+  { id: 'eq-arg-power', lhs: argOf(pow(xai, num(2))), after: '\\arctan\\left(\\frac{a}{x}\\right) = y' },
+  { id: 'eq-arg-swapped', lhs: argOf(pow(xai, num(2))), after: '2\\arctan\\left(\\frac{x}{a}\\right) = y' },
+  { id: 'eq-arg-arctan-forgotten', lhs: argOf(pow(xai, num(2))), after: '\\frac{2a}{x} = y' },
+  { id: 'eq-arg-quotient-sign', lhs: argOf(div(xai, add(num(1), IMAG))), after: '\\arctan\\left(\\frac{a}{x}\\right) + \\frac{\\pi}{4} = y' },
+  { id: 'eq-vec-not-divided', lhs: mirror, after: '\\arccos(x^{2} - a^{2}) = y' },
+  { id: 'eq-vec-one-length', lhs: mirror, after: '\\arccos\\left(\\frac{x^{2} - a^{2}}{\\sqrt{x^{2} + a^{2}}}\\right) = y' },
+  { id: 'eq-vec-sine', lhs: mirror, after: '\\arcsin\\left(\\frac{x^{2} - a^{2}}{x^{2} + a^{2}}\\right) = y' },
+  { id: 'eq-vec-dot-sign', lhs: planDot, after: 'x(x + b) + ac = y' },
+  { id: 'eq-vec-dot-cross', lhs: planDot, after: 'a(x + b) - cx = y' },
 ]
 
 describe('Katalog der Fehlerregeln', () => {

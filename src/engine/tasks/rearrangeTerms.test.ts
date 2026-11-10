@@ -31,7 +31,7 @@ describe.each(KIT_LEVELS)('Abwechslung Stufe %i', (level) => {
   })
 })
 
-const TOOL_STEPS = new Set(['derive', 'partial', 'antiderivative', 'sumFormula', 'series', 'limit', 'ode', 'det', 'detExpand'])
+const TOOL_STEPS = new Set(['derive', 'partial', 'antiderivative', 'sumFormula', 'series', 'limit', 'ode', 'det', 'detExpand', 'abs', 'arg', 'length', 'dot', 'angle'])
 
 describe('Baukasten der Stufen 1 bis 5', () => {
   const tasks = (level: Level) => Array.from({ length: 200 }, (_, i) => generateRearrangeTask({ level, seed: i + 1 }).task)
@@ -124,7 +124,7 @@ describe('Baukasten der Stufen 1 bis 5', () => {
     expect([...blocks].sort()).toEqual(['fn', 'ohne', 'pow', 'root'])
   })
 
-  it('Stufe 5, Teile 7a bis 8a: in jeder Aufgabe ein Werkzeug, im Mittel mindestens 8 Umformungen', () => {
+  it('Stufe 5, Teile 7a bis 8b: in jeder Aufgabe ein Werkzeug, im Mittel mindestens 8 Umformungen', () => {
     const all = tasks(5)
     const solutions = all.map((t) => solveTask(t)!)
     const lengths = solutions.map((s) => s.steps.length)
@@ -143,7 +143,8 @@ describe('Baukasten der Stufen 1 bis 5', () => {
     // auch zwei Werkzeuge in einer Aufgabe, Werkzeug im Bruch, unter der Wurzel und im \ln, Reihe in
     // einer Ableitung bzw. einem Integral
     const generated = Array.from({ length: 200 }, (_, i) => generateRearrangeTask({ level: 5, seed: i + 1 }))
-    const labels = generated.map((g) => g.label)
+    // seit Teil 8b sind manche Arten aus 7a seltener: die Namen über 400 Nummern
+    const labels = [...generated, ...Array.from({ length: 200 }, (_, i) => generateRearrangeTask({ level: 5, seed: i + 201 }))].map((g) => g.label)
     for (const part of [
       'Integral gleich Ableitung',
       'in einer Summe',
@@ -173,7 +174,13 @@ describe('Baukasten der Stufen 1 bis 5', () => {
     const dets = generated.filter((g) => g.template.id === 'baukasten-5-determinante').length
     expect(dets).toBeGreaterThanOrEqual(10)
     expect(dets).toBeLessThanOrEqual(35)
-    expect(taskLatex(generated[5].task)).toBe('y = \\frac{\\mathrm{d}}{\\mathrm{d}x}\\left(\\frac{x^{2}}{x + a}\\right)')
+    // Teil 8b: 30 % der Nummern, die zu keinem früheren Teil gehören
+    const polar = generated.filter((g) => g.template.id === 'baukasten-5-betrag-winkel').length
+    expect(polar).toBeGreaterThanOrEqual(8)
+    expect(polar).toBeLessThanOrEqual(35)
+    // 5-6 gehört seit Teil 8b zu Betrag und Winkel, die Nummern aus 7a behalten sonst ihre Aufgabe (5-7, 5-17)
+    expect(taskLatex(generated[5].task)).toBe('\\left\\lvert \\frac{(x + a\\mathrm{i})^{2}}{(x - b\\mathrm{i})^{2}} \\right\\rvert = y')
+    expect(taskLatex(generated[16].task)).toBe('m = \\frac{\\mathrm{d}}{\\mathrm{d}x}\\left(\\sqrt{x^{2} + k}\\right)')
     expect(taskLatex(generated[6].task)).toBe('\\frac{\\int_{0}^{x} be^{-3t}\\,\\mathrm{d}t}{ce^{-3x} + d} = g - h')
     expect(taskLatex(generated[119].task)).toBe('m - \\lim_{n \\to \\infty} \\left(\\frac{n}{n + x}\\right)^{3n} = p')
     // die Differentialgleichung steht über der Gleichung, f und g sind keine Buchstaben der Aufgabe

@@ -157,13 +157,14 @@ const rearrangeLevels: LevelPreview[] = [
   {
     level: 5,
     available: true,
-    title: 'Quer durch die Mathematik: erst Ableitung, Integral, Summe, Reihe, Grenzwert, Differentialgleichung oder Determinante ausrechnen, dann umstellen (komplexe Zahlen, Vektoren und Additionstheoreme folgen)',
+    title: 'Quer durch die Mathematik: erst Ableitung, Integral, Summe, Reihe, Grenzwert, Differentialgleichung, Determinante, Betrag oder Winkel ausrechnen, dann umstellen (Additionstheoreme folgen)',
     examples: [
       String.raw`\int_a^x \frac{\mathrm{d}t}{t(t + b)} = y`,
       String.raw`\sum_{k=1}^{\infty} k x^k = y`,
       String.raw`\lim_{n \to \infty}\left(\frac{n + x}{n - x}\right)^n = y`,
       String.raw`\begin{gathered}f'' = k^2 f \\ f(0) = a,\; f'(0) = 0 \\ f(x) = y\end{gathered}`,
       String.raw`\det\begin{pmatrix} e^{x} & e^{-x} \\ a & b \end{pmatrix} = y`,
+      String.raw`\left\lvert \frac{x + a\mathrm{i}}{x - b\mathrm{i}} \right\rvert = y`,
     ],
   },
 ]

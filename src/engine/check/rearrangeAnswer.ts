@@ -328,6 +328,8 @@ const hasExp = (...exprs: readonly Expr[]) =>
 const hasSecondOrderOde = (equation: Equation) => toolsIn(equation).some((v) => v.tool.kind === 'ode' && v.tool.order === 2)
 // zweite Seite mit Winkel-, Hyperbel- und Umkehrfunktionen, wenn eine davon vorkommt
 const hasTrig = (...exprs: readonly Expr[]) => exprs.some((e) => subterms(e).some((s) => s.kind === 'fn' && s.name !== 'ln'))
+// Taste \pi, wenn das Ergebnis \pi enthält (Teil 8b: \frac{a}{\tan\left(y - \frac{\pi}{4}\right)})
+const hasPi = (e: Expr) => subterms(e).some((s) => s.kind === 'const' && s.name === 'pi')
 
 export function prepareRearrangeFree(ref: TaskRef): FreeTask {
   const context = prepareRearrangeCheck(generateRearrangeTask(ref).task, ref.level >= 4)
@@ -339,7 +341,14 @@ export function prepareRearrangeFree(ref: TaskRef): FreeTask {
     answerLabel: `${target} =`,
     inputLabel: 'Dein Ergebnis',
     // bei f'' = k^2 f auch die Seite „Funktionen“: Das Ergebnis lässt sich mit arcosh bzw. arsinh schreiben
-    keyboard: { kind: 'rearrange', letters: context.letters, root: hasRoot(...all), exp: hasExp(...all), trig: hasTrig(...all) || hasSecondOrderOde(equation) },
+    keyboard: {
+      kind: 'rearrange',
+      letters: context.letters,
+      root: hasRoot(...all),
+      exp: hasExp(...all),
+      trig: hasTrig(...all) || hasSecondOrderOde(equation),
+      pi: hasPi(context.solution.result),
+    },
     check: (latex) => rearrangeFreeVerdict(checkRearrangeAnswer(context, latex), target),
   }
 }

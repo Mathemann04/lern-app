@@ -27,6 +27,11 @@ import {
   explainOde,
   explainDet,
   explainExpand,
+  explainAbs,
+  explainArg,
+  explainLength,
+  explainDot,
+  explainAngle,
   expMoves,
   factorMoves,
   logMoves,
@@ -74,6 +79,8 @@ import {
 } from '../rearrange/isolate.ts'
 import { type RearrangeTask, conditionLatex, conditionsText, taskLatex } from '../rearrange/task.ts'
 import { detWorkLatex, expandWork } from '../rearrange/tools/determinant.ts'
+import { polarWork } from '../rearrange/tools/polar.ts'
+import { angleWork, dotWorkLatex, lengthWorkLatex } from '../rearrange/tools/vector.ts'
 import { odeWork } from '../rearrange/tools/ode.ts'
 import { activeTool } from '../rearrange/tools/tool.ts'
 import { type Rng, createRng } from '../random/rng.ts'
@@ -162,7 +169,23 @@ export function planRearrange(task: RearrangeTask, ref: TaskRef, focus?: string)
 
 // Stufe 5: Schritte, die ein Werkzeug ausrechnen (Ableitung, Integral, Summe, Grenzwert). Sie werden nur
 // als „Was kommt heraus?" gefragt, der erste als „Was steht da eigentlich?"
-const TOOL_KINDS = new Set<StepKind | undefined>(['derive', 'partial', 'antiderivative', 'bounds', 'sumFormula', 'series', 'limit', 'ode', 'det', 'detExpand'])
+const TOOL_KINDS = new Set<StepKind | undefined>([
+  'derive',
+  'partial',
+  'antiderivative',
+  'bounds',
+  'sumFormula',
+  'series',
+  'limit',
+  'ode',
+  'det',
+  'detExpand',
+  'abs',
+  'arg',
+  'length',
+  'dot',
+  'angle',
+])
 
 const TOOL_QUESTIONS: Partial<Record<StepKind, string>> = {
   derive: 'Rechne die Ableitung aus: Was kommt heraus?',
@@ -175,6 +198,11 @@ const TOOL_QUESTIONS: Partial<Record<StepKind, string>> = {
   ode: 'Löse die Differentialgleichung mit den Anfangswerten: Was kommt heraus?',
   det: 'Rechne die Determinante aus: Was kommt heraus?',
   detExpand: 'Entwickle nach der Zeile oder Spalte mit zwei Nullen: Was kommt heraus?',
+  abs: 'Rechne den Betrag aus: Was kommt heraus?',
+  arg: 'Rechne den Winkel aus: Was kommt heraus?',
+  length: 'Rechne die Länge des Vektors aus: Was kommt heraus?',
+  dot: 'Rechne das Skalarprodukt aus: Was kommt heraus?',
+  angle: 'Rechne den Winkel zwischen den Vektoren aus: Was kommt heraus?',
 }
 
 // Tipp zur ganzen Aufgabe nach dem ersten Werkzeug-Schritt
@@ -189,6 +217,11 @@ const TASK_TOOL: Partial<Record<StepKind, TaskTool>> = {
   ode: 'ode',
   det: 'det',
   detExpand: 'det',
+  abs: 'complex',
+  arg: 'complex',
+  length: 'vector',
+  dot: 'vector',
+  angle: 'vector',
 }
 
 // --- Weichen: Schritte, bei denen man wissen muss, was als Nächstes kommt ---
@@ -306,6 +339,11 @@ function moveQuestion(step: RearrangeStep, t: string, target: string): MoveQuest
     case 'ode':
     case 'det':
     case 'detExpand':
+    case 'abs':
+    case 'arg':
+    case 'length':
+    case 'dot':
+    case 'angle':
       return null
     case 'add': {
       if (!side || !step.operand) return null
@@ -513,6 +551,11 @@ const RESULT_HINTS: Partial<Record<StepKind, string>> = {
   ode: REARRANGE_HINTS.ode,
   det: REARRANGE_HINTS.det,
   detExpand: REARRANGE_HINTS.detExpand,
+  abs: REARRANGE_HINTS.abs,
+  arg: REARRANGE_HINTS.arg,
+  length: REARRANGE_HINTS.length,
+  dot: REARRANGE_HINTS.dot,
+  angle: REARRANGE_HINTS.angle,
 }
 
 const spuriousWhy = (reason: string): Explanation => ({ detailed: `Diese Lösung ist eine Scheinlösung. ${reason}`, short: reason })
@@ -559,7 +602,7 @@ function resultStep(
     explanation:
       choose && step.operand
         ? explainChoose(toLatex(step.operand), rejectReason(step, t, context), after)
-        : (odeExplanation(step) ?? detExplanation(step) ?? explainResult(step.kind, stepLatex(step.kind, step.before), after)),
+        : (odeExplanation(step) ?? detExplanation(step) ?? polarExplanation(step) ?? explainResult(step.kind, stepLatex(step.kind, step.before), after)),
     established: [after],
     cards: cardsOf(step, t, previous),
   }
@@ -578,6 +621,31 @@ function detExplanation(step: RearrangeStep): Explanation | null {
   }
   const work = expandWork(tool)
   return work ? explainExpand(work.line, work.entry, work.sign, before, after) : null
+}
+
+// Betrag und Winkel komplexer Zahlen, Vektoren (Teil 8b): Real- und Imaginärteil, Quadrate, Produkte der Einträge
+function polarExplanation(step: RearrangeStep): Explanation | null {
+  const tool = activeTool(step.before)?.tool.tool
+  if (!tool || tool.kind !== step.kind) return null
+  const before = stepLatex(step.kind, step.before)
+  const after = stepLatex(step.kind, step.after)
+  switch (tool.kind) {
+    case 'abs':
+    case 'arg': {
+      const work = polarWork(tool)
+      return work && (tool.kind === 'abs' ? explainAbs(work, before, after) : explainArg(work, before, after))
+    }
+    case 'length':
+      return explainLength(lengthWorkLatex(tool.vector), before, after)
+    case 'dot':
+      return explainDot(dotWorkLatex(tool.left, tool.right), before, after)
+    case 'angle': {
+      const work = angleWork(tool)
+      return work && explainAngle(work, before, after)
+    }
+    default:
+      return null
+  }
 }
 
 // Differentialgleichung: die Frage nennt die Funktion (bei f und g in einer Aufgabe wichtig)
@@ -660,6 +728,11 @@ const CARDS_BY_KIND: Record<StepKind, readonly string[]> = {
   ode: [REARRANGE_CARD_IDS.ode],
   det: [REARRANGE_CARD_IDS.det],
   detExpand: [REARRANGE_CARD_IDS.det],
+  abs: [REARRANGE_CARD_IDS.complex],
+  arg: [REARRANGE_CARD_IDS.complex],
+  length: [REARRANGE_CARD_IDS.vector],
+  dot: [REARRANGE_CARD_IDS.vector],
+  angle: [REARRANGE_CARD_IDS.vector],
   finish: [FRACTION_CARD_IDS.add, FRACTION_CARD_IDS.expand],
 }
 

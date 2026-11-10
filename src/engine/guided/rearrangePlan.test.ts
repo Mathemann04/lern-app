@@ -4,8 +4,8 @@ import { parseRichText } from '../explain/richText.ts'
 import { cardById } from '../explain/cards.ts'
 import { latexProblem } from '../expr/latexChecks.ts'
 import { toLatex } from '../expr/print.ts'
-import { type Expr, add, div, eq, exp, mul, neg, num, pow, sub, variable } from '../expr/types.ts'
-import { derivativeOf, detOf, integralOf, limitOf, odeOf, seriesOf, sumOf } from '../rearrange/tools/tool.ts'
+import { type Expr, IMAG, PI, add, div, eq, exp, mul, neg, num, pow, sub, variable } from '../expr/types.ts'
+import { absOf, angleOf, argOf, derivativeOf, detOf, dotOf, integralOf, limitOf, odeOf, seriesOf, sumOf } from '../rearrange/tools/tool.ts'
 import { parseLatex } from '../parse/latex.ts'
 import { REARRANGE_ERROR_RULES } from '../rearrange/errorRules.ts'
 import type { Level } from '../tasks/taskNumber.ts'
@@ -242,6 +242,42 @@ describe('Geführt umstellen: Stufe 5 (Werkzeuge)', () => {
     // die Unterdeterminante danach ohne „Was steht da eigentlich?"
     expect(three.steps[1].title).toBe('Determinante ausrechnen')
     expectRenderable(three.steps[0].explanation.detailed, 'Erklärung')
+  })
+
+  it('Betrag und Winkel (Teil 8b): Real- und Imaginärteil in der Erklärung, Fehler aus den Regeln für Betrag und Winkel', () => {
+    const [a, b, x, y] = ['a', 'b', 'x', 'y'].map(variable)
+    const task = (lhs: Expr, conditions: { lhs: Expr; rel: '<' | '>'; rhs: Expr }[] = []) => planRearrange({ equation: eq(lhs, y), target: 'x', conditions }, { level: 5, seed: 1 })
+    const abs = task(absOf(div(add(x, mul(a, IMAG)), sub(x, mul(b, IMAG)))))
+    const first = abs.steps[0]
+    expect(first.title).toBe('Was steht da eigentlich?')
+    expect(first.question).toBe('Rechne den Betrag aus: Was kommt heraus?')
+    expect(first.choices.find((c) => c.correct)?.content).toBe('$\\sqrt{\\frac{x^{2} + a^{2}}{x^{2} + b^{2}}} = y$')
+    expect(first.choices.map((c) => c.errorRuleId).filter(Boolean).sort()).toEqual(['eq-abs-imag-squared', 'eq-abs-root', 'eq-abs-termwise'])
+    expect(first.explanation.detailed).toContain('Realteil $x$, Imaginärteil $a$')
+    expect(first.explanation.detailed).toContain('Betrag oben durch Betrag unten')
+    expect(first.cards).toEqual(['rearrange-complex'])
+    expect(abs.ruleHint.detailed).toContain('komplexen Zahl')
+    expectRenderable(first.explanation.detailed, 'Erklärung')
+
+    const arg = task(argOf(pow(add(x, mul(a, IMAG)), num(2)))).steps[0]
+    expect(arg.question).toBe('Rechne den Winkel aus: Was kommt heraus?')
+    expect(arg.choices.find((c) => c.correct)?.content).toBe('$2\\arctan\\left(\\frac{a}{x}\\right) = y$')
+    expect(arg.choices.map((c) => c.errorRuleId).filter(Boolean).sort()).toEqual(['eq-arg-arctan-forgotten', 'eq-arg-power', 'eq-arg-swapped'])
+    expect(arg.explanation.detailed).toContain('verdoppelt sich der Winkel')
+
+    const angle = task(angleOf([x, a, b], [num(1), num(0), num(0)]), [{ lhs: y, rel: '<', rhs: div(PI, num(2)) }])
+    expect(angle.steps[0].question).toBe('Rechne den Winkel zwischen den Vektoren aus: Was kommt heraus?')
+    expect(angle.steps[0].choices.find((c) => c.correct)?.content).toBe('$\\arccos\\left(\\frac{x}{\\sqrt{x^{2} + a^{2} + b^{2}}}\\right) = y$')
+    // mit einem Vektor der Länge 1 kein „nur durch eine Länge geteilt“ (es stimmte zufällig)
+    expect(angle.steps[0].choices.map((c) => c.errorRuleId)).not.toContain('eq-vec-one-length')
+    expect(angle.steps[0].explanation.detailed).toContain('Skalarprodukt')
+    expect(angle.steps[0].cards).toEqual(['rearrange-vector'])
+    expect(angle.ruleHint.detailed).toContain('Vektoren')
+    expectRenderable(angle.steps[0].explanation.detailed, 'Erklärung')
+
+    const dot = task(dotOf([x, a], [add(x, b), neg(variable('c'))])).steps[0]
+    expect(dot.choices.map((c) => c.errorRuleId).filter(Boolean).sort()).toEqual(['eq-vec-dot-cross', 'eq-vec-dot-sign'])
+    expect(dot.explanation.detailed).toContain('x \\cdot (x + b) + a \\cdot (-c)')
   })
 })
 

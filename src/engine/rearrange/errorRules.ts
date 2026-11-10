@@ -48,7 +48,23 @@ import {
 import type { RearrangeTask } from './task.ts'
 import { type ToolStepKind, toolMistakes } from './tools/steps.ts'
 
-const TOOL_STEPS = new Set<string>(['derive', 'partial', 'antiderivative', 'bounds', 'sumFormula', 'series', 'limit', 'ode', 'det', 'detExpand'])
+const TOOL_STEPS = new Set<string>([
+  'derive',
+  'partial',
+  'antiderivative',
+  'bounds',
+  'sumFormula',
+  'series',
+  'limit',
+  'ode',
+  'det',
+  'detExpand',
+  'abs',
+  'arg',
+  'length',
+  'dot',
+  'angle',
+])
 // Schritt, der ein Werkzeug der Stufe 5 ausrechnet (Ableitung, Integral, …, Determinante)
 export const isToolStep = (kind: string) => TOOL_STEPS.has(kind)
 
@@ -142,6 +158,19 @@ export const REARRANGE_ERROR_RULES: readonly EqErrorRule[] = [
   { id: 'eq-det-main', name: 'Nur die Hauptdiagonale malgenommen', wrongFormula: '\\det\\begin{pmatrix} p & q \\\\ r & s \\end{pmatrix} = ps' },
   { id: 'eq-det-checkerboard', name: 'Beim Entwickeln das Vorzeichen aus dem Schachbrett vertauscht', wrongFormula: '\\det\\begin{pmatrix} 0 & p & q \\\\ a & 1 & 2 \\\\ 0 & r & s \\end{pmatrix} = a\\det\\begin{pmatrix} p & q \\\\ r & s \\end{pmatrix}' },
   { id: 'eq-det-entry', name: 'Beim Entwickeln den Eintrag vor der Unterdeterminante vergessen', wrongFormula: '\\det\\begin{pmatrix} 0 & p & q \\\\ a & 1 & 2 \\\\ 0 & r & s \\end{pmatrix} = -\\det\\begin{pmatrix} p & q \\\\ r & s \\end{pmatrix}' },
+  // Werkzeuge der Stufe 5 (Schritt 8b): Betrag und Winkel komplexer Zahlen, Vektoren (Länge, Skalarprodukt, Winkel)
+  { id: 'eq-abs-termwise', name: 'Den Betrag gliedweise genommen', wrongFormula: '\\lvert p + q\\mathrm{i}\\rvert = p + q' },
+  { id: 'eq-abs-root', name: 'Beim Betrag die Wurzel vergessen', wrongFormula: '\\lvert p + q\\mathrm{i}\\rvert = p^2 + q^2' },
+  { id: 'eq-abs-imag-squared', name: 'Beim Betrag das $\\mathrm{i}$ mitquadriert', wrongFormula: '\\lvert p + q\\mathrm{i}\\rvert = \\sqrt{p^2 - q^2}' },
+  { id: 'eq-arg-power', name: 'Den Winkel beim Quadrieren nicht verdoppelt', wrongFormula: '\\arg\\left(z^2\\right) = \\arg z' },
+  { id: 'eq-arg-swapped', name: 'Real- und Imaginärteil im $\\arctan$ vertauscht', wrongFormula: '\\arg(p + q\\mathrm{i}) = \\arctan\\frac{p}{q}' },
+  { id: 'eq-arg-arctan-forgotten', name: 'Beim Winkel den $\\arctan$ vergessen', wrongFormula: '\\arg(p + q\\mathrm{i}) = \\frac{q}{p}' },
+  { id: 'eq-arg-quotient-sign', name: 'Beim Teilen die Winkel addiert', wrongFormula: '\\arg\\frac{z}{w} = \\arg z + \\arg w' },
+  { id: 'eq-vec-not-divided', name: 'Beim Winkel nicht durch die Längen geteilt', wrongFormula: '\\cos\\varphi = \\vec{u} \\cdot \\vec{v}' },
+  { id: 'eq-vec-one-length', name: 'Beim Winkel nur durch eine der beiden Längen geteilt', wrongFormula: '\\cos\\varphi = \\frac{\\vec{u} \\cdot \\vec{v}}{\\lvert\\vec{u}\\rvert}' },
+  { id: 'eq-vec-sine', name: 'Beim Winkel Sinus statt Kosinus genommen', wrongFormula: '\\sin\\varphi = \\frac{\\vec{u} \\cdot \\vec{v}}{\\lvert\\vec{u}\\rvert \\cdot \\lvert\\vec{v}\\rvert}' },
+  { id: 'eq-vec-dot-sign', name: 'Beim Skalarprodukt ein Minus verloren', wrongFormula: '\\begin{pmatrix} p \\\\ q \\end{pmatrix} \\cdot \\begin{pmatrix} r \\\\ -s \\end{pmatrix} = pr + qs' },
+  { id: 'eq-vec-dot-cross', name: 'Beim Skalarprodukt über Kreuz malgenommen', wrongFormula: '\\begin{pmatrix} p \\\\ q \\end{pmatrix} \\cdot \\begin{pmatrix} r \\\\ s \\end{pmatrix} = ps + qr' },
 ]
 
 export function rearrangeErrorRule(id: string): EqErrorRule {
@@ -689,8 +718,11 @@ function candidatesFor(steps: readonly RearrangeStep[], i: number, target: strin
     ...fractionMistakes(step, t),
     // ohne die Variable wäre es keine Gleichung mehr zum Umstellen (\frac{\mathrm{d}}{\mathrm{d}x}(…) falsch als 1);
     // nur beim Grenzwert ist gerade das der typische Fehler („1 hoch unendlich ist 1")
+    // steht schon in der Aufgabe … = 0 (Vektoren stehen senkrecht), gehört die 0 auch zur falschen Gleichung
     ...(TOOL_STEPS.has(step.kind)
-      ? toolMistakes(step.kind as ToolStepKind, step.before).filter((c) => step.kind === 'limit' || contains(c.after.lhs, t) || contains(c.after.rhs, t))
+      ? toolMistakes(step.kind as ToolStepKind, step.before)
+          .filter((c) => step.kind === 'limit' || contains(c.after.lhs, t) || contains(c.after.rhs, t))
+          .map((c) => (isZeroSide(step.after, t) ? { ...c, zeroForm: true } : c))
       : []),
   ]
 }

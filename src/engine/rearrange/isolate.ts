@@ -15,11 +15,13 @@ import {
   degreeIn,
   polyAdd,
   polyAtom,
+  polyConst,
   polyDivideExact,
   polyEquals,
   polyMul,
   polyPow,
   polyScale,
+  polySum,
   totalDegree,
 } from '../fraction/poly.ts'
 import { type Rational, isInteger, isOne, isZero, rat, ratAbs, ratDiv, ratEq, ratMul, ratNeg, ratSign, ratSub } from '../rational.ts'
@@ -90,6 +92,11 @@ export type StepKind =
   | 'ode'
   | 'det'
   | 'detExpand'
+  | 'abs'
+  | 'arg'
+  | 'length'
+  | 'dot'
+  | 'angle'
   | 'finish'
 
 export const STEP_NAMES: Record<StepKind, string> = {
@@ -131,6 +138,11 @@ export const STEP_NAMES: Record<StepKind, string> = {
   ode: 'Differentialgleichung lösen',
   det: 'Determinante ausrechnen',
   detExpand: 'Determinante entwickeln',
+  abs: 'Betrag ausrechnen',
+  arg: 'Winkel ausrechnen',
+  length: 'Länge ausrechnen',
+  dot: 'Skalarprodukt ausrechnen',
+  angle: 'Winkel zwischen den Vektoren ausrechnen',
   finish: 'Ergebnis',
 }
 
@@ -165,6 +177,11 @@ export function stepLabel(step: RearrangeStep, taskTarget: string): string {
     case 'finish':
       // ohne Bruch im Ergebnis (\sqrt{a^2 + e^b}) wird nur zusammengefasst und geordnet
       if (step.swapOnly) return 'Seiten tauschen'
+      // spitzer Winkel als Buchstabe (Teil 8b): mit \tan y geschrieben
+      if (step.operand?.kind === 'fn' && step.operand.name === 'tan') {
+        const angle = step.operand.arg
+        return `Mit $${operand} = ${toLatex(div(fn('sin', angle), fn('cos', angle)))}$ zusammenfassen`
+      }
       return subterms(step.after.rhs).some((x) => x.kind === 'div') ? 'Zu einem Bruch zusammenfassen' : 'Zusammenfassen und ordnen'
     case 'expand':
       return 'Die Klammern ausmultiplizieren'
@@ -184,6 +201,8 @@ export function stepLabel(step: RearrangeStep, taskTarget: string): string {
     case 'trig':
       return `$${FN_LATEX[step.fn!]}$ auf beiden Seiten`
     case 'pythagoras':
+      // spitzer Winkel als Buchstabe (Teil 8b): die Summe 1 - \cos^2 y wird ersetzt
+      if (step.operand?.kind === 'add') return `$${operand} = ${toLatex(acuteSquare(step.operand) ?? step.after.lhs)}$ einsetzen`
       return `$${operand} = ${toLatex(pythagorasOf(step.operand as PowerNode))}$ einsetzen`
     case 'tanQuotient':
       return `${step.side ? 'Zähler und Nenner' : 'Beide Seiten'} durch $${operand}$ teilen`
@@ -262,6 +281,8 @@ type Context = {
   readonly target: string
   readonly conditions: readonly Condition[]
   readonly sub?: Substitution
+  // Buchstaben, die nach den Bedingungen spitze Winkel sind (Teil 8b, acuteLetters)
+  readonly acute: ReadonlySet<string>
 }
 
 const MAX_STEPS = 30
@@ -1216,6 +1237,122 @@ export function tanQuotientWrong(e: Equation, t: string, wrong: 'flipped' | 'par
   return tanQuotientStep(e, t, wrong)?.after ?? null
 }
 
+// --- Spitzer Winkel als Buchstabe (Stufe 5, Teil 8b) ---
+//
+// Beim Winkel zwischen Vektoren ist der Winkel ein Buchstabe: \arccos\frac{x}{\sqrt{x^2 + a^2 + b^2}} = y mit
+// der Bedingung y < \frac{\pi}{2}. Für so einen spitzen Winkel sind \sin y, \cos y und \tan y positiv. Dann
+// ersetzt die Engine nach dem Ausklammern 1 - \cos^2 y durch \sin^2 y (eigener Schritt) und schreibt das
+// Ergebnis mit \tan y: x = \frac{\sqrt{a^2 + b^2}}{\tan y}. Nur Aufgaben mit so einer Bedingung an einen
+// Buchstaben rechnen so; in allen anderen gelten Bedingungen mit \pi nur für die gesuchte Variable, ihr
+// Rechenweg bleibt derselbe.
+
+// Buchstaben p (nicht die gesuchte Variable) mit einer Winkelbedingung wie p < \frac{\pi}{2} oder p < \frac{\pi}{3}:
+// Schranke mit \pi, ohne Buchstaben, höchstens \frac{\pi}{2}
+function acuteLetters(conditions: readonly Condition[], target: string): ReadonlySet<string> {
+  const out = new Set<string>()
+  for (const c of conditions) {
+    if (c.lhs.kind !== 'var' || c.lhs.name === target || c.rel !== '<' || variablesOf(c.rhs).length > 0) continue
+    if (!subterms(c.rhs).some((s) => key(s) === key(PI))) continue
+    const bound = evaluate(c.rhs, {})
+    if (bound > 0 && bound <= Math.PI / 2 + 1e-12) out.add(c.lhs.name)
+  }
+  return out
+}
+
+// c\left(1 - \cos^2 p\right) als c\sin^2 p, c\left(1 - \sin^2 p\right) als c\cos^2 p (c eine Zahl oder Buchstaben mit
+// Plus wie 4 oder b^2, p ein Buchstabe, mit letters einer von diesen); sonst null
+export function acuteSquare(s: Expr, letters?: ReadonlySet<string>): Expr | null {
+  if (s.kind !== 'add') return null
+  const atoms = anyAtoms()
+  const p = toPoly(s, atoms)
+  if (!p || p.length !== 2) return null
+  for (const f of [...atoms.opaque.values()]) {
+    if (f.kind !== 'fn' || (f.name !== 'sin' && f.name !== 'cos') || f.arg.kind !== 'var' || (letters && !letters.has(f.arg.name))) continue
+    const atom = atoms.names.get(key(f))
+    const c = p.filter((term) => !term.mono.some(([a]) => a === atom))
+    if (c.length !== 1 || ratSign(c[0].coef) <= 0) continue
+    if (!polyEquals(p, polyMul(c, toPoly(add(num(1), neg(squareOf(f))), atoms)!))) continue
+    const square = squareOf(fn(f.name === 'cos' ? 'sin' : 'cos', f.arg))
+    const front = polyToExpr(c, atoms)
+    return isOneExpr(front) ? square : mul(...factorsOf(front), square)
+  }
+  return null
+}
+
+// Faktor neben der Unbekannten ersetzen, die Vorzahl nach vorn: x^2\left(1 - \cos^2 y\right) = … → x^2\sin^2 y = …,
+// x^2\left(4 - 4\cos^2 y\right) = … → 4x^2\sin^2 y = … (y ein spitzer Winkel)
+function acutePythagorasStep(e: Equation, t: string, acute: ReadonlySet<string>): Draft | null {
+  if (acute.size === 0) return null
+  for (const s of [e.lhs, e.rhs].flatMap((side) => subterms(side))) {
+    if (s.kind !== 'mul' || !s.factors.some((f) => contains(f, t))) continue
+    for (const f of s.factors) {
+      const square = contains(f, t) ? null : acuteSquare(f, acute)
+      if (!square) continue
+      const parts = factorsOf(square)
+      const product = mul(...parts.slice(0, -1), ...s.factors.filter((g) => g !== f), parts[parts.length - 1])
+      const replace = new Map([[key(s), product]])
+      return { kind: 'pythagoras', operand: f, after: eq(substitute(e.lhs, replace), substitute(e.rhs, replace)) }
+    }
+  }
+  return null
+}
+
+// Endform mit spitzen Winkeln: Stehen \sin p und \cos p nur in geraden Potenzen da (auch unter der Wurzel),
+// bleibt mit \sin^2 p = \frac{\tan^2 p}{1 + \tan^2 p} und \cos^2 p = \frac{1}{1 + \tan^2 p} nur \tan p übrig:
+// \sqrt{\frac{a^2\cos^2 y + b^2\cos^2 y}{\sin^2 y}} = \frac{\sqrt{a^2 + b^2}}{\tan y}, \sqrt{\frac{a^2}{\cos^2 y} - a^2} = a\tan y.
+// null, wenn das nicht geht, danach noch 1 + \tan^2 p dasteht oder der Bruch mehr Summanden hätte als vorher;
+// sonst Ergebnis und \tan p (für den Text)
+function acuteForm(o: Expr, acute: ReadonlySet<string>): { result: Expr; tan: Expr } | null {
+  if (acute.size === 0) return null
+  const inRoot = o.kind === 'root' && o.index === 2
+  const atoms = anyAtoms()
+  const original = toRat(inRoot ? o.arg : o, atoms)
+  let f = original
+  let tan: Expr | null = null
+  for (const p of acute) {
+    const [c, s] = (['cos', 'sin'] as const).map((name) => atoms.names.get(key(fn(name, variable(p)))))
+    if (!f || (!c && !s)) continue
+    const half = (term: Poly[number], atom: string | undefined) => (term.mono.find(([a]) => a === atom)?.[1] ?? 0) / 2
+    const terms = [...f.num, ...f.den]
+    if (terms.some((term) => !Number.isInteger(half(term, c)) || !Number.isInteger(half(term, s)))) return null
+    const tanP = fn('tan', variable(p))
+    const tanSquare = polyPow(toPoly(tanP, atoms)!, 2)
+    const onePlus = polyAdd(polyConst(1), tanSquare)
+    const k = Math.max(...terms.map((term) => half(term, c) + half(term, s)))
+    // \cos^{2i} p \sin^{2j} p = \frac{\tan^{2j} p}{(1 + \tan^2 p)^{i + j}}; Zähler und Nenner mal (1 + \tan^2 p)^k
+    const rewrite = (q: Poly): Poly =>
+      polySum(
+        q.map((term) => {
+          const rest: Poly = [{ mono: term.mono.filter(([a]) => a !== c && a !== s), coef: term.coef }]
+          return polyMul(polyMul(rest, polyPow(tanSquare, half(term, s))), polyPow(onePlus, k - half(term, c) - half(term, s)))
+        }),
+      )
+    f = { num: rewrite(f.num), den: rewrite(f.den) }
+    const r = reduceFrac(f)
+    if (polyDivideExact(r.num, onePlus) || polyDivideExact(factoredPoly(r.den), onePlus)) return null
+    tan = tanP
+  }
+  // nie länger als vorher (z. B. mit (\sqrt{2})^2, das die Engine nicht ausrechnet)
+  const size = (g: Frac) => {
+    const r = reduceFrac(g)
+    return r.num.length + factoredPoly(r.den).length
+  }
+  if (!f || !original || !tan || size(f) > size(original)) return null
+  return { result: inRoot ? acuteRoot(f, atoms) : niceFrac(f, atoms), tan }
+}
+
+// Wurzel wie rootForm, aber mit einer Zahl im Nenner, die kein Quadrat ist, als eigene Wurzel:
+// \sqrt{\frac{a^2}{2\tan^2 y}} = \frac{a}{\sqrt{2}\tan y}
+function acuteRoot(f: Frac, atoms: Atoms): Expr {
+  const { n, d } = reduced(f, atoms)
+  const rn = monomialSqrt(n)
+  const c = d.length === 1 && isInteger(d[0].coef) && ratSign(d[0].coef) > 0 && !monomialSqrt(polyConst(d[0].coef)) ? d[0].coef : null
+  const rest = c && monomialSqrt([{ mono: d[0].mono, coef: rat(1) }])
+  if (!rn || !c || !rest) return rootForm(f, atoms)
+  const m = polyToExpr(rest, atoms)
+  return div(polyToExpr(rn, atoms), isOneExpr(m) ? sqrt(num(c)) : mul(sqrt(num(c)), m))
+}
+
 // Unbekannte beim Sortieren, Ausklammern und Teilen: x, √x (mit x = (√x)²) oder ein Baustein wie e^x
 export function unknownAtoms(e: Equation, t: string): { atoms: Atoms; u: string; uExpr: Expr; block: Expr | null } {
   const block = blockOf(e, t)
@@ -2023,9 +2160,15 @@ function nextStep(e: Equation, t: string, ctx: Context): Draft | null {
   if (combinedLogs) return combinedLogs
   const law = logLawStep(e, t)
   if (law) return law
+  // spitzer Winkel als Buchstabe (Teil 8b): 1 - \cos^2 y durch \sin^2 y ersetzen
+  const acuteSquared = acutePythagorasStep(e, t, ctx.acute)
+  if (acuteSquared) return acuteSquared
   if (parts === 'both') return mustStep(rational(e, t, ctx))
   const { s, o, side } = parts
   if (s.kind === 'var') {
+    // mit spitzen Winkeln: Wurzel aus \sin^2 y und \cos^2 y, geschrieben mit \tan y
+    const acute = acuteForm(o, ctx.acute)
+    if (acute) return { kind: 'finish', operand: acute.tan, after: eq(s, acute.result) }
     const result = finalForm(o)
     if (side === 'lhs' && key(result) === key(o)) return null
     return { kind: 'finish', after: eq(s, result), swapOnly: key(result) === key(o) }
@@ -2081,6 +2224,7 @@ export function solveEquation(equation: Equation, target: string, options: Solve
   let current = equation
   let sub = options.substitution
   const conditions = options.conditions ?? []
+  const acute = acuteLetters(conditions, target)
   try {
     // Stufe 5: erst die Werkzeuge ausrechnen (Ableitung, Integral, …), dann umstellen
     for (let i = 0; hasTool(current); i++) {
@@ -2094,7 +2238,7 @@ export function solveEquation(equation: Equation, target: string, options: Solve
       // nach dem Substituieren: nach u auflösen, dann zurück einsetzen
       const inU = sub !== undefined && (contains(current.lhs, sub.name) || contains(current.rhs, sub.name))
       const t = inU ? sub!.name : target
-      const ctx: Context = { original, target, conditions, sub }
+      const ctx: Context = { original, target, conditions, sub, acute }
       const draft = (inU ? resubstituteDraft(current, sub!) : null) ?? nextStep(current, t, ctx)
       if (!draft) {
         return {

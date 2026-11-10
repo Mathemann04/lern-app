@@ -20,6 +20,7 @@ const OPERATORS: Record<string, number> = {
   '\\arccos': 2.6,
   '\\arctan': 2.6,
   '\\det': 1.31,
+  '\\arg': 1.45,
 }
 
 const LETTERS: Record<string, number> = {
@@ -124,10 +125,17 @@ export function latexWidthEm(latex: string): number {
         previousAtom = c === ')'
         continue
       }
-      if (c === '[' || c === ']' || c === '|' || c === ',') {
+      if (c === '[' || c === ']' || c === '|') {
         w += 0.28
         i++
-        previousAtom = c !== ','
+        previousAtom = true
+        continue
+      }
+      // Komma mit dem kleinen Abstand danach (\\sphericalangle(\\vec u, \\vec v))
+      if (c === ',') {
+        w += 0.44
+        i++
+        previousAtom = false
         continue
       }
       if (c === '&') {
@@ -184,10 +192,11 @@ export function latexWidthEm(latex: string): number {
       if (command === '\\left' || command === '\\right') {
         const delimiter = s[i] === '\\' ? (/^\\[a-zA-Z]+|^\\./.exec(s.slice(i))?.[0] ?? '\\') : (s[i] ?? '')
         i += delimiter.length
-        // Klammern um hohe Inhalte (Matrix, Bruch) sind breiter
+        // Klammern um hohe Inhalte (Matrix, Bruch) sind breiter, Betragsstriche nicht
         const tall = command === '\\left' ? tallness(s, i) : lastTall
         if (command === '\\left') lastTall = tall
-        w += delimiter === '.' ? 0.12 : tall >= 3 ? 0.75 : tall === 2 ? 0.6 : 0.46
+        const bar = delimiter === '\\lvert' || delimiter === '\\rvert' || delimiter === '|'
+        w += delimiter === '.' ? 0.12 : bar ? 0.33 : tall >= 3 ? 0.75 : tall === 2 ? 0.6 : 0.46
         previousAtom = command === '\\right'
         continue
       }
@@ -228,6 +237,12 @@ export function latexWidthEm(latex: string): number {
       if (command === '\\pi') {
         w += 0.57
         previousAtom = true
+        continue
+      }
+      // Winkelzeichen ∢ (0,72 em), dazu die großen Klammern um zwei Vektoren
+      if (command === '\\sphericalangle') {
+        w += 1.2
+        previousAtom = false
         continue
       }
       if (command === '\\displaystyle') continue

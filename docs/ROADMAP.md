@@ -7,7 +7,7 @@ Stand: 10.11.2026
 | M1 | Grundgerüst + Ableitungsregeln (beide Modi, 5 Stufen, Erklärungen, Lernkarten, Fortschritt) | fertig |
 | M2 | Brüche (Bruchrechnung, Bruchterme kürzen und zusammenfassen, Doppelbrüche); App für mehrere Themen | fertig |
 | M2b | Brüche nachschärfen: viel mehr Abwechslung (Baukasten statt fester Vorlagen, keine Form doppelt), deutlich schwerer, Stufe 5 auf Profi-Niveau mit Partialbruchzerlegung und Brüchen aus späteren Kapiteln (komplexe Zahlen, Grenzwerte, Teleskopsummen, Hyperbelfunktionen) | fertig |
-| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | in Arbeit: 4. Fassung des Plans (Baukasten und Abwechslung, ab Stufe 3 verschachtelter); Schritte 4, 5 und 6 fertig (Stufe 4 komplett), Schritt 7 fertig (Stufe 5 mit Ableitungen, Integralen, Summen, Reihen, Grenzwerten und Differentialgleichungen), Schritt 8a fertig (Determinanten), als Nächstes 8b |
+| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | in Arbeit: 4. Fassung des Plans (Baukasten und Abwechslung, ab Stufe 3 verschachtelter); Schritte 4, 5 und 6 fertig (Stufe 4 komplett), Schritt 7 fertig (Stufe 5 mit Ableitungen, Integralen, Summen, Reihen, Grenzwerten und Differentialgleichungen), Schritte 8a und 8b fertig (Determinanten, Betrag und Winkel), als Nächstes 8c |
 | M4 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
 | M5 | weitere Themen aus Mathematik MB1 | offen |
 | M6 | Physik: Formeln mit Einheiten (Formeln umstellen mit Zeichen der Physik; Aufgaben lösen: Formel wählen, umstellen, Werte mit Einheiten einsetzen) | offen |
@@ -83,7 +83,7 @@ Details: [PLAN-M3.md](PLAN-M3.md) (4. Fassung, freigegeben am 05.11.2026 mit dei
   - [x] 7c. Differentialgleichungen
 - [ ] 8. Stufe 5, Teil 2: komplexe Zahlen, Determinanten, Vektoren, Additionstheoreme, in drei Teilen
   - [x] 8a. Determinanten ($2 \times 2$ und $3 \times 3$)
-  - [ ] 8b. Betrag und Winkel: komplexe Zahlen, Winkel zwischen Vektoren
+  - [x] 8b. Betrag und Winkel: komplexe Zahlen, Winkel zwischen Vektoren
   - [ ] 8c. Additionstheoreme
 - [ ] 9. Gezieltes Üben, Feinschliff, Abschluss von M3
 
@@ -568,3 +568,15 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   die Schuld für einen späteren Vorzeichenfehler); die Endform der Engine gilt im
   freien Modus in allen Stufen immer als fertig (vorher wurde sie z. B. bei 3-107
   mit einer Klammer unter der Wurzel abgelehnt).
+- 10.11.2026: M3 Schritt 8b fertig: In Stufe 5 von „Gleichungen umstellen"
+  stecken jetzt auch Betrag und Winkel komplexer Zahlen
+  ($\left\lvert\frac{x + a\mathrm{i}}{x - b\mathrm{i}}\right\rvert = y$,
+  $\arg\left((x + a\mathrm{i})^2\right) = y$, auch in Euler-Form) und Vektoren
+  (Länge, Skalarprodukt, Winkel zwischen zwei Vektoren). 30 % der Nummern aus 7a,
+  alle anderen behalten ihre Aufgabe. 195 Formen unter 200 Aufgaben, im Mittel 8,5
+  Umformungen. Zwölf neue typische Fehler, zwei neue Lernkarten. Beim Winkel mit
+  einer Achse rechnet die Engine mit $1 - \cos^2 y = \sin^2 y$ weiter und schreibt
+  das Ergebnis mit $\tan y$ (nur bei Aufgaben mit spitzem Winkel $y$, ältere
+  Aufgaben bleiben gleich). Im freien Modus gibt es eine $\pi$-Taste, wenn $\pi$
+  im Ergebnis steht. Browser-Tests mit 5-1899 (Winkel mit der $x$-Achse, geführt),
+  5-381 (Betrag eines Bruchs, frei) und 5-1155 (Winkel mit festem Faktor).

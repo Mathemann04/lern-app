@@ -29,6 +29,16 @@ const MEASURED: ReadonlyArray<readonly [string, number]> = [
   // die breitesten Aufgaben aus dem Baukasten (5-110, 5-47565): Klammer um eine Matrix, Schätzung knapp 5 % zu schmal
   ['y = 3\\left(c - \\det\\begin{pmatrix} \\tan x & a \\\\ 1 & b \\end{pmatrix}\\right)', 342],
   ['y = d\\left(\\det\\begin{pmatrix} \\tan x & a \\\\ 1 & b \\end{pmatrix} + c\\right)', 342.6],
+  // Teil 8b: Betrag, Winkel und Vektoren (Betragsstriche bleiben schmal, ∢ mit großen Klammern)
+  ['\\sphericalangle\\left(\\begin{pmatrix} x \\\\ k \\\\ m \\end{pmatrix}, \\begin{pmatrix} x \\\\ m \\\\ -k \\end{pmatrix}\\right) = y', 298.5],
+  ['\\sphericalangle\\left(\\begin{pmatrix} k \\\\ x \\end{pmatrix}, \\begin{pmatrix} 0 \\\\ 1 \\end{pmatrix}\\right) = y', 244.2],
+  ['\\frac{\\arg\\left((x + (x + a)\\mathrm{i})^{2}\\right)}{b} + c = y', 347.5],
+  ['y = \\arg\\left((x + a\\mathrm{i})(a - x\\mathrm{i})\\right)', 302.7],
+  ['\\left\\lvert \\frac{(x + a\\mathrm{i})^{2}}{(x - b\\mathrm{i})^{2}} \\right\\rvert = y', 180.6],
+  ['\\left\\lvert (6 + 8\\mathrm{i})(e^{x} + a\\mathrm{i}) \\right\\rvert = 4b', 271],
+  ['\\ln \\left\\lvert \\begin{pmatrix} x \\\\ a \\\\ b \\end{pmatrix} \\right\\rvert = y', 161.4],
+  ['\\begin{pmatrix} x + a \\\\ 1 \\end{pmatrix} \\cdot \\begin{pmatrix} x - a \\\\ -b \\end{pmatrix} = 0', 280],
+  ['y = \\left\\lvert k + me^{\\mathrm{i}x} \\right\\rvert', 173.5],
   // zu breit für das Handy
   ['\\ln\\left(\\det\\begin{pmatrix} e^{x} + a & b & 0 \\\\ c & e^{-x} & 1 \\\\ 1 & 0 & d \\end{pmatrix}\\right) = y', 401.9],
 ]

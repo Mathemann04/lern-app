@@ -473,8 +473,13 @@ Aufgabe: Löse $\int_a^x \frac{\mathrm{d}t}{t(t + b)} = y$ nach $x$ auf
 | Grenzwert | „1 hoch unendlich ist 1" (`eq-lim-one`, neu in 7b) | $\lim_{n \to \infty}\left(\frac{n + x}{n - x}\right)^n = 1$ |
 | Grenzwert | Faktor in der Hochzahl vergessen (`eq-lim-exponent`, neu in 7b) | $\lim_{n \to \infty}\left(1 + \frac{x}{n}\right)^{2n} = e^{x}$ |
 | Grenzwert | den Nenner nicht beachtet (`eq-lim-denominator`, neu in 7b) | $\lim_{n \to \infty}\left(\frac{n + x}{n - x}\right)^n = e^{x}$ |
-| Komplexe Zahlen | Betrag gliedweise | $\lvert x + a\,\mathrm{i}\rvert = x + a$ |
-| Komplexe Zahlen | Winkel beim Quadrieren nicht verdoppelt | $\arg\left(z^2\right) = \arg z$ |
+| Komplexe Zahlen, Vektoren | Betrag gliedweise genommen (`eq-abs-termwise`, neu in 8b; bei Vektoren die Einträge addiert) | $\lvert x + a\mathrm{i}\rvert = x + a$ |
+| Komplexe Zahlen, Vektoren | beim Betrag die Wurzel vergessen (`eq-abs-root`, neu in 8b; auch bei der Länge eines Vektors) | $\lvert x + a\mathrm{i}\rvert = x^2 + a^2$ |
+| Komplexe Zahlen | beim Betrag das $\mathrm{i}$ mitquadriert (`eq-abs-imag-squared`, neu in 8b) | $\lvert x + a\mathrm{i}\rvert = \sqrt{x^2 - a^2}$ |
+| Komplexe Zahlen | Winkel beim Quadrieren nicht verdoppelt (`eq-arg-power`, neu in 8b) | $\arg\left(z^2\right) = \arg z$ |
+| Komplexe Zahlen | Real- und Imaginärteil im $\arctan$ vertauscht (`eq-arg-swapped`, neu in 8b) | $\arg(x + a\mathrm{i}) = \arctan\frac{x}{a}$ |
+| Komplexe Zahlen | beim Winkel den $\arctan$ vergessen (`eq-arg-arctan-forgotten`, neu in 8b) | $\arg(x + a\mathrm{i}) = \frac{a}{x}$ |
+| Komplexe Zahlen | beim Teilen die Winkel addiert (`eq-arg-quotient-sign`, neu in 8b) | $\arg\frac{x + a\mathrm{i}}{1 + \mathrm{i}} = \arctan\frac{a}{x} + \frac{\pi}{4}$ |
 | Determinante | Plus statt Minus (`eq-det-plus`, neu in 8a) | $\det\begin{pmatrix} p & q \\ r & s \end{pmatrix} = ps + qr$ |
 | Determinante | Haupt- und Nebendiagonale vertauscht (`eq-det-swapped`, neu in 8a) | $\det\begin{pmatrix} p & q \\ r & s \end{pmatrix} = qr - ps$ |
 | Determinante | in Zeilen oder Spalten statt über Kreuz malgenommen (`eq-det-rows`, neu in 8a) | $\det\begin{pmatrix} p & q \\ r & s \end{pmatrix} = pq - rs$ |
@@ -482,7 +487,11 @@ Aufgabe: Löse $\int_a^x \frac{\mathrm{d}t}{t(t + b)} = y$ nach $x$ auf
 | Determinante | beim Entwickeln das Vorzeichen aus dem Schachbrett vertauscht (`eq-det-checkerboard`, neu in 8a) | $\det\begin{pmatrix} 0 & p & q \\ a & 1 & 2 \\ 0 & r & s \end{pmatrix} = a\det\begin{pmatrix} p & q \\ r & s \end{pmatrix}$ |
 | Determinante | beim Entwickeln den Eintrag vor der Unterdeterminante vergessen (`eq-det-entry`, neu in 8a) | $\det\begin{pmatrix} 0 & p & q \\ a & 1 & 2 \\ 0 & r & s \end{pmatrix} = -\det\begin{pmatrix} p & q \\ r & s \end{pmatrix}$ |
 | Additionstheorem | gliedweise | $\sin(x + a) = \sin x + \sin a$ |
-| Vektoren | nicht durch die Längen geteilt | $\cos\varphi = \vec{u} \cdot \vec{v}$ |
+| Vektoren | beim Winkel nicht durch die Längen geteilt (`eq-vec-not-divided`, neu in 8b) | $\cos\varphi = \vec{u} \cdot \vec{v}$ |
+| Vektoren | beim Winkel nur durch eine der beiden Längen geteilt (`eq-vec-one-length`, neu in 8b) | $\cos\varphi = \frac{\vec{u} \cdot \vec{v}}{\lvert\vec{u}\rvert}$ |
+| Vektoren | beim Winkel Sinus statt Kosinus genommen (`eq-vec-sine`, neu in 8b) | $\varphi = \arcsin\frac{\vec{u} \cdot \vec{v}}{\lvert\vec{u}\rvert \cdot \lvert\vec{v}\rvert}$ |
+| Vektoren | beim Skalarprodukt ein Minus verloren (`eq-vec-dot-sign`, neu in 8b) | $\begin{pmatrix} x \\ a \end{pmatrix} \cdot \begin{pmatrix} x + b \\ -c \end{pmatrix} = x(x + b) + ac$ |
+| Vektoren | beim Skalarprodukt über Kreuz malgenommen (`eq-vec-dot-cross`, neu in 8b) | $\begin{pmatrix} p \\ q \end{pmatrix} \cdot \begin{pmatrix} r \\ s \end{pmatrix} = ps + qr$ |
 | Differentialgleichung | einen Anfangswert nicht genutzt, z. B. $f'(0) = 0$ (`eq-ode-initial-unused`, neu in 7c) | $f'' = k^2 f$, $f(0) = a$, $f'(0) = 0$: $f(x) = a\,e^{kx}$ |
 | Differentialgleichung | bei $f'' = k^2 f$ die Konstanten nicht halbiert (`eq-ode-not-halved`, neu in 7c) | $f(x) = ae^{kx} + ae^{-kx}$ |
 | Differentialgleichung | bei $f'(0)$ den Faktor $k$ aus $\left(e^{kx}\right)' = ke^{kx}$ vergessen (`eq-ode-inner-factor`, neu in 7c) | $f(0) = 0$, $f'(0) = b$: $f(x) = \frac{b}{2}e^{kx} - \frac{b}{2}e^{-kx}$ |
@@ -1006,6 +1015,79 @@ Bekannt und offen: Gleichungen wie $c\left(bx^2 - ax\right) = y$ löst die Engin
 noch nicht (sie teilt durch $c$ und nimmt danach wieder mit $c$ mal). Solche
 Aufgaben sortiert der Filter aus; darum stehen $x^2$ und $x$, $x$ und $\sqrt{x}$
 sowie $e^{2x}$ und $e^{x}$ nie in einer $3 \times 3$-Determinante.
+
+**Umgesetzt (8b):** In Stufe 5 kommen Betrag und Winkel dazu (30 % der Nummern, die
+zu keinem früheren Teil gehören, also aus 7a: unter den Aufgaben 1 bis 200 sind es 24;
+alle übrigen Nummern behalten ihre Aufgabe). Fünf neue Werkzeuge, jedes in einem
+Schritt ausgerechnet (`rearrange/tools/polar.ts` und `vector.ts`):
+- **Betrag einer komplexen Zahl** $\lvert z\rvert$ („Betrag ausrechnen"): Realteil und
+  Imaginärteil ablesen, $\sqrt{p^2 + q^2}$. Ein Bruch steht unter einer Wurzel,
+  $\sqrt{\frac{x^2 + a^2}{x^2 + b^2}}$ (einen Bruch aus zwei Wurzeln löst die Engine nicht),
+  $\left\lvert z^2\right\rvert = p^2 + q^2$ ohne Wurzel, eine Zahl wie
+  $\lvert 3 + 4\mathrm{i}\rvert = 5$ vor der Wurzel, $\lvert 1 + \mathrm{i}\rvert$ unter ihr
+  ($\sqrt{2(x^2 + a^2)}$, denn mit $\left(\sqrt{2}\right)^2$ rechnet die Engine nicht weiter).
+  Auch in Euler-Form: $e^{\mathrm{i}x} = \cos x + \mathrm{i}\sin x$, danach Pythagoras
+  (Kosinussatz) und $\arccos$.
+- **Winkel einer komplexen Zahl** $\arg z$ („Winkel ausrechnen"): $\arctan\frac{q}{p}$ bei
+  positivem Realteil (dafür sorgt der Baukasten), beim Quadrieren doppelt, der Winkel
+  fester Faktoren ($\arg(1 + \mathrm{i}) = \frac{\pi}{4}$, auch $1 - \mathrm{i}$,
+  $\sqrt{3} + \mathrm{i}$, $1 + \mathrm{i}\sqrt{3}$) addiert, beim Teilen abgezogen;
+  zwei Faktoren mit $x$ werden erst ausmultipliziert. Steht $\pi$ im Ergebnis, hat die
+  Tastatur im freien Modus eine $\pi$-Taste.
+- **Vektoren** als Spalten: Länge $\lvert\vec u\rvert$, Skalarprodukt $\vec u \cdot \vec v$
+  (aufgeräumt wie bei Determinanten) und Winkel $\sphericalangle(\vec u, \vec v)$ als
+  $\arccos\frac{\vec u \cdot \vec v}{\lvert\vec u\rvert \cdot \lvert\vec v\rvert}$; die Länge
+  $1$ fällt weg, gleich lange Vektoren geben $\lvert\vec u\rvert^2$ ohne Wurzel.
+- Die Gegenprobe in `evaluate.ts` rechnet mit komplexen Zahlen (Betrag, Hauptwert des
+  Winkels) bzw. mit Zahlen (Winkel nach Kahan, genau auch bei fast parallelen Vektoren).
+
+Das Beispiel aus dem Plan mit der $x$-Achse: Damit $\frac{\sqrt{a^2 + b^2}}{\tan y}$
+herauskommt, ersetzt die Engine bei einem spitzen Winkel (Bedingung $y < \frac{\pi}{2}$
+in der Aufgabe) nach dem Ausklammern $1 - \cos^2 y$ durch $\sin^2 y$ (eigener Schritt
+„$1 - \cos^2 y = \sin^2 y$ einsetzen") und schreibt das Ergebnis mit $\tan y$. Das gilt
+nur in Aufgaben mit so einer Bedingung an einen Buchstaben, nach dem nicht aufgelöst
+wird; in allen älteren Aufgaben gelten Bedingungen mit $\pi$ nur für $x$, ihre
+Rechenwege und falschen Antworten bleiben gleich (verglichen über die Nummern 1 bis 300
+der Stufen 1 bis 4 und 1 bis 2000 der Stufe 5).
+
+Der Baukasten `buildLevel5Polar` setzt zusammen (je etwa die Hälfte komplexe Zahlen und
+Vektoren):
+- **Betrag:** Bruch mit $x$ oben und unten (Beispiel aus dem Plan, auch mit $e^{x}$ oder
+  $\sqrt{x}$, auch im Quadrat), $x$ im Real- und Imaginärteil (danach quadratisch, mit
+  $e^{x}$ oder $\sqrt{x}$ mit Substitution), mit Schalen, Baustein im Real- oder
+  Imaginärteil, fester Faktor, Betrag eines Quadrats, Betrag gegen den Realteil
+  ($\frac{\lvert x + a\mathrm{i}\rvert}{x} = y$), Euler-Form mit $x < \pi$;
+- **Winkel:** Winkel eines Quadrats (Beispiel aus dem Plan, auch mit $e^{x}$, $\sqrt{x}$,
+  $\ln x$), fester Faktor mit Standardwinkel, Baustein im Real- oder Imaginärteil, $x$ im
+  Real- und Imaginärteil, Produkt mit $x$ in beiden Faktoren;
+- **Vektoren:** Winkel mit einer Achse (Beispiel aus dem Plan, mit $y < \frac{\pi}{2}$;
+  auch $x$ nur in der Länge, dann $a\tan y$), Winkel zwischen gleich langen Vektoren
+  (gespiegelt oder gedreht), Länge (danach quadratisch, mit $e^{x}$ und $e^{-x}$, mit
+  Schalen), Skalarprodukt (danach quadratisch, senkrechte Vektoren mit $= 0$, mit
+  Bausteinen, im Bruch mit seinem Baustein).
+
+Damit kein typischer Fehler zufällig die richtige Gleichung ergibt: Jeder Faktor mit $x$
+hat Real- und Imaginärteil, beim Winkel ist sein Realteil für alle $x > 0$ positiv,
+nie ein Bruch aus zwei gleich langen Zahlen; nie zwei Vektoren der Länge 1, nie zweimal
+derselbe Eintrag in einem Vektor mit zwei Einträgen; ein Fehler, nach dem kein $x$ mehr
+dasteht oder der nichts ändert, wird nicht angeboten (ein Test prüft das).
+Breite wie in 8a nach der Schätzung in em (höchstens 12 em, Ergebnis höchstens 16,5 em,
+ohne Doppelbruch); die Schätzung kennt jetzt $\arg$, $\sphericalangle$ und schmale
+Betragsstriche (am Browser nachgemessen).
+
+Gemessen unter den Aufgaben 1 bis 3000 der Stufe 5: 289 Aufgaben, im Mittel 8,2
+Umformungen (6 bis 12), 205 Formen. Stufe 5 hat unter den Aufgaben 1 bis 200 jetzt 195
+Formen, keine öfter als 1 %, im Mittel 8,5 Umformungen.
+
+Geführt kommt zuerst „Was steht da eigentlich?" mit zwölf neuen Fehlern (Tabelle oben;
+„gliedweise" und „Wurzel vergessen" gelten für komplexe Zahlen und Vektoren); die
+Erklärung zeigt Real- und Imaginärteil, die Regel für Produkt, Bruch und Quadrat bzw.
+Skalarprodukt und Längen. Steht in der Aufgabe schon $= 0$ (senkrechte Vektoren), gibt
+es die Fehler trotzdem (vorher wurde jede falsche Gleichung mit $0$ auf einer Seite
+verworfen). Zwei neue Lernkarten „Betrag und Winkel komplexer Zahlen" und „Vektoren:
+Länge, Skalarprodukt, Winkel". Frei wird das Ergebnis eingetippt; die Fehler werden
+erkannt, einige nur geführt (mit „$\mathrm{i}$ mitquadriert" hat die Gleichung oft
+keine Lösung).
 
 #### Schritt 9: Gezieltes Üben, Feinschliff, Abschluss von M3
 - „Deine häufigsten Fehler" mit „Gezielt üben" auch fürs Umstellen, für

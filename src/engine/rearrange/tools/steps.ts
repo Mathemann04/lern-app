@@ -9,6 +9,8 @@ import { isOne, ratNeg, ratSign } from '../../rational.ts'
 import { type IntegralMistake, antiderivative, antiderivativeExpr, antiderivativeTerms, atBound, partialFractions } from './integrate.ts'
 import { DET_MISTAKES, EXPAND_MISTAKES, detValue, expandValue } from './determinant.ts'
 import { ODE_MISTAKES, odeSolution } from './ode.ts'
+import { ABS_MISTAKES, ARG_MISTAKES, absValue, argValue } from './polar.ts'
+import { ANGLE_MISTAKES, DOT_MISTAKES, LENGTH_MISTAKES, angleValue, dotValue, lengthValue } from './vector.ts'
 import { type LimitMistake, type SeriesMistake, geometricParts, limitParts, limitValue, seriesValue, sumValue } from './series.ts'
 import { type ActiveTool, type ToolVar, activeTool, bracketOf, integralOf } from './tool.ts'
 
@@ -20,9 +22,25 @@ import { type ActiveTool, type ToolVar, activeTool, bracketOf, integralOf } from
 // - Grenzwert: \lim_{n \to \infty}\left(1 + \frac{p}{n}\right)^{sn} = e^{sp}
 // - Differentialgleichung: Lösung mit den Anfangswerten (ode.ts)
 // - Determinante: 2 × 2 ausrechnen, 3 × 3 erst nach der Linie mit zwei Nullen entwickeln (determinant.ts)
+// - Betrag und Winkel einer komplexen Zahl (polar.ts), Länge, Skalarprodukt und Winkel von Vektoren (vector.ts)
 // Steckt ein Werkzeug in einem anderen (Reihe in einer Ableitung), kommt das innere zuerst.
 
-export type ToolStepKind = 'derive' | 'partial' | 'antiderivative' | 'bounds' | 'sumFormula' | 'series' | 'limit' | 'ode' | 'det' | 'detExpand'
+export type ToolStepKind =
+  | 'derive'
+  | 'partial'
+  | 'antiderivative'
+  | 'bounds'
+  | 'sumFormula'
+  | 'series'
+  | 'limit'
+  | 'ode'
+  | 'det'
+  | 'detExpand'
+  | 'abs'
+  | 'arg'
+  | 'length'
+  | 'dot'
+  | 'angle'
 
 export type ToolDraft = { readonly kind: ToolStepKind; readonly operand?: Expr; readonly after: Equation }
 
@@ -38,11 +56,22 @@ export function nextToolStep(e: Equation): ToolDraft | null {
 
 function toolDraft({ tool, put }: ActiveTool): ToolDraft | null {
   const t = tool.tool
-  if (t.kind === 'det') {
-    const expanded = t.rows.length === 3 ? expandValue(t, null) : null
-    if (expanded) return { kind: 'detExpand', after: put(expanded) }
-    const v = detValue(t, null)
-    return v ? { kind: 'det', after: put(v) } : null
+  const plain = (kind: ToolStepKind, v: Expr | null): ToolDraft | null => (v ? { kind, after: put(v) } : null)
+  switch (t.kind) {
+    case 'det': {
+      const expanded = t.rows.length === 3 ? expandValue(t, null) : null
+      return expanded ? plain('detExpand', expanded) : plain('det', detValue(t, null))
+    }
+    case 'abs':
+      return plain('abs', absValue(t, null))
+    case 'arg':
+      return plain('arg', argValue(t, null))
+    case 'length':
+      return plain('length', lengthValue(t.vector, null))
+    case 'dot':
+      return plain('dot', dotValue(t.left, t.right, null))
+    case 'angle':
+      return plain('angle', angleValue(t.left, t.right, null))
   }
   const value = (kind: ToolStepKind, v: Expr | null): ToolDraft | null => (v ? { kind, operand: t.body, after: put(v) } : null)
   switch (t.kind) {
@@ -228,5 +257,14 @@ export function toolMistakes(kind: ToolStepKind, before: Equation): ToolCandidat
       if (v) out.push({ id, after: put(v) })
     }
   }
+  // Teil 8b: Betrag und Winkel, Vektoren
+  const add = (id: string, v: Expr | null) => {
+    if (v) out.push({ id, after: put(v) })
+  }
+  if (kind === 'abs' && t.kind === 'abs') for (const id of ABS_MISTAKES) add(id, absValue(t, id))
+  if (kind === 'arg' && t.kind === 'arg') for (const id of ARG_MISTAKES) add(id, argValue(t, id))
+  if (kind === 'length' && t.kind === 'length') for (const id of LENGTH_MISTAKES) add(id, lengthValue(t.vector, id))
+  if (kind === 'dot' && t.kind === 'dot') for (const id of DOT_MISTAKES) add(id, dotValue(t.left, t.right, id))
+  if (kind === 'angle' && t.kind === 'angle') for (const id of ANGLE_MISTAKES) add(id, angleValue(t.left, t.right, id))
   return out
 }

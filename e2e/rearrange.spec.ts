@@ -118,10 +118,12 @@ test('Umstellen: Lernkarten-Ordner mit durchgerechneten Beispielen', async ({ pa
   await expect(page.getByRole('heading', { name: 'Stufe 3' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Stufe 4' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Stufe 5' })).toBeVisible()
-  await expect(page.locator('main li a')).toHaveCount(18)
+  await expect(page.locator('main li a')).toHaveCount(20)
   await expect(page.getByRole('link', { name: /^Geometrische Summe und Reihe/ })).toBeVisible()
   await expect(page.getByRole('link', { name: /^Differentialgleichungen/ })).toBeVisible()
   await expect(page.getByRole('link', { name: /^Determinanten/ })).toBeVisible()
+  await expect(page.getByRole('link', { name: /^Betrag und Winkel komplexer Zahlen/ })).toBeVisible()
+  await expect(page.getByRole('link', { name: /^Vektoren: Länge, Skalarprodukt, Winkel/ })).toBeVisible()
   await expectCleanPage(page, 'Ordner')
 
   await page.getByRole('link', { name: /^Variable im Nenner/ }).click()
@@ -324,6 +326,54 @@ test('Umstellen Stufe 5 frei: Determinante, in Zeilen statt über Kreuz, mehrdeu
   await enter(page, 'x=\\ln\\left(\\frac{y+\\sqrt{y^2+4ab}}{2b}\\right)')
   await expect(feedback(page)).toContainText('Richtig!')
   await expectCleanPage(page, 'Richtig Stufe 5 Determinante')
+})
+
+test('Umstellen Stufe 5: Winkel zwischen Vektoren geführt (Beispiel aus dem Plan), nichts wischt seitlich, mit Lernkarte aus Teil 8b', async ({ page }) => {
+  // \sphericalangle\left((x, k, m), (1, 0, 0)\right) = y mit y < \frac{\pi}{2}
+  await page.goto('./#/ueben/umstellen/5-1899')
+  await expect(page.getByText('Was steht da eigentlich?')).toBeVisible()
+  await expect(page.locator('#question')).toContainText('Winkel zwischen den Vektoren')
+  await expectCleanPage(page, 'Start Stufe 5 Winkel')
+  // richtig und drei Fehler: nicht durch die Längen geteilt, Sinus statt Kosinus, Wurzel vergessen
+  await expect(answers(page)).toHaveCount(4)
+  await solveWholeTask(page, (step) => expectNoInnerScroll(page, `Frage ${step + 1}`))
+  await expect(page.getByTestId('result')).toBeVisible()
+  const cards = page.getByRole('navigation', { name: 'Lernkarten zu dieser Aufgabe' })
+  await expect(cards.getByRole('link', { name: /^Vektoren: Länge, Skalarprodukt, Winkel/ })).toBeVisible()
+  await expectCleanPage(page, 'Stufe 5 Winkel')
+
+  await cards.getByRole('link', { name: /^Vektoren: Länge, Skalarprodukt, Winkel/ }).click()
+  await expect(page.getByRole('heading', { name: 'Vektoren: Länge, Skalarprodukt, Winkel', level: 1 })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Beispiel' })).toBeVisible()
+  await expectCleanPage(page, 'Lernkarte Vektoren')
+})
+
+test('Umstellen Stufe 5 frei: Betrag eines Bruchs (Beispiel aus dem Plan), Wurzel vergessen, dann richtig', async ({ page }) => {
+  // \left\lvert\frac{x + a\mathrm{i}}{x - b\mathrm{i}}\right\rvert = y
+  await page.goto('./#/frei/umstellen/5-381')
+  await expect(field(page)).toBeVisible()
+  await expectCleanPage(page, 'Start Stufe 5 Betrag frei')
+  await expectNoInnerScroll(page, 'Start Stufe 5 Betrag frei')
+  await enter(page, '\\sqrt{\\frac{a^2-b^2y}{y-1}}')
+  await expect(feedback(page)).toContainText('Beim Betrag die Wurzel vergessen')
+  await enter(page, 'x=\\sqrt{\\frac{a^2-b^2y^2}{y^2-1}}')
+  await expect(feedback(page)).toContainText('Richtig!')
+  await expectCleanPage(page, 'Richtig Stufe 5 Betrag')
+})
+
+test('Umstellen Stufe 5: Winkel einer komplexen Zahl geführt, frei mit π im Ergebnis', async ({ page }) => {
+  // \arg\left((1 + \mathrm{i})(x + a\mathrm{i})\right) = y
+  await page.goto('./#/ueben/umstellen/5-1155')
+  await expect(page.locator('#question')).toContainText('Rechne den Winkel aus')
+  await solveWholeTask(page)
+  const cards = page.getByRole('navigation', { name: 'Lernkarten zu dieser Aufgabe' })
+  await expect(cards.getByRole('link', { name: /^Betrag und Winkel komplexer Zahlen/ })).toBeVisible()
+  await expectCleanPage(page, 'Stufe 5 Winkel komplex')
+
+  await page.goto('./#/frei/umstellen/5-1155')
+  await expect(field(page)).toBeVisible()
+  await enter(page, 'x=\\frac{a}{\\tan\\left(y-\\frac{\\pi}{4}\\right)}')
+  await expect(feedback(page)).toContainText('Richtig!')
 })
 
 test('Umstellen Stufe 4: sin² und cos², ein Quadrat ersetzen, Umkehrfunktion, mit beiden Lernkarten aus Teil 6b', async ({ page }) => {

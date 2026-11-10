@@ -135,12 +135,20 @@ export function fractionKeyboard(letters: readonly string[], blocks: boolean, ro
 const LOG_KEY: Key = { label: 'log<sub>a</sub>', insert: '\\log_{#?}\\left(#?\\right)', class: 'small' }
 
 // Bildschirm-Tastatur fürs Umstellen: links der Reihe nach die Buchstaben der Aufgabe (oft fünf oder
-// sechs), Hochzahlen, Klammern, bei Wurzeln √, bei e-Funktion und Logarithmus (Stufe 4) e^□, ln und log_a
-export function rearrangeKeyboard(letters: readonly string[], root: boolean, exp = false): VirtualKeyboardLayout {
+// sechs), Hochzahlen, Klammern, bei Wurzeln √, bei e-Funktion und Logarithmus (Stufe 4) e^□, ln und log_a,
+// mit \pi im Ergebnis (Stufe 5, Winkel komplexer Zahlen) π
+export function rearrangeKeyboard(letters: readonly string[], root: boolean, exp = false, pi = false): VirtualKeyboardLayout {
   return withNumberPad(
     'umstellen',
     'Umstellen',
-    flowKeys([...letters.map((l) => [l]), POWERS, BRACKETS, root ? [ROOT] : [], exp ? [{ latex: 'e^{#?}' }, fnKey('ln'), LOG_KEY] : []]),
+    flowKeys([
+      ...letters.map((l) => [l]),
+      POWERS,
+      BRACKETS,
+      root ? [ROOT] : [],
+      exp ? [{ latex: 'e^{#?}' }, fnKey('ln'), LOG_KEY] : [],
+      pi ? [{ latex: '\\pi' }] : [],
+    ]),
   )
 }
 
@@ -160,7 +168,7 @@ export function keyboardLayouts(spec: KeyboardSpec): VirtualKeyboardLayout[] {
     case 'fraction':
       return [fractionKeyboard(spec.letters, spec.blocks, spec.root, spec.imag, spec.hyperbolic)]
     case 'rearrange': {
-      const main = rearrangeKeyboard(spec.letters, spec.root, spec.exp)
+      const main = rearrangeKeyboard(spec.letters, spec.root, spec.exp, spec.pi)
       return spec.trig ? [main, REARRANGE_FUNCTIONS_KEYBOARD] : [main]
     }
   }

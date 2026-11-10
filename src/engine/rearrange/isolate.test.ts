@@ -9,7 +9,7 @@ import { generateRearrangeTask, isRearrangeLevelAvailable } from '../tasks/rearr
 import { LEVELS } from '../tasks/taskNumber.ts'
 import { holds, samplePoints, withSubstitution } from './check.ts'
 import { rearrangeWrongAnswers } from './errorRules.ts'
-import { STEP_NAMES, finalForm, solveEquation, solveTask, stepEquationLatex } from './isolate.ts'
+import { STEP_NAMES, finalForm, solveEquation, solveTask, stepEquationLatex, stepLabel } from './isolate.ts'
 import type { Condition } from './task.ts'
 
 const p = (latex: string): Expr => {
@@ -226,6 +226,60 @@ describe('Rechenweg Stufe 4, Teil 6b: Winkel- und Hyperbelfunktionen, Umkehrfunk
       'Umkehrfunktion auf beiden Seiten: 2x = \\arcsin\\left(\\frac{y - ab}{a}\\right)',
       'Beide Seiten teilen: x = \\frac{\\arcsin\\left(\\frac{y - ab}{a}\\right)}{2}',
     ])
+  })
+})
+
+// Winkel y zwischen Vektoren: spitz, also y < \frac{\pi}{2}
+const acute: Condition[] = [{ lhs: variable('y'), rel: '<', rhs: div(PI, num(2)) }]
+
+describe('Rechenweg Stufe 5, Teil 8b: Winkel zwischen Vektoren (spitzer Winkel als Buchstabe)', () => {
+  const solveAcute = (lhs: string) => solveEquation(eq(p(lhs), p('y')), 'x', { conditions: acute })!
+
+  it('nach dem Ausklammern 1 - cos² y durch sin² y ersetzen, das Ergebnis mit tan y', () => {
+    expect(lines('\\arccos\\left(\\frac{x}{\\sqrt{x^2+a^2+b^2}}\\right)', 'y', 'x', acute)).toEqual([
+      'Funktion auf beiden Seiten: \\frac{x}{\\sqrt{x^{2} + a^{2} + b^{2}}} = \\cos y',
+      'Beide Seiten malnehmen: x = \\cos y \\cdot \\sqrt{x^{2} + a^{2} + b^{2}}',
+      'Beide Seiten quadrieren: x^{2} = \\cos^{2} y \\cdot (x^{2} + a^{2} + b^{2})',
+      'Ausmultiplizieren: x^{2} = x^{2}\\cos^{2} y + a^{2}\\cos^{2} y + b^{2}\\cos^{2} y',
+      'Variable nach links, Rest nach rechts: x^{2} - \\cos^{2} y \\cdot x^{2} = a^{2}\\cos^{2} y + b^{2}\\cos^{2} y',
+      'Ausklammern: x^{2}(1 - \\cos^{2} y) = a^{2}\\cos^{2} y + b^{2}\\cos^{2} y',
+      'Quadrat ersetzen: x^{2}\\sin^{2} y = a^{2}\\cos^{2} y + b^{2}\\cos^{2} y',
+      'Beide Seiten teilen: x^{2} = \\frac{a^{2}\\cos^{2} y + b^{2}\\cos^{2} y}{\\sin^{2} y}',
+      'Wurzel ziehen: x = \\sqrt{\\frac{a^{2}\\cos^{2} y + b^{2}\\cos^{2} y}{\\sin^{2} y}}',
+      'Ergebnis: x = \\frac{\\sqrt{a^{2} + b^{2}}}{\\tan y}',
+    ])
+  })
+
+  it('andere Vektoren: zwei Einträge, 2x, Länge mit √2, arcsin, x nur im Nenner', () => {
+    expect(toLatex(solveAcute('\\arccos\\left(\\frac{x}{\\sqrt{x^2+a^2}}\\right)').result)).toBe('\\frac{a}{\\tan y}')
+    expect(toLatex(solveAcute('\\arccos\\left(\\frac{2x}{\\sqrt{4x^2+a^2}}\\right)').result)).toBe('\\frac{a}{2\\tan y}')
+    expect(toLatex(solveAcute('\\arccos\\left(\\frac{2x}{\\sqrt{4x^2+2a^2}}\\right)').result)).toBe('\\frac{a}{\\sqrt{2}\\tan y}')
+    expect(toLatex(solveAcute('\\arcsin\\left(\\frac{x}{\\sqrt{x^2+a^2}}\\right)').result)).toBe('a\\tan y')
+    expect(toLatex(solveAcute('\\arccos\\left(\\frac{a}{\\sqrt{x^2+a^2}}\\right)').result)).toBe('a\\tan y')
+  })
+
+  it('Texte: die Vorzahl steht vorn', () => {
+    const s = solveAcute('\\arccos\\left(\\frac{2x}{\\sqrt{4x^2+a^2}}\\right)')
+    const step = (kind: string) => s.steps.find((x) => x.kind === kind)!
+    expect(stepEquationLatex('pythagoras', step('pythagoras').after)).toBe('4x^{2}\\sin^{2} y = a^{2}\\cos^{2} y')
+    expect(stepLabel(step('pythagoras'), 'x')).toBe('$4 - 4\\cos^{2} y = 4\\sin^{2} y$ einsetzen')
+    expect(stepLabel(step('finish'), 'x')).toBe('Mit $\\tan y = \\frac{\\sin y}{\\cos y}$ zusammenfassen')
+  })
+
+  it('jeder Schritt durch Einsetzen geprüft', () => {
+    for (const lhs of ['\\arccos\\left(\\frac{x}{\\sqrt{x^2+a^2+b^2}}\\right)', '\\arccos\\left(\\frac{2x}{\\sqrt{4x^2+2a^2}}\\right)', '\\arccos\\left(\\frac{a}{\\sqrt{x^2+a^2}}\\right)']) {
+      const task = { equation: eq(p(lhs), p('y')), target: 'x', conditions: acute }
+      const solution = solveTask(task)!
+      const points = samplePoints(task, solution.result, createRng(`spitz:${lhs}`), 24, solution.requires)
+      expect(points.length, lhs).toBeGreaterThanOrEqual(16)
+      for (const step of [{ after: task.equation }, ...solution.steps]) for (const point of points) expect(holds(step.after, point), lhs).toBe(true)
+    }
+  })
+
+  it('ohne die Bedingung y < π/2 bleibt der Rechenweg wie bisher', () => {
+    const steps = lines('\\arccos\\left(\\frac{x}{\\sqrt{x^2+a^2}}\\right)', 'y')
+    expect(steps.some((line) => line.startsWith('Quadrat ersetzen'))).toBe(false)
+    expect(steps.at(-1)).toBe('Wurzel ziehen: x = \\sqrt{\\frac{a^{2}\\cos^{2} y}{1 - \\cos^{2} y}}')
   })
 })
 
