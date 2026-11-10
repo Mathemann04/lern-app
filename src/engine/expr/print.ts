@@ -67,6 +67,9 @@ export function toolLatex(tool: Tool): string {
       return `\\left\\lvert ${columnLatex(tool.vector)} \\right\\rvert`
     case 'dot':
       return `${columnLatex(tool.left)} \\cdot ${columnLatex(tool.right)}`
+    // Additionstheorem (Teil 8c): wie die Funktion
+    case 'theorem':
+      return toLatex(tool.body)
     case 'angle':
       return `\\sphericalangle\\left(${columnLatex(tool.left)}, ${columnLatex(tool.right)}\\right)`
   }
@@ -281,6 +284,7 @@ function isPositiveIntegerLiteral(e: Expr): boolean {
 }
 
 function printPow(base: Expr, exponent: Expr): string {
+  if (base.kind === 'var' && base.tool?.kind === 'theorem') return printPow(base.tool.body, exponent)
   const exp = toLatex(exponent)
   if (base.kind === 'fn' && POWER_ON_NAME.has(base.name) && isPositiveIntegerLiteral(exponent)) {
     return `${FN_LATEX[base.name]}^{${exp}}${printArg(base.arg)}`

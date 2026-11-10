@@ -74,6 +74,8 @@ export type Tool =
   | { readonly kind: 'dot'; readonly left: readonly Expr[]; readonly right: readonly Expr[] }
   // Winkel zwischen zwei Vektoren \sphericalangle\left(…, …\right), zwischen 0 und \pi
   | { readonly kind: 'angle'; readonly left: readonly Expr[]; readonly right: readonly Expr[] }
+  // Additionstheorem bzw. doppelter Winkel (Teil 8c): body ist die Funktion, wie sie dasteht, \sin(x + a), \cos(2x)
+  | { readonly kind: 'theorem'; readonly body: Expr }
 
 // Gebundene Variable eines Werkzeugs (bei der Ableitung keine: dort ist v die Stelle) und die Teile
 // außerhalb des Rumpfs (Grenzen)

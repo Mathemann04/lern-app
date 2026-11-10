@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { equationToLatex, toLatex } from '../expr/print.ts'
-import { type Expr, IMAG, PI, add, div, eq, exp, mul, neg, num, pow, sin, sub, variable } from '../expr/types.ts'
+import { type Expr, IMAG, PI, add, cos, div, eq, exp, mul, neg, num, pow, sin, sub, variable } from '../expr/types.ts'
 import { parseLatex } from '../parse/latex.ts'
 import { REARRANGE_ERROR_RULES, rearrangeWrongAnswers } from './errorRules.ts'
 import { solveEquation, solveTask } from './isolate.ts'
 import type { Condition } from './task.ts'
-import { absOf, angleOf, argOf, derivativeOf, detOf, dotOf, integralOf, lengthOf, limitOf, odeOf, seriesOf, sumOf } from './tools/tool.ts'
+import { absOf, angleOf, argOf, derivativeOf, detOf, dotOf, integralOf, lengthOf, limitOf, odeOf, seriesOf, sumOf, theoremOf } from './tools/tool.ts'
 
 const p = (latex: string): Expr => {
   const r = parseLatex(latex)
@@ -81,8 +81,15 @@ const columnDet = detOf([
 const xai = add(x, mul(a, IMAG))
 const mirror = angleOf([x, a], [x, neg(a)])
 const planDot = dotOf([x, a], [add(x, b), neg(variable('c'))])
+// Schritt 8c: \cos(x + a) = y\sin x und \cos(2x) = y\sin x bzw. y\cos x, mit x < \frac{\pi}{2}
+const acuteX: Condition[] = [{ lhs: x, rel: '<', rhs: div(PI, num(2)) }]
+const cosSum = theoremOf(cos(add(x, a)))
+const cosDouble = theoremOf(cos(mul(num(2), x)))
+const ySin = mul(variable('y'), sin(x))
+const yCos = mul(variable('y'), cos(x))
 
-const TOOL_CATALOG: Array<{ id: string; lhs: Expr; target?: string; conditions?: Condition[]; after: string }> = [
+// rhs: andere Seite der Gleichung, sonst y
+const TOOL_CATALOG: Array<{ id: string; lhs: Expr; rhs?: Expr; target?: string; conditions?: Condition[]; after: string }> = [
   {
     id: 'eq-partial-factor',
     lhs: integralOf(div(num(1), mul(t, add(t, variable('b')))), variable('a'), variable('x')),
@@ -140,6 +147,14 @@ const TOOL_CATALOG: Array<{ id: string; lhs: Expr; target?: string; conditions?:
   { id: 'eq-vec-dot-cross', lhs: planDot, after: 'a(x + b) - cx = y' },
   { id: 'eq-vec-length-root', lhs: lengthOf([variable('x'), variable('a'), variable('b')]), after: 'x^{2} + a^{2} + b^{2} = y' },
   { id: 'eq-vec-length-termwise', lhs: lengthOf([variable('x'), variable('a'), variable('b')]), after: 'x + a + b = y' },
+  // Schritt 8c: Additionstheoreme und doppelter Winkel
+  { id: 'eq-add-termwise', lhs: cosSum, rhs: ySin, conditions: acuteX, after: '\\cos x + \\cos a = y\\sin x' },
+  { id: 'eq-add-sign', lhs: cosSum, rhs: ySin, conditions: acuteX, after: '\\cos x \\cdot \\cos a + \\sin x \\cdot \\sin a = y\\sin x' },
+  { id: 'eq-add-partner', lhs: cosSum, rhs: ySin, conditions: acuteX, after: '\\cos x \\cdot \\sin a - \\sin x \\cdot \\cos a = y\\sin x' },
+  { id: 'eq-double-factor', lhs: cosDouble, rhs: ySin, conditions: acuteX, after: '2\\cos x = y\\sin x' },
+  { id: 'eq-double-two', lhs: cosDouble, rhs: ySin, conditions: acuteX, after: '1 - \\sin^{2} x = y\\sin x' },
+  { id: 'eq-double-cos-plus', lhs: cosDouble, rhs: ySin, conditions: acuteX, after: '\\cos^{2} x + \\sin^{2} x = y\\sin x' },
+  { id: 'eq-double-cos-sign', lhs: cosDouble, rhs: yCos, conditions: acuteX, after: '1 - 2\\cos^{2} x = y\\cos x' },
 ]
 
 describe('Katalog der Fehlerregeln', () => {
@@ -148,8 +163,8 @@ describe('Katalog der Fehlerregeln', () => {
   })
 
   for (const c of TOOL_CATALOG) {
-    it(`${c.id}: ${equationToLatex(eq(c.lhs, variable('y')))}`, () => {
-      const task = { equation: eq(c.lhs, variable('y')), target: c.target ?? 'x', conditions: c.conditions ?? [] }
+    it(`${c.id}: ${equationToLatex(eq(c.lhs, c.rhs ?? variable('y')))}`, () => {
+      const task = { equation: eq(c.lhs, c.rhs ?? variable('y')), target: c.target ?? 'x', conditions: c.conditions ?? [] }
       const found = rearrangeWrongAnswers(task, solveTask(task)!).filter((w) => w.rule.id === c.id)
       expect(found.map((w) => equationToLatex(w.after))).toContain(c.after)
     })

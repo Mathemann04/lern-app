@@ -118,20 +118,60 @@ test('Umstellen: Lernkarten-Ordner mit durchgerechneten Beispielen', async ({ pa
   await expect(page.getByRole('heading', { name: 'Stufe 3' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Stufe 4' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Stufe 5' })).toBeVisible()
-  await expect(page.locator('main li a')).toHaveCount(20)
+  await expect(page.locator('main li a')).toHaveCount(21)
   await expect(page.getByRole('link', { name: /^Geometrische Summe und Reihe/ })).toBeVisible()
   await expect(page.getByRole('link', { name: /^Differentialgleichungen/ })).toBeVisible()
   await expect(page.getByRole('link', { name: /^Determinanten/ })).toBeVisible()
   await expect(page.getByRole('link', { name: /^Betrag und Winkel komplexer Zahlen/ })).toBeVisible()
   await expect(page.getByRole('link', { name: /^Vektoren: Länge, Skalarprodukt, Winkel/ })).toBeVisible()
+  await expect(page.getByRole('link', { name: /^Additionstheoreme/ })).toBeVisible()
   await expectCleanPage(page, 'Ordner')
 
   await page.getByRole('link', { name: /^Variable im Nenner/ }).click()
   await expect(page.getByRole('heading', { name: 'Variable im Nenner', level: 1 })).toBeVisible()
   await expect(page.getByRole('region', { name: 'Beispiel' })).toContainText('Beide Seiten mal')
-  // gezielt üben kommt erst später für dieses Thema
-  await expect(page.getByRole('link', { name: 'Gezielt üben' })).toHaveCount(0)
+  // gezielt üben für jeden typischen Fehler der Karte (seit Schritt 9)
+  await expect(page.getByRole('link', { name: 'Gezielt üben' }).first()).toBeVisible()
   await expectCleanPage(page, 'Lernkarte')
+})
+
+test('Umstellen funktioniert offline: geführt, frei und gezielt üben', async ({ page, context }) => {
+  await page.goto('./')
+  await expect(page.getByTestId('offline-status')).toHaveText('Offline nutzbar ✓', { timeout: 15_000 })
+  await context.setOffline(true)
+  await page.reload()
+  await page.getByRole('link', { name: /^Grundlagen/ }).click()
+  await page.getByRole('link', { name: /^Gleichungen umstellen/ }).click()
+  await expect(page.getByRole('heading', { name: 'Gleichungen umstellen', level: 1 })).toBeVisible()
+
+  // geführt: Additionstheorem (Beispiel aus dem Plan) ganz durch
+  await page.goto('./#/ueben/umstellen/5-2333')
+  await solveWholeTask(page)
+  await expectCleanPage(page, 'offline geführt')
+
+  // frei: doppelter Winkel
+  await page.goto('./#/frei/umstellen/5-1539')
+  await expect(field(page)).toBeVisible()
+  await enter(page, 'x=\\arcsin\\left(\\frac{\\sqrt{y^2+8}-y}{4}\\right)')
+  await expect(feedback(page)).toContainText('Richtig!')
+
+  // gezielt üben: Die Suche lädt erst jetzt, auch offline
+  await page.goto('./#/ueben/umstellen/2?fokus=eq-sign-not-flipped')
+  await expect(page).toHaveURL(/#\/ueben\/umstellen\/\d-\d+\?fokus=eq-sign-not-flipped$/, { timeout: 20_000 })
+  await expect(page.getByText('Gezielt üben:')).toBeVisible()
+  await expectCleanPage(page, 'offline gezielt')
+})
+
+test('Umstellen gezielt üben: „Beim Betrag die Wurzel vergessen" von der Lernkarte aus, findet eine Aufgabe der Stufe 5', async ({ page }) => {
+  await page.goto('./#/karten/umstellen/rearrange-complex')
+  const error = page.locator('li').filter({ hasText: /^Beim Betrag die Wurzel vergessen/ }).first()
+  await error.getByRole('link', { name: 'Gezielt üben' }).click()
+  await expect(page).toHaveURL(/#\/ueben\/umstellen\/5-\d+\?fokus=eq-abs-root$/, { timeout: 20_000 })
+  await expect(page.getByText('Gezielt üben:')).toBeVisible()
+  // der Fehler passiert gleich beim Ausrechnen des Betrags: „Was steht da eigentlich?"
+  await expect(page.getByText('Was steht da eigentlich?')).toBeVisible()
+  await expect(page.locator('#question')).toContainText('Betrag')
+  await expectCleanPage(page, 'Gezielt üben Betrag')
 })
 
 test('Umstellen Stufe 3: zwei Wurzeln, zweimal quadrieren geführt, mit Lernkarte „Wurzel und Quadrat"', async ({ page }) => {
@@ -395,6 +435,42 @@ test('Umstellen Stufe 5: Winkel einer komplexen Zahl geführt, frei mit π im Er
   }
   await enter(page, 'x=\\frac{a}{\\tan\\left(y-\\frac{\\pi}{4}\\right)}')
   await expect(feedback(page)).toContainText('Richtig!')
+})
+
+test('Umstellen Stufe 5: Additionstheorem geführt (Beispiel aus dem Plan), durch cos x teilen, mit Lernkarte aus Teil 8c', async ({ page }) => {
+  // b\sin(x + a) = y\cos x mit x < \frac{\pi}{2}
+  await page.goto('./#/ueben/umstellen/5-2333')
+  await expect(page.getByText('Was steht da eigentlich?')).toBeVisible()
+  await expect(page.locator('#question')).toContainText('mit dem Additionstheorem aus')
+  await expectCleanPage(page, 'Start Stufe 5 Additionstheorem')
+  // richtig und drei Fehler: gliedweise, Vorzeichen in der Mitte, Sinus und Kosinus falsch gepaart
+  await expect(answers(page)).toHaveCount(4)
+  await solveWholeTask(page, (step) => expectNoInnerScroll(page, `Frage ${step + 1}`))
+  await expect(page.getByTestId('result')).toBeVisible()
+  const cards = page.getByRole('navigation', { name: 'Lernkarten zu dieser Aufgabe' })
+  await expect(cards.getByRole('link', { name: /^Additionstheoreme/ })).toBeVisible()
+  await expectCleanPage(page, 'Stufe 5 Additionstheorem')
+
+  await cards.getByRole('link', { name: /^Additionstheoreme/ }).click()
+  await expect(page.getByRole('heading', { name: 'Additionstheoreme', level: 1 })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Beispiel' })).toBeVisible()
+  await expectCleanPage(page, 'Lernkarte Additionstheoreme')
+  await expectNoInnerScroll(page, 'Lernkarte Additionstheoreme')
+})
+
+test('Umstellen Stufe 5 frei: doppelter Winkel (Beispiel aus dem Plan), Plus statt Minus, die 2 vorgezogen, dann richtig', async ({ page }) => {
+  // \cos(2x) = y\sin x mit x < \frac{\pi}{2}
+  await page.goto('./#/frei/umstellen/5-1539')
+  await expect(field(page)).toBeVisible()
+  await expectCleanPage(page, 'Start Stufe 5 doppelter Winkel frei')
+  await enter(page, '\\arcsin\\left(\\frac{1}{y}\\right)')
+  await expect(feedback(page)).toContainText('Plus statt Minus')
+  await enter(page, '\\arctan\\left(\\frac{2}{y}\\right)')
+  await expect(feedback(page)).toContainText('aus dem Winkel vor die Funktion gezogen')
+  await expectCleanPage(page, 'Stufe 5 doppelter Winkel frei, Fehler')
+  await enter(page, 'x=\\arcsin\\left(\\frac{\\sqrt{y^2+8}-y}{4}\\right)')
+  await expect(feedback(page)).toContainText('Richtig!')
+  await expectCleanPage(page, 'Richtig Stufe 5 doppelter Winkel')
 })
 
 test('Umstellen Stufe 4: sin² und cos², ein Quadrat ersetzen, Umkehrfunktion, mit beiden Lernkarten aus Teil 6b', async ({ page }) => {

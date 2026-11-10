@@ -2,8 +2,9 @@ import { equationToLatex, toLatex } from '../expr/print.ts'
 import { contains, subterms } from '../expr/compare.ts'
 import type { Expr } from '../expr/types.ts'
 import { holds, samplePoints } from '../rearrange/check.ts'
+import { rearrangeWrongAnswers } from '../rearrange/errorRules.ts'
 import { hasNestedFraction as hasNestedResult } from '../rearrange/finished.ts'
-import { solveTask } from '../rearrange/isolate.ts'
+import { solveTask, stepEquationLatex } from '../rearrange/isolate.ts'
 import { type RearrangeTask, givenLatex, taskVariables } from '../rearrange/task.ts'
 import { type Rng, createRng } from '../random/rng.ts'
 import { latexWidthEm } from './latexWidth.ts'
@@ -17,7 +18,7 @@ import {
   buildLevel4Trig,
   buildLevel5Det,
   buildLevel5Ode,
-  buildLevel5Polar,
+  buildLevel5Polar, buildLevel5Theorem,
   buildLevel5Series,
   buildLevel5Tools,
 } from './rearrangeKit.ts'
@@ -43,6 +44,9 @@ export type RearrangeTemplate = {
   // das Ergebnis muss am Handy in eine Zeile passen (Teil 7c: nach der pq-Formel stehen sonst lange
   // Wurzeln da); ältere Vorlagen ohne diese Prüfung behalten ihre Aufgaben
   readonly narrow?: boolean
+  // typische Fehler, die vor allem in dieser Vorlage vorkommen: Gezielt üben sucht sie zuerst hier
+  // (rearrangeFocus.ts)
+  readonly focus?: readonly string[]
 }
 
 export type GeneratedRearrangeTask = {
@@ -69,6 +73,8 @@ const level2Kit: RearrangeTemplate = {
   label: 'Baukasten: Variable mehrfach oder im Nenner',
   build: (rng) => buildLevel2(rng).task,
   buildLabeled: buildLevel2,
+  // gezielt üben: hier zuerst gesucht (rearrangeFocus.ts)
+  focus: ['frac-distribute-first-only'],
 }
 
 // --- Stufe 3: Brüche, Wurzeln und Quadrate, Kerne ineinander (Baukasten) ---
@@ -79,6 +85,8 @@ const level3Kit: RearrangeTemplate = {
   label: 'Baukasten: Kerne ineinander, gegeneinander oder in einer Summe',
   build: (rng) => buildLevel3(rng).task,
   buildLabeled: buildLevel3,
+  // gezielt üben: hier zuerst gesucht (rearrangeFocus.ts)
+  focus: ['eq-reciprocal-termwise', 'eq-square-middle', 'frac-distribute-first-only'],
 }
 
 // --- Stufe 4: verschachtelt mit e-Funktion, Logarithmus, Wurzeln in Wurzeln (Baukasten, Teil 6a) ---
@@ -89,6 +97,8 @@ const level4Kit: RearrangeTemplate = {
   label: 'Baukasten: e-Funktion, Logarithmus, Wurzeln in Wurzeln, Potenz- und Logarithmusgesetze',
   build: (rng) => buildLevel4(rng).task,
   buildLabeled: buildLevel4,
+  // gezielt üben: hier zuerst gesucht (rearrangeFocus.ts)
+  focus: ['eq-nested-root', 'eq-power-sum', 'eq-log-product', 'eq-log-sum', 'eq-log-quotient'],
 }
 
 // Teil 6b: Winkel- und Hyperbelfunktionen, Umkehrfunktionen
@@ -99,6 +109,8 @@ const level4Trig: RearrangeTemplate = {
   build: (rng) => buildLevel4Trig(rng).task,
   buildLabeled: buildLevel4Trig,
   share: 0.35,
+  // gezielt üben: hier zuerst gesucht (rearrangeFocus.ts)
+  focus: ['eq-inverse-forgotten', 'eq-inverse-reciprocal', 'eq-divide-inside-arc', 'eq-pythagoras-square', 'eq-hyperbolic-sign', 'eq-tan-flipped', 'eq-divide-cos-partly'],
 }
 
 // Teil 6c: Substitution und pq-Formel; der Anteil gilt unter den Nummern, die nicht schon zu 6b gehören
@@ -109,6 +121,8 @@ const level4Quadratic: RearrangeTemplate = {
   build: (rng) => buildLevel4Quadratic(rng).task,
   buildLabeled: buildLevel4Quadratic,
   share: 0.4,
+  // gezielt üben: hier zuerst gesucht (rearrangeFocus.ts)
+  focus: ['eq-substitute-power', 'eq-substitute-reciprocal', 'eq-pq-sign', 'eq-pq-q-sign', 'eq-pq-half', 'eq-spurious-root', 'eq-not-resubstituted'],
 }
 
 // --- Stufe 5: quer durch die Mathematik, erst das Werkzeug ausrechnen (Teil 7a: Ableitungen, Integrale) ---
@@ -119,6 +133,8 @@ const level5Tools: RearrangeTemplate = {
   label: 'Baukasten: Ableitungen und Integrale',
   build: (rng) => buildLevel5Tools(rng).task,
   buildLabeled: buildLevel5Tools,
+  // gezielt üben: hier zuerst gesucht (rearrangeFocus.ts)
+  focus: ['eq-partial-factor', 'eq-int-inner-factor', 'eq-int-derived', 'eq-int-power', 'eq-int-sign', 'eq-int-bounds-swapped', 'eq-int-lower-forgotten'],
 }
 
 // Teil 7b: Summen, Reihen und Grenzwerte, mit festem Anteil (die übrigen Nummern behalten ihre Aufgabe)
@@ -130,6 +146,8 @@ const level5Series: RearrangeTemplate = {
   buildLabeled: buildLevel5Series,
   share: 0.4,
   novel: true,
+  // gezielt üben: hier zuerst gesucht (rearrangeFocus.ts)
+  focus: ['eq-sum-count', 'eq-series-start', 'eq-series-sign', 'eq-series-not-geometric', 'eq-lim-one', 'eq-lim-exponent', 'eq-lim-denominator'],
 }
 
 // Teil 7c: Differentialgleichungen; der Anteil gilt unter den Nummern, die nicht schon zu 7b gehören
@@ -142,6 +160,8 @@ const level5Ode: RearrangeTemplate = {
   share: 0.3,
   novel: true,
   narrow: true,
+  // gezielt üben: hier zuerst gesucht (rearrangeFocus.ts)
+  focus: ['eq-ode-initial-unused', 'eq-ode-not-halved', 'eq-ode-inner-factor', 'eq-ode-oscillation', 'eq-ode-root', 'eq-ode-constant-added', 'eq-ode-exp-sign', 'eq-ode-constant-start', 'eq-substitute-reciprocal'],
 }
 
 // Teil 8a: Determinanten; der Anteil gilt unter den Nummern, die weder zu 7b noch zu 7c gehören
@@ -154,6 +174,8 @@ const level5Det: RearrangeTemplate = {
   share: 0.25,
   novel: true,
   narrow: true,
+  // gezielt üben: hier zuerst gesucht (rearrangeFocus.ts)
+  focus: ['eq-det-plus', 'eq-det-swapped', 'eq-det-rows', 'eq-det-main', 'eq-det-checkerboard', 'eq-det-entry'],
 }
 
 // Teil 8b: Betrag und Winkel komplexer Zahlen, Vektoren; der Anteil gilt unter den Nummern, die zu keiner
@@ -167,6 +189,22 @@ const level5Polar: RearrangeTemplate = {
   share: 0.3,
   novel: true,
   narrow: true,
+  // gezielt üben: hier zuerst gesucht (rearrangeFocus.ts)
+  focus: ['eq-abs-termwise', 'eq-abs-root', 'eq-abs-imag-squared', 'eq-arg-power', 'eq-arg-swapped', 'eq-arg-arctan-forgotten', 'eq-arg-quotient-sign', 'eq-vec-not-divided', 'eq-vec-one-length', 'eq-vec-sine', 'eq-vec-dot-sign', 'eq-vec-dot-cross', 'eq-vec-length-termwise', 'eq-vec-length-root', 'eq-root-termwise'],
+}
+
+// Teil 8c: Additionstheoreme; der Anteil gilt unter den Nummern, die zu keiner späteren Vorlage gehören (also zu 7a)
+const level5Theorem: RearrangeTemplate = {
+  id: 'baukasten-5-additionstheoreme',
+  level: 5,
+  label: 'Baukasten: Additionstheoreme',
+  build: (rng) => buildLevel5Theorem(rng).task,
+  buildLabeled: buildLevel5Theorem,
+  share: 0.35,
+  novel: true,
+  narrow: true,
+  // gezielt üben: hier zuerst gesucht (rearrangeFocus.ts)
+  focus: ['eq-add-termwise', 'eq-add-sign', 'eq-add-partner', 'eq-double-factor', 'eq-double-two', 'eq-double-cos-plus', 'eq-double-cos-sign', 'eq-inverse-forgotten', 'eq-inverse-reciprocal', 'eq-tan-flipped', 'eq-divide-cos-partly'],
 }
 
 export const REARRANGE_TEMPLATES: readonly RearrangeTemplate[] = [
@@ -181,6 +219,7 @@ export const REARRANGE_TEMPLATES: readonly RearrangeTemplate[] = [
   level5Ode,
   level5Det,
   level5Polar,
+  level5Theorem,
 ]
 
 export function rearrangeTemplatesForLevel(level: Level): RearrangeTemplate[] {
@@ -209,9 +248,16 @@ const MAX_DET_WIDTH = 12
 // Ergebnis mit Determinante: Im Kasten am Handy (318 Pixel, kleinste Schrift) passen etwa 17,7 em
 const MAX_DET_RESULT_WIDTH = 16.5
 // Werkzeuge, deren Breite geschätzt wird: Determinante (8a), Betrag, Winkel und Vektoren (8b)
-const WIDE_TOOLS = new Set(['det', 'abs', 'arg', 'length', 'dot', 'angle'])
+// und Additionstheoreme (8c)
+const WIDE_TOOLS = new Set(['det', 'abs', 'arg', 'length', 'dot', 'angle', 'theorem'])
 const hasDet = (t: RearrangeTask) =>
   [t.equation.lhs, t.equation.rhs].flatMap((side) => subterms(side)).some((s) => s.kind === 'var' && s.tool !== undefined && WIDE_TOOLS.has(s.tool.kind))
+// Additionstheoreme (8c): Ausgeschrieben werden die Gleichungen lang (vier Produkte wie \sin x \cdot \cos a). Jede
+// Gleichung des Rechenwegs und jede falsche Antwort muss am Handy in eine Zeile passen; am Browser gemessen passen
+// in den Antworten etwa 23 em, 20 em sicher
+const MAX_THEOREM_STEP_WIDTH = 21
+const hasTheorem = (t: RearrangeTask) =>
+  [t.equation.lhs, t.equation.rhs].flatMap((side) => subterms(side)).some((s) => s.kind === 'var' && s.tool?.kind === 'theorem')
 
 // Wie oft kommt die gesuchte Variable vor, und steht sie in einem Nenner?
 function occurrences(t: RearrangeTask): { count: number; inDenominator: boolean } {
@@ -256,7 +302,18 @@ function isGood(t: RearrangeTask, level: Level, kit: boolean, novel = false, nar
   if (level === 5 && subterms(solution.result).some((s) => s.kind === 'root' && s.arg.kind === 'add' && subterms(s.arg).some((p) => p.kind === 'div'))) return false
   const points = samplePoints(t, solution.result, createRng('brauchbar'), 8, solution.requires)
   // Gegenprobe: Die Lösung erfüllt die Aufgabe an allen Prüfstellen
-  return points.length >= 8 && points.every((p) => holds(t.equation, p) === true)
+  if (points.length < 8 || !points.every((p) => holds(t.equation, p) === true)) return false
+  // mit Additionstheorem: kein Schritt und keine falsche Antwort zu breit fürs Handy; kein Minus, das sich
+  // herausziehen ließe, direkt unter der Wurzel oder in der Klammer (\sqrt{-\frac{a}{y - 2a + b}})
+  if (level === 5 && hasTheorem(t)) {
+    if (/\\sqrt\{-|\\left\(-/.test(toLatex(solution.result))) return false
+    // nicht nur winzige x (sonst ist \sin x fast x, und falsche Antworten stimmen an vielen Prüfstellen)
+    if (!points.some((p) => p[t.target] > 0.2)) return false
+    const wide = (latex: string) => latexWidthEm(latex) > MAX_THEOREM_STEP_WIDTH
+    if (solution.steps.some((s) => wide(stepEquationLatex(s.kind, s.after)))) return false
+    if (rearrangeWrongAnswers(t, solution).some((w) => wide(equationToLatex(w.after)))) return false
+  }
+  return true
 }
 
 // Ergebnis, das am Handy (390 Pixel breit, kleinste Schrift) in eine Zeile passt: höchstens 90 Zeichen
@@ -275,6 +332,15 @@ const MAX_RESULT_LATEX: Record<Level, number> = { 1: 90, 2: 90, 3: 90, 4: 120, 5
 function sharedPick(ref: TaskRef, templates: readonly RearrangeTemplate[]): RearrangeTemplate | null {
   const rng = createRng(`umstellen-anteil:${ref.level}:${ref.seed}`)
   return templates.find((t) => t.share !== undefined && rng.next() < t.share) ?? null
+}
+
+// Vorlage, die eine Nummer sehr wahrscheinlich nimmt, ohne die Aufgabe zu bauen (schnell): die mit festem Anteil
+// oder die erste Wahl unter den übrigen. Passt deren Aufgabe nicht, wählt generateRearrangeTask neu.
+export function likelyRearrangeTemplate(ref: TaskRef): RearrangeTemplate | null {
+  const templates = rearrangeTemplatesForLevel(ref.level)
+  if (templates.length === 0) return null
+  const regular = templates.filter((t) => t.share === undefined)
+  return sharedPick(ref, templates) ?? createRng(`umstellen:${ref.level}:${ref.seed}`).pick(regular)
 }
 
 // Erzeugt die Aufgabe zu einer Aufgaben-Nummer. Gleiche Nummer → gleiche Aufgabe.

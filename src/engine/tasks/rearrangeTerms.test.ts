@@ -31,7 +31,7 @@ describe.each(KIT_LEVELS)('Abwechslung Stufe %i', (level) => {
   })
 })
 
-const TOOL_STEPS = new Set(['derive', 'partial', 'antiderivative', 'sumFormula', 'series', 'limit', 'ode', 'det', 'detExpand', 'abs', 'arg', 'length', 'dot', 'angle'])
+const TOOL_STEPS = new Set(['derive', 'partial', 'antiderivative', 'sumFormula', 'series', 'limit', 'ode', 'det', 'detExpand', 'abs', 'arg', 'length', 'dot', 'angle', 'addition', 'doubleAngle'])
 
 describe('Baukasten der Stufen 1 bis 5', () => {
   const tasks = (level: Level) => Array.from({ length: 200 }, (_, i) => generateRearrangeTask({ level, seed: i + 1 }).task)
@@ -124,7 +124,7 @@ describe('Baukasten der Stufen 1 bis 5', () => {
     expect([...blocks].sort()).toEqual(['fn', 'ohne', 'pow', 'root'])
   })
 
-  it('Stufe 5, Teile 7a bis 8b: in jeder Aufgabe ein Werkzeug, im Mittel mindestens 8 Umformungen', () => {
+  it('Stufe 5, Teile 7a bis 8c: in jeder Aufgabe ein Werkzeug, im Mittel mindestens 8 Umformungen', () => {
     const all = tasks(5)
     const solutions = all.map((t) => solveTask(t)!)
     const lengths = solutions.map((s) => s.steps.length)

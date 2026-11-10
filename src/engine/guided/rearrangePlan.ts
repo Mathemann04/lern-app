@@ -33,6 +33,9 @@ import {
   explainDot,
   explainAngle,
   explainAcuteFinish,
+  explainAddition,
+  theoremErrorText,
+  explainDouble,
   explainAcuteMove,
   explainAcutePythagoras,
   acutePythagorasMoves,
@@ -85,6 +88,7 @@ import {
 import { type RearrangeTask, conditionLatex, conditionsText, taskLatex } from '../rearrange/task.ts'
 import { detWorkLatex, expandWork } from '../rearrange/tools/determinant.ts'
 import { polarWork } from '../rearrange/tools/polar.ts'
+import { theoremWork } from '../rearrange/tools/theorem.ts'
 import { angleWork, dotWorkLatex, lengthWorkLatex } from '../rearrange/tools/vector.ts'
 import { odeWork } from '../rearrange/tools/ode.ts'
 import { activeTool } from '../rearrange/tools/tool.ts'
@@ -190,6 +194,8 @@ const TOOL_KINDS = new Set<StepKind | undefined>([
   'length',
   'dot',
   'angle',
+  'addition',
+  'doubleAngle',
 ])
 
 const TOOL_QUESTIONS: Partial<Record<StepKind, string>> = {
@@ -208,6 +214,8 @@ const TOOL_QUESTIONS: Partial<Record<StepKind, string>> = {
   length: 'Rechne die Länge des Vektors aus: Was kommt heraus?',
   dot: 'Rechne das Skalarprodukt aus: Was kommt heraus?',
   angle: 'Rechne den Winkel zwischen den Vektoren aus: Was kommt heraus?',
+  addition: 'Wende das Additionstheorem an: Was kommt heraus?',
+  doubleAngle: 'Schreibe mit dem einfachen Winkel: Was kommt heraus?',
 }
 
 // Tipp zur ganzen Aufgabe nach dem ersten Werkzeug-Schritt
@@ -227,6 +235,8 @@ const TASK_TOOL: Partial<Record<StepKind, TaskTool>> = {
   length: 'vector',
   dot: 'vector',
   angle: 'vector',
+  addition: 'theorem',
+  doubleAngle: 'double',
 }
 
 // --- Weichen: Schritte, bei denen man wissen muss, was als Nächstes kommt ---
@@ -350,6 +360,8 @@ function moveQuestion(step: RearrangeStep, t: string, target: string): MoveQuest
     case 'length':
     case 'dot':
     case 'angle':
+    case 'addition':
+    case 'doubleAngle':
       return null
     case 'add': {
       if (!side || !step.operand) return null
@@ -462,7 +474,7 @@ function moveQuestion(step: RearrangeStep, t: string, target: string): MoveQuest
       const hyperbolic = cos.name === 'cosh'
       const sin = toLatex(fn(hyperbolic ? 'sinh' : 'sin', cos.arg))
       const tan = toLatex(fn(hyperbolic ? 'tanh' : 'tan', cos.arg))
-      const where = side ? 'Im Zähler und Nenner' : 'Auf beiden Seiten'
+      const where = side ? 'Im Zähler und Nenner' : 'In der Gleichung'
       return {
         question: `${where} stehen $${sin}$ und $${toLatex(cos)}$. Wie bleibt nur eine Funktion übrig?`,
         wrong: tanQuotientMoves(sin, toLatex(cos), tan, side !== undefined),
@@ -521,7 +533,10 @@ function moveStep(step: RearrangeStep, previous: RearrangeStep | undefined, q: M
     question: q.question,
     choices: rng.shuffle([correct, ...wrong]),
     hint: q.hint,
-    explanation: q.explanation ?? explainMove(step.kind === 'combine' ? COMBINE_EXPLANATION[combineContext(step)] : step.kind, label, t, unknownOf(step, t)),
+    // beim Zurück-Einsetzen ist der Platzhalter u (aus dem Schritt davor), nicht x
+    explanation:
+      q.explanation ??
+      explainMove(step.kind === 'combine' ? COMBINE_EXPLANATION[combineContext(step)] : step.kind, label, t, step.kind === 'resubstitute' ? (previous?.unknown ?? 'u') : unknownOf(step, t)),
     established,
     cards: cardsOf(step, t, previous),
   }
@@ -607,7 +622,11 @@ function resultStep(
       correct: false,
       errorRuleId: w.rule.id,
       // die Scheinlösung mit dem Grund dieser Aufgabe; beim Ableiten der Text aus „Ableiten"
-      whyWrong: w.derive ? explainError(w.derive) : w.rule.id === 'eq-spurious-root' && step.kind === 'choose' ? spuriousWhy(rejectReason(step, t, context)) : whyWrong(w.rule.id),
+      whyWrong: w.derive
+        ? explainError(w.derive)
+        : w.rule.id === 'eq-spurious-root' && step.kind === 'choose'
+          ? spuriousWhy(rejectReason(step, t, context))
+          : (theoremWhy(step, w.rule.id) ?? whyWrong(w.rule.id)),
     }),
   )
   const finish = step.kind === 'finish'
@@ -626,7 +645,7 @@ function resultStep(
         : `Fasse zu einem Bruch zusammen: Was ist $${t}$?`
       : choose
         ? 'Welche der beiden Lösungen passt?'
-        : (odeQuestion(step) ?? tool ?? 'Was kommt heraus?'),
+        : (odeQuestion(step) ?? theoremQuestion(step) ?? tool ?? 'Was kommt heraus?'),
     choices: rng.shuffle([correct, ...wrong]),
     hint: finish
       ? tan
@@ -634,11 +653,11 @@ function resultStep(
         : REARRANGE_HINTS.finish
       : step.kind === 'pythagoras' && step.operand?.kind === 'add'
         ? REARRANGE_HINTS.acutePythagoras
-        : (polarHint(step) ?? RESULT_HINTS[step.kind] ?? REARRANGE_HINTS.result),
+        : (polarHint(step) ?? theoremHint(step) ?? RESULT_HINTS[step.kind] ?? REARRANGE_HINTS.result),
     explanation:
       choose && step.operand
         ? explainChoose(toLatex(step.operand), rejectReason(step, t, context), after)
-        : (odeExplanation(step) ?? detExplanation(step) ?? polarExplanation(step) ?? acuteExplanation(step) ?? explainResult(step.kind, stepLatex(step.kind, step.before), after)),
+        : (odeExplanation(step) ?? detExplanation(step) ?? polarExplanation(step) ?? theoremExplanation(step) ?? acuteExplanation(step) ?? explainResult(step.kind, stepLatex(step.kind, step.before), after)),
     established: [after],
     cards: cardsOf(step, t, previous),
   }
@@ -703,6 +722,47 @@ function polarExplanation(step: RearrangeStep): Explanation | null {
     default:
       return null
   }
+}
+
+// Additionstheorem (Teil 8c): die Frage nennt die Funktion. Beim doppelten Winkel nennt sie nicht die Funktion, die
+// danach allein dastehen soll: Sonst schiede „nur \sin x" zwei falsche Antworten (2\cos x, \cos^2 x + \sin^2 x) ohne
+// jedes Wissen aus. Unter den Antworten steht ohnehin nur eine der gleichwertigen Formen; warum diese, sagt die Erklärung.
+function theoremTool(step: RearrangeStep) {
+  if (step.kind !== 'addition' && step.kind !== 'doubleAngle') return null
+  const tool = activeTool(step.before)?.tool.tool
+  return tool?.kind === 'theorem' ? tool : null
+}
+
+function theoremQuestion(step: RearrangeStep): string | null {
+  const tool = theoremTool(step)
+  const work = tool && theoremWork(tool, step.before)
+  if (!work) return null
+  if (work.kind === 'addition') return `Schreibe $${work.term}$ mit dem Additionstheorem aus: Was kommt heraus?`
+  return `Schreibe $${work.term}$ mit dem einfachen Winkel: Was kommt heraus?`
+}
+
+// „Warum ist das falsch?" beim Additionstheorem mit der Regel genau dieser Funktion und dieses Vorzeichens
+function theoremWhy(step: RearrangeStep, id: string): Explanation | null {
+  const tool = theoremTool(step)
+  const work = tool && theoremWork(tool, step.before)
+  return work?.kind === 'addition' ? theoremErrorText(id, work.rule) : null
+}
+
+function theoremHint(step: RearrangeStep): string | null {
+  const tool = theoremTool(step)
+  const work = tool && theoremWork(tool, step.before)
+  if (!work) return null
+  if (work.kind === 'addition') return work.name === 'sin' ? REARRANGE_HINTS.additionSin : work.name === 'cos' ? REARRANGE_HINTS.additionCos : REARRANGE_HINTS.additionTan
+  return work.name === 'cos' ? REARRANGE_HINTS.doubleCos : work.name === 'tan' ? REARRANGE_HINTS.doubleTan : REARRANGE_HINTS.doubleSin
+}
+
+function theoremExplanation(step: RearrangeStep): Explanation | null {
+  const tool = theoremTool(step)
+  const work = tool && theoremWork(tool, step.before)
+  if (!work) return null
+  const before = stepLatex(step.kind, step.before)
+  const after = stepLatex(step.kind, step.after)
+  return work.kind === 'addition' ? explainAddition(work.rule, work.alpha, work.beta, before, after) : explainDouble(work.name, work.form, work.alpha, work.other, before, after)
 }
 
 // Differentialgleichung: die Frage nennt die Funktion (bei f und g in einer Aufgabe wichtig)
@@ -790,6 +850,8 @@ const CARDS_BY_KIND: Record<StepKind, readonly string[]> = {
   length: [REARRANGE_CARD_IDS.vector],
   dot: [REARRANGE_CARD_IDS.vector],
   angle: [REARRANGE_CARD_IDS.vector],
+  addition: [REARRANGE_CARD_IDS.addition],
+  doubleAngle: [REARRANGE_CARD_IDS.addition],
   finish: [FRACTION_CARD_IDS.add, FRACTION_CARD_IDS.expand],
 }
 

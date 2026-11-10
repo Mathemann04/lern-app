@@ -12,6 +12,7 @@ import { ODE_MISTAKES, odeSolution } from './ode.ts'
 import { ABS_MISTAKES, ARG_MISTAKES, absValue, argValue } from './polar.ts'
 import { ANGLE_MISTAKES, DOT_MISTAKES, LENGTH_MISTAKES, angleValue, dotValue, lengthValue } from './vector.ts'
 import { type LimitMistake, type SeriesMistake, geometricParts, limitParts, limitValue, seriesValue, sumValue } from './series.ts'
+import { ADDITION_MISTAKES, DOUBLE_MISTAKES, theoremParts, theoremValue } from './theorem.ts'
 import { type ActiveTool, type ToolVar, activeTool, bracketOf, integralOf } from './tool.ts'
 
 // Werkzeug-Schritte der Stufe 5: Bevor umgestellt wird, wird das Werkzeug ausgerechnet, Schritt für
@@ -23,6 +24,7 @@ import { type ActiveTool, type ToolVar, activeTool, bracketOf, integralOf } from
 // - Differentialgleichung: Lösung mit den Anfangswerten (ode.ts)
 // - Determinante: 2 × 2 ausrechnen, 3 × 3 erst nach der Linie mit zwei Nullen entwickeln (determinant.ts)
 // - Betrag und Winkel einer komplexen Zahl (polar.ts), Länge, Skalarprodukt und Winkel von Vektoren (vector.ts)
+// - Additionstheorem und doppelter Winkel (theorem.ts); die Form von \cos(2x) hängt von der übrigen Gleichung ab
 // Steckt ein Werkzeug in einem anderen (Reihe in einer Ableitung), kommt das innere zuerst.
 
 export type ToolStepKind =
@@ -41,6 +43,8 @@ export type ToolStepKind =
   | 'length'
   | 'dot'
   | 'angle'
+  | 'addition'
+  | 'doubleAngle'
 
 export type ToolDraft = { readonly kind: ToolStepKind; readonly operand?: Expr; readonly after: Equation }
 
@@ -51,10 +55,10 @@ export type ToolCandidate = { readonly id: string; readonly after: Equation; rea
 // Nächster Werkzeug-Schritt; null, wenn kein Werkzeug mehr dasteht oder es sich nicht ausrechnen lässt
 export function nextToolStep(e: Equation): ToolDraft | null {
   const active = activeTool(e)
-  return active && toolDraft(active)
+  return active && toolDraft(active, e)
 }
 
-function toolDraft({ tool, put }: ActiveTool): ToolDraft | null {
+function toolDraft({ tool, put }: ActiveTool, e: Equation): ToolDraft | null {
   const t = tool.tool
   const plain = (kind: ToolStepKind, v: Expr | null): ToolDraft | null => (v ? { kind, after: put(v) } : null)
   switch (t.kind) {
@@ -72,6 +76,10 @@ function toolDraft({ tool, put }: ActiveTool): ToolDraft | null {
       return plain('dot', dotValue(t.left, t.right, null))
     case 'angle':
       return plain('angle', angleValue(t.left, t.right, null))
+    case 'theorem': {
+      const v = theoremValue(t, null, e)
+      return v ? { kind: theoremParts(t.body)?.kind === 'double' ? 'doubleAngle' : 'addition', operand: t.body, after: put(v) } : null
+    }
   }
   const value = (kind: ToolStepKind, v: Expr | null): ToolDraft | null => (v ? { kind, operand: t.body, after: put(v) } : null)
   switch (t.kind) {
@@ -266,5 +274,8 @@ export function toolMistakes(kind: ToolStepKind, before: Equation): ToolCandidat
   if (kind === 'length' && t.kind === 'length') for (const id of LENGTH_MISTAKES) add(id, lengthValue(t.vector, id))
   if (kind === 'dot' && t.kind === 'dot') for (const id of DOT_MISTAKES) add(id, dotValue(t.left, t.right, id))
   if (kind === 'angle' && t.kind === 'angle') for (const id of ANGLE_MISTAKES) add(id, angleValue(t.left, t.right, id))
+  // Teil 8c: Additionstheorem, doppelter Winkel
+  if (kind === 'addition' && t.kind === 'theorem') for (const id of ADDITION_MISTAKES) add(id, theoremValue(t, id, before))
+  if (kind === 'doubleAngle' && t.kind === 'theorem') for (const id of DOUBLE_MISTAKES) add(id, theoremValue(t, id, before))
   return out
 }

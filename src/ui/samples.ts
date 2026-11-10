@@ -26,8 +26,8 @@ export const notationGroups: NotationGroup[] = [
     ],
   },
   {
-    title: 'Kommt mit Stufe 5 von „Gleichungen umstellen“',
-    note: 'Ableitungen, Integrale, Summen, Reihen, Grenzwerte, Differentialgleichungen, Determinanten, Betrag und Winkel komplexer Zahlen und Vektoren stehen schon in Aufgaben, die Additionstheoreme kommen mit Schritt 8c von Meilenstein 3. So werden sie gesetzt.',
+    title: 'In Stufe 5 von „Gleichungen umstellen“',
+    note: 'Ableitungen, Integrale, Summen, Reihen, Grenzwerte, Differentialgleichungen, Determinanten, Betrag und Winkel komplexer Zahlen, Vektoren und Additionstheoreme. So werden sie gesetzt.',
     samples: [
       { label: 'Ableitung als Rechenzeichen', tex: String.raw`\frac{\mathrm{d}}{\mathrm{d}x}\left(x\sqrt{x^2 + a^2}\right)` },
       { label: 'Integral', tex: String.raw`\int_a^x \frac{\mathrm{d}t}{t(t + b)}` },
@@ -39,6 +39,7 @@ export const notationGroups: NotationGroup[] = [
       { label: 'Determinante 3 × 3', tex: String.raw`\det\begin{pmatrix} 1 & x & x^{2} \\ 1 & 0 & 0 \\ 1 & a & a^{2} \end{pmatrix}` },
       { label: 'Länge und Skalarprodukt', tex: String.raw`\left\lvert \begin{pmatrix} x \\ x + a \\ b \end{pmatrix} \right\rvert, \quad \begin{pmatrix} x \\ a \end{pmatrix} \cdot \begin{pmatrix} x + b \\ -c \end{pmatrix}` },
       { label: 'Winkel zwischen Vektoren', tex: String.raw`\sphericalangle\left(\begin{pmatrix} x \\ a \\ b \end{pmatrix}, \begin{pmatrix} 1 \\ 0 \\ 0 \end{pmatrix}\right)` },
+      { label: 'Additionstheorem und doppelter Winkel', tex: String.raw`\sin(x + a), \quad \cos(2x)` },
       { label: 'Umkehrfunktionen', tex: String.raw`\arcsin x, \quad \arctan\frac{y + 1}{y - 1}` },
     ],
   },

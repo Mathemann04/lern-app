@@ -1,0 +1,43 @@
+import { planRearrangeTask } from '../guided/rearrangePlan.ts'
+import type { Rng } from '../random/rng.ts'
+import { REARRANGE_TEMPLATES, likelyRearrangeTemplate } from './rearrangeTerms.ts'
+import { type Level, MAX_SEED, type TaskRef } from './taskNumber.ts'
+
+// Gezieltes Üben beim Umstellen (M3, Schritt 9): eine Aufgabe, in der ein bestimmter typischer Fehler im
+// geführten Modus als Antwort erscheint (der Schrittplaner zeigt ihn mit focus sicher, wo er passieren kann).
+// Wie bei den Brüchen: Fehler, die vor allem in einer Vorlage vorkommen (`focus` der Vorlage, z. B. die
+// Fehler beim Betrag in „Betrag und Winkel"), werden nur dort gesucht, und nur in den Stufen dieser Vorlagen.
+// Das Wählen einer Nummer ist schnell (likelyRearrangeTemplate), nur das Durchrechnen kostet Zeit (in Stufe 5
+// etwa 20 bis 90 Millisekunden je Aufgabe).
+
+// Versuche reihum in kleinen Portionen, zuerst die gewählte Stufe, dann die nächstgelegenen
+const TRIES_PER_ROUND = 8
+const TRIES_PER_LEVEL = 400
+const DRAWS_PER_TRY = 400
+
+const shows = (ref: TaskRef, errorId: string) => planRearrangeTask(ref, errorId).steps.some((s) => s.choices.some((c) => c.errorRuleId === errorId))
+
+export function findRearrangeTaskWithError(errorId: string, levels: readonly Level[], rng: Rng): TaskRef | null {
+  const homes = REARRANGE_TEMPLATES.filter((t) => t.focus?.includes(errorId))
+  // mit eigener Vorlage nur in deren Stufen, sonst in allen genannten
+  const searched = homes.length > 0 ? levels.filter((level) => homes.some((h) => h.level === level)) : levels
+  const searches = searched.map((level) => {
+    const home = homes.filter((h) => h.level === level)
+    return (): TaskRef => {
+      for (let draw = 0; draw < DRAWS_PER_TRY; draw++) {
+        const ref = { level, seed: rng.int(1, MAX_SEED) }
+        if (home.length === 0 || home.includes(likelyRearrangeTemplate(ref)!)) return ref
+      }
+      return { level, seed: rng.int(1, MAX_SEED) }
+    }
+  })
+  for (let done = 0; done < TRIES_PER_LEVEL; done += TRIES_PER_ROUND) {
+    for (const nextRef of searches) {
+      for (let i = 0; i < TRIES_PER_ROUND; i++) {
+        const ref = nextRef()
+        if (shows(ref, errorId)) return ref
+      }
+    }
+  }
+  return null
+}

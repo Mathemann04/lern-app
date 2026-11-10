@@ -157,7 +157,7 @@ const rearrangeLevels: LevelPreview[] = [
   {
     level: 5,
     available: true,
-    title: 'Quer durch die Mathematik: erst Ableitung, Integral, Summe, Reihe, Grenzwert, Differentialgleichung, Determinante, Betrag oder Winkel ausrechnen, dann umstellen (Additionstheoreme folgen)',
+    title: 'Quer durch die Mathematik: erst Ableitung, Integral, Summe, Reihe, Grenzwert, Differentialgleichung, Determinante, Betrag, Winkel oder Additionstheorem ausrechnen, dann umstellen',
     examples: [
       String.raw`\int_a^x \frac{\mathrm{d}t}{t(t + b)} = y`,
       String.raw`\sum_{k=1}^{\infty} k x^k = y`,
@@ -165,6 +165,7 @@ const rearrangeLevels: LevelPreview[] = [
       String.raw`\begin{gathered}f'' = k^2 f \\ f(0) = a,\; f'(0) = 0 \\ f(x) = y\end{gathered}`,
       String.raw`\det\begin{pmatrix} e^{x} & e^{-x} \\ a & b \end{pmatrix} = y`,
       String.raw`\left\lvert \frac{x + a\mathrm{i}}{x - b\mathrm{i}} \right\rvert = y`,
+      String.raw`b\sin(x + a) = y\cos x`,
     ],
   },
 ]
@@ -199,7 +200,7 @@ export const SUBJECTS: readonly Subject[] = [
             cards: 'umstellen',
             levels: rearrangeLevels,
             free: true,
-            focus: false,
+            focus: true,
           },
           {
             id: 'potenzen',

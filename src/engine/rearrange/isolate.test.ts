@@ -131,6 +131,14 @@ describe('Rechenweg Stufe 4, Teil 6c: Substitution und pq-Formel', () => {
     ])
   })
 
+  it('Anzeige nach dem Substituieren (Schritt 9): \\frac{a}{u} statt a \\cdot \\frac{1}{u}, nach dem Malnehmen gekürzt', () => {
+    expect(lines('e^{x}-ae^{-x}', 'y').slice(0, 3)).toEqual(['Substituieren: u - \\frac{a}{u} = y', 'Beide Seiten malnehmen: u^{2} - a = uy', 'Alles auf eine Seite: u^{2} - yu - a = 0'])
+    // Bruch als Vorzahl: \frac{a}{2}e^{-x} wird \frac{a}{2u}, nach dem Malnehmen mit 2u steht au^2 da
+    const half = lines('\\frac{a}{2}e^{x}+\\frac{a}{2}e^{-x}', 'y')
+    expect(half[0]).toBe('Substituieren: \\frac{a}{2}u + \\frac{a}{2u} = y')
+    expect(half[1]).toBe('Beide Seiten malnehmen: au^{2} + a = 2uy')
+  })
+
   it('e^x und e^{-x}: mit u malnehmen; die negative Lösung fällt weg, weil e^x positiv ist', () => {
     const solution = solveEquation(eq(p('y'), p('\\frac{e^{x}-e^{-x}}{2}')), 'x')!
     expect(toLatex(solution.result)).toBe('\\ln(y + \\sqrt{y^{2} + 1})')

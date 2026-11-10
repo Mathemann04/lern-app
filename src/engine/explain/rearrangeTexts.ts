@@ -371,6 +371,42 @@ export const REARRANGE_ERROR_TEXTS: Readonly<Record<string, Explanation>> = {
       '$u_1^2 + u_2^2$ ist das Quadrat der Länge, $\\lvert\\vec{u}\\rvert^2$. Die Länge selbst ist die Wurzel daraus: $\\lvert\\vec{u}\\rvert = \\sqrt{u_1^2 + u_2^2}$. Beim Winkel stehen im Nenner die Längen, nicht ihre Quadrate: $\\cos\\varphi = \\frac{\\vec{u} \\cdot \\vec{v}}{\\lvert\\vec{u}\\rvert \\cdot \\lvert\\vec{v}\\rvert}$.',
     short: 'Die Wurzel gehört dazu: $\\lvert\\vec{u}\\rvert = \\sqrt{u_1^2 + u_2^2}$.',
   },
+  // Werkzeuge der Stufe 5 (Schritt 8c): Additionstheoreme und doppelter Winkel
+  'eq-add-termwise': {
+    detailed:
+      'Eine Winkelfunktion lässt sich nicht Summand für Summand auf eine Summe anwenden. Probe: $\\sin\\left(\\frac{\\pi}{2} + \\frac{\\pi}{2}\\right) = \\sin\\pi = 0$, aber $\\sin\\frac{\\pi}{2} + \\sin\\frac{\\pi}{2} = 2$. Dafür gibt es die Additionstheoreme, etwa $\\sin(\\alpha + \\beta) = \\sin\\alpha \\cdot \\cos\\beta + \\cos\\alpha \\cdot \\sin\\beta$.',
+    short: 'Nicht gliedweise: $\\sin(\\alpha + \\beta) \\neq \\sin\\alpha + \\sin\\beta$. Dafür gibt es das Additionstheorem.',
+  },
+  'eq-add-sign': {
+    detailed:
+      'Beim Sinus steht in der Mitte dasselbe Vorzeichen wie in der Klammer, beim Kosinus das andere: $\\sin(\\alpha \\pm \\beta) = \\sin\\alpha \\cdot \\cos\\beta \\pm \\cos\\alpha \\cdot \\sin\\beta$ und $\\cos(\\alpha \\pm \\beta) = \\cos\\alpha \\cdot \\cos\\beta \\mp \\sin\\alpha \\cdot \\sin\\beta$. Probe mit $\\beta = \\alpha$: $\\cos(\\alpha - \\alpha) = \\cos 0 = 1$, und $1 = \\cos^2\\alpha + \\sin^2\\alpha$, mit Plus.',
+    short: 'Beim Sinus bleibt das Vorzeichen, beim Kosinus wechselt es: $\\sin(\\alpha \\pm \\beta) = \\sin\\alpha \\cdot \\cos\\beta \\pm \\cos\\alpha \\cdot \\sin\\beta$, $\\cos(\\alpha \\pm \\beta) = \\cos\\alpha \\cdot \\cos\\beta \\mp \\sin\\alpha \\cdot \\sin\\beta$.',
+  },
+  'eq-add-partner': {
+    detailed:
+      'Beim Sinus einer Summe stehen gemischte Produkte, immer Sinus mal Kosinus: $\\sin(\\alpha \\pm \\beta) = \\sin\\alpha \\cdot \\cos\\beta \\pm \\cos\\alpha \\cdot \\sin\\beta$. Beim Kosinus stehen gleiche: $\\cos(\\alpha \\pm \\beta) = \\cos\\alpha \\cdot \\cos\\beta \\mp \\sin\\alpha \\cdot \\sin\\beta$. Probe mit $\\beta = 0$: Dann muss wieder $\\sin\\alpha$ bzw. $\\cos\\alpha$ herauskommen.',
+    short: 'Sinus gemischt, Kosinus gleich: $\\sin(\\alpha \\pm \\beta) = \\sin\\alpha \\cdot \\cos\\beta \\pm \\cos\\alpha \\cdot \\sin\\beta$, $\\cos(\\alpha \\pm \\beta) = \\cos\\alpha \\cdot \\cos\\beta \\mp \\sin\\alpha \\cdot \\sin\\beta$.',
+  },
+  'eq-double-factor': {
+    detailed:
+      'Die $2$ verdoppelt den Winkel, nicht den Wert der Funktion: $\\sin(2\\alpha) \\neq 2\\sin\\alpha$ und $\\cos(2\\alpha) \\neq 2\\cos\\alpha$. Probe mit $\\alpha = \\frac{\\pi}{2}$: $\\sin\\pi = 0$, aber $2\\sin\\frac{\\pi}{2} = 2$. Schreibe $2\\alpha = \\alpha + \\alpha$ und nimm das Additionstheorem.',
+    short: '$\\cos(2\\alpha) \\neq 2\\cos\\alpha$: Schreibe $2\\alpha = \\alpha + \\alpha$ und nimm das Additionstheorem.',
+  },
+  'eq-double-two': {
+    detailed:
+      'Mit $\\beta = \\alpha$ liefert das Additionstheorem $\\cos(2\\alpha) = \\cos^2\\alpha - \\sin^2\\alpha$. Ersetzt du darin mit $\\sin^2\\alpha + \\cos^2\\alpha = 1$, kommt die $2$ dazu: $1 - 2\\sin^2\\alpha$ bzw. $2\\cos^2\\alpha - 1$. Beim Sinus entsteht sie aus zwei gleichen Produkten: $\\sin(2\\alpha) = 2\\sin\\alpha \\cdot \\cos\\alpha$.',
+    short: 'Die $2$ nicht vergessen: $\\cos(2\\alpha) = 1 - 2\\sin^2\\alpha$ bzw. $2\\cos^2\\alpha - 1$.',
+  },
+  'eq-double-cos-plus': {
+    detailed:
+      '$\\cos^2\\alpha + \\sin^2\\alpha$ ist immer $1$, das ist der Satz des Pythagoras am Einheitskreis. Beim doppelten Winkel steht ein Minus, wie im Additionstheorem des Kosinus: $\\cos(\\alpha + \\alpha) = \\cos^2\\alpha - \\sin^2\\alpha$.',
+    short: '$\\cos(2\\alpha) = \\cos^2\\alpha - \\sin^2\\alpha$, mit Minus; mit Plus wäre es immer $1$.',
+  },
+  'eq-double-cos-sign': {
+    detailed:
+      'Aus $\\cos(2\\alpha) = \\cos^2\\alpha - \\sin^2\\alpha$ wird mit $\\cos^2\\alpha = 1 - \\sin^2\\alpha$ die Form $1 - 2\\sin^2\\alpha$, mit $\\sin^2\\alpha = 1 - \\cos^2\\alpha$ die Form $2\\cos^2\\alpha - 1$. Probe mit $\\alpha = 0$: $\\cos 0 = 1$, also muss auch die Form $1$ ergeben.',
+    short: 'Probe mit $\\alpha = 0$: $\\cos 0 = 1$. Richtig sind $1 - 2\\sin^2\\alpha$ und $2\\cos^2\\alpha - 1$.',
+  },
   'eq-abs-imag-squared': {
     detailed:
       'In $\\sqrt{p^2 + q^2}$ stehen der Realteil $p$ und der Imaginärteil $q$, beide ohne $\\mathrm{i}$. Quadrierst du $q\\mathrm{i}$ mit, kommt wegen $\\mathrm{i}^2 = -1$ ein Minus hinein; das wäre ein Teil von $z^2$, nicht von $\\lvert z\\rvert^2$.',
@@ -889,10 +925,10 @@ export const EXTEND_MOVES: readonly WrongMove[] = [
 
 // unknown: die Unbekannte als LaTeX, x oder \sqrt{x} (dann ist √x die Unbekannte, x = (√x)²)
 export function collectMoves(target: string, unknown = target): WrongMove[] {
-  const rootUnknown = unknown !== target
+  const rootUnknown = unknown.startsWith('\\sqrt')
   return [
     {
-      label: rootUnknown ? `Durch den Faktor vor $${unknown}$ teilen` : `Durch den Faktor vor dem ersten $${target}$ teilen`,
+      label: unknown !== target ? `Durch den Faktor vor $${unknown}$ teilen` : `Durch den Faktor vor dem ersten $${target}$ teilen`,
       why: { detailed: `Danach steht $${target}$ immer noch auf beiden Seiten. Erst müssen alle Summanden mit $${unknown}$ auf eine Seite.`, short: `Danach steht $${target}$ immer noch auf beiden Seiten.` },
     },
     rootUnknown
@@ -901,7 +937,7 @@ export function collectMoves(target: string, unknown = target): WrongMove[] {
           why: { detailed: `Solange neben $${unknown}$ noch andere Summanden stehen, entsteht beim Quadrieren wieder eine Wurzel. Stelle zuerst den Summanden mit $${unknown}$ allein.`, short: `Erst den Summanden mit $${unknown}$ allein stellen.` },
         }
       : {
-          label: `Die Summanden mit $${target}$ auf beiden Seiten streichen`,
+          label: `Die Summanden mit $${unknown}$ auf beiden Seiten streichen`,
           why: { detailed: 'Streichen darfst du nur, was auf beiden Seiten genau gleich ist. Bringe die Summanden mit der Variable stattdessen auf eine Seite.', short: 'Nur genau Gleiches darf man auf beiden Seiten streichen.' },
         },
     { label: `Alles mit $${unknown}$ nach links, ohne die Vorzeichen zu ändern`, why: REARRANGE_ERROR_TEXTS['eq-sign-not-flipped'] },
@@ -952,6 +988,14 @@ export const REARRANGE_HINTS = {
     'Schreibe $e^{\\mathrm{i}x} = \\cos x + \\mathrm{i}\\sin x$ und lies Realteil und Imaginärteil ab, beide ohne $\\mathrm{i}$. Der Betrag ist die Wurzel aus der Summe ihrer Quadrate.',
   argMultiplied:
     'Stehen in beiden Faktoren Buchstaben, multipliziere erst aus und fasse Realteil und Imaginärteil zusammen. Dann ist $\\arg(p + q\\mathrm{i}) = \\arctan\\frac{q}{p}$ für $p > 0$.',
+  // Additionstheoreme (Teil 8c)
+  additionSin: 'Beim Sinus stehen gemischte Produkte, das Vorzeichen aus der Klammer bleibt: $\\sin(\\alpha \\pm \\beta) = \\sin\\alpha \\cdot \\cos\\beta \\pm \\cos\\alpha \\cdot \\sin\\beta$.',
+  additionCos: 'Beim Kosinus stehen gleiche Produkte, das Vorzeichen wechselt: $\\cos(\\alpha \\pm \\beta) = \\cos\\alpha \\cdot \\cos\\beta \\mp \\sin\\alpha \\cdot \\sin\\beta$.',
+  additionTan: 'Beim Tangens: $\\tan(\\alpha \\pm \\beta) = \\frac{\\tan\\alpha \\pm \\tan\\beta}{1 \\mp \\tan\\alpha \\cdot \\tan\\beta}$.',
+  doubleSin: 'Schreibe $2\\alpha = \\alpha + \\alpha$ und nimm das Additionstheorem des Sinus: Die beiden Produkte sind gleich.',
+  doubleTan: 'Schreibe $2\\alpha = \\alpha + \\alpha$ und nimm das Additionstheorem des Tangens: $\\tan(2\\alpha) = \\frac{2\\tan\\alpha}{1 - \\tan^2\\alpha}$.',
+  doubleCos:
+    'Es gilt $\\cos(2\\alpha) = \\cos^2\\alpha - \\sin^2\\alpha$. Ersetze mit $\\sin^2\\alpha + \\cos^2\\alpha = 1$ das Quadrat der Funktion, die sonst nicht in der Gleichung steht.',
   angle: 'Skalarprodukt durch das Produkt der Längen ist der Kosinus des Winkels: $\\cos\\varphi = \\frac{\\vec{u} \\cdot \\vec{v}}{\\lvert\\vec{u}\\rvert \\cdot \\lvert\\vec{v}\\rvert}$. Der Winkel ist der $\\arccos$ davon.',
   add: 'Ein Summand verschwindet mit der Gegenrechnung: Aus $+c$ wird auf beiden Seiten $-c$.',
   move: 'Bringe den Summanden mit Minus auf die andere Seite, dort steht er mit Plus. Den Rest bringst du herüber.',
@@ -996,7 +1040,7 @@ export const REARRANGE_HINTS = {
 } as const
 
 // Tipp für die ganze Aufgabe (im freien Modus)
-export type TaskTool = 'derivative' | 'integral' | 'series' | 'limit' | 'ode' | 'det' | 'complex' | 'vector'
+export type TaskTool = 'derivative' | 'integral' | 'series' | 'limit' | 'ode' | 'det' | 'complex' | 'vector' | 'theorem' | 'double'
 
 export function rearrangeTaskHint(target: string, several: boolean, block: string | null = null, quadratic = false, tool: TaskTool | null = null): Explanation {
   if (tool === 'derivative') return same(`Rechne zuerst die Ableitung aus. Dann steht eine gewöhnliche Gleichung da, die du nach $${target}$ auflöst.`)
@@ -1007,6 +1051,14 @@ export function rearrangeTaskHint(target: string, several: boolean, block: strin
     return same(`Rechne zuerst die Determinante aus: Hauptdiagonale minus Nebendiagonale, bei $3 \\times 3$ vorher nach der Zeile oder Spalte mit zwei Nullen entwickeln. Dann löst du nach $${target}$ auf.`)
   if (tool === 'complex')
     return same(`Rechne zuerst Betrag bzw. Winkel der komplexen Zahl aus: Realteil und Imaginärteil ablesen, $\\lvert p + q\\mathrm{i}\\rvert = \\sqrt{p^2 + q^2}$, $\\arg(p + q\\mathrm{i}) = \\arctan\\frac{q}{p}$ für $p > 0$. Dann löst du nach $${target}$ auf.`)
+  if (tool === 'theorem')
+    return same(`Schreibe zuerst die Winkelfunktion von $x \\pm a$ mit dem Additionstheorem aus. Dann stehen nur noch $\\sin x$ und $\\cos x$ da: Teile durch $\\cos x$, dann bleibt $\\tan x$. Löse nach $\\tan x$ auf und nimm zum Schluss den $\\arctan$.`)
+  // doppelter Winkel: danach steht nur noch eine Funktion da, meist quadratisch (substituieren, pq-Formel)
+  if (tool === 'double') {
+    const first = `Schreibe zuerst $\\cos(2x)$ mit dem einfachen Winkel: $1 - 2\\sin^2 x$, wenn sonst $\\sin x$ dasteht, $2\\cos^2 x - 1$, wenn $\\cos x$ dasteht.`
+    if (block) return same(`${first} Setze dann $u = ${block}$, löse die quadratische Gleichung in $u$ mit der $pq$-Formel, wähle die passende Lösung, setze zurück ein und löse nach $${target}$ auf.`)
+    return same(`${first} Dann steht nur noch eine Funktion da: Löse nach ihr auf, ziehe wenn nötig die Wurzel und nimm zum Schluss die Umkehrfunktion.`)
+  }
   if (tool === 'vector')
     return same(`Rechne zuerst Länge, Skalarprodukt bzw. Winkel der Vektoren aus, beim Winkel mit $\\cos\\varphi = \\frac{\\vec{u} \\cdot \\vec{v}}{\\lvert\\vec{u}\\rvert \\cdot \\lvert\\vec{v}\\rvert}$. Dann löst du nach $${target}$ auf.`)
   if (tool === 'ode') return same(`Löse zuerst die Differentialgleichung mit den Anfangswerten (Ansatz $e^{\\lambda x}$). Dann steht eine Gleichung mit e-Funktionen da, die du nach $${target}$ auflöst.`)
@@ -1084,7 +1136,9 @@ export function explainMove(kind: string, operation: string, target: string, unk
       return { detailed: 'Im Zähler und Nenner stehen weitere Brüche. Nimmst du Zähler und Nenner mit dem Hauptnenner der inneren Brüche mal, kürzen sich die inneren Nenner weg, und der Wert bleibt gleich.', short: `${operation}: Die inneren Nenner kürzen sich weg.` }
     case 'collect':
       if (unknown !== target) {
-        return { detailed: `Bringe den Summanden mit $${unknown}$ auf eine Seite und alle anderen auf die andere; was die Seite wechselt, wechselt das Vorzeichen. Steht $${unknown}$ allein, kannst du noch einmal quadrieren.`, short: `Summand mit $${unknown}$ nach links, Rest nach rechts.` }
+        // „noch einmal quadrieren" nur bei einer Wurzel (\sqrt{x}), nicht bei \tan x oder \sin^2 x
+        const square = unknown.startsWith('\\sqrt') ? ` Steht $${unknown}$ allein, kannst du noch einmal quadrieren.` : ''
+        return { detailed: `Bringe den Summanden mit $${unknown}$ auf eine Seite und alle anderen auf die andere; was die Seite wechselt, wechselt das Vorzeichen.${square}`, short: `Summand mit $${unknown}$ nach links, Rest nach rechts.` }
       }
       return { detailed: `$${target}$ kommt in mehreren Summanden vor. Bringe alle Summanden mit $${target}$ auf eine Seite und alle anderen auf die andere; was die Seite wechselt, wechselt das Vorzeichen.`, short: `Summanden mit $${target}$ nach links, Rest nach rechts.` }
     case 'factor':
@@ -1203,6 +1257,54 @@ export function explainAcuteFinish(before: string, after: string): Explanation {
   return {
     detailed: `Unter der Wurzel bleiben mit $\\sin^2 u + \\cos^2 u = 1$ nur Quadrate von $\\sin u$ und $\\cos u$. Bei einem spitzen Winkel sind beide positiv, also $\\sqrt{\\sin^2 u} = \\sin u$ und $\\sqrt{\\cos^2 u} = \\cos u$. Zuletzt wird $\\frac{\\sin u}{\\cos u}$ zu $\\tan u$ und $\\frac{\\cos u}{\\sin u}$ zu $\\frac{1}{\\tan u}$:\n${lines}`,
     short: `Mit $\\tan u = \\frac{\\sin u}{\\cos u}$:\n${lines}`,
+  }
+}
+
+// Additionstheorem (Teil 8c): die Regel mit \alpha und \beta, was \alpha und \beta hier sind (alles als LaTeX)
+// „Warum ist das falsch?" beim Additionstheorem mit genau der Regel der Aufgabe (Funktion und Vorzeichen), damit
+// der Text nicht das Muster einer anderen falschen Antwort zeigt; null bei anderen Fehlern
+export function theoremErrorText(id: string, rule: string): Explanation | null {
+  switch (id) {
+    case 'eq-add-termwise':
+      return {
+        detailed: `Eine Winkelfunktion lässt sich nicht Summand für Summand auf eine Summe anwenden. Probe: $\\sin\\left(\\frac{\\pi}{2} + \\frac{\\pi}{2}\\right) = \\sin\\pi = 0$, aber $\\sin\\frac{\\pi}{2} + \\sin\\frac{\\pi}{2} = 2$. Hier gilt das Additionstheorem $${rule}$.`,
+        short: `Nicht gliedweise. Hier gilt $${rule}$.`,
+      }
+    case 'eq-add-sign':
+      return {
+        detailed: `Beim Sinus steht in der Mitte dasselbe Vorzeichen wie in der Klammer, beim Kosinus das andere. Hier gilt $${rule}$.`,
+        short: `Beim Sinus bleibt das Vorzeichen, beim Kosinus wechselt es: $${rule}$.`,
+      }
+    case 'eq-add-partner':
+      return {
+        detailed: `Beim Sinus einer Summe stehen gemischte Produkte (Sinus mal Kosinus), beim Kosinus gleiche (Kosinus mal Kosinus, Sinus mal Sinus). Hier gilt $${rule}$. Probe mit $\\beta = 0$: Dann muss wieder $\\sin\\alpha$ bzw. $\\cos\\alpha$ herauskommen.`,
+        short: `Sinus gemischt, Kosinus gleich: $${rule}$.`,
+      }
+    default:
+      return null
+  }
+}
+
+export function explainAddition(rule: string, alpha: string, beta: string, before: string, after: string): Explanation {
+  const lines = `$${before}$\n$${after}$`
+  return {
+    detailed: `Das Additionstheorem $${rule}$ mit $\\alpha = ${alpha}$ und $\\beta = ${beta}$, eingesetzt:\n${lines}`,
+    short: `$\\alpha = ${alpha}$, $\\beta = ${beta}$:\n${lines}`,
+  }
+}
+
+// Doppelter Winkel (Teil 8c): beim Kosinus die Form, nach der nur die Funktion dasteht, die sonst vorkommt (other)
+export function explainDouble(name: string, form: 'sin' | 'cos' | null, alpha: string, other: string | null, before: string, after: string): Explanation {
+  const lines = `$${before}$\n$${after}$`
+  if (name !== 'cos' || !form || !other) {
+    const rule = name === 'tan' ? '\\tan(2\\alpha) = \\frac{2\\tan\\alpha}{1 - \\tan^2\\alpha}' : '\\sin(2\\alpha) = 2\\sin\\alpha \\cdot \\cos\\alpha'
+    return { detailed: `$2\\alpha = \\alpha + \\alpha$ ins Additionstheorem eingesetzt: $${rule}$, hier mit $\\alpha = ${alpha}$:\n${lines}`, short: `$${rule}$:\n${lines}` }
+  }
+  const rule = form === 'sin' ? '\\cos^2\\alpha = 1 - \\sin^2\\alpha' : '\\sin^2\\alpha = 1 - \\cos^2\\alpha'
+  const result = form === 'sin' ? '1 - 2\\sin^2\\alpha' : '2\\cos^2\\alpha - 1'
+  return {
+    detailed: `$2\\alpha = \\alpha + \\alpha$ ins Additionstheorem eingesetzt gibt $\\cos(2\\alpha) = \\cos^2\\alpha - \\sin^2\\alpha$, mit $${rule}$ also $${result}$. Diese Form passt, weil sonst nur $${other}$ in der Gleichung steht ($\\alpha = ${alpha}$):\n${lines}`,
+    short: `$\\cos(2\\alpha) = ${result}$:\n${lines}`,
   }
 }
 

@@ -308,6 +308,7 @@ Gesucht ist jeweils $x$.
 | Determinante | $\det\begin{pmatrix} 1 & x & x^2 \\ 1 & 0 & 0 \\ 1 & a & a^2 \end{pmatrix} = y$ | $x = \frac{a^2 + \sqrt{a^4 + 4ay}}{2a}$ |
 | Determinante | $\det\begin{pmatrix} e^{x} & e^{-x} \\ a & b \end{pmatrix} = y$ | $x = \ln\frac{y + \sqrt{y^2 + 4ab}}{2b}$ |
 | Additionstheorem | $\sin(x + a) = y\cos x$ | $x = \arctan\frac{y - \sin a}{\cos a}$ |
+| Doppelter Winkel | $\cos(2x) = y\sin x$ | $x = \arcsin\frac{\sqrt{y^2 + 8} - y}{4}$ |
 | Vektoren | $\begin{pmatrix} x \\ a \\ b \end{pmatrix}$ und $\begin{pmatrix} 1 \\ 0 \\ 0 \end{pmatrix}$ schließen den Winkel $y$ ein | $x = \frac{\sqrt{a^2 + b^2}}{\tan y}$ |
 | Differentialgleichung | $f'' = k^2 f$, $f(0) = a$, $f'(0) = 0$ und $f(x) = y$ | $x = \frac{1}{k}\ln\frac{y + \sqrt{y^2 - a^2}}{a}$ |
 | Reihe und Ableitung | $\frac{\mathrm{d}}{\mathrm{d}x}\sum_{k=1}^{\infty}\frac{x^k}{k} = y$ | $x = 1 - \frac{1}{y}$ |
@@ -486,7 +487,13 @@ Aufgabe: Löse $\int_a^x \frac{\mathrm{d}t}{t(t + b)} = y$ nach $x$ auf
 | Determinante | nur die Hauptdiagonale malgenommen, wie bei einer Dreiecksmatrix (`eq-det-main`, neu in 8a) | $\det\begin{pmatrix} p & q \\ r & s \end{pmatrix} = ps$ |
 | Determinante | beim Entwickeln das Vorzeichen aus dem Schachbrett vertauscht (`eq-det-checkerboard`, neu in 8a) | $\det\begin{pmatrix} 0 & p & q \\ a & 1 & 2 \\ 0 & r & s \end{pmatrix} = a\det\begin{pmatrix} p & q \\ r & s \end{pmatrix}$ |
 | Determinante | beim Entwickeln den Eintrag vor der Unterdeterminante vergessen (`eq-det-entry`, neu in 8a) | $\det\begin{pmatrix} 0 & p & q \\ a & 1 & 2 \\ 0 & r & s \end{pmatrix} = -\det\begin{pmatrix} p & q \\ r & s \end{pmatrix}$ |
-| Additionstheorem | gliedweise | $\sin(x + a) = \sin x + \sin a$ |
+| Additionstheorem | die Winkelfunktion gliedweise auf die Summe angewandt (`eq-add-termwise`, neu in 8c) | $\sin(x + a) = \sin x + \sin a$ |
+| Additionstheorem | das Vorzeichen in der Mitte vertauscht (`eq-add-sign`, neu in 8c) | $\cos(x + a) = \cos x \cdot \cos a + \sin x \cdot \sin a$ |
+| Additionstheorem | Sinus und Kosinus falsch gepaart (`eq-add-partner`, neu in 8c, nicht beim Tangens) | $\sin(x + a) = \sin x \cdot \sin a + \cos x \cdot \cos a$ |
+| Doppelter Winkel | die $2$ aus dem Winkel vor die Funktion gezogen (`eq-double-factor`, neu in 8c) | $\cos(2x) = 2\cos x$ |
+| Doppelter Winkel | die $2$ vergessen (`eq-double-two`, neu in 8c) | $\cos(2x) = 1 - \sin^2 x$, $\sin(2x) = \sin x \cdot \cos x$ |
+| Doppelter Winkel | bei $\cos(2x)$ Plus statt Minus, wie bei $\sin^2 x + \cos^2 x = 1$ (`eq-double-cos-plus`, neu in 8c) | $\cos(2x) = \cos^2 x + \sin^2 x$ |
+| Doppelter Winkel | bei $\cos(2x)$ die Formen mit $\sin^2 x$ und $\cos^2 x$ verwechselt (`eq-double-cos-sign`, neu in 8c) | $\cos(2x) = 2\sin^2 x - 1$ |
 | Vektoren | beim Winkel nicht durch die Längen geteilt (`eq-vec-not-divided`, neu in 8b) | $\cos\varphi = \vec{u} \cdot \vec{v}$ |
 | Vektoren | beim Winkel nur durch eine der beiden Längen geteilt (`eq-vec-one-length`, neu in 8b) | $\cos\varphi = \frac{\vec{u} \cdot \vec{v}}{\lvert\vec{u}\rvert}$ |
 | Vektoren | beim Winkel Sinus statt Kosinus genommen (`eq-vec-sine`, neu in 8b) | $\varphi = \arcsin\frac{\vec{u} \cdot \vec{v}}{\lvert\vec{u}\rvert \cdot \lvert\vec{v}\rvert}$ |
@@ -1114,10 +1121,100 @@ Länge, Skalarprodukt, Winkel". Frei wird das Ergebnis eingetippt; die Fehler we
 erkannt, einige nur geführt (mit „$\mathrm{i}$ mitquadriert" hat die Gleichung oft
 keine Lösung).
 
+**Umgesetzt (8c):** In Stufe 5 kommen Additionstheoreme dazu (35 % der Nummern, die zu
+keinem früheren Teil gehören, also aus 7a: unter den Aufgaben 1 bis 200 sind es 19; alle
+übrigen Nummern behalten ihre Aufgabe, verglichen über die Nummern 1 bis 300 der Stufen 1
+bis 4 und 1 bis 1500 der Stufe 5, mit Rechenweg und falschen Antworten). Neues Werkzeug
+„Additionstheorem" (`rearrange/tools/theorem.ts`): Im Rumpf steht die Funktion, wie sie
+in der Aufgabe steht, $\sin(x + a)$, $\cos(x - a)$, $\cos(2x)$; gesetzt und zur Gegenprobe
+ausgewertet wird sie wie die Funktion selbst. Ausgerechnet wird sie in einem Schritt:
+- **Additionstheorem** („Additionstheorem anwenden"): $\sin(p \pm q) = \sin p \cdot \cos q
+  \pm \cos p \cdot \sin q$, $\cos(p \pm q) = \cos p \cdot \cos q \mp \sin p \cdot \sin q$,
+  $\tan(p \pm q) = \frac{\tan p \pm \tan q}{1 \mp \tan p \cdot \tan q}$. Danach stehen
+  $\sin x$ und $\cos x$ da; die Engine teilt durch $\cos x$ und rechnet mit $\tan x$ weiter.
+- **Doppelter Winkel** („Doppelten Winkel auflösen"): $\sin(2p) = 2\sin p \cdot \cos p$,
+  $\cos(2p)$ in der Form, nach der nur noch eine Funktion dasteht: $1 - 2\sin^2 p$, wenn
+  sonst $\sin p$ vorkommt, $2\cos^2 p - 1$, wenn $\cos p$ vorkommt. Danach meist
+  quadratisch (Substitution, $pq$-Formel).
+
+Der Baukasten `buildLevel5Theorem` setzt zusammen, immer mit $x < \frac{\pi}{2}$:
+Additionstheorem gegen $\sin x$ oder $\cos x$ (Beispiel aus dem Plan
+$b\sin(x + a) = y\cos x$, auch mit Faktor davor oder geteilt), im Bruch mit $\sin x$ oder
+$\cos x$ (auch im $\ln$, unter der Wurzel, mit Schalen), Bruch aus zwei
+Additionstheoremen mit verschiedenen Winkeln (sonst wäre es $\tan(x + a)$);
+$\cos(2x)$ gegen $\sin x$ oder $\cos x$ (danach quadratisch), im Bruch damit, in einer
+Summe mit $\sin x$ oder $\cos x$, gegen $\sin^2 x$ oder $\cos^2 x$. $x$ steht nie nur in
+einem einzigen Additionstheorem (sonst ginge es gleich mit der Umkehrfunktion).
+Ausgeschrieben werden die Gleichungen lang; am Browser gemessen passen in den Antworten am
+Handy etwa 23 em. Darum ist jede Gleichung des Rechenwegs und jede falsche Antwort
+höchstens 21 em breit, die Aufgabe höchstens 12 em, das Ergebnis höchstens 16,5 em. Zwei
+Additionstheoreme nebeneinander (in einer Summe, auf beiden Seiten, Sinus und Kosinus
+derselben Summe) ergeben vier Produkte und passen nie; diese Arten sind nach der Prüfung
+weggefallen. Im Ergebnis steht kein Minus direkt unter der Wurzel oder in der Klammer
+($\sqrt{-\frac{a}{y - 2a + b}}$), und die Prüfstellen haben nicht nur winzige $x$ (bei
+$8k = \ln\frac{\cos(2x)}{\sin x}$ wären es nur $x < 0{,}09$, dort ist $\sin x$ fast $x$).
+
+Gemessen unter den Aufgaben 1 bis 3000 der Stufe 5: 240 Aufgaben, im Mittel 8,6
+Umformungen (6 bis 12), 155 Formen; 17,5 % der Nummern haben einen Zwilling (vor der
+Prüfung 20 %). Stufe 5 hat unter den Aufgaben 1 bis 200 weiter 195 Formen, keine öfter
+als 1 %, im Mittel 8,5 Umformungen.
+
+Geführt kommt zuerst „Was steht da eigentlich?" mit sieben neuen Fehlern (Tabelle oben):
+beim Additionstheorem „Schreibe $\sin(x + a)$ mit dem Additionstheorem aus", beim
+doppelten Winkel „Schreibe $\cos(2x)$ mit dem einfachen Winkel" (ohne „so, dass nur
+$\sin x$ vorkommt": das schiede zwei falsche Antworten ohne jedes Wissen aus). Die
+Erklärung nennt die Regel mit $\alpha$ und $\beta$ und was sie hier sind, beim doppelten
+Winkel auch, warum diese Form passt. „Warum ist das falsch?" zeigt beim Vorzeichen und
+beim falschen Paar genau die Regel dieser Funktion mit diesem Vorzeichen (vorher stand
+dort für $\sin(x - k)$ das Muster einer anderen falschen Antwort). Tipp für die ganze
+Aufgabe je nach Weg: beim Additionstheorem „durch $\cos x$ teilen, dann bleibt
+$\tan x$", beim doppelten Winkel die passende Form und danach Substitution und
+$pq$-Formel. Neue Lernkarte „Additionstheoreme". Frei wird das Ergebnis eingetippt
+(Tastatur mit Funktionen). Einige Fehler werden nur geführt angeboten: Mit
+$\cos^2 x - 1 \le 0$ hat die falsche Gleichung oft keine Lösung.
+
+Falsche Gleichungen in diesen Aufgaben: keine, die im Bereich der Aufgabe ($x <
+\frac{\pi}{2}$) nirgends definiert ist ($\sqrt{\frac{\cos^2 x - 1}{\cos x}}$ ist es nur
+für $x > \frac{\pi}{2}$), keine, in der sich $x$ als gemeinsamer Faktor wegkürzt
+($2\cos x = y\cos x$), keine mit einer Seite, die nur noch $0$ ist. Bei der Prüfung
+gefunden und gleich mit behoben (ältere Teile): nach dem Zurück-Einsetzen hieß es „$x$ war
+nur ein Platzhalter" statt „$u$", beim Sammeln mit $\tan x$ oder $\sin^2 x$ wurde „noch
+einmal quadrieren" angeboten, obwohl keine Wurzel dasteht, und die Frage „Auf beiden
+Seiten stehen $\sin x$ und $\cos x$" heißt jetzt „In der Gleichung stehen …" (oft steht
+auf einer Seite nur $\cos x$).
+
 #### Schritt 9: Gezieltes Üben, Feinschliff, Abschluss von M3
 - „Deine häufigsten Fehler" mit „Gezielt üben" auch fürs Umstellen, für
   jeden typischen Fehler (ein Test prüft alle).
 - Design-Durchgang, Offline-Test, Doku, M3 abhaken.
+
+**Umgesetzt (9):** „Gezielt üben" fürs Umstellen, auf den Lernkarten und unter „Deine
+häufigsten Fehler", für alle 90 typischen Fehler des Themas (auch die aus „Brüche" beim
+Zusammenfassen). `tasks/rearrangeFocus.ts` sucht reihum durch die Stufen (zuerst die
+gewählte, dann die nächstgelegenen, je Runde acht Versuche) eine Aufgabe, in der der Fehler
+im geführten Modus als Antwort erscheint; der Schrittplaner zeigt ihn dann sicher. Fehler,
+die vor allem in einer Aufgabenart vorkommen, stehen bei ihrer Vorlage (`focus`, z. B. die
+Fehler beim Betrag bei „Betrag und Winkel", die der Substitution bei „Stufe 4,
+quadratisch"); gesucht wird dann nur in diesen Vorlagen und ihren Stufen, die Vorlage einer
+Nummer lässt sich schnell vorab bestimmen (`likelyRearrangeTemplate`). Gemessen: meist
+unter einer halben Sekunde, höchstens etwa zwei (am seltensten „beim Teilen die Winkel
+addiert" und „Mehrfachklammer nur beim ersten Summanden ausmultipliziert"). Ein Test findet
+jeden Fehler, die seltensten mit verschiedenem Zufall. Die Suche wird in allen Themen erst
+beim gezielten Üben geladen (vorher lud die Übungsseite die Suche fürs Ableiten und für
+Brüche immer mit).
+
+Anzeige nach dem Substituieren (vorgemerkt seit 8a): $ae^{-x}$ wird $\frac{a}{u}$ statt
+$a \cdot \frac{1}{u}$ ($\frac{a}{2}e^{-x}$ wird $\frac{a}{2u}$, kein Doppelbruch), nach dem
+Malnehmen mit $u$ steht $u^2 - a = uy$ da; beim Malnehmen mit dem Hauptnenner wird ein Bruch
+als Vorzahl gekürzt ($2u \cdot \frac{a}{2}u$ wird $au^2$). Das betrifft die Zwischenschritte
+von 183 Aufgaben der Stufen 4 und 5 (geführt); alle Aufgaben und Ergebnisse bleiben gleich
+(verglichen über die Nummern 1 bis 300 der Stufen 1 bis 4 und 1 bis 1500 der Stufe 5).
+
+Design-Durchgang über alle Seiten des Themas in Handy- und Laptopgröße, hell und dunkel
+(Thema, alle 21 Lernkarten, Fortschritt, Galerie, zwölf Aufgaben aller Stufen geführt bis
+zum Ergebnis, frei, gezielt üben): nichts ragt heraus, keine Formel zu breit, keine
+Formelfehler, keine zu kleinen Knöpfe. Neuer Browser-Test: Umstellen offline, geführt, frei
+und gezielt üben. Damit ist M3 abgeschlossen.
 
 Pro Sitzung schaffen wir etwa ein bis zwei Schritte.
 
