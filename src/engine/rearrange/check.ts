@@ -94,16 +94,18 @@ export function definedSomewhere(e: Equation, rng: Rng, count = 60, conditions: 
 }
 
 // Hängt die Gleichung von t ab? An Zufallsstellen mit zwei Werten für t verglichen: x + a - x = b hängt nicht von x ab,
-// auch wenn x noch dasteht
-export function dependsOn(e: Equation, t: string, rng: Rng, count = 20): boolean {
-  const letters = [...new Set([...variablesOf(e.lhs), ...variablesOf(e.rhs)])].filter((name) => name !== t)
+// auch wenn x noch dasteht. Mit Bedingungen (Additionstheoreme, Teil 8c) nur Stellen, an denen sie gelten.
+export function dependsOn(e: Equation, t: string, rng: Rng, count = 20, conditions: readonly Condition[] = []): boolean {
+  const letters = [...new Set([...variablesOf(e.lhs), ...variablesOf(e.rhs), ...conditions.flatMap((c) => [...variablesOf(c.lhs), ...variablesOf(c.rhs)])])].filter((name) => name !== t)
   const diff = (env: Env) => evaluate(e.lhs, env) - evaluate(e.rhs, env)
   const value = () => SMALLEST * (LARGEST / SMALLEST) ** rng.next()
   for (let i = 0; i < count; i++) {
     const env: Record<string, number> = {}
     for (const name of letters) env[name] = value()
-    const u = diff({ ...env, [t]: value() })
-    const v = diff({ ...env, [t]: value() })
+    const [p, q] = [{ ...env, [t]: value() }, { ...env, [t]: value() }]
+    if (!conditionsHold(conditions, p) || !conditionsHold(conditions, q)) continue
+    const u = diff(p)
+    const v = diff(q)
     if (Number.isFinite(u) && Number.isFinite(v) && Math.abs(u - v) > 1e-7 * Math.max(1, Math.abs(u), Math.abs(v))) return true
   }
   return false

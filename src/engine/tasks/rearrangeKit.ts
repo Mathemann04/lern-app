@@ -2391,6 +2391,9 @@ function scaled(rng: Rng, n: ToolNames, tool: Expr, alone: number): Expr {
 // Faktor vor einem Werkzeug: b oder 3
 const theoremFactor = (rng: Rng, n: ToolNames): Expr => (rng.chance(0.7) ? n.letter() : k(rng, 2, 5))
 const fnName = (rng: Rng): 'sin' | 'cos' => (rng.chance(0.5) ? 'sin' : 'cos')
+// Seite im \ln oder unter der Wurzel: andere Seite nur y oder ein Buchstabe
+const wrapped = (side: Expr) => side.kind === 'root' || (side.kind === 'fn' && side.name === 'ln')
+const plainSide = (rng: Rng, n: ToolNames): Expr => (rng.chance(0.6) ? variable('y') : n.letter())
 
 // Beispiel aus dem Plan: \sin(x + a) = y\cos x, mit Faktor b\sin(x + a) = y\cos x oder geteilt
 function theoremAgainst(rng: Rng, n: ToolNames): Built {
@@ -2410,7 +2413,7 @@ function theoremFraction(rng: Rng, n: ToolNames): Built {
   const fraction = rng.chance(0.8) ? div(tool, g) : div(g, tool)
   const r = rng.next()
   const side = r < 0.3 ? fraction : r < 0.5 ? ln(fraction) : r < 0.65 ? sqrt(fraction) : r < 0.85 ? plus(fraction, n.letter()) : minus(mul(theoremFactor(rng, n), fraction), n.letter())
-  const other = side.kind === 'root' ? (rng.chance(0.6) ? variable('y') : n.letter()) : simpleSide(rng, n)
+  const other = wrapped(side) ? plainSide(rng, n) : simpleSide(rng, n)
   return { side, other, conditions: acuteX(x), label: 'Additionstheorem im Bruch mit $\\sin x$ oder $\\cos x$' }
 }
 
@@ -2439,8 +2442,9 @@ function doubleAgainst(rng: Rng, n: ToolNames): Built {
   // \ln nur mit \sin x im Nenner: \frac{\cos(2x)}{\cos x} ist höchstens 1, sein \ln nie positiv
   const logged = g.kind === 'fn' && g.name === 'sin' && s >= 0.5 && s < 0.7
   const side = s < 0.5 ? fraction : logged ? ln(fraction) : s < 0.85 ? sqrt(fraction) : mul(theoremFactor(rng, n), fraction)
-  // unter der Wurzel nur y oder ein Buchstabe als andere Seite (sonst große Zahlen im Ergebnis, 1024a^4)
-  const other = side.kind === 'root' ? (rng.chance(0.6) ? variable('y') : n.letter()) : simpleSide(rng, n)
+  // unter der Wurzel oder im \ln nur y oder ein Buchstabe als andere Seite (sonst große Zahlen im Ergebnis, 1024a^4,
+  // bzw. mit e^{8k} nur winzige x)
+  const other = wrapped(side) ? plainSide(rng, n) : simpleSide(rng, n)
   return { side, other, conditions: acuteX(x), label: '$\\cos(2x)$ im Bruch mit $\\sin x$ oder $\\cos x$' }
 }
 
@@ -2466,7 +2470,7 @@ function doubleSquare(rng: Rng, n: ToolNames): Built {
   // \ln nur mit \sin^2 x im Nenner: \frac{\cos(2x)}{\cos^2 x} = 1 - \tan^2 x ist kleiner als 1
   const logged = g.base.kind === 'fn' && g.base.name === 'sin' && s >= 0.4 && s < 0.65
   const side = s < 0.4 ? fraction : logged ? ln(fraction) : s < 0.65 ? mul(theoremFactor(rng, n), fraction) : minus(mul(theoremFactor(rng, n), fraction), n.letter())
-  return { side, other: simpleSide(rng, n), conditions: acuteX(x), label: '$\\cos(2x)$ im Bruch mit $\\sin^2 x$ oder $\\cos^2 x$' }
+  return { side, other: wrapped(side) ? plainSide(rng, n) : simpleSide(rng, n), conditions: acuteX(x), label: '$\\cos(2x)$ im Bruch mit $\\sin^2 x$ oder $\\cos^2 x$' }
 }
 
 const LEVEL5_THEOREM_CORES: readonly ToolBuild[] = [

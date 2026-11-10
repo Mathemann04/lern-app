@@ -1121,6 +1121,68 @@ Länge, Skalarprodukt, Winkel". Frei wird das Ergebnis eingetippt; die Fehler we
 erkannt, einige nur geführt (mit „$\mathrm{i}$ mitquadriert" hat die Gleichung oft
 keine Lösung).
 
+**Umgesetzt (8c):** In Stufe 5 kommen Additionstheoreme dazu (35 % der Nummern, die zu
+keinem früheren Teil gehören, also aus 7a: unter den Aufgaben 1 bis 200 sind es 19; alle
+übrigen Nummern behalten ihre Aufgabe, verglichen über die Nummern 1 bis 300 der Stufen 1
+bis 4 und 1 bis 1500 der Stufe 5, mit Rechenweg und falschen Antworten). Neues Werkzeug
+„Additionstheorem" (`rearrange/tools/theorem.ts`): Im Rumpf steht die Funktion, wie sie
+in der Aufgabe steht, $\sin(x + a)$, $\cos(x - a)$, $\cos(2x)$; gesetzt und zur Gegenprobe
+ausgewertet wird sie wie die Funktion selbst. Ausgerechnet wird sie in einem Schritt:
+- **Additionstheorem** („Additionstheorem anwenden"): $\sin(p \pm q) = \sin p \cdot \cos q
+  \pm \cos p \cdot \sin q$, $\cos(p \pm q) = \cos p \cdot \cos q \mp \sin p \cdot \sin q$,
+  $\tan(p \pm q) = \frac{\tan p \pm \tan q}{1 \mp \tan p \cdot \tan q}$. Danach stehen
+  $\sin x$ und $\cos x$ da; die Engine teilt durch $\cos x$ und rechnet mit $\tan x$ weiter.
+- **Doppelter Winkel** („Doppelten Winkel auflösen"): $\sin(2p) = 2\sin p \cdot \cos p$,
+  $\cos(2p)$ in der Form, nach der nur noch eine Funktion dasteht: $1 - 2\sin^2 p$, wenn
+  sonst $\sin p$ vorkommt, $2\cos^2 p - 1$, wenn $\cos p$ vorkommt. Danach meist
+  quadratisch (Substitution, $pq$-Formel).
+
+Der Baukasten `buildLevel5Theorem` setzt zusammen, immer mit $x < \frac{\pi}{2}$:
+Additionstheorem gegen $\sin x$ oder $\cos x$ (Beispiel aus dem Plan
+$b\sin(x + a) = y\cos x$, auch mit Faktor davor oder geteilt), im Bruch mit $\sin x$ oder
+$\cos x$ (auch im $\ln$, unter der Wurzel, mit Schalen), Bruch aus zwei
+Additionstheoremen mit verschiedenen Winkeln (sonst wäre es $\tan(x + a)$);
+$\cos(2x)$ gegen $\sin x$ oder $\cos x$ (danach quadratisch), im Bruch damit, in einer
+Summe mit $\sin x$ oder $\cos x$, gegen $\sin^2 x$ oder $\cos^2 x$. $x$ steht nie nur in
+einem einzigen Additionstheorem (sonst ginge es gleich mit der Umkehrfunktion).
+Ausgeschrieben werden die Gleichungen lang; am Browser gemessen passen in den Antworten am
+Handy etwa 23 em. Darum ist jede Gleichung des Rechenwegs und jede falsche Antwort
+höchstens 21 em breit, die Aufgabe höchstens 12 em, das Ergebnis höchstens 16,5 em. Zwei
+Additionstheoreme nebeneinander (in einer Summe, auf beiden Seiten, Sinus und Kosinus
+derselben Summe) ergeben vier Produkte und passen nie; diese Arten sind nach der Prüfung
+weggefallen. Im Ergebnis steht kein Minus direkt unter der Wurzel oder in der Klammer
+($\sqrt{-\frac{a}{y - 2a + b}}$), und die Prüfstellen haben nicht nur winzige $x$ (bei
+$8k = \ln\frac{\cos(2x)}{\sin x}$ wären es nur $x < 0{,}09$, dort ist $\sin x$ fast $x$).
+
+Gemessen unter den Aufgaben 1 bis 3000 der Stufe 5: 240 Aufgaben, im Mittel 8,6
+Umformungen (6 bis 12), 155 Formen; 17,5 % der Nummern haben einen Zwilling (vor der
+Prüfung 20 %). Stufe 5 hat unter den Aufgaben 1 bis 200 weiter 195 Formen, keine öfter
+als 1 %, im Mittel 8,5 Umformungen.
+
+Geführt kommt zuerst „Was steht da eigentlich?" mit sieben neuen Fehlern (Tabelle oben):
+beim Additionstheorem „Schreibe $\sin(x + a)$ mit dem Additionstheorem aus", beim
+doppelten Winkel „Schreibe $\cos(2x)$ mit dem einfachen Winkel" (ohne „so, dass nur
+$\sin x$ vorkommt": das schiede zwei falsche Antworten ohne jedes Wissen aus). Die
+Erklärung nennt die Regel mit $\alpha$ und $\beta$ und was sie hier sind, beim doppelten
+Winkel auch, warum diese Form passt. „Warum ist das falsch?" zeigt beim Vorzeichen und
+beim falschen Paar genau die Regel dieser Funktion mit diesem Vorzeichen (vorher stand
+dort für $\sin(x - k)$ das Muster einer anderen falschen Antwort). Tipp für die ganze
+Aufgabe je nach Weg: beim Additionstheorem „durch $\cos x$ teilen, dann bleibt
+$\tan x$", beim doppelten Winkel die passende Form und danach Substitution und
+$pq$-Formel. Neue Lernkarte „Additionstheoreme". Frei wird das Ergebnis eingetippt
+(Tastatur mit Funktionen). Einige Fehler werden nur geführt angeboten: Mit
+$\cos^2 x - 1 \le 0$ hat die falsche Gleichung oft keine Lösung.
+
+Falsche Gleichungen in diesen Aufgaben: keine, die im Bereich der Aufgabe ($x <
+\frac{\pi}{2}$) nirgends definiert ist ($\sqrt{\frac{\cos^2 x - 1}{\cos x}}$ ist es nur
+für $x > \frac{\pi}{2}$), keine, in der sich $x$ als gemeinsamer Faktor wegkürzt
+($2\cos x = y\cos x$), keine mit einer Seite, die nur noch $0$ ist. Bei der Prüfung
+gefunden und gleich mit behoben (ältere Teile): nach dem Zurück-Einsetzen hieß es „$x$ war
+nur ein Platzhalter" statt „$u$", beim Sammeln mit $\tan x$ oder $\sin^2 x$ wurde „noch
+einmal quadrieren" angeboten, obwohl keine Wurzel dasteht, und die Frage „Auf beiden
+Seiten stehen $\sin x$ und $\cos x$" heißt jetzt „In der Gleichung stehen …" (oft steht
+auf einer Seite nur $\cos x$).
+
 #### Schritt 9: Gezieltes Üben, Feinschliff, Abschluss von M3
 - „Deine häufigsten Fehler" mit „Gezielt üben" auch fürs Umstellen, für
   jeden typischen Fehler (ein Test prüft alle).

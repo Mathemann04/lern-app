@@ -6,6 +6,7 @@ import { type Equation, type Expr, PI, add, cos, div, eq, mul, num, pow, sin, su
 import { checkRearrangeAnswer, prepareRearrangeCheck, prepareRearrangeFree } from '../../check/rearrangeAnswer.ts'
 import { planRearrange } from '../../guided/rearrangePlan.ts'
 import { createRng } from '../../random/rng.ts'
+import { latexWidthEm } from '../../tasks/latexWidth.ts'
 import { generateRearrangeTask } from '../../tasks/rearrangeTerms.ts'
 import { definedSomewhere, dependsOn, holds, samplePoints } from '../check.ts'
 import { rearrangeWrongAnswers } from '../errorRules.ts'
@@ -164,6 +165,16 @@ describe('Beispiele aus dem Plan', () => {
     for (const id of ids) expect(DOUBLE_MISTAKES as readonly string[]).toContain(id)
   })
 
+  it('Tangens: Frage, Tipp und Erklärung passen zur Funktion (im Baukasten noch nicht, in der Engine schon)', () => {
+    const first = (body: Expr) => planRearrange({ equation: eq(theoremOf(body), y), target: 'x', conditions: acute }, { level: 5, seed: 1 }).steps[0]
+    const tan2 = first(tan(twoX))
+    expect(tan2.question).toBe('Schreibe $\\tan(2x)$ mit dem einfachen Winkel: Was kommt heraus?')
+    expect(tan2.hint).toContain('Additionstheorem des Tangens')
+    const tanSum = first(tan(add(x, a)))
+    expect(tanSum.question).toBe('Schreibe $\\tan(x + a)$ mit dem Additionstheorem aus: Was kommt heraus?')
+    expect(tanSum.explanation.detailed).toContain('\\tan(\\alpha + \\beta)')
+  })
+
   it('in keiner falschen Gleichung kürzt sich x als gemeinsamer Faktor weg (2\\cos x = y\\cos x)', () => {
     const task = { equation: eq(theoremOf(cos(twoX)), mul(y, cos(x))), target: 'x', conditions: acute }
     const ids = rearrangeWrongAnswers(task, solveTask(task)!).filter((w) => w.stepIndex === 0).map((w) => w.rule.id)
@@ -200,6 +211,21 @@ describe('Baukasten (Nummern 1 bis 1000 der Stufe 5)', () => {
     }
   })
 
+  it('am Handy in einer Zeile: Aufgabe höchstens 12 em, Ergebnis 16,5 em, jede Gleichung des Rechenwegs und jede falsche Antwort 21 em; nicht nur winzige x', () => {
+    for (const g of generated) {
+      const s = solveTask(g.task)!
+      const label = taskLatex(g.task)
+      expect(latexWidthEm(equationToLatex(g.task.equation)), label).toBeLessThanOrEqual(12)
+      expect(latexWidthEm(`x = ${toLatex(s.result)}`), label).toBeLessThanOrEqual(16.5)
+      for (const step of s.steps) expect(latexWidthEm(stepEquationLatex(step.kind, step.after)), `${label}: ${step.kind}`).toBeLessThanOrEqual(21)
+      for (const w of rearrangeWrongAnswers(g.task, s)) expect(latexWidthEm(equationToLatex(w.after)), `${label}: ${w.rule.id}`).toBeLessThanOrEqual(21)
+      // kein Minus, das sich herausziehen ließe, direkt unter der Wurzel oder in der Klammer
+      expect(toLatex(s.result), label).not.toMatch(/\\sqrt\{-|\\left\(-/)
+      const points = samplePoints(g.task, s.result, createRng('brauchbar'), 8, s.requires)
+      expect(points.some((p) => p.x > 0.2), label).toBe(true)
+    }
+  })
+
   it('der freie Modus nimmt das Ergebnis der Engine als richtig und fertig an, mit Funktionstasten', () => {
     for (const g of generated) {
       const c = prepareRearrangeCheck(g.task, true)
@@ -224,7 +250,8 @@ describe('Baukasten (Nummern 1 bis 1000 der Stufe 5)', () => {
         expect(definedSomewhere(w.after, createRng(`irgendwo:${label}`), 400, g.task.conditions), label).toBe(true)
         // keine Seite, die nur noch 0 ist
         for (const side of [w.after.lhs, w.after.rhs]) if (side.kind !== 'num') expect(points.every((p) => Math.abs(evaluate(side, p)) < 1e-9), label).toBe(false)
-        expect(dependsOn(w.after, 'x', createRng(`abhängig:${label}`), 400), label).toBe(true)
+        // x spielt eine Rolle, im Bereich der Aufgabe (wie in errorRules.ts)
+        expect(dependsOn(w.after, 'x', createRng(`abhängig:${label}`), 400, g.task.conditions), label).toBe(true)
         for (const other of wrong.slice(0, i)) expect(points.every((p) => close(diff(w.after, p), diff(other.after, p))), `${label} wie ${equationToLatex(other.after)}`).toBe(false)
       })
     }

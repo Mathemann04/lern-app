@@ -778,8 +778,11 @@ export function rearrangeWrongAnswers(task: RearrangeTask, solution: RearrangeSo
       // Betrag, Winkel, Vektoren (Teil 8b): keine Gleichung, die für kein x definiert ist, und keine, die anders
       // geschrieben dieselbe ist wie eine schon da (beim Winkel mit einer Achse in der Ebene sind Sinus statt
       // Kosinus und über Kreuz malgenommen dasselbe)
-      if (polar && !dependsOn(c.after, step.unknown ?? t, createRng(`abhängig:${latex}`))) continue
-      if (theorem && !isZeroSide(c.after, step.unknown ?? t) && !dependsOn(eq(div(c.after.lhs, c.after.rhs), num(1)), step.unknown ?? t, createRng(`gekürzt:${latex}`))) continue
+      // mit Additionstheorem im Bereich der Aufgabe und mit mehr Stellen (nach \ln oder Wurzel ist vieles nicht
+      // definiert); 8b wie bisher
+      const [draws, conditions] = theorem ? [200, task.conditions] : [20, []]
+      if (polar && !dependsOn(c.after, step.unknown ?? t, createRng(`abhängig:${latex}`), draws, conditions)) continue
+      if (theorem && !isZeroSide(c.after, step.unknown ?? t) && !dependsOn(eq(div(c.after.lhs, c.after.rhs), num(1)), step.unknown ?? t, createRng(`gekürzt:${latex}`), draws, conditions)) continue
       // eine Seite, die nur noch 0 ist (\sin x \cdot \cos a - \cos x \cdot \sin a - \sin(x - a)): Rundungsrest im
       // Bruch oben, darum eigens geprüft
       if (theorem && [c.after.lhs, c.after.rhs].some((side) => side.kind !== 'num' && vanishes(side, points))) continue

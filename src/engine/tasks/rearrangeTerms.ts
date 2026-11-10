@@ -282,6 +282,8 @@ function isGood(t: RearrangeTask, level: Level, kit: boolean, novel = false, nar
   // herausziehen ließe, direkt unter der Wurzel oder in der Klammer (\sqrt{-\frac{a}{y - 2a + b}})
   if (level === 5 && hasTheorem(t)) {
     if (/\\sqrt\{-|\\left\(-/.test(toLatex(solution.result))) return false
+    // nicht nur winzige x (sonst ist \sin x fast x, und falsche Antworten stimmen an vielen Prüfstellen)
+    if (!points.some((p) => p[t.target] > 0.2)) return false
     const wide = (latex: string) => latexWidthEm(latex) > MAX_THEOREM_STEP_WIDTH
     if (solution.steps.some((s) => wide(stepEquationLatex(s.kind, s.after)))) return false
     if (rearrangeWrongAnswers(t, solution).some((w) => wide(equationToLatex(w.after)))) return false

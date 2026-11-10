@@ -34,6 +34,7 @@ import {
   explainAngle,
   explainAcuteFinish,
   explainAddition,
+  theoremErrorText,
   explainDouble,
   explainAcuteMove,
   explainAcutePythagoras,
@@ -235,7 +236,7 @@ const TASK_TOOL: Partial<Record<StepKind, TaskTool>> = {
   dot: 'vector',
   angle: 'vector',
   addition: 'theorem',
-  doubleAngle: 'theorem',
+  doubleAngle: 'double',
 }
 
 // --- Weichen: Schritte, bei denen man wissen muss, was als Nächstes kommt ---
@@ -473,7 +474,7 @@ function moveQuestion(step: RearrangeStep, t: string, target: string): MoveQuest
       const hyperbolic = cos.name === 'cosh'
       const sin = toLatex(fn(hyperbolic ? 'sinh' : 'sin', cos.arg))
       const tan = toLatex(fn(hyperbolic ? 'tanh' : 'tan', cos.arg))
-      const where = side ? 'Im Zähler und Nenner' : 'Auf beiden Seiten'
+      const where = side ? 'Im Zähler und Nenner' : 'In der Gleichung'
       return {
         question: `${where} stehen $${sin}$ und $${toLatex(cos)}$. Wie bleibt nur eine Funktion übrig?`,
         wrong: tanQuotientMoves(sin, toLatex(cos), tan, side !== undefined),
@@ -532,7 +533,10 @@ function moveStep(step: RearrangeStep, previous: RearrangeStep | undefined, q: M
     question: q.question,
     choices: rng.shuffle([correct, ...wrong]),
     hint: q.hint,
-    explanation: q.explanation ?? explainMove(step.kind === 'combine' ? COMBINE_EXPLANATION[combineContext(step)] : step.kind, label, t, unknownOf(step, t)),
+    // beim Zurück-Einsetzen ist der Platzhalter u (aus dem Schritt davor), nicht x
+    explanation:
+      q.explanation ??
+      explainMove(step.kind === 'combine' ? COMBINE_EXPLANATION[combineContext(step)] : step.kind, label, t, step.kind === 'resubstitute' ? (previous?.unknown ?? 'u') : unknownOf(step, t)),
     established,
     cards: cardsOf(step, t, previous),
   }
@@ -618,7 +622,11 @@ function resultStep(
       correct: false,
       errorRuleId: w.rule.id,
       // die Scheinlösung mit dem Grund dieser Aufgabe; beim Ableiten der Text aus „Ableiten"
-      whyWrong: w.derive ? explainError(w.derive) : w.rule.id === 'eq-spurious-root' && step.kind === 'choose' ? spuriousWhy(rejectReason(step, t, context)) : whyWrong(w.rule.id),
+      whyWrong: w.derive
+        ? explainError(w.derive)
+        : w.rule.id === 'eq-spurious-root' && step.kind === 'choose'
+          ? spuriousWhy(rejectReason(step, t, context))
+          : (theoremWhy(step, w.rule.id) ?? whyWrong(w.rule.id)),
     }),
   )
   const finish = step.kind === 'finish'
@@ -716,7 +724,6 @@ function polarExplanation(step: RearrangeStep): Explanation | null {
   }
 }
 
-// Differentialgleichung: die Frage nennt die Funktion (bei f und g in einer Aufgabe wichtig)
 // Additionstheorem (Teil 8c): die Frage nennt die Funktion. Beim doppelten Winkel nennt sie nicht die Funktion, die
 // danach allein dastehen soll: Sonst schiede „nur \sin x" zwei falsche Antworten (2\cos x, \cos^2 x + \sin^2 x) ohne
 // jedes Wissen aus. Unter den Antworten steht ohnehin nur eine der gleichwertigen Formen; warum diese, sagt die Erklärung.
@@ -734,12 +741,19 @@ function theoremQuestion(step: RearrangeStep): string | null {
   return `Schreibe $${work.term}$ mit dem einfachen Winkel: Was kommt heraus?`
 }
 
+// „Warum ist das falsch?" beim Additionstheorem mit der Regel genau dieser Funktion und dieses Vorzeichens
+function theoremWhy(step: RearrangeStep, id: string): Explanation | null {
+  const tool = theoremTool(step)
+  const work = tool && theoremWork(tool, step.before)
+  return work?.kind === 'addition' ? theoremErrorText(id, work.rule) : null
+}
+
 function theoremHint(step: RearrangeStep): string | null {
   const tool = theoremTool(step)
   const work = tool && theoremWork(tool, step.before)
   if (!work) return null
   if (work.kind === 'addition') return work.name === 'sin' ? REARRANGE_HINTS.additionSin : work.name === 'cos' ? REARRANGE_HINTS.additionCos : REARRANGE_HINTS.additionTan
-  return work.name === 'cos' ? REARRANGE_HINTS.doubleCos : REARRANGE_HINTS.doubleSin
+  return work.name === 'cos' ? REARRANGE_HINTS.doubleCos : work.name === 'tan' ? REARRANGE_HINTS.doubleTan : REARRANGE_HINTS.doubleSin
 }
 
 function theoremExplanation(step: RearrangeStep): Explanation | null {
@@ -751,6 +765,7 @@ function theoremExplanation(step: RearrangeStep): Explanation | null {
   return work.kind === 'addition' ? explainAddition(work.rule, work.alpha, work.beta, before, after) : explainDouble(work.name, work.form, work.alpha, work.other, before, after)
 }
 
+// Differentialgleichung: die Frage nennt die Funktion (bei f und g in einer Aufgabe wichtig)
 function odeQuestion(step: RearrangeStep): string | null {
   if (step.kind !== 'ode') return null
   const tool = activeTool(step.before)?.tool.tool

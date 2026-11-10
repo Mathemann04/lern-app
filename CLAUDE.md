@@ -259,9 +259,10 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     Buchstaben „Was machst du als Nächstes?" zu $1 - \cos^2 y = \sin^2 y$ mit Irrwegen,
     `acuteQuestion`, und am Ende „Schreibe mit $\tan y$" mit Erklärung,
     `acuteExplanation`; beim Additionstheorem nennt die Frage die Funktion, beim
-    doppelten Winkel von $\cos$ die Funktion, die danach allein dastehen soll, mit
-    Tipp je Funktion und Erklärung mit $\alpha$ und $\beta$, `theoremQuestion`,
-    `theoremHint`, `theoremExplanation`);
+    doppelten Winkel nur „mit dem einfachen Winkel" (nicht die Funktion, die danach
+    allein dasteht: das verriete zwei falsche Antworten), mit Tipp je Funktion,
+    Erklärung mit $\alpha$ und $\beta$ und „Warum ist das falsch?" mit genau der Regel
+    der Aufgabe, `theoremQuestion`, `theoremHint`, `theoremExplanation`, `theoremWhy`);
     nach der $pq$-Formel „Welche der beiden Lösungen passt?" mit der
     Scheinlösung als falscher Antwort und dem Grund (`rejectReason`); nach dem
     Substituieren sprechen Fragen von $u$ (`step.unknown`);

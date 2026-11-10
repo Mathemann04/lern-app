@@ -7,7 +7,7 @@ Stand: 10.11.2026
 | M1 | Grundgerüst + Ableitungsregeln (beide Modi, 5 Stufen, Erklärungen, Lernkarten, Fortschritt) | fertig |
 | M2 | Brüche (Bruchrechnung, Bruchterme kürzen und zusammenfassen, Doppelbrüche); App für mehrere Themen | fertig |
 | M2b | Brüche nachschärfen: viel mehr Abwechslung (Baukasten statt fester Vorlagen, keine Form doppelt), deutlich schwerer, Stufe 5 auf Profi-Niveau mit Partialbruchzerlegung und Brüchen aus späteren Kapiteln (komplexe Zahlen, Grenzwerte, Teleskopsummen, Hyperbelfunktionen) | fertig |
-| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | in Arbeit: 4. Fassung des Plans (Baukasten und Abwechslung, ab Stufe 3 verschachtelter); Schritte 4, 5 und 6 fertig (Stufe 4 komplett), Schritt 7 fertig (Stufe 5 mit Ableitungen, Integralen, Summen, Reihen, Grenzwerten und Differentialgleichungen), Schritte 8a und 8b fertig (Determinanten, Betrag und Winkel), als Nächstes 8c |
+| M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten) | in Arbeit: 4. Fassung des Plans (Baukasten und Abwechslung, ab Stufe 3 verschachtelter); Schritte 4, 5 und 6 fertig (Stufe 4 komplett), Schritt 7 fertig (Stufe 5 mit Ableitungen, Integralen, Summen, Reihen, Grenzwerten und Differentialgleichungen), Schritt 8 fertig (Determinanten, Betrag und Winkel, Additionstheoreme), als Nächstes Schritt 9 (gezieltes Üben, Feinschliff, Abschluss) |
 | M4 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
 | M5 | weitere Themen aus Mathematik MB1 | offen |
 | M6 | Physik: Formeln mit Einheiten (Formeln umstellen mit Zeichen der Physik; Aufgaben lösen: Formel wählen, umstellen, Werte mit Einheiten einsetzen) | offen |
@@ -81,10 +81,10 @@ Details: [PLAN-M3.md](PLAN-M3.md) (4. Fassung, freigegeben am 05.11.2026 mit dei
   - [x] 7a. Ableitungen und Integrale (mit Partialbrüchen)
   - [x] 7b. Summen, Reihen und Grenzwerte
   - [x] 7c. Differentialgleichungen
-- [ ] 8. Stufe 5, Teil 2: komplexe Zahlen, Determinanten, Vektoren, Additionstheoreme, in drei Teilen
+- [x] 8. Stufe 5, Teil 2: komplexe Zahlen, Determinanten, Vektoren, Additionstheoreme, in drei Teilen
   - [x] 8a. Determinanten ($2 \times 2$ und $3 \times 3$)
   - [x] 8b. Betrag und Winkel: komplexe Zahlen, Winkel zwischen Vektoren
-  - [ ] 8c. Additionstheoreme
+  - [x] 8c. Additionstheoreme
 - [ ] 9. Gezieltes Üben, Feinschliff, Abschluss von M3
 
 ## M2: Schritte
@@ -586,3 +586,18 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   Browser-Tests mit 5-1899 (Winkel mit der $x$-Achse, geführt, mit beiden
   Lernkarten), 5-465 (Betrag eines Bruchs, frei) und 5-1155 (Winkel mit festem
   Faktor, Lernkarte, $\pi$-Taste).
+- 10.11.2026: M3 Schritt 8c fertig: In Stufe 5 von „Gleichungen umstellen"
+  stecken jetzt auch Additionstheoreme ($b\sin(x + a) = y\cos x$) und der doppelte
+  Winkel ($\cos(2x) = y\sin x$, danach Substitution und $pq$-Formel). 35 % der
+  Nummern aus 7a, alle anderen behalten ihre Aufgabe. 195 Formen unter 200
+  Aufgaben, im Mittel 8,5 Umformungen. Sieben neue typische Fehler, neue Lernkarte
+  „Additionstheoreme". Jede Gleichung des Rechenwegs und jede falsche Antwort passt
+  am Handy in eine Zeile (am Browser gemessen); darum gibt es keine zwei
+  Additionstheoreme nebeneinander. Unabhängige Prüfung aus vier Blickwinkeln: u. a.
+  keine falsche Antwort, die im Bereich der Aufgabe nirgends definiert ist, die Frage
+  zum doppelten Winkel verrät keine falschen Antworten mehr, „Warum ist das falsch?"
+  mit genau der Regel der Aufgabe, Tipp im freien Modus je nach Weg, mehr
+  Abwechslung; nebenbei drei ältere Textfehler behoben („$x$ war nur ein
+  Platzhalter", „noch einmal quadrieren" ohne Wurzel, „auf beiden Seiten").
+  Browser-Tests mit 5-2333 (Beispiel aus dem Plan, geführt, Lernkarte) und 5-1539
+  ($\cos(2x) = y\sin x$, frei). Damit ist Schritt 8 fertig.
