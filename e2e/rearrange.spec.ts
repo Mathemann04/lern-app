@@ -135,6 +135,33 @@ test('Umstellen: Lernkarten-Ordner mit durchgerechneten Beispielen', async ({ pa
   await expectCleanPage(page, 'Lernkarte')
 })
 
+test('Umstellen funktioniert offline: geführt, frei und gezielt üben', async ({ page, context }) => {
+  await page.goto('./')
+  await expect(page.getByTestId('offline-status')).toHaveText('Offline nutzbar ✓', { timeout: 15_000 })
+  await context.setOffline(true)
+  await page.reload()
+  await page.getByRole('link', { name: /^Grundlagen/ }).click()
+  await page.getByRole('link', { name: /^Gleichungen umstellen/ }).click()
+  await expect(page.getByRole('heading', { name: 'Gleichungen umstellen', level: 1 })).toBeVisible()
+
+  // geführt: Additionstheorem (Beispiel aus dem Plan) ganz durch
+  await page.goto('./#/ueben/umstellen/5-2333')
+  await solveWholeTask(page)
+  await expectCleanPage(page, 'offline geführt')
+
+  // frei: doppelter Winkel
+  await page.goto('./#/frei/umstellen/5-1539')
+  await expect(field(page)).toBeVisible()
+  await enter(page, 'x=\\arcsin\\left(\\frac{\\sqrt{y^2+8}-y}{4}\\right)')
+  await expect(feedback(page)).toContainText('Richtig!')
+
+  // gezielt üben: Die Suche lädt erst jetzt, auch offline
+  await page.goto('./#/ueben/umstellen/2?fokus=eq-sign-not-flipped')
+  await expect(page).toHaveURL(/#\/ueben\/umstellen\/\d-\d+\?fokus=eq-sign-not-flipped$/, { timeout: 20_000 })
+  await expect(page.getByText('Gezielt üben:')).toBeVisible()
+  await expectCleanPage(page, 'offline gezielt')
+})
+
 test('Umstellen gezielt üben: „Beim Betrag die Wurzel vergessen" von der Lernkarte aus, findet eine Aufgabe der Stufe 5', async ({ page }) => {
   await page.goto('./#/karten/umstellen/rearrange-complex')
   const error = page.locator('li').filter({ hasText: /^Beim Betrag die Wurzel vergessen/ }).first()

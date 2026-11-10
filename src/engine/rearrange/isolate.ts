@@ -929,6 +929,15 @@ function termTimes(term: Expr, lcd: Factored, atoms: Atoms, written: readonly Ex
     const inner = termTimes(term.arg, lcd, atoms, written)
     return inner.kind === 'add' ? neg(inner) : negated(inner)
   }
+  // Bruch als Vorzahl: \frac{a}{2}u · 2u → au^2 (nicht 2u \cdot \frac{a}{2}u)
+  if (term.kind === 'mul') {
+    const fractions = term.factors.filter((f) => f.kind === 'div' && (f.den.kind === 'num' || isMonomial(f.den)))
+    if (fractions.length === 1 && fractions[0].kind === 'div') {
+      const f = fractions[0]
+      const rest = term.factors.filter((g) => g !== f)
+      return termTimes(div(mul(f.num, ...rest), f.den), lcd, atoms, written)
+    }
+  }
   if (term.kind === 'div') {
     const d = toPoly(term.den, atoms)
     const k = d && factoredDivide(lcd, factorize(d, lcd.factors.map((f) => f.poly)))
@@ -1746,7 +1755,21 @@ function replaced(e: Expr, t: string, plan: SubPlan, u: Expr, wrong: SubstituteM
   const n = plan.power(e)
   if (n !== null) return uPower(u, n, plan.kind, wrong)
   const f = (x: Expr) => replaced(x, t, plan, u, wrong)
-  return rebuilt(e, f)
+  const r = rebuilt(e, f)
+  return r && reciprocalFolded(r)
+}
+
+// Anzeige nach dem Substituieren: a \cdot \frac{1}{u} als \frac{a}{u} (aus ae^{-x}), sonst stünde nach dem Malnehmen
+// mit u noch ua \cdot \frac{1}{u} da
+function reciprocalFolded(e: Expr): Expr {
+  if (e.kind !== 'mul') return e
+  const reciprocals = e.factors.filter((f) => f.kind === 'div' && f.num.kind === 'num' && isOne(f.num.value))
+  if (reciprocals.length !== 1 || reciprocals[0].kind !== 'div') return e
+  const rest = e.factors.filter((f) => f !== reciprocals[0])
+  const den = reciprocals[0].den
+  // \frac{a}{2} \cdot \frac{1}{u} als \frac{a}{2u}, nicht als Doppelbruch
+  if (rest.length === 1 && rest[0].kind === 'div') return div(rest[0].num, mul(rest[0].den, den))
+  return div(rest.length === 1 ? rest[0] : mul(...rest), den)
 }
 
 // Knoten mit neuen Kindern; null, wenn ein Kind null ist
