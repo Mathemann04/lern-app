@@ -563,7 +563,7 @@ Neue Entscheidungen unten anfügen.
   Mathe als M6b direkt nach M6, vor M5. Bilder rechnet die Engine, Tests prüfen
   sie; Bilder zum Anfassen später.
 - 10.11.2026: S3c fertig, damit S3 abgeschlossen. Wissensfragen zu
-  „Reaktionsgleichungen“ (53) und „Stoffmenge und Umsatz“ (52) mit je 35 Denkfehlern,
+  „Reaktionsgleichungen“ (53) und „Stoffmenge und Umsatz“ (52) mit 36 bzw. 35 Denkfehlern,
   in eigenen Worten (maschineller Wortvergleich mit dem Skript: keine 6 gleichen Wörter
   am Stück), Zahlen und Gleichungen mit der Engine nachgerechnet, unabhängig fachlich
   geprüft. Neues Unterthema „Reaktionsgleichungen lesen“. Inhalte, die nicht im Skript

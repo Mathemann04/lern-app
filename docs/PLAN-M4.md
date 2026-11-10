@@ -804,7 +804,7 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   letzten zehn Formen meidet die App trotzdem).
   **S3c** (fertig): Wissensfragen zu „Reaktionsgleichungen" (53, Unterthemen
   Lesen, Ausgleichen, Verbrennung) und „Stoffmenge und Umsatz" (52, Unterthemen
-  Molare Masse und Stoffmenge), je 17 bis 18 je Stufe, je 35 Denkfehler;
+  Molare Masse und Stoffmenge), je 17 bis 18 je Stufe, 36 bzw. 35 Denkfehler;
   danach mischt die App Fragen und Rechnungen wie beim Atombau.
 - **S4: Umsatz, Gase und Lösungen.** Umsatz in drei Schritten, ganze
   Klausuraufgabe 4; Gasgesetz, molares Volumen, Konzentration, Lösung
