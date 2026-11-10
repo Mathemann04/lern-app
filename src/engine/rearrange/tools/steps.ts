@@ -7,6 +7,7 @@ import { type WrongAnswer, wrongAnswers } from '../../derive/errorRules.ts'
 import { type Equation, type Expr, add, div, mul, neg, num } from '../../expr/types.ts'
 import { isOne, ratNeg, ratSign } from '../../rational.ts'
 import { type IntegralMistake, antiderivative, antiderivativeExpr, antiderivativeTerms, atBound, partialFractions } from './integrate.ts'
+import { DET_MISTAKES, EXPAND_MISTAKES, detValue, expandValue } from './determinant.ts'
 import { ODE_MISTAKES, odeSolution } from './ode.ts'
 import { type LimitMistake, type SeriesMistake, geometricParts, limitParts, limitValue, seriesValue, sumValue } from './series.ts'
 import { type ActiveTool, type ToolVar, activeTool, bracketOf, integralOf } from './tool.ts'
@@ -18,9 +19,10 @@ import { type ActiveTool, type ToolVar, activeTool, bracketOf, integralOf } from
 // - Summe, Reihe: Formel der geometrischen Summe bzw. Reihe (auch abgeleitet und integriert)
 // - Grenzwert: \lim_{n \to \infty}\left(1 + \frac{p}{n}\right)^{sn} = e^{sp}
 // - Differentialgleichung: Lösung mit den Anfangswerten (ode.ts)
+// - Determinante: 2 × 2 ausrechnen, 3 × 3 erst nach der Linie mit zwei Nullen entwickeln (determinant.ts)
 // Steckt ein Werkzeug in einem anderen (Reihe in einer Ableitung), kommt das innere zuerst.
 
-export type ToolStepKind = 'derive' | 'partial' | 'antiderivative' | 'bounds' | 'sumFormula' | 'series' | 'limit' | 'ode'
+export type ToolStepKind = 'derive' | 'partial' | 'antiderivative' | 'bounds' | 'sumFormula' | 'series' | 'limit' | 'ode' | 'det' | 'detExpand'
 
 export type ToolDraft = { readonly kind: ToolStepKind; readonly operand?: Expr; readonly after: Equation }
 
@@ -36,6 +38,12 @@ export function nextToolStep(e: Equation): ToolDraft | null {
 
 function toolDraft({ tool, put }: ActiveTool): ToolDraft | null {
   const t = tool.tool
+  if (t.kind === 'det') {
+    const expanded = t.rows.length === 3 ? expandValue(t, null) : null
+    if (expanded) return { kind: 'detExpand', after: put(expanded) }
+    const v = detValue(t, null)
+    return v ? { kind: 'det', after: put(v) } : null
+  }
   const value = (kind: ToolStepKind, v: Expr | null): ToolDraft | null => (v ? { kind, operand: t.body, after: put(v) } : null)
   switch (t.kind) {
     case 'derivative':
@@ -199,6 +207,18 @@ export function toolMistakes(kind: ToolStepKind, before: Equation): ToolCandidat
   if (kind === 'limit' && t.kind === 'limit') {
     for (const id of LIMIT_MISTAKES) {
       const v = seriesToolValue(t, id)
+      if (v) out.push({ id, after: put(v) })
+    }
+  }
+  if (kind === 'det' && t.kind === 'det') {
+    for (const id of DET_MISTAKES) {
+      const v = detValue(t, id)
+      if (v) out.push({ id, after: put(v) })
+    }
+  }
+  if (kind === 'detExpand' && t.kind === 'det') {
+    for (const id of EXPAND_MISTAKES) {
+      const v = expandValue(t, id)
       if (v) out.push({ id, after: put(v) })
     }
   }

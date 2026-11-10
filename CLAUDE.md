@@ -13,7 +13,8 @@ den Nutzer zugeschnitten: Maschinenbau, 1. Semester, THU, „Mathematik MB1".
   4. Fassung, freigegeben): erst Baukasten und Abwechslung in den Stufen 1
   bis 3 wie bei den Brüchen (Schritte 4 und 5; ab Stufe 3 Kerne ineinander,
   Test der Umformungen), dann die Stufen 4 und 5 (Schritte 6 bis 9; Stufe 4
-  in drei Teilen, 6a bis 6c fertig; Schritt 7 in drei Teilen, 7a bis 7c fertig).
+  in drei Teilen, 6a bis 6c fertig; Schritt 7 in drei Teilen, 7a bis 7c fertig;
+  Schritt 8 in drei Teilen, 8a fertig).
   Abgeschlossen:
   [docs/PLAN-M1.md](docs/PLAN-M1.md), [docs/PLAN-M2.md](docs/PLAN-M2.md),
   [docs/PLAN-M2b.md](docs/PLAN-M2b.md) (Brüche nachschärfen: Abwechslung und
@@ -106,17 +107,22 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     (`IMAG`, gerechnet nur in der Bruch-Engine, reell ausgewertet `NaN`);
     Werkzeuge der Stufe 5 beim Umstellen (`Tool`: Ableitung, bestimmtes
     Integral, Stammfunktion mit Grenzen, endliche Summe, Reihe, Grenzwert
-    $n \to \infty$, Lösung einer Differentialgleichung mit Anfangswerten) als
+    $n \to \infty$, Lösung einer Differentialgleichung mit Anfangswerten,
+    Determinante $2 \times 2$ oder $3 \times 3$ mit den Einträgen statt eines
+    Rumpfs, `toolBodies`, `mapToolBodies`) als
     Buchstabe mit eigenem Namen und
     `tool` (`Var.tool`): gesetzt von `print.ts` (`toolLatex`; Summe, Reihe und
     Grenzwert in Klammern, wenn danach noch etwas steht; die
     Differentialgleichung als $f(x)$, mit Malpunkt davor, die Gleichung selbst
-    über `odeLatex`), numerisch
+    über `odeLatex`; die Determinante als
+    $\det\begin{pmatrix} \dots \end{pmatrix}$, im $\ln$ und in Potenzen mit großen
+    Klammern), numerisch
     ausgewertet von `evaluate.ts` (Ableitung mit Richardson-Extrapolation,
     Integral adaptiv mit Gauß-Legendre, Summe Summand für Summand bzw.
     geometrisch fortgesetzt, Reihe über Teilsummen, Grenzwert mit großen $n$
     und Neville-Extrapolation, Differentialgleichung mit Runge-Kutta und
-    Richardson-Extrapolation, als Gegenprobe), `contains` und
+    Richardson-Extrapolation, Determinante mit dem Gauß-Verfahren, als
+    Gegenprobe), `contains` und
     `variablesOf` sehen ihre freien Buchstaben (`toolBound`, `toolLimits`)
   - `expr/normalize.ts`: *Normalform* zum Vergleichen; `expr/display.ts`:
     `simplify` = Normalform als *Anzeigeform* (schöne Schreibweise)
@@ -160,9 +166,13 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     gekürzt; eine Wurzel aus einem Bruch zählt wie ein Buchstabe, z. B.
     $b + \sqrt{\frac{y}{a}}$; ab Stufe 4 (`lenient`) jede gleichwertige Form
     ohne Doppelbruch, $\ln$, $e^{…}$, Winkel- und Umkehrfunktionen zählen wie
-    Buchstaben; steht noch $u$ aus der Substitution da: Hinweis, zurück
-    einzusetzen; sonst
-    typischer Fehler)
+    Buchstaben; die Endform der Engine zählt immer als fertig, auch mit anderer
+    Reihenfolge der Summanden und Faktoren; steht noch $u$
+    aus der Substitution da: Hinweis, zurück einzusetzen; sonst
+    typischer Fehler; passt das Ergebnis zu mehreren und steckt einer davon im
+    Ausrechnen eines Werkzeugs (Stufe 5), werden alle genannt und keiner gezählt;
+    die Doppelbruch-Prüfung, die freie Prüfung und Baukasten gemeinsam nutzen,
+    steht in `rearrange/finished.ts`)
   - `parse/latex.ts`: liest die Eingabe der Mathe-Tastatur (LaTeX) ein, mit
     verständlichen Fehlermeldungen
   - `explain/`: Textbausteine für Erklärungen (ausführlich/kurz), Tipps und
@@ -185,7 +195,7 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     „Winkel- und Hyperbelfunktionen", „Substitution", „$pq$-Formel"; Stufe 5:
     „Stammfunktionen und Partialbrüche", „Geometrische Summe und Reihe",
     „Grenzwert $\left(1 + \frac{x}{n}\right)^n \to e^x$",
-    „Differentialgleichungen $f' = kf$ und $f'' = k^2 f$"),
+    „Differentialgleichungen $f' = kf$ und $f'' = k^2 f$", „Determinanten"),
     durchgerechnete Beispiele in `rearrangeExample.ts`
   - `guided/plan.ts`: Schrittplaner für den geführten Modus (Regelwahl, dann je
     Summand ein Schritt; Produkt/Quotient: u', v', Einsetzen; Kette: äußere,
@@ -229,7 +239,9 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     „Was kommt heraus?" (beim Ableiten die Fehler und Lernkarten aus
     „Ableiten"; beim Grenzwert darf die falsche Gleichung ohne $x$ sein, „1 hoch
     unendlich ist 1"; bei der Differentialgleichung erklärt die Lösung Ansatz und
-    Konstanten aus den Anfangswerten, `odeExplanation`);
+    Konstanten aus den Anfangswerten, `odeExplanation`; bei der Determinante
+    zeigt die Erklärung die Produkte mit Malpunkt bzw. Linie, Eintrag und
+    Vorzeichen beim Entwickeln, `detExplanation`);
     nach der $pq$-Formel „Welche der beiden Lösungen passt?" mit der
     Scheinlösung als falscher Antwort und dem Grund (`rejectReason`); nach dem
     Substituieren sprechen Fragen von $u$ (`step.unknown`);
@@ -335,8 +347,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     Kreis), markiert `solution.novel`, damit ältere Vorlagen ihre Aufgaben
     behalten; bei der Normalform das Minus vor dem Bruch), `tools/` (Stufe 5:
     `tool.ts` Werkzeuge bauen (`derivativeOf`, `integralOf`, `bracketOf`,
-    `sumOf`, `seriesOf`, `limitOf`, `odeOf`; bei der Differentialgleichung steht
-    die Gleichung im Namen) und ersetzen, das innerste zuerst
+    `sumOf`, `seriesOf`, `limitOf`, `odeOf`, `detOf`; bei der
+    Differentialgleichung steht die Gleichung im Namen) und ersetzen, das innerste zuerst
     (`activeTool`: Reihe in einer Ableitung), `integrate.ts` Stammfunktionen
     aus einer Tafel als Faktor mal Term mit typischen Fehlern, Partialbrüche
     über die Bruch-Engine, Grenzen einsetzen; `series.ts` Summand als
@@ -346,9 +358,16 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     $f' = k(b - f)$ und $f'' = k^2 f$ mit $f(0) = a$, $f'(0) = 0$ bzw. $f(0) = 0$,
     $f'(0) = b$: Lösung in Exponentialform ($\frac{a}{2}e^{kx} + \frac{a}{2}e^{-kx}$,
     danach Substitution und $pq$-Formel), typische Fehler, Ansatz und Konstanten
-    für die Erklärung (`odeWork`); `steps.ts` Werkzeug-Schritte `derive`, `partial`,
-    `antiderivative`, `bounds`, `sumFormula`, `series`, `limit`, `ode` und ihre
-    typischen Fehler, beim Ableiten die aus „Ableiten" mit ihrer Stelle),
+    für die Erklärung (`odeWork`); `determinant.ts` Determinanten: $2 \times 2$
+    als Hauptdiagonale minus Nebendiagonale mit aufgeräumten Produkten
+    (`product`: Zahl vorn, Buchstaben sortiert, $e^{x} \cdot e^{-x} = 1$,
+    $x \cdot x = x^2$), $3 \times 3$ nur mit einer Zeile oder Spalte mit zwei
+    Nullen, nach ihr entwickelt (`expansionLine`, die Unterdeterminante ist ein
+    neues Werkzeug), typische Fehler (bei „in Zeilen oder Spalten" die Variante,
+    in der alle Buchstaben bleiben); `steps.ts` Werkzeug-Schritte `derive`,
+    `partial`, `antiderivative`, `bounds`, `sumFormula`, `series`, `limit`, `ode`,
+    `det`, `detExpand` und ihre typischen Fehler, beim Ableiten die aus „Ableiten"
+    mit ihrer Stelle),
     `check.ts`
     (Prüfstellen: Buchstaben zufällig positiv, Variable aus dem Ergebnis,
     Bedingungen der Aufgabe, Zwischenwerte aus `requires` nicht riesig;
@@ -362,7 +381,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     je Klammer ein Fehler beim Ausmultiplizieren; nie eine Gleichung, die doch
     stimmt), `task.ts` (Aufgabe, Bedingungen; mit Differentialgleichungen
     stehen sie je Funktion in einer Zeile über der Gleichung, `givenLatex`,
-    `\begin{gathered}`; ohne sie bleibt `taskLatex` wie bisher)
+    `\begin{gathered}`; ohne sie bleibt `taskLatex` wie bisher; `taskFormLatex`
+    ohne gathered und ohne den Namen pmatrix)
   - `random/rng.ts`: Zufall mit Startwert; `tasks/`: Aufgaben-Nummern
     („3-48213"), Vorlagen je Stufe (`derivativeTerms.ts`,
     `fractionTerms.ts`, `rearrangeTerms.ts`; Umstellen Stufen 1 bis 4 aus dem
@@ -401,6 +421,16 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     mit Schalen (erster Ordnung mindestens zwei), im Bruch mit $e^{kx}$, unter
     Wurzel oder $\ln$, zwei Funktionen $f$ und $g$ mit derselben Rate; Rate $k$
     oder eine Zahl, Funktionen $f$ und $g$ (diese Buchstaben sonst nicht);
+    Teil 8a `buildLevel5Det` (Anteil 25 % der Nummern, die weder zu 7b noch zu 7c
+    gehören, als letzte Vorlage): $2 \times 2$, danach quadratisch ($e^{x}$ und
+    $e^{-x}$, $x(x + c)$, $\sqrt{x}$, $\ln x$ mit $x > 1$, $\sin x$ und $\cos x$
+    mit $x < \frac{\pi}{2}$ …; allein, mit einer Schale, unter Wurzel oder $\ln$)
+    oder linear (mit Schalen oder im Bruch mit seinem Baustein), $3 \times 3$ um
+    einen $2 \times 2$-Kern (Eintrag nie 1, auf einem Minus-Feld des Schachbretts
+    die Spalten des Kerns getauscht, ohne Schalen; keine Kerne, nach denen nur ein
+    Polynom in $x$ dasteht, denn $c\left(bx^2 - ax\right) = y$ löst die Engine nicht),
+    Integral gleich Determinante; in einer $2 \times 2$-Determinante keine 0, kein
+    Minus vor einem Eintrag, nie derselbe Eintrag zweimal in einer Spalte;
     Filter in
     `rearrangeTerms.ts`: Mindestzahl der Umformungen je Stufe, Doppelbrüche
     erst ab Stufe 3, Ergebnis höchstens 90 bzw. ab Stufe 4 120 Zeichen (Stufe
@@ -408,7 +438,10 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     Aufgabe mit $\sum$ und $\lim$ so breit wie drei Zeichen, ohne die Zeilen
     der Differentialgleichung, die je höchstens 64 Zeichen haben; Vorlagen mit
     `narrow` (Teil 7c): Ergebnis höchstens 90 Zeichen, keine Wurzel aus mehr
-    als drei Summanden, damit es am Handy in eine Zeile passt),
+    als drei Summanden, damit es am Handy in eine Zeile passt; Aufgaben mit
+    Determinante nach ihrer Breite, höchstens 12 em, geschätzt in
+    `latexWidth.ts` und am Browser kalibriert, ihr Ergebnis höchstens 16,5 em und
+    ohne Doppelbruch),
     Gegenprobe der Aufgabe an den Prüfstellen), `focus.ts` und `fractionFocus.ts` (Aufgaben für
     gezieltes Üben; Brüche: reihum durch die Stufen, je Runde zwölf Versuche,
     seltene Fehler in ihrer Vorlage `focus`, `likelyFractionTemplate`;

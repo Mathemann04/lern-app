@@ -1,19 +1,20 @@
 import { explainFractionError, listing } from '../explain/fractionTexts.ts'
 import { explainRearrangeError } from '../explain/rearrangeTexts.ts'
 import { explainError } from '../explain/texts.ts'
-import { contains, subterms } from '../expr/compare.ts'
+import { contains, key, subterms } from '../expr/compare.ts'
 import { type Env, evaluate } from '../expr/evaluate.ts'
 import { equationToLatex, toLatex } from '../expr/print.ts'
 import { type Equation, type Expr, eq, mul, variable } from '../expr/types.ts'
 import { factoredPoly, reduceFrac } from '../fraction/factor.ts'
 import type { Frac } from '../fraction/frac.ts'
 import { isZeroPoly, polyContent, polyMul, polySub, totalDegree } from '../fraction/poly.ts'
-import { parseLatexEquation } from '../parse/latex.ts'
+import { parseLatex, parseLatexEquation } from '../parse/latex.ts'
 import { createRng } from '../random/rng.ts'
 import { newAtoms, toRat } from '../rearrange/algebra.ts'
 import { samplePoints } from '../rearrange/check.ts'
-import { type RearrangeWrong, rearrangeWrongAnswers } from '../rearrange/errorRules.ts'
+import { type RearrangeWrong, isToolStep, rearrangeWrongAnswers } from '../rearrange/errorRules.ts'
 import { type RearrangeSolution, solveTask } from '../rearrange/isolate.ts'
+import { hasFraction, hasLooseFraction, hasNestedFraction } from '../rearrange/finished.ts'
 import { type RearrangeTask, taskVariables } from '../rearrange/task.ts'
 import { hasTool, toolsIn } from '../rearrange/tools/tool.ts'
 import { isInteger, ratAbs } from '../rational.ts'
@@ -30,7 +31,9 @@ import type { FreeTask, FreeVerdict } from './freeTask.ts'
 //   im Zähler oder Nenner (auch unter einer Wurzel oder in einem Quadrat), Zähler und Nenner
 //   zusammengefasst, gekürzt. Ab Stufe 4 (lenient) zählt jede gleichwertige Form ohne Doppelbruch,
 //   z. B. \frac{1}{2}\ln y und \ln\sqrt{y}; \ln, e^{…} und Wurzeln aus Brüchen zählen wie Buchstaben.
-// - Sonst Vergleich mit den falschen Ergebnissen der typischen Fehler.
+// - Sonst Vergleich mit den falschen Ergebnissen der typischen Fehler. Passt das Ergebnis zu mehreren
+//   und steckt einer davon im Ausrechnen eines Werkzeugs (Stufe 5), werden alle genannt: Diagonalen
+//   vertauscht und später beim Rüberbringen das Vorzeichen nicht gewechselt ergeben oft dasselbe x.
 
 export type RearrangeCheckContext = {
   readonly task: RearrangeTask
@@ -42,6 +45,9 @@ export type RearrangeCheckContext = {
   readonly points: readonly Env[]
   // ab Stufe 4: fertig ist jede gleichwertige Form ohne Doppelbruch
   readonly lenient: boolean
+  // Endform der Engine, wie sie eingetippt wird (ohne Reihenfolge der Summanden und Faktoren): Sie ist immer
+  // fertig, so zeigt sie auch der geführte Modus
+  readonly resultForm: string
 }
 
 // Warum ein Ergebnis noch nicht fertig ist
@@ -52,6 +58,8 @@ export type RearrangeVerdict =
   | { readonly kind: 'correct' }
   | { readonly kind: 'unfinished'; readonly reason: NotDone }
   | { readonly kind: 'knownError'; readonly wrong: RearrangeWrong }
+  // passt zu mehreren typischen Fehlern (je Regel einer, in der Reihenfolge des Rechenwegs)
+  | { readonly kind: 'knownErrors'; readonly wrongs: readonly RearrangeWrong[] }
   | { readonly kind: 'wrongSign' }
   | { readonly kind: 'wrong' }
 
@@ -61,7 +69,9 @@ export function prepareRearrangeCheck(task: RearrangeTask, lenient = false): Rea
   const solution = solveTask(task)
   if (!solution) throw new Error(`Die Aufgabe ${equationToLatex(task.equation)} lässt sich nicht auflösen`)
   const points = samplePoints(task, solution.result, createRng(`umstellen-frei:${equationToLatex(task.equation)}`), POINTS, solution.requires)
-  return { task, solution, wrongs: rearrangeWrongAnswers(task, solution), letters: taskVariables(task), points, lenient }
+  const typed = parseLatex(toLatex(solution.result))
+  const resultForm = formKey(typed.ok ? typed.expr : solution.result)
+  return { task, solution, wrongs: rearrangeWrongAnswers(task, solution), letters: taskVariables(task), points, lenient, resultForm }
 }
 
 export function checkRearrangeAnswer(context: RearrangeCheckContext, latex: string): RearrangeVerdict {
@@ -92,17 +102,48 @@ export function checkRearrangeAnswer(context: RearrangeCheckContext, latex: stri
 
   const { points } = context
   if (agrees(answer, (p) => p[t], points)) {
+    if (formKey(answer) === context.resultForm) return { kind: 'correct' }
     const reason = context.lenient ? (hasNestedFraction(answer) ? 'nested' : null) : notDone(answer, context.solution.result)
     return reason ? { kind: 'unfinished', reason } : { kind: 'correct' }
   }
   // falsche Ergebnisse sind oft nur an wenigen Stellen definiert (z. B. \sqrt{a^2 - 4y^2})
-  const wrong = context.wrongs.find((w) => w.result && agrees(answer, (p) => evaluate(w.result!, p), points, MIN_COMPARED_WRONG))
-  if (wrong) return { kind: 'knownError', wrong }
+  const matches = context.wrongs.filter((w) => w.result && agrees(answer, (p) => evaluate(w.result!, p), points, MIN_COMPARED_WRONG))
+  if (matches.length > 0) {
+    const rules = matches.filter((w, i) => matches.findIndex((v) => v.rule.id === w.rule.id) === i)
+    // mit einem Werkzeug-Schritt lässt sich nicht sagen, wo der Fehler passiert ist: alle nennen
+    const ambiguous = rules.length > 1 && rules.some((w) => isToolStep(context.solution.steps[w.stepIndex].kind))
+    return ambiguous ? { kind: 'knownErrors', wrongs: rules } : { kind: 'knownError', wrong: matches[0] }
+  }
   if (agrees(answer, (p) => -p[t], points)) return { kind: 'wrongSign' }
   return { kind: 'wrong' }
 }
 
 const close = (a: number, b: number) => Math.abs(a - b) <= 1e-7 * Math.max(1, Math.abs(a), Math.abs(b))
+
+// Schlüssel einer Form ohne die Reihenfolge der Summanden und Faktoren: \sqrt{…} + 5 und 5 + \sqrt{…} sind
+// dieselbe Form
+function formKey(e: Expr): string {
+  switch (e.kind) {
+    case 'add':
+      return `+(${e.terms.map(formKey).sort().join(',')})`
+    case 'mul':
+      return `*(${e.factors.map(formKey).sort().join(',')})`
+    case 'neg':
+      return `-(${formKey(e.arg)})`
+    case 'div':
+      return `/(${formKey(e.num)},${formKey(e.den)})`
+    case 'pow':
+      return `^(${formKey(e.base)},${formKey(e.exp)})`
+    case 'root':
+      return `root${e.index}(${formKey(e.arg)})`
+    case 'fn':
+      return `${e.name}(${formKey(e.arg)})`
+    case 'log':
+      return `log(${formKey(e.base)},${formKey(e.arg)})`
+    default:
+      return key(e)
+  }
+}
 
 const MIN_COMPARED_WRONG = 3
 
@@ -128,44 +169,7 @@ function notIsolated(e: Equation, context: RearrangeCheckContext): RearrangeVerd
 
 // --- Ist ein gleichwertiges Ergebnis fertig? ---
 
-// Kommt ein Bruch vor? Hochzahlen zählen nicht (x^{\frac{1}{2}} ist kein Bruch)
-function hasFraction(e: Expr): boolean {
-  switch (e.kind) {
-    case 'div':
-      return true
-    case 'add':
-      return e.terms.some(hasFraction)
-    case 'mul':
-      return e.factors.some(hasFraction)
-    case 'neg':
-    case 'root':
-    case 'fn':
-      return hasFraction(e.arg)
-    case 'pow':
-      return hasFraction(e.base)
-    case 'log':
-      return hasFraction(e.base) || hasFraction(e.arg)
-    default:
-      return false
-  }
-}
-
 const stripMinus = (e: Expr): Expr => (e.kind === 'neg' ? stripMinus(e.arg) : e)
-
-// Doppelbruch irgendwo (außerhalb von Wurzeln, Logarithmen und Hochzahlen)?
-function hasNestedFraction(e: Expr): boolean {
-  return subterms(e).some((s) => s.kind === 'div' && (hasLooseFraction(s.num) || hasLooseFraction(s.den)))
-}
-
-// Bruch außerhalb von Wurzeln? Eine Wurzel aus einem Bruch zählt in einer Summe wie ein Buchstabe:
-// b + \sqrt{\frac{y}{a}} ist fertig; ebenso \ln\frac{a}{b} und e^{\frac{a}{b}}
-function hasLooseFraction(e: Expr): boolean {
-  if (e.kind === 'root' || e.kind === 'fn' || e.kind === 'log') return false
-  if (e.kind === 'add') return e.terms.some(hasLooseFraction)
-  if (e.kind === 'mul') return e.factors.some(hasLooseFraction)
-  if (e.kind === 'neg') return hasLooseFraction(e.arg)
-  return hasFraction(e)
-}
 
 // Zähler und Nenner der Eingabe; sonst, warum es kein einzelner Bruch ist. Eine Wurzel oder ein
 // Quadrat um einen Bruch zählt wie der Bruch: \sqrt{\frac{…}{…}}, \left(\frac{…}{…}\right)^2.
@@ -285,8 +289,17 @@ export function rearrangeFreeVerdict(v: RearrangeVerdict, target: string): FreeV
       return { kind: 'unfinished', title: v.reason === 'not-isolated' ? 'Richtig umgeformt, aber noch nicht fertig.' : 'Richtig gerechnet, aber noch nicht fertig.', message: notDoneText(v.reason, target) }
     case 'knownError': {
       const { id, name } = v.wrong.rule
-      const why = v.wrong.derive ? explainError(v.wrong.derive) : id.startsWith('frac-') ? explainFractionError(id) : explainRearrangeError(id)
-      return { kind: 'wrong', title: 'Nicht ganz.', error: { id, name, why } }
+      return { kind: 'wrong', title: 'Nicht ganz.', error: { id, name, why: whyOf(v.wrong) } }
+    }
+    // kein einzelner Fehler (der Fortschritt zählt keinen davon), dafür jeder mit seiner Regel
+    case 'knownErrors': {
+      const rules = v.wrongs.map((w) => `${w.rule.name}: ${whyOf(w).short}`).join('\n')
+      return {
+        kind: 'wrong',
+        title: 'Nicht ganz.',
+        message: `Dein Ergebnis passt zu ${v.wrongs.length === 2 ? 'zwei' : 'mehreren'} typischen Fehlern. Prüfe diese Stellen in deiner Rechnung:`,
+        explanation: { detailed: rules, short: rules },
+      }
     }
     case 'wrongSign':
       return { kind: 'wrong', title: 'Fast!', message: 'Bis auf das Vorzeichen stimmt es. Prüfe, wo ein Minus hingehört.' }
@@ -297,6 +310,13 @@ export function rearrangeFreeVerdict(v: RearrangeVerdict, target: string): FreeV
         message: 'Rechne noch einmal nach. Wenn du nicht weiterkommst, helfen dir der Tipp, der Lösungsweg oder der geführte Modus.',
       }
   }
+}
+
+// „Warum ist das falsch?" zu einem typischen Fehler: beim Ableiten aus „Ableiten", beim Zusammenfassen aus
+// „Brüche", sonst aus dem Umstellen
+function whyOf(w: RearrangeWrong) {
+  const { id } = w.rule
+  return w.derive ? explainError(w.derive) : id.startsWith('frac-') ? explainFractionError(id) : explainRearrangeError(id)
 }
 
 // Wurzel-Taste, wenn in der Aufgabe oder im Ergebnis eine Wurzel steht

@@ -55,6 +55,7 @@ export function toLatex(e: Expr): string {
 // Werkzeug der Stufe 5: \frac{\mathrm{d}}{\mathrm{d}x}\left(…\right), \int_a^x \frac{\mathrm{d}t}{t(t + b)},
 // \left[…\right]_a^x
 export function toolLatex(tool: Tool): string {
+  if (tool.kind === 'det') return `\\det\\begin{pmatrix} ${tool.rows.map((row) => row.map(toLatex).join(' & ')).join(' \\\\ ')} \\end{pmatrix}`
   const d = `\\mathrm{d}${tool.v}`
   switch (tool.kind) {
     case 'derivative':
@@ -124,9 +125,9 @@ function printNum(e: Extract<Expr, { kind: 'num' }>): string {
   return `${sign}\\frac{${abs.n}}{${abs.d}}`
 }
 
-// Große Klammern nur, wenn ein Bruch, eine Summe, ein Integral oder ein Grenzwert darin steht
+// Große Klammern nur, wenn ein Bruch, eine Summe, ein Integral, ein Grenzwert oder eine Matrix darin steht
 function paren(latex: string): string {
-  return /\\frac|\\sum|\\int|\\lim/.test(latex) ? `\\left(${latex}\\right)` : `(${latex})`
+  return /\\frac|\\sum|\\int|\\lim|\\begin/.test(latex) ? `\\left(${latex}\\right)` : `(${latex})`
 }
 
 // Beginnt der Term mit einem Minus?

@@ -6,7 +6,7 @@ import { subterms } from '../../expr/compare.ts'
 import { evaluate } from '../../expr/evaluate.ts'
 import { equationToLatex, toLatex } from '../../expr/print.ts'
 import { substitute } from '../../expr/substitute.ts'
-import { type Expr, add, eq, mul, neg, num, pow, sqrt, sub, variable } from '../../expr/types.ts'
+import { type Expr, add, eq, mul, neg, num, pow, sqrt, sub, toolBodies, variable } from '../../expr/types.ts'
 import { createRng } from '../../random/rng.ts'
 import { rat } from '../../rational.ts'
 import { generateRearrangeTask } from '../../tasks/rearrangeTerms.ts'
@@ -198,13 +198,13 @@ describe('Baukasten', () => {
     for (const g of generated) {
       for (const tool of toolsIn(g.task.equation)) {
         if (tool.tool.kind === 'ode') continue
-        expect(subterms(tool.tool.body).some((s) => s.kind === 'var' && s.tool?.kind === 'ode')).toBe(false)
+        expect(toolBodies(tool.tool).flatMap(subterms).some((s) => s.kind === 'var' && s.tool?.kind === 'ode')).toBe(false)
       }
     }
   })
 
   it('beide Funktionen f und g mit derselben Rate, eine Zeile je Funktion', () => {
-    const two = generated.filter((g) => toolsIn(g.task.equation).some((t) => t.tool.v === 'g'))
+    const two = generated.filter((g) => toolsIn(g.task.equation).some((t) => t.tool.kind === 'ode' && t.tool.v === 'g'))
     expect(two.length).toBeGreaterThan(0)
     for (const g of two) expect(taskLatex(g.task)).toMatch(/^\\begin\{gathered\}f' = .* \\\\ g' = /)
   })

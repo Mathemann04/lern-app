@@ -5,7 +5,7 @@ import { parseLatex } from '../parse/latex.ts'
 import { REARRANGE_ERROR_RULES, rearrangeWrongAnswers } from './errorRules.ts'
 import { solveEquation, solveTask } from './isolate.ts'
 import type { Condition } from './task.ts'
-import { derivativeOf, integralOf, limitOf, odeOf, seriesOf, sumOf } from './tools/tool.ts'
+import { derivativeOf, detOf, integralOf, limitOf, odeOf, seriesOf, sumOf } from './tools/tool.ts'
 
 const p = (latex: string): Expr => {
   const r = parseLatex(latex)
@@ -68,6 +68,15 @@ const CATALOG: Array<{ id: string; lhs: string; rhs: string; target?: string; af
 const t = variable('t')
 const [a, b, f, k, n, q, x] = ['a', 'b', 'f', 'k', 'n', 'q', 'x'].map(variable)
 const below1: Condition[] = [{ lhs: x, rel: '<', rhs: num(1) }]
+const planDet = detOf([
+  [exp(x), exp(neg(x))],
+  [a, b],
+])
+const columnDet = detOf([
+  [num(0), a, x],
+  [b, num(1), num(2)],
+  [num(0), x, a],
+])
 
 const TOOL_CATALOG: Array<{ id: string; lhs: Expr; target?: string; conditions?: Condition[]; after: string }> = [
   {
@@ -104,6 +113,14 @@ const TOOL_CATALOG: Array<{ id: string; lhs: Expr; target?: string; conditions?:
   { id: 'eq-ode-constant-added', lhs: odeOf(mul(k, f), 1, [a]), after: 'e^{kx} + a - 1 = y' },
   { id: 'eq-ode-exp-sign', lhs: odeOf(neg(mul(k, f)), 1, [a]), after: 'ae^{kx} = y' },
   { id: 'eq-ode-constant-start', lhs: odeOf(mul(k, sub(b, f)), 1, [a]), conditions: [{ lhs: a, rel: '>', rhs: b }], after: 'b + ae^{-kx} = y' },
+  // Schritt 8a: Determinanten (das Beispiel aus dem Plan, beim Entwickeln eine Spalte mit zwei Nullen)
+  { id: 'eq-det-plus', lhs: planDet, after: 'be^{x} + ae^{-x} = y' },
+  { id: 'eq-det-swapped', lhs: planDet, after: 'ae^{-x} - be^{x} = y' },
+  // zeilenweise fiele x weg (e^{x} \cdot e^{-x} = 1), darum spaltenweise
+  { id: 'eq-det-rows', lhs: planDet, after: 'ae^{x} - be^{-x} = y' },
+  { id: 'eq-det-main', lhs: planDet, after: 'be^{x} = y' },
+  { id: 'eq-det-checkerboard', lhs: columnDet, after: 'b\\det\\begin{pmatrix} a & x \\\\ x & a \\end{pmatrix} = y' },
+  { id: 'eq-det-entry', lhs: columnDet, after: '-\\det\\begin{pmatrix} a & x \\\\ x & a \\end{pmatrix} = y' },
 ]
 
 describe('Katalog der Fehlerregeln', () => {

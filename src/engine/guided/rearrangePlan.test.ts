@@ -4,8 +4,8 @@ import { parseRichText } from '../explain/richText.ts'
 import { cardById } from '../explain/cards.ts'
 import { latexProblem } from '../expr/latexChecks.ts'
 import { toLatex } from '../expr/print.ts'
-import { type Expr, add, div, eq, mul, num, pow, sub, variable } from '../expr/types.ts'
-import { derivativeOf, integralOf, limitOf, odeOf, seriesOf, sumOf } from '../rearrange/tools/tool.ts'
+import { type Expr, add, div, eq, exp, mul, neg, num, pow, sub, variable } from '../expr/types.ts'
+import { derivativeOf, detOf, integralOf, limitOf, odeOf, seriesOf, sumOf } from '../rearrange/tools/tool.ts'
 import { parseLatex } from '../parse/latex.ts'
 import { REARRANGE_ERROR_RULES } from '../rearrange/errorRules.ts'
 import type { Level } from '../tasks/taskNumber.ts'
@@ -201,6 +201,47 @@ describe('Geführt umstellen: Stufe 5 (Werkzeuge)', () => {
     expect(two.steps[1].title).toBe('Differentialgleichung lösen')
     expect(two.steps[1].question).toContain('für $g$')
     expect(x.name).toBe('x')
+  })
+
+  it('Determinante (Teil 8a): erst ausrechnen, bei 3 × 3 vorher entwickeln; Produkte und Schachbrett in der Erklärung', () => {
+    const [a, b, x, y] = ['a', 'b', 'x', 'y'].map(variable)
+    const plan = planRearrange({ equation: eq(detOf([[exp(x), exp(neg(x))], [a, b]]), y), target: 'x', conditions: [] }, { level: 5, seed: 1 })
+    const first = plan.steps[0]
+    expect(first.title).toBe('Was steht da eigentlich?')
+    expect(first.question).toBe('Rechne die Determinante aus: Was kommt heraus?')
+    expect(first.choices.find((c) => c.correct)?.content).toBe('$be^{x} - ae^{-x} = y$')
+    // drei der vier typischen Fehler: Plus statt Minus, vertauscht, in Zeilen oder Spalten, nur die Hauptdiagonale
+    const ids = first.choices.map((c) => c.errorRuleId).filter(Boolean)
+    expect(ids).toHaveLength(3)
+    for (const id of ids) expect(['eq-det-plus', 'eq-det-swapped', 'eq-det-rows', 'eq-det-main']).toContain(id)
+    expect(first.explanation.detailed).toContain('e^{x} \\cdot b - e^{-x} \\cdot a')
+    expect(first.cards).toEqual(['rearrange-det'])
+    expect(plan.ruleHint.detailed).toContain('Determinante')
+    expectRenderable(first.explanation.detailed, 'Erklärung')
+
+    const three = planRearrange(
+      {
+        equation: eq(
+          detOf([
+            [num(0), a, x],
+            [b, num(1), num(2)],
+            [num(0), x, a],
+          ]),
+          y,
+        ),
+        target: 'x',
+        conditions: [],
+      },
+      { level: 5, seed: 1 },
+    )
+    expect(three.steps[0].question).toBe('Entwickle nach der Zeile oder Spalte mit zwei Nullen: Was kommt heraus?')
+    expect(three.steps[0].choices.find((c) => c.correct)?.content).toBe('$-b\\det\\begin{pmatrix} a & x \\\\ x & a \\end{pmatrix} = y$')
+    expect(three.steps[0].choices.map((c) => c.errorRuleId).filter(Boolean).sort()).toEqual(['eq-det-checkerboard', 'eq-det-entry'])
+    expect(three.steps[0].explanation.detailed).toContain('In der 1. Spalte steht nur $b$')
+    expect(three.steps[0].explanation.detailed).toContain('($-$)')
+    // die Unterdeterminante danach ohne „Was steht da eigentlich?"
+    expect(three.steps[1].title).toBe('Determinante ausrechnen')
+    expectRenderable(three.steps[0].explanation.detailed, 'Erklärung')
   })
 })
 

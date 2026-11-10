@@ -1,6 +1,6 @@
 import { type Expr, PI, add, cos, div, eq, exp, fn, ln, mul, neg, num, pow, sin, sqrt, sub, variable } from '../expr/types.ts'
 import type { Condition, RearrangeTask } from '../rearrange/task.ts'
-import { derivativeOf, integralOf, limitOf, odeOf, seriesOf, sumOf } from '../rearrange/tools/tool.ts'
+import { derivativeOf, detOf, integralOf, limitOf, odeOf, seriesOf, sumOf } from '../rearrange/tools/tool.ts'
 import type { Card } from './cards.ts'
 
 // Lernkarten im Ordner „Gleichungen umstellen". Die Beispiele sind Aufgaben der Umstell-Engine; den
@@ -25,6 +25,7 @@ export const REARRANGE_CARD_IDS = {
   series: 'rearrange-series',
   limit: 'rearrange-limit',
   ode: 'rearrange-ode',
+  det: 'rearrange-det',
 } as const
 
 const [a, b, c, d, k, t, x, y] = ['a', 'b', 'c', 'd', 'k', 't', 'x', 'y'].map(variable)
@@ -351,5 +352,26 @@ export const REARRANGE_CARD_LIST: readonly Card[] = [
       'eq-ode-exp-sign',
       'eq-ode-constant-start',
     ],
+  },
+  {
+    id: REARRANGE_CARD_IDS.det,
+    topic: 'umstellen',
+    title: 'Determinanten',
+    level: 5,
+    rules: [],
+    formulas: [
+      '\\det\\begin{pmatrix} p & q \\\\ r & s \\end{pmatrix} = ps - qr',
+      '\\begin{pmatrix} + & - & + \\\\ - & + & - \\\\ + & - & + \\end{pmatrix}',
+      '\\begin{gathered}\\det\\begin{pmatrix} p & q & r \\\\ s & 0 & 0 \\\\ u & v & w \\end{pmatrix} \\\\ = -s\\det\\begin{pmatrix} q & r \\\\ v & w \\end{pmatrix}\\end{gathered}',
+    ],
+    memo: 'Hauptdiagonale minus Nebendiagonale. Bei $3 \\times 3$ nach einer Zeile oder Spalte entwickeln: für jeden Eintrag Vorzeichen aus dem Schachbrett mal Eintrag mal Unterdeterminante, alles addiert. Stehen in der Linie zwei Nullen, bleibt nur ein Summand.',
+    note: 'Die Unterdeterminante ist die Determinante der Matrix ohne die Zeile und Spalte des Eintrags; das Vorzeichen in Zeile $i$ und Spalte $j$ ist $(-1)^{i + j}$. Bei einer Dreiecksmatrix ist die Determinante das Produkt der Diagonale. Ist sie $0$, lässt sich die Matrix nicht umkehren (invertieren). Für $3 \\times 3$ gibt es auch die Regel von Sarrus.',
+    when: 'Wenn in der Gleichung eine Determinante steht: erst ausrechnen, dann umstellen.',
+    examples: [
+      task(detOf([[exp(x), exp(neg(x))], [a, b]]), y),
+      task(detOf([[x, a], [b, add(x, c)]]), y),
+      task(detOf([[n(1), x, sq(x)], [n(1), n(0), n(0)], [n(1), a, sq(a)]]), y),
+    ],
+    errors: ['eq-det-plus', 'eq-det-swapped', 'eq-det-rows', 'eq-det-main', 'eq-det-checkerboard', 'eq-det-entry'],
   },
 ]

@@ -25,6 +25,8 @@ import {
   explainResult,
   explainChoose,
   explainOde,
+  explainDet,
+  explainExpand,
   expMoves,
   factorMoves,
   logMoves,
@@ -71,6 +73,7 @@ import {
   stepLabel,
 } from '../rearrange/isolate.ts'
 import { type RearrangeTask, conditionLatex, conditionsText, taskLatex } from '../rearrange/task.ts'
+import { detWorkLatex, expandWork } from '../rearrange/tools/determinant.ts'
 import { odeWork } from '../rearrange/tools/ode.ts'
 import { activeTool } from '../rearrange/tools/tool.ts'
 import { type Rng, createRng } from '../random/rng.ts'
@@ -159,7 +162,7 @@ export function planRearrange(task: RearrangeTask, ref: TaskRef, focus?: string)
 
 // Stufe 5: Schritte, die ein Werkzeug ausrechnen (Ableitung, Integral, Summe, Grenzwert). Sie werden nur
 // als „Was kommt heraus?" gefragt, der erste als „Was steht da eigentlich?"
-const TOOL_KINDS = new Set<StepKind | undefined>(['derive', 'partial', 'antiderivative', 'bounds', 'sumFormula', 'series', 'limit', 'ode'])
+const TOOL_KINDS = new Set<StepKind | undefined>(['derive', 'partial', 'antiderivative', 'bounds', 'sumFormula', 'series', 'limit', 'ode', 'det', 'detExpand'])
 
 const TOOL_QUESTIONS: Partial<Record<StepKind, string>> = {
   derive: 'Rechne die Ableitung aus: Was kommt heraus?',
@@ -170,6 +173,8 @@ const TOOL_QUESTIONS: Partial<Record<StepKind, string>> = {
   series: 'Rechne die Reihe aus: Was kommt heraus?',
   limit: 'Rechne den Grenzwert aus: Was kommt heraus?',
   ode: 'Löse die Differentialgleichung mit den Anfangswerten: Was kommt heraus?',
+  det: 'Rechne die Determinante aus: Was kommt heraus?',
+  detExpand: 'Entwickle nach der Zeile oder Spalte mit zwei Nullen: Was kommt heraus?',
 }
 
 // Tipp zur ganzen Aufgabe nach dem ersten Werkzeug-Schritt
@@ -182,6 +187,8 @@ const TASK_TOOL: Partial<Record<StepKind, TaskTool>> = {
   series: 'series',
   limit: 'limit',
   ode: 'ode',
+  det: 'det',
+  detExpand: 'det',
 }
 
 // --- Weichen: Schritte, bei denen man wissen muss, was als Nächstes kommt ---
@@ -297,6 +304,8 @@ function moveQuestion(step: RearrangeStep, t: string, target: string): MoveQuest
     case 'series':
     case 'limit':
     case 'ode':
+    case 'det':
+    case 'detExpand':
       return null
     case 'add': {
       if (!side || !step.operand) return null
@@ -502,6 +511,8 @@ const RESULT_HINTS: Partial<Record<StepKind, string>> = {
   series: REARRANGE_HINTS.series,
   limit: REARRANGE_HINTS.limit,
   ode: REARRANGE_HINTS.ode,
+  det: REARRANGE_HINTS.det,
+  detExpand: REARRANGE_HINTS.detExpand,
 }
 
 const spuriousWhy = (reason: string): Explanation => ({ detailed: `Diese Lösung ist eine Scheinlösung. ${reason}`, short: reason })
@@ -548,10 +559,25 @@ function resultStep(
     explanation:
       choose && step.operand
         ? explainChoose(toLatex(step.operand), rejectReason(step, t, context), after)
-        : (odeExplanation(step) ?? explainResult(step.kind, stepLatex(step.kind, step.before), after)),
+        : (odeExplanation(step) ?? detExplanation(step) ?? explainResult(step.kind, stepLatex(step.kind, step.before), after)),
     established: [after],
     cards: cardsOf(step, t, previous),
   }
+}
+
+// Determinante: die Produkte mit Malpunkt bzw. Linie, Eintrag und Vorzeichen beim Entwickeln
+function detExplanation(step: RearrangeStep): Explanation | null {
+  if (step.kind !== 'det' && step.kind !== 'detExpand') return null
+  const tool = activeTool(step.before)?.tool.tool
+  if (tool?.kind !== 'det') return null
+  const before = stepLatex(step.kind, step.before)
+  const after = stepLatex(step.kind, step.after)
+  if (step.kind === 'det') {
+    const work = detWorkLatex(tool)
+    return work ? explainDet(work, before, after) : null
+  }
+  const work = expandWork(tool)
+  return work ? explainExpand(work.line, work.entry, work.sign, before, after) : null
 }
 
 // Differentialgleichung: die Frage nennt die Funktion (bei f und g in einer Aufgabe wichtig)
@@ -632,6 +658,8 @@ const CARDS_BY_KIND: Record<StepKind, readonly string[]> = {
   series: [REARRANGE_CARD_IDS.series],
   limit: [REARRANGE_CARD_IDS.limit],
   ode: [REARRANGE_CARD_IDS.ode],
+  det: [REARRANGE_CARD_IDS.det],
+  detExpand: [REARRANGE_CARD_IDS.det],
   finish: [FRACTION_CARD_IDS.add, FRACTION_CARD_IDS.expand],
 }
 

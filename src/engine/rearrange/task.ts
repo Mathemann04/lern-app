@@ -1,6 +1,6 @@
 import { subterms } from '../expr/compare.ts'
 import { equationToLatex, odeLines, toLatex } from '../expr/print.ts'
-import { type Equation, type Expr, toolBound, toolLimits } from '../expr/types.ts'
+import { type Equation, type Expr, toolBodies, toolBound, toolLimits } from '../expr/types.ts'
 
 // Eine Umstell-Aufgabe: Gleichung, gesuchte Variable und Bedingungen. Alle Buchstaben stehen für
 // positive Zahlen; dazu kommen Bedingungen der Aufgabe wie x > a, damit die Lösung eindeutig ist.
@@ -25,7 +25,7 @@ export function variablesOf(...exprs: readonly Expr[]): string[] {
         continue
       }
       const { tool } = s
-      const inner = variablesOf(tool.body).filter((n) => n !== toolBound(tool))
+      const inner = variablesOf(...toolBodies(tool)).filter((n) => n !== toolBound(tool))
       for (const n of [...inner, ...variablesOf(...toolLimits(tool))]) names.add(n)
     }
   }
@@ -52,9 +52,9 @@ export function taskLatex(t: RearrangeTask): string {
   return given.length === 0 ? equation : `\\begin{gathered}${[...given, equation].join(' \\\\ ')}\\end{gathered}`
 }
 
-// Für die Form der Aufgabe (tasks/forms.ts): wie taskLatex, aber ohne gathered (dessen Buchstaben
-// würden sonst mitgezählt)
-export const taskFormLatex = (t: RearrangeTask) => [...givenLatex(t), equationToLatex(t.equation)].join(' ; ')
+// Für die Form der Aufgabe (tasks/forms.ts): wie taskLatex, aber ohne gathered und ohne den Namen pmatrix
+// (deren Buchstaben würden sonst mitgezählt)
+export const taskFormLatex = (t: RearrangeTask) => [...givenLatex(t), equationToLatex(t.equation)].join(' ; ').replace(/\{pmatrix\}/g, '')
 
 export const conditionLatex = (c: Condition) => `${toLatex(c.lhs)} ${c.rel} ${toLatex(c.rhs)}`
 

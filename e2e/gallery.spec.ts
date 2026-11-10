@@ -21,7 +21,7 @@ test('Galerie ist über die Einstellungen erreichbar, mit der Schreibweise der F
   await expect(page.getByRole('heading', { name: 'Differentialrechnung' })).toBeVisible()
   for (const topic of ['Brüche', 'Gleichungen umstellen', 'Ableiten']) await expect(page.getByRole('link', { name: new RegExp(`^${topic}`) })).toBeVisible()
   const notation = page.getByRole('region', { name: 'Schreibweise' })
-  await expect(notation.locator('.katex')).toHaveCount(15)
+  await expect(notation.locator('.katex')).toHaveCount(16)
   await expect(notation.getByRole('heading', { name: /Kommt mit Stufe 5/ })).toBeVisible()
   await expect(notation.locator('code.text-red-700')).toHaveCount(0)
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
