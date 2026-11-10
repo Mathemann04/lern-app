@@ -5,7 +5,8 @@ import type { Level } from '../engine/tasks/taskNumber.ts'
 // ohne spielbare Stufe stehen blass mit „kommt bald" da. Absichtlich ohne Mathe-Engine, damit die
 // Startseite schnell lädt.
 
-// Bild eines Gebiets oder Themas (AreaIcon.tsx); Chemie-Themen nehmen das Bild ihres Gebiets
+// Bild eines Gebiets oder Themas (AreaIcon.tsx); jedes Thema mit eigenem Bild, Chemie-Themen ohne
+// eigenes (noch „kommt bald") nehmen das Bild ihres Gebiets
 export type AreaIcon =
   | 'basics'
   | 'derivative'
@@ -17,6 +18,8 @@ export type AreaIcon =
   | 'rearrange'
   | 'powers'
   | 'atom'
+  | 'nucleus'
+  | 'orbitals'
   | 'periodic'
   | 'bond'
   | 'flask'
@@ -318,13 +321,13 @@ export const SUBJECTS: readonly Subject[] = [
             id: ATOMBAU,
             title: 'Atombau',
             description: 'Stoffe, Elementarteilchen, Kernsymbol, Isotope, Ionen, Atommodelle und Licht',
-            icon: 'atom',
+            icon: 'nucleus',
             cards: 'chem-atombau',
             levels: atombauLevels,
             free: false,
             focus: false,
           },
-          comingSoon('chem-elektronen', 'Elektronen', 'Quantenzahlen, Orbitale und Elektronenkonfiguration', 'atom'),
+          comingSoon('chem-elektronen', 'Elektronen', 'Quantenzahlen, Orbitale und Elektronenkonfiguration', 'orbitals'),
         ],
       },
       {

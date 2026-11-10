@@ -51,7 +51,10 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   `prepareFree` für frei, `formOf` für die Form einer Aufgabe). Bei einer
   neuen Aufgabe zieht `PracticePage.tsx` (`PickNewTask`) eine Nummer, deren
   Form nicht unter den letzten zehn dieser Stufe ist (`src/ui/recentForms.ts`,
-  eigener Speicherschlüssel `rechenweg-formen`).
+  eigener Speicherschlüssel `rechenweg-formen`); Wissensfragen kommen dabei
+  reihum, keine doppelt, bevor alle der Stufe dran waren (`pickNewSeed` in
+  `practice.ts`, Runde je Thema und Stufe in `src/state/questionRounds.ts`,
+  Schlüssel `rechenweg-fragen`, „Fortschritt löschen" leert ihn).
   Seiten über `#/…` (`routes.ts`): Start `#/` („Weitermachen" und die
   Fächer), Gebiet `#/gebiet/grundlagen`, Thema `#/thema/brueche`,
   geführt üben `#/ueben/brueche/1` (neue Aufgabe) bzw.
@@ -99,6 +102,32 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   über `RichText` (Formeln zwischen `$…$`). Arbeitsauftrag und Hinweis
   unter der Aufgabe (z. B. „Alle Buchstaben stehen für positive Zahlen.",
   `note`) zeigt `TaskIntro` in `src/ui/task/TaskParts.tsx`.
+- Chemie (M4, Plan docs/PLAN-M4.md, Regeln docs/CHEMIE.md): Fach „Chemie 1"
+  mit eigenen Stufennamen (`levelNames` am Fach, `levelName()` in
+  `catalog.ts` überall statt „Stufe n": Grundlagen, Vertiefung,
+  Klausurniveau, Stufen 1 bis 3), Themen-Ids `chem-…` (Säure-Base und Redox
+  als „kommt bald"). Wissensfragen im geführten Bildschirm ohne Term
+  (`GuidedTaskBase` in `guided/types.ts`: Aufgabe als Text, Ergebnis
+  `resultText` mit der Frage `resultQuestion`), Knopf „Frage melden"
+  (`src/state/reports.ts`, Schlüssel `rechenweg-meldungen`, Liste zum
+  Kopieren in den Einstellungen, „Fortschritt löschen" lässt sie stehen),
+  Galerie „Fragen durchsehen" `#/galerie/chem-atombau`
+  (`src/ui/chem/QuestionGallery.tsx`), Lernkarten mit Text-Beispielen
+  (`ChemCardExample`, `formulas` darf leer sein), Denkfehler als Aussage
+  statt Formel (`wrongText`, `src/ui/ErrorShape.tsx`). Engine:
+  `src/engine/quiz/` (allgemein, auch für Werkstoffkunde: `types.ts` Format
+  der Fragen und Denkfehler `chem-mis-…`, `plan.ts` Frage → geführte Aufgabe
+  mit vier Antworten aus dem Vorrat, `numbers.ts` Aufgabennummern: 1 bis 9999
+  Frage in Grundform, 10000 bis 499999 erzeugte Rechnungen, 500000 + 50 ·
+  Nummer + Fassung) und `src/engine/chem/` (`engine.ts` für alle
+  `chem-…`-Themen mit `nextSeed` und `resolve` in `CourseEngine`, `banks.ts`,
+  `bank/<thema>.ts` mit Nummern Stufe · 100 + n, `misconceptions/<thema>.ts`
+  nur Name und falsche Aussage für die Fehlerstatistik, `<thema>Why.ts` die
+  Erklärungen, `misconceptions/index.ts`); Lernkarten in
+  `explain/chem/<thema>Cards.ts`. Die Inhaltsdateien entstehen aus geprüften
+  Inhalten (in eigenen Worten, Wortvergleich mit den Skripten außerhalb des
+  Repos). mhchem (`\ce`, `\pu`) fest in `renderFormula.ts` und
+  `expr/latexChecks.ts`.
 - `src/engine/`: Mathe-Engine, reines TypeScript
   - `rational.ts`: exakte Brüche (bigint)
   - `expr/types.ts`: Termbaum in *Aufgabenform* (Bruch, Wurzel, Minus bleiben,
@@ -553,14 +582,16 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
   gehört alles zum Ableiten), gemeinsamer Zustand (`store.ts`),
   Einstellungen (`settings.ts`: Stufe je Thema, zuletzt geübtes Thema,
   „Geführt"/„Frei" für alle, hell/dunkel) und Fortschritt je Thema mit
-  Fehlerstatistik und 8-von-10-Vorschlag (`progress.ts`)
+  Fehlerstatistik und 8-von-10-Vorschlag (`progress.ts`; höchstens 1000
+  gelöste Aufgaben je Thema)
 - `e2e/`: Browser-Tests (Playwright). Im freien Modus vor dem Tippen warten,
   bis das Feld bereit ist und den Fokus hat (`math-field[data-ready]`,
   `toBeFocused`): MathLive setzt den Fokus leicht verzögert.
 - `.github/workflows/app.yml`: prüft jeden Pull Request, veröffentlicht `main`
 - Farben zentral in `src/index.css`:
   - `accent-*` ist die Farbe des Gebiets: `data-tone="blue"` an einer Seite
-    oder Kachel färbt alles darin, ohne Angabe Blaugrün (App). `App.tsx`
+    oder Kachel färbt alles darin, ohne Angabe Blaugrün (App); Töne orange,
+    blue, violet, pink, cyan, indigo, sky, fuchsia. `App.tsx`
     setzt den Ton je Seite (`toneOf`).
   - Dunkles Design über die Klasse `dark` am html-Element (Einstellung
     „Aussehen", `useTheme.ts`, Skript in `index.html`). Die Leitern `zinc`,

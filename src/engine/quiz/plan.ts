@@ -52,6 +52,7 @@ export function planQuestion(
     ],
     cards: question.cards,
     resultText: question.correct.text,
+    resultQuestion: question.prompt,
     questionId: question.id,
   }
 }

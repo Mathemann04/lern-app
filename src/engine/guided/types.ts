@@ -62,6 +62,9 @@ export type GuidedTaskBase = {
   readonly resultLatex?: string
   // … oder als Text mit Formeln (bei Fragen: die richtige Antwort)
   readonly resultText?: string
+  // bei Fragen: die Frage selbst (Text mit Formeln), über der richtigen Antwort; ohne sie stünde eine
+  // Antwort, die nur ein Satzteil ist, ohne Zusammenhang da
+  readonly resultQuestion?: string
   // Zusatz zum Ergebnis (Text mit Formeln), z. B. „Gilt für $x \neq 0$."
   readonly resultNote?: string
   // Tipp für die ganze Aufgabe (im freien Modus)

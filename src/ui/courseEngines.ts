@@ -14,8 +14,9 @@ export type CourseEngine = {
   prepareFree(ref: TaskRef): FreeTask
   // Form der Aufgabe ohne Zahlen (Abwechslung, engine/tasks/variety.ts)
   formOf(ref: TaskRef): string
-  // Nummer einer neuen Aufgabe dieser Stufe; ohne Angabe eine zufällige (randomSeed)
-  nextSeed?(level: Level): number
+  // Nummer einer neuen Aufgabe dieser Stufe; ohne Angabe eine zufällige (randomSeed). Wissensfragen:
+  // shown sind die Fragen, die in der laufenden Runde schon dran waren (state/questionRounds.ts)
+  nextSeed?(level: Level, shown?: ReadonlySet<number>): number
   // Stufe, zu der eine Nummer gehört, null: Die Aufgabe gibt es nicht (mehr); ohne Angabe passt jede
   // Nummer zu jeder Stufe
   resolve?(ref: TaskRef): Level | null

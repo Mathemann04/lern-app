@@ -70,18 +70,29 @@ test('Chemie: Start → Atombau → Grundlagen, Frage richtig beantworten, melde
   await expectCleanPage(page, 'Frage')
 
   const { correct } = await answersFromGallery(context, questionNo(page.url()))
+  const prompt = (await page.locator('#question').textContent())!.trim()
   const index = await indexOfAnswer(page, correct)
   expect(index, `„${correct}" unter den Antworten`).toBeGreaterThanOrEqual(0)
   await answers(page).nth(index).click()
   await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
 
+  // Der Live-Bereich für die Bestätigung ist schon vor dem Melden da (sonst lesen Vorlesehilfen sie oft nicht vor)
+  const reportStatus = page.getByRole('status')
+  await expect(reportStatus).toHaveText('')
   await page.getByRole('button', { name: 'Frage melden' }).click()
-  await expect(page.getByText('Gemeldet. Die Liste findest du in den Einstellungen.')).toBeVisible()
+  await expect(reportStatus).toHaveText('Gemeldet. Die Liste findest du in den Einstellungen.')
+  // Der Knopf bleibt mit dem Fokus stehen, meldet aber nicht noch einmal
+  const reported = page.getByRole('button', { name: 'Gemeldet', exact: true })
+  await expect(reported).toHaveAttribute('aria-disabled', 'true')
+  await expect(reported).toBeFocused()
+  await reported.click({ force: true })
   await expect(page.getByRole('button', { name: 'Frage melden' })).toHaveCount(0)
 
   await page.getByRole('button', { name: 'Ergebnis ansehen' }).click()
   await expect(page.getByRole('heading', { name: 'Geschafft!' })).toBeVisible()
   await expect(page.getByTestId('result')).toContainText(correct)
+  // mit der Frage selbst, damit die Antwort einen Zusammenhang hat
+  await expect(page.getByTestId('result')).toContainText(prompt)
   await expectCleanPage(page, 'Abschluss')
 
   // „Nächste Aufgabe" zieht wieder eine Frage der Grundlagen
@@ -99,10 +110,13 @@ test('Chemie: Start → Atombau → Grundlagen, Frage richtig beantworten, melde
   const copied = await page.evaluate(() => navigator.clipboard.readText())
   expect(copied).toMatch(/^Gemeldete Fragen aus Rechenweg \(1\):\n1\. chem-atombau, Aufgabe 1-\d+, Frage [a-z0-9-]+ \(gemeldet am/)
   await expectCleanPage(page, 'Einstellungen')
-  // „Fortschritt löschen" lässt die Liste stehen
+  // „Fortschritt löschen" lässt die Liste stehen und beginnt die Runden der Fragen von vorn
+  const rounds = () => page.evaluate(() => JSON.parse(localStorage.getItem('rechenweg-fragen') ?? '{}') as Record<string, number[]>)
+  expect((await rounds())['chem-atombau:1']).toHaveLength(2)
   await page.goto('./#/fortschritt')
   await page.getByRole('button', { name: 'Fortschritt löschen' }).click()
   await page.getByRole('button', { name: 'Ja, löschen' }).click()
+  expect(await rounds()).toEqual({})
   await page.goto('./#/einstellungen')
   await expect(reports).toContainText('1 Frage gemeldet.')
   await reports.getByRole('button', { name: 'Liste leeren' }).click()

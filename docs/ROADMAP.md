@@ -60,7 +60,7 @@ feste Regeln: [CHEMIE.md](CHEMIE.md)
 
 - [x] 0. Plan freigegeben
 - Sprint bis Teil 1 der Klausur (um den 24.11.2026):
-  - [ ] S1. Fach und Atombau-Fragen (Säure-Base und Redox als „kommt bald“)
+  - [x] S1. Fach und Atombau-Fragen (Säure-Base und Redox als „kommt bald“)
   - [ ] S2. Erste Rechnungen (Protonen, Neutronen, Elektronen; Energie des Lichts)
   - [ ] S3. Molmasse, Stoffmenge, Reaktionsgleichungen
   - [ ] S4. Umsatz, Gase und Lösungen, Klausuraufgabe 4 üben
@@ -663,3 +663,13 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   bald“. Skripte lädt der Nutzer je Schritt neu hoch. Farben je Gebiet,
   Startseite „Schritt für Schritt selbst lösen“, Werkstoffkunde direkt nach
   Chemie.
+- 10.11.2026: M4 S1 fertig: Fach „Chemie 1“ auf der Startseite mit allen sieben
+  Gebieten und 20 Themen (Säure-Base und Redox als „kommt bald“), Stufennamen
+  Grundlagen, Vertiefung, Klausurniveau statt Zahlen, chemische Formeln mit mhchem.
+  Thema Atombau mit 60 Wissensfragen (je Stufe 20), 68 typischen Denkfehlern mit
+  „Warum ist das falsch?“ und 12 Lernkarten, alles in eigenen Worten, fachlich
+  zweimal geprüft und mit den Skripten Wort für Wort verglichen (keine Folge von 8
+  gleichen Wörtern). Fragen kommen reihum (keine doppelt, bevor alle dran waren),
+  jede Frage zeigt bei jedem Wiederkommen andere falsche Antworten. Knopf „Frage
+  melden“ mit Liste in den Einstellungen, Galerie „Fragen durchsehen“, neue Farben
+  und Bilder. Die Elementtabelle kommt mit S2.

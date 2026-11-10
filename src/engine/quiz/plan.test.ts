@@ -48,7 +48,7 @@ describe('Wissensfrage als geführte Aufgabe', () => {
   it('übernimmt Frage, Tipp, Erklärung, Karten und die richtige Antwort als Ergebnis', () => {
     const task = plan(3)
     const [step] = task.steps
-    expect(task).toMatchObject({ ref: REF, instruction: QUIZ_INSTRUCTION, cards: QUESTION.cards, resultText: 'Die richtige.', questionId: 'test-frage' })
+    expect(task).toMatchObject({ ref: REF, instruction: QUIZ_INSTRUCTION, cards: QUESTION.cards, resultText: 'Die richtige.', resultQuestion: 'Welche Antwort stimmt?', questionId: 'test-frage' })
     expect(task.functionLatex).toBeUndefined()
     expect(task.resultLatex).toBeUndefined()
     expect(step).toMatchObject({ title: 'Test', question: 'Welche Antwort stimmt?', hint: 'Ein Tipp.', explanation: QUESTION.explanation, cards: QUESTION.cards })

@@ -1,13 +1,13 @@
 import { Suspense, lazy, use, useEffect } from 'react'
-import { type Level, type TaskRef, randomSeed } from '../engine/tasks/taskNumber.ts'
-import { pickFresh } from '../engine/tasks/variety.ts'
+import type { Level, TaskRef } from '../engine/tasks/taskNumber.ts'
+import { rememberShown, shownInRound, startNewRound } from '../state/questionRounds.ts'
 import { updateSettings, useSettings } from '../state/settings.ts'
 import type { PracticeMode } from '../state/storage.ts'
 import { TaskScreen } from './guided/TaskScreen.tsx'
 import { courseById, isLevelAvailable, levelCount, levelName } from './catalog.ts'
 import { type CourseEngine, loadCourseEngine } from './courseEngines.ts'
 import { recentForms, rememberForm } from './recentForms.ts'
-import { knownFocus, newTaskHref } from './practice.ts'
+import { knownFocus, newTaskHref, pickNewSeed, questionNoOf } from './practice.ts'
 import { courseHref, practiceHref, taskHref } from './routes.ts'
 
 // Eine Aufgabe üben, geführt oder frei
@@ -112,21 +112,26 @@ function MissingTask({ course, level, mode }: { course: string; level: Level; mo
 }
 
 // Neue Aufgabe, deren Form nicht unter den letzten dieser Stufe ist; Nummern liefert die Engine des
-// Themas (Wissensfragen: eine Frage der Stufe) oder der Zufall
+// Themas (Wissensfragen: eine Frage der Stufe, die in der laufenden Runde noch nicht dran war) oder der
+// Zufall
 function PickNewTask({ course, level, mode }: { course: string; level: Level; mode: PracticeMode }) {
   const engine = use(loadCourseEngine(course))
   useEffect(() => {
-    const next = engine.nextSeed ? () => engine.nextSeed!(level) : randomSeed
-    const seed = pickFresh((s) => engine.formOf({ level, seed: s }), recentForms(course, level), next)
+    const { seed, newRound } = pickNewSeed(engine, level, recentForms(course, level), shownInRound(course, level))
+    if (newRound) startNewRound(course, level)
     window.location.replace(taskHref(course, { level, seed }, mode, null))
   }, [engine, course, level, mode])
   return null
 }
 
-// Merkt sich die Form der gezeigten Aufgabe
+// Merkt sich die Form der gezeigten Aufgabe, bei Wissensfragen auch die Frage für die Runde
 function useRememberForm(course: string, engine: CourseEngine, taskRef: TaskRef) {
   const { level, seed } = taskRef
-  useEffect(() => rememberForm(course, level, engine.formOf({ level, seed })), [course, engine, level, seed])
+  useEffect(() => {
+    rememberForm(course, level, engine.formOf({ level, seed }))
+    const no = questionNoOf(engine, seed)
+    if (no !== null) rememberShown(course, level, no)
+  }, [course, engine, level, seed])
 }
 
 type PracticeScreenProps = { course: string; engine: CourseEngine; taskRef: TaskRef; focus: string | null }

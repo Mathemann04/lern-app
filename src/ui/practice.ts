@@ -1,8 +1,11 @@
 import { isErrorOf } from '../engine/errorCatalog.ts'
+import { decodeSeed } from '../engine/quiz/numbers.ts'
 import { type Rng, createRng } from '../engine/random/rng.ts'
 import { type Level, type TaskRef, randomSeed } from '../engine/tasks/taskNumber.ts'
+import { pickFresh } from '../engine/tasks/variety.ts'
 import type { PracticeMode } from '../state/storage.ts'
 import { type Course, DERIVATIVES, FRACTIONS, REARRANGE, courseById } from './catalog.ts'
+import type { CourseEngine } from './courseEngines.ts'
 import { taskHref } from './routes.ts'
 
 // Gezielt üben nur mit bekannten Fehlern des Themas, wenn es das dort schon gibt; alles andere ist
@@ -35,4 +38,26 @@ export async function newTaskHref(course: string, mode: PracticeMode, level: Lev
   const find = load && (await load())
   const found = focus && find ? find(focus, levelsNear(courseById(course)!.course, level), createRng(String(Math.random()))) : null
   return taskHref(course, found ?? { level, seed: randomSeed() }, mode, found ? focus : null)
+}
+
+// Nummer der Wissensfrage hinter einer Aufgabe; null bei allem anderen (Mathe-Aufgaben, Rechnungen)
+export function questionNoOf(engine: Pick<CourseEngine, 'nextSeed'>, seed: number): number | null {
+  const decoded = engine.nextSeed ? decodeSeed(seed) : null
+  return decoded?.kind === 'question' ? decoded.no : null
+}
+
+// Nummer einer neuen Aufgabe, deren Form nicht unter den letzten dieser Stufe ist (recent, pickFresh).
+// Wissensfragen kommen dabei reihum: shown sind die Fragen, die in der laufenden Runde schon dran
+// waren, die Engine wählt unter den übrigen. newRound: Alle waren dran, die gewählte Frage beginnt eine
+// neue Runde.
+export function pickNewSeed(
+  engine: Pick<CourseEngine, 'formOf' | 'nextSeed'>,
+  level: Level,
+  recent: readonly string[],
+  shown: ReadonlySet<number>,
+): { seed: number; newRound: boolean } {
+  const next = engine.nextSeed ? () => engine.nextSeed!(level, shown) : randomSeed
+  const seed = pickFresh((s) => engine.formOf({ level, seed: s }), recent, next)
+  const no = questionNoOf(engine, seed)
+  return { seed, newRound: no !== null && shown.has(no) }
 }

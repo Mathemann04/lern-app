@@ -113,7 +113,8 @@ function ChemExample({ example }: { example: ChemCardExample }) {
       <ol className="space-y-3 border-l-2 border-accent-200 pl-4">
         {example.lines.map((line, i) => (
           <li key={i} className="space-y-1">
-            <RichText text={line.label} className={line.latex === undefined ? 'text-zinc-800' : 'text-sm text-zinc-600'} inline />
+            {/* Alle Beschriftungen gleich, ob mit Formel darunter oder ohne (in Aufzählungen sonst ungleich) */}
+            <RichText text={line.label} className="block text-zinc-800" inline />
             {line.latex !== undefined && (
               <FitWidth className="text-lg">
                 <Formula tex={line.latex} />

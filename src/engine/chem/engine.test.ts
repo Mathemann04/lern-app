@@ -53,6 +53,33 @@ describe.each(CHEM_TOPICS.map((t) => [t.bank.course, t] as const))('Chemie-Engin
     }
   })
 
+  it('zieht keine Frage doppelt, bevor alle der Stufe dran waren; danach beginnt eine neue Runde', () => {
+    for (const level of [1, 2, 3] as const) {
+      const inLevel = questions.filter((q) => q.level === level).map((q) => q.no)
+      if (inLevel.length === 0) continue
+      const shown = new Set<number>()
+      for (let i = 0; i < inLevel.length; i++) {
+        const decoded = decodeSeed(engine.nextSeed(level, shown))
+        if (decoded?.kind !== 'question') throw new Error('keine Frage')
+        expect(shown.has(decoded.no), `Zug ${i + 1}: Frage ${decoded.no} doppelt`).toBe(false)
+        shown.add(decoded.no)
+      }
+      // so viele Züge wie Fragen: jede genau einmal (bei 20 Fragen 20 verschiedene)
+      expect([...shown].sort((a, b) => a - b)).toEqual([...inLevel].sort((a, b) => a - b))
+      // Alle waren dran: wieder aus allen Fragen der Stufe
+      const again = new Set<number>()
+      for (let i = 0; i < 200; i++) {
+        const decoded = decodeSeed(engine.nextSeed(level, shown))
+        if (decoded?.kind !== 'question') throw new Error('keine Frage')
+        again.add(decoded.no)
+      }
+      expect(again.size).toBe(inLevel.length)
+      // Fragen anderer Stufen in der Runde stören nicht
+      const others = new Set(questions.filter((q) => q.level !== level).map((q) => q.no))
+      expect(engine.resolve({ level, seed: engine.nextSeed(level, others) })).toBe(level)
+    }
+  })
+
   it('nennt als Form den Fakt der Frage, in jeder Fassung gleich', () => {
     for (const q of questions) {
       expect(engine.formOf({ level: q.level, seed: q.no })).toBe(`q:${q.fact}`)
@@ -92,5 +119,12 @@ describe('Chemie-Engine: Sonderfälle', () => {
     const engine = topicEngine({ bank, misconceptions: topic.misconceptions }, seeded('gelöscht'))
     expect(engine.resolve({ level: first.level, seed: first.no })).toBeNull()
     for (let i = 0; i < 100; i++) expect(decodeSeed(engine.nextSeed(first.level))).not.toMatchObject({ no: first.no })
+    // Auch in einer Runde, in der alle übrigen schon dran waren, kommt die gelöschte Frage nicht wieder
+    const seenAllButRetired = new Set(rest.filter((q) => q.level === first.level).map((q) => q.no))
+    for (let i = 0; i < 100; i++) expect(decodeSeed(engine.nextSeed(first.level, seenAllButRetired))).not.toMatchObject({ no: first.no })
+    // Ist außer der gelöschten nur noch eine Frage offen, kommt genau sie
+    const fewSeen = new Set([...seenAllButRetired].slice(0, -1))
+    const [last] = [...seenAllButRetired].slice(-1)
+    for (let i = 0; i < 20; i++) expect(decodeSeed(engine.nextSeed(first.level, fewSeen))).toMatchObject({ no: last })
   })
 })

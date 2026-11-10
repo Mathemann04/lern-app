@@ -60,7 +60,8 @@ export function CourseScreen({ id }: { id: string }) {
                       disabled={disabled}
                       onChange={() => updateSettings({ practiceMode: option.value })}
                     />
-                    <span className={`block font-medium ${checked ? 'text-accent-700' : ''}`}>{option.title}</span>
+                    {/* Im Dunkeln eine Stufe heller: auf der grauen Fläche sonst zu wenig Kontrast */}
+                    <span className={`block font-medium ${checked ? 'text-accent-700 dark:text-accent-800' : ''}`}>{option.title}</span>
                     <span className="block text-sm text-zinc-500">{disabled ? 'kommt bald' : option.description}</span>
                   </label>
                 )

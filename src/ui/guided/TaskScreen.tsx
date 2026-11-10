@@ -187,35 +187,47 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext 
             <RichText text={step.hint} />
           </div>
         )}
-        <div className="flex flex-wrap gap-2">
-          {!solved && !hintOpen && (
-            <button
-              type="button"
-              onClick={() => setHintOpen(true)}
-              className="rounded-xl px-3 py-2.5 font-medium text-amber-800 hover:bg-amber-50"
-            >
-              Tipp anzeigen
-            </button>
-          )}
-          <CardSheetButton ids={step.cards} title={cardSheetTitle(step)} task={task} />
-          {report && !reported && (
-            <button
-              type="button"
-              onClick={() => {
-                addReport({ ...report, prompt: step.question, at: Date.now() })
-                setReported(true)
-              }}
-              className="rounded-xl px-3 py-2.5 font-medium text-zinc-600 hover:bg-zinc-100"
-            >
-              Frage melden
-            </button>
+        <div>
+          <div className="flex flex-wrap gap-2">
+            {!solved && !hintOpen && (
+              <button
+                type="button"
+                onClick={() => setHintOpen(true)}
+                className="rounded-xl px-3 py-2.5 font-medium text-amber-800 hover:bg-amber-50"
+              >
+                Tipp anzeigen
+              </button>
+            )}
+            <CardSheetButton ids={step.cards} title={cardSheetTitle(step)} task={task} />
+            {report && (
+              // Bleibt nach dem Melden stehen (so bleibt der Fokus auf dem Knopf), tut dann aber nichts mehr
+              <button
+                type="button"
+                aria-disabled={reported ? 'true' : undefined}
+                onClick={() => {
+                  if (reported) return
+                  addReport({ ...report, prompt: step.question, at: Date.now() })
+                  setReported(true)
+                }}
+                className={`rounded-xl px-3 py-2.5 font-medium ${reported ? 'cursor-default text-zinc-500' : 'text-zinc-600 hover:bg-zinc-100'}`}
+              >
+                {reported ? (
+                  <>
+                    Gemeldet <span aria-hidden>✓</span>
+                  </>
+                ) : (
+                  'Frage melden'
+                )}
+              </button>
+            )}
+          </div>
+          {/* Immer eingebunden (leer ohne Höhe), damit Vorlesehilfen die Bestätigung sicher vorlesen */}
+          {report && (
+            <p role="status" className="text-sm text-zinc-600">
+              {reported ? 'Gemeldet. Die Liste findest du in den Einstellungen.' : ''}
+            </p>
           )}
         </div>
-        {reported && (
-          <p role="status" className="text-sm text-zinc-600">
-            Gemeldet. Die Liste findest du in den Einstellungen.
-          </p>
-        )}
       </div>
 
       <div ref={feedbackRef} aria-live="polite">
@@ -301,6 +313,12 @@ function FinishView({ course, task, mistakes, focus }: { course: string; task: G
             </FitWidth>
           ) : (
             <>
+              {task.resultQuestion !== undefined && (
+                <div className="space-y-1 pb-1">
+                  <p className="text-sm text-zinc-600">Frage</p>
+                  <RichText text={task.resultQuestion} className="text-zinc-800" />
+                </div>
+              )}
               <p className="text-sm text-zinc-600">Richtige Antwort</p>
               <RichText text={task.resultText!} className="text-xl font-medium" />
             </>

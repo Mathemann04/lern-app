@@ -94,12 +94,14 @@ function QuestionCard({ course, question: q, misconceptions }: CardProps) {
   return (
     <article data-question-no={q.no} className="space-y-4 rounded-2xl border border-zinc-200 p-4">
       <div className="space-y-1">
-        <p className="text-sm text-zinc-500">
-          Nr. {q.no} ·{' '}
-          <a href={taskHref(course, ref)} className="font-medium text-accent-700 hover:underline">
+        {/* Link vorn in voller Höhe (44 px), Nummer, Id und Fakt daneben bzw. darunter */}
+        <p className="flex flex-wrap items-center gap-x-3 text-sm text-zinc-500">
+          <a href={taskHref(course, ref)} className="inline-flex min-h-11 items-center font-medium text-accent-700 hover:underline">
             Aufgabe {formatTaskNumber(ref)}
-          </a>{' '}
-          · {q.id} · Fakt {q.fact}
+          </a>
+          <span>
+            Nr. {q.no} · {q.id} · Fakt {q.fact}
+          </span>
         </p>
         <RichText text={q.title} className="block text-sm font-medium text-accent-700" inline />
         <RichText text={q.prompt} className="text-lg font-semibold" />

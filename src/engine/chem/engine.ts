@@ -15,8 +15,10 @@ export type ChemCourseEngine = {
   prepareFree(ref: TaskRef): FreeTask
   // Form für die Abwechslung: Fragen zum selben Fakt zählen als dieselbe Form
   formOf(ref: TaskRef): string
-  // zufällige Nummer einer Frage dieser Stufe in zufälliger Fassung
-  nextSeed(level: Level): number
+  // zufällige Nummer einer Frage dieser Stufe in zufälliger Fassung. shown: Nummern der Fragen, die in
+  // der laufenden Runde schon dran waren (state/questionRounds.ts); gewählt wird nur unter den übrigen,
+  // sind alle durch, wieder unter allen (neue Runde)
+  nextSeed(level: Level, shown?: ReadonlySet<number>): number
   // Stufe, zu der die Nummer gehört; null, wenn es dazu keine Aufgabe (mehr) gibt
   resolve(ref: TaskRef): Level | null
 }
@@ -56,9 +58,12 @@ export function topicEngine({ bank, misconceptions }: ChemTopic, random: () => n
       const found = questionOf(ref.seed)
       return found ? `q:${found.question.fact}` : 'q:?'
     },
-    nextSeed(level) {
-      const candidates = bank.questions.filter((q) => q.level === level && !retired.has(q.no))
-      if (candidates.length === 0) throw new Error(`Keine Fragen in Stufe ${level} des Themas ${course}`)
+    nextSeed(level, shown) {
+      const inLevel = bank.questions.filter((q) => q.level === level && !retired.has(q.no))
+      if (inLevel.length === 0) throw new Error(`Keine Fragen in Stufe ${level} des Themas ${course}`)
+      // Keine Frage doppelt, bevor alle dran waren
+      const unseen = shown ? inLevel.filter((q) => !shown.has(q.no)) : inLevel
+      const candidates = unseen.length > 0 ? unseen : inLevel
       return questionSeed(pick(candidates).no, Math.floor(random() * VARIANTS))
     },
     resolve(ref) {

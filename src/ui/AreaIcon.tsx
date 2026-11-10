@@ -116,6 +116,38 @@ const ART: Record<Kind, (id: string) => ReactNode> = {
       <circle cx="33.5" cy="7.5" r="2.8" className="fill-tone-600" />
     </>
   ),
+  // Atombau: Atomkern aus Protonen (dunkel, mit Plus) und Neutronen (hell), dicht gepackt; der Rand in
+  // der hellsten Stufe trennt gleichfarbige Teilchen
+  nucleus: () => (
+    <>
+      {NUCLEONS.map(([x, y, proton]) => (
+        <g key={`${x}-${y}`}>
+          <circle cx={x} cy={y} r="7.2" className={`stroke-tone-100 ${proton ? 'fill-tone-700' : 'fill-tone-400'}`} strokeWidth="1.6" />
+          {proton && <path d={`M${x - 2.6} ${y}h5.2M${x} ${y - 2.6}v5.2`} className="stroke-tone-50" strokeWidth="1.8" strokeLinecap="round" />}
+        </g>
+      ))}
+    </>
+  ),
+  // Elektronen: Kästchen der Orbitale mit Pfeilen für die Elektronen wie beim Stickstoff (2s voll, in
+  // den drei 2p-Kästchen je eines), die p-Kästchen eine Stufe höher
+  orbitals: () => (
+    <>
+      <rect x="3" y="27" width="14" height="15" rx="2.5" className="fill-tone-200 stroke-tone-600" strokeWidth="2" />
+      <rect x="18.5" y="8" width="27" height="15" rx="2.5" className="fill-tone-200 stroke-tone-600" strokeWidth="2" />
+      <path d="M27.5 8v15M36.5 8v15" className="stroke-tone-600" strokeWidth="2" />
+      {ORBITAL_ARROWS.map(([x, y, up]) => (
+        <path
+          key={`${x}-${y}`}
+          d={up ? `M${x} ${y + 10}V${y}m-2.2 2.6L${x} ${y}l2.2 2.6` : `M${x} ${y}V${y + 10}m-2.2-2.6L${x} ${y + 10}l2.2-2.6`}
+          className="stroke-tone-800"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+        />
+      ))}
+    </>
+  ),
   // Periodensystem: Kästchen in der Form der Tabelle (s-, d- und p-Block)
   periodic: () => (
     <>
@@ -200,6 +232,27 @@ const PERIODIC_CELLS: ReadonlyArray<readonly [number, number]> = [
   [4, 1],
   [5, 1],
   ...[0, 1, 2, 3, 4, 5].flatMap((column) => [[column, 2] as const, [column, 3] as const]),
+]
+
+// Kernteilchen als (x, y, Proton?): eins in der Mitte, sechs im Kreis darum; von hinten (oben) nach
+// vorn (unten) gezeichnet, so liegen die unteren leicht über den oberen
+const NUCLEONS: ReadonlyArray<readonly [number, number, boolean]> = [
+  [18, 13.6, false],
+  [30, 13.6, true],
+  [12, 24, true],
+  [24, 24, true],
+  [36, 24, false],
+  [18, 34.4, false],
+  [30, 34.4, true],
+]
+
+// Pfeile der Elektronen als (x, oberes Ende, nach oben?): ↑↓ im s-Kästchen, je ↑ in den p-Kästchen
+const ORBITAL_ARROWS: ReadonlyArray<readonly [number, number, boolean]> = [
+  [7.9, 29.5, true],
+  [12.1, 29.5, false],
+  [23, 10.5, true],
+  [32, 10.5, true],
+  [41, 10.5, true],
 ]
 
 // Würfel in Schrägansicht, (x, y) ist die obere Ecke
