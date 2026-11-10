@@ -725,15 +725,17 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
 - **S1: Fach und Atombau-Fragen.** Fach „Chemie 1“ auf der Startseite mit
   allen Gebieten und Themen; Säuren und Basen sowie Redox mit ihren Themen
   als „kommt bald“; Stufennamen statt Zahlen; chemische Formeln im
-  Formelsatz; Tabelle der Elemente mit Tests; Einfachauswahl mit „Warum ist
+  Formelsatz; Einfachauswahl mit „Warum ist
   das falsch?“; Atombau mit Wissensfragen in allen drei Stufen (auch
   Atommodelle und Licht); Lernkarten-Ordner „Atombau“; die Denkfehler in
   „Deine häufigsten Fehler“ (als Aussage statt Formel); Galerie-Seite
   „Fragen durchsehen“; Knopf „Frage melden“.
   Ausprobieren: Start → Chemie 1 → Aufbau der Materie → Atombau →
   Grundlagen, zehn Fragen.
-- **S2: Erste Rechnungen.** „Protonen, Neutronen, Elektronen“ und „Energie
-  des Lichts“ geführt, mit Karten und „Gezielt üben“.
+- **S2: Erste Rechnungen.** Tabelle der Elemente mit Tests (aus S1 hierher
+  verschoben, weil sie erst für Rechnungen gebraucht wird); „Protonen,
+  Neutronen, Elektronen“ und „Energie des Lichts“ geführt, mit Karten und
+  „Gezielt üben“.
   Ausprobieren: Vertiefung, ein Ion wie ³⁷Cl⁻, einmal absichtlich die
   Massenzahl als Neutronenzahl wählen.
 - **S3: Molmasse, Stoffmenge, Reaktionsgleichungen.** Die App liest
