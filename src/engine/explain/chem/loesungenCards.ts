@@ -27,7 +27,7 @@ export const LOESUNGEN_CARDS: readonly Card[] = [
         lines: [{ label: 'Ergebnis', latex: String.raw`n = c \cdot V = 0{,}25\,\mathrm{mol/L} \cdot 2\,\mathrm{L} = 0{,}5\,\mathrm{mol}` }],
       },
     ],
-    errors: ['chem-ml-not-l', 'chem-c-inverted'],
+    errors: ['chem-ml-not-l', 'chem-c-inverted', 'chem-mis-lo-v-not-solution', 'chem-mis-lo-c-mixup', 'chem-mis-lo-c-portion', 'chem-mis-lo-c-times', 'chem-mis-lo-c-inverted', 'chem-mis-lo-milli', 'chem-mis-lo-share-is-amount', 'chem-mis-lo-dilution-n', 'chem-mis-lo-dilution-direct', 'chem-mis-lo-water-no-effect', 'chem-mis-lo-most-important'],
   },
   {
     id: 'loesungen-ansetzen',
@@ -55,7 +55,7 @@ export const LOESUNGEN_CARDS: readonly Card[] = [
         ],
       },
     ],
-    errors: ['chem-molar-incomplete', 'chem-ml-not-l'],
+    errors: ['chem-molar-incomplete', 'chem-ml-not-l', 'chem-mis-lo-mol-as-gram', 'chem-mis-lo-m-incomplete', 'chem-mis-lo-reference'],
   },
   {
     id: 'loesungen-massenanteil',
@@ -80,7 +80,7 @@ export const LOESUNGEN_CARDS: readonly Card[] = [
         lines: [{ label: 'Ergebnis', latex: String.raw`w = \frac{4\,\mathrm{g}}{200\,\mathrm{g}} \cdot 100\,\% = 2\,\%` }],
       },
     ],
-    errors: ['chem-fraction-solvent'],
+    errors: ['chem-fraction-solvent', 'chem-mis-lo-share-solvent', 'chem-mis-lo-percent-factor', 'chem-mis-lo-w-volume'],
   },
   {
     id: 'loesungen-massenkonzentration',
@@ -102,7 +102,7 @@ export const LOESUNGEN_CARDS: readonly Card[] = [
         lines: [{ label: 'Ergebnis', latex: String.raw`m = \beta \cdot V = 9\,\mathrm{g/L} \cdot 0{,}5\,\mathrm{L} = 4{,}5\,\mathrm{g}` }],
       },
     ],
-    errors: ['chem-mass-conc-inverted', 'chem-ml-not-l'],
+    errors: ['chem-mass-conc-inverted', 'chem-ml-not-l', 'chem-mis-lo-beta-density'],
   },
   {
     id: 'loesungen-ppm',
@@ -127,7 +127,7 @@ export const LOESUNGEN_CARDS: readonly Card[] = [
         lines: [{ label: 'Ergebnis', latex: String.raw`m = 50 \cdot 10^{-6} \cdot 2000\,\mathrm{g} = 0{,}1\,\mathrm{g} = 100\,\mathrm{mg}` }],
       },
     ],
-    errors: ['chem-ppb'],
+    errors: ['chem-ppb', 'chem-mis-lo-ppm-factor', 'chem-mis-lo-billion'],
   },
   {
     id: 'loesungen-volumenanteil',
@@ -149,7 +149,7 @@ export const LOESUNGEN_CARDS: readonly Card[] = [
         lines: [{ label: 'Ergebnis', latex: String.raw`V = \frac{40}{100} \cdot 0{,}5\,\mathrm{L} = 0{,}2\,\mathrm{L}` }],
       },
     ],
-    errors: ['chem-vol-percent'],
+    errors: ['chem-vol-percent', 'chem-mis-lo-vol-mass', 'chem-mis-lo-volume-conserved', 'chem-mis-lo-contraction-loss'],
   },
   {
     id: 'loesungen-molvolumen',
@@ -171,7 +171,7 @@ export const LOESUNGEN_CARDS: readonly Card[] = [
         lines: [{ label: 'Ergebnis', latex: String.raw`n = \frac{44{,}8\,\mathrm{L}}{22{,}4\,\mathrm{L/mol}} = 2\,\mathrm{mol}` }],
       },
     ],
-    errors: ['chem-vm-conditions', 'chem-vm-inverted'],
+    errors: ['chem-vm-conditions', 'chem-vm-inverted', 'chem-mis-lo-vm-everything', 'chem-mis-lo-vm-any-condition', 'chem-mis-lo-vm-gas-specific', 'chem-mis-lo-vm-inverted', 'chem-mis-lo-atoms-count', 'chem-mis-lo-avogadro-mass'],
   },
   {
     id: 'loesungen-gasgesetz',
@@ -199,6 +199,6 @@ export const LOESUNGEN_CARDS: readonly Card[] = [
         ],
       },
     ],
-    errors: ['chem-celsius', 'chem-hpa'],
+    errors: ['chem-celsius', 'chem-hpa', 'chem-mis-lo-ideal-model', 'chem-mis-lo-celsius', 'chem-mis-lo-si-units', 'chem-mis-lo-gas-direction', 'chem-mis-lo-gas-fixed', 'chem-mis-lo-heat-more-particles'],
   },
 ]
