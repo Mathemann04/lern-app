@@ -301,9 +301,10 @@ test('Chemie: Themen mischen, „Nächste Aufgabe" bleibt in der Mischung, X und
   await expect(page.getByRole('checkbox', { name: 'Atombau' })).toBeChecked()
   await expect(page.getByRole('checkbox', { name: 'Stoffmenge und Umsatz' })).toBeChecked()
   await expectCleanPage(page, 'Mischseite')
-  // Dieser Test mischt nur Atombau (Stoffmenge und Reaktionsgleichungen haben seit S3a/S3b nur Rechnungen)
+  // Dieser Test mischt nur Atombau
   await page.getByRole('checkbox', { name: 'Stoffmenge und Umsatz' }).uncheck()
   await page.getByRole('checkbox', { name: 'Reaktionsgleichungen' }).uncheck()
+  await page.getByRole('checkbox', { name: 'Gase und Lösungen' }).uncheck()
 
   // Unterthemen aufklappen: dieselben Kästchen wie auf der Themenseite (Atombau steht zuerst)
   const toggle = page.getByRole('button', { name: /^Unterthemen: alle/ }).first()
