@@ -337,7 +337,7 @@ export const REARRANGE_ERROR_TEXTS: Readonly<Record<string, Explanation>> = {
   },
   'eq-det-main': {
     detailed:
-      'Bei $2 \\times 2$ ist die Determinante nur dann das Produkt der Diagonale, wenn $q = 0$ oder $r = 0$ ist (Dreiecksmatrix). Sonst wird das Produkt der Nebendiagonale abgezogen: $ps - qr$.',
+      'Bei $2 \\times 2$ ist die Determinante nur dann das Produkt der Diagonale, wenn rechts oben oder links unten eine $0$ steht (Dreiecksmatrix). Sonst wird das Produkt der Nebendiagonale abgezogen: $\\det\\begin{pmatrix} p & q \\\\ r & s \\end{pmatrix} = ps - qr$.',
     short: 'Die Nebendiagonale gehört dazu: $ps - qr$.',
   },
   'eq-det-checkerboard': {

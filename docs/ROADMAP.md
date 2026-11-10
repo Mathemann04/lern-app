@@ -566,4 +566,5 @@ Details: [PLAN-M1.md](PLAN-M1.md)
   die App jetzt alle typischen Fehler, zu denen ein Ergebnis passt, wenn einer
   davon im Ausrechnen eines Werkzeugs steckt (vorher bekam oft die Determinante
   die Schuld für einen späteren Vorzeichenfehler); die Endform der Engine gilt im
-  freien Modus immer als fertig.
+  freien Modus in allen Stufen immer als fertig (vorher wurde sie z. B. bei 3-107
+  mit einer Klammer unter der Wurzel abgelehnt).

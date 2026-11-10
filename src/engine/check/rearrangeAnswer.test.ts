@@ -278,9 +278,17 @@ describe('Umstellen frei: Determinanten (Stufe 5, Teil 8a)', () => {
     const v = prepareRearrangeFree({ level: 5, seed: 1460 }).check(swapped)
     expect(v.kind).toBe('wrong')
     expect(v.error).toBeUndefined()
-    expect(v.message).toContain('passt zu mehreren typischen Fehlern')
+    // jeder Fehler steht einmal da, mit seiner Regel
+    expect(v.message).toBe('Dein Ergebnis passt zu mehreren typischen Fehlern. Prüfe diese Stellen in deiner Rechnung:')
     expect(v.explanation?.detailed).toContain('Haupt- und Nebendiagonale vertauscht: Erst die Hauptdiagonale')
     expect(v.explanation?.detailed).toContain('Beim Rüberbringen das Vorzeichen nicht gewechselt: ')
+  })
+
+  it('ein Name mit eigenen Anführungszeichen bekommt keine zweiten („1 hoch unendlich ist 1“)', () => {
+    const v = prepareRearrangeFree({ level: 5, seed: 117 }).check('a-\\ln\\left(y-2\\right)')
+    expect(v.message).toBe('Dein Ergebnis passt zu zwei typischen Fehlern. Prüfe diese Stellen in deiner Rechnung:')
+    expect(v.explanation?.detailed).toContain('1 hoch unendlich ist 1')
+    expect(`${v.message} ${v.explanation?.detailed}`).not.toContain('„„')
   })
 
   it('Stufe 5: Lösung richtig, falsche Ergebnisse der Determinanten als Fehler erkannt', () => {

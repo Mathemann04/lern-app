@@ -996,10 +996,11 @@ die App den ersten Fehler im Rechenweg, also meist das Werkzeug, auch wenn der
 Fehler später passiert war. Jetzt gilt in Stufe 5: Passt ein Ergebnis zu mehreren
 typischen Fehlern und steckt einer davon im Ausrechnen eines Werkzeugs, nennt die
 App alle mit ihrer Regel und zählt keinen davon im Fortschritt. Außerdem gilt die
-Endform der Engine im freien Modus immer als fertig, auch mit anderer Reihenfolge der
-Summanden und Faktoren: Bei wenigen Aufgaben aus 7a bis
-7c stand im Ergebnis ein Bruch im Bruch, den der freie Modus als „noch nicht
-fertig" ablehnte, obwohl der geführte Modus genau ihn zeigt.
+Endform der Engine im freien Modus immer als fertig, in allen Stufen und auch mit
+anderer Reihenfolge der Summanden und Faktoren: Bei wenigen Aufgaben aus 7a bis 7c
+stand im Ergebnis ein Bruch im Bruch, in Stufe 3 eine Klammer unter der Wurzel
+(z. B. 3-107: $\sqrt{c(y - d) - ab} + 5$); der freie Modus lehnte das als „noch nicht
+fertig" ab, obwohl der geführte Modus genau diese Form zeigt.
 
 Bekannt und offen: Gleichungen wie $c\left(bx^2 - ax\right) = y$ löst die Engine
 noch nicht (sie teilt durch $c$ und nimmt danach wieder mit $c$ mal). Solche

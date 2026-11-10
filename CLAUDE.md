@@ -171,7 +171,8 @@ Mathe-Engine in `src/engine/` (reines TypeScript, ohne React).
     aus der Substitution da: Hinweis, zurück einzusetzen; sonst
     typischer Fehler; passt das Ergebnis zu mehreren und steckt einer davon im
     Ausrechnen eines Werkzeugs (Stufe 5), werden alle genannt und keiner gezählt;
-    was „fertig" heißt, steht für Prüfung und Baukasten in `rearrange/finished.ts`)
+    die Doppelbruch-Prüfung, die freie Prüfung und Baukasten gemeinsam nutzen,
+    steht in `rearrange/finished.ts`)
   - `parse/latex.ts`: liest die Eingabe der Mathe-Tastatur (LaTeX) ein, mit
     verständlichen Fehlermeldungen
   - `explain/`: Textbausteine für Erklärungen (ausführlich/kurz), Tipps und

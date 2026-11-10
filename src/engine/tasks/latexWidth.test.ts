@@ -4,7 +4,9 @@ import { latexWidthEm } from './latexWidth.ts'
 // Kalibrierung der Breitenschätzung: in Chromium gemessene Breiten (KaTeX wie in der App, \displaystyle,
 // Aufgabe in text-2xl: 24 px Schrift, .katex 1,15em, also 27,6 px je em). Am Handy hat die Aufgabe 350 px
 // Platz; die Grenze von 12 em im Baukasten (rearrangeTerms.ts) muss das sicher einhalten. Ändert sich die
-// Schrift oder die Größe von .katex, stimmen die Messwerte nicht mehr: dann neu messen.
+// Schrift oder die Größe von .katex, stimmen die Messwerte nicht mehr: dann neu messen. Gemessen ohne
+// Zeilenumbruch (breites Fenster): Am Handy bricht KaTeX eine zu breite Formel nach dem = um, dann wäre nur die
+// erste Zeile zu messen.
 const PX_PER_EM = 27.6
 const MEASURED: ReadonlyArray<readonly [string, number]> = [
   ['\\det\\begin{pmatrix} e^{x} & e^{-x} \\\\ a & b \\end{pmatrix} = y', 228],
@@ -23,12 +25,12 @@ const MEASURED: ReadonlyArray<readonly [string, number]> = [
   ['\\det\\begin{pmatrix} x & a & 0 \\\\ b & x & c \\\\ 0 & d & 1 \\end{pmatrix} = y', 243.1],
   ['\\det\\begin{pmatrix} e^{x} + a & b & 0 \\\\ c & e^{-x} & 1 \\\\ 1 & 0 & d \\end{pmatrix} = y', 326],
   ['\\frac{\\det\\begin{pmatrix} 1 & x & x^{2} \\\\ 1 & a & a^{2} \\\\ 1 & b & b^{2} \\end{pmatrix}}{c} - d = y', 308.8],
-  ['\\ln\\left(\\det\\begin{pmatrix} e^{x} & a & 0 \\\\ b & e^{-x} & c \\\\ 0 & 1 & d \\end{pmatrix}\\right) = y', 339],
+  ['\\ln\\left(\\det\\begin{pmatrix} e^{x} & a & 0 \\\\ b & e^{-x} & c \\\\ 0 & 1 & d \\end{pmatrix}\\right) = y', 353.5],
   // die breitesten Aufgaben aus dem Baukasten (5-110, 5-47565): Klammer um eine Matrix, Schätzung knapp 5 % zu schmal
   ['y = 3\\left(c - \\det\\begin{pmatrix} \\tan x & a \\\\ 1 & b \\end{pmatrix}\\right)', 342],
   ['y = d\\left(\\det\\begin{pmatrix} \\tan x & a \\\\ 1 & b \\end{pmatrix} + c\\right)', 342.6],
   // zu breit für das Handy
-  ['\\ln\\left(\\det\\begin{pmatrix} e^{x} + a & b & 0 \\\\ c & e^{-x} & 1 \\\\ 1 & 0 & d \\end{pmatrix}\\right) = y', 387.3],
+  ['\\ln\\left(\\det\\begin{pmatrix} e^{x} + a & b & 0 \\\\ c & e^{-x} & 1 \\\\ 1 & 0 & d \\end{pmatrix}\\right) = y', 401.9],
 ]
 // Bruch in der Matrix: KaTeX setzt ihn dort kleiner, die Schätzung ist zu breit (auf der sicheren Seite)
 const FRACTION_IN_MATRIX: ReadonlyArray<readonly [string, number]> = [

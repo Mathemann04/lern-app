@@ -215,6 +215,18 @@ describe('Baukasten (Nummern 1 bis 600 der Stufe 5)', () => {
     }
   })
 
+  it('ohne den Filter für das Ergebnis hätten 5-1237 (Doppelbruch in der Hochzahl) und 5-1742 (zu breit) eine andere Aufgabe', () => {
+    for (const seed of [1237, 1742]) {
+      const g = generateRearrangeTask({ level: 5, seed })
+      expect(g.template.id).toBe('baukasten-5-determinante')
+      const s = solveTask(g.task)!
+      expect(latexWidthEm(`x = ${toLatex(s.result)}`)).toBeLessThanOrEqual(16.5)
+      expect(hasNestedFraction(s.result)).toBe(false)
+    }
+    expect(taskLatex(generateRearrangeTask({ level: 5, seed: 1237 }).task)).toBe('\\det\\begin{pmatrix} e^{x} & e^{-x} \\\\ a & b \\end{pmatrix} = \\frac{c}{d}')
+    expect(taskLatex(generateRearrangeTask({ level: 5, seed: 1742 }).task)).toBe('c\\det\\begin{pmatrix} \\tan x & a \\\\ 1 & b \\end{pmatrix} - \\frac{d}{g} = y')
+  })
+
   it('der freie Modus nimmt das Ergebnis der Engine als richtig und fertig an', () => {
     for (const g of generated) {
       const c = prepareRearrangeCheck(g.task, true)
