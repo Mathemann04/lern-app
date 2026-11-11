@@ -608,3 +608,16 @@ Neue Entscheidungen unten anfügen.
   sich vorher); kein Caesiumphosphid. Aluminiumoxid und Magnesiumchlorid kommen in „Formel aus dem Namen“
   nicht vor (fast wie Klausuraufgabe 3a). Neuer Rechenfehler „Weg zu den Ionen abgezogen statt addiert“
   (`chem-bh-ions-subtracted`) für die Bildungsenthalpie. Rubidium-Salze für mehr Abwechslung.
+- 11.11.2026: S5b Moleküle. Abgleich mit Skript, Übungsblatt und Klausur: freie Paare als
+  Striche am Atom, „VSEPR-Modell“, Typ AXₙEₘ (E = freies Paar am Zentralatom), Gestalten mit
+  Bindestrich wie in der Musterlösung, „polares Molekül (Dipol)“ statt „Dipolmolekül“. Die
+  Musterlösung zeichnet BF₃ ohne freie Paare am Fluor; die App zeichnet sie (jedes F braucht
+  sein Oktett). Moleküle sind Daten mit Lage der Atome für die Lewis-Formel; alles andere
+  rechnet die Engine. Lewis-Formeln stehen als Bilder zur Auswahl (`figure` an der Antwort);
+  falsche Formeln entstehen aus typischen Fehlern (`chem/lewis.ts`). Gestalt als räumliches
+  Bild mit Keulen für freie Paare, im Ergebnis gezeigt, damit die Frage nichts verrät.
+  Elektronegativität erst für die Hauptgruppen-Elemente, die vorkommen, mit der gerundeten
+  Tabelle zum Abgleich (`chem/electronegativity.ts`); weitere mit S6. Nach der fachlichen
+  Prüfung: keine Polarität bei HCN, NOCl, OF₂, SCl₂ (dazu CHEMIE.md §6), Winkel nur bei
+  gleichen Partnern, Erklärungen „Warum ist das falsch?“ ohne die Lösung des Schritts.
+  Der Katalog-Fehler „mit dem Index malgenommen“ nimmt ΔEN mal den größeren Index.

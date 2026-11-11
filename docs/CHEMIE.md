@@ -147,7 +147,12 @@ zweiten, unabhängig eingetragenen Liste.
 ## 6. Grenzfälle, die die App nicht abfragt
 
 - Polarität von Molekülen mit kleiner ΔEN, die trotzdem Dipole sind: H₂S,
-  PH₃, NCl₃ (H₂S nur nach der Gestalt).
+  PH₃, NCl₃, dazu HCN und NOCl (nach Pauling sind alle ihre Bindungen
+  nahezu unpolar) sowie OF₂ und SCl₂ (ΔEN zu nah an 0,5); sie kommen in
+  Polaritäts-Aufgaben nicht vor, nur nach Gestalt und Lewis-Formel.
+- Bindungswinkel nur bei gleichen Partnern mit gleicher Bindung (CH₄, NH₃,
+  H₂O, BF₃, CO₂, SO₂ …); bei verschiedenen Partnern weicht der Winkel ab
+  (COCl₂ etwa 112°).
 - Bindungsart aus ΔEN bei Verbindungen aus Metall und Nichtmetall mit ΔEN
   unter 1,9: nahe der Grenze 1,8 (MgCl₂ 1,85; Al₂O₃ 1,83) oder nach ΔEN
   polar, obwohl aus Metall und Nichtmetall (AlCl₃ 1,55; BeCl₂ 1,59;

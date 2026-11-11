@@ -566,14 +566,40 @@ kommen mit ihren Schritten dazu. Die Denkfehler der Wissensfragen
 | Born-Haber | addiert statt abgezogen (`chem-bh-added`, seit S5a) | ΔH_G = ΔH_f + ΔH_Ionen |
 | Born-Haber | Gitterenthalpie mit falschem Vorzeichen (`chem-bh-lattice-sign`, seit S5a) | ΔH_f = ΔH_Ionen − ΔH_G |
 | Born-Haber | Weg zu den Ionen abgezogen (`chem-bh-ions-subtracted`, seit S5a) | ΔH_f = ΔH_G − ΔH_Ionen |
-| Gestalt | Doppelbindung als zwei Paare gezählt (`chem-vsepr-double-bond`) | CO₂ tetraedrisch |
-| Gestalt | freie Paare vergessen (`chem-vsepr-lone-pairs`) | NH₃ trigonal-planar, H₂O linear |
+| Lewis-Formel | Index beim Zählen vergessen (`chem-lewis-index-ignored`, seit S5b) | NH₃: 5 + 1 = 6 statt 8 Valenzelektronen |
+| Lewis-Formel | alle Elektronen statt Valenzelektronen (`chem-lewis-all-electrons`, seit S5b) | H₂O: 10 statt 8 |
+| Lewis-Formel | Oktette statt vorhandener Elektronen gezählt (`chem-lewis-octet-count`, seit S5b) | CH₄: 16 statt 8 |
+| Lewis-Formel | Elektronen nicht halbiert (`chem-lewis-pairs-not-halved`, seit S5b) | NH₃: 8 Paare statt 4 |
+| Lewis-Formel | nur Bindungen als Paare gezählt (`chem-lewis-bonds-only`, seit S5b) | H₂O: 2 Paare statt 4 |
+| Lewis-Formel | Mehrfachbindung als ein Paar gezählt (`chem-lewis-multiple-as-one`, seit S5b) | CO₂: 2 bindende Paare statt 4 |
+| Lewis-Formel | nur freie Paare am Zentralatom gezählt (`chem-lewis-free-central-only`, seit S5b) | PCl₃: 1 freies Paar statt 10 |
+| Lewis-Formel (Bild) | freie Paare am Zentralatom vergessen (`chem-lewis-pairs-missing`, seit S5b) | NH₃ ohne Paar am N |
+| Lewis-Formel (Bild) | freie Paare der äußeren Atome vergessen (`chem-lewis-terminal-pairs`, seit S5b) | CCl₄ ohne Paare an den Cl |
+| Lewis-Formel (Bild) | Einfachbindungen statt Mehrfachbindung (`chem-lewis-multiple-missing`, seit S5b) | O–C–O mit vollen Oktetts, 20 statt 16 Elektronen |
+| Lewis-Formel (Bild) | ein Paar zu viel am Zentralatom (`chem-lewis-octet-exceeded`, seit S5b) | CH₄ mit freiem Paar am C |
+| Lewis-Formel (Bild) | Wasserstoff mit freiem Paar (`chem-lewis-hydrogen`, seit S5b) | H mit Bindung und freiem Paar |
+| Gestalt | Mehrfachbindung doppelt gezählt (`chem-vsepr-double-counted`) | CO₂: AX₄, tetraedrisch |
+| Gestalt | freie Paare als Partner gezählt (`chem-vsepr-pairs-as-partners`, seit S5b) | NH₃: X = 4 |
+| Gestalt | Zentralatom mitgezählt (`chem-vsepr-all-atoms`, seit S5b) | CH₄: X = 5 |
+| Gestalt | freie Paare vergessen (`chem-vsepr-lone-pairs-forgotten`) | NH₃ trigonal-planar, H₂O linear |
+| Gestalt | übrige Elektronen nicht halbiert (`chem-vsepr-pairs-not-halved`, seit S5b) | H₂O: E = 4 |
+| Gestalt | Valenzelektronen als freie Paare (`chem-vsepr-valence-as-pairs`, seit S5b) | NH₃: E = 5 |
+| Gestalt | freie Paare aller Atome gezählt (`chem-vsepr-all-lone-pairs`, seit S5b) | CCl₄: E = 12 |
 | Gestalt | Anordnung der Paare statt Gestalt (`chem-vsepr-arrangement`) | NH₃ tetraedrisch |
-| ΔEN | Werte addiert (`chem-den-added`) | H–Cl: 5,36 statt 0,96 |
-| ΔEN | mit dem Index malgenommen (`chem-den-index`) | O–H in H₂O: 2,48 statt 1,24 |
-| Teilladungen | vertauscht (`chem-partial-swapped`) | δ− am H und δ+ am Cl in HCl |
-| Dipol | polare Bindung mit Dipolmolekül gleichgesetzt (`chem-polar-bond-dipole`) | CO₂ als Dipol |
-| Formel aus dem Namen | Vorsilbe auf das falsche Element bezogen (`chem-prefix-element`) | Schwefeldioxid als S₂O |
+| Gestalt | freies Paar angenommen (`chem-vsepr-extra-pair`, seit S5b) | CO₂ gewinkelt wie H₂O |
+| Gestalt | aus der flachen Lewis-Formel abgelesen (`chem-vsepr-flat`, seit S5b) | CH₄ quadratisch-planar, 90° |
+| Bindungswinkel | idealer Winkel trotz freier Paare (`chem-vsepr-angle-ideal`, seit S5b) | H₂O: 109,5° |
+| ΔEN | Werte addiert (`chem-en-added`) | O–H: 5,64 statt 1,24 |
+| ΔEN | mit dem Index malgenommen (`chem-en-index`) | O–H in H₂O: 2,48 statt 1,24 |
+| Bindungsart | Grenzen falsch angewandt (`chem-en-bond-type`, seit S5b) | ΔEN 1,24 als Ionenbindung |
+| Teilladungen | vertauscht (`chem-en-partial-swapped`) | δ− am H und δ+ am Cl in HCl |
+| Dipol | polare Bindung mit polarem Molekül gleichgesetzt (`chem-dipole-polar-bond`) | CO₂ als Dipol |
+| Dipol | Dipol ohne polare Bindungen (`chem-dipole-unpolar-bonds`, seit S5b) | CH₄ als Dipol |
+| Dipol | Symmetrie angenommen (`chem-dipole-symmetry-assumed`, seit S5b) | H₂O unpolar wie CO₂ |
+| Dipol | polare Bindungen für unpolar gehalten (`chem-dipole-unpolar-claimed`, seit S5b) | H₂O: Bindungen unpolar |
+| Name ↔ Formel | Vorsilben weggelassen (`chem-molname-no-prefix`, seit S5b) | N₂O: Stickstoffoxid |
+| Name ↔ Formel | Vorsilbe auf das falsche Element bezogen (`chem-molname-swapped`) | N₂O: Stickstoffdioxid; Schwefeldioxid als S₂O |
+| Name ↔ Formel | Vorsilbe am ersten Element vergessen (`chem-molname-first-prefix`, seit S5b) | N₂O₃: Stickstofftrioxid |
 | Ausgleichen | Index statt Koeffizient geändert (`chem-balance-index`) | Mg + O₂ → MgO₂ statt 2 Mg + O₂ → 2 MgO |
 | Ausgleichen | Sauerstoffatome falsch gezählt (`chem-balance-oxygen`: nicht halbiert oder Sauerstoff im Alkohol nicht abgezogen) | C₄H₁₀ + 13 O₂ → 4 CO₂ + 5 H₂O |
 | Ausgleichen | Sauerstoff im Wasser vergessen (`chem-balance-water-oxygen`) | C₃H₈ + 3 O₂ → 3 CO₂ + 4 H₂O |
@@ -871,6 +897,19 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   „Ionengitter“. Zehn Lernkarten, Wissensfragen. Der Fehler „Ladung des Anions auf das
   Kation übertragen“ fiel weg: Er ergibt fast immer denselben Wert wie „Index als
   Ladung gelesen“.
+  **S5b** (fertig): Thema „Moleküle“ mit Unterthemen Elektronenpaarbindung und
+  Lewis-Formeln, Räumlicher Bau (VSEPR-Modell), Elektronegativität und polare Moleküle
+  (ab Vertiefung), Namen von Molekülverbindungen (ab Vertiefung). 43 Moleküle als Daten
+  (`chem/molecules.ts`: Atome mit Lage, Bindungen, Dipol ja/nein); freie Paare, Elektronen,
+  Typ AXₙEₘ und Gestalt rechnet die Engine. Rechnungen: Lewis-Formel (Valenzelektronen →
+  Paare → bindende und freie → richtige Formel als Bild unter vier Bildern), Gestalt
+  (Partner → freie Paare → Typ → Gestalt → Winkel; bis zur Vertiefung mit der Lewis-Formel
+  als Bild, im Ergebnis das räumliche Bild), Polarität (ΔEN mit Werten aus der Aufgabe →
+  Bindungsart → Teilladungen → polares Molekül mit Begründung), Namen mit Vorsilben in
+  beide Richtungen. Neun Lernkarten, 50 Wissensfragen. In den Grundlagen alle Moleküle mit
+  Einfachbindungen (auch Halogenide wie PCl₃), Mehrfachbindungen ab Vertiefung.
+  Abwechslung mit eigener Kennzahl (etwa 40 sinnvolle Moleküle ohne Formalladungen:
+  mindestens 40 Formen unter 200, keine öfter als 6 von 100).
 - **S6: Elektronen und Periodensystem.** Konfiguration und
   Valenzkonfiguration als Auswahl, Quantenzahlen, Steckbrief, Ionenladung,
   Trends; „Klausuraufgabe 1 üben“ und „Klausuraufgabe 2 üben“.

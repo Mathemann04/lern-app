@@ -108,13 +108,14 @@ export const STOFFMENGE = 'chem-stoffmenge'
 export const GLEICHUNGEN = 'chem-gleichungen'
 export const LOESUNGEN = 'chem-loesungen'
 export const IONEN = 'chem-ionen'
+export const MOLEKUELE = 'chem-molekuele'
 
 // Chemie-Themen: Ids mit „chem-", Engine aus Wissensfragen (engine/chem/)
 export const isChemCourse = (id: string) => id.startsWith('chem-')
 
 // Themen mit Testseite in der Formel-Galerie (auch solche, die noch nicht spielbar sind); bei Chemie
 // die Seite „Fragen durchsehen"
-export const GALLERY_COURSES: readonly string[] = [DERIVATIVES, FRACTIONS, REARRANGE, ATOMBAU, GLEICHUNGEN, STOFFMENGE, LOESUNGEN, IONEN]
+export const GALLERY_COURSES: readonly string[] = [DERIVATIVES, FRACTIONS, REARRANGE, ATOMBAU, GLEICHUNGEN, STOFFMENGE, LOESUNGEN, IONEN, MOLEKUELE]
 
 const derivativeLevels: LevelPreview[] = [
   {
@@ -334,6 +335,35 @@ const ionenParts: CoursePart[] = [
   { id: 'energie', title: 'Gitterenergie und Born-Haber', levels: [2, 3] },
 ]
 
+const molekueleLevels: LevelPreview[] = [
+  {
+    level: 1,
+    available: true,
+    title: 'Elektronenpaarbindung, Lewis-Formeln mit Einfachbindungen, Gestalt einfacher Moleküle',
+    examples: [String.raw`\ce{NH3}`, String.raw`\ce{CH4}`],
+  },
+  {
+    level: 2,
+    available: true,
+    title: 'Mehrfachbindungen, Molekültyp und Bindungswinkel, Elektronegativität und Teilladungen, Namen mit Vorsilben',
+    examples: [String.raw`\ce{HCN}`, String.raw`\ce{COCl2}`],
+  },
+  {
+    level: 3,
+    available: true,
+    title: 'Lewis-Formel, Paare und Gestalt wie in der Klausur, polare Moleküle erkennen',
+    examples: [String.raw`\ce{PCl3}`, String.raw`\ce{SO2}`],
+  },
+]
+
+// Unterthemen von „Moleküle" (Rechnungen in engine/chem/generators/molekuele.ts, part)
+const molekueleParts: CoursePart[] = [
+  { id: 'lewis', title: 'Elektronenpaarbindung und Lewis-Formeln', levels: [1, 2, 3] },
+  { id: 'gestalt', title: 'Räumlicher Bau (VSEPR-Modell)', levels: [1, 2, 3] },
+  { id: 'polaritaet', title: 'Elektronegativität und polare Moleküle', levels: [2, 3] },
+  { id: 'namen', title: 'Namen von Molekülverbindungen', levels: [2, 3] },
+]
+
 // Unterthemen von „Gase und Lösungen" (Rechnungen in engine/chem/generators/loesungen.ts, part)
 const loesungenParts: CoursePart[] = [
   { id: 'konzentration', title: 'Konzentration und Lösung ansetzen', levels: [1, 2, 3] },
@@ -510,7 +540,17 @@ export const SUBJECTS: readonly Subject[] = [
             focus: true,
             parts: ionenParts,
           },
-          comingSoon('chem-molekuele', 'Moleküle', 'Lewis-Formel, räumlicher Bau, Polarität und Namen', 'bond'),
+          {
+            id: MOLEKUELE,
+            title: 'Moleküle',
+            description: 'Lewis-Formel, räumlicher Bau, Polarität und Namen',
+            icon: 'bond',
+            cards: 'chem-molekuele',
+            levels: molekueleLevels,
+            free: false,
+            focus: true,
+            parts: molekueleParts,
+          },
           comingSoon('chem-zmk', 'Zwischenmolekulare Kräfte', 'Van-der-Waals-Kräfte, Dipol-Dipol-Kräfte und Wasserstoffbrücken', 'bond'),
           comingSoon('chem-metalle', 'Metallbindung und Hybridisierung', 'Elektronengas, Bändermodell, Halbleiter und Hybridorbitale', 'bond'),
         ],

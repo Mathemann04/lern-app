@@ -22,6 +22,8 @@ export type Choice = {
   // bei falschen Antworten: welcher typische Fehler dahintersteckt und warum er falsch ist
   readonly errorRuleId?: string
   readonly whyWrong?: Explanation
+  // Antwort als Bild (Id aus engine/chem/figures.ts), z. B. eine Lewis-Formel; content beschreibt es in Worten
+  readonly figure?: string
 }
 
 export type GuidedStep = {
@@ -69,6 +71,8 @@ export type GuidedTaskBase = {
   readonly resultQuestion?: string
   // Zusatz zum Ergebnis (Text mit Formeln), z. B. „Gilt für $x \neq 0$."
   readonly resultNote?: string
+  // Bild zum Ergebnis (Id aus engine/chem/figures.ts), z. B. der räumliche Bau eines Moleküls
+  readonly resultFigure?: string
   // Tipp für die ganze Aufgabe (im freien Modus)
   readonly ruleHint?: Explanation
   // Name des gesuchten Ergebnisses im freien Modus
