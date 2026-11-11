@@ -1,4 +1,4 @@
-import type { Explanation, MatchQuestion, MultiChoice, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
+import type { Explanation, MatchQuestion, MultiChoice, OrderQuestion, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
 import { type Shift, concentrationShift, equilibriumById, equilibriumCe, opposite, pressureShift, temperatureShift } from '../equilibria.ts'
 
 // Wissensfragen zum Thema „Chemisches Gleichgewicht“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern: Stufe · 100 +
@@ -114,6 +114,31 @@ const ENERGY_TERMS: MatchQuestion = {
     'Exotherm gibt Wärme ab, endotherm nimmt sie auf; Aktivierungsenergie ist der Energieberg, Reaktionsenthalpie der Höhenunterschied.',
   ),
   cards: ['gg-exo-endo', 'gg-energiediagramm', 'gg-katalysator'],
+  ref: REF,
+}
+
+// Ordnen (N1c): dieselbe Reaktion bei verschiedenen Temperaturen, nach dem Anteil der Produkte im Gleichgewicht;
+// K vom größten zum kleinsten (Gegenprobe in chem/orderQuestions.test.ts)
+export const K_ORDER_EXPONENTS = [6, 2, 0, -2, -6]
+const K_ORDER: OrderQuestion = {
+  kind: 'order',
+  id: 'gg-v-ordnen-k-lage',
+  no: 221,
+  level: 2,
+  fact: 'order-k-position',
+  part: 'mwg',
+  title: 'Lage nach K ordnen',
+  prompt: r`Dieselbe Reaktion wurde bei verschiedenen Temperaturen untersucht. Ordne die Messungen nach dem Anteil der Produkte im Gleichgewicht.`,
+  items: K_ORDER_EXPONENTS.map((e) => ({ id: `k${e}`, text: e === 0 ? r`$${K} = 1$` : r`$${K} = 10^{${e}}$` })),
+  first: 'die meisten Produkte',
+  last: 'die wenigsten Produkte',
+  traps: [{ kind: 'reversed', misconception: 'chem-mis-gg-k-large' }],
+  hint: r`Im Zähler von $${K}$ stehen die Produkte.`,
+  explanation: why(
+    r`Je größer $${K}$, desto größer der Zähler im Verhältnis zum Nenner: Das Gleichgewicht liegt weiter auf der Seite der Produkte. Bei $${K} = 1$ halten sich Zähler und Nenner die Waage, bei sehr kleinem $${K}$ liegen fast nur Edukte vor.`,
+    'Großes K, viele Produkte; kleines K, fast nur Edukte.',
+  ),
+  cards: ['gg-k-wert'],
   ref: REF,
 }
 
@@ -1226,6 +1251,8 @@ export const MWG_BANK: QuestionBank = {
     // ---- Zuordnen (N1b)
     ENERGY_TERMS,
     LE_CHATELIER_AMMONIA,
+    // ---- Ordnen (N1c)
+    K_ORDER,
   ],
   retired: [],
 }

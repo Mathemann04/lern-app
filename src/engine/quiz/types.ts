@@ -85,7 +85,27 @@ export type MatchQuestion = Omit<SingleChoice, 'kind' | 'correct' | 'wrong'> & {
   readonly traps: readonly MatchTrap[]
 }
 
-export type Question = SingleChoice | MultiChoice | MatchQuestion
+// Ordnen (N1c): Glieder in einer eindeutigen Reihenfolge, z. B. Elemente nach dem Atomradius. Gezeigt werden vier
+// oder fünf Glieder aus dem Vorrat (in derselben Reihenfolge), gemischt; man schiebt sie mit Pfeilknöpfen an ihren Platz
+// (quiz/plan.ts). items stehen in der richtigen Reihenfolge, von first (oben) nach last (unten).
+export type OrderItem = { readonly id: string; readonly text: string }
+
+// Typische falsche Reihenfolge: ganz umgedreht (reversed) oder ein Glied vor einem anderen, das eigentlich davor steht
+// (before steht in items nach after, wird aber davor gesetzt)
+export type OrderTrap =
+  | { readonly kind: 'reversed'; readonly misconception: string; readonly why?: Explanation }
+  | { readonly kind: 'swap'; readonly before: string; readonly after: string; readonly misconception: string; readonly why?: Explanation }
+
+export type OrderQuestion = Omit<SingleChoice, 'kind' | 'correct' | 'wrong'> & {
+  readonly kind: 'order'
+  readonly items: readonly OrderItem[]
+  // Beschriftung oben und unten, z. B. „kleinster Atomradius“ und „größter Atomradius“
+  readonly first: string
+  readonly last: string
+  readonly traps: readonly OrderTrap[]
+}
+
+export type Question = SingleChoice | MultiChoice | MatchQuestion | OrderQuestion
 
 // richtige Antworten einer Frage mit Antworten zum Auswählen (bei der Einfachauswahl genau eine)
 export const correctOptionsOf = (question: SingleChoice | MultiChoice): readonly QuizOption[] =>
@@ -93,7 +113,7 @@ export const correctOptionsOf = (question: SingleChoice | MultiChoice): readonly
 
 // Denkfehler, die in einer Frage vorkommen können (falsche Antworten oder Verwechslungen)
 export const misconceptionsIn = (question: Question): readonly string[] =>
-  question.kind === 'match' ? question.traps.map((t) => t.misconception) : question.wrong.map((w) => w.misconception)
+  question.kind === 'match' || question.kind === 'order' ? question.traps.map((t) => t.misconception) : question.wrong.map((w) => w.misconception)
 
 // Typischer Denkfehler (Id „chem-mis-…"): falsche Aussage und warum sie falsch ist. Der Text nennt den
 // Fehler und die Regel, verrät aber nicht die richtige Antwort einer bestimmten Frage.

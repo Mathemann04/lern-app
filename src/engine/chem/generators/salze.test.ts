@@ -4,6 +4,7 @@ import { GENERATED_MIN } from '../../quiz/numbers.ts'
 import { ANIONS, CATIONS, isAllowedSalt, saltFormula, saltName } from '../ions.ts'
 import { parseFormula } from '../formula.ts'
 import { generatedCalc } from './index.ts'
+import { IONEN_BANK, LATTICE_ENERGY } from '../bank/ionen.ts'
 
 // Ionenbindung und Salze (S5a): Formeln und Namen gegen eine zweite, von Hand eingetragene Liste, Ladungen in
 // jeder Zerfallsgleichung, Born-Haber gegen Gitterenthalpien aus der Literatur, Zahlen der Lernkarten
@@ -155,5 +156,20 @@ describe('Lernkarten „Ionenbindung und Salze“: Formeln wie die Engine', () =
     expect(-411 - 375).toBe(-786)
     expect(89 + 419 + 158 / 2 - 328).toBe(259)
     expect(-567 - 259).toBe(-826)
+  })
+})
+
+// Ordnen (N1c): Gitterenergien der Frage folgen den Werten, je mindestens 15 % auseinander, und dieselben Salze wie in
+// Frage 318
+describe('Ordnen: Gitterenergie', () => {
+  it('folgt den Werten mit deutlichem Abstand', () => {
+    const q = IONEN_BANK.questions.find((x) => x.id === 'io-k-ordnen-gitterenergie')
+    if (q?.kind !== 'order') throw new Error('Frage fehlt')
+    const values = q.items.map((i) => LATTICE_ENERGY[i.id].kj)
+    for (let i = 1; i < values.length; i++) expect(values[i - 1] / values[i], q.items[i].id).toBeGreaterThanOrEqual(1.15)
+    // ohne Ladungen der Ionen gleich: Oxide (2+/2-) vor den Salzen mit einfach geladenen Ionen
+    const charge = (id: string) => (id.endsWith('O') ? 2 : 1)
+    const ids = q.items.map((i) => i.id)
+    expect([...ids].sort((a, b) => charge(b) - charge(a))).toEqual(ids)
   })
 })

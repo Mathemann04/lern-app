@@ -1,4 +1,4 @@
-import type { Explanation, MatchPair, MatchQuestion, MatchTrap, MultiChoice, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
+import type { Explanation, MatchPair, MatchQuestion, MatchTrap, MultiChoice, OrderQuestion, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
 import { spontaneousRange } from '../generators/energie.ts'
 
 // Wissensfragen zum Thema „Energie bei Reaktionen“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern: Stufe · 100 + laufende
@@ -134,6 +134,34 @@ const RANGE_MATCH: MatchQuestion = {
     'Gegensätzliche Vorzeichen: immer oder nie; gleiche Vorzeichen: je nach Temperatur.',
   ),
   cards: ['en-freie-enthalpie'],
+  ref: REF,
+}
+
+// Ordnen (N1c): Reaktionen nach K aus der freien Standardenthalpie bei 25 °C, K vom größten zum kleinsten
+// (Gegenprobe mit K = e^(−ΔG⁰/(R·T)) in chem/orderQuestions.test.ts)
+export const DG_ORDER_KJ = [-30, -5, 0, 5, 30]
+const DG_ORDER: OrderQuestion = {
+  kind: 'order',
+  id: 'en-k-ordnen-dg-k',
+  no: 319,
+  level: 3,
+  fact: 'order-dg-k',
+  part: 'freie-enthalpie',
+  title: 'Gleichgewichtskonstante aus $\\Delta G^{0}$',
+  prompt: r`Reaktionen bei $25\,^{\circ}\mathrm{C}$ mit verschiedenen freien Standardenthalpien. Ordne sie nach ihrer Gleichgewichtskonstante $K$.`,
+  items: DG_ORDER_KJ.map((dg) => ({
+    id: `dg${dg}`,
+    text: dg === 0 ? r`$\Delta G^{0} = 0$` : r`$\Delta G^{0} = ${dg < 0 ? '-' : '+'}${Math.abs(dg)}\,\mathrm{kJ/mol}$`,
+  })),
+  first: 'größtes $K$',
+  last: 'kleinstes $K$',
+  traps: [{ kind: 'reversed', misconception: 'chem-mis-en-k-sign' }],
+  hint: r`Überlege, wie das Vorzeichen von $\Delta G^{0}$ in $K = e^{-\frac{\Delta G^{0}}{R \cdot T}}$ wirkt.`,
+  explanation: why(
+    r`Aus $K = e^{-\frac{\Delta G^{0}}{R \cdot T}}$ folgt: Je negativer $\Delta G^{0}$, desto größer der Exponent und desto größer $K$. Bei $\Delta G^{0} = 0$ ist $K = 1$, bei positivem $\Delta G^{0}$ ist $K < 1$.`,
+    r`Je negativer $\Delta G^{0}$, desto größer $K$.`,
+  ),
+  cards: ['en-freie-enthalpie-k'],
   ref: REF,
 }
 
@@ -1226,6 +1254,8 @@ export const ENERGIE_BANK: QuestionBank = {
     // ---- Zuordnen (N1b)
     PHASE_SIGNS,
     RANGE_MATCH,
+    // ---- Ordnen (N1c)
+    DG_ORDER,
   ],
   retired: [],
 }

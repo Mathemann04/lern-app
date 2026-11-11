@@ -1,8 +1,8 @@
-import type { Choice, GuidedStep, GuidedTaskBase, MatchRow } from '../guided/types.ts'
+import type { Choice, GuidedStep, GuidedTaskBase, MatchRow, OrderStepTrap } from '../guided/types.ts'
 import { createRng } from '../random/rng.ts'
 import type { TaskRef } from '../tasks/taskNumber.ts'
 import type { Rng } from '../random/rng.ts'
-import type { MatchQuestion, MultiChoice, Misconception, Question, QuizOption, SingleChoice, WrongOption } from './types.ts'
+import type { MatchQuestion, MultiChoice, Misconception, OrderQuestion, Question, QuizOption, SingleChoice, WrongOption } from './types.ts'
 
 // Wissensfrage → geführte Aufgabe mit einem Schritt: die Frage mit vier Antworten, der richtigen und
 // drei falschen aus dem Vorrat; bei „Wähle alle richtigen“ (N1) vier bis sechs Aussagen (planMulti). Die Fassung (variant, 0 bis 49) wählt mit festem Zufall, welche
@@ -20,6 +20,9 @@ export const MULTI_CORRECT = { min: 1, max: 4 } as const
 export const MATCH_INSTRUCTION = 'Ordne richtig zu'
 // Zuordnen: so viele Paare stehen da (Plan M4, „Aufgabenarten“: drei bis sechs; aus einem Vorrat von mindestens vier)
 export const MATCH_SHOWN = { min: 4, max: 6 } as const
+export const ORDER_INSTRUCTION = 'Bring in die richtige Reihenfolge'
+// Ordnen: so viele Glieder stehen da (Plan M4, „Aufgabenarten“: drei bis fünf; aus einem Vorrat von mindestens vier)
+export const ORDER_SHOWN = { min: 4, max: 5 } as const
 
 // focus: Id eines Denkfehlers, dessen Antwort sicher dabei ist (gezieltes Üben); kommt er in der Frage
 // nicht vor, zählt er nicht
@@ -39,6 +42,7 @@ export function planQuestion(
   }
   const correctChoice = (option: QuizOption): Choice => ({ id: option.id, content: option.text, correct: true })
   if (question.kind === 'match') return planMatch(question, ref, rng, byId, focus)
+  if (question.kind === 'order') return planOrder(question, ref, rng, byId, focus)
   return question.kind === 'multi'
     ? planMulti(question, ref, rng, wrongChoice, correctChoice, focus)
     : planSingle(question, ref, rng, wrongChoice, correctChoice, focus)
@@ -123,6 +127,41 @@ function planMatch(question: MatchQuestion, ref: TaskRef, rng: Rng, byId: Readon
   return taskOf(question, ref, MATCH_INSTRUCTION, [], result, false, { rows, targets })
 }
 
+// Ordnen: vier oder fünf Glieder in ihrer Reihenfolge (beim gezielten Üben sicher die beiden Glieder der Verwechslung),
+// gemischt, nie schon richtig; Verwechslungen nur, wenn ihre Glieder dastehen
+function planOrder(question: OrderQuestion, ref: TaskRef, rng: Rng, byId: ReadonlyMap<string, Misconception>, focus?: string): GuidedTaskBase {
+  const all = question.items
+  const focused = focus ? question.traps.filter((t) => t.misconception === focus) : []
+  const trap = focused.length > 0 ? rng.pick(focused) : undefined
+  const forced = trap?.kind === 'swap' ? all.filter((i) => i.id === trap.before || i.id === trap.after) : []
+  const count = rng.int(Math.min(ORDER_SHOWN.min, all.length), Math.min(ORDER_SHOWN.max, all.length))
+  const chosen = new Set([...forced, ...rng.shuffle(all.filter((i) => !forced.includes(i))).slice(0, count - forced.length)])
+  const items = all.filter((i) => chosen.has(i)).map((i) => ({ id: i.id, content: i.text }))
+  const ids = items.map((i) => i.id)
+  let start = rng.shuffle(ids)
+  while (start.join() === ids.join()) start = rng.shuffle(ids)
+  const why = (t: OrderQuestion['traps'][number]) => {
+    const text = t.why ?? byId.get(t.misconception)?.why
+    if (!text) throw new Error(`Frage ${question.id}: Denkfehler ${t.misconception} ist unbekannt`)
+    return text
+  }
+  const traps: OrderStepTrap[] = question.traps
+    .filter((t) => t.kind === 'reversed' || (ids.includes(t.before) && ids.includes(t.after)))
+    .map((t) => ({ ...(t.kind === 'reversed' ? { kind: 'reversed' as const } : { kind: 'swap' as const, before: t.before, after: t.after }), errorRuleId: t.misconception, whyWrong: why(t) }))
+  // im Ergebnis die richtige Reihenfolge dieser Fassung, von oben nach unten
+  const result = items.map((i, n) => `${n + 1}. ${i.content}`).join('\n')
+  return taskOf(question, ref, ORDER_INSTRUCTION, [], result, false, undefined, { items, start, first: question.first, last: question.last, traps })
+}
+
+// Welche typischen Verwechslungen stecken in einer gelegten Reihenfolge (Ids von oben nach unten)?
+export function orderTrapsIn(order: readonly string[], traps: readonly OrderStepTrap[], correct: readonly string[]): OrderStepTrap[] {
+  // ganz umgedreht: nur dieser Denkfehler, nicht dazu noch jede vertauschte Paarung
+  const reversed = order.join() === [...correct].reverse().join()
+  const whole = traps.filter((t) => t.kind === 'reversed')
+  if (reversed && whole.length > 0) return whole
+  return traps.filter((t) => t.kind === 'swap' && order.indexOf(t.before) < order.indexOf(t.after))
+}
+
 function taskOf(
   question: Question,
   ref: TaskRef,
@@ -131,6 +170,7 @@ function taskOf(
   resultText: string,
   multi: boolean,
   match?: GuidedStep['match'],
+  order?: GuidedStep['order'],
 ): GuidedTaskBase {
   return {
     ref,
@@ -147,6 +187,7 @@ function taskOf(
         ...(question.figure ? { figure: question.figure } : {}),
         ...(multi ? { multi: true } : {}),
         ...(match ? { match } : {}),
+        ...(order ? { order } : {}),
       },
     ],
     cards: question.cards,

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { ELEMENTS, elementBySymbol } from './elements.ts'
 import {
+  AUFBAU,
   MAIN_GROUP,
   atomConfig,
   boxFigureId,
@@ -123,5 +124,20 @@ describe('Elektronenkonfiguration', () => {
     expect(configKey(valenceConfig(elementBySymbol('Se')!))).toBe('4s2 4p4')
     expect(MAIN_GROUP.map((el) => el.symbol)).toContain('Bi')
     expect(MAIN_GROUP.map((el) => el.symbol)).not.toContain('He')
+  })
+})
+
+// Ordnen (N1c): die Unterschalen der Ordnen-Frage folgen der Besetzungsreihenfolge, 4s vor 3d, nur bis 4p (bis Kr)
+describe('Ordnen-Frage zur Besetzung', () => {
+  it('folgt AUFBAU', async () => {
+    const { ELEKTRONEN_BANK } = await import('./bank/elektronen.ts')
+    const q = ELEKTRONEN_BANK.questions.find((x) => x.id === 'el-v-ordnen-besetzung')
+    if (q?.kind !== 'order') throw new Error('Frage fehlt')
+    const ids = q.items.map((i) => i.id)
+    const index = (id: string) => AUFBAU.findIndex((s) => `${s.n}${'spdf'[s.l]}` === id)
+    expect(ids.map(index)).toEqual([...ids.map(index)].sort((a, b) => a - b))
+    expect(ids.map(index).every((i) => i >= 0)).toBe(true)
+    expect(ids.indexOf('4s')).toBeLessThan(ids.indexOf('3d'))
+    expect(ids.at(-1)).toBe('4p')
   })
 })

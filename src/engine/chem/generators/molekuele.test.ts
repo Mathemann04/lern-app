@@ -6,6 +6,7 @@ import { figureById } from '../figures.ts'
 import { MOL_COMPOUNDS, compoundFormula, compoundName } from '../molNames.ts'
 import { bondingPairs, freePairs, moleculeById, typeLatex, valenceElectrons, vseprOf } from '../molecules.ts'
 import { generatedCalc } from './index.ts'
+import { MOLEKUELE_BANK, ORDER_ANGLE_IDS } from '../bank/molekuele.ts'
 
 // Rechnungen und Lernkarten zum Thema „Moleküle" (S5b): Karten rechnen wie die Engine, Namen wie eine zweite Liste,
 // Lösungen stimmen mit den Moleküldaten überein
@@ -138,6 +139,26 @@ describe('Rechnungen „Moleküle": Lösung passt zu den Daten', () => {
         if (!calc.form.startsWith('gestalt')) continue
         expect(Boolean(calc.task.steps[0].figure)).toBe(level === 1)
       }
+    }
+  })
+})
+
+// Ordnen (N1c): Reihenfolge der Bindungswinkel passt zu den Messwerten (ideale Winkel; Ammoniak etwa 107°, Wasser
+// etwa 104,5° wie auf der Lernkarte) und zum Typ aus der Engine
+describe('Ordnen: Bindungswinkel', () => {
+  const MEASURED: Readonly<Record<string, number>> = { CO2: 180, BF3: 120, CH4: 109.5, NH3: 107 }
+  const IDEAL: Readonly<Record<number, number>> = { 2: 180, 3: 120, 4: 109.5 }
+  it('folgt den Messwerten und dem VSEPR-Typ', () => {
+    const q = MOLEKUELE_BANK.questions.find((x) => x.id === 'mo-v-ordnen-winkel')
+    if (q?.kind !== 'order') throw new Error('Frage fehlt')
+    const ids = q.items.map((i) => i.id)
+    expect([...ids].sort()).toEqual([...ORDER_ANGLE_IDS].sort())
+    expect(ids).toEqual([...ids].sort((a, b) => MEASURED[b] - MEASURED[a]))
+    for (const id of ids) {
+      const { x, e } = vseprOf(moleculeById(id)!)
+      // ohne freie Paare der ideale Winkel, mit freien Paaren kleiner
+      if (e === 0) expect(MEASURED[id], id).toBe(IDEAL[x + e])
+      else expect(MEASURED[id], id).toBeLessThan(IDEAL[x + e])
     }
   })
 })

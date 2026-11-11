@@ -1,4 +1,4 @@
-import type { Explanation, MatchQuestion, MultiChoice, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
+import type { Explanation, MatchQuestion, MultiChoice, OrderQuestion, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
 import { elementBySymbol } from '../elements.ts'
 import { type Kind, kindOf, placeOf } from '../pse.ts'
 
@@ -86,6 +86,39 @@ const BLOCKS: MatchQuestion = {
     's-Block: I. und II. Hauptgruppe; p-Block: III. bis VIII.; d-Block: Nebengruppen.',
   ),
   cards: ['pse-bloecke'],
+  ref: REF,
+}
+
+// Ordnen (N1c): Elemente nach der Ordnungszahl aus der Tabelle (chem/elements.ts); Argon steht vor Kalium, obwohl
+// Argon die größere Molmasse hat (Gegenprobe in pse.test.ts)
+const BY_Z = ['S', 'Cl', 'Ar', 'K', 'Ca'].map((s) => elementBySymbol(s)!).sort((a, b) => a.z - b.z)
+const ORDNUNGSZAHL: OrderQuestion = {
+  kind: 'order',
+  id: 'pse-v-ordnen-ordnungszahl',
+  no: 219,
+  level: 2,
+  fact: 'order-atomic-number',
+  part: 'aufbau',
+  title: 'Platz im Periodensystem',
+  prompt: 'Ordne die Elemente so, wie sie im Periodensystem aufeinander folgen.',
+  items: BY_Z.map((el) => ({ id: el.symbol, text: `${el.name} (${el.symbol})` })),
+  first: 'kleinste Ordnungszahl',
+  last: 'größte Ordnungszahl',
+  traps: [
+    {
+      kind: 'swap',
+      before: 'K',
+      after: 'Ar',
+      misconception: 'chem-mis-pse-mass-order',
+      why: why('Kalium ist zwar etwas leichter als Argon, aber die Masse legt den Platz im Periodensystem nicht fest. Geordnet wird nach der Zahl der Protonen.', 'Geordnet wird nach den Protonen, nicht nach der Masse.'),
+    },
+  ],
+  hint: 'Was legt den Platz eines Elements im Periodensystem fest: die Masse oder die Zahl der Protonen?',
+  explanation: why(
+    `Das Periodensystem ordnet nach der Ordnungszahl, der Zahl der Protonen: ${BY_Z.map((el) => `${el.name} ${el.z}`).join(', ')}. Argon steht vor Kalium, obwohl Argon etwas schwerer ist.`,
+    'Nach der Ordnungszahl, nicht nach der Masse.',
+  ),
+  cards: ['pse-aufbau'],
   ref: REF,
 }
 
@@ -1138,6 +1171,8 @@ export const PSE_BANK: QuestionBank = {
     // ---- Zuordnen (N1b)
     METAL_KINDS,
     BLOCKS,
+    // ---- Ordnen (N1c)
+    ORDNUNGSZAHL,
   ],
   retired: [],
 }

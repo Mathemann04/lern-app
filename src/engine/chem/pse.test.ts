@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { ELEMENTS, elementBySymbol } from './elements.ts'
 import { pseFigureById } from './figures.ts'
+import { PSE_BANK } from './bank/pse.ts'
 import { IONIZATION, jumpAfter, kindOf, mainGroupName, placeOf, valenceOf } from './pse.ts'
 
 // Aufbau des Periodensystems (S6c): Plätze gegen eine zweite, von Hand eingetragene Liste (Periode, Gruppe 1 bis 18),
@@ -60,5 +61,19 @@ describe('Aufbau des Periodensystems', () => {
     expect(fe.main).toBe(false)
     expect(fe.cells.find((c) => c.period === 4 && c.group === 8)?.symbol).toBe('Fe')
     expect(pseFigureById('pse:Xx')).toBeNull()
+  })
+})
+
+// Ordnen (N1c): Elemente nach der Ordnungszahl; die Frage lebt davon, dass Argon schwerer ist als Kalium
+describe('Ordnen-Frage zur Ordnungszahl', () => {
+  it('folgt der Ordnungszahl, und Argon ist schwerer als Kalium', () => {
+    const q = PSE_BANK.questions.find((x) => x.id === 'pse-v-ordnen-ordnungszahl')
+    if (q?.kind !== 'order') throw new Error('Frage fehlt')
+    const zs = q.items.map((i) => elementBySymbol(i.id)!.z)
+    expect(zs).toEqual([...zs].sort((a, b) => a - b))
+    expect(new Set(zs).size).toBe(zs.length)
+    expect(Number(elementBySymbol('Ar')!.molarMass.replace(',', '.'))).toBeGreaterThan(Number(elementBySymbol('K')!.molarMass.replace(',', '.')))
+    const ids = q.items.map((i) => i.id)
+    expect(ids.indexOf('Ar')).toBeLessThan(ids.indexOf('K'))
   })
 })

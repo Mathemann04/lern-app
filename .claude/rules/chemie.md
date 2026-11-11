@@ -234,3 +234,9 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   `ui/guided/TaskScreen.tsx` (Knöpfe bei höchstens vier Zielen mit höchstens 16 Zeichen, sonst aufklappbare Liste; `data-verdict`
   right/wrong). Paare möglichst aus den Tabellen der Engine (Beispiel `MOLECULE_ION_NAMES` in `bank/ionen.ts`); `bank.test.ts`
   prüft Vorrat, eindeutige linke Einträge, Ziele und Verwechslungen. Fragen am Ende unter „Zuordnen (N1b)", Ids mit „-zuordnen-".
+- Ordnen (N1c): `OrderQuestion` in `quiz/types.ts` (`items` in richtiger Reihenfolge von `first` nach `last`, `traps` als `reversed`
+  oder `swap` mit `before`/`after`), `planOrder` in `quiz/plan.ts` (vier oder fünf Glieder `ORDER_SHOWN` als Teilfolge, Start nie
+  richtig, beim gezielten Üben die Glieder des Tauschs sicher dabei; `orderTrapsIn` erkennt die Fehler einer gelegten Reihenfolge,
+  bei ganz umgedreht nur diesen), Schritt `order` in `guided/types.ts`, Anzeige `OrderAnswers` und `OrderTrapWhy` in
+  `ui/guided/TaskScreen.tsx` (Pfeilknöpfe „Nach oben"/„Nach unten", `data-verdict`). Reihenfolgen aus Messwerten mit Gegenprobe
+  (Beispiel `RADIUS_PERIOD3` in `bank/trends.ts`, Test in `generators/trends.test.ts` mit `allComparable`). Ids mit „-ordnen-".
