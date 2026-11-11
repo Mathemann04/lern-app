@@ -32,7 +32,7 @@ export const IONEN_CARDS: readonly Card[] = [
         ],
       },
     ],
-    errors: ['chem-salt-anion-positive', 'chem-salt-anion-valence'],
+    errors: ['chem-salt-anion-positive', 'chem-salt-anion-valence', 'chem-mis-io-metal-anion', 'chem-mis-io-electron-sign', 'chem-mis-io-proton-charge', 'chem-mis-io-bond-mixup', 'chem-mis-io-molecule', 'chem-mis-io-ions-form-late'],
   },
   {
     id: 'ionen-formel',
@@ -61,7 +61,7 @@ export const IONEN_CARDS: readonly Card[] = [
         ],
       },
     ],
-    errors: ['chem-salt-not-reduced', 'chem-salt-indices-swapped', 'chem-salt-one-to-one', 'chem-salt-numeral-count'],
+    errors: ['chem-salt-not-reduced', 'chem-salt-indices-swapped', 'chem-salt-one-to-one', 'chem-salt-numeral-count', 'chem-mis-io-anion-positive', 'chem-mis-io-charge-valence', 'chem-mis-io-charge-always-one', 'chem-mis-io-fixed-ratio', 'chem-mis-io-index-is-charge', 'chem-mis-io-element-formula', 'chem-mis-io-index-swap', 'chem-mis-io-not-neutral'],
   },
   {
     id: 'ionen-namen',
@@ -90,7 +90,7 @@ export const IONEN_CARDS: readonly Card[] = [
         ],
       },
     ],
-    errors: ['chem-salt-charge-from-index', 'chem-salt-numeral-index', 'chem-salt-numeral-missing', 'chem-salt-anion-name'],
+    errors: ['chem-salt-charge-from-index', 'chem-salt-numeral-index', 'chem-salt-numeral-missing', 'chem-salt-anion-name', 'chem-mis-io-greek-prefix', 'chem-mis-io-numeral-always', 'chem-mis-io-name-order', 'chem-mis-io-ending-mixup', 'chem-mis-io-numeral-count', 'chem-mis-io-numeral-group', 'chem-mis-io-numeral-from-index'],
   },
   {
     id: 'ionen-molekuelionen',
@@ -120,7 +120,7 @@ export const IONEN_CARDS: readonly Card[] = [
         lines: [{ label: 'Formel', latex: String.raw`\ce{(NH4)2SO4}` }],
       },
     ],
-    errors: ['chem-salt-polyatomic-charge', 'chem-salt-bracket'],
+    errors: ['chem-salt-polyatomic-charge', 'chem-salt-bracket', 'chem-mis-io-poly-charge', 'chem-mis-io-bracket', 'chem-mis-io-poly-split'],
   },
   {
     id: 'ionen-gitter',
@@ -142,7 +142,7 @@ export const IONEN_CARDS: readonly Card[] = [
         lines: [{ label: 'Das große Caesium-Ion sitzt in der Mitte eines Würfels aus acht Chlorid-Ionen: Koordinationszahl 8.' }],
       },
     ],
-    errors: [],
+    errors: ['chem-mis-io-cell-is-unit', 'chem-mis-io-cell-is-polyhedron', 'chem-mis-io-cn-count-all', 'chem-mis-io-cn-same-charge', 'chem-mis-io-cn-from-formula', 'chem-mis-io-all-like-nacl', 'chem-mis-io-polyhedron-mixup', 'chem-mis-io-cn-size', 'chem-mis-io-cell-count-all', 'chem-mis-io-cn-vs-units', 'chem-mis-io-ion-is-unit'],
   },
   {
     id: 'ionen-eigenschaften',
@@ -163,7 +163,7 @@ export const IONEN_CARDS: readonly Card[] = [
         lines: [{ label: 'Als Kristall leitet es nicht; geschmolzen und gelöst leitet es, weil die Ionen dann wandern können.' }],
       },
     ],
-    errors: [],
+    errors: ['chem-mis-io-solid-conducts', 'chem-mis-io-electrons-conduct', 'chem-mis-io-state-decides', 'chem-mis-io-ductile', 'chem-mis-io-weak-forces', 'chem-mis-io-mass-decides', 'chem-mis-io-distance', 'chem-mis-io-charge-irrelevant', 'chem-mis-io-amorphous', 'chem-mis-io-crystal-look'],
   },
   {
     id: 'ionen-zerfall',
@@ -184,7 +184,7 @@ export const IONEN_CARDS: readonly Card[] = [
         lines: [{ label: 'Gleichung', latex: String.raw`\ce{Al2O3 -> 2 Al^3+ + 3 O^2-}` }],
       },
     ],
-    errors: ['chem-dissociation-coefficients', 'chem-dissociation-index-ion', 'chem-dissociation-charge', 'chem-dissociation-atoms'],
+    errors: ['chem-dissociation-coefficients', 'chem-dissociation-index-ion', 'chem-dissociation-charge', 'chem-dissociation-atoms', 'chem-mis-io-dissolve-atoms', 'chem-mis-io-dissolve-reacts', 'chem-mis-io-no-coefficients', 'chem-mis-io-index-in-ion', 'chem-mis-io-melt-lattice-stays', 'chem-mis-io-dissolve-is-melting'],
   },
   {
     id: 'ionen-loesen',
@@ -205,7 +205,7 @@ export const IONEN_CARDS: readonly Card[] = [
         lines: [{ label: 'Hydratationsenergie größer als Gitterenergie: Die Lösung wird warm.' }],
       },
     ],
-    errors: [],
+    errors: ['chem-mis-io-water-orientation', 'chem-mis-io-water-nonpolar', 'chem-mis-io-dissolve-always-same', 'chem-mis-io-balance-reversed', 'chem-mis-io-dissolve-no-energy', 'chem-mis-io-exo-endo-mixup'],
   },
   {
     id: 'ionen-born-haber',
@@ -232,7 +232,7 @@ export const IONEN_CARDS: readonly Card[] = [
         ],
       },
     ],
-    errors: ['chem-bh-ea-sign', 'chem-bh-full-bond', 'chem-bh-step-missing', 'chem-bh-subtracted-wrong', 'chem-bh-added', 'chem-bh-lattice-sign'],
+    errors: ['chem-bh-ea-sign', 'chem-bh-full-bond', 'chem-bh-step-missing', 'chem-bh-subtracted-wrong', 'chem-bh-added', 'chem-bh-lattice-sign', 'chem-mis-io-lattice-is-force', 'chem-mis-io-lattice-sign', 'chem-mis-io-lattice-mixup', 'chem-mis-io-bh-real-path', 'chem-mis-io-bh-path-dependent', 'chem-mis-io-ionization-releases', 'chem-mis-io-ea-compensates', 'chem-mis-io-bh-full-bond', 'chem-mis-io-bh-step-missing', 'chem-mis-io-neutral-no-force'],
   },
   {
     id: 'ionen-grenze',
