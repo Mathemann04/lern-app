@@ -1,4 +1,5 @@
-import type { Explanation, MultiChoice, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
+import type { Explanation, MatchPair, MatchQuestion, MatchTrap, MultiChoice, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
+import { spontaneousRange } from '../generators/energie.ts'
 
 // Wissensfragen zum Thema „Energie bei Reaktionen“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern: Stufe · 100 + laufende
 // Nummer; nie neu vergeben. Zahlenwerte wie in chem/thermo.ts (geprüft in generators/energie.test.ts).
@@ -30,6 +31,111 @@ const mk = multiAt(3)
 const DG = r`\Delta G`
 const DH = r`\Delta H`
 const DS = r`\Delta S`
+
+// ---- Zuordnen (N1b)
+
+// Phasenübergänge: zum beweglicheren Zustand (fest → flüssig → gasförmig) wird Wärme aufgenommen und die Unordnung
+// nimmt zu, in die Gegenrichtung beides umgekehrt (wie phaseTask in generators/energie.ts)
+const PHASE_ORDER = { s: 0, l: 1, g: 2 } as const
+const BOTH_UP = r`$\Delta H > 0$, $\Delta S > 0$`
+const BOTH_DOWN = r`$\Delta H < 0$, $\Delta S < 0$`
+const PHASE_PAIRS: readonly MatchPair[] = (
+  [
+    ['schmelzen', 'Eis schmilzt.', 's', 'l'],
+    ['erstarren', 'Flüssiges Eisen erstarrt.', 'l', 's'],
+    ['verdampfen', 'Wasser verdampft.', 'l', 'g'],
+    ['kondensieren', 'Ammoniak kondensiert.', 'g', 'l'],
+    ['sublimieren', 'Iod sublimiert.', 's', 'g'],
+    ['resublimieren', 'Kohlenstoffdioxid resublimiert.', 'g', 's'],
+  ] as const
+).map(([id, left, from, to]) => ({ id, left, right: PHASE_ORDER[to] > PHASE_ORDER[from] ? BOTH_UP : BOTH_DOWN }))
+const PHASE_SIGNS: MatchQuestion = {
+  kind: 'match',
+  id: 'en-g-zuordnen-phasen',
+  no: 119,
+  level: 1,
+  fact: 'match-phase-signs',
+  part: 'entropie',
+  title: 'Vorzeichen bei Phasenübergängen',
+  prompt: r`Welche Vorzeichen haben $\Delta H$ und $\Delta S$ bei diesem Vorgang?`,
+  pairs: PHASE_PAIRS,
+  traps: [
+    { pair: 'schmelzen', right: BOTH_DOWN, misconception: 'chem-mis-en-phase-dh' },
+    { pair: 'verdampfen', right: BOTH_DOWN, misconception: 'chem-mis-en-phase-ds' },
+    {
+      pair: 'erstarren',
+      right: BOTH_UP,
+      misconception: 'chem-mis-en-phase-ds',
+      why: why('Erstarren ist das Gegenteil von Schmelzen; beide Vorzeichen kehren sich gegenüber dem Schmelzen um. Überlege, ob die Teilchen danach beweglicher sind.', 'Gegenteil von Schmelzen.'),
+    },
+    {
+      pair: 'kondensieren',
+      right: BOTH_UP,
+      misconception: 'chem-mis-en-phase-ds',
+      why: why('Beim Kondensieren werden die Teilchen weniger beweglich, und Anziehungskräfte werden wirksam. Überlege, was das für Wärme und Unordnung heißt.', 'Die Teilchen werden weniger beweglich.'),
+    },
+  ],
+  hint: 'Werden die Teilchen beweglicher (fest → flüssig → gasförmig), oder rücken sie zusammen?',
+  explanation: why(
+    r`Schmelzen, Verdampfen und Sublimieren führen zu einem beweglicheren Zustand: Um die Anziehungskräfte zu überwinden, wird Wärme aufgenommen ($\Delta H > 0$), und die Unordnung nimmt zu ($\Delta S > 0$). Erstarren, Kondensieren und Resublimieren sind die Gegenrichtungen: Wärme wird frei ($\Delta H < 0$), und die Unordnung nimmt ab ($\Delta S < 0$).`,
+    'Zum beweglicheren Zustand beide positiv, in die Gegenrichtung beide negativ.',
+  ),
+  cards: ['en-vorzeichen', 'en-entropie'],
+  ref: REF,
+}
+
+// Vorzeichen von ΔH und ΔS → Temperaturbereich, in dem die Reaktion freiwillig abläuft; Bereich und typische Fehler wie
+// in rangeTask (generators/energie.ts): nur ΔH beachtet, ΔG = ΔH + T · ΔS, ΔG > 0 für freiwillig gehalten
+type Range = ReturnType<typeof spontaneousRange>
+const RANGE_TEXT: Readonly<Record<Range, string>> = {
+  always: 'bei jeder Temperatur',
+  never: 'bei keiner Temperatur',
+  high: 'nur oberhalb einer bestimmten Temperatur',
+  low: 'nur unterhalb einer bestimmten Temperatur',
+}
+const SIGNS: readonly (readonly [number, number])[] = [
+  [-1, 1],
+  [1, -1],
+  [-1, -1],
+  [1, 1],
+]
+const signId = (dh: number, ds: number) => `h${dh < 0 ? 'm' : 'p'}-s${ds < 0 ? 'm' : 'p'}`
+const RANGE_TRAPS: readonly MatchTrap[] = SIGNS.flatMap(([dh, ds]) => {
+  const wrongs: readonly (readonly [Range, string])[] = [
+    [dh < 0 ? 'always' : 'never', dh < 0 ? 'chem-mis-en-exo-always' : 'chem-mis-en-endo-never'],
+    [spontaneousRange(dh, -ds), 'chem-mis-en-gibbs-sign'],
+    [spontaneousRange(-dh, -ds), 'chem-mis-en-exergonic-sign'],
+  ]
+  const seen = new Set<Range>([spontaneousRange(dh, ds)])
+  return wrongs.flatMap(([range, misconception]) => {
+    if (seen.has(range)) return []
+    seen.add(range)
+    return [{ pair: signId(dh, ds), right: RANGE_TEXT[range], misconception }]
+  })
+})
+const RANGE_MATCH: MatchQuestion = {
+  kind: 'match',
+  id: 'en-v-zuordnen-bereich',
+  no: 220,
+  level: 2,
+  fact: 'match-spontaneous-range',
+  part: 'freie-enthalpie',
+  title: 'Freiwillig bei welcher Temperatur?',
+  prompt: 'Bei welchen Temperaturen läuft eine Reaktion mit diesen Vorzeichen freiwillig ab?',
+  pairs: SIGNS.map(([dh, ds]) => ({
+    id: signId(dh, ds),
+    left: `$${DH} ${dh < 0 ? '<' : '>'} 0$, $${DS} ${ds < 0 ? '<' : '>'} 0$`,
+    right: RANGE_TEXT[spontaneousRange(dh, ds)],
+  })),
+  traps: RANGE_TRAPS,
+  hint: r`Sieh dir in $\Delta G = \Delta H - T \cdot \Delta S$ an, welches Vorzeichen jeder der beiden Beiträge hat und welcher bei hoher Temperatur überwiegt.`,
+  explanation: why(
+    r`Freiwillig heißt $\Delta G < 0$ mit $\Delta G = \Delta H - T \cdot \Delta S$. Bei $\Delta H < 0$ und $\Delta S > 0$ machen beide Beiträge $\Delta G$ negativ: bei jeder Temperatur. Bei $\Delta H > 0$ und $\Delta S < 0$ machen beide es positiv: bei keiner. Sind beide negativ, überwiegt nur bei niedriger Temperatur $\Delta H$; sind beide positiv, überwiegt erst bei hoher Temperatur der Entropie-Beitrag.`,
+    'Gegensätzliche Vorzeichen: immer oder nie; gleiche Vorzeichen: je nach Temperatur.',
+  ),
+  cards: ['en-freie-enthalpie'],
+  ref: REF,
+}
 
 export const ENERGIE_BANK: QuestionBank = {
   course: 'chem-energie',
@@ -1117,6 +1223,9 @@ export const ENERGIE_BANK: QuestionBank = {
       cards: ['en-freie-enthalpie', 'en-freie-enthalpie-k', 'en-grenztemperatur'],
       ref: REF,
     }),
+    // ---- Zuordnen (N1b)
+    PHASE_SIGNS,
+    RANGE_MATCH,
   ],
   retired: [],
 }

@@ -1,4 +1,5 @@
-import type { Explanation, MultiChoice, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
+import type { Explanation, MatchQuestion, MultiChoice, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
+import { type Shift, concentrationShift, equilibriumById, equilibriumCe, opposite, pressureShift, temperatureShift } from '../equilibria.ts'
 
 // Wissensfragen zum Thema „Chemisches Gleichgewicht“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern: Stufe · 100 +
 // laufende Nummer; nie neu vergeben. Alle Gleichgewichte gasförmig; Reaktionsenthalpien wie in chem/equilibria.ts.
@@ -32,6 +33,89 @@ const VH = r`v_{\text{hin}}`
 const VR = r`v_{\text{rück}}`
 const KH = r`k_{\text{hin}}`
 const KR = r`k_{\text{rück}}`
+
+// ---- Zuordnen (N1b)
+
+// Le Chatelier bei der Ammoniaksynthese: Eingriff → Richtung, gerechnet mit chem/equilibria.ts (wie die Rechnung
+// „le-chatelier“ in generators/mwg.ts); ein Katalysator verschiebt nie
+const SHIFT_TEXT: Readonly<Record<Shift, string>> = { right: 'zu den Produkten', left: 'zu den Edukten', none: 'keine Verschiebung' }
+const AMMONIA = equilibriumById('nh3')!
+const [NITROGEN] = AMMONIA.left
+const [AMMONIA_GAS] = AMMONIA.right
+const LE_CHATELIER_AMMONIA: MatchQuestion = {
+  kind: 'match',
+  id: 'gg-v-zuordnen-ammoniak',
+  no: 220,
+  level: 2,
+  fact: 'match-lc-ammonia',
+  part: 'le-chatelier',
+  title: 'Le Chatelier bei der Ammoniaksynthese',
+  prompt: r`Ammoniaksynthese: $${equilibriumCe(AMMONIA)}$ mit $\Delta H = ${AMMONIA.dH! < 0 ? '-' : '+'}${Math.abs(AMMONIA.dH!)}\,\mathrm{kJ}$. Wohin verschiebt jeder Eingriff das Gleichgewicht?`,
+  pairs: [
+    { id: 'druck-hoch', left: 'Druck erhöhen', right: SHIFT_TEXT[pressureShift(AMMONIA, true)] },
+    { id: 'druck-tief', left: 'Druck senken', right: SHIFT_TEXT[pressureShift(AMMONIA, false)] },
+    { id: 'erwaermen', left: 'Erwärmen', right: SHIFT_TEXT[temperatureShift(AMMONIA, true)] },
+    { id: 'abkuehlen', left: 'Abkühlen', right: SHIFT_TEXT[temperatureShift(AMMONIA, false)] },
+    { id: 'n2-zu', left: `${NITROGEN.name} zugeben`, right: SHIFT_TEXT[concentrationShift(AMMONIA, NITROGEN.ce, true)] },
+    { id: 'nh3-zu', left: `${AMMONIA_GAS.name} zugeben`, right: SHIFT_TEXT[concentrationShift(AMMONIA, AMMONIA_GAS.ce, true)] },
+    { id: 'nh3-weg', left: `${AMMONIA_GAS.name} entfernen`, right: SHIFT_TEXT[concentrationShift(AMMONIA, AMMONIA_GAS.ce, false)] },
+    { id: 'katalysator', left: 'Katalysator zugeben', right: SHIFT_TEXT.none },
+  ],
+  traps: [
+    // Erwärmen hilft den Produkten (hier ist die Hinreaktion exotherm)
+    { pair: 'erwaermen', right: SHIFT_TEXT.right, misconception: 'chem-mis-gg-heat-products' },
+    { pair: 'erwaermen', right: SHIFT_TEXT.none, misconception: 'chem-mis-gg-temp-rate-only' },
+    // Druck erhöhen begünstige die Seite mit mehr Gasteilchen
+    { pair: 'druck-hoch', right: SHIFT_TEXT[pressureShift(AMMONIA, false)], misconception: 'chem-mis-gg-pressure-more' },
+    // zugegebener Stoff werde noch mehr gebildet
+    { pair: 'n2-zu', right: SHIFT_TEXT[opposite(concentrationShift(AMMONIA, NITROGEN.ce, true))], misconception: 'chem-mis-gg-conc-side' },
+    { pair: 'katalysator', right: SHIFT_TEXT.right, misconception: 'chem-mis-gg-cat-shift' },
+  ],
+  hint: r`Das Gleichgewicht weicht jedem Zwang so aus, dass er kleiner wird. Zähle die Gasteilchen auf beiden Seiten und beachte das Vorzeichen von $\Delta H$.`,
+  explanation: why(
+    r`Links stehen 4 Gasteilchen, rechts 2: Druck erhöhen begünstigt die Seite mit weniger Gasteilchen, also die Produkte; Druck senken die Edukte. Die Hinreaktion ist exotherm: Abkühlen begünstigt sie, Erwärmen die endotherme Rückreaktion. Stickstoff zugeben oder Ammoniak entfernen verschiebt zu den Produkten, Ammoniak zugeben zu den Edukten. Ein Katalysator ändert die Lage nicht; das Gleichgewicht stellt sich nur schneller ein.`,
+    'Hoher Druck, Abkühlen, Stickstoff zugeben, Ammoniak entfernen: zu den Produkten; Katalysator: keine Verschiebung.',
+  ),
+  cards: ['gg-le-chatelier', 'gg-druck-temperatur', 'gg-katalysator'],
+  ref: REF,
+}
+
+// Begriffe am Energiediagramm (Karten gg-exo-endo, gg-energiediagramm, gg-katalysator)
+const HEAT_OUT = r`gibt Wärme ab, $\Delta H < 0$`
+const HEAT_IN = r`nimmt Wärme auf, $\Delta H > 0$`
+const BARRIER = 'Höhe des Energiebergs über den Edukten'
+const DIFFERENCE = 'Höhenunterschied zwischen Edukten und Produkten'
+const ENERGY_TERMS: MatchQuestion = {
+  kind: 'match',
+  id: 'gg-g-zuordnen-energie',
+  no: 120,
+  level: 1,
+  fact: 'match-energy-terms',
+  part: 'katalysator',
+  title: 'Begriffe am Energiediagramm',
+  prompt: 'Was beschreibt jeder Begriff?',
+  pairs: [
+    { id: 'exo', left: 'exotherme Reaktion', right: HEAT_OUT },
+    { id: 'endo', left: 'endotherme Reaktion', right: HEAT_IN },
+    { id: 'rueck', left: 'Rückreaktion einer exothermen Reaktion', right: HEAT_IN },
+    { id: 'ea', left: r`Aktivierungsenergie $E_{\mathrm{A}}$`, right: BARRIER },
+    { id: 'dh', left: r`Reaktionsenthalpie $\Delta H$`, right: DIFFERENCE },
+    { id: 'kat', left: 'Katalysator', right: 'eröffnet einen Weg mit kleinerer Aktivierungsenergie' },
+  ],
+  traps: [
+    { pair: 'exo', right: HEAT_IN, misconception: 'chem-mis-gg-exo-endo' },
+    { pair: 'endo', right: HEAT_OUT, misconception: 'chem-mis-gg-exo-endo' },
+    { pair: 'ea', right: DIFFERENCE, misconception: 'chem-mis-gg-ea-dh' },
+    { pair: 'dh', right: BARRIER, misconception: 'chem-mis-gg-ea-dh' },
+  ],
+  hint: 'Denk an das Energiediagramm: Wo liegen Edukte und Produkte, wo liegt der Energieberg?',
+  explanation: why(
+    r`Eine exotherme Reaktion gibt Wärme ab ($\Delta H < 0$), eine endotherme nimmt Wärme auf ($\Delta H > 0$). Die Rückreaktion einer exothermen Reaktion ist endotherm: gleich großes $\Delta H$ mit umgekehrtem Vorzeichen. Im Energiediagramm ist die Aktivierungsenergie die Höhe des Energiebergs, von den Edukten aus gemessen; die Reaktionsenthalpie ist der Höhenunterschied zwischen Edukten und Produkten. Ein Katalysator eröffnet einen Reaktionsweg mit kleinerer Aktivierungsenergie.`,
+    'Exotherm gibt Wärme ab, endotherm nimmt sie auf; Aktivierungsenergie ist der Energieberg, Reaktionsenthalpie der Höhenunterschied.',
+  ),
+  cards: ['gg-exo-endo', 'gg-energiediagramm', 'gg-katalysator'],
+  ref: REF,
+}
 
 export const MWG_BANK: QuestionBank = {
   course: 'chem-mwg',
@@ -1139,6 +1223,9 @@ export const MWG_BANK: QuestionBank = {
       cards: ['gg-druck-temperatur', 'gg-le-chatelier', 'gg-k-wert', 'gg-katalysator'],
       ref: REF,
     }),
+    // ---- Zuordnen (N1b)
+    ENERGY_TERMS,
+    LE_CHATELIER_AMMONIA,
   ],
   retired: [],
 }
