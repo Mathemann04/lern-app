@@ -1,4 +1,4 @@
-import type { Explanation, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
+import type { Explanation, MultiChoice, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
 
 // Wissensfragen zum Thema „Zwischenmolekulare Kräfte“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern: Stufe ·
 // 100 + laufende Nummer; nie neu vergeben. Begriffe wie in der Vorlesung: Van-der-Waals-Kräfte, Dipol-Dipol-Kräfte,
@@ -20,6 +20,15 @@ const at = (level: QuestionLevel) => (spec: Spec): SingleChoice => ({ ...spec, k
 const g = at(1)
 const v = at(2)
 const k = at(3)
+
+// „Wähle alle richtigen“ (N1): richtige Aussagen r1, r2, …; jede Aussage ein ganzer Satz
+type MultiSpec = Omit<MultiChoice, 'kind' | 'level' | 'correct'> & { correct: readonly string[] }
+const multiAt = (level: QuestionLevel) => (spec: MultiSpec): MultiChoice => ({
+  ...spec,
+  kind: 'multi',
+  level,
+  correct: spec.correct.map((text, i) => ({ id: `r${i + 1}`, text })),
+})
 
 export const ZMK_BANK: QuestionBank = {
   course: 'chem-zmk',
@@ -1238,6 +1247,94 @@ export const ZMK_BANK: QuestionBank = {
       },
       cards: ['zmk-loesen'],
       ref: REF_LOESEN,
+    }),
+    // ---- Wähle alle richtigen (N1)
+    multiAt(1)({
+      id: 'zk-g-multi-kraefte',
+      no: 117,
+      fact: 'multi-forces',
+      part: 'kraefte',
+      title: 'Zwischenmolekulare Kräfte',
+      prompt: 'Welche Aussagen über zwischenmolekulare Kräfte stimmen?',
+      correct: [
+        'Zwischenmolekulare Kräfte halten Moleküle untereinander zusammen, etwa in einer Flüssigkeit.',
+        'Zwischenmolekulare Kräfte sind viel schwächer als Atom- und Ionenbindungen.',
+        'Van-der-Waals-Kräfte wirken zwischen allen Atomen und Molekülen.',
+        'Wasserstoffbrücken bilden sich, wenn ein H-Atom direkt an N, O oder F sitzt.',
+        r`Zwischen Methanmolekülen, $\ce{CH4}$, wirken nur Van-der-Waals-Kräfte.`,
+      ],
+      wrong: [
+        w('f1', 'Van-der-Waals-Kräfte wirken nur zwischen polaren Molekülen.', 'chem-mis-zk-vdw-some'),
+        w('f2', 'Van-der-Waals-Kräfte sind stärker als Wasserstoffbrücken.', 'chem-mis-zk-order'),
+        w('f3', 'Wasserstoffbrücken gibt es nur zwischen Wassermolekülen.', 'chem-mis-zk-water-only'),
+        w('f4', r`Zwischen Chlorwasserstoffmolekülen, $\ce{HCl}$, bilden sich Wasserstoffbrücken, weil das H-Atom an Chlor sitzt.`, 'chem-mis-zk-h-other'),
+        w('f5', 'Beim Sieden zerfallen die Moleküle in ihre Atome.', 'chem-mis-zk-boil-breaks'),
+      ],
+      hint: 'Zwischen welchen Teilchen wirken die Kräfte, und an welchen Atomen muss ein H-Atom für eine Wasserstoffbrücke sitzen?',
+      explanation: {
+        detailed: r`Zwischenmolekulare Kräfte wirken zwischen Molekülen und sind viel schwächer als die Bindungen in den Molekülen; beim Sieden werden nur sie überwunden. Van-der-Waals-Kräfte wirken zwischen allen Teilchen, auch zwischen unpolaren wie $\ce{CH4}$, wo sie die einzigen sind. Wasserstoffbrücken, die stärksten der drei Kräfte, gibt es nur, wenn ein H-Atom direkt an N, O oder F sitzt.`,
+        short: 'Zwischen Molekülen, viel schwächer als Bindungen; Van der Waals überall; Brücken nur mit H an N, O, F.',
+      },
+      cards: ['zmk-kraefte', 'zmk-wasserstoffbruecken'],
+      ref: REF_UEBERSICHT,
+    }),
+    multiAt(2)({
+      id: 'zk-v-multi-wasser',
+      no: 216,
+      fact: 'multi-water',
+      part: 'wasser',
+      title: 'Wasser ist besonders',
+      prompt: 'Welche Aussagen über die besonderen Eigenschaften von Wasser stimmen?',
+      correct: [
+        'Wasser siedet erst bei 100 °C, weil seine Moleküle über viele Wasserstoffbrücken zusammenhalten.',
+        'Eis schwimmt auf Wasser, weil die Wasserstoffbrücken die Moleküle im Eis weitmaschig anordnen.',
+        'Flüssiges Wasser hat seine größte Dichte bei etwa 4 °C.',
+        'Tiefe Seen frieren im Winter nicht bis zum Grund durch, weil Eis oben schwimmt und sich unten das dichteste Wasser sammelt.',
+        r`Wasser siedet höher als das größere $\ce{H2S}$, weil nur zwischen Wassermolekülen Wasserstoffbrücken wirken.`,
+      ],
+      wrong: [
+        w('f1', 'Eis ist dichter als flüssiges Wasser, weil die Teilchen im Feststoff enger liegen.', 'chem-mis-zk-ice-sinks'),
+        w('f2', 'Flüssiges Wasser hat seine größte Dichte genau am Gefrierpunkt.', 'chem-mis-zk-density-zero'),
+        w('f3', 'Der hohe Siedepunkt von Wasser hat keinen besonderen Grund; Wasser verhält sich wie andere kleine Moleküle.', 'chem-mis-zk-water-normal'),
+        w('f4', 'Beim Sieden von Wasser zerfallen die Moleküle in Wasserstoff und Sauerstoff.', 'chem-mis-zk-boil-breaks'),
+        w('f5', r`Zwischen $\ce{H2S}$-Molekülen bilden sich ebenso Wasserstoffbrücken wie zwischen Wassermolekülen.`, 'chem-mis-zk-h-other'),
+      ],
+      hint: 'Fast alles Besondere am Wasser geht auf eine Kraft zwischen seinen Molekülen zurück.',
+      explanation: {
+        detailed: r`Wassermoleküle halten über viele Wasserstoffbrücken zusammen; deshalb siedet Wasser erst bei 100 °C, während das größere $\ce{H2S}$ ohne Brücken viel tiefer siedet. Im Eis ordnen die Brücken die Moleküle weitmaschig an: Eis ist weniger dicht als Wasser und schwimmt. Flüssiges Wasser ist bei etwa 4 °C am dichtesten; dieses Wasser sammelt sich am Grund tiefer Seen, die deshalb nicht durchfrieren.`,
+        short: 'Wasserstoffbrücken: hoher Siedepunkt, Eis schwimmt, größte Dichte bei etwa 4 °C.',
+      },
+      cards: ['zmk-wasser'],
+      ref: REF_WASSER,
+    }),
+    multiAt(3)({
+      id: 'zk-k-multi-siedepunkte',
+      no: 318,
+      fact: 'multi-boiling',
+      part: 'siedepunkte',
+      title: 'Siedepunkte',
+      prompt: 'Welche Aussagen über die Siedepunkte molekularer Stoffe stimmen?',
+      correct: [
+        'Beim Sieden werden die Kräfte zwischen den Molekülen überwunden; die Moleküle selbst bleiben ganz.',
+        r`Ethanol, $\ce{C2H5OH}$, siedet höher als Dimethylether, $\ce{CH3OCH3}$, obwohl beide dieselbe Summenformel haben.`,
+        r`Fluorwasserstoff, $\ce{HF}$, siedet viel höher als Chlorwasserstoff, $\ce{HCl}$, weil er Wasserstoffbrücken bildet.`,
+        r`Das unpolare Tetrachlormethan, $\ce{CCl4}$, siedet höher als das polare Chlormethan, $\ce{CH3Cl}$.`,
+        r`Bei gleicher Art der Kraft siedet das größere Molekül höher, etwa Propan-1-ol, $\ce{C3H7OH}$, höher als Methanol, $\ce{CH3OH}$.`,
+      ],
+      wrong: [
+        w('f1', 'Je stärker die Kräfte zwischen den Molekülen sind, desto niedriger liegt der Siedepunkt.', 'chem-mis-zk-boil-weak'),
+        w('f2', 'Der Siedepunkt hängt nur von der Molmasse ab, nicht von der Art der Kräfte.', 'chem-mis-zk-mass-only'),
+        w('f3', 'Größere Moleküle haben schwächere Van-der-Waals-Kräfte als kleine und sieden deshalb tiefer.', 'chem-mis-zk-size'),
+        w('f4', 'Zwischen Molekülen von Dimethylether bilden sich Wasserstoffbrücken, weil sie Sauerstoff enthalten.', 'chem-mis-zk-any-h'),
+        w('f5', r`Chlorwasserstoff, $\ce{HCl}$, bildet wie Fluorwasserstoff Wasserstoffbrücken, weil beide ein H-Atom an einem Halogen haben.`, 'chem-mis-zk-h-other'),
+      ],
+      hint: 'Erst die Art der Kraft bestimmen, dann bei gleicher Art die Größe der Moleküle vergleichen; sehr große Moleküle können das umdrehen.',
+      explanation: {
+        detailed: r`Beim Sieden trennt man die Moleküle voneinander; je stärker sie sich anziehen, desto höher der Siedepunkt. Ethanol und $\ce{HF}$ bilden Wasserstoffbrücken, Dimethylether (H nur an C) und $\ce{HCl}$ nicht: Sie sieden tiefer. Bei gleicher Art der Kraft entscheidet die Größe, darum siedet Propan-1-ol höher als Methanol. Das große $\ce{CCl4}$ mit vielen Elektronen hat so starke Van-der-Waals-Kräfte, dass es höher siedet als das kleine, polare $\ce{CH3Cl}$.`,
+        short: 'Stärkere Kräfte, höherer Siedepunkt; erst die Art der Kraft, dann die Größe.',
+      },
+      cards: ['zmk-siedepunkte', 'zmk-wasserstoffbruecken'],
+      ref: REF_GROESSE,
     }),
   ],
   // 301 glich in der Form Klausuraufgabe 3c, 309 einer Übungsaufgabe (Prüfung 11.11.2026)
