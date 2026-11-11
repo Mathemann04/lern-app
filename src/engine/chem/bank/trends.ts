@@ -1,6 +1,6 @@
 import type { Explanation, MatchQuestion, MultiChoice, OrderQuestion, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
 import { elementBySymbol } from '../elements.ts'
-import { RADIUS } from '../trends.ts'
+import { EN, ISOELECTRONIC, RADIUS } from '../trends.ts'
 
 // Wissensfragen zum Thema „Trends im Periodensystem“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern: Stufe · 100
 // + laufende Nummer; nie neu vergeben. Vergleiche nur in derselben Periode oder Gruppe und nie mit den Paaren aus §6;
@@ -122,6 +122,57 @@ const RADIUS_PERIOD3: OrderQuestion = {
     'Nach rechts kleiner: Natrium am größten, Chlor am kleinsten.',
   ),
   cards: ['tr-atomradius'],
+  ref: REF,
+}
+
+// Ordnen (N1c): Halogene nach der Elektronegativität aus der Tabelle (chem/trends.ts), von der größten zur kleinsten
+const HALOGENS = ['F', 'Cl', 'Br', 'I']
+const EN_HALOGENS: OrderQuestion = {
+  kind: 'order',
+  id: 'tr-v-ordnen-en-halogene',
+  no: 220,
+  level: 2,
+  fact: 'order-en-halogens',
+  part: 'elektronegativitaet',
+  title: 'Elektronegativität ordnen',
+  prompt: 'Ordne die Halogene nach ihrer Elektronegativität.',
+  items: [...HALOGENS].sort((a, b) => EN[b] - EN[a]).map((symbol) => ({ id: symbol, text: `${elementBySymbol(symbol)!.name} (${symbol})` })),
+  first: 'größte Elektronegativität',
+  last: 'kleinste Elektronegativität',
+  traps: [{ kind: 'swap', before: 'Cl', after: 'F', misconception: 'chem-mis-tr-en-max-cl' }],
+  hint: 'Wie ändert sich die Elektronegativität in einer Hauptgruppe von oben nach unten?',
+  explanation: why(
+    r`In einer Hauptgruppe nimmt die Elektronegativität nach unten ab: Die Bindungselektronen sind weiter vom Kern entfernt und stärker abgeschirmt. Fluor steht oben und ist das elektronegativste Element überhaupt, Iod steht unten.`,
+    'Nach unten kleiner: Fluor am größten, Iod am kleinsten.',
+  ),
+  cards: ['tr-elektronegativitaet'],
+  ref: REF,
+}
+
+// Ordnen (N1c): isoelektronische Reihe wie Neon nach dem Ionenradius (chem/trends.ts), vom größten zum kleinsten
+const NEON_IONS = ISOELECTRONIC.find((s) => s.like === 'Ne')!.ions
+const ionId = (i: { symbol: string; charge: number }) => `${i.symbol}${i.charge > 0 ? '+' : '-'}${Math.abs(i.charge)}`
+const ionText = (i: { symbol: string; charge: number }) =>
+  r`$\ce{${i.symbol}^{${Math.abs(i.charge) === 1 ? '' : Math.abs(i.charge)}${i.charge > 0 ? '+' : '-'}}}$`
+const ISO_NEON: OrderQuestion = {
+  kind: 'order',
+  id: 'tr-k-ordnen-isoelektronisch-ne',
+  no: 318,
+  level: 3,
+  fact: 'order-iso-ne',
+  part: 'ionenradien',
+  title: 'Gleiche Elektronenzahl ordnen',
+  prompt: 'Diese Ionen haben alle 10 Elektronen wie Neon. Ordne sie nach ihrem Radius.',
+  items: [...NEON_IONS].sort((a, b) => b.radius - a.radius).map((i) => ({ id: ionId(i), text: ionText(i) })),
+  first: 'größter Radius',
+  last: 'kleinster Radius',
+  traps: [{ kind: 'reversed', misconception: 'chem-mis-tr-ion-protons' }],
+  hint: 'Alle haben gleich viele Elektronen. Was unterscheidet sie, und wie wirkt das auf die Hülle?',
+  explanation: why(
+    r`Bei gleich vielen Elektronen entscheidet die Kernladung: Je mehr Protonen, desto stärker wird die Hülle zusammengezogen. Sauerstoff hat 8 Protonen, Aluminium 13; darum gilt $\ce{O^2-} > \ce{F-} > \ce{Na+} > \ce{Mg^2+} > \ce{Al^3+}$.`,
+    'Mehr Protonen, kleineres Ion.',
+  ),
+  cards: ['tr-ionenradien'],
   ref: REF,
 }
 
@@ -1135,6 +1186,8 @@ export const TRENDS_BANK: QuestionBank = {
     QUANTITIES,
     // ---- Ordnen (N1c)
     RADIUS_PERIOD3,
+    EN_HALOGENS,
+    ISO_NEON,
   ],
   retired: [],
 }

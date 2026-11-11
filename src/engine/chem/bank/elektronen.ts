@@ -1,5 +1,5 @@
-import type { Explanation, MatchQuestion, MultiChoice, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
-import { LETTERS, capacity } from '../electrons.ts'
+import type { Explanation, MatchQuestion, MultiChoice, OrderQuestion, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
+import { AUFBAU, LETTERS, capacity } from '../electrons.ts'
 
 // Wissensfragen zum Thema „Elektronen“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern: Stufe · 100 + laufende
 // Nummer; nie neu vergeben. Begriffe wie in der Vorlesung: Hauptquantenzahl, Nebenquantenzahl, Magnetquantenzahl,
@@ -105,6 +105,31 @@ const CAPACITY: MatchQuestion = {
     r`s 2, p 6, d 10, f 14; Schale $2n^2$.`,
   ),
   cards: ['el-orbitale'],
+  ref: REF_QN,
+}
+
+// Ordnen (N1c): Unterschalen von 2p bis 4p in der Reihenfolge der Besetzung, aus AUFBAU (chem/electrons.ts)
+const ORDER_SUBSHELLS = AUFBAU.slice(AUFBAU.findIndex((s) => s.n === 2 && s.l === 1), AUFBAU.findIndex((s) => s.n === 4 && s.l === 1) + 1)
+const subshellId = (s: { n: number; l: number }) => `${s.n}${LETTERS[s.l]}`
+const BESETZUNG_ORDNEN: OrderQuestion = {
+  kind: 'order',
+  id: 'el-v-ordnen-besetzung',
+  no: 219,
+  level: 2,
+  fact: 'order-aufbau',
+  part: 'besetzung',
+  title: 'Reihenfolge der Besetzung',
+  prompt: 'Ordne die Unterschalen in der Reihenfolge, in der sie mit Elektronen besetzt werden.',
+  items: ORDER_SUBSHELLS.map((s) => ({ id: subshellId(s), text: r`$${s.n}\mathrm{${LETTERS[s.l]}}$` })),
+  first: 'wird zuerst besetzt',
+  last: 'wird zuletzt besetzt',
+  traps: [{ kind: 'swap', before: '3d', after: '4s', misconception: 'chem-mis-el-order-n' }],
+  hint: 'Besetzt wird nach steigender Energie. Liegt jede Unterschale der 3. Schale energetisch unter allen der 4. Schale?',
+  explanation: why(
+    r`Besetzt wird nach steigender Energie: $2\mathrm{p}$, $3\mathrm{s}$, $3\mathrm{p}$, dann $4\mathrm{s}$ vor $3\mathrm{d}$, danach $4\mathrm{p}$. Die $4\mathrm{s}$-Unterschale liegt energetisch etwas tiefer als $3\mathrm{d}$ und wird deshalb zuerst besetzt.`,
+    r`$4\mathrm{s}$ kommt vor $3\mathrm{d}$.`,
+  ),
+  cards: ['el-reihenfolge'],
   ref: REF_QN,
 }
 
@@ -1183,6 +1208,8 @@ export const ELEKTRONEN_BANK: QuestionBank = {
     // ---- Zuordnen (N1b)
     QN_MEANING,
     CAPACITY,
+    // ---- Ordnen (N1c)
+    BESETZUNG_ORDNEN,
   ],
   retired: [],
 }

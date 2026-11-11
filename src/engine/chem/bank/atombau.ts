@@ -1,4 +1,4 @@
-import type { MatchQuestion, MultiChoice, QuestionBank, QuestionLevel } from '../../quiz/types.ts'
+import type { MatchQuestion, MultiChoice, OrderQuestion, QuestionBank, QuestionLevel } from '../../quiz/types.ts'
 
 // Wissensfragen zum Thema „Atombau“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern: Stufe · 100
 // + laufende Nummer; nie neu vergeben, gelöschte kommen in retired.
@@ -82,6 +82,57 @@ const ATOMMODELLE: MatchQuestion = {
   explanation: {
     detailed: "Dalton: unteilbare Kugeln, die Atome eines Elements gleich. Thomson kannte die Elektronen und dachte sie sich in einer gleichmäßig positiv geladenen Kugel, noch ohne Kern. Rutherford schloss aus dem Streuversuch auf einen winzigen positiven Kern und eine fast leere Hülle. Bohr legte Bahnen mit festen Energien fest. Das Orbitalmodell ersetzt die Bahnen durch Raumbereiche, in denen sich ein Elektron mit hoher Wahrscheinlichkeit aufhält.",
     short: "Dalton Kugeln, Thomson ohne Kern, Rutherford Kern, Bohr feste Bahnen, Orbitalmodell Aufenthaltsräume.",
+  },
+  cards: ['atombau-modelle'],
+  ref: "Skript Aufbau der Materie",
+}
+
+// Ordnen (N1c): Atommodelle in der Reihenfolge, in der sie entstanden (wie in den Erklärungen der Fragen zu
+// Atommodellen: jedes Modell enthält nur, was die Versuche seiner Zeit zeigten)
+const MODELLE_ZEIT: OrderQuestion = {
+  kind: 'order',
+  id: 'atombau-v-ordnen-modelle',
+  no: 223,
+  level: 2,
+  fact: 'order-atom-models',
+  part: 'modelle',
+  title: "Atommodelle nacheinander",
+  prompt: "Ordne die Atommodelle nach der Zeit, in der sie entstanden.",
+  items: [
+    { id: 'dalton', text: "Dalton: unteilbare Kugeln" },
+    { id: 'thomson', text: "Thomson: positive Kugel mit Elektronen" },
+    { id: 'rutherford', text: "Rutherford: winziger Kern, fast leere Hülle" },
+    { id: 'bohr', text: "Bohr: Bahnen mit festen Energien" },
+    { id: 'orbital', text: "Orbitalmodell: Aufenthaltsräume statt Bahnen" },
+  ],
+  first: "das älteste Modell",
+  last: "das jüngste Modell",
+  traps: [
+    {
+      kind: 'swap',
+      before: 'rutherford',
+      after: 'thomson',
+      misconception: 'chem-mis-model-mixup',
+      why: {
+        detailed: "Ein Modell kann nur enthalten, was die Versuche bis dahin zeigten. Überlege, welches Modell schon einen Kern kennt und welcher Versuch diesen Kern erst gezeigt hat.",
+        short: "Wer kennt schon einen Kern?",
+      },
+    },
+    {
+      kind: 'swap',
+      before: 'bohr',
+      after: 'rutherford',
+      misconception: 'chem-mis-model-mixup',
+      why: {
+        detailed: "Bahnen um einen Kern setzen voraus, dass es einen Kern gibt. Prüfe, welches Modell den Kern einführte und welches darauf aufbaut.",
+        short: "Bahnen um einen Kern brauchen zuerst einen Kern.",
+      },
+    },
+  ],
+  hint: "Frag bei jedem Modell: Welche Teilchen oder Versuche musste man dafür schon kennen?",
+  explanation: {
+    detailed: "Dalton (Anfang des 19. Jahrhunderts) kannte noch keine Elektronen. Thomson hatte die Elektronen nachgewiesen und dachte sich eine positive Kugel. Rutherfords Streuversuch zeigte den winzigen Kern. Bohr setzte die Elektronen auf Bahnen mit festen Energien um diesen Kern. Das Orbitalmodell ersetzt die Bahnen durch Aufenthaltsräume.",
+    short: "Dalton, Thomson, Rutherford, Bohr, Orbitalmodell.",
   },
   cards: ['atombau-modelle'],
   ref: "Skript Aufbau der Materie",
@@ -2057,6 +2108,8 @@ export const ATOMBAU_BANK: QuestionBank = {
     // ---- Zuordnen (N1b)
     STOFFART,
     ATOMMODELLE,
+    // ---- Ordnen (N1c)
+    MODELLE_ZEIT,
   ],
   retired: [],
 }

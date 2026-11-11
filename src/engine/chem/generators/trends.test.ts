@@ -124,3 +124,22 @@ describe('Ordnen-Fragen zum Atomradius', () => {
     }
   })
 })
+
+describe('Ordnen-Fragen zu Elektronegativität und Ionenradien', () => {
+  it('folgen den Messwerten, mit genug Abstand und vergleichbar', () => {
+    for (const q of TRENDS_BANK.questions) {
+      if (q.kind !== 'order') continue
+      if (q.fact.startsWith('order-en')) {
+        const els = q.items.map((i) => elementBySymbol(i.id)!)
+        expect(allComparable('en', els), q.id).toBe(true)
+        expect(els.map((e) => e.symbol), q.id).toEqual(ascending('en', els).reverse().map((e) => e.symbol))
+      }
+      if (q.fact.startsWith('order-iso')) {
+        const series = ISOELECTRONIC.find((s) => q.fact.endsWith(`-${s.like.toLowerCase()}`))!
+        const radius = (id: string) => series.ions.find((i) => `${i.symbol}${i.charge > 0 ? '+' : '-'}${Math.abs(i.charge)}` === id)!.radius
+        const radii = q.items.map((i) => radius(i.id))
+        for (let k = 1; k < radii.length; k++) expect(radii[k - 1] / radii[k], q.id).toBeGreaterThanOrEqual(1.03)
+      }
+    }
+  })
+})
