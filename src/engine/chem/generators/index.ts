@@ -3,6 +3,7 @@ import type { Level, TaskRef } from '../../tasks/taskNumber.ts'
 import { GLEICHUNGEN_GENERATORS } from './gleichungen.ts'
 import { LIGHT_GENERATORS } from './light.ts'
 import { LOESUNGEN_GENERATORS } from './loesungen.ts'
+import { METALLE_GENERATORS } from './metalle.ts'
 import { MOLEKUELE_GENERATORS } from './molekuele.ts'
 import { PARTICLE_GENERATORS } from './particles.ts'
 import { SALZE_GENERATORS } from './salze.ts'
@@ -24,6 +25,7 @@ const GENERATORS: Readonly<Record<string, readonly ChemGenerator[]>> = {
   'chem-ionen': SALZE_GENERATORS,
   'chem-molekuele': MOLEKUELE_GENERATORS,
   'chem-zmk': ZMK_GENERATORS,
+  'chem-metalle': METALLE_GENERATORS,
 }
 
 // Rechenarten eines Themas in einer Stufe

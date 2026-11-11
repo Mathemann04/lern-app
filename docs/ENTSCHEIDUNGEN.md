@@ -636,3 +636,12 @@ Neue Entscheidungen unten anfügen.
   sieden anders); Chlor- und Fluorwasserstoff nicht in „Lösen“ (sie reagieren mit Wasser). Zwei Fragen
   gestrichen (301 glich in der Form Klausuraufgabe 3c, 309 einer Übungsaufgabe), ersetzt durch 316 und
   317; Erklärungen „Warum ist das falsch?“ ohne die Lösung.
+- 11.11.2026: S5d Metallbindung und Hybridisierung. Begriffe wie im Skript (Elektronengas,
+  Atomrümpfe, Valenzband, Leitungsband, verbotene Zone, Löcher); „Donator“ und „Akzeptor“ nur
+  als Zusatz auf der Karte. Hybridisierung zählt Partner und freie Paare wie die Musterlösung
+  (PCl₃ sp³), nicht nur Partner wie eine handschriftliche Notiz im Skript. Bindungsordnung nur
+  mit den Elektronenzahlen aus der Aufgabe, ohne Reihenfolge der Orbitale und ohne
+  Paramagnetismus. Härte- und Schmelzpunkt-Trends der Metalle nicht gefragt (für Nebengruppen
+  falsch); hexagonal dichteste Packung nur „schlecht formbar, gut gießbar“, nicht „spröde“.
+  Katalogbeispiele der Rechenfehler von S5c und S5d stehen in `chem/zmk.test.ts` und
+  `generators/metalle.test.ts` (Aufgaben werden dort gezielt gesucht).

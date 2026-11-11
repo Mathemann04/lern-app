@@ -110,13 +110,14 @@ export const LOESUNGEN = 'chem-loesungen'
 export const IONEN = 'chem-ionen'
 export const MOLEKUELE = 'chem-molekuele'
 export const ZMK = 'chem-zmk'
+export const METALLE = 'chem-metalle'
 
 // Chemie-Themen: Ids mit „chem-", Engine aus Wissensfragen (engine/chem/)
 export const isChemCourse = (id: string) => id.startsWith('chem-')
 
 // Themen mit Testseite in der Formel-Galerie (auch solche, die noch nicht spielbar sind); bei Chemie
 // die Seite „Fragen durchsehen"
-export const GALLERY_COURSES: readonly string[] = [DERIVATIVES, FRACTIONS, REARRANGE, ATOMBAU, GLEICHUNGEN, STOFFMENGE, LOESUNGEN, IONEN, MOLEKUELE, ZMK]
+export const GALLERY_COURSES: readonly string[] = [DERIVATIVES, FRACTIONS, REARRANGE, ATOMBAU, GLEICHUNGEN, STOFFMENGE, LOESUNGEN, IONEN, MOLEKUELE, ZMK, METALLE]
 
 const derivativeLevels: LevelPreview[] = [
   {
@@ -357,6 +358,35 @@ const molekueleLevels: LevelPreview[] = [
   },
 ]
 
+const metalleLevels: LevelPreview[] = [
+  {
+    level: 1,
+    available: true,
+    title: 'Elektronengas und Eigenschaften der Metalle, Leiter und Isolator, Hybridisierung',
+    examples: [String.raw`\ce{CH4}\text{: }\mathrm{sp^{3}}`],
+  },
+  {
+    level: 2,
+    available: true,
+    title: 'Metallgitter, verformbar oder spröde, Bändermodell, Dotierung, σ- und π-Bindungen',
+    examples: [String.raw`\ce{C2H4}\text{: } 5\,\sigma,\ 1\,\pi`],
+  },
+  {
+    level: 3,
+    available: true,
+    title: 'Leitfähigkeit beim Erwärmen, Schmelzflusselektrolyse von Aluminium, Bindungsordnung',
+    examples: [String.raw`\text{BO} = \tfrac{1}{2}(8 - 4) = 2`],
+  },
+]
+
+// Unterthemen von „Metallbindung und Hybridisierung" (Rechnungen in engine/chem/generators/metalle.ts, part)
+const metalleParts: CoursePart[] = [
+  { id: 'metallbindung', title: 'Metallbindung und Metallgitter', levels: [1, 2, 3] },
+  { id: 'halbleiter', title: 'Bändermodell, Leiter und Halbleiter', levels: [1, 2, 3] },
+  { id: 'hybrid', title: 'Hybridisierung, σ- und π-Bindungen', levels: [1, 2, 3] },
+  { id: 'mo', title: 'Molekülorbitale und Bindungsordnung', levels: [3] },
+]
+
 const zmkLevels: LevelPreview[] = [
   {
     level: 1,
@@ -592,7 +622,17 @@ export const SUBJECTS: readonly Subject[] = [
             focus: true,
             parts: zmkParts,
           },
-          comingSoon('chem-metalle', 'Metallbindung und Hybridisierung', 'Elektronengas, Bändermodell, Halbleiter und Hybridorbitale', 'bond'),
+          {
+            id: METALLE,
+            title: 'Metallbindung und Hybridisierung',
+            description: 'Elektronengas, Metallgitter, Bändermodell, Halbleiter, Hybridorbitale und Molekülorbitale',
+            icon: 'bond',
+            cards: 'chem-metalle',
+            levels: metalleLevels,
+            free: false,
+            focus: true,
+            parts: metalleParts,
+          },
         ],
       },
       {

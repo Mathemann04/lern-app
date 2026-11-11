@@ -16,7 +16,7 @@ import { LIGHT_SOURCES, lightValues } from './light.ts'
 
 const COURSE = 'chem-atombau'
 // alle Themen mit Rechnungen
-const CALC_COURSES = ['chem-atombau', 'chem-stoffmenge', 'chem-gleichungen', 'chem-loesungen', 'chem-ionen', 'chem-molekuele', 'chem-zmk']
+const CALC_COURSES = ['chem-atombau', 'chem-stoffmenge', 'chem-gleichungen', 'chem-loesungen', 'chem-ionen', 'chem-molekuele', 'chem-zmk', 'chem-metalle']
 // Abweichung mit Begründung (docs/PLAN-M4.md, S3b): Es gibt nur etwa 15 bis 25 sinnvolle Reaktionen bzw.
 // Brennstoffe je Stufe; dort zählt, dass jede vorkommt und keine deutlich öfter als die anderen
 const VARIETY: Readonly<Record<string, { distinct: number; maxShare: number }>> = {
@@ -25,6 +25,8 @@ const VARIETY: Readonly<Record<string, { distinct: number; maxShare: number }>> 
   'chem-molekuele': { distinct: 40, maxShare: 0.06 },
   // S5c: in den Grundlagen nur „stärkste Kraft“ mit etwa 30 Stoffen
   'chem-zmk': { distinct: 28, maxShare: 0.07 },
+  // S5d: in den Grundlagen nur Hybridisierung an etwa 25 Atomen
+  'chem-metalle': { distinct: 20, maxShare: 0.08 },
 }
 const LEVELS: readonly Level[] = [1, 2, 3]
 const SAMPLE = 400

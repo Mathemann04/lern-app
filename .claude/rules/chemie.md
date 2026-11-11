@@ -134,3 +134,8 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   `generators/zmk.ts` (Rechenarten `zmk-kraft`, `zmk-sieden` mit `pickBoilSet` und `ruleOf`,
   `zmk-loesen`; `ZMK_STEPS` für die Katalogtests), Karten `zmkCards.ts`, Fragen `bank/zmk.ts`
   (Denkfehler `chem-mis-zk-…`), Gegenprobe `chem/zmk.test.ts`.
+- Metallbindung und Hybridisierung (S5d): `generators/metalle.ts` (Rechenarten `hybrid` mit
+  `hybridSites` aus den Moleküldaten, `sigma-pi` nur Moleküle mit Mehrfachbindung und Lewis-Bild,
+  `dotierung` mit Fremdatomen der III. und V. Hauptgruppe in Si oder Ge, `bindungsordnung` mit
+  `MO_SPECIES`), Karten `metalleCards.ts`, Fragen `bank/metalle.ts` (Denkfehler `chem-mis-me-…`),
+  Katalogbeispiele und Gegenprobe in `generators/metalle.test.ts`.
