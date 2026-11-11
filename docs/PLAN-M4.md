@@ -757,6 +757,15 @@ kommen mit ihren Schritten dazu. Die Denkfehler der Wissensfragen
 | freie Enthalpie | °C statt K (`chem-dg-celsius`) | T = 25 statt 298,15 K |
 | freie Enthalpie | J und kJ nicht angeglichen (`chem-dg-units`) | ΔS in J/K mit ΔH in kJ verrechnet |
 | K aus ΔG⁰ | lg statt ln (`chem-dg-lg`) | K = 10^(−ΔG⁰/(R · T)) |
+| Vorzeichen von ΔH | exotherm und endotherm vertauscht (`chem-dh-sign`, seit S7b) | ΔH < 0: Wärme wird aufgenommen |
+| Phasenübergang | Wärme beim Wechsel des Aggregatzustands falsch eingeschätzt (`chem-dh-phase`, seit S7b) | Schmelzen: Wärme wird abgegeben |
+| Vorzeichen von ΔS | Unordnung falsch eingeschätzt (`chem-ds-sign`, seit S7b) | Verdampfen: ΔS < 0 |
+| Vorzeichen von ΔS | Gasteilchen ohne Koeffizienten gezählt (`chem-ds-count`, seit S7b) | N₂ + 3 H₂ → 2 NH₃: links 2, rechts 1 |
+| Reaktionsentropie | Elementen die Entropie 0 gegeben (`chem-ds-element-zero`, seit S7b) | S⁰(O₂) = 0 |
+| freie Enthalpie | ΔH + T · ΔS (`chem-dg-sign`, seit S7b; auch +R · T · ln K) | ΔH < 0, ΔS > 0: nur bei tiefer Temperatur |
+| freiwillig? | ΔG > 0 für freiwillig gehalten (`chem-dg-exergonic`, seit S7b) | ΔG > 0: läuft freiwillig ab |
+| freiwillig? | nur ΔH beachtet (`chem-dg-enthalpy-only`, seit S7b) | ΔH < 0: immer freiwillig |
+| Grenztemperatur | 273,15 abgezogen, obwohl T = ΔH/ΔS schon in K ist (`chem-dg-kelvin-twice`, seit S7b) | 463 K als 190 K |
 
 ### Probeklausur
 
@@ -1124,6 +1133,17 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   wird als „Exponenten weggelassen“ erzeugt; vier neue Rechenfehler (siehe Katalog). Le Chatelier in den Grundlagen
   nur als Wissensfrage (Zwang, Stoff zugeben oder entfernen). Abwechslung mit eigener Kennzahl (20 Gleichgewichte,
   in den Grundlagen nur das Massenwirkungsgesetz: mindestens 30 Formen unter 200, keine öfter als 6 von 100).
+  **S7b** (fertig): Thema „Energie bei Reaktionen“ mit Unterthemen Exotherm, endotherm und Bildungsenthalpie;
+  Reaktionsenthalpie berechnen; Hauptsätze und Entropie; Freie Enthalpie und freiwillige Reaktionen (ab Vertiefung).
+  Tabelle `chem/thermo.ts` (ΔfH° und S° von 41 Stoffen nach NIST bzw. CODATA, eine Nachkommastelle; 47 Reaktionen, davon
+  28 Bildungen aus den Elementen). Rechnungen: Reaktionsenthalpie (Σ Produkte, Σ Edukte, ΔH, exotherm oder endotherm; in
+  den Grundlagen nur Bildungen; mit H₂O(g) als Falle in der Wertetabelle), Vorzeichen von ΔH und ΔS bei Phasenübergängen
+  und (ab Vertiefung) aus der Stoffmenge an Gas, freie Enthalpie (T in K, ΔS in kJ/K, ΔG, freiwillig?; Reaktionen mit
+  Flüssigkeiten oder leicht schmelzenden Stoffen nur bei 25 °C), freiwillig bei welcher Temperatur (aus ΔH und ΔS), auf
+  Klausurniveau Grenztemperatur (ΔS aus Standardentropien, T = ΔH/ΔS, ober- oder unterhalb) und K aus ΔG⁰. Acht
+  Lernkarten, 52 Wissensfragen (17, 18, 17), 15 Rechenfehler (9 neu, im Katalog), 29 Denkfehler. Abwechslung mit eigener
+  Kennzahl (in den Grundlagen 28 Bildungen und 22 Phasenübergänge: mindestens 30 Formen unter 200, keine öfter als 6 von
+  100).
 - **S8: Frei rechnen und Wiederholung.** Ziffernblock, Toleranz,
   Rundungshinweis und Fehlererkennung für alle Rechnungen; falsch
   beantwortete Fragen kommen wieder.

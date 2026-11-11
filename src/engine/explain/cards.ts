@@ -37,6 +37,7 @@ import { ELEKTRONEN_CARDS } from './chem/elektronenCards.ts'
 import { PSE_CARDS } from './chem/pseCards.ts'
 import { TRENDS_CARDS } from './chem/trendsCards.ts'
 import { MWG_CARDS } from './chem/mwgCards.ts'
+import { ENERGIE_CARDS } from './chem/energieCards.ts'
 import { LOESUNGEN_CARDS } from './chem/loesungenCards.ts'
 import { STOFFMENGE_CARDS } from './chem/stoffmengeCards.ts'
 import { FRACTION_CARD_LIST } from './fractionCards.ts'
@@ -66,6 +67,7 @@ export const TOPICS: readonly Topic[] = [
   { id: 'chem-pse', title: 'Aufbau des Periodensystems', description: 'Perioden, Gruppen, Blöcke, Metalle und Nichtmetalle, Edelgasregel, Ionen, Ionisierungsenergie' },
   { id: 'chem-trends', title: 'Trends im Periodensystem', description: 'Atomradius, Ionisierungsenergie, Elektronegativität, Elektronenaffinität, Metallcharakter, Ionenradien' },
   { id: 'chem-mwg', title: 'Chemisches Gleichgewicht', description: 'Dynamisches Gleichgewicht, Massenwirkungsgesetz, Geschwindigkeit, Le Chatelier, exotherm und endotherm, Katalysator' },
+  { id: 'chem-energie', title: 'Energie bei Reaktionen', description: 'Exotherm und endotherm, Bildungs- und Reaktionsenthalpie, Hauptsätze, Entropie, freie Enthalpie und K' },
   { id: 'chem-gleichungen', title: 'Reaktionsgleichungen', description: 'Koeffizient und Index, Ausgleichen, Verbrennungen' },
   { id: 'chem-ionen', title: 'Ionenbindung und Salze', description: 'Ionen, Formeln und Namen von Salzen, Gitter, Zerfall in Ionen, Born-Haber' },
   { id: 'chem-molekuele', title: 'Moleküle', description: 'Lewis-Formeln, Gestalt nach dem VSEPR-Modell, Polarität und Namen' },
@@ -399,6 +401,7 @@ export const CARDS: readonly Card[] = [
   ...PSE_CARDS,
   ...TRENDS_CARDS,
   ...MWG_CARDS,
+  ...ENERGIE_CARDS,
 ]
 
 export function topicById(id: string): Topic | undefined {

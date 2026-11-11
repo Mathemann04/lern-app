@@ -715,3 +715,17 @@ Neue Entscheidungen unten anfügen.
   verrieten, als Frage zum Weiterdenken neu geschrieben; Bilder unter Fragen mit einer Unterschrift, die nichts verrät
   (`energie:…:frage`); drei Tipps entschärft; eine falsche Antwort mit richtiger Richtung ersetzt; ein Satz mit acht
   Wörtern wie im Skript umformuliert.
+- 11.11.2026: S7b Thema „Energie bei Reaktionen“. Eigene Tabelle `chem/thermo.ts` mit ΔfH° und S° (NIST bzw. CODATA, eine
+  Nachkommastelle), Gegenprobe mit einer zweiten Liste und mit den ΔH der Gleichgewichte aus S7a. Jede Rechnung nennt die
+  Werte, mit denen sie rechnet; steht flüssiges Wasser in der Gleichung, steht auch der Wert für Wasserdampf in der
+  Tabelle (wie im Skript), damit der Fehler „falscher Zustand“ vorkommen kann. ΔH in kJ für die Gleichung, wie sie
+  dasteht. Freie Enthalpie mit der Annahme, dass ΔH und ΔS kaum von der Temperatur abhängen (die Aufgabe sagt das);
+  Reaktionen mit Flüssigkeiten oder leicht schmelzenden Stoffen (Natrium, Iod, Schwefel, Glucose) nur bei 25 °C, die
+  übrigen bis 600 °C. Grenztemperatur nur für Reaktionen ohne Flüssigkeiten mit Ergebnis zwischen 250 und 2000 K.
+  K aus ΔG⁰ mit $R = 8{,}314$ und 25 °C; ln K und K auf drei Ziffern. Die Summe der Edukte ist nur dann ein eigener
+  Schritt, wenn dabei ein typischer Fehler passieren kann.
+  Nach der fachlichen Prüfung (Tabellenwerte und Rechnungen ohne Befund): Erklärungen, die die Antwort verrieten, als Frage
+  zum Weiterdenken neu geschrieben oder durch eigene Texte je Antwort ersetzt; zwei neue Rechenfehler, deren Erklärung zum
+  Fehler passt („Wärme beim Wechsel des Aggregatzustands falsch eingeschätzt“, „273,15 abgezogen, obwohl das Ergebnis schon
+  in Kelvin ist“); Calciumhydroxid nur bei 25 °C (es gibt oberhalb von etwa 500 °C Wasser ab); Kalkbrennen überall mit
+  drei Ziffern (1120 K).

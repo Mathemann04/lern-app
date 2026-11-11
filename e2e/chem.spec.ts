@@ -313,6 +313,7 @@ test('Chemie: Themen mischen, „Nächste Aufgabe" bleibt in der Mischung, X und
   await page.getByRole('checkbox', { name: 'Aufbau des Periodensystems', exact: true }).uncheck()
   await page.getByRole('checkbox', { name: 'Trends im Periodensystem', exact: true }).uncheck()
   await page.getByRole('checkbox', { name: 'Chemisches Gleichgewicht', exact: true }).uncheck()
+  await page.getByRole('checkbox', { name: 'Energie bei Reaktionen', exact: true }).uncheck()
 
   // Unterthemen aufklappen: dieselben Kästchen wie auf der Themenseite (Atombau steht zuerst)
   const toggle = page.getByRole('button', { name: /^Unterthemen: alle/ }).first()
@@ -774,5 +775,19 @@ test('Chemie: Chemisches Gleichgewicht, Rechnung und Lernkarte mit Energiediagra
   await expect(page.getByRole('heading', { name: 'Katalysator' })).toBeVisible()
   await expect(page.getByTestId('chem-figure')).toBeVisible()
   await expectCleanPage(page, 'Katalysator')
+  expect(errors).toEqual([])
+})
+
+test('Chemie: Energie bei Reaktionen, Rechnung und Lernkarte', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./#/gebiet/chem-gleichgewicht')
+  await page.getByRole('link', { name: /Energie bei Reaktionen/ }).click()
+  await expect(page.getByRole('heading', { name: 'Energie bei Reaktionen' })).toBeVisible()
+  await page.goto('./#/ueben/chem-energie/2-10000')
+  await expect(answers(page).first()).toBeVisible()
+  await expectCleanPage(page, 'Rechnung zur Energie')
+  await page.goto('./#/karten/chem-energie/en-reaktionsenthalpie')
+  await expect(page.getByRole('heading', { name: 'Reaktionsenthalpie aus Bildungsenthalpien' })).toBeVisible()
+  await expectCleanPage(page, 'Reaktionsenthalpie')
   expect(errors).toEqual([])
 })
