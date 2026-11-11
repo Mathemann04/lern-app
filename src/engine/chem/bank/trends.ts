@@ -966,8 +966,8 @@ export const TRENDS_BANK: QuestionBank = {
         w('f1', 'Ein Kation ist größer als das Atom, aus dem es entsteht, weil es geladen ist.', 'chem-mis-tr-cation-larger'),
         w('f2', 'Ein Anion ist kleiner als das Atom, aus dem es entsteht, weil die Ladung die Hülle zusammenzieht.', 'chem-mis-tr-anion-smaller'),
         w('f3', 'Von Teilchen mit gleich vielen Elektronen ist das mit den meisten Protonen am größten.', 'chem-mis-tr-ion-protons'),
-        w('f4', r`$\ce{F-}$ ist kleiner als $\ce{Na+}$, weil Fluor in einer höheren Periode steht als Natrium.`, 'chem-mis-tr-ion-protons', why(r`Beide Teilchen haben 10 Elektronen. Bei gleicher Elektronenzahl entscheidet allein die Zahl der Protonen, nicht die Periode des Elements.`, 'Bei gleicher Elektronenzahl zählen die Protonen.')),
-        w('f5', 'Alle Ionen mit gleich vielen Elektronen sind gleich groß.', 'chem-mis-tr-constant'),
+        w('f4', r`$\ce{F-}$ ist kleiner als $\ce{Na+}$, weil Fluor weiter oben im Periodensystem steht als Natrium.`, 'chem-mis-tr-ion-protons', why(r`Beide Teilchen haben 10 Elektronen. Bei gleicher Elektronenzahl entscheidet allein die Zahl der Protonen, nicht die Periode des Elements.`, 'Bei gleicher Elektronenzahl zählen die Protonen.')),
+        w('f5', 'Alle Ionen mit gleich vielen Elektronen sind gleich groß.', 'chem-mis-tr-constant', why('Gleich viele Elektronen heißt nicht gleich groß: Die Teilchen unterscheiden sich in der Kernladung, und die zieht dieselbe Hülle verschieden stark an.', 'Die Kernladung ist verschieden.')),
       ],
       hint: 'Was passiert mit der Hülle, wenn Elektronen wegfallen oder dazukommen? Und was, wenn bei gleich vielen Elektronen die Kernladung wächst?',
       explanation: why(
@@ -1015,7 +1015,7 @@ export const TRENDS_BANK: QuestionBank = {
       correct: [
         'Die Elektronegativität beschreibt, wie stark ein gebundenes Atom die Bindungselektronen anzieht.',
         'Die Elektronenaffinität ist die Energie, die ein freies Atom beim Aufnehmen eines Elektrons umsetzt.',
-        'Je kleiner die Ionisierungsenergie eines Elements, desto metallischer ist es.',
+        'Metalle geben ihre Valenzelektronen leicht ab und haben deshalb kleine Ionisierungsenergien.',
         'In einer Periode nimmt der Metallcharakter von links nach rechts ab.',
         'Einem Halogenatom fehlt genau ein Elektron bis zur Edelgaskonfiguration.',
       ],
@@ -1028,7 +1028,7 @@ export const TRENDS_BANK: QuestionBank = {
       hint: 'Unterscheide genau: Atom in einer Bindung oder freies Atom? Und wie hängt das Abgeben von Elektronen mit dem Metallcharakter zusammen?',
       explanation: why(
         'Die Elektronegativität ist eine Vergleichszahl für Atome in einer Bindung, die Elektronenaffinität eine Energie, die ein freies Atom beim Aufnehmen eines Elektrons umsetzt. Metalle geben Elektronen leicht ab, haben also kleine Ionisierungsenergien; nach rechts wächst die Ionisierungsenergie, der Metallcharakter nimmt ab. Halogenen fehlt genau ein Elektron bis zur Edelgaskonfiguration.',
-        'EN: Atom in Bindung; Elektronenaffinität: freies Atom; kleine Ionisierungsenergie heißt metallisch, nach rechts weniger metallisch.',
+        'EN: Atom in Bindung; Elektronenaffinität: freies Atom; Metalle haben kleine Ionisierungsenergien, nach rechts weniger metallisch.',
       ),
       cards: ['tr-elektronenaffinitaet', 'tr-metallcharakter'],
       ref: REF,

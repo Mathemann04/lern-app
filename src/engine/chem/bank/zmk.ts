@@ -1290,7 +1290,7 @@ export const ZMK_BANK: QuestionBank = {
         'Eis schwimmt auf Wasser, weil die Wasserstoffbrücken die Moleküle im Eis weitmaschig anordnen.',
         'Flüssiges Wasser hat seine größte Dichte bei etwa 4 °C.',
         'Tiefe Seen frieren im Winter nicht bis zum Grund durch, weil Eis oben schwimmt und sich unten das dichteste Wasser sammelt.',
-        r`Wasser siedet höher als das größere $\ce{H2S}$, weil nur zwischen Wassermolekülen Wasserstoffbrücken wirken.`,
+        r`Wasser siedet höher als das größere $\ce{H2S}$, weil zwischen Wassermolekülen Wasserstoffbrücken wirken, zwischen $\ce{H2S}$-Molekülen aber nicht.`,
       ],
       wrong: [
         w('f1', 'Eis ist dichter als flüssiges Wasser, weil die Teilchen im Feststoff enger liegen.', 'chem-mis-zk-ice-sinks'),

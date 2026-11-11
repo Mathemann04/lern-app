@@ -997,8 +997,8 @@ export const PSE_BANK: QuestionBank = {
       prompt: 'Welche Aussagen über den Aufbau des Periodensystems stimmen?',
       correct: [
         'Die Elemente sind nach steigender Ordnungszahl geordnet, also nach der Zahl der Protonen.',
-        'Die Nummer der Periode ist die Nummer der äußersten Schale, die Elektronen enthält.',
-        'Alle Elemente einer Hauptgruppe haben gleich viele Valenzelektronen.',
+        'Bei Hauptgruppenelementen ist die Nummer der Periode die Nummer der äußersten Schale, die Elektronen enthält.',
+        'Alle Elemente der I. Hauptgruppe haben ein Valenzelektron.',
         'Elemente derselben Hauptgruppe reagieren ähnlich.',
         'Ein Element der III. Hauptgruppe hat drei Valenzelektronen.',
       ],
@@ -1011,7 +1011,7 @@ export const PSE_BANK: QuestionBank = {
       ],
       hint: 'Was sagen Ordnungszahl, Periode und Hauptgruppe jeweils über ein Element aus?',
       explanation: why(
-        'Geordnet wird nach der Ordnungszahl, der Zahl der Protonen. Die Periode nennt die äußerste besetzte Schale. Alle Elemente einer Hauptgruppe haben so viele Valenzelektronen, wie die römische Nummer angibt, etwa drei in der III. Hauptgruppe; weil die Valenzelektronen das Verhalten bestimmen, reagieren sie ähnlich.',
+        'Geordnet wird nach der Ordnungszahl, der Zahl der Protonen. Bei Hauptgruppenelementen nennt die Periode die äußerste besetzte Schale. Die Elemente einer Hauptgruppe haben so viele Valenzelektronen, wie die römische Nummer angibt, etwa eins in der I. und drei in der III. Hauptgruppe (Ausnahme Helium mit zwei); weil die Valenzelektronen das Verhalten bestimmen, reagieren sie ähnlich.',
         'Ordnungszahl = Protonen; Periode = äußerste Schale; Hauptgruppe = Zahl der Valenzelektronen.',
       ),
       cards: ['pse-aufbau', 'pse-valenz'],
@@ -1058,7 +1058,7 @@ export const PSE_BANK: QuestionBank = {
         'Jedes weitere Elektron zu entfernen kostet mehr Energie als das vorige.',
         'Ein großer Sprung zeigt, dass das nächste Elektron aus einer inneren, voll besetzten Schale kommt.',
         'Bei Natrium liegt der große Sprung schon zwischen der ersten und der zweiten Ionisierungsenergie.',
-        'Liegt der große Sprung zwischen der dritten und der vierten Ionisierungsenergie, steht das Element in der III. Hauptgruppe.',
+        'Liegt bei einem Hauptgruppenelement der große Sprung zwischen der dritten und der vierten Ionisierungsenergie, steht es in der III. Hauptgruppe.',
       ],
       wrong: [
         w('f1', 'Die Ionisierungsenergie wird frei, wenn ein Atom ein Elektron abgibt.', 'chem-mis-pse-ie-definition'),

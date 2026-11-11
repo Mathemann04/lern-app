@@ -1137,7 +1137,7 @@ export const METALLE_BANK: QuestionBank = {
         w('f1', 'Eine Doppelbindung besteht aus zwei σ-Bindungen.', 'chem-mis-me-two-sigma'),
         w('f2', r`Ethin, $\ce{C2H2}$, hat zwischen den beiden Kohlenstoffatomen drei σ-Bindungen.`, 'chem-mis-me-two-sigma'),
         w('f3', 'Auch die π-Bindungen einer Doppelbindung sitzen in Hybridorbitalen.', 'chem-mis-me-hyb-pi'),
-        w('f4', 'Zwei Atome können allein über eine π-Bindung verbunden sein.', 'chem-mis-me-pi-alone'),
+        w('f4', 'In Ethen sind die beiden Kohlenstoffatome nur über eine π-Bindung verbunden.', 'chem-mis-me-pi-alone'),
         w('f5', r`Der Kohlenstoff in $\ce{O=C=O}$ ist $\mathrm{sp^{3}}$-hybridisiert, weil er vier Bindungsstriche hat.`, 'chem-mis-me-hyb-partners'),
       ],
       hint: 'Zähle für die Hybridisierung die Richtungen um das Atom; zwischen zwei Atomen gibt es nur eine σ-Bindung.',
