@@ -444,8 +444,8 @@ async function chooseAnswer(page: Page, text: string) {
 
 test('Chemie: Rechnung zu ³⁷Cl⁻, Massenzahl als Neutronenzahl, Fehler gezielt üben', async ({ page }) => {
   const errors = collectErrors(page)
-  await page.goto('./#/ueben/chem-atombau/2-11309')
-  await expect(page.getByText(/^Vertiefung · Aufgabe 2-11309 · Bestimme Protonen, Neutronen und Elektronen/)).toBeVisible()
+  await page.goto('./#/ueben/chem-atombau/2-11335')
+  await expect(page.getByText(/^Vertiefung · Aufgabe 2-11335 · Bestimme Protonen, Neutronen und Elektronen/)).toBeVisible()
   await expectCleanPage(page, 'Rechnung')
   await expect(page.locator('#question')).toHaveText('Wie viele Protonen hat das Teilchen?')
   await chooseAnswer(page, '17')
