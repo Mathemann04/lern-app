@@ -22,6 +22,7 @@ const STOFFMENGE = 'chem-stoffmenge'
 const GLEICHUNGEN = 'chem-gleichungen'
 const LOESUNGEN = 'chem-loesungen'
 const IONEN = 'chem-ionen'
+const MOLEKUELE = 'chem-molekuele'
 
 export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
   {
@@ -707,6 +708,347 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
     why: {
       detailed: 'Die Gitterenthalpie ist schon negativ angegeben, weil beim Aufbau des Gitters Energie frei wird. Sie wird mit ihrem Vorzeichen zum Weg zu den Ionen addiert; zieht man sie ab, wird aus der frei werdenden Energie eine aufgewendete.',
       short: 'Die Gitterenthalpie mit ihrem Vorzeichen addieren.',
+    },
+  },
+  // Moleküle (S5b)
+  {
+    id: 'chem-lewis-index-ignored',
+    course: MOLEKUELE,
+    name: 'Index beim Zählen der Valenzelektronen vergessen',
+    wrongFormula: String.raw`\ce{NH3}\text{: } 5 + 1 = 6\ \text{statt}\ 5 + 3 \cdot 1 = 8`,
+    why: {
+      detailed: 'Der Index sagt, wie viele Atome eines Elements im Molekül stecken. Jedes dieser Atome bringt seine eigenen Valenzelektronen mit; sie müssen alle gezählt werden, nicht nur einmal je Element.',
+      short: 'Jedes Atom der Formel zählt, auch die, die der Index angibt.',
+    },
+  },
+  {
+    id: 'chem-lewis-all-electrons',
+    course: MOLEKUELE,
+    name: 'Alle Elektronen statt der Valenzelektronen gezählt',
+    wrongFormula: String.raw`\ce{H2O}\text{: } 8 + 2 \cdot 1 = 10\ \text{statt}\ 6 + 2 \cdot 1 = 8`,
+    why: {
+      detailed: 'In einer Lewis-Formel stehen nur die Valenzelektronen, also die Elektronen der äußersten Schale. Die inneren Elektronen nehmen an Bindungen nicht teil. Ihre Zahl ist bei Hauptgruppen-Elementen die Nummer der Hauptgruppe, nicht die Ordnungszahl.',
+      short: 'Nur die Valenzelektronen zählen, nicht alle Elektronen.',
+    },
+  },
+  {
+    id: 'chem-lewis-octet-count',
+    course: MOLEKUELE,
+    name: 'Oktett statt der vorhandenen Elektronen gezählt',
+    wrongFormula: String.raw`\ce{CH4}\text{: } 8 + 4 \cdot 2 = 16\ \text{statt}\ 4 + 4 \cdot 1 = 8`,
+    why: {
+      detailed: 'Gezählt werden die Elektronen, die die Atome mitbringen, nicht die, die jedes Atom am Ende um sich haben soll. Weil Bindungselektronen zu zwei Atomen gehören, erreichen alle ihr Oktett mit weniger Elektronen, als man beim Zählen der Oktette erhält.',
+      short: 'Zählen, was die Atome mitbringen, nicht was sie brauchen.',
+    },
+  },
+  {
+    id: 'chem-lewis-pairs-not-halved',
+    course: MOLEKUELE,
+    name: 'Elektronen nicht zu Paaren zusammengefasst',
+    wrongFormula: String.raw`\ce{NH3}\text{: } 8\ \text{Paare statt}\ 8 : 2 = 4`,
+    why: {
+      detailed: 'Ein Elektronenpaar besteht aus zwei Elektronen. In der Lewis-Formel steht jeder Strich für ein Paar; die Zahl der Striche ist deshalb die Hälfte der Elektronenzahl.',
+      short: 'Ein Paar sind zwei Elektronen: durch zwei teilen.',
+    },
+  },
+  {
+    id: 'chem-lewis-bonds-only',
+    course: MOLEKUELE,
+    name: 'Nur die Bindungen als Paare gezählt',
+    wrongFormula: String.raw`\ce{H2O}\text{: } 2\ \text{Paare statt}\ 4`,
+    why: {
+      detailed: 'Zu den Elektronenpaaren gehören auch die freien Paare, die an einem Atom sitzen und keine Bindung bilden. Erst bindende und freie Paare zusammen ergeben alle Valenzelektronen.',
+      short: 'Freie Paare zählen auch mit.',
+    },
+  },
+  {
+    id: 'chem-lewis-multiple-as-one',
+    course: MOLEKUELE,
+    name: 'Mehrfachbindung als ein Paar gezählt',
+    wrongFormula: String.raw`\ce{CO2}\text{: } 2\ \text{bindende Paare statt}\ 4`,
+    why: {
+      detailed: 'Eine Doppelbindung besteht aus zwei gemeinsamen Elektronenpaaren, eine Dreifachbindung aus drei. Jeder ihrer Striche ist ein bindendes Paar.',
+      short: 'Doppelbindung zwei Paare, Dreifachbindung drei.',
+    },
+  },
+  {
+    id: 'chem-lewis-free-central-only',
+    course: MOLEKUELE,
+    name: 'Nur die freien Paare am Zentralatom gezählt',
+    wrongFormula: String.raw`\ce{PCl3}\text{: } 1\ \text{freies Paar statt}\ 10`,
+    why: {
+      detailed: 'Freie Paare gibt es nicht nur am Zentralatom. Auch die äußeren Atome wie Sauerstoff oder die Halogene tragen freie Paare, damit sie ihr Oktett haben. Für das ganze Molekül zählen alle.',
+      short: 'Auch die äußeren Atome tragen freie Paare.',
+    },
+  },
+  {
+    id: 'chem-lewis-pairs-missing',
+    course: MOLEKUELE,
+    name: 'Freie Paare am Zentralatom vergessen',
+    wrongFormula: String.raw`\ce{NH3}\ \text{ohne das freie Paar am}\ \ce{N}`,
+    why: {
+      detailed: 'Elektronen des Zentralatoms, die nicht in Bindungen stecken, bleiben als freie Paare an ihm. Fehlen sie in der Formel, stimmt die Zahl der Elektronen nicht mehr, und das Zentralatom hat kein Oktett.',
+      short: 'Übrige Elektronen bleiben als freie Paare am Atom.',
+    },
+  },
+  {
+    id: 'chem-lewis-terminal-pairs',
+    course: MOLEKUELE,
+    name: 'Freie Paare an den äußeren Atomen vergessen',
+    wrongFormula: String.raw`\ce{CCl4}\ \text{ohne freie Paare an den}\ \ce{Cl}`,
+    why: {
+      detailed: 'Auch die äußeren Atome brauchen ein Oktett. Ein Halogen mit nur einer Bindung hat dafür noch drei freie Paare, ein doppelt gebundener Sauerstoff zwei. Ohne sie fehlen Elektronen.',
+      short: 'Äußere Atome brauchen ihr Oktett auch.',
+    },
+  },
+  {
+    id: 'chem-lewis-multiple-missing',
+    course: MOLEKUELE,
+    name: 'Einfachbindungen statt Mehrfachbindung',
+    wrongFormula: String.raw`\ce{O-C-O}\ \text{mit vollen Oktetts statt}\ \ce{O=C=O}`,
+    why: {
+      detailed: 'Mit lauter Einfachbindungen bekommt jedes Atom sein Oktett nur, wenn man mehr Elektronen zeichnet, als die Atome mitbringen. Reichen die Valenzelektronen nicht, teilen sich zwei Atome ein zweites oder drittes Paar: Es entsteht eine Mehrfachbindung.',
+      short: 'Reichen die Elektronen nicht, teilen sich Atome mehrere Paare.',
+    },
+  },
+  {
+    id: 'chem-lewis-octet-exceeded',
+    course: MOLEKUELE,
+    name: 'Ein Paar zu viel am Zentralatom',
+    wrongFormula: String.raw`\ce{CH4}\ \text{mit einem freien Paar am}\ \ce{C}`,
+    why: {
+      detailed: 'Ein zusätzliches freies Paar braucht zwei Elektronen mehr, als die Atome mitbringen. Zähl nach: Alle Paare der Formel zusammen müssen genau die Valenzelektronen ergeben, und jedes Atom hat sein Oktett, nicht mehr.',
+      short: 'Alle Paare zusammen = Valenzelektronen; nachzählen.',
+    },
+  },
+  {
+    id: 'chem-lewis-hydrogen',
+    course: MOLEKUELE,
+    name: 'Wasserstoff mit freiem Paar',
+    wrongFormula: String.raw`\ce{H}\ \text{mit Bindung und freiem Paar}`,
+    why: {
+      detailed: 'Wasserstoff hat nur ein Elektron und erreicht mit einer einzigen Bindung schon zwei Elektronen, die Edelgaskonfiguration von Helium. Mehr passt in seine erste Schale nicht: Er trägt nie ein freies Paar.',
+      short: 'Wasserstoff: eine Bindung, kein freies Paar.',
+    },
+  },
+  {
+    id: 'chem-vsepr-double-counted',
+    course: MOLEKUELE,
+    name: 'Mehrfachbindung doppelt gezählt',
+    wrongFormula: String.raw`\ce{CO2}\text{: } \mathrm{AX_4}\text{, tetraedrisch statt linear}`,
+    why: {
+      detailed: 'Für die Gestalt zählt eine Mehrfachbindung wie eine einzige Bindung: Alle ihre Paare liegen zwischen denselben zwei Atomen und zeigen in dieselbe Richtung. Gezählt werden Bindungspartner, nicht Bindungsstriche.',
+      short: 'Eine Mehrfachbindung zählt als ein Bindungspartner.',
+    },
+  },
+  {
+    id: 'chem-vsepr-pairs-as-partners',
+    course: MOLEKUELE,
+    name: 'Freie Paare als Bindungspartner gezählt',
+    wrongFormula: String.raw`\ce{NH3}\text{: } X = 4\ \text{statt}\ 3`,
+    why: {
+      detailed: 'Bindungspartner (X) sind nur Atome, die am Zentralatom hängen. Freie Paare zählen getrennt als E; sie beeinflussen die Anordnung, sind aber keine Partner.',
+      short: 'X zählt Atome, E zählt freie Paare.',
+    },
+  },
+  {
+    id: 'chem-vsepr-all-atoms',
+    course: MOLEKUELE,
+    name: 'Zentralatom mitgezählt',
+    wrongFormula: String.raw`\ce{CH4}\text{: } X = 5\ \text{statt}\ 4`,
+    why: {
+      detailed: String.raw`Gezählt werden nur die Atome, die am Zentralatom hängen. Das Zentralatom selbst ist A in der Schreibweise $\mathrm{AX_nE_m}$ und kein eigener Bindungspartner.`,
+      short: 'Das Zentralatom ist A, nicht X.',
+    },
+  },
+  {
+    id: 'chem-vsepr-lone-pairs-forgotten',
+    course: MOLEKUELE,
+    name: 'Freie Paare am Zentralatom vergessen',
+    wrongFormula: String.raw`\ce{NH3}\text{: } \mathrm{AX_3}\text{, trigonal-planar statt trigonal-pyramidal}`,
+    why: {
+      detailed: 'Freie Paare am Zentralatom brauchen Platz wie Bindungen und stoßen die bindenden Paare ab. Wer sie weglässt, bekommt zu wenige Paare um das Zentralatom und damit eine zu flache Form und zu große Winkel.',
+      short: 'Freie Paare am Zentralatom zählen für die Anordnung mit.',
+    },
+  },
+  {
+    id: 'chem-vsepr-pairs-not-halved',
+    course: MOLEKUELE,
+    name: 'Übrige Elektronen nicht halbiert',
+    wrongFormula: String.raw`\ce{H2O}\text{: } E = 6 - 2 = 4\ \text{statt}\ 2`,
+    why: {
+      detailed: 'Was nach den Bindungen von den Valenzelektronen übrig bleibt, sind einzelne Elektronen. Je zwei davon bilden ein freies Paar; die Zahl der Paare ist die Hälfte.',
+      short: 'Übrige Elektronen durch zwei teilen.',
+    },
+  },
+  {
+    id: 'chem-vsepr-valence-as-pairs',
+    course: MOLEKUELE,
+    name: 'Valenzelektronen als freie Paare gezählt',
+    wrongFormula: String.raw`\ce{NH3}\text{: } E = 5\ \text{statt}\ 1`,
+    why: {
+      detailed: 'Ein Teil der Valenzelektronen steckt in den Bindungen. Freie Paare bilden nur die übrigen, und je zwei davon ergeben ein Paar.',
+      short: 'Erst die Bindungselektronen abziehen, dann halbieren.',
+    },
+  },
+  {
+    id: 'chem-vsepr-all-lone-pairs',
+    course: MOLEKUELE,
+    name: 'Freie Paare aller Atome gezählt',
+    wrongFormula: String.raw`\ce{CCl4}\text{: } E = 12\ \text{statt}\ 0`,
+    why: {
+      detailed: 'Für die Gestalt zählen nur die freien Paare am Zentralatom. Die freien Paare der äußeren Atome zeigen nach außen und ändern die Anordnung um das Zentralatom nicht.',
+      short: 'Nur freie Paare am Zentralatom zählen für die Gestalt.',
+    },
+  },
+  {
+    id: 'chem-vsepr-arrangement',
+    course: MOLEKUELE,
+    name: 'Anordnung der Paare statt Gestalt',
+    wrongFormula: String.raw`\ce{NH3}\text{: tetraedrisch statt trigonal-pyramidal}`,
+    why: {
+      detailed: 'Die Anordnung aller Paare und die Gestalt des Moleküls sind zweierlei. Die Gestalt beschreibt nur, wo die Atome sitzen; freie Paare sieht man darin nicht. Sitzt an einer Ecke ein freies Paar, fehlt dort ein Atom.',
+      short: 'Gestalt = Lage der Atome, ohne die freien Paare.',
+    },
+  },
+  {
+    id: 'chem-vsepr-extra-pair',
+    course: MOLEKUELE,
+    name: 'Freies Paar am Zentralatom angenommen',
+    wrongFormula: String.raw`\ce{CO2}\ \text{gewinkelt wie}\ \ce{H2O}`,
+    why: {
+      detailed: 'Ob ein Molekül gewinkelt oder pyramidal ist, hängt von den freien Paaren am Zentralatom ab. Hat das Zentralatom alle Valenzelektronen in Bindungen, gibt es kein freies Paar, das die Bindungen wegdrückt. Ähnliche Formeln haben deshalb nicht immer dieselbe Gestalt.',
+      short: 'Nur echte freie Paare am Zentralatom ändern die Gestalt.',
+    },
+  },
+  {
+    id: 'chem-vsepr-flat',
+    course: MOLEKUELE,
+    name: 'Gestalt aus der flachen Lewis-Formel abgelesen',
+    wrongFormula: String.raw`\ce{CH4}\text{: quadratisch-planar mit } 90^\circ`,
+    why: {
+      detailed: 'Die Lewis-Formel steht flach auf dem Papier; die Winkel darin sagen nichts über den Raum. Vier Paare gehen räumlich viel weiter auseinander, als es in einer Ebene möglich wäre.',
+      short: 'Die Lewis-Formel ist flach gezeichnet, das Molekül ist räumlich.',
+    },
+  },
+  {
+    id: 'chem-vsepr-angle-ideal',
+    course: MOLEKUELE,
+    name: 'Idealer Winkel trotz freier Paare',
+    wrongFormula: String.raw`\ce{H2O}\text{: } 109{,}5^\circ`,
+    why: {
+      detailed: 'Der ideale Winkel gilt, wenn alle Paare um das Zentralatom bindend sind. Freie Paare sitzen näher am Zentralatom, brauchen mehr Platz und drücken die Bindungen etwas zusammen.',
+      short: 'Freie Paare drücken die Bindungswinkel zusammen.',
+    },
+  },
+  {
+    id: 'chem-en-added',
+    course: MOLEKUELE,
+    name: 'Elektronegativitäten addiert',
+    wrongFormula: String.raw`\ce{O-H}\text{: } 3{,}44 + 2{,}20 = 5{,}64`,
+    why: {
+      detailed: 'Für die Polarität einer Bindung zählt, wie unterschiedlich stark die beiden Atome das bindende Paar anziehen. Das ist der Unterschied der Werte, also der größere minus der kleinere.',
+      short: String.raw`$\Delta \mathrm{EN}$ ist ein Unterschied: abziehen, nicht addieren.`,
+    },
+  },
+  {
+    id: 'chem-en-index',
+    course: MOLEKUELE,
+    name: 'Elektronegativität mit dem Index malgenommen',
+    wrongFormula: String.raw`\ce{H2O}\text{: } 2 \cdot (3{,}44 - 2{,}20) = 2{,}48`,
+    why: {
+      detailed: String.raw`$\Delta \mathrm{EN}$ beschreibt eine einzelne Bindung zwischen zwei Atomen. Wie oft ein Element in der Formel vorkommt, ändert nichts daran, wie stark ein einzelnes Atom das bindende Paar anzieht.`,
+      short: String.raw`$\Delta \mathrm{EN}$ gilt für eine Bindung; der Index spielt keine Rolle.`,
+    },
+  },
+  {
+    id: 'chem-en-bond-type',
+    course: MOLEKUELE,
+    name: 'Bindungsart falsch eingeordnet',
+    wrongFormula: String.raw`\Delta\mathrm{EN} = 1{,}24\text{: Ionenbindung statt polar}`,
+    why: {
+      detailed: 'Die Richtwerte: Unter 0,5 ist eine Bindung (nahezu) unpolar, von 0,5 bis 1,8 polar, darüber ist sie eine Ionenbindung. Die Grenzen sind fließend, die Einordnung folgt aber diesen Zahlen.',
+      short: 'Grenzen 0,5 und 1,8 beachten.',
+    },
+  },
+  {
+    id: 'chem-en-partial-swapped',
+    course: MOLEKUELE,
+    name: 'Teilladungen vertauscht',
+    wrongFormula: String.raw`\ce{H-Cl}\text{: } \delta-\ \text{am}\ \ce{H}`,
+    why: {
+      detailed: 'Das elektronegativere Atom zieht das bindende Paar zu sich. Dort halten sich die Elektronen öfter auf, also trägt es die negative Teilladung; der Partner wird positiv.',
+      short: String.raw`Das elektronegativere Atom trägt $\delta-$.`,
+    },
+  },
+  {
+    id: 'chem-dipole-polar-bond',
+    course: MOLEKUELE,
+    name: 'Polare Bindung mit polarem Molekül gleichgesetzt',
+    wrongFormula: String.raw`\ce{CO2}\ \text{ist ein Dipol, weil}\ \ce{C=O}\ \text{polar ist}`,
+    why: {
+      detailed: 'Polare Bindungen sind nötig, reichen aber nicht. Die Gestalt entscheidet: Sind die polaren Bindungen symmetrisch angeordnet, heben sich ihre Wirkungen auf, und die Ladungsschwerpunkte fallen zusammen.',
+      short: 'Polare Bindungen allein reichen nicht; die Gestalt entscheidet.',
+    },
+  },
+  {
+    id: 'chem-dipole-unpolar-bonds',
+    course: MOLEKUELE,
+    name: 'Dipol ohne polare Bindungen',
+    wrongFormula: String.raw`\ce{CH4}\ \text{als Dipol}`,
+    why: {
+      detailed: 'Ein Dipol braucht Teilladungen. Sind alle Bindungen (nahezu) unpolar, entstehen keine nennenswerten Teilladungen, ganz gleich, welche Gestalt das Molekül hat.',
+      short: 'Ohne polare Bindungen kein Dipol.',
+    },
+  },
+  {
+    id: 'chem-dipole-symmetry-assumed',
+    course: MOLEKUELE,
+    name: 'Symmetrie angenommen, wo freie Paare sie stören',
+    wrongFormula: String.raw`\ce{H2O}\ \text{unpolar wie}\ \ce{CO2}`,
+    why: {
+      detailed: 'Symmetrisch ist ein Molekül nur, wenn gleiche Partner gleichmäßig um das Zentralatom verteilt sind und es dort keine freien Paare gibt. Freie Paare machen ein Molekül gewinkelt oder pyramidal, verschiedene Partner ziehen unterschiedlich stark: Dann heben sich die Bindungen nicht auf.',
+      short: 'Freie Paare oder verschiedene Partner stören die Symmetrie.',
+    },
+  },
+  {
+    id: 'chem-dipole-unpolar-claimed',
+    course: MOLEKUELE,
+    name: 'Polare Bindungen für unpolar gehalten',
+    wrongFormula: String.raw`\ce{H2O}\text{: Bindungen unpolar}`,
+    why: {
+      detailed: 'Ob eine Bindung polar ist, sagt der Unterschied der Elektronegativität. Ab 0,5 gilt sie als polar; zwei verschiedene Nichtmetalle erreichen das oft.',
+      short: String.raw`$\Delta \mathrm{EN}$ ab 0,5: polare Bindung.`,
+    },
+  },
+  {
+    id: 'chem-molname-no-prefix',
+    course: MOLEKUELE,
+    name: 'Vorsilben weggelassen',
+    wrongFormula: String.raw`\ce{N2O}\text{: Stickstoffoxid}`,
+    why: {
+      detailed: 'Zwei Nichtmetalle bilden oft mehrere Verbindungen miteinander. Anders als bei Salzen ergibt sich die Zusammensetzung nicht aus Ladungen; deshalb nennt der Name sie mit Vorsilben: mono, di, tri, tetra, penta, hexa.',
+      short: 'Molekülverbindungen: Anzahlen mit Vorsilben nennen.',
+    },
+  },
+  {
+    id: 'chem-molname-swapped',
+    course: MOLEKUELE,
+    name: 'Vorsilben dem falschen Element zugeordnet',
+    wrongFormula: String.raw`\ce{N2O}\text{: Stickstoffdioxid}`,
+    why: {
+      detailed: 'Eine Vorsilbe gehört immer zu dem Element, vor dessen Namen sie steht, und zählt dessen Atome. Der Index in der Formel steht hinter dem Element, die Vorsilbe im Namen davor.',
+      short: 'Die Vorsilbe zählt das Element direkt dahinter.',
+    },
+  },
+  {
+    id: 'chem-molname-first-prefix',
+    course: MOLEKUELE,
+    name: 'Vorsilbe am ersten Element vergessen',
+    wrongFormula: String.raw`\ce{N2O3}\text{: Stickstofftrioxid}`,
+    why: {
+      detailed: 'Nur „mono" fällt am ersten Element weg. Stehen vom ersten Element mehrere Atome in der Formel, braucht auch es eine Vorsilbe.',
+      short: 'Nur „mono" fällt am ersten Element weg.',
     },
   },
 ]

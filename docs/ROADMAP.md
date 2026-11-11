@@ -1,6 +1,6 @@
 # Roadmap
 
-Stand: 10.11.2026
+Stand: 11.11.2026
 
 | Meilenstein | Inhalt | Status |
 | --- | --- | --- |
@@ -84,7 +84,7 @@ feste Regeln: [CHEMIE.md](CHEMIE.md)
     - [x] S4c. Klausuraufgabe 4 üben (Punkte, Folgefehler)
   - [ ] S5. Bindungen (auch Metallbindung und Hybridisierung)
     - [x] S5a. Ionenbindung und Salze (Rechnungen, Gitterbilder, Karten, Wissensfragen)
-    - [ ] S5b. Moleküle (Lewis-Formeln als Bilder, Gestalt, Polarität)
+    - [x] S5b. Moleküle (Lewis-Formeln als Bilder, Gestalt, Polarität, Namen)
     - [ ] S5c. Zwischenmolekulare Kräfte, Metallbindung und Hybridisierung
     - [ ] S5d. Klausuraufgabe 3 üben
   - [ ] S6. Elektronen und Periodensystem

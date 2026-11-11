@@ -117,3 +117,15 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   Lagen in der Elementarzelle, Linien zu nächsten Nachbarn, `coordinationOf`), gezeichnet
   von `ui/chem/ChemFigure.tsx`; Fragen und Schritte mit `figure`, Karten mit `figures`.
   Testmuster gegen Platzhalter erlauben `NaN` in Formeln wie NaNO₂ (`NaN(?![A-Z0-9])`).
+- Moleküle (S5b): `chem/molecules.ts` (43 Moleküle: Atome mit Lage x, y für die Lewis-Formel,
+  Bindungen mit Ordnung, `central`, `dipole` true/false/null = nicht fragen, `sextet` für Bor,
+  `expanded` ohne Lewis-Formel; `lonePairsOf`, `vseprOf`, `shapeOf`, `angleOf` als Text mit
+  `^\circ`, `typeLatex`), `chem/lewis.ts` (Lewis-Bild `lewis:<Molekül>[:<Fehler>]`, falsche
+  Formeln aus `LEWIS_VARIANTS`, freie Paare weg von den Bindungen, `lewisValid`), räumliches Bild
+  `gestalt:<Molekül>` in `chem/figures.ts` (Richtungen je Typ, Keulen für freie Paare),
+  `chem/electronegativity.ts` (Pauling und gerundete Tabelle, `bondTypeAskable`), `chem/molNames.ts`
+  (Namen mit Vorsilben aus den Anzahlen), `generators/molekuele.ts` (Rechenarten `lewis`, `gestalt`,
+  `polaritaet`, `molname`; `MOLECULE_STEPS` für die Katalogtests), Karten `molekueleCards.ts`, Fragen
+  `bank/molekuele.ts` (Denkfehler `chem-mis-mo-…`). Antworten als Bild: `figure` an `Choice`
+  (`TaskScreen` zeichnet `FigureDrawing`, der Text ist die Beschreibung für Vorlesehilfen), Bild im
+  Ergebnis `resultFigure`.

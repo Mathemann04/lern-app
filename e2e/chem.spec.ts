@@ -306,6 +306,7 @@ test('Chemie: Themen mischen, „Nächste Aufgabe" bleibt in der Mischung, X und
   await page.getByRole('checkbox', { name: 'Reaktionsgleichungen' }).uncheck()
   await page.getByRole('checkbox', { name: 'Gase und Lösungen' }).uncheck()
   await page.getByRole('checkbox', { name: 'Ionenbindung und Salze' }).uncheck()
+  await page.getByRole('checkbox', { name: 'Moleküle' }).uncheck()
 
   // Unterthemen aufklappen: dieselben Kästchen wie auf der Themenseite (Atombau steht zuerst)
   const toggle = page.getByRole('button', { name: /^Unterthemen: alle/ }).first()
@@ -582,3 +583,44 @@ test('Chemie: Ionenbindung und Salze, Rechnung zur Formel, Lernkarte mit Gitterb
   expect(errors).toEqual([])
 })
 
+
+// Schritt für Schritt lösen, ohne die Lösung zu kennen: Antworten der Reihe nach antippen, bis „Weiter" erscheint
+async function solveStepByTrying(page: Page) {
+  const buttons = answers(page)
+  const count = await buttons.count()
+  for (let i = 0; i < count; i++) {
+    if (await buttons.nth(i).isDisabled()) continue
+    await buttons.nth(i).click()
+    const next = page.getByRole('button', { name: /^(Weiter|Ergebnis ansehen)$/ })
+    if (await next.waitFor({ state: 'visible', timeout: 1500 }).then(() => true, () => false)) {
+      await next.click()
+      return
+    }
+  }
+}
+
+test('Chemie: Moleküle, Lewis-Formeln als Bilder zur Auswahl, Gestalt mit Bild, Lernkarten', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./#/gebiet/chem-bindung')
+  await page.getByRole('link', { name: /Moleküle/ }).click()
+  await expect(page.getByRole('heading', { name: 'Moleküle' })).toBeVisible()
+  // Lewis-Formel von H₂S (Grundlagen): Valenzelektronen, Paare, dann die Formel als Bild wählen
+  await page.goto('./#/ueben/chem-molekuele/1-10003')
+  await expect(answers(page).first()).toBeVisible()
+  await solveStepByTrying(page)
+  await solveStepByTrying(page)
+  await expect(page.getByRole('heading', { name: /Welche Lewis-Formel/ })).toBeVisible()
+  await expect(answers(page).locator('svg[role="img"]')).toHaveCount(await answers(page).count())
+  await expectCleanPage(page, 'Lewis-Formeln zur Auswahl')
+  await solveStepByTrying(page)
+  await expect(page.getByTestId('result').getByTestId('chem-figure')).toBeVisible()
+  // Gestalt von NH₃: die Lewis-Formel steht unter der ersten Frage, das räumliche Bild im Ergebnis
+  await page.goto('./#/ueben/chem-molekuele/1-10008')
+  await expect(page.getByTestId('chem-figure')).toBeVisible()
+  await expectCleanPage(page, 'Gestalt mit Lewis-Formel')
+  // Lernkarte mit drei räumlichen Bildern
+  await page.goto('./#/karten/chem-molekuele/mol-gestalt')
+  await expect(page.getByTestId('chem-figure')).toHaveCount(3)
+  await expectCleanPage(page, 'Gestalt der Moleküle')
+  expect(errors).toEqual([])
+})

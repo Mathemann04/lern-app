@@ -30,6 +30,7 @@ import type { RearrangeTask } from '../rearrange/task.ts'
 import { ATOMBAU_CARDS } from './chem/atombauCards.ts'
 import { GLEICHUNGEN_CARDS } from './chem/gleichungenCards.ts'
 import { IONEN_CARDS } from './chem/ionenCards.ts'
+import { MOLEKUELE_CARDS } from './chem/molekueleCards.ts'
 import { LOESUNGEN_CARDS } from './chem/loesungenCards.ts'
 import { STOFFMENGE_CARDS } from './chem/stoffmengeCards.ts'
 import { FRACTION_CARD_LIST } from './fractionCards.ts'
@@ -57,6 +58,7 @@ export const TOPICS: readonly Topic[] = [
   { id: 'chem-atombau', title: 'Atombau', description: 'Elementarteilchen, Kernsymbol, Isotope, Ionen, Atommodelle und Licht' },
   { id: 'chem-gleichungen', title: 'Reaktionsgleichungen', description: 'Koeffizient und Index, Ausgleichen, Verbrennungen' },
   { id: 'chem-ionen', title: 'Ionenbindung und Salze', description: 'Ionen, Formeln und Namen von Salzen, Gitter, Zerfall in Ionen, Born-Haber' },
+  { id: 'chem-molekuele', title: 'Moleküle', description: 'Lewis-Formeln, Gestalt nach dem VSEPR-Modell, Polarität und Namen' },
   { id: 'chem-loesungen', title: 'Gase und Lösungen', description: 'Konzentration, Lösung ansetzen, Anteile, molares Volumen und Gasgesetz' },
   { id: 'chem-stoffmenge', title: 'Stoffmenge und Umsatz', description: 'Stoffmenge, molare Masse, Masse und Teilchenzahl' },
 ]
@@ -378,6 +380,7 @@ export const CARDS: readonly Card[] = [
   ...GLEICHUNGEN_CARDS,
   ...LOESUNGEN_CARDS,
   ...IONEN_CARDS,
+  ...MOLEKUELE_CARDS,
 ]
 
 export function topicById(id: string): Topic | undefined {

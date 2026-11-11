@@ -16,11 +16,13 @@ import { LIGHT_SOURCES, lightValues } from './light.ts'
 
 const COURSE = 'chem-atombau'
 // alle Themen mit Rechnungen
-const CALC_COURSES = ['chem-atombau', 'chem-stoffmenge', 'chem-gleichungen', 'chem-loesungen', 'chem-ionen']
+const CALC_COURSES = ['chem-atombau', 'chem-stoffmenge', 'chem-gleichungen', 'chem-loesungen', 'chem-ionen', 'chem-molekuele']
 // Abweichung mit Begründung (docs/PLAN-M4.md, S3b): Es gibt nur etwa 15 bis 25 sinnvolle Reaktionen bzw.
 // Brennstoffe je Stufe; dort zählt, dass jede vorkommt und keine deutlich öfter als die anderen
 const VARIETY: Readonly<Record<string, { distinct: number; maxShare: number }>> = {
   'chem-gleichungen': { distinct: 15, maxShare: 0.12 },
+  // S5b: Es gibt nur etwa 40 sinnvolle Moleküle ohne Formalladungen, in den Grundlagen etwa 30
+  'chem-molekuele': { distinct: 40, maxShare: 0.06 },
 }
 const LEVELS: readonly Level[] = [1, 2, 3]
 const SAMPLE = 400

@@ -13,7 +13,8 @@ import type { CourseEngine } from '../courseEngines.ts'
 import { courseHref, mixHref, mixPracticeHref, practiceHref } from '../routes.ts'
 import { LevelUpSuggestion } from '../task/LevelUpSuggestion.tsx'
 import { CheckBadge, FocusBanner, TaskIntro, TaskTopBar } from '../task/TaskParts.tsx'
-import { ChemFigure } from '../chem/ChemFigure.tsx'
+import { ChemFigure, FigureDrawing } from '../chem/ChemFigure.tsx'
+import { figureById } from '../../engine/chem/figures.ts'
 import { type ExplanationMode, useExplanationMode } from '../task/explanationMode.ts'
 
 type Props = { course: string; engine: CourseEngine; taskRef: TaskRef; focus?: string | null; mix?: string | null }
@@ -274,6 +275,13 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext 
 
 // Eine Formel als Antwort setzt sich kleiner, bis sie passt; Text mit Formeln bricht um wie ein Satz
 function ChoiceContent({ choice }: { choice: Choice }) {
+  const figure = choice.figure ? figureById(choice.figure) : undefined
+  if (figure)
+    return (
+      <span className="block min-w-0 flex-1 py-1">
+        <FigureDrawing figure={figure} label={choice.content} />
+      </span>
+    )
   const content = (
     <>
       <RichText text={choice.content} className="block font-medium" inline />
@@ -329,6 +337,7 @@ function FinishView({ course, mix, task, mistakes, focus }: FinishProps) {
             </>
           )}
           {task.resultNote && <RichText text={task.resultNote} className="text-zinc-600" />}
+          {task.resultFigure && <ChemFigure id={task.resultFigure} />}
         </div>
       )}
       {/* In der Mischung kein Vorschlag für eine höhere Stufe: Die Stufe gilt dort für alle Themen */}

@@ -1,6 +1,9 @@
 // Bilder zu Chemie-Fragen und Lernkarten (Wunsch des Nutzers, Plan M4 S5): aus Daten gezeichnet, nicht von
 // Hand. Die Engine liefert die Lage der Teilchen; die Oberfläche (ui/chem/ChemFigure.tsx) zeichnet sie.
 
+import { type LewisFigure, lewisFigureById } from './lewis.ts'
+import { type MolBond, type Molecule, moleculeById, vseprOf } from './molecules.ts'
+
 // Ionengitter: Elementarzelle mit Kationen und Anionen in Koordinaten von 0 bis 1 (Würfelkante 1)
 export type LatticeIon = { readonly x: number; readonly y: number; readonly z: number; readonly kind: 'cation' | 'anion' }
 
@@ -22,7 +25,20 @@ export type LatticeFigure = {
   readonly center: number
 }
 
-export type ChemFigure = LatticeFigure
+// Räumlicher Bau eines Moleküls (Gestalt nach dem Elektronenpaar-Abstoßungsmodell): Zentralatom im Ursprung,
+// Partner und freie Paare in den Richtungen des Modells (x nach rechts, y nach oben, z zum Betrachter)
+export type ShapeFigure = {
+  readonly kind: 'shape'
+  readonly id: string
+  readonly caption: string
+  readonly atoms: readonly { readonly el: string; readonly x: number; readonly y: number; readonly z: number }[]
+  // [Zentralatom 0, Partner, Bindungsordnung]
+  readonly bonds: readonly MolBond[]
+  // Richtungen der freien Paare am Zentralatom
+  readonly lobes: readonly { readonly x: number; readonly y: number; readonly z: number }[]
+}
+
+export type ChemFigure = LatticeFigure | LewisFigure | ShapeFigure
 
 const distance = (a: LatticeIon, b: LatticeIon) => Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z)
 
@@ -91,7 +107,74 @@ const ZNS = lattice({
 
 export const FIGURES: readonly ChemFigure[] = [NACL, CSCL, ZNS]
 
-export const figureById = (id: string): ChemFigure | undefined => FIGURES.find((f) => f.id === id)
+export function figureById(id: string): ChemFigure | undefined {
+  if (id.startsWith('lewis:')) return lewisFigureById(id) ?? undefined
+  if (id.startsWith('gestalt:')) return shapeFigureById(id) ?? undefined
+  return FIGURES.find((f) => f.id === id)
+}
+
+// ---------------------------------------------------------------- Gestalt der Moleküle
+
+type Vec = { x: number; y: number; z: number }
+const v = (x: number, y: number, z: number): Vec => ({ x, y, z })
+const deg = (a: number) => (a * Math.PI) / 180
+// Tetraeder mit einer Ecke oben: die übrigen drei unten, eine davon zum Betrachter
+const TETRA_LOW = [90, 210, 330].map((p) => v((Math.sqrt(8) / 3) * Math.cos(deg(p)), -1 / 3, (Math.sqrt(8) / 3) * Math.sin(deg(p))))
+// gewinkelt AX₂E₂: Partner in der Bildebene unten, freie Paare oben vorn und hinten (halber Winkel 54,75°)
+const HALF = deg(109.47 / 2)
+const PLANAR = [90, 210, 330].map((p) => v(Math.cos(deg(p)), -Math.sin(deg(p)), 0))
+
+// Richtungen der Partner und der freien Paare je Typ AXₙEₘ
+function directions(x: number, e: number): { ligands: Vec[]; lobes: Vec[] } {
+  const key = `${x}:${e}`
+  switch (key) {
+    case '2:0':
+      return { ligands: [v(-1, 0, 0), v(1, 0, 0)], lobes: [] }
+    case '3:0':
+      return { ligands: PLANAR, lobes: [] }
+    case '2:1':
+      return { ligands: PLANAR.slice(1), lobes: [PLANAR[0]] }
+    case '4:0':
+      return { ligands: [v(0, 1, 0), ...TETRA_LOW], lobes: [] }
+    case '3:1':
+      return { ligands: TETRA_LOW, lobes: [v(0, 1, 0)] }
+    case '2:2':
+      return {
+        ligands: [v(-Math.sin(HALF), -Math.cos(HALF), 0), v(Math.sin(HALF), -Math.cos(HALF), 0)],
+        lobes: [v(0, Math.cos(HALF), Math.sin(HALF)), v(0, Math.cos(HALF), -Math.sin(HALF))],
+      }
+    case '5:0':
+      return { ligands: [v(0, 1, 0), v(0, -1, 0), ...[90, 210, 330].map((p) => v(Math.cos(deg(p)), 0, Math.sin(deg(p))))], lobes: [] }
+    case '6:0':
+      return { ligands: [v(0, 1, 0), v(0, -1, 0), v(-1, 0, 0), v(1, 0, 0), v(0, 0, 1), v(0, 0, -1)], lobes: [] }
+  }
+  throw new Error(`Typ AX${x}E${e} hat kein Bild`)
+}
+
+export const shapeId = (mol: Molecule) => `gestalt:${mol.id}`
+
+export function shapeFigureById(id: string): ShapeFigure | null {
+  const mol = moleculeById(id.slice('gestalt:'.length))
+  if (!mol || mol.central === undefined) return null
+  const { x, e } = vseprOf(mol)
+  const { ligands, lobes } = directions(x, e)
+  const partners = mol.bonds.filter(([a, b]) => a === mol.central || b === mol.central)
+  const atoms = [{ el: mol.atoms[mol.central].el, x: 0, y: 0, z: 0 }]
+  const bonds: MolBond[] = []
+  for (const [k, [a, b, order]] of partners.entries()) {
+    const other = a === mol.central ? b : a
+    atoms.push({ el: mol.atoms[other].el, ...ligands[k] })
+    bonds.push([0, k + 1, order])
+  }
+  return {
+    kind: 'shape',
+    id,
+    caption: String.raw`Räumlicher Bau von $\ce{${mol.id}}$: Kugeln sind Atome, Keulen freie Elektronenpaare am Zentralatom.`,
+    atoms,
+    bonds,
+    lobes,
+  }
+}
 
 // Koordinationszahl des hervorgehobenen Ions: Zahl seiner nächsten Nachbarn
 export const coordinationOf = (f: LatticeFigure) => f.bonds.filter(([a, b]) => a === f.center || b === f.center).length

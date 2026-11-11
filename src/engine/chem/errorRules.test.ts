@@ -15,6 +15,12 @@ import { CHEM_ERROR_RULES } from './errorRules.ts'
 import { generatorsOf } from './generators/index.ts'
 import { lightValues } from './generators/light.ts'
 import { type Field, type Particle, wrongValues } from './generators/particles.ts'
+import type { GuidedStep } from '../guided/types.ts'
+import { createRng } from '../random/rng.ts'
+import { MOLECULE_STEPS, nameTask } from './generators/molekuele.ts'
+import { LEWIS_VARIANTS, type LewisVariant, lewisFigure, lewisValid } from './lewis.ts'
+import { compoundName } from './molNames.ts'
+import { moleculeById } from './molecules.ts'
 
 // Katalogbeispiele der Rechenfehler (docs/PLAN-M4.md, „Katalog der Rechenfehler"): Jeder Fehler ergibt
 // genau den Wert aus dem Katalog; dazu Name, Formel und eigener Text „Warum ist das falsch?".
@@ -286,5 +292,96 @@ describe('Rechenfehler Ionenbindung und Salze: Katalogbeispiele', () => {
     expect(hf + ions).toBe(-36)
     expect(ions - lattice).toBe(1161)
     expect(lattice - ions).toBe(-1161)
+  })
+})
+
+describe('Rechenfehler Moleküle: Katalogbeispiele (S5b)', () => {
+  const S = MOLECULE_STEPS
+  const mol = (id: string) => moleculeById(id)!
+  const rng = () => createRng('katalog')
+  // Antwort eines Fehlers in einem Schritt (sicher dabei über focus)
+  const wrongIn = (step: GuidedStep | null, rule: string) => step?.choices.find((c) => c.errorRuleId === rule)?.content
+
+  it('Valenzelektronen: Index vergessen, alle Elektronen, Oktette gezählt', () => {
+    expect(wrongIn(S.valenceStep(mol('NH3'), rng(), 'chem-lewis-index-ignored'), 'chem-lewis-index-ignored')).toBe('$6$')
+    expect(wrongIn(S.valenceStep(mol('H2O'), rng(), 'chem-lewis-all-electrons'), 'chem-lewis-all-electrons')).toBe('$10$')
+    expect(wrongIn(S.valenceStep(mol('CH4'), rng(), 'chem-lewis-octet-count'), 'chem-lewis-octet-count')).toBe('$16$')
+  })
+
+  it('Paare: nicht halbiert, nur Bindungen, Mehrfachbindung als ein Paar, nur am Zentralatom', () => {
+    expect(wrongIn(S.pairsStep(mol('NH3'), rng(), 'chem-lewis-pairs-not-halved'), 'chem-lewis-pairs-not-halved')).toBe('$8$')
+    expect(wrongIn(S.pairsStep(mol('H2O'), rng(), 'chem-lewis-bonds-only'), 'chem-lewis-bonds-only')).toBe('$2$')
+    expect(wrongIn(S.splitStep(mol('CO2'), rng(), 'chem-lewis-multiple-as-one'), 'chem-lewis-multiple-as-one')).toBe('2 bindende und 6 freie Paare')
+    expect(wrongIn(S.splitStep(mol('PCl3'), rng(), 'chem-lewis-free-central-only'), 'chem-lewis-free-central-only')).toBe('3 bindende und 1 freies Paar')
+  })
+
+  it('Lewis-Bilder: jeder Fehler ergibt eine falsche Formel wie im Katalog', () => {
+    const variant = (id: string, v: LewisVariant) => lewisFigure(mol(id), v)!
+    expect(variant('NH3', 'ohne-paare-innen').atoms[0].pairs).toHaveLength(0)
+    expect(variant('CCl4', 'ohne-paare-aussen').atoms.slice(1).every((a) => a.pairs.length === 0)).toBe(true)
+    // O–C–O mit vollen Oktetts: 20 statt 16 Elektronen
+    const co2 = variant('CO2', 'einfachbindungen')
+    expect(co2.bonds.every(([, , o]) => o === 1)).toBe(true)
+    expect(co2.bonds.length * 2 + co2.atoms.reduce((s, a) => s + 2 * a.pairs.length, 0)).toBe(20)
+    expect(variant('CH4', 'paar-zu-viel').atoms[0].pairs).toHaveLength(1)
+    expect(variant('H2O', 'wasserstoff-paar').atoms.find((a) => a.el === 'H' && a.pairs.length === 1)).toBeDefined()
+    for (const v of Object.keys(LEWIS_VARIANTS) as LewisVariant[]) {
+      const id = { 'ohne-paare-innen': 'NH3', 'ohne-paare-aussen': 'CCl4', einfachbindungen: 'CO2', 'paar-zu-viel': 'CH4', 'wasserstoff-paar': 'H2O' }[v]
+      expect(lewisValid(mol(id), variant(id, v)), v).toBe(false)
+      const step = S.lewisChoiceStep(mol(id), rng(), LEWIS_VARIANTS[v])!
+      expect(step.choices.find((c) => c.errorRuleId === LEWIS_VARIANTS[v])?.figure, v).toBe(lewisFigure(mol(id), v)!.id)
+    }
+  })
+
+  it('Partner und freie Paare: doppelt gezählt, Paare als Partner, Zentralatom mitgezählt, nicht halbiert, Valenzelektronen, alle Paare', () => {
+    expect(wrongIn(S.partnerStep(mol('CO2'), rng(), 'chem-vsepr-double-counted'), 'chem-vsepr-double-counted')).toBe('$4$')
+    expect(wrongIn(S.partnerStep(mol('NH3'), rng(), 'chem-vsepr-pairs-as-partners'), 'chem-vsepr-pairs-as-partners')).toBe('$4$')
+    expect(wrongIn(S.partnerStep(mol('CH4'), rng(), 'chem-vsepr-all-atoms'), 'chem-vsepr-all-atoms')).toBe('$5$')
+    expect(wrongIn(S.lonePairStep(mol('H2O'), rng(), 'chem-vsepr-pairs-not-halved'), 'chem-vsepr-pairs-not-halved')).toBe('$4$')
+    expect(wrongIn(S.lonePairStep(mol('NH3'), rng(), 'chem-vsepr-valence-as-pairs'), 'chem-vsepr-valence-as-pairs')).toBe('$5$')
+    expect(wrongIn(S.lonePairStep(mol('CCl4'), rng(), 'chem-vsepr-all-lone-pairs'), 'chem-vsepr-all-lone-pairs')).toBe('$12$')
+    expect(wrongIn(S.typeStep(mol('CO2'), rng(), 'chem-vsepr-double-counted'), 'chem-vsepr-double-counted')).toBe(String.raw`$\mathrm{AX_{4}}$`)
+  })
+
+  it('Gestalt und Winkel: freie Paare vergessen, Anordnung, freies Paar angenommen, flach, idealer Winkel', () => {
+    expect(wrongIn(S.shapeStep(mol('CO2'), rng(), 'chem-vsepr-double-counted'), 'chem-vsepr-double-counted')).toBe('tetraedrisch')
+    expect(wrongIn(S.shapeStep(mol('NH3'), rng(), 'chem-vsepr-lone-pairs-forgotten'), 'chem-vsepr-lone-pairs-forgotten')).toBe('trigonal-planar')
+    expect(wrongIn(S.shapeStep(mol('H2O'), rng(), 'chem-vsepr-lone-pairs-forgotten'), 'chem-vsepr-lone-pairs-forgotten')).toBe('linear')
+    expect(wrongIn(S.shapeStep(mol('NH3'), rng(), 'chem-vsepr-arrangement'), 'chem-vsepr-arrangement')).toBe('tetraedrisch')
+    expect(wrongIn(S.shapeStep(mol('CO2'), rng(), 'chem-vsepr-extra-pair'), 'chem-vsepr-extra-pair')).toBe('gewinkelt')
+    expect(wrongIn(S.shapeStep(mol('CH4'), rng(), 'chem-vsepr-flat'), 'chem-vsepr-flat')).toBe('quadratisch-planar')
+    expect(wrongIn(S.angleStep(mol('CH4'), rng(), 'chem-vsepr-flat'), 'chem-vsepr-flat')).toBe(String.raw`$90^\circ$`)
+    expect(wrongIn(S.angleStep(mol('H2O'), rng(), 'chem-vsepr-angle-ideal'), 'chem-vsepr-angle-ideal')).toBe(String.raw`$109{,}5^\circ$`)
+  })
+
+  it('ΔEN, Bindungsart, Teilladungen: O–H 5,64 und 2,48 statt 1,24; H–Cl mit δ− am H', () => {
+    expect(wrongIn(S.deltaStep(mol('H2O'), 'H', 'O', rng(), 'chem-en-added'), 'chem-en-added')).toBe(String.raw`$5{,}64$`)
+    expect(wrongIn(S.deltaStep(mol('H2O'), 'H', 'O', rng(), 'chem-en-index'), 'chem-en-index')).toBe(String.raw`$2{,}48$`)
+    expect(S.deltaStep(mol('H2O'), 'H', 'O', rng())!.choices.find((c) => c.correct)!.content).toBe(String.raw`$1{,}24$`)
+    expect(S.bondTypeStep('H', 'O', rng())!.choices.filter((c) => c.errorRuleId === 'chem-en-bond-type').map((c) => c.content)).toContain('Ionenbindung')
+    expect(wrongIn(S.partialStep('H', 'Cl', rng()), 'chem-en-partial-swapped')).toBe(String.raw`$\delta-$ am $\ce{H}$, $\delta+$ am $\ce{Cl}$`)
+  })
+
+  it('Dipol: CO₂ als Dipol, CH₄ als Dipol, H₂O unpolar wie CO₂, Bindungen von H₂O für unpolar gehalten', () => {
+    const contentOf = (id: string, rule: string) => wrongIn(S.dipoleStep(mol(id), rng(), rule), rule)
+    expect(contentOf('CO2', 'chem-dipole-polar-bond')).toMatch(/^Ja/)
+    expect(contentOf('CH4', 'chem-dipole-unpolar-bonds')).toMatch(/^Ja/)
+    expect(contentOf('H2O', 'chem-dipole-symmetry-assumed')).toMatch(/^Nein: Die Bindungen sind polar/)
+    expect(contentOf('H2O', 'chem-dipole-unpolar-claimed')).toMatch(/^Nein: Alle Bindungen/)
+  })
+
+  it('Namen: N₂O als Stickstoffoxid und Stickstoffdioxid, N₂O₃ als Stickstofftrioxid', () => {
+    const n2o = ['N', 2, 'O', 1] as const
+    expect(compoundName(n2o)).toBe('Distickstoffmonoxid')
+    expect(compoundName(n2o, { first: null, second: null })).toBe('Stickstoffoxid')
+    expect(compoundName(n2o, { first: 1, second: 2 })).toBe('Stickstoffdioxid')
+    expect(compoundName(['N', 2, 'O', 3], { first: null, second: 3 })).toBe('Stickstofftrioxid')
+    // die Aufgabe nutzt genau diese Fehler
+    let seen = 0
+    for (let i = 0; i < 200 && seen < 3; i++) {
+      const calc = nameTask(3, createRng(`name-${i}`), { level: 3, seed: 10000 + i }, 'chem-molname-first-prefix')
+      if (calc?.task.steps[0].choices.some((c) => c.errorRuleId === 'chem-molname-first-prefix')) seen++
+    }
+    expect(seen).toBe(3)
   })
 })

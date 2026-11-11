@@ -7,6 +7,8 @@ import { varietyStats } from '../../engine/tasks/variety.ts'
 import { findError } from '../../engine/errorCatalog.ts'
 import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
+import { ChemFigure, FigureDrawing } from './ChemFigure.tsx'
+import { figureById } from '../../engine/chem/figures.ts'
 import { levelName } from '../catalog.ts'
 import { taskHref } from '../routes.ts'
 
@@ -108,6 +110,11 @@ function CalcCard({ course, level, seed }: { course: string; level: Level; seed:
             <ul className="space-y-1 text-sm">
               {step.choices.map((c) => (
                 <li key={c.id} className={c.correct ? 'text-green-800' : 'text-red-800'}>
+                  {c.figure && figureById(c.figure) && (
+                    <span className="block max-w-[12rem]">
+                      <FigureDrawing figure={figureById(c.figure)!} label={c.content} />
+                    </span>
+                  )}
                   <RichText text={c.content} inline /> {c.correct ? '(richtig)' : <span className="text-zinc-500">· {findError(c.errorRuleId ?? '')?.name ?? c.errorRuleId}</span>}
                 </li>
               ))}
@@ -118,6 +125,7 @@ function CalcCard({ course, level, seed }: { course: string; level: Level; seed:
       <div className="rounded-xl bg-green-50 px-3 py-2 text-sm">
         {task.resultLatex ? <Formula tex={task.resultLatex} /> : <RichText text={task.resultText ?? ''} />}
       </div>
+      {task.resultFigure && <ChemFigure id={task.resultFigure} />}
     </article>
   )
 }
