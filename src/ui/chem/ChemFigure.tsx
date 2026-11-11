@@ -1,4 +1,4 @@
-import { type BoxFigure, type ChemFigure as Figure, type LatticeFigure, type PseFigure, type ShapeFigure, figureById } from '../../engine/chem/figures.ts'
+import { type BoxFigure, type ChemFigure as Figure, type EnergyFigure, type LatticeFigure, type PseFigure, type ShapeFigure, figureById } from '../../engine/chem/figures.ts'
 import { LETTERS } from '../../engine/chem/electrons.ts'
 import type { LewisFigure } from '../../engine/chem/lewis.ts'
 import { RichText } from '../RichText.tsx'
@@ -344,12 +344,73 @@ function TrendArrows({ arrows, x0, y0, w, h }: { arrows: NonNullable<PseFigure['
   )
 }
 
+// Energiediagramm: Energie über dem Reaktionsweg, Pfeile für Aktivierungsenergie und Reaktionsenthalpie, mit Katalysator
+// gestrichelt der niedrigere Weg (Legende unten)
+function Energy({ figure }: { figure: EnergyFigure }) {
+  const educt = figure.exo ? 112 : 146
+  const productLevel = figure.exo ? 154 : 104
+  const peak = 40
+  const catPeak = 78
+  const top = (y: number) => `M34,${educt} H92 C122,${educt} 126,${y} 152,${y} C178,${y} 182,${productLevel} 212,${productLevel} H282`
+  const head = (x: number, y: number, down: boolean) => `${x - 5},${down ? y - 7 : y + 7} ${x},${y} ${x + 5},${down ? y - 7 : y + 7}`
+  const height = figure.catalyst ? 214 : 196
+  return (
+    <svg viewBox={`0 0 340 ${height}`} className="mx-auto block h-auto" style={{ width: 340, maxWidth: '100%' }} role="img" aria-label={`Energiediagramm einer ${figure.exo ? 'exothermen' : 'endothermen'} Reaktion${figure.catalyst ? ' mit und ohne Katalysator' : ''}`}>
+      <g className="stroke-zinc-600" strokeWidth={1.5} fill="none">
+        <line x1={24} y1={176} x2={24} y2={14} />
+        <polyline points="19,21 24,14 29,21" />
+        <line x1={24} y1={176} x2={318} y2={176} />
+        <polyline points="311,171 318,176 311,181" />
+      </g>
+      <text x={30} y={14} className="fill-zinc-700" fontSize={11}>
+        Energie
+      </text>
+      <text x={316} y={190} textAnchor="end" className="fill-zinc-700" fontSize={11}>
+        Reaktionsweg
+      </text>
+      <g className="stroke-zinc-400" strokeWidth={1} strokeDasharray="2 3">
+        <line x1={92} y1={educt} x2={310} y2={educt} />
+        <line x1={140} y1={peak} x2={164} y2={peak} />
+      </g>
+      {figure.catalyst && <path d={top(catPeak)} className="stroke-zinc-500" strokeWidth={2.5} strokeDasharray="6 4" fill="none" />}
+      <path d={top(peak)} className="stroke-accent-700" strokeWidth={3} fill="none" />
+      <g className="stroke-zinc-800" strokeWidth={1.8} fill="none" strokeLinecap="round" strokeLinejoin="round">
+        <line x1={152} y1={educt} x2={152} y2={peak + 2} />
+        <polyline points={head(152, peak + 2, false)} />
+        <line x1={300} y1={educt} x2={300} y2={productLevel} />
+        <polyline points={head(300, productLevel, productLevel > educt)} />
+      </g>
+      <text x={158} y={educt - 6} className="fill-zinc-800" fontSize={12} fontWeight={600}>
+        E<tspan dy={3} fontSize={9}>A</tspan>
+      </text>
+      <text x={294} y={(educt + productLevel) / 2 + 4} textAnchor="end" className="fill-zinc-800" fontSize={12} fontWeight={600}>
+        ΔH
+      </text>
+      <text x={62} y={educt - 8} textAnchor="middle" className="fill-zinc-700" fontSize={11}>
+        Edukte
+      </text>
+      <text x={244} y={productLevel - 8} textAnchor="middle" className="fill-zinc-700" fontSize={11}>
+        Produkte
+      </text>
+      {figure.catalyst && (
+        <g>
+          <line x1={34} y1={204} x2={64} y2={204} className="stroke-zinc-500" strokeWidth={2.5} strokeDasharray="6 4" />
+          <text x={70} y={208} className="fill-zinc-700" fontSize={11}>
+            mit Katalysator
+          </text>
+        </g>
+      )}
+    </svg>
+  )
+}
+
 // nur die Zeichnung, ohne Rahmen und Unterschrift (z. B. als Antwort zur Auswahl)
 export function FigureDrawing({ figure, label }: { figure: Figure; label?: string }) {
   if (figure.kind === 'lattice') return <Lattice figure={figure} />
   if (figure.kind === 'lewis') return <Lewis figure={figure} label={label ?? figure.description} />
   if (figure.kind === 'boxes') return <Boxes figure={figure} label={label ?? figure.description} />
   if (figure.kind === 'pse') return <Pse figure={figure} />
+  if (figure.kind === 'energy') return <Energy figure={figure} />
   return <Shape figure={figure} />
 }
 

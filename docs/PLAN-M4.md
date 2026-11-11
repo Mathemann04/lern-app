@@ -737,14 +737,20 @@ kommen mit ihren Schritten dazu. Die Denkfehler der Wissensfragen
 | Molares Volumen | durch V_m geteilt statt malgenommen oder umgekehrt (`chem-vm-inverted`, seit S4b) | 0,5 mol: 0,0223 L statt 11,2 L |
 | Vol-% | nicht durch 100 geteilt (`chem-vol-percent`) | 40 Vol-% von 0,5 L: 20 L statt 0,2 L |
 | Anteile | Bruch nicht mit 100 % malgenommen (`chem-percent-not-times`, seit S4b) | 10 g in 200 g: 0,05 % statt 5 % |
-| Massenwirkungsgesetz | Exponent passt nicht zum Koeffizienten (`chem-mwg-exponent`) | Ammoniaksynthese: c²(H₂) statt c³(H₂) |
+| Massenwirkungsgesetz | Exponent passt nicht zum Koeffizienten (`chem-mwg-exponent`; erzeugt als „Exponenten weggelassen“) | Ammoniaksynthese: c(H₂) statt c³(H₂) |
 | Massenwirkungsgesetz | Zähler und Nenner vertauscht (`chem-mwg-swapped`) | Edukte im Zähler |
 | Massenwirkungsgesetz | Koeffizient als Faktor (`chem-mwg-factor`) | 2 · c(NH₃) statt c²(NH₃) |
 | Massenwirkungsgesetz | Summe statt Produkt (`chem-mwg-sum`) | c(N₂) + c³(H₂) im Nenner |
 | K aus Geschwindigkeiten | k_rück/k_hin statt k_hin/k_rück (`chem-k-rates`) | Kehrwert von K |
+| K aus Geschwindigkeiten | k_hin · k_rück (`chem-k-product`, seit S7a) | Produkt statt Quotient |
+| Geschwindigkeit | Produkte in v_hin eingesetzt (`chem-rate-products`, seit S7a) | A + B ⇌ C: v_hin = k_hin · c(C) |
 | Le Chatelier | Druck begünstige die Seite mit mehr Gasteilchen (`chem-lc-pressure`) | Ammoniaksynthese: Druck erhöhen → Edukte |
 | Le Chatelier | Erwärmen helfe immer den Produkten (`chem-lc-heat`) | exotherme Reaktion: Erwärmen → Produkte |
 | Le Chatelier | Koeffizienten beim Zählen vergessen (`chem-lc-count`) | H₂ + I₂ ⇌ 2 HI: Druck → Produkte |
+| Le Chatelier | Ausweichen zur Seite des zugegebenen Stoffs (`chem-lc-conc`, seit S7a) | N₂ zugeben → Edukte |
+| Le Chatelier | exotherm und endotherm verwechselt (`chem-lc-exo-endo`, seit S7a) | ΔH < 0 als endotherm |
+| Le Chatelier | Zwang für wirkungslos gehalten (`chem-lc-no-shift`, seit S7a) | Temperatur ändern → Lage bleibt |
+| Ausbeute | Katalysator für bessere Ausbeute gehalten (`chem-lc-catalyst`, seit S7a) | Katalysator → mehr Produkt |
 | Reaktionsenthalpie | Edukte minus Produkte (`chem-dh-reversed`) | Vorzeichen umgedreht |
 | Reaktionsenthalpie | Koeffizienten vergessen (`chem-dh-coefficients`) | jede Bildungsenthalpie nur einmal gezählt |
 | Reaktionsenthalpie | H₂O(g) statt H₂O(l) aus der Tabelle (`chem-dh-water-gas`) | −241,8 statt −285,8 kJ/mol |
@@ -1103,6 +1109,21 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   Bildungsenthalpien, Entropie, freie Enthalpie; „Klausuraufgabe 5 üben“.
   Ausprobieren: „Welche Maßnahmen erhöhen die Ausbeute?“; ΔH einer
   Verbrennung geführt.
+  Geteilt (11.11.2026), damit jeder Teil einzeln ausprobierbar ist: **S7a** Thema „Chemisches Gleichgewicht“,
+  **S7b** Thema „Energie bei Reaktionen“, **S7c** „Klausuraufgabe 5 üben“.
+  **S7a** (fertig): Thema „Chemisches Gleichgewicht“ mit Unterthemen Dynamisches Gleichgewicht, Massenwirkungsgesetz,
+  Reaktionsgeschwindigkeit und K, Prinzip von Le Chatelier, Exotherm, Aktivierungsenergie und Katalysator (alle drei
+  Stufen). 20 Gasgleichgewichte als Daten (`chem/equilibria.ts`, ΔH aus Bildungsenthalpien nach NIST, gerundet; bei
+  H₂ + I₂ und drei weiteren ohne ΔH, also nie nach der Temperatur gefragt). Rechnungen: Massenwirkungsgesetz (Zähler
+  oder Nenner, dann der ganze Ausdruck; alle Stufen), K aus Konzentrationen (ab Vertiefung), Geschwindigkeit der
+  Hinreaktion und K = k_hin/k_rück an Reaktionen mit Buchstaben, die als einstufig angegeben sind (ab Vertiefung),
+  Le Chatelier für Druck (mit Gasteilchen zählen), Temperatur (erst exotherm oder endotherm) und Konzentration (ab
+  Vertiefung), Ausbeute mit Druck, Temperatur und beidem zusammen, der Katalysator als Falle (Klausurniveau). Bild:
+  Energiediagramm (exotherm oder endotherm, mit Katalysator gestrichelt) an Fragen und Karten. Neun Lernkarten,
+  53 Wissensfragen (18, 17, 18), 14 Rechenfehler, 26 Denkfehler. Abweichungen: Der Fehler „Exponent passt nicht“
+  wird als „Exponenten weggelassen“ erzeugt; vier neue Rechenfehler (siehe Katalog). Le Chatelier in den Grundlagen
+  nur als Wissensfrage (Zwang, Stoff zugeben oder entfernen). Abwechslung mit eigener Kennzahl (20 Gleichgewichte,
+  in den Grundlagen nur das Massenwirkungsgesetz: mindestens 30 Formen unter 200, keine öfter als 6 von 100).
 - **S8: Frei rechnen und Wiederholung.** Ziffernblock, Toleranz,
   Rundungshinweis und Fehlererkennung für alle Rechnungen; falsch
   beantwortete Fragen kommen wieder.

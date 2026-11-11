@@ -114,13 +114,14 @@ export const METALLE = 'chem-metalle'
 export const ELEKTRONEN = 'chem-elektronen'
 export const PSE = 'chem-pse'
 export const TRENDS = 'chem-trends'
+export const MWG = 'chem-mwg'
 
 // Chemie-Themen: Ids mit „chem-", Engine aus Wissensfragen (engine/chem/)
 export const isChemCourse = (id: string) => id.startsWith('chem-')
 
 // Themen mit Testseite in der Formel-Galerie (auch solche, die noch nicht spielbar sind); bei Chemie
 // die Seite „Fragen durchsehen"
-export const GALLERY_COURSES: readonly string[] = [DERIVATIVES, FRACTIONS, REARRANGE, ATOMBAU, GLEICHUNGEN, STOFFMENGE, LOESUNGEN, IONEN, MOLEKUELE, ZMK, METALLE, ELEKTRONEN, PSE, TRENDS]
+export const GALLERY_COURSES: readonly string[] = [DERIVATIVES, FRACTIONS, REARRANGE, ATOMBAU, GLEICHUNGEN, STOFFMENGE, LOESUNGEN, IONEN, MOLEKUELE, ZMK, METALLE, ELEKTRONEN, PSE, TRENDS, MWG]
 
 const derivativeLevels: LevelPreview[] = [
   {
@@ -418,6 +419,36 @@ const trendsParts: CoursePart[] = [
   { id: 'elektronegativitaet', title: 'Elektronegativität', levels: [1, 2, 3] },
   { id: 'affinitaet-metall', title: 'Elektronenaffinität und Metallcharakter', levels: [1, 2, 3] },
   { id: 'ionenradien', title: 'Ionenradien', levels: [2, 3] },
+]
+
+const mwgLevels: LevelPreview[] = [
+  {
+    level: 1,
+    available: true,
+    title: 'Dynamisches Gleichgewicht, Massenwirkungsgesetz aufstellen, exotherm und endotherm, Katalysator',
+    examples: [String.raw`K_{\mathrm{GG}} = \frac{c^{2}(\ce{HI})}{c(\ce{H2}) \cdot c(\ce{I2})}`],
+  },
+  {
+    level: 2,
+    available: true,
+    title: 'K berechnen und deuten, Geschwindigkeit und K, Le Chatelier bei Druck, Temperatur und Konzentration',
+    examples: [String.raw`K_{\mathrm{GG}} = \frac{k_{\text{hin}}}{k_{\text{rück}}}`],
+  },
+  {
+    level: 3,
+    available: true,
+    title: 'Bedingungen für eine große Ausbeute, Energiediagramme lesen, alles gemischt',
+    examples: [String.raw`\ce{N2 + 3 H2 <=> 2 NH3}`],
+  },
+]
+
+// Unterthemen von „Chemisches Gleichgewicht" (Rechnungen in engine/chem/generators/mwg.ts, part)
+const mwgParts: CoursePart[] = [
+  { id: 'gleichgewicht', title: 'Dynamisches Gleichgewicht', levels: [1, 2, 3] },
+  { id: 'mwg', title: 'Massenwirkungsgesetz', levels: [1, 2, 3] },
+  { id: 'geschwindigkeit', title: 'Reaktionsgeschwindigkeit und K', levels: [1, 2, 3] },
+  { id: 'le-chatelier', title: 'Prinzip von Le Chatelier', levels: [1, 2, 3] },
+  { id: 'katalysator', title: 'Exotherm, Aktivierungsenergie und Katalysator', levels: [1, 2, 3] },
 ]
 
 const pseLevels: LevelPreview[] = [
@@ -809,7 +840,17 @@ export const SUBJECTS: readonly Subject[] = [
         icon: 'equilibrium',
         tone: 'fuchsia',
         courses: [
-          comingSoon('chem-mwg', 'Chemisches Gleichgewicht', 'Massenwirkungsgesetz, Le Chatelier und Katalysator', 'equilibrium'),
+          {
+            id: MWG,
+            title: 'Chemisches Gleichgewicht',
+            description: 'Dynamisches Gleichgewicht, Massenwirkungsgesetz, Le Chatelier, Aktivierungsenergie und Katalysator',
+            icon: 'equilibrium',
+            cards: 'chem-mwg',
+            levels: mwgLevels,
+            free: false,
+            focus: true,
+            parts: mwgParts,
+          },
           comingSoon('chem-energie', 'Energie bei Reaktionen', 'Exotherm und endotherm, Enthalpie, Entropie und freie Enthalpie', 'equilibrium'),
         ],
       },

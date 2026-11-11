@@ -16,7 +16,7 @@ import { LIGHT_SOURCES, lightValues } from './light.ts'
 
 const COURSE = 'chem-atombau'
 // alle Themen mit Rechnungen
-const CALC_COURSES = ['chem-atombau', 'chem-stoffmenge', 'chem-gleichungen', 'chem-loesungen', 'chem-ionen', 'chem-molekuele', 'chem-zmk', 'chem-metalle', 'chem-elektronen', 'chem-pse', 'chem-trends']
+const CALC_COURSES = ['chem-atombau', 'chem-stoffmenge', 'chem-gleichungen', 'chem-loesungen', 'chem-ionen', 'chem-molekuele', 'chem-zmk', 'chem-metalle', 'chem-elektronen', 'chem-pse', 'chem-trends', 'chem-mwg']
 // Abweichung mit Begründung (docs/PLAN-M4.md, S3b): Es gibt nur etwa 15 bis 25 sinnvolle Reaktionen bzw.
 // Brennstoffe je Stufe; dort zählt, dass jede vorkommt und keine deutlich öfter als die anderen
 const VARIETY: Readonly<Record<string, { distinct: number; maxShare: number }>> = {
@@ -31,6 +31,8 @@ const VARIETY: Readonly<Record<string, { distinct: number; maxShare: number }>> 
   'chem-elektronen': { distinct: 45, maxShare: 0.06 },
   // S6c: etwa 30 Hauptgruppenelemente, 20 Ionen und 10 Elemente mit Ionisierungsenergien
   'chem-pse': { distinct: 40, maxShare: 0.07 },
+  // S7a: etwa 20 Gasgleichgewichte; in den Grundlagen nur das Massenwirkungsgesetz (Zähler oder Nenner je Gleichgewicht)
+  'chem-mwg': { distinct: 30, maxShare: 0.06 },
 }
 const LEVELS: readonly Level[] = [1, 2, 3]
 const SAMPLE = 400

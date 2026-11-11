@@ -95,6 +95,9 @@ feste Regeln: [CHEMIE.md](CHEMIE.md)
     - [x] S6d. Trends im Periodensystem
     - [x] S6e. Klausuraufgabe 2 üben
   - [ ] S7. Gleichgewicht und Energie
+    - [x] S7a. Thema Chemisches Gleichgewicht (Massenwirkungsgesetz, K, Le Chatelier, Katalysator, Energiediagramm)
+    - [ ] S7b. Thema Energie bei Reaktionen (Reaktionsenthalpie, Entropie, freie Enthalpie)
+    - [ ] S7c. Klausuraufgabe 5 üben
   - [ ] S8. Frei rechnen und Wiederholung
   - [ ] S9. Probeklausur Teil 1 (50 Punkte)
 - Nach Teil 1:

@@ -172,3 +172,10 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   Karten `trendsCards.ts`, Fragen `bank/trends.ts` (Denkfehler `chem-mis-tr-…`), Tests `generators/trends.test.ts`.
 - Klausuraufgabe 2 (S6e): `chem/exam/task2.ts` (Teil a aus `steckbriefTask` mit drei Schritten, Teil b aus `orderTask`
   der Trends oder `ionTask` aus `generators/pse.ts`), Kachel über `exam: { task: 2 }` am Gebiet `chem-periodensystem`.
+- Chemisches Gleichgewicht (S7a): `chem/equilibria.ts` (20 Gasgleichgewichte mit `dH` in kJ oder `null` = nie nach der
+  Temperatur fragen; `gasCount`, `speciesCount`, `pressureShift`, `temperatureShift`, `concentrationShift`, `equilibriumCe`
+  mit `<=>` und (g)), `generators/mwg.ts` (Rechenarten `mwg`, `k-wert`, `k-raten` mit Buchstaben-Reaktionen `GENERIC`,
+  `le-chatelier` mit Eingriff im Form-Text, `ausbeute`; `sideLatex` mit Varianten der Fehler, `expressionStep`,
+  `pressureAskable`), Rechenfehler `chem/mwgRules.ts`, Karten `mwgCards.ts`, Fragen `bank/mwg.ts` (Denkfehler
+  `chem-mis-gg-…`), Tests `generators/mwg.test.ts`. Bild `energie:<exo|endo>[:kat]` (`energyFigureById` in `figures.ts`,
+  gezeichnet als `Energy` in `ChemFigure.tsx`). Im Fließtext nie das Wort „null“ (die Tests suchen es als Platzhalter).

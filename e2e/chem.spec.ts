@@ -312,6 +312,7 @@ test('Chemie: Themen mischen, „Nächste Aufgabe" bleibt in der Mischung, X und
   await page.getByRole('checkbox', { name: 'Elektronen', exact: true }).uncheck()
   await page.getByRole('checkbox', { name: 'Aufbau des Periodensystems', exact: true }).uncheck()
   await page.getByRole('checkbox', { name: 'Trends im Periodensystem', exact: true }).uncheck()
+  await page.getByRole('checkbox', { name: 'Chemisches Gleichgewicht', exact: true }).uncheck()
 
   // Unterthemen aufklappen: dieselben Kästchen wie auf der Themenseite (Atombau steht zuerst)
   const toggle = page.getByRole('button', { name: /^Unterthemen: alle/ }).first()
@@ -758,5 +759,20 @@ test('Chemie: Klausuraufgabe 2 üben, Periodensystem, abgeben, Auswertung mit Pu
   await page.getByRole('button', { name: 'Abgeben' }).click()
   await expect(page.getByTestId('exam-score')).toHaveText(/^\d+(,5)? von 6 Punkten$/)
   await expectCleanPage(page, 'Auswertung Klausuraufgabe 2')
+  expect(errors).toEqual([])
+})
+
+test('Chemie: Chemisches Gleichgewicht, Rechnung und Lernkarte mit Energiediagramm', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./#/gebiet/chem-gleichgewicht')
+  await page.getByRole('link', { name: /Chemisches Gleichgewicht/ }).click()
+  await expect(page.getByRole('heading', { name: 'Chemisches Gleichgewicht' })).toBeVisible()
+  await page.goto('./#/ueben/chem-mwg/2-10000')
+  await expect(answers(page).first()).toBeVisible()
+  await expectCleanPage(page, 'Rechnung zum Gleichgewicht')
+  await page.goto('./#/karten/chem-mwg/gg-katalysator')
+  await expect(page.getByRole('heading', { name: 'Katalysator' })).toBeVisible()
+  await expect(page.getByTestId('chem-figure')).toBeVisible()
+  await expectCleanPage(page, 'Katalysator')
   expect(errors).toEqual([])
 })

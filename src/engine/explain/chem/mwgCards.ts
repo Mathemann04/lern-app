@@ -1,0 +1,163 @@
+import type { Card } from '../cards.ts'
+
+// Lernkarten des Ordners „Chemisches Gleichgewicht“ (Chemie 1, S7a), in eigenen Worten. Reaktionsenthalpien wie in
+// chem/equilibria.ts.
+
+const r = String.raw
+const K = r`K_{\mathrm{GG}}`
+
+export const MWG_CARDS: readonly Card[] = [
+  {
+    id: 'gg-dynamisch',
+    topic: 'chem-mwg',
+    title: 'Dynamisches Gleichgewicht',
+    level: 1,
+    rules: [],
+    formulas: [r`v_{\text{hin}} = v_{\text{rück}}`],
+    memo: 'Bei einer Gleichgewichtsreaktion (Doppelpfeil) laufen Hin- und Rückreaktion. Im Gleichgewicht sind beide gleich schnell: Es entstehen so viele Teilchen, wie zerfallen. Die Konzentrationen bleiben deshalb konstant, sind aber im Allgemeinen nicht gleich groß.',
+    note: 'Von außen sieht es so aus, als ruhe die Reaktion; im Kleinen reagieren die Teilchen weiter. Das Gleichgewicht lässt sich von beiden Seiten aus erreichen.',
+    examples: [
+      { chemTask: r`$\ce{N2(g) + 3 H2(g) <=> 2 NH3(g)}$`, lines: [{ label: 'Hinreaktion: Ammoniak entsteht; Rückreaktion: Ammoniak zerfällt' }] },
+      { chemTask: 'Start nur mit Edukten', lines: [{ label: 'Hinreaktion wird langsamer, Rückreaktion schneller, bis beide gleich schnell sind' }] },
+    ],
+    errors: ['chem-mis-gg-stopped', 'chem-mis-gg-equal-conc', 'chem-mis-gg-complete', 'chem-mis-gg-forward-faster'],
+  },
+  {
+    id: 'gg-mwg',
+    topic: 'chem-mwg',
+    title: 'Massenwirkungsgesetz',
+    level: 1,
+    rules: [],
+    formulas: [r`a\,\ce{A} + b\,\ce{B} \rightleftharpoons c\,\ce{C} + d\,\ce{D}`, r`${K} = \frac{c^{c}(\ce{C}) \cdot c^{d}(\ce{D})}{c^{a}(\ce{A}) \cdot c^{b}(\ce{B})}`],
+    memo: 'Produkte (rechts vom Doppelpfeil) kommen in den Zähler, Edukte (links) in den Nenner. Die Konzentrationen einer Seite werden multipliziert, jede hoch ihrem Koeffizienten aus der Gleichung.',
+    note: 'Ein Koeffizient wird zum Exponenten, nie zum Faktor: $c^{2}(\\ce{NH3})$, nicht $2 \\cdot c(\\ce{NH3})$.',
+    examples: [
+      { chemTask: r`$\ce{H2(g) + I2(g) <=> 2 HI(g)}$`, lines: [{ label: 'Ausdruck', latex: r`${K} = \frac{c^{2}(\ce{HI})}{c(\ce{H2}) \cdot c(\ce{I2})}` }] },
+      { chemTask: r`$\ce{N2(g) + 3 H2(g) <=> 2 NH3(g)}$`, lines: [{ label: 'Ausdruck', latex: r`${K} = \frac{c^{2}(\ce{NH3})}{c(\ce{N2}) \cdot c^{3}(\ce{H2})}` }] },
+    ],
+    errors: ['chem-mwg-swapped', 'chem-mwg-exponent', 'chem-mwg-factor', 'chem-mwg-sum', 'chem-mis-gg-mwg-educts-top', 'chem-mis-gg-mwg-coef', 'chem-mis-gg-mwg-sum'],
+  },
+  {
+    id: 'gg-k-wert',
+    topic: 'chem-mwg',
+    title: 'Gleichgewichtskonstante berechnen und deuten',
+    level: 2,
+    rules: [],
+    formulas: [],
+    memo: 'Setzt man die Konzentrationen im Gleichgewicht in das Massenwirkungsgesetz ein, erhält man $K_{\\mathrm{GG}}$. Ist $K_{\\mathrm{GG}}$ viel größer als 1, liegen vor allem Produkte vor; ist es viel kleiner als 1, vor allem Edukte.',
+    note: '$K_{\\mathrm{GG}}$ hängt nur von der Reaktion und der Temperatur ab, nicht von den eingesetzten Mengen und nicht von einem Katalysator. Über die Geschwindigkeit sagt es nichts. Hier wird es ohne Einheit angegeben.',
+    examples: [
+      {
+        chemTask: r`$\ce{N2O4(g) <=> 2 NO2(g)}$ mit $c(\ce{N2O4}) = 0{,}5\,\mathrm{mol/L}$, $c(\ce{NO2}) = 0{,}2\,\mathrm{mol/L}$`,
+        lines: [{ label: 'eingesetzt', latex: r`${K} = \frac{(0{,}2)^{2}}{0{,}5} = 0{,}08` }],
+      },
+      { chemTask: r`$${K} = 10^{10}$ bzw. $${K} = 10^{-8}$`, lines: [{ label: 'fast nur Produkte bzw. fast nur Edukte im Gleichgewicht' }] },
+    ],
+    errors: ['chem-mis-gg-k-large', 'chem-mis-gg-k-changes', 'chem-mis-gg-k-speed'],
+  },
+  {
+    id: 'gg-geschwindigkeit',
+    topic: 'chem-mwg',
+    title: 'Reaktionsgeschwindigkeit und K',
+    level: 1,
+    rules: [],
+    formulas: [r`v_{\text{hin}} = k_{\text{hin}} \cdot c^{a}(\ce{A}) \cdot c^{b}(\ce{B})`, r`${K} = \frac{k_{\text{hin}}}{k_{\text{rück}}}`],
+    memo: 'Die Geschwindigkeit einer Reaktion hängt von den Konzentrationen ab: Je mehr Teilchen, desto öfter stoßen sie zusammen. Läuft $a\\,\\ce{A} + b\\,\\ce{B} \\rightleftharpoons c\\,\\ce{C} + d\\,\\ce{D}$ in einem einzigen Schritt ab, gilt die Formel oben mit den Koeffizienten als Exponenten (entsprechend für die Rückreaktion). Im Gleichgewicht ist $v_{\\text{hin}} = v_{\\text{rück}}$; umgestellt ergibt das $K_{\\mathrm{GG}} = k_{\\text{hin}} / k_{\\text{rück}}$.',
+    note: 'Läuft eine Reaktion über mehrere Schritte, muss man die Exponenten im Geschwindigkeitsgesetz messen. Das Massenwirkungsgesetz gilt trotzdem mit den Koeffizienten.',
+    examples: [
+      { chemTask: r`$\ce{A + 2 B <=> C}$ in einem Schritt`, lines: [{ label: 'Geschwindigkeit der Hinreaktion', latex: r`v_{\text{hin}} = k_{\text{hin}} \cdot c(\ce{A}) \cdot c^{2}(\ce{B})` }] },
+      { chemTask: r`$k_{\text{hin}} = 6 \cdot 10^{-3}$, $k_{\text{rück}} = 3 \cdot 10^{-4}$`, lines: [{ label: 'eingesetzt', latex: r`${K} = \frac{6 \cdot 10^{-3}}{3 \cdot 10^{-4}} = 20` }] },
+    ],
+    errors: ['chem-rate-products', 'chem-k-rates', 'chem-k-product', 'chem-mis-gg-rate-const', 'chem-mis-gg-rate-conc', 'chem-mis-gg-k-rates'],
+  },
+  {
+    id: 'gg-le-chatelier',
+    topic: 'chem-mwg',
+    title: 'Prinzip von Le Chatelier',
+    level: 1,
+    rules: [],
+    formulas: [],
+    memo: 'Ein Gleichgewicht weicht einem Zwang von außen so aus, dass der Zwang kleiner wird (Prinzip des kleinsten Zwangs). Gibt man einen Stoff zu, wird er verstärkt verbraucht; entfernt man einen, wird er nachgebildet.',
+    note: 'Edukt zugeben oder Produkt entfernen verschiebt das Gleichgewicht nach rechts, Produkt zugeben oder Edukt entfernen nach links. $K_{\\mathrm{GG}}$ bleibt dabei gleich.',
+    examples: [
+      { chemTask: r`$\ce{N2(g) + 3 H2(g) <=> 2 NH3(g)}$, Stickstoff zugeben`, lines: [{ label: 'Stickstoff wird verbraucht: Verschiebung nach rechts, mehr Ammoniak' }] },
+      { chemTask: r`$\ce{CO(g) + H2O(g) <=> CO2(g) + H2(g)}$, Wasserstoff entfernen`, lines: [{ label: 'Wasserstoff wird nachgebildet: Verschiebung nach rechts' }] },
+    ],
+    errors: ['chem-lc-conc', 'chem-lc-no-shift', 'chem-mis-gg-conc-side'],
+  },
+  {
+    id: 'gg-druck-temperatur',
+    topic: 'chem-mwg',
+    title: 'Druck und Temperatur',
+    level: 2,
+    rules: [],
+    formulas: [],
+    memo: 'Druck erhöhen begünstigt die Seite mit weniger Gasteilchen, Druck senken die Seite mit mehr; gezählt wird mit den Koeffizienten. Stehen links und rechts gleich viele Gasteilchen, ändert der Druck nichts. Erwärmen begünstigt die endotherme Richtung (Wärme wird aufgenommen), Abkühlen die exotherme.',
+    note: 'Die Temperatur ändert als einzige Bedingung $K_{\\mathrm{GG}}$. Ein Katalysator ändert die Lage nicht; er sorgt nur dafür, dass sich das Gleichgewicht schneller einstellt.',
+    examples: [
+      {
+        chemTask: r`$\ce{N2(g) + 3 H2(g) <=> 2 NH3(g)}$, $\Delta H = -92\,\mathrm{kJ}$`,
+        lines: [{ label: 'links 4, rechts 2 Gasteilchen: hoher Druck und niedrige Temperatur liefern viel Ammoniak' }],
+      },
+      { chemTask: r`$\ce{H2(g) + I2(g) <=> 2 HI(g)}$`, lines: [{ label: 'links 2, rechts 2 Gasteilchen: Der Druck ändert die Lage nicht' }] },
+    ],
+    errors: [
+      'chem-lc-pressure',
+      'chem-lc-count',
+      'chem-lc-heat',
+      'chem-lc-catalyst',
+      'chem-mis-gg-heat-products',
+      'chem-mis-gg-pressure-more',
+      'chem-mis-gg-pressure-count',
+      'chem-mis-gg-temp-rate-only',
+    ],
+  },
+  {
+    id: 'gg-exo-endo',
+    topic: 'chem-mwg',
+    title: 'Exotherm und endotherm',
+    level: 1,
+    rules: [],
+    formulas: [r`\Delta H < 0:\ \text{exotherm}`, r`\Delta H > 0:\ \text{endotherm}`],
+    memo: 'Eine exotherme Reaktion gibt Wärme an die Umgebung ab; die Stoffe verlieren Energie, die Reaktionsenthalpie $\\Delta H$ ist negativ. Eine endotherme Reaktion nimmt Wärme auf, $\\Delta H$ ist positiv.',
+    note: 'Ist die Hinreaktion exotherm, ist die Rückreaktion endotherm, mit gleich großem $\\Delta H$ und umgekehrtem Vorzeichen.',
+    examples: [
+      { chemTask: 'Verbrennung von Erdgas', lines: [{ label: 'Wärme wird frei: exotherm', latex: r`\Delta H < 0` }] },
+      { chemTask: r`$\ce{N2O4(g) <=> 2 NO2(g)}$`, lines: [{ label: 'Wärme wird aufgenommen: endotherm', latex: r`\Delta H = +57\,\mathrm{kJ}` }] },
+    ],
+    errors: ['chem-lc-exo-endo', 'chem-mis-gg-exo-endo'],
+    figures: ['energie:exo', 'energie:endo'],
+  },
+  {
+    id: 'gg-energiediagramm',
+    topic: 'chem-mwg',
+    title: 'Energiediagramm und Aktivierungsenergie',
+    level: 1,
+    rules: [],
+    formulas: [],
+    memo: 'Im Energiediagramm liegt zwischen Edukten und Produkten ein Energieberg. Seine Höhe, gemessen von den Edukten aus, ist die Aktivierungsenergie $E_{\\mathrm{A}}$: So viel Energie muss man mindestens zuführen, damit die Reaktion startet. Der Höhenunterschied zwischen Edukten und Produkten ist die Reaktionsenthalpie $\\Delta H$.',
+    note: 'Auch exotherme Reaktionen brauchen Aktivierungsenergie: Holz brennt erst nach dem Anzünden.',
+    examples: [
+      { chemTask: 'Produkte tiefer als Edukte', lines: [{ label: 'exotherm, $\\Delta H < 0$; trotzdem ein Energieberg' }] },
+      { chemTask: 'Produkte höher als Edukte', lines: [{ label: 'endotherm, $\\Delta H > 0$' }] },
+    ],
+    errors: ['chem-mis-gg-ea-dh', 'chem-mis-gg-exo-no-ea'],
+    figures: ['energie:exo'],
+  },
+  {
+    id: 'gg-katalysator',
+    topic: 'chem-mwg',
+    title: 'Katalysator',
+    level: 1,
+    rules: [],
+    formulas: [],
+    memo: 'Ein Katalysator eröffnet einen Reaktionsweg mit kleinerer Aktivierungsenergie. Er beschleunigt Hin- und Rückreaktion gleich stark und liegt nach der Reaktion unverändert vor.',
+    note: 'Ein Katalysator ändert weder $\\Delta H$ noch die Lage des Gleichgewichts noch $K_{\\mathrm{GG}}$: Das Gleichgewicht stellt sich nur schneller ein.',
+    examples: [
+      { chemTask: 'Abgaskatalysator im Auto', lines: [{ label: 'wenig Platin reicht über Jahre, weil es nicht verbraucht wird' }] },
+      { chemTask: 'Ammoniaksynthese mit Eisenkatalysator', lines: [{ label: 'schneller am Gleichgewicht, Ausbeute gleich' }] },
+    ],
+    errors: ['chem-lc-catalyst', 'chem-mis-gg-cat-shift', 'chem-mis-gg-cat-used', 'chem-mis-gg-cat-dh', 'chem-mis-gg-cat-one-way', 'chem-mis-gg-cat-energy'],
+    figures: ['energie:exo:kat'],
+  },
+]
