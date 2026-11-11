@@ -1233,7 +1233,17 @@ braucht es erst für N3 und N4.
   gibt es „Warum ist das falsch?“. Wo die App eine Tabelle hat (Ionen,
   Moleküle, Kräfte, Periodensystem), rechnet sie die Paare selbst aus.
   Ausprobieren: Ionenbindung und Salze → Vertiefung, Aufgabe 2-219.
-  **N1c**: Ordnen.
+  **N1c** (fertig): Ordnen. Vier oder fünf Einträge aus einem Vorrat von
+  mindestens vier, gemischt (nie schon richtig); oben und unten steht, was
+  dort hingehört (z. B. „größter Atomradius“). Mit den Pfeilknöpfen ↑ und ↓
+  schiebst du die Einträge an ihren Platz, kein Ziehen mit dem Finger. Einmal
+  „Prüfen“, danach steht bei jedem Eintrag „richtig“ oder „gehört an Stelle
+  …“. Typische falsche Reihenfolgen (ganz umgedreht oder zwei bestimmte
+  Einträge vertauscht) nennen ihren Denkfehler mit „Warum ist das falsch?“.
+  Nur wo die Reihenfolge eindeutig ist; wo die App Messwerte hat, rechnet sie
+  die Reihenfolge selbst und ein Test prüft den Abstand (bei Trends die
+  Regeln aus CHEMIE.md §6, mindestens 3 %).
+  Ausprobieren: Trends im Periodensystem → Vertiefung, Aufgabe 2-219.
 - **N2: Eingaben.** Orbital-Kästchen, Baukasten fürs
   Massenwirkungsgesetz, Lewis-Baukasten, Koeffizienten-Felder,
   Element-Tastatur, Knöpfe für Konfigurationen im freien Modus.

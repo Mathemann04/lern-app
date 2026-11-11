@@ -791,3 +791,8 @@ Neue Entscheidungen unten anfügen.
   Zeilen passen. Der Hinweis „Dasselbe kann zu mehreren Zeilen passen“ steht nur da, wenn es in der Fassung so ist.
   Geprüft wird wie bei „Wähle alle richtigen“ einmal. In die Fehlerstatistik kommen nur gewählte typische
   Verwechslungen; eine andere falsche Zuordnung zählt als Fehlversuch, aber ohne Denkfehler.
+- 11.11.2026: N1c Ordnen. Verschoben wird nur mit Pfeilknöpfen (wie im Plan: kein Ziehen, das stört am Handy das
+  Scrollen). Gezeigt werden vier oder fünf Einträge; der Plan erlaubte drei bis fünf, aber drei lassen sich zu leicht
+  raten. Typische Fehler sind „ganz umgedreht“ (z. B. der Trend falsch herum) oder „A vor B“ (z. B. schwerer heißt
+  größer); ist alles umgedreht, nennt die App nur diesen Fehler, nicht dazu jede vertauschte Paarung. Bei der
+  Beispielfrage zum Atomradius der 3. Periode fehlt Schwefel, weil er nur 2 bis 3 % neben Phosphor und Chlor liegt.
