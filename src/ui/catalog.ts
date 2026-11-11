@@ -586,6 +586,7 @@ export const SUBJECTS: readonly Subject[] = [
         description: 'Atome, Isotope, Atommodelle und Elektronen',
         icon: 'atom',
         tone: 'indigo',
+        exam: { task: 1, points: 8 },
         courses: [
           {
             id: ATOMBAU,

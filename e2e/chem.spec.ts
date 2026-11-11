@@ -691,3 +691,22 @@ test('Chemie: Elektronen, Kästchenbilder als Antworten und Lernkarte', async ({
   await expectCleanPage(page, 'Hund’sche Regel')
   expect(errors).toEqual([])
 })
+
+test('Chemie: Klausuraufgabe 1 üben, Wissensfragen und Rechnungen, abgeben, Auswertung mit Erklärungen', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./#/gebiet/chem-materie')
+  await page.getByRole('link', { name: /Klausuraufgabe 1 üben/ }).click()
+  await expect(page).toHaveURL(/#\/klausur\/chemie\/aufgabe\/1\/\d+$/)
+  await page.goto('./#/klausur/chemie/aufgabe/1/7')
+  await expect(page.getByRole('heading', { name: /Aufgabe 1/ })).toBeVisible()
+  const items = page.getByTestId('exam-item')
+  const count = await items.count()
+  expect(count).toBeGreaterThanOrEqual(7)
+  await expectCleanPage(page, 'Klausuraufgabe 1')
+  // jeweils die letzte Antwort wählen und abgeben
+  for (let i = 0; i < count; i++) await items.nth(i).getByRole('group', { name: 'Antworten' }).getByRole('button').last().click()
+  await page.getByRole('button', { name: 'Abgeben' }).click()
+  await expect(page.getByTestId('exam-score')).toHaveText(/^\d+(,5)? von 8 Punkten$/)
+  await expectCleanPage(page, 'Auswertung Klausuraufgabe 1')
+  expect(errors).toEqual([])
+})

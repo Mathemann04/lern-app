@@ -1,5 +1,4 @@
-import type { ExamItem, ExamOption, ExamPart, ExamTask } from '../../exam/types.ts'
-import type { GuidedStep } from '../../guided/types.ts'
+import type { ExamPart, ExamTask } from '../../exam/types.ts'
 import { type Rng, createRng } from '../../random/rng.ts'
 import { lewisFigure } from '../lewis.ts'
 import { MOLECULES, type Molecule, vseprOf } from '../molecules.ts'
@@ -9,6 +8,7 @@ import { EXAM_SALTS, formulaStep, ionsStep, pickSalt } from '../generators/salze
 import { saltFormula } from '../ions.ts'
 import { UNCLEAR, ZMK_STEPS, boilTask } from '../generators/zmk.ts'
 import { ZMK_SUBSTANCES } from '../zmk.ts'
+import { fromStep } from './fromStep.ts'
 
 // „Klausuraufgabe 3 üben" (Plan M4, S5e; Bauplan Teil 1, Aufgabe 3 mit 12 Punkten): Bindungen.
 // a) Ionen und Formel eines Salzes (2), b) Lewis-Formel, Paare, Gestalt (3), c) Polarität (1),
@@ -21,27 +21,6 @@ export const TASK3_POINTS = 12
 
 // Moleküle der Altklausuren für „Lewis-Formel, Paare, Gestalt"
 const EXAM_MOLECULES = ['NH3', 'H2O']
-
-// Schritt einer Rechnung → Frage der Klausuraufgabe (Antworten wie im Schritt, die richtige ist erwartet und richtig)
-function fromStep(step: GuidedStep, id: string, title: string, points: number, final = false, question = step.question): ExamItem {
-  const options: ExamOption[] = step.choices.map((c) => ({
-    id: c.content,
-    content: c.content,
-    ...(c.errorRuleId ? { errorRuleId: c.errorRuleId } : {}),
-    ...(c.figure ? { figure: c.figure } : {}),
-  }))
-  const right = step.choices.find((c) => c.correct)!.content
-  return {
-    id,
-    title,
-    question,
-    points,
-    dependsOn: [],
-    ...(final ? { final: true } : {}),
-    cards: step.cards,
-    build: () => ({ options, expected: right, correct: right, explanation: step.explanation }),
-  }
-}
 
 const ce = (text: string) => String.raw`\ce{${text}}`
 

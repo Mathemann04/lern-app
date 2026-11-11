@@ -19,6 +19,8 @@ export type ExamOption = {
   readonly share?: { readonly value: number; readonly reason: string }
   // Antwort als Bild (Id aus engine/chem/figures.ts), z. B. eine Lewis-Formel; content beschreibt es in Worten
   readonly figure?: string
+  // „Warum ist das falsch?" nur für diese Antwort (sonst der Text des Fehlers)
+  readonly why?: Explanation
 }
 
 export type ExamItemBuild = {
