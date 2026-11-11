@@ -4,6 +4,7 @@ import { GENERATED_MIN } from '../../quiz/numbers.ts'
 import { ANIONS, CATIONS, isAllowedSalt, saltFormula, saltName } from '../ions.ts'
 import { parseFormula } from '../formula.ts'
 import { generatedCalc } from './index.ts'
+import { EXAM_SALTS, EXERCISE_SALTS, isExcludedSalt } from './salze.ts'
 import { IONEN_BANK, LATTICE_ENERGY, STRUVITE_IONS, chargeSum } from '../bank/ionen.ts'
 
 // Ionenbindung und Salze (S5a): Formeln und Namen gegen eine zweite, von Hand eingetragene Liste, Ladungen in
@@ -86,6 +87,21 @@ describe('Salze: Formel und Name auf zweitem Weg', () => {
         }
       }
     expect(seen).toBeGreaterThan(50)
+  })
+
+  // CHEMIE.md §9: Salze der Altklausuren und des Übungsblatts „Chemische Bindungen“ nie als Formel-Aufgabe
+  it('stellt keine Formel-Aufgabe zu Salzen der Altklausuren oder des Übungsblatts', () => {
+    expect(EXERCISE_SALTS).toEqual(['CaF2', 'Ca3(PO4)2'])
+    for (const f of [...EXAM_SALTS, ...EXERCISE_SALTS]) expect(isExcludedSalt(f), f).toBe(true)
+    expect(isExcludedSalt('CaCl2')).toBe(false)
+    let formulas = 0
+    for (const level of [1, 2, 3] as const)
+      for (const calc of tasks(level, 600)) {
+        if (!calc.form.startsWith('formel:')) continue
+        formulas++
+        expect([...EXAM_SALTS, ...EXERCISE_SALTS], calc.substance).not.toContain(calc.substance)
+      }
+    expect(formulas).toBeGreaterThan(200)
   })
 })
 

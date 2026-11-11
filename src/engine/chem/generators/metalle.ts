@@ -144,7 +144,8 @@ export const sigmaOf = (m: Molecule) => m.bonds.length
 export const piOf = (m: Molecule) => m.bonds.reduce((sum, [, , o]) => sum + o - 1, 0)
 
 function sigmaPiTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc | null {
-  const pool = MOLECULES.filter((m) => m.level <= level && !m.expanded && m.atoms.length > 2 && m.bonds.some(([, , o]) => o > 1))
+  // alle Moleküle mit Mehrfachbindung und Lewis-Bild, auch zweiatomige wie O₂ (1 σ, 1 π) und N₂ (1 σ, 2 π)
+  const pool = MOLECULES.filter((m) => m.level <= level && !m.expanded && m.bonds.some(([, , o]) => o > 1))
   if (pool.length === 0) return null
   const m = rng.pick(pool)
   const sigma = sigmaOf(m)
@@ -171,7 +172,7 @@ function sigmaPiTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): Chem
           question: `Wie viele σ-Bindungen hat ${molName(m)}?`,
           choices: sigmaChoices,
           hint: 'Zwischen zwei verbundenen Atomen gibt es genau eine σ-Bindung, egal ob einfach, doppelt oder dreifach gebunden.',
-          explanation: { detailed: `Jede Verbindung zwischen zwei Atomen enthält genau eine σ-Bindung: ${m.bonds.length} Verbindungen, also ${sigma} σ-Bindungen.`, short: math(String(sigma)) },
+          explanation: { detailed: `Jede Verbindung zwischen zwei Atomen enthält genau eine σ-Bindung: ${m.bonds.length === 1 ? 'eine Verbindung, also eine σ-Bindung' : `${m.bonds.length} Verbindungen, also ${sigma} σ-Bindungen`}.`, short: math(String(sigma)) },
           established: `${sigma}\\ \\sigma`,
           cards: [CARD_SIGMA],
           figure: `lewis:${m.id}`,

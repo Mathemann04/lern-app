@@ -327,14 +327,14 @@ const ionenLevels: LevelPreview[] = [
     available: true,
     free: false,
     title: 'Ionen aus Metall und Nichtmetall, Formeln und Namen einfacher Salze, Eigenschaften',
-    examples: [String.raw`\ce{Al2O3}`, String.raw`\ce{CaF2}`],
+    examples: [String.raw`\ce{Mg3N2}`, String.raw`\ce{K2S}`],
   },
   {
     level: 2,
     available: true,
     free: false,
     title: 'Molekül-Ionen, römische Ziffern, Zerfall in Ionen, Ionengitter und Koordinationszahl',
-    examples: [String.raw`\ce{Ca3(PO4)2}`, String.raw`\ce{Fe2(SO4)3}`],
+    examples: [String.raw`\ce{Mg3(PO4)2}`, String.raw`\ce{Fe2(SO4)3}`],
   },
   {
     level: 3,

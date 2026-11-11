@@ -12,13 +12,13 @@ export const METALLE_CARDS: readonly Card[] = [
     rules: [],
     formulas: [],
     memo: 'Metallatome geben ihre wenigen Valenzelektronen leicht ab. Im Metall sitzen positive Atomrümpfe auf festen Plätzen, und die Valenzelektronen bewegen sich frei zwischen ihnen: das Elektronengas. Die Anziehung zwischen Atomrümpfen und Elektronengas hält das Metall zusammen; sie wirkt in alle Richtungen.',
-    note: 'Daraus folgen die Eigenschaften: gute elektrische Leitfähigkeit und Wärmeleitfähigkeit, metallischer Glanz, gute Verformbarkeit.',
+    note: 'Daraus folgen die Eigenschaften: gute elektrische Leitfähigkeit und Wärmeleitfähigkeit, metallischer Glanz, gute Verformbarkeit. Eine Legierung ist ein Werkstoff aus mindestens zwei Elementen, darunter wenigstens ein Metall, etwa Stahl (Eisen mit wenig Kohlenstoff) oder Bronze (Kupfer mit Zinn). Die fremden Atome stören die regelmäßigen Schichten, sodass diese schwerer aneinander vorbeigleiten: Die Legierung ist meist härter als das reine Metall.',
     when: 'Wenn Metallatome untereinander verbunden sind, auch in Legierungen.',
     examples: [
       { chemTask: 'Ein Kupferdraht leitet Strom.', lines: [{ label: 'Die freien Elektronen wandern im elektrischen Feld; die Atomrümpfe bleiben an ihren Plätzen.' }] },
       { chemTask: 'Ein Metalllöffel wird in heißem Tee warm.', lines: [{ label: 'Bewegliche Elektronen und schwingende Atomrümpfe geben die Wärme schnell weiter.' }] },
     ],
-    errors: ['chem-mis-me-fixed', 'chem-mis-me-salt-like', 'chem-mis-me-cores-move'],
+    errors: ['chem-mis-me-fixed', 'chem-mis-me-salt-like', 'chem-mis-me-cores-move', 'chem-mis-me-alloy-metals-only'],
   },
   {
     id: 'met-gitter',

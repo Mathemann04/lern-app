@@ -99,6 +99,8 @@ export const MOLECULES: readonly Molecule[] = [
 
   // ---------------------------------------------------------------- Vertiefung
   diatomic('N2', 'Stickstoff', 2, 'N', 'N', 3, false),
+  // O₂ steht im Skript Kovalente Bindung (Folie 4) bei den Mehrfachbindungen: O=O mit je zwei freien Paaren
+  diatomic('O2', 'Sauerstoff', 2, 'O', 'O', 2, false),
   linear('CS2', 'Kohlenstoffdisulfid', 2, 'S', 'C', 'S', [2, 2], false),
   // HCN und NOCl: Mit Pauling-Werten sind alle Bindungen (nahezu) unpolar, die Moleküle trotzdem Dipole (CHEMIE.md §6)
   linear('HCN', 'Blausäure', 2, 'H', 'C', 'N', [1, 3], null),

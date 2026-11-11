@@ -39,7 +39,7 @@ const SHAPES: readonly [string, string, string][] = [
 
 // Dipolmoleküle laut Lehrbuch (zweite Liste)
 const DIPOLES = ['HF', 'HCl', 'HBr', 'H2O', 'NH3', 'CH2O', 'COCl2', 'PCl3', 'NF3', 'HOCl', 'CHCl3', 'CH2Cl2', 'CH3Cl', 'CH3OH', 'H2O2', 'N2H4', 'SO2']
-const NOT_DIPOLES = ['H2', 'F2', 'Cl2', 'Br2', 'CH4', 'SiH4', 'CCl4', 'CO2', 'N2', 'CS2', 'BF3', 'BCl3', 'CF4', 'SiCl4', 'C2H4', 'C2H2', 'C2H6', 'PCl5', 'SF6']
+const NOT_DIPOLES = ['H2', 'F2', 'Cl2', 'Br2', 'O2', 'CH4', 'SiH4', 'CCl4', 'CO2', 'N2', 'CS2', 'BF3', 'BCl3', 'CF4', 'SiCl4', 'C2H4', 'C2H2', 'C2H6', 'PCl5', 'SF6']
 
 describe('Moleküldaten', () => {
   it('hat etwa 40 Moleküle mit eindeutigen Ids', () => {
@@ -166,6 +166,11 @@ describe('Lewis-Formeln als Bilder', () => {
     const cl = lewisFigure(moleculeById('HCl')!)!
     expect(cl.atoms[1].pairs).toEqual([0, 90, 270])
     expect(cl.description).toBe('H mit 1 Bindungsstrich; Cl mit 1 Bindungsstrich und 3 freien Paaren')
+    // O₂: Doppelbindung, je zwei freie Paare, kein Zentralatom (keine Gestalt), unpolar
+    const o2 = moleculeById('O2')!
+    expect(lewisFigure(o2)!.description).toBe('2-mal O mit 2 Bindungsstrichen und 2 freien Paaren')
+    expect(o2.central).toBeUndefined()
+    expect(o2.dipole).toBe(false)
   })
 
   it('zeichnet keine Lewis-Formel bei erweitertem Oktett', () => {

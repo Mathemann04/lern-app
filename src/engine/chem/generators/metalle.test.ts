@@ -45,6 +45,12 @@ describe('Daten Metallbindung und Hybridisierung', () => {
     expect(sigmaOf(moleculeById('C2H2')!)).toBe(3)
     expect(piOf(moleculeById('C2H2')!)).toBe(2)
     expect(piOf(moleculeById('CO2')!)).toBe(2)
+    // O₂ (Skript Kovalente Bindung, Folie 4): O=O mit einer σ- und einer π-Bindung
+    expect(sigmaOf(moleculeById('O2')!)).toBe(1)
+    expect(piOf(moleculeById('O2')!)).toBe(1)
+    const o2 = findTask((i) => sigmaPiTask(2, createRng(`o${i}`), { level: 2, seed: 10000 + i }), 'O2')
+    expect(o2.task.steps.map((s) => s.choices.find((c) => c.correct)!.content)).toEqual(['$1$', '$1$'])
+    expect(o2.task.steps.every((s) => s.choices.length >= 2)).toBe(true)
     // keine Hybridisierung bei H₂S, PH₃, SCl₂; in den Grundlagen auch sp und sp²
     const basic = hybridSites(1)
     expect(basic.some((s) => ['H2S', 'PH3', 'SCl2'].includes(s.mol.id))).toBe(false)

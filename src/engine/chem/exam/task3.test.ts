@@ -105,8 +105,15 @@ describe('Klausuraufgabe 3: Aufbau', () => {
       const task = buildTask3(seed)
       const a = task.parts[0]
       const b = task.parts[1]
-      expect(a.prompt + JSON.stringify(a.items.map((i) => i.build(() => null!, () => null!).correct))).not.toMatch(/Al2O3|MgCl2/)
+      const salt = a.prompt + JSON.stringify(a.items.map((i) => i.build(() => null!, () => null!)))
+      expect(salt).not.toMatch(/Al2O3|MgCl2/)
+      // Salze des Übungsblatts (EXERCISE_SALTS): Calciumfluorid, Calciumphosphat
+      expect(salt).not.toMatch(/Calciumfluorid|Calciumphosphat|CaF2|Ca3\(PO4\)2/)
       expect(b.prompt).not.toMatch(/\\ce\{(NH3|H2O)\}/)
+      // Paare in der Lewis-Formel gezählt; bei Mehrfachbindung am Zentralatom sagt die Frage, wie
+      const pairs = b.items.find((i) => i.id === 'paare')!
+      expect(pairs.question, `${seed}`).toContain('in der Lewis-Formel')
+      if (/CO2|CS2|HCN|CH2O|COCl2|NOCl/.test(b.prompt)) expect(pairs.question, `${seed}`).toContain('Doppelbindung sind dabei zwei bindende Paare')
       salts.add(a.prompt)
       molecules.add(b.prompt)
     }

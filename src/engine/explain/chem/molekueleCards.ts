@@ -74,6 +74,7 @@ export const MOLEKUELE_CARDS: readonly Card[] = [
       'chem-lewis-hydrogen',
       'chem-mis-mo-lewis-all',
       'chem-mis-mo-lone-forgotten',
+      'chem-mis-mo-lone-whole-molecule',
       'chem-mis-mo-pair-types',
       'chem-mis-mo-stroke-electron',
     ],
@@ -87,7 +88,7 @@ export const MOLEKUELE_CARDS: readonly Card[] = [
     rules: [],
     formulas: [String.raw`\ce{O=C=O}`, String.raw`\ce{N#N}`],
     memo: 'Reichen die Elektronen nicht, damit mit Einfachbindungen jedes Atom ein Oktett hat, teilen sich zwei Atome ein zweites oder drittes Paar. Eine Doppelbindung sind zwei gemeinsame Paare, eine Dreifachbindung drei.',
-    note: 'Wasserstoff und die Halogene bilden nur Einfachbindungen. Doppelbindungen findet man oft bei C, N, O und S.',
+    note: String.raw`Wasserstoff und die Halogene bilden nur Einfachbindungen. Doppelbindungen findet man oft bei C, N, O und S, etwa im Sauerstoffmolekül $\ce{O=O}$ mit zwei freien Paaren an jedem O. Zwischen denselben beiden Atomen ist eine Dreifachbindung kürzer und stärker als eine Doppelbindung, und die ist wiederum kürzer und stärker als eine Einfachbindung.`,
     examples: [
       {
         chemTask: String.raw`$\ce{CO2}$ (Kohlenstoffdioxid)`,
@@ -115,7 +116,7 @@ export const MOLEKUELE_CARDS: readonly Card[] = [
     rules: [],
     formulas: [String.raw`\mathrm{AX_nE_m}`],
     memo: 'Alle Elektronenpaare um das Zentralatom stoßen sich ab und gehen im Raum so weit wie möglich auseinander. Man zählt die Bindungspartner (X) und die freien Paare am Zentralatom (E); eine Mehrfachbindung zählt wie eine Bindung. Die Gestalt beschreibt nur, wo die Atome sitzen.',
-    note: 'VSEPR heißt: Abstoßung der Valenzelektronenpaare. A ist das Zentralatom. Die Lewis-Formel ist flach gezeichnet; ihre Winkel zeigen nicht den Raum.',
+    note: String.raw`VSEPR heißt: Abstoßung der Valenzelektronenpaare. A ist das Zentralatom. Die Lewis-Formel ist flach gezeichnet; ihre Winkel zeigen nicht den Raum. Im VSEPR-Modell zählt man die Partner (X) und die freien Paare (E); eine Mehrfachbindung zählt dort nur einmal, in der Lewis-Formel dagegen mit allen ihren Paaren (in $\ce{CO2}$ zwei Partner, aber vier bindende Paare).`,
     when: 'Wenn nach dem räumlichen Bau eines Moleküls gefragt ist.',
     examples: [
       {

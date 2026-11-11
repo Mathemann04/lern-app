@@ -89,6 +89,10 @@ export const METALLE_WHY: Readonly<Record<string, Explanation>> = {
     detailed: "Sintern geschieht bei hoher Temperatur, aber unterhalb des Schmelzpunkts. Die Pulverkörner bleiben fest und wachsen an ihren Berührungsstellen zusammen; je nach Verfahren bleiben dabei Poren zurück oder nicht.",
     short: "Sintern bleibt unter dem Schmelzpunkt.",
   },
+  'chem-mis-me-alloy-metals-only': {
+    detailed: "Zu einer Legierung gehört mindestens ein Metall, die übrigen Bestandteile dürfen auch Nichtmetalle sein. Stahl etwa ist Eisen mit etwas Kohlenstoff und gilt als Legierung.",
+    short: "Wenigstens ein Metall genügt; Nichtmetalle dürfen dabei sein.",
+  },
   'chem-mis-me-interstitial-soft': {
     detailed: "Beim Verformen gleiten Gitterebenen aneinander vorbei. Kleine Atome in den Lücken stören dieses Gleiten; das Metall wird dadurch härter, nicht weicher.",
     short: "Eingelagerte Atome bremsen das Gleiten und härten.",

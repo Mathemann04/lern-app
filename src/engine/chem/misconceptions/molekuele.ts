@@ -147,6 +147,11 @@ export const MOLEKUELE_MISCONCEPTIONS: readonly MisconceptionName[] = [
     wrongText: "Elektronen, die keine Bindung bilden, kommen in der Lewis-Formel nicht vor.",
   },
   {
+    id: 'chem-mis-mo-lone-whole-molecule',
+    name: "Freie Paare des ganzen Moleküls dem Zentralatom zugerechnet",
+    wrongText: "Zu den freien Paaren am Zentralatom zählen auch die freien Paare der äußeren Atome.",
+  },
+  {
     id: 'chem-mis-mo-pair-types',
     name: "Bindende und freie Paare verwechselt",
     wrongText: "Bindende und freie Elektronenpaare sind dasselbe; man kann sie beliebig zusammenzählen oder vertauschen.",

@@ -264,3 +264,7 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   `chem-molar-m-times-n`, `chem-molar-n-over-m`); abgewogen nur Feststoffe (`WEIGH_IDS`, `NOT_WEIGHED`, `hydrateInfo` in
   `generators/loesungen.ts`, auch Klausuraufgabe 4 Teil d); `EXAM_GIVEN_MASSES` schließt auch Zahlen der Übungsblätter und
   Rechenbeispiele des Skripts aus; unvollständige Verbrennung nur in der Vertiefung.
+  Nachgeholt (S10, Musterlösung Bindungen): `splitQuestion` in `generators/molekuele.ts` (immer „in der Lewis-Formel … am Zentralatom“,
+  bei Mehrfachbindung mit Hinweis; VSEPR-Zählung nie als falsche Antwort), O₂ in `molecules.ts` (44 Moleküle), `sigma-pi` mit allen
+  Molekülen mit Mehrfachbindung (auch O₂, N₂), `EXERCISE_SALTS`/`isExcludedSalt` in `generators/salze.ts` (auch `saltPart` in task3),
+  Legierung auf `met-metallbindung`, Denkfehler `chem-mis-mo-lone-whole-molecule` und `chem-mis-me-alloy-metals-only`.
