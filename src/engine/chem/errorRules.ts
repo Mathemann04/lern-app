@@ -23,6 +23,7 @@ const GLEICHUNGEN = 'chem-gleichungen'
 const LOESUNGEN = 'chem-loesungen'
 const IONEN = 'chem-ionen'
 const MOLEKUELE = 'chem-molekuele'
+const ZMK = 'chem-zmk'
 
 export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
   {
@@ -1049,6 +1050,107 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
     why: {
       detailed: 'Nur „mono" fällt am ersten Element weg. Stehen vom ersten Element mehrere Atome in der Formel, braucht auch es eine Vorsilbe.',
       short: 'Nur „mono" fällt am ersten Element weg.',
+    },
+  },
+  // Zwischenmolekulare Kräfte (S5c)
+  {
+    id: 'chem-zmk-any-h',
+    course: ZMK,
+    name: 'Jedes H-Atom bildet Wasserstoffbrücken',
+    wrongFormula: String.raw`\ce{CH4}\text{: Wasserstoffbrücken}`,
+    why: {
+      detailed: 'Wasserstoffbrücken brauchen ein H-Atom, das direkt an N, O oder F sitzt. Nur dort ist es so stark positiv geladen, dass es das freie Paar eines Nachbarmoleküls anzieht. An Kohlenstoff gebundene H-Atome bilden keine.',
+      short: 'Nur H direkt an N, O oder F bildet Brücken.',
+    },
+  },
+  {
+    id: 'chem-zmk-h-other',
+    course: ZMK,
+    name: 'Wasserstoffbrücken mit Cl, Br, I oder S',
+    wrongFormula: String.raw`\ce{HCl}\text{: Wasserstoffbrücken}`,
+    why: {
+      detailed: 'Für Wasserstoffbrücken muss der Partner des H-Atoms sehr elektronegativ und zugleich klein sein. Das trifft nur auf N, O und F zu. Chlor, Brom, Iod und Schwefel sind dafür zu groß oder zu wenig elektronegativ.',
+      short: 'Brücken nur mit N, O und F.',
+    },
+  },
+  {
+    id: 'chem-zmk-hbond-missed',
+    course: ZMK,
+    name: 'Wasserstoffbrücken übersehen',
+    wrongFormula: String.raw`\ce{NH3}\text{: nur Dipol-Dipol-Kräfte}`,
+    why: {
+      detailed: 'Sitzt ein H-Atom direkt an N, O oder F, bilden sich Wasserstoffbrücken, nicht nur in Wasser. Sie sind ein besonders starker Fall der Dipol-Dipol-Kräfte und deshalb die stärkste Kraft zwischen solchen Molekülen.',
+      short: 'H an N, O oder F: Wasserstoffbrücken.',
+    },
+  },
+  {
+    id: 'chem-zmk-polar-bond',
+    course: ZMK,
+    name: 'Polare Bindungen mit polarem Molekül verwechselt',
+    wrongFormula: String.raw`\ce{CCl4}\text{: Dipol-Dipol-Kräfte}`,
+    why: {
+      detailed: 'Dipol-Dipol-Kräfte gibt es nur zwischen Molekülen, die als Ganzes ein Dipol sind. Liegen polare Bindungen symmetrisch, heben sie sich auf, und das Molekül ist unpolar.',
+      short: 'Es zählt die Polarität des ganzen Moleküls.',
+    },
+  },
+  {
+    id: 'chem-zmk-polar-ignored',
+    course: ZMK,
+    name: 'Polarität des Moleküls übersehen',
+    wrongFormula: String.raw`\ce{HCl}\text{: nur Van-der-Waals-Kräfte}`,
+    why: {
+      detailed: 'Van-der-Waals-Kräfte wirken zwischen allen Teilchen, sind aber die schwächsten. Ist ein Molekül polar, ziehen sich seine Enden zusätzlich als Dipole an; bei H an N, O oder F kommen Wasserstoffbrücken dazu.',
+      short: 'Polare Moleküle: stärkere Kräfte als nur Van der Waals.',
+    },
+  },
+  {
+    id: 'chem-zmk-intra',
+    course: ZMK,
+    name: 'Kräfte zwischen und in Molekülen verwechselt',
+    wrongFormula: String.raw`\text{Sieden: Atombindungen brechen auf}`,
+    why: {
+      detailed: 'Atombindungen halten die Atome innerhalb eines Moleküls zusammen und sind viel stärker als die Kräfte zwischen den Molekülen. Überlege, ob im Dampf andere Teilchen vorliegen als in der Flüssigkeit.',
+      short: 'Sind im Dampf andere Teilchen als in der Flüssigkeit?',
+    },
+  },
+  {
+    id: 'chem-zmk-mass-only',
+    course: ZMK,
+    name: 'Nur nach der Molmasse geordnet',
+    wrongFormula: String.raw`\ce{H2O} < \ce{H2S}`,
+    why: {
+      detailed: 'Die Größe der Moleküle entscheidet nur bei gleicher Art der Kraft. Wasserstoffbrücken sind so viel stärker als Van-der-Waals- und Dipol-Dipol-Kräfte, dass sie einen großen Unterschied der Molmasse übertreffen.',
+      short: 'Erst die Art der Kraft, dann die Größe.',
+    },
+  },
+  {
+    id: 'chem-zmk-reversed',
+    course: ZMK,
+    name: 'Stärkere Kräfte, niedrigerer Siedepunkt',
+    wrongFormula: String.raw`\ce{I2} < \ce{Br2} < \ce{Cl2}`,
+    why: {
+      detailed: 'Je stärker die Kräfte zwischen den Molekülen sind, desto mehr Energie braucht man, um sie voneinander zu trennen. Stärkere Kräfte bedeuten deshalb einen höheren Siedepunkt, nicht einen niedrigeren.',
+      short: 'Stärkere Kräfte: höherer Siedepunkt.',
+    },
+  },
+  {
+    id: 'chem-zmk-size-ignored',
+    course: ZMK,
+    name: 'Größe der Moleküle übersehen',
+    wrongFormula: String.raw`\text{Alkane: Art der Kraft entscheidet}`,
+    why: {
+      detailed: 'Die Art der Kraft erklärt eine Reihenfolge nur, wenn sie sich zwischen den Stoffen unterscheidet. Prüfe, ob das hier so ist, und was sonst verschieden ist.',
+      short: 'Unterscheidet sich die Art der Kraft hier überhaupt?',
+    },
+  },
+  {
+    id: 'chem-zmk-like-reversed',
+    course: ZMK,
+    name: 'Gegensätze lösen sich',
+    wrongFormula: String.raw`\ce{I2}\ \text{löst sich besser in Wasser}`,
+    why: {
+      detailed: 'Es gilt: Gleiches löst sich in Gleichem. Polare Stoffe mischen sich mit polaren, unpolare mit unpolaren, weil die Kräfte zwischen gleichartigen Teilchen viel stärker sind als zwischen polaren und unpolaren.',
+      short: 'Gleiches löst sich in Gleichem.',
     },
   },
 ]

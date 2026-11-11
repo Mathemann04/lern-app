@@ -600,6 +600,16 @@ kommen mit ihren Schritten dazu. Die Denkfehler der Wissensfragen
 | Name ↔ Formel | Vorsilben weggelassen (`chem-molname-no-prefix`, seit S5b) | N₂O: Stickstoffoxid |
 | Name ↔ Formel | Vorsilbe auf das falsche Element bezogen (`chem-molname-swapped`) | N₂O: Stickstoffdioxid; Schwefeldioxid als S₂O |
 | Name ↔ Formel | Vorsilbe am ersten Element vergessen (`chem-molname-first-prefix`, seit S5b) | N₂O₃: Stickstofftrioxid |
+| Stärkste Kraft | jedes H bildet Wasserstoffbrücken (`chem-zmk-any-h`, seit S5c) | CH₄: Wasserstoffbrücken |
+| Stärkste Kraft | Wasserstoffbrücken mit Cl, Br, I oder S (`chem-zmk-h-other`, seit S5c) | HCl: Wasserstoffbrücken |
+| Stärkste Kraft | Wasserstoffbrücken übersehen (`chem-zmk-hbond-missed`, seit S5c) | NH₃: nur Dipol-Dipol |
+| Stärkste Kraft | polare Bindungen mit polarem Molekül verwechselt (`chem-zmk-polar-bond`, seit S5c) | CCl₄: Dipol-Dipol |
+| Stärkste Kraft | Polarität übersehen (`chem-zmk-polar-ignored`, seit S5c) | HCl: nur Van der Waals |
+| Stärkste Kraft, Sieden | Kräfte zwischen und in Molekülen verwechselt (`chem-zmk-intra`, seit S5c) | Sieden: Atombindungen brechen |
+| Siedepunkte ordnen | nur nach der Molmasse (`chem-zmk-mass-only`, seit S5c) | H₂O < H₂S |
+| Siedepunkte ordnen | umgedreht (`chem-zmk-reversed`, seit S5c) | I₂ < Br₂ < Cl₂ |
+| Siedepunkte begründen | Größe übersehen (`chem-zmk-size-ignored`, seit S5c) | Alkane: Art der Kraft entscheidet |
+| Lösen | Gegensätze lösen sich (`chem-zmk-like-reversed`, seit S5c) | I₂ besser in Wasser |
 | Ausgleichen | Index statt Koeffizient geändert (`chem-balance-index`) | Mg + O₂ → MgO₂ statt 2 Mg + O₂ → 2 MgO |
 | Ausgleichen | Sauerstoffatome falsch gezählt (`chem-balance-oxygen`: nicht halbiert oder Sauerstoff im Alkohol nicht abgezogen) | C₄H₁₀ + 13 O₂ → 4 CO₂ + 5 H₂O |
 | Ausgleichen | Sauerstoff im Wasser vergessen (`chem-balance-water-oxygen`) | C₃H₈ + 3 O₂ → 3 CO₂ + 4 H₂O |
@@ -910,6 +920,17 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   Einfachbindungen (auch Halogenide wie PCl₃), Mehrfachbindungen ab Vertiefung.
   Abwechslung mit eigener Kennzahl (etwa 40 sinnvolle Moleküle ohne Formalladungen:
   mindestens 40 Formen unter 200, keine öfter als 6 von 100).
+  Geteilt (11.11.2026), weil S5c zu groß war: **S5c** zwischenmolekulare Kräfte, **S5d**
+  Metallbindung, Hybridisierung und Molekülorbitale, **S5e** „Klausuraufgabe 3 üben“.
+  **S5c** (fertig): Thema „Zwischenmolekulare Kräfte“ mit Unterthemen Die drei Kräfte und
+  Wasserstoffbrücken, Wasser ist besonders, Siedepunkte vergleichen (ab Vertiefung), Gleiches
+  löst sich in Gleichem (ab Vertiefung). 40 Stoffe als Daten (`chem/zmk.ts`: polar,
+  Wasserstoffbrücken, Siedepunkt); Rechnungen: stärkste Kraft (Wasserstoffbrücken möglich? →
+  stärkste Kraft → im Klausurniveau, was beim Sieden überwunden wird), Siedepunkte ordnen aus
+  Vergleichsgruppen mit einer Regel (gleiche Kraft: Größe; ähnliche Masse: Art der Kraft; sonst
+  erst Wasserstoffbrücken, dann Größe; ein Test prüft jede Auswahl gegen die Siedepunkte), Lösen
+  in Wasser oder Hexan. Fünf Lernkarten, Wissensfragen. Begriffe wie im Skript; die
+  Wasserstoffbrücke braucht auch ein freies Paar an N, O oder F (wie die Musterlösung).
 - **S6: Elektronen und Periodensystem.** Konfiguration und
   Valenzkonfiguration als Auswahl, Quantenzahlen, Steckbrief, Ionenladung,
   Trends; „Klausuraufgabe 1 üben“ und „Klausuraufgabe 2 üben“.

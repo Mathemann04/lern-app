@@ -109,13 +109,14 @@ export const GLEICHUNGEN = 'chem-gleichungen'
 export const LOESUNGEN = 'chem-loesungen'
 export const IONEN = 'chem-ionen'
 export const MOLEKUELE = 'chem-molekuele'
+export const ZMK = 'chem-zmk'
 
 // Chemie-Themen: Ids mit „chem-", Engine aus Wissensfragen (engine/chem/)
 export const isChemCourse = (id: string) => id.startsWith('chem-')
 
 // Themen mit Testseite in der Formel-Galerie (auch solche, die noch nicht spielbar sind); bei Chemie
 // die Seite „Fragen durchsehen"
-export const GALLERY_COURSES: readonly string[] = [DERIVATIVES, FRACTIONS, REARRANGE, ATOMBAU, GLEICHUNGEN, STOFFMENGE, LOESUNGEN, IONEN, MOLEKUELE]
+export const GALLERY_COURSES: readonly string[] = [DERIVATIVES, FRACTIONS, REARRANGE, ATOMBAU, GLEICHUNGEN, STOFFMENGE, LOESUNGEN, IONEN, MOLEKUELE, ZMK]
 
 const derivativeLevels: LevelPreview[] = [
   {
@@ -356,6 +357,35 @@ const molekueleLevels: LevelPreview[] = [
   },
 ]
 
+const zmkLevels: LevelPreview[] = [
+  {
+    level: 1,
+    available: true,
+    title: 'Die drei Kräfte, Wasserstoffbrücken erkennen, Besonderheiten des Wassers',
+    examples: [String.raw`\ce{H2O}`, String.raw`\ce{CH4}`],
+  },
+  {
+    level: 2,
+    available: true,
+    title: 'Siedepunkte ordnen, Größe der Moleküle, Gleiches löst sich in Gleichem',
+    examples: [String.raw`\ce{F2} < \ce{Cl2} < \ce{Br2}`],
+  },
+  {
+    level: 3,
+    available: true,
+    title: 'Siedepunkte begründen, Mischbarkeit, was beim Sieden überwunden wird',
+    examples: [String.raw`\ce{C3H8} < \ce{CH3CHO} < \ce{C2H5OH}`],
+  },
+]
+
+// Unterthemen von „Zwischenmolekulare Kräfte" (Rechnungen in engine/chem/generators/zmk.ts, part)
+const zmkParts: CoursePart[] = [
+  { id: 'kraefte', title: 'Die drei Kräfte und Wasserstoffbrücken', levels: [1, 2, 3] },
+  { id: 'wasser', title: 'Wasser ist besonders', levels: [1, 2, 3] },
+  { id: 'siedepunkte', title: 'Siedepunkte vergleichen', levels: [2, 3] },
+  { id: 'loesen', title: 'Gleiches löst sich in Gleichem', levels: [2, 3] },
+]
+
 // Unterthemen von „Moleküle" (Rechnungen in engine/chem/generators/molekuele.ts, part)
 const molekueleParts: CoursePart[] = [
   { id: 'lewis', title: 'Elektronenpaarbindung und Lewis-Formeln', levels: [1, 2, 3] },
@@ -551,7 +581,17 @@ export const SUBJECTS: readonly Subject[] = [
             focus: true,
             parts: molekueleParts,
           },
-          comingSoon('chem-zmk', 'Zwischenmolekulare Kräfte', 'Van-der-Waals-Kräfte, Dipol-Dipol-Kräfte und Wasserstoffbrücken', 'bond'),
+          {
+            id: ZMK,
+            title: 'Zwischenmolekulare Kräfte',
+            description: 'Van-der-Waals-Kräfte, Dipol-Dipol-Kräfte und Wasserstoffbrücken, Siedepunkte und Löslichkeit',
+            icon: 'bond',
+            cards: 'chem-zmk',
+            levels: zmkLevels,
+            free: false,
+            focus: true,
+            parts: zmkParts,
+          },
           comingSoon('chem-metalle', 'Metallbindung und Hybridisierung', 'Elektronengas, Bändermodell, Halbleiter und Hybridorbitale', 'bond'),
         ],
       },

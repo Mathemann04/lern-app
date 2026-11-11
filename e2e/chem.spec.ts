@@ -307,6 +307,7 @@ test('Chemie: Themen mischen, „Nächste Aufgabe" bleibt in der Mischung, X und
   await page.getByRole('checkbox', { name: 'Gase und Lösungen' }).uncheck()
   await page.getByRole('checkbox', { name: 'Ionenbindung und Salze' }).uncheck()
   await page.getByRole('checkbox', { name: 'Moleküle' }).uncheck()
+  await page.getByRole('checkbox', { name: 'Zwischenmolekulare Kräfte' }).uncheck()
 
   // Unterthemen aufklappen: dieselben Kästchen wie auf der Themenseite (Atombau steht zuerst)
   const toggle = page.getByRole('button', { name: /^Unterthemen: alle/ }).first()
@@ -622,5 +623,19 @@ test('Chemie: Moleküle, Lewis-Formeln als Bilder zur Auswahl, Gestalt mit Bild,
   await page.goto('./#/karten/chem-molekuele/mol-gestalt')
   await expect(page.getByTestId('chem-figure')).toHaveCount(3)
   await expectCleanPage(page, 'Gestalt der Moleküle')
+  expect(errors).toEqual([])
+})
+
+test('Chemie: Zwischenmolekulare Kräfte, Rechnung zur stärksten Kraft, Lernkarte', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./#/gebiet/chem-bindung')
+  await page.getByRole('link', { name: /Zwischenmolekulare Kräfte/ }).click()
+  await expect(page.getByRole('heading', { name: 'Zwischenmolekulare Kräfte' })).toBeVisible()
+  await page.goto('./#/ueben/chem-zmk/2-10000')
+  await expect(answers(page).first()).toBeVisible()
+  await expectCleanPage(page, 'Rechnung zu zwischenmolekularen Kräften')
+  await page.goto('./#/karten/chem-zmk/zmk-siedepunkte')
+  await expect(page.getByRole('heading', { name: 'Siedepunkte vergleichen' })).toBeVisible()
+  await expectCleanPage(page, 'Siedepunkte vergleichen')
   expect(errors).toEqual([])
 })

@@ -8,6 +8,7 @@ import { PARTICLE_GENERATORS } from './particles.ts'
 import { SALZE_GENERATORS } from './salze.ts'
 import { STOFFMENGE_GENERATORS } from './stoffmenge.ts'
 import { UMSATZ_GENERATORS } from './umsatz.ts'
+import { ZMK_GENERATORS } from './zmk.ts'
 import type { ChemCalc, ChemGenerator } from './shared.ts'
 
 // Erzeugte Rechnungen je Chemie-Thema (Aufgabennummern 10000 bis 499999, quiz/numbers.ts). Die Nummer
@@ -22,6 +23,7 @@ const GENERATORS: Readonly<Record<string, readonly ChemGenerator[]>> = {
   'chem-loesungen': LOESUNGEN_GENERATORS,
   'chem-ionen': SALZE_GENERATORS,
   'chem-molekuele': MOLEKUELE_GENERATORS,
+  'chem-zmk': ZMK_GENERATORS,
 }
 
 // Rechenarten eines Themas in einer Stufe

@@ -4,6 +4,7 @@ import { GLEICHUNGEN_MISCONCEPTIONS } from './gleichungen.ts'
 import { IONEN_MISCONCEPTIONS } from './ionen.ts'
 import { LOESUNGEN_MISCONCEPTIONS } from './loesungen.ts'
 import { MOLEKUELE_MISCONCEPTIONS } from './molekuele.ts'
+import { ZMK_MISCONCEPTIONS } from './zmk.ts'
 import { STOFFMENGE_MISCONCEPTIONS } from './stoffmenge.ts'
 
 // Denkfehler je Chemie-Thema (Id aus ui/catalog.ts), nur Name und falsche Aussage. Eigene kleine Liste,
@@ -17,4 +18,5 @@ export const MISCONCEPTIONS_BY_COURSE: Readonly<Record<string, readonly Misconce
   'chem-loesungen': LOESUNGEN_MISCONCEPTIONS,
   'chem-ionen': IONEN_MISCONCEPTIONS,
   'chem-molekuele': MOLEKUELE_MISCONCEPTIONS,
+  'chem-zmk': ZMK_MISCONCEPTIONS,
 }

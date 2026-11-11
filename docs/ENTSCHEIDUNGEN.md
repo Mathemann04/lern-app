@@ -621,3 +621,18 @@ Neue Entscheidungen unten anfügen.
   Prüfung: keine Polarität bei HCN, NOCl, OF₂, SCl₂ (dazu CHEMIE.md §6), Winkel nur bei
   gleichen Partnern, Erklärungen „Warum ist das falsch?“ ohne die Lösung des Schritts.
   Der Katalog-Fehler „mit dem Index malgenommen“ nimmt ΔEN mal den größeren Index.
+- 11.11.2026: S5c in drei Teile geteilt: S5c zwischenmolekulare Kräfte, S5d Metallbindung,
+  Hybridisierung und Molekülorbitale, S5e Klausuraufgabe 3. Zwischenmolekulare Kräfte mit den
+  Begriffen des Skripts (Van-der-Waals-, Dipol-Dipol-Kräfte, Wasserstoffbrücken); Siedepunkte
+  aus PubChem und CRC, ganzzahlig, im Repo mit zweiter Liste im Test. Siedepunkte ordnet die App
+  nur in festen Vergleichsgruppen, deren Reihenfolge eine einfache Regel erklärt (Edelgase,
+  Halogene, Alkane, Alkohole, Halogenwasserstoffe, Stoffe ähnlicher Molmasse, Wasser gegen
+  Schwefelwasserstoff); die Stoffe der Übung (CH₄, HCl, H₂O als Reihe) kommen nicht zusammen
+  vor. Schwefelwasserstoff wird nicht nach seiner stärksten Kraft gefragt (CHEMIE.md §6).
+  In den Grundlagen gibt es nur eine Rechenart; Abwechslung mit eigener Kennzahl.
+  Nach der fachlichen Prüfung: Iodwasserstoff wie Schwefelwasserstoff nicht nach seiner stärksten Kraft
+  gefragt (ΔEN 0,46 nahe 0,5); „ähnliche Molmasse“ als Begründung nur bis 25 % Unterschied; Edelgase
+  ohne Fragen zu Atombindungen; Propan-1-ol und Butan-1-ol statt „Propanol“ und „Butanol“ (Isomere
+  sieden anders); Chlor- und Fluorwasserstoff nicht in „Lösen“ (sie reagieren mit Wasser). Zwei Fragen
+  gestrichen (301 glich in der Form Klausuraufgabe 3c, 309 einer Übungsaufgabe), ersetzt durch 316 und
+  317; Erklärungen „Warum ist das falsch?“ ohne die Lösung.
