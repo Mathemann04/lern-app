@@ -212,3 +212,9 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   der Engine), Seite `ui/exam/MockExamPage.tsx` (Deckblatt, Schreiben, Auswertung), gemeinsame Teile mit „Klausuraufgabe N
   üben" in `ui/exam/ExamParts.tsx` und `ui/exam/examText.ts`, Kachel `MockTile` in `HomeScreen.tsx`, Bild `exam` in
   `AreaIcon.tsx`. Browser-Tests `e2e/chem-mock.spec.ts`.
+- Probeklausur, Rest (S9b): Hilfsmittel `ui/exam/ExamTools.tsx` (Knöpfe „Periodensystem" mit Tabelle aus `ELEMENTS` und `placeOf`,
+  „Formelsammlung" aus den Karten in `ui/exam/formulaCards.ts`, Test `formulaCards.test.ts`; Fenster über `ui/useSheetHistory.ts` wie
+  die Lernkarten), Stoffe meiden `mockSubstances` und `pickMockId` in `chem/exam/mock.ts`, „Das solltest du üben" `practiceHints` in
+  `engine/exam/mock.ts` (Thema über die erste Lernkarte der Frage), Wiederholung über `ExamItem.review` (Wissensfragen in
+  `task1.ts` und `task5.ts`), nachgeführt von `recordExamResult` in `ui/exam/examText.ts` (auch bei „Klausuraufgabe N üben"). In
+  Browser-Tests die Knöpfe mit `exact: true` suchen (Antworten enthalten das Wort „Periodensystem").

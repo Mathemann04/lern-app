@@ -766,3 +766,13 @@ Neue Entscheidungen unten anfügen.
   neue beginnen bricht sie nach Rückfrage ab. „Fortschritt löschen“ löscht auch sie. Die Kachel steht unter „Themen
   mischen“ und zeigt eine laufende Klausur zum Weiterschreiben. Bis S9b steht auf dem Deckblatt, dass man eigenes
   Periodensystem und eigene Formelsammlung bereitlegt.
+- 11.11.2026: S9b. Die Formelsammlung enthält nur Karten mit Rechenformeln und Konstanten (Kernsymbol, Ionen, Licht,
+  Stoffmenge, Lösungen und Gase, Born-Haber, Bindungsordnung, Massenwirkungsgesetz, Energie), keine Wissenskarten: Deren
+  Merksätze (z. B. Ionenladung je Hauptgruppe) wären in der Klausur schon die Antwort. Das Periodensystem zeigt die
+  Elemente der App (Z 1 bis 56 sowie Pt, Au, Hg, Pb, Bi); die übrigen Plätze von Periode 6 bleiben leer, statt Werte ohne
+  Prüfung nachzutragen. „Stoffe meiden“ liest die Stoffe an den Formeln in Aufgabentexten und Fragen ab (Verbindungen,
+  dazu die Elemente in „Element: …“, das Salz und die Lichtquelle; O₂, CO₂ und H₂O jeder Verbrennung zählen nicht) und
+  nimmt von 40 zufälligen Nummern die mit den wenigsten gleichen Stoffen. Ganz ohne Wiederholung geht es nicht, weil
+  manche Teile nur wenige Stoffe haben (z. B. Si oder Ge beim Dotieren); im Test teilt die gewählte Klausur weniger als
+  60 % so viele Stoffe mit den letzten drei wie eine zufällige. Beantwortete Wissensfragen gehen jetzt auch bei
+  „Klausuraufgabe N üben“ in die Wiederholung. „Fortschritt löschen“ löscht auch den Verlauf der Probeklausuren.

@@ -36,8 +36,9 @@ function question(no: number): Question {
 function questionItem(no: number, id: string, points: number, rng: Rng, final = false): ExamItem {
   const q = question(no)
   const variant = rng.int(0, VARIANTS - 1)
-  const task = planQuestion(q, chemTopic(ATOMBAU)!.misconceptions, { level: q.level, seed: questionSeed(no, variant) }, variant)
-  return fromStep(task.steps[0], id, q.title, points, final)
+  const seed = questionSeed(no, variant)
+  const task = planQuestion(q, chemTopic(ATOMBAU)!.misconceptions, { level: q.level, seed }, variant)
+  return { ...fromStep(task.steps[0], id, q.title, points, final), review: { course: ATOMBAU, seed } }
 }
 
 // --- c) Kernsymbol ---

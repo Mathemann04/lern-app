@@ -9,7 +9,7 @@ import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
 import { areaHref, examTaskHref } from '../routes.ts'
 import { ModeSwitch, PartResultView, PartView } from './ExamParts.tsx'
-import { decimal, pointsOf, recordExamErrors } from './examText.ts'
+import { decimal, pointsOf, recordExamResult } from './examText.ts'
 
 // „Klausuraufgabe N üben" (Plan M4, S4c): alle Teile einer Klausuraufgabe am Stück, ohne Zeit. Bis zur
 // Abgabe zeigt die App nicht, was stimmt; danach Punkte je Teil und Frage, Folgefehler, Lösungsweg und
@@ -41,7 +41,7 @@ function ExamTaskView({ subject, taskNo, seed, areaId, areaTitle }: { subject: s
 
   const submit = () => {
     const graded = gradeExam(task, answers)
-    recordExamErrors(graded)
+    recordExamResult(graded)
     setResult(graded)
     window.scrollTo(0, 0)
   }

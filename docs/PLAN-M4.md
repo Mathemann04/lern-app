@@ -1191,6 +1191,13 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   Engine `engine/exam/mock.ts` (allgemein: Summe der Aufgaben, Uhr, Punkte zum Bestehen) und `chem/exam/mock.ts`
   (`chemMockExam`: Aufgaben 1 bis 5 aus der Nummer). Stand auf dem Gerät `state/mockExam.ts`. Auswertung: Punkte je
   Aufgabe, was in Teil 2 noch zum Bestehen fehlt, gebrauchte Zeit, jede Frage mit Lösungsweg wie beim Üben.
+  **S9b** (fertig): In der Klausur die Knöpfe „Periodensystem“ (Tabelle mit Ordnungszahl, Symbol, Molmasse mit einer
+  Nachkommastelle; Periode 6 nur mit den Elementen der App) und „Formelsammlung“ (Formeln ausgewählter Lernkarten,
+  `ui/exam/formulaCards.ts`), beide als Fenster (`ui/exam/ExamTools.tsx`). Verlauf auf dem Deckblatt (bestes Ergebnis,
+  jede Klausur „Noch einmal“). Neue Nummern meiden die Stoffe der letzten drei Probeklausuren (`mockSubstances`,
+  `pickMockId`). Auswertung mit „Das solltest du üben“ (die drei Themen mit den meisten verlorenen Punkten, `practiceHints`);
+  beantwortete Wissensfragen gehen in die Wiederholung (`ExamItem.review`), auch bei „Klausuraufgabe N üben“. Damit ist
+  S9 und der Klausur-Sprint abgeschlossen.
 
 #### Nach Teil 1 der Klausur
 Die Reihenfolge richtet sich nach dem Termin von Teil 2: Kommt Teil 2 bald,

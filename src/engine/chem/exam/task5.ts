@@ -29,8 +29,9 @@ function questionItem(no: number, id: string, rng: Rng): ExamItem {
   const q = topic.bank.questions.find((x) => x.no === no)
   if (!q) throw new Error(`Frage ${no} fehlt im Thema Chemisches Gleichgewicht`)
   const variant = rng.int(0, VARIANTS - 1)
-  const task = planQuestion(q, topic.misconceptions, { level: q.level, seed: questionSeed(no, variant) }, variant)
-  return fromStep(task.steps[0], id, q.title, 1)
+  const seed = questionSeed(no, variant)
+  const task = planQuestion(q, topic.misconceptions, { level: q.level, seed }, variant)
+  return { ...fromStep(task.steps[0], id, q.title, 1), review: { course: MWG, seed } }
 }
 
 const ref = { level: 2 as const, seed: 10000 }

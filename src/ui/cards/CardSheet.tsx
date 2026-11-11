@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { type Card, cardById } from '../../engine/explain/cards.ts'
 import type { Expr } from '../../engine/expr/types.ts'
 import { FitWidth } from '../FitWidth.tsx'
@@ -6,39 +6,10 @@ import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
 import { cardHref } from './cardRoute.ts'
 import { CardBody } from './CardBody.tsx'
+import { useSheetHistory } from '../useSheetHistory.ts'
 
 // Lernkarten aus einer Aufgabe heraus: als Fenster über der Aufgabe, damit nichts verloren geht.
 // Die Zurück-Taste des Handys schließt das Fenster, statt die Aufgabe zu verlassen.
-
-function useSheetHistory() {
-  const [open, setOpen] = useState(false)
-  // Eintrag im Verlauf, den das Öffnen angelegt hat (gleiche Adresse, nur fürs Zurück)
-  const pushed = useRef(false)
-
-  useEffect(() => {
-    if (!open) return
-    const onBack = () => {
-      pushed.current = false
-      setOpen(false)
-    }
-    window.addEventListener('popstate', onBack)
-    return () => window.removeEventListener('popstate', onBack)
-  }, [open])
-
-  const show = () => {
-    window.history.pushState({ sheet: true }, '')
-    pushed.current = true
-    setOpen(true)
-  }
-  const close = () => {
-    if (pushed.current) {
-      pushed.current = false
-      window.history.back()
-    }
-    setOpen(false)
-  }
-  return { open, show, close }
-}
 
 // Knopf „Lernkarte" mit dem Fenster dazu; title: Überschrift im Fenster, task: die Aufgabe als Term
 // (deren Teile kommen nicht als Beispiel; Wissensfragen haben keinen Term)

@@ -135,3 +135,87 @@ function subscribe(listener: () => void) {
 export function useMockSession(): MockSession | null {
   return useSyncExternalStore(subscribe, current, current)
 }
+
+// --- Verlauf (S9b): Ergebnisse abgegebener Probeklausuren, die neueste zuerst ---
+
+export const MOCK_HISTORY_KEY = 'rechenweg-probeklausuren'
+// Obergrenze (die ältesten fallen weg)
+export const MAX_MOCK_HISTORY = 100
+
+export type MockRecord = {
+  readonly subject: string
+  readonly id: number
+  // Abgabe in Millisekunden
+  readonly at: number
+  readonly points: number
+  readonly max: number
+  // Punkte je Aufgabe, in der Reihenfolge der Klausur
+  readonly tasks: readonly number[]
+  readonly timed: boolean
+  // gebrauchte Zeit in Minuten (gerundet)
+  readonly minutes: number
+  readonly timeUp: boolean
+}
+
+const isPoints = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 1000
+
+function readRecord(raw: unknown): MockRecord | null {
+  if (!isRecord(raw)) return null
+  const { subject, id, at, points, max, tasks, timed, minutes, timeUp } = raw
+  if (typeof subject !== 'string' || !/^[a-z-]{1,40}$/.test(subject) || !isNo(id) || !isTime(at) || !isPoints(points) || !isPoints(max)) return null
+  if (!Array.isArray(tasks) || tasks.length > 20 || !tasks.every(isPoints) || typeof timed !== 'boolean' || !isPoints(minutes)) return null
+  return { subject, id, at, points, max, tasks: [...tasks], timed, minutes, timeUp: timeUp === true }
+}
+
+export function parseMockHistory(text: string | null): MockRecord[] {
+  if (!text) return []
+  try {
+    const raw = JSON.parse(text) as unknown
+    return Array.isArray(raw) ? raw.flatMap((r) => readRecord(r) ?? []).slice(0, MAX_MOCK_HISTORY) : []
+  } catch {
+    return []
+  }
+}
+
+export function loadMockHistory(store: KeyValueStore | null = browserStore()): MockRecord[] {
+  try {
+    return parseMockHistory(store?.getItem(MOCK_HISTORY_KEY) ?? null)
+  } catch {
+    return []
+  }
+}
+
+let history: MockRecord[] | undefined
+const historyListeners = new Set<() => void>()
+
+function currentHistory(): MockRecord[] {
+  if (history === undefined) history = loadMockHistory()
+  return history
+}
+
+function updateHistory(next: MockRecord[], store: KeyValueStore | null = browserStore()) {
+  history = next.slice(0, MAX_MOCK_HISTORY)
+  try {
+    store?.setItem(MOCK_HISTORY_KEY, JSON.stringify(history))
+  } catch {
+    // Speicher voll oder gesperrt: Der Verlauf fehlt dann nur
+  }
+  for (const listener of historyListeners) listener()
+}
+
+export const addMockRecord = (record: MockRecord) => updateHistory([record, ...currentHistory()])
+// Nummern der letzten Probeklausuren eines Fachs, die neueste zuerst
+export const recentMockIds = (subject: string) => currentHistory().filter((r) => r.subject === subject).map((r) => r.id)
+// Für „Fortschritt löschen"
+export const clearMockHistory = () => updateHistory([])
+
+export function useMockHistory(): readonly MockRecord[] {
+  return useSyncExternalStore(
+    (listener) => {
+      historyListeners.add(listener)
+      return () => historyListeners.delete(listener)
+    },
+    currentHistory,
+    currentHistory,
+  )
+}
