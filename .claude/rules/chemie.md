@@ -202,3 +202,7 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   `hasFree(level)`; Katalog `LevelPreview.free` und `isFreeAt` (vergleicht `catalog.test.ts`). Oberfläche: `TaskScreen` mit
   `free` (Ziffernblock `ui/numeric/NumberAnswer.tsx`, Rückmeldung `TypedFeedback`), `PracticePage` zeigt Chemie frei dort statt
   im MathLive-Bildschirm. Browser-Tests `e2e/chem-free.spec.ts` (rechnen die Antworten mit der Engine aus `src/`).
+- Klausuraufgaben frei (S8c): `ExamItemBuild.numeric` und `correctValue` (aus `fromStep` und `numberOptions` in `task4.ts`),
+  Antworten `zahl:<Eingabe>` (`numberAnswer`, `typedText`, `typedOption` in `engine/exam/grade.ts`; `ItemState.close`,
+  `ItemResult.close`), Schalter `ModeSwitch` und ein offener Ziffernblock je Teil in `ui/exam/ExamTaskPage.tsx` (`NumberAnswer`
+  mit `onSubmit`, `submitLabel`, `initial`). Tests `chem/exam/free.test.ts`, Browser-Test in `e2e/chem-free.spec.ts`.

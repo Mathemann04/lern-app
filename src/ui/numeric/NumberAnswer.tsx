@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { type NumericAnswer, type Verdict, judgeNumber } from '../../engine/quantity/judge.ts'
+import type { NumericAnswer } from '../../engine/quantity/judge.ts'
 import { formatLatex, readNumber } from '../../engine/quantity/numberDe.ts'
 import type { Rational } from '../../engine/rational.ts'
 import { Formula } from '../Formula.tsx'
@@ -9,7 +9,7 @@ import { RichText } from '../RichText.tsx'
 // eigener Ziffernblock mit Komma, Minus und Zehnerpotenz, ohne die Tastatur des Handys (keine
 // Autokorrektur). Über dem Feld steht, wie die App die Zahl gelesen hat; die Einheit steht fest daneben.
 // Auch mit der Tastatur des Laptops bedienbar (Ziffern, Komma oder Punkt, Minus, e für die Zehnerpotenz,
-// Rücktaste, Enter). Beurteilt wird mit judgeNumber (engine/quantity/judge.ts).
+// Rücktaste, Enter). Beurteilt wird außerhalb (judgeNumber in engine/quantity/judge.ts bzw. die Klausur).
 
 type Entry = { readonly mantissa: string; readonly exponent: string | null }
 const EMPTY: Entry = { mantissa: '', exponent: null }
@@ -47,11 +47,24 @@ function apply(entry: Entry, key: string): Entry {
   return entry
 }
 
+// Eingabe aus einem gespeicherten Text (entryText), z. B. „1,85e-3"
+function entryOf(text: string | undefined): Entry {
+  if (!text) return EMPTY
+  const [mantissa, exponent] = text.split('e')
+  return { mantissa, exponent: exponent ?? null }
+}
+
 type Props = {
-  readonly answer: NumericAnswer
+  // Einheit neben dem Feld, genaue Zahl (dann kein Rundungshinweis), Hinweis unter dem Feld
+  readonly answer: Pick<NumericAnswer, 'unit' | 'exact' | 'note'>
   // nach der richtigen Antwort gesperrt
   readonly disabled: boolean
-  readonly onVerdict: (verdict: Verdict, input: Rational) => void
+  // gelesene Zahl und die Eingabe als Text (zum Speichern, readNumber liest sie wieder)
+  readonly onSubmit: (value: Rational, text: string) => void
+  // Beschriftung des Knopfs, z. B. „Prüfen" (üben) oder „Übernehmen" (Klausur, ohne Rückmeldung)
+  readonly submitLabel?: string
+  // schon eingetippte Eingabe (entryText)
+  readonly initial?: string
 }
 
 const KEYS: readonly (readonly [string, string, string])[] = [
@@ -72,13 +85,13 @@ const KEYS: readonly (readonly [string, string, string])[] = [
   [',', ',', 'Komma'],
 ]
 
-export function NumberAnswer({ answer, disabled, onVerdict }: Props) {
-  const [entry, setEntry] = useState<Entry>(EMPTY)
+export function NumberAnswer({ answer, disabled, onSubmit, submitLabel = 'Prüfen', initial }: Props) {
+  const [entry, setEntry] = useState<Entry>(() => entryOf(initial))
   const value = readNumber(entryText(entry))
 
   function check() {
     if (disabled || !value) return
-    onVerdict(judgeNumber(value, answer), value)
+    onSubmit(value, entryText(entry))
   }
 
   // Tastatur des Laptops (nicht, solange ein Fenster wie die Lernkarten offen ist oder eine Taste mit
@@ -160,7 +173,7 @@ export function NumberAnswer({ answer, disabled, onVerdict }: Props) {
               disabled={!value}
               className="col-span-2 min-h-12 rounded-xl bg-accent-700 text-lg font-medium text-on-accent hover:bg-accent-800 disabled:opacity-50"
             >
-              Prüfen
+              {submitLabel}
             </button>
           </div>
           {!answer.exact && <p className="text-sm text-zinc-500">Runde auf drei gültige Ziffern, z.{' '}B. 0,0234 oder 1,85{' '}·{' '}10⁵.</p>}

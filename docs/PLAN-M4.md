@@ -1171,6 +1171,13 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   Ladungen genau), Leser `readNumber` in `quantity/numberDe.ts`. Nach einem Fehler „Lösung zeigen“. Frei kommen nur
   Rechenarten mit `free` (keine Wissensfragen, keine Wiederholung); Stufen ohne solche gehen geführt weiter, mit Hinweis auf
   der Themenseite. Abweichung: Die Einheit ist auch auf Klausurniveau vorgegeben (wählbare Einheiten mit N2, Eingaben).
+  **S8c** (fertig): Klausuraufgaben mit Zahlen (1, 4 und 5) haben oben den Schalter „Auswählen | Eintippen“ (dieselbe
+  Einstellung wie „Geführt“/„Frei“). Eintippen über denselben Ziffernblock („Übernehmen“, keine Rückmeldung bis zur
+  Abgabe). Bewertung `typedOption` in `engine/exam/grade.ts`: bis 1 % neben der erwarteten (Folgefehler) oder der ganz
+  richtigen Zahl wie die gewählte Antwort, 1 bis 4 % daneben volle Punkte mit „Knapp daneben: Prüfe deine Rundung“, sonst
+  eine eigene Antwort mit der Zahl (als typischer Fehler erkannt, wo er passt), mit der spätere Fragen weiterrechnen.
+  Zahlenfragen tragen `numeric` (aus `fromStep` bzw. `numberOptions` in `task4.ts` mit allen Fehlerwerten). Damit ist S8
+  abgeschlossen.
 - **S9: Probeklausur Teil 1** (50 Punkte, Bauplan unter „Probeklausur“), Uhr,
   Auswertung mit dem Hinweis auf die 40 Punkte, Verlauf, PSE und
   Formelsammlung in der Klausur.

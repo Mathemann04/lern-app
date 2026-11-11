@@ -751,3 +751,10 @@ Neue Entscheidungen unten anfügen.
   Liegen zwei Fehlerwerte nah beieinander, nennt die App den nächsten. Bei $K$ aus $\ln K$ gilt auch das Ergebnis mit dem
   gerundeten $\ln K$ als richtig (bei großem $\ln K$ läge es sonst über 1 % daneben). Wer im Thema „Frei“ wählt, übt in
   Stufen ohne Rechnung mit Zahlen geführt; die Themenseite sagt das.
+- 11.11.2026: S8c Klausuraufgaben frei. Eingetippte Zahlen knapp daneben (1 bis 4 %) geben in der Klausur die vollen
+  Punkte, mit Hinweis auf die Rundung (in der echten Klausur kostet eine kleine Rundungsabweichung nichts). Eine eigene
+  falsche Zahl rechnet in den späteren Fragen weiter, so zählen Folgefehler auch beim Eintippen; eine eingetippte Null
+  nicht (durch sie ließe sich nicht teilen), dann geht es mit der erwarteten Zahl weiter. Der Schalter auf der Klausurseite
+  ändert dieselbe Einstellung wie „Geführt“/„Frei“ auf den Themenseiten. Außerdem: Seit S7c schlug die Veröffentlichung
+  fehl, weil GitHub beim Einrichten der Browser-Tests die Ubuntu-Server nicht erreichte; der Browser wird jetzt notfalls
+  ohne Zusatzpakete installiert.

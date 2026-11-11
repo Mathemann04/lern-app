@@ -37,6 +37,8 @@ const ce = (s: Species) => formulaLatex(s.formula)
 const num = (c: ExamOption) => c.value as Rational
 const unitLatex = (unit: string) => (r: Rational) => `${sig(r)}\\,\\mathrm{${unit}}`
 const molar = (r: Rational) => molarLatex(r, VALUES)
+// Einheiten neben dem Eingabefeld (S8c)
+const U = { mol: String.raw`\mathrm{mol}`, g: String.raw`\mathrm{g}`, L: String.raw`\mathrm{L}` }
 
 // ähnlicher Stoff, dessen Molmasse man versehentlich nimmt
 const SIMILAR: Readonly<Record<string, string>> = { CO2: 'CO', H2O: 'H2O2', O2: 'O3' }
@@ -48,15 +50,17 @@ const apart = (a: Rational, b: Rational, share: number) => Math.abs(ratToNumber(
 
 // erwartete Antwort (mit den eigenen Werten) und bis zu drei falsche; falsche Werte wie bei den Rechnungen
 // mindestens 6 % neben der erwarteten und der ganz richtigen und 3 % auseinander (docs/CHEMIE.md §7).
-// exact: Werte nicht runden (Molmassen), Abstand trotzdem mit Toleranz
+// exact: Werte nicht runden (Molmassen), Abstand trotzdem mit Toleranz. unit: Einheit für das Eintippen (S8c);
+// dort zählen alle falschen Werte, nicht nur die angezeigten
 function numberOptions(
   rng: Rng,
   expected: Rational,
   correct: Rational,
   wrong: readonly { rule: string; value: Rational }[],
   latex: (r: Rational) => string,
+  unit: string,
   exact = false,
-): Pick<ExamItemBuild, 'options' | 'expected' | 'correct'> {
+): Pick<ExamItemBuild, 'options' | 'expected' | 'correct' | 'numeric' | 'correctValue'> {
   const keep = (a: Rational) => (exact ? a : shown(a))
   const option = (value: Rational, errorRuleId?: string): ExamOption => ({ id: latex(value), content: `$${latex(value)}$`, value: keep(value), ...(errorRuleId ? { errorRuleId } : {}) })
   const options = [option(expected)]
@@ -69,7 +73,13 @@ function numberOptions(
     kept.push(w)
   }
   options.push(...kept.slice(0, 4 - options.length).map((w) => option(w.value, w.rule)))
-  return { options: rng.shuffle(options), expected: latex(expected), correct: latex(correct) }
+  return {
+    options: rng.shuffle(options),
+    expected: latex(expected),
+    correct: latex(correct),
+    numeric: { value: expected, unit, wrongs: kept },
+    correctValue: correct,
+  }
 }
 
 // --- Gleichung ---
@@ -124,7 +134,7 @@ function molarOptions(s: Species, rng: Rng, coefficient: Rational): Pick<ExamIte
     // Koeffizient aus der Gleichung mitgerechnet
     ...(coefficient.d === 1n && coefficient.n > 1n ? [{ rule: 'chem-molar-coefficient', value: ratMul(mass, coefficient) }] : []),
   ]
-  return numberOptions(rng, mass, mass, wrong, molar, true)
+  return numberOptions(rng, mass, mass, wrong, molar, String.raw`\mathrm{g/mol}`, true)
 }
 
 function molarExplanation(s: Species): ExamItemBuild['explanation'] {
@@ -265,7 +275,7 @@ function task4(seed: string, setupData: Setup): ExamTask {
         { rule: 'chem-n-times', value: ratMul(mFuel, mU) },
         { rule: 'chem-n-inverted', value: ratDiv(mU, mFuel) },
       ]
-      return { ...numberOptions(rng, expected, ratDiv(mFuel, mT), wrong, unitLatex('mol')), explanation: explainLine('Masse geteilt durch molare Masse:', nFuelLine(mU, expected)) }
+      return { ...numberOptions(rng, expected, ratDiv(mFuel, mT), wrong, unitLatex('mol'), U.mol), explanation: explainLine('Masse geteilt durch molare Masse:', nFuelLine(mU, expected)) }
     },
   })
   const nTargetItem = (id: string, to: Species, points: number) =>
@@ -283,7 +293,7 @@ function task4(seed: string, setupData: Setup): ExamTask {
         const correct = nTargetValue(eqOf(truth('gleichung')), num(truth('stoffmenge-brennstoff')), to)
         const rng = rngFor(seed, id, [chosen('gleichung').id, chosen('stoffmenge-brennstoff').id])
         return {
-          ...numberOptions(rng, expected, correct, ratioWrongs(eqU, nU, to), unitLatex('mol')),
+          ...numberOptions(rng, expected, correct, ratioWrongs(eqU, nU, to), unitLatex('mol'), U.mol),
           explanation: explainLine('Die Koeffizienten der Gleichung geben das Verhältnis der Stoffmengen an:', nTargetLine(eqU, nU, to)),
         }
       },
@@ -309,7 +319,7 @@ function task4(seed: string, setupData: Setup): ExamTask {
         ...(similar ? [{ rule: 'chem-similar-molar-mass', value: ratMul(nU, molarMass(parseFormula(similar), VALUES)) }] : []),
       ]
       const line = `m(${ce(target)}) = n \\cdot M = ${sig(nU)}\\,\\mathrm{mol} \\cdot ${molar(mU)} ${eqSign(expected)} ${sig(expected)}\\,\\mathrm{g}`
-      return { ...numberOptions(rng, expected, correct, wrong, unitLatex('g')), explanation: explainLine('Stoffmenge mal molare Masse des gesuchten Stoffs:', line) }
+      return { ...numberOptions(rng, expected, correct, wrong, unitLatex('g'), U.g), explanation: explainLine('Stoffmenge mal molare Masse des gesuchten Stoffs:', line) }
     },
   })
   const partC: ExamPart = {
@@ -352,7 +362,7 @@ function gasPart(seed: string, gas: Species, nTargetItem: (id: string, to: Speci
         { rule: 'chem-vm-conditions', value: ratMul(nU, VM_25) },
       ]
       const line = `V = n \\cdot V_m = ${sig(nU)}\\,\\mathrm{mol} \\cdot 22{,}4\\,\\mathrm{L/mol} ${eqSign(expected)} ${sig(expected)}\\,\\mathrm{L}`
-      return { ...numberOptions(rng, expected, ratMul(num(truth('stoffmenge-gas')), VM), wrong, unitLatex('L')), explanation: explainLine('Stoffmenge mal molares Volumen:', line) }
+      return { ...numberOptions(rng, expected, ratMul(num(truth('stoffmenge-gas')), VM), wrong, unitLatex('L'), U.L), explanation: explainLine('Stoffmenge mal molares Volumen:', line) }
     },
   })
   return {
@@ -381,7 +391,7 @@ function solutionPart(seed: string, sol: NonNullable<ReturnType<typeof pickSolut
         { rule: 'chem-c-inverted', value: ratDiv(c, v) },
       ]
       const line = `n = c \\cdot V = ${sig(c)}\\,\\mathrm{mol/L} \\cdot ${sig(v)}\\,\\mathrm{L} ${eqSign(n)} ${sig(n)}\\,\\mathrm{mol}`
-      return { ...numberOptions(rngFor(seed, 'stoffmenge-loesung', []), n, n, wrong, unitLatex('mol')), explanation: explainLine('Konzentration mal Volumen in Litern:', line) }
+      return { ...numberOptions(rngFor(seed, 'stoffmenge-loesung', []), n, n, wrong, unitLatex('mol'), U.mol), explanation: explainLine('Konzentration mal Volumen in Litern:', line) }
     },
   })
   const mItem = item({
@@ -412,7 +422,7 @@ function solutionPart(seed: string, sol: NonNullable<ReturnType<typeof pickSolut
       ]
       const line = `m = n \\cdot M = ${sig(nU)}\\,\\mathrm{mol} \\cdot ${molar(mU)} ${eqSign(expected)} ${sig(expected)}\\,\\mathrm{g}`
       return {
-        ...numberOptions(rng, expected, ratMul(num(truth('stoffmenge-loesung')), num(truth('molmasse-loesung'))), wrong, unitLatex('g')),
+        ...numberOptions(rng, expected, ratMul(num(truth('stoffmenge-loesung')), num(truth('molmasse-loesung'))), wrong, unitLatex('g'), U.g),
         explanation: explainLine('Stoffmenge mal molare Masse:', line),
       }
     },

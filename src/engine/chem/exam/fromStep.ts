@@ -20,6 +20,7 @@ export function fromStep(step: GuidedStep, id: string, title: string, points: nu
     dependsOn: [],
     ...(final ? { final: true } : {}),
     cards: step.cards,
-    build: () => ({ options, expected: right, correct: right, explanation: step.explanation }),
+    // Zahl als Antwort: im freien Modus eintippen (S8c)
+    build: () => ({ options, expected: right, correct: right, explanation: step.explanation, ...(step.numeric ? { numeric: step.numeric } : {}) }),
   }
 }

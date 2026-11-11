@@ -7,7 +7,7 @@ import { addReport } from '../../state/reports.ts'
 import { isInReview, recordReview } from '../../state/reviews.ts'
 import { questionNoOf } from '../practice.ts'
 import type { ExplanationDetail, PracticeMode } from '../../state/storage.ts'
-import type { Verdict } from '../../engine/quantity/judge.ts'
+import { type Verdict, judgeNumber } from '../../engine/quantity/judge.ts'
 import type { Explanation } from '../../engine/explain/texts.ts'
 import { findError } from '../../engine/errorCatalog.ts'
 import { NumberAnswer } from '../numeric/NumberAnswer.tsx'
@@ -210,7 +210,7 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext,
       {step.figure && <ChemFigure id={step.figure} />}
 
       {numeric ? (
-        <NumberAnswer answer={numeric} disabled={solved} onVerdict={judged} />
+        <NumberAnswer answer={numeric} disabled={solved} onSubmit={(value) => judged(judgeNumber(value, numeric))} />
       ) : (
       <div className="space-y-3" role="group" aria-label="Antworten">
         {step.choices.map((choice) => {

@@ -1,11 +1,14 @@
 import { type Page, expect, test } from '@playwright/test'
 import { chemCourseEngine } from '../src/engine/chem/engine.ts'
+import { chemExamTask } from '../src/engine/chem/exam/index.ts'
+import { examState, gradeExam, itemsOf, numberAnswer } from '../src/engine/exam/grade.ts'
 import { GENERATED_MIN } from '../src/engine/quiz/numbers.ts'
 import { formatText } from '../src/engine/quantity/numberDe.ts'
 import { type Rational, ratMul, parseDecimal } from '../src/engine/rational.ts'
 
 // Chemie frei rechnen (S8b): Zahlen über den eigenen Ziffernblock, Toleranz, „Fast: Prüfe deine Rundung",
-// typischer Fehler mit Namen und Erklärung, Hinweis auf der Themenseite für Stufen ohne Rechnung
+// typischer Fehler mit Namen und Erklärung, Hinweis auf der Themenseite für Stufen ohne Rechnung; S8c: Klausuraufgabe
+// frei
 
 function collectErrors(page: Page): string[] {
   const errors: string[] = []
@@ -16,6 +19,7 @@ function collectErrors(page: Page): string[] {
   return errors
 }
 
+const SUP: Record<string, string> = { '⁻': '-', '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9' }
 const COURSE = 'chem-stoffmenge'
 const engine = chemCourseEngine(COURSE)
 
@@ -114,4 +118,44 @@ test('Chemie frei: Stufe ohne Rechnung mit Zahlen geht geführt weiter, mit Hinw
   // eine Adresse „frei" in einer solchen Stufe führt zum geführten Üben
   await page.goto('./#/frei/chem-ionen/1')
   await expect(page).toHaveURL(/#\/ueben\/chem-ionen\/1-\d+$/)
+})
+
+test('Chemie: Klausuraufgabe 4 frei, Zahlen eintippen, eine grob gerundet, abgeben, Auswertung', async ({ page }) => {
+  const errors = collectErrors(page)
+  const seed = 4242
+  const task = chemExamTask(4, seed)!
+  const items = itemsOf(task)
+  await page.goto(`./#/klausur/chemie/aufgabe/4/${seed}`)
+  await page.getByRole('button', { name: 'Eintippen', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Eintippen', exact: true })).toHaveAttribute('aria-pressed', 'true')
+
+  // wie ein Mensch: Gleichung wählen (die erste Antwort), Zahlen der erwarteten Antwort eintippen, die Molmasse des
+  // Brennstoffs 2,5 % daneben
+  const answers: Record<string, string> = {}
+  const fuelMolar = task.parts[1].items[0].id
+  for (const [index, item] of items.entries()) {
+    const build = examState(task, answers).find((s) => s.item.id === item.id)!.build!
+    const box = page.getByTestId('exam-item').nth(index)
+    if (!build.numeric) {
+      await box.getByRole('group', { name: 'Antworten' }).getByRole('button').first().click()
+      answers[item.id] = build.options[0].id
+      continue
+    }
+    const expected = build.options.find((o) => o.id === build.expected)!.value as Rational
+    const value = item.id === fuelMolar ? ratMul(expected, parseDecimal('1.025')!) : expected
+    const text = formatText(value, { significant: 6, scientific: true }).replace(' · 10', 'e').replace(/[⁻⁰¹²³⁴⁵⁶⁷⁸⁹]/g, (c) => SUP[c])
+    await box.getByRole('button', { name: 'Zahl eintippen' }).click()
+    await page.keyboard.type(text)
+    await box.getByRole('button', { name: 'Übernehmen' }).click()
+    await expect(box.getByTestId('typed-answer')).toBeVisible()
+    answers[item.id] = numberAnswer(text)
+  }
+  await expect(page.getByText('Kommt, sobald die Fragen davor beantwortet sind.')).toHaveCount(0)
+  await page.getByRole('button', { name: 'Abgeben' }).click()
+  const result = gradeExam(task, answers)
+  await expect(page.getByTestId('exam-score')).toHaveText(`${String(result.points).replace('.', ',')} von 14 Punkten`)
+  await expect(page.getByText('Knapp daneben: Prüfe deine Rundung. Das gibt hier trotzdem die vollen Punkte.')).toBeVisible()
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
+  expect(overflow).toBeLessThanOrEqual(0)
+  expect(errors).toEqual([])
 })

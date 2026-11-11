@@ -1,4 +1,6 @@
 import type { Explanation } from '../explain/texts.ts'
+import type { NumericAnswer } from '../quantity/judge.ts'
+import type { Rational } from '../rational.ts'
 
 // Klausuraufgaben mit Punkten (Plan M4, „Probeklausur", Bewertung): Eine Aufgabe besteht aus Teilen (a, b,
 // c …), jeder Teil aus Fragen mit Antworten zur Auswahl. Bis zur Abgabe sagt die App nicht, was stimmt.
@@ -31,6 +33,10 @@ export type ExamItemBuild = {
   readonly correct: string
   // Lösungsweg mit den bisherigen Antworten
   readonly explanation: Explanation
+  // Zahl als Antwort (S8c): Im freien Modus tippt man sie ein. Wert und Fehlerwerte mit den bisherigen Antworten
+  // (zur erwarteten Antwort), dazu der Wert der ganz richtigen Antwort, wenn er abweicht
+  readonly numeric?: NumericAnswer
+  readonly correctValue?: Rational
 }
 
 // gewählte Antwort einer früheren Frage
@@ -70,5 +76,6 @@ export type ExamTask = {
   readonly parts: readonly ExamPart[]
 }
 
-// Antworten: Frage → gewählte Antwort
+// Antworten: Frage → gewählte Antwort (Id einer Antwort) oder eingetippte Zahl „zahl:<Eingabe>" (grade.ts,
+// NUMBER_PREFIX)
 export type ExamAnswers = Readonly<Record<string, string>>
