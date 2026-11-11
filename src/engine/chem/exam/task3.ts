@@ -157,7 +157,7 @@ function forcesPart(seed: string, rng: Rng): ExamPart | null {
   const x = rng.pick(ZMK_SUBSTANCES.filter((s) => s.level <= 2 && !UNCLEAR.has(s.id) && s.id.length > 2))
   const force = ZMK_STEPS.forceStep(x, rng)
   if (!force) return null
-  return { id: 'd', prompt: 'Zwischenmolekulare Kräfte und Siedepunkte.', points: 2, items: [fromStep(force, 'kraft', 'Stärkste Kraft', 1), boil] }
+  return { id: 'd', prompt: 'Zwischenmolekulare Kräfte und Siedepunkte.', points: 2, items: [fromStep(force, 'kraft', 'Stärkste Art der Kraft', 1), boil] }
 }
 
 function semiconductorPart(seed: string): ExamPart | null {

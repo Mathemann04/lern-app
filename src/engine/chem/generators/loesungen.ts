@@ -219,7 +219,8 @@ function concTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCal
 // Lösung ansetzen: n = c · V, M, m = n · M
 function prepareTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc | null {
   const values: MassValues = level === 2 ? 'pse' : 'rounded'
-  const s = rng.pick(solutes(level === 3 ? [...WEIGH_EASY_IDS, ...SOLUTE_HARD_IDS, ...SOLUTE_HARD_IDS] : WEIGH_EASY_IDS))
+  // ab Vertiefung auch Klammern und Hydrate (Abwechslung, weil Flüssigkeiten hier fehlen), auf Klausurniveau doppelt so oft
+  const s = rng.pick(solutes(level === 3 ? [...WEIGH_EASY_IDS, ...SOLUTE_HARD_IDS, ...SOLUTE_HARD_IDS] : level === 2 ? [...WEIGH_EASY_IDS, ...SOLUTE_HARD_IDS] : WEIGH_EASY_IDS))
   const vMl = rng.pick(VOLUMES_ML)
   const v = ratMul(rat(vMl), ML)
   const c = rng.pick(NICE_C.filter((x) => within(x, maxC(s))))
