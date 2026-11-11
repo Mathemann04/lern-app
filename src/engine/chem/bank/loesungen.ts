@@ -29,7 +29,7 @@ export const CONCENTRATION_ORDER_ITEMS: readonly { readonly id: string; readonly
   { id: 'NaOH', grams: '8', mL: 250 },
   { id: 'C6H12O6', grams: '90', mL: 1000 },
   { id: 'KCl', grams: '7{,}46', mL: 250 },
-  { id: 'NaCl', grams: '5{,}85', mL: 500 },
+  { id: 'NaCl', grams: '11{,}7', mL: 1000 },
   { id: 'Na2SO4', grams: '14{,}21', mL: 1000 },
 ]
 const NAMES: Readonly<Record<string, string>> = { NaOH: 'Natriumhydroxid', C6H12O6: 'Glucose', KCl: 'Kaliumchlorid', NaCl: 'Natriumchlorid', Na2SO4: 'Natriumsulfat' }
@@ -73,7 +73,7 @@ export const CONCENTRATION_ORDER: OrderQuestion = {
   ],
   hint: 'Rechne für jede Lösung zuerst die Stoffmenge aus und teile sie durch das Volumen in Litern.',
   explanation: why(
-    String.raw`Mit $c = \frac{n}{V}$ und $n = \frac{m}{M}$: Natriumhydroxid $0{,}2\,\mathrm{mol}$ in $0{,}25\,\mathrm{L}$ gibt $0{,}8\,\mathrm{mol/L}$; Glucose $0{,}5\,\mathrm{mol}$ in $1\,\mathrm{L}$ gibt $0{,}5\,\mathrm{mol/L}$; Kaliumchlorid $0{,}1\,\mathrm{mol}$ in $0{,}25\,\mathrm{L}$ gibt $0{,}4\,\mathrm{mol/L}$; Natriumchlorid $0{,}1\,\mathrm{mol}$ in $0{,}5\,\mathrm{L}$ gibt $0{,}2\,\mathrm{mol/L}$; Natriumsulfat $0{,}1\,\mathrm{mol}$ in $1\,\mathrm{L}$ gibt $0{,}1\,\mathrm{mol/L}$.`,
+    String.raw`Mit $c = \frac{n}{V}$ und $n = \frac{m}{M}$: Natriumhydroxid $0{,}2\,\mathrm{mol}$ in $0{,}25\,\mathrm{L}$ gibt $0{,}8\,\mathrm{mol/L}$; Glucose $0{,}5\,\mathrm{mol}$ in $1\,\mathrm{L}$ gibt $0{,}5\,\mathrm{mol/L}$; Kaliumchlorid $0{,}1\,\mathrm{mol}$ in $0{,}25\,\mathrm{L}$ gibt $0{,}4\,\mathrm{mol/L}$; Natriumchlorid $0{,}2\,\mathrm{mol}$ in $1\,\mathrm{L}$ gibt $0{,}2\,\mathrm{mol/L}$; Natriumsulfat $0{,}1\,\mathrm{mol}$ in $1\,\mathrm{L}$ gibt $0{,}1\,\mathrm{mol/L}$.`,
     'Erst n = m/M, dann c = n/V.',
   ),
   cards: ['loesungen-konzentration'],
@@ -109,7 +109,7 @@ export const LOESUNGEN_BANK: QuestionBank = {
       ],
       hint: "Achte auf beide Teile des Namens: Was misst die Stoffmenge, und worauf bezieht sich eine Konzentration?",
       explanation: {
-        detailed: String.raw`Die Stoffmengenkonzentration ist $c = \frac{n}{V}$: Stoffmenge des gelösten Stoffs in Mol geteilt durch das Volumen der fertigen Lösung in Litern. Ihre Einheit ist $\mathrm{mol/L}$. Eine Lösung mit $c = 0{,}5\,\mathrm{mol/L}$ enthält in jedem Liter $0{,}5\,\mathrm{mol}$ gelösten Stoff.`,
+        detailed: String.raw`Die Stoffmengenkonzentration (im Skript molare Konzentration) ist $c = \frac{n}{V}$: Stoffmenge des gelösten Stoffs in Mol geteilt durch das Volumen der fertigen Lösung in Litern. Ihre Einheit ist $\mathrm{mol/L}$. Eine Lösung mit $c = 0{,}5\,\mathrm{mol/L}$ enthält in jedem Liter $0{,}5\,\mathrm{mol}$ gelösten Stoff.`,
         short: String.raw`$c = \frac{n}{V}$: Mol gelöster Stoff je Liter Lösung.`,
       },
       cards: ['loesungen-konzentration'],
@@ -217,7 +217,7 @@ export const LOESUNGEN_BANK: QuestionBank = {
           short: "Es zählt der Raum, in dem sich der Stoff verteilt.",
         } },
         { id: 'f3', text: String.raw`immer $22{,}4\,\mathrm{L}$, das Volumen eines Mols`, misconception: 'chem-mis-lo-vm-everything' },
-        { id: 'f4', text: "das Volumen in Millilitern, so wie man es am Messkolben abliest", misconception: 'chem-mis-lo-milli' },
+        { id: 'f4', text: "das Volumen in Millilitern, so wie man es am Maßkolben abliest", misconception: 'chem-mis-lo-milli' },
         { id: 'f5', text: "das Volumen des ganzen Gefäßes, auch wenn es nur halb gefüllt ist", misconception: 'chem-mis-lo-v-not-solution', why: {
           detailed: "Der leere Teil eines Gefäßes enthält weder Stoff noch Wasser; er gehört nicht zur Lösung und ändert nichts daran, wie dicht der Stoff verteilt ist.",
           short: "Der leere Teil des Gefäßes gehört nicht zur Lösung.",
@@ -472,7 +472,7 @@ export const LOESUNGEN_BANK: QuestionBank = {
         } },
         { id: 'f5', text: String.raw`nur bei Wasserstoff, $0\,^{\circ}\mathrm{C}$ und $1013\,\mathrm{hPa}$`, misconception: 'chem-mis-lo-vm-gas-specific' },
       ],
-      hint: "Zwei Dinge müssen passen: der Zustand des Stoffs und die Bedingungen, die Normbedingungen heißen.",
+      hint: "Zwei Dinge müssen passen: der Zustand des Stoffs und die Bedingungen, die Normbedingungen heißen (im Skript Normalbedingungen).",
       explanation: {
         detailed: String.raw`$22{,}4\,\mathrm{L/mol}$ gilt für ideale Gase bei Normbedingungen, $0\,^{\circ}\mathrm{C}$ ($273{,}15\,\mathrm{K}$) und $1013\,\mathrm{hPa}$, für jedes Gas gleich. Bei anderen Bedingungen ist das molare Volumen anders, bei $25\,^{\circ}\mathrm{C}$ etwa $24{,}5\,\mathrm{L/mol}$. Für Flüssigkeiten und Feststoffe gilt der Wert nicht.`,
         short: String.raw`Ideales Gas, $0\,^{\circ}\mathrm{C}$, $1013\,\mathrm{hPa}$.`,
@@ -651,7 +651,7 @@ export const LOESUNGEN_BANK: QuestionBank = {
       part: 'konzentration',
       title: "Vorgehen beim Ansetzen",
       prompt: String.raw`Wie setzt man $1\,\mathrm{L}$ einer Lösung mit $c = 0{,}5\,\mathrm{mol/L}$ richtig an?`,
-      correct: { id: 'r', text: String.raw`$0{,}5\,\mathrm{mol}$ des Stoffs abwiegen, in etwas Wasser lösen und im Messkolben auf genau $1\,\mathrm{L}$ Lösung auffüllen` },
+      correct: { id: 'r', text: String.raw`$0{,}5\,\mathrm{mol}$ des Stoffs abwiegen, in etwas Wasser lösen und im Maßkolben auf genau $1\,\mathrm{L}$ Lösung auffüllen` },
       wrong: [
         { id: 'f1', text: String.raw`$0{,}5\,\mathrm{mol}$ des Stoffs abwiegen und in genau $1\,\mathrm{L}$ Wasser geben`, misconception: 'chem-mis-lo-v-not-solution' },
         { id: 'f2', text: String.raw`$0{,}5\,\mathrm{g}$ des Stoffs abwiegen, lösen und auf $1\,\mathrm{L}$ Lösung auffüllen`, misconception: 'chem-mis-lo-mol-as-gram' },
@@ -666,7 +666,7 @@ export const LOESUNGEN_BANK: QuestionBank = {
       ],
       hint: "Welches Volumen steht in der Formel der Konzentration im Nenner, und wann kann man es messen?",
       explanation: {
-        detailed: String.raw`Gebraucht werden $n = c \cdot V = 0{,}5\,\mathrm{mol}$; die Masse dazu folgt aus der molaren Masse. Der Stoff wird in wenig Wasser gelöst, dann füllt man im Messkolben bis zur Marke auf. So ist das Volumen der fertigen Lösung genau $1\,\mathrm{L}$, auch wenn sich beim Lösen das Volumen etwas ändert.`,
+        detailed: String.raw`Gebraucht werden $n = c \cdot V = 0{,}5\,\mathrm{mol}$; die Masse dazu folgt aus der molaren Masse. Der Stoff wird in wenig Wasser gelöst, dann füllt man im Maßkolben (auch Messkolben genannt) bis zur Marke auf. So ist das Volumen der fertigen Lösung genau $1\,\mathrm{L}$, auch wenn sich beim Lösen das Volumen etwas ändert.`,
         short: "Abwiegen, lösen, auf das Endvolumen der Lösung auffüllen.",
       },
       cards: ['loesungen-ansetzen', 'loesungen-konzentration'],
@@ -786,9 +786,9 @@ export const LOESUNGEN_BANK: QuestionBank = {
           short: "Die Einheit verlangt eine andere Bezugsgröße.",
         } },
       ],
-      hint: "Lies die Einheit: Gramm wovon, je Liter wovon?",
+      hint: "Lies die Einheit: Gramm wovon, je Liter wovon? (Im Skript hat die Massenkonzentration das Zeichen $\\rho$.)",
       explanation: {
-        detailed: String.raw`Die Massenkonzentration ist $\beta = \frac{m(\text{Salz})}{V(\text{Lösung})}$. $50\,\mathrm{g/L}$ heißt: Jeder Liter fertiger Lösung enthält $50\,\mathrm{g}$ gelöstes Salz. Die Dichte der Lösung ist etwas anderes; sie zählt die Masse der ganzen Lösung, etwa $1000\,\mathrm{g}$ und mehr je Liter.`,
+        detailed: String.raw`Die Massenkonzentration ist $\beta = \frac{m(\text{Salz})}{V(\text{Lösung})}$ (im Skript mit dem Zeichen $\rho$). $50\,\mathrm{g/L}$ heißt: Jeder Liter fertiger Lösung enthält $50\,\mathrm{g}$ gelöstes Salz. Die Dichte der Lösung ist etwas anderes; sie zählt die Masse der ganzen Lösung, etwa $1000\,\mathrm{g}$ und mehr je Liter.`,
         short: String.raw`$50\,\mathrm{g}$ gelöstes Salz je Liter Lösung.`,
       },
       cards: ['loesungen-massenkonzentration'],
@@ -815,7 +815,7 @@ export const LOESUNGEN_BANK: QuestionBank = {
       ],
       hint: "Rechne das Volumen zuerst in Liter um.",
       explanation: {
-        detailed: String.raw`$\beta = \frac{m}{V} = \frac{6\,\mathrm{g}}{0{,}4\,\mathrm{L}} = 15\,\mathrm{g/L}$.`,
+        detailed: String.raw`$\beta = \frac{m}{V} = \frac{6\,\mathrm{g}}{0{,}4\,\mathrm{L}} = 15\,\mathrm{g/L}$. Im Skript steht für die Massenkonzentration das Zeichen $\rho$.`,
         short: String.raw`$\beta = \frac{6\,\mathrm{g}}{0{,}4\,\mathrm{L}} = 15\,\mathrm{g/L}$.`,
       },
       cards: ['loesungen-massenkonzentration'],
@@ -1263,7 +1263,7 @@ export const LOESUNGEN_BANK: QuestionBank = {
           short: "Die Masse je Liter Lösung ist schon gegeben.",
         } },
       ],
-      hint: "Wie viel Mol sind 10 g von jedem Stoff?",
+      hint: "Wie viel Mol sind 10 g von jedem Stoff? ($\\beta$ heißt im Skript $\\rho$; $c$ heißt dort molare Konzentration.)",
       explanation: {
         detailed: String.raw`Je Liter: $n(\ce{NaCl}) = \frac{10\,\mathrm{g}}{58{,}5\,\mathrm{g/mol}} \approx 0{,}171\,\mathrm{mol}$, $n(\text{Glucose}) = \frac{10\,\mathrm{g}}{180\,\mathrm{g/mol}} \approx 0{,}0556\,\mathrm{mol}$. Die Kochsalzlösung hat also $c \approx 0{,}171\,\mathrm{mol/L}$, die Glucoselösung nur $c \approx 0{,}0556\,\mathrm{mol/L}$.`,
         short: String.raw`$\frac{10}{58{,}5} \approx 0{,}171$ gegen $\frac{10}{180} \approx 0{,}0556\,\mathrm{mol/L}$.`,
@@ -1350,7 +1350,7 @@ export const LOESUNGEN_BANK: QuestionBank = {
           short: "Das ist die Masse des Wassers je Liter.",
         } },
       ],
-      hint: "Wie viel wiegt ein Liter der Lösung, und welcher Teil davon ist Salz?",
+      hint: "Wie viel wiegt ein Liter der Lösung, und welcher Teil davon ist Salz? Achtung: Hier steht $\\rho$ für die Dichte; im Skript bezeichnet $\\rho$ auch die Massenkonzentration.",
       explanation: {
         detailed: String.raw`Ein Liter Lösung wiegt $1000\,\mathrm{mL} \cdot 1{,}10\,\mathrm{g/mL} = 1100\,\mathrm{g}$. Davon sind $10\,\%$ Salz: $110\,\mathrm{g}$. Also $\beta = 110\,\mathrm{g/L}$. Die Dichte $\rho = 1100\,\mathrm{g/L}$ zählt die ganze Lösung, $\beta$ nur das Salz.`,
         short: String.raw`$\beta = w \cdot \rho = 0{,}10 \cdot 1100\,\mathrm{g/L} = 110\,\mathrm{g/L}$.`,
@@ -1589,15 +1589,15 @@ export const LOESUNGEN_BANK: QuestionBank = {
       fact: 'gasreaktion-volumen',
       part: 'gase',
       title: "Volumen bei einer Gasreaktion",
-      prompt: String.raw`Stickstoff und Wasserstoff reagieren vollständig zu Ammoniak: $\ce{N2 + 3 H2 -> 2 NH3}$. Alle Stoffe sind gasförmig, Druck und Temperatur bleiben gleich. Wie viel Ammoniak entsteht aus $1\,\mathrm{L}$ $\ce{N2}$ und $3\,\mathrm{L}$ $\ce{H2}$?`,
-      correct: { id: 'r', text: String.raw`$2\,\mathrm{L}$` },
+      prompt: String.raw`Kohlenstoffmonoxid verbrennt vollständig zu Kohlenstoffdioxid: $\ce{2 CO + O2 -> 2 CO2}$. Alle Stoffe sind gasförmig, Druck und Temperatur bleiben gleich. Wie viel Kohlenstoffdioxid entsteht aus $3\,\mathrm{L}$ $\ce{CO}$ und $1{,}5\,\mathrm{L}$ $\ce{O2}$?`,
+      correct: { id: 'r', text: String.raw`$3\,\mathrm{L}$` },
       wrong: [
-        { id: 'f1', text: String.raw`$4\,\mathrm{L}$`, misconception: 'chem-mis-lo-volume-conserved' },
-        { id: 'f2', text: String.raw`$8\,\mathrm{L}$`, misconception: 'chem-mis-lo-atoms-count', why: {
-          detailed: "Ein Ammoniakmolekül hat vier Atome, zählt für das Gasvolumen aber nur einmal. Die Zahlen vor den Formeln zählen Moleküle.",
+        { id: 'f1', text: String.raw`$4{,}5\,\mathrm{L}$`, misconception: 'chem-mis-lo-volume-conserved' },
+        { id: 'f2', text: String.raw`$9\,\mathrm{L}$`, misconception: 'chem-mis-lo-atoms-count', why: {
+          detailed: "Ein Molekül Kohlenstoffdioxid hat drei Atome, zählt für das Gasvolumen aber nur einmal. Die Zahlen vor den Formeln zählen Moleküle.",
           short: "Für das Gasvolumen zählt jedes Molekül einmal.",
         } },
-        { id: 'f3', text: String.raw`weniger als $2\,\mathrm{L}$, weil Ammoniak schwerer ist als Wasserstoff`, misconception: 'chem-mis-lo-vm-gas-specific' },
+        { id: 'f3', text: String.raw`weniger als $3\,\mathrm{L}$, weil Kohlenstoffdioxid schwerer ist als Kohlenstoffmonoxid`, misconception: 'chem-mis-lo-vm-gas-specific' },
         { id: 'f4', text: "Das lässt sich nur mit den molaren Massen der Gase berechnen.", misconception: 'chem-mis-lo-vm-gas-specific', why: {
           detailed: "Molare Massen braucht man, wenn Massen gegeben oder gesucht sind. Bei Gasen unter gleichen Bedingungen verhalten sich die Volumina wie die Stoffmengen; das reicht hier.",
           short: "Bei Gasen verhalten sich Volumina wie Stoffmengen.",
@@ -1605,8 +1605,8 @@ export const LOESUNGEN_BANK: QuestionBank = {
       ],
       hint: "Bei gleichem Druck und gleicher Temperatur: Wie hängen Gasvolumen und Zahl der Moleküle zusammen?",
       explanation: {
-        detailed: String.raw`Bei gleichem Druck und gleicher Temperatur ist das Gasvolumen proportional zur Stoffmenge. Die Gleichung sagt: 1 Teil $\ce{N2}$ und 3 Teile $\ce{H2}$ ergeben 2 Teile $\ce{NH3}$. Aus $1\,\mathrm{L}$ und $3\,\mathrm{L}$ entstehen also $2\,\mathrm{L}$ Ammoniak; das Gasvolumen sinkt von $4\,\mathrm{L}$ auf $2\,\mathrm{L}$, die Masse bleibt gleich.`,
-        short: String.raw`Volumina wie Koeffizienten: $1 + 3 \to 2$, also $2\,\mathrm{L}$.`,
+        detailed: String.raw`Bei gleichem Druck und gleicher Temperatur ist das Gasvolumen proportional zur Stoffmenge. Die Gleichung sagt: 2 Teile $\ce{CO}$ und 1 Teil $\ce{O2}$ ergeben 2 Teile $\ce{CO2}$. Aus $3\,\mathrm{L}$ und $1{,}5\,\mathrm{L}$ entstehen also $3\,\mathrm{L}$ Kohlenstoffdioxid; das Gasvolumen sinkt von $4{,}5\,\mathrm{L}$ auf $3\,\mathrm{L}$, die Masse bleibt gleich. Die Reaktion läuft vollständig ab; bei einem Gleichgewicht (Doppelpfeil) wäre das nur der höchstmögliche Wert.`,
+        short: String.raw`Volumina wie Koeffizienten: $2 + 1 \to 2$, also $3\,\mathrm{L}$.`,
       },
       cards: ['loesungen-molvolumen'],
       ref: REF_VM,
@@ -1815,7 +1815,7 @@ export const LOESUNGEN_BANK: QuestionBank = {
         { pair: 'w', right: 'Volumen des Stoffs durch Volumen der Mischung', misconception: 'chem-mis-lo-vol-mass' },
         { pair: 'phi', right: 'Masse des Stoffs durch Masse der Lösung', misconception: 'chem-mis-lo-vol-mass' },
       ],
-      hint: 'Achte auf das Zeichen: zählt die Angabe Teilchen, wiegt sie Masse, oder misst sie Volumen? Und worauf bezieht sie sich?',
+      hint: 'Achte auf das Zeichen: zählt die Angabe Teilchen, wiegt sie Masse, oder misst sie Volumen? Und worauf bezieht sie sich? (Im Skript heißt c auch molare Konzentration, und die Massenkonzentration hat das Zeichen $\\rho$.)',
       explanation: why(
         String.raw`Die Stoffmengenkonzentration zählt Mol je Liter Lösung, die Massenkonzentration Gramm je Liter Lösung. Der Massenanteil teilt die Masse des Stoffs durch die Masse der ganzen Lösung, der Volumenanteil das Volumen des Stoffs durch das Volumen der Mischung. $1\,\mathrm{ppm}$ ist ein Teil auf eine Million, bei Massen $1\,\mathrm{mg}$ je $\mathrm{kg}$. Das molare Volumen sagt, wie viele Liter ein Mol Gas einnimmt.`,
         'Mol je Liter, Gramm je Liter, Masse durch Masse, Volumen durch Volumen, mg je kg, Liter je Mol.',

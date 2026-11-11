@@ -110,16 +110,20 @@ export function particleItem(t: Particle): ExamItem {
   }
 }
 
+// Teilchen der Altklausuren und Übungsblätter (isExamParticle, docs/CHEMIE.md §9) kommen nicht vor
 function particlePart(rng: Rng): ExamPart {
-  let t: Particle
-  if (rng.chance(NEUTRAL_SHARE)) {
-    const el = rng.pick(NEUTRAL)
-    t = { el, a: rng.pick(neutralIsotopes(el)), q: 0 }
-  } else {
-    const el = rng.pick(WITH_IONS)
-    t = { el, a: rng.pick(el.isotopes), q: rng.pick(el.ions) }
+  const neutral = rng.chance(NEUTRAL_SHARE)
+  for (;;) {
+    let t: Particle
+    if (neutral) {
+      const el = rng.pick(NEUTRAL)
+      t = { el, a: rng.pick(neutralIsotopes(el)), q: 0 }
+    } else {
+      const el = rng.pick(WITH_IONS)
+      t = { el, a: rng.pick(el.isotopes), q: rng.pick(el.ions) }
+    }
+    if (!isExamParticle(t)) return { id: 'c', prompt: 'Kernsymbol.', points: 1, items: [particleItem(t)] }
   }
-  return { id: 'c', prompt: 'Kernsymbol.', points: 1, items: [particleItem(t)] }
 }
 
 // --- d) Valenzelektronen ---

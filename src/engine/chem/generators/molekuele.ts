@@ -27,7 +27,7 @@ import {
 import { type ChemCalc, type ChemGenerator, type WrongValue, MAX_WRONG, stepChoices } from './shared.ts'
 
 // Rechnungen zum Thema „Moleküle" (Plan M4, Thema 3.2), alles aus den Moleküldaten (chem/molecules.ts):
-// - Lewis-Formel (Unterthema „lewis"): Valenzelektronen → Elektronenpaare → bindende und freie → richtige Formel als Bild
+// - Lewis-Formel (Unterthema „lewis"): Valenzelektronen → Elektronenpaare → bindende und freie am Zentralatom → richtige Formel als Bild
 // - Gestalt (Unterthema „gestalt"): Bindungspartner → freie Paare am Zentralatom → Typ AXₙEₘ → Gestalt → Winkel
 // - Polarität (Unterthema „polaritaet", ab Vertiefung): ΔEN mit Werten aus der Aufgabe → Bindungsart → Teilladungen → Dipol
 // - Namen (Unterthema „namen", ab Vertiefung): Name aus der Formel oder Formel aus dem Namen, mit Vorsilben

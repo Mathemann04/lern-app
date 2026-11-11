@@ -62,6 +62,13 @@ test('Probeklausur: beginnen, antworten, neu laden, springen, unterbrechen, weit
   await page.getByRole('navigation', { name: 'Aufgaben' }).getByRole('button', { name: /^Aufgabe 4/ }).click()
   await expect(page.getByRole('heading', { name: /Aufgabe 4: Stöchiometrie/ })).toBeVisible()
   await expectCleanPage(page, 'Aufgabe 4')
+  // die Gleichung schreibt man in der Klausur selbst: Antworten erst nach dem Knopf, dann normal wählbar
+  const paper = page.getByTestId('paper-first')
+  await expect(paper).toHaveCount(1)
+  await paper.getByRole('button', { name: 'Auf Papier gelöst, Antworten zeigen' }).click()
+  await expect(paper).toHaveCount(0)
+  await page.getByTestId('exam-item').first().getByRole('group', { name: 'Antworten' }).getByRole('button').first().click()
+  await expect(page.getByTestId('exam-item').first().locator('[aria-pressed="true"]')).toHaveCount(1)
   await page.getByRole('button', { name: 'Aufgabe 5 →' }).click()
   await expect(page.getByRole('heading', { name: /Aufgabe 5/ })).toBeVisible()
 
@@ -82,6 +89,7 @@ test('Probeklausur: beginnen, antworten, neu laden, springen, unterbrechen, weit
   await expect(page.getByRole('heading', { name: 'Auswertung' })).toBeVisible()
   await expect(page.getByTestId('mock-score')).toHaveText(/^\d+(,5)? von 50 Punkten$/)
   await expect(page.getByTestId('mock-pass')).toContainText('in Teil 2 noch')
+  await expect(page.getByTestId('mock-choice-note')).toContainText('Auswählen ist leichter als selbst schreiben')
   await expect(page.getByText(/Punkte nach dem Schema der App, Teilpunkte geschätzt/)).toBeVisible()
   // fast alles offen: Vorschläge zum Üben mit Link zum Thema
   const hints = page.getByRole('region', { name: 'Das solltest du üben' }).getByRole('link')

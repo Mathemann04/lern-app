@@ -231,3 +231,24 @@ describe('Klausuraufgabe 4: Punkte', () => {
     for (const id of Object.keys(all).filter((id) => id.startsWith('molmasse-'))) expect(next[id]).toBe(all[id])
   })
 })
+
+describe('Klausuraufgabe 4, Teil d: Lösung ansetzen', () => {
+  it('wiegt nur Feststoffe ab; bei Hydraten gilt c für das wasserfreie Salz', () => {
+    let solutions = 0
+    let hydrates = 0
+    for (const seed of SEEDS) {
+      const part = buildTask4(seed).parts[3]
+      if (part.items[0].id !== 'stoffmenge-loesung') continue
+      solutions++
+      expect(part.prompt).not.toMatch(/\\ce\{(HCl|H2SO4|HNO3|H3PO4|H2O2|CH3OH|C2H5OH)\}/)
+      expect(part.prompt).toContain('Maßkolben')
+      if (/hydrat/.test(part.prompt)) {
+        hydrates++
+        expect(part.prompt).toMatch(/c\(\\ce\{[^}*]+\}\)/)
+        expect(part.prompt).toMatch(/Vorrätig ist nur das \w*hydrat/)
+      }
+    }
+    expect(solutions).toBeGreaterThan(50)
+    expect(hydrates).toBeGreaterThan(3)
+  })
+})
