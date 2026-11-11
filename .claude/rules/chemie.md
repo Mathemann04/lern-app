@@ -194,3 +194,11 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   `TaskScreen` nur bei Wissensfragen über `questionNoOf`, `clearReviews` bei „Fortschritt löschen"); `pickNewSeed` und
   `pickMixed` nehmen `review`/`reviewOf` (fällige zuerst über `dueInSelection`, wartende zählen wie gezeigt), nur beim
   geführten Üben.
+- Frei rechnen (S8b): `GuidedStep.numeric` (`NumericAnswer` in `engine/quantity/judge.ts`: Wert, Einheit als LaTeX, `exact`,
+  Fehlerwerte mit `why`, `also` für weitere richtige Werte, `note`), gebaut mit `tolerantNumeric`, `exactNumeric`,
+  `numericWrong`, `unitOf` in `generators/shared.ts` (`tolerantWrongs` gibt jetzt `value` mit). Rechenarten mit Zahlen tragen
+  `free: true` (`free.test.ts` prüft: jede ihrer Aufgaben hat einen Schritt mit `numeric`, die anderen keinen; gerundete
+  Lösung angenommen, jede falsche Antwort als ihr Fehler erkannt). Engine: `nextSeed(level, shown, parts, free)`,
+  `hasFree(level)`; Katalog `LevelPreview.free` und `isFreeAt` (vergleicht `catalog.test.ts`). Oberfläche: `TaskScreen` mit
+  `free` (Ziffernblock `ui/numeric/NumberAnswer.tsx`, Rückmeldung `TypedFeedback`), `PracticePage` zeigt Chemie frei dort statt
+  im MathLive-Bildschirm. Browser-Tests `e2e/chem-free.spec.ts` (rechnen die Antworten mit der Engine aus `src/`).

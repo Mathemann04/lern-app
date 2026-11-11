@@ -1162,6 +1162,15 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   falsch zurück in Fach 0, aus Fach 4 heraus gelernt), Speicher `state/reviews.ts` (Schlüssel `rechenweg-wiederholung`),
   fällige Fragen zuerst in `pickNewSeed` und `pickMixed`, wartende Fragen erst, wenn sie fällig sind; Hinweis
   „Wiederholung“ über der Frage. Einzelheiten in ENTSCHEIDUNGEN.md.
+  **S8b** (fertig): „Frei“ in Atombau, Stoffmenge und Umsatz, Gase und Lösungen, Energie (alle Stufen), Gleichgewicht (ab
+  Vertiefung) und Salze (Klausurniveau, Born-Haber). Eine Rechnung läuft frei in denselben Schritten wie geführt; jeder
+  Schritt mit einer Zahl (`GuidedStep.numeric`) wird über den eigenen Ziffernblock eingetippt (`ui/numeric/NumberAnswer.tsx`:
+  Ziffern, Komma, Minus, „·10ⁿ“, „Gelesen als …“ über dem Feld, Einheit fest daneben, auch mit der Tastatur des Laptops),
+  die übrigen Schritte bleiben Auswahl. Urteil `engine/quantity/judge.ts` nach CHEMIE.md §7 (richtig bis 1 %, typischer
+  Fehler mit Namen und „Warum ist das falsch?“, „Fast: Prüfe deine Rundung“ bis 4 % ohne Fehler, Teilchenzahlen und
+  Ladungen genau), Leser `readNumber` in `quantity/numberDe.ts`. Nach einem Fehler „Lösung zeigen“. Frei kommen nur
+  Rechenarten mit `free` (keine Wissensfragen, keine Wiederholung); Stufen ohne solche gehen geführt weiter, mit Hinweis auf
+  der Themenseite. Abweichung: Die Einheit ist auch auf Klausurniveau vorgegeben (wählbare Einheiten mit N2, Eingaben).
 - **S9: Probeklausur Teil 1** (50 Punkte, Bauplan unter „Probeklausur“), Uhr,
   Auswertung mit dem Hinweis auf die 40 Punkte, Verlauf, PSE und
   Formelsammlung in der Klausur.

@@ -743,3 +743,11 @@ Neue Entscheidungen unten anfügen.
   bevor sie fällig ist (z. B. nach Neuladen), ändert sich nichts. Über der Frage steht „Wiederholung“, nach einer falschen
   Antwort „Die Frage kommt nach drei anderen Aufgaben noch einmal.“ Nur Wissensfragen kommen wieder, Rechnungen nicht
   (dort hat jede Aufgabe neue Zahlen und Stoffe).
+- 11.11.2026: S8b frei rechnen. Frei läuft eine Rechnung in denselben Schritten wie geführt; nur Schritte mit einer Zahl
+  werden eingetippt, Gleichungen, Formeln, Namen, Konfigurationen und Urteile bleiben Auswahl (eigene Eingaben dafür mit
+  N2). So gibt es auch frei „Bisher“, Tipps und Erklärungen je Schritt. Die Einheit steht fest neben dem Feld, auch auf
+  Klausurniveau (wählbare Einheiten erst mit N2; Abweichung von CHEMIE.md §7). Neu gegenüber dem Plan: Nach einem Fehler
+  lässt sich die Lösung des Schritts zeigen (sonst bliebe man bei einer Zahl hängen); der Schritt zählt dann als Fehler.
+  Liegen zwei Fehlerwerte nah beieinander, nennt die App den nächsten. Bei $K$ aus $\ln K$ gilt auch das Ergebnis mit dem
+  gerundeten $\ln K$ als richtig (bei großem $\ln K$ läge es sonst über 1 % daneben). Wer im Thema „Frei“ wählt, übt in
+  Stufen ohne Rechnung mit Zahlen geführt; die Themenseite sagt das.

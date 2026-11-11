@@ -40,6 +40,9 @@ export type LevelPreview = {
   readonly examples: readonly string[]
   // schon im geführten Modus spielbar
   readonly available: boolean
+  // freier Modus in dieser Stufe (ohne Angabe: wie Course.free); false z. B. in Chemie-Stufen ohne Rechnung
+  // mit Zahlen (ein Test vergleicht mit der Engine). „Frei" geht dort geführt weiter, mit Hinweis.
+  readonly free?: boolean
 }
 
 // Ein Unterthema eines Themas, z. B. „Isotope und Ionen" im Atombau. Auf der Themenseite und in der
@@ -317,12 +320,14 @@ const ionenLevels: LevelPreview[] = [
   {
     level: 1,
     available: true,
+    free: false,
     title: 'Ionen aus Metall und Nichtmetall, Formeln und Namen einfacher Salze, Eigenschaften',
     examples: [String.raw`\ce{Al2O3}`, String.raw`\ce{CaF2}`],
   },
   {
     level: 2,
     available: true,
+    free: false,
     title: 'Molekül-Ionen, römische Ziffern, Zerfall in Ionen, Ionengitter und Koordinationszahl',
     examples: [String.raw`\ce{Ca3(PO4)2}`, String.raw`\ce{Fe2(SO4)3}`],
   },
@@ -426,6 +431,7 @@ const mwgLevels: LevelPreview[] = [
   {
     level: 1,
     available: true,
+    free: false,
     title: 'Dynamisches Gleichgewicht, Massenwirkungsgesetz aufstellen, exotherm und endotherm, Katalysator',
     examples: [String.raw`K_{\mathrm{GG}} = \frac{c^{2}(\ce{HI})}{c(\ce{H2}) \cdot c(\ce{I2})}`],
   },
@@ -717,7 +723,7 @@ export const SUBJECTS: readonly Subject[] = [
             icon: 'nucleus',
             cards: 'chem-atombau',
             levels: atombauLevels,
-            free: false,
+            free: true,
             focus: true,
             parts: atombauParts,
           },
@@ -781,7 +787,7 @@ export const SUBJECTS: readonly Subject[] = [
             icon: 'bond',
             cards: 'chem-ionen',
             levels: ionenLevels,
-            free: false,
+            free: true,
             focus: true,
             parts: ionenParts,
           },
@@ -846,7 +852,7 @@ export const SUBJECTS: readonly Subject[] = [
             icon: 'flask',
             cards: 'chem-stoffmenge',
             levels: stoffmengeLevels,
-            free: false,
+            free: true,
             focus: true,
             parts: stoffmengeParts,
           },
@@ -857,7 +863,7 @@ export const SUBJECTS: readonly Subject[] = [
             icon: 'flask',
             cards: 'chem-loesungen',
             levels: loesungenLevels,
-            free: false,
+            free: true,
             focus: true,
             parts: loesungenParts,
           },
@@ -878,7 +884,7 @@ export const SUBJECTS: readonly Subject[] = [
             icon: 'equilibrium',
             cards: 'chem-mwg',
             levels: mwgLevels,
-            free: false,
+            free: true,
             focus: true,
             parts: mwgParts,
           },
@@ -889,7 +895,7 @@ export const SUBJECTS: readonly Subject[] = [
             icon: 'equilibrium',
             cards: 'chem-energie',
             levels: energieLevels,
-            free: false,
+            free: true,
             focus: true,
             parts: energieParts,
           },
@@ -954,6 +960,9 @@ export const SUBJECTS: readonly Subject[] = [
 export const isCourseAvailable = (course: Course) => course.levels.some((l) => l.available)
 export const isAreaAvailable = (area: Area) => area.courses.some(isCourseAvailable)
 export const isLevelAvailable = (course: Course, level: Level) => course.levels.some((l) => l.level === level && l.available)
+
+// Gibt es in dieser Stufe den freien Modus?
+export const isFreeAt = (course: Course, level: Level) => course.free && (course.levels.find((l) => l.level === level)?.free ?? true)
 
 const AREAS = SUBJECTS.flatMap((subject) => subject.areas.map((area) => ({ subject, area })))
 const COURSES = AREAS.flatMap(({ subject, area }) => area.courses.map((course) => ({ subject, area, course })))

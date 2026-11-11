@@ -4,7 +4,7 @@ import { setCourseLevel, setSkippedParts, updateSettings, useSettings } from '..
 import type { PracticeMode } from '../state/storage.ts'
 import { AreaIcon } from './AreaIcon.tsx'
 import { BackLink } from './BackLink.tsx'
-import { courseById, hasLevelNames, levelName, playableLevel } from './catalog.ts'
+import { courseById, hasLevelNames, isFreeAt, levelName, playableLevel } from './catalog.ts'
 import { Formula } from './Formula.tsx'
 import { PartPicker } from './PartPicker.tsx'
 import { areaHref, cardFolderHref, practiceHref } from './routes.ts'
@@ -24,8 +24,9 @@ export function CourseScreen({ id }: { id: string }) {
   const settings = useSettings()
   // Eine gespeicherte Stufe, die (noch) nicht spielbar ist, zählt als erste spielbare
   const selected = playableLevel(course, settings.levels[id])
-  // Ohne freien Modus wird geführt geübt
-  const practiceMode: PracticeMode = course.free ? settings.practiceMode : 'guided'
+  // Ohne freien Modus wird geführt geübt, auch in Stufen ohne Rechnung zum Eintippen (Chemie, S8b)
+  const practiceMode: PracticeMode = isFreeAt(course, selected) ? settings.practiceMode : 'guided'
+  const freeElsewhere = course.free && settings.practiceMode === 'free' && practiceMode === 'guided'
   // Stufen mit Namen (Chemie): der Name steht über dem Inhalt der Stufe
   const named = hasLevelNames(id)
   // Unterthemen: Lässt sich mit der Auswahl in dieser Stufe üben? Wie viele der Unterthemen dieser Stufe
@@ -53,7 +54,7 @@ export function CourseScreen({ id }: { id: string }) {
             <div className="flex gap-1 rounded-xl bg-zinc-100 p-1">
               {MODES.map((option) => {
                 const disabled = option.value === 'free' && !course.free
-                const checked = practiceMode === option.value
+                const checked = (course.free ? settings.practiceMode : 'guided') === option.value
                 return (
                   <label
                     key={option.value}
@@ -94,6 +95,11 @@ export function CourseScreen({ id }: { id: string }) {
               >
                 {practiceLabel}
               </button>
+            )}
+            {freeElsewhere && (
+              <p className="text-sm text-pretty text-zinc-600" data-testid="free-note">
+                In {levelName(id, selected)} gibt es hier nichts zum Eintippen, deshalb übst du geführt.
+              </p>
             )}
             {partCount && (
               <div className="flex items-center justify-between gap-3 text-sm">

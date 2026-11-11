@@ -16,7 +16,7 @@ import {
   sideSum,
   thermoByKey,
 } from '../thermo.ts'
-import { type ChemCalc, type ChemGenerator, type WrongValue, stepChoices, tolerantWrongs } from './shared.ts'
+import { type ChemCalc, type ChemGenerator, type WrongValue, stepChoices, tolerantNumeric, tolerantWrongs } from './shared.ts'
 
 // Rechnungen zum Thema „Energie bei Reaktionen" (S7b, Plan M4 Thema 5.2), aus den Tabellenwerten in chem/thermo.ts:
 // - Reaktionsenthalpie (Unterthema „reaktionsenthalpie"): Σ Produkte, Σ Edukte, ΔH, exotherm oder endotherm; in den Grundlagen
@@ -62,6 +62,10 @@ function valuesText(keys: readonly string[], value: (key: string) => Rational, e
 
 // --- Reaktionsenthalpie ---
 
+// falscher Wert in kJ (genaue Dezimalzahl), mit Wert für den freien Modus
+const KJ = r`\mathrm{kJ}`
+const kjWrong = (rule: string, value: Rational): WrongValue => ({ rule, key: dec(value), content: math(kj(value)), value })
+
 // die Summe einer Seite mit Rechenweg, z. B. „1 · (−393,5) + 2 · (−285,8)"
 const sumLine = (side: readonly Term[], value: (key: string) => Rational) =>
   side.map(([c, k]) => `${c} \\cdot (${dec(value(k))})`).join(' + ')
@@ -72,8 +76,8 @@ const hasCoef = (side: readonly Term[]) => side.some(([c, k]) => c > 1 && !therm
 function sumStep(id: 'produkte' | 'edukte', side: readonly Term[], rng: Rng, focus?: string): GuidedStep | null {
   const correct = sideSum(side, dfhOf)
   const wrong: WrongValue[] = []
-  if (hasCoef(side)) wrong.push({ rule: 'chem-dh-coefficients', key: dec(sideSum(side, dfhOf, { noCoef: true })), content: math(kj(sideSum(side, dfhOf, { noCoef: true }))) })
-  if (hasWaterL(side)) wrong.push({ rule: 'chem-dh-water-gas', key: dec(sideSum(side, dfhOf, { waterGas: true })), content: math(kj(sideSum(side, dfhOf, { waterGas: true }))) })
+  if (hasCoef(side)) wrong.push(kjWrong('chem-dh-coefficients', sideSum(side, dfhOf, { noCoef: true })))
+  if (hasWaterL(side)) wrong.push(kjWrong('chem-dh-water-gas', sideSum(side, dfhOf, { waterGas: true })))
   const choices = stepChoices(rng, { key: dec(correct), content: math(kj(correct)) }, wrong, focus)
   if (choices.length === 0) return null
   const what = id === 'produkte' ? 'Produkte' : 'Edukte'
@@ -83,6 +87,7 @@ function sumStep(id: 'produkte' | 'edukte', side: readonly Term[], rng: Rng, foc
     title: `Summe der ${what}`,
     question: `Wie groß ist die Summe der Bildungsenthalpien der ${what}?`,
     choices,
+    numeric: tolerantNumeric(correct, wrong, KJ),
     hint: 'Jeder Wert gilt für 1 mol; nimm ihn so oft, wie der Koeffizient sagt, und achte auf den Zustand. Elemente im Standardzustand zählen 0.',
     explanation: { detailed: `Koeffizient mal Tabellenwert, dann zusammengezählt: $${line}$.`, short: math(kj(correct)) },
     established: line,
@@ -92,9 +97,9 @@ function sumStep(id: 'produkte' | 'edukte', side: readonly Term[], rng: Rng, foc
 
 function dhStep(x: ThermoReaction, rng: Rng, focus?: string): GuidedStep | null {
   const dh = reactionDH(x)
-  const wrong: WrongValue[] = [{ rule: 'chem-dh-reversed', key: dec(ratNeg(dh)), content: math(kj(ratNeg(dh))) }]
-  if (hasCoef(x.left) || hasCoef(x.right)) wrong.push({ rule: 'chem-dh-coefficients', key: dec(reactionDH(x, { noCoef: true })), content: math(kj(reactionDH(x, { noCoef: true }))) })
-  if (hasWaterL(x.left) || hasWaterL(x.right)) wrong.push({ rule: 'chem-dh-water-gas', key: dec(reactionDH(x, { waterGas: true })), content: math(kj(reactionDH(x, { waterGas: true }))) })
+  const wrong: WrongValue[] = [kjWrong('chem-dh-reversed', ratNeg(dh))]
+  if (hasCoef(x.left) || hasCoef(x.right)) wrong.push(kjWrong('chem-dh-coefficients', reactionDH(x, { noCoef: true })))
+  if (hasWaterL(x.left) || hasWaterL(x.right)) wrong.push(kjWrong('chem-dh-water-gas', reactionDH(x, { waterGas: true })))
   const choices = stepChoices(rng, { key: dec(dh), content: math(kj(dh)) }, wrong, focus)
   if (choices.length === 0) return null
   const p = sideSum(x.right, dfhOf)
@@ -105,6 +110,7 @@ function dhStep(x: ThermoReaction, rng: Rng, focus?: string): GuidedStep | null 
     title: 'Reaktionsenthalpie',
     question: 'Wie groß ist die Reaktionsenthalpie $\\Delta H^{0}$ für die Gleichung, wie sie dasteht?',
     choices,
+    numeric: tolerantNumeric(dh, wrong, KJ),
     hint: 'Welche Summe kommt zuerst, welche wird abgezogen? Denk an „nachher minus vorher“.',
     explanation: { detailed: `Produkte minus Edukte: $${line}$.`, short: math(r`\Delta H^{0} = ${kj(dh)}`) },
     established: line,
@@ -314,11 +320,13 @@ const kelvinLatex = (theta: number) => r`T = ${theta} + 273{,}15 = ${dec(ratAdd(
 
 function kelvinStep(theta: number, rng: Rng, focus?: string): GuidedStep {
   const t = ratAdd(rat(theta), KELVIN)
+  const celsius: WrongValue = { rule: 'chem-dg-celsius', key: String(theta), content: math(r`${theta}\,\mathrm{K}`), value: rat(theta) }
   return {
     id: 'kelvin',
     title: 'Temperatur in Kelvin',
     question: `Welche Temperatur setzt du für ${theta} °C ein?`,
-    choices: stepChoices(rng, { key: dec(t), content: math(r`${dec(t)}\,\mathrm{K}`) }, [{ rule: 'chem-dg-celsius', key: String(theta), content: math(r`${theta}\,\mathrm{K}`) }], focus),
+    choices: stepChoices(rng, { key: dec(t), content: math(r`${dec(t)}\,\mathrm{K}`) }, [celsius], focus),
+    numeric: tolerantNumeric(t, [celsius], r`\mathrm{K}`),
     hint: 'In thermodynamischen Formeln steht die absolute Temperatur.',
     explanation: { detailed: `$${kelvinLatex(theta)}$.`, short: math(r`${dec(t)}\,\mathrm{K}`) },
     established: kelvinLatex(theta),
@@ -337,20 +345,16 @@ function gibbsTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCa
   // nahe 0 wäre das Urteil heikel (gerundete Tabellenwerte)
   if (Math.abs(ratToNumber(dg)) < 5) return null
   const kjU = (v: Rational) => unit(v, 'kJ')
-  const gStep = stepChoices(
-    rng,
-    { key: kjU(dg), content: math(kjU(dg)) },
-    tolerantWrongs(
-      dg,
-      [
-        { rule: 'chem-dg-celsius', value: ratSub(dh, ratMul(rat(theta), ds)) },
-        { rule: 'chem-dg-units', value: ratSub(dh, ratMul(t, dsJ)) },
-        { rule: 'chem-dg-sign', value: ratAdd(dh, ratMul(t, ds)) },
-      ].filter((w) => ratSign(w.value) !== 0),
-      kjU,
-    ),
-    focus,
+  const gWrong = tolerantWrongs(
+    dg,
+    [
+      { rule: 'chem-dg-celsius', value: ratSub(dh, ratMul(rat(theta), ds)) },
+      { rule: 'chem-dg-units', value: ratSub(dh, ratMul(t, dsJ)) },
+      { rule: 'chem-dg-sign', value: ratAdd(dh, ratMul(t, ds)) },
+    ].filter((w) => ratSign(w.value) !== 0),
+    kjU,
   )
+  const gStep = stepChoices(rng, { key: kjU(dg), content: math(kjU(dg)) }, gWrong, focus)
   const exergonic = ratSign(dg) < 0
   const verdict = exergonic ? EXERGON : ENDERGON
   const byDh = ratSign(dh) < 0 ? BY_DH.exo : BY_DH.endo
@@ -360,12 +364,8 @@ function gibbsTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCa
     [textWrong('chem-dg-exergonic', exergonic ? ENDERGON : EXERGON), ...((ratSign(dh) < 0) !== exergonic ? [textWrong('chem-dg-enthalpy-only', byDh)] : [])],
     focus,
   )
-  const dsKjStep = stepChoices(
-    rng,
-    { key: dec(ds), content: math(r`${dec(ds)}\,\mathrm{kJ/K}`) },
-    [{ rule: 'chem-dg-units', key: dec(dsJ), content: math(r`${dec(dsJ)}\,\mathrm{kJ/K}`) }],
-    focus,
-  )
+  const dsWrong: WrongValue[] = [{ rule: 'chem-dg-units', key: dec(dsJ), content: math(r`${dec(dsJ)}\,\mathrm{kJ/K}`), value: dsJ }]
+  const dsKjStep = stepChoices(rng, { key: dec(ds), content: math(r`${dec(ds)}\,\mathrm{kJ/K}`) }, dsWrong, focus)
   if (gStep.length === 0) return null
   const line = r`\Delta G = ${kj(dh)} - ${dec(t)}\,\mathrm{K} \cdot (${dec(ds)}\,\mathrm{kJ/K}) ${eqSign(dg)} ${kjU(dg)}`
   return {
@@ -381,6 +381,7 @@ function gibbsTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCa
           title: 'Einheiten angleichen',
           question: '$\\Delta H$ steht in kJ. Wie lautet $\\Delta S$ in kJ/K?',
           choices: dsKjStep,
+          numeric: tolerantNumeric(ds, dsWrong, r`\mathrm{kJ/K}`),
           hint: '$1\\,\\mathrm{kJ} = 1000\\,\\mathrm{J}$.',
           explanation: { detailed: `$\\Delta S = ${dec(dsJ)}\\,\\mathrm{J/K} = ${dec(ds)}\\,\\mathrm{kJ/K}$.`, short: math(r`${dec(ds)}\,\mathrm{kJ/K}`) },
           cards: [CARD.gibbs],
@@ -390,6 +391,7 @@ function gibbsTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCa
           title: 'Freie Enthalpie',
           question: `Wie groß ist $\\Delta G$ bei ${theta} °C?`,
           choices: gStep,
+          numeric: tolerantNumeric(dg, gWrong, KJ),
           hint: 'Setze in die Gibbs-Helmholtz-Gleichung ein; achte auf Vorzeichen und Einheiten.',
           explanation: { detailed: `$\\Delta G = \\Delta H - T \\cdot \\Delta S$: $${line}$.`, short: math(r`\Delta G ${eqSign(dg)} ${kjU(dg)}`) },
           established: line,
@@ -502,31 +504,23 @@ function limitTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCa
   const keys = keysOf(x)
   // ΔS aus der Tabelle
   const elementsZero = (k: string) => (thermoByKey(k)!.element ? rat(0) : sOf(k))
+  const jk = (rule: string, v: Rational): WrongValue => ({ rule, key: dec(v), content: math(r`${dec(v)}\,\mathrm{J/K}`), value: v })
   const dsWrong: WrongValue[] = [
-    { rule: 'chem-dh-reversed', key: dec(ratNeg(ds)), content: math(r`${dec(ratNeg(ds))}\,\mathrm{J/K}`) },
-    ...(hasCoefAny(x) ? [{ rule: 'chem-dh-coefficients', key: dec(reactionDS(x, { noCoef: true })), content: math(r`${dec(reactionDS(x, { noCoef: true }))}\,\mathrm{J/K}`) }] : []),
-    ...(keys.some((k) => thermoByKey(k)!.element)
-      ? [(() => {
-          const v = ratSub(sideSum(x.right, elementsZero), sideSum(x.left, elementsZero))
-          return { rule: 'chem-ds-element-zero', key: dec(v), content: math(r`${dec(v)}\,\mathrm{J/K}`) }
-        })()]
-      : []),
+    jk('chem-dh-reversed', ratNeg(ds)),
+    ...(hasCoefAny(x) ? [jk('chem-dh-coefficients', reactionDS(x, { noCoef: true }))] : []),
+    ...(keys.some((k) => thermoByKey(k)!.element) ? [jk('chem-ds-element-zero', ratSub(sideSum(x.right, elementsZero), sideSum(x.left, elementsZero)))] : []),
   ]
   const dsChoices = stepChoices(rng, { key: dec(ds), content: math(r`${dec(ds)}\,\mathrm{J/K}`) }, dsWrong, focus)
   const t = ratDiv(ratMul(dh, rat(1000)), ds)
-  const tChoices = stepChoices(
-    rng,
-    { key: unit(t, 'K'), content: math(unit(t, 'K')) },
-    tolerantWrongs(
-      t,
-      [
-        { rule: 'chem-dg-units', value: ratDiv(dh, ds) },
-        { rule: 'chem-dg-kelvin-twice', value: ratSub(t, KELVIN) },
-      ],
-      (v) => unit(v, 'K'),
-    ),
-    focus,
+  const tWrong = tolerantWrongs(
+    t,
+    [
+      { rule: 'chem-dg-units', value: ratDiv(dh, ds) },
+      { rule: 'chem-dg-kelvin-twice', value: ratSub(t, KELVIN) },
+    ],
+    (v) => unit(v, 'K'),
   )
+  const tChoices = stepChoices(rng, { key: unit(t, 'K'), content: math(unit(t, 'K')) }, tWrong, focus)
   const above = ratSign(dh) > 0
   const tText = unit(t, 'K')
   const text = (up: boolean) => (up ? `Oberhalb von etwa $${tText}$ läuft sie freiwillig ab.` : `Unterhalb von etwa $${tText}$ läuft sie freiwillig ab.`)
@@ -555,6 +549,7 @@ function limitTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCa
           title: 'Reaktionsentropie',
           question: 'Wie groß ist $\\Delta S^{0}$ für die Gleichung, wie sie dasteht?',
           choices: dsChoices,
+          numeric: tolerantNumeric(ds, dsWrong, r`\mathrm{J/K}`),
           hint: 'Wie bei der Enthalpie: Produkte minus Edukte, jeder Wert mal Koeffizient. Achtung: Auch Elemente haben eine Entropie.',
           explanation: { detailed: `$${dsLine}$.`, short: math(r`\Delta S^{0} = ${dec(ds)}\,\mathrm{J/K}`) },
           established: dsLine,
@@ -565,6 +560,7 @@ function limitTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCa
           title: 'Grenztemperatur',
           question: 'Bei welcher Temperatur ist $\\Delta G = 0$?',
           choices: tChoices,
+          numeric: tolerantNumeric(t, tWrong, r`\mathrm{K}`),
           hint: 'Setze $\\Delta G = 0$ in die Gibbs-Helmholtz-Gleichung und stelle nach $T$ um; gleiche vorher die Einheiten an.',
           explanation: { detailed: `$0 = \\Delta H - T \\cdot \\Delta S$, also $${tLine}$.`, short: math(unit(t, 'K')) },
           established: tLine,
@@ -621,21 +617,20 @@ function kTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc |
     { rule: 'chem-dg-sign', value: ratOf(-lnK) },
     { rule: 'chem-dg-celsius', value: ratOf((-ratToNumber(dg) * 1000) / (8.314 * theta)) },
   ]
-  const lnChoices = stepChoices(rng, { key: sig(lnRight), content: math(sig(lnRight)) }, tolerantWrongs(lnRight, lnWrong, sig), focus)
+  const lnWrongValues = tolerantWrongs(lnRight, lnWrong, sig)
+  const lnChoices = stepChoices(rng, { key: sig(lnRight), content: math(sig(lnRight)) }, lnWrongValues, focus)
   const kValue = ratOf(Math.exp(lnK))
-  const kChoices = stepChoices(
-    rng,
-    { key: sig(kValue), content: math(sig(kValue)) },
-    tolerantWrongs(
-      kValue,
-      [
-        { rule: 'chem-dg-lg', value: ratOf(10 ** lnK) },
-        { rule: 'chem-dg-sign', value: ratOf(Math.exp(-lnK)) },
-      ],
-      sig,
-    ),
-    focus,
+  // frei: auch richtig, wer mit dem gerundeten ln K weiterrechnet (bei großem ln K sonst über 1 % daneben)
+  const lnShown = ratToNumber(roundSignificant(lnRight).value)
+  const kWrong = tolerantWrongs(
+    kValue,
+    [
+      { rule: 'chem-dg-lg', value: ratOf(10 ** lnK) },
+      { rule: 'chem-dg-sign', value: ratOf(Math.exp(-lnK)) },
+    ],
+    sig,
   )
+  const kChoices = stepChoices(rng, { key: sig(kValue), content: math(sig(kValue)) }, kWrong, focus)
   if (lnChoices.length === 0 || kChoices.length === 0) return null
   const dgLatex = r`\Delta G^{0} = ${dec(dg)}\,\mathrm{kJ/mol}`
   const lnLine = r`\ln K = -\frac{\Delta G^{0}}{R \cdot T} = -\frac{${dec(ratMul(dg, rat(1000)))}\,\mathrm{J/mol}}{8{,}314\,\mathrm{J/(mol \cdot K)} \cdot ${dec(t)}\,\mathrm{K}} \approx ${sig(lnRight)}`
@@ -654,6 +649,7 @@ function kTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc |
           title: 'ln K',
           question: 'Wie groß ist $\\ln K$?',
           choices: lnChoices,
+          numeric: tolerantNumeric(lnRight, lnWrongValues, ''),
           hint: 'Stelle nach $\\ln K$ um; $\\Delta G^{0}$ muss dafür in J/mol stehen, weil $R$ in J angegeben ist.',
           explanation: { detailed: `$${lnLine}$.`, short: math(r`\ln K \approx ${sig(lnRight)}`) },
           established: lnLine,
@@ -664,6 +660,7 @@ function kTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc |
           title: 'K',
           question: 'Wie groß ist $K$?',
           choices: kChoices,
+          numeric: { ...tolerantNumeric(kValue, kWrong, ''), also: [ratOf(Math.exp(lnShown))] },
           hint: 'Welche Funktion macht den natürlichen Logarithmus rückgängig?',
           explanation: { detailed: `$${kLine}$. ${favoured ? 'Weil $\\Delta G^{0} < 0$ ist, ist $K > 1$: Die Produkte überwiegen.' : 'Weil $\\Delta G^{0} > 0$ ist, ist $K < 1$: Die Edukte überwiegen.'}`, short: math(r`K \approx ${sig(kValue)}`) },
           established: kLine,
@@ -683,6 +680,7 @@ export { dhTask, phaseTask, gasDsTask, gibbsTask, rangeTask, limitTask, kTask }
 export const ENERGIE_GENERATORS: readonly ChemGenerator[] = [
   {
     kind: 'reaktionsenthalpie',
+    free: true,
     part: 'reaktionsenthalpie',
     weights: { 1: 0.55, 2: 0.3, 3: 0.25 },
     errors: ['chem-dh-reversed', 'chem-dh-coefficients', 'chem-dh-water-gas', 'chem-dh-sign'],
@@ -697,6 +695,7 @@ export const ENERGIE_GENERATORS: readonly ChemGenerator[] = [
   },
   {
     kind: 'gibbs',
+    free: true,
     part: 'freie-enthalpie',
     weights: { 2: 0.3, 3: 0.15 },
     errors: ['chem-dg-celsius', 'chem-dg-units', 'chem-dg-sign', 'chem-dg-exergonic', 'chem-dg-enthalpy-only'],
@@ -711,6 +710,7 @@ export const ENERGIE_GENERATORS: readonly ChemGenerator[] = [
   },
   {
     kind: 'grenztemperatur',
+    free: true,
     part: 'freie-enthalpie',
     weights: { 3: 0.2 },
     errors: ['chem-dh-reversed', 'chem-dh-coefficients', 'chem-ds-element-zero', 'chem-dg-units', 'chem-dg-kelvin-twice', 'chem-dg-sign', 'chem-dg-enthalpy-only'],
@@ -718,6 +718,7 @@ export const ENERGIE_GENERATORS: readonly ChemGenerator[] = [
   },
   {
     kind: 'dg-k',
+    free: true,
     part: 'freie-enthalpie',
     weights: { 3: 0.15 },
     errors: ['chem-dg-celsius', 'chem-dg-units', 'chem-dg-sign', 'chem-dg-lg'],

@@ -70,10 +70,10 @@ test('Chemie: Start → Atombau → Grundlagen, Frage richtig beantworten, melde
   await page.getByRole('link', { name: /^Atombau/ }).click()
   await expect(page).toHaveURL(/#\/thema\/chem-atombau$/)
   await expect(page.getByRole('heading', { name: 'Atombau', level: 1 })).toBeVisible()
-  // Stufen mit Namen, nur geführt; Vorschau-Formeln mit mhchem
+  // Stufen mit Namen, seit S8b auch frei; Vorschau-Formeln mit mhchem
   await expect(page.getByRole('radio', { name: /^Grundlagen/ })).toBeChecked()
   await expect(page.getByRole('radio', { name: /^Klausurniveau/ })).toBeEnabled()
-  await expect(page.getByRole('radio', { name: /Frei/ })).toBeDisabled()
+  await expect(page.getByRole('radio', { name: /Frei/ })).toBeEnabled()
   expect(await page.locator('.katex').count()).toBeGreaterThanOrEqual(5)
   await expectCleanPage(page, 'Thema')
 

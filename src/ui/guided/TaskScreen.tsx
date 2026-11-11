@@ -6,7 +6,11 @@ import { recordAttempt, recordError } from '../../state/progress.ts'
 import { addReport } from '../../state/reports.ts'
 import { isInReview, recordReview } from '../../state/reviews.ts'
 import { questionNoOf } from '../practice.ts'
-import type { ExplanationDetail } from '../../state/storage.ts'
+import type { ExplanationDetail, PracticeMode } from '../../state/storage.ts'
+import type { Verdict } from '../../engine/quantity/judge.ts'
+import type { Explanation } from '../../engine/explain/texts.ts'
+import { findError } from '../../engine/errorCatalog.ts'
+import { NumberAnswer } from '../numeric/NumberAnswer.tsx'
 import { FitWidth } from '../FitWidth.tsx'
 import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
@@ -19,12 +23,14 @@ import { ChemFigure, FigureDrawing } from '../chem/ChemFigure.tsx'
 import { figureById } from '../../engine/chem/figures.ts'
 import { type ExplanationMode, useExplanationMode } from '../task/explanationMode.ts'
 
-type Props = { course: string; engine: CourseEngine; taskRef: TaskRef; focus?: string | null; mix?: string | null }
+type Props = { course: string; engine: CourseEngine; taskRef: TaskRef; focus?: string | null; mix?: string | null; free?: boolean }
 
 // course: Id des Themas, engine: seine Engine (Mathe oder Wissensfragen); focus: gezielt einen
 // typischen Fehler üben (der Fehler erscheint sicher als Antwort); mix: Id des Fachs, wenn die Aufgabe
-// aus „Themen mischen" kommt (weiter geht es dann in der Mischung)
-export function TaskScreen({ course, engine, taskRef, focus = null, mix = null }: Props) {
+// aus „Themen mischen" kommt (weiter geht es dann in der Mischung); free: freier Modus der Chemie (S8b):
+// Schritte mit Zahl (step.numeric) werden über den Ziffernblock beantwortet, die übrigen wie geführt
+export function TaskScreen({ course, engine, taskRef, focus = null, mix = null, free = false }: Props) {
+  const practiceMode: PracticeMode = free ? 'free' : 'guided'
   const { level, seed } = taskRef
   const task = useMemo(() => engine.planGuidedTask({ level, seed }, focus ?? undefined), [engine, level, seed, focus])
   const { mode, detail, cycle } = useExplanationMode()
@@ -41,9 +47,9 @@ export function TaskScreen({ course, engine, taskRef, focus = null, mix = null }
   useEffect(() => {
     if (!finished || recorded.current) return
     recorded.current = true
-    recordAttempt({ course, level, mode: 'guided', clean: mistakes === 0 })
+    recordAttempt({ course, level, mode: practiceMode, clean: mistakes === 0 })
     if (isQuestion) recordReview(course, seed, mistakes === 0)
-  }, [finished, course, level, seed, isQuestion, mistakes])
+  }, [finished, course, level, seed, isQuestion, mistakes, practiceMode])
 
   return (
     <main className="space-y-6">
@@ -73,10 +79,11 @@ export function TaskScreen({ course, engine, taskRef, focus = null, mix = null }
       <TaskHeader course={course} mix={mix} task={task} stepIndex={stepIndex} />
 
       {finished ? (
-        <FinishView course={course} mix={mix} task={task} mistakes={mistakes} focus={focus} isQuestion={isQuestion} />
+        <FinishView course={course} mix={mix} task={task} mistakes={mistakes} focus={focus} isQuestion={isQuestion} practiceMode={practiceMode} />
       ) : (
         <StepView
           key={stepIndex}
+          free={free}
           step={task.steps[stepIndex]}
           task={task.expr}
           report={task.questionId ? { id: task.questionId, course, ref: formatTaskNumber(task.ref) } : undefined}
@@ -122,14 +129,24 @@ type StepProps = {
   detail: ExplanationDetail
   onMistake: () => void
   onNext: () => void
+  free: boolean
 }
 
-function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext }: StepProps) {
+// Rückmeldung auf eine eingetippte Zahl (freier Modus): typischer Fehler mit Erklärung, „fast" (Rundung)
+// oder falsch; tries zählt die Versuche, damit dieselbe Rückmeldung ein zweites Mal neu erscheint
+type Typed = { readonly kind: 'error' | 'close' | 'wrong'; readonly rule?: string; readonly why?: Explanation; readonly tries: number }
+
+function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext, free }: StepProps) {
   const [wrongPicks, setWrongPicks] = useState<string[]>([])
   const [solved, setSolved] = useState(false)
   const [hintOpen, setHintOpen] = useState(false)
   const [whyOpen, setWhyOpen] = useState(false)
   const [reported, setReported] = useState(false)
+  // freier Modus: Zahl eintippen statt auswählen
+  const numeric = free ? step.numeric : undefined
+  const [typed, setTyped] = useState<Typed | null>(null)
+  const [revealed, setRevealed] = useState(false)
+  const hadMistake = useRef(false)
   const questionRef = useRef<HTMLHeadingElement>(null)
   const feedbackRef = useRef<HTMLDivElement>(null)
 
@@ -139,8 +156,33 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext 
   }, [])
 
   useEffect(() => {
-    if (solved || wrongPicks.length > 0) feedbackRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-  }, [solved, wrongPicks.length, whyOpen])
+    if (solved || wrongPicks.length > 0 || typed) feedbackRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+  }, [solved, wrongPicks.length, whyOpen, typed])
+
+  function judged(verdict: Verdict) {
+    if (verdict.kind === 'correct') {
+      setSolved(true)
+      setTyped(null)
+      return
+    }
+    const tries = (typed?.tries ?? 0) + 1
+    setWhyOpen(false)
+    if (verdict.kind === 'close') {
+      // „Fast": zählt nicht als Fehler
+      setTyped({ kind: 'close', tries })
+      return
+    }
+    const firstMistake = !hadMistake.current
+    hadMistake.current = true
+    if (verdict.kind === 'error') {
+      // wie bei der Auswahl: nur der erste Fehler je Schritt zählt für die Statistik
+      if (firstMistake) recordError(verdict.rule)
+      setTyped({ kind: 'error', rule: verdict.rule, why: numeric?.wrongs.find((w) => w.rule === verdict.rule)?.why, tries })
+    } else {
+      setTyped({ kind: 'wrong', tries })
+    }
+    onMistake()
+  }
 
   function pick(choice: Choice) {
     if (solved || wrongPicks.includes(choice.id)) return
@@ -167,6 +209,9 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext 
       </div>
       {step.figure && <ChemFigure id={step.figure} />}
 
+      {numeric ? (
+        <NumberAnswer answer={numeric} disabled={solved} onVerdict={judged} />
+      ) : (
       <div className="space-y-3" role="group" aria-label="Antworten">
         {step.choices.map((choice) => {
           const isWrong = wrongPicks.includes(choice.id)
@@ -195,6 +240,7 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext 
           )
         })}
       </div>
+      )}
 
       <div className="space-y-3">
         {!solved && hintOpen && (
@@ -249,11 +295,18 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext 
       <div ref={feedbackRef} aria-live="polite">
         {solved ? (
           <div className="animate-step-in space-y-4 rounded-2xl bg-green-50 p-4">
-            <p className="text-lg font-semibold text-green-800">
-              <CheckBadge />
-              Richtig!
-            </p>
-            {mode !== 'off' && <RichText text={step.explanation[mode]} className="text-zinc-800" />}
+            {revealed ? (
+              <>
+                <p className="text-lg font-semibold text-green-800">Die Lösung</p>
+                <RichText text={step.choices.find((c) => c.correct)?.content ?? ''} className="block text-xl font-medium" />
+              </>
+            ) : (
+              <p className="text-lg font-semibold text-green-800">
+                <CheckBadge />
+                Richtig!
+              </p>
+            )}
+            {(mode !== 'off' || revealed) && <RichText text={step.explanation[mode === 'off' ? 'short' : mode]} className="text-zinc-800" />}
             <button
               type="button"
               onClick={onNext}
@@ -262,6 +315,18 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext 
               {isLast ? 'Ergebnis ansehen' : 'Weiter'}
             </button>
           </div>
+        ) : typed ? (
+          <TypedFeedback
+            key={typed.tries}
+            typed={typed}
+            detail={detail}
+            whyOpen={whyOpen}
+            onWhy={() => setWhyOpen(true)}
+            onReveal={() => {
+              setRevealed(true)
+              setSolved(true)
+            }}
+          />
         ) : (
           lastWrong && (
             <div className="animate-step-in space-y-3 rounded-2xl bg-red-50 p-4">
@@ -282,6 +347,48 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext 
         )}
       </div>
     </section>
+  )
+}
+
+type TypedFeedbackProps = { typed: Typed; detail: ExplanationDetail; whyOpen: boolean; onWhy: () => void; onReveal: () => void }
+
+// Rückmeldung auf eine eingetippte Zahl: „Fast" (Rundung, zählt nicht als Fehler), typischer Fehler mit
+// Namen und „Warum ist das falsch?", sonst falsch; nach einem Fehler lässt sich die Lösung zeigen
+function TypedFeedback({ typed, detail, whyOpen, onWhy, onReveal }: TypedFeedbackProps) {
+  if (typed.kind === 'close')
+    return (
+      <div className="animate-step-in space-y-1 rounded-2xl bg-amber-50 p-4">
+        <p className="text-lg font-semibold text-amber-800">Fast: Prüfe deine Rundung.</p>
+        <p className="text-zinc-800">Rechne mit allen Ziffern weiter und runde erst am Ende auf drei gültige Ziffern. Das zählt nicht als Fehler.</p>
+      </div>
+    )
+  const name = typed.rule ? findError(typed.rule)?.name : undefined
+  return (
+    <div className="animate-step-in space-y-3 rounded-2xl bg-red-50 p-4">
+      <p className="text-lg font-semibold text-red-800">Nicht ganz. Versuch es noch einmal.</p>
+      {name && (
+        <p className="text-zinc-800">
+          Das passt zu einem typischen Fehler: <RichText text={name} className="font-medium" inline />
+        </p>
+      )}
+      <div className="flex flex-wrap gap-2">
+        {typed.why &&
+          (whyOpen ? (
+            <RichText text={typed.why[detail]} className="text-zinc-800" />
+          ) : (
+            <button
+              type="button"
+              onClick={onWhy}
+              className="rounded-xl border border-red-200 bg-surface px-4 py-2.5 font-medium text-red-800 hover:bg-red-100"
+            >
+              Warum ist das falsch?
+            </button>
+          ))}
+        <button type="button" onClick={onReveal} className="rounded-xl px-4 py-2.5 font-medium text-red-800 hover:bg-red-100">
+          Lösung zeigen
+        </button>
+      </div>
+    </div>
   )
 }
 
@@ -310,9 +417,9 @@ function cardSheetTitle(step: GuidedStep): string {
   return step.cards.length === 1 ? 'Lernkarte zu diesem Schritt' : 'Lernkarten zu diesem Schritt'
 }
 
-type FinishProps = { course: string; mix: string | null; task: GuidedTaskBase; mistakes: number; focus: string | null; isQuestion: boolean }
+type FinishProps = { course: string; mix: string | null; task: GuidedTaskBase; mistakes: number; focus: string | null; isQuestion: boolean; practiceMode: PracticeMode }
 
-function FinishView({ course, mix, task, mistakes, focus, isQuestion }: FinishProps) {
+function FinishView({ course, mix, task, mistakes, focus, isQuestion, practiceMode }: FinishProps) {
   const headingRef = useRef<HTMLHeadingElement>(null)
   useEffect(() => {
     headingRef.current?.focus({ preventScroll: true })
@@ -354,10 +461,10 @@ function FinishView({ course, mix, task, mistakes, focus, isQuestion }: FinishPr
         </div>
       )}
       {/* In der Mischung kein Vorschlag für eine höhere Stufe: Die Stufe gilt dort für alle Themen */}
-      {!mix && <LevelUpSuggestion course={course} level={task.ref.level} mode="guided" />}
+      {!mix && <LevelUpSuggestion course={course} level={task.ref.level} mode={practiceMode} />}
       <div className="flex flex-col gap-3 sm:flex-row">
         <a
-          href={mix ? mixPracticeHref(mix, task.ref.level) : practiceHref(course, task.ref.level, 'guided', focus)}
+          href={mix ? mixPracticeHref(mix, task.ref.level) : practiceHref(course, task.ref.level, practiceMode, focus)}
           className="flex-1 rounded-xl bg-accent-700 px-4 py-3 text-center text-lg font-medium text-on-accent hover:bg-accent-800"
         >
           Nächste Aufgabe

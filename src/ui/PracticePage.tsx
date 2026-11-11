@@ -6,7 +6,7 @@ import { setLastMix, updateSettings, useSettings } from '../state/settings.ts'
 import { getAppState } from '../state/store.ts'
 import type { PracticeMode } from '../state/storage.ts'
 import { TaskScreen } from './guided/TaskScreen.tsx'
-import { courseById, isLevelAvailable, levelCount, levelName, subjectById } from './catalog.ts'
+import { courseById, isChemCourse, isFreeAt, isLevelAvailable, levelCount, levelName, subjectById } from './catalog.ts'
 import { type CourseEngine, loadCourseEngine } from './courseEngines.ts'
 import { type MixEngine, pickMixed } from './mix.ts'
 import { recentForms, rememberForm } from './recentForms.ts'
@@ -27,7 +27,7 @@ export default function PracticePage({ course: courseId, mode: wantedMode, level
   const { course } = courseById(courseId)!
   const focus = knownFocus(courseId, wanted)
   // Ohne freien Modus: geführt mit derselben Aufgabe
-  const mode = course.free ? wantedMode : 'guided'
+  const mode = isFreeAt(course, level) ? wantedMode : 'guided'
   // Eine Stufe über der Zahl der Stufen des Fachs (z. B. Stufe 5 in Chemie) führt zur höchsten
   const highest = levelCount(courseId) as Level
   const tooHigh = level > highest
@@ -90,6 +90,8 @@ function ResolvedPractice({ course, mode, taskRef, focus, mix }: ResolvedProps) 
   }, [wrongLevel, course, actual, taskRef.seed, mode, focus, mix])
   if (actual === null) return <MissingTask course={course} level={taskRef.level} mode={mode} mix={mix} />
   if (wrongLevel) return null
+  // Chemie frei (S8b): derselbe Bildschirm wie geführt, Zahlen werden eingetippt
+  if (mode === 'free' && isChemCourse(course)) return <GuidedPractice course={course} engine={engine} taskRef={taskRef} focus={focus} mix={mix} free />
   if (mode === 'free') {
     return (
       <Suspense fallback={<p className="text-zinc-500">Mathe-Tastatur wird geladen …</p>}>
@@ -131,7 +133,7 @@ function PickNewTask({ course, level, mode, mix }: { course: string; level: Leve
     const parts = selectedParts(courseById(course)!.course, getAppState().settings, level)
     // Wiederholung nur beim geführten Üben (Wissensfragen gibt es nur geführt)
     const review = mode === 'guided' ? reviewsOf(course) : undefined
-    const { seed, newRound } = pickNewSeed(engine, level, recentForms(course, level), shownInRound(course, level), parts, review)
+    const { seed, newRound } = pickNewSeed(engine, level, recentForms(course, level), shownInRound(course, level), parts, review, mode === 'free')
     if (newRound) startNewRound(course, level, engine.questionNos?.(level, parts))
     window.location.replace(taskHref(course, { level, seed }, mode, null, mix))
   }, [engine, course, level, mode, mix])
@@ -152,9 +154,9 @@ function useRememberForm(course: string, engine: CourseEngine, taskRef: TaskRef)
 
 type PracticeScreenProps = { course: string; engine: CourseEngine; taskRef: TaskRef; focus: string | null; mix: string | null }
 
-function GuidedPractice({ course, engine, taskRef, focus, mix }: PracticeScreenProps) {
+function GuidedPractice({ course, engine, taskRef, focus, mix, free = false }: PracticeScreenProps & { free?: boolean }) {
   useRememberForm(course, engine, taskRef)
-  return <TaskScreen course={course} engine={engine} taskRef={taskRef} focus={focus} mix={mix} />
+  return <TaskScreen course={course} engine={engine} taskRef={taskRef} focus={focus} mix={mix} free={free} />
 }
 
 function FreePractice({ course, engine, taskRef, focus, mix }: PracticeScreenProps) {
@@ -179,6 +181,8 @@ export function MixPracticePage({ subject: subjectId, level }: { subject: string
       .then((engines) => {
         if (cancelled) return
         const byId = new Map<string, MixEngine>(courses.map((course, i) => [course.id, engines[i]]))
+        // Art für alle Themen gleich, in Stufen ohne freien Modus geführt
+        const modeOf = (course: string): PracticeMode => (isFreeAt(courseById(course)!.course, level) ? settings.practiceMode : 'guided')
         const picked = pickMixed({
           courses,
           level,
@@ -187,15 +191,15 @@ export function MixPracticePage({ subject: subjectId, level }: { subject: string
           recentOf: (course) => recentForms(course, level),
           partsOf: (course) => selectedParts(courseById(course)!.course, settings, level),
           // Wiederholung nur beim geführten Üben (Wissensfragen gibt es nur geführt)
-          reviewOf: (course) => (courseById(course)!.course.free && settings.practiceMode === 'free' ? undefined : reviewsOf(course)),
+          reviewOf: (course) => (modeOf(course) === 'free' ? undefined : reviewsOf(course)),
+          freeOf: (course) => modeOf(course) === 'free',
         })
         if (!picked) {
           setState('empty')
           return
         }
         if (picked.newRound) startNewRound(picked.course, level, picked.nos)
-        // Art für alle Themen gleich, ohne freien Modus geführt
-        const mode = courseById(picked.course)!.course.free ? settings.practiceMode : 'guided'
+        const mode = modeOf(picked.course)
         window.location.replace(taskHref(picked.course, { level, seed: picked.seed }, mode, null, subject.id))
       })
       .catch(() => {

@@ -75,6 +75,8 @@ export function dueInSelection(
 // review: Wiederholung des Themas (state/reviews.ts, S8a). Eine fällige Frage der Auswahl kommt zuerst, in
 // einer anderen Fassung als beim letzten Mal und ohne Rücksicht auf Runde und letzte Formen; Fragen, die
 // noch warten, kommen vorher nicht dran (außer es gibt sonst nichts).
+// free: freier Modus (Chemie, S8b): nur Rechnungen mit Zahlen; Wiederholungen von Fragen kommen dann nicht
+// (die gibt es nur geführt), deshalb review weglassen.
 export function pickNewSeed(
   engine: Pick<CourseEngine, 'formOf' | 'nextSeed' | 'questionNos'>,
   level: Level,
@@ -82,12 +84,13 @@ export function pickNewSeed(
   shown: ReadonlySet<number>,
   parts?: ReadonlySet<string>,
   review?: CourseReviews,
+  free = false,
 ): { seed: number; newRound: boolean; review: boolean } {
   const due = dueInSelection(engine, level, review, parts)
   if (due) return { seed: questionSeed(due.no, otherVariant(due.variant)), newRound: false, review: true }
   // Wartende Fragen zählen wie schon gezeigte: Die Engine nimmt sie erst, wenn alle anderen dran waren
   const blocked = review && review.waiting.size > 0 ? new Set([...shown, ...review.waiting]) : shown
-  const next = engine.nextSeed ? () => engine.nextSeed!(level, blocked, parts) : randomSeed
+  const next = engine.nextSeed ? () => engine.nextSeed!(level, blocked, parts, free) : randomSeed
   const seed = pickFresh((s) => engine.formOf({ level, seed: s }), recent, next)
   const no = questionNoOf(engine, seed)
   return { seed, newRound: no !== null && blocked.has(no), review: false }
