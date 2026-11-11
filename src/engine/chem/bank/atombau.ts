@@ -1,7 +1,16 @@
-import type { QuestionBank } from '../../quiz/types.ts'
+import type { MultiChoice, QuestionBank, QuestionLevel } from '../../quiz/types.ts'
 
 // Wissensfragen zum Thema „Atombau“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern: Stufe · 100
 // + laufende Nummer; nie neu vergeben, gelöschte kommen in retired.
+
+// „Wähle alle richtigen“ (N1): richtige Aussagen r1, r2, …; jede Aussage ein ganzer Satz
+type MultiSpec = Omit<MultiChoice, 'kind' | 'level' | 'correct'> & { correct: readonly string[] }
+const multiAt = (level: QuestionLevel) => (spec: MultiSpec): MultiChoice => ({
+  ...spec,
+  kind: 'multi',
+  level,
+  correct: spec.correct.map((text, i) => ({ id: `r${i + 1}`, text })),
+})
 
 export const ATOMBAU_BANK: QuestionBank = {
   course: 'chem-atombau',
@@ -1880,6 +1889,96 @@ export const ATOMBAU_BANK: QuestionBank = {
       cards: ['atombau-trennen'],
       ref: "Skript Aufbau der Materie, Folie 5",
     },
+    // ---- Wähle alle richtigen (N1)
+    multiAt(1)({
+      id: 'atombau-g-multi-teilchen',
+      no: 121,
+      fact: 'multi-teilchen',
+      part: 'teilchen',
+      title: "Teilchen im Atom",
+      prompt: "Welche Aussagen über die Teilchen im Atom stimmen?",
+      correct: [
+        "Das Proton ist positiv geladen, das Elektron negativ, und das Neutron ist ungeladen.",
+        "Protonen und Neutronen sitzen im Kern, die Elektronen in der Hülle.",
+        "Proton und Neutron sind etwa gleich schwer, das Elektron ist viel leichter.",
+        "Ein ungeladenes Atom hat genauso viele Elektronen wie Protonen.",
+        "Die Massenzahl zählt die Protonen und die Neutronen zusammen.",
+      ],
+      wrong: [
+        { id: 'f1', text: "Im Kern sitzen Protonen und Elektronen, die Neutronen bewegen sich in der Hülle.", misconception: 'chem-mis-particle-place' },
+        { id: 'f2', text: "Ein Elektron ist etwa so schwer wie ein Proton.", misconception: 'chem-mis-electron-mass' },
+        { id: 'f3', text: "Ein ungeladenes Atom hat gleich viele Neutronen wie Protonen, damit sich die Ladungen aufheben.", misconception: 'chem-mis-neutron-balances-charge' },
+        { id: 'f4', text: "Die Ordnungszahl gibt an, wie viele Neutronen im Kern sind.", misconception: 'chem-mis-z-meaning' },
+        { id: 'f5', text: "Jedes Teilchen im Atomkern trägt eine positive Ladung.", misconception: 'chem-mis-nucleus-all-positive' },
+        { id: 'f6', text: "Ein ungeladenes Atom enthält gar keine geladenen Teilchen.", misconception: 'chem-mis-neutral-no-charges' },
+      ],
+      hint: "Gehe die drei Teilchen einzeln durch: Wo sitzen sie, welche Ladung tragen sie, wie schwer sind sie?",
+      explanation: {
+        detailed: "Im Kern sitzen die positiven Protonen und die ungeladenen Neutronen, beide etwa gleich schwer. In der Hülle sind die negativen, viel leichteren Elektronen. Im ungeladenen Atom heben sich die Ladungen von Protonen und Elektronen auf, also sind es gleich viele. Die Massenzahl zählt alle Teilchen im Kern: Protonen und Neutronen.",
+        short: "Kern: Protonen (+) und Neutronen (ungeladen), Hülle: leichte Elektronen (−); ungeladen heißt gleich viele Elektronen wie Protonen.",
+      },
+      cards: ['atombau-teilchen', 'atombau-kernsymbol'],
+      ref: "Skript Aufbau der Materie, Folie 7",
+    }),
+    multiAt(2)({
+      id: 'atombau-v-multi-isotope-ionen',
+      no: 221,
+      fact: 'multi-isotope-ionen',
+      part: 'isotope-ionen',
+      title: "Isotope und Ionen",
+      prompt: "Welche Aussagen über Isotope und Ionen stimmen?",
+      correct: [
+        "Isotope eines Elements haben gleich viele Protonen, aber verschieden viele Neutronen.",
+        "Isotope eines Elements verhalten sich chemisch nahezu gleich.",
+        "Ein positives Ion entsteht, wenn ein Atom Elektronen abgibt.",
+        "Ein zweifach negatives Ion hat zwei Elektronen mehr als das ungeladene Atom.",
+        "Gibt ein Atom Elektronen ab, wird es dadurch kaum merklich leichter.",
+      ],
+      wrong: [
+        { id: 'f1', text: "Isotope eines Elements unterscheiden sich in der Zahl ihrer Protonen.", misconception: 'chem-mis-isotope-protons' },
+        { id: 'f2', text: "Isotope eines Elements haben dieselbe Massenzahl, aber verschieden viele Neutronen.", misconception: 'chem-mis-isotope-same-a' },
+        { id: 'f3', text: "Ein positives Ion entsteht, wenn ein Atom ein zusätzliches Proton aufnimmt.", misconception: 'chem-mis-ion-changes-nucleus' },
+        { id: 'f4', text: "Ein negativ geladenes Ion hat weniger Elektronen als das ungeladene Atom.", misconception: 'chem-mis-ion-sign-reversed' },
+        { id: 'f5', text: "Isotope sind die radioaktiven Atome eines Elements; ein stabiles Atom ist kein Isotop.", misconception: 'chem-mis-isotope-radioactive' },
+        { id: 'f6', text: "Auch ein Ion hat immer genauso viele Elektronen wie Protonen.", misconception: 'chem-mis-ion-charge-ignored' },
+      ],
+      hint: "Bei Isotopen ändert sich etwas im Kern, bei Ionen etwas in der Hülle. Was genau?",
+      explanation: {
+        detailed: "Isotope eines Elements haben dieselbe Protonenzahl, aber verschiedene Neutronenzahlen und damit verschiedene Massenzahlen; chemisch verhalten sie sich nahezu gleich, weil die Hülle gleich ist. Ionen entstehen in der Hülle: Gibt ein Atom Elektronen ab, wird es positiv, nimmt es zwei auf, wird es zweifach negativ. Weil Elektronen sehr leicht sind, ändert sich die Masse dabei kaum.",
+        short: "Isotope: gleiche Protonen-, andere Neutronenzahl. Ionen: andere Elektronenzahl, Kern unverändert.",
+      },
+      cards: ['atombau-isotope', 'atombau-ionen'],
+      ref: "Skript Aufbau der Materie, Folie 9",
+    }),
+    multiAt(3)({
+      id: 'atombau-k-multi-modelle',
+      no: 321,
+      fact: 'multi-modelle',
+      part: 'modelle',
+      title: "Atommodelle",
+      prompt: "Welche Aussagen über die Atommodelle von Thomson, Rutherford und Bohr stimmen?",
+      correct: [
+        "Thomson stellte sich das Atom als positiv geladene Kugel vor, in der die Elektronen verteilt stecken.",
+        "Aus dem Streuversuch folgt, dass ein Atom zum allergrößten Teil aus leerem Raum besteht.",
+        "Nach Rutherford sitzen die positive Ladung und fast die ganze Masse in einem winzigen Kern.",
+        "Im Modell von Bohr dürfen Elektronen nur Bahnen mit festen Energien besetzen.",
+        "Das Modell von Bohr erklärt das Spektrum des Wasserstoffs, versagt aber bei Atomen mit mehreren Elektronen.",
+      ],
+      wrong: [
+        { id: 'f1', text: "Schon im Modell von Thomson gab es einen kleinen, positiv geladenen Atomkern.", misconception: 'chem-mis-model-mixup' },
+        { id: 'f2', text: "Das Modell von Rutherford erklärt, warum Atome nur Licht bestimmter Wellenlängen aussenden.", misconception: 'chem-mis-model-explains-too-much' },
+        { id: 'f3', text: "Beim Streuversuch wurden die meisten Alpha-Teilchen abgelenkt; das Atom ist also dicht mit Masse gefüllt.", misconception: 'chem-mis-scatter-misread' },
+        { id: 'f4', text: "Im Streuversuch prallten die Alpha-Teilchen an den Elektronen der Goldatome ab.", misconception: 'chem-mis-alpha-hit-electrons' },
+        { id: 'f5', text: "Im Modell von Bohr gibt ein Elektron auf seiner Bahn ständig Energie als Licht ab.", misconception: 'chem-mis-electron-radiates' },
+      ],
+      hint: "Ordne jede Aussage einem Modell zu und frage dich, welcher Versuch oder welche Beobachtung dahintersteht.",
+      explanation: {
+        detailed: "Thomson kannte noch keinen Kern: Für ihn war das Atom eine positive Kugel mit eingebetteten Elektronen. Der Streuversuch zeigte, dass fast alle Alpha-Teilchen die Goldfolie durchfliegen, einzelne aber zurückprallen: Das Atom ist fast leer, Ladung und Masse sitzen in einem winzigen Kern. Bohr erlaubte den Elektronen nur Bahnen mit festen Energien, auf denen sie keine Energie abgeben; damit erklärte er das Spektrum des Wasserstoffs, aber nicht das von Atomen mit mehreren Elektronen.",
+        short: "Thomson: Kugel ohne Kern; Rutherford: winziger Kern, sonst leer; Bohr: feste Energien, passt nur für ein Elektron.",
+      },
+      cards: ['atombau-modelle', 'atombau-kern-huelle'],
+      ref: "Skript Aufbau der Materie, Folie 11",
+    }),
   ],
   retired: [],
 }
