@@ -1,6 +1,6 @@
 import { chemTopic } from '../../engine/chem/banks.ts'
 import { cardById } from '../../engine/explain/cards.ts'
-import { type Misconception, type Question, correctOptionsOf } from '../../engine/quiz/types.ts'
+import { type MatchQuestion, type Misconception, type Question, correctOptionsOf } from '../../engine/quiz/types.ts'
 import { formatTaskNumber } from '../../engine/tasks/taskNumber.ts'
 import { AreaIcon } from '../AreaIcon.tsx'
 import { BackLink } from '../BackLink.tsx'
@@ -37,7 +37,7 @@ export default function QuestionGallery({ course: id }: { course: string }) {
         <p className="text-zinc-600 text-pretty">
           Alle Fragen mit der richtigen Antwort, allen falschen Antworten samt Denkfehler und „Warum ist das falsch?“, Tipp, Erklärung und
           Lernkarten. Beim Üben werden je Frage drei der falschen Antworten gezeigt, bei „Wähle alle richtigen“ vier bis sechs
-          Aussagen, davon eine bis vier richtige.
+          Aussagen, davon eine bis vier richtige, beim Zuordnen vier bis sechs der Paare.
         </p>
       </section>
 
@@ -150,6 +150,7 @@ function QuestionCard({ course, question: q, part, misconceptions }: CardProps) 
           <span>
             Nr. {q.no} · {q.id} · Fakt {q.fact}
             {q.kind === 'multi' && ' · Wähle alle richtigen'}
+            {q.kind === 'match' && ' · Zuordnen'}
           </span>
         </p>
         <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -162,35 +163,41 @@ function QuestionCard({ course, question: q, part, misconceptions }: CardProps) 
         {q.figure && <ChemFigure id={q.figure} />}
       </div>
 
-      <div className="space-y-1 rounded-xl bg-green-50 px-3 py-2">
-        <p className="text-sm font-semibold text-green-800">{q.kind === 'multi' ? `Richtig (${q.correct.length})` : 'Richtig'}</p>
-        {correctOptionsOf(q).map((o) => (
-          <div key={o.id} data-testid="correct-answer">
-            <RichText text={o.text} />
+      {q.kind === 'match' ? (
+        <MatchPairs question={q} misconceptions={misconceptions} />
+      ) : (
+        <>
+          <div className="space-y-1 rounded-xl bg-green-50 px-3 py-2">
+            <p className="text-sm font-semibold text-green-800">{q.kind === 'multi' ? `Richtig (${q.correct.length})` : 'Richtig'}</p>
+            {correctOptionsOf(q).map((o) => (
+              <div key={o.id} data-testid="correct-answer">
+                <RichText text={o.text} />
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-      <div className="space-y-2">
-        <p className="text-sm font-semibold text-red-800">Falsch ({q.wrong.length})</p>
-        <ul className="space-y-3">
-          {q.wrong.map((w) => {
-            const m = misconceptions.get(w.misconception)
-            const why = w.why ?? m?.why
-            return (
-              <li key={w.id} className="space-y-1 border-l-2 border-red-200 pl-3">
-                <div data-testid="wrong-answer">
-                  <RichText text={w.text} className="font-medium" />
-                </div>
-                <p className="text-sm text-zinc-500">
-                  Denkfehler: {m ? <RichText text={m.name} inline /> : 'unbekannt'} ({w.misconception}){w.why && ' · eigener Text'}
-                </p>
-                {why && <RichText text={why.detailed} className="text-sm text-zinc-700" />}
-              </li>
-            )
-          })}
-        </ul>
-      </div>
+          <div className="space-y-2">
+            <p className="text-sm font-semibold text-red-800">Falsch ({q.wrong.length})</p>
+            <ul className="space-y-3">
+              {q.wrong.map((w) => {
+                const m = misconceptions.get(w.misconception)
+                const why = w.why ?? m?.why
+                return (
+                  <li key={w.id} className="space-y-1 border-l-2 border-red-200 pl-3">
+                    <div data-testid="wrong-answer">
+                      <RichText text={w.text} className="font-medium" />
+                    </div>
+                    <p className="text-sm text-zinc-500">
+                      Denkfehler: {m ? <RichText text={m.name} inline /> : 'unbekannt'} ({w.misconception}){w.why && ' · eigener Text'}
+                    </p>
+                    {why && <RichText text={why.detailed} className="text-sm text-zinc-700" />}
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        </>
+      )}
 
       <dl className="space-y-2 text-sm">
         <div>
@@ -231,5 +238,48 @@ function QuestionCard({ course, question: q, part, misconceptions }: CardProps) 
         </div>
       </dl>
     </article>
+  )
+}
+
+// Zuordnen: alle Paare des Vorrats und die typischen Verwechslungen mit Denkfehler
+function MatchPairs({ question: q, misconceptions }: { question: MatchQuestion; misconceptions: ReadonlyMap<string, Misconception> }) {
+  return (
+    <>
+      <div className="space-y-1 rounded-xl bg-green-50 px-3 py-2">
+        <p className="text-sm font-semibold text-green-800">Paare ({q.pairs.length})</p>
+        <ul className="space-y-1">
+          {q.pairs.map((p) => (
+            <li key={p.id} data-testid="match-pair" className="flex flex-wrap gap-x-2">
+              <RichText text={p.left} inline />
+              <span aria-hidden>→</span>
+              <RichText text={p.right} className="font-medium" inline />
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className="space-y-2">
+        <p className="text-sm font-semibold text-red-800">Verwechslungen ({q.traps.length})</p>
+        <ul className="space-y-3">
+          {q.traps.map((t) => {
+            const m = misconceptions.get(t.misconception)
+            const why = t.why ?? m?.why
+            const pair = q.pairs.find((p) => p.id === t.pair)
+            return (
+              <li key={`${t.pair}-${t.right}`} className="space-y-1 border-l-2 border-red-200 pl-3">
+                <p className="flex flex-wrap gap-x-2 font-medium">
+                  <RichText text={pair?.left ?? t.pair} inline />
+                  <span aria-hidden>→</span>
+                  <RichText text={t.right} inline />
+                </p>
+                <p className="text-sm text-zinc-500">
+                  Denkfehler: {m ? <RichText text={m.name} inline /> : 'unbekannt'} ({t.misconception}){t.why && ' · eigener Text'}
+                </p>
+                {why && <RichText text={why.detailed} className="text-sm text-zinc-700" />}
+              </li>
+            )
+          })}
+        </ul>
+      </div>
+    </>
   )
 }

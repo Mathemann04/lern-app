@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { numericImplicitDerivative } from '../check/curve.ts'
 import { numericDerivative } from '../check/numeric.ts'
 import { chemTopic } from '../chem/banks.ts'
+import { misconceptionsIn } from '../quiz/types.ts'
 import { CHEM_ERROR_RULES } from '../chem/errorRules.ts'
 import { findChemTaskWithError } from '../chem/focus.ts'
 import { lightValues } from '../chem/generators/light.ts'
@@ -339,7 +340,7 @@ describe('Lernkarten: Chemie', () => {
     for (const topicId of new Set(CHEM_CARDS.map((c) => c.topic))) {
       const { bank } = chemTopic(topicId)!
       const shown = new Set(cardsInTopic(topicId).flatMap((c) => c.errors))
-      const used = new Set(bank.questions.flatMap((q) => q.wrong.map((w) => w.misconception)))
+      const used = new Set(bank.questions.flatMap((q) => misconceptionsIn(q)))
       expect([...used].filter((id) => !shown.has(id)), topicId).toEqual([])
     }
   })

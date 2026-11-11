@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { Choice, GuidedStep, GuidedTaskBase } from '../../engine/guided/types.ts'
+import type { Choice, GuidedStep, GuidedTaskBase, MatchStep } from '../../engine/guided/types.ts'
 import type { Expr } from '../../engine/expr/types.ts'
 import { type TaskRef, formatTaskNumber } from '../../engine/tasks/taskNumber.ts'
 import { recordAttempt, recordError } from '../../state/progress.ts'
@@ -200,6 +200,19 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext,
     }
   }
 
+  // Zuordnen (N1b): wie „Wähle alle richtigen“ einmal prüfen; in die Fehlerstatistik kommen die Denkfehler der
+  // typischen Verwechslungen, die gewählt wurden
+  function checkMatch(assigned: Readonly<Record<string, string>>) {
+    const match = step.match
+    if (solved || !match) return
+    const wrongRows = match.rows.filter((row) => assigned[row.id] !== row.answer)
+    const rules = wrongRows.flatMap((row) => row.traps.filter((t) => t.target === assigned[row.id]).map((t) => t.errorRuleId))
+    for (const rule of new Set(rules)) recordError(rule)
+    if (wrongRows.length > 0) onMistake()
+    setMultiResult({ clean: wrongRows.length === 0 })
+    setSolved(true)
+  }
+
   function toggle(choice: Choice) {
     if (solved) return
     setSelected((ids) => (ids.includes(choice.id) ? ids.filter((id) => id !== choice.id) : [...ids, choice.id]))
@@ -232,6 +245,8 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext,
 
       {numeric ? (
         <NumberAnswer answer={numeric} disabled={solved} onSubmit={(value) => judged(judgeNumber(value, numeric))} />
+      ) : step.match ? (
+        <MatchAnswers match={step.match} checked={multiResult !== null} detail={detail} onCheck={checkMatch} />
       ) : step.multi ? (
         <MultiAnswers choices={step.choices} selected={selected} checked={multiResult !== null} detail={detail} onToggle={toggle} onCheck={checkMulti} />
       ) : (
@@ -319,7 +334,9 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext,
         {multiResult && !multiResult.clean ? (
           <div className="animate-step-in space-y-4 rounded-2xl bg-red-50 p-4">
             <p className="text-lg font-semibold text-red-800">Nicht ganz.</p>
-            <p className="text-zinc-800">Oben steht bei jeder Aussage, was richtig war. Die Frage kommt später noch einmal.</p>
+            <p className="text-zinc-800">
+              Oben steht bei jeder {step.match ? 'Zeile' : 'Aussage'}, was richtig war. Die Frage kommt später noch einmal.
+            </p>
             <RichText text={step.explanation[mode === 'off' ? 'short' : mode]} className="text-zinc-800" />
             <button
               type="button"
@@ -477,6 +494,147 @@ function MultiAnswers({ choices, selected, checked, detail, onToggle, onCheck }:
   )
 }
 
+type MatchProps = {
+  match: MatchStep
+  checked: boolean
+  detail: ExplanationDetail
+  onCheck: (assigned: Readonly<Record<string, string>>) => void
+}
+
+// Wenige kurze Ziele stehen als Knöpfe in jeder Zeile, sonst klappt je Zeile eine Liste auf (Plan M4, „Aufgabenarten“)
+const SHORT_TARGETS = 4
+const SHORT_TARGET_LENGTH = 16
+const isShortTargets = (match: MatchStep) =>
+  match.targets.length <= SHORT_TARGETS && match.targets.every((t) => t.content.replace(/\$[^$]*\$/g, 'xxx').length <= SHORT_TARGET_LENGTH)
+
+// Zuordnen (N1b): je Zeile ein Ziel wählen, dann „Prüfen“. Danach steht bei jeder Zeile, ob sie stimmt; bei einer
+// falschen das richtige Ziel und bei einer typischen Verwechslung „Warum ist das falsch?“.
+function MatchAnswers({ match, checked, detail, onCheck }: MatchProps) {
+  const [assigned, setAssigned] = useState<Record<string, string>>({})
+  const [open, setOpen] = useState<string | null>(match.rows[0]?.id ?? null)
+  const [whyOpen, setWhyOpen] = useState<string[]>([])
+  const short = isShortTargets(match)
+  // passt ein Ziel zu mehreren Zeilen? (sonst verriete der Hinweis, dass jedes Ziel genau einmal vorkommt)
+  const shared = match.targets.length < match.rows.length
+  const complete = match.rows.every((row) => assigned[row.id] !== undefined)
+  const targetOf = (id: string | undefined) => match.targets.find((t) => t.id === id)
+
+  function choose(rowIndex: number, target: string) {
+    if (checked) return
+    const row = match.rows[rowIndex]
+    setAssigned((a) => ({ ...a, [row.id]: target }))
+    // in der Liste weiter zur nächsten offenen Zeile
+    const next = match.rows.find((r, i) => i > rowIndex && assigned[r.id] === undefined)
+    setOpen(next?.id ?? null)
+  }
+
+  return (
+    <div className="space-y-3">
+      <p className="text-sm text-zinc-600">
+        {short ? 'Tippe in jeder Zeile an, was dazu passt.' : 'Wähle für jede Zeile aus der Liste, was dazu passt.'}
+        {shared && ' Dasselbe kann zu mehreren Zeilen passen.'} Dann tippe auf „Prüfen“.
+      </p>
+      <ol className="space-y-3" aria-label="Zuordnungen">
+        {match.rows.map((row, index) => {
+          const chosen = targetOf(assigned[row.id])
+          const verdict = !checked ? null : assigned[row.id] === row.answer ? 'right' : 'wrong'
+          const trap = verdict === 'wrong' ? row.traps.find((t) => t.target === assigned[row.id]) : undefined
+          const tone = verdict === 'right' ? 'border-green-600 bg-green-50' : verdict === 'wrong' ? 'border-red-300 bg-red-50' : 'border-zinc-200 bg-surface'
+          return (
+            <li key={row.id} className={`space-y-2 rounded-2xl border-2 px-4 py-3 ${tone}`} data-verdict={verdict ?? undefined}>
+              <RichText text={row.content} className="block text-lg font-medium" />
+              {short ? (
+                <div className="flex flex-wrap gap-2" role="group" aria-label="Ziele">
+                  {match.targets.map((t) => {
+                    const isChosen = assigned[row.id] === t.id
+                    return (
+                      <button
+                        key={t.id}
+                        type="button"
+                        aria-pressed={isChosen}
+                        disabled={checked}
+                        onClick={() => choose(index, t.id)}
+                        className={`min-h-11 rounded-xl border-2 px-3 py-1.5 font-medium ${
+                          isChosen ? 'border-accent-700 bg-accent-700 text-on-accent' : 'border-zinc-300 bg-surface hover:border-accent-600'
+                        } ${checked && !isChosen ? 'opacity-60' : ''}`}
+                      >
+                        <RichText text={t.content} inline />
+                      </button>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <button
+                    type="button"
+                    disabled={checked}
+                    aria-expanded={open === row.id}
+                    onClick={() => setOpen(open === row.id ? null : row.id)}
+                    className="flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border-2 border-zinc-300 bg-surface px-3 py-2 text-left font-medium hover:border-accent-600"
+                  >
+                    {chosen ? <RichText text={chosen.content} inline /> : <span className="text-zinc-600">Auswählen …</span>}
+                    {!checked && <span aria-hidden className="text-zinc-500">{open === row.id ? '▲' : '▼'}</span>}
+                  </button>
+                  {open === row.id && !checked && (
+                    <div className="space-y-2" role="group" aria-label="Ziele">
+                      {match.targets.map((t) => (
+                        <button
+                          key={t.id}
+                          type="button"
+                          aria-pressed={assigned[row.id] === t.id}
+                          onClick={() => choose(index, t.id)}
+                          className={`block min-h-11 w-full rounded-xl border-2 px-3 py-2 text-left ${
+                            assigned[row.id] === t.id ? 'border-accent-700 bg-accent-50' : 'border-zinc-200 bg-surface hover:border-accent-600'
+                          }`}
+                        >
+                          <RichText text={t.content} inline />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+              {verdict && (
+                <div className="space-y-2">
+                  {verdict === 'right' ? (
+                    <p className="text-sm font-semibold text-green-800">✓ Richtig zugeordnet</p>
+                  ) : (
+                    <p className="text-sm font-semibold text-red-800">
+                      ✗ Richtig wäre: <RichText text={targetOf(row.answer)?.content ?? ''} inline />
+                    </p>
+                  )}
+                  {trap &&
+                    (whyOpen.includes(row.id) ? (
+                      <RichText text={trap.whyWrong[detail]} className="text-zinc-800" />
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setWhyOpen((ids) => [...ids, row.id])}
+                        className="rounded-xl border border-red-200 bg-surface px-4 py-2.5 font-medium text-red-800 hover:bg-red-100"
+                      >
+                        Warum ist das falsch?
+                      </button>
+                    ))}
+                </div>
+              )}
+            </li>
+          )
+        })}
+      </ol>
+      {!checked && (
+        <button
+          type="button"
+          onClick={() => onCheck(assigned)}
+          disabled={!complete}
+          className="w-full rounded-xl bg-accent-700 px-4 py-3 text-lg font-medium text-on-accent hover:bg-accent-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-600"
+        >
+          Prüfen
+        </button>
+      )}
+    </div>
+  )
+}
+
 type TypedFeedbackProps = { typed: Typed; detail: ExplanationDetail; whyOpen: boolean; onWhy: () => void; onReveal: () => void }
 
 // Rückmeldung auf eine eingetippte Zahl: „Fast" (Rundung, zählt nicht als Fehler), typischer Fehler mit
@@ -563,6 +721,8 @@ function FinishView({ course, mix, task, mistakes, focus, isQuestion, practiceMo
             ? 'Alles beim ersten Versuch richtig.'
             : task.steps.some((st) => st.multi)
               ? 'Nicht alles richtig angekreuzt.'
+              : task.steps.some((st) => st.match)
+                ? 'Nicht alles richtig zugeordnet.'
               : `Gelöst mit ${mistakes} ${mistakes === 1 ? 'Fehlversuch' : 'Fehlversuchen'}.`}
           {isQuestion && mistakes > 0 && ' Die Frage kommt nach drei anderen Aufgaben noch einmal.'}
         </p>
@@ -581,7 +741,7 @@ function FinishView({ course, mix, task, mistakes, focus, isQuestion, practiceMo
                   <RichText text={task.resultQuestion} className="text-zinc-800" />
                 </div>
               )}
-              <p className="text-sm text-zinc-600">{task.steps.some((st) => st.multi) ? 'Richtige Aussagen' : 'Richtige Antwort'}</p>
+              <p className="text-sm text-zinc-600">{task.steps.some((st) => st.multi) ? 'Richtige Aussagen' : task.steps.some((st) => st.match) ? 'Richtige Zuordnung' : 'Richtige Antwort'}</p>
               <RichText text={task.resultText!} className="text-xl font-medium" />
             </>
           )}

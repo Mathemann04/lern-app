@@ -1,4 +1,5 @@
-import type { MultiChoice, QuestionBank, QuestionLevel } from '../../quiz/types.ts'
+import type { MatchQuestion, MatchTrap, MultiChoice, QuestionBank, QuestionLevel } from '../../quiz/types.ts'
+import { ANIONS, type Ion, ionCe } from '../ions.ts'
 
 // Wissensfragen zum Thema „Ionenbindung und Salze“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern: Stufe ·
 // 100 + laufende Nummer; nie neu vergeben, gelöschte kommen in retired. Salze heißen „ionisch“, wo es zählt; keine
@@ -25,6 +26,39 @@ const multiAt = (level: QuestionLevel) => (spec: MultiSpec): MultiChoice => ({
   level,
   correct: spec.correct.map((text, i) => ({ id: `r${i + 1}`, text })),
 })
+
+// Zuordnen (N1b): Molekül-Ionen und ihre Namen, beides aus der Ionentabelle (chem/ions.ts)
+const MOLECULE_ANIONS = ['SO4', 'SO3', 'NO3', 'NO2', 'CO3', 'HCO3', 'PO4', 'OH'].map((id) => ANIONS.find((a) => a.id === id)!)
+const anionName = (a: Ion) => `${a.name[0].toUpperCase()}${a.name.slice(1)}`
+const ENDING_TRAPS: readonly [string, string][] = [
+  ['SO4', 'SO3'],
+  ['SO3', 'SO4'],
+  ['NO3', 'NO2'],
+  ['NO2', 'NO3'],
+]
+const MOLECULE_ION_NAMES: MatchQuestion = {
+  kind: 'match',
+  id: 'io-v-zuordnen-molekuelionen',
+  no: 219,
+  level: 2,
+  fact: 'match-molecule-ion-names',
+  part: 'formel',
+  title: 'Molekül-Ionen',
+  prompt: 'Welcher Name gehört zu welchem Molekül-Ion?',
+  pairs: MOLECULE_ANIONS.map((a) => ({ id: a.id, left: String.raw`$\ce{${ionCe(a)}}$`, right: anionName(a) })),
+  traps: ENDING_TRAPS.map(([pair, other]): MatchTrap => ({
+    pair,
+    right: anionName(MOLECULE_ANIONS.find((a) => a.id === other)!),
+    misconception: 'chem-mis-io-ending-mixup',
+  })),
+  hint: 'Bei Sauerstoff-Ionen desselben Elements hat die Endung -at mehr Sauerstoff als -it.',
+  explanation: {
+    detailed: String.raw`Die Namen der Molekül-Ionen mit Sauerstoff enden auf -at oder -it; -at hat mehr Sauerstoff: Sulfat $\ce{SO4^2-}$ und Sulfit $\ce{SO3^2-}$, Nitrat $\ce{NO3-}$ und Nitrit $\ce{NO2-}$. Dazu kommen Carbonat $\ce{CO3^2-}$, Hydrogencarbonat $\ce{HCO3-}$, Phosphat $\ce{PO4^3-}$ und Hydroxid $\ce{OH-}$.`,
+    short: 'Die Endung -at hat mehr Sauerstoff als -it.',
+  },
+  cards: ['ionen-molekuelionen'],
+  ref: REF_NAMEN,
+}
 
 export const IONEN_BANK: QuestionBank = {
   course: 'chem-ionen',
@@ -1535,6 +1569,8 @@ export const IONEN_BANK: QuestionBank = {
       cards: ['ionen-born-haber'],
       ref: REF_ENERGIE,
     }),
+    // ---- Zuordnen (N1b)
+    MOLECULE_ION_NAMES,
   ],
   retired: [],
 }

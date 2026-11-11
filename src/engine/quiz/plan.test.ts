@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { MULTI_CORRECT, MULTI_INSTRUCTION, MULTI_SHOWN, QUIZ_INSTRUCTION, SHOWN_WRONG, planQuestion } from './plan.ts'
-import type { Misconception, MultiChoice, Question } from './types.ts'
+import { MATCH_INSTRUCTION, MATCH_SHOWN, MULTI_CORRECT, MULTI_INSTRUCTION, MULTI_SHOWN, QUIZ_INSTRUCTION, SHOWN_WRONG, planQuestion } from './plan.ts'
+import type { MatchQuestion, Misconception, MultiChoice, Question } from './types.ts'
 
 // Eigene kleine Frage für die Tests, unabhängig von den Sammlungen
 const why = (text: string) => ({ detailed: `${text} (ausführlich)`, short: text })
@@ -157,5 +157,84 @@ describe('„Wähle alle richtigen" als geführte Aufgabe', () => {
 
   it('lässt die Einfachauswahl ohne Merkmal multi', () => {
     expect(plan(0).steps[0].multi).toBeUndefined()
+  })
+})
+
+// Zuordnen (N1b): sieben Paare, zwei Ziele kommen doppelt vor, drei Verwechslungen
+const MATCH: MatchQuestion = {
+  ...QUESTION,
+  kind: 'match',
+  id: 'test-zuordnen',
+  prompt: 'Was gehört zusammen?',
+  pairs: [
+    { id: 'a', left: 'A', right: 'eins' },
+    { id: 'b', left: 'B', right: 'eins' },
+    { id: 'c', left: 'C', right: 'zwei' },
+    { id: 'd', left: 'D', right: 'zwei' },
+    { id: 'e', left: 'E', right: 'drei' },
+    { id: 'f', left: 'F', right: 'vier' },
+    { id: 'g', left: 'G', right: 'fünf' },
+  ],
+  traps: [
+    { pair: 'a', right: 'zwei', misconception: 'chem-mis-a' },
+    { pair: 'e', right: 'fünf', misconception: 'chem-mis-b', why: why('Eigener Text zu E') },
+    { pair: 'g', right: 'drei', misconception: 'chem-mis-c' },
+  ],
+}
+const planMatch = (variant: number, focus?: string) => planQuestion(MATCH, MISCONCEPTIONS, REF, variant, focus)
+
+describe('Zuordnen als geführte Aufgabe', () => {
+  it('zeigt vier bis sechs Zeilen, mindestens zwei Ziele, jede Antwort unter den Zielen, Ziele ohne Doppel', () => {
+    for (const variant of MANY) {
+      const task = planMatch(variant)
+      const [step] = task.steps
+      const match = step.match!
+      expect(task.instruction).toBe(MATCH_INSTRUCTION)
+      expect(step.choices).toEqual([])
+      expect(match.rows.length).toBeGreaterThanOrEqual(MATCH_SHOWN.min)
+      expect(match.rows.length).toBeLessThanOrEqual(MATCH_SHOWN.max)
+      expect(match.targets.length).toBeGreaterThanOrEqual(2)
+      expect(new Set(match.targets.map((t) => t.content)).size).toBe(match.targets.length)
+      for (const row of match.rows) {
+        const pair = MATCH.pairs.find((p) => p.id === row.id)!
+        expect(row.content).toBe(pair.left)
+        expect(match.targets.find((t) => t.id === row.answer)?.content).toBe(pair.right)
+        // Verwechslungen nur, wenn ihr Ziel dasteht, und nie die richtige Zuordnung
+        for (const trap of row.traps) {
+          expect(match.targets.map((t) => t.id)).toContain(trap.target)
+          expect(trap.target).not.toBe(row.answer)
+        }
+      }
+      // genau die Ziele der gezeigten Zeilen
+      expect(new Set(match.targets.map((t) => t.id))).toEqual(new Set(match.rows.map((r) => r.answer)))
+      expect(planMatch(variant)).toEqual(task)
+    }
+  })
+
+  it('wechselt Auswahl und Reihenfolge der Paare und nennt im Ergebnis jedes Paar', () => {
+    const tasks = MANY.map((v) => planMatch(v))
+    expect(new Set(tasks.map((t) => t.steps[0].match!.rows.map((r) => r.id).join(','))).size).toBeGreaterThan(100)
+    expect(new Set(tasks.map((t) => t.steps[0].match!.rows.length))).toEqual(new Set([4, 5, 6]))
+    const task = planMatch(3)
+    const { rows, targets } = task.steps[0].match!
+    expect(task.resultText).toBe(rows.map((r) => `${r.content}: ${targets.find((t) => t.id === r.answer)!.content}`).join('\n'))
+  })
+
+  it('gibt Verwechslungen ihren Denkfehler und den eigenen Text vor dem des Denkfehlers', () => {
+    const traps = MANY.flatMap((v) => planMatch(v).steps[0].match!.rows.flatMap((r) => r.traps.map((t) => ({ row: r.id, ...t }))))
+    expect(new Set(traps.map((t) => t.errorRuleId))).toEqual(new Set(['chem-mis-a', 'chem-mis-b', 'chem-mis-c']))
+    for (const t of traps) {
+      if (t.row === 'e') expect(t.whyWrong).toEqual(why('Eigener Text zu E'))
+      else expect(t.whyWrong).toEqual(MISCONCEPTIONS.find((m) => m.id === t.errorRuleId)!.why)
+    }
+  })
+
+  it('zeigt beim gezielten Üben sicher die Zeile mit der Verwechslung und ihr falsches Ziel', () => {
+    for (const variant of MANY) {
+      for (const focus of ['chem-mis-a', 'chem-mis-b', 'chem-mis-c']) {
+        const rows = planMatch(variant, focus).steps[0].match!.rows
+        expect(rows.some((r) => r.traps.some((t) => t.errorRuleId === focus)), `${variant} ${focus}`).toBe(true)
+      }
+    }
   })
 })

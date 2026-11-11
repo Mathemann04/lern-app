@@ -60,11 +60,40 @@ export type MultiChoice = Omit<SingleChoice, 'kind' | 'correct'> & {
   readonly correct: readonly QuizOption[]
 }
 
-export type Question = SingleChoice | MultiChoice
+// Zuordnen (N1b): Paare aus einem linken Eintrag und dem passenden rechten, z. B. Molekül ↔ Gestalt. Gezeigt
+// werden vier bis sechs Paare aus dem Vorrat; rechts stehen die rechten Einträge dieser Paare (gleiche nur einmal),
+// man ordnet jeder Zeile einen zu (quiz/plan.ts). Mehrere Zeilen dürfen dasselbe Ziel haben.
+export type MatchPair = {
+  // eindeutig innerhalb der Frage
+  readonly id: string
+  readonly left: string
+  readonly right: string
+}
 
-// richtige Antworten einer Frage (bei der Einfachauswahl genau eine)
-export const correctOptionsOf = (question: Question): readonly QuizOption[] =>
+// Typische Verwechslung: Zeile pair bekommt das Ziel right (der rechte Eintrag eines anderen Paars) – ein Denkfehler
+export type MatchTrap = {
+  readonly pair: string
+  readonly right: string
+  readonly misconception: string
+  // „Warum ist das falsch?" nur für diese Verwechslung; ohne Angabe gilt der Text des Denkfehlers
+  readonly why?: Explanation
+}
+
+export type MatchQuestion = Omit<SingleChoice, 'kind' | 'correct' | 'wrong'> & {
+  readonly kind: 'match'
+  readonly pairs: readonly MatchPair[]
+  readonly traps: readonly MatchTrap[]
+}
+
+export type Question = SingleChoice | MultiChoice | MatchQuestion
+
+// richtige Antworten einer Frage mit Antworten zum Auswählen (bei der Einfachauswahl genau eine)
+export const correctOptionsOf = (question: SingleChoice | MultiChoice): readonly QuizOption[] =>
   question.kind === 'multi' ? question.correct : [question.correct]
+
+// Denkfehler, die in einer Frage vorkommen können (falsche Antworten oder Verwechslungen)
+export const misconceptionsIn = (question: Question): readonly string[] =>
+  question.kind === 'match' ? question.traps.map((t) => t.misconception) : question.wrong.map((w) => w.misconception)
 
 // Typischer Denkfehler (Id „chem-mis-…"): falsche Aussage und warum sie falsch ist. Der Text nennt den
 // Fehler und die Regel, verrät aber nicht die richtige Antwort einer bestimmten Frage.

@@ -4,7 +4,7 @@ import { cardById, cardsInTopic } from '../explain/cards.ts'
 import { parseRichText } from '../explain/richText.ts'
 import { latexProblem } from '../expr/latexChecks.ts'
 import { QUESTION_NO_MAX } from '../quiz/numbers.ts'
-import { type Explanation, type Question, correctOptionsOf } from '../quiz/types.ts'
+import { type Explanation, type MatchQuestion, type Question, correctOptionsOf } from '../quiz/types.ts'
 import { CHEM_TOPICS } from './banks.ts'
 import { generatorsOf } from './generators/index.ts'
 
@@ -16,6 +16,9 @@ const MIN_WRONG = 4
 // „Wähle alle richtigen“: Vorrat mindestens zwei richtige und drei falsche Aussagen (quiz/types.ts)
 const MULTI_MIN_CORRECT = 2
 const MULTI_MIN_WRONG = 3
+// Zuordnen: Vorrat mindestens vier Paare und zwei typische Verwechslungen
+const MATCH_MIN_PAIRS = 4
+const MATCH_MIN_TRAPS = 2
 
 // Texte mit $…$-Formeln: jede Formel setzt sich im strengen Modus
 function expectRenderable(text: string, context: string) {
@@ -121,6 +124,14 @@ describe.each(CHEM_TOPICS.map((t) => [t.bank.course, t] as const))('Fragensammlu
   })
 
   it.each(bank.questions.map((q) => [q.id, q] as const))('%s: Antworten, Denkfehler, Karten und Texte', (id, q) => {
+    for (const card of q.cards) expect(cardById(card), `${id}: Karte ${card}`).toBeDefined()
+    for (const text of [q.title, q.prompt, q.hint]) expectRenderable(text, id)
+    expectExplanation(q.explanation, id)
+    expect(q.fact, id).toMatch(/^[a-z0-9-]+$/)
+    if (q.kind === 'match') {
+      expectMatch(q, id)
+      return
+    }
     if (q.kind === 'multi') {
       expect(q.correct.length, `${id}: richtige Aussagen`).toBeGreaterThanOrEqual(MULTI_MIN_CORRECT)
       expect(q.wrong.length, `${id}: falsche Aussagen`).toBeGreaterThanOrEqual(MULTI_MIN_WRONG)
@@ -136,11 +147,31 @@ describe.each(CHEM_TOPICS.map((t) => [t.bank.course, t] as const))('Fragensammlu
       expect(known.has(option.misconception), `${id}: Denkfehler ${option.misconception}`).toBe(true)
       if (option.why) expectExplanation(option.why, `${id}/${option.id}`)
     }
-    for (const card of q.cards) expect(cardById(card), `${id}: Karte ${card}`).toBeDefined()
-    for (const text of [q.title, q.prompt, q.hint, ...options.map((o) => o.text)]) expectRenderable(text, id)
-    expectExplanation(q.explanation, id)
-    expect(q.fact, id).toMatch(/^[a-z0-9-]+$/)
+    for (const text of options.map((o) => o.text)) expectRenderable(text, id)
   })
+
+  // Zuordnen (N1b): Vorrat, eindeutige linke Einträge, mindestens zwei verschiedene Ziele; jede Verwechslung
+  // nimmt das Ziel eines anderen Paars und ist ein Denkfehler des Themas
+  function expectMatch(q: MatchQuestion, id: string) {
+    expect(q.pairs.length, `${id}: Paare`).toBeGreaterThanOrEqual(MATCH_MIN_PAIRS)
+    expect(new Set(q.pairs.map((p) => p.id)).size, `${id}: Ids der Paare`).toBe(q.pairs.length)
+    const lefts = q.pairs.map((p) => normalized(p.left))
+    expect(lefts.filter((t, i) => lefts.indexOf(t) !== i), `${id}: doppelte linke Einträge`).toEqual([])
+    const rights = new Set(q.pairs.map((p) => p.right))
+    expect(rights.size, `${id}: verschiedene Ziele`).toBeGreaterThanOrEqual(2)
+    // kein Ziel mehr als die Hälfte der Paare, damit jede Fassung mindestens zwei verschiedene Ziele zeigt
+    for (const right of rights) expect(q.pairs.filter((p) => p.right === right).length, `${id}: ${right}`).toBeLessThanOrEqual(q.pairs.length / 2)
+    expect(q.traps.length, `${id}: Verwechslungen`).toBeGreaterThanOrEqual(MATCH_MIN_TRAPS)
+    for (const trap of q.traps) {
+      const pair = q.pairs.find((p) => p.id === trap.pair)
+      expect(pair, `${id}: Verwechslung zu ${trap.pair}`).toBeDefined()
+      expect(trap.right, `${id}/${trap.pair}: Verwechslung ist die richtige Zuordnung`).not.toBe(pair?.right)
+      expect(rights.has(trap.right), `${id}/${trap.pair}: Ziel ${trap.right} gehört zu keinem Paar`).toBe(true)
+      expect(known.has(trap.misconception), `${id}: Denkfehler ${trap.misconception}`).toBe(true)
+      if (trap.why) expectExplanation(trap.why, `${id}/${trap.pair}`)
+    }
+    for (const pair of q.pairs) for (const text of [pair.left, pair.right]) expectRenderable(text, `${id}/${pair.id}`)
+  }
 
   it('hat Denkfehler mit Namen, falscher Aussage und Erklärung', () => {
     for (const m of misconceptions) {
