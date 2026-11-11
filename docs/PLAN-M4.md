@@ -543,18 +543,29 @@ kommen mit ihren Schritten dazu. Die Denkfehler der Wissensfragen
 | Ionenladung | Valenzelektronen abgegeben statt Oktett aufgefüllt (`chem-ion-valence-given`) | P⁵⁺ statt P³⁻ |
 | Ionenladung | Vorzeichen vertauscht (`chem-ion-sign`) | Na⁻ statt Na⁺ |
 | Ionisierungsenergien | größter Wert statt größter Sprung (`chem-ie-largest`) | Mg mit vier Werten: Mg⁴⁺ statt Mg²⁺ |
+| Salzformel | Nichtmetall als Kation (`chem-salt-anion-positive`, seit S5a) | Na₃P mit P³⁺ |
+| Salzformel | Ladung des Anions aus den Valenzelektronen (`chem-salt-anion-valence`, seit S5a) | O⁶⁻ statt O²⁻ |
+| Salzformel | Molekül-Ion mit falscher Ladung (`chem-salt-polyatomic-charge`, seit S5a) | SO₄⁻ statt SO₄²⁻ |
 | Salzformel | nicht gekürzt (`chem-salt-not-reduced`) | Mg₂S₂ statt MgS |
-| Salzformel | Indizes vertauscht (`chem-salt-swapped`) | Al₃O₂ statt Al₂O₃ |
+| Salzformel | Indizes vertauscht (`chem-salt-indices-swapped`) | Al₃O₂ statt Al₂O₃ |
 | Salzformel | immer 1 : 1 (`chem-salt-one-to-one`) | AlO |
-| Salzformel | Klammer vergessen (`chem-salt-bracket`) | Ca₃PO₄₂ statt Ca₃(PO₄)₂ |
-| Salzformel | falsche Ionenladung (`chem-salt-charge`) | Calciumnitrid mit N⁵⁻: Ca₅N₂ statt Ca₃N₂ |
-| Name ↔ Formel | Index statt Ladung in der Klammer (`chem-name-index`) | Fe₂O₃ als Eisen(II)-oxid |
-| Name ↔ Formel | Endung verwechselt (`chem-name-suffix`) | Na₂SO₄ als Natriumsulfid |
+| Salzformel | Klammer vergessen (`chem-salt-bracket`) | CaNO₃₂ statt Ca(NO₃)₂ |
+| Salzformel | römische Ziffer als Anzahl gelesen (`chem-salt-numeral-count`, seit S5a) | Eisen(III)-chlorid als Fe₃Cl |
+| Name ↔ Formel | Index als Ladung gelesen (`chem-salt-charge-from-index`, seit S5a) | Fe₂O₃ mit Fe²⁺ |
+| Name ↔ Formel | Index statt Ladung in der Klammer (`chem-salt-numeral-index`) | Fe₂O₃ als Eisen(II)-oxid |
+| Name ↔ Formel | römische Ziffer weggelassen (`chem-salt-numeral-missing`, seit S5a) | FeCl₃ als Eisenchlorid |
+| Name ↔ Formel | Endung verwechselt (`chem-salt-anion-name`) | Na₂SO₄ als Natriumsulfid |
 | Zerfall in Ionen | Koeffizienten vergessen (`chem-dissociation-coefficients`) | Al₂O₃ → Al³⁺ + O²⁻ |
-| Zerfall in Ionen | Index als Teil des Ions (`chem-dissociation-index`) | Al₂O₃ → Al₂³⁺ + O₃²⁻ |
+| Zerfall in Ionen | Index als Teil des Ions (`chem-dissociation-index-ion`) | Al₂O₃ → Al₂³⁺ + 3 O²⁻ |
+| Zerfall in Ionen | Ladungen gehen nicht auf (`chem-dissociation-charge`, seit S5a) | CaCl₂ → Ca²⁺ + 2 Cl²⁻ |
+| Zerfall in Ionen | Atome statt Ionen (`chem-dissociation-atoms`, seit S5a) | NaCl → Na + Cl |
 | Born-Haber | Vorzeichen der Elektronenaffinität (`chem-bh-ea-sign`) | Cl: +349 statt −349 kJ/mol |
-| Born-Haber | ganze statt halbe Bindungsenergie (`chem-bh-whole-bond`) | Cl₂: 243 statt 121,5 kJ/mol |
+| Born-Haber | ganze statt halbe Bindungsenergie (`chem-bh-full-bond`) | Cl₂: 242 statt 121 kJ/mol |
 | Born-Haber | Schritt vergessen (`chem-bh-step-missing`) | Sublimation des Natriums fehlt |
+| Born-Haber | Kreisprozess falsch herum umgestellt (`chem-bh-subtracted-wrong`, seit S5a) | ΔH_G = ΔH_Ionen − ΔH_f |
+| Born-Haber | addiert statt abgezogen (`chem-bh-added`, seit S5a) | ΔH_G = ΔH_f + ΔH_Ionen |
+| Born-Haber | Gitterenthalpie mit falschem Vorzeichen (`chem-bh-lattice-sign`, seit S5a) | ΔH_f = ΔH_Ionen − ΔH_G |
+| Born-Haber | Weg zu den Ionen abgezogen (`chem-bh-ions-subtracted`, seit S5a) | ΔH_f = ΔH_G − ΔH_Ionen |
 | Gestalt | Doppelbindung als zwei Paare gezählt (`chem-vsepr-double-bond`) | CO₂ tetraedrisch |
 | Gestalt | freie Paare vergessen (`chem-vsepr-lone-pairs`) | NH₃ trigonal-planar, H₂O linear |
 | Gestalt | Anordnung der Paare statt Gestalt (`chem-vsepr-arrangement`) | NH₃ tetraedrisch |
@@ -848,6 +859,18 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   Natriumchlorid) und die Gestalt der Moleküle als selbst gezeichnete Bilder
   zu den passenden Fragen, aus den Daten der Aufgabe gezeichnet.
   Ausprobieren: PCl₃ im Klausurformat; Calciumphosphat als Formel.
+  Geteilt (11.11.2026): **S5a** (fertig) Ionenbindung und Salze, **S5b** Moleküle,
+  **S5c** zwischenmolekulare Kräfte, Metallbindung und Hybridisierung, **S5d**
+  „Klausuraufgabe 3 üben“. S5a: Thema „Ionenbindung und Salze“ mit Unterthemen Formeln
+  und Namen, Gitter und Eigenschaften, Zerfall in Ionen, Gitterenergie (ab Vertiefung);
+  Rechnungen: Formel aus dem Namen (Ionen → Formel), Name aus der Formel (bei
+  Nebengruppen erst die Ladung), Zerfall in Wasser oder in der Schmelze, Born-Haber
+  (Gitter- oder Bildungsenthalpie, Fluoride und Chloride der Alkalimetalle); nur Salze,
+  die es als Stoff gibt (Liste in `chem/ions.ts`). Bilder: Elementarzellen von NaCl,
+  CsCl und Zinkblende, aus den Lagen der Ionen gezeichnet, an Fragen und an der Karte
+  „Ionengitter“. Zehn Lernkarten, Wissensfragen. Der Fehler „Ladung des Anions auf das
+  Kation übertragen“ fiel weg: Er ergibt fast immer denselben Wert wie „Index als
+  Ladung gelesen“.
 - **S6: Elektronen und Periodensystem.** Konfiguration und
   Valenzkonfiguration als Auswahl, Quantenzahlen, Steckbrief, Ionenladung,
   Trends; „Klausuraufgabe 1 üben“ und „Klausuraufgabe 2 üben“.

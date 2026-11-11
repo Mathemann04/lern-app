@@ -595,3 +595,16 @@ Neue Entscheidungen unten anfügen.
   Folgefehler im Ergebnis gibt die vollen Punkte eines Teils nur, wenn der Fehler aus einem
   früheren Teil stammt. Teil d) ist abwechselnd Gasvolumen oder Lösung ansetzen (Bauplan Teil 1, 14 Punkte).
   Die Auswertung wird noch nicht gespeichert; Verlauf kommt mit der Probeklausur (S9).
+- 11.11.2026: S5 in vier Teile geteilt (S5a Ionenbindung und Salze, S5b Moleküle, S5c
+  zwischenmolekulare Kräfte, Metallbindung und Hybridisierung, S5d Klausuraufgabe 3), damit
+  jeder Teil einzeln ausprobierbar ist. In Salz-Aufgaben nur Salze, die es als Stoff gibt;
+  ohne Blei und Zinn, ohne Zink- und Aluminiumphosphid (eher Atombindung), Aluminiumnitrid
+  wie im Skript. Bilder der Ionengitter rechnet die Engine aus den Lagen der Ionen
+  (`chem/figures.ts`), die Oberfläche zeichnet sie (`ui/chem/ChemFigure.tsx`); Koordinationszahl
+  und Zahl der Formeleinheiten prüft ein Test am Bild. Born-Haber mit Werten aus NIST und CRC,
+  dazu Rubidium und Caesium für mehr Abwechslung.
+- 11.11.2026: S5a nach der fachlichen Prüfung: Salze in Wasser ohne Sulfide (S2- reagiert zu HS-), ohne
+  Ammoniumphosphat und Aluminium nur als Nitrat und Sulfat; Schmelze ohne K2O, Rb2O und Cs2O (zersetzen
+  sich vorher); kein Caesiumphosphid. Aluminiumoxid und Magnesiumchlorid kommen in „Formel aus dem Namen“
+  nicht vor (fast wie Klausuraufgabe 3a). Neuer Rechenfehler „Weg zu den Ionen abgezogen statt addiert“
+  (`chem-bh-ions-subtracted`) für die Bildungsenthalpie. Rubidium-Salze für mehr Abwechslung.

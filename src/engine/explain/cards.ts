@@ -29,6 +29,7 @@ import type { Level } from '../tasks/taskNumber.ts'
 import type { RearrangeTask } from '../rearrange/task.ts'
 import { ATOMBAU_CARDS } from './chem/atombauCards.ts'
 import { GLEICHUNGEN_CARDS } from './chem/gleichungenCards.ts'
+import { IONEN_CARDS } from './chem/ionenCards.ts'
 import { LOESUNGEN_CARDS } from './chem/loesungenCards.ts'
 import { STOFFMENGE_CARDS } from './chem/stoffmengeCards.ts'
 import { FRACTION_CARD_LIST } from './fractionCards.ts'
@@ -55,6 +56,7 @@ export const TOPICS: readonly Topic[] = [
   { id: 'umstellen', title: 'Gleichungen umstellen', description: 'Gegenrechnung, Rüberbringen, Variable im Nenner, Ausklammern' },
   { id: 'chem-atombau', title: 'Atombau', description: 'Elementarteilchen, Kernsymbol, Isotope, Ionen, Atommodelle und Licht' },
   { id: 'chem-gleichungen', title: 'Reaktionsgleichungen', description: 'Koeffizient und Index, Ausgleichen, Verbrennungen' },
+  { id: 'chem-ionen', title: 'Ionenbindung und Salze', description: 'Ionen, Formeln und Namen von Salzen, Gitter, Zerfall in Ionen, Born-Haber' },
   { id: 'chem-loesungen', title: 'Gase und Lösungen', description: 'Konzentration, Lösung ansetzen, Anteile, molares Volumen und Gasgesetz' },
   { id: 'chem-stoffmenge', title: 'Stoffmenge und Umsatz', description: 'Stoffmenge, molare Masse, Masse und Teilchenzahl' },
 ]
@@ -100,6 +102,8 @@ export type Card = {
   readonly examples: readonly CardExample[]
   // Ids der typischen Fehler (Fehlerregeln)
   readonly errors: readonly string[]
+  // Bild auf der Karte (Id aus engine/chem/figures.ts)
+  readonly figures?: readonly string[]
 }
 
 const [x2, x3] = [pow(x, num(2)), pow(x, num(3))]
@@ -373,6 +377,7 @@ export const CARDS: readonly Card[] = [
   ...STOFFMENGE_CARDS,
   ...GLEICHUNGEN_CARDS,
   ...LOESUNGEN_CARDS,
+  ...IONEN_CARDS,
 ]
 
 export function topicById(id: string): Topic | undefined {

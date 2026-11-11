@@ -6,6 +6,7 @@ import { formatText } from '../quantity/numberDe.ts'
 import { parseDecimal, rat, ratAdd, ratDiv, ratMul, toDecimalString, type Rational } from '../rational.ts'
 import type { Rng } from '../random/rng.ts'
 import { elementBySymbol } from './elements.ts'
+import { ANIONS, CATIONS, ionCe, saltFormula, saltIndices, saltName } from './ions.ts'
 import { balance, coefficientsOf, equationCe, isBalanced, species, withCoefficients } from './equation.ts'
 import { indexChanged, partly, probeStep, singleAtom } from './generators/gleichungen.ts'
 import { parseFormula } from './formula.ts'
@@ -239,5 +240,51 @@ describe('Rechenfehler: Namen und Texte', () => {
       const used = new Set([1, 2, 3].flatMap((level) => generatorsOf(rule.course, level as 1).flatMap((g) => g.errors)))
       expect(used.has(rule.id), rule.id).toBe(true)
     }
+  })
+})
+
+describe('Rechenfehler Ionenbindung und Salze: Katalogbeispiele', () => {
+  const cat = (id: string) => CATIONS.find((i) => i.id === id)!
+  const an = (id: string) => ANIONS.find((i) => i.id === id)!
+  it('Ionen: P³⁺, O⁶⁻, SO₄⁻', () => {
+    expect(ionCe(an('P'), 3)).toBe('P^3+')
+    expect(ionCe(an('O'), -(8 + an('O').charge))).toBe('O^6-')
+    expect(ionCe(an('SO4'), -1)).toBe('SO4^-')
+  })
+  it('Formeln: Mg₂S₂, Al₃O₂, AlO, CaNO₃₂, Fe₃Cl', () => {
+    expect(saltFormula(cat('Mg'), an('S'))).toBe('MgS')
+    expect(saltFormula(cat('Mg'), an('S'), { cation: 2, anion: 2 })).toBe('Mg2S2')
+    expect(saltFormula(cat('Al'), an('O'))).toBe('Al2O3')
+    expect(saltFormula(cat('Al'), an('O'), { cation: 3, anion: 2 })).toBe('Al3O2')
+    expect(saltFormula(cat('Al'), an('O'), { cation: 1, anion: 1 })).toBe('AlO')
+    expect(saltFormula(cat('Ca'), an('NO3'))).toBe('Ca(NO3)2')
+    expect(saltFormula(cat('Ca'), an('NO3'), { cation: 1, anion: 2 }, false)).toBe('CaNO32')
+    expect(saltFormula(cat('Fe3'), an('Cl'), { cation: 3, anion: 1 })).toBe('Fe3Cl')
+  })
+  it('Namen: Fe₂O₃ mit Fe²⁺ und als Eisen(II)-oxid, Eisenchlorid, Natriumsulfid', () => {
+    expect(saltIndices(cat('Fe3'), an('O')).cation).toBe(2)
+    expect(saltName(cat('Fe3'), an('O'))).toBe('Eisen(III)-oxid')
+    expect(saltName(cat('Fe3'), an('O'), 'Eisen(II)')).toBe('Eisen(II)-oxid')
+    expect(saltName(cat('Fe3'), an('Cl'), 'Eisen')).toBe('Eisenchlorid')
+    expect(saltName(cat('Na'), an('S'))).toBe('Natriumsulfid')
+    expect(saltFormula(cat('Na'), an('SO4'))).toBe('Na2SO4')
+  })
+  it('Zerfall: Ladungen von 2 Cl²⁻ gehen nicht auf', () => {
+    expect(cat('Ca').charge + 2 * -2).not.toBe(0)
+    expect(cat('Ca').charge + 2 * an('Cl').charge).toBe(0)
+  })
+  it('Born-Haber mit NaCl: +349, ganze Bindungsenergie, ohne Sublimation, falsch umgestellt', () => {
+    const [sub, ie, d, ea, hf] = [107, 496, 242, -349, -411]
+    const ions = sub + ie + d / 2 + ea
+    expect(ions).toBe(375)
+    expect(sub + ie + d / 2 - ea).toBe(1073)
+    expect(sub + ie + d + ea).toBe(496)
+    expect(ie + d / 2 + ea).toBe(268)
+    const lattice = hf - ions
+    expect(lattice).toBe(-786)
+    expect(ions - hf).toBe(786)
+    expect(hf + ions).toBe(-36)
+    expect(ions - lattice).toBe(1161)
+    expect(lattice - ions).toBe(-1161)
   })
 })

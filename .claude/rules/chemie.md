@@ -108,3 +108,12 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   Seite `ui/exam/ExamTaskPage.tsx` unter `#/klausur/chemie/aufgabe/4[/<nummer>]`, Kachel
   im Gebiet über `exam` am Gebiet in `catalog.ts` (`examAreaOf`). `pickSolution` in
   `generators/loesungen.ts` liefert die Lösung für Teil d.
+- Ionenbindung und Salze (S5a): `chem/ions.ts` (Kationen und Anionen mit Name, Ladung,
+  Formel, Molekül-Ion; `isAllowedSalt` nur echte Salze, `isSoluble`, `meltsAsIons`,
+  `saltFormula`, `saltName` mit Bindestrich bei römischer Ziffer, `ionCe`),
+  `generators/salze.ts` (Formel aus Namen, Name aus Formel, Zerfall in Wasser oder Schmelze,
+  Born-Haber mit `METALS`, `HALOGENS`, `FORMATION`), Karten `ionenCards.ts`, Fragen
+  `bank/ionen.ts` (Denkfehler `chem-mis-io-…`). Bilder: `chem/figures.ts` (Ionengitter als
+  Lagen in der Elementarzelle, Linien zu nächsten Nachbarn, `coordinationOf`), gezeichnet
+  von `ui/chem/ChemFigure.tsx`; Fragen und Schritte mit `figure`, Karten mit `figures`.
+  Testmuster gegen Platzhalter erlauben `NaN` in Formeln wie NaNO₂ (`NaN(?![A-Z0-9])`).

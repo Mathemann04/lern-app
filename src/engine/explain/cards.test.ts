@@ -68,7 +68,7 @@ const derivativeExample = (e: CardExample): Expr | Equation => {
 }
 
 function expectRenderable(text: string, context: string) {
-  expect(text, context).not.toMatch(/undefined|NaN|\[object|null/)
+  expect(text, context).not.toMatch(/undefined|NaN(?![A-Z0-9])|\[object|null/)
   for (const segment of parseRichText(text).flat()) {
     if (segment.kind === 'math') expect(latexProblem(segment.latex, { checkUgly: false }), context).toBeNull()
   }

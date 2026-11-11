@@ -305,6 +305,7 @@ test('Chemie: Themen mischen, „Nächste Aufgabe" bleibt in der Mischung, X und
   await page.getByRole('checkbox', { name: 'Stoffmenge und Umsatz' }).uncheck()
   await page.getByRole('checkbox', { name: 'Reaktionsgleichungen' }).uncheck()
   await page.getByRole('checkbox', { name: 'Gase und Lösungen' }).uncheck()
+  await page.getByRole('checkbox', { name: 'Ionenbindung und Salze' }).uncheck()
 
   // Unterthemen aufklappen: dieselben Kästchen wie auf der Themenseite (Atombau steht zuerst)
   const toggle = page.getByRole('button', { name: /^Unterthemen: alle/ }).first()
@@ -564,3 +565,20 @@ test('Chemie: Klausuraufgabe 4 üben, alle Teile beantworten, abgeben, Auswertun
   expect(page.url()).not.toBe(url)
   expect(errors).toEqual([])
 })
+
+test('Chemie: Ionenbindung und Salze, Rechnung zur Formel, Lernkarte mit Gitterbildern', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./#/gebiet/chem-bindung')
+  await page.getByRole('link', { name: /Ionenbindung und Salze/ }).click()
+  await expect(page.getByRole('heading', { name: 'Ionenbindung und Salze' })).toBeVisible()
+  // eine feste Rechnung der Grundlagen (Formel, Name oder Zerfall in Ionen)
+  await page.goto('./#/ueben/chem-ionen/1-10000')
+  await expect(answers(page).first()).toBeVisible()
+  await expectCleanPage(page, 'Rechnung zu Salzen')
+  // Lernkarte mit drei Bildern
+  await page.goto('./#/karten/chem-ionen/ionen-gitter')
+  await expect(page.getByTestId('chem-figure')).toHaveCount(3)
+  await expectCleanPage(page, 'Ionengitter')
+  expect(errors).toEqual([])
+})
+

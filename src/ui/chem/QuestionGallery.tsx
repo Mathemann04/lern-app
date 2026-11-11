@@ -9,6 +9,7 @@ import { cardHref } from '../cards/cardRoute.ts'
 import { type Course, type CoursePart, courseById, levelName } from '../catalog.ts'
 import { galleryHref, taskHref } from '../routes.ts'
 import { CalcGallery } from './CalcGallery.tsx'
+import { ChemFigure } from './ChemFigure.tsx'
 
 // Testseite „Fragen durchsehen" eines Chemie-Themas (#/galerie/chem-atombau), erst bei Bedarf
 // geladen: je Stufe alle Fragen mit Nummer, richtiger Antwort, allen falschen Antworten samt
@@ -156,6 +157,7 @@ function QuestionCard({ course, question: q, part, misconceptions }: CardProps) 
           </span>
         </p>
         <RichText text={q.prompt} className="text-lg font-semibold" />
+        {q.figure && <ChemFigure id={q.figure} />}
       </div>
 
       <div className="space-y-1 rounded-xl bg-green-50 px-3 py-2">

@@ -4,6 +4,7 @@ import { GLEICHUNGEN_GENERATORS } from './gleichungen.ts'
 import { LIGHT_GENERATORS } from './light.ts'
 import { LOESUNGEN_GENERATORS } from './loesungen.ts'
 import { PARTICLE_GENERATORS } from './particles.ts'
+import { SALZE_GENERATORS } from './salze.ts'
 import { STOFFMENGE_GENERATORS } from './stoffmenge.ts'
 import { UMSATZ_GENERATORS } from './umsatz.ts'
 import type { ChemCalc, ChemGenerator } from './shared.ts'
@@ -18,6 +19,7 @@ const GENERATORS: Readonly<Record<string, readonly ChemGenerator[]>> = {
   'chem-stoffmenge': [...STOFFMENGE_GENERATORS, ...UMSATZ_GENERATORS],
   'chem-gleichungen': GLEICHUNGEN_GENERATORS,
   'chem-loesungen': LOESUNGEN_GENERATORS,
+  'chem-ionen': SALZE_GENERATORS,
 }
 
 // Rechenarten eines Themas in einer Stufe

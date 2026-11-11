@@ -1,6 +1,7 @@
 import type { MisconceptionName } from '../../quiz/types.ts'
 import { ATOMBAU_MISCONCEPTIONS } from './atombau.ts'
 import { GLEICHUNGEN_MISCONCEPTIONS } from './gleichungen.ts'
+import { IONEN_MISCONCEPTIONS } from './ionen.ts'
 import { LOESUNGEN_MISCONCEPTIONS } from './loesungen.ts'
 import { STOFFMENGE_MISCONCEPTIONS } from './stoffmenge.ts'
 
@@ -13,4 +14,5 @@ export const MISCONCEPTIONS_BY_COURSE: Readonly<Record<string, readonly Misconce
   'chem-stoffmenge': STOFFMENGE_MISCONCEPTIONS,
   'chem-gleichungen': GLEICHUNGEN_MISCONCEPTIONS,
   'chem-loesungen': LOESUNGEN_MISCONCEPTIONS,
+  'chem-ionen': IONEN_MISCONCEPTIONS,
 }
