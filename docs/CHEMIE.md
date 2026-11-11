@@ -21,6 +21,16 @@ passende Datei hoch; danach wird sie nicht gespeichert.
    Grundlagen und als Quelle typischer Denkfehler. Eine richtige Antwort
    stützt sich nie allein auf sie.
 5. **Frei zugängliche Tabellenwerke** für Zahlenwerte (Abschnitt 4).
+6. **Lehrbuch „Physik für Ingenieure“** (Fotos des Nutzers aus den Kapiteln
+   Kernphysik und Festkörperphysik, seit 11.11.2026): Vorbild für Tabellen
+   mit Bildern, die wir selbst gestaltet nachbauen (eigene Auswahl, eigene
+   Worte, selbst gezeichnet, nie abgezeichnet), und Gegenprobe für
+   Rechnungen: Aufgaben mit Lösung aus dem Buch rechnet Claude in der
+   Sitzung mit der Engine nach; Aufgaben und Zahlen daraus kommen nie ins
+   Repo. Bei Widerspruch gilt das Skript, bei Zahlenwerten das
+   Tabellenwerk. Was über die Vorlesung hinausgeht, kommt nie in die Stufen
+   und nie in die Probeklausur, höchstens als Vertiefung ins
+   Nachschlagewerk (M12); dort ist das Buch die Quelle.
 
 Kurznamen für Fundstellen (`ref` an Fragen, „Skript Stöchiometrie, Folie
 11“): Skript Einführung, Skript Aufbau der Materie, Skript Trends, Skript
