@@ -1,4 +1,5 @@
 import { GENERATED_MAX, GENERATED_MIN, VARIANTS, questionSeed } from '../quiz/numbers.ts'
+import { misconceptionsIn } from '../quiz/types.ts'
 import type { Rng } from '../random/rng.ts'
 import type { Level, TaskRef } from '../tasks/taskNumber.ts'
 import { chemTopic } from './banks.ts'
@@ -14,7 +15,7 @@ const ATTEMPTS = 80
 export function findChemTaskWithError(course: string, errorId: string, levels: readonly Level[], rng: Rng): TaskRef | null {
   const topic = chemTopic(course)
   for (const level of levels) {
-    const questions = (topic?.bank.questions ?? []).filter((q) => q.level === level && q.wrong.some((w) => w.misconception === errorId))
+    const questions = (topic?.bank.questions ?? []).filter((q) => q.level === level && misconceptionsIn(q).includes(errorId))
     if (questions.length > 0) return { level, seed: questionSeed(rng.pick(questions).no, rng.int(0, VARIANTS - 1)) }
     for (let attempt = 0; attempt < ATTEMPTS; attempt++) {
       const ref = { level, seed: rng.int(GENERATED_MIN, GENERATED_MAX) }

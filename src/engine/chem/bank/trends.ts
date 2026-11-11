@@ -1,4 +1,4 @@
-import type { Explanation, MultiChoice, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
+import type { Explanation, MatchQuestion, MultiChoice, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
 
 // Wissensfragen zum Thema „Trends im Periodensystem“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern: Stufe · 100
 // + laufende Nummer; nie neu vergeben. Vergleiche nur in derselben Periode oder Gruppe und nie mit den Paaren aus §6;
@@ -27,6 +27,71 @@ const multiAt = (level: QuestionLevel) => (spec: MultiSpec): MultiChoice => ({
 const mg = multiAt(1)
 const mv = multiAt(2)
 const mk = multiAt(3)
+
+// Zuordnen (N1b): Richtung der Trends in Periode und Gruppe; Größe ↔ was sie beschreibt
+const UP = 'nimmt zu'
+const DOWN = 'nimmt ab'
+const DIRECTIONS: MatchQuestion = {
+  kind: 'match',
+  id: 'tr-g-zuordnen-richtungen',
+  no: 118,
+  level: 1,
+  fact: 'match-trend-directions',
+  part: 'atomradius',
+  title: 'Richtung der Trends',
+  prompt: 'Wie ändert sich die Größe in der angegebenen Richtung?',
+  pairs: [
+    { id: 'radius-p', left: 'Atomradius, in der Periode nach rechts', right: DOWN },
+    { id: 'radius-g', left: 'Atomradius, in der Hauptgruppe nach unten', right: UP },
+    { id: 'ie-p', left: 'Ionisierungsenergie, in der Periode nach rechts', right: UP },
+    { id: 'ie-g', left: 'Ionisierungsenergie, in der Hauptgruppe nach unten', right: DOWN },
+    { id: 'en-p', left: 'Elektronegativität, in der Periode nach rechts', right: UP },
+    { id: 'en-g', left: 'Elektronegativität, in der Hauptgruppe nach unten', right: DOWN },
+    { id: 'metall-p', left: 'Metallcharakter, in der Periode nach rechts', right: DOWN },
+    { id: 'metall-g', left: 'Metallcharakter, in der Hauptgruppe nach unten', right: UP },
+  ],
+  traps: [
+    { pair: 'radius-p', right: UP, misconception: 'chem-mis-tr-radius-electrons' },
+    { pair: 'radius-g', right: DOWN, misconception: 'chem-mis-tr-radius-protons' },
+    { pair: 'ie-g', right: UP, misconception: 'chem-mis-tr-ie-reversed' },
+    { pair: 'metall-p', right: UP, misconception: 'chem-mis-tr-metal-right' },
+  ],
+  hint: 'In der Periode wächst die Kernladung bei gleicher Zahl von Schalen; in der Gruppe kommt nach unten jedes Mal eine Schale dazu.',
+  explanation: why(
+    'Atomradius und Metallcharakter nehmen nach links unten zu, also in der Periode nach rechts ab und in der Gruppe nach unten zu. Ionisierungsenergie und Elektronegativität nehmen nach rechts oben zu, also in der Periode nach rechts zu und in der Gruppe nach unten ab. Der Grund: In der Periode hält die wachsende Kernladung die Elektronen fester; in der Gruppe sitzen sie nach unten weiter außen und sind stärker abgeschirmt.',
+    'Radius und Metallcharakter nach links unten größer, Ionisierungsenergie und Elektronegativität nach rechts oben.',
+  ),
+  cards: ['tr-ueberblick'],
+  ref: REF,
+}
+
+const QUANTITIES: MatchQuestion = {
+  kind: 'match',
+  id: 'tr-v-zuordnen-groessen',
+  no: 218,
+  level: 2,
+  fact: 'match-trend-quantities',
+  part: 'affinitaet-metall',
+  title: 'Was die Größen beschreiben',
+  prompt: 'Was beschreibt jede dieser Größen?',
+  pairs: [
+    { id: 'en', left: 'Elektronegativität', right: 'wie stark ein gebundenes Atom die Bindungselektronen anzieht' },
+    { id: 'ea', left: 'Elektronenaffinität', right: 'die Energie, wenn ein freies Atom ein Elektron aufnimmt' },
+    { id: 'ie', left: 'erste Ionisierungsenergie', right: 'die Energie, um einem Atom ein Elektron zu entreißen' },
+    { id: 'metall', left: 'Metallcharakter', right: 'wie leicht ein Element seine Valenzelektronen abgibt' },
+  ],
+  traps: [
+    { pair: 'en', right: 'die Energie, wenn ein freies Atom ein Elektron aufnimmt', misconception: 'chem-mis-tr-en-ea-same' },
+    { pair: 'ea', right: 'wie stark ein gebundenes Atom die Bindungselektronen anzieht', misconception: 'chem-mis-tr-en-ea-same' },
+  ],
+  hint: 'Welche Größe braucht eine Bindung, welche nur ein einzelnes Atom? Geht es ums Aufnehmen oder ums Abgeben?',
+  explanation: why(
+    'Die Elektronegativität ist eine Vergleichszahl ohne Einheit: wie stark ein gebundenes Atom die Bindungselektronen anzieht. Die Elektronenaffinität ist die Energie, die ein freies Atom beim Aufnehmen eines Elektrons umsetzt. Die erste Ionisierungsenergie muss man aufwenden, um ein Elektron zu entfernen. Der Metallcharakter sagt, wie leicht ein Element seine Valenzelektronen abgibt.',
+    'EN: Anziehung in der Bindung; Elektronenaffinität: Aufnehmen; Ionisierungsenergie: Entfernen; Metallcharakter: leicht abgeben.',
+  ),
+  cards: ['tr-elektronegativitaet', 'tr-elektronenaffinitaet', 'tr-ionisierung', 'tr-metallcharakter'],
+  ref: REF,
+}
 
 export const TRENDS_BANK: QuestionBank = {
   course: 'chem-trends',
@@ -1033,6 +1098,9 @@ export const TRENDS_BANK: QuestionBank = {
       cards: ['tr-elektronenaffinitaet', 'tr-metallcharakter'],
       ref: REF,
     }),
+    // ---- Zuordnen (N1b)
+    DIRECTIONS,
+    QUANTITIES,
   ],
   retired: [],
 }

@@ -45,11 +45,11 @@ const isCalc = (url: string) => {
   const seed = Number(/-(\d+)(?:\?.*)?$/.exec(url)?.[1] ?? 0)
   return seed >= 10_000 && seed < 500_000
 }
-// Ab N1 gibt es auch „Wähle alle richtigen“ (Aussagen zum Ankreuzen statt Antwortknöpfen): Tests für die
-// Einfachauswahl ziehen auch dann neu
+// Ab N1 gibt es auch „Wähle alle richtigen“ (Aussagen zum Ankreuzen) und Zuordnen (Zeilen mit Zielen) statt
+// Antwortknöpfen: Tests für die Einfachauswahl ziehen auch dann neu
 const isMulti = async (page: Page) => {
   await page.locator('#question').waitFor()
-  return (await page.getByRole('list', { name: 'Aussagen' }).count()) > 0
+  return (await page.getByRole('list', { name: 'Aussagen' }).count()) + (await page.getByRole('list', { name: 'Zuordnungen' }).count()) > 0
 }
 async function ensureQuestion(page: Page, href: string) {
   for (let i = 0; i < 30 && (isCalc(page.url()) || (await isMulti(page))); i++) {
@@ -879,5 +879,46 @@ test('Chemie: „Wähle alle richtigen“, erst alles richtig, dann mit Fehlern 
   await expectCleanPage(page, 'Wähle alle richtigen, ausgewertet')
   await page.getByRole('button', { name: 'Ergebnis ansehen' }).click()
   await expect(page.getByText('Nicht alles richtig angekreuzt.', { exact: false })).toBeVisible()
+  expect(errors).toEqual([])
+})
+
+// N1b: Zuordnen – erst falsch (alles auf dasselbe Ziel), Auswertung mit „Richtig wäre“, dann dieselbe Aufgabe richtig
+test('Chemie: Zuordnen, Molekül-Ionen und ihre Namen, erst falsch, dann richtig', async ({ page }) => {
+  const errors = collectErrors(page)
+  const href = `./#/ueben/chem-ionen/2-${500_000 + 219 * 50 + 1}`
+  const rows = page.getByRole('list', { name: 'Zuordnungen' }).getByRole('listitem')
+  // Ziel einer Zeile wählen: als Knopf in der Zeile oder in der aufgeklappten Liste
+  async function choose(index: number, name: string) {
+    const row = rows.nth(index)
+    const toggle = row.locator('button[aria-expanded]')
+    if ((await toggle.count()) > 0 && (await toggle.getAttribute('aria-expanded')) !== 'true') await toggle.click()
+    await row.getByRole('group', { name: 'Ziele' }).getByRole('button', { name, exact: true }).click()
+  }
+
+  await page.goto(href)
+  await expect(page.getByText(/· Ordne richtig zu/)).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Prüfen' })).toBeDisabled()
+  await expectCleanPage(page, 'Zuordnen')
+  const count = await rows.count()
+  expect(count).toBeGreaterThanOrEqual(4)
+  for (let i = 0; i < count; i++) await choose(i, 'Sulfat')
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Nicht ganz.')).toBeVisible()
+  const solution: string[] = []
+  for (let i = 0; i < count; i++) {
+    const right = rows.nth(i).getByText(/Richtig wäre:/)
+    solution.push((await right.count()) > 0 ? ((await right.textContent()) ?? '').replace(/^.*Richtig wäre:\s*/, '').trim() : 'Sulfat')
+  }
+  await expectCleanPage(page, 'Zuordnen, ausgewertet')
+  await page.getByRole('button', { name: 'Ergebnis ansehen' }).click()
+  await expect(page.getByText('Nicht alles richtig zugeordnet.', { exact: false })).toBeVisible()
+  await expect(page.getByText('Richtige Zuordnung')).toBeVisible()
+
+  await page.goto('./')
+  await page.goto(href)
+  for (const [i, name] of solution.entries()) await choose(i, name)
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
+  await expect(rows.filter({ hasText: 'Richtig zugeordnet' })).toHaveCount(count)
   expect(errors).toEqual([])
 })

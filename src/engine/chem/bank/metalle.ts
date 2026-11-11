@@ -1,4 +1,5 @@
-import type { Explanation, MultiChoice, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
+import type { Explanation, MatchQuestion, MultiChoice, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
+import { lonePairsOf, moleculeById, partnersOf } from '../molecules.ts'
 
 // Wissensfragen zum Thema „Metallbindung und Hybridisierung“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern:
 // Stufe · 100 + laufende Nummer; nie neu vergeben. Begriffe wie in der Vorlesung: Elektronengas, Atomrümpfe, Valenzband,
@@ -38,6 +39,87 @@ const multiAt = (level: QuestionLevel) => (spec: MultiSpec): MultiChoice => ({
 const SP3 = r`$\mathrm{sp^{3}}$`
 const SP2 = r`$\mathrm{sp^{2}}$`
 const SP = r`$\mathrm{sp}$`
+
+// Zuordnen (N1b): Hybridisierung aus den Moleküldaten (Richtungen = Partner + freie Paare, wie hybridSites in
+// generators/metalle.ts); nur Atome, die dort auch gefragt werden
+const HYBRID_LATEX: Readonly<Record<number, string>> = { 2: r`$\mathrm{sp}$`, 3: r`$\mathrm{sp^{2}}$`, 4: r`$\mathrm{sp^{3}}$` }
+const hybridOf = (molId: string, atom: number) => {
+  const m = moleculeById(molId)
+  if (!m) throw new Error(`Molekül ${molId} fehlt`)
+  return HYBRID_LATEX[partnersOf(m, atom) + lonePairsOf(m, atom)]
+}
+// [Molekül, Index des Atoms, Beschriftung]
+const HYBRID_SITES: readonly [string, number, string][] = [
+  ['C2H6', 0, r`ein C-Atom in $\ce{C2H6}$ (Ethan)`],
+  ['C2H4', 0, r`ein C-Atom in $\ce{C2H4}$ (Ethen)`],
+  ['C2H2', 1, r`ein C-Atom in $\ce{C2H2}$ (Ethin)`],
+  ['BF3', 0, r`das B-Atom in $\ce{BF3}$`],
+  ['CO2', 1, r`das C-Atom in $\ce{CO2}$`],
+  ['NH3', 0, r`das N-Atom in $\ce{NH3}$`],
+  ['H2O', 0, r`das O-Atom in $\ce{H2O}$`],
+  ['CH2O', 0, r`das C-Atom in $\ce{CH2O}$ (Formaldehyd)`],
+]
+const site = (molId: string) => HYBRID_SITES.find(([id]) => id === molId)!
+const hybridRight = (molId: string) => hybridOf(molId, site(molId)[1])
+
+const MATCH_HYBRID: MatchQuestion = {
+  kind: 'match',
+  id: 'me-v-zuordnen-hybrid',
+  no: 217,
+  level: 2,
+  fact: 'match-hybrid',
+  part: 'hybrid',
+  title: 'Hybridisierung',
+  prompt: 'Wie ist das jeweilige Atom hybridisiert?',
+  pairs: HYBRID_SITES.map(([molId, atom, label]) => ({ id: molId, left: label, right: hybridOf(molId, atom) })),
+  traps: [
+    { pair: 'H2O', right: hybridRight('C2H2'), misconception: 'chem-mis-me-hyb-partners' },
+    { pair: 'NH3', right: hybridRight('C2H4'), misconception: 'chem-mis-me-hyb-partners' },
+    { pair: 'C2H4', right: hybridRight('C2H6'), misconception: 'chem-mis-me-hyb-pi' },
+    { pair: 'C2H2', right: hybridRight('C2H6'), misconception: 'chem-mis-me-hyb-pi' },
+  ],
+  hint: 'Zähle um das Atom die Richtungen: jeden Bindungspartner einmal, auch bei einer Mehrfachbindung, und jedes freie Paar.',
+  explanation: why(
+    r`Je Richtung ein Hybridorbital: Vier Richtungen ergeben $\mathrm{sp^{3}}$ (C in Ethan; N in $\ce{NH3}$ mit drei Partnern und einem freien Paar; O in $\ce{H2O}$ mit zwei Partnern und zwei freien Paaren). Drei Richtungen ergeben $\mathrm{sp^{2}}$ (C in Ethen und in $\ce{CH2O}$, B in $\ce{BF3}$). Zwei Richtungen ergeben $\mathrm{sp}$ (C in Ethin und in $\ce{CO2}$). Die π-Bindungen einer Mehrfachbindung liegen in den übrigen p-Orbitalen und zählen nicht als Richtung.`,
+    r`Richtungen zählen: vier $\mathrm{sp^{3}}$, drei $\mathrm{sp^{2}}$, zwei $\mathrm{sp}$; freie Paare zählen mit, π-Bindungen nicht.`,
+  ),
+  cards: ['met-hybrid'],
+  ref: REF_HYBRID,
+}
+
+// Leiter, Halbleiter, Isolator (Breite der verbotenen Zone wie in Frage 109 und auf der Karte met-baender)
+const CONDUCTOR = 'Leiter'
+const SEMICONDUCTOR = 'Halbleiter'
+const INSULATOR = 'Isolator'
+const MATCH_CONDUCTION: MatchQuestion = {
+  kind: 'match',
+  id: 'me-g-zuordnen-leiter',
+  no: 118,
+  level: 1,
+  fact: 'match-conductor',
+  part: 'halbleiter',
+  title: 'Leiter, Halbleiter, Isolator',
+  prompt: 'Was ist welcher Stoff: Leiter, Halbleiter oder Isolator?',
+  pairs: [
+    { id: 'cu', left: 'Kupfer', right: CONDUCTOR },
+    { id: 'al', left: 'Aluminium', right: CONDUCTOR },
+    { id: 'si', left: 'Silicium', right: SEMICONDUCTOR },
+    { id: 'ge', left: 'Germanium', right: SEMICONDUCTOR },
+    { id: 'c', left: 'Diamant', right: INSULATOR },
+  ],
+  traps: [
+    { pair: 'cu', right: INSULATOR, misconception: 'chem-mis-me-gap' },
+    { pair: 'c', right: CONDUCTOR, misconception: 'chem-mis-me-gap' },
+    { pair: 'si', right: CONDUCTOR, misconception: 'chem-mis-me-gap', why: why('Silicium ist kein Metall: Zwischen seinen Bändern liegt eine verbotene Zone. Ein Leiter hat keine. Entscheidend ist die Breite dieser Zone.', 'Silicium hat eine verbotene Zone.') },
+  ],
+  hint: 'Entscheidend ist die verbotene Zone zwischen den Bändern: keine, eine schmale oder eine breite?',
+  explanation: why(
+    'Metalle wie Kupfer und Aluminium haben keine verbotene Zone: Leiter. Silicium (etwa 1,1 eV) und Germanium (etwa 0,7 eV) haben eine schmale: Halbleiter. Diamant hat eine breite von etwa 5,5 eV: Isolator.',
+    'Keine Lücke: Leiter; schmale: Halbleiter; breite: Isolator.',
+  ),
+  cards: ['met-baender'],
+  ref: REF_HALBLEITER,
+}
 
 export const METALLE_BANK: QuestionBank = {
   course: 'chem-metalle',
@@ -1148,6 +1230,9 @@ export const METALLE_BANK: QuestionBank = {
       cards: ['met-hybrid', 'met-sigma-pi'],
       ref: REF_SIGMA,
     }),
+    // ---- Zuordnen (N1b)
+    MATCH_CONDUCTION,
+    MATCH_HYBRID,
   ],
   retired: [],
 }

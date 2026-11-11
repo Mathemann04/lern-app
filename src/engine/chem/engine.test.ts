@@ -175,13 +175,17 @@ describe.each(WITH_QUESTIONS.map((t) => [t.bank.course, t] as const))('Chemie-En
     }
   })
 
-  it('plant jede Frage in jeder Fassung mit vier Antworten, genau eine richtig („Wähle alle richtigen“: vier bis sechs, mindestens eine falsch)', () => {
+  it('plant jede Frage in jeder Fassung mit vier Antworten, genau eine richtig („Wähle alle richtigen“: vier bis sechs, mindestens eine falsch; Zuordnen: vier bis sechs Zeilen)', () => {
     for (const q of questions) {
       for (const variant of [0, 1, 2, 49]) {
         const task = engine.planGuidedTask({ level: q.level, seed: questionSeed(q.no, variant) })
         const [step] = task.steps
         const right = step.choices.filter((c) => c.correct).length
-        if (q.kind === 'multi') {
+        if (q.kind === 'match') {
+          expect(step.match?.rows.length, q.id).toBeGreaterThanOrEqual(4)
+          expect(step.match?.rows.length, q.id).toBeLessThanOrEqual(6)
+          expect(new Set(step.match?.rows.map((r) => r.answer)).size, q.id).toBeGreaterThanOrEqual(2)
+        } else if (q.kind === 'multi') {
           expect(step.multi, q.id).toBe(true)
           expect(step.choices.length, q.id).toBeGreaterThanOrEqual(4)
           expect(step.choices.length, q.id).toBeLessThanOrEqual(6)

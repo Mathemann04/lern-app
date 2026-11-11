@@ -1,4 +1,4 @@
-import type { MultiChoice, QuestionBank, QuestionLevel } from '../../quiz/types.ts'
+import type { MatchQuestion, MultiChoice, QuestionBank, QuestionLevel } from '../../quiz/types.ts'
 
 // Wissensfragen zum Thema „Atombau“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern: Stufe · 100
 // + laufende Nummer; nie neu vergeben, gelöschte kommen in retired.
@@ -11,6 +11,81 @@ const multiAt = (level: QuestionLevel) => (spec: MultiSpec): MultiChoice => ({
   level,
   correct: spec.correct.map((text, i) => ({ id: `r${i + 1}`, text })),
 })
+
+// Zuordnen (N1b): Stoff ↔ Stoffart und Atommodell ↔ Kernaussage
+const STOFFART: MatchQuestion = {
+  kind: 'match',
+  id: 'atombau-g-zuordnen-stoffart',
+  no: 122,
+  level: 1,
+  fact: 'match-stoffart',
+  part: 'stoffe',
+  title: "Element, Verbindung oder Gemisch",
+  prompt: "Was ist welcher Stoff: Element, Verbindung oder Gemisch?",
+  pairs: [
+    { id: 'schwefel', left: "Schwefel", right: "Element" },
+    { id: 'sauerstoff', left: String.raw`Sauerstoff $\ce{O2}$`, right: "Element" },
+    { id: 'wasser', left: "reines Wasser", right: "Verbindung" },
+    { id: 'kochsalz', left: String.raw`Kochsalz $\ce{NaCl}$`, right: "Verbindung" },
+    { id: 'co2', left: String.raw`Kohlenstoffdioxid $\ce{CO2}$`, right: "Verbindung" },
+    { id: 'luft', left: "Luft", right: "Gemisch" },
+    { id: 'messing', left: "Messing", right: "Gemisch" },
+    { id: 'salzwasser', left: "Salzwasser", right: "Gemisch" },
+  ],
+  traps: [
+    { pair: 'wasser', right: "Element", misconception: 'chem-mis-element-compound-swap' },
+    { pair: 'sauerstoff', right: "Verbindung", misconception: 'chem-mis-molecule-is-compound' },
+    { pair: 'kochsalz', right: "Gemisch", misconception: 'chem-mis-compound-is-mixture' },
+    { pair: 'luft', right: "Verbindung", misconception: 'chem-mis-mixture-as-pure' },
+    { pair: 'messing', right: "Element", misconception: 'chem-mis-mixture-as-pure' },
+  ],
+  hint: "Wie viele Atomsorten enthält der Stoff, und sind sie fest gebunden oder nur vermischt?",
+  explanation: {
+    detailed: String.raw`Ein Element besteht aus nur einer Atomsorte, auch wenn wie in $\ce{O2}$ zwei Atome aneinander gebunden sind. Eine Verbindung enthält mehrere Elemente, chemisch gebunden in festem Verhältnis: Wasser, Kochsalz, Kohlenstoffdioxid. Ein Gemisch enthält mehrere Stoffe mit schwankenden Anteilen, auch wenn es überall gleich aussieht: Luft, die Legierung Messing, Salzwasser.`,
+    short: "Element: eine Atomsorte; Verbindung: gebunden in festem Verhältnis; Gemisch: mehrere Stoffe, Anteile schwanken.",
+  },
+  cards: ['atombau-stoffe'],
+  ref: "Skript Aufbau der Materie, Folie 3",
+}
+
+const ATOMMODELLE: MatchQuestion = {
+  kind: 'match',
+  id: 'atombau-v-zuordnen-modelle',
+  no: 222,
+  level: 2,
+  fact: 'match-atom-models',
+  part: 'modelle',
+  title: "Atommodelle",
+  prompt: "Was kam mit welchem Atommodell neu hinzu?",
+  pairs: [
+    { id: 'dalton', left: "Dalton", right: "unteilbare Kugeln, je Element eine Sorte" },
+    { id: 'thomson', left: "Thomson", right: "positive Kugel mit eingebetteten Elektronen" },
+    { id: 'rutherford', left: "Rutherford", right: "winziger positiver Kern, fast leere Hülle" },
+    { id: 'bohr', left: "Bohr", right: "Elektronen auf Bahnen mit festen Energien" },
+    { id: 'orbital', left: "Orbitalmodell", right: "Aufenthaltsräume der Elektronen statt Bahnen" },
+  ],
+  traps: [
+    { pair: 'thomson', right: "winziger positiver Kern, fast leere Hülle", misconception: 'chem-mis-model-mixup' },
+    { pair: 'rutherford', right: "Elektronen auf Bahnen mit festen Energien", misconception: 'chem-mis-model-explains-too-much' },
+    { pair: 'orbital', right: "Elektronen auf Bahnen mit festen Energien", misconception: 'chem-mis-orbital-is-path' },
+    {
+      pair: 'dalton',
+      right: "positive Kugel mit eingebetteten Elektronen",
+      misconception: 'chem-mis-model-mixup',
+      why: {
+        detailed: "Ein Atommodell enthält nur, was die Versuche seiner Zeit zeigten. Zu Daltons Zeit, Anfang des 19. Jahrhunderts, waren Elektronen noch unbekannt; geladene Teilchen im Atom kamen erst in einem späteren Modell vor.",
+        short: "Zu Daltons Zeit kannte man noch keine Elektronen.",
+      },
+    },
+  ],
+  hint: "Ordne die Modelle zuerst nach der Zeit: Was war zu jedem Zeitpunkt schon bekannt?",
+  explanation: {
+    detailed: "Dalton: unteilbare Kugeln, die Atome eines Elements gleich. Thomson kannte die Elektronen und dachte sie sich in einer gleichmäßig positiv geladenen Kugel, noch ohne Kern. Rutherford schloss aus dem Streuversuch auf einen winzigen positiven Kern und eine fast leere Hülle. Bohr legte Bahnen mit festen Energien fest. Das Orbitalmodell ersetzt die Bahnen durch Raumbereiche, in denen sich ein Elektron mit hoher Wahrscheinlichkeit aufhält.",
+    short: "Dalton Kugeln, Thomson ohne Kern, Rutherford Kern, Bohr feste Bahnen, Orbitalmodell Aufenthaltsräume.",
+  },
+  cards: ['atombau-modelle'],
+  ref: "Skript Aufbau der Materie",
+}
 
 export const ATOMBAU_BANK: QuestionBank = {
   course: 'chem-atombau',
@@ -1979,6 +2054,9 @@ export const ATOMBAU_BANK: QuestionBank = {
       cards: ['atombau-modelle', 'atombau-kern-huelle'],
       ref: "Skript Aufbau der Materie, Folie 11",
     }),
+    // ---- Zuordnen (N1b)
+    STOFFART,
+    ATOMMODELLE,
   ],
   retired: [],
 }

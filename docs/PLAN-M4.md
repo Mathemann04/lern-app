@@ -1222,7 +1222,18 @@ braucht es erst für N3 und N4.
   Ausprobieren: Trends im Periodensystem → Klausurniveau, Aufgabe 3-317
   (oder in der Galerie „Fragen durchsehen“ auf eine Frage mit „Wähle alle
   richtigen“ tippen).
-  **N1b**: Zuordnen. **N1c**: Ordnen.
+  **N1b** (fertig): Zuordnen. Vier bis sechs Paare aus einem Vorrat von
+  mindestens vier, z. B. Molekül-Ion ↔ Name; rechts stehen die Ziele dieser
+  Paare (gleiche nur einmal, dasselbe Ziel darf zu mehreren Zeilen passen).
+  Bei höchstens vier kurzen Zielen tippst du in jeder Zeile einen Knopf an,
+  sonst klappt je Zeile eine Liste auf (so lassen sich auch Formeln als Ziele
+  zeigen). Einmal „Prüfen“, danach steht bei jeder Zeile „richtig
+  zugeordnet“ oder „Richtig wäre: …“; ist die falsche Wahl eine typische
+  Verwechslung (mindestens zwei je Frage, jede ein Denkfehler des Themas),
+  gibt es „Warum ist das falsch?“. Wo die App eine Tabelle hat (Ionen,
+  Moleküle, Kräfte, Periodensystem), rechnet sie die Paare selbst aus.
+  Ausprobieren: Ionenbindung und Salze → Vertiefung, Aufgabe 2-219.
+  **N1c**: Ordnen.
 - **N2: Eingaben.** Orbital-Kästchen, Baukasten fürs
   Massenwirkungsgesetz, Lewis-Baukasten, Koeffizienten-Felder,
   Element-Tastatur, Knöpfe für Konfigurationen im freien Modus.

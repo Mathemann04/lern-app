@@ -50,6 +50,23 @@ export type GuidedStep = {
   // „Wähle alle richtigen“ (N1): mehrere Antworten können richtig sein; man kreuzt an und prüft einmal,
   // danach steht bei jeder Aussage, ob sie richtig gewählt, zu Unrecht gewählt oder vergessen ist
   readonly multi?: boolean
+  // Zuordnen (N1b): jeder Zeile ein Ziel zuordnen und einmal prüfen; choices ist dann leer
+  readonly match?: MatchStep
+}
+
+export type MatchStep = {
+  readonly rows: readonly MatchRow[]
+  readonly targets: readonly { readonly id: string; readonly content: string }[]
+}
+
+export type MatchRow = {
+  readonly id: string
+  // linker Eintrag (Text mit Formeln)
+  readonly content: string
+  // Id des richtigen Ziels
+  readonly answer: string
+  // typische Verwechslungen dieser Zeile: Ziel, Denkfehler und warum das falsch ist
+  readonly traps: readonly { readonly target: string; readonly errorRuleId: string; readonly whyWrong: Explanation }[]
 }
 
 // Gemeinsame Basis aller geführten Aufgaben: Mathe-Aufgaben mit Term (GuidedTask) und Wissensfragen
