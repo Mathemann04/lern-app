@@ -1,5 +1,6 @@
 import { createRng } from '../../random/rng.ts'
 import type { Level, TaskRef } from '../../tasks/taskNumber.ts'
+import { ELEKTRONEN_GENERATORS } from './elektronen.ts'
 import { GLEICHUNGEN_GENERATORS } from './gleichungen.ts'
 import { LIGHT_GENERATORS } from './light.ts'
 import { LOESUNGEN_GENERATORS } from './loesungen.ts'
@@ -26,6 +27,7 @@ const GENERATORS: Readonly<Record<string, readonly ChemGenerator[]>> = {
   'chem-molekuele': MOLEKUELE_GENERATORS,
   'chem-zmk': ZMK_GENERATORS,
   'chem-metalle': METALLE_GENERATORS,
+  'chem-elektronen': ELEKTRONEN_GENERATORS,
 }
 
 // Rechenarten eines Themas in einer Stufe

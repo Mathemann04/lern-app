@@ -111,13 +111,14 @@ export const IONEN = 'chem-ionen'
 export const MOLEKUELE = 'chem-molekuele'
 export const ZMK = 'chem-zmk'
 export const METALLE = 'chem-metalle'
+export const ELEKTRONEN = 'chem-elektronen'
 
 // Chemie-Themen: Ids mit „chem-", Engine aus Wissensfragen (engine/chem/)
 export const isChemCourse = (id: string) => id.startsWith('chem-')
 
 // Themen mit Testseite in der Formel-Galerie (auch solche, die noch nicht spielbar sind); bei Chemie
 // die Seite „Fragen durchsehen"
-export const GALLERY_COURSES: readonly string[] = [DERIVATIVES, FRACTIONS, REARRANGE, ATOMBAU, GLEICHUNGEN, STOFFMENGE, LOESUNGEN, IONEN, MOLEKUELE, ZMK, METALLE]
+export const GALLERY_COURSES: readonly string[] = [DERIVATIVES, FRACTIONS, REARRANGE, ATOMBAU, GLEICHUNGEN, STOFFMENGE, LOESUNGEN, IONEN, MOLEKUELE, ZMK, METALLE, ELEKTRONEN]
 
 const derivativeLevels: LevelPreview[] = [
   {
@@ -358,6 +359,35 @@ const molekueleLevels: LevelPreview[] = [
   },
 ]
 
+const elektronenLevels: LevelPreview[] = [
+  {
+    level: 1,
+    available: true,
+    title: 'Quantenzahlen, Orbitale, Pauli und Hund, Konfiguration bis Argon, Valenzelektronen',
+    examples: [String.raw`\ce{O}\text{: } 1\mathrm{s}^{2}\,2\mathrm{s}^{2}\,2\mathrm{p}^{4}`],
+  },
+  {
+    level: 2,
+    available: true,
+    title: 'Konfiguration bis Krypton mit Edelgaskern, 4s vor 3d, Chrom und Kupfer, Ionen',
+    examples: [String.raw`\ce{Fe^2+}\text{: } [\mathrm{Ar}]\,3\mathrm{d}^{6}`],
+  },
+  {
+    level: 3,
+    available: true,
+    title: 'Erlaubte Quantenzahlen, Besetzungen beurteilen, Element aus der Valenzkonfiguration',
+    examples: [String.raw`4\mathrm{s}^{2}\,4\mathrm{p}^{3}\text{: } \ce{As}`],
+  },
+]
+
+// Unterthemen von „Elektronen" (Rechnungen in engine/chem/generators/elektronen.ts, part)
+const elektronenParts: CoursePart[] = [
+  { id: 'quantenzahlen', title: 'Quantenzahlen und Orbitale', levels: [1, 2, 3] },
+  { id: 'besetzung', title: 'Pauli, Hund und Elektronenkonfiguration', levels: [1, 2, 3] },
+  { id: 'ionen', title: 'Konfiguration von Ionen', levels: [2, 3] },
+  { id: 'valenz', title: 'Valenzelektronen', levels: [1, 2, 3] },
+]
+
 const metalleLevels: LevelPreview[] = [
   {
     level: 1,
@@ -568,7 +598,17 @@ export const SUBJECTS: readonly Subject[] = [
             focus: true,
             parts: atombauParts,
           },
-          comingSoon('chem-elektronen', 'Elektronen', 'Quantenzahlen, Orbitale und Elektronenkonfiguration', 'orbitals'),
+          {
+            id: ELEKTRONEN,
+            title: 'Elektronen',
+            description: 'Quantenzahlen, Orbitale, Pauli und Hund, Elektronenkonfiguration und Valenzelektronen',
+            icon: 'orbitals',
+            cards: 'chem-elektronen',
+            levels: elektronenLevels,
+            free: false,
+            focus: true,
+            parts: elektronenParts,
+          },
         ],
       },
       {

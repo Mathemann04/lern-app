@@ -655,3 +655,17 @@ Neue Entscheidungen unten anfügen.
   Die Fragen nutzen die Schritte der Rechnungen (Rechenfehler und Erklärungen geprüft in S5a bis
   S5d); eine eigene fachliche Prüfung war nicht nötig, weil kein neuer Fachinhalt dazukam, nur
   Überschriften der Teile.
+- 11.11.2026: S6 geteilt in S6a „Elektronen“, S6b „Klausuraufgabe 1 üben“, S6c Aufbau des
+  Periodensystems, S6d Trends, S6e „Klausuraufgabe 2 üben“ (jeder Teil einzeln ausprobierbar).
+  S6a: Die Engine rechnet jede Konfiguration selbst (Besetzungsreihenfolge, Ausnahmen nach dem
+  NIST-Tabellenwerk, Ionen); Gegenprobe mit einer zweiten, von Hand eingetragenen Liste. Grundlagen
+  bis Argon statt nur bis Neon (sonst zu wenig Abwechslung), immer ohne Edelgaskern (CHEMIE.md §3);
+  erzeugte Konfigurationen und Valenzkonfigurationen nur bis Kr (CHEMIE.md §6). Kationen mit
+  Edelgaskonfiguration kurz als [Ar], Anionen mit dem Kern des Atoms ([Ne] 3s² 3p⁶), damit man das
+  Auffüllen sieht; falsche Konfigurationen mit demselben Kern wie die Lösung, damit der Kern nichts
+  verrät. Kästchenbilder werden aus den Daten gezeichnet, auch als Antworten. Das Skript lag in
+  dieser Sitzung nicht vor: Fundstellen nur mit dem Namen des Skripts, ohne Foliennummer; der
+  Wortvergleich mit dem Skript folgt, sobald es hochgeladen ist.
+  Nach der fachlichen Prüfung (Chemie ohne Befund): 58 Erklärungen „Warum ist das falsch?“ neu
+  geschrieben, weil sie die Lösung verrieten; die allgemeinen Texte der Denkfehler nennen nur noch die
+  Regel, ohne Tabellenwerte; eigene Texte für Pd und Ag; Valenzkonfigurationen nur bis Kr.
