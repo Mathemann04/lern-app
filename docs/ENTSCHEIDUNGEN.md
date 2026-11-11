@@ -729,3 +729,7 @@ Neue Entscheidungen unten anfügen.
   Fehler passt („Wärme beim Wechsel des Aggregatzustands falsch eingeschätzt“, „273,15 abgezogen, obwohl das Ergebnis schon
   in Kelvin ist“); Calciumhydroxid nur bei 25 °C (es gibt oberhalb von etwa 500 °C Wasser ab); Kalkbrennen überall mit
   drei Ziffern (1120 K).
+- 11.11.2026: S7c „Klausuraufgabe 5 üben“ (10 Punkte nach dem Bauplan Teil 1). Teil d hat zwei Fragen (Summe der Produkte,
+  dann ΔH), außer wenn bei der Summe kein typischer Fehler passieren kann; dann zählt nur ΔH mit 3 Punkten. Teil e wechselt
+  zwischen ΔG mit Urteil und dem Temperaturbereich. Eine eigene fachliche Prüfung war nicht nötig: kein neuer Fachinhalt,
+  nur die geprüften Fragen und Rechnungen aus S7a und S7b. Damit ist S7 abgeschlossen.
