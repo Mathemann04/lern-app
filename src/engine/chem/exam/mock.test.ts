@@ -1,8 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { truthOf } from '../../exam/grade.ts'
-import { type MockAnswers, gradeMock, missingToPass, mockMax, openCountOf, remainingMs } from '../../exam/mock.ts'
+import { type MockAnswers, gradeMock, missingToPass, mockMax, openCountOf, practiceHints, remainingMs } from '../../exam/mock.ts'
+import { CARDS } from '../../explain/cards.ts'
+import { decodeSeed } from '../../quiz/numbers.ts'
+import { createRng } from '../../random/rng.ts'
+import { chemTopic } from '../banks.ts'
 import type { ExamTask } from '../../exam/types.ts'
-import { CHEM_MOCK, chemMockExam } from './mock.ts'
+import { CHEM_MOCK, chemMockExam, mockSubstances, pickMockId } from './mock.ts'
 import { TASK1_POINTS } from './task1.ts'
 import { TASK2_POINTS } from './task2.ts'
 import { TASK3_POINTS } from './task3.ts'
@@ -64,5 +68,66 @@ describe('Probeklausur Chemie 1, Teil 1', () => {
     expect(missingToPass(31, CHEM_MOCK.passTotal)).toBe(9)
     expect(missingToPass(40, CHEM_MOCK.passTotal)).toBe(0)
     expect(missingToPass(47.5, CHEM_MOCK.passTotal)).toBe(0)
+  })
+})
+
+describe('Probeklausur: Verlauf, Wiederholung und Übungsvorschläge (S9b)', () => {
+  it('Wissensfragen tragen ihr Thema und ihre Nummer für die Wiederholung, und die Nummer passt zur Frage', () => {
+    let count = 0
+    for (const id of IDS.slice(0, 20)) {
+      for (const t of chemMockExam(id).tasks) {
+        for (const item of t.task.parts.flatMap((p) => p.items)) {
+          if (!item.review) continue
+          count++
+          const decoded = decodeSeed(item.review.seed)
+          expect(decoded?.kind, item.id).toBe('question')
+          const q = chemTopic(item.review.course)!.bank.questions.find((x) => decoded?.kind === 'question' && x.no === decoded.no)
+          expect(q?.title, item.id).toBe(item.title)
+        }
+      }
+    }
+    expect(count).toBeGreaterThan(40)
+  })
+
+  it('schlägt die Themen mit den meisten verlorenen Punkten vor; alles richtig: nichts', () => {
+    const exam = chemMockExam(7)
+    const right: MockAnswers = Object.fromEntries(exam.tasks.map((t) => [String(t.no), truthAnswers(t.task)]))
+    const topicOf = (card: string) => CARDS.find((c) => c.id === card)?.topic
+    expect(practiceHints(gradeMock(exam, right), topicOf)).toEqual([])
+    // nur Aufgabe 4 offen: alles, was fehlt, gehört zu Themen der Stöchiometrie
+    const without4 = Object.fromEntries(Object.entries(right).filter(([no]) => no !== '4'))
+    const hints = practiceHints(gradeMock(exam, without4), topicOf, 10)
+    expect(hints.reduce((s, h) => s + h.lost, 0)).toBeCloseTo(14, 0)
+    for (const h of hints) expect(['chem-gleichungen', 'chem-stoffmenge', 'chem-loesungen']).toContain(h.course)
+    // nichts beantwortet: alle Punkte verloren, höchstens drei Vorschläge, absteigend
+    const all = practiceHints(gradeMock(exam, {}), topicOf)
+    expect(all).toHaveLength(3)
+    expect(all[0].lost).toBeGreaterThanOrEqual(all[2].lost)
+  })
+
+  it('jede Frage hat eine Lernkarte mit einem Thema', () => {
+    for (const id of IDS.slice(0, 20)) {
+      for (const t of chemMockExam(id).tasks) {
+        for (const item of t.task.parts.flatMap((p) => p.items)) expect(item.cards.some((c) => CARDS.find((x) => x.id === c)?.topic), `${id} ${item.id}`).toBe(true)
+      }
+    }
+  })
+
+  it('meidet Stoffe der letzten drei Probeklausuren: deutlich weniger gleiche Stoffe als zufällig', () => {
+    expect(mockSubstances(chemMockExam(1))).toContain('Germanium')
+    expect(mockSubstances(chemMockExam(1))).not.toContain('CO2')
+    const rng = createRng('meiden')
+    const random = () => rng.int(0, 999_999) / 1_000_000
+    let picked = 0
+    let plain = 0
+    for (let k = 0; k < 8; k++) {
+      const recent = [rng.int(1, 99_999), rng.int(1, 99_999), rng.int(1, 99_999)]
+      const used = new Set(recent.flatMap((x) => mockSubstances(chemMockExam(x))))
+      const id = pickMockId(recent, random)
+      expect(recent).not.toContain(id)
+      picked += mockSubstances(chemMockExam(id)).filter((s) => used.has(s)).length
+      plain += mockSubstances(chemMockExam(rng.int(1, 99_999))).filter((s) => used.has(s)).length
+    }
+    expect(picked).toBeLessThan(plain * 0.6)
   })
 })

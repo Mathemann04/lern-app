@@ -42,3 +42,29 @@ export const remainingMs = (startedAt: number, minutes: number, now: number) => 
 
 // Punkte, die im anderen Teil der Klausur noch zum Bestehen fehlen (nie unter null)
 export const missingToPass = (points: number, passTotal: number) => Math.max(0, passTotal - points)
+
+// „Das solltest du üben" (S9b): verlorene Punkte je Thema, die meisten zuerst. Das Thema einer Frage kommt von ihrer
+// ersten Lernkarte (courseOfCard). Gibt das Ergebnis eines Teils die vollen Punkte, zählt dort nichts als verloren;
+// sonst werden die verlorenen Punkte des Teils auf seine Fragen verteilt, so wie diese Punkte verloren haben.
+export type PracticeHint = { readonly course: string; readonly lost: number }
+
+export function practiceHints(result: MockResult, courseOfCard: (cardId: string) => string | undefined, limit = 3): PracticeHint[] {
+  const lost = new Map<string, number>()
+  for (const { result: task } of result.tasks) {
+    for (const part of task.parts) {
+      const partLost = part.part.points - part.points
+      const items = part.items.map((r) => ({ r, lost: r.item.points - r.points })).filter((x) => x.lost > 0)
+      const sum = items.reduce((s, x) => s + x.lost, 0)
+      if (partLost <= 0 || sum === 0) continue
+      for (const { r, lost: itemLost } of items) {
+        const course = r.item.cards.map(courseOfCard).find((c) => c !== undefined)
+        if (course) lost.set(course, (lost.get(course) ?? 0) + (itemLost * partLost) / sum)
+      }
+    }
+  }
+  return [...lost]
+    .map(([course, points]) => ({ course, lost: Math.round(points * 2) / 2 }))
+    .filter((h) => h.lost > 0)
+    .sort((a, b) => b.lost - a.lost || a.course.localeCompare(b.course))
+    .slice(0, limit)
+}

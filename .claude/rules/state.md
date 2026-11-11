@@ -23,3 +23,5 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
 - Probeklausur (S9a): `mockExam.ts`, Schlüssel `rechenweg-probeklausur`, höchstens eine (laufend oder zuletzt abgegeben;
   Startzeit, ohne Zeitdruck, Antworten je Aufgabe, gezeigte Aufgabe, Abgabe, `timeUp`); im Speicher zwischengehalten, daher
   liest erst ein Neuladen von außen geänderte Werte. „Fortschritt löschen" leert ihn.
+- Verlauf der Probeklausuren (S9b): ebenfalls in `mockExam.ts`, Schlüssel `rechenweg-probeklausuren` (Liste `MockRecord`, die neueste
+  zuerst, höchstens 100; `addMockRecord` bei der Abgabe, `recentMockIds` für „Stoffe meiden"), „Fortschritt löschen" leert ihn.

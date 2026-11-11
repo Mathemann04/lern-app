@@ -42,6 +42,22 @@ test('Probeklausur: beginnen, antworten, neu laden, springen, unterbrechen, weit
   await page.reload()
   await expect(page.getByTestId('exam-item').first().locator('[aria-pressed="true"]')).toHaveCount(1)
 
+  // Hilfsmittel: Periodensystem und Formelsammlung als Fenster
+  await page.getByRole('button', { name: 'Periodensystem', exact: true }).click()
+  const pse = page.getByRole('dialog', { name: 'Periodensystem' })
+  await expect(pse.getByRole('cell', { name: /^8\s*O\s*16,0$/ })).toBeVisible()
+  await expect(pse.getByRole('cell', { name: /^17\s*Cl\s*35,5$/ })).toBeVisible()
+  await pse.getByRole('button', { name: 'Schließen' }).click()
+  await expect(pse).toBeHidden()
+  await page.getByRole('button', { name: 'Formelsammlung', exact: true }).click()
+  const formulas = page.getByRole('dialog', { name: 'Formelsammlung' })
+  await expect(formulas.getByText('Ideales Gasgesetz')).toBeVisible()
+  await expect(formulas.locator('code.text-red-700')).toHaveCount(0)
+  // die Zurück-Taste schließt nur das Fenster
+  await page.goBack()
+  await expect(formulas).toBeHidden()
+  await expect(page.getByRole('heading', { name: /Aufgabe 1: Aufbau der Materie/ })).toBeVisible()
+
   // springen zu Aufgabe 4 und weiter mit dem Knopf
   await page.getByRole('navigation', { name: 'Aufgaben' }).getByRole('button', { name: /^Aufgabe 4/ }).click()
   await expect(page.getByRole('heading', { name: /Aufgabe 4: Stöchiometrie/ })).toBeVisible()
@@ -67,6 +83,9 @@ test('Probeklausur: beginnen, antworten, neu laden, springen, unterbrechen, weit
   await expect(page.getByTestId('mock-score')).toHaveText(/^\d+(,5)? von 50 Punkten$/)
   await expect(page.getByTestId('mock-pass')).toContainText('in Teil 2 noch')
   await expect(page.getByText(/Punkte nach dem Schema der App, Teilpunkte geschätzt/)).toBeVisible()
+  // fast alles offen: Vorschläge zum Üben mit Link zum Thema
+  const hints = page.getByRole('region', { name: 'Das solltest du üben' }).getByRole('link')
+  await expect(hints).toHaveCount(3)
   await expectCleanPage(page, 'Auswertung')
   // Einzelheiten je Aufgabe
   await page.getByRole('navigation', { name: 'Aufgaben' }).getByRole('button', { name: /^Aufgabe 3/ }).click()
@@ -79,6 +98,10 @@ test('Probeklausur: beginnen, antworten, neu laden, springen, unterbrechen, weit
   await page.getByRole('link', { name: 'Neue Probeklausur' }).first().click()
   await expect(page).toHaveURL(/#\/probeklausur\/chemie$/)
   await expect(page.getByRole('link', { name: /Letzte Auswertung ansehen/ })).toBeVisible()
+  // Verlauf mit dieser Klausur
+  await expect(page.getByTestId('mock-history').getByRole('listitem')).toHaveCount(1)
+  await expect(page.getByText(/^Bestes Ergebnis: /)).toBeVisible()
+  await expectCleanPage(page, 'Deckblatt mit Verlauf')
   expect(errors).toEqual([])
 })
 
@@ -97,5 +120,28 @@ test('Probeklausur: Zeit um, die App gibt ab; alles richtig gibt 50 Punkte', asy
   await expect(page.getByTestId('mock-score')).toHaveText('50 von 50 Punkten')
   await expect(page.getByTestId('mock-pass')).toHaveText('Damit hast du die 40 Punkte zum Bestehen schon mit Teil 1 zusammen.')
   await expectCleanPage(page, 'Auswertung alles richtig')
+  expect(errors).toEqual([])
+})
+
+test('Probeklausur: falsch beantwortete Wissensfrage kommt in die Wiederholung', async ({ page }) => {
+  const errors = collectErrors(page)
+  const id = 4712
+  const exam = chemMockExam(id)
+  const task1 = exam.tasks[0]
+  const item = task1.task.parts.flatMap((p) => p.items).find((i) => i.review)!
+  const build = [...truthOf(task1.task)].find(([itemId]) => itemId === item.id)![1].build
+  const wrong = build.options.find((o) => o.id !== build.correct)!
+  const session = { subject: 'chemie', id, startedAt: Date.now(), timed: true, answers: { '1': { [item.id]: wrong.id } }, current: 1, submittedAt: null, timeUp: false }
+  await page.goto('./#/')
+  await page.evaluate((s) => localStorage.setItem('rechenweg-probeklausur', JSON.stringify(s)), session)
+  await page.goto(`./#/probeklausur/chemie/${id}`)
+  await page.reload()
+  await page.getByRole('button', { name: 'Klausur abgeben' }).click()
+  await page.getByRole('button', { name: 'Ja, abgeben' }).click()
+  await expect(page.getByRole('heading', { name: 'Auswertung' })).toBeVisible()
+  const reviews = await page.evaluate(() => JSON.parse(localStorage.getItem('rechenweg-wiederholung') ?? '{}') as { items?: Record<string, unknown> })
+  expect(Object.keys(reviews.items ?? {})).toEqual([`${item.review!.course}:${Math.floor((item.review!.seed - 500_000) / 50)}`])
+  const history = await page.evaluate(() => JSON.parse(localStorage.getItem('rechenweg-probeklausuren') ?? '[]') as { id: number }[])
+  expect(history.map((r) => r.id)).toEqual([id])
   expect(errors).toEqual([])
 })

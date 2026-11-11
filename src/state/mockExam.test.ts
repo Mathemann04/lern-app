@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { MOCK_KEY, loadMockSession, parseMockSession } from './mockExam.ts'
+import { MAX_MOCK_HISTORY, MOCK_KEY, loadMockSession, parseMockHistory, parseMockSession } from './mockExam.ts'
 
 // Probeklausur auf dem Gerät (S9): robust gegen kaputten Inhalt
 
@@ -46,5 +46,23 @@ describe('Probeklausur speichern', () => {
       setItem: () => {},
     }
     expect(loadMockSession(broken)).toBeNull()
+  })
+})
+
+describe('Verlauf der Probeklausuren', () => {
+  const RECORD = { subject: 'chemie', id: 12, at: 1_700_000_000_000, points: 31.5, max: 50, tasks: [6, 4, 8.5, 7, 6], timed: true, minutes: 41, timeUp: false }
+
+  it('liest gespeicherte Ergebnisse und lässt Unlesbares einzeln weg', () => {
+    expect(parseMockHistory(JSON.stringify([RECORD]))).toEqual([RECORD])
+    expect(parseMockHistory(JSON.stringify([RECORD, { ...RECORD, points: -1 }, { ...RECORD, tasks: 'x' }, 7, null]))).toEqual([RECORD])
+    expect(parseMockHistory('{kaputt')).toEqual([])
+    expect(parseMockHistory(null)).toEqual([])
+  })
+
+  it('hält höchstens die neuesten Ergebnisse', () => {
+    const many = Array.from({ length: MAX_MOCK_HISTORY + 5 }, (_, i) => ({ ...RECORD, id: i + 1 }))
+    const parsed = parseMockHistory(JSON.stringify(many))
+    expect(parsed).toHaveLength(MAX_MOCK_HISTORY)
+    expect(parsed[0].id).toBe(1)
   })
 })

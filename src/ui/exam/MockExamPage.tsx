@@ -1,16 +1,29 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { CHEM_MOCK, MOCK_ID_MAX, chemMockExam } from '../../engine/chem/exam/mock.ts'
+import { CHEM_MOCK, chemMockExam, pickMockId } from '../../engine/chem/exam/mock.ts'
+import { cardById } from '../../engine/explain/cards.ts'
 import { examState, truthOf, withAnswer } from '../../engine/exam/grade.ts'
-import { type MockExam, type MockTask, answersOf, gradeMock, missingToPass, openCountOf, remainingMs } from '../../engine/exam/mock.ts'
-import { type MockSession, setMockAnswers, showMockTask, startMockSession, submitMockSession, useMockSession } from '../../state/mockExam.ts'
+import { type MockExam, type MockTask, answersOf, gradeMock, missingToPass, openCountOf, practiceHints, remainingMs } from '../../engine/exam/mock.ts'
+import {
+  type MockRecord,
+  type MockSession,
+  addMockRecord,
+  recentMockIds,
+  setMockAnswers,
+  showMockTask,
+  startMockSession,
+  submitMockSession,
+  useMockHistory,
+  useMockSession,
+} from '../../state/mockExam.ts'
 import { useSettings } from '../../state/settings.ts'
-import { type Subject, mockSubjectOf } from '../catalog.ts'
+import { type Subject, courseById, mockSubjectOf } from '../catalog.ts'
 import { FitWidth } from '../FitWidth.tsx'
 import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
-import { mockHref } from '../routes.ts'
+import { courseHref, mockHref } from '../routes.ts'
 import { ModeSwitch, PartResultView, PartView } from './ExamParts.tsx'
-import { decimal, pointsOf, recordExamErrors } from './examText.ts'
+import { ExamTools } from './ExamTools.tsx'
+import { decimal, points, pointsOf, recordExamResult } from './examText.ts'
 
 // Probeklausur (Plan M4, „Probeklausur", S9a): Deckblatt, dann alle Klausuraufgaben am Stück mit Uhr (45 Minuten,
 // rückwärts; „Ohne Zeitdruck" wählbar). Man springt frei zwischen den Aufgaben; bis zur Abgabe gibt es keine
@@ -25,7 +38,13 @@ const clock = (ms: number) => {
   return `${Math.floor(seconds / 60)}:${twoDigits(seconds % 60)}`
 }
 const minutes = (n: number) => `${n} ${n === 1 ? 'Minute' : 'Minuten'}`
-const randomId = () => 1 + Math.floor(Math.random() * MOCK_ID_MAX)
+// gebrauchte Zeit in Minuten (mit Uhr höchstens die Zeit der Klausur)
+const usedMinutes = (session: MockSession, total: number) =>
+  Math.min(Math.round(((session.submittedAt ?? session.startedAt) - session.startedAt) / 60_000), session.timed ? total : Infinity)
+const dateOf = (at: number) => {
+  const d = new Date(at)
+  return `${twoDigits(d.getDate())}.${twoDigits(d.getMonth() + 1)}.${d.getFullYear()}`
+}
 
 // Uhrzeit, die sich jede Sekunde erneuert
 function useNow(): number {
@@ -64,7 +83,8 @@ function Cover({ subject, id, session }: { subject: Subject; id: number | null; 
       setConfirming(true)
       return
     }
-    const next = id ?? randomId()
+    // neue Nummer: Stoffe der letzten drei Probeklausuren meiden
+    const next = id ?? pickMockId(recentMockIds(subject.id))
     startMockSession(subject.id, next, timed, 1)
     window.location.hash = mockHref(subject.id, next).slice(1)
   }
@@ -119,7 +139,7 @@ function Cover({ subject, id, session }: { subject: Subject; id: number | null; 
           ))}
         </ol>
         <ul className="list-disc space-y-1 pl-5 text-sm text-pretty text-zinc-600">
-          <li>Hilfsmittel: dein Taschenrechner, ein Periodensystem und eine Formelsammlung (bitte deine eigenen bereitlegen).</li>
+          <li>Hilfsmittel: dein Taschenrechner. Periodensystem und Formelsammlung öffnest du in der Klausur über die Knöpfe oben.</li>
           <li>Du springst frei zwischen den Aufgaben. Bis zur Abgabe gibt es keine Rückmeldung, keine Tipps und keine Lernkarten.</li>
           <li>Folgefehler zählen nicht doppelt. Ist die Zeit um, gibt die App deine Klausur ab.</li>
           <li>
@@ -155,6 +175,8 @@ function Cover({ subject, id, session }: { subject: Subject; id: number | null; 
           </a>
         )}
       </div>
+
+      <History subject={subject} timed={timed} running={running !== null} />
     </main>
   )
 }
@@ -168,9 +190,23 @@ function MockRun({ subject, session }: { subject: Subject; session: MockSession 
 }
 
 // Abgeben: bewerten, erkannte Fehler zählen (nur beim ersten Mal)
+// Abgeben: bewerten, erkannte Fehler und Wissensfragen nachführen, Ergebnis in den Verlauf (nur beim ersten Mal)
 function submit(exam: MockExam, session: MockSession, timeUp: boolean) {
-  if (!submitMockSession(timeUp)) return
-  for (const t of gradeMock(exam, session.answers).tasks) recordExamErrors(t.result)
+  const now = Date.now()
+  if (!submitMockSession(timeUp, now)) return
+  const result = gradeMock(exam, session.answers)
+  for (const t of result.tasks) recordExamResult(t.result)
+  addMockRecord({
+    subject: session.subject,
+    id: session.id,
+    at: now,
+    points: result.points,
+    max: result.max,
+    tasks: result.tasks.map((t) => t.result.points),
+    timed: session.timed,
+    minutes: usedMinutes({ ...session, submittedAt: now }, exam.minutes),
+    timeUp,
+  })
   window.scrollTo(0, 0)
 }
 
@@ -242,6 +278,7 @@ function MockWriting({ subject, session, exam }: { subject: Subject; session: Mo
         </section>
       )}
 
+      <ExamTools />
       <TaskHeader subject={subject} task={current} />
       <TaskWriting key={current.no} task={current} answers={answersOf(session.answers, current)} free={practiceMode === 'free'} onChange={() => setConfirming(false)} />
 
@@ -380,7 +417,8 @@ function MockResultView({ subject, session, exam }: { subject: Subject; session:
   const detailsRef = useRef<HTMLDivElement>(null)
   const mock = subject.mock!
   const missing = missingToPass(result.points, CHEM_MOCK.passTotal)
-  const used = Math.min(Math.round(((session.submittedAt ?? session.startedAt) - session.startedAt) / 60_000), session.timed ? exam.minutes : Infinity)
+  const used = usedMinutes(session, exam.minutes)
+  const hints = useMemo(() => practiceHints(result, (card) => cardById(card)?.topic), [result])
   const task = exam.tasks.find((t) => t.no === shown)!
   const taskResult = result.tasks.find((t) => t.task.no === shown)!.result
   const states = useMemo(() => examState(task.task, answersOf(session.answers, task)), [task, session.answers])
@@ -421,6 +459,37 @@ function MockResultView({ subject, session, exam }: { subject: Subject; session:
           Teilpunkte geschätzt.
         </p>
         <MockLinks subject={subject} session={session} />
+      </section>
+
+      <section className="space-y-3" aria-label="Das solltest du üben">
+        <h2 className="text-xl font-semibold">Das solltest du üben</h2>
+        {hints.length === 0 ? (
+          <p className="text-zinc-700">Keine Punkte verloren. Stark!</p>
+        ) : (
+          <ul className="space-y-2">
+            {hints.map((h) => {
+              const found = courseById(h.course)
+              return (
+                <li key={h.course}>
+                  <a
+                    href={courseHref(h.course)}
+                    data-tone={found?.area.tone}
+                    className="flex min-h-11 items-center gap-3 rounded-2xl border-2 border-accent-200 bg-accent-50 px-4 py-2 hover:border-accent-600"
+                  >
+                    <span className="min-w-0 flex-1 font-medium">{found?.course.title ?? h.course}</span>
+                    <span className="shrink-0 text-sm text-zinc-600">{points(h.lost)} verloren</span>
+                    <span aria-hidden className="text-accent-700">
+                      →
+                    </span>
+                  </a>
+                </li>
+              )
+            })}
+          </ul>
+        )}
+        <p className="text-sm text-pretty text-zinc-600">
+          Falsch beantwortete Wissensfragen kommen beim Üben ihres Themas wieder. Erkannte Fehler zählen in deine Fehlerstatistik.
+        </p>
       </section>
 
       <div ref={detailsRef} className="space-y-6">
@@ -474,5 +543,44 @@ function MockLinks({ subject, session }: { subject: Subject; session: MockSessio
         Zur Startseite
       </a>
     </div>
+  )
+}
+
+// Verlauf auf dem Deckblatt: bisherige Probeklausuren, die neueste zuerst; jede lässt sich noch einmal schreiben
+// running: Eine Probeklausur läuft; dann kein „Noch einmal" (sie ginge ohne Rückfrage verloren)
+function History({ subject, timed, running }: { subject: Subject; timed: boolean; running: boolean }) {
+  const records = useMockHistory().filter((r) => r.subject === subject.id)
+  if (records.length === 0) return null
+  const best = records.reduce((a, b) => (b.points > a.points ? b : a))
+  const again = (r: MockRecord) => {
+    startMockSession(subject.id, r.id, timed, 1)
+    window.location.assign(mockHref(subject.id, r.id))
+  }
+  return (
+    <section className="space-y-3" aria-label="Bisherige Probeklausuren">
+      <h2 className="text-xl font-semibold">Bisherige Probeklausuren</h2>
+      <p className="text-sm text-zinc-600">
+        Bestes Ergebnis: {pointsOf(best.points, best.max)} (Nr. {best.id})
+      </p>
+      <ul className="space-y-2" data-testid="mock-history">
+        {records.slice(0, 10).map((r) => (
+          <li key={`${r.id}-${r.at}`} className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-2xl border border-zinc-200 px-4 py-2">
+            <span className="min-w-0 flex-1">
+              <span className="block font-medium">{pointsOf(r.points, r.max)}</span>
+              <span className="block text-sm text-zinc-600">
+                {dateOf(r.at)} · Nr. {r.id} · {r.timed ? minutes(r.minutes) : `ohne Zeitdruck, ${minutes(r.minutes)}`}
+                {r.timeUp ? ' · Zeit um' : ''}
+              </span>
+              <span className="block text-sm text-zinc-500">Aufgaben: {r.tasks.map(decimal).join(' · ')}</span>
+            </span>
+            {!running && (
+              <button type="button" onClick={() => again(r)} className="min-h-11 rounded-xl px-3 font-medium text-accent-700 hover:bg-accent-50">
+                Noch einmal
+              </button>
+            )}
+          </li>
+        ))}
+      </ul>
+    </section>
   )
 }

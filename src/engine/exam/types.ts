@@ -53,6 +53,8 @@ export type ExamItem = {
   // Ergebnis des Teils: richtig (auch als Folgefehler) gibt die vollen Punkte des Teils
   readonly final?: boolean
   readonly cards: readonly string[]
+  // Wissensfrage aus einem Thema (Nummer wie beim Üben): falsch beantwortet kommt sie in die Wiederholung (S9b)
+  readonly review?: { readonly course: string; readonly seed: number }
   // chosen: Antworten auf diesem Weg; truth: die richtigen Antworten
   build(chosen: Chosen, truth: Chosen): ExamItemBuild
 }
