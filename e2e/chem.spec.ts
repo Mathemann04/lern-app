@@ -310,6 +310,7 @@ test('Chemie: Themen mischen, „Nächste Aufgabe" bleibt in der Mischung, X und
   await page.getByRole('checkbox', { name: 'Zwischenmolekulare Kräfte' }).uncheck()
   await page.getByRole('checkbox', { name: 'Metallbindung und Hybridisierung' }).uncheck()
   await page.getByRole('checkbox', { name: 'Elektronen', exact: true }).uncheck()
+  await page.getByRole('checkbox', { name: 'Aufbau des Periodensystems', exact: true }).uncheck()
 
   // Unterthemen aufklappen: dieselben Kästchen wie auf der Themenseite (Atombau steht zuerst)
   const toggle = page.getByRole('button', { name: /^Unterthemen: alle/ }).first()
@@ -708,5 +709,20 @@ test('Chemie: Klausuraufgabe 1 üben, Wissensfragen und Rechnungen, abgeben, Aus
   await page.getByRole('button', { name: 'Abgeben' }).click()
   await expect(page.getByTestId('exam-score')).toHaveText(/^\d+(,5)? von 8 Punkten$/)
   await expectCleanPage(page, 'Auswertung Klausuraufgabe 1')
+  expect(errors).toEqual([])
+})
+
+test('Chemie: Aufbau des Periodensystems, Rechnung mit Ausschnitt des Periodensystems und Lernkarte', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./#/gebiet/chem-periodensystem')
+  await page.getByRole('link', { name: /Aufbau des Periodensystems/ }).click()
+  await expect(page.getByRole('heading', { name: 'Aufbau des Periodensystems' })).toBeVisible()
+  await page.goto('./#/ueben/chem-pse/2-10000')
+  await expect(answers(page).first()).toBeVisible()
+  await expectCleanPage(page, 'Rechnung zum Periodensystem')
+  await page.goto('./#/karten/chem-pse/pse-bloecke')
+  await expect(page.getByRole('heading', { name: /Blöcke/ })).toBeVisible()
+  await expect(page.getByTestId('chem-figure')).toBeVisible()
+  await expectCleanPage(page, 'Blöcke')
   expect(errors).toEqual([])
 })

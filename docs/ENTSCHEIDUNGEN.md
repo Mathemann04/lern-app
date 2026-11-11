@@ -675,3 +675,16 @@ Neue Entscheidungen unten anfügen.
   fragt Protonen, Neutronen und Elektronen in einer Antwort (wie in der Klausur ein Punkt für alle drei).
   Eine eigene fachliche Prüfung war nicht nötig: kein neuer Fachinhalt, nur geprüfte Fragen und Rechnungen
   aus S1, S2 und S6a.
+- 11.11.2026: S6c Thema „Aufbau des Periodensystems“. Platz (Periode, Gruppe 1 bis 18, Block) aus der
+  Elektronenkonfiguration gerechnet; Gegenprobe mit einer zweiten Liste. Aufeinanderfolgende Ionisierungsenergien
+  von zehn Elementen (Li bis C, Na bis Si, K, Ca) nach NIST, ganzzahlig; ein Test prüft, dass der größte Sprung
+  (als Verhältnis und als Unterschied) bei der Hauptgruppe liegt. Ionenladung nur für Ionen mit Edelgaskonfiguration
+  (nicht Ga³⁺ oder In³⁺) bis zur 5. Periode. Halbmetalle B, Si, Ge, As, Sb, Te; Selen wird nicht eingeordnet.
+  Metalle und Nichtmetalle nur als Wissensfragen. Ausschnitt des Periodensystems als Bild aus der Elementtabelle
+  (Hauptgruppen oder Nebengruppen), im Ergebnis, damit er die Antwort nicht vorwegnimmt. Das Skript „Trends“ lag
+  nicht vor: Fundstellen ohne Foliennummer, Wortvergleich folgt.
+  Nach der fachlichen Prüfung: Steckbrief ohne Nb, Mo, Ru, Rh, Pd, Ag (CHEMIE.md §6); „nur s-Elektronen gezählt“
+  nur bei zwei s-Elektronen außen; Erklärungen, die die Lösung verrieten, neu geschrieben; drei neue Denkfehler
+  (Ladung falsch gezählt, Ionisierungsenergien falsch gezählt, alle Edelgase wie Helium), damit gezieltes Üben
+  passende Antworten zeigt; Hauptgruppen überall mit der Nummer 1 bis 18 in Klammern (CHEMIE.md §3); vier
+  Ionisierungsenergien auf die NIST-Werte korrigiert (Abweichung je 1 kJ/mol).

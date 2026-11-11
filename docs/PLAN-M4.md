@@ -548,6 +548,29 @@ kommen mit ihren Schritten dazu. Die Denkfehler der Wissensfragen
 | Element aus der Valenzkonfiguration | Periode falsch abgelesen (`chem-val-rev-period`, seit S6a) | 4s² 4p³: P |
 | Element aus der Valenzkonfiguration | Valenzelektronen als Ordnungszahl (`chem-val-rev-z`, seit S6a) | 4s² 4p³: B |
 | Element aus der Valenzkonfiguration | nur p-Elektronen gezählt (`chem-val-rev-p-only`, seit S6a) | 4s² 4p³: Ga |
+| Periode | Valenzelektronen als Periode (`chem-pse-period-valence`, seit S6c) | S: 6. Periode |
+| Periode | nur volle Schalen gezählt (`chem-pse-period-shells`, seit S6c) | S: 2. Periode |
+| Gruppe | Periode als Hauptgruppe (`chem-pse-group-period`, seit S6c) | S: III. Hauptgruppe |
+| Gruppe | Valenzelektronen als Gruppe 1 bis 18 (`chem-pse-group-number-valence`, seit S6c) | P: Gruppe 5 |
+| Gruppe | Nebengruppe als Hauptgruppe (`chem-pse-transition-main`, seit S6c) | Fe: VIII. Hauptgruppe |
+| Gruppe | nur s-Elektronen gezählt (`chem-pse-transition-s`, seit S6c) | Fe: II. Hauptgruppe |
+| Block | nach der äußersten s-Unterschale (`chem-pse-block-outer-s`, seit S6c) | Fe: s-Block |
+| Block | ab der 4. Periode d-Block (`chem-pse-block-period4`, seit S6c) | K: d-Block |
+| Steckbrief | Periode und Valenzelektronen vertauscht (`chem-pse-rev-swapped`, seit S6c) | 3. Periode, 5 Valenzelektronen: In |
+| Steckbrief | Valenzelektronen als Gruppe 1 bis 18 (`chem-pse-rev-group-number`, seit S6c) | 4. Periode, 5 Valenzelektronen: V |
+| Steckbrief | Periode verschoben (`chem-pse-rev-period-shift`, seit S6c) | 3. Periode, 5 Valenzelektronen: N |
+| Ionenladung | Metall nimmt auf (`chem-pse-ion-take`, seit S6c) | Na nimmt 7 Elektronen auf |
+| Ionenladung | Nichtmetall gibt ab (`chem-pse-ion-give`, seit S6c) | O gibt 6 Elektronen ab |
+| Ionenladung | Vorzeichen vertauscht (`chem-pse-charge-sign`, seit S6c) | Na⁻ |
+| Ionenladung | Gruppennummer als Ladung (`chem-pse-charge-group-number`, seit S6c) | Al¹³⁺ |
+| Ionenladung | Valenzelektronen als positive Ladung (`chem-pse-charge-valence`, seit S6c) | P⁵⁺ |
+| Ionenladung | bis zum Oktett aufgefüllt (`chem-pse-charge-octet`, seit S6c) | Na⁷⁻ |
+| Edelgaskonfiguration | Kation wie das Edelgas der eigenen Periode (`chem-pse-noble-own-period`, seit S6c) | Na⁺ wie Argon |
+| Edelgaskonfiguration | Anion wie das Edelgas davor (`chem-pse-noble-previous`, seit S6c) | Cl⁻ wie Neon |
+| Ionisierungsenergie | größter Wert statt größter Sprung (`chem-pse-ie-largest`, seit S6c) | Mg: Sprung bei I₃/I₄ |
+| Ionisierungsenergie | erster Anstieg (`chem-pse-ie-first`, seit S6c) | Al: Sprung bei I₁/I₂ |
+| Ionisierungsenergie | Elektron nach dem Sprung mitgezählt (`chem-pse-ie-count-after`, seit S6c) | Mg: III. Hauptgruppe |
+| Ionisierungsenergie | alle Werte gezählt (`chem-pse-ie-count-all`, seit S6c) | Na: IV. Hauptgruppe |
 | Quantenzahlen | l bis n statt n − 1 (`chem-qn-l-to-n`, seit S6a) | n = 3: l = 0, 1, 2, 3 |
 | Quantenzahlen | l ab 1 (`chem-qn-l-from-1`, seit S6a) | n = 3: l = 1, 2, 3 |
 | Quantenzahlen | Buchstabe um eins verschoben (`chem-qn-letter-shift`, seit S6a) | 3d: l = 3 |
@@ -1040,6 +1063,17 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   aus den Wissensfragen und Rechnungen von Atombau und Elektronen; auch Wissensfragen tragen ihren Denkfehler
   und ihr „Warum ist das falsch?“ in die Auswertung (`why` an der Antwort). Keine Folgefehler, die Teile
   sind unabhängig.
+  **S6c** (fertig): Thema „Aufbau des Periodensystems“ mit Unterthemen Perioden, Gruppen und Blöcke; Metalle,
+  Halbmetalle, Nichtmetalle; Edelgasregel und Ionenladung; Ionisierungsenergie (ab Vertiefung). Den Platz eines
+  Elements (Periode, Gruppe 1 bis 18, Block) rechnet die Engine aus der Elektronenkonfiguration (`chem/pse.ts`).
+  Rechnungen: Steckbrief (Periode, Gruppe, ab Vertiefung Block und Nebengruppen), Element aus Periode und Zahl der
+  Valenzelektronen (ab Vertiefung), Ionenladung (abgeben oder aufnehmen, Ion, ab Vertiefung das Edelgas mit derselben
+  Konfiguration), Ionisierungsenergie (größter Sprung, Hauptgruppe, auf Klausurniveau das Element) mit
+  aufeinanderfolgenden Ionisierungsenergien von zehn Elementen (NIST). Bild: Ausschnitt des Periodensystems
+  (Hauptgruppen oder Nebengruppen) mit markiertem Element im Ergebnis, auf Karten und Fragen. Sieben Lernkarten,
+  50 Wissensfragen, 23 Rechenfehler, 20 Denkfehler. Nebengruppen ohne die Ausnahmen der Besetzung (nur Cr und Cu). Metalle und Nichtmetalle nur als Wissensfragen (Selen wird nicht
+  eingeordnet, die Bücher sind sich uneins). Abwechslung mit eigener Kennzahl (etwa 50 sinnvolle Formen in den
+  Grundlagen).
 - **S7: Gleichgewicht und Energie.** Massenwirkungsgesetz als Auswahl, Le
   Chatelier, Katalysator, K aus Konzentrationen; Reaktionsenthalpie aus
   Bildungsenthalpien, Entropie, freie Enthalpie; „Klausuraufgabe 5 üben“.

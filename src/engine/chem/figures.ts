@@ -2,8 +2,10 @@
 // Hand. Die Engine liefert die Lage der Teilchen; die Oberfläche (ui/chem/ChemFigure.tsx) zeichnet sie.
 
 import { type BoxRow, boxRowsText, parseBoxFigureId, subshellName } from './electrons.ts'
+import { elementBySymbol } from './elements.ts'
 import { type LewisFigure, lewisFigureById } from './lewis.ts'
 import { type MolBond, type Molecule, moleculeById, vseprOf } from './molecules.ts'
+import { elementAt, placeOf } from './pse.ts'
 
 // Ionengitter: Elementarzelle mit Kationen und Anionen in Koordinaten von 0 bis 1 (Würfelkante 1)
 export type LatticeIon = { readonly x: number; readonly y: number; readonly z: number; readonly kind: 'cation' | 'anion' }
@@ -52,7 +54,48 @@ export type BoxFigure = {
   readonly rows: readonly BoxRow[]
 }
 
-export type ChemFigure = LatticeFigure | LewisFigure | ShapeFigure | BoxFigure
+// Ausschnitt des Periodensystems mit markiertem Element: Hauptgruppen (1, 2, 13 bis 18) der Perioden 1 bis 6 oder die
+// Nebengruppen (3 bis 12) der Perioden 4 bis 6; Felder ohne Element der Tabelle bleiben leer
+export type PseFigure = {
+  readonly kind: 'pse'
+  readonly id: string
+  readonly caption: string
+  readonly groups: readonly number[]
+  readonly periods: readonly number[]
+  // Symbol je Feld (Periode, Gruppe); null: Element nicht in der Tabelle der App oder kein Element
+  readonly cells: readonly { readonly period: number; readonly group: number; readonly symbol: string | null }[]
+  readonly mark: string
+  // Überschrift der Spalten: römische Hauptgruppe oder Nummer
+  readonly main: boolean
+}
+
+export type ChemFigure = LatticeFigure | LewisFigure | ShapeFigure | BoxFigure | PseFigure
+
+export function pseFigureById(id: string): PseFigure | null {
+  const el = elementBySymbol(id.slice('pse:'.length))
+  if (!el) return null
+  const place = placeOf(el)
+  const main = place.main
+  const groups = main ? [1, 2, 13, 14, 15, 16, 17, 18] : [3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+  const periods = main ? [1, 2, 3, 4, 5, 6] : [4, 5, 6]
+  const cells = periods.flatMap((period) =>
+    groups.flatMap((group) => {
+      // Periode 1 hat nur H (Gruppe 1) und He (Gruppe 18)
+      if (period === 1 && group !== 1 && group !== 18) return []
+      return [{ period, group, symbol: elementAt(period, group)?.symbol ?? null }]
+    }),
+  )
+  return {
+    kind: 'pse',
+    id,
+    caption: `Ausschnitt des Periodensystems (${main ? 'Hauptgruppen' : 'Nebengruppen'}), markiert: ${el.name}, ${place.period}. Periode, Gruppe ${place.group}.`,
+    groups,
+    periods,
+    cells,
+    mark: el.symbol,
+    main,
+  }
+}
 
 export function boxFigureById(id: string): BoxFigure | null {
   const parsed = parseBoxFigureId(id)
@@ -139,6 +182,7 @@ export function figureById(id: string): ChemFigure | undefined {
   if (id.startsWith('lewis:')) return lewisFigureById(id) ?? undefined
   if (id.startsWith('gestalt:')) return shapeFigureById(id) ?? undefined
   if (id.startsWith('kaestchen:')) return boxFigureById(id) ?? undefined
+  if (id.startsWith('pse:')) return pseFigureById(id) ?? undefined
   return FIGURES.find((f) => f.id === id)
 }
 

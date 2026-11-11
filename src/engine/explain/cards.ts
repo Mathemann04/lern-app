@@ -34,6 +34,7 @@ import { MOLEKUELE_CARDS } from './chem/molekueleCards.ts'
 import { ZMK_CARDS } from './chem/zmkCards.ts'
 import { METALLE_CARDS } from './chem/metalleCards.ts'
 import { ELEKTRONEN_CARDS } from './chem/elektronenCards.ts'
+import { PSE_CARDS } from './chem/pseCards.ts'
 import { LOESUNGEN_CARDS } from './chem/loesungenCards.ts'
 import { STOFFMENGE_CARDS } from './chem/stoffmengeCards.ts'
 import { FRACTION_CARD_LIST } from './fractionCards.ts'
@@ -60,6 +61,7 @@ export const TOPICS: readonly Topic[] = [
   { id: 'umstellen', title: 'Gleichungen umstellen', description: 'Gegenrechnung, Rüberbringen, Variable im Nenner, Ausklammern' },
   { id: 'chem-atombau', title: 'Atombau', description: 'Elementarteilchen, Kernsymbol, Isotope, Ionen, Atommodelle und Licht' },
   { id: 'chem-elektronen', title: 'Elektronen', description: 'Quantenzahlen, Orbitale, Pauli und Hund, Elektronenkonfiguration, Valenzelektronen und Ionen' },
+  { id: 'chem-pse', title: 'Aufbau des Periodensystems', description: 'Perioden, Gruppen, Blöcke, Metalle und Nichtmetalle, Edelgasregel, Ionen, Ionisierungsenergie' },
   { id: 'chem-gleichungen', title: 'Reaktionsgleichungen', description: 'Koeffizient und Index, Ausgleichen, Verbrennungen' },
   { id: 'chem-ionen', title: 'Ionenbindung und Salze', description: 'Ionen, Formeln und Namen von Salzen, Gitter, Zerfall in Ionen, Born-Haber' },
   { id: 'chem-molekuele', title: 'Moleküle', description: 'Lewis-Formeln, Gestalt nach dem VSEPR-Modell, Polarität und Namen' },
@@ -390,6 +392,7 @@ export const CARDS: readonly Card[] = [
   ...ZMK_CARDS,
   ...METALLE_CARDS,
   ...ELEKTRONEN_CARDS,
+  ...PSE_CARDS,
 ]
 
 export function topicById(id: string): Topic | undefined {

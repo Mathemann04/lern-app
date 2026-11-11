@@ -1,4 +1,4 @@
-import { type BoxFigure, type ChemFigure as Figure, type LatticeFigure, type ShapeFigure, figureById } from '../../engine/chem/figures.ts'
+import { type BoxFigure, type ChemFigure as Figure, type LatticeFigure, type PseFigure, type ShapeFigure, figureById } from '../../engine/chem/figures.ts'
 import { LETTERS } from '../../engine/chem/electrons.ts'
 import type { LewisFigure } from '../../engine/chem/lewis.ts'
 import { RichText } from '../RichText.tsx'
@@ -270,11 +270,60 @@ function Boxes({ figure, label }: { figure: BoxFigure; label: string }) {
   )
 }
 
+// Ausschnitt des Periodensystems: Felder mit Symbol, oben die Gruppen, links die Perioden; das gefragte Element farbig
+const ROMAN_HEAD = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII']
+function Pse({ figure }: { figure: PseFigure }) {
+  const cell = 34
+  const left = 22
+  const top = 20
+  const width = left + figure.groups.length * cell + 2
+  const height = top + figure.periods.length * cell + 2
+  const x = (group: number) => left + figure.groups.indexOf(group) * cell
+  const y = (period: number) => top + figure.periods.indexOf(period) * cell
+  const head = (group: number) => (figure.main ? ROMAN_HEAD[(group <= 2 ? group : group - 10) - 1] : String(group))
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} className="mx-auto block h-auto" style={{ width: Math.min(width * 1.1, 360), maxWidth: '100%' }} role="img" aria-label={figure.caption}>
+      {figure.groups.map((g) => (
+        <text key={`g${g}`} x={x(g) + cell / 2} y={13} textAnchor="middle" className="fill-zinc-600" fontSize={10}>
+          {head(g)}
+        </text>
+      ))}
+      {figure.periods.map((p) => (
+        <text key={`p${p}`} x={left / 2} y={y(p) + cell / 2} textAnchor="middle" dominantBaseline="central" className="fill-zinc-600" fontSize={10}>
+          {p}
+        </text>
+      ))}
+      {figure.cells.map((c) => {
+        const marked = c.symbol === figure.mark
+        return (
+          <g key={`${c.period}-${c.group}`}>
+            <rect
+              x={x(c.group) + 1}
+              y={y(c.period) + 1}
+              width={cell - 2}
+              height={cell - 2}
+              rx={3}
+              className={marked ? 'fill-accent-600 stroke-accent-800' : c.symbol ? 'fill-surface stroke-zinc-400' : 'fill-zinc-100 stroke-zinc-300'}
+              strokeWidth={marked ? 2 : 1}
+            />
+            {c.symbol && (
+              <text x={x(c.group) + cell / 2} y={y(c.period) + cell / 2} textAnchor="middle" dominantBaseline="central" className={marked ? 'fill-on-accent' : 'fill-zinc-800'} fontSize={12} fontWeight={marked ? 700 : 500}>
+                {c.symbol}
+              </text>
+            )}
+          </g>
+        )
+      })}
+    </svg>
+  )
+}
+
 // nur die Zeichnung, ohne Rahmen und Unterschrift (z. B. als Antwort zur Auswahl)
 export function FigureDrawing({ figure, label }: { figure: Figure; label?: string }) {
   if (figure.kind === 'lattice') return <Lattice figure={figure} />
   if (figure.kind === 'lewis') return <Lewis figure={figure} label={label ?? figure.description} />
   if (figure.kind === 'boxes') return <Boxes figure={figure} label={label ?? figure.description} />
+  if (figure.kind === 'pse') return <Pse figure={figure} />
   return <Shape figure={figure} />
 }
 
