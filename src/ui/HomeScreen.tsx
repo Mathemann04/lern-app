@@ -1,4 +1,5 @@
 import { Fragment } from 'react'
+import { useMockSession } from '../state/mockExam.ts'
 import { SUGGEST_WINDOW, levelSummary, useProgress } from '../state/progress.ts'
 import { useSettings } from '../state/settings.ts'
 import type { Progress, Settings } from '../state/storage.ts'
@@ -18,7 +19,7 @@ import {
   subjectLevelName,
 } from './catalog.ts'
 import { RecentDots } from './RecentDots.tsx'
-import { areaHref, courseHref, mixHref, mixPracticeHref, practiceHref } from './routes.ts'
+import { areaHref, courseHref, mixHref, mixPracticeHref, mockHref, practiceHref } from './routes.ts'
 import { courseSummary, isSelectionPlayable, joinTitles, levelPartCount, mixBlockedHint, mixChoiceOf, mixedCourses } from './selection.ts'
 
 // Startseite: „Weitermachen" und darunter die Fächer mit ihren Gebieten (Aufbau in catalog.ts)
@@ -49,6 +50,12 @@ export function HomeScreen() {
                 {i === lastPlayableArea(subject) && isMixAvailable(subject) && (
                   <li>
                     <MixTile subject={subject} />
+                  </li>
+                )}
+                {/* „Probeklausur" gleich darunter */}
+                {i === lastPlayableArea(subject) && subject.mock && (
+                  <li>
+                    <MockTile subject={subject} />
                   </li>
                 )}
               </Fragment>
@@ -218,6 +225,30 @@ function MixTile({ subject }: { subject: Subject }) {
       <span className="min-w-0 flex-1">
         <span className="block text-lg font-semibold">Themen mischen</span>
         <span className="block text-sm text-pretty text-zinc-600">Themen und Unterthemen ankreuzen, gemischt üben</span>
+      </span>
+      <span aria-hidden className="text-accent-700">
+        →
+      </span>
+    </a>
+  )
+}
+
+// Kachel „Probeklausur" im Blaugrün der App; läuft eine, führt sie zum Weiterschreiben
+function MockTile({ subject }: { subject: Subject }) {
+  const session = useMockSession()
+  const mock = subject.mock!
+  const running = session && session.subject === subject.id && session.submittedAt === null ? session : null
+  return (
+    <a
+      href={running ? mockHref(subject.id, running.id) : mockHref(subject.id)}
+      className="flex items-center gap-4 rounded-2xl border border-accent-200 bg-accent-50 px-4 py-3 transition-colors hover:border-accent-600"
+    >
+      <AreaIcon kind="exam" className="size-14 shrink-0" />
+      <span className="min-w-0 flex-1">
+        <span className="block text-lg font-semibold">Probeklausur</span>
+        <span className="block text-sm text-pretty text-zinc-600">
+          {running ? `Nr. ${running.id} läuft: weiterschreiben` : `Teil ${mock.part} wie die echte Klausur: ${mock.minutes} Minuten, ${mock.points} Punkte`}
+        </span>
       </span>
       <span aria-hidden className="text-accent-700">
         →

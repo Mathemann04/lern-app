@@ -28,14 +28,16 @@ const PracticePage = lazy(loadPractice)
 const MixPracticePage = lazy(() => loadPractice().then((m) => ({ default: m.MixPracticePage })))
 // Klausuraufgabe üben: eigener Teil mit der Engine des Fachs
 const ExamTaskPage = lazy(() => import('./ui/exam/ExamTaskPage.tsx'))
+// Probeklausur: Deckblatt, Klausur mit Uhr und Auswertung
+const MockExamPage = lazy(() => import('./ui/exam/MockExamPage.tsx'))
 
 export function App() {
   const pwa = usePwa()
   useTheme()
   const path = useHashRoute()
   const route = parseRoute(path)
-  // In Aufgaben kein Hauptmenü: dort beendet das X die Aufgabe
-  const showNav = route.page !== 'practice' && route.page !== 'mixPractice' && route.page !== 'examTask'
+  // In Aufgaben kein Hauptmenü: dort beendet das X die Aufgabe (in der Probeklausur nur auf dem Deckblatt)
+  const showNav = route.page !== 'practice' && route.page !== 'mixPractice' && route.page !== 'examTask' && !(route.page === 'mock' && route.id !== null)
 
   // Kurz nach dem Start schon die Teile für Aufgaben holen (auch die Engine des zuletzt geübten
   // Themas), damit „Weiter üben" sofort reagiert
@@ -156,6 +158,8 @@ function Page({ route }: { route: Route }) {
       return <MixPracticePage subject={route.subject} level={route.level} />
     case 'examTask':
       return <ExamTaskPage key={`${route.task}-${route.seed}`} subject={route.subject} task={route.task} seed={route.seed} />
+    case 'mock':
+      return <MockExamPage key={route.id ?? 'deckblatt'} subject={route.subject} id={route.id} />
     case 'home':
       return <HomeScreen />
   }

@@ -28,6 +28,8 @@ export type AreaIcon =
   | 'redox'
   // Kachel „Themen mischen" (kein Gebiet, aber im selben Stil)
   | 'mix'
+  // Kachel „Probeklausur": Blatt mit Zeilen und Uhr
+  | 'exam'
 
 // Farbe eines Gebiets (Farbfamilie aus index.css, gesetzt über data-tone). Die App selbst ist Blaugrün.
 // Nicht green, red, amber (richtig, falsch, Tipp) und nicht teal (App-Farbe).
@@ -100,6 +102,9 @@ export type Subject = {
   // Kachel „Themen mischen" auf der Startseite: Themen des Fachs ankreuzen, Fragen kommen gemischt
   // (#/mischen/<fach>, ui/mix.ts)
   readonly mix?: boolean
+  // Kachel „Probeklausur" auf der Startseite (#/probeklausur/<fach>, S9): Zeit, Punkte und Zahl der Aufgaben,
+  // Teil der Klausur (ein Test vergleicht mit der Engine)
+  readonly mock?: { readonly minutes: number; readonly points: number; readonly tasks: number; readonly part: number }
   readonly areas: readonly Area[]
 }
 
@@ -707,6 +712,7 @@ export const SUBJECTS: readonly Subject[] = [
     title: 'Chemie 1',
     levelNames: ['Grundlagen', 'Vertiefung', 'Klausurniveau'],
     mix: true,
+    mock: { minutes: 45, points: 50, tasks: 5, part: 1 },
     areas: [
       {
         id: 'chem-materie',
@@ -1035,4 +1041,10 @@ export function examAreaOf(subjectId: string, task: number): { subject: Subject;
   const subject = subjectById(subjectId)
   const area = subject?.areas.find((a) => a.exam?.task === task)
   return subject && area ? { subject, area } : undefined
+}
+
+// Fach mit der Kachel „Probeklausur"
+export function mockSubjectOf(subjectId: string): Subject | undefined {
+  const subject = subjectById(subjectId)
+  return subject?.mock ? subject : undefined
 }

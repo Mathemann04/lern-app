@@ -241,6 +241,20 @@ const ART: Record<Kind, (id: string) => ReactNode> = {
       ))}
     </>
   ),
+  // Probeklausur: Blatt mit Aufgabenzeilen, unten rechts eine Uhr
+  exam: () => (
+    <>
+      <rect x="7" y="7" width="28" height="36" rx="4" className="fill-tone-300 dark:fill-tone-800" />
+      <rect x="6" y="4" width="28" height="36" rx="4" className="fill-tone-100" />
+      <rect x="11" y="10" width="14" height="3" rx="1.5" className="fill-tone-700" />
+      <rect x="11" y="17" width="18" height="2.6" rx="1.3" className="fill-tone-400" />
+      <rect x="11" y="23" width="12" height="2.6" rx="1.3" className="fill-tone-400" />
+      <rect x="11" y="29" width="8" height="2.6" rx="1.3" className="fill-tone-400" />
+      <circle cx="34" cy="33" r="10" className="fill-tone-500" />
+      <circle cx="34" cy="33" r="7.5" className="fill-tone-50" />
+      <path d="M34 28.5V33l3 2" className="stroke-tone-700" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    </>
+  ),
 }
 
 // Zeilen der Liste im Bild „Themen mischen" als (y, angekreuzt?)

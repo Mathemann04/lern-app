@@ -20,3 +20,6 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
 - Wiederholung falsch beantworteter Wissensfragen (S8a): `reviews.ts`, eigener
   Schlüssel `rechenweg-wiederholung` (Regeln in `engine/quiz/schedule.ts`),
   „Fortschritt löschen" leert ihn wie `rechenweg-fragen` (`questionRounds.ts`).
+- Probeklausur (S9a): `mockExam.ts`, Schlüssel `rechenweg-probeklausur`, höchstens eine (laufend oder zuletzt abgegeben;
+  Startzeit, ohne Zeitdruck, Antworten je Aufgabe, gezeigte Aufgabe, Abgabe, `timeUp`); im Speicher zwischengehalten, daher
+  liest erst ein Neuladen von außen geänderte Werte. „Fortschritt löschen" leert ihn.

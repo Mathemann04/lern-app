@@ -1183,6 +1183,14 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   Formelsammlung in der Klausur.
   Ausprobieren: Chemie 1 → Probeklausur → schreiben, abgeben, Auswertung
   ansehen; mitten in der Klausur neu laden.
+  Geteilt (11.11.2026): **S9a** schreiben und auswerten, **S9b** PSE und Formelsammlung, Verlauf, Stoffe der letzten drei
+  meiden, „Das solltest du üben“, Wiederholung.
+  **S9a** (fertig): Kachel „Probeklausur“ auf der Startseite unter „Themen mischen“ (`mock` am Fach im Katalog), Deckblatt
+  `#/probeklausur/chemie` (Zeit, Punkte, Aufgaben, Regeln, „Ohne Zeitdruck“, „Auswählen | Eintippen“), Klausur
+  `#/probeklausur/chemie/<Nummer>` mit Uhr rückwärts, Knöpfen 1 bis 5 mit offenen Fragen, ohne Hauptmenü, X fragt nach.
+  Engine `engine/exam/mock.ts` (allgemein: Summe der Aufgaben, Uhr, Punkte zum Bestehen) und `chem/exam/mock.ts`
+  (`chemMockExam`: Aufgaben 1 bis 5 aus der Nummer). Stand auf dem Gerät `state/mockExam.ts`. Auswertung: Punkte je
+  Aufgabe, was in Teil 2 noch zum Bestehen fehlt, gebrauchte Zeit, jede Frage mit Lösungsweg wie beim Üben.
 
 #### Nach Teil 1 der Klausur
 Die Reihenfolge richtet sich nach dem Termin von Teil 2: Kommt Teil 2 bald,

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { ATOMBAU } from './catalog.ts'
-import { areaHref, cardFolderHref, courseHref, examTaskHref, mixHref, mixPracticeHref, parseRoute, practiceHref, sectionOf, taskHref } from './routes.ts'
+import { areaHref, cardFolderHref, courseHref, examTaskHref, mixHref, mockHref, mixPracticeHref, parseRoute, practiceHref, sectionOf, taskHref } from './routes.ts'
 
 describe('parseRoute', () => {
   it('erkennt die Seiten', () => {
@@ -167,3 +167,18 @@ describe('Klausuraufgabe üben (S4c)', () => {
   })
 })
 
+
+describe('Probeklausur (S9)', () => {
+  it('erkennt Deckblatt und Klausur, nur für Fächer mit Probeklausur', () => {
+    expect(parseRoute('/probeklausur/chemie')).toEqual({ page: 'mock', subject: 'chemie', id: null })
+    expect(parseRoute('/probeklausur/chemie/4711')).toEqual({ page: 'mock', subject: 'chemie', id: 4711 })
+    expect(parseRoute('/probeklausur/chemie/0')).toEqual({ page: 'mock', subject: 'chemie', id: null })
+    expect(parseRoute('/probeklausur/mathe')).toEqual({ page: 'home' })
+    expect(parseRoute('/probeklausur/chemie/123456')).toEqual({ page: 'home' })
+    expect(parseRoute('/probeklausur/chemie/x')).toEqual({ page: 'home' })
+    expect(mockHref('chemie')).toBe('#/probeklausur/chemie')
+    expect(mockHref('chemie', 7)).toBe('#/probeklausur/chemie/7')
+    expect(sectionOf(parseRoute('/probeklausur/chemie'))).toBe('home')
+    expect(sectionOf(parseRoute('/probeklausur/chemie/7'))).toBeNull()
+  })
+})

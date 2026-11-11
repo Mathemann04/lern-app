@@ -206,3 +206,9 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   Antworten `zahl:<Eingabe>` (`numberAnswer`, `typedText`, `typedOption` in `engine/exam/grade.ts`; `ItemState.close`,
   `ItemResult.close`), Schalter `ModeSwitch` und ein offener Ziffernblock je Teil in `ui/exam/ExamTaskPage.tsx` (`NumberAnswer`
   mit `onSubmit`, `submitLabel`, `initial`). Tests `chem/exam/free.test.ts`, Browser-Test in `e2e/chem-free.spec.ts`.
+- Probeklausur (S9a): allgemein `engine/exam/mock.ts` (`MockExam` aus Aufgaben mit Nummer und Startwert, `gradeMock` je Aufgabe
+  mit `gradeExam`, `openCountOf`, `remainingMs`, `missingToPass`), Chemie `chem/exam/mock.ts` (`CHEM_MOCK`: 45 min, Aufgaben 1
+  bis 5, 50 Punkte, bestanden mit 40 von 100; `chemMockExam(id)`), Katalog `mock` am Fach (`mockSubjectOf`, Test vergleicht mit
+  der Engine), Seite `ui/exam/MockExamPage.tsx` (Deckblatt, Schreiben, Auswertung), gemeinsame Teile mit „Klausuraufgabe N
+  üben" in `ui/exam/ExamParts.tsx` und `ui/exam/examText.ts`, Kachel `MockTile` in `HomeScreen.tsx`, Bild `exam` in
+  `AreaIcon.tsx`. Browser-Tests `e2e/chem-mock.spec.ts`.
