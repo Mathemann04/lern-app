@@ -1,4 +1,4 @@
-import type { MatchQuestion, MatchTrap, MultiChoice, QuestionBank, QuestionLevel } from '../../quiz/types.ts'
+import type { MatchQuestion, MatchTrap, MultiChoice, OrderQuestion, QuestionBank, QuestionLevel } from '../../quiz/types.ts'
 import { type CountMode, atomCounts, formulaCe, parseFormula } from '../formula.ts'
 import { substanceById } from '../substances.ts'
 
@@ -85,6 +85,65 @@ const OXYGEN_COUNTS: MatchQuestion = {
     short: 'Index hinter der Klammer gilt für die ganze Klammer; Kristallwasser zählt mit.',
   },
   cards: ['stoffmenge-formeln', 'stoffmenge-molmasse'],
+  ref: 'Skript Stöchiometrie',
+}
+
+// Ordnen (N1c): Stoffe nach der molaren Masse, Reihenfolge aus chem/molarMass.ts (Werte des PSE der App, Vertiefung);
+// die Vertauschungen sind die Reihenfolgen, die beim Rechnen ohne Klammer bzw. ohne Kristallwasser herauskommen
+// (Gegenprobe in chem/orderQuestions.test.ts)
+export const MOLAR_MASS_ORDER_IDS = ['CH4', 'CO2', 'Mg(OH)2', 'H2SO4', 'Mg(NO3)2', 'Na2CO3*10H2O']
+export const MOLAR_MASS_ORDER: OrderQuestion = {
+  kind: 'order',
+  id: 'st-v-ordnen-molmasse',
+  no: 221,
+  level: 2,
+  fact: 'order-molar-mass',
+  part: 'molmasse',
+  title: 'Molare Massen ordnen',
+  prompt: 'Ordne die Stoffe nach ihrer molaren Masse. Nimm die Werte aus dem Periodensystem.',
+  items: MOLAR_MASS_ORDER_IDS.map((id) => {
+    const x = substanceById(id)!
+    return { id, text: String.raw`${x.name} $\ce{${formulaCe(x.formula)}}$` }
+  }),
+  first: 'kleinste molare Masse',
+  last: 'größte molare Masse',
+  traps: [
+    { kind: 'swap', before: 'Mg(OH)2', after: 'CO2', misconception: 'chem-mis-st-bracket' },
+    { kind: 'swap', before: 'Na2CO3*10H2O', after: 'Mg(NO3)2', misconception: 'chem-mis-st-hydrate-forgotten' },
+  ],
+  hint: 'Zähle jedes Atom so oft, wie es in der Formel vorkommt, auch in Klammern und im Kristallwasser.',
+  explanation: {
+    detailed: String.raw`Mit den Werten des Periodensystems: $M(\ce{CH4}) = 16{,}0$, $M(\ce{CO2}) = 44{,}0$, $M(\ce{Mg(OH)2}) = 58{,}3$, $M(\ce{H2SO4}) = 98{,}1$, $M(\ce{Mg(NO3)2}) = 148{,}3$ und $M(\ce{Na2CO3 * 10 H2O}) = 286{,}0\,\mathrm{g/mol}$. Der Index hinter der Klammer gilt für alles in der Klammer, und das Kristallwasser zählt mit.`,
+    short: 'Klammern ganz malnehmen, Kristallwasser mitzählen.',
+  },
+  cards: ['stoffmenge-molmasse', 'stoffmenge-formeln'],
+  ref: 'Skript Stöchiometrie',
+}
+
+// Ordnen (N1c): gleich schwere Portionen nach der Zahl der Teilchen (gerundete molare Massen, Klausurniveau)
+export const PARTICLE_ORDER_IDS = ['H2', 'CH4', 'O2', 'CO2', 'C6H12O6']
+export const PARTICLE_ORDER: OrderQuestion = {
+  kind: 'order',
+  id: 'st-k-ordnen-teilchenzahl',
+  no: 319,
+  level: 3,
+  fact: 'order-particles-same-mass',
+  part: 'stoffmenge',
+  title: 'Gleiche Masse, wie viele Teilchen?',
+  prompt: 'Von jedem Stoff liegen genau 10 g vor. Ordne die Portionen nach der Zahl ihrer Teilchen (Moleküle).',
+  items: PARTICLE_ORDER_IDS.map((id) => {
+    const x = substanceById(id)!
+    return { id, text: String.raw`$10\,\mathrm{g}$ ${x.name} $\ce{${formulaCe(x.formula)}}$` }
+  }),
+  first: 'die meisten Teilchen',
+  last: 'die wenigsten Teilchen',
+  traps: [{ kind: 'reversed', misconception: 'chem-mis-st-heavier-more' }],
+  hint: 'Die Zahl der Teilchen folgt aus der Stoffmenge. Wie hängt sie bei fester Masse von der molaren Masse ab?',
+  explanation: {
+    detailed: String.raw`Bei gleicher Masse ist $n = \frac{m}{M}$ umso größer, je kleiner die molare Masse ist. $M$ in g/mol: $\ce{H2}$ 2, $\ce{CH4}$ 16, $\ce{O2}$ 32, $\ce{CO2}$ 44, $\ce{C6H12O6}$ 180. Die leichtesten Moleküle ergeben also die meisten Teilchen.`,
+    short: 'Gleiche Masse: kleinere molare Masse, mehr Teilchen.',
+  },
+  cards: ['stoffmenge-n-m-m', 'stoffmenge-mol'],
   ref: 'Skript Stöchiometrie',
 }
 
@@ -1777,6 +1836,9 @@ export const STOFFMENGE_BANK: QuestionBank = {
     // ---- Zuordnen (N1b)
     UNITS,
     OXYGEN_COUNTS,
+    // ---- Ordnen (N1c)
+    MOLAR_MASS_ORDER,
+    PARTICLE_ORDER,
   ],
   retired: [],
 }

@@ -1,4 +1,4 @@
-import type { MultiChoice, Question, QuestionBank, QuestionLevel } from '../../quiz/types.ts'
+import type { MultiChoice, OrderQuestion, Question, QuestionBank, QuestionLevel } from '../../quiz/types.ts'
 import { atomCounts, formulaCe } from '../formula.ts'
 import { FUELS, type Fuel } from '../reactions.ts'
 
@@ -1869,8 +1869,47 @@ const MATCH: readonly Question[] = [
   },
 ]
 
+// ---- Ordnen (N1c): Reihenfolge beim Ausgleichen einer Verbrennung, wie auf der Karte „Vollständige Verbrennung“
+const COMBUSTION_STEPS: OrderQuestion = {
+  kind: 'order',
+  id: 'gl-v-ordnen-verbrennung',
+  no: 220,
+  level: 2,
+  fact: 'order-combustion-steps',
+  part: 'verbrennung',
+  title: 'Verbrennung ausgleichen',
+  prompt: 'In welcher Reihenfolge stellst du die Gleichung für die vollständige Verbrennung eines Alkans auf?',
+  items: [
+    { id: 'produkte', text: String.raw`Produkte hinschreiben: $\ce{CO2}$ und $\ce{H2O}$` },
+    { id: 'ch', text: String.raw`Kohlenstoff und Wasserstoff ausgleichen (Zahlen vor $\ce{CO2}$ und $\ce{H2O}$)` },
+    { id: 'o', text: String.raw`Sauerstoff ausgleichen (Zahl vor $\ce{O2}$)` },
+    { id: 'ganz', text: 'Steht ein Bruch da: alle Zahlen mit 2 malnehmen' },
+  ],
+  first: 'zuerst',
+  last: 'zuletzt',
+  traps: [
+    {
+      kind: 'swap',
+      before: 'o',
+      after: 'ch',
+      misconception: 'chem-mis-gl-water-oxygen',
+      why: {
+        detailed: String.raw`Sauerstoff steckt rechts in $\ce{CO2}$ und in $\ce{H2O}$. Wie viel Sauerstoff rechts steht, weißt du erst, wenn die Zahlen vor beiden Produkten feststehen.`,
+        short: String.raw`Der Sauerstoff rechts hängt von $\ce{CO2}$ und $\ce{H2O}$ ab.`,
+      },
+    },
+  ],
+  hint: 'Welches Element kommt rechts in zwei Produkten vor? Und wann kann ein Bruch entstehen?',
+  explanation: {
+    detailed: String.raw`Zuerst stehen die Produkte fest: Bei vollständiger Verbrennung entstehen nur $\ce{CO2}$ und $\ce{H2O}$. Kohlenstoff und Wasserstoff kommen rechts je nur in einem Produkt vor, damit liegen die Zahlen vor $\ce{CO2}$ und $\ce{H2O}$ fest. Erst dann lässt sich der Sauerstoff rechts zählen und die Zahl vor $\ce{O2}$ bestimmen. Ist sie ein Bruch, nimmt man zum Schluss alle Zahlen mit 2 mal.`,
+    short: 'Produkte, dann C und H, dann O, zum Schluss ganzzahlig machen.',
+  },
+  cards: ['gleichungen-verbrennung'],
+  ref: 'Skript Stöchiometrie',
+}
+
 export const GLEICHUNGEN_BANK: QuestionBank = {
   course: 'chem-gleichungen',
-  questions: [...LEVEL_1, ...LEVEL_2, ...LEVEL_3, ...MULTI, ...MATCH],
+  questions: [...LEVEL_1, ...LEVEL_2, ...LEVEL_3, ...MULTI, ...MATCH, COMBUSTION_STEPS],
   retired: [],
 }

@@ -1,4 +1,4 @@
-import type { Explanation, MultiChoice, QuestionBank, QuestionLevel } from '../../quiz/types.ts'
+import type { Explanation, MultiChoice, OrderQuestion, QuestionBank, QuestionLevel } from '../../quiz/types.ts'
 
 // Wissensfragen zum Thema „Gase und Lösungen“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern: Stufe · 100 +
 // laufende Nummer; nie neu vergeben, gelöschte kommen in retired. Zahlen nachgerechnet (molare Massen wie
@@ -21,6 +21,55 @@ const multiAt = (level: QuestionLevel) => (spec: MultiSpec): MultiChoice => ({
   level,
   correct: spec.correct.map((text, i) => ({ id: `r${i + 1}`, text })),
 })
+
+// Ordnen (N1c): Lösungen nach der Stoffmengenkonzentration, gerechnet mit chem/molarMass.ts (Werte des PSE der App);
+// die Vertauschungen: nach Gramm je Liter bzw. nach der Masse gelöstem Stoff geordnet (Gegenprobe in
+// chem/orderQuestions.test.ts)
+export const CONCENTRATION_ORDER_ITEMS: readonly { readonly id: string; readonly grams: string; readonly mL: number }[] = [
+  { id: 'NaOH', grams: '8', mL: 250 },
+  { id: 'C6H12O6', grams: '90', mL: 1000 },
+  { id: 'KCl', grams: '7,46', mL: 250 },
+  { id: 'NaCl', grams: '5,85', mL: 500 },
+  { id: 'Na2SO4', grams: '14,21', mL: 1000 },
+]
+const NAMES: Readonly<Record<string, string>> = { NaOH: 'Natriumhydroxid', C6H12O6: 'Glucose', KCl: 'Kaliumchlorid', NaCl: 'Natriumchlorid', Na2SO4: 'Natriumsulfat' }
+const volumeText = (mL: number) => (mL >= 1000 ? String.raw`$${mL / 1000}\,\mathrm{L}$` : String.raw`$${mL}\,\mathrm{mL}$`)
+export const CONCENTRATION_ORDER: OrderQuestion = {
+  kind: 'order',
+  id: 'lo-v-ordnen-konzentration',
+  no: 220,
+  level: 2,
+  fact: 'order-concentration',
+  part: 'konzentration',
+  title: 'Konzentrationen vergleichen',
+  prompt: 'Ordne die Lösungen nach ihrer Stoffmengenkonzentration. Nimm die molaren Massen aus dem Periodensystem.',
+  items: CONCENTRATION_ORDER_ITEMS.map((x) => ({
+    id: x.id,
+    text: String.raw`$${x.grams}\,\mathrm{g}$ ${NAMES[x.id]} $\ce{${x.id}}$ in ${volumeText(x.mL)} Lösung`,
+  })),
+  first: 'größte Konzentration',
+  last: 'kleinste Konzentration',
+  traps: [
+    {
+      kind: 'swap',
+      before: 'C6H12O6',
+      after: 'NaOH',
+      misconception: 'chem-mis-lo-c-mixup',
+      why: why(
+        'Gramm je Liter sind noch keine Mol je Liter. Ein Stoff mit großer molarer Masse ergibt aus vielen Gramm nur wenig Mol; rechne erst die Stoffmenge aus und teile dann durch das Volumen.',
+        'Erst in Mol umrechnen, dann durch das Volumen teilen.',
+      ),
+    },
+    { kind: 'swap', before: 'Na2SO4', after: 'NaCl', misconception: 'chem-mis-lo-share-is-amount' },
+  ],
+  hint: 'Rechne für jede Lösung zuerst die Stoffmenge aus und teile sie durch das Volumen in Litern.',
+  explanation: why(
+    String.raw`Mit $c = \frac{n}{V}$ und $n = \frac{m}{M}$: Natriumhydroxid $0{,}2\,\mathrm{mol}$ in $0{,}25\,\mathrm{L}$ gibt $0{,}8\,\mathrm{mol/L}$; Glucose $0{,}5\,\mathrm{mol}$ in $1\,\mathrm{L}$ gibt $0{,}5\,\mathrm{mol/L}$; Kaliumchlorid $0{,}1\,\mathrm{mol}$ in $0{,}25\,\mathrm{L}$ gibt $0{,}4\,\mathrm{mol/L}$; Natriumchlorid $0{,}1\,\mathrm{mol}$ in $0{,}5\,\mathrm{L}$ gibt $0{,}2\,\mathrm{mol/L}$; Natriumsulfat $0{,}1\,\mathrm{mol}$ in $1\,\mathrm{L}$ gibt $0{,}1\,\mathrm{mol/L}$.`,
+    'Erst n = m/M, dann c = n/V.',
+  ),
+  cards: ['loesungen-konzentration'],
+  ref: REF_C,
+}
 
 export const LOESUNGEN_BANK: QuestionBank = {
   course: 'chem-loesungen',
@@ -1795,6 +1844,8 @@ export const LOESUNGEN_BANK: QuestionBank = {
       cards: ['loesungen-gasgesetz'],
       ref: REF_GAS,
     },
+    // ---- Ordnen (N1c)
+    CONCENTRATION_ORDER,
   ],
   retired: [],
 }
