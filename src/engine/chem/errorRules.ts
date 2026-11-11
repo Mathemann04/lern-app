@@ -125,6 +125,16 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
     },
   },
   {
+    id: 'chem-molar-coefficient',
+    course: STOFFMENGE,
+    name: 'Koeffizient in die Molmasse mitgerechnet',
+    wrongFormula: String.raw`\ce{2 C4H10}\text{: } M = 2 \cdot 58 = 116\ \text{statt}\ 58\,\mathrm{g/mol}`,
+    why: {
+      detailed: 'Die molare Masse gehört zum Stoff und ist die Masse von einem Mol davon, egal, was in der Gleichung davor steht. Der Koeffizient sagt nur, wie viele Teilchen miteinander reagieren; er kommt erst beim Verhältnis der Stoffmengen ins Spiel.',
+      short: 'Die Molmasse gehört zum Stoff; der Koeffizient zählt erst beim Verhältnis.',
+    },
+  },
+  {
     id: 'chem-molar-atomic-number',
     course: STOFFMENGE,
     name: 'Ordnungszahlen statt Molmassen',

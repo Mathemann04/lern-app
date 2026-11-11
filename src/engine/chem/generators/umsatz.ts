@@ -86,7 +86,7 @@ function generate(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCal
   // 1. Molmasse und Stoffmenge des gegebenen Stoffs
   const withMolar = level >= 2
   if (withMolar) {
-    const molar = molarSteps(sg, values, rng, focus)
+    const molar = molarSteps(sg, values, rng, focus, nuG)
     if (!molar) return null
     steps.push(...molar.steps.filter((s) => s.id === 'molmasse').map((s) => ({ ...s, id: 'molmasse-gegeben' })))
   }
@@ -135,7 +135,7 @@ function generate(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCal
 
   // 3. Molmasse und Masse des gesuchten Stoffs
   if (withMolar) {
-    const molar = molarSteps(st, values, rng, focus)
+    const molar = molarSteps(st, values, rng, focus, nuT)
     if (!molar) return null
     steps.push(...molar.steps.filter((s) => s.id === 'molmasse').map((s) => ({ ...s, id: 'molmasse-gesucht' })))
   }
@@ -193,7 +193,7 @@ export const UMSATZ_GENERATORS: readonly ChemGenerator[] = [
     kind: 'umsatz',
     part: 'umsatz',
     weights: { 1: 0.3, 2: 0.35, 3: 0.45 },
-    errors: ['chem-molar-index', 'chem-molar-atomic-number', 'chem-n-times', 'chem-n-inverted', 'chem-ratio-one', 'chem-ratio-swapped', 'chem-ratio-product-only', 'chem-ratio-other-coefficient', 'chem-m-divided', 'chem-ratio-wrong-molar-mass', 'chem-similar-molar-mass'],
+    errors: ['chem-molar-index', 'chem-molar-atomic-number', 'chem-molar-coefficient', 'chem-n-times', 'chem-n-inverted', 'chem-ratio-one', 'chem-ratio-swapped', 'chem-ratio-product-only', 'chem-ratio-other-coefficient', 'chem-m-divided', 'chem-ratio-wrong-molar-mass', 'chem-similar-molar-mass'],
     generate,
   },
 ]

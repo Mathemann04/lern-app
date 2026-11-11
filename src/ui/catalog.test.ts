@@ -158,3 +158,17 @@ describe('Unterthemen und Mischung im Katalog (S1b)', () => {
     expect(subjectLevelName(subjectById('mathe')!, 4)).toBe('Stufe 4')
   })
 })
+
+describe('Klausuraufgaben im Katalog (S4c)', () => {
+  it('Punkte der Kachel wie in der Engine', async () => {
+    const { chemExamTask } = await import('../engine/chem/exam/index.ts')
+    const { totalPoints } = await import('../engine/exam/grade.ts')
+    const areas = SUBJECTS.flatMap((s) => s.areas.filter((a) => a.exam).map((a) => ({ subject: s.id, exam: a.exam! })))
+    expect(areas.length).toBeGreaterThan(0)
+    for (const { subject, exam } of areas) {
+      expect(subject).toBe('chemie')
+      expect(totalPoints(chemExamTask(exam.task, 1)!)).toBe(exam.points)
+    }
+  })
+})
+

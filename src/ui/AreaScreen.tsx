@@ -2,7 +2,7 @@ import { solvedInCourse, useProgress } from '../state/progress.ts'
 import { AreaIcon } from './AreaIcon.tsx'
 import { BackLink } from './BackLink.tsx'
 import { type Course, areaById, isCourseAvailable } from './catalog.ts'
-import { courseHref } from './routes.ts'
+import { courseHref, examTaskHref } from './routes.ts'
 
 // Ein Gebiet, z. B. Grundlagen: seine Themen als Kacheln; Themen ohne spielbare Stufe blass mit
 // „kommt bald"
@@ -27,6 +27,21 @@ export function AreaScreen({ id }: { id: string }) {
           </li>
         ))}
       </ul>
+      {area.exam && (
+        <a
+          href={examTaskHref(subject.id, area.exam.task)}
+          className="flex items-center gap-4 rounded-2xl border-2 border-accent-600 bg-accent-50 px-4 py-4 transition-colors hover:bg-accent-100"
+        >
+          <span className="min-w-0 flex-1 space-y-1">
+            <span className="block text-lg font-semibold">Klausuraufgabe {area.exam.task} üben</span>
+            <span className="block text-pretty text-zinc-600">Alle Teile am Stück wie in der Klausur, mit Punkten und Auswertung</span>
+            <span className="block text-sm text-zinc-500">{area.exam.points} Punkte · ohne Zeit</span>
+          </span>
+          <span aria-hidden className="text-accent-700">
+            →
+          </span>
+        </a>
+      )}
       <p className="text-sm text-zinc-500 text-pretty">Weitere Themen kommen dazu, sobald sie in der App sind.</p>
     </main>
   )

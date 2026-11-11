@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { ATOMBAU } from './catalog.ts'
-import { areaHref, cardFolderHref, courseHref, mixHref, mixPracticeHref, parseRoute, practiceHref, sectionOf, taskHref } from './routes.ts'
+import { areaHref, cardFolderHref, courseHref, examTaskHref, mixHref, mixPracticeHref, parseRoute, practiceHref, sectionOf, taskHref } from './routes.ts'
 
 describe('parseRoute', () => {
   it('erkennt die Seiten', () => {
@@ -153,3 +153,17 @@ describe('sectionOf', () => {
     expect(sectionOf(parseRoute(`/ueben/${ATOMBAU}/2-101?mischen=chemie`))).toBeNull()
   })
 })
+
+describe('Klausuraufgabe üben (S4c)', () => {
+  it('erkennt die Adressen, nur für Aufgaben mit Kachel im Katalog', () => {
+    expect(parseRoute('/klausur/chemie/aufgabe/4')).toEqual({ page: 'examTask', subject: 'chemie', task: 4, seed: null })
+    expect(parseRoute('/klausur/chemie/aufgabe/4/123')).toEqual({ page: 'examTask', subject: 'chemie', task: 4, seed: 123 })
+    expect(parseRoute('/klausur/chemie/aufgabe/9')).toEqual({ page: 'home' })
+    expect(parseRoute('/klausur/mathe/aufgabe/4')).toEqual({ page: 'home' })
+    expect(parseRoute('/klausur/chemie/aufgabe/4/x')).toEqual({ page: 'home' })
+    expect(examTaskHref('chemie', 4)).toBe('#/klausur/chemie/aufgabe/4')
+    expect(examTaskHref('chemie', 4, 7)).toBe('#/klausur/chemie/aufgabe/4/7')
+    expect(sectionOf({ page: 'examTask', subject: 'chemie', task: 4, seed: 1 })).toBeNull()
+  })
+})
+

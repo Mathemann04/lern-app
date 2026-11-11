@@ -127,6 +127,15 @@ const maxBeta = (s: Substance) => 800 * saturation(s)
 const within = (r: Rational, limit: number) => ratToNumber(r) <= limit + 1e-9
 const VOLUMES_ML = [50, 100, 150, 200, 250, 500, 750, 1000]
 
+// Lösung ansetzen für Klausuraufgabe 4 (chem/exam/task4.ts): Stoff, Konzentration und Volumen wie auf
+// Klausurniveau, unter der Löslichkeit, nie wie in den Altklausuren; null: neu ziehen
+export function pickSolution(rng: Rng): { substance: Substance; c: Rational; vMl: number } | null {
+  const s = rng.pick(solutes([...SOLUTE_IDS, ...SOLUTE_HARD_IDS]))
+  const vMl = rng.pick(VOLUMES_ML)
+  const c = rng.pick(NICE_C.filter((x) => within(x, maxC(s))))
+  return usesExamSolution(s.id, c, vMl) ? null : { substance: s, c, vMl }
+}
+
 // --- Konzentration ---
 
 function concTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc | null {

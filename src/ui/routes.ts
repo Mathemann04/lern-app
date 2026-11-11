@@ -5,6 +5,7 @@ import {
   GALLERY_COURSES,
   areaById,
   courseById,
+  examAreaOf,
   isAreaAvailable,
   isCourseAvailable,
   isMixAvailable,
@@ -43,6 +44,9 @@ export type Route =
   // neue gemischte Aufgabe #/mischen/chemie/2: würfelt Thema und Aufgabe und leitet zur Aufgabe weiter
   // (taskHref mit mix), damit Neuladen dieselbe Aufgabe zeigt
   | { readonly page: 'mixPractice'; readonly subject: string; readonly level: Level }
+  // Klausuraufgabe N üben: #/klausur/chemie/aufgabe/4 würfelt eine Nummer und leitet weiter auf
+  // #/klausur/chemie/aufgabe/4/123, damit Neuladen dieselbe Aufgabe zeigt
+  | { readonly page: 'examTask'; readonly subject: string; readonly task: number; readonly seed: number | null }
 
 // Geführt: #/ueben/brueche/2-4711, frei: #/frei/ableiten/2-4711,
 // gezielt: #/ueben/ableiten/2-4711?fokus=cos-sign, in der Mischung:
@@ -83,6 +87,12 @@ export function parseRoute(fullPath: string): Route {
     // ohne oder mit unbekannter Stufe: zur Auswahl
     return { page: 'mix', subject: subject.id }
   }
+  const exam = /^\/klausur\/([a-z]+)\/aufgabe\/(\d)(?:\/(\d{1,9}))?$/.exec(path)
+  if (exam) {
+    const found = examAreaOf(exam[1], Number(exam[2]))
+    if (!found) return { page: 'home' }
+    return { page: 'examTask', subject: found.subject.id, task: Number(exam[2]), seed: exam[3] ? Number(exam[3]) : null }
+  }
   const cards = /^\/karten(?:\/([^/]+))?(?:\/([^/]+))?$/.exec(path)
   if (cards) return { page: 'cards', folder: cards[1] ?? null, card: cards[2] ?? null }
   const practice = /^\/(ueben|frei)\/(?:([a-z-]+)\/)?([^/]+)$/.exec(path)
@@ -116,6 +126,7 @@ export const mixHref = (subject: string) => `#/mischen/${subject}`
 export const mixPracticeHref = (subject: string, level: Level) => `#/mischen/${subject}/${level}`
 
 export const areaHref = (id: string) => `#/gebiet/${id}`
+export const examTaskHref = (subject: string, task: number, seed?: number) => `#/klausur/${subject}/aufgabe/${task}${seed === undefined ? '' : `/${seed}`}`
 export const galleryHref = (course?: string) => (course ? `#/galerie/${course}` : '#/galerie')
 export const courseHref = (id: string) => `#/thema/${id}`
 

@@ -58,7 +58,7 @@ export const STOFFMENGE_CARDS: readonly Card[] = [
         ],
       },
     ],
-    errors: ['chem-molar-index', 'chem-molar-atomic-number', 'chem-mis-st-units', 'chem-mis-st-atomic-number', 'chem-mis-st-mass-number', 'chem-mis-st-index-ignored', 'chem-mis-st-atom-for-molecule', 'chem-mis-st-decimal', 'chem-mis-st-molar-mass-portion', 'chem-mis-st-particle-mass', 'chem-mis-st-same-m-same-stoff', 'chem-mis-st-formula-split', 'chem-mis-st-formula-reduced'],
+    errors: ['chem-molar-index', 'chem-molar-atomic-number', 'chem-molar-coefficient', 'chem-mis-st-units', 'chem-mis-st-atomic-number', 'chem-mis-st-mass-number', 'chem-mis-st-index-ignored', 'chem-mis-st-atom-for-molecule', 'chem-mis-st-decimal', 'chem-mis-st-molar-mass-portion', 'chem-mis-st-particle-mass', 'chem-mis-st-same-m-same-stoff', 'chem-mis-st-formula-split', 'chem-mis-st-formula-reduced'],
   },
   {
     id: 'stoffmenge-n-m-m',

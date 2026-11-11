@@ -65,8 +65,9 @@ const CARD_NMM = 'stoffmenge-n-m-m'
 const CARD_MOL = 'stoffmenge-mol'
 const CARD_ATOMS = 'stoffmenge-atome'
 
-// Schritte „Atome zählen" (nur, wenn ein Fehler dort etwas ändert) und „Molmasse"; dazu die Molmasse
-export function molarSteps(s: Substance, values: MassValues, rng: Rng, focus?: string): { steps: GuidedStep[]; mass: Rational } | null {
+// Schritte „Atome zählen" (nur, wenn ein Fehler dort etwas ändert) und „Molmasse"; dazu die Molmasse.
+// coefficient: Koeffizient des Stoffs in der Gleichung der Aufgabe (Fehler „Koeffizient mitgerechnet")
+export function molarSteps(s: Substance, values: MassValues, rng: Rng, focus?: string, coefficient?: Rational): { steps: GuidedStep[]; mass: Rational } | null {
   const counts = atomCounts(s.formula)
   const mass = molarMass(s.formula, values)
   const steps: GuidedStep[] = []
@@ -106,6 +107,7 @@ export function molarSteps(s: Substance, values: MassValues, rng: Rng, focus?: s
     [
       ...countErrors(s).map(({ rule, mode }) => ({ rule, value: molarMass(s.formula, values, mode) })),
       { rule: 'chem-molar-atomic-number', value: atomicNumberSum(s.formula) },
+      ...(coefficient && coefficient.d === 1n && coefficient.n > 1n ? [{ rule: 'chem-molar-coefficient', value: ratMul(mass, coefficient) }] : []),
     ],
     (r) => molarLatex(r, values),
   )
