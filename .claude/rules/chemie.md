@@ -170,3 +170,5 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   Pfeilen (`TREND_ARROWS`, `pseTrendFigureById`; `PseFigure.marks` statt einer Markierung), `generators/trends.ts`
   (je Größe `vergleich-…` und `ordnen-…`, dazu `ionenradien`; `pairs`, `lines`), Rechenfehler `chem/trendRules.ts`,
   Karten `trendsCards.ts`, Fragen `bank/trends.ts` (Denkfehler `chem-mis-tr-…`), Tests `generators/trends.test.ts`.
+- Klausuraufgabe 2 (S6e): `chem/exam/task2.ts` (Teil a aus `steckbriefTask` mit drei Schritten, Teil b aus `orderTask`
+  der Trends oder `ionTask` aus `generators/pse.ts`), Kachel über `exam: { task: 2 }` am Gebiet `chem-periodensystem`.

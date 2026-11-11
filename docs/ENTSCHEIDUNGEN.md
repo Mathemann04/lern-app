@@ -699,3 +699,7 @@ Neue Entscheidungen unten anfügen.
   Fehler „zwei benachbarte Elemente vertauscht“ allgemein benannt; Erklärungen, die die Lösung verrieten oder
   nicht passten, neu geschrieben; Denkfehler zu den Edelgasen enger gefasst (Krypton hat nach Pauling eine etwas
   größere Elektronegativität als Brom); vier Ionen nur aus der Reihe wie Neon.
+- 11.11.2026: S6e „Klausuraufgabe 2 üben“ (6 Punkte nach dem Bauplan Teil 1). Teil a fragt Periode, Gruppe und Block
+  desselben Elements (ab Vertiefung, also auch Nebengruppen); Teil b wechselt zwischen einem Trend und einer
+  Ionenladung. Eine eigene fachliche Prüfung war nicht nötig: kein neuer Fachinhalt, nur die geprüften Rechnungen
+  aus S6c und S6d. Damit ist S6 abgeschlossen.
