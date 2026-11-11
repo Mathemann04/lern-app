@@ -52,7 +52,25 @@ export type GuidedStep = {
   readonly multi?: boolean
   // Zuordnen (N1b): jeder Zeile ein Ziel zuordnen und einmal prüfen; choices ist dann leer
   readonly match?: MatchStep
+  // Ordnen (N1c): Glieder mit Pfeilknöpfen in die richtige Reihenfolge bringen und einmal prüfen; choices ist leer
+  readonly order?: OrderStep
 }
+
+export type OrderStep = {
+  // in der richtigen Reihenfolge, von first nach last
+  readonly items: readonly { readonly id: string; readonly content: string }[]
+  // Reihenfolge am Anfang (Ids), nie schon die richtige
+  readonly start: readonly string[]
+  readonly first: string
+  readonly last: string
+  // typische falsche Reihenfolgen dieser Fassung (nur solche, deren Glieder dastehen)
+  readonly traps: readonly OrderStepTrap[]
+}
+
+export type OrderStepTrap = (
+  | { readonly kind: 'reversed' }
+  | { readonly kind: 'swap'; readonly before: string; readonly after: string }
+) & { readonly errorRuleId: string; readonly whyWrong: Explanation }
 
 export type MatchStep = {
   readonly rows: readonly MatchRow[]

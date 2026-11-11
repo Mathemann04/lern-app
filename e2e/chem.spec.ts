@@ -45,11 +45,14 @@ const isCalc = (url: string) => {
   const seed = Number(/-(\d+)(?:\?.*)?$/.exec(url)?.[1] ?? 0)
   return seed >= 10_000 && seed < 500_000
 }
-// Ab N1 gibt es auch „Wähle alle richtigen“ (Aussagen zum Ankreuzen) und Zuordnen (Zeilen mit Zielen) statt
+// Ab N1 gibt es auch „Wähle alle richtigen“ (Aussagen zum Ankreuzen), Zuordnen (Zeilen mit Zielen) und Ordnen statt
 // Antwortknöpfen: Tests für die Einfachauswahl ziehen auch dann neu
 const isMulti = async (page: Page) => {
   await page.locator('#question').waitFor()
-  return (await page.getByRole('list', { name: 'Aussagen' }).count()) + (await page.getByRole('list', { name: 'Zuordnungen' }).count()) > 0
+  const lists = ['Aussagen', 'Zuordnungen', 'Reihenfolge']
+  let count = 0
+  for (const name of lists) count += await page.getByRole('list', { name }).count()
+  return count > 0
 }
 async function ensureQuestion(page: Page, href: string) {
   for (let i = 0; i < 30 && (isCalc(page.url()) || (await isMulti(page))); i++) {
@@ -920,5 +923,47 @@ test('Chemie: Zuordnen, Molekül-Ionen und ihre Namen, erst falsch, dann richtig
   await page.getByRole('button', { name: 'Prüfen' }).click()
   await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
   await expect(rows.filter({ hasText: 'Richtig zugeordnet' })).toHaveCount(count)
+  expect(errors).toEqual([])
+})
+
+// N1c: Ordnen – erst falsch (so wie gemischt), Auswertung mit „gehört an Stelle“, dann dieselbe Aufgabe richtig sortiert
+test('Chemie: Ordnen, Atomradius in der 3. Periode, erst falsch, dann mit den Pfeilen richtig', async ({ page }) => {
+  const errors = collectErrors(page)
+  const href = `./#/ueben/chem-trends/2-${500_000 + 219 * 50 + 2}`
+  const rows = page.getByRole('list', { name: 'Reihenfolge' }).getByRole('listitem')
+  const names = async () => (await rows.allTextContents()).map((t) => /[A-ZÄÖÜ][a-zäöü]+ \([A-Za-z]+\)/.exec(t)![0])
+
+  await page.goto(href)
+  await expect(page.getByText(/· Bring in die richtige Reihenfolge/)).toBeVisible()
+  await expect(page.getByText('Oben: größter Atomradius')).toBeVisible()
+  await expectCleanPage(page, 'Ordnen')
+  const start = await names()
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Nicht ganz.')).toBeVisible()
+  await expect(page.getByText(/gehört an Stelle/).first()).toBeVisible()
+  // richtige Stelle jedes Eintrags aus der Auswertung
+  const target: string[] = []
+  for (const [i, text] of (await rows.allTextContents()).entries()) {
+    const place = /gehört an Stelle (\d)/.exec(text)
+    target[place ? Number(place[1]) - 1 : i] = start[i]
+  }
+  await page.getByRole('button', { name: 'Ergebnis ansehen' }).click()
+  await expect(page.getByText('Die Reihenfolge stimmte noch nicht.', { exact: false })).toBeVisible()
+  await expect(page.getByTestId('result').getByText('Richtige Reihenfolge')).toBeVisible()
+
+  await page.goto('./')
+  await page.goto(href)
+  await expect(page.getByRole('button', { name: 'Prüfen' })).toBeVisible()
+  // Eintrag für Eintrag von unten nach oben an seinen Platz schieben
+  for (const [i, name] of target.entries()) {
+    let from = (await names()).indexOf(name)
+    while (from > i) {
+      await rows.nth(from).getByRole('button', { name: 'Nach oben' }).click()
+      from--
+    }
+  }
+  expect(await names()).toEqual(target)
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
   expect(errors).toEqual([])
 })

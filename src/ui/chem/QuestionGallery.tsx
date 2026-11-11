@@ -1,6 +1,6 @@
 import { chemTopic } from '../../engine/chem/banks.ts'
 import { cardById } from '../../engine/explain/cards.ts'
-import { type MatchQuestion, type Misconception, type Question, correctOptionsOf } from '../../engine/quiz/types.ts'
+import { type MatchQuestion, type Misconception, type OrderQuestion, type Question, correctOptionsOf } from '../../engine/quiz/types.ts'
 import { formatTaskNumber } from '../../engine/tasks/taskNumber.ts'
 import { AreaIcon } from '../AreaIcon.tsx'
 import { BackLink } from '../BackLink.tsx'
@@ -37,7 +37,7 @@ export default function QuestionGallery({ course: id }: { course: string }) {
         <p className="text-zinc-600 text-pretty">
           Alle Fragen mit der richtigen Antwort, allen falschen Antworten samt Denkfehler und „Warum ist das falsch?“, Tipp, Erklärung und
           Lernkarten. Beim Üben werden je Frage drei der falschen Antworten gezeigt, bei „Wähle alle richtigen“ vier bis sechs
-          Aussagen, davon eine bis vier richtige, beim Zuordnen vier bis sechs der Paare.
+          Aussagen, davon eine bis vier richtige, beim Zuordnen vier bis sechs der Paare, beim Ordnen vier oder fünf der Glieder.
         </p>
       </section>
 
@@ -151,6 +151,7 @@ function QuestionCard({ course, question: q, part, misconceptions }: CardProps) 
             Nr. {q.no} · {q.id} · Fakt {q.fact}
             {q.kind === 'multi' && ' · Wähle alle richtigen'}
             {q.kind === 'match' && ' · Zuordnen'}
+            {q.kind === 'order' && ' · Ordnen'}
           </span>
         </p>
         <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -165,6 +166,8 @@ function QuestionCard({ course, question: q, part, misconceptions }: CardProps) 
 
       {q.kind === 'match' ? (
         <MatchPairs question={q} misconceptions={misconceptions} />
+      ) : q.kind === 'order' ? (
+        <OrderItems question={q} misconceptions={misconceptions} />
       ) : (
         <>
           <div className="space-y-1 rounded-xl bg-green-50 px-3 py-2">
@@ -270,6 +273,53 @@ function MatchPairs({ question: q, misconceptions }: { question: MatchQuestion; 
                   <RichText text={pair?.left ?? t.pair} inline />
                   <span aria-hidden>→</span>
                   <RichText text={t.right} inline />
+                </p>
+                <p className="text-sm text-zinc-500">
+                  Denkfehler: {m ? <RichText text={m.name} inline /> : 'unbekannt'} ({t.misconception}){t.why && ' · eigener Text'}
+                </p>
+                {why && <RichText text={why.detailed} className="text-sm text-zinc-700" />}
+              </li>
+            )
+          })}
+        </ul>
+      </div>
+    </>
+  )
+}
+
+// Ordnen: alle Glieder des Vorrats in der richtigen Reihenfolge und die typischen falschen Reihenfolgen mit Denkfehler
+function OrderItems({ question: q, misconceptions }: { question: OrderQuestion; misconceptions: ReadonlyMap<string, Misconception> }) {
+  const text = (id: string) => q.items.find((i) => i.id === id)?.text ?? id
+  return (
+    <>
+      <div className="space-y-1 rounded-xl bg-green-50 px-3 py-2">
+        <p className="text-sm font-semibold text-green-800">
+          Reihenfolge ({q.items.length}): oben <RichText text={q.first} inline />, unten <RichText text={q.last} inline />
+        </p>
+        <ol className="list-decimal space-y-1 pl-6">
+          {q.items.map((i) => (
+            <li key={i.id} data-testid="order-item">
+              <RichText text={i.text} inline />
+            </li>
+          ))}
+        </ol>
+      </div>
+      <div className="space-y-2">
+        <p className="text-sm font-semibold text-red-800">Verwechslungen ({q.traps.length})</p>
+        <ul className="space-y-3">
+          {q.traps.map((t) => {
+            const m = misconceptions.get(t.misconception)
+            const why = t.why ?? m?.why
+            return (
+              <li key={t.kind === 'swap' ? `${t.before}-${t.after}` : 'reversed'} className="space-y-1 border-l-2 border-red-200 pl-3">
+                <p className="font-medium">
+                  {t.kind === 'reversed' ? (
+                    'ganz umgedreht'
+                  ) : (
+                    <>
+                      <RichText text={text(t.before)} inline /> vor <RichText text={text(t.after)} inline />
+                    </>
+                  )}
                 </p>
                 <p className="text-sm text-zinc-500">
                   Denkfehler: {m ? <RichText text={m.name} inline /> : 'unbekannt'} ({t.misconception}){t.why && ' · eigener Text'}

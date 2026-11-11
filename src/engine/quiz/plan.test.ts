@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { MATCH_INSTRUCTION, MATCH_SHOWN, MULTI_CORRECT, MULTI_INSTRUCTION, MULTI_SHOWN, QUIZ_INSTRUCTION, SHOWN_WRONG, planQuestion } from './plan.ts'
-import type { MatchQuestion, Misconception, MultiChoice, Question } from './types.ts'
+import { MATCH_INSTRUCTION, MATCH_SHOWN, MULTI_CORRECT, MULTI_INSTRUCTION, MULTI_SHOWN, ORDER_INSTRUCTION, ORDER_SHOWN, QUIZ_INSTRUCTION, SHOWN_WRONG, orderTrapsIn, planQuestion } from './plan.ts'
+import type { MatchQuestion, Misconception, MultiChoice, OrderQuestion, Question } from './types.ts'
 
 // Eigene kleine Frage für die Tests, unabhängig von den Sammlungen
 const why = (text: string) => ({ detailed: `${text} (ausführlich)`, short: text })
@@ -235,6 +235,76 @@ describe('Zuordnen als geführte Aufgabe', () => {
         const rows = planMatch(variant, focus).steps[0].match!.rows
         expect(rows.some((r) => r.traps.some((t) => t.errorRuleId === focus)), `${variant} ${focus}`).toBe(true)
       }
+    }
+  })
+})
+
+// Ordnen (N1c): sechs Glieder, eine Umkehrung und zwei Vertauschungen
+const ORDER: OrderQuestion = {
+  ...QUESTION,
+  kind: 'order',
+  id: 'test-ordnen',
+  prompt: 'Ordne!',
+  items: ['a', 'b', 'c', 'd', 'e', 'f'].map((id) => ({ id, text: id.toUpperCase() })),
+  first: 'klein',
+  last: 'groß',
+  traps: [
+    { kind: 'reversed', misconception: 'chem-mis-a' },
+    { kind: 'swap', before: 'f', after: 'a', misconception: 'chem-mis-b', why: why('Eigener Text zu F vor A') },
+    { kind: 'swap', before: 'c', after: 'b', misconception: 'chem-mis-c' },
+  ],
+}
+const planOrder = (variant: number, focus?: string) => planQuestion(ORDER, MISCONCEPTIONS, REF, variant, focus)
+
+describe('Ordnen als geführte Aufgabe', () => {
+  it('zeigt vier oder fünf Glieder in ihrer Reihenfolge, gemischt und nie schon richtig', () => {
+    for (const variant of MANY) {
+      const task = planOrder(variant)
+      const order = task.steps[0].order!
+      expect(task.instruction).toBe(ORDER_INSTRUCTION)
+      expect(task.steps[0].choices).toEqual([])
+      expect(order.items.length).toBeGreaterThanOrEqual(ORDER_SHOWN.min)
+      expect(order.items.length).toBeLessThanOrEqual(ORDER_SHOWN.max)
+      const ids = order.items.map((i) => i.id)
+      // Teilfolge des Vorrats in derselben Reihenfolge
+      expect(ids).toEqual(ORDER.items.map((i) => i.id).filter((id) => ids.includes(id)))
+      expect([...order.start].sort()).toEqual([...ids].sort())
+      expect(order.start).not.toEqual(ids)
+      expect(order.first).toBe('klein')
+      expect(task.resultText).toBe(order.items.map((i, n) => `${n + 1}. ${i.content}`).join('\n'))
+      expect(planOrder(variant)).toEqual(task)
+    }
+    expect(new Set(MANY.map((v) => planOrder(v).steps[0].order!.start.join())).size).toBeGreaterThan(100)
+  })
+
+  it('nimmt Vertauschungen nur, wenn beide Glieder dastehen, und gibt den eigenen Text vor dem des Denkfehlers', () => {
+    for (const variant of MANY) {
+      const { items, traps } = planOrder(variant).steps[0].order!
+      const ids = items.map((i) => i.id)
+      expect(traps.filter((t) => t.kind === 'reversed')).toHaveLength(1)
+      for (const t of traps) {
+        if (t.kind !== 'swap') continue
+        expect(ids).toContain(t.before)
+        expect(ids).toContain(t.after)
+        expect(t.whyWrong).toEqual(t.before === 'f' ? why('Eigener Text zu F vor A') : MISCONCEPTIONS.find((m) => m.id === t.errorRuleId)!.why)
+      }
+    }
+  })
+
+  it('erkennt Umkehrung und Vertauschungen in einer gelegten Reihenfolge', () => {
+    const { traps } = planOrder(0, 'chem-mis-b').steps[0].order!
+    const correct = ['a', 'b', 'c', 'f']
+    const found = (order: string[]) => orderTrapsIn(order, traps, correct).map((t) => t.errorRuleId)
+    expect(found(['f', 'c', 'b', 'a'])).toEqual(['chem-mis-a'])
+    expect(found(['f', 'a', 'b', 'c'])).toEqual(['chem-mis-b'])
+    expect(found(['a', 'b', 'c', 'f'])).toEqual([])
+  })
+
+  it('zeigt beim gezielten Üben sicher die Glieder der Vertauschung', () => {
+    for (const variant of MANY) {
+      const ids = planOrder(variant, 'chem-mis-c').steps[0].order!.items.map((i) => i.id)
+      expect(ids).toContain('b')
+      expect(ids).toContain('c')
     }
   })
 })

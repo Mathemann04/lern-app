@@ -4,7 +4,7 @@ import { cardById, cardsInTopic } from '../explain/cards.ts'
 import { parseRichText } from '../explain/richText.ts'
 import { latexProblem } from '../expr/latexChecks.ts'
 import { QUESTION_NO_MAX } from '../quiz/numbers.ts'
-import { type Explanation, type MatchQuestion, type Question, correctOptionsOf } from '../quiz/types.ts'
+import { type Explanation, type MatchQuestion, type OrderQuestion, type Question, correctOptionsOf } from '../quiz/types.ts'
 import { CHEM_TOPICS } from './banks.ts'
 import { generatorsOf } from './generators/index.ts'
 
@@ -19,6 +19,8 @@ const MULTI_MIN_WRONG = 3
 // Zuordnen: Vorrat mindestens vier Paare und zwei typische Verwechslungen
 const MATCH_MIN_PAIRS = 4
 const MATCH_MIN_TRAPS = 2
+// Ordnen: Vorrat mindestens vier Glieder
+const ORDER_MIN_ITEMS = 4
 
 // Texte mit $…$-Formeln: jede Formel setzt sich im strengen Modus
 function expectRenderable(text: string, context: string) {
@@ -132,6 +134,10 @@ describe.each(CHEM_TOPICS.map((t) => [t.bank.course, t] as const))('Fragensammlu
       expectMatch(q, id)
       return
     }
+    if (q.kind === 'order') {
+      expectOrder(q, id)
+      return
+    }
     if (q.kind === 'multi') {
       expect(q.correct.length, `${id}: richtige Aussagen`).toBeGreaterThanOrEqual(MULTI_MIN_CORRECT)
       expect(q.wrong.length, `${id}: falsche Aussagen`).toBeGreaterThanOrEqual(MULTI_MIN_WRONG)
@@ -149,6 +155,29 @@ describe.each(CHEM_TOPICS.map((t) => [t.bank.course, t] as const))('Fragensammlu
     }
     for (const text of options.map((o) => o.text)) expectRenderable(text, id)
   })
+
+  // Ordnen (N1c): Vorrat, verschiedene Glieder, Beschriftung oben und unten; jede Verwechslung ein Denkfehler des
+  // Themas, ein Tausch nennt zwei Glieder in der falschen Reihenfolge
+  function expectOrder(q: OrderQuestion, id: string) {
+    expect(q.items.length, `${id}: Glieder`).toBeGreaterThanOrEqual(ORDER_MIN_ITEMS)
+    expect(new Set(q.items.map((i) => i.id)).size, `${id}: Ids der Glieder`).toBe(q.items.length)
+    const texts = q.items.map((i) => normalized(i.text))
+    expect(texts.filter((t, i) => texts.indexOf(t) !== i), `${id}: doppelte Glieder`).toEqual([])
+    expect(normalized(q.first), `${id}: oben und unten gleich`).not.toBe(normalized(q.last))
+    expect(q.traps.length, `${id}: Verwechslungen`).toBeGreaterThanOrEqual(1)
+    const ids = q.items.map((i) => i.id)
+    for (const trap of q.traps) {
+      expect(known.has(trap.misconception), `${id}: Denkfehler ${trap.misconception}`).toBe(true)
+      if (trap.why) expectExplanation(trap.why, `${id}/${trap.kind}`)
+      if (trap.kind === 'swap') {
+        expect(ids, `${id}: Glied ${trap.before}`).toContain(trap.before)
+        expect(ids, `${id}: Glied ${trap.after}`).toContain(trap.after)
+        expect(ids.indexOf(trap.before), `${id}: ${trap.before} vor ${trap.after} wäre richtig`).toBeGreaterThan(ids.indexOf(trap.after))
+      }
+    }
+    expect(q.traps.filter((t) => t.kind === 'reversed').length, `${id}: höchstens eine Umkehrung`).toBeLessThanOrEqual(1)
+    for (const text of [q.first, q.last, ...q.items.map((i) => i.text)]) expectRenderable(text, id)
+  }
 
   // Zuordnen (N1b): Vorrat, eindeutige linke Einträge, mindestens zwei verschiedene Ziele; jede Verwechslung
   // nimmt das Ziel eines anderen Paars und ist ein Denkfehler des Themas

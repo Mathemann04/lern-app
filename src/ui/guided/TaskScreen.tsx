@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { Choice, GuidedStep, GuidedTaskBase, MatchStep } from '../../engine/guided/types.ts'
+import type { Choice, GuidedStep, GuidedTaskBase, MatchStep, OrderStep, OrderStepTrap } from '../../engine/guided/types.ts'
+import { orderTrapsIn } from '../../engine/quiz/plan.ts'
 import type { Expr } from '../../engine/expr/types.ts'
 import { type TaskRef, formatTaskNumber } from '../../engine/tasks/taskNumber.ts'
 import { recordAttempt, recordError } from '../../state/progress.ts'
@@ -213,6 +214,21 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext,
     setSolved(true)
   }
 
+  // Ordnen (N1c): einmal prüfen; in die Fehlerstatistik kommen die erkannten typischen falschen Reihenfolgen
+  const [orderTraps, setOrderTraps] = useState<readonly OrderStepTrap[]>([])
+  function checkOrder(placed: readonly string[]) {
+    const order = step.order
+    if (solved || !order) return
+    const correct = order.items.map((i) => i.id)
+    const clean = placed.join() === correct.join()
+    const found = clean ? [] : orderTrapsIn(placed, order.traps, correct)
+    for (const rule of new Set(found.map((t) => t.errorRuleId))) recordError(rule)
+    if (!clean) onMistake()
+    setOrderTraps(found)
+    setMultiResult({ clean })
+    setSolved(true)
+  }
+
   function toggle(choice: Choice) {
     if (solved) return
     setSelected((ids) => (ids.includes(choice.id) ? ids.filter((id) => id !== choice.id) : [...ids, choice.id]))
@@ -245,6 +261,8 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext,
 
       {numeric ? (
         <NumberAnswer answer={numeric} disabled={solved} onSubmit={(value) => judged(judgeNumber(value, numeric))} />
+      ) : step.order ? (
+        <OrderAnswers order={step.order} checked={multiResult !== null} onCheck={checkOrder} />
       ) : step.match ? (
         <MatchAnswers match={step.match} checked={multiResult !== null} detail={detail} onCheck={checkMatch} />
       ) : step.multi ? (
@@ -335,8 +353,14 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext,
           <div className="animate-step-in space-y-4 rounded-2xl bg-red-50 p-4">
             <p className="text-lg font-semibold text-red-800">Nicht ganz.</p>
             <p className="text-zinc-800">
-              Oben steht bei jeder {step.match ? 'Zeile' : 'Aussage'}, was richtig war. Die Frage kommt später noch einmal.
+              {step.order
+                ? 'Oben steht bei jedem Eintrag, an welche Stelle er gehört.'
+                : `Oben steht bei jeder ${step.match ? 'Zeile' : 'Aussage'}, was richtig war.`}{' '}
+              Die Frage kommt später noch einmal.
             </p>
+            {orderTraps.map((t, i) => (
+              <OrderTrapWhy key={i} trap={t} detail={detail} />
+            ))}
             <RichText text={step.explanation[mode === 'off' ? 'short' : mode]} className="text-zinc-800" />
             <button
               type="button"
@@ -635,6 +659,109 @@ function MatchAnswers({ match, checked, detail, onCheck }: MatchProps) {
   )
 }
 
+type OrderProps = { order: OrderStep; checked: boolean; onCheck: (placed: readonly string[]) => void }
+
+// Ordnen (N1c): Glieder mit Pfeilknöpfen nach oben und unten schieben (kein Ziehen mit dem Finger, verträgt sich am
+// Handy schlecht mit dem Scrollen), dann „Prüfen“. Danach steht bei jedem Glied, ob es am richtigen Platz ist.
+function OrderAnswers({ order, checked, onCheck }: OrderProps) {
+  const [placed, setPlaced] = useState<readonly string[]>(order.start)
+  const correct = order.items.map((i) => i.id)
+  const content = (id: string) => order.items.find((i) => i.id === id)?.content ?? ''
+  function move(index: number, by: -1 | 1) {
+    const to = index + by
+    if (checked || to < 0 || to >= placed.length) return
+    const next = [...placed]
+    ;[next[index], next[to]] = [next[to], next[index]]
+    setPlaced(next)
+  }
+  return (
+    <div className="space-y-3">
+      <p className="text-sm text-zinc-600">Schiebe die Einträge mit den Pfeilen an ihren Platz. Dann tippe auf „Prüfen“.</p>
+      <p className="text-sm font-medium text-zinc-700">
+        Oben: <RichText text={order.first} inline />
+      </p>
+      <ol className="space-y-2" aria-label="Reihenfolge">
+        {placed.map((id, index) => {
+          const verdict = !checked ? null : correct[index] === id ? 'right' : 'wrong'
+          const tone = verdict === 'right' ? 'border-green-600 bg-green-50' : verdict === 'wrong' ? 'border-red-300 bg-red-50' : 'border-zinc-200 bg-surface'
+          return (
+            <li key={id} className={`flex items-center gap-2 rounded-2xl border-2 py-1 pr-1 pl-4 ${tone}`} data-verdict={verdict ?? undefined}>
+              <span className="w-5 shrink-0 text-sm font-semibold text-zinc-600">{index + 1}.</span>
+              <span className="min-w-0 flex-1 py-2">
+                <RichText text={content(id)} className="block text-lg font-medium" inline />
+                {verdict === 'wrong' && (
+                  <span className="block text-sm font-semibold text-red-800">✗ gehört an Stelle {correct.indexOf(id) + 1}</span>
+                )}
+                {verdict === 'right' && <span className="block text-sm font-semibold text-green-800">✓ richtig</span>}
+              </span>
+              {!checked && (
+                <span className="flex shrink-0 gap-1">
+                  <button
+                    type="button"
+                    onClick={() => move(index, -1)}
+                    disabled={index === 0}
+                    aria-label="Nach oben"
+                    className="flex size-11 items-center justify-center rounded-xl border border-zinc-300 text-lg hover:border-accent-600 disabled:opacity-30"
+                  >
+                    <span aria-hidden>↑</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => move(index, 1)}
+                    disabled={index === placed.length - 1}
+                    aria-label="Nach unten"
+                    className="flex size-11 items-center justify-center rounded-xl border border-zinc-300 text-lg hover:border-accent-600 disabled:opacity-30"
+                  >
+                    <span aria-hidden>↓</span>
+                  </button>
+                </span>
+              )}
+            </li>
+          )
+        })}
+      </ol>
+      <p className="text-sm font-medium text-zinc-700">
+        Unten: <RichText text={order.last} inline />
+      </p>
+      {!checked && (
+        <button
+          type="button"
+          onClick={() => onCheck(placed)}
+          className="w-full rounded-xl bg-accent-700 px-4 py-3 text-lg font-medium text-on-accent hover:bg-accent-800"
+        >
+          Prüfen
+        </button>
+      )}
+    </div>
+  )
+}
+
+// „Warum ist das falsch?“ zu einer erkannten typischen falschen Reihenfolge
+function OrderTrapWhy({ trap, detail }: { trap: OrderStepTrap; detail: ExplanationDetail }) {
+  const [open, setOpen] = useState(false)
+  const name = findError(trap.errorRuleId)?.name
+  return (
+    <div className="space-y-2">
+      {name && (
+        <p className="text-zinc-800">
+          Das passt zu einem typischen Fehler: <RichText text={name} className="font-medium" inline />
+        </p>
+      )}
+      {open ? (
+        <RichText text={trap.whyWrong[detail]} className="text-zinc-800" />
+      ) : (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="rounded-xl border border-red-200 bg-surface px-4 py-2.5 font-medium text-red-800 hover:bg-red-100"
+        >
+          Warum ist das falsch?
+        </button>
+      )}
+    </div>
+  )
+}
+
 type TypedFeedbackProps = { typed: Typed; detail: ExplanationDetail; whyOpen: boolean; onWhy: () => void; onReveal: () => void }
 
 // Rückmeldung auf eine eingetippte Zahl: „Fast" (Rundung, zählt nicht als Fehler), typischer Fehler mit
@@ -723,6 +850,8 @@ function FinishView({ course, mix, task, mistakes, focus, isQuestion, practiceMo
               ? 'Nicht alles richtig angekreuzt.'
               : task.steps.some((st) => st.match)
                 ? 'Nicht alles richtig zugeordnet.'
+                : task.steps.some((st) => st.order)
+                  ? 'Die Reihenfolge stimmte noch nicht.'
               : `Gelöst mit ${mistakes} ${mistakes === 1 ? 'Fehlversuch' : 'Fehlversuchen'}.`}
           {isQuestion && mistakes > 0 && ' Die Frage kommt nach drei anderen Aufgaben noch einmal.'}
         </p>
@@ -741,7 +870,13 @@ function FinishView({ course, mix, task, mistakes, focus, isQuestion, practiceMo
                   <RichText text={task.resultQuestion} className="text-zinc-800" />
                 </div>
               )}
-              <p className="text-sm text-zinc-600">{task.steps.some((st) => st.multi) ? 'Richtige Aussagen' : task.steps.some((st) => st.match) ? 'Richtige Zuordnung' : 'Richtige Antwort'}</p>
+              <p className="text-sm text-zinc-600">{task.steps.some((st) => st.multi)
+                  ? 'Richtige Aussagen'
+                  : task.steps.some((st) => st.match)
+                    ? 'Richtige Zuordnung'
+                    : task.steps.some((st) => st.order)
+                      ? 'Richtige Reihenfolge'
+                      : 'Richtige Antwort'}</p>
               <RichText text={task.resultText!} className="text-xl font-medium" />
             </>
           )}

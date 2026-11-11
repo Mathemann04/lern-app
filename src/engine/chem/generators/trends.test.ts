@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { createRng } from '../../random/rng.ts'
 import { elementBySymbol } from '../elements.ts'
 import { figureById } from '../figures.ts'
-import { EN, FIRST_IE, ISOELECTRONIC, RADIUS, type Property, VALUES, comparable } from '../trends.ts'
+import { EN, FIRST_IE, ISOELECTRONIC, RADIUS, type Property, VALUES, allComparable, ascending, comparable } from '../trends.ts'
+import { TRENDS_BANK } from '../bank/trends.ts'
 import { compareTask, ionTask, lines, orderTask, pairs } from './trends.ts'
 
 // Trends im Periodensystem (S6d): Messwerte gegen Stichproben einer zweiten Liste, jede erlaubte Reihe gegen die
@@ -108,5 +109,18 @@ describe('Rechenfehler Trends: Katalogbeispiele', () => {
     if (en.kind === 'pse') expect(en.arrows).toMatchObject({ period: 1, group: -1 })
     expect(figureById('pse-trend:xyz')).toBeUndefined()
     expect(figureById('pse-trend:en:Fe')).toBeUndefined()
+  })
+})
+
+// Ordnen (N1c): Fragen der Sammlung, deren Glieder Elementsymbole sind, folgen der Tabelle, und je zwei sind nach den
+// Regeln vergleichbar (CHEMIE.md §6)
+describe('Ordnen-Fragen zum Atomradius', () => {
+  it('folgen den Messwerten und sind alle vergleichbar', () => {
+    for (const q of TRENDS_BANK.questions) {
+      if (q.kind !== 'order' || !q.fact.startsWith('order-radius')) continue
+      const els = q.items.map((i) => elementBySymbol(i.id)!)
+      expect(allComparable('radius', els), q.id).toBe(true)
+      expect(els.map((e) => e.symbol), q.id).toEqual(ascending('radius', els).reverse().map((e) => e.symbol))
+    }
   })
 })
