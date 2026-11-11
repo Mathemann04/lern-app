@@ -6,6 +6,7 @@ import {
   areaById,
   courseById,
   examAreaOf,
+  mockSubjectOf,
   isAreaAvailable,
   isCourseAvailable,
   isMixAvailable,
@@ -47,6 +48,9 @@ export type Route =
   // Klausuraufgabe N üben: #/klausur/chemie/aufgabe/4 würfelt eine Nummer und leitet weiter auf
   // #/klausur/chemie/aufgabe/4/123, damit Neuladen dieselbe Aufgabe zeigt
   | { readonly page: 'examTask'; readonly subject: string; readonly task: number; readonly seed: number | null }
+  // Probeklausur (S9): Deckblatt #/probeklausur/chemie, eine Klausur #/probeklausur/chemie/4711 (schreiben, solange sie
+  // läuft, danach die Auswertung; ist sie nicht die gespeicherte, das Deckblatt dieser Nummer)
+  | { readonly page: 'mock'; readonly subject: string; readonly id: number | null }
 
 // Geführt: #/ueben/brueche/2-4711, frei: #/frei/ableiten/2-4711,
 // gezielt: #/ueben/ableiten/2-4711?fokus=cos-sign, in der Mischung:
@@ -93,6 +97,13 @@ export function parseRoute(fullPath: string): Route {
     if (!found) return { page: 'home' }
     return { page: 'examTask', subject: found.subject.id, task: Number(exam[2]), seed: exam[3] ? Number(exam[3]) : null }
   }
+  const mock = /^\/probeklausur\/([a-z]+)(?:\/(\d{1,5}))?$/.exec(path)
+  if (mock) {
+    const subject = mockSubjectOf(mock[1])
+    if (!subject) return { page: 'home' }
+    const id = mock[2] ? Number(mock[2]) : null
+    return { page: 'mock', subject: subject.id, id: id === 0 ? null : id }
+  }
   const cards = /^\/karten(?:\/([^/]+))?(?:\/([^/]+))?$/.exec(path)
   if (cards) return { page: 'cards', folder: cards[1] ?? null, card: cards[2] ?? null }
   const practice = /^\/(ueben|frei)\/(?:([a-z-]+)\/)?([^/]+)$/.exec(path)
@@ -127,6 +138,7 @@ export const mixPracticeHref = (subject: string, level: Level) => `#/mischen/${s
 
 export const areaHref = (id: string) => `#/gebiet/${id}`
 export const examTaskHref = (subject: string, task: number, seed?: number) => `#/klausur/${subject}/aufgabe/${task}${seed === undefined ? '' : `/${seed}`}`
+export const mockHref = (subject: string, id?: number) => `#/probeklausur/${subject}${id === undefined ? '' : `/${id}`}`
 export const galleryHref = (course?: string) => (course ? `#/galerie/${course}` : '#/galerie')
 export const courseHref = (id: string) => `#/thema/${id}`
 
@@ -144,6 +156,9 @@ export function sectionOf(route: Route): Section | null {
     case 'course':
     case 'mix':
       return 'home'
+    // Deckblatt der Probeklausur zum Start, die Klausur selbst zu keinem Bereich
+    case 'mock':
+      return route.id === null ? 'home' : null
     case 'cards':
       return 'cards'
     case 'progress':

@@ -103,6 +103,8 @@ feste Regeln: [CHEMIE.md](CHEMIE.md)
     - [x] S8b. Frei rechnen in den Themen (Ziffernblock, Toleranz, Rundungshinweis, Fehlererkennung)
     - [x] S8c. Klausuraufgaben frei rechnen
   - [ ] S9. Probeklausur Teil 1 (50 Punkte)
+    - [x] S9a. Probeklausur schreiben und auswerten (Deckblatt, Uhr, Springen, Stand bleibt, Hinweis auf die 40 Punkte)
+    - [ ] S9b. Periodensystem und Formelsammlung in der Klausur, Verlauf, Übungsvorschläge, Wiederholung
 - Nach Teil 1:
   - [ ] N1. Weitere Fragearten (Wähle alle richtigen, Zuordnen, Ordnen)
   - [ ] N2. Eingaben (Kästchen, Baukästen, Element-Tastatur)

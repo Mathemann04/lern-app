@@ -758,3 +758,11 @@ Neue Entscheidungen unten anfügen.
   ändert dieselbe Einstellung wie „Geführt“/„Frei“ auf den Themenseiten. Außerdem: Seit S7c schlug die Veröffentlichung
   fehl, weil GitHub beim Einrichten der Browser-Tests die Ubuntu-Server nicht erreichte; der Browser wird jetzt notfalls
   ohne Zusatzpakete installiert.
+- 11.11.2026: S9 geteilt wie S8: **S9a** Probeklausur schreiben und auswerten, **S9b** Periodensystem und
+  Formelsammlung in der Klausur, Verlauf, Stoffe der letzten drei Probeklausuren meiden, „Das solltest du üben“ und
+  Wiederholung. S9a: Die Probeklausur Teil 1 sind die Klausuraufgaben 1 bis 5 (8, 6, 12, 14, 10 Punkte, wie der
+  Bauplan), jede für sich bewertet wie beim Üben. Die Uhr läuft ab dem Start, auch wenn die App zu ist (wie in der echten
+  Klausur); ist die Zeit um, gibt die App ab, auch beim nächsten Öffnen. Es gibt höchstens eine offene Probeklausur; eine
+  neue beginnen bricht sie nach Rückfrage ab. „Fortschritt löschen“ löscht auch sie. Die Kachel steht unter „Themen
+  mischen“ und zeigt eine laufende Klausur zum Weiterschreiben. Bis S9b steht auf dem Deckblatt, dass man eigenes
+  Periodensystem und eigene Formelsammlung bereitlegt.

@@ -185,3 +185,15 @@ describe('Klausuraufgaben im Katalog (S4c)', () => {
   })
 })
 
+
+describe('Probeklausur im Katalog (S9)', () => {
+  it('Zeit, Punkte und Aufgaben der Kachel wie in der Engine', async () => {
+    const { CHEM_MOCK, chemMockExam } = await import('../engine/chem/exam/mock.ts')
+    const { mockMax } = await import('../engine/exam/mock.ts')
+    const subjects = SUBJECTS.filter((s) => s.mock)
+    expect(subjects.map((s) => s.id)).toEqual(['chemie'])
+    const mock = subjects[0].mock!
+    const exam = chemMockExam(1)
+    expect(mock).toEqual({ minutes: CHEM_MOCK.minutes, points: mockMax(exam), tasks: exam.tasks.length, part: 1 })
+  })
+})
