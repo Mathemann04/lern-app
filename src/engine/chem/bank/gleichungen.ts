@@ -1,4 +1,4 @@
-import type { Question, QuestionBank } from '../../quiz/types.ts'
+import type { MultiChoice, Question, QuestionBank, QuestionLevel } from '../../quiz/types.ts'
 
 // Wissensfragen zum Thema „Reaktionsgleichungen“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern:
 // Stufe · 100 + laufende Nummer; nie neu vergeben, gelöschte kommen in retired. Jede Gleichung ist mit der
@@ -1702,8 +1702,108 @@ const LEVEL_3: readonly Question[] = [
   },
 ]
 
+// ---- Wähle alle richtigen (N1): richtige Aussagen r1, r2, …; jede Aussage ein ganzer Satz
+type MultiSpec = Omit<MultiChoice, 'kind' | 'level' | 'correct'> & { correct: readonly string[] }
+const multiAt = (level: QuestionLevel) => (spec: MultiSpec): MultiChoice => ({
+  ...spec,
+  kind: 'multi',
+  level,
+  correct: spec.correct.map((text, i) => ({ id: `r${i + 1}`, text })),
+})
+
+const MULTI: readonly Question[] = [
+  multiAt(1)({
+    id: 'gl-g-multi-lesen',
+    no: 119,
+    fact: 'multi-reading',
+    part: 'lesen',
+    title: 'Gleichungen lesen',
+    prompt: 'Welche Aussagen über Reaktionsgleichungen stimmen?',
+    correct: [
+      'Links vom Pfeil stehen die Edukte, rechts die Produkte.',
+      'Bei einer Reaktion werden die Atome nur neu verbunden; keines geht verloren, keines kommt hinzu.',
+      'Der Koeffizient vor einer Formel sagt, wie viele Teilchen dieses Stoffes reagieren.',
+      'Das Zeichen (aq) hinter einer Formel bedeutet, dass der Stoff in Wasser gelöst vorliegt.',
+    ],
+    wrong: [
+      { id: 'f1', text: 'Bei einer chemischen Reaktion werden Atome eines Elements zu Atomen eines anderen Elements.', misconception: 'chem-mis-gl-atoms-transform' },
+      { id: 'f2', text: 'Links und rechts vom Pfeil müssen immer gleich viele Moleküle stehen.', misconception: 'chem-mis-gl-molecules-conserved' },
+      { id: 'f3', text: 'Das Zeichen (l) hinter einer Formel steht für einen in Wasser gelösten Stoff.', misconception: 'chem-mis-gl-state-symbols' },
+      { id: 'f4', text: 'Die große Zahl vor einer Formel gibt an, wie viele Atome ein Teilchen des Stoffes enthält.', misconception: 'chem-mis-gl-coef-index-swap' },
+      { id: 'f5', text: 'Steht vor einer Formel keine Zahl, nimmt dieser Stoff nicht an der Reaktion teil.', misconception: 'chem-mis-gl-coef-one' },
+      { id: 'f6', text: 'Bei einer Reaktion im geschlossenen Gefäß geht Masse verloren, weil Stoffe verbraucht werden.', misconception: 'chem-mis-gl-mass-changes' },
+    ],
+    hint: 'Was bedeuten die beiden Seiten des Pfeils, die Zahlen vor den Formeln und die Zeichen in Klammern? Und was geschieht mit den Atomen?',
+    explanation: {
+      detailed: 'Links vom Pfeil stehen die Ausgangsstoffe (Edukte), rechts die Produkte. Bei der Reaktion werden die Atome nur neu verbunden, deshalb bleiben sie und die Masse erhalten. Der Koeffizient vor einer Formel zählt die Teilchen, die reagieren; (aq) heißt in Wasser gelöst.',
+      short: 'Edukte links, Produkte rechts; Atome bleiben erhalten; der Koeffizient zählt Teilchen; (aq) heißt gelöst.',
+    },
+    cards: ['gleichungen-lesen'],
+    ref: 'Skript Stöchiometrie',
+  }),
+  multiAt(2)({
+    id: 'gl-v-multi-ausgleichen',
+    no: 218,
+    fact: 'multi-balancing',
+    part: 'ausgleichen',
+    title: 'Ausgleichen',
+    prompt: 'Welche Aussagen über das Ausgleichen von Reaktionsgleichungen stimmen?',
+    correct: [
+      'Beim Ausgleichen ändert man nur die Koeffizienten vor den Formeln.',
+      'Eine Gleichung ist ausgeglichen, wenn von jedem Element links und rechts gleich viele Atome stehen.',
+      String.raw`Wasserstoff, Stickstoff, Sauerstoff und die Halogene stehen in Gleichungen als Moleküle aus zwei Atomen, etwa $\ce{O2}$ oder $\ce{Cl2}$.`,
+      'Üblicherweise schreibt man eine ausgeglichene Gleichung mit den kleinsten ganzen Koeffizienten.',
+      String.raw`Die Gleichung $\ce{2 Zn + O2 -> 2 ZnO}$ ist ausgeglichen.`,
+    ],
+    wrong: [
+      { id: 'f1', text: String.raw`Beim Ausgleichen darf man die kleinen Zahlen in einer Formel ändern, etwa $\ce{MgO}$ zu $\ce{MgO2}$.`, misconception: 'chem-mis-gl-index-changed' },
+      { id: 'f2', text: 'Fehlen auf einer Seite Atome, schreibt man einfach ein passendes Atom dazu.', misconception: 'chem-mis-gl-add-species' },
+      { id: 'f3', text: String.raw`Metalle wie Natrium stehen in Gleichungen als Moleküle aus zwei Atomen, etwa $\ce{Na2}$.`, misconception: 'chem-mis-gl-diatomic-metal' },
+      { id: 'f4', text: 'Hat man ein Element mit einem Koeffizienten ausgeglichen, stimmen die übrigen Elemente von selbst.', misconception: 'chem-mis-gl-not-recounted' },
+      { id: 'f5', text: 'Ein Bruch vor einer Formel darf in der fertigen Gleichung auf eine ganze Zahl gerundet werden.', misconception: 'chem-mis-gl-fraction' },
+      { id: 'f6', text: String.raw`Werden sechs Sauerstoffatome gebraucht, schreibt man $\ce{6 O2}$.`, misconception: 'chem-mis-gl-atoms-molecules' },
+    ],
+    hint: 'Was darf man beim Ausgleichen ändern, was nicht? Zähle bei jeder Gleichung jedes Element links und rechts.',
+    explanation: {
+      detailed: String.raw`Ausgleichen heißt, die Koeffizienten so zu wählen, dass von jedem Element links und rechts gleich viele Atome stehen; die Formeln selbst bleiben. Wasserstoff, Stickstoff, Sauerstoff und die Halogene stehen dabei als Moleküle aus zwei Atomen. Üblich sind die kleinsten ganzen Zahlen. In $\ce{2 Zn + O2 -> 2 ZnO}$ stehen auf beiden Seiten zwei Zink- und zwei Sauerstoffatome.`,
+      short: 'Nur Koeffizienten ändern, bis jedes Element links und rechts gleich oft vorkommt; kleinste ganze Zahlen.',
+    },
+    cards: ['gleichungen-ausgleichen', 'gleichungen-zweiatomig'],
+    ref: 'Skript Stöchiometrie',
+  }),
+  multiAt(3)({
+    id: 'gl-k-multi-verbrennung',
+    no: 319,
+    fact: 'multi-combustion',
+    part: 'verbrennung',
+    title: 'Verbrennung',
+    prompt: 'Welche Aussagen über Verbrennungen von Alkanen und Alkoholen stimmen?',
+    correct: [
+      'Bei der vollständigen Verbrennung eines Alkans entstehen nur Kohlenstoffdioxid und Wasser.',
+      String.raw`Ein Alkan mit $n$ Kohlenstoffatomen hat $2n + 2$ Wasserstoffatome.`,
+      'Beim Ausgleichen einer Verbrennung zählt auch der Sauerstoff im Wasser mit.',
+      'Bei Sauerstoffmangel entstehen Wasser und Kohlenstoffmonoxid, bei starkem Mangel auch Ruß.',
+      String.raw`Die Gleichung $\ce{2 C2H6 + 7 O2 -> 4 CO2 + 6 H2O}$ ist ausgeglichen.`,
+    ],
+    wrong: [
+      { id: 'f1', text: 'Bei der vollständigen Verbrennung eines Kohlenwasserstoffs entstehen Kohlenstoffmonoxid und Wasserstoff.', misconception: 'chem-mis-gl-combustion-products' },
+      { id: 'f2', text: 'Aus jedem Wasserstoffatom des Brennstoffs entsteht ein Wassermolekül.', misconception: 'chem-mis-gl-h-per-water' },
+      { id: 'f3', text: 'Den Sauerstoff im Alkohol muss man beim Ausgleichen der Verbrennung nicht beachten.', misconception: 'chem-mis-gl-fuel-oxygen' },
+      { id: 'f4', text: 'Bei Sauerstoffmangel bleibt der Wasserstoff des Brennstoffs als Gas übrig.', misconception: 'chem-mis-gl-incomplete-hydrogen' },
+      { id: 'f5', text: 'Pentan hat vier Kohlenstoffatome.', misconception: 'chem-mis-gl-alkane-name' },
+    ],
+    hint: 'Welche Produkte entstehen bei genug und bei zu wenig Sauerstoff? Zähle in der Gleichung jedes Element auf beiden Seiten.',
+    explanation: {
+      detailed: String.raw`Vollständig verbrannt wird ein Alkan zu Kohlenstoffdioxid und Wasser; zu $n$ Kohlenstoffatomen gehören $2n + 2$ Wasserstoffatome. Beim Ausgleichen kommt der Sauerstoff zuletzt, und dabei zählt der in $\ce{CO2}$ und der in $\ce{H2O}$. Bei Sauerstoffmangel entsteht statt $\ce{CO2}$ Kohlenstoffmonoxid oder sogar Ruß. In $\ce{2 C2H6 + 7 O2 -> 4 CO2 + 6 H2O}$ stehen links und rechts je 4 C, 12 H und 14 O.`,
+      short: String.raw`Vollständig: $\ce{CO2}$ und $\ce{H2O}$; Alkane $\ce{C_nH_{2n+2}}$; Sauerstoff in beiden Produkten zählen; bei Mangel CO oder Ruß.`,
+    },
+    cards: ['gleichungen-verbrennung', 'gleichungen-alkane'],
+    ref: 'Skript Stöchiometrie',
+  }),
+]
+
 export const GLEICHUNGEN_BANK: QuestionBank = {
   course: 'chem-gleichungen',
-  questions: [...LEVEL_1, ...LEVEL_2, ...LEVEL_3],
+  questions: [...LEVEL_1, ...LEVEL_2, ...LEVEL_3, ...MULTI],
   retired: [],
 }

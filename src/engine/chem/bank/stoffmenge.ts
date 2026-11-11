@@ -1,8 +1,17 @@
-import type { QuestionBank } from '../../quiz/types.ts'
+import type { MultiChoice, QuestionBank, QuestionLevel } from '../../quiz/types.ts'
 
 // Wissensfragen zum Thema „Stoffmenge und Umsatz“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern:
 // Stufe · 100 + laufende Nummer; nie neu vergeben, gelöschte kommen in retired. Zahlen nachgerechnet mit
 // chem/molarMass.ts; Umsatz kommt mit S4.
+
+// „Wähle alle richtigen“ (N1): richtige Aussagen r1, r2, …; jede Aussage ein ganzer Satz
+type MultiSpec = Omit<MultiChoice, 'kind' | 'level' | 'correct'> & { correct: readonly string[] }
+const multiAt = (level: QuestionLevel) => (spec: MultiSpec): MultiChoice => ({
+  ...spec,
+  kind: 'multi',
+  level,
+  correct: spec.correct.map((text, i) => ({ id: `r${i + 1}`, text })),
+})
 
 export const STOFFMENGE_BANK: QuestionBank = {
   course: 'chem-stoffmenge',
@@ -1605,6 +1614,91 @@ export const STOFFMENGE_BANK: QuestionBank = {
       },
       cards: ['stoffmenge-molmasse'],
     },
+    // ---- Wähle alle richtigen (N1)
+    multiAt(1)({
+      id: 'st-g-multi-mol',
+      no: 118,
+      fact: 'multi-mol',
+      part: 'stoffmenge',
+      title: "Das Mol",
+      prompt: "Welche Aussagen über das Mol und die Stoffmenge stimmen?",
+      correct: [
+        "Ein Mol enthält bei jedem Stoff gleich viele Teilchen.",
+        String.raw`Ein Mol sind rund $6{,}022 \cdot 10^{23}$ Teilchen.`,
+        "Die Stoffmenge gibt an, wie viele Teilchen eine Portion enthält, gezählt in Mol.",
+        "Ein Mol Kupfer und ein Mol Methan enthalten gleich viele Teilchen, sind aber verschieden schwer.",
+      ],
+      wrong: [
+        { id: 'f1', text: "Ein Mol eines Stoffes aus schweren Teilchen enthält weniger Teilchen als ein Mol eines Stoffes aus leichten Teilchen.", misconception: 'chem-mis-st-mol-count-varies' },
+        { id: 'f2', text: String.raw`Ein Mol wiegt bei jedem Stoff gleich viel, zum Beispiel $1\,\mathrm{g}$.`, misconception: 'chem-mis-st-mol-is-mass' },
+        { id: 'f3', text: "Die Stoffmenge in Mol ist dieselbe Zahl wie die Zahl der Teilchen in der Portion.", misconception: 'chem-mis-st-n-is-count' },
+        { id: 'f4', text: String.raw`Nur bei einem Gas unter Normbedingungen enthält ein Mol $6{,}022 \cdot 10^{23}$ Teilchen.`, misconception: 'chem-mis-st-mol-only-gas' },
+        { id: 'f5', text: String.raw`$10\,\mathrm{g}$ eines Stoffes sind immer $10\,\mathrm{mol}$.`, misconception: 'chem-mis-st-n-is-mass' },
+      ],
+      hint: "Das Mol ist eine Zähleinheit wie das Dutzend. Was zählt es, und was sagt es über die Masse?",
+      explanation: {
+        detailed: String.raw`Das Mol ist eine feste Anzahl: $6{,}022 \cdot 10^{23}$ Teilchen, bei jedem Stoff gleich viele. Die Stoffmenge zählt die Teilchen einer Portion in dieser Einheit. Wie viel ein Mol wiegt, hängt dagegen vom Stoff ab: Ein Mol Kupfer ist schwerer als ein Mol Methan.`,
+        short: String.raw`Ein Mol sind bei jedem Stoff $6{,}022 \cdot 10^{23}$ Teilchen; die Masse eines Mols hängt vom Stoff ab.`,
+      },
+      cards: ['stoffmenge-mol'],
+      ref: "Skript Stöchiometrie",
+    }),
+    multiAt(2)({
+      id: 'st-v-multi-formeln',
+      no: 219,
+      fact: 'multi-formula-reading',
+      part: 'molmasse',
+      title: "Formeln lesen",
+      prompt: "Welche Aussagen über das Lesen von Summenformeln stimmen?",
+      correct: [
+        String.raw`In $\ce{Ca(OH)2}$ gilt die 2 für alles in der Klammer: Eine Formeleinheit enthält zwei Sauerstoff- und zwei Wasserstoffatome.`,
+        String.raw`Zu jeder Formeleinheit $\ce{CuSO4 * 5 H2O}$ gehören fünf Wassermoleküle, die fest im Kristall eingebaut sind.`,
+        String.raw`Eine Formeleinheit $\ce{Ca3(PO4)2}$ enthält 8 Sauerstoffatome.`,
+        String.raw`Eine Formeleinheit $\ce{CuSO4 * 5 H2O}$ enthält 9 Sauerstoffatome.`,
+      ],
+      wrong: [
+        { id: 'f1', text: String.raw`In $\ce{Ca(OH)2}$ gilt die 2 nur für das Wasserstoffatom direkt davor.`, misconception: 'chem-mis-st-bracket' },
+        { id: 'f2', text: String.raw`Das Wasser hinter dem Malpunkt in $\ce{CuSO4 * 5 H2O}$ zählt bei der molaren Masse nicht mit.`, misconception: 'chem-mis-st-hydrate-forgotten' },
+        { id: 'f3', text: String.raw`In $\ce{CuSO4 * 5 H2O}$ gilt die 5 nur für den Wasserstoff, und der Malpunkt bedeutet malnehmen.`, misconception: 'chem-mis-st-hydrate-factor' },
+        { id: 'f4', text: String.raw`Die 2 in $\ce{Ca(OH)2}$ bedeutet, dass zwei Formeleinheiten Calciumhydroxid vorliegen.`, misconception: 'chem-mis-st-index-coefficient' },
+        { id: 'f5', text: String.raw`In $\ce{NH3}$ zählt jedes Element einmal; der kleine Index ändert an der molaren Masse nichts.`, misconception: 'chem-mis-st-index-ignored' },
+      ],
+      hint: "Wofür gilt ein Index hinter einer Klammer, und wofür die Zahl vor dem Kristallwasser?",
+      explanation: {
+        detailed: String.raw`Ein Index hinter einer Klammer gilt für alles in der Klammer: $\ce{Ca(OH)2}$ hat zwei O und zwei H, $\ce{Ca3(PO4)2}$ hat $2 \cdot 4 = 8$ O. Kristallwasser hinter dem Malpunkt gehört fest zur Formeleinheit, und die Zahl davor gilt für das ganze Wassermolekül: $\ce{CuSO4 * 5 H2O}$ hat $4 + 5 = 9$ O.`,
+        short: "Der Index hinter der Klammer gilt für die ganze Klammer, die Zahl vor dem Kristallwasser für das ganze Wassermolekül.",
+      },
+      cards: ['stoffmenge-formeln'],
+      ref: "Skript Stöchiometrie",
+    }),
+    multiAt(3)({
+      id: 'st-k-multi-portionen',
+      no: 318,
+      fact: 'multi-portions',
+      part: 'stoffmenge',
+      title: "Portionen vergleichen",
+      prompt: "Welche Aussagen über Masse, Stoffmenge und molare Masse von Stoffportionen stimmen?",
+      correct: [
+        "Bei gleicher Masse enthält die Portion des Stoffes mit der kleineren molaren Masse mehr Teilchen.",
+        "Die molare Masse gehört zum Stoff: Teilt man eine Portion, bleibt sie in jeder Hälfte gleich.",
+        "Verdampft man flüssiges Wasser, ohne dass etwas verloren geht, bleiben Stoffmenge und Masse gleich.",
+        "Die Masse einer Portion ist ihre Stoffmenge mal die molare Masse.",
+      ],
+      wrong: [
+        { id: 'f1', text: "Zwei gleich schwere Portionen verschiedener Stoffe enthalten immer gleich viele Teilchen.", misconception: 'chem-mis-st-same-mass-same-n' },
+        { id: 'f2', text: "Gleiche Stoffmengen verschiedener Stoffe sind immer gleich schwer.", misconception: 'chem-mis-st-n-decides-mass' },
+        { id: 'f3', text: "Eine Portion des Stoffes mit der größeren molaren Masse ist immer schwerer, egal wie viel Mol sie enthält.", misconception: 'chem-mis-st-m-ignores-n' },
+        { id: 'f4', text: String.raw`Ein einzelnes Wassermolekül wiegt $18\,\mathrm{g}$.`, misconception: 'chem-mis-st-particle-mass' },
+        { id: 'f5', text: "Zwei Stoffe mit derselben molaren Masse sind derselbe Stoff.", misconception: 'chem-mis-st-same-m-same-stoff' },
+      ],
+      hint: String.raw`Denke an $m = n \cdot M$: Was hängt von der Portion ab, was nur vom Stoff?`,
+      explanation: {
+        detailed: String.raw`Es gilt $m = n \cdot M$. Bei gleicher Masse ist $n = \frac{m}{M}$ dort größer, wo $M$ kleiner ist. Die molare Masse ist eine Eigenschaft des Stoffes und ändert sich nicht, wenn man die Portion teilt. Beim Verdampfen geht kein Teilchen verloren: Stoffmenge und Masse bleiben, nur das Volumen wächst.`,
+        short: String.raw`$m = n \cdot M$; $M$ gehört zum Stoff, $n$ und $m$ zur Portion.`,
+      },
+      cards: ['stoffmenge-n-m-m', 'stoffmenge-mol'],
+      ref: "Skript Stöchiometrie",
+    }),
   ],
   retired: [],
 }
