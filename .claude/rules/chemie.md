@@ -165,3 +165,8 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   `steckbrief`, `steckbrief-rueckwaerts`, `ionenladung` mit `ION_ELEMENTS`, `ionisierung`; `narrow` schränkt beim
   gezielten Üben nie auf null ein), Rechenfehler `chem/pseRules.ts`, Karten `pseCards.ts`, Fragen `bank/pse.ts`
   (Denkfehler `chem-mis-pse-…`), Gegenprobe `chem/pse.test.ts`, Katalogbeispiele `generators/pse.test.ts`.
+- Trends im Periodensystem (S6d): `chem/trends.ts` (`RADIUS`, `FIRST_IE`, `EN`, `VALUES`, Richtung `RULE`, `comparable` mit
+  `EXCLUDED` aus §6, `allComparable`, `ascending`, `ISOELECTRONIC` Ionenradien), Bild `pse-trend:<Größe>[:A,B]` mit
+  Pfeilen (`TREND_ARROWS`, `pseTrendFigureById`; `PseFigure.marks` statt einer Markierung), `generators/trends.ts`
+  (je Größe `vergleich-…` und `ordnen-…`, dazu `ionenradien`; `pairs`, `lines`), Rechenfehler `chem/trendRules.ts`,
+  Karten `trendsCards.ts`, Fragen `bank/trends.ts` (Denkfehler `chem-mis-tr-…`), Tests `generators/trends.test.ts`.

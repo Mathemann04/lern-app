@@ -688,3 +688,14 @@ Neue Entscheidungen unten anfügen.
   (Ladung falsch gezählt, Ionisierungsenergien falsch gezählt, alle Edelgase wie Helium), damit gezieltes Üben
   passende Antworten zeigt; Hauptgruppen überall mit der Nummer 1 bis 18 in Klammern (CHEMIE.md §3); vier
   Ionisierungsenergien auf die NIST-Werte korrigiert (Abweichung je 1 kJ/mol).
+- 11.11.2026: S6d Thema „Trends im Periodensystem“. Messwerte als eigene Tabellen mit Quelle (`chem/trends.ts`); die
+  App rechnet selbst aus, welche Paare und Reihen sie fragen darf (gleiche Periode oder Gruppe, Regel und Messwerte
+  stimmen mit mindestens 3 % Unterschied überein, Paare aus CHEMIE.md §6 ausgeschlossen, Ionisierungsenergie und
+  Elektronegativität nie innerhalb der Gruppen 13 und 14). Die Elektronenaffinität und der Metallcharakter kommen nur
+  in Wissensfragen vor. Pauling-Werte der übrigen Hauptgruppen stehen in `trends.ts`, nicht in `electronegativity.ts`,
+  damit Moleküle und zwischenmolekulare Kräfte unverändert bleiben. Bild: Hauptgruppen mit Pfeilen in Richtung der
+  Zunahme. Das Skript „Trends“ lag nicht vor: Fundstellen ohne Foliennummer, Wortvergleich folgt.
+  Nach der fachlichen Prüfung (Messwerte ohne Befund): Sb/Te bei der Ionisierungsenergie ausgeschlossen (§6);
+  Fehler „zwei benachbarte Elemente vertauscht“ allgemein benannt; Erklärungen, die die Lösung verrieten oder
+  nicht passten, neu geschrieben; Denkfehler zu den Edelgasen enger gefasst (Krypton hat nach Pauling eine etwas
+  größere Elektronegativität als Brom); vier Ionen nur aus der Reihe wie Neon.

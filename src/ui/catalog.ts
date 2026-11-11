@@ -113,13 +113,14 @@ export const ZMK = 'chem-zmk'
 export const METALLE = 'chem-metalle'
 export const ELEKTRONEN = 'chem-elektronen'
 export const PSE = 'chem-pse'
+export const TRENDS = 'chem-trends'
 
 // Chemie-Themen: Ids mit „chem-", Engine aus Wissensfragen (engine/chem/)
 export const isChemCourse = (id: string) => id.startsWith('chem-')
 
 // Themen mit Testseite in der Formel-Galerie (auch solche, die noch nicht spielbar sind); bei Chemie
 // die Seite „Fragen durchsehen"
-export const GALLERY_COURSES: readonly string[] = [DERIVATIVES, FRACTIONS, REARRANGE, ATOMBAU, GLEICHUNGEN, STOFFMENGE, LOESUNGEN, IONEN, MOLEKUELE, ZMK, METALLE, ELEKTRONEN, PSE]
+export const GALLERY_COURSES: readonly string[] = [DERIVATIVES, FRACTIONS, REARRANGE, ATOMBAU, GLEICHUNGEN, STOFFMENGE, LOESUNGEN, IONEN, MOLEKUELE, ZMK, METALLE, ELEKTRONEN, PSE, TRENDS]
 
 const derivativeLevels: LevelPreview[] = [
   {
@@ -387,6 +388,36 @@ const elektronenParts: CoursePart[] = [
   { id: 'besetzung', title: 'Pauli, Hund und Elektronenkonfiguration', levels: [1, 2, 3] },
   { id: 'ionen', title: 'Konfiguration von Ionen', levels: [2, 3] },
   { id: 'valenz', title: 'Valenzelektronen', levels: [1, 2, 3] },
+]
+
+const trendsLevels: LevelPreview[] = [
+  {
+    level: 1,
+    available: true,
+    title: 'Richtung der Trends in Periode und Gruppe, zwei Elemente vergleichen',
+    examples: [String.raw`r(\ce{Na}) > r(\ce{Cl})`],
+  },
+  {
+    level: 2,
+    available: true,
+    title: 'Drei Elemente ordnen, Begründungen, Ionenradien, Elektronenaffinität',
+    examples: [String.raw`\ce{Mg^2+} < \ce{Na+} < \ce{F-}`],
+  },
+  {
+    level: 3,
+    available: true,
+    title: 'Vier Elemente ordnen, Ausnahmen erklären, alles gemischt',
+    examples: [String.raw`\ce{I} < \ce{Br} < \ce{Cl} < \ce{F}`],
+  },
+]
+
+// Unterthemen von „Trends im Periodensystem" (Rechnungen in engine/chem/generators/trends.ts, part)
+const trendsParts: CoursePart[] = [
+  { id: 'atomradius', title: 'Atomradius', levels: [1, 2, 3] },
+  { id: 'ionisierung', title: 'Ionisierungsenergie', levels: [1, 2, 3] },
+  { id: 'elektronegativitaet', title: 'Elektronegativität', levels: [1, 2, 3] },
+  { id: 'affinitaet-metall', title: 'Elektronenaffinität und Metallcharakter', levels: [1, 2, 3] },
+  { id: 'ionenradien', title: 'Ionenradien', levels: [2, 3] },
 ]
 
 const pseLevels: LevelPreview[] = [
@@ -660,7 +691,17 @@ export const SUBJECTS: readonly Subject[] = [
             focus: true,
             parts: pseParts,
           },
-          comingSoon('chem-trends', 'Trends im Periodensystem', 'Atomradius, Ionisierungsenergie, Elektronegativität und Metallcharakter', 'periodic'),
+          {
+            id: TRENDS,
+            title: 'Trends im Periodensystem',
+            description: 'Atomradius, Ionisierungsenergie, Elektronegativität, Elektronenaffinität, Metallcharakter und Ionenradien',
+            icon: 'periodic',
+            cards: 'chem-trends',
+            levels: trendsLevels,
+            free: false,
+            focus: true,
+            parts: trendsParts,
+          },
         ],
       },
       {

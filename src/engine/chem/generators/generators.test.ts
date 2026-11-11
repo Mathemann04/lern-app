@@ -16,7 +16,7 @@ import { LIGHT_SOURCES, lightValues } from './light.ts'
 
 const COURSE = 'chem-atombau'
 // alle Themen mit Rechnungen
-const CALC_COURSES = ['chem-atombau', 'chem-stoffmenge', 'chem-gleichungen', 'chem-loesungen', 'chem-ionen', 'chem-molekuele', 'chem-zmk', 'chem-metalle', 'chem-elektronen', 'chem-pse']
+const CALC_COURSES = ['chem-atombau', 'chem-stoffmenge', 'chem-gleichungen', 'chem-loesungen', 'chem-ionen', 'chem-molekuele', 'chem-zmk', 'chem-metalle', 'chem-elektronen', 'chem-pse', 'chem-trends']
 // Abweichung mit Begründung (docs/PLAN-M4.md, S3b): Es gibt nur etwa 15 bis 25 sinnvolle Reaktionen bzw.
 // Brennstoffe je Stufe; dort zählt, dass jede vorkommt und keine deutlich öfter als die anderen
 const VARIETY: Readonly<Record<string, { distinct: number; maxShare: number }>> = {

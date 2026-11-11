@@ -276,8 +276,13 @@ function Pse({ figure }: { figure: PseFigure }) {
   const cell = 34
   const left = 22
   const top = 20
-  const width = left + figure.groups.length * cell + 2
-  const height = top + figure.periods.length * cell + 2
+  const arrows = figure.arrows
+  const right = arrows ? 24 : 2
+  const bottom = arrows ? 30 : 2
+  const tableWidth = figure.groups.length * cell
+  const tableHeight = figure.periods.length * cell
+  const width = left + tableWidth + right
+  const height = top + tableHeight + bottom
   const x = (group: number) => left + figure.groups.indexOf(group) * cell
   const y = (period: number) => top + figure.periods.indexOf(period) * cell
   const head = (group: number) => (figure.main ? ROMAN_HEAD[(group <= 2 ? group : group - 10) - 1] : String(group))
@@ -294,7 +299,7 @@ function Pse({ figure }: { figure: PseFigure }) {
         </text>
       ))}
       {figure.cells.map((c) => {
-        const marked = c.symbol === figure.mark
+        const marked = c.symbol !== null && figure.marks.includes(c.symbol)
         return (
           <g key={`${c.period}-${c.group}`}>
             <rect
@@ -314,7 +319,28 @@ function Pse({ figure }: { figure: PseFigure }) {
           </g>
         )
       })}
+      {arrows && <TrendArrows arrows={arrows} x0={left} y0={top} w={tableWidth} h={tableHeight} />}
     </svg>
+  )
+}
+
+// Pfeile unter und rechts neben dem Ausschnitt: in Richtung der Zunahme
+function TrendArrows({ arrows, x0, y0, w, h }: { arrows: NonNullable<PseFigure['arrows']>; x0: number; y0: number; w: number; h: number }) {
+  const yh = y0 + h + 12
+  const [hx1, hx2] = arrows.period === 1 ? [x0 + 8, x0 + w - 8] : [x0 + w - 8, x0 + 8]
+  const xv = x0 + w + 12
+  const [vy1, vy2] = arrows.group === 1 ? [y0 + 8, y0 + h - 8] : [y0 + h - 8, y0 + 8]
+  const head = (x: number, y: number, dx: number, dy: number) => `${x - dx * 7 - dy * 5},${y - dy * 7 - dx * 5} ${x},${y} ${x - dx * 7 + dy * 5},${y - dy * 7 + dx * 5}`
+  return (
+    <g className="stroke-accent-700" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" fill="none">
+      <line x1={hx1} y1={yh} x2={hx2} y2={yh} />
+      <polyline points={head(hx2, yh, Math.sign(hx2 - hx1), 0)} />
+      <line x1={xv} y1={vy1} x2={xv} y2={vy2} />
+      <polyline points={head(xv, vy2, 0, Math.sign(vy2 - vy1))} />
+      <text x={x0 + w / 2} y={yh + 14} textAnchor="middle" className="fill-zinc-700 stroke-none" fontSize={10}>
+        {`${arrows.label} nimmt zu`}
+      </text>
+    </g>
   )
 }
 

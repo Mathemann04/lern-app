@@ -8,6 +8,7 @@ import { METALLE_GENERATORS } from './metalle.ts'
 import { MOLEKUELE_GENERATORS } from './molekuele.ts'
 import { PARTICLE_GENERATORS } from './particles.ts'
 import { PSE_GENERATORS } from './pse.ts'
+import { TREND_GENERATORS } from './trends.ts'
 import { SALZE_GENERATORS } from './salze.ts'
 import { STOFFMENGE_GENERATORS } from './stoffmenge.ts'
 import { UMSATZ_GENERATORS } from './umsatz.ts'
@@ -30,6 +31,7 @@ const GENERATORS: Readonly<Record<string, readonly ChemGenerator[]>> = {
   'chem-metalle': METALLE_GENERATORS,
   'chem-elektronen': ELEKTRONEN_GENERATORS,
   'chem-pse': PSE_GENERATORS,
+  'chem-trends': TREND_GENERATORS,
 }
 
 // Rechenarten eines Themas in einer Stufe

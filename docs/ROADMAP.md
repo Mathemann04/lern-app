@@ -92,7 +92,7 @@ feste Regeln: [CHEMIE.md](CHEMIE.md)
     - [x] S6a. Thema Elektronen (Quantenzahlen, Konfiguration, Kästchenbilder, Ionen, Valenzelektronen)
     - [x] S6b. Klausuraufgabe 1 üben (Atombau und Elektronen)
     - [x] S6c. Aufbau des Periodensystems (mit Ausschnitt des Periodensystems als Bild)
-    - [ ] S6d. Trends im Periodensystem
+    - [x] S6d. Trends im Periodensystem
     - [ ] S6e. Klausuraufgabe 2 üben
   - [ ] S7. Gleichgewicht und Energie
   - [ ] S8. Frei rechnen und Wiederholung

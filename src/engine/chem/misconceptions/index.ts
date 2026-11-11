@@ -8,6 +8,7 @@ import { ZMK_MISCONCEPTIONS } from './zmk.ts'
 import { METALLE_MISCONCEPTIONS } from './metalle.ts'
 import { ELEKTRONEN_MISCONCEPTIONS } from './elektronen.ts'
 import { PSE_MISCONCEPTIONS } from './pse.ts'
+import { TRENDS_MISCONCEPTIONS } from './trends.ts'
 import { STOFFMENGE_MISCONCEPTIONS } from './stoffmenge.ts'
 
 // Denkfehler je Chemie-Thema (Id aus ui/catalog.ts), nur Name und falsche Aussage. Eigene kleine Liste,
@@ -25,4 +26,5 @@ export const MISCONCEPTIONS_BY_COURSE: Readonly<Record<string, readonly Misconce
   'chem-metalle': METALLE_MISCONCEPTIONS,
   'chem-elektronen': ELEKTRONEN_MISCONCEPTIONS,
   'chem-pse': PSE_MISCONCEPTIONS,
+  'chem-trends': TRENDS_MISCONCEPTIONS,
 }
