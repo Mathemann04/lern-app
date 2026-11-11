@@ -1839,7 +1839,7 @@ const MATCH: readonly Question[] = [
     ],
     hint: 'Die Zustandszeichen kürzen lateinische und englische Wörter ab. Beim Pfeil: Läuft auch die Rückreaktion?',
     explanation: {
-      detailed: String.raw`Zustände stehen in Klammern hinter der Formel: (s) fest, (l) flüssig, (g) gasförmig, (aq) in Wasser gelöst. Der einfache Pfeil $\rightarrow$ steht für eine Reaktion, die vollständig abläuft, der Doppelpfeil $\rightleftharpoons$ für ein Gleichgewicht.`,
+      detailed: String.raw`Zustände stehen in Klammern hinter der Formel: (s) für fest, (l) für flüssig, (g) für gasförmig und (aq) für in Wasser gelöst. Der einfache Pfeil $\rightarrow$ steht für eine Reaktion, die vollständig abläuft, der Doppelpfeil $\rightleftharpoons$ für ein Gleichgewicht.`,
       short: String.raw`(s) fest, (l) flüssig, (g) gasförmig, (aq) gelöst; $\rightarrow$ vollständig, $\rightleftharpoons$ Gleichgewicht.`,
     },
     cards: ['gleichungen-lesen'],

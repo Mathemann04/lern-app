@@ -12,7 +12,7 @@ export const GLEICHUNGEN_CARDS: readonly Card[] = [
     rules: [],
     formulas: [String.raw`\ce{2 H2 + O2 -> 2 H2O}`],
     memo: 'Links stehen die Ausgangsstoffe (Edukte), rechts die Produkte, dazwischen der Reaktionspfeil. Die Zahl vor einer Formel (Koeffizient) sagt, wie viele Teilchen reagieren; die kleine Zahl in der Formel (Index) gehört zum Stoff selbst.',
-    note: String.raw`Der einfache Pfeil $\rightarrow$ steht für eine Reaktion, die vollständig abläuft, der Doppelpfeil $\rightleftharpoons$ für ein Gleichgewicht. Zustände stehen in Klammern dahinter: (s) fest, (l) flüssig, (g) gasförmig, (aq) in Wasser gelöst. Bei einer Reaktion gehen keine Atome verloren und keine entstehen neu; deshalb bleibt die Masse erhalten.`,
+    note: String.raw`Der einfache Pfeil $\rightarrow$ steht für eine Reaktion, die vollständig abläuft, der Doppelpfeil $\rightleftharpoons$ für ein Gleichgewicht. Zustände stehen in Klammern dahinter: (s) für fest, (l) für flüssig, (g) für gasförmig und (aq) für in Wasser gelöst. Bei einer Reaktion gehen keine Atome verloren und keine entstehen neu; deshalb bleibt die Masse erhalten.`,
     when: 'Immer, wenn eine Reaktionsgleichung gelesen oder geprüft wird.',
     examples: [
       {

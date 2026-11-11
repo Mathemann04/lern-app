@@ -186,7 +186,7 @@ export const TRENDS_BANK: QuestionBank = {
       fact: 'radius-period',
       part: 'atomradius',
       title: 'Atomradius in der Periode',
-      prompt: 'Wie ändert sich der Atomradius innerhalb einer Periode von links nach rechts?',
+      prompt: 'Du gehst in einer Periode von links nach rechts. Was passiert dabei mit dem Atomradius?',
       correct: 'Er nimmt ab.',
       wrong: [
         w('f1', 'Er nimmt zu, weil Elektronen dazukommen.', 'chem-mis-tr-radius-electrons'),
