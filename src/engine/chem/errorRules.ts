@@ -3,6 +3,7 @@ import { ELEKTRONEN_ERROR_RULES } from './elektronenRules.ts'
 import { PSE_ERROR_RULES } from './pseRules.ts'
 import { TREND_ERROR_RULES } from './trendRules.ts'
 import { MWG_ERROR_RULES } from './mwgRules.ts'
+import { ENERGIE_ERROR_RULES } from './energieRules.ts'
 
 // Typische Rechenfehler der Chemie-Rechnungen (Ids „chem-…", Katalog in docs/PLAN-M4.md, „Katalog der
 // Rechenfehler"). Jeder Fehler rechnet die Aufgabe falsch weiter (generators/*); hier stehen Name,
@@ -1393,6 +1394,7 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
   ...PSE_ERROR_RULES,
   ...TREND_ERROR_RULES,
   ...MWG_ERROR_RULES,
+  ...ENERGIE_ERROR_RULES,
 ]
 
 const BY_ID = new Map(CHEM_ERROR_RULES.map((r) => [r.id, r]))

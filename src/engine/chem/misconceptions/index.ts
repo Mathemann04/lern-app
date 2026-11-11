@@ -10,6 +10,7 @@ import { ELEKTRONEN_MISCONCEPTIONS } from './elektronen.ts'
 import { PSE_MISCONCEPTIONS } from './pse.ts'
 import { TRENDS_MISCONCEPTIONS } from './trends.ts'
 import { MWG_MISCONCEPTIONS } from './mwg.ts'
+import { ENERGIE_MISCONCEPTIONS } from './energie.ts'
 import { STOFFMENGE_MISCONCEPTIONS } from './stoffmenge.ts'
 
 // Denkfehler je Chemie-Thema (Id aus ui/catalog.ts), nur Name und falsche Aussage. Eigene kleine Liste,
@@ -29,4 +30,5 @@ export const MISCONCEPTIONS_BY_COURSE: Readonly<Record<string, readonly Misconce
   'chem-pse': PSE_MISCONCEPTIONS,
   'chem-trends': TRENDS_MISCONCEPTIONS,
   'chem-mwg': MWG_MISCONCEPTIONS,
+  'chem-energie': ENERGIE_MISCONCEPTIONS,
 }

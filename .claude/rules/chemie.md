@@ -179,3 +179,10 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   `pressureAskable`), Rechenfehler `chem/mwgRules.ts`, Karten `mwgCards.ts`, Fragen `bank/mwg.ts` (Denkfehler
   `chem-mis-gg-…`), Tests `generators/mwg.test.ts`. Bild `energie:<exo|endo>[:kat]` (`energyFigureById` in `figures.ts`,
   gezeichnet als `Energy` in `ChemFigure.tsx`). Im Fließtext nie das Wort „null“ (die Tests suchen es als Platzhalter).
+- Energie bei Reaktionen (S7b): `chem/thermo.ts` (`THERMO` mit ΔfH° und S° als Text, Schlüssel `H2O(l)`, `element`;
+  `THERMO_REACTIONS` mit `formation`, `sideSum` mit Fehlern `noCoef` und `waterGas`, `reactionDH`, `reactionDS`,
+  `reactionCe` mit `->`), `generators/energie.ts` (Rechenarten `reaktionsenthalpie`, `entropie` mit Phasenübergängen
+  und `GAS_DS_REACTIONS`, `gibbs`, `bereich` mit `spontaneousRange`, `grenztemperatur` mit `LIMIT_REACTIONS`, `dg-k`;
+  `dec` schreibt exakte Dezimalzahlen, `toDecimalString` liefert schon das Komma), Rechenfehler `chem/energieRules.ts`,
+  Karten `energieCards.ts`, Fragen `bank/energie.ts` (Denkfehler `chem-mis-en-…`), Tests `generators/energie.test.ts`.
+  Hochgestellte Ziffern wie in ΔG⁰ nur in Formeln (`$\Delta G^{0}$`), auch in Titeln.

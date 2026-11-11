@@ -115,13 +115,14 @@ export const ELEKTRONEN = 'chem-elektronen'
 export const PSE = 'chem-pse'
 export const TRENDS = 'chem-trends'
 export const MWG = 'chem-mwg'
+export const ENERGIE = 'chem-energie'
 
 // Chemie-Themen: Ids mit „chem-", Engine aus Wissensfragen (engine/chem/)
 export const isChemCourse = (id: string) => id.startsWith('chem-')
 
 // Themen mit Testseite in der Formel-Galerie (auch solche, die noch nicht spielbar sind); bei Chemie
 // die Seite „Fragen durchsehen"
-export const GALLERY_COURSES: readonly string[] = [DERIVATIVES, FRACTIONS, REARRANGE, ATOMBAU, GLEICHUNGEN, STOFFMENGE, LOESUNGEN, IONEN, MOLEKUELE, ZMK, METALLE, ELEKTRONEN, PSE, TRENDS, MWG]
+export const GALLERY_COURSES: readonly string[] = [DERIVATIVES, FRACTIONS, REARRANGE, ATOMBAU, GLEICHUNGEN, STOFFMENGE, LOESUNGEN, IONEN, MOLEKUELE, ZMK, METALLE, ELEKTRONEN, PSE, TRENDS, MWG, ENERGIE]
 
 const derivativeLevels: LevelPreview[] = [
   {
@@ -449,6 +450,35 @@ const mwgParts: CoursePart[] = [
   { id: 'geschwindigkeit', title: 'Reaktionsgeschwindigkeit und K', levels: [1, 2, 3] },
   { id: 'le-chatelier', title: 'Prinzip von Le Chatelier', levels: [1, 2, 3] },
   { id: 'katalysator', title: 'Exotherm, Aktivierungsenergie und Katalysator', levels: [1, 2, 3] },
+]
+
+const energieLevels: LevelPreview[] = [
+  {
+    level: 1,
+    available: true,
+    title: 'Exotherm und endotherm, Bildungsenthalpie, Reaktionsenthalpie einfacher Bildungen, Hauptsätze, Entropie beim Schmelzen und Verdampfen',
+    examples: [String.raw`\Delta H^{0} = 2 \cdot (-285{,}8) = -571{,}6\,\mathrm{kJ}`],
+  },
+  {
+    level: 2,
+    available: true,
+    title: 'Reaktionsenthalpie beliebiger Reaktionen, Entropie von Gasreaktionen, freie Enthalpie und freiwillige Reaktionen',
+    examples: [String.raw`\Delta G = \Delta H - T \cdot \Delta S`],
+  },
+  {
+    level: 3,
+    available: true,
+    title: 'Temperatur, ab der eine Reaktion freiwillig abläuft, Gleichgewichtskonstante aus der freien Enthalpie, alles gemischt',
+    examples: [String.raw`\Delta G^{0} = -R \cdot T \cdot \ln K`],
+  },
+]
+
+// Unterthemen von „Energie bei Reaktionen" (Rechnungen in engine/chem/generators/energie.ts, part)
+const energieParts: CoursePart[] = [
+  { id: 'enthalpie', title: 'Exotherm, endotherm und Bildungsenthalpie', levels: [1, 2, 3] },
+  { id: 'reaktionsenthalpie', title: 'Reaktionsenthalpie berechnen', levels: [1, 2, 3] },
+  { id: 'entropie', title: 'Hauptsätze und Entropie', levels: [1, 2, 3] },
+  { id: 'freie-enthalpie', title: 'Freie Enthalpie und freiwillige Reaktionen', levels: [2, 3] },
 ]
 
 const pseLevels: LevelPreview[] = [
@@ -851,7 +881,17 @@ export const SUBJECTS: readonly Subject[] = [
             focus: true,
             parts: mwgParts,
           },
-          comingSoon('chem-energie', 'Energie bei Reaktionen', 'Exotherm und endotherm, Enthalpie, Entropie und freie Enthalpie', 'equilibrium'),
+          {
+            id: ENERGIE,
+            title: 'Energie bei Reaktionen',
+            description: 'Exotherm und endotherm, Reaktionsenthalpie, Hauptsätze, Entropie und freie Enthalpie',
+            icon: 'equilibrium',
+            cards: 'chem-energie',
+            levels: energieLevels,
+            free: false,
+            focus: true,
+            parts: energieParts,
+          },
         ],
       },
       {

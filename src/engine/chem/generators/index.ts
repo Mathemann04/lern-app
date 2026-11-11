@@ -10,6 +10,7 @@ import { PARTICLE_GENERATORS } from './particles.ts'
 import { PSE_GENERATORS } from './pse.ts'
 import { TREND_GENERATORS } from './trends.ts'
 import { MWG_GENERATORS } from './mwg.ts'
+import { ENERGIE_GENERATORS } from './energie.ts'
 import { SALZE_GENERATORS } from './salze.ts'
 import { STOFFMENGE_GENERATORS } from './stoffmenge.ts'
 import { UMSATZ_GENERATORS } from './umsatz.ts'
@@ -34,6 +35,7 @@ const GENERATORS: Readonly<Record<string, readonly ChemGenerator[]>> = {
   'chem-pse': PSE_GENERATORS,
   'chem-trends': TREND_GENERATORS,
   'chem-mwg': MWG_GENERATORS,
+  'chem-energie': ENERGIE_GENERATORS,
 }
 
 // Rechenarten eines Themas in einer Stufe

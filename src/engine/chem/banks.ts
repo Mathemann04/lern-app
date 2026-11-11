@@ -10,6 +10,7 @@ import { ELEKTRONEN_BANK } from './bank/elektronen.ts'
 import { PSE_BANK } from './bank/pse.ts'
 import { TRENDS_BANK } from './bank/trends.ts'
 import { MWG_BANK } from './bank/mwg.ts'
+import { ENERGIE_BANK } from './bank/energie.ts'
 import { STOFFMENGE_BANK } from './bank/stoffmenge.ts'
 import { ATOMBAU_WHY } from './misconceptions/atombauWhy.ts'
 import { GLEICHUNGEN_WHY } from './misconceptions/gleichungenWhy.ts'
@@ -22,6 +23,7 @@ import { ELEKTRONEN_WHY } from './misconceptions/elektronenWhy.ts'
 import { PSE_WHY } from './misconceptions/pseWhy.ts'
 import { TRENDS_WHY } from './misconceptions/trendsWhy.ts'
 import { MWG_WHY } from './misconceptions/mwgWhy.ts'
+import { ENERGIE_WHY } from './misconceptions/energieWhy.ts'
 import { STOFFMENGE_WHY } from './misconceptions/stoffmengeWhy.ts'
 import { MISCONCEPTIONS_BY_COURSE } from './misconceptions/index.ts'
 
@@ -40,6 +42,7 @@ const BANKS: readonly { readonly bank: QuestionBank; readonly why: Readonly<Reco
   { bank: PSE_BANK, why: PSE_WHY },
   { bank: TRENDS_BANK, why: TRENDS_WHY },
   { bank: MWG_BANK, why: MWG_WHY },
+  { bank: ENERGIE_BANK, why: ENERGIE_WHY },
 ]
 
 export type ChemTopic = { readonly bank: QuestionBank; readonly misconceptions: readonly Misconception[] }
