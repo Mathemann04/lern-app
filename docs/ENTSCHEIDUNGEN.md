@@ -811,3 +811,12 @@ Neue Entscheidungen unten anfügen.
   Fotos aus dem Lehrbuch „Physik für Ingenieure“ (Kernphysik, Festkörperphysik)
   werden wie die Skripte nur in der Sitzung hochgeladen; ihre Tabellen und Bilder
   werden selbst gestaltet nachgebaut (CHEMIE.md §1, Quelle 6).
+- 11.11.2026: S10 Inhalts-Check in einer Sitzung mit allen Unterlagen. Entscheidungen des Nutzers: In Klausuraufgaben und
+  Probeklausur zeigen die Teile, die man in der Klausur selbst schreibt, ihre Antworten erst nach „Auf Papier gelöst,
+  Antworten zeigen“; Klausuraufgabe 2 wird gemischt (Steckbrief und Reihe bleiben, dazu wechselnd Wissensfragen wie in
+  den Altklausuren, gleiche Punkte). Weitere Festlegungen: Unabhängige Fragen eines Teils zählen einzeln; „knapp daneben“
+  gibt in der Probeklausur halbe Punkte (beim Üben volle), weil ungenaues Runden in der echten Klausur Punkte kostet;
+  Paare in Lewis-Formeln werden am Zentralatom gezählt wie in Vorlesung und Klausur; Gleichgewichtsreaktionen stehen
+  immer mit ⇌, auch in Umsatzrechnungen; Fragen und Lernkarten nennen bei abweichenden Begriffen beide (App und Skript).
+  Stoff über die Vorlesung hinaus wandert aus dem Klausurniveau in die Vertiefung oder wird gelöscht (Nummern in
+  `retired`). Einzelheiten in PLAN-M4 (S10, „Probeklausur“) und CHEMIE.md §5, §6, §8, §9.

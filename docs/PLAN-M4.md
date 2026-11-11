@@ -835,6 +835,20 @@ Je Probeklausur wählt die App für jeden Teil eine der Varianten.
 - Lewis: Bild bzw. Baukasten 1 Punkt, Paare 1 Punkt, Gestalt 1 Punkt.
 - Weil es keine Musterlösung gibt, steht in der Auswertung: „Punkte nach dem
   Schema der App, Teilpunkte geschätzt“.
+- Seit S10: Unabhängige Fragen eines Teils zählen einzeln; nur ein Ergebnis,
+  das wirklich aus den Schritten davor folgt (ΔH, Aufgabe 4), gibt die
+  vollen Punkte des Teils. „Freiwillig?“ wird gegen das eigene ΔG bewertet.
+  Eingetippt knapp daneben (1 bis 4 %): beim Üben volle Punkte, in der
+  Probeklausur halbe, mit Hinweis. Jede Auswahlfrage hat möglichst vier
+  Antworten (zusätzliche ohne typischen Fehler, aber mit Erklärung). Teile,
+  die man in der Klausur selbst schreibt (Salz mit Ionen, Lewis-Formel,
+  Gleichung, Massenwirkungsgesetz), zeigen ihre Antworten erst nach „Auf
+  Papier gelöst, Antworten zeigen“ (Wunsch des Nutzers, 11.11.2026).
+  Aufgabe 2: Steckbrief (Periode, Gruppe, Block, 3 P.), eine Wissensfrage zu
+  Gruppe, Periode, Block oder Trend (1 P.), Trend oder Ionenladung (2 P.);
+  Aufgabe 1 fragt das Valenzelektron als Begriff oder als Zahl, das
+  Kernsymbol von Atom oder Ion; Aufgaben 3d und 5c wechseln mit Wissensfragen
+  wie in den Altklausuren.
 
 **Auswertung**: Punkte je Aufgabe und Teil, deine Antwort neben der
 richtigen, Lösungsweg und „Warum ist das falsch?“, Links zu Thema und
@@ -1198,6 +1212,27 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   `pickMockId`). Auswertung mit „Das solltest du üben“ (die drei Themen mit den meisten verlorenen Punkten, `practiceHints`);
   beantwortete Wissensfragen gehen in die Wiederholung (`ExamItem.review`), auch bei „Klausuraufgabe N üben“. Damit ist
   S9 und der Klausur-Sprint abgeschlossen.
+- **S10: Inhalts-Check** (11.11.2026, alle Skripte, Übungsblätter und beide
+  Altklausuren in einer Sitzung). Zuerst ein Wortvergleich aller Texte der App
+  mit den Unterlagen (acht Wörter am Stück): zwei Stellen umformuliert. Dann
+  sechs Prüfer je Gebiet und einer mit dem Blickwinkel der Klausur; danach je
+  Gebiet ein Helfer, der die Befunde einarbeitet. Kaum Rechenfehler; behoben
+  wurden u. a. ein falscher Zusatz zur Lage des Gleichgewichts bei K-Werten,
+  Gleichgewichtsreaktionen mit einfachem Pfeil, mehrdeutige Fragen
+  (Calcium(II)-bromid, „stärkste Kraft“, „äußerste Schale voll“), Begriffe
+  des Skripts (K_GG, spontan, Dipol-Dipol-Wechselwirkungen,
+  Wasserstoffbrückenbindung, Maßkolben, molare Konzentration,
+  Normalbedingungen, entartet, effektive Kernladung), Paare am Zentralatom,
+  Zahlen und Wortlaut der Altklausuren und Übungsblätter, falsch zugeordnete
+  Denkfehler, Stoff über die Vorlesung hinaus auf Klausurniveau sowie die
+  Bewertung der Klausuraufgaben (siehe „Probeklausur“, Bewertung). Neu sind
+  Fragen und Karten zu Lücken aus den Skripten (u. a. Rydberg-Formel als
+  Rechnung, Spin und Magnetismus, Gruppennamen, Eigenschaften der
+  Metallgitter, Hartmetall und Sintern, Beryllium als Leiter, delokalisierte
+  Bindungen, Dipole im elektrischen Feld, Dipolmoment, Aggregatzustand bei
+  Raumtemperatur, M aus m und n, Umsatz vom Produkt aus). Festlegungen in
+  CHEMIE.md §5, §6, §8, §9. Die Gegenprobe mit Rechenaufgaben aus dem
+  Lehrbuch entfiel, weil keine Fotos hochgeladen waren.
 
 #### Nach Teil 1 der Klausur
 Die Reihenfolge richtet sich nach dem Termin von Teil 2: Kommt Teil 2 bald,

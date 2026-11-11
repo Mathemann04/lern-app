@@ -246,3 +246,16 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   `totalMatches`), gebaut in `boxTask` (`generators/elektronen.ts`; ohne `boxes` beim gezielten Üben von `chem-el-pauli`),
   Anzeige `BoxAnswers` in `ui/guided/TaskScreen.tsx` (Rückmeldung über `judged` und `TypedFeedback` mit `note`). Test
   `chem/boxInput.test.ts` prüft gegen die falschen Bilder der Auswahl.
+- Inhalts-Check (S10): Ausschlüsse nach CHEMIE.md §9 `EXAM_PARTICLES`/`isExamParticle` (`generators/particles.ts`), `EXERCISE_LINES`,
+  `EXERCISE_IONS` (`generators/trends.ts`), `SCRIPT_TRANSITIONS` (Rydberg in `generators/light.ts`, `rydbergValues`,
+  `RYDBERG_TRANSITIONS`), `EXAM_VALENCE_ELEMENTS` (Klausuraufgabe 1); `directionStep` fragt absichtlich anders als Altklausur 2d
+  (`NAME.dative`). Moleküle: `splitStep` zählt Paare am Zentralatom (nur Moleküle mit `central`; Fehler
+  `chem-lewis-free-whole-molecule`), `OTHER_NAMES` und Vorsilben bis nona in `molNames.ts`; `chem/zmk.ts` mit `structure`
+  (Bauhinweis ab Stufe 3), `MELT` und `roomStateOf` (Zustand bei 20 bis 25 °C), `FORCE_NAME` mit den Begriffen des Skripts.
+  Metalle: Cl₂ in `MO_SPECIES`, Karten `met-einlagerung`, `met-mehrzentren`. Gleichgewicht: `positionNote` (Lage nur bei K ≥ 10 bzw.
+  ≤ 0,1), Fundstellen über `folie(n)`; K_GG auch im Thema Energie (Test in `generators/energie.test.ts`). Klausur: kein `final` bei
+  unabhängigen Fragen (task1 bis 3), `paperFirst` an `ExamItem` (Knopf „Auf Papier gelöst, Antworten zeigen" in
+  `ui/exam/ExamParts.tsx`), zusätzliche falsche Antworten `chem/exam/extraOptions.ts`, Wissensfragen der Altklausuren
+  `chem/exam/knowledge.ts`, „knapp daneben" in der Probeklausur halb (`MOCK_CLOSE_SHARE`, `gradeExam(…, { closeShare })`), „freiwillig?"
+  gegen das eigene ΔG (`dgSign` in `task5.ts`). Wortvergleich mit den Unterlagen: Skript `ngram.py` im Arbeitsordner der Sitzung
+  (acht Wörter am Stück), nie ins Repo.
