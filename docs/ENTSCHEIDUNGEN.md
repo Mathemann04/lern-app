@@ -796,6 +796,12 @@ Neue Entscheidungen unten anfügen.
   raten. Typische Fehler sind „ganz umgedreht“ (z. B. der Trend falsch herum) oder „A vor B“ (z. B. schwerer heißt
   größer); ist alles umgedreht, nennt die App nur diesen Fehler, nicht dazu jede vertauschte Paarung. Bei der
   Beispielfrage zum Atomradius der 3. Periode fehlt Schwefel, weil er nur 2 bis 3 % neben Phosphor und Chlor liegt.
+- 11.11.2026: N2 in sechs Teile geteilt (N2a Kästchen, N2b Koeffizienten, N2c Massenwirkungsgesetz, N2d Konfigurationen,
+  N2e Element-Tastatur, N2f Lewis-Baukasten), Reihenfolge nach Nutzen für Teil 1 der Klausur. N2a: Bei den Kästchen gilt
+  jede Lage der Elektronen in einer Reihe und beide Spinrichtungen als richtig, solange Pauli und Hund erfüllt sind (die
+  Bilder der App zeichnen erst die Paare, dann ↑). Anders als bei den neuen Fragearten aus N1 darf man nach einem Fehler
+  weiter tippen, wie bei der Auswahl und beim Eintippen von Zahlen: Die Rückmeldung nennt nur den Fehler, nicht die Lösung.
+  N2a entstand parallel zur neuen Reihenfolge (S10, S11, dann M6 und M12); N2b bis N2f warten bis nach M6 und M12.
 - 11.11.2026: Durchsicht der App nach dem Klausur-Sprint. Vor Teil 1 noch S10
   (Inhalts-Check aller Inhalte von Teil 1 gegen die Skripte, weil in zwei Tagen sehr
   viel entstanden ist und jeder Schritt nur einzeln geprüft wurde) und S11

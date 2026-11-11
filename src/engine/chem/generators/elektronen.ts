@@ -1,4 +1,5 @@
-import type { Choice, GuidedStep } from '../../guided/types.ts'
+import type { BoxInputStep, Choice, GuidedStep } from '../../guided/types.ts'
+import { chemErrorRule } from '../errorRules.ts'
 import type { Rng } from '../../random/rng.ts'
 import type { Level, TaskRef } from '../../tasks/taskNumber.ts'
 import {
@@ -31,6 +32,7 @@ import {
   removeLast,
   sorted,
   subshellLatex,
+  subshellName,
   unpairedIn,
   unpairedOf,
   valenceConfig,
@@ -293,17 +295,37 @@ function boxTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc
   // mindestens zwei falsche Bilder, sonst ist die Wahl zu leicht
   if (plain.length < 3) return null
   const choices = withFigures(plain, ids)
+  // Kästchen zum Antippen (N2a); beim gezielten Üben von Pauli bleibt es bei der Auswahl, denn ↑↑ lässt sich nicht tippen
+  const countIn = (c: Config, shell: Subshell) => c.find((o) => o.n === shell.n && o.l === shell.l)?.count ?? 0
+  const alternatives = [
+    ...(z >= 19 && z <= 28 ? [{ rule: 'chem-el-3d-first', config: dFirstConfig(z) }] : []),
+    ...(exception ? [{ rule: 'chem-el-exception', config: regularConfig(z) }] : []),
+  ]
+  const boxes: BoxInputStep | undefined =
+    focus === 'chem-el-pauli'
+      ? undefined
+      : {
+          core: coreName,
+          rows: shells.map((shell) => ({ shell: subshellName(shell), orbitals: orbitalsOf(shell.l), count: countIn(config, shell) })),
+          alternatives: alternatives.map((a) => ({ rule: a.rule, counts: shells.map((shell) => countIn(a.config, shell)) })),
+          whys: Object.fromEntries(
+            ['chem-el-hund', 'chem-el-hund-spin', ...alternatives.map((a) => a.rule)].map((rule) => [rule, chemErrorRule(rule).why]),
+          ),
+        }
   return {
     task: {
       ref,
-      instruction: 'Wähle das richtige Kästchenbild',
+      instruction: boxes ? 'Besetze die Kästchen' : 'Wähle das richtige Kästchenbild',
       note: `Element: ${elName(el)}, Ordnungszahl $Z = ${z}$.${core ? ` Die inneren Elektronen $[\\mathrm{${core.symbol}}]$ sind nicht gezeichnet.` : ''} Jedes Kästchen ist ein Orbital, jeder Pfeil ein Elektron mit seinem Spin.`,
       steps: [
         {
           id: 'kaestchen',
           title: 'Kästchenschreibweise',
-          question: `Welches Bild zeigt den Grundzustand von ${elName(el)}?`,
+          question: boxes
+            ? `Besetze die Kästchen für den Grundzustand von ${elName(el)}.`
+            : `Welches Bild zeigt den Grundzustand von ${elName(el)}?`,
           choices,
+          ...(boxes ? { boxes } : {}),
           hint: 'Prüfe drei Regeln: Ein Orbital fasst höchstens zwei Elektronen mit entgegengesetztem Spin (Pauli). Gleichwertige Orbitale werden erst einzeln mit gleichem Spin besetzt (Hund). 4s kommt vor 3d.',
           explanation: {
             detailed: `${el.name}: $${configLatex(config, core !== null)}$. ${exception ? `Eine ${el.symbol === 'Cr' ? 'halb' : 'ganz'} volle d-Unterschale ist günstiger; deshalb steht in 4s nur ein Elektron. ` : ''}In jedem Orbital höchstens ein Paar mit entgegengesetztem Spin; in einer teilweise besetzten Unterschale zuerst je ein Elektron pro Orbital, alle mit gleichem Spin.`,

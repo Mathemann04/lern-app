@@ -1247,6 +1247,26 @@ braucht es erst für N3 und N4.
 - **N2: Eingaben.** Orbital-Kästchen, Baukasten fürs
   Massenwirkungsgesetz, Lewis-Baukasten, Koeffizienten-Felder,
   Element-Tastatur, Knöpfe für Konfigurationen im freien Modus.
+  Geteilt (11.11.2026) in N2a Orbital-Kästchen, N2b Koeffizienten-Felder,
+  N2c Baukasten Massenwirkungsgesetz, N2d Knöpfe für Konfigurationen, N2e
+  Element-Tastatur, N2f Lewis-Baukasten; zuerst das, was in Teil 1 der
+  Klausur vorkommt. N2a entstand am selben Tag, kurz bevor die neue
+  Reihenfolge feststand (S10 und S11 vor Teil 1, danach M6 und M12); N2b bis
+  N2f kommen nach M6 und M12.
+  **N2a** (fertig): Die Rechnung „Kästchen“ im Thema Elektronen ist jetzt
+  zum Antippen, in allen drei Stufen: je Unterschale eine Reihe Kästchen
+  (bei Kalium und Calcium auch die leere 3d), Tippen schaltet leer → ↑ → ↓
+  → ↑↓. Richtig ist jede Besetzung nach Pauli und Hund; ob die einzelnen
+  Elektronen alle ↑ oder alle ↓ zeigen und wo in der Reihe sie sitzen, ist
+  egal. Erkannt werden Paare vor der Einzelbesetzung, einzelne Elektronen
+  mit verschiedenem Spin, 3d vor 4s und Chrom bzw. Kupfer ohne Ausnahme
+  (jeweils mit „Warum ist das falsch?“); sonst sagt die App, ob die Zahl
+  der Elektronen oder nur ihre Verteilung nicht stimmt. Danach lässt sich
+  weiter tippen oder die Lösung zeigen. Zwei gleiche Pfeile in einem
+  Kästchen (Pauli) lassen sich so nicht tippen; dafür bleiben die Bilder zum
+  Beurteilen, und beim gezielten Üben des Pauli-Fehlers kommt die Aufgabe
+  wie bisher zur Auswahl. Klausuraufgaben behalten die Auswahl.
+  Ausprobieren: Elektronen → Vertiefung, Aufgabe 2-10030 (Kupfer).
 - **N3: Säuren und Basen** (Skript nötig), „Klausuraufgabe 6 üben“.
 - **N4: Redox und Elektrochemie** (Skript nötig), „Klausuraufgabe 7 üben“,
   Probeklausur Teil 2.

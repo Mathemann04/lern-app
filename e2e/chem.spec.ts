@@ -716,14 +716,30 @@ test('Chemie: Klausuraufgabe 3 üben, Lewis-Formeln als Bilder, abgeben, Auswert
   expect(errors).toEqual([])
 })
 
-test('Chemie: Elektronen, Kästchenbilder als Antworten und Lernkarte', async ({ page }) => {
+// N2a: Kästchen antippen (leer → ↑ → ↓ → ↑↓), erst gegen die Hund'sche Regel, dann richtig
+test('Chemie: Elektronen, Kästchen antippen, Hund verletzt, dann richtig, und Lernkarte', async ({ page }) => {
   const errors = collectErrors(page)
   await page.goto('./#/gebiet/chem-materie')
   await page.getByRole('link', { name: /Elektronen/ }).click()
   await expect(page.getByRole('heading', { name: 'Elektronen' })).toBeVisible()
+  // Sauerstoff: 1s, 2s und drei 2p-Kästchen
   await page.goto('./#/ueben/chem-elektronen/1-10004')
-  await expect(answers(page).first()).toBeVisible()
+  const boxes = page.getByRole('group', { name: 'Kästchen' }).getByRole('button')
+  await expect(boxes).toHaveCount(5)
   await expectCleanPage(page, 'Rechnung zu Elektronen')
+  const tapTo = async (i: number, times: number) => {
+    for (let k = 0; k < times; k++) await boxes.nth(i).click()
+  }
+  // 1s ↑↓, 2s ↑↓, 2p ↑↓ ↑↓ leer: Paare zu früh
+  for (const i of [0, 1, 2, 3]) await tapTo(i, 3)
+  await expect(boxes.nth(3)).toHaveAccessibleName('2p, Orbital 2: zwei Elektronen')
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Paare vor der Einzelbesetzung (Hund verletzt)')).toBeVisible()
+  // 2p ↑↓ ↑ ↑: zweites Kästchen einmal weiter (leer), dann ↑; drittes ↑
+  await tapTo(3, 2)
+  await tapTo(4, 1)
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
   await page.goto('./#/karten/chem-elektronen/el-hund')
   await expect(page.getByRole('heading', { name: /Hund/ })).toBeVisible()
   await expect(page.getByTestId('chem-figure')).toBeVisible()
