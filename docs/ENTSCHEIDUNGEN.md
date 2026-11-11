@@ -588,3 +588,8 @@ Neue Entscheidungen unten anfügen.
   bis zu einem sicheren Druck. Lösungen aus den Altklausuren (Stoff, Konzentration, Volumen) werden
   nie erzeugt. Vol-% bezieht sich in der App wie beim Alkoholgehalt auf die fertige Mischung (so auch
   im Skript; DIN 1310 nennt das Volumenkonzentration). Spurenstoffe nur in üblicher Größenordnung.
+- 11.11.2026: S4c fertig. „Klausuraufgabe 4 üben" hat bis S8 Antworten zur Auswahl statt
+  freier Eingabe; Folgefehler funktionieren trotzdem, weil die Antworten jeder Rechnung aus
+  den eigenen früheren Antworten entstehen (die ganz richtige Antwort steht immer mit zur
+  Wahl). Teil d) ist abwechselnd Gasvolumen oder Lösung ansetzen (Bauplan Teil 1, 14 Punkte).
+  Die Auswertung wird noch nicht gespeichert; Verlauf kommt mit der Probeklausur (S9).

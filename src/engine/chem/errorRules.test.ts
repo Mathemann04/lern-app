@@ -78,6 +78,10 @@ describe('Rechenfehler Stoffmenge: Katalogbeispiele', () => {
     expect(m(molarMass(f('O2'), 'rounded', { ignoreIndices: true }))).toBe('16')
   })
 
+  it('Koeffizient mitgerechnet: 2 C₄H₁₀ ergibt 116 statt 58 g/mol', () => {
+    expect(m(ratMul(rat(2), molarMass(f('C4H10'), 'rounded')))).toBe('116')
+  })
+
   it('Ordnungszahlen statt Molmassen: M(C₄H₁₀) = 34 g/mol', () => {
     expect(m(atomicNumberSum(f('C4H10')))).toBe('34')
   })

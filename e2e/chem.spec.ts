@@ -528,3 +528,39 @@ test('Chemie: Wissensfragen zu Reaktionsgleichungen und Stoffmenge in der Galeri
   }
   expect(errors).toEqual([])
 })
+
+test('Chemie: Klausuraufgabe 4 üben, alle Teile beantworten, abgeben, Auswertung mit Punkten', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./#/gebiet/chem-stoechiometrie')
+  await page.getByRole('link', { name: /Klausuraufgabe 4 üben/ }).click()
+  // ohne Nummer würfelt die Seite eine und leitet weiter
+  await expect(page).toHaveURL(/#\/klausur\/chemie\/aufgabe\/4\/\d+$/)
+  await expect(page.getByRole('heading', { name: /Klausuraufgabe 4/ })).toBeVisible()
+  await expectCleanPage(page, 'Klausuraufgabe 4')
+
+  // Abgeben mit offenen Fragen fragt nach
+  await page.getByRole('button', { name: 'Abgeben' }).click()
+  await expect(page.getByText(/Fragen offen/)).toBeVisible()
+
+  // jede Frage: die erste Antwort (spätere Fragen erscheinen, sobald die davor beantwortet sind)
+  for (let i = 0; i < 20; i++) {
+    const open = page.getByTestId('exam-item').getByRole('group', { name: 'Antworten' }).filter({ hasNot: page.locator('[aria-pressed="true"]') })
+    if ((await open.count()) === 0) break
+    await open.first().getByRole('button').first().click()
+  }
+  await expect(page.getByText('Kommt, sobald die Fragen davor beantwortet sind.')).toHaveCount(0)
+  await page.getByRole('button', { name: 'Abgeben' }).click()
+  await expect(page.getByTestId('exam-score')).toHaveText(/^\d+(,5)? von 14 Punkten$/)
+  await expect(page.getByText('Punkte nach dem Schema der App, Teilpunkte geschätzt.')).toBeVisible()
+  await expectCleanPage(page, 'Auswertung')
+  // Lösungsweg aufklappen
+  await page.getByText('Lösungsweg').first().click()
+  await expectCleanPage(page, 'Lösungsweg')
+
+  // Neuladen zeigt dieselbe Aufgabe; „Neue Aufgabe" würfelt eine andere Nummer
+  const url = page.url()
+  await page.getByRole('link', { name: 'Neue Aufgabe' }).first().click()
+  await expect(page).toHaveURL(/#\/klausur\/chemie\/aufgabe\/4\/\d+$/)
+  expect(page.url()).not.toBe(url)
+  expect(errors).toEqual([])
+})

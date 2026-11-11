@@ -100,3 +100,11 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   Fragen `bank/loesungen.ts` (Denkfehler `chem-mis-lo-…`); Grenzen: `SOLUBILITY` (g je 100 g Wasser,
   80 % der Sättigung, höchstens 5 mol/L), `MAX_BAR` für Gase, die sich verflüssigen; Lösungen der
   Altklausuren über `usesExamSolution` in `shared.ts`.
+- Klausuraufgabe üben (S4c): allgemein in `src/engine/exam/` (`types.ts`: Aufgabe aus Teilen,
+  Fragen mit `build(chosen, truth)`, Antworten hängen von früheren Antworten ab; `grade.ts`:
+  `examState`, `withAnswer` löscht abhängige Antworten, `gradeExam` mit Folgefehlern, halben
+  Punkten `share` und Teilpunkten, `final` gibt die Punkte des Teils); Chemie in
+  `chem/exam/` (`task4.ts` Klausuraufgabe 4, `index.ts` Nummer → Aufgabe und Fehlertexte),
+  Seite `ui/exam/ExamTaskPage.tsx` unter `#/klausur/chemie/aufgabe/4[/<nummer>]`, Kachel
+  im Gebiet über `exam` am Gebiet in `catalog.ts` (`examAreaOf`). `pickSolution` in
+  `generators/loesungen.ts` liefert die Lösung für Teil d.

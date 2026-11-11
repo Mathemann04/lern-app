@@ -82,6 +82,9 @@ export type Area = {
   readonly tone: Tone
   // leer: Gebiet kommt bald
   readonly courses: readonly Course[]
+  // Kachel „Klausuraufgabe N üben" (#/klausur/<fach>/aufgabe/<N>, engine/<fach>/exam/): Nummer der
+  // Aufgabe in der Klausur und ihre Punkte (ein Test vergleicht mit der Engine)
+  readonly exam?: { readonly task: number; readonly points: number }
 }
 
 // Ein Fach, z. B. „Mathematik MB1"
@@ -478,6 +481,7 @@ export const SUBJECTS: readonly Subject[] = [
         description: 'Gleichungen, Stoffmenge, Umsatz und Konzentration',
         icon: 'flask',
         tone: 'orange',
+        exam: { task: 4, points: 14 },
         courses: [
           {
             id: GLEICHUNGEN,
@@ -650,3 +654,10 @@ export function mixCourses(subject: Subject): readonly { readonly area: Area; re
 
 // Hat das Fach die Kachel „Themen mischen" (mix) und mindestens ein spielbares Thema?
 export const isMixAvailable = (subject: Subject): boolean => subject.mix === true && subject.areas.some(isAreaAvailable)
+
+// Gebiet mit der Kachel „Klausuraufgabe N üben" in diesem Fach
+export function examAreaOf(subjectId: string, task: number): { subject: Subject; area: Area } | undefined {
+  const subject = subjectById(subjectId)
+  const area = subject?.areas.find((a) => a.exam?.task === task)
+  return subject && area ? { subject, area } : undefined
+}

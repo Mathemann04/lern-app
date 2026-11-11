@@ -573,7 +573,7 @@ kommen mit ihren Schritten dazu. Die Denkfehler der Wissensfragen
 | Probe, Verbrennung | Index beim Zählen vergessen (`chem-balance-count-index`, seit S3b) | 4 Fe + 3 O₂: links 3 statt 6 O-Atome; C₄H₁₀: 10 H₂O statt 5 |
 | Molmasse | Index vergessen, auch Atom statt Molekül (`chem-molar-index`; beides ergibt bei Elementen denselben Wert) | M(CO₂) = 28 statt 44 g/mol; M(O₂) = 16 statt 32 g/mol |
 | Molmasse | Ordnungszahlen statt Molmassen (`chem-molar-atomic-number`) | M(C₄H₁₀) = 34 g/mol |
-| Molmasse | Koeffizient mitgerechnet (`chem-molar-coefficient`) | 2 C₄H₁₀: 116 g/mol |
+| Molmasse | Koeffizient mitgerechnet (`chem-molar-coefficient`, seit S4c in Klausuraufgabe 4) | 2 C₄H₁₀: 116 g/mol |
 | Molmasse | Klammer nicht malgenommen (`chem-molar-bracket`) | M(Ca(OH)₂) = 58,1 statt 74,1 g/mol |
 | Molmasse | Kristallwasser vergessen (`chem-molar-hydrate`, seit S3a) | M(CuSO₄ · 5 H₂O) = 159,6 statt 249,6 g/mol |
 | Stoffmenge | n = m · M (`chem-n-times`) | 5,8 g Butan: 336 mol |
@@ -828,8 +828,17 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   Gasvolumen aus einer Reaktion bei Normbedingungen); acht Lernkarten,
   Wissensfragen; neuer Rechenfehler „durch das molare Volumen geteilt statt
   malgenommen" (`chem-vm-inverted`). Die Massenkonzentration heißt β (im
-  Skript ρ), damit sie nicht mit der Dichte verwechselt wird. **S4c**:
-  „Klausuraufgabe 4 üben" mit Punkten, Teilpunkten und Folgefehlern.
+  Skript ρ), damit sie nicht mit der Dichte verwechselt wird. **S4c** (fertig):
+  „Klausuraufgabe 4 üben" als Kachel im Gebiet Stöchiometrie, 14 Punkte nach dem
+  Bauplan Teil 1: a) Verbrennung ausgleichen (2), b) Molmassen der vier Stoffe (je 1),
+  c) Masse eines Produkts (Stoffmenge 1, Verhältnis 1, Masse 2), d) Gasvolumen bei
+  Normbedingungen oder Lösung ansetzen (4). Bis S8 mit Antworten zur Auswahl (frei
+  rechnen kommt mit S8); bis zur Abgabe keine Rückmeldung. Folgefehler: Die Antworten
+  jeder Rechnung entstehen aus den eigenen früheren Antworten, die erwartete und die
+  ganz richtige Antwort geben beide die vollen Punkte. Teilpunkte: richtiges Ergebnis
+  eines Teils gibt alle Punkte, sonst die der richtigen Zwischenschritte. Gleichung mit
+  Bruch oder nicht gekürzt: halbe Punkte. Neuer Rechenfehler „Koeffizient in die
+  Molmasse mitgerechnet" (`chem-molar-coefficient`), auch in den Umsatz-Rechnungen.
 - **S5: Bindungen.** Ionenbindung und Salze (Formel, Name, Gitter,
   Born-Haber); Moleküle (Lewis-Formeln als selbst gezeichnete Bilder zur
   Auswahl, Paare zählen, Typ AXₙEₘ, Gestalt, ΔEN, Polarität, Namen);
