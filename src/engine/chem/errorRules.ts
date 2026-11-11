@@ -1144,9 +1144,9 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
     id: 'chem-zmk-hbond-missed',
     course: ZMK,
     name: 'Wasserstoffbrücken übersehen',
-    wrongFormula: String.raw`\ce{NH3}\text{: nur Dipol-Dipol-Kräfte}`,
+    wrongFormula: String.raw`\ce{NH3}\text{: nur Dipol-Dipol-Wechselwirkungen}`,
     why: {
-      detailed: 'Sitzt ein H-Atom direkt an N, O oder F, bilden sich Wasserstoffbrücken, nicht nur in Wasser. Sie sind ein besonders starker Fall der Dipol-Dipol-Kräfte und deshalb die stärkste Kraft zwischen solchen Molekülen.',
+      detailed: 'Sitzt ein H-Atom direkt an N, O oder F, bilden sich Wasserstoffbrücken, nicht nur in Wasser. Sie sind ein besonders starker Fall der Dipol-Dipol-Wechselwirkungen und deshalb die stärkste Kraft zwischen solchen Molekülen.',
       short: 'H an N, O oder F: Wasserstoffbrücken.',
     },
   },
@@ -1154,9 +1154,9 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
     id: 'chem-zmk-polar-bond',
     course: ZMK,
     name: 'Polare Bindungen mit polarem Molekül verwechselt',
-    wrongFormula: String.raw`\ce{CCl4}\text{: Dipol-Dipol-Kräfte}`,
+    wrongFormula: String.raw`\ce{CCl4}\text{: Dipol-Dipol-Wechselwirkungen}`,
     why: {
-      detailed: 'Dipol-Dipol-Kräfte gibt es nur zwischen Molekülen, die als Ganzes ein Dipol sind. Liegen polare Bindungen symmetrisch, heben sie sich auf, und das Molekül ist unpolar.',
+      detailed: 'Dipol-Dipol-Wechselwirkungen gibt es nur zwischen Molekülen, die als Ganzes ein Dipol sind. Liegen polare Bindungen symmetrisch, heben sie sich auf, und das Molekül ist unpolar.',
       short: 'Es zählt die Polarität des ganzen Moleküls.',
     },
   },
@@ -1186,7 +1186,7 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
     name: 'Nur nach der Molmasse geordnet',
     wrongFormula: String.raw`\ce{H2O} < \ce{H2S}`,
     why: {
-      detailed: 'Die Größe der Moleküle entscheidet nur bei gleicher Art der Kraft. Wasserstoffbrücken sind so viel stärker als Van-der-Waals- und Dipol-Dipol-Kräfte, dass sie einen großen Unterschied der Molmasse übertreffen.',
+      detailed: 'Die Größe der Moleküle entscheidet nur bei gleicher Art der Kraft. Wasserstoffbrücken sind so viel stärker als Van-der-Waals-Kräfte und Dipol-Dipol-Wechselwirkungen, dass sie einen großen Unterschied der Molmasse übertreffen.',
       short: 'Erst die Art der Kraft, dann die Größe.',
     },
   },

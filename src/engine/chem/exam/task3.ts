@@ -122,7 +122,7 @@ function polarityPart(mol: Molecule, rng: Rng): ExamPart | null {
 
 const BOIL_WHY: ExtraOption['why'] = {
   detailed:
-    'Zuerst die Art der stärksten Kraft vergleichen: Wasserstoffbrücken sind stärker als Dipol-Dipol-Kräfte, diese stärker als Van-der-Waals-Kräfte. Bei gleicher Art siedet der Stoff mit den größeren Molekülen höher.',
+    'Zuerst die Art der stärksten Kraft vergleichen: Wasserstoffbrücken sind stärker als Dipol-Dipol-Wechselwirkungen, diese stärker als Van-der-Waals-Kräfte. Bei gleicher Art siedet der Stoff mit den größeren Molekülen höher.',
   short: 'Erst die Art der Kraft, dann die Größe der Moleküle.',
 }
 

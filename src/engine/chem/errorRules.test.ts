@@ -146,6 +146,14 @@ describe('Rechenfehler Stoffmenge: Katalogbeispiele', () => {
     expect(m(ratMul(rat(1, 2), water))).toBe('9')
   })
 
+  it('M = m · n und M = n : m: 11 g und 0,25 mol ergeben 2,75 bzw. 0,0227 statt 44 g/mol (seit S10)', () => {
+    const mass = rat(11)
+    const amount = rat(1, 4)
+    expect(m(ratMul(mass, amount))).toBe('2,75')
+    expect(m(ratDiv(amount, mass))).toBe('0,0227')
+    expect(m(ratDiv(mass, amount))).toBe('44')
+  })
+
   it('N = n : N_A: 0,5 mol ergibt 8,3 · 10⁻²⁵; Moleküle statt Atome: 3,01 · 10²³ statt 6,02 · 10²³ H-Atome', () => {
     const na = rat(6022n * 10n ** 20n)
     expect(m(ratDiv(rat(1, 2), na))).toBe('8,3 · 10⁻²⁵')

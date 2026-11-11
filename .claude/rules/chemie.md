@@ -259,3 +259,8 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   `chem/exam/knowledge.ts`, „knapp daneben" in der Probeklausur halb (`MOCK_CLOSE_SHARE`, `gradeExam(…, { closeShare })`), „freiwillig?"
   gegen das eigene ΔG (`dgSign` in `task5.ts`). Wortvergleich mit den Unterlagen: Skript `ngram.py` im Arbeitsordner der Sitzung
   (acht Wörter am Stück), nie ins Repo.
+  Stöchiometrie (S10): Reaktionen mit `equilibrium` (Ammoniak, SO₃, NO₂) stehen mit ⇌ (`reactionLatex` in `chem/reactions.ts`), nie im
+  Umsatz (`UMSATZ_REACTIONS`); Umsatz auch vom Produkt aus (Form `aus-produkt`); Untertyp `M-from-m-n` (Rechenfehler
+  `chem-molar-m-times-n`, `chem-molar-n-over-m`); abgewogen nur Feststoffe (`WEIGH_IDS`, `NOT_WEIGHED`, `hydrateInfo` in
+  `generators/loesungen.ts`, auch Klausuraufgabe 4 Teil d); `EXAM_GIVEN_MASSES` schließt auch Zahlen der Übungsblätter und
+  Rechenbeispiele des Skripts aus; unvollständige Verbrennung nur in der Vertiefung.
