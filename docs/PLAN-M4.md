@@ -610,6 +610,29 @@ kommen mit ihren Schritten dazu. Die Denkfehler der Wissensfragen
 | Siedepunkte ordnen | umgedreht (`chem-zmk-reversed`, seit S5c) | I₂ < Br₂ < Cl₂ |
 | Siedepunkte begründen | Größe übersehen (`chem-zmk-size-ignored`, seit S5c) | Alkane: Art der Kraft entscheidet |
 | Lösen | Gegensätze lösen sich (`chem-zmk-like-reversed`, seit S5c) | I₂ besser in Wasser |
+| Hybridisierung | freie Paare vergessen (`chem-hyb-lone-pairs-ignored`, seit S5d) | NH₃: sp² statt sp³ |
+| Hybridisierung | Mehrfachbindung mehrfach gezählt (`chem-hyb-multiple-counted`, seit S5d) | CO₂: C als sp³ |
+| Hybridisierung | Valenzelektronen als Richtungen (`chem-hyb-valence`, seit S5d) | H₂O: 6 Richtungen am O |
+| Hybridisierung | alle Atome gezählt (`chem-hyb-all-atoms`, seit S5d) | CH₄: 5 Richtungen |
+| Hybridisierung | Hochzahl mit Zahl der Richtungen verwechselt (`chem-hyb-exponent`, seit S5d) | 3 Richtungen: sp³ |
+| Hybridisierung | zu wenige Hybridorbitale (`chem-hyb-too-few`, seit S5d) | CH₄: sp² |
+| Bindungsordnung | ein bindendes Paar für zu wenig gehalten (`chem-bo-one-pair`, seit S5d) | H₂ ungebunden |
+| σ und π | jeder Strich eine σ-Bindung (`chem-sigma-all-lines`, seit S5d) | CO₂: 4 σ |
+| σ und π | σ in der Mehrfachbindung vergessen (`chem-sigma-multiple-only`, seit S5d) | C₂H₄: 4 σ |
+| σ und π | alle Striche der Mehrfachbindung als π (`chem-pi-all-lines`, seit S5d) | C₂H₄: 2 π |
+| σ und π | Dreifachbindung mit einer π-Bindung (`chem-pi-per-bond`, seit S5d) | HCN: 1 π |
+| σ und π | Einfachbindungen als π (`chem-pi-single`, seit S5d) | C₂H₄: 5 π |
+| Dotierung | Gruppennummer als Valenzelektronen (`chem-dope-group-number`, seit S5d) | P: 15 |
+| Dotierung | Valenzelektronen des Siliciums genommen (`chem-dope-host-valence`, seit S5d) | B: 4 |
+| Dotierung | n und p vertauscht (`chem-dope-swapped`, seit S5d) | Si mit P: p-Leiter |
+| Dotierung | Kristall für geladen gehalten (`chem-dope-charged`, seit S5d) | dotiertes Si negativ |
+| Dotierung | Wirkung übersehen (`chem-dope-no-effect`, seit S5d) | Si mit B: keine Änderung |
+| Bindungsordnung | nicht halbiert (`chem-bo-not-halved`, seit S5d) | O₂: 8 − 4 = 4 |
+| Bindungsordnung | antibindende addiert (`chem-bo-added`, seit S5d) | O₂: (8 + 4) : 2 = 6 |
+| Bindungsordnung | antibindende vergessen (`chem-bo-bonding-only`, seit S5d) | He₂: 1 |
+| Bindungsordnung | BO 0 für gebunden gehalten (`chem-bo-zero-stable`, seit S5d) | He₂ gebunden |
+| Bindungsordnung | halbe BO für ungebunden gehalten (`chem-bo-half-unstable`, seit S5d) | H₂⁺ ungebunden |
+| Bindungsordnung | antibindende verhindern jede Bindung (`chem-bo-antibonding-blocks`, seit S5d) | O₂ ungebunden |
 | Ausgleichen | Index statt Koeffizient geändert (`chem-balance-index`) | Mg + O₂ → MgO₂ statt 2 Mg + O₂ → 2 MgO |
 | Ausgleichen | Sauerstoffatome falsch gezählt (`chem-balance-oxygen`: nicht halbiert oder Sauerstoff im Alkohol nicht abgezogen) | C₄H₁₀ + 13 O₂ → 4 CO₂ + 5 H₂O |
 | Ausgleichen | Sauerstoff im Wasser vergessen (`chem-balance-water-oxygen`) | C₃H₈ + 3 O₂ → 3 CO₂ + 4 H₂O |
@@ -931,6 +954,15 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   erst Wasserstoffbrücken, dann Größe; ein Test prüft jede Auswahl gegen die Siedepunkte), Lösen
   in Wasser oder Hexan. Fünf Lernkarten, Wissensfragen. Begriffe wie im Skript; die
   Wasserstoffbrücke braucht auch ein freies Paar an N, O oder F (wie die Musterlösung).
+  **S5d** (fertig): Thema „Metallbindung und Hybridisierung“ mit Unterthemen Metallbindung
+  und Metallgitter, Bändermodell, Leiter und Halbleiter, Hybridisierung, σ- und π-Bindungen,
+  Molekülorbitale und Bindungsordnung (Klausurniveau). Rechnungen: Hybridisierung eines Atoms
+  aus den Moleküldaten (Richtungen → sp, sp², sp³), σ- und π-Bindungen zählen (mit der
+  Lewis-Formel als Bild), Dotierung von Silicium oder Germanium (Valenzelektronen → n- oder
+  p-Leiter), Bindungsordnung (bindende und antibindende Elektronen stehen in der Aufgabe, die
+  Reihenfolge der Orbitale wird nicht gefragt). Schmelzflusselektrolyse von Aluminium als
+  Wissensfragen. Neun Lernkarten, Wissensfragen. Metall-Trends bei Härte und Schmelzpunkt
+  werden nicht gefragt (im Skript nur grob, für Nebengruppen falsch).
 - **S6: Elektronen und Periodensystem.** Konfiguration und
   Valenzkonfiguration als Auswahl, Quantenzahlen, Steckbrief, Ionenladung,
   Trends; „Klausuraufgabe 1 üben“ und „Klausuraufgabe 2 üben“.

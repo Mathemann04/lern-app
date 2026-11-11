@@ -24,6 +24,7 @@ const LOESUNGEN = 'chem-loesungen'
 const IONEN = 'chem-ionen'
 const MOLEKUELE = 'chem-molekuele'
 const ZMK = 'chem-zmk'
+const METALLE = 'chem-metalle'
 
 export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
   {
@@ -1151,6 +1152,237 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
     why: {
       detailed: 'Es gilt: Gleiches löst sich in Gleichem. Polare Stoffe mischen sich mit polaren, unpolare mit unpolaren, weil die Kräfte zwischen gleichartigen Teilchen viel stärker sind als zwischen polaren und unpolaren.',
       short: 'Gleiches löst sich in Gleichem.',
+    },
+  },
+  // Metallbindung und Hybridisierung (S5d)
+  {
+    id: 'chem-hyb-lone-pairs-ignored',
+    course: METALLE,
+    name: 'Freie Paare bei der Hybridisierung vergessen',
+    wrongFormula: String.raw`\ce{NH3}\text{: } \mathrm{sp^{2}}\ \text{statt}\ \mathrm{sp^{3}}`,
+    why: {
+      detailed: 'Auch ein freies Paar sitzt in einem Hybridorbital und braucht eine eigene Richtung. Gezählt werden deshalb Bindungspartner und freie Paare am Atom zusammen.',
+      short: 'Freie Paare brauchen auch ein Hybridorbital.',
+    },
+  },
+  {
+    id: 'chem-hyb-multiple-counted',
+    course: METALLE,
+    name: 'Mehrfachbindung mehrfach gezählt',
+    wrongFormula: String.raw`\ce{CO2}\text{: C als}\ \mathrm{sp^{3}}`,
+    why: {
+      detailed: 'Von einer Doppel- oder Dreifachbindung liegt nur die σ-Bindung in einem Hybridorbital. Die π-Bindungen entstehen aus nicht hybridisierten p-Orbitalen. Eine Mehrfachbindung zählt deshalb nur einmal.',
+      short: 'Nur die σ-Bindung braucht ein Hybridorbital.',
+    },
+  },
+  {
+    id: 'chem-hyb-valence',
+    course: METALLE,
+    name: 'Valenzelektronen als Richtungen gezählt',
+    wrongFormula: String.raw`\ce{H2O}\text{: 6 Richtungen am O}`,
+    why: {
+      detailed: 'Gezählt werden Richtungen, also Bindungspartner und freie Paare, nicht einzelne Elektronen. Ein freies Paar besteht aus zwei Elektronen und zeigt in eine Richtung.',
+      short: 'Richtungen zählen, nicht Elektronen.',
+    },
+  },
+  {
+    id: 'chem-hyb-exponent',
+    course: METALLE,
+    name: 'Hochzahl mit der Zahl der Richtungen verwechselt',
+    wrongFormula: String.raw`3\ \text{Richtungen:}\ \mathrm{sp^{3}}\ \text{statt}\ \mathrm{sp^{2}}`,
+    why: {
+      detailed: 'Die Hochzahl nennt die Zahl der p-Orbitale, die sich mit dem einen s-Orbital mischen. Die Zahl der Hybridorbitale ist deshalb um eins größer als die Hochzahl.',
+      short: 'Hybridorbitale = 1 s-Orbital + Hochzahl p-Orbitale.',
+    },
+  },
+  {
+    id: 'chem-hyb-all-atoms',
+    course: METALLE,
+    name: 'Alle Atome des Moleküls gezählt',
+    wrongFormula: String.raw`\ce{CH4}\text{: 5 Richtungen}`,
+    why: {
+      detailed: 'Gezählt werden nur die Richtungen um das eine Atom: seine direkten Bindungspartner und seine freien Paare. Das Atom selbst und weiter entfernte Atome zählen nicht.',
+      short: 'Nur direkte Partner und freie Paare des Atoms.',
+    },
+  },
+  {
+    id: 'chem-hyb-too-few',
+    course: METALLE,
+    name: 'Zu wenige Hybridorbitale',
+    wrongFormula: String.raw`\ce{CH4}\text{: } \mathrm{sp^{2}}`,
+    why: {
+      detailed: 'Für jede Richtung braucht das Atom ein eigenes Hybridorbital. Zähle die Richtungen und vergleiche mit der Zahl der Orbitale, die sich mischen: ein s-Orbital und so viele p-Orbitale, wie die Hochzahl sagt.',
+      short: 'Ein Hybridorbital je Richtung.',
+    },
+  },
+  {
+    id: 'chem-sigma-all-lines',
+    course: METALLE,
+    name: 'Jeden Bindungsstrich als σ-Bindung gezählt',
+    wrongFormula: String.raw`\ce{CO2}\text{: } 4\,\sigma`,
+    why: {
+      detailed: 'Zwischen zwei Atomen gibt es höchstens eine σ-Bindung. Die weiteren Striche einer Doppel- oder Dreifachbindung sind π-Bindungen.',
+      short: 'Höchstens eine σ-Bindung zwischen zwei Atomen.',
+    },
+  },
+  {
+    id: 'chem-sigma-multiple-only',
+    course: METALLE,
+    name: 'σ-Bindung in der Mehrfachbindung vergessen',
+    wrongFormula: String.raw`\ce{C2H4}\text{: } 4\,\sigma`,
+    why: {
+      detailed: 'Auch eine Doppel- oder Dreifachbindung enthält eine σ-Bindung; die π-Bindungen kommen nur hinzu. Jede Verbindung zwischen zwei Atomen hat genau eine σ-Bindung.',
+      short: 'Jede Mehrfachbindung enthält auch eine σ-Bindung.',
+    },
+  },
+  {
+    id: 'chem-pi-all-lines',
+    course: METALLE,
+    name: 'Alle Striche der Mehrfachbindung als π gezählt',
+    wrongFormula: String.raw`\ce{C2H4}\text{: } 2\,\pi`,
+    why: {
+      detailed: 'Einer der Striche einer Mehrfachbindung ist die σ-Bindung. Nur die übrigen sind π-Bindungen.',
+      short: 'Ein Strich jeder Mehrfachbindung ist σ.',
+    },
+  },
+  {
+    id: 'chem-pi-per-bond',
+    course: METALLE,
+    name: 'Dreifachbindung mit nur einer π-Bindung',
+    wrongFormula: String.raw`\ce{HCN}\text{: } 1\,\pi`,
+    why: {
+      detailed: 'Eine Dreifachbindung besteht aus einer σ- und zwei π-Bindungen, weil zwei p-Orbitale seitlich überlappen.',
+      short: 'Dreifachbindung: zwei π-Bindungen.',
+    },
+  },
+  {
+    id: 'chem-pi-single',
+    course: METALLE,
+    name: 'Einfachbindungen als π-Bindungen gezählt',
+    wrongFormula: String.raw`\ce{C2H4}\text{: } 5\,\pi`,
+    why: {
+      detailed: 'Eine Einfachbindung ist immer eine σ-Bindung: Die Orbitale überlappen frontal, auf der Verbindungslinie. π-Bindungen gibt es nur zusätzlich in Mehrfachbindungen.',
+      short: 'Einfachbindung = σ-Bindung.',
+    },
+  },
+  {
+    id: 'chem-dope-group-number',
+    course: METALLE,
+    name: 'Gruppennummer als Zahl der Valenzelektronen',
+    wrongFormula: String.raw`\ce{P}\text{: 15 Valenzelektronen}`,
+    why: {
+      detailed: 'Bei den Hauptgruppen 13 bis 18 ist die Zahl der Valenzelektronen die Gruppennummer minus 10, also die römische Nummer der Hauptgruppe.',
+      short: 'Gruppe 13 bis 18: minus 10.',
+    },
+  },
+  {
+    id: 'chem-dope-host-valence',
+    course: METALLE,
+    name: 'Valenzelektronen des Grundgitters genommen',
+    wrongFormula: String.raw`\ce{B}\text{: 4 Valenzelektronen}`,
+    why: {
+      detailed: 'Gefragt ist das Fremdatom, nicht das Silicium. Es bringt seine eigenen Valenzelektronen mit; gerade dass es mehr oder weniger als vier sind, macht die Dotierung aus.',
+      short: 'Das Fremdatom zählt.',
+    },
+  },
+  {
+    id: 'chem-dope-swapped',
+    course: METALLE,
+    name: 'n- und p-Leiter verwechselt',
+    wrongFormula: String.raw`\ce{Si}\ \text{mit}\ \ce{P}\text{: p-Leiter}`,
+    why: {
+      detailed: 'Bringt das Fremdatom ein Elektron mehr mit, als für die vier Bindungen nötig ist, bleibt ein bewegliches Elektron übrig (negativ, n). Bringt es eines weniger mit, fehlt eines, und ein Loch entsteht (positiv, p).',
+      short: 'Elektron übrig: n; Elektron fehlt: p.',
+    },
+  },
+  {
+    id: 'chem-dope-charged',
+    course: METALLE,
+    name: 'Dotierter Kristall für geladen gehalten',
+    wrongFormula: String.raw`\text{dotiertes Si ist negativ geladen}`,
+    why: {
+      detailed: 'Das Fremdatom bringt genauso viele Protonen wie Elektronen mit; der Kristall bleibt insgesamt neutral. Es ändert sich nur, wie viele Ladungsträger frei beweglich sind.',
+      short: 'Der Kristall bleibt neutral.',
+    },
+  },
+  {
+    id: 'chem-dope-no-effect',
+    course: METALLE,
+    name: 'Wirkung der Dotierung übersehen',
+    wrongFormula: String.raw`\ce{Si}\ \text{mit}\ \ce{B}\text{: keine Änderung}`,
+    why: {
+      detailed: 'Ein Fremdatom mit drei oder fünf Valenzelektronen passt nicht genau in das Gitter aus Atomen mit vier Bindungen. Es entsteht ein freies Elektron oder ein Loch, und das ändert die Leitfähigkeit stark.',
+      short: 'Drei oder fünf passen nicht zu vier Bindungen.',
+    },
+  },
+  {
+    id: 'chem-bo-not-halved',
+    course: METALLE,
+    name: 'Bindungsordnung nicht halbiert',
+    wrongFormula: String.raw`\ce{O2}\text{: } 8 - 4 = 4`,
+    why: {
+      detailed: 'Eine Bindung besteht aus einem Elektronenpaar, also zwei Elektronen. Der Unterschied der Elektronenzahlen muss deshalb durch zwei geteilt werden.',
+      short: 'Durch zwei teilen: ein Paar pro Bindung.',
+    },
+  },
+  {
+    id: 'chem-bo-added',
+    course: METALLE,
+    name: 'Antibindende Elektronen addiert',
+    wrongFormula: String.raw`\ce{O2}\text{: } (8 + 4) : 2 = 6`,
+    why: {
+      detailed: 'Antibindende Elektronen schwächen die Bindung: Sie heben die Wirkung bindender Elektronen auf. Sie werden deshalb abgezogen, nicht addiert.',
+      short: 'Antibindende Elektronen abziehen.',
+    },
+  },
+  {
+    id: 'chem-bo-bonding-only',
+    course: METALLE,
+    name: 'Antibindende Elektronen vergessen',
+    wrongFormula: String.raw`\ce{He2}\text{: } 2 : 2 = 1`,
+    why: {
+      detailed: 'In die Bindungsordnung gehen auch die antibindenden Elektronen ein. Jedes von ihnen hebt die Wirkung eines bindenden Elektrons auf.',
+      short: 'Auch antibindende Elektronen zählen.',
+    },
+  },
+  {
+    id: 'chem-bo-zero-stable',
+    course: METALLE,
+    name: 'Bindungsordnung 0 für gebunden gehalten',
+    wrongFormula: String.raw`\ce{He2}\ \text{ist gebunden}`,
+    why: {
+      detailed: 'Bindende Elektronen allein reichen nicht. Stehen ebenso viele Elektronen in antibindenden Orbitalen, heben sich beide Wirkungen auf, und es entsteht keine Bindung.',
+      short: 'Gleich viele antibindende heben die Bindung auf.',
+    },
+  },
+  {
+    id: 'chem-bo-half-unstable',
+    course: METALLE,
+    name: 'Halbe Bindungsordnung für ungebunden gehalten',
+    wrongFormula: String.raw`\ce{H2+}\ \text{ist nicht gebunden}`,
+    why: {
+      detailed: 'Jede Bindungsordnung über 0 bedeutet, dass die bindenden Elektronen überwiegen. Auch eine halbe Bindung hält zwei Atome zusammen, nur schwächer.',
+      short: 'Über 0 heißt gebunden, auch halb.',
+    },
+  },
+  {
+    id: 'chem-bo-one-pair',
+    course: METALLE,
+    name: 'Ein bindendes Paar für zu wenig gehalten',
+    wrongFormula: String.raw`\ce{H2}\ \text{ungebunden}`,
+    why: {
+      detailed: 'Schon ein einziges Paar in einem bindenden Orbital bildet eine Bindung, wenn kein antibindendes Elektron es aufhebt. So entsteht die Einfachbindung im Wasserstoffmolekül.',
+      short: 'Ein bindendes Paar ist eine Bindung.',
+    },
+  },
+  {
+    id: 'chem-bo-antibonding-blocks',
+    course: METALLE,
+    name: 'Antibindende Elektronen verhindern jede Bindung',
+    wrongFormula: String.raw`\ce{O2}\ \text{wegen antibindender Elektronen ungebunden}`,
+    why: {
+      detailed: 'Antibindende Elektronen schwächen eine Bindung nur. Entscheidend ist, ob die bindenden Elektronen überwiegen; dann ist das Teilchen gebunden.',
+      short: 'Es zählt, wer überwiegt.',
     },
   },
 ]

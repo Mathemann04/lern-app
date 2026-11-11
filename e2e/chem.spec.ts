@@ -308,6 +308,7 @@ test('Chemie: Themen mischen, „Nächste Aufgabe" bleibt in der Mischung, X und
   await page.getByRole('checkbox', { name: 'Ionenbindung und Salze' }).uncheck()
   await page.getByRole('checkbox', { name: 'Moleküle' }).uncheck()
   await page.getByRole('checkbox', { name: 'Zwischenmolekulare Kräfte' }).uncheck()
+  await page.getByRole('checkbox', { name: 'Metallbindung und Hybridisierung' }).uncheck()
 
   // Unterthemen aufklappen: dieselben Kästchen wie auf der Themenseite (Atombau steht zuerst)
   const toggle = page.getByRole('button', { name: /^Unterthemen: alle/ }).first()
@@ -330,7 +331,8 @@ test('Chemie: Themen mischen, „Nächste Aufgabe" bleibt in der Mischung, X und
   await expect(page.getByText('Kreuze unten bei Atombau mindestens ein Unterthema an, das es in Grundlagen gibt.')).toBeVisible()
   for (const name of basics) await page.getByRole('checkbox', { name }).check()
 
-  await page.locator('label', { hasText: 'Klausurniveau' }).click()
+  // Stufenwahl (das Unterthema „Molekülorbitale“ nennt im Hinweis auch „Klausurniveau“)
+  await page.locator('label', { hasText: /^\s*3\s*Klausurniveau/ }).click()
   await expect(page.getByText('Fragen aus Atombau (4 von 5 Unterthemen)')).toBeVisible()
   await page.getByRole('link', { name: 'Klausurniveau gemischt üben' }).click()
   await expect(page).toHaveURL(/#\/ueben\/chem-atombau\/3-\d+\?mischen=chemie$/)
@@ -637,5 +639,19 @@ test('Chemie: Zwischenmolekulare Kräfte, Rechnung zur stärksten Kraft, Lernkar
   await page.goto('./#/karten/chem-zmk/zmk-siedepunkte')
   await expect(page.getByRole('heading', { name: 'Siedepunkte vergleichen' })).toBeVisible()
   await expectCleanPage(page, 'Siedepunkte vergleichen')
+  expect(errors).toEqual([])
+})
+
+test('Chemie: Metallbindung und Hybridisierung, Rechnung und Lernkarte', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./#/gebiet/chem-bindung')
+  await page.getByRole('link', { name: /Metallbindung und Hybridisierung/ }).click()
+  await expect(page.getByRole('heading', { name: 'Metallbindung und Hybridisierung' })).toBeVisible()
+  await page.goto('./#/ueben/chem-metalle/2-10000')
+  await expect(answers(page).first()).toBeVisible()
+  await expectCleanPage(page, 'Rechnung zu Metallen und Hybridisierung')
+  await page.goto('./#/karten/chem-metalle/met-baender')
+  await expect(page.getByRole('heading', { name: /Bändermodell/ })).toBeVisible()
+  await expectCleanPage(page, 'Bändermodell')
   expect(errors).toEqual([])
 })
