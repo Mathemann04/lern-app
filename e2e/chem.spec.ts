@@ -125,6 +125,7 @@ test('Chemie: Start → Atombau → Grundlagen, Frage richtig beantworten, melde
   await expect(page).toHaveURL(/#\/ueben\/chem-atombau\/1-\d+$/)
   await ensureQuestion(page, './#/ueben/chem-atombau/1')
   await expect(page.locator('#question')).toBeVisible()
+  const second = questionNo(page.url())
 
   // Einstellungen: Liste kopieren und leeren
   await context.grantPermissions(['clipboard-read', 'clipboard-write'])
@@ -138,7 +139,11 @@ test('Chemie: Start → Atombau → Grundlagen, Frage richtig beantworten, melde
   await expectCleanPage(page, 'Einstellungen')
   // „Fortschritt löschen" lässt die Liste stehen und beginnt die Runden der Fragen von vorn
   const rounds = () => page.evaluate(() => JSON.parse(localStorage.getItem('rechenweg-fragen') ?? '{}') as Record<string, number[]>)
-  expect((await rounds())['chem-atombau:1']).toHaveLength(2)
+  // mindestens die beiden Fragen; ensureQuestion zieht über Fragen mit Aussagen, Zuordnen oder Ordnen hinweg neu, die
+  // zählen dann auch als gezeigt
+  const shown = (await rounds())['chem-atombau:1']
+  expect(shown.length).toBeGreaterThanOrEqual(2)
+  expect(shown).toContain(second)
   await page.goto('./#/fortschritt')
   await page.getByRole('button', { name: 'Fortschritt löschen' }).click()
   await page.getByRole('button', { name: 'Ja, löschen' }).click()
