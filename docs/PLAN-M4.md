@@ -1094,6 +1094,10 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   ordnen. Bild: Hauptgruppen mit Pfeilen in Richtung der Zunahme und markierten Elementen (im Ergebnis und auf den
   Karten). Sieben Lernkarten, 48 Wissensfragen, 10 Rechenfehler, 15 Denkfehler. Die Elektronenaffinität wird nicht
   geordnet (die Messwerte folgen der Regel zu oft nicht).
+  **S6e** (fertig): „Klausuraufgabe 2 üben“ als Kachel im Gebiet Periodensystem, 6 Punkte nach dem Bauplan Teil 1:
+  a) Periode, Gruppe und Block eines Elements (je 1), b) zur Hälfte ein Trend (Richtung 1, drei Elemente ordnen 2) oder
+  eine Ionenladung (abgeben oder aufnehmen, Ion, Edelgas, je 1). Die Fragen kommen aus den Rechnungen von S6c und S6d,
+  mit denselben Rechenfehlern; Folgefehler gibt es nicht, die Teile sind unabhängig.
 - **S7: Gleichgewicht und Energie.** Massenwirkungsgesetz als Auswahl, Le
   Chatelier, Katalysator, K aus Konzentrationen; Reaktionsenthalpie aus
   Bildungsenthalpien, Entropie, freie Enthalpie; „Klausuraufgabe 5 üben“.

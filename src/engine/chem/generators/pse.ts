@@ -43,7 +43,8 @@ const asMain = (group: number) => {
 function steckbriefPool(level: Level): Element[] {
   return ELEMENTS.filter((el) => {
     const place = placeOf(el)
-    if (el.z <= 2) return false
+    // ohne Technetium (kein natürliches Isotop, wie bei den Teilchenzahlen)
+    if (el.z <= 2 || el.isotopes.length === 0) return false
     // Ausnahmen der Besetzung in Aufgaben nur Cr und Cu (docs/CHEMIE.md §6)
     if (EXCEPTIONS[el.symbol] && !(TASK_EXCEPTIONS as readonly string[]).includes(el.symbol)) return false
     if (level === 1) return place.main && place.period <= 5

@@ -679,6 +679,7 @@ export const SUBJECTS: readonly Subject[] = [
         description: 'Aufbau, Gruppen, Perioden und Trends',
         icon: 'periodic',
         tone: 'sky',
+        exam: { task: 2, points: 6 },
         courses: [
           {
             id: PSE,

@@ -88,12 +88,12 @@ feste Regeln: [CHEMIE.md](CHEMIE.md)
     - [x] S5c. Zwischenmolekulare Kräfte (Rechnungen, Siedepunkte, Karten, Wissensfragen)
     - [x] S5d. Metallbindung, Hybridisierung und Molekülorbitale
     - [x] S5e. Klausuraufgabe 3 üben
-  - [ ] S6. Elektronen und Periodensystem
+  - [x] S6. Elektronen und Periodensystem
     - [x] S6a. Thema Elektronen (Quantenzahlen, Konfiguration, Kästchenbilder, Ionen, Valenzelektronen)
     - [x] S6b. Klausuraufgabe 1 üben (Atombau und Elektronen)
     - [x] S6c. Aufbau des Periodensystems (mit Ausschnitt des Periodensystems als Bild)
     - [x] S6d. Trends im Periodensystem
-    - [ ] S6e. Klausuraufgabe 2 üben
+    - [x] S6e. Klausuraufgabe 2 üben
   - [ ] S7. Gleichgewicht und Energie
   - [ ] S8. Frei rechnen und Wiederholung
   - [ ] S9. Probeklausur Teil 1 (50 Punkte)
