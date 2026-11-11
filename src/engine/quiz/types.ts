@@ -47,6 +47,8 @@ export type SingleChoice = {
   readonly cards: readonly string[]
   // Fundstelle zum Nachlesen, nur der Ort (z. B. „Skript Aufbau der Materie, Folie 7"), keine Personen
   readonly ref?: string
+  // Bild zur Frage (Id aus engine/chem/figures.ts), gezeigt unter der Frage
+  readonly figure?: string
 }
 
 export type Question = SingleChoice

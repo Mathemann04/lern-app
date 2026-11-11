@@ -48,6 +48,7 @@ export function planQuestion(
         hint: question.hint,
         explanation: question.explanation,
         cards: question.cards,
+        ...(question.figure ? { figure: question.figure } : {}),
       },
     ],
     cards: question.cards,

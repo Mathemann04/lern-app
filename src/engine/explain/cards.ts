@@ -102,6 +102,8 @@ export type Card = {
   readonly examples: readonly CardExample[]
   // Ids der typischen Fehler (Fehlerregeln)
   readonly errors: readonly string[]
+  // Bild auf der Karte (Id aus engine/chem/figures.ts)
+  readonly figures?: readonly string[]
 }
 
 const [x2, x3] = [pow(x, num(2)), pow(x, num(3))]

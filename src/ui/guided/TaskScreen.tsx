@@ -13,6 +13,7 @@ import type { CourseEngine } from '../courseEngines.ts'
 import { courseHref, mixHref, mixPracticeHref, practiceHref } from '../routes.ts'
 import { LevelUpSuggestion } from '../task/LevelUpSuggestion.tsx'
 import { CheckBadge, FocusBanner, TaskIntro, TaskTopBar } from '../task/TaskParts.tsx'
+import { ChemFigure } from '../chem/ChemFigure.tsx'
 import { type ExplanationMode, useExplanationMode } from '../task/explanationMode.ts'
 
 type Props = { course: string; engine: CourseEngine; taskRef: TaskRef; focus?: string | null; mix?: string | null }
@@ -151,6 +152,7 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext 
           <RichText text={step.question} inline />
         </h1>
       </div>
+      {step.figure && <ChemFigure id={step.figure} />}
 
       <div className="space-y-3" role="group" aria-label="Antworten">
         {step.choices.map((choice) => {

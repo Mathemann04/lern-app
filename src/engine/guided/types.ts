@@ -40,6 +40,8 @@ export type GuidedStep = {
   readonly established?: string | readonly string[]
   // passende Lernkarten (Ids aus cards.ts); bei der Regelwahl die Karten aller angebotenen Regeln
   readonly cards: readonly string[]
+  // Bild unter der Frage (Id aus engine/chem/figures.ts), z. B. ein Ionengitter
+  readonly figure?: string
 }
 
 // Gemeinsame Basis aller geführten Aufgaben: Mathe-Aufgaben mit Term (GuidedTask) und Wissensfragen

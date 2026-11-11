@@ -131,6 +131,7 @@ export const IONEN_CARDS: readonly Card[] = [
     formulas: [],
     memo: 'In einem Salzkristall sind Kationen und Anionen regelmäßig in allen drei Raumrichtungen angeordnet. Das kleinste Stück, aus dem sich das ganze Gitter aufbauen lässt, ist die Elementarzelle. Die Koordinationszahl sagt, wie viele nächste Nachbarn mit entgegengesetzter Ladung ein Ion hat.',
     note: 'Natriumchlorid: Koordinationszahl 6, die Nachbarn bilden ein Oktaeder. Caesiumchlorid: 8, ein Würfel. Zinkblende (ZnS): 4, ein Tetraeder. Größere Kationen haben Platz für mehr Nachbarn.',
+    figures: ['gitter-nacl', 'gitter-cscl', 'gitter-zns'],
     examples: [
       {
         chemTask: String.raw`$\ce{NaCl}$-Gitter`,

@@ -11,6 +11,7 @@ import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
 import { courseOfCards, playableLevel } from '../catalog.ts'
 import { practiceHref } from '../routes.ts'
+import { ChemFigure } from '../chem/ChemFigure.tsx'
 
 // Inhalt einer Lernkarte: Formel, Merksatz, wann man die Regel braucht, ein durchgerechnetes
 // Beispiel (von der Engine; bei Wissenskarten in Chemie als Text) und die typischen Fehler. Karten
@@ -41,6 +42,8 @@ export function CardBody({ card, heading: H, practice, task }: Props) {
         <RichText text={card.memo} className="text-lg font-medium" />
         {card.note && <RichText text={card.note} className="text-zinc-600" />}
       </section>
+
+      {card.figures?.map((id) => <ChemFigure key={id} id={id} />)}
 
       {card.when && (
         <section className="space-y-2">
