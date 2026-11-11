@@ -7,6 +7,7 @@ import { CHEM_ERROR_RULES } from '../errorRules.ts'
 import { elementBySymbol } from '../elements.ts'
 import { MISCONCEPTIONS_BY_COURSE } from '../misconceptions/index.ts'
 import { figureById } from '../figures.ts'
+import { EXAM_PARTICLES, symbolLatex } from '../generators/particles.ts'
 import { CHARGE_ASSIGNMENT, TASK1_POINTS, buildTask1, particleItem } from './task1.ts'
 
 // Klausuraufgabe 1 (S6b): Aufbau, Punkte, saubere Texte, Teilchenzahlen richtig, Abwechslung
@@ -87,6 +88,8 @@ describe('Klausuraufgabe 1: Aufbau', () => {
       const task = buildTask1(seed)
       const [a, , c, d] = task.parts
       expect(c.items[0].question).toMatch(/^Bestimme die Zahl der Protonen, Neutronen und Elektronen von /)
+      // keine Teilchen der Altklausuren und Übungsblätter
+      for (const [symbol, a, q] of EXAM_PARTICLES) expect(c.items[0].question, `${seed}`).not.toContain(`$${symbolLatex({ el: elementBySymbol(symbol)!, a, q })}$`)
       if (!/\^\{?[0-9]*[+-]/.test(c.items[0].question.replace(/\^\{\d+\}_\{\d+\}/, ''))) neutral++
       const no = Math.floor((a.items[0].review!.seed - 500_000) / 50)
       if (no === CHARGE_ASSIGNMENT) assignment++

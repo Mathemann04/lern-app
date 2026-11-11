@@ -8,7 +8,7 @@ import { chemErrorRule } from '../errorRules.ts'
 import { type Element, ELEMENTS } from '../elements.ts'
 import { valenceTask } from '../generators/elektronen.ts'
 import { LIGHT_GENERATORS } from '../generators/light.ts'
-import { type Particle, symbolLatex } from '../generators/particles.ts'
+import { type Particle, isExamParticle, symbolLatex } from '../generators/particles.ts'
 import { type ExtraOption, withExtraOptions } from './extraOptions.ts'
 import { fromStep } from './fromStep.ts'
 
