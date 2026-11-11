@@ -146,7 +146,7 @@ describe('Rechnungen „Moleküle": Lösung passt zu den Daten', () => {
 // Ordnen (N1c): Reihenfolge der Bindungswinkel passt zu den Messwerten (ideale Winkel; Ammoniak etwa 107°, Wasser
 // etwa 104,5° wie auf der Lernkarte) und zum Typ aus der Engine
 describe('Ordnen: Bindungswinkel', () => {
-  const MEASURED: Readonly<Record<string, number>> = { CO2: 180, BF3: 120, CH4: 109.5, NH3: 107, H2O: 104.5 }
+  const MEASURED: Readonly<Record<string, number>> = { CO2: 180, BF3: 120, CH4: 109.5, NH3: 107 }
   const IDEAL: Readonly<Record<number, number>> = { 2: 180, 3: 120, 4: 109.5 }
   it('folgt den Messwerten und dem VSEPR-Typ', () => {
     const q = MOLEKUELE_BANK.questions.find((x) => x.id === 'mo-v-ordnen-winkel')

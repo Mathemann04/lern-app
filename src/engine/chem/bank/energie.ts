@@ -148,7 +148,7 @@ const DG_ORDER: OrderQuestion = {
   fact: 'order-dg-k',
   part: 'freie-enthalpie',
   title: 'Gleichgewichtskonstante aus $\\Delta G^{0}$',
-  prompt: r`Fünf Reaktionen bei $25\,^{\circ}\mathrm{C}$ mit verschiedenen freien Standardenthalpien. Ordne sie nach ihrer Gleichgewichtskonstante $K$.`,
+  prompt: r`Reaktionen bei $25\,^{\circ}\mathrm{C}$ mit verschiedenen freien Standardenthalpien. Ordne sie nach ihrer Gleichgewichtskonstante $K$.`,
   items: DG_ORDER_KJ.map((dg) => ({
     id: `dg${dg}`,
     text: dg === 0 ? r`$\Delta G^{0} = 0$` : r`$\Delta G^{0} = ${dg < 0 ? '-' : '+'}${Math.abs(dg)}\,\mathrm{kJ/mol}$`,

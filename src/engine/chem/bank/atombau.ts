@@ -118,16 +118,6 @@ const MODELLE_ZEIT: OrderQuestion = {
         short: "Wer kennt schon einen Kern?",
       },
     },
-    {
-      kind: 'swap',
-      before: 'bohr',
-      after: 'rutherford',
-      misconception: 'chem-mis-model-mixup',
-      why: {
-        detailed: "Bahnen um einen Kern setzen voraus, dass es einen Kern gibt. Prüfe, welches Modell den Kern einführte und welches darauf aufbaut.",
-        short: "Bahnen um einen Kern brauchen zuerst einen Kern.",
-      },
-    },
   ],
   hint: "Frag bei jedem Modell: Welche Teilchen oder Versuche musste man dafür schon kennen?",
   explanation: {

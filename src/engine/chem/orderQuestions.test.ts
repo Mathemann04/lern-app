@@ -35,7 +35,7 @@ describe('Ordnen: Gegenproben', () => {
   })
 
   it('Konzentrationen fallen mit deutlichem Abstand; die Vertauschungen folgen Gramm je Liter bzw. der Masse', () => {
-    const grams = (id: string) => Number(CONCENTRATION_ORDER_ITEMS.find((x) => x.id === id)!.grams.replace(',', '.'))
+    const grams = (id: string) => Number(CONCENTRATION_ORDER_ITEMS.find((x) => x.id === id)!.grams.replace('{,}', '.'))
     const liters = (id: string) => CONCENTRATION_ORDER_ITEMS.find((x) => x.id === id)!.mL / 1000
     const c = (id: string) => grams(id) / M(id) / liters(id)
     const ids = CONCENTRATION_ORDER.items.map((i) => i.id)

@@ -28,9 +28,9 @@ const multiAt = (level: QuestionLevel) => (spec: MultiSpec): MultiChoice => ({
 export const CONCENTRATION_ORDER_ITEMS: readonly { readonly id: string; readonly grams: string; readonly mL: number }[] = [
   { id: 'NaOH', grams: '8', mL: 250 },
   { id: 'C6H12O6', grams: '90', mL: 1000 },
-  { id: 'KCl', grams: '7,46', mL: 250 },
-  { id: 'NaCl', grams: '5,85', mL: 500 },
-  { id: 'Na2SO4', grams: '14,21', mL: 1000 },
+  { id: 'KCl', grams: '7{,}46', mL: 250 },
+  { id: 'NaCl', grams: '5{,}85', mL: 500 },
+  { id: 'Na2SO4', grams: '14{,}21', mL: 1000 },
 ]
 const NAMES: Readonly<Record<string, string>> = { NaOH: 'Natriumhydroxid', C6H12O6: 'Glucose', KCl: 'Kaliumchlorid', NaCl: 'Natriumchlorid', Na2SO4: 'Natriumsulfat' }
 const volumeText = (mL: number) => (mL >= 1000 ? String.raw`$${mL / 1000}\,\mathrm{L}$` : String.raw`$${mL}\,\mathrm{mL}$`)
@@ -60,7 +60,16 @@ export const CONCENTRATION_ORDER: OrderQuestion = {
         'Erst in Mol umrechnen, dann durch das Volumen teilen.',
       ),
     },
-    { kind: 'swap', before: 'Na2SO4', after: 'NaCl', misconception: 'chem-mis-lo-share-is-amount' },
+    {
+      kind: 'swap',
+      before: 'Na2SO4',
+      after: 'NaCl',
+      misconception: 'chem-mis-lo-c-mixup',
+      why: why(
+        'Mehr Gramm heißen nicht mehr Mol: Natriumsulfat hat eine große molare Masse, darum ergeben viele Gramm nur wenig Stoffmenge. Rechne erst $n = \\frac{m}{M}$ aus und teile dann durch das Volumen.',
+        'Erst in Mol umrechnen, dann durch das Volumen teilen.',
+      ),
+    },
   ],
   hint: 'Rechne für jede Lösung zuerst die Stoffmenge aus und teile sie durch das Volumen in Litern.',
   explanation: why(

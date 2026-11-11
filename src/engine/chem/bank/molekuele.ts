@@ -124,7 +124,7 @@ const MATCH_ANGLES: MatchQuestion = {
 // Ordnen (N1c): Bindungswinkel vom größten zum kleinsten. Die Engine liefert den idealen Winkel aus der Zahl der
 // Richtungen; bei gleicher Zahl macht jedes freie Paar den Winkel kleiner (Lernkarte: etwa 107° bei Ammoniak, 104,5° bei
 // Wasser). Gegenprobe in generators/molekuele.test.ts.
-export const ORDER_ANGLE_IDS = ['CO2', 'BF3', 'CH4', 'NH3', 'H2O']
+export const ORDER_ANGLE_IDS = ['CO2', 'BF3', 'CH4', 'NH3']
 const IDEAL_ANGLE: Readonly<Record<number, number>> = { 2: 180, 3: 120, 4: 109.5 }
 export const angleRank = (id: string) => {
   const { x, e } = vseprOf(mol(id))
@@ -146,13 +146,12 @@ const ORDER_ANGLES: OrderQuestion = {
   last: 'kleinster Bindungswinkel',
   traps: [
     { kind: 'swap', before: 'NH3', after: 'CH4', misconception: 'chem-mis-mo-lone-small' },
-    { kind: 'swap', before: 'H2O', after: 'NH3', misconception: 'chem-mis-mo-lone-small' },
-    { kind: 'swap', before: 'CH4', after: 'CO2', misconception: 'chem-mis-mo-multiple-domains' },
+    { kind: 'swap', before: 'BF3', after: 'CO2', misconception: 'chem-mis-mo-multiple-domains' },
   ],
   hint: 'Zähle die Richtungen um das Zentralatom, Bindungen und freie Paare zusammen. Brauchen freie Paare mehr oder weniger Platz als bindende?',
   explanation: why(
-    r`Zwei Richtungen ergeben $180^\circ$ ($\ce{CO2}$; eine Doppelbindung zählt als eine Richtung), drei ergeben $120^\circ$ ($\ce{BF3}$), vier ergeben $109{,}5^\circ$ ($\ce{CH4}$). Freie Paare brauchen mehr Platz und drücken die Bindungen zusammen: $\ce{NH3}$ mit einem freien Paar etwa $107^\circ$, $\ce{H2O}$ mit zwei freien Paaren etwa $104{,}5^\circ$.`,
-    'Weniger Richtungen, größerer Winkel; jedes freie Paar macht ihn kleiner.',
+    r`Zwei Richtungen ergeben $180^\circ$ ($\ce{CO2}$; eine Doppelbindung zählt als eine Richtung), drei ergeben $120^\circ$ ($\ce{BF3}$), vier ergeben $109{,}5^\circ$ ($\ce{CH4}$). Freie Paare brauchen mehr Platz und drücken die Bindungen zusammen: $\ce{NH3}$ hat bei vier Richtungen ein freies Paar, sein Winkel ist kleiner als $109{,}5^\circ$.`,
+    'Weniger Richtungen, größerer Winkel; ein freies Paar macht ihn kleiner.',
   ),
   cards: ['mol-gestalt', 'mol-freie-paare'],
   ref: REF_VSEPR,
