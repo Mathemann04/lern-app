@@ -1,4 +1,4 @@
-import { type Species, species } from './equation.ts'
+import { type Equation, type Species, equationLatex, species } from './equation.ts'
 
 // Reaktionen zum Ausgleichen (Thema „Reaktionsgleichungen", Plan M4, Thema 4.1). Nur Edukte und
 // Produkte; die Koeffizienten rechnet die Engine (equation.ts, balance). Zweiatomige Elemente als X₂,
@@ -13,15 +13,23 @@ export type Reaction = {
   readonly reactants: readonly Species[]
   readonly products: readonly Species[]
   readonly levels: readonly (1 | 2 | 3)[]
+  // Gleichgewichtsreaktion (Skript Gleichgewicht, erste Folie; docs/CHEMIE.md §3 und §5): immer mit ⇌ geschrieben,
+  // nie als vollständig ablaufend gerechnet (der Umsatz lässt sie weg); dieselben Reaktionen wie in equilibria.ts
+  readonly equilibrium?: true
 }
 
-const r = (id: string, name: string, left: string, right: string, levels: readonly (1 | 2 | 3)[]): Reaction => ({
+const r = (id: string, name: string, left: string, right: string, levels: readonly (1 | 2 | 3)[], equilibrium?: true): Reaction => ({
   id,
   name,
   reactants: left.split(' + ').map(species),
   products: right.split(' + ').map(species),
   levels,
+  ...(equilibrium ? { equilibrium } : {}),
 })
+
+// Gleichung einer Reaktion als LaTeX: bei Gleichgewichten mit Doppelpfeil
+export const reactionLatex = (reaction: Pick<Reaction, 'equilibrium'>, eq: Equation) =>
+  reaction.equilibrium ? equationLatex(eq).replace(' -> ', ' <=> ') : equationLatex(eq)
 
 export const REACTIONS: readonly Reaction[] = [
   // Grundlagen: zwei oder drei Stoffe
@@ -37,11 +45,11 @@ export const REACTIONS: readonly Reaction[] = [
   r('lithiumoxid', 'Lithium reagiert mit Sauerstoff zu Lithiumoxid', 'Li + O2', 'Li2O', [1]),
   r('natriumoxid', 'Natrium reagiert mit Sauerstoff zu Natriumoxid', 'Na + O2', 'Na2O', [1]),
   r('peroxid', 'Wasserstoffperoxid zerfällt in Wasser und Sauerstoff', 'H2O2', 'H2O + O2', [1]),
-  r('quecksilberoxid', 'Quecksilberoxid zerfällt beim Erhitzen in Quecksilber und Sauerstoff', 'HgO', 'Hg + O2', [1]),
-  r('schwefeltrioxid', 'Schwefeldioxid reagiert mit Sauerstoff zu Schwefeltrioxid', 'SO2 + O2', 'SO3', [1]),
-  r('stickstoffdioxid', 'Stickstoffmonoxid reagiert mit Sauerstoff zu Stickstoffdioxid', 'NO + O2', 'NO2', [1]),
+  r('quecksilberoxid', 'Quecksilber(II)-oxid zerfällt beim Erhitzen in Quecksilber und Sauerstoff', 'HgO', 'Hg + O2', [1]),
+  r('schwefeltrioxid', 'Schwefeldioxid reagiert im Gleichgewicht mit Sauerstoff zu Schwefeltrioxid', 'SO2 + O2', 'SO3', [1], true),
+  r('stickstoffdioxid', 'Stickstoffmonoxid reagiert im Gleichgewicht mit Sauerstoff zu Stickstoffdioxid', 'NO + O2', 'NO2', [1], true),
   // Vertiefung: größere Gleichungen
-  r('ammoniak', 'Ammoniaksynthese aus Stickstoff und Wasserstoff', 'N2 + H2', 'NH3', [2]),
+  r('ammoniak', 'Ammoniaksynthese: Stickstoff und Wasserstoff reagieren im Gleichgewicht zu Ammoniak', 'N2 + H2', 'NH3', [2], true),
   r('aluminiumoxid', 'Aluminium verbrennt zu Aluminiumoxid', 'Al + O2', 'Al2O3', [2]),
   r('rosten', 'Eisen rostet zu Eisen(III)-oxid', 'Fe + O2', 'Fe2O3', [2]),
   r('eisenchlorid', 'Eisen reagiert mit Chlor zu Eisen(III)-chlorid', 'Fe + Cl2', 'FeCl3', [2]),

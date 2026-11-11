@@ -13,6 +13,9 @@ import { NICE_N, eqSign, given, mLatex, molarLatex, molarSteps, nLatex, nStep, s
 
 // Rechnung „Umsatz" (Plan M4, Thema 4.2, Klausur 4c) in drei Schritten: Stoffmenge des gegebenen Stoffs →
 // Stoffmenge des gesuchten über das Verhältnis der Koeffizienten → Masse des gesuchten Stoffs.
+// Gegeben ist meist ein Edukt; manchmal ist ein Produkt gegeben und der Bedarf an einem Edukt gesucht (so rechnet das
+// Skript Stöchiometrie, Folie 12). Gleichgewichtsreaktionen (reactions.ts, equilibrium) laufen nie vollständig ab und
+// kommen deshalb hier nicht vor (docs/CHEMIE.md §3 und §5).
 // - Grundlagen: einfache Reaktionen und Verbrennungen, die Molmassen stehen in der Aufgabe
 // - Vertiefung: auch größere Reaktionen, Molmassen mit dem PSE der App als eigene Schritte
 // - Klausurniveau: Verbrennungen aller Alkane und Alkohole und größere Reaktionen, ganze Werte aus der
@@ -48,18 +51,27 @@ function valuesNote(list: readonly Species[], values: MassValues): string {
 
 type Choice = { readonly equation: Equation; readonly given: Species; readonly target: Species; readonly id: string }
 
+// Anteil der Aufgaben, in denen ein Produkt gegeben und der Bedarf an einem Edukt gesucht ist
+const FROM_PRODUCT = 0.3
+// Reaktionen, die vollständig ablaufen (ohne Gleichgewichte)
+export const UMSATZ_REACTIONS = REACTIONS.filter((r) => !r.equilibrium)
+
 function pickReaction(level: Level, rng: Rng): Choice | null {
   const combustion = level === 3 ? rng.chance(0.7) : rng.chance(0.35)
+  const fromProduct = rng.chance(FROM_PRODUCT)
   if (combustion) {
     const fuel = rng.pick(FUELS.filter((f) => f.levels.includes(level as 1 | 2 | 3)))
     const equation = balance([fuel.species, O2], [CO2, H2O])!
+    // gegeben ein Produkt: Wie viel Brennstoff oder Sauerstoff ist dafür nötig?
+    if (fromProduct) return { equation, given: rng.pick([CO2, H2O]), target: rng.pick([fuel.species, fuel.species, O2]), id: `verbrennung-${fuel.id}` }
     // gesucht: meist ein Produkt, manchmal der Bedarf an Sauerstoff
     const target = rng.pick([CO2, H2O, CO2, O2])
     return { equation, given: fuel.species, target, id: `verbrennung-${fuel.id}` }
   }
-  const pool = REACTIONS.filter((r) => r.levels.some((l) => l <= level))
+  const pool = UMSATZ_REACTIONS.filter((r) => r.levels.some((l) => l <= level))
   const reaction = rng.pick(pool)
   const equation = balance(reaction.reactants, reaction.products)!
+  if (fromProduct) return { equation, given: rng.pick(reaction.products), target: rng.pick(reaction.reactants), id: reaction.id }
   const givenSpecies = rng.pick(reaction.reactants)
   const others = [...reaction.reactants, ...reaction.products].filter((s) => s !== givenSpecies)
   return { equation, given: givenSpecies, target: rng.pick(others), id: reaction.id }
@@ -167,17 +179,21 @@ function generate(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCal
     ? valuesNote([g, target], values)
     : `$M(${formulaLatex(g.formula)}) = ${molarLatex(massG, values)}$, $M(${formulaLatex(target.formula)}) = ${molarLatex(massT, values)}$.`
   const isTargetReactant = equation.reactants.some((t) => t.species === target)
+  const isGivenProduct = equation.products.some((t) => t.species === g)
+  const what = isGivenProduct
+    ? `Es soll ${withName(g)} entstehen; gesucht ist, wie viel ${withName(target)} dafür nötig ist.`
+    : `Gegeben ist ${withName(g)}, gesucht ${withName(target)}.`
   return {
     task: {
       ref,
       instruction: isTargetReactant ? 'Berechne, wie viel gebraucht wird' : 'Berechne, wie viel entsteht',
       functionLatex: String.raw`\begin{gathered} ${equationLatex(equation)} \\ ${mLatex(sg)} = ${sig(mGiven)}\,\mathrm{g} \qquad ${mLatex(st)} = \,? \end{gathered}`,
-      note: `Gegeben ist ${withName(g)}, gesucht ${withName(target)}. ${molarNote}`,
+      note: `${what} ${molarNote}`,
       steps,
       cards: [CARD_UMSATZ, ...new Set(steps.flatMap((s) => s.cards))].filter((c, i, all) => all.indexOf(c) === i),
       resultLatex: `${mLatex(st)} ${eqSign(mT)} ${sig(mT)}\\,\\mathrm{g}`,
     },
-    form: `umsatz:${level}:${isTargetReactant ? 'bedarf' : 'produkt'}`,
+    form: `umsatz:${level}:${isGivenProduct ? 'aus-produkt' : isTargetReactant ? 'bedarf' : 'produkt'}`,
     substance: `${picked.id}:${target.text}`,
   }
 }

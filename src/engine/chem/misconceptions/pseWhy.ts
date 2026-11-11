@@ -81,6 +81,18 @@ export const PSE_WHY: Readonly<Record<string, Explanation>> = {
     detailed: 'Helium ist ein Sonderfall: Seine einzige Schale ist klein. Die übrigen Edelgase haben eine größere äußerste Schale mit s und p.',
     short: 'Helium ist ein Sonderfall.',
   },
+  'chem-mis-pse-metal-direction': {
+    detailed: 'In einer Hauptgruppe kommt nach unten mit jeder Periode eine Schale dazu; die Valenzelektronen sitzen weiter außen und sind stärker abgeschirmt. Überlege, ob sie dann leichter oder schwerer abgegeben werden und was das für den Metallcharakter heißt.',
+    short: 'Wie leicht gehen die Valenzelektronen weiter unten weg?',
+  },
+  'chem-mis-pse-semimetal': {
+    detailed: 'Halbmetalle stehen an der Grenze zwischen Metallen und Nichtmetallen. Ihre Eigenschaften liegen dazwischen: Sie haben manche Züge eines Metalls, aber nicht alle.',
+    short: 'Halbmetalle liegen dazwischen.',
+  },
+  'chem-mis-pse-group-names': {
+    detailed: 'Vier Hauptgruppen haben eigene Namen, und jeder gehört zu genau einer Spalte. Merkhilfe: Die Erdalkalimetalle folgen auf die Alkalimetalle, die Halogene stehen direkt vor den Edelgasen, und die Edelgase schließen jede Periode ab.',
+    short: 'Jeder Name gehört zu einer festen Spalte.',
+  },
   'chem-mis-pse-ie-definition': {
     detailed: 'Elektronen werden vom positiven Kern angezogen. Überlege, ob beim Entfernen eines Elektrons gegen diese Anziehung Energie frei wird oder ob man welche hineinstecken muss.',
     short: 'Denk an die Anziehung durch den Kern.',

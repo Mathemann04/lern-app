@@ -408,7 +408,7 @@ export const METALLE_BANK: QuestionBank = {
       part: 'hybrid',
       title: 'Hybridisierung',
       prompt: 'Was versteht man unter Hybridisierung?',
-      correct: 'Ein s-Orbital und p-Orbitale eines Atoms mischen sich zu gleichwertigen Hybridorbitalen.',
+      correct: 'Ein s-Orbital und p-Orbitale eines Atoms mischen sich zu energiegleichen (entarteten) Hybridorbitalen.',
       wrong: [
         w('f1', 'Zwei Atome tauschen ihre Elektronen aus.', 'chem-mis-me-fixed', why('Bei der Hybridisierung bleibt alles an einem Atom: Seine eigenen Orbitale mischen sich.', 'Es geht um Orbitale eines Atoms.')),
         w('f2', 'Ein Atom gibt ein Elektron ab und wird zum Ion.', 'chem-mis-me-salt-like', why('Ionen entstehen durch Abgabe oder Aufnahme von Elektronen. Bei der Hybridisierung ändert sich die Zahl der Elektronen nicht.', 'Keine Ionenbildung.')),
@@ -417,7 +417,7 @@ export const METALLE_BANK: QuestionBank = {
       ],
       hint: 'Es geht um die Orbitale eines einzelnen Atoms, das Bindungen eingeht.',
       explanation: why(
-        'Ein s-Orbital und ein, zwei oder drei p-Orbitale eines Atoms mischen sich rechnerisch zu gleich energiereichen Hybridorbitalen. Sie zeigen in die Richtungen, in denen das Atom bindet oder freie Paare trägt.',
+        'Beim Kohlenstoff wird zuerst ein Elektron aus dem 2s-Orbital in das leere 2p-Orbital angeregt; das gelingt leicht, weil beide Energien dicht beieinanderliegen. Dann mischen sich das s-Orbital und ein, zwei oder drei p-Orbitale rechnerisch zu Hybridorbitalen, die alle genau dieselbe Energie haben: Sie sind entartet. Sie zeigen in die Richtungen, in denen das Atom bindet oder freie Paare trägt.',
         'Mischung von s- und p-Orbitalen eines Atoms.',
       ),
       cards: ['met-hybrid'],

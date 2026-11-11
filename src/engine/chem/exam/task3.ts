@@ -56,7 +56,7 @@ function moleculePart(mol: Molecule, rng: Rng): ExamPart | null {
     points: 3,
     items: [
       fromStep(lewis, 'lewis', 'Lewis-Formel', 1, false, 'Welche Lewis-Formel ist richtig?'),
-      fromStep(split, 'paare', 'Paare', 1, false, 'Wie viele bindende und freie Elektronenpaare hat das Molekül?'),
+      fromStep(split, 'paare', 'Paare am Zentralatom', 1, false, `Wie viele bindende und wie viele freie Elektronenpaare hat das Zentralatom $${ce(mol.atoms[mol.central!].el)}$?`),
       fromStep(shape, 'gestalt', 'Gestalt', 1, true, 'Welche Gestalt hat das Molekül?'),
     ],
   }

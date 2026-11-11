@@ -27,13 +27,14 @@ export const METALLE_CARDS: readonly Card[] = [
     level: 2,
     rules: [],
     formulas: [],
-    memo: 'Metallatome packen sich wie gleich große Kugeln. In den beiden dichtesten Packungen (kubisch-flächenzentriert und hexagonal) hat jedes Atom 12 nächste Nachbarn, und 74 % des Raums sind gefüllt. Im kubisch-raumzentrierten Gitter sind es 8 Nachbarn und 68 %.',
-    note: 'Beispiele: kubisch-flächenzentriert Cu, Ag, Au, Al; hexagonal Mg, Zn, Ti; kubisch-raumzentriert W, Cr, Na.',
+    memo: 'Metallatome packen sich wie gleich große Kugeln. Es gibt zwei dichteste Packungen: die kubisch dichteste Packung (kdP, dasselbe wie kubisch-flächenzentriert, kfz) mit der Schichtfolge ABC und die hexagonal dichteste Packung (hdP) mit der Schichtfolge AB. In beiden hat jedes Atom 12 nächste Nachbarn, und 74 % des Raums sind gefüllt. Im kubisch-raumzentrierten Gitter (krz) sind es 8 Nachbarn und 68 %.',
+    note: 'Gitter und Eigenschaften: kdP eher weich und leicht plastisch verformbar, etwa zum Walzen oder Drahtziehen (Cu, Ag, Au, Al); hdP schlecht formbar, aber gut gießbar (Mg, Zn, Ti); krz sehr hart und spröde (W, Cr, Mo). Auch die Alkalimetalle wie Na sind krz, aber trotzdem sehr weich, weil sie nur ein Außenelektron haben.',
     examples: [
       { chemTask: 'Kupfer (kubisch-flächenzentriert)', lines: [{ label: 'Koordinationszahl 12, Raumerfüllung 74 %, gut formbar.' }] },
       { chemTask: 'Wolfram (kubisch-raumzentriert)', lines: [{ label: 'Koordinationszahl 8, Raumerfüllung 68 %, sehr hart.' }] },
+      { chemTask: 'Magnesium (hexagonal dichteste Packung)', lines: [{ label: 'Koordinationszahl 12 wie Kupfer, trotzdem schlecht formbar; Bauteile werden eher gegossen.' }] },
     ],
-    errors: ['chem-mis-me-kz'],
+    errors: ['chem-mis-me-kz', 'chem-mis-me-dense-hard', 'chem-mis-me-hdp-like-kdp'],
   },
   {
     id: 'met-verformbar',
@@ -58,12 +59,12 @@ export const METALLE_CARDS: readonly Card[] = [
     rules: [],
     formulas: [],
     memo: 'Im Festkörper verschmelzen die Orbitale vieler Atome zu Bändern. Im Valenzband sitzen die Valenzelektronen, das Leitungsband darüber ist leer oder teilweise besetzt. Leiter: Das Valenzband ist nur teilweise besetzt oder überlappt mit dem Leitungsband. Isolator: Eine breite verbotene Zone trennt das volle Valenzband vom leeren Leitungsband. Halbleiter: Die verbotene Zone ist schmal.',
-    note: 'Breite der verbotenen Zone etwa: Diamant 5,5 eV, Silicium 1,1 eV, Germanium 0,7 eV. Erwärmen: Metalle leiten schlechter (die Atomrümpfe schwingen stärker und bremsen die Elektronen), Halbleiter besser (mehr Elektronen überwinden die Lücke).',
+    note: 'Breite der verbotenen Zone etwa: Diamant 5,5 eV, Silicium 1,1 eV, Germanium 0,7 eV. Erwärmen: Metalle leiten schlechter (die Atomrümpfe schwingen stärker und bremsen die Elektronen), Halbleiter besser (mehr Elektronen überwinden die Lücke). Beryllium leitet, obwohl seine 2s-Unterschale voll ist: Das 2s-Band überlappt mit dem leeren 2p-Band.',
     examples: [
       { chemTask: 'Kupfer, Silicium, Diamant', lines: [{ label: 'Leiter, Halbleiter, Isolator' }] },
       { chemTask: 'Silicium wird erwärmt', lines: [{ label: 'Mehr Elektronen gelangen ins Leitungsband: Die Leitfähigkeit steigt.' }] },
     ],
-    errors: ['chem-mis-me-heat-metal', 'chem-mis-me-heat-semi', 'chem-mis-me-no-electrons', 'chem-mis-me-gap'],
+    errors: ['chem-mis-me-heat-metal', 'chem-mis-me-heat-semi', 'chem-mis-me-no-electrons', 'chem-mis-me-gap', 'chem-mis-me-full-band'],
   },
   {
     id: 'met-dotierung',
@@ -87,7 +88,7 @@ export const METALLE_CARDS: readonly Card[] = [
     level: 1,
     rules: [],
     formulas: [String.raw`2\ \text{Richtungen: } \mathrm{sp},\quad 3\text{: } \mathrm{sp^{2}},\quad 4\text{: } \mathrm{sp^{3}}`],
-    memo: 'Ein s-Orbital und p-Orbitale eines Atoms mischen sich zu gleichwertigen Hybridorbitalen. Man braucht so viele, wie Richtungen um das Atom zeigen: Bindungspartner und freie Paare zusammen, eine Mehrfachbindung zählt einmal.',
+    memo: 'Ein s-Orbital und p-Orbitale eines Atoms mischen sich zu Hybridorbitalen, die alle dieselbe Energie haben (sie sind entartet, also energiegleich). Beim Kohlenstoff wird vorher ein Elektron aus dem 2s- in das leere 2p-Orbital angeregt, sodass vier einfach besetzte Orbitale zum Mischen bereitstehen. Man braucht so viele, wie Richtungen um das Atom zeigen: Bindungspartner und freie Paare zusammen, eine Mehrfachbindung zählt einmal.',
     note: String.raw`$\mathrm{sp}$-Orbitale liegen linear (180°), $\mathrm{sp^{2}}$-Orbitale trigonal-planar (120°), $\mathrm{sp^{3}}$-Orbitale tetraedrisch (109,5°). Die Hybridisierung ist ein vereinfachtes Modell, das die Gestalt erklärt.`,
     examples: [
       { chemTask: String.raw`$\ce{CH4}$, $\ce{C2H4}$, $\ce{C2H2}$`, lines: [{ label: 'Kohlenstoff mit 4, 3 und 2 Richtungen', latex: String.raw`\mathrm{sp^{3}},\ \mathrm{sp^{2}},\ \mathrm{sp}` }] },

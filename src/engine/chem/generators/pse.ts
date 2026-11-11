@@ -104,7 +104,7 @@ function steckbriefTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): C
       : 'Bei welchen Elementen wird eine d-Unterschale aufgefüllt? Sie stehen nicht in den Hauptgruppen.',
     explanation: {
       detailed: place.main
-        ? `${el.name} hat ${valence} Valenzelektronen: ${groupText}.`
+        ? `${el.name} hat ${valence} ${valence === 1 ? 'Valenzelektron' : 'Valenzelektronen'}: ${groupText}.`
         : `Bei ${el.name} wird die d-Unterschale aufgefüllt; es ist ein Nebengruppenelement. Die Nummer zählt die s- und d-Elektronen der beiden äußersten Schalen: ${groupText}.`,
       short: groupText,
     },
@@ -251,8 +251,8 @@ function ionTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc
       hint: `${el.name} hat ${v} ${v === 1 ? 'Valenzelektron' : 'Valenzelektronen'}. Was ist weniger: diese abzugeben oder bis zu acht aufzufüllen?`,
       explanation: {
         detailed: give
-          ? `Mit ${v} ${v === 1 ? 'Valenzelektron' : 'Valenzelektronen'} ist Abgeben einfacher als ${8 - v} aufzunehmen. Danach ist die voll besetzte Schale darunter die äußerste.`
-          : `Mit ${v} Valenzelektronen fehlen nur ${8 - v} bis zum Oktett. Aufnehmen ist einfacher als ${v} abzugeben.`,
+          ? `Mit ${v} ${v === 1 ? 'Valenzelektron' : 'Valenzelektronen'} ist Abgeben einfacher als ${8 - v} aufzunehmen. Danach ist die Schale darunter die äußerste, und sie hat schon Edelgaskonfiguration.`
+          : `Mit ${v} Valenzelektronen ${8 - v === 1 ? 'fehlt nur eins' : `fehlen nur ${8 - v}`} bis zum Oktett. Aufnehmen ist einfacher als ${v} abzugeben.`,
         short: `Es ${transferText(k, give)}.`,
       },
       cards: [CARD_NOBLE],
@@ -337,7 +337,7 @@ function ieTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc 
       choices: first,
       hint: 'Vergleiche jede Energie mit der vorherigen. Wo steigt sie auf ein Vielfaches?',
       explanation: {
-        detailed: `Von $${subscriptI(jump)}$ nach $${subscriptI(jump + 1)}$ steigt die Energie auf mehr als das ${Math.floor(energies[jump] / energies[jump - 1])}-Fache. Ab dort muss ein Elektron aus einer inneren, voll besetzten Schale entfernt werden.`,
+        detailed: `Von $${subscriptI(jump)}$ nach $${subscriptI(jump + 1)}$ steigt die Energie auf mehr als das ${Math.floor(energies[jump] / energies[jump - 1])}-Fache. Ab dort muss ein Elektron aus einer inneren Schale mit Edelgaskonfiguration entfernt werden.`,
         short: pairText(jump),
       },
       cards: [CARD_IE],

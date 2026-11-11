@@ -480,7 +480,7 @@ const energieLevels: LevelPreview[] = [
     level: 3,
     available: true,
     title: 'Temperatur, ab der eine Reaktion freiwillig abläuft, Gleichgewichtskonstante aus der freien Enthalpie, alles gemischt',
-    examples: [String.raw`\Delta G^{0} = -R \cdot T \cdot \ln K`],
+    examples: [String.raw`\Delta G^{0} = -R \cdot T \cdot \ln K_{\mathrm{GG}}`],
   },
 ]
 

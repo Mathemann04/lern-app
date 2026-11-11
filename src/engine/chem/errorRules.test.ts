@@ -308,11 +308,14 @@ describe('Rechenfehler Moleküle: Katalogbeispiele (S5b)', () => {
     expect(wrongIn(S.valenceStep(mol('CH4'), rng(), 'chem-lewis-octet-count'), 'chem-lewis-octet-count')).toBe('$16$')
   })
 
-  it('Paare: nicht halbiert, nur Bindungen, Mehrfachbindung als ein Paar, nur am Zentralatom', () => {
+  it('Paare: nicht halbiert, nur Bindungen, Mehrfachbindung als ein Paar, ganzes Molekül statt Zentralatom', () => {
     expect(wrongIn(S.pairsStep(mol('NH3'), rng(), 'chem-lewis-pairs-not-halved'), 'chem-lewis-pairs-not-halved')).toBe('$8$')
     expect(wrongIn(S.pairsStep(mol('H2O'), rng(), 'chem-lewis-bonds-only'), 'chem-lewis-bonds-only')).toBe('$2$')
-    expect(wrongIn(S.splitStep(mol('CO2'), rng(), 'chem-lewis-multiple-as-one'), 'chem-lewis-multiple-as-one')).toBe('2 bindende und 6 freie Paare')
-    expect(wrongIn(S.splitStep(mol('PCl3'), rng(), 'chem-lewis-free-central-only'), 'chem-lewis-free-central-only')).toBe('3 bindende und 1 freies Paar')
+    expect(wrongIn(S.splitStep(mol('CO2'), rng(), 'chem-lewis-multiple-as-one'), 'chem-lewis-multiple-as-one')).toBe('2 bindende und 2 freie Paare')
+    expect(wrongIn(S.splitStep(mol('PCl3'), rng(), 'chem-lewis-free-whole-molecule'), 'chem-lewis-free-whole-molecule')).toBe('3 bindende und 10 freie Paare')
+    expect(S.splitStep(mol('PCl3'), rng())!.choices.find((c) => c.correct)!.content).toBe('3 bindende und 1 freies Paar')
+    expect(wrongIn(S.splitStep(mol('NH3'), rng(), 'chem-lewis-pairs-missing'), 'chem-lewis-pairs-missing')).toBe('3 bindende und 0 freie Paare')
+    expect(wrongIn(S.splitStep(mol('CH4'), rng(), 'chem-lewis-octet-exceeded'), 'chem-lewis-octet-exceeded')).toBe('4 bindende und 1 freies Paar')
   })
 
   it('Lewis-Bilder: jeder Fehler ergibt eine falsche Formel wie im Katalog', () => {

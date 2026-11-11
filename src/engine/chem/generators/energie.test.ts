@@ -213,7 +213,7 @@ describe('Thema Energie: Gleichgewichtskonstante und Fundstellen', () => {
   it('schreibt die Gleichgewichtskonstante überall als K_GG (Fragen, Karten, Denkfehler, Rechnung dg-k)', () => {
     const tasks = Array.from({ length: 60 }, (_, i) => kTask(3, createRng(`kgg${i}`), ref(3, i))).filter((c) => c !== null)
     expect(tasks.length).toBeGreaterThan(30)
-    const texts = [...strings([ENERGIE_BANK.questions, ENERGIE_CARDS, ENERGIE_MISCONCEPTIONS, ENERGIE_WHY]), ...strings(tasks.map((c) => c.task), ['whyWrong', 'why'])]
+    const texts = [...strings([ENERGIE_BANK.questions, ENERGIE_CARDS, ENERGIE_MISCONCEPTIONS, ENERGIE_WHY]), ...strings(tasks.map((c) => c.task))]
     expect(texts.filter(bareK)).toEqual([])
     expect(texts.filter((t) => t.includes(String.raw`K_{\mathrm{GG}}`)).length).toBeGreaterThan(40)
   })

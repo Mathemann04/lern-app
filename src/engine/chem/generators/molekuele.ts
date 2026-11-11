@@ -111,30 +111,39 @@ function pairsStep(mol: Molecule, rng: Rng, focus?: string): GuidedStep | null {
 
 const splitText = (bonding: number, free: number) => `${bonding} bindende und ${free} ${free === 1 ? 'freies' : 'freie'} Paar${free === 1 ? '' : 'e'}`
 
+// Bindende und freie Paare am Zentralatom, wie in der Vorlesung gezählt (Doppelbindung = zwei bindende Paare).
+// Typischer Fehler: die Paare des ganzen Moleküls (auch die freien Paare der äußeren Atome) gezählt.
 function splitStep(mol: Molecule, rng: Rng, focus?: string): GuidedStep | null {
-  const pairs = valenceElectrons(mol) / 2
-  const bonding = bondingPairs(mol)
-  const free = freePairs(mol)
+  if (mol.central === undefined) return null
+  const c = mol.central
+  const el = mol.atoms[c].el
+  const bonding = bondsOf(mol, c)
+  const free = lonePairsOf(mol, c)
+  const partners = partnersOf(mol, c)
   const correct = splitText(bonding, free)
-  const inner = mol.atoms.map((_, i) => i).filter((i) => mol.atoms[i].el !== 'H' && partnersOf(mol, i) >= 2)
-  const innerFree = inner.reduce((s, i) => s + lonePairsOf(mol, i), 0)
+  const wholeBonding = bondingPairs(mol)
+  const wholeFree = freePairs(mol)
   const wrong = [
-    ...(hasMultiple(mol) ? [textWrong('chem-lewis-multiple-as-one', splitText(mol.bonds.length, pairs - mol.bonds.length))] : []),
-    ...(inner.length > 0 && innerFree !== free ? [textWrong('chem-lewis-free-central-only', splitText(bonding, innerFree))] : []),
+    ...(wholeBonding !== bonding || wholeFree !== free ? [textWrong('chem-lewis-free-whole-molecule', splitText(wholeBonding, wholeFree))] : []),
+    // Mehrfachbindung als ein Paar, die übrigen Paare bis zum Oktett als freie
+    ...(partners !== bonding ? [textWrong('chem-lewis-multiple-as-one', splitText(partners, bonding + free - partners))] : []),
+    ...(free > 0 ? [textWrong('chem-lewis-pairs-missing', splitText(bonding, 0))] : []),
+    textWrong('chem-lewis-octet-exceeded', splitText(bonding, free + 1)),
   ]
   const choices = stepChoices(rng, { key: correct, content: correct }, wrong, focus)
   if (choices.length === 0) return null
+  const around = bonding + free
   return {
     id: 'verteilung',
-    title: 'Bindende und freie Paare',
-    question: `Wie verteilen sich die ${pairs} Paare in der Lewis-Formel von $${ce(mol.id)}$?`,
+    title: 'Paare am Zentralatom',
+    question: `Wie viele bindende und wie viele freie Elektronenpaare sitzen in der Lewis-Formel von $${ce(mol.id)}$ am Zentralatom $${ce(el)}$?`,
     choices,
-    hint: 'Jede Bindung zwischen zwei Atomen ist ein bindendes Paar, eine Doppelbindung sind zwei. Was übrig bleibt, sind freie Paare, auch an den äußeren Atomen.',
+    hint: `Zähle nur am $${ce(el)}$: Jeder Strich zu einem Partner ist ein bindendes Paar, eine Doppelbindung sind zwei. Die freien Paare der äußeren Atome zählen nicht mit.`,
     explanation: {
-      detailed: `${hasMultiple(mol) ? 'Mehrfachbindungen zählen mit jedem ihrer Paare. ' : ''}Bindende Paare: ${bonding}. Freie Paare an allen Atomen zusammen: ${pairs} − ${bonding} = ${free}.`,
+      detailed: `Am $${ce(el)}$ sitzen ${bonding} bindende Paare${partners !== bonding ? ` zu ${partners} Partnern (Mehrfachbindungen zählen mit jedem ihrer Paare)` : ''} und ${free} ${free === 1 ? 'freies Paar' : 'freie Paare'}, zusammen ${around} Paare${around === 4 ? ': sein Oktett' : ''}.${sextetNote(mol)}${wholeFree !== free ? ` Die übrigen freien Paare sitzen an den äußeren Atomen; im ganzen Molekül sind es ${wholeFree}.` : ''}`,
       short: correct,
     },
-    established: String.raw`${bonding}\ \text{bindende},\ ${free}\ \text{freie Paare}`,
+    established: String.raw`\ce{${el}}\text{: }${bonding}\ \text{bindende},\ ${free}\ \text{freie Paare}`,
     cards: hasMultiple(mol) ? [CARD_LEWIS, CARD_MULTIPLE] : [CARD_LEWIS],
   }
 }
@@ -186,7 +195,7 @@ function lewisTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCa
       note: `Molekül: ${titleOf(mol)}.${sextetNote(mol)}`,
       steps: kept,
       cards: hasMultiple(mol) ? [CARD_LEWIS, CARD_MULTIPLE, CARD_PAIR] : [CARD_LEWIS, CARD_PAIR],
-      resultText: `$${ce(mol.id)}$: ${valenceElectrons(mol) / 2} Elektronenpaare, davon ${splitText(bondingPairs(mol), freePairs(mol))}`,
+      resultText: `$${ce(mol.id)}$: ${valenceElectrons(mol) / 2} Elektronenpaare, davon ${splitText(bondingPairs(mol), freePairs(mol))}${mol.central !== undefined ? `; am Zentralatom $${ce(centralEl(mol))}$ ${splitText(bondsOf(mol, mol.central), lonePairsOf(mol, mol.central))}` : ''}`,
       resultFigure: lewisFigure(mol)!.id,
     },
     form: `lewis:${level}:${kept.length}`,
@@ -616,7 +625,7 @@ export const MOLEKUELE_GENERATORS: readonly ChemGenerator[] = [
       'chem-lewis-pairs-not-halved',
       'chem-lewis-bonds-only',
       'chem-lewis-multiple-as-one',
-      'chem-lewis-free-central-only',
+      'chem-lewis-free-whole-molecule',
       ...Object.values(LEWIS_VARIANTS),
     ],
     generate: lewisTask,

@@ -58,7 +58,8 @@ export const RULE: Readonly<Record<Property, { readonly period: 1 | -1; readonly
 const EXCLUDED: Readonly<Record<Property, readonly (readonly [string, string])[]>> = {
   radius: [['As', 'Se'], ['As', 'Br'], ['Se', 'Br'], ['Sn', 'Sb'], ['Te', 'I'], ['Pb', 'Bi']],
   ie: [['Be', 'B'], ['Mg', 'Al'], ['Ca', 'Ga'], ['Sr', 'In'], ['N', 'O'], ['P', 'S'], ['As', 'Se'], ['Sb', 'Te'], ['Pb', 'Bi'], ['Al', 'Ga'], ['Sn', 'Pb'], ['B', 'Al']],
-  en: [['K', 'Rb'], ['Al', 'Ga'], ['B', 'Al'], ['Si', 'Ge'], ['Ge', 'Sn'], ['Ga', 'In'], ['Sn', 'Pb'], ['In', 'Tl'], ['Bi', 'Sb'], ['Pb', 'Bi']],
+  // K, Rb, Cs je 0,8 und Ca, Sr je 1,0 in Tabellen mit einer Nachkommastelle (so im PSE des Skripts)
+  en: [['K', 'Rb'], ['K', 'Cs'], ['Rb', 'Cs'], ['Ca', 'Sr'], ['Al', 'Ga'], ['B', 'Al'], ['Si', 'Ge'], ['Ge', 'Sn'], ['Ga', 'In'], ['Sn', 'Pb'], ['In', 'Tl'], ['Bi', 'Sb'], ['Pb', 'Bi']],
 }
 
 const excluded = (prop: Property, a: string, b: string) => EXCLUDED[prop].some(([x, y]) => (x === a && y === b) || (x === b && y === a))

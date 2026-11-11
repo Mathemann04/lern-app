@@ -204,6 +204,26 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
     },
   },
   {
+    id: 'chem-molar-m-times-n',
+    course: STOFFMENGE,
+    name: 'Masse mal Stoffmenge statt geteilt',
+    wrongFormula: String.raw`11\,\mathrm{g}\ \text{und}\ 0{,}25\,\mathrm{mol}\text{: } M = 11 \cdot 0{,}25 = 2{,}75\,\mathrm{g/mol}`,
+    why: {
+      detailed: String.raw`Die molare Masse ist die Masse eines einzigen Mols. Hat eine Probe mehrere oder weniger als ein Mol, teilt man ihre Masse durch die Stoffmenge: $M = \frac{m}{n}$. Die Einheiten zeigen es: Gramm geteilt durch Mol ergibt Gramm je Mol, Gramm mal Mol dagegen nicht.`,
+      short: String.raw`$M = \frac{m}{n}$; Gramm geteilt durch Mol ergibt Gramm je Mol.`,
+    },
+  },
+  {
+    id: 'chem-molar-n-over-m',
+    course: STOFFMENGE,
+    name: 'Stoffmenge durch Masse geteilt',
+    wrongFormula: String.raw`11\,\mathrm{g}\ \text{und}\ 0{,}25\,\mathrm{mol}\text{: } M = \frac{0{,}25}{11} = 0{,}0227\,\mathrm{g/mol}`,
+    why: {
+      detailed: String.raw`In $M = \frac{m}{n}$ steht die Masse der Probe oben und die Stoffmenge unten. Umgekehrt käme Mol je Gramm heraus, keine molare Masse. Prüfe am Ergebnis: Ein Mol wiegt bei fast jedem Stoff mehr als ein Gramm.`,
+      short: String.raw`$M = \frac{m}{n}$: die Masse oben, die Stoffmenge unten.`,
+    },
+  },
+  {
     id: 'chem-particles-divided',
     course: STOFFMENGE,
     name: 'Avogadro-Konstante falsch herum verrechnet',
@@ -779,13 +799,13 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
     },
   },
   {
-    id: 'chem-lewis-free-central-only',
+    id: 'chem-lewis-free-whole-molecule',
     course: MOLEKUELE,
-    name: 'Nur die freien Paare am Zentralatom gezählt',
-    wrongFormula: String.raw`\ce{PCl3}\text{: } 1\ \text{freies Paar statt}\ 10`,
+    name: 'Paare des ganzen Moleküls statt am Zentralatom gezählt',
+    wrongFormula: String.raw`\ce{PCl3}\text{ am }\ce{P}\text{: } 10\ \text{freie Paare statt}\ 1`,
     why: {
-      detailed: 'Freie Paare gibt es nicht nur am Zentralatom. Auch die äußeren Atome wie Sauerstoff oder die Halogene tragen freie Paare, damit sie ihr Oktett haben. Für das ganze Molekül zählen alle.',
-      short: 'Auch die äußeren Atome tragen freie Paare.',
+      detailed: 'Gefragt sind nur die Paare, die am Zentralatom sitzen: die Striche zu seinen Partnern und die freien Paare an ihm selbst. Die freien Paare der äußeren Atome gehören zu diesen Atomen und zählen hier nicht mit.',
+      short: 'Nur die Paare am Zentralatom zählen.',
     },
   },
   {

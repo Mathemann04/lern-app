@@ -12,7 +12,7 @@ export const MOLEKUELE_CARDS: readonly Card[] = [
     rules: [],
     formulas: [String.raw`\ce{H + H -> H-H}`],
     memo: 'Nichtmetalle geben ungern Elektronen ab. Stattdessen teilen sich zwei Atome ein Elektronenpaar, das zu beiden gehört. So erreichen beide eine Edelgaskonfiguration: meist acht Elektronen um sich (Oktett), Wasserstoff zwei.',
-    note: 'Andere Namen: Atombindung oder kovalente Bindung. Ein Atom bildet so viele Bindungen, wie ihm Elektronen bis zum Oktett fehlen: H und die Halogene eine, O zwei, N drei, C vier.',
+    note: String.raw`Andere Namen: Atombindung oder kovalente Bindung. Ein Atom bildet so viele Bindungen, wie ihm Elektronen bis zum Oktett fehlen: H und die Halogene eine, O zwei, N drei, C vier. Darum binden sie so viele H-Atome: $\ce{HCl}$, $\ce{H2O}$, $\ce{NH3}$, $\ce{CH4}$. Die Elemente darunter in derselben Hauptgruppe tun es ebenso: $\ce{H2S}$, $\ce{PH3}$, $\ce{SiH4}$. Die Oktettregel gilt in der Regel, nicht immer: Bor hat in $\ce{BF3}$ nur sechs Elektronen um sich.`,
     when: 'Wenn sich Nichtmetalle miteinander verbinden.',
     examples: [
       {
@@ -30,7 +30,7 @@ export const MOLEKUELE_CARDS: readonly Card[] = [
         ],
       },
     ],
-    errors: ['chem-mis-mo-bond-transfer', 'chem-mis-mo-metal-partners', 'chem-mis-mo-octet-hydrogen', 'chem-mis-mo-shared-once', 'chem-mis-mo-bonds-valence', 'chem-mis-mo-octet-molecule'],
+    errors: ['chem-mis-mo-bond-transfer', 'chem-mis-mo-metal-partners', 'chem-mis-mo-octet-hydrogen', 'chem-mis-mo-shared-once', 'chem-mis-mo-bonds-valence', 'chem-mis-mo-octet-molecule', 'chem-mis-mo-h-count', 'chem-mis-mo-element-x2'],
   },
   {
     id: 'mol-lewis',
@@ -39,8 +39,8 @@ export const MOLEKUELE_CARDS: readonly Card[] = [
     level: 1,
     rules: [],
     formulas: [String.raw`\text{Paare} = \frac{\text{Valenzelektronen aller Atome}}{2}`],
-    memo: '1. Valenzelektronen aller Atome zusammenzählen. 2. Durch zwei teilen: So viele Paare sind zu verteilen. 3. Atome mit Einfachbindungen verbinden, das Zentralatom in die Mitte. 4. Die übrigen Paare als freie Paare so verteilen, dass jedes Atom ein Oktett hat, Wasserstoff zwei Elektronen.',
-    note: 'Bindende Paare sind Striche zwischen den Atomen, freie Paare Striche am Atom. Probe: Jedes Atom hat vier Paare um sich (Wasserstoff eines), und alle Paare zusammen ergeben die Zahl aus Schritt 2.',
+    memo: '1. Valenzelektronen aller Atome zusammenzählen. 2. Durch zwei teilen: So viele Paare sind zu verteilen. 3. Atome mit Einfachbindungen verbinden, das Zentralatom in die Mitte. 4. Die übrigen Paare als freie Paare so verteilen, dass jedes Atom ein Oktett hat (Ausnahmen wie Bor mit sechs Elektronen), Wasserstoff zwei Elektronen.',
+    note: 'Bindende Paare sind Striche zwischen den Atomen, freie Paare Striche am Atom. Probe: Jedes Atom hat vier Paare um sich (Wasserstoff eines), und alle Paare zusammen ergeben die Zahl aus Schritt 2. Fragt man nach den bindenden und freien Paaren, zählt man wie in der Vorlesung am Zentralatom; die freien Paare der äußeren Atome gehören nicht dazu.',
     when: 'Wenn die Lewis-Formel (Valenzstrichformel) eines Moleküls gefragt ist.',
     examples: [
       {
@@ -56,7 +56,8 @@ export const MOLEKUELE_CARDS: readonly Card[] = [
         lines: [
           { label: 'Valenzelektronen', latex: String.raw`5 + 3 \cdot 7 = 26` },
           { label: 'Paare', latex: String.raw`26 : 2 = 13` },
-          { label: 'Drei bindende Paare; je drei freie Paare an jedem Cl und ein freies Paar am P: zusammen 10 freie.' },
+          { label: 'Am Zentralatom P: drei bindende Paare und ein freies Paar.' },
+          { label: 'Dazu je drei freie Paare an jedem Cl: Alle 13 Paare sind verteilt.' },
         ],
       },
     ],
@@ -66,7 +67,7 @@ export const MOLEKUELE_CARDS: readonly Card[] = [
       'chem-lewis-octet-count',
       'chem-lewis-pairs-not-halved',
       'chem-lewis-bonds-only',
-      'chem-lewis-free-central-only',
+      'chem-lewis-free-whole-molecule',
       'chem-lewis-pairs-missing',
       'chem-lewis-terminal-pairs',
       'chem-lewis-octet-exceeded',
@@ -188,7 +189,7 @@ export const MOLEKUELE_CARDS: readonly Card[] = [
     rules: [],
     formulas: [String.raw`\Delta \mathrm{EN} = \mathrm{EN}_{\text{größer}} - \mathrm{EN}_{\text{kleiner}}`],
     memo: String.raw`Die Elektronegativität (EN) misst, wie stark ein Atom das bindende Paar zu sich zieht. Sie steigt im Periodensystem nach rechts und nach oben; Fluor hat den höchsten Wert. Der Unterschied $\Delta \mathrm{EN}$ der beiden Partner entscheidet über die Bindungsart.`,
-    note: String.raw`Richtwerte: $\Delta \mathrm{EN}$ unter 0,5 (nahezu) unpolare Atombindung, 0,5 bis 1,8 polare Atombindung, über 1,8 Ionenbindung. Die Grenzen sind fließend. Die App rechnet mit Pauling-Werten (H 2,20; C 2,55; N 3,04; O 3,44; F 3,98; Cl 3,16); ältere Tabellen runden (C 2,5; O 3,5).`,
+    note: String.raw`Richtwerte: $\Delta \mathrm{EN} = 0$ heißt reine (unpolare) Atombindung; das gibt es nur zwischen gleichen Atomen wie in $\ce{Cl2}$. 0,5 bis 1,8: polare Atombindung. Über 1,8: Ionenbindung. Unter 0,5 nennt man die Bindung üblicherweise nahezu unpolar; das ist ein gängiger Richtwert, keine feste Grenze. Die Grenzen sind fließend: Zwei Nichtmetalle bilden auch knapp über 1,8 eine Atombindung, dann eine stark polare, etwa B–F in $\ce{BF3}$ (nach Pauling 1,94, gerundet 2,0). Ionenbindungen bilden typischerweise Metalle mit Nichtmetallen. Die App rechnet mit Pauling-Werten (H 2,20; C 2,55; N 3,04; O 3,44; F 3,98; Cl 3,16). In der Vorlesung stehen auch gerundete Tabellenwerte (C 2,5; O 3,5; F 4,0); die Einordnung fällt in den Aufgaben der App mit beiden gleich aus.`,
     examples: [
       {
         chemTask: String.raw`Bindung $\ce{O-H}$`,
@@ -205,7 +206,7 @@ export const MOLEKUELE_CARDS: readonly Card[] = [
         ],
       },
     ],
-    errors: ['chem-en-added', 'chem-en-index', 'chem-en-bond-type', 'chem-dipole-unpolar-claimed', 'chem-mis-mo-en-meaning', 'chem-mis-mo-en-trend', 'chem-mis-mo-same-atoms-polar', 'chem-mis-mo-en-boundaries'],
+    errors: ['chem-en-added', 'chem-en-index', 'chem-en-bond-type', 'chem-dipole-unpolar-claimed', 'chem-mis-mo-en-meaning', 'chem-mis-mo-en-trend', 'chem-mis-mo-same-atoms-polar', 'chem-mis-mo-en-boundaries', 'chem-mis-mo-en-unbonded'],
   },
   {
     id: 'mol-teilladung',
@@ -234,15 +235,15 @@ export const MOLEKUELE_CARDS: readonly Card[] = [
     title: 'Polare Moleküle (Dipole)',
     level: 2,
     rules: [],
-    formulas: [],
-    memo: 'Ein Molekül ist polar (ein Dipol), wenn es polare Bindungen hat und die Schwerpunkte der positiven und negativen Teilladungen wegen der Gestalt nicht zusammenfallen. Die Gestalt entscheidet: Liegen gleiche polare Bindungen symmetrisch, heben sie sich auf.',
-    note: String.raw`Ein Dipol ist insgesamt neutral. Wo ein Pfeil das Dipolmoment zeigt, geht er in der Vorlesung wie in der Physik von $\delta-$ nach $\delta+$; manche Bücher zeichnen ihn andersherum. Die App fragt nicht nach der Pfeilrichtung.`,
+    formulas: [String.raw`\vec{\mu} = q \cdot \vec{d}`, String.raw`\vec{\mu}_{\text{ges}} = \vec{\mu}_1 + \vec{\mu}_2 + \dots`],
+    memo: 'Ein Molekül ist polar (ein Dipol), wenn es polare Bindungen hat und die Schwerpunkte der positiven und negativen Teilladungen wegen der Gestalt nicht zusammenfallen. Die Gestalt entscheidet: Liegen gleiche polare Bindungen symmetrisch, heben sie sich auf. Jede polare Bindung hat ein Dipolmoment, Ladung mal Abstand. Das Dipolmoment des Moleküls ist die Summe dieser Bindungsdipole als Pfeile mit Richtung (Vektoren), nicht als bloße Zahlen.',
+    note: String.raw`Ein Dipol ist insgesamt neutral. Wo ein Pfeil das Dipolmoment zeigt, geht er in der Vorlesung wie in der Physik von $\delta-$ nach $\delta+$; manche Bücher zeichnen ihn andersherum. Die App fragt nicht nach der Pfeilrichtung. Im elektrischen Feld, etwa zwischen zwei geladenen Platten, drehen sich Dipolmoleküle: Ihr negatives Ende zeigt zur positiven Platte, ihr positives Ende zur negativen. Unpolare Moleküle richten sich so nicht aus.`,
     examples: [
       {
         chemTask: String.raw`$\ce{CO2}$ und $\ce{H2O}$`,
         lines: [
-          { label: 'Kohlenstoffdioxid ist linear: Die beiden polaren Bindungen heben sich auf, das Molekül ist unpolar.' },
-          { label: 'Wasser ist gewinkelt: Die Wirkungen heben sich nicht auf, das Molekül ist polar.' },
+          { label: 'Kohlenstoffdioxid ist linear: Die beiden gleich großen Bindungsdipole zeigen genau entgegengesetzt, ihre Summe ist null. Das Molekül ist unpolar.' },
+          { label: 'Wasser ist gewinkelt: Beide Bindungsdipole zeigen schräg zur selben Seite, ihre Summe ist nicht null. Das Molekül ist polar.' },
         ],
       },
       {
@@ -253,7 +254,7 @@ export const MOLEKUELE_CARDS: readonly Card[] = [
         ],
       },
     ],
-    errors: ['chem-dipole-polar-bond', 'chem-dipole-unpolar-bonds', 'chem-dipole-symmetry-assumed', 'chem-mis-mo-polar-bond-molecule', 'chem-mis-mo-dipole-charged', 'chem-mis-mo-symmetry-assumed'],
+    errors: ['chem-dipole-polar-bond', 'chem-dipole-unpolar-bonds', 'chem-dipole-symmetry-assumed', 'chem-mis-mo-polar-bond-molecule', 'chem-mis-mo-dipole-charged', 'chem-mis-mo-symmetry-assumed', 'chem-mis-mo-field-magnetic', 'chem-mis-mo-dipole-scalar'],
     figures: ['gestalt:CO2', 'gestalt:H2O'],
   },
   {
@@ -263,8 +264,8 @@ export const MOLEKUELE_CARDS: readonly Card[] = [
     level: 2,
     rules: [],
     formulas: [],
-    memo: 'Vorn steht das weniger elektronegative Element mit seinem deutschen Namen, dahinter das andere mit der Endung -id. Vorsilben zählen die Atome: mono 1, di 2, tri 3, tetra 4, penta 5, hexa 6, hepta 7, deca 10. Am ersten Element entfällt „mono“.',
-    note: 'Vor „oxid“ wird aus „mono“ kurz „mon“: Kohlenstoffmonoxid. Bekannte Stoffe haben oft eigene Namen: Wasser, Ammoniak, Methan.',
+    memo: 'Vorn steht das weniger elektronegative Element mit seinem deutschen Namen, dahinter das andere mit der Endung -id. Vorsilben zählen die Atome: mono 1, di 2, tri 3, tetra 4, penta 5, hexa 6, hepta 7, octa 8, nona 9, deca 10. Am ersten Element entfällt „mono“.',
+    note: String.raw`Vor „oxid“ wird aus „mono“ kurz „mon“: Kohlenstoffmonoxid. Bekannte Stoffe haben oft eigene Namen: Wasser, Ammoniak, Methan. Für $\ce{CCl4}$ sind zwei Namen üblich: Kohlenstofftetrachlorid nach diesen Regeln und Tetrachlormethan als Abkömmling des Methans.`,
     examples: [
       {
         chemTask: String.raw`$\ce{N2O}$`,

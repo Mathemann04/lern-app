@@ -50,8 +50,12 @@ export type ExamItem = {
   readonly points: number
   // Fragen, deren Antworten hier gebraucht werden (stehen in der Aufgabe weiter vorn)
   readonly dependsOn: readonly string[]
-  // Ergebnis des Teils: richtig (auch als Folgefehler) gibt die vollen Punkte des Teils
+  // Ergebnis des Teils: richtig (auch als Folgefehler) gibt die vollen Punkte des Teils. Nur dort, wo das Ergebnis aus
+  // den Fragen davor folgt (z. B. Masse aus Stoffmenge und Molmasse); unabhängige Fragen zählen jede für sich
   readonly final?: boolean
+  // In der echten Klausur selbst geschrieben (Salzformel, Lewis-Formel, Gleichung, Massenwirkungsgesetz): Die Antworten
+  // erscheinen erst, wenn man die Frage auf Papier gelöst hat und sie aufdeckt (ui/exam/ExamParts.tsx)
+  readonly paperFirst?: boolean
   readonly cards: readonly string[]
   // Wissensfrage aus einem Thema (Nummer wie beim Üben): falsch beantwortet kommt sie in die Wiederholung (S9b)
   readonly review?: { readonly course: string; readonly seed: number }

@@ -14,8 +14,8 @@ export const TRENDS_WHY: Readonly<Record<string, Explanation>> = {
     short: 'Nach unten kommt eine Schale dazu.',
   },
   'chem-mis-tr-radius-mass': {
-    detailed: 'Die Masse steckt fast ganz im winzigen Kern. Die Größe eines Atoms bestimmt seine Elektronenhülle, und die hängt von Schalen und Kernladung ab.',
-    short: 'Die Größe bestimmt die Hülle, nicht die Masse.',
+    detailed: 'Die Masse steckt fast ganz im winzigen Kern. Wie groß ein Atom ist und wie fest es seine Elektronen hält, bestimmt die Elektronenhülle, und die hängt von Schalen und Kernladung ab.',
+    short: 'Es zählen Hülle und Kernladung, nicht die Masse.',
   },
   'chem-mis-tr-shielding': {
     detailed: 'Überlege, was zwischen dem Kern und den äußeren Elektronen liegt und wie sich geladene Teilchen gegenseitig beeinflussen.',
@@ -26,8 +26,8 @@ export const TRENDS_WHY: Readonly<Record<string, Explanation>> = {
     short: 'Kernladung oder Schalen ändern sich.',
   },
   'chem-mis-tr-ie-reversed': {
-    detailed: 'Überlege, wo die Valenzelektronen weiter unten in einer Gruppe sitzen und wie stark sie abgeschirmt sind. Davon hängt ab, wie viel Energie ihr Entfernen kostet.',
-    short: 'Wo sitzen die Valenzelektronen weiter unten?',
+    detailed: 'Überlege, wie fest die Valenzelektronen gehalten werden: Was ändert sich in einer Periode an der Kernladung, was in einer Gruppe an der Schale und der Abschirmung? Davon hängt ab, wie viel Energie ihr Entfernen kostet.',
+    short: 'Wie fest werden die Valenzelektronen gehalten?',
   },
   'chem-mis-tr-ie-noble-low': {
     detailed: 'Überlege, wie die Ionisierungsenergie innerhalb einer Periode verläuft und welche Elemente am Ende jeder Periode stehen.',
@@ -38,8 +38,12 @@ export const TRENDS_WHY: Readonly<Record<string, Explanation>> = {
     short: 'Zwei Begriffe verwechselt.',
   },
   'chem-mis-tr-en-max-cl': {
-    detailed: 'Chlor zieht Bindungselektronen stark an, aber nicht am stärksten. Überlege, in welche Richtungen die Elektronegativität in Periode und Gruppe zunimmt.',
+    detailed: 'Chlor und Sauerstoff ziehen Bindungselektronen stark an, aber nicht am stärksten. Überlege, in welche Richtungen die Elektronegativität in Periode und Gruppe zunimmt und welches Element dann ganz außen steht.',
     short: 'Prüfe die Richtungen des Trends.',
+  },
+  'chem-mis-tr-en-reversed': {
+    detailed: 'Die Elektronegativität hängt davon ab, wie nah die Bindungselektronen am Kern sind und wie stark die Kernladung bei ihnen ankommt. Überlege, was sich daran in einer Periode nach rechts und in einer Gruppe nach unten ändert.',
+    short: 'Wie nah und wie stark angezogen sind die Bindungselektronen?',
   },
   'chem-mis-tr-noble-en': {
     detailed: 'Überlege, wofür die Elektronegativität gedacht ist und ob die leichten Edelgase in solchen Situationen vorkommen.',
