@@ -1,6 +1,7 @@
 import { Suspense, lazy, use, useEffect, useState } from 'react'
 import type { Level, TaskRef } from '../engine/tasks/taskNumber.ts'
 import { rememberShown, shownInRound, startNewRound } from '../state/questionRounds.ts'
+import { rememberTaskShown, reviewsOf } from '../state/reviews.ts'
 import { setLastMix, updateSettings, useSettings } from '../state/settings.ts'
 import { getAppState } from '../state/store.ts'
 import type { PracticeMode } from '../state/storage.ts'
@@ -128,18 +129,22 @@ function PickNewTask({ course, level, mode, mix }: { course: string; level: Leve
   useEffect(() => {
     // Auswahl beim Würfeln lesen (nicht als Abhängigkeit: Sonst würfelte eine Änderung der Einstellungen neu)
     const parts = selectedParts(courseById(course)!.course, getAppState().settings, level)
-    const { seed, newRound } = pickNewSeed(engine, level, recentForms(course, level), shownInRound(course, level), parts)
+    // Wiederholung nur beim geführten Üben (Wissensfragen gibt es nur geführt)
+    const review = mode === 'guided' ? reviewsOf(course) : undefined
+    const { seed, newRound } = pickNewSeed(engine, level, recentForms(course, level), shownInRound(course, level), parts, review)
     if (newRound) startNewRound(course, level, engine.questionNos?.(level, parts))
     window.location.replace(taskHref(course, { level, seed }, mode, null, mix))
   }, [engine, course, level, mode, mix])
   return null
 }
 
-// Merkt sich die Form der gezeigten Aufgabe, bei Wissensfragen auch die Frage für die Runde
+// Merkt sich die Form der gezeigten Aufgabe, bei Wissensfragen auch die Frage für die Runde; zählt die
+// gezeigten Aufgaben für die Wiederholung („nach drei anderen Aufgaben")
 function useRememberForm(course: string, engine: CourseEngine, taskRef: TaskRef) {
   const { level, seed } = taskRef
   useEffect(() => {
     rememberForm(course, level, engine.formOf({ level, seed }))
+    rememberTaskShown(course, level, seed)
     const no = questionNoOf(engine, seed)
     if (no !== null) rememberShown(course, level, no)
   }, [course, engine, level, seed])
@@ -181,6 +186,8 @@ export function MixPracticePage({ subject: subjectId, level }: { subject: string
           shownOf: (course) => shownInRound(course, level),
           recentOf: (course) => recentForms(course, level),
           partsOf: (course) => selectedParts(courseById(course)!.course, settings, level),
+          // Wiederholung nur beim geführten Üben (Wissensfragen gibt es nur geführt)
+          reviewOf: (course) => (courseById(course)!.course.free && settings.practiceMode === 'free' ? undefined : reviewsOf(course)),
         })
         if (!picked) {
           setState('empty')

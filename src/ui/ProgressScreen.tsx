@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { findError, isErrorOf } from '../engine/errorCatalog.ts'
 import { levelSummary, resetProgress, topErrors, useProgress } from '../state/progress.ts'
 import { clearRounds } from '../state/questionRounds.ts'
+import { clearReviews } from '../state/reviews.ts'
 import { useSettings } from '../state/settings.ts'
 import { AVAILABLE_COURSES, type Course, courseById, hasLevelNames, levelName, playableLevel } from './catalog.ts'
 import { ErrorShape } from './ErrorShape.tsx'
@@ -35,8 +36,9 @@ export function ProgressScreen() {
                   type="button"
                   onClick={() => {
                     resetProgress()
-                    // Die Runden der Wissensfragen beginnen von vorn; gemeldete Fragen bleiben
+                    // Die Runden der Wissensfragen beginnen von vorn, die Wiederholung ist leer; gemeldete Fragen bleiben
                     clearRounds()
+                    clearReviews()
                     setConfirmReset(false)
                   }}
                   className="rounded-xl bg-red-700 px-4 py-2.5 font-medium text-on-accent hover:bg-red-800"

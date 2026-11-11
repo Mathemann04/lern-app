@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { chemTopic } from '../engine/chem/banks.ts'
 import { chemCourseEngine } from '../engine/chem/engine.ts'
+import { decodeSeed } from '../engine/quiz/numbers.ts'
 import { createRng } from '../engine/random/rng.ts'
 import { rememberShown, shownInRound, startNewRound } from '../state/questionRounds.ts'
 import type { KeyValueStore } from '../state/storage.ts'
@@ -105,5 +106,35 @@ describe('Neue Wissensfrage ziehen (wie PickNewTask)', () => {
     expect(questionNoOf(engine, 101)).toBe(101)
     // Mathe-Engines ziehen ihre Nummern selbst: Die Zahl ist dort keine Frage
     expect(questionNoOf({}, 500_000 + 50 * 101 + 7)).toBeNull()
+  })
+})
+
+describe('Wiederholung beim Ziehen (S8a)', () => {
+  const rng = createRng('wiederholung')
+  const engine = chemCourseEngine(ATOMBAU, () => rng.next())
+  const nos1 = engine.questionNos(1)
+
+  it('bringt eine fällige Frage der Auswahl zuerst, in einer anderen Fassung', () => {
+    const due = [{ no: nos1[3], variant: 5, answeredAt: 1 }]
+    for (let i = 0; i < 20; i++) {
+      const picked = pickNewSeed(engine, 1, [], new Set(), undefined, { due, waiting: new Set() })
+      expect(picked.review).toBe(true)
+      expect(picked.newRound).toBe(false)
+      const decoded = decodeSeed(picked.seed)
+      expect(decoded).toMatchObject({ kind: 'question', no: nos1[3] })
+      expect(decoded?.kind === 'question' && decoded.variant).not.toBe(5)
+    }
+    // fällig, aber aus einer anderen Stufe oder einem nicht angekreuzten Unterthema: normal weiter
+    const other = engine.questionNos(2)[0]
+    expect(pickNewSeed(engine, 1, [], new Set(), undefined, { due: [{ no: other, variant: 0, answeredAt: 1 }], waiting: new Set() }).review).toBe(false)
+  })
+
+  it('zieht wartende Fragen nicht, solange es andere gibt', () => {
+    const waiting = new Set(nos1.slice(0, -1))
+    for (let i = 0; i < 60; i++) {
+      const picked = pickNewSeed(engine, 1, [], new Set(), undefined, { due: [], waiting })
+      const no = questionNoOf(engine, picked.seed)
+      if (no !== null) expect(no).toBe(nos1.at(-1))
+    }
   })
 })

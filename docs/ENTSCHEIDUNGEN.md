@@ -733,3 +733,13 @@ Neue Entscheidungen unten anfügen.
   dann ΔH), außer wenn bei der Summe kein typischer Fehler passieren kann; dann zählt nur ΔH mit 3 Punkten. Teil e wechselt
   zwischen ΔG mit Urteil und dem Temperaturbereich. Eine eigene fachliche Prüfung war nicht nötig: kein neuer Fachinhalt,
   nur die geprüften Fragen und Rechnungen aus S7a und S7b. Damit ist S7 abgeschlossen.
+- 11.11.2026: S8 geteilt, damit jeder Teil einzeln ausprobierbar ist: S8a Wiederholung falsch beantworteter Fragen,
+  S8b frei rechnen in den Themen (Ziffernblock, Toleranz, Rundungshinweis, Fehlererkennung), S8c Klausuraufgaben frei.
+  S8a: Die Wiederholung steht im eigenen Speichereintrag `rechenweg-wiederholung` (der im Plan genannte Schlüssel
+  `rechenweg-fragen` hält seit S1 die Runden; so muss nichts umgezogen werden); „Fortschritt löschen“ leert ihn. „Nach drei
+  anderen Aufgaben“ zählt alle gezeigten Aufgaben, auch Mathe und Rechnungen; Neuladen zählt nicht. Eine fällige Frage
+  kommt beim Üben ihrer Stufe (und ihres Unterthemas, wenn angekreuzt) und in der Mischung zuerst, in einer anderen
+  Fassung; bis sie fällig ist, kommt sie auch in der Runde nicht dran (außer es gibt sonst nichts). Richtig beantwortet,
+  bevor sie fällig ist (z. B. nach Neuladen), ändert sich nichts. Über der Frage steht „Wiederholung“, nach einer falschen
+  Antwort „Die Frage kommt nach drei anderen Aufgaben noch einmal.“ Nur Wissensfragen kommen wieder, Rechnungen nicht
+  (dort hat jede Aufgabe neue Zahlen und Stoffe).

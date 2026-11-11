@@ -4,6 +4,8 @@ import type { Expr } from '../../engine/expr/types.ts'
 import { type TaskRef, formatTaskNumber } from '../../engine/tasks/taskNumber.ts'
 import { recordAttempt, recordError } from '../../state/progress.ts'
 import { addReport } from '../../state/reports.ts'
+import { isInReview, recordReview } from '../../state/reviews.ts'
+import { questionNoOf } from '../practice.ts'
 import type { ExplanationDetail } from '../../state/storage.ts'
 import { FitWidth } from '../FitWidth.tsx'
 import { Formula } from '../Formula.tsx'
@@ -29,14 +31,19 @@ export function TaskScreen({ course, engine, taskRef, focus = null, mix = null }
   const [stepIndex, setStepIndex] = useState(0)
   const [mistakes, setMistakes] = useState(0)
   const finished = stepIndex >= task.steps.length
+  // Wissensfrage (nur sie kommen in die Wiederholung, S8a); beim Öffnen schon in der Wiederholung?
+  const isQuestion = questionNoOf(engine, seed) !== null
+  const [inReview] = useState(() => isQuestion && isInReview(course, seed))
 
-  // Fertig gelöst: einmal in den Fortschritt eintragen (ohne Fehlversuch zählt als „ohne Fehler")
+  // Fertig gelöst: einmal in den Fortschritt eintragen (ohne Fehlversuch zählt als „ohne Fehler"); eine
+  // falsch beantwortete Wissensfrage kommt wieder (state/reviews.ts)
   const recorded = useRef(false)
   useEffect(() => {
     if (!finished || recorded.current) return
     recorded.current = true
     recordAttempt({ course, level, mode: 'guided', clean: mistakes === 0 })
-  }, [finished, course, level, mistakes])
+    if (isQuestion) recordReview(course, seed, mistakes === 0)
+  }, [finished, course, level, seed, isQuestion, mistakes])
 
   return (
     <main className="space-y-6">
@@ -57,11 +64,16 @@ export function TaskScreen({ course, engine, taskRef, focus = null, mix = null }
       </TaskTopBar>
 
       {focus && <FocusBanner focus={focus} />}
+      {inReview && !focus && (
+        <p className="rounded-xl bg-accent-50 px-4 py-2 text-sm text-accent-800" data-testid="review-note">
+          Wiederholung: Diese Frage hattest du schon einmal falsch.
+        </p>
+      )}
 
       <TaskHeader course={course} mix={mix} task={task} stepIndex={stepIndex} />
 
       {finished ? (
-        <FinishView course={course} mix={mix} task={task} mistakes={mistakes} focus={focus} />
+        <FinishView course={course} mix={mix} task={task} mistakes={mistakes} focus={focus} isQuestion={isQuestion} />
       ) : (
         <StepView
           key={stepIndex}
@@ -298,9 +310,9 @@ function cardSheetTitle(step: GuidedStep): string {
   return step.cards.length === 1 ? 'Lernkarte zu diesem Schritt' : 'Lernkarten zu diesem Schritt'
 }
 
-type FinishProps = { course: string; mix: string | null; task: GuidedTaskBase; mistakes: number; focus: string | null }
+type FinishProps = { course: string; mix: string | null; task: GuidedTaskBase; mistakes: number; focus: string | null; isQuestion: boolean }
 
-function FinishView({ course, mix, task, mistakes, focus }: FinishProps) {
+function FinishView({ course, mix, task, mistakes, focus, isQuestion }: FinishProps) {
   const headingRef = useRef<HTMLHeadingElement>(null)
   useEffect(() => {
     headingRef.current?.focus({ preventScroll: true })
@@ -316,6 +328,7 @@ function FinishView({ course, mix, task, mistakes, focus }: FinishProps) {
           {mistakes === 0
             ? 'Alles beim ersten Versuch richtig.'
             : `Gelöst mit ${mistakes} ${mistakes === 1 ? 'Fehlversuch' : 'Fehlversuchen'}.`}
+          {isQuestion && mistakes > 0 && ' Die Frage kommt nach drei anderen Aufgaben noch einmal.'}
         </p>
       </div>
       {(task.resultLatex !== undefined || task.resultText !== undefined) && (

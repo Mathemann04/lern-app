@@ -1,5 +1,6 @@
 import { isErrorOf } from '../engine/errorCatalog.ts'
-import { decodeSeed } from '../engine/quiz/numbers.ts'
+import { decodeSeed, questionSeed } from '../engine/quiz/numbers.ts'
+import { type CourseReviews, type DueQuestion, otherVariant } from '../engine/quiz/schedule.ts'
 import { type Rng, createRng } from '../engine/random/rng.ts'
 import { type Level, type TaskRef, randomSeed } from '../engine/tasks/taskNumber.ts'
 import { pickFresh } from '../engine/tasks/variety.ts'
@@ -52,21 +53,42 @@ export function questionNoOf(engine: Pick<CourseEngine, 'nextSeed'>, seed: numbe
   return decoded?.kind === 'question' ? decoded.no : null
 }
 
+// Erste fällige Wiederholung des Themas, die zur Auswahl gehört (Stufe und angekreuzte Unterthemen,
+// engine.questionNos); null, wenn keine fällig ist
+export function dueInSelection(
+  engine: Pick<CourseEngine, 'questionNos'>,
+  level: Level,
+  review: CourseReviews | undefined,
+  parts?: ReadonlySet<string>,
+): DueQuestion | null {
+  if (!review || review.due.length === 0 || !engine.questionNos) return null
+  const allowed = new Set(engine.questionNos(level, parts))
+  return review.due.find((d) => allowed.has(d.no)) ?? null
+}
+
 // Nummer einer neuen Aufgabe, deren Form nicht unter den letzten dieser Stufe ist (recent, pickFresh).
 // Wissensfragen kommen dabei reihum: shown sind die Fragen, die in der laufenden Runde schon dran
 // waren, die Engine wählt unter den übrigen. parts: angekreuzte Unterthemen (ui/selection.ts,
 // selectedParts; ohne Angabe alle). newRound: Alle (der Auswahl) waren dran, die gewählte Frage beginnt
 // eine neue Runde; dann startNewRound(course, level, engine.questionNos(level, parts)) aufrufen, damit nur
 // die Fragen der Auswahl von vorn beginnen.
+// review: Wiederholung des Themas (state/reviews.ts, S8a). Eine fällige Frage der Auswahl kommt zuerst, in
+// einer anderen Fassung als beim letzten Mal und ohne Rücksicht auf Runde und letzte Formen; Fragen, die
+// noch warten, kommen vorher nicht dran (außer es gibt sonst nichts).
 export function pickNewSeed(
-  engine: Pick<CourseEngine, 'formOf' | 'nextSeed'>,
+  engine: Pick<CourseEngine, 'formOf' | 'nextSeed' | 'questionNos'>,
   level: Level,
   recent: readonly string[],
   shown: ReadonlySet<number>,
   parts?: ReadonlySet<string>,
-): { seed: number; newRound: boolean } {
-  const next = engine.nextSeed ? () => engine.nextSeed!(level, shown, parts) : randomSeed
+  review?: CourseReviews,
+): { seed: number; newRound: boolean; review: boolean } {
+  const due = dueInSelection(engine, level, review, parts)
+  if (due) return { seed: questionSeed(due.no, otherVariant(due.variant)), newRound: false, review: true }
+  // Wartende Fragen zählen wie schon gezeigte: Die Engine nimmt sie erst, wenn alle anderen dran waren
+  const blocked = review && review.waiting.size > 0 ? new Set([...shown, ...review.waiting]) : shown
+  const next = engine.nextSeed ? () => engine.nextSeed!(level, blocked, parts) : randomSeed
   const seed = pickFresh((s) => engine.formOf({ level, seed: s }), recent, next)
   const no = questionNoOf(engine, seed)
-  return { seed, newRound: no !== null && shown.has(no) }
+  return { seed, newRound: no !== null && blocked.has(no), review: false }
 }

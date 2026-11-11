@@ -1157,6 +1157,11 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   beantwortete Fragen kommen wieder.
   Ausprobieren: Klausuraufgabe 4 frei, einmal grob gerundet; eine Frage
   absichtlich falsch beantworten und sehen, dass sie wiederkommt.
+  Geteilt (11.11.2026): **S8a** Wiederholung, **S8b** frei rechnen in den Themen, **S8c** Klausuraufgaben frei.
+  **S8a** (fertig): `engine/quiz/schedule.ts` (Fächer 0 bis 4: nach drei anderen Aufgaben, dann 1, 3, 7 und 21 Tage;
+  falsch zurück in Fach 0, aus Fach 4 heraus gelernt), Speicher `state/reviews.ts` (Schlüssel `rechenweg-wiederholung`),
+  fällige Fragen zuerst in `pickNewSeed` und `pickMixed`, wartende Fragen erst, wenn sie fällig sind; Hinweis
+  „Wiederholung“ über der Frage. Einzelheiten in ENTSCHEIDUNGEN.md.
 - **S9: Probeklausur Teil 1** (50 Punkte, Bauplan unter „Probeklausur“), Uhr,
   Auswertung mit dem Hinweis auf die 40 Punkte, Verlauf, PSE und
   Formelsammlung in der Klausur.
