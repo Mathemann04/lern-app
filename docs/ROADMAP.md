@@ -85,8 +85,9 @@ feste Regeln: [CHEMIE.md](CHEMIE.md)
   - [ ] S5. Bindungen (auch Metallbindung und Hybridisierung)
     - [x] S5a. Ionenbindung und Salze (Rechnungen, Gitterbilder, Karten, Wissensfragen)
     - [x] S5b. Moleküle (Lewis-Formeln als Bilder, Gestalt, Polarität, Namen)
-    - [ ] S5c. Zwischenmolekulare Kräfte, Metallbindung und Hybridisierung
-    - [ ] S5d. Klausuraufgabe 3 üben
+    - [x] S5c. Zwischenmolekulare Kräfte (Rechnungen, Siedepunkte, Karten, Wissensfragen)
+    - [ ] S5d. Metallbindung, Hybridisierung und Molekülorbitale
+    - [ ] S5e. Klausuraufgabe 3 üben
   - [ ] S6. Elektronen und Periodensystem
   - [ ] S7. Gleichgewicht und Energie
   - [ ] S8. Frei rechnen und Wiederholung

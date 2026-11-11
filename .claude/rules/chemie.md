@@ -129,3 +129,8 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   `bank/molekuele.ts` (Denkfehler `chem-mis-mo-…`). Antworten als Bild: `figure` an `Choice`
   (`TaskScreen` zeichnet `FigureDrawing`, der Text ist die Beschreibung für Vorlesehilfen), Bild im
   Ergebnis `resultFigure`.
+- Zwischenmolekulare Kräfte (S5c): `chem/zmk.ts` (40 Stoffe: `polar`, `hBond`, Siedepunkt `boil`;
+  `forceOf`, Vergleichsgruppen `BOIL_GROUPS` mit Regel, `orderByRule`, `orderByBoil`),
+  `generators/zmk.ts` (Rechenarten `zmk-kraft`, `zmk-sieden` mit `pickBoilSet` und `ruleOf`,
+  `zmk-loesen`; `ZMK_STEPS` für die Katalogtests), Karten `zmkCards.ts`, Fragen `bank/zmk.ts`
+  (Denkfehler `chem-mis-zk-…`), Gegenprobe `chem/zmk.test.ts`.
