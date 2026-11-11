@@ -13,7 +13,7 @@ import { parseFormula } from './formula.ts'
 import { atomicNumberSum, molarMass } from './molarMass.ts'
 import { CHEM_ERROR_RULES } from './errorRules.ts'
 import { generatorsOf } from './generators/index.ts'
-import { lightValues } from './generators/light.ts'
+import { lightValues, rydbergValues } from './generators/light.ts'
 import { type Field, type Particle, wrongValues } from './generators/particles.ts'
 import type { GuidedStep } from '../guided/types.ts'
 import { createRng } from '../random/rng.ts'
@@ -73,6 +73,34 @@ describe('Rechenfehler: Katalogbeispiele', () => {
     const { wrong } = lightValues('energy', 500)
     // 6,626 · 10⁻³⁴ · 5 · 10⁻⁷ / (3 · 10⁸) ≈ 1,10 · 10⁻⁴⁸
     expect(formatText(wrong.find((w) => w.rule === 'chem-light-formula')!.value)).toBe('1,1 · 10⁻⁴⁸')
+  })
+
+  // Rydberg-Formel: Sprung 4 → 2 (486 nm) und Lösen aus n = 2
+  const jump = rydbergValues('wavelength', { upper: 4, lower: 2 })
+  const freed = rydbergValues('ionization', { upper: null, lower: 2 })
+  const rydberg = (values: typeof jump, rule: string) => formatText(values.wrong.find((w) => w.rule === rule)!.value)
+
+  it('Quadrat vergessen: 4 → 2 ergibt 365 nm statt 486 nm, aus n = 2 gelöst 1,09 · 10⁻¹⁸ J', () => {
+    expect(formatText(jump.correct)).toBe('486')
+    expect(rydberg(jump, 'chem-rydberg-no-square')).toBe('365')
+    expect(rydberg(freed, 'chem-rydberg-no-square')).toBe('1,09 · 10⁻¹⁸')
+  })
+
+  it('Kehrwert vergessen: 4 → 2 ergibt 2,06 · 10¹⁵ nm', () => {
+    expect(rydberg(jump, 'chem-rydberg-not-inverted')).toBe('2,06 · 10¹⁵')
+  })
+
+  it('Niveaus vertauscht: 4 → 2 ergibt −486 nm', () => {
+    expect(rydberg(jump, 'chem-rydberg-swapped')).toBe('-486')
+  })
+
+  it('Bis zum Grundzustand gerechnet: aus n = 2 gelöst 1,64 · 10⁻¹⁸ J statt 5,45 · 10⁻¹⁹ J', () => {
+    expect(formatText(freed.correct)).toBe('5,45 · 10⁻¹⁹')
+    expect(rydberg(freed, 'chem-rydberg-to-ground')).toBe('1,64 · 10⁻¹⁸')
+  })
+
+  it('Nanometer nicht umgerechnet bei der Rydberg-Formel: 4 → 2 ergibt 4,86 · 10⁻⁷', () => {
+    expect(rydberg(jump, 'chem-light-nm')).toBe('4,86 · 10⁻⁷')
   })
 })
 

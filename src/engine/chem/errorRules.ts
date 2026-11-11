@@ -98,7 +98,7 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
     name: 'Elektronen zur Massenzahl gezählt',
     wrongFormula: String.raw`\ce{^{37}_{17}Cl}\text{: } A = 17 + 20 + 17`,
     why: {
-      detailed: String.raw`Die Massenzahl zählt nur die Teilchen im Kern: Protonen und Neutronen, $A = Z + N$. Elektronen gehören zur Hülle; sie sind fast 2000-mal leichter als ein Proton und zählen nicht mit.`,
+      detailed: String.raw`Die Massenzahl zählt nur die Teilchen im Kern: Protonen und Neutronen, $A = Z + N$. Elektronen gehören zur Hülle; ein Elektron ist rund 1836-mal leichter als ein Proton (im Skript: etwa $\frac{1}{2000}\,\mathrm{u}$) und zählt nicht mit.`,
       short: String.raw`Die Massenzahl zählt nur Protonen und Neutronen: $A = Z + N$.`,
     },
   },
@@ -120,6 +120,47 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
     why: {
       detailed: String.raw`Die Energie eines Photons wächst mit der Frequenz und sinkt mit der Wellenlänge: $E = h \cdot f$ und $c = \lambda \cdot f$. Stelle nach der gesuchten Größe um und prüfe die Einheit: Am Ende muss bei einer Energie $\mathrm{J}$ stehen, bei einer Frequenz $\mathrm{s^{-1}}$, bei einer Wellenlänge $\mathrm{m}$.`,
       short: String.raw`$E = h \cdot f$ und $c = \lambda \cdot f$; die Einheit zeigt, ob richtig umgestellt ist.`,
+    },
+  },
+  // Rydberg-Formel (Wasserstoffatom)
+  {
+    id: 'chem-rydberg-no-square',
+    course: ATOMBAU,
+    name: 'Quadrat in der Rydberg-Formel vergessen',
+    wrongFormula: String.raw`\frac{1}{\lambda} = R_{\mathrm{H}} \cdot \left(\frac{1}{2} - \frac{1}{4}\right)`,
+    why: {
+      detailed: String.raw`In der Rydberg-Formel stehen die Nummern der beiden Niveaus im Quadrat: $\frac{1}{n^2}$ und $\frac{1}{m^2}$. Ohne die Quadrate stimmt die Energiedifferenz nicht, und damit auch Wellenlänge und Energie nicht.`,
+      short: String.raw`Die Niveaus stehen im Quadrat: $\frac{1}{n^2} - \frac{1}{m^2}$.`,
+    },
+  },
+  {
+    id: 'chem-rydberg-not-inverted',
+    course: ATOMBAU,
+    name: 'Kehrwert vergessen',
+    wrongFormula: String.raw`\lambda = R_{\mathrm{H}} \cdot \left(\frac{1}{n^2} - \frac{1}{m^2}\right)`,
+    why: {
+      detailed: String.raw`Die Rydberg-Formel liefert $\frac{1}{\lambda}$ in $\mathrm{m^{-1}}$, nicht die Wellenlänge selbst. Erst der Kehrwert ist $\lambda$ in Meter; die Energie folgt aus $E = \frac{h \cdot c}{\lambda} = h \cdot c \cdot \frac{1}{\lambda}$. Die Einheit zeigt den Fehler: Eine Wellenlänge hat die Einheit $\mathrm{m}$, nicht $\mathrm{m^{-1}}$.`,
+      short: String.raw`Die Formel liefert $\frac{1}{\lambda}$; erst der Kehrwert ist die Wellenlänge.`,
+    },
+  },
+  {
+    id: 'chem-rydberg-swapped',
+    course: ATOMBAU,
+    name: 'Niveaus in der Rydberg-Formel vertauscht',
+    wrongFormula: String.raw`\frac{1}{\lambda} = R_{\mathrm{H}} \cdot \left(\frac{1}{4^2} - \frac{1}{2^2}\right) < 0`,
+    why: {
+      detailed: String.raw`In der Klammer steht vorn das untere Niveau $n$ und hinten das obere $m$, mit $n < m$. Nur so ist die Klammer positiv. Eine negative Wellenlänge oder Energie gibt es nicht; sie zeigt, dass die beiden Niveaus vertauscht sind.`,
+      short: String.raw`Vorn das untere Niveau $n$, hinten das obere $m$.`,
+    },
+  },
+  {
+    id: 'chem-rydberg-to-ground',
+    course: ATOMBAU,
+    name: 'Bis zum Grundzustand statt ins Unendliche gerechnet',
+    wrongFormula: String.raw`n = 2 \to \infty\text{: } E = h \cdot c \cdot R_{\mathrm{H}} \cdot \left(\frac{1}{1^2} - \frac{1}{2^2}\right)`,
+    why: {
+      detailed: String.raw`Gerechnet ist hier der Sprung hinunter auf das erste Niveau. Um das Elektron ganz vom Atom zu lösen, muss es aber aus seinem Niveau ins Unendliche: Das obere Niveau ist $m \to \infty$ mit $\frac{1}{m^2} \to 0$, und im ersten Bruch steht das Niveau, auf dem das Elektron sitzt.`,
+      short: String.raw`Ganz lösen heißt: $m \to \infty$, nicht hinunter auf $n = 1$.`,
     },
   },
   // Stoffmenge und Umsatz (S3a)

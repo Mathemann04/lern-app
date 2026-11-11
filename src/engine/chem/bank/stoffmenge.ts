@@ -1422,16 +1422,16 @@ export const STOFFMENGE_BANK: QuestionBank = {
       fact: 'molmasse-chlor',
       part: 'molmasse',
       title: "Molare Masse von Chlor",
-      prompt: String.raw`Warum rechnet man für Chlor mit $M(\ce{Cl}) = 35{,}5\,\mathrm{g/mol}$ und nicht mit einer ganzen Zahl?`,
+      prompt: String.raw`Warum steht für Chlor im Periodensystem $M(\ce{Cl}) = 35{,}5\,\mathrm{g/mol}$ und keine ganze Zahl?`,
       correct: { id: 'r', text: String.raw`Natürliches Chlor besteht aus den Isotopen $\ce{^{35}Cl}$ und $\ce{^{37}Cl}$; $35{,}5$ ist der nach ihrer Häufigkeit gewichtete Mittelwert.` },
       wrong: [
         { id: 'f1', text: String.raw`Ein Chloratom hat $35{,}5$ Kernteilchen.`, misconception: 'chem-mis-st-mass-number', why: {
           detailed: "Kernteilchen gibt es nur ganz: Ein einzelnes Chloratom hat je nach Isotop 35 oder 37 Protonen und Neutronen zusammen. Ein krummer Wert kann nicht von einem einzelnen Atom stammen.",
           short: "Ein Atom hat immer eine ganze Zahl von Kernteilchen.",
         } },
-        { id: 'f2', text: String.raw`Der Wert ist gerundet; genau gerechnet wäre es $37\,\mathrm{g/mol}$ wie beim schweren Isotop.`, misconception: 'chem-mis-st-mass-number', why: {
-          detailed: "Die Massenzahl 37 gehört nur zum schwereren der beiden Chlorisotope. Eine Probe natürlichen Chlors besteht nicht nur aus diesem Isotop; mit 37 zu rechnen ist deshalb zu viel.",
-          short: "37 gilt nur für ein Isotop.",
+        { id: 'f2', text: String.raw`Der Wert ist gerundet; genau wäre es $37\,\mathrm{g/mol}$ wie beim schweren Isotop.`, misconception: 'chem-mis-st-mass-number', why: {
+          detailed: "Die Massenzahl 37 gehört nur zum schwereren der beiden Chlorisotope. Eine Probe natürlichen Chlors besteht nicht nur aus diesem Isotop, deshalb ist 37 nicht der Mittelwert über alle Chloratome.",
+          short: "37 ist die Massenzahl eines einzelnen Isotops, nicht der Mittelwert.",
         } },
         { id: 'f3', text: "Beide Isotope kommen genau gleich häufig vor, und der Wert liegt in der Mitte.", misconception: 'chem-mis-st-mass-number', why: {
           detailed: String.raw`Wären beide Isotope gleich häufig, läge der Mittelwert genau zwischen den Massenzahlen, also bei 36. Der Wert liegt aber näher an einer der beiden; das zeigt, dass ein Isotop deutlich häufiger ist.`,
@@ -1448,7 +1448,7 @@ export const STOFFMENGE_BANK: QuestionBank = {
       ],
       hint: "Denk an Isotope: Haben alle Chloratome in einer Probe dieselbe Masse?",
       explanation: {
-        detailed: String.raw`Chlor ist ein Gemisch aus etwa drei Vierteln $\ce{^{35}Cl}$ und einem Viertel $\ce{^{37}Cl}$. Die molare Masse mittelt über alle Atome einer Probe, gewichtet nach Häufigkeit, und liegt deshalb bei $35{,}5\,\mathrm{g/mol}$, näher am häufigeren Isotop. Mit $35$ oder $37$ zu rechnen ist ein typischer Fehler.`,
+        detailed: String.raw`Chlor ist ein Gemisch aus etwa drei Vierteln $\ce{^{35}Cl}$ und einem Viertel $\ce{^{37}Cl}$. Die molare Masse mittelt über alle Atome einer Probe, gewichtet nach Häufigkeit, und liegt deshalb bei $35{,}5\,\mathrm{g/mol}$, näher am häufigeren Isotop. Die Massenzahl eines einzelnen Isotops (35 oder 37) ist nicht dieser Mittelwert. Im Skript heißt die Zahl im Periodensystem auch Massenzahl; gemeint ist der Mittelwert. Nennt eine Aufgabe einen eigenen Wert für Chlor, rechnet man mit diesem.`,
         short: "Gewichteter Mittelwert der Isotope 35 und 37.",
       },
       cards: ['stoffmenge-molmasse'],

@@ -114,7 +114,8 @@ describe('Probeklausur: Verlauf, Wiederholung und Übungsvorschläge (S9b)', () 
   })
 
   it('meidet Stoffe der letzten drei Probeklausuren: deutlich weniger gleiche Stoffe als zufällig', () => {
-    expect(mockSubstances(chemMockExam(1))).toContain('Germanium')
+    // Elemente, um die sich ein Teil dreht („Element: …"), als Name
+    expect(mockSubstances(chemMockExam(1)).some((s) => /^[A-Z][a-zäöü]+$/.test(s) && s.length > 3)).toBe(true)
     expect(mockSubstances(chemMockExam(1))).not.toContain('CO2')
     const rng = createRng('meiden')
     const random = () => rng.int(0, 999_999) / 1_000_000

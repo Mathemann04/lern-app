@@ -6,7 +6,7 @@ import { bondTypeAskable, bondTypeOf, deltaEn, enHundredths, enLatex, type BondT
 import { chemErrorRule } from '../errorRules.ts'
 import { shapeId } from '../figures.ts'
 import { LEWIS_VARIANTS, type LewisVariant, lewisFigure } from '../lewis.ts'
-import { MOL_COMPOUNDS, type MolCompound, compoundFormula, compoundName } from '../molNames.ts'
+import { MOL_COMPOUNDS, type MolCompound, OTHER_NAMES, PREFIXES, compoundFormula, compoundName } from '../molNames.ts'
 import {
   MOLECULES,
   type Molecule,
@@ -486,6 +486,7 @@ function dipoleStep(mol: Molecule, rng: Rng, focus?: string): GuidedStep | null 
   const wrong = (Object.keys(wrongRules) as (keyof typeof DIPOLE_TEXT)[]).map((k) => textWrong(wrongRules[k]!, DIPOLE_TEXT[k]))
   const choices = stepChoices(rng, { key: DIPOLE_TEXT[key], content: DIPOLE_TEXT[key] }, wrong, focus)
   if (choices.length === 0) return null
+  const strong = mol.bonds.some(([a, b]) => bondTypeOf(deltaEn(mol.atoms[a].el, mol.atoms[b].el)) === 'ionisch')
   const shape = mol.central !== undefined ? vseprOf(mol).shape : mol.atoms.length === 2 ? 'linear' : null
   return {
     id: 'dipol',
@@ -494,7 +495,7 @@ function dipoleStep(mol: Molecule, rng: Rng, focus?: string): GuidedStep | null 
     choices,
     hint: 'Zwei Fragen: Gibt es polare Bindungen? Und heben sich ihre Wirkungen wegen einer symmetrischen Gestalt auf?',
     explanation: {
-      detailed: `${polar ? 'Das Molekül hat polare Bindungen.' : 'Die Bindungen sind (nahezu) unpolar.'}${shape ? ` Gestalt: ${shape}.` : ''} ${DIPOLE_TEXT[key]}`,
+      detailed: `${polar ? (strong ? 'Das Molekül hat stark polare Bindungen; zwischen zwei Nichtmetallen bleiben sie Atombindungen, auch wenn $\\Delta \\mathrm{EN}$ knapp über 1,8 liegt.' : 'Das Molekül hat polare Bindungen.') : 'Die Bindungen sind (nahezu) unpolar.'}${shape ? ` Gestalt: ${shape}.` : ''} ${DIPOLE_TEXT[key]}`,
       short: DIPOLE_TEXT[key].split(':')[0],
     },
     cards: [CARD_DIPOLE],
@@ -538,6 +539,8 @@ function nameTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCal
   const [, x, , y] = parts
   const formula = compoundFormula(parts)
   const name = compoundName(parts)
+  const other = OTHER_NAMES[formula]
+  const otherNote = other ? ` Üblich ist auch der Name ${other}.` : ''
   const toName = rng.chance(0.5)
   const swapped = [parts[0], y, parts[2], x] as const
   if (toName) {
@@ -560,14 +563,14 @@ function nameTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCal
             choices,
             hint: 'Vorsilben zählen die Atome: mono, di, tri, tetra, penta, hexa … Am ersten Element fällt „mono" weg, am zweiten nicht.',
             explanation: {
-              detailed: `${x > 1 ? `${x} Atome des ersten Elements: „${PREFIX_HINT(x)}". ` : 'Ein Atom des ersten Elements: ohne Vorsilbe. '}${y} Atom${y === 1 ? '' : 'e'} des zweiten: „${PREFIX_HINT(y)}". Name: ${name}.`,
+              detailed: `${x > 1 ? `${x} Atome des ersten Elements: „${PREFIX_HINT(x)}". ` : 'Ein Atom des ersten Elements: ohne Vorsilbe. '}${y} Atom${y === 1 ? '' : 'e'} des zweiten: „${PREFIX_HINT(y)}". Name: ${name}.${otherNote}`,
               short: name,
             },
             cards: [CARD_NAMES],
           },
         ],
         cards: [CARD_NAMES],
-        resultText: `$${ce(formula)}$: ${name}`,
+        resultText: `$${ce(formula)}$: ${name}${other ? ` (auch ${other})` : ''}`,
       },
       form: `name:${level}:formel-zu-name`,
       substance: formula,
@@ -593,7 +596,7 @@ function nameTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCal
           choices,
           hint: 'Jede Vorsilbe gehört zu dem Element direkt dahinter und gibt die Zahl seiner Atome an. Ohne Vorsilbe steht ein Atom.',
           explanation: {
-            detailed: `${x > 1 ? `„${PREFIX_HINT(x)}" vor dem ersten Element: ${x} Atome.` : 'Keine Vorsilbe vor dem ersten Element: ein Atom.'} „${PREFIX_HINT(y)}" vor dem zweiten: ${y} Atom${y === 1 ? '' : 'e'}. Formel: $${ce(formula)}$.`,
+            detailed: `${x > 1 ? `„${PREFIX_HINT(x)}" vor dem ersten Element: ${x} Atome.` : 'Keine Vorsilbe vor dem ersten Element: ein Atom.'} „${PREFIX_HINT(y)}" vor dem zweiten: ${y} Atom${y === 1 ? '' : 'e'}. Formel: $${ce(formula)}$.${otherNote}`,
             short: math(ce(formula)),
           },
           cards: [CARD_NAMES],
@@ -607,7 +610,7 @@ function nameTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCal
   }
 }
 
-const PREFIX_HINT = (n: number) => ({ 1: 'mono', 2: 'di', 3: 'tri', 4: 'tetra', 5: 'penta', 6: 'hexa', 7: 'hepta', 10: 'deca' })[n] ?? String(n)
+const PREFIX_HINT = (n: number) => PREFIXES[n] ?? String(n)
 
 // Schritte einzeln, für die Katalogbeispiele in errorRules.test.ts
 export const MOLECULE_STEPS = { valenceStep, pairsStep, splitStep, lewisChoiceStep, partnerStep, lonePairStep, typeStep, shapeStep, angleStep, deltaStep, bondTypeStep, partialStep, dipoleStep }

@@ -14,7 +14,8 @@ export const ELEKTRONEN_CARDS: readonly Card[] = [
     rules: [],
     formulas: [r`n = 1, 2, 3, \dots \qquad l = 0, \dots, n - 1 \qquad m = -l, \dots, +l \qquad s = \pm\tfrac{1}{2}`],
     memo: r`Vier Quantenzahlen beschreiben ein Elektron im Atom. Die Hauptquantenzahl $n$ gibt die Schale an (Energie und Größe). Die Nebenquantenzahl $l$ gibt die Unterschale und damit die Form des Orbitals an: $l = 0, 1, 2, 3$ heißt s, p, d, f. Die Magnetquantenzahl $m$ gibt die Ausrichtung des Orbitals im Raum an. Die Spinquantenzahl $s$ hat nur die Werte $+\tfrac{1}{2}$ und $-\tfrac{1}{2}$.`,
-    note: r`Die Zahl vor dem Buchstaben ist $n$, der Buchstabe steht für $l$: $3\mathrm{d}$ heißt $n = 3$, $l = 2$.`,
+    note: r`Die Zahl vor dem Buchstaben ist $n$, der Buchstabe steht für $l$: $3\mathrm{d}$ heißt $n = 3$, $l = 2$.
+Spin und Magnetismus: Der Spin macht jedes Elektron zu einem winzigen Magneten; er ist der Ursprung des Magnetismus. Im voll besetzten Orbital zeigen die beiden Spins in entgegengesetzte Richtungen und heben sich auf, magnetisch wirken nur ungepaarte Elektronen. Richten sich die Spins sehr vieler Atome gleich aus, entsteht ein Magnet, den man spürt; so ist es bei den ferromagnetischen Metallen Eisen, Cobalt und Nickel.`,
     examples: [
       { chemTask: r`Unterschale $3\mathrm{d}$`, lines: [{ label: 'Quantenzahlen', latex: r`n = 3,\ l = 2,\ m = -2, -1, 0, 1, 2` }] },
       { chemTask: r`Schale $n = 3$`, lines: [{ label: 'Unterschalen', latex: r`l = 0, 1, 2\text{: } 3\mathrm{s},\ 3\mathrm{p},\ 3\mathrm{d}` }] },
@@ -32,6 +33,8 @@ export const ELEKTRONEN_CARDS: readonly Card[] = [
       'chem-mis-el-l-to-n',
       'chem-mis-el-m-range',
       'chem-mis-el-spin-values',
+      'chem-mis-el-spin-pair-magnet',
+      'chem-mis-el-magnet-nucleus',
     ],
   },
   {
@@ -42,9 +45,9 @@ export const ELEKTRONEN_CARDS: readonly Card[] = [
     rules: [],
     formulas: [r`\text{Unterschale: } 2l + 1 \text{ Orbitale},\ 2 \cdot (2l + 1) \text{ Elektronen} \qquad \text{Schale: } n^2 \text{ Orbitale},\ 2n^2 \text{ Elektronen}`],
     memo: 'Ein Orbital ist ein Raumbereich, in dem ein Elektron mit hoher Wahrscheinlichkeit anzutreffen ist; jedes fasst zwei Elektronen. s-Orbitale sind kugelförmig, p-Orbitale hantelförmig. Eine s-Unterschale hat 1 Orbital, p hat 3, d hat 5, f hat 7. Die Orbitale einer Unterschale haben dieselbe Energie.',
-    note: 'Plätze je Unterschale: s 2, p 6, d 10, f 14. Je Schale: 2, 8, 18, 32 Elektronen für n = 1 bis 4.',
+    note: 'Plätze je Unterschale: s 2, p 6, d 10, f 14. Je Schale: 2, 8, 18, 32 Elektronen für $n = 1$ bis $n = 4$.',
     examples: [
-      { chemTask: r`Schale $n = 3$`, lines: [{ label: '1 + 3 + 5 = 9 Orbitale', latex: r`2 \cdot 3^2 = 18 \text{ Elektronen}` }] },
+      { chemTask: r`Schale $n = 3$`, lines: [{ label: '$1 + 3 + 5 = 9$ Orbitale', latex: r`2 \cdot 3^2 = 18 \text{ Elektronen}` }] },
       { chemTask: r`Unterschale $4\mathrm{f}$`, lines: [{ label: '7 Orbitale', latex: r`2 \cdot 7 = 14 \text{ Elektronen}` }] },
     ],
     errors: [
@@ -84,8 +87,9 @@ export const ELEKTRONEN_CARDS: readonly Card[] = [
     level: 1,
     rules: [],
     formulas: [],
-    memo: 'Energiegleiche Orbitale einer Unterschale werden zuerst einzeln besetzt, alle mit demselben Spin. Erst wenn jedes Orbital ein Elektron hat, bilden sich Paare. Elektronen, die allein in einem Orbital sitzen, heißen ungepaart.',
-    note: 'Ungepaarte Elektronen zählen: In einer Unterschale mit k Orbitalen und e Elektronen sind es e, solange e ≤ k ist, sonst 2k − e.',
+    memo: 'Energiegleiche (entartete) Orbitale einer Unterschale werden zuerst einzeln besetzt, alle mit demselben Spin. Erst wenn jedes Orbital ein Elektron hat, bilden sich Paare. Elektronen, die allein in einem Orbital sitzen, heißen ungepaart.',
+    note: r`Andere Namen: Energiegleiche Orbitale heißen auch entartet, und die Hund’sche Regel heißt auch Regel der maximalen Multiplizität (möglichst viele einzelne Elektronen mit parallelem Spin).
+Ungepaarte Elektronen zählen: In einer Unterschale mit $k$ Orbitalen und $e$ Elektronen sind es $e$, solange $e \le k$ ist, sonst $2k - e$.`,
     examples: [
       { chemTask: r`Stickstoff, $2\mathrm{p}^{3}$`, lines: [{ label: '↑ ↑ ↑: drei ungepaarte Elektronen' }] },
       { chemTask: r`Sauerstoff, $2\mathrm{p}^{4}$`, lines: [{ label: '↑↓ ↑ ↑: zwei ungepaarte Elektronen' }] },
@@ -101,10 +105,11 @@ export const ELEKTRONEN_CARDS: readonly Card[] = [
     rules: [],
     formulas: [r`1\mathrm{s} \to 2\mathrm{s} \to 2\mathrm{p} \to 3\mathrm{s} \to 3\mathrm{p} \to 4\mathrm{s} \to 3\mathrm{d} \to 4\mathrm{p} \to 5\mathrm{s} \to 4\mathrm{d} \to 5\mathrm{p}`],
     memo: 'Die Elektronen besetzen die Unterschalen nach steigender Energie. Dabei kommt 4s vor 3d und 5s vor 4d. Man schreibt jede Unterschale mit der Zahl ihrer Elektronen als Hochzahl, in der Reihenfolge der Besetzung. Die Summe der Hochzahlen ist im Atom gleich der Ordnungszahl.',
-    note: r`Kürzer mit Edelgaskern: Die Elektronen des vorherigen Edelgases stehen in eckigen Klammern, z. B. $[\mathrm{Ne}]$ für $1\mathrm{s}^{2}\,2\mathrm{s}^{2}\,2\mathrm{p}^{6}$.`,
+    note: r`Kürzer mit Edelgaskern: Die Elektronen des vorherigen Edelgases stehen in eckigen Klammern, z. B. $[\mathrm{Ne}]$ für $1\mathrm{s}^{2}\,2\mathrm{s}^{2}\,2\mathrm{p}^{6}$.
+Beide Reihenfolgen sind üblich: Die App schreibt 4s vor 3d (Reihenfolge der Besetzung), die Vorlesung und viele Bücher ordnen nach der Schale und schreiben 3d vor 4s. Gemeint ist dasselbe; bei der Eingabe zählt beides.`,
     examples: [
       { chemTask: r`Schwefel, $Z = 16$`, lines: [{ label: 'ausführlich', latex: r`1\mathrm{s}^{2}\,2\mathrm{s}^{2}\,2\mathrm{p}^{6}\,3\mathrm{s}^{2}\,3\mathrm{p}^{4}` }, { label: 'mit Edelgaskern', latex: r`[\mathrm{Ne}]\,3\mathrm{s}^{2}\,3\mathrm{p}^{4}` }] },
-      { chemTask: r`Eisen, $Z = 26$`, lines: [{ label: '4s vor 3d', latex: r`[\mathrm{Ar}]\,4\mathrm{s}^{2}\,3\mathrm{d}^{6}` }] },
+      { chemTask: r`Eisen, $Z = 26$`, lines: [{ label: '4s vor 3d', latex: r`[\mathrm{Ar}]\,4\mathrm{s}^{2}\,3\mathrm{d}^{6}` }, { label: 'nach Schalen geordnet, wie in der Vorlesung', latex: r`[\mathrm{Ar}]\,3\mathrm{d}^{6}\,4\mathrm{s}^{2}` }] },
     ],
     errors: ['chem-el-3d-first', 'chem-el-count', 'chem-el-d-skipped', 'chem-mis-el-order-n', 'chem-mis-el-d-count'],
   },
@@ -131,8 +136,8 @@ export const ELEKTRONEN_CARDS: readonly Card[] = [
     level: 1,
     rules: [],
     formulas: [r`\text{Hauptgruppe I bis VIII: } n\mathrm{s}^{1} \ \dots\ n\mathrm{s}^{2}\,n\mathrm{p}^{6}`],
-    memo: 'Valenzelektronen sind die Elektronen der äußersten Schale; sie bestimmen, wie ein Atom reagiert und bindet. Bei Hauptgruppenelementen ist ihre Zahl die römische Nummer der Hauptgruppe, und die Nummer der äußersten Schale ist die Periode. Die Valenzkonfiguration besteht nur aus ns und np dieser Schale.',
-    note: 'In der Zählung 1 bis 18 haben die Gruppen 13 bis 18 zehn mehr als die Zahl der Valenzelektronen (die zehn Nebengruppen liegen dazwischen). Volle d-Unterschalen weiter innen gehören nicht zur Valenzkonfiguration.',
+    memo: 'Valenzelektronen sind die Elektronen der äußersten Schale. Man beschreibt sie auch über ihre Aufgabe: Mit ihnen geht ein Atom Bindungen ein oder kann sie eingehen (daher auch Außen- oder Bindungselektronen); sie bestimmen, wie ein Atom reagiert. Bei Hauptgruppenelementen ist ihre Zahl die römische Nummer der Hauptgruppe, und die Nummer der äußersten Schale ist die Periode. Die Valenzkonfiguration besteht nur aus $n\\mathrm{s}$ und $n\\mathrm{p}$ dieser Schale.',
+    note: 'In der Zählung 1 bis 18 haben die Gruppen 13 bis 18 zehn mehr als die Zahl der Valenzelektronen (die zehn Nebengruppen liegen dazwischen). Volle d-Unterschalen weiter innen gehören nicht zur Valenzkonfiguration.\nAusnahme Helium: Es steht bei den Edelgasen (VIII. Hauptgruppe), hat aber nur zwei Valenzelektronen; seine einzige Schale ist mit $1\\mathrm{s}^{2}$ voll.',
     examples: [
       { chemTask: r`Schwefel ($\ce{S}$): 3. Periode, VI. Hauptgruppe`, lines: [{ label: '6 Valenzelektronen', latex: r`3\mathrm{s}^{2}\,3\mathrm{p}^{4}` }] },
       { chemTask: r`Selen ($\ce{Se}$): 4. Periode, VI. Hauptgruppe`, lines: [{ label: '6 Valenzelektronen, 3d gehört zum Rumpf', latex: r`4\mathrm{s}^{2}\,4\mathrm{p}^{4}` }] },
@@ -165,7 +170,7 @@ export const ELEKTRONEN_CARDS: readonly Card[] = [
     note: r`Viele Ionen der Hauptgruppen haben danach die Konfiguration eines Edelgases: $\ce{Na+}$ und $\ce{O^2-}$ wie Neon, $\ce{K+}$ und $\ce{Cl-}$ wie Argon.`,
     examples: [
       { chemTask: r`$\ce{Fe^3+}$`, lines: [{ label: 'erst beide 4s, dann ein 3d', latex: r`[\mathrm{Ar}]\,3\mathrm{d}^{5}` }] },
-      { chemTask: r`$\ce{S^2-}$`, lines: [{ label: 'zwei Elektronen in 3p dazu', latex: r`[\mathrm{Ne}]\,3\mathrm{s}^{2}\,3\mathrm{p}^{6}` }] },
+      { chemTask: r`$\ce{S^2-}$`, lines: [{ label: 'zwei Elektronen in 3p dazu, wie Argon', latex: r`[\mathrm{Ne}]\,3\mathrm{s}^{2}\,3\mathrm{p}^{6} = [\mathrm{Ar}]` }] },
     ],
     errors: ['chem-el-charge-ignored', 'chem-el-charge-sign', 'chem-el-ion-3d', 'chem-mis-el-ion-3d', 'chem-mis-el-noble-ion'],
   },

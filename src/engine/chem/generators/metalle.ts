@@ -293,6 +293,8 @@ export const MO_SPECIES: readonly { id: string; ce: string; bonding: number; ant
   { id: 'O2-', ce: 'O2-', bonding: 8, antibonding: 5, level: 3 },
   { id: 'F2', ce: 'F2', bonding: 8, antibonding: 6, level: 3 },
   { id: 'Ne2', ce: 'Ne2', bonding: 8, antibonding: 8, level: 3 },
+  // dritte Periode: 3s und 3p wie 2s und 2p gezählt (Skript Kovalente Bindung, Folie 15)
+  { id: 'Cl2', ce: 'Cl2', bonding: 8, antibonding: 6, level: 3 },
 ]
 
 const half = (n: number) => (Number.isInteger(n / 2) ? String(n / 2) : `${(n - 1) / 2}{,}5`)

@@ -13,7 +13,7 @@ export const TRENDS_CARDS: readonly Card[] = [
     level: 1,
     rules: [],
     formulas: [],
-    memo: 'Zwei Größen erklären fast alle Trends: die Kernladung und die Zahl der Schalen. In einer Periode wächst die Kernladung bei gleicher Zahl von Schalen; der Kern hält die Elektronen fester. In einer Gruppe kommt nach unten jedes Mal eine Schale dazu; die äußeren Elektronen sind weiter weg und stärker abgeschirmt.',
+    memo: 'Zwei Größen erklären fast alle Trends: die Kernladung und die Zahl der Schalen. Die inneren Elektronen schirmen einen Teil der Kernladung ab; was bei den äußeren Elektronen davon ankommt, heißt effektive Kernladung. In einer Periode wächst sie bei gleicher Zahl von Schalen, und der Kern hält die Elektronen fester. In einer Gruppe kommt nach unten jedes Mal eine Schale dazu; die äußeren Elektronen sind weiter weg und stärker abgeschirmt.',
     note: 'Atomradius und Metallcharakter nehmen nach links unten zu. Ionisierungsenergie, Elektronegativität und (mit Ausnahmen) Elektronenaffinität nehmen nach rechts oben zu.',
     examples: [
       { chemTask: r`$\ce{Cs}$ (links unten)`, lines: [{ label: 'großes Atom, kleine Ionisierungsenergie, kleine Elektronegativität, stark metallisch' }] },
@@ -30,10 +30,10 @@ export const TRENDS_CARDS: readonly Card[] = [
     rules: [],
     formulas: [],
     memo: 'Der Atomradius nimmt in einer Periode von links nach rechts ab: Die Elektronen kommen in dieselbe Schale, die Kernladung wächst und zieht die Hülle zusammen. In einer Gruppe nimmt er nach unten zu, weil jedes Mal eine Schale dazukommt.',
-    note: 'Gemessen wird der halbe Abstand zweier gebundener gleicher Atome (Kovalenzradius). Edelgase werden dabei nicht verglichen, weil sie kaum Bindungen eingehen.',
+    note: 'Tabellen nennen verschiedene Radien: für Metalle oft den Metallradius (halber Abstand der Atome im Metall), sonst den Kovalenzradius (halber Abstand zweier gleicher, gebundener Atome). Die Zahlen weichen deshalb von Tabelle zu Tabelle ab, der Trend bleibt derselbe. Die App rechnet mit Kovalenzradien und vergleicht keine Edelgase, weil sie kaum Bindungen eingehen.',
     examples: [
-      { chemTask: r`$\ce{Na}$, $\ce{Mg}$, $\ce{Cl}$`, lines: [{ label: 'Kovalenzradien', latex: r`166\,\mathrm{pm} > 141\,\mathrm{pm} > 102\,\mathrm{pm}` }] },
-      { chemTask: r`$\ce{Li}$, $\ce{Na}$, $\ce{K}$`, lines: [{ label: 'Kovalenzradien', latex: r`128\,\mathrm{pm} < 166\,\mathrm{pm} < 203\,\mathrm{pm}` }] },
+      { chemTask: r`$\ce{Na}$, $\ce{Al}$, $\ce{P}$ (3. Periode)`, lines: [{ label: 'nach rechts kleiner', latex: r`r(\ce{Na}) > r(\ce{Al}) > r(\ce{P})` }] },
+      { chemTask: r`$\ce{Be}$, $\ce{Mg}$, $\ce{Ca}$ (II. Hauptgruppe)`, lines: [{ label: 'nach unten größer', latex: r`r(\ce{Be}) < r(\ce{Mg}) < r(\ce{Ca})` }] },
     ],
     errors: ['chem-tr-radius-period', 'chem-tr-radius-group', 'chem-mis-tr-radius-electrons', 'chem-mis-tr-radius-protons', 'chem-mis-tr-radius-mass'],
     figures: ['pse-trend:radius'],
@@ -45,7 +45,7 @@ export const TRENDS_CARDS: readonly Card[] = [
     level: 1,
     rules: [],
     formulas: [],
-    memo: 'Die erste Ionisierungsenergie nimmt in einer Periode nach rechts zu, weil die wachsende Kernladung die Valenzelektronen fester hält. In einer Gruppe nimmt sie nach unten ab: Die Valenzelektronen sitzen weiter außen und sind stärker abgeschirmt. Die Edelgase haben in ihrer Periode die größte, die Alkalimetalle die kleinste.',
+    memo: 'Die erste Ionisierungsenergie nimmt in einer Periode nach rechts zu: Die Kernladung wächst, die Abschirmung durch die inneren Elektronen kaum, also steigt die effektive Kernladung und hält die Valenzelektronen fester. In einer Gruppe nimmt sie nach unten ab: Die Valenzelektronen sitzen weiter außen und sind stärker abgeschirmt. Die Edelgase haben in ihrer Periode die größte, die Alkalimetalle die kleinste.',
     note: 'Es gibt kleine Ausnahmen in der Periode, etwa zwischen der II. und der III. Hauptgruppe; Reihen mit solchen Paaren werden hier nicht gefragt.',
     examples: [
       { chemTask: r`$\ce{Na}$, $\ce{Si}$, $\ce{Cl}$`, lines: [{ label: 'erste Ionisierungsenergie in kJ/mol', latex: r`496 < 787 < 1251` }] },
@@ -61,13 +61,13 @@ export const TRENDS_CARDS: readonly Card[] = [
     level: 1,
     rules: [],
     formulas: [],
-    memo: 'Die Elektronegativität gibt an, wie stark ein Atom in einer Bindung die gemeinsamen Elektronen zu sich zieht. Sie ist eine Vergleichszahl ohne Einheit (Pauling-Skala). Sie nimmt in einer Periode nach rechts zu und in einer Gruppe nach unten ab. Fluor hat mit 3,98 den größten Wert.',
+    memo: 'Die Elektronegativität gibt an, wie stark ein Atom in einer Bindung die gemeinsamen Elektronen zu sich zieht. Sie ist eine relative Größe ohne Einheit: Bezug ist Fluor, das am stärksten zieht und den Wert 4 bekommt (Pauling-Skala, genauer 3,98). Sie nimmt in einer Periode nach rechts zu und in einer Gruppe nach unten ab.',
     note: 'Für Helium, Neon und Argon wird meist kein Wert angegeben, weil sie praktisch keine Bindungen bilden.',
     examples: [
       { chemTask: r`$\ce{F}$, $\ce{Cl}$, $\ce{Br}$, $\ce{I}$`, lines: [{ label: 'Pauling-Werte', latex: r`3{,}98 > 3{,}16 > 2{,}96 > 2{,}66` }] },
       { chemTask: r`$\ce{Li}$, $\ce{C}$, $\ce{F}$`, lines: [{ label: 'Pauling-Werte', latex: r`0{,}98 < 2{,}55 < 3{,}98` }] },
     ],
-    errors: ['chem-tr-en-period', 'chem-tr-en-group', 'chem-mis-tr-en-max-cl', 'chem-mis-tr-noble-en'],
+    errors: ['chem-tr-en-period', 'chem-tr-en-group', 'chem-mis-tr-en-max-cl', 'chem-mis-tr-noble-en', 'chem-mis-tr-en-reversed'],
     figures: ['pse-trend:en'],
   },
   {

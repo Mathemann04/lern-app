@@ -176,4 +176,30 @@ export const MOLEKUELE_MISCONCEPTIONS: readonly MisconceptionName[] = [
     name: "Keine Vorsilbe am ersten Element",
     wrongText: "Am ersten Element einer Molekülverbindung steht nie eine Vorsilbe.",
   },
+  // Ergänzt nach dem Abgleich mit den Skripten (11.11.2026)
+  {
+    id: 'chem-mis-mo-h-count',
+    name: "Zahl der H-Atome nicht aus den Bindungen bestimmt",
+    wrongText: "Schwefel bindet wie Stickstoff drei Wasserstoffatome: $\\ce{SH3}$.",
+  },
+  {
+    id: 'chem-mis-mo-element-x2',
+    name: "Zweiatomiges Element in der Verbindung",
+    wrongText: "Chlor bleibt auch in Verbindungen ein $\\ce{Cl2}$-Molekül; Chlorwasserstoff ist deshalb $\\ce{H2Cl2}$.",
+  },
+  {
+    id: 'chem-mis-mo-field-magnetic',
+    name: "Elektrisches mit magnetischem Feld verwechselt",
+    wrongText: "Dipolmoleküle richten sich in einem Magnetfeld aus, in einem elektrischen Feld nicht.",
+  },
+  {
+    id: 'chem-mis-mo-dipole-scalar',
+    name: "Bindungsdipole ohne Richtung addiert",
+    wrongText: "Die Bindungsdipole addiert man als bloße Zahlen; zwei polare Bindungen ergeben immer ein Dipolmoment.",
+  },
+  {
+    id: 'chem-mis-mo-en-unbonded',
+    name: "Unterschied der Elektronegativität ohne Bindung",
+    wrongText: "Man rechnet $\\Delta \\mathrm{EN}$ auch zwischen Atomen aus, die gar nicht miteinander verbunden sind, etwa in $\\ce{HCN}$ zwischen H und N.",
+  },
 ]

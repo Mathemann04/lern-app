@@ -242,8 +242,8 @@ export const MOLEKUELE_CARDS: readonly Card[] = [
       {
         chemTask: String.raw`$\ce{CO2}$ und $\ce{H2O}$`,
         lines: [
-          { label: 'Kohlenstoffdioxid ist linear: Die beiden gleich großen Bindungsdipole zeigen genau entgegengesetzt, ihre Summe ist null. Das Molekül ist unpolar.' },
-          { label: 'Wasser ist gewinkelt: Beide Bindungsdipole zeigen schräg zur selben Seite, ihre Summe ist nicht null. Das Molekül ist polar.' },
+          { label: 'Kohlenstoffdioxid ist linear: Die beiden gleich großen Bindungsdipole zeigen genau entgegengesetzt, sie heben sich auf. Das Molekül ist unpolar.' },
+          { label: 'Wasser ist gewinkelt: Beide Bindungsdipole zeigen schräg zur selben Seite, ihre Summe bleibt übrig. Das Molekül ist polar.' },
         ],
       },
       {

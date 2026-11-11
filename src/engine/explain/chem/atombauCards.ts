@@ -14,7 +14,9 @@ export const ATOMBAU_CARDS: readonly Card[] = [
     note: String.raw`Element: lässt sich durch keine chemische Reaktion weiter zerlegen und steht im Periodensystem.
 Verbindung: feste Zusammensetzung und eigene Eigenschaften; zerlegen lässt sie sich nur durch eine chemische Reaktion.
 Gemisch: Die Anteile können schwanken. Es kann einheitlich aussehen (Salzwasser, Luft, Messing) oder nicht (Sand in Wasser).
-Auch Sauerstoff $\ce{O2}$ und Stickstoff $\ce{N2}$ sind Elemente: In ihren Molekülen sind nur Atome einer einzigen Sorte gebunden.`,
+Auch Sauerstoff $\ce{O2}$ und Stickstoff $\ce{N2}$ sind Elemente: In ihren Molekülen sind nur Atome einer einzigen Sorte gebunden.
+Legierungen sind Gemische aus Metallen, keine Verbindungen: Bronze aus Kupfer und Zinn, Messing aus Kupfer und Zink. Man zählt sie zur anorganischen Chemie.
+Organische Verbindungen sind Verbindungen des Kohlenstoffs, in der Regel mit Wasserstoff; in der Vorlesung gehören diese beiden Elemente immer dazu. Oft kommen Sauerstoff, Stickstoff, Schwefel, Phosphor oder Halogene hinzu. Jedes Kohlenstoffatom geht vier Bindungen ein; daher gibt es Millionen verschiedener organischer Stoffe.`,
     when: "Wenn du einen Stoff einordnen sollst: Frag zuerst, ob nur ein Stoff vorliegt, dann, ob er sich chemisch weiter zerlegen lässt.",
     examples: [
       {
@@ -126,8 +128,9 @@ Auch Sauerstoff $\ce{O2}$ und Stickstoff $\ce{N2}$ sind Elemente: In ihren Molek
     level: 1,
     rules: [],
     formulas: [String.raw`m(\ce{p+}) \approx m(\ce{n^0}) \approx 1\,\mathrm{u}`, String.raw`m(\ce{e-}) \approx \frac{m(\ce{p+})}{1836}`, String.raw`1\,\mathrm{u} \approx 1{,}66 \cdot 10^{-24}\,\mathrm{g}`],
-    memo: String.raw`Proton: positiv geladen, etwa $1\,\mathrm{u}$, im Kern. Neutron: ungeladen, etwa $1\,\mathrm{u}$, im Kern. Elektron: negativ geladen, rund 1800-mal leichter als ein Proton, in der Hülle. Proton und Elektron tragen gleich große Ladungen mit entgegengesetztem Vorzeichen.`,
-    note: String.raw`Jedes Proton trägt genau eine Elementarladung, $e = 1{,}602 \cdot 10^{-19}\,\mathrm{C}$; jedes Ion trägt ein ganzzahliges Vielfaches davon. Das Neutron ist ein klein wenig schwerer als das Proton. Ein Atom ist nach außen ungeladen, wenn es gleich viele Elektronen wie Protonen hat. Protonen und Neutronen sind aus noch kleineren Bausteinen aufgebaut (Quarks), das Elektron nicht.`,
+    memo: String.raw`Proton: positiv geladen, etwa $1\,\mathrm{u}$, im Kern. Neutron: ungeladen, etwa $1\,\mathrm{u}$, im Kern. Elektron: negativ geladen, rund 1836-mal leichter als ein Proton (im Skript: etwa $\frac{1}{2000}\,\mathrm{u}$), in der Hülle. Proton und Elektron tragen gleich große Ladungen mit entgegengesetztem Vorzeichen.`,
+    note: String.raw`Jedes Proton trägt genau eine Elementarladung, $e = 1{,}602 \cdot 10^{-19}\,\mathrm{C}$; jedes Ion trägt ein ganzzahliges Vielfaches davon. Das Neutron ist ein klein wenig schwerer als das Proton. Ein Atom ist nach außen ungeladen, wenn es gleich viele Elektronen wie Protonen hat. Protonen und Neutronen sind aus noch kleineren Bausteinen aufgebaut (Quarks), das Elektron nicht.
+Wie man die Teilchen fand: In einer luftleeren Glasröhre unter Hochspannung entsteht ein Strahl aus Elektronen (Kathodenstrahl). Elektrische und magnetische Felder lenken ihn ab; daraus folgt das Verhältnis von Ladung zu Masse, und zusammen mit dem Öltröpfchenversuch ergeben sich die Elementarladung und die Masse des Elektrons. Enthält die Röhre ein Gas, schlagen die Elektronen aus dessen Atomen weitere Elektronen heraus, und es bleiben positive Ionen; die leichtesten davon stammen aus Wasserstoff: das Proton. Weil Atome schwerer sind als ihre Protonen und Elektronen zusammen, vermutete man ungeladene Teilchen im Kern; nachgewiesen hat das Neutron Chadwick im Jahr 1932.`,
     examples: [
       {
         chemTask: "Ordne Ladung und Ort zu: Proton, Neutron, Elektron.",
@@ -330,7 +333,7 @@ Auch Sauerstoff $\ce{O2}$ und Stickstoff $\ce{N2}$ sind Elemente: In ihren Molek
     rules: [],
     formulas: [],
     memo: "Jedes Atommodell erklärt die Versuche seiner Zeit und wurde abgelöst, als neue Beobachtungen nicht mehr dazu passten. Die Reihenfolge: Dalton, Thomson, Rutherford, Bohr, Orbitalmodell.",
-    note: "Dalton (Anfang des 19. Jahrhunderts): Atome sind unteilbare Kugeln, für jedes Element eine eigene Sorte. Grenze: kein innerer Aufbau, keine Ladungen.\nThomson (um 1900): Elektronen stecken in einer gleichmäßig positiv geladenen Kugel. Grenze: kein Kern, die Rückstreuung im Streuversuch bleibt unerklärt.\nRutherford (1911): winziger positiver Kern mit fast der ganzen Masse, um ihn herum eine große, fast leere Hülle mit den Elektronen. Grenze: erklärt weder die Linienspektren noch, warum die kreisenden Elektronen nicht in den Kern fallen.\nBohr (1913): Elektronen auf Bahnen mit festen Energien; beim Sprung zwischen zwei Bahnen wird Energie aufgenommen oder als Licht abgegeben. Grenze: stimmt genau nur für Teilchen mit einem einzigen Elektron wie das Wasserstoffatom und erklärt nicht, wie sich Spektrallinien im Magnetfeld aufspalten.\nOrbitalmodell (Schrödinger, 1926): Die Elektronen werden als stehende Wellen beschrieben; ein Orbital ist ein Raumbereich, in dem das Elektron wahrscheinlich anzutreffen ist, keine Bahn.",
+    note: "Dalton (Anfang des 19. Jahrhunderts): Atome sind unteilbare Kugeln, für jedes Element eine eigene Sorte. Grenze: kein innerer Aufbau, keine Ladungen.\nThomson (um 1900): Elektronen stecken in einer gleichmäßig positiv geladenen Kugel. Grenze: kein Kern, die Rückstreuung im Streuversuch bleibt unerklärt.\nRutherford (1911): winziger positiver Kern mit fast der ganzen Masse, um ihn herum eine große, fast leere Hülle mit den Elektronen. Grenze: erklärt weder die Linienspektren noch, warum die kreisenden Elektronen nicht in den Kern fallen.\nBohr (1913): Elektronen auf Bahnen mit festen Energien; beim Sprung zwischen zwei Bahnen wird Energie aufgenommen oder als Licht abgegeben. Grenze: stimmt genau nur für Teilchen mit einem einzigen Elektron wie das Wasserstoffatom und erklärt keine magnetischen Eigenschaften von Stoffen.\nOrbitalmodell (Schrödinger, 1926): Die Elektronen werden als stehende Wellen beschrieben; ein Orbital ist ein Raumbereich, in dem das Elektron wahrscheinlich anzutreffen ist, keine Bahn.",
     examples: [
       {
         chemTask: "Welche Beobachtung passte nicht mehr zum Modell von Thomson?",
@@ -415,9 +418,13 @@ Im Vakuum ist Licht jeder Farbe gleich schnell; die Farben unterscheiden sich in
     title: "Linienspektrum",
     level: 2,
     rules: [],
-    formulas: [String.raw`\Delta E = E_{\mathrm{oben}} - E_{\mathrm{unten}} = \frac{h \cdot c}{\lambda}`, String.raw`\frac{1}{\lambda} = R_{\mathrm{H}} \cdot \left(\frac{1}{n^2} - \frac{1}{m^2}\right)`],
+    formulas: [
+      String.raw`\Delta E = E_{\mathrm{oben}} - E_{\mathrm{unten}} = \frac{h \cdot c}{\lambda}`,
+      String.raw`\frac{1}{\lambda} = R_{\mathrm{H}} \cdot \left(\frac{1}{n^2} - \frac{1}{m^2}\right) \quad (n < m)`,
+      String.raw`E = h \cdot c \cdot R_{\mathrm{H}} \cdot \left(\frac{1}{n^2} - \frac{1}{m^2}\right)`,
+    ],
     memo: "Ein Elektron im Atom kann nur bestimmte Energien haben. Fällt es auf ein niedrigeres Niveau, gibt das Atom genau die Energiedifferenz als Licht einer bestimmten Wellenlänge ab (Emission); für den Sprung nach oben muss es genau diese Energie aufnehmen (Absorption). Darum zeigt jedes Element einzelne Linien, die nur für dieses Element typisch sind.",
-    note: String.raw`Emissionsspektrum: helle Linien auf dunklem Grund. Absorptionsspektrum: dunkle Linien in einem sonst lückenlosen Spektrum, bei Wellenlängen, bei denen das Element auch Licht aussendet. Lückenlos ist zum Beispiel das Licht einer Glühlampe im Prisma. Weil jedes Element eigene Linien hat, lassen sich Elemente an ihrem Spektrum erkennen (Atomemissions- und Atomabsorptionsspektroskopie). In der Rydberg-Formel für Wasserstoff ist $R_{\mathrm{H}} = 1{,}097 \cdot 10^{7}\,\mathrm{m}^{-1}$, $n$ das untere und $m$ das obere Niveau.
+    note: String.raw`Emissionsspektrum: helle Linien auf dunklem Grund. Absorptionsspektrum: dunkle Linien in einem sonst lückenlosen Spektrum, bei Wellenlängen, bei denen das Element auch Licht aussendet. Lückenlos ist zum Beispiel das Licht einer Glühlampe im Prisma. Weil jedes Element eigene Linien hat, lassen sich Elemente an ihrem Spektrum erkennen (Atomemissions- und Atomabsorptionsspektroskopie). In der Rydberg-Formel für Wasserstoff ist $R_{\mathrm{H}} = 1{,}097 \cdot 10^{7}\,\mathrm{m}^{-1}$, $n$ das untere und $m$ das obere Niveau. Die Formel liefert den Kehrwert $\frac{1}{\lambda}$; die Energie des Photons ist $E = h \cdot c \cdot \frac{1}{\lambda}$. Um das Elektron ganz vom Atom zu lösen, geht es ins Unendliche: $m \to \infty$, der Bruch $\frac{1}{m^2}$ fällt weg. Aus dem Grundzustand $n = 1$ ist das die Ionisierungsenergie des Wasserstoffatoms.
 Beim Anregen bleibt das Elektron im Atom; erst wenn es ganz vom Kern gelöst wird, entsteht ein Ion. Das Licht stammt aus der Hülle, der Kern bleibt in Flamme und Gasröhre unverändert.`,
     examples: [
       {
@@ -445,7 +452,20 @@ Beim Anregen bleibt das Elektron im Atom; erst wenn es ganz vom Kern gelöst wir
         ],
       },
     ],
-    errors: ['chem-mis-line-spectrum-continuous', 'chem-mis-emission-on-excitation', 'chem-mis-lines-per-electron', 'chem-mis-light-from-nucleus', 'chem-mis-excitation-is-ionization', 'chem-mis-absorption-other-lines', 'chem-mis-spectra-all-same', 'chem-mis-electron-radiates'],
+    errors: [
+      'chem-mis-line-spectrum-continuous',
+      'chem-mis-emission-on-excitation',
+      'chem-mis-lines-per-electron',
+      'chem-mis-light-from-nucleus',
+      'chem-mis-excitation-is-ionization',
+      'chem-mis-absorption-other-lines',
+      'chem-mis-spectra-all-same',
+      'chem-mis-electron-radiates',
+      'chem-rydberg-no-square',
+      'chem-rydberg-not-inverted',
+      'chem-rydberg-swapped',
+      'chem-rydberg-to-ground',
+    ],
   },
   {
     id: 'atombau-welle-teilchen',

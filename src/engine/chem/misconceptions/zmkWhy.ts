@@ -16,7 +16,7 @@ export const ZMK_WHY: Readonly<Record<string, Explanation>> = {
     short: "Van-der-Waals-Kräfte wirken zwischen allen Teilchen.",
   },
   'chem-mis-zk-hbond-covalent': {
-    detailed: "Eine Wasserstoffbrücke ist eine Anziehung zwischen einem stark positiv geladenen H-Atom und dem freien Paar eines Nachbarmoleküls. Ein gemeinsames Elektronenpaar gibt es dabei nicht; sie ist ein besonders starker Fall der Dipol-Dipol-Kräfte und viel schwächer als eine Atombindung.",
+    detailed: "Eine Wasserstoffbrücke ist eine Anziehung zwischen einem stark positiv geladenen H-Atom und dem freien Paar eines Nachbarmoleküls. Ein gemeinsames Elektronenpaar gibt es dabei nicht; sie ist ein besonders starker Fall der Dipol-Dipol-Wechselwirkungen und viel schwächer als eine Atombindung.",
     short: "Eine Anziehung zwischen Molekülen, kein gemeinsames Paar.",
   },
   'chem-mis-zk-any-h': {
@@ -32,11 +32,11 @@ export const ZMK_WHY: Readonly<Record<string, Explanation>> = {
     short: "Brücken nur mit N, O und F.",
   },
   'chem-mis-zk-dipole-nonpolar': {
-    detailed: "Dipol-Dipol-Kräfte brauchen Moleküle, die als Ganzes ein Dipol sind. Heben sich die polaren Bindungen wegen der Gestalt auf, hat das Molekül keine positive und negative Seite, die ein Nachbar anziehen könnte.",
+    detailed: "Dipol-Dipol-Wechselwirkungen brauchen Moleküle, die als Ganzes ein Dipol sind. Heben sich die polaren Bindungen wegen der Gestalt auf, hat das Molekül keine positive und negative Seite, die ein Nachbar anziehen könnte.",
     short: "Nur ganze Dipole ziehen sich als Dipole an.",
   },
   'chem-mis-zk-order': {
-    detailed: "Die Reihenfolge ist fest: Van-der-Waals-Kräfte sind die schwächsten, Dipol-Dipol-Kräfte stärker, Wasserstoffbrücken am stärksten. Nur bei sehr großen Molekülen können viele Van-der-Waals-Kräfte zusammen viel ausmachen.",
+    detailed: "Die Reihenfolge ist fest: Van-der-Waals-Kräfte sind die schwächsten, Dipol-Dipol-Wechselwirkungen stärker, Wasserstoffbrücken am stärksten. Nur bei sehr großen Molekülen können viele Van-der-Waals-Kräfte zusammen viel ausmachen.",
     short: "Van der Waals < Dipol-Dipol < Wasserstoffbrücken.",
   },
   'chem-mis-zk-size': {
@@ -52,7 +52,7 @@ export const ZMK_WHY: Readonly<Record<string, Explanation>> = {
     short: "Die Moleküle bleiben ganz.",
   },
   'chem-mis-zk-mass-only': {
-    detailed: "Die Molmasse hilft nur beim Vergleich von Stoffen mit derselben Art von Kräften. Wasserstoffbrücken oder Dipol-Dipol-Kräfte können einen Stoff mit kleinerer Molmasse viel höher sieden lassen.",
+    detailed: "Die Molmasse hilft nur beim Vergleich von Stoffen mit derselben Art von Kräften. Wasserstoffbrücken oder Dipol-Dipol-Wechselwirkungen können einen Stoff mit kleinerer Molmasse viel höher sieden lassen.",
     short: "Erst die Art der Kraft, dann die Größe.",
   },
   'chem-mis-zk-ice-sinks': {
@@ -74,5 +74,9 @@ export const ZMK_WHY: Readonly<Record<string, Explanation>> = {
   'chem-mis-zk-oil-light': {
     detailed: "Die Dichte erklärt nur, welche Schicht oben schwimmt. Dass sich Öl und Wasser überhaupt nicht mischen, liegt an den Kräften: Wassermoleküle halten über Wasserstoffbrücken lieber untereinander zusammen als mit unpolaren Ölmolekülen.",
     short: "Nicht die Dichte, die Kräfte verhindern das Mischen.",
+  },
+  'chem-mis-zk-room-state': {
+    detailed: "Ob ein Stoff bei Raumtemperatur (etwa 20 °C) ein Gas, eine Flüssigkeit oder ein Feststoff ist, sagen Siede- und Schmelzpunkt. Siedet er oberhalb von 20 °C, ist er noch kein Gas; schmilzt er erst oberhalb, ist er fest. Mit der Größe der Moleküle steigen beide Temperaturen.",
+    short: "Siede- und Schmelzpunkt mit 20 °C vergleichen.",
   },
 }

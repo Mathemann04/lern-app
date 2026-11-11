@@ -77,6 +77,38 @@ export const METALLE_WHY: Readonly<Record<string, Explanation>> = {
     detailed: "Aus jeder Kombination von Atomorbitalen entstehen ebenso viele Molekülorbitale: ein bindendes und ein antibindendes aus zwei Atomorbitalen.",
     short: "So viele Molekülorbitale wie Atomorbitale.",
   },
+  'chem-mis-me-dense-hard': {
+    detailed: "Die Härte hängt nicht davon ab, wie dicht die Kugeln liegen, sondern davon, wie leicht Gitterebenen aneinander abgleiten. Gerade die dichtesten Packungen wie bei Kupfer haben viele glatte Gleitebenen; das weniger dicht gepackte kubisch-raumzentrierte Gitter gehört zu den härtesten.",
+    short: "Dicht gepackt heißt nicht hart; es kommt auf das Gleiten der Ebenen an.",
+  },
+  'chem-mis-me-hdp-like-kdp': {
+    detailed: "Beide Packungen haben 12 Nachbarn und 74 % Raumerfüllung, aber eine andere Schichtfolge. Davon hängt ab, in wie vielen Richtungen Ebenen gleiten können: Die kubische Packung lässt sich leicht walzen und ziehen, die hexagonale kaum; dafür lässt sie sich gut gießen.",
+    short: "Gleiche Dichte, andere Schichtfolge: Die hexagonale Packung ist schlecht formbar.",
+  },
+  'chem-mis-me-sinter-melt': {
+    detailed: "Sintern geschieht bei hoher Temperatur, aber unterhalb des Schmelzpunkts. Die Pulverkörner bleiben fest und wachsen an ihren Berührungsstellen zusammen; je nach Verfahren bleiben dabei Poren zurück oder nicht.",
+    short: "Sintern bleibt unter dem Schmelzpunkt.",
+  },
+  'chem-mis-me-interstitial-soft': {
+    detailed: "Beim Verformen gleiten Gitterebenen aneinander vorbei. Kleine Atome in den Lücken stören dieses Gleiten; das Metall wird dadurch härter, nicht weicher.",
+    short: "Eingelagerte Atome bremsen das Gleiten und härten.",
+  },
+  'chem-mis-me-h2-molecule': {
+    detailed: String.raw`Das $\ce{H2}$-Molekül wird im Metall gespalten; einzelne Wasserstoffatome sind so klein, dass sie in die Lücken zwischen den Metallatomen passen. Erst beim Erwärmen finden sie wieder zu $\ce{H2}$ zusammen und entweichen.`,
+    short: "Im Metall sitzen einzelne H-Atome, keine Moleküle.",
+  },
+  'chem-mis-me-full-band': {
+    detailed: "In einem voll besetzten Band ist jedes Niveau belegt; ein Elektron kann seine Energie nicht ändern, weil kein freier Platz in Reichweite ist. Strom fließt erst, wenn ein Band nur teilweise besetzt ist oder mit einem freien Band überlappt.",
+    short: "Ein volles Band ohne Überlappung leitet nicht.",
+  },
+  'chem-mis-me-levels-spread': {
+    detailed: "Mit jedem Atom kommt ein Molekülorbital hinzu, doch alle bleiben in einem begrenzten Energiebereich. Mehr Niveaus im selben Bereich heißt: Sie rücken enger zusammen, bis sie bei sehr vielen Atomen ein Band bilden.",
+    short: "Mehr Atome, dichter liegende Niveaus.",
+  },
+  'chem-mis-me-color-atoms': {
+    detailed: "Ein Stoff ist farbig, wenn er einen Teil des sichtbaren Lichts aufnimmt. Das gelingt nur, wenn die Energie des Lichts genau reicht, um ein Elektron auf ein freies Niveau zu heben. Ob das so ist, hängt von den Abständen der Energieniveaus ab, nicht von der Masse oder davon, welche Atome für sich genommen beteiligt sind.",
+    short: "Farbe hängt von den Abständen der Energieniveaus ab.",
+  },
   'chem-mis-me-kryolith': {
     detailed: "Das Aluminium stammt aus dem Aluminiumoxid. Kryolith wird zugesetzt, weil das Gemisch viel niedriger schmilzt als reines Aluminiumoxid; das spart viel Energie.",
     short: "Kryolith senkt die Schmelztemperatur.",

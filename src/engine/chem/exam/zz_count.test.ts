@@ -2,17 +2,19 @@ import { it } from 'vitest'
 import { writeFileSync } from 'node:fs'
 import { truthOf } from '../../exam/grade.ts'
 import { chemExamTask } from './index.ts'
-it('count', () => {
-  const stats = new Map<string, number[]>()
-  for (const no of [1, 2, 3, 5]) for (let s = 1; s <= 300; s++) {
+it('dump', () => {
+  const out: string[] = []
+  for (const [no, s] of [[1, 7], [1, 8], [2, 7], [2, 9], [2, 11], [3, 7], [5, 7]]) {
     const t = chemExamTask(no, s)!
-    for (const [id, { build }] of truthOf(t)) {
-      const k = `${no}:${id}`
-      const arr = stats.get(k) ?? [0, 0, 0, 0, 0]
-      arr[build.options.length]++
-      stats.set(k, arr)
+    const tr = truthOf(t)
+    for (const p of t.parts) {
+      out.push(`== ${no}/${s} ${p.id} (${p.points}) ${p.prompt}`)
+      for (const i of p.items) {
+        const b = tr.get(i.id)!.build
+        out.push(`  [${i.id} ${i.points}${i.paperFirst ? ' P' : ''}] ${i.question}`)
+        for (const o of b.options) out.push(`     ${o.id === b.correct ? '*' : ' '} ${o.content} ${o.errorRuleId ?? (o.id === b.correct ? '' : 'WHY: ' + o.why?.short)}`)
+      }
     }
   }
-  const out: string[] = []; for (const [k, v] of stats) out.push(k + ' ' + v.join(' '))
-  writeFileSync('/tmp/claude-0/-home-user-lern-app/ba157216-5c9e-5642-893c-01a51a8fe6a7/scratchpad/count.txt', out.join('\n'))
+  writeFileSync('/tmp/claude-0/-home-user-lern-app/ba157216-5c9e-5642-893c-01a51a8fe6a7/scratchpad/dump.txt', out.join('\n'))
 })

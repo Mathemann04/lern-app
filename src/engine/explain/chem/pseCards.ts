@@ -14,12 +14,21 @@ export const PSE_CARDS: readonly Card[] = [
     rules: [],
     formulas: [],
     memo: 'Die Elemente stehen nach steigender Ordnungszahl, also nach der Zahl ihrer Protonen. Eine Zeile heißt Periode: Ihre Nummer ist die Nummer der äußersten Schale. Eine Spalte heißt Gruppe: Elemente einer Hauptgruppe haben gleich viele Valenzelektronen und deshalb ähnliche Eigenschaften.',
-    note: 'Die Hauptgruppen werden römisch gezählt (I bis VIII), alle Gruppen zusammen auch von 1 bis 18. Dazwischen stehen die zehn Nebengruppen (Gruppen 3 bis 12).',
+    note: 'Die Hauptgruppen werden römisch gezählt (I bis VIII), alle Gruppen zusammen auch von 1 bis 18. Dazwischen stehen die zehn Nebengruppen (Gruppen 3 bis 12). Zur Geschichte: Mendelejew und Meyer stellten 1869 ein Periodensystem auf, ließen Lücken für damals unbekannte Elemente und sagten deren Eigenschaften voraus. Moseley bestimmte 1913 die Ordnungszahlen aus Röntgenspektren; seitdem stehen die Elemente nach der Ordnungszahl, der Zahl der Protonen.',
     examples: [
       { chemTask: r`Schwefel ($\ce{S}$, $Z = 16$)`, lines: [{ label: '3. Periode, VI. Hauptgruppe (Gruppe 16)' }] },
       { chemTask: r`Lithium, Natrium, Kalium`, lines: [{ label: 'alle in der I. Hauptgruppe: je ein Valenzelektron, ähnlich heftige Reaktionen mit Wasser' }] },
+      {
+        chemTask: 'Hauptgruppen mit eigenem Namen',
+        lines: [
+          { label: 'I. Hauptgruppe: Alkalimetalle (1 Valenzelektron)' },
+          { label: 'II. Hauptgruppe: Erdalkalimetalle (2 Valenzelektronen)' },
+          { label: 'VII. Hauptgruppe: Halogene (7 Valenzelektronen)' },
+          { label: 'VIII. Hauptgruppe: Edelgase (8 Valenzelektronen, Helium 2)' },
+        ],
+      },
     ],
-    errors: ['chem-pse-period-valence', 'chem-pse-period-shells', 'chem-pse-group-period', 'chem-mis-pse-mass-order', 'chem-mis-pse-period-similar', 'chem-mis-pse-z-meaning', 'chem-mis-pse-row-column'],
+    errors: ['chem-pse-period-valence', 'chem-pse-period-shells', 'chem-pse-group-period', 'chem-mis-pse-mass-order', 'chem-mis-pse-period-similar', 'chem-mis-pse-z-meaning', 'chem-mis-pse-row-column', 'chem-mis-pse-group-names'],
     figures: ['pse:S'],
   },
   {
@@ -61,12 +70,12 @@ export const PSE_CARDS: readonly Card[] = [
     rules: [],
     formulas: [],
     memo: 'Die meisten Elemente sind Metalle; sie stehen links und in der Mitte des Periodensystems. Die Nichtmetalle stehen rechts oben. Dazwischen verläuft eine Treppe aus Halbmetallen wie Bor, Silicium, Germanium, Arsen, Antimon und Tellur, deren Eigenschaften zwischen beiden liegen.',
-    note: 'Wasserstoff steht in der I. Hauptgruppe, ist aber ein Nichtmetall. Innerhalb einer Hauptgruppe nimmt der Metallcharakter nach unten zu.',
+    note: 'Wasserstoff steht in der I. Hauptgruppe, ist aber ein Nichtmetall. Innerhalb einer Hauptgruppe werden die Elemente nach unten metallischer: Die Valenzelektronen sitzen weiter außen und gehen leichter weg.',
     examples: [
       { chemTask: 'IV. Hauptgruppe von oben nach unten', lines: [{ label: 'Kohlenstoff (Nichtmetall), Silicium und Germanium (Halbmetalle), Zinn und Blei (Metalle)' }] },
       { chemTask: 'Silicium', lines: [{ label: 'Halbmetall: glänzt wie ein Metall, leitet aber nur schwach (Halbleiter)' }] },
     ],
-    errors: ['chem-mis-pse-boron-metal', 'chem-mis-pse-hydrogen-metal', 'chem-mis-pse-metal-right', 'chem-mis-pse-li-reactive'],
+    errors: ['chem-mis-pse-boron-metal', 'chem-mis-pse-hydrogen-metal', 'chem-mis-pse-metal-right', 'chem-mis-pse-li-reactive', 'chem-mis-pse-metal-direction', 'chem-mis-pse-semimetal'],
   },
   {
     id: 'pse-edelgasregel',
@@ -75,8 +84,8 @@ export const PSE_CARDS: readonly Card[] = [
     level: 1,
     rules: [],
     formulas: [],
-    memo: 'Edelgase haben eine voll besetzte äußerste Schale (bis auf Helium acht Elektronen, das Oktett) und reagieren kaum. Andere Atome erreichen diese Konfiguration, indem sie Elektronen abgeben, aufnehmen oder teilen, und zwar auf dem kürzesten Weg.',
-    note: 'Kationen erreichen die Konfiguration des Edelgases vor ihnen (Ende der vorherigen Periode), Anionen die des Edelgases am Ende ihrer eigenen Periode.',
+    memo: r`Bei den Edelgasen sind die s- und p-Orbitale der äußersten Schale voll besetzt: $n\mathrm{s}^{2}\,n\mathrm{p}^{6}$, acht Elektronen, das Oktett. Bei Helium ist die erste Schale mit $1\mathrm{s}^{2}$ voll. Deshalb reagieren Edelgase kaum. Andere Atome erreichen diese Konfiguration, indem sie Elektronen abgeben, aufnehmen oder teilen, und zwar auf dem kürzesten Weg.`,
+    note: 'Voll heißt hier: s und p der äußersten Schale, nicht unbedingt die ganze Schale. Die 3. Schale fasst 18 Elektronen, bei Argon sitzen dort acht. Kationen erreichen die Konfiguration des Edelgases vor ihnen (Ende der vorherigen Periode), Anionen die des Edelgases am Ende ihrer eigenen Periode.',
     examples: [
       { chemTask: r`$\ce{Na+}$ und $\ce{O^2-}$`, lines: [{ label: 'beide 10 Elektronen: Konfiguration von Neon' }] },
       { chemTask: r`$\ce{Cl-}$`, lines: [{ label: '18 Elektronen: Konfiguration von Argon' }] },
@@ -105,7 +114,7 @@ export const PSE_CARDS: readonly Card[] = [
     level: 2,
     rules: [],
     formulas: [r`\ce{X -> X+ + e-}\quad I_{1},\qquad \ce{X+ -> X^2+ + e-}\quad I_{2}`],
-    memo: 'Die Ionisierungsenergie ist die Energie, die man braucht, um einem Atom (oder Ion) im Gaszustand ein Elektron zu entreißen. Jede weitere ist größer, weil das Teilchen schon positiv ist. Einen großen Sprung gibt es, wenn das nächste Elektron aus einer inneren, voll besetzten Schale kommt.',
+    memo: 'Die erste Ionisierungsenergie muss man aufwenden, um einem freien Atom im Gaszustand ein Elektron aus seinem äußersten besetzten Orbital zu entreißen und es ganz vom entstehenden Ion zu trennen. Die weiteren gelten ebenso für das Ion; jede ist größer als die vorige, weil das Teilchen schon positiv ist. Einen großen Sprung gibt es, wenn das nächste Elektron aus einer inneren Schale mit Edelgaskonfiguration kommt.',
     note: 'Die Zahl der Elektronen vor dem großen Sprung ist die Zahl der Valenzelektronen, also die Hauptgruppe.',
     examples: [
       { chemTask: r`Magnesium: $I_{1} = 738$, $I_{2} = 1451$, $I_{3} = 7733$ kJ/mol`, lines: [{ label: 'Sprung nach dem 2. Elektron: II. Hauptgruppe' }] },

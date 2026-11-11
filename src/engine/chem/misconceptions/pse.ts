@@ -21,7 +21,7 @@ export const PSE_MISCONCEPTIONS: readonly MisconceptionName[] = [
   { id: 'chem-mis-pse-ie-decrease', name: 'Ionisierungsenergie sinkt', wrongText: 'Jedes weitere Elektron lässt sich leichter entfernen als das vorige.' },
   { id: 'chem-mis-pse-li-reactive', name: 'Lithium heftiger als Natrium', wrongText: 'Lithium reagiert heftiger mit Wasser als Natrium.' },
   { id: 'chem-mis-pse-charge-count', name: 'Ladung falsch gezählt', wrongText: 'Die Ladung eines Ions ist die Zahl seiner Valenzelektronen oder die Zahl der Elektronen bis zum Oktett, egal ob es Elektronen abgibt oder aufnimmt.' },
-  { id: 'chem-mis-pse-ie-count', name: 'Valenzelektronen aus Ionisierungsenergien falsch gezählt', wrongText: 'Die Hauptgruppe ist die Zahl aller angegebenen Ionisierungsenergien oder die Zahl der Elektronen bis einschließlich des Sprungs.' },
+  { id: 'chem-mis-pse-ie-count', name: 'Valenzelektronen aus Ionisierungsenergien falsch gezählt', wrongText: 'Die Hauptgruppe ist die Zahl aller angegebenen Ionisierungsenergien, die Zahl der Elektronen bis einschließlich des Sprungs oder die Stelle eines kleineren Anstiegs.' },
   { id: 'chem-mis-pse-helium-all', name: 'Alle Edelgase wie Helium', wrongText: 'Alle Edelgase haben wie Helium zwei Außenelektronen.' },
   { id: 'chem-mis-pse-metal-direction', name: 'Metallcharakter in der Hauptgruppe falsch eingeschätzt', wrongText: 'In einer Hauptgruppe nimmt der Metallcharakter von oben nach unten ab oder bleibt gleich.' },
   { id: 'chem-mis-pse-semimetal', name: 'Halbmetall wie Metall oder Nichtmetall', wrongText: 'Ein Halbmetall verhält sich ganz wie ein Metall oder ganz wie ein Nichtmetall.' },

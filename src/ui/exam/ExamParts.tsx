@@ -57,6 +57,8 @@ export type PartViewProps = { part: ExamPart; states: ItemState[]; free: boolean
 export function PartView({ part, states, free, answers, onPick }: PartViewProps) {
   // Frage, deren Ziffernblock offen ist (immer nur einer: die Tastatur des Laptops gilt ihm)
   const [editing, setEditing] = useState<string | null>(null)
+  // aufgedeckte Fragen, die man zuerst auf Papier löst (paperFirst); beantwortete bleiben aufgedeckt
+  const [revealed, setRevealed] = useState<ReadonlySet<string>>(new Set())
   return (
     <section className="space-y-4" aria-label={`Teil ${part.id}`}>
       <PartHeader part={part} />
@@ -98,6 +100,18 @@ export function PartView({ part, states, free, answers, onPick }: PartViewProps)
                 </button>
               </div>
             )
+          ) : build && item.paperFirst && !revealed.has(item.id) && answers[item.id] === undefined ? (
+            // in der Klausur selbst geschrieben: erst auf Papier lösen, dann die Antworten zeigen
+            <div className="space-y-2 rounded-2xl bg-zinc-100 px-4 py-3" data-testid="paper-first">
+              <p className="text-sm text-zinc-700">In der Klausur schreibst du das selbst hin. Löse es zuerst auf Papier, dann vergleiche mit den Antworten.</p>
+              <button
+                type="button"
+                onClick={() => setRevealed((r) => new Set([...r, item.id]))}
+                className="min-h-11 rounded-xl border-2 border-accent-600 px-4 font-medium text-accent-700 hover:bg-accent-50"
+              >
+                Auf Papier gelöst, Antworten zeigen
+              </button>
+            </div>
           ) : build ? (
             <div className="grid gap-2 sm:grid-cols-2" role="group" aria-label="Antworten">
               {build.options.map((option) => {
@@ -167,7 +181,8 @@ function ItemResultView({ result: r, typed }: { result: ItemResult; typed: strin
   const status = STATUS[r.status]
   const info = r.status === 'falsch' && r.chosen?.errorRuleId ? chemErrorInfo(r.chosen.errorRuleId) : null
   const why = r.chosen?.why ?? info?.why
-  const error = info && why ? { name: info.name, why } : null
+  // falsche Antwort ohne typischen Fehler (weitere Antwort einer Klausurfrage): Erklärung ohne Namen
+  const error = info && why ? { name: info.name, why } : r.status === 'falsch' && why ? { name: '', why } : null
   return (
     <div className="space-y-2 rounded-2xl border border-zinc-200 px-4 py-3">
       <p className="font-medium">
@@ -182,7 +197,13 @@ function ItemResultView({ result: r, typed }: { result: ItemResult; typed: strin
           Deine Antwort: <RichText text={typed ?? r.chosen.content} inline />
         </p>
       )}
-      {r.close && <p className="text-sm text-amber-800">Knapp daneben: Prüfe deine Rundung. Das gibt hier trotzdem die vollen Punkte.</p>}
+      {r.close && (
+        <p className="text-sm text-amber-800">
+          {r.points < r.item.points
+            ? 'Knapp daneben: Prüfe deine Rundung. In der Probeklausur gibt das nur die halben Punkte, wie oft in der echten Klausur.'
+            : 'Knapp daneben: Prüfe deine Rundung. Das gibt hier trotzdem die vollen Punkte.'}
+        </p>
+      )}
       {r.status !== 'richtig' && (
         <p className="text-zinc-700">
           Richtig: <RichText text={r.correct.content} inline />
@@ -193,7 +214,7 @@ function ItemResultView({ result: r, typed }: { result: ItemResult; typed: strin
       {error && (
         <div className="rounded-xl bg-red-50 px-3 py-2 text-zinc-800">
           <p className="text-sm font-semibold text-red-800">
-            Warum ist das falsch? <RichText text={error.name} inline />
+            Warum ist das falsch?{error.name && <> <RichText text={error.name} inline /></>}
           </p>
           <RichText text={error.why.detailed} className="text-sm" />
         </div>

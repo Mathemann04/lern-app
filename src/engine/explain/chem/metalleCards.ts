@@ -32,7 +32,7 @@ export const METALLE_CARDS: readonly Card[] = [
     examples: [
       { chemTask: 'Kupfer (kubisch-flächenzentriert)', lines: [{ label: 'Koordinationszahl 12, Raumerfüllung 74 %, gut formbar.' }] },
       { chemTask: 'Wolfram (kubisch-raumzentriert)', lines: [{ label: 'Koordinationszahl 8, Raumerfüllung 68 %, sehr hart.' }] },
-      { chemTask: 'Magnesium (hexagonal dichteste Packung)', lines: [{ label: 'Koordinationszahl 12 wie Kupfer, trotzdem schlecht formbar; Bauteile werden eher gegossen.' }] },
+      { chemTask: 'Magnesium (hexagonal dichteste Packung)', lines: [{ label: 'Koordinationszahl 12 wie Kupfer, aber schlecht formbar und dafür gut gießbar.' }] },
     ],
     errors: ['chem-mis-me-kz', 'chem-mis-me-dense-hard', 'chem-mis-me-hdp-like-kdp'],
   },
@@ -50,6 +50,21 @@ export const METALLE_CARDS: readonly Card[] = [
       { chemTask: 'Ein Kochsalzkristall unter dem Hammer', lines: [{ label: 'Gleich geladene Ionen treffen aufeinander; der Kristall zerspringt.' }] },
     ],
     errors: ['chem-mis-me-brittle', 'chem-mis-me-salt-deform'],
+  },
+  {
+    id: 'met-einlagerung',
+    topic: 'chem-metalle',
+    title: 'Einlagerungen, Hartmetall und Wasserstoffspeicher',
+    level: 3,
+    rules: [],
+    formulas: [],
+    memo: 'In die Lücken einer Metallpackung passen kleine Nichtmetallatome wie H, C oder N. Die dichte Packung der Metallatome bleibt erhalten, deshalb glänzt der Stoff weiter und leitet den Strom. Die eingelagerten Atome bremsen aber das Gleiten der Gitterebenen: Der Stoff wird härter.',
+    note: String.raw`Hartmetall: Wolframcarbid ($\ce{WC}$) ist ein äußerst harter Hartstoff. Damit man daraus Werkzeuge formen kann, sintert man ihn mit dem Metall Cobalt zusammen. Sintern heißt: Pulverkörner wachsen bei hoher Temperatur zusammen, die aber unter dem Schmelzpunkt des Pulvers bleibt; je nach Verfahren entstehen Teile mit oder ohne Poren. Wasserstoffspeicher: Palladium und manche Legierungen wie $\ce{LaNi5}$ nehmen viel Wasserstoff auf. Im Metall wird $\ce{H2}$ in Atome gespalten, die in die Lücken wandern; beim Erwärmen entweicht wieder $\ce{H2}$. Weil Wasserstoff so klein ist, dringt er auch leicht durch Metalle hindurch.`,
+    examples: [
+      { chemTask: 'Stahl: Kohlenstoff in den Lücken des Eisengitters', lines: [{ label: 'Die Eisenatome bleiben dicht gepackt; die C-Atome bremsen das Gleiten, der Stahl wird härter.' }] },
+      { chemTask: 'Wasserstoff in Palladium speichern', lines: [{ label: String.raw`Aufnehmen: $\ce{H2}$ wird in H-Atome gespalten, die in die Lücken gehen. Erwärmen: Der Wasserstoff entweicht wieder als $\ce{H2}$.` }] },
+    ],
+    errors: ['chem-mis-me-interstitial-soft', 'chem-mis-me-sinter-melt', 'chem-mis-me-h2-molecule'],
   },
   {
     id: 'met-baender',
@@ -125,6 +140,21 @@ export const METALLE_CARDS: readonly Card[] = [
       { chemTask: String.raw`$\ce{O2}$ (8 bindende, 4 antibindende Valenzelektronen)`, lines: [{ label: 'Doppelbindung', latex: String.raw`\tfrac{1}{2}(8 - 4) = 2` }] },
     ],
     errors: ['chem-bo-not-halved', 'chem-bo-added', 'chem-bo-bonding-only', 'chem-bo-zero-stable', 'chem-bo-half-unstable', 'chem-bo-antibonding-blocks', 'chem-bo-one-pair', 'chem-mis-me-antibonding', 'chem-mis-me-mo-count'],
+  },
+  {
+    id: 'met-mehrzentren',
+    topic: 'chem-metalle',
+    title: 'Mehrzentrenbindungen: delokalisierte Elektronen',
+    level: 3,
+    rules: [],
+    formulas: [String.raw`n\ \text{Atomorbitale} \rightarrow n\ \text{Molekülorbitale}`],
+    memo: 'Überlappen die Atomorbitale von mehr als zwei Atomen, entstehen Molekülorbitale, die sich über alle diese Atome erstrecken; die Elektronen darin sind delokalisiert. Man spricht von einer Mehrzentrenbindung. Aus n Atomorbitalen werden n Molekülorbitale, bindende und antibindende. Je mehr Atome beteiligt sind, desto mehr Niveaus gibt es und desto enger liegen sie beieinander; bei sehr vielen Atomen wie im Metall verschmelzen sie zu einem Band.',
+    note: 'Folge für die Farbe: In einer langen Kohlenstoffkette mit abwechselnden Einfach- und Doppelbindungen (konjugierte Kette) überlappen die p-Orbitale aller C-Atome. Der Abstand zwischen dem höchsten besetzten und dem niedrigsten freien Niveau wird so klein, dass schon sichtbares Licht ein Elektron anheben kann. Der Stoff nimmt einen Teil des Lichts auf und erscheint farbig, etwa der rote Farbstoff Lycopin der Tomate.',
+    examples: [
+      { chemTask: 'Zwei, drei und vier Atome nebeneinander', lines: [{ label: 'Zwei, drei und vier Molekülorbitale; mit jedem Atom rücken die Niveaus enger zusammen.' }] },
+      { chemTask: 'Kurze und lange konjugierte Kette', lines: [{ label: 'Hexatrien mit sechs C-Atomen in der Kette ist farblos. Lycopin mit einer viel längeren Kette nimmt blaues und grünes Licht auf und ist rot.' }] },
+    ],
+    errors: ['chem-mis-me-levels-spread', 'chem-mis-me-color-atoms'],
   },
   {
     id: 'met-aluminium',

@@ -539,8 +539,8 @@ export const ATOMBAU_BANK: QuestionBank = {
       ],
       hint: "Die Massenzahl zählt nur die Teilchen, die zur Masse eines Atoms wirklich beitragen.",
       explanation: {
-        detailed: String.raw`Proton und Neutron haben jeweils etwa die Masse $1\,\mathrm{u}$; das Neutron ist nur ganz wenig schwerer. Ein Elektron ist dagegen rund 1800-mal leichter als ein Proton. Darum steckt fast die ganze Masse eines Atoms in seinem Kern.`,
-        short: String.raw`Proton und Neutron haben je etwa $1\,\mathrm{u}$, das Elektron ist rund 1800-mal leichter.`,
+        detailed: String.raw`Proton und Neutron haben jeweils etwa die Masse $1\,\mathrm{u}$; das Neutron ist nur ganz wenig schwerer. Ein Elektron ist dagegen rund 1836-mal leichter als ein Proton (im Skript: etwa $\frac{1}{2000}\,\mathrm{u}$). Darum steckt fast die ganze Masse eines Atoms in seinem Kern.`,
+        short: String.raw`Proton und Neutron haben je etwa $1\,\mathrm{u}$, das Elektron ist rund 1836-mal leichter.`,
       },
       cards: ['atombau-teilchen'],
       ref: "Skript Aufbau der Materie, Folie 7",
@@ -599,7 +599,7 @@ export const ATOMBAU_BANK: QuestionBank = {
         } },
         { id: 'f3', text: String.raw`$1{,}602 \cdot 10^{-19}\,\mathrm{g}$`, misconception: 'chem-mis-charge-as-mass' },
         { id: 'f4', text: String.raw`$9{,}109 \cdot 10^{-28}\,\mathrm{g}$`, misconception: 'chem-mis-electron-mass', why: {
-          detailed: "Das ist die Masse eines Elektrons. Ein Elektron ist aber rund 1800-mal leichter als ein Proton und taugt deshalb nicht als Maß für die Masse der Kernteilchen.",
+          detailed: "Das ist die Masse eines Elektrons. Ein Elektron ist aber rund 1836-mal leichter als ein Proton und taugt deshalb nicht als Maß für die Masse der Kernteilchen.",
           short: "Das ist die Masse eines Elektrons, nicht die eines Protons.",
         } },
       ],
@@ -1116,7 +1116,7 @@ export const ATOMBAU_BANK: QuestionBank = {
       ],
       hint: "Bohr entwickelte sein Modell am Spektrum des einfachsten Atoms.",
       explanation: {
-        detailed: String.raw`Bohr berechnete die Linien des Wasserstoffs, und dort stimmt sein Modell genau. Hat ein Atom mehrere Elektronen, beeinflussen sie sich gegenseitig, und die Vorhersagen weichen von den Messungen ab; genau gilt es also nur für Teilchen mit einem Elektron wie $\ce{H}$ oder $\ce{He+}$. Außerdem erklärt es nicht, wie sich Spektrallinien im Magnetfeld aufspalten.`,
+        detailed: String.raw`Bohr berechnete die Linien des Wasserstoffs, und dort stimmt sein Modell genau. Hat ein Atom mehrere Elektronen, beeinflussen sie sich gegenseitig, und die Vorhersagen weichen von den Messungen ab; genau gilt es also nur für Teilchen mit einem Elektron wie $\ce{H}$ oder $\ce{He+}$. Außerdem kann es die magnetischen Eigenschaften von Stoffen nicht erklären.`,
         short: "Bohrs Modell stimmt genau nur für Teilchen mit einem Elektron wie das Wasserstoffatom.",
       },
       cards: ['atombau-modelle'],
@@ -1526,7 +1526,7 @@ export const ATOMBAU_BANK: QuestionBank = {
           short: "Das Vorzeichen zeigt, welche Ladungsart überwiegt; Elektronen sind negativ.",
         } },
         { id: 'f2', text: String.raw`$\ce{^{82}_{34}Se^2-}$`, misconception: 'chem-mis-electron-mass', why: {
-          detailed: "Die Massenzahl zählt nur die Teilchen im Kern, also Protonen und Neutronen. Elektronen gehören zur Hülle und sind zudem rund 1800-mal leichter als ein Proton; in der Massenzahl zählen sie nie mit.",
+          detailed: "Die Massenzahl zählt nur die Teilchen im Kern, also Protonen und Neutronen. Elektronen gehören zur Hülle und sind zudem rund 1836-mal leichter als ein Proton; in der Massenzahl zählen sie nie mit.",
           short: "Elektronen zählen in der Massenzahl nicht mit.",
         } },
         { id: 'f3', text: String.raw`$\ce{^{80}_{36}Kr}$`, misconception: 'chem-mis-element-not-by-protons' },
@@ -1594,7 +1594,7 @@ export const ATOMBAU_BANK: QuestionBank = {
       ],
       hint: "Thomson gab das unteilbare Atom auf. Frag bei jeder Beobachtung, ob sie zeigt, dass ein Atom aus noch kleineren Teilen besteht.",
       explanation: {
-        detailed: "Thomson untersuchte Strahlen, die in einer luftleeren Röhre unter Hochspannung entstehen. Sie bestehen aus negativ geladenen Teilchen, den Elektronen, die rund 1800-mal leichter sind als das leichteste Atom und sich aus jedem Stoff lösen lassen. Ein Atom, aus dem sich Teile lösen lassen, kann nicht unteilbar sein; Thomson setzte die Elektronen deshalb in eine positiv geladene Kugel.",
+        detailed: String.raw`Thomson untersuchte Strahlen, die in einer luftleeren Röhre unter Hochspannung entstehen. Sie bestehen aus negativ geladenen Teilchen, den Elektronen, die rund 1836-mal leichter sind als ein Proton (im Skript: etwa $\frac{1}{2000}\,\mathrm{u}$) und sich aus jedem Stoff lösen lassen. Ein Atom, aus dem sich Teile lösen lassen, kann nicht unteilbar sein; Thomson setzte die Elektronen deshalb in eine positiv geladene Kugel.`,
         short: "Elektronen lassen sich aus jedem Atom lösen; also ist das Atom nicht unteilbar.",
       },
       cards: ['atombau-modelle', 'atombau-teilchen'],
@@ -1832,7 +1832,7 @@ export const ATOMBAU_BANK: QuestionBank = {
       ],
       hint: "Prüfe jede Aussage: Gehört sie zu Bohr, zu einem älteren oder zu einem späteren Modell?",
       explanation: {
-        detailed: "Bohr ließ nur Bahnen mit festen Energien zu; damit konnte er die Linien des Wasserstoffs sogar berechnen. Bei Atomen mit mehreren Elektronen stoßen sich die Elektronen gegenseitig ab, und das Modell sagt die Linien nicht mehr richtig voraus. Auch wie sich Spektrallinien im Magnetfeld aufspalten, erklärt es nicht.",
+        detailed: "Bohr ließ nur Bahnen mit festen Energien zu; damit konnte er die Linien des Wasserstoffs sogar berechnen. Bei Atomen mit mehreren Elektronen stoßen sich die Elektronen gegenseitig ab, und das Modell sagt die Linien nicht mehr richtig voraus. Auch die magnetischen Eigenschaften von Stoffen erklärt es nicht.",
         short: "Bohr erklärt das Wasserstoffspektrum, versagt aber bei mehreren Elektronen.",
       },
       cards: ['atombau-modelle', 'atombau-spektren'],
@@ -1922,9 +1922,9 @@ export const ATOMBAU_BANK: QuestionBank = {
       part: 'modelle',
       title: "Materiewellen",
       prompt: "Ein Elektron und ein Proton haben dieselbe Wellenlänge nach de Broglie. Was folgt daraus für ihre Geschwindigkeiten?",
-      correct: { id: 'r', text: "Das Elektron muss rund 1800-mal so schnell sein wie das Proton, weil es so viel leichter ist." },
+      correct: { id: 'r', text: "Das Elektron muss rund 1836-mal so schnell sein wie das Proton, weil es so viel leichter ist." },
       wrong: [
-        { id: 'f1', text: "Das Proton muss rund 1800-mal so schnell sein wie das Elektron, weil es so viel schwerer ist.", misconception: 'chem-mis-heavy-long-wave', why: {
+        { id: 'f1', text: "Das Proton muss rund 1836-mal so schnell sein wie das Elektron, weil es so viel schwerer ist.", misconception: 'chem-mis-heavy-long-wave', why: {
           detailed: String.raw`In $\lambda = \frac{h}{m \cdot v}$ steht die Masse im Nenner, zusammen mit der Geschwindigkeit. Gleiche Wellenlänge heißt deshalb gleiches Produkt $m \cdot v$.`,
           short: String.raw`Gleiche Wellenlänge heißt gleiches Produkt $m \cdot v$.`,
         } },
@@ -1944,7 +1944,7 @@ export const ATOMBAU_BANK: QuestionBank = {
       ],
       hint: String.raw`Schau dir an, wo Masse und Geschwindigkeit in $\lambda = \frac{h}{m \cdot v}$ stehen. Was muss gleich sein, damit der Bruch gleich bleibt?`,
       explanation: {
-        detailed: String.raw`Nach $\lambda = \frac{h}{m \cdot v}$ haben zwei Teilchen dieselbe Wellenlänge, wenn das Produkt $m \cdot v$ gleich ist. Das Proton ist rund 1836-mal so schwer wie das Elektron; damit das Produkt gleich bleibt, muss das Elektron rund 1836-mal so schnell sein. Die Wellenlänge hängt also nicht von der Geschwindigkeit allein ab, sondern vom Produkt aus Masse und Geschwindigkeit, dem Impuls.`,
+        detailed: String.raw`Nach $\lambda = \frac{h}{m \cdot v}$ haben zwei Teilchen dieselbe Wellenlänge, wenn das Produkt $m \cdot v$ gleich ist. Das Proton ist rund 1836-mal so schwer wie das Elektron (im Skript hat das Elektron etwa $\frac{1}{2000}\,\mathrm{u}$); damit das Produkt gleich bleibt, muss das Elektron rund 1836-mal so schnell sein. Die Wellenlänge hängt also nicht von der Geschwindigkeit allein ab, sondern vom Produkt aus Masse und Geschwindigkeit, dem Impuls.`,
         short: String.raw`Gleiche Wellenlänge heißt gleiches $m \cdot v$: Das leichte Elektron muss viel schneller sein.`,
       },
       cards: ['atombau-welle-teilchen'],

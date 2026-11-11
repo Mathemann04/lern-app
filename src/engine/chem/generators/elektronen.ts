@@ -398,7 +398,7 @@ function ionTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc
       explanation: {
         detailed: fromOuter
           ? `Das Atom: $${atomLatex}$. Abgegeben werden zuerst die Elektronen aus 4s (größtes n), erst danach aus 3d: $${correct}$.`
-          : `Das Atom: $${atomLatex}$. ${q > 0 ? `Es gibt ${q} ${q === 1 ? 'Elektron' : 'Elektronen'} aus der äußersten Schale ab` : `Es nimmt ${-q} ${q === -1 ? 'Elektron' : 'Elektronen'} auf`}: $${nobleGas ? configLatex(config, false) : correct}$.${noble ? ` Das ist die Konfiguration des Edelgases ${elementByZ(n)!.name}${nobleGas ? `, kurz $${correct}$` : ''}.` : ''}`,
+          : `Das Atom: $${atomLatex}$. ${q > 0 ? `Es gibt ${q} ${q === 1 ? 'Elektron' : 'Elektronen'} aus der äußersten Schale ab` : `Es nimmt ${-q} ${q === -1 ? 'Elektron' : 'Elektronen'} auf`}: $${nobleGas ? configLatex(config, false) : correct}${noble ? ` = [\\mathrm{${noble.symbol}}]$, die Konfiguration des Edelgases ${elementByZ(n)!.name}.` : '$.'}`,
         short: math(correct),
       },
       established: correct,
@@ -428,6 +428,8 @@ function ionTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc
 
 // --- Valenzelektronen ---
 
+// „1 Valenzelektron“, „2 Valenzelektronen“
+const valenceWord = (count: number) => (count === 1 ? 'Valenzelektron' : 'Valenzelektronen')
 const valenceLatex = (config: Config) => config.map(occupiedLatex).join('\\,')
 const valenceWrong = (rule: string, config: Config): WrongValue => ({ rule, key: configKey(config), content: math(valenceLatex(config)) })
 const shifted = (config: Config, dn: number): Config => config.map((o) => ({ ...o, n: o.n + dn }))
@@ -499,10 +501,10 @@ function valenceTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): Chem
           choices: first,
           hint: 'Bei Hauptgruppenelementen sagt die römische Nummer der Hauptgruppe, wie viele Elektronen in der äußersten Schale sind.',
           explanation: {
-            detailed: `${el.name} steht in der ${roman}. Hauptgruppe: ${count} Valenzelektronen.${group >= 13 ? ` In der Zählung 1 bis 18 liegen die zehn Nebengruppen dazwischen; für die Gruppen 13 bis 18 zieht man deshalb zehn ab: $${group} - 10 = ${count}$.` : ''}`,
+            detailed: `${el.name} steht in der ${roman}. Hauptgruppe: ${count} ${valenceWord(count)}.${group >= 13 ? ` In der Zählung 1 bis 18 liegen die zehn Nebengruppen dazwischen; für die Gruppen 13 bis 18 zieht man deshalb zehn ab: $${group} - 10 = ${count}$.` : ''}`,
             short: math(String(count)),
           },
-          established: `${count}\\ \\text{Valenzelektronen}`,
+          established: `${count}\\ \\text{${valenceWord(count)}}`,
           cards: [CARD_VALENCE],
         },
         {
@@ -512,7 +514,7 @@ function valenceTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): Chem
           choices: second,
           hint: `Die Valenzelektronen sitzen in der äußersten Schale; ihre Nummer ist die Periode. Bei Hauptgruppen zählen nur s und p dieser Schale.`,
           explanation: {
-            detailed: `${period}. Periode: äußerste Schale $n = ${period}$. Die ${count} Valenzelektronen verteilen sich auf ${period}s (höchstens 2) und ${period}p: $${result}$.`,
+            detailed: `${period}. Periode: äußerste Schale $n = ${period}$. ${count === 1 ? `Das eine Valenzelektron sitzt in ${period}s` : count === 2 ? `Die beiden Valenzelektronen füllen ${period}s` : `Die ${count} Valenzelektronen verteilen sich auf ${period}s (höchstens 2) und ${period}p`}: $${result}$.`,
             short: math(result),
           },
           established: result,
@@ -520,7 +522,7 @@ function valenceTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): Chem
         },
       ],
       cards: [CARD_VALENCE],
-      resultText: `${elName(el)}: ${count} ${count === 1 ? 'Valenzelektron' : 'Valenzelektronen'}, $${result}$`,
+      resultText: `${elName(el)}: ${count} ${valenceWord(count)}, $${result}$`,
     },
     form: `valenz:${level}:${group}`,
     substance: el.symbol,
@@ -567,7 +569,7 @@ function elementTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): Chem
           choices,
           hint: 'Die Nummer der Schale ist die Periode. Die Zahl aller Valenzelektronen (s und p zusammen) ist die Nummer der Hauptgruppe.',
           explanation: {
-            detailed: `Äußerste Schale $n = ${period}$: ${period}. Periode. ${count} Valenzelektronen: ${roman}. Hauptgruppe. Dort steht ${el.name}.`,
+            detailed: `Äußerste Schale $n = ${period}$: ${period}. Periode. ${count} ${valenceWord(count)}: ${roman}. Hauptgruppe. Dort steht ${el.name}.`,
             short: elName(el),
           },
           cards: [CARD_VALENCE],
@@ -608,7 +610,7 @@ function shellTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCa
           title: 'Nebenquantenzahl',
           question: `Welche Werte kann die Nebenquantenzahl $l$ für $n = ${n}$ annehmen?`,
           choices: first,
-          hint: 'Die Nebenquantenzahl beginnt bei 0 und bleibt kleiner als n.',
+          hint: 'Die Nebenquantenzahl beginnt bei $0$ und bleibt kleiner als $n$.',
           explanation: { detailed: `$l$ läuft von $0$ bis $n - 1 = ${n - 1}$. Das sind ${n} Unterschalen: ${subshells}.`, short: lValues(range(0, n - 1)) },
           established: `l = ${list(range(0, n - 1))}`,
           cards: [CARD_QN],
@@ -618,7 +620,7 @@ function shellTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCa
           title: 'Plätze der Schale',
           question: `Wie viele Elektronen fasst die Schale $n = ${n}$ höchstens?`,
           choices: second,
-          hint: 'Die Schale hat n² Orbitale, und jedes Orbital fasst zwei Elektronen.',
+          hint: 'Die Schale hat $n^2$ Orbitale, und jedes Orbital fasst zwei Elektronen.',
           explanation: { detailed: `$${n}^2 = ${n * n}$ Orbitale mit je 2 Elektronen: $2n^2 = ${max}$.`, short: math(String(max)) },
           established: `${max}\\ \\text{Elektronen}`,
           cards: [CARD_ORBITALS],
@@ -740,7 +742,7 @@ function allowedTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): Chem
           title: 'Erlaubter Satz',
           question: 'Welcher Satz von Quantenzahlen ist erlaubt?',
           choices: first,
-          hint: 'Prüfe der Reihe nach: l von 0 bis n − 1, m von −l bis +l, s nur +½ oder −½.',
+          hint: 'Prüfe der Reihe nach: $l$ von $0$ bis $n - 1$, $m$ von $-l$ bis $+l$, $s$ nur $+\\tfrac{1}{2}$ oder $-\\tfrac{1}{2}$.',
           explanation: { detailed: `$l = ${l}$ ist kleiner als $n = ${n}$, $m = ${m}$ liegt zwischen $-${l}$ und $+${l}$, und der Spin ist $${spin}$. Alle Regeln sind erfüllt.`, short: math(qnLatex(valid)) },
           established: qnLatex(valid),
           cards: [CARD_QN],

@@ -59,9 +59,9 @@ describe('Ausgleichen', () => {
   )
 })
 
-// Gleichung aus der mhchem-Schreibweise der App zurücklesen: „2 C4H10 + 13/2 O2 -> 8 CO2 + 10 H2O"
+// Gleichung aus der mhchem-Schreibweise der App zurücklesen: „2 C4H10 + 13/2 O2 -> 8 CO2 + 10 H2O" (Gleichgewichte mit „<=>")
 function parseCe(text: string) {
-  const [left, right] = text.split(' -> ')
+  const [left, right] = text.split(/ (?:->|<=>) /)
   const side = (part: string) =>
     part.split(' + ').map((term) => {
       const [, coef = '1', formula] = /^(?:(\d+(?:\/\d+)?) )?(.+)$/.exec(term)!
@@ -80,7 +80,7 @@ describe('Rechnung „Ausgleichen": Antworten', () => {
       expect(isBalanced(result), task.resultLatex).toBe(true)
       for (const step of task.steps) {
         for (const c of step.choices) {
-          const m = /^\$\\ce\{(.* -> .*)\}\$$/.exec(c.content)
+          const m = /^\$\\ce\{(.* (?:->|<=>) .*)\}\$$/.exec(c.content)
           if (!m) continue
           const eq = parseCe(m[1])
           if (c.correct) expect(isBalanced(eq), c.content).toBe(true)
@@ -91,6 +91,29 @@ describe('Rechnung „Ausgleichen": Antworten', () => {
         }
       }
     }
+  })
+})
+
+// Gleichgewichte (Skript Gleichgewicht, erste Folie; docs/CHEMIE.md §3 und §5): immer mit Doppelpfeil, dieselben wie in
+// equilibria.ts
+describe('Reaktionsgleichungen: Gleichgewichte mit Doppelpfeil', () => {
+  it('kennzeichnet Ammoniak, Schwefeltrioxid und Stickstoffdioxid als Gleichgewicht', () => {
+    expect(REACTIONS.filter((r) => r.equilibrium).map((r) => r.id).sort()).toEqual(['ammoniak', 'schwefeltrioxid', 'stickstoffdioxid'])
+  })
+
+  it('zeigt Gleichgewichte in jeder Gleichung der Aufgabe mit <=>, die übrigen Reaktionen mit ->', () => {
+    let equilibria = 0
+    for (const level of [1, 2] as const) {
+      for (let i = 0; i < 400; i++) {
+        const calc = generatedCalc('chem-gleichungen', { level, seed: GENERATED_MIN + i })!
+        const reaction = REACTIONS.find((r) => r.id === calc.substance)
+        if (!reaction) continue
+        const texts = [calc.task.functionLatex!, calc.task.resultLatex!, ...calc.task.steps.flatMap((s) => s.choices.map((c) => c.content))].filter((t) => t.includes('\\ce{') && /->|<=>/.test(t))
+        for (const t of texts) expect(t, reaction.id).toContain(reaction.equilibrium ? '<=>' : '->')
+        if (reaction.equilibrium) equilibria++
+      }
+    }
+    expect(equilibria).toBeGreaterThan(10)
   })
 })
 

@@ -72,8 +72,8 @@ export const STOFFMENGE_MISCONCEPTIONS: readonly MisconceptionName[] = [
   },
   {
     id: 'chem-mis-st-mass-number',
-    name: "Molare Masse mit der Massenzahl gleichgesetzt",
-    wrongText: String.raw`Die molare Masse eines Elements ist die Massenzahl eines seiner Isotope und deshalb immer ganzzahlig, für Chlor also $35$ oder $37\,\mathrm{g/mol}$.`,
+    name: "Molare Masse mit der Massenzahl eines einzelnen Isotops gleichgesetzt",
+    wrongText: String.raw`Die molare Masse eines Elements ist die Massenzahl eines einzelnen Isotops und deshalb immer ganzzahlig; im Periodensystem müsste für Chlor also $35$ oder $37\,\mathrm{g/mol}$ stehen.`,
   },
   {
     id: 'chem-mis-st-index-ignored',

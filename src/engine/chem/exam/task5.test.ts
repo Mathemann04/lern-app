@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { gradeExam, itemsOf, totalPoints, truthOf } from '../../exam/grade.ts'
+import { examState, gradeExam, itemsOf, totalPoints, truthOf } from '../../exam/grade.ts'
 import type { ExamTask } from '../../exam/types.ts'
 import { parseRichText } from '../../explain/richText.ts'
 import { latexProblem } from '../../expr/latexChecks.ts'
 import { chemTopic } from '../banks.ts'
 import { CHEM_ERROR_RULES } from '../errorRules.ts'
 import { MISCONCEPTIONS_BY_COURSE } from '../misconceptions/index.ts'
-import { CATALYST_QUESTIONS, EQUILIBRIUM_QUESTIONS, TASK5_POINTS, buildTask5 } from './task5.ts'
+import { CATALYST_QUESTIONS, EQUILIBRIUM_QUESTIONS, LE_CHATELIER_QUESTIONS, TASK5_POINTS, buildTask5, dgSign } from './task5.ts'
 
 // Klausuraufgabe 5 (S7c): Aufbau, Punkte, saubere Texte, Abwechslung
 
@@ -40,7 +40,7 @@ describe('Klausuraufgabe 5: Aufbau', () => {
         expect(ids.filter((x) => x === build.correct), `${seed} ${id}`).toHaveLength(1)
         for (const o of build.options) {
           if (o.id === build.correct) continue
-          expect(RULES.has(o.errorRuleId ?? ''), `${seed} ${id} ${o.errorRuleId}`).toBe(true)
+          if (o.errorRuleId) expect(RULES.has(o.errorRuleId), `${seed} ${id} ${o.errorRuleId}`).toBe(true)
           expect(o.why?.detailed, `${seed} ${id}`).toBeTruthy()
         }
       }
@@ -68,6 +68,50 @@ describe('Klausuraufgabe 5: Aufbau', () => {
         }
       }
     }
+  })
+
+  it('„freiwillig?" mit dem eigenen ΔG: die zum falschen ΔG passende Folgerung ist ein Folgefehler, kein zweiter Fehler', () => {
+    let checked = 0
+    for (const seed of SEEDS) {
+      const task = buildTask5(seed)
+      const truth = truthOf(task)
+      if (!truth.has('freiwillig')) continue
+      const dg = truth.get('dg')!
+      const wrongSign = dg.build.options.find((o) => o.id !== dg.build.correct && dgSign(o) !== dgSign(dg.option))
+      if (!wrongSign) continue
+      const answersFor = (verdict: (ids: { expected: string; correct: string }) => string) => {
+        const state = examState(task, { dg: wrongSign.id }).find((s) => s.item.id === 'freiwillig')!
+        return { dg: wrongSign.id, freiwillig: verdict({ expected: state.build!.expected, correct: state.build!.correct }) }
+      }
+      // zum eigenen ΔG passend: Folgefehler, der Punkt für „freiwillig?" bleibt
+      const consistent = gradeExam(task, answersFor((x) => x.expected))
+      const e = consistent.parts.find((p) => p.part.id === 'e')!
+      expect(e.items.find((r) => r.item.id === 'freiwillig')!.status, `${seed}`).toBe('folgefehler')
+      expect(e.points, `${seed}`).toBe(1)
+      // die richtige Folgerung zum wahren ΔG zählt weiter
+      expect(gradeExam(task, answersFor((x) => x.correct)).parts.find((p) => p.part.id === 'e')!.points, `${seed}`).toBe(1)
+      expect(truth.get('freiwillig')!.build.expected).toBe(truth.get('freiwillig')!.build.correct)
+      checked++
+    }
+    expect(checked).toBeGreaterThan(10)
+  })
+
+  it('Abgleich mit den Altklausuren: Massenwirkungsgesetz erst auf Papier, Le Chatelier auch als Wissensfrage, nur ΔH als Ergebnis des Teils', () => {
+    let knowledge = 0
+    for (const seed of SEEDS) {
+      const task = buildTask5(seed)
+      expect(itemsOf(task).filter((i) => i.paperFirst).map((i) => i.id)).toEqual(['mwg'])
+      for (const item of itemsOf(task)) if (item.id !== 'dh') expect(item.final, `${seed} ${item.id}`).toBeUndefined()
+      const c = task.parts[2].items[0]
+      if (c.review) {
+        knowledge++
+        expect(LE_CHATELIER_QUESTIONS).toContain(Math.floor((c.review.seed - 500_000) / 50))
+      }
+    }
+    expect(knowledge).toBeGreaterThan(40)
+    expect(knowledge).toBeLessThan(100)
+    const bank = chemTopic('chem-mwg')!.bank.questions
+    for (const no of LE_CHATELIER_QUESTIONS) expect(bank.find((q) => q.no === no)?.kind, String(no)).toBe('single')
   })
 
   it('viel Abwechslung: verschiedene Gleichgewichte und Reaktionen, beide Formen von Teil e', () => {

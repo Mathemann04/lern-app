@@ -56,8 +56,8 @@ export const STOFFMENGE_WHY: Readonly<Record<string, Explanation>> = {
     short: "Die Ordnungszahl zählt Protonen; die molare Masse ist eine eigene Zahl im Periodensystem.",
   },
   'chem-mis-st-mass-number': {
-    detailed: String.raw`Die Massenzahl gehört zu einem einzelnen Isotop und zählt Protonen und Neutronen. Die molare Masse eines Elements ist ein Mittelwert über alle natürlich vorkommenden Isotope, gewichtet nach ihrer Häufigkeit. Deshalb ist sie oft keine ganze Zahl; bei Chlor liegt sie zwischen den Massenzahlen seiner zwei häufigen Isotope, näher am häufigeren.`,
-    short: "Die molare Masse ist ein gewichteter Mittelwert über die Isotope, keine Massenzahl.",
+    detailed: String.raw`Die Massenzahl eines einzelnen Isotops zählt dessen Protonen und Neutronen. Die molare Masse eines Elements ist dagegen ein Mittelwert über alle natürlich vorkommenden Isotope, gewichtet nach ihrer Häufigkeit; im Skript heißt diese Zahl im Periodensystem auch Massenzahl. Deshalb ist sie oft keine ganze Zahl: Bei Chlor liegt sie zwischen den Massenzahlen seiner zwei häufigen Isotope, näher am häufigeren. Nennt eine Aufgabe einen eigenen Wert, rechnet man mit diesem.`,
+    short: "Die Massenzahl eines einzelnen Isotops ist nicht der Mittelwert über alle Isotope.",
   },
   'chem-mis-st-index-ignored': {
     detailed: "Der Index unten rechts sagt, wie viele Atome des Elements direkt davor in einem Teilchen stecken. Jedes dieser Atome bringt seine molare Masse mit; deshalb zählt jedes Element so oft, wie sein Index angibt. Ohne Index ist es genau ein Atom.",

@@ -81,7 +81,8 @@ describe('Fragen und Karten zum Periodensystem passen zur Engine', () => {
     for (const [symbol, values] of Object.entries({ Na: [496, 4562], Mg: [738, 1451, 7733], Al: [578, 1817, 2745, 11577], Ca: [590, 1145, 4912, 6491] }))
       for (const [i, value] of values.entries()) {
         expect(IONIZATION[symbol][i], symbol).toBe(value)
-        expect(text, `${symbol} ${value}`).toContain(String(value))
+        // Tausender ab 10 000 mit schmalem Leerzeichen (docs/CHEMIE.md §3)
+        expect(text, `${symbol} ${value}`).toContain(value < 10000 ? String(value) : `${String(value).slice(0, -3)}\\,${String(value).slice(-3)}`)
       }
     // Sprünge der Fragen
     expect(jumpAfter(IONIZATION.Ca)).toBe(2)

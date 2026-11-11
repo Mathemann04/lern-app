@@ -89,13 +89,13 @@ function forceStep(x: ZmkSubstance, rng: Rng, focus?: string): GuidedStep | null
   if (choices.length === 0) return null
   const why: Record<Force, string> = {
     'van-der-waals': `${hasPolarBonds(x) ? 'Die Bindungen sind zwar polar, das Molekül als Ganzes aber nicht. ' : ''}Ohne Dipol und ohne Wasserstoffbrücken bleiben nur Van-der-Waals-Kräfte; sie wirken zwischen allen Teilchen.`,
-    'dipol-dipol': 'Das Molekül ist polar (ein Dipol), aber kein H-Atom sitzt an N, O oder F. Die positiven und negativen Enden der Nachbarmoleküle ziehen sich an: Dipol-Dipol-Kräfte.',
-    wasserstoffbruecken: 'Ein H-Atom sitzt direkt an N, O oder F: Zwischen den Molekülen bilden sich Wasserstoffbrücken, die stärkste der drei Kräfte. Van-der-Waals-Kräfte wirken zusätzlich.',
+    'dipol-dipol': 'Das Molekül ist polar (ein Dipol), aber kein H-Atom sitzt an N, O oder F. Die positiven und negativen Enden der Nachbarmoleküle ziehen sich an: Dipol-Dipol-Wechselwirkungen. Van-der-Waals-Kräfte wirken zusätzlich und können insgesamt sogar mehr zum Zusammenhalt beitragen, besonders bei großen Molekülen. Gefragt ist hier die Art der Kraft.',
+    wasserstoffbruecken: 'Ein H-Atom sitzt direkt an N, O oder F: Zwischen den Molekülen bilden sich Wasserstoffbrückenbindungen (kurz Wasserstoffbrücken), die stärkste Art der drei Kräfte. Van-der-Waals-Kräfte wirken zusätzlich.',
   }
   return {
     id: 'kraft',
-    title: 'Stärkste Kraft',
-    question: `Welche ist die stärkste zwischenmolekulare Kraft zwischen Teilchen von ${nameOf(x)}?`,
+    title: 'Stärkste Art der Kraft',
+    question: `Welche ist die stärkste Art von zwischenmolekularer Kraft, die zwischen Teilchen von ${nameOf(x)} vorkommt?`,
     choices,
     hint: 'Prüfe der Reihe nach: Sitzt H direkt an N, O oder F? Wenn nicht: Ist das Molekül polar? Wenn nicht: Was wirkt zwischen allen Teilchen?',
     explanation: { detailed: why[force], short: correct },
@@ -136,10 +136,10 @@ function forceTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCa
     task: {
       ref,
       instruction: 'Bestimme die zwischenmolekularen Kräfte',
-      note: `Stoff: ${nameOf(x)}.`,
+      note: `Stoff: ${nameOf(x)}${x.structure ? `, ${x.structure}` : ''}.`,
       steps,
       cards: [CARD_FORCES, CARD_HBOND],
-      resultText: `Zwischen Teilchen von ${nameOf(x)} wirken als stärkste Kraft ${FORCE_NAME[forceOf(x)]}.`,
+      resultText: `Zwischen Teilchen von ${nameOf(x)} kommen als stärkste Art von Kraft ${FORCE_NAME[forceOf(x)]} vor.`,
     },
     form: `kraft:${level}:${steps.length}`,
     substance: x.id,
@@ -173,6 +173,13 @@ export function pickBoilSet(level: Level, rng: Rng): string[] | null {
   if (orderByRule(ids, rule).join() !== orderByBoil(ids).join()) return null
   return ids
 }
+
+// Bauhinweise der Stoffe, deren Summenformel Polarität oder Wasserstoffbrücken nicht zeigt (nur Klausurniveau)
+const structures = (subs: readonly ZmkSubstance[]) =>
+  subs
+    .filter((x) => x.structure)
+    .map((x) => ` ${x.name}: ${x.structure}.`)
+    .join('')
 
 const orderText = (ids: readonly string[]) => ids.map((id) => `$${ce(id)}$`).join(' < ')
 
@@ -230,7 +237,7 @@ function boilTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCal
     task: {
       ref,
       instruction: 'Ordne nach dem Siedepunkt',
-      note: `Stoffe: ${subs.map(nameOf).join(', ')}.${level === 2 ? ` Molmassen: ${masses}.` : ''}`,
+      note: `Stoffe: ${subs.map(nameOf).join(', ')}.${level === 2 ? ` Molmassen: ${masses}.` : ''}${structures(subs)}`,
       steps,
       cards: [CARD_BOIL, CARD_FORCES],
       resultText: `Siedepunkte bei Normaldruck: ${correct.map((id) => `$${ce(id)}$ $${zmkById(id).boil}\\,^\\circ\\mathrm{C}$`).join(', ')}`,

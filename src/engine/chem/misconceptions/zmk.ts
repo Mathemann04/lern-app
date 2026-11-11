@@ -41,8 +41,8 @@ export const ZMK_MISCONCEPTIONS: readonly MisconceptionName[] = [
   },
   {
     id: 'chem-mis-zk-dipole-nonpolar',
-    name: "Dipol-Dipol-Kräfte bei unpolaren Molekülen",
-    wrongText: "Dipol-Dipol-Kräfte wirken auch zwischen unpolaren Molekülen, wenn sie polare Bindungen haben.",
+    name: "Dipol-Dipol-Wechselwirkungen bei unpolaren Molekülen",
+    wrongText: "Dipol-Dipol-Wechselwirkungen wirken auch zwischen unpolaren Molekülen, wenn sie polare Bindungen haben.",
   },
   {
     id: 'chem-mis-zk-order',
@@ -93,5 +93,11 @@ export const ZMK_MISCONCEPTIONS: readonly MisconceptionName[] = [
     id: 'chem-mis-zk-oil-light',
     name: "Entmischung nur wegen der Dichte",
     wrongText: "Öl und Wasser mischen sich nur deshalb nicht, weil Öl leichter ist.",
+  },
+  // Ergänzt nach dem Abgleich mit den Skripten (11.11.2026)
+  {
+    id: 'chem-mis-zk-room-state',
+    name: "Zustand bei Raumtemperatur falsch eingeschätzt",
+    wrongText: "Pentan ist bei Raumtemperatur gasförmig wie Methan, Ethan, Propan und Butan.",
   },
 ]

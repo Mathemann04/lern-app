@@ -40,7 +40,7 @@ export const STOFFMENGE_CARDS: readonly Card[] = [
     rules: [],
     formulas: [String.raw`M(\ce{H2O}) = 2 \cdot M(\ce{H}) + M(\ce{O})`],
     memo: 'Die molare Masse sagt, wie viel Gramm ein Mol eines Stoffes wiegt. Für ein Element steht sie im Periodensystem, für eine Verbindung zählst du die Molmassen aller Atome der Formel zusammen, jedes so oft, wie es vorkommt.',
-    note: 'Einheit: g/mol. Im Periodensystem steht bei jedem Element neben der Ordnungszahl auch die Molmasse; für die Rechnung zählt nur die Molmasse.',
+    note: 'Einheit: g/mol. Im Periodensystem steht bei jedem Element neben der Ordnungszahl auch die Molmasse; für die Rechnung zählt nur die Molmasse. Im Skript heißt diese Zahl auch „Massenzahl“; gemeint ist die mittlere Atommasse über alle Isotope (Chlor 35,5), nicht die Massenzahl eines einzelnen Isotops. Nennt eine Aufgabe eigene Werte, etwa für Chlor, rechnest du mit diesen.',
     when: 'Immer, wenn zwischen Masse und Stoffmenge umgerechnet wird.',
     examples: [
       {
@@ -68,7 +68,7 @@ export const STOFFMENGE_CARDS: readonly Card[] = [
     rules: [],
     formulas: [String.raw`m = n \cdot M`, String.raw`n = \frac{m}{M}`, String.raw`M = \frac{m}{n}`],
     memo: 'Masse, Stoffmenge und molare Masse hängen über eine einzige Gleichung zusammen: Die Masse einer Portion ist ihre Stoffmenge mal die Masse eines Mols. Die anderen beiden Formen entstehen durch Umstellen.',
-    note: 'Die Einheiten helfen beim Umstellen: Mol mal Gramm je Mol ergibt Gramm, Gramm geteilt durch Gramm je Mol ergibt Mol.',
+    note: 'Die Einheiten helfen beim Umstellen: Mol mal Gramm je Mol ergibt Gramm, Gramm geteilt durch Gramm je Mol ergibt Mol, Gramm geteilt durch Mol ergibt Gramm je Mol. Runden: Ein Ergebnis ist nur so genau wie die ungenaueste Angabe (gültige Ziffern). Die App zeigt höchstens drei gültige Ziffern und lässt Nullen am Ende weg; 0,1 mol steht also auch für 0,100 mol.',
     when: 'Wenn eine Masse in eine Stoffmenge umgerechnet werden soll oder umgekehrt.',
     examples: [
       {
@@ -86,7 +86,7 @@ export const STOFFMENGE_CARDS: readonly Card[] = [
         ],
       },
     ],
-    errors: ['chem-n-times', 'chem-n-inverted', 'chem-m-divided', 'chem-mis-st-n-times-m', 'chem-mis-st-n-inverted', 'chem-mis-st-m-divided', 'chem-mis-st-same-mass-same-n', 'chem-mis-st-heavier-more', 'chem-mis-st-n-decides-mass', 'chem-mis-st-m-ignores-n', 'chem-mis-st-prefix', 'chem-mis-st-magnitude'],
+    errors: ['chem-n-times', 'chem-n-inverted', 'chem-m-divided', 'chem-molar-m-times-n', 'chem-molar-n-over-m', 'chem-mis-st-n-times-m', 'chem-mis-st-n-inverted', 'chem-mis-st-m-divided', 'chem-mis-st-same-mass-same-n', 'chem-mis-st-heavier-more', 'chem-mis-st-n-decides-mass', 'chem-mis-st-m-ignores-n', 'chem-mis-st-prefix', 'chem-mis-st-magnitude'],
   },
   {
     id: 'stoffmenge-formeln',
