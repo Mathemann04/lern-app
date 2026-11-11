@@ -1,4 +1,5 @@
-import type { Explanation, MatchQuestion, MultiChoice, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
+import type { Explanation, MatchQuestion, MultiChoice, OrderQuestion, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
+import { MO_SPECIES } from '../generators/metalle.ts'
 import { lonePairsOf, moleculeById, partnersOf } from '../molecules.ts'
 
 // Wissensfragen zum Thema „Metallbindung und Hybridisierung“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern:
@@ -119,6 +120,39 @@ const MATCH_CONDUCTION: MatchQuestion = {
   ),
   cards: ['met-baender'],
   ref: REF_HALBLEITER,
+}
+
+// Ordnen (N1c): Bindungsordnung aus den Elektronenzahlen der Rechnungen (MO_SPECIES in generators/metalle.ts), vom
+// größten zum kleinsten Wert; alle Werte verschieden (Gegenprobe in generators/metalle.test.ts)
+export const ORDER_BO_IDS = ['N2', 'O2+', 'O2', 'O2-', 'F2', 'He2+']
+export const bondOrderOf = (id: string) => {
+  const sp = MO_SPECIES.find((x) => x.id === id)
+  if (!sp) throw new Error(`Teilchen ${id} fehlt in MO_SPECIES`)
+  return (sp.bonding - sp.antibonding) / 2
+}
+const ORDER_BOND_ORDER: OrderQuestion = {
+  kind: 'order',
+  id: 'me-k-ordnen-bindungsordnung',
+  no: 317,
+  level: 3,
+  fact: 'order-bond-order',
+  part: 'mo',
+  title: 'Bindungsordnung ordnen',
+  prompt: 'Ordne die Teilchen nach ihrer Bindungsordnung.',
+  items: [...ORDER_BO_IDS].sort((a, b) => bondOrderOf(b) - bondOrderOf(a)).map((id) => ({ id, text: r`$\ce{${id}}$` })),
+  first: 'größte Bindungsordnung',
+  last: 'kleinste Bindungsordnung',
+  traps: [
+    { kind: 'swap', before: 'F2', after: 'N2', misconception: 'chem-mis-me-antibonding' },
+    { kind: 'swap', before: 'O2-', after: 'O2+', misconception: 'chem-mis-me-antibonding' },
+  ],
+  hint: 'Zähle bindende und antibindende Valenzelektronen. Welche stärken die Bindung, welche schwächen sie?',
+  explanation: why(
+    r`$\text{BO} = \tfrac{1}{2}(\text{bindende} - \text{antibindende Elektronen})$. Von $\ce{N2}$ über $\ce{O2+}$, $\ce{O2}$ und $\ce{O2-}$ bis $\ce{F2}$ kommt jedes zusätzliche Elektron in ein antibindendes Orbital und senkt die Bindungsordnung um $0{,}5$: 3; 2,5; 2; 1,5; 1. $\ce{He2+}$ hat zwei bindende und ein antibindendes Elektron: $0{,}5$.`,
+    'Mehr antibindende Elektronen, kleinere Bindungsordnung.',
+  ),
+  cards: ['met-bindungsordnung'],
+  ref: REF_MO,
 }
 
 export const METALLE_BANK: QuestionBank = {
@@ -1233,6 +1267,8 @@ export const METALLE_BANK: QuestionBank = {
     // ---- Zuordnen (N1b)
     MATCH_CONDUCTION,
     MATCH_HYBRID,
+    // ---- Ordnen (N1c)
+    ORDER_BOND_ORDER,
   ],
   retired: [],
 }

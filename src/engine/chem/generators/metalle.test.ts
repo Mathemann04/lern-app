@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { createRng } from '../../random/rng.ts'
 import { moleculeById, vseprOf } from '../molecules.ts'
 import { MO_SPECIES, bondOrderTask, domainsOf, dopeTask, hybridSites, hybridTask, piOf, sigmaOf, sigmaPiTask } from './metalle.ts'
+import { METALLE_BANK, ORDER_BO_IDS, bondOrderOf } from '../bank/metalle.ts'
 
 // Rechnungen „Metallbindung und Hybridisierung" (S5d): Daten gegen eine zweite Liste, Katalogbeispiele der Rechenfehler
 
@@ -96,5 +97,18 @@ describe('Rechenfehler Metallbindung und Hybridisierung: Katalogbeispiele', () =
     expect(wrongIn(findTask(make('chem-bo-one-pair'), 'H2'), 'stabil', 'chem-bo-one-pair')).toMatch(/^Nein/)
     // ohne antibindende Elektronen nie die Antwort über antibindende Elektronen
     expect(wrongIn(findTask(make('chem-bo-antibonding-blocks'), 'H2'), 'stabil', 'chem-bo-antibonding-blocks')).toBeUndefined()
+  })
+})
+
+// Ordnen (N1c): Bindungsordnungen aus den Elektronenzahlen, alle verschieden, absteigend
+describe('Ordnen: Bindungsordnung', () => {
+  it('folgt den Elektronenzahlen, keine zwei gleich', () => {
+    const q = METALLE_BANK.questions.find((x) => x.id === 'me-k-ordnen-bindungsordnung')
+    if (q?.kind !== 'order') throw new Error('Frage fehlt')
+    const values = q.items.map((i) => bondOrderOf(i.id))
+    expect(q.items.map((i) => i.id).sort()).toEqual([...ORDER_BO_IDS].sort())
+    for (let i = 1; i < values.length; i++) expect(values[i - 1] - values[i], q.items[i].id).toBeGreaterThanOrEqual(0.5)
+    expect(values).toEqual([3, 2.5, 2, 1.5, 1, 0.5])
+    for (const id of ORDER_BO_IDS) expect(MO_SPECIES.some((s) => s.id === id), id).toBe(true)
   })
 })

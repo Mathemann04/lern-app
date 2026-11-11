@@ -1,4 +1,4 @@
-import type { MatchQuestion, MatchTrap, MultiChoice, QuestionBank, QuestionLevel } from '../../quiz/types.ts'
+import type { MatchQuestion, MatchTrap, MultiChoice, OrderQuestion, QuestionBank, QuestionLevel } from '../../quiz/types.ts'
 import { elementBySymbol } from '../elements.ts'
 import { ANIONS, CATIONS, type Ion, ionCe } from '../ions.ts'
 
@@ -90,6 +90,43 @@ const ION_CHARGES: MatchQuestion = {
   },
   cards: ['ionen-bindung', 'ionen-formel'],
   ref: REF_FORMEL,
+}
+
+// Ordnen (N1c): Gitterenergie (Betrag, kJ/mol) der Salze aus Frage 318, Werte wie im Kopf dieser Datei, je mindestens
+// 15 % auseinander (Test in generators/salze.test.ts)
+export const LATTICE_ENERGY: Readonly<Record<string, { readonly name: string; readonly kj: number }>> = {
+  MgO: { name: 'Magnesiumoxid', kj: 3800 },
+  BaO: { name: 'Bariumoxid', kj: 3050 },
+  NaF: { name: 'Natriumfluorid', kj: 920 },
+  KCl: { name: 'Kaliumchlorid', kj: 710 },
+  CsI: { name: 'Caesiumiodid', kj: 600 },
+}
+const LATTICE_ORDER: OrderQuestion = {
+  kind: 'order',
+  id: 'io-k-ordnen-gitterenergie',
+  no: 320,
+  level: 3,
+  fact: 'order-lattice-energy',
+  part: 'energie',
+  title: 'Gitterenergie ordnen',
+  prompt: 'Ordne die ionischen Salze nach dem Betrag ihrer Gitterenergie.',
+  items: Object.entries(LATTICE_ENERGY)
+    .sort(([, a], [, b]) => b.kj - a.kj)
+    .map(([id, salt]) => ({ id, text: String.raw`${salt.name} $\ce{${id}}$` })),
+  first: 'größte Gitterenergie',
+  last: 'kleinste Gitterenergie',
+  traps: [
+    { kind: 'swap', before: 'BaO', after: 'MgO', misconception: 'chem-mis-io-distance' },
+    { kind: 'swap', before: 'NaF', after: 'BaO', misconception: 'chem-mis-io-charge-irrelevant' },
+    { kind: 'swap', before: 'CsI', after: 'KCl', misconception: 'chem-mis-io-mass-decides' },
+  ],
+  hint: 'Vergleiche zuerst die Ladungen der Ionen, bei gleichen Ladungen dann ihre Größe.',
+  explanation: {
+    detailed: String.raw`Die Gitterenergie wächst mit den Ladungen der Ionen und wird mit größerem Abstand kleiner. Die beiden Oxide mit Ionen der Ladungen $+2$ und $-2$ stehen weit vorn, Magnesiumoxid mit dem kleineren Kation vor Bariumoxid. Bei den Salzen mit einfach geladenen Ionen werden die Ionen von Natriumfluorid über Kaliumchlorid zu Caesiumiodid immer größer, die Gitterenergie also kleiner (etwa 3800, 3050, 920, 710 und 600 kJ/mol).`,
+    short: 'Erst die Ladungen, dann die Größe: MgO, BaO, NaF, KCl, CsI.',
+  },
+  cards: ['ionen-born-haber', 'ionen-eigenschaften'],
+  ref: REF_SCHMELZ,
 }
 
 export const IONEN_BANK: QuestionBank = {
@@ -1604,6 +1641,8 @@ export const IONEN_BANK: QuestionBank = {
     // ---- Zuordnen (N1b)
     MOLECULE_ION_NAMES,
     ION_CHARGES,
+    // ---- Ordnen (N1c)
+    LATTICE_ORDER,
   ],
   retired: [],
 }

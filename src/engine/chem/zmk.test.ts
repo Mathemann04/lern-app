@@ -7,6 +7,7 @@ import { bondTypeAskable, bondTypeOf, deltaEn, PAULING } from './electronegativi
 import { atomCounts, parseFormula } from './formula.ts'
 import { moleculeById } from './molecules.ts'
 import { BOIL_GROUPS, ZMK_SUBSTANCES, forceOf, orderByBoil, orderByRule, zmkById } from './zmk.ts'
+import { ORDER_ALKANES, ORDER_HALIDES, ZMK_BANK } from './bank/zmk.ts'
 
 // Gegenprobe der Stoffdaten „Zwischenmolekulare Kräfte" (S5c): Siedepunkte gegen eine zweite Liste, Kräfte gegen die
 // Moleküldaten, jede Vergleichsgruppe passt zu ihrer Regel, Katalogbeispiele der Rechenfehler
@@ -134,5 +135,23 @@ describe('Rechenfehler zwischenmolekulare Kräfte: Katalogbeispiele', () => {
       if (calc?.substance === 'I2') seen = wrongIn(calc.task.steps[0], 'chem-zmk-like-reversed') === 'in Wasser, weil sich Gegensätze anziehen'
     }
     expect(seen).toBe(true)
+  })
+})
+
+// Ordnen (N1c): die Reihen sind Vergleichsgruppen, Regel und Messwert ergeben dieselbe Reihenfolge, je mindestens 15 K
+// Abstand
+describe('Ordnen: Siedepunkte', () => {
+  it.each([
+    ['zk-v-ordnen-alkane', ORDER_ALKANES],
+    ['zk-k-ordnen-halogenwasserstoffe', ORDER_HALIDES],
+  ] as const)('%s folgt Regel und Messwert', (id, group) => {
+    const q = ZMK_BANK.questions.find((x) => x.id === id)
+    if (q?.kind !== 'order') throw new Error('Frage fehlt')
+    const boil = BOIL_GROUPS.find((g) => g.ids.length === group.length && g.ids.every((x) => group.includes(x)))
+    expect(boil, id).toBeDefined()
+    const ids = q.items.map((i) => i.id)
+    expect(ids).toEqual(orderByBoil(group))
+    expect(ids).toEqual(orderByRule(group, boil!.rule))
+    for (let i = 1; i < ids.length; i++) expect(zmkById(ids[i]).boil - zmkById(ids[i - 1]).boil, ids[i]).toBeGreaterThanOrEqual(15)
   })
 })

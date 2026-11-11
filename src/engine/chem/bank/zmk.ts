@@ -1,5 +1,5 @@
-import type { Explanation, MatchQuestion, MultiChoice, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
-import { FORCE_NAME, forceOf, zmkById } from '../zmk.ts'
+import type { Explanation, MatchQuestion, MultiChoice, OrderQuestion, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
+import { FORCE_NAME, forceOf, orderByBoil, zmkById } from '../zmk.ts'
 
 // Wissensfragen zum Thema „Zwischenmolekulare Kräfte“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern: Stufe ·
 // 100 + laufende Nummer; nie neu vergeben. Begriffe wie in der Vorlesung: Van-der-Waals-Kräfte, Dipol-Dipol-Kräfte,
@@ -86,6 +86,59 @@ const MATCH_FORCES_EXAM: MatchQuestion = {
   ),
   cards: ['zmk-kraefte', 'zmk-wasserstoffbruecken'],
   ref: REF_UEBERSICHT,
+}
+
+// Ordnen (N1c): Siedepunkte zweier Vergleichsgruppen aus chem/zmk.ts (BOIL_GROUPS), vom niedrigsten zum höchsten nach
+// den Messwerten; Regel und Messwert stimmen überein (Gegenprobe in chem/zmk.test.ts)
+export const ORDER_ALKANES = ['CH4', 'C2H6', 'C3H8', 'C4H10', 'C5H12', 'C6H14', 'C7H16', 'C8H18']
+export const ORDER_HALIDES = ['HF', 'HCl', 'HBr', 'HI']
+const boilItem = (id: string) => ({ id, text: r`${zmkById(id).name} $\ce{${id}}$` })
+
+const ORDER_ALKANE_BOIL: OrderQuestion = {
+  kind: 'order',
+  id: 'zk-v-ordnen-alkane',
+  no: 217,
+  level: 2,
+  fact: 'order-alkane-boil',
+  part: 'siedepunkte',
+  title: 'Siedepunkte ordnen',
+  prompt: 'Ordne die Alkane nach ihrem Siedepunkt.',
+  items: orderByBoil(ORDER_ALKANES).map(boilItem),
+  first: 'niedrigster Siedepunkt',
+  last: 'höchster Siedepunkt',
+  traps: [{ kind: 'reversed', misconception: 'chem-mis-zk-size' }],
+  hint: 'Zwischen Alkanen wirken nur Van-der-Waals-Kräfte. Wie hängen sie von der Größe der Moleküle ab?',
+  explanation: why(
+    'Alkane sind unpolar; zwischen ihren Molekülen wirken nur Van-der-Waals-Kräfte. Je länger die Kette, desto größer das Molekül und desto mehr Elektronen lassen sich verschieben: Die Kräfte werden stärker, der Siedepunkt steigt von Methan bis Octan.',
+    'Längere Kette, stärkere Van-der-Waals-Kräfte, höherer Siedepunkt.',
+  ),
+  cards: ['zmk-siedepunkte'],
+  ref: REF_GROESSE,
+}
+
+const ORDER_HALIDE_BOIL: OrderQuestion = {
+  kind: 'order',
+  id: 'zk-k-ordnen-halogenwasserstoffe',
+  no: 320,
+  level: 3,
+  fact: 'order-halide-boil',
+  part: 'siedepunkte',
+  title: 'Siedepunkte ordnen',
+  prompt: 'Ordne die Halogenwasserstoffe nach ihrem Siedepunkt.',
+  items: orderByBoil(ORDER_HALIDES).map(boilItem),
+  first: 'niedrigster Siedepunkt',
+  last: 'höchster Siedepunkt',
+  traps: [
+    { kind: 'reversed', misconception: 'chem-mis-zk-boil-weak' },
+    { kind: 'swap', before: 'HF', after: 'HCl', misconception: 'chem-mis-zk-mass-only' },
+  ],
+  hint: 'Prüfe zuerst, welches Molekül eine besondere Kraft hat. Für die übrigen entscheidet die Größe.',
+  explanation: why(
+    r`Zwischen $\ce{HCl}$-, $\ce{HBr}$- und $\ce{HI}$-Molekülen wirken Dipol-Dipol- und Van-der-Waals-Kräfte; nach unten in der Gruppe werden die Moleküle größer, die Siedepunkte steigen. Fluorwasserstoff bildet als einziger Wasserstoffbrücken (H an F) und siedet deshalb trotz der kleinsten Molmasse am höchsten.`,
+    r`$\ce{HCl} < \ce{HBr} < \ce{HI} < \ce{HF}$: Wasserstoffbrücken vor Größe.`,
+  ),
+  cards: ['zmk-siedepunkte', 'zmk-wasserstoffbruecken'],
+  ref: REF_BRUECKEN,
 }
 
 export const ZMK_BANK: QuestionBank = {
@@ -1397,6 +1450,9 @@ export const ZMK_BANK: QuestionBank = {
     // ---- Zuordnen (N1b)
     MATCH_FORCES_BASIC,
     MATCH_FORCES_EXAM,
+    // ---- Ordnen (N1c)
+    ORDER_ALKANE_BOIL,
+    ORDER_HALIDE_BOIL,
   ],
   // 301 glich in der Form Klausuraufgabe 3c, 309 einer Übungsaufgabe (Prüfung 11.11.2026)
   retired: [301, 309],
