@@ -159,3 +159,9 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   `particleItem` für Protonen, Neutronen, Elektronen in einer Antwort, `valenceTask`, Licht aus
   `LIGHT_GENERATORS`), `fromStep` jetzt in `chem/exam/fromStep.ts` (übernimmt `whyWrong` als `ExamOption.why`);
   `chemErrorInfo` kennt auch Denkfehler (nur den Namen). Kachel über `exam: { task: 1 }` am Gebiet `chem-materie`.
+- Aufbau des Periodensystems (S6c): `chem/pse.ts` (`placeOf`: Periode, Gruppe 1 bis 18, Block aus der Konfiguration,
+  auch Pd; `valenceOf`, `mainGroupName`, `elementAt`, `kindOf` mit Halbmetallen, `IONIZATION` und `jumpAfter`),
+  Bild `pse:<Symbol>` (`pseFigureById` in `figures.ts`, gezeichnet als `PseFigure`), `generators/pse.ts` (Rechenarten
+  `steckbrief`, `steckbrief-rueckwaerts`, `ionenladung` mit `ION_ELEMENTS`, `ionisierung`; `narrow` schränkt beim
+  gezielten Üben nie auf null ein), Rechenfehler `chem/pseRules.ts`, Karten `pseCards.ts`, Fragen `bank/pse.ts`
+  (Denkfehler `chem-mis-pse-…`), Gegenprobe `chem/pse.test.ts`, Katalogbeispiele `generators/pse.test.ts`.

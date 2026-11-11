@@ -112,13 +112,14 @@ export const MOLEKUELE = 'chem-molekuele'
 export const ZMK = 'chem-zmk'
 export const METALLE = 'chem-metalle'
 export const ELEKTRONEN = 'chem-elektronen'
+export const PSE = 'chem-pse'
 
 // Chemie-Themen: Ids mit „chem-", Engine aus Wissensfragen (engine/chem/)
 export const isChemCourse = (id: string) => id.startsWith('chem-')
 
 // Themen mit Testseite in der Formel-Galerie (auch solche, die noch nicht spielbar sind); bei Chemie
 // die Seite „Fragen durchsehen"
-export const GALLERY_COURSES: readonly string[] = [DERIVATIVES, FRACTIONS, REARRANGE, ATOMBAU, GLEICHUNGEN, STOFFMENGE, LOESUNGEN, IONEN, MOLEKUELE, ZMK, METALLE, ELEKTRONEN]
+export const GALLERY_COURSES: readonly string[] = [DERIVATIVES, FRACTIONS, REARRANGE, ATOMBAU, GLEICHUNGEN, STOFFMENGE, LOESUNGEN, IONEN, MOLEKUELE, ZMK, METALLE, ELEKTRONEN, PSE]
 
 const derivativeLevels: LevelPreview[] = [
   {
@@ -388,6 +389,35 @@ const elektronenParts: CoursePart[] = [
   { id: 'valenz', title: 'Valenzelektronen', levels: [1, 2, 3] },
 ]
 
+const pseLevels: LevelPreview[] = [
+  {
+    level: 1,
+    available: true,
+    title: 'Perioden und Hauptgruppen, Metalle und Nichtmetalle, Edelgasregel, Ionenladung',
+    examples: [String.raw`\ce{S}\text{: 3. Periode, VI. Hauptgruppe}`],
+  },
+  {
+    level: 2,
+    available: true,
+    title: 'Blöcke und Nebengruppen, Element aus dem Steckbrief, Ionisierungsenergie und ihr Sprung',
+    examples: [String.raw`\ce{Mg}\text{: } I_{2} \to I_{3} \text{ Sprung}`],
+  },
+  {
+    level: 3,
+    available: true,
+    title: 'Element aus den Ionisierungsenergien, Teilchen mit gleicher Konfiguration, alles gemischt',
+    examples: [String.raw`\ce{S^2-},\ \ce{Cl-},\ \ce{K+},\ \ce{Ca^2+}`],
+  },
+]
+
+// Unterthemen von „Aufbau des Periodensystems" (Rechnungen in engine/chem/generators/pse.ts, part)
+const pseParts: CoursePart[] = [
+  { id: 'aufbau', title: 'Perioden, Gruppen und Blöcke', levels: [1, 2, 3] },
+  { id: 'metalle', title: 'Metalle, Halbmetalle, Nichtmetalle', levels: [1, 2, 3] },
+  { id: 'ionen', title: 'Edelgasregel und Ionenladung', levels: [1, 2, 3] },
+  { id: 'ionisierung', title: 'Ionisierungsenergie', levels: [2, 3] },
+]
+
 const metalleLevels: LevelPreview[] = [
   {
     level: 1,
@@ -619,7 +649,17 @@ export const SUBJECTS: readonly Subject[] = [
         icon: 'periodic',
         tone: 'sky',
         courses: [
-          comingSoon('chem-pse', 'Aufbau des Periodensystems', 'Perioden, Gruppen, Blöcke, Valenzelektronen und Ionenladung', 'periodic'),
+          {
+            id: PSE,
+            title: 'Aufbau des Periodensystems',
+            description: 'Perioden, Gruppen, Blöcke, Metalle und Nichtmetalle, Edelgasregel, Ionenladung und Ionisierungsenergie',
+            icon: 'periodic',
+            cards: 'chem-pse',
+            levels: pseLevels,
+            free: false,
+            focus: true,
+            parts: pseParts,
+          },
           comingSoon('chem-trends', 'Trends im Periodensystem', 'Atomradius, Ionisierungsenergie, Elektronegativität und Metallcharakter', 'periodic'),
         ],
       },
