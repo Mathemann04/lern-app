@@ -1,4 +1,4 @@
-import type { Explanation, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
+import type { Explanation, MultiChoice, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
 
 // Wissensfragen zum Thema „Moleküle“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern: Stufe · 100 + laufende
 // Nummer; nie neu vergeben, gelöschte kommen in retired. Begriffe wie in der Vorlesung: Elektronenpaarbindung,
@@ -41,6 +41,16 @@ const at = (level: QuestionLevel) => (spec: Spec): SingleChoice => ({ ...spec, k
 const g = at(1)
 const v = at(2)
 const k = at(3)
+
+// „Wähle alle richtigen“ (N1): richtige Aussagen r1, r2, …; jede Aussage ein ganzer Satz
+type MultiSpec = Omit<MultiChoice, 'kind' | 'level' | 'correct'> & { correct: readonly string[] }
+const why = (detailed: string, short: string): Explanation => ({ detailed, short })
+const multiAt = (level: QuestionLevel) => (spec: MultiSpec): MultiChoice => ({
+  ...spec,
+  kind: 'multi',
+  level,
+  correct: spec.correct.map((text, i) => ({ id: `r${i + 1}`, text })),
+})
 
 export const MOLEKUELE_BANK: QuestionBank = {
   course: 'chem-molekuele',
@@ -1342,6 +1352,94 @@ export const MOLEKUELE_BANK: QuestionBank = {
       },
       cards: ['mol-namen'],
       ref: REF_NAMEN,
+    }),
+    // ---- Wähle alle richtigen (N1)
+    multiAt(1)({
+      id: 'mo-g-multi-paarbindung',
+      no: 117,
+      fact: 'multi-pair-bond',
+      part: 'lewis',
+      title: 'Elektronenpaarbindung',
+      prompt: 'Welche Aussagen über die Elektronenpaarbindung und Lewis-Formeln stimmen?',
+      correct: [
+        'In einer Elektronenpaarbindung teilen sich zwei Atome ein gemeinsames Elektronenpaar.',
+        'Elektronenpaarbindungen entstehen typischerweise zwischen Nichtmetallatomen.',
+        'Ein Wasserstoffatom hat in einem Molekül zwei Elektronen um sich, so viele wie Helium.',
+        'Ein Sauerstoffatom bildet in Molekülen wie Wasser zwei Bindungen, weil ihm zwei Elektronen zum Oktett fehlen.',
+        'Ein Strich zwischen zwei Atomen in der Lewis-Formel steht für ein Elektronenpaar, also zwei Elektronen.',
+      ],
+      wrong: [
+        w('f1', 'In einer Elektronenpaarbindung gibt ein Atom seine Elektronen ganz an das andere ab.', 'chem-mis-mo-bond-transfer'),
+        w('f2', 'Auch ein Wasserstoffatom braucht in einem Molekül acht Elektronen um sich.', 'chem-mis-mo-octet-hydrogen'),
+        w('f3', 'In einer Lewis-Formel zeichnet man alle Elektronen eines Atoms, auch die inneren.', 'chem-mis-mo-lewis-all'),
+        w('f4', 'Ein Sauerstoffatom bildet sechs Bindungen, weil es sechs Valenzelektronen hat.', 'chem-mis-mo-bonds-valence'),
+        w('f5', 'Die Oktettregel besagt, dass ein Molekül insgesamt acht Elektronen hat.', 'chem-mis-mo-octet-molecule'),
+      ],
+      hint: 'Wem gehört ein bindendes Paar, und wie viele Elektronen braucht jedes Atom für seine volle Schale?',
+      explanation: why(
+        'In der Elektronenpaarbindung, typisch zwischen Nichtmetallatomen, gehört ein gemeinsames Paar beiden Atomen; in der Lewis-Formel steht es als Strich für zwei Elektronen, gezeichnet werden nur die Valenzelektronen. Jedes Atom außer Wasserstoff hat acht Elektronen um sich, Wasserstoff zwei wie Helium. Ein Atom bildet so viele Bindungen, wie ihm Elektronen zum Oktett fehlen: Sauerstoff zwei.',
+        'Gemeinsames Paar zwischen Nichtmetallen; Strich = zwei Elektronen; Wasserstoff zwei, Sauerstoff zwei Bindungen.',
+      ),
+      cards: ['mol-paarbindung', 'mol-lewis'],
+      ref: REF_LEWIS,
+    }),
+    multiAt(2)({
+      id: 'mo-v-multi-vsepr',
+      no: 220,
+      fact: 'multi-vsepr',
+      part: 'gestalt',
+      title: 'VSEPR-Modell',
+      prompt: 'Welche Aussagen über den räumlichen Bau von Molekülen nach dem VSEPR-Modell stimmen?',
+      correct: [
+        'Die Elektronenpaare um ein Zentralatom stoßen sich ab und ordnen sich möglichst weit voneinander entfernt an.',
+        r`In Wasser ist der Bindungswinkel kleiner als $109{,}5^\circ$, weil die freien Paare am Sauerstoff mehr Platz brauchen.`,
+        r`Ammoniak, $\ce{NH3}$, ist trigonal-pyramidal.`,
+        r`Kohlenstoffdioxid, $\ce{O=C=O}$, ist linear.`,
+        r`Bortrifluorid, $\ce{BF3}$, ist trigonal-planar.`,
+      ],
+      wrong: [
+        w('f1', 'Die Lewis-Formel zeigt schon den räumlichen Bau mit den richtigen Winkeln.', 'chem-mis-mo-shape-drawing'),
+        w('f2', r`Wasser ist linear gebaut, weil es wie $\ce{CO2}$ aus drei Atomen besteht.`, 'chem-mis-mo-shape-formula'),
+        w('f3', 'Freie Elektronenpaare brauchen weniger Platz als bindende und ändern die Gestalt nicht.', 'chem-mis-mo-lone-small'),
+        w('f4', r`Für die Gestalt zählt jede Doppelbindung in $\ce{O=C=O}$ wie zwei Bindungen.`, 'chem-mis-mo-multiple-domains'),
+        w('f5', 'Wasser ist tetraedrisch, weil die Gestalt auch die Lage der freien Paare beschreibt.', 'chem-mis-mo-shape-arrangement'),
+      ],
+      hint: 'Zähle am Zentralatom Bindungspartner und freie Paare; die Gestalt nennt nur die Lage der Atome.',
+      explanation: why(
+        r`Die Paare am Zentralatom sind negativ geladen, stoßen sich ab und gehen möglichst weit auseinander; eine Mehrfachbindung zählt dabei wie eine Bindung. $\ce{CO2}$ hat zwei Richtungen und ist linear, $\ce{BF3}$ drei und ist trigonal-planar. In $\ce{NH3}$ liegen vier Paare tetraedrisch, eines davon frei: trigonal-pyramidal. Freie Paare brauchen mehr Platz und drücken die Bindungen zusammen, darum ist der Winkel in Wasser kleiner als $109{,}5^\circ$.`,
+        'Paare stoßen sich ab; Mehrfachbindung zählt einmal; freie Paare brauchen mehr Platz.',
+      ),
+      cards: ['mol-gestalt', 'mol-freie-paare'],
+      ref: REF_VSEPR,
+    }),
+    multiAt(3)({
+      id: 'mo-k-multi-polaritaet',
+      no: 316,
+      fact: 'multi-polarity',
+      part: 'polaritaet',
+      title: 'Polare Moleküle',
+      prompt: 'Welche Aussagen über polare Bindungen und polare Moleküle stimmen?',
+      correct: [
+        r`In $\ce{HCl}$ trägt das Chloratom die negative Teilladung, weil es elektronegativer ist.`,
+        r`Kohlenstoffdioxid, $\ce{CO2}$, ist unpolar, obwohl seine Bindungen polar sind.`,
+        r`Chlormethan, $\ce{CH3Cl}$, ist polar, Tetrachlormethan, $\ce{CCl4}$, dagegen unpolar.`,
+        'Fluor hat die höchste Elektronegativität aller Elemente.',
+        r`Von den Bindungen $\ce{H-F}$, $\ce{H-Cl}$, $\ce{H-Br}$ und $\ce{H-I}$ ist $\ce{H-F}$ am stärksten polar.`,
+      ],
+      wrong: [
+        w('f1', 'Ein Molekül mit polaren Bindungen ist immer polar, egal welche Gestalt es hat.', 'chem-mis-mo-polar-bond-molecule'),
+        w('f2', 'Ein polares Molekül trägt insgesamt eine elektrische Ladung, wie ein Ion.', 'chem-mis-mo-dipole-charged'),
+        w('f3', r`In einer polaren Bindung wie $\ce{O-H}$ tragen die beiden Atome ganze Ladungen wie Ionen.`, 'chem-mis-mo-partial-full'),
+        w('f4', r`Die Bindung im $\ce{Cl2}$-Molekül ist polar.`, 'chem-mis-mo-same-atoms-polar'),
+        w('f5', 'Ein tetraedrisches Molekül ist immer unpolar, auch wenn die Partner am Zentralatom verschieden sind.', 'chem-mis-mo-symmetry-assumed'),
+      ],
+      hint: 'Prüfe erst die Bindungen über die Elektronegativität, dann die Gestalt: Heben sich die polaren Bindungen auf?',
+      explanation: why(
+        r`Das elektronegativere Atom zieht das Paar zu sich und trägt die negative Teilladung, in $\ce{HCl}$ das Chlor. Fluor ist das elektronegativste Element, darum ist $\ce{H-F}$ die am stärksten polare der vier Bindungen. Ob ein Molekül polar ist, entscheidet die Gestalt: In $\ce{CO2}$ (linear) und $\ce{CCl4}$ (tetraedrisch, gleiche Partner) heben sich die polaren Bindungen auf; in $\ce{CH3Cl}$ sind die Partner verschieden, und es bleibt ein Dipol.`,
+        'Elektronegativeres Atom negativ; Fluor am elektronegativsten; die Gestalt entscheidet über den Dipol.',
+      ),
+      cards: ['mol-dipol', 'mol-en'],
+      ref: REF_GESAMTDIPOL,
     }),
   ],
   retired: [],

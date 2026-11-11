@@ -146,6 +146,9 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext,
   const numeric = free ? step.numeric : undefined
   const [typed, setTyped] = useState<Typed | null>(null)
   const [revealed, setRevealed] = useState(false)
+  // „Wähle alle richtigen“: angekreuzte Aussagen; nach dem Prüfen, ob alles stimmte
+  const [selected, setSelected] = useState<string[]>([])
+  const [multiResult, setMultiResult] = useState<{ clean: boolean } | null>(null)
   const hadMistake = useRef(false)
   const questionRef = useRef<HTMLHeadingElement>(null)
   const feedbackRef = useRef<HTMLDivElement>(null)
@@ -197,6 +200,24 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext,
     }
   }
 
+  function toggle(choice: Choice) {
+    if (solved) return
+    setSelected((ids) => (ids.includes(choice.id) ? ids.filter((id) => id !== choice.id) : [...ids, choice.id]))
+  }
+
+  // Einmal prüfen, dann ist der Schritt vorbei: Jeder Fehler (zu Unrecht gewählt oder vergessen) zählt als ein
+  // Fehlversuch; in die Fehlerstatistik kommen die Denkfehler der zu Unrecht gewählten Aussagen
+  function checkMulti() {
+    if (solved || selected.length === 0) return
+    const wrongPicked = step.choices.filter((c) => !c.correct && selected.includes(c.id))
+    const missed = step.choices.filter((c) => c.correct && !selected.includes(c.id))
+    const clean = wrongPicked.length === 0 && missed.length === 0
+    for (const rule of new Set(wrongPicked.flatMap((c) => (c.errorRuleId ? [c.errorRuleId] : [])))) recordError(rule)
+    if (!clean) onMistake()
+    setMultiResult({ clean })
+    setSolved(true)
+  }
+
   const lastWrong = step.choices.find((c) => c.id === wrongPicks.at(-1))
 
   return (
@@ -211,6 +232,8 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext,
 
       {numeric ? (
         <NumberAnswer answer={numeric} disabled={solved} onSubmit={(value) => judged(judgeNumber(value, numeric))} />
+      ) : step.multi ? (
+        <MultiAnswers choices={step.choices} selected={selected} checked={multiResult !== null} detail={detail} onToggle={toggle} onCheck={checkMulti} />
       ) : (
       <div className="space-y-3" role="group" aria-label="Antworten">
         {step.choices.map((choice) => {
@@ -293,7 +316,20 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext,
       </div>
 
       <div ref={feedbackRef} aria-live="polite">
-        {solved ? (
+        {multiResult && !multiResult.clean ? (
+          <div className="animate-step-in space-y-4 rounded-2xl bg-red-50 p-4">
+            <p className="text-lg font-semibold text-red-800">Nicht ganz.</p>
+            <p className="text-zinc-800">Oben steht bei jeder Aussage, was richtig war. Die Frage kommt später noch einmal.</p>
+            <RichText text={step.explanation[mode === 'off' ? 'short' : mode]} className="text-zinc-800" />
+            <button
+              type="button"
+              onClick={onNext}
+              className="w-full rounded-xl bg-accent-700 px-4 py-3 text-lg font-medium text-on-accent hover:bg-accent-800"
+            >
+              {isLast ? 'Ergebnis ansehen' : 'Weiter'}
+            </button>
+          </div>
+        ) : solved ? (
           <div className="animate-step-in space-y-4 rounded-2xl bg-green-50 p-4">
             {revealed ? (
               <>
@@ -347,6 +383,97 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext,
         )}
       </div>
     </section>
+  )
+}
+
+type MultiProps = {
+  choices: readonly Choice[]
+  selected: readonly string[]
+  checked: boolean
+  detail: ExplanationDetail
+  onToggle: (choice: Choice) => void
+  onCheck: () => void
+}
+
+// „Wähle alle richtigen“ (N1): Aussagen zum Ankreuzen, dann „Prüfen“. Danach steht bei jeder Aussage, ob sie
+// richtig gewählt, zu Unrecht gewählt (mit „Warum ist das falsch?“) oder vergessen ist.
+function MultiAnswers({ choices, selected, checked, detail, onToggle, onCheck }: MultiProps) {
+  const [whyOpen, setWhyOpen] = useState<string[]>([])
+  return (
+    <div className="space-y-3">
+      <p className="text-sm text-zinc-600">Eine oder mehrere Aussagen stimmen. Kreuze alle richtigen an und tippe dann auf „Prüfen“.</p>
+      <ul className="space-y-3" aria-label="Aussagen">
+        {choices.map((choice) => {
+          const isSelected = selected.includes(choice.id)
+          const verdict = !checked ? null : choice.correct ? (isSelected ? 'hit' : 'missed') : isSelected ? 'wrong' : 'skipped'
+          const tone =
+            verdict === 'hit'
+              ? 'border-green-600 bg-green-50'
+              : verdict === 'wrong'
+                ? 'border-red-300 bg-red-50'
+                : verdict === 'missed'
+                  ? 'border-amber-400 bg-amber-50'
+                  : verdict === 'skipped'
+                    ? 'border-zinc-200 opacity-60'
+                    : isSelected
+                      ? 'border-accent-600 bg-accent-50'
+                      : 'border-zinc-200 bg-surface hover:border-accent-600'
+          return (
+            <li key={choice.id} className={`rounded-2xl border-2 transition-colors ${tone}`} data-verdict={verdict ?? undefined}>
+              <button
+                type="button"
+                onClick={() => onToggle(choice)}
+                disabled={checked}
+                aria-pressed={isSelected}
+                className="flex w-full items-center gap-3 px-4 py-3 text-left"
+              >
+                <span
+                  aria-hidden
+                  className={`flex size-6 shrink-0 items-center justify-center rounded-md border-2 text-sm font-bold ${
+                    isSelected ? 'border-accent-700 bg-accent-700 text-on-accent' : 'border-zinc-400'
+                  }`}
+                >
+                  {isSelected ? '✓' : ''}
+                </span>
+                <ChoiceContent choice={choice} />
+              </button>
+              {verdict && verdict !== 'skipped' && (
+                <div className="space-y-2 px-4 pb-3">
+                  <p
+                    className={`text-sm font-semibold ${verdict === 'hit' ? 'text-green-800' : verdict === 'wrong' ? 'text-red-800' : 'text-amber-800'}`}
+                  >
+                    {verdict === 'hit' ? '✓ Richtig gewählt' : verdict === 'wrong' ? '✗ Zu Unrecht gewählt: Diese Aussage stimmt nicht.' : 'Vergessen: Diese Aussage stimmt auch.'}
+                  </p>
+                  {verdict === 'wrong' &&
+                    choice.whyWrong &&
+                    (whyOpen.includes(choice.id) ? (
+                      <RichText text={choice.whyWrong[detail]} className="text-zinc-800" />
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setWhyOpen((ids) => [...ids, choice.id])}
+                        className="rounded-xl border border-red-200 bg-surface px-4 py-2.5 font-medium text-red-800 hover:bg-red-100"
+                      >
+                        Warum ist das falsch?
+                      </button>
+                    ))}
+                </div>
+              )}
+            </li>
+          )
+        })}
+      </ul>
+      {!checked && (
+        <button
+          type="button"
+          onClick={onCheck}
+          disabled={selected.length === 0}
+          className="w-full rounded-xl bg-accent-700 px-4 py-3 text-lg font-medium text-on-accent hover:bg-accent-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-600"
+        >
+          Prüfen
+        </button>
+      )}
+    </div>
   )
 }
 
@@ -434,7 +561,9 @@ function FinishView({ course, mix, task, mistakes, focus, isQuestion, practiceMo
         <p className="text-zinc-600">
           {mistakes === 0
             ? 'Alles beim ersten Versuch richtig.'
-            : `Gelöst mit ${mistakes} ${mistakes === 1 ? 'Fehlversuch' : 'Fehlversuchen'}.`}
+            : task.steps.some((st) => st.multi)
+              ? 'Nicht alles richtig angekreuzt.'
+              : `Gelöst mit ${mistakes} ${mistakes === 1 ? 'Fehlversuch' : 'Fehlversuchen'}.`}
           {isQuestion && mistakes > 0 && ' Die Frage kommt nach drei anderen Aufgaben noch einmal.'}
         </p>
       </div>
@@ -452,7 +581,7 @@ function FinishView({ course, mix, task, mistakes, focus, isQuestion, practiceMo
                   <RichText text={task.resultQuestion} className="text-zinc-800" />
                 </div>
               )}
-              <p className="text-sm text-zinc-600">Richtige Antwort</p>
+              <p className="text-sm text-zinc-600">{task.steps.some((st) => st.multi) ? 'Richtige Aussagen' : 'Richtige Antwort'}</p>
               <RichText text={task.resultText!} className="text-xl font-medium" />
             </>
           )}

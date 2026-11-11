@@ -1,4 +1,4 @@
-import type { Explanation, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
+import type { Explanation, MultiChoice, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
 
 // Wissensfragen zum Thema „Elektronen“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern: Stufe · 100 + laufende
 // Nummer; nie neu vergeben. Begriffe wie in der Vorlesung: Hauptquantenzahl, Nebenquantenzahl, Magnetquantenzahl,
@@ -18,6 +18,18 @@ const at = (level: QuestionLevel) => (spec: Spec): SingleChoice => ({ ...spec, k
 const g = at(1)
 const v = at(2)
 const k = at(3)
+
+// „Wähle alle richtigen“ (N1): richtige Aussagen r1, r2, …; jede Aussage ein ganzer Satz
+type MultiSpec = Omit<MultiChoice, 'kind' | 'level' | 'correct'> & { correct: readonly string[] }
+const multiAt = (level: QuestionLevel) => (spec: MultiSpec): MultiChoice => ({
+  ...spec,
+  kind: 'multi',
+  level,
+  correct: spec.correct.map((text, i) => ({ id: `r${i + 1}`, text })),
+})
+const mg = multiAt(1)
+const mv = multiAt(2)
+const mk = multiAt(3)
 
 // Konfiguration als Formel: „[Ar] 4s2 3d6“ → $[\mathrm{Ar}]\,4\mathrm{s}^{2}\,3\mathrm{d}^{6}$
 export const cfg = (text: string) =>
@@ -1005,6 +1017,96 @@ export const ELEKTRONEN_BANK: QuestionBank = {
       ],
       hint: r`Eisen: $[\mathrm{Ar}]\,4\mathrm{s}^{2}\,3\mathrm{d}^{6}$. Welche drei Elektronen gehen?`,
       explanation: why(r`Zuerst gehen beide 4s-Elektronen, dann eines aus 3d: $[\mathrm{Ar}]\,3\mathrm{d}^{5}$. Jedes der fünf d-Orbitale ist einfach besetzt; halb volle Unterschalen sind besonders günstig.`, 'Halb volle 3d-Unterschale.'),
+      cards: ['el-ionen'],
+      ref: REF_QN,
+    }),
+    // ---- Wähle alle richtigen (N1)
+    mg({
+      id: 'el-g-multi-quantenzahlen',
+      no: 119,
+      fact: 'multi-quantenzahlen',
+      part: 'quantenzahlen',
+      title: 'Quantenzahlen und Orbitale',
+      prompt: 'Welche Aussagen über Quantenzahlen und Orbitale stimmen?',
+      correct: [
+        r`Die Hauptquantenzahl $n$ gibt die Schale an.`,
+        'Ein s-Orbital ist kugelförmig, ein p-Orbital hantelförmig.',
+        'Eine p-Unterschale besteht aus drei Orbitalen.',
+        'Die drei p-Orbitale einer Unterschale haben dieselbe Energie.',
+        r`Die Spinquantenzahl kann nur die Werte $+\tfrac{1}{2}$ und $-\tfrac{1}{2}$ annehmen.`,
+      ],
+      wrong: [
+        w('f1', 'Die Hauptquantenzahl legt die Form eines Orbitals fest.', 'chem-mis-el-qn-meaning'),
+        w('f2', 'Eine p-Unterschale besteht aus sechs Orbitalen.', 'chem-mis-el-orbital-count'),
+        w('f3', 'Ein Orbital ist eine feste Bahn, auf der das Elektron den Kern umkreist.', 'chem-mis-el-orbital-path'),
+        w('f4', 's-Orbitale sind hantelförmig, p-Orbitale kugelförmig.', 'chem-mis-el-shape'),
+        w('f5', 'Die Spinquantenzahl kann die Werte 0 und 1 annehmen.', 'chem-mis-el-spin-values'),
+        w('f6', 'Jede Schale fasst höchstens acht Elektronen.', 'chem-mis-el-shell-8'),
+      ],
+      hint: 'Gehe die vier Quantenzahlen der Reihe nach durch: Schale, Unterschale und Form, Ausrichtung, Spin.',
+      explanation: why(
+        r`$n$ nummeriert die Schalen. Die Unterschale bestimmt die Form: s kugelförmig, p hantelförmig. Für p gibt es drei Orbitale ($m = -1, 0, +1$), die sich nur in der Ausrichtung unterscheiden und dieselbe Energie haben. Der Spin hat genau zwei Werte, $+\tfrac{1}{2}$ und $-\tfrac{1}{2}$.`,
+        r`$n$: Schale; s kugelförmig, p hantelförmig; drei energiegleiche p-Orbitale; Spin $\pm\tfrac{1}{2}$.`,
+      ),
+      cards: ['el-quantenzahlen', 'el-orbitale'],
+      ref: REF_QN,
+    }),
+    mv({
+      id: 'el-v-multi-besetzung',
+      no: 217,
+      fact: 'multi-besetzung',
+      part: 'besetzung',
+      title: 'Besetzung der Orbitale',
+      prompt: 'Welche Aussagen über die Besetzung der Orbitale stimmen?',
+      correct: [
+        'Ein Orbital fasst höchstens zwei Elektronen, und die beiden haben entgegengesetzten Spin.',
+        'Energiegleiche Orbitale werden zuerst einzeln mit gleichem Spin besetzt, erst dann gepaart.',
+        'Beim Auffüllen liegt 4s tiefer als 3d, deshalb wird 4s vor 3d besetzt.',
+        `Eisen hat die Konfiguration ${cfg('[Ar] 4s2 3d6')}.`,
+        'Chrom und Kupfer weichen von der Reihenfolge ab, weil halb volle und ganz volle d-Unterschalen besonders günstig sind.',
+      ],
+      wrong: [
+        w('f1', 'Zwei Elektronen eines Orbitals dürfen in allen vier Quantenzahlen übereinstimmen.', 'chem-mis-el-pauli-same'),
+        w('f2', 'Das Pauli-Prinzip besagt, dass energiegleiche Orbitale zuerst einzeln besetzt werden.', 'chem-mis-el-pauli-hund'),
+        w('f3', 'In einer Unterschale bilden die Elektronen zuerst Paare, bevor sie das nächste Orbital besetzen.', 'chem-mis-el-hund-pair'),
+        w('f4', 'Die Unterschalen werden streng nach der Schale besetzt: erst 3s, 3p und 3d, dann 4s.', 'chem-mis-el-order-n'),
+        w('f5', 'Bei Eisen sind alle acht Elektronen nach dem Argon-Kern d-Elektronen.', 'chem-mis-el-d-count'),
+        w('f6', 'Chrom hat die Schalenbesetzung 2, 8, 12, 2.', 'chem-mis-el-cr-shells'),
+      ],
+      hint: 'Denke an das Pauli-Prinzip, die Hund’sche Regel und die Reihenfolge nach steigender Energie.',
+      explanation: why(
+        r`Nach Pauli unterscheiden sich zwei Elektronen eines Orbitals im Spin, also passen höchstens zwei hinein. Nach Hund werden energiegleiche Orbitale erst einzeln mit gleichem Spin besetzt. Besetzt wird nach steigender Energie, und 4s liegt beim Auffüllen tiefer als 3d; so hat Eisen $[\mathrm{Ar}]\,4\mathrm{s}^{2}\,3\mathrm{d}^{6}$. Chrom und Kupfer sind Ausnahmen, weil eine halb volle bzw. ganz volle 3d-Unterschale günstiger ist.`,
+        'Pauli: höchstens zwei je Orbital; Hund: erst einzeln; 4s vor 3d; Ausnahmen Cr und Cu.',
+      ),
+      cards: ['el-pauli', 'el-hund', 'el-reihenfolge', 'el-ausnahmen'],
+      ref: REF_QN,
+    }),
+    mk({
+      id: 'el-k-multi-ionen',
+      no: 318,
+      fact: 'multi-ion-config',
+      part: 'ionen',
+      title: 'Konfiguration von Ionen',
+      prompt: 'Welche Aussagen über die Elektronenkonfiguration von Ionen stimmen?',
+      correct: [
+        'Ein Kation gibt zuerst die Elektronen mit der größten Hauptquantenzahl ab.',
+        r`$\ce{Fe^2+}$ hat die Konfiguration ` + cfg('[Ar] 3d6') + '.',
+        r`$\ce{Mg^2+}$ hat dieselbe Konfiguration wie Neon.`,
+        r`$\ce{Zn^2+}$ hat die Konfiguration ` + cfg('[Ar] 3d10') + '.',
+        r`$\ce{Fe^3+}$ hat eine halb volle 3d-Unterschale.`,
+      ],
+      wrong: [
+        w('f1', 'Übergangsmetalle geben bei der Bildung von Kationen zuerst ihre 3d-Elektronen ab.', 'chem-mis-el-ion-3d'),
+        w('f2', r`$\ce{Fe^2+}$ hat die Konfiguration ` + cfg('[Ar] 4s2 3d4') + '.', 'chem-mis-el-ion-3d'),
+        w('f3', 'Ein Kation eines Übergangsmetalls behält seine 4s-Elektronen, weil 4s vor 3d besetzt wurde.', 'chem-mis-el-ion-3d'),
+        w('f4', r`$\ce{Mg^2+}$ hat dieselbe Konfiguration wie Argon, das Edelgas am Ende der 3. Periode.`, 'chem-mis-el-noble-ion'),
+        w('f5', r`$\ce{Na+}$ hat dieselbe Konfiguration wie Argon.`, 'chem-mis-el-noble-ion'),
+      ],
+      hint: 'Welche Elektronen sitzen bei einem Übergangsmetall am weitesten außen? Und wie viele Elektronen hat das Ion noch?',
+      explanation: why(
+        r`Kationen geben die äußersten Elektronen ab, also die mit dem größten $n$: bei Eisen und Zink zuerst beide 4s-Elektronen. So hat $\ce{Fe^2+}$ $[\mathrm{Ar}]\,3\mathrm{d}^{6}$ und $\ce{Zn^2+}$ $[\mathrm{Ar}]\,3\mathrm{d}^{10}$; $\ce{Fe^3+}$ gibt danach noch ein 3d-Elektron ab und hat $[\mathrm{Ar}]\,3\mathrm{d}^{5}$, eine halb volle Unterschale. $\ce{Mg^2+}$ hat 10 Elektronen wie Neon.`,
+        r`Zuerst gehen die Elektronen mit dem größten $n$; $\ce{Mg^2+}$ hat die Konfiguration von Neon.`,
+      ),
       cards: ['el-ionen'],
       ref: REF_QN,
     }),

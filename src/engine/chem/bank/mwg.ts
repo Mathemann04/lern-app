@@ -1,4 +1,4 @@
-import type { Explanation, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
+import type { Explanation, MultiChoice, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
 
 // Wissensfragen zum Thema „Chemisches Gleichgewicht“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern: Stufe · 100 +
 // laufende Nummer; nie neu vergeben. Alle Gleichgewichte gasförmig; Reaktionsenthalpien wie in chem/equilibria.ts.
@@ -14,6 +14,18 @@ const at = (level: QuestionLevel) => (spec: Spec): SingleChoice => ({ ...spec, k
 const g = at(1)
 const v = at(2)
 const k = at(3)
+
+// „Wähle alle richtigen“ (N1): richtige Aussagen r1, r2, …; jede Aussage ein ganzer Satz
+type MultiSpec = Omit<MultiChoice, 'kind' | 'level' | 'correct'> & { correct: readonly string[] }
+const multiAt = (level: QuestionLevel) => (spec: MultiSpec): MultiChoice => ({
+  ...spec,
+  kind: 'multi',
+  level,
+  correct: spec.correct.map((text, i) => ({ id: `r${i + 1}`, text })),
+})
+const mg = multiAt(1)
+const mv = multiAt(2)
+const mk = multiAt(3)
 
 const K = r`K_{\mathrm{GG}}`
 const VH = r`v_{\text{hin}}`
@@ -1038,6 +1050,93 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Niedrige Temperatur ist gut für die Lage, aber schlecht für etwas anderes. Wofür?',
       explanation: why('Die Hinreaktion ist exotherm; niedrige Temperatur wäre gut für die Ausbeute, macht die Reaktion aber sehr langsam. Der Katalysator sorgt dafür, dass sich das Gleichgewicht trotzdem schnell einstellt.', 'Für die Geschwindigkeit.'),
       cards: ['gg-katalysator'],
+      ref: REF,
+    }),
+    // ---------------------------------------------------------------- Wähle alle richtigen (N1)
+    mg({
+      id: 'gg-g-multi-dynamisch',
+      no: 119,
+      fact: 'multi-dynamic',
+      part: 'gleichgewicht',
+      title: 'Dynamisches Gleichgewicht',
+      prompt: 'Welche Aussagen über eine Reaktion im chemischen Gleichgewicht stimmen?',
+      correct: [
+        'Der Doppelpfeil in der Gleichung zeigt, dass die Reaktion in beide Richtungen läuft.',
+        'Im Gleichgewicht laufen Hin- und Rückreaktion weiter, und zwar gleich schnell.',
+        'Im Gleichgewicht bleiben die Konzentrationen aller Stoffe konstant.',
+        'Im Gleichgewicht sind die Konzentrationen von Edukten und Produkten meist verschieden groß.',
+      ],
+      wrong: [
+        w('f1', 'Im Gleichgewicht ist die Reaktion zum Stillstand gekommen.', 'chem-mis-gg-stopped'),
+        w('f2', 'Im Gleichgewicht liegen Edukte und Produkte immer in gleicher Konzentration vor.', 'chem-mis-gg-equal-conc'),
+        w('f3', 'Eine Gleichgewichtsreaktion setzt die Edukte am Ende vollständig zu Produkten um.', 'chem-mis-gg-complete'),
+        w('f4', 'Im Gleichgewicht läuft die Hinreaktion schneller als die Rückreaktion.', 'chem-mis-gg-forward-faster'),
+      ],
+      hint: 'Unterscheide, was man von außen sieht, und was die einzelnen Teilchen tun.',
+      explanation: why(
+        'Der Doppelpfeil steht für eine Reaktion in beide Richtungen. Im Gleichgewicht reagieren weiterhin Teilchen, Hin- und Rückreaktion laufen gleich schnell. Deshalb bleiben die Konzentrationen konstant; gleich groß müssen sie nicht sein, das hängt von der Reaktion ab.',
+        'Beide Richtungen laufen gleich schnell weiter; Konzentrationen konstant, meist verschieden.',
+      ),
+      cards: ['gg-dynamisch'],
+      ref: REF,
+    }),
+    mv({
+      id: 'gg-v-multi-katalysator',
+      no: 219,
+      fact: 'multi-catalyst',
+      part: 'katalysator',
+      title: 'Katalysator',
+      prompt: 'Welche Aussagen über einen Katalysator stimmen?',
+      correct: [
+        'Ein Katalysator ermöglicht einen Reaktionsweg mit kleinerer Aktivierungsenergie.',
+        'Ein Katalysator liegt nach der Reaktion unverändert wieder vor.',
+        'Ein Katalysator beschleunigt Hin- und Rückreaktion gleichermaßen.',
+        'Mit einem Katalysator stellt sich ein Gleichgewicht schneller ein, seine Lage bleibt aber gleich.',
+        r`Ein Katalysator ändert die Reaktionsenthalpie $\Delta H$ nicht.`,
+      ],
+      wrong: [
+        w('f1', 'Ein Katalysator verschiebt das Gleichgewicht zu den Produkten und erhöht so die Ausbeute.', 'chem-mis-gg-cat-shift'),
+        w('f2', 'Ein Katalysator wird bei der Reaktion nach und nach verbraucht.', 'chem-mis-gg-cat-used'),
+        w('f3', 'Ein Katalysator macht eine Reaktion stärker exotherm.', 'chem-mis-gg-cat-dh'),
+        w('f4', 'Ein Katalysator beschleunigt nur die Hinreaktion.', 'chem-mis-gg-cat-one-way'),
+        w('f5', 'Ein Katalysator liefert die Energie, die zum Start der Reaktion fehlt.', 'chem-mis-gg-cat-energy'),
+      ],
+      hint: 'Was verändert ein Katalysator im Energiediagramm, und was bleibt dort gleich?',
+      explanation: why(
+        r`Ein Katalysator eröffnet einen Weg mit niedrigerem Energieberg, über den Hin- und Rückreaktion müssen; beide werden gleich stark beschleunigt. Edukte und Produkte liegen gleich hoch wie vorher, also bleibt $\Delta H$ gleich, und die Lage des Gleichgewichts ändert sich nicht, es ist nur schneller erreicht. Am Ende liegt der Katalysator unverändert vor.`,
+        r`Kleinere Aktivierungsenergie für beide Richtungen; $\Delta H$, Lage und Katalysator bleiben gleich.`,
+      ),
+      cards: ['gg-katalysator', 'gg-energiediagramm'],
+      ref: REF,
+    }),
+    mk({
+      id: 'gg-k-multi-so3',
+      no: 319,
+      fact: 'multi-so3',
+      part: 'le-chatelier',
+      title: 'Gleichgewicht beeinflussen',
+      prompt: r`Für $\ce{2 SO2(g) + O2(g) <=> 2 SO3(g)}$ ist $\Delta H = -198\,\mathrm{kJ}$. Welche Aussagen über dieses Gleichgewicht stimmen?`,
+      correct: [
+        r`Höherer Druck verschiebt das Gleichgewicht zum $\ce{SO3}$, weil rechts weniger Gasteilchen stehen.`,
+        r`Abkühlen verschiebt das Gleichgewicht zum $\ce{SO3}$.`,
+        r`Beim Erwärmen wird die Gleichgewichtskonstante $${K}$ kleiner.`,
+        r`Entfernt man laufend $\ce{SO3}$, wird nach und nach mehr Edukt umgesetzt.`,
+        r`Gibt man bei gleicher Temperatur Sauerstoff zu, bleibt $${K}$ gleich.`,
+      ],
+      wrong: [
+        w('f1', r`Ein Katalysator verschiebt das Gleichgewicht zum $\ce{SO3}$ und erhöht so die Ausbeute.`, 'chem-mis-gg-cat-shift'),
+        w('f2', 'Höherer Druck begünstigt die Seite mit mehr Gasteilchen, hier also die Edukte.', 'chem-mis-gg-pressure-more'),
+        w('f3', r`Erwärmen verschiebt das Gleichgewicht zum $\ce{SO3}$, weil Wärme jede Hinreaktion antreibt.`, 'chem-mis-gg-heat-products'),
+        w('f4', 'Die Temperatur ändert nur, wie schnell sich das Gleichgewicht einstellt, nicht seine Lage.', 'chem-mis-gg-temp-rate-only'),
+        w('f5', r`Gibt man bei gleicher Temperatur Sauerstoff zu, ändert sich $${K}$.`, 'chem-mis-gg-k-changes'),
+        w('f6', r`Gibt man $\ce{SO3}$ zu, bildet sich noch mehr $\ce{SO3}$.`, 'chem-mis-gg-conc-side'),
+      ],
+      hint: 'Zähle die Gasteilchen auf beiden Seiten, achte auf das Vorzeichen von $\\Delta H$ und überlege, welche Bedingung als einzige die Gleichgewichtskonstante ändert.',
+      explanation: why(
+        r`Links stehen $3$, rechts $2$ Gasteilchen: Höherer Druck begünstigt $\ce{SO3}$. Die Hinreaktion ist exotherm: Abkühlen begünstigt sie, Erwärmen die Rückreaktion, und $${K}$ wird beim Erwärmen kleiner. Die Temperatur ist die einzige Bedingung, die $${K}$ ändert; nach Zugabe eines Stoffs stellen sich nur die Konzentrationen neu ein. Wird $\ce{SO3}$ laufend entfernt, bildet das Gleichgewicht es nach.`,
+        r`Druck hoch und Abkühlen begünstigen $\ce{SO3}$; nur die Temperatur ändert $${K}$.`,
+      ),
+      cards: ['gg-druck-temperatur', 'gg-le-chatelier', 'gg-k-wert', 'gg-katalysator'],
       ref: REF,
     }),
   ],

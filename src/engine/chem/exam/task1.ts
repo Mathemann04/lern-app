@@ -1,7 +1,7 @@
 import type { ExamItem, ExamOption, ExamPart, ExamTask } from '../../exam/types.ts'
 import { VARIANTS, questionSeed } from '../../quiz/numbers.ts'
 import { planQuestion } from '../../quiz/plan.ts'
-import type { Question } from '../../quiz/types.ts'
+import type { SingleChoice } from '../../quiz/types.ts'
 import { type Rng, createRng } from '../../random/rng.ts'
 import { chemTopic } from '../banks.ts'
 import { chemErrorRule } from '../errorRules.ts'
@@ -26,9 +26,10 @@ export const CHARGE_QUESTIONS = [111, 113, 115, 307]
 export const TERM_QUESTIONS = [102, 116, 117, 118, 119, 120, 201, 202, 301, 302, 303, 308]
 export const MODEL_QUESTIONS = [206, 207, 208, 209, 210, 211, 212, 306, 311, 312, 313, 314]
 
-function question(no: number): Question {
+// nur Einfachauswahl: Klausurfragen haben vier Antworten, genau eine richtig
+function question(no: number): SingleChoice {
   const q = chemTopic(ATOMBAU)!.bank.questions.find((x) => x.no === no)
-  if (!q) throw new Error(`Frage ${no} fehlt im Atombau`)
+  if (q?.kind !== 'single') throw new Error(`Frage ${no} fehlt im Atombau oder ist keine Einfachauswahl`)
   return q
 }
 

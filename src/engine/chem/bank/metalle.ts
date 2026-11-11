@@ -1,4 +1,4 @@
-import type { Explanation, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
+import type { Explanation, MultiChoice, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
 
 // Wissensfragen zum Thema „Metallbindung und Hybridisierung“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern:
 // Stufe · 100 + laufende Nummer; nie neu vergeben. Begriffe wie in der Vorlesung: Elektronengas, Atomrümpfe, Valenzband,
@@ -25,6 +25,15 @@ const at = (level: QuestionLevel) => (spec: Spec): SingleChoice => ({ ...spec, k
 const g = at(1)
 const v = at(2)
 const k = at(3)
+
+// „Wähle alle richtigen“ (N1): richtige Aussagen r1, r2, …; jede Aussage ein ganzer Satz
+type MultiSpec = Omit<MultiChoice, 'kind' | 'level' | 'correct'> & { correct: readonly string[] }
+const multiAt = (level: QuestionLevel) => (spec: MultiSpec): MultiChoice => ({
+  ...spec,
+  kind: 'multi',
+  level,
+  correct: spec.correct.map((text, i) => ({ id: `r${i + 1}`, text })),
+})
 
 const SP3 = r`$\mathrm{sp^{3}}$`
 const SP2 = r`$\mathrm{sp^{2}}$`
@@ -1050,6 +1059,94 @@ export const METALLE_BANK: QuestionBank = {
       ),
       cards: ['met-bindungsordnung'],
       ref: REF_MO,
+    }),
+    // ---- Wähle alle richtigen (N1)
+    multiAt(1)({
+      id: 'me-g-multi-metallbindung',
+      no: 117,
+      fact: 'multi-metal-bond',
+      part: 'metallbindung',
+      title: 'Metallbindung',
+      prompt: 'Welche Aussagen über Metalle und die Metallbindung stimmen?',
+      correct: [
+        'Im Metall halten positive Atomrümpfe und frei bewegliche Valenzelektronen zusammen.',
+        'Metalle leiten den Strom, weil ihre Valenzelektronen frei beweglich sind.',
+        'Metalle leiten Strom und Wärme gut, glänzen und lassen sich gut verformen.',
+        'Die Metallbindung wirkt in alle Richtungen gleich; die Elektronen gehören nicht einzelnen Atompaaren.',
+        'Kupfer leitet als Feststoff den Strom, festes Kochsalz dagegen nicht.',
+      ],
+      wrong: [
+        w('f1', 'In einem Metall sitzen die Valenzelektronen fest an ihren Atomen, wie in einer Atombindung.', 'chem-mis-me-fixed'),
+        w('f2', 'Ein Metall besteht aus positiven und negativen Ionen, wie ein Salz.', 'chem-mis-me-salt-like'),
+        w('f3', 'Metalle leiten den Strom, weil die Atomrümpfe durch das Gitter wandern.', 'chem-mis-me-cores-move'),
+        w('f4', 'Metalle brechen beim Verformen, weil sich gleich geladene Teilchen gegenüberstehen.', 'chem-mis-me-brittle'),
+        w('f5', 'Festes Kochsalz lässt sich verformen wie ein Metall, weil seine Ionen ebenfalls gleiten können.', 'chem-mis-me-salt-deform'),
+      ],
+      hint: 'Welche Teilchen sitzen im Metall fest, und welche können sich bewegen?',
+      explanation: why(
+        'Im Metall sitzen positive Atomrümpfe an festen Plätzen, umgeben von frei beweglichen Valenzelektronen, dem Elektronengas. Die Anziehung wirkt in alle Richtungen, und die Elektronen gehören allen gemeinsam. Weil die Elektronen wandern können, leiten Metalle schon als Feststoff Strom und Wärme; im festen Kochsalz sitzen die Ionen dagegen fest. Dazu kommen Glanz und gute Verformbarkeit.',
+        'Atomrümpfe im Elektronengas: leitfähig, glänzend, verformbar.',
+      ),
+      cards: ['met-metallbindung'],
+      ref: REF_EIGENSCHAFTEN,
+    }),
+    multiAt(2)({
+      id: 'me-v-multi-baender',
+      no: 216,
+      fact: 'multi-bands',
+      part: 'halbleiter',
+      title: 'Leiter, Halbleiter, Isolatoren',
+      prompt: 'Welche Aussagen über Leiter, Halbleiter und Isolatoren stimmen?',
+      correct: [
+        'Beim Isolator trennt eine breite verbotene Zone das volle Valenzband vom leeren Leitungsband.',
+        'Ein Halbleiter hat eine schmale verbotene Zone, die Elektronen mit etwas Energie überwinden können.',
+        'Erwärmt man ein Metall, sinkt seine elektrische Leitfähigkeit.',
+        'Ein mit Phosphor dotierter Siliciumkristall bleibt insgesamt elektrisch neutral.',
+        'Mit Bor dotiertes Silicium ist ein p-Leiter.',
+      ],
+      wrong: [
+        w('f1', 'Isolatoren leiten nicht, weil sie keine Elektronen haben.', 'chem-mis-me-no-electrons'),
+        w('f2', 'Metalle haben eine breite verbotene Zone, Isolatoren keine.', 'chem-mis-me-gap'),
+        w('f3', 'Ein Metalldraht leitet den Strom besser, wenn man ihn erwärmt.', 'chem-mis-me-heat-metal'),
+        w('f4', 'Fremdatome mit fünf Valenzelektronen, etwa Phosphor, erzeugen in Silicium Löcher.', 'chem-mis-me-dope-swap'),
+        w('f5', 'Halbleiter leiten den Strom schlechter, wenn man sie erwärmt.', 'chem-mis-me-heat-semi'),
+      ],
+      hint: 'Wie breit ist die verbotene Zone bei den drei Stoffarten, und was bringen Wärme oder Fremdatome?',
+      explanation: why(
+        'Beim Isolator trennt eine breite verbotene Zone das volle Valenzband vom leeren Leitungsband, beim Halbleiter ist sie schmal und mit etwas Energie zu überwinden. Im Metall bremsen beim Erwärmen die stärker schwingenden Atomrümpfe die Elektronen: Die Leitfähigkeit sinkt. Dotieren bringt bewegliche Ladungsträger, aber jedes Fremdatom ist selbst neutral, der Kristall bleibt es auch. Bor hat ein Valenzelektron weniger als Silicium und hinterlässt Löcher: ein p-Leiter.',
+        'Isolator: breite Lücke; Halbleiter: schmale; Metall warm schlechter; dotiert, aber neutral; Bor gibt p.',
+      ),
+      cards: ['met-baender', 'met-dotierung'],
+      ref: REF_HALBLEITER,
+    }),
+    multiAt(3)({
+      id: 'me-k-multi-sigma-pi',
+      no: 316,
+      fact: 'multi-sigma-pi',
+      part: 'hybrid',
+      title: 'Hybridisierung, σ und π',
+      prompt: 'Welche Aussagen über Hybridisierung sowie σ- und π-Bindungen stimmen?',
+      correct: [
+        r`Der Kohlenstoff ist in Ethan $\mathrm{sp^{3}}$-, in Ethen $\mathrm{sp^{2}}$- und in Ethin $\mathrm{sp}$-hybridisiert.`,
+        r`Die Dreifachbindung im $\ce{N2}$ besteht aus einer σ- und zwei π-Bindungen.`,
+        r`Der Phosphor in $\ce{PCl3}$ ist $\mathrm{sp^{3}}$-hybridisiert, weil auch sein freies Paar als Richtung zählt.`,
+        r`Kohlenstoffdioxid, $\ce{O=C=O}$, hat zwei π-Bindungen.`,
+        'Eine π-Bindung liegt ober- und unterhalb der Verbindungslinie der Kerne, zusätzlich zur σ-Bindung.',
+      ],
+      wrong: [
+        w('f1', 'Eine Doppelbindung besteht aus zwei σ-Bindungen.', 'chem-mis-me-two-sigma'),
+        w('f2', r`Ethin, $\ce{C2H2}$, hat zwischen den beiden Kohlenstoffatomen drei σ-Bindungen.`, 'chem-mis-me-two-sigma'),
+        w('f3', 'Auch die π-Bindungen einer Doppelbindung sitzen in Hybridorbitalen.', 'chem-mis-me-hyb-pi'),
+        w('f4', 'In Ethen sind die beiden Kohlenstoffatome nur über eine π-Bindung verbunden.', 'chem-mis-me-pi-alone'),
+        w('f5', r`Der Kohlenstoff in $\ce{O=C=O}$ ist $\mathrm{sp^{3}}$-hybridisiert, weil er vier Bindungsstriche hat.`, 'chem-mis-me-hyb-partners'),
+      ],
+      hint: 'Zähle für die Hybridisierung die Richtungen um das Atom; zwischen zwei Atomen gibt es nur eine σ-Bindung.',
+      explanation: why(
+        r`Gezählt werden die Richtungen um das Atom, Partner und freie Paare; eine Mehrfachbindung zählt einmal: Ethan $\mathrm{sp^{3}}$, Ethen $\mathrm{sp^{2}}$, Ethin $\mathrm{sp}$, und $\ce{PCl3}$ mit drei Partnern und einem freien Paar $\mathrm{sp^{3}}$. Zwischen zwei Atomen gibt es nur eine σ-Bindung; jede weitere ist eine π-Bindung aus nicht hybridisierten p-Orbitalen, ober- und unterhalb der Kernverbindung. Darum hat $\ce{N2}$ eine σ- und zwei π-Bindungen, $\ce{CO2}$ mit zwei Doppelbindungen zwei π-Bindungen.`,
+        'Richtungen zählen; eine σ-Bindung je Atompaar, jede weitere ist π.',
+      ),
+      cards: ['met-hybrid', 'met-sigma-pi'],
+      ref: REF_SIGMA,
     }),
   ],
   retired: [],

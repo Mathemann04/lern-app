@@ -1,6 +1,6 @@
 import { chemTopic } from '../../engine/chem/banks.ts'
 import { cardById } from '../../engine/explain/cards.ts'
-import type { Misconception, Question } from '../../engine/quiz/types.ts'
+import { type Misconception, type Question, correctOptionsOf } from '../../engine/quiz/types.ts'
 import { formatTaskNumber } from '../../engine/tasks/taskNumber.ts'
 import { AreaIcon } from '../AreaIcon.tsx'
 import { BackLink } from '../BackLink.tsx'
@@ -36,7 +36,8 @@ export default function QuestionGallery({ course: id }: { course: string }) {
         </div>
         <p className="text-zinc-600 text-pretty">
           Alle Fragen mit der richtigen Antwort, allen falschen Antworten samt Denkfehler und „Warum ist das falsch?“, Tipp, Erklärung und
-          Lernkarten. Beim Üben werden je Frage drei der falschen Antworten gezeigt.
+          Lernkarten. Beim Üben werden je Frage drei der falschen Antworten gezeigt, bei „Wähle alle richtigen“ vier bis sechs
+          Aussagen, davon eine bis vier richtige.
         </p>
       </section>
 
@@ -148,6 +149,7 @@ function QuestionCard({ course, question: q, part, misconceptions }: CardProps) 
           </a>
           <span>
             Nr. {q.no} · {q.id} · Fakt {q.fact}
+            {q.kind === 'multi' && ' · Wähle alle richtigen'}
           </span>
         </p>
         <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -161,10 +163,12 @@ function QuestionCard({ course, question: q, part, misconceptions }: CardProps) 
       </div>
 
       <div className="space-y-1 rounded-xl bg-green-50 px-3 py-2">
-        <p className="text-sm font-semibold text-green-800">Richtig</p>
-        <div data-testid="correct-answer">
-          <RichText text={q.correct.text} />
-        </div>
+        <p className="text-sm font-semibold text-green-800">{q.kind === 'multi' ? `Richtig (${q.correct.length})` : 'Richtig'}</p>
+        {correctOptionsOf(q).map((o) => (
+          <div key={o.id} data-testid="correct-answer">
+            <RichText text={o.text} />
+          </div>
+        ))}
       </div>
 
       <div className="space-y-2">

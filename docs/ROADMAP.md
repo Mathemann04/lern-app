@@ -8,7 +8,7 @@ Stand: 11.11.2026
 | M2 | Brüche (Bruchrechnung, Bruchterme kürzen und zusammenfassen, Doppelbrüche); App für mehrere Themen | fertig |
 | M2b | Brüche nachschärfen: viel mehr Abwechslung (Baukasten statt fester Vorlagen, keine Form doppelt), deutlich schwerer, Stufe 5 auf Profi-Niveau mit Partialbruchzerlegung und Brüchen aus späteren Kapiteln (komplexe Zahlen, Grenzwerte, Teleskopsummen, Hyperbelfunktionen) | fertig |
 | M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten, Vektoren, Additionstheoremen) | fertig |
-| M4 | **Chemie 1**: neues Fach mit Wissensfragen (Auswahl, Zuordnen, Ordnen) und Rechnungen zu allen Themen der Vorlesung, drei Stufen (Grundlagen, Vertiefung, Klausurniveau), Lernkarten, Wiederholung, Probeklausur wie die echte (45 min, 50 Punkte) | in Arbeit: Plan freigegeben ([PLAN-M4.md](PLAN-M4.md)), Klausur-Sprint fertig (S1 bis S9), danach N1 bis N5 |
+| M4 | **Chemie 1**: neues Fach mit Wissensfragen (Auswahl, Zuordnen, Ordnen) und Rechnungen zu allen Themen der Vorlesung, drei Stufen (Grundlagen, Vertiefung, Klausurniveau), Lernkarten, Wiederholung, Probeklausur wie die echte (45 min, 50 Punkte) | in Arbeit: Plan freigegeben ([PLAN-M4.md](PLAN-M4.md)), Klausur-Sprint fertig (S1 bis S9), jetzt N1 (N1a fertig), danach N2 bis N5 |
 | M5 | **Werkstoffkunde**: eigenes Fach nach demselben Muster wie Chemie | offen (nach M6 und M6b; die Skripte kommen vom Nutzer; früher, falls die Werkstoffkunde-Klausur früher ist) |
 | M6 | **Neue Struktur** (ersetzt „Themen einzeln üben“, Idee des Nutzers, 10.11.2026): drei getrennte Fragen – was tust du (Tätigkeit als Kachel: Vereinfachen, Gleichungen umstellen, Ableiten), womit (Bausteine ankreuzen, ein Thema gezielt mit „nur“), wie schwer (Stufe = nur Verschachtelung, nie neuer Stoff); aufgeräumte Startseite, Fortschritt je Baustein, „Meine Schwächen“, Knopf „Überspringen“, ohne Kopfzeile, Startseite nur mit Fächern. Entwurf: [PLAN-M6.md](PLAN-M6.md) | offen: als Nächstes nach M4, vor M5 |
 | M6b | **Bilder in Mathe** (Wunsch des Nutzers, 10.11.2026): gemeinsame Zeichen-Grundlage (Koordinatensystem, Graph, Pfeile, Einheitskreis, Zahlenebene); je Baustein ein Bild in Aufgaben und Lernkarten (Graph bei e-Funktion und Logarithmus, Tangente beim Ableiten, Fläche beim Integral, Einheitskreis bei Winkelfunktionen, Pfeile bei Vektoren, Zahlenebene bei komplexen Zahlen); Aufgaben wie „Welcher Graph gehört zur Funktion?“. Später Bilder zum Anfassen (Punkt verschieben). Ausblick in [PLAN-M6.md](PLAN-M6.md) | offen: direkt nach M6, vor M5 |
@@ -107,6 +107,9 @@ feste Regeln: [CHEMIE.md](CHEMIE.md)
     - [x] S9b. Periodensystem und Formelsammlung in der Klausur, Verlauf, Übungsvorschläge, Wiederholung
 - Nach Teil 1 (Teil 2 im Januar 2027, daher in dieser Reihenfolge):
   - [ ] N1. Weitere Fragearten (Wähle alle richtigen, Zuordnen, Ordnen)
+    - [x] N1a. „Wähle alle richtigen“ (ankreuzen, prüfen, je Aussage bewertet) mit Fragen in allen Themen
+    - [ ] N1b. Zuordnen
+    - [ ] N1c. Ordnen
   - [ ] N2. Eingaben (Kästchen, Baukästen, Element-Tastatur)
   - [ ] N3. Säuren und Basen (Skript nötig)
   - [ ] N4. Redox und Elektrochemie (Skript nötig), Probeklausur Teil 2

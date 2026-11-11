@@ -1,4 +1,4 @@
-import type { Explanation, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
+import type { Explanation, MultiChoice, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
 
 // Wissensfragen zum Thema „Energie bei Reaktionen“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern: Stufe · 100 + laufende
 // Nummer; nie neu vergeben. Zahlenwerte wie in chem/thermo.ts (geprüft in generators/energie.test.ts).
@@ -14,6 +14,18 @@ const at = (level: QuestionLevel) => (spec: Spec): SingleChoice => ({ ...spec, k
 const g = at(1)
 const v = at(2)
 const k = at(3)
+
+// „Wähle alle richtigen“ (N1): richtige Aussagen r1, r2, …; jede Aussage ein ganzer Satz
+type MultiSpec = Omit<MultiChoice, 'kind' | 'level' | 'correct'> & { correct: readonly string[] }
+const multiAt = (level: QuestionLevel) => (spec: MultiSpec): MultiChoice => ({
+  ...spec,
+  kind: 'multi',
+  level,
+  correct: spec.correct.map((text, i) => ({ id: `r${i + 1}`, text })),
+})
+const mg = multiAt(1)
+const mv = multiAt(2)
+const mk = multiAt(3)
 
 const DG = r`\Delta G`
 const DH = r`\Delta H`
@@ -1013,6 +1025,96 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Welche Stoffe sind Elemente im Standardzustand?',
       explanation: why('Aluminium und Eisen sind Elemente im Standardzustand und zählen 0. Übrig bleiben die beiden Oxide: $\\Delta H^{0} = \\Delta_f H^{0}(\\ce{Al2O3}) - \\Delta_f H^{0}(\\ce{Fe2O3})$.', 'Nur die beiden Oxide.'),
       cards: ['en-reaktionsenthalpie', 'en-bildungsenthalpie'],
+      ref: REF,
+    }),
+    // ---------------------------------------------------------------- Wähle alle richtigen (N1)
+    mg({
+      id: 'en-g-multi-hauptsaetze',
+      no: 118,
+      fact: 'multi-laws',
+      part: 'entropie',
+      title: 'Hauptsätze und Entropie',
+      prompt: 'Welche Aussagen über die Hauptsätze und die Entropie stimmen?',
+      correct: [
+        'Bei einer Reaktion bleibt die Energie erhalten; sie wird nur umgewandelt oder übertragen.',
+        'In einem abgeschlossenen System nimmt die Entropie nie ab.',
+        'Den absoluten Nullpunkt der Temperatur kann man nur annähern, aber nicht erreichen.',
+        'Die Entropie ist ein Maß für die Unordnung.',
+        'Beim Verdampfen nimmt die Entropie zu.',
+      ],
+      wrong: [
+        w('f1', 'Bei einer exothermen Reaktion entsteht Energie neu.', 'chem-mis-en-first-law'),
+        w('f2', 'In einem abgeschlossenen System kann die Entropie von selbst abnehmen.', 'chem-mis-en-second-law'),
+        w('f3', 'Mit genug Aufwand lässt sich der absolute Nullpunkt erreichen.', 'chem-mis-en-third-law'),
+        w('f4', 'Je geordneter ein Stoff ist, desto größer ist seine Entropie.', 'chem-mis-en-entropy-order'),
+        w('f5', 'Beim Schmelzen und Verdampfen nimmt die Entropie ab.', 'chem-mis-en-phase-ds'),
+      ],
+      hint: 'Geh die drei Hauptsätze der Reihe nach durch: Energie, Entropie, absoluter Nullpunkt.',
+      explanation: why(
+        'Erster Hauptsatz: Die Energie bleibt erhalten, sie wird nur umgewandelt oder übertragen. Zweiter Hauptsatz: In einem abgeschlossenen System nimmt die Entropie nicht ab. Dritter Hauptsatz: Der absolute Nullpunkt lässt sich nur annähern. Die Entropie misst die Unordnung; beim Verdampfen werden die Teilchen frei beweglich, sie nimmt zu.',
+        'Energie bleibt erhalten, Entropie nimmt nicht ab, 0 K unerreichbar; Entropie heißt Unordnung.',
+      ),
+      cards: ['en-hauptsaetze', 'en-entropie'],
+      ref: REF,
+    }),
+    mv({
+      id: 'en-v-multi-reaktionsenthalpie',
+      no: 219,
+      fact: 'multi-reaction-enthalpy',
+      part: 'reaktionsenthalpie',
+      title: 'Reaktionsenthalpie berechnen',
+      prompt: 'Man berechnet eine Reaktionsenthalpie aus Standardbildungsenthalpien. Welche Aussagen stimmen?',
+      correct: [
+        'Man rechnet die Summe der Produkte minus die Summe der Edukte.',
+        'Jede Bildungsenthalpie wird mit dem Koeffizienten ihres Stoffs in der Gleichung multipliziert.',
+        'Elemente in ihrem Standardzustand tragen nichts zur Summe bei.',
+        'Die Rückreaktion hat denselben Betrag der Reaktionsenthalpie mit umgekehrtem Vorzeichen.',
+        'Für Wasser nimmt man den Tabellenwert, der zum Zustand in der Gleichung passt.',
+      ],
+      wrong: [
+        w('f1', 'Man rechnet die Summe der Edukte minus die Summe der Produkte.', 'chem-mis-en-reversed'),
+        w('f2', 'Die Bildungsenthalpie jedes Stoffs zählt genau einmal, egal welcher Koeffizient davorsteht.', 'chem-mis-en-coef'),
+        w('f3', 'Für Wasser ist es gleich, ob man den Wert für flüssiges Wasser oder für Wasserdampf nimmt.', 'chem-mis-en-state'),
+        w('f4', 'Die Rückreaktion hat dieselbe Reaktionsenthalpie wie die Hinreaktion.', 'chem-mis-en-reverse-reaction'),
+        w('f5', r`Auch $\ce{O2(g)}$ geht mit einer Bildungsenthalpie ungleich 0 in die Summe ein.`, 'chem-mis-en-element-nonzero'),
+        w('f6', r`Jede Form eines Elements, auch $\ce{Br2(g)}$, zählt in der Summe mit 0.`, 'chem-mis-en-element-any-form'),
+      ],
+      hint: 'Denk an „nachher minus vorher“, an die Koeffizienten und an den Bezugswert der Elemente.',
+      explanation: why(
+        r`$\Delta H^{0} = \sum \nu \cdot \Delta_f H^{0}(\text{Produkte}) - \sum \nu \cdot \Delta_f H^{0}(\text{Edukte})$, $\nu$ ist der Koeffizient. Elemente in ihrem Standardzustand haben $\Delta_f H^{0} = 0$. Die Rückreaktion nimmt auf, was die Hinreaktion abgibt: gleicher Betrag, umgekehrtes Vorzeichen. Flüssiges Wasser und Wasserdampf haben verschiedene Werte; man nimmt den, der zur Gleichung passt.`,
+        'Produkte minus Edukte, mit Koeffizienten; Elemente im Standardzustand 0; Rückreaktion mit umgekehrtem Vorzeichen.',
+      ),
+      cards: ['en-reaktionsenthalpie', 'en-bildungsenthalpie'],
+      ref: REF,
+    }),
+    mk({
+      id: 'en-k-multi-freie-enthalpie',
+      no: 318,
+      fact: 'multi-gibbs',
+      part: 'freie-enthalpie',
+      title: 'Freie Enthalpie',
+      prompt: r`Welche Aussagen über $${DG}$, $${DG}^{0}$ und die Gleichgewichtskonstante stimmen?`,
+      correct: [
+        r`Ist $${DG}^{0}$ negativ, ist $K$ größer als 1.`,
+        r`Ist $${DG}^{0} = 0$, ist $K = 1$.`,
+        r`Ist $${DH} < 0$ und $${DS} > 0$, läuft die Reaktion bei jeder Temperatur freiwillig ab.`,
+        r`Ist $${DH} > 0$ und $${DS} < 0$, läuft die Reaktion bei keiner Temperatur freiwillig ab.`,
+        r`Ist $${DH} > 0$ und $${DS} > 0$, läuft die Reaktion erst oberhalb einer Grenztemperatur freiwillig ab.`,
+      ],
+      wrong: [
+        w('f1', r`Ist $${DG}^{0}$ negativ, ist $K$ kleiner als 1.`, 'chem-mis-en-k-sign'),
+        w('f2', r`Es gilt $${DG}^{0} = -R \cdot T \cdot \lg K$ mit dem Zehnerlogarithmus.`, 'chem-mis-en-lg'),
+        w('f3', r`In $${DG} = ${DH} - T \cdot ${DS}$ setzt man die Temperatur in °C ein.`, 'chem-mis-en-celsius'),
+        w('f4', r`$${DH}$ in kJ und $${DS}$ in J/K darf man direkt miteinander verrechnen.`, 'chem-mis-en-units'),
+        w('f5', r`Es gilt $${DG} = ${DH} + T \cdot ${DS}$.`, 'chem-mis-en-gibbs-sign'),
+        w('f6', 'Eine endotherme Reaktion kann nie freiwillig ablaufen.', 'chem-mis-en-endo-never'),
+      ],
+      hint: r`Nutze $${DG} = ${DH} - T \cdot ${DS}$ und $${DG}^{0} = -R \cdot T \cdot \ln K$ und prüfe jeweils die Vorzeichen.`,
+      explanation: why(
+        r`Aus $${DG}^{0} = -R \cdot T \cdot \ln K$ folgt: Ist $${DG}^{0}$ negativ, ist $\ln K$ positiv und $K > 1$; bei $${DG}^{0} = 0$ ist $K = 1$. In $${DG} = ${DH} - T \cdot ${DS}$ ($T$ in Kelvin, gleiche Energie-Einheit) machen $${DH} < 0$ und $${DS} > 0$ das $${DG}$ immer negativ, $${DH} > 0$ und $${DS} < 0$ immer positiv. Sind beide positiv, überwiegt $T \cdot ${DS}$ erst oberhalb einer Grenztemperatur.`,
+        r`$${DG}^{0} < 0$ heißt $K > 1$; die Vorzeichen von $${DH}$ und $${DS}$ entscheiden über den Temperaturbereich.`,
+      ),
+      cards: ['en-freie-enthalpie', 'en-freie-enthalpie-k', 'en-grenztemperatur'],
       ref: REF,
     }),
   ],

@@ -175,13 +175,22 @@ describe.each(WITH_QUESTIONS.map((t) => [t.bank.course, t] as const))('Chemie-En
     }
   })
 
-  it('plant jede Frage in jeder Fassung mit vier Antworten, genau eine richtig', () => {
+  it('plant jede Frage in jeder Fassung mit vier Antworten, genau eine richtig („Wähle alle richtigen“: vier bis sechs, mindestens eine falsch)', () => {
     for (const q of questions) {
       for (const variant of [0, 1, 2, 49]) {
         const task = engine.planGuidedTask({ level: q.level, seed: questionSeed(q.no, variant) })
         const [step] = task.steps
-        expect(step.choices, q.id).toHaveLength(4)
-        expect(step.choices.filter((c) => c.correct), q.id).toHaveLength(1)
+        const right = step.choices.filter((c) => c.correct).length
+        if (q.kind === 'multi') {
+          expect(step.multi, q.id).toBe(true)
+          expect(step.choices.length, q.id).toBeGreaterThanOrEqual(4)
+          expect(step.choices.length, q.id).toBeLessThanOrEqual(6)
+          expect(right, q.id).toBeGreaterThanOrEqual(1)
+          expect(right, q.id).toBeLessThan(step.choices.length)
+        } else {
+          expect(step.choices, q.id).toHaveLength(4)
+          expect(right, q.id).toBe(1)
+        }
         expect(task.questionId).toBe(q.id)
       }
       // Grundform und Fassung 0 sind dieselbe Aufgabe

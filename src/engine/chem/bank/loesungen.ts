@@ -1,4 +1,4 @@
-import type { QuestionBank } from '../../quiz/types.ts'
+import type { MultiChoice, QuestionBank, QuestionLevel } from '../../quiz/types.ts'
 
 // Wissensfragen zum Thema „Gase und Lösungen“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern: Stufe · 100 +
 // laufende Nummer; nie neu vergeben, gelöschte kommen in retired. Zahlen nachgerechnet (molare Massen wie
@@ -10,6 +10,15 @@ const REF_C = 'Skript Stöchiometrie, Folie 20'
 const REF_MASS = 'Skript Stöchiometrie, Folie 22'
 const REF_PPM = 'Skript Stöchiometrie, Folie 23'
 const REF_VOL = 'Skript Stöchiometrie, Folie 24'
+
+// „Wähle alle richtigen“ (N1): richtige Aussagen r1, r2, …; jede Aussage ein ganzer Satz
+type MultiSpec = Omit<MultiChoice, 'kind' | 'level' | 'correct'> & { correct: readonly string[] }
+const multiAt = (level: QuestionLevel) => (spec: MultiSpec): MultiChoice => ({
+  ...spec,
+  kind: 'multi',
+  level,
+  correct: spec.correct.map((text, i) => ({ id: `r${i + 1}`, text })),
+})
 
 export const LOESUNGEN_BANK: QuestionBank = {
   course: 'chem-loesungen',
@@ -1634,6 +1643,94 @@ export const LOESUNGEN_BANK: QuestionBank = {
       cards: ['loesungen-gasgesetz'],
       ref: REF_GAS,
     },
+    // ---- Wähle alle richtigen (N1)
+    multiAt(1)({
+      id: 'lo-g-multi-konzentration',
+      no: 118,
+      fact: 'multi-concentration',
+      part: 'konzentration',
+      title: "Stoffmengenkonzentration",
+      prompt: "Welche Aussagen über die Stoffmengenkonzentration stimmen?",
+      correct: [
+        "Die Stoffmengenkonzentration gibt an, wie viel Mol des gelösten Stoffs in einem Liter Lösung stecken.",
+        String.raw`Die Stoffmengenkonzentration gibt man in $\mathrm{mol/L}$ an.`,
+        "Füllt man einen Teil einer Lösung ab, hat dieser Teil dieselbe Konzentration wie die ganze Lösung.",
+        "In der Chemie arbeitet man bevorzugt mit der Stoffmengenkonzentration, weil bei Reaktionen die Zahl der Teilchen zählt.",
+      ],
+      wrong: [
+        { id: 'f1', text: String.raw`In $c = \frac{n}{V}$ ist $V$ das Volumen des Wassers, in dem man den Stoff löst.`, misconception: 'chem-mis-lo-v-not-solution' },
+        { id: 'f2', text: String.raw`Eine Konzentration erhält man, indem man die Stoffmenge mit dem Volumen malnimmt: $c = n \cdot V$.`, misconception: 'chem-mis-lo-c-times' },
+        { id: 'f3', text: String.raw`Bei der Konzentration steht das Volumen im Zähler: $c = \frac{V}{n}$.`, misconception: 'chem-mis-lo-c-inverted' },
+        { id: 'f4', text: "Die Lösung mit der höchsten Konzentration enthält immer auch am meisten gelösten Stoff.", misconception: 'chem-mis-lo-share-is-amount' },
+        { id: 'f5', text: "Gleiche Gramm je Liter bedeuten bei verschiedenen Stoffen auch gleiche Mol je Liter.", misconception: 'chem-mis-lo-c-mixup' },
+      ],
+      hint: String.raw`Was steht in $c = \frac{n}{V}$ im Zähler, was im Nenner, und welches Volumen ist gemeint?`,
+      explanation: {
+        detailed: String.raw`Die Stoffmengenkonzentration ist $c = \frac{n}{V}$: Mol gelöster Stoff je Liter fertiger Lösung, Einheit $\mathrm{mol/L}$. Sie beschreibt, wie dicht der Stoff verteilt ist, deshalb hat jeder abgefüllte Teil dieselbe Konzentration. In der Chemie ist sie die wichtigste Angabe, weil Stoffe in festen Verhältnissen von Teilchen reagieren.`,
+        short: String.raw`$c = \frac{n}{V}$ in $\mathrm{mol/L}$; jeder Teil der Lösung hat dieselbe Konzentration.`,
+      },
+      cards: ['loesungen-konzentration'],
+      ref: REF_C,
+    }),
+    multiAt(2)({
+      id: 'lo-v-multi-anteile',
+      no: 218,
+      fact: 'multi-shares',
+      part: 'anteile',
+      title: "Anteile und ppm",
+      prompt: "Welche Aussagen über Anteile in Lösungen und Mischungen stimmen?",
+      correct: [
+        "Beim Massenanteil steht im Nenner die Masse der ganzen Lösung, also gelöster Stoff und Wasser zusammen.",
+        String.raw`Bei Massen bedeutet $1\,\mathrm{ppm}$ ein Milligramm Stoff je Kilogramm Probe.`,
+        String.raw`$100\,\mathrm{mL}$ eines Mittels mit $70\,\mathrm{Vol}\text{-}\%$ Ethanol enthalten $70\,\mathrm{mL}$ Ethanol.`,
+        String.raw`Mischt man $60\,\mathrm{mL}$ Ethanol mit $40\,\mathrm{mL}$ Wasser, entsteht etwas weniger als $100\,\mathrm{mL}$ Mischung.`,
+      ],
+      wrong: [
+        { id: 'f1', text: String.raw`$1\,\mathrm{ppm}$ ist ein Tausendstel, also dasselbe wie ein Promille.`, misconception: 'chem-mis-lo-ppm-factor' },
+        { id: 'f2', text: String.raw`Das b in ppb steht für die deutsche Billion, also ein Teil auf $10^{12}$ Teile.`, misconception: 'chem-mis-lo-billion' },
+        { id: 'f3', text: String.raw`Ein Massenanteil von $10\,\%$ heißt: $10\,\mathrm{g}$ Stoff in $100\,\mathrm{mL}$ Lösung.`, misconception: 'chem-mis-lo-w-volume' },
+        { id: 'f4', text: String.raw`$40\,\mathrm{Vol}\text{-}\%$ Ethanol heißen $40\,\mathrm{g}$ Ethanol in $100\,\mathrm{g}$ Mischung.`, misconception: 'chem-mis-lo-vol-mass' },
+        { id: 'f5', text: "Die Massenkonzentration einer Lösung in g/L ist dasselbe wie ihre Dichte.", misconception: 'chem-mis-lo-beta-density' },
+        { id: 'f6', text: String.raw`Ein Anteil von $0{,}05$ als Dezimalzahl sind $0{,}05\,\%$.`, misconception: 'chem-mis-lo-percent-factor' },
+      ],
+      hint: "Worauf bezieht sich jede Angabe: auf Masse oder Volumen, auf die ganze Lösung oder nur auf das Wasser? Und wie viele Teile stecken hinter ppm und ppb?",
+      explanation: {
+        detailed: String.raw`Der Massenanteil teilt die Masse des gelösten Stoffs durch die Masse der ganzen Lösung. $1\,\mathrm{ppm}$ ist ein Teil auf eine Million, bei Massen $1\,\mathrm{mg}$ je $\mathrm{kg}$. Vol-% beziehen sich auf das Volumen der fertigen Mischung: $70\,\mathrm{Vol}\text{-}\%$ heißt $70\,\mathrm{mL}$ in $100\,\mathrm{mL}$. Ethanol und Wasser ordnen sich beim Mischen dichter an, deshalb addieren sich ihre Volumina nicht genau.`,
+        short: String.raw`Massenanteil durch die ganze Lösung; $1\,\mathrm{ppm} = 1\,\mathrm{mg/kg}$; Vol-% auf das Volumen der Mischung; Volumina addieren sich nicht genau.`,
+      },
+      cards: ['loesungen-massenanteil', 'loesungen-ppm', 'loesungen-volumenanteil'],
+      ref: REF_MASS,
+    }),
+    multiAt(3)({
+      id: 'lo-k-multi-gase',
+      no: 319,
+      fact: 'multi-gases',
+      part: 'gase',
+      title: "Ideale Gase",
+      prompt: "Welche Aussagen über ideale Gase stimmen?",
+      correct: [
+        "Bei gleichem Druck und gleicher Temperatur nimmt ein Mol eines idealen Gases dasselbe Volumen ein, egal um welches Gas es sich handelt.",
+        String.raw`Bei $0\,^{\circ}\mathrm{C}$ und $1013\,\mathrm{hPa}$ nimmt ein Mol eines idealen Gases $22{,}4\,\mathrm{L}$ ein.`,
+        String.raw`Mit $R = 8{,}314\,\mathrm{J/(mol \cdot K)}$ setzt man im Gasgesetz den Druck in $\mathrm{Pa}$, das Volumen in $\mathrm{m^3}$ und die Temperatur in $\mathrm{K}$ ein.`,
+        "Drückt man ein Gas bei gleicher Temperatur auf die Hälfte seines Volumens zusammen, verdoppelt sich der Druck.",
+        "Im Modell des idealen Gases ziehen sich die Teilchen nicht an, und ihr Eigenvolumen ist vernachlässigbar.",
+      ],
+      wrong: [
+        { id: 'f1', text: String.raw`Bei $0\,^{\circ}\mathrm{C}$ und $1013\,\mathrm{hPa}$ nimmt ein Mol jedes Stoffes $22{,}4\,\mathrm{L}$ ein, auch ein Mol flüssiges Wasser.`, misconception: 'chem-mis-lo-vm-everything' },
+        { id: 'f2', text: "Gleich große Volumina verschiedener Gase enthalten bei gleichem Druck und gleicher Temperatur dieselbe Masse.", misconception: 'chem-mis-lo-avogadro-mass' },
+        { id: 'f3', text: String.raw`Verdoppelt sich die Temperatur eines Gases in $^{\circ}\mathrm{C}$, verdoppelt sich bei gleichem Druck auch sein Volumen.`, misconception: 'chem-mis-lo-celsius' },
+        { id: 'f4', text: "Erwärmt man ein Gas, entstehen zusätzliche Gasteilchen; deshalb dehnt es sich aus.", misconception: 'chem-mis-lo-heat-more-particles' },
+        { id: 'f5', text: String.raw`Ein Mol $\ce{O2}$ nimmt bei gleichem Druck und gleicher Temperatur doppelt so viel Raum ein wie ein Mol $\ce{He}$.`, misconception: 'chem-mis-lo-atoms-count' },
+        { id: 'f6', text: String.raw`Ein Mol Gas nimmt immer $22{,}4\,\mathrm{L}$ ein, egal bei welcher Temperatur und welchem Druck.`, misconception: 'chem-mis-lo-vm-any-condition' },
+      ],
+      hint: String.raw`Denke an $p \cdot V = n \cdot R \cdot T$: Wovon hängt das Volumen ab, wovon nicht? In welchen Einheiten rechnet die Gleichung?`,
+      explanation: {
+        detailed: String.raw`Nach $p \cdot V = n \cdot R \cdot T$ hängt das Volumen eines idealen Gases nur von Stoffmenge, Druck und Temperatur ab, nicht von der Art des Gases; bei Normbedingungen sind es $22{,}4\,\mathrm{L}$ je Mol. Bei gleicher Temperatur sind Druck und Volumen umgekehrt proportional. Gerechnet wird in SI-Einheiten: Pa, $\mathrm{m^3}$, K. Das Modell nimmt an, dass sich die Teilchen nicht anziehen und kaum Raum einnehmen.`,
+        short: String.raw`$p \cdot V = n \cdot R \cdot T$ in SI-Einheiten; das Volumen hängt nicht von der Art des Gases ab.`,
+      },
+      cards: ['loesungen-molvolumen', 'loesungen-gasgesetz'],
+      ref: REF_GAS,
+    }),
   ],
   retired: [],
 }

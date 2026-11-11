@@ -27,7 +27,8 @@ export const CATALYST_QUESTIONS = [113, 114, 115, 218, 318]
 function questionItem(no: number, id: string, rng: Rng): ExamItem {
   const topic = chemTopic(MWG)!
   const q = topic.bank.questions.find((x) => x.no === no)
-  if (!q) throw new Error(`Frage ${no} fehlt im Thema Chemisches Gleichgewicht`)
+  // nur Einfachauswahl: Klausurfragen haben vier Antworten, genau eine richtig
+  if (q?.kind !== 'single') throw new Error(`Frage ${no} fehlt im Thema Chemisches Gleichgewicht oder ist keine Einfachauswahl`)
   const variant = rng.int(0, VARIANTS - 1)
   const seed = questionSeed(no, variant)
   const task = planQuestion(q, topic.misconceptions, { level: q.level, seed }, variant)

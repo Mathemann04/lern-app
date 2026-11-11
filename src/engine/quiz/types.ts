@@ -51,7 +51,20 @@ export type SingleChoice = {
   readonly figure?: string
 }
 
-export type Question = SingleChoice
+// „Wähle alle richtigen“ (N1): Aussagen, von denen eine oder mehrere stimmen. Gezeigt werden vier bis sechs
+// Aussagen aus dem Vorrat, davon eine bis vier richtige und mindestens eine falsche (quiz/plan.ts). Jede
+// falsche Aussage ist ein typischer Denkfehler wie bei der Einfachauswahl. Im Vorrat mindestens zwei
+// richtige und drei falsche, damit jede Fassung anders aussieht.
+export type MultiChoice = Omit<SingleChoice, 'kind' | 'correct'> & {
+  readonly kind: 'multi'
+  readonly correct: readonly QuizOption[]
+}
+
+export type Question = SingleChoice | MultiChoice
+
+// richtige Antworten einer Frage (bei der Einfachauswahl genau eine)
+export const correctOptionsOf = (question: Question): readonly QuizOption[] =>
+  question.kind === 'multi' ? question.correct : [question.correct]
 
 // Typischer Denkfehler (Id „chem-mis-…"): falsche Aussage und warum sie falsch ist. Der Text nennt den
 // Fehler und die Regel, verrät aber nicht die richtige Antwort einer bestimmten Frage.

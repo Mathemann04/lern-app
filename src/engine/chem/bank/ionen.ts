@@ -1,4 +1,4 @@
-import type { QuestionBank } from '../../quiz/types.ts'
+import type { MultiChoice, QuestionBank, QuestionLevel } from '../../quiz/types.ts'
 
 // Wissensfragen zum Thema „Ionenbindung und Salze“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern: Stufe ·
 // 100 + laufende Nummer; nie neu vergeben, gelöschte kommen in retired. Salze heißen „ionisch“, wo es zählt; keine
@@ -16,6 +16,15 @@ const REF_LOESEN = 'Skript Ionenbindung, Folie 9'
 const REF_SCHMELZ = 'Skript Ionenbindung, Folie 10'
 const REF_AMORPH = 'Skript Ionenbindung, Folie 11'
 const REF_UEBUNG = 'Übung Bindungen'
+
+// „Wähle alle richtigen“ (N1): richtige Aussagen r1, r2, …; jede Aussage ein ganzer Satz
+type MultiSpec = Omit<MultiChoice, 'kind' | 'level' | 'correct'> & { correct: readonly string[] }
+const multiAt = (level: QuestionLevel) => (spec: MultiSpec): MultiChoice => ({
+  ...spec,
+  kind: 'multi',
+  level,
+  correct: spec.correct.map((text, i) => ({ id: `r${i + 1}`, text })),
+})
 
 export const IONEN_BANK: QuestionBank = {
   course: 'chem-ionen',
@@ -1438,6 +1447,94 @@ export const IONEN_BANK: QuestionBank = {
       cards: ['ionen-born-haber', 'ionen-eigenschaften'],
       ref: REF_SCHMELZ,
     },
+    // ---- Wähle alle richtigen (N1)
+    multiAt(1)({
+      id: 'io-g-multi-salze',
+      no: 118,
+      fact: 'multi-salt-properties',
+      part: 'gitter',
+      title: "Eigenschaften der Salze",
+      prompt: "Welche Aussagen über Salze wie Kochsalz stimmen?",
+      correct: [
+        "Ein Salzkristall ist spröde und zerspringt, wenn man mit einem Hammer auf ihn schlägt.",
+        "Salze wie Kochsalz schmelzen erst bei hoher Temperatur.",
+        "Eine Salzschmelze leitet den elektrischen Strom, weil die Ionen darin wandern können.",
+        "Im Kristall wird jedes Ion von mehreren entgegengesetzt geladenen Nachbarn angezogen.",
+      ],
+      wrong: [
+        { id: 'f1', text: "Ein fester Salzkristall leitet den Strom, weil er aus geladenen Teilchen besteht.", misconception: 'chem-mis-io-solid-conducts' },
+        { id: 'f2', text: "Salzkristalle lassen sich wie Metalle hämmern und biegen, ohne zu brechen.", misconception: 'chem-mis-io-ductile' },
+        { id: 'f3', text: "Zwischen den Ionen eines Salzes wirken nur schwache Kräfte, deshalb schmelzen Salze leicht.", misconception: 'chem-mis-io-weak-forces' },
+        { id: 'f4', text: "Eine Salzschmelze leitet den Strom über freie Elektronen, so wie ein Metall.", misconception: 'chem-mis-io-electrons-conduct' },
+        { id: 'f5', text: "Ein fester Salzkristall besteht aus neutralen Atomen; Ionen entstehen erst beim Schmelzen.", misconception: 'chem-mis-io-ions-form-late' },
+      ],
+      hint: "Überlege, wie fest die Ionen im Kristall sitzen und was sich beim Schmelzen daran ändert.",
+      explanation: {
+        detailed: "Im Kristall wird jedes Ion von mehreren Gegenionen stark angezogen; diese Anziehung muss man beim Schmelzen überwinden, deshalb schmelzen Salze erst bei hoher Temperatur. Verschiebt man eine Schicht des Gitters, kommen gleich geladene Ionen nebeneinander und stoßen sich ab: Der Kristall ist spröde. Im festen Kristall sitzen die Ionen fest, in der Schmelze können sie wandern und den Strom tragen.",
+        short: "Starke Anziehung, spröde, hoher Schmelzpunkt; leitend erst, wenn die Ionen wandern können.",
+      },
+      cards: ['ionen-eigenschaften'],
+      ref: REF_SCHMELZ,
+    }),
+    multiAt(2)({
+      id: 'io-v-multi-loesen',
+      no: 218,
+      fact: 'multi-dissolving',
+      part: 'zerfall',
+      title: "Salze lösen",
+      prompt: "Welche Aussagen über das Lösen von Salzen in Wasser stimmen?",
+      correct: [
+        "Beim Lösen löst sich das Gitter auf, und die Ionen verteilen sich einzeln, jeweils von Wassermolekülen umhüllt.",
+        String.raw`Nach dem Lösen von $\ce{MgBr2}$ liegen $\ce{Mg^2+}$ und $\ce{Br-}$ im Verhältnis $1 : 2$ vor.`,
+        "An ein Kation lagern sich die Wassermoleküle mit ihrem Sauerstoffatom an.",
+        "Löst man Ammoniumchlorid in Wasser, kühlt die Lösung ab.",
+        String.raw`Ein Molekül-Ion wie $\ce{SO4^2-}$ bleibt beim Lösen als Ganzes erhalten.`,
+      ],
+      wrong: [
+        { id: 'f1', text: "Beim Lösen zerfällt ein Salz in neutrale Atome.", misconception: 'chem-mis-io-dissolve-atoms' },
+        { id: 'f2', text: "An ein Kation lagern sich die Wassermoleküle mit ihren Wasserstoffatomen voran an.", misconception: 'chem-mis-io-water-orientation' },
+        { id: 'f3', text: String.raw`Beim Lösen von Kochsalz bleiben kleine $\ce{NaCl}$-Moleküle erhalten, die im Wasser schwimmen.`, misconception: 'chem-mis-io-molecule' },
+        { id: 'f4', text: "Lösen und Schmelzen sind derselbe Vorgang: Das Salz schmilzt im Wasser.", misconception: 'chem-mis-io-dissolve-is-melting' },
+        { id: 'f5', text: "Jedes Salz erwärmt beim Lösen das Wasser.", misconception: 'chem-mis-io-dissolve-always-same' },
+        { id: 'f6', text: String.raw`$\ce{CaCl2}$ zerfällt beim Lösen in ein $\ce{Ca^2+}$ und ein $\ce{Cl2^2-}$.`, misconception: 'chem-mis-io-index-in-ion' },
+      ],
+      hint: "Was behalten die Ionen beim Lösen, und welche Seite des Wassermoleküls ist negativ geladen?",
+      explanation: {
+        detailed: String.raw`Beim Lösen holen Wassermoleküle die Ionen aus dem Gitter und umhüllen sie; die Ionen behalten ihre Ladung. An ein Kation lagert sich das Sauerstoffatom mit seiner negativen Teilladung an. Der Index wird zur Anzahl der Ionen: $\ce{MgBr2}$ gibt ein $\ce{Mg^2+}$ und zwei $\ce{Br-}$; Molekül-Ionen wie Sulfat bleiben ganz. Bei Ammoniumchlorid kostet das Aufbrechen des Gitters mehr Energie, als die Hydratation freisetzt: Die Lösung kühlt ab.`,
+        short: "Ionen werden einzeln umhüllt, behalten Ladung und Verhältnis; Ammoniumchlorid kühlt.",
+      },
+      cards: ['ionen-zerfall', 'ionen-loesen'],
+      ref: REF_LOESEN,
+    }),
+    multiAt(3)({
+      id: 'io-k-multi-born-haber',
+      no: 319,
+      fact: 'multi-born-haber',
+      part: 'energie',
+      title: "Gitterenergie und Born-Haber",
+      prompt: "Welche Aussagen über die Gitterenergie und den Born-Haber-Kreisprozess stimmen?",
+      correct: [
+        "Lagern sich gasförmige Ionen zu einem Kristall zusammen, wird Energie frei.",
+        "Die Gitterenergie lässt sich nicht direkt messen; man berechnet sie aus messbaren Schritten.",
+        "Das Ionisieren des Metallatoms kostet Energie, obwohl es dabei die Edelgaskonfiguration erreicht.",
+        String.raw`Für ein Mol Natriumfluorid spaltet man ein halbes Mol $\ce{F2}$ in Atome.`,
+        "Die Summe aller Schritte über die gasförmigen Ionen ergibt genau die Bildungsenthalpie des Salzes.",
+      ],
+      wrong: [
+        { id: 'f1', text: "Die Gitterenergie ist eine Kraft zwischen den Ionen und wird in Newton angegeben.", misconception: 'chem-mis-io-lattice-is-force' },
+        { id: 'f2', text: "Bildet sich ein Ionengitter aus gasförmigen Ionen, wird dabei Energie aufgenommen.", misconception: 'chem-mis-io-lattice-sign' },
+        { id: 'f3', text: "Der Kreisprozess zeigt, wie ein Salz in Wirklichkeit Schritt für Schritt entsteht.", misconception: 'chem-mis-io-bh-real-path' },
+        { id: 'f4', text: "Der Umweg über die gasförmigen Ionen liefert eine andere Energie als der direkte Weg von den Elementen zum Salz.", misconception: 'chem-mis-io-bh-path-dependent' },
+        { id: 'f5', text: "Die Gitterenergie ist dasselbe wie die Bildungsenthalpie des Salzes.", misconception: 'chem-mis-io-lattice-mixup' },
+      ],
+      hint: "Welcher Schritt gehört zur Gitterenergie, und hängt eine Energie vom Weg zwischen denselben Stoffen ab?",
+      explanation: {
+        detailed: String.raw`Rücken entgegengesetzt geladene Ionen zum Kristall zusammen, wird Energie frei; das ist die Gitterenergie, eine Energie in $\mathrm{kJ/mol}$. Sie lässt sich nicht direkt messen und wird aus messbaren Schritten berechnet, weil die Energie von den Elementen zum Salz nicht vom Weg abhängt: Die Summe aller Schritte ergibt die Bildungsenthalpie. Das Ionisieren des Metalls kostet Energie, auch mit Edelgaskonfiguration. Für eine Formeleinheit $\ce{NaF}$ braucht man nur ein Fluoratom, also ein halbes $\ce{F2}$.`,
+        short: "Gitterbildung setzt Energie frei; der Weg ist egal; Ionisieren kostet; halbes Halogenmolekül.",
+      },
+      cards: ['ionen-born-haber'],
+      ref: REF_ENERGIE,
+    }),
   ],
   retired: [],
 }

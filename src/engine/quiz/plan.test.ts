@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { QUIZ_INSTRUCTION, SHOWN_WRONG, planQuestion } from './plan.ts'
-import type { Misconception, Question } from './types.ts'
+import { MULTI_CORRECT, MULTI_INSTRUCTION, MULTI_SHOWN, QUIZ_INSTRUCTION, SHOWN_WRONG, planQuestion } from './plan.ts'
+import type { Misconception, MultiChoice, Question } from './types.ts'
 
 // Eigene kleine Frage für die Tests, unabhängig von den Sammlungen
 const why = (text: string) => ({ detailed: `${text} (ausführlich)`, short: text })
@@ -94,5 +94,68 @@ describe('Wissensfrage als geführte Aufgabe', () => {
   it('meldet einen unbekannten Denkfehler', () => {
     const broken: Question = { ...QUESTION, wrong: QUESTION.wrong.map((o) => ({ ...o, misconception: 'chem-mis-unbekannt', why: undefined })) }
     expect(() => planQuestion(broken, MISCONCEPTIONS, REF, 0)).toThrow(/unbekannt/)
+  })
+})
+
+// „Wähle alle richtigen“ (N1): kleinster erlaubter Vorrat (zwei richtige, drei falsche) und ein großer
+const MULTI: MultiChoice = {
+  ...QUESTION,
+  kind: 'multi',
+  id: 'test-mehrfach',
+  prompt: 'Welche Aussagen stimmen?',
+  correct: [
+    { id: 'r1', text: 'Richtig eins.' },
+    { id: 'r2', text: 'Richtig zwei.' },
+    { id: 'r3', text: 'Richtig drei.' },
+    { id: 'r4', text: 'Richtig vier.' },
+    { id: 'r5', text: 'Richtig fünf.' },
+  ],
+}
+const SMALL: MultiChoice = { ...MULTI, id: 'test-klein', correct: MULTI.correct.slice(0, 2), wrong: QUESTION.wrong.slice(0, 3) }
+const planMulti = (q: MultiChoice, variant: number, focus?: string) => planQuestion(q, MISCONCEPTIONS, REF, variant, focus)
+const MANY = Array.from({ length: 400 }, (_, i) => i)
+
+describe('„Wähle alle richtigen" als geführte Aufgabe', () => {
+  it.each([
+    ['großer Vorrat', MULTI],
+    ['kleinster Vorrat', SMALL],
+  ] as const)('%s: vier bis sechs Aussagen, eine bis vier richtig, mindestens eine falsch, keine doppelt', (_, q) => {
+    for (const variant of MANY) {
+      const [step] = planMulti(q, variant).steps
+      expect(step.multi).toBe(true)
+      const right = step.choices.filter((c) => c.correct).length
+      expect(step.choices.length).toBeGreaterThanOrEqual(MULTI_SHOWN.min)
+      expect(step.choices.length).toBeLessThanOrEqual(MULTI_SHOWN.max)
+      expect(right).toBeGreaterThanOrEqual(MULTI_CORRECT.min)
+      expect(right).toBeLessThanOrEqual(MULTI_CORRECT.max)
+      expect(step.choices.length - right).toBeGreaterThanOrEqual(1)
+      expect(new Set(step.choices.map((c) => c.id)).size).toBe(step.choices.length)
+    }
+  })
+
+  it('wechselt Zahl der Aussagen, Zahl der richtigen und Auswahl', () => {
+    const steps = MANY.map((v) => planMulti(MULTI, v).steps[0])
+    expect(new Set(steps.map((s) => s.choices.length))).toEqual(new Set([4, 5, 6]))
+    expect(new Set(steps.map((s) => s.choices.filter((c) => c.correct).length))).toEqual(new Set([1, 2, 3, 4]))
+    expect(new Set(steps.map((s) => s.choices.map((c) => c.id).sort().join(','))).size).toBeGreaterThan(100)
+  })
+
+  it('gibt jeder falschen Aussage ihren Denkfehler und nennt im Ergebnis genau die richtigen der Fassung', () => {
+    for (const variant of VARIANTS) {
+      const task = planMulti(MULTI, variant)
+      const [step] = task.steps
+      expect(task.instruction).toBe(MULTI_INSTRUCTION)
+      for (const c of step.choices.filter((x) => !x.correct)) expect(c.whyWrong).toBeDefined()
+      expect(task.resultText).toBe(step.choices.filter((c) => c.correct).map((c) => c.content).join('\n'))
+      expect(planMulti(MULTI, variant)).toEqual(task)
+    }
+  })
+
+  it('nimmt beim gezielten Üben die Aussage des Denkfehlers sicher mit', () => {
+    for (const variant of MANY) expect(planMulti(SMALL, variant, 'chem-mis-b').steps[0].choices.some((c) => c.errorRuleId === 'chem-mis-b')).toBe(true)
+  })
+
+  it('lässt die Einfachauswahl ohne Merkmal multi', () => {
+    expect(plan(0).steps[0].multi).toBeUndefined()
   })
 })

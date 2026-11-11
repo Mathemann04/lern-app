@@ -1,4 +1,4 @@
-import type { Explanation, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
+import type { Explanation, MultiChoice, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
 
 // Wissensfragen zum Thema „Aufbau des Periodensystems“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern: Stufe ·
 // 100 + laufende Nummer; nie neu vergeben. Begriffe: Periode, Haupt- und Nebengruppe, s-, p- und d-Block, Valenzelektronen,
@@ -15,6 +15,18 @@ const at = (level: QuestionLevel) => (spec: Spec): SingleChoice => ({ ...spec, k
 const g = at(1)
 const v = at(2)
 const k = at(3)
+
+// „Wähle alle richtigen“ (N1): richtige Aussagen r1, r2, …; jede Aussage ein ganzer Satz
+type MultiSpec = Omit<MultiChoice, 'kind' | 'level' | 'correct'> & { correct: readonly string[] }
+const multiAt = (level: QuestionLevel) => (spec: MultiSpec): MultiChoice => ({
+  ...spec,
+  kind: 'multi',
+  level,
+  correct: spec.correct.map((text, i) => ({ id: `r${i + 1}`, text })),
+})
+const mg = multiAt(1)
+const mv = multiAt(2)
+const mk = multiAt(3)
 
 export const PSE_BANK: QuestionBank = {
   course: 'chem-pse',
@@ -973,6 +985,93 @@ export const PSE_BANK: QuestionBank = {
       hint: 'Was zählt die Ordnungszahl, und wie viele Elektronen hat ein ungeladenes Atom?',
       explanation: why('Die Ordnungszahl steigt um eins: ein Proton mehr. Das ungeladene Atom hat dann auch ein Elektron mehr, das in die nächste freie Unterschale kommt.', 'Ein Proton und ein Elektron mehr.'),
       cards: ['pse-aufbau'],
+      ref: REF,
+    }),
+    // ---- Wähle alle richtigen (N1)
+    mg({
+      id: 'pse-g-multi-aufbau',
+      no: 119,
+      fact: 'multi-pse-aufbau',
+      part: 'aufbau',
+      title: 'Aufbau des Periodensystems',
+      prompt: 'Welche Aussagen über den Aufbau des Periodensystems stimmen?',
+      correct: [
+        'Die Elemente sind nach steigender Ordnungszahl geordnet, also nach der Zahl der Protonen.',
+        'Bei Hauptgruppenelementen ist die Nummer der Periode die Nummer der äußersten Schale, die Elektronen enthält.',
+        'Alle Elemente der I. Hauptgruppe haben ein Valenzelektron.',
+        'Elemente derselben Hauptgruppe reagieren ähnlich.',
+        'Ein Element der III. Hauptgruppe hat drei Valenzelektronen.',
+      ],
+      wrong: [
+        w('f1', 'Die Elemente sind nach ihrer Atommasse geordnet.', 'chem-mis-pse-mass-order'),
+        w('f2', 'Die Nummer der Periode gibt an, wie viele Valenzelektronen ein Element hat.', 'chem-mis-pse-row-column'),
+        w('f3', 'Elemente derselben Periode haben besonders ähnliche Eigenschaften.', 'chem-mis-pse-period-similar'),
+        w('f4', 'Aluminium in Gruppe 13 hat 13 Valenzelektronen.', 'chem-mis-pse-group-number'),
+        w('f5', 'Die Ordnungszahl zählt alle Teilchen im Kern.', 'chem-mis-pse-z-meaning'),
+      ],
+      hint: 'Was sagen Ordnungszahl, Periode und Hauptgruppe jeweils über ein Element aus?',
+      explanation: why(
+        'Geordnet wird nach der Ordnungszahl, der Zahl der Protonen. Bei Hauptgruppenelementen nennt die Periode die äußerste besetzte Schale. Die Elemente einer Hauptgruppe haben so viele Valenzelektronen, wie die römische Nummer angibt, etwa eins in der I. und drei in der III. Hauptgruppe (Ausnahme Helium mit zwei); weil die Valenzelektronen das Verhalten bestimmen, reagieren sie ähnlich.',
+        'Ordnungszahl = Protonen; Periode = äußerste Schale; Hauptgruppe = Zahl der Valenzelektronen.',
+      ),
+      cards: ['pse-aufbau', 'pse-valenz'],
+      ref: REF,
+    }),
+    mv({
+      id: 'pse-v-multi-edelgasregel',
+      no: 217,
+      fact: 'multi-noble-gas-rule',
+      part: 'ionen',
+      title: 'Edelgasregel und Ionen',
+      prompt: 'Welche Aussagen über die Edelgasregel und die Ladung von Ionen stimmen?',
+      correct: [
+        'Natrium gibt sein Valenzelektron ab und erreicht als Ion die Konfiguration von Neon.',
+        r`Selen nimmt zwei Elektronen auf und bildet $\ce{Se^2-}$.`,
+        r`$\ce{Na+}$, $\ce{Mg^2+}$ und $\ce{O^2-}$ haben je 10 Elektronen wie Neon.`,
+        'Edelgase reagieren kaum, weil ihre äußerste Schale voll besetzt ist.',
+        'Helium hat zwei Außenelektronen, und seine einzige Schale ist damit voll.',
+      ],
+      wrong: [
+        w('f1', 'Ein Atom, das Elektronen abgibt, wird negativ geladen.', 'chem-mis-pse-charge-sign'),
+        w('f2', 'Natrium erreicht als Ion die Konfiguration von Argon, dem Edelgas seiner Periode.', 'chem-mis-pse-noble-own'),
+        w('f3', 'Edelgase reagieren leicht, weil ihre volle Schale Elektronen abgeben möchte.', 'chem-mis-pse-noble-reactive'),
+        w('f4', 'Jedes Edelgas, auch Helium, hat acht Außenelektronen.', 'chem-mis-pse-octet-all'),
+        w('f5', r`Schwefel bildet das Ion $\ce{S^6-}$, weil er sechs Valenzelektronen hat.`, 'chem-mis-pse-charge-count'),
+      ],
+      hint: 'Zähle bei jedem Ion die Elektronen und vergleiche mit dem nächsten Edelgas.',
+      explanation: why(
+        r`Atome geben Elektronen ab oder nehmen welche auf, bis sie die Konfiguration eines Edelgases haben. Natrium gibt ein Elektron ab und hat dann 10 wie Neon; ebenso $\ce{Mg^2+}$ ($12 - 2$) und $\ce{O^2-}$ ($8 + 2$). Selen hat sechs Valenzelektronen und nimmt zwei auf: $\ce{Se^2-}$. Edelgase haben schon eine volle äußerste Schale und reagieren deshalb kaum; bei Helium ist das die erste Schale mit zwei Elektronen.`,
+        'Ionen erreichen die Elektronenzahl eines Edelgases; Edelgase haben schon eine volle Schale.',
+      ),
+      cards: ['pse-ionen', 'pse-edelgasregel'],
+      ref: REF,
+    }),
+    mk({
+      id: 'pse-k-multi-ionisierung',
+      no: 317,
+      fact: 'multi-ionization',
+      part: 'ionisierung',
+      title: 'Ionisierungsenergien',
+      prompt: 'Welche Aussagen über die Ionisierungsenergien eines Elements stimmen?',
+      correct: [
+        'Die Ionisierungsenergie muss man aufwenden, um einem Atom im Gaszustand ein Elektron zu entreißen.',
+        'Jedes weitere Elektron zu entfernen kostet mehr Energie als das vorige.',
+        'Ein großer Sprung zeigt, dass das nächste Elektron aus einer inneren, voll besetzten Schale kommt.',
+        'Bei Natrium liegt der große Sprung schon zwischen der ersten und der zweiten Ionisierungsenergie.',
+        'Liegt bei einem Hauptgruppenelement der große Sprung zwischen der dritten und der vierten Ionisierungsenergie, steht es in der III. Hauptgruppe.',
+      ],
+      wrong: [
+        w('f1', 'Die Ionisierungsenergie wird frei, wenn ein Atom ein Elektron abgibt.', 'chem-mis-pse-ie-definition'),
+        w('f2', 'Jedes weitere Elektron lässt sich leichter entfernen als das vorige, weil weniger Elektronen übrig sind.', 'chem-mis-pse-ie-decrease'),
+        w('f3', 'Die Nummer der Hauptgruppe ist die Zahl aller angegebenen Ionisierungsenergien.', 'chem-mis-pse-ie-count'),
+        w('f4', 'Liegt der große Sprung zwischen der zweiten und der dritten Ionisierungsenergie, hat das Element drei Valenzelektronen.', 'chem-mis-pse-ie-count'),
+      ],
+      hint: 'Was passiert mit der Ladung des Teilchens bei jedem entfernten Elektron, und woher kommt das Elektron nach dem Sprung?',
+      explanation: why(
+        r`Die Ionisierungsenergie muss aufgewendet werden, weil der Kern das Elektron anzieht. Jedes weitere Elektron kostet mehr, weil das Ion schon positiv ist. Ein großer Sprung zeigt, dass das nächste Elektron aus einer inneren, vollen Schale kommt; die Zahl der Elektronen vor dem Sprung ist die Zahl der Valenzelektronen. Bei Natrium kommt schon das zweite aus der vollen 2. Schale, bei einem Sprung nach $I_{3}$ sind es drei Valenzelektronen: III. Hauptgruppe.`,
+        'Aufzuwenden, steigt mit jedem Elektron; Elektronen vor dem Sprung = Valenzelektronen.',
+      ),
+      cards: ['pse-ionisierung'],
       ref: REF,
     }),
   ],
