@@ -186,3 +186,6 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   `dec` schreibt exakte Dezimalzahlen, `toDecimalString` liefert schon das Komma), Rechenfehler `chem/energieRules.ts`,
   Karten `energieCards.ts`, Fragen `bank/energie.ts` (Denkfehler `chem-mis-en-…`), Tests `generators/energie.test.ts`.
   Hochgestellte Ziffern wie in ΔG⁰ nur in Formeln (`$\Delta G^{0}$`), auch in Titeln.
+- Klausuraufgabe 5 (S7c): `chem/exam/task5.ts` (a aus Wissensfragen `EQUILIBRIUM_QUESTIONS` und `CATALYST_QUESTIONS`, b aus
+  `expressionStep`, c letzter Schritt von `leChatelierTask`, d aus `dhTask` auf Klausurniveau ohne Bildungen, e aus
+  `gibbsTask` oder `rangeTask`), Kachel über `exam: { task: 5 }` am Gebiet `chem-gleichgewicht`.

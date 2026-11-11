@@ -314,7 +314,7 @@ const DIR_SHORT: Readonly<Record<Shift, string>> = { right: 'zu den Produkten', 
 // Druck lässt sich fragen, wenn sich die Gasteilchen unterscheiden oder das Zählen der Stoffe einen Fehler ergibt
 export const pressureAskable = (e: Equilibrium) => gasCount(e.left) !== gasCount(e.right) || speciesCount(e.left) !== speciesCount(e.right)
 
-const dHLatex = (e: Equilibrium) => r`\Delta H = ${e.dH! > 0 ? '+' : '-'}${Math.abs(e.dH!)}\,\mathrm{kJ}`
+export const dHLatex = (e: Equilibrium) => r`\Delta H = ${e.dH! > 0 ? '+' : '-'}${Math.abs(e.dH!)}\,\mathrm{kJ}`
 
 // Richtung als Auswahl; wrong: Regel → falsche Richtung (die erste Regel mit derselben Richtung gewinnt)
 function directionStep(id: string, question: string, correct: Shift, wrong: readonly [string, Shift][], hint: string, why: string, cards: readonly string[], rng: Rng, focus?: string): GuidedStep | null {

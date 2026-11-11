@@ -1144,6 +1144,14 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   Lernkarten, 52 Wissensfragen (17, 18, 17), 15 Rechenfehler (9 neu, im Katalog), 29 Denkfehler. Abwechslung mit eigener
   Kennzahl (in den Grundlagen 28 Bildungen und 22 Phasenübergänge: mindestens 30 Formen unter 200, keine öfter als 6 von
   100).
+  **S7c** (fertig): „Klausuraufgabe 5 üben“ als Kachel im Gebiet Gleichgewicht und Energie, 10 Punkte nach dem Bauplan
+  Teil 1: a) zwei Wissensfragen zum dynamischen Gleichgewicht und zum Katalysator (2), b) Massenwirkungsgesetz eines
+  Gasgleichgewichts (2), c) Le Chatelier bei Druck, Temperatur oder Konzentration (1), d) Reaktionsenthalpie aus
+  Bildungsenthalpien (Summe der Produkte 1, ΔH 2; ohne typischen Fehler bei der Summe nur ΔH mit 3), e) freiwillig oder
+  nicht (ΔG und Urteil je 1, oder der Temperaturbereich aus ΔH und ΔS mit 2). Die Fragen kommen aus den Wissensfragen und
+  Rechnungen von S7a und S7b, mit denselben falschen Antworten und Fehlern; keine Folgefehler, die Teile sind unabhängig.
+  Die Summen von Produkten und Edukten sind jetzt auch im Thema nur dann eigene Schritte, wenn dabei ein typischer Fehler
+  passieren kann (so kommen alle Reaktionen vor, auch C + O₂ → CO₂).
 - **S8: Frei rechnen und Wiederholung.** Ziffernblock, Toleranz,
   Rundungshinweis und Fehlererkennung für alle Rechnungen; falsch
   beantwortete Fragen kommen wieder.

@@ -869,6 +869,7 @@ export const SUBJECTS: readonly Subject[] = [
         description: 'Massenwirkungsgesetz, Le Chatelier, Enthalpie und Entropie',
         icon: 'equilibrium',
         tone: 'fuchsia',
+        exam: { task: 5, points: 10 },
         courses: [
           {
             id: MWG,

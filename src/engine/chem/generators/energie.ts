@@ -137,10 +137,9 @@ function dhTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc 
   const x = rng.pick(pool)
   const dh = reactionDH(x)
   const steps: GuidedStep[] = []
+  // die Summen als eigene Schritte nur, wo dabei ein typischer Fehler passieren kann
   const products = sumStep('produkte', x.right, rng, focus)
-  if (!products) return null
-  steps.push(products)
-  // die Summe der Edukte als eigener Schritt nur, wo dabei ein typischer Fehler passieren kann
+  if (products) steps.push(products)
   const educts = x.formation ? null : sumStep('edukte', x.left, rng, focus)
   if (educts) steps.push(educts)
   const total = dhStep(x, rng, focus)
