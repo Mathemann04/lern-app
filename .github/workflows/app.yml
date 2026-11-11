@@ -37,8 +37,10 @@ jobs:
         run: npm test
       - name: Bauen
         run: npm run build
+      # Mit Zusatzpaketen (Schriften) von den Ubuntu-Servern; sind die nicht erreichbar (11.11.2026 stundenlang so),
+      # ohne sie: Die Bibliotheken für Chromium liegen auf den Rechnern von GitHub schon bereit
       - name: Browser installieren
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium || npx playwright install chromium
       - name: Browser-Tests
         run: npx playwright test
       - name: Ergebnis für GitHub Pages bereitstellen

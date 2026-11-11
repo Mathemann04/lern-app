@@ -98,3 +98,5 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
     `text-on-accent` auf farbigen Knöpfen, nie `text-white` auf Farbe.
   - Dort auch die dezenten Animationen (`animate-*`, aus bei „Bewegung
     reduzieren").
+- `.github/workflows/app.yml` installiert den Test-Browser notfalls ohne Zusatzpakete (`--with-deps` scheitert, wenn GitHub
+  die Ubuntu-Server nicht erreicht; dann fiel bis 11.11.2026 auch die Veröffentlichung aus).

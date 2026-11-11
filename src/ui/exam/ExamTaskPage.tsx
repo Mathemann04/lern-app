@@ -2,7 +2,11 @@ import { useEffect, useMemo, useState } from 'react'
 import { figureById } from '../../engine/chem/figures.ts'
 import { FigureDrawing } from '../chem/ChemFigure.tsx'
 import { chemErrorInfo, chemExamTask } from '../../engine/chem/exam/index.ts'
-import { type ExamResult, type ItemResult, type ItemState, examState, gradeExam, totalPoints, withAnswer } from '../../engine/exam/grade.ts'
+import { type ExamResult, type ItemResult, type ItemState, examState, gradeExam, numberAnswer, totalPoints, truthOf, typedText, withAnswer } from '../../engine/exam/grade.ts'
+import { formatLatex, readNumber } from '../../engine/quantity/numberDe.ts'
+import { updateSettings, useSettings } from '../../state/settings.ts'
+import type { PracticeMode } from '../../state/storage.ts'
+import { NumberAnswer } from '../numeric/NumberAnswer.tsx'
 import type { ExamAnswers, ExamPart } from '../../engine/exam/types.ts'
 import { recordError } from '../../state/progress.ts'
 import { CardSheetButton } from '../cards/CardSheet.tsx'
@@ -14,7 +18,14 @@ import { areaHref, examTaskHref } from '../routes.ts'
 
 // „Klausuraufgabe N üben" (Plan M4, S4c): alle Teile einer Klausuraufgabe am Stück, ohne Zeit. Bis zur
 // Abgabe zeigt die App nicht, was stimmt; danach Punkte je Teil und Frage, Folgefehler, Lösungsweg und
-// „Warum ist das falsch?". Erkannte Fehler zählen in die Fehlerstatistik.
+// „Warum ist das falsch?". Erkannte Fehler zählen in die Fehlerstatistik. Frei (S8c, Schalter „Eintippen", dieselbe
+// Einstellung wie „Geführt"/„Frei"): Zahlen werden über den Ziffernblock eingetippt, ohne Rückmeldung bis zur Abgabe.
+
+// eingetippte Zahl mit Einheit als Text mit Formel, z. B. „$1{,}85\,\mathrm{g}$"
+function typedContent(text: string, unit: string): string {
+  const value = readNumber(text)
+  return value ? `$${formatLatex(value, { significant: 12 })}${unit ? `\\,${unit}` : ''}$` : text
+}
 
 const decimal = (n: number) => String(n).replace('.', ',')
 const points = (n: number) => `${decimal(n)} ${n === 1 ? 'Punkt' : 'Punkte'}`
@@ -39,6 +50,10 @@ function ExamTaskView({ subject, taskNo, seed, areaId, areaTitle }: { subject: s
   const states = useMemo(() => examState(task, answers), [task, answers])
   const open = states.filter((s) => !s.chosen).length
   const max = totalPoints(task)
+  // Eintippen nur, wo es Zahlen gibt
+  const hasNumbers = useMemo(() => [...truthOf(task).values()].some((t) => t.build.numeric), [task])
+  const { practiceMode } = useSettings()
+  const free = hasNumbers && practiceMode === 'free'
 
   const submit = () => {
     const graded = gradeExam(task, answers)
@@ -63,9 +78,11 @@ function ExamTaskView({ subject, taskNo, seed, areaId, areaTitle }: { subject: s
         <h1 className="text-2xl font-semibold tracking-tight hyphens-auto">{task.title}</h1>
         {!result && (
           <p className="text-pretty text-zinc-600">
-            Wie in der Klausur, nur ohne Zeit: Wähle zu jeder Frage eine Antwort. Was stimmt, zeigt die Auswertung nach der Abgabe; Folgefehler zählen nicht doppelt.
+            Wie in der Klausur, nur ohne Zeit: {free ? 'Tippe Zahlen selbst ein, sonst wähle eine Antwort.' : 'Wähle zu jeder Frage eine Antwort.'} Was stimmt,
+            zeigt die Auswertung nach der Abgabe; Folgefehler zählen nicht doppelt.
           </p>
         )}
+        {!result && hasNumbers && <ModeSwitch mode={free ? 'free' : 'guided'} />}
       </div>
 
       {result && <Summary result={result} subject={subject} taskNo={taskNo} areaId={areaId} areaTitle={areaTitle} />}
@@ -82,12 +99,14 @@ function ExamTaskView({ subject, taskNo, seed, areaId, areaTitle }: { subject: s
 
       {task.parts.map((part) =>
         result ? (
-          <PartResultView key={part.id} part={part} result={result.parts.find((p) => p.part.id === part.id)!} />
+          <PartResultView key={part.id} part={part} result={result.parts.find((p) => p.part.id === part.id)!} answers={answers} states={states} />
         ) : (
           <PartView
             key={part.id}
             part={part}
             states={states.filter((s) => part.items.includes(s.item))}
+            free={free}
+            answers={answers}
             onPick={(itemId, optionId) => {
               setAnswers((a) => withAnswer(task, a, itemId, optionId))
               setConfirming(false)
@@ -132,7 +151,34 @@ function PartHeader({ part, earned }: { part: ExamPart; earned?: number }) {
   )
 }
 
-function PartView({ part, states, onPick }: { part: ExamPart; states: ItemState[]; onPick: (itemId: string, optionId: string) => void }) {
+// Auswählen oder Eintippen (dieselbe Einstellung wie „Geführt"/„Frei" beim Üben)
+function ModeSwitch({ mode }: { mode: PracticeMode }) {
+  const options: [PracticeMode, string][] = [
+    ['guided', 'Auswählen'],
+    ['free', 'Eintippen'],
+  ]
+  return (
+    <div className="flex gap-1 rounded-xl bg-zinc-100 p-1" role="group" aria-label="Zahlen">
+      {options.map(([value, label]) => (
+        <button
+          key={value}
+          type="button"
+          aria-pressed={mode === value}
+          onClick={() => updateSettings({ practiceMode: value })}
+          className={`min-h-11 flex-1 rounded-lg px-3 font-medium ${mode === value ? 'bg-raised text-accent-700 shadow-sm dark:text-accent-800' : 'text-zinc-600 hover:text-zinc-900'}`}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+type PartViewProps = { part: ExamPart; states: ItemState[]; free: boolean; answers: ExamAnswers; onPick: (itemId: string, optionId: string) => void }
+
+function PartView({ part, states, free, answers, onPick }: PartViewProps) {
+  // Frage, deren Ziffernblock offen ist (immer nur einer: die Tastatur des Laptops gilt ihm)
+  const [editing, setEditing] = useState<string | null>(null)
   return (
     <section className="space-y-4" aria-label={`Teil ${part.id}`}>
       <PartHeader part={part} />
@@ -142,7 +188,39 @@ function PartView({ part, states, onPick }: { part: ExamPart; states: ItemState[
             <RichText text={item.question} inline />
             <span className="ml-2 text-sm font-normal text-zinc-500">({points(item.points)})</span>
           </p>
-          {build ? (
+          {build && free && build.numeric ? (
+            editing === item.id ? (
+              <NumberAnswer
+                answer={build.numeric}
+                disabled={false}
+                submitLabel="Übernehmen"
+                initial={typedText(answers[item.id]) ?? undefined}
+                onSubmit={(_, text) => {
+                  onPick(item.id, numberAnswer(text))
+                  setEditing(null)
+                }}
+              />
+            ) : (
+              <div className="flex flex-wrap items-center gap-3">
+                {typedText(answers[item.id]) !== null ? (
+                  <p data-testid="typed-answer">
+                    Deine Zahl: <RichText text={typedContent(typedText(answers[item.id])!, build.numeric.unit)} inline />
+                  </p>
+                ) : chosen ? (
+                  <p>
+                    Gewählt: <RichText text={chosen.content} inline />
+                  </p>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => setEditing(item.id)}
+                  className="min-h-11 rounded-xl border-2 border-accent-600 px-4 font-medium text-accent-700 hover:bg-accent-50"
+                >
+                  {chosen ? 'Ändern' : 'Zahl eintippen'}
+                </button>
+              </div>
+            )
+          ) : build ? (
             <div className="grid gap-2 sm:grid-cols-2" role="group" aria-label="Antworten">
               {build.options.map((option) => {
                 const selected = chosen?.id === option.id
@@ -219,18 +297,23 @@ const STATUS: Record<ItemResult['status'], { label: string; className: string }>
   offen: { label: 'Nicht beantwortet', className: 'bg-zinc-100 text-zinc-600' },
 }
 
-function PartResultView({ part, result }: { part: ExamPart; result: ExamResult['parts'][number] }) {
+type PartResultProps = { part: ExamPart; result: ExamResult['parts'][number]; answers: ExamAnswers; states: ItemState[] }
+
+function PartResultView({ part, result, answers, states }: PartResultProps) {
   return (
     <section className="space-y-4" aria-label={`Teil ${part.id}`}>
       <PartHeader part={part} earned={result.points} />
-      {result.items.map((r) => (
-        <ItemResultView key={r.item.id} result={r} />
-      ))}
+      {result.items.map((r) => {
+        const text = typedText(answers[r.item.id])
+        const unit = states.find((s) => s.item.id === r.item.id)?.build?.numeric?.unit ?? ''
+        return <ItemResultView key={r.item.id} result={r} typed={text === null ? null : typedContent(text, unit)} />
+      })}
     </section>
   )
 }
 
-function ItemResultView({ result: r }: { result: ItemResult }) {
+// typed: eingetippte Zahl (Text mit Formel), sonst null
+function ItemResultView({ result: r, typed }: { result: ItemResult; typed: string | null }) {
   const status = STATUS[r.status]
   const info = r.status === 'falsch' && r.chosen?.errorRuleId ? chemErrorInfo(r.chosen.errorRuleId) : null
   const why = r.chosen?.why ?? info?.why
@@ -246,9 +329,10 @@ function ItemResultView({ result: r }: { result: ItemResult }) {
       <p className={`inline-block rounded-full px-2.5 py-0.5 text-sm font-medium ${status.className}`}>{status.label}</p>
       {r.chosen && (
         <p className="text-zinc-700">
-          Deine Antwort: <RichText text={r.chosen.content} inline />
+          Deine Antwort: <RichText text={typed ?? r.chosen.content} inline />
         </p>
       )}
+      {r.close && <p className="text-sm text-amber-800">Knapp daneben: Prüfe deine Rundung. Das gibt hier trotzdem die vollen Punkte.</p>}
       {r.status !== 'richtig' && (
         <p className="text-zinc-700">
           Richtig: <RichText text={r.correct.content} inline />

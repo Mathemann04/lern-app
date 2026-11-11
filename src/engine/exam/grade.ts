@@ -1,3 +1,6 @@
+import { judgeNumber } from '../quantity/judge.ts'
+import { formatLatex, readNumber } from '../quantity/numberDe.ts'
+import { ratSign } from '../rational.ts'
 import type { ExamAnswers, ExamItem, ExamItemBuild, ExamOption, ExamPart, ExamTask } from './types.ts'
 
 // Ablauf und Bewertung einer Klausuraufgabe (Plan M4, „Bewertung"):
@@ -17,6 +20,44 @@ export type ItemState = {
   // null: Fragen davor sind noch offen
   readonly build: ExamItemBuild | null
   readonly chosen: ExamOption | null
+  // eingetippte Zahl 1 bis 4 % neben der erwarteten: zählt wie richtig, mit Hinweis auf die Rundung
+  readonly close?: boolean
+}
+
+// --- Eingetippte Zahlen (freier Modus, S8c) ---
+
+export const NUMBER_PREFIX = 'zahl:'
+export const numberAnswer = (input: string) => `${NUMBER_PREFIX}${input}`
+// eingetippter Text einer Antwort; null bei einer gewählten Antwort
+export const typedText = (answer: string | undefined) => (answer?.startsWith(NUMBER_PREFIX) ? answer.slice(NUMBER_PREFIX.length) : null)
+
+// Eingetippte Zahl → Antwort: richtig (bis 1 % neben der erwarteten oder der ganz richtigen Zahl) oder „fast"
+// (bis 4 %) ergibt die erwartete bzw. richtige Antwort; sonst eine eigene Antwort mit der Zahl als Wert (spätere
+// Fragen rechnen damit weiter), bei einem typischen Fehler mit dessen Id. null: keine Zahl oder keine Zahlenfrage.
+export function typedOption(build: ExamItemBuild, answer: string | undefined): { option: ExamOption; close: boolean } | null {
+  const text = typedText(answer)
+  const numeric = build.numeric
+  if (text === null || !numeric) return null
+  const value = readNumber(text)
+  if (!value) return null
+  const byId = (id: string) => build.options.find((o) => o.id === id)!
+  if (build.correctValue && build.correct !== build.expected && judgeNumber(value, { ...numeric, value: build.correctValue, also: [] }).kind === 'correct')
+    return { option: byId(build.correct), close: false }
+  const verdict = judgeNumber(value, numeric)
+  if (verdict.kind === 'correct' || verdict.kind === 'close') return { option: byId(build.expected), close: verdict.kind === 'close' }
+  const content = `$${formatLatex(value, { significant: 12 })}${numeric.unit ? `\\,${numeric.unit}` : ''}$`
+  const error = verdict.kind === 'error' ? numeric.wrongs.find((w) => w.rule === verdict.rule) : undefined
+  // mit einer Null ließe sich nicht weiterrechnen (z. B. durch die Molmasse teilen): spätere Fragen rechnen dann mit
+  // der erwarteten Zahl weiter
+  const carried = ratSign(value) === 0 ? byId(build.expected).value : value
+  return { option: { id: answer!, content, value: carried, ...(error ? { errorRuleId: error.rule, ...(error.why ? { why: error.why } : {}) } : {}) }, close: false }
+}
+
+// Antwort einer Frage mit diesen Antworten: gewählt oder eingetippt
+function chosenOption(build: ExamItemBuild, answer: string | undefined): { option: ExamOption | null; close: boolean } {
+  const typed = typedOption(build, answer)
+  if (typed) return typed
+  return { option: build.options.find((o) => o.id === answer) ?? null, close: false }
 }
 
 // Lösungsweg mit lauter richtigen Antworten
@@ -49,9 +90,9 @@ export function examState(task: ExamTask, answers: ExamAnswers): ItemState[] {
   return itemsOf(task).map((item) => {
     if (!item.dependsOn.every((id) => chosenOf.has(id))) return { item, build: null, chosen: null }
     const build = item.build(chosen, truth)
-    const option = build.options.find((o) => o.id === answers[item.id]) ?? null
+    const { option, close } = chosenOption(build, answers[item.id])
     if (option) chosenOf.set(item.id, option)
-    return { item, build, chosen: option }
+    return { item, build, chosen: option, ...(close ? { close } : {}) }
   })
 }
 
@@ -79,6 +120,8 @@ export type ItemResult = {
   readonly explanation: ExamItemBuild['explanation']
   // Lösungsweg mit den eigenen früheren Antworten (bei Folgefehlern)
   readonly ownExplanation: ExamItemBuild['explanation'] | null
+  // eingetippte Zahl knapp daneben (1 bis 4 %): volle Punkte, Hinweis auf die Rundung
+  readonly close?: boolean
 }
 
 export type PartResult = { readonly part: ExamPart; readonly points: number; readonly items: readonly ItemResult[] }
@@ -89,9 +132,9 @@ export function gradeExam(task: ExamTask, answers: ExamAnswers): ExamResult {
   const states = new Map(examState(task, answers).map((s) => [s.item.id, s]))
   const parts = task.parts.map((part): PartResult => {
     const items = part.items.map((item): ItemResult => {
-      const { build, chosen } = states.get(item.id)!
+      const { build, chosen, close } = states.get(item.id)!
       const truth = truthMap.get(item.id)!
-      const base = { item, chosen, correct: truth.option, explanation: truth.build.explanation }
+      const base = { item, chosen, correct: truth.option, explanation: truth.build.explanation, ...(close ? { close } : {}) }
       if (!build || !chosen) return { ...base, status: 'offen', points: 0, ownExplanation: null }
       if (chosen.id === build.correct) return { ...base, status: 'richtig', points: item.points, ownExplanation: null }
       if (chosen.id === build.expected) return { ...base, status: 'folgefehler', points: item.points, ownExplanation: build.explanation }
