@@ -17,6 +17,8 @@ export type ExamOption = {
   // Anteil der Punkte für eine nicht ganz richtige Antwort (z. B. 0,5 für eine ausgeglichene Gleichung,
   // die nicht mit den kleinsten ganzen Zahlen geschrieben ist), mit kurzem Grund
   readonly share?: { readonly value: number; readonly reason: string }
+  // Antwort als Bild (Id aus engine/chem/figures.ts), z. B. eine Lewis-Formel; content beschreibt es in Worten
+  readonly figure?: string
 }
 
 export type ExamItemBuild = {
@@ -58,7 +60,7 @@ export type ExamPart = {
 
 export type ExamTask = {
   readonly title: string
-  // Ausgangslage (Text mit Formeln) und Angaben als Formel
+  // Ausgangslage (Text mit Formeln) und Angaben als Formel (leer: keine Formel)
   readonly intro: string
   readonly givenLatex: string
   // Werte, mit denen gerechnet wird

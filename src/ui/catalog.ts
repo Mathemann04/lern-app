@@ -588,6 +588,7 @@ export const SUBJECTS: readonly Subject[] = [
         description: 'Ionen, Moleküle, Metalle und zwischenmolekulare Kräfte',
         icon: 'bond',
         tone: 'violet',
+        exam: { task: 3, points: 12 },
         courses: [
           {
             id: IONEN,

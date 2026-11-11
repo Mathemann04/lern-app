@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
+import { figureById } from '../../engine/chem/figures.ts'
+import { FigureDrawing } from '../chem/ChemFigure.tsx'
 import { chemErrorInfo, chemExamTask } from '../../engine/chem/exam/index.ts'
 import { type ExamResult, type ItemResult, type ItemState, examState, gradeExam, totalPoints, withAnswer } from '../../engine/exam/grade.ts'
 import type { ExamAnswers, ExamPart } from '../../engine/exam/types.ts'
@@ -70,9 +72,11 @@ function ExamTaskView({ subject, taskNo, seed, areaId, areaTitle }: { subject: s
 
       <section className="space-y-3 rounded-2xl bg-zinc-100 px-4 py-4" aria-label="Aufgabe">
         <RichText text={task.intro} />
-        <FitWidth className="text-xl">
-          <Formula tex={task.givenLatex} />
-        </FitWidth>
+        {task.givenLatex && (
+          <FitWidth className="text-xl">
+            <Formula tex={task.givenLatex} />
+          </FitWidth>
+        )}
         <RichText text={task.note} className="text-sm text-zinc-600" />
       </section>
 
@@ -152,9 +156,20 @@ function PartView({ part, states, onPick }: { part: ExamPart; states: ItemState[
                       selected ? 'border-accent-600 bg-accent-50' : 'border-zinc-200 bg-surface hover:border-accent-600'
                     }`}
                   >
-                    <FitWidth>
-                      <RichText text={option.content} inline />
-                    </FitWidth>
+                    {option.figure && figureById(option.figure) ? (
+                      <span className="block w-full py-1">
+                        <FigureDrawing figure={figureById(option.figure)!} label={option.content} />
+                      </span>
+                    ) : /^\$[^$]+\$$/.test(option.content) ? (
+                      // eine einzelne Formel setzt sich kleiner, bis sie passt; Text bricht um
+                      <FitWidth>
+                        <RichText text={option.content} inline />
+                      </FitWidth>
+                    ) : (
+                      <span className="block min-w-0">
+                        <RichText text={option.content} inline />
+                      </span>
+                    )}
                   </button>
                 )
               })}

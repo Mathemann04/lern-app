@@ -21,12 +21,12 @@ const ce = (text: string) => String.raw`\ce{${text}}`
 const math = (latex: string) => `$${latex}$`
 const wrongOf = (rule: string, latex: string): WrongValue => ({ rule, key: latex, content: math(latex) })
 
-type Salt = { readonly cation: Ion; readonly anion: Ion }
+export type Salt = { readonly cation: Ion; readonly anion: Ion }
 
 const ionsUpTo = (list: readonly Ion[], level: Level) => list.filter((i) => i.level <= Math.min(level, 2))
 
 // Salz der Stufe: Grundlagen nur einfache Ionen; Vertiefung mit Molekül-Ionen oder Nebengruppe; Klausurniveau alles
-function pickSalt(level: Level, rng: Rng, extra: (s: Salt) => boolean = () => true): Salt | null {
+export function pickSalt(level: Level, rng: Rng, extra: (s: Salt) => boolean = () => true): Salt | null {
   const cation = rng.pick(ionsUpTo(CATIONS, level))
   const anions = ionsUpTo(ANIONS, level).filter((a) => isAllowedSalt(cation, a) && extra({ cation, anion: a }))
   if (anions.length === 0) return null
@@ -46,7 +46,7 @@ const elementName = (i: Ion) => i.name.replace(/\(.*\)$/, '')
 // Ladung eines einatomigen Anions, wenn man die Valenzelektronen statt der fehlenden Elektronen nimmt
 const valenceCharge = (a: Ion) => -(8 + a.charge)
 
-function ionsStep(s: Salt, rng: Rng, focus?: string): GuidedStep | null {
+export function ionsStep(s: Salt, rng: Rng, focus?: string): GuidedStep | null {
   const pair = (c: string, a: string) => `$${ce(c)}$ und $${ce(a)}$`
   const correct = pair(ionCe(s.cation), ionCe(s.anion))
   const wrong: WrongValue[] = []
@@ -77,7 +77,7 @@ function ionsStep(s: Salt, rng: Rng, focus?: string): GuidedStep | null {
   }
 }
 
-function formulaStep(s: Salt, rng: Rng, focus?: string): GuidedStep | null {
+export function formulaStep(s: Salt, rng: Rng, focus?: string): GuidedStep | null {
   const correct = ce(formulaOf(s))
   const { cation: x, anion: y } = saltIndices(s.cation, s.anion)
   const qa = s.cation.charge
@@ -112,7 +112,7 @@ function formulaStep(s: Salt, rng: Rng, focus?: string): GuidedStep | null {
 }
 
 // Aluminiumoxid und Magnesiumchlorid mit Ionen und Formel bildeten Klausuraufgabe 3a fast genau nach (§9)
-const EXAM_SALTS = ['Al2O3', 'MgCl2']
+export const EXAM_SALTS = ['Al2O3', 'MgCl2']
 
 function formulaTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc | null {
   const s = pickSalt(level, rng)
