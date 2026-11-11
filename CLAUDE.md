@@ -10,8 +10,9 @@ den Nutzer zugeschnitten: Maschinenbau, 1. Semester, THU, „Mathematik MB1".
   Kapitel und ihre Themen in der App: [docs/LEHRBUCH.md](docs/LEHRBUCH.md)
 - Meilensteine und aktueller Stand: [docs/ROADMAP.md](docs/ROADMAP.md)
 - Laufender Plan: [docs/PLAN-M4.md](docs/PLAN-M4.md) (Chemie 1, freigegeben
-  10.11.2026, Klausur-Sprint S1 bis S9 bis Teil 1 der Klausur um den
-  24.11.2026, danach N1 bis N5); feste Regeln für alle Chemie-Inhalte:
+  10.11.2026, Klausur-Sprint S1 bis S11 bis Teil 1 der Klausur um den
+  24.11.2026, danach M6, M12 und N2 bis N5, Reihenfolge in docs/ROADMAP.md
+  unter „Vorgemerkt“); feste Regeln für alle Chemie-Inhalte:
   [docs/CHEMIE.md](docs/CHEMIE.md). Abgeschlossen:
   [docs/PLAN-M1.md](docs/PLAN-M1.md), [docs/PLAN-M2.md](docs/PLAN-M2.md),
   [docs/PLAN-M2b.md](docs/PLAN-M2b.md) (Brüche nachschärfen: Abwechslung und
@@ -109,10 +110,12 @@ Ausführliche Notizen je Bereich (wörtlich wie früher hier, jetzt ausgelagert)
   mehrmals laufen lassen. Numerische Vergleiche nur an aussagekräftigen,
   stabilen Stellen (Rundungseffekte sonst als Scheinfehler).
 - **Unterlagen des Nutzers (Urheberrecht):** Skripte, Übungsblätter,
-  Klausuren und Auszüge daraus kommen nie ins Repo (es ist öffentlich), auch
-  nicht in Testdateien oder Doku. Alle Inhalte in eigenen Worten, keine
-  Folien- oder Aufgabentexte, keine kopierten Bilder, keine Namen von
-  Lehrenden. Einzelheiten in docs/CHEMIE.md.
+  Klausuren, Fotos aus Lehrbüchern und Auszüge daraus kommen nie ins Repo
+  (es ist öffentlich), auch nicht in Testdateien oder Doku. Alle Inhalte in
+  eigenen Worten, keine Folien- oder Aufgabentexte, keine kopierten Bilder,
+  keine Namen von Lehrenden. Tabellen und Bilder aus einem Lehrbuch werden
+  selbst gestaltet nachgebaut, nie abgezeichnet. Einzelheiten in
+  docs/CHEMIE.md.
 - **Chemie:** Richtig ist, was die Skripte der Vorlesung oder ein frei
   zugängliches Tabellenwerk sagen; handschriftliche Ergänzungen und
   Mitschriften liefern nur Ideen und falsche Antworten. Rechnungen,

@@ -796,3 +796,12 @@ Neue Entscheidungen unten anfügen.
   raten. Typische Fehler sind „ganz umgedreht“ (z. B. der Trend falsch herum) oder „A vor B“ (z. B. schwerer heißt
   größer); ist alles umgedreht, nennt die App nur diesen Fehler, nicht dazu jede vertauschte Paarung. Bei der
   Beispielfrage zum Atomradius der 3. Periode fehlt Schwefel, weil er nur 2 bis 3 % neben Phosphor und Chlor liegt.
+- 11.11.2026: Durchsicht der App nach dem Klausur-Sprint. Vor Teil 1 noch S10
+  (Inhalts-Check aller Inhalte von Teil 1 gegen die Skripte, weil in zwei Tagen sehr
+  viel entstanden ist und jeder Schritt nur einzeln geprüft wurde) und S11
+  (Klausur-Start: Probeklausur und fällige Wiederholung oben, kurzer
+  Klausur-Überblick). Nach Teil 1 zuerst M6, dann das neue Nachschlagewerk M12
+  (Wunsch des Nutzers), dann N2 bis N5; so wartet der Umbau nicht bis Januar.
+  Fotos aus dem Lehrbuch „Physik für Ingenieure“ (Kernphysik, Festkörperphysik)
+  werden wie die Skripte nur in der Sitzung hochgeladen; ihre Tabellen und Bilder
+  werden selbst gestaltet nachgebaut (CHEMIE.md §1, Quelle 6).
