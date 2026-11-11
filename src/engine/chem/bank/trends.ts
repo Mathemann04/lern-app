@@ -1,4 +1,4 @@
-import type { Explanation, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
+import type { Explanation, MultiChoice, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
 
 // Wissensfragen zum Thema „Trends im Periodensystem“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern: Stufe · 100
 // + laufende Nummer; nie neu vergeben. Vergleiche nur in derselben Periode oder Gruppe und nie mit den Paaren aus §6;
@@ -15,6 +15,18 @@ const at = (level: QuestionLevel) => (spec: Spec): SingleChoice => ({ ...spec, k
 const g = at(1)
 const v = at(2)
 const k = at(3)
+
+// „Wähle alle richtigen“ (N1): richtige Aussagen r1, r2, …; jede Aussage ein ganzer Satz
+type MultiSpec = Omit<MultiChoice, 'kind' | 'level' | 'correct'> & { correct: readonly string[] }
+const multiAt = (level: QuestionLevel) => (spec: MultiSpec): MultiChoice => ({
+  ...spec,
+  kind: 'multi',
+  level,
+  correct: spec.correct.map((text, i) => ({ id: `r${i + 1}`, text })),
+})
+const mg = multiAt(1)
+const mv = multiAt(2)
+const mk = multiAt(3)
 
 export const TRENDS_BANK: QuestionBank = {
   course: 'chem-trends',
@@ -934,6 +946,91 @@ export const TRENDS_BANK: QuestionBank = {
       hint: 'Die Werte reichen von etwa 0,7 bis 4 und dienen nur zum Vergleichen.',
       explanation: why('Die Elektronegativität nach Pauling ist eine Vergleichszahl ohne Einheit: Fluor hat 3,98, Caesium 0,79.', 'Keine Einheit.'),
       cards: ['tr-elektronegativitaet'],
+      ref: REF,
+    }),
+    // ---------------------------------------------------------------- Wähle alle richtigen (N1)
+    mk({
+      id: 'tr-k-multi-ionenradien',
+      no: 317,
+      fact: 'multi-ion-radius',
+      part: 'ionenradien',
+      title: 'Ionenradien',
+      prompt: 'Welche Aussagen über die Größe von Ionen stimmen?',
+      correct: [
+        'Ein Kation ist kleiner als das Atom, aus dem es entsteht.',
+        'Ein Anion ist größer als das Atom, aus dem es entsteht.',
+        'Von Teilchen mit gleich vielen Elektronen ist das mit den meisten Protonen am kleinsten.',
+        r`$\ce{Mg^2+}$ ist kleiner als $\ce{Na+}$, obwohl beide 10 Elektronen haben.`,
+      ],
+      wrong: [
+        w('f1', 'Ein Kation ist größer als das Atom, aus dem es entsteht, weil es geladen ist.', 'chem-mis-tr-cation-larger'),
+        w('f2', 'Ein Anion ist kleiner als das Atom, aus dem es entsteht, weil die Ladung die Hülle zusammenzieht.', 'chem-mis-tr-anion-smaller'),
+        w('f3', 'Von Teilchen mit gleich vielen Elektronen ist das mit den meisten Protonen am größten.', 'chem-mis-tr-ion-protons'),
+        w('f4', r`$\ce{F-}$ ist kleiner als $\ce{Na+}$, weil Fluor in einer höheren Periode steht als Natrium.`, 'chem-mis-tr-ion-protons', why(r`Beide Teilchen haben 10 Elektronen. Bei gleicher Elektronenzahl entscheidet allein die Zahl der Protonen, nicht die Periode des Elements.`, 'Bei gleicher Elektronenzahl zählen die Protonen.')),
+        w('f5', 'Alle Ionen mit gleich vielen Elektronen sind gleich groß.', 'chem-mis-tr-constant'),
+      ],
+      hint: 'Was passiert mit der Hülle, wenn Elektronen wegfallen oder dazukommen? Und was, wenn bei gleich vielen Elektronen die Kernladung wächst?',
+      explanation: why(
+        r`Gibt ein Atom Elektronen ab, fällt oft die äußere Schale weg, und die übrigen Elektronen spüren mehr Kernladung: Das Kation ist kleiner. Nimmt es Elektronen auf, stoßen sie sich ab: Das Anion ist größer. Bei gleicher Elektronenzahl zieht mehr Kernladung die Hülle stärker zusammen, darum gilt $\ce{Mg^2+} < \ce{Na+} < \ce{F-}$.`,
+        'Kation kleiner, Anion größer; bei gleicher Elektronenzahl ist das Teilchen mit den meisten Protonen am kleinsten.',
+      ),
+      cards: ['tr-ionenradien'],
+      ref: REF,
+    }),
+    mg({
+      id: 'tr-g-multi-atomradius',
+      no: 117,
+      fact: 'multi-radius',
+      part: 'atomradius',
+      title: 'Atomradius',
+      prompt: 'Welche Aussagen über den Atomradius stimmen?',
+      correct: [
+        'Innerhalb einer Periode nimmt der Atomradius von links nach rechts ab.',
+        'Innerhalb einer Hauptgruppe nimmt der Atomradius von oben nach unten zu.',
+        'In einer Periode wächst nach rechts die Kernladung, während die Elektronen in derselben Schale bleiben.',
+        'In einer Hauptgruppe kommt nach unten mit jeder Periode eine Schale dazu.',
+      ],
+      wrong: [
+        w('f1', 'In einer Periode werden die Atome nach rechts größer, weil Elektronen dazukommen.', 'chem-mis-tr-radius-electrons'),
+        w('f2', 'In einer Hauptgruppe werden die Atome nach unten kleiner, weil die Kernladung steigt.', 'chem-mis-tr-radius-protons'),
+        w('f3', 'Ein schwereres Atom ist immer auch größer als ein leichteres.', 'chem-mis-tr-radius-mass'),
+        w('f4', 'In einer Periode bleibt der Atomradius gleich, weil die Zahl der Schalen gleich bleibt.', 'chem-mis-tr-constant', why('Die Zahl der Schalen bleibt zwar gleich, aber die Kernladung ändert sich von Element zu Element. Das wirkt auf die Größe der Hülle.', 'Die Kernladung ändert sich.')),
+        w('f5', 'Die inneren Elektronen haben keinen Einfluss darauf, wie stark der Kern die äußeren Elektronen anzieht.', 'chem-mis-tr-shielding'),
+      ],
+      hint: 'Was ändert sich in einer Periode, was in einer Gruppe: die Kernladung, die Zahl der Schalen oder beides?',
+      explanation: why(
+        'In einer Periode wächst die Kernladung, die Elektronen bleiben in derselben Schale: Der Kern zieht die Hülle stärker zusammen, der Radius nimmt nach rechts ab. In einer Gruppe kommt nach unten jedes Mal eine Schale dazu, die äußeren Elektronen sind weiter weg und von den inneren abgeschirmt: Der Radius nimmt zu.',
+        'Nach rechts kleiner (mehr Kernladung), nach unten größer (mehr Schalen).',
+      ),
+      cards: ['tr-atomradius'],
+      ref: REF,
+    }),
+    mv({
+      id: 'tr-v-multi-affinitaet-metall',
+      no: 217,
+      fact: 'multi-ea-metal',
+      part: 'affinitaet-metall',
+      title: 'Elektronenaffinität und Metallcharakter',
+      prompt: 'Welche Aussagen über Elektronegativität, Elektronenaffinität und Metallcharakter stimmen?',
+      correct: [
+        'Die Elektronegativität beschreibt, wie stark ein gebundenes Atom die Bindungselektronen anzieht.',
+        'Die Elektronenaffinität ist die Energie, die ein freies Atom beim Aufnehmen eines Elektrons umsetzt.',
+        'Je kleiner die Ionisierungsenergie eines Elements, desto metallischer ist es.',
+        'In einer Periode nimmt der Metallcharakter von links nach rechts ab.',
+        'Einem Halogenatom fehlt genau ein Elektron bis zur Edelgaskonfiguration.',
+      ],
+      wrong: [
+        w('f1', 'Elektronegativität und Elektronenaffinität sind zwei Namen für dieselbe Größe.', 'chem-mis-tr-en-ea-same'),
+        w('f2', 'Der Metallcharakter nimmt im Periodensystem nach rechts und nach oben zu.', 'chem-mis-tr-metal-right'),
+        w('f3', 'Um einem Atom ein Elektron hinzuzufügen, muss man immer Energie aufwenden.', 'chem-mis-tr-ea-sign'),
+        w('f4', 'In einer Periode bleibt der Metallcharakter gleich, weil alle Elemente gleich viele Schalen haben.', 'chem-mis-tr-constant', why('Gleich viele Schalen heißt nicht gleiche Eigenschaften: In der Periode wächst die Kernladung, und damit ändert sich, wie leicht ein Atom Elektronen abgibt.', 'Die Kernladung ändert sich.')),
+      ],
+      hint: 'Unterscheide genau: Atom in einer Bindung oder freies Atom? Und wie hängt das Abgeben von Elektronen mit dem Metallcharakter zusammen?',
+      explanation: why(
+        'Die Elektronegativität ist eine Vergleichszahl für Atome in einer Bindung, die Elektronenaffinität eine Energie, die ein freies Atom beim Aufnehmen eines Elektrons umsetzt. Metalle geben Elektronen leicht ab, haben also kleine Ionisierungsenergien; nach rechts wächst die Ionisierungsenergie, der Metallcharakter nimmt ab. Halogenen fehlt genau ein Elektron bis zur Edelgaskonfiguration.',
+        'EN: Atom in Bindung; Elektronenaffinität: freies Atom; kleine Ionisierungsenergie heißt metallisch, nach rechts weniger metallisch.',
+      ),
+      cards: ['tr-elektronenaffinitaet', 'tr-metallcharakter'],
       ref: REF,
     }),
   ],
