@@ -92,3 +92,11 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   Rechnungen mit gegebener Masse). Auswahl nur mit Rechnungen: `questionNos` leer,
   `nextSeed` nur Rechnungen (`candidatesOf` in `engine.ts`). Chemie-Aufgaben setzen
   ihre große Formel mit `FitWidth` (`TaskIntro` in `ui/task/TaskParts.tsx`).
+- Gase und Lösungen (S4b): `generators/loesungen.ts` (Rechenarten `konzentration`,
+  `anteile`, `gase` je Unterthema; `calcStep` für einen Schritt mit Toleranz, `stacked`
+  setzt Angaben untereinander; Gase aus der Stoffliste und Edelgase; Gasgesetz mit
+  R = 8,314, T = ϑ + 273,15, Druck in hPa oder bar; Gas aus einer Reaktion bei
+  Normbedingungen mit `GAS_REACTIONS` und Brennstoffen), Karten `loesungenCards.ts`,
+  Fragen `bank/loesungen.ts` (Denkfehler `chem-mis-lo-…`); Grenzen: `SOLUBILITY` (g je 100 g Wasser,
+  80 % der Sättigung, höchstens 5 mol/L), `MAX_BAR` für Gase, die sich verflüssigen; Lösungen der
+  Altklausuren über `usesExamSolution` in `shared.ts`.

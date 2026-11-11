@@ -29,6 +29,7 @@ import type { Level } from '../tasks/taskNumber.ts'
 import type { RearrangeTask } from '../rearrange/task.ts'
 import { ATOMBAU_CARDS } from './chem/atombauCards.ts'
 import { GLEICHUNGEN_CARDS } from './chem/gleichungenCards.ts'
+import { LOESUNGEN_CARDS } from './chem/loesungenCards.ts'
 import { STOFFMENGE_CARDS } from './chem/stoffmengeCards.ts'
 import { FRACTION_CARD_LIST } from './fractionCards.ts'
 import { REARRANGE_CARD_LIST } from './rearrangeCards.ts'
@@ -54,6 +55,7 @@ export const TOPICS: readonly Topic[] = [
   { id: 'umstellen', title: 'Gleichungen umstellen', description: 'Gegenrechnung, Rüberbringen, Variable im Nenner, Ausklammern' },
   { id: 'chem-atombau', title: 'Atombau', description: 'Elementarteilchen, Kernsymbol, Isotope, Ionen, Atommodelle und Licht' },
   { id: 'chem-gleichungen', title: 'Reaktionsgleichungen', description: 'Koeffizient und Index, Ausgleichen, Verbrennungen' },
+  { id: 'chem-loesungen', title: 'Gase und Lösungen', description: 'Konzentration, Lösung ansetzen, Anteile, molares Volumen und Gasgesetz' },
   { id: 'chem-stoffmenge', title: 'Stoffmenge und Umsatz', description: 'Stoffmenge, molare Masse, Masse und Teilchenzahl' },
 ]
 
@@ -370,6 +372,7 @@ export const CARDS: readonly Card[] = [
   ...ATOMBAU_CARDS,
   ...STOFFMENGE_CARDS,
   ...GLEICHUNGEN_CARDS,
+  ...LOESUNGEN_CARDS,
 ]
 
 export function topicById(id: string): Topic | undefined {

@@ -76,15 +76,15 @@ describe('Auswahl der Mischung', () => {
     expect(mixChoiceOf(chemistry, DEFAULT_SETTINGS)).toEqual({ level: 1, skip: [] })
     expect(isMixCourseChecked(chemistry, atombau, DEFAULT_SETTINGS)).toBe(true)
     // seit S3a und S3b auch „Reaktionsgleichungen" und „Stoffmenge und Umsatz" (nur Rechnungen)
-    expect(mixedCourses(chemistry, DEFAULT_SETTINGS).map((c) => c.id)).toEqual([ATOMBAU, 'chem-gleichungen', 'chem-stoffmenge'])
+    expect(mixedCourses(chemistry, DEFAULT_SETTINGS).map((c) => c.id)).toEqual([ATOMBAU, 'chem-gleichungen', 'chem-stoffmenge', 'chem-loesungen'])
   })
 
   it('nimmt nur angekreuzte Themen, deren Stufe spielbar ist und deren Unterthemen dort Fragen haben', () => {
     const settings: Settings = { ...DEFAULT_SETTINGS, mix: { chemie: { level: 2, skip: [] } } }
     expect(mixChoiceOf(chemistry, settings).level).toBe(2)
-    expect(mixedCourses(chemistry, settings).map((c) => c.id)).toEqual([ATOMBAU, 'chem-gleichungen', 'chem-stoffmenge'])
+    expect(mixedCourses(chemistry, settings).map((c) => c.id)).toEqual([ATOMBAU, 'chem-gleichungen', 'chem-stoffmenge', 'chem-loesungen'])
     // Atombau und Stoffmenge abgewählt
-    const skipped: Settings = { ...settings, mix: { chemie: { level: 2, skip: [ATOMBAU, 'chem-gleichungen', 'chem-stoffmenge'] } } }
+    const skipped: Settings = { ...settings, mix: { chemie: { level: 2, skip: [ATOMBAU, 'chem-gleichungen', 'chem-stoffmenge', 'chem-loesungen'] } } }
     expect(isMixCourseChecked(chemistry, atombau, skipped)).toBe(false)
     expect(mixedCourses(chemistry, skipped)).toEqual([])
     // Themen ohne spielbare Stufe kommen nie vor, auch angekreuzt
@@ -92,8 +92,8 @@ describe('Auswahl der Mischung', () => {
     expect(mixedCourses(chemistry, settings, 1).map((c) => c.id)).not.toContain(comingSoon.id)
     // nur Atommodelle angekreuzt: in Grundlagen nichts zu üben, in Vertiefung schon
     const onlyModels: Settings = { ...settings, skipParts: { [ATOMBAU]: ['stoffe', 'teilchen', 'isotope-ionen', 'licht'] } }
-    expect(mixedCourses(chemistry, onlyModels, 1).map((c) => c.id)).toEqual(['chem-gleichungen', 'chem-stoffmenge'])
-    expect(mixedCourses(chemistry, onlyModels, 2).map((c) => c.id)).toEqual([ATOMBAU, 'chem-gleichungen', 'chem-stoffmenge'])
+    expect(mixedCourses(chemistry, onlyModels, 1).map((c) => c.id)).toEqual(['chem-gleichungen', 'chem-stoffmenge', 'chem-loesungen'])
+    expect(mixedCourses(chemistry, onlyModels, 2).map((c) => c.id)).toEqual([ATOMBAU, 'chem-gleichungen', 'chem-stoffmenge', 'chem-loesungen'])
   })
 
   it('hält die Reihenfolge der Startseite ein und übersteht eine Stufe, die das Fach nicht hat', () => {

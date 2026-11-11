@@ -3,7 +3,7 @@ import { findError } from '../errorCatalog.ts'
 import { parseRichText } from '../explain/richText.ts'
 import { latexProblem } from '../expr/latexChecks.ts'
 import { formatText } from '../quantity/numberDe.ts'
-import { type Rational, rat, ratDiv, ratMul, toDecimalString } from '../rational.ts'
+import { parseDecimal, rat, ratAdd, ratDiv, ratMul, toDecimalString, type Rational } from '../rational.ts'
 import type { Rng } from '../random/rng.ts'
 import { elementBySymbol } from './elements.ts'
 import { balance, coefficientsOf, equationCe, isBalanced, species, withCoefficients } from './equation.ts'
@@ -183,6 +183,33 @@ describe('Rechenfehler Umsatz: Koeffizient eines anderen Stoffs (CH₄ → CO₂
     const n = rat(1, 4)
     expect(formatText(ratMul(n, rat(2)))).toBe('0,5')
     expect(formatText(n)).toBe('0,25')
+  })
+})
+
+describe('Rechenfehler Gase und Lösungen: Katalogbeispiele', () => {
+  const t = formatText
+  it('mL statt L, c = V/n, unvollständige Molmasse', () => {
+    expect(t(ratDiv(rat(1, 10), rat(200)))).toBe('5 · 10⁻⁴')
+    expect(t(ratDiv(rat(1, 5), rat(1, 10)))).toBe('2')
+    // NH4Cl ohne die H: 14 + 35,5
+    expect(t(ratAdd(rat(14), parseDecimal('35.5')!))).toBe('49,5')
+  })
+  it('°C statt K und hPa statt Pa im Gasgesetz', () => {
+    const v = (temp: number, pa: number) => ratMul(ratDiv(ratMul(parseDecimal('8.314')!, parseDecimal(String(temp))!), rat(pa)), rat(1000))
+    expect(t(v(298.15, 101300))).toBe('24,5')
+    expect(Number(t(v(25, 101300)).replace(',', '.'))).toBeCloseTo(2.05, 2)
+    expect(t(v(298.15, 1013))).toBe('2450')
+  })
+  it('22,4 L/mol außerhalb der Normbedingungen, Massenanteil durch das Wasser, ppb, Vol-%', () => {
+    expect(t(ratMul(rat(1), parseDecimal('22.4')!))).toBe('22,4')
+    expect(t(ratMul(ratDiv(rat(10), rat(90)), rat(100)))).toBe('11,1')
+    expect(t(ratDiv(rat(3), parseDecimal('0.1')!))).toBe('30')
+    expect(t(ratDiv(parseDecimal('0.1')!, rat(3)))).toBe('0,0333')
+    expect(t(ratMul(rat(40), parseDecimal('0.5')!))).toBe('20')
+    expect(t(ratMul(rat(40, 100), parseDecimal('0.5')!))).toBe('0,2')
+    expect(t(ratDiv(parseDecimal('0.5')!, parseDecimal('22.4')!))).toBe('0,0223')
+    // Anteil nicht mit 100 % malgenommen: 10 g in 200 g
+    expect(t(ratDiv(rat(10), rat(200)))).toBe('0,05')
   })
 })
 

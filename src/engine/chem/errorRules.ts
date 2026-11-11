@@ -20,6 +20,7 @@ export type ChemErrorRule = {
 const ATOMBAU = 'chem-atombau'
 const STOFFMENGE = 'chem-stoffmenge'
 const GLEICHUNGEN = 'chem-gleichungen'
+const LOESUNGEN = 'chem-loesungen'
 
 export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
   {
@@ -343,6 +344,127 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
     why: {
       detailed: 'Für das Verhältnis zählen nur die Koeffizienten der beiden Stoffe, um die es geht: des gegebenen und des gesuchten. Die Zahlen vor den übrigen Stoffen der Gleichung spielen dafür keine Rolle.',
       short: 'Nur die Koeffizienten des gegebenen und des gesuchten Stoffs zählen.',
+    },
+  },
+  // Gase und Lösungen (S4b)
+  {
+    id: 'chem-ml-not-l',
+    course: LOESUNGEN,
+    name: 'Milliliter nicht in Liter umgerechnet',
+    wrongFormula: String.raw`0{,}1\,\mathrm{mol}\ \text{in}\ 200\,\mathrm{mL}\text{: } c = \frac{0{,}1}{200} = 0{,}0005\,\mathrm{mol/L}`,
+    why: {
+      detailed: String.raw`Konzentrationen in $\mathrm{mol/L}$ oder $\mathrm{g/L}$ beziehen sich auf Liter. Ein Volumen in Millilitern muss deshalb vorher umgerechnet werden: $1\,\mathrm{mL} = 0{,}001\,\mathrm{L}$. Sonst liegt das Ergebnis um den Faktor 1000 daneben.`,
+      short: String.raw`Erst in Liter umrechnen: $1\,\mathrm{mL} = 0{,}001\,\mathrm{L}$.`,
+    },
+  },
+  {
+    id: 'chem-c-inverted',
+    course: LOESUNGEN,
+    name: 'Formel der Konzentration falsch herum',
+    wrongFormula: String.raw`c = \frac{V}{n} = 2\,\mathrm{L/mol}`,
+    why: {
+      detailed: String.raw`Die Konzentration ist Stoffmenge je Volumen: $c = \frac{n}{V}$, in $\mathrm{mol/L}$. Umgestellt gilt $n = c \cdot V$ und $V = \frac{n}{c}$. Die Einheit zeigt, ob richtig umgestellt ist.`,
+      short: String.raw`$c = \frac{n}{V}$; die Einheit $\mathrm{mol/L}$ prüft das Umstellen.`,
+    },
+  },
+  {
+    id: 'chem-molar-incomplete',
+    course: LOESUNGEN,
+    name: 'Molmasse unvollständig',
+    wrongFormula: String.raw`M(\ce{NH4Cl}) = 14 + 35{,}5 = 49{,}5\,\mathrm{g/mol}`,
+    why: {
+      detailed: 'Abgewogen wird der ganze Stoff, also zählt die molare Masse der ganzen Formel: jedes Atom so oft, wie es vorkommt, auch die Wasserstoffatome und gegebenenfalls das Kristallwasser.',
+      short: 'Die molare Masse der ganzen Formel nehmen, mit allen Atomen.',
+    },
+  },
+  {
+    id: 'chem-celsius',
+    course: LOESUNGEN,
+    name: String.raw`Temperatur in $^{\circ}\mathrm{C}$ statt in Kelvin eingesetzt`,
+    wrongFormula: String.raw`T = 25\ \text{statt}\ 298{,}15\,\mathrm{K}`,
+    why: {
+      detailed: String.raw`Im Gasgesetz steht die absolute Temperatur in Kelvin; sie beginnt beim absoluten Nullpunkt. Umrechnen: $T = \vartheta + 273{,}15$. Mit Grad Celsius gerechnet, käme bei $0\,^{\circ}\mathrm{C}$ sogar das Volumen null heraus.`,
+      short: String.raw`Im Gasgesetz $T$ in Kelvin: $T = \vartheta + 273{,}15$.`,
+    },
+  },
+  {
+    id: 'chem-hpa',
+    course: LOESUNGEN,
+    name: 'Druck nicht in Pascal umgerechnet',
+    wrongFormula: String.raw`p = 1013\ \text{statt}\ 101\,300\,\mathrm{Pa}`,
+    why: {
+      detailed: String.raw`Mit $R = 8{,}314\,\mathrm{J/(mol \cdot K)}$ wird in SI-Einheiten gerechnet: Druck in Pascal, Volumen in Kubikmetern. $1\,\mathrm{hPa} = 100\,\mathrm{Pa}$, $1\,\mathrm{bar} = 10^{5}\,\mathrm{Pa}$.`,
+      short: String.raw`Druck in Pascal: $1\,\mathrm{hPa} = 100\,\mathrm{Pa}$.`,
+    },
+  },
+  {
+    id: 'chem-vm-conditions',
+    course: LOESUNGEN,
+    name: 'Molares Volumen anderer Bedingungen verwendet',
+    wrongFormula: String.raw`1\,\mathrm{mol}\ \text{bei}\ 25\,^{\circ}\mathrm{C}\text{: } 22{,}4\ \text{statt}\ 24{,}5\,\mathrm{L}`,
+    why: {
+      detailed: String.raw`Das molare Volumen hängt von Temperatur und Druck ab: $22{,}4\,\mathrm{L/mol}$ gilt bei $0\,^{\circ}\mathrm{C}$ und $1013\,\mathrm{hPa}$, bei $25\,^{\circ}\mathrm{C}$ sind es etwa $24{,}5\,\mathrm{L/mol}$. Unter anderen Bedingungen rechnet man mit dem Gasgesetz $p \cdot V = n \cdot R \cdot T$.`,
+      short: 'Das molare Volumen gilt nur für seine Temperatur und seinen Druck.',
+    },
+  },
+  {
+    id: 'chem-vm-inverted',
+    course: LOESUNGEN,
+    name: 'Durch das molare Volumen geteilt statt malgenommen (oder umgekehrt)',
+    wrongFormula: String.raw`0{,}5\,\mathrm{mol}\text{: } V = \frac{0{,}5}{22{,}4} = 0{,}0223\,\mathrm{L}`,
+    why: {
+      detailed: String.raw`Das molare Volumen ist das Volumen eines Mols. Mehrere Mol nehmen entsprechend mehr Platz ein: $V = n \cdot V_m$, umgekehrt $n = \frac{V}{V_m}$. Die Einheiten zeigen es: $\mathrm{mol} \cdot \mathrm{L/mol} = \mathrm{L}$.`,
+      short: String.raw`$V = n \cdot V_m$ und $n = \frac{V}{V_m}$.`,
+    },
+  },
+  {
+    id: 'chem-fraction-solvent',
+    course: LOESUNGEN,
+    name: 'Durch die Masse des Wassers statt der Lösung geteilt',
+    wrongFormula: String.raw`10\,\mathrm{g}\ \text{Salz in}\ 90\,\mathrm{g}\ \text{Wasser: } w = 11{,}1\,\%`,
+    why: {
+      detailed: 'Der Massenanteil bezieht den gelösten Stoff auf die ganze Lösung. Im Nenner steht deshalb die Masse von gelöstem Stoff und Wasser zusammen, nicht die des Wassers allein.',
+      short: 'Im Nenner die Masse der ganzen Lösung: Stoff plus Wasser.',
+    },
+  },
+  {
+    id: 'chem-mass-conc-inverted',
+    course: LOESUNGEN,
+    name: 'Massenkonzentration als Volumen durch Masse',
+    wrongFormula: String.raw`3\,\mathrm{g}\ \text{in}\ 100\,\mathrm{mL}\text{: } 0{,}0333\,\mathrm{L/g}`,
+    why: {
+      detailed: String.raw`Die Massenkonzentration ist Masse je Volumen, $\beta = \frac{m}{V}$ in $\mathrm{g/L}$. Steht am Ende eine Einheit wie $\mathrm{L/g}$, ist die Formel falsch herum.`,
+      short: String.raw`$\beta = \frac{m}{V}$ in $\mathrm{g/L}$.`,
+    },
+  },
+  {
+    id: 'chem-ppb',
+    course: LOESUNGEN,
+    name: 'ppm, ppb und ppt verwechselt',
+    wrongFormula: String.raw`5\,\mathrm{ppb}\ \text{als}\ 5 \cdot 10^{-12}`,
+    why: {
+      detailed: String.raw`ppm steht für Millionstel ($10^{-6}$), ppb für Milliardstel ($10^{-9}$), ppt für Billionstel ($10^{-12}$). Das englische „billion“ ist die deutsche Milliarde.`,
+      short: String.raw`ppm $= 10^{-6}$, ppb $= 10^{-9}$, ppt $= 10^{-12}$.`,
+    },
+  },
+  {
+    id: 'chem-vol-percent',
+    course: LOESUNGEN,
+    name: 'Prozentangabe nicht durch 100 geteilt',
+    wrongFormula: String.raw`40\,\mathrm{Vol}\text{-}\%\ \text{von}\ 0{,}5\,\mathrm{L}\text{: } 20\ \text{statt}\ 0{,}2\,\mathrm{L}`,
+    why: {
+      detailed: String.raw`Prozent heißt „von hundert“: $40\,\%$ sind $\frac{40}{100} = 0{,}4$. Ein Anteil kann nie mehr sein als das Ganze; ein Ergebnis größer als die ganze Menge ist ein sicheres Zeichen für diesen Fehler.`,
+      short: String.raw`$40\,\% = 0{,}4$: durch 100 teilen.`,
+    },
+  },
+  {
+    id: 'chem-percent-not-times',
+    course: LOESUNGEN,
+    name: 'Anteil nicht mit 100 % malgenommen',
+    wrongFormula: String.raw`\frac{10\,\mathrm{g}}{200\,\mathrm{g}} = 0{,}05\,\%\ \text{statt}\ 5\,\%`,
+    why: {
+      detailed: String.raw`Teil geteilt durch Ganzes ergibt eine Dezimalzahl wie $0{,}05$. In Prozent wird daraus erst durch Malnehmen mit $100\,\%$: $0{,}05 = 5\,\%$. Ohne diesen Schritt ist der Anteil hundertmal zu klein.`,
+      short: String.raw`Dezimalzahl mal $100\,\%$ ergibt Prozent.`,
     },
   },
 ]
