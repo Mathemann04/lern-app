@@ -1,4 +1,5 @@
 import type { Explanation } from '../quiz/types.ts'
+import { ELEKTRONEN_ERROR_RULES } from './elektronenRules.ts'
 
 // Typische Rechenfehler der Chemie-Rechnungen (Ids „chem-…", Katalog in docs/PLAN-M4.md, „Katalog der
 // Rechenfehler"). Jeder Fehler rechnet die Aufgabe falsch weiter (generators/*); hier stehen Name,
@@ -1385,6 +1386,7 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
       short: 'Es zählt, wer überwiegt.',
     },
   },
+  ...ELEKTRONEN_ERROR_RULES,
 ]
 
 const BY_ID = new Map(CHEM_ERROR_RULES.map((r) => [r.id, r]))

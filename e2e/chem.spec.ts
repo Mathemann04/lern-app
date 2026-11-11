@@ -63,8 +63,8 @@ test('Chemie: Start → Atombau → Grundlagen, Frage richtig beantworten, melde
   await page.getByRole('link', { name: /^Aufbau der Materie/ }).click()
   await expect(page).toHaveURL(/#\/gebiet\/chem-materie$/)
   await expect(page.getByRole('heading', { name: 'Aufbau der Materie', level: 1 })).toBeVisible()
-  // Elektronen kommen bald
-  await expect(page.getByText('kommt bald')).toHaveCount(1)
+  // seit S6a sind beide Themen spielbar
+  await expect(page.getByText('kommt bald')).toHaveCount(0)
   await expectCleanPage(page, 'Gebiet')
 
   await page.getByRole('link', { name: /^Atombau/ }).click()
@@ -309,6 +309,7 @@ test('Chemie: Themen mischen, „Nächste Aufgabe" bleibt in der Mischung, X und
   await page.getByRole('checkbox', { name: 'Moleküle' }).uncheck()
   await page.getByRole('checkbox', { name: 'Zwischenmolekulare Kräfte' }).uncheck()
   await page.getByRole('checkbox', { name: 'Metallbindung und Hybridisierung' }).uncheck()
+  await page.getByRole('checkbox', { name: 'Elektronen', exact: true }).uncheck()
 
   // Unterthemen aufklappen: dieselben Kästchen wie auf der Themenseite (Atombau steht zuerst)
   const toggle = page.getByRole('button', { name: /^Unterthemen: alle/ }).first()
@@ -673,5 +674,20 @@ test('Chemie: Klausuraufgabe 3 üben, Lewis-Formeln als Bilder, abgeben, Auswert
   await page.getByRole('button', { name: 'Abgeben' }).click()
   await expect(page.getByTestId('exam-score')).toHaveText(/^\d+(,5)? von 12 Punkten$/)
   await expectCleanPage(page, 'Auswertung Klausuraufgabe 3')
+  expect(errors).toEqual([])
+})
+
+test('Chemie: Elektronen, Kästchenbilder als Antworten und Lernkarte', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./#/gebiet/chem-materie')
+  await page.getByRole('link', { name: /Elektronen/ }).click()
+  await expect(page.getByRole('heading', { name: 'Elektronen' })).toBeVisible()
+  await page.goto('./#/ueben/chem-elektronen/1-10004')
+  await expect(answers(page).first()).toBeVisible()
+  await expectCleanPage(page, 'Rechnung zu Elektronen')
+  await page.goto('./#/karten/chem-elektronen/el-hund')
+  await expect(page.getByRole('heading', { name: /Hund/ })).toBeVisible()
+  await expect(page.getByTestId('chem-figure')).toBeVisible()
+  await expectCleanPage(page, 'Hund’sche Regel')
   expect(errors).toEqual([])
 })

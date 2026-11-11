@@ -1,4 +1,5 @@
-import { type ChemFigure as Figure, type LatticeFigure, type ShapeFigure, figureById } from '../../engine/chem/figures.ts'
+import { type BoxFigure, type ChemFigure as Figure, type LatticeFigure, type ShapeFigure, figureById } from '../../engine/chem/figures.ts'
+import { LETTERS } from '../../engine/chem/electrons.ts'
 import type { LewisFigure } from '../../engine/chem/lewis.ts'
 import { RichText } from '../RichText.tsx'
 
@@ -201,10 +202,79 @@ function Shape({ figure }: { figure: ShapeFigure }) {
   )
 }
 
+// Kästchenschreibweise: je Unterschale eine Gruppe Kästchen nebeneinander, darunter ihr Name; Pfeile für Elektronen.
+// Breite fest je Kästchen, damit alle Antworten einer Frage gleich groß wirken.
+const BOX = 26
+const GAP = 10
+
+function Arrow({ x, y, up, shift }: { x: number; y: number; up: boolean; shift: number }) {
+  const top = y + 5
+  const bottom = y + BOX - 5
+  const cx = x + BOX / 2 + shift
+  const [from, to] = up ? [bottom, top] : [top, bottom]
+  const head = up ? 1 : -1
+  return (
+    <g className="stroke-zinc-800" strokeWidth={1.8} strokeLinecap="round" fill="none">
+      <line x1={cx} y1={from} x2={cx} y2={to} />
+      <polyline points={`${cx - 3.5},${to + head * 4.5} ${cx},${to} ${cx + 3.5},${to + head * 4.5}`} />
+    </g>
+  )
+}
+
+function Boxes({ figure, label }: { figure: BoxFigure; label: string }) {
+  const coreWidth = figure.core ? 44 : 0
+  const groups = figure.rows.map((r) => r.boxes.length)
+  const width = coreWidth + groups.reduce((sum, k) => sum + k * BOX, 0) + GAP * (groups.length - 1) + 8
+  const height = BOX + 26
+  // linker Rand jeder Gruppe
+  const starts = groups.map((_, k) => coreWidth + 4 + groups.slice(0, k).reduce((sum, n) => sum + n * BOX + GAP, 0))
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} className="mx-auto block h-auto" style={{ width: Math.min(width * 1.25, 340), maxWidth: '100%' }} role="img" aria-label={label}>
+      {figure.core && (
+        <text x={coreWidth / 2} y={4 + BOX / 2} textAnchor="middle" dominantBaseline="central" className="fill-zinc-700" fontSize={14} fontWeight={600}>
+          [{figure.core}]
+        </text>
+      )}
+      {figure.rows.map((row, k) => {
+        const start = starts[k]
+        return (
+          <g key={k}>
+            {row.boxes.map((b, i) => {
+              const bx = start + i * BOX
+              return (
+                <g key={i}>
+                  <rect x={bx} y={4} width={BOX} height={BOX} className="fill-surface stroke-zinc-500" strokeWidth={1.2} />
+                  {(b === 'u' || b === 'd') && <Arrow x={bx} y={4} up={b === 'u'} shift={0} />}
+                  {b === '2' && (
+                    <>
+                      <Arrow x={bx} y={4} up shift={-4.5} />
+                      <Arrow x={bx} y={4} up={false} shift={4.5} />
+                    </>
+                  )}
+                  {b === 'x' && (
+                    <>
+                      <Arrow x={bx} y={4} up shift={-4.5} />
+                      <Arrow x={bx} y={4} up shift={4.5} />
+                    </>
+                  )}
+                </g>
+              )
+            })}
+            <text x={start + (row.boxes.length * BOX) / 2} y={BOX + 18} textAnchor="middle" className="fill-zinc-600" fontSize={12}>
+              {`${row.shell.n}${LETTERS[row.shell.l]}`}
+            </text>
+          </g>
+        )
+      })}
+    </svg>
+  )
+}
+
 // nur die Zeichnung, ohne Rahmen und Unterschrift (z. B. als Antwort zur Auswahl)
 export function FigureDrawing({ figure, label }: { figure: Figure; label?: string }) {
   if (figure.kind === 'lattice') return <Lattice figure={figure} />
   if (figure.kind === 'lewis') return <Lewis figure={figure} label={label ?? figure.description} />
+  if (figure.kind === 'boxes') return <Boxes figure={figure} label={label ?? figure.description} />
   return <Shape figure={figure} />
 }
 

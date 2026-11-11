@@ -6,6 +6,7 @@ import { LOESUNGEN_BANK } from './bank/loesungen.ts'
 import { MOLEKUELE_BANK } from './bank/molekuele.ts'
 import { ZMK_BANK } from './bank/zmk.ts'
 import { METALLE_BANK } from './bank/metalle.ts'
+import { ELEKTRONEN_BANK } from './bank/elektronen.ts'
 import { STOFFMENGE_BANK } from './bank/stoffmenge.ts'
 import { ATOMBAU_WHY } from './misconceptions/atombauWhy.ts'
 import { GLEICHUNGEN_WHY } from './misconceptions/gleichungenWhy.ts'
@@ -14,6 +15,7 @@ import { LOESUNGEN_WHY } from './misconceptions/loesungenWhy.ts'
 import { MOLEKUELE_WHY } from './misconceptions/molekueleWhy.ts'
 import { ZMK_WHY } from './misconceptions/zmkWhy.ts'
 import { METALLE_WHY } from './misconceptions/metalleWhy.ts'
+import { ELEKTRONEN_WHY } from './misconceptions/elektronenWhy.ts'
 import { STOFFMENGE_WHY } from './misconceptions/stoffmengeWhy.ts'
 import { MISCONCEPTIONS_BY_COURSE } from './misconceptions/index.ts'
 
@@ -28,6 +30,7 @@ const BANKS: readonly { readonly bank: QuestionBank; readonly why: Readonly<Reco
   { bank: MOLEKUELE_BANK, why: MOLEKUELE_WHY },
   { bank: ZMK_BANK, why: ZMK_WHY },
   { bank: METALLE_BANK, why: METALLE_WHY },
+  { bank: ELEKTRONEN_BANK, why: ELEKTRONEN_WHY },
 ]
 
 export type ChemTopic = { readonly bank: QuestionBank; readonly misconceptions: readonly Misconception[] }

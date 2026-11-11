@@ -1,6 +1,7 @@
 // Bilder zu Chemie-Fragen und Lernkarten (Wunsch des Nutzers, Plan M4 S5): aus Daten gezeichnet, nicht von
 // Hand. Die Engine liefert die Lage der Teilchen; die Oberfläche (ui/chem/ChemFigure.tsx) zeichnet sie.
 
+import { type BoxRow, boxRowsText, parseBoxFigureId, subshellName } from './electrons.ts'
 import { type LewisFigure, lewisFigureById } from './lewis.ts'
 import { type MolBond, type Molecule, moleculeById, vseprOf } from './molecules.ts'
 
@@ -38,7 +39,34 @@ export type ShapeFigure = {
   readonly lobes: readonly { readonly x: number; readonly y: number; readonly z: number }[]
 }
 
-export type ChemFigure = LatticeFigure | LewisFigure | ShapeFigure
+// Kästchenschreibweise: je Unterschale eine Reihe Kästchen (Orbitale) mit Pfeilen (Elektronen und Spin), links
+// der Edelgaskern; aus der Id gelesen (electrons.ts, boxFigureId), auch für falsche Besetzungen als Antworten
+export type BoxFigure = {
+  readonly kind: 'boxes'
+  readonly id: string
+  readonly caption: string
+  // die Besetzung in Worten (für Vorlesehilfen)
+  readonly description: string
+  // Edelgaskern (Symbol) oder leer
+  readonly core: string
+  readonly rows: readonly BoxRow[]
+}
+
+export type ChemFigure = LatticeFigure | LewisFigure | ShapeFigure | BoxFigure
+
+export function boxFigureById(id: string): BoxFigure | null {
+  const parsed = parseBoxFigureId(id)
+  if (!parsed) return null
+  const shells = parsed.rows.map((r) => subshellName(r.shell)).join(', ')
+  return {
+    kind: 'boxes',
+    id,
+    caption: `Kästchenschreibweise${parsed.core ? String.raw` mit Edelgaskern $[\mathrm{${parsed.core}}]$` : ''}: ${shells}. Jedes Kästchen ist ein Orbital, jeder Pfeil ein Elektron.`,
+    description: boxRowsText(parsed.core, parsed.rows),
+    core: parsed.core,
+    rows: parsed.rows,
+  }
+}
 
 const distance = (a: LatticeIon, b: LatticeIon) => Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z)
 
@@ -110,6 +138,7 @@ export const FIGURES: readonly ChemFigure[] = [NACL, CSCL, ZNS]
 export function figureById(id: string): ChemFigure | undefined {
   if (id.startsWith('lewis:')) return lewisFigureById(id) ?? undefined
   if (id.startsWith('gestalt:')) return shapeFigureById(id) ?? undefined
+  if (id.startsWith('kaestchen:')) return boxFigureById(id) ?? undefined
   return FIGURES.find((f) => f.id === id)
 }
 

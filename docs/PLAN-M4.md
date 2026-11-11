@@ -525,9 +525,42 @@ kommen mit ihren Schritten dazu. Die Denkfehler der Wissensfragen
 | Übergang im H-Atom | Kehrwert vergessen (`chem-rydberg-reciprocal`) | 1/λ als λ angegeben |
 | Welle eines Teilchens | Lichtgeschwindigkeit statt Geschwindigkeit des Teilchens (`chem-debroglie-c`) | λ = h/(m · c) |
 | Welle eines Teilchens | Masse in g statt kg (`chem-debroglie-gram`) | λ um den Faktor 1000 zu klein |
-| Konfiguration | 3d vor 4s besetzt (`chem-3d-before-4s`) | K: [Ar] 3d¹ |
-| Konfiguration | Hund'sche Regel verletzt (`chem-hund`) | N: 2p mit ↑↓, ↑ und einem leeren Kästchen |
-| Konfiguration | Unterschale überfüllt (`chem-subshell-overfilled`) | Ne: 1s² 2s³ 2p⁵ |
+| Konfiguration | 3d vor 4s besetzt (`chem-el-3d-first`, seit S6a) | K: [Ar] 3d¹ |
+| Konfiguration | Unterschale überfüllt, s³ oder p⁷ (`chem-el-overfilled`, seit S6a) | Na: 1s² 2s² 2p⁷ |
+| Konfiguration | Elektronen falsch gezählt, Summe ≠ Z (`chem-el-count`, seit S6a) | P: [Ne] 3s² 3p⁴ |
+| Konfiguration | 3d übersprungen (`chem-el-d-skipped`, seit S6a) | Ga: [Ar] 4s² 4p¹ |
+| Konfiguration | Ausnahme bei Cr oder Cu übersehen (`chem-el-exception`, seit S6a) | Cr: [Ar] 4s² 3d⁴ |
+| Konfiguration eines Ions | Ladung nicht beachtet (`chem-el-charge-ignored`, seit S6a) | Fe²⁺: 26 Elektronen |
+| Konfiguration eines Ions | Ladung in die falsche Richtung (`chem-el-charge-sign`, seit S6a) | O²⁻: 6 Elektronen |
+| Konfiguration eines Ions | bei Kationen zuerst 3d geleert (`chem-el-ion-3d`, seit S6a) | Fe²⁺: [Ar] 4s² 3d⁴ |
+| Kästchen | Hund verletzt: erst Paare (`chem-el-hund`, seit S6a) | N: 2p mit ↑↓, ↑ und einem leeren Kästchen |
+| Kästchen | Hund verletzt: einzelne Elektronen mit entgegengesetztem Spin (`chem-el-hund-spin`, seit S6a) | N: 2p mit ↑, ↓, ↑ |
+| Kästchen | Pauli verletzt: Paar mit gleichem Spin (`chem-el-pauli`, seit S6a) | He: 1s mit ↑↑ |
+| Ungepaarte Elektronen | erst gepaart gezählt (`chem-el-unpaired-paired-first`, seit S6a) | O: 0 |
+| Ungepaarte Elektronen | alle der letzten Unterschale (`chem-el-unpaired-all`, seit S6a) | O: 4 |
+| Valenzelektronen | Gruppennummer 13 bis 18 (`chem-val-group-number`, seit S6a) | Al: 13 |
+| Valenzelektronen | Periode als Anzahl (`chem-val-period`, seit S6a) | S: 3 |
+| Valenzelektronen | alle Elektronen (`chem-val-all-electrons`, seit S6a) | Se: 34 |
+| Valenzkonfiguration | falsche Schale (`chem-val-wrong-shell`, seit S6a) | S: 4s² 4p⁴ |
+| Valenzkonfiguration | innere Elektronen mitgezählt (`chem-val-core`, seit S6a) | Se: 4s² 3d¹⁰ 4p⁴ |
+| Valenzkonfiguration | Ion statt Atom (`chem-val-ion`, seit S6a) | S: 3s² 3p⁶ |
+| Valenzkonfiguration | alle in p gesetzt (`chem-val-s-missing`, seit S6a) | S: 3p⁶ |
+| Element aus der Valenzkonfiguration | Periode falsch abgelesen (`chem-val-rev-period`, seit S6a) | 4s² 4p³: P |
+| Element aus der Valenzkonfiguration | Valenzelektronen als Ordnungszahl (`chem-val-rev-z`, seit S6a) | 4s² 4p³: B |
+| Element aus der Valenzkonfiguration | nur p-Elektronen gezählt (`chem-val-rev-p-only`, seit S6a) | 4s² 4p³: Ga |
+| Quantenzahlen | l bis n statt n − 1 (`chem-qn-l-to-n`, seit S6a) | n = 3: l = 0, 1, 2, 3 |
+| Quantenzahlen | l ab 1 (`chem-qn-l-from-1`, seit S6a) | n = 3: l = 1, 2, 3 |
+| Quantenzahlen | Buchstabe um eins verschoben (`chem-qn-letter-shift`, seit S6a) | 3d: l = 3 |
+| Quantenzahlen | n als l genommen (`chem-qn-l-is-n`, seit S6a) | 4p: l = 4 |
+| Quantenzahlen | negative m vergessen (`chem-qn-m-positive`, seit S6a) | l = 2: m = 0, 1, 2 |
+| Quantenzahlen | m größer als l (`chem-qn-m-beyond-l`, seit S6a) | l = 1, m = −2 |
+| Quantenzahlen | Spin 0 oder 1 (`chem-qn-spin`, seit S6a) | s = 1 |
+| Quantenzahlen | m statt l für die Unterschale (`chem-qn-m-as-l`, seit S6a) | n = 3, l = 2, m = 1: 3p |
+| Elektronen je Schale | 2n statt 2n² (`chem-qn-2n`, seit S6a) | n = 3: 6 |
+| Elektronen je Schale | Orbitale statt Elektronen, n² (`chem-qn-n-squared`, seit S6a) | n = 3: 9 |
+| Elektronen je Schale | acht für jede Schale (`chem-qn-octet`, seit S6a) | n = 3: 8 |
+| Elektronen je Unterschale | ein Elektron je Orbital (`chem-qn-one-per-orbital`, seit S6a) | 3d: 5 |
+| Elektronen je Unterschale | Plätze der ganzen Schale (`chem-qn-subshell-as-shell`, seit S6a) | 3d: 18 |
 | Konfiguration | Summe ungleich Z (`chem-electron-count`) | S: 1s² 2s² 2p⁶ 3s² 3p³ |
 | Konfiguration | Ausnahme nicht beachtet (`chem-exception-ignored`) | Cr: [Ar] 4s² 3d⁴ |
 | Konfiguration eines Ions | 3d statt 4s geleert (`chem-ion-3d-emptied`) | Fe²⁺: [Ar] 4s² 3d⁴ statt [Ar] 3d⁶ |
@@ -980,6 +1013,26 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   in Richtung der Zunahme. Gezeichnet aus der Elementtabelle, nicht von Hand.
   Ausprobieren: Valenzkonfiguration von Schwefel; Na, Mg und Cl nach
   Atomradius.
+  Geteilt (11.11.2026), damit jeder Teil einzeln ausprobierbar ist: **S6a** Thema
+  „Elektronen“, **S6b** „Klausuraufgabe 1 üben“ (Atombau und Elektronen), **S6c** Aufbau
+  des Periodensystems (mit Ausschnitt des Periodensystems als Bild), **S6d** Trends im
+  Periodensystem, **S6e** „Klausuraufgabe 2 üben“.
+  **S6a** (fertig): Thema „Elektronen“ mit Unterthemen Quantenzahlen und Orbitale; Pauli,
+  Hund und Elektronenkonfiguration; Konfiguration von Ionen (ab Vertiefung); Valenzelektronen.
+  Die Engine rechnet jede Konfiguration selbst (`chem/electrons.ts`: Besetzungsreihenfolge,
+  Ausnahmen aus dem Tabellenwerk, Ionen, Edelgaskern, Kästchen nach Hund). Rechnungen:
+  Konfiguration eines Atoms (in den Grundlagen H bis Ar ausführlich, ab Vertiefung bis Kr mit
+  Edelgaskern, Cr und Cu als Ausnahmen) mit ungepaarten Elektronen; Kästchenbild wählen (vier
+  Bilder, die falschen verletzen Pauli, Hund oder die Reihenfolge); Konfiguration eines Ions
+  (Elektronen zählen, Konfiguration, bei Übergangsmetallen ungepaarte Elektronen); Valenzelektronen
+  und Valenzkonfiguration von Hauptgruppenelementen (Grundlagen bis zur 3. Periode, sonst bis Kr);
+  Element aus der Valenzkonfiguration (ab Vertiefung); Quantenzahlen einer Schale, einer Unterschale und erlaubte Sätze (Klausurniveau).
+  Bilder: Kästchenschreibweise aus den Daten gezeichnet, als Antworten, unter Fragen, im
+  Ergebnis und auf Karten. Acht Lernkarten, 51 Wissensfragen (18, 16, 17), 36 Rechenfehler,
+  25 Denkfehler. Abweichungen: Grundlagen bis Ar statt bis Ne (sonst gäbe es zu wenig
+  Abwechslung); Abwechslung mit eigener Kennzahl (in den Grundlagen etwa 50 sinnvolle Formen);
+  Kationen mit Edelgaskonfiguration kurz als [Ar], Anionen mit dem Kern des Atoms
+  ([Ne] 3s² 3p⁶), damit man das Auffüllen sieht.
 - **S7: Gleichgewicht und Energie.** Massenwirkungsgesetz als Auswahl, Le
   Chatelier, Katalysator, K aus Konzentrationen; Reaktionsenthalpie aus
   Bildungsenthalpien, Entropie, freie Enthalpie; „Klausuraufgabe 5 üben“.

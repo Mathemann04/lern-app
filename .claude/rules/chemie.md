@@ -144,3 +144,14 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   `generators/salze.ts`, `MOLECULE_STEPS`, `ZMK_STEPS`, `boilTask`, `dopeTask`, `hybridTask`), Kachel über
   `exam: { task: 3 }` am Gebiet `chem-bindung`. `ExamOption.figure` zeigt Bilder als Antworten
   (`ui/exam/ExamTaskPage.tsx`); `givenLatex` darf leer sein.
+- Elektronen (S6a): `chem/electrons.ts` (Besetzungsreihenfolge `AUFBAU` bis 6p, `atomConfig` mit Ausnahmen
+  `EXCEPTIONS`, in Aufgaben nur `TASK_EXCEPTIONS` Cr und Cu; `ionConfig`: Kationen geben das größte n ab,
+  `removeLast` als Fehler; `coreOf` Edelgaskern mit weniger Elektronen, `configLatex`, `configKey` zum Vergleichen;
+  Kästchen `hundBoxes`, `pairedFirstBoxes`, Bild-Id `kaestchen:<Kern>/<Unterschale>=<Kästchen>` mit `0 u d 2 x`,
+  gezeichnet von `ChemFigure.tsx` als `BoxFigure`; `mainGroupOf`, `valenceConfig`, `MAIN_GROUP`),
+  `generators/elektronen.ts` (Rechenarten `konfiguration`, `kaestchen`, `ion-konfiguration`, `valenz`,
+  `element-aus-valenz`, `schale`, `unterschale`, `quantenzahlen-erlaubt`; falsche Konfigurationen mit dem Kern der
+  Lösung, wo er passt; Kationen mit Edelgaskonfiguration kurz als [Ar]), Rechenfehler in `chem/elektronenRules.ts`
+  (in `CHEM_ERROR_RULES` eingehängt), Karten `elektronenCards.ts`, Fragen `bank/elektronen.ts` (`cfg` schreibt
+  Konfigurationen), Denkfehler `chem-mis-el-…`, Gegenprobe `chem/electrons.test.ts` (zweite Liste nach NIST),
+  Katalogbeispiele `generators/elektronen.test.ts`.
