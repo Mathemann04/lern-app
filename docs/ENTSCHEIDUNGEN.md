@@ -778,3 +778,10 @@ Neue Entscheidungen unten anfügen.
   „Klausuraufgabe N üben“ in die Wiederholung. „Fortschritt löschen“ löscht auch den Verlauf der Probeklausuren.
 - 11.11.2026: Teil 2 der Chemie-Klausur ist im Januar 2027. Nach Teil 1 geht es deshalb in der Reihenfolge des Plans
   weiter: N1 (Fragearten), N2 (Eingaben), dann N3 (Säure-Base) und N4 (Redox, Probeklausur Teil 2), zuletzt N5.
+- 11.11.2026: N1 in drei Teile geteilt (N1a „Wähle alle richtigen“, N1b Zuordnen, N1c Ordnen). Bei „Wähle alle
+  richtigen“ wird einmal geprüft, danach ist die Frage vorbei: Wer nach der Auswertung (richtig gewählt, zu Unrecht
+  gewählt, vergessen) noch einmal prüfen dürfte, müsste nur die Markierungen abschreiben. Jeder Fehler zählt als ein
+  Fehlversuch, die Frage kommt in die Wiederholung. In die Fehlerstatistik kommen die Denkfehler der zu Unrecht
+  gewählten Aussagen; vergessene richtige Aussagen haben keinen eigenen Denkfehler. Es steht immer mindestens eine
+  falsche Aussage da (sonst wäre „alle ankreuzen“ ein sicherer Weg). Klausuraufgaben und Probeklausur nehmen nur
+  Fragen mit Einfachauswahl, wie die echte Klausur.

@@ -45,12 +45,18 @@ const isCalc = (url: string) => {
   const seed = Number(/-(\d+)(?:\?.*)?$/.exec(url)?.[1] ?? 0)
   return seed >= 10_000 && seed < 500_000
 }
+// Ab N1 gibt es auch „Wähle alle richtigen“ (Aussagen zum Ankreuzen statt Antwortknöpfen): Tests für die
+// Einfachauswahl ziehen auch dann neu
+const isMulti = async (page: Page) => {
+  await page.locator('#question').waitFor()
+  return (await page.getByRole('list', { name: 'Aussagen' }).count()) > 0
+}
 async function ensureQuestion(page: Page, href: string) {
-  for (let i = 0; i < 30 && isCalc(page.url()); i++) {
+  for (let i = 0; i < 30 && (isCalc(page.url()) || (await isMulti(page))); i++) {
     await page.goto(href)
     await expect(page).toHaveURL(/-\d+(\?.*)?$/)
   }
-  expect(isCalc(page.url()), 'nach 30 Versuchen noch keine Frage').toBe(false)
+  expect(isCalc(page.url()) || (await isMulti(page)), 'nach 30 Versuchen noch keine Frage mit einer richtigen Antwort').toBe(false)
 }
 
 async function indexOfAnswer(page: Page, text: string): Promise<number> {
@@ -828,5 +834,50 @@ test('Chemie: Klausuraufgabe 5 üben, Gleichgewicht und Energie, abgeben, Auswer
   await page.getByRole('button', { name: 'Abgeben' }).click()
   await expect(page.getByTestId('exam-score')).toHaveText(/^\d+(,5)? von 10 Punkten$/)
   await expectCleanPage(page, 'Auswertung Klausuraufgabe 5')
+  expect(errors).toEqual([])
+})
+
+// N1a: „Wähle alle richtigen“ – ankreuzen, prüfen, je Aussage richtig gewählt, zu Unrecht gewählt oder vergessen
+test('Chemie: „Wähle alle richtigen“, erst alles richtig, dann mit Fehlern und „Warum ist das falsch?“', async ({ page, context }) => {
+  const errors = collectErrors(page)
+  const gallery = await context.newPage()
+  await gallery.goto('./#/galerie/chem-trends')
+  const card = gallery.locator('article[data-question-no="317"]')
+  await expect(card).toContainText('Wähle alle richtigen')
+  const correct = (await card.getByTestId('correct-answer').allTextContents()).map((t) => t.trim())
+  expect(correct.length).toBeGreaterThanOrEqual(2)
+  await gallery.close()
+
+  const statements = page.getByRole('list', { name: 'Aussagen' }).getByRole('button')
+  const isCorrect = (text: string) => correct.some((c) => c.split('\\displaystyle')[0].trim() === text.split('\\displaystyle')[0].trim())
+
+  // alle richtigen ankreuzen
+  await page.goto('./#/ueben/chem-trends/3-317')
+  await expect(page.getByText(/· Wähle alle richtigen Aussagen/)).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Prüfen' })).toBeDisabled()
+  await expectCleanPage(page, 'Wähle alle richtigen')
+  const texts = (await statements.allTextContents()).map((t) => t.trim())
+  expect(texts.length).toBeGreaterThanOrEqual(4)
+  for (const [i, text] of texts.entries()) if (isCorrect(text)) await statements.nth(i).click()
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
+  await page.getByRole('button', { name: 'Ergebnis ansehen' }).click()
+  await expect(page.getByText('Alles beim ersten Versuch richtig.')).toBeVisible()
+  await expect(page.getByText('Richtige Aussagen')).toBeVisible()
+
+  // eine andere Fassung: nur eine falsche Aussage ankreuzen
+  await page.goto(`./#/ueben/chem-trends/3-${500_000 + 317 * 50 + 7}`)
+  await expect(page.getByRole('button', { name: 'Prüfen' })).toBeVisible()
+  const other = (await statements.allTextContents()).map((t) => t.trim())
+  await statements.nth(other.findIndex((t) => !isCorrect(t))).click()
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Zu Unrecht gewählt', { exact: false })).toBeVisible()
+  await expect(page.getByText('Vergessen: Diese Aussage stimmt auch.').first()).toBeVisible()
+  await expect(page.getByText('Nicht ganz.')).toBeVisible()
+  await page.getByRole('button', { name: 'Warum ist das falsch?' }).click()
+  await expect(page.getByRole('button', { name: 'Warum ist das falsch?' })).toHaveCount(0)
+  await expectCleanPage(page, 'Wähle alle richtigen, ausgewertet')
+  await page.getByRole('button', { name: 'Ergebnis ansehen' }).click()
+  await expect(page.getByText('Nicht alles richtig angekreuzt.', { exact: false })).toBeVisible()
   expect(errors).toEqual([])
 })

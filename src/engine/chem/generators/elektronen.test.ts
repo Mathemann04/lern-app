@@ -137,9 +137,15 @@ describe('Fragen und Karten zu Elektronen passen zur Engine', () => {
     'el-k-palladium': ['Pd', 0],
     'el-k-silber': ['Ag', 0],
   }
+  // Frage der Sammlung als Einfachauswahl
+  const single = (id: string) => {
+    const question = ELEKTRONEN_BANK.questions.find((x) => x.id === id)
+    if (question?.kind !== 'single') throw new Error(`${id} ist keine Einfachauswahl`)
+    return question
+  }
   it('richtige Konfigurationen in Fragen', () => {
     for (const [id, [symbol, q]] of Object.entries(CONFIG_QUESTIONS)) {
-      const question = ELEKTRONEN_BANK.questions.find((x) => x.id === id)!
+      const question = single(id)
       const config = ionConfig(z(symbol), q)
       const expected = [configLatex(config, false), configLatex(config, true)].map((x) => `$${x}$`)
       expect(expected, id).toContain(question.correct.text)
@@ -151,7 +157,7 @@ describe('Fragen und Karten zu Elektronen passen zur Engine', () => {
 
   it('Kästchenbilder der Fragen und Karten passen zur Lösung', () => {
     const unpaired = (id: string) => parseBoxFigureId(id)!.rows.reduce((sum, r) => sum + unpairedIn(r.boxes), 0)
-    const byId = (id: string) => ELEKTRONEN_BANK.questions.find((x) => x.id === id)!
+    const byId = single
     expect(unpaired(byId('el-g-stickstoff').figure!)).toBe(Number(byId('el-g-stickstoff').correct.text))
     expect(unpaired(byId('el-v-eisen-ungepaart').figure!)).toBe(Number(byId('el-v-eisen-ungepaart').correct.text))
     // das richtige Bild von Chrom ist die Engine-Besetzung, die Bilder zu Hund und Pauli sind es nicht

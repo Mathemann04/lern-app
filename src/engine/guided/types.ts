@@ -47,6 +47,9 @@ export type GuidedStep = {
   readonly figure?: string
   // Zahl als Ergebnis: Im freien Modus (Chemie, S8b) tippt man sie selbst ein, statt auszuwählen
   readonly numeric?: NumericAnswer
+  // „Wähle alle richtigen“ (N1): mehrere Antworten können richtig sein; man kreuzt an und prüft einmal,
+  // danach steht bei jeder Aussage, ob sie richtig gewählt, zu Unrecht gewählt oder vergessen ist
+  readonly multi?: boolean
 }
 
 // Gemeinsame Basis aller geführten Aufgaben: Mathe-Aufgaben mit Term (GuidedTask) und Wissensfragen

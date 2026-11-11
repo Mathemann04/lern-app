@@ -1206,6 +1206,23 @@ der Reihenfolge N1, N2, N3, N4, N5; die Skripte zu Säure-Base und Redox
 braucht es erst für N3 und N4.
 - **N1: Weitere Fragearten.** „Wähle alle richtigen“, Zuordnen, Ordnen;
   Fragen damit ergänzen.
+  Geteilt (11.11.2026), damit jede Frageart einzeln ausprobierbar ist:
+  **N1a** (fertig): „Wähle alle richtigen“. Vier bis sechs Aussagen, davon
+  eine bis vier richtig und immer mindestens eine falsch; jede Fassung wählt
+  Zahl, Auswahl und Reihenfolge neu aus einem Vorrat (mindestens zwei richtige
+  und drei falsche Aussagen). Du kreuzt an und tippst auf „Prüfen“; danach
+  steht bei jeder Aussage „richtig gewählt“, „zu Unrecht gewählt“ (mit „Warum
+  ist das falsch?“) oder „vergessen“. Geprüft wird einmal: Ist nicht alles
+  richtig, zählt die Frage als falsch beantwortet und kommt wieder. Jede
+  falsche Aussage ist ein Denkfehler des Themas (Fehlerstatistik, gezieltes
+  Üben). Neue Fragen: drei je Thema (eine je Stufe), nur aus Fakten, die schon
+  in den geprüften Fragen und Karten des Themas stehen. Die Klausuraufgaben
+  und die Probeklausur bleiben bei der Einfachauswahl wie in der echten
+  Klausur.
+  Ausprobieren: Trends im Periodensystem → Klausurniveau, Aufgabe 3-317
+  (oder in der Galerie „Fragen durchsehen“ auf eine Frage mit „Wähle alle
+  richtigen“ tippen).
+  **N1b**: Zuordnen. **N1c**: Ordnen.
 - **N2: Eingaben.** Orbital-Kästchen, Baukasten fürs
   Massenwirkungsgesetz, Lewis-Baukasten, Koeffizienten-Felder,
   Element-Tastatur, Knöpfe für Konfigurationen im freien Modus.

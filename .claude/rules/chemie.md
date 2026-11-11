@@ -218,3 +218,12 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   `engine/exam/mock.ts` (Thema über die erste Lernkarte der Frage), Wiederholung über `ExamItem.review` (Wissensfragen in
   `task1.ts` und `task5.ts`), nachgeführt von `recordExamResult` in `ui/exam/examText.ts` (auch bei „Klausuraufgabe N üben"). In
   Browser-Tests die Knöpfe mit `exact: true` suchen (Antworten enthalten das Wort „Periodensystem").
+- „Wähle alle richtigen" (N1a): `MultiChoice` in `quiz/types.ts` (`kind: 'multi'`, `correct` als Liste, Vorrat mindestens
+  zwei richtige und drei falsche; `correctOptionsOf` für beide Arten), `planMulti` in `quiz/plan.ts` (vier bis sechs
+  Aussagen, eine bis vier richtig, mindestens eine falsch, `MULTI_SHOWN`, `MULTI_CORRECT`; Ergebnis die richtigen der
+  Fassung, je Zeile eine), Schritt mit `multi: true` (`guided/types.ts`), Anzeige `MultiAnswers` in
+  `ui/guided/TaskScreen.tsx` (ankreuzen mit `aria-pressed`, „Prüfen" einmal, danach je Aussage `data-verdict` hit,
+  wrong, missed, skipped). In den Sammlungen Helfer `multiAt` (Ids der richtigen `r1`, `r2`, …), Fragen am Ende unter
+  „Wähle alle richtigen (N1)"; jede Aussage ein Satz mit Punkt, die Frage nennt „Aussagen" (`bank.test.ts`).
+  Klausuraufgaben (`task1.ts`, `task5.ts`) nehmen nur Einfachauswahl. Browser-Tests für die Einfachauswahl ziehen mit
+  `ensureQuestion` neu, wenn eine Frage mit Aussagen kommt.

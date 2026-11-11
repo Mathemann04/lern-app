@@ -4,7 +4,7 @@ import { cardById, cardsInTopic } from '../explain/cards.ts'
 import { parseRichText } from '../explain/richText.ts'
 import { latexProblem } from '../expr/latexChecks.ts'
 import { QUESTION_NO_MAX } from '../quiz/numbers.ts'
-import type { Explanation, Question } from '../quiz/types.ts'
+import { type Explanation, type Question, correctOptionsOf } from '../quiz/types.ts'
 import { CHEM_TOPICS } from './banks.ts'
 import { generatorsOf } from './generators/index.ts'
 
@@ -13,6 +13,9 @@ import { generatorsOf } from './generators/index.ts'
 
 const MIN_PER_LEVEL = 15
 const MIN_WRONG = 4
+// „Wähle alle richtigen“: Vorrat mindestens zwei richtige und drei falsche Aussagen (quiz/types.ts)
+const MULTI_MIN_CORRECT = 2
+const MULTI_MIN_WRONG = 3
 
 // Texte mit $…$-Formeln: jede Formel setzt sich im strengen Modus
 function expectRenderable(text: string, context: string) {
@@ -118,8 +121,14 @@ describe.each(CHEM_TOPICS.map((t) => [t.bank.course, t] as const))('Fragensammlu
   })
 
   it.each(bank.questions.map((q) => [q.id, q] as const))('%s: Antworten, Denkfehler, Karten und Texte', (id, q) => {
-    expect(q.wrong.length, id).toBeGreaterThanOrEqual(MIN_WRONG)
-    const options = [q.correct, ...q.wrong]
+    if (q.kind === 'multi') {
+      expect(q.correct.length, `${id}: richtige Aussagen`).toBeGreaterThanOrEqual(MULTI_MIN_CORRECT)
+      expect(q.wrong.length, `${id}: falsche Aussagen`).toBeGreaterThanOrEqual(MULTI_MIN_WRONG)
+      // jede Aussage steht für sich als ganzer Satz; die Frage sagt, dass mehrere stimmen können
+      for (const option of [...q.correct, ...q.wrong]) expect(option.text, `${id}/${option.id}`).toMatch(/[.!]$/)
+      expect(q.prompt, id).toMatch(/Aussagen/)
+    } else expect(q.wrong.length, id).toBeGreaterThanOrEqual(MIN_WRONG)
+    const options = [...correctOptionsOf(q), ...q.wrong]
     expect(new Set(options.map((o) => o.id)).size, `${id}: Ids der Antworten`).toBe(options.length)
     const texts = options.map((o) => normalized(o.text))
     expect(texts.filter((t, i) => texts.indexOf(t) !== i), `${id}: doppelte Antworten`).toEqual([])
