@@ -776,3 +776,5 @@ Neue Entscheidungen unten anfügen.
   manche Teile nur wenige Stoffe haben (z. B. Si oder Ge beim Dotieren); im Test teilt die gewählte Klausur weniger als
   60 % so viele Stoffe mit den letzten drei wie eine zufällige. Beantwortete Wissensfragen gehen jetzt auch bei
   „Klausuraufgabe N üben“ in die Wiederholung. „Fortschritt löschen“ löscht auch den Verlauf der Probeklausuren.
+- 11.11.2026: Teil 2 der Chemie-Klausur ist im Januar 2027. Nach Teil 1 geht es deshalb in der Reihenfolge des Plans
+  weiter: N1 (Fragearten), N2 (Eingaben), dann N3 (Säure-Base) und N4 (Redox, Probeklausur Teil 2), zuletzt N5.

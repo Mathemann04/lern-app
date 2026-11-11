@@ -1201,7 +1201,9 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
 
 #### Nach Teil 1 der Klausur
 Die Reihenfolge richtet sich nach dem Termin von Teil 2: Kommt Teil 2 bald,
-zuerst N3 und N4.
+zuerst N3 und N4. Teil 2 ist im Januar 2027 (Antwort vom 11.11.2026), also in
+der Reihenfolge N1, N2, N3, N4, N5; die Skripte zu Säure-Base und Redox
+braucht es erst für N3 und N4.
 - **N1: Weitere Fragearten.** „Wähle alle richtigen“, Zuordnen, Ordnen;
   Fragen damit ergänzen.
 - **N2: Eingaben.** Orbital-Kästchen, Baukasten fürs
