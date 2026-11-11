@@ -1206,6 +1206,16 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
     },
   },
   {
+    id: 'chem-hyb-too-few',
+    course: METALLE,
+    name: 'Zu wenige Hybridorbitale',
+    wrongFormula: String.raw`\ce{CH4}\text{: } \mathrm{sp^{2}}`,
+    why: {
+      detailed: 'Für jede Richtung braucht das Atom ein eigenes Hybridorbital. Zähle die Richtungen und vergleiche mit der Zahl der Orbitale, die sich mischen: ein s-Orbital und so viele p-Orbitale, wie die Hochzahl sagt.',
+      short: 'Ein Hybridorbital je Richtung.',
+    },
+  },
+  {
     id: 'chem-sigma-all-lines',
     course: METALLE,
     name: 'Jeden Bindungsstrich als σ-Bindung gezählt',
@@ -1353,6 +1363,16 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
     why: {
       detailed: 'Jede Bindungsordnung über 0 bedeutet, dass die bindenden Elektronen überwiegen. Auch eine halbe Bindung hält zwei Atome zusammen, nur schwächer.',
       short: 'Über 0 heißt gebunden, auch halb.',
+    },
+  },
+  {
+    id: 'chem-bo-one-pair',
+    course: METALLE,
+    name: 'Ein bindendes Paar für zu wenig gehalten',
+    wrongFormula: String.raw`\ce{H2}\ \text{ungebunden}`,
+    why: {
+      detailed: 'Schon ein einziges Paar in einem bindenden Orbital bildet eine Bindung, wenn kein antibindendes Elektron es aufhebt. So entsteht die Einfachbindung im Wasserstoffmolekül.',
+      short: 'Ein bindendes Paar ist eine Bindung.',
     },
   },
   {

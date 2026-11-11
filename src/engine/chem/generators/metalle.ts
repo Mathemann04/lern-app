@@ -28,8 +28,13 @@ const hybridLatex = (n: number) => String.raw`\mathrm{${HYBRID[n]}}`
 
 // Atome, deren Hybridisierung gefragt werden kann: kein H, mindestens zwei Partner, höchstens vier Richtungen
 type Site = { readonly mol: Molecule; readonly atom: number }
+// H₂S, PH₃ und SCl₂ nicht: Ihre Winkel (etwa 92° bis 103°) passen schlecht zum Modell, Lehrbücher nehmen dort reine p-Orbitale an
+const NO_HYBRID = new Set(['H2S', 'PH3', 'SCl2'])
+// in den Grundlagen auch sp und sp² (sonst wäre die Antwort fast immer sp³)
+const BASIC_EXTRA = new Set(['C2H4', 'C2H2', 'CH2O', 'HCN', 'CS2', 'COCl2', 'BF3', 'BCl3'])
+
 export function hybridSites(level: Level): Site[] {
-  return MOLECULES.filter((m) => m.level <= level && !m.expanded).flatMap((mol) =>
+  return MOLECULES.filter((m) => (m.level <= level || (level === 1 && BASIC_EXTRA.has(m.id))) && !m.expanded && !NO_HYBRID.has(m.id)).flatMap((mol) =>
     mol.atoms.flatMap((a, atom) => {
       if (a.el === 'H' || partnersOf(mol, atom) < 2) return []
       const domains = partnersOf(mol, atom) + lonePairsOf(mol, atom)
@@ -85,8 +90,8 @@ function hybridStep(s: Site, rng: Rng, focus?: string): GuidedStep | null {
     ...(bondCount !== d && HYBRID[bondCount] ? [{ rule: 'chem-hyb-multiple-counted', key: hybridLatex(bondCount), content: math(hybridLatex(bondCount)) }] : []),
     // Hochzahl gleich der Zahl der Richtungen gelesen: drei Richtungen als sp³
     ...(HYBRID[d + 1] ? [{ rule: 'chem-hyb-exponent', key: hybridLatex(d + 1), content: math(hybridLatex(d + 1)) }] : []),
-    // umgekehrt: Hochzahl gleich der Zahl der Hybridorbitale minus eins vergessen, vier Richtungen als sp²
-    ...(HYBRID[d - 1] ? [{ rule: 'chem-hyb-exponent', key: hybridLatex(d - 1), content: math(hybridLatex(d - 1)) }] : []),
+    // zu wenige Hybridorbitale: vier Richtungen als sp²
+    ...(HYBRID[d - 1] ? [{ rule: 'chem-hyb-too-few', key: hybridLatex(d - 1), content: math(hybridLatex(d - 1)) }] : []),
   ]
   const correct = hybridLatex(d)
   const choices = stepChoices(rng, { key: correct, content: math(correct) }, wrong, focus)
@@ -110,16 +115,19 @@ function hybridStep(s: Site, rng: Rng, focus?: string): GuidedStep | null {
 function hybridTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc | null {
   const sites = hybridSites(level)
   const unique = [...new Map(sites.map((s) => [siteKey(s), s])).values()]
-  const s = rng.pick(unique)
+  // erst die Hybridisierung wählen (sp³ in der Hälfte der Aufgaben), dann das Atom: sonst wäre fast immer sp³ richtig
+  const roll = rng.next()
+  const d = roll < 0.5 ? 4 : roll < 0.75 ? 3 : 2
+  const withD = unique.filter((x) => domainsOf(x) === d)
+  const s = rng.pick(withD.length > 0 ? withD : unique)
   const first = domainStep(s, rng, focus)
   const second = hybridStep(s, rng, focus)
   if (!first || !second) return null
-  const d = domainsOf(s)
   return {
     task: {
       ref,
       instruction: 'Bestimme die Hybridisierung',
-      note: `Molekül: ${molName(s.mol)}.`,
+      note: `Molekül: ${molName(s.mol)}.${s.mol.sextet ? ' Bor hat hier nur sechs Valenzelektronen um sich (kein Oktett) und kein freies Paar.' : ''}`,
       steps: [first, second],
       cards: [CARD_HYBRID],
       resultText: `${atomLabel(s).replace(/^(ein|das)/, (w) => (w === 'ein' ? 'Ein' : 'Das'))} in $${ce(s.mol.id)}$ ist $${hybridLatex(d)}$-hybridisiert.`,
@@ -295,10 +303,12 @@ const STABLE = {
   noHalf: 'Nein: Nur ganzzahlige Bindungsordnungen ergeben eine Bindung.',
   yesElectrons: 'Ja: Es hat bindende Elektronen, das reicht.',
   noAnti: 'Nein: Sobald antibindende Elektronen da sind, gibt es keine Bindung.',
+  noPair: 'Nein: Ein einzelnes bindendes Elektronenpaar reicht für keine Bindung.',
 }
 
 function bondOrderTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc | null {
-  const sp = rng.pick(MO_SPECIES)
+  // gezielt üben „ein Paar zu wenig“: nur Teilchen ohne antibindende Elektronen mit ganzer Bindungsordnung
+  const sp = rng.pick(focus === 'chem-bo-one-pair' ? MO_SPECIES.filter((x) => x.antibonding === 0 && x.bonding % 2 === 0) : MO_SPECIES)
   const b = sp.bonding
   const a = sp.antibonding
   const order = b - a
@@ -318,7 +328,7 @@ function bondOrderTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): Ch
     rng,
     { key: correct, content: correct },
     stable
-      ? [order % 2 === 1 ? textWrong('chem-bo-half-unstable', STABLE.noHalf) : textWrong('chem-bo-antibonding-blocks', STABLE.noAnti)]
+      ? [order % 2 === 1 ? textWrong('chem-bo-half-unstable', STABLE.noHalf) : a > 0 ? textWrong('chem-bo-antibonding-blocks', STABLE.noAnti) : textWrong('chem-bo-one-pair', STABLE.noPair)]
       : [textWrong('chem-bo-zero-stable', STABLE.yesElectrons)],
     focus,
   )
@@ -342,11 +352,11 @@ function bondOrderTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): Ch
         {
           id: 'stabil',
           title: 'Bindung oder nicht?',
-          question: `Kann $${ce(sp.ce)}$ als gebundenes Teilchen bestehen?`,
+          question: `Sagt das MO-Modell für $${ce(sp.ce)}$ eine Bindung voraus?`,
           choices: second,
           hint: 'Eine Bindung besteht, sobald die bindenden Elektronen überwiegen, auch bei einer halben Bindungsordnung.',
           explanation: {
-            detailed: stable ? `Die Bindungsordnung ${half(order)} ist größer als 0: Die bindenden Elektronen überwiegen, das Teilchen ist gebunden.` : 'Bindende und antibindende Elektronen heben sich auf; es entsteht keine Bindung.',
+            detailed: stable ? `Die Bindungsordnung $${half(order)}$ ist größer als 0: Die bindenden Elektronen überwiegen, das Modell sagt eine Bindung voraus.` : 'Bindende und antibindende Elektronen heben sich auf; das Modell sagt keine Bindung voraus. (Höchstens sehr schwache Anziehungen wie Van-der-Waals-Kräfte bleiben.)',
             short: correct,
           },
           cards: [CARD_BO],
@@ -367,7 +377,7 @@ export const METALLE_GENERATORS: readonly ChemGenerator[] = [
     kind: 'hybrid',
     part: 'hybrid',
     weights: { 1: 1, 2: 0.35, 3: 0.25 },
-    errors: ['chem-hyb-lone-pairs-ignored', 'chem-hyb-multiple-counted', 'chem-hyb-valence', 'chem-hyb-all-atoms', 'chem-hyb-exponent'],
+    errors: ['chem-hyb-lone-pairs-ignored', 'chem-hyb-multiple-counted', 'chem-hyb-valence', 'chem-hyb-all-atoms', 'chem-hyb-exponent', 'chem-hyb-too-few'],
     generate: hybridTask,
   },
   {
@@ -388,7 +398,7 @@ export const METALLE_GENERATORS: readonly ChemGenerator[] = [
     kind: 'bindungsordnung',
     part: 'mo',
     weights: { 3: 0.3 },
-    errors: ['chem-bo-not-halved', 'chem-bo-added', 'chem-bo-bonding-only', 'chem-bo-zero-stable', 'chem-bo-half-unstable', 'chem-bo-antibonding-blocks'],
+    errors: ['chem-bo-not-halved', 'chem-bo-added', 'chem-bo-bonding-only', 'chem-bo-zero-stable', 'chem-bo-half-unstable', 'chem-bo-antibonding-blocks', 'chem-bo-one-pair'],
     generate: bondOrderTask,
   },
 ]

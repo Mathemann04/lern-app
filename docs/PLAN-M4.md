@@ -615,6 +615,8 @@ kommen mit ihren Schritten dazu. Die Denkfehler der Wissensfragen
 | Hybridisierung | Valenzelektronen als Richtungen (`chem-hyb-valence`, seit S5d) | H₂O: 6 Richtungen am O |
 | Hybridisierung | alle Atome gezählt (`chem-hyb-all-atoms`, seit S5d) | CH₄: 5 Richtungen |
 | Hybridisierung | Hochzahl mit Zahl der Richtungen verwechselt (`chem-hyb-exponent`, seit S5d) | 3 Richtungen: sp³ |
+| Hybridisierung | zu wenige Hybridorbitale (`chem-hyb-too-few`, seit S5d) | CH₄: sp² |
+| Bindungsordnung | ein bindendes Paar für zu wenig gehalten (`chem-bo-one-pair`, seit S5d) | H₂ ungebunden |
 | σ und π | jeder Strich eine σ-Bindung (`chem-sigma-all-lines`, seit S5d) | CO₂: 4 σ |
 | σ und π | σ in der Mehrfachbindung vergessen (`chem-sigma-multiple-only`, seit S5d) | C₂H₄: 4 σ |
 | σ und π | alle Striche der Mehrfachbindung als π (`chem-pi-all-lines`, seit S5d) | C₂H₄: 2 π |

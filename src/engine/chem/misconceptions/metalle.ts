@@ -16,7 +16,7 @@ export const METALLE_MISCONCEPTIONS: readonly MisconceptionName[] = [
   { id: 'chem-mis-me-gap', name: "Bandlücke falsch zugeordnet", wrongText: "Metalle haben eine breite verbotene Zone, Isolatoren keine." },
   { id: 'chem-mis-me-dope-charge', name: "Dotierter Halbleiter für geladen gehalten", wrongText: "Ein dotierter Halbleiter ist elektrisch geladen." },
   { id: 'chem-mis-me-dope-swap', name: "n- und p-Dotierung vertauscht", wrongText: "Fremdatome mit fünf Valenzelektronen erzeugen Löcher, solche mit drei freie Elektronen." },
-  { id: 'chem-mis-me-hyb-partners', name: "Freie Paare bei der Hybridisierung vergessen", wrongText: "Die Hybridisierung hängt nur von der Zahl der Bindungspartner ab; freie Paare zählen nicht." },
+  { id: 'chem-mis-me-hyb-partners', name: "Richtungen falsch gezählt", wrongText: "Für die Hybridisierung zählt man nur die Bindungspartner, die Bindungsstriche oder die Hochzahl, nicht die Richtungen um das Atom." },
   { id: 'chem-mis-me-hyb-pi', name: "π-Bindungen in Hybridorbitalen", wrongText: "Auch die π-Bindungen einer Doppelbindung sitzen in Hybridorbitalen." },
   { id: 'chem-mis-me-two-sigma', name: "Doppelbindung aus zwei σ-Bindungen", wrongText: "Eine Doppelbindung besteht aus zwei σ-Bindungen." },
   { id: 'chem-mis-me-pi-alone', name: "π-Bindung ohne σ-Bindung", wrongText: "Zwei Atome können allein über eine π-Bindung verbunden sein." },

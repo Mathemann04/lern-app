@@ -25,8 +25,8 @@ const VARIETY: Readonly<Record<string, { distinct: number; maxShare: number }>> 
   'chem-molekuele': { distinct: 40, maxShare: 0.06 },
   // S5c: in den Grundlagen nur „stärkste Kraft“ mit etwa 30 Stoffen
   'chem-zmk': { distinct: 28, maxShare: 0.07 },
-  // S5d: in den Grundlagen nur Hybridisierung an etwa 25 Atomen
-  'chem-metalle': { distinct: 20, maxShare: 0.08 },
+  // S5d: in den Grundlagen nur Hybridisierung an etwa 25 Atomen, sp und sp² mit wenigen Atomen
+  'chem-metalle': { distinct: 20, maxShare: 0.1 },
 }
 const LEVELS: readonly Level[] = [1, 2, 3]
 const SAMPLE = 400

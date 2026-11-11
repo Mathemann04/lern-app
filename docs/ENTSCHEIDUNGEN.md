@@ -645,3 +645,8 @@ Neue Entscheidungen unten anfügen.
   falsch); hexagonal dichteste Packung nur „schlecht formbar, gut gießbar“, nicht „spröde“.
   Katalogbeispiele der Rechenfehler von S5c und S5d stehen in `chem/zmk.test.ts` und
   `generators/metalle.test.ts` (Aufgaben werden dort gezielt gesucht).
+  Nach der fachlichen Prüfung: keine Hybridisierung bei H₂S, PH₃ und SCl₂ (Winkel nahe 90°, Lehrbücher
+  nehmen dort reine p-Orbitale an); in den Grundlagen auch sp und sp² (Hybridisierung zuerst gewählt, sp³
+  in der Hälfte der Aufgaben); Bor mit Hinweis auf sechs Elektronen; die Frage zur Bindungsordnung lautet
+  „Sagt das MO-Modell eine Bindung voraus?“ (Be₂, Ne₂ sind als schwach gebundene Teilchen bekannt); neue
+  Rechenfehler `chem-hyb-too-few` und `chem-bo-one-pair`; eigene Erklärungen, die die Lösung nicht verraten.

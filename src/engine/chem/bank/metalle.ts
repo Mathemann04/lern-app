@@ -43,8 +43,8 @@ export const METALLE_BANK: QuestionBank = {
       prompt: 'Was hält die Atome in einem Metall zusammen?',
       correct: 'die Anziehung zwischen positiven Atomrümpfen und frei beweglichen Valenzelektronen (Elektronengas)',
       wrong: [
-        w('f1', 'gemeinsame Elektronenpaare zwischen je zwei Atomen', 'chem-mis-me-fixed'),
-        w('f2', 'die Anziehung zwischen positiven und negativen Metall-Ionen', 'chem-mis-me-salt-like'),
+        w('f1', 'gemeinsame Elektronenpaare zwischen je zwei Atomen', 'chem-mis-me-fixed', why("Überlege, was mit den wenigen Valenzelektronen der Metallatome geschieht: Bleiben sie bei ihrem Atom, wechseln sie zu einem Partner, oder gehören sie keinem bestimmten Atom?", "Was geschieht mit den Valenzelektronen?")),
+        w('f2', 'die Anziehung zwischen positiven und negativen Metall-Ionen', 'chem-mis-me-salt-like', why("In einem reinen Metall gibt es keine Nichtmetallatome, die Elektronen aufnehmen und zu Anionen werden könnten.", "Wer sollte im Metall Anion werden?")),
         w('f3', 'Wasserstoffbrücken zwischen den Atomen', 'chem-mis-me-fixed', why('Wasserstoffbrücken brauchen H-Atome an N, O oder F; in einem reinen Metall gibt es keine. Überlege, was mit den wenigen Valenzelektronen der Metallatome geschieht.', 'Im Metall gibt es keine Wasserstoffbrücken.')),
         w('f4', 'die Schwerkraft zwischen den schweren Atomen', 'chem-mis-me-fixed', why('Die Schwerkraft zwischen Atomen ist winzig. Was Atome zusammenhält, sind elektrische Anziehungen zwischen Ladungen.', 'Atome halten über elektrische Kräfte zusammen.')),
       ],
@@ -66,7 +66,7 @@ export const METALLE_BANK: QuestionBank = {
       correct: 'Ihre Valenzelektronen sind frei beweglich und wandern im elektrischen Feld.',
       wrong: [
         w('f1', 'Die Atomrümpfe wandern durch das Gitter.', 'chem-mis-me-cores-move', why('Die Atomrümpfe sitzen auf festen Plätzen; ein Draht verliert beim Stromfluss kein Metall. Was ist im Metall sonst noch beweglich?', 'Die Atomrümpfe bleiben an ihren Plätzen.')),
-        w('f2', 'Positive und negative Ionen wandern in entgegengesetzte Richtungen.', 'chem-mis-me-salt-like'),
+        w('f2', 'Positive und negative Ionen wandern in entgegengesetzte Richtungen.', 'chem-mis-me-salt-like', why("Ein reines Metall enthält keine Anionen; alle Atome sind gleichartig. Überlege, welche Teilchen dort trotzdem beweglich sind.", "Im Metall gibt es keine Anionen.")),
         w('f3', 'Metalle enthalten gelöstes Wasser, das den Strom leitet.', 'chem-mis-me-fixed', why('Auch völlig trockene Metalle leiten hervorragend. Die Leitfähigkeit muss also aus dem Metall selbst kommen.', 'Die Ursache liegt im Metall selbst.')),
         w('f4', 'Die Elektronen sitzen fest und geben den Strom von Atom zu Atom weiter wie eine Kette.', 'chem-mis-me-fixed', why('Säßen die Elektronen fest an ihren Atomen, könnte keine Ladung fließen. Strom heißt: Ladungsträger bewegen sich.', 'Strom braucht bewegliche Ladungsträger.')),
       ],
@@ -110,8 +110,8 @@ export const METALLE_BANK: QuestionBank = {
       correct: 'eine positive',
       wrong: [
         w('f1', 'eine negative', 'chem-mis-me-salt-like', why('Ein Atomrumpf ist das, was übrig bleibt, wenn ein Atom Valenzelektronen abgibt. Überlege, welche Ladung ein Teilchen hat, dem Elektronen fehlen.', 'Was fehlt dem Atomrumpf?')),
-        w('f2', 'gar keine, sie sind neutrale Atome', 'chem-mis-me-fixed'),
-        w('f3', 'abwechselnd positiv und negativ', 'chem-mis-me-salt-like'),
+        w('f2', 'gar keine, sie sind neutrale Atome', 'chem-mis-me-fixed', why("Ein neutrales Atom hätte alle seine Elektronen noch bei sich. Überlege, wo die Valenzelektronen im Metall sind.", "Wo sind die Valenzelektronen?")),
+        w('f3', 'abwechselnd positiv und negativ', 'chem-mis-me-salt-like', why("Abwechselnde Ladungen kennzeichnen ein Ionengitter. Im Metall sind alle Atomrümpfe gleichartig; überlege, was ihnen nach Abgabe der Valenzelektronen fehlt.", "Im Metall sind alle Rümpfe gleichartig.")),
         w('f4', 'je nach Temperatur positiv oder negativ', 'chem-mis-me-salt-like', why('Die Temperatur ändert nur, wie stark die Atomrümpfe schwingen, nicht ihre Ladung.', 'Die Temperatur ändert die Ladung nicht.')),
       ],
       hint: 'Was bleibt von einem Atom übrig, das seine Valenzelektronen abgibt?',
@@ -155,7 +155,7 @@ export const METALLE_BANK: QuestionBank = {
       wrong: [
         w('f1', 'Kochsalz hat keine Elektronen.', 'chem-mis-me-no-electrons', why('Jedes Ion hat Elektronen. Für Strom müssen Ladungsträger aber beweglich sein.', 'Es kommt auf bewegliche Ladungsträger an.')),
         w('f2', 'Im Kupfer wandern Kupfer-Ionen, im Salz können Ionen das nicht.', 'chem-mis-me-cores-move'),
-        w('f3', 'Beide bestehen aus Ionen; Kupfer-Ionen sind nur kleiner.', 'chem-mis-me-salt-like'),
+        w('f3', 'Beide bestehen aus Ionen; Kupfer-Ionen sind nur kleiner.', 'chem-mis-me-salt-like', why("Kupfer ist ein reines Metall ohne Anionen; ein Salz besteht aus Kationen und Anionen. Die beiden Stoffe sind verschieden aufgebaut.", "Kupfer und Salz sind verschieden aufgebaut.")),
         w('f4', 'Kochsalz ist ein Metall, das erst warm leitet.', 'chem-mis-me-salt-like', why('Kochsalz ist ein Salz aus Natrium- und Chlorid-Ionen, kein Metall. Seine Ionen werden erst in der Schmelze oder in Lösung beweglich.', 'Kochsalz ist ein Salz.')),
       ],
       hint: 'Welche Teilchen sind im festen Kupfer beweglich, welche im festen Salz?',
@@ -175,10 +175,10 @@ export const METALLE_BANK: QuestionBank = {
       prompt: 'Wie unterscheidet sich die Metallbindung von einer Atombindung?',
       correct: 'Sie wirkt in alle Richtungen gleich; die Elektronen gehören nicht einzelnen Atompaaren.',
       wrong: [
-        w('f1', 'Sie ist eine Atombindung mit besonders vielen Elektronenpaaren.', 'chem-mis-me-fixed'),
+        w('f1', 'Sie ist eine Atombindung mit besonders vielen Elektronenpaaren.', 'chem-mis-me-fixed', why("In einer Atombindung gehört jedes Paar genau zwei Atomen. Überlege, ob das für die Elektronen im Metall auch gilt.", "Gehören die Elektronen zwei bestimmten Atomen?")),
         w('f2', 'Sie besteht aus Ionen mit entgegengesetzter Ladung.', 'chem-mis-me-salt-like'),
         w('f3', 'Sie wirkt nur entlang fester Richtungen zwischen zwei Atomen.', 'chem-mis-me-fixed', why('Feste Richtungen zwischen zwei Atomen kennzeichnen die Atombindung. Im Metall ist das Elektronengas überall um die Atomrümpfe verteilt.', 'Das beschreibt die Atombindung.')),
-        w('f4', 'Es gibt keinen Unterschied.', 'chem-mis-me-fixed'),
+        w('f4', 'Es gibt keinen Unterschied.', 'chem-mis-me-fixed', why("Metalle und Molekülstoffe verhalten sich sehr verschieden, etwa beim Leiten und Verformen. Das muss an der Art der Bindung liegen.", "Die Eigenschaften unterscheiden sich deutlich.")),
       ],
       hint: 'In einer Atombindung sitzt ein Elektronenpaar zwischen zwei bestimmten Atomen. Wie ist das im Elektronengas?',
       explanation: why(
@@ -197,7 +197,7 @@ export const METALLE_BANK: QuestionBank = {
       prompt: 'Wodurch unterscheidet sich ein Isolator von einem Leiter im Bändermodell?',
       correct: 'Beim Isolator trennt eine breite verbotene Zone das volle Valenzband vom leeren Leitungsband.',
       wrong: [
-        w('f1', 'Ein Isolator hat keine Elektronen.', 'chem-mis-me-no-electrons'),
+        w('f1', 'Ein Isolator hat keine Elektronen.', 'chem-mis-me-no-electrons', why("Jeder Stoff besteht aus Atomen mit Elektronen. Die Frage ist, ob die Elektronen in freie Zustände wechseln können.", "Elektronen haben alle Stoffe.")),
         w('f2', 'Beim Isolator überlappen Valenzband und Leitungsband.', 'chem-mis-me-gap', why('Überlappende Bänder lassen Elektronen ohne Hindernis in freie Zustände wechseln: Das ist ein Kennzeichen von Leitern.', 'Überlappen heißt: leitet.')),
         w('f3', 'Ein Isolator hat nur ein Leitungsband und kein Valenzband.', 'chem-mis-me-no-electrons', why('Auch ein Isolator hat Valenzelektronen, also ein besetztes Valenzband. Die Frage ist, ob sie in freie Zustände gelangen können.', 'Auch Isolatoren haben Valenzelektronen.')),
         w('f4', 'Beim Isolator ist das Valenzband nur halb besetzt.', 'chem-mis-me-gap', why('Ein halb besetztes Band hat freie Plätze direkt neben den besetzten; Elektronen können sich darin bewegen. Das ist typisch für Metalle.', 'Halb besetzt heißt: leitet.')),
@@ -243,7 +243,7 @@ export const METALLE_BANK: QuestionBank = {
       wrong: [
         w('f1', 'ein halb besetztes Valenzband', 'chem-mis-me-gap', why('Ein teilweise besetztes Valenzband haben Metalle. Der Name „Halbleiter“ bezieht sich nicht auf die Besetzung.', 'Teilweise besetzt: Metall.')),
         w('f2', 'eine sehr breite verbotene Zone', 'chem-mis-me-gap', why('Eine sehr breite Lücke hat ein Isolator. Damit ein Stoff etwas leitet, muss die Lücke überwindbar sein.', 'Breite Lücke: Isolator.')),
-        w('f3', 'gar keine Elektronen im Valenzband', 'chem-mis-me-no-electrons'),
+        w('f3', 'gar keine Elektronen im Valenzband', 'chem-mis-me-no-electrons', why("Auch ein Halbleiter hat Valenzelektronen; die Frage ist, wie leicht sie ins Leitungsband gelangen.", "Auch Halbleiter haben Valenzelektronen.")),
         w('f4', 'Valenz- und Leitungsband überlappen', 'chem-mis-me-gap', why('Überlappende Bänder haben Metalle; sie leiten ohne Hindernis.', 'Überlappen: Metall.')),
       ],
       hint: 'Ein Halbleiter liegt zwischen Leiter und Isolator. Was heißt das für die verbotene Zone?',
@@ -354,7 +354,7 @@ export const METALLE_BANK: QuestionBank = {
         w('f1', SP3, 'chem-mis-me-hyb-pi', why('Jeder Kohlenstoff hat zwei Partner: ein H und den anderen Kohlenstoff. Die Dreifachbindung zeigt in eine Richtung.', 'Die Mehrfachbindung zählt einmal.')),
         w('f2', SP2, 'chem-mis-me-hyb-pi', why('Drei Hybridorbitale braucht ein Atom mit drei Richtungen. Zähle die Partner eines Kohlenstoffs in Ethin.', 'Zähle die Richtungen.')),
         w('f3', r`$\mathrm{sp^{3}}$, weil Kohlenstoff immer vier Bindungen bildet`, 'chem-mis-me-hyb-pi', why('Vier Bindungen heißt nicht vier Richtungen: Mehrere Bindungen einer Mehrfachbindung zeigen zum selben Partner.', 'Bindungen sind nicht gleich Richtungen.')),
-        w('f4', 'gar nicht hybridisiert', 'chem-mis-me-hyb-partners'),
+        w('f4', 'gar nicht hybridisiert', 'chem-mis-me-hyb-partners', why("Die Kohlenstoffatome in Ethin binden gleichwertig in zwei Richtungen; das erklärt man mit Hybridorbitalen. Zähle die Richtungen um ein C-Atom.", "Zähle die Richtungen.")),
       ],
       hint: 'Wie viele Partner hat jedes C-Atom? Die Dreifachbindung zeigt in eine Richtung.',
       explanation: why(
@@ -375,7 +375,7 @@ export const METALLE_BANK: QuestionBank = {
       wrong: [
         w('f1', 'zwei, wie die Hochzahl sagt', 'chem-mis-me-hyb-partners', why('Die Hochzahl zählt nur die beteiligten p-Orbitale. Dazu kommt immer noch das s-Orbital.', 'Das s-Orbital zählt auch.')),
         w('f2', 'vier', 'chem-mis-me-hyb-partners', why('Vier Hybridorbitale entstehen, wenn alle drei p-Orbitale mitmachen. Hier sind es weniger.', 'Hier mischen nicht alle drei p-Orbitale mit.')),
-        w('f3', 'eines', 'chem-mis-me-mo-count'),
+        w('f3', 'eines', 'chem-mis-me-mo-count', why("Aus so vielen Atomorbitalen, wie sich mischen, entstehen ebenso viele Hybridorbitale.", "So viele, wie sich mischen.")),
         w('f4', 'sechs, eines für jedes Elektron', 'chem-mis-me-hyb-partners', why('Hybridorbitale entstehen aus Orbitalen, nicht aus Elektronen: So viele Orbitale sich mischen, so viele entstehen.', 'Orbitale zählen, nicht Elektronen.')),
       ],
       hint: 'Wie viele Orbitale mischen sich: wie viele s-, wie viele p-Orbitale?',
@@ -399,8 +399,8 @@ export const METALLE_BANK: QuestionBank = {
       wrong: [
         w('f1', '8', 'chem-mis-me-kz', why('Acht Nachbarn hat ein Atom im kubisch-raumzentrierten Gitter, das nicht dichtest gepackt ist.', 'Acht: kubisch-raumzentriert.')),
         w('f2', '6', 'chem-mis-me-kz', why('Sechs Nachbarn hat ein Atom nur in seiner eigenen Schicht; dazu kommen Nachbarn in den Schichten darüber und darunter.', 'Auch die Schichten darüber und darunter zählen.')),
-        w('f3', '4', 'chem-mis-me-kz'),
-        w('f4', '2', 'chem-mis-me-kz'),
+        w('f3', '4', 'chem-mis-me-kz', why("Zähle die Nachbarn in der eigenen Schicht und die in den Schichten darüber und darunter zusammen.", "Auch die Nachbarschichten zählen.")),
+        w('f4', '2', 'chem-mis-me-kz', why("Zähle die Nachbarn in der eigenen Schicht und die in den Schichten darüber und darunter zusammen.", "Auch die Nachbarschichten zählen.")),
       ],
       hint: 'Zähle die Nachbarn in der eigenen Schicht und in den Schichten darüber und darunter.',
       explanation: why(
@@ -420,9 +420,9 @@ export const METALLE_BANK: QuestionBank = {
       correct: '8 Nachbarn, etwa 68 %',
       wrong: [
         w('f1', '12 Nachbarn, etwa 74 %', 'chem-mis-me-kz', why('12 Nachbarn und 74 % gelten für die dichtesten Packungen. Das raumzentrierte Gitter ist weniger dicht.', 'Das sind die Werte der dichtesten Packungen.')),
-        w('f2', '6 Nachbarn, etwa 52 %', 'chem-mis-me-kz'),
+        w('f2', '6 Nachbarn, etwa 52 %', 'chem-mis-me-kz', why("Im raumzentrierten Würfel berührt das mittlere Atom alle Atome auf den Ecken. Zähle die Ecken eines Würfels.", "Zähle die Ecken des Würfels.")),
         w('f3', '8 Nachbarn, 100 %', 'chem-mis-me-kz', why('Kugeln können einen Raum nie ganz ausfüllen; zwischen ihnen bleiben immer Lücken.', 'Zwischen Kugeln bleiben Lücken.')),
-        w('f4', '12 Nachbarn, etwa 68 %', 'chem-mis-me-kz'),
+        w('f4', '12 Nachbarn, etwa 68 %', 'chem-mis-me-kz', why("Zahl der Nachbarn und Raumerfüllung gehören zusammen: Mehr Nachbarn heißt dichter gepackt. Diese Kombination passt nicht zusammen.", "Die Werte passen nicht zusammen.")),
       ],
       hint: 'Im Würfel sitzt ein Atom in der Mitte, die Nachbarn auf den Ecken.',
       explanation: why(
@@ -463,7 +463,7 @@ export const METALLE_BANK: QuestionBank = {
       prompt: 'Warum lässt sich ein Metall verformen, ohne zu brechen?',
       correct: 'Die Schichten der Atomrümpfe gleiten aneinander vorbei; das Elektronengas hält sie in jeder Lage zusammen.',
       wrong: [
-        w('f1', 'Beim Verformen bilden sich sofort neue Atombindungen.', 'chem-mis-me-fixed'),
+        w('f1', 'Beim Verformen bilden sich sofort neue Atombindungen.', 'chem-mis-me-fixed', why("Im Metall gibt es keine festen Paare zwischen zwei Atomen, die beim Verformen neu geknüpft werden müssten. Überlege, was die Atomrümpfe in jeder Lage zusammenhält.", "Was hält die Rümpfe in jeder Lage zusammen?")),
         w('f2', 'Metalle schmelzen beim Biegen kurz auf.', 'chem-mis-me-fixed', why('Biegen bei Raumtemperatur bringt ein Metall nicht zum Schmelzen; es bleibt fest und verformt sich trotzdem.', 'Das Metall bleibt fest.')),
         w('f3', 'Gleich geladene Ionen stoßen sich nach dem Verschieben ab und halten so Abstand.', 'chem-mis-me-brittle'),
         w('f4', 'Metalle haben gar keine festen Plätze für ihre Atome.', 'chem-mis-me-cores-move', why('Metalle haben ein geordnetes Gitter; die Atomrümpfe sitzen auf festen Plätzen. Beim Verformen verschieben sich ganze Schichten.', 'Metalle haben ein Gitter.')),
@@ -485,7 +485,7 @@ export const METALLE_BANK: QuestionBank = {
       prompt: 'Warum zerspringt ein Salzkristall unter einem Hammerschlag?',
       correct: 'Nach dem Verschieben stehen sich gleich geladene Ionen gegenüber und stoßen sich ab.',
       wrong: [
-        w('f1', 'Die Ionen gleiten wie im Metall, aber zu schnell.', 'chem-mis-me-salt-deform'),
+        w('f1', 'Die Ionen gleiten wie im Metall, aber zu schnell.', 'chem-mis-me-salt-deform', why("Im Salz ist jedes Ion von Gegenionen umgeben. Überlege, welche Ionen sich nach dem Verschieben um einen Platz gegenüberstehen.", "Wer steht sich nach dem Verschieben gegenüber?")),
         w('f2', 'Salze haben schwächere Bindungen als Moleküle.', 'chem-mis-me-salt-deform', why('Die Ionenbindung ist stark; Salze schmelzen erst bei hohen Temperaturen. Das Problem liegt nicht in der Stärke, sondern in den Ladungen nach dem Verschieben.', 'Die Ionenbindung ist stark.')),
         w('f3', 'Im Salz gibt es ein Elektronengas, das beim Schlag entweicht.', 'chem-mis-me-salt-like', why('Ein Salz hat kein Elektronengas; seine Elektronen sitzen fest an den Ionen.', 'Salze haben kein Elektronengas.')),
         w('f4', 'Salzkristalle enthalten Wasser, das beim Schlag verdampft.', 'chem-mis-me-salt-deform', why('Auch völlig trockene Salzkristalle sind spröde. Die Ursache liegt im Aufbau aus Ionen.', 'Auch trockene Salze sind spröde.')),
@@ -551,10 +551,10 @@ export const METALLE_BANK: QuestionBank = {
       prompt: 'Ein Siliciumkristall wird mit Phosphor dotiert. Welche Gesamtladung hat der Kristall danach?',
       correct: 'keine, er bleibt neutral',
       wrong: [
-        w('f1', 'negativ, wegen der zusätzlichen Elektronen', 'chem-mis-me-dope-charge'),
-        w('f2', 'positiv, weil Phosphor ein Elektron abgibt', 'chem-mis-me-dope-charge'),
-        w('f3', 'negativ, aber nur bei Wärme', 'chem-mis-me-dope-charge'),
-        w('f4', 'positiv, wegen der Löcher', 'chem-mis-me-dope-swap'),
+        w('f1', 'negativ, wegen der zusätzlichen Elektronen', 'chem-mis-me-dope-charge', why("Überlege, ob mit dem Fremdatom ebenso viele Protonen wie Elektronen in den Kristall kommen.", "Bringt das Fremdatom gleich viele Protonen und Elektronen?")),
+        w('f2', 'positiv, weil Phosphor ein Elektron abgibt', 'chem-mis-me-dope-charge', why("Überlege, ob mit dem Fremdatom ebenso viele Protonen wie Elektronen in den Kristall kommen.", "Bringt das Fremdatom gleich viele Protonen und Elektronen?")),
+        w('f3', 'negativ, aber nur bei Wärme', 'chem-mis-me-dope-charge', why("Überlege, ob mit dem Fremdatom ebenso viele Protonen wie Elektronen in den Kristall kommen.", "Bringt das Fremdatom gleich viele Protonen und Elektronen?")),
+        w('f4', 'positiv, wegen der Löcher', 'chem-mis-me-dope-swap', why("Löcher entstehen bei Fremdatomen mit weniger Valenzelektronen als Silicium. Phosphor hat mehr; und geladen wird der Kristall durch Dotieren ohnehin nicht.", "Phosphor hat mehr Valenzelektronen.")),
       ],
       hint: 'Wie viele Protonen bringt jedes Phosphoratom mit, wie viele Elektronen?',
       explanation: why(
@@ -595,8 +595,8 @@ export const METALLE_BANK: QuestionBank = {
       prompt: 'Woraus besteht eine Doppelbindung?',
       correct: 'aus einer σ-Bindung und einer π-Bindung',
       wrong: [
-        w('f1', 'aus zwei σ-Bindungen', 'chem-mis-me-two-sigma'),
-        w('f2', 'aus zwei π-Bindungen', 'chem-mis-me-pi-alone'),
+        w('f1', 'aus zwei σ-Bindungen', 'chem-mis-me-two-sigma', why("Frontal auf der Verbindungslinie kann sich zwischen zwei Atomen nur ein Orbitalpaar überlappen. Überlege, wie die zweite Bindung entstehen muss.", "Nur eine Überlappung auf der Linie.")),
+        w('f2', 'aus zwei π-Bindungen', 'chem-mis-me-pi-alone', why("Bevor sich p-Orbitale seitlich überlappen können, müssen die Atome schon verbunden sein. Überlege, welche Bindung immer zuerst da ist.", "Welche Bindung ist immer da?")),
         w('f3', 'aus einer einzigen, besonders starken σ-Bindung', 'chem-mis-me-two-sigma', why('Eine Doppelbindung besteht aus zwei Elektronenpaaren. Überlege, wie sich zwei Paare zwischen denselben Atomen verteilen können.', 'Zwei Paare, zwei Bindungen.')),
         w('f4', 'aus einer Ionenbindung und einer Atombindung', 'chem-mis-me-salt-like'),
       ],
@@ -617,10 +617,10 @@ export const METALLE_BANK: QuestionBank = {
       prompt: r`Wie sind die Kohlenstoffatome in Ethen $\ce{C2H4}$ hybridisiert, und woraus entsteht die π-Bindung?`,
       correct: r`$\mathrm{sp^{2}}$; die π-Bindung entsteht aus den nicht hybridisierten p-Orbitalen`,
       wrong: [
-        w('f1', r`$\mathrm{sp^{3}}$; die π-Bindung entsteht aus Hybridorbitalen`, 'chem-mis-me-hyb-pi'),
-        w('f2', r`$\mathrm{sp^{2}}$; die π-Bindung entsteht aus den Hybridorbitalen`, 'chem-mis-me-hyb-pi'),
+        w('f1', r`$\mathrm{sp^{3}}$; die π-Bindung entsteht aus Hybridorbitalen`, 'chem-mis-me-hyb-pi', why("Überlege, wie viele Partner ein Kohlenstoff in Ethen hat und welche Orbitale nach der Hybridisierung noch übrig sind.", "Zähle Partner und übrige Orbitale.")),
+        w('f2', r`$\mathrm{sp^{2}}$; die π-Bindung entsteht aus den Hybridorbitalen`, 'chem-mis-me-hyb-pi', why("Überlege, wie viele Partner ein Kohlenstoff in Ethen hat und welche Orbitale nach der Hybridisierung noch übrig sind.", "Zähle Partner und übrige Orbitale.")),
         w('f3', r`$\mathrm{sp}$; die π-Bindung entsteht aus s-Orbitalen`, 'chem-mis-me-hyb-partners', why('Zähle die Partner eines Kohlenstoffs in Ethen. Und s-Orbitale sind kugelförmig; seitlich überlappen können nur p-Orbitale.', 'Zähle die Partner; seitlich überlappen nur p-Orbitale.')),
-        w('f4', r`$\mathrm{sp^{3}}$, weil Kohlenstoff vier Bindungen bildet`, 'chem-mis-me-hyb-pi'),
+        w('f4', r`$\mathrm{sp^{3}}$, weil Kohlenstoff vier Bindungen bildet`, 'chem-mis-me-hyb-pi', why("Überlege, wie viele Partner ein Kohlenstoff in Ethen hat und welche Orbitale nach der Hybridisierung noch übrig sind.", "Zähle Partner und übrige Orbitale.")),
       ],
       hint: 'Jeder Kohlenstoff hat drei Partner. Wie viele p-Orbitale bleiben bei der Hybridisierung übrig?',
       explanation: why(
@@ -639,7 +639,7 @@ export const METALLE_BANK: QuestionBank = {
       prompt: r`Phosphortrichlorid $\ce{PCl3}$ hat am Phosphor drei Partner und ein freies Paar. Wie ist der Phosphor hybridisiert?`,
       correct: SP3,
       wrong: [
-        w('f1', SP2, 'chem-mis-me-hyb-partners'),
+        w('f1', SP2, 'chem-mis-me-hyb-partners', why("Zähle am Phosphor nicht nur die Partner, sondern alles, was eine Richtung braucht.", "Zähle alle Richtungen.")),
         w('f2', SP, 'chem-mis-me-hyb-partners', why('Zwei Hybridorbitale reichen nur für zwei Richtungen. Zähle Partner und freie Paare.', 'Zähle alle Richtungen.')),
         w('f3', 'gar nicht, weil Phosphor ein freies Paar hat', 'chem-mis-me-hyb-partners', why('Ein freies Paar verhindert die Hybridisierung nicht; es besetzt selbst ein Hybridorbital.', 'Freie Paare sitzen auch in Hybridorbitalen.')),
         w('f4', r`$\mathrm{sp^{4}}$`, 'chem-mis-me-hyb-partners', why('Es gibt nur drei p-Orbitale; eine Hochzahl über 3 kommt nicht vor.', 'Nur drei p-Orbitale.')),
@@ -662,9 +662,9 @@ export const METALLE_BANK: QuestionBank = {
       correct: 'ober- und unterhalb der Verbindungslinie der Kerne, zusätzlich zur σ-Bindung',
       wrong: [
         w('f1', 'genau auf der Verbindungslinie, statt der σ-Bindung', 'chem-mis-me-pi-alone', why('Auf der Verbindungslinie liegt die frontal überlappende Bindung. Eine seitliche Überlappung kann nicht auf der Linie liegen.', 'Seitliche Überlappung liegt neben der Linie.')),
-        w('f2', 'in einem Hybridorbital, das zum Nachbarn zeigt', 'chem-mis-me-hyb-pi'),
+        w('f2', 'in einem Hybridorbital, das zum Nachbarn zeigt', 'chem-mis-me-hyb-pi', why("Hybridorbitale zeigen auf die Partner und bilden Bindungen auf der Verbindungslinie. Überlege, wo seitlich überlappende Orbitale ihre Elektronen haben.", "Wo liegt eine seitliche Überlappung?")),
         w('f3', 'zwischen zwei Molekülen', 'chem-mis-me-pi-alone', why('π-Bindungen sind Teil von Mehrfachbindungen innerhalb eines Moleküls, keine Kräfte zwischen Molekülen.', 'π-Bindungen liegen im Molekül.')),
-        w('f4', 'ohne σ-Bindung, wenn die Atome weit auseinander sind', 'chem-mis-me-pi-alone'),
+        w('f4', 'ohne σ-Bindung, wenn die Atome weit auseinander sind', 'chem-mis-me-pi-alone', why("Ohne eine Bindung auf der Verbindungslinie kommen sich die Atome nicht nahe genug, damit p-Orbitale seitlich überlappen können.", "Die Atome müssen schon verbunden sein.")),
       ],
       hint: 'p-Orbitale, die senkrecht zur Verbindungslinie stehen, überlappen seitlich. Wo liegt diese Überlappung?',
       explanation: why(
@@ -683,9 +683,9 @@ export const METALLE_BANK: QuestionBank = {
       prompt: r`Woraus besteht die Dreifachbindung im Stickstoffmolekül $\ce{N#N}$?`,
       correct: 'aus einer σ- und zwei π-Bindungen',
       wrong: [
-        w('f1', 'aus drei σ-Bindungen', 'chem-mis-me-two-sigma'),
-        w('f2', 'aus drei π-Bindungen', 'chem-mis-me-pi-alone'),
-        w('f3', 'aus zwei σ- und einer π-Bindung', 'chem-mis-me-two-sigma'),
+        w('f1', 'aus drei σ-Bindungen', 'chem-mis-me-two-sigma', why("Frontal auf der Verbindungslinie kann sich zwischen zwei Atomen nur ein Orbitalpaar überlappen. Überlege, wie die übrigen Bindungen entstehen.", "Nur eine Überlappung auf der Linie.")),
+        w('f2', 'aus drei π-Bindungen', 'chem-mis-me-pi-alone', why("Seitliche Überlappungen setzen voraus, dass die Atome schon auf der Verbindungslinie verbunden sind.", "Eine Bindung liegt auf der Linie.")),
+        w('f3', 'aus zwei σ- und einer π-Bindung', 'chem-mis-me-two-sigma', why("Zwei Bindungen genau auf derselben Verbindungslinie zwischen denselben Atomen kann es nicht geben.", "Nur eine Bindung auf der Linie.")),
         w('f4', 'aus einer σ-Bindung und einem freien Paar', 'chem-mis-me-pi-alone', why('Freie Paare sind keine Bindungen; sie sitzen an einem Atom. Die Dreifachbindung besteht aus drei bindenden Paaren.', 'Freie Paare sind keine Bindungen.')),
       ],
       hint: 'Wie viele Bindungen können zwischen zwei Atomen frontal auf der Verbindungslinie liegen?',
@@ -752,7 +752,7 @@ export const METALLE_BANK: QuestionBank = {
       prompt: 'Welche Ladungsträger leiten in Silicium, das mit Arsen dotiert ist, vor allem den Strom?',
       correct: 'die überzähligen Elektronen der Arsenatome im Leitungsband',
       wrong: [
-        w('f1', 'Löcher im Valenzband', 'chem-mis-me-dope-swap'),
+        w('f1', 'Löcher im Valenzband', 'chem-mis-me-dope-swap', why("Löcher entstehen bei Fremdatomen, denen ein Elektron fehlt. Zähle die Valenzelektronen von Arsen.", "Zähle die Valenzelektronen von Arsen.")),
         w('f2', 'wandernde Arsen-Ionen', 'chem-mis-me-cores-move', why('Die Fremdatome sitzen fest auf Gitterplätzen. Beweglich ist, was sie an Elektronen übrig haben oder was ihnen fehlt.', 'Die Fremdatome sitzen fest.')),
         w('f3', 'gar keine, Dotieren macht Silicium zum Isolator', 'chem-mis-me-dope-charge', why('Dotieren erhöht die Leitfähigkeit von Silicium stark; genau dafür wird es gemacht.', 'Dotieren erhöht die Leitfähigkeit.')),
         w('f4', 'Protonen aus den Arsenkernen', 'chem-mis-me-cores-move', why('Protonen sitzen fest im Kern. Ladungsträger in Festkörpern sind Elektronen oder Löcher.', 'Protonen bleiben im Kern.')),
@@ -829,7 +829,7 @@ export const METALLE_BANK: QuestionBank = {
         'Sie behindern das Gleiten.',
       ),
       cards: ['met-gitter', 'met-verformbar'],
-      ref: 'Skript Metallbindung, Folie 8',
+      ref: REF_EIGENSCHAFTEN,
     }),
     k({
       id: 'me-k-bo-he2',
@@ -862,7 +862,7 @@ export const METALLE_BANK: QuestionBank = {
       prompt: 'Wie viele Molekülorbitale entstehen, wenn sich zwei Atomorbitale kombinieren?',
       correct: 'zwei: ein bindendes und ein antibindendes',
       wrong: [
-        w('f1', 'eines, ein bindendes', 'chem-mis-me-mo-count'),
+        w('f1', 'eines, ein bindendes', 'chem-mis-me-mo-count', why("Bei der Kombination bleibt die Zahl der Orbitale erhalten. Zähle die Atomorbitale, die sich kombinieren.", "Die Zahl der Orbitale bleibt erhalten.")),
         w('f2', 'vier', 'chem-mis-me-mo-count', why('Es gilt: So viele Atomorbitale sich kombinieren, so viele Molekülorbitale entstehen. Hier sind es zwei Atomorbitale.', 'So viele wie Atomorbitale.')),
         w('f3', 'zwei bindende', 'chem-mis-me-antibonding', why('Wären beide bindend, würde jede Kombination die Bindung verstärken. Bei der Kombination entsteht aber immer auch ein energiereicheres Orbital.', 'Es entsteht auch ein energiereicheres Orbital.')),
         w('f4', 'so viele, wie Elektronen vorhanden sind', 'chem-mis-me-mo-count', why('Die Zahl der Orbitale hängt nicht von den Elektronen ab, sondern von den Atomorbitalen, die sich kombinieren.', 'Orbitale zählen, nicht Elektronen.')),
@@ -906,7 +906,7 @@ export const METALLE_BANK: QuestionBank = {
       prompt: 'Was bewirken Elektronen in antibindenden Molekülorbitalen?',
       correct: 'Sie schwächen die Bindung und heben die Wirkung bindender Elektronen auf.',
       wrong: [
-        w('f1', 'Sie verstärken die Bindung wie bindende Elektronen.', 'chem-mis-me-antibonding'),
+        w('f1', 'Sie verstärken die Bindung wie bindende Elektronen.', 'chem-mis-me-antibonding', why("Wäre das so, gäbe es auch ein Molekül aus zwei Heliumatomen mit zwei bindenden und zwei antibindenden Elektronen.", "Denk an Helium.")),
         w('f2', 'Sie haben keine Wirkung auf die Bindung.', 'chem-mis-me-antibonding', why('Sonst gäbe es auch ein Molekül aus zwei Heliumatomen. Antibindende Elektronen müssen also etwas bewirken.', 'Denk an Helium.')),
         w('f3', 'Sie machen das Molekül zu einem Ion.', 'chem-mis-me-salt-like', why('Ob ein Teilchen geladen ist, hängt von der Gesamtzahl der Elektronen ab, nicht davon, in welchen Orbitalen sie sitzen.', 'Die Ladung hängt von der Elektronenzahl ab.')),
         w('f4', 'Sie bilden die π-Bindungen.', 'chem-mis-me-pi-alone', why('π-Bindungen sind bindend; es gibt bindende und antibindende π-Orbitale. Antibindend heißt nicht π.', 'Antibindend ist nicht dasselbe wie π.')),
@@ -930,7 +930,7 @@ export const METALLE_BANK: QuestionBank = {
       wrong: [
         w('f1', r`$\mathrm{sp^{3}}$, keine π-Bindung`, 'chem-mis-me-two-sigma', why('Jede Doppelbindung enthält eine π-Bindung, und Mehrfachbindungen zählen für die Hybridisierung nur einmal.', 'Mehrfachbindungen zählen einmal.')),
         w('f2', r`$\mathrm{sp^{2}}$, eine π-Bindung`, 'chem-mis-me-hyb-partners', why('Zähle die Partner des Kohlenstoffs. Und jede der beiden Doppelbindungen bringt eine π-Bindung mit.', 'Zähle Partner und Doppelbindungen.')),
-        w('f3', r`$\mathrm{sp^{3}}$, vier π-Bindungen`, 'chem-mis-me-hyb-pi'),
+        w('f3', r`$\mathrm{sp^{3}}$, vier π-Bindungen`, 'chem-mis-me-hyb-pi', why("Zähle die Partner des Kohlenstoffs; eine Doppelbindung zählt einmal. Und jede Doppelbindung bringt genau eine π-Bindung.", "Zähle Partner und Doppelbindungen.")),
         w('f4', r`$\mathrm{sp}$, vier π-Bindungen`, 'chem-mis-me-two-sigma', why('In jeder Doppelbindung ist eine Bindung die σ-Bindung; π ist nur die zweite.', 'Eine Bindung jeder Doppelbindung ist σ.')),
       ],
       hint: 'Zwei Partner, kein freies Paar am Kohlenstoff. Jede Doppelbindung: eine σ und eine π.',
@@ -951,8 +951,8 @@ export const METALLE_BANK: QuestionBank = {
       correct: r`$\mathrm{sp^{3}}$, $\mathrm{sp^{2}}$, $\mathrm{sp}$`,
       wrong: [
         w('f1', r`$\mathrm{sp}$, $\mathrm{sp^{2}}$, $\mathrm{sp^{3}}$`, 'chem-mis-me-hyb-pi', why('Mehr Bindungsstriche heißt nicht mehr Richtungen. Zähle für jedes Molekül die Partner eines Kohlenstoffs.', 'Zähle die Partner.')),
-        w('f2', r`$\mathrm{sp^{3}}$, $\mathrm{sp^{3}}$, $\mathrm{sp^{3}}$, weil Kohlenstoff immer vier Bindungen bildet`, 'chem-mis-me-hyb-pi'),
-        w('f3', r`$\mathrm{sp^{2}}$, $\mathrm{sp^{2}}$, $\mathrm{sp^{2}}$`, 'chem-mis-me-hyb-partners'),
+        w('f2', r`$\mathrm{sp^{3}}$, $\mathrm{sp^{3}}$, $\mathrm{sp^{3}}$, weil Kohlenstoff immer vier Bindungen bildet`, 'chem-mis-me-hyb-pi', why("Vier Bindungen heißt nicht vier Richtungen: Mehrere Bindungen einer Mehrfachbindung zeigen zum selben Partner.", "Bindungen sind nicht gleich Richtungen.")),
+        w('f3', r`$\mathrm{sp^{2}}$, $\mathrm{sp^{2}}$, $\mathrm{sp^{2}}$`, 'chem-mis-me-hyb-partners', why("Ethan, Ethen und Ethin haben verschieden viele Partner an jedem Kohlenstoff. Zähle für jedes Molekül.", "Zähle die Partner je Molekül.")),
         w('f4', r`$\mathrm{sp^{3}}$, $\mathrm{sp}$, $\mathrm{sp^{2}}$`, 'chem-mis-me-hyb-partners', why('Ethen hat eine Doppel-, Ethin eine Dreifachbindung. Zähle bei jedem die Partner eines Kohlenstoffs.', 'Zähle die Partner.')),
       ],
       hint: 'Ein C in Ethan hat vier Partner, in Ethen drei, in Ethin zwei.',
@@ -1017,7 +1017,7 @@ export const METALLE_BANK: QuestionBank = {
       correct: 'um die Zahl der beweglichen Ladungsträger und damit die Leitfähigkeit gezielt zu erhöhen',
       wrong: [
         w('f1', 'um es zu einem Metall zu machen', 'chem-mis-me-gap', why('Silicium bleibt auch dotiert ein Halbleiter mit verbotener Zone; es bekommt nur zusätzliche Ladungsträger.', 'Es bleibt ein Halbleiter.')),
-        w('f2', 'um es elektrisch aufzuladen', 'chem-mis-me-dope-charge'),
+        w('f2', 'um es elektrisch aufzuladen', 'chem-mis-me-dope-charge', why("Überlege, ob mit dem Fremdatom ebenso viele Protonen wie Elektronen in den Kristall kommen.", "Bringt das Fremdatom gleich viele Protonen und Elektronen?")),
         w('f3', 'um seine verbotene Zone zu verbreitern und es zum Isolator zu machen', 'chem-mis-me-gap', why('Für Isolatoren braucht man kein Silicium. Dotieren soll das Gegenteil bewirken: mehr Leitfähigkeit.', 'Ziel ist mehr Leitfähigkeit.')),
         w('f4', 'um seine Kristallstruktur in ein Ionengitter umzuwandeln', 'chem-mis-me-salt-like'),
       ],

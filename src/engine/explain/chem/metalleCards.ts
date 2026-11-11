@@ -93,7 +93,7 @@ export const METALLE_CARDS: readonly Card[] = [
       { chemTask: String.raw`$\ce{CH4}$, $\ce{C2H4}$, $\ce{C2H2}$`, lines: [{ label: 'Kohlenstoff mit 4, 3 und 2 Richtungen', latex: String.raw`\mathrm{sp^{3}},\ \mathrm{sp^{2}},\ \mathrm{sp}` }] },
       { chemTask: String.raw`$\ce{PCl3}$`, lines: [{ label: 'Drei Partner und ein freies Paar: 4 Richtungen', latex: String.raw`\mathrm{sp^{3}}` }] },
     ],
-    errors: ['chem-hyb-lone-pairs-ignored', 'chem-hyb-multiple-counted', 'chem-hyb-valence', 'chem-hyb-all-atoms', 'chem-hyb-exponent', 'chem-mis-me-hyb-partners', 'chem-mis-me-hyb-pi'],
+    errors: ['chem-hyb-lone-pairs-ignored', 'chem-hyb-multiple-counted', 'chem-hyb-valence', 'chem-hyb-all-atoms', 'chem-hyb-exponent', 'chem-hyb-too-few', 'chem-mis-me-hyb-partners', 'chem-mis-me-hyb-pi'],
   },
   {
     id: 'met-sigma-pi',
@@ -123,7 +123,7 @@ export const METALLE_CARDS: readonly Card[] = [
       { chemTask: String.raw`$\ce{H2}$ und $\ce{He2}$`, lines: [{ label: 'Wasserstoff', latex: String.raw`\tfrac{1}{2}(2 - 0) = 1` }, { label: 'Helium: keine Bindung', latex: String.raw`\tfrac{1}{2}(2 - 2) = 0` }] },
       { chemTask: String.raw`$\ce{O2}$ (8 bindende, 4 antibindende Valenzelektronen)`, lines: [{ label: 'Doppelbindung', latex: String.raw`\tfrac{1}{2}(8 - 4) = 2` }] },
     ],
-    errors: ['chem-bo-not-halved', 'chem-bo-added', 'chem-bo-bonding-only', 'chem-bo-zero-stable', 'chem-bo-half-unstable', 'chem-bo-antibonding-blocks', 'chem-mis-me-antibonding', 'chem-mis-me-mo-count'],
+    errors: ['chem-bo-not-halved', 'chem-bo-added', 'chem-bo-bonding-only', 'chem-bo-zero-stable', 'chem-bo-half-unstable', 'chem-bo-antibonding-blocks', 'chem-bo-one-pair', 'chem-mis-me-antibonding', 'chem-mis-me-mo-count'],
   },
   {
     id: 'met-aluminium',

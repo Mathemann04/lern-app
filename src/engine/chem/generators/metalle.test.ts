@@ -44,6 +44,10 @@ describe('Daten Metallbindung und Hybridisierung', () => {
     expect(sigmaOf(moleculeById('C2H2')!)).toBe(3)
     expect(piOf(moleculeById('C2H2')!)).toBe(2)
     expect(piOf(moleculeById('CO2')!)).toBe(2)
+    // keine Hybridisierung bei H₂S, PH₃, SCl₂; in den Grundlagen auch sp und sp²
+    const basic = hybridSites(1)
+    expect(basic.some((s) => ['H2S', 'PH3', 'SCl2'].includes(s.mol.id))).toBe(false)
+    expect(new Set(basic.map(domainsOf))).toEqual(new Set([2, 3, 4]))
   })
 })
 
@@ -59,6 +63,8 @@ describe('Rechenfehler Metallbindung und Hybridisierung: Katalogbeispiele', () =
     expect(wrongIn(ch4, 'richtungen', 'chem-hyb-all-atoms')).toBe('$5$')
     const bf3 = findTask((i) => hybridTask(3, createRng(`b${i}`), { level: 3, seed: 10000 + i }, 'chem-hyb-exponent'), 'BF3:B')
     expect(wrongIn(bf3, 'hybrid', 'chem-hyb-exponent')).toBe(String.raw`$\mathrm{sp^{3}}$`)
+    const ch4b = findTask((i) => hybridTask(3, createRng(`t${i}`), { level: 3, seed: 10000 + i }, 'chem-hyb-too-few'), 'CH4:C')
+    expect(wrongIn(ch4b, 'hybrid', 'chem-hyb-too-few')).toBe(String.raw`$\mathrm{sp^{2}}$`)
   })
 
   it('σ und π: CO₂ mit 4 σ, C₂H₄ mit 4 σ und 2 π, HCN mit 1 π, C₂H₄ mit 5 π', () => {
@@ -75,6 +81,8 @@ describe('Rechenfehler Metallbindung und Hybridisierung: Katalogbeispiele', () =
     expect(wrongIn(findTask(make('chem-dope-group-number'), 'Si-P'), 'valenz', 'chem-dope-group-number')).toBe('$15$')
     expect(wrongIn(findTask(make('chem-dope-host-valence'), 'Si-B'), 'valenz', 'chem-dope-host-valence')).toBe('$4$')
     expect(wrongIn(findTask(make('chem-dope-swapped'), 'Si-P'), 'typ', 'chem-dope-swapped')).toMatch(/p-Leiter/)
+    expect(wrongIn(findTask(make('chem-dope-charged'), 'Si-P'), 'typ', 'chem-dope-charged')).toMatch(/geladen/)
+    expect(wrongIn(findTask(make('chem-dope-no-effect'), 'Si-B'), 'typ', 'chem-dope-no-effect')).toMatch(/^Nichts ändert sich/)
   })
 
   it('Bindungsordnung: O₂ mit 4 und 6, He₂ mit 1, He₂ und O₂ gebunden oder nicht', () => {
@@ -85,5 +93,8 @@ describe('Rechenfehler Metallbindung und Hybridisierung: Katalogbeispiele', () =
     expect(wrongIn(findTask(make('chem-bo-zero-stable'), 'He2'), 'stabil', 'chem-bo-zero-stable')).toMatch(/^Ja/)
     expect(wrongIn(findTask(make('chem-bo-half-unstable'), 'H2+'), 'stabil', 'chem-bo-half-unstable')).toMatch(/^Nein/)
     expect(wrongIn(findTask(make('chem-bo-antibonding-blocks'), 'O2'), 'stabil', 'chem-bo-antibonding-blocks')).toMatch(/^Nein/)
+    expect(wrongIn(findTask(make('chem-bo-one-pair'), 'H2'), 'stabil', 'chem-bo-one-pair')).toMatch(/^Nein/)
+    // ohne antibindende Elektronen nie die Antwort über antibindende Elektronen
+    expect(wrongIn(findTask(make('chem-bo-antibonding-blocks'), 'H2'), 'stabil', 'chem-bo-antibonding-blocks')).toBeUndefined()
   })
 })

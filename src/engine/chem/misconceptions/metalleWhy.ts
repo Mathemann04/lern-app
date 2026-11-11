@@ -53,9 +53,10 @@ export const METALLE_WHY: Readonly<Record<string, Explanation>> = {
     short: "Mehr Elektronen: n; weniger: p.",
   },
   'chem-mis-me-hyb-partners': {
-    detailed: String.raw`Freie Paare sitzen ebenfalls in Hybridorbitalen und brauchen eine eigene Richtung. Ein Atom mit drei Partnern und einem freien Paar braucht deshalb vier Hybridorbitale, nicht drei.`,
-    short: "Freie Paare zählen mit.",
+    detailed: "Gezählt werden die Richtungen um das Atom: Bindungspartner und freie Paare; eine Mehrfachbindung zählt einmal. So viele Richtungen, so viele Hybridorbitale.",
+    short: "Richtungen zählen: Partner und freie Paare.",
   },
+
   'chem-mis-me-hyb-pi': {
     detailed: "Nur die σ-Bindung einer Mehrfachbindung liegt in einem Hybridorbital. Die π-Bindungen entstehen aus p-Orbitalen, die nicht an der Hybridisierung teilgenommen haben und seitlich überlappen.",
     short: "π-Bindungen kommen aus nicht hybridisierten p-Orbitalen.",
