@@ -785,3 +785,9 @@ Neue Entscheidungen unten anfügen.
   gewählten Aussagen; vergessene richtige Aussagen haben keinen eigenen Denkfehler. Es steht immer mindestens eine
   falsche Aussage da (sonst wäre „alle ankreuzen“ ein sicherer Weg). Klausuraufgaben und Probeklausur nehmen nur
   Fragen mit Einfachauswahl, wie die echte Klausur.
+- 11.11.2026: N1b Zuordnen. Statt einer Auswahlliste des Browsers (die keine Formeln setzen kann) klappt bei vielen
+  oder langen Zielen je Zeile eine Liste mit Knöpfen auf; bei höchstens vier kurzen Zielen stehen die Knöpfe direkt in
+  der Zeile. Rechts stehen nur Ziele der gezeigten Paare, keine zusätzlichen Ablenker; dafür darf ein Ziel zu mehreren
+  Zeilen passen. Der Hinweis „Dasselbe kann zu mehreren Zeilen passen“ steht nur da, wenn es in der Fassung so ist.
+  Geprüft wird wie bei „Wähle alle richtigen“ einmal. In die Fehlerstatistik kommen nur gewählte typische
+  Verwechslungen; eine andere falsche Zuordnung zählt als Fehlversuch, aber ohne Denkfehler.

@@ -227,3 +227,10 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   „Wähle alle richtigen (N1)"; jede Aussage ein Satz mit Punkt, die Frage nennt „Aussagen" (`bank.test.ts`).
   Klausuraufgaben (`task1.ts`, `task5.ts`) nehmen nur Einfachauswahl. Browser-Tests für die Einfachauswahl ziehen mit
   `ensureQuestion` neu, wenn eine Frage mit Aussagen kommt.
+- Zuordnen (N1b): `MatchQuestion` in `quiz/types.ts` (`pairs` mit `left`/`right`, `traps` = Zeile, falsches Ziel eines anderen
+  Paars, Denkfehler; `misconceptionsIn` für alle Arten, genutzt von `focus.ts` und `cards.test.ts`), `planMatch` in `quiz/plan.ts`
+  (vier bis sechs Paare `MATCH_SHOWN`, Ziel-Ids `z-<erstes Paar mit diesem Ziel>`, beim gezielten Üben Zeile und Paar des
+  falschen Ziels sicher dabei; `choices` leer, `match` mit `rows` und `targets` in `guided/types.ts`), Anzeige `MatchAnswers` in
+  `ui/guided/TaskScreen.tsx` (Knöpfe bei höchstens vier Zielen mit höchstens 16 Zeichen, sonst aufklappbare Liste; `data-verdict`
+  right/wrong). Paare möglichst aus den Tabellen der Engine (Beispiel `MOLECULE_ION_NAMES` in `bank/ionen.ts`); `bank.test.ts`
+  prüft Vorrat, eindeutige linke Einträge, Ziele und Verwechslungen. Fragen am Ende unter „Zuordnen (N1b)", Ids mit „-zuordnen-".
