@@ -16,7 +16,7 @@ import { LIGHT_SOURCES, lightValues } from './light.ts'
 
 const COURSE = 'chem-atombau'
 // alle Themen mit Rechnungen
-const CALC_COURSES = ['chem-atombau', 'chem-stoffmenge', 'chem-gleichungen', 'chem-loesungen']
+const CALC_COURSES = ['chem-atombau', 'chem-stoffmenge', 'chem-gleichungen', 'chem-loesungen', 'chem-ionen']
 // Abweichung mit Begründung (docs/PLAN-M4.md, S3b): Es gibt nur etwa 15 bis 25 sinnvolle Reaktionen bzw.
 // Brennstoffe je Stufe; dort zählt, dass jede vorkommt und keine deutlich öfter als die anderen
 const VARIETY: Readonly<Record<string, { distinct: number; maxShare: number }>> = {
@@ -27,7 +27,7 @@ const SAMPLE = 400
 const tasksOf = (level: Level, count = SAMPLE) => Array.from({ length: count }, (_, i) => ({ level, seed: GENERATED_MIN + i }))
 
 function expectRenderable(text: string, context: string) {
-  expect(text, context).not.toMatch(/undefined|NaN|\[object|null/)
+  expect(text, context).not.toMatch(/undefined|NaN(?![A-Z0-9])|\[object|null/)
   for (const segment of parseRichText(text).flat()) {
     if (segment.kind === 'math') expect(latexProblem(segment.latex, { checkUgly: false }), `${context}: ${segment.latex}`).toBeNull()
     else expect(segment.text, `${context}: Unicode-Index außerhalb von $…$`).not.toMatch(/[₀-₉⁰-⁹⁺⁻]/)

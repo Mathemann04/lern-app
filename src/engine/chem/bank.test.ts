@@ -17,7 +17,7 @@ const MIN_WRONG = 4
 // Texte mit $…$-Formeln: jede Formel setzt sich im strengen Modus
 function expectRenderable(text: string, context: string) {
   expect(text.trim(), context).not.toBe('')
-  expect(text, context).not.toMatch(/undefined|NaN|\[object|null/)
+  expect(text, context).not.toMatch(/undefined|NaN(?![A-Z0-9])|\[object|null/)
   for (const segment of parseRichText(text).flat()) {
     if (segment.kind === 'math') expect(latexProblem(segment.latex, { checkUgly: false }), context).toBeNull()
     // keine Unicode-Indizes und -Ladungen im Fließtext, Formeln gehören in $…$

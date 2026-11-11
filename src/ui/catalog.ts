@@ -107,13 +107,14 @@ export const ATOMBAU = 'chem-atombau'
 export const STOFFMENGE = 'chem-stoffmenge'
 export const GLEICHUNGEN = 'chem-gleichungen'
 export const LOESUNGEN = 'chem-loesungen'
+export const IONEN = 'chem-ionen'
 
 // Chemie-Themen: Ids mit „chem-", Engine aus Wissensfragen (engine/chem/)
 export const isChemCourse = (id: string) => id.startsWith('chem-')
 
 // Themen mit Testseite in der Formel-Galerie (auch solche, die noch nicht spielbar sind); bei Chemie
 // die Seite „Fragen durchsehen"
-export const GALLERY_COURSES: readonly string[] = [DERIVATIVES, FRACTIONS, REARRANGE, ATOMBAU, GLEICHUNGEN, STOFFMENGE, LOESUNGEN]
+export const GALLERY_COURSES: readonly string[] = [DERIVATIVES, FRACTIONS, REARRANGE, ATOMBAU, GLEICHUNGEN, STOFFMENGE, LOESUNGEN, IONEN]
 
 const derivativeLevels: LevelPreview[] = [
   {
@@ -304,6 +305,35 @@ const loesungenLevels: LevelPreview[] = [
   },
 ]
 
+const ionenLevels: LevelPreview[] = [
+  {
+    level: 1,
+    available: true,
+    title: 'Ionen aus Metall und Nichtmetall, Formeln und Namen einfacher Salze, Eigenschaften',
+    examples: [String.raw`\ce{Al2O3}`, String.raw`\ce{CaF2}`],
+  },
+  {
+    level: 2,
+    available: true,
+    title: 'Molekül-Ionen, römische Ziffern, Zerfall in Ionen, Ionengitter und Koordinationszahl',
+    examples: [String.raw`\ce{Ca3(PO4)2}`, String.raw`\ce{Fe2(SO4)3}`],
+  },
+  {
+    level: 3,
+    available: true,
+    title: 'Name und Formel in beide Richtungen, Schmelzpunkte begründen, Born-Haber-Kreisprozess',
+    examples: [String.raw`\ce{Na(s) + 1/2 Cl2(g) -> NaCl(s)}`],
+  },
+]
+
+// Unterthemen von „Ionenbindung und Salze" (Rechnungen in engine/chem/generators/salze.ts, part)
+const ionenParts: CoursePart[] = [
+  { id: 'formel', title: 'Ionen, Formeln und Namen', levels: [1, 2, 3] },
+  { id: 'gitter', title: 'Ionengitter und Eigenschaften der Salze', levels: [1, 2, 3] },
+  { id: 'zerfall', title: 'Lösen und Schmelzen, Zerfall in Ionen', levels: [1, 2, 3] },
+  { id: 'energie', title: 'Gitterenergie und Born-Haber', levels: [2, 3] },
+]
+
 // Unterthemen von „Gase und Lösungen" (Rechnungen in engine/chem/generators/loesungen.ts, part)
 const loesungenParts: CoursePart[] = [
   { id: 'konzentration', title: 'Konzentration und Lösung ansetzen', levels: [1, 2, 3] },
@@ -469,7 +499,17 @@ export const SUBJECTS: readonly Subject[] = [
         icon: 'bond',
         tone: 'violet',
         courses: [
-          comingSoon('chem-ionen', 'Ionenbindung und Salze', 'Formeln und Namen von Salzen, Ionengitter und ihre Eigenschaften', 'bond'),
+          {
+            id: IONEN,
+            title: 'Ionenbindung und Salze',
+            description: 'Formeln und Namen von Salzen, Ionengitter und ihre Eigenschaften',
+            icon: 'bond',
+            cards: 'chem-ionen',
+            levels: ionenLevels,
+            free: false,
+            focus: true,
+            parts: ionenParts,
+          },
           comingSoon('chem-molekuele', 'Moleküle', 'Lewis-Formel, räumlicher Bau, Polarität und Namen', 'bond'),
           comingSoon('chem-zmk', 'Zwischenmolekulare Kräfte', 'Van-der-Waals-Kräfte, Dipol-Dipol-Kräfte und Wasserstoffbrücken', 'bond'),
           comingSoon('chem-metalle', 'Metallbindung und Hybridisierung', 'Elektronengas, Bändermodell, Halbleiter und Hybridorbitale', 'bond'),

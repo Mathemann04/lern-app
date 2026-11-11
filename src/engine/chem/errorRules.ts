@@ -21,6 +21,7 @@ const ATOMBAU = 'chem-atombau'
 const STOFFMENGE = 'chem-stoffmenge'
 const GLEICHUNGEN = 'chem-gleichungen'
 const LOESUNGEN = 'chem-loesungen'
+const IONEN = 'chem-ionen'
 
 export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
   {
@@ -475,6 +476,227 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
     why: {
       detailed: String.raw`Teil geteilt durch Ganzes ergibt eine Dezimalzahl wie $0{,}05$. In Prozent wird daraus erst durch Malnehmen mit $100\,\%$: $0{,}05 = 5\,\%$. Ohne diesen Schritt ist der Anteil hundertmal zu klein.`,
       short: String.raw`Dezimalzahl mal $100\,\%$ ergibt Prozent.`,
+    },
+  },
+  // Ionenbindung und Salze (S5a)
+  {
+    id: 'chem-salt-anion-positive',
+    course: IONEN,
+    name: 'Nichtmetall als Kation',
+    wrongFormula: String.raw`\ce{Na3P}\text{: } \ce{P^3+}\ \text{statt}\ \ce{P^3-}`,
+    why: {
+      detailed: 'Nichtmetalle nehmen Elektronen auf, bis sie die Edelgaskonfiguration erreichen; dabei werden sie negativ geladen. Positive Ionen bilden die Metalle, die Elektronen abgeben.',
+      short: 'Nichtmetalle nehmen Elektronen auf und werden zu Anionen.',
+    },
+  },
+  {
+    id: 'chem-salt-anion-valence',
+    course: IONEN,
+    name: 'Ladung des Anions aus den Valenzelektronen',
+    wrongFormula: String.raw`\ce{O^6-}\ \text{statt}\ \ce{O^2-}`,
+    why: {
+      detailed: 'Die Ladung eines einatomigen Anions ist die Zahl der Elektronen, die es aufnimmt, nicht die Zahl seiner Valenzelektronen. Aufgenommen werden so viele, wie bis acht Valenzelektronen fehlen.',
+      short: 'Ladung = Zahl der aufgenommenen Elektronen, bis acht fehlen.',
+    },
+  },
+  {
+    id: 'chem-salt-polyatomic-charge',
+    course: IONEN,
+    name: 'Molekül-Ion mit falscher Ladung',
+    wrongFormula: String.raw`\ce{SO4^-}\ \text{statt}\ \ce{SO4^2-}`,
+    why: {
+      detailed: 'Molekül-Ionen wie Sulfat, Nitrat, Carbonat oder Phosphat haben eine feste Ladung, die man nicht aus der Formel ablesen kann. Sie muss man kennen; die Lernkarte zu den Molekül-Ionen listet sie auf.',
+      short: 'Die Ladungen der Molekül-Ionen muss man kennen.',
+    },
+  },
+  {
+    id: 'chem-salt-not-reduced',
+    course: IONEN,
+    name: 'Indizes nicht gekürzt',
+    wrongFormula: String.raw`\ce{Mg2S2}\ \text{statt}\ \ce{MgS}`,
+    why: {
+      detailed: 'Die Formel eines Salzes gibt das kleinste ganzzahlige Verhältnis der Ionen an. Über Kreuz genommene Ladungen müssen deshalb noch gekürzt werden, wenn sie einen gemeinsamen Teiler haben.',
+      short: 'Salzformeln mit dem kleinsten ganzzahligen Verhältnis.',
+    },
+  },
+  {
+    id: 'chem-salt-indices-swapped',
+    course: IONEN,
+    name: 'Indizes vertauscht',
+    wrongFormula: String.raw`\ce{Al3O2}\ \text{statt}\ \ce{Al2O3}`,
+    why: {
+      detailed: 'Der Index eines Ions sagt, wie viele davon nötig sind, damit sich die Ladungen aufheben. Die Ladung des Kations bestimmt also, wie viele Anionen gebraucht werden, und umgekehrt. Probe: Index mal Ladung muss für beide Ionen gleich groß sein.',
+      short: 'Probe: Index mal Ladung ist für Kation und Anion gleich.',
+    },
+  },
+  {
+    id: 'chem-salt-one-to-one',
+    course: IONEN,
+    name: 'Ionen 1 : 1 kombiniert',
+    wrongFormula: String.raw`\ce{AlO}\ \text{statt}\ \ce{Al2O3}`,
+    why: {
+      detailed: 'Ein Salz ist nach außen neutral. Haben Kation und Anion verschieden große Ladungen, heben sich ein Kation und ein Anion nicht auf; es braucht mehr von der Sorte mit der kleineren Ladung.',
+      short: 'Die Ladungen müssen sich aufheben.',
+    },
+  },
+  {
+    id: 'chem-salt-bracket',
+    course: IONEN,
+    name: 'Klammer um das Molekül-Ion vergessen',
+    wrongFormula: String.raw`\ce{CaNO32}\ \text{statt}\ \ce{Ca(NO3)2}`,
+    why: {
+      detailed: 'Kommt ein Molekül-Ion mehrmals vor, steht es in Klammern und der Index dahinter gilt für die ganze Gruppe. Ohne Klammer würde der Index zur letzten Atomsorte gehören und die Formel einen anderen Stoff beschreiben.',
+      short: 'Mehrere Molekül-Ionen: in Klammern, Index dahinter.',
+    },
+  },
+  {
+    id: 'chem-salt-numeral-count',
+    course: IONEN,
+    name: 'Römische Ziffer als Anzahl gelesen',
+    wrongFormula: String.raw`\text{Eisen(III)-chlorid: } \ce{Fe3Cl}\ \text{statt}\ \ce{FeCl3}`,
+    why: {
+      detailed: 'Die römische Ziffer im Namen ist die Ladung des Metall-Ions, nicht die Zahl der Metall-Atome in der Formel. Aus der Ladung folgt erst über den Ladungsausgleich, wie viele Ionen jeder Sorte nötig sind.',
+      short: 'Die römische Ziffer ist die Ladung des Kations.',
+    },
+  },
+  {
+    id: 'chem-salt-charge-from-index',
+    course: IONEN,
+    name: 'Index als Ladung gelesen',
+    wrongFormula: String.raw`\ce{Fe2O3}\text{: } \ce{Fe^2+}\ \text{statt}\ \ce{Fe^3+}`,
+    why: {
+      detailed: 'Der Index in der Formel zählt die Ionen, er ist nicht ihre Ladung. Die Ladung des Kations folgt aus der Gesamtladung der Anionen, verteilt auf die Kationen.',
+      short: 'Index = Anzahl, nicht Ladung.',
+    },
+  },
+  {
+    id: 'chem-salt-anion-name',
+    course: IONEN,
+    name: 'Anion falsch benannt',
+    wrongFormula: String.raw`\ce{Na2SO4}\text{: Natriumsulfid statt Natriumsulfat}`,
+    why: {
+      detailed: 'Die Endung verrät das Anion: -id steht für das einatomige Anion (Sulfid, Nitrid, Chlorid), -it und -at für Molekül-Ionen mit Sauerstoff, -at mit mehr Sauerstoff als -it (Sulfit, Sulfat). Hydrogen- zeigt ein zusätzliches H an.',
+      short: '-id ohne Sauerstoff, -it und -at mit Sauerstoff.',
+    },
+  },
+  {
+    id: 'chem-salt-numeral-index',
+    course: IONEN,
+    name: 'Index statt Ladung in der Klammer',
+    wrongFormula: String.raw`\ce{Fe2O3}\text{: Eisen(II)-oxid statt Eisen(III)-oxid}`,
+    why: {
+      detailed: 'Die römische Ziffer im Namen gibt die Ladung des Metall-Ions an, nicht wie oft es in der Formel steht. Die Ladung ergibt sich aus dem Ausgleich mit den Anionen.',
+      short: 'In die Klammer gehört die Ladung, nicht der Index.',
+    },
+  },
+  {
+    id: 'chem-salt-numeral-missing',
+    course: IONEN,
+    name: 'Römische Ziffer weggelassen',
+    wrongFormula: String.raw`\ce{FeCl3}\text{: Eisenchlorid statt Eisen(III)-chlorid}`,
+    why: {
+      detailed: 'Metalle wie Eisen, Kupfer, Chrom oder Mangan bilden Ionen mit verschiedenen Ladungen. Erst die römische Ziffer sagt, welches Ion gemeint ist; ohne sie passt der Name zu mehreren Salzen.',
+      short: 'Bei Metallen mit mehreren Ladungen gehört die Ziffer dazu.',
+    },
+  },
+  {
+    id: 'chem-dissociation-coefficients',
+    course: IONEN,
+    name: 'Koeffizienten der Ionen vergessen',
+    wrongFormula: String.raw`\ce{Al2O3 -> Al^3+ + O^2-}`,
+    why: {
+      detailed: 'Beim Zerfall wird jedes Ion der Formeleinheit frei. Steht ein Ion mit Index in der Formel, entstehen so viele Ionen davon; das zeigt der Koeffizient vor dem Ion. Probe: Die Ladungen rechts heben sich auf.',
+      short: 'So viele Ionen, wie der Index sagt; Ladungen rechts heben sich auf.',
+    },
+  },
+  {
+    id: 'chem-dissociation-index-ion',
+    course: IONEN,
+    name: 'Index als Teil des Ions',
+    wrongFormula: String.raw`\ce{Al2O3 -> Al2^3+ + 3 O^2-}`,
+    why: {
+      detailed: 'Die Ionen eines Salzes sind einzelne Teilchen; ein Index in der Formel zählt nur, wie viele davon vorkommen. Beim Zerfall wird aus dem Index ein Koeffizient vor dem einzelnen Ion.',
+      short: 'Der Index wird zum Koeffizienten vor dem Ion.',
+    },
+  },
+  {
+    id: 'chem-dissociation-charge',
+    course: IONEN,
+    name: 'Ladungen gehen nicht auf',
+    wrongFormula: String.raw`\ce{CaCl2 -> Ca^2+ + 2 Cl^2-}`,
+    why: {
+      detailed: 'Jedes Ion behält beim Zerfall seine eigene Ladung. Probe: Rechts müssen sich die Ladungen aufheben, weil das Salz links neutral ist.',
+      short: 'Jedes Ion behält seine Ladung; zusammen heben sie sich auf.',
+    },
+  },
+  {
+    id: 'chem-dissociation-atoms',
+    course: IONEN,
+    name: 'Zerfall in Atome statt Ionen',
+    wrongFormula: String.raw`\ce{NaCl -> Na + Cl}`,
+    why: {
+      detailed: 'Ein Salz besteht schon aus Ionen. Beim Lösen oder Schmelzen werden diese Ionen beweglich; sie geben dabei keine Elektronen zurück. Deshalb tragen sie rechts ihre Ladungen.',
+      short: 'Salze bestehen aus Ionen und zerfallen in Ionen.',
+    },
+  },
+  {
+    id: 'chem-bh-ea-sign',
+    course: IONEN,
+    name: 'Vorzeichen der Elektronenaffinität',
+    wrongFormula: String.raw`+349\ \text{statt}\ -349\,\mathrm{kJ/mol}\ \text{für}\ \ce{Cl -> Cl^-}`,
+    why: {
+      detailed: 'Wenn ein Halogen-Atom ein Elektron aufnimmt, wird Energie frei; die Elektronenaffinität ist dann negativ und senkt die Summe. Im Kreisprozess geht jeder Schritt mit dem Vorzeichen in die Summe ein, das er in Richtung des Kreises hat.',
+      short: 'Elektronenaufnahme beim Halogen setzt Energie frei: negatives Vorzeichen.',
+    },
+  },
+  {
+    id: 'chem-bh-full-bond',
+    course: IONEN,
+    name: 'Ganze statt halbe Bindungsenergie',
+    wrongFormula: String.raw`242\ \text{statt}\ \tfrac{1}{2} \cdot 242\,\mathrm{kJ/mol}\ \text{für}\ \ce{Cl}`,
+    why: {
+      detailed: 'Die Bindungsenergie gilt für das Spalten eines ganzen Moleküls in zwei Atome. Für eine Formeleinheit MX wird nur ein Halogen-Atom gebraucht, also ein halbes Molekül und die halbe Bindungsenergie.',
+      short: String.raw`Ein Atom $\ce{X}$ braucht nur ein halbes $\ce{X2}$.`,
+    },
+  },
+  {
+    id: 'chem-bh-step-missing',
+    course: IONEN,
+    name: 'Sublimation vergessen',
+    wrongFormula: String.raw`\ce{Na(s) -> Na^+(g)}\ \text{ohne}\ \ce{Na(s) -> Na(g)}`,
+    why: {
+      detailed: 'Ionisiert werden kann nur ein freies Atom im Gas. Das feste Metall muss deshalb zuerst verdampft werden; dieser Schritt kostet Energie und gehört in den Kreisprozess.',
+      short: 'Erst verdampfen, dann ionisieren.',
+    },
+  },
+  {
+    id: 'chem-bh-subtracted-wrong',
+    course: IONEN,
+    name: 'Kreisprozess falsch herum umgestellt',
+    wrongFormula: String.raw`\Delta H_G = \Delta H_{\text{Ionen}} - \Delta H_f`,
+    why: {
+      detailed: 'Beide Wege von den Elementen zum Salz liefern dieselbe Energie: Bildungsenthalpie = Weg zu den Ionen + Gitterenthalpie. Diese Gleichung wird nach der gesuchten Größe umgestellt; dabei bleibt jedes Vorzeichen erhalten. Probe: Beim Aufbau eines Gitters wird Energie frei.',
+      short: String.raw`$\Delta H_f = \Delta H_{\text{Ionen}} + \Delta H_G$ richtig umstellen.`,
+    },
+  },
+  {
+    id: 'chem-bh-added',
+    course: IONEN,
+    name: 'Addiert statt abgezogen',
+    wrongFormula: String.raw`\Delta H_G = \Delta H_f + \Delta H_{\text{Ionen}}`,
+    why: {
+      detailed: 'Die Bildungsenthalpie ist die Summe aus dem Weg zu den Ionen und der Gitterenthalpie. Wer die Gitterenthalpie sucht, muss den Weg zu den Ionen auf die andere Seite bringen, also abziehen.',
+      short: String.raw`Nach $\Delta H_G$ umstellen: abziehen.`,
+    },
+  },
+  {
+    id: 'chem-bh-lattice-sign',
+    course: IONEN,
+    name: 'Gitterenthalpie mit falschem Vorzeichen',
+    wrongFormula: String.raw`\Delta H_f = \Delta H_{\text{Ionen}} - \Delta H_G`,
+    why: {
+      detailed: 'Die Gitterenthalpie ist schon negativ angegeben, weil beim Aufbau des Gitters Energie frei wird. Sie wird mit ihrem Vorzeichen zum Weg zu den Ionen addiert; zieht man sie ab, wird aus der frei werdenden Energie eine aufgewendete.',
+      short: 'Die Gitterenthalpie mit ihrem Vorzeichen addieren.',
     },
   },
 ]

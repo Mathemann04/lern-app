@@ -63,7 +63,7 @@ describe('Klausuraufgabe 4: Aufbau', () => {
       const texts = [task.intro, task.note, ...task.parts.map((p) => p.prompt), ...itemsOf(task).map((i) => i.question)]
       for (const [, { build }] of truthOf(task)) texts.push(...build.options.map((o) => o.content), build.explanation.detailed)
       for (const text of texts) {
-        expect(text, `${seed}`).not.toMatch(/undefined|NaN|\[object|null/)
+        expect(text, `${seed}`).not.toMatch(/undefined|NaN(?![A-Z0-9])|\[object|null/)
         for (const seg of parseRichText(text).flat()) if (seg.kind === 'math') expect(latexProblem(seg.latex, { checkUgly: false }), `${seed}: ${seg.latex}`).toBeNull()
       }
     }
