@@ -54,6 +54,21 @@ export type GuidedStep = {
   readonly match?: MatchStep
   // Ordnen (N1c): Glieder mit Pfeilknöpfen in die richtige Reihenfolge bringen und einmal prüfen; choices ist leer
   readonly order?: OrderStep
+  // Orbital-Kästchen zum Antippen (N2a): im geführten Bildschirm statt der Auswahl; die Auswahl (choices) bleibt für
+  // Klausuraufgaben und Galerie
+  readonly boxes?: BoxInputStep
+}
+
+// Kästchen-Eingabe: je Unterschale eine Zeile; Tippen schaltet leer → ↑ → ↓ → ↑↓ (engine/chem/boxInput.ts prüft)
+export type BoxInputStep = {
+  // Edelgaskern vor den Kästchen („Ar“) oder leer
+  readonly core: string
+  // Unterschalen in der gezeigten Reihenfolge, z. B. „4s“, mit der Zahl der Orbitale und der richtigen Zahl der Elektronen
+  readonly rows: readonly { readonly shell: string; readonly orbitals: number; readonly count: number }[]
+  // typische falsche Verteilungen der Elektronen auf die Unterschalen (z. B. 3d vor 4s), je Zeile die Zahl
+  readonly alternatives: readonly { readonly rule: string; readonly counts: readonly number[] }[]
+  // „Warum ist das falsch?" je Rechenfehler, der vorkommen kann
+  readonly whys: Readonly<Record<string, Explanation>>
 }
 
 export type OrderStep = {

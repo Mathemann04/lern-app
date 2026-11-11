@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { Choice, GuidedStep, GuidedTaskBase, MatchStep, OrderStep, OrderStepTrap } from '../../engine/guided/types.ts'
+import type { BoxInputStep, Choice, GuidedStep, GuidedTaskBase, MatchStep, OrderStep, OrderStepTrap } from '../../engine/guided/types.ts'
+import { type InputBox, judgeBoxes, nextBox, solutionBoxes, totalMatches } from '../../engine/chem/boxInput.ts'
 import { orderTrapsIn } from '../../engine/quiz/plan.ts'
 import type { Expr } from '../../engine/expr/types.ts'
 import { type TaskRef, formatTaskNumber } from '../../engine/tasks/taskNumber.ts'
@@ -135,7 +136,7 @@ type StepProps = {
 
 // Rückmeldung auf eine eingetippte Zahl (freier Modus): typischer Fehler mit Erklärung, „fast" (Rundung)
 // oder falsch; tries zählt die Versuche, damit dieselbe Rückmeldung ein zweites Mal neu erscheint
-type Typed = { readonly kind: 'error' | 'close' | 'wrong'; readonly rule?: string; readonly why?: Explanation; readonly tries: number }
+type Typed = { readonly kind: 'error' | 'close' | 'wrong'; readonly rule?: string; readonly why?: Explanation; readonly note?: string; readonly tries: number }
 
 function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext, free }: StepProps) {
   const [wrongPicks, setWrongPicks] = useState<string[]>([])
@@ -163,7 +164,7 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext,
     if (solved || wrongPicks.length > 0 || typed) feedbackRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
   }, [solved, wrongPicks.length, whyOpen, typed])
 
-  function judged(verdict: Verdict) {
+  function judged(verdict: Verdict, note?: string) {
     if (verdict.kind === 'correct') {
       setSolved(true)
       setTyped(null)
@@ -181,9 +182,10 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext,
     if (verdict.kind === 'error') {
       // wie bei der Auswahl: nur der erste Fehler je Schritt zählt für die Statistik
       if (firstMistake) recordError(verdict.rule)
-      setTyped({ kind: 'error', rule: verdict.rule, why: numeric?.wrongs.find((w) => w.rule === verdict.rule)?.why, tries })
+      const why = numeric?.wrongs.find((w) => w.rule === verdict.rule)?.why ?? step.boxes?.whys[verdict.rule]
+      setTyped({ kind: 'error', rule: verdict.rule, why, tries })
     } else {
-      setTyped({ kind: 'wrong', tries })
+      setTyped({ kind: 'wrong', note, tries })
     }
     onMistake()
   }
@@ -261,6 +263,20 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext,
 
       {numeric ? (
         <NumberAnswer answer={numeric} disabled={solved} onSubmit={(value) => judged(judgeNumber(value, numeric))} />
+      ) : step.boxes ? (
+        <BoxAnswers
+          step={step.boxes}
+          solved={solved}
+          revealed={revealed}
+          onCheck={(input) =>
+            judged(
+              judgeBoxes(step.boxes!, input),
+              totalMatches(step.boxes!, input)
+                ? 'Die Zahl der Elektronen stimmt, aber nicht ihre Verteilung auf die Unterschalen.'
+                : 'Zähle die Elektronen: Ihre Zahl stimmt noch nicht.',
+            )
+          }
+        />
       ) : step.order ? (
         <OrderAnswers order={step.order} checked={multiResult !== null} onCheck={checkOrder} />
       ) : step.match ? (
@@ -659,6 +675,63 @@ function MatchAnswers({ match, checked, detail, onCheck }: MatchProps) {
   )
 }
 
+type BoxProps = { step: BoxInputStep; solved: boolean; revealed: boolean; onCheck: (input: InputBox[][]) => void }
+
+// Orbital-Kästchen zum Antippen (N2a): je Unterschale eine Zeile, Tippen schaltet leer → ↑ → ↓ → ↑↓. Nach einem Fehler
+// lässt sich weiter tippen und neu prüfen; „Lösung zeigen“ füllt die richtige Besetzung ein.
+function BoxAnswers({ step, solved, revealed, onCheck }: BoxProps) {
+  const [input, setInput] = useState<InputBox[][]>(() => step.rows.map((r) => Array.from({ length: r.orbitals }, (): InputBox => '0')))
+  const shown = revealed ? solutionBoxes(step) : input
+  function tap(row: number, box: number) {
+    if (solved) return
+    setInput((rows) => rows.map((r, i) => (i === row ? r.map((b, k) => (k === box ? nextBox(b) : b)) : r)))
+  }
+  const arrows: Readonly<Record<InputBox, string>> = { '0': '', u: '↑', d: '↓', '2': '↑↓' }
+  const words: Readonly<Record<InputBox, string>> = { '0': 'leer', u: 'ein Elektron, Spin nach oben', d: 'ein Elektron, Spin nach unten', '2': 'zwei Elektronen' }
+  return (
+    <div className="space-y-3">
+      <p className="text-sm text-zinc-600">Tippen schaltet ein Kästchen: leer, ↑, ↓, ↑↓. Dann tippe auf „Prüfen“.</p>
+      <div className="flex flex-wrap items-end gap-x-4 gap-y-3" role="group" aria-label="Kästchen">
+        {step.core && (
+          <span className="pb-3 text-lg font-semibold text-zinc-700">
+            <Formula tex={`[\\mathrm{${step.core}}]`} />
+          </span>
+        )}
+        {step.rows.map((row, i) => (
+          <div key={row.shell} className="space-y-1">
+            <div className="flex">
+              {shown[i].map((b, k) => (
+                <button
+                  key={k}
+                  type="button"
+                  disabled={solved}
+                  onClick={() => tap(i, k)}
+                  aria-label={`${row.shell}, Orbital ${k + 1}: ${words[b]}`}
+                  className="-ml-0.5 flex size-12 items-center justify-center border-2 border-zinc-500 bg-surface text-xl font-semibold first:ml-0 hover:bg-accent-50 disabled:hover:bg-surface"
+                >
+                  <span aria-hidden>{arrows[b]}</span>
+                </button>
+              ))}
+            </div>
+            <p className="text-center text-sm font-medium text-zinc-700">
+              <Formula tex={`${row.shell[0]}\\mathrm{${row.shell.slice(1)}}`} />
+            </p>
+          </div>
+        ))}
+      </div>
+      {!solved && (
+        <button
+          type="button"
+          onClick={() => onCheck(input)}
+          className="w-full rounded-xl bg-accent-700 px-4 py-3 text-lg font-medium text-on-accent hover:bg-accent-800"
+        >
+          Prüfen
+        </button>
+      )}
+    </div>
+  )
+}
+
 type OrderProps = { order: OrderStep; checked: boolean; onCheck: (placed: readonly string[]) => void }
 
 // Ordnen (N1c): Glieder mit Pfeilknöpfen nach oben und unten schieben (kein Ziehen mit dem Finger, verträgt sich am
@@ -778,6 +851,7 @@ function TypedFeedback({ typed, detail, whyOpen, onWhy, onReveal }: TypedFeedbac
   return (
     <div className="animate-step-in space-y-3 rounded-2xl bg-red-50 p-4">
       <p className="text-lg font-semibold text-red-800">Nicht ganz. Versuch es noch einmal.</p>
+      {typed.note && <p className="text-zinc-800">{typed.note}</p>}
       {name && (
         <p className="text-zinc-800">
           Das passt zu einem typischen Fehler: <RichText text={name} className="font-medium" inline />

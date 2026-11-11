@@ -240,3 +240,9 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   bei ganz umgedreht nur diesen), Schritt `order` in `guided/types.ts`, Anzeige `OrderAnswers` und `OrderTrapWhy` in
   `ui/guided/TaskScreen.tsx` (Pfeilknöpfe „Nach oben"/„Nach unten", `data-verdict`). Reihenfolgen aus Messwerten mit Gegenprobe
   (Beispiel `RADIUS_PERIOD3` in `bank/trends.ts`, Test in `generators/trends.test.ts` mit `allComparable`). Ids mit „-ordnen-".
+- Kästchen antippen (N2a): `GuidedStep.boxes` (`BoxInputStep` in `guided/types.ts`: Kern, Zeilen mit Unterschale, Orbitalen und
+  richtiger Zahl, `alternatives` als Zahlen je Zeile für 3d vor 4s und Ausnahmen, `whys`), Urteil `judgeBoxes` in `chem/boxInput.ts`
+  (Zahl je Zeile, dann Form: Paare zu früh `chem-el-hund`, gemischte Spins `chem-el-hund-spin`; `nextBox`, `solutionBoxes`,
+  `totalMatches`), gebaut in `boxTask` (`generators/elektronen.ts`; ohne `boxes` beim gezielten Üben von `chem-el-pauli`),
+  Anzeige `BoxAnswers` in `ui/guided/TaskScreen.tsx` (Rückmeldung über `judged` und `TypedFeedback` mit `note`). Test
+  `chem/boxInput.test.ts` prüft gegen die falschen Bilder der Auswahl.
