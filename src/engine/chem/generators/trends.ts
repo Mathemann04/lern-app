@@ -21,26 +21,27 @@ const ce = (text: string) => String.raw`\ce{${text}}`
 const elName = (el: Element) => `${el.name} ($${ce(el.symbol)}$)`
 const textWrong = (rule: string, text: string): WrongValue => ({ rule, key: text, content: text })
 
-// Name mit Artikel: „der Atomradius", „die Ionisierungsenergie"
-const NAME: Readonly<Record<Property, { readonly the: string; readonly larger: string; readonly unit: string }>> = {
-  radius: { the: 'der Atomradius', larger: 'den größeren Atomradius', unit: 'pm' },
-  ie: { the: 'die erste Ionisierungsenergie', larger: 'die größere erste Ionisierungsenergie', unit: 'kJ/mol' },
-  en: { the: 'die Elektronegativität', larger: 'die größere Elektronegativität', unit: '' },
+// Name mit Artikel: „der Atomradius", „die Ionisierungsenergie"; im Dativ „dem Atomradius"
+const NAME: Readonly<Record<Property, { readonly the: string; readonly dative: string; readonly larger: string; readonly unit: string }>> = {
+  radius: { the: 'der Atomradius', dative: 'dem Atomradius', larger: 'den größeren Atomradius', unit: 'pm' },
+  ie: { the: 'die erste Ionisierungsenergie', dative: 'der ersten Ionisierungsenergie', larger: 'die größere erste Ionisierungsenergie', unit: 'kJ/mol' },
+  en: { the: 'die Elektronegativität', dative: 'der Elektronegativität', larger: 'die größere Elektronegativität', unit: '' },
 }
 const capital = (s: string) => s[0].toUpperCase() + s.slice(1)
 
-// Begründung je Eigenschaft und Richtung
+// Begründung je Eigenschaft und Richtung; effektive Kernladung = was die äußeren Elektronen von der Kernladung spüren,
+// nachdem die inneren einen Teil abgeschirmt haben
 const REASON: Readonly<Record<Property, { readonly period: string; readonly group: string }>> = {
   radius: {
-    period: 'In einer Periode bleibt die Zahl der Schalen gleich, die Kernladung wächst. Der Kern zieht die Elektronen stärker an; die Atome werden nach rechts kleiner.',
+    period: 'In einer Periode bleibt die Zahl der Schalen gleich, die Kernladung wächst, und die inneren Elektronen schirmen kaum mehr ab. Die effektive Kernladung steigt und zieht die Elektronen stärker an; die Atome werden nach rechts kleiner.',
     group: 'In einer Gruppe kommt nach unten jedes Mal eine Schale dazu. Die äußeren Elektronen sind weiter vom Kern entfernt und von den inneren abgeschirmt; die Atome werden größer.',
   },
   ie: {
-    period: 'In einer Periode wächst die Kernladung bei gleicher Zahl von Schalen. Die Valenzelektronen werden fester gehalten; nach rechts braucht man mehr Energie.',
+    period: 'In einer Periode wächst die Kernladung bei gleicher Zahl von Schalen; die effektive Kernladung, die die Valenzelektronen spüren, steigt. Sie werden fester gehalten; nach rechts braucht man mehr Energie.',
     group: 'In einer Gruppe sitzen die Valenzelektronen nach unten immer weiter außen und sind stärker abgeschirmt. Sie lassen sich leichter entfernen.',
   },
   en: {
-    period: 'In einer Periode wächst die Kernladung bei gleicher Zahl von Schalen. Das Atom zieht Bindungselektronen nach rechts stärker an.',
+    period: 'In einer Periode wächst die Kernladung bei gleicher Zahl von Schalen; die effektive Kernladung steigt. Das Atom zieht Bindungselektronen nach rechts stärker an.',
     group: 'In einer Gruppe sind die Valenzelektronen nach unten weiter vom Kern entfernt und stärker abgeschirmt. Das Atom zieht Bindungselektronen schwächer an.',
   },
 }
@@ -56,21 +57,24 @@ const measured = (prop: Property, els: readonly Element[]) =>
 
 // Schritt „Richtung des Trends"
 function directionStep(prop: Property, dir: 'period' | 'group', rng: Rng, focus?: string): GuidedStep | null {
-  const where = dir === 'period' ? 'innerhalb einer Periode von links nach rechts' : 'innerhalb einer Hauptgruppe von oben nach unten'
+  // eigene Worte (docs/CHEMIE.md §9): nicht wie die Frage einer Altklausur „Wie verändert sich … innerhalb einer Periode?"
+  const walk = dir === 'period' ? 'Du gehst in einer Periode Feld für Feld nach rechts.' : 'Du gehst in einer Hauptgruppe Zeile für Zeile nach unten.'
   const up = RULE[prop][dir] === 1
-  const correct = up ? 'Sie nimmt zu.' : 'Sie nimmt ab.'
+  const larger = 'Sie wird größer.'
+  const smaller = 'Sie wird kleiner.'
+  const correct = up ? larger : smaller
   const fix = (s: string) => (prop === 'radius' ? s.replace('Sie', 'Er') : s)
   const choices = stepChoices(
     rng,
     { key: correct, content: fix(correct) },
-    [textWrong(ruleId(prop, dir), fix(up ? 'Sie nimmt ab.' : 'Sie nimmt zu.')), textWrong('chem-tr-constant', fix('Sie bleibt ungefähr gleich.'))],
+    [textWrong(ruleId(prop, dir), fix(up ? smaller : larger)), textWrong('chem-tr-constant', fix('Sie bleibt etwa gleich.'))],
     focus,
   )
   if (choices.length === 0) return null
   return {
     id: 'richtung',
     title: 'Richtung des Trends',
-    question: `Wie ändert sich ${NAME[prop].the} ${where}?`,
+    question: `${walk} Was geschieht mit ${NAME[prop].dative}?`,
     choices,
     hint: dir === 'period' ? 'In einer Periode bleibt die Zahl der Schalen gleich. Was ändert sich von Element zu Element?' : 'In einer Gruppe kommt nach unten jedes Mal eine Schale dazu.',
     explanation: { detailed: REASON[prop][dir], short: fix(correct) },
@@ -84,6 +88,12 @@ function pairs(prop: Property): [Element, Element][] {
   return els.flatMap((a, i) => els.slice(i + 1).filter((b) => comparable(prop, a, b)).map((b) => [a, b] as [Element, Element]))
 }
 
+// Reihen aus den Übungsblättern der Vorlesung erzeugt die App nicht (docs/CHEMIE.md §9: keine Kombinationen aus
+// Klausuren und Übungsblättern); verglichen als sortierte Symbole
+const EXERCISE_LINES: Readonly<Record<Property, readonly string[]>> = { radius: ['Cl-Mg-Na', 'K-Li-Na'], ie: [], en: [] }
+const EXERCISE_IONS: readonly string[] = ['F-Mg-Na-O']
+const setKey = (symbols: readonly string[]) => [...symbols].sort().join('-')
+
 function lines(prop: Property, size: number): Element[][] {
   const els = TREND_ELEMENTS.filter((el) => VALUES[prop][el.symbol] !== undefined)
   const result: Element[][] = []
@@ -93,7 +103,7 @@ function lines(prop: Property, size: number): Element[][] {
     // alle Teilmengen der Größe size, deren Paare alle vergleichbar sind
     const pick = (start: number, chosen: Element[]) => {
       if (chosen.length === size) {
-        if (allComparable(prop, chosen)) result.push([...chosen])
+        if (allComparable(prop, chosen) && !EXERCISE_LINES[prop].includes(setKey(chosen.map((el) => el.symbol)))) result.push([...chosen])
         return
       }
       for (let i = start; i < line.length; i++) pick(i + 1, [...chosen, line[i]])
@@ -213,6 +223,7 @@ function ionTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc
   // vier Ionen nur aus der Reihe wie Neon (bei Argon liegen S²⁻ und Cl⁻ zu nah beieinander)
   const size = level >= 3 && series.like === 'Ne' ? 4 : 3
   const ions = rng.shuffle(rng.shuffle(series.ions).slice(0, size))
+  if (EXERCISE_IONS.includes(setKey(ions.map((i) => i.symbol)))) return null
   const up = [...ions].sort((a, b) => a.radius - b.radius)
   // Abstand der Radien mindestens 3 %
   if (up.some((x, i) => i > 0 && (x.radius - up[i - 1].radius) / up[i - 1].radius < 0.03)) return null

@@ -15,7 +15,8 @@ import { type ChemCalc, type ChemGenerator, type WrongValue, stepChoices, tolera
 //   mit ganzen Werten aus der Aufgabe, Vertiefung Klammern und Kristallwasser mit dem PSE der App,
 //   Klausurniveau Klammern und Kristallwasser mit ganzen Werten
 // - Stoffmenge, Masse und Teilchenzahl (Unterthema „stoffmenge"): n = m : M, m = n · M, N = n · N_A,
-//   ab Vertiefung mit der Molmasse als erstem Schritt, auf Klausurniveau auch Atome eines Elements
+//   ab Vertiefung mit der Molmasse als erstem Schritt, auf Klausurniveau auch Atome eines Elements; dazu
+//   M = m : n aus Masse und Stoffmenge einer Probe (wie auf dem Übungsblatt, mit eigenen Zahlen)
 // Jede Aufgabe nennt die Werte, mit denen sie rechnet (Molmassen der Elemente, N_A).
 
 // N_A = 6,022 · 10²³ 1/mol
@@ -148,10 +149,10 @@ export const given = (r: Rational) => roundSignificant(r).value
 // „schöne" Stoffmengen in mol, aus denen die gegebenen Werte entstehen
 export const NICE_N = ['0.05', '0.1', '0.15', '0.2', '0.25', '0.3', '0.4', '0.5', '0.75', '1.5', '2', '2.5', '3', '4'].map((t) => parseDecimal(t)!)
 
-type Subtype = 'n-from-m' | 'm-from-n' | 'N-from-n' | 'N-from-m' | 'm-from-N' | 'atoms-from-m'
+type Subtype = 'n-from-m' | 'm-from-n' | 'N-from-n' | 'N-from-m' | 'm-from-N' | 'atoms-from-m' | 'M-from-m-n'
 const SUBTYPES: Readonly<Record<1 | 2 | 3, readonly Subtype[]>> = {
-  1: ['n-from-m', 'm-from-n', 'N-from-n'],
-  2: ['n-from-m', 'm-from-n', 'N-from-m'],
+  1: ['n-from-m', 'm-from-n', 'N-from-n', 'M-from-m-n'],
+  2: ['n-from-m', 'm-from-n', 'N-from-m', 'M-from-m-n'],
   3: ['N-from-m', 'm-from-N', 'atoms-from-m'],
 }
 
@@ -205,6 +206,32 @@ function mStep(s: Substance, n: Rational, mass: Rational, values: MassValues, rn
     rng,
     focus,
   )
+}
+
+// M = m : n aus Masse und Stoffmenge einer Probe
+function molarFromStep(m: Rational, n: Rational, rng: Rng, focus?: string): { step: GuidedStep; mass: Rational } | null {
+  const mass = ratDiv(m, n)
+  const line = `M = \\frac{m}{n} = \\frac{${sig(m)}\\,\\mathrm{g}}{${sig(n)}\\,\\mathrm{mol}} ${eqSign(mass)} ${sig(mass)}\\,\\mathrm{g/mol}`
+  const step = amountStep(
+    'molmasse-aus-probe',
+    { value: mass, latex: sig(mass) },
+    [
+      { rule: 'chem-molar-m-times-n', value: ratMul(m, n) },
+      { rule: 'chem-molar-n-over-m', value: ratDiv(n, m) },
+    ],
+    String.raw`\,\mathrm{g/mol}`,
+    {
+      title: 'Molare Masse',
+      question: 'Wie groß ist die molare Masse $M$ des Stoffs?',
+      hint: 'Die Einheit verrät die Rechnung: Gramm je Mol.',
+      explanation: explain(`Die molare Masse ist die Masse geteilt durch die Stoffmenge: $${line}$.`, `$${line}$`),
+      established: line,
+      cards: [CARD_NMM],
+    },
+    rng,
+    focus,
+  )
+  return step && { step, mass }
 }
 
 function particleStep(s: Substance, n: Rational, rng: Rng, focus?: string): { step: GuidedStep; count: Rational } | null {
@@ -327,7 +354,7 @@ function amountTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemC
   const nNice = rng.pick(NICE_N)
   const steps: GuidedStep[] = []
   // Grundlagen: Molmasse steht in der Aufgabe; sonst ist sie der erste Rechenschritt
-  const withMolarStep = level >= 2 && subtype !== 'N-from-n'
+  const withMolarStep = level >= 2 && subtype !== 'N-from-n' && subtype !== 'M-from-m-n'
   if (withMolarStep) {
     const molar = molarSteps(s, values, rng, focus)
     if (!molar) return null
@@ -393,6 +420,16 @@ function amountTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemC
       resultLatex = `${mLatex(s)} ${eqSign(m)} ${sig(m)}\\,\\mathrm{g}`
       break
     }
+    case 'M-from-m-n': {
+      const m = given(ratMul(nNice, mass))
+      const r = molarFromStep(m, nNice, rng, focus)
+      if (!r) return null
+      steps.push(r.step)
+      instruction = 'Berechne die molare Masse'
+      givenLatex = `m = ${sig(m)}\\,\\mathrm{g} \\qquad n = ${sig(nNice)}\\,\\mathrm{mol}`
+      resultLatex = `M ${eqSign(r.mass)} ${sig(r.mass)}\\,\\mathrm{g/mol}`
+      break
+    }
     case 'atoms-from-m': {
       const [symbol, index] = rng.pick(multi(s))
       const m = given(ratMul(nNice, mass))
@@ -412,14 +449,23 @@ function amountTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemC
   }
 
   if (usesExamNumbers(givenLatex)) return null
-  const needsNA = subtype !== 'n-from-m' && subtype !== 'm-from-n'
+  const needsNA = subtype !== 'n-from-m' && subtype !== 'm-from-n' && subtype !== 'M-from-m-n'
   const massNote = withMolarStep ? valuesNote(s, values) : `$M(${ce(s)}) = ${molarLatex(mass, values)}$.`
+  // M aus m und n: Die Probe ist ein unbekannter Stoff; welcher es sein kann, steht erst in der Erklärung
+  const note =
+    subtype === 'M-from-m-n'
+      ? 'Eine Probe eines unbekannten Stoffs wird gewogen; ihre Stoffmenge ist bekannt.'
+      : `${s.name}. ${subtype === 'N-from-n' ? '' : `${massNote} `}${needsNA ? `$N_A = ${NA_LATEX}$.` : ''}`.trim()
+  if (subtype === 'M-from-m-n') {
+    const last = steps[steps.length - 1]
+    steps[steps.length - 1] = { ...last, explanation: { ...last.explanation, detailed: `${last.explanation.detailed} Das passt zum Beispiel zu ${s.name} $${ce(s)}$.` } }
+  }
   return {
     task: {
       ref,
       instruction,
       functionLatex: givenLatex,
-      note: `${s.name}. ${subtype === 'N-from-n' ? '' : `${massNote} `}${needsNA ? `$N_A = ${NA_LATEX}$.` : ''}`.trim(),
+      note,
       steps,
       cards: [...new Set(steps.flatMap((x) => x.cards))],
       resultLatex,
@@ -445,7 +491,7 @@ export const STOFFMENGE_GENERATORS: readonly ChemGenerator[] = [
     free: true,
     part: 'stoffmenge',
     weights: { 1: 0.55, 2: 0.6, 3: 0.7 },
-    errors: [...MOLAR_ERRORS, 'chem-n-times', 'chem-n-inverted', 'chem-m-divided', 'chem-particles-divided', 'chem-atoms-molecules'],
+    errors: [...MOLAR_ERRORS, 'chem-n-times', 'chem-n-inverted', 'chem-m-divided', 'chem-particles-divided', 'chem-atoms-molecules', 'chem-molar-m-times-n', 'chem-molar-n-over-m'],
     generate: amountTask,
   },
 ]

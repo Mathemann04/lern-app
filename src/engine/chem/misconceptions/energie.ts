@@ -30,7 +30,7 @@ export const ENERGIE_MISCONCEPTIONS: readonly MisconceptionName[] = [
   { id: 'chem-mis-en-dg-temp', name: 'ΔG ohne Temperatur', wrongText: 'Die freie Enthalpie einer Reaktion hängt nicht von der Temperatur ab.' },
   { id: 'chem-mis-en-celsius', name: 'Temperatur in °C eingesetzt', wrongText: 'In $\\Delta G = \\Delta H - T \\cdot \\Delta S$ setzt man die Temperatur in °C ein.' },
   { id: 'chem-mis-en-units', name: 'kJ und J gemischt', wrongText: '$\\Delta H$ in kJ und $\\Delta S$ in J/K darf man direkt miteinander verrechnen.' },
-  { id: 'chem-mis-en-k-sign', name: 'Negatives $\\Delta G^{0}$, kleines K', wrongText: 'Ist $\\Delta G^{0}$ negativ, ist $K$ kleiner als 1.' },
-  { id: 'chem-mis-en-lg', name: 'Zehnerlogarithmus statt ln', wrongText: 'Es gilt $\\Delta G^{0} = -R \\cdot T \\cdot \\lg K$.' },
+  { id: 'chem-mis-en-k-sign', name: 'Negatives $\\Delta G^{0}$, kleines $K_{\\mathrm{GG}}$', wrongText: 'Ist $\\Delta G^{0}$ negativ, ist $K_{\\mathrm{GG}}$ kleiner als 1.' },
+  { id: 'chem-mis-en-lg', name: 'Zehnerlogarithmus statt ln', wrongText: 'Es gilt $\\Delta G^{0} = -R \\cdot T \\cdot \\lg K_{\\mathrm{GG}}$.' },
   { id: 'chem-mis-en-cat-dg', name: 'Katalysator macht freiwillig', wrongText: 'Ein Katalysator kann eine Reaktion mit $\\Delta G > 0$ freiwillig machen.' },
 ]

@@ -1,9 +1,10 @@
 import type { Explanation, MatchQuestion, MultiChoice, OrderQuestion, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
-import { FORCE_NAME, forceOf, orderByBoil, zmkById } from '../zmk.ts'
+import { FORCE_NAME, MELT, forceOf, orderByBoil, roomStateOf, zmkById } from '../zmk.ts'
 
 // Wissensfragen zum Thema „Zwischenmolekulare Kräfte“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern: Stufe ·
-// 100 + laufende Nummer; nie neu vergeben. Begriffe wie in der Vorlesung: Van-der-Waals-Kräfte, Dipol-Dipol-Kräfte,
-// Wasserstoffbrücken. Siedepunkte aus chem/zmk.ts (gerundet, Normaldruck); Vergleiche nur mit mindestens 10 K Abstand.
+// 100 + laufende Nummer; nie neu vergeben. Begriffe wie in der Vorlesung: Van-der-Waals-Kräfte, Dipol-Dipol-Wechselwirkungen,
+// Wasserstoffbrückenbindungen (im Fließtext auch kurz Wasserstoffbrücken). „Stärkste Kraft“ heißt immer die stärkste Art,
+// die vorkommt: Bei großen polaren Molekülen können Van-der-Waals-Kräfte insgesamt mehr beitragen (zk-k-chlormethane). Siedepunkte aus chem/zmk.ts (gerundet, Normaldruck); Vergleiche nur mit mindestens 10 K Abstand.
 
 const REF_UEBERSICHT = 'Skript Zwischenmolekulare Kräfte, Folie 2'
 const REF_VDW = 'Skript Zwischenmolekulare Kräfte, Folie 3'
@@ -12,6 +13,8 @@ const REF_DIPOL = 'Skript Zwischenmolekulare Kräfte, Folie 5'
 const REF_BRUECKEN = 'Skript Zwischenmolekulare Kräfte, Folie 6'
 const REF_WASSER = 'Skript Zwischenmolekulare Kräfte, Folie 7'
 const REF_LOESEN = 'Skript Zwischenmolekulare Kräfte, Folie 9'
+const REF_TRENNEN = 'Skript Zwischenmolekulare Kräfte, Folie 10'
+const REF_UNPOLAR = 'Skript Zwischenmolekulare Kräfte, Folie 4'
 
 const r = String.raw
 const w = (id: string, text: string, misconception: string, why?: Explanation): WrongOption => ({ id, text, misconception, ...(why ? { why } : {}) })
@@ -33,7 +36,10 @@ const multiAt = (level: QuestionLevel) => (spec: MultiSpec): MultiChoice => ({
 
 // Zuordnen (N1b): die stärkste Kraft rechnet die Engine (forceOf in chem/zmk.ts) aus den Stoffdaten; nur Stoffe,
 // die die Rechnungen auch fragen (nicht H2S und HI, generators/zmk.ts)
-const zmkLabel = (id: string) => `$\\ce{${id}}$ (${zmkById(id).name})`
+const zmkLabel = (id: string) => {
+  const x = zmkById(id)
+  return `$\\ce{${id}}$ (${x.name}${x.structure ? `, ${x.structure}` : ''})`
+}
 const strongest = (id: string) => FORCE_NAME[forceOf(zmkById(id))]
 const forcePairs = (ids: readonly string[]) => ids.map((id) => ({ id, left: zmkLabel(id), right: strongest(id) }))
 const why = (detailed: string, short: string): Explanation => ({ detailed, short })
@@ -45,8 +51,8 @@ const MATCH_FORCES_BASIC: MatchQuestion = {
   level: 1,
   fact: 'match-strongest-force',
   part: 'kraefte',
-  title: 'Stärkste Kraft',
-  prompt: 'Welche Kraft ist zwischen den Molekülen jeweils am stärksten?',
+  title: 'Stärkste Art der Kraft',
+  prompt: 'Welche ist jeweils die stärkste Art von zwischenmolekularer Kraft, die vorkommt?',
   pairs: forcePairs(['CH4', 'Cl2', 'HCl', 'HBr', 'CH3Cl', 'H2O', 'NH3', 'HF']),
   traps: [
     { pair: 'HCl', right: strongest('H2O'), misconception: 'chem-mis-zk-h-other' },
@@ -56,8 +62,8 @@ const MATCH_FORCES_BASIC: MatchQuestion = {
   ],
   hint: 'Prüfe erst, ob ein H-Atom direkt an N, O oder F sitzt. Wenn nicht: Ist das Molekül ein Dipol?',
   explanation: why(
-    r`Sitzt ein H-Atom direkt an N, O oder F, bilden sich Wasserstoffbrücken: $\ce{H2O}$, $\ce{NH3}$, $\ce{HF}$. Sonst entscheidet, ob das Molekül ein Dipol ist: $\ce{HCl}$, $\ce{HBr}$ und $\ce{CH3Cl}$ sind polar, also Dipol-Dipol-Kräfte. $\ce{CH4}$ und $\ce{Cl2}$ sind unpolar; zwischen ihnen wirken nur Van-der-Waals-Kräfte.`,
-    'H an N, O oder F: Wasserstoffbrücken; sonst Dipol: Dipol-Dipol-Kräfte; unpolar: Van-der-Waals-Kräfte.',
+    r`Sitzt ein H-Atom direkt an N, O oder F, bilden sich Wasserstoffbrücken: $\ce{H2O}$, $\ce{NH3}$, $\ce{HF}$. Sonst entscheidet, ob das Molekül ein Dipol ist: $\ce{HCl}$, $\ce{HBr}$ und $\ce{CH3Cl}$ sind polar, also Dipol-Dipol-Wechselwirkungen. $\ce{CH4}$ und $\ce{Cl2}$ sind unpolar; zwischen ihnen wirken nur Van-der-Waals-Kräfte.`,
+    'H an N, O oder F: Wasserstoffbrücken; sonst Dipol: Dipol-Dipol-Wechselwirkungen; unpolar: Van-der-Waals-Kräfte.',
   ),
   cards: ['zmk-kraefte', 'zmk-wasserstoffbruecken'],
   ref: REF_UEBERSICHT,
@@ -70,8 +76,8 @@ const MATCH_FORCES_EXAM: MatchQuestion = {
   level: 3,
   fact: 'match-strongest-force-exam',
   part: 'kraefte',
-  title: 'Stärkste Kraft',
-  prompt: 'Welche Kraft ist zwischen den Molekülen jeweils am stärksten?',
+  title: 'Stärkste Art der Kraft',
+  prompt: 'Welche ist jeweils die stärkste Art von zwischenmolekularer Kraft, die vorkommt? (Van-der-Waals-Kräfte wirken überall zusätzlich.)',
   pairs: forcePairs(['CCl4', 'C8H18', 'I2', 'CHCl3', 'CH3OCH3', 'CH3COCH3', 'CH3OH', 'C3H7OH']),
   traps: [
     { pair: 'CCl4', right: strongest('CHCl3'), misconception: 'chem-mis-zk-dipole-nonpolar' },
@@ -81,7 +87,7 @@ const MATCH_FORCES_EXAM: MatchQuestion = {
   ],
   hint: 'Sitzt ein H-Atom direkt an N, O oder F? Wenn nicht: Ist das ganze Molekül ein Dipol, nicht nur eine seiner Bindungen?',
   explanation: why(
-    r`In Methanol und Propan-1-ol sitzt ein H-Atom am Sauerstoff: Wasserstoffbrücken. In Dimethylether und Aceton sitzen alle H-Atome am Kohlenstoff; die Moleküle sind aber Dipole, also Dipol-Dipol-Kräfte, ebenso bei $\ce{CHCl3}$. $\ce{CCl4}$ hat zwar polare Bindungen, ist als Tetraeder aber unpolar; wie bei Octan und Iod wirken nur Van-der-Waals-Kräfte.`,
+    r`In Methanol und Propan-1-ol sitzt ein H-Atom am Sauerstoff: Wasserstoffbrücken. In Dimethylether und Aceton sitzen alle H-Atome am Kohlenstoff; die Moleküle sind aber Dipole, also Dipol-Dipol-Wechselwirkungen, ebenso bei $\ce{CHCl3}$. $\ce{CCl4}$ hat zwar polare Bindungen, ist als Tetraeder aber unpolar; wie bei Octan und Iod wirken nur Van-der-Waals-Kräfte. Gefragt ist die Art: Bei großen Molekülen wie $\ce{CHCl3}$ tragen die Van-der-Waals-Kräfte insgesamt sogar mehr bei als die Dipol-Dipol-Wechselwirkungen.`,
     'H an O: Wasserstoffbrücken; Dipol ohne solches H: Dipol-Dipol; unpolares Molekül: Van der Waals.',
   ),
   cards: ['zmk-kraefte', 'zmk-wasserstoffbruecken'],
@@ -134,11 +140,43 @@ const ORDER_HALIDE_BOIL: OrderQuestion = {
   ],
   hint: 'Prüfe zuerst, welches Molekül eine besondere Kraft hat. Für die übrigen entscheidet die Größe.',
   explanation: why(
-    r`Zwischen $\ce{HCl}$-, $\ce{HBr}$- und $\ce{HI}$-Molekülen wirken Dipol-Dipol- und Van-der-Waals-Kräfte; nach unten in der Gruppe werden die Moleküle größer, die Siedepunkte steigen. Fluorwasserstoff bildet als einziger Wasserstoffbrücken (H an F) und siedet deshalb trotz der kleinsten Molmasse am höchsten.`,
+    r`Zwischen $\ce{HCl}$-, $\ce{HBr}$- und $\ce{HI}$-Molekülen wirken Dipol-Dipol-Wechselwirkungen und Van-der-Waals-Kräfte; nach unten in der Gruppe werden die Moleküle größer, die Siedepunkte steigen. Fluorwasserstoff bildet als einziger Wasserstoffbrücken (H an F) und siedet deshalb trotz der kleinsten Molmasse am höchsten.`,
     r`$\ce{HCl} < \ce{HBr} < \ce{HI} < \ce{HF}$: Wasserstoffbrücken vor Größe.`,
   ),
   cards: ['zmk-siedepunkte', 'zmk-wasserstoffbruecken'],
   ref: REF_BRUECKEN,
+}
+
+// Zuordnen (N1b): Zustand bei Raumtemperatur aus Siede- und Schmelzpunkt (roomStateOf in chem/zmk.ts); nur Stoffe mit
+// mindestens 10 K Abstand zu 20 bis 25 °C (Gegenprobe in chem/zmk.test.ts)
+export const ROOM_STATE_IDS = ['F2', 'Cl2', 'Br2', 'I2', 'CH4', 'C4H10', 'C5H12', 'C8H18']
+const roomState = (id: string): string => {
+  const state = roomStateOf(id)
+  if (!state) throw new Error(`Zustand von ${id} bei Raumtemperatur unklar`)
+  return state
+}
+const MATCH_ROOM_STATE: MatchQuestion = {
+  kind: 'match',
+  id: 'zk-v-zuordnen-zustand',
+  no: 218,
+  level: 2,
+  fact: 'match-room-state',
+  part: 'siedepunkte',
+  title: 'Zustand bei Raumtemperatur',
+  prompt: 'In welchem Zustand liegt jeder Stoff bei Raumtemperatur (etwa 20 °C) und Normaldruck vor?',
+  pairs: ROOM_STATE_IDS.map((id) => ({ id, left: `${zmkById(id).name} $\\ce{${id}}$`, right: roomState(id) })),
+  traps: [
+    { pair: 'C5H12', right: roomState('C4H10'), misconception: 'chem-mis-zk-room-state' },
+    { pair: 'Br2', right: roomState('I2'), misconception: 'chem-mis-zk-room-state', why: { detailed: 'Fest ist ein Stoff bei Raumtemperatur nur, wenn auch sein Schmelzpunkt darüber liegt. Brom schmilzt schon weit unter 0 °C.', short: 'Schmelzpunkt mit 20 °C vergleichen.' } },
+    { pair: 'I2', right: roomState('Cl2'), misconception: 'chem-mis-zk-size' },
+  ],
+  hint: 'Alle diese Stoffe sind unpolar; es wirken nur Van-der-Waals-Kräfte. Mit der Größe der Moleküle steigen Siede- und Schmelzpunkt: Liegt der Siedepunkt unter 20 °C, ist der Stoff ein Gas.',
+  explanation: why(
+    `Je größer die Moleküle, desto stärker die Van-der-Waals-Kräfte und desto höher Siede- und Schmelzpunkt. ${ROOM_STATE_IDS.map((id) => `${zmkById(id).name} siedet bei ${zmkById(id).boil} °C`.replace('-', '−')).join(', ')}. Gasförmig sind die Stoffe, die unter 20 °C sieden. Iod schmilzt erst bei ${MELT.I2} °C und ist deshalb fest.`,
+    'Siedepunkt unter 20 °C: gasförmig; Schmelzpunkt über 25 °C: fest; sonst flüssig.',
+  ),
+  cards: ['zmk-siedepunkte'],
+  ref: REF_UNPOLAR,
 }
 
 export const ZMK_BANK: QuestionBank = {
@@ -211,17 +249,17 @@ export const ZMK_BANK: QuestionBank = {
       part: 'kraefte',
       title: 'Stärke',
       prompt: 'Wie ordnen sich die drei Kräfte nach ihrer Stärke (bei ähnlich großen Molekülen)?',
-      correct: 'Van-der-Waals-Kräfte < Dipol-Dipol-Kräfte < Wasserstoffbrücken',
+      correct: 'Van-der-Waals-Kräfte < Dipol-Dipol-Wechselwirkungen < Wasserstoffbrückenbindungen',
       wrong: [
-        w('f1', 'Wasserstoffbrücken < Dipol-Dipol-Kräfte < Van-der-Waals-Kräfte', 'chem-mis-zk-order', {
+        w('f1', 'Wasserstoffbrückenbindungen < Dipol-Dipol-Wechselwirkungen < Van-der-Waals-Kräfte', 'chem-mis-zk-order', {
           detailed: "Die drei Kräfte beruhen auf verschieden großen Ladungsverschiebungen: kurzzeitige Dipole bei allen Teilchen, dauerhafte Dipole bei polaren Molekülen und ein Sonderfall mit H an N, O oder F. Überlege, wo die Verschiebung am größten ist.",
           short: "Größere Ladungsverschiebung, stärkere Kraft.",
         }),
-        w('f2', 'Dipol-Dipol-Kräfte < Van-der-Waals-Kräfte < Wasserstoffbrücken', 'chem-mis-zk-order', {
+        w('f2', 'Dipol-Dipol-Wechselwirkungen < Van-der-Waals-Kräfte < Wasserstoffbrückenbindungen', 'chem-mis-zk-order', {
           detailed: "Die drei Kräfte beruhen auf verschieden großen Ladungsverschiebungen: kurzzeitige Dipole bei allen Teilchen, dauerhafte Dipole bei polaren Molekülen und ein Sonderfall mit H an N, O oder F. Überlege, wo die Verschiebung am größten ist.",
           short: "Größere Ladungsverschiebung, stärkere Kraft.",
         }),
-        w('f3', 'Van-der-Waals-Kräfte < Wasserstoffbrücken < Dipol-Dipol-Kräfte', 'chem-mis-zk-order', {
+        w('f3', 'Van-der-Waals-Kräfte < Wasserstoffbrückenbindungen < Dipol-Dipol-Wechselwirkungen', 'chem-mis-zk-order', {
           detailed: "Die drei Kräfte beruhen auf verschieden großen Ladungsverschiebungen: kurzzeitige Dipole bei allen Teilchen, dauerhafte Dipole bei polaren Molekülen und ein Sonderfall mit H an N, O oder F. Überlege, wo die Verschiebung am größten ist.",
           short: "Größere Ladungsverschiebung, stärkere Kraft.",
         }),
@@ -232,7 +270,7 @@ export const ZMK_BANK: QuestionBank = {
       ],
       hint: 'Welche Kraft wirkt auch zwischen unpolaren Teilchen, und welche ist ein besonders starker Sonderfall?',
       explanation: {
-        detailed: 'Van-der-Waals-Kräfte beruhen auf kurzzeitigen Dipolen und sind am schwächsten. Dipol-Dipol-Kräfte wirken zwischen dauerhaften Dipolen und sind stärker. Wasserstoffbrücken sind ein besonders starker Fall der Dipol-Dipol-Kräfte.',
+        detailed: 'Van-der-Waals-Kräfte beruhen auf kurzzeitigen Dipolen und sind am schwächsten. Dipol-Dipol-Wechselwirkungen wirken zwischen dauerhaften Dipolen und sind stärker. Wasserstoffbrücken sind ein besonders starker Fall der Dipol-Dipol-Wechselwirkungen.',
         short: 'Van der Waals < Dipol-Dipol < Wasserstoffbrücken.',
       },
       cards: ['zmk-kraefte'],
@@ -280,8 +318,8 @@ export const ZMK_BANK: QuestionBank = {
       wrong: [
         w('f1', 'Ein Molekül gibt Elektronen an seinen Nachbarn ab.', 'chem-mis-zk-intra'),
         w('f2', 'Dauerhafte Dipole richten sich aneinander aus.', 'chem-mis-zk-vdw-some', {
-          detailed: 'Dauerhafte Dipole gibt es nur bei polaren Molekülen; ihre Anziehung heißt Dipol-Dipol-Kraft. Van-der-Waals-Kräfte gibt es auch bei unpolaren Teilchen, deren Dipole nur kurz bestehen.',
-          short: 'Dauerhafte Dipole: das sind Dipol-Dipol-Kräfte.',
+          detailed: 'Dauerhafte Dipole gibt es nur bei polaren Molekülen; ihre Anziehung heißt Dipol-Dipol-Wechselwirkung. Van-der-Waals-Kräfte gibt es auch bei unpolaren Teilchen, deren Dipole nur kurz bestehen.',
+          short: 'Dauerhafte Dipole: das sind Dipol-Dipol-Wechselwirkungen.',
         }),
         w('f3', 'Zwei Moleküle teilen sich ein Elektronenpaar.', 'chem-mis-zk-hbond-covalent'),
         w('f4', 'Positive und negative Ionen ziehen sich an.', 'chem-mis-zk-stronger'),
@@ -299,8 +337,8 @@ export const ZMK_BANK: QuestionBank = {
       no: 106,
       fact: 'dipol-dipol-wo',
       part: 'kraefte',
-      title: 'Dipol-Dipol-Kräfte',
-      prompt: 'Welche Moleküle ziehen sich über Dipol-Dipol-Kräfte an?',
+      title: 'Dipol-Dipol-Wechselwirkungen',
+      prompt: 'Welche Moleküle ziehen sich über Dipol-Dipol-Wechselwirkungen an?',
       correct: 'Moleküle, die als Ganzes eine positive und eine negative Seite haben',
       wrong: [
         w('f1', 'alle Moleküle mit polaren Bindungen, auch symmetrisch gebaute', 'chem-mis-zk-dipole-nonpolar'),
@@ -313,7 +351,7 @@ export const ZMK_BANK: QuestionBank = {
       ],
       hint: 'Ein Dipol hat zwei verschieden geladene Enden. Das muss für das ganze Molekül gelten.',
       explanation: {
-        detailed: 'Dipol-Dipol-Kräfte wirken zwischen polaren Molekülen: Das positive Ende eines Moleküls zieht das negative Ende des Nachbarn an. Symmetrisch gebaute Moleküle sind trotz polarer Bindungen keine Dipole.',
+        detailed: 'Dipol-Dipol-Wechselwirkungen wirken zwischen polaren Molekülen: Das positive Ende eines Moleküls zieht das negative Ende des Nachbarn an. Symmetrisch gebaute Moleküle sind trotz polarer Bindungen keine Dipole.',
         short: 'Zwischen polaren Molekülen (Dipolen).',
       },
       cards: ['zmk-kraefte'],
@@ -355,12 +393,12 @@ export const ZMK_BANK: QuestionBank = {
       no: 108,
       fact: 'kraft-methan',
       part: 'kraefte',
-      title: 'Stärkste Kraft',
+      title: 'Zwischenmolekulare Kräfte',
       prompt: r`Welche zwischenmolekularen Kräfte wirken zwischen Methanmolekülen $\ce{CH4}$?`,
       correct: 'nur Van-der-Waals-Kräfte',
       wrong: [
         w('f1', 'Wasserstoffbrücken, weil Methan H-Atome hat', 'chem-mis-zk-any-h'),
-        w('f2', 'Dipol-Dipol-Kräfte', 'chem-mis-zk-dipole-nonpolar'),
+        w('f2', 'Dipol-Dipol-Wechselwirkungen', 'chem-mis-zk-dipole-nonpolar'),
         w('f3', 'gar keine', 'chem-mis-zk-vdw-some'),
         w('f4', 'die Atombindungen zwischen C und H', 'chem-mis-zk-intra'),
       ],
@@ -377,11 +415,11 @@ export const ZMK_BANK: QuestionBank = {
       no: 109,
       fact: 'kraft-ammoniak',
       part: 'kraefte',
-      title: 'Stärkste Kraft',
-      prompt: r`Welche ist die stärkste Kraft zwischen Ammoniakmolekülen $\ce{NH3}$?`,
-      correct: 'Wasserstoffbrücken',
+      title: 'Stärkste Art der Kraft',
+      prompt: r`Welche ist die stärkste Art von Kraft zwischen Ammoniakmolekülen $\ce{NH3}$?`,
+      correct: 'Wasserstoffbrückenbindungen',
       wrong: [
-        w('f1', 'Dipol-Dipol-Kräfte, Wasserstoffbrücken gibt es nur in Wasser', 'chem-mis-zk-water-only', {
+        w('f1', 'Dipol-Dipol-Wechselwirkungen, Wasserstoffbrücken gibt es nur in Wasser', 'chem-mis-zk-water-only', {
           detailed: "Wasserstoffbrücken hängen nicht am Stoff Wasser, sondern daran, woran das H-Atom sitzt.",
           short: "Woran sitzt das H-Atom?",
         }),
@@ -402,13 +440,13 @@ export const ZMK_BANK: QuestionBank = {
       no: 110,
       fact: 'kraft-hcl',
       part: 'kraefte',
-      title: 'Stärkste Kraft',
-      prompt: r`Welche ist die stärkste Kraft zwischen Chlorwasserstoffmolekülen $\ce{HCl}$?`,
-      correct: 'Dipol-Dipol-Kräfte',
+      title: 'Stärkste Art der Kraft',
+      prompt: r`Welche ist die stärkste Art von Kraft zwischen Chlorwasserstoffmolekülen $\ce{HCl}$?`,
+      correct: 'Dipol-Dipol-Wechselwirkungen',
       wrong: [
         w('f1', 'Wasserstoffbrücken, weil Chlor sehr elektronegativ ist', 'chem-mis-zk-h-other'),
         w('f2', 'nur Van-der-Waals-Kräfte', 'chem-mis-zk-vdw-some', {
-          detailed: 'Van-der-Waals-Kräfte wirken zwar auch, sind aber nicht die stärkste Kraft. Chlorwasserstoff ist polar; seine Moleküle ziehen sich zusätzlich als Dipole an.',
+          detailed: 'Van-der-Waals-Kräfte wirken zwar auch, sind aber nicht die einzige Art. Chlorwasserstoff ist polar; seine Moleküle ziehen sich zusätzlich als Dipole an.',
           short: 'Das Molekül ist polar.',
         }),
         w('f3', r`Ionenbindungen zwischen $\ce{H+}$ und $\ce{Cl-}$`, 'chem-mis-zk-stronger'),
@@ -416,8 +454,8 @@ export const ZMK_BANK: QuestionBank = {
       ],
       hint: 'Ist das Molekül polar? Sitzt das H an N, O oder F?',
       explanation: {
-        detailed: 'Chlor ist elektronegativer als Wasserstoff: Das Molekül ist ein Dipol. Für Wasserstoffbrücken müsste das H an N, O oder F sitzen. Die stärkste Kraft sind deshalb Dipol-Dipol-Kräfte.',
-        short: 'Dipol-Dipol-Kräfte.',
+        detailed: 'Chlor ist elektronegativer als Wasserstoff: Das Molekül ist ein Dipol. Für Wasserstoffbrücken müsste das H an N, O oder F sitzen. Die stärkste Art von Kraft sind deshalb Dipol-Dipol-Wechselwirkungen; Van-der-Waals-Kräfte wirken zusätzlich.',
+        short: 'Dipol-Dipol-Wechselwirkungen.',
       },
       cards: ['zmk-kraefte', 'zmk-wasserstoffbruecken'],
       ref: REF_DIPOL,
@@ -677,7 +715,7 @@ export const ZMK_BANK: QuestionBank = {
       ],
       hint: 'Gleiche Molmasse: Die Art der Kraft entscheidet. Wo sitzt in jedem Molekül das H?',
       explanation: {
-        detailed: 'Im Ethanol sitzt ein H am Sauerstoff; die Moleküle bilden Wasserstoffbrücken. Im Dimethylether sitzen alle H am Kohlenstoff; es bleiben Dipol-Dipol-Kräfte. Ethanol siedet bei 78 °C, Dimethylether schon bei etwa −24 °C.',
+        detailed: 'Im Ethanol sitzt ein H am Sauerstoff; die Moleküle bilden Wasserstoffbrücken. Im Dimethylether sitzen alle H am Kohlenstoff; es bleiben Dipol-Dipol-Wechselwirkungen. Ethanol siedet bei 78 °C, Dimethylether schon bei etwa −24 °C.',
         short: 'Ethanol (Wasserstoffbrücken).',
       },
       cards: ['zmk-siedepunkte', 'zmk-wasserstoffbruecken'],
@@ -713,11 +751,11 @@ export const ZMK_BANK: QuestionBank = {
       no: 206,
       fact: 'kraft-ccl4',
       part: 'kraefte',
-      title: 'Stärkste Kraft',
+      title: 'Zwischenmolekulare Kräfte',
       prompt: r`Tetrachlormethan $\ce{CCl4}$ hat vier polare Bindungen. Welche Kräfte wirken zwischen seinen Molekülen?`,
       correct: 'nur Van-der-Waals-Kräfte, weil das Molekül als Ganzes unpolar ist',
       wrong: [
-        w('f1', 'Dipol-Dipol-Kräfte, weil die Bindungen polar sind', 'chem-mis-zk-dipole-nonpolar'),
+        w('f1', 'Dipol-Dipol-Wechselwirkungen, weil die Bindungen polar sind', 'chem-mis-zk-dipole-nonpolar'),
         w('f2', 'Wasserstoffbrücken, weil Chlor sehr elektronegativ ist', 'chem-mis-zk-h-other', {
           detailed: 'Wasserstoffbrücken brauchen ein H-Atom an N, O oder F. Tetrachlormethan hat gar keine H-Atome.',
           short: 'Kein H-Atom vorhanden.',
@@ -740,7 +778,7 @@ export const ZMK_BANK: QuestionBank = {
       part: 'kraefte',
       title: 'Wasserstoffbrücken',
       prompt: 'Was für eine Anziehung ist eine Wasserstoffbrücke?',
-      correct: 'ein besonders starker Fall der Dipol-Dipol-Kräfte zwischen Molekülen',
+      correct: 'ein besonders starker Fall der Dipol-Dipol-Wechselwirkungen zwischen Molekülen',
       wrong: [
         w('f1', 'eine besonders starke Atombindung', 'chem-mis-zk-hbond-covalent', {
           detailed: "Bei einer Atombindung teilen sich zwei Atome ein Elektronenpaar. Bei einer Wasserstoffbrücke gehört das H-Atom weiter fest zu seinem eigenen Molekül.",
@@ -752,8 +790,8 @@ export const ZMK_BANK: QuestionBank = {
       ],
       hint: 'Das H-Atom trägt eine positive Teilladung, das Nachbaratom eine negative.',
       explanation: {
-        detailed: 'Ein H-Atom an N, O oder F trägt eine deutliche positive Teilladung, das freie Paar des Nachbarn eine negative. Ihre Anziehung ist eine besonders starke Dipol-Dipol-Kraft. Ein gemeinsames Elektronenpaar wie in einer Atombindung entsteht nicht.',
-        short: 'Starker Sonderfall der Dipol-Dipol-Kräfte.',
+        detailed: 'Ein H-Atom an N, O oder F trägt eine deutliche positive Teilladung, das freie Paar des Nachbarn eine negative. Ihre Anziehung ist eine besonders starke Dipol-Dipol-Wechselwirkung. Ein gemeinsames Elektronenpaar wie in einer Atombindung entsteht nicht.',
+        short: 'Starker Sonderfall der Dipol-Dipol-Wechselwirkungen.',
       },
       cards: ['zmk-wasserstoffbruecken'],
       ref: REF_BRUECKEN,
@@ -913,11 +951,11 @@ export const ZMK_BANK: QuestionBank = {
       no: 214,
       fact: 'kraft-hf',
       part: 'kraefte',
-      title: 'Stärkste Kraft',
-      prompt: r`Welche ist die stärkste Kraft zwischen Fluorwasserstoffmolekülen $\ce{HF}$?`,
-      correct: 'Wasserstoffbrücken',
+      title: 'Stärkste Art der Kraft',
+      prompt: r`Welche ist die stärkste Art von Kraft zwischen Fluorwasserstoffmolekülen $\ce{HF}$?`,
+      correct: 'Wasserstoffbrückenbindungen',
       wrong: [
-        w('f1', 'Dipol-Dipol-Kräfte wie bei Chlorwasserstoff', 'chem-mis-zk-water-only', {
+        w('f1', 'Dipol-Dipol-Wechselwirkungen wie bei Chlorwasserstoff', 'chem-mis-zk-water-only', {
           detailed: "Wasserstoffbrücken hängen nicht am Stoff Wasser, sondern daran, woran das H-Atom sitzt.",
           short: "Woran sitzt das H-Atom?",
         }),
@@ -987,7 +1025,7 @@ export const ZMK_BANK: QuestionBank = {
           detailed: 'Edelgasatome haben eine volle Außenschale und gehen keine Atombindungen ein. Flüssiges Argon besteht aus einzelnen Atomen.',
           short: 'Edelgase bilden keine Atombindungen.',
         }),
-        w('f4', 'Die Atome ziehen sich über Dipol-Dipol-Kräfte zwischen dauerhaften Dipolen an.', 'chem-mis-zk-dipole-nonpolar', {
+        w('f4', 'Die Atome ziehen sich über Dipol-Dipol-Wechselwirkungen zwischen dauerhaften Dipolen an.', 'chem-mis-zk-dipole-nonpolar', {
           detailed: 'Ein einzelnes Argonatom hat keine dauerhafte positive und negative Seite. Dauerhafte Dipole gibt es nur bei polaren Molekülen.',
           short: 'Argonatome sind keine dauerhaften Dipole.',
         }),
@@ -1028,7 +1066,7 @@ export const ZMK_BANK: QuestionBank = {
       ],
       hint: 'Gesucht ist die falsche Aussage. Prüfe bei jeder, ob die Bedingung für die genannte Kraft erfüllt ist.',
       explanation: {
-        detailed: 'Im Dimethylether sitzen alle H-Atome an Kohlenstoff, keines am Sauerstoff. Untereinander bilden die Moleküle deshalb keine Wasserstoffbrücken, nur Dipol-Dipol- und Van-der-Waals-Kräfte. Die übrigen Aussagen stimmen.',
+        detailed: 'Im Dimethylether sitzen alle H-Atome an Kohlenstoff, keines am Sauerstoff. Untereinander bilden die Moleküle deshalb keine Wasserstoffbrücken, nur Dipol-Dipol-Wechselwirkungen und Van-der-Waals-Kräfte. Die übrigen Aussagen stimmen.',
         short: 'Dimethylether bildet untereinander keine Wasserstoffbrücken.',
       },
       cards: ['zmk-wasserstoffbruecken'],
@@ -1041,7 +1079,7 @@ export const ZMK_BANK: QuestionBank = {
       part: 'siedepunkte',
       title: 'Siedepunkte begründen',
       prompt: r`Warum siedet Fluorwasserstoff $\ce{HF}$ (20 °C) viel höher als Chlorwasserstoff $\ce{HCl}$ (−85 °C), obwohl er kleiner ist?`,
-      correct: 'Fluorwasserstoff bildet Wasserstoffbrücken; Chlorwasserstoff nur Dipol-Dipol-Kräfte.',
+      correct: 'Fluorwasserstoff bildet Wasserstoffbrücken; Chlorwasserstoff nur Dipol-Dipol-Wechselwirkungen.',
       wrong: [
         w('f1', 'Fluorwasserstoff ist das schwerere Molekül.', 'chem-mis-zk-mass-only'),
         w('f2', 'Kleinere Moleküle haben immer stärkere Van-der-Waals-Kräfte.', 'chem-mis-zk-size'),
@@ -1068,7 +1106,7 @@ export const ZMK_BANK: QuestionBank = {
         w('f1', 'Propan-1-ol bildet mehr Wasserstoffbrücken, weil es mehr H-Atome hat.', 'chem-mis-zk-any-h'),
         w('f2', 'Längere Ketten machen die Van-der-Waals-Kräfte schwächer.', 'chem-mis-zk-size'),
         w('f3', 'Bei Propan-1-ol müssen mehr $\\ce{C-C}$-Bindungen beim Sieden brechen.', 'chem-mis-zk-boil-breaks'),
-        w('f4', 'Propan-1-ol ist kein Alkohol und bildet Dipol-Dipol-Kräfte.', 'chem-mis-zk-order'),
+        w('f4', 'Propan-1-ol ist kein Alkohol und bildet Dipol-Dipol-Wechselwirkungen.', 'chem-mis-zk-order'),
       ],
       hint: 'Jedes dieser Moleküle hat genau eine OH-Gruppe. Was unterscheidet sie dann?',
       explanation: {
@@ -1084,7 +1122,7 @@ export const ZMK_BANK: QuestionBank = {
       fact: 'ordnen-gleiche-masse',
       part: 'siedepunkte',
       title: 'Siedepunkte ordnen',
-      prompt: r`Ordne Butan $\ce{C4H10}$, Aceton $\ce{CH3COCH3}$ und Propan-1-ol $\ce{C3H7OH}$ (alle etwa 58 bis 60 g/mol) nach steigendem Siedepunkt.`,
+      prompt: r`Ordne Butan $\ce{C4H10}$, Aceton $\ce{CH3COCH3}$ (polare $\ce{C=O}$-Gruppe, alle H am C) und Propan-1-ol $\ce{C3H7OH}$ (alle etwa 58 bis 60 g/mol) nach steigendem Siedepunkt.`,
       correct: r`$\ce{C4H10} < \ce{CH3COCH3} < \ce{C3H7OH}$`,
       wrong: [
         w('f1', r`$\ce{C3H7OH} < \ce{CH3COCH3} < \ce{C4H10}$`, 'chem-mis-zk-boil-weak'),
@@ -1097,7 +1135,7 @@ export const ZMK_BANK: QuestionBank = {
       ],
       hint: 'Bei gleicher Molmasse entscheidet die Art der stärksten Kraft. Welcher Stoff ist unpolar, welcher polar, welcher bildet Wasserstoffbrücken?',
       explanation: {
-        detailed: 'Butan ist unpolar (Van-der-Waals-Kräfte), Aceton polar ohne H an O (Dipol-Dipol-Kräfte), Propan-1-ol bildet Wasserstoffbrücken. Bei ähnlicher Molmasse ergibt das die Reihenfolge; die Siedepunkte sind etwa −1 °C, 56 °C und 97 °C.',
+        detailed: 'Butan ist unpolar (Van-der-Waals-Kräfte), Aceton polar ohne H an O (Dipol-Dipol-Wechselwirkungen), Propan-1-ol bildet Wasserstoffbrücken. Bei ähnlicher Molmasse ergibt das die Reihenfolge; die Siedepunkte sind etwa −1 °C, 56 °C und 97 °C.',
         short: 'Van der Waals < Dipol-Dipol < Wasserstoffbrücken.',
       },
       cards: ['zmk-siedepunkte'],
@@ -1110,7 +1148,7 @@ export const ZMK_BANK: QuestionBank = {
       part: 'siedepunkte',
       title: 'Siedepunkte begründen',
       prompt: r`Tetrachlormethan $\ce{CCl4}$ ist unpolar und siedet trotzdem höher (77 °C) als das polare Chlormethan $\ce{CH3Cl}$ (−24 °C). Wie passt das zusammen?`,
-      correct: 'Das große Molekül mit vielen Elektronen hat so starke Van-der-Waals-Kräfte, dass sie die Dipol-Dipol-Kräfte des kleinen übertreffen.',
+      correct: 'Das große Molekül mit vielen Elektronen hat so starke Van-der-Waals-Kräfte, dass sie die Dipol-Dipol-Wechselwirkungen des kleinen übertreffen.',
       wrong: [
         w('f1', 'Tetrachlormethan bildet Wasserstoffbrücken.', 'chem-mis-zk-h-other'),
         w('f2', 'Tetrachlormethan ist in Wirklichkeit polar.', 'chem-mis-zk-dipole-nonpolar'),
@@ -1119,7 +1157,7 @@ export const ZMK_BANK: QuestionBank = {
       ],
       hint: 'Die Reihenfolge der Kräfte gilt bei ähnlich großen Molekülen. Wie groß sind die beiden Moleküle?',
       explanation: {
-        detailed: 'Die Reihenfolge Van der Waals < Dipol-Dipol gilt für ähnlich große Moleküle. Tetrachlormethan (154 g/mol) ist dreimal so schwer wie Chlormethan (50,5 g/mol) und hat viel mehr Elektronen. Seine Van-der-Waals-Kräfte werden dadurch stärker als die Dipol-Dipol-Kräfte des kleinen Chlormethans.',
+        detailed: 'Die Reihenfolge Van der Waals < Dipol-Dipol gilt für ähnlich große Moleküle. Tetrachlormethan (154 g/mol) ist dreimal so schwer wie Chlormethan (50,5 g/mol) und hat viel mehr Elektronen. Seine Van-der-Waals-Kräfte werden dadurch stärker als die Dipol-Dipol-Wechselwirkungen des kleinen Chlormethans.',
         short: 'Viel größer: starke Van-der-Waals-Kräfte.',
       },
       cards: ['zmk-siedepunkte'],
@@ -1144,7 +1182,7 @@ export const ZMK_BANK: QuestionBank = {
       ],
       hint: 'Vergleiche mit Schwefelwasserstoff, der ähnlich gebaut ist, aber keine Wasserstoffbrücken bildet.',
       explanation: {
-        detailed: 'Ohne Wasserstoffbrücken blieben Wasser nur schwache Dipol-Dipol- und Van-der-Waals-Kräfte. Nach dem Trend der Gruppe läge sein Siedepunkt weit unter 0 °C; Wasser wäre bei Raumtemperatur ein Gas. Erst die Wasserstoffbrücken machen es flüssig.',
+        detailed: 'Ohne Wasserstoffbrücken blieben Wasser nur schwache Dipol-Dipol-Wechselwirkungen und Van-der-Waals-Kräfte. Nach dem Trend der Gruppe läge sein Siedepunkt weit unter 0 °C; Wasser wäre bei Raumtemperatur ein Gas. Erst die Wasserstoffbrücken machen es flüssig.',
         short: 'Ein Gas.',
       },
       cards: ['zmk-wasser'],
@@ -1263,7 +1301,7 @@ export const ZMK_BANK: QuestionBank = {
         short: 'Ausschütteln mit Hexan.',
       },
       cards: ['zmk-loesen'],
-      ref: REF_LOESEN,
+      ref: REF_TRENNEN,
     }),
     k({
       id: 'zk-k-groesse-gegen-dipol',
@@ -1272,7 +1310,7 @@ export const ZMK_BANK: QuestionBank = {
       part: 'siedepunkte',
       title: 'Siedepunkte begründen',
       prompt: r`Brom $\ce{Br2}$ (unpolar, 160 g/mol) siedet bei 59 °C, Chlorwasserstoff $\ce{HCl}$ (polar, 36,5 g/mol) bei −85 °C. Was folgt daraus?`,
-      correct: 'Bei sehr verschieden großen Molekülen können Van-der-Waals-Kräfte stärker sein als Dipol-Dipol-Kräfte.',
+      correct: 'Bei sehr verschieden großen Molekülen können Van-der-Waals-Kräfte stärker sein als Dipol-Dipol-Wechselwirkungen.',
       wrong: [
         w('f1', 'Brom muss polar sein.', 'chem-mis-zk-dipole-nonpolar', {
           detailed: "Halogenmoleküle bestehen aus zwei gleichen Atomen; sie haben keine polaren Bindungen und werden auch weiter unten in der Gruppe nicht polar.",
@@ -1284,7 +1322,7 @@ export const ZMK_BANK: QuestionBank = {
       ],
       hint: 'Die Reihenfolge der Kräfte gilt für ähnlich große Moleküle. Sind diese beiden ähnlich groß?',
       explanation: {
-        detailed: 'Brom ist mehr als viermal so schwer und hat viel mehr Elektronen. Seine Van-der-Waals-Kräfte werden so stark, dass sie die Dipol-Dipol-Kräfte des kleinen Chlorwasserstoffs übertreffen. Die Reihenfolge der Kräfte gilt nur bei ähnlicher Größe.',
+        detailed: 'Brom ist mehr als viermal so schwer und hat viel mehr Elektronen. Seine Van-der-Waals-Kräfte werden so stark, dass sie die Dipol-Dipol-Wechselwirkungen des kleinen Chlorwasserstoffs übertreffen. Die Reihenfolge der Kräfte gilt nur bei ähnlicher Größe.',
         short: 'Große unpolare Moleküle können höher sieden als kleine polare.',
       },
       cards: ['zmk-siedepunkte'],
@@ -1450,6 +1488,7 @@ export const ZMK_BANK: QuestionBank = {
     // ---- Zuordnen (N1b)
     MATCH_FORCES_BASIC,
     MATCH_FORCES_EXAM,
+    MATCH_ROOM_STATE,
     // ---- Ordnen (N1c)
     ORDER_ALKANE_BOIL,
     ORDER_HALIDE_BOIL,

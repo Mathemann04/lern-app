@@ -14,10 +14,11 @@ export type Force = 'van-der-waals' | 'dipol-dipol' | 'wasserstoffbruecken'
 
 export const FORCE_RANK: Readonly<Record<Force, number>> = { 'van-der-waals': 1, 'dipol-dipol': 2, wasserstoffbruecken: 3 }
 
+// Namen wie im Skript und in den Klausuren
 export const FORCE_NAME: Readonly<Record<Force, string>> = {
   'van-der-waals': 'Van-der-Waals-Kräfte',
-  'dipol-dipol': 'Dipol-Dipol-Kräfte',
-  wasserstoffbruecken: 'Wasserstoffbrücken',
+  'dipol-dipol': 'Dipol-Dipol-Wechselwirkungen',
+  wasserstoffbruecken: 'Wasserstoffbrückenbindungen',
 }
 
 export type ZmkSubstance = {
@@ -35,6 +36,8 @@ export type ZmkSubstance = {
   readonly hasH: boolean
   // Halogen- oder andere H-Verbindung mit H an einem elektronegativen Atom, das keine Brücken bildet (Cl, S, Br, I)
   readonly hOnOther?: true
+  // Hinweis auf den Bau, wo die Summenformel Polarität oder Wasserstoffbrücken nicht zeigt (Klausurniveau)
+  readonly structure?: string
 }
 
 const s = (id: string, name: string, level: 1 | 2 | 3, polar: boolean, hBond: boolean, boil: number, hOnOther = false): ZmkSubstance => ({
@@ -47,6 +50,8 @@ const s = (id: string, name: string, level: 1 | 2 | 3, polar: boolean, hBond: bo
   hasH: /H(?![a-z])/.test(id),
   ...(hOnOther ? { hOnOther: true as const } : {}),
 })
+
+const STRUCTURE_CO = String.raw`polare $\ce{C=O}$-Gruppe, alle H am C`
 
 export const ZMK_SUBSTANCES: readonly ZmkSubstance[] = [
   // Edelgase und Elemente
@@ -90,10 +95,10 @@ export const ZMK_SUBSTANCES: readonly ZmkSubstance[] = [
   s('CH2Cl2', 'Dichlormethan', 1, true, false, 40),
   s('CHCl3', 'Trichlormethan', 1, true, false, 61),
   s('CCl4', 'Tetrachlormethan', 1, false, false, 77),
-  s('CH2O', 'Formaldehyd', 3, true, false, -19),
-  s('CH3CHO', 'Acetaldehyd', 3, true, false, 20),
-  s('CH3COCH3', 'Aceton', 3, true, false, 56),
-  s('CH3OCH3', 'Dimethylether', 3, true, false, -24),
+  { ...s('CH2O', 'Formaldehyd', 3, true, false, -19), structure: STRUCTURE_CO },
+  { ...s('CH3CHO', 'Acetaldehyd', 3, true, false, 20), structure: STRUCTURE_CO },
+  { ...s('CH3COCH3', 'Aceton', 3, true, false, 56), structure: STRUCTURE_CO },
+  { ...s('CH3OCH3', 'Dimethylether', 3, true, false, -24), structure: String.raw`O zwischen zwei C-Atomen, ohne H daran` },
 ]
 
 const BY_ID = new Map(ZMK_SUBSTANCES.map((x) => [x.id, x]))
@@ -104,6 +109,29 @@ export const zmkById = (id: string): ZmkSubstance => {
 }
 
 export const forceOf = (x: ZmkSubstance): Force => (x.hBond ? 'wasserstoffbruecken' : x.polar ? 'dipol-dipol' : 'van-der-waals')
+
+// Schmelzpunkte in °C bei 1013 hPa, ganzzahlig gerundet, nur für die Stoffe der Frage „Zustand bei Raumtemperatur"
+// (Quelle wie bei den Siedepunkten: PubChem „Melting Point", abgeglichen mit dem CRC Handbook; Gegenprobe in
+// zmk.test.ts)
+export const MELT: Readonly<Record<string, number>> = {
+  F2: -220, Cl2: -101, Br2: -7, I2: 114,
+  CH4: -182, C2H6: -183, C3H8: -188, C4H10: -138, C5H12: -130, C6H14: -95, C7H16: -91, C8H18: -57,
+}
+
+// Zustand bei Raumtemperatur (20 bis 25 °C) und Normaldruck; null, wenn Siede- oder Schmelzpunkt näher als 10 K
+// an diesem Bereich liegt oder der Schmelzpunkt fehlt
+export type RoomState = 'gasförmig' | 'flüssig' | 'fest'
+export const ROOM_MIN = 20
+export const ROOM_MAX = 25
+export function roomStateOf(id: string): RoomState | null {
+  const x = zmkById(id)
+  const melt = MELT[id]
+  if (melt === undefined) return null
+  const near = (t: number) => t > ROOM_MIN - 10 && t < ROOM_MAX + 10
+  if (near(x.boil) || near(melt)) return null
+  if (x.boil < ROOM_MIN) return 'gasförmig'
+  return melt > ROOM_MAX ? 'fest' : 'flüssig'
+}
 
 // Molmasse mit den Werten des PSE der App (eine Nachkommastelle), als Zahl
 export const molarMassOf = (x: ZmkSubstance) => ratToNumber(molarMass(parseFormula(x.id), 'pse'))

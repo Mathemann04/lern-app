@@ -94,3 +94,37 @@ describe('Umsatz: Verhältnis 1 : 1 kommt vor', () => {
   })
 })
 
+
+describe('Umsatz: Gleichgewichte und Bedarf aus einem Produkt', () => {
+  it('rechnet nie mit einer Gleichgewichtsreaktion (sie läuft nicht vollständig ab)', () => {
+    const equilibria = REACTIONS.filter((r) => r.equilibrium).map((r) => r.id)
+    expect(equilibria.length).toBeGreaterThan(0)
+    for (const level of [1, 2, 3] as const) {
+      for (let i = 0; i < 1500; i++) {
+        const calc = generatedCalc(COURSE, { level, seed: GENERATED_MIN + i })!
+        if (!calc.form.startsWith('umsatz:')) continue
+        expect(equilibria, calc.substance).not.toContain(calc.substance.split(':')[0])
+        expect(calc.task.functionLatex).not.toContain('<=>')
+      }
+    }
+  })
+
+  it('fragt auch nach dem Bedarf an einem Edukt, wenn ein Produkt gegeben ist (Stoffmenge des Produkts zuerst)', () => {
+    let seen = 0
+    for (const level of [1, 2, 3] as const) {
+      for (let i = 0; i < 1500; i++) {
+        const calc = generatedCalc(COURSE, { level, seed: GENERATED_MIN + i })!
+        if (!calc.form.endsWith(':aus-produkt')) continue
+        seen++
+        const [, left, right] = /\\ce\{(.*?) -> (.*?)\}/.exec(calc.task.functionLatex!)!
+        const givenF = /m\(\\ce\{([^}]+)\}\) = [\d{},]+\\,\\mathrm\{g\}/.exec(calc.task.functionLatex!)![1]
+        const targetF = /\\qquad m\(\\ce\{([^}]+)\}\) = \\,\?/.exec(calc.task.functionLatex!)![1]
+        const formulas = (side: string) => side.split(' + ').map((t) => t.replace(/^\d+ /, ''))
+        expect(formulas(right), calc.task.functionLatex).toContain(givenF)
+        expect(formulas(left), calc.task.functionLatex).toContain(targetF)
+        expect(calc.task.instruction).toBe('Berechne, wie viel gebraucht wird')
+      }
+    }
+    expect(seen).toBeGreaterThan(100)
+  })
+})

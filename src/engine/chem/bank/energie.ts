@@ -4,7 +4,8 @@ import { spontaneousRange } from '../generators/energie.ts'
 // Wissensfragen zum Thema „Energie bei Reaktionen“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern: Stufe · 100 + laufende
 // Nummer; nie neu vergeben. Zahlenwerte wie in chem/thermo.ts (geprüft in generators/energie.test.ts).
 
-const REF = 'Skript Chemische Reaktionen'
+// Fundstelle: Kurzname laut docs/CHEMIE.md §1 mit Folie
+const folie = (n: number) => `Skript Gleichgewicht, Folie ${n}`
 
 const r = String.raw
 const why = (detailed: string, short: string): Explanation => ({ detailed, short })
@@ -81,7 +82,7 @@ const PHASE_SIGNS: MatchQuestion = {
     'Zum beweglicheren Zustand beide positiv, in die Gegenrichtung beide negativ.',
   ),
   cards: ['en-vorzeichen', 'en-entropie'],
-  ref: REF,
+  ref: folie(9),
 }
 
 // Vorzeichen von ΔH und ΔS → Temperaturbereich, in dem die Reaktion freiwillig abläuft; Bereich und typische Fehler wie
@@ -134,11 +135,11 @@ const RANGE_MATCH: MatchQuestion = {
     'Gegensätzliche Vorzeichen: immer oder nie; gleiche Vorzeichen: je nach Temperatur.',
   ),
   cards: ['en-freie-enthalpie'],
-  ref: REF,
+  ref: folie(9),
 }
 
-// Ordnen (N1c): Reaktionen nach K aus der freien Standardenthalpie bei 25 °C, K vom größten zum kleinsten
-// (Gegenprobe mit K = e^(−ΔG⁰/(R·T)) in chem/orderQuestions.test.ts)
+// Ordnen (N1c): Reaktionen nach K_GG aus der freien Standardenthalpie bei 25 °C, K_GG vom größten zum kleinsten
+// (Gegenprobe mit K_GG = e^(−ΔG⁰/(R·T)) in chem/orderQuestions.test.ts)
 export const DG_ORDER_KJ = [-30, -5, 0, 5, 30]
 const DG_ORDER: OrderQuestion = {
   kind: 'order',
@@ -148,21 +149,21 @@ const DG_ORDER: OrderQuestion = {
   fact: 'order-dg-k',
   part: 'freie-enthalpie',
   title: 'Gleichgewichtskonstante aus $\\Delta G^{0}$',
-  prompt: r`Reaktionen bei $25\,^{\circ}\mathrm{C}$ mit verschiedenen freien Standardenthalpien. Ordne sie nach ihrer Gleichgewichtskonstante $K$.`,
+  prompt: r`Reaktionen bei $25\,^{\circ}\mathrm{C}$ mit verschiedenen freien Standardenthalpien. Ordne sie nach ihrer Gleichgewichtskonstante $K_{\mathrm{GG}}$.`,
   items: DG_ORDER_KJ.map((dg) => ({
     id: `dg${dg}`,
     text: dg === 0 ? r`$\Delta G^{0} = 0$` : r`$\Delta G^{0} = ${dg < 0 ? '-' : '+'}${Math.abs(dg)}\,\mathrm{kJ/mol}$`,
   })),
-  first: 'größtes $K$',
-  last: 'kleinstes $K$',
+  first: 'größtes $K_{\\mathrm{GG}}$',
+  last: 'kleinstes $K_{\\mathrm{GG}}$',
   traps: [{ kind: 'reversed', misconception: 'chem-mis-en-k-sign' }],
-  hint: r`Überlege, wie das Vorzeichen von $\Delta G^{0}$ in $K = e^{-\frac{\Delta G^{0}}{R \cdot T}}$ wirkt.`,
+  hint: r`Überlege, wie das Vorzeichen von $\Delta G^{0}$ in $K_{\mathrm{GG}} = e^{-\frac{\Delta G^{0}}{R \cdot T}}$ wirkt.`,
   explanation: why(
-    r`Aus $K = e^{-\frac{\Delta G^{0}}{R \cdot T}}$ folgt: Je negativer $\Delta G^{0}$, desto größer der Exponent und desto größer $K$. Bei $\Delta G^{0} = 0$ ist $K = 1$, bei positivem $\Delta G^{0}$ ist $K < 1$.`,
-    r`Je negativer $\Delta G^{0}$, desto größer $K$.`,
+    r`Aus $K_{\mathrm{GG}} = e^{-\frac{\Delta G^{0}}{R \cdot T}}$ folgt: Je negativer $\Delta G^{0}$, desto größer der Exponent und desto größer $K_{\mathrm{GG}}$. Bei $\Delta G^{0} = 0$ ist $K_{\mathrm{GG}} = 1$, bei positivem $\Delta G^{0}$ ist $K_{\mathrm{GG}} < 1$.`,
+    r`Je negativer $\Delta G^{0}$, desto größer $K_{\mathrm{GG}}$.`,
   ),
   cards: ['en-freie-enthalpie-k'],
-  ref: REF,
+  ref: folie(9),
 }
 
 export const ENERGIE_BANK: QuestionBank = {
@@ -186,7 +187,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: '„endo“ heißt „hinein“. Gewinnen die Stoffe dabei Energie oder verlieren sie welche?',
       explanation: why('Endotherm: Die Stoffe nehmen Wärme aus der Umgebung auf und gewinnen Energie, $\\Delta H > 0$.', 'Positiv.'),
       cards: ['en-vorzeichen'],
-      ref: REF,
+      ref: folie(7),
     }),
     g({
       id: 'en-g-endo-beispiel',
@@ -205,7 +206,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Bei welchem Vorgang muss man Wärme zuführen?',
       explanation: why('Zum Verdampfen müssen die Anziehungskräfte zwischen den Wassermolekülen überwunden werden; dafür braucht es Wärme. Verbrennen, Rosten, Kondensieren und Gefrieren geben Wärme ab.', 'Verdampfen.'),
       cards: ['en-vorzeichen'],
-      ref: REF,
+      ref: folie(7),
     }),
     g({
       id: 'en-g-bildung-def',
@@ -224,7 +225,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Der Name verrät es: Was wird gebildet, und woraus?',
       explanation: why('Die Standardbildungsenthalpie $\\Delta_f H^{0}$ ist die Enthalpieänderung bei der Bildung von 1 mol eines Stoffs aus den Elementen in ihrem Standardzustand, bei 25 °C und 1013 hPa.', 'Bildung von 1 mol aus den Elementen.'),
       cards: ['en-bildungsenthalpie'],
-      ref: REF,
+      ref: folie(8),
     }),
     g({
       id: 'en-g-element-null',
@@ -243,7 +244,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Gesucht ist ein Element, und zwar in seiner stabilsten Form bei 25 °C.',
       explanation: why('Elemente in ihrem Standardzustand haben die Bildungsenthalpie 0. Für Sauerstoff ist das $\\ce{O2(g)}$; Ozon und einzelne Atome sind andere Formen.', r`$\ce{O2(g)}$`),
       cards: ['en-bildungsenthalpie'],
-      ref: REF,
+      ref: folie(8),
     }),
     g({
       id: 'en-g-brom',
@@ -262,7 +263,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Wie sieht Brom bei Raumtemperatur aus?',
       explanation: why('Brom ist bei 25 °C und 1013 hPa eine Flüssigkeit. Nur dieser Standardzustand $\\ce{Br2(l)}$ hat die Bildungsenthalpie 0.', r`$\ce{Br2(l)}$`),
       cards: ['en-bildungsenthalpie'],
-      ref: REF,
+      ref: folie(8),
     }),
     g({
       id: 'en-g-kohlenstoff',
@@ -281,7 +282,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Welche Form ist bei 25 °C und 1013 hPa die stabilste?',
       explanation: why('Bezugspunkt ist die stabilste Form unter Standardbedingungen. Für Kohlenstoff ist das Graphit; Diamant hat einen kleinen positiven Wert.', 'Graphit.'),
       cards: ['en-bildungsenthalpie'],
-      ref: REF,
+      ref: folie(8),
     }),
     g({
       id: 'en-g-formel',
@@ -300,7 +301,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Gesucht ist eine Änderung: nachher minus vorher.',
       explanation: why('$\\Delta H^{0} = \\sum \\nu \\cdot \\Delta_f H^{0}(\\text{Produkte}) - \\sum \\nu \\cdot \\Delta_f H^{0}(\\text{Edukte})$; $\\nu$ ist der Koeffizient.', 'Produkte minus Edukte, mit Koeffizienten.'),
       cards: ['en-reaktionsenthalpie'],
-      ref: REF,
+      ref: folie(8),
     }),
     g({
       id: 'en-g-wasser',
@@ -319,7 +320,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Die Elemente zählen 0; der Koeffizient vor dem Wasser zählt mit.',
       explanation: why('$\\Delta H^{0} = 2 \\cdot (-285{,}8) - 0 = -571{,}6\\,\\mathrm{kJ}$.', r`$-571{,}6\,\mathrm{kJ}$`),
       cards: ['en-reaktionsenthalpie'],
-      ref: REF,
+      ref: folie(8),
     }),
     g({
       id: 'en-g-rueckreaktion',
@@ -338,7 +339,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Was passiert mit „nachher minus vorher“, wenn vorher und nachher tauschen?',
       explanation: why('Die Rückreaktion hat denselben Betrag mit umgekehrtem Vorzeichen: Was die Hinreaktion abgibt, nimmt die Rückreaktion auf.', r`$+91{,}8\,\mathrm{kJ}$`),
       cards: ['en-reaktionsenthalpie'],
-      ref: REF,
+      ref: folie(8),
     }),
     g({
       id: 'en-g-erster-hauptsatz',
@@ -357,7 +358,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Es geht um die Energie: Kann sie neu entstehen oder verschwinden?',
       explanation: why('Erster Hauptsatz: Die Energie bleibt erhalten. Bei einer Reaktion wird sie nur zwischen den Stoffen und der Umgebung verschoben oder in andere Formen umgewandelt.', 'Energie bleibt erhalten.'),
       cards: ['en-hauptsaetze'],
-      ref: REF,
+      ref: folie(10),
     }),
     g({
       id: 'en-g-zweiter-hauptsatz',
@@ -376,7 +377,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Es geht um die Entropie, das Maß für die Unordnung.',
       explanation: why('Zweiter Hauptsatz: Die Entropie eines abgeschlossenen Systems nimmt nicht ab. Vorgänge, die von selbst ablaufen, erhöhen sie.', 'Die Entropie nimmt nicht ab.'),
       cards: ['en-hauptsaetze', 'en-entropie'],
-      ref: REF,
+      ref: folie(10),
     }),
     g({
       id: 'en-g-dritter-hauptsatz',
@@ -395,7 +396,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Der dritte Hauptsatz handelt von der tiefsten denkbaren Temperatur.',
       explanation: why('Dritter Hauptsatz: Der absolute Nullpunkt (0 K, −273,15 °C) lässt sich nicht erreichen, nur annähern.', 'Der absolute Nullpunkt ist unerreichbar.'),
       cards: ['en-hauptsaetze'],
-      ref: REF,
+      ref: folie(10),
     }),
     g({
       id: 'en-g-entropie',
@@ -414,7 +415,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Ein Gas hat mehr Entropie als ein Kristall desselben Stoffs.',
       explanation: why('Die Entropie ist ein Maß für die Unordnung: Je mehr Möglichkeiten die Teilchen haben, sich anzuordnen und zu bewegen, desto größer ist sie.', 'Die Unordnung.'),
       cards: ['en-entropie'],
-      ref: REF,
+      ref: folie(9),
     }),
     g({
       id: 'en-g-verdampfen',
@@ -433,7 +434,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Muss man Wärme zuführen? Werden die Teilchen beweglicher?',
       explanation: why('Zum Verdampfen braucht man Wärme ($\\Delta H > 0$), und die Teilchen eines Gases sind viel freier beweglich ($\\Delta S > 0$).', r`$${DH} > 0$, $${DS} > 0$`),
       cards: ['en-vorzeichen', 'en-entropie'],
-      ref: REF,
+      ref: folie(9),
     }),
     g({
       id: 'en-g-gefrieren',
@@ -452,7 +453,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Gefrieren ist das Gegenteil von Schmelzen.',
       explanation: why('Beim Gefrieren wird Wärme frei ($\\Delta H < 0$), und die Teilchen ordnen sich im Kristall ($\\Delta S < 0$).', r`$${DH} < 0$, $${DS} < 0$`),
       cards: ['en-vorzeichen', 'en-entropie'],
-      ref: REF,
+      ref: folie(9),
     }),
     g({
       id: 'en-g-entropie-zunahme',
@@ -471,7 +472,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Wo werden die Teilchen beweglicher, oder wo entsteht Gas?',
       explanation: why('Entsteht aus einem Feststoff ein Gas, werden Teilchen frei beweglich: Die Unordnung und damit die Entropie nehmen zu.', 'Ein Gas wird frei.'),
       cards: ['en-entropie'],
-      ref: REF,
+      ref: folie(9),
     }),
     g({
       id: 'en-g-wasser-zustaende',
@@ -490,7 +491,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'In welchem Zustand sind die Teilchen am freiesten beweglich?',
       explanation: why('Gasteilchen sind am freiesten beweglich: Wasserdampf hat die größte Entropie ($188{,}8$ gegenüber $70{,}0\\,\\mathrm{J/(mol \\cdot K)}$ für flüssiges Wasser).', 'Als Wasserdampf.'),
       cards: ['en-entropie'],
-      ref: REF,
+      ref: folie(9),
     }),
 
     // ---------------------------------------------------------------- Stufe 2: Vertiefung
@@ -511,7 +512,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Wie liegt Brom bei 25 °C und 1013 hPa vor?',
       explanation: why('Brom ist bei Standardbedingungen flüssig. Gasförmiges Brom entsteht daraus nur unter Energieaufwand; deshalb ist $\\Delta_f H^{0}(\\ce{Br2(g)})$ positiv.', 'Standardzustand flüssig.'),
       cards: ['en-bildungsenthalpie'],
-      ref: REF,
+      ref: folie(8),
     }),
     v({
       id: 'en-v-photosynthese',
@@ -530,7 +531,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Die Photosynthese ist die Rückreaktion der Verbrennung.',
       explanation: why('Die Photosynthese ist die Umkehrung der Verbrennung. Sie hat denselben Betrag von $\\Delta H$ mit positivem Vorzeichen: endotherm, angetrieben vom Licht.', 'Endotherm.'),
       cards: ['en-vorzeichen', 'en-reaktionsenthalpie'],
-      ref: REF,
+      ref: folie(7),
     }),
     v({
       id: 'en-v-koeffizient',
@@ -549,7 +550,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Wasser ist ein Produkt; welcher Koeffizient steht davor?',
       explanation: why('Wasser ist ein Produkt mit Koeffizient 2: $2 \\cdot \\Delta_f H^{0}(\\ce{H2O(l)})$ steht in der Summe der Produkte, also mit positivem Vorzeichen.', 'Zweimal, positiv.'),
       cards: ['en-reaktionsenthalpie'],
-      ref: REF,
+      ref: folie(8),
     }),
     v({
       id: 'en-v-zwei-werte',
@@ -568,7 +569,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Was unterscheidet die beiden Stoffe, und was kostet der Übergang?',
       explanation: why('Der Unterschied von $44\\,\\mathrm{kJ/mol}$ ist die Wärme, die man zum Verdampfen braucht. Deshalb muss man den Wert nehmen, der zum Zustand in der Gleichung passt.', 'Zwei Zustände, zwei Werte.'),
       cards: ['en-reaktionsenthalpie'],
-      ref: REF,
+      ref: folie(8),
     }),
     v({
       id: 'en-v-methan',
@@ -587,7 +588,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Produkte mit Koeffizienten minus Edukte; achte auf den Zustand des Wassers.',
       explanation: why('$\\Delta H^{0} = (-393{,}5 + 2 \\cdot (-285{,}8)) - (-74{,}9) = -890{,}2\\,\\mathrm{kJ}$.', r`$-890{,}2\,\mathrm{kJ}$`),
       cards: ['en-reaktionsenthalpie'],
-      ref: REF,
+      ref: folie(8),
     }),
     v({
       id: 'en-v-halbe-gleichung',
@@ -606,7 +607,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Die Reaktionsenthalpie gilt für die Gleichung, wie sie dasteht. Was ändert sich, wenn nur halb so viel umgesetzt wird?',
       explanation: why('Halbiert man alle Koeffizienten, halbiert sich auch $\\Delta H^{0}$: $-285{,}8\\,\\mathrm{kJ}$, genau die Bildungsenthalpie von flüssigem Wasser.', r`$-285{,}8\,\mathrm{kJ}$`),
       cards: ['en-reaktionsenthalpie'],
-      ref: REF,
+      ref: folie(8),
     }),
     v({
       id: 'en-v-elemente-fehlen',
@@ -625,7 +626,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Welchen Bezugswert haben Elemente im Standardzustand?',
       explanation: why('Elemente in ihrem Standardzustand haben $\\Delta_f H^{0} = 0$. Sie stehen zwar in der Gleichung, ändern die Summe aber nicht.', 'Sein Wert ist 0.'),
       cards: ['en-bildungsenthalpie', 'en-reaktionsenthalpie'],
-      ref: REF,
+      ref: folie(8),
     }),
     v({
       id: 'en-v-ds-reaktion',
@@ -644,7 +645,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Zähle bei jeder Gleichung die Gasteilchen links und rechts (mit Koeffizienten).',
       explanation: why('Bei der Ammoniaksynthese werden aus $4$ Gasteilchen $2$: Die Unordnung nimmt ab, $\\Delta S < 0$. Bei den anderen entsteht Gas.', r`Die Ammoniaksynthese.`),
       cards: ['en-entropie'],
-      ref: REF,
+      ref: folie(9),
     }),
     v({
       id: 'en-v-gas-regel',
@@ -663,7 +664,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Welche Teilchen haben besonders viel Entropie?',
       explanation: why('Gase haben viel mehr Entropie als Flüssigkeiten und Feststoffe. Entsteht mehr Gas (mit Koeffizienten gezählt), ist meist $\\Delta S > 0$, sonst $\\Delta S < 0$.', 'Änderung der Stoffmenge an Gas.'),
       cards: ['en-entropie'],
-      ref: REF,
+      ref: folie(9),
     }),
     v({
       id: 'en-v-kuehlschrank',
@@ -682,7 +683,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Wohin geht die Wärme, die das Wasser beim Gefrieren abgibt?',
       explanation: why('Der zweite Hauptsatz gilt für abgeschlossene Systeme. Das Wasser gibt Wärme an die Umgebung ab; deren Entropie wächst stärker, als die des Wassers sinkt.', 'Nein, die Umgebung zählt mit.'),
       cards: ['en-hauptsaetze'],
-      ref: REF,
+      ref: folie(10),
     }),
     v({
       id: 'en-v-gibbs',
@@ -701,7 +702,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Mehr Unordnung soll $\\Delta G$ kleiner machen. Welches Vorzeichen braucht der Entropie-Term?',
       explanation: why('$\\Delta G = \\Delta H - T \\cdot \\Delta S$; $T$ in Kelvin.', r`$${DG} = ${DH} - T \cdot ${DS}$`),
       cards: ['en-freie-enthalpie'],
-      ref: REF,
+      ref: folie(9),
     }),
     v({
       id: 'en-v-exergonisch',
@@ -710,17 +711,17 @@ export const ENERGIE_BANK: QuestionBank = {
       part: 'freie-enthalpie',
       title: 'Exergonisch',
       prompt: 'Was bedeutet „exergonisch“?',
-      correct: r`$${DG} < 0$: Die Reaktion läuft freiwillig ab.`,
+      correct: r`$${DG} < 0$: Die Reaktion läuft freiwillig (spontan) ab.`,
       wrong: [
-        w('f1', r`$${DG} > 0$: Die Reaktion läuft freiwillig ab.`, 'chem-mis-en-exergonic-sign'),
+        w('f1', r`$${DG} > 0$: Die Reaktion läuft freiwillig (spontan) ab.`, 'chem-mis-en-exergonic-sign'),
         w('f2', r`$${DH} < 0$: Bei der Reaktion wird Wärme frei.`, 'chem-mis-en-exergonic-exotherm'),
         w('f3', r`$${DS} > 0$: Die Unordnung nimmt zu.`, 'chem-mis-en-exergonic-exotherm', why('Die Entropie allein entscheidet nicht; „exergonisch“ bezieht sich auf die freie Enthalpie, in die $\\Delta H$ und $\\Delta S$ eingehen.', 'Es geht um die freie Enthalpie.')),
         w('f4', 'Die Reaktion läuft besonders schnell ab.', 'chem-mis-en-spont-fast'),
       ],
       hint: '„exergonisch“ gehört zu $\\Delta G$, „exotherm“ zu $\\Delta H$.',
-      explanation: why('Exergonisch heißt $\\Delta G < 0$: Die Reaktion läuft freiwillig ab. Endergonisch heißt $\\Delta G > 0$.', r`$${DG} < 0$`),
+      explanation: why('Exergonisch heißt $\\Delta G < 0$: Die Reaktion läuft freiwillig ab; im Skript heißt das spontan. Endergonisch heißt $\\Delta G > 0$.', r`$${DG} < 0$`),
       cards: ['en-freie-enthalpie'],
-      ref: REF,
+      ref: folie(9),
     }),
     v({
       id: 'en-v-exergon-exotherm',
@@ -739,7 +740,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: r`Was steht in $${DG} = ${DH} - T \cdot ${DS}$ außer $${DH}$?`,
       explanation: why('Exergonisch bezieht sich auf $\\Delta G$, exotherm auf $\\Delta H$. Bei großem positivem $\\Delta S$ und hoher Temperatur kann $\\Delta G$ negativ sein, obwohl $\\Delta H$ positiv ist.', 'Nein.'),
       cards: ['en-freie-enthalpie'],
-      ref: REF,
+      ref: folie(9),
     }),
     v({
       id: 'en-v-eis-schmilzt',
@@ -758,7 +759,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Gesucht ist ein Vorgang, der Wärme aufnimmt und bei Raumtemperatur von selbst passiert.',
       explanation: why('Schmelzen nimmt Wärme auf ($\\Delta H > 0$), erhöht aber die Unordnung ($\\Delta S > 0$). Oberhalb von 0 °C überwiegt $T \\cdot \\Delta S$, und $\\Delta G$ ist negativ.', 'Eis schmilzt.'),
       cards: ['en-freie-enthalpie'],
-      ref: REF,
+      ref: folie(9),
     }),
     v({
       id: 'en-v-temperatur-dg',
@@ -777,7 +778,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: r`Welcher Teil von $${DG} = ${DH} - T \cdot ${DS}$ hängt von $T$ ab?`,
       explanation: why('$\\Delta H$ und $\\Delta S$ ändern sich mit der Temperatur kaum, der Beitrag $T \\cdot \\Delta S$ aber wächst mit $T$. So kann er das Vorzeichen von $\\Delta G$ umdrehen.', r`$T \cdot ${DS}$ wächst mit $T$.`),
       cards: ['en-freie-enthalpie'],
-      ref: REF,
+      ref: folie(9),
     }),
     v({
       id: 'en-v-diamant',
@@ -796,7 +797,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Sagt $\\Delta G$ etwas darüber, wie schnell eine Reaktion läuft?',
       explanation: why('$\\Delta G$ sagt nur, ob ein Vorgang von selbst ablaufen kann. Wie schnell, hängt von der Aktivierungsenergie ab; bei Diamant ist sie so hoch, dass man nichts bemerkt.', 'Extrem langsam.'),
       cards: ['en-freie-enthalpie'],
-      ref: REF,
+      ref: folie(9),
     }),
     v({
       id: 'en-v-katalysator',
@@ -815,7 +816,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Ändert ein Katalysator Edukte oder Produkte?',
       explanation: why('Ein Katalysator eröffnet nur einen schnelleren Weg. Edukte und Produkte und damit $\\Delta G$ bleiben gleich; eine endergonische Reaktion bleibt endergonisch.', 'Nein.'),
       cards: ['en-freie-enthalpie'],
-      ref: REF,
+      ref: folie(9),
     }),
     v({
       id: 'en-v-kelvin',
@@ -834,7 +835,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Thermodynamische Formeln brauchen die absolute Temperatur.',
       explanation: why('$T = 25 + 273{,}15 = 298{,}15\\,\\mathrm{K}$.', r`$298{,}15\,\mathrm{K}$`),
       cards: ['en-freie-enthalpie'],
-      ref: REF,
+      ref: folie(9),
     }),
 
     // ---------------------------------------------------------------- Stufe 3: Klausurniveau
@@ -855,7 +856,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: r`Setze $${DG} = 0$ und stelle nach $T$ um; gleiche vorher kJ und J an.`,
       explanation: why('$T = \\frac{179\\,200\\,\\mathrm{J}}{160{,}2\\,\\mathrm{J/K}} \\approx 1120\\,\\mathrm{K}$. Beide Werte sind positiv: Oberhalb dieser Temperatur überwiegt $T \\cdot \\Delta S$, und $\\Delta G$ wird negativ.', r`Oberhalb von etwa $1120\,\mathrm{K}$.`),
       cards: ['en-grenztemperatur'],
-      ref: REF,
+      ref: folie(9),
     }),
     k({
       id: 'en-k-ammoniak',
@@ -874,26 +875,26 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Beide Werte sind negativ. Wann überwiegt $\\Delta H$, wann $T \\cdot \\Delta S$?',
       explanation: why('$T = \\frac{-91\\,800\\,\\mathrm{J}}{-198{,}1\\,\\mathrm{J/K}} \\approx 463\\,\\mathrm{K}$. Bei niedriger Temperatur überwiegt das negative $\\Delta H$; darüber macht $-T \\cdot \\Delta S$ das $\\Delta G$ positiv.', r`Unterhalb von etwa $463\,\mathrm{K}$.`),
       cards: ['en-grenztemperatur'],
-      ref: REF,
+      ref: folie(9),
     }),
     k({
       id: 'en-k-k-vorzeichen',
       no: 303,
       fact: 'k-from-dg-sign',
       part: 'freie-enthalpie',
-      title: 'Freie Standardenthalpie und K',
-      prompt: r`Für eine Reaktion gilt $${DG}^{0} < 0$. Was folgt für die Gleichgewichtskonstante $K$?`,
-      correct: r`$K > 1$; im Gleichgewicht überwiegen die Produkte.`,
+      title: 'Freie Standardenthalpie und $K_{\\mathrm{GG}}$',
+      prompt: r`Für eine Reaktion gilt $${DG}^{0} < 0$. Was folgt für die Gleichgewichtskonstante $K_{\mathrm{GG}}$?`,
+      correct: r`$K_{\mathrm{GG}} > 1$; das Gleichgewicht liegt eher auf der Seite der Produkte.`,
       wrong: [
-        w('f1', r`$K < 1$; im Gleichgewicht überwiegen die Edukte.`, 'chem-mis-en-k-sign', why('Setze ein negatives $\\Delta G^{0}$ in $\\Delta G^{0} = -R \\cdot T \\cdot \\ln K$ ein und prüfe das Vorzeichen von $\\ln K$.', 'Vorzeichen von ln K prüfen.')),
-        w('f2', r`$K = 0$`, 'chem-mis-en-k-sign', why('$K$ ist ein Quotient aus Konzentrationen und damit nie 0, solange Produkte vorliegen.', 'K ist nie 0.')),
-        w('f3', r`$K < 0$`, 'chem-mis-en-k-sign', why('$K$ ist ein Quotient aus positiven Konzentrationen und damit immer positiv.', 'K ist immer positiv.')),
-        w('f4', r`Über $K$ sagt $${DG}^{0}$ nichts.`, 'chem-mis-en-k-sign', why('Es gilt $\\Delta G^{0} = -R \\cdot T \\cdot \\ln K$: Beide Größen hängen fest zusammen.', 'Sie hängen fest zusammen.')),
+        w('f1', r`$K_{\mathrm{GG}} < 1$; das Gleichgewicht liegt eher auf der Seite der Edukte.`, 'chem-mis-en-k-sign', why('Setze ein negatives $\\Delta G^{0}$ in $\\Delta G^{0} = -R \\cdot T \\cdot \\ln K_{\\mathrm{GG}}$ ein und prüfe das Vorzeichen von $\\ln K_{\\mathrm{GG}}$.', 'Vorzeichen von $\\ln K_{\\mathrm{GG}}$ prüfen.')),
+        w('f2', r`$K_{\mathrm{GG}} = 0$`, 'chem-mis-en-k-sign', why('$K_{\\mathrm{GG}}$ ist ein Quotient aus Konzentrationen und damit nie 0, solange Produkte vorliegen.', '$K_{\\mathrm{GG}}$ ist nie 0.')),
+        w('f3', r`$K_{\mathrm{GG}} < 0$`, 'chem-mis-en-k-sign', why('$K_{\\mathrm{GG}}$ ist ein Quotient aus positiven Konzentrationen und damit immer positiv.', '$K_{\\mathrm{GG}}$ ist immer positiv.')),
+        w('f4', r`Über $K_{\mathrm{GG}}$ sagt $${DG}^{0}$ nichts.`, 'chem-mis-en-k-sign', why('Es gilt $\\Delta G^{0} = -R \\cdot T \\cdot \\ln K_{\\mathrm{GG}}$: Beide Größen hängen fest zusammen.', 'Sie hängen fest zusammen.')),
       ],
-      hint: r`Aus $${DG}^{0} = -R \cdot T \cdot \ln K$: Welches Vorzeichen hat dann $\ln K$?`,
-      explanation: why('Ist $\\Delta G^{0}$ negativ, ist $\\ln K$ positiv und damit $K > 1$: Die Produkte überwiegen.', r`$K > 1$`),
+      hint: r`Aus $${DG}^{0} = -R \cdot T \cdot \ln K_{\mathrm{GG}}$: Welches Vorzeichen hat dann $\ln K_{\mathrm{GG}}$?`,
+      explanation: why('Ist $\\Delta G^{0}$ negativ, ist $\\ln K_{\\mathrm{GG}}$ positiv und damit $K_{\\mathrm{GG}} > 1$: Die Lage des Gleichgewichts ist eher auf der Seite der Produkte.', r`$K_{\mathrm{GG}} > 1$`),
       cards: ['en-freie-enthalpie-k'],
-      ref: REF,
+      ref: folie(9),
     }),
     k({
       id: 'en-k-k-eins',
@@ -901,37 +902,37 @@ export const ENERGIE_BANK: QuestionBank = {
       fact: 'k-equals-one',
       part: 'freie-enthalpie',
       title: 'Freie Standardenthalpie gleich 0',
-      prompt: r`Was gilt für $K$, wenn $${DG}^{0} = 0$ ist?`,
-      correct: r`$K = 1$`,
+      prompt: r`Was gilt für $K_{\mathrm{GG}}$, wenn $${DG}^{0} = 0$ ist?`,
+      correct: r`$K_{\mathrm{GG}} = 1$`,
       wrong: [
-        w('f1', r`$K = 0$`, 'chem-mis-en-k-sign', why('Aus $\\Delta G^{0} = 0$ folgt $\\ln K = 0$. Überlege, welche Zahl den natürlichen Logarithmus 0 hat; 0 selbst hat gar keinen.', 'Welche Zahl hat den Logarithmus 0?')),
-        w('f2', r`$K = 10$`, 'chem-mis-en-lg', why('Aus $\\Delta G^{0} = 0$ folgt $\\ln K = 0$. Überlege, welche Zahl den natürlichen Logarithmus 0 hat.', 'Welche Zahl hat den Logarithmus 0?')),
-        w('f3', r`$K$ ist unendlich groß.`, 'chem-mis-en-k-sign', why('Ein unendlich großes $K$ gehörte zu einem unendlich negativen $\\Delta G^{0}$. Hier ist $\\Delta G^{0}$ genau 0.', 'Das gehörte zu einem anderen $\\Delta G^{0}$.')),
-        w('f4', r`$K = e$`, 'chem-mis-en-k-sign', why('$K = e$ hieße $\\ln K = 1$. Aus $\\Delta G^{0} = 0$ folgt aber ein anderer Wert für $\\ln K$.', 'ln K wäre 1.')),
+        w('f1', r`$K_{\mathrm{GG}} = 0$`, 'chem-mis-en-k-sign', why('Aus $\\Delta G^{0} = 0$ folgt $\\ln K_{\\mathrm{GG}} = 0$. Überlege, welche Zahl den natürlichen Logarithmus 0 hat; 0 selbst hat gar keinen.', 'Welche Zahl hat den Logarithmus 0?')),
+        w('f2', r`$K_{\mathrm{GG}} = 10$`, 'chem-mis-en-lg', why('Aus $\\Delta G^{0} = 0$ folgt $\\ln K_{\\mathrm{GG}} = 0$. Überlege, welche Zahl den natürlichen Logarithmus 0 hat.', 'Welche Zahl hat den Logarithmus 0?')),
+        w('f3', r`$K_{\mathrm{GG}}$ ist unendlich groß.`, 'chem-mis-en-k-sign', why('Ein unendlich großes $K_{\\mathrm{GG}}$ gehörte zu einem unendlich negativen $\\Delta G^{0}$. Hier ist $\\Delta G^{0}$ genau 0.', 'Das gehörte zu einem anderen $\\Delta G^{0}$.')),
+        w('f4', r`$K_{\mathrm{GG}} = e$`, 'chem-mis-en-k-sign', why('$K_{\\mathrm{GG}} = e$ hieße $\\ln K_{\\mathrm{GG}} = 1$. Aus $\\Delta G^{0} = 0$ folgt aber ein anderer Wert für $\\ln K_{\\mathrm{GG}}$.', '$\\ln K_{\\mathrm{GG}}$ wäre 1.')),
       ],
-      hint: r`Setze $${DG}^{0} = 0$ in $${DG}^{0} = -R \cdot T \cdot \ln K$ ein.`,
-      explanation: why('$0 = -R \\cdot T \\cdot \\ln K$ heißt $\\ln K = 0$, also $K = e^{0} = 1$: Edukte und Produkte sind im Massenwirkungsgesetz ausgeglichen.', r`$K = 1$`),
+      hint: r`Setze $${DG}^{0} = 0$ in $${DG}^{0} = -R \cdot T \cdot \ln K_{\mathrm{GG}}$ ein.`,
+      explanation: why('$0 = -R \\cdot T \\cdot \\ln K_{\\mathrm{GG}}$ heißt $\\ln K_{\\mathrm{GG}} = 0$, also $K_{\\mathrm{GG}} = e^{0} = 1$: Zähler und Nenner des Massenwirkungsgesetzes sind gleich groß.', r`$K_{\mathrm{GG}} = 1$`),
       cards: ['en-freie-enthalpie-k'],
-      ref: REF,
+      ref: folie(9),
     }),
     k({
       id: 'en-k-formel-k',
       no: 305,
       fact: 'dg-k-formula',
       part: 'freie-enthalpie',
-      title: 'Freie Standardenthalpie und K',
-      prompt: r`Welcher Zusammenhang besteht zwischen $${DG}^{0}$ und der Gleichgewichtskonstante $K$?`,
-      correct: r`$${DG}^{0} = -R \cdot T \cdot \ln K$`,
+      title: 'Freie Standardenthalpie und $K_{\\mathrm{GG}}$',
+      prompt: r`Welcher Zusammenhang besteht zwischen $${DG}^{0}$ und der Gleichgewichtskonstante $K_{\mathrm{GG}}$?`,
+      correct: r`$${DG}^{0} = -R \cdot T \cdot \ln K_{\mathrm{GG}}$`,
       wrong: [
-        w('f1', r`$${DG}^{0} = R \cdot T \cdot \ln K$`, 'chem-mis-en-k-sign', why('Ein negatives $\\Delta G^{0}$ soll zu einem großen $K$ gehören. Prüfe, ob das mit diesem Vorzeichen herauskommt.', 'Passt das Vorzeichen?')),
-        w('f2', r`$${DG}^{0} = -R \cdot T \cdot \lg K$`, 'chem-mis-en-lg'),
-        w('f3', r`$${DG}^{0} = -R \cdot T \cdot K$`, 'chem-mis-en-k-sign', why('$K$ kann über viele Zehnerpotenzen reichen; in die Beziehung geht deshalb sein Logarithmus ein.', 'Der Logarithmus von K.')),
-        w('f4', r`$${DG}^{0} = -\frac{\ln K}{R \cdot T}$`, 'chem-mis-en-units', why('$\\Delta G^{0}$ ist eine Energie pro mol; $R \\cdot T$ hat diese Einheit, ein Quotient mit $R \\cdot T$ im Nenner hätte sie nicht.', 'Prüfe die Einheiten.')),
+        w('f1', r`$${DG}^{0} = R \cdot T \cdot \ln K_{\mathrm{GG}}$`, 'chem-mis-en-k-sign', why('Ein negatives $\\Delta G^{0}$ soll zu einem großen $K_{\\mathrm{GG}}$ gehören. Prüfe, ob das mit diesem Vorzeichen herauskommt.', 'Passt das Vorzeichen?')),
+        w('f2', r`$${DG}^{0} = -R \cdot T \cdot \lg K_{\mathrm{GG}}$`, 'chem-mis-en-lg'),
+        w('f3', r`$${DG}^{0} = -R \cdot T \cdot K_{\mathrm{GG}}$`, 'chem-mis-en-k-sign', why('$K_{\\mathrm{GG}}$ kann über viele Zehnerpotenzen reichen; in die Beziehung geht deshalb sein Logarithmus ein.', 'Der Logarithmus von $K_{\\mathrm{GG}}$.')),
+        w('f4', r`$${DG}^{0} = -\frac{\ln K_{\mathrm{GG}}}{R \cdot T}$`, 'chem-mis-en-units', why('$\\Delta G^{0}$ ist eine Energie pro mol; $R \\cdot T$ hat diese Einheit, ein Quotient mit $R \\cdot T$ im Nenner hätte sie nicht.', 'Prüfe die Einheiten.')),
       ],
-      hint: 'Ein negatives $\\Delta G^{0}$ soll zu einem großen $K$ gehören.',
-      explanation: why('$\\Delta G^{0} = -R \\cdot T \\cdot \\ln K$ mit dem natürlichen Logarithmus, $R = 8{,}314\\,\\mathrm{J/(mol \\cdot K)}$ und $T$ in Kelvin.', r`$${DG}^{0} = -R \cdot T \cdot \ln K$`),
+      hint: 'Ein negatives $\\Delta G^{0}$ soll zu einem großen $K_{\\mathrm{GG}}$ gehören.',
+      explanation: why('$\\Delta G^{0} = -R \\cdot T \\cdot \\ln K_{\\mathrm{GG}}$ mit dem natürlichen Logarithmus, $R = 8{,}314\\,\\mathrm{J/(mol \\cdot K)}$ und $T$ in Kelvin.', r`$${DG}^{0} = -R \cdot T \cdot \ln K_{\mathrm{GG}}$`),
       cards: ['en-freie-enthalpie-k'],
-      ref: REF,
+      ref: folie(9),
     }),
     k({
       id: 'en-k-einheiten',
@@ -950,7 +951,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: '$1\\,\\mathrm{kJ} = 1000\\,\\mathrm{J}$.',
       explanation: why('Beide Größen müssen dieselbe Energie-Einheit haben: entweder $\\Delta S$ in kJ/K (durch 1000) oder $\\Delta H$ in J (mal 1000).', 'Einheiten angleichen.'),
       cards: ['en-freie-enthalpie'],
-      ref: REF,
+      ref: folie(9),
     }),
     k({
       id: 'en-k-jede-temperatur',
@@ -969,7 +970,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: r`Welches Vorzeichen haben $${DH}$ und $-T \cdot ${DS}$?`,
       explanation: why('$\\Delta H < 0$ und $-T \\cdot \\Delta S < 0$: Beide Beiträge machen $\\Delta G$ negativ, bei jeder Temperatur.', 'Bei jeder Temperatur.'),
       cards: ['en-freie-enthalpie'],
-      ref: REF,
+      ref: folie(9),
     }),
     k({
       id: 'en-k-keine-temperatur',
@@ -988,7 +989,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: r`Welches Vorzeichen haben $${DH}$ und $-T \cdot ${DS}$?`,
       explanation: why('$\\Delta H > 0$ und $-T \\cdot \\Delta S > 0$: Beide Beiträge machen $\\Delta G$ positiv, bei jeder Temperatur. Die Reaktion läuft nie freiwillig ab.', 'Bei keiner Temperatur.'),
       cards: ['en-freie-enthalpie'],
-      ref: REF,
+      ref: folie(9),
     }),
     k({
       id: 'en-k-ds-berechnen',
@@ -1007,7 +1008,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Wie bei der Enthalpie, mit einem Unterschied bei den Elementen.',
       explanation: why('$\\Delta S^{0} = \\sum \\nu \\cdot S^{0}(\\text{Produkte}) - \\sum \\nu \\cdot S^{0}(\\text{Edukte})$. Anders als bei der Bildungsenthalpie haben auch Elemente einen Wert ungleich 0.', 'Produkte minus Edukte, Elemente mit Wert.'),
       cards: ['en-entropie'],
-      ref: REF,
+      ref: folie(9),
     }),
     k({
       id: 'en-k-entropie-o2',
@@ -1026,7 +1027,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Welche der beiden Größen hat einen frei gewählten Bezugspunkt?',
       explanation: why('Bildungsenthalpien sind auf die Elemente bezogen (dort 0). Die Entropie hat einen natürlichen Nullpunkt bei 0 K; bei 25 °C hat jeder Stoff, auch ein Element, eine positive Entropie.', 'Absolute Werte.'),
       cards: ['en-entropie', 'en-hauptsaetze'],
-      ref: REF,
+      ref: folie(9),
     }),
     k({
       id: 'en-k-energie-woher',
@@ -1045,7 +1046,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Energie entsteht nicht neu. Wo war sie vorher gespeichert?',
       explanation: why('Nach dem ersten Hauptsatz bleibt die Energie erhalten. Die Produkte $\\ce{CO2}$ und $\\ce{H2O}$ haben weniger Enthalpie als Methan und Sauerstoff; der Unterschied geht als Wärme in die Umgebung.', 'Aus den Stoffen.'),
       cards: ['en-hauptsaetze', 'en-vorzeichen'],
-      ref: REF,
+      ref: folie(10),
     }),
     k({
       id: 'en-k-wasser-zustand',
@@ -1064,7 +1065,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Vergleiche die Bildungsenthalpien von flüssigem Wasser und Wasserdampf.',
       explanation: why('Flüssiges Wasser liegt energetisch tiefer als Wasserdampf. Entsteht es, wird zusätzlich die Wärme frei, die beim Kondensieren abgegeben wird: $\\Delta H$ ist negativer.', 'Mit flüssigem Wasser.'),
       cards: ['en-reaktionsenthalpie'],
-      ref: REF,
+      ref: folie(8),
     }),
     k({
       id: 'en-k-dg-null',
@@ -1083,26 +1084,26 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Tabellenwerte brauchen feste Bedingungen.',
       explanation: why('Die 0 steht für Standardbedingungen: Normdruck 1013 hPa, Stoffe in ihrem Standardzustand; Tabellenwerte meist bei 25 °C.', 'Standardbedingungen.'),
       cards: ['en-bildungsenthalpie', 'en-freie-enthalpie-k'],
-      ref: REF,
+      ref: folie(8),
     }),
     k({
       id: 'en-k-kleines-k',
       no: 314,
       fact: 'small-k-dg',
       part: 'freie-enthalpie',
-      title: 'Kleines K',
-      prompt: r`Eine Reaktion hat bei 25 °C die Gleichgewichtskonstante $K = 10^{-5}$. Was gilt für $${DG}^{0}$?`,
+      title: 'Kleines $K_{\\mathrm{GG}}$',
+      prompt: r`Eine Reaktion hat bei 25 °C die Gleichgewichtskonstante $K_{\mathrm{GG}} = 10^{-5}$. Was gilt für $${DG}^{0}$?`,
       correct: r`$${DG}^{0} > 0$`,
       wrong: [
         w('f1', r`$${DG}^{0} < 0$`, 'chem-mis-en-k-sign'),
-        w('f2', r`$${DG}^{0} = 0$`, 'chem-mis-en-k-sign', why('$\\Delta G^{0} = 0$ gehört zu einem ganz bestimmten Wert von $K$; prüfe, ob $10^{-5}$ dieser Wert ist.', 'Gehört zu einem bestimmten K.')),
-        w('f3', r`$${DG}^{0} = 10^{-5}\,\mathrm{kJ/mol}$`, 'chem-mis-en-k-sign', why('$\\Delta G^{0}$ und $K$ sind nicht gleich, sondern über $\\Delta G^{0} = -R \\cdot T \\cdot \\ln K$ verbunden.', 'Verbunden über ln K.')),
-        w('f4', r`Darüber sagt $K$ nichts.`, 'chem-mis-en-k-sign', why('Es gilt $\\Delta G^{0} = -R \\cdot T \\cdot \\ln K$: Beide Größen hängen fest zusammen.', 'Sie hängen fest zusammen.')),
+        w('f2', r`$${DG}^{0} = 0$`, 'chem-mis-en-k-sign', why('$\\Delta G^{0} = 0$ gehört zu einem ganz bestimmten Wert von $K_{\\mathrm{GG}}$; prüfe, ob $10^{-5}$ dieser Wert ist.', 'Gehört zu einem bestimmten $K_{\\mathrm{GG}}$.')),
+        w('f3', r`$${DG}^{0} = 10^{-5}\,\mathrm{kJ/mol}$`, 'chem-mis-en-k-sign', why('$\\Delta G^{0}$ und $K_{\\mathrm{GG}}$ sind nicht gleich, sondern über $\\Delta G^{0} = -R \\cdot T \\cdot \\ln K_{\\mathrm{GG}}$ verbunden.', 'Verbunden über $\\ln K_{\\mathrm{GG}}$.')),
+        w('f4', r`Darüber sagt $K_{\mathrm{GG}}$ nichts.`, 'chem-mis-en-k-sign', why('Es gilt $\\Delta G^{0} = -R \\cdot T \\cdot \\ln K_{\\mathrm{GG}}$: Beide Größen hängen fest zusammen.', 'Sie hängen fest zusammen.')),
       ],
-      hint: r`Welches Vorzeichen hat $\ln K$ für $K < 1$?`,
-      explanation: why('Für $K < 1$ ist $\\ln K$ negativ, also $\\Delta G^{0} = -R \\cdot T \\cdot \\ln K$ positiv: Unter Standardbedingungen ist die Reaktion endergonisch.', r`$${DG}^{0} > 0$`),
+      hint: r`Welches Vorzeichen hat $\ln K_{\mathrm{GG}}$ für $K_{\mathrm{GG}} < 1$?`,
+      explanation: why('Für $K_{\\mathrm{GG}} < 1$ ist $\\ln K_{\\mathrm{GG}}$ negativ, also $\\Delta G^{0} = -R \\cdot T \\cdot \\ln K_{\\mathrm{GG}}$ positiv: Unter Standardbedingungen ist die Reaktion endergonisch.', r`$${DG}^{0} > 0$`),
       cards: ['en-freie-enthalpie-k'],
-      ref: REF,
+      ref: folie(9),
     }),
     k({
       id: 'en-k-hohe-temperatur',
@@ -1121,7 +1122,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: r`Vergleiche die beiden Beiträge in $${DG} = ${DH} - T \cdot ${DS}$ bei niedriger und bei hoher Temperatur.`,
       explanation: why('Bei niedriger Temperatur überwiegt das positive $\\Delta H$. Mit steigender Temperatur wächst $T \\cdot \\Delta S$, bis es $\\Delta H$ übertrifft und $\\Delta G$ negativ wird.', r`$T \cdot ${DS}$ übertrifft $${DH}$.`),
       cards: ['en-grenztemperatur'],
-      ref: REF,
+      ref: folie(9),
     }),
     k({
       id: 'en-k-umgebung',
@@ -1140,7 +1141,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Wohin geht die Wärme einer exothermen Reaktion, und was macht sie dort mit der Unordnung?',
       explanation: why('Der zweite Hauptsatz gilt für Stoffe und Umgebung zusammen. Die abgegebene Wärme erhöht die Entropie der Umgebung; insgesamt nimmt die Entropie zu. Das steckt im Beitrag $\\Delta H$ der Gleichung für $\\Delta G$.', 'Die Umgebung gewinnt mehr Entropie.'),
       cards: ['en-hauptsaetze', 'en-freie-enthalpie'],
-      ref: REF,
+      ref: folie(10),
     }),
     k({
       id: 'en-k-thermit',
@@ -1159,7 +1160,7 @@ export const ENERGIE_BANK: QuestionBank = {
       hint: 'Welche Stoffe sind Elemente im Standardzustand?',
       explanation: why('Aluminium und Eisen sind Elemente im Standardzustand und zählen 0. Übrig bleiben die beiden Oxide: $\\Delta H^{0} = \\Delta_f H^{0}(\\ce{Al2O3}) - \\Delta_f H^{0}(\\ce{Fe2O3})$.', 'Nur die beiden Oxide.'),
       cards: ['en-reaktionsenthalpie', 'en-bildungsenthalpie'],
-      ref: REF,
+      ref: folie(8),
     }),
     // ---------------------------------------------------------------- Wähle alle richtigen (N1)
     mg({
@@ -1189,7 +1190,7 @@ export const ENERGIE_BANK: QuestionBank = {
         'Energie bleibt erhalten, Entropie nimmt nicht ab, 0 K unerreichbar; Entropie heißt Unordnung.',
       ),
       cards: ['en-hauptsaetze', 'en-entropie'],
-      ref: REF,
+      ref: folie(10),
     }),
     mv({
       id: 'en-v-multi-reaktionsenthalpie',
@@ -1219,7 +1220,7 @@ export const ENERGIE_BANK: QuestionBank = {
         'Produkte minus Edukte, mit Koeffizienten; Elemente im Standardzustand 0; Rückreaktion mit umgekehrtem Vorzeichen.',
       ),
       cards: ['en-reaktionsenthalpie', 'en-bildungsenthalpie'],
-      ref: REF,
+      ref: folie(8),
     }),
     mk({
       id: 'en-k-multi-freie-enthalpie',
@@ -1229,27 +1230,27 @@ export const ENERGIE_BANK: QuestionBank = {
       title: 'Freie Enthalpie',
       prompt: r`Welche Aussagen über $${DG}$, $${DG}^{0}$ und die Gleichgewichtskonstante stimmen?`,
       correct: [
-        r`Ist $${DG}^{0}$ negativ, ist $K$ größer als 1.`,
-        r`Ist $${DG}^{0} = 0$, ist $K = 1$.`,
+        r`Ist $${DG}^{0}$ negativ, ist $K_{\mathrm{GG}}$ größer als 1.`,
+        r`Ist $${DG}^{0} = 0$, ist $K_{\mathrm{GG}} = 1$.`,
         r`Ist $${DH} < 0$ und $${DS} > 0$, läuft die Reaktion bei jeder Temperatur freiwillig ab.`,
         r`Ist $${DH} > 0$ und $${DS} < 0$, läuft die Reaktion bei keiner Temperatur freiwillig ab.`,
         r`Ist $${DH} > 0$ und $${DS} > 0$, läuft die Reaktion erst oberhalb einer Grenztemperatur freiwillig ab.`,
       ],
       wrong: [
-        w('f1', r`Ist $${DG}^{0}$ negativ, ist $K$ kleiner als 1.`, 'chem-mis-en-k-sign'),
-        w('f2', r`Es gilt $${DG}^{0} = -R \cdot T \cdot \lg K$ mit dem Zehnerlogarithmus.`, 'chem-mis-en-lg'),
+        w('f1', r`Ist $${DG}^{0}$ negativ, ist $K_{\mathrm{GG}}$ kleiner als 1.`, 'chem-mis-en-k-sign'),
+        w('f2', r`Es gilt $${DG}^{0} = -R \cdot T \cdot \lg K_{\mathrm{GG}}$ mit dem Zehnerlogarithmus.`, 'chem-mis-en-lg'),
         w('f3', r`In $${DG} = ${DH} - T \cdot ${DS}$ setzt man die Temperatur in °C ein.`, 'chem-mis-en-celsius'),
         w('f4', r`$${DH}$ in kJ und $${DS}$ in J/K darf man direkt miteinander verrechnen.`, 'chem-mis-en-units'),
         w('f5', r`Es gilt $${DG} = ${DH} + T \cdot ${DS}$.`, 'chem-mis-en-gibbs-sign'),
         w('f6', 'Eine endotherme Reaktion kann nie freiwillig ablaufen.', 'chem-mis-en-endo-never'),
       ],
-      hint: r`Nutze $${DG} = ${DH} - T \cdot ${DS}$ und $${DG}^{0} = -R \cdot T \cdot \ln K$ und prüfe jeweils die Vorzeichen.`,
+      hint: r`Nutze $${DG} = ${DH} - T \cdot ${DS}$ und $${DG}^{0} = -R \cdot T \cdot \ln K_{\mathrm{GG}}$ und prüfe jeweils die Vorzeichen.`,
       explanation: why(
-        r`Aus $${DG}^{0} = -R \cdot T \cdot \ln K$ folgt: Ist $${DG}^{0}$ negativ, ist $\ln K$ positiv und $K > 1$; bei $${DG}^{0} = 0$ ist $K = 1$. In $${DG} = ${DH} - T \cdot ${DS}$ ($T$ in Kelvin, gleiche Energie-Einheit) machen $${DH} < 0$ und $${DS} > 0$ das $${DG}$ immer negativ, $${DH} > 0$ und $${DS} < 0$ immer positiv. Sind beide positiv, überwiegt $T \cdot ${DS}$ erst oberhalb einer Grenztemperatur.`,
-        r`$${DG}^{0} < 0$ heißt $K > 1$; die Vorzeichen von $${DH}$ und $${DS}$ entscheiden über den Temperaturbereich.`,
+        r`Aus $${DG}^{0} = -R \cdot T \cdot \ln K_{\mathrm{GG}}$ folgt: Ist $${DG}^{0}$ negativ, ist $\ln K_{\mathrm{GG}}$ positiv und $K_{\mathrm{GG}} > 1$; bei $${DG}^{0} = 0$ ist $K_{\mathrm{GG}} = 1$. In $${DG} = ${DH} - T \cdot ${DS}$ ($T$ in Kelvin, gleiche Energie-Einheit) machen $${DH} < 0$ und $${DS} > 0$ das $${DG}$ immer negativ, $${DH} > 0$ und $${DS} < 0$ immer positiv. Sind beide positiv, überwiegt $T \cdot ${DS}$ erst oberhalb einer Grenztemperatur.`,
+        r`$${DG}^{0} < 0$ heißt $K_{\mathrm{GG}} > 1$; die Vorzeichen von $${DH}$ und $${DS}$ entscheiden über den Temperaturbereich.`,
       ),
       cards: ['en-freie-enthalpie', 'en-freie-enthalpie-k', 'en-grenztemperatur'],
-      ref: REF,
+      ref: folie(9),
     }),
     // ---- Zuordnen (N1b)
     PHASE_SIGNS,

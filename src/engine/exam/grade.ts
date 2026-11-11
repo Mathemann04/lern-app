@@ -10,7 +10,9 @@ import type { ExamAnswers, ExamItem, ExamItemBuild, ExamOption, ExamPart, ExamTa
 // - Ist das Ergebnis eines Teils (final) richtig, gibt es die vollen Punkte des Teils; sonst zählen die
 //   Punkte der richtigen Zwischenschritte (Teilpunkte). Ein Folgefehler im Ergebnis gibt die vollen Punkte
 //   des Teils nur, wenn der Fehler aus einem früheren Teil stammt (alle Fragen dieses Teils voll); ein
-//   Fehler im selben Teil kostet die Punkte seines Zwischenschritts.
+//   Fehler im selben Teil kostet die Punkte seines Zwischenschritts. Teile ohne final zählen jede Frage für sich.
+// - Eine eingetippte Zahl knapp daneben (1 bis 4 %, „fast") gibt beim Üben die vollen Punkte, in der Probeklausur nur
+//   den Anteil closeShare (GradeOptions).
 
 export const itemsOf = (task: ExamTask): ExamItem[] => task.parts.flatMap((p) => p.items)
 export const totalPoints = (task: ExamTask) => task.parts.reduce((sum, p) => sum + p.points, 0)
@@ -127,24 +129,37 @@ export type ItemResult = {
 export type PartResult = { readonly part: ExamPart; readonly points: number; readonly items: readonly ItemResult[] }
 export type ExamResult = { readonly points: number; readonly max: number; readonly parts: readonly PartResult[] }
 
-export function gradeExam(task: ExamTask, answers: ExamAnswers): ExamResult {
+export type GradeOptions = {
+  // Anteil der Punkte für eine eingetippte Zahl knapp daneben (1 bis 4 %); 1 = volle Punkte (Üben)
+  readonly closeShare?: number
+}
+
+export function gradeExam(task: ExamTask, answers: ExamAnswers, options: GradeOptions = {}): ExamResult {
+  const closeShare = options.closeShare ?? 1
   const truthMap = truthOf(task)
   const states = new Map(examState(task, answers).map((s) => [s.item.id, s]))
   const parts = task.parts.map((part): PartResult => {
-    const items = part.items.map((item): ItemResult => {
+    // hit: richtig oder Folgefehler, auch wenn „fast" die Punkte kürzt
+    const graded = part.items.map((item): { r: ItemResult; hit: 'richtig' | 'folgefehler' | null; cut: boolean } => {
       const { build, chosen, close } = states.get(item.id)!
       const truth = truthMap.get(item.id)!
       const base = { item, chosen, correct: truth.option, explanation: truth.build.explanation, ...(close ? { close } : {}) }
-      if (!build || !chosen) return { ...base, status: 'offen', points: 0, ownExplanation: null }
-      if (chosen.id === build.correct) return { ...base, status: 'richtig', points: item.points, ownExplanation: null }
-      if (chosen.id === build.expected) return { ...base, status: 'folgefehler', points: item.points, ownExplanation: build.explanation }
-      if (chosen.share) return { ...base, status: 'teilweise', points: item.points * chosen.share.value, ownExplanation: null }
-      return { ...base, status: 'falsch', points: 0, ownExplanation: build.expected === build.correct ? null : build.explanation }
+      if (!build || !chosen) return { r: { ...base, status: 'offen', points: 0, ownExplanation: null }, hit: null, cut: false }
+      const hit = chosen.id === build.correct ? 'richtig' : chosen.id === build.expected ? 'folgefehler' : null
+      const ownExplanation = hit === 'folgefehler' ? build.explanation : null
+      if (hit && close && closeShare < 1) return { r: { ...base, status: 'teilweise', points: item.points * closeShare, ownExplanation }, hit, cut: true }
+      if (hit) return { r: { ...base, status: hit, points: item.points, ownExplanation }, hit, cut: false }
+      if (chosen.share) return { r: { ...base, status: 'teilweise', points: item.points * chosen.share.value, ownExplanation: null }, hit: null, cut: false }
+      return { r: { ...base, status: 'falsch', points: 0, ownExplanation: build.expected === build.correct ? null : build.explanation }, hit: null, cut: false }
     })
-    const allFull = items.every((r) => r.points === r.item.points)
-    const finalFull = items.some((r) => r.item.final && (r.status === 'richtig' || (r.status === 'folgefehler' && allFull)))
+    const items = graded.map((g) => g.r)
+    const full = (r: ItemResult) => r.points === r.item.points
     const sum = items.reduce((s, r) => s + r.points, 0)
-    return { part, points: finalFull ? part.points : Math.min(part.points, sum), items }
+    let points = Math.min(part.points, sum)
+    // Ergebnis des Teils richtig: volle Punkte des Teils (knapp daneben in der Probeklausur: der Anteil davon)
+    const final = graded.find((g) => g.r.item.final && g.hit && (g.hit === 'richtig' || items.every((r) => r === g.r || full(r))))
+    if (final) points = final.cut ? Math.max(points, part.points * closeShare) : part.points
+    return { part, points, items }
   })
   return { points: parts.reduce((s, p) => s + p.points, 0), max: totalPoints(task), parts }
 }

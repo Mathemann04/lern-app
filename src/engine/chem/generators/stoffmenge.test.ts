@@ -53,6 +53,14 @@ describe('Stoffmenge, Masse und Teilchenzahl: auf zweitem Weg', () => {
       kinds.add(subtype)
       const given = lastNumber(calc.task.functionLatex!)
       const result = lastNumber(calc.task.resultLatex!)
+      // M aus m und n (Probe eines unbekannten Stoffs): M = m / n, passend zum Stoff der Erklärung
+      if (subtype === 'M-from-m-n') {
+        const m = numberOf(calc.task.functionLatex!)
+        expect(Math.abs(result / (m / given) - 1), calc.task.functionLatex!).toBeLessThan(0.006)
+        expect(Math.abs(result / iupacMass(calc.substance) - 1), calc.substance).toBeLessThan(0.01)
+        expect(calc.task.steps.at(-1)!.explanation.detailed).toContain(substanceById(calc.substance)!.name)
+        continue
+      }
       // M mit den Werten der Aufgabe: aus dem Schritt „Molmasse" oder aus der Aufgabe
       const molarStep = calc.task.steps.find((s) => s.id === 'molmasse')
       const fromNote = /M\(\\ce\{[^}]+\}\) = ([^$]+)\$/.exec(calc.task.note!)
@@ -80,7 +88,7 @@ describe('Stoffmenge, Masse und Teilchenzahl: auf zweitem Weg', () => {
         for (const c of step.choices.filter((c) => !c.correct)) if (/\d/.test(c.content) && !c.content.includes(':')) expect(Math.abs(numberOf(c.content) / right - 1)).toBeGreaterThan(0.06)
       }
     }
-    expect(kinds.size).toBe(3)
+    expect(kinds.size).toBe(level === 3 ? 3 : 4)
   })
 })
 

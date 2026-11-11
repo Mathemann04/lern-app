@@ -16,6 +16,8 @@ const REF_HALBLEITER = 'Skript Metallbindung, Folie 11'
 const REF_HYBRID = 'Skript Kovalente Bindung, Folie 12'
 const REF_SIGMA = 'Skript Kovalente Bindung, Folie 13'
 const REF_MO = 'Skript Kovalente Bindung, Folie 14'
+const REF_MEHRZENTREN = 'Skript Kovalente Bindung, Folien 16 und 17'
+const REF_EINLAGERUNG = 'Skript Metallbindung, Folien 8 und 9'
 const REF_UEBUNG = 'Übung Bindungen'
 
 const r = String.raw
@@ -86,6 +88,45 @@ const MATCH_HYBRID: MatchQuestion = {
   ),
   cards: ['met-hybrid'],
   ref: REF_HYBRID,
+}
+
+// Zuordnen (N1b): Metallgitter mit Eigenschaften und den Beispielen, die das Skript nennt (Metallbindung, Folie 5)
+const KDP = 'kdP: weich, gut verformbar'
+const HDP = 'hdP: schlecht formbar, gut gießbar'
+const KRZ = 'krz: sehr hart und spröde'
+const MATCH_LATTICE: MatchQuestion = {
+  kind: 'match',
+  id: 'me-v-zuordnen-gitter',
+  no: 218,
+  level: 2,
+  fact: 'match-lattice-properties',
+  part: 'metallbindung',
+  title: 'Metallgitter und Eigenschaften',
+  prompt: 'Welches Gitter mit welchen Eigenschaften hat das jeweilige Metall?',
+  pairs: [
+    { id: 'cu', left: 'Kupfer', right: KDP },
+    { id: 'au', left: 'Gold', right: KDP },
+    { id: 'al', left: 'Aluminium', right: KDP },
+    { id: 'mg', left: 'Magnesium', right: HDP },
+    { id: 'zn', left: 'Zink', right: HDP },
+    { id: 'ti', left: 'Titan', right: HDP },
+    { id: 'w', left: 'Wolfram', right: KRZ },
+    { id: 'cr', left: 'Chrom', right: KRZ },
+    { id: 'mo', left: 'Molybdän', right: KRZ },
+  ],
+  traps: [
+    { pair: 'cu', right: KRZ, misconception: 'chem-mis-me-dense-hard' },
+    { pair: 'al', right: KRZ, misconception: 'chem-mis-me-dense-hard' },
+    { pair: 'mg', right: KDP, misconception: 'chem-mis-me-hdp-like-kdp' },
+    { pair: 'ti', right: KDP, misconception: 'chem-mis-me-hdp-like-kdp' },
+  ],
+  hint: 'Denke an die Verwendung: Welche Metalle zieht man zu Drähten, welche gießt man eher, welche sind besonders hart?',
+  explanation: why(
+    'Kubisch dichteste Packung (kdP): Kupfer, Gold und Aluminium sind eher weich und lassen sich gut walzen und zu Drähten ziehen. Hexagonal dichteste Packung (hdP): Magnesium, Zink und Titan lassen sich schlecht umformen, dafür gut gießen. Kubisch-raumzentriert (krz): Wolfram, Chrom und Molybdän sind sehr hart und spröde; sie bilden die härtesten Metallgitter.',
+    'kdP weich (Cu, Au, Al), hdP gießbar (Mg, Zn, Ti), krz hart (W, Cr, Mo).',
+  ),
+  cards: ['met-gitter'],
+  ref: REF_GITTER,
 }
 
 // Leiter, Halbleiter, Isolator (Breite der verbotenen Zone wie in Frage 109 und auf der Karte met-baender)
@@ -408,7 +449,7 @@ export const METALLE_BANK: QuestionBank = {
       part: 'hybrid',
       title: 'Hybridisierung',
       prompt: 'Was versteht man unter Hybridisierung?',
-      correct: 'Ein s-Orbital und p-Orbitale eines Atoms mischen sich zu gleichwertigen Hybridorbitalen.',
+      correct: 'Ein s-Orbital und p-Orbitale eines Atoms mischen sich zu energiegleichen (entarteten) Hybridorbitalen.',
       wrong: [
         w('f1', 'Zwei Atome tauschen ihre Elektronen aus.', 'chem-mis-me-fixed', why('Bei der Hybridisierung bleibt alles an einem Atom: Seine eigenen Orbitale mischen sich.', 'Es geht um Orbitale eines Atoms.')),
         w('f2', 'Ein Atom gibt ein Elektron ab und wird zum Ion.', 'chem-mis-me-salt-like', why('Ionen entstehen durch Abgabe oder Aufnahme von Elektronen. Bei der Hybridisierung ändert sich die Zahl der Elektronen nicht.', 'Keine Ionenbildung.')),
@@ -417,7 +458,7 @@ export const METALLE_BANK: QuestionBank = {
       ],
       hint: 'Es geht um die Orbitale eines einzelnen Atoms, das Bindungen eingeht.',
       explanation: why(
-        'Ein s-Orbital und ein, zwei oder drei p-Orbitale eines Atoms mischen sich rechnerisch zu gleich energiereichen Hybridorbitalen. Sie zeigen in die Richtungen, in denen das Atom bindet oder freie Paare trägt.',
+        'Beim Kohlenstoff wird zuerst ein Elektron aus dem 2s-Orbital in das leere 2p-Orbital angeregt; das gelingt leicht, weil beide Energien dicht beieinanderliegen. Dann mischen sich das s-Orbital und ein, zwei oder drei p-Orbitale rechnerisch zu Hybridorbitalen, die alle genau dieselbe Energie haben: Sie sind entartet. Sie zeigen in die Richtungen, in denen das Atom bindet oder freie Paare trägt.',
         'Mischung von s- und p-Orbitalen eines Atoms.',
       ),
       cards: ['met-hybrid'],
@@ -953,7 +994,7 @@ export const METALLE_BANK: QuestionBank = {
         'Beim Verformen gleiten Gitterebenen aneinander vorbei. Kleine Fremdatome in den Lücken verzerren das Gitter und blockieren dieses Gleiten; das Metall wird härter und weniger leicht formbar.',
         'Sie behindern das Gleiten.',
       ),
-      cards: ['met-gitter', 'met-verformbar'],
+      cards: ['met-gitter', 'met-verformbar', 'met-einlagerung'],
       ref: REF_EIGENSCHAFTEN,
     }),
     k({
@@ -1264,9 +1305,105 @@ export const METALLE_BANK: QuestionBank = {
       cards: ['met-hybrid', 'met-sigma-pi'],
       ref: REF_SIGMA,
     }),
+    // ---- Nachträge nach der Prüfung gegen die Skripte (Beryllium, Mehrzentrenbindungen, Hartmetall)
+    v({
+      id: 'me-v-beryllium',
+      no: 219,
+      fact: 'beryllium-leiter',
+      part: 'halbleiter',
+      title: 'Bändermodell',
+      prompt: r`Beryllium hat die Konfiguration $1\mathrm{s}^{2}\,2\mathrm{s}^{2}$; seine 2s-Unterschale ist also voll besetzt. Warum leitet es trotzdem den Strom?`,
+      correct: 'Das volle 2s-Band überlappt mit dem leeren 2p-Band; direkt über den besetzten Niveaus liegen freie, die die Elektronen erreichen.',
+      wrong: [
+        w('f1', 'Ein volles Band leitet besonders gut, weil darin die meisten Elektronen sitzen.', 'chem-mis-me-full-band'),
+        w('f2', 'Die Atomrümpfe tragen den Strom, weil die Elektronen in der vollen Unterschale festsitzen.', 'chem-mis-me-cores-move'),
+        w('f3', 'Zwischen 2s- und 2p-Band liegt eine breite verbotene Zone, die die Elektronen mühelos überspringen.', 'chem-mis-me-gap', why('Über eine breite verbotene Zone kommen Elektronen gerade nicht hinweg; so sieht ein Isolator aus. Ein Leiter braucht freie Niveaus, die die Elektronen ohne Sprung über eine Lücke erreichen.', 'Eine breite Lücke macht einen Isolator.')),
+        w('f4', 'Die beiden 1s-Elektronen sind frei beweglich und tragen den Strom.', 'chem-mis-me-full-band', why('Die 1s-Elektronen sitzen nah am Kern in einem voll besetzten, tief liegenden Band, weit unter allen freien Niveaus. Ein solches Band trägt keinen Strom.', 'Das 1s-Band ist voll und liegt tief.')),
+      ],
+      hint: 'Ein Band leitet nur, wenn die Elektronen freie Niveaus in ihrer Nähe finden. Wo liegt bei Beryllium das 2p-Band?',
+      explanation: why(
+        r`Ein voll besetztes Band allein leitet nicht, weil die Elektronen darin keine freien Plätze finden. Bei Beryllium überlappt das volle 2s-Band aber mit dem leeren 2p-Band. Direkt über den besetzten Niveaus liegen also freie, und die Elektronen können sich im elektrischen Feld bewegen: Beryllium ist ein Leiter. Bei Lithium ($1\mathrm{s}^{2}\,2\mathrm{s}^{1}$) ist schon das 2s-Band nur halb besetzt.`,
+        '2s- und 2p-Band überlappen.',
+      ),
+      cards: ['met-baender'],
+      ref: REF_BAENDER,
+    }),
+    k({
+      id: 'me-k-mehrzentren-niveaus',
+      no: 318,
+      fact: 'mehrzentren-niveaus',
+      part: 'mo',
+      title: 'Mehrzentrenbindungen',
+      prompt: 'In einer Kette überlappen die p-Orbitale vieler Kohlenstoffatome zu einer Mehrzentrenbindung. Was geschieht mit den Molekülorbitalen, wenn die Kette länger wird?',
+      correct: 'Es entstehen mehr Molekülorbitale, und ihre Energieniveaus rücken enger zusammen.',
+      wrong: [
+        w('f1', 'Es entstehen mehr Molekülorbitale, aber ihre Energieniveaus rücken weiter auseinander.', 'chem-mis-me-levels-spread'),
+        w('f2', 'Es bleibt bei zwei Molekülorbitalen, in denen nur mehr Elektronen Platz finden.', 'chem-mis-me-mo-count', why('Jedes beteiligte Atomorbital bringt ein Molekülorbital mit; die Zahl der Molekülorbitale wächst also mit der Zahl der Atome.', 'Mit jedem Atom kommt ein Molekülorbital hinzu.')),
+        w('f3', 'Je zwei Atomorbitale ergeben zusammen ein Molekülorbital, die Zahl halbiert sich also.', 'chem-mis-me-mo-count'),
+        w('f4', 'Die antibindenden Molekülorbitale verschwinden, es bleiben nur bindende.', 'chem-mis-me-mo-count', why('Auch in langen Ketten entstehen neben bindenden immer antibindende Molekülorbitale. Die Zahl aller Molekülorbitale bleibt gleich der Zahl der Atomorbitale.', 'Bindende und antibindende bleiben.')),
+      ],
+      hint: 'Aus wie vielen Atomorbitalen entstehen wie viele Molekülorbitale, und in welchem Energiebereich liegen sie?',
+      explanation: why(
+        'Aus n Atomorbitalen entstehen n Molekülorbitale, bindende und antibindende. Mit jedem weiteren Atom kommt ein Niveau hinzu, doch alle bleiben in einem begrenzten Energiebereich; die Abstände zwischen ihnen werden deshalb immer kleiner. Bei sehr vielen Atomen wie in einem Metall entsteht daraus ein Band.',
+        'Mehr Molekülorbitale, dichter liegende Niveaus.',
+      ),
+      cards: ['met-mehrzentren'],
+      ref: REF_MEHRZENTREN,
+    }),
+    k({
+      id: 'me-k-mehrzentren-farbe',
+      no: 319,
+      fact: 'mehrzentren-farbe',
+      part: 'mo',
+      title: 'Mehrzentrenbindungen',
+      prompt: 'Der Tomatenfarbstoff Lycopin enthält eine lange Kette aus abwechselnden Einfach- und Doppelbindungen und ist rot. Ethen mit nur einer Doppelbindung ist farblos. Woran liegt das?',
+      correct: 'In der langen Kette liegen die Niveaus der delokalisierten Elektronen so dicht, dass schon sichtbares Licht ein Elektron anheben kann; ein Teil des Lichts wird aufgenommen.',
+      wrong: [
+        w('f1', 'In der langen Kette liegen die Niveaus besonders weit auseinander, und genau dieser große Abstand passt zu sichtbarem Licht.', 'chem-mis-me-levels-spread'),
+        w('f2', 'Die Farbe stammt von den Kohlenstoffatomen selbst; in einer langen Kette stecken einfach mehr davon.', 'chem-mis-me-color-atoms'),
+        w('f3', 'Schwere Moleküle sind farbig und leichte farblos; es kommt nur auf die Masse an.', 'chem-mis-me-color-atoms'),
+        w('f4', 'In der Kette bilden alle p-Orbitale zusammen ein einziges Molekülorbital, und dieses ist rot.', 'chem-mis-me-mo-count', why('Auch in einer langen Kette entsteht aus jedem beteiligten Atomorbital ein eigenes Molekülorbital. Farbig ist nicht ein Orbital, sondern ein Stoff, der einen Teil des sichtbaren Lichts aufnimmt.', 'Aus jedem Atomorbital wird ein Molekülorbital.')),
+      ],
+      hint: 'Was geschieht mit den Abständen der Energieniveaus, wenn sich die Elektronen über viele Atome verteilen? Wie viel Energie bringt sichtbares Licht mit?',
+      explanation: why(
+        'Bei Ethen ist der Abstand zwischen dem besetzten und dem freien Niveau groß; nur energiereiches UV-Licht kann ein Elektron anheben, sichtbares Licht geht ungehindert hindurch. In der langen konjugierten Kette von Lycopin sind die Elektronen über viele Atome delokalisiert, und die Niveaus rücken eng zusammen. Dann reicht schon die kleinere Energie von sichtbarem Licht: Lycopin nimmt vor allem blaues und grünes Licht auf, übrig bleibt der rote Eindruck.',
+        'Dichte Niveaus: Sichtbares Licht wird aufgenommen.',
+      ),
+      cards: ['met-mehrzentren'],
+      ref: REF_MEHRZENTREN,
+    }),
+    multiAt(3)({
+      id: 'me-k-multi-hartmetall',
+      no: 320,
+      fact: 'multi-hartmetall',
+      part: 'metallbindung',
+      title: 'Hartmetall und Wasserstoffspeicher',
+      prompt: 'Welche Aussagen über Hartmetall, Sintern und Wasserstoffspeicher stimmen?',
+      correct: [
+        'Wolframcarbid ist ein äußerst harter Stoff, ein sogenannter Hartstoff.',
+        'Damit sich Wolframcarbid verarbeiten lässt, sintert man es mit Cobalt zu einem Werkstück zusammen.',
+        'Beim Sintern wachsen Pulverkörner bei hoher Temperatur zusammen, ohne dass das Pulver schmilzt.',
+        r`Palladium kann große Mengen Wasserstoff aufnehmen und gibt ihn beim Erwärmen als $\ce{H2}$ wieder ab.`,
+        r`Im Metall wird $\ce{H2}$ in einzelne H-Atome gespalten, die sich in die Lücken zwischen den Metallatomen setzen.`,
+      ],
+      wrong: [
+        w('f1', 'Beim Sintern schmilzt man das Pulver ganz und gießt es danach in eine Form.', 'chem-mis-me-sinter-melt'),
+        w('f2', 'Kleine Atome in den Lücken eines Metallgitters machen das Metall weicher.', 'chem-mis-me-interstitial-soft'),
+        w('f3', r`Ein Metall speichert Wasserstoff als ganze $\ce{H2}$-Moleküle in den Lücken seines Gitters.`, 'chem-mis-me-h2-molecule'),
+        w('f4', 'Gesinterte Werkstücke lassen sich nur ganz ohne Poren herstellen.', 'chem-mis-me-sinter-melt', why('Weil die Körner beim Sintern nicht schmelzen, sondern nur an ihren Berührungsstellen zusammenwachsen, kann man Hohlräume gezielt zwischen ihnen lassen oder fast ganz schließen.', 'Sintern erlaubt Teile mit und ohne Poren.')),
+      ],
+      hint: 'Sintern geschieht unterhalb des Schmelzpunkts. Und wie klein ist ein Wasserstoffatom im Vergleich zu den Lücken zwischen Metallatomen?',
+      explanation: why(
+        r`Wolframcarbid ist ein Hartstoff; erst zusammengesintert mit Cobalt lässt es sich zu Werkzeugen verarbeiten. Beim Sintern wachsen Pulverkörner bei hoher Temperatur zusammen, ohne zu schmelzen; die Teile können Poren haben oder nicht. Kleine Atome in den Lücken bremsen das Gleiten der Gitterebenen und machen das Metall härter. Palladium spaltet $\ce{H2}$ in Atome, die in die Lücken wandern; beim Erwärmen entweicht wieder $\ce{H2}$.`,
+        'Hartstoff mit Cobalt gesintert, unter dem Schmelzpunkt; Wasserstoff als Atome in den Lücken.',
+      ),
+      cards: ['met-einlagerung'],
+      ref: REF_EINLAGERUNG,
+    }),
     // ---- Zuordnen (N1b)
     MATCH_CONDUCTION,
     MATCH_HYBRID,
+    MATCH_LATTICE,
     // ---- Ordnen (N1c)
     ORDER_BOND_ORDER,
   ],

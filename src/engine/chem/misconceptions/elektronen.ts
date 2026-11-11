@@ -31,4 +31,6 @@ export const ELEKTRONEN_MISCONCEPTIONS: readonly MisconceptionName[] = [
   { id: 'chem-mis-el-valence-all', name: 'Alle Elektronen als Valenzelektronen', wrongText: 'Valenzelektronen sind alle Elektronen eines Atoms.' },
   { id: 'chem-mis-el-wrong-shell', name: 'Valenzelektronen in der falschen Schale', wrongText: 'In der 3. Periode sitzen die Valenzelektronen in 4s und 4p.' },
   { id: 'chem-mis-el-unpaired-valence', name: 'Alle Valenzelektronen ungepaart', wrongText: 'Alle Valenzelektronen eines Atoms sind ungepaart.' },
+  { id: 'chem-mis-el-spin-pair-magnet', name: 'Gepaarte Spins als stärkerer Magnet', wrongText: 'Zwei Elektronen mit entgegengesetztem Spin in einem Orbital verstärken ihre magnetische Wirkung.' },
+  { id: 'chem-mis-el-magnet-nucleus', name: 'Magnetismus aus dem Kern', wrongText: 'Der Magnetismus eines Stoffs wie Eisen entsteht im Atomkern, nicht bei den Elektronen.' },
 ]

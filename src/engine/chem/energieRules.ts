@@ -122,9 +122,9 @@ export const ENERGIE_ERROR_RULES: readonly ChemErrorRule[] = [
     id: 'chem-dg-lg',
     course: C,
     name: 'Zehnerpotenz statt e-Funktion',
-    wrongFormula: r`K = 10^{\ln K}\ \text{statt}\ K = e^{\ln K}`,
+    wrongFormula: r`K_{\mathrm{GG}} = 10^{\ln K_{\mathrm{GG}}}\ \text{statt}\ K_{\mathrm{GG}} = e^{\ln K_{\mathrm{GG}}}`,
     why: {
-      detailed: 'In $\\Delta G^{0} = -R \\cdot T \\cdot \\ln K$ steht der natürliche Logarithmus. Sein Gegenstück ist die e-Funktion, nicht die Zehnerpotenz.',
+      detailed: 'In $\\Delta G^{0} = -R \\cdot T \\cdot \\ln K_{\\mathrm{GG}}$ steht der natürliche Logarithmus. Sein Gegenstück ist die e-Funktion, nicht die Zehnerpotenz.',
       short: 'Zu ln gehört die e-Funktion.',
     },
   },
@@ -134,7 +134,7 @@ export const ENERGIE_ERROR_RULES: readonly ChemErrorRule[] = [
     name: 'Vorzeichen in der Gibbs-Helmholtz-Gleichung vertauscht',
     wrongFormula: r`\Delta G = \Delta H + T \cdot \Delta S`,
     why: {
-      detailed: 'In $\\Delta G = \\Delta H - T \\cdot \\Delta S$ wird der Entropie-Term abgezogen; in $\\Delta G^{0} = -R \\cdot T \\cdot \\ln K$ steht ein Minus. Prüfe das Vorzeichen jedes Terms.',
+      detailed: 'In $\\Delta G = \\Delta H - T \\cdot \\Delta S$ wird der Entropie-Term abgezogen; in $\\Delta G^{0} = -R \\cdot T \\cdot \\ln K_{\\mathrm{GG}}$ steht ein Minus. Prüfe das Vorzeichen jedes Terms.',
       short: 'Vorzeichen prüfen.',
     },
   },

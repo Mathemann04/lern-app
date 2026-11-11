@@ -40,7 +40,20 @@ export type WrongValue = { readonly rule: string; readonly key: string; readonly
 
 // Zahlen der Altklausuren, die nicht vorkommen dürfen (docs/CHEMIE.md §9): gegebene Masse eines Stoffs,
 // so geschrieben, wie sie in der Aufgabe stünde
-export const EXAM_GIVEN_MASSES: readonly string[] = [String.raw`m(\ce{C2H6}) = 6\,\mathrm{g}`, String.raw`m(\ce{C3H8}) = 4{,}4\,\mathrm{g}`]
+// (dazu die Angaben des Übungsblatts und der Rechenbeispiele des Skripts Stöchiometrie: Masse oder Stoffmenge
+// desselben Stoffs bzw. dieselbe Probe)
+export const EXAM_GIVEN_MASSES: readonly string[] = [
+  String.raw`m(\ce{C2H6}) = 6\,\mathrm{g}`,
+  String.raw`m(\ce{C3H8}) = 4{,}4\,\mathrm{g}`,
+  String.raw`m(\ce{H2O}) = 18\,\mathrm{g}`,
+  String.raw`m(\ce{CO2}) = 88\,\mathrm{g}`,
+  String.raw`m(\ce{NaCl}) = 5{,}85\,\mathrm{g}`,
+  String.raw`n(\ce{O2}) = 0{,}25\,\mathrm{mol}`,
+  String.raw`n(\ce{C6H12O6}) = 0{,}1\,\mathrm{mol}`,
+  String.raw`m = 9{,}2\,\mathrm{g} \qquad n = 0{,}2\,\mathrm{mol}`,
+  String.raw`m(\ce{C6H12O6}) = 10\,\mathrm{g}`,
+  String.raw`m(\ce{H2O}) = 1\,\mathrm{g}`,
+]
 export const usesExamNumbers = (latex: string) => EXAM_GIVEN_MASSES.some((x) => latex.includes(x))
 // Lösungen aus den Altklausuren (Stoff, Konzentration in mol/L, Volumen in mL): so nie erzeugen
 export const EXAM_SOLUTIONS: readonly (readonly [string, string, number])[] = [

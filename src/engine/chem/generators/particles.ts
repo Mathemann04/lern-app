@@ -311,8 +311,25 @@ function stepsOf(t: Particle, set: GivenSet, withCharge: boolean, rng: Rng, pref
 const WITH_ISOTOPES = ELEMENTS.filter((el) => el.isotopes.length > 0)
 const WITH_IONS = WITH_ISOTOPES.filter((el) => el.ions.length > 0)
 
-function randomParticle(rng: Rng, ion: boolean, el = rng.pick(ion ? WITH_IONS : WITH_ISOTOPES)): Particle {
-  return { el, a: rng.pick(el.isotopes), q: ion ? rng.pick(el.ions) : 0 }
+// Teilchen der Altklausuren und des Übungsblatts (docs/CHEMIE.md §9): als Kernsymbol, in der Tabelle und im Paar
+// nie erzeugen (Symbol, Massenzahl, Ladung)
+export const EXAM_PARTICLES: readonly (readonly [string, number, number])[] = [
+  ['Fe', 56, 0],
+  ['Cl', 35, 0],
+  ['Na', 23, 0],
+  ['Cl', 35, -1],
+]
+export const isExamParticle = (t: Particle) => EXAM_PARTICLES.some(([symbol, a, q]) => t.el.symbol === symbol && t.a === a && t.q === q)
+
+// Massenzahl und Ladung, die für dieses Element erlaubt sind (ohne die Teilchen der Altklausuren)
+function allowedOf(el: Element, ion: boolean): Particle[] {
+  return el.isotopes.flatMap((a) => (ion ? el.ions : [0]).map((q) => ({ el, a, q }))).filter((t) => !isExamParticle(t))
+}
+
+// null, wenn das Element so kein erlaubtes Teilchen hat (Natrium hat nur ²³Na; der Aufrufer zieht neu)
+function randomParticle(rng: Rng, ion: boolean, el = rng.pick(ion ? WITH_IONS : WITH_ISOTOPES)): Particle | null {
+  const allowed = allowedOf(el, ion)
+  return allowed.length > 0 ? rng.pick(allowed) : null
 }
 
 // Kurzform eines Teilchens in der Form: atom oder ion
@@ -320,6 +337,7 @@ const chargeKind = (t: Particle) => (t.q === 0 ? 'atom' : 'ion')
 
 function singleTask(level: Level, rng: Rng, ref: TaskRef, ion: boolean, focus?: string): ChemCalc | null {
   const t = randomParticle(rng, ion)
+  if (!t) return null
   const withCharge = level >= 2
   // Grundlagen: nur Angaben ohne Ladung; „Element, Neutronen, Ladung" und „Protonen, Massenzahl,
   // Ladung" dort ohne Ladung
@@ -347,8 +365,10 @@ function singleTask(level: Level, rng: Rng, ref: TaskRef, ion: boolean, focus?: 
 // desselben Elements (Isotope oder Atom und Ion)
 function pairTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc | null {
   const first = randomParticle(rng, rng.chance(0.7))
+  if (!first) return null
   const sameElement = rng.chance(0.5)
   const second = sameElement ? randomParticle(rng, first.el.ions.length > 0 && rng.chance(0.5), first.el) : randomParticle(rng, rng.chance(0.5))
+  if (!second) return null
   if (second.el === first.el && second.a === first.a && second.q === first.q) return null
   const [set1, set2] = rng.shuffle(GIVEN_SETS.filter((s) => s !== 'symbol'))
   const steps1 = stepsOf(first, set1, true, rng, '1', focus)

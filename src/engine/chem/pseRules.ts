@@ -218,7 +218,7 @@ export const PSE_ERROR_RULES: readonly ChemErrorRule[] = [
     name: 'Ersten Anstieg für den Sprung gehalten',
     wrongFormula: r`\ce{Al}\text{: Sprung zwischen } I_{1} \text{ und } I_{2}`,
     why: {
-      detailed: 'Die Energie steigt von Elektron zu Elektron immer, weil das Ion schon positiv ist. Gesucht ist der Anstieg, der deutlich größer ist als alle übrigen: Dort ist eine innere, volle Schale erreicht.',
+      detailed: 'Die Energie steigt von Elektron zu Elektron immer, weil das Ion schon positiv ist. Gesucht ist der Anstieg, der deutlich größer ist als alle übrigen: Dort ist eine innere Schale mit Edelgaskonfiguration erreicht.',
       short: 'Gesucht ist der deutlich größte Anstieg.',
     },
   },

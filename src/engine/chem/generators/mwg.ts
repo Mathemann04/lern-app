@@ -1,7 +1,7 @@
 import type { GuidedStep } from '../../guided/types.ts'
 import { formatLatex, roundSignificant } from '../../quantity/numberDe.ts'
 import type { Rng } from '../../random/rng.ts'
-import { type Rational, ONE, parseDecimal, rat, ratAdd, ratDiv, ratEq, ratMul, ratPowInt, ratToNumber } from '../../rational.ts'
+import { type Rational, ONE, parseDecimal, rat, ratAdd, ratCmp, ratDiv, ratEq, ratMul, ratPowInt, ratToNumber } from '../../rational.ts'
 import type { Level, TaskRef } from '../../tasks/taskNumber.ts'
 import {
   EQUILIBRIA,
@@ -163,6 +163,20 @@ const eqSign = (x: Rational) => (ratEq(roundSignificant(x).value, x) ? '=' : r`\
 const numbersOf = (side: readonly EqSpecies[], c: ReadonlyMap<string, Rational>) =>
   side.map((x) => (x.coef > 1 ? r`(${sig(c.get(x.ce)!)})^{${x.coef}}` : sig(c.get(x.ce)!))).join(r` \cdot `)
 
+// Zusatz zum Ergebnis: K_GG beschreibt die Lage des Gleichgewichts, nicht, welcher Stoff gerade die größte Konzentration
+// hat. Eine Seite nur bei deutlichem Abstand von 1 nennen; bei genau 1 ein neutraler Satz, dazwischen kein Zusatz.
+export const POSITION_NOTES = {
+  products: r`Weil $${K}$ mindestens 10 ist, liegt das Gleichgewicht auf der Seite der Produkte.`,
+  educts: r`Weil $${K}$ höchstens 0,1 ist, liegt das Gleichgewicht auf der Seite der Edukte.`,
+  balanced: r`Bei $${K} = 1$ sind Zähler und Nenner des Massenwirkungsgesetzes gleich groß; das Gleichgewicht liegt auf keiner Seite deutlich.`,
+}
+export function positionNote(k: Rational): string | undefined {
+  if (ratCmp(k, rat(10)) >= 0) return POSITION_NOTES.products
+  if (ratCmp(k, rat(1, 10)) <= 0) return POSITION_NOTES.educts
+  if (ratEq(k, ONE)) return POSITION_NOTES.balanced
+  return undefined
+}
+
 function kValueTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc | null {
   const e = rng.pick(EQUILIBRIA)
   const c = new Map([...e.left, ...e.right].map((x) => [x.ce, rng.pick(NICE_C)]))
@@ -179,6 +193,7 @@ function kValueTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemC
   if (choices.length === 0) return null
   const line = r`${K} = \frac{${numbersOf(e.right, c)}}{${numbersOf(e.left, c)}} ${eqSign(value)} ${sig(value)}`
   const given = [...e.left, ...e.right].map((x) => r`c(${ce(x.ce)}) = ${sig(c.get(x.ce)!)}\,\mathrm{mol/L}`)
+  const note = positionNote(value)
   return {
     task: {
       ref,
@@ -201,7 +216,7 @@ function kValueTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemC
       ],
       cards: [CARD.mwg, CARD.kWert],
       resultLatex: r`${K} ${eqSign(value)} ${sig(value)}`,
-      resultNote: size > 1 ? 'Im Gleichgewicht überwiegen die Produkte.' : 'Im Gleichgewicht überwiegen die Edukte.',
+      ...(note ? { resultNote: note } : {}),
     },
     form: `k-wert:${level}`,
     substance: e.id,

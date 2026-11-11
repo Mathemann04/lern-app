@@ -7,9 +7,9 @@ import { METALLE_BANK, ORDER_BO_IDS, bondOrderOf } from '../bank/metalle.ts'
 // Rechnungen „Metallbindung und Hybridisierung" (S5d): Daten gegen eine zweite Liste, Katalogbeispiele der Rechenfehler
 
 // Zweite, unabhängig eingetragene Liste: Bindungsordnungen (Lehrbuchwerte)
-const BO: Readonly<Record<string, number>> = { H2: 1, 'H2+': 0.5, He2: 0, 'He2+': 0.5, Li2: 1, Be2: 0, B2: 1, C2: 2, N2: 3, 'N2+': 2.5, O2: 2, 'O2+': 2.5, 'O2-': 1.5, F2: 1, Ne2: 0 }
+const BO: Readonly<Record<string, number>> = { H2: 1, 'H2+': 0.5, He2: 0, 'He2+': 0.5, Li2: 1, Be2: 0, B2: 1, C2: 2, N2: 3, 'N2+': 2.5, O2: 2, 'O2+': 2.5, 'O2-': 1.5, F2: 1, Ne2: 0, Cl2: 1 }
 // Valenzelektronen je Atom (für die Summe bindend + antibindend)
-const VE: Readonly<Record<string, number>> = { H: 1, He: 2, Li: 1, Be: 2, B: 3, C: 4, N: 5, O: 6, F: 7, Ne: 8 }
+const VE: Readonly<Record<string, number>> = { H: 1, He: 2, Li: 1, Be: 2, B: 3, C: 4, N: 5, O: 6, F: 7, Ne: 8, Cl: 7 }
 
 const wrongIn = (calc: { task: { steps: readonly { id: string; choices: readonly { errorRuleId?: string; content: string }[] }[] } } | null, step: string, rule: string) =>
   calc?.task.steps.find((s) => s.id === step)?.choices.find((c) => c.errorRuleId === rule)?.content

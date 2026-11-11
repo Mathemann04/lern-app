@@ -5,12 +5,14 @@ import { parseRichText } from '../../explain/richText.ts'
 import { latexProblem } from '../../expr/latexChecks.ts'
 import { CHEM_ERROR_RULES } from '../errorRules.ts'
 import { figureById } from '../figures.ts'
-import { TASK3_POINTS, buildTask3 } from './task3.ts'
+import { MISCONCEPTIONS_BY_COURSE } from '../misconceptions/index.ts'
+import { TASK3_POINTS, ZMK_QUESTIONS, buildTask3 } from './task3.ts'
 
 // Klausuraufgabe 3 (S5e): Aufbau, Punkte, saubere Texte, keine Stoffe der Altklausuren, Abwechslung
 
 const SEEDS = Array.from({ length: 200 }, (_, i) => i + 1)
-const RULES = new Set(CHEM_ERROR_RULES.map((r) => r.id))
+// Rechenfehler und Denkfehler der Wissensfragen
+const RULES = new Set([...CHEM_ERROR_RULES.map((r) => r.id), ...Object.values(MISCONCEPTIONS_BY_COURSE).flat().map((m) => m.id)])
 const truthAnswers = (task: ExamTask): Record<string, string> => Object.fromEntries([...truthOf(task)].map(([id, t]) => [id, t.option.id]))
 
 describe('Klausuraufgabe 3: Aufbau', () => {
@@ -27,7 +29,9 @@ describe('Klausuraufgabe 3: Aufbau', () => {
         expect(ids.length, `${seed} ${id}`).toBeLessThanOrEqual(4)
         expect(ids.filter((x) => x === build.correct), `${seed} ${id}`).toHaveLength(1)
         for (const o of build.options) {
-          if (o.id !== build.correct) expect(RULES.has(o.errorRuleId ?? ''), `${seed} ${id} ${o.errorRuleId}`).toBe(true)
+          // typischer Fehler aus dem Katalog oder weitere Antwort ohne Fehler (extraOptions.ts) mit Erklärung
+          if (o.id !== build.correct && o.errorRuleId) expect(RULES.has(o.errorRuleId), `${seed} ${id} ${o.errorRuleId}`).toBe(true)
+          if (o.id !== build.correct && !o.errorRuleId) expect(o.why?.detailed, `${seed} ${id}`).toBeTruthy()
           if (o.figure) expect(figureById(o.figure), o.figure).toBeDefined()
         }
       }
@@ -54,6 +58,43 @@ describe('Klausuraufgabe 3: Aufbau', () => {
           else expect(seg.text, `${seed}: Unicode-Index außerhalb von $…$`).not.toMatch(/[₀-₉⁰-⁹⁺⁻]/)
         }
       }
+    }
+  })
+
+  it('Abgleich mit den Altklausuren: vier Antworten bei Ionen und Siedepunkten (drei Stoffe), selbst schreiben zuerst, Wissensfrage zu Kräften', () => {
+    let knowledge = 0
+    for (const seed of SEEDS) {
+      const task = buildTask3(seed)
+      const truth = truthOf(task)
+      expect(truth.get('ionen')!.build.options, `${seed}`).toHaveLength(4)
+      expect(truth.get('formel')!.build.options.length, `${seed}`).toBeGreaterThanOrEqual(3)
+      expect(truth.get('sieden')!.build.options, `${seed}`).toHaveLength(4)
+      expect(truth.get('sieden')!.option.content.split(' < '), `${seed}`).toHaveLength(3)
+      const paper = itemsOf(task)
+        .filter((i) => i.paperFirst)
+        .map((i) => i.id)
+      expect(paper).toEqual(['ionen', 'formel', 'lewis'])
+      for (const item of itemsOf(task)) expect(item.final, `${seed} ${item.id}`).toBeUndefined()
+      const d = task.parts[3].items[0]
+      if (d.review) {
+        knowledge++
+        expect(ZMK_QUESTIONS).toContain(Math.floor((d.review.seed - 500_000) / 50))
+      }
+    }
+    expect(knowledge).toBeGreaterThan(40)
+    expect(knowledge).toBeLessThan(100)
+  })
+
+  it('Lewis-Formel, Paare und Gestalt zählen je 1 Punkt: die Gestalt allein gibt nicht die vollen Punkte', () => {
+    for (const seed of SEEDS.slice(0, 20)) {
+      const task = buildTask3(seed)
+      const truth = truthOf(task)
+      const wrong = (id: string) => truth.get(id)!.build.options.find((o) => o.id !== truth.get(id)!.build.correct)!.id
+      const answers = { lewis: wrong('lewis'), paare: wrong('paare'), gestalt: truth.get('gestalt')!.option.id, ionen: wrong('ionen'), formel: truth.get('formel')!.option.id }
+      const result = gradeExam(task, answers)
+      expect(result.parts[1].points, `${seed}`).toBe(1)
+      // Formel richtig, Ionen falsch: 1 von 2 Punkten
+      expect(result.parts[0].points, `${seed}`).toBe(1)
     }
   })
 

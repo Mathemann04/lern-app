@@ -224,7 +224,7 @@ export const MOLEKUELE_BANK: QuestionBank = {
       part: 'lewis',
       title: 'Oktettregel',
       prompt: 'Was besagt die Oktettregel für Moleküle?',
-      correct: 'Jedes Atom außer Wasserstoff hat acht Elektronen um sich; bindende Paare zählen für beide Partner mit.',
+      correct: 'In der Regel hat jedes Atom außer Wasserstoff acht Elektronen um sich; bindende Paare zählen für beide Partner mit.',
       wrong: [
         w('f1', 'Jedes Atom, auch Wasserstoff, hat acht Elektronen um sich.', 'chem-mis-mo-octet-hydrogen'),
         w('f2', 'Das ganze Molekül hat genau acht Valenzelektronen.', 'chem-mis-mo-octet-molecule'),
@@ -236,8 +236,8 @@ export const MOLEKUELE_BANK: QuestionBank = {
       ],
       hint: 'Das Oktett gilt für jedes einzelne Atom. Welche Elektronen zählen dabei mit?',
       explanation: {
-        detailed: 'Nach der Oktettregel hat jedes Atom in einem Molekül vier Elektronenpaare um sich, also acht Elektronen wie ein Edelgas. Bindende Paare zählen für beide Atome, freie Paare nur für ihr Atom. Wasserstoff ist schon mit zwei Elektronen zufrieden.',
-        short: 'Acht Elektronen um jedes Atom, Wasserstoff zwei.',
+        detailed: 'Nach der Oktettregel hat ein Atom in einem Molekül meist vier Elektronenpaare um sich, also acht Elektronen wie ein Edelgas. Bindende Paare zählen für beide Atome, freie Paare nur für ihr Atom. Wasserstoff ist schon mit zwei Elektronen zufrieden. Die Regel gilt nicht ausnahmslos: Bor kommt in Bortrifluorid mit sechs Elektronen aus.',
+        short: 'In der Regel acht Elektronen um jedes Atom, Wasserstoff zwei.',
       },
       cards: ['mol-paarbindung'],
       ref: REF_LEWIS,
@@ -687,7 +687,7 @@ export const MOLEKUELE_BANK: QuestionBank = {
         short: r`$\ce{H-C}$ einfach, $\ce{C#N}$ dreifach.`,
       },
       cards: ['mol-mehrfach'],
-      ref: REF_UEBUNG,
+      ref: REF_MEHRFACH,
     }),
     v({
       id: 'mo-v-typ-e',
@@ -1213,7 +1213,7 @@ export const MOLEKUELE_BANK: QuestionBank = {
         short: r`$\ce{H2S}$ und $\ce{OF2}$: $\mathrm{AX_2E_2}$.`,
       },
       cards: ['mol-gestalt'],
-      ref: REF_UEBUNG,
+      ref: REF_BEISPIELE,
     }),
     k({
       id: 'mo-k-ammoniak-nicht-planar',
@@ -1266,7 +1266,7 @@ export const MOLEKUELE_BANK: QuestionBank = {
         short: r`$\mathrm{AX_3}$, trigonal-planar.`,
       },
       cards: ['mol-gestalt', 'mol-mehrfach'],
-      ref: REF_UEBUNG,
+      ref: REF_VSEPR,
       figure: 'lewis:COCl2',
     }),
     k({
@@ -1339,7 +1339,7 @@ export const MOLEKUELE_BANK: QuestionBank = {
       ],
       hint: 'Prüfe jedes Molekül: polare Bindungen? Und hebt die Gestalt sie auf?',
       explanation: {
-        detailed: 'Wasser ist gewinkelt, Ammoniak pyramidal, Chlorwasserstoff hat nur eine polare Bindung: Alle drei sind polar. Kohlenstoffdioxid (linear), Tetrachlormethan (tetraedrisch) und Bortrifluorid (trigonal-planar) heben ihre polaren Bindungen auf; Methan und Chlor haben keine polaren Bindungen.',
+        detailed: 'Wasser ist gewinkelt, Ammoniak pyramidal, Chlorwasserstoff hat nur eine polare Bindung: Alle drei sind polar. Kohlenstoffdioxid (linear), Tetrachlormethan (tetraedrisch) und Bortrifluorid (trigonal-planar) heben ihre polaren Bindungen auf; die $\\ce{B-F}$-Bindungen sind stark polare Atombindungen zwischen zwei Nichtmetallen, auch wenn $\\Delta \\mathrm{EN}$ knapp über 1,8 liegt; Methan und Chlor haben keine polaren Bindungen.',
         short: 'Wasser, Ammoniak und Chlorwasserstoff.',
       },
       cards: ['mol-dipol'],
@@ -1361,7 +1361,7 @@ export const MOLEKUELE_BANK: QuestionBank = {
       ],
       hint: 'Unpolar heißt: keine polaren Bindungen, oder gleiche polare Bindungen in symmetrischer Anordnung.',
       explanation: {
-        detailed: 'Kohlenstoffdioxid ist linear, Bortrifluorid trigonal-planar, jeweils mit gleichen Partnern: Die polaren Bindungen heben sich auf. Methan hat nahezu unpolare Bindungen. Wasser und Ammoniak sind wegen ihrer freien Paare unsymmetrisch; Chlormethan und Chlorwasserstoff haben verschiedene Partner.',
+        detailed: 'Kohlenstoffdioxid ist linear, Bortrifluorid trigonal-planar, jeweils mit gleichen Partnern: Die polaren Bindungen heben sich auf. Die $\\ce{B-F}$-Bindungen sind dabei stark polare Atombindungen; zwei Nichtmetalle bilden keine Ionenbindung, auch wenn $\\Delta \\mathrm{EN}$ knapp über 1,8 liegt. Methan hat nahezu unpolare Bindungen. Wasser und Ammoniak sind wegen ihrer freien Paare unsymmetrisch; Chlormethan und Chlorwasserstoff haben verschiedene Partner.',
         short: 'Kohlenstoffdioxid, Methan und Bortrifluorid.',
       },
       cards: ['mol-dipol'],
@@ -1458,6 +1458,123 @@ export const MOLEKUELE_BANK: QuestionBank = {
       cards: ['mol-namen'],
       ref: REF_NAMEN,
     }),
+    // ---- Ergänzt nach dem Abgleich mit den Skripten (11.11.2026)
+    g({
+      id: 'mo-g-wasserstoffverbindungen',
+      no: 119,
+      fact: 'h-verbindungen-formel',
+      part: 'lewis',
+      title: 'Zahl der Bindungen',
+      prompt: 'Chlor, Schwefel, Phosphor und Silicium bilden mit Wasserstoff Moleküle aus Einfachbindungen. Welche Formeln haben diese Wasserstoffverbindungen?',
+      correct: r`$\ce{HCl}$, $\ce{H2S}$, $\ce{PH3}$, $\ce{SiH4}$`,
+      wrong: [
+        w('f1', r`$\ce{H2Cl2}$, $\ce{H2S}$, $\ce{PH3}$, $\ce{SiH4}$`, 'chem-mis-mo-element-x2'),
+        w('f2', r`$\ce{HCl}$, $\ce{SH3}$, $\ce{PH3}$, $\ce{SiH4}$`, 'chem-mis-mo-h-count'),
+        w('f3', r`$\ce{ClH7}$, $\ce{SH6}$, $\ce{PH5}$, $\ce{SiH4}$`, 'chem-mis-mo-bonds-valence', {
+          detailed: 'Nicht jedes Valenzelektron bildet eine Bindung. Ein Atom bindet nur so oft, wie ihm Elektronen bis zum Oktett fehlen; die übrigen Valenzelektronen bleiben als freie Paare an ihm.',
+          short: 'Bindungen = Elektronen, die zum Oktett fehlen.',
+        }),
+        w('f4', r`$\ce{HCl}$, $\ce{HS}$, $\ce{PH2}$, $\ce{SiH3}$`, 'chem-mis-mo-h-count', {
+          detailed: 'Jedes H-Atom bringt dem Nichtmetall über eine gemeinsame Bindung ein Elektron. Es braucht so viele davon, wie ihm bis acht fehlen: acht minus die Nummer seiner Hauptgruppe. Zähl für jedes Element nach.',
+          short: 'Acht minus Hauptgruppe, für jedes Element.',
+        }),
+      ],
+      hint: 'Ein Atom bildet so viele Bindungen, wie ihm Elektronen zum Oktett fehlen. In welcher Hauptgruppe steht jedes Element?',
+      explanation: {
+        detailed: r`Chlor (VII. Hauptgruppe) fehlt ein Elektron: eine Bindung, $\ce{HCl}$. Schwefel (VI.) fehlen zwei: $\ce{H2S}$, gebaut wie Wasser. Phosphor (V.) fehlen drei: $\ce{PH3}$ wie Ammoniak. Silicium (IV.) fehlen vier: $\ce{SiH4}$ wie Methan. Jedes H-Atom bildet genau eine Bindung.`,
+        short: 'Bindungen = acht minus Hauptgruppe: 1, 2, 3, 4.',
+      },
+      cards: ['mol-paarbindung'],
+      ref: REF_LEWIS,
+    }),
+    v({
+      id: 'mo-v-dipol-feld',
+      no: 223,
+      fact: 'dipol-im-feld',
+      part: 'polaritaet',
+      title: 'Dipole im elektrischen Feld',
+      prompt: 'Man bringt ein Gas aus polaren Molekülen zwischen zwei Metallplatten und lädt die eine positiv, die andere negativ auf. Was tun die Moleküle?',
+      correct: 'Sie drehen sich, bis ihr negatives Ende zur positiven und ihr positives Ende zur negativen Platte zeigt.',
+      wrong: [
+        w('f1', 'Nichts; Dipolmoleküle richten sich nur in einem Magnetfeld aus.', 'chem-mis-mo-field-magnetic'),
+        w('f2', 'Sie zerfallen in Ionen, die zu den Platten wandern.', 'chem-mis-mo-dipole-charged', {
+          detailed: 'Ein Dipol ist insgesamt neutral; seine Teilladungen sind fest an das Molekül gebunden. Die Platten trennen die Atome nicht voneinander, sie drehen nur das ganze Molekül.',
+          short: 'Ein Dipol bleibt ein neutrales Molekül.',
+        }),
+        w('f3', 'Sie drehen ihr negatives Ende zur negativen Platte.', 'chem-mis-mo-partial-swapped', {
+          detailed: 'Gleiche Ladungen stoßen sich ab, entgegengesetzte ziehen sich an. Überlege, welche Platte das negative Ende eines Dipols anzieht.',
+          short: 'Entgegengesetzte Ladungen ziehen sich an.',
+        }),
+        w('f4', r`Sie drehen sich, und unpolare Moleküle wie $\ce{CO2}$ drehen sich genauso.`, 'chem-mis-mo-polar-bond-molecule', {
+          detailed: r`In $\ce{CO2}$ heben sich die beiden Bindungsdipole auf; das Molekül hat kein Dipolmoment. Ohne getrennte Ladungsschwerpunkte gibt es nichts, woran das Feld drehen könnte.`,
+          short: 'Ohne Dipolmoment keine Ausrichtung.',
+        }),
+      ],
+      hint: 'Ein Dipol hat ein negatives und ein positives Ende. Welches Ende zieht welche Platte an?',
+      explanation: {
+        detailed: 'Zwischen geladenen Platten herrscht ein elektrisches Feld. Es zieht das negative Ende eines Dipols zur positiven Platte und das positive Ende zur negativen: Die Moleküle richten sich aus. Unpolare Moleküle haben keine getrennten Ladungsschwerpunkte und drehen sich nicht.',
+        short: 'Dipole richten sich im elektrischen Feld aus.',
+      },
+      cards: ['mol-dipol'],
+      ref: 'Skript Kovalente Bindung, Folie 7',
+    }),
+    k({
+      id: 'mo-k-dipolmoment-summe',
+      no: 317,
+      fact: 'dipolmoment-vektorsumme',
+      part: 'polaritaet',
+      title: 'Dipolmoment des Moleküls',
+      prompt: r`$\ce{CO2}$ und $\ce{H2O}$ haben je zwei polare Bindungen. Wie ergibt sich daraus das Dipolmoment des ganzen Moleküls?`,
+      correct: r`Die Bindungsdipole werden als Pfeile mit Richtung addiert: In $\ce{CO2}$ zeigen sie entgegengesetzt und heben sich auf, in $\ce{H2O}$ zeigen sie schräg zur selben Seite und ergeben einen Dipol.`,
+      wrong: [
+        w('f1', r`Man addiert die Bindungsdipole als Zahlen; beide Moleküle haben deshalb ein Dipolmoment.`, 'chem-mis-mo-dipole-scalar'),
+        w('f2', r`Man zieht die beiden Bindungsdipole voneinander ab; bei zwei gleichen Bindungen ist das Molekül immer unpolar, auch $\ce{H2O}$.`, 'chem-mis-mo-symmetry-assumed', {
+          detailed: r`Abziehen passt nur, wenn zwei gleich große Pfeile genau entgegengesetzt zeigen. In einem gewinkelten Molekül stehen sie schräg zueinander; ihre Summe hängt vom Winkel ab.`,
+          short: 'Es kommt auf den Winkel zwischen den Pfeilen an.',
+        }),
+        w('f3', 'Das Dipolmoment hängt nur von der Gesamtladung des Moleküls ab, nicht von den Bindungen.', 'chem-mis-mo-dipole-charged'),
+        w('f4', r`Es zählt nur die am stärksten polare Bindung; deshalb sind beide Moleküle Dipole.`, 'chem-mis-mo-polar-bond-molecule', {
+          detailed: 'Alle Bindungen tragen zum Dipolmoment bei, jede mit ihrer Richtung. Erst ihre Summe sagt, ob das Molekül ein Dipol ist.',
+          short: 'Alle Bindungsdipole zählen, mit Richtung.',
+        }),
+      ],
+      hint: r`Jeder Bindungsdipol $\vec{\mu} = q \cdot \vec{d}$ hat eine Richtung. Wie liegen die beiden Pfeile in einem linearen und in einem gewinkelten Molekül?`,
+      explanation: {
+        detailed: r`Jede polare Bindung hat ein Dipolmoment $\vec{\mu} = q \cdot \vec{d}$ (Ladung mal Abstand), also einen Pfeil mit Richtung. Das Dipolmoment des Moleküls ist die Summe dieser Pfeile: $\vec{\mu}_{\text{ges}} = \vec{\mu}_1 + \vec{\mu}_2$. In linearem $\ce{CO2}$ heben sich zwei gleiche, entgegengesetzte Pfeile auf; in gewinkeltem $\ce{H2O}$ bleibt eine Summe übrig.`,
+        short: 'Bindungsdipole als Vektoren addieren; die Gestalt entscheidet.',
+      },
+      cards: ['mol-dipol'],
+      ref: REF_GESAMTDIPOL,
+      figure: 'gestalt:H2O',
+    }),
+    k({
+      id: 'mo-k-en-paare',
+      no: 318,
+      fact: 'en-nur-gebundene',
+      part: 'polaritaet',
+      title: 'Bindungen einordnen',
+      prompt: r`In hypochloriger Säure $\ce{H-O-Cl}$ sitzt der Sauerstoff in der Mitte. Für welche Atompaare rechnet man $\Delta \mathrm{EN}$ aus, um die Bindungen einzuordnen?`,
+      correct: r`für $\ce{O-H}$ und $\ce{O-Cl}$`,
+      wrong: [
+        w('f1', r`für H und Cl, weil sie an den beiden Enden sitzen`, 'chem-mis-mo-en-unbonded'),
+        w('f2', r`für alle drei Paare: $\ce{O-H}$, $\ce{O-Cl}$ und H mit Cl`, 'chem-mis-mo-en-unbonded'),
+        w('f3', r`nur für $\ce{O-H}$, weil Chlor und Sauerstoff beide Nichtmetalle sind`, 'chem-mis-mo-same-atoms-polar', {
+          detailed: 'Auch zwei Nichtmetalle können sich in der Elektronegativität unterscheiden; gleich sind nur gleiche Atome. Jede Bindung zwischen verschiedenen Atomen gehört eingeordnet.',
+          short: 'Verschiedene Atome: Unterschied ausrechnen.',
+        }),
+        w('f4', r`einmal für das ganze Molekül: größter minus kleinster Wert aller Atome`, 'chem-mis-mo-en-unbonded', {
+          detailed: 'Die Elektronegativität beschreibt das Teilen eines Paars zwischen zwei verbundenen Atomen. Ein Wert für das ganze Molekül mischt Atome, die gar keine Bindung miteinander haben.',
+          short: 'Je Bindung ein Unterschied.',
+        }),
+      ],
+      hint: 'Ein Unterschied der Elektronegativität gehört zu einer Bindung. Welche Atome verbindet in der Formel ein Strich?',
+      explanation: {
+        detailed: r`$\Delta \mathrm{EN}$ beschreibt, wie ungleich zwei verbundene Atome ihr gemeinsames Paar teilen. In $\ce{H-O-Cl}$ gibt es zwei Bindungen, beide am Sauerstoff: $\ce{O-H}$ und $\ce{O-Cl}$. Wasserstoff und Chlor sind nicht miteinander verbunden; zwischen ihnen gibt es kein gemeinsames Paar.`,
+        short: r`Nur die Bindungen $\ce{O-H}$ und $\ce{O-Cl}$.`,
+      },
+      cards: ['mol-en'],
+      ref: REF_EN,
+    }),
     // ---- Wähle alle richtigen (N1)
     multiAt(1)({
       id: 'mo-g-multi-paarbindung',
@@ -1482,7 +1599,7 @@ export const MOLEKUELE_BANK: QuestionBank = {
       ],
       hint: 'Wem gehört ein bindendes Paar, und wie viele Elektronen braucht jedes Atom für seine volle Schale?',
       explanation: why(
-        'In der Elektronenpaarbindung, typisch zwischen Nichtmetallatomen, gehört ein gemeinsames Paar beiden Atomen; in der Lewis-Formel steht es als Strich für zwei Elektronen, gezeichnet werden nur die Valenzelektronen. Jedes Atom außer Wasserstoff hat acht Elektronen um sich, Wasserstoff zwei wie Helium. Ein Atom bildet so viele Bindungen, wie ihm Elektronen zum Oktett fehlen: Sauerstoff zwei.',
+        'In der Elektronenpaarbindung, typisch zwischen Nichtmetallatomen, gehört ein gemeinsames Paar beiden Atomen; in der Lewis-Formel steht es als Strich für zwei Elektronen, gezeichnet werden nur die Valenzelektronen. In der Regel hat jedes Atom außer Wasserstoff acht Elektronen um sich, Wasserstoff zwei wie Helium. Ein Atom bildet so viele Bindungen, wie ihm Elektronen zum Oktett fehlen: Sauerstoff zwei.',
         'Gemeinsames Paar zwischen Nichtmetallen; Strich = zwei Elektronen; Wasserstoff zwei, Sauerstoff zwei Bindungen.',
       ),
       cards: ['mol-paarbindung', 'mol-lewis'],

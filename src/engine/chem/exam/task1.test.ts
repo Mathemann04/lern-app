@@ -7,7 +7,8 @@ import { CHEM_ERROR_RULES } from '../errorRules.ts'
 import { elementBySymbol } from '../elements.ts'
 import { MISCONCEPTIONS_BY_COURSE } from '../misconceptions/index.ts'
 import { figureById } from '../figures.ts'
-import { TASK1_POINTS, buildTask1, particleItem } from './task1.ts'
+import { EXAM_PARTICLES, symbolLatex } from '../generators/particles.ts'
+import { CHARGE_ASSIGNMENT, TASK1_POINTS, buildTask1, particleItem } from './task1.ts'
 
 // Klausuraufgabe 1 (S6b): Aufbau, Punkte, saubere Texte, Teilchenzahlen richtig, Abwechslung
 
@@ -31,7 +32,8 @@ describe('Klausuraufgabe 1: Aufbau', () => {
         expect(ids.filter((x) => x === build.correct), `${seed} ${id}`).toHaveLength(1)
         for (const o of build.options) {
           if (o.id !== build.correct) {
-            expect(RULES.has(o.errorRuleId ?? ''), `${seed} ${id} ${o.errorRuleId}`).toBe(true)
+            // typischer Fehler aus dem Katalog oder weitere Antwort ohne Fehler (extraOptions.ts), immer mit Erklärung
+            if (o.errorRuleId) expect(RULES.has(o.errorRuleId), `${seed} ${id} ${o.errorRuleId}`).toBe(true)
             expect(o.why?.detailed, `${seed} ${id}`).toBeTruthy()
           }
           if (o.figure) expect(figureById(o.figure), o.figure).toBeDefined()
@@ -69,6 +71,39 @@ describe('Klausuraufgabe 1: Aufbau', () => {
     const byRule = Object.fromEntries(cl.options.filter((o) => o.errorRuleId).map((o) => [o.errorRuleId, o.content]))
     expect(byRule['chem-neutrons-mass-number']).toBe('$17$ Protonen, $37$ Neutronen, $18$ Elektronen')
     expect(byRule['chem-ion-charge-ignored']).toBe('$17$ Protonen, $20$ Neutronen, $17$ Elektronen')
+  })
+
+  it('ungeladenes Atom im Kernsymbol: vier Antworten, Elektronen gleich Protonen', () => {
+    const c = particleItem({ el: elementBySymbol('C')!, a: 13, q: 0 }).build(() => null!, () => null!)
+    expect(c.correct).toBe('$6$ Protonen, $7$ Neutronen, $6$ Elektronen')
+    expect(c.options).toHaveLength(4)
+    for (const o of c.options) if (o.id !== c.correct) expect(o.why?.detailed).toBeTruthy()
+  })
+
+  it('Abgleich mit den Altklausuren: eigener Wortlaut, Atome und Ionen, Ladungen zuordnen oft, kein O und Cl in Teil d, jede Frage zählt für sich', () => {
+    let neutral = 0
+    let assignment = 0
+    let valenceQuestion = 0
+    for (const seed of SEEDS) {
+      const task = buildTask1(seed)
+      const [a, , c, d] = task.parts
+      expect(c.items[0].question).toMatch(/^Bestimme die Zahl der Protonen, Neutronen und Elektronen von /)
+      // keine Teilchen der Altklausuren und Übungsblätter
+      for (const [symbol, a, q] of EXAM_PARTICLES) expect(c.items[0].question, `${seed}`).not.toContain(`$${symbolLatex({ el: elementBySymbol(symbol)!, a, q })}$`)
+      if (!/\^\{?[0-9]*[+-]/.test(c.items[0].question.replace(/\^\{\d+\}_\{\d+\}/, ''))) neutral++
+      const no = Math.floor((a.items[0].review!.seed - 500_000) / 50)
+      if (no === CHARGE_ASSIGNMENT) assignment++
+      expect(d.prompt, `${seed}`).not.toMatch(/\(\$\\ce\{(O|Cl)\}\$\)/)
+      if (d.items[0].id === 'valenzelektron') valenceQuestion++
+      for (const item of itemsOf(task)) expect(item.final, `${seed} ${item.id}`).toBeUndefined()
+      // jede Frage mit drei oder vier Antworten
+      for (const [id, { build }] of truthOf(task)) expect(build.options.length, `${seed} ${id}`).toBeGreaterThanOrEqual(3)
+    }
+    expect(neutral).toBeGreaterThan(50)
+    expect(neutral).toBeLessThan(120)
+    expect(assignment).toBeGreaterThan(70)
+    expect(valenceQuestion).toBeGreaterThan(60)
+    expect(valenceQuestion).toBeLessThan(140)
   })
 
   it('viel Abwechslung: verschiedene Teilchen, Begriffsfragen, Elemente, Modell oder Licht', () => {

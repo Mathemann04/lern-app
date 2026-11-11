@@ -13,7 +13,7 @@ export const ENERGIE_CARDS: readonly Card[] = [
     rules: [],
     formulas: [r`\Delta H < 0:\ \text{exotherm}`, r`\Delta H > 0:\ \text{endotherm}`],
     memo: 'Die Reaktionsenthalpie $\\Delta H$ zählt aus Sicht der Stoffe. Geben sie Wärme an die Umgebung ab, verlieren sie Energie: $\\Delta H < 0$, exotherm. Nehmen sie Wärme auf: $\\Delta H > 0$, endotherm.',
-    note: 'Schmelzen, Verdampfen und Sublimieren brauchen Wärme (Anziehungskräfte werden überwunden); Erstarren, Kondensieren und Resublimieren geben Wärme ab. Die Rückreaktion hat dasselbe $\\Delta H$ mit umgekehrtem Vorzeichen.',
+    note: 'Schmelzen, Verdampfen und Sublimieren brauchen Wärme (Anziehungskräfte werden überwunden); Erstarren, Kondensieren und Resublimieren geben Wärme ab. Die Rückreaktion hat dasselbe $\\Delta H$ mit umgekehrtem Vorzeichen. Hinter $\\Delta H$ steht die Enthalpie $H = U + p \\cdot V$, also die innere Energie $U$ plus Druck mal Volumen.',
     examples: [
       { chemTask: 'Verbrennung von Erdgas', lines: [{ label: 'Wärme wird frei: exotherm', latex: r`\Delta H < 0` }] },
       { chemTask: 'Wasser verdampft', lines: [{ label: 'Wärme wird aufgenommen: endotherm', latex: r`\Delta H > 0` }] },
@@ -28,7 +28,7 @@ export const ENERGIE_CARDS: readonly Card[] = [
     level: 1,
     rules: [],
     formulas: [],
-    memo: 'Die Standardbildungsenthalpie $\\Delta_f H^{0}$ ist die Enthalpieänderung, wenn 1 mol eines Stoffs aus seinen Elementen entsteht, bei 25 °C und 1013 hPa. Elemente in ihrem Standardzustand haben den Wert 0.',
+    memo: 'Die Standardbildungsenthalpie $\\Delta_f H^{0}$ (im Skript $\\Delta H_f^{0}$ geschrieben; beides meint dasselbe) ist die Enthalpieänderung, wenn 1 mol eines Stoffs aus seinen Elementen entsteht, bei 25 °C und 1013 hPa. Elemente in ihrem Standardzustand haben den Wert 0.',
     note: 'Standardzustand ist die stabilste Form bei 25 °C und 1013 hPa: $\\ce{O2(g)}$, $\\ce{N2(g)}$, $\\ce{Br2(l)}$, $\\ce{I2(s)}$, Kohlenstoff als Graphit. Andere Formen wie $\\ce{O3(g)}$, $\\ce{Br2(g)}$ oder Diamant haben Werte ungleich 0. Die hochgestellte 0 steht für Standardbedingungen.',
     examples: [
       { chemTask: r`$\ce{H2O(l)}$ und $\ce{H2O(g)}$`, lines: [{ label: 'zwei Zustände, zwei Werte in kJ/mol', latex: r`-285{,}8 \quad \text{bzw.} \quad -241{,}8` }] },
@@ -62,7 +62,7 @@ export const ENERGIE_CARDS: readonly Card[] = [
     rules: [],
     formulas: [],
     memo: 'Erster Hauptsatz: Energie bleibt erhalten; sie wird nur umgewandelt oder übertragen. Zweiter Hauptsatz: Die Entropie eines abgeschlossenen Systems nimmt nicht ab, bei freiwilligen Vorgängen nimmt sie zu. Dritter Hauptsatz: Den absoluten Nullpunkt kann man nicht erreichen.',
-    note: 'Der Hauptsatz Nummer 0 macht die Temperatur zur Grundlage des thermischen Gleichgewichts. Beim zweiten Hauptsatz zählen Stoffe und Umgebung zusammen: Die Entropie der Stoffe kann sinken, wenn die der Umgebung stärker steigt.',
+    note: 'Der Hauptsatz Nummer 0 macht die Temperatur zur Grundlage des thermischen Gleichgewichts. Beim zweiten Hauptsatz zählen Stoffe und Umgebung zusammen: Die Entropie der Stoffe kann sinken, wenn die der Umgebung stärker steigt. Liest du, bei einer freiwilligen (spontanen) Reaktion nehme die Entropie zu, ist deshalb die Entropie insgesamt gemeint, von Stoffen und Umgebung zusammen; schaut man nur auf die Stoffe, entscheidet $\\Delta G$, nicht $\\Delta S$.',
     examples: [
       { chemTask: 'Verbrennung von Methan', lines: [{ label: 'Die Wärme stammt aus den Stoffen; keine Energie entsteht neu.' }] },
       { chemTask: 'Wasser gefriert im Gefrierfach', lines: [{ label: 'Entropie des Wassers sinkt, die der Umgebung steigt stärker.' }] },
@@ -91,7 +91,7 @@ export const ENERGIE_CARDS: readonly Card[] = [
     level: 2,
     rules: [],
     formulas: [r`\Delta G = \Delta H - T \cdot \Delta S`],
-    memo: 'Ob eine Reaktion freiwillig abläuft, entscheidet die freie Enthalpie $\\Delta G$: $\\Delta G < 0$ exergonisch, sie läuft freiwillig ab; $\\Delta G > 0$ endergonisch, sie läuft nicht freiwillig ab. $T$ in Kelvin, $\\Delta S$ in kJ/K, wenn $\\Delta H$ in kJ steht.',
+    memo: 'Ob eine Reaktion freiwillig (im Skript: spontan) abläuft, entscheidet die Änderung der freien Enthalpie $\\Delta G$; $G$ heißt freie Enthalpie oder Gibbs-Energie. $\\Delta G < 0$ exergonisch, sie läuft freiwillig ab; $\\Delta G > 0$ endergonisch, sie läuft nicht freiwillig ab. $T$ in Kelvin, $\\Delta S$ in kJ/K, wenn $\\Delta H$ in kJ steht.',
     note: 'Exergonisch ist nicht exotherm: Auch endotherme Reaktionen laufen freiwillig ab, wenn $T \\cdot \\Delta S$ groß genug ist. Freiwillig heißt nicht schnell; die Geschwindigkeit hängt von der Aktivierungsenergie ab, und ein Katalysator ändert $\\Delta G$ nicht.',
     examples: [
       { chemTask: r`$\Delta H < 0$, $\Delta S > 0$ bzw. $\Delta H > 0$, $\Delta S < 0$`, lines: [{ label: 'freiwillig bei jeder Temperatur bzw. bei keiner' }] },
@@ -136,15 +136,15 @@ export const ENERGIE_CARDS: readonly Card[] = [
     title: 'Freie Standardenthalpie und Gleichgewichtskonstante',
     level: 3,
     rules: [],
-    formulas: [r`\Delta G^{0} = -R \cdot T \cdot \ln K`, r`K = e^{-\frac{\Delta G^{0}}{R \cdot T}}`],
-    memo: 'Aus $\\Delta G^{0}$ folgt die Gleichgewichtskonstante: $\\Delta G^{0} < 0$ gibt $K > 1$ (Produkte überwiegen), $\\Delta G^{0} > 0$ gibt $K < 1$, $\\Delta G^{0} = 0$ gibt $K = 1$.',
+    formulas: [r`\Delta G^{0} = -R \cdot T \cdot \ln K_{\mathrm{GG}}`, r`K_{\mathrm{GG}} = e^{-\frac{\Delta G^{0}}{R \cdot T}}`],
+    memo: 'Aus $\\Delta G^{0}$ folgt die Gleichgewichtskonstante: $\\Delta G^{0} < 0$ gibt $K_{\\mathrm{GG}} > 1$ (Lage eher auf der Seite der Produkte), $\\Delta G^{0} > 0$ gibt $K_{\\mathrm{GG}} < 1$, $\\Delta G^{0} = 0$ gibt $K_{\\mathrm{GG}} = 1$.',
     note: '$R = 8{,}314\\,\\mathrm{J/(mol \\cdot K)}$, also $\\Delta G^{0}$ in J/mol einsetzen und $T$ in Kelvin. Es ist der natürliche Logarithmus; zurück geht es mit der e-Funktion.',
     examples: [
       {
         chemTask: r`$\Delta G^{0} = -11{,}4\,\mathrm{kJ/mol}$ bei 25 °C`,
-        lines: [{ label: 'eingesetzt', latex: r`\ln K = \frac{11\,400}{8{,}314 \cdot 298{,}15} \approx 4{,}60, \quad K \approx 99{,}4` }],
+        lines: [{ label: 'eingesetzt', latex: r`\ln K_{\mathrm{GG}} = \frac{11\,400}{8{,}314 \cdot 298{,}15} \approx 4{,}60, \quad K_{\mathrm{GG}} \approx 99{,}4` }],
       },
-      { chemTask: r`$\Delta G^{0} = 0$`, lines: [{ label: 'Edukte und Produkte ausgeglichen', latex: r`K = 1` }] },
+      { chemTask: r`$\Delta G^{0} = 0$`, lines: [{ label: 'Zähler und Nenner des Massenwirkungsgesetzes gleich groß', latex: r`K_{\mathrm{GG}} = 1` }] },
     ],
     errors: ['chem-dg-lg', 'chem-mis-en-k-sign', 'chem-mis-en-lg'],
   },

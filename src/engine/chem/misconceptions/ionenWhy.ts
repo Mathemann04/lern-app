@@ -64,8 +64,8 @@ export const IONEN_WHY: Readonly<Record<string, Explanation>> = {
     short: "Salznamen haben keine Zahlwörter; die Anzahlen folgen aus den Ladungen.",
   },
   'chem-mis-io-numeral-always': {
-    detailed: "Die Ziffer klärt nur, welches Ion gemeint ist, wenn ein Metall Ionen mit verschiedenen Ladungen bilden kann, etwa Eisen oder Mangan. Alkali- und Erdalkalimetalle sowie Aluminium bilden nur ein Ion; bei ihnen ist die Ladung klar, und die Ziffer entfällt.",
-    short: "Die Ziffer steht nur bei Metallen mit mehreren möglichen Ladungen.",
+    detailed: "Die Ziffer klärt, welches Ion gemeint ist, wenn ein Metall Ionen mit verschiedenen Ladungen bilden kann, etwa Eisen oder Mangan. Alkali- und Erdalkalimetalle, Aluminium, Zink und Silber bilden nur ein Ion; bei ihnen ist der Name auch ohne Ziffer eindeutig. Bei eindeutiger Ladung lässt man sie deshalb üblicherweise weg.",
+    short: "Nötig ist die Ziffer nur bei Metallen mit mehreren möglichen Ladungen.",
   },
   'chem-mis-io-name-order': {
     detailed: String.raw`Wie in der Formel kommt auch im Namen zuerst das Kation, meist das Metall, und danach das Anion. So wird aus $\ce{NaCl}$ der Name Natriumchlorid.`,
@@ -138,6 +138,18 @@ export const IONEN_WHY: Readonly<Record<string, Explanation>> = {
   'chem-mis-io-crystal-look': {
     detailed: "Kristallin beschreibt den inneren Aufbau, nicht das Aussehen. Glas ist durchsichtig und trotzdem amorph, ein Metall ist undurchsichtig und trotzdem kristallin. Entscheidend ist, ob die Teilchen regelmäßig in einem Gitter angeordnet sind.",
     short: "Kristallin betrifft die Anordnung der Teilchen, nicht das Aussehen.",
+  },
+  'chem-mis-io-all-soluble': {
+    detailed: "Ob sich ein Salz löst, hängt davon ab, wie fest seine Ionen zusammenhalten. Bei kleinen Ionen mit hohen Ladungen ist die Anziehung im Gitter so stark, dass Wasser sie kaum trennen kann; solche Salze lösen sich schlecht oder praktisch gar nicht.",
+    short: "Nicht jedes Salz ist gut löslich; starke Anziehung im Gitter erschwert das Lösen.",
+  },
+  'chem-mis-io-charge-soluble': {
+    detailed: "Höhere Ladungen ziehen zwar das Wasser stärker an, sie halten aber vor allem die Ionen im Gitter viel fester zusammen. Löslichkeit, Schmelzpunkt und Härte folgen in erster Linie der Anziehung zwischen den Ionen: Je stärker sie ist, desto schwerer löst sich ein Salz.",
+    short: "Hohe Ladungen halten das Gitter fester zusammen und erschweren das Lösen.",
+  },
+  'chem-mis-io-atom-crystal-weak': {
+    detailed: "In einem Atomkristall verbinden Atombindungen jeden Baustein mit seinen Nachbarn; der ganze Kristall ist ein einziges Netz aus starken Bindungen. Um ihn zu schmelzen oder zu ritzen, muss man solche Bindungen aufbrechen.",
+    short: "Im Atomkristall halten starke Atombindungen alles zusammen.",
   },
   'chem-mis-io-cell-is-unit': {
     detailed: "Die Elementarzelle ist das kleinste Stück, aus dem sich das Gitter durch Aneinanderreihen aufbauen lässt. Wie viele Formeleinheiten sie enthält, hängt vom Gittertyp ab. Man zählt es aus, indem man jedes Ion nach seinem Anteil an der Zelle gewichtet.",

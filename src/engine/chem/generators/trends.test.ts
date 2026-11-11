@@ -36,7 +36,7 @@ describe('Messwerte der Trends', () => {
   it('fragt die Paare aus docs/CHEMIE.md §6 nie', () => {
     const never: [Property, string, string][] = [
       ['ie', 'Mg', 'Al'], ['ie', 'N', 'O'], ['ie', 'Be', 'B'], ['ie', 'P', 'S'], ['ie', 'Al', 'Ga'], ['ie', 'Sn', 'Pb'], ['ie', 'Pb', 'Bi'], ['ie', 'C', 'Si'],
-      ['en', 'K', 'Rb'], ['en', 'Al', 'Ga'], ['en', 'C', 'Si'], ['en', 'B', 'Al'],
+      ['en', 'K', 'Rb'], ['en', 'K', 'Cs'], ['en', 'Rb', 'Cs'], ['en', 'Ca', 'Sr'], ['en', 'Al', 'Ga'], ['en', 'C', 'Si'], ['en', 'B', 'Al'],
       ['radius', 'As', 'Se'], ['radius', 'Se', 'Br'], ['radius', 'Sn', 'Sb'], ['radius', 'Te', 'I'], ['radius', 'Pb', 'Bi'],
       // Diagonale
       ['radius', 'Na', 'Ca'], ['en', 'Li', 'Mg'],
@@ -45,6 +45,22 @@ describe('Messwerte der Trends', () => {
     // jede Reihe besteht nur aus vergleichbaren Paaren
     for (const prop of ['radius', 'ie', 'en'] as const)
       for (const line of [...lines(prop, 3), ...lines(prop, 4)]) for (const [i, a] of line.entries()) for (const b of line.slice(i + 1)) expect(comparable(prop, a, b)).toBe(true)
+  })
+
+  it('erzeugt die Reihen der Übungsblätter nicht (Atomradius Na, Mg, Cl und Li, Na, K; Ionen wie Neon O, F, Na, Mg)', () => {
+    const keys = lines('radius', 3).map((line) => line.map((e) => e.symbol).sort().join('-'))
+    expect(keys).not.toContain('Cl-Mg-Na')
+    expect(keys).not.toContain('K-Li-Na')
+    expect(keys).toContain('Al-Na-P')
+    for (let i = 0; i < 400; i++) expect(ionTask(3, createRng(`x${i}`), ref(3, i))?.substance).not.toBe('Mg-Na-F-O')
+  })
+
+  it('fragt die Richtung in eigenen Worten (nicht wie die Altklausur) und nennt die effektive Kernladung', () => {
+    const calc = findTask((i) => compareTask('en', 1, createRng(`r${i}`), ref(1, i)), 'en-F-Li')
+    const step = calc.task.steps.find((s) => s.id === 'richtung')! as unknown as { question: string; explanation: { detailed: string } }
+    expect(step.question).toBe('Du gehst in einer Periode Feld für Feld nach rechts. Was geschieht mit der Elektronegativität?')
+    expect(step.question).not.toMatch(/ändert|verändert/)
+    expect(step.explanation.detailed).toMatch(/effektive Kernladung/)
   })
 
   it('Ionenradien: in jeder Reihe gleich viele Elektronen, mehr Protonen heißt kleiner', () => {
@@ -75,7 +91,7 @@ describe('Rechenfehler Trends: Katalogbeispiele', () => {
   it('Vergleich: Cl größer als Na, K kleiner als Na, Na schwerer zu ionisieren als Cl, K schwerer als Na, Li elektronegativer als F, I elektronegativer als Cl', () => {
     const r1 = findTask((i) => compareTask('radius', 1, createRng(`a${i}`), ref(1, i)), 'radius-Cl-Na')
     expect(wrongIn(r1, 'vergleich', 'chem-tr-radius-period')).toContain(String.raw`\ce{Cl}`)
-    expect(wrongIn(r1, 'richtung', 'chem-tr-constant')).toBe('Er bleibt ungefähr gleich.')
+    expect(wrongIn(r1, 'richtung', 'chem-tr-constant')).toBe('Er bleibt etwa gleich.')
     const r2 = findTask((i) => compareTask('radius', 1, createRng(`b${i}`), ref(1, i)), 'radius-K-Na')
     expect(wrongIn(r2, 'vergleich', 'chem-tr-radius-group')).toContain(String.raw`\ce{Na}`)
     const i1 = findTask((i) => compareTask('ie', 1, createRng(`c${i}`), ref(1, i)), 'ie-Cl-Na')

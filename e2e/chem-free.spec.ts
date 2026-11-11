@@ -137,6 +137,8 @@ test('Chemie: Klausuraufgabe 4 frei, Zahlen eintippen, eine grob gerundet, abgeb
     const build = examState(task, answers).find((s) => s.item.id === item.id)!.build!
     const box = page.getByTestId('exam-item').nth(index)
     if (!build.numeric) {
+      // die Gleichung schreibt man in der Klausur selbst: erst die Antworten zeigen
+      if (item.paperFirst) await box.getByRole('button', { name: 'Auf Papier gelöst, Antworten zeigen' }).click()
       await box.getByRole('group', { name: 'Antworten' }).getByRole('button').first().click()
       answers[item.id] = build.options[0].id
       continue

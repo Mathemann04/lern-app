@@ -11,7 +11,7 @@ export const LOESUNGEN_CARDS: readonly Card[] = [
     level: 1,
     rules: [],
     formulas: [String.raw`c = \frac{n}{V}`, String.raw`n = c \cdot V`],
-    memo: 'Die Stoffmengenkonzentration sagt, wie viel Mol eines gelösten Stoffs in einem Liter Lösung stecken. Sie ist in der Chemie die wichtigste Konzentrationsangabe, weil bei Reaktionen die Zahl der Teilchen zählt.',
+    memo: 'Die Stoffmengenkonzentration (im Skript: molare Konzentration) sagt, wie viel Mol eines gelösten Stoffs in einem Liter Lösung stecken. Sie ist in der Chemie die wichtigste Konzentrationsangabe, weil bei Reaktionen die Zahl der Teilchen zählt.',
     note: String.raw`Einheit: $\mathrm{mol/L}$; eine Lösung mit $1\,\mathrm{mol/L}$ heißt auch „1-molar“. Das Volumen ist das der fertigen Lösung, nicht das des Wassers. Volumen in Millilitern vorher in Liter umrechnen: $1\,\mathrm{mL} = 0{,}001\,\mathrm{L}$.`,
     when: 'Wenn Stoffmenge und Volumen einer Lösung zusammenhängen.',
     examples: [
@@ -36,8 +36,8 @@ export const LOESUNGEN_CARDS: readonly Card[] = [
     level: 2,
     rules: [],
     formulas: [String.raw`m = c \cdot V \cdot M`],
-    memo: 'Um eine Lösung mit bestimmter Konzentration herzustellen, rechnest du erst die nötige Stoffmenge aus, dann die Masse, die du abwiegst. Danach wird der Stoff gelöst und mit Wasser bis zum gewünschten Volumen aufgefüllt.',
-    note: 'Zwei Schritte: n = c · V, dann m = n · M. Die molare Masse ist die der ganzen Formel, mit allen Atomen und gegebenenfalls mit Kristallwasser.',
+    memo: 'Um eine Lösung mit bestimmter Konzentration herzustellen, rechnest du erst die nötige Stoffmenge aus, dann die Masse, die du abwiegst. Danach wird der Stoff in wenig Wasser gelöst und im Maßkolben (auch Messkolben genannt) bis zur Marke aufgefüllt.',
+    note: 'Zwei Schritte: n = c · V, dann m = n · M. Die molare Masse ist die der ganzen Formel, mit allen Atomen und gegebenenfalls mit Kristallwasser. Bei einem Hydrat gilt die Konzentration für das wasserfreie Salz; abgewogen wird das Hydrat, und jede seiner Formeleinheiten bringt eine Formeleinheit Salz mit. Abgewogen werden feste Stoffe; Flüssigkeiten wie Säuren oder Alkohole misst man ab.',
     when: 'Wenn eine Lösung bestimmter Konzentration angesetzt werden soll.',
     examples: [
       {
@@ -158,7 +158,7 @@ export const LOESUNGEN_CARDS: readonly Card[] = [
     level: 1,
     rules: [],
     formulas: [String.raw`V = n \cdot V_m`, String.raw`V_m = 22{,}4\,\mathrm{L/mol}\ \text{bei}\ 0\,^{\circ}\mathrm{C},\ 1013\,\mathrm{hPa}`],
-    memo: 'Ein Mol eines idealen Gases nimmt bei gleichem Druck und gleicher Temperatur immer dasselbe Volumen ein, egal um welches Gas es sich handelt. Bei 0 °C und 1013 hPa (Normbedingungen) sind das 22,4 Liter.',
+    memo: 'Ein Mol eines idealen Gases nimmt bei gleichem Druck und gleicher Temperatur immer dasselbe Volumen ein, egal um welches Gas es sich handelt. Bei 0 °C und 1013 hPa (Normbedingungen, im Skript Normalbedingungen) sind das 22,4 Liter.',
     note: String.raw`Der Wert gilt nur für Gase und nur bei diesen Bedingungen; bei $25\,^{\circ}\mathrm{C}$ und $1013\,\mathrm{hPa}$ sind es etwa $24{,}5\,\mathrm{L/mol}$. Für Flüssigkeiten und Feststoffe gilt er nicht.`,
     when: 'Wenn Stoffmenge und Volumen eines Gases bei Normbedingungen zusammenhängen.',
     examples: [

@@ -62,8 +62,8 @@ export const MWG_CARDS: readonly Card[] = [
     level: 1,
     rules: [],
     formulas: [r`v_{\text{hin}} = k_{\text{hin}} \cdot c^{a}(\ce{A}) \cdot c^{b}(\ce{B})`, r`${K} = \frac{k_{\text{hin}}}{k_{\text{rück}}}`],
-    memo: 'Die Geschwindigkeit einer Reaktion hängt von den Konzentrationen ab: Je mehr Teilchen, desto öfter stoßen sie zusammen. Läuft $a\\,\\ce{A} + b\\,\\ce{B} \\rightleftharpoons c\\,\\ce{C} + d\\,\\ce{D}$ in einem einzigen Schritt ab, gilt die Formel oben mit den Koeffizienten als Exponenten (entsprechend für die Rückreaktion). Im Gleichgewicht ist $v_{\\text{hin}} = v_{\\text{rück}}$; umgestellt ergibt das $K_{\\mathrm{GG}} = k_{\\text{hin}} / k_{\\text{rück}}$.',
-    note: 'Läuft eine Reaktion über mehrere Schritte, muss man die Exponenten im Geschwindigkeitsgesetz messen. Das Massenwirkungsgesetz gilt trotzdem mit den Koeffizienten.',
+    memo: 'Die Reaktionsgeschwindigkeit gibt an, um wie viel sich die Konzentration eines Stoffs in einer Zeitspanne ändert (Betrag von $\\Delta c / \\Delta t$). Sie hängt von den Konzentrationen ab: Je mehr Teilchen, desto öfter stoßen sie zusammen. Für $a\\,\\ce{A} + b\\,\\ce{B} \\rightleftharpoons c\\,\\ce{C} + d\\,\\ce{D}$ gilt die Formel oben mit den Koeffizienten als Exponenten (entsprechend für die Rückreaktion). Im Gleichgewicht ist $v_{\\text{hin}} = v_{\\text{rück}}$; umgestellt ergibt das $K_{\\mathrm{GG}} = k_{\\text{hin}} / k_{\\text{rück}}$.',
+    note: 'Die Aufgaben hier nehmen an, dass die Reaktion in einem Schritt abläuft; dann sind die Koeffizienten die Exponenten. $k_{\\text{hin}}$ und $k_{\\text{rück}}$ heißen Geschwindigkeitskonstanten (auch Geschwindigkeitskoeffizienten); sie hängen nicht von den Konzentrationen ab.',
     examples: [
       { chemTask: r`$\ce{A + 2 B <=> C}$ in einem Schritt`, lines: [{ label: 'Geschwindigkeit der Hinreaktion', latex: r`v_{\text{hin}} = k_{\text{hin}} \cdot c(\ce{A}) \cdot c^{2}(\ce{B})` }] },
       { chemTask: r`$k_{\text{hin}} = 6 \cdot 10^{-3}$, $k_{\text{rück}} = 3 \cdot 10^{-4}$`, lines: [{ label: 'eingesetzt', latex: r`${K} = \frac{6 \cdot 10^{-3}}{3 \cdot 10^{-4}} = 20` }] },

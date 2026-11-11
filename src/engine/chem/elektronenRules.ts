@@ -86,7 +86,7 @@ export const ELEKTRONEN_ERROR_RULES: readonly ChemErrorRule[] = [
     wrongFormula: r`\ce{Fe^2+}\text{: } [\mathrm{Ar}]\,4\mathrm{s}^{2}\,3\mathrm{d}^{4}`,
     why: {
       detailed: r`Ein Kation gibt die Elektronen der äußersten Schale ab, also die mit dem größten $n$. Bei den Übergangsmetallen ist das 4s, auch wenn 3d zuletzt aufgefüllt wurde.`,
-      short: 'Kationen geben zuerst die Elektronen mit dem größten n ab.',
+      short: r`Kationen geben zuerst die Elektronen mit dem größten $n$ ab.`,
     },
   },
   // --- Kästchen und ungepaarte Elektronen ---
@@ -208,7 +208,7 @@ export const ELEKTRONEN_ERROR_RULES: readonly ChemErrorRule[] = [
     wrongFormula: r`\ce{S}\text{: } 3\mathrm{p}^{6}`,
     why: {
       detailed: r`Auch in der äußersten Schale wird zuerst die s-Unterschale gefüllt. Bei den Elementen der III. bis VIII. Hauptgruppe sitzen davon immer zwei Elektronen in s, erst der Rest in p.`,
-      short: 'Zuerst ns², dann np.',
+      short: r`Zuerst $n\mathrm{s}^{2}$, dann $n\mathrm{p}$.`,
     },
   },
   {
@@ -245,7 +245,7 @@ export const ELEKTRONEN_ERROR_RULES: readonly ChemErrorRule[] = [
   {
     id: 'chem-qn-l-to-n',
     course: C,
-    name: 'Nebenquantenzahl bis n statt bis n − 1',
+    name: r`Nebenquantenzahl bis $n$ statt bis $n - 1$`,
     wrongFormula: r`n = 3\text{: } l = 0,\ 1,\ 2,\ 3`,
     why: {
       detailed: r`Die Nebenquantenzahl beginnt bei $0$ und bleibt immer kleiner als die Hauptquantenzahl: $l = 0, 1, \dots, n - 1$. Zu $n$ gehören deshalb genau $n$ Unterschalen.`,
@@ -265,7 +265,7 @@ export const ELEKTRONEN_ERROR_RULES: readonly ChemErrorRule[] = [
   {
     id: 'chem-qn-2n',
     course: C,
-    name: '2n statt 2n² Elektronen je Schale',
+    name: r`$2n$ statt $2n^2$ Elektronen je Schale`,
     wrongFormula: r`n = 3\text{: } 6 \text{ Elektronen}`,
     why: {
       detailed: r`Eine Schale hat nicht $n$, sondern $n^2$ Orbitale (ein s, drei p, fünf d …). Mit zwei Elektronen je Orbital fasst sie $2n^2$ Elektronen.`,

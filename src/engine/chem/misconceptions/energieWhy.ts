@@ -110,7 +110,7 @@ export const ENERGIE_WHY: Readonly<Record<string, Explanation>> = {
     short: 'Einheiten angleichen.',
   },
   'chem-mis-en-k-sign': {
-    detailed: 'Überlege, was ein negatives $\\Delta G^{0}$ für die Lage des Gleichgewichts bedeutet: Ist die Reaktion dann unter Standardbedingungen freiwillig, und was folgt daraus für $K$?',
+    detailed: 'Überlege, was ein negatives $\\Delta G^{0}$ für die Lage des Gleichgewichts bedeutet: Ist die Reaktion dann unter Standardbedingungen freiwillig, und was folgt daraus für $K_{\\mathrm{GG}}$?',
     short: 'Was bedeutet ein negatives $\\Delta G^{0}$ für die Lage?',
   },
   'chem-mis-en-lg': {

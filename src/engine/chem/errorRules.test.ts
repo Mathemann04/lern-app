@@ -13,7 +13,7 @@ import { parseFormula } from './formula.ts'
 import { atomicNumberSum, molarMass } from './molarMass.ts'
 import { CHEM_ERROR_RULES } from './errorRules.ts'
 import { generatorsOf } from './generators/index.ts'
-import { lightValues } from './generators/light.ts'
+import { lightValues, rydbergValues } from './generators/light.ts'
 import { type Field, type Particle, wrongValues } from './generators/particles.ts'
 import type { GuidedStep } from '../guided/types.ts'
 import { createRng } from '../random/rng.ts'
@@ -74,6 +74,34 @@ describe('Rechenfehler: Katalogbeispiele', () => {
     // 6,626 · 10⁻³⁴ · 5 · 10⁻⁷ / (3 · 10⁸) ≈ 1,10 · 10⁻⁴⁸
     expect(formatText(wrong.find((w) => w.rule === 'chem-light-formula')!.value)).toBe('1,1 · 10⁻⁴⁸')
   })
+
+  // Rydberg-Formel: Sprung 4 → 2 (486 nm) und Lösen aus n = 2
+  const jump = rydbergValues('wavelength', { upper: 4, lower: 2 })
+  const freed = rydbergValues('ionization', { upper: null, lower: 2 })
+  const rydberg = (values: typeof jump, rule: string) => formatText(values.wrong.find((w) => w.rule === rule)!.value)
+
+  it('Quadrat vergessen: 4 → 2 ergibt 365 nm statt 486 nm, aus n = 2 gelöst 1,09 · 10⁻¹⁸ J', () => {
+    expect(formatText(jump.correct)).toBe('486')
+    expect(rydberg(jump, 'chem-rydberg-no-square')).toBe('365')
+    expect(rydberg(freed, 'chem-rydberg-no-square')).toBe('1,09 · 10⁻¹⁸')
+  })
+
+  it('Kehrwert vergessen: 4 → 2 ergibt 2,06 · 10¹⁵ nm', () => {
+    expect(rydberg(jump, 'chem-rydberg-not-inverted')).toBe('2,06 · 10¹⁵')
+  })
+
+  it('Niveaus vertauscht: 4 → 2 ergibt −486 nm', () => {
+    expect(rydberg(jump, 'chem-rydberg-swapped')).toBe('-486')
+  })
+
+  it('Bis zum Grundzustand gerechnet: aus n = 2 gelöst 1,64 · 10⁻¹⁸ J statt 5,45 · 10⁻¹⁹ J', () => {
+    expect(formatText(freed.correct)).toBe('5,45 · 10⁻¹⁹')
+    expect(rydberg(freed, 'chem-rydberg-to-ground')).toBe('1,64 · 10⁻¹⁸')
+  })
+
+  it('Nanometer nicht umgerechnet bei der Rydberg-Formel: 4 → 2 ergibt 4,86 · 10⁻⁷', () => {
+    expect(rydberg(jump, 'chem-light-nm')).toBe('4,86 · 10⁻⁷')
+  })
 })
 
 describe('Rechenfehler Stoffmenge: Katalogbeispiele', () => {
@@ -116,6 +144,14 @@ describe('Rechenfehler Stoffmenge: Katalogbeispiele', () => {
     const water = molarMass(f('H2O'), 'rounded')
     expect(m(ratDiv(rat(1, 2), water))).toBe('0,0278')
     expect(m(ratMul(rat(1, 2), water))).toBe('9')
+  })
+
+  it('M = m · n und M = n : m: 11 g und 0,25 mol ergeben 2,75 bzw. 0,0227 statt 44 g/mol (seit S10)', () => {
+    const mass = rat(11)
+    const amount = rat(1, 4)
+    expect(m(ratMul(mass, amount))).toBe('2,75')
+    expect(m(ratDiv(amount, mass))).toBe('0,0227')
+    expect(m(ratDiv(mass, amount))).toBe('44')
   })
 
   it('N = n : N_A: 0,5 mol ergibt 8,3 · 10⁻²⁵; Moleküle statt Atome: 3,01 · 10²³ statt 6,02 · 10²³ H-Atome', () => {
@@ -308,11 +344,14 @@ describe('Rechenfehler Moleküle: Katalogbeispiele (S5b)', () => {
     expect(wrongIn(S.valenceStep(mol('CH4'), rng(), 'chem-lewis-octet-count'), 'chem-lewis-octet-count')).toBe('$16$')
   })
 
-  it('Paare: nicht halbiert, nur Bindungen, Mehrfachbindung als ein Paar, nur am Zentralatom', () => {
+  it('Paare: nicht halbiert, nur Bindungen, Mehrfachbindung als ein Paar, ganzes Molekül statt Zentralatom', () => {
     expect(wrongIn(S.pairsStep(mol('NH3'), rng(), 'chem-lewis-pairs-not-halved'), 'chem-lewis-pairs-not-halved')).toBe('$8$')
     expect(wrongIn(S.pairsStep(mol('H2O'), rng(), 'chem-lewis-bonds-only'), 'chem-lewis-bonds-only')).toBe('$2$')
-    expect(wrongIn(S.splitStep(mol('CO2'), rng(), 'chem-lewis-multiple-as-one'), 'chem-lewis-multiple-as-one')).toBe('2 bindende und 6 freie Paare')
-    expect(wrongIn(S.splitStep(mol('PCl3'), rng(), 'chem-lewis-free-central-only'), 'chem-lewis-free-central-only')).toBe('3 bindende und 1 freies Paar')
+    expect(wrongIn(S.splitStep(mol('CO2'), rng(), 'chem-lewis-multiple-as-one'), 'chem-lewis-multiple-as-one')).toBe('2 bindende und 2 freie Paare')
+    expect(wrongIn(S.splitStep(mol('PCl3'), rng(), 'chem-lewis-free-whole-molecule'), 'chem-lewis-free-whole-molecule')).toBe('3 bindende und 10 freie Paare')
+    expect(S.splitStep(mol('PCl3'), rng())!.choices.find((c) => c.correct)!.content).toBe('3 bindende und 1 freies Paar')
+    expect(wrongIn(S.splitStep(mol('NH3'), rng(), 'chem-lewis-pairs-missing'), 'chem-lewis-pairs-missing')).toBe('3 bindende und 0 freie Paare')
+    expect(wrongIn(S.splitStep(mol('CH4'), rng(), 'chem-lewis-octet-exceeded'), 'chem-lewis-octet-exceeded')).toBe('4 bindende und 1 freies Paar')
   })
 
   it('Lewis-Bilder: jeder Fehler ergibt eine falsche Formel wie im Katalog', () => {

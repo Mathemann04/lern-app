@@ -520,6 +520,10 @@ kommen mit ihren Schritten dazu. Die Denkfehler der Wissensfragen
 | Protonen, Neutronen, Elektronen | Elektronen statt Protonen gezählt (`chem-electrons-as-protons`, seit S2) | ³⁷Cl⁻: N = 37 − 18 = 19 |
 | Protonen, Neutronen, Elektronen | Elektronen zur Massenzahl gezählt (`chem-mass-number-electrons`, seit S2) | 17 Protonen, 20 Neutronen: A = 54 |
 | Energie des Lichts | nm nicht in m umgerechnet (`chem-light-nm`) | 500 nm: 3,98 · 10⁻²⁸ J statt 3,98 · 10⁻¹⁹ J |
+| Rydberg-Formel | Quadrate vergessen (`chem-rydberg-no-square`, seit S10) | 4 → 2: 365 statt 486 nm |
+| Rydberg-Formel | Kehrwert vergessen (`chem-rydberg-not-inverted`, seit S10) | 4 → 2: 2,06 · 10¹⁵ nm |
+| Rydberg-Formel | Schalen vertauscht (`chem-rydberg-swapped`, seit S10) | 4 → 2: −486 nm |
+| Rydberg-Formel | beim Lösen bis zum Grundzustand gerechnet (`chem-rydberg-to-ground`, seit S10) | aus n = 2: 1,64 · 10⁻¹⁸ statt 5,45 · 10⁻¹⁹ J |
 | Energie des Lichts | Formel falsch umgestellt (`chem-light-formula`) | E = h · λ/c, bei 500 nm 1,1 · 10⁻⁴⁸ J |
 | Übergang im H-Atom | Quadrate vergessen (`chem-rydberg-squares`) | 3 → 2: 547 nm statt 656 nm |
 | Übergang im H-Atom | Kehrwert vergessen (`chem-rydberg-reciprocal`) | 1/λ als λ angegeben |
@@ -638,7 +642,7 @@ kommen mit ihren Schritten dazu. Die Denkfehler der Wissensfragen
 | Lewis-Formel | Elektronen nicht halbiert (`chem-lewis-pairs-not-halved`, seit S5b) | NH₃: 8 Paare statt 4 |
 | Lewis-Formel | nur Bindungen als Paare gezählt (`chem-lewis-bonds-only`, seit S5b) | H₂O: 2 Paare statt 4 |
 | Lewis-Formel | Mehrfachbindung als ein Paar gezählt (`chem-lewis-multiple-as-one`, seit S5b) | CO₂: 2 bindende Paare statt 4 |
-| Lewis-Formel | nur freie Paare am Zentralatom gezählt (`chem-lewis-free-central-only`, seit S5b) | PCl₃: 1 freies Paar statt 10 |
+| Lewis-Formel | Paare des ganzen Moleküls statt am Zentralatom gezählt (`chem-lewis-free-whole-molecule`, seit S10; ersetzt `chem-lewis-free-central-only`) | PCl₃ am P: 10 freie Paare statt 1 |
 | Lewis-Formel (Bild) | freie Paare am Zentralatom vergessen (`chem-lewis-pairs-missing`, seit S5b) | NH₃ ohne Paar am N |
 | Lewis-Formel (Bild) | freie Paare der äußeren Atome vergessen (`chem-lewis-terminal-pairs`, seit S5b) | CCl₄ ohne Paare an den Cl |
 | Lewis-Formel (Bild) | Einfachbindungen statt Mehrfachbindung (`chem-lewis-multiple-missing`, seit S5b) | O–C–O mit vollen Oktetts, 20 statt 16 Elektronen |
@@ -708,6 +712,8 @@ kommen mit ihren Schritten dazu. Die Denkfehler der Wissensfragen
 | Probe | Koeffizient beim Zählen vergessen (`chem-balance-count-coefficient`, seit S3b) | 4 Fe + 3 O₂: links 2 statt 6 O-Atome |
 | Probe, Verbrennung | Index beim Zählen vergessen (`chem-balance-count-index`, seit S3b) | 4 Fe + 3 O₂: links 3 statt 6 O-Atome; C₄H₁₀: 10 H₂O statt 5 |
 | Molmasse | Index vergessen, auch Atom statt Molekül (`chem-molar-index`; beides ergibt bei Elementen denselben Wert) | M(CO₂) = 28 statt 44 g/mol; M(O₂) = 16 statt 32 g/mol |
+| Molare Masse aus m und n | Masse mal Stoffmenge (`chem-molar-m-times-n`, seit S10) | 11 g und 0,25 mol: 2,75 statt 44 g/mol |
+| Molare Masse aus m und n | Stoffmenge durch Masse (`chem-molar-n-over-m`, seit S10) | 11 g und 0,25 mol: 0,0227 statt 44 g/mol |
 | Molmasse | Ordnungszahlen statt Molmassen (`chem-molar-atomic-number`) | M(C₄H₁₀) = 34 g/mol |
 | Molmasse | Koeffizient mitgerechnet (`chem-molar-coefficient`, seit S4c in Klausuraufgabe 4) | 2 C₄H₁₀: 116 g/mol |
 | Molmasse | Klammer nicht malgenommen (`chem-molar-bracket`) | M(Ca(OH)₂) = 58,1 statt 74,1 g/mol |
@@ -835,6 +841,20 @@ Je Probeklausur wählt die App für jeden Teil eine der Varianten.
 - Lewis: Bild bzw. Baukasten 1 Punkt, Paare 1 Punkt, Gestalt 1 Punkt.
 - Weil es keine Musterlösung gibt, steht in der Auswertung: „Punkte nach dem
   Schema der App, Teilpunkte geschätzt“.
+- Seit S10: Unabhängige Fragen eines Teils zählen einzeln; nur ein Ergebnis,
+  das wirklich aus den Schritten davor folgt (ΔH, Aufgabe 4), gibt die
+  vollen Punkte des Teils. „Freiwillig?“ wird gegen das eigene ΔG bewertet.
+  Eingetippt knapp daneben (1 bis 4 %): beim Üben volle Punkte, in der
+  Probeklausur halbe, mit Hinweis. Jede Auswahlfrage hat möglichst vier
+  Antworten (zusätzliche ohne typischen Fehler, aber mit Erklärung). Teile,
+  die man in der Klausur selbst schreibt (Salz mit Ionen, Lewis-Formel,
+  Gleichung, Massenwirkungsgesetz), zeigen ihre Antworten erst nach „Auf
+  Papier gelöst, Antworten zeigen“ (Wunsch des Nutzers, 11.11.2026).
+  Aufgabe 2: Steckbrief (Periode, Gruppe, Block, 3 P.), eine Wissensfrage zu
+  Gruppe, Periode, Block oder Trend (1 P.), Trend oder Ionenladung (2 P.);
+  Aufgabe 1 fragt das Valenzelektron als Begriff oder als Zahl, das
+  Kernsymbol von Atom oder Ion; Aufgaben 3d und 5c wechseln mit Wissensfragen
+  wie in den Altklausuren.
 
 **Auswertung**: Punkte je Aufgabe und Teil, deine Antwort neben der
 richtigen, Lösungsweg und „Warum ist das falsch?“, Links zu Thema und
@@ -1198,6 +1218,27 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   `pickMockId`). Auswertung mit „Das solltest du üben“ (die drei Themen mit den meisten verlorenen Punkten, `practiceHints`);
   beantwortete Wissensfragen gehen in die Wiederholung (`ExamItem.review`), auch bei „Klausuraufgabe N üben“. Damit ist
   S9 und der Klausur-Sprint abgeschlossen.
+- **S10: Inhalts-Check** (11.11.2026, alle Skripte, Übungsblätter und beide
+  Altklausuren in einer Sitzung). Zuerst ein Wortvergleich aller Texte der App
+  mit den Unterlagen (acht Wörter am Stück): zwei Stellen umformuliert. Dann
+  sechs Prüfer je Gebiet und einer mit dem Blickwinkel der Klausur; danach je
+  Gebiet ein Helfer, der die Befunde einarbeitet. Kaum Rechenfehler; behoben
+  wurden u. a. ein falscher Zusatz zur Lage des Gleichgewichts bei K-Werten,
+  Gleichgewichtsreaktionen mit einfachem Pfeil, mehrdeutige Fragen
+  (Calcium(II)-bromid, „stärkste Kraft“, „äußerste Schale voll“), Begriffe
+  des Skripts (K_GG, spontan, Dipol-Dipol-Wechselwirkungen,
+  Wasserstoffbrückenbindung, Maßkolben, molare Konzentration,
+  Normalbedingungen, entartet, effektive Kernladung), Paare am Zentralatom,
+  Zahlen und Wortlaut der Altklausuren und Übungsblätter, falsch zugeordnete
+  Denkfehler, Stoff über die Vorlesung hinaus auf Klausurniveau sowie die
+  Bewertung der Klausuraufgaben (siehe „Probeklausur“, Bewertung). Neu sind
+  Fragen und Karten zu Lücken aus den Skripten (u. a. Rydberg-Formel als
+  Rechnung, Spin und Magnetismus, Gruppennamen, Eigenschaften der
+  Metallgitter, Hartmetall und Sintern, Beryllium als Leiter, delokalisierte
+  Bindungen, Dipole im elektrischen Feld, Dipolmoment, Aggregatzustand bei
+  Raumtemperatur, M aus m und n, Umsatz vom Produkt aus). Festlegungen in
+  CHEMIE.md §5, §6, §8, §9. Die Gegenprobe mit Rechenaufgaben aus dem
+  Lehrbuch entfiel, weil keine Fotos hochgeladen waren.
 
 #### Nach Teil 1 der Klausur
 Die Reihenfolge richtet sich nach dem Termin von Teil 2: Kommt Teil 2 bald,

@@ -9,7 +9,8 @@ import type { Level } from '../../tasks/taskNumber.ts'
 import { elementBySymbol } from '../elements.ts'
 import { CHEM_ERROR_RULES } from '../errorRules.ts'
 import { calcForm, generatedCalc, generatorOf, generatorsOf } from './index.ts'
-import { LIGHT_SOURCES, lightValues } from './light.ts'
+import { LIGHT_SOURCES, RYDBERG_TRANSITIONS, SCRIPT_TRANSITIONS, type Transition, lightValues, rydbergValues } from './light.ts'
+import { formatText } from '../../quantity/numberDe.ts'
 
 // Rechnungen des Atombaus (Plan M4, Teil B „Tests", Rechnungen): Form der Aufgaben, Ergebnis auf
 // zweitem Weg, falsche Antworten, Schreibweise, Abwechslung je Stufe
@@ -182,6 +183,52 @@ describe('Energie des Lichts: Ergebnis auf zweitem Weg', () => {
       expect(calc.task.note).toContain('6{,}626')
     }
     expect(seen).toBeGreaterThan(SAMPLE / 10)
+  })
+})
+
+describe('Rydberg-Formel: Ergebnis auf zweitem Weg', () => {
+  const h = 6.626e-34
+  const c = 3e8
+  const R = 1.097e7
+  const num = (r: { n: bigint; d: bigint }) => Number(r.n) / Number(r.d)
+  // 1/λ = R · (1/n² − 1/m²) mit Gleitkommazahlen, m = null: Elektron ganz gelöst
+  const inverse = (t: Transition) => R * (1 / t.lower ** 2 - (t.upper === null ? 0 : 1 / t.upper ** 2))
+
+  it('rechnet die Hausaufgabe des Skripts richtig nach, ohne sie je als Aufgabe zu stellen', () => {
+    // Sprung 3 → 2: rote Linie bei etwa 656 nm; Lösen aus dem Grundzustand: etwa 2,18 · 10⁻¹⁸ J
+    expect(formatText(rydbergValues('wavelength', { upper: 3, lower: 2 }).correct)).toBe('656')
+    expect(formatText(rydbergValues('ionization', { upper: null, lower: 1 }).correct)).toBe('2,18 · 10⁻¹⁸')
+    for (const t of SCRIPT_TRANSITIONS) expect(RYDBERG_TRANSITIONS, JSON.stringify(t)).not.toContainEqual(t)
+  })
+
+  it('rechnet jeden Sprung wie mit Gleitkommazahlen, falsche Werte nie gleich der Lösung', () => {
+    for (const t of RYDBERG_TRANSITIONS) {
+      const kinds = t.upper === null ? (['ionization'] as const) : (['wavelength', 'energy'] as const)
+      for (const kind of kinds) {
+        const { correct, wrong } = rydbergValues(kind, t)
+        const expected = kind === 'wavelength' ? 1e9 / inverse(t) : h * c * inverse(t)
+        expect(num(correct) / expected - 1, `${kind} ${JSON.stringify(t)}`).toBeCloseTo(0, 12)
+        for (const w of wrong) expect(Math.abs(num(w.value) / expected - 1), `${kind} ${w.rule}`).toBeGreaterThan(0.06)
+      }
+    }
+  })
+
+  it('stellt in der Vertiefung Aufgaben mit passender Lösung, nie die Hausaufgabe des Skripts', () => {
+    let seen = 0
+    for (const ref of tasksOf(2, 1200)) {
+      const calc = generatedCalc(COURSE, ref)!
+      if (!calc.form.startsWith('rydberg:')) continue
+      seen++
+      const [, upper, lower] = /^h-(\d+|inf)-(\d+)$/.exec(calc.substance)!
+      const t: Transition = { upper: upper === 'inf' ? null : Number(upper), lower: Number(lower) }
+      expect(SCRIPT_TRANSITIONS, calc.substance).not.toContainEqual(t)
+      const [step] = calc.task.steps
+      const right = numberOf(step.choices.find((x) => x.correct)!.content)
+      const expected = calc.form.startsWith('rydberg:wavelength') ? 1e9 / inverse(t) : h * c * inverse(t)
+      expect(Math.abs(right / expected - 1), calc.substance).toBeLessThan(0.006)
+      expect(calc.task.note).toContain('1{,}097')
+    }
+    expect(seen).toBeGreaterThan(60)
   })
 })
 

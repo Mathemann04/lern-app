@@ -144,7 +144,7 @@ zweiten, unabhängig eingetragenen Liste.
 | Thema | Festlegung |
 | --- | --- |
 | Elektronegativität | Pauling mit zwei Nachkommastellen (oben). Ältere, gerundete Tabellen (C 2,5; O 3,5; Cl 3,0) gibt es auch; deshalb fragt die App nur Einordnungen ab, die mit beiden gleich ausfallen. |
-| Bindungsart aus ΔEN | unter 0,5: (nahezu) unpolare Atombindung; 0,5 bis 1,8: polare Atombindung; über 1,8: Ionenbindung. Eine Lernkarte sagt, dass die Grenzen fließend sind. Abgefragt nur, wenn die Einordnung mit beiden Tabellen gleich ist und ΔEN mindestens 0,1 von jeder Grenze entfernt liegt (C–H mit 0,35 ist erlaubt). |
+| Bindungsart aus ΔEN | ΔEN = 0: reine Atombindung, nur bei gleichen Atomen; unter 0,5 (üblicher Richtwert, nicht aus dem Skript): (nahezu) unpolare Atombindung; 0,5 bis 1,8: polare Atombindung; über 1,8: Ionenbindung. Eine Lernkarte sagt, dass die Grenzen fließend sind. Abgefragt nur, wenn die Einordnung mit beiden Tabellen gleich ist und ΔEN mindestens 0,1 von jeder Grenze entfernt liegt (C–H mit 0,35 ist erlaubt). |
 | Salze | Salz-Aufgaben arbeiten mit Metall und Nichtmetall und sagen „ionisch“ wie die Klausur. Dieselbe Verbindung kommt nie zugleich als Salz und in einer ΔEN-Frage vor. |
 | Dipolmolekül | Ein Molekül ist ein Dipol, wenn es polare Bindungen hat und die Ladungsschwerpunkte wegen der Gestalt nicht zusammenfallen („die Gestalt entscheidet“). Die Polarität ist ein gespeicherter Wert je Molekül. |
 | Richtung des Dipolpfeils | Wo die App einen Pfeil zeigt, wie in der Vorlesung von δ− nach δ+, immer mit Legende. Keine Frage nach der Pfeilrichtung ohne die Festlegung in der Aufgabe. Eine Lernkarte erklärt beide üblichen Schreibweisen. |
@@ -152,7 +152,18 @@ zweiten, unabhängig eingetragenen Liste.
 | Vorzeichen von Energien | ΔH < 0 heißt exotherm. Die Gitterenthalpie ist negativ (beim Bilden des Gitters wird Energie frei). Born-Haber mit Vorzeichen in Richtung des Kreises. Reaktionsenthalpie in kJ für die Gleichung, wie sie dasteht; kJ/mol wird auch angenommen. |
 | Molmasse von Chlor | 35,5 g/mol. |
 | Bildungsenthalpie | 0 für Elemente in ihrem Standardzustand, meist der stabilsten Form unter Standardbedingungen (O₂(g), Br₂(l), I₂(s), Kohlenstoff als Graphit). Ausnahme Phosphor (Bezug ist weißer Phosphor, obwohl roter stabiler ist); Phosphor deshalb nicht in Enthalpie-Aufgaben. Tabellenwerte für (g) und (l) getrennt. |
-| Pfeil bei Gleichgewichten | immer ⇌. |
+| Pfeil bei Gleichgewichten | immer ⇌, auch in Reaktionsgleichungen und Umsatzrechnungen (Ammoniak, Schwefeltrioxid); vollständig ablaufend nur mit →. |
+| Spontan und Entropie (seit S10) | Das Skript sagt „spontan“, die App „freiwillig“ und nennt „spontan“ als Wort des Skripts; G heißt freie Enthalpie oder Gibbs-Energie. Die Aussage, bei einer spontanen Reaktion nehme die Entropie zu, gilt für die Entropie insgesamt (Stoffe und Umgebung, zweiter Hauptsatz). Für die Stoffe allein entscheidet ΔG = ΔH − T · ΔS; ihr ΔS darf bei einer freiwilligen Reaktion negativ sein. |
+| Gleichgewichtskonstante | Überall K_GG wie im Skript, auch im Thema Energie (ΔG⁰ = −R · T · ln K_GG). Zur Lage nur bei K_GG ≥ 10 bzw. ≤ 0,1 („Lage auf der Seite der Produkte/Edukte“), nie „überwiegen“. |
+| Paare in der Lewis-Formel (seit S10) | Bindende und freie Paare werden am Zentralatom gezählt wie in der Vorlesung und der Klausur; die Zählung über das ganze Molekül ist der Fehler `chem-lewis-free-whole-molecule`. |
+| Namen der Kräfte | Van-der-Waals-Kräfte, Dipol-Dipol-Wechselwirkungen, Wasserstoffbrückenbindungen (im Fließtext auch Wasserstoffbrücken) wie im Skript. „Stärkste Kraft“ heißt immer die stärkste Art, die vorkommt; bei großen Molekülen können Van-der-Waals-Kräfte insgesamt mehr beitragen. |
+| Römische Ziffer im Salznamen | Nötig nur, wo das Metall mehrere Ladungen bilden kann; bei eindeutiger Ladung (Na, Mg, Ca, Al, Zn, Ag) unnötig, aber nicht falsch. Abgefragt wird nur „wo nötig“. |
+| Edelgaskonfiguration | „Voll“ heißt bei Edelgasen: s- und p-Orbitale der äußersten Schale voll (Oktett, ns² np⁶), bei Helium die erste Schale. Beim Sprung der Ionisierungsenergie „innere Schale mit Edelgaskonfiguration“, nicht „voll besetzte Schale“. |
+| Valenzelektronen | Zwei Sichtweisen wie in Skript und Klausur: Elektronen der äußersten Schale und Elektronen, die an Bindungen beteiligt sind; Ausnahme Helium mit 2. |
+| Masse des Elektrons | „rund 1836-mal leichter als ein Proton“ (im Skript: etwa 1/2000 u). |
+| Reihenfolge in Konfigurationen | Die App schreibt nach der Besetzung (4s vor 3d), die Vorlesung oft 3d vor 4s; beides gilt, die Karte sagt es. |
+| Begriffe der Stöchiometrie | Stoffmengenkonzentration (Skript: molare Konzentration), Normbedingungen (Skript: Normalbedingungen), Maßkolben, Massenkonzentration β (Skript: ρ); die Karten nennen beide. Im Skript heißt die Zahl im Periodensystem auch „Massenzahl“, gemeint ist die mittlere Atommasse. |
+| Abwiegen | Nur Feststoffe (Salze, Hydrate, NaOH, KOH, Glucose); Gase und reine Säuren werden nie abgewogen. |
 
 ## 6. Grenzfälle, die die App nicht abfragt
 
@@ -178,7 +189,9 @@ zweiten, unabhängig eingetragenen Liste.
   - Elektronenaffinität zwischen 2. und 3. Periode (B < Al, C < Si, O < S,
     F < Cl), zwischen Gruppe 1 und 13 derselben Periode (Li > B, Na > Al,
     K > Ga, Rb > In), Rb < Cs, Ga = In sowie in den Gruppen 2, 15 und 18;
-  - Elektronegativität innerhalb der Gruppen 13 und 14, K = Rb und bei
+  - Elektronegativität innerhalb der Gruppen 13 und 14, K, Rb und Cs
+    untereinander sowie Ca/Sr (im Periodensystem des Skripts mit einer
+    Nachkommastelle gleich: K, Rb, Cs je 0,8; Ca, Sr je 1,0; seit S10) und bei
     schweren Elementen (z. B. Ga > Al);
   - Atomradius (Kovalenzradien): nie mit Edelgasen (Ne > F, Ar > Cl,
     Xe > I), nicht zwischen As, Se und Br, nicht Sn/Sb, Te/I, Pb/Bi.
@@ -190,8 +203,12 @@ zweiten, unabhängig eingetragenen Liste.
   halten sich an diese Liste.
 - Born-Haber für Bromide und Iodide (Brom ist flüssig, Iod fest; es fehlte ein
   Schritt).
-- Das Gleichgewicht H₂ + I₂ ⇌ 2 HI nur für „Druck ändert nichts“, nie für
-  die Temperatur (das Vorzeichen von ΔH hängt vom Zustand des Iods ab).
+- Das Gleichgewicht H₂ + I₂ ⇌ 2 HI nie für die Temperatur (das Vorzeichen
+  von ΔH hängt vom Zustand des Iods ab); erlaubt fürs Massenwirkungsgesetz
+  (Ausdruck aufstellen, K_GG ausrechnen) und für „Druck ändert nichts“.
+- Bindungen zwischen zwei Nichtmetallen mit ΔEN knapp über 1,8 (B–F in BF₃:
+  Pauling 1,94, gerundet 2,0) gelten als stark polare Atombindung, nicht als
+  Ionenbindung; ihre Bindungsart wird nicht abgefragt (seit S10).
   Gleichgewichte mit Feststoffen vorerst nicht.
 - Wasserdampf nie mit 22,4 L/mol bei 0 °C.
 - Pb, Bi und Po nicht in Erzeugern für Formeln (die einfache Wertigkeitsregel
@@ -296,6 +313,18 @@ einer Lernkarte als Tatsache. Ein Test prüft das.
   Katalysator erhöhe die Ausbeute; endergonisch heiße ΔG < 0 (richtig:
   ΔG > 0); exotherm und endotherm verwechselt (eine Verbrennung gibt Energie
   ab, ist also exotherm).
+- **Seit S10 dazu** (je mit eigener Id): Metallcharakter nehme in einer
+  Hauptgruppe nach unten ab; ein Halbmetall verhalte sich ganz wie ein Metall
+  oder ganz wie ein Nichtmetall; Alkali- und Erdalkalimetalle verwechselt;
+  Elektronegativität nehme in der Gruppe nach unten zu; gepaarte Spins
+  verstärkten den Magnetismus, Magnetismus komme aus dem Kern; Dipole
+  richteten sich im Magnetfeld aus (im elektrischen Feld); Bindungsdipole
+  ohne Richtung addiert; ΔEN zwischen nicht verbundenen Atomen (H–N in HCN);
+  SH₃ statt H₂S, H₂Cl₂ statt HCl; dichteste Packung sei am härtesten; Sintern
+  heiße Schmelzen; Einlagerungen machten Metalle weich; Wasserstoff sitze als
+  H₂ im Metall; ein volles Band leite nie (Beryllium); mehr Atome spreizten die
+  Energieniveaus; Farbe hänge an einzelnen Atomen; Atomkristalle seien weich;
+  alle Salze seien gut löslich.
 - **Redox**: Mg → Mg²⁺ + e⁻ (2 e⁻).
 
 ## 9. Regeln für Fragen und Texte
@@ -310,6 +339,16 @@ einer Lernkarte als Tatsache. Ein Test prüft das.
   Volumen mit derselben Konzentration desselben Stoffs) schließen die
   Erzeuger aus. Standardbeispiele wie Wasser, Ammoniak oder die
   Ammoniaksynthese bleiben erlaubt; sie stehen in jedem Lehrbuch.
+  Seit S10 ebenso ausgeschlossen: die Kernsymbole aus Klausuren und Übung
+  (⁵⁶₂₆Fe, ³⁵₁₇Cl, ²³₁₁Na als Atom, ³⁵₁₇Cl⁻; `EXAM_PARTICLES` in
+  `generators/particles.ts`), die Valenzkonfiguration von Sauerstoff und
+  Chlor in Klausuraufgabe 1, die Element- und Ionenreihen der Übungsblätter
+  (`EXERCISE_LINES`, `EXERCISE_IONS` in `generators/trends.ts`) und die
+  Übergänge der Rydberg-Hausaufgabe des Skripts. Auch Fragen nach dem Muster
+  einer Klausurfrage („Wie ändert sich … innerhalb einer Periode von links
+  nach rechts?“) stehen in eigenen Worten. Ein Wortvergleich aller Texte der
+  App mit Skripten, Übungsblättern und Klausuren (keine acht Wörter am
+  Stück) lief zuletzt bei S10 ohne Treffer.
 - Eine Frage, die sich nur auf die Mitschriften-Mappen stützt, ist höchstens
   Grundlagen; ihre richtige Antwort muss durch ein Skript oder ein
   Tabellenwerk gedeckt sein.

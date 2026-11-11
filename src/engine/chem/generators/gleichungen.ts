@@ -16,7 +16,7 @@ import {
   withCoefficients,
 } from '../equation.ts'
 import { type Formula, atomCounts, formulaCe } from '../formula.ts'
-import { CO, CO2, FUELS, type Fuel, H2O, O2, REACTIONS } from '../reactions.ts'
+import { CO, CO2, FUELS, type Fuel, H2O, O2, REACTIONS, reactionLatex } from '../reactions.ts'
 import { elementBySymbol } from '../elements.ts'
 import { type ChemCalc, type ChemGenerator, type WrongValue, stepChoices } from './shared.ts'
 
@@ -35,8 +35,9 @@ const CARD_COMBUSTION = 'gleichungen-verbrennung'
 
 const DIATOMIC = new Set(['H2', 'O2', 'N2', 'F2', 'Cl2', 'Br2', 'I2'])
 
-const eqWrong = (rule: string, eq: Equation): WrongValue => ({ rule, key: equationLatex(eq), content: `$${equationLatex(eq)}$` })
-const eqCorrect = (eq: Equation) => ({ key: equationLatex(eq), content: `$${equationLatex(eq)}$` })
+// latex: Schreibweise der Gleichung (bei Gleichgewichten mit Doppelpfeil, reactionLatex)
+const eqWrong = (rule: string, eq: Equation, latex = equationLatex): WrongValue => ({ rule, key: latex(eq), content: `$${latex(eq)}$` })
+const eqCorrect = (eq: Equation, latex = equationLatex) => ({ key: latex(eq), content: `$${latex(eq)}$` })
 
 // Ist die Gleichung ein Vielfaches der richtigen (gleiche Stoffe, Koeffizienten im selben Verhältnis)?
 function isMultiple(eq: Equation, correct: Equation): boolean {
@@ -143,13 +144,15 @@ export function probeStep(eq: Equation, rng: Rng, focus?: string): GuidedStep | 
 function simpleTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc | null {
   const reaction = rng.pick(REACTIONS.filter((x) => x.levels.includes(level as 1 | 2 | 3)))
   const correct = balance(reaction.reactants, reaction.products)!
+  // Gleichgewichte mit Doppelpfeil (docs/CHEMIE.md §3)
+  const latex = (eq: Equation) => reactionLatex(reaction, eq)
   const candidates = [
     { rule: 'chem-balance-index', eq: indexChanged(reaction) },
     { rule: 'chem-balance-single-atom', eq: singleAtom(reaction, rng) },
     { rule: 'chem-balance-partly-doubled', eq: partly(correct, rng) },
   ]
-  const wrong = candidates.filter((c): c is { rule: string; eq: Equation } => c.eq !== null && !isMultiple(c.eq, correct)).map((c) => eqWrong(c.rule, c.eq))
-  const choices = stepChoices(rng, eqCorrect(correct), wrong, focus)
+  const wrong = candidates.filter((c): c is { rule: string; eq: Equation } => c.eq !== null && !isMultiple(c.eq, correct)).map((c) => eqWrong(c.rule, c.eq, latex))
+  const choices = stepChoices(rng, eqCorrect(correct, latex), wrong, focus)
   if (choices.length === 0) return null
   const hasDiatomic = [...reaction.reactants, ...reaction.products].some((s) => DIATOMIC.has(s.text))
   const steps: GuidedStep[] = [
@@ -160,10 +163,10 @@ function simpleTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemC
       choices,
       hint: 'Nur die Zahlen vor den Formeln dürfen sich ändern, die Formeln selbst nie. Links und rechts müssen von jedem Element gleich viele Atome stehen.',
       explanation: {
-        detailed: `Mit den Koeffizienten $${equationLatex(correct)}$ stimmt die Atombilanz für jedes Element, und es sind die kleinsten ganzen Zahlen. Die Formeln der Stoffe bleiben dabei unverändert.`,
-        short: `$${equationLatex(correct)}$`,
+        detailed: `Mit den Koeffizienten $${latex(correct)}$ stimmt die Atombilanz für jedes Element, und es sind die kleinsten ganzen Zahlen. Die Formeln der Stoffe bleiben dabei unverändert.${reaction.equilibrium ? ' Der Doppelpfeil zeigt, dass sich ein Gleichgewicht einstellt; ausgeglichen wird genauso.' : ''}`,
+        short: `$${latex(correct)}$`,
       },
-      established: equationLatex(correct),
+      established: latex(correct),
       cards: [CARD_BALANCE, ...(hasDiatomic ? [CARD_DIATOMIC] : [])],
     },
   ]
@@ -173,11 +176,11 @@ function simpleTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemC
     task: {
       ref,
       instruction: 'Gleiche die Reaktionsgleichung aus',
-      functionLatex: equationLatex(skeleton(reaction.reactants, reaction.products)),
+      functionLatex: latex(skeleton(reaction.reactants, reaction.products)),
       note: `${reaction.name}.`,
       steps,
       cards: [...new Set(steps.flatMap((s) => s.cards))],
-      resultLatex: equationLatex(correct),
+      resultLatex: latex(correct),
     },
     form: `gleichung:${level}:${reaction.reactants.length + reaction.products.length}`,
     substance: reaction.id,

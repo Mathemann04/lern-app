@@ -1,20 +1,21 @@
-import type { ExamItem, ExamPart, ExamTask } from '../../exam/types.ts'
-import { VARIANTS, questionSeed } from '../../quiz/numbers.ts'
-import { planQuestion } from '../../quiz/plan.ts'
+import type { ExamItem, ExamOption, ExamPart, ExamTask } from '../../exam/types.ts'
+import { type Rational, ratSign } from '../../rational.ts'
 import { type Rng, createRng } from '../../random/rng.ts'
-import { chemTopic } from '../banks.ts'
 import { EQUILIBRIA, equilibriumById, equilibriumCe } from '../equilibria.ts'
 import { dhTask, gibbsTask, rangeTask } from '../generators/energie.ts'
 import { dHLatex, expressionStep, leChatelierTask } from '../generators/mwg.ts'
 import { thermoReactionById } from '../thermo.ts'
 import { fromStep } from './fromStep.ts'
+import { knowledgeItem } from './knowledge.ts'
 
 // „Klausuraufgabe 5 üben" (Plan M4, S7c; Bauplan Teil 1, Aufgabe 5 mit 10 Punkten): Gleichgewicht und Energie.
 // a) Gleichgewicht und Katalysator: zwei Wissensfragen (2), b) Massenwirkungsgesetz (2), c) Le Chatelier (1),
 // d) Reaktionsenthalpie aus Bildungsenthalpien (Summe der Produkte 1, ΔH 2), e) freiwillig oder nicht (ΔG und Urteil je 1,
 // oder der Temperaturbereich 2). Die Fragen kommen aus den Wissensfragen und Rechnungen der Themen „Chemisches Gleichgewicht"
-// und „Energie bei Reaktionen", mit denselben falschen Antworten, Denk- und Rechenfehlern. Die Teile hängen nicht voneinander
-// ab (keine Folgefehler).
+// und „Energie bei Reaktionen", mit denselben falschen Antworten, Denk- und Rechenfehlern. Le Chatelier (c) ist eine Rechnung
+// oder eine Wissensfrage. Die Teile hängen nicht voneinander ab. Innerhalb eines Teils: ΔH folgt aus der Summe der
+// Produkte (d, Ergebnis des Teils), das Urteil „freiwillig?" aus dem eigenen ΔG (e, Folgefehler zählen nicht doppelt).
+// Das Massenwirkungsgesetz schreibt man in der Klausur selbst: Seine Antworten erscheinen erst nach dem Lösen auf Papier.
 
 export const TASK5_POINTS = 10
 
@@ -23,17 +24,11 @@ const MWG = 'chem-mwg'
 // Fragen je Teil a (Nummern der Sammlung „Chemisches Gleichgewicht"): dynamisches Gleichgewicht und Katalysator
 export const EQUILIBRIUM_QUESTIONS = [102, 103, 104, 201, 202, 301]
 export const CATALYST_QUESTIONS = [113, 114, 115, 218, 318]
+// Teil c als Wissensfrage zu Le Chatelier (Temperatur, Ausbeute), Anteil LE_CHATELIER_QUESTION_SHARE
+export const LE_CHATELIER_QUESTIONS = [215, 310, 312]
+export const LE_CHATELIER_QUESTION_SHARE = 1 / 3
 
-function questionItem(no: number, id: string, rng: Rng): ExamItem {
-  const topic = chemTopic(MWG)!
-  const q = topic.bank.questions.find((x) => x.no === no)
-  // nur Einfachauswahl: Klausurfragen haben vier Antworten, genau eine richtig
-  if (q?.kind !== 'single') throw new Error(`Frage ${no} fehlt im Thema Chemisches Gleichgewicht oder ist keine Einfachauswahl`)
-  const variant = rng.int(0, VARIANTS - 1)
-  const seed = questionSeed(no, variant)
-  const task = planQuestion(q, topic.misconceptions, { level: q.level, seed }, variant)
-  return { ...fromStep(task.steps[0], id, q.title, 1), review: { course: MWG, seed } }
-}
+const questionItem = (no: number, id: string, rng: Rng): ExamItem => knowledgeItem(MWG, no, id, 1, rng)
 
 const ref = { level: 2 as const, seed: 10000 }
 
@@ -45,11 +40,14 @@ function mwgPart(rng: Rng): ExamPart | null {
     id: 'b',
     prompt: `Gleichgewicht: $${equilibriumCe(e)}$${e.process ? ` (${e.process})` : ''}.`,
     points: 2,
-    items: [fromStep(step, 'mwg', 'Massenwirkungsgesetz', 2, true)],
+    items: [{ ...fromStep(step, 'mwg', 'Massenwirkungsgesetz', 2), paperFirst: true }],
   }
 }
 
-function chatelierPart(seed: string): ExamPart | null {
+function chatelierPart(seed: string, rng: Rng): ExamPart | null {
+  if (rng.chance(LE_CHATELIER_QUESTION_SHARE)) {
+    return { id: 'c', prompt: 'Prinzip von Le Chatelier.', points: 1, items: [questionItem(rng.pick(LE_CHATELIER_QUESTIONS), 'le-chatelier', rng)] }
+  }
   const calc = leChatelierTask(2, createRng(`${seed}:lc`), ref)
   if (!calc) return null
   const e = equilibriumById(calc.substance.split(':')[0])!
@@ -60,7 +58,7 @@ function chatelierPart(seed: string): ExamPart | null {
     id: 'c',
     prompt: `Gleichgewicht: $${equilibriumCe(e)}$${withDH ? ` mit $${dHLatex(e)}$` : ''}; alle Stoffe gasförmig. ${change}`,
     points: 1,
-    items: [fromStep(step, 'richtung', 'Le Chatelier', 1, true)],
+    items: [fromStep(step, 'richtung', 'Le Chatelier', 1)],
   }
 }
 
@@ -91,6 +89,33 @@ const inline = (latex: string) =>
     .map((x) => `$${x}$`)
     .join(', ')
 
+// Vorzeichen eines gewählten oder eingetippten ΔG: eingetippt mit Zahl als Wert, gewählt aus dem Text („$-12{,}3\,…$")
+export function dgSign(option: ExamOption): number {
+  if (option.value !== undefined) return ratSign(option.value as Rational)
+  return /^\$\s*[-−]/.test(option.content) ? -1 : 1
+}
+
+// „Freiwillig?" mit dem eigenen ΔG bewerten (Folgefehler): Wer mit einem falschen ΔG die dazu passende Folgerung zieht,
+// verliert den Punkt nicht doppelt. Die Gegenantwort ist die mit dem Denkfehler „exergon und endergon verwechselt".
+function verdictItem(item: ExamItem): ExamItem {
+  return {
+    ...item,
+    dependsOn: ['dg'],
+    build: (chosen, truth) => {
+      const base = item.build(chosen, truth)
+      const own = dgSign(chosen('dg'))
+      if (own === 0 || own === dgSign(truth('dg'))) return base
+      const opposite = base.options.find((o) => o.errorRuleId === 'chem-dg-exergonic')
+      if (!opposite) return base
+      return {
+        ...base,
+        expected: opposite.id,
+        explanation: { detailed: `Mit deinem $\\Delta G$ (${own < 0 ? 'negativ' : 'positiv'}) folgt: ${opposite.content}`, short: opposite.content },
+      }
+    },
+  }
+}
+
 function gibbsPart(seed: string, rng: Rng): ExamPart | null {
   if (rng.chance(0.5)) {
     for (let i = 0; i < 30; i++) {
@@ -102,7 +127,7 @@ function gibbsPart(seed: string, rng: Rng): ExamPart | null {
         id: 'e',
         prompt: `Freie Enthalpie: ${inline(calc.task.functionLatex!)}. ${calc.task.note!}`,
         points: 2,
-        items: [fromStep(dg, 'dg', 'Freie Enthalpie', 1), fromStep(verdict, 'freiwillig', 'Freiwillig?', 1)],
+        items: [fromStep(dg, 'dg', 'Freie Enthalpie', 1), verdictItem(fromStep(verdict, 'freiwillig', 'Freiwillig?', 1))],
       }
     }
     return null
@@ -113,7 +138,7 @@ function gibbsPart(seed: string, rng: Rng): ExamPart | null {
     id: 'e',
     prompt: `Freiwillig oder nicht: ${inline(calc.task.functionLatex!)}. ${calc.task.note!}`,
     points: 2,
-    items: [fromStep(calc.task.steps[0], 'bereich', 'Freiwillig?', 2, true)],
+    items: [fromStep(calc.task.steps[0], 'bereich', 'Freiwillig?', 2)],
   }
 }
 
@@ -128,7 +153,7 @@ export function buildTask5(seed: number): ExamTask {
       items: [questionItem(rng.pick(EQUILIBRIUM_QUESTIONS), 'gleichgewicht', rng), questionItem(rng.pick(CATALYST_QUESTIONS), 'katalysator', rng)],
     }
     const b = mwgPart(rng)
-    const c = chatelierPart(key)
+    const c = chatelierPart(key, rng)
     const d = enthalpyPart(key)
     const e = gibbsPart(key, rng)
     if (!b || !c || !d || !e) continue

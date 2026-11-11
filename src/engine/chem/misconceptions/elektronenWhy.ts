@@ -105,4 +105,12 @@ export const ELEKTRONEN_WHY: Readonly<Record<string, Explanation>> = {
     detailed: 'Ungepaart ist nur ein Elektron, das allein in seinem Orbital sitzt. Auch Valenzelektronen bilden Paare, sobald eine Unterschale mehr Elektronen als Orbitale hat.',
     short: 'Auch Valenzelektronen bilden Paare.',
   },
+  'chem-mis-el-spin-pair-magnet': {
+    detailed: 'Hier ist übersehen, dass entgegengesetzte Spins auch entgegengesetzt ausgerichtete kleine Magnete sind. Überlege, was zwei gleich starke Magnete bewirken, die in entgegengesetzte Richtungen zeigen.',
+    short: 'Entgegengesetzte Spins heben sich auf.',
+  },
+  'chem-mis-el-magnet-nucleus': {
+    detailed: 'Den Magnetismus von Stoffen wie Eisen erzeugen die Elektronen der Hülle: Ihr Spin macht jedes von ihnen zu einem winzigen Magneten. Überlege, welche Elektronen dabei zählen.',
+    short: 'Der Spin der Elektronen erzeugt den Magnetismus.',
+  },
 }

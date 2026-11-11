@@ -480,7 +480,7 @@ const energieLevels: LevelPreview[] = [
     level: 3,
     available: true,
     title: 'Temperatur, ab der eine Reaktion freiwillig abläuft, Gleichgewichtskonstante aus der freien Enthalpie, alles gemischt',
-    examples: [String.raw`\Delta G^{0} = -R \cdot T \cdot \ln K`],
+    examples: [String.raw`\Delta G^{0} = -R \cdot T \cdot \ln K_{\mathrm{GG}}`],
   },
 ]
 
@@ -573,7 +573,7 @@ const zmkLevels: LevelPreview[] = [
 
 // Unterthemen von „Zwischenmolekulare Kräfte" (Rechnungen in engine/chem/generators/zmk.ts, part)
 const zmkParts: CoursePart[] = [
-  { id: 'kraefte', title: 'Die drei Kräfte und Wasserstoffbrücken', levels: [1, 2, 3] },
+  { id: 'kraefte', title: 'Die drei Kräfte und Wasserstoffbrückenbindungen', levels: [1, 2, 3] },
   { id: 'wasser', title: 'Wasser ist besonders', levels: [1, 2, 3] },
   { id: 'siedepunkte', title: 'Siedepunkte vergleichen', levels: [2, 3] },
   { id: 'loesen', title: 'Gleiches löst sich in Gleichem', levels: [2, 3] },
@@ -811,7 +811,7 @@ export const SUBJECTS: readonly Subject[] = [
           {
             id: ZMK,
             title: 'Zwischenmolekulare Kräfte',
-            description: 'Van-der-Waals-Kräfte, Dipol-Dipol-Kräfte und Wasserstoffbrücken, Siedepunkte und Löslichkeit',
+            description: 'Van-der-Waals-Kräfte, Dipol-Dipol-Wechselwirkungen und Wasserstoffbrückenbindungen, Siedepunkte und Löslichkeit',
             icon: 'bond',
             cards: 'chem-zmk',
             levels: zmkLevels,

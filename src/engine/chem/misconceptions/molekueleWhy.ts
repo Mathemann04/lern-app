@@ -135,4 +135,24 @@ export const MOLEKUELE_WHY: Readonly<Record<string, Explanation>> = {
     detailed: "Nur „mono“ lässt man am ersten Element weg. Stehen vom ersten Element mehrere Atome in der Formel, bekommt auch es eine Vorsilbe, wie in Dischwefeldichlorid.",
     short: "Nur „mono“ entfällt am ersten Element.",
   },
+  'chem-mis-mo-h-count': {
+    detailed: "Wie viele H-Atome ein Nichtmetall bindet, folgt aus den Elektronen, die ihm zum Oktett fehlen: acht minus die Nummer seiner Hauptgruppe. Elemente derselben Hauptgruppe binden gleich viele H-Atome; prüfe, in welcher Gruppe das Element steht.",
+    short: "Bindungen = acht minus Hauptgruppe.",
+  },
+  'chem-mis-mo-element-x2': {
+    detailed: "Die Schreibweise $\\ce{Cl2}$ gilt nur für das Element selbst, in dem sich zwei Chloratome ein Paar teilen. In einer Verbindung zählt jedes Atom für sich: Ein Chloratom bildet eine Bindung, also gehört zu ihm ein H-Atom. Die Formel nennt das kleinste Verhältnis der Atome.",
+    short: "In Verbindungen zählt jedes Atom einzeln.",
+  },
+  'chem-mis-mo-field-magnetic': {
+    detailed: "Ein Dipol trägt an seinen Enden elektrische Teilladungen. Auf Ladungen wirkt ein elektrisches Feld, etwa zwischen zwei geladenen Platten: Es dreht das Molekül, bis sein negatives Ende zur positiven Seite zeigt. Ein Magnetfeld übt auf ruhende Ladungen keine Kraft aus.",
+    short: "Teilladungen spüren das elektrische Feld.",
+  },
+  'chem-mis-mo-dipole-scalar': {
+    detailed: "Jeder Bindungsdipol hat eine Richtung. Man addiert sie wie Pfeile (Vektoren): Zeigen zwei gleich große genau entgegengesetzt, heben sie sich ganz auf. Erst die Gestalt sagt, wie die Pfeile zueinander stehen.",
+    short: "Bindungsdipole addiert man mit ihrer Richtung.",
+  },
+  'chem-mis-mo-en-unbonded': {
+    detailed: "Der Unterschied der Elektronegativität beschreibt, wie ungleich zwei Atome ein gemeinsames Paar teilen. Das gibt es nur zwischen zwei Atomen, die direkt verbunden sind. Schau in der Lewis-Formel nach, welche Atome ein Strich verbindet.",
+    short: "Nur direkt verbundene Atome teilen ein Paar.",
+  },
 }

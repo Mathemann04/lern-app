@@ -98,7 +98,7 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
     name: 'Elektronen zur Massenzahl gezählt',
     wrongFormula: String.raw`\ce{^{37}_{17}Cl}\text{: } A = 17 + 20 + 17`,
     why: {
-      detailed: String.raw`Die Massenzahl zählt nur die Teilchen im Kern: Protonen und Neutronen, $A = Z + N$. Elektronen gehören zur Hülle; sie sind fast 2000-mal leichter als ein Proton und zählen nicht mit.`,
+      detailed: String.raw`Die Massenzahl zählt nur die Teilchen im Kern: Protonen und Neutronen, $A = Z + N$. Elektronen gehören zur Hülle; ein Elektron ist rund 1836-mal leichter als ein Proton (im Skript: etwa $\frac{1}{2000}\,\mathrm{u}$) und zählt nicht mit.`,
       short: String.raw`Die Massenzahl zählt nur Protonen und Neutronen: $A = Z + N$.`,
     },
   },
@@ -120,6 +120,47 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
     why: {
       detailed: String.raw`Die Energie eines Photons wächst mit der Frequenz und sinkt mit der Wellenlänge: $E = h \cdot f$ und $c = \lambda \cdot f$. Stelle nach der gesuchten Größe um und prüfe die Einheit: Am Ende muss bei einer Energie $\mathrm{J}$ stehen, bei einer Frequenz $\mathrm{s^{-1}}$, bei einer Wellenlänge $\mathrm{m}$.`,
       short: String.raw`$E = h \cdot f$ und $c = \lambda \cdot f$; die Einheit zeigt, ob richtig umgestellt ist.`,
+    },
+  },
+  // Rydberg-Formel (Wasserstoffatom)
+  {
+    id: 'chem-rydberg-no-square',
+    course: ATOMBAU,
+    name: 'Quadrat in der Rydberg-Formel vergessen',
+    wrongFormula: String.raw`\frac{1}{\lambda} = R_{\mathrm{H}} \cdot \left(\frac{1}{2} - \frac{1}{4}\right)`,
+    why: {
+      detailed: String.raw`In der Rydberg-Formel stehen die Nummern der beiden Niveaus im Quadrat: $\frac{1}{n^2}$ und $\frac{1}{m^2}$. Ohne die Quadrate stimmt die Energiedifferenz nicht, und damit auch Wellenlänge und Energie nicht.`,
+      short: String.raw`Die Niveaus stehen im Quadrat: $\frac{1}{n^2} - \frac{1}{m^2}$.`,
+    },
+  },
+  {
+    id: 'chem-rydberg-not-inverted',
+    course: ATOMBAU,
+    name: 'Kehrwert vergessen',
+    wrongFormula: String.raw`\lambda = R_{\mathrm{H}} \cdot \left(\frac{1}{n^2} - \frac{1}{m^2}\right)`,
+    why: {
+      detailed: String.raw`Die Rydberg-Formel liefert $\frac{1}{\lambda}$ in $\mathrm{m^{-1}}$, nicht die Wellenlänge selbst. Erst der Kehrwert ist $\lambda$ in Meter; die Energie folgt aus $E = \frac{h \cdot c}{\lambda} = h \cdot c \cdot \frac{1}{\lambda}$. Die Einheit zeigt den Fehler: Eine Wellenlänge hat die Einheit $\mathrm{m}$, nicht $\mathrm{m^{-1}}$.`,
+      short: String.raw`Die Formel liefert $\frac{1}{\lambda}$; erst der Kehrwert ist die Wellenlänge.`,
+    },
+  },
+  {
+    id: 'chem-rydberg-swapped',
+    course: ATOMBAU,
+    name: 'Niveaus in der Rydberg-Formel vertauscht',
+    wrongFormula: String.raw`\frac{1}{\lambda} = R_{\mathrm{H}} \cdot \left(\frac{1}{4^2} - \frac{1}{2^2}\right) < 0`,
+    why: {
+      detailed: String.raw`In der Klammer steht vorn das untere Niveau $n$ und hinten das obere $m$, mit $n < m$. Nur so ist die Klammer positiv. Eine negative Wellenlänge oder Energie gibt es nicht; sie zeigt, dass die beiden Niveaus vertauscht sind.`,
+      short: String.raw`Vorn das untere Niveau $n$, hinten das obere $m$.`,
+    },
+  },
+  {
+    id: 'chem-rydberg-to-ground',
+    course: ATOMBAU,
+    name: 'Bis zum Grundzustand statt ins Unendliche gerechnet',
+    wrongFormula: String.raw`n = 2 \to \infty\text{: } E = h \cdot c \cdot R_{\mathrm{H}} \cdot \left(\frac{1}{1^2} - \frac{1}{2^2}\right)`,
+    why: {
+      detailed: String.raw`Gerechnet ist hier der Sprung hinunter auf das erste Niveau. Um das Elektron ganz vom Atom zu lösen, muss es aber aus seinem Niveau ins Unendliche: Das obere Niveau ist $m \to \infty$ mit $\frac{1}{m^2} \to 0$, und im ersten Bruch steht das Niveau, auf dem das Elektron sitzt.`,
+      short: String.raw`Ganz lösen heißt: $m \to \infty$, nicht hinunter auf $n = 1$.`,
     },
   },
   // Stoffmenge und Umsatz (S3a)
@@ -201,6 +242,26 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
     why: {
       detailed: String.raw`Ein Mol wiegt so viel Gramm, wie die molare Masse angibt; mehrere Mol wiegen entsprechend mehr. Die Masse ist deshalb das Produkt $m = n \cdot M$; die Einheiten zeigen es: $\mathrm{mol} \cdot \frac{\mathrm{g}}{\mathrm{mol}} = \mathrm{g}$.`,
       short: String.raw`$m = n \cdot M$; Mol mal Gramm je Mol ergibt Gramm.`,
+    },
+  },
+  {
+    id: 'chem-molar-m-times-n',
+    course: STOFFMENGE,
+    name: 'Masse mal Stoffmenge statt geteilt',
+    wrongFormula: String.raw`11\,\mathrm{g}\ \text{und}\ 0{,}25\,\mathrm{mol}\text{: } M = 11 \cdot 0{,}25 = 2{,}75\,\mathrm{g/mol}`,
+    why: {
+      detailed: String.raw`Die molare Masse ist die Masse eines einzigen Mols. Hat eine Probe mehrere oder weniger als ein Mol, teilt man ihre Masse durch die Stoffmenge: $M = \frac{m}{n}$. Die Einheiten zeigen es: Gramm geteilt durch Mol ergibt Gramm je Mol, Gramm mal Mol dagegen nicht.`,
+      short: String.raw`$M = \frac{m}{n}$; Gramm geteilt durch Mol ergibt Gramm je Mol.`,
+    },
+  },
+  {
+    id: 'chem-molar-n-over-m',
+    course: STOFFMENGE,
+    name: 'Stoffmenge durch Masse geteilt',
+    wrongFormula: String.raw`11\,\mathrm{g}\ \text{und}\ 0{,}25\,\mathrm{mol}\text{: } M = \frac{0{,}25}{11} = 0{,}0227\,\mathrm{g/mol}`,
+    why: {
+      detailed: String.raw`In $M = \frac{m}{n}$ steht die Masse der Probe oben und die Stoffmenge unten. Umgekehrt käme Mol je Gramm heraus, keine molare Masse. Prüfe am Ergebnis: Ein Mol wiegt bei fast jedem Stoff mehr als ein Gramm.`,
+      short: String.raw`$M = \frac{m}{n}$: die Masse oben, die Stoffmenge unten.`,
     },
   },
   {
@@ -779,13 +840,13 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
     },
   },
   {
-    id: 'chem-lewis-free-central-only',
+    id: 'chem-lewis-free-whole-molecule',
     course: MOLEKUELE,
-    name: 'Nur die freien Paare am Zentralatom gezählt',
-    wrongFormula: String.raw`\ce{PCl3}\text{: } 1\ \text{freies Paar statt}\ 10`,
+    name: 'Paare des ganzen Moleküls statt am Zentralatom gezählt',
+    wrongFormula: String.raw`\ce{PCl3}\text{ am }\ce{P}\text{: } 10\ \text{freie Paare statt}\ 1`,
     why: {
-      detailed: 'Freie Paare gibt es nicht nur am Zentralatom. Auch die äußeren Atome wie Sauerstoff oder die Halogene tragen freie Paare, damit sie ihr Oktett haben. Für das ganze Molekül zählen alle.',
-      short: 'Auch die äußeren Atome tragen freie Paare.',
+      detailed: 'Gefragt sind nur die Paare, die am Zentralatom sitzen: die Striche zu seinen Partnern und die freien Paare an ihm selbst. Die freien Paare der äußeren Atome gehören zu diesen Atomen und zählen hier nicht mit.',
+      short: 'Nur die Paare am Zentralatom zählen.',
     },
   },
   {
@@ -1083,9 +1144,9 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
     id: 'chem-zmk-hbond-missed',
     course: ZMK,
     name: 'Wasserstoffbrücken übersehen',
-    wrongFormula: String.raw`\ce{NH3}\text{: nur Dipol-Dipol-Kräfte}`,
+    wrongFormula: String.raw`\ce{NH3}\text{: nur Dipol-Dipol-Wechselwirkungen}`,
     why: {
-      detailed: 'Sitzt ein H-Atom direkt an N, O oder F, bilden sich Wasserstoffbrücken, nicht nur in Wasser. Sie sind ein besonders starker Fall der Dipol-Dipol-Kräfte und deshalb die stärkste Kraft zwischen solchen Molekülen.',
+      detailed: 'Sitzt ein H-Atom direkt an N, O oder F, bilden sich Wasserstoffbrücken, nicht nur in Wasser. Sie sind ein besonders starker Fall der Dipol-Dipol-Wechselwirkungen und deshalb die stärkste Kraft zwischen solchen Molekülen.',
       short: 'H an N, O oder F: Wasserstoffbrücken.',
     },
   },
@@ -1093,9 +1154,9 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
     id: 'chem-zmk-polar-bond',
     course: ZMK,
     name: 'Polare Bindungen mit polarem Molekül verwechselt',
-    wrongFormula: String.raw`\ce{CCl4}\text{: Dipol-Dipol-Kräfte}`,
+    wrongFormula: String.raw`\ce{CCl4}\text{: Dipol-Dipol-Wechselwirkungen}`,
     why: {
-      detailed: 'Dipol-Dipol-Kräfte gibt es nur zwischen Molekülen, die als Ganzes ein Dipol sind. Liegen polare Bindungen symmetrisch, heben sie sich auf, und das Molekül ist unpolar.',
+      detailed: 'Dipol-Dipol-Wechselwirkungen gibt es nur zwischen Molekülen, die als Ganzes ein Dipol sind. Liegen polare Bindungen symmetrisch, heben sie sich auf, und das Molekül ist unpolar.',
       short: 'Es zählt die Polarität des ganzen Moleküls.',
     },
   },
@@ -1125,7 +1186,7 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
     name: 'Nur nach der Molmasse geordnet',
     wrongFormula: String.raw`\ce{H2O} < \ce{H2S}`,
     why: {
-      detailed: 'Die Größe der Moleküle entscheidet nur bei gleicher Art der Kraft. Wasserstoffbrücken sind so viel stärker als Van-der-Waals- und Dipol-Dipol-Kräfte, dass sie einen großen Unterschied der Molmasse übertreffen.',
+      detailed: 'Die Größe der Moleküle entscheidet nur bei gleicher Art der Kraft. Wasserstoffbrücken sind so viel stärker als Van-der-Waals-Kräfte und Dipol-Dipol-Wechselwirkungen, dass sie einen großen Unterschied der Molmasse übertreffen.',
       short: 'Erst die Art der Kraft, dann die Größe.',
     },
   },

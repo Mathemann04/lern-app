@@ -176,8 +176,8 @@ const LEVEL_1: readonly Question[] = [
         short: '(g) heißt gasförmig.',
       } },
       { id: 'f4', text: '(f)', misconception: 'chem-mis-gl-state-symbols', why: {
-        detailed: 'Die Zeichen kommen nicht von deutschen Wörtern, sondern aus dem Lateinischen und Englischen. Ein Zeichen (f) gibt es nicht.',
-        short: 'Die Zeichen stammen nicht aus dem Deutschen; (f) gibt es nicht.',
+        detailed: 'In der Vorlesung stehen die Zeichen (s), (l), (g) und (aq); sie kommen aus dem Lateinischen und Englischen. (f) stünde für fest, wie das deutsche Wort; für fest steht aber (s), und gefragt ist ein flüssiger Stoff.',
+        short: '(f) stünde für fest; üblich sind (s), (l), (g) und (aq).',
       } },
     ],
     hint: 'Die Kürzel stammen aus dem Lateinischen und Englischen, nicht aus dem Deutschen.',
@@ -1120,6 +1120,132 @@ const LEVEL_2: readonly Question[] = [
     },
     cards: ['gleichungen-verbrennung', 'gleichungen-alkane'],
   },
+  {
+    kind: 'single',
+    id: 'gl-v-unvollstaendig',
+    no: 221,
+    level: 2,
+    fact: 'unvollstaendig',
+    part: 'verbrennung',
+    title: 'Unvollständige Verbrennung',
+    prompt: String.raw`Ein Gasbrenner bekommt zu wenig Luft, sodass Methan $\ce{CH4}$ unvollständig verbrennt. Was entsteht dabei?`,
+    correct: { id: 'r', text: 'Wasser und Kohlenstoffmonoxid, bei starkem Sauerstoffmangel auch Ruß' },
+    wrong: [
+      { id: 'f1', text: 'Kohlenstoffdioxid und Wasser; die Reaktion läuft bloß langsamer', misconception: 'chem-mis-gl-incomplete', why: {
+        detailed: 'Fehlt Sauerstoff, reicht er nicht, um jedes C-Atom mit zwei O-Atomen zu verbinden. Es entstehen deshalb andere Kohlenstoffprodukte als bei genug Sauerstoff.',
+        short: 'Bei Sauerstoffmangel entstehen andere Kohlenstoffprodukte.',
+      } },
+      { id: 'f2', text: 'Kohlenstoffmonoxid und freier Wasserstoff, weil der Sauerstoff nur für den Kohlenstoff reicht', misconception: 'chem-mis-gl-incomplete-hydrogen' },
+      { id: 'f3', text: 'Kohlenstoffdioxid und Wasser wie sonst, nur weniger davon', misconception: 'chem-mis-gl-incomplete' },
+      { id: 'f4', text: 'Ruß und Wasserstoff, aber kein Wasser', misconception: 'chem-mis-gl-incomplete-hydrogen' },
+    ],
+    hint: 'Überlege, was mit dem Kohlenstoff geschieht, wenn nicht genug Sauerstoff für zwei O-Atome je C-Atom da ist.',
+    explanation: {
+      detailed: 'Bei Sauerstoffmangel wird der Kohlenstoff nicht vollständig zu Kohlenstoffdioxid oxidiert. Es entsteht Kohlenstoffmonoxid, ein giftiges Gas, und bei noch weniger Sauerstoff Ruß, also fester Kohlenstoff. Der Wasserstoff bildet weiterhin Wasser.',
+      short: 'Unvollständig: Kohlenstoffmonoxid und Ruß statt Kohlenstoffdioxid.',
+    },
+    cards: ['gleichungen-verbrennung'],
+  },
+  {
+    kind: 'single',
+    id: 'gl-v-unvollstaendig-co',
+    no: 222,
+    level: 2,
+    fact: 'unvollstaendig-co',
+    part: 'verbrennung',
+    title: 'Unvollständige Verbrennung',
+    prompt: String.raw`Methan $\ce{CH4}$ verbrennt unvollständig zu Kohlenstoffmonoxid und Wasser. Welche Gleichung ist mit den kleinsten ganzen Zahlen richtig ausgeglichen?`,
+    correct: { id: 'r', text: String.raw`$\ce{2 CH4 + 3 O2 -> 2 CO + 4 H2O}$` },
+    wrong: [
+      { id: 'f1', text: String.raw`$\ce{CH4 + 2 O2 -> CO + 2 H2O}$`, misconception: 'chem-mis-gl-incomplete', why: {
+        detailed: String.raw`So viel Sauerstoff braucht die vollständige Verbrennung zu $\ce{CO2}$. Ein $\ce{CO}$ enthält nur ein O-Atom; zähle den Sauerstoff rechts neu.`,
+        short: String.raw`$\ce{CO}$ enthält nur ein O-Atom; den Sauerstoff neu zählen.`,
+      } },
+      { id: 'f2', text: String.raw`$\ce{CH4 + 3/2 O2 -> CO + 2 H2O}$`, misconception: 'chem-mis-gl-fraction', why: {
+        detailed: 'Die Atombilanz stimmt hier zwar, aber gefragt ist die Form mit den kleinsten ganzen Zahlen. Ein Bruch ist nur ein Zwischenschritt.',
+        short: 'Gefragt sind ganze Zahlen; der Bruch ist nur ein Zwischenschritt.',
+      } },
+      { id: 'f3', text: String.raw`$\ce{2 CH4 + 3 O2 -> 2 CO2 + 4 H2O}$`, misconception: 'chem-mis-gl-incomplete', why: {
+        detailed: 'Hier steht Kohlenstoffdioxid statt Kohlenstoffmonoxid, und die Sauerstoffbilanz stimmt nicht.',
+        short: 'Falsches Kohlenstoffprodukt, und der Sauerstoff stimmt nicht.',
+      } },
+      { id: 'f4', text: String.raw`$\ce{CH4 + O2 -> CO + 2 H2O}$`, misconception: 'chem-mis-gl-not-recounted' },
+      { id: 'f5', text: String.raw`$\ce{2 CH4 + 3 O2 -> 2 CO + 4 H2}$`, misconception: 'chem-mis-gl-incomplete-hydrogen', why: {
+        detailed: 'Auch bei unvollständiger Verbrennung wird der Wasserstoff zu Wasser. Hier steht freier Wasserstoff, und der Sauerstoff stimmt nicht mehr.',
+        short: 'Der Wasserstoff wird auch hier zu Wasser.',
+      } },
+    ],
+    hint: 'Gleiche aus wie bei der vollständigen Verbrennung, aber zähle rechts nur ein O-Atom je Kohlenstoffmonoxid.',
+    explanation: {
+      detailed: String.raw`Kohlenstoff: ein $\ce{CO}$. Wasserstoff: 4 H-Atome ergeben zwei $\ce{H2O}$. Sauerstoff rechts: $1 + 2 = 3$ Atome, also $\frac{3}{2}$ Moleküle $\ce{O2}$. Mit 2 malgenommen: 2, 3, 2 und 4.`,
+      short: String.raw`Rechts $1 + 2 = 3$ O-Atome; mit 2 malnehmen ergibt 2, 3, 2, 4.`,
+    },
+    cards: ['gleichungen-verbrennung'],
+  },
+  {
+    kind: 'single',
+    id: 'gl-v-alkan-formel',
+    no: 223,
+    level: 2,
+    fact: 'alkan-formel',
+    part: 'verbrennung',
+    title: 'Formel eines Alkans',
+    prompt: 'Ein Alkan hat eine Kette aus fünf Kohlenstoffatomen. Welche Summenformel hat es?',
+    correct: { id: 'r', text: String.raw`$\ce{C5H12}$` },
+    wrong: [
+      { id: 'f1', text: String.raw`$\ce{C5H7}$`, misconception: 'chem-mis-gl-alkane-formula' },
+      { id: 'f2', text: String.raw`$\ce{C5H10}$`, misconception: 'chem-mis-gl-alkane-formula', why: {
+        detailed: String.raw`Mit nur $2n$ Wasserstoffatomen fehlen die beiden H-Atome an den Enden der Kette. Alkane haben die allgemeine Formel $\ce{C_nH_{2n+2}}$.`,
+        short: String.raw`Alkane haben $2n + 2$ H-Atome, nicht $2n$.`,
+      } },
+      { id: 'f3', text: String.raw`$\ce{C4H10}$`, misconception: 'chem-mis-gl-alkane-name', why: {
+        detailed: 'Das ist Butan mit vier Kohlenstoffatomen. Die Kette in der Frage ist um ein Atom länger.',
+        short: 'Das ist Butan; die Kette ist um ein C-Atom zu kurz.',
+      } },
+      { id: 'f4', text: String.raw`$\ce{C5H11OH}$`, misconception: 'chem-mis-gl-alcohol-formula', why: {
+        detailed: 'Das ist ein Alkohol, erkennbar an der OH-Gruppe. Ein Alkan besteht nur aus Kohlenstoff und Wasserstoff.',
+        short: 'Das ist ein Alkohol, kein Alkan.',
+      } },
+    ],
+    hint: 'Die Zahl der H-Atome folgt aus der allgemeinen Formel der Alkane.',
+    explanation: {
+      detailed: String.raw`Nach $\ce{C_nH_{2n+2}}$ gehören zu 5 Kohlenstoffatomen $2 \cdot 5 + 2 = 12$ Wasserstoffatome: $\ce{C5H12}$ (Pentan).`,
+      short: String.raw`$n = 5$, also $2 \cdot 5 + 2 = 12$ H-Atome.`,
+    },
+    cards: ['gleichungen-alkane'],
+  },
+  {
+    kind: 'single',
+    id: 'gl-v-alkohol-formel',
+    no: 224,
+    level: 2,
+    fact: 'alkohol-formel',
+    part: 'verbrennung',
+    title: 'Formel eines Alkohols',
+    prompt: 'Welche Summenformel hat Butanol?',
+    correct: { id: 'r', text: String.raw`$\ce{C4H9OH}$` },
+    wrong: [
+      { id: 'f1', text: String.raw`$\ce{C4H10OH}$`, misconception: 'chem-mis-gl-alcohol-formula' },
+      { id: 'f2', text: String.raw`$\ce{C5H11OH}$`, misconception: 'chem-mis-gl-alkane-name', why: {
+        detailed: 'Das ist Pentanol mit fünf Kohlenstoffatomen. Prüfe, für welche Zahl die Vorsilbe But- steht.',
+        short: 'Das ist Pentanol; die Kette ist um ein C-Atom zu lang.',
+      } },
+      { id: 'f3', text: String.raw`$\ce{C3H7OH}$`, misconception: 'chem-mis-gl-alkane-name', why: {
+        detailed: 'Das ist Propanol mit drei Kohlenstoffatomen. Prüfe, für welche Zahl die Vorsilbe But- steht.',
+        short: 'Das ist Propanol; die Kette ist um ein C-Atom zu kurz.',
+      } },
+      { id: 'f4', text: String.raw`$\ce{C4H10}$`, misconception: 'chem-mis-gl-alcohol-formula', why: {
+        detailed: 'Das ist Butan, das Alkan. Die Endung -ol zeigt eine OH-Gruppe an, die hier fehlt.',
+        short: 'Das ist Butan; die OH-Gruppe fehlt.',
+      } },
+    ],
+    hint: 'Schreibe zuerst das Alkan mit derselben Zahl an C-Atomen auf und überlege, was die OH-Gruppe daran ändert.',
+    explanation: {
+      detailed: String.raw`But- steht für 4 Kohlenstoffatome; das Alkan Butan ist $\ce{C4H10}$. Im Alkohol ersetzt eine OH-Gruppe ein H-Atom: $\ce{C4H9OH}$, passend zur allgemeinen Formel $\ce{C_nH_{2n+1}OH}$ mit $2 \cdot 4 + 1 = 9$.`,
+      short: String.raw`Butan $\ce{C4H10}$, ein H durch OH ersetzt: $\ce{C4H9OH}$.`,
+    },
+    cards: ['gleichungen-alkane'],
+  },
 ]
 
 const LEVEL_3: readonly Question[] = [
@@ -1153,42 +1279,6 @@ const LEVEL_3: readonly Question[] = [
     },
     cards: ['gleichungen-verbrennung'],
     ref: 'Skript Stöchiometrie, Folie 7',
-  },
-  {
-    kind: 'single',
-    id: 'gl-k-nonan-formel',
-    no: 302,
-    level: 3,
-    fact: 'alkan-formel',
-    part: 'verbrennung',
-    title: 'Formel eines Alkans',
-    prompt: 'Welche Summenformel hat Nonan?',
-    correct: { id: 'r', text: String.raw`$\ce{C9H20}$` },
-    wrong: [
-      { id: 'f1', text: String.raw`$\ce{C9H11}$`, misconception: 'chem-mis-gl-alkane-formula' },
-      { id: 'f2', text: String.raw`$\ce{C9H18}$`, misconception: 'chem-mis-gl-alkane-formula', why: {
-        detailed: String.raw`Mit nur $2n$ Wasserstoffatomen fehlen die beiden H-Atome an den Kettenenden. Alkane haben die allgemeine Formel $\ce{C_nH_{2n+2}}$.`,
-        short: String.raw`Alkane haben $2n + 2$ H-Atome, nicht $2n$.`,
-      } },
-      { id: 'f3', text: String.raw`$\ce{C8H18}$`, misconception: 'chem-mis-gl-alkane-name', why: {
-        detailed: 'Das ist Octan mit acht Kohlenstoffatomen. Prüfe, für welche Zahl die Vorsilbe Non- steht.',
-        short: 'Das ist Octan; die Kette ist um ein C-Atom zu kurz.',
-      } },
-      { id: 'f4', text: String.raw`$\ce{C10H22}$`, misconception: 'chem-mis-gl-alkane-name', why: {
-        detailed: 'Das ist Decan mit zehn Kohlenstoffatomen. Prüfe, für welche Zahl die Vorsilbe Non- steht.',
-        short: 'Das ist Decan; die Kette ist um ein C-Atom zu lang.',
-      } },
-      { id: 'f5', text: String.raw`$\ce{C9H19OH}$`, misconception: 'chem-mis-gl-alcohol-formula', why: {
-        detailed: 'Das ist ein Alkohol, erkennbar an der OH-Gruppe; sein Name würde auf -ol enden. Ein Alkan enthält keinen Sauerstoff.',
-        short: 'Das ist ein Alkohol, kein Alkan.',
-      } },
-    ],
-    hint: 'Die Vorsilbe zählt die Kohlenstoffatome; die Zahl der H-Atome folgt aus der allgemeinen Formel der Alkane.',
-    explanation: {
-      detailed: String.raw`Non- steht für 9 Kohlenstoffatome. Nach $\ce{C_nH_{2n+2}}$ gehören dazu $2 \cdot 9 + 2 = 20$ Wasserstoffatome.`,
-      short: String.raw`$n = 9$, also $2 \cdot 9 + 2 = 20$ H-Atome.`,
-    },
-    cards: ['gleichungen-alkane'],
   },
   {
     kind: 'single',
@@ -1317,98 +1407,6 @@ const LEVEL_3: readonly Question[] = [
       short: String.raw`$7 - 1 = 6$ O-Atome, also 3 Moleküle $\ce{O2}$.`,
     },
     cards: ['gleichungen-verbrennung', 'gleichungen-alkane'],
-  },
-  {
-    kind: 'single',
-    id: 'gl-k-unvollstaendig',
-    no: 307,
-    level: 3,
-    fact: 'unvollstaendig',
-    part: 'verbrennung',
-    title: 'Unvollständige Verbrennung',
-    prompt: String.raw`Ein Gasbrenner bekommt zu wenig Luft, sodass Methan $\ce{CH4}$ unvollständig verbrennt. Was entsteht dabei?`,
-    correct: { id: 'r', text: 'Wasser und Kohlenstoffmonoxid, bei starkem Sauerstoffmangel auch Ruß' },
-    wrong: [
-      { id: 'f1', text: 'Kohlenstoffdioxid und Wasser; die Reaktion läuft bloß langsamer', misconception: 'chem-mis-gl-incomplete', why: {
-        detailed: 'Fehlt Sauerstoff, reicht er nicht, um jedes C-Atom mit zwei O-Atomen zu verbinden. Es entstehen deshalb andere Kohlenstoffprodukte als bei genug Sauerstoff.',
-        short: 'Bei Sauerstoffmangel entstehen andere Kohlenstoffprodukte.',
-      } },
-      { id: 'f2', text: 'Kohlenstoffmonoxid und freier Wasserstoff, weil der Sauerstoff nur für den Kohlenstoff reicht', misconception: 'chem-mis-gl-incomplete-hydrogen' },
-      { id: 'f3', text: 'Kohlenstoffdioxid und Wasser wie sonst, nur weniger davon', misconception: 'chem-mis-gl-incomplete' },
-      { id: 'f4', text: 'Ruß und Wasserstoff, aber kein Wasser', misconception: 'chem-mis-gl-incomplete-hydrogen' },
-    ],
-    hint: 'Überlege, was mit dem Kohlenstoff geschieht, wenn nicht genug Sauerstoff für zwei O-Atome je C-Atom da ist.',
-    explanation: {
-      detailed: 'Bei Sauerstoffmangel wird der Kohlenstoff nicht vollständig zu Kohlenstoffdioxid oxidiert. Es entsteht Kohlenstoffmonoxid, ein giftiges Gas, und bei noch weniger Sauerstoff Ruß, also fester Kohlenstoff. Der Wasserstoff bildet weiterhin Wasser.',
-      short: 'Unvollständig: Kohlenstoffmonoxid und Ruß statt Kohlenstoffdioxid.',
-    },
-    cards: ['gleichungen-verbrennung'],
-  },
-  {
-    kind: 'single',
-    id: 'gl-k-unvollstaendig-co',
-    no: 308,
-    level: 3,
-    fact: 'unvollstaendig-co',
-    part: 'verbrennung',
-    title: 'Unvollständige Verbrennung',
-    prompt: String.raw`Methan $\ce{CH4}$ verbrennt unvollständig zu Kohlenstoffmonoxid und Wasser. Welche Gleichung ist mit den kleinsten ganzen Zahlen richtig ausgeglichen?`,
-    correct: { id: 'r', text: String.raw`$\ce{2 CH4 + 3 O2 -> 2 CO + 4 H2O}$` },
-    wrong: [
-      { id: 'f1', text: String.raw`$\ce{CH4 + 2 O2 -> CO + 2 H2O}$`, misconception: 'chem-mis-gl-incomplete', why: {
-        detailed: String.raw`So viel Sauerstoff braucht die vollständige Verbrennung zu $\ce{CO2}$. Ein $\ce{CO}$ enthält nur ein O-Atom; zähle den Sauerstoff rechts neu.`,
-        short: String.raw`$\ce{CO}$ enthält nur ein O-Atom; den Sauerstoff neu zählen.`,
-      } },
-      { id: 'f2', text: String.raw`$\ce{CH4 + 3/2 O2 -> CO + 2 H2O}$`, misconception: 'chem-mis-gl-fraction', why: {
-        detailed: 'Die Atombilanz stimmt hier zwar, aber gefragt ist die Form mit den kleinsten ganzen Zahlen. Ein Bruch ist nur ein Zwischenschritt.',
-        short: 'Gefragt sind ganze Zahlen; der Bruch ist nur ein Zwischenschritt.',
-      } },
-      { id: 'f3', text: String.raw`$\ce{2 CH4 + 3 O2 -> 2 CO2 + 4 H2O}$`, misconception: 'chem-mis-gl-incomplete', why: {
-        detailed: 'Hier steht Kohlenstoffdioxid statt Kohlenstoffmonoxid, und die Sauerstoffbilanz stimmt nicht.',
-        short: 'Falsches Kohlenstoffprodukt, und der Sauerstoff stimmt nicht.',
-      } },
-      { id: 'f4', text: String.raw`$\ce{CH4 + O2 -> CO + 2 H2O}$`, misconception: 'chem-mis-gl-not-recounted' },
-      { id: 'f5', text: String.raw`$\ce{2 CH4 + 3 O2 -> 2 CO + 4 H2}$`, misconception: 'chem-mis-gl-incomplete-hydrogen', why: {
-        detailed: 'Auch bei unvollständiger Verbrennung wird der Wasserstoff zu Wasser. Hier steht freier Wasserstoff, und der Sauerstoff stimmt nicht mehr.',
-        short: 'Der Wasserstoff wird auch hier zu Wasser.',
-      } },
-    ],
-    hint: 'Gleiche aus wie bei der vollständigen Verbrennung, aber zähle rechts nur ein O-Atom je Kohlenstoffmonoxid.',
-    explanation: {
-      detailed: String.raw`Kohlenstoff: ein $\ce{CO}$. Wasserstoff: 4 H-Atome ergeben zwei $\ce{H2O}$. Sauerstoff rechts: $1 + 2 = 3$ Atome, also $\frac{3}{2}$ Moleküle $\ce{O2}$. Mit 2 malgenommen: 2, 3, 2 und 4.`,
-      short: String.raw`Rechts $1 + 2 = 3$ O-Atome; mit 2 malnehmen ergibt 2, 3, 2, 4.`,
-    },
-    cards: ['gleichungen-verbrennung'],
-  },
-  {
-    kind: 'single',
-    id: 'gl-k-russ',
-    no: 309,
-    level: 3,
-    fact: 'unvollstaendig-russ',
-    part: 'verbrennung',
-    title: 'Unvollständige Verbrennung',
-    prompt: String.raw`Bei starkem Sauerstoffmangel verbrennt Methan $\ce{CH4}$ zu Ruß (Kohlenstoff) und Wasser. Welche Gleichung ist richtig ausgeglichen?`,
-    correct: { id: 'r', text: String.raw`$\ce{CH4 + O2 -> C + 2 H2O}$` },
-    wrong: [
-      { id: 'f1', text: String.raw`$\ce{CH4 + 2 O2 -> C + 2 H2O}$`, misconception: 'chem-mis-gl-incomplete', why: {
-        detailed: 'Ruß enthält keinen Sauerstoff. Zähle die O-Atome rechts: Sie stecken nur noch im Wasser.',
-        short: 'Ruß enthält keinen Sauerstoff; den Sauerstoff neu zählen.',
-      } },
-      { id: 'f2', text: String.raw`$\ce{CH4 + O2 -> C + H2O}$`, misconception: 'chem-mis-gl-skeleton-ok' },
-      { id: 'f3', text: String.raw`$\ce{2 CH4 + O2 -> 2 C + 2 H2O}$`, misconception: 'chem-mis-gl-not-recounted' },
-      { id: 'f4', text: String.raw`$\ce{CH4 + O2 -> C + 2 H2}$`, misconception: 'chem-mis-gl-incomplete-hydrogen', why: {
-        detailed: 'Auch bei starkem Sauerstoffmangel wird der Wasserstoff zu Wasser. Hier taucht der Sauerstoff rechts gar nicht mehr auf.',
-        short: 'Der Wasserstoff wird zu Wasser; der Sauerstoff fehlt rechts.',
-      } },
-      { id: 'f5', text: String.raw`$\ce{CH4 + O -> C + H2O}$`, misconception: 'chem-mis-gl-single-atom' },
-    ],
-    hint: 'Ruß ist reiner Kohlenstoff. In welchem Produkt steckt dann der ganze Sauerstoff?',
-    explanation: {
-      detailed: String.raw`Der Kohlenstoff bleibt als Ruß übrig, die 4 H-Atome bilden zwei $\ce{H2O}$. Darin stecken 2 O-Atome, also braucht man genau ein Molekül $\ce{O2}$.`,
-      short: String.raw`Zwei $\ce{H2O}$ mit zusammen 2 O-Atomen: ein $\ce{O2}$.`,
-    },
-    cards: ['gleichungen-verbrennung'],
   },
   {
     kind: 'single',
@@ -1672,35 +1670,59 @@ const LEVEL_3: readonly Question[] = [
   },
   {
     kind: 'single',
-    id: 'gl-k-alkohol-formel',
-    no: 318,
+    id: 'gl-k-butanol-sauerstoff',
+    no: 320,
     level: 3,
-    fact: 'alkohol-formel',
+    fact: 'butanol-sauerstoff',
     part: 'verbrennung',
-    title: 'Formel eines Alkohols',
-    prompt: 'Welche Summenformel hat Butanol?',
-    correct: { id: 'r', text: String.raw`$\ce{C4H9OH}$` },
+    title: 'Verbrennung von Butanol',
+    prompt: String.raw`Butanol $\ce{C4H9OH}$ verbrennt vollständig zu Kohlenstoffdioxid und Wasser. Welcher Koeffizient steht vor $\ce{O2}$, wenn die Gleichung mit den kleinsten ganzen Zahlen geschrieben ist?`,
+    correct: { id: 'r', text: '6' },
     wrong: [
-      { id: 'f1', text: String.raw`$\ce{C4H10OH}$`, misconception: 'chem-mis-gl-alcohol-formula' },
-      { id: 'f2', text: String.raw`$\ce{C5H11OH}$`, misconception: 'chem-mis-gl-alkane-name', why: {
-        detailed: 'Das ist Pentanol mit fünf Kohlenstoffatomen. Prüfe, für welche Zahl die Vorsilbe But- steht.',
-        short: 'Das ist Pentanol; die Kette ist um ein C-Atom zu lang.',
+      { id: 'f1', text: String.raw`$\frac{13}{2}$`, misconception: 'chem-mis-gl-fuel-oxygen', why: {
+        detailed: 'Hier wurde der Sauerstoff im Butanol vergessen. Seine OH-Gruppe bringt ein O-Atom mit, das nicht aus Sauerstoffmolekülen kommen muss.',
+        short: 'Den Sauerstoff im Butanol abziehen.',
       } },
-      { id: 'f3', text: String.raw`$\ce{C3H7OH}$`, misconception: 'chem-mis-gl-alkane-name', why: {
-        detailed: 'Das ist Propanol mit drei Kohlenstoffatomen. Prüfe, für welche Zahl die Vorsilbe But- steht.',
-        short: 'Das ist Propanol; die Kette ist um ein C-Atom zu kurz.',
+      { id: 'f2', text: '7', misconception: 'chem-mis-gl-fuel-oxygen', why: {
+        detailed: 'Hier wurde der Sauerstoff im Butanol dazugezählt statt abgezogen. Der Brennstoff liefert dieses O-Atom selbst.',
+        short: 'Den Sauerstoff im Brennstoff abziehen, nicht dazuzählen.',
       } },
-      { id: 'f4', text: String.raw`$\ce{C4H10}$`, misconception: 'chem-mis-gl-alcohol-formula', why: {
-        detailed: 'Das ist Butan, das Alkan. Die Endung -ol zeigt eine OH-Gruppe an, die hier fehlt.',
-        short: 'Das ist Butan; die OH-Gruppe fehlt.',
+      { id: 'f3', text: '12', misconception: 'chem-mis-gl-atoms-molecules' },
+      { id: 'f4', text: String.raw`$\frac{7}{2}$`, misconception: 'chem-mis-gl-water-oxygen' },
+      { id: 'f5', text: String.raw`$\frac{17}{2}$`, misconception: 'chem-mis-gl-h-per-water' },
+    ],
+    hint: 'Bestimme die Produkte für ein Molekül Butanol, zähle ihren Sauerstoff und ziehe den Sauerstoff im Butanol ab.',
+    explanation: {
+      detailed: String.raw`Kohlenstoff: vier $\ce{CO2}$. Wasserstoff: $9 + 1 = 10$ H-Atome ergeben fünf $\ce{H2O}$. Sauerstoff rechts: $4 \cdot 2 + 5 = 13$ Atome; eines bringt das Butanol mit, es bleiben 12, also sechs Moleküle $\ce{O2}$: $\ce{C4H9OH + 6 O2 -> 4 CO2 + 5 H2O}$. Ein Bruch entsteht hier nicht.`,
+      short: String.raw`$13 - 1 = 12$ O-Atome, also 6 Moleküle $\ce{O2}$.`,
+    },
+    cards: ['gleichungen-verbrennung'],
+  },
+  {
+    kind: 'single',
+    id: 'gl-k-pentan',
+    no: 321,
+    level: 3,
+    fact: 'pentan',
+    part: 'verbrennung',
+    title: 'Verbrennung von Pentan',
+    prompt: String.raw`Pentan $\ce{C5H12}$ verbrennt vollständig. Welche Gleichung ist mit den kleinsten ganzen Zahlen richtig ausgeglichen?`,
+    correct: { id: 'r', text: String.raw`$\ce{C5H12 + 8 O2 -> 5 CO2 + 6 H2O}$` },
+    wrong: [
+      { id: 'f1', text: String.raw`$\ce{C5H12 + 8 O2 -> 5 CO2 + 12 H2O}$`, misconception: 'chem-mis-gl-h-per-water' },
+      { id: 'f2', text: String.raw`$\ce{C5H12 + 5 O2 -> 5 CO2 + 6 H2O}$`, misconception: 'chem-mis-gl-water-oxygen' },
+      { id: 'f3', text: String.raw`$\ce{C5H12 + 16 O2 -> 5 CO2 + 6 H2O}$`, misconception: 'chem-mis-gl-atoms-molecules' },
+      { id: 'f4', text: String.raw`$\ce{2 C5H12 + 16 O2 -> 10 CO2 + 12 H2O}$`, misconception: 'chem-mis-gl-not-smallest', why: {
+        detailed: 'Die Atombilanz stimmt hier zwar, aber alle Koeffizienten lassen sich noch durch 2 teilen. Gefragt sind die kleinsten ganzen Zahlen.',
+        short: 'Alle Koeffizienten lassen sich noch durch 2 teilen.',
       } },
     ],
-    hint: 'Schreibe zuerst das Alkan mit derselben Zahl an C-Atomen auf und überlege, was die OH-Gruppe daran ändert.',
+    hint: 'Reihenfolge: Kohlenstoff, Wasserstoff, Sauerstoff. Prüfe, ob überhaupt ein Bruch entsteht.',
     explanation: {
-      detailed: String.raw`But- steht für 4 Kohlenstoffatome; das Alkan Butan ist $\ce{C4H10}$. Im Alkohol ersetzt eine OH-Gruppe ein H-Atom: $\ce{C4H9OH}$, passend zur allgemeinen Formel $\ce{C_nH_{2n+1}OH}$ mit $2 \cdot 4 + 1 = 9$.`,
-      short: String.raw`Butan $\ce{C4H10}$, ein H durch OH ersetzt: $\ce{C4H9OH}$.`,
+      detailed: String.raw`Kohlenstoff: fünf $\ce{CO2}$. Wasserstoff: 12 H-Atome ergeben sechs $\ce{H2O}$. Sauerstoff rechts: $5 \cdot 2 + 6 = 16$ Atome, also acht Moleküle $\ce{O2}$. Die Zahlen sind schon ganz; mit 2 malnehmen ist hier nicht nötig.`,
+      short: String.raw`Rechts $10 + 6 = 16$ O-Atome: 8 Moleküle $\ce{O2}$.`,
     },
-    cards: ['gleichungen-alkane'],
+    cards: ['gleichungen-verbrennung'],
   },
 ]
 
@@ -1784,20 +1806,18 @@ const MULTI: readonly Question[] = [
       'Bei der vollständigen Verbrennung eines Alkans entstehen nur Kohlenstoffdioxid und Wasser.',
       String.raw`Ein Alkan mit $n$ Kohlenstoffatomen hat $2n + 2$ Wasserstoffatome.`,
       'Beim Ausgleichen einer Verbrennung zählt auch der Sauerstoff im Wasser mit.',
-      'Bei Sauerstoffmangel entstehen Wasser und Kohlenstoffmonoxid, bei starkem Mangel auch Ruß.',
       String.raw`Die Gleichung $\ce{2 C2H6 + 7 O2 -> 4 CO2 + 6 H2O}$ ist ausgeglichen.`,
     ],
     wrong: [
       { id: 'f1', text: 'Bei der vollständigen Verbrennung eines Kohlenwasserstoffs entstehen Kohlenstoffmonoxid und Wasserstoff.', misconception: 'chem-mis-gl-combustion-products' },
       { id: 'f2', text: 'Aus jedem Wasserstoffatom des Brennstoffs entsteht ein Wassermolekül.', misconception: 'chem-mis-gl-h-per-water' },
       { id: 'f3', text: 'Den Sauerstoff im Alkohol muss man beim Ausgleichen der Verbrennung nicht beachten.', misconception: 'chem-mis-gl-fuel-oxygen' },
-      { id: 'f4', text: 'Bei Sauerstoffmangel bleibt der Wasserstoff des Brennstoffs als Gas übrig.', misconception: 'chem-mis-gl-incomplete-hydrogen' },
-      { id: 'f5', text: 'Pentan hat vier Kohlenstoffatome.', misconception: 'chem-mis-gl-alkane-name' },
+      { id: 'f4', text: 'Pentan hat vier Kohlenstoffatome.', misconception: 'chem-mis-gl-alkane-name' },
     ],
-    hint: 'Welche Produkte entstehen bei genug und bei zu wenig Sauerstoff? Zähle in der Gleichung jedes Element auf beiden Seiten.',
+    hint: 'Welche Produkte entstehen bei vollständiger Verbrennung? Zähle in der Gleichung jedes Element auf beiden Seiten.',
     explanation: {
-      detailed: String.raw`Vollständig verbrannt wird ein Alkan zu Kohlenstoffdioxid und Wasser; zu $n$ Kohlenstoffatomen gehören $2n + 2$ Wasserstoffatome. Beim Ausgleichen kommt der Sauerstoff zuletzt, und dabei zählt der in $\ce{CO2}$ und der in $\ce{H2O}$. Bei Sauerstoffmangel entsteht statt $\ce{CO2}$ Kohlenstoffmonoxid oder sogar Ruß. In $\ce{2 C2H6 + 7 O2 -> 4 CO2 + 6 H2O}$ stehen links und rechts je 4 C, 12 H und 14 O.`,
-      short: String.raw`Vollständig: $\ce{CO2}$ und $\ce{H2O}$; Alkane $\ce{C_nH_{2n+2}}$; Sauerstoff in beiden Produkten zählen; bei Mangel CO oder Ruß.`,
+      detailed: String.raw`Vollständig verbrannt wird ein Alkan zu Kohlenstoffdioxid und Wasser; zu $n$ Kohlenstoffatomen gehören $2n + 2$ Wasserstoffatome. Beim Ausgleichen kommt der Sauerstoff zuletzt, und dabei zählt der in $\ce{CO2}$ und der in $\ce{H2O}$. In $\ce{2 C2H6 + 7 O2 -> 4 CO2 + 6 H2O}$ stehen links und rechts je 4 C, 12 H und 14 O.`,
+      short: String.raw`Vollständig: $\ce{CO2}$ und $\ce{H2O}$; Alkane $\ce{C_nH_{2n+2}}$; Sauerstoff in beiden Produkten zählen.`,
     },
     cards: ['gleichungen-verbrennung', 'gleichungen-alkane'],
     ref: 'Skript Stöchiometrie',
@@ -1839,7 +1859,7 @@ const MATCH: readonly Question[] = [
     ],
     hint: 'Die Zustandszeichen kürzen lateinische und englische Wörter ab. Beim Pfeil: Läuft auch die Rückreaktion?',
     explanation: {
-      detailed: String.raw`Zustände stehen in Klammern hinter der Formel: (s) fest, (l) flüssig, (g) gasförmig, (aq) in Wasser gelöst. Der einfache Pfeil $\rightarrow$ steht für eine Reaktion, die vollständig abläuft, der Doppelpfeil $\rightleftharpoons$ für ein Gleichgewicht.`,
+      detailed: String.raw`Zustände stehen in Klammern hinter der Formel: (s) für fest, (l) für flüssig, (g) für gasförmig und (aq) für in Wasser gelöst. Der einfache Pfeil $\rightarrow$ steht für eine Reaktion, die vollständig abläuft, der Doppelpfeil $\rightleftharpoons$ für ein Gleichgewicht.`,
       short: String.raw`(s) fest, (l) flüssig, (g) gasförmig, (aq) gelöst; $\rightarrow$ vollständig, $\rightleftharpoons$ Gleichgewicht.`,
     },
     cards: ['gleichungen-lesen'],
@@ -1911,5 +1931,7 @@ const COMBUSTION_STEPS: OrderQuestion = {
 export const GLEICHUNGEN_BANK: QuestionBank = {
   course: 'chem-gleichungen',
   questions: [...LEVEL_1, ...LEVEL_2, ...LEVEL_3, ...MULTI, ...MATCH, COMBUSTION_STEPS],
-  retired: [],
+  // 302, 307, 308, 318: über die Vorlesung hinaus (Name statt Formel, unvollständige Verbrennung); als 221 bis 224 in der
+  // Vertiefung neu. 309 (Ruß) ohne Ersatz
+  retired: [302, 307, 308, 309, 318],
 }

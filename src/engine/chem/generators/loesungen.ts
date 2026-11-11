@@ -4,7 +4,7 @@ import { type Rational, parseDecimal, rat, ratAdd, ratDiv, ratEq, ratMul, ratToN
 import type { Level, TaskRef } from '../../tasks/taskNumber.ts'
 import { type Species, balance, equationLatex, species } from '../equation.ts'
 import { type Formula, atomCounts, formulaLatex, parseFormula } from '../formula.ts'
-import { type MassValues, elementMolarMass, molarMass } from '../molarMass.ts'
+import { type MassValues, atomicNumberSum, elementMolarMass, molarMass } from '../molarMass.ts'
 import { FUELS, CO2, H2O, O2 } from '../reactions.ts'
 import { SUBSTANCES, type Substance, substanceById } from '../substances.ts'
 import { type ChemCalc, type ChemGenerator, stepChoices, tolerantNumeric, tolerantWrongs, usesExamNumbers, usesExamSolution } from './shared.ts'
@@ -76,6 +76,11 @@ function calcStep(spec: StepSpec, rng: Rng, focus?: string): GuidedStep | null {
 
 const SOLUTE_IDS = ['NaCl', 'KCl', 'NaOH', 'KOH', 'CaCl2', 'MgCl2', 'Na2CO3', 'NaHCO3', 'Na2SO4', 'CuSO4', 'KNO3', 'AgNO3', 'KMnO4', 'NH4Cl', 'C6H12O6', 'HCl', 'H2SO4', 'HNO3', 'H3PO4', 'H2O2', 'CH3OH', 'C2H5OH']
 const SOLUTE_HARD_IDS = ['Ca(NO3)2', 'Mg(NO3)2', 'Al2(SO4)3', '(NH4)2SO4', 'CuSO4*5H2O', 'MgSO4*7H2O', 'FeSO4*7H2O', 'Na2CO3*10H2O', 'CoCl2*6H2O', 'CaCl2*2H2O']
+// Abgewogen werden nur Feststoffe (Salze, Hydroxide, Glucose, Hydrate). Gase und Flüssigkeiten (Chlorwasserstoff,
+// Säuren, Wasserstoffperoxid, Alkohole) kommen nur in Aufgaben vor, in denen nichts abgewogen wird.
+const NOT_WEIGHED = new Set(['HCl', 'H2SO4', 'HNO3', 'H3PO4', 'H2O2', 'CH3OH', 'C2H5OH'])
+export const WEIGH_IDS: readonly string[] = [...SOLUTE_IDS, ...SOLUTE_HARD_IDS].filter((id) => !NOT_WEIGHED.has(id))
+const WEIGH_EASY_IDS = SOLUTE_IDS.filter((id) => !NOT_WEIGHED.has(id))
 const GAS_IDS = ['H2', 'O2', 'N2', 'Cl2', 'CO2', 'CO', 'NH3', 'CH4', 'C2H6', 'C3H8', 'C4H10', 'SO2', 'N2O', 'HCl']
 const solutes = (ids: readonly string[]) => ids.map((id) => substanceById(id)!)
 // Gase: aus der Stoffliste und die Edelgase
@@ -93,6 +98,16 @@ function valuesNote(formula: Formula, values: MassValues): string {
   const parts = [...atomCounts(formula).keys()].map((symbol) => `$M(\\ce{${symbol}}) = ${molarLatex(elementMolarMass(symbol, values), values)}$`)
   const joined = parts.length === 1 ? parts[0] : `${parts.slice(0, -1).join(', ')} und ${parts[parts.length - 1]}`
   return values === 'pse' ? `Werte aus dem PSE: ${joined}.` : `Rechne mit ${joined}.`
+}
+
+// Hydrat: Die Konzentration gilt für das wasserfreie Salz (wie in der Frage lo-k-kristallwasser); abgewogen wird das
+// Hydrat, und jede seiner Formeleinheiten bringt eine Formeleinheit Salz mit (gleiche Stoffmenge)
+export type HydrateInfo = { readonly salt: Substance; readonly word: string }
+export function hydrateInfo(s: Substance): HydrateInfo | null {
+  if (s.formula.adducts.length === 0) return null
+  const word = /-([A-Za-z]*hydrat)/.exec(s.name)?.[1] ?? 'Hydrat'
+  const name = s.name.replace(/-[A-Za-z]*hydrat.*$/, '')
+  return { salt: { id: s.id.split('*')[0], name, kind: 'simple', formula: { units: s.formula.units, adducts: [] } }, word }
 }
 
 // „Molmasse unvollständig": ohne die Wasserstoffatome bzw. nur das erste Element
@@ -131,8 +146,9 @@ const VOLUMES_ML = [50, 100, 150, 200, 250, 500, 750, 1000]
 
 // Lösung ansetzen für Klausuraufgabe 4 (chem/exam/task4.ts): Stoff, Konzentration und Volumen wie auf
 // Klausurniveau, unter der Löslichkeit, nie wie in den Altklausuren; null: neu ziehen
+// (nur Feststoffe, die man abwiegen kann)
 export function pickSolution(rng: Rng): { substance: Substance; c: Rational; vMl: number } | null {
-  const s = rng.pick(solutes([...SOLUTE_IDS, ...SOLUTE_HARD_IDS]))
+  const s = rng.pick(solutes(WEIGH_IDS))
   const vMl = rng.pick(VOLUMES_ML)
   const c = rng.pick(NICE_C.filter((x) => within(x, maxC(s))))
   return usesExamSolution(s.id, c, vMl) ? null : { substance: s, c, vMl }
@@ -162,7 +178,7 @@ function concTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCal
           { rule: 'chem-c-inverted', value: ratDiv(v, n) },
         ],
         unit: 'mol/L',
-        hint: 'In welcher Einheit muss das Volumen stehen, damit mol/L herauskommt?',
+        hint: 'Gesucht ist die molare Konzentration (Stoffmengenkonzentration). In welcher Einheit muss das Volumen stehen, damit mol/L herauskommt?',
         line: `c = \\frac{n}{V} = \\frac{${unit(n, 'mol')}}{${unit(v, 'L')}} ${eqSign(c)} ${unit(c, 'mol/L')}`,
         why: 'Konzentration ist Stoffmenge je Liter Lösung:',
         card: CARD.konz,
@@ -203,18 +219,22 @@ function concTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCal
 // Lösung ansetzen: n = c · V, M, m = n · M
 function prepareTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc | null {
   const values: MassValues = level === 2 ? 'pse' : 'rounded'
-  const s = rng.pick(solutes(level === 3 ? [...SOLUTE_IDS, ...SOLUTE_HARD_IDS, ...SOLUTE_HARD_IDS] : SOLUTE_IDS))
+  // ab Vertiefung auch Klammern und Hydrate (Abwechslung, weil Flüssigkeiten hier fehlen), auf Klausurniveau doppelt so oft
+  const s = rng.pick(solutes(level === 3 ? [...WEIGH_EASY_IDS, ...SOLUTE_HARD_IDS, ...SOLUTE_HARD_IDS] : level === 2 ? [...WEIGH_EASY_IDS, ...SOLUTE_HARD_IDS] : WEIGH_EASY_IDS))
   const vMl = rng.pick(VOLUMES_ML)
   const v = ratMul(rat(vMl), ML)
   const c = rng.pick(NICE_C.filter((x) => within(x, maxC(s))))
   if (usesExamSolution(s.id, c, vMl)) return null
   const n = ratMul(c, v)
+  // bei Hydraten gilt c für das wasserfreie Salz
+  const hydrate = hydrateInfo(s)
+  const dissolved = hydrate ? hydrate.salt : s
   const steps: GuidedStep[] = []
   const nStepped = calcStep(
     {
       id: 'stoffmenge',
       title: 'Stoffmenge',
-      question: `Welche Stoffmenge $${ce(s)}$ wird gebraucht?`,
+      question: `Welche Stoffmenge $${ce(dissolved)}$ wird gebraucht?`,
       correct: n,
       wrong: [
         { rule: 'chem-ml-not-l', value: ratMul(c, rat(vMl)) },
@@ -240,12 +260,16 @@ function prepareTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): Chem
       title: 'Molmasse',
       question: `Wie groß ist die molare Masse $M(${ce(s)})$?`,
       correct: mass,
+      // „Molmasse unvollständig" liegt bei NaOH, KOH oder NaHCO₃ zu nah an der Lösung und fällt dann weg (tolerantWrongs);
+      // dafür bleiben Index vergessen und Ordnungszahlen
       wrong: [
         { rule: 'chem-molar-incomplete', value: incompleteMass(s.formula, values) },
-        ...(s.formula.adducts.length > 0 ? [{ rule: 'chem-molar-hydrate', value: molarMass(s.formula, values, { withoutAdducts: true }) }] : []),
+        ...(hydrate ? [{ rule: 'chem-molar-hydrate', value: molarMass(s.formula, values, { withoutAdducts: true }) }] : []),
+        { rule: 'chem-molar-index', value: molarMass(s.formula, values, { ignoreIndices: true }) },
+        { rule: 'chem-molar-atomic-number', value: atomicNumberSum(s.formula) },
       ],
       latex: mLatex,
-      hint: 'Zähle jedes Atom der Formel, auch Wasserstoff und Kristallwasser.',
+      hint: hydrate ? 'Abgewogen wird das Hydrat: Zähle jedes Atom der Formel, auch das Kristallwasser.' : 'Zähle jedes Atom der Formel, auch Wasserstoff.',
       line: `M(${ce(s)}) = ${molarText(mass, values)}`,
       why: 'Die molare Masse der ganzen Formel:',
       card: CARD.ansetzen,
@@ -260,16 +284,19 @@ function prepareTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): Chem
     {
       id: 'masse',
       title: 'Masse',
-      question: `Wie viel $${ce(s)}$ muss abgewogen werden?`,
+      question: hydrate ? `Wie viel ${hydrate.word} $${ce(s)}$ muss abgewogen werden?` : `Wie viel $${ce(s)}$ muss abgewogen werden?`,
       correct: m,
       wrong: [
         { rule: 'chem-m-divided', value: ratDiv(nShown, mass) },
         { rule: 'chem-molar-incomplete', value: ratMul(nShown, incompleteMass(s.formula, values)) },
+        ...(hydrate ? [{ rule: 'chem-molar-hydrate', value: ratMul(nShown, molarMass(s.formula, values, { withoutAdducts: true })) }] : []),
       ],
       unit: 'g',
       hint: 'Mol mal Gramm je Mol ergibt Gramm.',
       line: `m = n \\cdot M = ${unit(nShown, 'mol')} \\cdot ${molarText(mass, values)} ${eqSign(m)} ${unit(m, 'g')}`,
-      why: 'Masse ist Stoffmenge mal molare Masse:',
+      why: hydrate
+        ? `Jede Formeleinheit ${hydrate.word} bringt eine Formeleinheit $${ce(dissolved)}$ mit; man wiegt also so viel Mol Hydrat ab, wie Salz gebraucht wird:`
+        : 'Masse ist Stoffmenge mal molare Masse:',
       card: CARD.ansetzen,
     },
     rng,
@@ -280,8 +307,10 @@ function prepareTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): Chem
   return finish(
     ref,
     'Wie viel muss für die Lösung abgewogen werden?',
-    `V = ${vMl}\\,\\mathrm{mL} \\qquad c(${ce(s)}) = ${unit(c, 'mol/L')}`,
-    `${named(s)}. ${valuesNote(s.formula, values)}`,
+    `V = ${vMl}\\,\\mathrm{mL} \\qquad c(${ce(dissolved)}) = ${unit(c, 'mol/L')}`,
+    hydrate
+      ? `Lösung von ${named(dissolved)}; abgewogen wird das ${hydrate.word} $${ce(s)}$, gelöst und im Maßkolben aufgefüllt. ${valuesNote(s.formula, values)}`
+      : `${named(s)}, abgewogen, gelöst und im Maßkolben aufgefüllt. ${valuesNote(s.formula, values)}`,
     steps,
     `m ${eqSign(m)} ${unit(m, 'g')}`,
     `ansetzen:${level}:${s.kind}`,
@@ -389,7 +418,7 @@ function betaTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCal
         { rule: 'chem-mass-conc-inverted', value: ratDiv(v, m) },
       ],
       unit: 'g/L',
-      hint: 'Masse je Volumen, und das Volumen in Litern.',
+      hint: String.raw`Masse je Volumen, und das Volumen in Litern. Im Skript hat die Massenkonzentration das Zeichen $\rho$.`,
       line: `\\beta = \\frac{m}{V} = \\frac{${unit(m, 'g')}}{${unit(v, 'L')}} ${eqSign(beta)} ${unit(beta, 'g/L')}`,
       why: 'Massenkonzentration ist Masse des gelösten Stoffs je Liter Lösung:',
       card: CARD.beta,
@@ -557,7 +586,7 @@ function vmTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc 
         correct: vol,
         wrong: [{ rule: 'chem-vm-inverted', value: ratDiv(nShown, VM) }],
         unit: 'L',
-        hint: 'Wie viel Platz nimmt ein Mol eines Gases bei Normbedingungen ein?',
+        hint: 'Wie viel Platz nimmt ein Mol eines Gases bei Normbedingungen (im Skript: Normalbedingungen) ein?',
         line: `V = n \\cdot V_m = ${unit(nShown, 'mol')} \\cdot 22{,}4\\,\\mathrm{L/mol} ${eqSign(vol)} ${unit(vol, 'L')}`,
         why: 'Stoffmenge mal molares Volumen:',
         card: CARD.vm,
@@ -589,7 +618,7 @@ function vmTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc 
           correct: v,
           wrong: [{ rule: 'chem-vm-inverted', value: ratDiv(n, VM) }],
           unit: 'L',
-          hint: 'Wie viel Platz nimmt ein Mol eines Gases bei Normbedingungen ein?',
+          hint: 'Wie viel Platz nimmt ein Mol eines Gases bei Normbedingungen (im Skript: Normalbedingungen) ein?',
           line: `V = n \\cdot V_m = ${unit(n, 'mol')} \\cdot 22{,}4\\,\\mathrm{L/mol} ${eqSign(v)} ${unit(v, 'L')}`,
           why: String.raw`Bei Normbedingungen nimmt jedes Mol eines Gases $22{,}4\,\mathrm{L}$ ein:`,
           card: CARD.vm,
@@ -803,7 +832,7 @@ export const LOESUNGEN_GENERATORS: readonly ChemGenerator[] = [
     free: true,
     part: 'konzentration',
     weights: { 1: 0.35, 2: 0.35, 3: 0.35 },
-    errors: ['chem-ml-not-l', 'chem-c-inverted', 'chem-molar-incomplete', 'chem-molar-hydrate', 'chem-m-divided'],
+    errors: ['chem-ml-not-l', 'chem-c-inverted', 'chem-molar-incomplete', 'chem-molar-hydrate', 'chem-molar-index', 'chem-molar-atomic-number', 'chem-m-divided'],
     generate: konzentration,
   },
   {

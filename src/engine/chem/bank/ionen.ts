@@ -92,6 +92,18 @@ const ION_CHARGES: MatchQuestion = {
   ref: REF_FORMEL,
 }
 
+// Ladungsprobe eines Salzes aus mehreren Ionensorten (Frage 321): Ionen mit Anzahl, Ladungen aus der Ionentabelle
+// (chem/ions.ts); die Summe prüft generators/salze.test.ts
+export const STRUVITE_IONS: readonly (readonly [Ion, number])[] = [
+  [CATIONS.find((c) => c.id === 'Mg')!, 1],
+  [CATIONS.find((c) => c.id === 'NH4')!, 1],
+  [ANIONS.find((a) => a.id === 'PO4')!, 1],
+]
+const signed = (n: number) => (n > 0 ? `+${n}` : String(n))
+export const chargeSum = (ions: readonly (readonly [Ion, number])[]) => ions.reduce((sum, [ion, count]) => sum + count * ion.charge, 0)
+const chargeSumLatex = (ions: readonly (readonly [Ion, number])[]) =>
+  `${ions.map(([ion, count]) => `${count > 1 ? `${count} \\cdot ` : ''}(${signed(ion.charge)})`).join(' + ')} = ${chargeSum(ions)}`
+
 // Ordnen (N1c): Gitterenergie (Betrag, kJ/mol) der Salze aus Frage 318, Werte wie im Kopf dieser Datei, je mindestens
 // 15 % auseinander (Test in generators/salze.test.ts)
 export const LATTICE_ENERGY: Readonly<Record<string, { readonly name: string; readonly kj: number }>> = {
@@ -250,7 +262,6 @@ export const IONEN_BANK: QuestionBank = {
       correct: { id: 'r', text: "Calciumbromid" },
       wrong: [
         { id: 'f1', text: "Calciumdibromid", misconception: 'chem-mis-io-greek-prefix' },
-        { id: 'f2', text: "Calcium(II)-bromid", misconception: 'chem-mis-io-numeral-always' },
         { id: 'f3', text: "Bromidcalcium", misconception: 'chem-mis-io-name-order' },
         { id: 'f4', text: "Calciumbromat", misconception: 'chem-mis-io-ending-mixup' },
         { id: 'f5', text: "Calciumbrom", misconception: 'chem-mis-io-ending-mixup', why: {
@@ -260,7 +271,7 @@ export const IONEN_BANK: QuestionBank = {
       ],
       hint: "Erst das Kation, dann das Anion. Welche Endung tragen einatomige Anionen?",
       explanation: {
-        detailed: String.raw`Zuerst kommt der Name des Metalls, Calcium. Das einatomige Anion $\ce{Br-}$ heißt Bromid, mit der Endung -id. Calcium bildet nur das Ion $\ce{Ca^2+}$; der Name braucht deshalb keine römische Ziffer, und Zahlwörter wie di- verwendet man bei Salzen nicht: Calciumbromid.`,
+        detailed: String.raw`Zuerst kommt der Name des Metalls, Calcium. Das einatomige Anion $\ce{Br-}$ heißt Bromid, mit der Endung -id. Calcium bildet nur das Ion $\ce{Ca^2+}$; eine römische Ziffer ist deshalb nicht nötig und wird üblicherweise weggelassen, und Zahlwörter wie di- verwendet man bei Salzen nicht: Calciumbromid.`,
         short: "Kation, dann Anion auf -id: Calciumbromid.",
       },
       cards: ['ionen-namen'],
@@ -620,7 +631,7 @@ export const IONEN_BANK: QuestionBank = {
       fact: 'ziffer-wann',
       part: 'formel',
       title: "Wann eine Ziffer?",
-      prompt: "Bei welchem dieser ionischen Salze gehört eine römische Ziffer in den Namen?",
+      prompt: "Bei welchem dieser ionischen Salze braucht der Name eine römische Ziffer, damit eindeutig ist, welches Salz gemeint ist?",
       correct: { id: 'r', text: String.raw`$\ce{CuBr2}$` },
       wrong: [
         { id: 'f1', text: String.raw`$\ce{NaCl}$`, misconception: 'chem-mis-io-numeral-always' },
@@ -630,14 +641,14 @@ export const IONEN_BANK: QuestionBank = {
           short: "Aluminium bildet nur ein Ion; die Indizes ändern daran nichts.",
         } },
         { id: 'f4', text: String.raw`$\ce{MgO}$`, misconception: 'chem-mis-io-numeral-always', why: {
-          detailed: "Magnesium steht in der II. Hauptgruppe und bildet nur eine Sorte Ion. Wo die Ladung eindeutig ist, steht keine Ziffer im Namen.",
-          short: "Magnesium bildet nur ein Ion; eine Ziffer ist überflüssig.",
+          detailed: "Magnesium steht in der II. Hauptgruppe und bildet nur eine Sorte Ion. Der Name Magnesiumoxid ist also schon ohne Ziffer eindeutig; bei eindeutiger Ladung lässt man sie weg.",
+          short: "Magnesium bildet nur ein Ion; der Name ist auch ohne Ziffer eindeutig.",
         } },
       ],
       hint: "Welches dieser Metalle kann Ionen mit verschiedenen Ladungen bilden?",
       explanation: {
-        detailed: String.raw`Kupfer bildet $\ce{Cu+}$ und $\ce{Cu^2+}$; deshalb muss der Name sagen, welches vorliegt: $\ce{CuBr2}$ heißt Kupfer(II)-bromid. Natrium, Calcium, Aluminium und Magnesium bilden je nur ein Ion ($\ce{Na+}$, $\ce{Ca^2+}$, $\ce{Al^3+}$, $\ce{Mg^2+}$); bei ihnen steht keine Ziffer, auch wenn in der Formel ein Index auftaucht.`,
-        short: "Nur Metalle mit mehreren möglichen Ladungen wie Kupfer brauchen die Ziffer.",
+        detailed: String.raw`Kupfer bildet $\ce{Cu+}$ und $\ce{Cu^2+}$; deshalb muss der Name sagen, welches vorliegt: $\ce{CuBr2}$ heißt Kupfer(II)-bromid. Natrium, Calcium, Aluminium und Magnesium bilden je nur ein Ion ($\ce{Na+}$, $\ce{Ca^2+}$, $\ce{Al^3+}$, $\ce{Mg^2+}$); ihre Namen sind auch ohne Ziffer eindeutig, auch wenn in der Formel ein Index auftaucht. Bei ihnen lässt man die Ziffer üblicherweise weg; falsch wäre sie nicht, nur überflüssig.`,
+        short: "Nötig ist die Ziffer nur bei Metallen mit mehreren möglichen Ladungen wie Kupfer.",
       },
       cards: ['ionen-namen'],
       ref: REF_NAMEN,
@@ -1638,6 +1649,104 @@ export const IONEN_BANK: QuestionBank = {
       cards: ['ionen-born-haber'],
       ref: REF_ENERGIE,
     }),
+    // ---- Nachträge nach der Prüfung gegen die Skripte (Atomkristall, Löslichkeit, Ladungsprobe)
+    {
+      kind: 'single',
+      id: 'io-v-atomkristall',
+      no: 220,
+      level: 2,
+      fact: 'atomkristall',
+      part: 'gitter',
+      title: "Atomkristall",
+      prompt: "In einem Atomkristall wie Diamant sind alle Gitterbausteine über Atombindungen miteinander verbunden. Welche Eigenschaften hat ein solcher Stoff?",
+      correct: { id: 'r', text: "einen hohen Schmelzpunkt und eine große Härte" },
+      wrong: [
+        { id: 'f1', text: "einen niedrigen Schmelzpunkt und eine geringe Härte", misconception: 'chem-mis-io-atom-crystal-weak' },
+        { id: 'f2', text: "einen niedrigen Schmelzpunkt, aber eine große Härte", misconception: 'chem-mis-io-atom-crystal-weak', why: {
+          detailed: "Härte und Schmelzpunkt haben hier dieselbe Ursache: Beides verlangt, Bindungen zwischen den Bausteinen aufzubrechen. Halten diese Bindungen fest, gilt das für das Ritzen ebenso wie für das Schmelzen.",
+          short: "Härte und Schmelzpunkt hängen an denselben Bindungen.",
+        } },
+        { id: 'f3', text: "gute Leitfähigkeit als Feststoff, weil die Elektronen frei beweglich sind", misconception: 'chem-mis-io-bond-mixup', why: {
+          detailed: "Frei bewegliche Elektronen zwischen Atomrümpfen kennzeichnen die Metallbindung. In einer Atombindung sitzen die Elektronen als gemeinsame Paare fest zwischen zwei Atomen.",
+          short: "Freie Elektronen gehören zur Metallbindung, nicht zur Atombindung.",
+        } },
+        { id: 'f4', text: "Zerfall in Ionen beim Lösen in Wasser, danach leitet die Lösung den Strom", misconception: 'chem-mis-io-bond-mixup', why: {
+          detailed: "Ein Atomkristall enthält keine Ionen. Seine Bausteine sind Atome, die über gemeinsame Elektronenpaare verbunden sind; in Ionen zerfallen nur Salze.",
+          short: "Ein Atomkristall besteht nicht aus Ionen.",
+        } },
+      ],
+      hint: "Was muss man aufbrechen, um einen Atomkristall zu schmelzen oder zu ritzen?",
+      explanation: {
+        detailed: "Im Atomkristall ist jeder Baustein über starke Atombindungen mit seinen Nachbarn verknüpft. Wer ihn schmelzen oder ritzen will, muss diese Bindungen aufbrechen. Deshalb haben Atomkristalle wie Diamant einen sehr hohen Schmelzpunkt und eine große Härte.",
+        short: "Starke Atombindungen: hoher Schmelzpunkt, große Härte.",
+      },
+      cards: ['ionen-gitter'],
+      ref: REF_TYPEN,
+    },
+    {
+      kind: 'single',
+      id: 'io-v-loeslich-mgo',
+      no: 221,
+      level: 2,
+      fact: 'loeslich-mgo',
+      part: 'zerfall',
+      title: "Löslichkeit von Salzen",
+      prompt: String.raw`Natriumchlorid $\ce{NaCl}$ löst sich gut in Wasser. Wie verhält sich Magnesiumoxid $\ce{MgO}$?`,
+      correct: { id: 'r', text: "Es löst sich praktisch nicht, weil seine zweifach geladenen Ionen viel fester zusammenhalten." },
+      wrong: [
+        { id: 'f1', text: "Es löst sich ebenso gut, denn Salze sind in Wasser immer gut löslich.", misconception: 'chem-mis-io-all-soluble' },
+        { id: 'f2', text: "Es löst sich noch besser, weil zweifach geladene Ionen das Wasser stärker anziehen.", misconception: 'chem-mis-io-charge-soluble' },
+        { id: 'f3', text: "Es zerfällt im Wasser in Magnesium- und Sauerstoffatome.", misconception: 'chem-mis-io-dissolve-atoms' },
+        { id: 'f4', text: String.raw`Es löst sich nicht, weil es aus $\ce{MgO}$-Molekülen statt aus Ionen besteht.`, misconception: 'chem-mis-io-molecule' },
+      ],
+      hint: "Vergleiche die Ladungen der Ionen in beiden Salzen. Was bedeutet das für den Zusammenhalt im Gitter?",
+      explanation: {
+        detailed: String.raw`Löslichkeit, Schmelzpunkt und Härte eines Salzes hängen in erster Näherung von der Anziehung zwischen den Ionen ab. In $\ce{MgO}$ ziehen sich $\ce{Mg^2+}$ und $\ce{O^2-}$ viel stärker an als $\ce{Na+}$ und $\ce{Cl-}$ in Kochsalz, zumal die Ionen kleiner sind. Wasser kann das Gitter deshalb kaum auflösen: Magnesiumoxid ist praktisch unlöslich, schmilzt viel höher und ist härter.`,
+        short: "Höhere Ladungen, festeres Gitter: Magnesiumoxid löst sich praktisch nicht.",
+      },
+      cards: ['ionen-eigenschaften'],
+      ref: REF_SCHMELZ,
+    },
+    {
+      kind: 'single',
+      id: 'io-k-ladungsprobe-phosphat',
+      no: 321,
+      level: 3,
+      fact: 'ladungsprobe-phosphat',
+      part: 'formel',
+      title: "Ladungsprobe mit Phosphat",
+      prompt: String.raw`Magnesiumammoniumphosphat hat die Formel $\ce{MgNH4PO4}$. Mit welcher Ladungsprobe prüft man richtig, ob die Formel elektrisch neutral ist?`,
+      correct: { id: 'r', text: `$${chargeSumLatex(STRUVITE_IONS)}$` },
+      wrong: [
+        { id: 'f1', text: String.raw`$(+2) + (-1) + (-3) = -2$`, misconception: 'chem-mis-io-poly-charge', why: {
+          detailed: "Hier ist Ammonium negativ gerechnet. Ammonium ist aber das bekannte Molekül-Ion mit positiver Ladung; es steht in der Formel wie ein Metall-Ion vorn bei den Kationen.",
+          short: "Ammonium ist ein Kation.",
+        } },
+        { id: 'f2', text: String.raw`$(+2) + (+1) + (-2) = +1$`, misconception: 'chem-mis-io-poly-charge', why: {
+          detailed: "Hier hat Phosphat die Ladung von Sulfat bekommen. Jedes Molekül-Ion hat seine eigene, feste Ladung; die von Phosphat muss man kennen, nicht von einem anderen Ion übernehmen.",
+          short: "Phosphat hat nicht die Ladung von Sulfat.",
+        } },
+        { id: 'f3', text: String.raw`$(+2) + (-3) = -1$`, misconception: 'chem-mis-io-poly-charge', why: {
+          detailed: "Ammonium ist hier weggelassen worden. Obwohl es nur aus Nichtmetallen besteht, ist es ein geladenes Ion und zählt bei der Ladungsprobe mit.",
+          short: "Auch Ammonium trägt eine Ladung und zählt mit.",
+        } },
+        { id: 'f4', text: String.raw`$(+1) + (+4) + (-4) = +1$`, misconception: 'chem-mis-io-index-is-charge', why: {
+          detailed: String.raw`Die Indizes in $\ce{NH4}$ und $\ce{PO4}$ zählen Atome innerhalb der Molekül-Ionen; sie sind keine Ladungen. Ebenso hat Magnesium nicht die Ladung 1, nur weil kein Index dasteht.`,
+          short: "Indizes zählen Atome, keine Ladungen.",
+        } },
+        { id: 'f5', text: String.raw`$(+2) + 4 \cdot (+1) + (-3) = +3$`, misconception: 'chem-mis-io-poly-split', why: {
+          detailed: "Hier trägt jedes Wasserstoffatom des Ammoniums eine eigene Ladung. Die Ladung eines Molekül-Ions gehört aber zur ganzen Gruppe; ein Ammonium-Ion zählt einmal mit seiner Ladung.",
+          short: "Die Ladung gehört zum ganzen Molekül-Ion.",
+        } },
+      ],
+      hint: "Jedes Ion zählt so oft, wie es in der Formel steht, mit seiner ganzen Ladung. Welche Ladungen tragen Ammonium und Phosphat?",
+      explanation: {
+        detailed: String.raw`In der Formel stecken ein $\ce{Mg^2+}$, ein Ammonium-Ion $\ce{NH4+}$ und ein Phosphat-Ion $\ce{PO4^3-}$. Zusammen: $${chargeSumLatex(STRUVITE_IONS)}$. Die Formel ist also elektrisch neutral. Die 4 in $\ce{NH4}$ und $\ce{PO4}$ zählt Atome im Molekül-Ion, keine Ladungen.`,
+        short: String.raw`$${chargeSumLatex(STRUVITE_IONS)}$: neutral.`,
+      },
+      cards: ['ionen-molekuelionen', 'ionen-formel'],
+      ref: REF_UEBUNG,
+    },
     // ---- Zuordnen (N1b)
     MOLECULE_ION_NAMES,
     ION_CHARGES,

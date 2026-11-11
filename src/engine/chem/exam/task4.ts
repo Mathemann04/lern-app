@@ -7,7 +7,7 @@ import { atomCounts, formulaLatex, hasBracket, parseFormula } from '../formula.t
 import { type MassValues, atomicNumberSum, elementMolarMass, molarMass } from '../molarMass.ts'
 import { CO2, FUELS, type Fuel, H2O, O2 } from '../reactions.ts'
 import { partly } from '../generators/gleichungen.ts'
-import { pickSolution } from '../generators/loesungen.ts'
+import { hydrateInfo, pickSolution } from '../generators/loesungen.ts'
 import { usesExamNumbers } from '../generators/shared.ts'
 import { NICE_N, eqSign, given, molarLatex, sig, valuesNote } from '../generators/stoffmenge.ts'
 
@@ -211,6 +211,8 @@ function task4(seed: string, setupData: Setup): ExamTask {
         question: 'Welche Gleichung ist richtig?',
         points: 2,
         dependsOn: [],
+        // in der Klausur selbst aufgestellt: erst auf Papier lösen, dann die Antworten zeigen
+        paperFirst: true,
         cards: [CARD_COMBUSTION, CARD_BALANCE],
         build: () => {
           const options = equationOptions(fuel, equation, rngFor(seed, 'gleichung', []))
@@ -376,12 +378,15 @@ function gasPart(seed: string, gas: Species, nTargetItem: (id: string, to: Speci
 function solutionPart(seed: string, sol: NonNullable<ReturnType<typeof pickSolution>>): ExamPart {
   const { substance, c, vMl } = sol
   const sp: Species = { text: substance.id, formula: substance.formula }
+  // Hydrat: c gilt für das wasserfreie Salz, abgewogen wird das Hydrat (gleiche Stoffmenge)
+  const hydrate = hydrateInfo(substance)
+  const dissolved: Species = hydrate ? { text: hydrate.salt.id, formula: hydrate.salt.formula } : sp
   const v = ratMul(rat(vMl), ML)
   const n = ratMul(c, v)
   const nItem = item({
     id: 'stoffmenge-loesung',
     title: 'Stoffmenge',
-    question: `Welche Stoffmenge $${ce(sp)}$ wird gebraucht?`,
+    question: `Welche Stoffmenge $${ce(dissolved)}$ wird gebraucht?`,
     points: 1,
     dependsOn: [],
     cards: [CARD_ANSETZEN],
@@ -406,7 +411,7 @@ function solutionPart(seed: string, sol: NonNullable<ReturnType<typeof pickSolut
   const massItem = item({
     id: 'masse-loesung',
     title: 'Masse',
-    question: `Wie viel Gramm $${ce(sp)}$ musst du abwiegen?`,
+    question: hydrate ? `Wie viel Gramm ${hydrate.word} $${ce(sp)}$ musst du abwiegen?` : `Wie viel Gramm $${ce(sp)}$ musst du abwiegen?`,
     points: 2,
     dependsOn: ['stoffmenge-loesung', 'molmasse-loesung'],
     final: true,
@@ -429,7 +434,9 @@ function solutionPart(seed: string, sol: NonNullable<ReturnType<typeof pickSolut
   })
   return {
     id: 'd',
-    prompt: `Für einen Versuch sollen $${vMl}\\,\\mathrm{mL}$ einer Lösung von ${substance.name} $${ce(sp)}$ mit $c = ${sig(c)}\\,\\mathrm{mol/L}$ angesetzt werden. Wie viel musst du abwiegen? ${valuesNote(substance, VALUES)}`,
+    prompt: hydrate
+      ? `Für einen Versuch sollen im Maßkolben $${vMl}\\,\\mathrm{mL}$ einer Lösung von ${hydrate.salt.name} mit $c(${ce(dissolved)}) = ${sig(c)}\\,\\mathrm{mol/L}$ angesetzt werden. Vorrätig ist nur das ${hydrate.word} $${ce(sp)}$. Wie viel davon musst du abwiegen? ${valuesNote(substance, VALUES)}`
+      : `Für einen Versuch sollen im Maßkolben $${vMl}\\,\\mathrm{mL}$ einer Lösung von ${substance.name} $${ce(sp)}$ mit $c = ${sig(c)}\\,\\mathrm{mol/L}$ angesetzt werden. Wie viel musst du abwiegen? ${valuesNote(substance, VALUES)}`,
     points: 4,
     items: [nItem, mItem, massItem],
   }

@@ -45,7 +45,7 @@ export const ATOMBAU_WHY: Readonly<Record<string, Explanation>> = {
   },
   'chem-mis-electron-mass': {
     detailed: String.raw`Proton und Neutron haben je etwa die Masse $1\,\mathrm{u}$, ein Elektron ist dagegen etwa 1836-mal leichter als ein Proton. Selbst alle Elektronen eines Atoms zusammen machen weniger als ein Promille seiner Masse aus. Dass die Hülle viel größer ist als der Kern, ändert daran nichts: Groß heißt nicht schwer.`,
-    short: "Ein Elektron ist rund 1800-mal leichter als ein Proton; die Masse steckt im Kern.",
+    short: "Ein Elektron ist rund 1836-mal leichter als ein Proton; die Masse steckt im Kern.",
   },
   'chem-mis-particle-place': {
     detailed: "Der Atomkern besteht aus den schweren Teilchen, die dort dicht gepackt sind. Die leichten Elektronen bilden die Hülle um den Kern. Bei chemischen Vorgängen werden nur Elektronen der Hülle abgegeben, aufgenommen oder geteilt; der Kern bleibt unberührt.",

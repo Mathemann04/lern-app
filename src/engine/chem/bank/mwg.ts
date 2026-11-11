@@ -4,7 +4,8 @@ import { type Shift, concentrationShift, equilibriumById, equilibriumCe, opposit
 // Wissensfragen zum Thema „Chemisches Gleichgewicht“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern: Stufe · 100 +
 // laufende Nummer; nie neu vergeben. Alle Gleichgewichte gasförmig; Reaktionsenthalpien wie in chem/equilibria.ts.
 
-const REF = 'Skript Chemische Reaktionen'
+// Fundstelle: Kurzname laut docs/CHEMIE.md §1 mit Folie
+const folie = (n: number) => `Skript Gleichgewicht, Folie ${n}`
 
 const r = String.raw
 const why = (detailed: string, short: string): Explanation => ({ detailed, short })
@@ -77,7 +78,7 @@ const LE_CHATELIER_AMMONIA: MatchQuestion = {
     'Hoher Druck, Abkühlen, Stickstoff zugeben, Ammoniak entfernen: zu den Produkten; Katalysator: keine Verschiebung.',
   ),
   cards: ['gg-le-chatelier', 'gg-druck-temperatur', 'gg-katalysator'],
-  ref: REF,
+  ref: folie(5),
 }
 
 // Begriffe am Energiediagramm (Karten gg-exo-endo, gg-energiediagramm, gg-katalysator)
@@ -114,7 +115,7 @@ const ENERGY_TERMS: MatchQuestion = {
     'Exotherm gibt Wärme ab, endotherm nimmt sie auf; Aktivierungsenergie ist der Energieberg, Reaktionsenthalpie der Höhenunterschied.',
   ),
   cards: ['gg-exo-endo', 'gg-energiediagramm', 'gg-katalysator'],
-  ref: REF,
+  ref: folie(6),
 }
 
 // Ordnen (N1c): dieselbe Reaktion bei verschiedenen Temperaturen, nach dem Anteil der Produkte im Gleichgewicht;
@@ -139,7 +140,7 @@ const K_ORDER: OrderQuestion = {
     'Großes K, viele Produkte; kleines K, fast nur Edukte.',
   ),
   cards: ['gg-k-wert'],
-  ref: REF,
+  ref: folie(5),
 }
 
 export const MWG_BANK: QuestionBank = {
@@ -163,7 +164,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Wofür steht der Pfeil nach rechts, wofür der nach links?',
       explanation: why('Der Doppelpfeil zeigt eine Gleichgewichtsreaktion: Hinreaktion (nach rechts) und Rückreaktion (nach links) laufen beide, bis sich ein Gleichgewicht einstellt.', 'Beide Richtungen, Gleichgewicht.'),
       cards: ['gg-dynamisch'],
-      ref: REF,
+      ref: folie(2),
     }),
     g({
       id: 'gg-g-dynamisch',
@@ -182,7 +183,7 @@ export const MWG_BANK: QuestionBank = {
       hint: '„Dynamisch“ heißt „in Bewegung“. Was ist hier in Bewegung?',
       explanation: why('Im Gleichgewicht reagieren weiterhin Teilchen, in beiden Richtungen gleich schnell. Deshalb ändern sich die Konzentrationen von außen gesehen nicht mehr.', 'Beide Richtungen laufen gleich schnell.'),
       cards: ['gg-dynamisch'],
-      ref: REF,
+      ref: folie(2),
     }),
     g({
       id: 'gg-g-konzentrationen',
@@ -201,7 +202,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Gleich sind im Gleichgewicht zwei Geschwindigkeiten. Was folgt daraus für die Mengen?',
       explanation: why('Weil Hin- und Rückreaktion gleich schnell sind, bleiben die Konzentrationen konstant. Gleich groß müssen sie deshalb nicht sein; das hängt von der Reaktion ab.', 'Konstant, meist verschieden groß.'),
       cards: ['gg-dynamisch'],
-      ref: REF,
+      ref: folie(2),
     }),
     g({
       id: 'gg-g-geschwindigkeiten',
@@ -220,7 +221,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Was müsste passieren, wenn eine Richtung schneller wäre?',
       explanation: why('Im Gleichgewicht gilt $v_{\\text{hin}} = v_{\\text{rück}}$: In jeder Zeitspanne entsteht so viel Produkt, wie zerfällt.', '$v_{\\text{hin}} = v_{\\text{rück}}$'),
       cards: ['gg-dynamisch'],
-      ref: REF,
+      ref: folie(4),
     }),
     g({
       id: 'gg-g-verlauf',
@@ -239,7 +240,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Wovon hängt die Geschwindigkeit der Hinreaktion ab, und wie ändert sich das im Lauf der Reaktion?',
       explanation: why('Die Geschwindigkeit der Hinreaktion hängt von den Konzentrationen der Edukte ab. Die nehmen ab, also wird die Hinreaktion langsamer, bis sie so schnell ist wie die Rückreaktion.', 'Sie nimmt ab.'),
       cards: ['gg-geschwindigkeit'],
-      ref: REF,
+      ref: folie(3),
     }),
     g({
       id: 'gg-g-zaehler',
@@ -258,7 +259,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Welche Stoffe entstehen bei der Hinreaktion?',
       explanation: why('Im Zähler stehen die Konzentrationen der Produkte, im Nenner die der Edukte, jede hoch ihrem Koeffizienten.', 'Die Produkte.'),
       cards: ['gg-mwg'],
-      ref: REF,
+      ref: folie(4),
     }),
     g({
       id: 'gg-g-exponent',
@@ -277,7 +278,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Zwei Teilchen $\\ce{SO3}$ heißt: Die Konzentration geht zweimal ein.',
       explanation: why(r`Der Koeffizient wird zum Exponenten, und $\ce{SO3}$ ist ein Produkt: Im Zähler steht $c^{2}(\ce{SO3})$.`, r`$c^{2}(\ce{SO3})$ im Zähler`),
       cards: ['gg-mwg'],
-      ref: REF,
+      ref: folie(4),
     }),
     g({
       id: 'gg-g-mwg-hi',
@@ -296,7 +297,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Produkte in den Zähler, Edukte in den Nenner, Koeffizienten als Exponenten.',
       explanation: why(r`Produkt $\ce{HI}$ mit Exponent 2 in den Zähler, die Edukte multipliziert in den Nenner: $${K} = \frac{c^{2}(\ce{HI})}{c(\ce{H2}) \cdot c(\ce{I2})}$.`, r`$${K} = \frac{c^{2}(\ce{HI})}{c(\ce{H2}) \cdot c(\ce{I2})}$`),
       cards: ['gg-mwg'],
-      ref: REF,
+      ref: folie(4),
     }),
     g({
       id: 'gg-g-produkt',
@@ -315,7 +316,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Sieh dir den Nenner bei der Ammoniaksynthese an: Wie stehen $c(\\ce{N2})$ und $c^{3}(\\ce{H2})$ zueinander?',
       explanation: why('Die Konzentrationen einer Seite werden multipliziert, jede hoch ihrem Koeffizienten.', 'Multipliziert.'),
       cards: ['gg-mwg'],
-      ref: REF,
+      ref: folie(4),
     }),
     g({
       id: 'gg-g-exotherm',
@@ -334,7 +335,7 @@ export const MWG_BANK: QuestionBank = {
       hint: '„exo“ heißt „hinaus“. Verlieren die Stoffe dabei Energie oder gewinnen sie welche?',
       explanation: why('Exotherm: Wärme wird frei und an die Umgebung abgegeben. Die Stoffe verlieren Energie, $\\Delta H < 0$.', 'Wärme wird abgegeben, $\\Delta H < 0$.'),
       cards: ['gg-exo-endo'],
-      ref: REF,
+      ref: folie(7),
     }),
     g({
       id: 'gg-g-verbrennung',
@@ -353,7 +354,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Wird Wärme abgegeben oder aufgenommen?',
       explanation: why('Verbrennungen geben Wärme ab: Sie sind exotherm, $\\Delta H < 0$. Der Funken liefert nur die Aktivierungsenergie.', r`exotherm, $\Delta H < 0$`),
       cards: ['gg-exo-endo'],
-      ref: REF,
+      ref: folie(7),
     }),
     g({
       id: 'gg-g-aktivierung',
@@ -372,7 +373,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Denk an ein Streichholz: Es brennt erst, wenn man es anreibt.',
       explanation: why('Die Aktivierungsenergie ist der Energieberg zwischen Edukten und Produkten. Erst wenn die Teilchen genug Energie haben, um ihn zu überwinden, startet die Reaktion.', 'Energie zum Starten der Reaktion.'),
       cards: ['gg-energiediagramm'],
-      ref: REF,
+      ref: folie(6),
       figure: 'energie:exo:frage',
     }),
     g({
@@ -392,7 +393,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Ein Katalysator ändert den Weg von den Edukten zu den Produkten, nicht Anfang und Ende.',
       explanation: why('Ein Katalysator eröffnet einen anderen Weg mit niedrigerem Energieberg. So haben mehr Teilchen genug Energie zum Reagieren.', 'Kleinere Aktivierungsenergie.'),
       cards: ['gg-katalysator', 'gg-energiediagramm'],
-      ref: REF,
+      ref: folie(6),
     }),
     g({
       id: 'gg-g-kat-verbraucht',
@@ -411,7 +412,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Warum genügen in Abgaskatalysatoren kleine Mengen Platin über Jahre?',
       explanation: why('Ein Katalysator nimmt an Zwischenschritten teil, wird am Ende aber zurückgebildet. Er wird nicht verbraucht.', 'Unverändert.'),
       cards: ['gg-katalysator'],
-      ref: REF,
+      ref: folie(6),
     }),
     g({
       id: 'gg-g-kat-richtung',
@@ -430,7 +431,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Hin- und Rückreaktion müssen über denselben Energieberg.',
       explanation: why('Der Katalysator senkt den Energieberg, über den beide Richtungen müssen. Beide werden gleich stark beschleunigt.', 'Beide gleichermaßen.'),
       cards: ['gg-katalysator'],
-      ref: REF,
+      ref: folie(6),
     }),
     g({
       id: 'gg-g-prinzip',
@@ -449,7 +450,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Zwänge sind zum Beispiel Druck, Temperatur oder zugegebene Stoffe. Was tut das Gleichgewicht dagegen?',
       explanation: why('Ein Gleichgewicht weicht aus: Es verschiebt sich in die Richtung, die den Zwang verkleinert, etwa einen zugegebenen Stoff verbraucht.', 'Es weicht dem Zwang aus.'),
       cards: ['gg-le-chatelier'],
-      ref: REF,
+      ref: folie(5),
     }),
     g({
       id: 'gg-g-edukt-zu',
@@ -468,7 +469,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Wie kann das Gleichgewicht den zusätzlichen Stoff wieder loswerden?',
       explanation: why('Das zusätzliche Edukt wird teilweise verbraucht: Die Hinreaktion überwiegt kurz, bis sich das Gleichgewicht neu eingestellt hat. Es liegt dann mehr Produkt vor.', 'Mehr Produkt, nach rechts.'),
       cards: ['gg-le-chatelier'],
-      ref: REF,
+      ref: folie(5),
     }),
     g({
       id: 'gg-g-produkt-weg',
@@ -487,7 +488,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Ein Stoff fehlt. Wie kann das Gleichgewicht das ausgleichen?',
       explanation: why('Fehlt ein Produkt, läuft verstärkt die Hinreaktion und bildet es nach. Wer Produkt laufend entfernt, kann die Edukte so fast ganz umsetzen.', 'Produkt wird nachgebildet.'),
       cards: ['gg-le-chatelier'],
-      ref: REF,
+      ref: folie(5),
     }),
 
     // ---------------------------------------------------------------- Stufe 2: Vertiefung
@@ -508,7 +509,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Die Rückreaktion ist auch eine Reaktion. Wann wird sie langsamer?',
       explanation: why('Ein Gleichgewicht lässt sich von beiden Seiten aus erreichen: Aus reinem Produkt entsteht so lange Edukt, bis Hin- und Rückreaktion gleich schnell sind.', 'Es bildet sich Edukt bis zum Gleichgewicht.'),
       cards: ['gg-dynamisch'],
-      ref: REF,
+      ref: folie(2),
     }),
     v({
       id: 'gg-v-warum-konstant',
@@ -527,7 +528,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Denk an ein Becken mit Zulauf und Abfluss, in dem der Wasserstand gleich bleibt.',
       explanation: why('Bildung und Zerfall jedes Stoffs laufen gleich schnell. Deshalb ändern sich die Konzentrationen nicht, obwohl ständig Teilchen reagieren.', 'Bildung und Zerfall gleich schnell.'),
       cards: ['gg-dynamisch'],
-      ref: REF,
+      ref: folie(2),
     }),
     v({
       id: 'gg-v-k-gross',
@@ -546,7 +547,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Im Zähler von $K_{\\mathrm{GG}}$ stehen die Produkte.',
       explanation: why('Ein großer Bruch heißt: viel im Zähler, wenig im Nenner. Im Gleichgewicht liegen fast nur Produkte vor.', 'Weit auf der Seite der Produkte.'),
       cards: ['gg-k-wert'],
-      ref: REF,
+      ref: folie(5),
     }),
     v({
       id: 'gg-v-k-klein',
@@ -565,7 +566,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Wann wird ein Bruch sehr klein?',
       explanation: why('Ein sehr kleiner Bruch heißt: wenig im Zähler (Produkte), viel im Nenner (Edukte). Die Reaktion läuft kaum ab.', 'Fast nur Edukte.'),
       cards: ['gg-k-wert'],
-      ref: REF,
+      ref: folie(5),
     }),
     v({
       id: 'gg-v-k-zugabe',
@@ -584,7 +585,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Wovon hängt die Gleichgewichtskonstante ab?',
       explanation: why('Die Gleichgewichtskonstante hängt nur von der Reaktion und der Temperatur ab. Nach der Zugabe verschieben sich die Konzentrationen, bis der Bruch wieder denselben Wert hat.', 'Bleibt gleich.'),
       cards: ['gg-k-wert'],
-      ref: REF,
+      ref: folie(5),
     }),
     v({
       id: 'gg-v-k-abhaengig',
@@ -603,7 +604,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Konzentrationen und Druck verschieben nur die Lage. Was verändert die Konstante selbst?',
       explanation: why('Für eine gegebene Reaktion ist $K_{\\mathrm{GG}}$ eine Konstante, die sich nur mit der Temperatur ändert.', 'Reaktion und Temperatur.'),
       cards: ['gg-k-wert'],
-      ref: REF,
+      ref: folie(5),
     }),
     v({
       id: 'gg-v-mwg-so3',
@@ -622,7 +623,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Beide Koeffizienten 2 werden zu Exponenten.',
       explanation: why(r`Produkt im Zähler, Edukte multipliziert im Nenner, Koeffizienten als Exponenten: $${K} = \frac{c^{2}(\ce{SO3})}{c^{2}(\ce{SO2}) \cdot c(\ce{O2})}$.`, r`$${K} = \frac{c^{2}(\ce{SO3})}{c^{2}(\ce{SO2}) \cdot c(\ce{O2})}$`),
       cards: ['gg-mwg'],
-      ref: REF,
+      ref: folie(4),
     }),
     v({
       id: 'gg-v-welche-reaktion',
@@ -641,7 +642,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Zähler: Produkte, Exponenten: Koeffizienten. Lies den Ausdruck rückwärts.',
       explanation: why(r`Im Zähler steht $\ce{NO2}$ mit Exponent 2, im Nenner $\ce{N2O4}$: Aus $\ce{N2O4}$ entstehen $\ce{2 NO2}$.`, r`$\ce{N2O4(g) <=> 2 NO2(g)}$`),
       cards: ['gg-mwg'],
-      ref: REF,
+      ref: folie(4),
     }),
     v({
       id: 'gg-v-v-abhaengig',
@@ -660,7 +661,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Wann stoßen Teilchen öfter zusammen?',
       explanation: why('Je höher die Konzentrationen der reagierenden Stoffe, desto öfter stoßen ihre Teilchen zusammen und desto schneller läuft die Reaktion.', 'Von den Konzentrationen.'),
       cards: ['gg-geschwindigkeit'],
-      ref: REF,
+      ref: folie(4),
     }),
     v({
       id: 'gg-v-v-hin',
@@ -679,7 +680,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Bei einer Reaktion in einem Schritt geht jeder Koeffizient der Edukte als Exponent ein.',
       explanation: why(r`Ein Teilchen A muss mit zwei Teilchen B zusammentreffen: $${VH} = ${KH} \cdot c(\ce{A}) \cdot c^{2}(\ce{B})$.`, r`$${VH} = ${KH} \cdot c(\ce{A}) \cdot c^{2}(\ce{B})$`),
       cards: ['gg-geschwindigkeit'],
-      ref: REF,
+      ref: folie(4),
     }),
     v({
       id: 'gg-v-k-konstanten',
@@ -698,7 +699,7 @@ export const MWG_BANK: QuestionBank = {
       hint: r`Setze $${VH} = ${VR}$ und bringe die Konstanten auf eine Seite.`,
       explanation: why(r`Aus $${KH} \cdot c(\text{Edukte}) = ${KR} \cdot c(\text{Produkte})$ folgt $\frac{${KH}}{${KR}} = \frac{c(\text{Produkte})}{c(\text{Edukte})} = ${K}$.`, r`$${K} = \frac{${KH}}{${KR}}$`),
       cards: ['gg-geschwindigkeit'],
-      ref: REF,
+      ref: folie(4),
     }),
     v({
       id: 'gg-v-druck-nh3',
@@ -717,7 +718,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Zähle die Gasteilchen links und rechts mit den Koeffizienten.',
       explanation: why('Links stehen $1 + 3 = 4$, rechts $2$ Gasteilchen. Höherer Druck begünstigt die Seite mit weniger Teilchen: Es bildet sich mehr Ammoniak.', 'Zum Ammoniak.'),
       cards: ['gg-druck-temperatur'],
-      ref: REF,
+      ref: folie(5),
     }),
     v({
       id: 'gg-v-druck-hi',
@@ -736,7 +737,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Zähle die Gasteilchen links und rechts mit den Koeffizienten.',
       explanation: why('Links $1 + 1 = 2$, rechts $2$ Gasteilchen: Keine Richtung kann den Druck senken. Die Lage bleibt gleich.', 'Keine Änderung.'),
       cards: ['gg-druck-temperatur'],
-      ref: REF,
+      ref: folie(5),
     }),
     v({
       id: 'gg-v-erwaermen-exo',
@@ -755,7 +756,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Welche Richtung nimmt Wärme auf?',
       explanation: why('Die Hinreaktion gibt Wärme ab, also nimmt die Rückreaktion Wärme auf. Erwärmen begünstigt die Wärme aufnehmende Richtung: das Gleichgewicht verschiebt sich zu den Edukten.', 'Zu den Edukten.'),
       cards: ['gg-druck-temperatur'],
-      ref: REF,
+      ref: folie(5),
     }),
     v({
       id: 'gg-v-kuehlen-endo',
@@ -774,7 +775,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Ist die Hinreaktion exotherm oder endotherm? Welche Richtung gibt Wärme ab?',
       explanation: why(r`Die Hinreaktion ist endotherm ($\Delta H > 0$), die Rückreaktion gibt Wärme ab. Abkühlen begünstigt sie: Es bildet sich mehr $\ce{N2O4}$.`, 'Nach links.'),
       cards: ['gg-druck-temperatur', 'gg-exo-endo'],
-      ref: REF,
+      ref: folie(5),
     }),
     v({
       id: 'gg-v-diagramm-kat',
@@ -793,7 +794,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Vergleiche Anfang, Ende und Gipfel der beiden Wege.',
       explanation: why('Edukte und Produkte liegen auf beiden Wegen gleich hoch; deshalb ist $\\Delta H$ gleich. Nur der Energieberg, also die Aktivierungsenergie, ist mit Katalysator kleiner.', r`$\Delta H$`),
       cards: ['gg-energiediagramm', 'gg-katalysator'],
-      ref: REF,
+      ref: folie(6),
       figure: 'energie:exo:kat:frage',
     }),
     v({
@@ -813,7 +814,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Wirkt der Katalysator auf eine Richtung stärker als auf die andere?',
       explanation: why('Ein Katalysator beschleunigt beide Richtungen gleich stark. Das Gleichgewicht ist schneller erreicht, liegt aber an derselben Stelle.', 'Schneller, gleiche Lage.'),
       cards: ['gg-katalysator'],
-      ref: REF,
+      ref: folie(6),
     }),
 
     // ---------------------------------------------------------------- Stufe 3: Klausurniveau
@@ -834,7 +835,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Was ist im Gleichgewicht gleich, was nicht?',
       explanation: why('Im Gleichgewicht laufen Hin- und Rückreaktion gleich schnell weiter. Die Konzentrationen bleiben deshalb konstant, sind aber nicht gleich groß.', 'Weiter reagieren, Waage halten.'),
       cards: ['gg-dynamisch'],
-      ref: REF,
+      ref: folie(2),
     }),
     k({
       id: 'gg-k-verlauf',
@@ -853,7 +854,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Zu Beginn gibt es kein Produkt. Wie schnell kann dann die Rückreaktion sein?',
       explanation: why('Zu Beginn ist die Hinreaktion schnell und die Rückreaktion steht still, weil noch kein Produkt da ist. Mit abnehmenden Edukten wird die Hinreaktion langsamer, mit zunehmenden Produkten die Rückreaktion schneller, bis beide gleich schnell sind.', r`$${VH}$ sinkt, $${VR}$ steigt.`),
       cards: ['gg-geschwindigkeit', 'gg-dynamisch'],
-      ref: REF,
+      ref: folie(3),
     }),
     k({
       id: 'gg-k-mwg-deacon',
@@ -872,7 +873,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Alle vier Stoffe sind gasförmig und kommen vor; Koeffizienten als Exponenten.',
       explanation: why(r`Produkte multipliziert im Zähler, Edukte im Nenner, jede Konzentration hoch ihrem Koeffizienten: $${K} = \frac{c^{2}(\ce{Cl2}) \cdot c^{2}(\ce{H2O})}{c^{4}(\ce{HCl}) \cdot c(\ce{O2})}$.`, r`$${K} = \frac{c^{2}(\ce{Cl2}) \cdot c^{2}(\ce{H2O})}{c^{4}(\ce{HCl}) \cdot c(\ce{O2})}$`),
       cards: ['gg-mwg'],
-      ref: REF,
+      ref: folie(4),
     }),
     k({
       id: 'gg-k-welche-reaktion',
@@ -891,7 +892,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Lies den Ausdruck rückwärts: Zähler ergibt die rechte Seite, Exponenten die Koeffizienten.',
       explanation: why(r`Im Zähler steht $\ce{CH3OH}$ mit Exponent 1, im Nenner $\ce{CO}$ mit 1 und $\ce{H2}$ mit 2: $\ce{CO + 2 H2 <=> CH3OH}$.`, r`$\ce{CO(g) + 2 H2(g) <=> CH3OH(g)}$`),
       cards: ['gg-mwg'],
-      ref: REF,
+      ref: folie(4),
     }),
     k({
       id: 'gg-k-h2-zugabe',
@@ -910,7 +911,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Was passiert mit dem Bruch, wenn der Nenner wächst, und was muss das Gleichgewicht dagegen tun?',
       explanation: why('Der zusätzliche Wasserstoff wird teilweise zu Ammoniak umgesetzt. Die Konzentrationen ändern sich so, dass der Bruch wieder den alten Wert hat: $K_{\\mathrm{GG}}$ hängt nur von der Temperatur ab.', 'Mehr Ammoniak, gleiches K.'),
       cards: ['gg-k-wert', 'gg-le-chatelier'],
-      ref: REF,
+      ref: folie(5),
     }),
     k({
       id: 'gg-k-zwei-k',
@@ -927,29 +928,11 @@ export const MWG_BANK: QuestionBank = {
         w('f4', 'Reaktion 2 läuft überhaupt nicht ab.', 'chem-mis-gg-stopped', why('Auch bei kleinem K laufen Hin- und Rückreaktion; es entsteht nur wenig Produkt.', 'Sie läuft, aber es entsteht wenig Produkt.')),
       ],
       hint: 'Produkte stehen im Zähler. Was heißt ein Bruch größer als 1, was einer kleiner als 1?',
-      explanation: why('$K_{\\mathrm{GG}} > 1$: Die Produkte überwiegen; $K_{\\mathrm{GG}} < 1$: Die Edukte überwiegen. Über die Geschwindigkeit sagt K nichts.', 'Reaktion 1: Produkte, Reaktion 2: Edukte.'),
+      explanation: why('Ist $K_{\\mathrm{GG}}$ viel größer als 1, liegt das Gleichgewicht auf der Seite der Produkte; ist es viel kleiner als 1, auf der Seite der Edukte. Über die Geschwindigkeit sagt $K_{\\mathrm{GG}}$ nichts.', 'Reaktion 1: Produkte, Reaktion 2: Edukte.'),
       cards: ['gg-k-wert'],
-      ref: REF,
+      ref: folie(5),
     }),
-    k({
-      id: 'gg-k-exponenten-messen',
-      no: 307,
-      fact: 'rate-measured',
-      part: 'geschwindigkeit',
-      title: 'Exponenten im Geschwindigkeitsgesetz',
-      prompt: 'Eine Reaktion läuft über mehrere Zwischenschritte ab. Woher kennt man die Exponenten der Konzentrationen in ihrem Geschwindigkeitsgesetz?',
-      correct: 'Man bestimmt sie durch Messungen.',
-      wrong: [
-        w('f1', 'Es sind immer die Koeffizienten der Gesamtgleichung.', 'chem-mis-gg-mwg-coef', why('Die Koeffizienten als Exponenten gelten nur für eine Reaktion, die in einem einzigen Schritt abläuft. Bei mehreren Schritten bestimmt der langsamste das Tempo.', 'Nur bei einem einzigen Schritt.')),
-        w('f2', 'Sie sind immer 1.', 'chem-mis-gg-mwg-coef'),
-        w('f3', 'Man liest sie an der Gleichgewichtskonstante ab.', 'chem-mis-gg-k-speed'),
-        w('f4', 'Es gibt keine, weil die Geschwindigkeit nicht von Konzentrationen abhängt.', 'chem-mis-gg-rate-conc'),
-      ],
-      hint: 'Gilt die Regel „Koeffizient wird Exponent“ für jede Reaktion?',
-      explanation: why('Nur bei einer Reaktion in einem einzigen Schritt sind die Exponenten die Koeffizienten. Sonst muss man sie messen. Für das Massenwirkungsgesetz gilt die Regel trotzdem immer.', 'Durch Messungen.'),
-      cards: ['gg-geschwindigkeit'],
-      ref: REF,
-    }),
+    // Nr. 307 (Exponenten im Geschwindigkeitsgesetz messen) gestrichen: ging über das Skript hinaus
     k({
       id: 'gg-k-warum-k-raten',
       no: 308,
@@ -967,7 +950,7 @@ export const MWG_BANK: QuestionBank = {
       hint: r`Schreibe $${VH}$ und $${VR}$ mit Konzentrationen auf und setze sie gleich.`,
       explanation: why(r`Aus $${KH} \cdot c(\text{Edukte}) = ${KR} \cdot c(\text{Produkte})$ folgt durch Teilen $\frac{${KH}}{${KR}} = \frac{c(\text{Produkte})}{c(\text{Edukte})}$, und das ist $${K}$.`, r`$${VH} = ${VR}$ umgestellt.`),
       cards: ['gg-geschwindigkeit'],
-      ref: REF,
+      ref: folie(4),
     }),
     k({
       id: 'gg-k-verdoppeln',
@@ -986,7 +969,7 @@ export const MWG_BANK: QuestionBank = {
       hint: r`Setze $2 \cdot c(\ce{B})$ ein und rechne das Quadrat aus.`,
       explanation: why(r`$(2 \cdot c(\ce{B}))^{2} = 4 \cdot c^{2}(\ce{B})$: Die Geschwindigkeit wird viermal so groß.`, 'Viermal so groß.'),
       cards: ['gg-geschwindigkeit'],
-      ref: REF,
+      ref: folie(4),
     }),
     k({
       id: 'gg-k-ausbeute-so3',
@@ -1005,7 +988,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Zähle die Gasteilchen und beachte das Vorzeichen von $\\Delta H$.',
       explanation: why('Links $3$, rechts $2$ Gasteilchen: Hoher Druck begünstigt $\\ce{SO3}$. Die Hinreaktion ist exotherm: Niedrige Temperatur begünstigt sie.', 'Hoher Druck, niedrige Temperatur.'),
       cards: ['gg-druck-temperatur'],
-      ref: REF,
+      ref: folie(5),
     }),
     k({
       id: 'gg-k-ausbeute-reforming',
@@ -1024,7 +1007,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Zähle die Gasteilchen mit Koeffizienten und beachte das Vorzeichen von $\\Delta H$.',
       explanation: why('Links $2$, rechts $4$ Gasteilchen: Niedriger Druck begünstigt die Produkte. Die Hinreaktion ist endotherm: Hohe Temperatur begünstigt sie.', 'Niedriger Druck, hohe Temperatur.'),
       cards: ['gg-druck-temperatur'],
-      ref: REF,
+      ref: folie(5),
     }),
     k({
       id: 'gg-k-nicht-ausbeute',
@@ -1043,7 +1026,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Prüfe jede Maßnahme: Verschiebt sie die Lage des Gleichgewichts oder nicht?',
       explanation: why('Druck erhöhen, Temperatur senken, Produkt entfernen und Edukt nachliefern verschieben das Gleichgewicht zu den Produkten. Ein Katalysator beschleunigt nur, an der Lage ändert er nichts.', 'Der Katalysator.'),
       cards: ['gg-katalysator', 'gg-druck-temperatur'],
-      ref: REF,
+      ref: folie(5),
     }),
     k({
       id: 'gg-k-temperatur-k',
@@ -1062,7 +1045,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Überlege, welche Bedingungen die Lage verschieben und welche davon auch $K_{\\mathrm{GG}}$ selbst verändern.',
       explanation: why('Die Temperatur ist die einzige Bedingung, die $K_{\\mathrm{GG}}$ ändert: Bei endothermer Hinreaktion wird K beim Erwärmen größer, bei exothermer kleiner. Damit verschiebt sich die Lage.', 'K ändert sich.'),
       cards: ['gg-druck-temperatur', 'gg-k-wert'],
-      ref: REF,
+      ref: folie(5),
     }),
     k({
       id: 'gg-k-nh3-entfernen',
@@ -1081,7 +1064,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Ein Stoff fehlt. Wie reagiert das Gleichgewicht?',
       explanation: why('Fehlt Ammoniak, überwiegt die Hinreaktion, bis sich das Gleichgewicht neu einstellt. Wiederholt man das, wird immer mehr Edukt umgesetzt.', 'Ammoniak wird nachgebildet.'),
       cards: ['gg-le-chatelier'],
-      ref: REF,
+      ref: folie(5),
     }),
     k({
       id: 'gg-k-diagramm-endo',
@@ -1100,7 +1083,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Vergleiche, wie hoch Edukte und Produkte liegen.',
       explanation: why('Die Produkte liegen höher als die Edukte: Die Reaktion nimmt Energie auf, $\\Delta H > 0$, sie ist endotherm. Der Energieberg ist die Aktivierungsenergie.', 'Endotherm.'),
       cards: ['gg-energiediagramm', 'gg-exo-endo'],
-      ref: REF,
+      ref: folie(6),
       figure: 'energie:endo:frage',
     }),
     k({
@@ -1120,7 +1103,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Vergleiche, wo der Gipfel liegt, einmal von den Edukten und einmal von den Produkten aus gesehen.',
       explanation: why('Der Katalysator senkt den Gipfel; Edukte und Produkte bleiben gleich hoch. Für beide Richtungen wird der Berg also um denselben Betrag niedriger.', 'Sinkt ebenfalls um 40 kJ/mol.'),
       cards: ['gg-katalysator', 'gg-energiediagramm'],
-      ref: REF,
+      ref: folie(6),
       figure: 'energie:exo:kat:frage',
     }),
     k({
@@ -1140,7 +1123,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Denk an den Energieberg im Energiediagramm.',
       explanation: why('Auch eine exotherme Reaktion muss erst über den Energieberg. Die Reibungswärme liefert die Aktivierungsenergie; danach hält die frei werdende Wärme die Verbrennung in Gang.', 'Es fehlt die Aktivierungsenergie.'),
       cards: ['gg-energiediagramm'],
-      ref: REF,
+      ref: folie(6),
     }),
     k({
       id: 'gg-k-kat-industrie',
@@ -1159,7 +1142,7 @@ export const MWG_BANK: QuestionBank = {
       hint: 'Niedrige Temperatur ist gut für die Lage, aber schlecht für etwas anderes. Wofür?',
       explanation: why('Die Hinreaktion ist exotherm; niedrige Temperatur wäre gut für die Ausbeute, macht die Reaktion aber sehr langsam. Der Katalysator sorgt dafür, dass sich das Gleichgewicht trotzdem schnell einstellt.', 'Für die Geschwindigkeit.'),
       cards: ['gg-katalysator'],
-      ref: REF,
+      ref: folie(6),
     }),
     // ---------------------------------------------------------------- Wähle alle richtigen (N1)
     mg({
@@ -1187,7 +1170,7 @@ export const MWG_BANK: QuestionBank = {
         'Beide Richtungen laufen gleich schnell weiter; Konzentrationen konstant, meist verschieden.',
       ),
       cards: ['gg-dynamisch'],
-      ref: REF,
+      ref: folie(2),
     }),
     mv({
       id: 'gg-v-multi-katalysator',
@@ -1216,7 +1199,7 @@ export const MWG_BANK: QuestionBank = {
         r`Kleinere Aktivierungsenergie für beide Richtungen; $\Delta H$, Lage und Katalysator bleiben gleich.`,
       ),
       cards: ['gg-katalysator', 'gg-energiediagramm'],
-      ref: REF,
+      ref: folie(6),
     }),
     mk({
       id: 'gg-k-multi-so3',
@@ -1246,7 +1229,7 @@ export const MWG_BANK: QuestionBank = {
         r`Druck hoch und Abkühlen begünstigen $\ce{SO3}$; nur die Temperatur ändert $${K}$.`,
       ),
       cards: ['gg-druck-temperatur', 'gg-le-chatelier', 'gg-k-wert', 'gg-katalysator'],
-      ref: REF,
+      ref: folie(5),
     }),
     // ---- Zuordnen (N1b)
     ENERGY_TERMS,
@@ -1254,5 +1237,5 @@ export const MWG_BANK: QuestionBank = {
     // ---- Ordnen (N1c)
     K_ORDER,
   ],
-  retired: [],
+  retired: [307],
 }

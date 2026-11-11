@@ -144,3 +144,41 @@ describe('Gase und Lösungen: realistische Aufgaben', () => {
     for (const id of ['kalk', 'chlorat', 'zink', 'magnesium', 'peroxid', 'natron', 'aluminium', 'CH4', 'CH3OH']) expect(seen, id).toContain(id)
   })
 })
+
+describe('Lösung ansetzen: nur Feststoffe abwiegen, Hydrate, NaOH und KOH', () => {
+  const LIQUIDS = ['HCl', 'H2SO4', 'HNO3', 'H3PO4', 'H2O2', 'CH3OH', 'C2H5OH']
+  const prepared = () => ([1, 2, 3] as const).flatMap((level) => tasks(level, 2000).filter((c) => c.form.startsWith('ansetzen:')))
+
+  it('wiegt nie Gase oder Flüssigkeiten ab (Säuren, Wasserstoffperoxid, Alkohole)', () => {
+    for (const calc of prepared()) expect(LIQUIDS, calc.task.functionLatex).not.toContain(calc.substance)
+    // in Konzentrationsaufgaben ohne Abwiegen kommen sie vor
+    const conc = ([1, 2, 3] as const).flatMap((level) => tasks(level, 2000).filter((c) => c.form.startsWith('konzentration:')))
+    expect(conc.some((c) => LIQUIDS.includes(c.substance))).toBe(true)
+  })
+
+  it('bringt auch NaOH und KOH (Molmasse unvollständig liegt dort zu nah: dann andere Fehler), nie mit den Zahlen der Altklausuren', () => {
+    const seen = new Set<string>()
+    for (const calc of prepared()) {
+      if (calc.substance !== 'NaOH' && calc.substance !== 'KOH') continue
+      seen.add(calc.substance)
+      const f = calc.task.functionLatex!
+      expect(f).not.toMatch(calc.substance === 'KOH' ? /V = 250\\,\\mathrm\{mL\}.*c\(\\ce\{KOH\}\) = 0\{,\}5\\,/s : /V = 500\\,\\mathrm\{mL\}.*c\(\\ce\{NaOH\}\) = 1\\,/s)
+      const molar = calc.task.steps.find((s) => s.id === 'molmasse')!
+      expect(molar.choices.filter((c) => !c.correct).length).toBeGreaterThanOrEqual(1)
+      expect(molar.choices.map((c) => c.errorRuleId)).not.toContain('chem-molar-incomplete')
+    }
+    expect(seen).toEqual(new Set(['NaOH', 'KOH']))
+  })
+
+  it('Hydrat: c gilt für das wasserfreie Salz, abgewogen wird das Hydrat', () => {
+    let seen = 0
+    for (const calc of tasks(3, 2000).filter((c) => c.form === 'ansetzen:3:hydrate')) {
+      seen++
+      const salt = calc.substance.split('*')[0]
+      expect(calc.task.functionLatex).toContain(String.raw`c(\ce{${salt}})`)
+      expect(calc.task.note).toMatch(/abgewogen wird das \w*hydrat/)
+      expect(calc.task.steps.at(-1)!.question).toMatch(/hydrat/)
+    }
+    expect(seen).toBeGreaterThan(20)
+  })
+})

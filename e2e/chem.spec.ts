@@ -21,6 +21,12 @@ async function expectCleanPage(page: Page, context: string) {
 
 const answers = (page: Page) => page.getByRole('group', { name: 'Antworten' }).getByRole('button')
 
+// Klausuraufgaben: Fragen, die man in der Klausur selbst schreibt, zeigen ihre Antworten erst nach dem Knopf
+async function revealPaperFirst(page: Page) {
+  const buttons = page.getByRole('button', { name: 'Auf Papier gelöst, Antworten zeigen' })
+  while ((await buttons.count()) > 0) await buttons.first().click()
+}
+
 // Nummer der Frage aus der Adresse: Grundform (bis 9999) oder 500000 + 50 · Nummer + Fassung (auch mit
 // ?mischen= dahinter)
 function questionNo(url: string): number {
@@ -438,8 +444,8 @@ async function chooseAnswer(page: Page, text: string) {
 
 test('Chemie: Rechnung zu ³⁷Cl⁻, Massenzahl als Neutronenzahl, Fehler gezielt üben', async ({ page }) => {
   const errors = collectErrors(page)
-  await page.goto('./#/ueben/chem-atombau/2-11309')
-  await expect(page.getByText(/^Vertiefung · Aufgabe 2-11309 · Bestimme Protonen, Neutronen und Elektronen/)).toBeVisible()
+  await page.goto('./#/ueben/chem-atombau/2-11335')
+  await expect(page.getByText(/^Vertiefung · Aufgabe 2-11335 · Bestimme Protonen, Neutronen und Elektronen/)).toBeVisible()
   await expectCleanPage(page, 'Rechnung')
   await expect(page.locator('#question')).toHaveText('Wie viele Protonen hat das Teilchen?')
   await chooseAnswer(page, '17')
@@ -587,6 +593,9 @@ test('Chemie: Klausuraufgabe 4 üben, alle Teile beantworten, abgeben, Auswertun
   await page.getByRole('button', { name: 'Abgeben' }).click()
   await expect(page.getByText(/Fragen offen/)).toBeVisible()
 
+  // die Gleichung schreibt man in der Klausur selbst: erst auf Papier lösen, dann die Antworten zeigen
+  await expect(page.getByTestId('paper-first')).toHaveCount(1)
+  await revealPaperFirst(page)
   // jede Frage: die erste Antwort (spätere Fragen erscheinen, sobald die davor beantwortet sind)
   for (let i = 0; i < 20; i++) {
     const open = page.getByTestId('exam-item').getByRole('group', { name: 'Antworten' }).filter({ hasNot: page.locator('[aria-pressed="true"]') })
@@ -705,6 +714,17 @@ test('Chemie: Klausuraufgabe 3 üben, Lewis-Formeln als Bilder, abgeben, Auswert
   await expect(page.getByRole('heading', { name: /Aufgabe 3/ })).toBeVisible()
   const items = page.getByTestId('exam-item')
   await expect(items).toHaveCount(12)
+  // Ionen, Formel und Lewis-Formel schreibt man in der Klausur selbst: erst nur die Frage mit Hinweis und Knopf
+  await expect(page.getByTestId('paper-first')).toHaveCount(3)
+  await expect(items.nth(0).getByRole('group', { name: 'Antworten' })).toHaveCount(0)
+  await expect(items.nth(0).getByText('Löse es zuerst auf Papier')).toBeVisible()
+  const reveal = items.nth(0).getByRole('button', { name: 'Auf Papier gelöst, Antworten zeigen' })
+  expect((await reveal.boundingBox())!.height).toBeGreaterThanOrEqual(44)
+  await expectCleanPage(page, 'Klausuraufgabe 3 vor dem Aufdecken')
+  await reveal.click()
+  await expect(items.nth(0).getByRole('group', { name: 'Antworten' }).getByRole('button')).toHaveCount(4)
+  await expect(page.getByTestId('paper-first')).toHaveCount(2)
+  await revealPaperFirst(page)
   // Teil b zeigt die Lewis-Formeln als Bilder
   await expect(items.nth(2).locator('svg[role="img"]').first()).toBeVisible()
   await expectCleanPage(page, 'Klausuraufgabe 3')
@@ -854,6 +874,9 @@ test('Chemie: Klausuraufgabe 5 üben, Gleichgewicht und Energie, abgeben, Auswer
   const count = await items.count()
   expect(count).toBeGreaterThanOrEqual(6)
   await expectCleanPage(page, 'Klausuraufgabe 5')
+  // das Massenwirkungsgesetz schreibt man in der Klausur selbst
+  await expect(page.getByTestId('paper-first')).toHaveCount(1)
+  await revealPaperFirst(page)
   for (let i = 0; i < count; i++) await items.nth(i).getByRole('group', { name: 'Antworten' }).getByRole('button').first().click()
   await page.getByRole('button', { name: 'Abgeben' }).click()
   await expect(page.getByTestId('exam-score')).toHaveText(/^\d+(,5)? von 10 Punkten$/)

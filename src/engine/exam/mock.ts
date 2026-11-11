@@ -32,8 +32,12 @@ export const mockMax = (exam: MockExam) => exam.tasks.reduce((sum, t) => sum + t
 // offene Fragen je Aufgabe (auch die, die erst nach anderen drankommen)
 export const openCountOf = (task: MockTask, answers: MockAnswers) => examState(task.task, answersOf(answers, task)).filter((s) => !s.chosen).length
 
+// Eine eingetippte Zahl knapp daneben (1 bis 4 %) gibt in der Probeklausur nur die halben Punkte, mit Hinweis: In der
+// Klausur kostet ungenaues Runden oft Punkte, und beim Üben (volle Punkte) soll der Hinweis nur aufmerksam machen
+export const MOCK_CLOSE_SHARE = 0.5
+
 export function gradeMock(exam: MockExam, answers: MockAnswers): MockResult {
-  const tasks = exam.tasks.map((task) => ({ task, result: gradeExam(task.task, answersOf(answers, task)) }))
+  const tasks = exam.tasks.map((task) => ({ task, result: gradeExam(task.task, answersOf(answers, task), { closeShare: MOCK_CLOSE_SHARE }) }))
   return { points: tasks.reduce((sum, t) => sum + t.result.points, 0), max: mockMax(exam), tasks }
 }
 

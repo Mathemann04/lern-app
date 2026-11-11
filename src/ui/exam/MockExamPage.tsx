@@ -454,6 +454,10 @@ function MockResultView({ subject, session, exam }: { subject: Subject; session:
             ? `Damit hast du die ${CHEM_MOCK.passTotal} Punkte zum Bestehen schon mit Teil ${mock.part} zusammen.`
             : `Bestanden ist die Klausur mit ${CHEM_MOCK.passTotal} von ${CHEM_MOCK.total} Punkten aus beiden Teilen. Mit diesem Ergebnis bräuchtest du in Teil 2 noch ${pointsOf(missing, mock.points)}.`}
         </p>
+        <p className="text-pretty text-sm text-zinc-600" data-testid="mock-choice-note">
+          Bedenke: Auswählen ist leichter als selbst schreiben. In der echten Klausur schreibst du Formeln, Gleichungen und
+          Rechenwege selbst hin; rechne dort mit etwas weniger Punkten.
+        </p>
         <p className="text-sm text-zinc-500">
           {session.timed ? `Gebraucht: ${minutes(used)} von ${exam.minutes}.` : `Ohne Zeitdruck, gebraucht: ${minutes(used)}.`} Punkte nach dem Schema der App,
           Teilpunkte geschätzt.

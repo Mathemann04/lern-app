@@ -11,7 +11,10 @@ export type MolCompound = {
   readonly level: 2 | 3
 }
 
-export const PREFIXES: Readonly<Record<number, string>> = { 1: 'mono', 2: 'di', 3: 'tri', 4: 'tetra', 5: 'penta', 6: 'hexa', 7: 'hepta', 10: 'deca' }
+export const PREFIXES: Readonly<Record<number, string>> = { 1: 'mono', 2: 'di', 3: 'tri', 4: 'tetra', 5: 'penta', 6: 'hexa', 7: 'hepta', 8: 'octa', 9: 'nona', 10: 'deca' }
+
+// Übliche zweite Namen, die neben dem Namen nach diesen Regeln vorkommen (in der Erklärung genannt)
+export const OTHER_NAMES: Readonly<Record<string, string>> = { CCl4: 'Tetrachlormethan' }
 
 const STEMS: Readonly<Record<string, string>> = { O: 'oxid', F: 'fluorid', Cl: 'chlorid', Br: 'bromid', S: 'sulfid' }
 

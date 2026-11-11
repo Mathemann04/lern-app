@@ -4,7 +4,7 @@ import { GENERATED_MIN } from '../../quiz/numbers.ts'
 import { ANIONS, CATIONS, isAllowedSalt, saltFormula, saltName } from '../ions.ts'
 import { parseFormula } from '../formula.ts'
 import { generatedCalc } from './index.ts'
-import { IONEN_BANK, LATTICE_ENERGY } from '../bank/ionen.ts'
+import { IONEN_BANK, LATTICE_ENERGY, STRUVITE_IONS, chargeSum } from '../bank/ionen.ts'
 
 // Ionenbindung und Salze (S5a): Formeln und Namen gegen eine zweite, von Hand eingetragene Liste, Ladungen in
 // jeder Zerfallsgleichung, Born-Haber gegen Gitterenthalpien aus der Literatur, Zahlen der Lernkarten
@@ -171,5 +171,24 @@ describe('Ordnen: Gitterenergie', () => {
     const charge = (id: string) => (id.endsWith('O') ? 2 : 1)
     const ids = q.items.map((i) => i.id)
     expect([...ids].sort((a, b) => charge(b) - charge(a))).toEqual(ids)
+  })
+
+  it('Ladungsprobe in Frage 321: Formel aus den Ionen der Tabelle, neutral; die falschen Proben ergeben nie 0', () => {
+    const formula = STRUVITE_IONS.map(([ion, n]) => `${ion.formula}${n > 1 ? n : ''}`).join('')
+    expect(formula).toBe('MgNH4PO4')
+    expect(chargeSum(STRUVITE_IONS)).toBe(0)
+    const q = IONEN_BANK.questions.find((x) => x.id === 'io-k-ladungsprobe-phosphat')
+    if (q?.kind !== 'single') throw new Error('Frage fehlt')
+    expect(q.correct.text).toBe('$(+2) + (+1) + (-3) = 0$')
+    // jede falsche Probe ist in sich richtig gerechnet, aber nicht neutral
+    for (const w of q.wrong) {
+      const [left, right] = w.text.replace(/\$/g, '').split('=')
+      const sum = left.split(' + ').reduce((acc, part) => {
+        const m = part.match(/(?:(\d+) \\cdot )?\(([+-]\d+)\)/)
+        return m ? acc + Number(m[1] ?? 1) * Number(m[2]) : acc
+      }, 0)
+      expect(sum, w.id).toBe(Number(right))
+      expect(sum, w.id).not.toBe(0)
+    }
   })
 })
