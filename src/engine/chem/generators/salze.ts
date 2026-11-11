@@ -111,9 +111,12 @@ function formulaStep(s: Salt, rng: Rng, focus?: string): GuidedStep | null {
   }
 }
 
+// Aluminiumoxid und Magnesiumchlorid mit Ionen und Formel bildeten Klausuraufgabe 3a fast genau nach (§9)
+const EXAM_SALTS = ['Al2O3', 'MgCl2']
+
 function formulaTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc | null {
   const s = pickSalt(level, rng)
-  if (!s) return null
+  if (!s || EXAM_SALTS.includes(formulaOf(s))) return null
   const first = ionsStep(s, rng, focus)
   const second = formulaStep(s, rng, focus)
   if (!first || !second) return null
@@ -279,9 +282,10 @@ function dissociationTask(level: Level, rng: Rng, ref: TaskRef, focus?: string):
 
 // --- Born-Haber ---
 
-// Werte in kJ/mol (gerundet; NIST Chemistry WebBook und CRC Handbook, abgerufen 11.11.2026): Sublimation
-// des Metalls (Atomisierung), erste Ionisierungsenergie, Bindungsenergie X₂, Elektronenaffinität,
-// Bildungsenthalpie des Salzes. Nur Fluoride und Chloride der Alkalimetalle (kein Verdampfungsschritt
+// Werte in kJ/mol (NIST Chemistry WebBook und CRC Handbook, abgerufen 11.11.2026, auf ganze Zahlen
+// gerundet): Sublimation des Metalls (Atomisierung), erste Ionisierungsenergie, Elektronenaffinität,
+// Bildungsenthalpie des Salzes. Bindungsenergien von F2 und Cl2 als übliche Lehrbuchwerte 158 und 242
+// (Tabelle 158,7 und 242,6), damit die halbe Bindungsenergie ganzzahlig bleibt. Nur Fluoride und Chloride der Alkalimetalle (kein Verdampfungsschritt
 // fehlt, docs/CHEMIE.md §6).
 const METALS = [
   { id: 'Li', name: 'Lithium', sublimation: 159, ionization: 520 },
@@ -294,7 +298,7 @@ const HALOGENS = [
   { id: 'F', name: 'Fluor', bond: 158, affinity: -328 },
   { id: 'Cl', name: 'Chlor', bond: 242, affinity: -349 },
 ]
-const FORMATION: Readonly<Record<string, number>> = { LiF: -616, LiCl: -409, NaF: -576, NaCl: -411, KF: -567, KCl: -437, RbF: -558, RbCl: -435, CsF: -553, CsCl: -443 }
+const FORMATION: Readonly<Record<string, number>> = { LiF: -616, LiCl: -409, NaF: -577, NaCl: -411, KF: -567, KCl: -437, RbF: -558, RbCl: -435, CsF: -553, CsCl: -443 }
 
 const kj = (n: number) => `${n < 0 ? '-' : ''}${Math.abs(n)}\\,\\mathrm{kJ/mol}`
 const signed = (n: number) => (n < 0 ? `(${n})` : `${n}`)
@@ -324,7 +328,7 @@ function bornHaberTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): Ch
       ]
     : [
         { rule: 'chem-bh-lattice-sign', value: sum - lattice },
-        { rule: 'chem-bh-subtracted-wrong', value: lattice - sum },
+        { rule: 'chem-bh-ions-subtracted', value: lattice - sum },
       ]
   const second = stepChoices(rng, { key: kj(target), content: math(kj(target)) }, targetWrong.filter((w) => w.value !== target).map((w) => wrongOf(w.rule, kj(w.value))), focus)
   if (first.length === 0 || second.length === 0) return null
@@ -416,7 +420,7 @@ export const SALZE_GENERATORS: readonly ChemGenerator[] = [
     kind: 'born-haber',
     part: 'energie',
     weights: { 3: 0.14 },
-    errors: ['chem-bh-ea-sign', 'chem-bh-full-bond', 'chem-bh-step-missing', 'chem-bh-subtracted-wrong', 'chem-bh-added', 'chem-bh-lattice-sign'],
+    errors: ['chem-bh-ea-sign', 'chem-bh-full-bond', 'chem-bh-step-missing', 'chem-bh-subtracted-wrong', 'chem-bh-added', 'chem-bh-lattice-sign', 'chem-bh-ions-subtracted'],
     generate: bornHaberTask,
   },
 ]

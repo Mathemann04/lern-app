@@ -44,7 +44,7 @@ export const IONEN_WHY: Readonly<Record<string, Explanation>> = {
     short: "Das Verhältnis folgt aus den Ladungen; zusammen müssen sie sich aufheben.",
   },
   'chem-mis-io-index-is-charge': {
-    detailed: String.raw`Die Ladung eines Ions folgt aus seiner Stellung im Periodensystem, nicht aus der Formel. Der tiefgestellte Index zählt, wie viele Ionen dieser Sorte in einer Formeleinheit stecken. Eine Ladung steht hochgestellt am Ion, etwa bei $\ce{Na+}$.`,
+    detailed: String.raw`Der tiefgestellte Index zählt, wie viele Ionen dieser Sorte in einer Formeleinheit stecken. Die Ladung steht hochgestellt am Ion, etwa bei $\ce{Na+}$; sie folgt aus dem Periodensystem, aus der Liste der Molekül-Ionen oder aus dem Ladungsausgleich, nicht aus dem Index.`,
     short: "Der Index zählt Ionen; die Ladung steht hochgestellt am Ion.",
   },
   'chem-mis-io-element-formula': {
@@ -64,7 +64,7 @@ export const IONEN_WHY: Readonly<Record<string, Explanation>> = {
     short: "Salznamen haben keine Zahlwörter; die Anzahlen folgen aus den Ladungen.",
   },
   'chem-mis-io-numeral-always': {
-    detailed: "Die Ziffer klärt nur, welches Ion gemeint ist, wenn ein Metall Ionen mit verschiedenen Ladungen bilden kann, etwa Eisen oder Mangan. Die Metalle der I. bis III. Hauptgruppe bilden jeweils nur ein Ion; bei ihnen ist die Ladung klar, und die Ziffer entfällt.",
+    detailed: "Die Ziffer klärt nur, welches Ion gemeint ist, wenn ein Metall Ionen mit verschiedenen Ladungen bilden kann, etwa Eisen oder Mangan. Alkali- und Erdalkalimetalle sowie Aluminium bilden nur ein Ion; bei ihnen ist die Ladung klar, und die Ziffer entfällt.",
     short: "Die Ziffer steht nur bei Metallen mit mehreren möglichen Ladungen.",
   },
   'chem-mis-io-name-order': {
@@ -72,8 +72,8 @@ export const IONEN_WHY: Readonly<Record<string, Explanation>> = {
     short: "Zuerst das Kation, dann das Anion.",
   },
   'chem-mis-io-ending-mixup': {
-    detailed: String.raw`Die Endung legt fest, welches Ion gemeint ist. -id steht für ein einatomiges Anion ohne Sauerstoff, etwa Nitrid $\ce{N^3-}$. -at und -it stehen für Molekül-Ionen mit Sauerstoff, -at mit mehr Sauerstoff als -it: Nitrat $\ce{NO3-}$, Nitrit $\ce{NO2-}$. Der bloße Name des Elements bezeichnet gar kein Ion.`,
-    short: "Die Endung legt das Ion fest: -id ohne Sauerstoff, -it und -at mit Sauerstoff.",
+    detailed: String.raw`Die Endung legt fest, welches Ion gemeint ist. -id steht meist für ein einatomiges Anion, etwa Nitrid $\ce{N^3-}$ oder Oxid $\ce{O^2-}$ (Ausnahme: Hydroxid $\ce{OH-}$). -at und -it stehen für Molekül-Ionen mit Sauerstoff, -at mit mehr Sauerstoff als -it: Nitrat $\ce{NO3-}$, Nitrit $\ce{NO2-}$. Der bloße Name des Elements bezeichnet gar kein Ion.`,
+    short: "Die Endung legt das Ion fest: -id meist einatomig, -it und -at Molekül-Ionen mit Sauerstoff.",
   },
   'chem-mis-io-numeral-count': {
     detailed: String.raw`Die Ziffer ist keine Anzahl in der Formel: Eisen(III)-chlorid $\ce{FeCl3}$ enthält ein Eisen-Ion, Kupfer(I)-oxid $\ce{Cu2O}$ dagegen zwei Kupfer-Ionen. Wie viele Ionen jeder Sorte in der Formel stehen, folgt erst aus dem Ladungsausgleich.`,

@@ -305,6 +305,7 @@ test('Chemie: Themen mischen, „Nächste Aufgabe" bleibt in der Mischung, X und
   await page.getByRole('checkbox', { name: 'Stoffmenge und Umsatz' }).uncheck()
   await page.getByRole('checkbox', { name: 'Reaktionsgleichungen' }).uncheck()
   await page.getByRole('checkbox', { name: 'Gase und Lösungen' }).uncheck()
+  await page.getByRole('checkbox', { name: 'Ionenbindung und Salze' }).uncheck()
 
   // Unterthemen aufklappen: dieselben Kästchen wie auf der Themenseite (Atombau steht zuerst)
   const toggle = page.getByRole('button', { name: /^Unterthemen: alle/ }).first()
@@ -570,10 +571,10 @@ test('Chemie: Ionenbindung und Salze, Rechnung zur Formel, Lernkarte mit Gitterb
   await page.goto('./#/gebiet/chem-bindung')
   await page.getByRole('link', { name: /Ionenbindung und Salze/ }).click()
   await expect(page.getByRole('heading', { name: 'Ionenbindung und Salze' })).toBeVisible()
-  // eine feste Rechnung: Formel aus dem Namen
+  // eine feste Rechnung der Grundlagen (Formel, Name oder Zerfall in Ionen)
   await page.goto('./#/ueben/chem-ionen/1-10000')
-  await expect(page.getByText('Aus welchen Ionen ist Natriumoxid aufgebaut?')).toBeVisible()
-  await expectCleanPage(page, 'Salzformel')
+  await expect(answers(page).first()).toBeVisible()
+  await expectCleanPage(page, 'Rechnung zu Salzen')
   // Lernkarte mit drei Bildern
   await page.goto('./#/karten/chem-ionen/ionen-gitter')
   await expect(page.getByTestId('chem-figure')).toHaveCount(3)

@@ -67,7 +67,7 @@ export const IONEN_BANK: QuestionBank = {
         { id: 'f3', text: "positiv geladene Ionen, weil sie Protonen aufnehmen", misconception: 'chem-mis-io-proton-charge' },
         { id: 'f4', text: "ungeladene Atome, die sich mit dem Nichtmetall Elektronenpaare teilen", misconception: 'chem-mis-io-bond-mixup' },
       ],
-      hint: "Ein Elektron ist negativ geladen. Was bleibt übrig, wenn ein neutrales Atom eines davon verliert?",
+      hint: "Hat ein Metallatom viele oder wenige Außenelektronen, und was ist leichter: wenige abgeben oder viele aufnehmen?",
       explanation: {
         detailed: String.raw`Metallatome haben wenige Außenelektronen und geben sie bei der Reaktion ab. Danach überwiegen die positiven Ladungen im Kern; aus dem Atom ist ein Kation geworden, etwa $\ce{Na+}$ oder $\ce{Mg^2+}$. Die Protonen im Kern bleiben dabei unverändert.`,
         short: "Metalle geben Elektronen ab und werden zu Kationen.",
@@ -134,7 +134,7 @@ export const IONEN_BANK: QuestionBank = {
       fact: 'name-einfach',
       part: 'formel',
       title: "Name eines Salzes",
-      prompt: String.raw`Wie heißt das ionische Salz $\ce{CaBr2}$?`,
+      prompt: String.raw`Wie lautet der übliche Name des ionischen Salzes $\ce{CaBr2}$?`,
       correct: { id: 'r', text: "Calciumbromid" },
       wrong: [
         { id: 'f1', text: "Calciumdibromid", misconception: 'chem-mis-io-greek-prefix' },
@@ -522,7 +522,7 @@ export const IONEN_BANK: QuestionBank = {
           short: "Magnesium bildet nur ein Ion; eine Ziffer ist überflüssig.",
         } },
       ],
-      hint: "Eine Ziffer braucht nur ein Metall, das Ionen mit verschiedenen Ladungen bilden kann. Die Metalle der I. bis III. Hauptgruppe bilden jeweils nur eine Sorte.",
+      hint: "Welches dieser Metalle kann Ionen mit verschiedenen Ladungen bilden?",
       explanation: {
         detailed: String.raw`Kupfer bildet $\ce{Cu+}$ und $\ce{Cu^2+}$; deshalb muss der Name sagen, welches vorliegt: $\ce{CuBr2}$ heißt Kupfer(II)-bromid. Natrium, Calcium, Aluminium und Magnesium bilden je nur ein Ion ($\ce{Na+}$, $\ce{Ca^2+}$, $\ce{Al^3+}$, $\ce{Mg^2+}$); bei ihnen steht keine Ziffer, auch wenn in der Formel ein Index auftaucht.`,
         short: "Nur Metalle mit mehreren möglichen Ladungen wie Kupfer brauchen die Ziffer.",

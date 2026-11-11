@@ -575,8 +575,8 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
     name: 'Anion falsch benannt',
     wrongFormula: String.raw`\ce{Na2SO4}\text{: Natriumsulfid statt Natriumsulfat}`,
     why: {
-      detailed: 'Die Endung verrät das Anion: -id steht für das einatomige Anion (Sulfid, Nitrid, Chlorid), -it und -at für Molekül-Ionen mit Sauerstoff, -at mit mehr Sauerstoff als -it (Sulfit, Sulfat). Hydrogen- zeigt ein zusätzliches H an.',
-      short: '-id ohne Sauerstoff, -it und -at mit Sauerstoff.',
+      detailed: 'Die Endung verrät das Anion: -id steht meist für ein einatomiges Anion (Sulfid, Nitrid, Chlorid, Oxid; Ausnahme Hydroxid), -it und -at für Molekül-Ionen mit Sauerstoff, -at mit mehr Sauerstoff als -it (Sulfit, Sulfat). Hydrogen- zeigt ein zusätzliches H an.',
+      short: '-id meist einatomig; -it und -at: Molekül-Ionen mit Sauerstoff.',
     },
   },
   {
@@ -687,6 +687,16 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
     why: {
       detailed: 'Die Bildungsenthalpie ist die Summe aus dem Weg zu den Ionen und der Gitterenthalpie. Wer die Gitterenthalpie sucht, muss den Weg zu den Ionen auf die andere Seite bringen, also abziehen.',
       short: String.raw`Nach $\Delta H_G$ umstellen: abziehen.`,
+    },
+  },
+  {
+    id: 'chem-bh-ions-subtracted',
+    course: IONEN,
+    name: 'Weg zu den Ionen abgezogen statt addiert',
+    wrongFormula: String.raw`\Delta H_f = \Delta H_G - \Delta H_{\text{Ionen}}`,
+    why: {
+      detailed: 'Die Bildungsenthalpie ist die Summe aller Schritte des Umwegs: erst zu den Ionen im Gas, dann ins Gitter. Beide Beiträge werden mit ihrem Vorzeichen addiert; keiner wird abgezogen.',
+      short: 'Alle Schritte des Umwegs mit ihrem Vorzeichen addieren.',
     },
   },
   {

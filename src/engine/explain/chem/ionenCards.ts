@@ -232,7 +232,7 @@ export const IONEN_CARDS: readonly Card[] = [
         ],
       },
     ],
-    errors: ['chem-bh-ea-sign', 'chem-bh-full-bond', 'chem-bh-step-missing', 'chem-bh-subtracted-wrong', 'chem-bh-added', 'chem-bh-lattice-sign', 'chem-mis-io-lattice-is-force', 'chem-mis-io-lattice-sign', 'chem-mis-io-lattice-mixup', 'chem-mis-io-bh-real-path', 'chem-mis-io-bh-path-dependent', 'chem-mis-io-ionization-releases', 'chem-mis-io-ea-compensates', 'chem-mis-io-bh-full-bond', 'chem-mis-io-bh-step-missing', 'chem-mis-io-neutral-no-force'],
+    errors: ['chem-bh-ea-sign', 'chem-bh-full-bond', 'chem-bh-step-missing', 'chem-bh-subtracted-wrong', 'chem-bh-added', 'chem-bh-lattice-sign', 'chem-bh-ions-subtracted', 'chem-mis-io-lattice-is-force', 'chem-mis-io-lattice-sign', 'chem-mis-io-lattice-mixup', 'chem-mis-io-bh-real-path', 'chem-mis-io-bh-path-dependent', 'chem-mis-io-ionization-releases', 'chem-mis-io-ea-compensates', 'chem-mis-io-bh-full-bond', 'chem-mis-io-bh-step-missing', 'chem-mis-io-neutral-no-force'],
   },
   {
     id: 'ionen-grenze',

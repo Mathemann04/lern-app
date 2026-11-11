@@ -603,3 +603,8 @@ Neue Entscheidungen unten anfügen.
   (`chem/figures.ts`), die Oberfläche zeichnet sie (`ui/chem/ChemFigure.tsx`); Koordinationszahl
   und Zahl der Formeleinheiten prüft ein Test am Bild. Born-Haber mit Werten aus NIST und CRC,
   dazu Rubidium und Caesium für mehr Abwechslung.
+- 11.11.2026: S5a nach der fachlichen Prüfung: Salze in Wasser ohne Sulfide (S2- reagiert zu HS-), ohne
+  Ammoniumphosphat und Aluminium nur als Nitrat und Sulfat; Schmelze ohne K2O, Rb2O und Cs2O (zersetzen
+  sich vorher); kein Caesiumphosphid. Aluminiumoxid und Magnesiumchlorid kommen in „Formel aus dem Namen“
+  nicht vor (fast wie Klausuraufgabe 3a). Neuer Rechenfehler „Weg zu den Ionen abgezogen statt addiert“
+  (`chem-bh-ions-subtracted`) für die Bildungsenthalpie. Rubidium-Salze für mehr Abwechslung.

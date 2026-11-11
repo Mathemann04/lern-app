@@ -27,6 +27,7 @@ export const CATIONS: readonly Ion[] = [
   ion('Ca', 'Ca', 2, 'Calcium', 1),
   ion('Sr', 'Sr', 2, 'Strontium', 1),
   ion('Ba', 'Ba', 2, 'Barium', 1),
+  ion('Rb', 'Rb', 1, 'Rubidium', 1),
   ion('Cs', 'Cs', 1, 'Caesium', 1),
   ion('Al', 'Al', 3, 'Aluminium', 1),
   ion('Zn', 'Zn', 2, 'Zink', 1),
@@ -63,34 +64,37 @@ export const ANIONS: readonly Ion[] = [
 // mit Halogeniden außer Fluorid sowie Oxid und Sulfid; FeI₃, CuI₂, Fe₂S₃, Cr₂S₃ gibt es nicht als
 // beständige Stoffe; Nitride und Phosphide nur der leichten Hauptgruppenmetalle (Zink- und Aluminiumphosphid
 // sind eher Halbleiter mit Atombindung; Aluminiumnitrid wie im Skript); Hydrogencarbonate fest nur von
-// Alkalimetallen und Ammonium; Ammonium nicht mit Oxid, Hydroxid, Sulfid, Nitrid, Phosphid, Nitrit)
+// Alkalimetallen und Ammonium; Ammonium nicht mit Oxid, Hydroxid, Sulfid, Nitrid, Phosphid, Nitrit und
+// Phosphat (gibt Ammoniak ab); kein Caesiumphosphid Cs3P)
 const ALLOWED: Readonly<Record<string, readonly string[]>> = {
-  F: ['Li', 'Na', 'K', 'Cs', 'Mg', 'Ca', 'Sr', 'Ba', 'Al', 'Zn', 'Ag', 'NH4', 'Fe2', 'Fe3', 'Cu2', 'Cr3', 'Mn2'],
-  Cl: ['Li', 'Na', 'K', 'Cs', 'Mg', 'Ca', 'Sr', 'Ba', 'Al', 'Zn', 'Ag', 'NH4', 'Fe2', 'Fe3', 'Cu1', 'Cu2', 'Cr3', 'Mn2'],
-  Br: ['Li', 'Na', 'K', 'Cs', 'Mg', 'Ca', 'Sr', 'Ba', 'Al', 'Zn', 'Ag', 'NH4', 'Fe2', 'Fe3', 'Cu1', 'Cu2', 'Cr3', 'Mn2'],
-  I: ['Li', 'Na', 'K', 'Cs', 'Mg', 'Ca', 'Sr', 'Ba', 'Al', 'Zn', 'Ag', 'NH4', 'Fe2', 'Cu1', 'Cr3', 'Mn2'],
-  O: ['Li', 'Na', 'K', 'Cs', 'Mg', 'Ca', 'Sr', 'Ba', 'Al', 'Zn', 'Ag', 'Fe2', 'Fe3', 'Cu1', 'Cu2', 'Cr3', 'Mn2'],
-  S: ['Li', 'Na', 'K', 'Cs', 'Mg', 'Ca', 'Sr', 'Ba', 'Al', 'Zn', 'Ag', 'Fe2', 'Cu1', 'Cu2', 'Mn2'],
+  F: ['Li', 'Na', 'K', 'Rb', 'Cs', 'Mg', 'Ca', 'Sr', 'Ba', 'Al', 'Zn', 'Ag', 'NH4', 'Fe2', 'Fe3', 'Cu2', 'Cr3', 'Mn2'],
+  Cl: ['Li', 'Na', 'K', 'Rb', 'Cs', 'Mg', 'Ca', 'Sr', 'Ba', 'Al', 'Zn', 'Ag', 'NH4', 'Fe2', 'Fe3', 'Cu1', 'Cu2', 'Cr3', 'Mn2'],
+  Br: ['Li', 'Na', 'K', 'Rb', 'Cs', 'Mg', 'Ca', 'Sr', 'Ba', 'Al', 'Zn', 'Ag', 'NH4', 'Fe2', 'Fe3', 'Cu1', 'Cu2', 'Cr3', 'Mn2'],
+  I: ['Li', 'Na', 'K', 'Rb', 'Cs', 'Mg', 'Ca', 'Sr', 'Ba', 'Al', 'Zn', 'Ag', 'NH4', 'Fe2', 'Cu1', 'Cr3', 'Mn2'],
+  O: ['Li', 'Na', 'K', 'Rb', 'Cs', 'Mg', 'Ca', 'Sr', 'Ba', 'Al', 'Zn', 'Ag', 'Fe2', 'Fe3', 'Cu1', 'Cu2', 'Cr3', 'Mn2'],
+  S: ['Li', 'Na', 'K', 'Rb', 'Cs', 'Mg', 'Ca', 'Sr', 'Ba', 'Al', 'Zn', 'Ag', 'Fe2', 'Cu1', 'Cu2', 'Mn2'],
   N: ['Li', 'Mg', 'Ca', 'Sr', 'Ba', 'Al'],
-  P: ['Li', 'Na', 'K', 'Cs', 'Mg', 'Ca', 'Sr'],
-  OH: ['Li', 'Na', 'K', 'Cs', 'Mg', 'Ca', 'Sr', 'Ba', 'Al', 'Zn', 'Fe2', 'Fe3', 'Cu2', 'Cr3', 'Mn2'],
-  NO3: ['Li', 'Na', 'K', 'Cs', 'Mg', 'Ca', 'Sr', 'Ba', 'Al', 'Zn', 'Ag', 'NH4', 'Fe2', 'Fe3', 'Cu2', 'Cr3', 'Mn2'],
-  NO2: ['Li', 'Na', 'K', 'Cs', 'Mg', 'Ca', 'Sr', 'Ba', 'Ag'],
-  SO4: ['Li', 'Na', 'K', 'Cs', 'Mg', 'Ca', 'Sr', 'Ba', 'Al', 'Zn', 'Ag', 'NH4', 'Fe2', 'Fe3', 'Cu2', 'Cr3', 'Mn2'],
-  SO3: ['Li', 'Na', 'K', 'Cs', 'Mg', 'Ca', 'Sr', 'Ba', 'Zn', 'NH4'],
-  CO3: ['Li', 'Na', 'K', 'Cs', 'Mg', 'Ca', 'Sr', 'Ba', 'Zn', 'Ag', 'NH4', 'Fe2', 'Mn2'],
-  HCO3: ['Na', 'K', 'Cs', 'NH4'],
-  PO4: ['Li', 'Na', 'K', 'Cs', 'Mg', 'Ca', 'Sr', 'Ba', 'Al', 'Zn', 'Ag', 'NH4', 'Fe2', 'Fe3', 'Cu2', 'Cr3', 'Mn2'],
+  P: ['Li', 'Na', 'K', 'Mg', 'Ca', 'Sr'],
+  OH: ['Li', 'Na', 'K', 'Rb', 'Cs', 'Mg', 'Ca', 'Sr', 'Ba', 'Al', 'Zn', 'Fe2', 'Fe3', 'Cu2', 'Cr3', 'Mn2'],
+  NO3: ['Li', 'Na', 'K', 'Rb', 'Cs', 'Mg', 'Ca', 'Sr', 'Ba', 'Al', 'Zn', 'Ag', 'NH4', 'Fe2', 'Fe3', 'Cu2', 'Cr3', 'Mn2'],
+  NO2: ['Li', 'Na', 'K', 'Rb', 'Cs', 'Mg', 'Ca', 'Sr', 'Ba', 'Ag'],
+  SO4: ['Li', 'Na', 'K', 'Rb', 'Cs', 'Mg', 'Ca', 'Sr', 'Ba', 'Al', 'Zn', 'Ag', 'NH4', 'Fe2', 'Fe3', 'Cu2', 'Cr3', 'Mn2'],
+  SO3: ['Li', 'Na', 'K', 'Rb', 'Cs', 'Mg', 'Ca', 'Sr', 'Ba', 'Zn', 'NH4'],
+  CO3: ['Li', 'Na', 'K', 'Rb', 'Cs', 'Mg', 'Ca', 'Sr', 'Ba', 'Zn', 'Ag', 'NH4', 'Fe2', 'Mn2'],
+  HCO3: ['Na', 'K', 'Rb', 'Cs', 'NH4'],
+  PO4: ['Li', 'Na', 'K', 'Rb', 'Cs', 'Mg', 'Ca', 'Sr', 'Ba', 'Al', 'Zn', 'Ag', 'Fe2', 'Fe3', 'Cu2', 'Cr3', 'Mn2'],
 }
 
 export const isAllowedSalt = (cation: Ion, anion: Ion) => ALLOWED[anion.id]?.includes(cation.id) ?? false
 
 // In Wasser gut löslich (für „in Wasser gelöst"): Salze der Alkalimetalle und des Ammoniums, alle Nitrate;
-// Chloride, Bromide und Iodide außer Silber und Kupfer(I); Sulfate außer Barium, Calcium und Silber;
-// Hydroxid von Barium. Oxide, Nitride und Phosphide reagieren mit Wasser und kommen hier nie vor.
+// Chloride, Bromide und Iodide außer Silber und Kupfer(I); Sulfate außer Barium, Strontium, Calcium und Silber;
+// Hydroxide von Barium und Strontium. Oxide, Nitride, Phosphide und Sulfide reagieren mit Wasser (S2- wird zu
+// HS-) und kommen hier nie vor; Aluminium nur als Nitrat und Sulfat (die Halogenide reagieren heftig).
 export function isSoluble(cation: Ion, anion: Ion): boolean {
-  if (['O', 'N', 'P'].includes(anion.id)) return false
-  if (['Li', 'Na', 'K', 'Cs', 'NH4'].includes(cation.id)) return !(cation.id === 'Li' && ['F', 'CO3', 'PO4'].includes(anion.id))
+  if (['O', 'N', 'P', 'S'].includes(anion.id)) return false
+  if (cation.id === 'Al') return ['NO3', 'SO4'].includes(anion.id)
+  if (['Li', 'Na', 'K', 'Rb', 'Cs', 'NH4'].includes(cation.id)) return !(cation.id === 'Li' && ['F', 'CO3', 'PO4'].includes(anion.id))
   if (anion.id === 'NO3') return true
   if (['Cl', 'Br', 'I'].includes(anion.id)) return !['Ag', 'Cu1'].includes(cation.id)
   if (anion.id === 'SO4') return !['Ba', 'Sr', 'Ca', 'Ag'].includes(cation.id)
@@ -98,11 +102,13 @@ export function isSoluble(cation: Ion, anion: Ion): boolean {
   return false
 }
 
-// Schmelzflusselektrolyse und Schmelzen ohne Zersetzung: Halogenide und Oxide der Alkali- und
-// Erdalkalimetalle, dazu Aluminiumoxid (gelöst in Kryolith, wie in der Technik)
+// Schmelzflusselektrolyse und Schmelzen ohne Zersetzung: Halogenide der Alkali- und Erdalkalimetalle, Oxide
+// von Lithium, Natrium und den Erdalkalimetallen (K2O, Rb2O und Cs2O zersetzen sich vor dem Schmelzen), dazu
+// Aluminiumoxid (gelöst in Kryolith, wie in der Technik)
 export function meltsAsIons(cation: Ion, anion: Ion): boolean {
   if (cation.id === 'Al') return anion.id === 'O'
-  return ['Li', 'Na', 'K', 'Cs', 'Mg', 'Ca', 'Sr', 'Ba'].includes(cation.id) && ['F', 'Cl', 'Br', 'I', 'O'].includes(anion.id)
+  if (anion.id === 'O' && ['K', 'Rb', 'Cs'].includes(cation.id)) return false
+  return ['Li', 'Na', 'K', 'Rb', 'Cs', 'Mg', 'Ca', 'Sr', 'Ba'].includes(cation.id) && ['F', 'Cl', 'Br', 'I', 'O'].includes(anion.id)
 }
 
 const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b))
