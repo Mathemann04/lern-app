@@ -650,3 +650,8 @@ Neue Entscheidungen unten anfügen.
   in der Hälfte der Aufgaben); Bor mit Hinweis auf sechs Elektronen; die Frage zur Bindungsordnung lautet
   „Sagt das MO-Modell eine Bindung voraus?“ (Be₂, Ne₂ sind als schwach gebundene Teilchen bekannt); neue
   Rechenfehler `chem-hyb-too-few` und `chem-bo-one-pair`; eigene Erklärungen, die die Lösung nicht verraten.
+- 11.11.2026: S5e „Klausuraufgabe 3 üben“ mit 12 Punkten nach dem Bauplan Teil 1 (nicht 6 Punkte
+  wie in der Altklausur), damit auch Polarität, Metalle, Halbleiter und Hybridisierung geübt werden.
+  Die Fragen nutzen die Schritte der Rechnungen (Rechenfehler und Erklärungen geprüft in S5a bis
+  S5d); eine eigene fachliche Prüfung war nicht nötig, weil kein neuer Fachinhalt dazukam, nur
+  Überschriften der Teile.

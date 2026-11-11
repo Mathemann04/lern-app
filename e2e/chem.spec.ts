@@ -655,3 +655,23 @@ test('Chemie: Metallbindung und Hybridisierung, Rechnung und Lernkarte', async (
   await expectCleanPage(page, 'Bändermodell')
   expect(errors).toEqual([])
 })
+
+test('Chemie: Klausuraufgabe 3 üben, Lewis-Formeln als Bilder, abgeben, Auswertung mit Punkten', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./#/gebiet/chem-bindung')
+  await page.getByRole('link', { name: /Klausuraufgabe 3 üben/ }).click()
+  await expect(page).toHaveURL(/#\/klausur\/chemie\/aufgabe\/3\/\d+$/)
+  await page.goto('./#/klausur/chemie/aufgabe/3/7')
+  await expect(page.getByRole('heading', { name: /Aufgabe 3/ })).toBeVisible()
+  const items = page.getByTestId('exam-item')
+  await expect(items).toHaveCount(12)
+  // Teil b zeigt die Lewis-Formeln als Bilder
+  await expect(items.nth(2).locator('svg[role="img"]').first()).toBeVisible()
+  await expectCleanPage(page, 'Klausuraufgabe 3')
+  // jeweils die erste Antwort wählen und abgeben
+  for (let i = 0; i < 12; i++) await items.nth(i).getByRole('group', { name: 'Antworten' }).getByRole('button').first().click()
+  await page.getByRole('button', { name: 'Abgeben' }).click()
+  await expect(page.getByTestId('exam-score')).toHaveText(/^\d+(,5)? von 12 Punkten$/)
+  await expectCleanPage(page, 'Auswertung Klausuraufgabe 3')
+  expect(errors).toEqual([])
+})

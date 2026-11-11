@@ -139,3 +139,8 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   `dotierung` mit Fremdatomen der III. und V. Hauptgruppe in Si oder Ge, `bindungsordnung` mit
   `MO_SPECIES`), Karten `metalleCards.ts`, Fragen `bank/metalle.ts` (Denkfehler `chem-mis-me-…`),
   Katalogbeispiele und Gegenprobe in `generators/metalle.test.ts`.
+- Klausuraufgabe 3 (S5e): `chem/exam/task3.ts` (Teile aus Schritten der Rechnungen über `fromStep`:
+  Antworten, Rechenfehler, Bild und Erklärung übernommen; `pickSalt`, `ionsStep`, `formulaStep` aus
+  `generators/salze.ts`, `MOLECULE_STEPS`, `ZMK_STEPS`, `boilTask`, `dopeTask`, `hybridTask`), Kachel über
+  `exam: { task: 3 }` am Gebiet `chem-bindung`. `ExamOption.figure` zeigt Bilder als Antworten
+  (`ui/exam/ExamTaskPage.tsx`); `givenLatex` darf leer sein.

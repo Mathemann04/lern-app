@@ -963,6 +963,14 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   Reihenfolge der Orbitale wird nicht gefragt). Schmelzflusselektrolyse von Aluminium als
   Wissensfragen. Neun Lernkarten, Wissensfragen. Metall-Trends bei Härte und Schmelzpunkt
   werden nicht gefragt (im Skript nur grob, für Nebengruppen falsch).
+  **S5e** (fertig): „Klausuraufgabe 3 üben“ als Kachel im Gebiet Chemische Bindung, 12 Punkte
+  nach dem Bauplan Teil 1: a) Ionen und Formel eines Salzes (2), b) Lewis-Formel als Bild,
+  Paare, Gestalt (3), c) polares Molekül (1), d) stärkste Kraft und Siedepunkte ordnen (2),
+  e) Dotierung eines Halbleiters (2), f) Hybridisierung (2). Die Fragen kommen aus den
+  Rechnungen der Themen, mit denselben Rechenfehlern; Folgefehler gibt es hier nicht, weil die
+  Teile unabhängig sind. Ohne die Stoffe der Altklausuren (Aluminiumoxid, Magnesiumchlorid,
+  Ammoniak und Wasser in Teil b). Antworten als Bild auch in Klausuraufgaben (`figure` an
+  `ExamOption`); Antworten mit Text brechen um, nur einzelne Formeln setzen sich kleiner.
 - **S6: Elektronen und Periodensystem.** Konfiguration und
   Valenzkonfiguration als Auswahl, Quantenzahlen, Steckbrief, Ionenladung,
   Trends; „Klausuraufgabe 1 üben“ und „Klausuraufgabe 2 üben“.
