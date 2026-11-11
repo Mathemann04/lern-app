@@ -1,4 +1,6 @@
-import type { MultiChoice, QuestionBank, QuestionLevel } from '../../quiz/types.ts'
+import type { MatchQuestion, MatchTrap, MultiChoice, QuestionBank, QuestionLevel } from '../../quiz/types.ts'
+import { type CountMode, atomCounts, formulaCe, parseFormula } from '../formula.ts'
+import { substanceById } from '../substances.ts'
 
 // Wissensfragen zum Thema „Stoffmenge und Umsatz“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern:
 // Stufe · 100 + laufende Nummer; nie neu vergeben, gelöschte kommen in retired. Zahlen nachgerechnet mit
@@ -12,6 +14,79 @@ const multiAt = (level: QuestionLevel) => (spec: MultiSpec): MultiChoice => ({
   level,
   correct: spec.correct.map((text, i) => ({ id: `r${i + 1}`, text })),
 })
+
+// Zuordnen (N1b): Größe ↔ Einheit
+const UNITS: MatchQuestion = {
+  kind: 'match',
+  id: 'st-g-zuordnen-einheiten',
+  no: 119,
+  level: 1,
+  fact: 'match-units',
+  part: 'stoffmenge',
+  title: 'Größen und Einheiten',
+  prompt: 'Welche Einheit gehört zu welcher Größe?',
+  pairs: [
+    { id: 'm', left: 'Masse $m$', right: String.raw`$\mathrm{g}$` },
+    { id: 'n', left: 'Stoffmenge $n$', right: String.raw`$\mathrm{mol}$` },
+    { id: 'M', left: 'molare Masse $M$', right: String.raw`$\mathrm{g/mol}$` },
+    { id: 'NA', left: 'Avogadro-Konstante $N_A$', right: String.raw`$\mathrm{mol^{-1}}$` },
+    { id: 'V', left: 'Volumen $V$', right: String.raw`$\mathrm{L}$` },
+  ],
+  traps: [
+    { pair: 'M', right: String.raw`$\mathrm{g}$`, misconception: 'chem-mis-st-units' },
+    { pair: 'n', right: String.raw`$\mathrm{g/mol}$`, misconception: 'chem-mis-st-units' },
+    { pair: 'n', right: String.raw`$\mathrm{g}$`, misconception: 'chem-mis-st-n-is-mass' },
+  ],
+  hint: 'Überlege bei jeder Größe, was sie misst: eine Masse, eine Zahl von Teilchen oder etwas je Mol?',
+  explanation: {
+    detailed: String.raw`Die Masse einer Portion misst man in Gramm, ihr Volumen in Litern. Die Stoffmenge zählt Teilchen in der Einheit Mol. Die molare Masse sagt, wie viel Gramm ein Mol wiegt: $\mathrm{g/mol}$. Die Avogadro-Konstante zählt Teilchen je Mol: $\mathrm{mol^{-1}}$.`,
+    short: String.raw`$m$ in g, $n$ in mol, $M$ in g/mol, $N_A$ in $\mathrm{mol^{-1}}$, $V$ in L.`,
+  },
+  cards: ['stoffmenge-n-m-m', 'stoffmenge-mol'],
+  ref: 'Skript Stöchiometrie',
+}
+
+// Zuordnen (N1b): Formel ↔ Zahl der Sauerstoffatome, gezählt von chem/formula.ts; Verwechslungen sind die
+// Zahlen, die beim typischen Verzählen herauskommen, wenn sie zu einer anderen Formel des Vorrats gehören
+const OXYGEN_FORMULAS = ['NaOH', 'Ca(OH)2', 'Fe2O3', 'H2SO4', 'Mg(NO3)2', 'Ca3(PO4)2', 'CuSO4*5H2O', 'Al2(SO4)3'].map((id) => substanceById(id)!)
+const oxygenIn = (id: string, mode: CountMode = {}) => atomCounts(substanceById(id)!.formula, mode).get('O') ?? 0
+// typisches Verzählen: Kristallwasser vergessen; Index der Klammer nur aufs letzte Atom oder gar nicht angewendet;
+// in Formeln ohne Klammer und Kristallwasser jeden Index als 1 gelesen
+const COUNT_ERRORS: readonly [(id: string) => number | null, string][] = [
+  [(id) => oxygenIn(id, { withoutAdducts: true }), 'chem-mis-st-hydrate-forgotten'],
+  [(id) => oxygenIn(id, { bracketOnLast: true }), 'chem-mis-st-bracket'],
+  [(id) => atomCounts(parseFormula(id.replace(/\)\d+/g, ')')), {}).get('O') ?? 0, 'chem-mis-st-bracket'],
+  [(id) => (substanceById(id)!.kind === 'simple' ? oxygenIn(id, { ignoreIndices: true }) : null), 'chem-mis-st-index-ignored'],
+]
+const OXYGEN_COUNTS: MatchQuestion = {
+  kind: 'match',
+  id: 'st-v-zuordnen-sauerstoffatome',
+  no: 220,
+  level: 2,
+  fact: 'match-oxygen-count',
+  part: 'molmasse',
+  title: 'Atome zählen',
+  prompt: 'Wie viele Sauerstoffatome stehen in der Formel?',
+  pairs: OXYGEN_FORMULAS.map((x) => ({ id: x.id, left: String.raw`$\ce{${formulaCe(x.formula)}}$`, right: `$${oxygenIn(x.id)}$` })),
+  traps: OXYGEN_FORMULAS.flatMap((x) => {
+    const right = oxygenIn(x.id)
+    const others = new Set(OXYGEN_FORMULAS.filter((y) => oxygenIn(y.id) !== right).map((y) => oxygenIn(y.id)))
+    const seen = new Set<number>()
+    return COUNT_ERRORS.flatMap(([count, misconception]): MatchTrap[] => {
+      const wrong = count(x.id)
+      if (wrong === null || wrong === right || !others.has(wrong) || seen.has(wrong)) return []
+      seen.add(wrong)
+      return [{ pair: x.id, right: `$${wrong}$`, misconception }]
+    })
+  }),
+  hint: 'Ein Index hinter einer Klammer gilt für alles in der Klammer, die Zahl vor dem Kristallwasser für das ganze Wassermolekül.',
+  explanation: {
+    detailed: String.raw`Jeder Index gilt für das Symbol davor, ein Index hinter einer Klammer für alles in der Klammer. Kristallwasser zählt mit, und die Zahl davor gilt für das ganze Wassermolekül: In $\ce{CuSO4 * 5 H2O}$ stecken $4 + 5 = 9$ Sauerstoffatome, in $\ce{Ca3(PO4)2}$ sind es $2 \cdot 4 = 8$.`,
+    short: 'Index hinter der Klammer gilt für die ganze Klammer; Kristallwasser zählt mit.',
+  },
+  cards: ['stoffmenge-formeln', 'stoffmenge-molmasse'],
+  ref: 'Skript Stöchiometrie',
+}
 
 export const STOFFMENGE_BANK: QuestionBank = {
   course: 'chem-stoffmenge',
@@ -1699,6 +1774,9 @@ export const STOFFMENGE_BANK: QuestionBank = {
       cards: ['stoffmenge-n-m-m', 'stoffmenge-mol'],
       ref: "Skript Stöchiometrie",
     }),
+    // ---- Zuordnen (N1b)
+    UNITS,
+    OXYGEN_COUNTS,
   ],
   retired: [],
 }

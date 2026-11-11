@@ -1,4 +1,6 @@
 import type { MultiChoice, Question, QuestionBank, QuestionLevel } from '../../quiz/types.ts'
+import { atomCounts, formulaCe } from '../formula.ts'
+import { FUELS, type Fuel } from '../reactions.ts'
 
 // Wissensfragen zum Thema „Reaktionsgleichungen“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern:
 // Stufe · 100 + laufende Nummer; nie neu vergeben, gelöschte kommen in retired. Jede Gleichung ist mit der
@@ -1802,8 +1804,73 @@ const MULTI: readonly Question[] = [
   }),
 ]
 
+// ---- Zuordnen (N1b)
+
+// Alkane und Alkohole der Vertiefung mit ihren Formeln aus chem/reactions.ts; Verwechslung: die Vorsilbe um eins
+// verschoben gelesen (Formel des Alkans mit einem C-Atom weniger)
+const FUELS_2 = FUELS.filter((f) => f.levels.includes(2))
+const fuelFormula = (f: Fuel) => String.raw`$\ce{${formulaCe(f.species.formula)}}$`
+const carbons = (f: Fuel) => atomCounts(f.species.formula).get('C') ?? 0
+const isAlkane = (f: Fuel) => !atomCounts(f.species.formula).has('O')
+
+const MATCH: readonly Question[] = [
+  {
+    kind: 'match',
+    id: 'gl-g-zuordnen-zeichen',
+    no: 120,
+    level: 1,
+    fact: 'match-symbols',
+    part: 'lesen',
+    title: 'Zeichen in Gleichungen',
+    prompt: 'Was bedeutet welches Zeichen in einer Reaktionsgleichung?',
+    pairs: [
+      { id: 's', left: '(s)', right: 'fest' },
+      { id: 'l', left: '(l)', right: 'flüssig' },
+      { id: 'g', left: '(g)', right: 'gasförmig' },
+      { id: 'aq', left: '(aq)', right: 'in Wasser gelöst' },
+      { id: 'pfeil', left: String.raw`$\rightarrow$`, right: 'läuft vollständig ab' },
+      { id: 'doppelpfeil', left: String.raw`$\rightleftharpoons$`, right: 'Gleichgewicht' },
+    ],
+    traps: [
+      { pair: 'aq', right: 'flüssig', misconception: 'chem-mis-gl-state-symbols' },
+      { pair: 'l', right: 'in Wasser gelöst', misconception: 'chem-mis-gl-state-symbols' },
+      { pair: 'doppelpfeil', right: 'läuft vollständig ab', misconception: 'chem-mis-gl-arrow' },
+      { pair: 'pfeil', right: 'Gleichgewicht', misconception: 'chem-mis-gl-arrow' },
+    ],
+    hint: 'Die Zustandszeichen kürzen lateinische und englische Wörter ab. Beim Pfeil: Läuft auch die Rückreaktion?',
+    explanation: {
+      detailed: String.raw`Zustände stehen in Klammern hinter der Formel: (s) fest, (l) flüssig, (g) gasförmig, (aq) in Wasser gelöst. Der einfache Pfeil $\rightarrow$ steht für eine Reaktion, die vollständig abläuft, der Doppelpfeil $\rightleftharpoons$ für ein Gleichgewicht.`,
+      short: String.raw`(s) fest, (l) flüssig, (g) gasförmig, (aq) gelöst; $\rightarrow$ vollständig, $\rightleftharpoons$ Gleichgewicht.`,
+    },
+    cards: ['gleichungen-lesen'],
+    ref: 'Skript Stöchiometrie, Folie 3',
+  },
+  {
+    kind: 'match',
+    id: 'gl-v-zuordnen-brennstoffe',
+    no: 219,
+    level: 2,
+    fact: 'match-fuel-formulas',
+    part: 'verbrennung',
+    title: 'Alkane und Alkohole',
+    prompt: 'Welche Formel gehört zu welchem Stoff?',
+    pairs: FUELS_2.map((f) => ({ id: f.id, left: f.name, right: fuelFormula(f) })),
+    traps: FUELS_2.filter(isAlkane).flatMap((f) => {
+      const shorter = FUELS_2.find((g) => isAlkane(g) && carbons(g) === carbons(f) - 1)
+      return shorter ? [{ pair: f.id, right: fuelFormula(shorter), misconception: 'chem-mis-gl-alkane-name' }] : []
+    }),
+    hint: 'Die Vorsilbe zählt die Kohlenstoffatome; die Endung -ol zeigt eine OH-Gruppe.',
+    explanation: {
+      detailed: String.raw`Meth- steht für 1, Eth- für 2, Prop- für 3 und But- für 4 Kohlenstoffatome. Ein Alkan hat $2n + 2$ Wasserstoffatome: $\ce{CH4}$, $\ce{C2H6}$, $\ce{C3H8}$, $\ce{C4H10}$. Ein Alkohol hat statt eines H-Atoms eine OH-Gruppe: Methanol $\ce{CH3OH}$, Ethanol $\ce{C2H5OH}$.`,
+      short: 'Vorsilbe zählt die C-Atome; Alkan mit 2n + 2 H, Alkohol mit OH statt eines H.',
+    },
+    cards: ['gleichungen-alkane'],
+    ref: 'Skript Stöchiometrie',
+  },
+]
+
 export const GLEICHUNGEN_BANK: QuestionBank = {
   course: 'chem-gleichungen',
-  questions: [...LEVEL_1, ...LEVEL_2, ...LEVEL_3, ...MULTI],
+  questions: [...LEVEL_1, ...LEVEL_2, ...LEVEL_3, ...MULTI, ...MATCH],
   retired: [],
 }

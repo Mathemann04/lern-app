@@ -1,4 +1,5 @@
-import type { Explanation, MultiChoice, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
+import type { Explanation, MatchQuestion, MultiChoice, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
+import { FORCE_NAME, forceOf, zmkById } from '../zmk.ts'
 
 // Wissensfragen zum Thema „Zwischenmolekulare Kräfte“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern: Stufe ·
 // 100 + laufende Nummer; nie neu vergeben. Begriffe wie in der Vorlesung: Van-der-Waals-Kräfte, Dipol-Dipol-Kräfte,
@@ -29,6 +30,63 @@ const multiAt = (level: QuestionLevel) => (spec: MultiSpec): MultiChoice => ({
   level,
   correct: spec.correct.map((text, i) => ({ id: `r${i + 1}`, text })),
 })
+
+// Zuordnen (N1b): die stärkste Kraft rechnet die Engine (forceOf in chem/zmk.ts) aus den Stoffdaten; nur Stoffe,
+// die die Rechnungen auch fragen (nicht H2S und HI, generators/zmk.ts)
+const zmkLabel = (id: string) => `$\\ce{${id}}$ (${zmkById(id).name})`
+const strongest = (id: string) => FORCE_NAME[forceOf(zmkById(id))]
+const forcePairs = (ids: readonly string[]) => ids.map((id) => ({ id, left: zmkLabel(id), right: strongest(id) }))
+const why = (detailed: string, short: string): Explanation => ({ detailed, short })
+
+const MATCH_FORCES_BASIC: MatchQuestion = {
+  kind: 'match',
+  id: 'zk-g-zuordnen-kraft',
+  no: 118,
+  level: 1,
+  fact: 'match-strongest-force',
+  part: 'kraefte',
+  title: 'Stärkste Kraft',
+  prompt: 'Welche Kraft ist zwischen den Molekülen jeweils am stärksten?',
+  pairs: forcePairs(['CH4', 'Cl2', 'HCl', 'HBr', 'CH3Cl', 'H2O', 'NH3', 'HF']),
+  traps: [
+    { pair: 'HCl', right: strongest('H2O'), misconception: 'chem-mis-zk-h-other' },
+    { pair: 'HBr', right: strongest('H2O'), misconception: 'chem-mis-zk-h-other' },
+    { pair: 'CH4', right: strongest('H2O'), misconception: 'chem-mis-zk-any-h' },
+    { pair: 'NH3', right: strongest('HCl'), misconception: 'chem-mis-zk-water-only' },
+  ],
+  hint: 'Prüfe erst, ob ein H-Atom direkt an N, O oder F sitzt. Wenn nicht: Ist das Molekül ein Dipol?',
+  explanation: why(
+    r`Sitzt ein H-Atom direkt an N, O oder F, bilden sich Wasserstoffbrücken: $\ce{H2O}$, $\ce{NH3}$, $\ce{HF}$. Sonst entscheidet, ob das Molekül ein Dipol ist: $\ce{HCl}$, $\ce{HBr}$ und $\ce{CH3Cl}$ sind polar, also Dipol-Dipol-Kräfte. $\ce{CH4}$ und $\ce{Cl2}$ sind unpolar; zwischen ihnen wirken nur Van-der-Waals-Kräfte.`,
+    'H an N, O oder F: Wasserstoffbrücken; sonst Dipol: Dipol-Dipol-Kräfte; unpolar: Van-der-Waals-Kräfte.',
+  ),
+  cards: ['zmk-kraefte', 'zmk-wasserstoffbruecken'],
+  ref: REF_UEBERSICHT,
+}
+
+const MATCH_FORCES_EXAM: MatchQuestion = {
+  kind: 'match',
+  id: 'zk-k-zuordnen-kraft',
+  no: 319,
+  level: 3,
+  fact: 'match-strongest-force-exam',
+  part: 'kraefte',
+  title: 'Stärkste Kraft',
+  prompt: 'Welche Kraft ist zwischen den Molekülen jeweils am stärksten?',
+  pairs: forcePairs(['CCl4', 'C8H18', 'I2', 'CHCl3', 'CH3OCH3', 'CH3COCH3', 'CH3OH', 'C3H7OH']),
+  traps: [
+    { pair: 'CCl4', right: strongest('CHCl3'), misconception: 'chem-mis-zk-dipole-nonpolar' },
+    { pair: 'CH3OCH3', right: strongest('CH3OH'), misconception: 'chem-mis-zk-any-h' },
+    { pair: 'CH3COCH3', right: strongest('CH3OH'), misconception: 'chem-mis-zk-any-h' },
+    { pair: 'CHCl3', right: strongest('CH3OH'), misconception: 'chem-mis-zk-any-h' },
+  ],
+  hint: 'Sitzt ein H-Atom direkt an N, O oder F? Wenn nicht: Ist das ganze Molekül ein Dipol, nicht nur eine seiner Bindungen?',
+  explanation: why(
+    r`In Methanol und Propan-1-ol sitzt ein H-Atom am Sauerstoff: Wasserstoffbrücken. In Dimethylether und Aceton sitzen alle H-Atome am Kohlenstoff; die Moleküle sind aber Dipole, also Dipol-Dipol-Kräfte, ebenso bei $\ce{CHCl3}$. $\ce{CCl4}$ hat zwar polare Bindungen, ist als Tetraeder aber unpolar; wie bei Octan und Iod wirken nur Van-der-Waals-Kräfte.`,
+    'H an O: Wasserstoffbrücken; Dipol ohne solches H: Dipol-Dipol; unpolares Molekül: Van der Waals.',
+  ),
+  cards: ['zmk-kraefte', 'zmk-wasserstoffbruecken'],
+  ref: REF_UEBERSICHT,
+}
 
 export const ZMK_BANK: QuestionBank = {
   course: 'chem-zmk',
@@ -1336,6 +1394,9 @@ export const ZMK_BANK: QuestionBank = {
       cards: ['zmk-siedepunkte', 'zmk-wasserstoffbruecken'],
       ref: REF_GROESSE,
     }),
+    // ---- Zuordnen (N1b)
+    MATCH_FORCES_BASIC,
+    MATCH_FORCES_EXAM,
   ],
   // 301 glich in der Form Klausuraufgabe 3c, 309 einer Übungsaufgabe (Prüfung 11.11.2026)
   retired: [301, 309],

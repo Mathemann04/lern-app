@@ -1,4 +1,5 @@
-import type { Explanation, MultiChoice, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
+import type { Explanation, MatchQuestion, MultiChoice, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
+import { type Molecule, type Shape, angleOf, moleculeById, vseprOf } from '../molecules.ts'
 
 // Wissensfragen zum Thema „Moleküle“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern: Stufe · 100 + laufende
 // Nummer; nie neu vergeben, gelöschte kommen in retired. Begriffe wie in der Vorlesung: Elektronenpaarbindung,
@@ -51,6 +52,74 @@ const multiAt = (level: QuestionLevel) => (spec: MultiSpec): MultiChoice => ({
   level,
   correct: spec.correct.map((text, i) => ({ id: `r${i + 1}`, text })),
 })
+
+// Zuordnen (N1b): Gestalt und Bindungswinkel rechnet die Engine (chem/molecules.ts) aus den Moleküldaten
+const mol = (id: string): Molecule => {
+  const found = moleculeById(id)
+  if (!found) throw new Error(`Molekül ${id} fehlt`)
+  return found
+}
+const molLabel = (id: string) => `$\\ce{${id}}$ (${mol(id).name})`
+const shapeName = (id: string): Shape => vseprOf(mol(id)).shape
+const angleName = (id: string): string => {
+  const { x, e } = vseprOf(mol(id))
+  const angle = angleOf(x, e)
+  if (!angle) throw new Error(`Molekül ${id} hat keinen einfachen Bindungswinkel`)
+  return angle
+}
+// Gestalt: Moleküle der Grundlagen mit Zentralatom
+const SHAPE_IDS = ['H2O', 'H2S', 'NH3', 'PH3', 'CH4', 'CCl4', 'CO2']
+// Winkel: nur gleiche Partner mit gleicher Bindung (sonst weicht der Winkel vom idealen ab, wie in generators/molekuele.ts)
+const ANGLE_IDS = ['CO2', 'CS2', 'BF3', 'BCl3', 'CH4', 'CF4', 'NH3', 'H2O']
+
+const MATCH_SHAPES: MatchQuestion = {
+  kind: 'match',
+  id: 'mo-g-zuordnen-gestalt',
+  no: 118,
+  level: 1,
+  fact: 'match-shape',
+  part: 'gestalt',
+  title: 'Gestalt',
+  prompt: 'Welche Gestalt hat welches Molekül?',
+  pairs: SHAPE_IDS.map((id) => ({ id, left: molLabel(id), right: shapeName(id) })),
+  traps: [
+    { pair: 'H2O', right: shapeName('CO2'), misconception: 'chem-mis-mo-lone-small' },
+    { pair: 'NH3', right: shapeName('CH4'), misconception: 'chem-mis-mo-shape-arrangement' },
+    { pair: 'H2S', right: shapeName('CH4'), misconception: 'chem-mis-mo-shape-arrangement' },
+    { pair: 'CO2', right: shapeName('H2O'), misconception: 'chem-mis-mo-shape-formula' },
+  ],
+  hint: 'Zähle am Zentralatom die Bindungspartner und die freien Paare. Die Gestalt beschreibt nur, wo die Atome sitzen.',
+  explanation: why(
+    r`Alle Elektronenpaare um das Zentralatom gehen so weit wie möglich auseinander, die Gestalt beschreibt aber nur die Lage der Atome. $\ce{CO2}$: zwei Partner, keine freien Paare am C, linear. $\ce{CH4}$ und $\ce{CCl4}$: vier Partner, tetraedrisch. $\ce{NH3}$ und $\ce{PH3}$: drei Partner und ein freies Paar, trigonal-pyramidal. $\ce{H2O}$ und $\ce{H2S}$: zwei Partner und zwei freie Paare, gewinkelt.`,
+    'Partner und freie Paare am Zentralatom zählen; die Gestalt zeigt nur die Atome.',
+  ),
+  cards: ['mol-gestalt', 'mol-freie-paare'],
+  ref: REF_VSEPR,
+}
+
+const MATCH_ANGLES: MatchQuestion = {
+  kind: 'match',
+  id: 'mo-v-zuordnen-winkel',
+  no: 221,
+  level: 2,
+  fact: 'match-angle',
+  part: 'gestalt',
+  title: 'Bindungswinkel',
+  prompt: 'Welcher Bindungswinkel gehört zu welchem Molekül?',
+  pairs: ANGLE_IDS.map((id) => ({ id, left: molLabel(id), right: angleName(id) })),
+  traps: [
+    { pair: 'NH3', right: angleName('CH4'), misconception: 'chem-mis-mo-lone-small' },
+    { pair: 'H2O', right: angleName('CO2'), misconception: 'chem-mis-mo-shape-formula' },
+    { pair: 'CO2', right: angleName('CH4'), misconception: 'chem-mis-mo-multiple-domains' },
+  ],
+  hint: 'Wie viele Richtungen gibt es um das Zentralatom, Bindungen und freie Paare zusammen? Und brauchen freie Paare mehr oder weniger Platz?',
+  explanation: why(
+    r`Zwei Richtungen ergeben $180^\circ$ ($\ce{CO2}$, $\ce{CS2}$; eine Doppelbindung zählt als eine Richtung), drei ergeben $120^\circ$ ($\ce{BF3}$, $\ce{BCl3}$), vier ergeben $109{,}5^\circ$ ($\ce{CH4}$, $\ce{CF4}$). Bei $\ce{NH3}$ und $\ce{H2O}$ sind es auch vier Richtungen, aber freie Paare brauchen mehr Platz und drücken die Bindungen zusammen: Der Winkel ist kleiner als $109{,}5^\circ$.`,
+    'Zahl der Richtungen gibt den Winkel; freie Paare machen ihn kleiner.',
+  ),
+  cards: ['mol-gestalt', 'mol-freie-paare'],
+  ref: REF_VSEPR,
+}
 
 export const MOLEKUELE_BANK: QuestionBank = {
   course: 'chem-molekuele',
@@ -1441,6 +1510,9 @@ export const MOLEKUELE_BANK: QuestionBank = {
       cards: ['mol-dipol', 'mol-en'],
       ref: REF_GESAMTDIPOL,
     }),
+    // ---- Zuordnen (N1b)
+    MATCH_SHAPES,
+    MATCH_ANGLES,
   ],
   retired: [],
 }

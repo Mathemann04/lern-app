@@ -1,5 +1,6 @@
 import type { MatchQuestion, MatchTrap, MultiChoice, QuestionBank, QuestionLevel } from '../../quiz/types.ts'
-import { ANIONS, type Ion, ionCe } from '../ions.ts'
+import { elementBySymbol } from '../elements.ts'
+import { ANIONS, CATIONS, type Ion, ionCe } from '../ions.ts'
 
 // Wissensfragen zum Thema „Ionenbindung und Salze“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern: Stufe ·
 // 100 + laufende Nummer; nie neu vergeben, gelöschte kommen in retired. Salze heißen „ionisch“, wo es zählt; keine
@@ -58,6 +59,37 @@ const MOLECULE_ION_NAMES: MatchQuestion = {
   },
   cards: ['ionen-molekuelionen'],
   ref: REF_NAMEN,
+}
+
+// Zuordnen (N1b): Element und Ladung seines Ions, beides aus der Ionentabelle (chem/ions.ts), Namen der Elemente aus
+// chem/elements.ts; nur Ionen der Grundlagen
+const ELEMENT_IONS = [...['Na', 'K', 'Mg', 'Ca', 'Al'].map((id) => CATIONS.find((c) => c.id === id)!), ...['Cl', 'O', 'N'].map((id) => ANIONS.find((a) => a.id === id)!)]
+const chargeText = (a: Ion) => `$${a.charge > 0 ? '+' : '-'}${Math.abs(a.charge)}$`
+const ionCharge = (id: string) => chargeText(ELEMENT_IONS.find((a) => a.id === id)!)
+const ION_CHARGES: MatchQuestion = {
+  kind: 'match',
+  id: 'io-g-zuordnen-ladung',
+  no: 119,
+  level: 1,
+  fact: 'match-ion-charge',
+  part: 'formel',
+  title: 'Ladung der Ionen',
+  prompt: 'Welche Ladung hat das Ion, das das Element in einem Salz bildet?',
+  pairs: ELEMENT_IONS.map((a) => ({ id: a.id, left: `${elementBySymbol(a.formula)!.name} ($\\ce{${a.formula}}$)`, right: chargeText(a) })),
+  traps: [
+    { pair: 'Cl', right: ionCharge('Na'), misconception: 'chem-mis-io-anion-positive' },
+    { pair: 'O', right: ionCharge('Mg'), misconception: 'chem-mis-io-anion-positive' },
+    { pair: 'Mg', right: ionCharge('Na'), misconception: 'chem-mis-io-charge-always-one' },
+    { pair: 'O', right: ionCharge('Cl'), misconception: 'chem-mis-io-charge-always-one' },
+    { pair: 'Na', right: ionCharge('Cl'), misconception: 'chem-mis-io-electron-sign' },
+  ],
+  hint: 'Wie viele Elektronen gibt das Atom ab oder nimmt es auf, bis es die Edelgaskonfiguration erreicht? Metalle geben ab, Nichtmetalle nehmen auf.',
+  explanation: {
+    detailed: String.raw`Metalle geben ihre Valenzelektronen ab und werden positiv: Natrium und Kalium (I. Hauptgruppe) $+1$, Magnesium und Calcium (II.) $+2$, Aluminium (III.) $+3$. Nichtmetalle nehmen so viele auf, wie zum Oktett fehlen, und werden negativ: Chlor (VII.) $-1$, Sauerstoff (VI.) $-2$, Stickstoff (V.) $-3$.`,
+    short: 'Metalle geben ihre Valenzelektronen ab (positiv), Nichtmetalle nehmen bis zum Oktett auf (negativ).',
+  },
+  cards: ['ionen-bindung', 'ionen-formel'],
+  ref: REF_FORMEL,
 }
 
 export const IONEN_BANK: QuestionBank = {
@@ -1571,6 +1603,7 @@ export const IONEN_BANK: QuestionBank = {
     }),
     // ---- Zuordnen (N1b)
     MOLECULE_ION_NAMES,
+    ION_CHARGES,
   ],
   retired: [],
 }

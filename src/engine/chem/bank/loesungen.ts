@@ -1,4 +1,4 @@
-import type { MultiChoice, QuestionBank, QuestionLevel } from '../../quiz/types.ts'
+import type { Explanation, MultiChoice, QuestionBank, QuestionLevel } from '../../quiz/types.ts'
 
 // Wissensfragen zum Thema „Gase und Lösungen“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern: Stufe · 100 +
 // laufende Nummer; nie neu vergeben, gelöschte kommen in retired. Zahlen nachgerechnet (molare Massen wie
@@ -10,6 +10,8 @@ const REF_C = 'Skript Stöchiometrie, Folie 20'
 const REF_MASS = 'Skript Stöchiometrie, Folie 22'
 const REF_PPM = 'Skript Stöchiometrie, Folie 23'
 const REF_VOL = 'Skript Stöchiometrie, Folie 24'
+
+const why = (detailed: string, short: string): Explanation => ({ detailed, short })
 
 // „Wähle alle richtigen“ (N1): richtige Aussagen r1, r2, …; jede Aussage ein ganzer Satz
 type MultiSpec = Omit<MultiChoice, 'kind' | 'level' | 'correct'> & { correct: readonly string[] }
@@ -1731,6 +1733,68 @@ export const LOESUNGEN_BANK: QuestionBank = {
       cards: ['loesungen-molvolumen', 'loesungen-gasgesetz'],
       ref: REF_GAS,
     }),
+    // ---- Zuordnen (N1b)
+    {
+      kind: 'match',
+      id: 'lo-v-zuordnen-gehalt',
+      no: 219,
+      level: 2,
+      fact: 'match-content-measures',
+      part: 'anteile',
+      title: 'Gehaltsangaben',
+      prompt: 'Was bedeutet welche Angabe?',
+      pairs: [
+        { id: 'c', left: 'Stoffmengenkonzentration $c$', right: 'Mol gelöster Stoff je Liter Lösung' },
+        { id: 'beta', left: String.raw`Massenkonzentration $\beta$`, right: 'Gramm gelöster Stoff je Liter Lösung' },
+        { id: 'w', left: 'Massenanteil $w$', right: 'Masse des Stoffs durch Masse der Lösung' },
+        { id: 'phi', left: String.raw`Volumenanteil $\varphi$`, right: 'Volumen des Stoffs durch Volumen der Mischung' },
+        { id: 'ppm', left: String.raw`$1\,\mathrm{ppm}$ bei Massen`, right: String.raw`$1\,\mathrm{mg}$ je $\mathrm{kg}$` },
+        { id: 'vm', left: 'molares Volumen $V_m$', right: 'Liter je Mol Gas' },
+      ],
+      traps: [
+        { pair: 'c', right: 'Gramm gelöster Stoff je Liter Lösung', misconception: 'chem-mis-lo-c-mixup' },
+        { pair: 'beta', right: 'Mol gelöster Stoff je Liter Lösung', misconception: 'chem-mis-lo-c-mixup' },
+        { pair: 'w', right: 'Volumen des Stoffs durch Volumen der Mischung', misconception: 'chem-mis-lo-vol-mass' },
+        { pair: 'phi', right: 'Masse des Stoffs durch Masse der Lösung', misconception: 'chem-mis-lo-vol-mass' },
+      ],
+      hint: 'Achte auf das Zeichen: zählt die Angabe Teilchen, wiegt sie Masse, oder misst sie Volumen? Und worauf bezieht sie sich?',
+      explanation: why(
+        String.raw`Die Stoffmengenkonzentration zählt Mol je Liter Lösung, die Massenkonzentration Gramm je Liter Lösung. Der Massenanteil teilt die Masse des Stoffs durch die Masse der ganzen Lösung, der Volumenanteil das Volumen des Stoffs durch das Volumen der Mischung. $1\,\mathrm{ppm}$ ist ein Teil auf eine Million, bei Massen $1\,\mathrm{mg}$ je $\mathrm{kg}$. Das molare Volumen sagt, wie viele Liter ein Mol Gas einnimmt.`,
+        'Mol je Liter, Gramm je Liter, Masse durch Masse, Volumen durch Volumen, mg je kg, Liter je Mol.',
+      ),
+      cards: ['loesungen-massenanteil', 'loesungen-massenkonzentration', 'loesungen-volumenanteil', 'loesungen-ppm'],
+      ref: REF_MASS,
+    },
+    {
+      kind: 'match',
+      id: 'lo-k-zuordnen-gasgesetz',
+      no: 320,
+      level: 3,
+      fact: 'match-gas-changes',
+      part: 'gase',
+      title: 'Gasgesetz',
+      prompt: 'Ein ideales Gas wird verändert; die Stoffmenge bleibt gleich, wenn nichts anderes dasteht. Was folgt jeweils?',
+      pairs: [
+        { id: 'v-halb', left: 'Volumen halbieren, Temperatur bleibt', right: 'Druck verdoppelt sich' },
+        { id: 'v-doppelt', left: 'Volumen verdoppeln, Temperatur bleibt', right: 'Druck halbiert sich' },
+        { id: 't-doppelt-p', left: 'Temperatur in Kelvin verdoppeln, Druck bleibt', right: 'Volumen verdoppelt sich' },
+        { id: 't-doppelt-v', left: 'Temperatur in Kelvin verdoppeln, Volumen bleibt', right: 'Druck verdoppelt sich' },
+        { id: 't-halb-p', left: 'Temperatur in Kelvin halbieren, Druck bleibt', right: 'Volumen halbiert sich' },
+        { id: 'n-doppelt', left: 'Stoffmenge verdoppeln, Druck und Temperatur bleiben', right: 'Volumen verdoppelt sich' },
+      ],
+      traps: [
+        { pair: 'v-halb', right: 'Druck halbiert sich', misconception: 'chem-mis-lo-gas-direction' },
+        { pair: 'v-doppelt', right: 'Druck verdoppelt sich', misconception: 'chem-mis-lo-gas-direction' },
+        { pair: 't-doppelt-p', right: 'Volumen halbiert sich', misconception: 'chem-mis-lo-gas-direction' },
+      ],
+      hint: String.raw`Stelle $p \cdot V = n \cdot R \cdot T$ so um, dass die gesuchte Größe allein steht, und halte die übrigen fest.`,
+      explanation: why(
+        String.raw`Aus $p \cdot V = n \cdot R \cdot T$ folgt: Bei gleicher Temperatur und Stoffmenge ist $p \cdot V$ fest, halbes Volumen heißt doppelter Druck. Bei gleichem Druck ist $V$ proportional zu $T$ in Kelvin und zu $n$, bei gleichem Volumen ist $p$ proportional zu $T$.`,
+        String.raw`$p \cdot V = n \cdot R \cdot T$: $p$ und $V$ umgekehrt, $V$ und $p$ wachsen mit $T$ in Kelvin.`,
+      ),
+      cards: ['loesungen-gasgesetz'],
+      ref: REF_GAS,
+    },
   ],
   retired: [],
 }
