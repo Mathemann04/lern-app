@@ -25,7 +25,7 @@ import { type ChemCalc, type ChemGenerator, type WrongValue, stepChoices, tolera
 // - freie Enthalpie (Unterthema „freie-enthalpie", ab Vertiefung): T in K, ΔS in kJ/K, ΔG = ΔH − T · ΔS, freiwillig?
 // - freiwillig bei welcher Temperatur? (ab Vertiefung): aus den Vorzeichen von ΔH und ΔS
 // - Grenztemperatur (Klausurniveau): ΔS aus der Tabelle, T = ΔH/ΔS, oberhalb oder unterhalb
-// - K aus ΔG⁰ (Klausurniveau): T in K, ln K, K
+// - K_GG aus ΔG⁰ (Klausurniveau): T in K, ln K_GG, K_GG
 
 const CARD = {
   bildung: 'en-bildungsenthalpie',
@@ -592,7 +592,7 @@ function limitTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCa
 
 const hasCoefAny = (x: ThermoReaction) => [...x.left, ...x.right].some(([c]) => c > 1)
 
-// --- K aus ΔG⁰ ---
+// --- K_GG aus ΔG⁰ ---
 
 // Kommazahl mit 7 gültigen Ziffern als exakter Bruch (Gleitkommarechnung für ln und e)
 function ratOf(x: number): Rational {
@@ -633,42 +633,42 @@ function kTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc |
   const kChoices = stepChoices(rng, { key: sig(kValue), content: math(sig(kValue)) }, kWrong, focus)
   if (lnChoices.length === 0 || kChoices.length === 0) return null
   const dgLatex = r`\Delta G^{0} = ${dec(dg)}\,\mathrm{kJ/mol}`
-  const lnLine = r`\ln K = -\frac{\Delta G^{0}}{R \cdot T} = -\frac{${dec(ratMul(dg, rat(1000)))}\,\mathrm{J/mol}}{8{,}314\,\mathrm{J/(mol \cdot K)} \cdot ${dec(t)}\,\mathrm{K}} \approx ${sig(lnRight)}`
-  const kLine = r`K = e^{${sig(lnRight)}} \approx ${sig(kValue)}`
+  const lnLine = r`\ln K_{\mathrm{GG}} = -\frac{\Delta G^{0}}{R \cdot T} = -\frac{${dec(ratMul(dg, rat(1000)))}\,\mathrm{J/mol}}{8{,}314\,\mathrm{J/(mol \cdot K)} \cdot ${dec(t)}\,\mathrm{K}} \approx ${sig(lnRight)}`
+  const kLine = r`K_{\mathrm{GG}} = e^{${sig(lnRight)}} \approx ${sig(kValue)}`
   const favoured = ratSign(dg) < 0
   return {
     task: {
       ref,
       instruction: 'Berechne die Gleichgewichtskonstante aus der freien Standardenthalpie',
       functionLatex: r`${dgLatex} \qquad \vartheta = ${theta}\,^{\circ}\mathrm{C}`,
-      note: 'Rechne mit $\\Delta G^{0} = -R \\cdot T \\cdot \\ln K$ und $R = 8{,}314\\,\\mathrm{J/(mol \\cdot K)}$. $K$ ohne Einheit.',
+      note: 'Rechne mit $\\Delta G^{0} = -R \\cdot T \\cdot \\ln K_{\\mathrm{GG}}$ und $R = 8{,}314\\,\\mathrm{J/(mol \\cdot K)}$. $K_{\\mathrm{GG}}$ ohne Einheit.',
       steps: [
         kelvinStep(theta, rng, focus),
         {
           id: 'ln',
-          title: 'ln K',
-          question: 'Wie groß ist $\\ln K$?',
+          title: '$\\ln K_{\\mathrm{GG}}$',
+          question: 'Wie groß ist $\\ln K_{\\mathrm{GG}}$?',
           choices: lnChoices,
           numeric: tolerantNumeric(lnRight, lnWrongValues, ''),
-          hint: 'Stelle nach $\\ln K$ um; $\\Delta G^{0}$ muss dafür in J/mol stehen, weil $R$ in J angegeben ist.',
-          explanation: { detailed: `$${lnLine}$.`, short: math(r`\ln K \approx ${sig(lnRight)}`) },
+          hint: 'Stelle nach $\\ln K_{\\mathrm{GG}}$ um; $\\Delta G^{0}$ muss dafür in J/mol stehen, weil $R$ in J angegeben ist.',
+          explanation: { detailed: `$${lnLine}$.`, short: math(r`\ln K_{\mathrm{GG}} \approx ${sig(lnRight)}`) },
           established: lnLine,
           cards: [CARD.k],
         },
         {
           id: 'k',
-          title: 'K',
-          question: 'Wie groß ist $K$?',
+          title: '$K_{\\mathrm{GG}}$',
+          question: 'Wie groß ist $K_{\\mathrm{GG}}$?',
           choices: kChoices,
           numeric: { ...tolerantNumeric(kValue, kWrong, ''), also: [ratOf(Math.exp(lnShown))] },
           hint: 'Welche Funktion macht den natürlichen Logarithmus rückgängig?',
-          explanation: { detailed: `$${kLine}$. ${favoured ? 'Weil $\\Delta G^{0} < 0$ ist, ist $K > 1$: Die Produkte überwiegen.' : 'Weil $\\Delta G^{0} > 0$ ist, ist $K < 1$: Die Edukte überwiegen.'}`, short: math(r`K \approx ${sig(kValue)}`) },
+          explanation: { detailed: `$${kLine}$. ${favoured ? 'Weil $\\Delta G^{0} < 0$ ist, ist $K_{\\mathrm{GG}} > 1$: Das Gleichgewicht liegt eher auf der Seite der Produkte.' : 'Weil $\\Delta G^{0} > 0$ ist, ist $K_{\\mathrm{GG}} < 1$: Das Gleichgewicht liegt eher auf der Seite der Edukte.'}`, short: math(r`K_{\mathrm{GG}} \approx ${sig(kValue)}`) },
           established: kLine,
           cards: [CARD.k],
         },
       ],
       cards: [CARD.k],
-      resultLatex: r`K \approx ${sig(kValue)}`,
+      resultLatex: r`K_{\mathrm{GG}} \approx ${sig(kValue)}`,
     },
     form: `dg-k:${level}:${favoured ? 'neg' : 'pos'}`,
     substance: `dg${dgText}`,

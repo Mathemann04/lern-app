@@ -5,8 +5,9 @@ import { atomCounts, parseFormula } from '../formula.ts'
 import { GENERATED_MIN } from '../../quiz/numbers.ts'
 import type { Level } from '../../tasks/taskNumber.ts'
 import { generatedCalc } from './index.ts'
-import { expressionStep, kValueTask, leChatelierTask, rateTask, yieldTask } from './mwg.ts'
+import { POSITION_NOTES, expressionStep, kValueTask, leChatelierTask, rateTask, yieldTask } from './mwg.ts'
 import type { ChemCalc } from './shared.ts'
+import { MWG_BANK } from '../bank/mwg.ts'
 
 // Rechnungen „Chemisches Gleichgewicht" (S7a): Daten gegen eine zweite Liste, Richtung nach Le Chatelier auf eigenem Weg,
 // K auf zweitem Weg, Katalogbeispiele der Rechenfehler
@@ -140,6 +141,26 @@ describe('Gleichgewichtskonstante auf zweitem Weg', () => {
     expect(values).toBeGreaterThan(30)
     expect(rates).toBeGreaterThan(20)
   })
+
+  // K_GG beschreibt die Lage (Skript Gleichgewicht, Folie 5): eine Seite nur bei K ≥ 10 bzw. K ≤ 0,1, bei K = 1 neutral
+  it('Zusatz zum Ergebnis nennt die Lage passend zu K, auf eigenem Weg gerechnet', () => {
+    const seen = { products: 0, educts: 0, balanced: 0, none: 0 }
+    for (const level of [2, 3] as const) {
+      for (let i = 0; i < 3000; i++) {
+        const calc = kValueTask(level, createRng(`lage${i}`), ref(level, i))
+        if (!calc) continue
+        const given = calc.task.functionLatex ?? ''
+        const e = equilibriumById(calc.substance)!
+        const c = (x: EqSpecies) => Number(new RegExp(String.raw`c\(\\ce\{${x.ce}\}\) = ([\d{},]+)\\,`).exec(given)![1].replace('{,}', '.'))
+        const k = e.right.reduce((p, x) => p * c(x) ** x.coef, 1) / e.left.reduce((p, x) => p * c(x) ** x.coef, 1)
+        const kind = k >= 10 * (1 - 1e-12) ? 'products' : k <= 0.1 * (1 + 1e-12) ? 'educts' : Math.abs(k - 1) < 1e-12 ? 'balanced' : 'none'
+        seen[kind]++
+        expect(calc.task.resultNote, given).toBe(kind === 'none' ? undefined : POSITION_NOTES[kind])
+        expect(calc.task.resultNote ?? '').not.toMatch(/überwieg/)
+      }
+    }
+    for (const kind of ['products', 'educts', 'balanced', 'none'] as const) expect(seen[kind], kind).toBeGreaterThan(5)
+  })
 })
 
 describe('Rechenfehler Chemisches Gleichgewicht: Katalogbeispiele', () => {
@@ -190,5 +211,11 @@ describe('Rechenfehler Chemisches Gleichgewicht: Katalogbeispiele', () => {
   it('K aus Konzentrationen: Kehrwert bei vertauschtem Bruch', () => {
     const calc = findTask((i) => kValueTask(2, createRng(`w${i}`), ref(2, i), 'chem-mwg-swapped'), (c) => wrongIn(c, 'wert', 'chem-mwg-swapped') !== undefined)
     expect(numberOf(wrongIn(calc, 'wert', 'chem-mwg-swapped')!) * numberOf(rightIn(calc, 'wert'))).toBeCloseTo(1, 1)
+  })
+})
+
+describe('Thema Gleichgewicht: Fundstellen', () => {
+  it('jede Frage nennt das Skript Gleichgewicht mit einer Folie zwischen 2 und 7', () => {
+    for (const q of MWG_BANK.questions) expect(q.ref, q.id).toMatch(/^Skript Gleichgewicht, Folie [2-7]$/)
   })
 })

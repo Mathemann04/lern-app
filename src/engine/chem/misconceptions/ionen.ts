@@ -85,7 +85,7 @@ export const IONEN_MISCONCEPTIONS: readonly MisconceptionName[] = [
   },
   {
     id: 'chem-mis-io-numeral-always',
-    name: "Römische Ziffer bei jedem Metall",
+    name: "Römische Ziffer bei jedem Metall für nötig gehalten",
     wrongText: "Jedes Metall braucht im Namen eines Salzes eine römische Ziffer, auch Natrium oder Magnesium.",
   },
   {
@@ -180,7 +180,22 @@ export const IONEN_MISCONCEPTIONS: readonly MisconceptionName[] = [
     name: "Kristallin nach dem Aussehen beurteilt",
     wrongText: "Ob ein Stoff kristallin ist, erkennt man daran, dass er glänzt oder durchsichtig ist.",
   },
+  {
+    id: 'chem-mis-io-all-soluble',
+    name: "Alle Salze für gut löslich gehalten",
+    wrongText: "Jedes Salz löst sich gut in Wasser, weil Wasser jedes Ionengitter auseinandernimmt.",
+  },
+  {
+    id: 'chem-mis-io-charge-soluble',
+    name: "Höhere Ladung, bessere Löslichkeit",
+    wrongText: "Je höher die Ladungen der Ionen, desto besser löst sich ein Salz, weil die Ionen das Wasser stärker anziehen.",
+  },
   // Ionengitter
+  {
+    id: 'chem-mis-io-atom-crystal-weak',
+    name: "Atomkristall für weich gehalten",
+    wrongText: "In einem Atomkristall halten die Atome nur locker zusammen; solche Stoffe sind weich und schmelzen leicht.",
+  },
   {
     id: 'chem-mis-io-cell-is-unit',
     name: "Elementarzelle gleich Formeleinheit",

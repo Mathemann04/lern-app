@@ -250,7 +250,6 @@ export const IONEN_BANK: QuestionBank = {
       correct: { id: 'r', text: "Calciumbromid" },
       wrong: [
         { id: 'f1', text: "Calciumdibromid", misconception: 'chem-mis-io-greek-prefix' },
-        { id: 'f2', text: "Calcium(II)-bromid", misconception: 'chem-mis-io-numeral-always' },
         { id: 'f3', text: "Bromidcalcium", misconception: 'chem-mis-io-name-order' },
         { id: 'f4', text: "Calciumbromat", misconception: 'chem-mis-io-ending-mixup' },
         { id: 'f5', text: "Calciumbrom", misconception: 'chem-mis-io-ending-mixup', why: {
@@ -260,7 +259,7 @@ export const IONEN_BANK: QuestionBank = {
       ],
       hint: "Erst das Kation, dann das Anion. Welche Endung tragen einatomige Anionen?",
       explanation: {
-        detailed: String.raw`Zuerst kommt der Name des Metalls, Calcium. Das einatomige Anion $\ce{Br-}$ heißt Bromid, mit der Endung -id. Calcium bildet nur das Ion $\ce{Ca^2+}$; der Name braucht deshalb keine römische Ziffer, und Zahlwörter wie di- verwendet man bei Salzen nicht: Calciumbromid.`,
+        detailed: String.raw`Zuerst kommt der Name des Metalls, Calcium. Das einatomige Anion $\ce{Br-}$ heißt Bromid, mit der Endung -id. Calcium bildet nur das Ion $\ce{Ca^2+}$; eine römische Ziffer ist deshalb nicht nötig und wird üblicherweise weggelassen, und Zahlwörter wie di- verwendet man bei Salzen nicht: Calciumbromid.`,
         short: "Kation, dann Anion auf -id: Calciumbromid.",
       },
       cards: ['ionen-namen'],
@@ -620,7 +619,7 @@ export const IONEN_BANK: QuestionBank = {
       fact: 'ziffer-wann',
       part: 'formel',
       title: "Wann eine Ziffer?",
-      prompt: "Bei welchem dieser ionischen Salze gehört eine römische Ziffer in den Namen?",
+      prompt: "Bei welchem dieser ionischen Salze braucht der Name eine römische Ziffer, damit eindeutig ist, welches Salz gemeint ist?",
       correct: { id: 'r', text: String.raw`$\ce{CuBr2}$` },
       wrong: [
         { id: 'f1', text: String.raw`$\ce{NaCl}$`, misconception: 'chem-mis-io-numeral-always' },
@@ -630,14 +629,14 @@ export const IONEN_BANK: QuestionBank = {
           short: "Aluminium bildet nur ein Ion; die Indizes ändern daran nichts.",
         } },
         { id: 'f4', text: String.raw`$\ce{MgO}$`, misconception: 'chem-mis-io-numeral-always', why: {
-          detailed: "Magnesium steht in der II. Hauptgruppe und bildet nur eine Sorte Ion. Wo die Ladung eindeutig ist, steht keine Ziffer im Namen.",
-          short: "Magnesium bildet nur ein Ion; eine Ziffer ist überflüssig.",
+          detailed: "Magnesium steht in der II. Hauptgruppe und bildet nur eine Sorte Ion. Der Name Magnesiumoxid ist also schon ohne Ziffer eindeutig; bei eindeutiger Ladung lässt man sie weg.",
+          short: "Magnesium bildet nur ein Ion; der Name ist auch ohne Ziffer eindeutig.",
         } },
       ],
       hint: "Welches dieser Metalle kann Ionen mit verschiedenen Ladungen bilden?",
       explanation: {
-        detailed: String.raw`Kupfer bildet $\ce{Cu+}$ und $\ce{Cu^2+}$; deshalb muss der Name sagen, welches vorliegt: $\ce{CuBr2}$ heißt Kupfer(II)-bromid. Natrium, Calcium, Aluminium und Magnesium bilden je nur ein Ion ($\ce{Na+}$, $\ce{Ca^2+}$, $\ce{Al^3+}$, $\ce{Mg^2+}$); bei ihnen steht keine Ziffer, auch wenn in der Formel ein Index auftaucht.`,
-        short: "Nur Metalle mit mehreren möglichen Ladungen wie Kupfer brauchen die Ziffer.",
+        detailed: String.raw`Kupfer bildet $\ce{Cu+}$ und $\ce{Cu^2+}$; deshalb muss der Name sagen, welches vorliegt: $\ce{CuBr2}$ heißt Kupfer(II)-bromid. Natrium, Calcium, Aluminium und Magnesium bilden je nur ein Ion ($\ce{Na+}$, $\ce{Ca^2+}$, $\ce{Al^3+}$, $\ce{Mg^2+}$); ihre Namen sind auch ohne Ziffer eindeutig, auch wenn in der Formel ein Index auftaucht. Bei ihnen lässt man die Ziffer üblicherweise weg; falsch wäre sie nicht, nur überflüssig.`,
+        short: "Nötig ist die Ziffer nur bei Metallen mit mehreren möglichen Ladungen wie Kupfer.",
       },
       cards: ['ionen-namen'],
       ref: REF_NAMEN,

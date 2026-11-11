@@ -71,7 +71,7 @@ export const IONEN_CARDS: readonly Card[] = [
     rules: [],
     formulas: [],
     memo: 'Zuerst kommt das Kation mit dem Namen des Metalls, dann das Anion. Einatomige Anionen enden auf -id: Chlorid, Oxid, Sulfid, Nitrid. Bildet ein Metall Ionen mit verschiedenen Ladungen, steht die Ladung als römische Ziffer in Klammern dahinter.',
-    note: 'Eisen, Kupfer, Chrom und Mangan brauchen die Ziffer, Natrium, Magnesium oder Aluminium nicht. Mit Ziffer steht ein Bindestrich vor dem Anion: Eisen(III)-chlorid. Die Ziffer ist die Ladung, nicht die Anzahl in der Formel.',
+    note: String.raw`Eisen, Kupfer, Chrom und Mangan brauchen die Ziffer. Natrium, Magnesium oder Aluminium bilden nur ein Ion, ebenso die Nebengruppenmetalle Zink ($\ce{Zn^2+}$) und Silber ($\ce{Ag+}$); ihre Namen sind ohne Ziffer eindeutig, deshalb lässt man sie dort weg (Zinkchlorid, Silbernitrat). Mit Ziffer steht ein Bindestrich vor dem Anion: Eisen(III)-chlorid. Die Ziffer ist die Ladung, nicht die Anzahl in der Formel.`,
     when: 'Wenn ein Salz benannt oder seine Formel aus dem Namen gelesen werden soll.',
     examples: [
       {
@@ -130,7 +130,7 @@ export const IONEN_CARDS: readonly Card[] = [
     rules: [],
     formulas: [],
     memo: 'In einem Salzkristall sind Kationen und Anionen regelmäßig in allen drei Raumrichtungen angeordnet. Das kleinste Stück, aus dem sich das ganze Gitter aufbauen lässt, ist die Elementarzelle. Die Koordinationszahl sagt, wie viele nächste Nachbarn mit entgegengesetzter Ladung ein Ion hat.',
-    note: 'Natriumchlorid: Koordinationszahl 6, die Nachbarn bilden ein Oktaeder. Caesiumchlorid: 8, ein Würfel. Zinkblende (ZnS): 4, ein Tetraeder. Größere Kationen haben Platz für mehr Nachbarn.',
+    note: 'Natriumchlorid: Koordinationszahl 6, die Nachbarn bilden ein Oktaeder. Caesiumchlorid: 8, ein Würfel. Zinkblende (ZnS): 4, ein Tetraeder. Größere Kationen haben Platz für mehr Nachbarn. Auch Atome bilden Gitter: Im Atomkristall (etwa Diamant) verbinden starke Atombindungen alle Bausteine; solche Stoffe schmelzen sehr hoch und sind sehr hart.',
     figures: ['gitter-nacl', 'gitter-cscl', 'gitter-zns'],
     examples: [
       {
@@ -142,7 +142,7 @@ export const IONEN_CARDS: readonly Card[] = [
         lines: [{ label: 'Das große Caesium-Ion sitzt in der Mitte eines Würfels aus acht Chlorid-Ionen: Koordinationszahl 8.' }],
       },
     ],
-    errors: ['chem-mis-io-cell-is-unit', 'chem-mis-io-cell-is-polyhedron', 'chem-mis-io-cn-count-all', 'chem-mis-io-cn-same-charge', 'chem-mis-io-cn-from-formula', 'chem-mis-io-all-like-nacl', 'chem-mis-io-polyhedron-mixup', 'chem-mis-io-cn-size', 'chem-mis-io-cell-count-all', 'chem-mis-io-cn-vs-units', 'chem-mis-io-ion-is-unit'],
+    errors: ['chem-mis-io-cell-is-unit', 'chem-mis-io-cell-is-polyhedron', 'chem-mis-io-cn-count-all', 'chem-mis-io-cn-same-charge', 'chem-mis-io-cn-from-formula', 'chem-mis-io-all-like-nacl', 'chem-mis-io-polyhedron-mixup', 'chem-mis-io-cn-size', 'chem-mis-io-cell-count-all', 'chem-mis-io-cn-vs-units', 'chem-mis-io-ion-is-unit', 'chem-mis-io-atom-crystal-weak'],
   },
   {
     id: 'ionen-eigenschaften',
@@ -156,14 +156,14 @@ export const IONEN_CARDS: readonly Card[] = [
     examples: [
       {
         chemTask: String.raw`$\ce{MgO}$ und $\ce{NaCl}$`,
-        lines: [{ label: 'Magnesiumoxid schmilzt viel höher: Ladungen 2+ und 2− statt 1+ und 1−, dazu kleinere Ionen.' }],
+        lines: [{ label: String.raw`Magnesiumoxid schmilzt viel höher: $\ce{Mg^2+}$ und $\ce{O^2-}$ statt $\ce{Na+}$ und $\ce{Cl-}$, dazu kleinere Ionen. Aus demselben Grund löst sich Magnesiumoxid in Wasser praktisch nicht, Natriumchlorid dagegen gut.` }],
       },
       {
         chemTask: 'Kochsalz als Kristall, als Schmelze und in Wasser',
         lines: [{ label: 'Als Kristall leitet es nicht; geschmolzen und gelöst leitet es, weil die Ionen dann wandern können.' }],
       },
     ],
-    errors: ['chem-mis-io-solid-conducts', 'chem-mis-io-electrons-conduct', 'chem-mis-io-state-decides', 'chem-mis-io-ductile', 'chem-mis-io-weak-forces', 'chem-mis-io-mass-decides', 'chem-mis-io-distance', 'chem-mis-io-charge-irrelevant', 'chem-mis-io-amorphous', 'chem-mis-io-crystal-look'],
+    errors: ['chem-mis-io-solid-conducts', 'chem-mis-io-electrons-conduct', 'chem-mis-io-state-decides', 'chem-mis-io-ductile', 'chem-mis-io-weak-forces', 'chem-mis-io-mass-decides', 'chem-mis-io-distance', 'chem-mis-io-charge-irrelevant', 'chem-mis-io-amorphous', 'chem-mis-io-crystal-look', 'chem-mis-io-all-soluble', 'chem-mis-io-charge-soluble'],
   },
   {
     id: 'ionen-zerfall',
@@ -193,7 +193,7 @@ export const IONEN_CARDS: readonly Card[] = [
     level: 2,
     rules: [],
     formulas: [],
-    memo: 'Beim Lösen muss das Gitter aufgebrochen werden; das kostet die Gitterenergie. Dafür lagern sich Wassermoleküle an die Ionen an (Hydratation), dabei wird Energie frei. Überwiegt die Hydratation, wird die Lösung warm, sonst kalt.',
+    memo: 'Beim Lösen muss das Gitter aufgebrochen werden; das kostet die Gitterenergie. Dafür lagern sich Wassermoleküle an die Ionen an (Hydratation, auch Hydratisierung genannt), dabei wird die Hydratationsenergie (auch Hydratisierungsenergie) frei. Überwiegt sie, wird die Lösung warm, sonst kalt.',
     note: 'Ammoniumchlorid kühlt beim Lösen (Kältepackung), Natriumhydroxid erwärmt das Wasser stark.',
     examples: [
       {
@@ -215,7 +215,7 @@ export const IONEN_CARDS: readonly Card[] = [
     rules: [],
     formulas: [String.raw`\Delta H_f = \Delta H_{\text{Sub}} + I + \tfrac{1}{2} D + E_A + \Delta H_G`],
     memo: 'Die Gitterenthalpie lässt sich nicht direkt messen. Man rechnet sie über einen Umweg aus: Von den Elementen zum Salz kommt man direkt (Bildungsenthalpie) oder über Schritte zu den Ionen im Gas und dann ins Gitter. Beide Wege liefern dieselbe Energie.',
-    note: String.raw`Schritte für $\ce{MX}$: Metall verdampfen, ionisieren; ein halbes $\ce{X2}$-Molekül spalten; Elektron an $\ce{X}$ anlagern (Elektronenaffinität, bei Halogenen negativ); Ionen ins Gitter (Gitterenthalpie, negativ).`,
+    note: String.raw`Schritte für $\ce{MX}$: Metall verdampfen, ionisieren; ein halbes $\ce{X2}$-Molekül spalten; Elektron an $\ce{X}$ anlagern (Elektronenaffinität, bei Halogenen negativ); Ionen ins Gitter (Gitterenthalpie, negativ). Die Werte unterscheiden sich je nach Tabelle etwas; man rechnet immer mit den Werten, die die Aufgabe nennt.`,
     examples: [
       {
         chemTask: String.raw`$\ce{NaCl}$, Werte in kJ/mol: Sublimation 107, Ionisierung 496, Bindungsenergie $\ce{Cl2}$ 242, Elektronenaffinität −349, $\Delta H_f = -411$`,

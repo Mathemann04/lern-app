@@ -8,6 +8,10 @@ import { THERMO, THERMO_REACTIONS, type Term, thermoByKey, thermoReactionById } 
 import { dhTask, gasDsTask, gibbsTask, kTask, limitTask, phaseTask, rangeTask } from './energie.ts'
 import { generatedCalc } from './index.ts'
 import type { ChemCalc } from './shared.ts'
+import { ENERGIE_BANK } from '../bank/energie.ts'
+import { ENERGIE_MISCONCEPTIONS } from '../misconceptions/energie.ts'
+import { ENERGIE_WHY } from '../misconceptions/energieWhy.ts'
+import { ENERGIE_CARDS } from '../../explain/chem/energieCards.ts'
 
 // Rechnungen „Energie bei Reaktionen" (S7b): Tabellenwerte gegen eine zweite Liste, Ergebnisse auf zweitem Weg (Gleitkomma),
 // Katalogbeispiele der Rechenfehler
@@ -189,5 +193,32 @@ describe('Rechenfehler Energie bei Reaktionen: Katalogbeispiele', () => {
     const calc = findTask((i) => kTask(3, createRng(`k${i}`), ref(3, i), 'chem-dg-lg'), (c) => c.substance === 'dg-11.4')
     expect(numberOf(rightIn(calc, 'k'))).toBeCloseTo(99.4, 1)
     expect(numberOf(wrongIn(calc, 'k', 'chem-dg-lg')!)).toBeCloseTo(39700, -2)
+  })
+})
+
+// Skript Gleichgewicht (Folie 9) und docs/CHEMIE.md §3: Die Gleichgewichtskonstante heißt auch im Thema Energie K_GG
+// skip: Schlüssel, deren Texte aus chem/energieRules.ts stammen (dort nicht Teil dieser Prüfung)
+const strings = (x: unknown, skip: readonly string[] = []): string[] =>
+  typeof x === 'string'
+    ? [x]
+    : Array.isArray(x)
+      ? x.flatMap((y) => strings(y, skip))
+      : x && typeof x === 'object'
+        ? Object.entries(x).flatMap(([key, y]) => (skip.includes(key) ? [] : strings(y, skip)))
+        : []
+// ein K, das weder K_GG noch die Einheit Kelvin ist (\mathrm{K}, J/(mol · K), „0 K“)
+const bareK = (text: string) => /(?<![\p{L}{\\/_\d])(?<!\d )K(?![\p{L}_})\d])/u.test(text.replace(/\\mathrm\{[^}]*\}/g, ''))
+
+describe('Thema Energie: Gleichgewichtskonstante und Fundstellen', () => {
+  it('schreibt die Gleichgewichtskonstante überall als K_GG (Fragen, Karten, Denkfehler, Rechnung dg-k)', () => {
+    const tasks = Array.from({ length: 60 }, (_, i) => kTask(3, createRng(`kgg${i}`), ref(3, i))).filter((c) => c !== null)
+    expect(tasks.length).toBeGreaterThan(30)
+    const texts = [...strings([ENERGIE_BANK.questions, ENERGIE_CARDS, ENERGIE_MISCONCEPTIONS, ENERGIE_WHY]), ...strings(tasks.map((c) => c.task), ['whyWrong', 'why'])]
+    expect(texts.filter(bareK)).toEqual([])
+    expect(texts.filter((t) => t.includes(String.raw`K_{\mathrm{GG}}`)).length).toBeGreaterThan(40)
+  })
+
+  it('jede Frage nennt das Skript Gleichgewicht mit einer Folie zwischen 7 und 10', () => {
+    for (const q of ENERGIE_BANK.questions) expect(q.ref, q.id).toMatch(/^Skript Gleichgewicht, Folie ([7-9]|10)$/)
   })
 })
