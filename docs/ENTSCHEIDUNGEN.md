@@ -703,3 +703,15 @@ Neue Entscheidungen unten anfügen.
   desselben Elements (ab Vertiefung, also auch Nebengruppen); Teil b wechselt zwischen einem Trend und einer
   Ionenladung. Eine eigene fachliche Prüfung war nicht nötig: kein neuer Fachinhalt, nur die geprüften Rechnungen
   aus S6c und S6d. Damit ist S6 abgeschlossen.
+- 11.11.2026: S7a Thema „Chemisches Gleichgewicht“. S7 geteilt in S7a (Gleichgewicht), S7b (Energie) und S7c
+  („Klausuraufgabe 5 üben“). Nur Gasgleichgewichte (CHEMIE.md §6); ΔH je Gleichung aus Standardbildungsenthalpien
+  (NIST), auf ganze kJ gerundet, mit einer zweiten Liste im Test; wo die Tabellenwerke zu weit auseinanderliegen
+  (PCl₅, COCl₂, NOCl) und bei H₂ + I₂ (§6) steht kein ΔH, und die App fragt dort nie nach der Temperatur. Die
+  Gleichgewichtskonstante wird ohne Einheit angegeben (die Aufgabe sagt das). Geschwindigkeit und K nur an Reaktionen
+  mit Buchstaben, deren Ablauf in einem Schritt die Aufgabe ausdrücklich annimmt; eine Karte sagt, dass man die
+  Exponenten sonst messen muss. Le Chatelier in den Grundlagen nur als Wissensfrage, Rechnungen ab Vertiefung.
+  Neues Bild: Energiediagramm (schematisch, ohne Zahlen). Das Skript „Chemische Reaktionen“ lag vor.
+  Nach der fachlichen Prüfung (Chemie und ΔH-Werte ohne Befund): Erklärungen „Warum ist das falsch?“, die die Antwort
+  verrieten, als Frage zum Weiterdenken neu geschrieben; Bilder unter Fragen mit einer Unterschrift, die nichts verrät
+  (`energie:…:frage`); drei Tipps entschärft; eine falsche Antwort mit richtiger Richtung ersetzt; ein Satz mit acht
+  Wörtern wie im Skript umformuliert.

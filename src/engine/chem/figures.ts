@@ -113,7 +113,36 @@ export function pseTrendFigureById(id: string): PseFigure | null {
   }
 }
 
-export type ChemFigure = LatticeFigure | LewisFigure | ShapeFigure | BoxFigure | PseFigure
+// Energiediagramm einer Reaktion (S7a): Energie über dem Reaktionsweg, mit Aktivierungsenergie und Reaktionsenthalpie;
+// mit Katalysator zusätzlich gestrichelt der niedrigere Weg. Schematisch, ohne Zahlen.
+export type EnergyFigure = {
+  readonly kind: 'energy'
+  readonly id: string
+  readonly caption: string
+  readonly exo: boolean
+  readonly catalyst: boolean
+}
+
+// „energie:exo", „energie:endo", mit „:kat" der Weg mit Katalysator; mit „:frage" eine Unterschrift, die nichts verrät (unter
+// Fragen, die nach dem Bild fragen)
+export function energyFigureById(id: string): EnergyFigure | null {
+  const [head, type, ...extra] = id.split(':')
+  if (head !== 'energie' || (type !== 'exo' && type !== 'endo') || extra.some((x) => x !== 'kat' && x !== 'frage') || new Set(extra).size !== extra.length) return null
+  const exo = type === 'exo'
+  const catalyst = extra.includes('kat')
+  if (extra.includes('frage')) {
+    return { kind: 'energy', id, caption: `Energiediagramm einer Reaktion${catalyst ? ': durchgezogen ohne, gestrichelt mit Katalysator' : ''}.`, exo, catalyst }
+  }
+  return {
+    kind: 'energy',
+    id,
+    caption: `Energiediagramm einer ${exo ? 'exothermen' : 'endothermen'} Reaktion: Die Produkte liegen energetisch ${exo ? 'tiefer' : 'höher'} als die Edukte (${exo ? '$\\Delta H < 0$' : '$\\Delta H > 0$'}). Der Pfeil $E_{\\mathrm{A}}$ zeigt die Aktivierungsenergie${catalyst ? '; gestrichelt der Weg mit Katalysator, mit kleinerer Aktivierungsenergie und gleichem $\\Delta H$' : ''}.`,
+    exo,
+    catalyst,
+  }
+}
+
+export type ChemFigure = LatticeFigure | LewisFigure | ShapeFigure | BoxFigure | PseFigure | EnergyFigure
 
 export function pseFigureById(id: string): PseFigure | null {
   const el = elementBySymbol(id.slice('pse:'.length))
@@ -228,6 +257,7 @@ export function figureById(id: string): ChemFigure | undefined {
   if (id.startsWith('kaestchen:')) return boxFigureById(id) ?? undefined
   if (id.startsWith('pse:')) return pseFigureById(id) ?? undefined
   if (id.startsWith('pse-trend:')) return pseTrendFigureById(id) ?? undefined
+  if (id.startsWith('energie:')) return energyFigureById(id) ?? undefined
   return FIGURES.find((f) => f.id === id)
 }
 
