@@ -83,12 +83,6 @@ const QUANTITIES: MatchQuestion = {
   traps: [
     { pair: 'en', right: 'die Energie, wenn ein freies Atom ein Elektron aufnimmt', misconception: 'chem-mis-tr-en-ea-same' },
     { pair: 'ea', right: 'wie stark ein gebundenes Atom die Bindungselektronen anzieht', misconception: 'chem-mis-tr-en-ea-same' },
-    {
-      pair: 'en',
-      right: 'die Energie, um einem Atom ein Elektron zu entreißen',
-      misconception: 'chem-mis-tr-en-ea-same',
-      why: why('Die Energie zum Entfernen eines Elektrons ist eine gemessene Energie eines einzelnen Atoms. Die Elektronegativität ist dagegen eine Vergleichszahl ohne Einheit und braucht eine Bindung.', 'Eine Vergleichszahl für Atome in einer Bindung.'),
-    },
   ],
   hint: 'Welche Größe braucht eine Bindung, welche nur ein einzelnes Atom? Geht es ums Aufnehmen oder ums Abgeben?',
   explanation: why(

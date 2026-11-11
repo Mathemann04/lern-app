@@ -50,7 +50,7 @@ const MATCH_FORCES_BASIC: MatchQuestion = {
   pairs: forcePairs(['CH4', 'Cl2', 'HCl', 'HBr', 'CH3Cl', 'H2O', 'NH3', 'HF']),
   traps: [
     { pair: 'HCl', right: strongest('H2O'), misconception: 'chem-mis-zk-h-other' },
-    { pair: 'HBr', right: strongest('H2O'), misconception: 'chem-mis-zk-h-other' },
+    { pair: 'HBr', right: strongest('H2O'), misconception: 'chem-mis-zk-h-other', why: { detailed: 'Für Wasserstoffbrücken muss das H-Atom an Stickstoff, Sauerstoff oder Fluor sitzen. Brom ist dafür zu groß und zu wenig elektronegativ.', short: 'H muss an N, O oder F sitzen.' } },
     { pair: 'CH4', right: strongest('H2O'), misconception: 'chem-mis-zk-any-h' },
     { pair: 'NH3', right: strongest('HCl'), misconception: 'chem-mis-zk-water-only' },
   ],

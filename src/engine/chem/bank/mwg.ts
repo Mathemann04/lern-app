@@ -50,10 +50,10 @@ const LE_CHATELIER_AMMONIA: MatchQuestion = {
   fact: 'match-lc-ammonia',
   part: 'le-chatelier',
   title: 'Le Chatelier bei der Ammoniaksynthese',
-  prompt: r`Ammoniaksynthese: $${equilibriumCe(AMMONIA)}$ mit $\Delta H = ${AMMONIA.dH! < 0 ? '-' : '+'}${Math.abs(AMMONIA.dH!)}\,\mathrm{kJ}$. Wohin verschiebt jeder Eingriff das Gleichgewicht?`,
+  prompt: r`Ammoniaksynthese: $${equilibriumCe(AMMONIA)}$ mit $\Delta H = ${AMMONIA.dH! < 0 ? '-' : '+'}${Math.abs(AMMONIA.dH!)}\,\mathrm{kJ}$. Wohin verschiebt jeder Eingriff das Gleichgewicht? Stoffe werden bei gleichem Volumen zugegeben oder entfernt.`,
   pairs: [
-    { id: 'druck-hoch', left: 'Druck erhöhen', right: SHIFT_TEXT[pressureShift(AMMONIA, true)] },
-    { id: 'druck-tief', left: 'Druck senken', right: SHIFT_TEXT[pressureShift(AMMONIA, false)] },
+    { id: 'druck-hoch', left: 'Druck erhöhen (Volumen verkleinern)', right: SHIFT_TEXT[pressureShift(AMMONIA, true)] },
+    { id: 'druck-tief', left: 'Druck senken (Volumen vergrößern)', right: SHIFT_TEXT[pressureShift(AMMONIA, false)] },
     { id: 'erwaermen', left: 'Erwärmen', right: SHIFT_TEXT[temperatureShift(AMMONIA, true)] },
     { id: 'abkuehlen', left: 'Abkühlen', right: SHIFT_TEXT[temperatureShift(AMMONIA, false)] },
     { id: 'n2-zu', left: `${NITROGEN.name} zugeben`, right: SHIFT_TEXT[concentrationShift(AMMONIA, NITROGEN.ce, true)] },

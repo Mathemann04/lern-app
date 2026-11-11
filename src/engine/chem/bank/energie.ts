@@ -60,8 +60,8 @@ const PHASE_SIGNS: MatchQuestion = {
   prompt: r`Welche Vorzeichen haben $\Delta H$ und $\Delta S$ bei diesem Vorgang?`,
   pairs: PHASE_PAIRS,
   traps: [
-    { pair: 'schmelzen', right: BOTH_DOWN, misconception: 'chem-mis-en-phase-dh' },
-    { pair: 'verdampfen', right: BOTH_DOWN, misconception: 'chem-mis-en-phase-ds' },
+    { pair: 'schmelzen', right: BOTH_DOWN, misconception: 'chem-mis-en-phase-dh', why: why('Beim Schmelzen muss man Wärme zuführen, um den Zusammenhalt im Feststoff zu lösen. Überlege außerdem, ob die Teilchen danach beweglicher sind: Das entscheidet über das Vorzeichen der Entropie.', 'Schmelzen braucht Wärme; prüfe auch die Beweglichkeit der Teilchen.') },
+    { pair: 'verdampfen', right: BOTH_DOWN, misconception: 'chem-mis-en-phase-ds', why: why('Im Gas sind die Teilchen viel beweglicher als in der Flüssigkeit, das ändert die Entropie. Und zum Verdampfen muss man Wärme zuführen: Prüfe beide Vorzeichen.', 'Gas ist ungeordneter, Verdampfen braucht Wärme.') },
     {
       pair: 'erstarren',
       right: BOTH_UP,

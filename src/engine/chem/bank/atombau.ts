@@ -56,7 +56,7 @@ const ATOMMODELLE: MatchQuestion = {
   fact: 'match-atom-models',
   part: 'modelle',
   title: "Atommodelle",
-  prompt: "Welche Kernaussage gehört zu welchem Atommodell?",
+  prompt: "Was kam mit welchem Atommodell neu hinzu?",
   pairs: [
     { id: 'dalton', left: "Dalton", right: "unteilbare Kugeln, je Element eine Sorte" },
     { id: 'thomson', left: "Thomson", right: "positive Kugel mit eingebetteten Elektronen" },

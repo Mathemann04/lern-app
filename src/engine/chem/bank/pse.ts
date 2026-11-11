@@ -82,7 +82,7 @@ const BLOCKS: MatchQuestion = {
   ],
   hint: 'Welche Unterschale wird beim Element zuletzt aufgefüllt?',
   explanation: why(
-    r`Der Block nennt die Unterschale, die zuletzt aufgefüllt wird. In der I. und II. Hauptgruppe ist es eine s-Unterschale (Natrium, Kalium, Calcium), in der III. bis VIII. Hauptgruppe eine p-Unterschale (Aluminium, Schwefel, Chlor). Bei den Nebengruppenelementen wie Eisen, Kupfer und Zink wird die 3d-Unterschale aufgefüllt, auch wenn außen ein 4s-Elektron sitzt: d-Block.`,
+    r`Der Block nennt die Unterschale, die zuletzt aufgefüllt wird. In der I. und II. Hauptgruppe ist es eine s-Unterschale (Natrium, Kalium, Calcium), in der III. bis VIII. Hauptgruppe eine p-Unterschale (Aluminium, Schwefel, Chlor). Bei den Nebengruppenelementen wie Eisen, Kupfer und Zink wird die 3d-Unterschale aufgefüllt, auch wenn außen 4s-Elektronen sitzen: d-Block.`,
     's-Block: I. und II. Hauptgruppe; p-Block: III. bis VIII.; d-Block: Nebengruppen.',
   ),
   cards: ['pse-bloecke'],
