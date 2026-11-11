@@ -331,7 +331,8 @@ test('Chemie: Themen mischen, „Nächste Aufgabe" bleibt in der Mischung, X und
   await expect(page.getByText('Kreuze unten bei Atombau mindestens ein Unterthema an, das es in Grundlagen gibt.')).toBeVisible()
   for (const name of basics) await page.getByRole('checkbox', { name }).check()
 
-  await page.locator('label', { hasText: 'Klausurniveau' }).click()
+  // Stufenwahl (das Unterthema „Molekülorbitale“ nennt im Hinweis auch „Klausurniveau“)
+  await page.locator('label', { hasText: /^\s*3\s*Klausurniveau/ }).click()
   await expect(page.getByText('Fragen aus Atombau (4 von 5 Unterthemen)')).toBeVisible()
   await page.getByRole('link', { name: 'Klausurniveau gemischt üben' }).click()
   await expect(page).toHaveURL(/#\/ueben\/chem-atombau\/3-\d+\?mischen=chemie$/)
