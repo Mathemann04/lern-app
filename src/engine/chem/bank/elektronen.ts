@@ -1,4 +1,5 @@
-import type { Explanation, MultiChoice, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
+import type { Explanation, MatchQuestion, MultiChoice, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
+import { LETTERS, capacity } from '../electrons.ts'
 
 // Wissensfragen zum Thema „Elektronen“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern: Stufe · 100 + laufende
 // Nummer; nie neu vergeben. Begriffe wie in der Vorlesung: Hauptquantenzahl, Nebenquantenzahl, Magnetquantenzahl,
@@ -37,6 +38,75 @@ export const cfg = (text: string) =>
     .split(' ')
     .map((part) => (part.startsWith('[') ? r`[\mathrm{${part.slice(1, -1)}}]` : part.replace(/^(\d)([spdf])(\d+)$/, (_, n, l, e) => `${n}\\mathrm{${l}}^{${e}}`)))
     .join('\\,')}$`
+
+// Zuordnen (N1b): Quantenzahl ↔ Bedeutung; Unterschale oder Schale ↔ höchstens so viele Elektronen (aus der Engine:
+// Unterschale 2 · (2l + 1), Schale 2n²)
+const QN_MEANING: MatchQuestion = {
+  kind: 'match',
+  id: 'el-g-zuordnen-quantenzahlen',
+  no: 120,
+  level: 1,
+  fact: 'match-qn-meaning',
+  part: 'quantenzahlen',
+  title: 'Quantenzahlen',
+  prompt: 'Was gibt welche Quantenzahl an?',
+  pairs: [
+    { id: 'n', left: r`Hauptquantenzahl $n$`, right: 'die Schale' },
+    { id: 'l', left: r`Nebenquantenzahl $l$`, right: 'die Form des Orbitals' },
+    { id: 'm', left: r`Magnetquantenzahl $m$`, right: 'die Ausrichtung im Raum' },
+    { id: 's', left: r`Spinquantenzahl $s$`, right: r`den Spin, $+\tfrac{1}{2}$ oder $-\tfrac{1}{2}$` },
+  ],
+  traps: [
+    { pair: 'n', right: 'die Form des Orbitals', misconception: 'chem-mis-el-qn-meaning' },
+    { pair: 'l', right: 'die Ausrichtung im Raum', misconception: 'chem-mis-el-qn-meaning' },
+    { pair: 'm', right: 'die Form des Orbitals', misconception: 'chem-mis-el-qn-meaning' },
+  ],
+  hint: 'Gehe von außen nach innen: Schale, Unterschale, einzelnes Orbital, einzelnes Elektron.',
+  explanation: why(
+    r`Die Hauptquantenzahl $n$ gibt die Schale an (Energie und Größe), die Nebenquantenzahl $l$ die Unterschale und damit die Form des Orbitals, die Magnetquantenzahl $m$ die Ausrichtung des Orbitals im Raum. Die Spinquantenzahl $s$ hat nur die Werte $+\tfrac{1}{2}$ und $-\tfrac{1}{2}$.`,
+    'n Schale, l Form, m Ausrichtung, s Spin.',
+  ),
+  cards: ['el-quantenzahlen'],
+  ref: REF_QN,
+}
+
+// höchstens so viele Elektronen, als Formel
+const places = (count: number) => `$${count}$`
+const SUBSHELLS = [0, 1, 2, 3].map((l) => ({ id: LETTERS[l], left: `${LETTERS[l]}-Unterschale`, right: places(capacity(l)) }))
+const SHELLS = [1, 2, 3, 4].map((n) => ({ id: `schale-${n}`, left: r`Schale $n = ${n}$`, right: places(2 * n * n) }))
+const CAPACITY: MatchQuestion = {
+  kind: 'match',
+  id: 'el-v-zuordnen-plaetze',
+  no: 218,
+  level: 2,
+  fact: 'match-capacity',
+  part: 'quantenzahlen',
+  title: 'Plätze für Elektronen',
+  prompt: 'Wie viele Elektronen fasst jede Unterschale und jede Schale höchstens?',
+  pairs: [...SUBSHELLS, ...SHELLS],
+  traps: [
+    {
+      pair: 'schale-3',
+      right: places(8),
+      misconception: 'chem-mis-el-shell-8',
+      why: why('Acht Elektronen sind das Oktett der äußersten Schale, keine Grenze jeder Schale. Ab der dritten Schale gibt es auch d-Orbitale.', 'Ab der 3. Schale gibt es d-Orbitale.'),
+    },
+    { pair: 'schale-3', right: places(6), misconception: 'chem-mis-el-shell-2n' },
+    {
+      pair: 'schale-4',
+      right: places(8),
+      misconception: 'chem-mis-el-shell-8',
+      why: why('Acht Elektronen sind das Oktett der äußersten Schale, keine Grenze jeder Schale. Zähle die Orbitale aller Unterschalen der vierten Schale.', 'Zähle alle Unterschalen der Schale.'),
+    },
+  ],
+  hint: r`Jedes Orbital fasst zwei Elektronen. Eine Unterschale hat $2l + 1$ Orbitale, eine Schale $n^2$.`,
+  explanation: why(
+    r`Die Unterschalen s, p, d und f haben 1, 3, 5 und 7 Orbitale, also 2, 6, 10 und 14 Plätze. Eine Schale fasst $2n^2$ Elektronen: 2, 8, 18 und 32 für $n = 1$ bis $4$.`,
+    r`s 2, p 6, d 10, f 14; Schale $2n^2$.`,
+  ),
+  cards: ['el-orbitale'],
+  ref: REF_QN,
+}
 
 export const ELEKTRONEN_BANK: QuestionBank = {
   course: 'chem-elektronen',
@@ -1110,6 +1180,9 @@ export const ELEKTRONEN_BANK: QuestionBank = {
       cards: ['el-ionen'],
       ref: REF_QN,
     }),
+    // ---- Zuordnen (N1b)
+    QN_MEANING,
+    CAPACITY,
   ],
   retired: [],
 }

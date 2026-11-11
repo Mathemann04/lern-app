@@ -1,4 +1,6 @@
-import type { Explanation, MultiChoice, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
+import type { Explanation, MatchQuestion, MultiChoice, QuestionBank, QuestionLevel, SingleChoice, WrongOption } from '../../quiz/types.ts'
+import { elementBySymbol } from '../elements.ts'
+import { type Kind, kindOf, placeOf } from '../pse.ts'
 
 // Wissensfragen zum Thema „Aufbau des Periodensystems“ (in eigenen Worten; Regeln in docs/CHEMIE.md). Nummern: Stufe ·
 // 100 + laufende Nummer; nie neu vergeben. Begriffe: Periode, Haupt- und Nebengruppe, s-, p- und d-Block, Valenzelektronen,
@@ -27,6 +29,65 @@ const multiAt = (level: QuestionLevel) => (spec: MultiSpec): MultiChoice => ({
 const mg = multiAt(1)
 const mv = multiAt(2)
 const mk = multiAt(3)
+
+// Zuordnen (N1b): Element ↔ Metall, Halbmetall oder Nichtmetall (kindOf) und Element ↔ Block (placeOf), beides aus der
+// Engine; Elemente mit Namen und Symbol
+const elementLabel = (symbol: string) => `${elementBySymbol(symbol)!.name} ($\\ce{${symbol}}$)`
+const KIND_NAMES: Readonly<Record<Kind, string>> = { metall: 'Metall', halbmetall: 'Halbmetall', nichtmetall: 'Nichtmetall' }
+const kindName = (symbol: string) => KIND_NAMES[kindOf(elementBySymbol(symbol)!)]
+const blockName = (symbol: string) => `${placeOf(elementBySymbol(symbol)!).block}-Block`
+const pairsBy = (symbols: readonly string[], right: (symbol: string) => string) => symbols.map((symbol) => ({ id: symbol, left: elementLabel(symbol), right: right(symbol) }))
+
+const KIND_ELEMENTS = ['Na', 'Fe', 'Al', 'B', 'Si', 'Ge', 'H', 'S', 'Cl', 'N']
+const METAL_KINDS: MatchQuestion = {
+  kind: 'match',
+  id: 'pse-g-zuordnen-metalle',
+  no: 120,
+  level: 1,
+  fact: 'match-metal-kind',
+  part: 'metalle',
+  title: 'Metalle, Halbmetalle, Nichtmetalle',
+  prompt: 'Ist das Element ein Metall, ein Halbmetall oder ein Nichtmetall?',
+  pairs: pairsBy(KIND_ELEMENTS, kindName),
+  traps: [
+    { pair: 'B', right: kindName('Al'), misconception: 'chem-mis-pse-boron-metal' },
+    { pair: 'H', right: kindName('Na'), misconception: 'chem-mis-pse-hydrogen-metal' },
+    { pair: 'Cl', right: kindName('Na'), misconception: 'chem-mis-pse-metal-right' },
+    { pair: 'Na', right: kindName('Cl'), misconception: 'chem-mis-pse-metal-right' },
+  ],
+  hint: 'Wo stehen Metalle, wo Nichtmetalle, und wo verläuft die Treppe dazwischen?',
+  explanation: why(
+    r`Metalle stehen links und in der Mitte des Periodensystems: Natrium, Eisen, Aluminium. Nichtmetalle stehen rechts oben, dazu der Wasserstoff: Schwefel, Chlor, Stickstoff. Auf der Grenze dazwischen liegen die Halbmetalle wie Bor, Silicium und Germanium.`,
+    'Metalle links, Nichtmetalle rechts oben und Wasserstoff, Halbmetalle auf der Grenze.',
+  ),
+  cards: ['pse-metalle'],
+  ref: REF,
+}
+
+const BLOCK_ELEMENTS = ['Na', 'K', 'Ca', 'Al', 'S', 'Cl', 'Fe', 'Cu', 'Zn']
+const BLOCKS: MatchQuestion = {
+  kind: 'match',
+  id: 'pse-v-zuordnen-bloecke',
+  no: 218,
+  level: 2,
+  fact: 'match-block',
+  part: 'aufbau',
+  title: 'Blöcke',
+  prompt: 'Zu welchem Block gehört jedes Element?',
+  pairs: pairsBy(BLOCK_ELEMENTS, blockName),
+  traps: [
+    { pair: 'Fe', right: blockName('Na'), misconception: 'chem-mis-pse-block' },
+    { pair: 'Zn', right: blockName('Na'), misconception: 'chem-mis-pse-block' },
+    { pair: 'Cu', right: blockName('Na'), misconception: 'chem-mis-pse-block' },
+  ],
+  hint: 'Welche Unterschale wird beim Element zuletzt aufgefüllt?',
+  explanation: why(
+    r`Der Block nennt die Unterschale, die zuletzt aufgefüllt wird. In der I. und II. Hauptgruppe ist es eine s-Unterschale (Natrium, Kalium, Calcium), in der III. bis VIII. Hauptgruppe eine p-Unterschale (Aluminium, Schwefel, Chlor). Bei den Nebengruppenelementen wie Eisen, Kupfer und Zink wird die 3d-Unterschale aufgefüllt, auch wenn außen ein 4s-Elektron sitzt: d-Block.`,
+    's-Block: I. und II. Hauptgruppe; p-Block: III. bis VIII.; d-Block: Nebengruppen.',
+  ),
+  cards: ['pse-bloecke'],
+  ref: REF,
+}
 
 export const PSE_BANK: QuestionBank = {
   course: 'chem-pse',
@@ -1074,6 +1135,9 @@ export const PSE_BANK: QuestionBank = {
       cards: ['pse-ionisierung'],
       ref: REF,
     }),
+    // ---- Zuordnen (N1b)
+    METAL_KINDS,
+    BLOCKS,
   ],
   retired: [],
 }
