@@ -1,7 +1,8 @@
 import type { Level } from '../engine/tasks/taskNumber.ts'
 import { type Course, isLevelAvailable } from './catalog.ts'
 import type { CourseEngine } from './courseEngines.ts'
-import { pickNewSeed } from './practice.ts'
+import type { CourseReviews } from '../engine/quiz/schedule.ts'
+import { dueInSelection, pickNewSeed } from './practice.ts'
 
 // „Themen mischen" (S1b): Aus den angekreuzten Themen eines Fachs kommt die nächste Aufgabe gemischt.
 // Reine Funktion ohne React, erst auf der Übungsseite geladen (sie braucht practice.ts); was angekreuzt
@@ -22,6 +23,8 @@ export type MixInput = {
   readonly recentOf: (course: string) => readonly string[]
   // angekreuzte Unterthemen des Themas (selection.ts, selectedParts mit der Stufe); undefined: alle
   readonly partsOf: (course: string) => ReadonlySet<string> | undefined
+  // Wiederholung des Themas (state/reviews.ts, reviewsOf); ohne Angabe keine
+  readonly reviewOf?: (course: string) => CourseReviews | undefined
   // Zufall für die Wahl des Themas (in Tests fest)
   readonly random?: () => number
 }
@@ -53,11 +56,11 @@ type Weighted = { readonly course: Course; readonly nos: readonly number[] | und
 // durch sind, und danach kämen die Themen am Stück.) Engines ohne Wissensfragen (Mathe) zählen 1, Chemie-Themen
 // ohne Fragen in der Stufe (nur Rechnungen, z. B. „Stoffmenge und Umsatz" bis S3b) so viel wie ein Thema mit der
 // Mindestzahl an Fragen (CALC_ONLY_WEIGHT).
-export function mixWeights(input: Omit<MixInput, 'shownOf' | 'recentOf' | 'random'>): readonly { readonly course: string; readonly weight: number }[] {
+export function mixWeights(input: Omit<MixInput, 'shownOf' | 'recentOf' | 'random' | 'reviewOf'>): readonly { readonly course: string; readonly weight: number }[] {
   return weighted(input).map(({ course, weight }) => ({ course: course.id, weight }))
 }
 
-function weighted({ courses, level, engineOf, partsOf }: Omit<MixInput, 'shownOf' | 'recentOf' | 'random'>): Weighted[] {
+function weighted({ courses, level, engineOf, partsOf }: Omit<MixInput, 'shownOf' | 'recentOf' | 'random' | 'reviewOf'>): Weighted[] {
   return courses
     .filter((course) => isLevelAvailable(course, level))
     .map((course) => {
@@ -68,16 +71,21 @@ function weighted({ courses, level, engineOf, partsOf }: Omit<MixInput, 'shownOf
 
 // Nächste Aufgabe der Mischung: Thema gewichtet nach mixWeights, dann eine Aufgabe darin wie beim Üben
 // eines einzelnen Themas (pickNewSeed mit seinen Unterthemen). null: Es gibt nichts zu üben (keine
-// spielbaren Themen oder keine Fragen).
+// spielbaren Themen oder keine Fragen). Fällige Wiederholungen (reviewOf) kommen zuerst: das Thema mit der
+// am längsten fälligen Frage der Auswahl.
 export function pickMixed(input: MixInput): MixPick | null {
-  const { level, engineOf, shownOf, recentOf, partsOf, random = Math.random } = input
+  const { level, engineOf, shownOf, recentOf, partsOf, reviewOf, random = Math.random } = input
   const choices = weighted(input).filter(({ weight }) => weight > 0)
   const sum = choices.reduce((total, { weight }) => total + weight, 0)
   if (sum === 0) return null
+  const due = choices
+    .map((choice) => ({ choice, due: dueInSelection(engineOf(choice.course.id), level, reviewOf?.(choice.course.id), partsOf(choice.course.id)) }))
+    .filter((d) => d.due !== null)
+    .sort((a, b) => a.due!.answeredAt - b.due!.answeredAt)[0]
   // Zufallszahl in [0, sum): das Thema, in dessen Abschnitt sie fällt
   let rest = random() * sum
-  let chosen = choices[choices.length - 1]
-  for (const choice of choices) {
+  let chosen = due?.choice ?? choices[choices.length - 1]
+  for (const choice of due ? [] : choices) {
     if (rest < choice.weight) {
       chosen = choice
       break
@@ -86,6 +94,6 @@ export function pickMixed(input: MixInput): MixPick | null {
   }
   const id = chosen.course.id
   const parts = partsOf(id)
-  const { seed, newRound } = pickNewSeed(engineOf(id), level, recentOf(id), shownOf(id), parts)
+  const { seed, newRound } = pickNewSeed(engineOf(id), level, recentOf(id), shownOf(id), parts, reviewOf?.(id))
   return { course: id, seed, newRound, nos: chosen.nos }
 }

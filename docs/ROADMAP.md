@@ -99,6 +99,9 @@ feste Regeln: [CHEMIE.md](CHEMIE.md)
     - [x] S7b. Thema Energie bei Reaktionen (Reaktionsenthalpie, Entropie, freie Enthalpie)
     - [x] S7c. Klausuraufgabe 5 üben
   - [ ] S8. Frei rechnen und Wiederholung
+    - [x] S8a. Falsch beantwortete Fragen kommen wieder
+    - [ ] S8b. Frei rechnen in den Themen (Ziffernblock, Toleranz, Rundungshinweis, Fehlererkennung)
+    - [ ] S8c. Klausuraufgaben frei rechnen
   - [ ] S9. Probeklausur Teil 1 (50 Punkte)
 - Nach Teil 1:
   - [ ] N1. Weitere Fragearten (Wähle alle richtigen, Zuordnen, Ordnen)

@@ -189,3 +189,8 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
 - Klausuraufgabe 5 (S7c): `chem/exam/task5.ts` (a aus Wissensfragen `EQUILIBRIUM_QUESTIONS` und `CATALYST_QUESTIONS`, b aus
   `expressionStep`, c letzter Schritt von `leChatelierTask`, d aus `dhTask` auf Klausurniveau ohne Bildungen, e aus
   `gibbsTask` oder `rangeTask`), Kachel über `exam: { task: 5 }` am Gebiet `chem-gleichgewicht`.
+- Wiederholung (S8a): Regeln rein in `engine/quiz/schedule.ts` (`afterAnswer`, `noteShown`, `courseReviews`, `otherVariant`),
+  Speicher `state/reviews.ts` (Schlüssel `rechenweg-wiederholung`, `rememberTaskShown` in `useRememberForm`, `recordReview` im
+  `TaskScreen` nur bei Wissensfragen über `questionNoOf`, `clearReviews` bei „Fortschritt löschen"); `pickNewSeed` und
+  `pickMixed` nehmen `review`/`reviewOf` (fällige zuerst über `dueInSelection`, wartende zählen wie gezeigt), nur beim
+  geführten Üben.

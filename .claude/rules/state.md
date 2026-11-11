@@ -17,3 +17,6 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   `skipParts`, Mischung je Fach `mix`, zuletzt geübte Mischung `lastMix`) und Fortschritt je Thema mit
   Fehlerstatistik und 8-von-10-Vorschlag (`progress.ts`; höchstens 1000
   gelöste Aufgaben je Thema)
+- Wiederholung falsch beantworteter Wissensfragen (S8a): `reviews.ts`, eigener
+  Schlüssel `rechenweg-wiederholung` (Regeln in `engine/quiz/schedule.ts`),
+  „Fortschritt löschen" leert ihn wie `rechenweg-fragen` (`questionRounds.ts`).

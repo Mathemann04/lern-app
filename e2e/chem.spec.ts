@@ -134,6 +134,8 @@ test('Chemie: Start → Atombau → Grundlagen, Frage richtig beantworten, melde
   await page.getByRole('button', { name: 'Fortschritt löschen' }).click()
   await page.getByRole('button', { name: 'Ja, löschen' }).click()
   expect(await rounds()).toEqual({})
+  // … und leert die Wiederholung (S8a)
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('rechenweg-wiederholung') ?? 'null') as unknown)).toEqual({ tick: 0, last: null, items: {} })
   await page.goto('./#/einstellungen')
   await expect(reports).toContainText('1 Frage gemeldet.')
   await reports.getByRole('button', { name: 'Liste leeren' }).click()
@@ -163,7 +165,26 @@ test('Chemie: falsche Antwort mit „Warum ist das falsch?", Denkfehler im Forts
   await expectCleanPage(page, 'Lernkarte in der Aufgabe')
   await page.getByRole('dialog').getByRole('button', { name: 'Schließen' }).click()
   await page.getByRole('button', { name: 'Ergebnis ansehen' }).click()
-  await expect(page.getByText('Gelöst mit 1 Fehlversuch.')).toBeVisible()
+  await expect(page.getByText('Gelöst mit 1 Fehlversuch. Die Frage kommt nach drei anderen Aufgaben noch einmal.')).toBeVisible()
+
+  // Wiederholung (S8a): nach drei anderen Aufgaben kommt dieselbe Frage zuerst, in einer anderen Fassung
+  const wrongNo = questionNo(page.url())
+  const wrongUrl = page.url()
+  await expect(page.getByTestId('review-note')).toHaveCount(0)
+  for (const seed of [11, 12]) {
+    await page.goto(`./#/ueben/brueche/1-${seed}`)
+    await expect(page.getByText(/^Stufe 1 · Aufgabe 1-/)).toBeVisible()
+  }
+  await page.goto('./#/ueben/chem-atombau/2')
+  await expect(page).toHaveURL(/#\/ueben\/chem-atombau\/2-\d+$/)
+  // erst zwei andere Aufgaben: die neue Aufgabe ist die dritte, noch keine Wiederholung
+  expect(questionNo(page.url())).not.toBe(wrongNo)
+  await page.goto('./#/ueben/chem-atombau/2')
+  await expect(page).toHaveURL(/#\/ueben\/chem-atombau\/2-\d+$/)
+  expect(questionNo(page.url())).toBe(wrongNo)
+  expect(page.url()).not.toBe(wrongUrl)
+  await expect(page.getByTestId('review-note')).toHaveText('Wiederholung: Diese Frage hattest du schon einmal falsch.')
+  await expectCleanPage(page, 'Wiederholung')
 
   // Fortschritt: Atombau mit Stufennamen und dem Denkfehler als Aussage
   await page.goto('./#/fortschritt')
