@@ -155,3 +155,7 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   (in `CHEM_ERROR_RULES` eingehängt), Karten `elektronenCards.ts`, Fragen `bank/elektronen.ts` (`cfg` schreibt
   Konfigurationen), Denkfehler `chem-mis-el-…`, Gegenprobe `chem/electrons.test.ts` (zweite Liste nach NIST),
   Katalogbeispiele `generators/elektronen.test.ts`.
+- Klausuraufgabe 1 (S6b): `chem/exam/task1.ts` (Teile aus Wissensfragen über `planQuestion` und Rechnungen,
+  `particleItem` für Protonen, Neutronen, Elektronen in einer Antwort, `valenceTask`, Licht aus
+  `LIGHT_GENERATORS`), `fromStep` jetzt in `chem/exam/fromStep.ts` (übernimmt `whyWrong` als `ExamOption.why`);
+  `chemErrorInfo` kennt auch Denkfehler (nur den Namen). Kachel über `exam: { task: 1 }` am Gebiet `chem-materie`.

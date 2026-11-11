@@ -232,7 +232,9 @@ function PartResultView({ part, result }: { part: ExamPart; result: ExamResult['
 
 function ItemResultView({ result: r }: { result: ItemResult }) {
   const status = STATUS[r.status]
-  const error = r.status === 'falsch' && r.chosen?.errorRuleId ? chemErrorInfo(r.chosen.errorRuleId) : null
+  const info = r.status === 'falsch' && r.chosen?.errorRuleId ? chemErrorInfo(r.chosen.errorRuleId) : null
+  const why = r.chosen?.why ?? info?.why
+  const error = info && why ? { name: info.name, why } : null
   return (
     <div className="space-y-2 rounded-2xl border border-zinc-200 px-4 py-3">
       <p className="font-medium">

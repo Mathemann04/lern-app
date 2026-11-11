@@ -669,3 +669,9 @@ Neue Entscheidungen unten anfügen.
   Nach der fachlichen Prüfung (Chemie ohne Befund): 58 Erklärungen „Warum ist das falsch?“ neu
   geschrieben, weil sie die Lösung verrieten; die allgemeinen Texte der Denkfehler nennen nur noch die
   Regel, ohne Tabellenwerte; eigene Texte für Pd und Ag; Valenzkonfigurationen nur bis Kr.
+- 11.11.2026: S6b „Klausuraufgabe 1 üben“ (8 Punkte nach dem Bauplan Teil 1). Erstmals stehen
+  Wissensfragen in einer Klausuraufgabe: Sie bringen ihren Denkfehler und ihre eigene Erklärung mit
+  (`ExamOption.why`), die Auswertung zeigt beides und zählt den Denkfehler in die Fehlerstatistik. Teil c
+  fragt Protonen, Neutronen und Elektronen in einer Antwort (wie in der Klausur ein Punkt für alle drei).
+  Eine eigene fachliche Prüfung war nicht nötig: kein neuer Fachinhalt, nur geprüfte Fragen und Rechnungen
+  aus S1, S2 und S6a.

@@ -1033,6 +1033,13 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   Abwechslung); Abwechslung mit eigener Kennzahl (in den Grundlagen etwa 50 sinnvolle Formen);
   Kationen mit Edelgaskonfiguration kurz als [Ar], Anionen mit dem Kern des Atoms
   ([Ne] 3s² 3p⁶), damit man das Auffüllen sieht.
+  **S6b** (fertig): „Klausuraufgabe 1 üben“ als Kachel im Gebiet Aufbau der Materie, 8 Punkte nach dem
+  Bauplan Teil 1: a) Ladungen der Elementarteilchen (1), b) zwei Begriffsfragen (2), c) Protonen,
+  Neutronen und Elektronen aus einem Kernsymbol (1, eine Antwort mit allen drei Zahlen), d) Valenzelektronen
+  und Valenzkonfiguration (2), e) zwei Fragen zu Atommodellen oder Energie des Lichts (2). Die Fragen kommen
+  aus den Wissensfragen und Rechnungen von Atombau und Elektronen; auch Wissensfragen tragen ihren Denkfehler
+  und ihr „Warum ist das falsch?“ in die Auswertung (`why` an der Antwort). Keine Folgefehler, die Teile
+  sind unabhängig.
 - **S7: Gleichgewicht und Energie.** Massenwirkungsgesetz als Auswahl, Le
   Chatelier, Katalysator, K aus Konzentrationen; Reaktionsenthalpie aus
   Bildungsenthalpien, Entropie, freie Enthalpie; „Klausuraufgabe 5 üben“.
