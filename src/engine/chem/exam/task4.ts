@@ -15,8 +15,9 @@ import { NICE_N, eqSign, given, molarLatex, sig, valuesNote } from '../generator
 // oder Alkohols. a) Gleichung (2), b) Molmassen der vier Stoffe (je 1), c) Masse eines Produkts (4: Stoffmenge
 // des Brennstoffs 1, Stoffmenge des Produkts 1, Masse 2), d) Gasvolumen bei Normbedingungen oder eine
 // Lösung ansetzen (4). Aufgabentexte in eigenen Worten, andere Stoffe und Zahlen als die Altklausuren.
-// Folgefehler: Jede Rechnung rechnet mit den gewählten früheren Antworten weiter (exam/grade.ts); die ganz
-// richtige Antwort steht immer mit zur Wahl.
+// Folgefehler: Jede Rechnung rechnet mit den gewählten früheren Antworten weiter (exam/grade.ts). Die ganz
+// richtige Antwort steht dann nicht zusätzlich zur Wahl: Sonst verrieten Zahl und Inhalt der Antworten, ob
+// eine frühere Antwort falsch war (und durch Ausprobieren sogar die richtige).
 
 export const TASK4_POINTS = 14
 const VALUES: MassValues = 'rounded'
@@ -45,8 +46,9 @@ const SIMILAR: Readonly<Record<string, string>> = { CO2: 'CO', H2O: 'H2O2', O2: 
 const shown = (r: Rational) => roundSignificant(r).value
 const apart = (a: Rational, b: Rational, share: number) => Math.abs(ratToNumber(shown(a)) / ratToNumber(shown(b)) - 1) >= share
 
-// erwartete Antwort (mit den eigenen Werten), die ganz richtige und bis zu vier Antworten insgesamt; falsche
-// Werte wie bei den Rechnungen mindestens 6 % neben beiden und 3 % auseinander (docs/CHEMIE.md §7)
+// erwartete Antwort (mit den eigenen Werten) und bis zu drei falsche; falsche Werte wie bei den Rechnungen
+// mindestens 6 % neben der erwarteten und der ganz richtigen und 3 % auseinander (docs/CHEMIE.md §7).
+// exact: Werte nicht runden (Molmassen), Abstand trotzdem mit Toleranz
 function numberOptions(
   rng: Rng,
   expected: Rational,
@@ -58,8 +60,7 @@ function numberOptions(
   const keep = (a: Rational) => (exact ? a : shown(a))
   const option = (value: Rational, errorRuleId?: string): ExamOption => ({ id: latex(value), content: `$${latex(value)}$`, value: keep(value), ...(errorRuleId ? { errorRuleId } : {}) })
   const options = [option(expected)]
-  if (latex(correct) !== latex(expected)) options.push(option(correct))
-  const far = (a: Rational, b: Rational, share: number) => (exact ? !ratEq(a, b) : apart(a, b, share))
+  const far = (a: Rational, b: Rational, share: number) => (exact ? Math.abs(ratToNumber(a) / ratToNumber(b) - 1) >= share : apart(a, b, share))
   const kept: { rule: string; value: Rational }[] = []
   for (const w of rng.shuffle([...wrong])) {
     if (w.value.n <= 0n) continue
@@ -238,7 +239,7 @@ function task4(seed: string, setupData: Setup): ExamTask {
   const nTargetValue = (eq: Equation, nF: Rational, to: Species) => ratMul(nF, ratio(eq, to))
   const nTargetLine = (eq: Equation, nF: Rational, to: Species) => {
     const n = nTargetValue(eq, nF, to)
-    return `n(${ce(to)}) = ${sig(nF)}\\,\\mathrm{mol} \\cdot \\frac{${coefficientOf(eq, to).n}}{${coefficientOf(eq, f).n}} ${eqSign(n)} ${sig(n)}\\,\\mathrm{mol}`
+    return `n(${ce(to)}) = ${sig(nF)}\\,\\mathrm{mol} \\cdot \\frac{${sig(coefficientOf(eq, to))}}{${sig(coefficientOf(eq, f))}} ${eqSign(n)} ${sig(n)}\\,\\mathrm{mol}`
   }
   const ratioWrongs = (eq: Equation, nF: Rational, to: Species) => [
     { rule: 'chem-ratio-one', value: nF },
@@ -356,7 +357,7 @@ function gasPart(seed: string, gas: Species, nTargetItem: (id: string, to: Speci
   })
   return {
     id: 'd',
-    prompt: `Welches Volumen $${ce(gas)}$ ${verb} dabei bei Normbedingungen ($0\\,^{\\circ}\\mathrm{C}$, $1013\\,\\mathrm{hPa}$, $V_m = 22{,}4\\,\\mathrm{L/mol}$)?`,
+    prompt: `Welches Volumen $${ce(gas)}$ ${consumed ? 'wird' : 'entsteht'} dabei bei Normbedingungen ($0\\,^{\\circ}\\mathrm{C}$, $1013\\,\\mathrm{hPa}$, $V_m = 22{,}4\\,\\mathrm{L/mol}$)${consumed ? ' verbraucht' : ''}?`,
     points: 4,
     items: [nTargetItem('stoffmenge-gas', gas, 2), volumeItem],
   }

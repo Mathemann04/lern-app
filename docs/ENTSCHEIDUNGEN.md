@@ -590,6 +590,8 @@ Neue Entscheidungen unten anfügen.
   im Skript; DIN 1310 nennt das Volumenkonzentration). Spurenstoffe nur in üblicher Größenordnung.
 - 11.11.2026: S4c fertig. „Klausuraufgabe 4 üben" hat bis S8 Antworten zur Auswahl statt
   freier Eingabe; Folgefehler funktionieren trotzdem, weil die Antworten jeder Rechnung aus
-  den eigenen früheren Antworten entstehen (die ganz richtige Antwort steht immer mit zur
-  Wahl). Teil d) ist abwechselnd Gasvolumen oder Lösung ansetzen (Bauplan Teil 1, 14 Punkte).
+  den eigenen früheren Antworten entstehen. Die ganz richtige Antwort steht dann nicht
+  zusätzlich zur Wahl, sonst verrieten die Antworten, dass eine frühere falsch war. Ein
+  Folgefehler im Ergebnis gibt die vollen Punkte eines Teils nur, wenn der Fehler aus einem
+  früheren Teil stammt. Teil d) ist abwechselnd Gasvolumen oder Lösung ansetzen (Bauplan Teil 1, 14 Punkte).
   Die Auswertung wird noch nicht gespeichert; Verlauf kommt mit der Probeklausur (S9).

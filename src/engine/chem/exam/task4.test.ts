@@ -167,6 +167,58 @@ describe('Klausuraufgabe 4: Punkte', () => {
     }
   })
 
+  it('Fehler im selben Teil: Folgefehler im Ergebnis kostet den Zwischenschritt', () => {
+    const wrongFirst = (id: string) => ({ [id]: (b: { options: readonly { id: string; errorRuleId?: string }[] }) => b.options.find((o) => o.errorRuleId)?.id })
+    let gas = 0
+    let solution = 0
+    for (const seed of SEEDS.slice(0, 80)) {
+      const task = buildTask4(seed)
+      const c = gradeExam(task, followUp(task, wrongFirst('stoffmenge-brennstoff'))).parts[2]
+      expect(c.points, `${seed}`).toBe(3)
+      const d = task.parts[3]
+      const first = d.items[0].id
+      const points = gradeExam(task, followUp(task, wrongFirst(first))).parts[3].points
+      if (first === 'stoffmenge-gas') {
+        gas++
+        expect(points, `${seed}`).toBe(2)
+      } else {
+        solution++
+        expect(points, `${seed}`).toBe(3)
+      }
+    }
+    expect(gas).toBeGreaterThan(10)
+    expect(solution).toBeGreaterThan(10)
+  })
+
+  it('verrät nichts: Nach einer falschen Antwort steht die ganz richtige nicht zusätzlich zur Wahl', () => {
+    let seen = 0
+    for (const seed of SEEDS.slice(0, 100)) {
+      const task = buildTask4(seed)
+      const fuelMolar = itemsOf(task).find((i) => i.id.startsWith('molmasse-'))!.id
+      const answers = followUp(task, { [fuelMolar]: (b) => b.options.find((o) => o.errorRuleId)?.id, gleichung: (b) => b.options.find((o) => o.errorRuleId)?.id })
+      for (const state of examState(task, answers)) {
+        const build = state.build!
+        if (build.expected === build.correct) continue
+        seen++
+        expect(build.options.map((o) => o.id), `${seed} ${state.item.id}`).not.toContain(build.correct)
+      }
+    }
+    expect(seen).toBeGreaterThan(200)
+  })
+
+  it('falsche Molmassen mindestens 6 % neben der richtigen und 3 % auseinander', () => {
+    const value = (id: string) => numberOf(id)
+    for (const seed of SEEDS) {
+      for (const [id, { build }] of truthOf(buildTask4(seed))) {
+        if (!id.startsWith('molmasse')) continue
+        const wrong = build.options.filter((o) => o.id !== build.correct).map((o) => value(o.id))
+        const right = value(build.correct)
+        for (const w of wrong) expect(Math.abs(w / right - 1), `${seed} ${id}`).toBeGreaterThanOrEqual(0.06)
+        for (const [i, w] of wrong.entries()) for (const v of wrong.slice(i + 1)) expect(Math.abs(w / v - 1), `${seed} ${id}`).toBeGreaterThanOrEqual(0.03)
+      }
+    }
+  })
+
   it('eine neue Antwort löscht die Antworten, die davon abhängen, sonst nichts', () => {
     const task = buildTask4(7)
     const all = truthAnswers(task)

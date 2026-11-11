@@ -5,7 +5,9 @@ import type { ExamAnswers, ExamItem, ExamItemBuild, ExamOption, ExamPart, ExamTa
 // - Richtig ist die erwartete Antwort mit den eigenen früheren Antworten (Folgefehler) oder die ganz
 //   richtige Antwort; beides gibt die vollen Punkte der Frage. Manche Antworten geben einen Teil der Punkte.
 // - Ist das Ergebnis eines Teils (final) richtig, gibt es die vollen Punkte des Teils; sonst zählen die
-//   Punkte der richtigen Zwischenschritte (Teilpunkte).
+//   Punkte der richtigen Zwischenschritte (Teilpunkte). Ein Folgefehler im Ergebnis gibt die vollen Punkte
+//   des Teils nur, wenn der Fehler aus einem früheren Teil stammt (alle Fragen dieses Teils voll); ein
+//   Fehler im selben Teil kostet die Punkte seines Zwischenschritts.
 
 export const itemsOf = (task: ExamTask): ExamItem[] => task.parts.flatMap((p) => p.items)
 export const totalPoints = (task: ExamTask) => task.parts.reduce((sum, p) => sum + p.points, 0)
@@ -96,7 +98,8 @@ export function gradeExam(task: ExamTask, answers: ExamAnswers): ExamResult {
       if (chosen.share) return { ...base, status: 'teilweise', points: item.points * chosen.share.value, ownExplanation: null }
       return { ...base, status: 'falsch', points: 0, ownExplanation: build.expected === build.correct ? null : build.explanation }
     })
-    const finalFull = items.some((r) => r.item.final && r.points === r.item.points && r.points > 0)
+    const allFull = items.every((r) => r.points === r.item.points)
+    const finalFull = items.some((r) => r.item.final && (r.status === 'richtig' || (r.status === 'folgefehler' && allFull)))
     const sum = items.reduce((s, r) => s + r.points, 0)
     return { part, points: finalFull ? part.points : Math.min(part.points, sum), items }
   })
