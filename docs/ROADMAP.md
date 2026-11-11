@@ -8,15 +8,16 @@ Stand: 11.11.2026
 | M2 | Brüche (Bruchrechnung, Bruchterme kürzen und zusammenfassen, Doppelbrüche); App für mehrere Themen | fertig |
 | M2b | Brüche nachschärfen: viel mehr Abwechslung (Baukasten statt fester Vorlagen, keine Form doppelt), deutlich schwerer, Stufe 5 auf Profi-Niveau mit Partialbruchzerlegung und Brüchen aus späteren Kapiteln (komplexe Zahlen, Grenzwerte, Teleskopsummen, Hyperbelfunktionen) | fertig |
 | M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten, Vektoren, Additionstheoremen) | fertig |
-| M4 | **Chemie 1**: neues Fach mit Wissensfragen (Auswahl, Zuordnen, Ordnen) und Rechnungen zu allen Themen der Vorlesung, drei Stufen (Grundlagen, Vertiefung, Klausurniveau), Lernkarten, Wiederholung, Probeklausur wie die echte (45 min, 50 Punkte) | in Arbeit: Plan freigegeben ([PLAN-M4.md](PLAN-M4.md)), Klausur-Sprint fertig (S1 bis S9), N1 fertig, jetzt N2 (N2a fertig), danach N3 bis N5 |
-| M5 | **Werkstoffkunde**: eigenes Fach nach demselben Muster wie Chemie | offen (nach M6 und M6b; die Skripte kommen vom Nutzer; früher, falls die Werkstoffkunde-Klausur früher ist) |
+| M4 | **Chemie 1**: neues Fach mit Wissensfragen (Auswahl, Zuordnen, Ordnen) und Rechnungen zu allen Themen der Vorlesung, drei Stufen (Grundlagen, Vertiefung, Klausurniveau), Lernkarten, Wiederholung, Probeklausur wie die echte (45 min, 50 Punkte) | in Arbeit: Plan freigegeben ([PLAN-M4.md](PLAN-M4.md)), Klausur-Sprint S1 bis S9 fertig, als Nächstes S10 und S11 vor Teil 1; N1 und N2a fertig, N2b bis N5 nach M6 und M12 |
+| M5 | **Werkstoffkunde**: eigenes Fach nach demselben Muster wie Chemie, mit Nachschlagewerk; Vorbild für Tabellen und Bilder auch das Lehrbuch „Physik für Ingenieure“ (Festkörperphysik) | offen (nach M6, M12 und M6b; die Skripte und Buchfotos kommen vom Nutzer; früher, falls die Werkstoffkunde-Klausur früher ist) |
 | M6 | **Neue Struktur** (ersetzt „Themen einzeln üben“, Idee des Nutzers, 10.11.2026): drei getrennte Fragen – was tust du (Tätigkeit als Kachel: Vereinfachen, Gleichungen umstellen, Ableiten), womit (Bausteine ankreuzen, ein Thema gezielt mit „nur“), wie schwer (Stufe = nur Verschachtelung, nie neuer Stoff); aufgeräumte Startseite, Fortschritt je Baustein, „Meine Schwächen“, Knopf „Überspringen“, ohne Kopfzeile, Startseite nur mit Fächern. Entwurf: [PLAN-M6.md](PLAN-M6.md) | offen: als Nächstes nach M4, vor M5 |
 | M6b | **Bilder in Mathe** (Wunsch des Nutzers, 10.11.2026): gemeinsame Zeichen-Grundlage (Koordinatensystem, Graph, Pfeile, Einheitskreis, Zahlenebene); je Baustein ein Bild in Aufgaben und Lernkarten (Graph bei e-Funktion und Logarithmus, Tangente beim Ableiten, Fläche beim Integral, Einheitskreis bei Winkelfunktionen, Pfeile bei Vektoren, Zahlenebene bei komplexen Zahlen); Aufgaben wie „Welcher Graph gehört zur Funktion?“. Später Bilder zum Anfassen (Punkt verschieben). Ausblick in [PLAN-M6.md](PLAN-M6.md) | offen: direkt nach M6, vor M5 |
 | M7 | **Vektoren** als eigenes Gebiet: Rechnen mit Vektoren, Länge, Skalarprodukt, Winkel, Kreuzprodukt, Projektion (ob Geraden und Ebenen dazukommen, klären wir beim Plan) | offen |
 | M8 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
 | M9 | weitere Themen aus Mathematik MB1, „Ableiten" nachschärfen | offen |
-| M10 | Physik: Formeln mit Einheiten (Formeln umstellen mit Zeichen der Physik; Aufgaben lösen: Formel wählen, umstellen, Werte mit Einheiten einsetzen) | offen |
+| M10 | Physik: Formeln mit Einheiten (Formeln umstellen mit Zeichen der Physik; Aufgaben lösen: Formel wählen, umstellen, Werte mit Einheiten einsetzen); Maßstab und Ideen für Übungen: das Lehrbuch „Physik für Ingenieure“ (eigene Aufgaben, eigene Zahlen) | offen |
 | M11 | Technische Mechanik: Freischnitt, Gleichgewicht, Lagerkräfte, statische Bestimmtheit | offen |
+| M12 | **Nachschlagewerk** (Wunsch des Nutzers, 11.11.2026): zu jedem Thema Seiten zum gezielten Lesen und Nachschlagen, ausführlicher als die Lernkarten: Erklärungen, alle Formeln (Formelsammlung je Fach), Tabellen mit Bildern (selbst gestaltet und gezeichnet; Vorbild u. a. die Tabellen im Lehrbuch „Physik für Ingenieure“), Beispiele aus der Engine, Suche über alle Themen, Verweise auf Lernkarten und Üben; Inhalte abgesichert wie die Lernkarten. Zuerst Rahmen und Chemie, danach bekommt jedes neue Fach sein Nachschlagewerk gleich mit | offen (direkt nach M6; vorher Plan mit Entwurf zum Ansehen) |
 | Später | Konto und Sync, Teilen mit Kommilitonen, App-Store-Version, optional KI-Hilfe | offen |
 
 ## Vorgemerkt
@@ -28,9 +29,21 @@ Stand: 11.11.2026
   gezeichnet (nie aus den Skripten), am Handy und im dunklen Design lesbar;
   Tests prüfen, dass Bild und Aufgabe zusammenpassen. Bilder zum Anfassen
   erst, wenn die festen laufen.
-- **Reihenfolge nach Chemie** (Wunsch des Nutzers, 10.11.2026): Nach M4 kommt
-  zuerst M6 (neue Struktur, Entwurf in [PLAN-M6.md](PLAN-M6.md)), dann M6b
-  (Bilder in Mathe), danach M5 (Werkstoffkunde), damit Werkstoffkunde gleich in der neuen Struktur entsteht.
+- **Reihenfolge nach Chemie** (Wunsch des Nutzers, 10.11.2026, geändert
+  11.11.2026): Bis Teil 1 der Klausur noch S10 (Inhalts-Check) und S11
+  (Klausur-Start). Nach Teil 1 kommt zuerst M6 (neue Struktur, Entwurf in
+  [PLAN-M6.md](PLAN-M6.md)), dann M12 (Nachschlagewerk), dann die übrigen
+  Chemie-Schritte N2 bis N5 für Teil 2 (N3 und N4 vorziehen, sobald die
+  Skripte da sind), dann M6b (Bilder in Mathe), danach M5 (Werkstoffkunde),
+  damit Werkstoffkunde gleich in der neuen Struktur und mit Nachschlagewerk
+  entsteht. M6 wartet also nicht mehr bis Januar.
+- **Lehrbuch „Physik für Ingenieure“** (Fotos des Nutzers, 11.11.2026): Kapitel
+  Kernphysik und Festkörperphysik, passend zu Chemie und Werkstoffkunde, teils
+  weiter als die Vorlesung; später auch für Physik (M10). Die Fotos liegen
+  nicht im Repo: Der Nutzer lädt in der Sitzung, die sie braucht, nur die
+  passenden Seiten hoch (wie die Skripte). Tabellen und Bilder dienen als
+  Vorbild und werden selbst gestaltet nachgebaut; Regeln in
+  [CHEMIE.md](CHEMIE.md) §1.
 - **Neue Reihenfolge** (Wunsch des Nutzers, 10.11.2026): Chemie zuerst, weil
   sie für den Nutzer gerade am wichtigsten ist. „Brüche" und „Gleichungen
   umstellen" bekommen vorerst keine neuen Inhalte; stattdessen werden ihre
@@ -105,7 +118,9 @@ feste Regeln: [CHEMIE.md](CHEMIE.md)
   - [x] S9. Probeklausur Teil 1 (50 Punkte)
     - [x] S9a. Probeklausur schreiben und auswerten (Deckblatt, Uhr, Springen, Stand bleibt, Hinweis auf die 40 Punkte)
     - [x] S9b. Periodensystem und Formelsammlung in der Klausur, Verlauf, Übungsvorschläge, Wiederholung
-- Nach Teil 1 (Teil 2 im Januar 2027, daher in dieser Reihenfolge):
+  - [ ] S10. Inhalts-Check vor der Klausur (Durchsicht 11.11.2026): alle Fragen, Rechnungen und Lernkarten von Teil 1 gegen die Skripte, Prüfung aus mehreren Blickwinkeln, Rechenaufgaben aus dem Lehrbuch als Gegenprobe; bei Bedarf je Gebiet geteilt, je Sitzung nur das passende Skript
+  - [ ] S11. Klausur-Start: Probeklausur und „heute fällige Wiederholung“ oben auf Start- und Chemie-Seite; kurzer Klausur-Überblick (je Klausuraufgabe, wie sicher, letzte Probeklausur) statt der langen Fortschritt-Seite
+- Nach Teil 1 (Teil 2 im Januar 2027; erst nach M6 und M12, N3 und N4 vorziehen, sobald die Skripte da sind):
   - [x] N1. Weitere Fragearten (Wähle alle richtigen, Zuordnen, Ordnen)
     - [x] N1a. „Wähle alle richtigen“ (ankreuzen, prüfen, je Aussage bewertet) mit Fragen in allen Themen
     - [x] N1b. Zuordnen (je Zeile ein Ziel, Knöpfe oder Liste, typische Verwechslungen) mit Fragen in allen Themen

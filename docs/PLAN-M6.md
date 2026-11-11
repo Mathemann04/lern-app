@@ -122,6 +122,19 @@ neben jedem Baustein). Eigene Themenseiten braucht es dafür nicht.
 - „Integrieren“ als eigene Tätigkeit (heute nur als Werkzeug in Stufe 5 von
   „Gleichungen umstellen“).
 
+## Befunde der Durchsicht (11.11.2026)
+
+- Die Fach-Seite bekommt neben Üben, Lernkarten und Klausur einen Platz für
+  „Nachschlagen“ (M12), damit das Nachschlagewerk ohne neuen Umbau dazukommt.
+- „Fortschritt“ ist rund 16 Bildschirme lang (jede Stufe jedes Themas, Mathe
+  zuerst, auch nie geübte). Neu: je Fach kurz, Geübtes zuerst, Einzelheiten
+  erst beim Antippen. Den Klausur-Überblick für Chemie baut S11 schon vorher;
+  M6 übernimmt ihn.
+- Heute fällige Wiederholung sichtbar machen (S11) und in die neue Startseite
+  übernehmen.
+- Die Nummer der Aufgabe („Aufgabe 1-505136“) steht über jeder Aufgabe, wird
+  aber nur für „Frage melden“ gebraucht: kleiner oder erst dort zeigen.
+
 ## Ausblick: M6b, Bilder in Mathe (direkt nach M6)
 
 Wunsch des Nutzers vom 10.11.2026: wie bei Brilliant mehr mit Bildern lernen.

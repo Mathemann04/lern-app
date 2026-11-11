@@ -801,3 +801,13 @@ Neue Entscheidungen unten anfügen.
   jede Lage der Elektronen in einer Reihe und beide Spinrichtungen als richtig, solange Pauli und Hund erfüllt sind (die
   Bilder der App zeichnen erst die Paare, dann ↑). Anders als bei den neuen Fragearten aus N1 darf man nach einem Fehler
   weiter tippen, wie bei der Auswahl und beim Eintippen von Zahlen: Die Rückmeldung nennt nur den Fehler, nicht die Lösung.
+  N2a entstand parallel zur neuen Reihenfolge (S10, S11, dann M6 und M12); N2b bis N2f warten bis nach M6 und M12.
+- 11.11.2026: Durchsicht der App nach dem Klausur-Sprint. Vor Teil 1 noch S10
+  (Inhalts-Check aller Inhalte von Teil 1 gegen die Skripte, weil in zwei Tagen sehr
+  viel entstanden ist und jeder Schritt nur einzeln geprüft wurde) und S11
+  (Klausur-Start: Probeklausur und fällige Wiederholung oben, kurzer
+  Klausur-Überblick). Nach Teil 1 zuerst M6, dann das neue Nachschlagewerk M12
+  (Wunsch des Nutzers), dann N2 bis N5; so wartet der Umbau nicht bis Januar.
+  Fotos aus dem Lehrbuch „Physik für Ingenieure“ (Kernphysik, Festkörperphysik)
+  werden wie die Skripte nur in der Sitzung hochgeladen; ihre Tabellen und Bilder
+  werden selbst gestaltet nachgebaut (CHEMIE.md §1, Quelle 6).

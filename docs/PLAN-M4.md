@@ -1250,7 +1250,9 @@ braucht es erst für N3 und N4.
   Geteilt (11.11.2026) in N2a Orbital-Kästchen, N2b Koeffizienten-Felder,
   N2c Baukasten Massenwirkungsgesetz, N2d Knöpfe für Konfigurationen, N2e
   Element-Tastatur, N2f Lewis-Baukasten; zuerst das, was in Teil 1 der
-  Klausur vorkommt.
+  Klausur vorkommt. N2a entstand am selben Tag, kurz bevor die neue
+  Reihenfolge feststand (S10 und S11 vor Teil 1, danach M6 und M12); N2b bis
+  N2f kommen nach M6 und M12.
   **N2a** (fertig): Die Rechnung „Kästchen“ im Thema Elektronen ist jetzt
   zum Antippen, in allen drei Stufen: je Unterschale eine Reihe Kästchen
   (bei Kalium und Calcium auch die leere 3d), Tippen schaltet leer → ↑ → ↓
