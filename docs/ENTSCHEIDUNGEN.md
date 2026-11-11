@@ -630,3 +630,9 @@ Neue Entscheidungen unten anfügen.
   Schwefelwasserstoff); die Stoffe der Übung (CH₄, HCl, H₂O als Reihe) kommen nicht zusammen
   vor. Schwefelwasserstoff wird nicht nach seiner stärksten Kraft gefragt (CHEMIE.md §6).
   In den Grundlagen gibt es nur eine Rechenart; Abwechslung mit eigener Kennzahl.
+  Nach der fachlichen Prüfung: Iodwasserstoff wie Schwefelwasserstoff nicht nach seiner stärksten Kraft
+  gefragt (ΔEN 0,46 nahe 0,5); „ähnliche Molmasse“ als Begründung nur bis 25 % Unterschied; Edelgase
+  ohne Fragen zu Atombindungen; Propan-1-ol und Butan-1-ol statt „Propanol“ und „Butanol“ (Isomere
+  sieden anders); Chlor- und Fluorwasserstoff nicht in „Lösen“ (sie reagieren mit Wasser). Zwei Fragen
+  gestrichen (301 glich in der Form Klausuraufgabe 3c, 309 einer Übungsaufgabe), ersetzt durch 316 und
+  317; Erklärungen „Warum ist das falsch?“ ohne die Lösung.

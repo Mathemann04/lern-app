@@ -21,7 +21,10 @@ const textWrong = (rule: string, text: string): WrongValue => ({ rule, key: text
 const nameOf = (x: ZmkSubstance) => `$${ce(x.id)}$ (${x.name})`
 
 // Stoffe, deren stärkste Kraft die App nicht fragt (Polarität nicht gefragt, CHEMIE.md §6)
-const UNCLEAR = new Set(['H2S'])
+// Iodwasserstoff: ΔEN 0,46 liegt zu nah an 0,5 (CHEMIE.md §5)
+export const UNCLEAR = new Set(['H2S', 'HI'])
+// Edelgase sind einzelne Atome: keine Atombindungen, nichts zum „Zerfallen“
+const isAtom = (x: ZmkSubstance) => /^[A-Z][a-z]?$/.test(x.id)
 
 // polare Bindungen im Molekül (nach Pauling), auch wenn das Molekül unpolar ist (CCl₄)
 function hasPolarBonds(x: ZmkSubstance): boolean {
@@ -80,7 +83,7 @@ function forceStep(x: ZmkSubstance, rng: Rng, focus?: string): GuidedStep | null
     other('dipol-dipol', 'chem-zmk-hbond-missed')
     other('van-der-waals', 'chem-zmk-polar-ignored')
   }
-  wrong.push(textWrong('chem-zmk-intra', INTRA))
+  if (!isAtom(x)) wrong.push(textWrong('chem-zmk-intra', INTRA))
   const correct = FORCE_NAME[force]
   const choices = stepChoices(rng, { key: correct, content: correct }, wrong, focus)
   if (choices.length === 0) return null
@@ -128,7 +131,7 @@ function forceTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCa
   const first = hbondStep(x, rng, focus)
   const second = forceStep(x, rng, focus)
   if (!second) return null
-  const steps = [...(first ? [first] : []), second, ...(level === 3 ? [evaporateStep(x, rng, focus)!] : [])]
+  const steps = [...(first ? [first] : []), second, ...(level === 3 && !isAtom(x) ? [evaporateStep(x, rng, focus)!] : [])]
   return {
     task: {
       ref,
@@ -146,10 +149,16 @@ function forceTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCa
 // --- Siedepunkte ordnen ---
 
 // Regel für eine Auswahl: alle gleiche Kraft → Größe; alle verschieden → Art der Kraft; sonst beides
+// Ähnliche Molmasse: höchstens 25 % Unterschied zwischen der kleinsten und der größten
+export const similarMasses = (ids: readonly string[]) => {
+  const masses = ids.map((id) => molarMassOf(zmkById(id)))
+  return Math.max(...masses) / Math.min(...masses) <= 1.25
+}
+
 export function ruleOf(ids: readonly string[]): BoilRule {
   const forces = new Set(ids.map((id) => forceOf(zmkById(id))))
   if (forces.size === 1) return 'mass'
-  if (forces.size === ids.length) return 'force'
+  if (forces.size === ids.length && similarMasses(ids)) return 'force'
   return 'force-then-mass'
 }
 
@@ -188,7 +197,7 @@ function boilTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCal
   const choices = stepChoices(rng, { key: orderText(correct), content: orderText(correct) }, wrong, focus)
   if (choices.length === 0) return null
   const masses = subs.map((x) => `$M(${ce(x.id)}) = ${String(Math.round(molarMassOf(x) * 10) / 10).replace('.', '{,}')}\\,\\mathrm{g/mol}$`).join(', ')
-  const forces = subs.map((x) => `$${ce(x.id)}$: ${FORCE_NAME[forceOf(x)]}`).join('; ')
+  const forces = subs.map((x) => `$${ce(x.id)}$: ${UNCLEAR.has(x.id) ? 'keine Wasserstoffbrücken' : FORCE_NAME[forceOf(x)]}`).join('; ')
   const steps: GuidedStep[] = [
     {
       id: 'reihenfolge',
@@ -233,7 +242,8 @@ function boilTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCal
 
 // --- Lösen ---
 
-const IN_WATER = ['CH3OH', 'C2H5OH', 'NH3', 'HCl', 'HF']
+// Chlor- und Fluorwasserstoff nicht: Sie lösen sich vor allem, weil sie mit Wasser reagieren (Säure-Base)
+const IN_WATER = ['CH3OH', 'C2H5OH', 'NH3', 'C3H7OH']
 const IN_HEXANE = ['I2', 'Br2', 'CCl4', 'C8H18', 'C7H16', 'CH4']
 
 const SOLVE = {

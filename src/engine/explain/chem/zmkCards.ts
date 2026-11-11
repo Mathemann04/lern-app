@@ -16,11 +16,11 @@ export const ZMK_CARDS: readonly Card[] = [
     when: 'Wenn es um Siedepunkte, Schmelzpunkte oder das Mischen von Stoffen geht.',
     examples: [
       {
-        chemTask: String.raw`$\ce{CH4}$, $\ce{HCl}$, $\ce{NH3}$`,
+        chemTask: String.raw`$\ce{Ar}$, $\ce{CH3Cl}$, $\ce{HF}$`,
         lines: [
-          { label: 'Methan: unpolar, nur Van-der-Waals-Kräfte' },
-          { label: 'Chlorwasserstoff: polar, Dipol-Dipol-Kräfte' },
-          { label: 'Ammoniak: H an N, Wasserstoffbrücken' },
+          { label: 'Argon: einzelne Atome, nur Van-der-Waals-Kräfte' },
+          { label: 'Chlormethan: polar, Dipol-Dipol-Kräfte' },
+          { label: 'Fluorwasserstoff: H an F, Wasserstoffbrücken' },
         ],
       },
       {

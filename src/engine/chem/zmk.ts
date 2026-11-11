@@ -78,13 +78,13 @@ export const ZMK_SUBSTANCES: readonly ZmkSubstance[] = [
   s('C4H10', 'Butan', 1, false, false, -1),
   s('C5H12', 'Pentan', 1, false, false, 36),
   s('C6H14', 'Hexan', 1, false, false, 69),
-  s('C7H16', 'Heptan', 3, false, false, 98),
-  s('C8H18', 'Octan', 3, false, false, 126),
+  s('C7H16', 'Heptan', 1, false, false, 98),
+  s('C8H18', 'Octan', 1, false, false, 126),
   // Alkohole
   s('CH3OH', 'Methanol', 1, true, true, 65),
   s('C2H5OH', 'Ethanol', 1, true, true, 78),
-  s('C3H7OH', 'Propanol', 1, true, true, 97),
-  s('C4H9OH', 'Butanol', 3, true, true, 118),
+  s('C3H7OH', 'Propan-1-ol', 1, true, true, 97),
+  s('C4H9OH', 'Butan-1-ol', 1, true, true, 118),
   // weitere polare Stoffe ohne Wasserstoffbrücken untereinander
   s('CH3Cl', 'Chlormethan', 1, true, false, -24),
   s('CH2Cl2', 'Dichlormethan', 1, true, false, 40),

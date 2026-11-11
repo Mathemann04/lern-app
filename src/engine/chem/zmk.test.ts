@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { cardById } from '../explain/cards.ts'
 import { createRng } from '../random/rng.ts'
-import { ZMK_STEPS, boilTask, pickBoilSet, ruleOf, solveTask } from './generators/zmk.ts'
+import { generatedCalc } from './generators/index.ts'
+import { UNCLEAR, ZMK_STEPS, boilTask, pickBoilSet, ruleOf, similarMasses, solveTask } from './generators/zmk.ts'
+import { bondTypeAskable, bondTypeOf, deltaEn, PAULING } from './electronegativity.ts'
+import { atomCounts, parseFormula } from './formula.ts'
 import { moleculeById } from './molecules.ts'
 import { BOIL_GROUPS, ZMK_SUBSTANCES, forceOf, orderByBoil, orderByRule, zmkById } from './zmk.ts'
 
@@ -60,6 +63,31 @@ describe('Stoffdaten zwischenmolekulare Kräfte', () => {
     for (let i = 0; i < 200; i++) {
       const ids = pickBoilSet(3, createRng(`z${i}`))
       if (ids) expect(orderByRule(ids, ruleOf(ids))).toEqual(orderByBoil(ids))
+    }
+  })
+
+  it('fragt Dipol-Dipol-Kräfte nur bei Stoffen mit einer sicher polaren Bindung (CHEMIE.md §5)', () => {
+    for (const x of ZMK_SUBSTANCES.filter((x) => forceOf(x) === 'dipol-dipol' && !UNCLEAR.has(x.id))) {
+      const els = [...atomCounts(parseFormula(x.id)).keys()].filter((el) => PAULING[el] !== undefined)
+      const ok = els.some((a) => els.some((b) => a !== b && bondTypeAskable(a, b) && bondTypeOf(deltaEn(a, b)) === 'polar'))
+      expect(ok, x.id).toBe(true)
+    }
+    expect(UNCLEAR.has('HI')).toBe(true)
+  })
+
+  it('begründet mit „ähnlicher Molmasse" nur, wo die Molmassen wirklich ähnlich sind', () => {
+    expect(ruleOf(['H2O', 'H2S'])).toBe('force-then-mass')
+    expect(ruleOf(['HF', 'HCl'])).toBe('force-then-mass')
+    expect(ruleOf(['C2H6', 'CH2O', 'CH3OH'])).toBe('force')
+    for (const group of BOIL_GROUPS) for (const ids of subsets(group.ids)) if (ruleOf(ids) === 'force') expect(similarMasses(ids), ids.join()).toBe(true)
+  })
+
+  it('fragt bei Edelgasen nicht nach Atombindungen', () => {
+    for (let seed = 10000; seed < 10600; seed++) {
+      const calc = generatedCalc('chem-zmk', { level: 3, seed })!
+      if (!/^(He|Ne|Ar|Kr|Xe)$/.test(calc.substance)) continue
+      expect(calc.task.steps.map((s) => s.id)).not.toContain('sieden')
+      for (const step of calc.task.steps) for (const c of step.choices) expect(c.content).not.toMatch(/Atombindung/)
     }
   })
 

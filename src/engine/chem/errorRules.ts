@@ -1109,8 +1109,8 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
     name: 'Kräfte zwischen und in Molekülen verwechselt',
     wrongFormula: String.raw`\text{Sieden: Atombindungen brechen auf}`,
     why: {
-      detailed: 'Atombindungen halten die Atome innerhalb eines Moleküls zusammen und sind viel stärker als die Kräfte zwischen den Molekülen. Beim Schmelzen und Sieden lösen sich nur die Moleküle voneinander; sie selbst bleiben ganz.',
-      short: 'Zwischen den Molekülen wirken die schwachen Kräfte; die Moleküle bleiben ganz.',
+      detailed: 'Atombindungen halten die Atome innerhalb eines Moleküls zusammen und sind viel stärker als die Kräfte zwischen den Molekülen. Überlege, ob im Dampf andere Teilchen vorliegen als in der Flüssigkeit.',
+      short: 'Sind im Dampf andere Teilchen als in der Flüssigkeit?',
     },
   },
   {
@@ -1139,8 +1139,8 @@ export const CHEM_ERROR_RULES: readonly ChemErrorRule[] = [
     name: 'Größe der Moleküle übersehen',
     wrongFormula: String.raw`\text{Alkane: Art der Kraft entscheidet}`,
     why: {
-      detailed: 'Haben alle Stoffe dieselbe Art von stärkster Kraft, kann sie die Reihenfolge nicht erklären. Dann entscheidet die Größe: Größere Moleküle mit mehr Elektronen haben stärkere Van-der-Waals-Kräfte.',
-      short: 'Gleiche Art der Kraft: Die Größe entscheidet.',
+      detailed: 'Die Art der Kraft erklärt eine Reihenfolge nur, wenn sie sich zwischen den Stoffen unterscheidet. Prüfe, ob das hier so ist, und was sonst verschieden ist.',
+      short: 'Unterscheidet sich die Art der Kraft hier überhaupt?',
     },
   },
   {

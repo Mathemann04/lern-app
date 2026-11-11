@@ -24,7 +24,7 @@ const VARIETY: Readonly<Record<string, { distinct: number; maxShare: number }>> 
   // S5b: Es gibt nur etwa 40 sinnvolle Moleküle ohne Formalladungen, in den Grundlagen etwa 30
   'chem-molekuele': { distinct: 40, maxShare: 0.06 },
   // S5c: in den Grundlagen nur „stärkste Kraft“ mit etwa 30 Stoffen
-  'chem-zmk': { distinct: 30, maxShare: 0.07 },
+  'chem-zmk': { distinct: 28, maxShare: 0.07 },
 }
 const LEVELS: readonly Level[] = [1, 2, 3]
 const SAMPLE = 400
