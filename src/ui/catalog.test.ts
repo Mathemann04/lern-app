@@ -3,6 +3,7 @@ import { TOPICS, topicById } from '../engine/explain/cards.ts'
 import { ERRORS_BY_COURSE } from '../engine/errorCatalog.ts'
 import { toLatex } from '../engine/expr/print.ts'
 import { isMathTask } from '../engine/guided/types.ts'
+import { chemCourseEngine } from '../engine/chem/engine.ts'
 import {
   ATOMBAU,
   AVAILABLE_COURSES,
@@ -14,6 +15,7 @@ import {
   courseOfCards,
   isAreaAvailable,
   isChemCourse,
+  isFreeAt,
   isMixAvailable,
   levelCount,
   levelName,
@@ -50,6 +52,17 @@ describe('Aufbau der App (Fächer, Gebiete, Themen)', () => {
       const seed = engine.nextSeed ? engine.nextSeed(level) : 1
       const plan = engine.planGuidedTask({ level, seed })
       expect(plan.steps.length, course.id).toBeGreaterThan(0)
+      // Chemie frei (S8b): genau die Stufen mit Rechnungen zum Eintippen, und dort kommt eine solche
+      if (isChemCourse(course.id)) {
+        const chem = chemCourseEngine(course.id)
+        for (const l of course.levels.filter((x) => x.available)) {
+          expect(isFreeAt(course, l.level), `${course.id} ${l.level}`).toBe(chem.hasFree(l.level))
+          if (!isFreeAt(course, l.level)) continue
+          const freeTask = chem.planGuidedTask({ level: l.level, seed: chem.nextSeed(l.level, undefined, undefined, true) })
+          expect(freeTask.steps.some((s) => s.numeric), `${course.id} ${l.level}`).toBe(true)
+        }
+        continue
+      }
       // freier Modus: das Ergebnis des geführten Modus (Mathe-Engine) gilt als richtig
       if (course.free) {
         if (!isMathTask(plan)) throw new Error(`${course.id}: freier Modus ohne Ergebnis als Term`)

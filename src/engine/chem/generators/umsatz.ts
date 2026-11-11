@@ -8,7 +8,7 @@ import { atomCounts, formulaLatex, parseFormula } from '../formula.ts'
 import { type MassValues, elementMolarMass, molarMass } from '../molarMass.ts'
 import { CO2, FUELS, H2O, O2, REACTIONS } from '../reactions.ts'
 import { type Substance, SUBSTANCES } from '../substances.ts'
-import { type ChemCalc, type ChemGenerator, stepChoices, tolerantWrongs, usesExamNumbers } from './shared.ts'
+import { type ChemCalc, type ChemGenerator, stepChoices, tolerantNumeric, tolerantWrongs, usesExamNumbers } from './shared.ts'
 import { NICE_N, eqSign, given, mLatex, molarLatex, molarSteps, nLatex, nStep, sig, valuesOf } from './stoffmenge.ts'
 
 // Rechnung „Umsatz" (Plan M4, Thema 4.2, Klausur 4c) in drei Schritten: Stoffmenge des gegebenen Stoffs →
@@ -99,10 +99,7 @@ function generate(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCal
   const nT = ratMul(nG, ratDiv(nuT, nuG))
   const ratioLine = `${nLatex(st)} = ${nLatex(sg)} \\cdot \\frac{${nuT.n}}{${nuG.n}} = ${sig(nG)}\\,\\mathrm{mol} \\cdot \\frac{${nuT.n}}{${nuG.n}} ${eqSign(nT)} ${sig(nT)}\\,\\mathrm{mol}`
   const molLatex = (r: Rational) => `${sig(r)}\\,\\mathrm{mol}`
-  const ratioChoices = stepChoices(
-    rng,
-    { key: molLatex(nT), content: `$${molLatex(nT)}$` },
-    tolerantWrongs(
+  const ratioWrong = tolerantWrongs(
       nT,
       [
         { rule: 'chem-ratio-one', value: nG },
@@ -114,15 +111,15 @@ function generate(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCal
           .map((t) => ({ rule: 'chem-ratio-other-coefficient', value: ratMul(nG, ratDiv(t.coefficient, nuG)) })),
       ],
       molLatex,
-    ),
-    focus,
-  )
+    )
+  const ratioChoices = stepChoices(rng, { key: molLatex(nT), content: `$${molLatex(nT)}$` }, ratioWrong, focus)
   if (ratioChoices.length === 0) return null
   steps.push({
     id: 'verhaeltnis',
     title: 'Verhältnis',
     question: `Wie groß ist die Stoffmenge $${nLatex(st)}$?`,
     choices: ratioChoices,
+    numeric: tolerantNumeric(nT, ratioWrong, String.raw`\mathrm{mol}`),
     hint: 'Die Koeffizienten der Gleichung sagen, wie viele Teilchen der beiden Stoffe zusammengehören.',
     explanation: {
       detailed: `Laut Gleichung gehören zu ${nuG.n} Teilchen $${formulaLatex(g.formula)}$ genau ${nuT.n} Teilchen $${formulaLatex(target.formula)}$; dasselbe Verhältnis gilt für die Stoffmengen: $${ratioLine}$.`,
@@ -143,26 +140,23 @@ function generate(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCal
   const gLatex = (r: Rational) => `${sig(r)}\\,\\mathrm{g}`
   const similar = SIMILAR[target.text]
   const massLine = `${mLatex(st)} = n \\cdot M = ${sig(nTShown)}\\,\\mathrm{mol} \\cdot ${molarLatex(massT, values)} ${eqSign(mT)} ${sig(mT)}\\,\\mathrm{g}`
-  const massChoices = stepChoices(
-    rng,
-    { key: gLatex(mT), content: `$${gLatex(mT)}$` },
-    tolerantWrongs(
-      mT,
-      [
-        { rule: 'chem-m-divided', value: ratDiv(nTShown, massT) },
-        { rule: 'chem-ratio-wrong-molar-mass', value: ratMul(nTShown, massG) },
-        ...(similar ? [{ rule: 'chem-similar-molar-mass', value: ratMul(nTShown, molarMass(parseFormula(similar), values)) }] : []),
-      ],
-      gLatex,
-    ),
-    focus,
+  const massWrong = tolerantWrongs(
+    mT,
+    [
+      { rule: 'chem-m-divided', value: ratDiv(nTShown, massT) },
+      { rule: 'chem-ratio-wrong-molar-mass', value: ratMul(nTShown, massG) },
+      ...(similar ? [{ rule: 'chem-similar-molar-mass', value: ratMul(nTShown, molarMass(parseFormula(similar), values)) }] : []),
+    ],
+    gLatex,
   )
+  const massChoices = stepChoices(rng, { key: gLatex(mT), content: `$${gLatex(mT)}$` }, massWrong, focus)
   if (massChoices.length === 0) return null
   steps.push({
     id: 'masse-gesucht',
     title: 'Masse',
     question: `Wie groß ist die Masse $${mLatex(st)}$?`,
     choices: massChoices,
+    numeric: tolerantNumeric(mT, massWrong, String.raw`\mathrm{g}`),
     hint: 'Welche Molmasse gehört zu dem Stoff, nach dem gefragt ist?',
     explanation: { detailed: `Stoffmenge mal molare Masse des gesuchten Stoffs: $${massLine}$.`, short: `$${massLine}$` },
     established: massLine,
@@ -191,6 +185,7 @@ function generate(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCal
 export const UMSATZ_GENERATORS: readonly ChemGenerator[] = [
   {
     kind: 'umsatz',
+    free: true,
     part: 'umsatz',
     weights: { 1: 0.3, 2: 0.35, 3: 0.45 },
     errors: ['chem-molar-index', 'chem-molar-atomic-number', 'chem-molar-coefficient', 'chem-n-times', 'chem-n-inverted', 'chem-ratio-one', 'chem-ratio-swapped', 'chem-ratio-product-only', 'chem-ratio-other-coefficient', 'chem-m-divided', 'chem-ratio-wrong-molar-mass', 'chem-similar-molar-mass'],

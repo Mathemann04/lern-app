@@ -3,7 +3,7 @@ import type { GuidedStep } from '../../guided/types.ts'
 import type { Rng } from '../../random/rng.ts'
 import type { Level, TaskRef } from '../../tasks/taskNumber.ts'
 import { ELEMENTS, type Element, elementByZ } from '../elements.ts'
-import { type ChemCalc, type ChemGenerator, type WrongValue, stepChoices } from './shared.ts'
+import { type ChemCalc, type ChemGenerator, type WrongValue, exactNumeric, stepChoices } from './shared.ts'
 
 // Rechnung „Protonen, Neutronen, Elektronen" (Plan M4, Thema 1.1): Aus einem Teil der Angaben zu einem
 // Atom oder Ion (Element, Massenzahl, Protonen, Neutronen, Elektronen, Ladung) die übrigen bestimmen.
@@ -283,7 +283,9 @@ function stepsOf(t: Particle, set: GivenSet, withCharge: boolean, rng: Rng, pref
   if (!withCharge) known.add('q')
   const steps: GuidedStep[] = []
   for (const field of askedFields(set, withCharge)) {
-    const choices = stepChoices(rng, correctOf(t, field), wrongValues(t, field, known), focus)
+    const correct = correctOf(t, field)
+    const wrong = wrongValues(t, field, known)
+    const choices = stepChoices(rng, correct, wrong, focus)
     if (choices.length === 0) return null
     const card = cardOf(t, field)
     steps.push({
@@ -291,6 +293,8 @@ function stepsOf(t: Particle, set: GivenSet, withCharge: boolean, rng: Rng, pref
       title: prefix ? `Teilchen ${prefix}: ${TITLES[field]}` : TITLES[field],
       question: prefix ? `Teilchen ${prefix}: ${QUESTIONS[field]}` : QUESTIONS[field],
       choices,
+      // frei (S8b): Zahlen genau; das Element bleibt eine Auswahl
+      ...(field === 'element' ? {} : { numeric: exactNumeric(correct.key, wrong, '', field === 'q' ? 'Ladung als Zahl mit Vorzeichen, z. B. $-2$; ungeladen $0$.' : undefined) }),
       hint: hint(t, field),
       explanation: explanation(t, field),
       established: prefix ? String.raw`\text{(${prefix}) } ${established(t, field)}` : established(t, field),
@@ -383,6 +387,7 @@ const ION_ERRORS = ['chem-ion-charge-ignored', 'chem-ion-charge-sign', 'chem-ele
 export const PARTICLE_GENERATORS: readonly ChemGenerator[] = [
   {
     kind: 'pne-atom',
+    free: true,
     part: 'teilchen',
     weights: { 1: 1, 2: 0.3 },
     errors: PARTICLE_ERRORS,
@@ -390,6 +395,7 @@ export const PARTICLE_GENERATORS: readonly ChemGenerator[] = [
   },
   {
     kind: 'pne-ion',
+    free: true,
     part: 'isotope-ionen',
     weights: { 2: 0.4 },
     errors: [...PARTICLE_ERRORS, ...ION_ERRORS],
@@ -397,6 +403,7 @@ export const PARTICLE_GENERATORS: readonly ChemGenerator[] = [
   },
   {
     kind: 'pne-pair',
+    free: true,
     part: 'isotope-ionen',
     weights: { 3: 1 },
     errors: [...PARTICLE_ERRORS, ...ION_ERRORS],

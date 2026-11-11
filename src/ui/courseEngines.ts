@@ -17,7 +17,8 @@ export type CourseEngine = {
   // Nummer einer neuen Aufgabe dieser Stufe; ohne Angabe eine zufällige (randomSeed). Wissensfragen:
   // shown sind die Fragen, die in der laufenden Runde schon dran waren (state/questionRounds.ts); parts
   // die angekreuzten Unterthemen (ohne Angabe alle; kommen sie in der Stufe nicht vor, gelten alle)
-  nextSeed?(level: Level, shown?: ReadonlySet<number>, parts?: ReadonlySet<string>): number
+  // free: freier Modus (Chemie, S8b): nur Rechnungen mit Zahlen zum Eintippen
+  nextSeed?(level: Level, shown?: ReadonlySet<number>, parts?: ReadonlySet<string>, free?: boolean): number
   // Nur Wissensfragen: Nummern der Fragen, unter denen nextSeed mit diesen Unterthemen wählt (für die
   // Runde und die Mischung, ui/mix.ts)
   questionNos?(level: Level, parts?: ReadonlySet<string>): readonly number[]

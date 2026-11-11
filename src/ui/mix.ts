@@ -25,6 +25,8 @@ export type MixInput = {
   readonly partsOf: (course: string) => ReadonlySet<string> | undefined
   // Wiederholung des Themas (state/reviews.ts, reviewsOf); ohne Angabe keine
   readonly reviewOf?: (course: string) => CourseReviews | undefined
+  // freier Modus im Thema (Chemie, S8b: nur Rechnungen mit Zahlen); ohne Angabe geführt
+  readonly freeOf?: (course: string) => boolean
   // Zufall für die Wahl des Themas (in Tests fest)
   readonly random?: () => number
 }
@@ -56,11 +58,11 @@ type Weighted = { readonly course: Course; readonly nos: readonly number[] | und
 // durch sind, und danach kämen die Themen am Stück.) Engines ohne Wissensfragen (Mathe) zählen 1, Chemie-Themen
 // ohne Fragen in der Stufe (nur Rechnungen, z. B. „Stoffmenge und Umsatz" bis S3b) so viel wie ein Thema mit der
 // Mindestzahl an Fragen (CALC_ONLY_WEIGHT).
-export function mixWeights(input: Omit<MixInput, 'shownOf' | 'recentOf' | 'random' | 'reviewOf'>): readonly { readonly course: string; readonly weight: number }[] {
+export function mixWeights(input: Omit<MixInput, 'shownOf' | 'recentOf' | 'random' | 'reviewOf' | 'freeOf'>): readonly { readonly course: string; readonly weight: number }[] {
   return weighted(input).map(({ course, weight }) => ({ course: course.id, weight }))
 }
 
-function weighted({ courses, level, engineOf, partsOf }: Omit<MixInput, 'shownOf' | 'recentOf' | 'random' | 'reviewOf'>): Weighted[] {
+function weighted({ courses, level, engineOf, partsOf }: Omit<MixInput, 'shownOf' | 'recentOf' | 'random' | 'reviewOf' | 'freeOf'>): Weighted[] {
   return courses
     .filter((course) => isLevelAvailable(course, level))
     .map((course) => {
@@ -74,7 +76,7 @@ function weighted({ courses, level, engineOf, partsOf }: Omit<MixInput, 'shownOf
 // spielbaren Themen oder keine Fragen). Fällige Wiederholungen (reviewOf) kommen zuerst: das Thema mit der
 // am längsten fälligen Frage der Auswahl.
 export function pickMixed(input: MixInput): MixPick | null {
-  const { level, engineOf, shownOf, recentOf, partsOf, reviewOf, random = Math.random } = input
+  const { level, engineOf, shownOf, recentOf, partsOf, reviewOf, freeOf, random = Math.random } = input
   const choices = weighted(input).filter(({ weight }) => weight > 0)
   const sum = choices.reduce((total, { weight }) => total + weight, 0)
   if (sum === 0) return null
@@ -94,6 +96,6 @@ export function pickMixed(input: MixInput): MixPick | null {
   }
   const id = chosen.course.id
   const parts = partsOf(id)
-  const { seed, newRound } = pickNewSeed(engineOf(id), level, recentOf(id), shownOf(id), parts, reviewOf?.(id))
+  const { seed, newRound } = pickNewSeed(engineOf(id), level, recentOf(id), shownOf(id), parts, reviewOf?.(id), freeOf?.(id) ?? false)
   return { course: id, seed, newRound, nos: chosen.nos }
 }

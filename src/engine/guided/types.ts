@@ -1,6 +1,7 @@
 import type { RuleId } from '../derive/rules.ts'
 import type { Explanation } from '../explain/texts.ts'
 import type { Expr } from '../expr/types.ts'
+import type { NumericAnswer } from '../quantity/judge.ts'
 import type { TaskRef } from '../tasks/taskNumber.ts'
 
 // Geführter Modus, für alle Themen gleich: eine Aufgabe als Folge von Bildschirm-Schritten mit
@@ -44,6 +45,8 @@ export type GuidedStep = {
   readonly cards: readonly string[]
   // Bild unter der Frage (Id aus engine/chem/figures.ts), z. B. ein Ionengitter
   readonly figure?: string
+  // Zahl als Ergebnis: Im freien Modus (Chemie, S8b) tippt man sie selbst ein, statt auszuwählen
+  readonly numeric?: NumericAnswer
 }
 
 // Gemeinsame Basis aller geführten Aufgaben: Mathe-Aufgaben mit Term (GuidedTask) und Wissensfragen

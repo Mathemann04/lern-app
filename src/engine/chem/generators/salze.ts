@@ -1,8 +1,10 @@
 import type { GuidedStep } from '../../guided/types.ts'
+import type { NumericAnswer } from '../../quantity/judge.ts'
 import type { Rng } from '../../random/rng.ts'
+import { rat } from '../../rational.ts'
 import type { Level, TaskRef } from '../../tasks/taskNumber.ts'
 import { ANIONS, CATIONS, type Ion, ROMAN, ionCe, isAllowedSalt, isSoluble, meltsAsIons, saltFormula, saltIndices, saltName } from '../ions.ts'
-import { type ChemCalc, type ChemGenerator, type WrongValue, stepChoices } from './shared.ts'
+import { type ChemCalc, type ChemGenerator, type WrongValue, numericWrong, stepChoices } from './shared.ts'
 
 // Rechnungen zum Thema „Ionenbindung und Salze" (Plan M4, Thema 3.1):
 // - Formel aus dem Namen (Unterthema „formel"): Ionen mit Ladung → Formel mit den kleinsten ganzen Zahlen
@@ -302,6 +304,12 @@ const FORMATION: Readonly<Record<string, number>> = { LiF: -616, LiCl: -409, NaF
 
 const kj = (n: number) => `${n < 0 ? '-' : ''}${Math.abs(n)}\\,\\mathrm{kJ/mol}`
 const signed = (n: number) => (n < 0 ? `(${n})` : `${n}`)
+// frei (S8b): Ergebnis in kJ/mol mit Toleranz wie andere Rechnungen; Fehler mit dem Wert der Lösung fallen weg
+const kjNumeric = (value: number, wrong: readonly { rule: string; value: number }[]): NumericAnswer => ({
+  value: rat(value),
+  unit: String.raw`\mathrm{kJ/mol}`,
+  wrongs: wrong.filter((w) => w.value !== value).map((w) => numericWrong(w.rule, rat(w.value))),
+})
 
 function bornHaberTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc | null {
   const m = rng.pick(METALS)
@@ -347,6 +355,7 @@ function bornHaberTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): Ch
           title: 'Weg zu den Ionen',
           question: `Wie viel Energie braucht der Weg von den Elementen zu den Ionen $${ce(ionGas)}$?`,
           choices: first,
+          numeric: kjNumeric(sum, sumWrong),
           hint: 'Metall verdampfen, ionisieren; Halogen-Moleküle spalten (wie viele braucht man?), Elektronen anlagern. Achte auf die Vorzeichen.',
           explanation: {
             detailed: `Sublimation, Ionisierung, halbe Bindungsenergie (es wird nur ein Halogen-Atom gebraucht) und Elektronenaffinität: $${sumLine}\\,\\mathrm{kJ/mol}$.`,
@@ -360,6 +369,7 @@ function bornHaberTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): Ch
           title: askLattice ? 'Gitterenthalpie' : 'Bildungsenthalpie',
           question: askLattice ? 'Wie groß ist die Gitterenthalpie?' : 'Wie groß ist die Bildungsenthalpie?',
           choices: second,
+          numeric: kjNumeric(target, targetWrong),
           hint: 'Beide Wege von den Elementen zum Salz liefern dieselbe Energie: direkt über die Bildungsenthalpie oder über die Ionen und das Gitter.',
           explanation: askLattice
             ? {
@@ -418,6 +428,7 @@ export const SALZE_GENERATORS: readonly ChemGenerator[] = [
   },
   {
     kind: 'born-haber',
+    free: true,
     part: 'energie',
     weights: { 3: 0.14 },
     errors: ['chem-bh-ea-sign', 'chem-bh-full-bond', 'chem-bh-step-missing', 'chem-bh-subtracted-wrong', 'chem-bh-added', 'chem-bh-lattice-sign', 'chem-bh-ions-subtracted'],

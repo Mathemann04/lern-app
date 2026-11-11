@@ -8,7 +8,7 @@ import { elementBySymbol } from '../elements.ts'
 import { type CountMode, atomCounts, formulaLatex, hasBracket } from '../formula.ts'
 import { type MassValues, atomicNumberSum, elementMolarMass, molarMass } from '../molarMass.ts'
 import { type Substance, substancesOf } from '../substances.ts'
-import { type ChemCalc, type ChemGenerator, type WrongValue, stepChoices, tolerantWrongs, usesExamNumbers } from './shared.ts'
+import { type ChemCalc, type ChemGenerator, type WrongValue, stepChoices, tolerantNumeric, tolerantWrongs, unitOf, usesExamNumbers } from './shared.ts'
 
 // Rechnungen zum Thema „Stoffmenge und Umsatz" (Plan M4, Thema 4.2; Umsatz kommt mit S4):
 // - Molmasse (Unterthema „molmasse"): Atome zählen → Molmasse als Summe. Grundlagen einfache Formeln
@@ -118,6 +118,7 @@ export function molarSteps(s: Substance, values: MassValues, rng: Rng, focus?: s
     title: 'Molmasse',
     question: `Wie groß ist die molare Masse $M(${ce(s)})$?`,
     choices: massChoices,
+    numeric: tolerantNumeric(mass, massWrong, String.raw`\mathrm{g/mol}`),
     hint: 'Nimm die Molmasse jedes Elements so oft, wie das Atom in der Formel vorkommt, und zähle alles zusammen.',
     explanation: {
       detailed: `Die molare Masse ist die Summe der Molmassen aller Atome der Formel: $${sumLatex}$.`,
@@ -135,8 +136,9 @@ type Quantity = { readonly value: Rational; readonly latex: string }
 
 export function amountStep(id: string, correct: Quantity, wrong: { rule: string; value: Rational }[], unit: string, parts: Omit<GuidedStep, 'id' | 'choices'>, rng: Rng, focus?: string): GuidedStep | null {
   const latex = (r: Rational) => `${sig(r)}${unit}`
-  const choices = stepChoices(rng, { key: latex(correct.value), content: `$${latex(correct.value)}$` }, tolerantWrongs(correct.value, wrong, latex), focus)
-  return choices.length === 0 ? null : { id, choices, ...parts }
+  const wrongValues = tolerantWrongs(correct.value, wrong, latex)
+  const choices = stepChoices(rng, { key: latex(correct.value), content: `$${latex(correct.value)}$` }, wrongValues, focus)
+  return choices.length === 0 ? null : { id, choices, numeric: tolerantNumeric(correct.value, wrongValues, unitOf(unit)), ...parts }
 }
 
 // gerundet wie in einer Aufgabe (drei gültige Ziffern); auch Zwischenwerte: Ein Folgeschritt rechnet mit der
@@ -432,6 +434,7 @@ export const MOLAR_ERRORS = ['chem-molar-index', 'chem-molar-bracket', 'chem-mol
 export const STOFFMENGE_GENERATORS: readonly ChemGenerator[] = [
   {
     kind: 'molmasse',
+    free: true,
     part: 'molmasse',
     weights: { 1: 0.45, 2: 0.4, 3: 0.3 },
     errors: MOLAR_ERRORS,
@@ -439,6 +442,7 @@ export const STOFFMENGE_GENERATORS: readonly ChemGenerator[] = [
   },
   {
     kind: 'stoffmenge',
+    free: true,
     part: 'stoffmenge',
     weights: { 1: 0.55, 2: 0.6, 3: 0.7 },
     errors: [...MOLAR_ERRORS, 'chem-n-times', 'chem-n-inverted', 'chem-m-divided', 'chem-particles-divided', 'chem-atoms-molecules'],

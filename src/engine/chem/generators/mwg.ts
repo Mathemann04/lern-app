@@ -16,7 +16,7 @@ import {
   speciesCount,
   temperatureShift,
 } from '../equilibria.ts'
-import { type ChemCalc, type ChemGenerator, type WrongValue, stepChoices, tolerantWrongs } from './shared.ts'
+import { type ChemCalc, type ChemGenerator, type WrongValue, stepChoices, tolerantNumeric, tolerantWrongs } from './shared.ts'
 
 // Rechnungen zum Thema „Chemisches Gleichgewicht" (S7a, Plan M4 Thema 5.1), aus den Gasgleichgewichten in chem/equilibria.ts:
 // - Massenwirkungsgesetz (Unterthema „mwg"): Zähler oder Nenner, dann der ganze Ausdruck für K_GG
@@ -174,7 +174,8 @@ function kValueTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemC
   if (!first) return null
   const wrong: { rule: string; value: Rational }[] = [{ rule: 'chem-mwg-swapped', value: ratDiv(ONE, value) }]
   for (const variant of ['exponent', 'factor', 'sum'] as const) if (applies(e.left, variant) || applies(e.right, variant)) wrong.push({ rule: VARIANT_RULE[variant], value: kOf(variant) })
-  const choices = stepChoices(rng, { key: sig(value), content: math(sig(value)) }, tolerantWrongs(value, wrong, sig), focus)
+  const kWrong = tolerantWrongs(value, wrong, sig)
+  const choices = stepChoices(rng, { key: sig(value), content: math(sig(value)) }, kWrong, focus)
   if (choices.length === 0) return null
   const line = r`${K} = \frac{${numbersOf(e.right, c)}}{${numbersOf(e.left, c)}} ${eqSign(value)} ${sig(value)}`
   const given = [...e.left, ...e.right].map((x) => r`c(${ce(x.ce)}) = ${sig(c.get(x.ce)!)}\,\mathrm{mol/L}`)
@@ -191,6 +192,7 @@ function kValueTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemC
           title: 'Wert von K',
           question: `Wie groß ist $${K}$?`,
           choices,
+          numeric: tolerantNumeric(value, kWrong, ''),
           hint: 'Setze die Konzentrationen in den Ausdruck ein; vergiss die Exponenten nicht.',
           explanation: { detailed: `Eingesetzt: $${line}$.`, short: math(r`${K} ${eqSign(value)} ${sig(value)}`) },
           established: line,
@@ -245,19 +247,15 @@ function rateTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCal
   const kBack = ratMul(rng.pick(K_BACK), rat(1n, 10n ** BigInt(rng.int(1, 5))))
   const kForward = ratMul(kValue, kBack)
   if (!ratEq(roundSignificant(kForward).value, kForward)) return null
-  const second = stepChoices(
-    rng,
-    { key: sig(kValue), content: math(sig(kValue)) },
-    tolerantWrongs(
-      kValue,
-      [
-        { rule: 'chem-k-rates', value: ratDiv(ONE, kValue) },
-        { rule: 'chem-k-product', value: ratMul(kForward, kBack) },
-      ],
-      sig,
-    ),
-    focus,
+  const kWrong = tolerantWrongs(
+    kValue,
+    [
+      { rule: 'chem-k-rates', value: ratDiv(ONE, kValue) },
+      { rule: 'chem-k-product', value: ratMul(kForward, kBack) },
+    ],
+    sig,
   )
+  const second = stepChoices(rng, { key: sig(kValue), content: math(sig(kValue)) }, kWrong, focus)
   if (first.length === 0 || second.length === 0) return null
   const line = r`${K} = \frac{${KHIN}}{${KRUECK}} = \frac{${sig(kForward)}}{${sig(kBack)}} = ${sig(kValue)}`
   return {
@@ -285,6 +283,7 @@ function rateTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCal
           title: 'Gleichgewichtskonstante',
           question: `Wie groß ist $${K}$?`,
           choices: second,
+          numeric: tolerantNumeric(kValue, kWrong, ''),
           hint: `Im Gleichgewicht gilt $${VHIN} = v_{\\text{rück}}$. Stelle so um, dass links nur noch die Konstanten stehen.`,
           explanation: {
             detailed: `Aus $${VHIN} = v_{\\text{rück}}$ folgt, dass $${K}$ der Quotient aus der Konstante der Hinreaktion und der der Rückreaktion ist: $${line}$.`,
@@ -576,6 +575,7 @@ export const MWG_GENERATORS: readonly ChemGenerator[] = [
   },
   {
     kind: 'k-wert',
+    free: true,
     part: 'mwg',
     weights: { 2: 0.25, 3: 0.2 },
     errors: ['chem-mwg-exponent', 'chem-mwg-swapped', 'chem-mwg-factor', 'chem-mwg-sum'],
@@ -583,6 +583,7 @@ export const MWG_GENERATORS: readonly ChemGenerator[] = [
   },
   {
     kind: 'k-raten',
+    free: true,
     part: 'geschwindigkeit',
     weights: { 2: 0.2, 3: 0.15 },
     errors: ['chem-rate-products', 'chem-mwg-exponent', 'chem-mwg-factor', 'chem-mwg-sum', 'chem-k-rates', 'chem-k-product'],

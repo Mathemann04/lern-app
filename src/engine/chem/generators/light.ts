@@ -2,7 +2,7 @@ import type { Rng } from '../../random/rng.ts'
 import { type Rational, rat, ratDiv, ratMul } from '../../rational.ts'
 import { formatLatex, roundSignificant } from '../../quantity/numberDe.ts'
 import type { Level, TaskRef } from '../../tasks/taskNumber.ts'
-import { type ChemCalc, type ChemGenerator, type WrongValue, stepChoices, tolerantWrongs } from './shared.ts'
+import { type ChemCalc, type ChemGenerator, type WrongValue, stepChoices, tolerantNumeric, tolerantWrongs, unitOf } from './shared.ts'
 
 // Rechnung „Energie des Lichts" (Plan M4, Thema 1.1, Vertiefung): Energie oder Frequenz eines Photons
 // aus der Wellenlänge, Wellenlänge aus der Energie. Exakt gerechnet mit den Konstanten aus
@@ -118,7 +118,8 @@ function generate(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCal
   }
 
   const answer = `${show(correct, subtype)}${UNIT[subtype]}`
-  const choices = stepChoices(rng, { key: show(correct, subtype), content: `$${answer}$` }, tolerantWrong(correct, wrong, subtype), focus)
+  const wrongValues = tolerantWrong(correct, wrong, subtype)
+  const choices = stepChoices(rng, { key: show(correct, subtype), content: `$${answer}$` }, wrongValues, focus)
   if (choices.length === 0) return null
   const symbol = SYMBOL[subtype]
   const formula = subtype === 'energy' ? String.raw`E = \frac{h \cdot c}{\lambda}` : subtype === 'frequency' ? String.raw`f = \frac{c}{\lambda}` : String.raw`\lambda = \frac{h \cdot c}{E}`
@@ -135,6 +136,7 @@ function generate(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCal
           title: { energy: 'Energie', frequency: 'Frequenz', wavelength: 'Wellenlänge' }[subtype],
           question: { energy: 'Welche Energie hat ein Photon?', frequency: 'Welche Frequenz hat das Licht?', wavelength: 'Welche Wellenlänge hat das Licht?' }[subtype],
           choices,
+          numeric: tolerantNumeric(correct, wrongValues, unitOf(UNIT[subtype])),
           hint:
             subtype === 'wavelength'
               ? 'Stelle $E = h \\cdot f$ mit $f = \\frac{c}{\\lambda}$ nach $\\lambda$ um. In welcher Einheit liefert die Formel die Wellenlänge?'
@@ -155,6 +157,7 @@ function generate(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCal
 export const LIGHT_GENERATORS: readonly ChemGenerator[] = [
   {
     kind: 'licht',
+    free: true,
     part: 'licht',
     weights: { 2: 0.3 },
     errors: ['chem-light-nm', 'chem-light-formula'],

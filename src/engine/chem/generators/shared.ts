@@ -1,7 +1,8 @@
 import type { Choice, GuidedTaskBase } from '../../guided/types.ts'
 import type { Rng } from '../../random/rng.ts'
+import type { NumericAnswer } from '../../quantity/judge.ts'
 import { roundSignificant } from '../../quantity/numberDe.ts'
-import { type Rational, parseDecimal, ratEq, ratToNumber } from '../../rational.ts'
+import { type Rational, parseDecimal, rat, ratEq, ratToNumber } from '../../rational.ts'
 import type { Level, TaskRef } from '../../tasks/taskNumber.ts'
 import { chemErrorRule } from '../errorRules.ts'
 
@@ -26,12 +27,16 @@ export type ChemGenerator = {
   readonly weights: Partial<Readonly<Record<Level, number>>>
   // Rechenfehler, die in dieser Rechnung vorkommen können (für gezieltes Üben)
   readonly errors: readonly string[]
+  // Rechnung mit Zahlen zum Eintippen (Schritte mit numeric): kommt im freien Modus dran (S8b); ein Test
+  // prüft, dass jede Aufgabe dieser Rechenart mindestens einen solchen Schritt hat und die anderen keinen
+  readonly free?: boolean
   // null: Diese Zufallszahlen ergeben keine brauchbare Aufgabe (der Aufrufer zieht neu)
   generate(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc | null
 }
 
 // Falsche Antwort aus einem Rechenfehler: Wert zum Vergleichen (gleiche Werte zählen einmal) und Inhalt
-export type WrongValue = { readonly rule: string; readonly key: string; readonly content: string }
+// value: bei Zahlen der Wert (für den freien Modus, S8b; tolerantWrongs setzt ihn)
+export type WrongValue = { readonly rule: string; readonly key: string; readonly content: string; readonly value?: Rational }
 
 // Zahlen der Altklausuren, die nicht vorkommen dürfen (docs/CHEMIE.md §9): gegebene Masse eines Stoffs,
 // so geschrieben, wie sie in der Aufgabe stünde
@@ -82,5 +87,32 @@ export function tolerantWrongs(correct: Rational, wrong: readonly { rule: string
   const shown = (r: Rational) => roundSignificant(r).value
   const kept: { rule: string; value: Rational }[] = []
   for (const w of wrong) if (apart(shown(w.value), shown(correct), 0.06) && kept.every((k) => apart(shown(w.value), shown(k.value), 0.03))) kept.push(w)
-  return kept.map((w) => ({ rule: w.rule, key: latex(w.value), content: `$${latex(w.value)}$` }))
+  return kept.map((w) => ({ rule: w.rule, key: latex(w.value), content: `$${latex(w.value)}$`, value: w.value }))
+}
+
+// --- Freier Modus (S8b): Zahl selbst eingeben statt auswählen ---
+
+// Einheit für das Eingabefeld aus der Einheit hinter einer Zahl (ohne den kleinen Abstand davor)
+export const unitOf = (latex: string) => latex.replace(/^\s*\\,\s*/, '').trim()
+
+// Antwort mit Toleranz (docs/CHEMIE.md §7) aus der Lösung und den falschen Werten von tolerantWrongs (alle,
+// nicht nur die drei gezeigten). unit: Einheit als LaTeX ohne Abstand davor, z. B. „\mathrm{g/mol}"
+export function tolerantNumeric(correct: Rational, wrong: readonly WrongValue[], unit: string, note?: string): NumericAnswer {
+  const wrongs = wrong.flatMap((w) => (w.value ? [numericWrong(w.rule, w.value)] : []))
+  return { value: correct, unit, wrongs, ...(note ? { note } : {}) }
+}
+
+// Fehlerwert für den freien Modus mit „Warum ist das falsch?" des Rechenfehlers
+export const numericWrong = (rule: string, value: Rational) => ({ rule, value, why: chemErrorRule(rule).why })
+
+// Antwort, die genau stimmen muss (ganze Zahlen wie Protonen, Ladung, Anzahl), aus den Schlüsseln der Antworten
+// (ganze Zahlen als Text); falsche Werte gleich der Lösung oder doppelt fallen weg
+export function exactNumeric(correctKey: string, wrong: readonly WrongValue[], unit = '', note?: string): NumericAnswer {
+  const seen = new Set([correctKey])
+  const wrongs = wrong.flatMap((w) => {
+    if (seen.has(w.key) || !/^-?\d+$/.test(w.key)) return []
+    seen.add(w.key)
+    return [numericWrong(w.rule, rat(BigInt(w.key)))]
+  })
+  return { value: rat(BigInt(correctKey)), unit, exact: true, wrongs, ...(note ? { note } : {}) }
 }

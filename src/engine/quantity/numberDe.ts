@@ -1,8 +1,8 @@
-import { type Rational, ratCmp, ratMul, ratNeg, ratSign, ratToNumber, rat } from '../rational.ts'
+import { type Rational, parseDecimal, ratCmp, ratMul, ratNeg, ratSign, ratToNumber, rat } from '../rational.ts'
 
 // Zahlen in deutscher Schreibweise (docs/CHEMIE.md §3 und §7): exakt gerundet auf gültige Ziffern,
 // Dezimalkomma, Zehnerpotenzen als „· 10ⁿ", keine Nullen am Ende. Allgemein (Chemie, später
-// Werkstoffkunde und Physik). Der Leser für Eingaben kommt mit dem freien Modus (S8).
+// Werkstoffkunde und Physik). Dazu der Leser für Eingaben im freien Modus (readNumber, S8b).
 
 export type Rounded = {
   // gerundeter Wert, exakt
@@ -80,4 +80,21 @@ function format(r: Rational, { significant = 3, scientific }: FormatOptions, com
   if (!useScientific) return plain(digits, exponent, comma)
   const mantissa = plain(digits, 0, comma)
   return exponent === 0 ? mantissa : power(mantissa, exponent)
+}
+
+// Liest eine eingegebene Zahl, exakt: Komma oder Punkt, Minus (auch „−"), Zehnerpotenz als „· 10^-5",
+// „*10^-5", „x10^-5", „e-5" oder „E-5", Hochzahlen auch als ⁻⁵, Leerzeichen egal. Ein Punkt gilt als Komma (Tausenderpunkte gibt es nicht).
+// null, wenn es keine Zahl ist (auch „1,5e" oder „1,2,3").
+export function readNumber(text: string): Rational | null {
+  const sup: Readonly<Record<string, string>> = { '⁻': '-', '⁰': '0', '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6', '⁷': '7', '⁸': '8', '⁹': '9' }
+  const plain = text
+    .replace(/[⁻⁰¹²³⁴⁵⁶⁷⁸⁹]/g, (c) => sup[c])
+    .replace(/[−–]/g, '-')
+    .replace(/\s+/g, '')
+  const match = /^(-?\d+(?:[,.]\d+)?|-?[,.]\d+)(?:(?:[·*x×]10\^?|[eE])([+-]?\d{1,3}))?$/.exec(plain)
+  if (!match) return null
+  const [, mantissaText, exponentText] = match
+  const mantissa = parseDecimal(mantissaText.replace(/^(-?)[,.]/, (_, sign: string) => `${sign}0,`))
+  if (!mantissa) return null
+  return exponentText === undefined ? mantissa : ratMul(mantissa, pow10(Number(exponentText)))
 }

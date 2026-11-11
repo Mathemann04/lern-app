@@ -25,8 +25,12 @@ export type ChemCourseEngine = {
   // CALC_SHARE). shown: Nummern der Fragen, die in
   // der laufenden Runde schon dran waren (state/questionRounds.ts); gewählt wird nur unter den übrigen,
   // sind alle durch, wieder unter allen (neue Runde). parts: erlaubte Unterthemen (ohne Angabe alle);
-  // gibt es dazu in der Stufe weder Frage noch Rechnung, gelten alle der Stufe (nie ein Absturz)
-  nextSeed(level: Level, shown?: ReadonlySet<number>, parts?: ReadonlySet<string>): number
+  // gibt es dazu in der Stufe weder Frage noch Rechnung, gelten alle der Stufe (nie ein Absturz).
+  // free: freier Modus (S8b), nur Rechnungen mit Zahlen zum Eintippen (ChemGenerator.free); gibt es davon in
+  // der Auswahl keine, die der ganzen Stufe; hat die Stufe keine, wie geführt
+  nextSeed(level: Level, shown?: ReadonlySet<number>, parts?: ReadonlySet<string>, free?: boolean): number
+  // Gibt es in der Stufe Rechnungen für den freien Modus?
+  hasFree(level: Level): boolean
   // Nummern der Fragen, unter denen nextSeed mit diesen Unterthemen wählt (dieselbe Rückfall-Regel), in
   // der Reihenfolge der Sammlung: für die Runde (nur sie beginnen von vorn) und für die Mischung; leer,
   // wenn die Stufe keine Fragen hat
@@ -77,7 +81,7 @@ export function topicEngine({ bank, misconceptions }: ChemTopic, random: () => n
   // Nummer einer Rechnung, deren Rechenart erlaubt ist
   const randomCalcSeed = () => GENERATED_MIN + Math.floor(random() * (GENERATED_MAX - GENERATED_MIN + 1))
   function calcSeed(level: Level, kinds: ReadonlySet<string>): number {
-    for (let attempt = 0; attempt < 200; attempt++) {
+    for (let attempt = 0; attempt < 2000; attempt++) {
       const seed = randomCalcSeed()
       if (kinds.has(generatorOf(course, { level, seed })?.kind ?? '')) return seed
     }
@@ -106,7 +110,16 @@ export function topicEngine({ bank, misconceptions }: ChemTopic, random: () => n
       const found = questionOf(ref.seed)
       return found ? `q:${found.question.fact}` : 'q:?'
     },
-    nextSeed(level, shown, parts) {
+    hasFree(level) {
+      return generatorsOf(course, level).some((g) => g.free)
+    },
+    nextSeed(level, shown, parts, free) {
+      // Frei: nur Rechnungen mit Zahlen, erst der Auswahl, sonst der ganzen Stufe
+      if (free) {
+        const chosen = generatorsIn(level, parts).filter((g) => g.free)
+        const kinds = chosen.length > 0 ? chosen : generatorsOf(course, level).filter((g) => g.free)
+        if (kinds.length > 0) return calcSeed(level, new Set(kinds.map((g) => g.kind)))
+      }
       // Auswahl: Fragen und Rechenarten der angekreuzten Unterthemen; gibt es davon keine, alle der Stufe
       let questions: readonly Question[] = bank.questions.filter((q) => q.level === level && !retired.has(q.no) && (!parts || parts.has(q.part)))
       let generators = generatorsIn(level, parts)

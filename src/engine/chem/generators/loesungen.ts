@@ -7,7 +7,7 @@ import { type Formula, atomCounts, formulaLatex, parseFormula } from '../formula
 import { type MassValues, elementMolarMass, molarMass } from '../molarMass.ts'
 import { FUELS, CO2, H2O, O2 } from '../reactions.ts'
 import { SUBSTANCES, type Substance, substanceById } from '../substances.ts'
-import { type ChemCalc, type ChemGenerator, stepChoices, tolerantWrongs, usesExamNumbers, usesExamSolution } from './shared.ts'
+import { type ChemCalc, type ChemGenerator, stepChoices, tolerantNumeric, tolerantWrongs, usesExamNumbers, usesExamSolution } from './shared.ts'
 import { eqSign, given, molarLatex, nLatex, nStep, sig } from './stoffmenge.ts'
 
 // Rechnungen zum Thema „Gase und Lösungen" (Plan M4, Thema 4.3). Exakt mit Brüchen gerechnet, angezeigt mit
@@ -56,13 +56,15 @@ type StepSpec = {
 }
 function calcStep(spec: StepSpec, rng: Rng, focus?: string): GuidedStep | null {
   const latex = (r: Rational) => unit(r, spec.unit)
-  const choices = stepChoices(rng, { key: latex(spec.correct), content: `$${latex(spec.correct)}$` }, tolerantWrongs(spec.correct, spec.wrong.filter((w) => w.value.n > 0n), latex), focus)
+  const wrong = tolerantWrongs(spec.correct, spec.wrong.filter((w) => w.value.n > 0n), latex)
+  const choices = stepChoices(rng, { key: latex(spec.correct), content: `$${latex(spec.correct)}$` }, wrong, focus)
   if (choices.length === 0) return null
   return {
     id: spec.id,
     title: spec.title,
     question: spec.question,
     choices,
+    numeric: tolerantNumeric(spec.correct, wrong, `\\mathrm{${spec.unit}}`),
     hint: spec.hint,
     explanation: { detailed: `${spec.why} $${spec.line}$.`, short: `$${spec.line}$` },
     established: spec.line,
@@ -294,13 +296,16 @@ function molarText(r: Rational, values: MassValues): string {
 
 // Schritt mit genauen Werten (Molmassen): Toleranz wie sonst, Schreibweise eigen
 function calcStepExact(spec: Omit<StepSpec, 'unit'> & { latex: (r: Rational) => string }, rng: Rng, focus?: string): GuidedStep | null {
-  const choices = stepChoices(rng, { key: spec.latex(spec.correct), content: `$${spec.latex(spec.correct)}$` }, tolerantWrongs(spec.correct, spec.wrong, spec.latex), focus)
+  const wrong = tolerantWrongs(spec.correct, spec.wrong, spec.latex)
+  const choices = stepChoices(rng, { key: spec.latex(spec.correct), content: `$${spec.latex(spec.correct)}$` }, wrong, focus)
   if (choices.length === 0) return null
   return {
     id: spec.id,
     title: spec.title,
     question: spec.question,
     choices,
+    // bisher nur Molmassen
+    numeric: tolerantNumeric(spec.correct, wrong, String.raw`\mathrm{g/mol}`),
     hint: spec.hint,
     explanation: { detailed: `${spec.why} $${spec.line}$.`, short: `$${spec.line}$` },
     established: spec.line,
@@ -795,6 +800,7 @@ function gase(level: Level, rng: Rng, ref: TaskRef, focus?: string) {
 export const LOESUNGEN_GENERATORS: readonly ChemGenerator[] = [
   {
     kind: 'konzentration',
+    free: true,
     part: 'konzentration',
     weights: { 1: 0.35, 2: 0.35, 3: 0.35 },
     errors: ['chem-ml-not-l', 'chem-c-inverted', 'chem-molar-incomplete', 'chem-molar-hydrate', 'chem-m-divided'],
@@ -802,6 +808,7 @@ export const LOESUNGEN_GENERATORS: readonly ChemGenerator[] = [
   },
   {
     kind: 'anteile',
+    free: true,
     part: 'anteile',
     weights: { 1: 0.3, 2: 0.35, 3: 0.3 },
     errors: ['chem-fraction-solvent', 'chem-vol-percent', 'chem-percent-not-times', 'chem-ml-not-l', 'chem-mass-conc-inverted', 'chem-ppb'],
@@ -809,6 +816,7 @@ export const LOESUNGEN_GENERATORS: readonly ChemGenerator[] = [
   },
   {
     kind: 'gase',
+    free: true,
     part: 'gase',
     weights: { 1: 0.35, 2: 0.3, 3: 0.35 },
     errors: ['chem-vm-inverted', 'chem-vm-conditions', 'chem-celsius', 'chem-hpa', 'chem-ratio-one', 'chem-ratio-swapped', 'chem-ratio-other-coefficient', 'chem-n-times', 'chem-n-inverted'],
