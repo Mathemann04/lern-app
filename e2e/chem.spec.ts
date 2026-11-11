@@ -311,6 +311,7 @@ test('Chemie: Themen mischen, „Nächste Aufgabe" bleibt in der Mischung, X und
   await page.getByRole('checkbox', { name: 'Metallbindung und Hybridisierung' }).uncheck()
   await page.getByRole('checkbox', { name: 'Elektronen', exact: true }).uncheck()
   await page.getByRole('checkbox', { name: 'Aufbau des Periodensystems', exact: true }).uncheck()
+  await page.getByRole('checkbox', { name: 'Trends im Periodensystem', exact: true }).uncheck()
 
   // Unterthemen aufklappen: dieselben Kästchen wie auf der Themenseite (Atombau steht zuerst)
   const toggle = page.getByRole('button', { name: /^Unterthemen: alle/ }).first()
@@ -724,5 +725,20 @@ test('Chemie: Aufbau des Periodensystems, Rechnung mit Ausschnitt des Periodensy
   await expect(page.getByRole('heading', { name: /Blöcke/ })).toBeVisible()
   await expect(page.getByTestId('chem-figure')).toBeVisible()
   await expectCleanPage(page, 'Blöcke')
+  expect(errors).toEqual([])
+})
+
+test('Chemie: Trends im Periodensystem, Rechnung mit Pfeilen im Periodensystem und Lernkarte', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./#/gebiet/chem-periodensystem')
+  await page.getByRole('link', { name: /Trends im Periodensystem/ }).click()
+  await expect(page.getByRole('heading', { name: 'Trends im Periodensystem' })).toBeVisible()
+  await page.goto('./#/ueben/chem-trends/2-10000')
+  await expect(answers(page).first()).toBeVisible()
+  await expectCleanPage(page, 'Rechnung zu Trends')
+  await page.goto('./#/karten/chem-trends/tr-atomradius')
+  await expect(page.getByRole('heading', { name: 'Atomradius' })).toBeVisible()
+  await expect(page.getByTestId('chem-figure')).toBeVisible()
+  await expectCleanPage(page, 'Atomradius')
   expect(errors).toEqual([])
 })

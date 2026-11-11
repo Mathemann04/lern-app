@@ -64,9 +64,53 @@ export type PseFigure = {
   readonly periods: readonly number[]
   // Symbol je Feld (Periode, Gruppe); null: Element nicht in der Tabelle der App oder kein Element
   readonly cells: readonly { readonly period: number; readonly group: number; readonly symbol: string | null }[]
-  readonly mark: string
+  // markierte Elemente (Symbole)
+  readonly marks: readonly string[]
   // Überschrift der Spalten: römische Hauptgruppe oder Nummer
   readonly main: boolean
+  // Pfeile in Richtung der Zunahme (Trends): in der Periode nach rechts (+1) oder links (−1), in der Gruppe nach unten
+  // (+1) oder oben (−1)
+  readonly arrows?: { readonly period: 1 | -1; readonly group: 1 | -1; readonly label: string }
+}
+
+// Trends, die das Bild mit Pfeilen zeigen kann: Richtung der Zunahme
+export const TREND_ARROWS: Readonly<Record<string, { period: 1 | -1; group: 1 | -1; label: string }>> = {
+  radius: { period: -1, group: 1, label: 'Atomradius' },
+  ie: { period: 1, group: -1, label: 'Ionisierungsenergie' },
+  en: { period: 1, group: -1, label: 'Elektronegativität' },
+  ea: { period: 1, group: -1, label: 'Elektronenaffinität' },
+  metall: { period: -1, group: 1, label: 'Metallcharakter' },
+}
+
+const MAIN_GROUPS = [1, 2, 13, 14, 15, 16, 17, 18]
+const mainCells = (periods: readonly number[]) =>
+  periods.flatMap((period) =>
+    MAIN_GROUPS.flatMap((group) => {
+      // Periode 1 hat nur H (Gruppe 1) und He (Gruppe 18)
+      if (period === 1 && group !== 1 && group !== 18) return []
+      return [{ period, group, symbol: elementAt(period, group)?.symbol ?? null }]
+    }),
+  )
+
+// „pse-trend:en" oder „pse-trend:radius:Na,Mg,Cl": Hauptgruppen mit Pfeilen in Richtung der Zunahme, Elemente markiert
+export function pseTrendFigureById(id: string): PseFigure | null {
+  const [, prop, list] = id.split(':')
+  const arrows = TREND_ARROWS[prop]
+  if (!arrows) return null
+  const marks = list ? list.split(',') : []
+  if (marks.some((s) => !elementBySymbol(s) || !placeOf(elementBySymbol(s)!).main)) return null
+  const periods = [1, 2, 3, 4, 5, 6]
+  return {
+    kind: 'pse',
+    id,
+    caption: `Hauptgruppen des Periodensystems. Die Pfeile zeigen, in welche Richtung ${prop === 'radius' || prop === 'metall' ? 'der' : 'die'} ${arrows.label} zunimmt${marks.length ? `; markiert: ${marks.map((s) => elementBySymbol(s)!.name).join(', ')}` : ''}.`,
+    groups: MAIN_GROUPS,
+    periods,
+    cells: mainCells(periods),
+    marks,
+    main: true,
+    arrows,
+  }
 }
 
 export type ChemFigure = LatticeFigure | LewisFigure | ShapeFigure | BoxFigure | PseFigure
@@ -92,7 +136,7 @@ export function pseFigureById(id: string): PseFigure | null {
     groups,
     periods,
     cells,
-    mark: el.symbol,
+    marks: [el.symbol],
     main,
   }
 }
@@ -183,6 +227,7 @@ export function figureById(id: string): ChemFigure | undefined {
   if (id.startsWith('gestalt:')) return shapeFigureById(id) ?? undefined
   if (id.startsWith('kaestchen:')) return boxFigureById(id) ?? undefined
   if (id.startsWith('pse:')) return pseFigureById(id) ?? undefined
+  if (id.startsWith('pse-trend:')) return pseTrendFigureById(id) ?? undefined
   return FIGURES.find((f) => f.id === id)
 }
 

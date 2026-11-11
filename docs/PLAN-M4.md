@@ -571,6 +571,16 @@ kommen mit ihren Schritten dazu. Die Denkfehler der Wissensfragen
 | Ionisierungsenergie | erster Anstieg (`chem-pse-ie-first`, seit S6c) | Al: Sprung bei I₁/I₂ |
 | Ionisierungsenergie | Elektron nach dem Sprung mitgezählt (`chem-pse-ie-count-after`, seit S6c) | Mg: III. Hauptgruppe |
 | Ionisierungsenergie | alle Werte gezählt (`chem-pse-ie-count-all`, seit S6c) | Na: IV. Hauptgruppe |
+| Trend | Atomradius in der Periode falsch herum (`chem-tr-radius-period`, seit S6d) | Cl größer als Na |
+| Trend | Atomradius in der Gruppe falsch herum (`chem-tr-radius-group`, seit S6d) | K kleiner als Na |
+| Trend | Ionisierungsenergie in der Periode falsch herum (`chem-tr-ie-period`, seit S6d) | Na schwerer zu ionisieren als Cl |
+| Trend | Ionisierungsenergie in der Gruppe falsch herum (`chem-tr-ie-group`, seit S6d) | K schwerer zu ionisieren als Na |
+| Trend | Elektronegativität in der Periode falsch herum (`chem-tr-en-period`, seit S6d) | Li elektronegativer als F |
+| Trend | Elektronegativität in der Gruppe falsch herum (`chem-tr-en-group`, seit S6d) | I elektronegativer als Cl |
+| Trend | kein Trend angenommen (`chem-tr-constant`, seit S6d) | Na und Cl gleich groß |
+| Reihe | nur die äußeren richtig (`chem-tr-order-middle`, seit S6d) | K < Na < Rb |
+| Ionenradien | mehr Protonen, größeres Ion (`chem-tr-ion-reversed`, seit S6d) | Al³⁺ größer als O²⁻ |
+| Ionenradien | gleiche Elektronenzahl, gleiche Größe (`chem-tr-ion-same`, seit S6d) | Na⁺ und F⁻ gleich groß |
 | Quantenzahlen | l bis n statt n − 1 (`chem-qn-l-to-n`, seit S6a) | n = 3: l = 0, 1, 2, 3 |
 | Quantenzahlen | l ab 1 (`chem-qn-l-from-1`, seit S6a) | n = 3: l = 1, 2, 3 |
 | Quantenzahlen | Buchstabe um eins verschoben (`chem-qn-letter-shift`, seit S6a) | 3d: l = 3 |
@@ -1074,6 +1084,16 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   50 Wissensfragen, 23 Rechenfehler, 20 Denkfehler. Nebengruppen ohne die Ausnahmen der Besetzung (nur Cr und Cu). Metalle und Nichtmetalle nur als Wissensfragen (Selen wird nicht
   eingeordnet, die Bücher sind sich uneins). Abwechslung mit eigener Kennzahl (etwa 50 sinnvolle Formen in den
   Grundlagen).
+  **S6d** (fertig): Thema „Trends im Periodensystem“ mit Unterthemen Atomradius, Ionisierungsenergie,
+  Elektronegativität, Elektronenaffinität und Metallcharakter (nur Wissensfragen), Ionenradien (ab Vertiefung).
+  Messwerte in `chem/trends.ts` (Kovalenzradien nach Cordero, erste Ionisierungsenergien nach NIST,
+  Pauling-Elektronegativitäten, Ionenradien nach Shannon). Gefragt wird nur, wo Regel und Messwerte übereinstimmen:
+  gleiche Periode oder Gruppe, mindestens 3 % Unterschied, nie die Paare aus CHEMIE.md §6, Ionisierungsenergie und
+  Elektronegativität nie innerhalb der Gruppen 13 und 14. Rechnungen: zwei Elemente vergleichen (Richtung des Trends,
+  dann der Vergleich), drei (Klausurniveau auch vier) Elemente ordnen, Ionen mit gleicher Elektronenzahl nach Radius
+  ordnen. Bild: Hauptgruppen mit Pfeilen in Richtung der Zunahme und markierten Elementen (im Ergebnis und auf den
+  Karten). Sieben Lernkarten, 48 Wissensfragen, 10 Rechenfehler, 15 Denkfehler. Die Elektronenaffinität wird nicht
+  geordnet (die Messwerte folgen der Regel zu oft nicht).
 - **S7: Gleichgewicht und Energie.** Massenwirkungsgesetz als Auswahl, Le
   Chatelier, Katalysator, K aus Konzentrationen; Reaktionsenthalpie aus
   Bildungsenthalpien, Entropie, freie Enthalpie; „Klausuraufgabe 5 üben“.
