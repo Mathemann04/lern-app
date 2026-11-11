@@ -78,11 +78,15 @@ feste Regeln: [CHEMIE.md](CHEMIE.md)
     - [x] S3a. Summenformeln, Molmasse, Stoffmenge, Masse, Teilchenzahl (Rechnungen und Karten)
     - [x] S3b. Reaktionsgleichungen ausgleichen, Verbrennungen (Rechnungen und Karten)
     - [x] S3c. Wissensfragen zu Reaktionsgleichungen und Stoffmenge
-  - [ ] S4. Umsatz, Gase und Lösungen, Klausuraufgabe 4 üben
+  - [x] S4. Umsatz, Gase und Lösungen, Klausuraufgabe 4 üben
     - [x] S4a. Umsatzrechnung in drei Schritten (Rechnung und Karte)
     - [x] S4b. Gase und Lösungen (Rechnungen, Karten, Wissensfragen)
     - [x] S4c. Klausuraufgabe 4 üben (Punkte, Folgefehler)
   - [ ] S5. Bindungen (auch Metallbindung und Hybridisierung)
+    - [x] S5a. Ionenbindung und Salze (Rechnungen, Gitterbilder, Karten, Wissensfragen)
+    - [ ] S5b. Moleküle (Lewis-Formeln als Bilder, Gestalt, Polarität)
+    - [ ] S5c. Zwischenmolekulare Kräfte, Metallbindung und Hybridisierung
+    - [ ] S5d. Klausuraufgabe 3 üben
   - [ ] S6. Elektronen und Periodensystem
   - [ ] S7. Gleichgewicht und Energie
   - [ ] S8. Frei rechnen und Wiederholung

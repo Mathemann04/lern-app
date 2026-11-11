@@ -848,6 +848,18 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   Natriumchlorid) und die Gestalt der Moleküle als selbst gezeichnete Bilder
   zu den passenden Fragen, aus den Daten der Aufgabe gezeichnet.
   Ausprobieren: PCl₃ im Klausurformat; Calciumphosphat als Formel.
+  Geteilt (11.11.2026): **S5a** (fertig) Ionenbindung und Salze, **S5b** Moleküle,
+  **S5c** zwischenmolekulare Kräfte, Metallbindung und Hybridisierung, **S5d**
+  „Klausuraufgabe 3 üben“. S5a: Thema „Ionenbindung und Salze“ mit Unterthemen Formeln
+  und Namen, Gitter und Eigenschaften, Zerfall in Ionen, Gitterenergie (ab Vertiefung);
+  Rechnungen: Formel aus dem Namen (Ionen → Formel), Name aus der Formel (bei
+  Nebengruppen erst die Ladung), Zerfall in Wasser oder in der Schmelze, Born-Haber
+  (Gitter- oder Bildungsenthalpie, Fluoride und Chloride der Alkalimetalle); nur Salze,
+  die es als Stoff gibt (Liste in `chem/ions.ts`). Bilder: Elementarzellen von NaCl,
+  CsCl und Zinkblende, aus den Lagen der Ionen gezeichnet, an Fragen und an der Karte
+  „Ionengitter“. Zehn Lernkarten, Wissensfragen. Der Fehler „Ladung des Anions auf das
+  Kation übertragen“ fiel weg: Er ergibt fast immer denselben Wert wie „Index als
+  Ladung gelesen“.
 - **S6: Elektronen und Periodensystem.** Konfiguration und
   Valenzkonfiguration als Auswahl, Quantenzahlen, Steckbrief, Ionenladung,
   Trends; „Klausuraufgabe 1 üben“ und „Klausuraufgabe 2 üben“.

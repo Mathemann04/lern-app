@@ -564,3 +564,20 @@ test('Chemie: Klausuraufgabe 4 üben, alle Teile beantworten, abgeben, Auswertun
   expect(page.url()).not.toBe(url)
   expect(errors).toEqual([])
 })
+
+test('Chemie: Ionenbindung und Salze, Rechnung zur Formel, Lernkarte mit Gitterbildern', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./#/gebiet/chem-bindung')
+  await page.getByRole('link', { name: /Ionenbindung und Salze/ }).click()
+  await expect(page.getByRole('heading', { name: 'Ionenbindung und Salze' })).toBeVisible()
+  // eine feste Rechnung: Formel aus dem Namen
+  await page.goto('./#/ueben/chem-ionen/1-10000')
+  await expect(page.getByText('Aus welchen Ionen ist Natriumoxid aufgebaut?')).toBeVisible()
+  await expectCleanPage(page, 'Salzformel')
+  // Lernkarte mit drei Bildern
+  await page.goto('./#/karten/chem-ionen/ionen-gitter')
+  await expect(page.getByTestId('chem-figure')).toHaveCount(3)
+  await expectCleanPage(page, 'Ionengitter')
+  expect(errors).toEqual([])
+})
+
