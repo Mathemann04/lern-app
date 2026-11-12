@@ -82,5 +82,9 @@ usw. = spätere Meilensteine (docs/ROADMAP.md).
   Wurzel, zwei Wurzeln, zwei Logarithmen derselben Basis, $x$ und $\sqrt{x}$ (mit
   „Quadratische Gleichungen"), Formeln wie Schwingungsdauer (Engine kann sie schon,
   Aufgaben dazu kommen in 4b).
-- Alles Übrige ist in docs/PLAN-M6.md (4b, 5d, 6, 7) und docs/ROADMAP.md (M7, M9)
+- M6 Schritt 4b-1 (12.11.2026): Formeln aus Technik und Physik nach verschiedenen Größen
+  umstellen (eigene Sammlung in `src/engine/tasks/formulas.ts`, darunter Schwingungsdauer
+  eines Pendels und Plattenkondensator), Zeichen wie $U_0$ und $\varepsilon_r$ auch beim
+  Eintippen.
+- Alles Übrige ist in docs/PLAN-M6.md (4b-2, 4b-3, 5d, 6, 7) und docs/ROADMAP.md (M7, M9)
   eingeplant.

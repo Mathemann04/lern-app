@@ -155,4 +155,11 @@ Teil der Mathe-Engine `src/engine/` (reines TypeScript, ohne React).
     (je Baustein und Stufe 100 Formen unter 200, keine über 3 %, genau dieser Baustein; Bausteine aus dem Verzeichnis mit
     denselben Kennzahlen; Ziehen); die großen Prüfungen (`isolate.test.ts`, `rearrangePlan.test.ts`,
     `rearrangeAnswer.test.ts`) nehmen je Baustein und Stufe einige Nummern mit Baustein mit
+  - Formeln aus Technik und Physik (M6 Schritt 4b-1): `tasks/formulas.ts` (reine Daten: `FORMULAS` mit Name, LaTeX,
+    Zeichen und Bedeutung, Bedingungen; `FORMULA_TASKS` = Formel und Größe mit Stufe und Bausteinen, Nummer = Stelle ab 1,
+    nur hinten anhängen), `tasks/formulaTasks.ts` (`formulaRearrangeTask` mit `context`, `formulaTaskAt`, `formulaLevel`:
+    bis 3 Umformungen Stufe 1, bis 5 Stufe 2, sonst 3). Nummern `formel.2-1` (Code `formel` in `BLOCK_CODES`, kein
+    Baustein). Ziehen: `formulaPool`, `FORMULA_SHARE` (20 %) in `rearrangePick.ts`; spielbare Mengen auch aus den Formeln
+    (`REARRANGE_PLAYABLE_COMBOS`). Test `formulaTasks.test.ts` rechnet Stufe und Bausteine nach, prüft jedes Zeichen auf
+    eine Erklärung, Lösung durch Einsetzen, geführt und frei
 

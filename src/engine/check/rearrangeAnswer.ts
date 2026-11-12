@@ -332,7 +332,10 @@ const hasTrig = (...exprs: readonly Expr[]) => exprs.some((e) => subterms(e).som
 const hasPi = (e: Expr) => subterms(e).some((s) => s.kind === 'const' && s.name === 'pi')
 
 export function prepareRearrangeFree(ref: TaskRef): FreeTask {
-  const context = prepareRearrangeCheck(generateRearrangeTask(ref).task, ref.level >= 4)
+  // großzügig (jede gleichwertige Form ohne Doppelbruch) ab Stufe 4 und, seit es Aufgaben je Baustein gibt (M6 Schritt 4),
+  // in jeder Aufgabe mit e-Funktion, Logarithmus, Winkel- oder Hyperbelfunktion
+  const task = generateRearrangeTask(ref).task
+  const context = prepareRearrangeCheck(task, ref.level >= 4 || hasExp(task.equation.lhs, task.equation.rhs))
   const { equation, target } = context.task
   // mit einem Werkzeug (Stufe 5) zählt auch, was nach dem Ausrechnen dasteht
   const evaluated = hasTool(equation) ? context.solution.steps.flatMap((s) => [s.after.lhs, s.after.rhs]) : []

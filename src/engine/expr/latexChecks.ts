@@ -5,9 +5,9 @@ import 'katex/contrib/mhchem'
 
 // Muster, die in sauber gesetzten Ergebnissen nie vorkommen dürfen
 export const UGLY_PATTERNS: Array<[string, RegExp]> = [
-  // ein Summand 1 vor \right) ist kein Faktor
-  ['Faktor 1', /(?<![\d{,])1(?=[a-z(]|\\(?!right))/],
-  ['Faktor 0', /(?<![\d{,])0(?=[a-z(]|\\(?!right))/],
+  // ein Summand 1 vor \right) ist kein Faktor, eine Ziffer im Index wie bei v_0t auch nicht
+  ['Faktor 1', /(?<![\d{,_])1(?=[a-z(]|\\(?!right))/],
+  ['Faktor 0', /(?<![\d{,_])0(?=[a-z(]|\\(?!right))/],
   ['Exponent 1', /\^\{1\}/],
   ['Exponent 0', /\^\{0\}/],
   ['plus minus', /\+ -/],

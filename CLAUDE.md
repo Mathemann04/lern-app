@@ -155,6 +155,10 @@ Ausführliche Notizen je Bereich (wörtlich wie früher hier, jetzt ausgelagert)
 - **Kommunikation:** Der Nutzer hat keine Programmierkenntnisse.
   - So schreiben, dass es jemand ohne Programmierkenntnisse versteht.
   - Fachwörter vermeiden. Wenn eins nötig ist, in wenigen Worten erklären.
+  - Jede Antwort nennt kurz den Stand (Meilenstein und Schritt, z. B. „M6,
+    Schritt 4b-1“), empfiehlt für den nächsten Schritt den Aufwand in Claude
+    („Mittel“, „Hoch“, „Sehr hoch“) und sagt, ob sich eine neue Sitzung lohnt
+    (Wunsch des Nutzers, 12.11.2026).
   - Jede Antwort endet mit „Das musst du jetzt tun:" und nummerierten
     Schritten mit den genauen Namen der Knöpfe. Wenn nichts zu tun ist:
     „Nichts".

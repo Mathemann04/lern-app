@@ -13,6 +13,7 @@ import { type Expr, type FnName, E, IMAG, PI, add, dec, div, fn, log, mul, neg, 
 //   \sin^2 x = (\sin x)^2; \ln, \log_2, \lg, \operatorname{arsinh} …
 // - e ist immer die eulersche Zahl, \pi die Kreiszahl, i die imaginäre Einheit (auch \mathrm{i},
 //   \imaginaryI)
+// - Größen mit Index (U_0, T_{U}) und griechische Buchstaben (\lambda, \varepsilon_r) wie in Formeln der Physik
 // - davor darf „f'(x) =" stehen
 
 export type ParseResult = { readonly ok: true; readonly expr: Expr } | { readonly ok: false; readonly message: string }
@@ -60,6 +61,10 @@ const SYMBOL_COMMANDS: Readonly<Record<string, string>> = {
   rvert: '|',
 }
 const TEXT_COMMANDS = new Set(['mathrm', 'operatorname', 'mathit', 'text', 'textrm', 'mbox'])
+// griechische Buchstaben, die als Größen vorkommen (\pi bleibt die Kreiszahl)
+const GREEK = new Set(['alpha', 'beta', 'gamma', 'delta', 'varepsilon', 'epsilon', 'eta', 'vartheta', 'theta', 'kappa', 'lambda', 'mu', 'nu', 'rho', 'sigma', 'tau', 'varphi', 'phi', 'omega'])
+// zwei Schreibweisen desselben Buchstabens: Am Laptop macht MathLive aus „epsilon" \epsilon, die Aufgaben schreiben \varepsilon
+const GREEK_NAME: Readonly<Record<string, string>> = { epsilon: 'varepsilon', phi: 'varphi', theta: 'vartheta' }
 
 function tokenize(input: string): Token[] {
   // Dezimalkomma in der Form von MathLive: 0{,}5
@@ -231,6 +236,22 @@ class Parser {
     }
   }
 
+  // Größe mit Index wie in Formeln der Physik: U_0, U_{0}, T_U, R_{12}, \varepsilon_r. Der Name ist so geschrieben, wie
+  // ihn print.ts wieder ausgibt: ein Zeichen ohne Klammern (U_0), mehrere mit ({R_{12}})
+  private withSubscript(name: string): string {
+    if (!isSymbol(this.peek(), '_')) return name
+    this.pos++
+    let sub = ''
+    if (isSymbol(this.peek(), '{')) {
+      this.pos++
+      while (this.peek()?.kind === 'digit' || this.peek()?.kind === 'letter') sub += this.next().value
+      if (!isSymbol(this.peek(), '}')) throw new ParseError('Unten am Zeichen dürfen nur Ziffern und Buchstaben stehen, z. B. $U_0$.')
+      this.pos++
+    } else if (this.peek()?.kind === 'digit' || this.peek()?.kind === 'letter') sub = this.next().value
+    if (sub === '') throw new ParseError('Unten am Zeichen fehlt noch etwas, z. B. $U_0$.')
+    return sub.length === 1 ? `${name}_${sub}` : `${name}_{${sub}}`
+  }
+
   // Argument von ^, \frac, \sqrt, _: {…} oder ein einzelnes Zeichen (x^2, \frac12)
   private parseArgument(what: string): Expr {
     const t = this.peek()
@@ -272,7 +293,9 @@ class Parser {
     if (t.kind === 'digit') return this.parseNumber()
     if (t.kind === 'letter') {
       this.pos++
-      return t.value === 'e' ? E : t.value === 'i' ? IMAG : variable(t.value)
+      if (t.value === 'e') return E
+      if (t.value === 'i') return IMAG
+      return variable(this.withSubscript(t.value))
     }
     if (t.kind === 'command') return this.parseCommand()
 
@@ -350,6 +373,8 @@ class Parser {
         throw new ParseError('Ein Feld ist noch leer.')
       default:
         if (TEXT_COMMANDS.has(name)) return this.parseText()
+        // griechische Buchstaben als Größen wie in Formeln der Physik (\lambda, \varepsilon_r)
+        if (GREEK.has(name)) return variable(this.withSubscript(`\\${GREEK_NAME[name] ?? name}`))
         throw new ParseError(`Das Zeichen „\\${name}" kenne ich nicht.`)
     }
   }
@@ -416,11 +441,11 @@ class Parser {
     return build(mul(...factors))
   }
 
-  // Teile eines Arguments ohne Klammer: Zahlen, Buchstaben, π, Brüche, Wurzeln
+  // Teile eines Arguments ohne Klammer: Zahlen, Buchstaben (auch griechische), π, Brüche, Wurzeln
   private startsBareFactor(t: Token | undefined): boolean {
     if (!t) return false
     if (t.kind === 'digit' || t.kind === 'letter') return true
-    return t.kind === 'command' && ['pi', 'exponentialE', 'imaginaryI', 'frac', 'dfrac', 'tfrac', 'sqrt'].includes(t.value)
+    return t.kind === 'command' && (['pi', 'exponentialE', 'imaginaryI', 'frac', 'dfrac', 'tfrac', 'sqrt'].includes(t.value) || GREEK.has(t.value))
   }
 }
 

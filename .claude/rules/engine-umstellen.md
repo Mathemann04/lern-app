@@ -132,7 +132,8 @@ Teil der Mathe-Engine `src/engine/` (reines TypeScript, ohne React).
     der $x$ keine Rolle mehr spielt, keine, die für kein $x$ definiert ist, und keine
     zwei, die anders geschrieben dieselbe sind; mit Additionstheoremen auch keine, in der
     sich $x$ als gemeinsamer Faktor wegkürzt wie $2\cos x = y\cos x$, und keine mit
-    einer Seite, die nur noch 0 ist), `task.ts` (Aufgabe, Bedingungen; mit Differentialgleichungen
+    einer Seite, die nur noch 0 ist), `task.ts` (Aufgabe, Bedingungen; bei Formeln `context` mit Name und Bedeutung der Zeichen, `conditionsText` dann
+    „Alle Größen sind positiv“; mit Differentialgleichungen
     stehen sie je Funktion in einer Zeile über der Gleichung, `givenLatex`,
     `\begin{gathered}`; ohne sie bleibt `taskLatex` wie bisher; `taskFormLatex`
     ohne gathered und ohne den Namen pmatrix)

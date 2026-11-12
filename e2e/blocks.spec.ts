@@ -179,3 +179,21 @@ test('„nur e-Funktion" in Stufe 1 (M6 Schritt 4): leichte Aufgabe nur mit e-Fu
   await expectCleanPage(page, 'frei')
   expect(errors).toEqual([])
 })
+
+test('Formel aus Technik und Physik (M6 Schritt 4b): Fadenpendel nach g, mit Bedeutung der Zeichen, geführt und frei', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./#/ueben/umstellen/formel.2-2')
+  await expect(page.getByText('Stufe 2 · Löse nach')).toBeVisible()
+  await expect(page.getByText(/Schwingungsdauer eines Fadenpendels:/)).toBeVisible()
+  await expect(page.getByText(/Alle Größen sind positiv/)).toBeVisible()
+  await expect(page.getByText('Aufgabe formel.2-2')).toBeVisible()
+  await expectCleanPage(page, 'Formel')
+  await solveWholeTask(page)
+
+  // Abklingen beim Entladen eines Kondensators nach t, frei: Tastatur mit den Größen der Formel (auch U_0)
+  await page.goto('./#/frei/umstellen/formel.2-24')
+  await expect(page.locator('math-field[data-ready]')).toBeVisible()
+  await expect(page.getByText(/Entladen eines Kondensators:/)).toBeVisible()
+  await expectCleanPage(page, 'Formel frei')
+  expect(errors).toEqual([])
+})
