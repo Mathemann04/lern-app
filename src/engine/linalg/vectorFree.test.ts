@@ -67,6 +67,8 @@ describe('Ergebnis lesen', () => {
   it.each(LEVELS)('Stufe %i: das gelesene Ergebnis ist die Gegenprobe der Aufgabe', (level) => {
     for (const s of SEEDS(150)) {
       const task = buildVectorTask(ref(level, s))
+      // Zieh-Aufgaben ohne eindeutiges Ergebnis prüft dragTasks.test.ts
+      if (task.dragOnly) continue
       const parts = readResult(task.resultLatex!)
       expect(parts, task.resultLatex).not.toBeNull()
       const values = parts!.flatMap((p) => p.values)
@@ -96,6 +98,8 @@ describe('prüfen', () => {
   it.each(LEVELS)('Stufe %i: die Einträge der Engine sind richtig, ein falscher Eintrag wird markiert', (level) => {
     for (const s of SEEDS(120)) {
       const task = buildVectorTask(ref(level, s))
+      // Zieh-Aufgaben ohne eindeutiges Ergebnis prüft dragTasks.test.ts
+      if (task.dragOnly) continue
       const free = prepareVectorFreeTask(ref(level, s))
       // t_1 und t_2 stehen im Ergebnis getrennt, im freien Modus in einem Teil: nach den Kästchen neu aufteilen
       const flat = exactEntries(task.resultLatex!).flat()
@@ -119,6 +123,8 @@ describe('prüfen', () => {
     let found = 0
     for (const s of SEEDS(120)) {
       const task = buildVectorTask(ref(level, s))
+      // Zieh-Aufgaben ohne eindeutiges Ergebnis prüft dragTasks.test.ts
+      if (task.dragOnly) continue
       const check = prepareVectorCheck(task)
       check.parts.forEach((part, i) => {
         for (const w of check.wrongs[i]) {
@@ -182,6 +188,6 @@ describe('prüfen', () => {
   it('jeder Fehler, den der freie Modus erkennt, steht im Katalog', () => {
     const ids = new Set(VECTOR_ERROR_RULES.map((r) => r.id))
     for (const level of LEVELS)
-      for (const s of SEEDS(60)) for (const ws of prepareVectorCheck(buildVectorTask(ref(level, s))).wrongs) for (const w of ws) expect(ids.has(w.rule), w.rule).toBe(true)
+      for (const s of SEEDS(60)) for (const ws of buildVectorTask(ref(level, s)).dragOnly ? [] : prepareVectorCheck(buildVectorTask(ref(level, s))).wrongs) for (const w of ws) expect(ids.has(w.rule), w.rule).toBe(true)
   })
 })

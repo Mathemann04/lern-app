@@ -1032,3 +1032,15 @@ Neue Entscheidungen unten anfügen.
   verwechselt“ (neutral, passt zu spitzen und stumpfen Winkeln) und „Pfeil nicht am Scheitel“ ohne Hinweis auf die
   Antwort; neuer Test: keine falsche Antwort hat denselben Wert wie die richtige (Gleichungen mit Parameter über
   Einsetzen).
+
+- 12.11.2026: M7 Schritt 2b, Pfeil ziehen. Zieh-Aufgaben sind keine eigene Tätigkeit und kein eigener Baustein, sondern
+  eine Art im Baustein „Skalarprodukt und Winkel“ mit festem Anteil (ein Viertel der Nummern, eigener Zufall vorweg wie
+  bei den Vorlagen der Brüche; die übrigen Nummern behalten ihre Aufgabe aus 2a, eine Nummer im Browser-Test musste
+  wechseln). Gezogen wird nur in der Ebene: im Raum lässt sich eine Spitze mit dem Finger nicht eindeutig setzen.
+  Die Stelle rastet auf ganzen Zahlen ein; fast immer gibt es mehrere richtige Stellen, darum prüft die Engine
+  Bedingungen (`linalg/drag.ts`, exakt mit ganzen Zahlen) statt eines Ergebnisses. Ohne Ziehen geht es mit „−“, „+“
+  und Eintippen (Tastatur und Vorlesehilfen). „Prüfen“ an der Startstelle zählt nicht als Fehler (Hinweis „Zieh
+  zuerst …“), sonst würde ein versehentlicher Druck als typischer Fehler gezählt. Der Winkelbogen läuft in Stufe 1, 2
+  und 4 mit und zeigt bei 90° das Quadrat: Das hilft beim Entdecken, die Rechnung steht danach in der Rückmeldung
+  (und in Stufe 4 als eigene Schritte). Im freien Modus wird bei Aufgaben ohne eindeutiges Ergebnis gezogen; bei
+  Aufgaben mit Parameter wird das Ergebnis wie bisher getippt, das Bild bleibt zum Ausprobieren.

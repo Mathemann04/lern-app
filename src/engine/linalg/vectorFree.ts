@@ -6,6 +6,7 @@ import type { Expr } from '../expr/types.ts'
 import type { GuidedStep } from '../guided/types.ts'
 import { parseLatex } from '../parse/latex.ts'
 import type { TaskRef } from '../tasks/taskNumber.ts'
+import { type DragStep, judgeDrag } from './drag.ts'
 import { vectorErrorRule } from './errorRules.ts'
 import { ANGLE_TYPES } from './dotTasks.ts'
 import { type VectorTask, buildVectorTask } from './vectorTasks.ts'
@@ -347,8 +348,31 @@ export function checkVectorEntries(check: VectorCheck, input: EntryInput): FreeV
 
 // ------------------------------------------------------------------ Anschluss
 
+// Zieh-Aufgabe ohne eindeutiges Ergebnis (Schritt 2b): die gezogene Stelle prüfen wie im geführten Modus
+export function checkVectorDrag(drag: DragStep, at: readonly number[]): FreeVerdict {
+  const v = judgeDrag(drag, at)
+  if (v.kind === 'invalid') return { kind: 'unreadable', title: 'So geht es nicht.', message: v.note }
+  const lines = v.lines.map((l) => `$${l.latex}$ ${l.ok ? '✓' : '✗'}`).join('\n')
+  if (v.kind === 'correct') return { kind: 'correct', title: 'Richtig!', message: lines }
+  if (v.kind === 'error') {
+    const rule = vectorErrorRule(v.rule)
+    return { kind: 'wrong', title: 'Nicht ganz.', message: lines, error: { id: rule.id, name: rule.name, why: drag.whys[v.rule] ?? rule.why } }
+  }
+  return { kind: 'wrong', title: 'Das stimmt noch nicht.', message: lines }
+}
+
 export function prepareVectorFreeTask(ref: TaskRef): FreeTask {
   const task = buildVectorTask(ref)
+  const drag = task.steps[0]?.drag
+  if (task.dragOnly && drag)
+    return {
+      answerLabel: '',
+      inputLabel: 'Deine Stelle',
+      keyboard: { kind: 'vector' },
+      drag,
+      checkDrag: (at) => checkVectorDrag(drag, at),
+      check: () => ({ kind: 'unreadable', title: 'Zieh im Bild.' }),
+    }
   const check = prepareVectorCheck(task)
   return {
     answerLabel: '',

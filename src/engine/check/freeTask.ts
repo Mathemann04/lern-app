@@ -1,4 +1,5 @@
 import type { Explanation } from '../explain/texts.ts'
+import type { DragStep } from '../linalg/drag.ts'
 
 // Freier Modus, für alle Themen gleich: Die Engine eines Themas bereitet eine Aufgabe vor und
 // prüft jede Eingabe; die Oberfläche (ui/free/) kennt nur diese Typen. Texte mit $…$-Formeln.
@@ -51,6 +52,10 @@ export type FreeTask = {
   // Eingabe in Kästchen statt in einem Feld (M7, Vektoren): dann prüft checkEntries alle Kästchen zusammen
   readonly entries?: readonly EntryGroup[]
   checkEntries?(input: readonly (readonly string[])[]): FreeVerdict
+  // Pfeil ziehen (M7 Schritt 2b): Die Antwort ist eine Stelle im Bild, checkDrag prüft sie (Zieh-Aufgaben ohne
+  // eindeutiges Ergebnis). Bei Zieh-Aufgaben mit Ergebnis (Parameter) gibt es entries und dazu das Bild zum Ausprobieren.
+  readonly drag?: DragStep
+  checkDrag?(at: readonly number[]): FreeVerdict
 }
 
 // Eingabe des Knopfs „Keine Lösung" (leere Menge)

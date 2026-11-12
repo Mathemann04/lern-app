@@ -143,8 +143,12 @@ export const VECTOR_CARD_LIST: readonly Card[] = [
     title: 'Senkrecht, spitz oder stumpf',
     level: 1,
     rules: [],
-    formulas: [String.raw`\vec a \perp \vec b \;\Leftrightarrow\; \vec a \cdot \vec b = 0`, String.raw`\vec a \cdot \vec b > 0 \;\Leftrightarrow\; \varphi < 90^\circ`],
-    memo: 'Die Längen sind positiv, also hat das Skalarprodukt dasselbe Vorzeichen wie $\\cos\\varphi$: positiv heißt spitz, gleich $0$ heißt senkrecht, negativ heißt stumpf. Steht ein Parameter im Vektor, wird daraus eine Gleichung (senkrecht) oder eine Ungleichung (spitz, stumpf).',
+    formulas: [
+      String.raw`\vec a \perp \vec b \;\Leftrightarrow\; \vec a \cdot \vec b = 0`,
+      String.raw`\vec a \cdot \vec b > 0 \;\Leftrightarrow\; \varphi < 90^\circ`,
+      String.raw`\begin{pmatrix} a_1 \\ a_2 \end{pmatrix} \perp \begin{pmatrix} -a_2 \\ a_1 \end{pmatrix}`,
+    ],
+    memo: 'Die Längen sind positiv, also hat das Skalarprodukt dasselbe Vorzeichen wie $\\cos\\varphi$: positiv heißt spitz, gleich $0$ heißt senkrecht, negativ heißt stumpf. Steht ein Parameter im Vektor, wird daraus eine Gleichung (senkrecht) oder eine Ungleichung (spitz, stumpf). In der Ebene bekommst du einen senkrechten Pfeil, wenn du die Einträge vertauschst und bei einem das Vorzeichen änderst. Im Dreieck liegt der rechte Winkel an der Ecke, an der beide Pfeile beginnen; ein rechter Winkel ist weder spitz noch stumpf.',
     note: 'Beim Teilen einer Ungleichung durch eine negative Zahl dreht sich das Zeichen um.',
     when: 'In der Klausur jedes Jahr, z. B. „Für welche $t$ stehen die Vektoren senkrecht?" oder „Für welche $t$ ist der Winkel stumpf?"',
     examples: [
@@ -152,7 +156,7 @@ export const VECTOR_CARD_LIST: readonly Card[] = [
       { vector: { kind: 'perp', level: 2, seed: 1 } },
       { vector: { kind: 'classifyParam', level: 4, seed: 1 } },
     ],
-    errors: ['vec-angle-sign', 'vec-angle-zero', 'vec-perp-one', 'vec-param-solve', 'vec-ineq-flip'],
+    errors: ['vec-angle-sign', 'vec-angle-zero', 'vec-perp-one', 'vec-param-solve', 'vec-ineq-flip', 'vec-perp-swap', 'vec-right-not-acute', 'vec-right-wrong-corner'],
   },
   {
     id: 'vec-winkel',
@@ -182,6 +186,6 @@ export const VECTOR_CARD_LIST: readonly Card[] = [
       { vector: { kind: 'lengthAngle', level: 3, seed: 1 } },
       { vector: { kind: 'lengthAngle', level: 5, seed: 1 } },
     ],
-    errors: ['vec-binomial-middle', 'vec-dot-no-cos', 'vec-coef-not-squared'],
+    errors: ['vec-binomial-middle', 'vec-dot-no-cos', 'vec-coef-not-squared', 'vec-diagonals-sides'],
   },
 ]

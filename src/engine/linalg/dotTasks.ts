@@ -443,7 +443,7 @@ function perpEquationStep(rng: Rng, t: string, an: string, bn: string, terms: st
 
 // Für welches t stehen a und b senkrecht? Stufe 1 Ebene, 2 Raum, 4 Parameter in beiden Vektoren (auch Brüche),
 // Stufe 5 quadratisch (zwei Lösungen)
-function buildPerp(rng: Rng, level: Level): Built {
+export function buildPerp(rng: Rng, level: Level): Built {
   if (level === 5) return buildPerpQuadratic(rng)
   const dim = level === 1 ? 2 : level === 2 ? 3 : rng.pick([3, 4])
   const t = rng.pick(PARAMS)
@@ -1002,8 +1002,9 @@ function buildAngleFromLength(rng: Rng): Built {
 }
 
 // Stufe 4: Für welche t ist der Winkel spitz bzw. stumpf? Lineare Ungleichung (beim Teilen durch eine negative Zahl umdrehen)
-function buildClassifyParam(rng: Rng): Built {
-  const dim = rng.pick([2, 3])
+// forcedDim: für die Zieh-Aufgabe (dragTasks.ts) immer in der Ebene; sonst zieht der Zufall wie bisher
+export function buildClassifyParam(rng: Rng, forcedDim?: 2 | 3): Built {
+  const dim = forcedDim ?? rng.pick([2, 3])
   const t = rng.pick(PARAMS)
   const { vecs } = letters(rng)
   const an = vecName(vecs[0])

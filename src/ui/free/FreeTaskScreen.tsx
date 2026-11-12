@@ -10,6 +10,7 @@ import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
 import { CardSheetButton, TaskCardLinks } from '../cards/CardSheet.tsx'
 import { VectorFigure } from '../draw/VectorFigure.tsx'
+import { DragPad } from '../draw/DragPad.tsx'
 import type { CourseEngine } from '../courseEngines.ts'
 import { courseHref, mixHref, nextTaskHref, taskHref } from '../routes.ts'
 import { LevelUpSuggestion } from '../task/LevelUpSuggestion.tsx'
@@ -32,7 +33,7 @@ export default function FreeTaskScreen({ course, engine, taskRef, focus = null, 
     // Den freien Modus gibt es nur für Aufgaben mit Term und Ergebnis (Mathe) oder mit Kästchen (Vektoren)
     const plan = engine.planGuidedTask({ level, seed })
     const free = engine.prepareFree({ level, seed })
-    if (!free.entries && !isMathTask(plan)) throw new Error(`Aufgabe ${level}-${seed} hat keinen freien Modus`)
+    if (!free.entries && !free.drag && !isMathTask(plan)) throw new Error(`Aufgabe ${level}-${seed} hat keinen freien Modus`)
     return { free, plan }
   }, [engine, level, seed])
   const { mode, detail, cycle } = useExplanationMode()
@@ -40,6 +41,9 @@ export default function FreeTaskScreen({ course, engine, taskRef, focus = null, 
   // Eingabe in Kästchen: je Teil und Eintrag (in einer Ref, damit Enter im letzten Feld den neuesten Stand prüft)
   const entriesRef = useRef<string[][]>(free.entries?.map((g) => Array.from({ length: g.count }, () => '')) ?? [])
   const [verdict, setVerdict] = useState<FreeVerdict | null>(null)
+  // Zieh-Aufgabe (M7 Schritt 2b): Stelle im Bild; bei Aufgaben mit Ergebnis nur zum Ausprobieren
+  const firstDrag = plan.steps[0]?.drag
+  const [dragAt, setDragAt] = useState<readonly number[]>(() => firstDrag?.start ?? [])
   const [hintOpen, setHintOpen] = useState(false)
   const [revealed, setRevealed] = useState(0)
   const [keyboardHeight, setKeyboardHeight] = useState(0)
@@ -54,7 +58,10 @@ export default function FreeTaskScreen({ course, engine, taskRef, focus = null, 
 
   function submit(value: string) {
     let result: FreeVerdict
-    if (free.entries) {
+    if (free.drag) {
+      submittedRef.current = JSON.stringify(dragAt)
+      result = free.checkDrag!(dragAt)
+    } else if (free.entries) {
       const input = entriesRef.current.map((row) => [...row])
       submittedRef.current = JSON.stringify(input)
       result = free.checkEntries!(input)
@@ -95,10 +102,26 @@ export default function FreeTaskScreen({ course, engine, taskRef, focus = null, 
       </section>
 
       {/* Bild zur Aufgabe (Vektoren): das des ersten Schritts, es zeigt nur Gegebenes */}
-      {plan.steps[0]?.drawing && <VectorFigure drawing={plan.steps[0].drawing} />}
+      {firstDrag && plan.steps[0].drawing ? (
+        <DragPad
+          step={firstDrag}
+          drawing={plan.steps[0].drawing}
+          at={dragAt}
+          onMove={
+            solved
+              ? undefined
+              : (next) => {
+                  setDragAt(next)
+                  if (free.drag && JSON.stringify(next) !== submittedRef.current) setVerdict(null)
+                }
+          }
+        />
+      ) : (
+        plan.steps[0]?.drawing && <VectorFigure drawing={plan.steps[0].drawing} />
+      )}
 
       <section className="space-y-3" aria-label="Deine Antwort">
-        {free.entries ? (
+        {free.drag ? null : free.entries ? (
           <EntryInput
             groups={free.entries}
             keyboard={free.keyboard}
@@ -155,7 +178,8 @@ export default function FreeTaskScreen({ course, engine, taskRef, focus = null, 
 
       <div ref={feedbackRef} aria-live="polite">
         {verdict && (
-          <Feedback verdict={verdict} resultLatex={plan.resultLatex ?? ''} resultNote={plan.resultNote} resultDrawing={plan.resultDrawing} detail={detail} mode={mode} />
+          // Zieh-Aufgabe ohne eindeutiges Ergebnis: die Rechnung mit der eigenen Stelle statt eines Ergebnisses
+          <Feedback verdict={verdict} resultLatex={free.drag ? '' : (plan.resultLatex ?? '')} resultNote={plan.resultNote} resultDrawing={free.drag ? undefined : plan.resultDrawing} detail={detail} mode={mode} />
         )}
       </div>
 
@@ -245,12 +269,16 @@ function Feedback({ verdict, resultLatex, resultNote, resultDrawing, detail, mod
     <Box tone={tone} title={verdict.title}>
       {verdict.kind === 'correct' && (
         <>
-          {mode !== 'off' && <p>Zusammengefasst:</p>}
-          <div data-testid="result">
-            <FitWidth className="text-xl">
-              <Formula tex={resultLatex} />
-            </FitWidth>
-          </div>
+          {resultLatex && (
+            <>
+              {mode !== 'off' && <p>Zusammengefasst:</p>}
+              <div data-testid="result">
+                <FitWidth className="text-xl">
+                  <Formula tex={resultLatex} />
+                </FitWidth>
+              </div>
+            </>
+          )}
           {resultNote && <RichText text={resultNote} className="text-zinc-700" />}
           {resultDrawing && <VectorFigure drawing={resultDrawing} />}
         </>

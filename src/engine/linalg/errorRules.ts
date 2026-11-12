@@ -377,6 +377,43 @@ export const VECTOR_ERROR_RULES: readonly VectorErrorRule[] = [
       short: String.raw`$\lvert k\,\vec a \rvert^2 = k^2 \lvert \vec a \rvert^2$.`,
     },
   },
+  // Zieh-Aufgaben (M7 Schritt 2b)
+  {
+    id: 'vec-perp-swap',
+    name: 'Nur vertauscht, kein Vorzeichen geändert',
+    wrongFormula: String.raw`\vec a = ${col(2, 3)} \;\Rightarrow\; \vec b = ${col(3, 2)} \perp \vec a`,
+    why: {
+      detailed: String.raw`Vertauschst du nur die Einträge von $\vec a$, bekommst du zwei Produkte mit demselben Vorzeichen, und die heben sich nicht auf. Für einen senkrechten Pfeil in der Ebene vertauschst du die Einträge **und** änderst bei einem das Vorzeichen. Prüfe immer mit dem Skalarprodukt: Es muss $0$ sein.`,
+      short: String.raw`Vertauschen **und** ein Vorzeichen ändern; Probe: Skalarprodukt $0$.`,
+    },
+  },
+  {
+    id: 'vec-right-not-acute',
+    name: 'Rechter Winkel als spitz oder stumpf gezählt',
+    wrongFormula: String.raw`\vec a \cdot \vec b = 0 \;\Rightarrow\; \text{spitz}`,
+    why: {
+      detailed: String.raw`Ein rechter Winkel ist weder spitz noch stumpf. Spitz heißt unter $90^\circ$, also Skalarprodukt **größer** als $0$; stumpf heißt über $90^\circ$, also Skalarprodukt **kleiner** als $0$. Bei genau $0$ stehen die Pfeile senkrecht.`,
+      short: String.raw`Skalarprodukt $0$ heißt rechter Winkel, nicht spitz und nicht stumpf.`,
+    },
+  },
+  {
+    id: 'vec-right-wrong-corner',
+    name: 'Rechter Winkel an der falschen Ecke',
+    wrongFormula: String.raw`\angle A = 90^\circ: \; \overrightarrow{CA} \cdot \overrightarrow{CB} = 0`,
+    why: {
+      detailed: String.raw`Der rechte Winkel liegt an der Ecke, an der **beide** Pfeile beginnen. Für einen rechten Winkel bei $A$ prüfst du $\overrightarrow{AB} \cdot \overrightarrow{AC} = 0$, für einen bei $C$ dagegen $\overrightarrow{CA} \cdot \overrightarrow{CB} = 0$. Lies genau, an welcher Ecke er sein soll.`,
+      short: String.raw`Beide Pfeile beginnen an der Ecke mit dem rechten Winkel.`,
+    },
+  },
+  {
+    id: 'vec-diagonals-sides',
+    name: 'Seiten statt Diagonalen senkrecht',
+    wrongFormula: String.raw`(\vec a + \vec b) \perp (\vec a - \vec b) \;\Rightarrow\; \vec a \perp \vec b`,
+    why: {
+      detailed: String.raw`$\vec a + \vec b$ und $\vec a - \vec b$ sind die **Diagonalen** des Parallelogramms aus $\vec a$ und $\vec b$, nicht seine Seiten. Multipliziere aus: $(\vec a + \vec b) \cdot (\vec a - \vec b) = \lvert \vec a \rvert^2 - \lvert \vec b \rvert^2$. Die Diagonalen stehen also senkrecht, wenn beide Pfeile **gleich lang** sind (eine Raute), nicht wenn die Seiten senkrecht sind.`,
+      short: String.raw`$(\vec a + \vec b) \cdot (\vec a - \vec b) = \lvert \vec a \rvert^2 - \lvert \vec b \rvert^2$: gleich lang, nicht senkrecht.`,
+    },
+  },
 ]
 
 export const vectorErrorRule = (id: string): VectorErrorRule => {

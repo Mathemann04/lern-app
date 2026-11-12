@@ -168,7 +168,13 @@ describe('Vektoren: Rechnen und Länge', () => {
     const used = new Set<string>()
     // beide Bausteine: Rechnen und Länge, Skalarprodukt und Winkel (Schritt 2)
     const both = (level: Level) => [...tasks(level, 200), ...Array.from({ length: 200 }, (_, i) => buildVectorTask({ level, seed: blockSeed('skalar', i + 1) }))]
-    for (const level of LEVELS) for (const task of both(level)) for (const step of task.steps) for (const c of step.choices) if (c.errorRuleId) used.add(c.errorRuleId)
+    for (const level of LEVELS)
+      for (const task of both(level))
+        for (const step of task.steps) {
+          for (const c of step.choices) if (c.errorRuleId) used.add(c.errorRuleId)
+          // Zieh-Aufgaben (Schritt 2b): typische Fehler beim Ziehen
+          for (const t of step.drag?.traps ?? []) used.add(t.rule)
+        }
     expect(VECTOR_ERROR_RULES.map((r) => r.id).filter((id) => !used.has(id))).toEqual([])
   })
 
