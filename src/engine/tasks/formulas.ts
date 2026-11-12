@@ -3,7 +3,7 @@
 // Mathe-Engine wissen, welche Bausteine dabei vorkommen. Die Aufgaben baut formulaTasks.ts.
 //
 // Jede Aufgabe ist eine Formel und eine Größe, nach der aufgelöst wird. Ihre Nummer ist ihre Stelle in FORMULA_TASKS
-// (ab 1, „formel.2-7"); neue Formeln und Größen deshalb nur hinten anhängen, nie umsortieren oder löschen. Stufe und
+// (ab 1, „formel.2-1"); neue Formeln und Größen deshalb nur hinten anhängen, nie umsortieren oder löschen. Stufe und
 // Bausteine stehen hier fest; ein Test rechnet sie mit der Engine nach (formulaTasks.test.ts).
 
 import type { Level } from './taskNumber.ts'
@@ -64,7 +64,7 @@ export const FORMULAS: readonly Formula[] = [
   {
     id: 'beschleunigt',
     name: 'Gleichmäßig beschleunigte Bewegung',
-    latex: 's = v_0t + \\frac{1}{2}at^{2}',
+    latex: 's = v_0t + \\frac{at^{2}}{2}',
     quantities: [['s', 'Weg'], ['v_0', 'Anfangsgeschwindigkeit'], ['a', 'Beschleunigung'], ['t', 'Zeit']],
   },
   {
@@ -113,7 +113,7 @@ export const FORMULAS: readonly Formula[] = [
     id: 'zerfall',
     name: 'Radioaktiver Zerfall',
     latex: 'N = N_0e^{-\\lambda t}',
-    quantities: [['N', 'Zahl der Kerne'], ['N_0', 'Zahl der Kerne am Anfang'], ['\\lambda', 'Zerfallskonstante'], ['t', 'Zeit']],
+    quantities: [['N', 'Zahl der noch nicht zerfallenen Kerne'], ['N_0', 'Zahl der Kerne am Anfang'], ['\\lambda', 'Zerfallskonstante'], ['t', 'Zeit']],
   },
   {
     id: 'abkuehlen',
@@ -164,13 +164,13 @@ export const FORMULAS: readonly Formula[] = [
     id: 'seil',
     name: 'Durchhängendes Seil (Kettenlinie)',
     latex: 'y = a\\cosh\\left(\\frac{x}{a}\\right)',
-    quantities: [['y', 'Höhe des Seils'], ['x', 'Abstand vom tiefsten Punkt'], ['a', 'Parameter des Seils']],
+    quantities: [['y', 'Höhe des Seils'], ['x', 'waagrechter Abstand vom tiefsten Punkt'], ['a', 'Parameter des Seils']],
   },
   {
     id: 'auftrieb',
     name: 'Auftrieb',
     latex: 'F = \\rho gV',
-    quantities: [['F', 'Auftriebskraft'], ['\\rho', 'Dichte der Flüssigkeit'], ['g', 'Fallbeschleunigung'], ['V', 'Volumen']],
+    quantities: [['F', 'Auftriebskraft'], ['\\rho', 'Dichte der Flüssigkeit'], ['g', 'Fallbeschleunigung'], ['V', 'eingetauchtes Volumen']],
   },
   {
     id: 'fluchtgeschwindigkeit',
@@ -210,7 +210,7 @@ export const FORMULA_TASKS: readonly FormulaTask[] = [
   { formula: 'aufprall', target: 'g', level: 1, blocks: ['wurzeln'] },
   { formula: 'bewegungsenergie', target: 'v', level: 1, blocks: ['potenzen'] },
   { formula: 'bewegungsenergie', target: 'm', level: 1, blocks: ['linear'] },
-  { formula: 'beschleunigt', target: 'a', level: 1, blocks: ['linear'] },
+  { formula: 'beschleunigt', target: 'a', level: 2, blocks: ['linear'] },
   { formula: 'beschleunigt', target: 'v_0', level: 1, blocks: ['linear'] },
   { formula: 'beschleunigt', target: 't', level: 3, blocks: ['quadratisch'] },
   { formula: 'bremsweg', target: 'v', level: 1, blocks: ['potenzen'] },

@@ -16,7 +16,7 @@ import { FORMULA_SHARE, nextRearrangeSeed, rearrangeSeedBlocks } from './rearran
 import { generateRearrangeTask } from './rearrangeTerms.ts'
 import { type Level, blockSeed, formatTaskNumber, parseTaskNumber, seedBlock } from './taskNumber.ts'
 
-// Formeln aus Technik und Physik (M6 Schritt 4b): feste Aufgaben mit Nummern wie „formel.2-7"
+// Formeln aus Technik und Physik (M6 Schritt 4b): feste Aufgaben mit Nummern wie „formel.2-1"
 
 const refs = FORMULA_TASKS.map((task, i) => ({ level: task.level, seed: blockSeed('formel', i + 1) }))
 

@@ -63,6 +63,8 @@ const SYMBOL_COMMANDS: Readonly<Record<string, string>> = {
 const TEXT_COMMANDS = new Set(['mathrm', 'operatorname', 'mathit', 'text', 'textrm', 'mbox'])
 // griechische Buchstaben, die als Größen vorkommen (\pi bleibt die Kreiszahl)
 const GREEK = new Set(['alpha', 'beta', 'gamma', 'delta', 'varepsilon', 'epsilon', 'eta', 'vartheta', 'theta', 'kappa', 'lambda', 'mu', 'nu', 'rho', 'sigma', 'tau', 'varphi', 'phi', 'omega'])
+// zwei Schreibweisen desselben Buchstabens: Am Laptop macht MathLive aus „epsilon" \epsilon, die Aufgaben schreiben \varepsilon
+const GREEK_NAME: Readonly<Record<string, string>> = { epsilon: 'varepsilon', phi: 'varphi', theta: 'vartheta' }
 
 function tokenize(input: string): Token[] {
   // Dezimalkomma in der Form von MathLive: 0{,}5
@@ -372,7 +374,7 @@ class Parser {
       default:
         if (TEXT_COMMANDS.has(name)) return this.parseText()
         // griechische Buchstaben als Größen wie in Formeln der Physik (\lambda, \varepsilon_r)
-        if (GREEK.has(name)) return variable(this.withSubscript(`\\${name}`))
+        if (GREEK.has(name)) return variable(this.withSubscript(`\\${GREEK_NAME[name] ?? name}`))
         throw new ParseError(`Das Zeichen „\\${name}" kenne ich nicht.`)
     }
   }

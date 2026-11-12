@@ -101,6 +101,10 @@ describe('Leser für die Mathe-Tastatur', () => {
     ['\\lambda t', mul(variable('\\lambda'), variable('t'))],
     ['\\varepsilon_r\\frac{A}{d}', mul(variable('\\varepsilon_r'), div(variable('A'), variable('d')))],
     ['\\sin\\alpha', sin(variable('\\alpha'))],
+    // zwei Schreibweisen desselben Buchstabens
+    ['\\epsilon_0', variable('\\varepsilon_0')],
+    ['\\phi', variable('\\varphi')],
+    ['\\theta', variable('\\vartheta')],
     ['N_0e^{-\\lambda t}', mul(variable('N_0'), exp(neg(mul(variable('\\lambda'), variable('t')))))],
   ])('liest Größen der Physik: %s', (latex, expected) => {
     expect(parsed(latex)).toEqual(expected)

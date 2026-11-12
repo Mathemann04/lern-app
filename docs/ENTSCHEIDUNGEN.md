@@ -896,3 +896,9 @@ Neue Entscheidungen unten anfügen.
   $\varepsilon_r$; $\pi$ bleibt die Kreiszahl). Außerdem prüft der freie Modus Aufgaben mit e-Funktion, Logarithmus,
   Winkel- oder Hyperbelfunktion jetzt in jeder Stufe großzügig (jede gleichwertige Form ohne Doppelbruch), nicht erst ab
   Stufe 4, weil es sie seit Schritt 4 ab Stufe 1 gibt.
+  Nach der unabhängigen Prüfung: $\frac{1}{2}at^2$ ergab beim Malnehmen mit 2 „$1at^2$“ im Rechenweg, die Formel steht
+  jetzt als $\frac{at^2}{2}$ da, und alle Formel-Aufgaben laufen durch dieselben Prüfungen je Schritt wie die übrigen
+  Aufgaben. $\epsilon$ und $\varepsilon$ (ebenso $\phi$/$\varphi$, $\theta$/$\vartheta$) gelten beim Eintippen als
+  dasselbe Zeichen, weil MathLive aus getipptem „epsilon“ $\epsilon$ macht. Bedeutungen genauer (waagrechter Abstand,
+  eingetauchtes Volumen, noch nicht zerfallene Kerne).
+

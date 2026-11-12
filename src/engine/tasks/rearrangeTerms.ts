@@ -422,7 +422,7 @@ function cancels(sums: readonly Expr[], env: Env): boolean {
   })
 }
 
-// Formeln aus Technik und Physik (M6 Schritt 4b, formulas.ts): feste Aufgaben, Nummern wie „formel.2-7"
+// Formeln aus Technik und Physik (M6 Schritt 4b, formulas.ts): feste Aufgaben, Nummern wie „formel.2-1"
 const FORMULA_TEMPLATE: RearrangeTemplate = {
   id: 'formeln',
   level: 1,
