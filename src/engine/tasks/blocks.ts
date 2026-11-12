@@ -42,3 +42,25 @@ export const REARRANGE_BLOCKS: readonly Block[] = [
   { id: 'komplex', title: 'Komplexe Zahlen', note: 'Betrag und Winkel', group: 'spaeter' },
   { id: 'vektoren', title: 'Vektoren', note: 'Länge, Skalarprodukt, Winkel', group: 'spaeter' },
 ]
+
+// Feste Nummer je Baustein für Aufgabennummern mit Baustein wie „exp.1-4711" (M6 Schritt 4, taskNumber.ts). Gilt für alle
+// Tätigkeiten (dieselbe Id heißt überall derselbe Baustein); nie ändern, neue Bausteine bekommen die nächste freie Nummer.
+export const BLOCK_CODES: Readonly<Record<string, number>> = {
+  linear: 1,
+  brueche: 2,
+  wurzeln: 3,
+  potenzen: 4,
+  exp: 5,
+  log: 6,
+  quadratisch: 7,
+  winkel: 8,
+  hyperbel: 9,
+  ableitung: 10,
+  integral: 11,
+  reihen: 12,
+  grenzwert: 13,
+  dgl: 14,
+  det: 15,
+  komplex: 16,
+  vektoren: 17,
+}

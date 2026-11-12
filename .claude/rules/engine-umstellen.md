@@ -138,5 +138,10 @@ Teil der Mathe-Engine `src/engine/` (reines TypeScript, ohne React).
     ohne gathered und ohne den Namen pmatrix)
   - Bausteine und Verzeichnis (M6 Schritt 3, Einzelheiten in `engine-aufgaben.md`): Ändert sich der
     Rechenweg oder eine Vorlage, ändern sich die Bausteine einzelner Nummern; dann
-    `node scripts/rearrange-index.ts` laufen lassen (`rearrangeIndex.test.ts` meldet es sonst)
+    `node scripts/rearrange-index.ts` laufen lassen (`rearrangeIndex.test.ts` meldet es sonst). Seit Schritt 4
+    gehört ein Quadrat wie $x^2$, das die pq-Formel löst, zu „Quadratische Gleichungen“, nicht zu „Quadrate und
+    Potenzen“. Die Engine löst noch nicht: Logarithmen auf beiden Seiten mit einer Zahl dazu
+    ($\log_2(x - a) = \log_2(b - x) + 1$), verschiedene Basen ($\ln$ und $\log_3$ desselben Terms), Gleichungen nur
+    mit Zahlen wie $3\sqrt{x} + 4 = x$, $a x^n = y$ mit Buchstaben als Hochzahl, $\sqrt[3]{\ldots}$ in der Aufgabe,
+    eine Wurzel in einer Wurzel als Baustein auf beiden Seiten (geplant in M6 4b, docs/AUFGABENARTEN.md)
 

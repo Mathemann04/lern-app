@@ -97,7 +97,8 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   `FitWidth` (`src/ui/FitWidth.tsx`) setzen sich selbst kleiner, bis sie
   passen (ohne Umbruch); im geführten Modus nur Antworten, die eine
   einzige Formel sind, Antworten mit Text brechen um. Texte mit Formeln
-  über `RichText` (Formeln zwischen `$…$`). Arbeitsauftrag und Hinweis
+  über `RichText` (Formeln zwischen `$…$`). Die Gleichung oben in einer Aufgabe steht in `FitWidth` (`TaskIntro`, Mathe
+  seit M6 Schritt 4 wie Chemie; vorher brach KaTeX lange Gleichungen nach dem Gleichheitszeichen um). Arbeitsauftrag und Hinweis
   unter der Aufgabe (z. B. „Alle Buchstaben stehen für positive Zahlen.",
   `note`) zeigt `TaskIntro` in `src/ui/task/TaskParts.tsx`.
 - `e2e/`: Browser-Tests (Playwright). Im freien Modus vor dem Tippen warten,

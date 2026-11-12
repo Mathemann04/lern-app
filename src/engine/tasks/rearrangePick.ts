@@ -1,11 +1,16 @@
+import { REARRANGE_BLOCKS } from './blocks.ts'
 import { REARRANGE_COMBOS } from './rearrangeCombos.ts'
+import { hasRearrangeFamily } from './rearrangeFamilies.ts'
 import { REARRANGE_INDEX_CODES, REARRANGE_INDEX_WIDTH } from './rearrangeIndex.ts'
 import { INDEX_ALPHABET } from './rearrangeIndexFormat.ts'
-import { type Level, randomSeed } from './taskNumber.ts'
+import { type Level, MAX_SEED, blockSeed, randomSeed, seedBlock } from './taskNumber.ts'
 
-// Neue Umstell-Aufgabe zu angekreuzten Bausteinen (M6 Schritt 3): aus dem Verzeichnis (rearrangeIndex.ts, erzeugt von
-// scripts/rearrange-index.ts) die Nummern, deren Bausteine alle angekreuzt sind. Die Aufgaben selbst kommen unverändert
-// aus generateRearrangeTask; das Verzeichnis sagt nur, welche Nummer welche Bausteine hat.
+// Neue Umstell-Aufgabe zu angekreuzten Bausteinen (M6 Schritte 3 und 4): aus dem Verzeichnis (rearrangeIndex.ts, erzeugt
+// von scripts/rearrange-index.ts) die Nummern, deren Bausteine alle angekreuzt sind, dazu die Aufgaben einzelner Bausteine
+// (Nummern wie „exp.1-4711", rearrangeFamilies.ts). Die Aufgaben selbst kommen aus generateRearrangeTask; das Verzeichnis
+// sagt nur, welche Nummer welche Bausteine hat.
+
+const ALL_BLOCKS: ReadonlySet<string> = new Set(REARRANGE_BLOCKS.map((block) => block.id))
 
 // Stelle der Kombination (in REARRANGE_COMBOS) je Nummer: Nummer n steht an Stelle n − 1
 const decoded = new Map<Level, Uint16Array>()
@@ -53,11 +58,54 @@ export function rearrangePool(level: Level, blocks: ReadonlySet<string>): readon
   return pool
 }
 
-// Nummer einer neuen Aufgabe: ohne Auswahl (undefined: alle Bausteine) eine beliebige wie bisher; sonst eine aus dem
-// Verzeichnis, deren Bausteine alle angekreuzt sind. Gibt es keine, eine beliebige (wie bei den Unterthemen der Chemie:
-// passt nichts, gelten alle; die Seiten sperren den Üben-Knopf vorher).
+// Nummern aus dem Verzeichnis mit dem Baustein main, deren übrige Bausteine alle in blocks stehen. Hat main in der Stufe
+// eigene Aufgaben, fehlen die Nummern mit main allein (die kommen dann aus den eigenen Aufgaben).
+const mainPools = new Map<string, readonly number[]>()
+
+function mainPool(level: Level, blocks: ReadonlySet<string>, main: string): readonly number[] {
+  const key = `${level}:${main}:${[...blocks].sort().join('+')}`
+  let pool = mainPools.get(key)
+  if (!pool) {
+    const own = hasRearrangeFamily(main, level)
+    const allowed = REARRANGE_COMBOS[level].map((combo) => {
+      const ids = combo.split('+')
+      return ids.includes(main) && ids.every((id) => blocks.has(id)) && !(own && ids.length === 1)
+    })
+    const positions = comboPositions(level)
+    const seeds: number[] = []
+    for (let i = 0; i < positions.length; i++) if (allowed[positions[i]]) seeds.push(i + 1)
+    pool = seeds
+    mainPools.set(key, pool)
+  }
+  return pool
+}
+
+// Anteil der eigenen Aufgaben eines Bausteins, wenn es auch Aufgaben mit ihm und anderen angekreuzten gibt
+export const FAMILY_SHARE = 0.5
+
+// Bausteine der Auswahl, zu denen es in der Stufe Aufgaben gibt (in der Reihenfolge der Liste)
+export function rearrangeMains(level: Level, blocks: ReadonlySet<string> = ALL_BLOCKS): string[] {
+  return REARRANGE_BLOCKS.map((block) => block.id).filter((id) => blocks.has(id) && (hasRearrangeFamily(id, level) || mainPool(level, blocks, id).length > 0))
+}
+
+// Nummer einer neuen Aufgabe: erst einen angekreuzten Baustein wählen (jeder gleich oft, ohne Auswahl alle), dann eine
+// Aufgabe mit ihm, deren Bausteine alle angekreuzt sind: halb eigene Aufgaben des Bausteins (wo es sie gibt), halb aus dem
+// Verzeichnis. Gibt es zur Auswahl in der Stufe keine Aufgabe, eine beliebige alte Nummer (die Seiten sperren den
+// Üben-Knopf vorher).
 export function nextRearrangeSeed(level: Level, blocks?: ReadonlySet<string>, random: () => number = Math.random): number {
-  if (!blocks) return randomSeed()
-  const pool = rearrangePool(level, blocks)
-  return pool.length > 0 ? pool[Math.floor(random() * pool.length)] : randomSeed()
+  const chosen = blocks ?? ALL_BLOCKS
+  const mains = rearrangeMains(level, chosen)
+  if (mains.length === 0) return randomSeed()
+  const main = mains[Math.floor(random() * mains.length)]
+  const pool = mainPool(level, chosen, main)
+  if (hasRearrangeFamily(main, level) && (pool.length === 0 || random() < FAMILY_SHARE)) return blockSeed(main, 1 + Math.floor(random() * MAX_SEED))
+  return pool[Math.floor(random() * pool.length)]
+}
+
+// Bausteine einer Nummer ohne die Aufgabe zu bauen: bei eigenen Aufgaben eines Bausteins dieser, sonst laut Verzeichnis
+// (null außerhalb des Verzeichnisses)
+export function rearrangeSeedBlocks(level: Level, seed: number): readonly string[] | null {
+  const own = seedBlock(seed)
+  if (own) return hasRearrangeFamily(own.block, level) ? [own.block] : indexedBlocks(level, own.s)
+  return indexedBlocks(level, seed)
 }

@@ -1,4 +1,4 @@
-import { type Level, type TaskRef, formatTaskNumber, parseTaskNumber } from '../engine/tasks/taskNumber.ts'
+import { type Level, type TaskRef, formatTaskNumber, parseTaskNumber, seedBlock } from '../engine/tasks/taskNumber.ts'
 import type { PracticeMode } from '../state/storage.ts'
 import {
   DERIVATIVES,
@@ -6,6 +6,7 @@ import {
   areaById,
   courseById,
   examAreaOf,
+  hasBlocks,
   mockSubjectOf,
   isAreaAvailable,
   isCourseAvailable,
@@ -149,6 +150,8 @@ export function parseRoute(fullPath: string): Route {
     // Wiederholung nur ohne gezieltes Üben und Mischung
     const review = focus || mix ? null : reviewOf(params.get('wiederholen'), course)
     const ref = parseTaskNumber(number)
+    // Nummern mit Baustein („exp.1-4711") gibt es nur bei Tätigkeiten mit Bausteinen
+    if (ref && seedBlock(ref.seed) && !hasBlocks(found.course)) return { page: 'home' }
     if (ref) return { page: 'practice', course, mode, level: ref.level, seed: ref.seed, focus, mix, review }
     if (/^[1-5]$/.test(number)) return { page: 'practice', course, mode, level: Number(number) as Level, seed: null, focus, mix, review }
   }

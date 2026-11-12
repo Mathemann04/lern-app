@@ -31,14 +31,14 @@ const FAMILIES: readonly (readonly string[])[] = [
   ['r', 's', 't', 'u', 'v', 'w', 'z'],
 ]
 
-type Names = {
+export type Names = {
   readonly unknown: Expr
   readonly target: string
   // nächster freier Buchstabe
   letter(): Expr
 }
 
-function names(rng: Rng, letterTarget: boolean): Names {
+export function names(rng: Rng, letterTarget: boolean): Names {
   const family = rng.pick(FAMILIES)
   // gesucht ist ein Buchstabe: dann steht x als gewöhnlicher Buchstabe mit drin
   const target = letterTarget ? family[0] : 'x'
@@ -53,16 +53,16 @@ function names(rng: Rng, letterTarget: boolean): Names {
 
 // --- kleine Bausteine ---
 
-const termsOf = (e: Expr): readonly Expr[] => (e.kind === 'add' ? e.terms : [e])
+export const termsOf = (e: Expr): readonly Expr[] => (e.kind === 'add' ? e.terms : [e])
 // Summe ohne geschachtelte Summen
-const plus = (...parts: Expr[]): Expr => add(...parts.flatMap(termsOf))
-const minus = (a: Expr, b: Expr): Expr => plus(a, neg(b))
-const k = (rng: Rng, min = 2, max = 9) => num(rng.int(min, max))
+export const plus = (...parts: Expr[]): Expr => add(...parts.flatMap(termsOf))
+export const minus = (a: Expr, b: Expr): Expr => plus(a, neg(b))
+export const k = (rng: Rng, min = 2, max = 9) => num(rng.int(min, max))
 // Produkt zweier Buchstaben in alphabetischer Reihenfolge: bx statt xb
-const letters = (a: Expr, b: Expr): Expr => (a.kind === 'var' && b.kind === 'var' && a.name > b.name ? mul(b, a) : mul(a, b))
+export const letters = (a: Expr, b: Expr): Expr => (a.kind === 'var' && b.kind === 'var' && a.name > b.name ? mul(b, a) : mul(a, b))
 
 // Summand ohne die gesuchte Variable: b, 3b, bc, \frac{b}{c}, 5
-function summand(rng: Rng, n: Names): Expr {
+export function summand(rng: Rng, n: Names): Expr {
   const r = rng.next()
   if (r < 0.5) return n.letter()
   if (r < 0.7) return mul(k(rng), n.letter())
@@ -72,7 +72,7 @@ function summand(rng: Rng, n: Names): Expr {
 }
 
 // Faktor: 3, b, 2b
-function factor(rng: Rng, n: Names): Expr {
+export function factor(rng: Rng, n: Names): Expr {
   const r = rng.next()
   if (r < 0.4) return k(rng)
   if (r < 0.85) return n.letter()
@@ -80,7 +80,7 @@ function factor(rng: Rng, n: Names): Expr {
 }
 
 // Nenner: 4, b, 2b, b + c
-function denominator(rng: Rng, n: Names): Expr {
+export function denominator(rng: Rng, n: Names): Expr {
   const r = rng.next()
   if (r < 0.35) return k(rng)
   if (r < 0.75) return n.letter()
@@ -115,9 +115,9 @@ function shell(rng: Rng, e: Expr, n: Names, kind: ShellKind): Expr {
   }
 }
 
-const hasFraction = (e: Expr) => subterms(e).some((s) => s.kind === 'div')
+export const hasFraction = (e: Expr) => subterms(e).some((s) => s.kind === 'div')
 
-function shells(rng: Rng, core: Expr, n: Names, count: number): Expr {
+export function shells(rng: Rng, core: Expr, n: Names, count: number): Expr {
   let e = core
   let additive = rng.chance(0.5)
   for (let i = 0; i < count; i++) {
@@ -132,7 +132,7 @@ function shells(rng: Rng, core: Expr, n: Names, count: number): Expr {
 
 // --- andere Seite ---
 
-function otherSide(rng: Rng, n: Names): Expr {
+export function otherSide(rng: Rng, n: Names): Expr {
   const r = rng.next()
   if (r < 0.45) return variable('y')
   if (r < 0.65) return n.letter()
@@ -142,7 +142,7 @@ function otherSide(rng: Rng, n: Names): Expr {
 }
 
 // Gleichung mit der Seite der Variable links oder rechts; „y = …" steht meist links
-function equation(rng: Rng, side: Expr, other: Expr) {
+export function equation(rng: Rng, side: Expr, other: Expr) {
   const isY = other.kind === 'var' && other.name === 'y'
   return rng.chance(isY ? 0.6 : 0.2) ? eq(other, side) : eq(side, other)
 }
@@ -247,10 +247,10 @@ export function buildLevel2(rng: Rng): KitTask {
 // mehrere Kerne in einer Summe (Brüche mit verschiedenen Nennern, zwei Wurzeln, Kehrwerte). Dazu
 // kommen Schalen wie in Stufe 1.
 
-type Built = { readonly side: Expr; readonly other?: Expr; readonly conditions?: readonly Condition[]; readonly label: string }
+export type Built = { readonly side: Expr; readonly other?: Expr; readonly conditions?: readonly Condition[]; readonly label: string }
 
 // Zahl oder Buchstabe als Summand in einer Klammer: b, 3, 2b
-function constant(rng: Rng, n: Names): Expr {
+export function constant(rng: Rng, n: Names): Expr {
   const r = rng.next()
   if (r < 0.65) return n.letter()
   if (r < 0.85) return k(rng)
@@ -258,17 +258,17 @@ function constant(rng: Rng, n: Names): Expr {
 }
 
 // Vorderteil mit der Variable: x, 2x, bx
-function head(rng: Rng, n: Names, u: Expr): Expr {
+export function head(rng: Rng, n: Names, u: Expr): Expr {
   const r = rng.next()
   if (r < 0.65) return u
   if (r < 0.85) return mul(k(rng, 2, 5), u)
   return letters(n.letter(), u)
 }
 
-type Linear = { readonly expr: Expr; readonly head: Expr; readonly rest: Expr; readonly sign: 1 | -1 | 0 }
+export type Linear = { readonly expr: Expr; readonly head: Expr; readonly rest: Expr; readonly sign: 1 | -1 | 0 }
 
 // Klammer, linear in u: x + b, 2x - b, b - x (sign: +1 Kopf minus Rest, −1 Rest minus Kopf, 0 Summe)
-function bracketIn(rng: Rng, n: Names, u: Expr, allowSum = true): Linear {
+export function bracketIn(rng: Rng, n: Names, u: Expr, allowSum = true): Linear {
   const h = head(rng, n, u)
   const rest = constant(rng, n)
   const r = rng.next()
@@ -278,7 +278,7 @@ function bracketIn(rng: Rng, n: Names, u: Expr, allowSum = true): Linear {
 }
 
 // Bedingung, unter der die Klammer positiv ist: x - b → x > b, 2x - b → x > \frac{b}{2}, b - x → x < b
-function positiveCondition(l: Linear, u: Expr): Condition | null {
+export function positiveCondition(l: Linear, u: Expr): Condition | null {
   if (l.sign === 0) return null
   const coefficient = l.head === u ? null : l.head.kind === 'mul' ? l.head.factors[0] : null
   const bound = coefficient ? div(l.rest, coefficient) : l.rest
@@ -286,7 +286,7 @@ function positiveCondition(l: Linear, u: Expr): Condition | null {
 }
 
 // Schalen um einen Kern: min bis max, abwechselnd additiv und malnehmend
-function someShells(rng: Rng, core: Expr, n: Names, max: number, min = 0): { e: Expr; count: number } {
+export function someShells(rng: Rng, core: Expr, n: Names, max: number, min = 0): { e: Expr; count: number } {
   const count = rng.int(min, max)
   return { e: shells(rng, core, n, count), count }
 }
@@ -390,7 +390,7 @@ function rootCircle(rng: Rng, n: Names): Built {
 }
 
 // Zwei Wurzeln (zweimal quadrieren): \sqrt{x + a} + \sqrt{x - b} = y, \sqrt{x + a} - \sqrt{x} = y
-function twoRoots(rng: Rng, n: Names): Built {
+export function twoRoots(rng: Rng, n: Names): Built {
   const u = n.unknown
   const first = plus(u, constant(rng, n))
   const shift = rng.chance(0.35) ? null : constant(rng, n)
@@ -479,7 +479,7 @@ const LEVEL3_CORES: readonly Core[] = [
   [13, doubleFraction],
 ]
 
-type Core = readonly [number, (rng: Rng, n: Names) => Built]
+export type Core = readonly [number, (rng: Rng, n: Names) => Built]
 
 // Kern nach Anteilen wählen, bauen, andere Seite dazu
 function buildFrom(rng: Rng, cores: readonly Core[], letterTarget: number): KitTask {
@@ -506,7 +506,7 @@ export function buildLevel3(rng: Rng): KitTask {
 // wie in Stufe 1.
 
 // Hochzahl mit der Variable: x, kx, -kx, 2x, \frac{x}{k}, -\frac{x}{k}, x - c, -k(x - c)
-function exponentIn(rng: Rng, n: Names, u: Expr): Expr {
+export function exponentIn(rng: Rng, n: Names, u: Expr): Expr {
   const r = rng.next()
   if (r < 0.15) return u
   if (r < 0.35) return letters(n.letter(), u)
@@ -519,7 +519,7 @@ function exponentIn(rng: Rng, n: Names, u: Expr): Expr {
 }
 
 // Basis einer Potenz: meist e, sonst 2, 3, 10 oder ein Buchstabe
-function powerBase(rng: Rng, n: Names): Expr {
+export function powerBase(rng: Rng, n: Names): Expr {
   const r = rng.next()
   if (r < 0.7) return E
   if (r < 0.9) return num(rng.pick([2, 3, 10]))
@@ -527,7 +527,7 @@ function powerBase(rng: Rng, n: Names): Expr {
 }
 
 // Logarithmus: meist \ln, sonst \log_2, \log_{10} oder \log_a
-function logOf(rng: Rng, n: Names, arg: Expr): Expr {
+export function logOf(rng: Rng, n: Names, arg: Expr): Expr {
   const r = rng.next()
   if (r < 0.75) return ln(arg)
   if (r < 0.9) return log(num(rng.pick([2, 10])), arg)
@@ -622,7 +622,7 @@ function logOfRoot(rng: Rng, n: Names): Built {
 }
 
 // Wurzeln in Wurzeln: \sqrt{a + \sqrt{b + \sqrt{x}}} = y, \sqrt{a + b\sqrt{x - c}} = y
-function nestedRoots(rng: Rng, n: Names): Built {
+export function nestedRoots(rng: Rng, n: Names): Built {
   const u = n.unknown
   const l = bracketIn(rng, n, u)
   const plain = rng.chance(0.5)
@@ -636,7 +636,7 @@ function nestedRoots(rng: Rng, n: Names): Built {
 }
 
 // Potenzen derselben Basis mit verschiedenen Hochzahlen: a \cdot 2^{x + 1} - b \cdot 2^x = c
-function powerSums(rng: Rng, n: Names): Built {
+export function powerSums(rng: Rng, n: Names): Built {
   const u = n.unknown
   const b = rng.chance(0.6) ? num(rng.pick([2, 3, 5, 10])) : rng.chance(0.5) ? E : n.letter()
   const g = rng.chance(0.75) ? u : mul(k(rng, 2, 3), u)
@@ -650,7 +650,7 @@ function powerSums(rng: Rng, n: Names): Built {
 }
 
 // Potenzen verschiedener Basen: 3^{2x - 1} = a \cdot 5^x, a^x \cdot b^{2x - 1} = c, \frac{2^{x + 1}}{3^x} = y
-function powerVsPower(rng: Rng, n: Names): Built {
+export function powerVsPower(rng: Rng, n: Names): Built {
   const u = n.unknown
   const pool: Expr[] = [num(2), num(3), num(5), E, n.letter(), n.letter()]
   const [b1, b2] = rng.shuffle(pool).slice(0, 2)
@@ -720,15 +720,15 @@ export function buildLevel4(rng: Rng): KitTask {
 // um einen Kern (\arctan\frac{x + a}{x - b} = c). Damit die Lösung eindeutig ist, nennt die Aufgabe den
 // Bereich des Winkels, z. B. x < \frac{\pi}{2} (x ist positiv wie alle Buchstaben).
 
-type TrigName = 'sin' | 'cos' | 'tan' | 'sinh' | 'cosh' | 'tanh'
+export type TrigName = 'sin' | 'cos' | 'tan' | 'sinh' | 'cosh' | 'tanh'
 
 // Funktion: meist Winkelfunktionen, seltener Hyperbelfunktionen
-function trigName(rng: Rng, allowed: readonly TrigName[] = ['sin', 'sin', 'cos', 'cos', 'tan', 'tan', 'sinh', 'cosh', 'tanh']): TrigName {
+export function trigName(rng: Rng, allowed: readonly TrigName[] = ['sin', 'sin', 'cos', 'cos', 'tan', 'tan', 'sinh', 'cosh', 'tanh']): TrigName {
   return rng.pick(allowed)
 }
 
 // Winkel mit der Variable: x, 2x, bx, \frac{x}{b}
-function angleIn(rng: Rng, n: Names, u: Expr): Expr {
+export function angleIn(rng: Rng, n: Names, u: Expr): Expr {
   const r = rng.next()
   if (r < 0.45) return u
   if (r < 0.7) return mul(k(rng, 2, 3), u)
@@ -739,7 +739,7 @@ function angleIn(rng: Rng, n: Names, u: Expr): Expr {
 // Bereich, in dem die Funktion umkehrbar ist: \sin und \tan bis \frac{\pi}{2}, \cos bis \pi (im Quadrat
 // oder unter einer Wurzel bis \frac{\pi}{2}); Hyperbelfunktionen brauchen nur x > 0.
 // Winkel kx: \frac{\pi}{2k}, bx: \frac{\pi}{2b}, \frac{x}{b}: \frac{b\pi}{2}
-function angleConditions(name: TrigName, angle: Expr, u: Expr, half = false): Condition[] {
+export function angleConditions(name: TrigName, angle: Expr, u: Expr, half = false): Condition[] {
   if (name === 'sinh' || name === 'cosh' || name === 'tanh') return []
   const quarter = half || name !== 'cos'
   let bound: Expr
@@ -752,7 +752,7 @@ function angleConditions(name: TrigName, angle: Expr, u: Expr, half = false): Co
   return [{ lhs: u, rel: '<', rhs: bound }]
 }
 
-const trigOf = (name: TrigName, angle: Expr) => fn(name, angle)
+export const trigOf = (name: TrigName, angle: Expr) => fn(name, angle)
 
 // Bruch aus \sin x oder \tanh x: \frac{a + \sin x}{a - \sin x} = y, \frac{a}{b + c\tan x} = y,
 // a\cos(2x) + b = c\cos(2x) + d
@@ -824,9 +824,10 @@ function arcOfCore(rng: Rng, n: Names): Built {
 }
 
 // Quadrate: y = a\cos^2 x + b\sin^2 x, a\sin^2 x = b\cos^2 x + c, a\cosh^2 x - b\sinh^2 x = y
-function trigSquares(rng: Rng, n: Names): Built {
+// kind: nur Winkel- oder nur Hyperbelfunktionen (Aufgaben je Baustein, M6 Schritt 4); ohne Angabe wie bisher gewürfelt
+export function trigSquares(rng: Rng, n: Names, kind?: 'trig' | 'hyperbolic'): Built {
   const u = n.unknown
-  const hyperbolic = rng.chance(0.3)
+  const hyperbolic = kind === undefined ? rng.chance(0.3) : kind === 'hyperbolic'
   const [s, c] = hyperbolic ? (['sinh', 'cosh'] as const) : (['sin', 'cos'] as const)
   const angle = rng.chance(0.6) ? u : angleIn(rng, n, u)
   const sq = (name: TrigName) => pow(trigOf(name, angle), num(2))
@@ -844,9 +845,10 @@ function trigSquares(rng: Rng, n: Names): Built {
 }
 
 // Sinus und Kosinus in jedem Summanden: \frac{a\sin x + b\cos x}{\sin x - c\cos x} = y, a\sin x = b\cos x + c\sin x
-function trigQuotient(rng: Rng, n: Names): Built {
+// kind wie bei trigSquares
+export function trigQuotient(rng: Rng, n: Names, kind?: 'trig' | 'hyperbolic'): Built {
   const u = n.unknown
-  const hyperbolic = rng.chance(0.25)
+  const hyperbolic = kind === undefined ? rng.chance(0.25) : kind === 'hyperbolic'
   const [s, c] = hyperbolic ? (['sinh', 'cosh'] as const) : (['sin', 'cos'] as const)
   const angle = rng.chance(0.6) ? u : angleIn(rng, n, u)
   const conditions = angleConditions(s === 'sin' ? 'tan' : 'tanh', angle, u)
@@ -898,7 +900,7 @@ export function buildLevel4Trig(rng: Rng): KitTask {
 // Vorzeichen von q ändern könnten, gibt es bei diesen Kernen nicht (positiveShells).
 
 // Andere Seite, sicher positiv: y, b, 3b, \frac{b}{c}, b + c
-function positiveSide(rng: Rng, n: Names): Expr {
+export function positiveSide(rng: Rng, n: Names): Expr {
   const r = rng.next()
   if (r < 0.45) return variable('y')
   if (r < 0.7) return n.letter()
@@ -908,7 +910,7 @@ function positiveSide(rng: Rng, n: Names): Expr {
 }
 
 // Schalen, die q < 0 erhalten: mal, geteilt, minus eine positive Zahl
-function positiveShells(rng: Rng, core: Expr, n: Names, max: number, min = 0): { e: Expr; count: number } {
+export function positiveShells(rng: Rng, core: Expr, n: Names, max: number, min = 0): { e: Expr; count: number } {
   const count = rng.int(min, max)
   let e = core
   for (let i = 0; i < count; i++) {
@@ -921,7 +923,7 @@ function positiveShells(rng: Rng, core: Expr, n: Names, max: number, min = 0): {
 }
 
 // Schalen, die nur malnehmen oder teilen (die andere Seite steckt später in p, dort keine Summen)
-function scaleShells(rng: Rng, core: Expr, n: Names, max: number, min = 0): { e: Expr; count: number } {
+export function scaleShells(rng: Rng, core: Expr, n: Names, max: number, min = 0): { e: Expr; count: number } {
   const count = rng.int(min, max)
   let e = core
   for (let i = 0; i < count; i++) e = rng.chance(0.5) && !hasFraction(e) ? div(e, denominator(rng, n)) : letters(factor(rng, n), e)
@@ -929,7 +931,7 @@ function scaleShells(rng: Rng, core: Expr, n: Names, max: number, min = 0): { e:
 }
 
 // Andere Seite ohne Summe: y, b, 3b, \frac{b}{c}
-function simpleSide(rng: Rng, n: Names): Expr {
+export function simpleSide(rng: Rng, n: Names): Expr {
   const r = rng.next()
   if (r < 0.5) return variable('y')
   if (r < 0.75) return n.letter()
@@ -938,10 +940,10 @@ function simpleSide(rng: Rng, n: Names): Expr {
 }
 
 // Koeffizient vor einem Baustein: b oder 3
-const coefficient = (rng: Rng, n: Names): Expr => (rng.chance(0.65) ? n.letter() : k(rng, 2, 5))
+export const coefficient = (rng: Rng, n: Names): Expr => (rng.chance(0.65) ? n.letter() : k(rng, 2, 5))
 
 // Baustein mal Koeffizient, manchmal ohne: e^{x}, be^{x}
-const maybeTimes = (rng: Rng, n: Names, e: Expr, p = 0.5): Expr => (rng.chance(p) ? mul(coefficient(rng, n), e) : e)
+export const maybeTimes = (rng: Rng, n: Names, e: Expr, p = 0.5): Expr => (rng.chance(p) ? mul(coefficient(rng, n), e) : e)
 
 // Potenzen eines Bausteins B = b^{kx}: power(m) = b^{mkx}, z. B. e^{x}, e^{2x}, e^{-x}; e^{3x}, e^{6x};
 // a^{x}, a^{2x}; e^{kx}, e^{2kx}

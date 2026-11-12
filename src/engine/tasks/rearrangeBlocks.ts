@@ -37,13 +37,15 @@ function numericExponent(e: Expr): { readonly n: bigint; readonly d: bigint } | 
 // Bausteine der Teile eines Terms, in denen die gesuchte Variable steckt. In einem Werkzeug (Integral, Summe, …) zählen
 // Teile mit seiner gebundenen Variable nicht: Was beim Ausrechnen herauskommt (ln aus 1/t, der Bruch der geometrischen
 // Reihe, die Wurzel einer Länge), gehört zum Baustein des Werkzeugs.
-function collect(e: Expr, target: string, bound: ReadonlySet<string>, out: Set<string>) {
+// quadratic: Der Rechenweg nimmt die pq-Formel; dann gehört ein Quadrat wie x^2 oder (x + a)^2 zur quadratischen Gleichung
+// (M6 Schritt 4), nicht zu „Quadrate und Potenzen"
+function collect(e: Expr, target: string, bound: ReadonlySet<string>, out: Set<string>, quadratic: boolean) {
   for (const s of subterms(e)) {
     if (s.kind === 'var' && s.tool) {
       out.add(TOOL_BLOCK[s.tool.kind])
       const own = toolBound(s.tool)
       const inner = own ? new Set([...bound, own]) : bound
-      for (const part of [...toolBodies(s.tool), ...toolLimits(s.tool)]) collect(part, target, inner, out)
+      for (const part of [...toolBodies(s.tool), ...toolLimits(s.tool)]) collect(part, target, inner, out, quadratic)
       continue
     }
     if (!contains(s, target) || [...bound].some((b) => contains(s, b))) continue
@@ -63,6 +65,7 @@ function collect(e: Expr, target: string, bound: ReadonlySet<string>, out: Set<s
         const exponent = numericExponent(s.exp)
         if (!exponent) out.add('potenzen')
         else if (exponent.d !== 1n) out.add('wurzeln')
+        else if (exponent.n === 2n && quadratic) break
         else if (exponent.n >= 2n) out.add('potenzen')
         else if (exponent.n < 0n) out.add('brueche')
         break
@@ -81,14 +84,15 @@ function collect(e: Expr, target: string, bound: ReadonlySet<string>, out: Set<s
 
 // Bausteine der Aufgabe in der Reihenfolge der Liste (REARRANGE_BLOCKS): was in der Aufgabe steht (Werkzeuge und die
 // Teile mit der gesuchten Variable, auch in den Rümpfen der Werkzeuge), dazu aus dem Rechenweg die quadratische Gleichung
-// (Substitution oder pq-Formel) und, ohne Werkzeug, das Wurzelziehen (Quadrate und Potenzen, z. B. bei x/a = b/x). Was erst
+// (Substitution oder pq-Formel; ein Quadrat, das die pq-Formel löst, gehört dann dazu) und, ohne Werkzeug, das Wurzelziehen (Quadrate und Potenzen, z. B. bei x/a = b/x). Was erst
 // beim Lösen dazukommt (ln beim Lösen einer e-Gleichung, die Wurzel einer Länge), gehört zum Baustein, der es verlangt; so
 // lässt sich fast jeder Baustein auch allein üben (Probe mit 2000 Aufgaben am 12.11.2026, docs/ENTSCHEIDUNGEN.md).
 // Ohne jeden Baustein: „Lineare Gleichungen".
 export function rearrangeTaskBlocks(task: RearrangeTask, solution: RearrangeSolution): string[] {
   const out = new Set<string>()
-  collect(task.equation.lhs, task.target, new Set(), out)
-  collect(task.equation.rhs, task.target, new Set(), out)
+  const quadratic = solution.steps.some((s) => s.kind === 'pq')
+  collect(task.equation.lhs, task.target, new Set(), out, quadratic)
+  collect(task.equation.rhs, task.target, new Set(), out, quadratic)
   const hasTool = [task.equation.lhs, task.equation.rhs].some((side) => subterms(side).some((t) => t.kind === 'var' && t.tool !== undefined))
   if (solution.steps.some((s) => s.kind === 'pq' || s.kind === 'substitute')) out.add('quadratisch')
   if (!hasTool && solution.steps.some((s) => s.kind === 'root')) out.add('potenzen')

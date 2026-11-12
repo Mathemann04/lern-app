@@ -240,6 +240,27 @@ Prüfung im Browser (Handy und Laptop, hell und dunkel), Pull Request.
   Winkelfunktionen, Hyperbelfunktionen (heute erst ab Stufe 4).
 - Test: jeder Baustein allein liefert in jeder Stufe genug verschiedene
   Aufgaben (Kennzahlen aus PLAN-M2b.md).
+- Umgesetzt am 12.11.2026 für alle neun Bausteine aus „Grundlagen“ und
+  „Funktionen“ in allen fünf Stufen (Einzelheiten in docs/ENTSCHEIDUNGEN.md).
+
+#### Schritt 4b: Gleichungen wie auf den Übungsblättern (neu, Wunsch des Nutzers 12.11.2026)
+
+Aus den Unterlagen der Vorlesung (Übersicht in [AUFGABENARTEN.md](AUFGABENARTEN.md)),
+mit eigenen Zahlen und Buchstaben:
+- **Gleichungen mit Zahlen lösen:** Ergebnis eine Zahl, mit Definitionsbereich
+  und Probe; auch Scheinlösungen und „keine Lösung“ (Wurzel gleich negativer
+  Zahl). Die Engine braucht dafür Gleichungen ohne Buchstaben und als Antwort
+  „keine Lösung“.
+- **Logarithmen auf beiden Seiten:** Zahl als Logarithmus schreiben, Faktor als
+  Hochzahl, zusammenfassen, entlogarithmieren, danach linear oder quadratisch;
+  verschiedene Basen über den Basiswechsel. Die Engine kann das heute noch nicht.
+- **Formeln aus Technik und Physik** nach jeder Größe umstellen (eigene
+  Formelsammlung: Schwingungsdauer von Pendel und Federpendel, Fallweg,
+  Bewegungsenergie, Linsengleichung, Plattenkondensator, Reihen- und
+  Parallelschaltung, Entladen eines Kondensators, Abkühlen); Größen mit ihren
+  Zeichen, ohne Einheiten (mit Einheiten in M10).
+- Alles einsortiert in die Bausteine (Logarithmus, Wurzeln, …); Tests wie in
+  Schritt 4.
 
 #### Schritt 5: Umstellen, leichte Aufgaben aus späteren Kapiteln (in Teilen)
 
@@ -248,7 +269,14 @@ Prüfung im Browser (Handy und Laptop, hell und dunkel), Pull Request.
 - 5b: Differentialgleichungen, Determinanten ab Stufe 1.
 - 5c: komplexe Zahlen und Vektoren ab Stufe 1 (Betrag, Winkel, Länge,
   Skalarprodukt).
-- 5d: Beträge (neu: zwei Fälle, mehrere Lösungen).
+- 5d: Beträge (neu: zwei Fälle, mehrere Lösungen). Nach den Übungsblättern:
+  ein oder zwei Beträge, Lösung eine Zahl, zwei Zahlen, leere Menge oder ein
+  ganzer Bereich; geführt als Fallunterscheidung (Fallgrenzen, Bereiche, je
+  Bereich ohne Betrag lösen, gegen den Bereich prüfen, vereinigen), dazu die
+  Kandidaten-Methode; typische Fehler aus den Lösungen als Fehlerregeln
+  (Fallgrenze bei 0, nur ersten Summanden negiert, Bereich nicht geprüft, Probe
+  in der Fallgleichung, „immer wahr“ nicht als Bereich gedeutet, vier statt drei
+  Bereiche); Liste in [AUFGABENARTEN.md](AUFGABENARTEN.md).
 - Danach ist jeder Baustein in jeder Stufe übbar; „gezielt üben“ je
   Fehlerregel bleibt.
 
@@ -259,12 +287,20 @@ Prüfung im Browser (Handy und Laptop, hell und dunkel), Pull Request.
   Wurzeln, e-Funktion und Logarithmus, Winkel- und Hyperbelfunktionen,
   Partialbrüche, Differenzenquotienten, Grenzwerte, Teleskopsummen, komplexe
   Zahlen (heute nur in Stufe 5).
+- Aus den Übungsblättern ([AUFGABENARTEN.md](AUFGABENARTEN.md)): Terme in die
+  Form $a^x$ bringen, negative Hochzahlen beseitigen, Nenner rational machen
+  (auch mit dem Gegenstück), Logarithmen aus zwei gegebenen Werten abschätzen,
+  Basiswechsel, Doppelbrüche aus Formeln, quadratische Terme zerlegen (Vieta).
 
 #### Schritt 7: „Ableiten“ mit Bausteinen
 
 - Wie Schritt 3 für das heutige „Ableiten“, mit den Gruppen „Funktionen“
   und „Regeln“; leichte Aufgaben für Umkehr- und Hyperbelfunktionen,
   logarithmisch und implizit ableiten (heute nur in Stufe 5).
+- Aus den Übungsblättern ([AUFGABENARTEN.md](AUFGABENARTEN.md)): Ableitung an
+  einer Stelle mit Einheit deuten (z. B. Geschwindigkeit zu Beschleunigung),
+  Differenzenquotient (h-Methode), höhere Ableitungen, Variable $t$,
+  logarithmisch ableiten wie $f(x)^{g(x)}$.
 
 #### Schritt 8: „Mathe mischen“
 

@@ -8,9 +8,11 @@ den Nutzer zugeschnitten: Maschinenbau, 1. Semester, THU, „Mathematik MB1".
 - Vision und Anforderungen: [docs/VISION.md](docs/VISION.md)
 - Maßstab fürs Niveau: das Buch des Nutzers „Mathe für Ingenieure",
   Kapitel und ihre Themen in der App: [docs/LEHRBUCH.md](docs/LEHRBUCH.md)
+- Aufgabenarten und Rechenschemata aus allen Unterlagen der Vorlesung (in eigenen
+  Worten, mit Ziel in der App): [docs/AUFGABENARTEN.md](docs/AUFGABENARTEN.md)
 - Meilensteine und aktueller Stand: [docs/ROADMAP.md](docs/ROADMAP.md)
 - Laufender Plan: [docs/PLAN-M6.md](docs/PLAN-M6.md) (neue Struktur mit
-  Tätigkeiten und Bausteinen, freigegeben 12.11.2026, zehn Schritte); danach
+  Tätigkeiten und Bausteinen, freigegeben 12.11.2026, zehn Schritte und 4b); danach
   M12 und der Rest von [docs/PLAN-M4.md](docs/PLAN-M4.md) (Chemie 1, Klausur-Sprint
   S1 bis S11 fertig, offen N2 bis N5), Reihenfolge in docs/ROADMAP.md unter
   „Vorgemerkt“; feste Regeln für alle Chemie-Inhalte:

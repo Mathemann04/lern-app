@@ -1,5 +1,6 @@
 import { equationToLatex, toLatex } from '../expr/print.ts'
 import { contains, subterms } from '../expr/compare.ts'
+import { type Env, evaluate } from '../expr/evaluate.ts'
 import type { Expr } from '../expr/types.ts'
 import { holds, samplePoints } from '../rearrange/check.ts'
 import { rearrangeWrongAnswers } from '../rearrange/errorRules.ts'
@@ -7,7 +8,11 @@ import { hasNestedFraction as hasNestedResult } from '../rearrange/finished.ts'
 import { solveTask, stepEquationLatex } from '../rearrange/isolate.ts'
 import { type RearrangeTask, givenLatex, taskVariables } from '../rearrange/task.ts'
 import { type Rng, createRng } from '../random/rng.ts'
+import { REARRANGE_BLOCKS } from './blocks.ts'
 import { latexWidthEm } from './latexWidth.ts'
+import { buildFamilyTask } from './rearrangeBlockKit.ts'
+import { rearrangeTaskBlocks } from './rearrangeBlocks.ts'
+import { hasRearrangeFamily } from './rearrangeFamilies.ts'
 import {
   type KitTask,
   buildLevel1,
@@ -22,7 +27,7 @@ import {
   buildLevel5Series,
   buildLevel5Tools,
 } from './rearrangeKit.ts'
-import type { Level, TaskRef } from './taskNumber.ts'
+import { type Level, type TaskRef, seedBlock } from './taskNumber.ts'
 
 // Vorlagen für Umstell-Aufgaben je Stufe (siehe docs/PLAN-M3.md, „Stufen"). Jede Vorlage baut aus
 // Zufallszahlen eine Gleichung; Rechenweg und Lösung berechnet die Umstell-Engine. Die Stufen 1 bis
@@ -337,14 +342,107 @@ function sharedPick(ref: TaskRef, templates: readonly RearrangeTemplate[]): Rear
 // Vorlage, die eine Nummer sehr wahrscheinlich nimmt, ohne die Aufgabe zu bauen (schnell): die mit festem Anteil
 // oder die erste Wahl unter den übrigen. Passt deren Aufgabe nicht, wählt generateRearrangeTask neu.
 export function likelyRearrangeTemplate(ref: TaskRef): RearrangeTemplate | null {
+  const own = seedBlock(ref.seed)
+  if (own) return hasRearrangeFamily(own.block, ref.level) ? familyTemplate(own.block, ref.level) : likelyRearrangeTemplate({ level: ref.level, seed: own.s })
   const templates = rearrangeTemplatesForLevel(ref.level)
   if (templates.length === 0) return null
   const regular = templates.filter((t) => t.share === undefined)
   return sharedPick(ref, templates) ?? createRng(`umstellen:${ref.level}:${ref.seed}`).pick(regular)
 }
 
-// Erzeugt die Aufgabe zu einer Aufgaben-Nummer. Gleiche Nummer → gleiche Aufgabe.
+// --- Aufgaben eines einzelnen Bausteins (M6 Schritt 4, rearrangeBlockKit.ts), Nummern wie „exp.1-4711" ---
+
+// Mindestzahl der Umformungen je Stufe (Stufe 1: z. B. e^{2x} = y → \ln, durch 2)
+const FAMILY_MIN_STEPS: Record<Level, number> = { 1: 2, 2: 3, 3: 4, 4: 5, 5: 6 }
+// lineare Gleichungen brauchen auch tief geschachtelt nur wenige Umformungen (ausmultiplizieren, sortieren, teilen)
+const LINEAR_MIN_STEPS: Record<Level, number> = { 1: 2, 2: 3, 3: 3, 4: 4, 5: 5 }
+
+// Vorlage je Baustein und Stufe (für Galerie und Beschreibung)
+const familyTemplates = new Map<string, RearrangeTemplate>()
+export function familyTemplate(block: string, level: Level): RearrangeTemplate {
+  const key = `${block}:${level}`
+  let template = familyTemplates.get(key)
+  if (!template) {
+    const title = REARRANGE_BLOCKS.find((b) => b.id === block)?.title ?? block
+    template = {
+      id: `baustein-${block}-${level}`,
+      level,
+      label: `Baustein ${title}`,
+      build: (rng) => buildFamilyTask(rng, block, level).task,
+      buildLabeled: (rng) => buildFamilyTask(rng, block, level),
+      novel: true,
+      narrow: true,
+    }
+    familyTemplates.set(key, template)
+  }
+  return template
+}
+
+// Brauchbar wie im Baukasten, dazu: genau dieser Baustein, Ergebnis in einer Zeile am Handy, in Stufe 1 die Variable
+// einmal (außer bei quadratischen Gleichungen)
+// Breiteste Aufgabe eines einzelnen Bausteins in em (latexWidth.ts): Am Handy passen etwa 12 em in eine Zeile, die Aufgabe
+// darf bis auf 70 % kleiner werden (FitWidth in TaskParts.tsx)
+const MAX_FAMILY_TASK_WIDTH = 16
+
+function isGoodFamily(t: RearrangeTask, level: Level, block: string): boolean {
+  const letters = taskVariables(t).length
+  const latex = equationToLatex(t.equation)
+  if (latex.length > MAX_TASK_LATEX || letters > 7 || letters < 2 || latexWidthEm(latex) > MAX_FAMILY_TASK_WIDTH) return false
+  if (level === 1 && block !== 'quadratisch' && occurrences(t).count !== 1) return false
+  if (level <= 2 && hasNestedFraction(t)) return false
+  const solution = solveTask(t)
+  if (!solution || contains(solution.result, t.target)) return false
+  if (solution.steps.length < (block === 'linear' ? LINEAR_MIN_STEPS : FAMILY_MIN_STEPS)[level]) return false
+  if (toLatex(solution.result).length > MAX_RESULT_LATEX[level] || !fitsOneLine(solution.result)) return false
+  const blocks = rearrangeTaskBlocks(t, solution)
+  if (blocks.length !== 1 || blocks[0] !== block) return false
+  if (level === 5 && subterms(solution.result).some((s) => s.kind === 'root' && s.arg.kind === 'add' && subterms(s.arg).some((p) => p.kind === 'div'))) return false
+  // Gegenprobe an viel mehr Stellen als im Baukasten (achtmal 16 mit eigenem Zufall): genug erlaubte Stellen und keine, an
+  // der die Rechnung numerisch kippt (z. B. \ln x + a fast 0 in einem Logarithmus)
+  const sums = [t.equation.lhs, t.equation.rhs].flatMap((side) => subterms(side)).filter((e) => e.kind === 'add' && contains(e, t.target))
+  for (let i = 1; i <= 8; i++) {
+    const seed = i === 1 ? 'brauchbar' : `brauchbar-${i}`
+    const points = samplePoints(t, solution.result, createRng(seed), 16, solution.requires)
+    if (points.length < 16 || !points.every((p) => holds(t.equation, p) === true && !cancels(sums, p))) return false
+  }
+  return true
+}
+
+// Hebt sich an der Stelle eine Summe mit der Variable fast auf (\ln(4x) + 2a nahe 0)? Dann kippt die Gegenprobe dort
+// durch Rundung, auch wenn die Lösung stimmt; solche Aufgaben haben empfindliche Bereiche und werden nicht genommen.
+const CANCEL_LIMIT = 1e5
+function cancels(sums: readonly Expr[], env: Env): boolean {
+  return sums.some((sum) => {
+    if (sum.kind !== 'add') return false
+    const size = sum.terms.reduce((total, term) => total + Math.abs(evaluate(term, env)), 0)
+    const value = Math.abs(evaluate(sum, env))
+    return Number.isFinite(size) && size > 0 && value * CANCEL_LIMIT < size
+  })
+}
+
+// Höchstens so viele Versuche je Nummer (die Baukästen treffen meist nach wenigen)
+const FAMILY_ATTEMPTS = 3000
+
+function generateFamilyTask(ref: TaskRef, block: string, s: number): GeneratedRearrangeTask {
+  const rng = createRng(`umstellen-baustein:${block}:${ref.level}:${s}`)
+  // Art der Aufgabe vorab fest, danach nur innerhalb dieser Art neu gewürfelt
+  const variant = createRng(`umstellen-baustein-art:${block}:${ref.level}:${s}`).next()
+  const template = familyTemplate(block, ref.level)
+  for (let i = 0; i < FAMILY_ATTEMPTS; i++) {
+    const kit = buildFamilyTask(rng, block, ref.level, variant)
+    if (isGoodFamily(kit.task, ref.level, block)) return { ref, template, task: kit.task, label: kit.label }
+  }
+  throw new Error(`Keine Aufgabe für ${block}.${ref.level}-${s}`)
+}
+
+// Erzeugt die Aufgabe zu einer Aufgaben-Nummer. Gleiche Nummer → gleiche Aufgabe. Nummern mit Baustein („exp.1-4711")
+// bauen eine Aufgabe nur dieses Bausteins; hat er in der Stufe keine eigenen Aufgaben, die alte Nummer ohne Baustein.
 export function generateRearrangeTask(ref: TaskRef): GeneratedRearrangeTask {
+  const own = seedBlock(ref.seed)
+  if (own) {
+    if (hasRearrangeFamily(own.block, ref.level)) return generateFamilyTask(ref, own.block, own.s)
+    return { ...generateRearrangeTask({ level: ref.level, seed: own.s }), ref }
+  }
   const rng = createRng(`umstellen:${ref.level}:${ref.seed}`)
   const templates = rearrangeTemplatesForLevel(ref.level)
   if (templates.length === 0) throw new Error(`Für Stufe ${ref.level} gibt es noch keine Umstell-Aufgaben`)

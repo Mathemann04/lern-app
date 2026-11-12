@@ -1,5 +1,5 @@
 import { type Block, REARRANGE_BLOCKS } from '../engine/tasks/blocks.ts'
-import { REARRANGE_COMBOS } from '../engine/tasks/rearrangeCombos.ts'
+import { REARRANGE_PLAYABLE_COMBOS } from '../engine/tasks/rearrangeFamilies.ts'
 import { LEVELS, type Level } from '../engine/tasks/taskNumber.ts'
 
 // Aufbau der App wie bei Brilliant: Fächer (große Kacheln auf der Startseite, eigene Seite) → Gebiete
@@ -719,8 +719,8 @@ export const SUBJECTS: readonly Subject[] = [
             levels: rearrangeLevels,
             free: true,
             focus: true,
-            parts: blockParts(REARRANGE_BLOCKS, REARRANGE_COMBOS),
-            blockCombos: splitCombos(REARRANGE_COMBOS),
+            parts: blockParts(REARRANGE_BLOCKS, REARRANGE_PLAYABLE_COMBOS),
+            blockCombos: splitCombos(REARRANGE_PLAYABLE_COMBOS),
           },
         ],
       },
