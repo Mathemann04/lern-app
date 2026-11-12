@@ -55,6 +55,18 @@ Stand: 12.11.2026
   Skripte da sind), dann M6b (Bilder in Mathe), danach M5 (Werkstoffkunde),
   damit Werkstoffkunde gleich in der neuen Struktur und mit Nachschlagewerk
   entsteht. M6 wartet also nicht mehr bis Januar.
+- **Reihenfolge bestätigt** (Nutzer, 12.11.2026): wie oben (M6 zu Ende, M12, Chemie Teil 2,
+  M6b, M5, danach weitere Mathe-Themen, dann **Physik** und ganz am Schluss **Technische
+  Mechanik**). Physik und Technische Mechanik sind zwei eigene Fächer. Die „Formeln aus
+  Technik und Physik“ beim Umstellen (M6 Schritt 4b-1) sind Mathe-Übungen und bleiben, wie sie
+  sind.
+- **Unterlagen sichten** (Wunsch des Nutzers, 12.11.2026, vor M6 Schritt 4b-2): Der Nutzer lädt
+  in einer eigenen Sitzung die Unterlagen aller Fächer hoch (Skripte, Übungsblätter mit
+  Lösungen, Altklausuren). Jedes Fach wird vollständig durchgesehen (bei vielen Seiten mit
+  Helfern), und je Fach entsteht eine Übersicht in eigenen Worten wie
+  [AUFGABENARTEN.md](AUFGABENARTEN.md): Themen, Aufgabenarten, Rechenschemata, typische Fehler,
+  Ziel in der App. Keine Aufgabentexte, Zahlen oder Namen von Lehrenden; die Unterlagen selbst
+  kommen nie ins Repo. Danach weiter mit M6 Schritt 4b-2.
 - **Lehrbuch „Physik für Ingenieure“** (Fotos des Nutzers, 11.11.2026): Kapitel
   Kernphysik und Festkörperphysik, passend zu Chemie und Werkstoffkunde, teils
   weiter als die Vorlesung; später auch für Physik (M10). Die Fotos liegen
