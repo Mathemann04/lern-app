@@ -219,9 +219,8 @@ Grundlage: Skript-Kapitel 6 (und 1.8 für Gauß), Blätter 4 und 12, Übung 6, j
 ## Was die Durchsicht sonst ergeben hat
 
 - **Dritte Wurzel aus negativen Zahlen:** Das Skript (Kapitel 1 und 5) erlaubt ungerade Wurzeln
-  aus negativen Zahlen. Die App folgt bisher der Schulkonvention und erlaubt sie nur für
-  Zahlen ≥ 0 (docs/ENTSCHEIDUNGEN.md). Ob das so bleibt, entscheidet der Nutzer. In der
-  Klausur kommt der Fall kaum vor.
+  aus negativen Zahlen. Die App folgt dem seit M6 Schritt 4c (12.11.2026): $\sqrt[3]{-8} = -2$,
+  $x^{1/3}$ weiter nur für $x \ge 0$ (docs/ENTSCHEIDUNGEN.md). In der Klausur kommt der Fall kaum vor.
 - **Fehler in den Unterlagen** (nicht übernehmen): ein Druckfehler bei den
   Additionstheoremen der Hyperbelfunktionen im Skript, einzelne Rechen- und Abschreibfehler in
   handschriftlichen Lösungen (z. B. Vorzeichen, Faktor beim Gleichnamigmachen, Wert eines
