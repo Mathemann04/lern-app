@@ -121,7 +121,7 @@ test('Umstellen: Lernkarten-Ordner mit durchgerechneten Beispielen', async ({ pa
   await expect(page.getByRole('heading', { name: 'Stufe 3' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Stufe 4' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Stufe 5' })).toBeVisible()
-  await expect(page.locator('main li a')).toHaveCount(23)
+  await expect(page.locator('main li a')).toHaveCount(24)
   await expect(page.getByRole('link', { name: /^Logarithmen auf beiden Seiten/ })).toBeVisible()
   await expect(page.getByRole('link', { name: /^Gleichungen mit Zahlen/ })).toBeVisible()
   await expect(page.getByRole('link', { name: /^Geometrische Summe und Reihe/ })).toBeVisible()
