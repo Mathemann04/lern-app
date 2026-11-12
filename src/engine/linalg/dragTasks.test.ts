@@ -67,10 +67,11 @@ function expected(task: VectorTask, p: readonly number[]): boolean {
   }
 }
 
-function expectRenderable(text: string, context: string) {
+// ugly: auch unschöne Formeln melden (Faktor 1, „· −1“ ohne Klammer …); für die Texte des Zieh-Schritts
+function expectRenderable(text: string, context: string, ugly = false) {
   expect(text, context).not.toMatch(/undefined|NaN|\[object|null/)
   for (const segment of parseRichText(text).flat()) {
-    if (segment.kind === 'math') expect(latexProblem(segment.latex, { checkUgly: false }), `${context}: ${segment.latex}`).toBeNull()
+    if (segment.kind === 'math') expect(latexProblem(segment.latex, { checkUgly: ugly }), `${context}: ${segment.latex}`).toBeNull()
   }
 }
 
@@ -109,7 +110,13 @@ function checkTask(task: VectorTask) {
     expect(drag.whys[t.rule], t.rule).toBeDefined()
   }
   // Texte
-  for (const text of [task.instruction, step.question, step.hint, step.explanation.detailed, step.explanation.short, step.choices[0].content, ...drag.forbidden.map((f) => f.note)]) expectRenderable(text, context)
+  for (const text of [task.instruction, step.question, step.hint, step.explanation.detailed, step.explanation.short, step.choices[0].content, ...drag.forbidden.map((f) => f.note)]) expectRenderable(text, context, true)
+  // Stufe 4: Was der Zieh-Schritt zeigt, verrät keine richtige Antwort der folgenden Schritte
+  const shown = [step.question, step.hint, step.explanation.detailed, step.explanation.short].join(' ')
+  for (const s of task.steps.slice(1)) {
+    const answer = s.choices.find((c) => c.correct)!.content
+    expect(shown.includes(answer), `${context}: ${s.id} verraten`).toBe(false)
+  }
   expect(latexProblem(task.functionLatex!, { checkUgly: false }), context).toBeNull()
   expect(latexProblem(task.resultLatex!, { checkUgly: false }), context).toBeNull()
   expectRenderable(task.resultDrawing!.caption, context)

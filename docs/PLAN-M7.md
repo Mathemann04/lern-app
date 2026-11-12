@@ -100,7 +100,7 @@ Animationen starten nur auf Knopfdruck („Abspielen“) und entfallen, wenn am 
   $\lvert\vec b\rvert$ statt $\lvert\vec b\rvert^2$ bei der Projektion, Projektion verwechselt, zweite Lösung (±)
   vergessen, Zeile statt Spalte (Falk, Cramer), Produkt nicht definiert, $(AB)^{\mathsf T} = A^{\mathsf T}B^{\mathsf T}$,
   $\lambda$ statt $\lambda^n$, Vorzeichen beim Zeilentausch, Sarrus bei 4×4, rechte Seite vergessen, Nullzeile falsch
-  gedeutet, gleicher Parameter für zwei Geraden, beim Ziehen (2b): nur vertauscht ohne Vorzeichen, rechter Winkel als spitz
+  gedeutet, gleicher Parameter für zwei Geraden, beim Ziehen (2b): nur vertauscht oder nur ein Vorzeichen geändert, rechter Winkel als spitz
   oder stumpf gezählt, rechter Winkel an der falschen Ecke, Seiten statt Diagonalen senkrecht, cos statt sin bei Gerade–Ebene, „$A - 2$“ ohne $E$, auf der falschen
   Seite ausgeklammert. Jede mit Katalogbeispiel, eigenem Text für „Warum ist das falsch?“ und Platz auf einer Lernkarte
   (Regeln aus CLAUDE.md).
@@ -151,7 +151,7 @@ Request.
      Stufe 5 Diagonalen einer Raute senkrecht, $(\vec a - \vec b) \perp \vec b$, zwei Bedingungen mit eindeutiger
      Lösung. Rückmeldung mit der Rechnung an der eigenen Stelle; „Prüfen“ am Start zählt nicht. Frei: ohne eindeutiges
      Ergebnis wird gezogen, mit Parameter wird getippt und das Bild dient zum Ausprobieren. Vier neue typische Fehler:
-     nur vertauscht ohne Vorzeichen, rechter Winkel als spitz oder stumpf gezählt, rechter Winkel an der falschen Ecke,
+     nur vertauscht oder nur ein Vorzeichen geändert, rechter Winkel als spitz oder stumpf gezählt, rechter Winkel an der falschen Ecke,
      Seiten statt Diagonalen senkrecht.
 3. **Projektion, Zerlegung und Kräfte:** Animation „Licht an“, typischer Fehler im Bild, schiefe Ebene.
 4. **Kreuzprodukt und Spatprodukt:** räumliche Ansicht zum Drehen, Schema mit Hilfszeilen, Flächen und Volumen

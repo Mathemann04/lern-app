@@ -1044,3 +1044,9 @@ Neue Entscheidungen unten anfügen.
   und 4 mit und zeigt bei 90° das Quadrat: Das hilft beim Entdecken, die Rechnung steht danach in der Rückmeldung
   (und in Stufe 4 als eigene Schritte). Im freien Modus wird bei Aufgaben ohne eindeutiges Ergebnis gezogen; bei
   Aufgaben mit Parameter wird das Ergebnis wie bisher getippt, das Bild bleibt zum Ausprobieren.
+
+  Nach der unabhängigen Prüfung: Die Erklärung des Zieh-Schritts in Stufe 4 verriet die Gleichung des nächsten
+  Schritts (jetzt eigene Erklärung, ein Test prüft das für alle folgenden Schritte); „nur ein Vorzeichen geändert“
+  zählt jetzt zum typischen Fehler „Nur vertauscht oder nur ein Vorzeichen geändert“ statt zu „Über Kreuz
+  multipliziert“; Beispiel beim senkrechten Pfeil ungekürzt wie beschrieben; Formeln ohne Faktor 1 und ohne „· −1“;
+  bei genau einer richtigen Stelle kein „Zum Beispiel“. Die Tests der Zieh-Schritte melden jetzt auch unschöne Formeln.

@@ -380,10 +380,10 @@ export const VECTOR_ERROR_RULES: readonly VectorErrorRule[] = [
   // Zieh-Aufgaben (M7 Schritt 2b)
   {
     id: 'vec-perp-swap',
-    name: 'Nur vertauscht, kein Vorzeichen geändert',
-    wrongFormula: String.raw`\vec a = ${col(2, 3)} \;\Rightarrow\; \vec b = ${col(3, 2)} \perp \vec a`,
+    name: 'Nur vertauscht oder nur ein Vorzeichen geändert',
+    wrongFormula: String.raw`\vec a = ${col(2, 3)} \;\Rightarrow\; \vec b = ${col(3, 2)} \text{ oder } ${col(2, -3)} \perp \vec a`,
     why: {
-      detailed: String.raw`Vertauschst du nur die Einträge von $\vec a$, bekommst du zwei Produkte mit demselben Vorzeichen, und die heben sich nicht auf. Für einen senkrechten Pfeil in der Ebene vertauschst du die Einträge **und** änderst bei einem das Vorzeichen. Prüfe immer mit dem Skalarprodukt: Es muss $0$ sein.`,
+      detailed: String.raw`Für einen senkrechten Pfeil in der Ebene brauchst du **beides**: die Einträge von $\vec a$ vertauschen **und** bei einem das Vorzeichen ändern. Machst du nur eins davon, stehen im Skalarprodukt zwei Produkte, die sich nicht aufheben. Prüfe immer mit dem Skalarprodukt: Es muss $0$ sein.`,
       short: String.raw`Vertauschen **und** ein Vorzeichen ändern; Probe: Skalarprodukt $0$.`,
     },
   },

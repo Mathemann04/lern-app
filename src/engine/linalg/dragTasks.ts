@@ -47,6 +47,15 @@ const inFrame = (p: V, f: DragFrame) => p[0] >= f.xmin && p[0] <= f.xmax && p[1]
 const FRAME: DragFrame = { xmin: -5, xmax: 5, ymin: -5, ymax: 5 }
 const randVec = (rng: Rng, lo: number, hi: number): V => [rng.int(lo, hi), rng.int(lo, hi)]
 const colLatex = (v: V) => columnLatex(v.map(String))
+// c1 x + c2 y ohne Faktor 1 und ohne „+ −“
+function linXY(c1: number, c2: number): string {
+  const term = (c: number, v: string, first: boolean) => {
+    if (c === 0) return ''
+    const sign = c < 0 ? (first ? '-' : ' - ') : first ? '' : ' + '
+    return `${sign}${Math.abs(c) === 1 ? '' : Math.abs(c)}${v}`
+  }
+  return term(c1, 'x', true) + term(c2, 'y', c1 === 0) || '0'
+}
 const signs = (...vs: V[]) => vs.map((v) => v.map((x) => (x < 0 ? '-' : x === 0 ? '0' : '+')).join('')).join(',')
 
 // Bedingungen: Skalarprodukt von w mit p − from, Länge von p − from (Quadrat), allgemein
@@ -122,7 +131,8 @@ function dragStep(drag: DragStep, drawing: VectorDrawing, question: string, hint
     id: 'ziehen',
     title: drag.mode === 'point' ? 'Punkt ziehen' : 'Pfeil ziehen',
     question,
-    choices: [{ id: 'richtig', content: `Zum Beispiel ${at}`, correct: true }],
+    // bei genau einer richtigen Stelle ohne „Zum Beispiel“
+    choices: [{ id: 'richtig', content: dragSolutions(drag).length === 1 ? at : `Zum Beispiel ${at}`, correct: true }],
     hint,
     explanation,
     cards,
@@ -167,7 +177,7 @@ function variantSimple(rng: Rng, level: Level, variant: 'perp' | 'acute' | 'obtu
     variant === 'perp' ? [dotCond(a, O, '=', 0, side)] : [dotCond(a, O, variant === 'acute' ? '>' : '<', 0, side)]
   const traps =
     variant === 'perp'
-      ? [trap('vec-angle-zero', par), trap('vec-perp-swap', general([a[0], -a[1]], 0, 0, '=', 0)), trap('vec-dot-cross', general([a[1], a[0]], 0, 0, '=', 0))]
+      ? [trap('vec-angle-zero', par), trap('vec-perp-swap', general([a[0], -a[1]], 0, 0, '=', 0)), trap('vec-perp-swap', general([a[1], a[0]], 0, 0, '=', 0))]
       : [trap('vec-right-not-acute', dotCond(a, O, '=', 0, '')), trap('vec-angle-sign', dotCond(a, O, variant === 'acute' ? '<' : '>', 0, ''))]
   const frame = frameOf(a)
   const drag = makeDrag(rng, { mode: 'arrow', name: bn, from: O, liveAngle: a, frame, conditions, forbidden: [{ at: O, note: ZERO_NOTE(bn) }], traps })
@@ -176,7 +186,8 @@ function variantSimple(rng: Rng, level: Level, variant: 'perp' | 'acute' | 'obtu
   const word = { perp: 'senkrecht auf', acute: 'spitz', obtuse: 'stumpf' }[variant]
   const question =
     variant === 'perp' ? `Zieh $${bn}$ so, dass $${bn}$ senkrecht auf $${an}$ steht.` : `Zieh $${bn}$ so, dass der Winkel zwischen $${an}$ und $${bn}$ ${word} ist.`
-  const r = rot(a)
+  // so wie beschrieben: vertauscht, ein Vorzeichen geändert (nicht gekürzt)
+  const r: V = [-a[1], a[0]]
   const explanation: Explanation =
     variant === 'perp'
       ? {
@@ -234,9 +245,9 @@ function variantDotValue(rng: Rng, level: Level): Result {
     drag,
     drawing,
     question,
-    `Rechne mit deiner Stelle: $${a[0]} \\cdot x ${a[1] < 0 ? '-' : '+'} ${Math.abs(a[1])} \\cdot y$ soll $${k}$ ergeben.`,
+    `Für $${bn} = \\begin{pmatrix} x \\\\ y \\end{pmatrix}$ soll $${linXY(a[0], a[1])} = ${k}$ werden. Rechne mit deiner Stelle nach.`,
     {
-      detailed: `Für $${bn} = \\begin{pmatrix} x \\\\ y \\end{pmatrix}$ ist $${side} = ${a[0]}x ${a[1] < 0 ? '-' : '+'} ${Math.abs(a[1])}y$. Alle Spitzen mit $${a[0]}x ${a[1] < 0 ? '-' : '+'} ${Math.abs(a[1])}y = ${k}$ liegen auf einer Geraden senkrecht zu $${an}$, z. B. $${bn} = ${colLatex(v)}$.`,
+      detailed: `Für $${bn} = \\begin{pmatrix} x \\\\ y \\end{pmatrix}$ ist $${side} = ${linXY(a[0], a[1])}$. Alle Spitzen mit $${linXY(a[0], a[1])} = ${k}$ liegen auf einer Geraden senkrecht zu $${an}$, z. B. $${bn} = ${colLatex(v)}$.`,
       short: `$${side} = ${k}$, z. B. $${bn} = ${colLatex(v)}$.`,
     },
     [CARD.skalar],
@@ -394,6 +405,7 @@ function variantPerpLength(rng: Rng, level: Level): Result {
   const traps = [
     trap('vec-angle-zero', general([-a[1], a[0]], 0, 0, '=', 0), lengthCond(L2, '')),
     trap('vec-perp-swap', general([a[0], -a[1]], 0, 0, '=', 0), lengthCond(L2, '')),
+    trap('vec-perp-swap', general([a[1], a[0]], 0, 0, '=', 0), lengthCond(L2, '')),
   ]
   const drag = makeDrag(rng, { mode: 'arrow', name: bn, from: O, frame, conditions: [dotCond(a, O, '=', 0, sideDot), lengthCond(L2, sideLen)], forbidden: [{ at: O, note: ZERO_NOTE(bn) }], traps })
   if (!drag) return null
@@ -523,7 +535,18 @@ function variantPerpLine(rng: Rng, level: Level): Result {
   if (!made) return null
   const { drag, drawing } = made
   const question = `Zieh die Spitze von $${bn}$ entlang der Geraden, bis $${bn}$ senkrecht auf $${an}$ steht.`
-  const step = dragStep(drag, drawing, question, `Senkrecht heißt $${side} = 0$. Beobachte den Winkelbogen und rechne an deiner Stelle nach.`, built.steps[0].explanation, [CARD.senkrecht])
+  // eigene Erklärung: die des nächsten Schritts verriete dessen Gleichung
+  const step = dragStep(
+    drag,
+    drawing,
+    question,
+    `Senkrecht heißt $${side} = 0$. Beobachte den Winkelbogen und rechne an deiner Stelle nach.`,
+    {
+      detailed: `Senkrecht heißt $${side} = 0$. Beim Ziehen ändert sich nur der Eintrag mit $${t}$, und nur an einer Stelle der Geraden stehen die Pfeile senkrecht. Wie man diese Stelle ohne Ausprobieren findet, rechnest du als Nächstes.`,
+      short: `Senkrecht heißt $${side} = 0$.`,
+    },
+    [CARD.senkrecht],
+  )
   return {
     task: {
       ...built,
@@ -684,6 +707,9 @@ function variantThalesVec(rng: Rng, level: Level): Result {
   }
 }
 
+// m · s ohne Faktor 1
+const sTerm = (m: number) => (m === 1 ? 's' : m === -1 ? '-s' : `${m}s`)
+
 function variantTwoDots(rng: Rng, level: Level): Result {
   const { an, bn, cn, key } = names(rng)
   const a = randVec(rng, -4, 4)
@@ -719,8 +745,8 @@ function variantTwoDots(rng: Rng, level: Level): Result {
     question,
     `Erst die Richtung: senkrecht zu $${an}$ heißt ein Vielfaches von $${colLatex(rot(a))}$. Dann das Vielfache so wählen, dass $${sideC} = ${k}$ wird.`,
     {
-      detailed: `Aus $${sideA} = 0$ folgt $${bn} = s \\cdot ${colLatex(rot(a))}$. Dann ist $${sideC} = s \\cdot ${dot(c, rot(a))} = ${k}$, also $s = ${k / dot(c, rot(a))}$ und $${bn} = ${colLatex(v)}$. Die Lösung ist eindeutig.`,
-      short: `$${bn} = s \\cdot ${colLatex(rot(a))}$ mit $s = ${k / dot(c, rot(a))}$: $${bn} = ${colLatex(v)}$.`,
+      detailed: `Aus $${sideA} = 0$ folgt $${bn} = s \\cdot ${colLatex(rot(a))}$. Dann ist $${sideC} = ${sTerm(dot(c, rot(a)))} = ${k}$, also $s = ${k / dot(c, rot(a))}$ und $${bn} = ${colLatex(v)}$. Die Lösung ist eindeutig.`,
+      short: `$${bn} = s \\cdot ${colLatex(rot(a))}$ mit $${sTerm(dot(c, rot(a)))} = ${k}$, also $s = ${k / dot(c, rot(a))}$: $${bn} = ${colLatex(v)}$.`,
     },
     [CARD.senkrecht, CARD.skalar],
   )
