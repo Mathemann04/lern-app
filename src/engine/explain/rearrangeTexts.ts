@@ -230,8 +230,8 @@ export const REARRANGE_ERROR_TEXTS: Readonly<Record<string, Explanation>> = {
   // M6 Schritt 4b-3
   'eq-root-negative-squared': {
     detailed:
-      'Eine Wurzel ist nie negativ. Steht sie allein gleich einer negativen Zahl, gibt es keine Lösung. Wer trotzdem quadriert, macht aus der falschen Gleichung eine, die eine Lösung hat: eine Scheinlösung, die die Probe nicht besteht.',
-    short: 'Eine Wurzel ist nie negativ: keine Lösung.',
+      'Quadrieren ist nur eine Folgerung: Es kann Zahlen bringen, die die Gleichung davor gar nicht erfüllen. Schau vor dem Quadrieren, welche Werte die Wurzel auf der einen Seite überhaupt annehmen kann, und vergleiche mit der anderen Seite.',
+    short: 'Vor dem Quadrieren: Welche Werte kann eine Wurzel annehmen?',
   },
   'eq-not-resubstituted': {
     detailed: 'Die $pq$-Formel liefert $u$, gesucht ist aber $x$. Setze für $u$ wieder den Baustein ein, zum Beispiel $e^x$, und löse dann nach $x$ auf.',

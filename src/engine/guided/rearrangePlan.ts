@@ -421,13 +421,13 @@ function moveQuestion(step: RearrangeStep, t: string, target: string): MoveQuest
       }
     }
     case 'zero':
-      return { question: `Die Gleichung ist quadratisch in $${t}$. Was machst du zuerst?`, wrong: zeroMoves(t), hint: REARRANGE_HINTS.zero }
+      return { question: `Die Gleichung ist quadratisch in $${t}$. Was machst du zuerst?`, wrong: fitting(zeroMoves(t), step.after, t), hint: REARRANGE_HINTS.zero }
     case 'normalize':
       return step.operand
         ? { question: `Vor $${t}^2$ steht $${toLatex(step.operand)}$. Was machst du vor der $pq$-Formel?`, wrong: normalizeMoves(t, toLatex(step.operand)), hint: REARRANGE_HINTS.normalize }
         : null
     case 'pq':
-      return { question: `Die Gleichung hat die Form $${t}^2 + p${t} + q = 0$. Wie geht es weiter?`, wrong: pqMoves(t), hint: REARRANGE_HINTS.pq }
+      return { question: `Die Gleichung hat die Form $${t}^2 + p${t} + q = 0$. Wie geht es weiter?`, wrong: fitting(pqMoves(t), step.before, t), hint: REARRANGE_HINTS.pq }
     case 'resubstitute':
       return step.substitution
         ? {
@@ -643,6 +643,18 @@ function moveStep(step: RearrangeStep, previous: RearrangeStep | undefined, q: M
     established,
     cards: cardsOf(step, t, previous),
   }
+}
+
+// Gleichungen mit Zahlen (M6 Schritt 4b-3) können ohne Zahl (x^2 - 7x = 0) oder ohne x (x^2 - 9 = 0) sein: Dann führen
+// Ausklammern, Teilen durch x bzw. Wurzelziehen auch zum Ziel und sind keine Irrwege
+function fitting(moves: readonly WrongMove[], normal: Equation, t: string): WrongMove[] {
+  const terms = normal.lhs.kind === 'add' ? normal.lhs.terms : [normal.lhs]
+  const constant = terms.some((term) => !contains(term, t))
+  const linear = terms.some((term) => contains(term, t) && !subterms(term).some((s) => s.kind === 'pow' && contains(s.base, t)))
+  return moves.filter((m) => {
+    if (!constant && (m.label.includes('ausklammern') || m.label.includes(`durch $${t}$ teilen`))) return false
+    return linear || !m.label.includes('Wurzel ziehen')
+  })
 }
 
 // Art des Bausteins einer Substitution (für die Irrwege)

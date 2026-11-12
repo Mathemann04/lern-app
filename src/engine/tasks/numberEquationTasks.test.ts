@@ -168,6 +168,26 @@ describe('Gleichungen mit Zahlen: Aufgaben', () => {
     for (const line of rearrangeExample(task).lines) expect(latexProblem(line.latex, line.label.startsWith('Probe') ? { checkUgly: false } : undefined), label).toBeNull()
   })
 
+  it('ohne Zahl in der Normalform (x^2 - 7x = 0) sind Ausklammern und Teilen durch x keine Irrwege; „Warum falsch?" verrät nicht „keine Lösung"', () => {
+    let checked = 0
+    for (const level of [2, 4] as Level[]) {
+      for (let s = 1; s <= 80; s++) {
+        const ref = { level, seed: blockSeed('zahlen', s) }
+        const solution = solveTask(generateRearrangeTask(ref).task)!
+        const pq = solution.steps.find((step) => step.kind === 'pq')
+        const plan = planRearrangeTask(ref)
+        for (const step of plan.steps) {
+          for (const c of step.choices) if (!c.correct && c.whyWrong) expect(c.whyWrong.detailed.toLowerCase(), formatTaskNumber(ref)).not.toContain('keine lösung')
+        }
+        if (!pq || !(pq.before.lhs.kind === 'add' && pq.before.lhs.terms.every((term) => term.kind !== 'num' && !(term.kind === 'neg' && term.arg.kind === 'num')))) continue
+        checked++
+        const wrongMoves = plan.steps.flatMap((step) => step.choices.filter((c) => !c.correct).map((c) => c.content))
+        expect(wrongMoves.filter((c) => c.includes('ausklammern') || c.includes('durch $x$ teilen')), formatTaskNumber(ref)).toEqual([])
+      }
+    }
+    expect(checked).toBeGreaterThan(0)
+  })
+
   it.each(LEVELS)('Stufe %i: Abwechslung (200 Aufgaben, mindestens 100 Formen, keine öfter als 3 von 100)', (level) => {
     const forms = new Map<string, number>()
     for (let s = 1; s <= 200; s++) {

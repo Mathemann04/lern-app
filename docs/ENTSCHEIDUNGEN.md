@@ -965,3 +965,7 @@ Neue Entscheidungen unten anfügen.
   Nebenbei behoben (Bildschirmfoto des Nutzers): Auf der Seite „Gleichungen umstellen“ ragten ab „Wie verschachtelt?“
   Stufen und Beispiel rechts über den Rahmen, weil ein Formularrahmen (fieldset) nie schmaler wird als sein breitester
   Inhalt; jetzt darf er schrumpfen, das Beispiel setzt sich kleiner, ein Browser-Test prüft das.
+  Nach der unabhängigen Prüfung (500 Nummern je Stufe gegen eine eigene Suche aller Lösungen, Mathematik ohne Befund):
+  Steht in der Normalform keine Zahl ($x^2 - 7x = 0$), sind „$x$ ausklammern“ und „durch $x$ teilen“ keine Irrwege mehr
+  (ohne $x$ allein ebenso „Wurzel ziehen“). „Warum ist das falsch?“ beim Quadrieren einer Wurzel gleich negativer Zahl
+  verrät nicht mehr, dass es keine Lösung gibt, sondern fragt, welche Werte eine Wurzel annehmen kann.
