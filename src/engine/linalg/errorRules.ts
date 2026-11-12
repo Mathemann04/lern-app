@@ -57,7 +57,7 @@ export const VECTOR_ERROR_RULES: readonly VectorErrorRule[] = [
     name: 'Nur einen Eintrag vervielfacht',
     wrongFormula: String.raw`3 ${col(2, -1)} = ${col(6, -1)}`,
     why: {
-      detailed: String.raw`Eine Zahl vor einem Vektor streckt den ganzen Pfeil. Deshalb wird **jeder** Eintrag mit ihr malgenommen, nicht nur der erste.`,
+      detailed: String.raw`Eine Zahl vor einem Vektor streckt den ganzen Pfeil. Deshalb wird **jeder** Eintrag mit ihr malgenommen, nicht nur einer.`,
       short: String.raw`Jeder Eintrag wird mit der Zahl malgenommen.`,
     },
   },
@@ -156,8 +156,8 @@ export const VECTOR_ERROR_RULES: readonly VectorErrorRule[] = [
     name: 'Zweite Lösung vergessen',
     wrongFormula: String.raw`t^2 = 4 \;\Rightarrow\; t = 2`,
     why: {
-      detailed: String.raw`Ein Quadrat ist für eine Zahl und ihre Gegenzahl gleich: $2^2 = (-2)^2$. Deshalb hat $u^2 = c$ mit $c > 0$ zwei Lösungen, $u = \sqrt{c}$ und $u = -\sqrt{c}$. Beide Vektoren haben die gesuchte Länge.`,
-      short: String.raw`$u^2 = c > 0$ hat zwei Lösungen: $u = \pm\sqrt{c}$.`,
+      detailed: String.raw`Eine quadratische Gleichung hat oft zwei Lösungen, und gesucht sind alle. Bei $u^2 = c$ mit $c > 0$ sind es $u = \sqrt{c}$ und $u = -\sqrt{c}$, denn $2^2 = (-2)^2$. Bei $t^2 + pt + q = 0$ liefert die pq-Formel mit $\pm$ beide. Prüfe jede Lösung durch Einsetzen.`,
+      short: String.raw`Quadratische Gleichungen haben oft zwei Lösungen: beide angeben.`,
     },
   },
   {
@@ -201,7 +201,7 @@ export const VECTOR_ERROR_RULES: readonly VectorErrorRule[] = [
     name: 'Nur einen Teil geteilt',
     wrongFormula: String.raw`2\vec x = \vec b - \vec a \;\Rightarrow\; \vec x = \tfrac{1}{2}\vec b - \vec a`,
     why: {
-      detailed: String.raw`Teilst du eine Seite durch eine Zahl, wird jeder Summand dieser Seite geteilt, nicht nur der erste.`,
+      detailed: String.raw`Teilst du eine Seite durch eine Zahl, wird jeder Summand dieser Seite geteilt, nicht nur einer.`,
       short: String.raw`Beim Teilen jeden Summanden teilen.`,
     },
   },
@@ -212,6 +212,169 @@ export const VECTOR_ERROR_RULES: readonly VectorErrorRule[] = [
     why: {
       detailed: String.raw`Vor $\vec x$ steht noch eine Zahl. Erst wenn du die ganze rechte Seite durch sie teilst, steht $\vec x$ allein da.`,
       short: String.raw`Noch durch die Zahl vor $\vec x$ teilen.`,
+    },
+  },
+  // ---------------------------------------------------------------- Skalarprodukt und Winkel (M7 Schritt 2)
+  {
+    id: 'vec-dot-vector',
+    name: 'Skalarprodukt als Vektor',
+    wrongFormula: String.raw`${col(1, 2)} \cdot ${col(3, 4)} = ${col(3, 8)}`,
+    why: {
+      detailed: String.raw`Das Skalarprodukt ist eine **Zahl**, kein Vektor: Nimm die Einträge an derselben Stelle mal und **addiere** die Produkte, $\vec a \cdot \vec b = a_1 b_1 + a_2 b_2 + a_3 b_3$.`,
+      short: String.raw`Produkte der Einträge addieren: Das Ergebnis ist eine Zahl.`,
+    },
+  },
+  {
+    id: 'vec-dot-sign',
+    name: 'Vorzeichen im Produkt falsch',
+    wrongFormula: String.raw`(-2) \cdot (-3) = -6`,
+    why: {
+      detailed: String.raw`Achte bei jedem Produkt auf die Vorzeichen: Minus mal Minus ergibt Plus, Minus mal Plus ergibt Minus. Setze negative Einträge in Klammern, dann passiert das seltener. Dasselbe gilt, wenn du ausmultiplizierst und zusammenfasst.`,
+      short: String.raw`Minus mal Minus ist Plus, Minus mal Plus ist Minus.`,
+    },
+  },
+  {
+    id: 'vec-dot-cross',
+    name: 'Über Kreuz multipliziert',
+    wrongFormula: String.raw`${col(1, 2)} \cdot ${col(3, 4)} = 1 \cdot 4 + 2 \cdot 3`,
+    why: {
+      detailed: String.raw`Beim Skalarprodukt gehören immer die Einträge **an derselben Stelle** zusammen: der erste mit dem ersten, der zweite mit dem zweiten. Über Kreuz rechnet man erst beim Kreuzprodukt.`,
+      short: String.raw`Erster mal erster, zweiter mal zweiter, …`,
+    },
+  },
+  {
+    id: 'vec-dot-sum',
+    name: 'Addiert statt malgenommen',
+    wrongFormula: String.raw`${col(1, 2)} \cdot ${col(3, 4)} = (1 + 3) + (2 + 4)`,
+    why: {
+      detailed: String.raw`Beim Skalarprodukt werden die Einträge an derselben Stelle **malgenommen**, erst die Produkte werden addiert: $a_1 b_1 + a_2 b_2 + \ldots$`,
+      short: String.raw`Erst malnehmen, dann die Produkte addieren.`,
+    },
+  },
+  {
+    id: 'vec-angle-sign',
+    name: 'Spitz und stumpf verwechselt',
+    wrongFormula: String.raw`\vec a \cdot \vec b > 0 \;\Rightarrow\; \text{stumpf}`,
+    why: {
+      detailed: String.raw`Das Vorzeichen des Skalarprodukts ist das Vorzeichen von $\cos\varphi$, denn die Längen sind positiv. $\cos\varphi > 0$ heißt $\varphi < 90^\circ$ (spitz), $\cos\varphi < 0$ heißt $\varphi > 90^\circ$ (stumpf).`,
+      short: String.raw`Skalarprodukt positiv: spitz; negativ: stumpf.`,
+    },
+  },
+  {
+    id: 'vec-angle-zero',
+    name: 'Senkrecht falsch erkannt',
+    wrongFormula: String.raw`\vec a \cdot \vec b = 0 \;\Rightarrow\; \vec a \parallel \vec b`,
+    why: {
+      detailed: String.raw`Zwei Vektoren (beide nicht der Nullvektor) stehen **genau dann** senkrecht aufeinander, wenn ihr Skalarprodukt $0$ ist, denn $\cos 90^\circ = 0$. Ist es nicht $0$, sind sie nicht senkrecht; parallele Vektoren haben dagegen das größtmögliche Skalarprodukt (dem Betrag nach).`,
+      short: String.raw`Senkrecht heißt genau: Skalarprodukt $0$.`,
+    },
+  },
+  {
+    id: 'vec-cos-squared',
+    name: 'Längen ohne Wurzel im Nenner',
+    wrongFormula: String.raw`\cos\varphi = \frac{\vec a \cdot \vec b}{\lvert \vec a \rvert^2 \, \lvert \vec b \rvert^2}`,
+    why: {
+      detailed: String.raw`Im Nenner stehen die **Längen** selbst, nicht ihre Quadrate: $\cos\varphi = \frac{\vec a \cdot \vec b}{\lvert \vec a \rvert \cdot \lvert \vec b \rvert}$. Die Summe der Quadrate der Einträge ist erst das Quadrat der Länge; zieh die Wurzel.`,
+      short: String.raw`Durch die Längen teilen, nicht durch ihre Quadrate.`,
+    },
+  },
+  {
+    id: 'vec-cos-one-length',
+    name: 'Nur durch eine Länge geteilt',
+    wrongFormula: String.raw`\cos\varphi = \frac{\vec a \cdot \vec b}{\lvert \vec a \rvert}`,
+    why: {
+      detailed: String.raw`Das Skalarprodukt enthält **beide** Längen: $\vec a \cdot \vec b = \lvert \vec a \rvert \, \lvert \vec b \rvert \cos\varphi$. Für $\cos\varphi$ teilst du deshalb durch das Produkt beider Längen.`,
+      short: String.raw`Durch $\lvert \vec a \rvert \cdot \lvert \vec b \rvert$ teilen.`,
+    },
+  },
+  {
+    id: 'vec-angle-supplement',
+    name: 'Winkel und Nebenwinkel verwechselt',
+    wrongFormula: String.raw`\cos\varphi = -\tfrac{1}{2} \;\Rightarrow\; \varphi = 60^\circ`,
+    why: {
+      detailed: String.raw`Das Vorzeichen von $\cos\varphi$ entscheidet: positiv heißt spitz (unter $90^\circ$), negativ heißt stumpf (über $90^\circ$). Ein Winkel und sein Nebenwinkel haben Kosinuswerte mit entgegengesetztem Vorzeichen, $\cos(180^\circ - \alpha) = -\cos\alpha$. Prüfe, ob dein Winkel zum Vorzeichen passt.`,
+      short: String.raw`Vorzeichen von $\cos\varphi$: positiv spitz, negativ stumpf.`,
+    },
+  },
+  {
+    id: 'vec-angle-arcsin',
+    name: 'Sinus und Kosinus verwechselt',
+    wrongFormula: String.raw`\cos\varphi = \tfrac{1}{2} \;\Rightarrow\; \varphi = 30^\circ`,
+    why: {
+      detailed: String.raw`Im Skalarprodukt steckt der **Kosinus** des Winkels: $\vec a \cdot \vec b = \lvert \vec a \rvert \, \lvert \vec b \rvert \cos\varphi$. Vom Winkel zum Skalarprodukt nimmst du also $\cos$, zurück zum Winkel $\arccos$, nie $\sin$ oder $\arcsin$. Merke: $\cos 0^\circ = 1$ (gleiche Richtung), $\cos 90^\circ = 0$ (senkrecht).`,
+      short: String.raw`Im Skalarprodukt steckt $\cos\varphi$, nicht $\sin\varphi$.`,
+    },
+  },
+  {
+    id: 'vec-angle-table',
+    name: 'Besondere Werte verwechselt',
+    wrongFormula: String.raw`\cos\varphi = \tfrac{\sqrt{2}}{2} \;\Rightarrow\; \varphi = 60^\circ`,
+    why: {
+      detailed: String.raw`Präge dir die Tabelle ein: $\cos 30^\circ = \frac{\sqrt{3}}{2}$, $\cos 45^\circ = \frac{\sqrt{2}}{2}$, $\cos 60^\circ = \frac{1}{2}$, $\cos 90^\circ = 0$; bei negativem Kosinus der Nebenwinkel $180^\circ - \alpha$. Je größer der Winkel, desto kleiner der Kosinus.`,
+      short: String.raw`$\cos 30^\circ = \frac{\sqrt{3}}{2}$, $\cos 45^\circ = \frac{\sqrt{2}}{2}$, $\cos 60^\circ = \frac{1}{2}$.`,
+    },
+  },
+  {
+    id: 'vec-angle-direction',
+    name: 'Pfeil nicht am Scheitel begonnen',
+    wrongFormula: String.raw`\angle B: \; \overrightarrow{AB} \cdot \overrightarrow{BC}`,
+    why: {
+      detailed: String.raw`Der Winkel an einer Ecke liegt zwischen zwei Pfeilen, die **beide an dieser Ecke beginnen**, bei $B$ also $\overrightarrow{BA}$ und $\overrightarrow{BC}$. Zeigt einer zur Ecke hin, kippt das Vorzeichen des Skalarprodukts und damit das von $\cos\varphi$.`,
+      short: String.raw`Beide Pfeile beginnen am Scheitel des Winkels.`,
+    },
+  },
+  {
+    id: 'vec-perp-one',
+    name: 'Skalarprodukt gleich 1 gesetzt',
+    wrongFormula: String.raw`\vec a \perp \vec b \;\Rightarrow\; \vec a \cdot \vec b = 1`,
+    why: {
+      detailed: String.raw`Senkrecht heißt Winkel $90^\circ$, und $\cos 90^\circ = 0$. Deshalb gilt $\vec a \perp \vec b$ genau dann, wenn $\vec a \cdot \vec b = 0$. Die $1$ gehört zu Einheitsvektoren in gleicher Richtung.`,
+      short: String.raw`Senkrecht: Skalarprodukt gleich $0$.`,
+    },
+  },
+  {
+    id: 'vec-param-solve',
+    name: 'Falsch nach dem Parameter aufgelöst',
+    wrongFormula: String.raw`3t - 6 = 0 \;\Rightarrow\; t = -2`,
+    why: {
+      detailed: String.raw`Bring die Zahl ohne Parameter mit der Gegenrechnung auf die andere Seite (dabei wechselt ihr Vorzeichen) und teile dann durch die Zahl vor dem Parameter, nicht umgekehrt. Bei $t^2 + pt + q = 0$: $t_{1,2} = -\frac{p}{2} \pm \sqrt{\left(\frac{p}{2}\right)^2 - q}$. Probe: Einsetzen muss $0$ ergeben.`,
+      short: String.raw`Gegenrechnung, dann durch die Zahl vor dem Parameter teilen; Probe machen.`,
+    },
+  },
+  {
+    id: 'vec-ineq-flip',
+    name: 'Ungleichung falsch umgedreht',
+    wrongFormula: String.raw`-2t > 6 \;\Rightarrow\; t > -3`,
+    why: {
+      detailed: String.raw`Teilst du eine Ungleichung durch eine **negative** Zahl, dreht sich das Zeichen um: aus $>$ wird $<$. Bei einer positiven Zahl bleibt es, wie es ist. Probe mit einem Wert: Setze eine Zahl aus deinem Bereich ein und prüfe das Vorzeichen des Skalarprodukts.`,
+      short: String.raw`Nur beim Teilen durch eine negative Zahl dreht sich das Zeichen um.`,
+    },
+  },
+  {
+    id: 'vec-binomial-middle',
+    name: 'Mittelglied vergessen',
+    wrongFormula: String.raw`\lvert \vec a + \vec b \rvert^2 = \lvert \vec a \rvert^2 + \lvert \vec b \rvert^2`,
+    why: {
+      detailed: String.raw`Rechne wie bei einer binomischen Formel: $(\vec a + \vec b) \cdot (\vec a + \vec b) = \vec a \cdot \vec a + 2\,\vec a \cdot \vec b + \vec b \cdot \vec b$. Das Mittelglied $2\,\vec a \cdot \vec b$ fällt nur weg, wenn die Vektoren senkrecht stehen (Pythagoras).`,
+      short: String.raw`$\lvert \vec a + \vec b \rvert^2 = \lvert \vec a \rvert^2 + 2\,\vec a \cdot \vec b + \lvert \vec b \rvert^2$.`,
+    },
+  },
+  {
+    id: 'vec-dot-no-cos',
+    name: 'Kosinus vergessen',
+    wrongFormula: String.raw`\vec a \cdot \vec b = \lvert \vec a \rvert \, \lvert \vec b \rvert`,
+    why: {
+      detailed: String.raw`Aus Längen und Winkel gilt $\vec a \cdot \vec b = \lvert \vec a \rvert \, \lvert \vec b \rvert \cos\varphi$. Ohne den Kosinus stimmt das nur, wenn beide Vektoren in dieselbe Richtung zeigen.`,
+      short: String.raw`$\vec a \cdot \vec b = \lvert \vec a \rvert \, \lvert \vec b \rvert \cos\varphi$.`,
+    },
+  },
+  {
+    id: 'vec-coef-not-squared',
+    name: 'Zahl vor dem Vektor nicht quadriert',
+    wrongFormula: String.raw`\lvert 2\vec a \rvert^2 = 2\lvert \vec a \rvert^2`,
+    why: {
+      detailed: String.raw`$(k\,\vec a) \cdot (k\,\vec a) = k^2 \, \vec a \cdot \vec a$: Die Zahl kommt aus beiden Faktoren, also im Quadrat. Im Mittelglied stehen die beiden Zahlen einmal: $2 k m \, \vec a \cdot \vec b$.`,
+      short: String.raw`$\lvert k\,\vec a \rvert^2 = k^2 \lvert \vec a \rvert^2$.`,
     },
   },
 ]

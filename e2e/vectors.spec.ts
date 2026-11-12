@@ -45,6 +45,7 @@ test('Mathe-Seite zeigt die Kachel „Vektoren", die Seite der Tätigkeit hat Ba
   await page.getByRole('link', { name: /Vektoren/ }).first().click()
   await expect(page.getByRole('heading', { name: 'Vektoren', level: 1 })).toBeVisible()
   await expect(page.getByRole('checkbox', { name: 'Rechnen und Länge', exact: true })).toBeChecked()
+  await expect(page.getByRole('checkbox', { name: 'Skalarprodukt und Winkel', exact: true })).toBeChecked()
   await expect(page.getByTestId('example').locator('.katex').first()).toBeVisible()
   await expectCleanPage(page, 'Tätigkeit Vektoren')
   expect(errors).toEqual([])
@@ -145,5 +146,64 @@ test('Frei: Einheitsvektor als Spalte, ungekürzter Bruch ist noch nicht fertig'
   await page.getByRole('button', { name: 'Prüfen' }).click()
   await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
   await expectCleanPage(page, 'Einheitsvektor frei')
+  expect(errors).toEqual([])
+})
+
+// M7 Schritt 2: Skalarprodukt und Winkel
+test('Skalarprodukt: jede Stufe lässt sich lösen, Bild mit Winkelbogen, Lernkarte', async ({ page }) => {
+  const errors = collectErrors(page)
+  for (const level of [1, 2, 3, 4, 5]) {
+    await page.goto(`./#/ueben/vektoren/skalar.${level}-${20 + level}`)
+    await solveWholeTask(page)
+    await expectCleanPage(page, `Skalarprodukt Stufe ${level}`)
+  }
+  // Winkel im Raum: Ergebnis mit Bild und Winkelbogen
+  await page.goto('./#/ueben/vektoren/skalar.2-3')
+  await solveWholeTask(page)
+  const figure = page.getByTestId('result').getByTestId('vector-figure')
+  await expect(figure.locator('svg path').first()).toBeVisible()
+  await page.goto('./#/karten/vektoren/vec-winkel')
+  await expect(page.getByRole('heading', { name: 'Winkel zwischen Vektoren' })).toBeVisible()
+  await expect(page.getByTestId('vector-figure').first()).toBeVisible()
+  await expectCleanPage(page, 'Lernkarte Winkel')
+  expect(errors).toEqual([])
+})
+
+test('Frei: Skalarprodukt und Art des Winkels zum Antippen', async ({ page }) => {
+  const errors = collectErrors(page)
+  // p = (3, 5), q = (−3, 2): p · q = 1, spitz
+  await page.goto('./#/frei/vektoren/skalar.1-3')
+  await expect(page.getByRole('radiogroup', { name: 'Der Winkel ist' })).toBeVisible()
+  await expectCleanPage(page, 'Art frei leer')
+  await typeInto(page, 'Dein Ergebnis von Teil 1', '1')
+  await page.getByRole('radio', { name: 'stumpf' }).click()
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Typischer Fehler: Spitz und stumpf verwechselt.')).toBeVisible()
+  await expect(page.locator('[data-testid="entry-choice"][data-marked]')).toHaveCount(1)
+  await page.getByRole('radio', { name: 'spitz' }).click()
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
+  await expectCleanPage(page, 'Art frei gelöst')
+  expect(errors).toEqual([])
+})
+
+test('Frei: Ungleichung mit Zeichen und Winkel in Grad', async ({ page }) => {
+  const errors = collectErrors(page)
+  // a = (3, −5), b = (3t, 3): stumpf für t < 5/3
+  await page.goto('./#/frei/vektoren/skalar.4-10')
+  await page.getByRole('radio', { name: 'größer als' }).click()
+  await typeInto(page, 'Dein Ergebnis', '5/3')
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Typischer Fehler: Ungleichung falsch umgedreht.')).toBeVisible()
+  await page.getByRole('radio', { name: 'kleiner als' }).click()
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
+  await expectCleanPage(page, 'Ungleichung frei')
+  // Winkel 30° zwischen (1, 1, −2) und (2, 0, −2)
+  await page.goto('./#/frei/vektoren/skalar.2-3')
+  await typeInto(page, 'Dein Ergebnis', '30')
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
+  await expectCleanPage(page, 'Winkel frei')
   expect(errors).toEqual([])
 })

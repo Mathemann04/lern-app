@@ -1,5 +1,5 @@
 import { type PointerEvent, useEffect, useMemo, useRef, useState } from 'react'
-import { type DrawColor, type VectorDrawing, hasAnimation } from '../../engine/linalg/figures.ts'
+import { type DrawColor, type VectorDrawing, anglePath, hasAnimation } from '../../engine/linalg/figures.ts'
 import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
 import { START_PITCH, type View, arrowGeometry, bestYaw, lerpPoint, planeView, spaceView } from './view.ts'
@@ -25,7 +25,7 @@ const reducedMotion = () => typeof window !== 'undefined' && window.matchMedia?.
 type Props = { drawing: VectorDrawing; compact?: boolean; label?: string }
 
 export function VectorFigure({ drawing, compact = false, label }: Props) {
-  const maxPhase = useMemo(() => Math.max(0, ...[...drawing.arrows, ...drawing.points, ...drawing.segments, ...drawing.polygons].map((e) => e.phase ?? 0)), [drawing])
+  const maxPhase = useMemo(() => Math.max(0, ...[...drawing.arrows, ...drawing.points, ...drawing.segments, ...drawing.polygons, ...(drawing.angles ?? [])].map((e) => e.phase ?? 0)), [drawing])
   const [time, setTime] = useState(maxPhase)
   const [angles, setAngles] = useState(() => ({ yaw: drawing.dim === 3 ? bestYaw(drawing) : 0, pitch: START_PITCH }))
   const frame = useRef<number | null>(null)
@@ -97,6 +97,34 @@ export function VectorFigure({ drawing, compact = false, label }: Props) {
         const [x2, y2] = project(lerpPoint(seg.from, seg.to, q))
         if (seg.label && q > 0.95) labels.push({ key: `s${i}`, x: (x1 + x2) / 2 + (y2 - y1 === 0 ? 0 : 12), y: (y1 + y2) / 2 + (y2 - y1 === 0 ? -13 : 0), tex: seg.label, color: COLOR.muted })
         return <line key={`seg${i}`} x1={x1} y1={y1} x2={x2} y2={y2} style={{ stroke: COLOR[seg.color] }} strokeWidth={seg.dashed ? 1.6 : 2} strokeDasharray={seg.dashed ? '5 5' : undefined} strokeLinecap="round" />
+      })}
+      {(drawing.angles ?? []).map((angle, i) => {
+        const q = progress(angle.phase)
+        if (q <= 0) return null
+        // Radius: etwa 22 Pixel, höchstens ein Drittel des kürzeren Schenkels
+        const [ax, ay] = project(angle.at)
+        const unitPx = (k: readonly number[]) => {
+          const l = Math.hypot(...k)
+          const [bx, by] = project(angle.at.map((x, j) => x + k[j] / l))
+          return Math.max(1e-6, Math.hypot(bx - ax, by - ay))
+        }
+        const r = Math.min(0.34 * Math.min(Math.hypot(...angle.u), Math.hypot(...angle.v)), (compact ? 15 : 22) / Math.min(unitPx(angle.u), unitPx(angle.v)))
+        const path = anglePath(angle, r)
+        const pts = path.points.map((pt) => project(pt))
+        const d = path.right ? `M${pts[0].join(',')}L${pts[1].join(',')}L${pts[2].join(',')}` : `M${ax},${ay}L${pts.map((pt) => pt.join(',')).join('L')}Z`
+        if (angle.label && q > 0.95 && !compact) {
+          const [lx, ly] = project(path.labelAt)
+          labels.push({ key: `w${i}`, x: lx, y: ly, tex: angle.label, color: COLOR[angle.color] })
+        }
+        return (
+          <path
+            key={`angle${i}`}
+            d={d}
+            style={{ fill: path.right ? 'none' : COLOR[angle.color], fillOpacity: 0.18 * q, stroke: COLOR[angle.color], opacity: q }}
+            strokeWidth={2}
+            strokeLinejoin="round"
+          />
+        )
       })}
       {drawing.arrows.map((arrow, i) => {
         const q = progress(arrow.phase)

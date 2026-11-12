@@ -285,7 +285,11 @@ const vectorLevels: LevelPreview[] = [
     available: true,
     name: 'Einstieg',
     title: 'Einstieg – in der Ebene, ein bis zwei Schritte',
-    examples: [String.raw`\overrightarrow{AB} \text{ für } A(1 \mid -2),\; B(4 \mid 3)`, String.raw`\left\lvert \begin{pmatrix} 3 \\ -4 \end{pmatrix} \right\rvert`],
+    examples: [
+      String.raw`\overrightarrow{AB} \text{ für } A(1 \mid -2),\; B(4 \mid 3)`,
+      String.raw`\left\lvert \begin{pmatrix} 3 \\ -4 \end{pmatrix} \right\rvert`,
+      String.raw`\begin{pmatrix} 3 \\ 5 \end{pmatrix} \cdot \begin{pmatrix} -3 \\ 2 \end{pmatrix}`,
+    ],
   },
   {
     level: 2,
@@ -299,21 +303,21 @@ const vectorLevels: LevelPreview[] = [
     available: true,
     name: 'Kombiniert',
     title: 'Kombiniert – zwei Rechnungen zusammen',
-    examples: [String.raw`3\vec x - \vec a = \vec b`, String.raw`\text{Parallelogramm } ABCD`],
+    examples: [String.raw`3\vec x - \vec a = \vec b`, String.raw`\text{Parallelogramm } ABCD`, String.raw`\lvert \vec a + 2\vec b \rvert \text{ bei } \varphi = 60^\circ`],
   },
   {
     level: 4,
     available: true,
     name: 'Klausur',
     title: 'Klausur – mit Parameter oder in mehr Dimensionen',
-    examples: [String.raw`\left\lvert \begin{pmatrix} 2t \\ 1 \\ -2 \end{pmatrix} \right\rvert = 3`],
+    examples: [String.raw`\left\lvert \begin{pmatrix} 2t \\ 1 \\ -2 \end{pmatrix} \right\rvert = 3`, String.raw`\begin{pmatrix} 3 \\ -5 \end{pmatrix} \cdot \begin{pmatrix} 3t \\ 3 \end{pmatrix} < 0`],
   },
   {
     level: 5,
     available: true,
     name: 'Profi',
     title: 'Profi – alles ineinander',
-    examples: [String.raw`\lvert \overrightarrow{AB} \rvert = 9 \text{ für } B(t \mid 2 \mid 5)`],
+    examples: [String.raw`\lvert \overrightarrow{AB} \rvert = 9 \text{ für } B(t \mid 2 \mid 5)`, String.raw`\overrightarrow{CA} \perp \overrightarrow{CB} \text{ für } C(t \mid 0 \mid -2)`],
   },
 ]
 
@@ -797,7 +801,7 @@ export const SUBJECTS: readonly Subject[] = [
           {
             id: VECTORS,
             title: 'Vektoren',
-            description: 'Mit Pfeilen rechnen, Längen, Mittelpunkte und Einheitsvektoren, mit Bildern zum Abspielen und Drehen',
+            description: 'Mit Pfeilen rechnen, Längen, Skalarprodukt und Winkel, mit Bildern zum Abspielen und Drehen',
             icon: 'vectors',
             tone: 'cyan',
             cards: 'vektoren',

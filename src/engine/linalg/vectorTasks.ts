@@ -1,10 +1,31 @@
-import type { Choice, GuidedStep, GuidedTaskBase } from '../guided/types.ts'
-import type { Explanation } from '../explain/texts.ts'
+import type { GuidedStep } from '../guided/types.ts'
 import { type Rng, createRng } from '../random/rng.ts'
 import { type Rational, rat, ratAbs, ratAdd, ratDiv, ratMul, ratNeg, ratSign, ratSub, isZero } from '../rational.ts'
-import type { Level, TaskRef } from '../tasks/taskNumber.ts'
-import { vectorErrorRule } from './errorRules.ts'
+import { type Level, type TaskRef, seedBlock } from '../tasks/taskNumber.ts'
+import { DOT_BUILDERS, DOT_KINDS_BY_LEVEL } from './dotTasks.ts'
 import { type DrawArrow, type VectorDrawing, emptyDrawing } from './figures.ts'
+import {
+  type Built,
+  type VectorKind,
+  type VectorTask,
+  type Wrong,
+  CARD,
+  PARAMS,
+  choiceStep,
+  connectStep,
+  dimOf,
+  drawable,
+  ints,
+  letters,
+  math,
+  negCount,
+  nums,
+  origin,
+  pointsDrawing,
+  pythagorean,
+  signShape,
+  zeroCount,
+} from './taskKit.ts'
 import {
   type Surd,
   type Vec,
@@ -22,38 +43,17 @@ import {
   vecLatex,
   vecName,
   vecNorm2,
-  vecNumbers,
   vecScale,
   vecSub,
 } from './vec.ts'
+
+export { CARD, type VectorKind, type VectorTask } from './taskKit.ts'
 
 // Baukasten für die Tätigkeit „Vektoren", Baustein „Rechnen und Länge" (M7 Schritt 1, docs/PLAN-M7.md): Jede Art
 // (kind) baut eine geführte Aufgabe mit Schritten, falschen Antworten aus typischen Fehlern (errorRules.ts) und Bildern
 // (figures.ts). Alle Zahlen rechnet die Engine exakt (vec.ts). Die Stufe sagt nur, wie verschachtelt: 1 in der Ebene,
 // 2 im Raum, 3 zwei Rechnungen zusammen, 4 mit Parameter oder in vier und fünf Dimensionen, 5 alles ineinander.
 
-export type VectorKind =
-  | 'connect'
-  | 'combo'
-  | 'length'
-  | 'distance'
-  | 'midpoint'
-  | 'unit'
-  | 'givenLength'
-  | 'parallelogram'
-  | 'equation'
-  | 'paramLength'
-  | 'paramDistance'
-
-export type VectorTask = GuidedTaskBase & {
-  readonly kind: VectorKind
-  // Form ohne Zahlen (Abwechslung, engine/tasks/variety.ts)
-  readonly form: string
-  // Zahlenwerte zur Gegenprobe in Tests: das Ergebnis als Zahlen (Vektor, Punkt, Länge oder Lösungen)
-  readonly answer: readonly number[]
-  // gegebene Größen als Zahlen, für die unabhängige Gegenprobe in Tests (je Art eigene Namen)
-  readonly data: Readonly<Record<string, readonly number[]>>
-}
 
 // Arten je Stufe (gleich oft)
 export const KINDS_BY_LEVEL: Readonly<Record<Level, readonly VectorKind[]>> = {
@@ -64,174 +64,7 @@ export const KINDS_BY_LEVEL: Readonly<Record<Level, readonly VectorKind[]>> = {
   5: ['paramDistance', 'givenLength', 'paramLength', 'equation', 'parallelogram'],
 }
 
-// Lernkarten des Bausteins (vectorCards.ts)
-export const CARD = {
-  rechnen: 'vec-rechnen',
-  verbindung: 'vec-verbindung',
-  laenge: 'vec-laenge',
-  mittelpunkt: 'vec-mittelpunkt',
-  einheit: 'vec-einheit',
-  parallelogramm: 'vec-parallelogramm',
-  gleichung: 'vec-gleichung',
-  parameter: 'vec-parameter',
-} as const
 
-// ------------------------------------------------------------------ Hilfen
-
-type Wrong = { readonly content: string; readonly rule: string; readonly why?: Explanation; readonly drawing?: VectorDrawing }
-
-type StepSpec = {
-  readonly id: string
-  readonly title: string
-  readonly question: string
-  // richtige Antwort (Text mit Formeln)
-  readonly correct: string
-  readonly correctDrawing?: VectorDrawing
-  readonly wrongs: readonly Wrong[]
-  readonly hint: string
-  readonly explanation: Explanation
-  readonly established?: readonly string[]
-  readonly cards: readonly string[]
-  readonly drawing?: VectorDrawing
-}
-
-const math = (latex: string) => `$${latex}$`
-
-// Ein Schritt mit Auswahl: falsche Antworten ohne Doppelte und ohne solche, die wie die richtige aussehen; höchstens drei
-function choiceStep(rng: Rng, s: StepSpec): GuidedStep {
-  const seen = new Set([s.correct])
-  const wrongs: Wrong[] = []
-  for (const w of s.wrongs) {
-    if (seen.has(w.content) || wrongs.length >= 3) continue
-    seen.add(w.content)
-    wrongs.push(w)
-  }
-  const choices: Choice[] = [
-    { id: 'richtig', content: s.correct, correct: true, ...(s.correctDrawing ? { drawing: s.correctDrawing } : {}) },
-    ...wrongs.map((w, i) => ({
-      id: `falsch-${i + 1}`,
-      content: w.content,
-      correct: false,
-      errorRuleId: w.rule,
-      whyWrong: w.why ?? vectorErrorRule(w.rule).why,
-      ...(w.drawing ? { drawing: w.drawing } : {}),
-    })),
-  ]
-  return {
-    id: s.id,
-    title: s.title,
-    question: s.question,
-    choices: rng.shuffle(choices),
-    hint: s.hint,
-    explanation: s.explanation,
-    ...(s.established ? { established: s.established } : {}),
-    cards: s.cards,
-    ...(s.drawing ? { drawing: s.drawing } : {}),
-  }
-}
-
-const ints = (rng: Rng, dim: number, lo: number, hi: number, nonzero = false): Vec =>
-  vec(
-    ...Array.from({ length: dim }, () => {
-      let v = rng.int(lo, hi)
-      while (nonzero && v === 0) v = rng.int(lo, hi)
-      return v
-    }),
-  )
-
-const negCount = (v: Vec) => v.filter((x) => ratSign(x) < 0).length
-const zeroCount = (v: Vec) => v.filter((x) => isZero(x)).length
-const dimOf = (v: Vec) => v.length
-
-// Muster der Vorzeichen für die Form: wie viele negative Einträge (0, 1, mehr) und ob eine Null dabei ist
-const signShape = (...vs: Vec[]) => vs.map((v) => `${negCount(v)}${zeroCount(v) > 0 ? 'z' : ''}`).join(',')
-
-// Vektoren mit ganzzahliger Länge: Einträge (Beträge) und Länge
-const LENGTH_POOLS: Readonly<Record<number, readonly (readonly number[])[]>> = {
-  2: [[3, 4, 5], [6, 8, 10], [5, 12, 13], [8, 15, 17], [9, 12, 15], [12, 16, 20]],
-  3: [
-    [1, 2, 2, 3],
-    [2, 3, 6, 7],
-    [1, 4, 8, 9],
-    [2, 4, 4, 6],
-    [2, 6, 9, 11],
-    [6, 6, 7, 11],
-    [3, 4, 12, 13],
-    [2, 10, 11, 15],
-    [4, 4, 7, 9],
-    [2, 5, 14, 15],
-    [3, 6, 6, 9],
-  ],
-  4: [[1, 2, 2, 4, 5], [2, 2, 4, 5, 7], [1, 3, 3, 9, 10], [2, 4, 5, 6, 9], [1, 1, 3, 5, 6], [1, 1, 7, 7, 10]],
-  5: [[1, 1, 1, 2, 3, 4], [1, 1, 3, 3, 4, 6], [1, 2, 3, 5, 5, 8], [1, 1, 2, 3, 7, 8], [2, 2, 3, 4, 4, 7]],
-}
-
-// Vektor mit ganzzahliger Länge in dim Dimensionen: Einträge gemischt, Vorzeichen zufällig (mindestens eins negativ)
-function pythagorean(rng: Rng, dim: number): { readonly v: Vec; readonly length: number } {
-  const row = rng.pick(LENGTH_POOLS[dim])
-  const entries = rng.shuffle(row.slice(0, dim)).map((x) => (rng.chance(0.45) ? -x : x))
-  if (!entries.some((x) => x < 0)) {
-    const i = rng.int(0, dim - 1)
-    entries[i] = -entries[i]
-  }
-  return { v: vec(...entries), length: row[dim] }
-}
-
-const VEC_LETTERS = [
-  ['a', 'b', 'c'],
-  ['u', 'v', 'w'],
-  ['p', 'q', 'r'],
-] as const
-const POINT_LETTERS = [
-  ['A', 'B'],
-  ['P', 'Q'],
-  ['R', 'S'],
-] as const
-const PARAMS = ['t', 's', '\\lambda'] as const
-
-// ------------------------------------------------------------------ Bilder
-
-const nums = vecNumbers
-const origin = (dim: number) => Array.from({ length: dim }, () => 0)
-const drawable = (dim: number): dim is 2 | 3 => dim === 2 || dim === 3
-
-function pointsDrawing(dim: 2 | 3, pts: readonly { name: string; at: Vec }[], caption: string, ghosts = true): VectorDrawing {
-  const base = emptyDrawing(dim, caption)
-  return {
-    ...base,
-    points: pts.map((p) => ({ at: nums(p.at), label: p.name })),
-    arrows: ghosts ? pts.map((p) => ({ from: origin(dim), to: nums(p.at), color: 'muted' as const, ghost: true })) : [],
-  }
-}
-
-// ------------------------------------------------------------------ Bausteine der Rechnung (je ein Schritt)
-
-// Verbindungsvektor PQ = Q − P mit falschen Antworten
-function connectStep(rng: Rng, P: string, Q: string, p: Vec, q: Vec, drawing?: VectorDrawing): GuidedStep {
-  const d = vecSub(q, p)
-  const slip = p.findIndex((x) => ratSign(x) < 0)
-  const wrongs: Wrong[] = [
-    { content: math(vecLatex(vecSub(p, q))), rule: 'vec-reversed' },
-    { content: math(vecLatex(vecAdd(p, q))), rule: 'vec-added-points' },
-  ]
-  if (slip >= 0) wrongs.push({ content: math(vecLatex(d.map((x, i) => (i === slip ? ratAdd(q[i], p[i]) : x)))), rule: 'vec-sign-slip' })
-  const name = arrowName(P, Q)
-  return choiceStep(rng, {
-    id: 'verbindung',
-    title: 'Verbindungsvektor',
-    question: `Wie lautet ${math(name)}?`,
-    correct: math(vecLatex(d)),
-    wrongs,
-    hint: `Spitze minus Fuß: Ortsvektor von $${Q}$ minus Ortsvektor von $${P}$, Eintrag für Eintrag.`,
-    explanation: {
-      detailed: `Der Pfeil beginnt beim Fuß $${P}$ und endet bei der Spitze $${Q}$. Deshalb rechnest du $${name} = ${vecLatex(q)} - ${vecLatex(p)}$, Eintrag für Eintrag.`,
-      short: `$${name} = ${Q} - ${P}$: Spitze minus Fuß.`,
-    },
-    established: [`${name} = ${vecLatex(q)} - ${vecLatex(p)} = ${vecLatex(d)}`],
-    cards: [CARD.verbindung],
-    ...(drawing ? { drawing } : {}),
-  })
-}
 
 const squaresLatex = (v: Vec) => v.map((x) => `${ratFactorLatex(x)}^2`).join(' + ')
 
@@ -336,12 +169,6 @@ function lengthDrawing(dim: 2 | 3, name: string, v: Vec, from: Vec | null = null
 
 // ------------------------------------------------------------------ Arten
 
-type Built = Omit<VectorTask, 'ref'>
-
-function letters(rng: Rng) {
-  const i = rng.int(0, 2)
-  return { vecs: VEC_LETTERS[i], points: POINT_LETTERS[rng.int(0, 2)], key: i }
-}
 
 // Verbindungsvektor: Stufe 1 in der Ebene mit „Welcher Pfeil?", sonst im Raum
 function buildConnect(rng: Rng, level: Level): Built {
@@ -1309,6 +1136,7 @@ function buildParamDistance(rng: Rng): Built {
 }
 
 const BUILDERS: Readonly<Record<VectorKind, (rng: Rng, level: Level) => Built>> = {
+  ...DOT_BUILDERS,
   connect: buildConnect,
   combo: buildCombo,
   length: buildLength,
@@ -1325,7 +1153,9 @@ const BUILDERS: Readonly<Record<VectorKind, (rng: Rng, level: Level) => Built>> 
 // Aufgabe zu einer Nummer (Stufe und Startwert); kind erzwingt eine Art (Lernkarten)
 export function buildVectorTask(ref: TaskRef, kind?: VectorKind): VectorTask {
   const rng = createRng(`vektoren:${ref.level}:${ref.seed}`)
-  const chosen = kind ?? rng.pick(KINDS_BY_LEVEL[ref.level])
+  // Baustein aus der Nummer: „skalar.2-4711" zieht aus dem Skalarprodukt, alles andere aus „Rechnen und Länge"
+  const kinds = seedBlock(ref.seed)?.block === 'skalar' ? DOT_KINDS_BY_LEVEL : KINDS_BY_LEVEL
+  const chosen = kind ?? rng.pick(kinds[ref.level])
   const built = BUILDERS[chosen](rng, ref.level)
   // Tipp im freien Modus: kurz der erste Schritt, ausführlich alle Schritte
   const ruleHint = { short: built.steps[0].hint, detailed: built.steps.map((s) => s.hint).join(' ') }
