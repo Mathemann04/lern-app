@@ -11,6 +11,7 @@ import { type CourseEngine, loadCourseEngine } from './courseEngines.ts'
 import { type MixEngine, pickMixed } from './mix.ts'
 import { recentForms, rememberForm } from './recentForms.ts'
 import { knownFocus, newTaskHref, pickNewSeed, questionNoOf } from './practice.ts'
+import { avoidedQuestion, taskShown } from './skip.ts'
 import { mixHref, mixPracticeHref, practiceHref, reviewHref, taskExitHref, taskHref } from './routes.ts'
 import { mixBlockedHint, mixedCourses, selectedParts } from './selection.ts'
 
@@ -143,7 +144,8 @@ function PickNewTask({ course, level, mode, mix }: { course: string; level: Leve
     const parts = selectedParts(courseById(course)!.course, getAppState().settings, level)
     // Wiederholung nur beim geführten Üben (Wissensfragen gibt es nur geführt)
     const review = mode === 'guided' ? reviewsOf(course) : undefined
-    const { seed, newRound } = pickNewSeed(engine, level, recentForms(course, level), shownInRound(course, level), parts, review, mode === 'free')
+    const avoid = avoidedQuestion(course, level)
+    const { seed, newRound } = pickNewSeed(engine, level, recentForms(course, level), shownInRound(course, level), parts, review, mode === 'free', avoid)
     if (newRound) startNewRound(course, level, engine.questionNos?.(level, parts))
     window.location.replace(taskHref(course, { level, seed }, mode, null, mix))
   }, [engine, course, level, mode, mix])
@@ -159,6 +161,8 @@ function useRememberForm(course: string, engine: CourseEngine, taskRef: TaskRef)
     rememberTaskShown(course, level, seed)
     const no = questionNoOf(engine, seed)
     if (no !== null) rememberShown(course, level, no)
+    // „Überspringen": erledigt, sobald eine andere Aufgabe da ist
+    taskShown(course, seed)
   }, [course, engine, level, seed])
 }
 
@@ -203,6 +207,7 @@ export function MixPracticePage({ subject: subjectId, level }: { subject: string
           // Wiederholung nur beim geführten Üben (Wissensfragen gibt es nur geführt)
           reviewOf: (course) => (modeOf(course) === 'free' ? undefined : reviewsOf(course)),
           freeOf: (course) => modeOf(course) === 'free',
+          avoidOf: (course) => avoidedQuestion(course, level),
         })
         if (!picked) {
           setState('empty')

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { MAX_ROUND, ROUNDS_KEY, clearRounds, parseRounds, rememberShown, shownInRound, startNewRound } from './questionRounds.ts'
+import { MAX_ROUND, ROUNDS_KEY, clearRounds, forgetShown, parseRounds, rememberShown, shownInRound, startNewRound } from './questionRounds.ts'
 import type { KeyValueStore } from './storage.ts'
 
 // Speicher wie im Browser, nur im Arbeitsspeicher
@@ -22,6 +22,20 @@ describe('Runden der Wissensfragen', () => {
     expect([...shownInRound('chem-atombau', 2, store)]).toEqual([201])
     expect([...shownInRound('chem-andere', 1, store)]).toEqual([101])
     expect(JSON.parse(store.data.get(ROUNDS_KEY)!)).toEqual({ 'chem-atombau:1': [101, 105], 'chem-atombau:2': [201], 'chem-andere:1': [101] })
+  })
+
+  it('nimmt eine übersprungene Frage aus der Runde, sonst bleibt alles', () => {
+    const store = memoryStore()
+    for (const no of [101, 102, 103]) rememberShown('chem-atombau', 1, no, store)
+    rememberShown('chem-atombau', 2, 102, store)
+    forgetShown('chem-atombau', 1, 102, store)
+    expect([...shownInRound('chem-atombau', 1, store)]).toEqual([101, 103])
+    expect([...shownInRound('chem-atombau', 2, store)]).toEqual([102])
+    // nicht in der Runde oder kein Eintrag: nichts passiert
+    const before = store.data.get(ROUNDS_KEY)
+    forgetShown('chem-atombau', 1, 999, store)
+    forgetShown('chem-andere', 3, 101, store)
+    expect(store.data.get(ROUNDS_KEY)).toBe(before)
   })
 
   it('beginnt eine Runde von vorn, ohne die anderen anzurühren', () => {

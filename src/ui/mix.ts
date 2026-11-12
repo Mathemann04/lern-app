@@ -27,6 +27,8 @@ export type MixInput = {
   readonly reviewOf?: (course: string) => CourseReviews | undefined
   // freier Modus im Thema (Chemie, S8b: nur Rechnungen mit Zahlen); ohne Angabe geführt
   readonly freeOf?: (course: string) => boolean
+  // gerade übersprungene Wissensfrage des Themas (ui/skip.ts, avoidedQuestion); ohne Angabe keine
+  readonly avoidOf?: (course: string) => number | null
   // Zufall für die Wahl des Themas (in Tests fest)
   readonly random?: () => number
 }
@@ -58,11 +60,11 @@ type Weighted = { readonly course: Course; readonly nos: readonly number[] | und
 // durch sind, und danach kämen die Themen am Stück.) Engines ohne Wissensfragen (Mathe) zählen 1, Chemie-Themen
 // ohne Fragen in der Stufe (nur Rechnungen, z. B. „Stoffmenge und Umsatz" bis S3b) so viel wie ein Thema mit der
 // Mindestzahl an Fragen (CALC_ONLY_WEIGHT).
-export function mixWeights(input: Omit<MixInput, 'shownOf' | 'recentOf' | 'random' | 'reviewOf' | 'freeOf'>): readonly { readonly course: string; readonly weight: number }[] {
+export function mixWeights(input: Omit<MixInput, 'shownOf' | 'recentOf' | 'random' | 'reviewOf' | 'freeOf' | 'avoidOf'>): readonly { readonly course: string; readonly weight: number }[] {
   return weighted(input).map(({ course, weight }) => ({ course: course.id, weight }))
 }
 
-function weighted({ courses, level, engineOf, partsOf }: Omit<MixInput, 'shownOf' | 'recentOf' | 'random' | 'reviewOf' | 'freeOf'>): Weighted[] {
+function weighted({ courses, level, engineOf, partsOf }: Omit<MixInput, 'shownOf' | 'recentOf' | 'random' | 'reviewOf' | 'freeOf' | 'avoidOf'>): Weighted[] {
   return courses
     .filter((course) => isLevelAvailable(course, level))
     .map((course) => {
@@ -76,12 +78,15 @@ function weighted({ courses, level, engineOf, partsOf }: Omit<MixInput, 'shownOf
 // spielbaren Themen oder keine Fragen). Fällige Wiederholungen (reviewOf) kommen zuerst: das Thema mit der
 // am längsten fälligen Frage der Auswahl.
 export function pickMixed(input: MixInput): MixPick | null {
-  const { level, engineOf, shownOf, recentOf, partsOf, reviewOf, freeOf, random = Math.random } = input
+  const { level, engineOf, shownOf, recentOf, partsOf, reviewOf, freeOf, avoidOf, random = Math.random } = input
   const choices = weighted(input).filter(({ weight }) => weight > 0)
   const sum = choices.reduce((total, { weight }) => total + weight, 0)
   if (sum === 0) return null
   const due = choices
-    .map((choice) => ({ choice, due: dueInSelection(engineOf(choice.course.id), level, reviewOf?.(choice.course.id), partsOf(choice.course.id)) }))
+    .map((choice) => {
+      const id = choice.course.id
+      return { choice, due: dueInSelection(engineOf(id), level, reviewOf?.(id), partsOf(id), avoidOf?.(id) ?? null) }
+    })
     .filter((d) => d.due !== null)
     .sort((a, b) => a.due!.answeredAt - b.due!.answeredAt)[0]
   // Zufallszahl in [0, sum): das Thema, in dessen Abschnitt sie fällt
@@ -96,6 +101,6 @@ export function pickMixed(input: MixInput): MixPick | null {
   }
   const id = chosen.course.id
   const parts = partsOf(id)
-  const { seed, newRound } = pickNewSeed(engineOf(id), level, recentOf(id), shownOf(id), parts, reviewOf?.(id), freeOf?.(id) ?? false)
+  const { seed, newRound } = pickNewSeed(engineOf(id), level, recentOf(id), shownOf(id), parts, reviewOf?.(id), freeOf?.(id) ?? false, avoidOf?.(id) ?? null)
   return { course: id, seed, newRound, nos: chosen.nos }
 }

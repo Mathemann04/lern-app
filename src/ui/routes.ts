@@ -166,6 +166,11 @@ export const practiceHref = (course: string, level: Level, mode: PracticeMode = 
 export const taskHref = (course: string, ref: TaskRef, mode: PracticeMode = 'guided', focus?: string | null, mix?: string | null, review?: string | null) =>
   `#/${PREFIX[mode]}/${course}/${formatTaskNumber(ref)}${practiceQuery(focus, mix, review)}`
 
+// Wohin „Nächste Aufgabe" und „Überspringen" führen: in der Wiederholung zur nächsten fälligen Frage, in der Mischung zur
+// nächsten gemischten Aufgabe, sonst zu einer neuen Aufgabe des Themas (gezielt üben bleibt dabei)
+export const nextTaskHref = (course: string, level: Level, mode: PracticeMode, focus?: string | null, mix?: string | null, review?: string | null) =>
+  review ? reviewHref(review) : mix ? mixPracticeHref(mix, level) : practiceHref(course, level, mode, focus)
+
 // Themen mischen: Auswahl eines Fachs und neue gemischte Aufgabe in einer Stufe
 export const mixHref = (subject: string) => `#/mischen/${subject}`
 export const mixPracticeHref = (subject: string, level: Level) => `#/mischen/${subject}/${level}`

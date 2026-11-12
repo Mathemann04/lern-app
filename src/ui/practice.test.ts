@@ -138,3 +138,46 @@ describe('Wiederholung beim Ziehen (S8a)', () => {
     }
   })
 })
+
+describe('Überspringen beim Ziehen (M6 Schritt 2)', () => {
+  const rng = createRng('ueberspringen')
+  const engine = chemCourseEngine(ATOMBAU, () => rng.next())
+  const nos1 = engine.questionNos(1)
+
+  it('nimmt die übersprungene Frage nicht gleich wieder, solange es andere offene gibt', () => {
+    const avoid = nos1[2]
+    for (let i = 0; i < 80; i++) {
+      const picked = pickNewSeed(engine, 1, [], new Set(), undefined, undefined, false, avoid)
+      expect(questionNoOf(engine, picked.seed)).not.toBe(avoid)
+      expect(picked.newRound).toBe(false)
+    }
+  })
+
+  it('nimmt sie, wenn sie die letzte offene Frage der Runde ist, ohne die Runde neu zu beginnen', () => {
+    const avoid = nos1.at(-1)!
+    const shown = new Set(nos1.slice(0, -1))
+    let found = false
+    for (let i = 0; i < 80; i++) {
+      const picked = pickNewSeed(engine, 1, [], shown, undefined, undefined, false, avoid)
+      const no = questionNoOf(engine, picked.seed)
+      if (no === null) continue
+      expect(no).toBe(avoid)
+      expect(picked.newRound).toBe(false)
+      found = true
+    }
+    expect(found).toBe(true)
+  })
+
+  it('bringt bei der Wiederholung erst eine andere fällige Frage; ist nur die übersprungene fällig, normal weiter', () => {
+    const due = [
+      { no: nos1[0], variant: 1, answeredAt: 1 },
+      { no: nos1[1], variant: 1, answeredAt: 2 },
+    ]
+    const picked = pickNewSeed(engine, 1, [], new Set(), undefined, { due, waiting: new Set() }, false, nos1[0])
+    expect(picked.review).toBe(true)
+    expect(decodeSeed(picked.seed)).toMatchObject({ kind: 'question', no: nos1[1] })
+    const only = pickNewSeed(engine, 1, [], new Set(), undefined, { due: due.slice(0, 1), waiting: new Set() }, false, nos1[0])
+    expect(only.review).toBe(false)
+    expect(questionNoOf(engine, only.seed)).not.toBe(nos1[0])
+  })
+})

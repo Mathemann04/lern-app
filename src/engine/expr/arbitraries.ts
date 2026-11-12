@@ -53,8 +53,21 @@ export function closeEnough(a: number, b: number): boolean {
 // Stelle sprunghaft ändert. Sie sind für Vergleiche wertlos und werden übersprungen.
 export function reliableValue(e: Expr, at: number): number | null {
   const value = evaluate(e, { x: at })
-  if (!Number.isFinite(value) || Math.abs(value) > 1e10 || !isStableAt(e, at) || hasCancellation(e, at)) return null
+  if (!Number.isFinite(value) || Math.abs(value) > 1e10 || !isStableAt(e, at) || hasCancellation(e, at) || hasNoisyRoot(e, at)) return null
   return value
+}
+
+// Wurzel aus Rundungsrauschen: Eine Wurzel oder gebrochene Potenz eines Werts, der fast 0 ist, vergrößert das Rauschen um
+// viele Größenordnungen (\sqrt[3]{\sin \pi} ist mathematisch 0, am Rechner etwa 5 · 10⁻⁶, weil \sin \pi als 10⁻¹⁶
+// herauskommt). Der Wert ist dort für Vergleiche wertlos, im Ausgangsterm (reliableValue) wie im umgeformten Term: Vergleiche
+// überspringen eine Stelle auch dann, wenn erst die Umformung eine solche Wurzel enthält.
+export function hasNoisyRoot(e: Expr, at: number): boolean {
+  return subterms(e).some((s) => {
+    const inner = s.kind === 'root' ? s.arg : s.kind === 'pow' && s.exp.kind === 'num' && s.exp.value.d !== 1n ? s.base : null
+    if (inner === null) return false
+    const value = evaluate(inner, { x: at })
+    return value !== 0 && Math.abs(value) < 1e-12
+  })
 }
 
 // Auslöschung: Eine Summe, deren Wert winzig gegen ihre Summanden ist (−x + sin π + x ist

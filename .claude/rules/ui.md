@@ -65,8 +65,13 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   rechts (sonst nichts im Kopf), in Aufgaben ausgeblendet (das X führt zum Thema). Unterseiten
   haben oben `BackLink` („← Ordner", eine Ebene höher; Gebiet, Mischung und
   Klausur-Überblick führen zur Seite ihres Fachs). Die Nummer einer Aufgabe
-  steht klein ganz unten (`TaskNumber` in `TaskParts.tsx`), über der Aufgabe nur
-  „Stufe 2 · Leite ab“. Fortschritt `#/fortschritt` je Fach: geübte Themen als
+  steht klein ganz unten (`TaskFooter` in `TaskParts.tsx`), über der Aufgabe nur
+  „Stufe 2 · Leite ab“. Daneben, solange die Aufgabe offen ist, „Überspringen“
+  (`TaskFooter`, M6 Schritt 2; Ziel wie „Nächste Aufgabe“ über `nextTaskHref` in
+  `routes.ts`; `src/ui/skip.ts` merkt sich die übersprungene Aufgabe nur im
+  Arbeitsspeicher, bis eine andere gezeigt ist: `taskShown` in `useRememberForm`;
+  die nächste zeigt „Aufgabe übersprungen“, `SkipNotice`). Nichts wird als
+  gelöst oder Fehler gezählt; Fehler davor bleiben gezählt. Fortschritt `#/fortschritt` je Fach: geübte Themen als
   kurze Karten (zuletzt geübtes oben, letzte zehn Aufgaben, häufigster Fehler),
   „Einzelheiten“ klappt Stufen und Fehler mit „Gezielt üben“ auf; nicht
   geübte Themen in einer Zeile.

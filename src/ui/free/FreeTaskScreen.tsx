@@ -9,9 +9,9 @@ import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
 import { CardSheetButton, TaskCardLinks } from '../cards/CardSheet.tsx'
 import type { CourseEngine } from '../courseEngines.ts'
-import { courseHref, mixHref, mixPracticeHref, practiceHref, taskHref } from '../routes.ts'
+import { courseHref, mixHref, nextTaskHref, taskHref } from '../routes.ts'
 import { LevelUpSuggestion } from '../task/LevelUpSuggestion.tsx'
-import { CheckBadge, FocusBanner, TaskIntro, TaskNumber, TaskTopBar } from '../task/TaskParts.tsx'
+import { CheckBadge, FocusBanner, SkipNotice, TaskFooter, TaskIntro, TaskTopBar } from '../task/TaskParts.tsx'
 import { type ExplanationMode, useExplanationMode } from '../task/explanationMode.ts'
 import { MathInput } from './MathInput.tsx'
 
@@ -74,6 +74,7 @@ export default function FreeTaskScreen({ course, engine, taskRef, focus = null, 
       <TaskTopBar course={course} mix={mix} mode={mode} onCycleMode={cycle} />
 
       {focus && <FocusBanner focus={focus} />}
+      <SkipNotice course={course} seed={seed} />
 
       <section className="space-y-3">
         <TaskIntro course={course} mix={mix} taskRef={taskRef} functionLatex={plan.functionLatex} instruction={plan.instruction} note={plan.note} />
@@ -117,7 +118,7 @@ export default function FreeTaskScreen({ course, engine, taskRef, focus = null, 
         <div className="space-y-5">
           <div className="flex flex-col gap-3 sm:flex-row">
             <a
-              href={mix ? mixPracticeHref(mix, level) : practiceHref(course, level, 'free', focus)}
+              href={nextTaskHref(course, level, 'free', focus, mix)}
               className="flex-1 rounded-xl bg-accent-700 px-4 py-3 text-center text-lg font-medium text-on-accent hover:bg-accent-800"
             >
               Nächste Aufgabe
@@ -182,7 +183,7 @@ export default function FreeTaskScreen({ course, engine, taskRef, focus = null, 
         />
       )}
 
-      <TaskNumber taskRef={taskRef} />
+      <TaskFooter course={course} taskRef={taskRef} skipHref={solved ? null : nextTaskHref(course, level, 'free', focus, mix)} />
     </main>
   )
 }

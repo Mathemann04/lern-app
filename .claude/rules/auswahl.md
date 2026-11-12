@@ -43,3 +43,9 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   „Eine Stufe höher?"; Fortschritt, Fehler, Runden und Formen zählen beim
   Thema; „Weitermachen" setzt über `lastMix` die Mischung fort (`null`, sobald
   ein Thema allein geübt wird).
+  **Überspringen** (M6 Schritt 2): Eine übersprungene Wissensfrage verlässt die
+  Runde (`forgetShown` in `questionRounds.ts`) und zählt bei der nächsten Wahl wie
+  gezeigt (`avoid` in `pickNewSeed` und `dueInSelection`, `avoidOf` in `pickMixed`,
+  aus `avoidedQuestion` in `ui/skip.ts`), außer sie ist die letzte offene Frage der
+  Runde. „Wiederholen“ (`ReviewPage.tsx`) nimmt zuerst eine andere fällige Frage; ist
+  nur die übersprungene fällig: „Nur noch die übersprungene Frage ist fällig“.
