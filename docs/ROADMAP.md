@@ -10,10 +10,10 @@ Stand: 12.11.2026
 | M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten, Vektoren, Additionstheoremen) | fertig |
 | M4 | **Chemie 1**: neues Fach mit Wissensfragen (Auswahl, Zuordnen, Ordnen) und Rechnungen zu allen Themen der Vorlesung, drei Stufen (Grundlagen, Vertiefung, Klausurniveau), Lernkarten, Wiederholung, Probeklausur wie die echte (45 min, 50 Punkte) | in Arbeit: Plan freigegeben ([PLAN-M4.md](PLAN-M4.md)), Klausur-Sprint S1 bis S9 fertig, Klausur-Sprint mit S10 und S11 fertig; N1 und N2a fertig, N2b bis N5 nach M6 und M12 |
 | M5 | **Werkstoffkunde**: eigenes Fach nach demselben Muster wie Chemie, mit Nachschlagewerk; Vorbild für Tabellen und Bilder auch das Lehrbuch „Physik für Ingenieure“ (Festkörperphysik) | offen (nach M6, M12 und M6b; die Skripte und Buchfotos kommen vom Nutzer; früher, falls die Werkstoffkunde-Klausur früher ist) |
-| M6 | **Neue Struktur** (ersetzt „Themen einzeln üben“, Idee des Nutzers, 10.11.2026): drei getrennte Fragen – was tust du (Tätigkeit als Kachel: Vereinfachen, Gleichungen umstellen, Ableiten), womit (Bausteine ankreuzen, ein Thema gezielt mit „nur“), wie schwer (Stufe = nur Verschachtelung, nie neuer Stoff); aufgeräumte Startseite, Fortschritt je Baustein, „Meine Schwächen“, Knopf „Überspringen“, ohne Kopfzeile, Startseite nur mit Fächern. Plan: [PLAN-M6.md](PLAN-M6.md) | als Nächstes: ausführlicher Plan mit zehn Schritten fertig (12.11.2026), wartet auf das OK des Nutzers |
+| M6 | **Neue Struktur** (ersetzt „Themen einzeln üben“, Idee des Nutzers, 10.11.2026): drei getrennte Fragen – was tust du (Tätigkeit als Kachel: Vereinfachen, Gleichungen umstellen, Ableiten), womit (Bausteine ankreuzen, ein Thema gezielt mit „nur“), wie schwer (Stufe = nur Verschachtelung, nie neuer Stoff); aufgeräumte Startseite, Fortschritt je Baustein, „Meine Schwächen“, Knopf „Überspringen“, ohne Kopfzeile, Startseite nur mit Fächern. Plan: [PLAN-M6.md](PLAN-M6.md) | als Nächstes: ausführlicher Plan mit zehn Schritten fertig (12.11.2026), Fragen beantwortet, Bausteine mit der Vorlesung abgeglichen; Modellwahl fürs Gestalten offen |
 | M6b | **Bilder in Mathe** (Wunsch des Nutzers, 10.11.2026): gemeinsame Zeichen-Grundlage (Koordinatensystem, Graph, Pfeile, Einheitskreis, Zahlenebene); je Baustein ein Bild in Aufgaben und Lernkarten (Graph bei e-Funktion und Logarithmus, Tangente beim Ableiten, Fläche beim Integral, Einheitskreis bei Winkelfunktionen, Pfeile bei Vektoren, Zahlenebene bei komplexen Zahlen); Aufgaben wie „Welcher Graph gehört zur Funktion?“. Später Bilder zum Anfassen (Punkt verschieben). Ausblick in [PLAN-M6.md](PLAN-M6.md) | offen: direkt nach M6, vor M5 |
-| M7 | **Vektoren** als eigenes Gebiet: Rechnen mit Vektoren, Länge, Skalarprodukt, Winkel, Kreuzprodukt, Projektion (ob Geraden und Ebenen dazukommen, klären wir beim Plan) | offen |
-| M8 | Potenz-, Wurzel- und Logarithmusgesetze | offen |
+| M7 | **Vektoren** (seit 12.11.2026 Baustein beim Umstellen in M6, später eigene Tätigkeit „Vektoren rechnen“): Rechnen mit Vektoren, Länge, Skalarprodukt, Winkel, Kreuzprodukt, Projektion (ob Geraden und Ebenen dazukommen, klären wir beim Plan) | offen |
+| M8 | Potenz-, Wurzel- und Logarithmusgesetze | in M6 aufgegangen (Bausteine bei „Vereinfachen“, Schritt 6) |
 | M9 | weitere Themen aus Mathematik MB1, „Ableiten" nachschärfen | offen |
 | M10 | Physik: Formeln mit Einheiten (Formeln umstellen mit Zeichen der Physik; Aufgaben lösen: Formel wählen, umstellen, Werte mit Einheiten einsetzen); Maßstab und Ideen für Übungen: das Lehrbuch „Physik für Ingenieure“ (eigene Aufgaben, eigene Zahlen) | offen |
 | M11 | Technische Mechanik: Freischnitt, Gleichgewicht, Lagerkräfte, statische Bestimmtheit | offen |
@@ -21,6 +21,12 @@ Stand: 12.11.2026
 | Später | Konto und Sync, Teilen mit Kommilitonen, App-Store-Version, optional KI-Hilfe | offen |
 
 ## Vorgemerkt
+
+- **Weitere Themen der Vorlesung MB1** (abgeglichen am 12.11.2026, Liste in
+  [PLAN-M6.md](PLAN-M6.md) unter „Antworten des Nutzers“): Grenzwerte
+  berechnen, Polynome, Funktionen und Schwingungen, Linearisieren,
+  Gleichungssysteme (Gauß), Vektoren rechnen, Matrizen, Mengen und
+  Summenzeichen; in der neuen Struktur als Tätigkeiten nach M6.
 
 - **Bilder in Aufgaben** (Wunsch des Nutzers, 10.11.2026): wie bei Brilliant in
   allen Fächern mehr mit Bildern lernen. Chemie in S5 und S6 (Gitter, Gestalt

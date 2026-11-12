@@ -1,6 +1,6 @@
 # Plan für Meilenstein 6: Neue Struktur
 
-Status: **ausführlicher Plan, wartet auf das OK des Nutzers** (Entwurf vom
+Status: **ausführlicher Plan, Fragen beantwortet (12.11.2026)** (Entwurf vom
 10.11.2026, ausgearbeitet am 12.11.2026). Gebaut wird nach dem Klausur-Sprint
 von M4 und vor M12 (Nachschlagewerk), M6b und M5, damit die neuen Fächer
 gleich in der neuen Struktur entstehen. Erst nach dem OK wird programmiert.
@@ -141,7 +141,7 @@ wie viele Schalen und wie viele Bausteine ineinander stecken.
 
 | Gruppe | Bausteine |
 | --- | --- |
-| Grundlagen | Brüche (x im Nenner, Doppelbrüche), Wurzeln, Quadrate und Potenzen, e-Funktion, Logarithmus, quadratisch (pq-Formel, Substitution) |
+| Grundlagen | Brüche (x im Nenner, Doppelbrüche), Wurzeln, Quadrate und Potenzen, e-Funktion und Potenzen mit anderer Basis, Logarithmus (auch lg und $\log_2$), Beträge (Fallunterscheidung, neu), quadratisch (pq-Formel, Substitution) |
 | Funktionen | Winkelfunktionen (mit Umkehrfunktionen und Additionstheoremen), Hyperbelfunktionen |
 | Aus späteren Kapiteln | Ableitungen, Integrale, Summen und Reihen, Grenzwerte, Differentialgleichungen, Determinanten, komplexe Zahlen, Vektoren |
 
@@ -150,7 +150,8 @@ wie viele Schalen und wie viele Bausteine ineinander stecken.
 | Gruppe | Bausteine |
 | --- | --- |
 | Zahlen | Zahlenbrüche (mit Dezimalzahlen) |
-| Terme | Buchstaben in Produkten, Ausklammern und binomische Formeln, Zerlegen (Zahl vorn, in Gruppen, Polynomdivision), Doppelbrüche, dritte Potenzen |
+| Terme | Buchstaben in Produkten, Ausklammern und binomische Formeln, Zerlegen (Zahl vorn, in Gruppen, Polynomdivision, Horner-Schema), Doppelbrüche, dritte Potenzen |
+| Gesetze (früher M8) | Potenzgesetze, Wurzelgesetze (Wurzeln als Potenzen, Nenner rational machen), Logarithmengesetze (als Summe schreiben, zu einem Logarithmus zusammenfassen) |
 | Funktionen | Wurzeln, e-Funktion und Logarithmus, Winkelfunktionen, Hyperbelfunktionen |
 | Aus späteren Kapiteln | Partialbruchzerlegung, Differenzenquotienten, Grenzwerte, Teleskopsummen, komplexe Zahlen |
 
@@ -160,7 +161,8 @@ angekreuzte Bausteine):
 | Gruppe | Bausteine |
 | --- | --- |
 | Funktionen | Potenzen und Wurzeln, e-Funktion, Logarithmus, Winkelfunktionen, Umkehrfunktionen (arcsin, arctan …), Hyperbelfunktionen |
-| Regeln | Produktregel, Quotientenregel, Kettenregel, logarithmisch ableiten, implizit ableiten |
+| Regeln | Produktregel, Quotientenregel, Kettenregel, logarithmisch ableiten, implizit ableiten, zweite Ableitung |
+| Schreibweise | andere Variable als $x$ (z. B. $t$) und Buchstaben als feste Größen (z. B. $\omega$, $\varphi$, $a$) |
 
 Faktor- und Summenregel sind immer erlaubt (Handwerkszeug).
 
@@ -246,12 +248,14 @@ Prüfung im Browser (Handy und Laptop, hell und dunkel), Pull Request.
 - 5b: Differentialgleichungen, Determinanten ab Stufe 1.
 - 5c: komplexe Zahlen und Vektoren ab Stufe 1 (Betrag, Winkel, Länge,
   Skalarprodukt).
+- 5d: Beträge (neu: zwei Fälle, mehrere Lösungen).
 - Danach ist jeder Baustein in jeder Stufe übbar; „gezielt üben“ je
   Fehlerregel bleibt.
 
 #### Schritt 6: „Vereinfachen“ mit Bausteinen
 
-- Wie Schritt 3 für die heutigen „Brüche“, dazu leichte Aufgaben für
+- Wie Schritt 3 für die heutigen „Brüche“, dazu die neuen Bausteine
+  Potenz-, Wurzel- und Logarithmengesetze (früher M8) und leichte Aufgaben für
   Wurzeln, e-Funktion und Logarithmus, Winkel- und Hyperbelfunktionen,
   Partialbrüche, Differenzenquotienten, Grenzwerte, Teleskopsummen, komplexe
   Zahlen (heute nur in Stufe 5).
@@ -279,19 +283,27 @@ Prüfung im Browser (Handy und Laptop, hell und dunkel), Pull Request.
 - Prüfung aus mehreren Blickwinkeln, Doku, alte Adressen ein letztes Mal
   durchgetestet.
 
-### Fragen an dich
+### Antworten des Nutzers (12.11.2026)
 
-1. Passen die Bausteine in den Tabellen oben? Fehlt etwas aus der Vorlesung
-   MB1, oder soll etwas anders heißen?
-2. M7 (Vektoren) und M8 (Potenz-, Wurzel- und Logarithmusgesetze): Vorschlag:
-   keine eigenen Gebiete mehr, sondern Bausteine in dieser Struktur (Vektoren
-   als Baustein beim Umstellen und später als eigene Tätigkeit „Vektoren
-   rechnen“; Potenz-, Wurzel- und Logarithmusgesetze als Bausteine bei
-   „Vereinfachen“).
-3. Namen der Stufen: „Einstieg, Grundlagen, Kombiniert, Klausur, Profi“?
-4. Ableiten: Regeln (Produkt-, Quotienten-, Kettenregel) als ankreuzbare
-   Bausteine wie oben, oder nur die Funktionen ankreuzen und die Regeln
-   ergeben sich aus der Stufe?
+1. Bausteine: passen; abgeglichen mit dem Vorlesungsmaterial MB1 (Mitschrift
+   und Übungsblätter, nicht im Repo). Daraus ergänzt: Beträge beim
+   Umstellen, Logarithmen zu anderen Basen, Gesetze bei „Vereinfachen“,
+   zweite Ableitung und Buchstaben als feste Größen beim Ableiten.
+2. M7 und M8 werden Bausteine bzw. Tätigkeiten in dieser Struktur (ja).
+3. Namen der Stufen: Einstieg, Grundlagen, Kombiniert, Klausur, Profi (ja).
+4. Ableiten: Regeln ankreuzbar (ja).
+
+**Weitere Themen der Vorlesung** (nicht Teil von M6, als „Demnächst“ auf der
+Mathe-Seite und in docs/ROADMAP.md vorgemerkt): Grenzwerte berechnen (Folgen
+für $n \to \infty$, Funktionen mit $\frac{0}{0}$), Polynome (Nullstellen,
+Linearfaktoren, Horner-Schema, Interpolation), Funktionen (Verschieben und
+Strecken, Schwingungen $A\sin(\omega t + \varphi)$), Linearisieren und
+Tangenten, lineare Gleichungssysteme (Gauß), Vektoren rechnen (Länge,
+Projektion, Kreuz- und Spatprodukt, Fläche, Linearkombination, Basis),
+Matrizen multiplizieren, Mengen und Summenzeichen.
+
+**Beträge** brauchen eine neue Fähigkeit der Engine (zwei Fälle, mehrere
+Lösungen). Sie kommen deshalb als eigener Teil nach Schritt 5 (5d).
 
 ## Teil B: Technischer Bauplan
 
