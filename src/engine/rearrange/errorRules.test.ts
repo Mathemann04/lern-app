@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { equationToLatex, toLatex } from '../expr/print.ts'
-import { type Expr, IMAG, PI, add, cos, div, eq, exp, mul, neg, num, pow, sin, sub, variable } from '../expr/types.ts'
+import { type Expr, IMAG, PI, add, cos, div, eq, exp, fn, mul, neg, num, pow, sin, sub, variable } from '../expr/types.ts'
 import { parseLatex } from '../parse/latex.ts'
 import { REARRANGE_ERROR_RULES, rearrangeWrongAnswers } from './errorRules.ts'
 import { solveEquation, solveTask } from './isolate.ts'
@@ -162,6 +162,22 @@ const TOOL_CATALOG: Array<{ id: string; lhs: Expr; rhs?: Expr; target?: string; 
   { id: 'eq-double-cos-plus', lhs: cosDouble, rhs: ySin, conditions: acuteX, after: '\\cos^{2} x + \\sin^{2} x = y\\sin x' },
   { id: 'eq-double-cos-sign', lhs: cosDouble, rhs: yCos, conditions: acuteX, after: '1 - 2\\cos^{2} x = y\\cos x' },
 ]
+
+describe('Logarithmen zusammenfassen nach „Zahl als Logarithmus“ (M6 Schritt 4b-2)', () => {
+  it('auch mit der Zahl als Logarithmus die Summe als Fehler; ältere Aufgaben der Stufe 5 behalten ihre falschen Antworten', () => {
+    const [a, b, k, x, y] = ['a', 'b', 'k', 'x', 'y'].map(variable)
+    const task = { equation: eq(p('\\log_{2}(x+a)'), p('\\log_{2}x+3')), target: 'x', conditions: [] }
+    const sums = rearrangeWrongAnswers(task, solveTask(task)!).filter((w) => w.rule.id === 'eq-log-sum').map((w) => equationToLatex(w.after))
+    expect(sums).toContain('\\log_{2}(x + a) = \\log_{2}(x + 8)')
+    // ein Logarithmus mit x und einer ohne, ohne „Zahl als Logarithmus“ davor: kein Quotient als Fehler (wie vor 4b-2)
+    for (const lhs of [sub(fn('ln', a), fn('ln', sub(a, x))), sub(fn('ln', add(pow(x, num(2)), k)), fn('ln', k))]) {
+      const old = { equation: eq(mul(b, lhs), y), target: 'x', conditions: [{ lhs: x, rel: '<', rhs: a } as Condition] }
+      const solution = solveTask(old)
+      if (!solution) continue
+      expect(rearrangeWrongAnswers(old, solution).map((w) => w.rule.id)).not.toContain('eq-log-quotient')
+    }
+  })
+})
 
 describe('Katalog der Fehlerregeln', () => {
   it('jede Regel hat ein Katalogbeispiel', () => {

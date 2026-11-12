@@ -916,6 +916,10 @@ Neue Entscheidungen unten anfügen.
   und bei quadratischen Gleichungen die Probe mit der Gleichung vom Anfang; ein Buchstabe als Basis bekommt die
   Bedingung, größer als 1 zu sein. Stufe 5 bekommt keine eigenen Aufgaben dieser Art (dort bleibt es bei den
   Werkzeugen).
+  Nach der unabhängigen Prüfung: Der Fehler „Summe der Logarithmen“ mit einer Zahl als Logarithmus ($\log_2 8 + \log_2 x$)
+  galt zuerst bei jedem Zusammenfassen und gab 29 älteren Aufgaben der Stufe 5 eine zusätzliche falsche Antwort; er gilt
+  jetzt nur nach „Zahl als Logarithmus“, ein Test sichert das. Mathematik, Bedingungen und Scheinlösungen hat die Prüfung
+  an 480 Aufgaben unabhängig nachgerechnet, ohne Befund.
 
 - 12.11.2026: Unterlagen zu Technische Mechanik 1 durchgesehen (Skripte Kapitel 1 bis 8, Übungsblätter 9 bis 19).
   Übersicht in eigenen Worten in docs/MECHANIK.md, dazu die Schreibweisen und Vorzeichenregeln, die die App genauso

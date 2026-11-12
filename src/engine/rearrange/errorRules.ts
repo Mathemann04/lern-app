@@ -564,15 +564,15 @@ function divideInsideLn(step: RearrangeStep): Candidate[] {
 }
 
 // Logarithmen zusammenfassen: \ln u + \ln v = \ln(u + v), \ln u - \ln v = \frac{\ln u}{\ln v}
-function logCombineMistakes(step: RearrangeStep, t: string): Candidate[] {
+function logCombineMistakes(step: RearrangeStep, t: string, afterNumber: boolean): Candidate[] {
   if (step.kind !== 'logCombine' || !step.side || !step.operand) return []
   const base = step.operand
   const s = step.before[step.side]
   if (s.kind !== 'add') return []
   const withT = s.terms.map((x) => signedLog(x, t))
-  // nur ein Logarithmus mit der Variable (nach „Zahl als Logarithmus", M6 Schritt 4b-2): auch die ohne sie
-  // (\log_2 8 + \log_2 x)
-  const parsed = withT.filter((p) => p !== null).length < 2 ? s.terms.map((x) => signedLog(x, t, true)) : withT
+  // nach „Zahl als Logarithmus" (M6 Schritt 4b-2) mit nur einem Logarithmus mit der Variable: auch die ohne sie
+  // (\log_2 8 + \log_2 x); sonst wie bisher, damit ältere Aufgaben (Stufe 5) dieselben falschen Antworten behalten
+  const parsed = afterNumber && withT.filter((p) => p !== null).length < 2 ? s.terms.map((x) => signedLog(x, t, true)) : withT
   const ups = parsed.filter((p) => p !== null && p.sign > 0).map((p) => p!.arg)
   const downs = parsed.filter((p) => p !== null && p.sign < 0).map((p) => p!.arg)
   const logOf = (arg: Expr) => (isE(base) ? fn('ln', arg) : log(base, arg))
@@ -812,7 +812,7 @@ function candidatesFor(steps: readonly RearrangeStep[], i: number, target: strin
     ...expLogMistakes(step),
     ...logLawMistakes(step, t),
     ...divideInsideLn(step),
-    ...logCombineMistakes(step, t),
+    ...logCombineMistakes(step, t, steps.slice(0, i).some((s) => s.kind === 'logNumber')),
     ...logEquationMistakes(step, t),
     ...powerSum(step, t),
     ...inverseMistakes(step),
