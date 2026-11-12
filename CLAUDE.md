@@ -15,8 +15,9 @@ den Nutzer zugeschnitten: Maschinenbau, 1. Semester, THU, „Mathematik MB1".
   [docs/PHYSIK.md](docs/PHYSIK.md), Technische Mechanik 1 mit festen Schreibweisen
   [docs/MECHANIK.md](docs/MECHANIK.md)
 - Meilensteine und aktueller Stand: [docs/ROADMAP.md](docs/ROADMAP.md)
-- Laufender Plan: [docs/PLAN-M6.md](docs/PLAN-M6.md) (neue Struktur mit
-  Tätigkeiten und Bausteinen, freigegeben 12.11.2026, zehn Schritte, 4b und 4c), danach vorgezogen M7 (Vektoren und Matrizen), dann der Rest von M6;
+- Laufender Plan: [docs/PLAN-M7.md](docs/PLAN-M7.md) (Vektoren, Geraden und
+  Ebenen, Matrizen; Entwurf vom 12.11.2026, wartet auf OK), vorgezogen vor den
+  Rest von [docs/PLAN-M6.md](docs/PLAN-M6.md) (fertig bis Schritt 4c);
   danach
   M12 und der Rest von [docs/PLAN-M4.md](docs/PLAN-M4.md) (Chemie 1, Klausur-Sprint
   S1 bis S11 fertig, offen N2 bis N5), Reihenfolge in docs/ROADMAP.md unter
@@ -152,6 +153,10 @@ Ausführliche Notizen je Bereich (wörtlich wie früher hier, jetzt ausgelagert)
   `explain/fractionTexts.ts` bzw. `explain/rearrangeTexts.ts` (Tests
   verbieten den Rückfalltext). Beim Bearbeiten mit Skripten auf Backslashes
   achten (`\f` in `\frac` wird sonst zum Steuerzeichen).
+- **Bilder:** Jedes Thema plant Bilder und Animationen von Anfang an, wie bei
+  Brilliant (Wunsch des Nutzers). Die Engine rechnet sie aus der Aufgabe,
+  Tests prüfen, dass Bild und Aufgabe zusammenpassen; Animationen nur auf
+  Knopfdruck und ohne bei „Bewegung reduzieren“.
 - **Bedienbarkeit:** Knöpfe und Links mindestens 44 px hoch; Text nicht
   heller als `zinc-500`.
 - **Schreibweise:** Formeln immer über KaTeX gesetzt, nie als Text wie
