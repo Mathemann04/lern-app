@@ -134,5 +134,8 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   „Vereinfachen" ist bis Schritt 6 die Seite der Brüche (Id `brueche`). Zurück-Links der Mathe-Themen
   und -Gebiete führen zur Seite des Fachs.
 - Freier Modus (M6 Schritt 4b-3): bei Gleichungen mit Zahlen neben „Prüfen“ der Knopf „Keine Lösung“ (`FreeTask.noSolution`).
+- Freier Modus mit Kästchen (M7 Schritt 1b, `FreeTask.entries`): `ui/free/EntryInput.tsx`, je Kästchen ein `MathInput`
+  (`autoFocus` nur im ersten), Markierung aus `FreeVerdict.marks` (rot bei falsch, sonst gelb). Browser-Tests tippen über
+  `math-field[aria-label="…"]` mit `focus()`; Enter in einem Bruch prüft nicht, darum dort „Prüfen“ klicken.
 - Ein `fieldset` wird im Browser nie schmaler als sein breitester Inhalt: Steht darin eine Formel mit `FitWidth`, braucht es
   `min-w-0` (Fehler vom 12.11.2026 auf der Seite „Gleichungen umstellen“, Browser-Test in `e2e/blocks.spec.ts`).

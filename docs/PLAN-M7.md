@@ -1,6 +1,6 @@
 # Plan für Meilenstein 7: Vektoren, Geraden und Ebenen, Matrizen
 
-Status: **freigegeben** (Nutzer, 12.11.2026: „Passt alles“). Schritt 1a fertig (12.11.2026).
+Status: **freigegeben** (Nutzer, 12.11.2026: „Passt alles“). Schritte 1a und 1b fertig (12.11.2026).
 
 Entwurf zum Ansehen und Anfassen (privat, nur für den Nutzer):
 https://claude.ai/artifact/WXe4sjavAGF64jyAWSa3hi. Er zeigt acht Bilder und Aufgaben im geplanten Stil. Die Seite ist
@@ -122,8 +122,12 @@ Request.
      auch in vier und fünf Dimensionen. 22 typische Fehler mit Text und Lernkarte, acht Lernkarten mit Bild. Bilder:
      Gitter mit Zahlen an den Achsen, Raum zum Drehen (Startblick so, dass kein Pfeil auf den Betrachter zeigt),
      „Abspielen“ (Pfeile hängen sich aneinander, Katheten und Quader erscheinen, Punkte tauchen auf).
-   - **1b (als Nächstes):** freier Modus mit Eingabe eines Vektors (je Eintrag ein Kästchen), Kennzeichnung falscher
-     Einträge.
+   - **1b (fertig, 12.11.2026):** freier Modus mit Eingabe in Kästchen: ein Vektor als Spalte in Klammern, ein Punkt
+     als Zeile $Q(\square \mid \square \mid \square)$, eine Länge als Zahl, zwei Lösungen in beliebiger Reihenfolge,
+     beim Parallelogramm der Stufe 5 Punkt und Länge. Falsche Einträge rot markiert, leere und nicht fertige gelb.
+     Typische Fehler wie im geführten Modus (aus den falschen Antworten des Schritts, der das Ergebnis liefert), eine
+     Lösung vergessen, gerundete Kommazahl. Fertig ist eine ganze Zahl, eine Kommazahl, ein gekürzter Bruch oder ein
+     Vielfaches einer vereinfachten Wurzel, auch mit der Wurzel im Nenner wie $\frac{3}{\sqrt{14}}$.
 2. **Skalarprodukt und Winkel:** Zieh-Aufgaben (senkrecht, spitz, stumpf, auch mit Parameter), Einheitsvektor und
    Vektor gegebener Länge (zwei Lösungen).
 3. **Projektion, Zerlegung und Kräfte:** Animation „Licht an“, typischer Fehler im Bild, schiefe Ebene.

@@ -1,10 +1,11 @@
 import type { FreeTask } from '../check/freeTask.ts'
 import type { GuidedTaskBase } from '../guided/types.ts'
 import { type Level, type TaskRef, blockSeed, randomSeed } from '../tasks/taskNumber.ts'
+import { prepareVectorFreeTask } from './vectorFree.ts'
 import { buildVectorTask } from './vectorTasks.ts'
 
 // Engine der Tätigkeit „Vektoren" für die Oberfläche (ui/courseEngines.ts): Aufgaben aus dem Baukasten (vectorTasks.ts),
-// Nummern mit Baustein („rechnen.1-4711"). Den freien Modus mit Eingabe eines Vektors bringt ein späterer Schritt.
+// Nummern mit Baustein („rechnen.1-4711"); freier Modus mit Eingabe je Eintrag (vectorFree.ts, Schritt 1b).
 
 export const VECTOR_BLOCK_IDS = ['rechnen'] as const
 
@@ -23,6 +24,4 @@ export function nextVectorSeed(_level: Level, parts?: ReadonlySet<string>): numb
 
 export const vectorExampleLatex = (ref: TaskRef): string => buildVectorTask(ref).functionLatex ?? ''
 
-export function prepareVectorFree(): FreeTask {
-  throw new Error('Vektoren haben noch keinen freien Modus')
-}
+export const prepareVectorFree = (ref: TaskRef): FreeTask => prepareVectorFreeTask(ref)

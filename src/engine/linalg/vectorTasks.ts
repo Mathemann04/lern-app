@@ -1327,7 +1327,9 @@ export function buildVectorTask(ref: TaskRef, kind?: VectorKind): VectorTask {
   const rng = createRng(`vektoren:${ref.level}:${ref.seed}`)
   const chosen = kind ?? rng.pick(KINDS_BY_LEVEL[ref.level])
   const built = BUILDERS[chosen](rng, ref.level)
-  return { ...built, ref, form: `${ref.level}:${built.form}` }
+  // Tipp im freien Modus: kurz der erste Schritt, ausführlich alle Schritte
+  const ruleHint = { short: built.steps[0].hint, detailed: built.steps.map((s) => s.hint).join(' ') }
+  return { ...built, ref, ruleHint, form: `${ref.level}:${built.form}` }
 }
 
 // Ergebnis in Worten für Tests (Zahlen der richtigen Antworten)
