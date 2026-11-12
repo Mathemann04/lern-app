@@ -16,7 +16,8 @@ den Nutzer zugeschnitten: Maschinenbau, 1. Semester, THU, „Mathematik MB1".
   [docs/MECHANIK.md](docs/MECHANIK.md)
 - Meilensteine und aktueller Stand: [docs/ROADMAP.md](docs/ROADMAP.md)
 - Laufender Plan: [docs/PLAN-M6.md](docs/PLAN-M6.md) (neue Struktur mit
-  Tätigkeiten und Bausteinen, freigegeben 12.11.2026, zehn Schritte und 4b); danach
+  Tätigkeiten und Bausteinen, freigegeben 12.11.2026, zehn Schritte, 4b und 4c), danach vorgezogen M7 (Vektoren und Matrizen), dann der Rest von M6;
+  danach
   M12 und der Rest von [docs/PLAN-M4.md](docs/PLAN-M4.md) (Chemie 1, Klausur-Sprint
   S1 bis S11 fertig, offen N2 bis N5), Reihenfolge in docs/ROADMAP.md unter
   „Vorgemerkt“; feste Regeln für alle Chemie-Inhalte:
@@ -110,7 +111,8 @@ Ausführliche Notizen je Bereich (wörtlich wie früher hier, jetzt ausgelagert)
   Gegenprobe, falsche Optionen nie gleichwertig zur Lösung.
 - **Engine-Regeln:** Definitionsbereich nach deutscher Schulkonvention
   (Wurzeln und gebrochene Exponenten nur für Zahlen ≥ 0, auch die dritte
-  Wurzel; variable Exponenten nur für Basis > 0). Vereinfachen darf den
+  Wurzel; variable Exponenten nur für Basis > 0; beschlossen am 12.11.2026: ungerade
+  Wurzeln künftig auch aus negativen Zahlen wie im Skript, Umsetzung in M6 Schritt 4c). Vereinfachen darf den
   Definitionsbereich vergrößern (x/x → 1), nie verkleinern und nie einen Wert
   ändern; z. B. (u^a)^k → u^(a·k) nur für ganzzahliges k. Die Zufallstests in
   `normalize.test.ts` und `finalForm.test.ts` prüfen das; nach Änderungen
