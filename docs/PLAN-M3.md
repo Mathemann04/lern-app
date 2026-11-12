@@ -438,6 +438,11 @@ Aufgabe: Löse $\int_a^x \frac{\mathrm{d}t}{t(t + b)} = y$ nach $x$ auf
 | Logarithmusgesetz | Summe der $\ln$ als $\ln$ der Summe (`eq-log-sum`, neu in 6a) | $\ln u + \ln v = \ln(u + v)$ |
 | Logarithmusgesetz | Differenz der $\ln$ als Quotient (`eq-log-quotient`) | $\ln u - \ln v = \frac{\ln u}{\ln v}$ |
 | Potenzgesetz | Summe in der Hochzahl als Summe (`eq-power-sum`, neu in 6a; ersetzt „Exponent nur auf einen Faktor", der in den Aufgaben von 6a nicht vorkommt) | $2^{x + 1} = 2^x + 2$ |
+| Basiswechsel (M6 4b-2) | malgenommen statt geteilt (`eq-log-base-flipped`) | $\log_4 u = 2\log_2 u$ |
+| Basiswechsel (M6 4b-2) | Bruch in den Logarithmus gezogen (`eq-log-base-quotient`) | $\frac{\ln u}{\ln 3} = \ln\frac{u}{3}$ |
+| Faktor als Hochzahl (M6 4b-2) | Faktor als Faktor hineingezogen (`eq-log-power-factor`) | $2\ln u = \ln(2u)$ |
+| Zahl als Logarithmus (M6 4b-2) | die Zahl selbst in den Logarithmus (`eq-log-number-plain`) | $\log_2 u + 3 = \log_2 u + \log_2 3$ |
+| Zahl als Logarithmus (M6 4b-2) | die Zahl in den Logarithmus daneben hineinaddiert (`eq-log-number-inside`) | $\log_2 u + 1 = \log_2(u + 1)$ |
 | Substitution | Potenz falsch übersetzt (`eq-substitute-power`, neu in 6c) | $u = e^x$: $e^{2x} = 2u$ (bei $u = \sqrt{x}$: $x = u$) |
 | Substitution | $e^{-x}$ als $-u$ statt $\frac{1}{u}$ (`eq-substitute-reciprocal`, neu in 6c) | $e^x - e^{-x} = y \Rightarrow u - (-u) = y$ |
 | $pq$-Formel | Vorzeichen von $p$ nicht gewechselt (`eq-pq-sign`, neu in 6c) | $u^2 - 2yu - 1 = 0 \Rightarrow u_{1,2} = -y \pm \sqrt{y^2 + 1}$ |

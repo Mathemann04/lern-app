@@ -1,4 +1,4 @@
-import { type Expr, IMAG, PI, add, cos, div, eq, exp, fn, ln, mul, neg, num, pow, sin, sqrt, sub, variable } from '../expr/types.ts'
+import { type Expr, IMAG, PI, add, cos, div, eq, exp, fn, ln, log, mul, neg, num, pow, sin, sqrt, sub, variable } from '../expr/types.ts'
 import type { Condition, RearrangeTask } from '../rearrange/task.ts'
 import { absOf, angleOf, argOf, derivativeOf, detOf, dotOf, integralOf, lengthOf, limitOf, odeOf, seriesOf, sumOf, theoremOf } from '../rearrange/tools/tool.ts'
 import type { Card } from './cards.ts'
@@ -17,6 +17,7 @@ export const REARRANGE_CARD_IDS = {
   root: 'rearrange-root',
   exp: 'rearrange-exp',
   laws: 'rearrange-laws',
+  logEquation: 'rearrange-log-equation',
   arc: 'rearrange-arc',
   trig: 'rearrange-trig',
   substitution: 'rearrange-substitution',
@@ -183,6 +184,29 @@ export const REARRANGE_CARD_LIST: readonly Card[] = [
       task(pow(num(3), sub(mul(num(2), x), num(1))), mul(a, pow(num(5), x))),
     ],
     errors: ['eq-log-product', 'eq-log-sum', 'eq-log-quotient', 'eq-power-sum', 'eq-log-base-forgotten'],
+  },
+  {
+    // M6 Schritt 4b-2
+    id: REARRANGE_CARD_IDS.logEquation,
+    topic: 'umstellen',
+    title: 'Logarithmen auf beiden Seiten',
+    level: 1,
+    rules: [],
+    formulas: [
+      '\\log_a u = \\log_a v \\;\\Rightarrow\\; u = v',
+      'c = \\log_a\\left(a^{c}\\right)',
+      'k \\log_a u = \\log_a\\left(u^{k}\\right)',
+      '\\log_b u = \\frac{\\log_a u}{\\log_a b}',
+    ],
+    memo: 'Bringe alles auf eine Basis, ziehe Faktoren als Hochzahl hinein, schreibe Zahlen als Logarithmus und fasse je Seite zu einem Logarithmus zusammen. Dann sind die Argumente gleich.',
+    note: 'Beim Zusammenfassen kann der Definitionsbereich größer werden: Die Lösung muss in jedem Logarithmus der Aufgabe ein positives Argument geben. Eine Zahl neben dem Logarithmus gehört nicht in ihn hinein: $\\log_2 u + 1 = \\log_2(2u)$, nicht $\\log_2(u + 1)$.',
+    when: 'Wenn die Variable in Logarithmen auf beiden Seiten steht oder Logarithmen verschiedener Basen vorkommen.',
+    examples: [
+      task(log(n(2), sub(x, a)), add(log(n(2), sub(b, x)), n(1)), 'x', [{ lhs: x, rel: '>', rhs: a }, { lhs: x, rel: '<', rhs: b }]),
+      task(mul(n(2), ln(x)), ln(add(mul(a, x), b))),
+      task(log(n(2), x), log(n(4), add(x, a))),
+    ],
+    errors: ['eq-log-number-inside', 'eq-log-number-plain', 'eq-log-power-factor', 'eq-log-base-flipped', 'eq-log-base-quotient'],
   },
   {
     id: REARRANGE_CARD_IDS.arc,

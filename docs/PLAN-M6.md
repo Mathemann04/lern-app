@@ -264,7 +264,8 @@ mit eigenen Zahlen und Buchstaben:
 - In drei Teilen zum einzelnen Ausprobieren: **4b-1** Formeln aus Technik und
   Physik (fertig 12.11.2026: 27 Formeln, 48 Aufgaben, Nummern `formel.2-1`, Größen
   mit Index und griechische Buchstaben auch in der Eingabe), **4b-2** Logarithmen
-  auf beiden Seiten, **4b-3** Gleichungen mit Zahlen.
+  auf beiden Seiten (fertig 12.11.2026: neun Arten in Stufe 1 bis 4, Nummern `logeq.2-4711`, vier neue Schritte,
+  Lernkarte „Logarithmen auf beiden Seiten“), **4b-3** Gleichungen mit Zahlen.
 
 #### Schritt 5: Umstellen, leichte Aufgaben aus späteren Kapiteln (in Teilen)
 

@@ -9,6 +9,7 @@ import { absOf, angleOf, argOf, derivativeOf, detOf, dotOf, integralOf, limitOf,
 import { parseLatex } from '../parse/latex.ts'
 import { REARRANGE_ERROR_RULES } from '../rearrange/errorRules.ts'
 import { FORMULA_TASKS } from '../tasks/formulas.ts'
+import { hasLogEquations } from '../tasks/logEquationKinds.ts'
 import { familyBlocks } from '../tasks/rearrangeFamilies.ts'
 import { type Level, blockSeed, formatTaskNumber } from '../tasks/taskNumber.ts'
 import { planRearrange, planRearrangeTask } from './rearrangePlan.ts'
@@ -93,7 +94,7 @@ describe('Geführt umstellen: Zufallsaufgaben der Stufen 1 bis 5', () => {
   for (const level of [1, 2, 3, 4, 5] as const) {
     it(`Stufe ${level}: jede Aufgabe lässt sich sauber durchspielen`, () => {
       // dazu je Baustein mit eigenen Aufgaben (M6 Schritt 4) und alle Formeln der Stufe (4b-1) zehn Nummern wie „exp.1-4711"
-      const seeds = [...Array.from({ length: 200 }, (_, i) => i + 1), ...familyBlocks(level).flatMap((block) => Array.from({ length: 10 }, (_, i) => blockSeed(block, i + 1))), ...FORMULA_TASKS.flatMap((task, i) => (task.level === level ? [blockSeed('formel', i + 1)] : []))]
+      const seeds = [...Array.from({ length: 200 }, (_, i) => i + 1), ...familyBlocks(level).flatMap((block) => Array.from({ length: 10 }, (_, i) => blockSeed(block, i + 1))), ...FORMULA_TASKS.flatMap((task, i) => (task.level === level ? [blockSeed('formel', i + 1)] : [])), ...(hasLogEquations(level) ? Array.from({ length: 8 }, (_, i) => blockSeed('logeq', i + 1)) : [])]
       for (const seed of seeds) {
         const task = planRearrangeTask({ level, seed })
         const label = `${formatTaskNumber({ level, seed })}: ${task.functionLatex}`

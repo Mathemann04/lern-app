@@ -1,7 +1,8 @@
 import { planRearrangeTask } from '../guided/rearrangePlan.ts'
 import type { Rng } from '../random/rng.ts'
 import { REARRANGE_TEMPLATES, likelyRearrangeTemplate } from './rearrangeTerms.ts'
-import { type Level, MAX_SEED, type TaskRef } from './taskNumber.ts'
+import { hasLogEquations } from './logEquationKinds.ts'
+import { type Level, MAX_SEED, type TaskRef, blockSeed } from './taskNumber.ts'
 
 // Gezieltes Üben beim Umstellen (M3, Schritt 9): eine Aufgabe, in der ein bestimmter typischer Fehler im
 // geführten Modus als Antwort erscheint (der Schrittplaner zeigt ihn mit focus sicher, wo er passieren kann).
@@ -17,7 +18,14 @@ const DRAWS_PER_TRY = 400
 
 const shows = (ref: TaskRef, errorId: string) => planRearrangeTask(ref, errorId).steps.some((s) => s.choices.some((c) => c.errorRuleId === errorId))
 
+// Fehler, die nur bei Logarithmen auf beiden Seiten vorkommen (M6 Schritt 4b-2): nur unter Nummern wie „logeq.2-4711“
+export const LOG_EQUATION_ERRORS: ReadonlySet<string> = new Set(['eq-log-base-flipped', 'eq-log-base-quotient', 'eq-log-power-factor', 'eq-log-number-plain', 'eq-log-number-inside'])
+
 export function findRearrangeTaskWithError(errorId: string, levels: readonly Level[], rng: Rng): TaskRef | null {
+  if (LOG_EQUATION_ERRORS.has(errorId)) {
+    const logLevels = levels.filter(hasLogEquations)
+    return search(logLevels.map((level) => () => ({ level, seed: blockSeed('logeq', rng.int(1, MAX_SEED)) })), errorId)
+  }
   const homes = REARRANGE_TEMPLATES.filter((t) => t.focus?.includes(errorId))
   // mit eigener Vorlage nur in deren Stufen, sonst in allen genannten
   const searched = homes.length > 0 ? levels.filter((level) => homes.some((h) => h.level === level)) : levels
@@ -31,6 +39,10 @@ export function findRearrangeTaskWithError(errorId: string, levels: readonly Lev
       return { level, seed: rng.int(1, MAX_SEED) }
     }
   })
+  return search(searches, errorId)
+}
+
+function search(searches: readonly (() => TaskRef)[], errorId: string): TaskRef | null {
   for (let done = 0; done < TRIES_PER_LEVEL; done += TRIES_PER_ROUND) {
     for (const nextRef of searches) {
       for (let i = 0; i < TRIES_PER_ROUND; i++) {

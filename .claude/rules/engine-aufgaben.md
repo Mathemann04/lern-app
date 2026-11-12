@@ -162,4 +162,12 @@ Teil der Mathe-Engine `src/engine/` (reines TypeScript, ohne React).
     Baustein). Ziehen: `formulaPool`, `FORMULA_SHARE` (20 %) in `rearrangePick.ts`; spielbare Mengen auch aus den Formeln
     (`REARRANGE_PLAYABLE_COMBOS`). Test `formulaTasks.test.ts` rechnet Stufe und Bausteine nach, prüft jedes Zeichen auf
     eine Erklärung, Lösung durch Einsetzen, geführt und frei
-
+  - Logarithmen auf beiden Seiten (M6 Schritt 4b-2): `tasks/logEquationKinds.ts` (reine Daten: `LOG_EQUATION_KINDS` mit
+    Stufe 1 bis 4, Bausteinen und Anteil; `logEquationKind(level, s)` wählt die Art je Nummer vorab mit eigenem Zufall;
+    Arten nur hinten anhängen, Anteile nicht ändern), `tasks/logEquationTasks.ts` (Baukasten je Art: Argumente aus `linear`,
+    Basen e, 2, 3, 5, 10 oder ein Buchstabe mit Bedingung größer 1, Zahl oder Logarithmus ohne $x$ dazu, Basis hoch Zahl
+    höchstens 100). Nummern `logeq.2-4711` (Code `logeq` in `BLOCK_CODES`, kein Baustein). `rearrangeTerms.ts`:
+    `generateLogEquationTask` mit Filter `isGoodLogEquation` (Bausteine genau die der Art, Weg mit `logPath`, sonst wie bei
+    einem Baustein, Gegenprobe `robust`). Ziehen: `logEquationPool`, `LOG_EQUATION_SHARE` (25 %) in `rearrangePick.ts`;
+    spielbare Mengen auch aus den Arten. Test `logEquationTasks.test.ts` (Art und Bausteine, Gegenprobe, geführt und frei,
+    Abwechslung je Stufe, Ziehen)

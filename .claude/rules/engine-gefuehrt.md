@@ -73,5 +73,6 @@ Teil der Mathe-Engine `src/engine/` (reines TypeScript, ohne React).
     Substituieren sprechen Fragen von $u$ (`step.unknown`);
     ist √x oder ein Baustein wie $e^x$ die Unbekannte, sprechen
     Fragen und Antworten davon, `unknownOf`; Bedingung des Ergebnisses wie „Gilt für
-    $a \neq c$."). Gemeinsame Typen in `guided/types.ts`
+    $a \neq c$."; Logarithmen auf beiden Seiten (M6 4b-2): Weichen mit eigener Frage und Irrwegen für Basiswechsel,
+    Faktor als Hochzahl, Zahl als Logarithmus und Entlogarithmieren, Lernkarte `rearrange-log-equation`). Gemeinsame Typen in `guided/types.ts`
   - `errorCatalog.ts`: typische Fehler aller Themen mit Namen, je Thema

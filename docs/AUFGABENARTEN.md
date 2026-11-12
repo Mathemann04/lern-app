@@ -245,7 +245,10 @@ Grundlage: Skript-Kapitel 6 (und 1.8 für Gauß), Blätter 4 und 12, Übung 6, j
   umstellen. Die eigene Sammlung steht in `src/engine/tasks/formulas.ts`, darunter die
   Schwingungsdauer eines Pendels und der Plattenkondensator. Zeichen wie $U_0$ und
   $\varepsilon_r$ gehen auch beim Eintippen.
-- Alles Übrige ist in docs/PLAN-M6.md (4b-2, 4b-3, 5d, 6, 7) und docs/ROADMAP.md (M7, M9)
+- M6 Schritt 4b-2 (12.11.2026): Logarithmen auf beiden Seiten mit Zahl und Faktor, verschiedene Basen über den
+  Basiswechsel (Basen wie 2 und 4 auf die kleinere, sonst auf $\ln$), danach linear oder quadratisch; mit Buchstaben
+  (Gleichungen mit Zahlen kommen in 4b-3).
+- Alles Übrige ist in docs/PLAN-M6.md (4b-3, 5d, 6, 7) und docs/ROADMAP.md (M7, M9)
   eingeplant. Neu nach der Sichtung (12.11.2026):
   - Exponentialgleichungen und Umkehrfunktionen für 4b
   - „Funktion untersuchen“ (gebrochen-rational und Kurvendiskussion) als eigene Tätigkeit in M9

@@ -70,6 +70,11 @@ export type StepKind =
   | 'log'
   | 'logCombine'
   | 'logLaw'
+  // M6 Schritt 4b-2: Logarithmen auf beiden Seiten
+  | 'logBase'
+  | 'logPower'
+  | 'logNumber'
+  | 'unlog'
   | 'powerLaw'
   | 'arc'
   | 'trig'
@@ -119,6 +124,10 @@ export const STEP_NAMES: Record<StepKind, string> = {
   log: 'Logarithmieren',
   logCombine: 'Logarithmen zusammenfassen',
   logLaw: 'Logarithmusgesetze anwenden',
+  logBase: 'Basiswechsel',
+  logPower: 'Faktor als Hochzahl',
+  logNumber: 'Zahl als Logarithmus schreiben',
+  unlog: 'Entlogarithmieren',
   powerLaw: 'Potenzgesetz anwenden',
   arc: 'Umkehrfunktion auf beiden Seiten',
   trig: 'Funktion auf beiden Seiten',
@@ -203,6 +212,15 @@ export function stepLabel(step: RearrangeStep, taskTarget: string): string {
       return `Die Logarithmen zu einem $${step.operand && !isE(step.operand) ? `\\log_{${operand}}` : '\\ln'}$ zusammenfassen`
     case 'logLaw':
       return 'Logarithmusgesetze anwenden'
+    // M6 Schritt 4b-2, ohne das Ergebnis zu verraten
+    case 'logBase':
+      return `Basiswechsel: alle Logarithmen zur Basis $${step.operand && !isE(step.operand) ? operand : 'e'}$`
+    case 'logPower':
+      return 'Faktor vor dem Logarithmus als Hochzahl hineinziehen'
+    case 'logNumber':
+      return `Zahlen als $${step.operand && !isE(step.operand) ? `\\log_{${operand}}` : '\\ln'}$ schreiben`
+    case 'unlog':
+      return 'Entlogarithmieren: die Argumente gleichsetzen'
     case 'powerLaw':
       return 'Potenzgesetz $a^{m + n} = a^m \\cdot a^n$ anwenden'
     case 'arc':
@@ -283,6 +301,8 @@ export type RearrangeSolution = {
   readonly substitution?: Substitution
   // mit Wegen, die die Engine erst seit Teil 7b geht (siehe novelPaths)
   readonly novel?: true
+  // mit Logarithmen auf beiden Seiten oder verschiedenen Basen (M6 Schritt 4b-2, siehe logPaths)
+  readonly logPath?: true
 }
 
 // Was das Lösen über die Aufgabe wissen muss: Bedingungen (welche Lösung der pq-Formel passt) und,
@@ -1496,6 +1516,255 @@ function logCombineStep(e: Equation, t: string): Draft | null {
   return null
 }
 
+// --- Logarithmen auf beiden Seiten (M6 Schritt 4b-2) ---
+//
+// Steht die Variable nur in Logarithmen, und zwar in verschiedenen Logarithmen auf beiden Seiten
+// (\log_2(x - a) = \log_2(b - x) + 1, 2\ln x = \ln(ax + b)), geht es wie im Skript: verschiedene Basen
+// zuerst auf eine bringen (Basiswechsel), Brüche wegmultiplizieren, Faktoren als Hochzahl hineinziehen,
+// Zahlen als Logarithmus derselben Basis schreiben, je Seite zusammenfassen (logCombineStep),
+// entlogarithmieren. Danach ist die Gleichung linear oder quadratisch. Zusammenfassen und Faktoren
+// hineinziehen vergrößern den Definitionsbereich; die Bedingungen der Aufgabe sorgen für die passende
+// Lösung, bei der pq-Formel die Probe mit der Gleichung vom Anfang (chooseRoot).
+// Verschiedene Basen auf einer Seite mit demselben Argument (\ln(x + a) + \log_3(x + a) = b) gehen nach
+// dem Basiswechsel über den Baustein \ln(x + a) weiter.
+
+// Summand als Faktor mal Logarithmus: \log_2 u, -2\ln u, \frac{\log_2 u}{2}; null sonst
+export type LogTerm = { readonly coef: Rational; readonly base: Expr; readonly arg: Expr }
+
+function logTerm(term: Expr, t: string): LogTerm | null {
+  let x = term
+  let coef = rat(1)
+  if (x.kind === 'neg') {
+    coef = ratNeg(coef)
+    x = x.arg
+  }
+  if (x.kind === 'div' && x.den.kind === 'num' && isInteger(x.den.value) && x.den.value.n > 0n) {
+    coef = ratDiv(coef, x.den.value)
+    x = x.num
+  }
+  if (x.kind === 'mul' && x.factors.length === 2 && x.factors[0].kind === 'num') {
+    coef = ratMul(coef, x.factors[0].value)
+    x = x.factors[1]
+  }
+  const p = logParts(x, t, true)
+  return p && !contains(p.base, t) ? { coef, base: p.base, arg: p.arg } : null
+}
+
+const logExpr = (base: Expr, arg: Expr): Expr => (isE(base) ? fn('ln', arg) : log(base, arg))
+
+// Faktor mal Logarithmus als Summand: 2\log_2 u, -\ln u, \frac{\log_2 u}{2}
+export function logTermExpr(coef: Rational, base: Expr, arg: Expr): Expr {
+  const L = logExpr(base, arg)
+  const a = ratAbs(coef)
+  const top = a.n === 1n ? L : mul(num(a.n), L)
+  const body = a.d === 1n ? top : div(top, num(a.d))
+  return ratSign(coef) < 0 ? neg(body) : body
+}
+
+// Ganzzahlige Basis als Potenz der kleinsten möglichen Basis: 8 = 2^3, 9 = 3^2, 6 = 6^1
+function smallestBase(b: Expr): { g: bigint; m: bigint } | null {
+  if (b.kind !== 'num' || !isInteger(b.value) || b.value.n < 2n) return null
+  const n = b.value.n
+  for (let g = 2n; g <= n; g++) {
+    let p = g
+    let m = 1n
+    while (p < n) {
+      p *= g
+      m++
+    }
+    if (p === n) return { g, m }
+  }
+  return null
+}
+
+// Zahl ohne die Variable als Logarithmus der Basis: 1 = \log_2 2, 3 = \log_2 8, 2 = \log_a\left(a^2\right),
+// c = \log_2\left(2^c\right), 1 = \ln e; null, wenn das nicht glatt geht
+export function numberAsLog(c: Expr, base: Expr): Expr | null {
+  const value = c.kind === 'num' ? c.value : null
+  if (value && !isInteger(value)) return null
+  if (value && base.kind === 'num' && isInteger(base.value)) {
+    const k = value.n
+    const power = base.value.n ** (k < 0n ? -k : k)
+    if (power > 10000n) return logExpr(base, pow(base, c))
+    return logExpr(base, k < 0n ? num(1n, power) : num(power))
+  }
+  if (value && isOne(value)) return logExpr(base, base)
+  if (!value && !(c.kind === 'var' || (c.kind === 'mul' && c.factors.every((f) => f.kind === 'var' || f.kind === 'num')))) return null
+  return logExpr(base, pow(base, c))
+}
+
+// Logarithmen eines Summanden ohne die Variable, die schon zur Basis passen (\log_2 3): bleiben stehen
+const isLogOf = (term: Expr, base: Expr, t: string) => {
+  const lt = logTerm(term, t)
+  return lt !== null && key(lt.base) === key(base) && isInteger(lt.coef)
+}
+
+// Wege mit Logarithmen auf beiden Seiten oder verschiedenen Basen (M6 Schritt 4b-2): Die Engine ging sie vorher nicht;
+// ältere Vorlagen nehmen solche Aufgaben nicht, damit ihre Nummern dieselbe Aufgabe behalten (solution.logPath)
+let logPaths = 0
+
+function logEquationStep(e: Equation, t: string): Draft | null {
+  const draft = logEquationDraft(e, t)
+  if (draft) logPaths++
+  return draft
+}
+
+function logEquationDraft(e: Equation, t: string): Draft | null {
+  const sides = [termsOf(e.lhs), termsOf(e.rhs)] as const
+  const parsed = sides.map((terms) => terms.map((term) => logTerm(term, t)))
+  // die Variable nur in Logarithmen, die selbst Summanden sind
+  for (let i = 0; i < 2; i++) {
+    for (let j = 0; j < sides[i].length; j++) {
+      if (!contains(sides[i][j], t)) continue
+      const lt = parsed[i][j]
+      if (!lt || !contains(lt.arg, t)) return null
+      // nicht nach dem Logarithmieren (\ln\left(3^{2x - 1}\right) = \ln\left(a \cdot 5^x\right)) und nicht \ln vom \ln
+      if (subterms(lt.arg).some((s) => isTPower(s, t) || logParts(s, t) !== null)) return null
+    }
+  }
+  const tLogs = parsed.flatMap((ps, i) => ps.filter((p, j): p is LogTerm => p !== null && contains(sides[i][j], t)))
+  if (tLogs.length < 2) return null
+  const bases = [...new Map(tLogs.map((p) => [key(p.base), p.base])).values()]
+  const both = sides.every((terms) => terms.some((term) => contains(term, t)))
+  if (bases.length > 1) return baseChangeDraft(bases, sides, parsed)
+  // ein einziger Logarithmus (auch auf beiden Seiten): als Baustein (blockOf)
+  if (new Set(tLogs.map((p) => key(p.arg))).size < 2 || !both) return null
+  const base = bases[0]
+  // Brüche aus dem Basiswechsel: beide Seiten mit dem Hauptnenner malnehmen
+  const dens = parsed.flat().filter((p): p is LogTerm => p !== null && key(p.base) === key(base)).map((p) => p.coef.d)
+  const lcm = dens.reduce((a, d) => (a * d) / gcd(a, d), 1n)
+  if (lcm > 1n) {
+    const times = (terms: readonly Expr[], ps: readonly (LogTerm | null)[]) =>
+      sumOf(terms.map((term, j) => {
+        const p = ps[j]
+        return p && key(p.base) === key(base) ? logTermExpr(ratMul(p.coef, rat(lcm)), p.base, p.arg) : timesFactor(term, num(lcm))
+      }))
+    return { kind: 'multiply', operand: num(lcm), after: eq(times(sides[0], parsed[0]), times(sides[1], parsed[1])) }
+  }
+  // Faktor vor einem Logarithmus mit der Variable als Hochzahl hineinziehen: 2\log_2 x = \log_2\left(x^2\right)
+  if (tLogs.some((p) => !ratEq(ratAbs(p.coef), rat(1)))) {
+    const inside = (terms: readonly Expr[], ps: readonly (LogTerm | null)[]) =>
+      sumOf(terms.map((term, j) => {
+        const p = ps[j]
+        if (!p || !contains(term, t) || ratEq(ratAbs(p.coef), rat(1))) return term
+        return logTermExpr(rat(ratSign(p.coef)), p.base, powerOfArg(p.arg, ratAbs(p.coef).n))
+      }))
+    return { kind: 'logPower', operand: base, after: eq(inside(sides[0], parsed[0]), inside(sides[1], parsed[1])) }
+  }
+  // Zahlen als Logarithmus derselben Basis schreiben: 1 = \log_2 2
+  const constants = sides.flatMap((terms) => terms.filter((term) => !contains(term, t) && !isLogOf(term, base, t)))
+  if (constants.length > 0) {
+    // die neuen Logarithmen vorn, damit beim Zusammenfassen die Zahl vorn steht: \log_2 8 + \log_2 x = \log_2(8x)
+    const asLogs = (terms: readonly Expr[]): Expr | null => {
+      const front: Expr[] = []
+      const rest: Expr[] = []
+      for (const term of terms) {
+        if (contains(term, t) || isLogOf(term, base, t)) {
+          rest.push(term)
+          continue
+        }
+        const { minus, size } = unsigned(term)
+        const l = numberAsLog(size, base)
+        if (!l) return null
+        front.push(minus ? neg(l) : l)
+      }
+      // ein Minus nicht vorn: \log_2 x - \log_2 2 statt -\log_2 2 + \log_2 x
+      return sumOf(front.some((x) => x.kind === 'neg') ? [...rest, ...front] : [...front, ...rest])
+    }
+    const l = asLogs(sides[0])
+    const r = asLogs(sides[1])
+    return l && r ? { kind: 'logNumber', operand: base, after: eq(l, r) } : null
+  }
+  // je Seite ein Logarithmus derselben Basis: entlogarithmieren (mehrere fasst vorher logCombineStep zusammen)
+  if (sides.every((terms) => terms.length === 1)) {
+    const [l, r] = [parsed[0][0], parsed[1][0]]
+    if (l && r && isOne(l.coef) && isOne(r.coef)) return { kind: 'unlog', operand: base, after: eq(l.arg, r.arg) }
+  }
+  return null
+}
+
+// Zahl ohne Vorzeichen: -c und die negative Zahl -2 (nach dem Malnehmen) als Minus vor c bzw. 2
+export function unsigned(term: Expr): { minus: boolean; size: Expr } {
+  if (term.kind === 'neg') return { minus: true, size: term.arg }
+  if (term.kind === 'num' && ratSign(term.value) < 0) return { minus: true, size: num(ratNeg(term.value)) }
+  return { minus: false, size: term }
+}
+
+// Argument hoch k: x^2, ein Produkt wie 4x ausgerechnet (16x^2), eine Summe in Klammern ((x + a)^2)
+export function powerOfArg(arg: Expr, k: bigint): Expr {
+  const atoms = anyAtoms()
+  const p = toPoly(arg, atoms)
+  if (p && p.length === 1 && !(arg.kind === 'var')) return polyToExpr(polyPow(p, Number(k)), atoms)
+  return pow(arg, num(k))
+}
+
+const gcd = (a: bigint, b: bigint): bigint => (b === 0n ? a : gcd(b, a % b))
+
+// Basiswechsel: alle Logarithmen mit der Variable auf eine Basis. Sind die Basen Potenzen derselben Zahl (2, 4, 8), auf
+// diese: \log_4 u = \frac{\log_2 u}{2}; sonst auf e: \log_3 u = \frac{\ln u}{\ln 3}
+// wrong: typische Fehler, falsch herum (\log_4 u = 2\log_2 u, \log_3 u = \ln 3 \cdot \ln u) bzw. als Logarithmus des
+// Quotienten (\log_4 u = \log_2\frac{u}{4}, \log_3 u = \ln\frac{u}{3})
+type BaseMistake = 'flipped' | 'quotient'
+
+function baseChangeDraft(
+  bases: readonly Expr[],
+  sides: readonly (readonly Expr[])[],
+  parsed: readonly (readonly (LogTerm | null)[])[],
+  wrong: BaseMistake | null = null,
+): Draft | null {
+  const powers = bases.map(smallestBase)
+  const common = powers.every((p) => p !== null && p.g === powers[0]!.g) ? num(powers[0]!.g) : E
+  const rewrite = (terms: readonly Expr[], ps: readonly (LogTerm | null)[]): Expr | null => {
+    const out: Expr[] = []
+    for (let j = 0; j < terms.length; j++) {
+      const p = ps[j]
+      // auch Logarithmen ohne die Variable (\log_4 b), wenn sich ihre Basis umrechnen lässt
+      const convertible = p !== null && (common === E || smallestBase(p.base)?.g === (common as Extract<Expr, { kind: 'num' }>).value.n)
+      if (!p || !convertible || key(p.base) === key(common)) {
+        out.push(terms[j])
+        continue
+      }
+      if (common !== E) {
+        const m = smallestBase(p.base)!.m
+        if (wrong === 'quotient') out.push(logTermExpr(p.coef, common, div(p.arg, p.base)))
+        else out.push(logTermExpr(wrong === 'flipped' ? ratMul(p.coef, rat(m)) : ratDiv(p.coef, rat(m)), common, p.arg))
+        continue
+      }
+      if (!isInteger(p.coef)) return null
+      if (wrong === 'quotient') {
+        out.push(logTermExpr(p.coef, E, div(p.arg, p.base)))
+        continue
+      }
+      const k = p.coef.n < 0n ? -p.coef.n : p.coef.n
+      const top = k === 1n ? fn('ln', p.arg) : mul(num(k), fn('ln', p.arg))
+      const body = wrong === 'flipped' ? mul(fn('ln', p.base), fn('ln', p.arg)) : div(top, fn('ln', p.base))
+      const scaled = wrong === 'flipped' && k !== 1n ? mul(num(k), body) : body
+      out.push(p.coef.n < 0n ? neg(scaled) : scaled)
+    }
+    return sumOf(out)
+  }
+  const l = rewrite(sides[0], parsed[0])
+  const r = rewrite(sides[1], parsed[1])
+  return l && r ? { kind: 'logBase', operand: common, after: eq(l, r) } : null
+}
+
+// Typische Fehler beim Basiswechsel (Gleichung danach; null, wenn es nicht passt)
+export function logBaseWrong(e: Equation, t: string, wrong: BaseMistake): Equation | null {
+  const sides = [termsOf(e.lhs), termsOf(e.rhs)] as const
+  const parsed = sides.map((terms) => terms.map((term) => logTerm(term, t)))
+  const tLogs = parsed.flat().filter((p): p is LogTerm => p !== null && contains(p.arg, t))
+  const bases = [...new Map(tLogs.map((p) => [key(p.base), p.base])).values()]
+  if (bases.length < 2) return null
+  return baseChangeDraft(bases, sides, parsed, wrong)?.after ?? null
+}
+
+// Summanden einer Seite als Logarithmen (für die typischen Fehler): null, wenn ein Summand mit der Variable keiner ist
+export type SideLogTerm = { readonly term: Expr; readonly log: LogTerm | null }
+export function sideLogTerms(side: Expr, t: string): SideLogTerm[] | null {
+  const out = termsOf(side).map((term) => ({ term, log: logTerm(term, t) }))
+  return out.every((x) => !contains(x.term, t) || (x.log && contains(x.log.arg, t))) ? out : null
+}
+
 // Potenzen derselben Basis mit verschiedenen Hochzahlen auf eine gemeinsame Potenz bringen
 // (a^{m + n} = a^m \cdot a^n): a \cdot 2^{x + 1} - b \cdot 2^x = c → 2a \cdot 2^x - b \cdot 2^x = c
 function powerLawStep(e: Equation, t: string, asSum = false): Draft | null {
@@ -2252,6 +2521,9 @@ function nextStep(e: Equation, t: string, ctx: Context): Draft | null {
     const substituted = substituteDraft(e, t, null)
     if (substituted) return substituted
   }
+  // Logarithmen auf beiden Seiten, verschiedene Basen (M6 Schritt 4b-2)
+  const logEquation = logEquationStep(e, t)
+  if (logEquation) return logEquation
   const combinedLogs = logCombineStep(e, t)
   if (combinedLogs) return combinedLogs
   const law = logLawStep(e, t)
@@ -2316,6 +2588,7 @@ export const solveTask = (task: { readonly equation: Equation; readonly target: 
 // Gleichung in u weiter (beim Weiterrechnen mit einem typischen Fehler).
 export function solveEquation(equation: Equation, target: string, options: SolveOptions = {}): RearrangeSolution | null {
   const startPaths = novelPaths
+  const startLogPaths = logPaths
   const steps: RearrangeStep[] = []
   let current = equation
   let sub = options.substitution
@@ -2344,6 +2617,7 @@ export function solveEquation(equation: Equation, target: string, options: Solve
           requires: steps.flatMap((x) => (x.requires ? [x.requires] : [])),
           ...(sub ? { substitution: sub } : {}),
           ...(novelPaths > startPaths ? { novel: true as const } : {}),
+          ...(logPaths > startLogPaths ? { logPath: true as const } : {}),
         }
       }
       const unknown = inU && draft.kind !== 'resubstitute' ? { unknown: sub!.name } : {}

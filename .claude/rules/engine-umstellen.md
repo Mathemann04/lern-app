@@ -141,8 +141,18 @@ Teil der Mathe-Engine `src/engine/` (reines TypeScript, ohne React).
     Rechenweg oder eine Vorlage, ändern sich die Bausteine einzelner Nummern; dann
     `node scripts/rearrange-index.ts` laufen lassen (`rearrangeIndex.test.ts` meldet es sonst). Seit Schritt 4
     gehört ein Quadrat wie $x^2$, das die pq-Formel löst, zu „Quadratische Gleichungen“, nicht zu „Quadrate und
-    Potenzen“. Die Engine löst noch nicht: Logarithmen auf beiden Seiten mit einer Zahl dazu
-    ($\log_2(x - a) = \log_2(b - x) + 1$), verschiedene Basen ($\ln$ und $\log_3$ desselben Terms), Gleichungen nur
+    Potenzen“. Die Engine löst noch nicht: Gleichungen nur
     mit Zahlen wie $3\sqrt{x} + 4 = x$, $a x^n = y$ mit Buchstaben als Hochzahl, $\sqrt[3]{\ldots}$ in der Aufgabe,
     eine Wurzel in einer Wurzel als Baustein auf beiden Seiten (geplant in M6 4b, docs/AUFGABENARTEN.md)
-
+  - Logarithmen auf beiden Seiten (M6 Schritt 4b-2, `logEquationStep` in `isolate.ts`, vor `logCombineStep`): nur wenn
+    die Variable allein in Logarithmen steht, die Summanden sind (Faktor davor erlaubt, `logTerm`), nicht nach dem
+    Logarithmieren (Argument mit $x$ in einer Hochzahl) und nicht bei einem einzigen Logarithmus (dann Baustein). Schritte:
+    verschiedene Basen `logBase` (Potenzen derselben Zahl auf die kleinere, $\log_4 u = \frac{\log_2 u}{2}$, sonst auf $e$,
+    $\log_3 u = \frac{\ln u}{\ln 3}$; auch Logarithmen ohne $x$), dann bei verschiedenen Argumenten auf beiden Seiten:
+    Brüche wegmultiplizieren (`multiply` ohne Seite), Faktor als Hochzahl `logPower` (Produkt ausgerechnet, $(3x)^2 = 9x^2$,
+    `powerOfArg`), Zahlen als Logarithmus `logNumber` (`numberAsLog`: $3 = \log_2 8$ bis 10000, sonst $\log_2\left(2^c\right)$,
+    $1 = \ln e$, $c = \ln\left(e^c\right)$; vorn, mit Minus hinten als $-\log_3 9$, `unsigned`), zusammenfassen
+    (`logCombineStep`), `unlog` (Argumente gleichsetzen). Solche Wege zählt `logPaths`, die Lösung trägt `logPath`;
+    ältere Vorlagen und Aufgaben einzelner Bausteine nehmen sie nicht. Typische Fehler `eq-log-base-flipped`,
+    `eq-log-base-quotient` (`logBaseWrong`), `eq-log-power-factor`, `eq-log-number-plain`, `eq-log-number-inside`
+    (`logEquationMistakes`); beim Zusammenfassen nach `logNumber` auch `eq-log-sum` mit der Zahl

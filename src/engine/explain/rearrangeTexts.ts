@@ -136,6 +136,31 @@ export const REARRANGE_ERROR_TEXTS: Readonly<Record<string, Explanation>> = {
     detailed: 'Eine Differenz von Logarithmen wird zum Logarithmus eines Quotienten: $\\ln u - \\ln v = \\ln\\frac{u}{v}$. Der Bruch steht im $\\ln$, nicht zwischen zwei Logarithmen.',
     short: '$\\ln u - \\ln v = \\ln\\frac{u}{v}$.',
   },
+  // Logarithmen auf beiden Seiten (M6 Schritt 4b-2)
+  'eq-log-base-flipped': {
+    detailed:
+      'Beim Basiswechsel teilst du durch den Logarithmus der alten Basis: $\\log_b u = \\frac{\\log_a u}{\\log_a b}$, zum Beispiel $\\log_4 u = \\frac{\\log_2 u}{2}$, weil $\\log_2 4 = 2$. Malnehmen ist falsch herum: Zur größeren Basis gehört der kleinere Logarithmus.',
+    short: '$\\log_b u = \\frac{\\log_a u}{\\log_a b}$: teilen, nicht malnehmen.',
+  },
+  'eq-log-base-quotient': {
+    detailed:
+      'Beim Basiswechsel steht ein Bruch aus zwei Logarithmen: $\\log_b u = \\frac{\\ln u}{\\ln b}$. Er ist nicht der Logarithmus eines Bruchs: $\\frac{\\ln u}{\\ln b} \\neq \\ln\\frac{u}{b}$. Das Gesetz $\\ln u - \\ln v = \\ln\\frac{u}{v}$ gilt für eine Differenz, nicht für einen Quotienten.',
+    short: '$\\frac{\\ln u}{\\ln b} \\neq \\ln\\frac{u}{b}$.',
+  },
+  'eq-log-power-factor': {
+    detailed: 'Ein Faktor vor dem Logarithmus wird beim Hineinziehen zur Hochzahl: $k\\ln u = \\ln\\left(u^k\\right)$. Als Faktor im Logarithmus stimmt es nicht: $\\ln(ku) = \\ln k + \\ln u$.',
+    short: '$k\\ln u = \\ln\\left(u^k\\right)$, nicht $\\ln(ku)$.',
+  },
+  'eq-log-number-plain': {
+    detailed:
+      'Eine Zahl $c$ als Logarithmus zur Basis $a$ ist $\\log_a\\left(a^c\\right)$, denn der Logarithmus fragt nach der Hochzahl: $3 = \\log_2 8$, weil $2^3 = 8$, und $1 = \\ln e$. Die Zahl selbst in den Logarithmus zu schreiben ändert den Wert: $\\log_2 3$ ist etwa $1{,}6$, nicht $3$.',
+    short: '$c = \\log_a\\left(a^c\\right)$, zum Beispiel $3 = \\log_2 8$.',
+  },
+  'eq-log-number-inside': {
+    detailed:
+      'Eine Zahl neben dem Logarithmus darfst du nicht einfach in ihn hineinaddieren: $\\log_2 u + 1 \\neq \\log_2(u + 1)$. Schreibe sie zuerst als Logarithmus derselben Basis ($1 = \\log_2 2$) und fasse dann mit $\\log_2 u + \\log_2 v = \\log_2(uv)$ zusammen.',
+    short: 'Erst $1 = \\log_2 2$ schreiben, dann zu $\\log_2(2u)$ zusammenfassen.',
+  },
   'eq-power-sum': {
     detailed: 'Eine Summe in der Hochzahl wird zu einem Produkt: $a^{x + 1} = a^x \\cdot a^1 = a \\cdot a^x$. Als Summe $a^x + a$ stimmt es nicht.',
     short: '$a^{x + 1} = a \\cdot a^x$, nicht $a^x + a$.',
@@ -668,6 +693,36 @@ export const LOG_LAW_MOVES: readonly WrongMove[] = [
   },
 ]
 
+// Logarithmen auf beiden Seiten (M6 Schritt 4b-2)
+const LOGS_DROPPED: Explanation = {
+  detailed:
+    'Die Logarithmen darfst du erst weglassen, wenn auf jeder Seite genau ein Logarithmus derselben Basis steht und sonst nichts: Aus $\\log_a u = \\log_a v$ folgt $u = v$. Vorher ändert Weglassen die Gleichung.',
+  short: 'Erst je Seite genau ein Logarithmus, dann entlogarithmieren.',
+}
+
+export const LOG_BASE_MOVES: readonly WrongMove[] = [
+  { label: 'Die Basen einfach weglassen', why: { detailed: 'Logarithmen zu verschiedenen Basen haben verschiedene Werte: $\\log_2 8 = 3$, aber $\\log_4 8 = 1{,}5$. Bringe sie mit $\\log_b u = \\frac{\\log_a u}{\\log_a b}$ auf eine Basis.', short: 'Erst auf eine Basis bringen.' } },
+  { label: 'Mit dem Logarithmus der alten Basis malnehmen', why: REARRANGE_ERROR_TEXTS['eq-log-base-flipped'] },
+  { label: 'Die Logarithmen gleich weglassen', why: LOGS_DROPPED },
+]
+
+export const LOG_POWER_MOVES: readonly WrongMove[] = [
+  { label: 'Den Faktor als Faktor in den Logarithmus schreiben', why: REARRANGE_ERROR_TEXTS['eq-log-power-factor'] },
+  { label: 'Beide Seiten durch den Faktor teilen', why: { detailed: 'Dann steht auf der anderen Seite ein Bruch mit einem Logarithmus, und du kannst nicht entlogarithmieren. Ziehe den Faktor als Hochzahl in den Logarithmus: $k\\ln u = \\ln\\left(u^k\\right)$.', short: 'Faktor als Hochzahl hineinziehen.' } },
+  { label: 'Die Logarithmen gleich weglassen', why: LOGS_DROPPED },
+]
+
+export const LOG_NUMBER_MOVES: readonly WrongMove[] = [
+  { label: 'Die Zahl in den Logarithmus daneben hineinaddieren', why: REARRANGE_ERROR_TEXTS['eq-log-number-inside'] },
+  { label: 'Die Logarithmen weglassen, die Zahl bleibt stehen', why: LOGS_DROPPED },
+  { label: 'Die Zahl selbst in einen Logarithmus schreiben', why: REARRANGE_ERROR_TEXTS['eq-log-number-plain'] },
+]
+
+export const UNLOG_MOVES: readonly WrongMove[] = [
+  { label: 'Beide Seiten durch den Logarithmus teilen', why: { detailed: 'Durch $\\log_a$ kann man nicht teilen: Der Logarithmus ist eine Funktion, kein Faktor. Stehen auf beiden Seiten Logarithmen derselben Basis, sind ihre Argumente gleich.', short: 'Kein Faktor: die Argumente gleichsetzen.' } },
+  { label: 'Nur eine Seite als Hochzahl der Basis schreiben', why: ONE_SIDED },
+]
+
 // Potenzgesetz
 export const POWER_LAW_MOVES: readonly WrongMove[] = [
   { label: '$a^{x + 1}$ als $a^x + a$ schreiben', why: REARRANGE_ERROR_TEXTS['eq-power-sum'] },
@@ -1015,6 +1070,10 @@ export const REARRANGE_HINTS = {
   logLaw: 'Ziehe den $\\ln$ mit den Gesetzen auseinander: $\\ln(u \\cdot v) = \\ln u + \\ln v$, $\\ln\\left(a^u\\right) = u\\ln a$.',
   logCombine: 'Fasse die Logarithmen mit den Gesetzen zusammen: $\\ln u + \\ln v = \\ln(uv)$, $\\ln u - \\ln v = \\ln\\frac{u}{v}$.',
   powerLaw: 'Zerlege die Potenzen mit $a^{m + n} = a^m \\cdot a^n$, bis überall dieselbe Potenz steht.',
+  logBase: 'Bringe alle Logarithmen auf eine Basis: $\\log_b u = \\frac{\\log_a u}{\\log_a b}$, zum Beispiel $\\log_4 u = \\frac{\\log_2 u}{2}$ oder $\\log_3 u = \\frac{\\ln u}{\\ln 3}$.',
+  logPower: 'Ziehe den Faktor vor dem Logarithmus als Hochzahl hinein: $k\\log_a u = \\log_a\\left(u^k\\right)$.',
+  logNumber: 'Schreibe die Zahl als Logarithmus derselben Basis: $c = \\log_a\\left(a^c\\right)$, zum Beispiel $1 = \\log_2 2$, $2 = \\log_3 9$, $1 = \\ln e$.',
+  unlog: 'Steht auf jeder Seite genau ein Logarithmus derselben Basis, sind die Argumente gleich: $\\log_a u = \\log_a v \\Rightarrow u = v$.',
   arc: 'Gegen eine Winkel- oder Hyperbelfunktion hilft ihre Umkehrfunktion, auf beiden Seiten: $\\sin u = w \\Leftrightarrow u = \\arcsin w$.',
   trig: 'Gegen eine Umkehrfunktion hilft die Funktion selbst, auf beiden Seiten: $\\arctan u = w \\Leftrightarrow u = \\tan w$.',
   pythagoras: 'Mit $\\sin^2 u + \\cos^2 u = 1$ (bei Hyperbelfunktionen $\\cosh^2 u - \\sinh^2 u = 1$) ersetzt du ein Quadrat durch die andere Funktion.',
@@ -1104,6 +1163,14 @@ export function explainMove(kind: string, operation: string, target: string, unk
       return { detailed: 'Im $\\ln$ steht ein Produkt oder eine Potenz mit der Variable in der Hochzahl. Mit den Logarithmusgesetzen wird daraus eine Summe, und die Hochzahl kommt als Faktor herunter: $\\ln(u \\cdot v) = \\ln u + \\ln v$, $\\ln\\left(a^u\\right) = u\\ln a$.', short: 'Logarithmusgesetze: die Hochzahl kommt herunter.' }
     case 'logCombine':
       return { detailed: 'Die Variable steckt in mehreren Logarithmen. Mit den Logarithmusgesetzen wird daraus einer: $\\ln u + \\ln v = \\ln(uv)$, $\\ln u - \\ln v = \\ln\\frac{u}{v}$. Den löst du dann mit der Basis hoch auf.', short: 'Logarithmusgesetze: aus mehreren Logarithmen wird einer.' }
+    case 'logBase':
+      return { detailed: 'Die Logarithmen haben verschiedene Basen; zusammenfassen kannst du nur Logarithmen derselben Basis. Mit $\\log_b u = \\frac{\\log_a u}{\\log_a b}$ bringst du alle auf eine: Sind die Basen Potenzen derselben Zahl wie $2$ und $4$, auf die kleinere ($\\log_4 u = \\frac{\\log_2 u}{2}$), sonst auf $e$ ($\\log_3 u = \\frac{\\ln u}{\\ln 3}$).', short: `${operation}: alles zu einer Basis.` }
+    case 'logPower':
+      return { detailed: 'Vor einem Logarithmus steht ein Faktor. Zum Entlogarithmieren muss auf jeder Seite ein einzelner Logarithmus stehen, darum kommt der Faktor als Hochzahl hinein: $k\\log_a u = \\log_a\\left(u^k\\right)$.', short: 'Faktor als Hochzahl: $k\\log_a u = \\log_a\\left(u^k\\right)$.' }
+    case 'logNumber':
+      return { detailed: 'Neben den Logarithmen steht eine Zahl. Schreibe sie als Logarithmus derselben Basis, $c = \\log_a\\left(a^c\\right)$; dann lassen sich alle Logarithmen einer Seite zu einem zusammenfassen.', short: 'Die Zahl als Logarithmus: $c = \\log_a\\left(a^c\\right)$.' }
+    case 'unlog':
+      return { detailed: 'Auf jeder Seite steht genau ein Logarithmus derselben Basis. Der Logarithmus nimmt jeden Wert nur einmal an, also sind die Argumente gleich: $\\log_a u = \\log_a v \\Rightarrow u = v$. Weil beim Zusammenfassen der Definitionsbereich größer werden kann, muss die Lösung am Ende in jedem Logarithmus ein positives Argument geben.', short: 'Entlogarithmieren: die Argumente gleichsetzen.' }
     case 'powerLaw':
       return { detailed: 'Die Variable steht in mehreren Hochzahlen, die sich nur um einen festen Teil unterscheiden. Mit $a^{m + n} = a^m \\cdot a^n$ steht danach überall dieselbe Potenz, die du ausklammern kannst.', short: 'Potenzgesetz: überall dieselbe Potenz.' }
     case 'arc':

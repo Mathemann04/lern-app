@@ -1,5 +1,6 @@
 import { REARRANGE_BLOCKS } from './blocks.ts'
 import { FORMULA_TASKS } from './formulas.ts'
+import { LOG_EQUATION_KINDS, type LogEquationKind, logEquationKind } from './logEquationKinds.ts'
 import { REARRANGE_COMBOS } from './rearrangeCombos.ts'
 import { hasRearrangeFamily } from './rearrangeFamilies.ts'
 import { REARRANGE_INDEX_CODES, REARRANGE_INDEX_WIDTH } from './rearrangeIndex.ts'
@@ -92,16 +93,36 @@ export function formulaPool(level: Level, blocks: ReadonlySet<string>, main: str
   return FORMULA_TASKS.flatMap((task, i) => (task.level === level && task.blocks.includes(main) && task.blocks.every((id) => blocks.has(id)) ? [i + 1] : []))
 }
 
+// Anteil der Logarithmen auf beiden Seiten (logEquationKinds.ts, M6 Schritt 4b-2), wo es zum Baustein welche gibt
+export const LOG_EQUATION_SHARE = 0.25
+
+// Arten der Logarithmus-Aufgaben der Stufe mit dem Baustein main, deren Bausteine alle in blocks stehen
+export function logEquationPool(level: Level, blocks: ReadonlySet<string>, main: string): LogEquationKind[] {
+  return LOG_EQUATION_KINDS.filter((kind) => kind.level === level && kind.blocks.includes(main) && kind.blocks.every((id) => blocks.has(id)))
+}
+
+// Nummer (ab 1) einer Logarithmus-Aufgabe, deren Art in kinds steht
+function logEquationSeed(level: Level, kinds: readonly LogEquationKind[], random: () => number): number | null {
+  for (let i = 0; i < 400; i++) {
+    const s = 1 + Math.floor(random() * MAX_SEED)
+    const kind = logEquationKind(level, s)
+    if (kind && kinds.includes(kind)) return s
+  }
+  return null
+}
+
 // Bausteine der Auswahl, zu denen es in der Stufe Aufgaben gibt (in der Reihenfolge der Liste)
 export function rearrangeMains(level: Level, blocks: ReadonlySet<string> = ALL_BLOCKS): string[] {
   return REARRANGE_BLOCKS.map((block) => block.id).filter(
-    (id) => blocks.has(id) && (hasRearrangeFamily(id, level) || mainPool(level, blocks, id).length > 0 || formulaPool(level, blocks, id).length > 0),
+    (id) =>
+      blocks.has(id) &&
+      (hasRearrangeFamily(id, level) || mainPool(level, blocks, id).length > 0 || formulaPool(level, blocks, id).length > 0 || logEquationPool(level, blocks, id).length > 0),
   )
 }
 
 // Nummer einer neuen Aufgabe: erst einen angekreuzten Baustein wählen (jeder gleich oft, ohne Auswahl alle), dann eine
 // Aufgabe mit ihm, deren Bausteine alle angekreuzt sind: etwa jede fünfte eine Formel aus Technik und Physik (wo es zum
-// Baustein in der Stufe welche gibt), sonst halb eigene Aufgaben des Bausteins (wo es sie gibt), halb aus dem
+// Baustein in der Stufe welche gibt), von den übrigen etwa jede vierte mit Logarithmen auf beiden Seiten (ebenso), sonst halb eigene Aufgaben des Bausteins (wo es sie gibt), halb aus dem
 // Verzeichnis. Gibt es zur Auswahl in der Stufe keine Aufgabe, eine beliebige alte Nummer (die Seiten sperren den
 // Üben-Knopf vorher).
 export function nextRearrangeSeed(level: Level, blocks?: ReadonlySet<string>, random: () => number = Math.random): number {
@@ -113,6 +134,12 @@ export function nextRearrangeSeed(level: Level, blocks?: ReadonlySet<string>, ra
   const pool = mainPool(level, chosen, main)
   const own = hasRearrangeFamily(main, level)
   if (formulas.length > 0 && ((!own && pool.length === 0) || random() < FORMULA_SHARE)) return blockSeed('formel', formulas[Math.floor(random() * formulas.length)])
+  // Logarithmen auf beiden Seiten: etwa jede vierte Aufgabe (oder jede, wenn es sonst keine gibt)
+  const logKinds = logEquationPool(level, chosen, main)
+  if (logKinds.length > 0 && ((!own && pool.length === 0) || random() < LOG_EQUATION_SHARE)) {
+    const s = logEquationSeed(level, logKinds, random)
+    if (s !== null) return blockSeed('logeq', s)
+  }
   if (own && (pool.length === 0 || random() < FAMILY_SHARE)) return blockSeed(main, 1 + Math.floor(random() * MAX_SEED))
   return pool[Math.floor(random() * pool.length)]
 }
@@ -125,6 +152,7 @@ export function rearrangeSeedBlocks(level: Level, seed: number): readonly string
     const task = FORMULA_TASKS[own.s - 1]
     return task && task.level === level ? task.blocks : indexedBlocks(level, own.s)
   }
+  if (own?.block === 'logeq') return logEquationKind(level, own.s)?.blocks ?? indexedBlocks(level, own.s)
   if (own) return hasRearrangeFamily(own.block, level) ? [own.block] : indexedBlocks(level, own.s)
   return indexedBlocks(level, seed)
 }

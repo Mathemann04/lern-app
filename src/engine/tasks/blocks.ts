@@ -65,4 +65,7 @@ export const BLOCK_CODES: Readonly<Record<string, number>> = {
   vektoren: 17,
   // kein Baustein, sondern eine Sammlung: Aufgaben aus der Formelsammlung (formulas.ts, „formel.2-1")
   formel: 18,
+  // kein Baustein, sondern eine Sammlung: Logarithmen auf beiden Seiten, verschiedene Basen (logEquationKinds.ts,
+  // „logeq.2-4711", M6 Schritt 4b-2)
+  logeq: 19,
 }

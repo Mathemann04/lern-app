@@ -197,3 +197,17 @@ test('Formel aus Technik und Physik (M6 Schritt 4b): Fadenpendel nach g, mit Bed
   await expectCleanPage(page, 'Formel frei')
   expect(errors).toEqual([])
 })
+
+test('Logarithmen auf beiden Seiten (M6 Schritt 4b-2): geführt bis zum Ergebnis, frei mit ln-Taste', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./#/ueben/umstellen/logeq.1-1')
+  await expect(page.getByText('Stufe 1 · Löse nach')).toBeVisible()
+  await expect(page.getByText('Aufgabe logeq.1-1')).toBeVisible()
+  await expectCleanPage(page, 'Logarithmen')
+  await solveWholeTask(page)
+
+  await page.goto('./#/frei/umstellen/logeq.3-2')
+  await expect(page.locator('math-field[data-ready]')).toBeVisible()
+  await expectCleanPage(page, 'Logarithmen frei')
+  expect(errors).toEqual([])
+})
