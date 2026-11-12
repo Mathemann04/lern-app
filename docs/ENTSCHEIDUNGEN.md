@@ -923,3 +923,11 @@ Neue Entscheidungen unten anfügen.
   für M5: Wo Folienwerte von freien Tabellenwerken abweichen, gilt die Tabelle; Werte nur aus der Vorlesung werden als
   Richtwert gekennzeichnet; Bilder der Folien werden nie nachgezeichnet; in Formeln eindeutige Zeichen (z. B. $c_0$ für
   die Legierung statt des L der Vorlesung). Vier Fragen an den Nutzer stehen am Ende der Übersicht.
+- 12.11.2026: Mathe-Unterlagen vollständig gesichtet (Skript-Kapitel 1 und 3 bis 8, Übungen, ältere Blätter,
+  Tests, 16 Altklausuren, 10 Probe- und Übungsklausuren); docs/AUFGABENARTEN.md neu gefasst mit Aufbau und Gewicht
+  der Klausur. Zwei Entscheidungen des Nutzers dazu:
+  - **M7 (Vektoren und Matrizen) vorgezogen**: direkt nach M6 Schritt 4b und 4c, danach M6 ab Schritt 5. Grund: Die
+    Vorlesung ist gerade dort, und lineare Algebra und Geometrie bringen rund die Hälfte der Klausurpunkte.
+  - **Ungerade Wurzeln aus negativen Zahlen** sind künftig erlaubt wie im Skript ($\sqrt[3]{-8} = -2$); das ersetzt
+    die Schulkonvention vom 28.10.2026 für Wurzeln. Gebrochene Hochzahlen wie $x^{1/3}$ bleiben nur für $x \ge 0$
+    definiert (so auch das Skript). Umsetzung in M6 Schritt 4c; bis dahin gilt die alte Regel.

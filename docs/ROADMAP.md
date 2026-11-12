@@ -12,7 +12,7 @@ Stand: 12.11.2026
 | M5 | **Werkstoffkunde**: eigenes Fach nach demselben Muster wie Chemie, mit Nachschlagewerk; Vorbild für Tabellen und Bilder auch das Lehrbuch „Physik für Ingenieure“ (Festkörperphysik) | offen (nach M6, M12 und M6b; früher, falls die Werkstoffkunde-Klausur früher ist). Unterlagen der Kapitel 1 bis 7 gesichtet: [WERKSTOFFKUNDE.md](WERKSTOFFKUNDE.md); Kapitel 8 bis 15, Altklausuren und Buchfotos fehlen noch |
 | M6 | **Neue Struktur** (ersetzt „Themen einzeln üben“, Idee des Nutzers, 10.11.2026): drei getrennte Fragen – was tust du (Tätigkeit als Kachel: Vereinfachen, Gleichungen umstellen, Ableiten), womit (Bausteine ankreuzen, ein Thema gezielt mit „nur“), wie schwer (Stufe = nur Verschachtelung, nie neuer Stoff); aufgeräumte Startseite, Fortschritt je Baustein, „Meine Schwächen“, Knopf „Überspringen“, ohne Kopfzeile, Startseite nur mit Fächern. Plan: [PLAN-M6.md](PLAN-M6.md) | in Arbeit: Schritte 1 bis 4 und 4b-1 fertig (12.11.2026); neu 4b: Gleichungen wie auf den Übungsblättern |
 | M6b | **Bilder in Mathe** (Wunsch des Nutzers, 10.11.2026): gemeinsame Zeichen-Grundlage (Koordinatensystem, Graph, Pfeile, Einheitskreis, Zahlenebene); je Baustein ein Bild in Aufgaben und Lernkarten (Graph bei e-Funktion und Logarithmus, Tangente beim Ableiten, Fläche beim Integral, Einheitskreis bei Winkelfunktionen, Pfeile bei Vektoren, Zahlenebene bei komplexen Zahlen); Aufgaben wie „Welcher Graph gehört zur Funktion?“. Später Bilder zum Anfassen (Punkt verschieben). Ausblick in [PLAN-M6.md](PLAN-M6.md) | offen: direkt nach M6, vor M5 |
-| M7 | **Vektoren** (seit 12.11.2026 Baustein beim Umstellen in M6, später eigene Tätigkeit „Vektoren rechnen“): Rechnen mit Vektoren, Länge, Skalarprodukt, Winkel, Zerlegung, Kreuzprodukt, Spatprodukt, Linearkombination und Basis, Projektion, Matrizen mit Falk-Schema und Inverse (wie in der Vorlesung, [AUFGABENARTEN.md](AUFGABENARTEN.md); ob Geraden und Ebenen dazukommen, klären wir beim Plan) | offen |
+| M7 | **Vektoren** (seit 12.11.2026 Baustein beim Umstellen in M6, später eigene Tätigkeit „Vektoren rechnen“): Rechnen mit Vektoren, Länge, Skalarprodukt, Winkel, Zerlegung, Kreuzprodukt, Spatprodukt, Linearkombination und Basis, Projektion, Matrizen mit Falk-Schema und Inverse (wie in der Vorlesung, [AUFGABENARTEN.md](AUFGABENARTEN.md); mit Geraden und Ebenen, Gleichungssystemen mit Parameter und Determinanten) | offen, **vorgezogen**: direkt nach M6 Schritt 4b und 4c (Entscheidung 12.11.2026) |
 | M8 | Potenz-, Wurzel- und Logarithmusgesetze | in M6 aufgegangen (Bausteine bei „Vereinfachen“, Schritt 6) |
 | M9 | weitere Themen aus Mathematik MB1 als Tätigkeiten (Polynome mit Horner-Schema und Interpolation, Grenzwerte, Linearisieren, Funktionen und Schwingungen, Mengen und Summen; Liste in [AUFGABENARTEN.md](AUFGABENARTEN.md)), „Ableiten" nachschärfen | offen |
 | M10 | Physik: Formeln mit Einheiten (Formeln umstellen mit Zeichen der Physik; Aufgaben lösen: Formel wählen, umstellen, Werte mit Einheiten einsetzen); Themen der Vorlesung (Einheiten und Messwerte, Bewegungen, Diagramme, Würfe, Drehbewegungen, Kräfte), Aufgabenarten und Vorschlag für Tätigkeiten in [PHYSIK.md](PHYSIK.md); Maßstab und Ideen für Übungen auch das Lehrbuch „Physik für Ingenieure“ (eigene Aufgaben, eigene Zahlen) | offen (Unterlagen gesichtet 12.11.2026) |
@@ -60,6 +60,12 @@ Stand: 12.11.2026
   Mechanik**). Physik und Technische Mechanik sind zwei eigene Fächer. Die „Formeln aus
   Technik und Physik“ beim Umstellen (M6 Schritt 4b-1) sind Mathe-Übungen und bleiben, wie sie
   sind.
+- **M7 vorgezogen** (Nutzer, 12.11.2026, nach der Sichtung der Mathe-Unterlagen): Die Vorlesung
+  ist bei Vektoren und Matrizen, und Vektoren, Geraden und Ebenen, Matrizen, Determinanten und
+  Gleichungssysteme bringen rund die Hälfte der Klausurpunkte. Darum kommt M7 direkt nach
+  M6 Schritt 4b und 4c, danach M6 ab Schritt 5 und die übrige Reihenfolge wie oben. M7 umfasst
+  auch Geraden und Ebenen sowie Gleichungssysteme mit Parameter (Liste in
+  [AUFGABENARTEN.md](AUFGABENARTEN.md)).
 - **Unterlagen sichten** (Wunsch des Nutzers, 12.11.2026, vor M6 Schritt 4b-2): Der Nutzer lädt
   in einer eigenen Sitzung die Unterlagen aller Fächer hoch (Skripte, Übungsblätter mit
   Lösungen, Altklausuren). Jedes Fach wird vollständig durchgesehen (bei vielen Seiten mit
@@ -145,6 +151,11 @@ Details: [PLAN-M6.md](PLAN-M6.md) (Plan ausgearbeitet und Fragen beantwortet am
     $\varepsilon_r$ auch beim Eintippen)
   - [ ] 4b-2. Logarithmen auf beiden Seiten, verschiedene Basen
   - [ ] 4b-3. Gleichungen mit Zahlen (Probe, Scheinlösungen, keine Lösung)
+- [ ] 4c. Ungerade Wurzeln aus negativen Zahlen erlauben wie im Skript (Entscheidung 12.11.2026):
+  $\sqrt[3]{-8} = -2$; gebrochene Hochzahlen wie $x^{1/3}$ bleiben nur für $x \ge 0$; Engine,
+  Definitionsbereich, Zufallstests, Lernkarte
+- **Danach M7 (Vektoren und Matrizen) vorgezogen** (Entscheidung 12.11.2026, die Vorlesung ist
+  gerade dort), erst Plan; anschließend M6 ab Schritt 5 weiter
 - [ ] 5. Umstellen: leichte Aufgaben aus späteren Kapiteln (5a bis 5d)
 - [ ] 6. „Vereinfachen“ mit Bausteinen (mit Potenz-, Wurzel- und Logarithmengesetzen)
 - [ ] 7. „Ableiten“ mit Bausteinen
