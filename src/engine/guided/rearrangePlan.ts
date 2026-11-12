@@ -18,6 +18,9 @@ import {
   POWER_LAW_MOVES,
   REARRANGE_HINTS,
   ROOT_MOVES,
+  CUBE_ROOT_EXPLANATION,
+  CUBE_ROOT_MOVES,
+  CUBE_ROOT_NEGATIVE_MOVE,
   SQUARE_MOVES,
   type WrongMove,
   addMoves,
@@ -71,6 +74,7 @@ import { cardIdsFor } from '../explain/cards.ts'
 import { allNodes, derive } from '../derive/derive.ts'
 import type { RuleId } from '../derive/rules.ts'
 import { contains, subterms } from '../expr/compare.ts'
+import { evaluate } from '../expr/evaluate.ts'
 import { FN_LATEX, odeLatex, toLatex } from '../expr/print.ts'
 import { type Equation, type Expr, asRational, fn, mul, num, pow, sub } from '../expr/types.ts'
 import { readableLatex } from '../fraction/task.ts'
@@ -94,7 +98,7 @@ import {
   stepLabel,
 } from '../rearrange/isolate.ts'
 import { DOMAIN_TEXT, probeLatex, probeOf } from '../rearrange/probe.ts'
-import { type RearrangeTask, conditionLatex, conditionsText, taskLatex } from '../rearrange/task.ts'
+import { type RearrangeTask, conditionLatex, conditionsText, taskLatex, variablesOf } from '../rearrange/task.ts'
 import { detWorkLatex, expandWork } from '../rearrange/tools/determinant.ts'
 import { polarWork } from '../rearrange/tools/polar.ts'
 import { theoremWork } from '../rearrange/tools/theorem.ts'
@@ -599,8 +603,20 @@ function moveQuestion(step: RearrangeStep, t: string, target: string): MoveQuest
     }
     case 'square':
       return { question: 'Wie wirst du die Wurzel los?', wrong: SQUARE_MOVES, hint: REARRANGE_HINTS.square }
-    case 'root':
+    case 'root': {
+      if (step.operand && toLatex(step.operand) === '3') {
+        // M6 Schritt 4c: dritte Wurzel, auch aus einer negativen Zahl
+        const other = side === 'lhs' ? step.before.rhs : side === 'rhs' ? step.before.lhs : null
+        const negative = other !== null && variablesOf(other).length === 0 && evaluate(other, {}) < 0
+        return {
+          question: 'Wie wirst du die Hochzahl $3$ los?',
+          wrong: negative ? [CUBE_ROOT_NEGATIVE_MOVE, ...CUBE_ROOT_MOVES] : CUBE_ROOT_MOVES,
+          hint: REARRANGE_HINTS.cubeRoot,
+          explanation: CUBE_ROOT_EXPLANATION,
+        }
+      }
       return { question: 'Wie wirst du das Quadrat los?', wrong: ROOT_MOVES, hint: REARRANGE_HINTS.root }
+    }
     case 'finish':
       return null
   }
@@ -982,6 +998,8 @@ const CARDS_BY_KIND: Record<StepKind, readonly string[]> = {
 function cardsOf(step: RearrangeStep, t: string, previous: RearrangeStep | undefined): string[] {
   // Ableiten: die Karten aus „Ableiten" zu den Regeln, die vorkommen
   if (step.kind === 'derive' && step.operand) return derivativeCards(step.operand)
+  // Hochzahl 3: dritte Wurzel, auch aus negativen Zahlen (M6 Schritt 4c)
+  if (step.kind === 'root' && step.operand && toLatex(step.operand) === '3') return [REARRANGE_CARD_IDS.cubeRoot]
   if (step.kind === 'multiply') {
     const den = denominatorOf(step)
     // alle Nenner beseitigen bzw. Variable im Nenner

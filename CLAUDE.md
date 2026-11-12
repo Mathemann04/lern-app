@@ -109,10 +109,10 @@ Ausführliche Notizen je Bereich (wörtlich wie früher hier, jetzt ausgelagert)
   Beispiele kommen aus der Engine, nie von Hand. Jede neue Regel,
   Fehlerregel oder Vorlage bekommt Tests: Ergebnis gegen numerische
   Gegenprobe, falsche Optionen nie gleichwertig zur Lösung.
-- **Engine-Regeln:** Definitionsbereich nach deutscher Schulkonvention
-  (Wurzeln und gebrochene Exponenten nur für Zahlen ≥ 0, auch die dritte
-  Wurzel; variable Exponenten nur für Basis > 0; beschlossen am 12.11.2026: ungerade
-  Wurzeln künftig auch aus negativen Zahlen wie im Skript, Umsetzung in M6 Schritt 4c). Vereinfachen darf den
+- **Engine-Regeln:** Definitionsbereich wie im Skript (seit M6 Schritt 4c):
+  gerade Wurzeln und gebrochene Exponenten (auch x^(1/3)) nur für Zahlen ≥ 0,
+  ungerade Wurzeln für alle Zahlen (∛(−8) = −2); variable Exponenten nur für
+  Basis > 0. Vereinfachen darf den
   Definitionsbereich vergrößern (x/x → 1), nie verkleinern und nie einen Wert
   ändern; z. B. (u^a)^k → u^(a·k) nur für ganzzahliges k. Die Zufallstests in
   `normalize.test.ts` und `finalForm.test.ts` prüfen das; nach Änderungen

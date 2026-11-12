@@ -19,6 +19,7 @@ export const REARRANGE_CARD_IDS = {
   laws: 'rearrange-laws',
   logEquation: 'rearrange-log-equation',
   numberEquation: 'rearrange-number-equation',
+  cubeRoot: 'rearrange-cube-root',
   arc: 'rearrange-arc',
   trig: 'rearrange-trig',
   substitution: 'rearrange-substitution',
@@ -227,6 +228,29 @@ export const REARRANGE_CARD_LIST: readonly Card[] = [
       { equation: eq(add(log(n(2), x), log(n(2), sub(x, n(2)))), n(3)), target: 'x', conditions: [], numeric: true },
     ],
     errors: ['eq-root-negative-squared', 'eq-spurious-root'],
+  },
+  {
+    // M6 Schritt 4c: ungerade Wurzeln auch aus negativen Zahlen (wie im Skript)
+    id: REARRANGE_CARD_IDS.cubeRoot,
+    topic: 'umstellen',
+    title: 'Dritte Wurzel und Hochzahl 3',
+    level: 1,
+    rules: [],
+    formulas: [
+      'u^3 = A \\;\\Rightarrow\\; u = \\sqrt[3]{A}',
+      '\\sqrt[3]{-8} = -2 \\quad \\text{denn } (-2)^3 = -8',
+      '\\sqrt{-4} \\text{ gibt es nicht}',
+      'x^{\\frac{1}{3}} \\text{ nur für } x \\ge 0',
+    ],
+    memo: 'Gegen die Hochzahl $3$ hilft die dritte Wurzel, auf beiden Seiten. Anders als die Quadratwurzel gibt es sie für jede Zahl, auch für negative, und sie ist eindeutig: kein $\\pm$, und eine negative Zahl hat eine negative dritte Wurzel.',
+    note: 'Das gilt für alle ungeraden Wurzeln ($\\sqrt[3]{\\phantom{x}}$, $\\sqrt[5]{\\phantom{x}}$, …), denn eine negative Zahl hoch $3$ oder $5$ ist wieder negativ. Gerade Wurzeln ($\\sqrt{\\phantom{x}}$, $\\sqrt[4]{\\phantom{x}}$) gibt es nur für Zahlen $\\ge 0$. Als Potenz mit gebrochener Hochzahl geschrieben, $x^{\\frac{1}{3}}$, gilt sie wie im Skript nur für $x \\ge 0$.',
+    when: 'Wenn die Variable in einer dritten Potenz steht wie $(2x - 1)^3$, besonders wenn auf der anderen Seite eine negative Zahl steht.',
+    examples: [
+      { equation: eq(pow(sub(x, n(1)), n(3)), n(-8)), target: 'x', conditions: [], numeric: true },
+      { equation: eq(add(mul(n(2), pow(add(x, n(3)), n(3))), n(5)), n(-11)), target: 'x', conditions: [], numeric: true },
+      { equation: eq(add(pow(x, n(3)), n(30)), n(3)), target: 'x', conditions: [], numeric: true },
+    ],
+    errors: ['eq-cube-root-sign'],
   },
   {
     id: REARRANGE_CARD_IDS.arc,

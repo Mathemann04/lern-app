@@ -32,7 +32,7 @@ export const arbExpr: fc.Arbitrary<Expr> = fc.letrec<{ e: Expr }>((tie) => ({
     tie('e').map(neg),
     fc.tuple(tie('e'), tie('e')).map(([a, b]) => div(a, b)),
     fc.tuple(tie('e'), exponent).map(([b, e]) => pow(b, e)),
-    fc.tuple(tie('e'), fc.integer({ min: 2, max: 3 })).map(([a, n]) => root(a, n)),
+    fc.tuple(tie('e'), fc.constantFrom(2, 3, 3, 5)).map(([a, n]) => root(a, n)),
     fc.tuple(fc.constantFrom(...fnNames), tie('e')).map(([name, a]) => fn(name, a)),
     tie('e').map((a) => log(num(2), a)),
   ),

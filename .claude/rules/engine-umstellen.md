@@ -142,7 +142,7 @@ Teil der Mathe-Engine `src/engine/` (reines TypeScript, ohne React).
     `node scripts/rearrange-index.ts` laufen lassen (`rearrangeIndex.test.ts` meldet es sonst). Seit Schritt 4
     gehört ein Quadrat wie $x^2$, das die pq-Formel löst, zu „Quadratische Gleichungen“, nicht zu „Quadrate und
     Potenzen“. Die Engine löst noch nicht: Gleichungen mit Zahlen
-    und zwei Lösungen wie $x^2 = 9$, $a x^n = y$ mit Buchstaben als Hochzahl, $\sqrt[3]{\ldots}$ in der Aufgabe,
+    und zwei Lösungen wie $x^2 = 9$, $a x^n = y$ mit Buchstaben als Hochzahl, $\sqrt[3]{\ldots}$ mit $x$ in der Aufgabe,
     eine Wurzel in einer Wurzel als Baustein auf beiden Seiten (geplant in M6 4b, docs/AUFGABENARTEN.md)
   - Logarithmen auf beiden Seiten (M6 Schritt 4b-2, `logEquationStep` in `isolate.ts`, vor `logCombineStep`): nur wenn
     die Variable allein in Logarithmen steht, die Summanden sind (Faktor davor erlaubt, `logTerm`), nicht nach dem
@@ -168,3 +168,7 @@ Teil der Mathe-Engine `src/engine/` (reines TypeScript, ohne React).
     `rootNegative`. Probe als Zeile `rearrange/probe.ts` (`probeOf`, `probeLatex`, `DOMAIN_TEXT`). Falsche Antworten
     `numericWrongAnswers`: falsch ist, was andere Lösungen hat als die richtige Gleichung (numerisch zwischen $-60$ und $60$,
     `numericRoots`), Zahlen ausgerechnet; Fehler `eq-root-negative-squared`
+  - Hochzahl 3 (M6 Schritt 4c): `foldNumbers` rechnet aufgehende Wurzeln über die Normalform aus ($\sqrt[3]{-8} = -2$);
+    beim Schritt `root` mit Operand 3 eigene Frage „Wie wirst du die Hochzahl $3$ los?“ (`CUBE_ROOT_MOVES`, bei negativer
+    Zahl auch „Keine Lösung“ als Irrweg), Erklärung, Tipp und Lernkarte `rearrange-cube-root`; Fehler `eq-cube-root-sign`
+    (`cubeRootSign`: Minus verloren). Noch nicht: $\sqrt[3]{\ldots}$ mit $x$ in der Aufgabe (hoch 3 nehmen)

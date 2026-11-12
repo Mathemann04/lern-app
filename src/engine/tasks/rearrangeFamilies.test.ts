@@ -91,7 +91,7 @@ describe('Aufgaben einzelner Bausteine', () => {
 
   // Eine Potenz mit x und fester Hochzahl braucht eine positive Basis, und zwar für alle x, die die Bedingungen der Aufgabe
   // erfüllen (nicht nur an der Lösung): sonst hat eine gerade Hochzahl eine zweite Lösung, und bei einer ungeraden stünde
-  // eine dritte Wurzel aus einer negativen Zahl da (Engine-Regeln in CLAUDE.md). Geprüft für x von einem Hundertstel bis zum
+  // eine dritte Wurzel aus einer negativen Zahl da (bei Buchstaben nicht gewollt, rearrangeBlockKit.ts). Geprüft für x von einem Hundertstel bis zum
   // Hundertfachen der Lösung.
   it.each(familyCells)('%s in Stufe %i: jede Potenz mit x hat für alle erlaubten x eine positive Basis', (block, level) => {
     for (let s = 1; s <= 30; s++) {

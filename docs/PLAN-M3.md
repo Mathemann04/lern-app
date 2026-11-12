@@ -450,6 +450,7 @@ Aufgabe: Löse $\int_a^x \frac{\mathrm{d}t}{t(t + b)} = y$ nach $x$ auf
 | $pq$-Formel | $p^2$ statt $\left(\frac{p}{2}\right)^2$ (`eq-pq-half`, neu in 6c) | $u^2 - au - b = 0 \Rightarrow u_{1,2} = \frac{a}{2} \pm \sqrt{a^2 + b}$ |
 | Lösung wählen | Scheinlösung nicht verworfen (`eq-spurious-root`, neu in 6c) | $u = e^x = \frac{a}{2} - \sqrt{\frac{a^2}{4} + b}$ (negativ) |
 | Wurzel gleich negativer Zahl (M6 4b-3) | trotzdem quadriert statt „keine Lösung“ (`eq-root-negative-squared`) | $\sqrt{x + 3} = -2 \Rightarrow x + 3 = 4$ |
+| Dritte Wurzel (M6 4c) | aus einer negativen Zahl ohne das Minus gezogen (`eq-cube-root-sign`) | $(x - 1)^3 = -8 \Rightarrow x - 1 = 2$ |
 | Substitution | nicht zurückgerechnet (`eq-not-resubstituted`, neu in 6c) | $x = y + \sqrt{y^2 + 1}$ statt $\ln\left(y + \sqrt{y^2 + 1}\right)$ |
 | Winkelfunktion | beim Ersetzen mit $\sin^2 x + \cos^2 x = 1$ das Quadrat vergessen (`eq-pythagoras-square`, neu in 6b) | $\sin^2 x = 1 - \cos x$ |
 | Hyperbelfunktion | $\sinh^2 x$ wie $\sin^2 x$ ersetzt, falsches Vorzeichen (`eq-hyperbolic-sign`, neu in 6b) | $\sinh^2 x = 1 - \cosh^2 x$ |

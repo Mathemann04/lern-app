@@ -1,4 +1,5 @@
-import { type Rational, ONE, isOne, ratAbs, ratMul, ratNeg, ratSign, ratToNumber } from '../rational.ts'
+import { type Rational, ONE, isInteger, isOne, ratAbs, ratMul, ratNeg, ratSign, ratToNumber } from '../rational.ts'
+import { subterms } from './compare.ts'
 import { normalize } from './normalize.ts'
 import { type Expr, div, fn, log, mul, neg, num, pow, root } from './types.ts'
 
@@ -22,6 +23,9 @@ export function toDisplayForm(e: Expr): Expr {
       return fn(e.name, toDisplayForm(e.arg))
     case 'log':
       return log(toDisplayForm(e.base), toDisplayForm(e.arg))
+    case 'root':
+      // ungerade Wurzel (bleibt in der Normalform stehen)
+      return root(toDisplayForm(e.arg), e.index)
     default:
       return toDisplayForm(normalize(e))
   }
@@ -140,6 +144,8 @@ function byDisplayOrder(a: Expr, b: Expr): number {
 
 // base^r mit positivem rationalem r: Exponent 1/n wird zur Wurzel
 function displayPower(base: Expr, r: Rational): Expr {
+  // (∛u)² wird ∛(u²); bei festen negativen Werten wie (∛(\cos 2))² bleibt die Potenz (∛(\cos^2 2) wäre eine andere Normalform)
+  if (base.kind === 'root' && isInteger(r) && subterms(base.arg).some((t) => t.kind === 'var')) return root(isOne(r) ? toDisplayForm(base.arg) : pow(toDisplayForm(base.arg), num(r)), base.index)
   const b = toDisplayForm(base)
   if (isOne(r)) return b
   if (r.n === 1n && r.d <= 10n) return root(b, Number(r.d))

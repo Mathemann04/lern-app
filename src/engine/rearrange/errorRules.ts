@@ -1,7 +1,7 @@
 import { contains, key, subterms } from '../expr/compare.ts'
 import { type Env, evaluate } from '../expr/evaluate.ts'
 import { equationToLatex } from '../expr/print.ts'
-import { type Equation, type Expr, add, div, eq, fn, log, mul, num, pow, variable } from '../expr/types.ts'
+import { type Equation, type Expr, add, asRational, div, eq, fn, log, mul, num, pow, root, variable } from '../expr/types.ts'
 import { ERROR_RULES, type WrongAnswer } from '../derive/errorRules.ts'
 import { FRACTION_ERROR_RULES, fractionWrongAnswers } from '../fraction/errorRules.ts'
 import { type Signed, expanded, minus, part, plus } from '../fraction/task.ts'
@@ -143,6 +143,8 @@ export const REARRANGE_ERROR_RULES: readonly EqErrorRule[] = [
   { id: 'eq-spurious-root', name: 'Die Lösung genommen, die nicht passt (Scheinlösung)', wrongFormula: 'u = e^x: u = \\frac{a}{2} - \\sqrt{\\frac{a^2}{4} + b}' },
   // Gleichungen mit Zahlen (M6 Schritt 4b-3)
   { id: 'eq-root-negative-squared', name: 'Wurzel gleich negativer Zahl trotzdem quadriert', wrongFormula: '\\sqrt{x + 3} = -2 \\Rightarrow x + 3 = 4' },
+  // M6 Schritt 4c: dritte Wurzel aus einer negativen Zahl
+  { id: 'eq-cube-root-sign', name: 'Bei der dritten Wurzel aus einer negativen Zahl das Minus verloren', wrongFormula: '(x - 1)^3 = -8 \\Rightarrow x - 1 = 2' },
   { id: 'eq-not-resubstituted', name: 'Nach der Substitution nicht zurückgerechnet', wrongFormula: 'u = e^x = y + \\sqrt{y^2 + 1} \\Rightarrow x = y + \\sqrt{y^2 + 1}' },
   // Werkzeuge der Stufe 5 (Schritt 7a): Integrale; beim Ableiten die Fehler aus „Ableiten"
   { id: 'eq-partial-factor', name: 'Bei den Partialbrüchen den Faktor vergessen', wrongFormula: '\\frac{1}{t(t + b)} = \\frac{1}{t} - \\frac{1}{t + b}' },
@@ -463,6 +465,15 @@ function termRoot(e: Expr, atoms: Atoms): Expr | null {
   const n = f && monomialSqrt(f.num)
   const d = f && monomialSqrt(f.den)
   return n && d ? niceFrac({ num: n, den: d }, atoms) : null
+}
+
+// Dritte Wurzel aus einer negativen Zahl ohne das Minus (M6 Schritt 4c): (x - 1)^3 = -8 → x - 1 = 2
+function cubeRootSign(step: RearrangeStep): Candidate[] {
+  const k = step.operand && asRational(step.operand)
+  if (step.kind !== 'root' || !step.side || !k || k.n !== 3n || k.d !== 1n) return []
+  const o = step.before[other(step.side)]
+  if (subterms(o).some((x) => x.kind === 'var') || !(evaluate(o, {}) < 0)) return []
+  return [{ id: 'eq-cube-root-sign', after: withSide(step.after, other(step.side), root(negated(o), 3)) }]
 }
 
 function rootTermwise(step: RearrangeStep, t: string): Candidate[] {
@@ -809,6 +820,7 @@ function candidatesFor(steps: readonly RearrangeStep[], i: number, target: strin
     ...factorSign(step, t),
     ...reciprocalTermwise(step, steps[i - 1]),
     ...rootTermwise(step, t),
+    ...cubeRootSign(step),
     ...squareHalved(step),
     ...squareOneFactor(step, t),
     ...nestedRoot(step, t),

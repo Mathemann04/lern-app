@@ -30,9 +30,13 @@ describe('evaluate', () => {
     expect(evaluate(fn('tan', num(0)), {})).toBe(0)
   })
 
-  it('folgt der deutschen Konvention für Wurzeln negativer Zahlen', () => {
-    expect(evaluate(root(x, 3), at(-8))).toBeNaN()
+  it('zieht ungerade Wurzeln auch aus negativen Zahlen, gerade Wurzeln und gebrochene Hochzahlen nicht (wie im Skript)', () => {
+    expect(evaluate(root(x, 3), at(-8))).toBe(-2)
+    expect(evaluate(root(x, 5), at(-32))).toBeCloseTo(-2, 12)
+    expect(evaluate(root(x, 2), at(-4))).toBeNaN()
+    expect(evaluate(root(x, 4), at(-16))).toBeNaN()
     expect(evaluate(pow(x, num(1, 3)), at(-8))).toBeNaN()
+    expect(evaluate(pow(x, num(2, 3)), at(-8))).toBeNaN()
     // Ganzzahlige Exponenten sind für negative Zahlen definiert
     expect(evaluate(pow(x, num(3)), at(-2))).toBe(-8)
     expect(evaluate(pow(x, num(-2)), at(-2))).toBe(0.25)

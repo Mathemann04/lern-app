@@ -9,7 +9,7 @@ Neue Entscheidungen unten anfügen.
 - 28.10.2026: Claude erstellt am Ende jeder Sitzung den Pull Request selbst.
 - 28.10.2026: Definitionsbereich nach deutscher Schulkonvention: Wurzeln aus
   negativen Zahlen sind nicht definiert, auch nicht die dritte Wurzel
-  (änderbar, falls das Skript es anders handhabt).
+  (änderbar, falls das Skript es anders handhabt). Für ungerade Wurzeln ersetzt seit M6 Schritt 4c (12.11.2026).
 - 29.10.2026: Geführter Modus für Produkt und Quotient: $u'$, $v'$, dann
   Einsetzen (Antworten als eingesetzte Formel, Ergebnis danach
   zusammengefasst). Kettenregel: äußere Ableitung nach $u$, innere
@@ -969,3 +969,16 @@ Neue Entscheidungen unten anfügen.
   Steht in der Normalform keine Zahl ($x^2 - 7x = 0$), sind „$x$ ausklammern“ und „durch $x$ teilen“ keine Irrwege mehr
   (ohne $x$ allein ebenso „Wurzel ziehen“). „Warum ist das falsch?“ beim Quadrieren einer Wurzel gleich negativer Zahl
   verrät nicht mehr, dass es keine Lösung gibt, sondern fragt, welche Werte eine Wurzel annehmen kann.
+- 12.11.2026: M6 Schritt 4c, ungerade Wurzeln aus negativen Zahlen wie im Skript: $\sqrt[3]{-8} = -2$, auch fünfte
+  Wurzeln; gerade Wurzeln und gebrochene Hochzahlen ($x^{1/3}$) weiter nur für Zahlen $\ge 0$. In der Normalform bleibt
+  eine ungerade Wurzel eine Wurzel (sonst würde $\sqrt[3]{x} \to x^{1/3}$ den Definitionsbereich verkleinern): Zahlfaktoren
+  und Faktoren werden einzeln gezogen ($\sqrt[3]{-8x} = -2\sqrt[3]{x}$), $(\sqrt[3]{u})^4 = u\sqrt[3]{u}$. Umgekehrt wird
+  $u^{p/q}$ mit ungeradem $q$ zur Wurzel ($x^{2/3} \to (\sqrt[3]{x})^2$); das vergrößert nur den Definitionsbereich und gibt
+  $\sqrt[3]{x}$ und $x^{1/3}$ dieselbe Normalform, damit beide Schreibweisen als gleich erkannt werden. Feste Werte ohne
+  Buchstaben ($\sqrt[3]{2}$, $\sqrt[3]{\pi}$) bleiben Potenzen. Sichtbar wird das an einer neuen Art der Gleichungen mit Zahlen
+  in Stufe 1 („hoch-drei“, z. B. $(x - 10)^3 = -8$; fester Anteil 20 % mit eigenem Zufall, die übrigen Nummern behalten ihre
+  Art), am neuen typischen Fehler „Minus verloren“ (`eq-cube-root-sign`), an der Lernkarte „Dritte Wurzel und Hochzahl 3“ und
+  an der Frage beim Wurzelziehen: bei der Hochzahl 3 heißt sie jetzt „Wie wirst du die Hochzahl $3$ los?“ (bisher fälschlich
+  „das Quadrat“), mit Irrwegen „durch 3 teilen“, „mit $\pm$“ und, bei einer negativen Zahl, „keine Lösung“. Aufgaben mit
+  Buchstaben bleiben so (Basen von Potenzen mit $x$ positiv). Wurzelgleichungen wie $\sqrt[3]{2x + 1} = -3$ (hoch 3 nehmen)
+  löst die Engine noch nicht; vorgemerkt.

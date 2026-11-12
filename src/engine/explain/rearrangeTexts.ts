@@ -233,6 +233,12 @@ export const REARRANGE_ERROR_TEXTS: Readonly<Record<string, Explanation>> = {
       'Quadrieren ist nur eine Folgerung: Es kann Zahlen bringen, die die Gleichung davor gar nicht erfüllen. Schau vor dem Quadrieren, welche Werte die Wurzel auf der einen Seite überhaupt annehmen kann, und vergleiche mit der anderen Seite.',
     short: 'Vor dem Quadrieren: Welche Werte kann eine Wurzel annehmen?',
   },
+  // M6 Schritt 4c
+  'eq-cube-root-sign': {
+    detailed:
+      'Bei der Hochzahl $3$ behält eine Zahl ihr Vorzeichen: $(-u)^3 = -u^3$. Darum ist die dritte Wurzel aus einer negativen Zahl negativ. Mach die Probe: Deine Zahl hoch $3$ muss die Zahl unter der Wurzel ergeben, mit Vorzeichen.',
+    short: 'Die dritte Wurzel einer negativen Zahl ist negativ.',
+  },
   'eq-not-resubstituted': {
     detailed: 'Die $pq$-Formel liefert $u$, gesucht ist aber $x$. Setze für $u$ wieder den Baustein ein, zum Beispiel $e^x$, und löse dann nach $x$ auf.',
     short: 'Zurück einsetzen: $u$ ist noch nicht $x$.',
@@ -1028,6 +1034,27 @@ export const ROOT_MOVES: readonly WrongMove[] = [
   { label: 'Das Quadrat einfach weglassen', why: { detailed: 'Weglassen ändert den Wert der Seite. Ziehe auf beiden Seiten die Wurzel.', short: 'Auf beiden Seiten die Wurzel ziehen.' } },
 ]
 
+// Hochzahl 3 auf einer Seite (M6 Schritt 4c): die dritte Wurzel gibt es auch für negative Zahlen, eindeutig
+export const CUBE_ROOT_MOVES: readonly WrongMove[] = [
+  { label: 'Beide Seiten durch $3$ teilen', why: { detailed: 'Die Hochzahl $3$ ist kein Faktor: $\\frac{u^3}{3}$ ist nicht $u$. Die Gegenrechnung zur Hochzahl $3$ ist die dritte Wurzel.', short: 'Gegenrechnung zur Hochzahl $3$ ist die dritte Wurzel.' } },
+  { label: 'Die Hochzahl $3$ einfach weglassen', why: { detailed: 'Weglassen ändert den Wert der Seite. Ziehe auf beiden Seiten die dritte Wurzel.', short: 'Auf beiden Seiten die dritte Wurzel ziehen.' } },
+  { label: 'Beide Seiten mit $\\pm$ wurzeln', why: { detailed: 'Das $\\pm$ gehört zur Quadratwurzel: $(-u)^2 = u^2$. Bei der Hochzahl $3$ behält die Zahl ihr Vorzeichen, $(-u)^3 = -u^3$; die dritte Wurzel ist also eindeutig.', short: 'Die dritte Wurzel ist eindeutig, kein $\\pm$.' } },
+]
+
+// steht rechts eine negative Zahl: „keine Lösung“ ist ein Irrweg (anders als bei der Quadratwurzel)
+export const CUBE_ROOT_NEGATIVE_MOVE: WrongMove = {
+  label: 'Keine Lösung: Aus einer negativen Zahl gibt es keine Wurzel',
+  why: {
+    detailed: 'Das gilt nur für gerade Wurzeln wie die Quadratwurzel. Eine negative Zahl hoch $3$ ist negativ, $(-u)^3 = -u^3$; darum hat jede Zahl genau eine dritte Wurzel, eine negative Zahl eine negative.',
+    short: 'Dritte Wurzeln gibt es auch aus negativen Zahlen.',
+  },
+}
+
+export const CUBE_ROOT_EXPLANATION: Explanation = {
+  detailed: 'Die Gegenrechnung zur Hochzahl $3$ ist die dritte Wurzel, auf beiden Seiten. Sie ist eindeutig und auch für negative Zahlen definiert: $\\sqrt[3]{-27} = -3$, denn $(-3)^3 = -27$.',
+  short: 'Gegenrechnung zur Hochzahl $3$: dritte Wurzel.',
+}
+
 // --- Tipps ---
 
 export const REARRANGE_HINTS = {
@@ -1099,6 +1126,7 @@ export const REARRANGE_HINTS = {
   factor: 'Klammere die Variable aus: $ax + bx = x(a + b)$. Steht ein Summand nur als $x$ da, bleibt in der Klammer eine $1$.',
   square: 'Die Gegenrechnung zur Wurzel ist das Quadrieren, auf beiden Seiten.',
   root: 'Die Gegenrechnung zum Quadrat ist die Wurzel. Alle Buchstaben sind positiv, also brauchst du kein $\\pm$.',
+  cubeRoot: 'Die Gegenrechnung zur Hochzahl $3$ ist die dritte Wurzel. Sie gibt es auch für negative Zahlen, und sie ist eindeutig: kein $\\pm$.',
   finish: 'Bringe alles auf einen Hauptnenner und fasse die Zähler zusammen.',
   result: 'Rechne die Umformung auf beiden Seiten aus. Auf der Seite mit der Variable hebt sich etwas weg.',
   // spitzer Winkel als Buchstabe (Teil 8b)
