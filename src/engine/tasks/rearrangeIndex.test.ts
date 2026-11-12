@@ -1,15 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { solveTask } from '../rearrange/isolate.ts'
 import { REARRANGE_BLOCKS } from './blocks.ts'
-import { rearrangeForm } from './forms.ts'
 import { rearrangeTaskBlocks } from './rearrangeBlocks.ts'
 import { REARRANGE_COMBOS } from './rearrangeCombos.ts'
 import { REARRANGE_INDEX_CODES, REARRANGE_INDEX_WIDTH } from './rearrangeIndex.ts'
 import { INDEX_ALPHABET, REARRANGE_INDEX_LEVELS } from './rearrangeIndexFormat.ts'
-import { indexSize, indexedBlocks, nextRearrangeSeed, rearrangePool } from './rearrangePick.ts'
+import { indexSize, indexedBlocks, nextRearrangeSeed, rearrangeMains, rearrangePool, rearrangeSeedBlocks } from './rearrangePick.ts'
 import { generateRearrangeTask } from './rearrangeTerms.ts'
 import { LEVELS } from './taskNumber.ts'
-import { varietyStats } from './variety.ts'
 
 // Verzeichnis der Umstell-Aufgaben nach Bausteinen (M6 Schritt 3, scripts/rearrange-index.ts)
 
@@ -57,7 +55,7 @@ describe('Neue Umstell-Aufgabe zu angekreuzten Bausteinen', () => {
     const pair = new Set(['wurzeln', 'brueche'])
     for (let i = 0; i < 40; i++) {
       const seed = nextRearrangeSeed(3, pair)
-      for (const id of indexedBlocks(3, seed)!) expect(pair.has(id)).toBe(true)
+      for (const id of rearrangeSeedBlocks(3, seed)!) expect(pair.has(id)).toBe(true)
     }
     // die Aufgabe selbst hat diese Bausteine (nicht nur das Verzeichnis)
     const seed = nextRearrangeSeed(5, chosen)
@@ -65,26 +63,12 @@ describe('Neue Umstell-Aufgabe zu angekreuzten Bausteinen', () => {
     expect(rearrangeTaskBlocks(task, solveTask(task)!)).toEqual(['det'])
   })
 
-  it('ohne Auswahl eine beliebige Nummer wie bisher, ohne passende Aufgabe ebenfalls', () => {
-    const seeds = Array.from({ length: 30 }, () => nextRearrangeSeed(4))
-    expect(seeds.some((seed) => seed > REARRANGE_INDEX_LEVELS[4])).toBe(true)
+  it('ohne passende Aufgabe eine beliebige Nummer (die Seiten sperren den Knopf vorher)', () => {
     // Ableitungen gibt es in Stufe 5 (noch) nicht allein, Determinanten in Stufe 1 nicht
     expect(rearrangePool(5, new Set(['ableitung']))).toEqual([])
     expect(rearrangePool(1, new Set(['det']))).toEqual([])
+    expect(rearrangeMains(1, new Set(['det']))).toEqual([])
     expect(Number.isInteger(nextRearrangeSeed(1, new Set(['det'])))).toBe(true)
   })
-
-  // Abwechslung je Baustein allein (Mindestmaß für Schritt 3; die Schritte 4 und 5 bringen leichte Aufgaben je Baustein und
-  // heben es an): unter bis zu 100 Aufgaben mindestens 20 Formen (bei weniger Aufgaben alle verschieden bis auf ein Fünftel),
-  // keine Form öfter als 15 von 100. Für „Alle" gelten die Kennzahlen je Stufe (rearrangeTerms.test.ts).
-  it.each(LEVELS)('bringt in Stufe %i auch mit nur einem Baustein genug verschiedene Formen', (level) => {
-    for (const block of REARRANGE_BLOCKS) {
-      const pool = rearrangePool(level, new Set([block.id]))
-      if (pool.length === 0) continue
-      const sample = pool.slice(0, 100)
-      const stats = varietyStats(sample.map((seed) => rearrangeForm({ level, seed })))
-      expect(stats.distinct, `${block.id}: Formen`).toBeGreaterThanOrEqual(Math.min(20, Math.ceil(sample.length * 0.8)))
-      expect(stats.maxShare, `${block.id}: häufigste Form`).toBeLessThanOrEqual(0.15)
-    }
-  })
+  // Abwechslung je Baustein allein und das Ziehen ohne Auswahl: rearrangeFamilies.test.ts (M6 Schritt 4)
 })

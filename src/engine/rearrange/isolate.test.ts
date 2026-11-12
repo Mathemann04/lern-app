@@ -6,7 +6,8 @@ import { type Expr, PI, div, eq, num, variable } from '../expr/types.ts'
 import { parseLatex } from '../parse/latex.ts'
 import { createRng } from '../random/rng.ts'
 import { generateRearrangeTask, isRearrangeLevelAvailable } from '../tasks/rearrangeTerms.ts'
-import { LEVELS } from '../tasks/taskNumber.ts'
+import { familyBlocks } from '../tasks/rearrangeFamilies.ts'
+import { LEVELS, blockSeed, formatTaskNumber } from '../tasks/taskNumber.ts'
 import { holds, samplePoints, withSubstitution } from './check.ts'
 import { rearrangeWrongAnswers } from './errorRules.ts'
 import { STEP_NAMES, finalForm, solveEquation, solveTask, stepEquationLatex, stepLabel } from './isolate.ts'
@@ -324,9 +325,11 @@ describe('Zufallsaufgaben je Stufe', () => {
   for (const level of levels) {
     it(`Stufe ${level}: Lösung und jeder Schritt durch Einsetzen geprüft, Endform fertig, falsche Antworten falsch`, () => {
       const seen = new Set<string>()
-      for (let seed = 1; seed <= 300; seed++) {
+      // dazu je Baustein mit eigenen Aufgaben (M6 Schritt 4) zwölf Nummern wie „exp.1-4711"
+      const seeds = [...Array.from({ length: 300 }, (_, i) => i + 1), ...familyBlocks(level).flatMap((block) => Array.from({ length: 12 }, (_, i) => blockSeed(block, i + 1)))]
+      for (const seed of seeds) {
         const { task } = generateRearrangeTask({ level, seed })
-        const label = `${level}-${seed}: ${equationToLatex(task.equation)} nach ${task.target}`
+        const label = `${formatTaskNumber({ level, seed })}: ${equationToLatex(task.equation)} nach ${task.target}`
         seen.add(label.slice(label.indexOf(':')))
         const solution = solveTask(task)
         expect(solution, label).not.toBeNull()

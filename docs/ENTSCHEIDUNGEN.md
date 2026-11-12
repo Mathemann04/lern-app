@@ -855,3 +855,28 @@ Neue Entscheidungen unten anfügen.
   höher?“ Aufgaben mit nicht angekreuzten Bausteinen); gibt es zur Auswahl in einer Stufe nichts, zeigt die Übungsseite
   einen Hinweis. „Eine Stufe höher?“ schlägt nur Stufen vor, in denen es zur Auswahl Aufgaben gibt (auch in Chemie).
 
+- 12.11.2026: M6 Schritt 4 „leichte Aufgaben je Baustein“. Gemacht für alle neun Bausteine aus „Grundlagen“ und
+  „Funktionen“ (nicht nur die fünf aus dem Plan), damit jeder davon in jeder Stufe allein übbar ist. Neue Aufgaben
+  eines einzelnen Bausteins tragen ihn in der Nummer (`exp.1-4711`); intern steckt er im Startwert (feste Nummer je
+  Baustein mal einer Million plus Startwert, `BLOCK_CODES`), damit Speicher, Adressen und Ziehen weiter mit einer Zahl
+  auskommen; deshalb kein Speicher-Umzug. Alte Nummern bauen dieselbe Aufgabe wie vorher. Wo die alten Vorlagen in einer
+  Stufe genug Aufgaben mit nur diesem Baustein haben (mindestens 100 Formen unter 200), kommen sie von dort, sonst aus
+  den neuen. Stufen je Baustein: 1 der Baustein mit ein bis zwei Schalen, 2 mit mehr Schalen oder auf beiden Seiten,
+  ab 3 der Baustein in sich selbst (e hoch e-Funktion, Wurzel in Wurzel, Logarithmus vom Logarithmus, Kettenbruch,
+  Potenz in Potenz, Umkehrfunktion um eine Winkelfunktion), nebeneinander (zwei Wurzeln, zwei Logarithmen, Sinus und
+  Kosinus) und mit mehr Schalen. Quadrate von Winkelfunktionen ($\sin^2 x + \cos^2 x$) zählen weiter auch als
+  „Quadrate und Potenzen“; ein Quadrat, das die pq-Formel löst ($x^2 + ax = y$), gehört jetzt zu „Quadratische
+  Gleichungen“ (sonst gäbe es sie nie allein). Ziehen: erst einen angekreuzten Baustein (jeder gleich oft, auch
+  ohne Auswahl), dann eine Aufgabe mit ihm, halb eigene Aufgaben des Bausteins, halb Aufgaben mit anderen
+  angekreuzten. Damit kommen bei „alle Bausteine“ in Stufe 1 auch e-Funktion, Logarithmus und Winkelfunktionen
+  dran (die Stufe sagt nur noch, wie verschachtelt). Die Art einer neuen Aufgabe steht je Nummer vorab fest, damit
+  schwer zu bauende Arten (lange Ergebnisse werden verworfen) in ihrem Anteil vorkommen. Quadratische Gleichungen
+  haben vor $x$ einen Buchstaben oder eine Zahl, sonst stünde unter der Wurzel der pq-Formel eine lange Summe. Jede
+  neue Aufgabe wird an 128 Stellen durch Einsetzen geprüft; Aufgaben, bei denen sich eine Summe mit der Variable an
+  einer Stelle fast aufhebt (dort kippt die Probe durch Rundung), werden nicht genommen.
+- 12.11.2026: Alle Unterlagen der Vorlesung MB1 durchgesehen (Wunsch des Nutzers: alle Aufgabenarten und Schemata
+  aufnehmen). Übersicht in eigenen Worten in docs/AUFGABENARTEN.md (keine Aufgabentexte, keine Zahlen aus den
+  Unterlagen). Was zu laufenden Tätigkeiten passt, kommt in M6 (neu 4b: Gleichungen wie auf den Übungsblättern mit
+  Zahlen, Logarithmen auf beiden Seiten und Formeln aus Technik und Physik; 5d Beträge nach dem Schema der Lösungen;
+  6 und 7 ergänzt); neue Tätigkeiten (Polynome, Grenzwerte, Linearisieren, Funktionen, Mengen und Summen) in M9,
+  Vektoren und Matrizen in M7.

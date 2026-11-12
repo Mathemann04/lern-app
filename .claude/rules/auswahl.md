@@ -62,5 +62,8 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   Rückfall auf alle** (`selectedParts` gibt die angekreuzten zurück, auch wenn die Stufe gesperrt ist):
   Die Übungsseite zeigt dann „Gerade gibt es hier keine Aufgabe.“ mit Hinweis und „Zur Auswahl“
   (`NoTasksForSelection` in `PracticePage.tsx`), „Eine Stufe höher?“ kommt nur, wenn die Auswahl in
-  der nächsten Stufe spielbar ist (`LevelUpSuggestion.tsx`, gilt auch für Chemie).
+  der nächsten Stufe spielbar ist (`LevelUpSuggestion.tsx`, gilt auch für Chemie). Seit Schritt 4 sind alle Bausteine
+  aus „Grundlagen“ und „Funktionen“ in jeder Stufe allein spielbar (`REARRANGE_PLAYABLE_COMBOS`); die Engine wählt erst
+  einen angekreuzten Baustein (jeder gleich oft, auch ohne Auswahl), dann eine Aufgabe mit ihm (`rearrangePick.ts`).
+  Nummern mit Baustein (`exp.1-4711`) nimmt `routes.ts` nur bei Tätigkeiten mit Bausteinen (`hasBlocks`).
 

@@ -160,8 +160,8 @@ describe('Bausteine ankreuzen (M6 Schritt 3, Gleichungen umstellen)', () => {
     expect(new Set(rearrange.parts!.map((part) => part.group))).toEqual(new Set(['grundlagen', 'funktionen', 'spaeter']))
     expect(partWords(rearrange).many).toBe('Bausteine')
     expect(partWords(atombau).many).toBe('Unterthemen')
-    // in Stufe 1 gibt es nur lineare Gleichungen
-    expect(partsAvailable(rearrange, 1).map((part) => part.id)).toEqual(['linear'])
+    // in Stufe 1 alle Bausteine aus „Grundlagen" und „Funktionen" (M6 Schritt 4), die aus späteren Kapiteln erst ab Stufe 5
+    expect(partsAvailable(rearrange, 1).map((part) => part.id)).toEqual(['linear', 'brueche', 'wurzeln', 'potenzen', 'exp', 'log', 'quadratisch', 'winkel', 'hyperbel'])
   })
 
   it('ist spielbar, wenn eine Menge der Stufe ganz angekreuzt ist, sonst nicht', () => {
@@ -171,9 +171,9 @@ describe('Bausteine ankreuzen (M6 Schritt 3, Gleichungen umstellen)', () => {
     // Ableitungen gibt es in Stufe 5 nur zusammen mit anderen Bausteinen
     expect(isSelectionPlayable(rearrange, only('ableitung'), 5)).toBe(false)
     expect(isSelectionPlayable(rearrange, only('ableitung', 'winkel'), 5)).toBe(true)
-    // Quadratische Gleichungen gibt es in Stufe 3 nur mit Wurzeln, allein nur in Stufe 4 (in Stufe 5 steckt in jeder
-    // Aufgabe ein Werkzeug)
-    expect(playableLevels(rearrange, only('quadratisch'))).toEqual([4])
+    // jeder Baustein aus „Grundlagen" und „Funktionen" allein in jeder Stufe (M6 Schritt 4)
+    expect(playableLevels(rearrange, only('quadratisch'))).toEqual([1, 2, 3, 4, 5])
+    expect(playableLevels(rearrange, only('hyperbel'))).toEqual([1, 2, 3, 4, 5])
     expect(isSelectionPlayable(rearrange, only(), 1)).toBe(false)
   })
 
@@ -199,7 +199,7 @@ describe('Bausteine ankreuzen (M6 Schritt 3, Gleichungen umstellen)', () => {
   it('nennt im Hinweis nur Stufen und Bausteine, mit denen es wirklich Aufgaben gibt', () => {
     expect(blockedHint(rearrange, only(), 3)).toBe('Kreuze mindestens einen Baustein an.')
     expect(blockedHint(rearrange, only('det'), 1)).toBe('Zu deiner Auswahl gibt es in Stufe 1 keine Aufgaben. In Stufe 5 gibt es welche.')
-    expect(blockedHint(rearrange, only('quadratisch'), 1)).toBe('Zu deiner Auswahl gibt es in Stufe 1 keine Aufgaben. In Stufe 4 gibt es welche.')
+    expect(blockedHint(rearrange, only('det', 'komplex'), 2)).toBe('Zu deiner Auswahl gibt es in Stufe 2 keine Aufgaben. In Stufe 5 gibt es welche.')
     expect(blockedHint(rearrange, only('det', 'dgl'), 3)).toBe('Zu deiner Auswahl gibt es in Stufe 3 keine Aufgaben. In Stufe 5 gibt es welche.')
     expect(blockedHint(rearrange, only('ableitung'), 5)).toMatch(/^Zu deiner Auswahl gibt es in Stufe 5 keine Aufgaben\. Kreuze dazu z\. B\. .+ an\.$/)
     expect(blockedHint(rearrange, only('ableitung'), 2)).toMatch(/^Zu deiner Auswahl gibt es in Stufe 2 keine Aufgaben\. In Stufe 5 gibt es welche, wenn du z\. B\. .+ dazu ankreuzt\.$/)

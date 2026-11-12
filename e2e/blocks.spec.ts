@@ -1,8 +1,9 @@
 import { type Page, expect, test } from '@playwright/test'
 import { REARRANGE_BLOCKS } from '../src/engine/tasks/blocks.ts'
-import { indexedBlocks, rearrangePool } from '../src/engine/tasks/rearrangePick.ts'
+import { indexedBlocks, rearrangePool, rearrangeSeedBlocks } from '../src/engine/tasks/rearrangePick.ts'
+import { parseTaskNumber } from '../src/engine/tasks/taskNumber.ts'
 
-// Gleichungen umstellen mit Bausteinen (M6 Schritt 3): ankreuzen, „nur", „Alle", „Keine", Stufe nach Verschachtelung,
+// Gleichungen umstellen mit Bausteinen (M6 Schritte 3 und 4): ankreuzen, „nur", „Alle", „Keine", Stufe nach Verschachtelung,
 // Beispiel aus der Auswahl, gesperrter Knopf mit Hinweis, Aufgaben nur aus den angekreuzten Bausteinen
 
 function collectErrors(page: Page): string[] {
@@ -106,7 +107,7 @@ test('„nur Determinanten": in Stufe 1 gesperrt mit Hinweis, Stufe 5 wählen, A
   await expectCleanPage(page, 'Aufgabe')
 
   await page.goto('./')
-  await expect(page.getByRole('region', { name: /Weitermachen|Los geht’s/ })).toContainText('1 von 16 Bausteinen angekreuzt')
+  await expect(page.getByRole('region', { name: /Weitermachen|Los geht’s/ })).toContainText('1 von 17 Bausteinen angekreuzt')
   expect(errors).toEqual([])
 })
 
@@ -132,26 +133,49 @@ test('„Keine", ein Baustein, der allein nicht reicht, und „Alle"', async ({ 
 
 test('Übungsseite ohne Aufgabe zur Auswahl: Hinweis statt einer Aufgabe mit anderen Bausteinen', async ({ page }) => {
   const errors = collectErrors(page)
-  // nur Brüche: in Stufe 4 gibt es dazu keine Aufgabe (z. B. nach „Eine Stufe höher?" oder einer alten Adresse)
-  await seed(page, ['brueche'], 4)
-  await page.goto('./#/ueben/umstellen/4')
+  // nur Ableitungen: in Stufe 5 gibt es dazu keine Aufgabe allein (z. B. nach einer alten Adresse)
+  await seed(page, ['ableitung'], 5)
+  await page.goto('./#/ueben/umstellen/5')
   await expect(page.getByRole('heading', { name: 'Gerade gibt es hier keine Aufgabe.' })).toBeVisible()
-  // in Stufe 4 gibt es Brüche nur zusammen mit anderen Bausteinen: der Hinweis nennt solche
-  await expect(page.getByTestId('no-tasks')).toHaveText('Zu deiner Auswahl gibt es in Stufe 4 keine Aufgaben. Kreuze dazu z. B. e-Funktion, Logarithmus oder Quadratische Gleichungen an.')
-  await expect(page).toHaveURL(/#\/ueben\/umstellen\/4$/)
+  // Ableitungen gibt es nur zusammen mit anderen Bausteinen: der Hinweis nennt solche
+  await expect(page.getByTestId('no-tasks')).toHaveText(/^Zu deiner Auswahl gibt es in Stufe 5 keine Aufgaben\. Kreuze dazu z\. B\. .+ an\.$/)
+  await expect(page).toHaveURL(/#\/ueben\/umstellen\/5$/)
   await page.getByRole('link', { name: 'Zur Auswahl' }).click()
   await expect(page).toHaveURL(/#\/thema\/umstellen$/)
   await expectCleanPage(page, 'Hinweis')
   expect(errors).toEqual([])
 })
 
-test('„Eine Stufe höher?" nur, wenn es in der nächsten Stufe Aufgaben zur Auswahl gibt', async ({ page }) => {
-  // neun Aufgaben ohne Fehler in Stufe 3 mit nur Brüchen; Stufe 4 hat dazu keine Aufgaben
+test('„Eine Stufe höher?", wenn es in der nächsten Stufe Aufgaben zur Auswahl gibt (Brüche gibt es jetzt in jeder Stufe)', async ({ page }) => {
+  // neun Aufgaben ohne Fehler in Stufe 3 mit nur Brüchen
   const clean = Array.from({ length: 9 }, (_, i) => ({ course: 'umstellen', level: 3, mode: 'guided', clean: true, at: i + 1 }))
   await seed(page, ['brueche'], 3, clean)
   await page.goto(`./#/ueben/umstellen/3-${rearrangePool(3, new Set(['brueche']))[0]}`)
   await solveWholeTask(page)
   await expect(page.getByRole('link', { name: 'Nächste Aufgabe' })).toBeVisible()
-  await expect(page.getByRole('region', { name: 'Eine Stufe höher?' })).toHaveCount(0)
+  await expect(page.getByRole('region', { name: 'Eine Stufe höher?' })).toBeVisible()
 })
 
+test('„nur e-Funktion" in Stufe 1 (M6 Schritt 4): leichte Aufgabe nur mit e-Funktion, Nummer mit Baustein, auch frei', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./#/thema/umstellen')
+  await blocks(page).getByRole('button', { name: 'Nur e-Funktion' }).click()
+  await expect(page.getByRole('radio', { name: /^Stufe 1: Einstieg/ })).toBeChecked()
+  await expect(start(page)).toHaveText('Stufe 1 geführt üben · 1 Baustein')
+  await expect(example(page).locator('.katex').first()).toBeVisible()
+  await start(page).click()
+  await expect(page).toHaveURL(/#\/ueben\/umstellen\/exp\.1-\d+$/)
+  const number = /(exp\.1-\d+)$/.exec(page.url())![1]
+  expect(rearrangeSeedBlocks(1, parseTaskNumber(number)!.seed)).toEqual(['exp'])
+  await expect(page.getByText(`Aufgabe ${number}`)).toBeVisible()
+  await expectCleanPage(page, 'Aufgabe')
+  await solveWholeTask(page)
+  await page.getByRole('link', { name: 'Nächste Aufgabe' }).click()
+  await expect(page).toHaveURL(/#\/ueben\/umstellen\/exp\.1-\d+$/)
+
+  // dieselbe Nummer frei: Tastatur mit e hoch x
+  await page.goto(`./#/frei/umstellen/${number}`)
+  await expect(page.locator('math-field[data-ready]')).toBeVisible()
+  await expectCleanPage(page, 'frei')
+  expect(errors).toEqual([])
+})

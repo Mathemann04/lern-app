@@ -4,7 +4,9 @@ import { type Expr, IMAG, add, div, eq, mul, neg, num, pow, sub, variable } from
 import { parseLatex } from '../parse/latex.ts'
 import type { RearrangeTask } from '../rearrange/task.ts'
 import { absOf, angleOf, argOf, dotOf } from '../rearrange/tools/tool.ts'
+import { familyBlocks } from '../tasks/rearrangeFamilies.ts'
 import { generateRearrangeTask } from '../tasks/rearrangeTerms.ts'
+import { blockSeed, formatTaskNumber } from '../tasks/taskNumber.ts'
 import { type RearrangeVerdict, checkRearrangeAnswer, prepareRearrangeCheck, prepareRearrangeFree, rearrangeFreeVerdict } from './rearrangeAnswer.ts'
 
 const p = (latex: string): Expr => {
@@ -184,6 +186,27 @@ describe('Umstellen frei: Zufallsaufgaben der Stufen 1 bis 4', () => {
         expect(context.points.length, label).toBeGreaterThanOrEqual(12)
         expect(checkRearrangeAnswer(context, result), `${label}: ${result}`).toEqual({ kind: 'correct' })
         expect(checkRearrangeAnswer(context, `${t.target} = ${result}`), label).toEqual({ kind: 'correct' })
+        for (const w of context.wrongs) {
+          if (!w.result) continue
+          const verdict = checkRearrangeAnswer(context, toLatex(w.result))
+          expect(verdict.kind, `${label}: ${w.rule.id} ${toLatex(w.result)}`).toBe('knownError')
+        }
+      }
+    }, 60_000)
+  }
+})
+
+// Aufgaben einzelner Bausteine (M6 Schritt 4): je Baustein und Stufe sechs Nummern wie „exp.1-4711"
+describe('Umstellen frei: Aufgaben einzelner Bausteine', () => {
+  for (const level of [1, 2, 3, 4, 5] as const) {
+    it(`Stufe ${level}: Lösung richtig, falsche Ergebnisse als Fehler erkannt`, () => {
+      for (const seed of familyBlocks(level).flatMap((block) => Array.from({ length: 6 }, (_, i) => blockSeed(block, i + 1)))) {
+        const t = generateRearrangeTask({ level, seed }).task
+        const context = prepareRearrangeCheck(t, level >= 4)
+        const label = `${formatTaskNumber({ level, seed })}: ${toLatex(t.equation.lhs)} = ${toLatex(t.equation.rhs)}`
+        const result = toLatex(context.solution.result)
+        expect(context.points.length, label).toBeGreaterThanOrEqual(12)
+        expect(checkRearrangeAnswer(context, result), `${label}: ${result}`).toEqual({ kind: 'correct' })
         for (const w of context.wrongs) {
           if (!w.result) continue
           const verdict = checkRearrangeAnswer(context, toLatex(w.result))

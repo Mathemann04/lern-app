@@ -58,8 +58,12 @@ describe('Bausteine einer Umstell-Aufgabe', () => {
     expect(latex('\\ln(x+a)', 'y')).toEqual(['log'])
   })
 
-  it('Quadratische Gleichungen: Substitution und pq-Formel im Rechenweg', () => {
+  it('Quadratische Gleichungen: Substitution und pq-Formel im Rechenweg; ein Quadrat, das die pq-Formel löst, gehört dazu', () => {
     expect(latex('e^{2x}-ae^{x}', 'b')).toEqual(['exp', 'quadratisch'])
+    expect(latex('x^{2}+ax', 'y')).toEqual(['quadratisch'])
+    expect(latex('x(x+a)', 'y')).toEqual(['quadratisch'])
+    // x^4 und x^2: nach der Substitution noch Wurzel ziehen
+    expect(latex('x^{4}-ax^{2}', 'b')).toEqual(['potenzen', 'quadratisch'])
   })
 
   it('Winkel- und Hyperbelfunktionen', () => {
