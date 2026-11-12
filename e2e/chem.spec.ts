@@ -597,7 +597,7 @@ test('Chemie: Klausuraufgabe 4 üben, alle Teile beantworten, abgeben, Auswertun
   await expectCleanPage(page, 'Klausuraufgabe 4')
 
   // Abgeben mit offenen Fragen fragt nach
-  await page.getByRole('button', { name: 'Abgeben' }).click()
+  await page.getByRole('button', { name: 'Abgeben', exact: true }).click()
   await expect(page.getByText(/Fragen offen/)).toBeVisible()
 
   // die Gleichung schreibt man in der Klausur selbst: erst auf Papier lösen, dann die Antworten zeigen
@@ -610,7 +610,7 @@ test('Chemie: Klausuraufgabe 4 üben, alle Teile beantworten, abgeben, Auswertun
     await open.first().getByRole('button').first().click()
   }
   await expect(page.getByText('Kommt, sobald die Fragen davor beantwortet sind.')).toHaveCount(0)
-  await page.getByRole('button', { name: 'Abgeben' }).click()
+  await page.getByRole('button', { name: 'Abgeben', exact: true }).click()
   await expect(page.getByTestId('exam-score')).toHaveText(/^\d+(,5)? von 14 Punkten$/)
   await expect(page.getByText('Punkte nach dem Schema der App, Teilpunkte geschätzt.')).toBeVisible()
   await expectCleanPage(page, 'Auswertung')
@@ -737,7 +737,7 @@ test('Chemie: Klausuraufgabe 3 üben, Lewis-Formeln als Bilder, abgeben, Auswert
   await expectCleanPage(page, 'Klausuraufgabe 3')
   // jeweils die erste Antwort wählen und abgeben
   for (let i = 0; i < 12; i++) await items.nth(i).getByRole('group', { name: 'Antworten' }).getByRole('button').first().click()
-  await page.getByRole('button', { name: 'Abgeben' }).click()
+  await page.getByRole('button', { name: 'Abgeben', exact: true }).click()
   await expect(page.getByTestId('exam-score')).toHaveText(/^\d+(,5)? von 12 Punkten$/)
   await expectCleanPage(page, 'Auswertung Klausuraufgabe 3')
   expect(errors).toEqual([])
@@ -787,7 +787,7 @@ test('Chemie: Klausuraufgabe 1 üben, Wissensfragen und Rechnungen, abgeben, Aus
   await expectCleanPage(page, 'Klausuraufgabe 1')
   // jeweils die letzte Antwort wählen und abgeben
   for (let i = 0; i < count; i++) await items.nth(i).getByRole('group', { name: 'Antworten' }).getByRole('button').last().click()
-  await page.getByRole('button', { name: 'Abgeben' }).click()
+  await page.getByRole('button', { name: 'Abgeben', exact: true }).click()
   await expect(page.getByTestId('exam-score')).toHaveText(/^\d+(,5)? von 8 Punkten$/)
   await expectCleanPage(page, 'Auswertung Klausuraufgabe 1')
   expect(errors).toEqual([])
@@ -835,7 +835,7 @@ test('Chemie: Klausuraufgabe 2 üben, Periodensystem, abgeben, Auswertung mit Pu
   expect(count).toBeGreaterThanOrEqual(5)
   await expectCleanPage(page, 'Klausuraufgabe 2')
   for (let i = 0; i < count; i++) await items.nth(i).getByRole('group', { name: 'Antworten' }).getByRole('button').first().click()
-  await page.getByRole('button', { name: 'Abgeben' }).click()
+  await page.getByRole('button', { name: 'Abgeben', exact: true }).click()
   await expect(page.getByTestId('exam-score')).toHaveText(/^\d+(,5)? von 6 Punkten$/)
   await expectCleanPage(page, 'Auswertung Klausuraufgabe 2')
   expect(errors).toEqual([])
@@ -885,7 +885,7 @@ test('Chemie: Klausuraufgabe 5 üben, Gleichgewicht und Energie, abgeben, Auswer
   await expect(page.getByTestId('paper-first')).toHaveCount(1)
   await revealPaperFirst(page)
   for (let i = 0; i < count; i++) await items.nth(i).getByRole('group', { name: 'Antworten' }).getByRole('button').first().click()
-  await page.getByRole('button', { name: 'Abgeben' }).click()
+  await page.getByRole('button', { name: 'Abgeben', exact: true }).click()
   await expect(page.getByTestId('exam-score')).toHaveText(/^\d+(,5)? von 10 Punkten$/)
   await expectCleanPage(page, 'Auswertung Klausuraufgabe 5')
   expect(errors).toEqual([])

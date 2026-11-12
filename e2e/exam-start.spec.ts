@@ -128,7 +128,7 @@ test('Klausur-Überblick: nach einer geübten Klausuraufgabe mit Stufe, Probekla
   // Klausuraufgabe 2 üben und ohne Antwort abgeben: 0 Punkte, unsicher
   await page.getByRole('link', { name: 'Klausuraufgabe 2 üben' }).click()
   await expect(page).toHaveURL(/#\/klausur\/chemie\/aufgabe\/2\/\d+$/)
-  await page.getByRole('button', { name: 'Abgeben' }).click()
+  await page.getByRole('button', { name: 'Abgeben', exact: true }).click()
   await page.getByRole('button', { name: 'Ja, abgeben' }).click()
   await expect(page.getByTestId('exam-score')).toHaveText('0 von 6 Punkten')
   const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('rechenweg-klausuraufgaben') ?? '[]') as { task: number; points: number; max: number }[])

@@ -153,7 +153,7 @@ test('Chemie: Klausuraufgabe 4 frei, Zahlen eintippen, eine grob gerundet, abgeb
     answers[item.id] = numberAnswer(text)
   }
   await expect(page.getByText('Kommt, sobald die Fragen davor beantwortet sind.')).toHaveCount(0)
-  await page.getByRole('button', { name: 'Abgeben' }).click()
+  await page.getByRole('button', { name: 'Abgeben', exact: true }).click()
   const result = gradeExam(task, answers)
   await expect(page.getByTestId('exam-score')).toHaveText(`${String(result.points).replace('.', ',')} von 14 Punkten`)
   await expect(page.getByText('Knapp daneben: Prüfe deine Rundung. Das gibt hier trotzdem die vollen Punkte.')).toBeVisible()
