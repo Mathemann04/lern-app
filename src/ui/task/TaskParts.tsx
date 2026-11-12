@@ -114,9 +114,11 @@ export function SkipNotice({ course, seed }: { course: string; seed: number }) {
     const timer = setTimeout(() => setVisible(false), 4000)
     return () => clearTimeout(timer)
   }, [visible])
+  // nur da, solange er zu sehen ist: Ein leerer Meldebereich in jeder Aufgabe stünde neben dem von „Frage melden"
+  if (!visible) return null
   return (
-    <p role="status" className={visible ? 'animate-step-in rounded-xl bg-zinc-100 px-4 py-2 text-sm text-zinc-700' : 'sr-only'}>
-      {visible ? 'Aufgabe übersprungen. Hier ist die nächste.' : ''}
+    <p role="status" className="animate-step-in rounded-xl bg-zinc-100 px-4 py-2 text-sm text-zinc-700">
+      Aufgabe übersprungen. Hier ist die nächste.
     </p>
   )
 }
