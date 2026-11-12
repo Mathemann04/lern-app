@@ -1248,7 +1248,8 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   stärkere Mehrfachbindungen; CaF₂ und Ca₃(PO₄)₂ als Aufgaben des
   Übungsblatts ausgeschlossen und auf Karten durch andere Salze ersetzt.
   Offen bleiben die Gegenprobe mit dem Lehrbuch und Übungsblätter zu
-  Gleichgewicht und Energie (nicht hochgeladen).
+  Gleichgewicht und Energie (nicht hochgeladen). Nachtrag 12.11.2026: Gegenprobe mit
+  Lehrbuch Kapitel 8 erledigt (docs/AUFGABENARTEN-CHEMIE.md), alle Werte passen.
 - **S11: Klausur-Start** (12.11.2026). Auf der Startseite steht im Fach
   ganz oben die Karte „Klausur Teil 1“ mit „Wiederholen“ (Zahl der heute
   fälligen Fragen über alle Themen und Stufen; startet sie direkt, jeweils in
@@ -1334,7 +1335,8 @@ braucht es erst für N3 und N4.
 - **N3: Säuren und Basen** (Skript nötig), „Klausuraufgabe 6 üben“.
 - **N4: Redox und Elektrochemie** (Skript nötig), „Klausuraufgabe 7 üben“,
   Probeklausur Teil 2.
-- **N5: Abschluss.** „Gezielt üben“ für jeden typischen Fehler (ein Test
+- **N5: Abschluss.** Neu aus „Unterlagen sichten“ (12.11.2026, docs/AUFGABENARTEN-CHEMIE.md): Rechenart
+  „Ladungsbilanz“ bei Ionenbindung (Formel mit mehr als zwei Ionensorten auf Neutralität prüfen). „Gezielt üben“ für jeden typischen Fehler (ein Test
   prüft alle); „Abwechslung je Stufe“ in der Galerie; Design-Durchgang über
   alle Seiten in Handy- und Laptopgröße, hell und dunkel; Offline-Test;
   Doku; M4 abhaken.

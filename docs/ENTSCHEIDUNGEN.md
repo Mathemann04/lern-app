@@ -902,3 +902,24 @@ Neue Entscheidungen unten anfügen.
   dasselbe Zeichen, weil MathLive aus getipptem „epsilon“ $\epsilon$ macht. Bedeutungen genauer (waagrechter Abstand,
   eingetauchtes Volumen, noch nicht zerfallene Kerne).
 
+- 12.11.2026: Unterlagen zu Technische Mechanik 1 durchgesehen (Skripte Kapitel 1 bis 8, Übungsblätter 9 bis 19).
+  Übersicht in eigenen Worten in docs/MECHANIK.md, dazu die Schreibweisen und Vorzeichenregeln, die die App genauso
+  verwenden muss (Drehsinn gegen den Uhrzeigersinn positiv, Unbekannte positiv angenommen, Fachwerkstäbe als Zug,
+  bei Schnittgrößen $z$ nach unten und positives Schnittufer, Diagramme positiv nach unten). Stabkräfte heißen in der
+  App einheitlich $S_i$, weil das Skript zwei Schreibweisen mischt. Lagerreaktionen stehen in Aufgaben immer mit ihrer
+  eingezeichneten Bezugsrichtung da, weil die Unterlagen an einer Stelle Werte mit verschiedenen Vorzeichen zeigen.
+  Für Reibung gibt es kein Skript; vor dem Bau wird der Maßstab geklärt (Skript nachreichen oder frei zugängliches
+  Lehrbuch). M11 bleibt am Ende der Reihenfolge.
+- 12.11.2026: Unterlagen zu Physik MB1a durchgesehen (Einführung, Kinematik 1 und 2, Kräfte, Übungsblätter 1 bis 4
+  mit Lösungen, Mindmap zum Lösen, Formelsammlung). Übersicht in eigenen Worten in docs/PHYSIK.md (keine Aufgabentexte,
+  keine Zahlen, keine Namen). In der Formelsammlung fehlt bei der Gipfelhöhe des schiefen Wurfs der Faktor ½, und die
+  Lösungen haben einzelne Tippfehler: Richtig ist in Physik, was die Engine nachrechnet, nicht die Formelsammlung. Vektoren
+  und Koordinaten bleiben Mathe (M7), Physik wendet sie nur an. Der geführte Modus in Physik folgt dem Vorgehen der
+  Vorlesung (gegeben/gesucht, Achse, Formel wählen, allgemein umstellen, einsetzen, prüfen). Die Aufteilung von M10 in
+  Tätigkeiten ist nur ein Vorschlag und wird im Plan zu M10 entschieden.
+- 12.11.2026: Werkstoffkunde-Unterlagen gesichtet (Kapitel 1 bis 7 mit Aufgabenblättern, alle Seiten, je Kapitel ein
+  Helfer). Übersicht in eigenen Worten in docs/WERKSTOFFKUNDE.md, aufgebaut wie docs/AUFGABENARTEN.md, je Kapitel mit
+  Inhalten, Formeln, Rechenschemata mit Fallen, Aufgabenarten, Denkfehlern, Bildern aus Daten und Unklarem. Festlegungen
+  für M5: Wo Folienwerte von freien Tabellenwerken abweichen, gilt die Tabelle; Werte nur aus der Vorlesung werden als
+  Richtwert gekennzeichnet; Bilder der Folien werden nie nachgezeichnet; in Formeln eindeutige Zeichen (z. B. $c_0$ für
+  die Legierung statt des L der Vorlesung). Vier Fragen an den Nutzer stehen am Ende der Übersicht.
