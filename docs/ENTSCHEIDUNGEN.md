@@ -902,3 +902,10 @@ Neue Entscheidungen unten anfügen.
   dasselbe Zeichen, weil MathLive aus getipptem „epsilon“ $\epsilon$ macht. Bedeutungen genauer (waagrechter Abstand,
   eingetauchtes Volumen, noch nicht zerfallene Kerne).
 
+- 12.11.2026: Unterlagen zu Physik MB1a durchgesehen (Einführung, Kinematik 1 und 2, Kräfte, Übungsblätter 1 bis 4
+  mit Lösungen, Mindmap zum Lösen, Formelsammlung). Übersicht in eigenen Worten in docs/PHYSIK.md (keine Aufgabentexte,
+  keine Zahlen, keine Namen). In der Formelsammlung fehlt bei der Gipfelhöhe des schiefen Wurfs der Faktor ½, und die
+  Lösungen haben einzelne Tippfehler: Richtig ist in Physik, was die Engine nachrechnet, nicht die Formelsammlung. Vektoren
+  und Koordinaten bleiben Mathe (M7), Physik wendet sie nur an. Der geführte Modus in Physik folgt dem Vorgehen der
+  Vorlesung (gegeben/gesucht, Achse, Formel wählen, allgemein umstellen, einsetzen, prüfen). Die Aufteilung von M10 in
+  Tätigkeiten ist nur ein Vorschlag und wird im Plan zu M10 entschieden.
