@@ -76,3 +76,9 @@ Teil der Mathe-Engine `src/engine/` (reines TypeScript, ohne React).
     $a \neq c$."; Logarithmen auf beiden Seiten (M6 4b-2): Weichen mit eigener Frage und Irrwegen für Basiswechsel,
     Faktor als Hochzahl, Zahl als Logarithmus und Entlogarithmieren, Lernkarte `rearrange-log-equation`). Gemeinsame Typen in `guided/types.ts`
   - `errorCatalog.ts`: typische Fehler aller Themen mit Namen, je Thema
+  - Gleichungen mit Zahlen (M6 Schritt 4b-3): Schritt `probe` als „Setze $x = 4$ in die Gleichung der Aufgabe ein. Ist es
+    eine Lösung?“ mit Ja / Nein: Scheinlösung / Nein: nicht im Definitionsbereich (`probeStep`; „Ja“ bei einer verworfenen
+    Zahl ist `eq-spurious-root`, die anderen falschen Gründe nur mit `PROBE_WHY`), unter „Bisher“ „$x = 0$ entfällt“;
+    `rootNegative` als „Wie geht es weiter?“ mit „Keine Lösung“, „Beide Seiten quadrieren“ (`eq-root-negative-squared`) und
+    „Das Minus weglassen“; am Ende steht das Ergebnis bzw. $\mathbb{L} = \{\,\}$ unter „Bisher“; Lernkarte
+    `rearrange-number-equation`

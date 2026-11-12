@@ -124,3 +124,7 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
     „Betrag und Winkel komplexer Zahlen", „Vektoren: Länge, Skalarprodukt, Winkel",
     „Additionstheoreme"),
     durchgerechnete Beispiele in `rearrangeExample.ts`
+  - Freier Modus bei Gleichungen mit Zahlen (M6 Schritt 4b-3, `checkNumberAnswer` in `check/rearrangeAnswer.ts`): eine
+    Zahl oder „Keine Lösung“ (Knopf, Eingabe `NO_SOLUTION_INPUT` aus `check/freeTask.ts`, `FreeTask.noSolution`); eine von
+    der Probe verworfene Zahl ist `eq-spurious-root` mit Erklärung `PROBE_WHY.kept`; „Keine Lösung“, obwohl es eine gibt,
+    bzw. eine Zahl, obwohl es keine gibt: Hinweis auf die Probe, ohne die Lösung zu verraten

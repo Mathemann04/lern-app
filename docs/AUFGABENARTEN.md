@@ -248,6 +248,11 @@ Grundlage: Skript-Kapitel 6 (und 1.8 für Gauß), Blätter 4 und 12, Übung 6, j
 - M6 Schritt 4b-2 (12.11.2026): Logarithmen auf beiden Seiten mit Zahl und Faktor, verschiedene Basen über den
   Basiswechsel (Basen wie 2 und 4 auf die kleinere, sonst auf $\ln$), danach linear oder quadratisch; mit Buchstaben
   (Gleichungen mit Zahlen kommen in 4b-3).
+- M6 Schritt 4b-3 (12.11.2026): Gleichungen mit Zahlen mit Probe in der Ausgangsgleichung: Wurzel gleich Zahl (auch gleich
+  einer negativen Zahl: keine Lösung), Wurzel gleich Term mit $x$ und zwei Wurzeln (Scheinlösung), $x$ und $\sqrt{x}$,
+  Brüche mit verbotenem Wert und Hauptnenner, Logarithmen mit Lösung außerhalb des Definitionsbereichs, $e^{2x}$ und
+  $e^{x}$ ($u \le 0$ verwerfen). Lösung eine ganze Zahl, ein einfacher Bruch oder $\ln$ einer Zahl. Noch offen: zwei
+  Lösungen als Lösungsmenge und Wurzel aus einem Betrag (mit 5d).
 - Alles Übrige ist in docs/PLAN-M6.md (4b-3, 5d, 6, 7) und docs/ROADMAP.md (M7, M9)
   eingeplant. Neu nach der Sichtung (12.11.2026):
   - Exponentialgleichungen und Umkehrfunktionen für 4b

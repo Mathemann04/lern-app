@@ -1,6 +1,7 @@
 import { REARRANGE_BLOCKS } from './blocks.ts'
 import { FORMULA_TASKS } from './formulas.ts'
 import { LOG_EQUATION_KINDS, type LogEquationKind, logEquationKind } from './logEquationKinds.ts'
+import { NUMBER_EQUATION_KINDS, type NumberEquationKind, numberEquationKind } from './numberEquationKinds.ts'
 import { REARRANGE_COMBOS } from './rearrangeCombos.ts'
 import { hasRearrangeFamily } from './rearrangeFamilies.ts'
 import { REARRANGE_INDEX_CODES, REARRANGE_INDEX_WIDTH } from './rearrangeIndex.ts'
@@ -111,18 +112,41 @@ function logEquationSeed(level: Level, kinds: readonly LogEquationKind[], random
   return null
 }
 
+// Anteil der Gleichungen mit Zahlen (numberEquationKinds.ts, M6 Schritt 4b-3), wo es zum Baustein welche gibt
+export const NUMBER_EQUATION_SHARE = 0.25
+
+// Arten der Gleichungen mit Zahlen der Stufe mit dem Baustein main, deren Bausteine alle in blocks stehen
+export function numberEquationPool(level: Level, blocks: ReadonlySet<string>, main: string): NumberEquationKind[] {
+  return NUMBER_EQUATION_KINDS.filter((kind) => kind.level === level && kind.blocks.includes(main) && kind.blocks.every((id) => blocks.has(id)))
+}
+
+// Nummer (ab 1) einer Gleichung mit Zahlen, deren Art in kinds steht
+function numberEquationSeed(level: Level, kinds: readonly NumberEquationKind[], random: () => number): number | null {
+  for (let i = 0; i < 400; i++) {
+    const s = 1 + Math.floor(random() * MAX_SEED)
+    const kind = numberEquationKind(level, s)
+    if (kind && kinds.includes(kind)) return s
+  }
+  return null
+}
+
 // Bausteine der Auswahl, zu denen es in der Stufe Aufgaben gibt (in der Reihenfolge der Liste)
 export function rearrangeMains(level: Level, blocks: ReadonlySet<string> = ALL_BLOCKS): string[] {
   return REARRANGE_BLOCKS.map((block) => block.id).filter(
     (id) =>
       blocks.has(id) &&
-      (hasRearrangeFamily(id, level) || mainPool(level, blocks, id).length > 0 || formulaPool(level, blocks, id).length > 0 || logEquationPool(level, blocks, id).length > 0),
+      (hasRearrangeFamily(id, level) ||
+        mainPool(level, blocks, id).length > 0 ||
+        formulaPool(level, blocks, id).length > 0 ||
+        logEquationPool(level, blocks, id).length > 0 ||
+        numberEquationPool(level, blocks, id).length > 0),
   )
 }
 
 // Nummer einer neuen Aufgabe: erst einen angekreuzten Baustein wählen (jeder gleich oft, ohne Auswahl alle), dann eine
 // Aufgabe mit ihm, deren Bausteine alle angekreuzt sind: etwa jede fünfte eine Formel aus Technik und Physik (wo es zum
-// Baustein in der Stufe welche gibt), von den übrigen etwa jede vierte mit Logarithmen auf beiden Seiten (ebenso), sonst halb eigene Aufgaben des Bausteins (wo es sie gibt), halb aus dem
+// Baustein in der Stufe welche gibt), von den übrigen etwa jede vierte mit Logarithmen auf beiden Seiten (ebenso), davon
+// übrig etwa jede vierte eine Gleichung mit Zahlen (ebenso), sonst halb eigene Aufgaben des Bausteins (wo es sie gibt), halb aus dem
 // Verzeichnis. Gibt es zur Auswahl in der Stufe keine Aufgabe, eine beliebige alte Nummer (die Seiten sperren den
 // Üben-Knopf vorher).
 export function nextRearrangeSeed(level: Level, blocks?: ReadonlySet<string>, random: () => number = Math.random): number {
@@ -140,6 +164,12 @@ export function nextRearrangeSeed(level: Level, blocks?: ReadonlySet<string>, ra
     const s = logEquationSeed(level, logKinds, random)
     if (s !== null) return blockSeed('logeq', s)
   }
+  // Gleichungen mit Zahlen (M6 Schritt 4b-3): von den übrigen etwa jede vierte
+  const numberKinds = numberEquationPool(level, chosen, main)
+  if (numberKinds.length > 0 && ((!own && pool.length === 0) || random() < NUMBER_EQUATION_SHARE)) {
+    const s = numberEquationSeed(level, numberKinds, random)
+    if (s !== null) return blockSeed('zahlen', s)
+  }
   if (own && (pool.length === 0 || random() < FAMILY_SHARE)) return blockSeed(main, 1 + Math.floor(random() * MAX_SEED))
   return pool[Math.floor(random() * pool.length)]
 }
@@ -153,6 +183,7 @@ export function rearrangeSeedBlocks(level: Level, seed: number): readonly string
     return task && task.level === level ? task.blocks : indexedBlocks(level, own.s)
   }
   if (own?.block === 'logeq') return logEquationKind(level, own.s)?.blocks ?? indexedBlocks(level, own.s)
+  if (own?.block === 'zahlen') return numberEquationKind(level, own.s)?.blocks ?? indexedBlocks(level, own.s)
   if (own) return hasRearrangeFamily(own.block, level) ? [own.block] : indexedBlocks(level, own.s)
   return indexedBlocks(level, seed)
 }

@@ -385,11 +385,20 @@ describe('Lernkarten: Gleichungen umstellen', () => {
     const example = cardExample(e)
     const solution = solveTask(e)!
     expect(example.result).toEqual(solution.result)
-    expect(example.lines.length).toBe(solution.steps.length)
+    // Gleichungen mit Zahlen (M6 Schritt 4b-3): zum Schluss die Lösung bzw. die leere Lösungsmenge
+    expect(example.lines.length).toBe(solution.steps.length + (e.numeric ? 1 : 0))
     expect(latexProblem(example.functionLatex, { checkUgly: false })).toBeNull()
     for (const line of example.lines) {
-      expect(latexProblem(line.latex), line.latex).toBeNull()
+      // in der Probe steht die eingesetzte Zahl, auch als 2 \cdot 1
+      expect(latexProblem(line.latex, line.label.startsWith('Probe') ? { checkUgly: false } : undefined), line.latex).toBeNull()
       expectRenderable(line.label, id)
+    }
+    // Gleichungen mit Zahlen (M6 Schritt 4b-3): Die Lösung erfüllt jede Zeile (die Probe und die pq-Formel zeigen andere Zahlen)
+    if (e.numeric) {
+      if (solution.none) return
+      const at = withSubstitution([{ [e.target]: evaluate(solution.result, {}) }], solution.substitution)[0]
+      for (const step of solution.steps) if (!['probe', 'pq', 'choose'].includes(step.kind)) expect(holds(step.after, at), id).toBe(true)
+      return
     }
     // Gegenprobe durch Einsetzen: jede Zeile hat dieselbe Lösung
     const points = withSubstitution(samplePoints(e, solution.result, createRng(id), 12, solution.requires), solution.substitution)

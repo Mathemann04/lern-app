@@ -2,6 +2,7 @@ import { planRearrangeTask } from '../guided/rearrangePlan.ts'
 import type { Rng } from '../random/rng.ts'
 import { REARRANGE_TEMPLATES, likelyRearrangeTemplate } from './rearrangeTerms.ts'
 import { hasLogEquations } from './logEquationKinds.ts'
+import { hasNumberEquations } from './numberEquationKinds.ts'
 import { type Level, MAX_SEED, type TaskRef, blockSeed } from './taskNumber.ts'
 
 // Gezieltes Üben beim Umstellen (M3, Schritt 9): eine Aufgabe, in der ein bestimmter typischer Fehler im
@@ -21,7 +22,14 @@ const shows = (ref: TaskRef, errorId: string) => planRearrangeTask(ref, errorId)
 // Fehler, die nur bei Logarithmen auf beiden Seiten vorkommen (M6 Schritt 4b-2): nur unter Nummern wie „logeq.2-4711“
 export const LOG_EQUATION_ERRORS: ReadonlySet<string> = new Set(['eq-log-base-flipped', 'eq-log-base-quotient', 'eq-log-power-factor', 'eq-log-number-plain', 'eq-log-number-inside'])
 
+// Fehler, die nur bei Gleichungen mit Zahlen vorkommen (M6 Schritt 4b-3): nur unter Nummern wie „zahlen.1-4711“
+export const NUMBER_EQUATION_ERRORS: ReadonlySet<string> = new Set(['eq-root-negative-squared'])
+
 export function findRearrangeTaskWithError(errorId: string, levels: readonly Level[], rng: Rng): TaskRef | null {
+  if (NUMBER_EQUATION_ERRORS.has(errorId)) {
+    const numberLevels = levels.filter(hasNumberEquations)
+    return search(numberLevels.map((level) => () => ({ level, seed: blockSeed('zahlen', rng.int(1, MAX_SEED)) })), errorId)
+  }
   if (LOG_EQUATION_ERRORS.has(errorId)) {
     const logLevels = levels.filter(hasLogEquations)
     return search(logLevels.map((level) => () => ({ level, seed: blockSeed('logeq', rng.int(1, MAX_SEED)) })), errorId)

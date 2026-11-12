@@ -29,6 +29,7 @@ import {
   complexRoot,
   dividedBy,
   factoredOut,
+  foldNumbers,
   isE,
   lnOf,
   lnTerms,
@@ -140,6 +141,8 @@ export const REARRANGE_ERROR_RULES: readonly EqErrorRule[] = [
   { id: 'eq-pq-q-sign', name: 'Bei der $pq$-Formel unter der Wurzel $+q$ statt $-q$', wrongFormula: 'u^2 - 2yu - 1 = 0 \\Rightarrow u_{1,2} = y \\pm \\sqrt{y^2 - 1}' },
   { id: 'eq-pq-half', name: 'Bei der $pq$-Formel unter der Wurzel $p^2$ statt $\\left(\\frac{p}{2}\\right)^2$', wrongFormula: 'u^2 - au - b = 0 \\Rightarrow u_{1,2} = \\frac{a}{2} \\pm \\sqrt{a^2 + b}' },
   { id: 'eq-spurious-root', name: 'Die Lösung genommen, die nicht passt (Scheinlösung)', wrongFormula: 'u = e^x: u = \\frac{a}{2} - \\sqrt{\\frac{a^2}{4} + b}' },
+  // Gleichungen mit Zahlen (M6 Schritt 4b-3)
+  { id: 'eq-root-negative-squared', name: 'Wurzel gleich negativer Zahl trotzdem quadriert', wrongFormula: '\\sqrt{x + 3} = -2 \\Rightarrow x + 3 = 4' },
   { id: 'eq-not-resubstituted', name: 'Nach der Substitution nicht zurückgerechnet', wrongFormula: 'u = e^x = y + \\sqrt{y^2 + 1} \\Rightarrow x = y + \\sqrt{y^2 + 1}' },
   // Werkzeuge der Stufe 5 (Schritt 7a): Integrale; beim Ableiten die Fehler aus „Ableiten"
   { id: 'eq-partial-factor', name: 'Bei den Partialbrüchen den Faktor vergessen', wrongFormula: '\\frac{1}{t(t + b)} = \\frac{1}{t} - \\frac{1}{t + b}' },
@@ -837,7 +840,86 @@ function candidatesFor(steps: readonly RearrangeStep[], i: number, target: strin
 
 // --- Alle falschen Antworten einer Aufgabe ---
 
+// --- Gleichungen mit Zahlen (M6 Schritt 4b-3) ---
+
+// Lösungen einer Gleichung in u zwischen -60 und 60, numerisch: Vorzeichenwechsel und Nullstellen auf dem Raster (ganze
+// Zahlen und Zwanzigstel liegen darauf, so auch doppelte Lösungen wie bei (x - 2)^2 = 0)
+function numericRoots(e: Equation, u: string): number[] {
+  const f = (x: number) => evaluate(e.lhs, { [u]: x }) - evaluate(e.rhs, { [u]: x })
+  const roots: number[] = []
+  const tiny = (x: number, v: number) => Math.abs(v) <= 1e-9 * Math.max(1, Math.abs(evaluate(e.lhs, { [u]: x })))
+  const add = (x: number) => {
+    if (!roots.some((r) => Math.abs(r - x) < 1e-6)) roots.push(x)
+  }
+  let prev = { x: -60, v: f(-60) }
+  if (Number.isFinite(prev.v) && tiny(prev.x, prev.v)) add(prev.x)
+  for (let i = -1199; i <= 1200; i++) {
+    const x = i / 20
+    const v = f(x)
+    if (Number.isFinite(v) && tiny(x, v)) add(x)
+    else if (Number.isFinite(v) && Number.isFinite(prev.v) && Math.sign(v) !== Math.sign(prev.v) && prev.v !== 0) {
+      let [a, b, fa] = [prev.x, x, prev.v]
+      for (let k = 0; k < 60; k++) {
+        const m = (a + b) / 2
+        const fm = f(m)
+        if (!Number.isFinite(fm)) break
+        if (Math.sign(fm) === Math.sign(fa)) [a, fa] = [m, fm]
+        else b = m
+      }
+      const m = (a + b) / 2
+      // kein Pol (dort wechselt das Vorzeichen auch)
+      if (Math.abs(f(m)) < 1e-6 * Math.max(1, Math.abs(evaluate(e.lhs, { [u]: m })))) add(m)
+    }
+    prev = { x, v }
+  }
+  return roots
+}
+
+const sameRoots = (a: readonly number[], b: readonly number[]) =>
+  a.length === b.length && a.every((x) => b.some((y) => Math.abs(x - y) < 1e-6))
+
+// Falsche Antworten bei Gleichungen mit Zahlen: falsch ist eine Gleichung, die andere Lösungen hat als die richtige nach
+// diesem Schritt (Prüfstellen gibt es ohne Buchstaben nicht). Weitergerechnet wird ohne Probe: Wer einen Fehler macht,
+// prüft meist auch nicht.
+function numericWrongAnswers(task: RearrangeTask, solution: RearrangeSolution): RearrangeWrong[] {
+  const t = task.target
+  const sub = solution.substitution
+  const value = solution.none ? null : evaluate(solution.result, {})
+  const out: RearrangeWrong[] = []
+  solution.steps.forEach((step, i) => {
+    if (step.kind === 'probe') return
+    const u = step.unknown ?? t
+    const candidates: Candidate[] =
+      step.kind === 'rootNegative'
+        ? rootNegativeMistakes(step)
+        : candidatesFor(solution.steps, i, t).map((c) => (step.kind === 'pq' || step.kind === 'choose' ? c : { ...c, after: foldNumbers(c.after) }))
+    const correct = step.kind === 'rootNegative' ? [] : numericRoots(step.after, u)
+    for (const c of candidates) {
+      if (!contains(c.after.lhs, u) && !contains(c.after.rhs, u)) continue
+      if (!c.zeroForm && isZeroSide(c.after, u)) continue
+      const latex = equationToLatex(c.after)
+      if (latex === equationToLatex(step.after) || out.some((w) => w.stepIndex === i && equationToLatex(w.after) === latex)) continue
+      if (sameRoots(numericRoots(c.after, u), correct)) continue
+      const options = { numeric: true, noProbe: true, ...(sub && u === sub.name ? { substitution: sub } : {}) }
+      const continued = solveEquation(c.after, t, options)
+      const wrong = continued && !continued.none && !contains(continued.result, t) ? continued.result : null
+      const result = wrong && (value === null || Math.abs(evaluate(wrong, {}) - value) > 1e-9) ? wrong : null
+      out.push({ rule: rearrangeErrorRule(c.id), stepIndex: i, after: c.after, result })
+    }
+  })
+  return out
+}
+
+// Wurzel gleich negativer Zahl: trotzdem quadriert
+function rootNegativeMistakes(step: RearrangeStep): Candidate[] {
+  const { lhs, rhs } = step.before
+  const [root, other] = lhs.kind === 'root' ? [lhs, rhs] : [rhs, lhs]
+  if (root.kind !== 'root') return []
+  return [{ id: 'eq-root-negative-squared', after: foldNumbers(eq(root.arg, squared(other))) }]
+}
+
 export function rearrangeWrongAnswers(task: RearrangeTask, solution: RearrangeSolution): RearrangeWrong[] {
+  if (task.numeric) return numericWrongAnswers(task, solution)
   const t = task.target
   const sub = solution.substitution
   const points = withSubstitution(samplePoints(task, solution.result, createRng(`umstellen:${equationToLatex(task.equation)}`), 24, solution.requires), sub)

@@ -28,6 +28,10 @@ import {
   explainRearrangeError,
   explainResult,
   explainChoose,
+  explainProbe,
+  PROBE_WHY,
+  ROOT_NEGATIVE_DROP_MINUS,
+  ROOT_NEGATIVE_EXPLANATION,
   explainOde,
   explainDet,
   explainExpand,
@@ -89,6 +93,7 @@ import {
   stepEquationLatex,
   stepLabel,
 } from '../rearrange/isolate.ts'
+import { DOMAIN_TEXT, probeLatex, probeOf } from '../rearrange/probe.ts'
 import { type RearrangeTask, conditionLatex, conditionsText, taskLatex } from '../rearrange/task.ts'
 import { detWorkLatex, expandWork } from '../rearrange/tools/determinant.ts'
 import { polarWork } from '../rearrange/tools/polar.ts'
@@ -141,6 +146,9 @@ export function planRearrange(task: RearrangeTask, ref: TaskRef, focus?: string)
     const after = stepLatex(step.kind, step.after)
     const rng = createRng(`umstellen-geführt:${ref.level}:${ref.seed}:${i}`)
     const resultWrongs = wrongs.filter((w) => w.stepIndex === i)
+    // Gleichungen mit Zahlen (M6 Schritt 4b-3): Probe und Wurzel gleich negativer Zahl mit eigener Frage
+    if (step.kind === 'probe') return push(probeStep(step, task, steps.length, rng))
+    if (step.kind === 'rootNegative') return push(rootNegativeStep(step, resultWrongs, steps.length, rng))
     // nach dem Substituieren wird nach u aufgelöst
     const st = step.unknown ?? t
     const move = ref.level <= ALL_MOVES_UNTIL_LEVEL || isJunction(step, st) ? moveQuestion(step, st, t) : null
@@ -158,11 +166,19 @@ export function planRearrange(task: RearrangeTask, ref: TaskRef, focus?: string)
   })
 
   const result = solution.result
+  // ohne Lösung (M6 Schritt 4b-3): leere Lösungsmenge
+  const none = solution.none ? { resultLatex: '\\mathbb{L} = \\{\\,\\}', resultNote: 'Die Gleichung hat keine Lösung.' } : null
+  // Gleichungen mit Zahlen: nach der Probe steht das Ergebnis zuletzt unter „Bisher" (auch wenn zuletzt eine Zahl wegfiel)
+  const last = steps.at(-1)
+  const finalLine = none ? none.resultLatex : readableLatex(`${t} = ${toLatex(result)}`)
+  if (task.numeric && last && (last.established ?? []).at(-1) !== finalLine) {
+    steps[steps.length - 1] = { ...last, established: [...(last.established ?? []), finalLine] }
+  }
   return {
     ref,
     expr: sub(task.equation.lhs, task.equation.rhs),
     functionLatex: taskLatex(task),
-    instruction: `Löse nach $${t}$ auf`,
+    instruction: task.numeric ? 'Löse die Gleichung' : `Löse nach $${t}$ auf`,
     note: conditionsText(task),
     answerLabel: t,
     steps,
@@ -175,8 +191,76 @@ export function planRearrange(task: RearrangeTask, ref: TaskRef, focus?: string)
     ),
     result,
     resultLatex: readableLatex(`${t} = ${toLatex(result)}`),
-    ...resultNote(result),
+    ...(task.numeric ? {} : resultNote(result)),
+    ...none,
     cards: [...new Set(steps.flatMap((s) => s.cards))],
+  }
+}
+
+// --- Gleichungen mit Zahlen (M6 Schritt 4b-3) ---
+
+// Probe: „Ist $x = 4$ eine Lösung?", Ja oder Nein mit Grund (Scheinlösung oder nicht im Definitionsbereich)
+function probeStep(step: RearrangeStep, task: RearrangeTask, index: number, rng: Rng): GuidedStep {
+  const t = task.target
+  const value = toLatex(step.operand!)
+  const probe = probeOf(task.equation, t, step.operand!)
+  const reason = step.reason ?? null
+  const answers: Record<'yes' | 'probe' | 'domain', string> = {
+    yes: `Ja, $${t} = ${value}$ erfüllt die Gleichung.`,
+    probe: 'Nein, die Probe stimmt nicht: eine Scheinlösung.',
+    domain: `Nein, $${t} = ${value}$ liegt nicht im Definitionsbereich.`,
+  }
+  const right = reason === 'domain' ? 'domain' : reason ? 'probe' : 'yes'
+  const wrong = (['yes', 'probe', 'domain'] as const).filter((a) => a !== right)
+  const choices = wrong.map(
+    (a, i): Choice => ({
+      id: `falsch-${i + 1}`,
+      content: answers[a],
+      correct: false,
+      ...(a === 'yes' ? { errorRuleId: 'eq-spurious-root', whyWrong: PROBE_WHY.kept } : { whyWrong: PROBE_WHY[a === 'probe' ? 'spurious' : 'domain'] }),
+    }),
+  )
+  const verdict =
+    right === 'domain'
+      ? `Für $${t} = ${value}$ ist die Gleichung nicht definiert: ${DOMAIN_TEXT[probe.domain ?? 'denominator']}.`
+      : right === 'probe'
+        ? `Die beiden Seiten sind verschieden, $${t} = ${value}$ ist eine Scheinlösung.`
+        : `Beide Seiten sind gleich, $${t} = ${value}$ ist eine Lösung.`
+  return {
+    id: `${index + 1}-probe`,
+    title: stepLabel(step, t),
+    question: `Setze $${t} = ${value}$ in die Gleichung der Aufgabe ein. Ist es eine Lösung?`,
+    choices: rng.shuffle([{ id: 'richtig', content: answers[right], correct: true }, ...choices]),
+    hint: REARRANGE_HINTS.probe,
+    explanation: explainProbe(readableLatex(probeLatex(probe)), verdict),
+    established: [reason ? `${t} = ${value} \\;\\text{entfällt}` : `${t} = ${value}`],
+    cards: [REARRANGE_CARD_IDS.numberEquation],
+  }
+}
+
+// Wurzel gleich negativer Zahl: keine Lösung (falsch: trotzdem quadrieren, das Minus weglassen)
+function rootNegativeStep(step: RearrangeStep, wrongs: readonly RearrangeWrong[], index: number, rng: Rng): GuidedStep {
+  const squaredWrong = wrongs.find((w) => w.rule.id === 'eq-root-negative-squared')
+  const choices: Choice[] = [
+    { id: 'richtig', content: 'Keine Lösung: Eine Wurzel ist nie negativ.', correct: true },
+    {
+      id: 'falsch-1',
+      content: squaredWrong ? `Beide Seiten quadrieren: $${stepLatex('square', squaredWrong.after)}$` : 'Beide Seiten quadrieren',
+      correct: false,
+      errorRuleId: 'eq-root-negative-squared',
+      whyWrong: whyWrong('eq-root-negative-squared'),
+    },
+    { id: 'falsch-2', content: 'Das Minus weglassen und weiterrechnen', correct: false, whyWrong: ROOT_NEGATIVE_DROP_MINUS },
+  ]
+  return {
+    id: `${index + 1}-rootNegative`,
+    title: 'Was machst du als Nächstes?',
+    question: `Die Wurzel steht allein, auf der anderen Seite $${toLatex(step.operand!)}$. Wie geht es weiter?`,
+    choices: rng.shuffle(choices),
+    hint: REARRANGE_HINTS.rootNegative,
+    explanation: ROOT_NEGATIVE_EXPLANATION,
+    established: ['\\mathbb{L} = \\{\\,\\}'],
+    cards: [REARRANGE_CARD_IDS.numberEquation],
   }
 }
 
@@ -353,6 +437,8 @@ function moveQuestion(step: RearrangeStep, t: string, target: string): MoveQuest
           }
         : null
     case 'choose':
+    case 'probe':
+    case 'rootNegative':
     case 'derive':
     case 'partial':
     case 'antiderivative':
@@ -585,6 +671,8 @@ function rejectReason(step: RearrangeStep, t: string, context: ResultContext): s
         return `Sie ist negativ, $${t} = ${block}$ ist aber positiv, weil $${context.task.target}$ positiv ist${bound ? ` und ${bound} gilt` : ''}.`
     }
   }
+  if (step.reason === 'domain') return 'Mit ihr wäre ein Teil der Gleichung der Aufgabe nicht definiert.'
+  if (step.reason === 'probe') return 'Sie erfüllt die Gleichung der Aufgabe nicht (Probe).'
   if (step.reason === 'targetNegative') return `Mit ihr wäre $${context.task.target}$ negativ, alle Buchstaben sind aber positiv.`
   return bound ? `Mit ihr gilt ${bound} nicht.` : `Sie erfüllt die Gleichung der Aufgabe nicht.`
 }
@@ -856,6 +944,8 @@ const CARDS_BY_KIND: Record<StepKind, readonly string[]> = {
   pq: [REARRANGE_CARD_IDS.pq],
   choose: [REARRANGE_CARD_IDS.pq],
   resubstitute: [REARRANGE_CARD_IDS.substitution],
+  probe: [REARRANGE_CARD_IDS.numberEquation],
+  rootNegative: [REARRANGE_CARD_IDS.numberEquation],
   derive: [],
   partial: [REARRANGE_CARD_IDS.integral],
   antiderivative: [REARRANGE_CARD_IDS.integral],

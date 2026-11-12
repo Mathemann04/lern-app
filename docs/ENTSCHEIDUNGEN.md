@@ -950,3 +950,18 @@ Neue Entscheidungen unten anfügen.
   - **Ungerade Wurzeln aus negativen Zahlen** sind künftig erlaubt wie im Skript ($\sqrt[3]{-8} = -2$); das ersetzt
     die Schulkonvention vom 28.10.2026 für Wurzeln. Gebrochene Hochzahlen wie $x^{1/3}$ bleiben nur für $x \ge 0$
     definiert (so auch das Skript). Umsetzung in M6 Schritt 4c; bis dahin gilt die alte Regel.
+- 12.11.2026: M6 Schritt 4b-3, Gleichungen mit Zahlen. Eigene Sammlung mit Nummern wie „zahlen.2-4711“ (wie die
+  Logarithmen kein Baustein; Art je Nummer fest, 14 Arten in Stufe 1 bis 4, beim Üben etwa jede vierte Aufgabe eines
+  passenden Bausteins). Erst die Lösung, dann die Zahlen der Aufgabe, damit alles glatt aufgeht. $x$ ist hier eine
+  beliebige reelle Zahl (nicht positiv wie die Buchstaben); Zahlen werden in jedem Schritt gleich ausgerechnet. Zum
+  Schluss die **Probe in der Gleichung der Aufgabe**, als eigene Frage im geführten Modus („Ist $x = 4$ eine Lösung?“,
+  Ja / Nein: Scheinlösung / Nein: nicht im Definitionsbereich); nach der $pq$-Formel für beide Zahlen. Ohne Lösung steht
+  am Ende $\mathbb{L} = \{\,\}$; im freien Modus gibt es dafür einen Knopf „Keine Lösung“ neben „Prüfen“ (bei jeder
+  Gleichung mit Zahlen, damit er nichts verrät). Eine Wurzel allein gleich einer negativen Zahl heißt sofort „keine
+  Lösung“; wer trotzdem quadriert, macht den neuen typischen Fehler „Wurzel gleich negativer Zahl trotzdem quadriert“.
+  Eine behaltene Scheinlösung zählt als „Scheinlösung genommen“. Gleichungen mit **zwei** Lösungen (z. B. $x^2 = 9$)
+  kommen noch nicht vor, dafür bräuchte die Eingabe eine Lösungsmenge; die $pq$-Formel läuft nur mit glatten Zahlen
+  (Normalform ohne Brüche). Die bisherigen Aufgaben mit Buchstaben bleiben unverändert (Verzeichnis neu erzeugt, gleich).
+  Nebenbei behoben (Bildschirmfoto des Nutzers): Auf der Seite „Gleichungen umstellen“ ragten ab „Wie verschachtelt?“
+  Stufen und Beispiel rechts über den Rahmen, weil ein Formularrahmen (fieldset) nie schmaler wird als sein breitester
+  Inhalt; jetzt darf er schrumpfen, das Beispiel setzt sich kleiner, ein Browser-Test prüft das.

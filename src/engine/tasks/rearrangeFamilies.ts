@@ -1,5 +1,6 @@
 import { FORMULA_TASKS } from './formulas.ts'
 import { logEquationKinds } from './logEquationKinds.ts'
+import { numberEquationKinds } from './numberEquationKinds.ts'
 import { REARRANGE_COMBOS } from './rearrangeCombos.ts'
 import type { Level } from './taskNumber.ts'
 
@@ -25,11 +26,14 @@ export const hasRearrangeFamily = (block: string, level: Level) => REARRANGE_FAM
 export const familyBlocks = (level: Level): string[] => Object.keys(REARRANGE_FAMILY_LEVELS).filter((block) => hasRearrangeFamily(block, level))
 
 // Mengen von Bausteinen, die in einer Stufe zusammen in einer Aufgabe vorkommen: aus dem Verzeichnis, je Baustein mit
-// eigenen Aufgaben dieser allein, aus der Formelsammlung und den Logarithmen auf beiden Seiten (für die Seiten: welche
+// eigenen Aufgaben dieser allein, aus der Formelsammlung, den Logarithmen auf beiden Seiten und den Gleichungen mit Zahlen (für die Seiten: welche
 // Auswahl spielbar ist)
 const formulaCombos = (level: Level) => FORMULA_TASKS.filter((task) => task.level === level).map((task) => task.blocks.join('+'))
 const logCombos = (level: Level) => logEquationKinds(level).map((kind) => kind.blocks.join('+'))
-const playable = (level: Level): readonly string[] => [...new Set([...REARRANGE_COMBOS[level], ...familyBlocks(level), ...formulaCombos(level), ...logCombos(level)])]
+const numberCombos = (level: Level) => numberEquationKinds(level).map((kind) => kind.blocks.join('+'))
+const playable = (level: Level): readonly string[] => [
+  ...new Set([...REARRANGE_COMBOS[level], ...familyBlocks(level), ...formulaCombos(level), ...logCombos(level), ...numberCombos(level)]),
+]
 export const REARRANGE_PLAYABLE_COMBOS: Readonly<Record<Level, readonly string[]>> = {
   1: playable(1),
   2: playable(2),

@@ -3,7 +3,7 @@ import { equationToLatex, toLatex } from '../expr/print.ts'
 import { type Expr, IMAG, PI, add, cos, div, eq, exp, fn, mul, neg, num, pow, sin, sub, variable } from '../expr/types.ts'
 import { parseLatex } from '../parse/latex.ts'
 import { REARRANGE_ERROR_RULES, rearrangeWrongAnswers } from './errorRules.ts'
-import { solveEquation, solveTask } from './isolate.ts'
+import { solveTask } from './isolate.ts'
 import type { Condition } from './task.ts'
 import { absOf, angleOf, argOf, derivativeOf, detOf, dotOf, integralOf, lengthOf, limitOf, odeOf, seriesOf, sumOf, theoremOf } from './tools/tool.ts'
 
@@ -13,14 +13,16 @@ const p = (latex: string): Expr => {
   return r.expr
 }
 
-function wrongs(lhs: string, rhs: string, target = 'x') {
-  const task = { equation: eq(p(lhs), p(rhs)), target, conditions: [] }
-  return rearrangeWrongAnswers(task, solveEquation(task.equation, target)!)
+function wrongs(lhs: string, rhs: string, target = 'x', numeric = false) {
+  const task = { equation: eq(p(lhs), p(rhs)), target, conditions: [], ...(numeric ? { numeric: true as const } : {}) }
+  return rearrangeWrongAnswers(task, solveTask(task)!)
 }
 
 // Katalogbeispiele (docs/PLAN-M3.md): Aufgabe, Fehlerregel, falsche Gleichung nach dem Schritt bzw.
 // falsches Ergebnis. Die Engine muss genau das Beispiel liefern.
-const CATALOG: Array<{ id: string; lhs: string; rhs: string; target?: string; after?: string; result?: string }> = [
+// numeric: Gleichung mit Zahlen (M6 Schritt 4b-3)
+const CATALOG: Array<{ id: string; lhs: string; rhs: string; target?: string; after?: string; result?: string; numeric?: boolean }> = [
+  { id: 'eq-root-negative-squared', lhs: '2\\sqrt{x+3}+7', rhs: '3', numeric: true, after: 'x + 3 = 4', result: '1' },
   { id: 'eq-sign-not-flipped', lhs: 'y', rhs: 'x+b', result: 'y + b' },
   { id: 'eq-inverse-op', lhs: 'y', rhs: 'ax', result: 'ay' },
   { id: 'eq-divide-one-term', lhs: 'ax', rhs: 'y+b', after: 'x = \\frac{y}{a} + b' },
@@ -252,7 +254,7 @@ describe('Katalog der Fehlerregeln', () => {
 
   for (const c of CATALOG) {
     it(`${c.id}: ${c.lhs} = ${c.rhs}`, () => {
-      const found = wrongs(c.lhs, c.rhs, c.target).filter((w) => w.rule.id === c.id)
+      const found = wrongs(c.lhs, c.rhs, c.target, c.numeric).filter((w) => w.rule.id === c.id)
       expect(found.length, `${c.id} kommt nicht vor`).toBeGreaterThan(0)
       if (c.after) expect(found.map((w) => equationToLatex(w.after))).toContain(c.after)
       if (c.result) expect(found.map((w) => (w.result ? toLatex(w.result) : null))).toContain(c.result)

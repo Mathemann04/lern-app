@@ -13,6 +13,8 @@ export type RearrangeTask = {
   readonly conditions: readonly Condition[]
   // Formel aus Technik und Physik (M6 Schritt 4b): ihr Name und was die Zeichen bedeuten, als Text mit $…$
   readonly context?: string
+  // Gleichung mit Zahlen (M6 Schritt 4b-3): x ist eine beliebige reelle Zahl, Ergebnis eine Zahl oder keine Lösung
+  readonly numeric?: true
 }
 
 // Alle Buchstaben eines Terms, alphabetisch; bei einem Werkzeug (Ableitung, Integral) seine freien
@@ -60,10 +62,12 @@ export const taskFormLatex = (t: RearrangeTask) => [...givenLatex(t), equationTo
 
 export const conditionLatex = (c: Condition) => `${toLatex(c.lhs)} ${c.rel} ${toLatex(c.rhs)}`
 
-export const instructionFor = (t: RearrangeTask) => `Löse nach $${t.target}$ auf.`
+export const instructionFor = (t: RearrangeTask) => (t.numeric ? 'Löse die Gleichung.' : `Löse nach $${t.target}$ auf.`)
 
 // „Alle Buchstaben stehen für positive Zahlen, dazu $x > a$."; bei Formeln vorweg, was die Zeichen bedeuten
 export function conditionsText(t: RearrangeTask): string {
+  // Gleichung mit Zahlen (M6 Schritt 4b-3)
+  if (t.numeric) return `Gesucht ist eine reelle Zahl $${t.target}$. Mach am Ende die Probe: Nicht jede Zahl, die herauskommt, ist eine Lösung.`
   const extra = t.conditions.map((c) => `$${conditionLatex(c)}$`).join(' und ')
   if (t.context) return `${t.context} Alle Größen sind positiv${extra ? `, dazu ${extra}` : ''}.`
   return `Alle Buchstaben stehen für positive Zahlen${extra ? `, dazu ${extra}` : ''}.`

@@ -75,7 +75,7 @@ export default function ActivityScreen({ id }: { id: string }) {
         </section>
 
         <div className="border-t border-zinc-100">
-          <fieldset className="space-y-3 p-5">
+          <fieldset className="min-w-0 space-y-3 p-5">
             <legend className="text-lg font-semibold">Wie verschachtelt?</legend>
             <div className="grid grid-cols-5 gap-1 rounded-xl bg-zinc-100 p-1">
               {course.levels.map((l) => {
