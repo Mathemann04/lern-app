@@ -1,12 +1,12 @@
 import fc from 'fast-check'
 import { describe, expect, it } from 'vitest'
-import { CHECK_POINTS, arbExpr, closeEnough, reliableValue } from './arbitraries.ts'
+import { CHECK_POINTS, arbExpr, closeEnough, hasNoisyRoot, reliableValue } from './arbitraries.ts'
 import { key } from './compare.ts'
 import { evaluate } from './evaluate.ts'
 import { finalForm } from './finalForm.ts'
 import { normalize } from './normalize.ts'
 import { toLatex } from './print.ts'
-import { type Expr, add, cos, div, exp, ln, mul, neg, num, pow, sin, sqrt, sub, x } from './types.ts'
+import { type Expr, PI, add, cos, div, exp, ln, mul, neg, num, pow, sin, sqrt, sub, x } from './types.ts'
 
 const x2 = pow(x, num(2))
 
@@ -76,22 +76,37 @@ describe('Endform: feste Beispiele', () => {
   })
 })
 
+// Erste Prüfstelle, an der die Endform einen anderen Wert hat (null: keine); nur Stellen, an denen beide Terme
+// zuverlässig berechenbar sind
+function valueChange(e: Expr, f: Expr): string | null {
+  for (const value of CHECK_POINTS) {
+    const original = reliableValue(e, value)
+    if (original === null || hasNoisyRoot(f, value)) continue
+    const result = evaluate(f, { x: value })
+    if (!closeEnough(original, result)) return `x = ${value}: ${toLatex(e)} = ${original}, Endform ${toLatex(f)} = ${result}`
+  }
+  return null
+}
+
 describe('Endform: Eigenschaften für zufällige Terme', () => {
   it('ändert den Wert nicht', () => {
     fc.assert(
       fc.property(arbExpr, (e) => {
-        const f = finalForm(e)
-        for (const value of CHECK_POINTS) {
-          const original = reliableValue(e, value)
-          if (original === null) continue
-          const result = evaluate(f, { x: value })
-          if (!closeEnough(original, result)) {
-            throw new Error(`x = ${value}: ${toLatex(e)} = ${original}, Endform ${toLatex(f)} = ${result}`)
-          }
-        }
+        const change = valueChange(e, finalForm(e))
+        if (change) throw new Error(change)
       }),
       { numRuns: 3000 },
     )
+  })
+
+  it('hält Rundungsrauschen unter einer Wurzel nicht für einen anderen Wert (Gegenbeispiel vom 12.11.2026)', () => {
+    // (sin π + x − x)^(1/3): am Rechner 0, die Endform \sqrt[3]{\sin \pi} etwa 5 · 10⁻⁶; beides ist mathematisch 0
+    const e = pow(add(sin(PI), x, neg(x)), num(1, 3))
+    const f = finalForm(e)
+    expect(CHECK_POINTS.some((value) => hasNoisyRoot(f, value))).toBe(true)
+    expect(valueChange(e, f)).toBeNull()
+    // eine echte Wurzel zählt weiter: \sqrt{x^2 + 1} ist nirgends Rauschen
+    expect(CHECK_POINTS.some((value) => hasNoisyRoot(sqrt(add(pow(x, num(2)), num(1))), value))).toBe(false)
   })
 
   it('ist beim zweiten Mal schon fertig', () => {
