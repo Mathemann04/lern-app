@@ -1,68 +1,85 @@
-import { Fragment } from 'react'
-import { useMockHistory, useMockSession } from '../state/mockExam.ts'
 import { SUGGEST_WINDOW, levelSummary, useProgress } from '../state/progress.ts'
-import { dueReviewsOf } from '../state/reviews.ts'
 import { useSettings } from '../state/settings.ts'
 import type { Progress, Settings } from '../state/storage.ts'
 import { AreaIcon } from './AreaIcon.tsx'
 import {
   AVAILABLE_COURSES,
-  type Area,
   SUBJECTS,
   type Subject,
   courseById,
-  isAreaAvailable,
   isCourseAvailable,
   isMixAvailable,
+  isSubjectAvailable,
   levelName,
   playableLevel,
   subjectById,
   subjectCourseIds,
   subjectLevelName,
 } from './catalog.ts'
-import { mockSummary, pointsText } from './examOverview.ts'
 import { RecentDots } from './RecentDots.tsx'
-import { areaHref, courseHref, examOverviewHref, mixHref, mixPracticeHref, mockHref, practiceHref, reviewHref } from './routes.ts'
+import { courseHref, mixHref, mixPracticeHref, practiceHref, subjectHref } from './routes.ts'
 import { courseSummary, isSelectionPlayable, joinTitles, levelPartCount, mixBlockedHint, mixChoiceOf, mixedCourses } from './selection.ts'
+import { ExamStartCard, SoonLine } from './SubjectScreen.tsx'
 
-// Startseite: „Weitermachen" und darunter die Fächer mit ihren Gebieten (Aufbau in catalog.ts)
+// Startseite (M6 Schritt 1): ohne Begrüßung; oben „Weitermachen" und die Klausur-Karte (S11), darunter nur die
+// Fächer als große Kacheln, Fächer ohne spielbares Gebiet in einer Zeile „Demnächst"
 export function HomeScreen() {
+  const subjects = SUBJECTS.filter(isSubjectAvailable)
+  const soon = SUBJECTS.filter((subject) => !isSubjectAvailable(subject))
   return (
-    <main className="space-y-10">
-      <section className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight text-balance">Schritt für Schritt selbst lösen</h1>
-        <p className="text-zinc-600 text-pretty">
-          Du lernst, indem du Aufgaben selbst löst: geführt mit Auswahl-Antworten oder frei mit eigener Eingabe.
-        </p>
-      </section>
+    <main className="space-y-8">
+      <h1 className="sr-only">Rechenweg</h1>
 
       <ContinueCard />
 
-      {SUBJECTS.map((subject) => (
-        <section key={subject.id} aria-labelledby={`subject-${subject.id}`} className="space-y-3">
-          <h2 id={`subject-${subject.id}`} className="text-xl font-semibold">
-            {subject.title}
-          </h2>
-          {/* Klausur-Start (S11): Wiederholen, Probeklausur und Überblick ganz oben */}
-          {subject.mock && subject.areas.some(isAreaAvailable) && <ExamStartCard subject={subject} />}
-          <ul className="space-y-3">
-            {subject.areas.map((area, i) => (
-              <Fragment key={area.id}>
-                <li>
-                  <AreaTile area={area} />
-                </li>
-                {/* „Themen mischen" gleich unter dem letzten Gebiet, das man schon üben kann */}
-                {i === lastPlayableArea(subject) && isMixAvailable(subject) && (
-                  <li>
-                    <MixTile subject={subject} />
-                  </li>
-                )}
-              </Fragment>
-            ))}
-          </ul>
-        </section>
-      ))}
+      {subjects
+        .filter((subject) => subject.mock)
+        .map((subject) => (
+          <ExamStartCard key={subject.id} subject={subject} withSubject />
+        ))}
+
+      <section aria-labelledby="subjects" className="space-y-3">
+        <h2 id="subjects" className="text-sm font-semibold tracking-wide text-zinc-600 uppercase">
+          Fächer
+        </h2>
+        <ul className="space-y-3">
+          {subjects.map((subject) => (
+            <li key={subject.id}>
+              <SubjectTile subject={subject} />
+            </li>
+          ))}
+        </ul>
+        {soon.length > 0 && <SoonLine titles={soon.map((subject) => subject.title)} />}
+      </section>
     </main>
+  )
+}
+
+// Große Kachel eines Fachs mit Bild, Untertitel und der Zahl der gelösten Aufgaben
+function SubjectTile({ subject }: { subject: Subject }) {
+  const progress = useProgress()
+  const ids = new Set(subjectCourseIds(subject))
+  const solved = progress.attempts.filter((a) => ids.has(a.course)).length
+  return (
+    <a
+      href={subjectHref(subject.id)}
+      data-tone={subject.tone}
+      className="flex items-center gap-4 rounded-2xl border border-zinc-200 px-4 py-4 transition-colors hover:border-accent-600 hover:bg-accent-50"
+    >
+      <AreaIcon kind={subject.icon} className="size-16 shrink-0" />
+      <span className="min-w-0 flex-1 space-y-0.5">
+        <span className="block text-xl font-semibold tracking-tight">{subject.title}</span>
+        <span className="block text-pretty text-zinc-600">{subject.description}</span>
+        {solved > 0 && (
+          <span className="block text-sm text-zinc-500">
+            {solved} {solved === 1 ? 'Aufgabe' : 'Aufgaben'} gelöst
+          </span>
+        )}
+      </span>
+      <span aria-hidden className="text-accent-700">
+        →
+      </span>
+    </a>
   )
 }
 
@@ -205,124 +222,5 @@ function MixContinueCard({ subject, settings, progress }: MixCardProps) {
         )}
       </div>
     </section>
-  )
-}
-
-// Index des letzten Gebiets eines Fachs, das sich schon üben lässt (-1: keins)
-function lastPlayableArea(subject: Subject): number {
-  return subject.areas.findLastIndex(isAreaAvailable)
-}
-
-// Kachel „Themen mischen" im Blaugrün der App, damit sie sich von den Gebieten abhebt
-function MixTile({ subject }: { subject: Subject }) {
-  return (
-    <a
-      href={mixHref(subject.id)}
-      className="flex items-center gap-4 rounded-2xl border border-accent-200 bg-accent-50 px-4 py-3 transition-colors hover:border-accent-600"
-    >
-      <AreaIcon kind="mix" className="size-14 shrink-0" />
-      <span className="min-w-0 flex-1">
-        <span className="block text-lg font-semibold">Themen mischen</span>
-        <span className="block text-sm text-pretty text-zinc-600">Themen und Unterthemen ankreuzen, gemischt üben</span>
-      </span>
-      <span aria-hidden className="text-accent-700">
-        →
-      </span>
-    </a>
-  )
-}
-
-// Karte „Klausur Teil N" (S11) im Blaugrün der App, oben im Fach: heute fällige Wiederholung über alle Themen des Fachs,
-// Probeklausur (läuft eine, weiterschreiben; sonst das letzte Ergebnis) und Klausur-Überblick. Ist nichts fällig, steht
-// dort dezent „nichts fällig" statt eines Knopfs, der ins Leere führt.
-function ExamStartCard({ subject }: { subject: Subject }) {
-  const session = useMockSession()
-  const history = useMockHistory()
-  const mock = subject.mock!
-  const running = session && session.subject === subject.id && session.submittedAt === null ? session : null
-  const { last } = mockSummary(subject, history)
-  // beim Zeigen gelesen: Die Startseite wird bei jedem Besuch neu aufgebaut
-  const due = dueReviewsOf(subjectCourseIds(subject)).length
-  const tile = 'flex min-h-11 flex-col justify-center rounded-xl px-3 py-2.5'
-  return (
-    <section aria-labelledby={`exam-${subject.id}`} className="space-y-3 rounded-2xl border border-accent-200 bg-accent-50 p-4">
-      <div className="flex items-center gap-3">
-        <AreaIcon kind="exam" className="size-10 shrink-0" />
-        <h3 id={`exam-${subject.id}`} className="text-lg font-semibold">
-          Klausur Teil {mock.part}
-        </h3>
-      </div>
-      <ul className="grid gap-2 sm:grid-cols-3">
-        <li>
-          {due > 0 ? (
-            <a href={reviewHref(subject.id)} className={`${tile} h-full bg-accent-700 text-on-accent hover:bg-accent-800`}>
-              <span className="font-semibold">Wiederholen</span>
-              <span className="text-sm">{due === 1 ? '1 Frage fällig' : `${due} Fragen fällig`}</span>
-            </a>
-          ) : (
-            <div className={`${tile} h-full border border-dashed border-zinc-300`} data-testid="review-none">
-              <span className="font-semibold text-zinc-600">Wiederholen</span>
-              <span className="text-sm text-zinc-500">nichts fällig</span>
-            </div>
-          )}
-        </li>
-        <li>
-          <a
-            href={running ? mockHref(subject.id, running.id) : mockHref(subject.id)}
-            className={`${tile} h-full border border-accent-200 bg-surface transition-colors hover:border-accent-600`}
-          >
-            <span className="font-semibold">Probeklausur</span>
-            <span className="text-sm text-pretty text-zinc-600">
-              {running
-                ? `Nr. ${running.id} läuft: weiterschreiben`
-                : last
-                  ? `zuletzt ${pointsText(last.points)} von ${last.max} Punkten`
-                  : `${mock.minutes} Minuten, ${mock.points} Punkte`}
-            </span>
-          </a>
-        </li>
-        <li>
-          <a href={examOverviewHref(subject.id)} className={`${tile} h-full border border-accent-200 bg-surface transition-colors hover:border-accent-600`}>
-            <span className="font-semibold">Klausur-Überblick</span>
-            <span className="text-sm text-pretty text-zinc-600">Wie sicher je Aufgabe</span>
-          </a>
-        </li>
-      </ul>
-    </section>
-  )
-}
-
-function AreaTile({ area }: { area: Area }) {
-  const available = isAreaAvailable(area)
-  const body = (
-    <>
-      <AreaIcon kind={area.icon} className={`size-14 shrink-0 ${available ? '' : 'opacity-50'}`} />
-      <span className="min-w-0 flex-1">
-        <span className={`block text-lg font-semibold ${available ? '' : 'text-zinc-500'}`}>{area.title}</span>
-        <span className={`block text-sm text-pretty ${available ? 'text-zinc-600' : 'text-zinc-500'}`}>{area.description}</span>
-        {!available && (
-          <span className="mt-2 inline-block rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-500">kommt bald</span>
-        )}
-      </span>
-    </>
-  )
-  if (!available) {
-    return (
-      <div data-tone={area.tone} className="flex items-center gap-4 rounded-2xl border border-dashed border-zinc-300 px-4 py-3">
-        {body}
-      </div>
-    )
-  }
-  return (
-    <a
-      href={areaHref(area.id)}
-      data-tone={area.tone}
-      className="flex items-center gap-4 rounded-2xl border border-zinc-200 px-4 py-3 transition-colors hover:border-accent-600 hover:bg-accent-50"
-    >
-      {body}
-      <span aria-hidden className="text-accent-700">
-        →
-      </span>
-    </a>
   )
 }

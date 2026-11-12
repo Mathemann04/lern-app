@@ -52,6 +52,7 @@ test('Stufe 3: 1/(x − 6) − 3/(x + 6) frei lösen', async ({ page }) => {
   // gezählt: gelöst, aber nicht ohne Fehler
   await page.goto('./#/fortschritt')
   const fractions = page.getByRole('region', { name: 'Brüche', exact: true })
+  await fractions.getByRole('button', { name: 'Einzelheiten' }).click()
   await expect(fractions.getByRole('listitem', { name: 'Stufe 3' })).toContainText('1 gelöst · zuletzt 0 von 1 ohne Fehler')
   await expect(fractions.getByRole('region', { name: 'Deine häufigsten Fehler' })).toContainText('Klammer nach dem Minus vergessen')
 })
@@ -66,6 +67,7 @@ test('Zahlenbrüche: noch nicht gekürzt, dann richtig', async ({ page }) => {
   await expect(feedback(page)).toContainText('Richtig!')
   // ohne Fehler gelöst
   await page.goto('./#/fortschritt')
+  await page.getByRole('region', { name: 'Brüche', exact: true }).getByRole('button', { name: 'Einzelheiten' }).click()
   await expect(page.getByRole('region', { name: 'Brüche', exact: true }).getByRole('listitem', { name: 'Stufe 1' })).toContainText('1 gelöst · zuletzt 1 von 1 ohne Fehler')
 })
 

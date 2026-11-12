@@ -50,6 +50,11 @@ test('Gebiete zeigen sich in ihrer eigenen Farbe', async ({ page }) => {
   await page.goto('./#/galerie/brueche')
   await expect.poll(() => newTasks.evaluate((el) => getComputedStyle(el).backgroundColor)).not.toEqual(blue)
   await page.goto('./')
-  await expect(page.getByRole('link', { name: /^Differentialrechnung/ })).toHaveAttribute('data-tone', 'blue')
+  // Fächer in ihrer Farbe: Mathematik blau, Chemie indigo
+  await expect(page.getByRole('link', { name: /^Mathematik MB1/ })).toHaveAttribute('data-tone', 'blue')
+  await expect(page.getByRole('link', { name: /^Chemie 1/ })).toHaveAttribute('data-tone', 'indigo')
   await expect(page.getByRole('region', { name: 'Los geht’s' })).toHaveAttribute('data-tone', 'blue')
+  await page.goto('./#/fach/mathe')
+  await expect(page.getByRole('link', { name: /^Differentialrechnung/ })).toHaveAttribute('data-tone', 'blue')
+  await expect(page.getByRole('link', { name: /^Grundlagen/ })).toHaveAttribute('data-tone', 'orange')
 })

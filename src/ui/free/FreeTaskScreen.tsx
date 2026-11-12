@@ -11,7 +11,7 @@ import { CardSheetButton, TaskCardLinks } from '../cards/CardSheet.tsx'
 import type { CourseEngine } from '../courseEngines.ts'
 import { courseHref, mixHref, mixPracticeHref, practiceHref, taskHref } from '../routes.ts'
 import { LevelUpSuggestion } from '../task/LevelUpSuggestion.tsx'
-import { CheckBadge, FocusBanner, TaskIntro, TaskTopBar } from '../task/TaskParts.tsx'
+import { CheckBadge, FocusBanner, TaskIntro, TaskNumber, TaskTopBar } from '../task/TaskParts.tsx'
 import { type ExplanationMode, useExplanationMode } from '../task/explanationMode.ts'
 import { MathInput } from './MathInput.tsx'
 
@@ -181,6 +181,8 @@ export default function FreeTaskScreen({ course, engine, taskRef, focus = null, 
           onNext={() => setRevealed((n) => n + 1)}
         />
       )}
+
+      <TaskNumber taskRef={taskRef} />
     </main>
   )
 }

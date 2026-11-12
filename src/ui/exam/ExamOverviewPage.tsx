@@ -5,7 +5,7 @@ import { AreaIcon } from '../AreaIcon.tsx'
 import { BackLink } from '../BackLink.tsx'
 import { type Subject, subjectById, subjectCourseIds } from '../catalog.ts'
 import { CONFIDENCE_LABEL, type Confidence, type ExamTaskInfo, confidenceOf, examAttempts, examTasksOf, mockSummary, pointsText, shortDate } from '../examOverview.ts'
-import { examTaskHref, mockHref, reviewHref } from '../routes.ts'
+import { examTaskHref, mockHref, reviewHref, subjectHref } from '../routes.ts'
 
 // Klausur-Überblick (S11, #/klausur/<fach>, Fächer mit Probeklausur): je Klausuraufgabe, wie sicher sie sitzt (aus den
 // letzten drei Versuchen, ui/examOverview.ts), mit „Üben"; darunter letzte und beste Probeklausur und die heute fällige
@@ -19,7 +19,7 @@ export default function ExamOverviewPage({ subject: subjectId }: { subject: stri
   return (
     <main className="space-y-8">
       <div className="space-y-3">
-        <BackLink href="#/" label="Start" />
+        <BackLink href={subjectHref(subject.id)} label={subject.title} />
         <h1 className="text-3xl font-semibold tracking-tight text-balance">Klausur-Überblick</h1>
         <p className="text-pretty text-zinc-600">
           {subject.title}, Teil {mock.part}: {mock.minutes} Minuten, {mock.points} Punkte. Wie sicher du bist, zählt aus deinen letzten drei

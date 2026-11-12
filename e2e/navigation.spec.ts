@@ -29,7 +29,14 @@ test('Hauptmenü: Start, Lernkarten, Fortschritt, Einstellungen, der aktuelle Be
   // Auch auf einer einzelnen Karte bleibt „Lernkarten" markiert
   await expect(menu(page).getByRole('link', { name: 'Lernkarten' })).toHaveAttribute('aria-current', 'page')
   await menu(page).getByRole('link', { name: 'Start' }).click()
-  await expect(page.getByRole('heading', { name: 'Mathematik MB1' })).toBeVisible()
+  await expect(page.getByRole('link', { name: /^Mathematik MB1/ })).toBeVisible()
+  // Auch auf der Seite eines Fachs ist „Start" markiert
+  await page.getByRole('link', { name: /^Mathematik MB1/ }).click()
+  await expect(menu(page).getByRole('link', { name: 'Start' })).toHaveAttribute('aria-current', 'page')
+  if (!isPhone()) {
+    // Am Laptop steht oben nur das Menü, rechts: kein Logo, kein „Rechenweg"
+    await expect(page.getByRole('banner').getByRole('link')).toHaveText(['Start', 'Lernkarten', 'Fortschritt', 'Einstellungen'])
+  }
 })
 
 test('Die Leiste verdeckt nichts und ist in Aufgaben ausgeblendet', async ({ page }) => {
@@ -54,8 +61,17 @@ test('Unterseiten haben einen Zurück-Knopf', async ({ page }) => {
   await page.goto('./#/thema/ableiten')
   await page.getByRole('link', { name: 'Differentialrechnung', exact: true }).click()
   await expect(page).toHaveURL(/#\/gebiet\/differentialrechnung$/)
+  await page.getByRole('main').getByRole('link', { name: 'Mathematik MB1', exact: true }).click()
+  await expect(page).toHaveURL(/#\/fach\/mathe$/)
   await page.getByRole('main').getByRole('link', { name: 'Start', exact: true }).click()
   await expect(page).toHaveURL(/#\/$/)
+  // Mischung und Klausur-Überblick führen zur Seite ihres Fachs zurück
+  await page.goto('./#/mischen/chemie')
+  await page.getByRole('main').getByRole('link', { name: 'Chemie 1', exact: true }).click()
+  await expect(page).toHaveURL(/#\/fach\/chemie$/)
+  await page.goto('./#/klausur/chemie')
+  await page.getByRole('main').getByRole('link', { name: 'Chemie 1', exact: true }).click()
+  await expect(page).toHaveURL(/#\/fach\/chemie$/)
   await page.goto('./#/karten/ableitungen/quotient')
   await page.getByRole('link', { name: 'Ableiten', exact: true }).click()
   await expect(page).toHaveURL(/#\/karten\/ableitungen$/)

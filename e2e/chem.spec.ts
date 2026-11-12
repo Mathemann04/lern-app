@@ -75,6 +75,7 @@ async function indexOfAnswer(page: Page, text: string): Promise<number> {
 test('Chemie: Start → Atombau → Grundlagen, Frage richtig beantworten, melden, Liste in den Einstellungen', async ({ page, context }) => {
   const errors = collectErrors(page)
   await page.goto('./')
+  await page.getByRole('link', { name: /^Chemie 1/ }).click()
   await page.getByRole('link', { name: /^Aufbau der Materie/ }).click()
   await expect(page).toHaveURL(/#\/gebiet\/chem-materie$/)
   await expect(page.getByRole('heading', { name: 'Aufbau der Materie', level: 1 })).toBeVisible()
@@ -96,7 +97,7 @@ test('Chemie: Start → Atombau → Grundlagen, Frage richtig beantworten, melde
   await expect(page).toHaveURL(/#\/ueben\/chem-atombau\/1-\d+$/)
   await ensureQuestion(page, './#/ueben/chem-atombau/1')
   await expect(page.locator('#question')).toBeVisible()
-  await expect(page.getByText(/^Grundlagen · Aufgabe 1-\d+ · Wähle die richtige Antwort/)).toBeVisible()
+  await expect(page.getByText(/^Grundlagen · Wähle die richtige Antwort/)).toBeVisible()
   await expect(answers(page)).toHaveCount(4)
   await expectCleanPage(page, 'Frage')
 
@@ -169,7 +170,7 @@ test('Chemie: falsche Antwort mit „Warum ist das falsch?", Denkfehler im Forts
   await page.goto('./#/ueben/chem-atombau/2')
   await expect(page).toHaveURL(/#\/ueben\/chem-atombau\/2-\d+$/)
   await ensureQuestion(page, './#/ueben/chem-atombau/2')
-  await expect(page.getByText(/^Vertiefung · Aufgabe 2-\d+/)).toBeVisible()
+  await expect(page.getByText(/^Vertiefung · /)).toBeVisible()
   const { correct, wrong } = await answersFromGallery(context, questionNo(page.url()))
   const texts = (await answers(page).allTextContents()).map((t) => t.trim())
   const wrongIndex = texts.findIndex((t) => wrong.includes(t))
@@ -193,7 +194,7 @@ test('Chemie: falsche Antwort mit „Warum ist das falsch?", Denkfehler im Forts
   await expect(page.getByTestId('review-note')).toHaveCount(0)
   for (const seed of [11, 12]) {
     await page.goto(`./#/ueben/brueche/1-${seed}`)
-    await expect(page.getByText(/^Stufe 1 · Aufgabe 1-/)).toBeVisible()
+    await expect(page.getByText(/^Stufe 1 · /)).toBeVisible()
   }
   await page.goto('./#/ueben/chem-atombau/2')
   await expect(page).toHaveURL(/#\/ueben\/chem-atombau\/2-\d+$/)
@@ -209,6 +210,8 @@ test('Chemie: falsche Antwort mit „Warum ist das falsch?", Denkfehler im Forts
   // Fortschritt: Atombau mit Stufennamen und dem Denkfehler als Aussage
   await page.goto('./#/fortschritt')
   const atombau = page.getByRole('region', { name: 'Atombau', exact: true })
+  await expect(atombau).toContainText('1 gelöst · zuletzt 0 von 1 ohne Fehler')
+  await atombau.getByRole('button', { name: 'Einzelheiten' }).click()
   await expect(atombau.getByRole('listitem', { name: 'Vertiefung' })).toContainText('1 gelöst · zuletzt 0 von 1 ohne Fehler')
   await expect(atombau).toContainText('So sieht der Fehler aus:')
   // ab S2 lässt sich jeder Fehler gezielt üben
@@ -239,7 +242,7 @@ test('Chemie: Adressen mit falscher Stufe, zu hoher Stufe und ohne Frage', async
   // Chemie hat drei Stufen: Stufe 5 führt zum Klausurniveau
   await page.goto('./#/ueben/chem-atombau/5')
   await expect(page).toHaveURL(/#\/ueben\/chem-atombau\/3-\d+$/)
-  await expect(page.getByText(/^Klausurniveau · Aufgabe 3-\d+/)).toBeVisible()
+  await expect(page.getByText(/^Klausurniveau · /)).toBeVisible()
   // Eine Nummer ohne Frage
   await page.goto('./#/ueben/chem-atombau/1-9999')
   await expect(page.getByRole('heading', { name: 'Diese Aufgabe gibt es nicht (mehr).' })).toBeVisible()
@@ -336,6 +339,7 @@ test('Chemie: Unterthemen ankreuzen, nur Atommodelle in der Vertiefung', async (
 test('Chemie: Themen mischen, „Nächste Aufgabe" bleibt in der Mischung, X und „Weitermachen"', async ({ page, context }) => {
   const errors = collectErrors(page)
   await page.goto('./')
+  await page.getByRole('link', { name: /^Chemie 1/ }).click()
   await page.getByRole('link', { name: /^Themen mischen/ }).click()
   await expect(page).toHaveURL(/#\/mischen\/chemie$/)
   await expect(page.getByRole('heading', { name: 'Themen mischen', level: 1 })).toBeVisible()
@@ -445,7 +449,9 @@ async function chooseAnswer(page: Page, text: string) {
 test('Chemie: Rechnung zu ³⁷Cl⁻, Massenzahl als Neutronenzahl, Fehler gezielt üben', async ({ page }) => {
   const errors = collectErrors(page)
   await page.goto('./#/ueben/chem-atombau/2-11335')
-  await expect(page.getByText(/^Vertiefung · Aufgabe 2-11335 · Bestimme Protonen, Neutronen und Elektronen/)).toBeVisible()
+  await expect(page.getByText(/^Vertiefung · Bestimme Protonen, Neutronen und Elektronen/)).toBeVisible()
+  // die Nummer steht klein unten (M6)
+  await expect(page.getByText('Aufgabe 2-11335', { exact: true })).toBeVisible()
   await expectCleanPage(page, 'Rechnung')
   await expect(page.locator('#question')).toHaveText('Wie viele Protonen hat das Teilchen?')
   await chooseAnswer(page, '17')
@@ -468,6 +474,7 @@ test('Chemie: Rechnung zu ³⁷Cl⁻, Massenzahl als Neutronenzahl, Fehler gezie
   await page.goto('./#/fortschritt')
   const atombau = page.getByRole('region', { name: 'Atombau', exact: true })
   await expect(atombau).toContainText('Massenzahl und Neutronenzahl gleichgesetzt')
+  await atombau.getByRole('button', { name: 'Einzelheiten' }).click()
   await atombau.getByRole('link', { name: 'Gezielt üben' }).first().click()
   await expect(page).toHaveURL(/#\/ueben\/chem-atombau\/[1-3]-\d+\?fokus=chem-neutrons-mass-number$/)
   await expect(page.getByText(/^Gezielt üben: Massenzahl und Neutronenzahl gleichgesetzt/)).toBeVisible()
@@ -497,7 +504,7 @@ test('Chemie: Molmasse von Zn(OH)₂ mit Klammer, Üben, Lernkarten', async ({ p
   await expectCleanPage(page, 'Thema Stoffmenge')
 
   await page.goto('./#/ueben/chem-stoffmenge/2-10078')
-  await expect(page.getByText(/^Vertiefung · Aufgabe 2-10078 · Berechne die molare Masse/)).toBeVisible()
+  await expect(page.getByText(/^Vertiefung · Berechne die molare Masse/)).toBeVisible()
   await expect(page.getByText(/Werte aus dem PSE/)).toBeVisible()
   await expectCleanPage(page, 'Molmasse')
   // absichtlich die Klammer nur auf das H bezogen
@@ -534,7 +541,7 @@ test('Chemie: Molmasse von Zn(OH)₂ mit Klammer, Üben, Lernkarten', async ({ p
 test('Chemie: Verbrennung von Butan mit 13/2 O₂, ganzzahlig machen, Lernkarten', async ({ page }) => {
   const errors = collectErrors(page)
   await page.goto('./#/ueben/chem-gleichungen/3-10000')
-  await expect(page.getByText(/^Klausurniveau · Aufgabe 3-10000 · Stelle die Gleichung der vollständigen Verbrennung auf/)).toBeVisible()
+  await expect(page.getByText(/^Klausurniveau · Stelle die Gleichung der vollständigen Verbrennung auf/)).toBeVisible()
   await expectCleanPage(page, 'Verbrennung')
   const pick = async (test: (t: string) => boolean) => {
     // die mhchem-Formel steht im Text für Vorlesehilfen: \ce{…}

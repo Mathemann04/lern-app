@@ -31,8 +31,8 @@ test('Galerie ist über die Einstellungen erreichbar, mit der Schreibweise der F
   await expect(page.getByRole('heading', { name: 'Ableiten', level: 1 })).toBeVisible()
   await page.getByRole('link', { name: 'Formel-Galerie', exact: true }).click()
   await expect(page).toHaveURL(/#\/galerie$/)
-  await page.getByRole('link', { name: 'Rechenweg' }).click()
-  await expect(page.getByRole('heading', { name: 'Mathematik MB1' })).toBeVisible()
+  await page.getByRole('navigation', { name: 'Hauptmenü' }).getByRole('link', { name: 'Start' }).click()
+  await expect(page.getByRole('link', { name: /^Mathematik MB1/ })).toBeVisible()
 })
 
 test('Galerie zeigt in jeder Stufe sauber gesetzte Aufgaben', async ({ page }) => {
