@@ -39,14 +39,17 @@ import {
   isChemExample,
   isFractionExample,
   isRearrangeExample,
+  isVectorExample,
   topicById,
 } from './cards.ts'
 import { cardExample, workedExample } from './example.ts'
 import { parseRichText } from './richText.ts'
 
 // Aufgabe eines Beispiels als Text (Chemie) bzw. als LaTeX (Mathe)
-const latexOf = (e: CardExample) =>
-  isChemExample(e)
+const latexOf = (e: CardExample): string =>
+  isVectorExample(e)
+    ? `vector:${e.vector.kind}:${e.vector.level}-${e.vector.seed}`
+    : isChemExample(e)
     ? e.chemTask
     : isRearrangeExample(e)
       ? rearrangeTaskLatex(e)
@@ -61,10 +64,11 @@ const latexOf = (e: CardExample) =>
 const DERIVATIVE_CARDS = cardsInTopic('ableitungen')
 const FRACTION_CARDS = cardsInTopic('brueche')
 const REARRANGE_CARDS = cardsInTopic('umstellen')
-const MATH_CARDS = [...DERIVATIVE_CARDS, ...FRACTION_CARDS, ...REARRANGE_CARDS]
+const VECTOR_CARDS = cardsInTopic('vektoren')
+const MATH_CARDS = [...DERIVATIVE_CARDS, ...FRACTION_CARDS, ...REARRANGE_CARDS, ...VECTOR_CARDS]
 const CHEM_CARDS = CARDS.filter((c) => c.topic.startsWith('chem-'))
 const derivativeExample = (e: CardExample): Expr | Equation => {
-  if (isChemExample(e) || isFractionExample(e) || isRearrangeExample(e)) throw new Error('Keine Ableitungsaufgabe auf einer Karte zum Ableiten')
+  if (isChemExample(e) || isVectorExample(e) || isFractionExample(e) || isRearrangeExample(e)) throw new Error('Keine Ableitungsaufgabe auf einer Karte zum Ableiten')
   return e
 }
 

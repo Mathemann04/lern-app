@@ -23,6 +23,7 @@ import { LevelUpSuggestion } from '../task/LevelUpSuggestion.tsx'
 import { CheckBadge, FocusBanner, SkipNotice, TaskFooter, TaskIntro, TaskTopBar } from '../task/TaskParts.tsx'
 import { ChemFigure, FigureDrawing } from '../chem/ChemFigure.tsx'
 import { figureById } from '../../engine/chem/figures.ts'
+import { VectorFigure } from '../draw/VectorFigure.tsx'
 import { type ExplanationMode, useExplanationMode } from '../task/explanationMode.ts'
 
 type Props = { course: string; engine: CourseEngine; taskRef: TaskRef; focus?: string | null; mix?: string | null; review?: string | null; free?: boolean }
@@ -260,6 +261,8 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext,
   }
 
   const lastWrong = step.choices.find((c) => c.id === wrongPicks.at(-1))
+  // Antworten als Bilder (M7, „Bild wählen“) in zwei Spalten
+  const pictures = step.choices.length > 0 && step.choices.every((c) => c.drawing)
 
   return (
     <section className="animate-step-in space-y-5" aria-labelledby="question">
@@ -270,6 +273,7 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext,
         </h1>
       </div>
       {step.figure && <ChemFigure id={step.figure} />}
+      {step.drawing && <VectorFigure drawing={step.drawing} />}
 
       {numeric ? (
         <NumberAnswer answer={numeric} disabled={solved} onSubmit={(value) => judged(judgeNumber(value, numeric))} />
@@ -294,7 +298,7 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext,
       ) : step.multi ? (
         <MultiAnswers choices={step.choices} selected={selected} checked={multiResult !== null} detail={detail} onToggle={toggle} onCheck={checkMulti} />
       ) : (
-      <div className="space-y-3" role="group" aria-label="Antworten">
+      <div className={pictures ? 'grid grid-cols-2 gap-3' : 'space-y-3'} role="group" aria-label="Antworten">
         {step.choices.map((choice) => {
           const isWrong = wrongPicks.includes(choice.id)
           const isRight = solved && choice.correct
@@ -304,8 +308,8 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext,
               type="button"
               onClick={() => pick(choice)}
               disabled={solved || isWrong}
-              aria-label={isWrong ? 'Falsche Antwort' : isRight ? 'Richtige Antwort' : undefined}
-              className={`flex w-full items-center gap-3 rounded-2xl border-2 px-4 py-3 text-left transition-colors ${
+              aria-label={isWrong ? 'Falsche Antwort' : isRight ? 'Richtige Antwort' : choice.drawing ? choice.content.replace(/\$/g, '') : undefined}
+              className={`flex w-full items-center gap-3 rounded-2xl border-2 ${pictures ? 'px-2 py-2' : 'px-4 py-3'} text-left transition-colors ${
                 isRight
                   ? 'animate-glow border-green-600 bg-green-50'
                   : isWrong
@@ -890,6 +894,12 @@ function TypedFeedback({ typed, detail, whyOpen, onWhy, onReveal }: TypedFeedbac
 
 // Eine Formel als Antwort setzt sich kleiner, bis sie passt; Text mit Formeln bricht um wie ein Satz
 function ChoiceContent({ choice }: { choice: Choice }) {
+  if (choice.drawing)
+    return (
+      <span className="block min-w-0 flex-1 py-1">
+        <VectorFigure drawing={choice.drawing} compact label={choice.content.replace(/\$/g, '')} />
+      </span>
+    )
   const figure = choice.figure ? figureById(choice.figure) : undefined
   if (figure)
     return (
@@ -966,6 +976,7 @@ function FinishView({ course, mix, review, task, mistakes, focus, isQuestion, pr
           )}
           {task.resultNote && <RichText text={task.resultNote} className="text-zinc-600" />}
           {task.resultFigure && <ChemFigure id={task.resultFigure} />}
+          {task.resultDrawing && <VectorFigure drawing={task.resultDrawing} />}
         </div>
       )}
       {/* In der Mischung kein Vorschlag für eine höhere Stufe: Die Stufe gilt dort für alle Themen; in der Wiederholung auch nicht */}

@@ -55,7 +55,8 @@ test('Startseite: ohne Kopf und Begrüßung, „Los geht’s", Klausur-Karte, nu
   await expect(page.getByRole('link', { name: /^Grundlagen/ })).toHaveCount(0)
   await expect(page.getByRole('region', { name: /Klausur/ })).toHaveCount(0)
   await expect(page.getByRole('link', { name: /^Themen mischen/ })).toHaveCount(0)
-  await expect(page.getByText('Demnächst: Mathe mischen, Integrieren')).toBeVisible()
+  await expect(page.getByRole('link', { name: /^Vektoren/ })).toHaveAttribute('href', '#/thema/vektoren')
+  await expect(page.getByText('Demnächst: Geraden und Ebenen, Matrizen und Gleichungssysteme, Mathe mischen, Integrieren')).toBeVisible()
   await expectCleanPage(page, 'Mathematik MB1')
   // Fächer ohne spielbares Gebiet haben keine Seite
   await page.goto('./#/fach/physik')

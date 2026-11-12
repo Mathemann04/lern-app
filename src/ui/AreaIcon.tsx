@@ -55,6 +55,18 @@ const ART: Record<Kind, (id: string) => ReactNode> = {
       <circle cx="24" cy="13" r="3" className="fill-tone-800" />
     </>
   ),
+  // Vektoren: zwei Pfeile aneinandergehängt, gestrichelt der Summenpfeil
+  vectors: () => (
+    <>
+      <Card />
+      <path d="M11 33.5 34 12.5" className="stroke-tone-400" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="2.5 4.5" />
+      <path d="M11 33.5 29 29" className="stroke-tone-700" strokeWidth="3.5" strokeLinecap="round" />
+      <path d="M31.5 28.4 25.7 25.6 26.9 32.2Z" className="fill-tone-700 stroke-tone-700" strokeWidth="1.5" strokeLinejoin="round" />
+      <path d="M30.5 28 34.5 15.5" className="stroke-tone-500" strokeWidth="3.5" strokeLinecap="round" />
+      <path d="M35.3 12.6 31.2 17.6 37.5 18.6Z" className="fill-tone-500 stroke-tone-500" strokeWidth="1.5" strokeLinejoin="round" />
+      <circle cx="11" cy="33.5" r="2.6" className="fill-tone-800" />
+    </>
+  ),
   // Potenzen, Wurzeln, Logarithmen: Quadrate, die immer größer werden
   powers: () => (
     <>

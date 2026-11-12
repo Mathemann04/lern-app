@@ -42,6 +42,8 @@ import { LOESUNGEN_CARDS } from './chem/loesungenCards.ts'
 import { STOFFMENGE_CARDS } from './chem/stoffmengeCards.ts'
 import { FRACTION_CARD_LIST } from './fractionCards.ts'
 import { REARRANGE_CARD_LIST } from './rearrangeCards.ts'
+import { VECTOR_CARD_LIST } from './vectorCards.ts'
+import type { VectorKind } from '../linalg/vectorTasks.ts'
 import { WHEN_NEEDED } from './texts.ts'
 
 // Lernkarten: je Regel die Formel, ein Merksatz, wann man sie braucht, Beispiele und die
@@ -62,6 +64,7 @@ export const TOPICS: readonly Topic[] = [
   { id: 'ableitungen', title: 'Ableiten', description: 'Von der Potenzregel bis zum impliziten Ableiten' },
   { id: 'brueche', title: 'Brüche', description: 'Kürzen, erweitern, Hauptnenner, mal und geteilt' },
   { id: 'umstellen', title: 'Gleichungen umstellen', description: 'Gegenrechnung, Rüberbringen, Variable im Nenner, Ausklammern' },
+  { id: 'vektoren', title: 'Vektoren', description: 'Rechnen, Verbindungsvektor, Länge, Mittelpunkt, Einheitsvektor, Parameter' },
   { id: 'chem-atombau', title: 'Atombau', description: 'Elementarteilchen, Kernsymbol, Isotope, Ionen, Atommodelle und Licht' },
   { id: 'chem-elektronen', title: 'Elektronen', description: 'Quantenzahlen, Orbitale, Pauli und Hund, Elektronenkonfiguration, Valenzelektronen und Ionen' },
   { id: 'chem-pse', title: 'Aufbau des Periodensystems', description: 'Perioden, Gruppen, Blöcke, Metalle und Nichtmetalle, Edelgasregel, Ionen, Ionisierungsenergie' },
@@ -87,12 +90,16 @@ export type ChemCardExample = {
 // Beispiel einer Mathe-Karte, von der Engine durchgerechnet (example.ts)
 export type MathCardExample = Expr | Equation | FractionTask | RearrangeTask
 
+// Beispiel einer Vektor-Karte (M7): eine Aufgabe des Baukastens (Art, Stufe, Startwert), von der Engine mit Bild gerechnet
+export type VectorCardExample = { readonly vector: { readonly kind: VectorKind; readonly level: Level; readonly seed: number } }
+
 // Beispiel einer Karte: beim Ableiten eine Funktion (beim impliziten Ableiten eine Gleichung), bei
 // Brüchen eine Aufgabe der Bruch-Engine, beim Umstellen eine Umstell-Aufgabe, in Chemie ein Text
-export type CardExample = MathCardExample | ChemCardExample
+export type CardExample = MathCardExample | ChemCardExample | VectorCardExample
 
 // Chemie zuerst prüfen: Ein Text-Beispiel hat kein „kind" und sähe sonst aus wie eine Gleichung
 export const isChemExample = (e: CardExample): e is ChemCardExample => 'chemTask' in e
+export const isVectorExample = (e: CardExample): e is VectorCardExample => 'vector' in e
 export const isFractionExample = (e: CardExample): e is FractionTask => 'hints' in e
 export const isRearrangeExample = (e: CardExample): e is RearrangeTask => 'target' in e
 
@@ -389,6 +396,7 @@ export const CARDS: readonly Card[] = [
   },
   ...FRACTION_CARD_LIST,
   ...REARRANGE_CARD_LIST,
+  ...VECTOR_CARD_LIST,
   ...ATOMBAU_CARDS,
   ...STOFFMENGE_CARDS,
   ...GLEICHUNGEN_CARDS,
@@ -431,7 +439,7 @@ function exampleTerm(e: MathCardExample): Expr {
 export function examplesFor(card: Card, task?: Expr): readonly CardExample[] {
   if (!task) return card.examples
   const parts = new Set(subterms(task).map(key))
-  const fresh = card.examples.filter((e) => isChemExample(e) || !parts.has(key(exampleTerm(e))))
+  const fresh = card.examples.filter((e) => isChemExample(e) || isVectorExample(e) || !parts.has(key(exampleTerm(e))))
   return fresh.length > 0 ? fresh : card.examples
 }
 

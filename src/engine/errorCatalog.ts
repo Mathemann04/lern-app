@@ -3,6 +3,7 @@ import { MISCONCEPTIONS_BY_COURSE } from './chem/misconceptions/index.ts'
 import { ERROR_RULES } from './derive/errorRules.ts'
 import { FRACTION_ERROR_RULES } from './fraction/errorRules.ts'
 import { REARRANGE_ERROR_RULES } from './rearrange/errorRules.ts'
+import { VECTOR_ERROR_RULES } from './linalg/errorRules.ts'
 
 // Typische Fehler aller Themen, mit Namen und Beispiel (für Fortschritt, Lernkarten und gezieltes
 // Üben). Die Ids sind über alle Themen eindeutig (Brüche mit der Vorsilbe „frac-", Umstellen mit
@@ -23,6 +24,7 @@ export type NamedError = {
 export const ERRORS_BY_COURSE: Readonly<Record<string, readonly NamedError[]>> = {
   ableiten: ERROR_RULES,
   brueche: FRACTION_ERROR_RULES,
+  vektoren: VECTOR_ERROR_RULES.map(({ id, name, wrongFormula }) => ({ id, name, wrongFormula })),
   umstellen: [...REARRANGE_ERROR_RULES, ...FRACTION_ERROR_RULES.filter((r) => r.step === 'combine' || r.step === 'expand')],
   // Chemie: Denkfehler der Wissensfragen (als Aussage) und Rechenfehler (als Formel)
   ...Object.fromEntries(

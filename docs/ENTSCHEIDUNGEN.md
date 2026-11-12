@@ -993,3 +993,16 @@ Neue Entscheidungen unten anfügen.
   Zusatzbibliothek (klein, offline). Neue Arten von Aufgaben: Vektor oder Matrix eingeben, Bild wählen, Pfeil ziehen,
   Schemata als Tabelle, Entscheidungsbaum. Animationen nur auf Knopfdruck. Reihenfolge wie in der Vorlesung. Dazu ein
   Entwurf zum Anfassen als private Seite für den Nutzer (nicht im Repo).
+- 12.11.2026: M7 Schritt 1a. Vektoren als eigene Tätigkeit im neuen Gebiet „Vektoren und Matrizen“ (Farbe Cyan, Bild
+  zweier aneinandergehängter Pfeile), Baustein „Rechnen und Länge“ mit Nummern wie `rechnen.2-4711` (Code 21). Eigene
+  kleine Engine `src/engine/linalg/` mit exakten Brüchen und vereinfachten Wurzeln statt der Term-Engine: Vektoren sind
+  Listen von Zahlen, das hält Baukasten und Prüfung einfach. Bilder sind reine Daten der Engine (`linalg/figures.ts`),
+  gezeichnet in `src/ui/draw/` ohne Zusatzbibliothek; Namen an Pfeilen und Punkten setzt KaTeX über dem Bild (HTML statt
+  SVG-Text, damit Pfeile über Buchstaben wie in den Formeln aussehen und Safari keine Probleme mit `foreignObject`
+  macht). Stufe 4 heißt bei Vektoren „mit Parameter oder in vier und fünf Dimensionen“ (wie in Übung 5). Der freie
+  Modus kommt als eigener Teil 1b, weil die Eingabe eines Vektors ein neues Eingabefeld braucht.
+
+  Nach der unabhängigen Prüfung: Ein einzelnes Vielfaches mit negativem Faktor wird mit Vorzeichen gefragt (sonst fragte
+  kein Schritt nach dem Ergebnis), neuer Fehler „Zahl vor dem Vektor vergessen“ (`vec-equation-no-divide`), Text zum
+  Parallelogramm-Fehler berichtigt, Endpunkt „PQ minus P“ zählt als „Punkte addiert“, Tests rechnen Endpunkt, Länge
+  einer Summe und Vektor gegebener Länge aus zwei Punkten aus den gegebenen Größen nach.
