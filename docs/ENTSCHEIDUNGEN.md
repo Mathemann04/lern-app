@@ -836,3 +836,19 @@ Neue Entscheidungen unten anfügen.
   falsch beantwortete und dann übersprungene Frage kommt nicht in die Wiederholung (nur fertig beantwortete zählen). Was
   übersprungen wurde, merkt sich die App nur bis zur nächsten gezeigten Aufgabe und nicht auf dem Gerät. Ist in
   „Wiederholen“ nur die übersprungene Frage fällig, zeigt die Seite das, statt dieselbe Frage sofort wieder zu bringen.
+- 12.11.2026: M6 Schritt 3 „Gleichungen umstellen“ mit Bausteinen. Die Bausteine einer Aufgabe liest die Engine an der
+  Aufgabe selbst ab (was mit der Variable dasteht, auch in Werkzeugen, dazu pq-Formel bzw. Substitution und Wurzelziehen
+  aus dem Rechenweg). Was erst beim Lösen entsteht, zählt nicht extra (ln beim Lösen einer e-Gleichung, die Wurzel einer
+  Länge): Mit dieser strengeren Regel ließe sich in Stufe 5 nur noch „Winkelfunktionen“ allein üben (Probe mit 2000
+  Aufgaben). Aufgaben ohne jeden Baustein heißen „Lineare Gleichungen“ (neuer Baustein, sonst könnte man sie nicht
+  abwählen); „Beträge“ kommt erst mit Schritt 5d in die Liste. Damit auch seltene Auswahlen sofort Aufgaben finden
+  (in Stufe 5 ist nur etwa jede 130. Aufgabe eine reine Determinanten-Aufgabe), gibt es ein Verzeichnis der Nummern 1 bis
+  N je Stufe mit ihren Bausteinen (3000 bis 12000 je Stufe, erzeugt von einem Skript, geprüft von einem Test); die
+  Aufgaben und ihre Nummern bleiben unverändert, mit allen Bausteinen wird weiter frei gewürfelt. Deshalb braucht es
+  in diesem Schritt weder die neue Aufgabennummer `<baustein>.<stufe>-<startwert>` noch einen Speicher-Umzug: beides
+  erst, wenn in Schritt 4 neue Aufgaben je Baustein dazukommen. Die Seite bleibt unter `#/thema/umstellen`. „Geführt“
+  oder „Frei“ gilt weiter für alle Tätigkeiten (je Tätigkeit erst mit „Mathe mischen“ in Schritt 8, damit Mischen
+  und einzelne Tätigkeiten nicht gegeneinander arbeiten). „Brüche“ heißt jetzt „Vereinfachen“; das kommende Thema
+  „Potenzen, Wurzeln, Logarithmen“ ist aus dem Katalog genommen (wird Baustein bei „Vereinfachen“, Schritt 6).
+  Farben nach dem Entwurf: Vereinfachen orange, Gleichungen umstellen blau, Ableiten violett.
+

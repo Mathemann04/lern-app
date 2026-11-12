@@ -24,7 +24,9 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   Seite des Fachs `#/fach/<id>` (`SubjectScreen.tsx`: Klausur-Karte bei Fächern
   mit `mock`, spielbare Gebiete als Kacheln, „Themen mischen“, kommende
   Gebiete in „Demnächst“, Lernkarten unter „Nachlesen“, dort später auch
-  „Nachschlagen“) → Gebiete → Themen (Stufe und Art wählen, üben; ohne spielbare Stufe blass
+  „Nachschlagen“; in Fächern mit `activities`, also Mathe seit M6 Schritt 3, statt der Gebiete
+  die Tätigkeiten als Kacheln in ihrer Farbe, `subjectCourses`, `CourseTile` aus `AreaScreen.tsx`,
+  und „Demnächst“ aus `soon`) → Gebiete → Themen (Stufe und Art wählen, üben; ohne spielbare Stufe blass
   mit „kommt bald"); neue Inhalte dort eintragen. Je Thema: Stufen mit
   Vorschau-Formeln und `available` (geführt spielbar), `free` (freier
   Modus da), `focus` (gezieltes Üben da), Lernkarten-Ordner `cards`. Jedes
@@ -120,3 +122,14 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   `?wiederholen=<fach>`; Vorrang `fokus` vor `mischen` vor `wiederholen`; `taskExitHref` in `routes.ts` sagt, wohin X und „Zur
   Übersicht" führen). Beide lädt `App.tsx` erst bei Bedarf; Startseite und Überblick kommen ohne Chemie-Engine und KaTeX aus (nur
   `engine/quiz/schedule.ts` und `numbers.ts`). Der Fortschritt verweist oben auf den Klausur-Überblick.
+- Tätigkeiten (M6 Schritt 3): ein Thema mit `blockCombos` (bisher „Gleichungen umstellen") hat statt
+  `CourseScreen.tsx` die Seite `ActivityScreen.tsx` (gleiche Adresse `#/thema/<id>`): „Was soll
+  drankommen?" (Bausteine in Gruppen, „Alle", „Keine", „nur"), „Wie verschachtelt?" (Stufen 1 bis 5 als
+  Umschalter, am Handy nur die Zahl, Kurzname `name` an der Stufe; ein Beispiel aus der Auswahl über
+  `exampleLatex` der Engine, „Anderes Beispiel"), Art und Knopf „Stufe 3 geführt üben · 2 Bausteine",
+  gesperrt mit Hinweis und Knopf „Stufe 5 wählen". Gemeinsame Teile in `CourseParts.tsx` (`ModeSwitch`,
+  `LevelProgressLine`, `CourseLinks`). Eigene Farbe eines Themas `tone` (sonst die des Gebiets,
+  `courseTone`): Vereinfachen orange, Gleichungen umstellen blau, Ableiten violett. Die Tätigkeit
+  „Vereinfachen" ist bis Schritt 6 die Seite der Brüche (Id `brueche`). Zurück-Links der Mathe-Themen
+  und -Gebiete führen zur Seite des Fachs.
+

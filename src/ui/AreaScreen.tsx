@@ -1,7 +1,7 @@
 import { solvedInCourse, useProgress } from '../state/progress.ts'
 import { AreaIcon } from './AreaIcon.tsx'
 import { BackLink } from './BackLink.tsx'
-import { type Course, areaById, isCourseAvailable } from './catalog.ts'
+import { type Course, type Tone, areaById, isCourseAvailable } from './catalog.ts'
 import { courseHref, examTaskHref, subjectHref } from './routes.ts'
 
 // Ein Gebiet, z. B. Grundlagen: seine Themen als Kacheln; Themen ohne spielbare Stufe blass mit
@@ -47,7 +47,8 @@ export function AreaScreen({ id }: { id: string }) {
   )
 }
 
-function CourseTile({ course }: { course: Course }) {
+// Kachel eines Themas; tone: eigene Farbe (Tätigkeiten auf der Seite des Fachs), sonst die der Seite
+export function CourseTile({ course, tone }: { course: Course; tone?: Tone }) {
   const solved = solvedInCourse(useProgress(), course.id)
   const available = isCourseAvailable(course)
   const body = (
@@ -70,6 +71,7 @@ function CourseTile({ course }: { course: Course }) {
   return (
     <a
       href={courseHref(course.id)}
+      data-tone={tone}
       className="flex items-center gap-4 rounded-2xl border border-zinc-200 px-4 py-4 transition-colors hover:border-accent-600 hover:bg-accent-50"
     >
       {body}

@@ -2,7 +2,7 @@ import { Suspense, lazy, useEffect } from 'react'
 import { AreaScreen } from './ui/AreaScreen.tsx'
 import { HomeScreen } from './ui/HomeScreen.tsx'
 import { MixScreen } from './ui/MixScreen.tsx'
-import { type Tone, areaById, courseById, courseOfCards, examAreaOf, isChemCourse, subjectById } from './ui/catalog.ts'
+import { type Tone, areaById, courseById, courseOfCards, courseTone, examAreaOf, hasBlocks, isChemCourse, subjectById } from './ui/catalog.ts'
 import { loadCourseEngine } from './ui/courseEngines.ts'
 import { SettingsScreen } from './ui/SettingsScreen.tsx'
 import { SubjectScreen } from './ui/SubjectScreen.tsx'
@@ -17,6 +17,8 @@ import { useTheme } from './ui/useTheme.ts'
 // Seiten mit Formeln oder Mathe-Engine werden erst bei Bedarf geladen: Die Startseite kommt ohne
 // beides aus und erscheint so schneller. (Offline liegen alle Teile ohnehin schon auf dem Gerät.)
 const CourseScreen = lazy(() => loadCourse().then((m) => ({ default: m.CourseScreen })))
+// Seite einer Tätigkeit mit Bausteinen (M6): Bausteine ankreuzen, Verschachtelung wählen
+const ActivityScreen = lazy(() => import('./ui/ActivityScreen.tsx'))
 const ProgressScreen = lazy(() => import('./ui/ProgressScreen.tsx').then((m) => ({ default: m.ProgressScreen })))
 const CardsPage = lazy(() => import('./ui/cards/CardsScreen.tsx').then((m) => ({ default: m.CardsPage })))
 const GalleryScreen = lazy(() => import('./ui/GalleryScreen.tsx').then((m) => ({ default: m.GalleryScreen })))
@@ -127,13 +129,15 @@ function toneOf(route: Route): Tone | undefined {
     case 'area':
       return areaById(route.id)?.area.tone
     case 'course':
-      return courseById(route.id)?.area.tone
+      return courseTone(route.id)
     case 'practice':
-      return courseById(route.course)?.area.tone
-    case 'cards':
-      return route.folder ? courseOfCards(route.folder)?.area.tone : undefined
+      return courseTone(route.course)
+    case 'cards': {
+      const found = route.folder ? courseOfCards(route.folder) : undefined
+      return found ? courseTone(found.course.id) : undefined
+    }
     case 'gallery':
-      return route.course ? courseById(route.course)?.area.tone : undefined
+      return route.course ? courseTone(route.course) : undefined
     case 'examTask':
       return examAreaOf(route.subject, route.task)?.area.tone
     default:
@@ -155,7 +159,7 @@ function Page({ route }: { route: Route }) {
     case 'area':
       return <AreaScreen key={route.id} id={route.id} />
     case 'course':
-      return <CourseScreen key={route.id} id={route.id} />
+      return hasBlocks(courseById(route.id)!.course) ? <ActivityScreen key={route.id} id={route.id} /> : <CourseScreen key={route.id} id={route.id} />
     case 'cards':
       return <CardsPage folder={route.folder} card={route.card} />
     case 'practice':

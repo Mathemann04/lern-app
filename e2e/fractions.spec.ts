@@ -29,7 +29,7 @@ async function expectCleanPage(page: Page, context: string) {
   expect(overflow, `${context}: ragt seitlich heraus`).toBeLessThanOrEqual(0)
 }
 
-test('Von der Startseite über Grundlagen zu den Brüchen und eine Aufgabe geführt lösen', async ({ page }) => {
+test('Von der Startseite über Mathe zu „Vereinfachen" (Brüche) und eine Aufgabe geführt lösen', async ({ page }) => {
   // alter Speicherstand (Version 2) mit Stufe 3 beim Ableiten
   await page.addInitScript(() => {
     if (sessionStorage.getItem('test-seeded')) return
@@ -40,17 +40,13 @@ test('Von der Startseite über Grundlagen zu den Brüchen und eine Aufgabe gefü
   })
   await page.goto('./')
   await page.getByRole('link', { name: /^Mathematik MB1/ }).click()
-  await page.getByRole('link', { name: /^Grundlagen/ }).click()
-  await expect(page).toHaveURL(/#\/gebiet\/grundlagen$/)
-  await expect(page.getByRole('heading', { name: 'Grundlagen', level: 1 })).toBeVisible()
-  // nur Potenzen kommen bald
-  await expect(page.getByText('kommt bald')).toHaveCount(1)
   await expect(page.getByRole('link', { name: /Gleichungen umstellen/ })).toBeVisible()
-  await expectCleanPage(page, 'Grundlagen')
+  await expectCleanPage(page, 'Mathematik MB1')
 
-  await page.getByRole('link', { name: /^Brüche/ }).click()
+  // „Vereinfachen" ist bis M6 Schritt 6 die Seite der Brüche
+  await page.getByRole('link', { name: /^Vereinfachen/ }).click()
   await expect(page).toHaveURL(/#\/thema\/brueche$/)
-  await expect(page.getByRole('heading', { name: 'Brüche', level: 1 })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Vereinfachen', level: 1 })).toBeVisible()
   // „Frei" ist beim Ableiten gewählt und gilt für alle Themen; hier wird auf „Geführt" umgestellt
   await expect(page.getByRole('radio', { name: /Frei/ })).toBeChecked()
   await page.getByText('Auswahl-Antworten').click()
@@ -70,7 +66,7 @@ test('Von der Startseite über Grundlagen zu den Brüchen und eine Aufgabe gefü
   // „Weitermachen" führt jetzt zu den Brüchen, beim Ableiten bleibt Stufe 3 gewählt
   await page.goto('./')
   const card = page.getByRole('region', { name: 'Weitermachen' })
-  await expect(card).toContainText('Brüche')
+  await expect(card).toContainText('Vereinfachen')
   await expect(card).toContainText('Stufe 1: Zahlenbrüche')
   await expect(card.getByRole('link', { name: 'Weiter üben · geführt' })).toHaveAttribute('href', '#/ueben/brueche/1')
   await page.goto('./#/thema/ableiten')
@@ -79,7 +75,7 @@ test('Von der Startseite über Grundlagen zu den Brüchen und eine Aufgabe gefü
 
   // Fortschritt getrennt je Thema, der alte Stand beim Ableiten ist noch da
   await page.goto('./#/fortschritt')
-  const fractions = page.getByRole('region', { name: 'Brüche', exact: true })
+  const fractions = page.getByRole('region', { name: 'Vereinfachen', exact: true })
   const derivatives = page.getByRole('region', { name: 'Ableiten', exact: true })
   await fractions.getByRole('button', { name: 'Einzelheiten' }).click()
   await derivatives.getByRole('button', { name: 'Einzelheiten' }).click()

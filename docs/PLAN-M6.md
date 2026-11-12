@@ -309,6 +309,12 @@ Lösungen). Sie kommen deshalb als eigener Teil nach Schritt 5 (5d).
 
 ### Aufgaben aus Bausteinen (`src/engine/tasks/`)
 
+Umgesetzt in Schritt 3 (12.11.2026, Einzelheiten in docs/ENTSCHEIDUNGEN.md): Die Bausteine liest die Engine an der
+Aufgabe selbst ab (`rearrangeBlocks.ts`), ein Verzeichnis der Nummern mit ihren Bausteinen (`rearrangeIndex.ts`, erzeugt
+von `scripts/rearrange-index.ts`) findet passende Aufgaben sofort. Die alten Nummern bleiben die einzigen; die neue
+Nummer mit Baustein und der Speicher-Umzug kommen erst mit den neuen Aufgaben je Baustein in Schritt 4. Die Art
+(„Geführt“/„Frei“) je Tätigkeit kommt mit „Mathe mischen“ (Schritt 8).
+
 - Neue Liste der Bausteine je Tätigkeit `blocks.ts` (feste Ids wie
   `wurzel`, `det`, nie umbenennen; Titel ohne Formeln; Gruppe), ohne
   Engine-Abhängigkeit, damit die Seiten ohne Mathe-Engine laden.

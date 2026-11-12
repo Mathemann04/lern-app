@@ -52,7 +52,6 @@ async function expectNoInnerScroll(page: Page, context: string) {
 test('Von der Startseite zu „Gleichungen umstellen" und eine Aufgabe der Stufe 2 geführt lösen', async ({ page }) => {
   await page.goto('./')
   await page.getByRole('link', { name: /^Mathematik MB1/ }).click()
-  await page.getByRole('link', { name: /^Grundlagen/ }).click()
   await page.getByRole('link', { name: /^Gleichungen umstellen/ }).click()
   await expect(page).toHaveURL(/#\/thema\/umstellen$/)
   await expect(page.getByRole('heading', { name: 'Gleichungen umstellen', level: 1 })).toBeVisible()
@@ -63,7 +62,7 @@ test('Von der Startseite zu „Gleichungen umstellen" und eine Aufgabe der Stufe
   await expect(page.getByRole('radio', { name: /Frei/ })).toBeEnabled()
   await expectCleanPage(page, 'Thema')
 
-  await page.getByText('Die Variable kommt mehrfach vor oder steht im Nenner').click()
+  await page.getByRole('radio', { name: /^Stufe 2/ }).check({ force: true })
   await expect(page.getByRole('radio', { name: /^Stufe 2/ })).toBeChecked()
   await page.getByRole('link', { name: 'Stufe 2 geführt üben' }).click()
   await expect(page).toHaveURL(/#\/ueben\/umstellen\/2-\d+$/)
@@ -143,7 +142,6 @@ test('Umstellen funktioniert offline: geführt, frei und gezielt üben', async (
   await context.setOffline(true)
   await page.reload()
   await page.getByRole('link', { name: /^Mathematik MB1/ }).click()
-  await page.getByRole('link', { name: /^Grundlagen/ }).click()
   await page.getByRole('link', { name: /^Gleichungen umstellen/ }).click()
   await expect(page.getByRole('heading', { name: 'Gleichungen umstellen', level: 1 })).toBeVisible()
 

@@ -49,3 +49,14 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   aus `avoidedQuestion` in `ui/skip.ts`), außer sie ist die letzte offene Frage der
   Runde. „Wiederholen“ (`ReviewPage.tsx`) nimmt zuerst eine andere fällige Frage; ist
   nur die übersprungene fällig: „Nur noch die übersprungene Frage ist fällig“.
+  **Bausteine der Mathe-Tätigkeiten** (M6 Schritt 3, bisher „Gleichungen umstellen"): dieselben `parts`
+  und `skipParts`, dazu `group` und `note` am Unterthema und `blockCombos` am Thema (je Stufe die
+  Mengen von Bausteinen, die zusammen in einer Aufgabe vorkommen, aus `engine/tasks/rearrangeCombos.ts`).
+  Eine Aufgabe kommt nur dran, wenn alle ihre Bausteine angekreuzt sind: `hasTasks` in `selection.ts`
+  (spielbar, wenn eine Menge ganz angekreuzt ist), `missingBlocks` (was man dazunehmen kann, nur
+  zusammen mit einem angekreuzten), `blockedHint` (Hinweis beim gesperrten Knopf, auch bei
+  „Weitermachen"), `playableLevels`, `partWords` („Bausteine" statt „Unterthemen"). `PartPicker.tsx`
+  zeigt Bausteine in Gruppen (`BLOCK_GROUPS`) mit Knopf „nur", am Laptop in zwei Spalten. Die Engine
+  bekommt die angekreuzten über `nextSeed(level, shown, parts)` (`engine/tasks/rearrangePick.ts`);
+  `questionNoOf` erkennt Wissensfragen an `questionNos`, nicht an `nextSeed`.
+

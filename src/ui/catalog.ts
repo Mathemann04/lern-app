@@ -1,9 +1,11 @@
-import type { Level } from '../engine/tasks/taskNumber.ts'
+import { type Block, REARRANGE_BLOCKS } from '../engine/tasks/blocks.ts'
+import { REARRANGE_COMBOS } from '../engine/tasks/rearrangeCombos.ts'
+import { LEVELS, type Level } from '../engine/tasks/taskNumber.ts'
 
-// Aufbau der App wie bei Brilliant: Fächer (Überschriften auf der Startseite) → Gebiete
-// (Kacheln mit eigener Seite) → Themen (eigene Seite mit Stufen und „Üben"). Gebiete und Themen
-// ohne spielbare Stufe stehen blass mit „kommt bald" da. Absichtlich ohne Mathe-Engine, damit die
-// Startseite schnell lädt.
+// Aufbau der App wie bei Brilliant: Fächer (große Kacheln auf der Startseite, eigene Seite) → Gebiete
+// (Kacheln mit eigener Seite) → Themen (eigene Seite mit Stufen und „Üben"). In Mathe heißen die Themen seit M6
+// Tätigkeiten und stehen direkt auf der Seite des Fachs (activities). Absichtlich ohne Mathe-Engine, damit die
+// Startseite schnell lädt (blocks.ts und rearrangeCombos.ts sind reine Daten).
 
 // Bild eines Gebiets oder Themas (AreaIcon.tsx); jedes Thema mit eigenem Bild, Chemie-Themen ohne
 // eigenes (noch „kommt bald") nehmen das Bild ihres Gebiets
@@ -40,6 +42,9 @@ export type Tone = 'orange' | 'blue' | 'violet' | 'pink' | 'cyan' | 'indigo' | '
 // Eine Stufe eines Themas mit Vorschau-Formeln (nur Aufgabenterme, keine Lösungen)
 export type LevelPreview = {
   readonly level: Level
+  // Kurzname der Stufe für die Wahl „Wie verschachtelt?" (Tätigkeiten mit Bausteinen, M6), z. B. „Einstieg"; steht
+  // auch vorn im Titel
+  readonly name?: string
   readonly title: string
   readonly examples: readonly string[]
   // schon im geführten Modus spielbar
@@ -59,6 +64,9 @@ export type CoursePart = {
   readonly title: string
   // Stufen, in denen es dazu Aufgaben gibt (ein Test vergleicht mit der Fragensammlung)
   readonly levels: readonly Level[]
+  // Bausteine (M6): Gruppe (Id aus BLOCK_GROUPS in engine/tasks/blocks.ts) und kurzer Zusatz unter dem Titel
+  readonly group?: string
+  readonly note?: string
 }
 
 // Ein Thema, z. B. „Ableiten"
@@ -76,8 +84,14 @@ export type Course = {
   // gezieltes Üben der häufigsten Fehler schon da
   readonly focus: boolean
   // Unterthemen zum Ankreuzen, in der Reihenfolge der Anzeige; nur bei Themen, die welche haben
-  // (bisher Chemie), sonst ohne Angabe
+  // (Chemie, und seit M6 die Bausteine der Mathe-Tätigkeiten), sonst ohne Angabe
   readonly parts?: readonly CoursePart[]
+  // Bausteine statt Unterthemen (M6): je Stufe die Mengen von Bausteinen, die zusammen in einer Aufgabe vorkommen (aus der
+  // Engine erzeugt, z. B. rearrangeCombos.ts). Eine Auswahl lässt sich üben, wenn eine dieser Mengen ganz angekreuzt ist;
+  // die Seite heißt dann „Seite einer Tätigkeit" (ActivityScreen.tsx)
+  readonly blockCombos?: Readonly<Partial<Record<Level, readonly (readonly string[])[]>>>
+  // eigene Farbe (sonst die des Gebiets), z. B. bei den Mathe-Tätigkeiten
+  readonly tone?: Tone
 }
 
 // Ein Gebiet, z. B. „Differentialrechnung"
@@ -113,6 +127,11 @@ export type Subject = {
   // Kachel „Probeklausur" auf der Startseite (#/probeklausur/<fach>, S9): Zeit, Punkte und Zahl der Aufgaben,
   // Teil der Klausur (ein Test vergleicht mit der Engine)
   readonly mock?: { readonly minutes: number; readonly points: number; readonly tasks: number; readonly part: number }
+  // Seite des Fachs zeigt die Themen als Tätigkeiten (M6, Mathe: Vereinfachen, Gleichungen umstellen, Ableiten) statt
+  // der Gebiete; die Gebiete bleiben für alte Adressen
+  readonly activities?: boolean
+  // „Demnächst" auf der Seite des Fachs (sonst die Gebiete ohne spielbares Thema)
+  readonly soon?: readonly string[]
   readonly areas: readonly Area[]
 }
 
@@ -206,37 +225,43 @@ const fractionLevels: LevelPreview[] = [
   },
 ]
 
-// Gleichungen umstellen (Plan M3): Stufen 1 bis 5 geführt und frei spielbar (Stufe 5 wächst mit den
-// Schritten 7a bis 8)
+// Gleichungen umstellen (Plan M3): Stufen 1 bis 5 geführt und frei spielbar. Seit M6 (Schritt 3) heißt die Stufe nur
+// noch „wie verschachtelt"; was drankommt, sagen die angekreuzten Bausteine. Die Beispiele zeigt die Galerie, die Seite
+// der Tätigkeit zieht ein Beispiel aus der Auswahl.
 const rearrangeLevels: LevelPreview[] = [
   {
     level: 1,
     available: true,
-    title: 'Mehrere Schritte, die Variable kommt einmal vor',
+    name: 'Einstieg',
+    title: 'Einstieg – ein Baustein, wenige Schritte',
     examples: [String.raw`y = \frac{3(x - a)}{b} + c`, String.raw`y = m(x - a) + b \;\text{ nach } m`, String.raw`\frac{x}{a} - \frac{b}{c} = d`],
   },
   {
     level: 2,
     available: true,
-    title: 'Die Variable kommt mehrfach vor oder steht im Nenner',
+    name: 'Grundlagen',
+    title: 'Grundlagen – ein Baustein, mehrere Schritte',
     examples: [String.raw`a(x + b) = c(x - d)`, String.raw`\frac{a}{x} + b = c`, String.raw`y = \frac{a}{b - x}`],
   },
   {
     level: 3,
     available: true,
-    title: 'Brüche, Wurzeln und Quadrate ineinander',
+    name: 'Kombiniert',
+    title: 'Kombiniert – zwei Bausteine ineinander oder nebeneinander',
     examples: [String.raw`b\sqrt{\frac{x + a}{x - a}} - c = y`, String.raw`\sqrt{x + a} + \sqrt{x - b} = y`, String.raw`\frac{a}{1 + \frac{b}{x}} = c`],
   },
   {
     level: 4,
     available: true,
-    title: 'Verschachtelt: e-Funktion, ln, Wurzeln in Wurzeln, Potenz- und Logarithmusgesetze, Winkel- und Umkehrfunktionen, Substitution und pq-Formel',
+    name: 'Klausur',
+    title: 'Klausur – mehrere Bausteine verschachtelt',
     examples: [String.raw`y = \ln\left(1 + \sqrt{1 + e^{2x}}\right)`, String.raw`\frac{\sin x + \cos x}{\sin x - \cos x} = y`, String.raw`e^{2x} - a e^{x} = b`],
   },
   {
     level: 5,
     available: true,
-    title: 'Quer durch die Mathematik: erst Ableitung, Integral, Summe, Reihe, Grenzwert, Differentialgleichung, Determinante, Betrag, Winkel oder Additionstheorem ausrechnen, dann umstellen',
+    name: 'Profi',
+    title: 'Profi – alles ineinander, quer durch die Mathematik',
     examples: [
       String.raw`\int_a^x \frac{\mathrm{d}t}{t(t + b)} = y`,
       String.raw`\sum_{k=1}^{\infty} k x^k = y`,
@@ -642,13 +667,29 @@ const comingSoon = (id: string, title: string, description: string, icon: AreaIc
   focus: false,
 })
 
+// Bausteine einer Tätigkeit als Kästchen: je Baustein die Stufen, in denen er in einer Aufgabe vorkommt
+function blockParts(blocks: readonly Block[], combos: Readonly<Record<Level, readonly string[]>>): CoursePart[] {
+  return blocks.map((block) => ({
+    id: block.id,
+    title: block.title,
+    note: block.note,
+    group: block.group,
+    levels: LEVELS.filter((level) => combos[level].some((combo) => combo.split('+').includes(block.id))),
+  }))
+}
+
+const splitCombos = (combos: Readonly<Record<Level, readonly string[]>>) =>
+  Object.fromEntries(LEVELS.map((level) => [level, combos[level].map((combo) => combo.split('+'))])) as Record<Level, string[][]>
+
 export const SUBJECTS: readonly Subject[] = [
   {
     id: 'mathe',
     title: 'Mathematik MB1',
-    description: 'Brüche, Gleichungen umstellen und Ableiten',
+    description: 'Vereinfachen, Gleichungen umstellen und Ableiten',
     icon: 'derivative',
     tone: 'blue',
+    activities: true,
+    soon: ['Mathe mischen', 'Integrieren'],
     areas: [
       {
         id: 'grundlagen',
@@ -659,8 +700,9 @@ export const SUBJECTS: readonly Subject[] = [
         courses: [
           {
             id: FRACTIONS,
-            title: 'Brüche',
-            description: 'Fünf Stufen, vom Zahlenbruch bis zu Partialbrüchen, Grenzwerten und komplexen Zahlen',
+            // Tätigkeit „Vereinfachen" (M6); bis Schritt 6 mit den Stufen der Brüche
+            title: 'Vereinfachen',
+            description: 'Brüche und Terme kürzen, zusammenfassen und zerlegen, vom Zahlenbruch bis zu Partialbrüchen und komplexen Zahlen',
             icon: 'fraction',
             cards: 'brueche',
             levels: fractionLevels,
@@ -670,22 +712,15 @@ export const SUBJECTS: readonly Subject[] = [
           {
             id: REARRANGE,
             title: 'Gleichungen umstellen',
-            description: 'Nach einer Variablen auflösen, von Brüchen und Wurzeln bis quer durch die Mathematik',
+            description: 'Nach einer Variablen auflösen: Bausteine ankreuzen, von Brüchen und Wurzeln bis quer durch die Mathematik',
             icon: 'rearrange',
+            tone: 'blue',
             cards: 'umstellen',
             levels: rearrangeLevels,
             free: true,
             focus: true,
-          },
-          {
-            id: 'potenzen',
-            title: 'Potenzen, Wurzeln, Logarithmen',
-            description: 'Die Rechenregeln sicher anwenden',
-            icon: 'powers',
-            cards: null,
-            levels: [],
-            free: false,
-            focus: false,
+            parts: blockParts(REARRANGE_BLOCKS, REARRANGE_COMBOS),
+            blockCombos: splitCombos(REARRANGE_COMBOS),
           },
         ],
       },
@@ -701,6 +736,7 @@ export const SUBJECTS: readonly Subject[] = [
             title: 'Ableiten',
             description: 'Fünf Stufen, von der Potenzregel bis zum impliziten Ableiten',
             icon: 'slope',
+            tone: 'violet',
             cards: 'ableitungen',
             levels: derivativeLevels,
             free: true,
@@ -992,6 +1028,8 @@ export const SUBJECTS: readonly Subject[] = [
 ]
 
 export const isCourseAvailable = (course: Course) => course.levels.some((l) => l.available)
+// Tätigkeit mit Bausteinen (M6): eigene Seite „Was soll drankommen? / Wie verschachtelt?" (ActivityScreen.tsx)
+export const hasBlocks = (course: Course) => course.blockCombos !== undefined
 export const isAreaAvailable = (area: Area) => area.courses.some(isCourseAvailable)
 // Fach mit mindestens einem spielbaren Gebiet: eigene Kachel und Seite; sonst „Demnächst"
 export const isSubjectAvailable = (subject: Subject) => subject.areas.some(isAreaAvailable)
@@ -1009,6 +1047,17 @@ export function areaById(id: string): { subject: Subject; area: Area } | undefin
 
 export function courseById(id: string): { subject: Subject; area: Area; course: Course } | undefined {
   return COURSES.find((entry) => entry.course.id === id)
+}
+
+// Farbe eines Themas: seine eigene, sonst die seines Gebiets
+export function courseTone(id: string): Tone | undefined {
+  const found = courseById(id)
+  return found ? (found.course.tone ?? found.area.tone) : undefined
+}
+
+// Spielbare Themen eines Fachs mit Gebiet, in der Reihenfolge der Seite des Fachs (Tätigkeiten in Mathe)
+export function subjectCourses(subject: Subject): readonly { readonly area: Area; readonly course: Course }[] {
+  return subject.areas.flatMap((area) => area.courses.filter(isCourseAvailable).map((course) => ({ area, course })))
 }
 
 // Spielbare Themen in der Reihenfolge der Startseite
