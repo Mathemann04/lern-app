@@ -831,3 +831,8 @@ Neue Entscheidungen unten anfügen.
   Startseite (mit Namen des Fachs) und auf der Seite des Fachs. Gebiet, Mischung und Klausur-Überblick führen mit dem
   Zurück-Link zur Seite ihres Fachs. Die Gebiete der Mathe-Seite bleiben bis Schritt 3, dann kommen die Tätigkeiten.
   Fortschritt: geübt heißt mindestens eine gelöste Aufgabe oder ein Fehler im Thema; zuletzt geübtes Thema oben.
+- 12.11.2026: M6 Schritt 2 „Überspringen“. Der Knopf steht unten neben der Aufgabennummer, nur solange die Aufgabe offen
+  ist. Ein Fehler, der vor dem Überspringen passiert ist, bleibt in der Fehlerstatistik (er ist wirklich passiert); eine
+  falsch beantwortete und dann übersprungene Frage kommt nicht in die Wiederholung (nur fertig beantwortete zählen). Was
+  übersprungen wurde, merkt sich die App nur bis zur nächsten gezeigten Aufgabe und nicht auf dem Gerät. Ist in
+  „Wiederholen“ nur die übersprungene Frage fällig, zeigt die Seite das, statt dieselbe Frage sofort wieder zu bringen.

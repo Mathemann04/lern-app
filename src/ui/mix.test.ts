@@ -238,6 +238,21 @@ describe('Themen mischen: Wiederholung (S8a)', () => {
     const picked = pickMixed({ ...input(1, [atombau, courseC]), reviewOf: (course) => reviews[course] })!
     expect(decodeSeed(picked.seed)).toMatchObject({ kind: 'question', no: noA })
   })
+
+  it('bringt nach dem Überspringen der fälligen Frage zuerst die nächste fällige (M6 Schritt 2)', () => {
+    const { input } = setup('wiederholung-ueberspringen')
+    const noB = bankB.questions.find((q) => q.level === 1)!.no
+    const noA = topic.bank.questions.find((q) => q.level === 1)!.no
+    const reviews: Record<string, { due: { no: number; variant: number; answeredAt: number }[]; waiting: Set<number> }> = {
+      [ATOMBAU]: { due: [{ no: noA, variant: 0, answeredAt: 20 }], waiting: new Set() },
+      [B]: { due: [{ no: noB, variant: 0, answeredAt: 10 }], waiting: new Set() },
+    }
+    for (let i = 0; i < 20; i++) {
+      const picked = pickMixed({ ...input(1), reviewOf: (course) => reviews[course], avoidOf: (course) => (course === B ? noB : null) })!
+      expect(picked.course).toBe(ATOMBAU)
+      expect(decodeSeed(picked.seed)).toMatchObject({ kind: 'question', no: noA })
+    }
+  })
 })
 
 describe('Themen mischen: Thema nur mit Rechnungen (S3a)', () => {

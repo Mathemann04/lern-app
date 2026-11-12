@@ -66,6 +66,14 @@ export function rememberShown(course: string, level: number, no: number, store: 
   save({ ...all, [keyOf(course, level)]: [...round, no].slice(-MAX_ROUND) }, store)
 }
 
+// Eine übersprungene Frage (M6 Schritt 2) aus der Runde nehmen: Sie kommt später in derselben Runde wieder
+export function forgetShown(course: string, level: number, no: number, store: KeyValueStore | null = browserStore()) {
+  const all = load(store)
+  const key = keyOf(course, level)
+  if (!all[key]?.includes(no)) return
+  save({ ...all, [key]: all[key].filter((shown) => shown !== no) }, store)
+}
+
 // Alle Fragen der Stufe waren dran: Die Runde beginnt von vorn. nos: nur diese Nummern aus der Runde
 // nehmen (die Fragen der angekreuzten Unterthemen, engine.questionNos); die übrigen bleiben gemerkt,
 // damit sie nach einer Änderung der Auswahl nicht gleich wiederkommen. Ohne nos: die ganze Runde leeren.

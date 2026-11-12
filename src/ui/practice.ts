@@ -54,16 +54,18 @@ export function questionNoOf(engine: Pick<CourseEngine, 'nextSeed'>, seed: numbe
 }
 
 // Erste fällige Wiederholung des Themas, die zur Auswahl gehört (Stufe und angekreuzte Unterthemen,
-// engine.questionNos); null, wenn keine fällig ist
+// engine.questionNos); null, wenn keine fällig ist. avoid: gerade übersprungene Frage (ui/skip.ts), sie kommt
+// erst nach einer anderen dran
 export function dueInSelection(
   engine: Pick<CourseEngine, 'questionNos'>,
   level: Level,
   review: CourseReviews | undefined,
   parts?: ReadonlySet<string>,
+  avoid: number | null = null,
 ): DueQuestion | null {
   if (!review || review.due.length === 0 || !engine.questionNos) return null
   const allowed = new Set(engine.questionNos(level, parts))
-  return review.due.find((d) => allowed.has(d.no)) ?? null
+  return review.due.find((d) => allowed.has(d.no) && d.no !== avoid) ?? null
 }
 
 // Nummer einer neuen Aufgabe, deren Form nicht unter den letzten dieser Stufe ist (recent, pickFresh).
@@ -77,6 +79,9 @@ export function dueInSelection(
 // noch warten, kommen vorher nicht dran (außer es gibt sonst nichts).
 // free: freier Modus (Chemie, S8b): nur Rechnungen mit Zahlen; Wiederholungen von Fragen kommen dann nicht
 // (die gibt es nur geführt), deshalb review weglassen.
+// avoid: gerade übersprungene Wissensfrage (ui/skip.ts, M6 Schritt 2). Sie ist schon aus der Runde genommen
+// (forgetShown) und zählt bei dieser einen Wahl wie gezeigt, damit erst eine andere kommt; ist sie die letzte offene
+// Frage der Runde, darf sie kommen (sonst begänne die Runde von vorn).
 export function pickNewSeed(
   engine: Pick<CourseEngine, 'formOf' | 'nextSeed' | 'questionNos'>,
   level: Level,
@@ -85,11 +90,14 @@ export function pickNewSeed(
   parts?: ReadonlySet<string>,
   review?: CourseReviews,
   free = false,
+  avoid: number | null = null,
 ): { seed: number; newRound: boolean; review: boolean } {
-  const due = dueInSelection(engine, level, review, parts)
+  const due = dueInSelection(engine, level, review, parts, avoid)
   if (due) return { seed: questionSeed(due.no, otherVariant(due.variant)), newRound: false, review: true }
   // Wartende Fragen zählen wie schon gezeigte: Die Engine nimmt sie erst, wenn alle anderen dran waren
-  const blocked = review && review.waiting.size > 0 ? new Set([...shown, ...review.waiting]) : shown
+  const open = review && review.waiting.size > 0 ? new Set([...shown, ...review.waiting]) : shown
+  const others = avoid !== null && (engine.questionNos?.(level, parts) ?? []).some((no) => no !== avoid && !open.has(no))
+  const blocked = others ? new Set([...open, avoid]) : open
   const next = engine.nextSeed ? () => engine.nextSeed!(level, blocked, parts, free) : randomSeed
   const seed = pickFresh((s) => engine.formOf({ level, seed: s }), recent, next)
   const no = questionNoOf(engine, seed)

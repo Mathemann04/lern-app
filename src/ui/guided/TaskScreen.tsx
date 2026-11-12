@@ -18,9 +18,9 @@ import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
 import { CardSheetButton, TaskCardLinks } from '../cards/CardSheet.tsx'
 import type { CourseEngine } from '../courseEngines.ts'
-import { mixPracticeHref, practiceHref, reviewHref, taskExitHref } from '../routes.ts'
+import { nextTaskHref, taskExitHref } from '../routes.ts'
 import { LevelUpSuggestion } from '../task/LevelUpSuggestion.tsx'
-import { CheckBadge, FocusBanner, TaskIntro, TaskNumber, TaskTopBar } from '../task/TaskParts.tsx'
+import { CheckBadge, FocusBanner, SkipNotice, TaskFooter, TaskIntro, TaskTopBar } from '../task/TaskParts.tsx'
 import { ChemFigure, FigureDrawing } from '../chem/ChemFigure.tsx'
 import { figureById } from '../../engine/chem/figures.ts'
 import { type ExplanationMode, useExplanationMode } from '../task/explanationMode.ts'
@@ -41,7 +41,8 @@ export function TaskScreen({ course, engine, taskRef, focus = null, mix = null, 
   const [mistakes, setMistakes] = useState(0)
   const finished = stepIndex >= task.steps.length
   // Wissensfrage (nur sie kommen in die Wiederholung, S8a); beim Öffnen schon in der Wiederholung?
-  const isQuestion = questionNoOf(engine, seed) !== null
+  const questionNo = questionNoOf(engine, seed)
+  const isQuestion = questionNo !== null
   const [inReview] = useState(() => isQuestion && isInReview(course, seed))
 
   // Fertig gelöst: einmal in den Fortschritt eintragen (ohne Fehlversuch zählt als „ohne Fehler"); eine
@@ -73,6 +74,7 @@ export function TaskScreen({ course, engine, taskRef, focus = null, mix = null, 
       </TaskTopBar>
 
       {focus && <FocusBanner focus={focus} />}
+      <SkipNotice course={course} seed={seed} />
       {inReview && !focus && (
         <p className="rounded-xl bg-accent-50 px-4 py-2 text-sm text-accent-800" data-testid="review-note">
           Wiederholung: Diese Frage hattest du schon einmal falsch.
@@ -98,7 +100,12 @@ export function TaskScreen({ course, engine, taskRef, focus = null, mix = null, 
         />
       )}
 
-      <TaskNumber taskRef={task.ref} />
+      <TaskFooter
+        course={course}
+        taskRef={task.ref}
+        skipHref={finished ? null : nextTaskHref(course, level, practiceMode, focus, mix, review)}
+        question={questionNo}
+      />
     </main>
   )
 }
@@ -965,7 +972,7 @@ function FinishView({ course, mix, review, task, mistakes, focus, isQuestion, pr
       {!mix && !review && <LevelUpSuggestion course={course} level={task.ref.level} mode={practiceMode} />}
       <div className="flex flex-col gap-3 sm:flex-row">
         <a
-          href={review ? reviewHref(review) : mix ? mixPracticeHref(mix, task.ref.level) : practiceHref(course, task.ref.level, practiceMode, focus)}
+          href={nextTaskHref(course, task.ref.level, practiceMode, focus, mix, review)}
           className="flex-1 rounded-xl bg-accent-700 px-4 py-3 text-center text-lg font-medium text-on-accent hover:bg-accent-800"
         >
           Nächste Aufgabe

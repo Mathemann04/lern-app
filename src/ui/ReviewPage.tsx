@@ -3,6 +3,7 @@ import { dueReviewsOf, waitingReviewCount } from '../state/reviews.ts'
 import { subjectById, subjectCourseIds } from './catalog.ts'
 import { loadCourseEngine } from './courseEngines.ts'
 import { pickReviewTask } from './reviewPick.ts'
+import { skippedQuestion } from './skip.ts'
 import { examOverviewHref, taskHref } from './routes.ts'
 
 // „Wiederholen" über alle Themen eines Fachs (S11, #/wiederholen/<fach>): wählt die am längsten fällige Frage
@@ -13,11 +14,19 @@ import { examOverviewHref, taskHref } from './routes.ts'
 
 export default function ReviewPage({ subject: subjectId }: { subject: string }) {
   const subject = subjectById(subjectId)!
-  const [state, setState] = useState<'loading' | 'done' | 'failed'>('loading')
+  // Fällige Fragen beim Öffnen; gerade übersprungen (M6 Schritt 2): erst eine andere. Ist die übersprungene die einzige,
+  // kommt sie nicht gleich wieder („Nur noch die übersprungene Frage ist fällig")
+  const [due] = useState(() => {
+    const skipped = skippedQuestion()
+    const all = dueReviewsOf(subjectCourseIds(subject))
+    const rest = all.filter((d) => !(skipped && d.course === skipped.course && d.no === skipped.no))
+    return { rest, skippedOnly: rest.length === 0 && all.length > 0 }
+  })
+  const [state, setState] = useState<'loading' | 'done' | 'skippedOnly' | 'failed'>(due.skippedOnly ? 'skippedOnly' : 'loading')
   useEffect(() => {
+    if (due.skippedOnly) return
     let cancelled = false
-    const courses = subjectCourseIds(subject)
-    pickReviewTask(dueReviewsOf(courses), async (course, seed) => {
+    pickReviewTask(due.rest, async (course, seed) => {
       const engine = await loadCourseEngine(course)
       // ohne resolve (Mathe) gibt es keine Wissensfragen
       return engine.resolve ? engine.resolve({ level: 1, seed }) : null
@@ -33,7 +42,7 @@ export default function ReviewPage({ subject: subjectId }: { subject: string }) 
     return () => {
       cancelled = true
     }
-  }, [subject])
+  }, [subject, due])
 
   // Hinweis erst nach einer Weile (wie beim Laden der Seiten in App.tsx): Meist geht es sofort weiter
   if (state === 'loading') return <p className="animate-late text-zinc-500">Wird geladen …</p>
@@ -60,9 +69,13 @@ export default function ReviewPage({ subject: subjectId }: { subject: string }) 
   const waiting = waitingReviewCount(subjectCourseIds(subject))
   return (
     <main className="space-y-4">
-      <h1 className="text-3xl font-semibold tracking-tight text-balance">Für heute ist alles wiederholt</h1>
+      <h1 className="text-3xl font-semibold tracking-tight text-balance">
+        {state === 'skippedOnly' ? 'Nur noch die übersprungene Frage ist fällig' : 'Für heute ist alles wiederholt'}
+      </h1>
       <p className="text-pretty text-zinc-600" data-testid="review-done-text">
-        {waiting > 0
+        {state === 'skippedOnly'
+          ? 'Sie bleibt fällig und kommt beim nächsten Wiederholen wieder.'
+          : waiting > 0
           ? `${waiting === 1 ? 'Eine Frage kommt' : `${waiting} Fragen kommen`} später wieder: nach drei anderen Aufgaben oder an einem der nächsten Tage.`
           : `In ${subject.title} wartet gerade keine Frage auf eine Wiederholung. Falsch beantwortete Fragen kommen von selbst wieder.`}
       </p>

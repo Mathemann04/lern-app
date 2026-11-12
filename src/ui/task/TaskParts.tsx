@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
 import { findError } from '../../engine/errorCatalog.ts'
 import { type TaskRef, formatTaskNumber } from '../../engine/tasks/taskNumber.ts'
 import { FitWidth } from '../FitWidth.tsx'
@@ -7,6 +7,7 @@ import { type ExplanationMode, MODE_LABEL } from './explanationMode.ts'
 import { RichText } from '../RichText.tsx'
 import { courseById, isChemCourse, levelName } from '../catalog.ts'
 import { taskExitHref } from '../routes.ts'
+import { showsSkipNotice, skipTask } from '../skip.ts'
 
 // Teile, die geführter und freier Modus gemeinsam haben
 
@@ -81,9 +82,43 @@ export function TaskIntro({ course, mix = null, review = null, taskRef, function
   )
 }
 
-// Nummer der Aufgabe klein ganz unten (M6 Schritt 1): gebraucht wird sie nur zum Melden und Wiederfinden
-export function TaskNumber({ taskRef }: { taskRef: TaskRef }) {
-  return <p className="pt-2 text-xs text-zinc-500">Aufgabe {formatTaskNumber(taskRef)}</p>
+// Ganz unten: die Nummer der Aufgabe, klein (M6 Schritt 1: gebraucht nur zum Melden und Wiederfinden), und solange
+// die Aufgabe offen ist der Knopf „Überspringen" (M6 Schritt 2) zur nächsten Aufgabe, ohne dass etwas zählt
+type FooterProps = { course: string; taskRef: TaskRef; skipHref?: string | null; question?: number | null }
+
+export function TaskFooter({ course, taskRef, skipHref = null, question = null }: FooterProps) {
+  return (
+    <div className="flex items-center justify-between gap-3 pt-2">
+      <p className="text-xs text-zinc-500">Aufgabe {formatTaskNumber(taskRef)}</p>
+      {skipHref && (
+        <a
+          href={skipHref}
+          onClick={() => skipTask({ course, level: taskRef.level, seed: taskRef.seed, question })}
+          className="-mr-3 inline-flex min-h-11 items-center gap-1 rounded-xl px-3 font-medium text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+        >
+          Überspringen
+          <svg aria-hidden viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M6 6l6 6-6 6M13 6l6 6-6 6" />
+          </svg>
+        </a>
+      )}
+    </div>
+  )
+}
+
+// „Aufgabe übersprungen" über der ersten Aufgabe nach dem Überspringen, verschwindet nach ein paar Sekunden
+export function SkipNotice({ course, seed }: { course: string; seed: number }) {
+  const [visible, setVisible] = useState(() => showsSkipNotice(course, seed))
+  useEffect(() => {
+    if (!visible) return
+    const timer = setTimeout(() => setVisible(false), 4000)
+    return () => clearTimeout(timer)
+  }, [visible])
+  return (
+    <p role="status" className={visible ? 'animate-step-in rounded-xl bg-zinc-100 px-4 py-2 text-sm text-zinc-700' : 'sr-only'}>
+      {visible ? 'Aufgabe übersprungen. Hier ist die nächste.' : ''}
+    </p>
+  )
 }
 
 // Hinweis beim gezielten Üben: welcher Fehler geübt wird, mit Ausstieg
