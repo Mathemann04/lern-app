@@ -172,6 +172,15 @@
   --surface: #fff;
   --raised: #fff;
   --on-accent: #fff;
+  /* Farben der Vektor-Bilder (M7, ui/draw/): a blau, b orange, Ergebnis violett, dritter blaugrün, Hilfslinien grau */
+  --vec-a: oklch(54.6% 0.245 262.881);
+  --vec-b: oklch(64.6% 0.222 41.116);
+  --vec-r: oklch(54.1% 0.281 293.009);
+  --vec-c: oklch(60% 0.118 184.704);
+  --vec-muted: oklch(55.2% 0.016 285.938);
+  --vec-bad: oklch(57.7% 0.245 27.325);
+  --vec-grid: oklch(93.5% 0.004 286);
+  --vec-axis: oklch(70.5% 0.015 286.067);
 }
 
 /* Dunkles Design (Klasse dark am html-Element, gesetzt in index.html und useTheme.ts). Die Leitern
@@ -182,6 +191,14 @@
   --surface: oklch(14.1% 0.005 285.823);
   --raised: oklch(37% 0.013 285.805);
   --on-accent: oklch(14.1% 0.005 285.823);
+  --vec-a: oklch(70.7% 0.165 254.624);
+  --vec-b: oklch(75% 0.183 55.934);
+  --vec-r: oklch(70.2% 0.183 293.541);
+  --vec-c: oklch(77.7% 0.152 181.912);
+  --vec-muted: oklch(70.5% 0.015 286.067);
+  --vec-bad: oklch(70.4% 0.191 22.216);
+  --vec-grid: oklch(25% 0.006 286);
+  --vec-axis: oklch(55.2% 0.016 285.938);
 
   --color-zinc-50: oklch(21% 0.006 285.885);
   --color-zinc-100: oklch(27.4% 0.006 286.033);

@@ -1,7 +1,7 @@
 import type { FreeTask } from '../engine/check/freeTask.ts'
 import type { GuidedTaskBase } from '../engine/guided/types.ts'
 import type { Level, TaskRef } from '../engine/tasks/taskNumber.ts'
-import { DERIVATIVES, FRACTIONS, REARRANGE, isChemCourse } from './catalog.ts'
+import { DERIVATIVES, FRACTIONS, REARRANGE, VECTORS, isChemCourse } from './catalog.ts'
 
 // Engine je Thema für den geführten und den freien Modus, erst bei Bedarf geladen (Ladezeit;
 // offline liegt sie ohnehin schon auf dem Gerät): Mathe-Engines und für alle Chemie-Themen die
@@ -54,6 +54,17 @@ const LOADERS: Readonly<Record<string, () => Promise<CourseEngine>>> = {
       // Bausteine (M6 Schritt 3): parts sind die angekreuzten Bausteine, ohne Angabe alle
       nextSeed: (level, _shown, parts) => pick.nextRearrangeSeed(level, parts),
       exampleLatex: (ref) => task.taskLatex(terms.generateRearrangeTask(ref).task),
+    }
+  },
+  [VECTORS]: async () => {
+    const engine = await import('../engine/linalg/vectorEngine.ts')
+    return {
+      planGuidedTask: (ref) => engine.planVectorTask(ref),
+      prepareFree: () => engine.prepareVectorFree(),
+      formOf: engine.vectorForm,
+      // Bausteine: parts sind die angekreuzten, ohne Angabe alle
+      nextSeed: (level, _shown, parts) => engine.nextVectorSeed(level, parts),
+      exampleLatex: engine.vectorExampleLatex,
     }
   },
 }

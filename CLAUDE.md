@@ -16,7 +16,7 @@ den Nutzer zugeschnitten: Maschinenbau, 1. Semester, THU, „Mathematik MB1".
   [docs/MECHANIK.md](docs/MECHANIK.md)
 - Meilensteine und aktueller Stand: [docs/ROADMAP.md](docs/ROADMAP.md)
 - Laufender Plan: [docs/PLAN-M7.md](docs/PLAN-M7.md) (Vektoren, Geraden und
-  Ebenen, Matrizen; Entwurf vom 12.11.2026, wartet auf OK), vorgezogen vor den
+  Ebenen, Matrizen; freigegeben 12.11.2026, Schritt 1a fertig), vorgezogen vor den
   Rest von [docs/PLAN-M6.md](docs/PLAN-M6.md) (fertig bis Schritt 4c);
   danach
   M12 und der Rest von [docs/PLAN-M4.md](docs/PLAN-M4.md) (Chemie 1, Klausur-Sprint
@@ -84,6 +84,7 @@ Ausführliche Notizen je Bereich (wörtlich wie früher hier, jetzt ausgelagert)
   - Gleichungen umstellen `rearrange/`: `.claude/rules/engine-umstellen.md`
   - Aufgaben, Vorlagen, Baukästen, Abwechslung `tasks/`:
     `.claude/rules/engine-aufgaben.md`
+  - Vektoren `linalg/` und Bilder `src/ui/draw/` (M7): `.claude/rules/engine-vektoren.md`
 - Speichern auf dem Gerät `src/state/`: `.claude/rules/state.md`
 
 ## Arbeitsregeln

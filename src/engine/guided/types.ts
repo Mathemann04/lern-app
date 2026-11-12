@@ -1,6 +1,7 @@
 import type { RuleId } from '../derive/rules.ts'
 import type { Explanation } from '../explain/texts.ts'
 import type { Expr } from '../expr/types.ts'
+import type { VectorDrawing } from '../linalg/figures.ts'
 import type { NumericAnswer } from '../quantity/judge.ts'
 import type { TaskRef } from '../tasks/taskNumber.ts'
 
@@ -25,6 +26,8 @@ export type Choice = {
   readonly whyWrong?: Explanation
   // Antwort als Bild (Id aus engine/chem/figures.ts), z. B. eine Lewis-Formel; content beschreibt es in Worten
   readonly figure?: string
+  // Antwort als Vektor-Bild (M7, „Bild wählen“); content beschreibt es in Worten
+  readonly drawing?: VectorDrawing
 }
 
 export type GuidedStep = {
@@ -45,6 +48,8 @@ export type GuidedStep = {
   readonly cards: readonly string[]
   // Bild unter der Frage (Id aus engine/chem/figures.ts), z. B. ein Ionengitter
   readonly figure?: string
+  // Vektor-Bild unter der Frage (M7, engine/linalg/figures.ts)
+  readonly drawing?: VectorDrawing
   // Zahl als Ergebnis: Im freien Modus (Chemie, S8b) tippt man sie selbst ein, statt auszuwählen
   readonly numeric?: NumericAnswer
   // „Wähle alle richtigen“ (N1): mehrere Antworten können richtig sein; man kreuzt an und prüft einmal,
@@ -129,6 +134,8 @@ export type GuidedTaskBase = {
   readonly resultNote?: string
   // Bild zum Ergebnis (Id aus engine/chem/figures.ts), z. B. der räumliche Bau eines Moleküls
   readonly resultFigure?: string
+  // Vektor-Bild zum Ergebnis (M7), mit „Abspielen“
+  readonly resultDrawing?: VectorDrawing
   // Tipp für die ganze Aufgabe (im freien Modus)
   readonly ruleHint?: Explanation
   // Name des gesuchten Ergebnisses im freien Modus

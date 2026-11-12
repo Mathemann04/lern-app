@@ -1,6 +1,9 @@
 import { useMemo, useState } from 'react'
 import { findError } from '../../engine/errorCatalog.ts'
-import { type Card, type CardExample as Example, type ChemCardExample, type MathCardExample, examplesFor, isChemExample } from '../../engine/explain/cards.ts'
+import { type Card, type CardExample as Example, type ChemCardExample, type MathCardExample, type VectorCardExample, examplesFor, isChemExample, isVectorExample } from '../../engine/explain/cards.ts'
+import { buildVectorTask } from '../../engine/linalg/vectorTasks.ts'
+import { blockSeed } from '../../engine/tasks/taskNumber.ts'
+import { VectorFigure } from '../draw/VectorFigure.tsx'
 import { cardExample } from '../../engine/explain/example.ts'
 import type { Expr } from '../../engine/expr/types.ts'
 import { useProgress } from '../../state/progress.ts'
@@ -72,7 +75,13 @@ function CardExample({ examples, heading: H, headingClass }: { examples: readonl
           </p>
         )}
       </div>
-      {isChemExample(current) ? <ChemExample key={index} example={current} /> : <WorkedExample key={index} example={current} />}
+      {isChemExample(current) ? (
+        <ChemExample key={index} example={current} />
+      ) : isVectorExample(current) ? (
+        <VectorExample key={index} example={current} />
+      ) : (
+        <WorkedExample key={index} example={current} />
+      )}
       {examples.length > 1 && (
         <button
           type="button"
@@ -101,6 +110,34 @@ function WorkedExample({ example: e }: { example: MathCardExample }) {
             <FitWidth className="text-lg">
               <Formula tex={line.latex} />
             </FitWidth>
+          </li>
+        ))}
+      </ol>
+    </>
+  )
+}
+
+// Vektoren (M7): Aufgabe des Baukastens mit Bild und den Zeilen des Rechenwegs, von der Engine gerechnet
+function VectorExample({ example }: { example: VectorCardExample }) {
+  const task = useMemo(() => buildVectorTask({ level: example.vector.level, seed: blockSeed('rechnen', example.vector.seed) }, example.vector.kind), [example])
+  return (
+    <>
+      <RichText text={task.instruction} className="text-lg font-medium" />
+      {task.functionLatex && (
+        <FitWidth className="text-lg">
+          <Formula tex={task.functionLatex} />
+        </FitWidth>
+      )}
+      {task.resultDrawing && <VectorFigure drawing={task.resultDrawing} />}
+      <ol className="space-y-3 border-l-2 border-accent-200 pl-4">
+        {task.steps.map((step) => (
+          <li key={step.id} className="space-y-1">
+            <RichText text={step.title} className="text-sm text-zinc-600" inline />
+            {(Array.isArray(step.established) ? step.established : step.established ? [step.established] : []).map((line) => (
+              <FitWidth key={line} className="text-lg">
+                <Formula tex={line} />
+              </FitWidth>
+            ))}
           </li>
         ))}
       </ol>

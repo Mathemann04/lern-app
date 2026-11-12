@@ -18,6 +18,8 @@ export const BLOCK_GROUPS: readonly BlockGroup[] = [
   { id: 'grundlagen', title: 'Grundlagen' },
   { id: 'funktionen', title: 'Funktionen' },
   { id: 'spaeter', title: 'Aus späteren Kapiteln' },
+  // Tätigkeit „Vektoren“ (M7)
+  { id: 'vektor-grundlagen', title: 'Grundlagen' },
 ]
 
 // Gleichungen umstellen. „Lineare Gleichungen" sind die Aufgaben ganz ohne andere Bausteine (die Variable steht nur
@@ -42,6 +44,14 @@ export const REARRANGE_BLOCKS: readonly Block[] = [
   { id: 'komplex', title: 'Komplexe Zahlen', note: 'Betrag und Winkel', group: 'spaeter' },
   { id: 'vektoren', title: 'Vektoren', note: 'Länge, Skalarprodukt, Winkel', group: 'spaeter' },
 ]
+
+// Vektoren (M7, docs/PLAN-M7.md): Schritt 1 bringt „Rechnen und Länge“, die übrigen Bausteine folgen in den Schritten 2 bis 5.
+export const VECTOR_BLOCKS: readonly Block[] = [
+  { id: 'rechnen', title: 'Rechnen und Länge', note: 'Summe, Vielfache, Verbindungsvektor, Mittelpunkt, Länge, Einheitsvektor', group: 'vektor-grundlagen' },
+]
+
+// Spielbare Mengen von Bausteinen je Stufe (wie REARRANGE_PLAYABLE_COMBOS)
+export const VECTOR_PLAYABLE_COMBOS: Readonly<Record<1 | 2 | 3 | 4 | 5, readonly string[]>> = { 1: ['rechnen'], 2: ['rechnen'], 3: ['rechnen'], 4: ['rechnen'], 5: ['rechnen'] }
 
 // Feste Nummer je Baustein für Aufgabennummern mit Baustein wie „exp.1-4711" (M6 Schritt 4, taskNumber.ts). Gilt für alle
 // Tätigkeiten (dieselbe Id heißt überall derselbe Baustein); nie ändern, neue Bausteine bekommen die nächste freie Nummer.
@@ -70,4 +80,6 @@ export const BLOCK_CODES: Readonly<Record<string, number>> = {
   logeq: 19,
   // kein Baustein, sondern eine Sammlung: Gleichungen mit Zahlen (numberEquationKinds.ts, „zahlen.2-4711", M6 Schritt 4b-3)
   zahlen: 20,
+  // Tätigkeit „Vektoren“ (M7 Schritt 1): Rechnen und Länge („rechnen.1-4711“)
+  rechnen: 21,
 }

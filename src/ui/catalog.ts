@@ -1,4 +1,4 @@
-import { type Block, REARRANGE_BLOCKS } from '../engine/tasks/blocks.ts'
+import { type Block, REARRANGE_BLOCKS, VECTOR_BLOCKS, VECTOR_PLAYABLE_COMBOS } from '../engine/tasks/blocks.ts'
 import { REARRANGE_PLAYABLE_COMBOS } from '../engine/tasks/rearrangeFamilies.ts'
 import { LEVELS, type Level } from '../engine/tasks/taskNumber.ts'
 
@@ -18,6 +18,8 @@ export type AreaIcon =
   | 'slope'
   | 'fraction'
   | 'rearrange'
+  // Vektoren (M7): zwei Pfeile aneinandergehängt
+  | 'vectors'
   | 'powers'
   | 'atom'
   | 'nucleus'
@@ -138,6 +140,7 @@ export type Subject = {
 export const DERIVATIVES = 'ableiten'
 export const FRACTIONS = 'brueche'
 export const REARRANGE = 'umstellen'
+export const VECTORS = 'vektoren'
 export const ATOMBAU = 'chem-atombau'
 export const STOFFMENGE = 'chem-stoffmenge'
 export const GLEICHUNGEN = 'chem-gleichungen'
@@ -271,6 +274,46 @@ const rearrangeLevels: LevelPreview[] = [
       String.raw`\left\lvert \frac{x + a\mathrm{i}}{x - b\mathrm{i}} \right\rvert = y`,
       String.raw`b\sin(x + a) = y\cos x`,
     ],
+  },
+]
+
+// Vektoren (M7, docs/PLAN-M7.md): Stufen wie bei den anderen Tätigkeiten; Stufe 1 in der Ebene, Stufe 2 im Raum, Stufe 4
+// mit Parameter wie in der Klausur
+const vectorLevels: LevelPreview[] = [
+  {
+    level: 1,
+    available: true,
+    name: 'Einstieg',
+    title: 'Einstieg – in der Ebene, ein bis zwei Schritte',
+    examples: [String.raw`\overrightarrow{AB} \text{ für } A(1 \mid -2),\; B(4 \mid 3)`, String.raw`\left\lvert \begin{pmatrix} 3 \\ -4 \end{pmatrix} \right\rvert`],
+  },
+  {
+    level: 2,
+    available: true,
+    name: 'Grundlagen',
+    title: 'Grundlagen – im Raum, mehrere Schritte',
+    examples: [String.raw`2\vec a - 3\vec b`, String.raw`\vec a^{\,0} \text{ für } \vec a = \begin{pmatrix} 2 \\ -1 \\ 2 \end{pmatrix}`],
+  },
+  {
+    level: 3,
+    available: true,
+    name: 'Kombiniert',
+    title: 'Kombiniert – zwei Rechnungen zusammen',
+    examples: [String.raw`3\vec x - \vec a = \vec b`, String.raw`\text{Parallelogramm } ABCD`],
+  },
+  {
+    level: 4,
+    available: true,
+    name: 'Klausur',
+    title: 'Klausur – mit Parameter oder in mehr Dimensionen',
+    examples: [String.raw`\left\lvert \begin{pmatrix} 2t \\ 1 \\ -2 \end{pmatrix} \right\rvert = 3`],
+  },
+  {
+    level: 5,
+    available: true,
+    name: 'Profi',
+    title: 'Profi – alles ineinander',
+    examples: [String.raw`\lvert \overrightarrow{AB} \rvert = 9 \text{ für } B(t \mid 2 \mid 5)`],
   },
 ]
 
@@ -685,11 +728,11 @@ export const SUBJECTS: readonly Subject[] = [
   {
     id: 'mathe',
     title: 'Mathematik MB1',
-    description: 'Vereinfachen, Gleichungen umstellen und Ableiten',
+    description: 'Vereinfachen, Gleichungen umstellen, Ableiten und Vektoren',
     icon: 'derivative',
     tone: 'blue',
     activities: true,
-    soon: ['Mathe mischen', 'Integrieren'],
+    soon: ['Geraden und Ebenen', 'Matrizen und Gleichungssysteme', 'Mathe mischen', 'Integrieren'],
     areas: [
       {
         id: 'grundlagen',
@@ -741,6 +784,28 @@ export const SUBJECTS: readonly Subject[] = [
             levels: derivativeLevels,
             free: true,
             focus: true,
+          },
+        ],
+      },
+      {
+        id: 'lineare-algebra',
+        title: 'Vektoren und Matrizen',
+        description: 'Vektoren, Geraden und Ebenen, Matrizen und Gleichungssysteme',
+        icon: 'vectors',
+        tone: 'cyan',
+        courses: [
+          {
+            id: VECTORS,
+            title: 'Vektoren',
+            description: 'Mit Pfeilen rechnen, Längen, Mittelpunkte und Einheitsvektoren, mit Bildern zum Abspielen und Drehen',
+            icon: 'vectors',
+            tone: 'cyan',
+            cards: 'vektoren',
+            levels: vectorLevels,
+            free: false,
+            focus: false,
+            parts: blockParts(VECTOR_BLOCKS, VECTOR_PLAYABLE_COMBOS),
+            blockCombos: splitCombos(VECTOR_PLAYABLE_COMBOS),
           },
         ],
       },
