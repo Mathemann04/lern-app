@@ -982,3 +982,7 @@ Neue Entscheidungen unten anfügen.
   „das Quadrat“), mit Irrwegen „durch 3 teilen“, „mit $\pm$“ und, bei einer negativen Zahl, „keine Lösung“. Aufgaben mit
   Buchstaben bleiben so (Basen von Potenzen mit $x$ positiv). Wurzelgleichungen wie $\sqrt[3]{2x + 1} = -3$ (hoch 3 nehmen)
   löst die Engine noch nicht; vorgemerkt.
+  Nach der unabhängigen Prüfung: Beim freien Ableiten liest die Prüfung Hochzahlen mit ungeradem Nenner als Wurzel
+  (`oddPowersAsRoots` in `check/answer.ts`), sonst wäre $\frac{1}{3}x^{-\frac{2}{3}}$ als Ableitung von $\sqrt[3]{x}$ an den
+  Stellen $x < 0$ gescheitert; die Normalform fasst $\sqrt[3]{u}$ mit Potenzen von $u$ zusammen ($\frac{x^2}{\sqrt[3]{x}}$ wie
+  $x^{5/3}$, $\sqrt{x} \cdot \sqrt[3]{x} = x^{5/6}$, `mergeOddRoots`), und die Anzeige ordnet $\sqrt[3]{x}$ nach seinem Grad.

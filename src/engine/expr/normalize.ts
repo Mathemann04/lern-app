@@ -5,6 +5,7 @@ import {
   isInteger,
   isOne,
   isZero,
+  rat,
   ratAdd,
   ratMul,
   ratNeg,
@@ -113,7 +114,7 @@ function makeAdd(terms: readonly Expr[]): Expr {
 }
 
 function makeMul(factors: readonly Expr[]): Expr {
-  const flat = factors.flatMap((f) => (f.kind === 'mul' ? f.factors : [f]))
+  const flat = mergeOddRoots(factors.flatMap((f) => (f.kind === 'mul' ? f.factors : [f]))).flatMap((f) => (f.kind === 'mul' ? f.factors : [f]))
   let coef = ONE
   const groups = new Map<string, { base: Expr; exps: Expr[]; original: Expr }>()
   for (const factor of flat) {
@@ -239,3 +240,38 @@ function makeOddRoot(arg: Expr, n: number): Expr {
 
 // Term ohne Buchstaben und ohne i (z. B. e, π, 2^(1/2), 1 − π)
 const isFixedValue = (e: Expr) => subterms(e).every((t) => t.kind !== 'var' && !(t.kind === 'const' && t.name === 'i'))
+
+// Ungerade Wurzel ⁿ√u und Potenzen von u im selben Produkt zusammenfassen (M6 Schritt 4c), damit x²/∛x und x^(5/3)
+// dieselbe Normalform haben:
+// - nur ganzzahlige Potenzen von u: alles in Potenzen von ⁿ√u zählen (u^a = (ⁿ√u)^(a·n), gilt für alle u), dann ganze
+//   Potenzen herausziehen: x² · (∛x)^(−1) = (∛x)^5 = x · (∛x)²,
+// - mit einer gebrochenen Potenz wie √u: Das Produkt ist nur für u ≥ 0 definiert, dort ist ⁿ√u = u^(1/n); alles als
+//   Potenz von u: √x · ∛x = x^(5/6).
+function mergeOddRoots(flat: readonly Expr[]): readonly Expr[] {
+  let out = flat
+  for (const f of flat) {
+    const r = f.kind === 'root' ? f : f.kind === 'pow' && f.base.kind === 'root' ? f.base : null
+    if (!r || r.index % 2 === 0) continue
+    const u = key(r.arg)
+    const rootKey = key(r)
+    const n = BigInt(r.index)
+    let thirds = 0n
+    let fractional: Rational | null = null
+    const rest: Expr[] = []
+    let touchesU = false
+    for (const g of out) {
+      const [base, exponent] = g.kind === 'pow' ? [g.base, g.exp] : [g, ONE_NUM]
+      const k = exponent.kind === 'num' ? exponent.value : null
+      if (k && isInteger(k) && key(base) === rootKey) thirds += k.n
+      else if (k && key(base) === u) {
+        touchesU = true
+        if (isInteger(k)) thirds += k.n * n
+        else fractional = ratAdd(fractional ?? ZERO, k)
+      } else rest.push(g)
+    }
+    if (!touchesU) continue
+    if (fractional) out = [...rest, makePow(r.arg, num(ratAdd(fractional, rat(thirds, n))))]
+    else out = [...rest, makePow(r.arg, num(thirds / n)), makePow(r, num(thirds % n))]
+  }
+  return out
+}

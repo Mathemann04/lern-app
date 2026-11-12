@@ -1,4 +1,4 @@
-import { type Rational, ONE, isInteger, isOne, ratAbs, ratMul, ratNeg, ratSign, ratToNumber } from '../rational.ts'
+import { type Rational, ONE, isInteger, isOne, rat, ratAbs, ratMul, ratNeg, ratSign, ratToNumber } from '../rational.ts'
 import { subterms } from './compare.ts'
 import { normalize } from './normalize.ts'
 import { type Expr, div, fn, log, mul, neg, num, pow, root } from './types.ts'
@@ -43,7 +43,16 @@ function degree(term: Expr): Rational | null {
   const [f] = rest
   if (f.kind === 'var') return ONE
   if (f.kind === 'pow' && f.base.kind === 'var' && f.exp.kind === 'num') return f.exp.value
+  // ungerade Wurzel aus x (M6 Schritt 4c): \sqrt[3]{x^2} hat den Grad 2/3
+  const r = rootOfVar(f)
+  if (r) return r
   return null
+}
+
+// Grad einer ungeraden Wurzel aus der Variable in der Normalform: ∛x → 1/3, (∛x)² → 2/3
+function rootOfVar(f: Expr): Rational | null {
+  const [base, k] = f.kind === 'pow' && f.exp.kind === 'num' ? [f.base, f.exp.value] : [f, ONE]
+  return base.kind === 'root' && base.arg.kind === 'var' ? rat(k.n, k.d * BigInt(base.index)) : null
 }
 
 // Summe der Exponenten von Variablen-Potenzen in einem Summanden: 2x² \cos x → 2
@@ -53,6 +62,7 @@ function variableDegree(term: Expr): number {
   for (const f of factors) {
     if (f.kind === 'var') total += 1
     else if (f.kind === 'pow' && f.base.kind === 'var' && f.exp.kind === 'num') total += ratToNumber(f.exp.value)
+    else if (rootOfVar(f)) total += ratToNumber(rootOfVar(f)!)
   }
   return total
 }

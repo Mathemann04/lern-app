@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { simplify } from '../expr/display.ts'
 import { toLatex } from '../expr/print.ts'
-import { type Expr, add, eq, exp, fn, mul, num, pow, sin, sqrt, x, y } from '../expr/types.ts'
+import { type Expr, add, eq, exp, fn, mul, num, pow, root, sin, sqrt, x, y } from '../expr/types.ts'
 import { generateDerivativeTask } from '../tasks/derivativeTerms.ts'
 import { LEVELS } from '../tasks/taskNumber.ts'
 import { type Verdict, checkAnswer, prepareAnswerCheck, prepareImplicitCheck } from './answer.ts'
@@ -25,6 +25,23 @@ describe('Beispiel aus dem Plan: x² eˣ', () => {
   it('erkennt typische Fehler der Produktregel', () => {
     expect(errorOf(verdict(task, '2xe^x'))).toContain('product-derivatives-multiplied')
     expect(errorOf(verdict(task, '2xe^x-x^2e^x'))).toContain('product-minus')
+  })
+})
+
+// M6 Schritt 4c: \sqrt[3]{x} gilt auch für x < 0, x^{\frac{1}{3}} nicht; die Potenzschreibweise wie im Buch zählt trotzdem
+describe('dritte Wurzel: Ableitung als Potenz oder als Wurzel', () => {
+  it.each<[Expr, string]>([
+    [root(x, 3), '\\frac{1}{3}x^{-\\frac{2}{3}}'],
+    [root(x, 3), '\\frac{1}{3x^{\\frac{2}{3}}}'],
+    [root(x, 3), '\\frac{1}{3\\sqrt[3]{x^2}}'],
+    [mul(num(3), root(pow(x, num(4)), 3)), '4x^{\\frac{1}{3}}'],
+    [mul(num(3), root(pow(x, num(4)), 3)), '4\\sqrt[3]{x}'],
+  ])('zählt die Ableitung von %o als %s richtig', (task, latex) => {
+    expect(verdict(task, latex).kind).toBe('correct')
+  })
+
+  it('erkennt weiter falsche Antworten', () => {
+    expect(verdict(root(x, 3), '\\frac{1}{3}x^{\\frac{2}{3}}').kind).not.toBe('correct')
   })
 })
 

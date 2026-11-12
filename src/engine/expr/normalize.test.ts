@@ -80,6 +80,15 @@ describe('Ungerade Wurzeln (M6 Schritt 4c)', () => {
     expect(key(normalize(div(num(1), root(pow(x, num(2)), 3))))).toBe(key(normalize(pow(x, num(-2, 3)))))
   })
 
+  it('fasst die dritte Wurzel mit Potenzen von x zusammen', () => {
+    const same = (a: Expr, b: Expr) => expect(key(normalize(a)), toLatex(a)).toBe(key(normalize(b)))
+    same(div(pow(x, num(2)), root(x, 3)), pow(x, num(5, 3)))
+    same(div(root(x, 3), x), pow(x, num(-2, 3)))
+    same(mul(sqrt(x), root(x, 3)), pow(x, num(5, 6)))
+    expect(simplified(div(x, root(x, 3)))).toBe('\\sqrt[3]{x^{2}}')
+    expect(simplified(add(root(x, 3), pow(x, num(2))))).toBe('x^{2} + \\sqrt[3]{x}')
+  })
+
   it('behält den Wert für negative x (die Normalform verkleinert den Definitionsbereich nicht)', () => {
     for (const e of [root(x, 3), root(sub(x, num(5)), 3), root(mul(num(-27), pow(x, num(5))), 3), root(x, 5), div(num(1), root(x, 3))]) {
       for (const value of [-7.3, -2.1, -0.6]) expect(closeEnough(evaluate(normalize(e), { x: value }), evaluate(e, { x: value })), toLatex(e)).toBe(true)
