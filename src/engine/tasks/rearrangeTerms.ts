@@ -10,6 +10,7 @@ import { type RearrangeTask, givenLatex, taskVariables } from '../rearrange/task
 import { type Rng, createRng } from '../random/rng.ts'
 import { REARRANGE_BLOCKS } from './blocks.ts'
 import { latexWidthEm } from './latexWidth.ts'
+import { formulaTaskAt } from './formulaTasks.ts'
 import { buildFamilyTask } from './rearrangeBlockKit.ts'
 import { rearrangeTaskBlocks } from './rearrangeBlocks.ts'
 import { hasRearrangeFamily } from './rearrangeFamilies.ts'
@@ -343,6 +344,7 @@ function sharedPick(ref: TaskRef, templates: readonly RearrangeTemplate[]): Rear
 // oder die erste Wahl unter den übrigen. Passt deren Aufgabe nicht, wählt generateRearrangeTask neu.
 export function likelyRearrangeTemplate(ref: TaskRef): RearrangeTemplate | null {
   const own = seedBlock(ref.seed)
+  if (own?.block === 'formel' && formulaTaskAt(ref.level, own.s)) return FORMULA_TEMPLATE
   if (own) return hasRearrangeFamily(own.block, ref.level) ? familyTemplate(own.block, ref.level) : likelyRearrangeTemplate({ level: ref.level, seed: own.s })
   const templates = rearrangeTemplatesForLevel(ref.level)
   if (templates.length === 0) return null
@@ -420,6 +422,16 @@ function cancels(sums: readonly Expr[], env: Env): boolean {
   })
 }
 
+// Formeln aus Technik und Physik (M6 Schritt 4b, formulas.ts): feste Aufgaben, Nummern wie „formel.2-7"
+const FORMULA_TEMPLATE: RearrangeTemplate = {
+  id: 'formeln',
+  level: 1,
+  label: 'Formel aus Technik und Physik',
+  build: () => {
+    throw new Error('Formel-Aufgaben haben feste Nummern (formulaTasks.ts)')
+  },
+}
+
 // Höchstens so viele Versuche je Nummer (die Baukästen treffen meist nach wenigen)
 const FAMILY_ATTEMPTS = 3000
 
@@ -440,6 +452,11 @@ function generateFamilyTask(ref: TaskRef, block: string, s: number): GeneratedRe
 export function generateRearrangeTask(ref: TaskRef): GeneratedRearrangeTask {
   const own = seedBlock(ref.seed)
   if (own) {
+    if (own.block === 'formel') {
+      const found = formulaTaskAt(ref.level, own.s)
+      if (found) return { ref, template: FORMULA_TEMPLATE, task: found.task, label: `Formel: ${found.task.context ?? ''}` }
+      return { ...generateRearrangeTask({ level: ref.level, seed: own.s }), ref }
+    }
     if (hasRearrangeFamily(own.block, ref.level)) return generateFamilyTask(ref, own.block, own.s)
     return { ...generateRearrangeTask({ level: ref.level, seed: own.s }), ref }
   }

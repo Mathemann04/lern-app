@@ -96,7 +96,10 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
     die Doppelbruch-Prüfung, die freie Prüfung und Baukasten gemeinsam nutzen,
     steht in `rearrange/finished.ts`)
   - `parse/latex.ts`: liest die Eingabe der Mathe-Tastatur (LaTeX) ein, mit
-    verständlichen Fehlermeldungen
+    verständlichen Fehlermeldungen; Größen mit Index (`U_0`, `U_{0}` → Name `U_0`, mehrere Zeichen
+    `R_{12}`) und griechische Buchstaben als Größen (`GREEK`, Name `\lambda`, auch ohne Klammer nach
+    $\sin$), so geschrieben, wie `print.ts` sie ausgibt (M6 Schritt 4b-1); `latexChecks.ts` zählt eine
+    Ziffer im Index nicht als Faktor
   - `explain/`: Textbausteine für Erklärungen (ausführlich/kurz), Tipps und
     „Warum ist das falsch?" (`texts.ts`); Format Text mit `$…$`-Formeln.
     Lernkarten (`cards.ts`: Ordner `TOPICS`, je Regel Formel, Merksatz,

@@ -5,7 +5,7 @@ import { closeEnough } from '../expr/arbitraries.ts'
 import { evaluate } from '../expr/evaluate.ts'
 import { toLatex } from '../expr/print.ts'
 import { samplePoints } from '../expr/sample.ts'
-import { type Expr, E, IMAG, PI, add, cos, div, exp, fn, ln, log, mul, neg, num, pow, root, sin, sqrt, x } from '../expr/types.ts'
+import { type Expr, E, IMAG, PI, add, cos, div, exp, fn, ln, log, mul, neg, num, pow, root, sin, sqrt, variable, x } from '../expr/types.ts'
 import { createRng } from '../random/rng.ts'
 import { generateDerivativeTask } from '../tasks/derivativeTerms.ts'
 import { LEVELS } from '../tasks/taskNumber.ts'
@@ -92,6 +92,26 @@ describe('Leser für die Mathe-Tastatur', () => {
     expectSameValue(parsed(latex), expected, latex)
   })
 
+  // Formeln aus Technik und Physik (M6 Schritt 4b): Größen mit Index und griechische Buchstaben
+  it.each<[string, Expr]>([
+    ['U_0', variable('U_0')],
+    ['U_{0}', variable('U_0')],
+    ['R_{12}', variable('R_{12}')],
+    ['T_U+2', add(variable('T_U'), num(2))],
+    ['\\lambda t', mul(variable('\\lambda'), variable('t'))],
+    ['\\varepsilon_r\\frac{A}{d}', mul(variable('\\varepsilon_r'), div(variable('A'), variable('d')))],
+    ['\\sin\\alpha', sin(variable('\\alpha'))],
+    ['N_0e^{-\\lambda t}', mul(variable('N_0'), exp(neg(mul(variable('\\lambda'), variable('t')))))],
+  ])('liest Größen der Physik: %s', (latex, expected) => {
+    expect(parsed(latex)).toEqual(expected)
+  })
+
+  it('gibt Größen mit Index und griechische Buchstaben so aus, dass sie wieder eingelesen werden', () => {
+    for (const latex of ['U_0e^{-\\frac{t}{RC}}', '\\frac{\\varepsilon_0\\varepsilon_r A}{d}', 'T_U + (T_0 - T_U)e^{-kt}', '\\lambda\\sin\\alpha', '\\frac{R_{12}}{\\tau}']) {
+      expect(parsed(toLatex(parsed(latex))), latex).toEqual(parsed(latex))
+    }
+  })
+
   it('merkt sich Dezimalzahlen als Dezimalzahlen', () => {
     expect(parsed('0{,}25')).toEqual({ kind: 'num', value: { n: 1n, d: 4n }, decimal: true })
   })
@@ -114,7 +134,9 @@ describe('Leser für die Mathe-Tastatur', () => {
     ['\\sin^{-1}x', /arcsin/],
     ['\\log x', /\\ln/],
     ['|x|', /Betragsstriche/],
-    ['\\alpha x', /kenne ich nicht/],
+    ['\\aleph x', /kenne ich nicht/],
+    ['U_{}', /fehlt noch etwas/],
+    ['U_{+}', /nur Ziffern und Buchstaben/],
     ['2x=3', /nach \$f'\(x\) =\$/],
     ["f''(x)'", /Ableitungsstriche/],
     [',5', /Vor dem Komma/],

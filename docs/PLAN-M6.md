@@ -261,6 +261,10 @@ mit eigenen Zahlen und Buchstaben:
   Zeichen, ohne Einheiten (mit Einheiten in M10).
 - Alles einsortiert in die Bausteine (Logarithmus, Wurzeln, …); Tests wie in
   Schritt 4.
+- In drei Teilen zum einzelnen Ausprobieren: **4b-1** Formeln aus Technik und
+  Physik (fertig 12.11.2026: 27 Formeln, 48 Aufgaben, Nummern `formel.2-7`, Größen
+  mit Index und griechische Buchstaben auch in der Eingabe), **4b-2** Logarithmen
+  auf beiden Seiten, **4b-3** Gleichungen mit Zahlen.
 
 #### Schritt 5: Umstellen, leichte Aufgaben aus späteren Kapiteln (in Teilen)
 

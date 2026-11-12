@@ -885,3 +885,14 @@ Neue Entscheidungen unten anfügen.
   Innere ist jetzt immer sicher positiv, ein Test prüft das für viele $x$. Lange Gleichungen oben in einer Mathe-Aufgabe
   werden am Handy kleiner gesetzt (wie bei Chemie) statt nach dem Gleichheitszeichen umzubrechen; neue Aufgaben je
   Baustein sind höchstens so breit, dass sie verkleinert in eine Zeile passen.
+- 12.11.2026: M6 Schritt 4b in drei Teilen (Formeln, Logarithmen auf beiden Seiten, Gleichungen mit Zahlen), damit der
+  Nutzer jeden einzeln ausprobieren kann. 4b-1: eigene Formelsammlung aus bekannten Formeln der Technik und Physik (keine
+  aus den Unterlagen übernommenen Aufgaben), ohne Einheiten (die kommen mit M10). Jede Aufgabe ist eine Formel und eine
+  Größe; Stufe nach der Zahl der Umformungen (bis 3 Einstieg, bis 5 Grundlagen, sonst Kombiniert), Bausteine wie bei allen
+  Aufgaben aus der Aufgabe abgelesen; beides steht als Daten fest und ein Test rechnet es nach. Formeln kommen beim Ziehen
+  in etwa jeder fünften Aufgabe eines Bausteins dran, für den es in der Stufe welche gibt (nur mit angekreuzten
+  Bausteinen). Unter der Aufgabe steht der Name der Formel und was jedes Zeichen bedeutet. Der Leser für eingetippte
+  Antworten versteht dafür Größen mit Index ($U_0$, $T_U$, $R_{12}$) und griechische Buchstaben als Größen ($\lambda$,
+  $\varepsilon_r$; $\pi$ bleibt die Kreiszahl). Außerdem prüft der freie Modus Aufgaben mit e-Funktion, Logarithmus,
+  Winkel- oder Hyperbelfunktion jetzt in jeder Stufe großzügig (jede gleichwertige Form ohne Doppelbruch), nicht erst ab
+  Stufe 4, weil es sie seit Schritt 4 ab Stufe 1 gibt.

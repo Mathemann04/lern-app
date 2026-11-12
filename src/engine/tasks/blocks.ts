@@ -63,4 +63,6 @@ export const BLOCK_CODES: Readonly<Record<string, number>> = {
   det: 15,
   komplex: 16,
   vektoren: 17,
+  // kein Baustein, sondern eine Sammlung: Aufgaben aus der Formelsammlung (formulas.ts, „formel.2-7")
+  formel: 18,
 }

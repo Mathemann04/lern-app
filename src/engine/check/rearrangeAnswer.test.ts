@@ -6,6 +6,7 @@ import type { RearrangeTask } from '../rearrange/task.ts'
 import { absOf, angleOf, argOf, dotOf } from '../rearrange/tools/tool.ts'
 import { familyBlocks } from '../tasks/rearrangeFamilies.ts'
 import { generateRearrangeTask } from '../tasks/rearrangeTerms.ts'
+import { solveTask } from '../rearrange/isolate.ts'
 import { blockSeed, formatTaskNumber } from '../tasks/taskNumber.ts'
 import { type RearrangeVerdict, checkRearrangeAnswer, prepareRearrangeCheck, prepareRearrangeFree, rearrangeFreeVerdict } from './rearrangeAnswer.ts'
 
@@ -194,6 +195,18 @@ describe('Umstellen frei: Zufallsaufgaben der Stufen 1 bis 4', () => {
       }
     }, 60_000)
   }
+})
+
+describe('Umstellen frei: großzügig nach dem Inhalt der Aufgabe', () => {
+  // seit es Aufgaben je Baustein gibt (M6 Schritt 4), stehen e-Funktion und Logarithmus schon in Stufe 1: Dort zählt jede
+  // gleichwertige Form ohne Doppelbruch wie ab Stufe 4, nicht nur ein gekürzter Bruch
+  it('Logarithmus in Stufe 1: auch eine umständlichere gleichwertige Form ist richtig', () => {
+    const ref = { level: 1 as const, seed: blockSeed('log', 3) }
+    const task = generateRearrangeTask(ref).task
+    const typed = `\\frac{2\\left(${toLatex(solveTask(task)!.result)}\\right)}{2}`
+    expect(checkRearrangeAnswer(prepareRearrangeCheck(task), typed).kind).toBe('unfinished')
+    expect(prepareRearrangeFree(ref).check(typed).kind).toBe('correct')
+  })
 })
 
 // Aufgaben einzelner Bausteine (M6 Schritt 4): je Baustein und Stufe sechs Nummern wie „exp.1-4711"
