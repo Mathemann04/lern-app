@@ -16,7 +16,7 @@ import {
   subjectLevelName,
 } from './catalog.ts'
 import { Checkbox, PartPicker } from './PartPicker.tsx'
-import { mixPracticeHref } from './routes.ts'
+import { mixPracticeHref, subjectHref } from './routes.ts'
 import {
   allPartsChecked,
   checkedParts,
@@ -45,7 +45,7 @@ export function MixScreen({ id }: { id: string }) {
   return (
     <main className="space-y-6">
       <div className="space-y-3">
-        <BackLink href="#/" label="Start" />
+        <BackLink href={subjectHref(subject.id)} label={subject.title} />
         <div className="flex items-center gap-4">
           <AreaIcon kind="mix" className="size-16 shrink-0" />
           <div className="min-w-0 space-y-1">

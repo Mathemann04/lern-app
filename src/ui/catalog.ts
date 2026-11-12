@@ -30,6 +30,8 @@ export type AreaIcon =
   | 'mix'
   // Kachel „Probeklausur": Blatt mit Zeilen und Uhr
   | 'exam'
+  // Fach Werkstoffkunde (kommt noch): Kristallgitter
+  | 'material'
 
 // Farbe eines Gebiets (Farbfamilie aus index.css, gesetzt über data-tone). Die App selbst ist Blaugrün.
 // Nicht green, red, amber (richtig, falsch, Tipp) und nicht teal (App-Farbe).
@@ -92,10 +94,16 @@ export type Area = {
   readonly exam?: { readonly task: number; readonly points: number }
 }
 
-// Ein Fach, z. B. „Mathematik MB1"
+// Ein Fach, z. B. „Mathematik MB1". Auf der Startseite stehen nur die Fächer als große Kacheln
+// (#/fach/<id>, M6 Schritt 1); Fächer ohne spielbares Gebiet stehen dort in der Zeile „Demnächst".
 export type Subject = {
   readonly id: string
   readonly title: string
+  // Untertitel der Kachel auf der Startseite (reiner Text)
+  readonly description: string
+  // Bild und Farbe der Kachel und der Seite des Fachs
+  readonly icon: AreaIcon
+  readonly tone: Tone
   // Namen der Stufen, z. B. „Grundlagen", „Vertiefung", „Klausurniveau"; ihre Zahl ist die Zahl der
   // Stufen. Ohne Angabe: fünf Stufen, genannt „Stufe 1" bis „Stufe 5".
   readonly levelNames?: readonly string[]
@@ -638,6 +646,9 @@ export const SUBJECTS: readonly Subject[] = [
   {
     id: 'mathe',
     title: 'Mathematik MB1',
+    description: 'Brüche, Gleichungen umstellen und Ableiten',
+    icon: 'derivative',
+    tone: 'blue',
     areas: [
       {
         id: 'grundlagen',
@@ -710,6 +721,9 @@ export const SUBJECTS: readonly Subject[] = [
   {
     id: 'chemie',
     title: 'Chemie 1',
+    description: 'Atombau, Periodensystem, Bindung, Stöchiometrie, Gleichgewicht und Energie',
+    icon: 'atom',
+    tone: 'indigo',
     levelNames: ['Grundlagen', 'Vertiefung', 'Klausurniveau'],
     mix: true,
     mock: { minutes: 45, points: 50, tasks: 5, part: 1 },
@@ -934,8 +948,19 @@ export const SUBJECTS: readonly Subject[] = [
     ],
   },
   {
+    id: 'werkstoffkunde',
+    title: 'Werkstoffkunde',
+    description: 'Aufbau und Eigenschaften der Werkstoffe',
+    icon: 'material',
+    tone: 'cyan',
+    areas: [],
+  },
+  {
     id: 'physik',
     title: 'Physik',
+    description: 'Formeln mit Einheiten',
+    icon: 'units',
+    tone: 'pink',
     areas: [
       {
         id: 'einheiten',
@@ -950,6 +975,9 @@ export const SUBJECTS: readonly Subject[] = [
   {
     id: 'mechanik',
     title: 'Technische Mechanik',
+    description: 'Statik',
+    icon: 'statics',
+    tone: 'cyan',
     areas: [
       {
         id: 'statik',
@@ -965,6 +993,8 @@ export const SUBJECTS: readonly Subject[] = [
 
 export const isCourseAvailable = (course: Course) => course.levels.some((l) => l.available)
 export const isAreaAvailable = (area: Area) => area.courses.some(isCourseAvailable)
+// Fach mit mindestens einem spielbaren Gebiet: eigene Kachel und Seite; sonst „Demnächst"
+export const isSubjectAvailable = (subject: Subject) => subject.areas.some(isAreaAvailable)
 export const isLevelAvailable = (course: Course, level: Level) => course.levels.some((l) => l.level === level && l.available)
 
 // Gibt es in dieser Stufe den freien Modus?

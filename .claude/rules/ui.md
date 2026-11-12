@@ -18,9 +18,13 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
 
 - `src/ui/`: Oberfläche (React). Formeln nur über `Formula`
   (`src/ui/Formula.tsx`), das setzt alles in voller Größe (`\displaystyle`).
-  Aufbau wie bei Brilliant in `catalog.ts`: Fächer (Überschriften auf der
-  Startseite) → Gebiete (Kacheln, ohne spielbares Thema blass mit „kommt
-  bald") → Themen (Stufe und Art wählen, üben; ohne spielbare Stufe blass
+  Aufbau wie bei Brilliant in `catalog.ts`: Fächer (seit M6 Schritt 1 große
+  Kacheln auf der Startseite mit `description`, `icon`, `tone`; Fächer ohne
+  spielbares Gebiet, `isSubjectAvailable`, nur in der Zeile „Demnächst“) →
+  Seite des Fachs `#/fach/<id>` (`SubjectScreen.tsx`: Klausur-Karte bei Fächern
+  mit `mock`, spielbare Gebiete als Kacheln, „Themen mischen“, kommende
+  Gebiete in „Demnächst“, Lernkarten unter „Nachlesen“, dort später auch
+  „Nachschlagen“) → Gebiete → Themen (Stufe und Art wählen, üben; ohne spielbare Stufe blass
   mit „kommt bald"); neue Inhalte dort eintragen. Je Thema: Stufen mit
   Vorschau-Formeln und `available` (geführt spielbar), `free` (freier
   Modus da), `focus` (gezieltes Üben da), Lernkarten-Ordner `cards`. Jedes
@@ -35,8 +39,9 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   Unterthemen dran waren (`pickNewSeed` in
   `practice.ts`, Runde je Thema und Stufe in `src/state/questionRounds.ts`,
   Schlüssel `rechenweg-fragen`, „Fortschritt löschen" leert ihn).
-  Seiten über `#/…` (`routes.ts`): Start `#/` („Weitermachen" und die
-  Fächer), Gebiet `#/gebiet/grundlagen`, Thema `#/thema/brueche`,
+  Seiten über `#/…` (`routes.ts`): Start `#/` (ohne Kopf mit Logo und ohne
+  Begrüßung: „Weitermachen", Klausur-Karte, Fächer, „Demnächst"), Fach
+  `#/fach/chemie`, Gebiet `#/gebiet/grundlagen`, Thema `#/thema/brueche`,
   geführt üben `#/ueben/brueche/1` (neue Aufgabe) bzw.
   `#/ueben/brueche/1-4711` (bestimmte Aufgabe), frei üben
   `#/frei/ableiten/1-4711` (ohne freien Modus geht es geführt weiter),
@@ -44,21 +49,27 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   `#/ueben/ableiten/2?fokus=cos-sign`); alte Adressen ohne Thema
   (`#/ueben/1-4711`) gehören zum Ableiten. Lernkarten in Ordnern nach
   Themen `#/karten`, `#/karten/brueche`, `#/karten/ableitungen/product`,
-  `#/fortschritt` (je Thema ein Abschnitt),
+  `#/fortschritt` (je Fach, siehe unten),
   `#/einstellungen`, Testseite `#/galerie` (Link in den Einstellungen;
   Übersicht wie die Startseite: Fach, Gebiete, Themen aus `GALLERY_COURSES`
   in `catalog.ts`, dazu die Schreibweise-Beispiele aus `samples.ts`, auch die
   für Stufe 5 von „Gleichungen umstellen"; je Thema eine Seite
   `#/galerie/brueche` mit Stufen und Aufgaben und „Abwechslung je Stufe":
   Formen der Aufgaben 1 bis 200 je Stufe, auf Knopfdruck in kleinen Portionen
-  gezählt). Startseite, Gebiet, Einstellungen, Mischseite,
+  gezählt). Startseite, Fach, Gebiet, Einstellungen, Mischseite,
   `routes.ts` und `catalog.ts` kommen ohne Mathe-Engine und KaTeX aus
   (Ladezeit); alle anderen Seiten lädt `App.tsx` erst bei Bedarf. Ob es
   eine Lernkarte oder einen typischen Fehler aus der Adresse gibt, prüfen
   `cards/cardRoute.ts` und `practice.ts`. Hauptmenü `MainNav.tsx`: am Handy
   Leiste unten (Start, Lernkarten, Fortschritt, Einstellungen), ab `md` oben
-  im Kopf, in Aufgaben ausgeblendet (das X führt zum Thema). Unterseiten
-  haben oben `BackLink` („← Ordner", eine Ebene höher).
+  rechts (sonst nichts im Kopf), in Aufgaben ausgeblendet (das X führt zum Thema). Unterseiten
+  haben oben `BackLink` („← Ordner", eine Ebene höher; Gebiet, Mischung und
+  Klausur-Überblick führen zur Seite ihres Fachs). Die Nummer einer Aufgabe
+  steht klein ganz unten (`TaskNumber` in `TaskParts.tsx`), über der Aufgabe nur
+  „Stufe 2 · Leite ab“. Fortschritt `#/fortschritt` je Fach: geübte Themen als
+  kurze Karten (zuletzt geübtes oben, letzte zehn Aufgaben, häufigster Fehler),
+  „Einzelheiten“ klappt Stufen und Fehler mit „Gezielt üben“ auf; nicht
+  geübte Themen in einer Zeile.
   Lernbildschirm geführt in `src/ui/guided/`, frei in `src/ui/free/`
   (für alle Themen gleich: Beschriftung, Tastatur und Prüfung kommen aus
   der Engine des Themas als `FreeTask`; MathLive mit eigener

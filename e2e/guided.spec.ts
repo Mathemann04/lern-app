@@ -80,7 +80,7 @@ test('Stufenwahl bleibt gespeichert, Stufe 2 lässt sich komplett lösen', async
 
   await page.getByRole('link', { name: 'Stufe 2 geführt üben' }).click()
   await expect(page).toHaveURL(/#\/ueben\/ableiten\/2-\d+$/)
-  await expect(page.getByText(/^Stufe 2 · Aufgabe 2-\d+/)).toBeVisible()
+  await expect(page.getByText(/^Stufe 2 · /)).toBeVisible()
   await solveWholeTask(page)
   expect(errors).toEqual([])
 })
@@ -94,7 +94,7 @@ for (const [task, established] of [
   test(`Stufe 4: Aufgabe ${task} lässt sich komplett lösen`, async ({ page }) => {
     const errors = collectErrors(page)
     await page.goto(`./#/ueben/${task}`)
-    await expect(page.getByText(/^Stufe 4 · Aufgabe/)).toBeVisible()
+    await expect(page.getByText(/^Stufe 4 · /)).toBeVisible()
     await solveWholeTask(page)
     await expect(page.getByLabel('Bisher').locator('.katex')).toHaveCount(established)
     expect(errors).toEqual([])
@@ -110,7 +110,7 @@ for (const [task, established] of [
   test(`Stufe 5: Aufgabe ${task} lässt sich komplett lösen`, async ({ page }) => {
     const errors = collectErrors(page)
     await page.goto(`./#/ueben/${task}`)
-    await expect(page.getByText(/^Stufe 5 · Aufgabe/)).toBeVisible()
+    await expect(page.getByText(/^Stufe 5 · /)).toBeVisible()
     await solveWholeTask(page)
     await expect(page.getByLabel('Bisher').locator('.katex')).toHaveCount(established)
     expect(errors).toEqual([])
@@ -133,7 +133,7 @@ for (const task of ['5-15', '5-43', '5-8']) {
   test(`Stufe 5: implizite Aufgabe ${task} lässt sich komplett lösen`, async ({ page }) => {
     const errors = collectErrors(page)
     await page.goto(`./#/ueben/${task}`)
-    await expect(page.getByText(/^Stufe 5 · Aufgabe 5-\d+ · Leite implizit ab$/)).toBeVisible()
+    await expect(page.getByText(/^Stufe 5 · Leite implizit ab$/)).toBeVisible()
     await solveWholeTask(page, 'y′')
     await expect(page.getByLabel('Bisher').locator('.katex')).toHaveCount(3)
     expect(errors).toEqual([])

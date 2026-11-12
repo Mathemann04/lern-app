@@ -40,11 +40,10 @@ const correctIndex = (seed: number) => engine.planGuidedTask({ level: 1, seed })
 const answerButtons = (page: Page) => page.getByRole('group', { name: 'Antworten' }).getByRole('button')
 const card = (page: Page) => page.getByRole('region', { name: 'Klausur Teil 1' })
 
-test('Startseite: Karte „Klausur Teil 1" oben in Chemie 1, ohne fällige Wiederholung', async ({ page }) => {
+test('Startseite: Karte „Chemie 1 · Klausur Teil 1" oben, ohne fällige Wiederholung', async ({ page }) => {
   const errors = collectErrors(page)
   await page.goto('./#/')
-  const chemie = page.getByRole('region', { name: 'Chemie 1' })
-  await expect(chemie.getByRole('region', { name: 'Klausur Teil 1' })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Chemie 1 · Klausur Teil 1' })).toBeVisible()
   await expect(card(page).getByTestId('review-none')).toContainText('nichts fällig')
   await expect(card(page).getByRole('link', { name: /Wiederholen/ })).toHaveCount(0)
   await expect(card(page).getByRole('link', { name: /^Probeklausur/ })).toHaveAttribute('href', '#/probeklausur/chemie')
@@ -53,7 +52,7 @@ test('Startseite: Karte „Klausur Teil 1" oben in Chemie 1, ohne fällige Wiede
   // die alte Kachel „Probeklausur" unten gibt es nicht mehr: nur ein Link zur Probeklausur
   await expect(page.getByRole('link', { name: /Probeklausur/ })).toHaveCount(1)
   // Mathe hat keine Probeklausur und keine Karte
-  await expect(page.getByRole('region', { name: 'Mathematik MB1' }).getByRole('region', { name: /Klausur/ })).toHaveCount(0)
+  await expect(page.getByRole('region', { name: /Klausur/ })).toHaveCount(1)
   await expectCleanPage(page, 'Startseite')
   expect(errors).toEqual([])
 })
@@ -129,7 +128,7 @@ test('Klausur-Überblick: nach einer geübten Klausuraufgabe mit Stufe, Probekla
   // Klausuraufgabe 2 üben und ohne Antwort abgeben: 0 Punkte, unsicher
   await page.getByRole('link', { name: 'Klausuraufgabe 2 üben' }).click()
   await expect(page).toHaveURL(/#\/klausur\/chemie\/aufgabe\/2\/\d+$/)
-  await page.getByRole('button', { name: 'Abgeben' }).click()
+  await page.getByRole('button', { name: 'Abgeben', exact: true }).click()
   await page.getByRole('button', { name: 'Ja, abgeben' }).click()
   await expect(page.getByTestId('exam-score')).toHaveText('0 von 6 Punkten')
   const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('rechenweg-klausuraufgaben') ?? '[]') as { task: number; points: number; max: number }[])

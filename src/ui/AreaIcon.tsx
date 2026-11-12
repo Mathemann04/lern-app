@@ -255,6 +255,16 @@ const ART: Record<Kind, (id: string) => ReactNode> = {
       <path d="M34 28.5V33l3 2" className="stroke-tone-700" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
     </>
   ),
+  // Werkstoffkunde: Ausschnitt eines Kristallgitters (3 × 3 Atome mit Bindungen)
+  material: () => (
+    <>
+      <Card />
+      <path d="M13 13H35M13 22.5H35M13 32H35M13 13V32M24 13V32M35 13V32" className="stroke-tone-400" strokeWidth="2" />
+      {[13, 24, 35].flatMap((x) =>
+        [13, 22.5, 32].map((y) => <circle key={`${x}-${y}`} cx={x} cy={y} r="4" className={x === 24 && y === 22.5 ? 'fill-tone-500' : 'fill-tone-700'} />),
+      )}
+    </>
+  ),
 }
 
 // Zeilen der Liste im Bild „Themen mischen" als (y, angekreuzt?)

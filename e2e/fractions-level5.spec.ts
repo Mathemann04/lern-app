@@ -304,6 +304,7 @@ test('Brüche funktionieren offline, geführt und frei', async ({ page, context 
   await expect(page.getByTestId('offline-status')).toHaveText('Offline nutzbar ✓', { timeout: 15_000 })
   await context.setOffline(true)
   await page.reload()
+  await page.getByRole('link', { name: /^Mathematik MB1/ }).click()
   await page.getByRole('link', { name: /^Grundlagen/ }).click()
   await page.getByRole('link', { name: /^Brüche/ }).click()
   await expect(page.getByRole('heading', { name: 'Brüche', level: 1 })).toBeVisible()

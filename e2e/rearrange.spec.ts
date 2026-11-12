@@ -51,6 +51,7 @@ async function expectNoInnerScroll(page: Page, context: string) {
 
 test('Von der Startseite zu „Gleichungen umstellen" und eine Aufgabe der Stufe 2 geführt lösen', async ({ page }) => {
   await page.goto('./')
+  await page.getByRole('link', { name: /^Mathematik MB1/ }).click()
   await page.getByRole('link', { name: /^Grundlagen/ }).click()
   await page.getByRole('link', { name: /^Gleichungen umstellen/ }).click()
   await expect(page).toHaveURL(/#\/thema\/umstellen$/)
@@ -77,6 +78,7 @@ test('Von der Startseite zu „Gleichungen umstellen" und eine Aufgabe der Stufe
   // Fortschritt hat einen eigenen Abschnitt
   await page.goto('./#/fortschritt')
   const progress = page.getByRole('region', { name: 'Gleichungen umstellen', exact: true })
+  await progress.getByRole('button', { name: 'Einzelheiten' }).click()
   await expect(progress.getByRole('listitem', { name: 'Stufe 2' })).toContainText('1 gelöst')
   await expectCleanPage(page, 'Fortschritt')
 })
@@ -140,6 +142,7 @@ test('Umstellen funktioniert offline: geführt, frei und gezielt üben', async (
   await expect(page.getByTestId('offline-status')).toHaveText('Offline nutzbar ✓', { timeout: 15_000 })
   await context.setOffline(true)
   await page.reload()
+  await page.getByRole('link', { name: /^Mathematik MB1/ }).click()
   await page.getByRole('link', { name: /^Grundlagen/ }).click()
   await page.getByRole('link', { name: /^Gleichungen umstellen/ }).click()
   await expect(page.getByRole('heading', { name: 'Gleichungen umstellen', level: 1 })).toBeVisible()
@@ -549,6 +552,7 @@ test('Umstellen frei: noch nicht fertig, Wurzel gliedweise gezogen, dann richtig
   // gezählt: gelöst, aber nicht ohne Fehler
   await page.goto('./#/fortschritt')
   const progress = page.getByRole('region', { name: 'Gleichungen umstellen', exact: true })
+  await progress.getByRole('button', { name: 'Einzelheiten' }).click()
   await expect(progress.getByRole('listitem', { name: 'Stufe 3' })).toContainText('1 gelöst')
   await expect(progress.getByRole('region', { name: 'Deine häufigsten Fehler' })).toContainText('Wurzel aus jedem Summanden einzeln gezogen')
 })

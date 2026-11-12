@@ -10,6 +10,7 @@ import {
   isAreaAvailable,
   isCourseAvailable,
   isMixAvailable,
+  isSubjectAvailable,
   subjectById,
   subjectLevelCount,
 } from './catalog.ts'
@@ -23,6 +24,8 @@ export type Route =
   | { readonly page: 'gallery'; readonly course: string | null }
   | { readonly page: 'settings' }
   | { readonly page: 'progress' }
+  // Seite eines Fachs (M6 Schritt 1): #/fach/mathe; nur Fächer mit spielbarem Gebiet, sonst die Startseite
+  | { readonly page: 'subject'; readonly id: string }
   // Gebiet #/gebiet/grundlagen, Thema #/thema/brueche (Aufbau in catalog.ts)
   | { readonly page: 'area'; readonly id: string }
   | { readonly page: 'course'; readonly id: string }
@@ -82,6 +85,11 @@ export function parseRoute(fullPath: string): Route {
   if (gallery) return { page: 'gallery', course: gallery[1] && GALLERY_COURSES.includes(gallery[1]) ? gallery[1] : null }
   if (path === '/einstellungen') return { page: 'settings' }
   if (path === '/fortschritt') return { page: 'progress' }
+  const subjectPage = /^\/fach\/([a-z]+)$/.exec(path)
+  if (subjectPage) {
+    const subject = subjectById(subjectPage[1])
+    return subject && isSubjectAvailable(subject) ? { page: 'subject', id: subject.id } : { page: 'home' }
+  }
   const catalog = /^\/(gebiet|thema)\/([^/]+)$/.exec(path)
   if (catalog) {
     const [, kind, id] = catalog
@@ -166,6 +174,7 @@ export const mixPracticeHref = (subject: string, level: Level) => `#/mischen/${s
 // Mischung, sonst zum Thema
 export const taskExitHref = (course: string, mix?: string | null, review?: string | null) => (review ? '#/' : mix ? mixHref(mix) : courseHref(course))
 
+export const subjectHref = (id: string) => `#/fach/${id}`
 export const areaHref = (id: string) => `#/gebiet/${id}`
 export const examTaskHref = (subject: string, task: number, seed?: number) => `#/klausur/${subject}/aufgabe/${task}${seed === undefined ? '' : `/${seed}`}`
 export const mockHref = (subject: string, id?: number) => `#/probeklausur/${subject}${id === undefined ? '' : `/${id}`}`
@@ -184,6 +193,7 @@ export type Section = 'home' | 'cards' | 'progress' | 'settings'
 export function sectionOf(route: Route): Section | null {
   switch (route.page) {
     case 'home':
+    case 'subject':
     case 'area':
     case 'course':
     case 'mix':

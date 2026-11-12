@@ -20,7 +20,7 @@ import { CardSheetButton, TaskCardLinks } from '../cards/CardSheet.tsx'
 import type { CourseEngine } from '../courseEngines.ts'
 import { mixPracticeHref, practiceHref, reviewHref, taskExitHref } from '../routes.ts'
 import { LevelUpSuggestion } from '../task/LevelUpSuggestion.tsx'
-import { CheckBadge, FocusBanner, TaskIntro, TaskTopBar } from '../task/TaskParts.tsx'
+import { CheckBadge, FocusBanner, TaskIntro, TaskNumber, TaskTopBar } from '../task/TaskParts.tsx'
 import { ChemFigure, FigureDrawing } from '../chem/ChemFigure.tsx'
 import { figureById } from '../../engine/chem/figures.ts'
 import { type ExplanationMode, useExplanationMode } from '../task/explanationMode.ts'
@@ -97,6 +97,8 @@ export function TaskScreen({ course, engine, taskRef, focus = null, mix = null, 
           onNext={() => setStepIndex((i) => i + 1)}
         />
       )}
+
+      <TaskNumber taskRef={task.ref} />
     </main>
   )
 }

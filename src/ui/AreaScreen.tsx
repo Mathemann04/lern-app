@@ -2,7 +2,7 @@ import { solvedInCourse, useProgress } from '../state/progress.ts'
 import { AreaIcon } from './AreaIcon.tsx'
 import { BackLink } from './BackLink.tsx'
 import { type Course, areaById, isCourseAvailable } from './catalog.ts'
-import { courseHref, examTaskHref } from './routes.ts'
+import { courseHref, examTaskHref, subjectHref } from './routes.ts'
 
 // Ein Gebiet, z. B. Grundlagen: seine Themen als Kacheln; Themen ohne spielbare Stufe blass mit
 // „kommt bald"
@@ -11,7 +11,7 @@ export function AreaScreen({ id }: { id: string }) {
   return (
     <main className="space-y-8">
       <div className="space-y-3">
-        <BackLink href="#/" label="Start" />
+        <BackLink href={subjectHref(subject.id)} label={subject.title} />
         <div className="flex items-center gap-4">
           <AreaIcon kind={area.icon} className="size-16 shrink-0" />
           <div className="min-w-0">

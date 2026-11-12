@@ -824,3 +824,10 @@ Neue Entscheidungen unten anfügen.
   (Übung und Probeklausur zählen gleich), Grenzen 50 % und 80 %. „Wiederholen“ nimmt alle fälligen Fragen des Fachs,
   unabhängig von angekreuzten Unterthemen und Stufen (vor der Klausur soll nichts liegen bleiben), und ändert „Weitermachen“
   nicht. Die Probeklausur steht nur noch in der Karte oben, nicht zusätzlich unten.
+- 12.11.2026: M6 ohne Fable gebaut (Rat: das Aussehen steht schon im Entwurf, der Hauptteil ist Rechenarbeit; Fable
+  verbraucht das Kontingent etwa doppelt so schnell). Aufwand je Schritt „Hoch“, Schritt 3 und 5d „Sehr hoch“.
+- 12.11.2026: M6 Schritt 1. Werkstoffkunde steht als Fach ohne Gebiete im Katalog, damit es in „Demnächst“ erscheint.
+  „Demnächst“ trennt mit Kommas (Titel wie „Säuren und Basen“ enthalten selbst „und“). Die Klausur-Karte steht auf der
+  Startseite (mit Namen des Fachs) und auf der Seite des Fachs. Gebiet, Mischung und Klausur-Überblick führen mit dem
+  Zurück-Link zur Seite ihres Fachs. Die Gebiete der Mathe-Seite bleiben bis Schritt 3, dann kommen die Tätigkeiten.
+  Fortschritt: geübt heißt mindestens eine gelöste Aufgabe oder ein Fehler im Thema; zuletzt geübtes Thema oben.

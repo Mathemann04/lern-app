@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { ATOMBAU } from './catalog.ts'
-import { areaHref, cardFolderHref, courseHref, examOverviewHref, examTaskHref, mixHref, mockHref, mixPracticeHref, parseRoute, practiceHref, reviewHref, sectionOf, taskHref } from './routes.ts'
+import { areaHref, cardFolderHref, subjectHref, courseHref, examOverviewHref, examTaskHref, mixHref, mockHref, mixPracticeHref, parseRoute, practiceHref, reviewHref, sectionOf, taskHref } from './routes.ts'
 
 describe('parseRoute', () => {
   it('erkennt die Seiten', () => {
@@ -12,6 +12,17 @@ describe('parseRoute', () => {
     expect(parseRoute('/einstellungen')).toEqual({ page: 'settings' })
     expect(parseRoute('/fortschritt')).toEqual({ page: 'progress' })
     expect(parseRoute('/unbekannt')).toEqual({ page: 'home' })
+  })
+
+  it('erkennt Fächer, aber nur solche mit spielbarem Gebiet', () => {
+    expect(parseRoute('/fach/mathe')).toEqual({ page: 'subject', id: 'mathe' })
+    expect(parseRoute('/fach/chemie')).toEqual({ page: 'subject', id: 'chemie' })
+    // Werkstoffkunde, Physik und Mechanik kommen noch
+    expect(parseRoute('/fach/werkstoffkunde')).toEqual({ page: 'home' })
+    expect(parseRoute('/fach/physik')).toEqual({ page: 'home' })
+    expect(parseRoute('/fach/gibtsnicht')).toEqual({ page: 'home' })
+    expect(subjectHref('chemie')).toBe('#/fach/chemie')
+    expect(sectionOf(parseRoute('/fach/mathe'))).toBe('home')
   })
 
   it('erkennt Gebiete und Themen, aber nur spielbare', () => {

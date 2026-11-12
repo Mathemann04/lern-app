@@ -17,32 +17,55 @@ async function expectCleanPage(page: Page, context: string) {
   expect(overflow, `${context}: ragt seitlich heraus`).toBeLessThanOrEqual(0)
 }
 
-test('Startseite zeigt Fächer mit Gebieten, Kommendes blass, und „Los geht’s"', async ({ page }) => {
+test('Startseite: ohne Kopf und Begrüßung, „Los geht’s", Klausur-Karte, nur Fächer und „Demnächst"', async ({ page }) => {
   const errors = collectErrors(page)
   await page.goto('./')
 
-  await expect(page.getByRole('heading', { name: 'Schritt für Schritt selbst lösen' })).toBeVisible()
-  await expect(page.getByRole('heading', { level: 2 })).toHaveText(['Los geht’s', 'Mathematik MB1', 'Chemie 1', 'Physik', 'Technische Mechanik'])
-  // Grundlagen, Differentialrechnung und Aufbau der Materie lassen sich öffnen; Integralrechnung, sechs
-  // Chemie-Gebiete (auch Säuren und Basen sowie Redox), Physik und Statik kommen bald
+  // kein Kopf mit Logo und keine Begrüßung mehr (M6)
+  await expect(page.getByRole('link', { name: 'Rechenweg' })).toHaveCount(0)
+  await expect(page.getByText('Schritt für Schritt selbst lösen')).toHaveCount(0)
+  await expect(page.getByRole('heading', { level: 2 })).toHaveText(['Los geht’s', 'Chemie 1 · Klausur Teil 1', 'Fächer'])
+  // nur die Fächer mit spielbaren Gebieten als Kacheln, keine Gebiete und kein „kommt bald"
+  await expect(page.getByRole('link', { name: /^Mathematik MB1/ })).toHaveAttribute('href', '#/fach/mathe')
+  await expect(page.getByRole('link', { name: /^Chemie 1/ })).toHaveAttribute('href', '#/fach/chemie')
+  await expect(page.getByRole('link', { name: /^Differentialrechnung/ })).toHaveCount(0)
+  await expect(page.getByText('kommt bald')).toHaveCount(0)
+  await expect(page.getByText('Demnächst: Werkstoffkunde, Physik, Technische Mechanik')).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Erste Aufgabe · geführt' })).toHaveAttribute('href', '#/ueben/ableiten/1')
+  await expectCleanPage(page, 'Startseite')
+
+  // Seite Chemie 1: Klausur-Karte, Gebiete, „Themen mischen", Kommendes in einer Zeile, Lernkarten
+  await page.getByRole('link', { name: /^Chemie 1/ }).click()
+  await expect(page).toHaveURL(/#\/fach\/chemie$/)
+  await expect(page.getByRole('heading', { name: 'Chemie 1', level: 1 })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Klausur Teil 1' })).toBeVisible()
+  await expect(page.getByRole('link', { name: /^Aufbau der Materie/ })).toHaveAttribute('href', '#/gebiet/chem-materie')
+  await expect(page.getByRole('link', { name: /^Themen mischen/ })).toHaveAttribute('href', '#/mischen/chemie')
+  await expect(page.getByText('Demnächst: Säuren und Basen, Redox und Elektrochemie')).toBeVisible()
+  await expect(page.getByRole('link', { name: /^Säuren und Basen/ })).toHaveCount(0)
+  await expect(page.getByRole('link', { name: /^Lernkarten/ }).first()).toBeVisible()
+  await expectCleanPage(page, 'Chemie 1')
+
+  // Seite Mathematik MB1: Gebiete ohne Klausur-Karte und ohne Mischung
+  await page.goto('./#/fach/mathe')
+  await expect(page.getByRole('heading', { name: 'Mathematik MB1', level: 1 })).toBeVisible()
   await expect(page.getByRole('link', { name: /^Grundlagen/ })).toBeVisible()
   await expect(page.getByRole('link', { name: /^Differentialrechnung/ })).toBeVisible()
-  await expect(page.getByRole('link', { name: /^Aufbau der Materie/ })).toBeVisible()
-  // seit S3a ist das Gebiet „Stöchiometrie“ spielbar, seit S7a „Gleichgewicht und Energie“
-  await expect(page.getByText('kommt bald')).toHaveCount(5)
-  await expect(page.getByRole('link', { name: /Integralrechnung/ })).toHaveCount(0)
-  await expect(page.getByRole('link', { name: /Säuren und Basen/ })).toHaveCount(0)
-  await expect(page.getByText('Redox und Elektrochemie')).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Erste Aufgabe · geführt' })).toHaveAttribute('href', '#/ueben/ableiten/1')
-  // Unter Chemie 1 die Kachel „Themen mischen" (S1b)
-  await expect(page.getByRole('link', { name: /^Themen mischen/ })).toHaveAttribute('href', '#/mischen/chemie')
-  await expectCleanPage(page, 'Startseite')
+  await expect(page.getByRole('region', { name: /Klausur/ })).toHaveCount(0)
+  await expect(page.getByRole('link', { name: /^Themen mischen/ })).toHaveCount(0)
+  await expect(page.getByText('Demnächst: Integralrechnung')).toBeVisible()
+  await expectCleanPage(page, 'Mathematik MB1')
+  // Fächer ohne spielbares Gebiet haben keine Seite
+  await page.goto('./#/fach/physik')
+  await expect(page.getByRole('heading', { level: 2, name: 'Fächer' })).toBeVisible()
   expect(errors).toEqual([])
 })
 
-test('Von der Startseite über Gebiet und Thema zur Aufgabe und zurück', async ({ page }) => {
+test('Von der Startseite über Fach, Gebiet und Thema zur Aufgabe und zurück', async ({ page }) => {
   const errors = collectErrors(page)
   await page.goto('./')
+  await page.getByRole('link', { name: /^Mathematik MB1/ }).click()
+  await expect(page).toHaveURL(/#\/fach\/mathe$/)
   await page.getByRole('link', { name: /^Differentialrechnung/ }).click()
   await expect(page).toHaveURL(/#\/gebiet\/differentialrechnung$/)
   await expect(page.getByRole('heading', { name: 'Differentialrechnung', level: 1 })).toBeVisible()
@@ -58,6 +81,10 @@ test('Von der Startseite über Gebiet und Thema zur Aufgabe und zurück', async 
   await page.getByText('Zwei Regeln kombiniert').click()
   await page.getByRole('link', { name: 'Stufe 3 geführt üben' }).click()
   await expect(page).toHaveURL(/#\/ueben\/ableiten\/3-\d+$/)
+  // Die Nummer der Aufgabe steht klein ganz unten, nicht mehr über der Aufgabe
+  await expect(page.getByText(/^Stufe 3 · Leite ab/)).toBeVisible()
+  const seed = /3-(\d+)$/.exec(page.url())![1]
+  await expect(page.getByText(`Aufgabe 3-${seed}`, { exact: true })).toBeVisible()
   // Das X führt zurück zum Thema
   await page.getByRole('link', { name: 'Aufgabe beenden' }).click()
   await expect(page).toHaveURL(/#\/thema\/ableiten$/)
@@ -93,8 +120,9 @@ test('App funktioniert nach dem ersten Besuch auch offline', async ({ page, cont
   await context.setOffline(true)
   await page.reload()
 
-  await expect(page.getByRole('heading', { name: 'Mathematik MB1' })).toBeVisible()
+  await expect(page.getByRole('link', { name: /^Mathematik MB1/ })).toBeVisible()
   await expect(page.getByTestId('offline-status')).toHaveText('Offline nutzbar ✓')
+  await page.getByRole('link', { name: /^Mathematik MB1/ }).click()
   await page.getByRole('link', { name: /^Differentialrechnung/ }).click()
   await page.getByRole('link', { name: /^Ableiten/ }).click()
   await expect(page.locator('.katex').first()).toBeVisible()

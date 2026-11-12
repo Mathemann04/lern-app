@@ -2,9 +2,10 @@ import { Suspense, lazy, useEffect } from 'react'
 import { AreaScreen } from './ui/AreaScreen.tsx'
 import { HomeScreen } from './ui/HomeScreen.tsx'
 import { MixScreen } from './ui/MixScreen.tsx'
-import { type Tone, areaById, courseById, courseOfCards, examAreaOf, isChemCourse } from './ui/catalog.ts'
+import { type Tone, areaById, courseById, courseOfCards, examAreaOf, isChemCourse, subjectById } from './ui/catalog.ts'
 import { loadCourseEngine } from './ui/courseEngines.ts'
 import { SettingsScreen } from './ui/SettingsScreen.tsx'
+import { SubjectScreen } from './ui/SubjectScreen.tsx'
 import { buildInfoLabel } from './ui/buildInfo.ts'
 import { type Route, parseRoute, sectionOf } from './ui/routes.ts'
 import { MainNav } from './ui/MainNav.tsx'
@@ -68,15 +69,14 @@ export function App() {
         showNav ? 'pb-[calc(5rem+env(safe-area-inset-bottom))]' : 'pb-[max(1.25rem,env(safe-area-inset-bottom))]'
       }`}
     >
-      <header className="flex items-center justify-between py-2">
-        <a href="#/" className="-my-1.5 inline-flex items-center gap-3 py-1.5">
-          <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" className="size-8" />
-          <span className="text-lg font-semibold tracking-tight">Rechenweg</span>
-        </a>
-        {showNav && <MainNav active={sectionOf(route)} />}
-      </header>
+      {/* Kein Kopf mit Logo mehr (M6): am Laptop steht oben nur das Menü, am Handy ist es eine Leiste unten */}
+      {showNav && (
+        <header className="flex justify-end md:py-2">
+          <MainNav active={sectionOf(route)} />
+        </header>
+      )}
 
-      <div key={path} data-tone={toneOf(route)} className="animate-page-in flex-1 py-8">
+      <div key={path} data-tone={toneOf(route)} className="animate-page-in flex-1 py-6 md:py-8">
         {/* Hinweis erst nach einer Weile: Meist ist der Teil sofort da */}
         <Suspense fallback={<p className="animate-late text-zinc-500">Wird geladen …</p>}>
           <Page route={route} />
@@ -122,6 +122,8 @@ export function App() {
 // (auch die Mischung; eine gemischte Aufgabe in der Farbe ihres Themas)
 function toneOf(route: Route): Tone | undefined {
   switch (route.page) {
+    case 'subject':
+      return subjectById(route.id)?.tone
     case 'area':
       return areaById(route.id)?.area.tone
     case 'course':
@@ -148,6 +150,8 @@ function Page({ route }: { route: Route }) {
       return <SettingsScreen />
     case 'progress':
       return <ProgressScreen />
+    case 'subject':
+      return <SubjectScreen key={route.id} id={route.id} />
     case 'area':
       return <AreaScreen key={route.id} id={route.id} />
     case 'course':

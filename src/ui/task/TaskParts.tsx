@@ -49,7 +49,7 @@ export function CheckBadge({ large = false }: { large?: boolean }) {
   )
 }
 
-// „Stufe 2 · Aufgabe 2-4711 · Leite ab" (in Chemie „Vertiefung · …") und die Funktion; ohne
+// „Stufe 2 · Leite ab" (in Chemie „Vertiefung · …") und die Funktion; ohne
 // functionLatex (Wissensfragen) keine Formel; note: Zusatz darunter, z. B. Bedingungen. In der
 // Mischung (mix) und in der Wiederholung (review) steht darüber, aus welchem Thema die Aufgabe kommt.
 type IntroProps = { course: string; mix?: string | null; review?: string | null; taskRef: TaskRef; functionLatex?: string; instruction: string; note?: string }
@@ -63,7 +63,7 @@ export function TaskIntro({ course, mix = null, review = null, taskRef, function
         </p>
       )}
       <p className="text-sm text-zinc-500">
-        {levelName(course, taskRef.level)} · Aufgabe {formatTaskNumber(taskRef)} · <RichText text={instruction} inline />
+        {levelName(course, taskRef.level)} · <RichText text={instruction} inline />
       </p>
       {/* Chemie: lange Gleichungen werden am Handy kleiner statt seitlich zu wischen (Mathe wie bisher) */}
       {functionLatex !== undefined &&
@@ -79,6 +79,11 @@ export function TaskIntro({ course, mix = null, review = null, taskRef, function
       {note && <RichText text={note} className="text-sm text-zinc-500" />}
     </>
   )
+}
+
+// Nummer der Aufgabe klein ganz unten (M6 Schritt 1): gebraucht wird sie nur zum Melden und Wiederfinden
+export function TaskNumber({ taskRef }: { taskRef: TaskRef }) {
+  return <p className="pt-2 text-xs text-zinc-500">Aufgabe {formatTaskNumber(taskRef)}</p>
 }
 
 // Hinweis beim gezielten Üben: welcher Fehler geübt wird, mit Ausstieg
