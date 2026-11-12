@@ -70,23 +70,47 @@ export function spaceView(d: VectorDrawing, yaw: number, pitch: number): View {
 // Blickwinkel zu Beginn: der, unter dem der kürzeste sichtbare Pfeil am längsten erscheint (kein Pfeil zeigt auf den
 // Betrachter); gleich gut: der erste der Liste
 export const START_PITCH = 0.42
+// Mit Winkeln (Skalarprodukt, M7 Schritt 2) zählt auch, wie unverzerrt der Winkel erscheint: Bogen und Pfeile sollen
+// nicht zu einem Strich zusammenfallen.
 export function bestYaw(d: VectorDrawing): number {
-  const candidates = [-0.62, -0.25, -1.0, 0.3, -1.4, 0.75, 2.2, -2.3]
+  const angles = d.angles ?? []
+  const candidates = [-0.62, -0.25, -1.0, 0.3, -1.4, 0.75, 2.2, -2.3, ...(angles.length > 0 ? [1.2, -1.8, 1.7, -2.8, 2.7, 0.0] : [])]
   const arrows = d.arrows.filter((a) => !a.ghost)
-  if (arrows.length === 0) return candidates[0]
+  if (arrows.length === 0 && angles.length === 0) return candidates[0]
   let best = { yaw: candidates[0], score: -1 }
   for (const yaw of candidates) {
     const view = spaceView(d, yaw, START_PITCH)
-    const score = Math.min(
+    const lengths = Math.min(
+      1e9,
       ...arrows.map((a) => {
         const [x1, y1] = view.project(a.from)
         const [x2, y2] = view.project(a.to)
         return Math.hypot(x2 - x1, y2 - y1) / Math.max(1e-9, Math.hypot(...a.to.map((x, k) => x - a.from[k])))
       }),
     )
+    const score = (lengths === 1e9 ? 1 : lengths) * Math.pow(angleFidelity(view, angles), 2)
     if (score > best.score * 1.15) best = { yaw, score }
   }
   return best.yaw
+}
+
+// 1, wenn alle Winkel im Bild so groß erscheinen wie in Wirklichkeit; kleiner, je mehr sie verzerrt sind
+function angleFidelity(view: View, angles: NonNullable<VectorDrawing['angles']>): number {
+  const clamp = (x: number) => Math.max(-1, Math.min(1, x))
+  const between = (u: readonly number[], v: readonly number[]) => Math.acos(clamp(u.reduce((s, x, i) => s + x * v[i], 0) / Math.max(1e-12, Math.hypot(...u) * Math.hypot(...v))))
+  return Math.min(
+    1,
+    ...angles.map((a) => {
+      const [ox, oy] = view.project(a.at)
+      const screen = (k: readonly number[]) => {
+        const [x, y] = view.project(a.at.map((x0, i) => x0 + k[i]))
+        return [x - ox, y - oy]
+      }
+      const shown = between(screen(a.u), screen(a.v))
+      const real = between(a.u, a.v)
+      return Math.min(shown, real) / Math.max(shown, real, 1e-9)
+    }),
+  )
 }
 
 // Spitze eines Pfeils: Dreieck an der Spitze, Linie endet davor

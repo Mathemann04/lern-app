@@ -1,6 +1,6 @@
 # Plan für Meilenstein 7: Vektoren, Geraden und Ebenen, Matrizen
 
-Status: **freigegeben** (Nutzer, 12.11.2026: „Passt alles“). Schritte 1a und 1b fertig (12.11.2026).
+Status: **freigegeben** (Nutzer, 12.11.2026: „Passt alles“). Schritte 1a, 1b und 2a fertig (12.11.2026).
 
 Entwurf zum Ansehen und Anfassen (privat, nur für den Nutzer):
 https://claude.ai/artifact/WXe4sjavAGF64jyAWSa3hi. Er zeigt acht Bilder und Aufgaben im geplanten Stil. Die Seite ist
@@ -128,8 +128,20 @@ Request.
      Typische Fehler wie im geführten Modus (aus den falschen Antworten des Schritts, der das Ergebnis liefert), eine
      Lösung vergessen, gerundete Kommazahl. Fertig ist eine ganze Zahl, eine Kommazahl, ein gekürzter Bruch oder ein
      Vielfaches einer vereinfachten Wurzel, auch mit der Wurzel im Nenner wie $\frac{3}{\sqrt{14}}$.
-2. **Skalarprodukt und Winkel:** Zieh-Aufgaben (senkrecht, spitz, stumpf, auch mit Parameter), Einheitsvektor und
-   Vektor gegebener Länge (zwei Lösungen).
+2. **Skalarprodukt und Winkel**, in zwei Teilen:
+   - **2a (fertig, 12.11.2026):** Baustein „Skalarprodukt und Winkel“ (`skalar`, Code 22) in den Stufen 1 bis 5, geführt
+     und frei. Acht Arten: Skalarprodukt (Stufe 3 mit Summe davor), spitz, recht oder stumpf, senkrecht mit Parameter
+     (Stufe 5 quadratisch, zwei Lösungen), Winkel (besondere Winkel in Grad, sonst $\cos\varphi$ exakt und spitz oder
+     stumpf), Innenwinkel im Dreieck, Länge aus Längen und Winkel (Stufe 4 im Bogenmaß, Stufe 5 rückwärts),
+     spitz oder stumpf mit Parameter (Ungleichung), rechter Winkel im Dreieck mit Parameter. Bilder mit Winkelbogen und
+     rechtem Winkel. Frei: Winkel in Grad, Art des Winkels zum Antippen, Ungleichung mit „<“ oder „>“. Vier Lernkarten.
+     Typische Fehler: Skalarprodukt als Vektor, Vorzeichen im Produkt, über Kreuz, addiert statt malgenommen, spitz und
+     stumpf verwechselt, senkrecht falsch erkannt, Längen ohne Wurzel im Nenner, nur durch eine Länge geteilt,
+     Vorzeichen des Kosinus übersehen, Sinus und Kosinus verwechselt, besondere Werte verwechselt, Pfeil nicht am
+     Scheitel, Skalarprodukt gleich 1 gesetzt, falsch nach dem Parameter aufgelöst, Ungleichung falsch umgedreht,
+     Mittelglied vergessen, Kosinus vergessen, Zahl vor dem Vektor nicht quadriert.
+   - **2b:** Zieh-Aufgaben (senkrecht, spitz, stumpf, auch mit Parameter; Pfeil rastet auf ganzen Zahlen ein, lösbar
+     auch durch Eintippen).
 3. **Projektion, Zerlegung und Kräfte:** Animation „Licht an“, typischer Fehler im Bild, schiefe Ebene.
 4. **Kreuzprodukt und Spatprodukt:** räumliche Ansicht zum Drehen, Schema mit Hilfszeilen, Flächen und Volumen
    (Spat, Prisma, Pyramide, Tetraeder), komplanar, Volumen mit Parameter.

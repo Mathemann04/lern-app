@@ -7,6 +7,7 @@ import type { GuidedStep } from '../guided/types.ts'
 import { parseLatex } from '../parse/latex.ts'
 import type { TaskRef } from '../tasks/taskNumber.ts'
 import { vectorErrorRule } from './errorRules.ts'
+import { ANGLE_TYPES } from './dotTasks.ts'
 import { type VectorTask, buildVectorTask } from './vectorTasks.ts'
 
 // Freier Modus der Tätigkeit „Vektoren" (M7 Schritt 1b): Das Ergebnis wird je Eintrag in ein eigenes Kästchen getippt
@@ -14,10 +15,22 @@ import { type VectorTask, buildVectorTask } from './vectorTasks.ts'
 // Engine aus dem Ergebnis der Aufgabe (resultLatex, gebaut aus vec.ts), die typischen Fehler aus den falschen Antworten
 // des Schritts, der dieses Ergebnis liefert. Jeder Eintrag wird einzeln geprüft und falsche werden markiert.
 
-export type EntryShape = 'vector' | 'point' | 'number' | 'solutions'
+// Seit Schritt 2 (Skalarprodukt): choice ist eine Auswahl (spitz, rechtwinklig, stumpf; Wert = Nummer der Antwort),
+// inequality eine Ungleichung wie t > 3/2 (Werte: +1 für >, −1 für <, dann die Grenze)
+export type EntryShape = 'vector' | 'point' | 'number' | 'solutions' | 'choice' | 'inequality'
 
-// Ein Teil des Ergebnisses: label ist LaTeX (vor den Kästchen: „\overrightarrow{AB} =", „Q", „\lvert \vec a \rvert =", „t")
-export type ResultPart = { readonly shape: EntryShape; readonly label: string; readonly values: readonly number[] }
+// Ein Teil des Ergebnisses: label ist LaTeX (vor den Kästchen: „\overrightarrow{AB} =", „Q", „\lvert \vec a \rvert =", „t");
+// options: die Antworten einer Auswahl bzw. die Zeichen einer Ungleichung; suffix: LaTeX nach dem Kästchen (Grad)
+export type ResultPart = {
+  readonly shape: EntryShape
+  readonly label: string
+  readonly values: readonly number[]
+  readonly options?: readonly string[]
+  readonly suffix?: string
+}
+
+export const RELATIONS = ['<', '>'] as const
+const DEGREE = '^\\circ'
 
 // ------------------------------------------------------------------ Ergebnis lesen
 
@@ -53,6 +66,18 @@ const END = '\\end{pmatrix}'
 
 function readPart(text: string): ResultPart | null {
   const t = text.trim()
+  // Art des Winkels: \text{spitz}
+  const word = /^\\text\{(\w+)\}$/.exec(t)
+  if (word) {
+    const idx = ANGLE_TYPES.indexOf(word[1] as (typeof ANGLE_TYPES)[number])
+    return idx < 0 ? null : { shape: 'choice', label: '', values: [idx], options: ANGLE_TYPES }
+  }
+  // Ungleichung für einen Parameter: t > \frac{3}{2}
+  const ineq = /^([a-z]|\\lambda) ([<>]) (.+)$/s.exec(t)
+  if (ineq) {
+    const v = numberOf(ineq[3])
+    return v === null ? null : { shape: 'inequality', label: ineq[1], values: [ineq[2] === '>' ? 1 : -1, v], options: RELATIONS }
+  }
   // Punkt: Q(1 \mid 2 \mid 3)
   const point = /^([A-Z](?:_\d)?)\((.*)\)$/s.exec(t)
   if (point) {
@@ -80,8 +105,10 @@ function readPart(text: string): ResultPart | null {
     const base = /^(.+)_\{1,2\}$/.exec(lhs)
     return v === null || !base ? null : { shape: 'solutions', label: base[1], values: [-v, v] }
   }
-  const v = numberOf(rhs)
-  return v === null ? null : { shape: 'number', label: lhs ? `${lhs} =` : '', values: [v] }
+  // Winkel in Grad: \varphi = 60^\circ
+  const degree = rhs.endsWith(DEGREE)
+  const v = numberOf(degree ? rhs.slice(0, -DEGREE.length) : rhs)
+  return v === null ? null : { shape: 'number', label: lhs ? `${lhs} =` : '', values: [v], ...(degree ? { suffix: DEGREE } : {}) }
 }
 
 // Ergebnis (LaTeX, auch zwischen $…$) als Teile; t_1 = …, t_2 = … werden zu einem Teil mit zwei Lösungen. null: nicht lesbar
@@ -196,9 +223,11 @@ export type EntryInput = readonly (readonly string[])[]
 
 type Read = { readonly value: number | null; readonly expr: Expr | null; readonly problem: string | null }
 
-function readEntry(latex: string): Read {
-  if (latex.trim() === '') return { value: null, expr: null, problem: 'empty' }
-  const parsed = parseLatex(latex.trim())
+function readEntry(raw: string): Read {
+  // ein Gradzeichen am Ende darf stehen (die Einheit steht schon hinter dem Kästchen)
+  const latex = raw.trim().replace(/(\^\{?\\circ\}?|°|\\degree)$/, '').trim()
+  if (latex === '') return { value: null, expr: null, problem: 'empty' }
+  const parsed = parseLatex(latex)
   if (!parsed.ok) return { value: null, expr: null, problem: parsed.message }
   const name = variablesOf(parsed.expr).values().next().value
   if (name !== undefined) return { value: null, expr: null, problem: `Gesucht ist eine Zahl. Was soll $${name}$ bedeuten?` }
@@ -209,16 +238,35 @@ function readEntry(latex: string): Read {
 
 export type VectorCheck = { readonly parts: readonly ResultPart[]; readonly wrongs: readonly (readonly PartWrong[])[] }
 
+// Art des Winkels falsch gewählt: spitz und stumpf verwechselt oder senkrecht falsch erkannt
+function choiceWrongs(part: ResultPart): PartWrong[] {
+  const idx = part.values[0]
+  return ANGLE_TYPES.flatMap((_, j) => {
+    if (j === idx) return []
+    const rule = vectorErrorRule(j === 1 || idx === 1 ? 'vec-angle-zero' : 'vec-angle-sign')
+    return [{ values: [j], rule: rule.id, why: rule.why }]
+  })
+}
+
 export function prepareVectorCheck(task: VectorTask): VectorCheck {
   const parts = readResult(task.resultLatex!)
   if (!parts) throw new Error(`Ergebnis nicht lesbar: ${task.resultLatex}`)
-  return { parts, wrongs: parts.map((p) => wrongsFor(task.steps, p)) }
+  return { parts, wrongs: parts.map((p) => (p.shape === 'choice' ? choiceWrongs(p) : wrongsFor(task.steps, p))) }
+}
+
+// Auswahl und Zeichen einer Ungleichung sind keine Zahlen: Wert = Nummer der Antwort bzw. +1 für >, −1 für <
+const isSymbol = (part: ResultPart, entry: number) => part.shape === 'choice' || (part.shape === 'inequality' && entry === 0)
+function readSymbol(text: string, part: ResultPart): Read {
+  if (text === '') return { value: null, expr: null, problem: 'empty' }
+  const idx = (part.options ?? []).indexOf(text)
+  if (idx < 0) return { value: null, expr: null, problem: 'Wähle eine der Antworten.' }
+  return { value: part.shape === 'inequality' ? (text === '>' ? 1 : -1) : idx, expr: null, problem: null }
 }
 
 const noMarks = (input: EntryInput) => input.map((row) => row.map(() => false))
 
 export function checkVectorEntries(check: VectorCheck, input: EntryInput): FreeVerdict {
-  const reads = input.map((row) => row.map(readEntry))
+  const reads = input.map((row, i) => row.map((x, j) => (check.parts[i] && isSymbol(check.parts[i], j) ? readSymbol(x, check.parts[i]) : readEntry(x))))
   const flat = reads.flat()
   if (flat.every((r) => r.problem === 'empty')) return { kind: 'unreadable', title: 'Noch nichts eingetragen.', message: 'Trage in jedes Kästchen eine Zahl ein.', marks: noMarks(input) }
 
@@ -236,7 +284,8 @@ export function checkVectorEntries(check: VectorCheck, input: EntryInput): FreeV
   if (flat.some((r) => r.problem !== null)) {
     const marks = reads.map((row) => row.map((r) => r.problem !== null))
     if (unread) return { kind: 'unreadable', title: 'Das kann ich noch nicht lesen.', message: unread.problem!, marks }
-    return { kind: 'unreadable', title: 'Es fehlt noch etwas.', message: 'Trage in jedes markierte Kästchen eine Zahl ein.', marks }
+    const message = reads.some((row, i) => row.some((r, j) => r.problem !== null && isSymbol(check.parts[i], j))) ? 'Fülle jedes markierte Feld aus.' : 'Trage in jedes markierte Kästchen eine Zahl ein.'
+    return { kind: 'unreadable', title: 'Es fehlt noch etwas.', message, marks }
   }
 
   const values = reads.map((row) => row.map((r) => r.value!))
@@ -254,7 +303,7 @@ export function checkVectorEntries(check: VectorCheck, input: EntryInput): FreeV
   const wrongParts = marks.map((row) => row.some(Boolean))
   if (!wrongParts.some(Boolean)) {
     // richtig: alle Einträge ausgerechnet?
-    const open = reads.map((row) => row.map((r) => !isFinishedNumber(r.expr!)))
+    const open = reads.map((row) => row.map((r) => r.expr !== null && !isFinishedNumber(r.expr)))
     if (open.flat().some(Boolean)) {
       return {
         kind: 'unfinished',
@@ -306,7 +355,7 @@ export function prepareVectorFreeTask(ref: TaskRef): FreeTask {
     inputLabel: 'Dein Ergebnis',
     // Wurzel-Taste immer: Sonst verriete die Tastatur, ob das Ergebnis eine Wurzel hat
     keyboard: { kind: 'vector' },
-    entries: check.parts.map((p) => ({ shape: p.shape, label: p.label, count: p.values.length })),
+    entries: check.parts.map((p) => ({ shape: p.shape, label: p.label, count: p.values.length, ...(p.options ? { options: p.options } : {}), ...(p.suffix ? { suffix: p.suffix } : {}) })),
     checkEntries: (input) => checkVectorEntries(check, input),
     check: (latex) => checkVectorEntries(check, [[latex]]),
   }

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { EntryGroup, KeyboardSpec } from '../../engine/check/freeTask.ts'
 import { Formula } from '../Formula.tsx'
 import { MathInput } from './MathInput.tsx'
@@ -30,11 +31,58 @@ function boxLabel(group: EntryGroup, entry: number): string {
     case 'solutions':
       return `${n}. Lösung`
     case 'number':
+    case 'inequality':
       return 'Dein Ergebnis'
+    case 'choice':
+      return 'Deine Antwort'
   }
 }
 
+// Text einer Antwort zum Auswählen: Zeichen der Ungleichung als Formel, Wörter als Text
+const RELATION_NAMES: Readonly<Record<string, string>> = { '<': 'kleiner als', '>': 'größer als' }
+
 export function EntryInput({ groups, keyboard, readOnly, marks, markTone, onInput, onSubmit, onKeyboardHeight }: Props) {
+  // gewählte Antwort je Teil (Auswahl und Zeichen einer Ungleichung)
+  const [picked, setPicked] = useState<Readonly<Record<number, string>>>({})
+  const markClass = (marked: boolean) => (marked ? (markTone === 'red' ? 'border-red-500' : 'border-amber-500') : 'border-zinc-300')
+
+  // Umschalter mit Knöpfen (mindestens 44 px hoch); entry ist der Eintrag, in den die Wahl geht
+  const options = (gi: number, entry: number, name: string, math: boolean) => {
+    const group = groups[gi]
+    const marked = marks?.[gi]?.[entry] ?? false
+    return (
+      <div
+        role="radiogroup"
+        aria-label={name}
+        data-testid="entry-choice"
+        data-marked={marked ? 'true' : undefined}
+        className={`inline-flex flex-wrap gap-1 rounded-xl border-2 p-1 ${markClass(marked)}`}
+      >
+        {(group.options ?? []).map((option) => {
+          const active = picked[gi] === option
+          return (
+            <button
+              key={option}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              aria-label={math ? RELATION_NAMES[option] : undefined}
+              disabled={readOnly}
+              onClick={() => {
+                setPicked((p) => ({ ...p, [gi]: option }))
+                onInput(gi, entry, option)
+              }}
+              className={`min-h-11 min-w-11 rounded-lg px-3 font-medium ${active ? 'bg-accent-600 text-on-accent' : 'text-zinc-700'}`}
+            >
+              {math ? <Formula tex={option} /> : option}
+            </button>
+          )
+        })}
+        {marked && <span className="sr-only">markiert</span>}
+      </div>
+    )
+  }
+
   const box = (gi: number, ei: number, width: string) => {
     const group = groups[gi]
     const marked = marks?.[gi]?.[ei] ?? false
@@ -45,7 +93,7 @@ export function EntryInput({ groups, keyboard, readOnly, marks, markTone, onInpu
         key={`${gi}-${ei}`}
         data-testid="entry"
         data-marked={marked ? 'true' : undefined}
-        className={`entry-box ${width} rounded-xl border-2 bg-surface px-2 py-1 focus-within:border-accent-600 ${marked ? (markTone === 'red' ? 'border-red-500' : 'border-amber-500') : 'border-zinc-300'}`}
+        className={`entry-box ${width} rounded-xl border-2 bg-surface px-2 py-1 focus-within:border-accent-600 ${markClass(marked)}`}
       >
         <MathInput
           label={label}
@@ -105,6 +153,28 @@ export function EntryInput({ groups, keyboard, readOnly, marks, markTone, onInpu
                   </span>
                 )}
                 {box(gi, 0, 'w-40 sm:w-48')}
+                {group.suffix && (
+                  <span className="shrink-0 text-2xl">
+                    <Formula tex={group.suffix} />
+                  </span>
+                )}
+              </div>
+            )
+          case 'inequality':
+            return (
+              <div key={gi} className="flex flex-wrap items-center gap-2">
+                <span className="shrink-0 text-2xl">
+                  <Formula tex={group.label} />
+                </span>
+                {options(gi, 0, 'Zeichen', true)}
+                {box(gi, 1, 'w-36 sm:w-44')}
+              </div>
+            )
+          case 'choice':
+            return (
+              <div key={gi} className="flex flex-wrap items-center gap-2">
+                <span className="shrink-0">Der Winkel ist</span>
+                {options(gi, 0, 'Der Winkel ist', false)}
               </div>
             )
           case 'solutions':

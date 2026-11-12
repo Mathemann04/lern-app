@@ -29,7 +29,15 @@ export type KeyboardSpec =
 
 // Ein Teil des Ergebnisses, je Eintrag ein Kästchen (M7): Vektor als Spalte, Punkt als Zeile, eine Zahl, zwei Lösungen
 // in beliebiger Reihenfolge. label ist LaTeX vor den Kästchen („\overrightarrow{AB} =", „Q", „t")
-export type EntryGroup = { readonly shape: 'vector' | 'point' | 'number' | 'solutions'; readonly label: string; readonly count: number }
+// Seit Schritt 2: choice (Auswahl unter options, eine Antwort) und inequality (Zeichen < oder > aus options, dann ein
+// Kästchen); suffix steht hinter dem Kästchen einer Zahl (z. B. ^\circ)
+export type EntryGroup = {
+  readonly shape: 'vector' | 'point' | 'number' | 'solutions' | 'choice' | 'inequality'
+  readonly label: string
+  readonly count: number
+  readonly options?: readonly string[]
+  readonly suffix?: string
+}
 
 export type FreeTask = {
   // vor dem Eingabefeld, z. B. f'(x) = (LaTeX)

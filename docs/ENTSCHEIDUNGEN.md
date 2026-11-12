@@ -1013,3 +1013,16 @@ Neue Entscheidungen unten anfügen.
   im Nenner wie $\frac{3}{\sqrt{14}}$ (beide Schreibweisen sind üblich) und eine Kommazahl, die genau stimmt
   ($0{,}5$); eine gerundete Kommazahl ist ein Hinweis, kein Fehler. Am Handy fehlt im Kästchen der Knopf für die
   Tastatur: Sie erscheint beim Antippen ohnehin, und das schmale Kästchen braucht den Platz für die Zahl.
+- 12.11.2026: M7 Schritt 2a, Baustein „Skalarprodukt und Winkel“ (Code 22, `skalar.2-4711`). Schritt 2 ist geteilt:
+  2a bringt den Baustein mit allen Stufen, geführt und frei; 2b die Aufgaben zum Pfeil-Ziehen, weil das Ziehen ein
+  eigenes Stück Oberfläche ist. Acht Arten: Skalarprodukt (Stufe 3 mit einer Summe davor), spitz, recht oder stumpf,
+  senkrecht mit Parameter (Stufe 4 mit Brüchen und Parameter in beiden Vektoren, Stufe 5 quadratisch), Winkel (besondere
+  Winkel in Grad aus einer Liste ganzzahliger Paare; sonst $\cos\varphi$ exakt und „spitz oder stumpf“, weil der Winkel
+  ohne Taschenrechner nicht exakt geht), Innenwinkel im Dreieck (Stufe 5 erst die Pfeile wählen), Länge aus Längen und
+  Winkel (Stufe 4 im Bogenmaß, Stufe 5 rückwärts: Winkel aus drei Längen), spitz oder stumpf mit Parameter
+  (Ungleichung), rechter Winkel im Dreieck mit Parameter (quadratisch). Verbindungsvektor und Länge zählen dabei als
+  Handwerkszeug, nicht als zweiter Baustein; jeder Baustein lässt sich allein üben. Im freien Modus kommen drei neue
+  Eingaben dazu: Winkel in Grad (Kästchen mit Gradzeichen dahinter, ein getipptes Gradzeichen stört nicht), die Art des
+  Winkels als Knöpfe zum Antippen, eine Ungleichung mit den Knöpfen „<“ und „>“ und einem Kästchen für die Grenze.
+  Bilder: Winkelbogen und rechter Winkel als kleines Quadrat (`DrawAngle`). Bei „spitz, recht oder stumpf“ zeigt erst
+  das Ergebnis ein Bild, weil das Bild die Antwort verriete. 18 neue typische Fehler.

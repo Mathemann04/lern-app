@@ -48,10 +48,17 @@ export const REARRANGE_BLOCKS: readonly Block[] = [
 // Vektoren (M7, docs/PLAN-M7.md): Schritt 1 bringt „Rechnen und Länge“, die übrigen Bausteine folgen in den Schritten 2 bis 5.
 export const VECTOR_BLOCKS: readonly Block[] = [
   { id: 'rechnen', title: 'Rechnen und Länge', note: 'Summe, Vielfache, Verbindungsvektor, Mittelpunkt, Länge, Einheitsvektor', group: 'vektor-grundlagen' },
+  { id: 'skalar', title: 'Skalarprodukt und Winkel', note: 'senkrecht, spitz, stumpf, Winkel, Länge aus Winkel', group: 'vektor-grundlagen' },
 ]
 
 // Spielbare Mengen von Bausteinen je Stufe (wie REARRANGE_PLAYABLE_COMBOS)
-export const VECTOR_PLAYABLE_COMBOS: Readonly<Record<1 | 2 | 3 | 4 | 5, readonly string[]>> = { 1: ['rechnen'], 2: ['rechnen'], 3: ['rechnen'], 4: ['rechnen'], 5: ['rechnen'] }
+export const VECTOR_PLAYABLE_COMBOS: Readonly<Record<1 | 2 | 3 | 4 | 5, readonly string[]>> = {
+  1: ['rechnen', 'skalar'],
+  2: ['rechnen', 'skalar'],
+  3: ['rechnen', 'skalar'],
+  4: ['rechnen', 'skalar'],
+  5: ['rechnen', 'skalar'],
+}
 
 // Feste Nummer je Baustein für Aufgabennummern mit Baustein wie „exp.1-4711" (M6 Schritt 4, taskNumber.ts). Gilt für alle
 // Tätigkeiten (dieselbe Id heißt überall derselbe Baustein); nie ändern, neue Bausteine bekommen die nächste freie Nummer.
@@ -82,4 +89,6 @@ export const BLOCK_CODES: Readonly<Record<string, number>> = {
   zahlen: 20,
   // Tätigkeit „Vektoren“ (M7 Schritt 1): Rechnen und Länge („rechnen.1-4711“)
   rechnen: 21,
+  // Tätigkeit „Vektoren“ (M7 Schritt 2): Skalarprodukt und Winkel („skalar.1-4711“)
+  skalar: 22,
 }

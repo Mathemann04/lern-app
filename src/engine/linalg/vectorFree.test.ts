@@ -2,14 +2,16 @@ import { describe, expect, it } from 'vitest'
 import { parseLatex } from '../parse/latex.ts'
 import { LEVELS, type Level, blockSeed } from '../tasks/taskNumber.ts'
 import { VECTOR_ERROR_RULES } from './errorRules.ts'
-import { checkVectorEntries, isFinishedNumber, prepareVectorCheck, prepareVectorFreeTask, readResult } from './vectorFree.ts'
+import { type ResultPart, checkVectorEntries, isFinishedNumber, prepareVectorCheck, prepareVectorFreeTask, readResult } from './vectorFree.ts'
 import { buildVectorTask } from './vectorTasks.ts'
 
 // M7 Schritt 1b: freier Modus mit Eingabe je Eintrag. Das gelesene Ergebnis passt zur Gegenprobe der Aufgabe (answer),
 // die richtige Eingabe zählt, jede falsche Antwort eines Schritts wird als ihr typischer Fehler erkannt, falsche
 // Einträge werden einzeln markiert.
 
-const ref = (level: Level, s: number) => ({ level, seed: blockSeed('rechnen', s) })
+// beide Bausteine: Nummern 1 bis 999 „Rechnen und Länge", ab 1000 „Skalarprodukt und Winkel" (Schritt 2)
+const ref = (level: Level, s: number) => (s < 1000 ? { level, seed: blockSeed('rechnen', s) } : { level, seed: blockSeed('skalar', s - 999) })
+const SEEDS = (n: number) => [...Array.from({ length: n }, (_, i) => i + 1), ...Array.from({ length: n }, (_, i) => 1000 + i)]
 const close = (a: number, b: number) => Math.abs(a - b) < 1e-9 * Math.max(1, Math.abs(a), Math.abs(b))
 
 // Zahl als LaTeX, wie sie jemand eintippt: ganze Zahl, Bruch oder Kommazahl mit sechs Stellen (nur für falsche Werte)
@@ -26,9 +28,17 @@ function typed(x: number): string {
 }
 const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b))
 
+// Eingabe zu Werten eines Teils: Auswahl als Wort, Zeichen der Ungleichung, sonst Zahlen
+const inputOf = (p: ResultPart, values: readonly number[]) =>
+  p.shape === 'choice' ? [p.options![values[0]]] : p.shape === 'inequality' ? [values[0] > 0 ? '>' : '<', typed(values[1])] : values.map(typed)
+
 // Einträge des richtigen Ergebnisses so, wie die Engine sie schreibt (Spalte, Punkt, Zahl, Lösungen)
 function exactEntries(resultLatex: string): string[][] {
   return resultLatex.split(',\\;').flatMap((piece) => {
+    const word = /^\s*\\text\{(\w+)\}\s*$/.exec(piece)
+    if (word) return [[word[1]]]
+    const ineq = /^\s*([a-z]|\\lambda) ([<>]) (.+)$/.exec(piece)
+    if (ineq) return [[ineq[2], ineq[3].trim()]]
     const point = /\((.*)\)$/s.exec(piece.trim())
     if (point && !piece.includes('=')) return [point[1].split('\\mid').map((s) => s.trim())]
     const rhs = piece.slice(piece.indexOf(' = ') + 3).trim()
@@ -39,7 +49,7 @@ function exactEntries(resultLatex: string): string[][] {
       return [prefix ? entries.map((e) => `${prefix}\\cdot ${e}`) : entries]
     }
     if (rhs.startsWith('\\pm')) return [[`-${rhs.slice(3).trim()}`, rhs.slice(3).trim()]]
-    return [[rhs]]
+    return [[rhs.replace('^\\circ', '')]]
   })
 }
 
@@ -55,7 +65,7 @@ describe('Ergebnis lesen', () => {
   })
 
   it.each(LEVELS)('Stufe %i: das gelesene Ergebnis ist die Gegenprobe der Aufgabe', (level) => {
-    for (let s = 1; s <= 150; s++) {
+    for (const s of SEEDS(150)) {
       const task = buildVectorTask(ref(level, s))
       const parts = readResult(task.resultLatex!)
       expect(parts, task.resultLatex).not.toBeNull()
@@ -84,7 +94,7 @@ describe('fertig?', () => {
 
 describe('prüfen', () => {
   it.each(LEVELS)('Stufe %i: die Einträge der Engine sind richtig, ein falscher Eintrag wird markiert', (level) => {
-    for (let s = 1; s <= 120; s++) {
+    for (const s of SEEDS(120)) {
       const task = buildVectorTask(ref(level, s))
       const free = prepareVectorFreeTask(ref(level, s))
       // t_1 und t_2 stehen im Ergebnis getrennt, im freien Modus in einem Teil: nach den Kästchen neu aufteilen
@@ -96,22 +106,23 @@ describe('prüfen', () => {
       const plain = free.checkEntries!(exact)
       expect(['correct', 'unfinished'], `${task.resultLatex}: ${plain.title}`).toContain(plain.kind)
       if (!task.resultLatex!.includes('}\\begin{pmatrix}')) expect(plain.kind, task.resultLatex).toBe('correct')
-      // ein Eintrag um 1 daneben: falsch, genau dieser markiert
-      const wrongInput = exact.map((row, i) => row.map((e, j) => (i === 0 && j === 0 ? `${e}+1` : e)))
+      // ein Eintrag um 1 daneben: falsch, genau dieser markiert (der erste, der eine Zahl ist)
+      const j0 = free.entries![0].shape === 'inequality' ? 1 : 0
+      const wrongInput = exact.map((row, i) => row.map((e, j) => (i === 0 && j === j0 ? `${e}+1` : e)))
       const v = free.checkEntries!(wrongInput)
       expect(v.kind, task.resultLatex).toBe('wrong')
-      if (free.entries![0].shape !== 'solutions') expect(v.marks![0], task.resultLatex).toEqual(exact[0].map((_, j) => j === 0))
+      if (free.entries![0].shape !== 'solutions') expect(v.marks![0], task.resultLatex).toEqual(exact[0].map((_, j) => j === j0))
     }
   })
 
   it.each(LEVELS)('Stufe %i: falsche Antworten des letzten Schritts werden als ihr typischer Fehler erkannt', (level) => {
     let found = 0
-    for (let s = 1; s <= 120; s++) {
+    for (const s of SEEDS(120)) {
       const task = buildVectorTask(ref(level, s))
       const check = prepareVectorCheck(task)
       check.parts.forEach((part, i) => {
         for (const w of check.wrongs[i]) {
-          const input = check.parts.map((p, k) => (k === i ? w.values : p.values).map(typed))
+          const input = check.parts.map((p, k) => inputOf(p, k === i ? w.values : p.values))
           if (input.flat().some((x) => x === null)) continue
           const v = checkVectorEntries(check, input)
           expect(v.kind, `${task.resultLatex}: ${input}`).toBe('wrong')
@@ -135,6 +146,24 @@ describe('prüfen', () => {
     expect(checkVectorEntries(check, [['3', '3']]).marks).toEqual([[false, true]])
   })
 
+  it('Winkel in Grad, Art des Winkels und Ungleichung (Schritt 2)', () => {
+    expect(readResult('\\varphi = 135^\\circ')).toEqual([{ shape: 'number', label: '\\varphi =', values: [135], suffix: '^\\circ' }])
+    const angle = { parts: readResult('\\varphi = 60^\\circ')!, wrongs: [[]] }
+    expect(checkVectorEntries(angle, [['60']]).kind).toBe('correct')
+    expect(checkVectorEntries(angle, [['60^{\\circ}']]).kind).toBe('correct')
+    const kind = prepareVectorCheck({ ...buildVectorTask(ref(1, 1)), resultLatex: '\\vec a \\cdot \\vec b = 5,\\; \\text{spitz}' })
+    expect(kind.parts[1]).toMatchObject({ shape: 'choice', values: [0] })
+    expect(checkVectorEntries(kind, [['5'], ['spitz']]).kind).toBe('correct')
+    expect(checkVectorEntries(kind, [['5'], ['stumpf']]).error?.id).toBe('vec-angle-sign')
+    expect(checkVectorEntries(kind, [['5'], ['rechtwinklig']]).error?.id).toBe('vec-angle-zero')
+    expect(checkVectorEntries(kind, [['5'], ['']]).marks).toEqual([[false], [true]])
+    const ineq = { parts: readResult('t > \\frac{3}{2}')!, wrongs: [[]] }
+    expect(ineq.parts[0]).toMatchObject({ shape: 'inequality', label: 't', values: [1, 1.5] })
+    expect(checkVectorEntries(ineq, [['>', '\\frac{3}{2}']]).kind).toBe('correct')
+    expect(checkVectorEntries(ineq, [['<', '\\frac{3}{2}']]).marks).toEqual([[true, false]])
+    expect(checkVectorEntries(ineq, [['>', '\\frac{6}{4}']]).kind).toBe('unfinished')
+  })
+
   it('leer, unlesbar, gerundet, nicht fertig', () => {
     const check = { parts: [{ shape: 'vector' as const, label: '\\vec x =', values: [1 / 3, Math.SQRT2] }], wrongs: [[]] }
     expect(checkVectorEntries(check, [['', '']]).kind).toBe('unreadable')
@@ -153,6 +182,6 @@ describe('prüfen', () => {
   it('jeder Fehler, den der freie Modus erkennt, steht im Katalog', () => {
     const ids = new Set(VECTOR_ERROR_RULES.map((r) => r.id))
     for (const level of LEVELS)
-      for (let s = 1; s <= 60; s++) for (const ws of prepareVectorCheck(buildVectorTask(ref(level, s))).wrongs) for (const w of ws) expect(ids.has(w.rule), w.rule).toBe(true)
+      for (const s of SEEDS(60)) for (const ws of prepareVectorCheck(buildVectorTask(ref(level, s))).wrongs) for (const w of ws) expect(ids.has(w.rule), w.rule).toBe(true)
   })
 })
