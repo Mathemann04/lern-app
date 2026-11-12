@@ -16,7 +16,7 @@ Stand: 12.11.2026
 | M8 | Potenz-, Wurzel- und Logarithmusgesetze | in M6 aufgegangen (Bausteine bei „Vereinfachen“, Schritt 6) |
 | M9 | weitere Themen aus Mathematik MB1 als Tätigkeiten (Polynome mit Horner-Schema und Interpolation, Grenzwerte, Linearisieren, Funktionen und Schwingungen, Mengen und Summen; Liste in [AUFGABENARTEN.md](AUFGABENARTEN.md)), „Ableiten" nachschärfen | offen |
 | M10 | Physik: Formeln mit Einheiten (Formeln umstellen mit Zeichen der Physik; Aufgaben lösen: Formel wählen, umstellen, Werte mit Einheiten einsetzen); Maßstab und Ideen für Übungen: das Lehrbuch „Physik für Ingenieure“ (eigene Aufgaben, eigene Zahlen) | offen |
-| M11 | Technische Mechanik: Freischnitt, Gleichgewicht, Lagerkräfte, statische Bestimmtheit | offen |
+| M11 | **Technische Mechanik 1**: Kräfte in der Ebene, Lagerreaktionen, statische Bestimmtheit, mehrteilige Tragwerke, Fachwerke, räumliche Statik, Schwerpunkte, Schnittgrößen, Reibung; Unterlagen gesichtet in [MECHANIK.md](MECHANIK.md) | offen (Übersicht fertig, 12.11.2026; Reibungsskript und Altklausur fehlen noch) |
 | M12 | **Nachschlagewerk** (Wunsch des Nutzers, 11.11.2026): zu jedem Thema Seiten zum gezielten Lesen und Nachschlagen, ausführlicher als die Lernkarten: Erklärungen, alle Formeln (Formelsammlung je Fach), Tabellen mit Bildern (selbst gestaltet und gezeichnet; Vorbild u. a. die Tabellen im Lehrbuch „Physik für Ingenieure“), Beispiele aus der Engine, Suche über alle Themen, Verweise auf Lernkarten und Üben; Inhalte abgesichert wie die Lernkarten. Zuerst Rahmen und Chemie, danach bekommt jedes neue Fach sein Nachschlagewerk gleich mit | offen (direkt nach M6; vorher Plan mit Entwurf zum Ansehen) |
 | Später | Konto und Sync, Teilen mit Kommilitonen, App-Store-Version, optional KI-Hilfe | offen |
 
@@ -67,6 +67,8 @@ Stand: 12.11.2026
   [AUFGABENARTEN.md](AUFGABENARTEN.md): Themen, Aufgabenarten, Rechenschemata, typische Fehler,
   Ziel in der App. Keine Aufgabentexte, Zahlen oder Namen von Lehrenden; die Unterlagen selbst
   kommen nie ins Repo. Danach weiter mit M6 Schritt 4b-2.
+  Erledigt: Mathematik MB1 ([AUFGABENARTEN.md](AUFGABENARTEN.md)), Technische Mechanik 1
+  ([MECHANIK.md](MECHANIK.md), Kapitel 1 bis 8 und Blätter 9 bis 19, 12.11.2026).
 - **Lehrbuch „Physik für Ingenieure“** (Fotos des Nutzers, 11.11.2026): Kapitel
   Kernphysik und Festkörperphysik, passend zu Chemie und Werkstoffkunde, teils
   weiter als die Vorlesung; später auch für Physik (M10). Die Fotos liegen

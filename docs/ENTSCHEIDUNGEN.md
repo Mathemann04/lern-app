@@ -902,3 +902,11 @@ Neue Entscheidungen unten anfügen.
   dasselbe Zeichen, weil MathLive aus getipptem „epsilon“ $\epsilon$ macht. Bedeutungen genauer (waagrechter Abstand,
   eingetauchtes Volumen, noch nicht zerfallene Kerne).
 
+- 12.11.2026: Unterlagen zu Technische Mechanik 1 durchgesehen (Skripte Kapitel 1 bis 8, Übungsblätter 9 bis 19).
+  Übersicht in eigenen Worten in docs/MECHANIK.md, dazu die Schreibweisen und Vorzeichenregeln, die die App genauso
+  verwenden muss (Drehsinn gegen den Uhrzeigersinn positiv, Unbekannte positiv angenommen, Fachwerkstäbe als Zug,
+  bei Schnittgrößen $z$ nach unten und positives Schnittufer, Diagramme positiv nach unten). Stabkräfte heißen in der
+  App einheitlich $S_i$, weil das Skript zwei Schreibweisen mischt. Lagerreaktionen stehen in Aufgaben immer mit ihrer
+  eingezeichneten Bezugsrichtung da, weil die Unterlagen an einer Stelle Werte mit verschiedenen Vorzeichen zeigen.
+  Für Reibung gibt es kein Skript; vor dem Bau wird der Maßstab geklärt (Skript nachreichen oder frei zugängliches
+  Lehrbuch). M11 bleibt am Ende der Reihenfolge.
