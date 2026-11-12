@@ -1,6 +1,7 @@
 import type { RuleId } from '../derive/rules.ts'
 import type { Explanation } from '../explain/texts.ts'
 import type { Expr } from '../expr/types.ts'
+import type { DragStep } from '../linalg/drag.ts'
 import type { VectorDrawing } from '../linalg/figures.ts'
 import type { NumericAnswer } from '../quantity/judge.ts'
 import type { TaskRef } from '../tasks/taskNumber.ts'
@@ -62,6 +63,10 @@ export type GuidedStep = {
   // Orbital-Kästchen zum Antippen (N2a): im geführten Bildschirm statt der Auswahl; die Auswahl (choices) bleibt für
   // Klausuraufgaben und Galerie
   readonly boxes?: BoxInputStep
+  // Pfeil ziehen (M7 Schritt 2b): Spitze oder Punkt im Bild ziehen (oder Koordinaten einstellen) und einmal prüfen
+  // lassen; engine/linalg/drag.ts prüft. drawing zeigt das Gegebene, choices enthält nur eine richtige Stelle als Text
+  // (für „Lösung zeigen“ und den Lösungsweg)
+  readonly drag?: DragStep
 }
 
 // Kästchen-Eingabe: je Unterschale eine Zeile; Tippen schaltet leer → ↑ → ↓ → ↑↓ (engine/chem/boxInput.ts prüft)

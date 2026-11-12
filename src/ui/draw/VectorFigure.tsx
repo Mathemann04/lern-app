@@ -1,5 +1,6 @@
 import { type PointerEvent, useEffect, useMemo, useRef, useState } from 'react'
-import { type DrawColor, type VectorDrawing, anglePath, hasAnimation } from '../../engine/linalg/figures.ts'
+import { type DragStep, snapDrag } from '../../engine/linalg/drag.ts'
+import { type DrawAngle, type DrawArrow, type DrawColor, type DrawPoint, type DrawSegment, type VectorDrawing, anglePath, hasAnimation } from '../../engine/linalg/figures.ts'
 import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
 import { START_PITCH, type View, arrowGeometry, bestYaw, lerpPoint, planeView, spaceView } from './view.ts'
@@ -8,6 +9,8 @@ import { START_PITCH, type View, arrowGeometry, bestYaw, lerpPoint, planeView, s
 // „Abspielen" lässt die Teile mit phase > 0 nacheinander erscheinen; ohne Abspielen ist alles da. Bei „Bewegung
 // reduzieren" gibt es keine Bewegung. Namen an Pfeilen und Punkten setzt KaTeX über dem Bild.
 // compact: kleines Bild ohne Knöpfe und Unterschrift (als Antwort bei „Bild wählen")
+// drag (Schritt 2b): Zieh-Aufgabe in der Ebene; at ist die Stelle, onMove bekommt die eingerastete neue Stelle (ohne
+// onMove steht sie fest, z. B. nach dem Prüfen). Mitlaufende Teile (Pfeil, Strecken, Winkelbogen) kommen aus DragStep.
 
 const COLOR: Readonly<Record<DrawColor, string>> = {
   a: 'var(--vec-a)',
@@ -22,9 +25,46 @@ const PHASE_MS = 900
 const ease = (p: number) => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2)
 const reducedMotion = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
 
-type Props = { drawing: VectorDrawing; compact?: boolean; label?: string }
+export type FigureDrag = { readonly step: DragStep; readonly at: readonly number[]; readonly onMove?: (at: readonly number[]) => void }
 
-export function VectorFigure({ drawing, compact = false, label }: Props) {
+type Props = { drawing: VectorDrawing; compact?: boolean; label?: string; drag?: FigureDrag }
+
+// Das Bild mit den mitlaufenden Teilen einer Zieh-Aufgabe an der Stelle at
+function withDrag(drawing: VectorDrawing, step: DragStep, at: readonly number[]): VectorDrawing {
+  const v = at.map((x, i) => x - step.from[i])
+  const moved = v.some((x) => x !== 0)
+  const arrows: DrawArrow[] = []
+  const segments: DrawSegment[] = []
+  const points: DrawPoint[] = []
+  const angles: DrawAngle[] = []
+  if (step.liveSum && moved) {
+    const sum = step.liveSum.map((x, i) => x + v[i])
+    arrows.push({ from: step.from, to: sum, color: 'r' })
+    segments.push({ from: step.liveSum, to: sum, color: 'muted', dashed: true }, { from: at, to: sum, color: 'muted', dashed: true })
+  }
+  if (step.liveDiff && moved && step.liveDiff.some((x, i) => x !== at[i])) arrows.push({ from: at, to: step.liveDiff, color: 'c' })
+  if (step.mode === 'arrow') {
+    if (moved) arrows.push({ from: step.from, to: at, color: step.color, label: step.name })
+  } else {
+    for (const l of step.links ?? []) if (l.some((x, i) => x !== at[i])) segments.push({ from: l, to: at, color: step.color })
+    points.push({ at, label: step.name, color: step.color })
+  }
+  if (step.liveAngle && moved) {
+    const w = step.liveAngle
+    const cos = (w[0] * v[0] + w[1] * v[1]) / (Math.hypot(...w) * Math.hypot(...v))
+    if (Math.abs(cos) < 0.999) angles.push({ at: step.from, u: w, v, color: 'r' })
+  }
+  return {
+    ...drawing,
+    arrows: [...drawing.arrows, ...arrows],
+    segments: [...drawing.segments, ...segments],
+    points: [...drawing.points, ...points],
+    angles: [...(drawing.angles ?? []), ...angles],
+  }
+}
+
+export function VectorFigure({ drawing: given, compact = false, label, drag: dragged }: Props) {
+  const drawing = useMemo(() => (dragged ? withDrag(given, dragged.step, dragged.at) : given), [given, dragged])
   const maxPhase = useMemo(() => Math.max(0, ...[...drawing.arrows, ...drawing.points, ...drawing.segments, ...drawing.polygons, ...(drawing.angles ?? [])].map((e) => e.phase ?? 0)), [drawing])
   const [time, setTime] = useState(maxPhase)
   const [angles, setAngles] = useState(() => ({ yaw: drawing.dim === 3 ? bestYaw(drawing) : 0, pitch: START_PITCH }))
@@ -71,17 +111,43 @@ export function VectorFigure({ drawing, compact = false, label }: Props) {
     onPointerCancel: () => (drag.current = null),
   }
 
+  // Zieh-Aufgabe: Stelle unter dem Finger, eingerastet
+  const svgRef = useRef<SVGSVGElement>(null)
+  const pulling = useRef(false)
+  const canPull = !!dragged?.onMove && !space && !!view.unproject
+  function pullTo(e: PointerEvent<SVGSVGElement>) {
+    const rect = svgRef.current?.getBoundingClientRect()
+    if (!rect || !dragged?.onMove || !view.unproject) return
+    const world = view.unproject(((e.clientX - rect.left) / rect.width) * view.width, ((e.clientY - rect.top) / rect.height) * view.height)
+    const next = snapDrag(dragged.step, world)
+    if (next.some((x, i) => x !== dragged.at[i])) dragged.onMove(next)
+  }
+  const pull = {
+    onPointerDown: (e: PointerEvent<SVGSVGElement>) => {
+      pulling.current = true
+      e.currentTarget.setPointerCapture(e.pointerId)
+      pullTo(e)
+    },
+    onPointerMove: (e: PointerEvent<SVGSVGElement>) => {
+      if (pulling.current) pullTo(e)
+    },
+    onPointerUp: () => (pulling.current = false),
+    onPointerCancel: () => (pulling.current = false),
+  }
+
   const labels: { key: string; x: number; y: number; tex: string; color: string }[] = []
   const project = view.project
 
   const svg = (
     <svg
       viewBox={`0 0 ${view.width} ${view.height}`}
-      className={`block w-full select-none ${space && !compact ? 'cursor-grab touch-none' : ''}`}
+      ref={svgRef}
+      className={`block w-full select-none ${(space && !compact) || canPull ? 'cursor-grab touch-none' : ''}`}
       role={compact ? undefined : 'img'}
       aria-hidden={compact ? true : undefined}
       aria-label={compact ? undefined : stripMath(drawing.caption)}
-      {...(space && !compact ? rotate : {})}
+      {...(space && !compact ? rotate : canPull ? pull : {})}
+      data-testid={canPull ? 'drag-surface' : undefined}
     >
       {view.grid && <Grid view={view} compact={compact} />}
       {space && <Axes view={view} />}
@@ -157,6 +223,16 @@ export function VectorFigure({ drawing, compact = false, label }: Props) {
         if (point.label) labels.push({ key: `p${i}`, x: x - 12 * off, y: y - 14 * off, tex: point.label, color: point.color ? COLOR[point.color] : 'currentColor' })
         return <circle key={`pt${i}`} cx={x} cy={y} r={compact ? 3.5 : 5} style={{ fill: point.color ? COLOR[point.color] : 'currentColor', opacity: q }} />
       })}
+      {dragged && (
+        <circle
+          cx={project(dragged.at)[0]}
+          cy={project(dragged.at)[1]}
+          r={canPull ? 13 : 8}
+          style={{ fill: COLOR[dragged.step.color], fillOpacity: 0.22, stroke: COLOR[dragged.step.color] }}
+          strokeWidth={2}
+          strokeDasharray={canPull ? '4 3' : undefined}
+        />
+      )}
     </svg>
   )
 
@@ -186,7 +262,7 @@ export function VectorFigure({ drawing, compact = false, label }: Props) {
     <figure className="space-y-2 rounded-2xl border border-zinc-200 bg-surface px-3 py-3" data-testid="vector-figure">
       <div className="mx-auto max-w-sm">{picture}</div>
       <figcaption className="space-y-2">
-        {(hasAnimation(drawing) || space) && (
+        {(hasAnimation(drawing) || space || canPull) && (
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
             {hasAnimation(drawing) && (
               <button
@@ -201,6 +277,7 @@ export function VectorFigure({ drawing, compact = false, label }: Props) {
               </button>
             )}
             {space && <span className="text-sm text-zinc-600">Zum Drehen im Bild ziehen</span>}
+            {canPull && <span className="text-sm text-zinc-600">Ziehen oder ins Gitter tippen</span>}
           </div>
         )}
         <RichText text={drawing.caption} className="block text-sm text-zinc-600 text-pretty" inline />

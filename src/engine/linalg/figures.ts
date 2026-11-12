@@ -66,6 +66,8 @@ export type VectorDrawing = {
   readonly angles?: readonly DrawAngle[]
   // Beschreibung (Text mit Formeln) unter dem Bild und für Vorlesehilfen
   readonly caption: string
+  // fester Ausschnitt der Ebene (Zieh-Aufgaben, Schritt 2b): Das Bild springt beim Ziehen nicht
+  readonly frame?: { readonly xmin: number; readonly xmax: number; readonly ymin: number; readonly ymax: number }
 }
 
 export const hasAnimation = (d: VectorDrawing): boolean =>

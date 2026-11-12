@@ -28,13 +28,25 @@ gezieltes Üben noch nicht (`focus: false`).
   $\cos\varphi$ exakt (`cosSurd`, Wurzel im Zähler) und spitz oder stumpf. Ergebnisse: Winkel `\varphi = 60^\circ`,
   Art `\text{spitz}` (`ANGLE_TYPES`), Ungleichung `t > \frac{3}{2}`. Bei „spitz, recht oder stumpf“ kein Bild vor dem
   Ergebnis (es verriete die Antwort). Tests in `dotTasks.test.ts`.
+- Pfeil ziehen (Schritt 2b): `linalg/drag.ts` (reine Daten `DragStep` am Schritt, `GuidedStep.drag`: Pfeil von `from`
+  oder Punkt mit Strecken zu `links`, Rahmen `frame`, wahlweise Gerade `line` mit Parameter; Bedingungen `quadratic`
+  (lin · p + quad · |p|² + c0 rel target, Rückmeldung mit Rechnung über `dotWith` bzw. `lengthOf`) und `angle`;
+  `forbidden` (Nullvektor, Start: „Zieh zuerst …“, zählt nicht), `traps` = typische Fehler, `judgeDrag`, `snapDrag`,
+  `dragPositions`). `linalg/dragTasks.ts`: 13 Arten in `DRAG_VARIANTS` je Stufe, Art `drag` mit Anteil `DRAG_SHARE`
+  (eigener Zufall in `buildVectorTask`), Form `drag|<Art>|…`; Stufe 4 baut auf `buildPerp(rng, 1)` und
+  `buildClassifyParam(rng, 2)` aus `dotTasks.ts` und hängt deren Schritte an. `dragOnly`: kein eindeutiges Ergebnis,
+  im freien Modus `FreeTask.drag`/`checkDrag` (`checkVectorDrag`); sonst Kästchen und Bild zum Ausprobieren.
+  Oberfläche: `ui/draw/DragPad.tsx` (Bild plus „−“/„+“ je Eintrag, beim Pfeil als Spalte, beim Punkt $x_C$, $y_C$, bei
+  der Geraden nur der Parameter), `VectorFigure` mit `drag` (mitlaufender Pfeil, Strecken, Winkelbogen, Summe und
+  Differenz; Fläche `data-testid="drag-surface"`), `view.ts` mit `frame` (fester Ausschnitt) und `unproject`. Tests in
+  `dragTasks.test.ts`: an jeder Stelle urteilt die Engine wie eine unabhängige Gegenprobe.
 - `linalg/vectorTasks.ts`: Baukasten. Je Art (`VectorKind`) eine Funktion, die die ganze geführte Aufgabe baut (Schritte
   mit `choiceStep`: falsche Antworten ohne Doppelte, höchstens drei, aus `errorRules.ts`; Bilder; Ergebnis; Form;
   `answer` und `data` für die Gegenprobe in Tests). Arten je Stufe in `KINDS_BY_LEVEL`: Stufe 1 Ebene, 2 Raum, 3 zwei
   Rechnungen zusammen, 4 Parameter oder vier und fünf Dimensionen, 5 alles ineinander. Gibt eine Art in einem Schritt
   weniger als drei Antworten, zieht sie neu (Schleife). Kennzahlen der Abwechslung wie überall (100 Formen unter 200,
   keine über 3 %); die Form enthält Art, Dimension, Variante, Buchstaben und Zahl der negativen Einträge.
-- `linalg/errorRules.ts`: 40 typische Fehler (22 aus Schritt 1, 18 zum Skalarprodukt) (`vec-…`), im Katalog `errorCatalog.ts` unter `vektoren`; Lernkarten in
+- `linalg/errorRules.ts`: 44 typische Fehler (22 aus Schritt 1, 18 zum Skalarprodukt, 4 beim Ziehen) (`vec-…`), im Katalog `errorCatalog.ts` unter `vektoren`; Lernkarten in
   `explain/vectorCards.ts` (Ordner `vektoren`, Beispiele `{ vector: { kind, level, seed } }`, gerechnet vom Baukasten,
   in `CardBody.tsx` mit Bild und Rechenweg).
 - `linalg/vectorEngine.ts`: Anschluss an `ui/courseEngines.ts` (planen, Form, neue Nummer, Beispiel).

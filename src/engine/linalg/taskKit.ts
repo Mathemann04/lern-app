@@ -30,6 +30,8 @@ export type VectorKind =
   | 'lengthAngle'
   | 'classifyParam'
   | 'rightParam'
+  // Pfeil ziehen (M7 Schritt 2b, dragTasks.ts)
+  | 'drag'
 
 export type VectorTask = GuidedTaskBase & {
   readonly kind: VectorKind
@@ -39,6 +41,8 @@ export type VectorTask = GuidedTaskBase & {
   readonly answer: readonly number[]
   // gegebene Größen als Zahlen, für die unabhängige Gegenprobe in Tests (je Art eigene Namen)
   readonly data: Readonly<Record<string, readonly number[]>>
+  // Zieh-Aufgabe ohne eindeutiges Ergebnis: Im freien Modus wird gezogen und die Stelle geprüft (vectorFree.ts)
+  readonly dragOnly?: true
 }
 
 // Lernkarten des Bausteins (vectorCards.ts)

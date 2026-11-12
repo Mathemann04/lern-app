@@ -136,6 +136,8 @@ describe('Vektoren: Skalarprodukt und Winkel', () => {
   it.each(cells)('Stufe %i: Ergebnis stimmt mit der Gegenprobe, Schritte und Antworten sind vollständig', (level) => {
     for (const task of tasks(level, 150)) {
       const context = `${level}-${task.ref.seed} ${task.form}`
+      // Zieh-Aufgaben (Schritt 2b) prüft dragTasks.test.ts
+      if (task.kind === 'drag') continue
       check(task, context)
       expect(DOT_KINDS_BY_LEVEL[level], context).toContain(task.kind)
       expectRenderable(task.instruction, context)
@@ -161,7 +163,8 @@ describe('Vektoren: Skalarprodukt und Winkel', () => {
 
   it('Stufe 1 in der Ebene, Stufe 2 im Raum, jeweils mit Bild', () => {
     for (const task of tasks(1, 60)) expect(task.resultDrawing?.dim, task.form).toBe(2)
-    for (const task of tasks(2, 60)) expect(task.resultDrawing?.dim, task.form).toBe(3)
+    // gezogen wird nur in der Ebene
+    for (const task of tasks(2, 60)) expect(task.resultDrawing?.dim, task.form).toBe(task.kind === 'drag' ? 2 : 3)
   })
 
   it('besondere Winkel: der Winkel im Bild ist der gesuchte; senkrecht heißt rechter Winkel im Bild', () => {

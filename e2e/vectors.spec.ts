@@ -189,10 +189,10 @@ test('Frei: Skalarprodukt und Art des Winkels zum Antippen', async ({ page }) =>
 
 test('Frei: Ungleichung mit Zeichen und Winkel in Grad', async ({ page }) => {
   const errors = collectErrors(page)
-  // a = (3, −5), b = (3t, 3): stumpf für t < 5/3
-  await page.goto('./#/frei/vektoren/skalar.4-10')
+  // p = (−2, 4, 1), q = (3t + 2, 4, 1): Lösung t < 13/6 (die frühere Nummer 4-10 ist seit Schritt 2b eine Zieh-Aufgabe)
+  await page.goto('./#/frei/vektoren/skalar.4-69')
   await page.getByRole('radio', { name: 'größer als' }).click()
-  await typeInto(page, 'Dein Ergebnis', '5/3')
+  await typeInto(page, 'Dein Ergebnis', '13/6')
   await page.getByRole('button', { name: 'Prüfen' }).click()
   await expect(page.getByText('Typischer Fehler: Ungleichung falsch umgedreht.')).toBeVisible()
   await page.getByRole('radio', { name: 'kleiner als' }).click()
@@ -205,5 +205,48 @@ test('Frei: Ungleichung mit Zeichen und Winkel in Grad', async ({ page }) => {
   await page.getByRole('button', { name: 'Prüfen' }).click()
   await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
   await expectCleanPage(page, 'Winkel frei')
+  expect(errors).toEqual([])
+})
+
+// M7 Schritt 2b: Pfeil ziehen (skalar.1-14: p = (−3, 2), q senkrecht dazu ziehen)
+test('Pfeil ziehen: Prüfen ohne Ziehen zählt nicht, typischer Fehler, dann richtig mit den Knöpfen', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./#/ueben/vektoren/skalar.1-14')
+  await expect(page.getByTestId('drag-surface')).toBeVisible()
+  await expectCleanPage(page, 'Ziehen leer')
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('So geht es nicht.')).toBeVisible()
+  // parallel ziehen: q = p (im Bild auf die Spitze von p tippen)
+  const surface = page.getByTestId('drag-surface')
+  const box = (await surface.boundingBox())!
+  // Ausschnitt −5,6 bis 5,6: die Stelle (−3 | 2) liegt bei (2,6 / 11,2; 3,6 / 11,2)
+  await page.mouse.click(box.x + (box.width * 2.6) / 11.2, box.y + (box.height * 3.6) / 11.2)
+  await expect(page.getByLabel('1. Eintrag', { exact: true })).toHaveValue('−3')
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Senkrecht falsch erkannt')).toBeVisible()
+  // mit den Knöpfen: q = (2, 3)
+  await page.getByLabel('1. Eintrag', { exact: true }).fill('2')
+  await page.getByLabel('2. Eintrag', { exact: true }).fill('3')
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
+  await expect(page.getByLabel('1. Eintrag', { exact: true })).toBeDisabled()
+  await expectCleanPage(page, 'Ziehen gelöst')
+  await page.getByRole('button', { name: 'Ergebnis ansehen' }).click()
+  await expect(page.getByRole('heading', { name: 'Geschafft!' })).toBeVisible()
+  // jede Stufe einmal: Lösung zeigen und weiter
+  for (const [level, s] of [[2, 36], [3, 19], [4, 10], [5, 5]]) {
+    await page.goto(`./#/ueben/vektoren/skalar.${level}-${s}`)
+    await page.getByLabel(/um 1 größer/).first().click()
+    await page.getByRole('button', { name: 'Prüfen' }).click()
+    await expect(page.getByText(/^(Richtig!|Nicht ganz\. Versuch es noch einmal\.|So geht es nicht\.)$/)).toBeVisible()
+    await expectCleanPage(page, `Ziehen Stufe ${level}`)
+  }
+  // frei: dieselbe Aufgabe, Stelle im Bild statt Kästchen
+  await page.goto('./#/frei/vektoren/skalar.1-14')
+  await page.getByLabel('1. Eintrag', { exact: true }).fill('-2')
+  await page.getByLabel('2. Eintrag', { exact: true }).fill('-3')
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
+  await expectCleanPage(page, 'Ziehen frei')
   expect(errors).toEqual([])
 })

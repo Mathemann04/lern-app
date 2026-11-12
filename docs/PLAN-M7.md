@@ -1,6 +1,6 @@
 # Plan für Meilenstein 7: Vektoren, Geraden und Ebenen, Matrizen
 
-Status: **freigegeben** (Nutzer, 12.11.2026: „Passt alles“). Schritte 1a, 1b und 2a fertig (12.11.2026).
+Status: **freigegeben** (Nutzer, 12.11.2026: „Passt alles“). Schritte 1a, 1b, 2a und 2b fertig (12.11.2026).
 
 Entwurf zum Ansehen und Anfassen (privat, nur für den Nutzer):
 https://claude.ai/artifact/WXe4sjavAGF64jyAWSa3hi. Er zeigt acht Bilder und Aufgaben im geplanten Stil. Die Seite ist
@@ -100,7 +100,8 @@ Animationen starten nur auf Knopfdruck („Abspielen“) und entfallen, wenn am 
   $\lvert\vec b\rvert$ statt $\lvert\vec b\rvert^2$ bei der Projektion, Projektion verwechselt, zweite Lösung (±)
   vergessen, Zeile statt Spalte (Falk, Cramer), Produkt nicht definiert, $(AB)^{\mathsf T} = A^{\mathsf T}B^{\mathsf T}$,
   $\lambda$ statt $\lambda^n$, Vorzeichen beim Zeilentausch, Sarrus bei 4×4, rechte Seite vergessen, Nullzeile falsch
-  gedeutet, gleicher Parameter für zwei Geraden, cos statt sin bei Gerade–Ebene, „$A - 2$“ ohne $E$, auf der falschen
+  gedeutet, gleicher Parameter für zwei Geraden, beim Ziehen (2b): nur vertauscht oder nur ein Vorzeichen geändert, rechter Winkel als spitz
+  oder stumpf gezählt, rechter Winkel an der falschen Ecke, Seiten statt Diagonalen senkrecht, cos statt sin bei Gerade–Ebene, „$A - 2$“ ohne $E$, auf der falschen
   Seite ausgeklammert. Jede mit Katalogbeispiel, eigenem Text für „Warum ist das falsch?“ und Platz auf einer Lernkarte
   (Regeln aus CLAUDE.md).
 - **Aufgabennummern** wie seit M6 mit Baustein (`taskNumber.ts`); neue Bausteine bekommen die nächsten freien Nummern in
@@ -140,8 +141,18 @@ Request.
      Vorzeichen des Kosinus übersehen, Sinus und Kosinus verwechselt, besondere Werte verwechselt, Pfeil nicht am
      Scheitel, Skalarprodukt gleich 1 gesetzt, falsch nach dem Parameter aufgelöst, Ungleichung falsch umgedreht,
      Mittelglied vergessen, Kosinus vergessen, Zahl vor dem Vektor nicht quadriert.
-   - **2b:** Zieh-Aufgaben (senkrecht, spitz, stumpf, auch mit Parameter; Pfeil rastet auf ganzen Zahlen ein, lösbar
-     auch durch Eintippen).
+   - **2b (fertig, 12.11.2026):** Zieh-Aufgaben im Baustein „Skalarprodukt und Winkel“ (ein Viertel der Nummern, mit
+     eigenem Zufall gewählt, damit die übrigen ihre Aufgabe behalten; immer in der Ebene). Die Spitze von $\vec b$ oder
+     ein Punkt rastet auf ganzen Zahlen ein (entlang einer Geraden auf ganzen Werten des Parameters) und lässt sich ohne
+     Ziehen mit „−“ und „+“ oder durch Eintippen einstellen. 13 Arten: Stufe 1 senkrecht, spitz, stumpf (mit
+     mitlaufendem Winkelbogen); Stufe 2 Skalarprodukt mit Wert, Winkel $45^\circ$ oder $135^\circ$, rechter Winkel an
+     einer gegebenen Ecke; Stufe 3 senkrecht und gegebene Länge (zwei Lösungen), rechter Winkel gegenüber einer Seite
+     (Thaleskreis); Stufe 4 Spitze entlang einer Geraden mit Parameter, danach Gleichung bzw. Ungleichung wie in 2a;
+     Stufe 5 Diagonalen einer Raute senkrecht, $(\vec a - \vec b) \perp \vec b$, zwei Bedingungen mit eindeutiger
+     Lösung. Rückmeldung mit der Rechnung an der eigenen Stelle; „Prüfen“ am Start zählt nicht. Frei: ohne eindeutiges
+     Ergebnis wird gezogen, mit Parameter wird getippt und das Bild dient zum Ausprobieren. Vier neue typische Fehler:
+     nur vertauscht oder nur ein Vorzeichen geändert, rechter Winkel als spitz oder stumpf gezählt, rechter Winkel an der falschen Ecke,
+     Seiten statt Diagonalen senkrecht.
 3. **Projektion, Zerlegung und Kräfte:** Animation „Licht an“, typischer Fehler im Bild, schiefe Ebene.
 4. **Kreuzprodukt und Spatprodukt:** räumliche Ansicht zum Drehen, Schema mit Hilfszeilen, Flächen und Volumen
    (Spat, Prisma, Pyramide, Tetraeder), komplanar, Volumen mit Parameter.

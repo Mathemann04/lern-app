@@ -24,6 +24,9 @@ import { CheckBadge, FocusBanner, SkipNotice, TaskFooter, TaskIntro, TaskTopBar 
 import { ChemFigure, FigureDrawing } from '../chem/ChemFigure.tsx'
 import { figureById } from '../../engine/chem/figures.ts'
 import { VectorFigure } from '../draw/VectorFigure.tsx'
+import { DragPad } from '../draw/DragPad.tsx'
+import { type DragLineReport, type DragStep, judgeDrag } from '../../engine/linalg/drag.ts'
+import type { VectorDrawing } from '../../engine/linalg/figures.ts'
 import { type ExplanationMode, useExplanationMode } from '../task/explanationMode.ts'
 
 type Props = { course: string; engine: CourseEngine; taskRef: TaskRef; focus?: string | null; mix?: string | null; review?: string | null; free?: boolean }
@@ -147,7 +150,8 @@ type StepProps = {
 
 // Rückmeldung auf eine eingetippte Zahl (freier Modus): typischer Fehler mit Erklärung, „fast" (Rundung)
 // oder falsch; tries zählt die Versuche, damit dieselbe Rückmeldung ein zweites Mal neu erscheint
-type Typed = { readonly kind: 'error' | 'close' | 'wrong'; readonly rule?: string; readonly why?: Explanation; readonly note?: string; readonly tries: number }
+// info: Hinweis ohne Fehler (Zieh-Aufgabe an einer Stelle, an der sie nicht geht)
+type Typed = { readonly kind: 'error' | 'close' | 'wrong' | 'info'; readonly rule?: string; readonly why?: Explanation; readonly note?: string; readonly tries: number }
 
 function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext, free }: StepProps) {
   const [wrongPicks, setWrongPicks] = useState<string[]>([])
@@ -162,6 +166,8 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext,
   // „Wähle alle richtigen“: angekreuzte Aussagen; nach dem Prüfen, ob alles stimmte
   const [selected, setSelected] = useState<string[]>([])
   const [multiResult, setMultiResult] = useState<{ clean: boolean } | null>(null)
+  // Zieh-Aufgabe: Rechnung mit der zuletzt geprüften Stelle (Text mit Formeln)
+  const [dragLines, setDragLines] = useState<string | null>(null)
   const hadMistake = useRef(false)
   const questionRef = useRef<HTMLHeadingElement>(null)
   const feedbackRef = useRef<HTMLDivElement>(null)
@@ -193,12 +199,26 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext,
     if (verdict.kind === 'error') {
       // wie bei der Auswahl: nur der erste Fehler je Schritt zählt für die Statistik
       if (firstMistake) recordError(verdict.rule)
-      const why = numeric?.wrongs.find((w) => w.rule === verdict.rule)?.why ?? step.boxes?.whys[verdict.rule]
-      setTyped({ kind: 'error', rule: verdict.rule, why, tries })
+      const why = numeric?.wrongs.find((w) => w.rule === verdict.rule)?.why ?? step.boxes?.whys[verdict.rule] ?? step.drag?.whys[verdict.rule]
+      setTyped({ kind: 'error', rule: verdict.rule, why, note, tries })
     } else {
       setTyped({ kind: 'wrong', note, tries })
     }
     onMistake()
+  }
+
+  // Zieh-Aufgabe (M7 Schritt 2b): die Stelle prüfen; an einer unmöglichen Stelle nur ein Hinweis
+  function checkDrag(at: readonly number[]) {
+    if (solved || !step.drag) return
+    const v = judgeDrag(step.drag, at)
+    if (v.kind === 'invalid') {
+      setDragLines(null)
+      setTyped({ kind: 'info', note: v.note, tries: (typed?.tries ?? 0) + 1 })
+      return
+    }
+    const lines = dragReport(v.lines)
+    setDragLines(lines)
+    judged(v.kind === 'correct' ? { kind: 'correct' } : v.kind === 'error' ? { kind: 'error', rule: v.rule } : { kind: 'wrong' }, lines)
   }
 
   function pick(choice: Choice) {
@@ -273,9 +293,11 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext,
         </h1>
       </div>
       {step.figure && <ChemFigure id={step.figure} />}
-      {step.drawing && <VectorFigure drawing={step.drawing} />}
+      {step.drawing && !step.drag && <VectorFigure drawing={step.drawing} />}
 
-      {numeric ? (
+      {step.drag && step.drawing ? (
+        <DragAnswers key={step.id} step={step.drag} drawing={step.drawing} solved={solved} revealed={revealed} onCheck={checkDrag} onMove={() => typed && setTyped(null)} />
+      ) : numeric ? (
         <NumberAnswer answer={numeric} disabled={solved} onSubmit={(value) => judged(judgeNumber(value, numeric))} />
       ) : step.boxes ? (
         <BoxAnswers
@@ -413,6 +435,7 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext,
                 Richtig!
               </p>
             )}
+            {dragLines && !revealed && <RichText text={dragLines} className="text-zinc-800" />}
             {(mode !== 'off' || revealed) && <RichText text={step.explanation[mode === 'off' ? 'short' : mode]} className="text-zinc-800" />}
             <button
               type="button"
@@ -689,6 +712,42 @@ function MatchAnswers({ match, checked, detail, onCheck }: MatchProps) {
   )
 }
 
+// Rechnung mit der gezogenen Stelle, je Bedingung eine Zeile mit ✓ oder ✗
+const dragReport = (lines: readonly DragLineReport[]) => lines.map((l) => `$${l.latex}$ ${l.ok ? '✓' : '✗'}`).join('\n')
+
+type DragProps = { step: DragStep; drawing: VectorDrawing; solved: boolean; revealed: boolean; onCheck: (at: readonly number[]) => void; onMove: () => void }
+
+// Pfeil ziehen (M7 Schritt 2b): Stelle im Bild ziehen oder einstellen, dann „Prüfen“; nach dem Lösen steht sie fest
+function DragAnswers({ step, drawing, solved, revealed, onCheck, onMove }: DragProps) {
+  const [at, setAt] = useState<readonly number[]>(step.start)
+  return (
+    <div className="space-y-3">
+      <DragPad
+        step={step}
+        drawing={drawing}
+        at={revealed ? step.solution : at}
+        onMove={
+          solved
+            ? undefined
+            : (next) => {
+                setAt(next)
+                onMove()
+              }
+        }
+      />
+      {!solved && (
+        <button
+          type="button"
+          onClick={() => onCheck(at)}
+          className="w-full rounded-xl bg-accent-700 px-4 py-3 text-lg font-medium text-on-accent hover:bg-accent-800"
+        >
+          Prüfen
+        </button>
+      )}
+    </div>
+  )
+}
+
 type BoxProps = { step: BoxInputStep; solved: boolean; revealed: boolean; onCheck: (input: InputBox[][]) => void }
 
 // Orbital-Kästchen zum Antippen (N2a): je Unterschale eine Zeile, Tippen schaltet leer → ↑ → ↓ → ↑↓. Nach einem Fehler
@@ -854,6 +913,13 @@ type TypedFeedbackProps = { typed: Typed; detail: ExplanationDetail; whyOpen: bo
 // Rückmeldung auf eine eingetippte Zahl: „Fast" (Rundung, zählt nicht als Fehler), typischer Fehler mit
 // Namen und „Warum ist das falsch?", sonst falsch; nach einem Fehler lässt sich die Lösung zeigen
 function TypedFeedback({ typed, detail, whyOpen, onWhy, onReveal }: TypedFeedbackProps) {
+  if (typed.kind === 'info')
+    return (
+      <div className="animate-step-in space-y-1 rounded-2xl bg-amber-50 p-4">
+        <p className="text-lg font-semibold text-amber-800">So geht es nicht.</p>
+        <RichText text={typed.note ?? ''} className="text-zinc-800" />
+      </div>
+    )
   if (typed.kind === 'close')
     return (
       <div className="animate-step-in space-y-1 rounded-2xl bg-amber-50 p-4">
@@ -865,7 +931,7 @@ function TypedFeedback({ typed, detail, whyOpen, onWhy, onReveal }: TypedFeedbac
   return (
     <div className="animate-step-in space-y-3 rounded-2xl bg-red-50 p-4">
       <p className="text-lg font-semibold text-red-800">Nicht ganz. Versuch es noch einmal.</p>
-      {typed.note && <p className="text-zinc-800">{typed.note}</p>}
+      {typed.note && <RichText text={typed.note} className="text-zinc-800" />}
       {name && (
         <p className="text-zinc-800">
           Das passt zu einem typischen Fehler: <RichText text={name} className="font-medium" inline />

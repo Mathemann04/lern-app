@@ -9,6 +9,8 @@ export type View = {
   readonly height: number
   // Weltpunkt → Punkt der Zeichenfläche
   readonly project: (p: readonly number[]) => readonly [number, number]
+  // Ebene: Punkt der Zeichenfläche → Weltpunkt (Ziehen, Schritt 2b)
+  readonly unproject?: (x: number, y: number) => readonly [number, number]
   // Ebene: Gitter
   readonly grid?: { readonly xmin: number; readonly xmax: number; readonly ymin: number; readonly ymax: number; readonly step: number }
   // Raum: Länge der Achsen
@@ -19,6 +21,7 @@ const WIDTH = 320
 const MAX_HEIGHT = 260
 
 export function planeView(d: VectorDrawing): View {
+  if (d.frame) return frameView(d.frame)
   const coords = [[0, 0], ...drawingCoordinates(d)]
   const xs = coords.map((c) => c[0])
   const ys = coords.map((c) => c[1])
@@ -42,6 +45,20 @@ export function planeView(d: VectorDrawing): View {
     height: (ymax - ymin) * unit,
     project: (p) => [(p[0] - xmin) * unit, (ymax - p[1]) * unit],
     grid: { xmin, xmax, ymin, ymax, step },
+  }
+}
+
+// Fester Ausschnitt (Zieh-Aufgaben): ein halbes Kästchen Rand, damit Punkte am Rand ganz zu sehen sind
+function frameView(f: NonNullable<VectorDrawing['frame']>): View {
+  const [xmin, xmax, ymin, ymax] = [f.xmin - 0.6, f.xmax + 0.6, f.ymin - 0.6, f.ymax + 0.6]
+  const unit = Math.min(WIDTH / (xmax - xmin), MAX_HEIGHT * 1.25 / (ymax - ymin))
+  const range = Math.max(f.xmax - f.xmin, f.ymax - f.ymin)
+  return {
+    width: (xmax - xmin) * unit,
+    height: (ymax - ymin) * unit,
+    project: (p) => [(p[0] - xmin) * unit, (ymax - p[1]) * unit],
+    unproject: (x, y) => [x / unit + xmin, ymax - y / unit],
+    grid: { xmin, xmax, ymin, ymax, step: range > 26 ? 5 : range > 13 ? 2 : 1 },
   }
 }
 
