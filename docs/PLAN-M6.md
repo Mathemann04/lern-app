@@ -1,15 +1,15 @@
-# Plan für Meilenstein 6: Neue Struktur (Entwurf)
+# Plan für Meilenstein 6: Neue Struktur
 
-Status: **Entwurf**, festgehalten am 10.11.2026 auf Wunsch des Nutzers.
-Gebaut wird **nach Abschluss von M4 (Chemie 1) und vor M5 (Werkstoffkunde)**,
-damit Werkstoffkunde gleich in der neuen Struktur entsteht. Vor dem Bauen wird
-aus diesem Entwurf der ausführliche Plan mit Schritten (Teil A und Teil B wie
-bei M1 bis M4); erst nach dem OK des Nutzers wird programmiert.
+Status: **ausführlicher Plan, wartet auf das OK des Nutzers** (Entwurf vom
+10.11.2026, ausgearbeitet am 12.11.2026). Gebaut wird nach dem Klausur-Sprint
+von M4 und vor M12 (Nachschlagewerk), M6b und M5, damit die neuen Fächer
+gleich in der neuen Struktur entstehen. Erst nach dem OK wird programmiert.
 
 Der Nutzer hat den Entwurf als Bild (Design-Canvas „Rechenweg – neue Struktur
 (Entwurf)“ mit Startseite, Mathe-Seite, der Seite „Gleichungen umstellen“ und
-einer Aufgabe mit „Überspringen“). Dieses Dokument beschreibt denselben Stand
-in Worten.
+einer Aufgabe mit „Überspringen“). Die Abschnitte bis „Befunde der
+Durchsicht“ beschreiben den Entwurf in Worten; „Teil A“ und „Teil B“ machen
+daraus Schritte und Bauplan.
 
 ## Warum
 
@@ -88,7 +88,7 @@ neben jedem Baustein). Eigene Themenseiten braucht es dafür nicht.
   `MixScreen.tsx`, `selection.ts`, `mix.ts`) werden für Mathe
   wiederverwendet, damit die App überall gleich funktioniert.
 
-## Was technisch dafür nötig ist (für den ausführlichen Plan)
+## Was technisch dafür nötig ist (ausgearbeitet in Teil B)
 
 - **Schlagworte je Baustein** an Vorlagen, Kernen und Werkzeugen der
   Baukästen (Brüche, Umstellen, Ableiten). Eine Aufgabe wird nur aus den
@@ -110,17 +110,9 @@ neben jedem Baustein). Eigene Themenseiten braucht es dafür nicht.
   „Vereinfachen“ und „Ableiten“; leichte Aufgaben je Baustein; Fortschritt je
   Baustein und „Meine Schwächen“.
 
-## Offene Fragen für den ausführlichen Plan
+## Offene Fragen
 
-- Genaue Liste der Bausteine je Tätigkeit, abgeglichen mit
-  [LEHRBUCH.md](LEHRBUCH.md) und der Vorlesung MB1 (der Nutzer ergänzt
-  fehlende).
-- M7 (Vektoren) und M8 (Potenz-, Wurzel- und Logarithmusgesetze): als
-  Bausteine oder eigene Tätigkeiten in dieser Struktur statt als eigene
-  Gebiete?
-- Namen der Stufen (Vorschlag oben).
-- „Integrieren“ als eigene Tätigkeit (heute nur als Werkzeug in Stufe 5 von
-  „Gleichungen umstellen“).
+Sind jetzt in Teil A unter „Fragen an dich“ beantwortet oder gestellt.
 
 ## Befunde der Durchsicht (11.11.2026)
 
@@ -134,6 +126,242 @@ neben jedem Baustein). Eigene Themenseiten braucht es dafür nicht.
   übernehmen.
 - Die Nummer der Aufgabe („Aufgabe 1-505136“) steht über jeder Aufgabe, wird
   aber nur für „Frage melden“ gebraucht: kleiner oder erst dort zeigen.
+
+## Teil A: Was entsteht
+
+### Bausteine je Tätigkeit (Vorschlag)
+
+Ein Baustein ist ein Stück Stoff, z. B. „Wurzeln“ oder „Determinanten“.
+**Immer erlaubt** und kein Baustein ist das Handwerkszeug jeder Aufgabe:
+Klammern, Punkt vor Strich, mal und durch eine Zahl oder einen Buchstaben,
+auf beide Seiten bringen (beim Umstellen „Schalen“ genannt). Die Stufe sagt,
+wie viele Schalen und wie viele Bausteine ineinander stecken.
+
+**Gleichungen umstellen** (heute Stufen 1 bis 5 mit allen Kernen):
+
+| Gruppe | Bausteine |
+| --- | --- |
+| Grundlagen | Brüche (x im Nenner, Doppelbrüche), Wurzeln, Quadrate und Potenzen, e-Funktion, Logarithmus, quadratisch (pq-Formel, Substitution) |
+| Funktionen | Winkelfunktionen (mit Umkehrfunktionen und Additionstheoremen), Hyperbelfunktionen |
+| Aus späteren Kapiteln | Ableitungen, Integrale, Summen und Reihen, Grenzwerte, Differentialgleichungen, Determinanten, komplexe Zahlen, Vektoren |
+
+**Vereinfachen** (heute „Brüche“):
+
+| Gruppe | Bausteine |
+| --- | --- |
+| Zahlen | Zahlenbrüche (mit Dezimalzahlen) |
+| Terme | Buchstaben in Produkten, Ausklammern und binomische Formeln, Zerlegen (Zahl vorn, in Gruppen, Polynomdivision), Doppelbrüche, dritte Potenzen |
+| Funktionen | Wurzeln, e-Funktion und Logarithmus, Winkelfunktionen, Hyperbelfunktionen |
+| Aus späteren Kapiteln | Partialbruchzerlegung, Differenzenquotienten, Grenzwerte, Teleskopsummen, komplexe Zahlen |
+
+**Ableiten** (zwei Gruppen; eine Aufgabe braucht aus beiden Gruppen nur
+angekreuzte Bausteine):
+
+| Gruppe | Bausteine |
+| --- | --- |
+| Funktionen | Potenzen und Wurzeln, e-Funktion, Logarithmus, Winkelfunktionen, Umkehrfunktionen (arcsin, arctan …), Hyperbelfunktionen |
+| Regeln | Produktregel, Quotientenregel, Kettenregel, logarithmisch ableiten, implizit ableiten |
+
+Faktor- und Summenregel sind immer erlaubt (Handwerkszeug).
+
+### Stufen: nur noch „wie verschachtelt“
+
+| Stufe | Name (Vorschlag) | Umstellen | Vereinfachen | Ableiten |
+| --- | --- | --- | --- | --- |
+| 1 | Einstieg | ein Baustein, ein bis zwei Schalen | ein Baustein, kurz | eine Funktion, eine Regel |
+| 2 | Grundlagen | ein Baustein, mehrere Schalen | ein Baustein, mehrere Teile | eine Regel, mehrere Funktionen |
+| 3 | Kombiniert | zwei Bausteine ineinander oder nebeneinander | zwei Bausteine zusammen | zwei Regeln ineinander |
+| 4 | Klausur | mehrere verschachtelt | mehrere verschachtelt | mehrere Regeln verschachtelt |
+| 5 | Profi | alles ineinander, kaum noch schwerer | wie heute Stufe 5 | wie heute Stufe 5 |
+
+Ist **nur ein** Baustein angekreuzt, steckt er in den Stufen 3 bis 5 in sich
+selbst oder in mehr Schalen (z. B. Wurzel in Wurzel, Determinante mit einem
+Bruch als Eintrag nur, wenn auch „Brüche“ angekreuzt ist). Eine Stufe bringt
+nie Stoff, der nicht angekreuzt ist.
+
+Heutige Aufgaben gehen nicht verloren: Die Aufgaben der heutigen Stufen
+werden mit ihren Bausteinen beschriftet und in die passende neue Stufe
+einsortiert. Neu gebaut werden nur die leichten Aufgaben für die Bausteine,
+die es heute erst spät gibt.
+
+### Schritte
+
+Jeder Schritt lässt sich einzeln ausprobieren. Nach jedem Schritt: Tests,
+Prüfung im Browser (Handy und Laptop, hell und dunkel), Pull Request.
+
+#### Schritt 1: Aufgeräumte Startseite und Fach-Seiten
+
+- Kopfzeile mit Logo und „Rechenweg“ und die Begrüßung entfallen; am Laptop
+  bleibt oben nur das Menü.
+- Startseite: oben „Weitermachen“, Probeklausur und fällige Wiederholung
+  (aus S11), darunter nur die Fächer als große Kacheln mit Bild; fehlende
+  Fächer in einer Zeile „Demnächst“.
+- Neue Seite je Fach (`#/fach/mathe`, `#/fach/chemie`): Mathe zeigt vorerst
+  die heutigen Gebiete und Themen, Chemie ihre Gebiete und „Themen mischen“;
+  dazu Platz für „Lernkarten“, „Klausur“ und später „Nachschlagen“ (M12).
+- Aufgabennummer klein unten statt groß über der Aufgabe.
+- Fortschritt: je Fach kurz, Geübtes zuerst, Einzelheiten beim Antippen; der
+  Klausur-Überblick aus S11 bleibt.
+- Alte Adressen (`#/gebiet/…`, `#/thema/…`) funktionieren weiter.
+
+#### Schritt 2: „Überspringen“
+
+- Knopf „Überspringen“ unten in jeder Aufgabe (geführt und frei, Mathe und
+  Chemie, auch beim Mischen, Wiederholen und gezielten Üben); kurzer Hinweis
+  „Aufgabe übersprungen“, dann die nächste.
+- Zählt nicht als Fehler, nicht als gelöst, nicht für „8 von 10“; die
+  Fehlerstatistik bleibt unberührt. Eine übersprungene Wissensfrage kommt
+  später in derselben Runde wieder. In Probeklausur und Klausuraufgaben gibt
+  es den Knopf nicht (dort springt man schon heute).
+
+#### Schritt 3: „Gleichungen umstellen“ mit Bausteinen (Grundgerüst)
+
+- Mathe-Seite mit den Tätigkeiten als Kacheln: „Vereinfachen“, „Gleichungen
+  umstellen“, „Ableiten“, „Mathe mischen“ (erst ab Schritt 8 spielbar),
+  „Demnächst: Integrieren“. „Vereinfachen“ und „Ableiten“ führen bis zu ihren
+  Schritten auf die heutigen Themenseiten.
+- Seite „Gleichungen umstellen“: „Was soll drankommen?“ mit „Alle“, „Keine“,
+  Bausteinen in Gruppen und Knopf „nur“; „Wie verschachtelt?“ mit Stufen 1
+  bis 5 und einer Beispielaufgabe aus der Auswahl; „Geführt“ oder „Frei“;
+  Start-Knopf („Geführt üben · 3 Bausteine“), ohne Auswahl gesperrt; Link zu
+  den Lernkarten der angekreuzten Bausteine. Gespeichert je Tätigkeit.
+- Die heutigen Aufgaben bekommen ihre Bausteine und neuen Stufen. Bausteine,
+  die es heute erst ab Stufe 4 oder 5 gibt, sind in niedrigeren Stufen
+  vorerst blass mit „erst ab Stufe 4“ (wie bei Chemie „erst ab
+  Vertiefung“); die Schritte 4 und 5 füllen das auf.
+- Alte Aufgabennummern (`#/ueben/umstellen/5-1234`) zeigen weiter genau
+  dieselbe Aufgabe; Fortschritt und Fehlerstatistik ziehen um.
+
+#### Schritt 4: Umstellen, leichte Aufgaben für Grundlagen und Funktionen
+
+- Ab Stufe 1 einzeln übbar: e-Funktion, Logarithmus, quadratisch,
+  Winkelfunktionen, Hyperbelfunktionen (heute erst ab Stufe 4).
+- Test: jeder Baustein allein liefert in jeder Stufe genug verschiedene
+  Aufgaben (Kennzahlen aus PLAN-M2b.md).
+
+#### Schritt 5: Umstellen, leichte Aufgaben aus späteren Kapiteln (in Teilen)
+
+- 5a: Ableitungen, Integrale, Summen und Reihen, Grenzwerte ab Stufe 1
+  (z. B. $\frac{\mathrm{d}}{\mathrm{d}x}\left(x^2\right) = y$ nach $x$, dann mit einer Schale).
+- 5b: Differentialgleichungen, Determinanten ab Stufe 1.
+- 5c: komplexe Zahlen und Vektoren ab Stufe 1 (Betrag, Winkel, Länge,
+  Skalarprodukt).
+- Danach ist jeder Baustein in jeder Stufe übbar; „gezielt üben“ je
+  Fehlerregel bleibt.
+
+#### Schritt 6: „Vereinfachen“ mit Bausteinen
+
+- Wie Schritt 3 für die heutigen „Brüche“, dazu leichte Aufgaben für
+  Wurzeln, e-Funktion und Logarithmus, Winkel- und Hyperbelfunktionen,
+  Partialbrüche, Differenzenquotienten, Grenzwerte, Teleskopsummen, komplexe
+  Zahlen (heute nur in Stufe 5).
+
+#### Schritt 7: „Ableiten“ mit Bausteinen
+
+- Wie Schritt 3 für das heutige „Ableiten“, mit den Gruppen „Funktionen“
+  und „Regeln“; leichte Aufgaben für Umkehr- und Hyperbelfunktionen,
+  logarithmisch und implizit ableiten (heute nur in Stufe 5).
+
+#### Schritt 8: „Mathe mischen“
+
+- Tätigkeiten und Bausteine quer durch Mathe ankreuzen, eine Stufe, Aufgaben
+  kommen gemischt (wie „Themen mischen“ in Chemie).
+
+#### Schritt 9: Fortschritt je Baustein und „Meine Schwächen“
+
+- Je Baustein der Anteil ohne Fehler (in Prozent) neben dem Kästchen.
+- „Meine Schwächen“ kreuzt die Bausteine mit den meisten Fehlern an (jede
+  Fehlerregel gehört zu einem Baustein).
+- Lernkarten und „Gezielt üben“ nach Bausteinen geordnet.
+
+#### Schritt 10: Abschluss von M6
+
+- Prüfung aus mehreren Blickwinkeln, Doku, alte Adressen ein letztes Mal
+  durchgetestet.
+
+### Fragen an dich
+
+1. Passen die Bausteine in den Tabellen oben? Fehlt etwas aus der Vorlesung
+   MB1, oder soll etwas anders heißen?
+2. M7 (Vektoren) und M8 (Potenz-, Wurzel- und Logarithmusgesetze): Vorschlag:
+   keine eigenen Gebiete mehr, sondern Bausteine in dieser Struktur (Vektoren
+   als Baustein beim Umstellen und später als eigene Tätigkeit „Vektoren
+   rechnen“; Potenz-, Wurzel- und Logarithmusgesetze als Bausteine bei
+   „Vereinfachen“).
+3. Namen der Stufen: „Einstieg, Grundlagen, Kombiniert, Klausur, Profi“?
+4. Ableiten: Regeln (Produkt-, Quotienten-, Kettenregel) als ankreuzbare
+   Bausteine wie oben, oder nur die Funktionen ankreuzen und die Regeln
+   ergeben sich aus der Stufe?
+
+## Teil B: Technischer Bauplan
+
+### Aufgaben aus Bausteinen (`src/engine/tasks/`)
+
+- Neue Liste der Bausteine je Tätigkeit `blocks.ts` (feste Ids wie
+  `wurzel`, `det`, nie umbenennen; Titel ohne Formeln; Gruppe), ohne
+  Engine-Abhängigkeit, damit die Seiten ohne Mathe-Engine laden.
+- Jede Vorlage, jeder Kern und jedes Werkzeug der Baukästen bekommt
+  Schlagworte (Bausteine). Eine Aufgabe trägt die Vereinigung der
+  Schlagworte ihrer Teile. Ein Test vergleicht die Schlagworte mit dem
+  Inhalt der Aufgabe (z. B. kein `\sqrt` ohne `wurzel`, kein `\det` ohne
+  `det`).
+- **Aufgabennummer mit Baustein:** `<baustein>.<stufe>-<startwert>`, z. B.
+  `det.2-4711`. Der Baustein ist der Hauptbaustein der Aufgabe; Partner in
+  den Stufen 3 bis 5 wählt der erste Zufallszug. `tagsOf(baustein, stufe,
+  startwert)` sagt die Schlagworte vorab, ohne die Aufgabe zu bauen. Die App
+  wählt den Hauptbaustein gewichtet aus der Auswahl und probiert Startwerte,
+  bis alle Schlagworte angekreuzt sind und die Form frisch ist (wie
+  `pickFresh`). So bleibt jede Nummer eindeutig, unabhängig von der Auswahl.
+- **Alte Nummern** `<stufe>-<startwert>` bauen weiter die heutige Aufgabe
+  (die heutigen Erzeuger bleiben unverändert erhalten); neu gezogene Aufgaben
+  bekommen die neue Form.
+- Heutige Aufgaben einsortieren: Die neuen Erzeuger je (Baustein, Stufe)
+  rufen die heutigen Baukästen mit eingeschränkter Auswahl auf (z. B. nur
+  Kerne mit `wurzel`, Anzahl der Schalen nach Stufe), statt sie zu kopieren.
+- Abwechslung: Form je Baustein und Stufe (`forms.ts`), zuletzt gesehene
+  Formen je Tätigkeit und Stufe; Kennzahlen-Test je Baustein allein und für
+  „Alle“.
+
+### Oberfläche (`src/ui/`)
+
+- `routes.ts`: `#/fach/<fach>`, `#/taetigkeit/<id>` (Seite einer
+  Tätigkeit), `#/ueben/<tätigkeit>/<nummer>` und `#/frei/…` mit der neuen
+  Nummer; alte Adressen leiten weiter.
+- `PartPicker.tsx` und `selection.ts` aus Chemie werden für Bausteine
+  verwendet (Gruppen, „nur“, „Alle“, „Keine“, blass mit „erst ab Stufe N“);
+  `MixScreen.tsx` und `mix.ts` für „Mathe mischen“.
+- `catalog.ts`: Tätigkeiten statt Mathe-Gebiete, mit Bild und Farbe;
+  Fächer mit Seite; Zeile „Demnächst“.
+- `HomeScreen.tsx`, `MainNav.tsx`, `App.tsx`: Kopf weg, neue Startseite.
+- „Überspringen“ in `src/ui/task/` (gemeinsam für geführt und frei).
+
+### Speichern (`src/state/`)
+
+- Speicher-Version 4 mit Umzug: Auswahl, Stufe und Modus je Tätigkeit;
+  Fortschritt und Fehler je Aufgabe mit Tätigkeit und Bausteinen (alte
+  Einträge bekommen ihre Bausteine aus der alten Nummer); „Weitermachen“
+  zeigt auf die Tätigkeit.
+- Übersprungene Aufgaben werden nicht gespeichert, nur die Runde der
+  Wissensfragen merkt sie sich.
+
+### Tests
+
+- Jede Auswahl aus einem Baustein liefert in jeder Stufe genug verschiedene
+  Aufgaben; jede Aufgabe enthält nur angekreuzte Bausteine.
+- Schlagworte passen zum Inhalt; neue leichte Aufgaben mit numerischer
+  Gegenprobe, falsche Optionen nie gleichwertig (wie bisher).
+- Alte Nummern: Stichprobe von Nummern je Thema und Stufe baut dieselbe
+  Aufgabe wie vorher (Abdruck vor dem Umbau gespeichert).
+- Speicher-Umzug von Version 3 auf 4.
+- Browser-Tests: Startseite, Fach-Seite, Tätigkeit ankreuzen und üben,
+  Überspringen, alte Adressen.
+
+### Risiken
+
+- Größter Brocken sind die leichten Aufgaben je Baustein (Schritte 4 bis 7);
+  Schritt 5 und 6 deshalb in Teilen.
+- Die heutigen Baukästen sind auf Stufen gebaut; wo eine eingeschränkte
+  Auswahl zu wenig Formen ergibt, braucht es eigene Kerne.
 
 ## Ausblick: M6b, Bilder in Mathe (direkt nach M6)
 
