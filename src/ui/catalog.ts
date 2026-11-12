@@ -303,7 +303,7 @@ const vectorLevels: LevelPreview[] = [
     available: true,
     name: 'Kombiniert',
     title: 'Kombiniert – zwei Rechnungen zusammen',
-    examples: [String.raw`3\vec x - \vec a = \vec b`, String.raw`\text{Parallelogramm } ABCD`, String.raw`\lvert \vec a + 2\vec b \rvert \text{ bei } \varphi = 60^\circ`],
+    examples: [String.raw`3\vec x - \vec a = \vec b`, String.raw`\text{Parallelogramm } ABCD`, String.raw`\lvert \vec a + 2\vec b \rvert \text{ bei } \varphi = 60^\circ`, String.raw`\text{Lotfußpunkt } F \text{ und Abstand}`],
   },
   {
     level: 4,
@@ -801,7 +801,7 @@ export const SUBJECTS: readonly Subject[] = [
           {
             id: VECTORS,
             title: 'Vektoren',
-            description: 'Mit Pfeilen rechnen, Längen, Skalarprodukt und Winkel, mit Bildern zum Abspielen und Drehen',
+            description: 'Mit Pfeilen rechnen, Längen, Skalarprodukt und Winkel, Projektion und Zerlegung, mit Bildern zum Abspielen und Drehen',
             icon: 'vectors',
             tone: 'cyan',
             cards: 'vektoren',

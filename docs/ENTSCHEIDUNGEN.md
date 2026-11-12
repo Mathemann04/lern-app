@@ -1050,3 +1050,12 @@ Neue Entscheidungen unten anfügen.
   zählt jetzt zum typischen Fehler „Nur vertauscht oder nur ein Vorzeichen geändert“ statt zu „Über Kreuz
   multipliziert“; Beispiel beim senkrechten Pfeil ungekürzt wie beschrieben; Formeln ohne Faktor 1 und ohne „· −1“;
   bei genau einer richtigen Stelle kein „Zum Beispiel“. Die Tests der Zieh-Schritte melden jetzt auch unschöne Formeln.
+- 12.11.2026: M7 Schritt 3, geteilt in 3a (Projektion und Zerlegung) und 3b (Kräfte), damit der erste Teil schnell zum
+  Ausprobieren kommt; Kräfte bauen auf der Zerlegung auf. Neuer Baustein „Projektion und Zerlegung“ (Code 23,
+  `projektion.2-4711`) statt Projektion im Baustein „Skalarprodukt“, weil die Übung der Vorlesung ihn als eigene
+  Aufgabenart führt. Schreibweise $\vec a_{\parallel}$ und $\vec a_{\perp}$ wie in der Übersicht der Aufgabenarten,
+  im Text „Schatten“ als anschauliches Wort. Der Knopf zum Abspielen heißt hier „Licht an“ (Plan); „Typischen Fehler
+  zeigen“ blendet den häufigsten Fehler rot ein (durch $\lvert\vec b\rvert$ statt $\lvert\vec b\rvert^2$ geteilt),
+  aber nur, wenn er ins Bild passt, sonst würde das Bild zu klein. Der Ausschnitt rechnet den Fehler immer mit ein,
+  damit das Bild beim Einblenden nicht springt. Projektion auf eine Ebene nur mit senkrechten Vektoren (Summe der
+  Schatten); die Normalgleichungen für schiefe Vektoren kommen mit den Gleichungssystemen (Schritt 5 bzw. 10).

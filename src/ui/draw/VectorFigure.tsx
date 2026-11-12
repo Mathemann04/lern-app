@@ -1,13 +1,15 @@
 import { type PointerEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { type DragStep, snapDrag } from '../../engine/linalg/drag.ts'
-import { type DrawAngle, type DrawArrow, type DrawColor, type DrawPoint, type DrawSegment, type VectorDrawing, anglePath, hasAnimation } from '../../engine/linalg/figures.ts'
+import { type DrawAngle, type DrawArrow, type DrawColor, type DrawPoint, type DrawSegment, type VectorDrawing, anglePath, hasAnimation, withMistake } from '../../engine/linalg/figures.ts'
 import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
 import { START_PITCH, type View, arrowGeometry, bestYaw, lerpPoint, planeView, spaceView } from './view.ts'
 
 // Bild zu einer Vektor-Aufgabe (M7): Gitter in der Ebene, im Raum eine Ansicht zum Drehen (mit dem Finger ziehen).
 // „Abspielen" lässt die Teile mit phase > 0 nacheinander erscheinen; ohne Abspielen ist alles da. Bei „Bewegung
-// reduzieren" gibt es keine Bewegung. Namen an Pfeilen und Punkten setzt KaTeX über dem Bild.
+// reduzieren" gibt es keine Bewegung. Namen an Pfeilen und Punkten setzt KaTeX über dem Bild. Hat das Bild einen
+// typischen Fehler (Schritt 3a), blendet „Typischen Fehler zeigen" ihn rot ein; der Knopf zum Abspielen kann anders
+// heißen (playLabel, z. B. „Licht an").
 // compact: kleines Bild ohne Knöpfe und Unterschrift (als Antwort bei „Bild wählen")
 // drag (Schritt 2b): Zieh-Aufgabe in der Ebene; at ist die Stelle, onMove bekommt die eingerastete neue Stelle (ohne
 // onMove steht sie fest, z. B. nach dem Prüfen). Mitlaufende Teile (Pfeil, Strecken, Winkelbogen) kommen aus DragStep.
@@ -64,7 +66,12 @@ function withDrag(drawing: VectorDrawing, step: DragStep, at: readonly number[])
 }
 
 export function VectorFigure({ drawing: given, compact = false, label, drag: dragged }: Props) {
-  const drawing = useMemo(() => (dragged ? withDrag(given, dragged.step, dragged.at) : given), [given, dragged])
+  // typischer Fehler eingeblendet (Schritt 3): rote Teile dazu, Erklärung statt der Beschreibung
+  const [showMistake, setShowMistake] = useState(false)
+  const drawing = useMemo(() => {
+    const base = dragged ? withDrag(given, dragged.step, dragged.at) : given
+    return showMistake ? withMistake(base) : base
+  }, [given, dragged, showMistake])
   const maxPhase = useMemo(() => Math.max(0, ...[...drawing.arrows, ...drawing.points, ...drawing.segments, ...drawing.polygons, ...(drawing.angles ?? [])].map((e) => e.phase ?? 0)), [drawing])
   const [time, setTime] = useState(maxPhase)
   const [angles, setAngles] = useState(() => ({ yaw: drawing.dim === 3 ? bestYaw(drawing) : 0, pitch: START_PITCH }))
@@ -262,7 +269,7 @@ export function VectorFigure({ drawing: given, compact = false, label, drag: dra
     <figure className="space-y-2 rounded-2xl border border-zinc-200 bg-surface px-3 py-3" data-testid="vector-figure">
       <div className="mx-auto max-w-sm">{picture}</div>
       <figcaption className="space-y-2">
-        {(hasAnimation(drawing) || space || canPull) && (
+        {(hasAnimation(drawing) || space || canPull || given.mistake) && (
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
             {hasAnimation(drawing) && (
               <button
@@ -273,7 +280,17 @@ export function VectorFigure({ drawing: given, compact = false, label, drag: dra
                 <svg viewBox="0 0 12 12" className="size-3" aria-hidden>
                   <path d="M2 1.2v9.6L10.4 6z" fill="currentColor" />
                 </svg>
-                Abspielen
+                {drawing.playLabel ?? 'Abspielen'}
+              </button>
+            )}
+            {given.mistake && !compact && (
+              <button
+                type="button"
+                aria-pressed={showMistake}
+                onClick={() => setShowMistake((v) => !v)}
+                className={`inline-flex min-h-11 items-center gap-2 rounded-xl border-2 px-4 font-medium shadow-[0_3px_0_var(--color-zinc-300)] active:translate-y-0.5 active:shadow-[0_1px_0_var(--color-zinc-300)] ${showMistake ? 'border-red-400 text-red-700' : 'border-zinc-300'}`}
+              >
+                {showMistake ? 'Fehler ausblenden' : 'Typischen Fehler zeigen'}
               </button>
             )}
             {space && <span className="text-sm text-zinc-600">Zum Drehen im Bild ziehen</span>}

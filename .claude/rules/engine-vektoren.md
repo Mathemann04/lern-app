@@ -10,7 +10,8 @@ paths:
 
 Plan: docs/PLAN-M7.md. Tätigkeit „Vektoren“ (Id `vektoren`) im Gebiet „Vektoren und Matrizen“ (`lineare-algebra`, Farbe
 `cyan`, Bild `vectors` in `AreaIcon.tsx`), Bausteine in `tasks/blocks.ts` (`VECTOR_BLOCKS`, Gruppe `vektor-grundlagen`,
-`VECTOR_PLAYABLE_COMBOS`; Bausteine `rechnen`, Code 21, Nummern `rechnen.2-4711`, und seit Schritt 2a `skalar`, Code 22;
+`VECTOR_PLAYABLE_COMBOS`; Bausteine `rechnen`, Code 21, Nummern `rechnen.2-4711`, seit Schritt 2a `skalar`, Code 22, seit
+Schritt 3a `projektion`, Code 23;
 jeder Baustein allein spielbar, `buildVectorTask` wählt die Arten nach dem Baustein in der Nummer). Freier Modus seit Schritt 1b (`free: true`),
 gezieltes Üben noch nicht (`focus: false`).
 
@@ -40,13 +41,24 @@ gezieltes Üben noch nicht (`focus: false`).
   der Geraden nur der Parameter), `VectorFigure` mit `drag` (mitlaufender Pfeil, Strecken, Winkelbogen, Summe und
   Differenz; Fläche `data-testid="drag-surface"`), `view.ts` mit `frame` (fester Ausschnitt) und `unproject`. Tests in
   `dragTasks.test.ts`: an jeder Stelle urteilt die Engine wie eine unabhängige Gegenprobe.
+- Projektion und Zerlegung (Schritt 3a): `linalg/projTasks.ts`, Arten in `PROJ_KINDS_BY_LEVEL` (projection, decompose,
+  shadowLength, foot, projParam, spanProjection). `pickSplit` zieht a und b mit kleinen Brüchen im Schatten und
+  cos² zwischen 1/16 und 15/16 (Schatten und Rest gut sichtbar). Schritte `factorStep` (k = a·b/|b|², Rechnung in der
+  Erklärung), `parStep`, `perpStep` (mit Probe), `lengthStep`, `distanceStep`; Namen `\vec a_{\parallel}`,
+  `\vec a_{\perp}`, `\vec a_E`, Lotfußpunkt `F`. Bilder: `projDrawing` (Gerade durch b gestrichelt, mit Ergebnis Lot
+  Phase 1, Schatten Phase 2, Rest und rechter Winkel Phase 3, `playLabel: 'Licht an'`) und `mistake` (rot der Schatten
+  mit |b| statt |b|², `shadowMistake`, nur bis 1,7-mal so lang wie der längste Pfeil). Vor dem Ergebnis kein Schatten
+  im Bild. In `figures.ts`: `playLabel`, `mistake` (`DrawMistake`), `withMistake` (rote Pfeile unter den richtigen),
+  `drawingCoordinates` nimmt den Fehler mit (Ausschnitt springt nicht); `VectorFigure` mit Knopf „Typischen Fehler
+  zeigen“/„Fehler ausblenden“ (`aria-pressed`). Stufe 5 mit Betrag: Skalarprodukt nie ohne Zahl (sonst wäre
+  „Vorzeichen falsch“ gleichwertig). Tests in `projTasks.test.ts` (Gleichungen mit Betrag an vielen Stellen verglichen).
 - `linalg/vectorTasks.ts`: Baukasten. Je Art (`VectorKind`) eine Funktion, die die ganze geführte Aufgabe baut (Schritte
   mit `choiceStep`: falsche Antworten ohne Doppelte, höchstens drei, aus `errorRules.ts`; Bilder; Ergebnis; Form;
   `answer` und `data` für die Gegenprobe in Tests). Arten je Stufe in `KINDS_BY_LEVEL`: Stufe 1 Ebene, 2 Raum, 3 zwei
   Rechnungen zusammen, 4 Parameter oder vier und fünf Dimensionen, 5 alles ineinander. Gibt eine Art in einem Schritt
   weniger als drei Antworten, zieht sie neu (Schleife). Kennzahlen der Abwechslung wie überall (100 Formen unter 200,
   keine über 3 %); die Form enthält Art, Dimension, Variante, Buchstaben und Zahl der negativen Einträge.
-- `linalg/errorRules.ts`: 44 typische Fehler (22 aus Schritt 1, 18 zum Skalarprodukt, 4 beim Ziehen) (`vec-…`), im Katalog `errorCatalog.ts` unter `vektoren`; Lernkarten in
+- `linalg/errorRules.ts`: 59 typische Fehler (22 aus Schritt 1, 18 zum Skalarprodukt, 4 beim Ziehen, 15 zur Projektion) (`vec-…`), im Katalog `errorCatalog.ts` unter `vektoren`; Lernkarten in
   `explain/vectorCards.ts` (Ordner `vektoren`, Beispiele `{ vector: { kind, level, seed } }`, gerechnet vom Baukasten,
   in `CardBody.tsx` mit Bild und Rechenweg).
 - `linalg/vectorEngine.ts`: Anschluss an `ui/courseEngines.ts` (planen, Form, neue Nummer, Beispiel).

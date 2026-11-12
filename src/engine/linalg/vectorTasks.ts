@@ -4,6 +4,7 @@ import { type Rational, rat, ratAbs, ratAdd, ratDiv, ratMul, ratNeg, ratSign, ra
 import { type Level, type TaskRef, seedBlock } from '../tasks/taskNumber.ts'
 import { DOT_BUILDERS, DOT_KINDS_BY_LEVEL } from './dotTasks.ts'
 import { DRAG_SHARE, buildDrag } from './dragTasks.ts'
+import { PROJ_BUILDERS, PROJ_KINDS_BY_LEVEL } from './projTasks.ts'
 import { type DrawArrow, type VectorDrawing, emptyDrawing } from './figures.ts'
 import {
   type Built,
@@ -1138,6 +1139,7 @@ function buildParamDistance(rng: Rng): Built {
 
 const BUILDERS: Readonly<Record<VectorKind, (rng: Rng, level: Level) => Built>> = {
   ...DOT_BUILDERS,
+  ...PROJ_BUILDERS,
   connect: buildConnect,
   combo: buildCombo,
   length: buildLength,
@@ -1155,9 +1157,11 @@ const BUILDERS: Readonly<Record<VectorKind, (rng: Rng, level: Level) => Built>> 
 // Aufgabe zu einer Nummer (Stufe und Startwert); kind erzwingt eine Art (Lernkarten)
 export function buildVectorTask(ref: TaskRef, kind?: VectorKind): VectorTask {
   const rng = createRng(`vektoren:${ref.level}:${ref.seed}`)
-  // Baustein aus der Nummer: „skalar.2-4711" zieht aus dem Skalarprodukt, alles andere aus „Rechnen und Länge"
-  const dotBlock = seedBlock(ref.seed)?.block === 'skalar'
-  const kinds = dotBlock ? DOT_KINDS_BY_LEVEL : KINDS_BY_LEVEL
+  // Baustein aus der Nummer: „skalar.2-4711" zieht aus dem Skalarprodukt, „projektion.2-4711" aus Projektion und
+  // Zerlegung (Schritt 3a), alles andere aus „Rechnen und Länge"
+  const block = seedBlock(ref.seed)?.block
+  const dotBlock = block === 'skalar'
+  const kinds = dotBlock ? DOT_KINDS_BY_LEVEL : block === 'projektion' ? PROJ_KINDS_BY_LEVEL : KINDS_BY_LEVEL
   // Zieh-Aufgaben (Schritt 2b) mit festem Anteil und eigenem Zufall: Die übrigen Nummern behalten ihre Aufgabe
   const drag = dotBlock && createRng(`vektoren-ziehen:${ref.level}:${ref.seed}`).chance(DRAG_SHARE)
   const chosen = kind ?? (drag ? 'drag' : rng.pick(kinds[ref.level]))
