@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
+import { contains, subterms } from '../expr/compare.ts'
+import { evaluate } from '../expr/evaluate.ts'
 import { createRng } from '../random/rng.ts'
+import { conditionsHold, samplePoints } from '../rearrange/check.ts'
 import { solveTask } from '../rearrange/isolate.ts'
 import { BLOCK_CODES, REARRANGE_BLOCKS } from './blocks.ts'
 import { rearrangeForm } from './forms.ts'
@@ -27,6 +30,7 @@ describe('Aufgabennummer mit Baustein', () => {
     expect(formatTaskNumber({ level: 3, seed: 48213 })).toBe('3-48213')
     expect(seedBlock(MAX_SEED)).toBeNull()
     expect(parseTaskNumber('quatsch.1-5')).toBeNull()
+    expect(parseTaskNumber('constructor.1-5')).toBeNull()
     expect(parseTaskNumber('exp.1-0')).toBeNull()
     expect(parseTaskNumber('exp.6-5')).toBeNull()
   })
@@ -84,6 +88,30 @@ describe('Aufgaben einzelner Bausteine', () => {
     expect(stats.distinct).toBeGreaterThanOrEqual(100)
     expect(stats.maxShare).toBeLessThanOrEqual(0.03)
   }, 60_000)
+
+  // Eine Potenz mit x und fester Hochzahl braucht eine positive Basis, und zwar für alle x, die die Bedingungen der Aufgabe
+  // erfüllen (nicht nur an der Lösung): sonst hat eine gerade Hochzahl eine zweite Lösung, und bei einer ungeraden stünde
+  // eine dritte Wurzel aus einer negativen Zahl da (Engine-Regeln in CLAUDE.md). Geprüft für x von einem Hundertstel bis zum
+  // Hundertfachen der Lösung.
+  it.each(familyCells)('%s in Stufe %i: jede Potenz mit x hat für alle erlaubten x eine positive Basis', (block, level) => {
+    for (let s = 1; s <= 30; s++) {
+      const ref = { level, seed: blockSeed(block, s) }
+      const { task } = generateRearrangeTask(ref)
+      const solution = solveTask(task)!
+      const bases = [task.equation.lhs, task.equation.rhs]
+        .flatMap((side) => subterms(side))
+        .flatMap((e) => (e.kind === 'pow' && e.exp.kind === 'num' && contains(e.base, task.target) ? [e.base] : []))
+      if (bases.length === 0) continue
+      for (const point of samplePoints(task, solution.result, createRng(`basis:${s}`), 6, solution.requires)) {
+        const x = point[task.target]
+        for (let i = 0; i <= 40; i++) {
+          const env = { ...point, [task.target]: x * 10 ** (-2 + i / 10) }
+          if (!conditionsHold(task.conditions, env)) continue
+          for (const base of bases) expect(evaluate(base, env), `${formatTaskNumber(ref)} bei ${task.target} = ${env[task.target]}`).toBeGreaterThan(0)
+        }
+      }
+    }
+  })
 
   // Wo ein Baustein in einer Stufe keine eigenen Aufgaben hat, kommen sie aus dem Verzeichnis: dieselben Kennzahlen unter den
   // ersten 200 Aufgaben mit nur diesem Baustein

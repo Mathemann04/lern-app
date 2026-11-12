@@ -218,13 +218,27 @@ const potenzen: FamilyBuild = (rng, n, level) => {
     const { e, count } = withShells(rng, n, power, level)
     return { side: e, conditions: base.conditions, label: `Baustein Potenzen: Potenz mit ${count} Schalen` }
   }
-  // Potenz in Potenz: das Innere ist sicher positiv (Quadrat plus Buchstabe) oder die äußere Hochzahl ungerade
-  const inner = rng.chance(0.6) ? plus(power, constant(rng, n)) : shells(rng, power, n, level === 3 ? 1 : 2)
-  const outerExponent = inner.kind === 'add' && inner.terms.every((t) => t.kind !== 'neg') ? exponent() : num(3)
-  let e = pow(inner, outerExponent)
-  if (level === 5) e = pow(plus(shells(rng, e, n, 1), constant(rng, n)), num(rng.pick([2, 3])))
-  const shelled = someShells(rng, e, n, level === 3 ? 2 : 2, 1)
+  // Potenz in Potenz: das Innere ist immer sicher positiv (Potenz einer positiven Basis, dann nur plus, mal und geteilt
+  // durch Buchstaben und Zahlen). Sonst hätte eine gerade Hochzahl eine zweite Lösung, und bei einer ungeraden stünde eine
+  // dritte Wurzel aus einer möglicherweise negativen Zahl da.
+  const inner = rng.chance(0.6) ? plus(power, constant(rng, n)) : growing(rng, n, power, level === 3 ? 1 : 2)
+  let e = pow(inner, exponent())
+  if (level === 5) e = pow(plus(growing(rng, n, e, 1), constant(rng, n)), num(rng.pick([2, 3])))
+  const shelled = someShells(rng, e, n, 2, 1)
   return { side: shelled.e, conditions: base.conditions, label: `Baustein Potenzen: Potenz in Potenz, ${shelled.count} Schalen` }
+}
+
+// Schalen, die ein positives e positiv lassen: plus eine positive Zahl, mal oder geteilt durch eine (immer mindestens eine
+// Summe, damit die Potenz darum nicht gleich zusammenfällt)
+function growing(rng: Rng, n: Names, e: Expr, count: number): Expr {
+  let out = e
+  for (let i = 0; i < count; i++) {
+    const r = rng.next()
+    if (i === 0 || r < 0.5) out = rng.chance(0.7) ? plus(out, constant(rng, n)) : plus(constant(rng, n), out)
+    else if (r < 0.8) out = letters(rng.chance(0.6) ? n.letter() : k(rng), out)
+    else out = div(out, rng.chance(0.6) ? n.letter() : k(rng))
+  }
+  return out
 }
 
 // --- e-Funktion: e^x mit Schalen, Sättigung, auf beiden Seiten, e hoch e hoch x, Potenzgesetze ---
@@ -288,13 +302,9 @@ const logFamily: FamilyBuild = (rng, n, level, r) => {
     const { e, count } = withShells(rng, n, logOf(rng, n, arg.e), level)
     return { side: e, conditions: arg.conditions, label: `Baustein Logarithmus: Logarithmus mit ${count} Schalen` }
   }
-  if (r < 0.45) {
-    // Logarithmus vom Logarithmus: \ln\left(a\ln(2x) + b\right)
-    const inner = shells(rng, logOf(rng, n, arg.e), n, level === 3 ? 1 : 2)
-    const { e, count } = someShells(rng, logOf(rng, n, scaled(rng, n, inner, false)), n, 2, 1)
-    return { side: e, conditions: arg.conditions, label: `Baustein Logarithmus: Logarithmus vom Logarithmus, ${count} Schalen` }
-  }
-  if (r < 0.8 || level === 3) {
+  // ab Stufe 3: Logarithmus vom Logarithmus (in Stufe 5 auch statt „auf beiden Seiten“, das am Handy zu breit wird) oder
+  // zwei Logarithmen
+  if (r >= 0.45 && r < 0.8) {
     // zwei Logarithmen derselben Basis, danach linear: \ln(x + a) - \ln x = b, \log_2(x + a) - \log_2(x - b) = c
     const r0 = rng.next()
     const base = r0 < 0.7 ? E : r0 < 0.85 ? num(rng.pick([2, 10])) : n.letter()
@@ -308,8 +318,14 @@ const logFamily: FamilyBuild = (rng, n, level, r) => {
     const { e, count } = someShells(rng, sum, n, level === 5 ? 2 : 1, level === 5 ? 1 : 0)
     return { side: e, conditions, label: `Baustein Logarithmus: zwei Logarithmen, ${count} Schalen` }
   }
-  const nested = logOf(rng, n, plus(constant(rng, n), letters(n.letter(), logOf(rng, n, arg.e))))
-  return { ...bothSides(rng, n, nested), conditions: arg.conditions, label: 'Baustein Logarithmus: Logarithmus vom Logarithmus auf beiden Seiten' }
+  return logOfLog(rng, n, level, arg)
+}
+
+// Logarithmus vom Logarithmus: \ln\left(a\ln(2x) + b\right)
+function logOfLog(rng: Rng, n: Names, level: Level, arg: { e: Expr; conditions: Condition[] }): Built {
+  const inner = shells(rng, logOf(rng, n, arg.e), n, level === 3 ? 1 : 2)
+  const { e, count } = someShells(rng, logOf(rng, n, scaled(rng, n, inner, false)), n, 2, 1)
+  return { side: e, conditions: arg.conditions, label: `Baustein Logarithmus: Logarithmus vom Logarithmus, ${count} Schalen` }
 }
 
 // --- Quadratische Gleichungen: pq-Formel mit genau einer positiven Lösung ---

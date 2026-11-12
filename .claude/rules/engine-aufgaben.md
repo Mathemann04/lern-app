@@ -142,11 +142,13 @@ Teil der Mathe-Engine `src/engine/` (reines TypeScript, ohne React).
     sich selbst, nebeneinander, mit mehr Schalen; `variant` wählt die Art und steht je Nummer vorab fest), Nummern
     `exp.1-4711` (`blockSeed`, `seedBlock`, `BLOCK_CODES` in `blocks.ts`: Baustein mal `BLOCK_SEED_BASE` plus Startwert;
     nie ändern). `generateRearrangeTask` baut sie über `generateFamilyTask` mit eigenem Filter `isGoodFamily`: genau
-    dieser Baustein, Mindestzahl der Umformungen (`FAMILY_MIN_STEPS`, lineare Gleichungen weniger), Ergebnis in einer
-    Zeile, Gegenprobe an 8 × 16 Stellen, keine Summe mit der Variable, die sich an einer Stelle fast aufhebt (`cancels`,
+    dieser Baustein, Mindestzahl der Umformungen (`FAMILY_MIN_STEPS`, lineare Gleichungen weniger), Aufgabe höchstens
+    16 em breit (`MAX_FAMILY_TASK_WIDTH`, am Handy mit `FitWidth` verkleinert), Ergebnis in einer Zeile, Gegenprobe an 8 × 16 Stellen, keine Summe mit der Variable, die sich an einer Stelle fast aufhebt (`cancels`,
     sonst kippt die Probe durch Rundung). Hat ein Baustein in der Stufe keine eigenen Aufgaben, baut die Nummer die alte
     Aufgabe mit dem Startwert. Quadratische Gleichungen: vor $x$ nur ein Buchstabe oder eine Zahl, andere Seite positiv
-    (genau eine Lösung passt). Ziehen in `rearrangePick.ts`: `rearrangeMains` (Bausteine der Auswahl mit Aufgaben),
+    (genau eine Lösung passt). Potenz in Potenz nur mit sicher positivem Inneren (`growing`: plus, mal, geteilt), sonst
+    zweite Lösung oder dritte Wurzel aus einer negativen Zahl; ein Test prüft die Basis jeder Potenz mit $x$ für viele
+    erlaubte $x$, nicht nur an der Lösung. Ziehen in `rearrangePick.ts`: `rearrangeMains` (Bausteine der Auswahl mit Aufgaben),
     `nextRearrangeSeed` erst Baustein gleich verteilt, dann `FAMILY_SHARE` (50 %) eigene Aufgaben, sonst aus dem
     Verzeichnis mit ihm und anderen angekreuzten (`mainPool`, ohne seine Einzelaufgaben, wo er eigene hat);
     `rearrangeSeedBlocks` sagt die Bausteine einer Nummer ohne sie zu bauen. Tests in `rearrangeFamilies.test.ts`

@@ -17,8 +17,8 @@ const BLOCK_IDS = new Map(Object.entries(BLOCK_CODES).map(([id, code]) => [code,
 
 // Startwert einer Aufgabe des Bausteins block (s von 1 bis MAX_SEED)
 export function blockSeed(block: string, s: number): number {
+  if (!Object.hasOwn(BLOCK_CODES, block)) throw new Error(`Unbekannter Baustein ${block}`)
   const code = BLOCK_CODES[block]
-  if (code === undefined) throw new Error(`Unbekannter Baustein ${block}`)
   return code * BLOCK_SEED_BASE + s
 }
 
@@ -42,7 +42,7 @@ export function parseTaskNumber(text: string): TaskRef | null {
   if (s < 1) return null
   const level = Number(match[2]) as Level
   if (!match[1]) return { level, seed: s }
-  return BLOCK_CODES[match[1]] === undefined ? null : { level, seed: blockSeed(match[1], s) }
+  return Object.hasOwn(BLOCK_CODES, match[1]) ? { level, seed: blockSeed(match[1], s) } : null
 }
 
 export function randomSeed(): number {

@@ -380,10 +380,14 @@ export function familyTemplate(block: string, level: Level): RearrangeTemplate {
 
 // Brauchbar wie im Baukasten, dazu: genau dieser Baustein, Ergebnis in einer Zeile am Handy, in Stufe 1 die Variable
 // einmal (außer bei quadratischen Gleichungen)
+// Breiteste Aufgabe eines einzelnen Bausteins in em (latexWidth.ts): Am Handy passen etwa 12 em in eine Zeile, die Aufgabe
+// darf bis auf 70 % kleiner werden (FitWidth in TaskParts.tsx)
+const MAX_FAMILY_TASK_WIDTH = 16
+
 function isGoodFamily(t: RearrangeTask, level: Level, block: string): boolean {
   const letters = taskVariables(t).length
   const latex = equationToLatex(t.equation)
-  if (latex.length > MAX_TASK_LATEX || letters > 7 || letters < 2) return false
+  if (latex.length > MAX_TASK_LATEX || letters > 7 || letters < 2 || latexWidthEm(latex) > MAX_FAMILY_TASK_WIDTH) return false
   if (level === 1 && block !== 'quadratisch' && occurrences(t).count !== 1) return false
   if (level <= 2 && hasNestedFraction(t)) return false
   const solution = solveTask(t)

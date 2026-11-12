@@ -880,3 +880,8 @@ Neue Entscheidungen unten anfügen.
   Zahlen, Logarithmen auf beiden Seiten und Formeln aus Technik und Physik; 5d Beträge nach dem Schema der Lösungen;
   6 und 7 ergänzt); neue Tätigkeiten (Polynome, Grenzwerte, Linearisieren, Funktionen, Mengen und Summen) in M9,
   Vektoren und Matrizen in M7.
+  Nach der unabhängigen Prüfung: Bei „Quadrate und Potenzen“ ab Stufe 3 konnte eine Potenz um einen Ausdruck stehen, der
+  negativ werden kann (zweite Lösung bei gerader Hochzahl, dritte Wurzel aus einer negativen Zahl bei ungerader); das
+  Innere ist jetzt immer sicher positiv, ein Test prüft das für viele $x$. Lange Gleichungen oben in einer Mathe-Aufgabe
+  werden am Handy kleiner gesetzt (wie bei Chemie) statt nach dem Gleichheitszeichen umzubrechen; neue Aufgaben je
+  Baustein sind höchstens so breit, dass sie verkleinert in eine Zeile passen.
