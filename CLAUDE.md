@@ -10,6 +10,7 @@ den Nutzer zugeschnitten: Maschinenbau, 1. Semester, THU, „Mathematik MB1".
   Kapitel und ihre Themen in der App: [docs/LEHRBUCH.md](docs/LEHRBUCH.md)
 - Aufgabenarten und Rechenschemata aus allen Unterlagen der Vorlesung (in eigenen
   Worten, mit Ziel in der App): [docs/AUFGABENARTEN.md](docs/AUFGABENARTEN.md)
+  und für Chemie [docs/AUFGABENARTEN-CHEMIE.md](docs/AUFGABENARTEN-CHEMIE.md)
 - Meilensteine und aktueller Stand: [docs/ROADMAP.md](docs/ROADMAP.md)
 - Laufender Plan: [docs/PLAN-M6.md](docs/PLAN-M6.md) (neue Struktur mit
   Tätigkeiten und Bausteinen, freigegeben 12.11.2026, zehn Schritte und 4b); danach

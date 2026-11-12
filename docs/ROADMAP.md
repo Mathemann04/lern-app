@@ -67,6 +67,10 @@ Stand: 12.11.2026
   [AUFGABENARTEN.md](AUFGABENARTEN.md): Themen, Aufgabenarten, Rechenschemata, typische Fehler,
   Ziel in der App. Keine Aufgabentexte, Zahlen oder Namen von Lehrenden; die Unterlagen selbst
   kommen nie ins Repo. Danach weiter mit M6 Schritt 4b-2.
+  Stand: Mathe fertig ([AUFGABENARTEN.md](AUFGABENARTEN.md)); Chemie fertig (12.11.2026,
+  [AUFGABENARTEN-CHEMIE.md](AUFGABENARTEN-CHEMIE.md), mit Lehrbuch Kapitel 8: eine kleine Lücke
+  „Ladungsbilanz“ für N5, Säure-Base und Redox wie geplant in N3 und N4). Offen: Werkstoffkunde,
+  Physik, Technische Mechanik und das Lehrbuch-Kapitel Festkörperphysik, sobald hochgeladen.
 - **Lehrbuch „Physik für Ingenieure“** (Fotos des Nutzers, 11.11.2026): Kapitel
   Kernphysik und Festkörperphysik, passend zu Chemie und Werkstoffkunde, teils
   weiter als die Vorlesung; später auch für Physik (M10). Die Fotos liegen

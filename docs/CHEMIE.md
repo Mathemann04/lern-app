@@ -30,7 +30,10 @@ passende Datei hoch; danach wird sie nicht gespeichert.
    Repo. Bei Widerspruch gilt das Skript, bei Zahlenwerten das
    Tabellenwerk. Was über die Vorlesung hinausgeht, kommt nie in die Stufen
    und nie in die Probeklausur, höchstens als Vertiefung ins
-   Nachschlagewerk (M12); dort ist das Buch die Quelle.
+   Nachschlagewerk (M12); dort ist das Buch die Quelle. Gesichtet am
+   12.11.2026: Kapitel 8 „Atom- und Kernphysik“ vollständig (Übersicht und
+   Gegenprobe in [AUFGABENARTEN-CHEMIE.md](AUFGABENARTEN-CHEMIE.md)); das
+   Kapitel Festkörperphysik fehlt noch.
 
 Kurznamen für Fundstellen (`ref` an Fragen, „Skript Stöchiometrie, Folie
 11“): Skript Einführung, Skript Aufbau der Materie, Skript Trends, Skript
@@ -160,6 +163,7 @@ zweiten, unabhängig eingetragenen Liste.
 | Römische Ziffer im Salznamen | Nötig nur, wo das Metall mehrere Ladungen bilden kann; bei eindeutiger Ladung (Na, Mg, Ca, Al, Zn, Ag) unnötig, aber nicht falsch. Abgefragt wird nur „wo nötig“. |
 | Edelgaskonfiguration | „Voll“ heißt bei Edelgasen: s- und p-Orbitale der äußersten Schale voll (Oktett, ns² np⁶), bei Helium die erste Schale. Beim Sprung der Ionisierungsenergie „innere Schale mit Edelgaskonfiguration“, nicht „voll besetzte Schale“. |
 | Valenzelektronen | Zwei Sichtweisen wie in Skript und Klausur: Elektronen der äußersten Schale und Elektronen, die an Bindungen beteiligt sind; Ausnahme Helium mit 2. |
+| Größe des Atomkerns (seit 12.11.2026) | Größenordnung 10⁻¹⁵ m wie im Skript und in der Übung, Atom 10⁻¹⁰ m. Das Lehrbuch nennt für schwere Kerne eher 10⁻¹⁴ m (Kernradius wächst mit der Massenzahl); beides liegt im Bereich weniger Femtometer. Die App fragt nie nach dem Unterschied zwischen beiden. |
 | Masse des Elektrons | „rund 1836-mal leichter als ein Proton“ (im Skript: etwa 1/2000 u). |
 | Reihenfolge in Konfigurationen | Die App schreibt nach der Besetzung (4s vor 3d), die Vorlesung oft 3d vor 4s; beides gilt, die Karte sagt es. |
 | Begriffe der Stöchiometrie | Stoffmengenkonzentration (Skript: molare Konzentration), Normbedingungen (Skript: Normalbedingungen), Maßkolben, Massenkonzentration β (Skript: ρ); die Karten nennen beide. Im Skript heißt die Zahl im Periodensystem auch „Massenzahl“, gemeint ist die mittlere Atommasse. |
