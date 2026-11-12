@@ -42,15 +42,15 @@ export const IONEN_CARDS: readonly Card[] = [
     rules: [],
     formulas: [String.raw`x \cdot (\text{Ladung des Kations}) = y \cdot |\text{Ladung des Anions}|`],
     memo: 'Ein Salz ist nach außen neutral. Man nimmt von jedem Ion so viele, dass sich die Ladungen genau aufheben, und zwar mit den kleinsten ganzen Zahlen. Diese Anzahlen stehen als Index hinter dem Ion.',
-    note: 'Ladung der Hauptgruppen-Ionen: Gruppe I +1, II +2, III +3; Gruppe V −3, VI −2, VII −1. Probe: Index mal Ladung ist für beide Ionen gleich groß.',
+    note: 'Ladung der Hauptgruppen-Ionen: I. Hauptgruppe (Gruppe 1) +1, II. (Gruppe 2) +2, III. (Gruppe 13) +3; V. (Gruppe 15) −3, VI. (Gruppe 16) −2, VII. (Gruppe 17) −1. Aluminium steht in Gruppe 13, nicht in Gruppe 3. Probe: Index mal Ladung ist für beide Ionen gleich groß. Die Formel eines Salzes heißt auch Verhältnisformel: Sie gibt nur an, in welchem kleinsten ganzzahligen Verhältnis die Ionen im Gitter stehen. Moleküle gibt es im Salz nicht.',
     when: 'Wenn aus dem Namen eines Salzes seine Formel werden soll.',
     examples: [
       {
-        chemTask: 'Aluminiumoxid',
+        chemTask: 'Magnesiumnitrid',
         lines: [
-          { label: 'Ionen', latex: String.raw`\ce{Al^3+},\ \ce{O^2-}` },
-          { label: 'Ausgleich', latex: String.raw`2 \cdot 3 = 3 \cdot 2 = 6` },
-          { label: 'Formel', latex: String.raw`\ce{Al2O3}` },
+          { label: 'Ionen', latex: String.raw`\ce{Mg^2+},\ \ce{N^3-}` },
+          { label: 'Ausgleich', latex: String.raw`3 \cdot 2 = 2 \cdot 3 = 6` },
+          { label: 'Formel', latex: String.raw`\ce{Mg3N2}` },
         ],
       },
       {
@@ -108,11 +108,11 @@ export const IONEN_CARDS: readonly Card[] = [
     when: 'Wenn ein Salz ein Molekül-Ion enthält.',
     examples: [
       {
-        chemTask: 'Calciumphosphat',
+        chemTask: 'Magnesiumphosphat',
         lines: [
-          { label: 'Ionen', latex: String.raw`\ce{Ca^2+},\ \ce{PO4^3-}` },
+          { label: 'Ionen', latex: String.raw`\ce{Mg^2+},\ \ce{PO4^3-}` },
           { label: 'Ausgleich', latex: String.raw`3 \cdot 2 = 2 \cdot 3 = 6` },
-          { label: 'Formel', latex: String.raw`\ce{Ca3(PO4)2}` },
+          { label: 'Formel', latex: String.raw`\ce{Mg3(PO4)2}` },
         ],
       },
       {
@@ -180,8 +180,8 @@ export const IONEN_CARDS: readonly Card[] = [
         lines: [{ label: 'Gleichung', latex: String.raw`\ce{Al2(SO4)3(s) -> 2 Al^3+(aq) + 3 SO4^2-(aq)}` }],
       },
       {
-        chemTask: String.raw`$\ce{Al2O3}$ als Schmelze`,
-        lines: [{ label: 'Gleichung', latex: String.raw`\ce{Al2O3 -> 2 Al^3+ + 3 O^2-}` }],
+        chemTask: String.raw`$\ce{MgF2}$ als Schmelze`,
+        lines: [{ label: 'Gleichung', latex: String.raw`\ce{MgF2 -> Mg^2+ + 2 F^-}` }],
       },
     ],
     errors: ['chem-dissociation-coefficients', 'chem-dissociation-index-ion', 'chem-dissociation-charge', 'chem-dissociation-atoms', 'chem-mis-io-dissolve-atoms', 'chem-mis-io-dissolve-reacts', 'chem-mis-io-no-coefficients', 'chem-mis-io-index-in-ion', 'chem-mis-io-melt-lattice-stays', 'chem-mis-io-dissolve-is-melting'],

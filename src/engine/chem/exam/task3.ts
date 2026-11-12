@@ -3,8 +3,8 @@ import { type Rng, createRng } from '../../random/rng.ts'
 import { lewisFigure } from '../lewis.ts'
 import { MOLECULES, type Molecule, vseprOf } from '../molecules.ts'
 import { dopeTask, hybridTask } from '../generators/metalle.ts'
-import { MOLECULE_STEPS } from '../generators/molekuele.ts'
-import { EXAM_SALTS, type Salt, formulaStep, ionsStep, pickSalt } from '../generators/salze.ts'
+import { MOLECULE_STEPS, splitQuestion } from '../generators/molekuele.ts'
+import { type Salt, formulaStep, ionsStep, isExcludedSalt, pickSalt } from '../generators/salze.ts'
 import { ionCe, saltFormula, saltIndices } from '../ions.ts'
 import { UNCLEAR, ZMK_STEPS, boilTask } from '../generators/zmk.ts'
 import { ZMK_SUBSTANCES } from '../zmk.ts'
@@ -21,7 +21,7 @@ import { knowledgeItem } from './knowledge.ts'
 // nicht voneinander ab; Folgefehler gibt es deshalb hier nicht, jede Frage zählt für sich (Lewis-Formel, Paare und
 // Gestalt je 1 Punkt wie in der Klausur). Salzformel und Lewis-Formel schreibt man in der Klausur selbst: Ihre
 // Antworten erscheinen erst nach dem Lösen auf Papier (paperFirst). Stoffe der Altklausuren (Aluminiumoxid,
-// Magnesiumchlorid; Ammoniak, Wasser in Teil b) kommen nicht vor.
+// Magnesiumchlorid; Ammoniak, Wasser in Teil b) kommen nicht vor, ebenso die Salze des Übungsblatts (EXERCISE_SALTS).
 
 export const TASK3_POINTS = 12
 
@@ -73,7 +73,7 @@ function formulaExtras(s: Salt): ExtraOption[] {
 
 function saltPart(rng: Rng): ExamPart | null {
   const s = pickSalt(2, rng)
-  if (!s || EXAM_SALTS.includes(saltFormula(s.cation, s.anion))) return null
+  if (!s || isExcludedSalt(saltFormula(s.cation, s.anion))) return null
   const ions = ionsStep(s, rng)
   const formula = formulaStep(s, rng)
   if (!ions || !formula) return null
@@ -106,7 +106,7 @@ function moleculePart(mol: Molecule, rng: Rng): ExamPart | null {
     points: 3,
     items: [
       { ...fromStep(lewis, 'lewis', 'Lewis-Formel', 1, false, 'Welche Lewis-Formel ist richtig?'), paperFirst: true },
-      fromStep(split, 'paare', 'Paare am Zentralatom', 1, false, `Wie viele bindende und wie viele freie Elektronenpaare hat das Zentralatom $${ce(mol.atoms[mol.central!].el)}$?`),
+      fromStep(split, 'paare', 'Paare am Zentralatom', 1, false, splitQuestion(mol)),
       fromStep(shape, 'gestalt', 'Gestalt', 1, false, 'Welche Gestalt hat das Molekül?'),
     ],
   }

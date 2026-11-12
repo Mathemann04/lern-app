@@ -1099,7 +1099,10 @@ export const MOLEKUELE_BANK: QuestionBank = {
           short: 'Bor hat keine Elektronen für ein freies Paar übrig.',
         }),
         w('f2', 'Bor bildet zu jedem F-Atom eine Doppelbindung.', 'chem-mis-mo-electron-count'),
-        w('f3', 'Die F-Atome tragen keine freien Paare.', 'chem-mis-mo-lone-forgotten'),
+        w('f3', 'Die F-Atome tragen keine freien Paare.', 'chem-mis-mo-lone-forgotten', {
+          detailed: 'Manche Strichformeln sparen die freien Paare der äußeren Atome aus. In der vollständigen Lewis-Formel trägt aber jedes F-Atom drei freie Paare; erst mit ihnen hat es sein Oktett.',
+          short: 'In der vollständigen Lewis-Formel hat jedes F drei freie Paare.',
+        }),
         w('f4', 'Bor gibt seine drei Elektronen ganz an die F-Atome ab.', 'chem-mis-mo-bond-transfer'),
       ],
       hint: 'Bor hat drei Valenzelektronen. Wie viele Paare kann es damit um sich haben?',
@@ -1115,25 +1118,32 @@ export const MOLEKUELE_BANK: QuestionBank = {
       no: 302,
       fact: 'pcl3-freie-paare',
       part: 'lewis',
-      title: 'Freie Paare',
-      prompt: r`Wie viele freie Elektronenpaare hat Phosphortrichlorid $\ce{PCl3}$ insgesamt?`,
-      correct: '10',
+      title: 'Freie Paare am Zentralatom',
+      // gezählt am Zentralatom wie in Vorlesung und Übung (CHEMIE.md §5); die Zählung übers ganze Molekül ist der Denkfehler
+      prompt: r`Wie viele freie Elektronenpaare hat das Zentralatom Phosphor in der Lewis-Formel von Phosphortrichlorid $\ce{PCl3}$?`,
+      correct: '1',
       wrong: [
-        w('f1', '1', 'chem-mis-mo-lone-forgotten', {
-          detailed: 'Ein freies Paar sitzt am Phosphor; aber auch jedes Chloratom hat drei freie Paare, damit es sein Oktett erreicht. Gefragt sind alle freien Paare im Molekül.',
-          short: 'Auch die Cl-Atome tragen freie Paare.',
+        w('f1', '10', 'chem-mis-mo-lone-whole-molecule'),
+        w('f2', '0', 'chem-mis-mo-lone-forgotten', {
+          detailed: 'Nicht alle Valenzelektronen des Phosphors stecken in den drei Bindungen zu den Chloratomen. Was übrig bleibt, sitzt als freie Paare am Phosphor und gehört in die Lewis-Formel.',
+          short: 'Übrige Valenzelektronen bilden freie Paare.',
         }),
-        w('f2', '9', 'chem-mis-mo-lone-forgotten'),
-        w('f3', '13', 'chem-mis-mo-pair-types'),
-        w('f4', '0', 'chem-mis-mo-lone-forgotten'),
+        w('f3', '3', 'chem-mis-mo-pair-types', {
+          detailed: 'Die Paare zwischen Phosphor und Chlor sind bindende Paare: Sie halten die Atome zusammen. Gefragt sind nur die freien Paare, die allein dem Phosphor gehören.',
+          short: 'Die Paare zu den Cl-Atomen sind bindend.',
+        }),
+        w('f4', '4', 'chem-mis-mo-pair-types', {
+          detailed: 'Hier sind bindende und freie Paare um den Phosphor zusammengezählt. Gefragt sind nur die freien; die Paare zu den Chloratomen binden.',
+          short: 'Nur die freien Paare zählen.',
+        }),
       ],
-      hint: r`Rechne: $5 + 3 \cdot 7$ Valenzelektronen, durch zwei; davon sind drei Paare bindend.`,
+      hint: 'Phosphor hat fünf Valenzelektronen. Wie viele davon braucht er für die drei Bindungen zu den Chloratomen?',
       explanation: {
-        detailed: r`$\ce{PCl3}$ hat $5 + 3 \cdot 7 = 26$ Valenzelektronen, also 13 Paare. Drei davon binden die Chloratome an den Phosphor. Die übrigen 10 sind frei: drei an jedem Cl und eines am P.`,
-        short: '13 Paare, davon 3 bindend: 10 freie.',
+        detailed: r`Phosphor bringt fünf Valenzelektronen mit. Drei davon bilden mit je einem Elektron eines Chloratoms die drei bindenden Paare. Die übrigen zwei Elektronen bleiben als ein freies Paar am Phosphor (Typ $\mathrm{AX_3E}$). Die Chloratome tragen zusammen neun weitere freie Paare; die sitzen aber nicht am Zentralatom. Erst übers ganze Molekül gezählt wären es zehn.`,
+        short: r`Am P: $5 - 3 = 2$ Elektronen, also 1 freies Paar.`,
       },
       cards: ['mol-lewis'],
-      ref: REF_UEBUNG,
+      ref: `${REF_VSEPR}; ${REF_UEBUNG}`,
     }),
     k({
       id: 'mo-k-pcl5',

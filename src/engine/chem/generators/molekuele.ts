@@ -111,8 +111,21 @@ function pairsStep(mol: Molecule, rng: Rng, focus?: string): GuidedStep | null {
 
 const splitText = (bonding: number, free: number) => `${bonding} bindende und ${free} ${free === 1 ? 'freies' : 'freie'} Paar${free === 1 ? '' : 'e'}`
 
+// Mehrfachbindung am Zentralatom? Dann zählt die Lewis-Formel mehr bindende Paare als Partner (VSEPR: X)
+const multipleAtCentral = (mol: Molecule) => mol.central !== undefined && bondsOf(mol, mol.central) !== partnersOf(mol, mol.central)
+
+// Frage nach den Paaren am Zentralatom (auch für Klausuraufgabe 3): Gezählt wird in der Lewis-Formel. Im VSEPR-Modell
+// zählt eine Mehrfachbindung nur einmal (Skript Kovalente Bindung, Folie 9); bei Mehrfachbindung am Zentralatom sagt die
+// Frage deshalb ausdrücklich, wie hier gezählt wird.
+export function splitQuestion(mol: Molecule): string {
+  const el = mol.atoms[mol.central!].el
+  const rule = multipleAtCentral(mol) ? ' Eine Doppelbindung sind dabei zwei bindende Paare, eine Dreifachbindung drei.' : ''
+  return `Wie viele bindende und wie viele freie Elektronenpaare sitzen in der Lewis-Formel von $${ce(mol.id)}$ am Zentralatom $${ce(el)}$?${rule}`
+}
+
 // Bindende und freie Paare am Zentralatom, wie in der Vorlesung gezählt (Doppelbindung = zwei bindende Paare).
-// Typischer Fehler: die Paare des ganzen Moleküls (auch die freien Paare der äußeren Atome) gezählt.
+// Typischer Fehler: die Paare des ganzen Moleküls (auch die freien Paare der äußeren Atome) gezählt. Eine falsche
+// Antwort, die nur wie das VSEPR-Modell zählt (Partner und freie Paare), kommt nie vor: Sie wäre nicht falsch gedacht.
 function splitStep(mol: Molecule, rng: Rng, focus?: string): GuidedStep | null {
   if (mol.central === undefined) return null
   const c = mol.central
@@ -129,18 +142,18 @@ function splitStep(mol: Molecule, rng: Rng, focus?: string): GuidedStep | null {
     ...(partners !== bonding ? [textWrong('chem-lewis-multiple-as-one', splitText(partners, bonding + free - partners))] : []),
     ...(free > 0 ? [textWrong('chem-lewis-pairs-missing', splitText(bonding, 0))] : []),
     textWrong('chem-lewis-octet-exceeded', splitText(bonding, free + 1)),
-  ]
+  ].filter((w) => w.key !== splitText(partners, free))
   const choices = stepChoices(rng, { key: correct, content: correct }, wrong, focus)
   if (choices.length === 0) return null
   const around = bonding + free
   return {
     id: 'verteilung',
     title: 'Paare am Zentralatom',
-    question: `Wie viele bindende und wie viele freie Elektronenpaare sitzen in der Lewis-Formel von $${ce(mol.id)}$ am Zentralatom $${ce(el)}$?`,
+    question: splitQuestion(mol),
     choices,
     hint: `Zähle nur am $${ce(el)}$: Jeder Strich zu einem Partner ist ein bindendes Paar, eine Doppelbindung sind zwei. Die freien Paare der äußeren Atome zählen nicht mit.`,
     explanation: {
-      detailed: `Am $${ce(el)}$ sitzen ${bonding} bindende Paare${partners !== bonding ? ` zu ${partners} Partnern (Mehrfachbindungen zählen mit jedem ihrer Paare)` : ''} und ${free} ${free === 1 ? 'freies Paar' : 'freie Paare'}, zusammen ${around} Paare${around === 4 ? ': sein Oktett' : ''}.${sextetNote(mol)}${wholeFree !== free ? ` Die übrigen freien Paare sitzen an den äußeren Atomen; im ganzen Molekül sind es ${wholeFree}.` : ''}`,
+      detailed: `Am $${ce(el)}$ sitzen ${bonding} bindende Paare${partners !== bonding ? ` zu ${partners} Partnern (in der Lewis-Formel zählt eine Mehrfachbindung mit jedem ihrer Paare, im VSEPR-Modell nur als ein Partner)` : ''} und ${free} ${free === 1 ? 'freies Paar' : 'freie Paare'}, zusammen ${around} Paare${around === 4 ? ': sein Oktett' : ''}.${sextetNote(mol)}${wholeFree !== free ? ` Die übrigen freien Paare sitzen an den äußeren Atomen; im ganzen Molekül sind es ${wholeFree}.` : ''}`,
       short: correct,
     },
     established: String.raw`\ce{${el}}\text{: }${bonding}\ \text{bindende},\ ${free}\ \text{freie Paare}`,

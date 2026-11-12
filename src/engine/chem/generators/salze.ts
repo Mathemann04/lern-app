@@ -115,10 +115,14 @@ export function formulaStep(s: Salt, rng: Rng, focus?: string): GuidedStep | nul
 
 // Aluminiumoxid und Magnesiumchlorid mit Ionen und Formel bildeten Klausuraufgabe 3a fast genau nach (§9)
 export const EXAM_SALTS = ['Al2O3', 'MgCl2']
+// Calciumfluorid (Formel aus den Elementen) und Calciumphosphat (Formel aus den Ionen) sind Aufgaben des Übungsblatts
+// zu den Bindungen mit denselben Stoffen (CHEMIE.md §9)
+export const EXERCISE_SALTS = ['CaF2', 'Ca3(PO4)2']
+export const isExcludedSalt = (formula: string) => EXAM_SALTS.includes(formula) || EXERCISE_SALTS.includes(formula)
 
 function formulaTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc | null {
   const s = pickSalt(level, rng)
-  if (!s || EXAM_SALTS.includes(formulaOf(s))) return null
+  if (!s || isExcludedSalt(formulaOf(s))) return null
   const first = ionsStep(s, rng, focus)
   const second = formulaStep(s, rng, focus)
   if (!first || !second) return null

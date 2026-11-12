@@ -155,7 +155,7 @@ zweiten, unabhängig eingetragenen Liste.
 | Pfeil bei Gleichgewichten | immer ⇌, auch in Reaktionsgleichungen und Umsatzrechnungen (Ammoniak, Schwefeltrioxid); vollständig ablaufend nur mit →. |
 | Spontan und Entropie (seit S10) | Das Skript sagt „spontan“, die App „freiwillig“ und nennt „spontan“ als Wort des Skripts; G heißt freie Enthalpie oder Gibbs-Energie. Die Aussage, bei einer spontanen Reaktion nehme die Entropie zu, gilt für die Entropie insgesamt (Stoffe und Umgebung, zweiter Hauptsatz). Für die Stoffe allein entscheidet ΔG = ΔH − T · ΔS; ihr ΔS darf bei einer freiwilligen Reaktion negativ sein. |
 | Gleichgewichtskonstante | Überall K_GG wie im Skript, auch im Thema Energie (ΔG⁰ = −R · T · ln K_GG). Zur Lage nur bei K_GG ≥ 10 bzw. ≤ 0,1 („Lage auf der Seite der Produkte/Edukte“), nie „überwiegen“. |
-| Paare in der Lewis-Formel (seit S10) | Bindende und freie Paare werden am Zentralatom gezählt wie in der Vorlesung und der Klausur; die Zählung über das ganze Molekül ist der Fehler `chem-lewis-free-whole-molecule`. |
+| Paare in der Lewis-Formel (seit S10) | Bindende und freie Paare werden am Zentralatom gezählt wie in der Vorlesung und der Klausur; die Zählung über das ganze Molekül ist der Fehler `chem-lewis-free-whole-molecule` (bei Wissensfragen `chem-mis-mo-lone-whole-molecule`). Die Frage sagt „in der Lewis-Formel“; bei einer Mehrfachbindung am Zentralatom zählt jedes Paar, und die Frage sagt das. Im VSEPR-Modell (Skript, Übung) zählt eine Mehrfachbindung als ein Partner X; diese Zählung ist nie eine falsche Antwort. |
 | Namen der Kräfte | Van-der-Waals-Kräfte, Dipol-Dipol-Wechselwirkungen, Wasserstoffbrückenbindungen (im Fließtext auch Wasserstoffbrücken) wie im Skript. „Stärkste Kraft“ heißt immer die stärkste Art, die vorkommt; bei großen Molekülen können Van-der-Waals-Kräfte insgesamt mehr beitragen. |
 | Römische Ziffer im Salznamen | Nötig nur, wo das Metall mehrere Ladungen bilden kann; bei eindeutiger Ladung (Na, Mg, Ca, Al, Zn, Ag) unnötig, aber nicht falsch. Abgefragt wird nur „wo nötig“. |
 | Edelgaskonfiguration | „Voll“ heißt bei Edelgasen: s- und p-Orbitale der äußersten Schale voll (Oktett, ns² np⁶), bei Helium die erste Schale. Beim Sprung der Ionisierungsenergie „innere Schale mit Edelgaskonfiguration“, nicht „voll besetzte Schale“. |
@@ -342,7 +342,8 @@ einer Lernkarte als Tatsache. Ein Test prüft das.
   Seit S10 ebenso ausgeschlossen: die Kernsymbole aus Klausuren und Übung
   (⁵⁶₂₆Fe, ³⁵₁₇Cl, ²³₁₁Na als Atom, ³⁵₁₇Cl⁻; `EXAM_PARTICLES` in
   `generators/particles.ts`), die Valenzkonfiguration von Sauerstoff und
-  Chlor in Klausuraufgabe 1, die Element- und Ionenreihen der Übungsblätter
+  Chlor in Klausuraufgabe 1, CaF₂ und Ca₃(PO₄)₂ als Salz-Aufgaben (`EXERCISE_SALTS`
+  in `generators/salze.ts`, Übung Bindungen), die Element- und Ionenreihen der Übungsblätter
   (`EXERCISE_LINES`, `EXERCISE_IONS` in `generators/trends.ts`) und die
   Übergänge der Rydberg-Hausaufgabe des Skripts. Auch Fragen nach dem Muster
   einer Klausurfrage („Wie ändert sich … innerhalb einer Periode von links

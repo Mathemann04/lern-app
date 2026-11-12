@@ -1239,6 +1239,16 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   Raumtemperatur, M aus m und n, Umsatz vom Produkt aus). Festlegungen in
   CHEMIE.md §5, §6, §8, §9. Die Gegenprobe mit Rechenaufgaben aus dem
   Lehrbuch entfiel, weil keine Fotos hochgeladen waren.
+  Nachgeholt (11.11.2026, abends): Die Musterlösung zum Übungsblatt
+  „Chemische Bindungen“ kam neu dazu (die übrigen Unterlagen waren
+  inhaltlich unverändert). Danach: Paare von PCl₃ am Zentralatom, Hinweis zur
+  Zählweise bei Mehrfachbindungen („in der Lewis-Formel“), Gruppennummern 1
+  bis 18 auf der Karte zu Salzformeln (Aluminium in Gruppe 13), Begriff
+  Verhältnisformel, O₂ als Molekül (Lewis, σ/π), Legierung, kürzere und
+  stärkere Mehrfachbindungen; CaF₂ und Ca₃(PO₄)₂ als Aufgaben des
+  Übungsblatts ausgeschlossen und auf Karten durch andere Salze ersetzt.
+  Offen bleiben die Gegenprobe mit dem Lehrbuch und Übungsblätter zu
+  Gleichgewicht und Energie (nicht hochgeladen).
 
 #### Nach Teil 1 der Klausur
 Die Reihenfolge richtet sich nach dem Termin von Teil 2: Kommt Teil 2 bald,

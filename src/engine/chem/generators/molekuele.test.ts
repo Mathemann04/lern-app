@@ -7,6 +7,8 @@ import { MOL_COMPOUNDS, PREFIXES, compoundFormula, compoundName } from '../molNa
 import { atomCounts, parseFormula } from '../formula.ts'
 import { bondingPairs, freePairs, lonePairsOf, moleculeById, typeLatex, valenceElectrons, vseprOf } from '../molecules.ts'
 import { generatedCalc } from './index.ts'
+import { MOLECULE_STEPS, splitQuestion } from './molekuele.ts'
+import { createRng } from '../../random/rng.ts'
 import { MOLEKUELE_BANK, ORDER_ANGLE_IDS } from '../bank/molekuele.ts'
 
 // Rechnungen und Lernkarten zum Thema „Moleküle" (S5b): Karten rechnen wie die Engine, Namen wie eine zweite Liste,
@@ -192,6 +194,52 @@ describe('Moleküle: Ergänzungen nach dem Abgleich', () => {
     }
     expect(central).toBeGreaterThan(40)
     expect(hOnly).toBeGreaterThan(3)
+  })
+
+  // Musterlösung und Skript (VSEPR, Folie 9) zählen eine Mehrfachbindung als einen Partner; die App fragt nach der
+  // Lewis-Formel und sagt bei Mehrfachbindung am Zentralatom, wie gezählt wird. Die Zählweise des VSEPR-Modells ist nie
+  // eine falsche Antwort.
+  it('fragt nach den Paaren in der Lewis-Formel und bietet die VSEPR-Zählung nie als falsche Antwort an', () => {
+    const split = (text: string) => /^(\d+) bindende und (\d+) frei/.exec(text)!
+    let multiple = 0
+    for (const m of ['CO2', 'CS2', 'HCN', 'CH2O', 'COCl2', 'NOCl', 'PCl3', 'H2O', 'CH4']) {
+      const molecule = mol(m)
+      const c = molecule.central!
+      const partners = molecule.bonds.filter(([a, b]) => a === c || b === c).length
+      const bonding = molecule.bonds.filter(([a, b]) => a === c || b === c).reduce((s, [, , o]) => s + o, 0)
+      const free = lonePairsOf(molecule, c)
+      for (let i = 0; i < 20; i++) {
+        for (const focus of [undefined, 'chem-lewis-multiple-as-one', 'chem-lewis-pairs-missing', 'chem-lewis-free-whole-molecule']) {
+          const step = MOLECULE_STEPS.splitStep(molecule, createRng(`${m}:${i}`), focus)!
+          expect(step.question, m).toContain('in der Lewis-Formel')
+          expect(step.question.includes('Doppelbindung sind dabei zwei bindende Paare'), m).toBe(partners !== bonding)
+          for (const choice of step.choices.filter((x) => !x.correct)) {
+            const [, b, f] = split(choice.content)
+            expect(`${b}/${f}`, `${m}: ${choice.content}`).not.toBe(`${partners}/${free}`)
+          }
+        }
+      }
+      if (partners !== bonding) multiple++
+    }
+    expect(multiple).toBe(6)
+    // Beispiele: NOCl nie „2 bindende, 1 freies“, CO₂ nie „2 bindende, 0 freie“
+    expect(splitQuestion(mol('NOCl'))).toContain('Dreifachbindung drei')
+    expect(splitQuestion(mol('NH3'))).not.toContain('Doppelbindung')
+  })
+
+  // Abgleich mit der Musterlösung „Chemische Bindungen“: freie Paare von PCl₃ am Phosphor, Karten zu VSEPR und Mehrfachbindungen
+  it('zählt in Frage 302 die freien Paare am Phosphor; die Zählung übers ganze Molekül ist ein Denkfehler', () => {
+    const q = MOLEKUELE_BANK.questions.find((x) => x.no === 302)!
+    expect(q.kind).toBe('single')
+    if (q.kind !== 'single') return
+    const p = mol('PCl3')
+    expect(q.correct.text).toBe(String(lonePairsOf(p, p.central!)))
+    expect(q.wrong.find((w) => w.text === String(freePairs(p)))?.misconception).toBe('chem-mis-mo-lone-whole-molecule')
+    expect(cardText('mol-gestalt')).toMatch(/Mehrfachbindung zählt dort nur einmal/)
+    expect(cardText('mol-mehrfach')).toMatch(/Dreifachbindung kürzer und stärker als eine Doppelbindung/)
+    expect(cardText('ionen-formel')).toMatch(/Gruppe 13, nicht in Gruppe 3/)
+    expect(cardText('ionen-formel')).toMatch(/Verhältnisformel/)
+    expect(cardText('met-metallbindung')).toMatch(/Legierung/)
   })
 
   it('kennt die Vorsilben bis deca, und die Karte nennt octa und nona', () => {

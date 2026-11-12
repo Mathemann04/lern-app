@@ -16,6 +16,7 @@ export const METALLE_MISCONCEPTIONS: readonly MisconceptionName[] = [
   { id: 'chem-mis-me-hdp-like-kdp', name: "Beide dichtesten Packungen gleich verformbar", wrongText: "Hexagonal und kubisch dicht gepackte Metalle lassen sich gleich gut verformen, weil beide dichteste Packungen sind." },
   { id: 'chem-mis-me-sinter-melt', name: "Sintern für Schmelzen gehalten", wrongText: "Beim Sintern wird das Pulver ganz geschmolzen und dann in eine Form gegossen." },
   { id: 'chem-mis-me-interstitial-soft', name: "Einlagerungen machen weicher", wrongText: "Kleine Atome in den Lücken eines Metallgitters machen das Metall weicher." },
+  { id: 'chem-mis-me-alloy-metals-only', name: "Legierung nur aus Metallen", wrongText: "Eine Legierung enthält nur Metalle; ein Werkstoff mit einem Nichtmetall wie Kohlenstoff ist keine Legierung." },
   { id: 'chem-mis-me-h2-molecule', name: "Wasserstoff als Molekül im Metall", wrongText: String.raw`Ein Metall speichert Wasserstoff als ganze $\ce{H2}$-Moleküle in den Lücken seines Gitters.` },
   { id: 'chem-mis-me-no-electrons', name: "Isolatoren ohne Elektronen", wrongText: "Isolatoren leiten nicht, weil sie keine Elektronen haben." },
   { id: 'chem-mis-me-gap', name: "Bandlücke falsch zugeordnet", wrongText: "Metalle haben eine breite verbotene Zone, Isolatoren keine." },

@@ -111,6 +111,10 @@ export const MOLEKUELE_WHY: Readonly<Record<string, Explanation>> = {
     detailed: "Die Lewis-Formel zeigt alle Valenzelektronen. Die nicht bindenden stehen als freie Paare am Atom; ohne sie stimmen weder die Elektronenzahl noch das Oktett, und man kann die Gestalt nicht bestimmen.",
     short: "Freie Paare gehören in die Lewis-Formel.",
   },
+  'chem-mis-mo-lone-whole-molecule': {
+    detailed: "Ein freies Paar gehört dem Atom, an dem es sitzt. Fragt man nach dem Zentralatom, zählen nur seine eigenen freien Paare; die freien Paare der äußeren Atome gehören diesen Atomen. Alle zusammen zählt man nur, wenn ausdrücklich nach dem ganzen Molekül gefragt ist.",
+    short: "Nur die freien Paare, die am Zentralatom selbst sitzen.",
+  },
   'chem-mis-mo-pair-types': {
     detailed: "Ein bindendes Paar liegt zwischen zwei Atomen und hält sie zusammen. Ein freies Paar gehört nur einem Atom und bildet keine Bindung. Beide zählen zu den Valenzelektronen, haben aber verschiedene Aufgaben.",
     short: "Bindende Paare verbinden Atome, freie Paare sitzen an einem Atom.",

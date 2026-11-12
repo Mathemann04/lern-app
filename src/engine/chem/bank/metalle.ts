@@ -1400,6 +1400,35 @@ export const METALLE_BANK: QuestionBank = {
       cards: ['met-einlagerung'],
       ref: REF_EINLAGERUNG,
     }),
+    // ---- Nachtrag nach dem Abgleich mit der Musterlösung „Chemische Bindungen“ (Legierungen, ohne Versetzungen)
+    multiAt(2)({
+      id: 'me-v-multi-legierung',
+      no: 220,
+      fact: 'multi-legierung',
+      part: 'metallbindung',
+      title: 'Legierungen',
+      prompt: 'Welche Aussagen über Legierungen stimmen?',
+      correct: [
+        'Eine Legierung besteht aus mindestens zwei Elementen, von denen wenigstens eines ein Metall ist.',
+        'Stahl ist eine Legierung aus Eisen mit wenig Kohlenstoff.',
+        'Bronze ist eine Legierung aus Kupfer und Zinn.',
+        'Fremde Atome im Metallgitter behindern das Gleiten der Atomschichten; die Legierung wird dadurch härter als das reine Metall.',
+        'Auch eine Legierung leitet den Strom, weil ihre Valenzelektronen frei beweglich bleiben.',
+      ],
+      wrong: [
+        w('f1', 'Eine Legierung enthält nur Metalle; mit Kohlenstoff darin wäre Stahl keine Legierung.', 'chem-mis-me-alloy-metals-only'),
+        w('f2', 'Eine Legierung ist aus Metall-Ionen und Nichtmetall-Ionen aufgebaut, wie ein Salz.', 'chem-mis-me-salt-like', why('Auch in einer Legierung halten Atomrümpfe und frei bewegliche Valenzelektronen zusammen; es ist weiter eine Metallbindung. Anionen wie in einem Salz entstehen dabei nicht.', 'Eine Legierung hat Metallbindung, keine Ionen wie ein Salz.')),
+        w('f3', 'Fremde Atome im Metallgitter machen das Metall weicher, weil die Schichten dann leichter gleiten.', 'chem-mis-me-interstitial-soft', why('Fremde Atome passen nicht genau in die regelmäßigen Schichten der Metallatome. Überlege, was das für Schichten bedeutet, die beim Verformen aneinander vorbeigleiten sollen.', 'Fremde Atome stören die Schichten.')),
+        w('f4', 'In einer Legierung sitzen die Valenzelektronen fest an ihren Atomen; sie leitet deshalb keinen Strom.', 'chem-mis-me-fixed'),
+      ],
+      hint: 'Denke an Stahl: Woraus besteht er? Und was geschieht beim Verformen, wenn fremde Atome zwischen den Schichten sitzen?',
+      explanation: why(
+        'Eine Legierung ist ein Werkstoff aus mindestens zwei Elementen, darunter wenigstens ein Metall: Stahl ist Eisen mit wenig Kohlenstoff, Bronze besteht aus Kupfer und Zinn. Die Metallbindung bleibt erhalten, die Elektronen bleiben beweglich, die Legierung leitet. Die fremden Atome sind anders groß als die Metallatome und stören die Schichten; diese gleiten schwerer aneinander vorbei, und die Legierung wird härter.',
+        'Mindestens zwei Elemente, wenigstens ein Metall; leitet weiter, wird härter.',
+      ),
+      cards: ['met-metallbindung', 'met-verformbar'],
+      ref: `${REF_VERFORMBAR}; ${REF_UEBUNG}`,
+    }),
     // ---- Zuordnen (N1b)
     MATCH_CONDUCTION,
     MATCH_HYBRID,

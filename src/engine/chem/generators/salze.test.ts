@@ -4,6 +4,7 @@ import { GENERATED_MIN } from '../../quiz/numbers.ts'
 import { ANIONS, CATIONS, isAllowedSalt, saltFormula, saltName } from '../ions.ts'
 import { parseFormula } from '../formula.ts'
 import { generatedCalc } from './index.ts'
+import { EXAM_SALTS, EXERCISE_SALTS, isExcludedSalt } from './salze.ts'
 import { IONEN_BANK, LATTICE_ENERGY, STRUVITE_IONS, chargeSum } from '../bank/ionen.ts'
 
 // Ionenbindung und Salze (S5a): Formeln und Namen gegen eine zweite, von Hand eingetragene Liste, Ladungen in
@@ -87,6 +88,21 @@ describe('Salze: Formel und Name auf zweitem Weg', () => {
       }
     expect(seen).toBeGreaterThan(50)
   })
+
+  // CHEMIE.md §9: Salze der Altklausuren und des Übungsblatts „Chemische Bindungen“ nie als Formel-Aufgabe
+  it('stellt keine Formel-Aufgabe zu Salzen der Altklausuren oder des Übungsblatts', () => {
+    expect(EXERCISE_SALTS).toEqual(['CaF2', 'Ca3(PO4)2'])
+    for (const f of [...EXAM_SALTS, ...EXERCISE_SALTS]) expect(isExcludedSalt(f), f).toBe(true)
+    expect(isExcludedSalt('CaCl2')).toBe(false)
+    let formulas = 0
+    for (const level of [1, 2, 3] as const)
+      for (const calc of tasks(level, 600)) {
+        if (!calc.form.startsWith('formel:')) continue
+        formulas++
+        expect([...EXAM_SALTS, ...EXERCISE_SALTS], calc.substance).not.toContain(calc.substance)
+      }
+    expect(formulas).toBeGreaterThan(200)
+  })
 })
 
 describe('Zerfall in Ionen', () => {
@@ -145,12 +161,18 @@ describe('Lernkarten „Ionenbindung und Salze“: Formeln wie die Engine', () =
       const a = ANIONS.find((x) => name.endsWith(x.name))!
       return saltFormula(c, a)
     }
-    expect(formula('Aluminiumoxid')).toBe('Al2O3')
+    expect(formula('Magnesiumnitrid')).toBe('Mg3N2')
     expect(formula('Magnesiumsulfid')).toBe('MgS')
-    expect(formula('Calciumphosphat')).toBe('Ca3(PO4)2')
+    expect(formula('Magnesiumphosphat')).toBe('Mg3(PO4)2')
     expect(formula('Ammoniumsulfat')).toBe('(NH4)2SO4')
     const text = JSON.stringify(['ionen-formel', 'ionen-molekuelionen', 'ionen-zerfall', 'ionen-born-haber'].map((id) => cardById(id)))
-    for (const f of ['Al2O3', 'MgS', 'Ca3(PO4)2', '(NH4)2SO4']) expect(text).toContain(f)
+    for (const f of ['Mg3N2', 'MgS', 'Mg3(PO4)2', '(NH4)2SO4', 'MgF2 -> Mg^2+ + 2 F^-']) expect(text).toContain(f)
+    // die Salze der Karten sind echte Salze der Engine
+    for (const name of ['Magnesiumnitrid', 'Magnesiumphosphat']) {
+      const c = CATIONS.find((x) => name.startsWith(x.name))!
+      const a = ANIONS.find((x) => name.endsWith(x.name))!
+      expect(isAllowedSalt(c, a), name).toBe(true)
+    }
     // Born-Haber NaCl und KF wie in der Engine gerechnet
     expect(107 + 496 + 242 / 2 - 349).toBe(375)
     expect(-411 - 375).toBe(-786)
