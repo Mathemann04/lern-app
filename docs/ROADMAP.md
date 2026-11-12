@@ -67,6 +67,12 @@ Stand: 12.11.2026
   [AUFGABENARTEN.md](AUFGABENARTEN.md): Themen, Aufgabenarten, Rechenschemata, typische Fehler,
   Ziel in der App. Keine Aufgabentexte, Zahlen oder Namen von Lehrenden; die Unterlagen selbst
   kommen nie ins Repo. Danach weiter mit M6 Schritt 4b-2.
+  **Mathe erledigt (12.11.2026):** gut 80 Dateien (Skript-Kapitel 1 und 3 bis 8, Übungen des
+  laufenden Semesters, 14 ältere Blätter mit Lösungen, Tests, 16 Altklausuren, 10 Probe- und
+  Übungsklausuren) durchgesehen; [AUFGABENARTEN.md](AUFGABENARTEN.md) neu gefasst, mit Aufbau
+  und Gewicht der Klausur (elf Bausteine, die fast jedes Jahr gleich vorkommen) und neuen
+  Abschnitten zu gebrochen-rationalen Funktionen, Kurvendiskussion, Tangenten, Geraden und
+  Ebenen, Matrizen, Determinanten und Gleichungssystemen. Offen: die übrigen Fächer.
 - **Lehrbuch „Physik für Ingenieure“** (Fotos des Nutzers, 11.11.2026): Kapitel
   Kernphysik und Festkörperphysik, passend zu Chemie und Werkstoffkunde, teils
   weiter als die Vorlesung; später auch für Physik (M10). Die Fotos liegen
