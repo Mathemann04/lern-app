@@ -986,3 +986,10 @@ Neue Entscheidungen unten anfügen.
   (`oddPowersAsRoots` in `check/answer.ts`), sonst wäre $\frac{1}{3}x^{-\frac{2}{3}}$ als Ableitung von $\sqrt[3]{x}$ an den
   Stellen $x < 0$ gescheitert; die Normalform fasst $\sqrt[3]{u}$ mit Potenzen von $u$ zusammen ($\frac{x^2}{\sqrt[3]{x}}$ wie
   $x^{5/3}$, $\sqrt{x} \cdot \sqrt[3]{x} = x^{5/6}$, `mergeOddRoots`), und die Anzeige ordnet $\sqrt[3]{x}$ nach seinem Grad.
+- 12.11.2026: M7 geplant ([PLAN-M7.md](PLAN-M7.md), wartet auf OK). Drei neue Tätigkeiten statt einer: „Vektoren“,
+  „Geraden und Ebenen“, „Matrizen und Gleichungssysteme“, jede mit Bausteinen und den Stufen aus M6 (Stufe 1 in der
+  Ebene, Stufe 4 mit Parameter wie in der Klausur). Auf Wunsch des Nutzers (mehrmals) Bilder und Animationen von Anfang
+  an; die Zeichen-Grundlage aus M6b wird darum schon in M7 Schritt 1 gebaut, mit räumlicher Ansicht zum Drehen ohne
+  Zusatzbibliothek (klein, offline). Neue Arten von Aufgaben: Vektor oder Matrix eingeben, Bild wählen, Pfeil ziehen,
+  Schemata als Tabelle, Entscheidungsbaum. Animationen nur auf Knopfdruck. Reihenfolge wie in der Vorlesung. Dazu ein
+  Entwurf zum Anfassen als private Seite für den Nutzer (nicht im Repo).
