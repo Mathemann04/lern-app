@@ -6,6 +6,7 @@ import { createRng } from '../engine/random/rng.ts'
 import { rememberShown, shownInRound, startNewRound } from '../state/questionRounds.ts'
 import type { KeyValueStore } from '../state/storage.ts'
 import { ATOMBAU } from './catalog.ts'
+import type { CourseEngine } from './courseEngines.ts'
 import { knownFocus, newTaskHref, pickNewSeed, questionNoOf } from './practice.ts'
 import { RECENT_FORMS } from './recentForms.ts'
 
@@ -104,8 +105,11 @@ describe('Neue Wissensfrage ziehen (wie PickNewTask)', () => {
     const engine = chemCourseEngine(ATOMBAU)
     expect(questionNoOf(engine, 500_000 + 50 * 101 + 7)).toBe(101)
     expect(questionNoOf(engine, 101)).toBe(101)
-    // Mathe-Engines ziehen ihre Nummern selbst: Die Zahl ist dort keine Frage
+    // Mathe-Engines ziehen ihre Nummern selbst: Die Zahl ist dort keine Frage, auch wenn die Engine (Umstellen mit
+    // Bausteinen, M6) eine eigene Wahl der Nummern hat
     expect(questionNoOf({}, 500_000 + 50 * 101 + 7)).toBeNull()
+    const withPick: Pick<CourseEngine, 'nextSeed' | 'questionNos'> = { nextSeed: () => 101 }
+    expect(questionNoOf(withPick, 101)).toBeNull()
   })
 })
 

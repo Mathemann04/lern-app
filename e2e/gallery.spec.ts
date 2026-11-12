@@ -19,7 +19,7 @@ test('Galerie ist über die Einstellungen erreichbar, mit der Schreibweise der F
   await expect(page.getByRole('heading', { name: 'Mathematik MB1' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Grundlagen' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Differentialrechnung' })).toBeVisible()
-  for (const topic of ['Brüche', 'Gleichungen umstellen', 'Ableiten']) await expect(page.getByRole('link', { name: new RegExp(`^${topic}`) })).toBeVisible()
+  for (const topic of ['Vereinfachen', 'Gleichungen umstellen', 'Ableiten']) await expect(page.getByRole('link', { name: new RegExp(`^${topic}`) })).toBeVisible()
   const notation = page.getByRole('region', { name: 'Schreibweise' })
   await expect(notation.locator('.katex')).toHaveCount(18)
   await expect(notation.getByRole('heading', { name: /In Stufe 5 von/ })).toBeVisible()
@@ -114,8 +114,8 @@ test('Implizite Aufgabe in der Galerie: y\', beide Seiten im Rechenweg, typische
 test('Galerie zeigt Bruchaufgaben der Stufen 1 bis 5 mit Rechenweg und typischen Fehlern', async ({ page }) => {
   const errors = collectErrors(page)
   await page.goto('./#/galerie')
-  await page.getByRole('link', { name: /^Brüche/ }).click()
-  await expect(page.getByRole('heading', { name: 'Brüche', level: 1 })).toBeVisible()
+  await page.getByRole('link', { name: /^Vereinfachen/ }).click()
+  await expect(page.getByRole('heading', { name: 'Vereinfachen', level: 1 })).toBeVisible()
   await page.getByLabel('Rechenweg zeigen').check()
   await page.getByLabel('Typische Fehler zeigen').check()
 

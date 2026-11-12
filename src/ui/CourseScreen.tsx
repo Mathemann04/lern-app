@@ -1,19 +1,13 @@
-import type { Level } from '../engine/tasks/taskNumber.ts'
-import { levelSummary, useProgress } from '../state/progress.ts'
-import { setCourseLevel, setSkippedParts, updateSettings, useSettings } from '../state/settings.ts'
+import { setCourseLevel, setSkippedParts, useSettings } from '../state/settings.ts'
 import type { PracticeMode } from '../state/storage.ts'
 import { AreaIcon } from './AreaIcon.tsx'
 import { BackLink } from './BackLink.tsx'
 import { courseById, hasLevelNames, isFreeAt, levelName, playableLevel } from './catalog.ts'
+import { CourseLinks, LevelProgressLine, ModeSwitch } from './CourseParts.tsx'
 import { Formula } from './Formula.tsx'
 import { PartPicker } from './PartPicker.tsx'
-import { areaHref, cardFolderHref, practiceHref } from './routes.ts'
+import { areaHref, practiceHref, subjectHref } from './routes.ts'
 import { isSelectionPlayable, levelPartCount } from './selection.ts'
-
-const MODES: Array<{ value: PracticeMode; title: string; description: string }> = [
-  { value: 'guided', title: 'Geführt', description: 'Auswahl-Antworten' },
-  { value: 'free', title: 'Frei', description: 'Selbst eintippen' },
-]
 
 // Ein Thema, z. B. „Brüche": Art und Stufe wählen, dann üben. Die Stufe merkt sich jedes Thema
 // selbst, die Art (geführt oder frei) gilt für alle. Themen mit Unterthemen (Chemie) haben zusätzlich
@@ -37,7 +31,8 @@ export function CourseScreen({ id }: { id: string }) {
   return (
     <main className="space-y-6">
       <div className="space-y-3">
-        <BackLink href={areaHref(area.id)} label={area.title} />
+        {/* In Fächern mit Tätigkeiten (Mathe, M6) eine Ebene höher zur Seite des Fachs, sonst zum Gebiet */}
+        {subject.activities ? <BackLink href={subjectHref(subject.id)} label={subject.title} /> : <BackLink href={areaHref(area.id)} label={area.title} />}
         <div className="flex items-center gap-4">
           <AreaIcon kind={course.icon} className="size-16 shrink-0" />
           <div className="min-w-0 space-y-1">
@@ -49,35 +44,7 @@ export function CourseScreen({ id }: { id: string }) {
 
       <section aria-label="Üben" className="rounded-2xl border border-zinc-200">
         <div className="space-y-4 p-5 pb-4">
-          <fieldset>
-            <legend className="sr-only">Wie willst du üben?</legend>
-            <div className="flex gap-1 rounded-xl bg-zinc-100 p-1">
-              {MODES.map((option) => {
-                const disabled = option.value === 'free' && !course.free
-                const checked = (course.free ? settings.practiceMode : 'guided') === option.value
-                return (
-                  <label
-                    key={option.value}
-                    className={`flex-1 rounded-lg px-3 py-2 text-center transition-colors has-focus-visible:ring-2 has-focus-visible:ring-accent-600 ${
-                      checked ? 'bg-raised shadow-sm' : disabled ? 'text-zinc-500' : 'cursor-pointer text-zinc-600 hover:text-zinc-900'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="art"
-                      className="sr-only"
-                      checked={checked}
-                      disabled={disabled}
-                      onChange={() => updateSettings({ practiceMode: option.value })}
-                    />
-                    {/* Im Dunkeln eine Stufe heller: auf der grauen Fläche sonst zu wenig Kontrast */}
-                    <span className={`block font-medium ${checked ? 'text-accent-700 dark:text-accent-800' : ''}`}>{option.title}</span>
-                    <span className="block text-sm text-zinc-500">{disabled ? 'kommt bald' : option.description}</span>
-                  </label>
-                )
-              })}
-            </div>
-          </fieldset>
+          <ModeSwitch course={course} mode={settings.practiceMode} />
           <div className="space-y-2">
             {playable ? (
               <a
@@ -186,34 +153,8 @@ export function CourseScreen({ id }: { id: string }) {
             </fieldset>
           </div>
         )}
-        {course.cards && (
-          <a
-            href={cardFolderHref(course.cards)}
-            className="flex items-center justify-between border-t border-zinc-100 px-5 py-4 font-medium text-accent-700 hover:bg-accent-50"
-          >
-            Lernkarten: alle Regeln im Überblick
-            <span aria-hidden>→</span>
-          </a>
-        )}
-        <a
-          href="#/fortschritt"
-          className="flex items-center justify-between rounded-b-2xl border-t border-zinc-100 px-5 py-4 font-medium text-accent-700 hover:bg-accent-50"
-        >
-          Dein Fortschritt und deine häufigsten Fehler
-          <span aria-hidden>→</span>
-        </a>
+        <CourseLinks course={course} />
       </section>
     </main>
-  )
-}
-
-// „12 gelöst · zuletzt 8 von 10 ohne Fehler"; nichts, solange noch keine Aufgabe gelöst ist
-function LevelProgressLine({ course, level }: { course: string; level: Level }) {
-  const { solved, recent, recentClean } = levelSummary(useProgress(), course, level)
-  if (solved === 0) return null
-  return (
-    <span className="block text-sm text-zinc-500">
-      {solved} gelöst · zuletzt {recentClean} von {recent.length} ohne Fehler
-    </span>
   )
 }

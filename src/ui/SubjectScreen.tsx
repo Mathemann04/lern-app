@@ -2,17 +2,19 @@ import { useMockHistory, useMockSession } from '../state/mockExam.ts'
 import { dueReviewsOf } from '../state/reviews.ts'
 import { AreaIcon } from './AreaIcon.tsx'
 import { BackLink } from './BackLink.tsx'
-import { type Area, type Subject, isAreaAvailable, isMixAvailable, subjectById, subjectCourseIds } from './catalog.ts'
+import { CourseTile } from './AreaScreen.tsx'
+import { type Area, type Subject, isAreaAvailable, isMixAvailable, subjectById, subjectCourseIds, subjectCourses } from './catalog.ts'
 import { mockSummary, pointsText } from './examOverview.ts'
 import { areaHref, examOverviewHref, mixHref, mockHref, reviewHref } from './routes.ts'
 
 // Seite eines Fachs (M6 Schritt 1, #/fach/<id>): oben die Klausur-Karte (Fächer mit Probeklausur), darunter die
 // spielbaren Gebiete als Kacheln und „Themen mischen", Kommendes in einer Zeile „Demnächst", unten Lernkarten (später
-// auch „Nachschlagen", M12). Kommt ohne Mathe-Engine und KaTeX aus.
+// auch „Nachschlagen", M12). In Fächern mit Tätigkeiten (Mathe, M6 Schritt 3) stehen statt der Gebiete die Tätigkeiten
+// selbst da, jede in ihrer Farbe. Kommt ohne Mathe-Engine und KaTeX aus.
 export function SubjectScreen({ id }: { id: string }) {
   const subject = subjectById(id)!
   const areas = subject.areas.filter(isAreaAvailable)
-  const soon = subject.areas.filter((area) => !isAreaAvailable(area))
+  const soon = subject.soon ?? subject.areas.filter((area) => !isAreaAvailable(area)).map((area) => area.title)
   return (
     <main className="space-y-8">
       <div className="space-y-3">
@@ -30,18 +32,24 @@ export function SubjectScreen({ id }: { id: string }) {
           Üben
         </h2>
         <ul className="space-y-3">
-          {areas.map((area) => (
-            <li key={area.id}>
-              <AreaTile area={area} />
-            </li>
-          ))}
+          {subject.activities
+            ? subjectCourses(subject).map(({ area, course }) => (
+                <li key={course.id}>
+                  <CourseTile course={course} tone={course.tone ?? area.tone} />
+                </li>
+              ))
+            : areas.map((area) => (
+                <li key={area.id}>
+                  <AreaTile area={area} />
+                </li>
+              ))}
           {isMixAvailable(subject) && (
             <li>
               <MixTile subject={subject} />
             </li>
           )}
         </ul>
-        {soon.length > 0 && <SoonLine titles={soon.map((area) => area.title)} />}
+        {soon.length > 0 && <SoonLine titles={soon} />}
       </section>
 
       <section aria-labelledby="more" className="space-y-3">

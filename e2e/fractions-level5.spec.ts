@@ -305,9 +305,8 @@ test('Brüche funktionieren offline, geführt und frei', async ({ page, context 
   await context.setOffline(true)
   await page.reload()
   await page.getByRole('link', { name: /^Mathematik MB1/ }).click()
-  await page.getByRole('link', { name: /^Grundlagen/ }).click()
-  await page.getByRole('link', { name: /^Brüche/ }).click()
-  await expect(page.getByRole('heading', { name: 'Brüche', level: 1 })).toBeVisible()
+  await page.getByRole('link', { name: /^Vereinfachen/ }).click()
+  await expect(page.getByRole('heading', { name: 'Vereinfachen', level: 1 })).toBeVisible()
 
   // geführt: 2/(1 − sin x) + 2/(1 + sin x) ganz durch
   await page.goto('./#/ueben/brueche/5-101')

@@ -119,3 +119,22 @@ Teil der Mathe-Engine `src/engine/` (reines TypeScript, ohne React).
     `varietyStats`; `pickFresh`) und `forms.ts` (Form je Thema;
     Partialbrüche mit eigenem Vorsatz „zerlegen:"; beim Umstellen mit der
     Differentialgleichung, `taskFormLatex`)
+  - Bausteine (M6 Schritt 3): `tasks/blocks.ts` (reine Daten: Gruppen `BLOCK_GROUPS`, Bausteine
+    der Tätigkeiten mit festen Ids, beim Umstellen `REARRANGE_BLOCKS`: linear, brueche, wurzeln,
+    potenzen, exp, log, quadratisch, winkel, hyperbel, ableitung, integral, reihen, grenzwert, dgl,
+    det, komplex, vektoren; „Beträge" kommt in Schritt 5d), `tasks/rearrangeBlocks.ts`
+    (`rearrangeTaskBlocks(task, solution)`: Werkzeuge und die Teile mit der gesuchten Variable,
+    auch in den Rümpfen der Werkzeuge, ohne Teile mit deren gebundener Variable; dazu `quadratisch`
+    bei Substitution oder pq-Formel im Rechenweg und `potenzen` beim Wurzelziehen ohne Werkzeug;
+    sonst `linear`; was erst beim Lösen entsteht, gehört zum Baustein, der es verlangt).
+    Verzeichnis: `scripts/rearrange-index.ts` erzeugt `tasks/rearrangeIndex.ts` (je Stufe für die
+    Nummern 1 bis N aus `rearrangeIndexFormat.ts`, welche Kombination) und `tasks/rearrangeCombos.ts`
+    (die Kombinationen je Stufe, auch für die Seiten ohne Engine); **nach jeder Änderung an
+    Baukasten, Vorlagen, Umstell-Engine oder Bausteinen neu erzeugen:** `node scripts/rearrange-index.ts`
+    (gut drei Minuten); `rearrangeIndex.test.ts` prüft Stichproben und meldet ein veraltetes
+    Verzeichnis. `tasks/rearrangePick.ts`: `nextRearrangeSeed(level, blocks)` (ohne Auswahl eine
+    beliebige Nummer wie bisher, sonst eine aus dem Verzeichnis, deren Bausteine alle angekreuzt sind),
+    `rearrangePool`, `indexedBlocks`. Die Aufgaben selbst und ihre Nummern bleiben unverändert.
+    Abwechslung je Baustein allein: mindestens 20 Formen unter 100 Aufgaben, keine öfter als 15 %
+    (Mindestmaß bis Schritt 5)
+

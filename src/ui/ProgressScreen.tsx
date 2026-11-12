@@ -133,7 +133,7 @@ function CourseProgress({ course }: { course: Course }) {
   const mode = course.free ? settings.practiceMode : 'guided'
   const detailsId = `details-${course.id}`
   return (
-    <section aria-labelledby={`progress-${course.id}`} data-tone={area.tone} className="rounded-2xl border border-zinc-200">
+    <section aria-labelledby={`progress-${course.id}`} data-tone={course.tone ?? area.tone} className="rounded-2xl border border-zinc-200">
       <div className="flex items-start gap-4 p-4">
         <AreaIcon kind={course.icon} className="size-12 shrink-0" />
         <div className="min-w-0 flex-1 space-y-1.5">

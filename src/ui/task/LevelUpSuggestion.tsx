@@ -1,17 +1,21 @@
 import type { Level } from '../../engine/tasks/taskNumber.ts'
 import { dismissSuggestion, levelSummary, shouldSuggestLevelUp, useProgress } from '../../state/progress.ts'
-import { setCourseLevel } from '../../state/settings.ts'
+import { setCourseLevel, useSettings } from '../../state/settings.ts'
 import type { PracticeMode } from '../../state/storage.ts'
 import { courseById, hasLevelNames, isLevelAvailable, levelCount, levelName } from '../catalog.ts'
 import { practiceHref } from '../routes.ts'
+import { isSelectionPlayable } from '../selection.ts'
 
 // „Eine Stufe höher?" nach 8 von 10 Aufgaben ohne Fehler, je Thema. Nur ein Vorschlag: Gewechselt
-// wird erst, wenn man auf den Knopf tippt. Stufen mit Namen (Chemie): „Lust auf Vertiefung?"
+// wird erst, wenn man auf den Knopf tippt. Stufen mit Namen (Chemie): „Lust auf Vertiefung?" Nur, wenn es in der nächsten
+// Stufe Aufgaben zur Auswahl gibt (Unterthemen, Bausteine).
 export function LevelUpSuggestion({ course, level, mode }: { course: string; level: Level; mode: PracticeMode }) {
   const progress = useProgress()
+  const settings = useSettings()
   const next = (level + 1) as Level
   const found = courseById(course)
   if (level >= levelCount(course) || !found || !isLevelAvailable(found.course, next) || !shouldSuggestLevelUp(progress, course, level)) return null
+  if (!isSelectionPlayable(found.course, settings, next)) return null
   const { recent, recentClean } = levelSummary(progress, course, level)
   const [current, upper] = [levelName(course, level), levelName(course, next)]
   const where = hasLevelNames(course) ? `in der Stufe ${current}` : `in ${current}`

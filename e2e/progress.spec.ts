@@ -76,7 +76,7 @@ test('Häufigste Fehler mit gezieltem Üben', async ({ page }) => {
   await expect(derivatives(page)).toContainText('Häufigster Fehler: Minuszeichen beim Kosinus vergessen')
   await expect(derivatives(page).getByRole('listitem', { name: 'Stufe 2' })).toHaveCount(0)
   // nicht geübte Themen stehen nur in einer Zeile
-  await expect(page.getByRole('region', { name: 'Mathematik MB1' })).toContainText('Noch nicht geübt: Brüche und Gleichungen umstellen')
+  await expect(page.getByRole('region', { name: 'Mathematik MB1' })).toContainText('Noch nicht geübt: Vereinfachen und Gleichungen umstellen')
   await derivatives(page).getByRole('button', { name: 'Einzelheiten' }).click()
   await expect(derivatives(page).getByRole('listitem', { name: 'Stufe 2' })).toContainText('3 gelöst · zuletzt 3 von 3 ohne Fehler')
   await expect(derivatives(page).getByRole('listitem', { name: 'Stufe 1' })).toContainText('Noch keine Aufgabe gelöst.')

@@ -18,7 +18,7 @@ import {
 } from './catalog.ts'
 import { RecentDots } from './RecentDots.tsx'
 import { courseHref, mixHref, mixPracticeHref, practiceHref, subjectHref } from './routes.ts'
-import { courseSummary, isSelectionPlayable, joinTitles, levelPartCount, mixBlockedHint, mixChoiceOf, mixedCourses } from './selection.ts'
+import { blockedHint, courseSummary, isSelectionPlayable, joinTitles, levelPartCount, mixBlockedHint, mixChoiceOf, mixedCourses, partWords } from './selection.ts'
 import { ExamStartCard, SoonLine } from './SubjectScreen.tsx'
 
 // Startseite (M6 Schritt 1): ohne Begrüßung; oben „Weitermachen" und die Klausur-Karte (S11), darunter nur die
@@ -102,7 +102,7 @@ function ContinueCard() {
   const playable = isSelectionPlayable(course, settings, level)
   const partCount = levelPartCount(course, settings, level)
   return (
-    <section aria-labelledby="continue" data-tone={area.tone} className="space-y-4 rounded-2xl bg-accent-50 p-5">
+    <section aria-labelledby="continue" data-tone={course.tone ?? area.tone} className="space-y-4 rounded-2xl bg-accent-50 p-5">
       <div className="flex items-start gap-4">
         <div className="min-w-0 flex-1 space-y-1">
           <h2 id="continue" className="text-sm font-semibold tracking-wide text-accent-700 uppercase">
@@ -114,9 +114,7 @@ function ContinueCard() {
           </p>
           {partCount && (
             <p className="text-sm text-pretty text-zinc-600">
-              {playable
-                ? `${partCount.checked} von ${partCount.total} Unterthemen angekreuzt`
-                : `Kreuze mindestens ein Unterthema an, das es in ${levelName(course.id, level)} gibt.`}
+              {playable ? `${partCount.checked} von ${partCount.total} ${partWords(course).dative} angekreuzt` : blockedHint(course, settings, level)}
             </p>
           )}
         </div>

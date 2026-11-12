@@ -136,3 +136,7 @@ Teil der Mathe-Engine `src/engine/` (reines TypeScript, ohne React).
     stehen sie je Funktion in einer Zeile über der Gleichung, `givenLatex`,
     `\begin{gathered}`; ohne sie bleibt `taskLatex` wie bisher; `taskFormLatex`
     ohne gathered und ohne den Namen pmatrix)
+  - Bausteine und Verzeichnis (M6 Schritt 3, Einzelheiten in `engine-aufgaben.md`): Ändert sich der
+    Rechenweg oder eine Vorlage, ändern sich die Bausteine einzelner Nummern; dann
+    `node scripts/rearrange-index.ts` laufen lassen (`rearrangeIndex.test.ts` meldet es sonst)
+

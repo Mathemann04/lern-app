@@ -1,0 +1,44 @@
+// Bausteine der Tätigkeiten (M6, docs/PLAN-M6.md „Bausteine je Tätigkeit"): ein Stück Stoff wie „Wurzeln" oder
+// „Determinanten", das man ankreuzen kann. Reine Daten ohne Engine, damit die Seiten ohne Mathe-Engine laden.
+// Ids sind fest und werden nie umbenannt (sie stehen in den Einstellungen auf dem Gerät).
+
+export type BlockGroup = { readonly id: string; readonly title: string }
+
+export type Block = {
+  readonly id: string
+  // reiner Text ohne Formeln
+  readonly title: string
+  // kurzer Zusatz unter dem Titel (reiner Text)
+  readonly note?: string
+  // Id der Gruppe
+  readonly group: string
+}
+
+export const BLOCK_GROUPS: readonly BlockGroup[] = [
+  { id: 'grundlagen', title: 'Grundlagen' },
+  { id: 'funktionen', title: 'Funktionen' },
+  { id: 'spaeter', title: 'Aus späteren Kapiteln' },
+]
+
+// Gleichungen umstellen. „Lineare Gleichungen" sind die Aufgaben ganz ohne andere Bausteine (die Variable steht nur
+// in Klammern, Summen und Produkten); Klammern, Punkt vor Strich, mal und durch und auf beide Seiten bringen sind kein
+// Baustein, sondern Handwerkszeug jeder Aufgabe.
+export const REARRANGE_BLOCKS: readonly Block[] = [
+  { id: 'linear', title: 'Lineare Gleichungen', note: 'Klammern, Variable mehrfach, nach einem Buchstaben', group: 'grundlagen' },
+  { id: 'brueche', title: 'Brüche', note: 'Variable im Nenner, Doppelbrüche', group: 'grundlagen' },
+  { id: 'wurzeln', title: 'Wurzeln', group: 'grundlagen' },
+  { id: 'potenzen', title: 'Quadrate und Potenzen', note: 'auch Wurzel ziehen', group: 'grundlagen' },
+  { id: 'exp', title: 'e-Funktion', note: 'auch andere Basen wie 2 hoch x', group: 'grundlagen' },
+  { id: 'log', title: 'Logarithmus', note: 'ln und Logarithmen zu anderen Basen', group: 'grundlagen' },
+  { id: 'quadratisch', title: 'Quadratische Gleichungen', note: 'pq-Formel, Substitution', group: 'grundlagen' },
+  { id: 'winkel', title: 'Winkelfunktionen', note: 'mit Umkehrfunktionen und Additionstheoremen', group: 'funktionen' },
+  { id: 'hyperbel', title: 'Hyperbelfunktionen', group: 'funktionen' },
+  { id: 'ableitung', title: 'Ableitungen', group: 'spaeter' },
+  { id: 'integral', title: 'Integrale', group: 'spaeter' },
+  { id: 'reihen', title: 'Summen und Reihen', group: 'spaeter' },
+  { id: 'grenzwert', title: 'Grenzwerte', group: 'spaeter' },
+  { id: 'dgl', title: 'Differentialgleichungen', group: 'spaeter' },
+  { id: 'det', title: 'Determinanten', group: 'spaeter' },
+  { id: 'komplex', title: 'Komplexe Zahlen', note: 'Betrag und Winkel', group: 'spaeter' },
+  { id: 'vektoren', title: 'Vektoren', note: 'Länge, Skalarprodukt, Winkel', group: 'spaeter' },
+]

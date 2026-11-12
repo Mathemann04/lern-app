@@ -47,9 +47,10 @@ export async function newTaskHref(course: string, mode: PracticeMode, level: Lev
   return taskHref(course, found ?? { level, seed: randomSeed() }, mode, found ? focus : null)
 }
 
-// Nummer der Wissensfrage hinter einer Aufgabe; null bei allem anderen (Mathe-Aufgaben, Rechnungen)
-export function questionNoOf(engine: Pick<CourseEngine, 'nextSeed'>, seed: number): number | null {
-  const decoded = engine.nextSeed ? decodeSeed(seed) : null
+// Nummer der Wissensfrage hinter einer Aufgabe; null bei allem anderen (Mathe-Aufgaben, Rechnungen). Nur Engines mit
+// Wissensfragen haben questionNos (Gleichungen umstellen hat seit M6 auch nextSeed, aber keine Fragen).
+export function questionNoOf(engine: Pick<CourseEngine, 'questionNos'>, seed: number): number | null {
+  const decoded = engine.questionNos ? decodeSeed(seed) : null
   return decoded?.kind === 'question' ? decoded.no : null
 }
 

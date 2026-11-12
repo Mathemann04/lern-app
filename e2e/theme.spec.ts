@@ -38,23 +38,25 @@ test('Dunkles Design: Eingabe im freien Modus ist lesbar', async ({ page }) => {
   expect(colors.text).toBe(colors.page)
 })
 
-test('Gebiete zeigen sich in ihrer eigenen Farbe', async ({ page }) => {
-  // Hintergrund des Übungsknopfs: Blau der Differentialrechnung
+test('Gebiete und Tätigkeiten zeigen sich in ihrer eigenen Farbe', async ({ page }) => {
+  // Hintergrund des Übungsknopfs: Violett des Ableitens (eigene Farbe der Tätigkeit, M6)
   await page.goto('./#/thema/ableiten')
   const button = page.getByRole('link', { name: 'Stufe 1 geführt üben' })
-  const blue = await button.evaluate((el) => getComputedStyle(el).backgroundColor)
-  // In der Galerie: Ableiten blau wie die Differentialrechnung, Brüche orange wie die Grundlagen
+  const violet = await button.evaluate((el) => getComputedStyle(el).backgroundColor)
+  // In der Galerie: Ableiten violett wie auf seiner Seite, Vereinfachen orange
   await page.goto('./#/galerie/ableiten')
   const newTasks = page.getByRole('button', { name: 'Neue Aufgaben' })
-  expect(await newTasks.evaluate((el) => getComputedStyle(el).backgroundColor)).toEqual(blue)
+  expect(await newTasks.evaluate((el) => getComputedStyle(el).backgroundColor)).toEqual(violet)
   await page.goto('./#/galerie/brueche')
-  await expect.poll(() => newTasks.evaluate((el) => getComputedStyle(el).backgroundColor)).not.toEqual(blue)
+  await expect.poll(() => newTasks.evaluate((el) => getComputedStyle(el).backgroundColor)).not.toEqual(violet)
   await page.goto('./')
   // Fächer in ihrer Farbe: Mathematik blau, Chemie indigo
   await expect(page.getByRole('link', { name: /^Mathematik MB1/ })).toHaveAttribute('data-tone', 'blue')
   await expect(page.getByRole('link', { name: /^Chemie 1/ })).toHaveAttribute('data-tone', 'indigo')
-  await expect(page.getByRole('region', { name: 'Los geht’s' })).toHaveAttribute('data-tone', 'blue')
+  await expect(page.getByRole('region', { name: 'Los geht’s' })).toHaveAttribute('data-tone', 'violet')
+  // Tätigkeiten in ihrer Farbe: Vereinfachen orange, Gleichungen umstellen blau, Ableiten violett
   await page.goto('./#/fach/mathe')
-  await expect(page.getByRole('link', { name: /^Differentialrechnung/ })).toHaveAttribute('data-tone', 'blue')
-  await expect(page.getByRole('link', { name: /^Grundlagen/ })).toHaveAttribute('data-tone', 'orange')
+  await expect(page.getByRole('link', { name: /^Vereinfachen/ })).toHaveAttribute('data-tone', 'orange')
+  await expect(page.getByRole('link', { name: /^Gleichungen umstellen/ })).toHaveAttribute('data-tone', 'blue')
+  await expect(page.getByRole('link', { name: /^Ableiten/ })).toHaveAttribute('data-tone', 'violet')
 })

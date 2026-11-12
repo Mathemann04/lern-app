@@ -25,6 +25,8 @@ export type CourseEngine = {
   // Stufe, zu der eine Nummer gehört, null: Die Aufgabe gibt es nicht (mehr); ohne Angabe passt jede
   // Nummer zu jeder Stufe
   resolve?(ref: TaskRef): Level | null
+  // Die Aufgabe als Formel, z. B. als Beispiel aus der Auswahl auf der Seite einer Tätigkeit (M6); ohne Angabe kein Beispiel
+  exampleLatex?(ref: TaskRef): string
 }
 
 const LOADERS: Readonly<Record<string, () => Promise<CourseEngine>>> = {
@@ -37,8 +39,22 @@ const LOADERS: Readonly<Record<string, () => Promise<CourseEngine>>> = {
     return { planGuidedTask: plan.planFractionTask, prepareFree: free.prepareFractionFree, formOf: forms.fractionForm }
   },
   [REARRANGE]: async () => {
-    const [plan, free, forms] = await Promise.all([import('../engine/guided/rearrangePlan.ts'), import('../engine/check/rearrangeAnswer.ts'), import('../engine/tasks/forms.ts')])
-    return { planGuidedTask: plan.planRearrangeTask, prepareFree: free.prepareRearrangeFree, formOf: forms.rearrangeForm }
+    const [plan, free, forms, pick, terms, task] = await Promise.all([
+      import('../engine/guided/rearrangePlan.ts'),
+      import('../engine/check/rearrangeAnswer.ts'),
+      import('../engine/tasks/forms.ts'),
+      import('../engine/tasks/rearrangePick.ts'),
+      import('../engine/tasks/rearrangeTerms.ts'),
+      import('../engine/rearrange/task.ts'),
+    ])
+    return {
+      planGuidedTask: plan.planRearrangeTask,
+      prepareFree: free.prepareRearrangeFree,
+      formOf: forms.rearrangeForm,
+      // Bausteine (M6 Schritt 3): parts sind die angekreuzten Bausteine, ohne Angabe alle
+      nextSeed: (level, _shown, parts) => pick.nextRearrangeSeed(level, parts),
+      exampleLatex: (ref) => task.taskLatex(terms.generateRearrangeTask(ref).task),
+    }
   },
 }
 
