@@ -11,6 +11,10 @@ import {
   EXTEND_MOVES,
   LOG_COMBINE_MOVES,
   LOG_LAW_MOVES,
+  LOG_BASE_MOVES,
+  LOG_NUMBER_MOVES,
+  LOG_POWER_MOVES,
+  UNLOG_MOVES,
   POWER_LAW_MOVES,
   REARRANGE_HINTS,
   ROOT_MOVES,
@@ -252,6 +256,10 @@ function isJunction(step: RearrangeStep, t: string): boolean {
     case 'log':
     case 'logCombine':
     case 'logLaw':
+    case 'logBase':
+    case 'logPower':
+    case 'logNumber':
+    case 'unlog':
     case 'powerLaw':
     case 'arc':
     case 'trig':
@@ -432,6 +440,15 @@ function moveQuestion(step: RearrangeStep, t: string, target: string): MoveQuest
       return { question: `$${t}$ steht in mehreren Logarithmen. Was machst du zuerst?`, wrong: LOG_COMBINE_MOVES, hint: REARRANGE_HINTS.logCombine }
     case 'logLaw':
       return { question: `Wie holst du die Hochzahl mit $${t}$ aus dem $\\ln$ heraus?`, wrong: LOG_LAW_MOVES, hint: REARRANGE_HINTS.logLaw }
+    // Logarithmen auf beiden Seiten (M6 Schritt 4b-2)
+    case 'logBase':
+      return { question: 'Die Logarithmen haben verschiedene Basen. Was machst du zuerst?', wrong: LOG_BASE_MOVES, hint: REARRANGE_HINTS.logBase }
+    case 'logPower':
+      return { question: 'Vor einem Logarithmus steht ein Faktor. Was machst du mit ihm?', wrong: LOG_POWER_MOVES, hint: REARRANGE_HINTS.logPower }
+    case 'logNumber':
+      return { question: 'Neben den Logarithmen steht eine Zahl. Was machst du mit ihr?', wrong: LOG_NUMBER_MOVES, hint: REARRANGE_HINTS.logNumber }
+    case 'unlog':
+      return { question: 'Auf jeder Seite steht ein Logarithmus derselben Basis. Wie geht es weiter?', wrong: UNLOG_MOVES, hint: REARRANGE_HINTS.unlog }
     case 'powerLaw':
       return {
         question: step.operand ? `Wie bekommst du überall dieselbe Potenz $${toLatex(step.operand)}$?` : 'Wie bekommst du überall dieselbe Potenz?',
@@ -824,6 +841,10 @@ const CARDS_BY_KIND: Record<StepKind, readonly string[]> = {
   log: [REARRANGE_CARD_IDS.exp],
   logCombine: [REARRANGE_CARD_IDS.laws],
   logLaw: [REARRANGE_CARD_IDS.laws],
+  logBase: [REARRANGE_CARD_IDS.logEquation],
+  logPower: [REARRANGE_CARD_IDS.logEquation],
+  logNumber: [REARRANGE_CARD_IDS.logEquation],
+  unlog: [REARRANGE_CARD_IDS.logEquation],
   powerLaw: [REARRANGE_CARD_IDS.laws],
   arc: [REARRANGE_CARD_IDS.arc],
   trig: [REARRANGE_CARD_IDS.arc],

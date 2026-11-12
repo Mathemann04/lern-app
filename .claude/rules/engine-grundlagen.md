@@ -116,7 +116,7 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
     „Gleichungen umstellen" in `rearrangeCards.ts` (Beispiele sind
     Umstell-Aufgaben; Stufe 3: Hauptnenner, Kehrwert, Wurzel und Quadrat
     mit Klammer im Quadrat und zwei Wurzeln; Stufe 4: „e-Funktion und
-    Logarithmus", „Logarithmus- und Potenzgesetze", „Umkehrfunktionen",
+    Logarithmus", „Logarithmus- und Potenzgesetze", „Logarithmen auf beiden Seiten" (M6 4b-2, Stufe 1), „Umkehrfunktionen",
     „Winkel- und Hyperbelfunktionen", „Substitution", „$pq$-Formel"; Stufe 5:
     „Stammfunktionen und Partialbrüche", „Geometrische Summe und Reihe",
     „Grenzwert $\left(1 + \frac{x}{n}\right)^n \to e^x$",

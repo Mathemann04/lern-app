@@ -901,6 +901,21 @@ Neue Entscheidungen unten anfügen.
   Aufgaben. $\epsilon$ und $\varepsilon$ (ebenso $\phi$/$\varphi$, $\theta$/$\vartheta$) gelten beim Eintippen als
   dasselbe Zeichen, weil MathLive aus getipptem „epsilon“ $\epsilon$ macht. Bedeutungen genauer (waagrechter Abstand,
   eingetauchtes Volumen, noch nicht zerfallene Kerne).
+- 12.11.2026: M6 Schritt 4b-2, Logarithmen auf beiden Seiten und verschiedene Basen. Rechenweg wie im Skript: verschiedene
+  Basen zuerst auf eine bringen (sind sie Potenzen derselben Zahl wie 2 und 4, auf die kleinere,
+  $\log_4 u = \frac{\log_2 u}{2}$, sonst auf $e$, $\log_3 u = \frac{\ln u}{\ln 3}$), Brüche wegmultiplizieren, Faktoren als
+  Hochzahl hineinziehen, Zahlen als Logarithmus derselben Basis schreiben ($3 = \log_2 8$, $1 = \ln e$, eine Zahl mit
+  Minus als $-\log_3 9$, nicht als $\log_3\frac{1}{9}$), je Seite zusammenfassen, entlogarithmieren. Vier neue Schritte
+  mit eigener Frage, Tipp, Erklärung und einer neuen Lernkarte „Logarithmen auf beiden Seiten“; fünf neue typische
+  Fehler. Die Aufgaben sind eine eigene Sammlung mit Nummern wie „logeq.2-4711“ (wie die Formeln kein Baustein; ihre
+  Bausteine sind Logarithmus, bei manchen Arten dazu „Quadratische Gleichungen“), neun Arten in den Stufen 1 bis 4, je
+  Nummer vorab eine Art; sie kommen beim Ziehen in etwa jeder vierten Aufgabe eines passenden Bausteins dran.
+  Abwechslung wie überall: unter 200 Aufgaben je Stufe mindestens 100 Formen, keine öfter als 3 von 100. Die neuen Wege
+  der Engine sind markiert (`logPath`); ältere Vorlagen und die Aufgaben einzelner Bausteine nehmen solche Aufgaben
+  nicht, damit alte Nummern dieselbe Aufgabe behalten. Den Definitionsbereich sichern Bedingungen der Aufgabe wie $x > b$
+  und bei quadratischen Gleichungen die Probe mit der Gleichung vom Anfang; ein Buchstabe als Basis bekommt die
+  Bedingung, größer als 1 zu sein. Stufe 5 bekommt keine eigenen Aufgaben dieser Art (dort bleibt es bei den
+  Werkzeugen).
 
 - 12.11.2026: Unterlagen zu Technische Mechanik 1 durchgesehen (Skripte Kapitel 1 bis 8, Übungsblätter 9 bis 19).
   Übersicht in eigenen Worten in docs/MECHANIK.md, dazu die Schreibweisen und Vorzeichenregeln, die die App genauso

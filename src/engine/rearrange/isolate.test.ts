@@ -7,6 +7,7 @@ import { parseLatex } from '../parse/latex.ts'
 import { createRng } from '../random/rng.ts'
 import { generateRearrangeTask, isRearrangeLevelAvailable } from '../tasks/rearrangeTerms.ts'
 import { FORMULA_TASKS } from '../tasks/formulas.ts'
+import { hasLogEquations } from '../tasks/logEquationKinds.ts'
 import { familyBlocks } from '../tasks/rearrangeFamilies.ts'
 import { LEVELS, blockSeed, formatTaskNumber } from '../tasks/taskNumber.ts'
 import { holds, samplePoints, withSubstitution } from './check.ts'
@@ -169,6 +170,42 @@ describe('Rechenweg Stufe 4, Teil 6c: Substitution und pq-Formel', () => {
     ])
   })
 
+  it('M6 4b-2: Zahl als Logarithmus, zusammenfassen, entlogarithmieren', () => {
+    expect(lines('\\log_{2}(x-a)', '\\log_{2}(b-x)+1')).toEqual([
+      'Zahl als Logarithmus schreiben: \\log_{2}(x - a) = \\log_{2} 2 + \\log_{2}(b - x)',
+      'Logarithmen zusammenfassen: \\log_{2}(x - a) = \\log_{2}(2(b - x))',
+      'Entlogarithmieren: x - a = 2(b - x)',
+      'Ausmultiplizieren: x - a = 2b - 2x',
+      'Variable nach links, Rest nach rechts: 3x = a + 2b',
+      'Beide Seiten teilen: x = \\frac{a + 2b}{3}',
+    ])
+    // Zahl mit Minus: hinten, als Logarithmus mit Minus
+    expect(lines('\\log_{3}(x+a)', '\\log_{3}x-2')[0]).toBe('Zahl als Logarithmus schreiben: \\log_{3}(x + a) = \\log_{3} x - \\log_{3} 9')
+    expect(lines('\\ln(x+a)', '\\ln x+c')[0]).toBe('Zahl als Logarithmus schreiben: \\ln(x + a) = \\ln(e^{c}) + \\ln x')
+  })
+
+  it('M6 4b-2: Faktor als Hochzahl, Basiswechsel zur kleineren Basis bzw. zu ln', () => {
+    expect(lines('\\log_{2}x', '\\log_{4}(x+a)').slice(0, 4)).toEqual([
+      'Basiswechsel: \\log_{2} x = \\frac{\\log_{2}(x + a)}{2}',
+      'Beide Seiten malnehmen: 2\\log_{2} x = \\log_{2}(x + a)',
+      'Faktor als Hochzahl: \\log_{2}(x^{2}) = \\log_{2}(x + a)',
+      'Entlogarithmieren: x^{2} = x + a',
+    ])
+    // ein Produkt wird ausgerechnet: (3x)^2 = 9x^2
+    expect(lines('2\\ln(3x)', '\\ln(x+a)')[0]).toBe('Faktor als Hochzahl: \\ln(9x^{2}) = \\ln(x + a)')
+    expect(lines('\\ln(x+a)+\\log_{3}(x+a)', 'b')[0]).toBe('Basiswechsel: \\ln(x + a) + \\frac{\\ln(x + a)}{\\ln 3} = b')
+    expect(toLatex(solveEquation(eq(p('\\ln(x+a)+\\log_{3}(x+a)'), p('b')), 'x')!.result)).toBe('e^{\\frac{b\\ln 3}{\\ln 3 + 1}} - a')
+    // auch ein Logarithmus ohne x wird umgerechnet
+    expect(lines('\\log_{2}x', '\\log_{4}(x+a)+\\log_{4}b')[0]).toBe('Basiswechsel: \\log_{2} x = \\frac{\\log_{2}(x + a)}{2} + \\frac{\\log_{2} b}{2}')
+  })
+
+  it('M6 4b-2: nicht nach dem Logarithmieren und nicht bei einem einzigen Logarithmus auf beiden Seiten', () => {
+    const solution = solveEquation(eq(p('3^{2x-1}'), p('a\\cdot5^{x}')), 'x')!
+    expect(solution.logPath).toBeUndefined()
+    expect(solveEquation(eq(p('\\ln(3x)+c'), p('a\\ln(3x)')), 'x')!.logPath).toBeUndefined()
+    expect(solveEquation(eq(p('\\log_{2}(x-a)'), p('\\log_{2}(b-x)+1')), 'x')!.logPath).toBe(true)
+  })
+
   it('Zahl vor u^2: erst durch sie teilen (Normalform)', () => {
     expect(lines('2e^{2x}-3ye^{x}', '2').slice(1, 4)).toEqual([
       'Alles auf eine Seite: 2u^{2} - 3yu - 2 = 0',
@@ -327,7 +364,7 @@ describe('Zufallsaufgaben je Stufe', () => {
     it(`Stufe ${level}: Lösung und jeder Schritt durch Einsetzen geprüft, Endform fertig, falsche Antworten falsch`, () => {
       const seen = new Set<string>()
       // dazu je Baustein mit eigenen Aufgaben (M6 Schritt 4) und alle Formeln der Stufe (4b-1) zwölf Nummern wie „exp.1-4711"
-      const seeds = [...Array.from({ length: 300 }, (_, i) => i + 1), ...familyBlocks(level).flatMap((block) => Array.from({ length: 12 }, (_, i) => blockSeed(block, i + 1))), ...FORMULA_TASKS.flatMap((task, i) => (task.level === level ? [blockSeed('formel', i + 1)] : []))]
+      const seeds = [...Array.from({ length: 300 }, (_, i) => i + 1), ...familyBlocks(level).flatMap((block) => Array.from({ length: 12 }, (_, i) => blockSeed(block, i + 1))), ...FORMULA_TASKS.flatMap((task, i) => (task.level === level ? [blockSeed('formel', i + 1)] : [])), ...(hasLogEquations(level) ? Array.from({ length: 8 }, (_, i) => blockSeed('logeq', i + 1)) : [])]
       for (const seed of seeds) {
         const { task } = generateRearrangeTask({ level, seed })
         const label = `${formatTaskNumber({ level, seed })}: ${equationToLatex(task.equation)} nach ${task.target}`

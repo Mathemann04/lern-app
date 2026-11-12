@@ -15,12 +15,13 @@ import {
   polyScale,
 } from '../fraction/poly.ts'
 import { createRng } from '../random/rng.ts'
-import { isOne, rat, ratAbs, ratSign } from '../rational.ts'
+import { isOne, rat, ratAbs, ratEq, ratSign } from '../rational.ts'
 import { type Atoms, RADICAL_ATOM, monomialSqrt, newAtoms, niceFrac, polyToExpr, radicalAtoms, toPoly, toRat } from './algebra.ts'
 import { clearlyFails, definedSomewhere, dependsOn, differsFromTarget, samplePoints, withSubstitution } from './check.ts'
 import {
   type RearrangeSolution,
   type RearrangeStep,
+  type SideLogTerm,
   type SolveOptions,
   type Side,
   acutePythagorasWrong,
@@ -31,6 +32,8 @@ import {
   isE,
   lnOf,
   lnTerms,
+  logBaseWrong,
+  logTermExpr,
   negated,
   plusTerm,
   TRIG_OF,
@@ -39,6 +42,7 @@ import {
   pqWrong,
   pythagorasWrong,
   quadraticWrong,
+  sideLogTerms,
   signedLog,
   substituteWrong,
   solveEquation,
@@ -46,6 +50,7 @@ import {
   tanQuotientWrong,
   timesFactor,
   unknownAtoms,
+  unsigned,
 } from './isolate.ts'
 import type { RearrangeTask } from './task.ts'
 import { type ToolStepKind, toolMistakes } from './tools/steps.ts'
@@ -114,6 +119,12 @@ export const REARRANGE_ERROR_RULES: readonly EqErrorRule[] = [
   { id: 'eq-log-sum', name: 'Summe der Logarithmen als Logarithmus der Summe', wrongFormula: '\\ln u + \\ln v = \\ln(u + v)' },
   { id: 'eq-log-quotient', name: 'Differenz der Logarithmen als Quotient', wrongFormula: '\\ln u - \\ln v = \\frac{\\ln u}{\\ln v}' },
   { id: 'eq-power-sum', name: 'Potenz mit Summe in der Hochzahl als Summe geschrieben', wrongFormula: '2^{x + 1} = 2^x + 2' },
+  // Logarithmen auf beiden Seiten, verschiedene Basen (M6 Schritt 4b-2)
+  { id: 'eq-log-base-flipped', name: 'Beim Basiswechsel malgenommen statt geteilt', wrongFormula: '\\log_4 u = 2\\log_2 u' },
+  { id: 'eq-log-base-quotient', name: 'Beim Basiswechsel den Bruch in den Logarithmus gezogen', wrongFormula: '\\log_3 u = \\frac{\\ln u}{\\ln 3} = \\ln\\frac{u}{3}' },
+  { id: 'eq-log-power-factor', name: 'Den Faktor vor dem Logarithmus als Faktor statt als Hochzahl hineingezogen', wrongFormula: '2\\ln u = \\ln(2u)' },
+  { id: 'eq-log-number-plain', name: 'Die Zahl selbst als Logarithmus geschrieben', wrongFormula: '\\log_2 u + 3 = \\log_2 u + \\log_2 3' },
+  { id: 'eq-log-number-inside', name: 'Die Zahl in den Logarithmus hineinaddiert', wrongFormula: '\\log_2 u + 1 = \\log_2(u + 1)' },
   // Winkel- und Hyperbelfunktionen, Umkehrfunktionen (ab Stufe 4, Schritt 6b)
   { id: 'eq-inverse-forgotten', name: 'Die Umkehrfunktion auf der anderen Seite vergessen', wrongFormula: '\\sin(kx) = w \\Rightarrow kx = w' },
   { id: 'eq-inverse-reciprocal', name: 'Umkehrfunktion mit dem Kehrwert verwechselt', wrongFormula: '\\tan x = w \\Rightarrow x = \\frac{1}{\\tan w}' },
@@ -558,7 +569,10 @@ function logCombineMistakes(step: RearrangeStep, t: string): Candidate[] {
   const base = step.operand
   const s = step.before[step.side]
   if (s.kind !== 'add') return []
-  const parsed = s.terms.map((x) => signedLog(x, t))
+  const withT = s.terms.map((x) => signedLog(x, t))
+  // nur ein Logarithmus mit der Variable (nach „Zahl als Logarithmus", M6 Schritt 4b-2): auch die ohne sie
+  // (\log_2 8 + \log_2 x)
+  const parsed = withT.filter((p) => p !== null).length < 2 ? s.terms.map((x) => signedLog(x, t, true)) : withT
   const ups = parsed.filter((p) => p !== null && p.sign > 0).map((p) => p!.arg)
   const downs = parsed.filter((p) => p !== null && p.sign < 0).map((p) => p!.arg)
   const logOf = (arg: Expr) => (isE(base) ? fn('ln', arg) : log(base, arg))
@@ -574,6 +588,73 @@ function logCombineMistakes(step: RearrangeStep, t: string): Candidate[] {
   if (downs.length > 0 && ups.length > 0) {
     out.push({ id: 'eq-log-quotient', after: withSide(step.after, step.side, rebuild(div(logOf(product(ups)), logOf(product(downs))))) })
   }
+  return out
+}
+
+// Logarithmen auf beiden Seiten (M6 Schritt 4b-2): Basiswechsel falsch herum oder als Logarithmus des Quotienten, Faktor
+// als Faktor statt als Hochzahl, Zahl selbst als Logarithmus bzw. in den Logarithmus daneben hineinaddiert
+function logEquationMistakes(step: RearrangeStep, t: string): Candidate[] {
+  const out: Candidate[] = []
+  if (step.kind === 'logBase') {
+    for (const wrong of ['flipped', 'quotient'] as const) {
+      const after = logBaseWrong(step.before, t, wrong)
+      if (after) out.push({ id: wrong === 'flipped' ? 'eq-log-base-flipped' : 'eq-log-base-quotient', after })
+    }
+    return out
+  }
+  if (step.kind !== 'logPower' && step.kind !== 'logNumber') return out
+  const base = step.operand
+  if (!base) return out
+  const sides = [step.before.lhs, step.before.rhs].map((side) => sideLogTerms(side, t))
+  if (sides.some((s) => s === null)) return out
+  const [l, r] = sides as SideLogTerm[][]
+  const rebuild = (f: (x: SideLogTerm) => Expr | null) => {
+    const side = (xs: readonly SideLogTerm[]): Expr | null => {
+      const terms: Expr[] = []
+      for (const x of xs) {
+        const y = f(x)
+        if (!y) return null
+        terms.push(y)
+      }
+      return sum(terms)
+    }
+    const a = side(l)
+    const b = side(r)
+    return a && b ? eq(a, b) : null
+  }
+  if (step.kind === 'logPower') {
+    // 2\ln u = \ln(2u)
+    const after = rebuild(({ term, log: lt }) => {
+      if (!lt || !contains(term, t) || ratAbs(lt.coef).n === 1n) return term
+      return logTermExpr(rat(ratSign(lt.coef)), lt.base, timesFactor(lt.arg, num(ratAbs(lt.coef).n)))
+    })
+    if (after) out.push({ id: 'eq-log-power-factor', after })
+    return out
+  }
+  const isConstant = (x: SideLogTerm) => !contains(x.term, t) && !x.log
+  // 1 = \log_2 1: die Zahl selbst in den Logarithmus (vorn wie im richtigen Schritt, isolate.ts)
+  const plainSide = (xs: readonly SideLogTerm[]): Expr => {
+    const front = xs.filter(isConstant).map(({ term }) => {
+      const { minus, size: inner } = unsigned(term)
+      const wrong = isE(base) ? fn('ln', inner) : log(base, inner)
+      return minus ? negated(wrong) : wrong
+    })
+    const rest = xs.filter((x) => !isConstant(x)).map((x) => x.term)
+    return sum(front.some((x) => x.kind === 'neg') ? [...rest, ...front] : [...front, ...rest])
+  }
+  out.push({ id: 'eq-log-number-plain', after: eq(plainSide(l), plainSide(r)) })
+  // \log_2(b - x) + 1 = \log_2(b - x + 1): nur, wenn auf der Seite der Zahl genau ein Logarithmus mit der Variable steht
+  const inside = (xs: readonly SideLogTerm[]): Expr | null => {
+    const logs = xs.filter((x) => contains(x.term, t))
+    const constants = xs.filter(isConstant)
+    if (constants.length === 0) return sum(xs.map((x) => x.term))
+    const lt = logs.length === 1 ? logs[0].log : null
+    if (!lt || !ratEq(lt.coef, rat(1)) || xs.length !== logs.length + constants.length) return null
+    return logTermExpr(lt.coef, lt.base, add(lt.arg, ...constants.map((x) => x.term)))
+  }
+  const a = inside(l)
+  const b = inside(r)
+  if (a && b) out.push({ id: 'eq-log-number-inside', after: eq(a, b) })
   return out
 }
 
@@ -732,6 +813,7 @@ function candidatesFor(steps: readonly RearrangeStep[], i: number, target: strin
     ...logLawMistakes(step, t),
     ...divideInsideLn(step),
     ...logCombineMistakes(step, t),
+    ...logEquationMistakes(step, t),
     ...powerSum(step, t),
     ...inverseMistakes(step),
     ...divideInsideArc(step),

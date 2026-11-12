@@ -5,12 +5,14 @@ import type { Expr } from '../expr/types.ts'
 import { holds, samplePoints } from '../rearrange/check.ts'
 import { rearrangeWrongAnswers } from '../rearrange/errorRules.ts'
 import { hasNestedFraction as hasNestedResult } from '../rearrange/finished.ts'
-import { solveTask, stepEquationLatex } from '../rearrange/isolate.ts'
+import { type RearrangeSolution, solveTask, stepEquationLatex } from '../rearrange/isolate.ts'
 import { type RearrangeTask, givenLatex, taskVariables } from '../rearrange/task.ts'
 import { type Rng, createRng } from '../random/rng.ts'
 import { REARRANGE_BLOCKS } from './blocks.ts'
 import { latexWidthEm } from './latexWidth.ts'
 import { formulaTaskAt } from './formulaTasks.ts'
+import { type LogEquationKind, logEquationKind } from './logEquationKinds.ts'
+import { buildLogEquation } from './logEquationTasks.ts'
 import { buildFamilyTask } from './rearrangeBlockKit.ts'
 import { rearrangeTaskBlocks } from './rearrangeBlocks.ts'
 import { hasRearrangeFamily } from './rearrangeFamilies.ts'
@@ -294,6 +296,8 @@ function isGood(t: RearrangeTask, level: Level, kit: boolean, novel = false, nar
   if (!solution || contains(solution.result, t.target)) return false
   // Wege der Engine ab Teil 7b nur in Vorlagen ab 7b (die älteren behalten ihre Aufgaben)
   if (solution.novel && !novel) return false
+  // Logarithmen auf beiden Seiten (M6 Schritt 4b-2) nur in ihrer eigenen Sammlung (die älteren Vorlagen behalten ihre Aufgaben)
+  if (solution.logPath) return false
   if (kit && solution.steps.length < MIN_STEPS[level]) return false
   if (toLatex(solution.result).length > MAX_RESULT_LATEX[level]) return false
   if (narrow && !fitsOneLine(solution.result)) return false
@@ -345,6 +349,7 @@ function sharedPick(ref: TaskRef, templates: readonly RearrangeTemplate[]): Rear
 export function likelyRearrangeTemplate(ref: TaskRef): RearrangeTemplate | null {
   const own = seedBlock(ref.seed)
   if (own?.block === 'formel' && formulaTaskAt(ref.level, own.s)) return FORMULA_TEMPLATE
+  if (own?.block === 'logeq' && logEquationKind(ref.level, own.s)) return LOG_EQUATION_TEMPLATE
   if (own) return hasRearrangeFamily(own.block, ref.level) ? familyTemplate(own.block, ref.level) : likelyRearrangeTemplate({ level: ref.level, seed: own.s })
   const templates = rearrangeTemplatesForLevel(ref.level)
   if (templates.length === 0) return null
@@ -393,14 +398,18 @@ function isGoodFamily(t: RearrangeTask, level: Level, block: string): boolean {
   if (level === 1 && block !== 'quadratisch' && occurrences(t).count !== 1) return false
   if (level <= 2 && hasNestedFraction(t)) return false
   const solution = solveTask(t)
-  if (!solution || contains(solution.result, t.target)) return false
+  if (!solution || contains(solution.result, t.target) || solution.logPath) return false
   if (solution.steps.length < (block === 'linear' ? LINEAR_MIN_STEPS : FAMILY_MIN_STEPS)[level]) return false
   if (toLatex(solution.result).length > MAX_RESULT_LATEX[level] || !fitsOneLine(solution.result)) return false
   const blocks = rearrangeTaskBlocks(t, solution)
   if (blocks.length !== 1 || blocks[0] !== block) return false
   if (level === 5 && subterms(solution.result).some((s) => s.kind === 'root' && s.arg.kind === 'add' && subterms(s.arg).some((p) => p.kind === 'div'))) return false
-  // Gegenprobe an viel mehr Stellen als im Baukasten (achtmal 16 mit eigenem Zufall): genug erlaubte Stellen und keine, an
-  // der die Rechnung numerisch kippt (z. B. \ln x + a fast 0 in einem Logarithmus)
+  return robust(t, solution)
+}
+
+// Gegenprobe an viel mehr Stellen als im Baukasten (achtmal 16 mit eigenem Zufall): genug erlaubte Stellen und keine, an
+// der die Rechnung numerisch kippt (z. B. \ln x + a fast 0 in einem Logarithmus)
+function robust(t: RearrangeTask, solution: RearrangeSolution): boolean {
   const sums = [t.equation.lhs, t.equation.rhs].flatMap((side) => subterms(side)).filter((e) => e.kind === 'add' && contains(e, t.target))
   for (let i = 1; i <= 8; i++) {
     const seed = i === 1 ? 'brauchbar' : `brauchbar-${i}`
@@ -408,6 +417,40 @@ function isGoodFamily(t: RearrangeTask, level: Level, block: string): boolean {
     if (points.length < 16 || !points.every((p) => holds(t.equation, p) === true && !cancels(sums, p))) return false
   }
   return true
+}
+
+// Logarithmen auf beiden Seiten (M6 Schritt 4b-2): wie bei einem Baustein, aber mit den Bausteinen der Art und nur über
+// die neuen Wege der Engine (sonst wäre es eine Aufgabe, die es schon gibt)
+function isGoodLogEquation(t: RearrangeTask, level: Level, kind: LogEquationKind): boolean {
+  const letters = taskVariables(t).length
+  const latex = equationToLatex(t.equation)
+  if (latex.length > MAX_TASK_LATEX || letters > 7 || letters < 2 || latexWidthEm(latex) > MAX_FAMILY_TASK_WIDTH) return false
+  const solution = solveTask(t)
+  if (!solution || contains(solution.result, t.target) || !solution.logPath) return false
+  if (solution.steps.length < FAMILY_MIN_STEPS[level]) return false
+  if (toLatex(solution.result).length > MAX_RESULT_LATEX[level] || !fitsOneLine(solution.result)) return false
+  const blocks = rearrangeTaskBlocks(t, solution)
+  if (blocks.length !== kind.blocks.length || !kind.blocks.every((b) => blocks.includes(b))) return false
+  return robust(t, solution)
+}
+
+// Nummern wie „logeq.2-4711": Art vorab fest (logEquationKinds.ts), dann so lange gewürfelt, bis die Aufgabe taugt
+function generateLogEquationTask(ref: TaskRef, kind: LogEquationKind, s: number): GeneratedRearrangeTask {
+  const rng = createRng(`umstellen-logeq:${ref.level}:${s}`)
+  for (let i = 0; i < FAMILY_ATTEMPTS; i++) {
+    const kit = buildLogEquation(rng, kind)
+    if (isGoodLogEquation(kit.task, ref.level, kind)) return { ref, template: LOG_EQUATION_TEMPLATE, task: kit.task, label: `Logarithmen: ${kit.label}` }
+  }
+  throw new Error(`Keine Aufgabe für logeq.${ref.level}-${s}`)
+}
+
+const LOG_EQUATION_TEMPLATE: RearrangeTemplate = {
+  id: 'logarithmen',
+  level: 1,
+  label: 'Logarithmen auf beiden Seiten',
+  build: () => {
+    throw new Error('Logarithmus-Aufgaben haben eigene Nummern (logEquationTasks.ts)')
+  },
 }
 
 // Hebt sich an der Stelle eine Summe mit der Variable fast auf (\ln(4x) + 2a nahe 0)? Dann kippt die Gegenprobe dort
@@ -455,6 +498,11 @@ export function generateRearrangeTask(ref: TaskRef): GeneratedRearrangeTask {
     if (own.block === 'formel') {
       const found = formulaTaskAt(ref.level, own.s)
       if (found) return { ref, template: FORMULA_TEMPLATE, task: found.task, label: `Formel: ${found.task.context ?? ''}` }
+      return { ...generateRearrangeTask({ level: ref.level, seed: own.s }), ref }
+    }
+    if (own.block === 'logeq') {
+      const kind = logEquationKind(ref.level, own.s)
+      if (kind) return generateLogEquationTask(ref, kind, own.s)
       return { ...generateRearrangeTask({ level: ref.level, seed: own.s }), ref }
     }
     if (hasRearrangeFamily(own.block, ref.level)) return generateFamilyTask(ref, own.block, own.s)

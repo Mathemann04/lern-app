@@ -48,6 +48,12 @@ const CATALOG: Array<{ id: string; lhs: string; rhs: string; target?: string; af
   { id: 'eq-log-sum', lhs: '\\ln(x+a)+\\ln(x-a)', rhs: 'b', after: '\\ln(2x) = b' },
   { id: 'eq-log-quotient', lhs: '\\ln(x+a)-\\ln x', rhs: 'b', after: '\\frac{\\ln(x + a)}{\\ln x} = b' },
   { id: 'eq-power-sum', lhs: 'a\\cdot2^{x+1}-b\\cdot2^{x}', rhs: 'c', after: 'a(2^{x} + 2) - b \\cdot 2^{x} = c' },
+  // M6 Schritt 4b-2: Logarithmen auf beiden Seiten
+  { id: 'eq-log-base-flipped', lhs: '\\log_{2}x', rhs: '\\log_{4}(x+a)', after: '\\log_{2} x = 2\\log_{2}(x + a)' },
+  { id: 'eq-log-base-quotient', lhs: '\\ln(x+a)+\\log_{3}(x+a)', rhs: 'b', after: '\\ln(x + a) + \\ln\\left(\\frac{x + a}{3}\\right) = b' },
+  { id: 'eq-log-power-factor', lhs: '2\\ln x', rhs: '\\ln(ax+b)', after: '\\ln(2x) = \\ln(ax + b)' },
+  { id: 'eq-log-number-plain', lhs: '\\log_{2}(x+a)', rhs: '\\log_{2}x+3', after: '\\log_{2}(x + a) = \\log_{2} 3 + \\log_{2} x' },
+  { id: 'eq-log-number-inside', lhs: '\\log_{2}(x+a)', rhs: '\\log_{2}x+3', after: '\\log_{2}(x + a) = \\log_{2}(x + 3)' },
   { id: 'eq-inverse-forgotten', lhs: '\\sin(kx)', rhs: 'w', after: 'kx = w' },
   { id: 'eq-inverse-reciprocal', lhs: '\\tan x', rhs: 'w', after: 'x = \\frac{1}{\\tan w}' },
   { id: 'eq-divide-inside-arc', lhs: '\\sin(kx)', rhs: 'w', after: 'x = \\arcsin\\left(\\frac{w}{k}\\right)' },
