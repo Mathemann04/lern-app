@@ -901,4 +901,9 @@ Neue Entscheidungen unten anfügen.
   Aufgaben. $\epsilon$ und $\varepsilon$ (ebenso $\phi$/$\varphi$, $\theta$/$\vartheta$) gelten beim Eintippen als
   dasselbe Zeichen, weil MathLive aus getipptem „epsilon“ $\epsilon$ macht. Bedeutungen genauer (waagrechter Abstand,
   eingetauchtes Volumen, noch nicht zerfallene Kerne).
-
+- 12.11.2026: Werkstoffkunde-Unterlagen gesichtet (Kapitel 1 bis 7 mit Aufgabenblättern, alle Seiten, je Kapitel ein
+  Helfer). Übersicht in eigenen Worten in docs/WERKSTOFFKUNDE.md, aufgebaut wie docs/AUFGABENARTEN.md, je Kapitel mit
+  Inhalten, Formeln, Rechenschemata mit Fallen, Aufgabenarten, Denkfehlern, Bildern aus Daten und Unklarem. Festlegungen
+  für M5: Wo Folienwerte von freien Tabellenwerken abweichen, gilt die Tabelle; Werte nur aus der Vorlesung werden als
+  Richtwert gekennzeichnet; Bilder der Folien werden nie nachgezeichnet; in Formeln eindeutige Zeichen (z. B. $c_0$ für
+  die Legierung statt des L der Vorlesung). Vier Fragen an den Nutzer stehen am Ende der Übersicht.
