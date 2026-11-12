@@ -33,7 +33,8 @@ async function solveStep(page: Page, askWhy: boolean): Promise<boolean> {
     if (askWhy) {
       await page.getByRole('button', { name: 'Warum ist das falsch?' }).click()
       const box = page.locator('[aria-live="polite"]')
-      await expect(box).toContainText(/\S{10,}/)
+      // nach der Rückmeldung steht eine Erklärung (früher: ein Wort mit zehn Zeichen; manche Erklärungen haben keins)
+      await expect(box).toContainText(/noch einmal\.\s*\S[\s\S]{29,}/)
     }
   }
   throw new Error('Keine richtige Antwort gefunden')
