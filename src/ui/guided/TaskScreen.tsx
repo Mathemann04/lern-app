@@ -18,20 +18,21 @@ import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
 import { CardSheetButton, TaskCardLinks } from '../cards/CardSheet.tsx'
 import type { CourseEngine } from '../courseEngines.ts'
-import { courseHref, mixHref, mixPracticeHref, practiceHref } from '../routes.ts'
+import { mixPracticeHref, practiceHref, reviewHref, taskExitHref } from '../routes.ts'
 import { LevelUpSuggestion } from '../task/LevelUpSuggestion.tsx'
 import { CheckBadge, FocusBanner, TaskIntro, TaskTopBar } from '../task/TaskParts.tsx'
 import { ChemFigure, FigureDrawing } from '../chem/ChemFigure.tsx'
 import { figureById } from '../../engine/chem/figures.ts'
 import { type ExplanationMode, useExplanationMode } from '../task/explanationMode.ts'
 
-type Props = { course: string; engine: CourseEngine; taskRef: TaskRef; focus?: string | null; mix?: string | null; free?: boolean }
+type Props = { course: string; engine: CourseEngine; taskRef: TaskRef; focus?: string | null; mix?: string | null; review?: string | null; free?: boolean }
 
 // course: Id des Themas, engine: seine Engine (Mathe oder Wissensfragen); focus: gezielt einen
 // typischen Fehler üben (der Fehler erscheint sicher als Antwort); mix: Id des Fachs, wenn die Aufgabe
 // aus „Themen mischen" kommt (weiter geht es dann in der Mischung); free: freier Modus der Chemie (S8b):
-// Schritte mit Zahl (step.numeric) werden über den Ziffernblock beantwortet, die übrigen wie geführt
-export function TaskScreen({ course, engine, taskRef, focus = null, mix = null, free = false }: Props) {
+// Schritte mit Zahl (step.numeric) werden über den Ziffernblock beantwortet, die übrigen wie geführt; review: Id des Fachs,
+// wenn die Aufgabe aus „Wiederholen" kommt (S11: weiter geht es mit der nächsten fälligen Frage, X zur Startseite)
+export function TaskScreen({ course, engine, taskRef, focus = null, mix = null, review = null, free = false }: Props) {
   const practiceMode: PracticeMode = free ? 'free' : 'guided'
   const { level, seed } = taskRef
   const task = useMemo(() => engine.planGuidedTask({ level, seed }, focus ?? undefined), [engine, level, seed, focus])
@@ -55,7 +56,7 @@ export function TaskScreen({ course, engine, taskRef, focus = null, mix = null, 
 
   return (
     <main className="space-y-6">
-      <TaskTopBar course={course} mix={mix} mode={mode} onCycleMode={cycle}>
+      <TaskTopBar course={course} mix={mix} review={review} mode={mode} onCycleMode={cycle}>
         <div
           className="h-2 overflow-hidden rounded-full bg-zinc-100"
           role="progressbar"
@@ -78,10 +79,10 @@ export function TaskScreen({ course, engine, taskRef, focus = null, mix = null, 
         </p>
       )}
 
-      <TaskHeader course={course} mix={mix} task={task} stepIndex={stepIndex} />
+      <TaskHeader course={course} mix={mix} review={review} task={task} stepIndex={stepIndex} />
 
       {finished ? (
-        <FinishView course={course} mix={mix} task={task} mistakes={mistakes} focus={focus} isQuestion={isQuestion} practiceMode={practiceMode} />
+        <FinishView course={course} mix={mix} review={review} task={task} mistakes={mistakes} focus={focus} isQuestion={isQuestion} practiceMode={practiceMode} />
       ) : (
         <StepView
           key={stepIndex}
@@ -100,11 +101,11 @@ export function TaskScreen({ course, engine, taskRef, focus = null, mix = null, 
   )
 }
 
-function TaskHeader({ course, mix, task, stepIndex }: { course: string; mix: string | null; task: GuidedTaskBase; stepIndex: number }) {
+function TaskHeader({ course, mix, review, task, stepIndex }: { course: string; mix: string | null; review: string | null; task: GuidedTaskBase; stepIndex: number }) {
   const established = task.steps.slice(0, stepIndex).flatMap((s) => s.established ?? [])
   return (
     <section className="space-y-3">
-      <TaskIntro course={course} mix={mix} taskRef={task.ref} functionLatex={task.functionLatex} instruction={task.instruction} note={task.note} />
+      <TaskIntro course={course} mix={mix} review={review} taskRef={task.ref} functionLatex={task.functionLatex} instruction={task.instruction} note={task.note} />
       {established.length > 0 && (
         <div className="space-y-2 rounded-xl bg-zinc-50 px-4 py-3" aria-label="Bisher">
           <p className="text-sm text-zinc-500">Bisher</p>
@@ -903,9 +904,9 @@ function cardSheetTitle(step: GuidedStep): string {
   return step.cards.length === 1 ? 'Lernkarte zu diesem Schritt' : 'Lernkarten zu diesem Schritt'
 }
 
-type FinishProps = { course: string; mix: string | null; task: GuidedTaskBase; mistakes: number; focus: string | null; isQuestion: boolean; practiceMode: PracticeMode }
+type FinishProps = { course: string; mix: string | null; review: string | null; task: GuidedTaskBase; mistakes: number; focus: string | null; isQuestion: boolean; practiceMode: PracticeMode }
 
-function FinishView({ course, mix, task, mistakes, focus, isQuestion, practiceMode }: FinishProps) {
+function FinishView({ course, mix, review, task, mistakes, focus, isQuestion, practiceMode }: FinishProps) {
   const headingRef = useRef<HTMLHeadingElement>(null)
   useEffect(() => {
     headingRef.current?.focus({ preventScroll: true })
@@ -958,17 +959,17 @@ function FinishView({ course, mix, task, mistakes, focus, isQuestion, practiceMo
           {task.resultFigure && <ChemFigure id={task.resultFigure} />}
         </div>
       )}
-      {/* In der Mischung kein Vorschlag für eine höhere Stufe: Die Stufe gilt dort für alle Themen */}
-      {!mix && <LevelUpSuggestion course={course} level={task.ref.level} mode={practiceMode} />}
+      {/* In der Mischung kein Vorschlag für eine höhere Stufe: Die Stufe gilt dort für alle Themen; in der Wiederholung auch nicht */}
+      {!mix && !review && <LevelUpSuggestion course={course} level={task.ref.level} mode={practiceMode} />}
       <div className="flex flex-col gap-3 sm:flex-row">
         <a
-          href={mix ? mixPracticeHref(mix, task.ref.level) : practiceHref(course, task.ref.level, practiceMode, focus)}
+          href={review ? reviewHref(review) : mix ? mixPracticeHref(mix, task.ref.level) : practiceHref(course, task.ref.level, practiceMode, focus)}
           className="flex-1 rounded-xl bg-accent-700 px-4 py-3 text-center text-lg font-medium text-on-accent hover:bg-accent-800"
         >
           Nächste Aufgabe
         </a>
         <a
-          href={mix ? mixHref(mix) : courseHref(course)}
+          href={taskExitHref(course, mix, review)}
           className="flex-1 rounded-xl border border-zinc-300 px-4 py-3 text-center text-lg font-medium hover:bg-zinc-50"
         >
           Zur Übersicht

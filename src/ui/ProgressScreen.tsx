@@ -2,12 +2,13 @@ import { useState } from 'react'
 import { findError, isErrorOf } from '../engine/errorCatalog.ts'
 import { levelSummary, resetProgress, topErrors, useProgress } from '../state/progress.ts'
 import { clearRounds } from '../state/questionRounds.ts'
-import { clearMockHistory, clearMockSession } from '../state/mockExam.ts'
+import { clearExamPractice, useExamPractice } from '../state/examPractice.ts'
+import { clearMockHistory, clearMockSession, useMockHistory } from '../state/mockExam.ts'
 import { clearReviews } from '../state/reviews.ts'
 import { useSettings } from '../state/settings.ts'
-import { AVAILABLE_COURSES, type Course, courseById, hasLevelNames, levelName, playableLevel } from './catalog.ts'
+import { AVAILABLE_COURSES, type Course, SUBJECTS, courseById, hasLevelNames, levelName, playableLevel } from './catalog.ts'
 import { ErrorShape } from './ErrorShape.tsx'
-import { practiceHref } from './routes.ts'
+import { examOverviewHref, practiceHref } from './routes.ts'
 import { RecentDots } from './RecentDots.tsx'
 import { RichText } from './RichText.tsx'
 
@@ -17,11 +18,26 @@ import { RichText } from './RichText.tsx'
 export function ProgressScreen() {
   const progress = useProgress()
   const [confirmReset, setConfirmReset] = useState(false)
-  const anything = progress.attempts.length > 0 || Object.keys(progress.errors).some((id) => findError(id))
+  const examPractice = useExamPractice()
+  const mockHistory = useMockHistory()
+  const anything = progress.attempts.length > 0 || Object.keys(progress.errors).some((id) => findError(id)) || examPractice.length > 0 || mockHistory.length > 0
 
   return (
     <main className="space-y-12">
-      <h1 className="text-3xl font-semibold tracking-tight">Dein Fortschritt</h1>
+      <div className="space-y-3">
+        <h1 className="text-3xl font-semibold tracking-tight">Dein Fortschritt</h1>
+        {/* Fächer mit Probeklausur: wie sicher die Klausuraufgaben sitzen, steht im Klausur-Überblick (S11) */}
+        {SUBJECTS.filter((subject) => subject.mock).map((subject) => (
+          <a
+            key={subject.id}
+            href={examOverviewHref(subject.id)}
+            className="-ml-2 inline-flex min-h-11 items-center gap-1 rounded-lg px-2 font-medium text-accent-700 hover:bg-accent-50"
+          >
+            Klausur-Überblick {subject.title}
+            <span aria-hidden>→</span>
+          </a>
+        ))}
+      </div>
 
       {AVAILABLE_COURSES.map((course) => (
         <CourseProgress key={course.id} course={course} />
@@ -37,12 +53,13 @@ export function ProgressScreen() {
                   type="button"
                   onClick={() => {
                     resetProgress()
-                    // Die Runden der Wissensfragen beginnen von vorn, die Wiederholung, die Probeklausur und ihr Verlauf sind leer;
-                    // gemeldete Fragen bleiben
+                    // Die Runden der Wissensfragen beginnen von vorn, die Wiederholung, die Probeklausur, ihr Verlauf und die
+                    // Ergebnisse der Klausuraufgaben sind leer; gemeldete Fragen bleiben
                     clearRounds()
                     clearReviews()
                     clearMockSession()
                     clearMockHistory()
+                    clearExamPractice()
                     setConfirmReset(false)
                   }}
                   className="rounded-xl bg-red-700 px-4 py-2.5 font-medium text-on-accent hover:bg-red-800"

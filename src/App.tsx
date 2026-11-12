@@ -30,6 +30,10 @@ const MixPracticePage = lazy(() => loadPractice().then((m) => ({ default: m.MixP
 const ExamTaskPage = lazy(() => import('./ui/exam/ExamTaskPage.tsx'))
 // Probeklausur: Deckblatt, Klausur mit Uhr und Auswertung
 const MockExamPage = lazy(() => import('./ui/exam/MockExamPage.tsx'))
+// Klausur-Überblick (S11): ohne Engine, aber nur bei Bedarf
+const ExamOverviewPage = lazy(() => import('./ui/exam/ExamOverviewPage.tsx'))
+// „Wiederholen" über alle Themen eines Fachs: lädt die Engine des Themas der fälligen Frage
+const ReviewPage = lazy(() => import('./ui/ReviewPage.tsx'))
 
 export function App() {
   const pwa = usePwa()
@@ -151,7 +155,7 @@ function Page({ route }: { route: Route }) {
     case 'cards':
       return <CardsPage folder={route.folder} card={route.card} />
     case 'practice':
-      return <PracticePage course={route.course} mode={route.mode} level={route.level} seed={route.seed} focus={route.focus} mix={route.mix} />
+      return <PracticePage course={route.course} mode={route.mode} level={route.level} seed={route.seed} focus={route.focus} mix={route.mix} review={route.review} />
     case 'mix':
       return <MixScreen key={route.subject} id={route.subject} />
     case 'mixPractice':
@@ -160,6 +164,10 @@ function Page({ route }: { route: Route }) {
       return <ExamTaskPage key={`${route.task}-${route.seed}`} subject={route.subject} task={route.task} seed={route.seed} />
     case 'mock':
       return <MockExamPage key={route.id ?? 'deckblatt'} subject={route.subject} id={route.id} />
+    case 'examOverview':
+      return <ExamOverviewPage key={route.subject} subject={route.subject} />
+    case 'review':
+      return <ReviewPage key={route.subject} subject={route.subject} />
     case 'home':
       return <HomeScreen />
   }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { questionSeed } from '../engine/quiz/numbers.ts'
-import { MAX_REVIEWS, REVIEWS_KEY, clearReviews, isInReview, parseReviews, recordReview, rememberTaskShown, reviewsOf } from './reviews.ts'
+import { MAX_REVIEWS, REVIEWS_KEY, clearReviews, dueReviewsOf, isInReview, parseReviews, recordReview, rememberTaskShown, reviewsOf, waitingReviewCount } from './reviews.ts'
 import type { KeyValueStore } from './storage.ts'
 
 function memoryStore(initial: Record<string, string> = {}): KeyValueStore & { data: Map<string, string> } {
@@ -47,5 +47,23 @@ describe('Wiederholung speichern', () => {
     expect(Object.keys(items)).toHaveLength(MAX_REVIEWS)
     expect(items['chem-atombau:1']).toBeUndefined()
     expect(items[`chem-atombau:${MAX_REVIEWS + 5}`]).toBeDefined()
+  })
+})
+
+describe('Wiederholung über alle Themen eines Fachs (S11)', () => {
+  it('zählt fällige und wartende Fragen mehrerer Themen', () => {
+    const store = memoryStore()
+    recordReview('chem-atombau', questionSeed(101, 3), false, 10, store)
+    recordReview('chem-ionen', questionSeed(7, 1), false, 5, store)
+    const courses = ['chem-atombau', 'chem-ionen']
+    expect(dueReviewsOf(courses, 20, store)).toEqual([])
+    expect(waitingReviewCount(courses, 20, store)).toBe(2)
+    for (const s of [1, 2, 3]) rememberTaskShown('brueche', 1, s, store)
+    expect(dueReviewsOf(courses, 20, store).map((d) => [d.course, d.no])).toEqual([
+      ['chem-ionen', 7],
+      ['chem-atombau', 101],
+    ])
+    expect(dueReviewsOf(['chem-ionen'], 20, store)).toHaveLength(1)
+    expect(waitingReviewCount(courses, 20, store)).toBe(0)
   })
 })

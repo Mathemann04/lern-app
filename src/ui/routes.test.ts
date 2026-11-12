@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { ATOMBAU } from './catalog.ts'
-import { areaHref, cardFolderHref, courseHref, examTaskHref, mixHref, mockHref, mixPracticeHref, parseRoute, practiceHref, sectionOf, taskHref } from './routes.ts'
+import { areaHref, cardFolderHref, courseHref, examOverviewHref, examTaskHref, mixHref, mockHref, mixPracticeHref, parseRoute, practiceHref, reviewHref, sectionOf, taskHref } from './routes.ts'
 
 describe('parseRoute', () => {
   it('erkennt die Seiten', () => {
@@ -39,27 +39,27 @@ describe('parseRoute', () => {
   })
 
   it('erkennt Übungsaufgaben mit und ohne Nummer, je Thema', () => {
-    expect(parseRoute('/ueben/brueche/1')).toEqual({ page: 'practice', course: 'brueche', mode: 'guided', level: 1, seed: null, focus: null, mix: null })
-    expect(parseRoute('/ueben/brueche/1-4711')).toEqual({ page: 'practice', course: 'brueche', mode: 'guided', level: 1, seed: 4711, focus: null, mix: null })
-    expect(parseRoute('/ueben/ableiten/3-17')).toEqual({ page: 'practice', course: 'ableiten', mode: 'guided', level: 3, seed: 17, focus: null, mix: null })
+    expect(parseRoute('/ueben/brueche/1')).toEqual({ page: 'practice', course: 'brueche', mode: 'guided', level: 1, seed: null, focus: null, mix: null, review: null })
+    expect(parseRoute('/ueben/brueche/1-4711')).toEqual({ page: 'practice', course: 'brueche', mode: 'guided', level: 1, seed: 4711, focus: null, mix: null, review: null })
+    expect(parseRoute('/ueben/ableiten/3-17')).toEqual({ page: 'practice', course: 'ableiten', mode: 'guided', level: 3, seed: 17, focus: null, mix: null, review: null })
     expect(parseRoute('/ueben/brueche/9')).toEqual({ page: 'home' })
     expect(parseRoute('/ueben/gibt-es-nicht/1')).toEqual({ page: 'home' })
-    expect(parseRoute('/ueben/umstellen/2-5')).toEqual({ page: 'practice', course: 'umstellen', mode: 'guided', level: 2, seed: 5, focus: null, mix: null })
+    expect(parseRoute('/ueben/umstellen/2-5')).toEqual({ page: 'practice', course: 'umstellen', mode: 'guided', level: 2, seed: 5, focus: null, mix: null, review: null })
     expect(parseRoute('/ueben/potenzen/1')).toEqual({ page: 'home' })
     expect(taskHref('brueche', { level: 1, seed: 4711 })).toBe('#/ueben/brueche/1-4711')
     expect(practiceHref('brueche', 2)).toBe('#/ueben/brueche/2')
   })
 
   it('führt ältere Adressen ohne Thema zum Ableiten', () => {
-    expect(parseRoute('/ueben/1')).toEqual({ page: 'practice', course: 'ableiten', mode: 'guided', level: 1, seed: null, focus: null, mix: null })
-    expect(parseRoute('/ueben/1-4711')).toEqual({ page: 'practice', course: 'ableiten', mode: 'guided', level: 1, seed: 4711, focus: null, mix: null })
-    expect(parseRoute('/frei/2-17')).toEqual({ page: 'practice', course: 'ableiten', mode: 'free', level: 2, seed: 17, focus: null, mix: null })
+    expect(parseRoute('/ueben/1')).toEqual({ page: 'practice', course: 'ableiten', mode: 'guided', level: 1, seed: null, focus: null, mix: null, review: null })
+    expect(parseRoute('/ueben/1-4711')).toEqual({ page: 'practice', course: 'ableiten', mode: 'guided', level: 1, seed: 4711, focus: null, mix: null, review: null })
+    expect(parseRoute('/frei/2-17')).toEqual({ page: 'practice', course: 'ableiten', mode: 'free', level: 2, seed: 17, focus: null, mix: null, review: null })
     expect(parseRoute('/ueben/9')).toEqual({ page: 'home' })
   })
 
   it('unterscheidet geführt und frei', () => {
-    expect(parseRoute('/frei/ableiten/2')).toEqual({ page: 'practice', course: 'ableiten', mode: 'free', level: 2, seed: null, focus: null, mix: null })
-    expect(parseRoute('/frei/ableiten/2-17')).toEqual({ page: 'practice', course: 'ableiten', mode: 'free', level: 2, seed: 17, focus: null, mix: null })
+    expect(parseRoute('/frei/ableiten/2')).toEqual({ page: 'practice', course: 'ableiten', mode: 'free', level: 2, seed: null, focus: null, mix: null, review: null })
+    expect(parseRoute('/frei/ableiten/2-17')).toEqual({ page: 'practice', course: 'ableiten', mode: 'free', level: 2, seed: 17, focus: null, mix: null, review: null })
     expect(practiceHref('ableiten', 3, 'free')).toBe('#/frei/ableiten/3')
     expect(taskHref('ableiten', { level: 2, seed: 17 }, 'free')).toBe('#/frei/ableiten/2-17')
   })
@@ -73,9 +73,10 @@ describe('parseRoute', () => {
       seed: 17,
       focus: 'cos-sign',
       mix: null,
+      review: null,
     })
     expect(parseRoute('/ueben/2-17?fokus=cos-sign')).toMatchObject({ course: 'ableiten', seed: 17, focus: 'cos-sign' })
-    expect(parseRoute('/frei/ableiten/3?fokus=')).toEqual({ page: 'practice', course: 'ableiten', mode: 'free', level: 3, seed: null, focus: null, mix: null })
+    expect(parseRoute('/frei/ableiten/3?fokus=')).toEqual({ page: 'practice', course: 'ableiten', mode: 'free', level: 3, seed: null, focus: null, mix: null, review: null })
     expect(practiceHref('ableiten', 2, 'guided', 'cos-sign')).toBe('#/ueben/ableiten/2?fokus=cos-sign')
     expect(taskHref('ableiten', { level: 2, seed: 17 }, 'free', 'cos-sign')).toBe('#/frei/ableiten/2-17?fokus=cos-sign')
   })
@@ -110,17 +111,18 @@ describe('Themen mischen', () => {
       seed: 500_123,
       focus: null,
       mix: 'chemie',
+      review: null,
     })
     expect(parseRoute(`/ueben/${ATOMBAU}/2?mischen=chemie`)).toMatchObject({ page: 'practice', seed: null, mix: 'chemie' })
     expect(parseRoute(`/frei/${ATOMBAU}/1-101?mischen=chemie`)).toMatchObject({ mode: 'free', mix: 'chemie' })
     // falsches Fach, Fach ohne Mischung, unbekannt oder leer: ohne Mischung
-    expect(parseRoute('/ueben/brueche/1-4711?mischen=chemie')).toMatchObject({ course: 'brueche', mix: null })
-    expect(parseRoute('/ueben/brueche/1-4711?mischen=mathe')).toMatchObject({ course: 'brueche', mix: null })
-    expect(parseRoute(`/ueben/${ATOMBAU}/1-101?mischen=gibt-es-nicht`)).toMatchObject({ mix: null })
-    expect(parseRoute(`/ueben/${ATOMBAU}/1-101?mischen=`)).toMatchObject({ mix: null })
+    expect(parseRoute('/ueben/brueche/1-4711?mischen=chemie')).toMatchObject({ course: 'brueche', mix: null, review: null })
+    expect(parseRoute('/ueben/brueche/1-4711?mischen=mathe')).toMatchObject({ course: 'brueche', mix: null, review: null })
+    expect(parseRoute(`/ueben/${ATOMBAU}/1-101?mischen=gibt-es-nicht`)).toMatchObject({ mix: null, review: null })
+    expect(parseRoute(`/ueben/${ATOMBAU}/1-101?mischen=`)).toMatchObject({ mix: null, review: null })
     // gezielt üben und Mischung zusammen: nur gezielt
-    expect(parseRoute(`/ueben/${ATOMBAU}/1-101?fokus=chem-mis-x&mischen=chemie`)).toMatchObject({ focus: 'chem-mis-x', mix: null })
-    expect(parseRoute(`/ueben/${ATOMBAU}/1-101?mischen=chemie&fokus=chem-mis-x`)).toMatchObject({ focus: 'chem-mis-x', mix: null })
+    expect(parseRoute(`/ueben/${ATOMBAU}/1-101?fokus=chem-mis-x&mischen=chemie`)).toMatchObject({ focus: 'chem-mis-x', mix: null, review: null })
+    expect(parseRoute(`/ueben/${ATOMBAU}/1-101?mischen=chemie&fokus=chem-mis-x`)).toMatchObject({ focus: 'chem-mis-x', mix: null, review: null })
   })
 
   it('schreibt die Mischung in Aufgabenadressen, gezielt üben gewinnt', () => {
@@ -180,5 +182,40 @@ describe('Probeklausur (S9)', () => {
     expect(mockHref('chemie', 7)).toBe('#/probeklausur/chemie/7')
     expect(sectionOf(parseRoute('/probeklausur/chemie'))).toBe('home')
     expect(sectionOf(parseRoute('/probeklausur/chemie/7'))).toBeNull()
+  })
+})
+
+describe('Klausur-Start (S11)', () => {
+  it('erkennt den Klausur-Überblick, nur für Fächer mit Probeklausur', () => {
+    expect(parseRoute('/klausur/chemie')).toEqual({ page: 'examOverview', subject: 'chemie' })
+    expect(parseRoute('/klausur/mathe')).toEqual({ page: 'home' })
+    expect(parseRoute('/klausur/gibtsnicht')).toEqual({ page: 'home' })
+    expect(parseRoute('/klausur/chemie/aufgabe')).toEqual({ page: 'home' })
+    expect(examOverviewHref('chemie')).toBe('#/klausur/chemie')
+    expect(parseRoute(examOverviewHref('chemie').slice(1))).toEqual({ page: 'examOverview', subject: 'chemie' })
+    expect(sectionOf(parseRoute('/klausur/chemie'))).toBe('home')
+  })
+
+  it('erkennt „Wiederholen" eines Fachs mit spielbaren Themen', () => {
+    expect(parseRoute('/wiederholen/chemie')).toEqual({ page: 'review', subject: 'chemie' })
+    expect(parseRoute('/wiederholen/mathe')).toEqual({ page: 'review', subject: 'mathe' })
+    expect(parseRoute('/wiederholen/physik')).toEqual({ page: 'home' })
+    expect(parseRoute('/wiederholen/gibtsnicht')).toEqual({ page: 'home' })
+    expect(parseRoute('/wiederholen')).toEqual({ page: 'home' })
+    expect(reviewHref('chemie')).toBe('#/wiederholen/chemie')
+    expect(sectionOf(parseRoute('/wiederholen/chemie'))).toBe('home')
+  })
+
+  it('liest und schreibt die Wiederholung an Aufgaben, nur passend zum Fach; gezielt üben und Mischung gewinnen', () => {
+    const href = taskHref(ATOMBAU, { level: 2, seed: 505_053 }, 'guided', null, null, 'chemie')
+    expect(href).toBe(`#/ueben/${ATOMBAU}/2-505053?wiederholen=chemie`)
+    expect(parseRoute(href.slice(1))).toEqual({ page: 'practice', course: ATOMBAU, mode: 'guided', level: 2, seed: 505_053, focus: null, mix: null, review: 'chemie' })
+    expect(practiceHref(ATOMBAU, 1, 'guided', null, null, 'chemie')).toBe(`#/ueben/${ATOMBAU}/1?wiederholen=chemie`)
+    expect(taskHref(ATOMBAU, { level: 2, seed: 101 }, 'guided', null, 'chemie', 'chemie')).toBe(`#/ueben/${ATOMBAU}/2-101?mischen=chemie`)
+    expect(parseRoute('/ueben/brueche/1-4711?wiederholen=chemie')).toMatchObject({ review: null })
+    expect(parseRoute(`/ueben/${ATOMBAU}/1-101?wiederholen=mathe`)).toMatchObject({ review: null })
+    expect(parseRoute(`/ueben/${ATOMBAU}/1-101?wiederholen=chemie&mischen=chemie`)).toMatchObject({ mix: 'chemie', review: null })
+    expect(parseRoute(`/ueben/${ATOMBAU}/1-101?wiederholen=chemie&fokus=chem-mis-x`)).toMatchObject({ focus: 'chem-mis-x', review: null })
+    expect(sectionOf(parseRoute(href.slice(1)))).toBeNull()
   })
 })

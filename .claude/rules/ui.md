@@ -100,3 +100,7 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
     reduzieren").
 - `.github/workflows/app.yml` installiert den Test-Browser notfalls ohne Zusatzpakete (`--with-deps` scheitert, wenn GitHub
   die Ubuntu-Server nicht erreicht; dann fiel bis 11.11.2026 auch die Veröffentlichung aus).
+- `#/klausur/<fach>` (Klausur-Überblick, Fächer mit `mock`) und `#/wiederholen/<fach>` (heute fällige Wiederholung, leitet zur Aufgabe mit
+  `?wiederholen=<fach>`; Vorrang `fokus` vor `mischen` vor `wiederholen`; `taskExitHref` in `routes.ts` sagt, wohin X und „Zur
+  Übersicht" führen). Beide lädt `App.tsx` erst bei Bedarf; Startseite und Überblick kommen ohne Chemie-Engine und KaTeX aus (nur
+  `engine/quiz/schedule.ts` und `numbers.ts`). Der Fortschritt verweist oben auf den Klausur-Überblick.

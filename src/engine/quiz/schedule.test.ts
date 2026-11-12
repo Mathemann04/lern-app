@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { VARIANTS } from './numbers.ts'
-import { EMPTY_REVIEWS, LAST_BOX, REVIEW_AFTER_TASKS, REVIEW_DAYS, type ReviewState, afterAnswer, courseReviews, noteShown, otherVariant, reviewKey } from './schedule.ts'
+import { EMPTY_REVIEWS, LAST_BOX, REVIEW_AFTER_TASKS, REVIEW_DAYS, type ReviewState, afterAnswer, courseReviews, dueAcross, noteShown, otherVariant, reviewKey } from './schedule.ts'
 
 const DAY = 24 * 60 * 60 * 1000
 const KEY = reviewKey('chem-atombau', 101)
@@ -73,5 +73,30 @@ describe('Wiederholung der Wissensfragen', () => {
         expect(other).toBeLessThan(VARIANTS)
       }
     }
+  })
+})
+
+describe('Fällige Fragen mehrerer Themen (S11)', () => {
+  it('sammelt die fälligen Fragen der genannten Themen, die am längsten fällige zuerst', () => {
+    const item = (answeredAt: number, dueTick = 0, dueAt = 0) => ({ box: 1, dueTick, dueAt, variant: 3, answeredAt })
+    const state: ReviewState = {
+      tick: 10,
+      last: null,
+      items: {
+        'chem-atombau:5': item(300),
+        'chem-atombau:7': item(100),
+        'chem-ionen:2': item(200),
+        // wartet noch auf andere Aufgaben bzw. auf morgen
+        'chem-ionen:3': item(50, 11),
+        'chem-ionen:4': item(60, 0, 5000),
+        // anderes Fach
+        'chem-mwg:1': item(10),
+      },
+    }
+    const due = dueAcross(state, ['chem-atombau', 'chem-ionen'], 1000)
+    expect(due.map((d) => `${d.course}:${d.no}`)).toEqual(['chem-atombau:7', 'chem-ionen:2', 'chem-atombau:5'])
+    expect(due[0]).toEqual({ course: 'chem-atombau', no: 7, variant: 3, answeredAt: 100 })
+    expect(dueAcross(state, [], 1000)).toEqual([])
+    expect(dueAcross(EMPTY_REVIEWS, ['chem-atombau'], 1000)).toEqual([])
   })
 })

@@ -268,3 +268,13 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   bei Mehrfachbindung mit Hinweis; VSEPR-Zählung nie als falsche Antwort), O₂ in `molecules.ts` (44 Moleküle), `sigma-pi` mit allen
   Molekülen mit Mehrfachbindung (auch O₂, N₂), `EXERCISE_SALTS`/`isExcludedSalt` in `generators/salze.ts` (auch `saltPart` in task3),
   Legierung auf `met-metallbindung`, Denkfehler `chem-mis-mo-lone-whole-molecule` und `chem-mis-me-alloy-metals-only`.
+- Klausur-Start (S11, allgemein für Fächer mit `mock`): Karte „Klausur Teil N" oben im Fach auf der Startseite (`ExamStartCard` in
+  `HomeScreen.tsx`, ersetzt `MockTile`) mit „Wiederholen" (Zahl der fälligen Fragen, bei 0 „nichts fällig" ohne Link), „Probeklausur"
+  und „Klausur-Überblick". Überblick `ui/exam/ExamOverviewPage.tsx` unter `#/klausur/<fach>`: je Klausuraufgabe die Stufe „wie sicher"
+  aus den letzten drei Versuchen (`ui/examOverview.ts`: `examAttempts` mit Übungen aus `state/examPractice.ts` und den Aufgabenpunkten
+  in `MockRecord.tasks` in der Reihenfolge `mockTaskOrder`, Test gegen `CHEM_MOCK.tasks`; `confidenceOf` unter 50 % unsicher, unter 80 %
+  fast sicher, sonst sicher), dazu letzte und beste Probeklausur und die Wiederholung. „Wiederholen" `#/wiederholen/<fach>`
+  (`ui/ReviewPage.tsx`, `ui/reviewPick.ts`, `dueAcross` in `engine/quiz/schedule.ts`): die am längsten fällige Frage aller Themen in
+  anderer Fassung, Stufe über `resolve`, Weiterleitung mit `?wiederholen=<fach>`; dort führen X und „Zur Übersicht" zur Startseite,
+  „Nächste Aufgabe" zur nächsten fälligen Frage; kein Stufenvorschlag; `lastCourse` und `lastMix` bleiben. Browser-Tests
+  `e2e/exam-start.spec.ts`.

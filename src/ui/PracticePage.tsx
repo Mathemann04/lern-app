@@ -11,19 +11,21 @@ import { type CourseEngine, loadCourseEngine } from './courseEngines.ts'
 import { type MixEngine, pickMixed } from './mix.ts'
 import { recentForms, rememberForm } from './recentForms.ts'
 import { knownFocus, newTaskHref, pickNewSeed, questionNoOf } from './practice.ts'
-import { courseHref, mixHref, mixPracticeHref, practiceHref, taskHref } from './routes.ts'
+import { mixHref, mixPracticeHref, practiceHref, reviewHref, taskExitHref, taskHref } from './routes.ts'
 import { mixBlockedHint, mixedCourses, selectedParts } from './selection.ts'
 
 // Eine Aufgabe üben, geführt oder frei; mix: Id des Fachs, wenn die Aufgabe aus „Themen mischen"
 // kommt (?mischen=): Dann führen X, „Zur Übersicht" und „Nächste Aufgabe" zur Mischung zurück, und
 // Weiterleitungen behalten die Mischung. Fortschritt, Fehler, Runden und Formen zählen beim Thema.
+// review: Id des Fachs, wenn die Aufgabe aus „Wiederholen" kommt (?wiederholen=, S11): X und „Zur Übersicht" führen zur
+// Startseite, „Nächste Aufgabe" zur nächsten fälligen Frage; „Weitermachen" bleibt, wie es war (Abstecher).
 
 // Der freie Modus mit der Mathe-Tastatur ist groß und wird erst bei Bedarf geladen
 const FreeTaskScreen = lazy(() => import('./free/FreeTaskScreen.tsx'))
 
-type PracticeProps = { course: string; mode: PracticeMode; level: Level; seed: number | null; focus: string | null; mix: string | null }
+type PracticeProps = { course: string; mode: PracticeMode; level: Level; seed: number | null; focus: string | null; mix: string | null; review: string | null }
 
-export default function PracticePage({ course: courseId, mode: wantedMode, level, seed, focus: wanted, mix }: PracticeProps) {
+export default function PracticePage({ course: courseId, mode: wantedMode, level, seed, focus: wanted, mix, review }: PracticeProps) {
   const { course } = courseById(courseId)!
   const focus = knownFocus(courseId, wanted)
   // Ohne freien Modus: geführt mit derselben Aufgabe
@@ -40,7 +42,7 @@ export default function PracticePage({ course: courseId, mode: wantedMode, level
   useEffect(() => {
     if (tooHigh) {
       window.location.replace(
-        seed === null ? practiceHref(courseId, highest, mode, focus, mix) : taskHref(courseId, { level: highest, seed }, mode, focus, mix),
+        seed === null ? practiceHref(courseId, highest, mode, focus, mix, review) : taskHref(courseId, { level: highest, seed }, mode, focus, mix, review),
       )
       return
     }
@@ -49,15 +51,23 @@ export default function PracticePage({ course: courseId, mode: wantedMode, level
       const timer = window.setTimeout(() => void newTaskHref(courseId, mode, level, focus).then((href) => window.location.replace(href)), 30)
       return () => window.clearTimeout(timer)
     }
-    if (seed !== null && mode !== wantedMode) window.location.replace(taskHref(courseId, { level, seed }, mode, focus, mix))
-  }, [courseId, mode, wantedMode, level, seed, focus, pick, tooHigh, highest, mix])
+    if (seed !== null && mode !== wantedMode) window.location.replace(taskHref(courseId, { level, seed }, mode, focus, mix, review))
+  }, [courseId, mode, wantedMode, level, seed, focus, pick, tooHigh, highest, mix, review])
 
-  // „Weitermachen" auf der Startseite führt zum zuletzt geübten Thema bzw. zur zuletzt geübten Mischung
+  // „Weitermachen" auf der Startseite führt zum zuletzt geübten Thema bzw. zur zuletzt geübten Mischung; die
+  // Wiederholung ist ein Abstecher und ändert daran nichts
   const { lastCourse } = useSettings()
   useEffect(() => {
+    if (review) return
     if (lastCourse !== courseId) updateSettings({ lastCourse: courseId })
     setLastMix(mix)
-  }, [lastCourse, courseId, mix])
+  }, [lastCourse, courseId, mix, review])
+
+  // ohne Nummer in der Wiederholung: zur nächsten fälligen Frage
+  useEffect(() => {
+    if (review && seed === null) window.location.replace(reviewHref(review))
+  }, [review, seed])
+  if (review && seed === null) return null
 
   if (pick) return <PickNewTask course={courseId} level={level} mode={mode} mix={mix} />
   if (seed === null && focus && !tooHigh) return <p className="text-zinc-500">Suche eine Aufgabe, in der dieser Fehler passieren kann …</p>
@@ -66,32 +76,32 @@ export default function PracticePage({ course: courseId, mode: wantedMode, level
     return (
       <main className="space-y-4">
         <h1 className="text-2xl font-semibold">{levelName(courseId, level)} kommt bald</h1>
-        <a href={mix ? mixHref(mix) : courseHref(courseId)} className="inline-block rounded-xl border border-zinc-300 px-4 py-2.5 font-medium hover:bg-zinc-50">
+        <a href={taskExitHref(courseId, mix, review)} className="inline-block rounded-xl border border-zinc-300 px-4 py-2.5 font-medium hover:bg-zinc-50">
           Zur Übersicht
         </a>
       </main>
     )
   }
   const taskRef = { level, seed: seed! }
-  const key = `${courseId}-${level}-${seed}-${focus ?? ''}-${mix ?? ''}`
-  return <ResolvedPractice key={key} course={courseId} mode={mode} taskRef={taskRef} focus={focus} mix={mix} />
+  const key = `${courseId}-${level}-${seed}-${focus ?? ''}-${mix ?? ''}-${review ?? ''}`
+  return <ResolvedPractice key={key} course={courseId} mode={mode} taskRef={taskRef} focus={focus} mix={mix} review={review} />
 }
 
-type ResolvedProps = { course: string; mode: PracticeMode; taskRef: TaskRef; focus: string | null; mix: string | null }
+type ResolvedProps = { course: string; mode: PracticeMode; taskRef: TaskRef; focus: string | null; mix: string | null; review: string | null }
 
 // Prüft mit der Engine, ob es die Aufgabe gibt und zu welcher Stufe sie gehört (bei Wissensfragen legt
 // die Nummer die Stufe fest), dann geführt oder frei
-function ResolvedPractice({ course, mode, taskRef, focus, mix }: ResolvedProps) {
+function ResolvedPractice({ course, mode, taskRef, focus, mix, review }: ResolvedProps) {
   const engine = use(loadCourseEngine(course))
   const actual = engine.resolve ? engine.resolve(taskRef) : taskRef.level
   const wrongLevel = actual !== null && actual !== taskRef.level
   useEffect(() => {
-    if (wrongLevel) window.location.replace(taskHref(course, { level: actual, seed: taskRef.seed }, mode, focus, mix))
-  }, [wrongLevel, course, actual, taskRef.seed, mode, focus, mix])
-  if (actual === null) return <MissingTask course={course} level={taskRef.level} mode={mode} mix={mix} />
+    if (wrongLevel) window.location.replace(taskHref(course, { level: actual, seed: taskRef.seed }, mode, focus, mix, review))
+  }, [wrongLevel, course, actual, taskRef.seed, mode, focus, mix, review])
+  if (actual === null) return <MissingTask course={course} level={taskRef.level} mode={mode} mix={mix} review={review} />
   if (wrongLevel) return null
   // Chemie frei (S8b): derselbe Bildschirm wie geführt, Zahlen werden eingetippt
-  if (mode === 'free' && isChemCourse(course)) return <GuidedPractice course={course} engine={engine} taskRef={taskRef} focus={focus} mix={mix} free />
+  if (mode === 'free' && isChemCourse(course)) return <GuidedPractice course={course} engine={engine} taskRef={taskRef} focus={focus} mix={mix} review={review} free />
   if (mode === 'free') {
     return (
       <Suspense fallback={<p className="text-zinc-500">Mathe-Tastatur wird geladen …</p>}>
@@ -99,23 +109,23 @@ function ResolvedPractice({ course, mode, taskRef, focus, mix }: ResolvedProps) 
       </Suspense>
     )
   }
-  return <GuidedPractice course={course} engine={engine} taskRef={taskRef} focus={focus} mix={mix} />
+  return <GuidedPractice course={course} engine={engine} taskRef={taskRef} focus={focus} mix={mix} review={review} />
 }
 
 // Eine Nummer, zu der es keine Aufgabe (mehr) gibt, z. B. eine gelöschte Frage; in der Mischung geht es
-// mit einer neuen gemischten Aufgabe weiter
-function MissingTask({ course, level, mode, mix }: { course: string; level: Level; mode: PracticeMode; mix: string | null }) {
+// mit einer neuen gemischten Aufgabe weiter, in der Wiederholung mit der nächsten fälligen Frage
+function MissingTask({ course, level, mode, mix, review }: { course: string; level: Level; mode: PracticeMode; mix: string | null; review: string | null }) {
   return (
     <main className="space-y-4">
       <h1 className="text-2xl font-semibold">Diese Aufgabe gibt es nicht (mehr).</h1>
       <div className="flex flex-wrap gap-3">
         <a
-          href={mix ? mixPracticeHref(mix, level) : practiceHref(course, level, mode)}
+          href={review ? reviewHref(review) : mix ? mixPracticeHref(mix, level) : practiceHref(course, level, mode)}
           className="inline-block rounded-xl bg-accent-700 px-4 py-2.5 font-medium text-on-accent hover:bg-accent-800"
         >
           Neue Aufgabe
         </a>
-        <a href={mix ? mixHref(mix) : courseHref(course)} className="inline-block rounded-xl border border-zinc-300 px-4 py-2.5 font-medium hover:bg-zinc-50">
+        <a href={taskExitHref(course, mix, review)} className="inline-block rounded-xl border border-zinc-300 px-4 py-2.5 font-medium hover:bg-zinc-50">
           Zur Übersicht
         </a>
       </div>
@@ -154,9 +164,9 @@ function useRememberForm(course: string, engine: CourseEngine, taskRef: TaskRef)
 
 type PracticeScreenProps = { course: string; engine: CourseEngine; taskRef: TaskRef; focus: string | null; mix: string | null }
 
-function GuidedPractice({ course, engine, taskRef, focus, mix, free = false }: PracticeScreenProps & { free?: boolean }) {
+function GuidedPractice({ course, engine, taskRef, focus, mix, review = null, free = false }: PracticeScreenProps & { review?: string | null; free?: boolean }) {
   useRememberForm(course, engine, taskRef)
-  return <TaskScreen course={course} engine={engine} taskRef={taskRef} focus={focus} mix={mix} free={free} />
+  return <TaskScreen course={course} engine={engine} taskRef={taskRef} focus={focus} mix={mix} review={review} free={free} />
 }
 
 function FreePractice({ course, engine, taskRef, focus, mix }: PracticeScreenProps) {
