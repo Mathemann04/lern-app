@@ -1249,6 +1249,19 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   Übungsblatts ausgeschlossen und auf Karten durch andere Salze ersetzt.
   Offen bleiben die Gegenprobe mit dem Lehrbuch und Übungsblätter zu
   Gleichgewicht und Energie (nicht hochgeladen).
+- **S11: Klausur-Start** (12.11.2026). Auf der Startseite steht im Fach
+  ganz oben die Karte „Klausur Teil 1“ mit „Wiederholen“ (Zahl der heute
+  fälligen Fragen über alle Themen und Stufen; startet sie direkt, jeweils in
+  einer anderen Fassung, „Nächste Aufgabe“ bleibt in der Wiederholung),
+  „Probeklausur“ (mit dem letzten Ergebnis; ersetzt die Kachel weiter unten)
+  und „Klausur-Überblick“. Der Überblick (`#/klausur/chemie`) zeigt je
+  Klausuraufgabe, wie sicher du bist: aus den letzten drei Versuchen in
+  „Klausuraufgabe N üben“ (jetzt gespeichert) und in Probeklausuren; unter
+  50 % unsicher, unter 80 % fast sicher, sonst sicher. Dazu letzte und beste
+  Probeklausur und die Wiederholung. Der Fortschritt verweist oben auf den
+  Überblick; seinen Umbau übernimmt M6. Damit ist der Klausur-Sprint
+  abgeschlossen.
+  Ausprobieren: Start → Karte „Klausur Teil 1“ → Klausur-Überblick.
 
 #### Nach Teil 1 der Klausur
 Die Reihenfolge richtet sich nach dem Termin von Teil 2: Kommt Teil 2 bald,

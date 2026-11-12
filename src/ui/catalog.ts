@@ -1048,3 +1048,8 @@ export function mockSubjectOf(subjectId: string): Subject | undefined {
   const subject = subjectById(subjectId)
   return subject?.mock ? subject : undefined
 }
+
+// Spielbare Themen eines Fachs (Ids), z. B. für „Wiederholen" über alle Themen (S11)
+export function subjectCourseIds(subject: Subject): string[] {
+  return subject.areas.flatMap((area) => area.courses.filter(isCourseAvailable).map((course) => course.id))
+}

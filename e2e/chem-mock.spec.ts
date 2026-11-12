@@ -23,7 +23,8 @@ async function expectCleanPage(page: Page, context: string) {
 test('Probeklausur: beginnen, antworten, neu laden, springen, unterbrechen, weiterschreiben, abgeben', async ({ page }) => {
   const errors = collectErrors(page)
   await page.goto('./#/')
-  await page.getByRole('link', { name: /Probeklausur/ }).click()
+  // Startseite: Karte „Klausur Teil 1" oben in Chemie 1 (S11)
+  await page.getByRole('region', { name: 'Klausur Teil 1' }).getByRole('link', { name: /^Probeklausur/ }).click()
   await expect(page).toHaveURL(/#\/probeklausur\/chemie$/)
   await expect(page.getByRole('heading', { name: 'Probeklausur' })).toBeVisible()
   await expect(page.getByText('Bestanden ist sie mit zusammen 40 von 100 Punkten.')).toBeVisible()
@@ -72,13 +73,13 @@ test('Probeklausur: beginnen, antworten, neu laden, springen, unterbrechen, weit
   await page.getByRole('button', { name: 'Aufgabe 5 →' }).click()
   await expect(page.getByRole('heading', { name: /Aufgabe 5/ })).toBeVisible()
 
-  // unterbrechen fragt nach; die Kachel führt zurück, an dieselbe Stelle
+  // unterbrechen fragt nach; die Karte auf der Startseite führt zurück, an dieselbe Stelle
   const url = page.url()
   await page.getByRole('button', { name: 'Klausur unterbrechen' }).click()
   await expect(page.getByText(/die Uhr läuft weiter/)).toBeVisible()
   await page.getByRole('link', { name: 'Unterbrechen' }).click()
   await expect(page).toHaveURL(/#\/$/)
-  await page.getByRole('link', { name: /läuft: weiterschreiben/ }).click()
+  await page.getByRole('region', { name: 'Klausur Teil 1' }).getByRole('link', { name: /läuft: weiterschreiben/ }).click()
   expect(page.url()).toBe(url)
   await expect(page.getByRole('heading', { name: /Aufgabe 5/ })).toBeVisible()
 

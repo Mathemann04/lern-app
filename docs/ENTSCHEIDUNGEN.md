@@ -820,3 +820,7 @@ Neue Entscheidungen unten anfügen.
   immer mit ⇌, auch in Umsatzrechnungen; Fragen und Lernkarten nennen bei abweichenden Begriffen beide (App und Skript).
   Stoff über die Vorlesung hinaus wandert aus dem Klausurniveau in die Vertiefung oder wird gelöscht (Nummern in
   `retired`). Einzelheiten in PLAN-M4 (S10, „Probeklausur“) und CHEMIE.md §5, §6, §8, §9.
+- 12.11.2026: S11 Klausur-Start. „Wie sicher“ je Klausuraufgabe aus dem Anteil der Punkte in den letzten drei Versuchen
+  (Übung und Probeklausur zählen gleich), Grenzen 50 % und 80 %. „Wiederholen“ nimmt alle fälligen Fragen des Fachs,
+  unabhängig von angekreuzten Unterthemen und Stufen (vor der Klausur soll nichts liegen bleiben), und ändert „Weitermachen“
+  nicht. Die Probeklausur steht nur noch in der Karte oben, nicht zusätzlich unten.

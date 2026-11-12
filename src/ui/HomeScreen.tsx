@@ -1,6 +1,7 @@
 import { Fragment } from 'react'
-import { useMockSession } from '../state/mockExam.ts'
+import { useMockHistory, useMockSession } from '../state/mockExam.ts'
 import { SUGGEST_WINDOW, levelSummary, useProgress } from '../state/progress.ts'
+import { dueReviewsOf } from '../state/reviews.ts'
 import { useSettings } from '../state/settings.ts'
 import type { Progress, Settings } from '../state/storage.ts'
 import { AreaIcon } from './AreaIcon.tsx'
@@ -16,10 +17,12 @@ import {
   levelName,
   playableLevel,
   subjectById,
+  subjectCourseIds,
   subjectLevelName,
 } from './catalog.ts'
+import { mockSummary, pointsText } from './examOverview.ts'
 import { RecentDots } from './RecentDots.tsx'
-import { areaHref, courseHref, mixHref, mixPracticeHref, mockHref, practiceHref } from './routes.ts'
+import { areaHref, courseHref, examOverviewHref, mixHref, mixPracticeHref, mockHref, practiceHref, reviewHref } from './routes.ts'
 import { courseSummary, isSelectionPlayable, joinTitles, levelPartCount, mixBlockedHint, mixChoiceOf, mixedCourses } from './selection.ts'
 
 // Startseite: „Weitermachen" und darunter die Fächer mit ihren Gebieten (Aufbau in catalog.ts)
@@ -40,6 +43,8 @@ export function HomeScreen() {
           <h2 id={`subject-${subject.id}`} className="text-xl font-semibold">
             {subject.title}
           </h2>
+          {/* Klausur-Start (S11): Wiederholen, Probeklausur und Überblick ganz oben */}
+          {subject.mock && subject.areas.some(isAreaAvailable) && <ExamStartCard subject={subject} />}
           <ul className="space-y-3">
             {subject.areas.map((area, i) => (
               <Fragment key={area.id}>
@@ -50,12 +55,6 @@ export function HomeScreen() {
                 {i === lastPlayableArea(subject) && isMixAvailable(subject) && (
                   <li>
                     <MixTile subject={subject} />
-                  </li>
-                )}
-                {/* „Probeklausur" gleich darunter */}
-                {i === lastPlayableArea(subject) && subject.mock && (
-                  <li>
-                    <MockTile subject={subject} />
                   </li>
                 )}
               </Fragment>
@@ -233,27 +232,63 @@ function MixTile({ subject }: { subject: Subject }) {
   )
 }
 
-// Kachel „Probeklausur" im Blaugrün der App; läuft eine, führt sie zum Weiterschreiben
-function MockTile({ subject }: { subject: Subject }) {
+// Karte „Klausur Teil N" (S11) im Blaugrün der App, oben im Fach: heute fällige Wiederholung über alle Themen des Fachs,
+// Probeklausur (läuft eine, weiterschreiben; sonst das letzte Ergebnis) und Klausur-Überblick. Ist nichts fällig, steht
+// dort dezent „nichts fällig" statt eines Knopfs, der ins Leere führt.
+function ExamStartCard({ subject }: { subject: Subject }) {
   const session = useMockSession()
+  const history = useMockHistory()
   const mock = subject.mock!
   const running = session && session.subject === subject.id && session.submittedAt === null ? session : null
+  const { last } = mockSummary(subject, history)
+  // beim Zeigen gelesen: Die Startseite wird bei jedem Besuch neu aufgebaut
+  const due = dueReviewsOf(subjectCourseIds(subject)).length
+  const tile = 'flex min-h-11 flex-col justify-center rounded-xl px-3 py-2.5'
   return (
-    <a
-      href={running ? mockHref(subject.id, running.id) : mockHref(subject.id)}
-      className="flex items-center gap-4 rounded-2xl border border-accent-200 bg-accent-50 px-4 py-3 transition-colors hover:border-accent-600"
-    >
-      <AreaIcon kind="exam" className="size-14 shrink-0" />
-      <span className="min-w-0 flex-1">
-        <span className="block text-lg font-semibold">Probeklausur</span>
-        <span className="block text-sm text-pretty text-zinc-600">
-          {running ? `Nr. ${running.id} läuft: weiterschreiben` : `Teil ${mock.part} wie die echte Klausur: ${mock.minutes} Minuten, ${mock.points} Punkte`}
-        </span>
-      </span>
-      <span aria-hidden className="text-accent-700">
-        →
-      </span>
-    </a>
+    <section aria-labelledby={`exam-${subject.id}`} className="space-y-3 rounded-2xl border border-accent-200 bg-accent-50 p-4">
+      <div className="flex items-center gap-3">
+        <AreaIcon kind="exam" className="size-10 shrink-0" />
+        <h3 id={`exam-${subject.id}`} className="text-lg font-semibold">
+          Klausur Teil {mock.part}
+        </h3>
+      </div>
+      <ul className="grid gap-2 sm:grid-cols-3">
+        <li>
+          {due > 0 ? (
+            <a href={reviewHref(subject.id)} className={`${tile} h-full bg-accent-700 text-on-accent hover:bg-accent-800`}>
+              <span className="font-semibold">Wiederholen</span>
+              <span className="text-sm">{due === 1 ? '1 Frage fällig' : `${due} Fragen fällig`}</span>
+            </a>
+          ) : (
+            <div className={`${tile} h-full border border-dashed border-zinc-300`} data-testid="review-none">
+              <span className="font-semibold text-zinc-600">Wiederholen</span>
+              <span className="text-sm text-zinc-500">nichts fällig</span>
+            </div>
+          )}
+        </li>
+        <li>
+          <a
+            href={running ? mockHref(subject.id, running.id) : mockHref(subject.id)}
+            className={`${tile} h-full border border-accent-200 bg-surface transition-colors hover:border-accent-600`}
+          >
+            <span className="font-semibold">Probeklausur</span>
+            <span className="text-sm text-pretty text-zinc-600">
+              {running
+                ? `Nr. ${running.id} läuft: weiterschreiben`
+                : last
+                  ? `zuletzt ${pointsText(last.points)} von ${last.max} Punkten`
+                  : `${mock.minutes} Minuten, ${mock.points} Punkte`}
+            </span>
+          </a>
+        </li>
+        <li>
+          <a href={examOverviewHref(subject.id)} className={`${tile} h-full border border-accent-200 bg-surface transition-colors hover:border-accent-600`}>
+            <span className="font-semibold">Klausur-Überblick</span>
+            <span className="text-sm text-pretty text-zinc-600">Wie sicher je Aufgabe</span>
+          </a>
+        </li>
+      </ul>
+    </section>
   )
 }
 

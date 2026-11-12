@@ -30,7 +30,8 @@ export type Route =
   | { readonly page: 'cards'; readonly folder: string | null; readonly card: string | null }
   // Üben: ohne Startwert wird eine neue Aufgabe gewürfelt; focus: gezielt einen typischen Fehler üben
   // (Id einer Fehlerregel, noch ungeprüft); mix: Aufgabe aus der Mischung dieses Fachs (Id, geprüft:
-  // Fach mit Mischung, das das Thema enthält; mit focus immer null)
+  // Fach mit Mischung, das das Thema enthält; mit focus immer null); review: Aufgabe aus „Wiederholen" dieses Fachs
+  // (S11, Id, geprüft: Fach des Themas; mit focus oder mix immer null)
   | {
       readonly page: 'practice'
       readonly course: string
@@ -39,6 +40,7 @@ export type Route =
       readonly seed: number | null
       readonly focus: string | null
       readonly mix: string | null
+      readonly review: string | null
     }
   // Themen mischen (Fächer mit mix im Katalog): Auswahl #/mischen/chemie
   | { readonly page: 'mix'; readonly subject: string }
@@ -51,6 +53,11 @@ export type Route =
   // Probeklausur (S9): Deckblatt #/probeklausur/chemie, eine Klausur #/probeklausur/chemie/4711 (schreiben, solange sie
   // läuft, danach die Auswertung; ist sie nicht die gespeicherte, das Deckblatt dieser Nummer)
   | { readonly page: 'mock'; readonly subject: string; readonly id: number | null }
+  // Klausur-Überblick (S11, Fächer mit Probeklausur): #/klausur/chemie
+  | { readonly page: 'examOverview'; readonly subject: string }
+  // heute fällige Wiederholung über alle Themen eines Fachs (S11): #/wiederholen/chemie wählt die am längsten fällige
+  // Frage und leitet zur Aufgabe mit ?wiederholen=chemie weiter; ist nichts fällig, „Für heute ist alles wiederholt"
+  | { readonly page: 'review'; readonly subject: string }
 
 // Geführt: #/ueben/brueche/2-4711, frei: #/frei/ableiten/2-4711,
 // gezielt: #/ueben/ableiten/2-4711?fokus=cos-sign, in der Mischung:
@@ -62,6 +69,11 @@ const PREFIX: Record<PracticeMode, string> = { guided: 'ueben', free: 'frei' }
 function mixOf(id: string | null, course: string): string | null {
   const subject = id ? subjectById(id) : undefined
   return subject && isMixAvailable(subject) && courseById(course)?.subject.id === subject.id ? subject.id : null
+}
+
+// Fach der Wiederholung aus der Adresse: nur das Fach, zu dem das Thema gehört
+function reviewOf(id: string | null, course: string): string | null {
+  return id && courseById(course)?.subject.id === id ? id : null
 }
 
 export function parseRoute(fullPath: string): Route {
@@ -97,6 +109,16 @@ export function parseRoute(fullPath: string): Route {
     if (!found) return { page: 'home' }
     return { page: 'examTask', subject: found.subject.id, task: Number(exam[2]), seed: exam[3] ? Number(exam[3]) : null }
   }
+  const overview = /^\/klausur\/([a-z]+)$/.exec(path)
+  if (overview) {
+    const subject = mockSubjectOf(overview[1])
+    return subject ? { page: 'examOverview', subject: subject.id } : { page: 'home' }
+  }
+  const review = /^\/wiederholen\/([a-z]+)$/.exec(path)
+  if (review) {
+    const subject = subjectById(review[1])
+    return subject && subject.areas.some(isAreaAvailable) ? { page: 'review', subject: subject.id } : { page: 'home' }
+  }
   const mock = /^\/probeklausur\/([a-z]+)(?:\/(\d{1,5}))?$/.exec(path)
   if (mock) {
     const subject = mockSubjectOf(mock[1])
@@ -116,29 +138,39 @@ export function parseRoute(fullPath: string): Route {
     const focus = params.get('fokus') || null
     // gezielt üben und Mischung zusammen: gezielt üben gewinnt
     const mix = focus ? null : mixOf(params.get('mischen'), course)
+    // Wiederholung nur ohne gezieltes Üben und Mischung
+    const review = focus || mix ? null : reviewOf(params.get('wiederholen'), course)
     const ref = parseTaskNumber(number)
-    if (ref) return { page: 'practice', course, mode, level: ref.level, seed: ref.seed, focus, mix }
-    if (/^[1-5]$/.test(number)) return { page: 'practice', course, mode, level: Number(number) as Level, seed: null, focus, mix }
+    if (ref) return { page: 'practice', course, mode, level: ref.level, seed: ref.seed, focus, mix, review }
+    if (/^[1-5]$/.test(number)) return { page: 'practice', course, mode, level: Number(number) as Level, seed: null, focus, mix, review }
   }
   return { page: 'home' }
 }
 
-// Zusatz einer Aufgabenadresse: gezielt üben (?fokus=) oder Mischung (?mischen=); gezielt üben gewinnt
-const practiceQuery = (focus?: string | null, mix?: string | null) => (focus ? `?fokus=${focus}` : mix ? `?mischen=${mix}` : '')
+// Zusatz einer Aufgabenadresse: gezielt üben (?fokus=), Mischung (?mischen=) oder Wiederholung (?wiederholen=); in
+// dieser Reihenfolge gewinnt das erste
+const practiceQuery = (focus?: string | null, mix?: string | null, review?: string | null) =>
+  focus ? `?fokus=${focus}` : mix ? `?mischen=${mix}` : review ? `?wiederholen=${review}` : ''
 
-// mix: Id des Fachs, wenn die Aufgabe aus der Mischung kommt
-export const practiceHref = (course: string, level: Level, mode: PracticeMode = 'guided', focus?: string | null, mix?: string | null) =>
-  `#/${PREFIX[mode]}/${course}/${level}${practiceQuery(focus, mix)}`
-export const taskHref = (course: string, ref: TaskRef, mode: PracticeMode = 'guided', focus?: string | null, mix?: string | null) =>
-  `#/${PREFIX[mode]}/${course}/${formatTaskNumber(ref)}${practiceQuery(focus, mix)}`
+// mix: Id des Fachs, wenn die Aufgabe aus der Mischung kommt; review: Id des Fachs, wenn sie aus „Wiederholen" kommt
+export const practiceHref = (course: string, level: Level, mode: PracticeMode = 'guided', focus?: string | null, mix?: string | null, review?: string | null) =>
+  `#/${PREFIX[mode]}/${course}/${level}${practiceQuery(focus, mix, review)}`
+export const taskHref = (course: string, ref: TaskRef, mode: PracticeMode = 'guided', focus?: string | null, mix?: string | null, review?: string | null) =>
+  `#/${PREFIX[mode]}/${course}/${formatTaskNumber(ref)}${practiceQuery(focus, mix, review)}`
 
 // Themen mischen: Auswahl eines Fachs und neue gemischte Aufgabe in einer Stufe
 export const mixHref = (subject: string) => `#/mischen/${subject}`
 export const mixPracticeHref = (subject: string, level: Level) => `#/mischen/${subject}/${level}`
 
+// Wohin X und „Zur Übersicht" einer Aufgabe führen: aus der Wiederholung zur Startseite, aus der Mischung zur
+// Mischung, sonst zum Thema
+export const taskExitHref = (course: string, mix?: string | null, review?: string | null) => (review ? '#/' : mix ? mixHref(mix) : courseHref(course))
+
 export const areaHref = (id: string) => `#/gebiet/${id}`
 export const examTaskHref = (subject: string, task: number, seed?: number) => `#/klausur/${subject}/aufgabe/${task}${seed === undefined ? '' : `/${seed}`}`
 export const mockHref = (subject: string, id?: number) => `#/probeklausur/${subject}${id === undefined ? '' : `/${id}`}`
+export const examOverviewHref = (subject: string) => `#/klausur/${subject}`
+export const reviewHref = (subject: string) => `#/wiederholen/${subject}`
 export const galleryHref = (course?: string) => (course ? `#/galerie/${course}` : '#/galerie')
 export const courseHref = (id: string) => `#/thema/${id}`
 
@@ -155,6 +187,8 @@ export function sectionOf(route: Route): Section | null {
     case 'area':
     case 'course':
     case 'mix':
+    case 'examOverview':
+    case 'review':
       return 'home'
     // Deckblatt der Probeklausur zum Start, die Klausur selbst zu keinem Bereich
     case 'mock':

@@ -85,6 +85,16 @@ export function courseReviews(state: ReviewState, course: string, now: number): 
   return { due, waiting }
 }
 
+// Fällige Fragen mehrerer Themen (z. B. aller Themen eines Fachs, „Wiederholen" auf der Startseite, S11), die am
+// längsten fällige zuerst (zuletzt beantwortet am längsten her); bei Gleichstand nach Thema und Nummer
+export type DueAcross = DueQuestion & { readonly course: string }
+
+export function dueAcross(state: ReviewState, courses: readonly string[], now: number): DueAcross[] {
+  return courses
+    .flatMap((course) => courseReviews(state, course, now).due.map((d) => ({ ...d, course })))
+    .sort((a, b) => a.answeredAt - b.answeredAt || a.course.localeCompare(b.course) || a.no - b.no)
+}
+
 // Andere Fassung als beim letzten Mal (andere falsche Antworten und Reihenfolge)
 export function otherVariant(variant: number, random: () => number = Math.random): number {
   return (variant + 1 + Math.floor(random() * (VARIANTS - 1))) % VARIANTS

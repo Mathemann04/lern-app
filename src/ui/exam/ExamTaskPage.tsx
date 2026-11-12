@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { chemExamTask } from '../../engine/chem/exam/index.ts'
 import { type ExamResult, examState, gradeExam, totalPoints, truthOf, withAnswer } from '../../engine/exam/grade.ts'
 import type { ExamAnswers } from '../../engine/exam/types.ts'
+import { addExamPractice } from '../../state/examPractice.ts'
 import { useSettings } from '../../state/settings.ts'
 import { examAreaOf } from '../catalog.ts'
 import { FitWidth } from '../FitWidth.tsx'
@@ -42,6 +43,8 @@ function ExamTaskView({ subject, taskNo, seed, areaId, areaTitle }: { subject: s
   const submit = () => {
     const graded = gradeExam(task, answers)
     recordExamResult(graded)
+    // für „wie sicher" im Klausur-Überblick (S11), mit den Punkten der Auswertung
+    addExamPractice({ subject, task: taskNo, points: graded.points, max: graded.max, at: Date.now() })
     setResult(graded)
     window.scrollTo(0, 0)
   }

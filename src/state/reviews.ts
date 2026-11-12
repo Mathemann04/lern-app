@@ -1,12 +1,14 @@
 import { VARIANTS, decodeSeed } from '../engine/quiz/numbers.ts'
 import {
   type CourseReviews,
+  type DueAcross,
   EMPTY_REVIEWS,
   LAST_BOX,
   type ReviewItem,
   type ReviewState,
   afterAnswer,
   courseReviews,
+  dueAcross,
   noteShown,
   reviewKey,
 } from '../engine/quiz/schedule.ts'
@@ -88,6 +90,17 @@ export function recordReview(course: string, seed: number, correct: boolean, now
 // Fällige und wartende Fragen eines Themas
 export function reviewsOf(course: string, now = Date.now(), store: KeyValueStore | null = browserStore()): CourseReviews {
   return courseReviews(load(store), course, now)
+}
+
+// Fällige Fragen mehrerer Themen (alle Themen eines Fachs), die am längsten fällige zuerst (S11)
+export function dueReviewsOf(courses: readonly string[], now = Date.now(), store: KeyValueStore | null = browserStore()): DueAcross[] {
+  return dueAcross(load(store), courses, now)
+}
+
+// Fragen dieser Themen, die noch warten (nach drei anderen Aufgaben oder an einem späteren Tag fällig)
+export function waitingReviewCount(courses: readonly string[], now = Date.now(), store: KeyValueStore | null = browserStore()): number {
+  const state = load(store)
+  return courses.reduce((sum, course) => sum + courseReviews(state, course, now).waiting.size, 0)
 }
 
 // Ist diese Frage gerade in der Wiederholung (falsch beantwortet und noch nicht gelernt)?

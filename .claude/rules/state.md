@@ -25,3 +25,6 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   liest erst ein Neuladen von außen geänderte Werte. „Fortschritt löschen" leert ihn.
 - Verlauf der Probeklausuren (S9b): ebenfalls in `mockExam.ts`, Schlüssel `rechenweg-probeklausuren` (Liste `MockRecord`, die neueste
   zuerst, höchstens 100; `addMockRecord` bei der Abgabe, `recentMockIds` für „Stoffe meiden"), „Fortschritt löschen" leert ihn.
+- Ergebnisse von „Klausuraufgabe N üben" (S11): `examPractice.ts`, Schlüssel `rechenweg-klausuraufgaben` (Liste `{subject, task,
+  points, max, at}`, die neueste zuerst, höchstens 200; `addExamPractice` bei der Abgabe in `ExamTaskPage.tsx`), „Fortschritt
+  löschen" leert ihn. Fällige Fragen über mehrere Themen: `dueReviewsOf` und `waitingReviewCount` in `reviews.ts`.
