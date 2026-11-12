@@ -60,7 +60,7 @@ const LOADERS: Readonly<Record<string, () => Promise<CourseEngine>>> = {
     const engine = await import('../engine/linalg/vectorEngine.ts')
     return {
       planGuidedTask: (ref) => engine.planVectorTask(ref),
-      prepareFree: () => engine.prepareVectorFree(),
+      prepareFree: engine.prepareVectorFree,
       formOf: engine.vectorForm,
       // Bausteine: parts sind die angekreuzten, ohne Angabe alle
       nextSeed: (level, _shown, parts) => engine.nextVectorSeed(level, parts),

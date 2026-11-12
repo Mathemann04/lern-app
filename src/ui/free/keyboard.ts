@@ -160,6 +160,15 @@ export const REARRANGE_FUNCTIONS_KEYBOARD: VirtualKeyboardLayout = withNumberPad
   [areaKey('arsinh'), areaKey('arcosh'), areaKey('artanh'), LOG_KEY],
 ])
 
+// --- Vektoren (M7) ---
+
+// Einträge eines Vektors oder Punkts: Zahlen, Brüche, Wurzeln, Klammern, Komma (Kommazahlen), Hochzahl 2
+export const VECTOR_KEYBOARD: VirtualKeyboardLayout = withNumberPad(
+  'vektoren',
+  'Vektoren',
+  flowKeys([[{ label: ',', key: ',' }, ROOT], BRACKETS, [{ latex: '#@^{2}' }]]),
+)
+
 // Seiten der Tastatur je Thema
 export function keyboardLayouts(spec: KeyboardSpec): VirtualKeyboardLayout[] {
   switch (spec.kind) {
@@ -171,5 +180,7 @@ export function keyboardLayouts(spec: KeyboardSpec): VirtualKeyboardLayout[] {
       const main = rearrangeKeyboard(spec.letters, spec.root, spec.exp, spec.pi)
       return spec.trig ? [main, REARRANGE_FUNCTIONS_KEYBOARD] : [main]
     }
+    case 'vector':
+      return [VECTOR_KEYBOARD]
   }
 }

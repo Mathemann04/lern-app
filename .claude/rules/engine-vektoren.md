@@ -10,8 +10,8 @@ paths:
 
 Plan: docs/PLAN-M7.md. Tätigkeit „Vektoren“ (Id `vektoren`) im Gebiet „Vektoren und Matrizen“ (`lineare-algebra`, Farbe
 `cyan`, Bild `vectors` in `AreaIcon.tsx`), Bausteine in `tasks/blocks.ts` (`VECTOR_BLOCKS`, Gruppe `vektor-grundlagen`,
-`VECTOR_PLAYABLE_COMBOS`; Baustein `rechnen`, Code 21, Nummern `rechnen.2-4711`). Freier Modus noch nicht (`free: false`,
-kommt in Schritt 1b), gezieltes Üben noch nicht (`focus: false`).
+`VECTOR_PLAYABLE_COMBOS`; Baustein `rechnen`, Code 21, Nummern `rechnen.2-4711`). Freier Modus seit Schritt 1b (`free: true`),
+gezieltes Üben noch nicht (`focus: false`).
 
 - `linalg/vec.ts`: Vektoren als Listen exakter Brüche (`rational.ts`), Längen als `Surd` (Zahl mal Wurzel, quadratfrei
   vereinfacht, `sqrtRat`), LaTeX: Spaltenvektoren `vecLatex`, Punkte `A(1 \mid 2)`, `coefLatex` für Faktoren vor Vektoren.
@@ -34,5 +34,16 @@ kommt in Schritt 1b), gezieltes Üben noch nicht (`focus: false`).
   Bild-Antworten ohne Knöpfe). Farben `--vec-*` in `index.css`, hell und dunkel. Im Lernbildschirm: `step.drawing` unter
   der Frage, `choice.drawing` als Antwort (zwei Spalten, wenn alle Antworten Bilder sind), `task.resultDrawing` beim
   Ergebnis.
+- Freier Modus (Schritt 1b) `linalg/vectorFree.ts`: liest das Ergebnis der Aufgabe (`resultLatex`, `readResult`) in
+  Teile (`vector` als Spalte, auch mit Faktor davor wie beim Einheitsvektor, `point`, `number`, `solutions` aus
+  `t_1 = …,\; t_2 = …` oder `t_{1,2} = \pm …`; mehrere Teile mit `,\;` getrennt). Neue Arten müssen ihr Ergebnis so
+  schreiben (`vectorFree.test.ts` prüft gegen `answer`). Typische Fehler: falsche Antworten des Schritts, dessen
+  richtige Antwort diesen Teil liefert (auch Antworten ohne Namen, nur Wert). Prüfung je Eintrag numerisch, dann fertig?
+  (`isFinishedNumber`: ganze Zahl, Kommazahl, gekürzter Bruch, k√r quadratfrei, Bruch mit höchstens einer Wurzel, nicht
+  mehr kürzbar), gerundete Kommazahl als Hinweis, eine Lösung vergessen `vec-one-solution`. Urteil mit `marks` je
+  Kästchen. Oberfläche: `FreeTask.entries`/`checkEntries` (`check/freeTask.ts`), Kästchen `ui/free/EntryInput.tsx`
+  (je Kästchen ein `MathInput`, Namen „1. Eintrag“, „2. Koordinate“, „1. Lösung“, „Dein Ergebnis“, bei mehreren Teilen
+  „… von Teil 2“; am Handy ohne Tastatur-Knopf im Kästchen, `.entry-box` in `index.css`), Tastatur `VECTOR_KEYBOARD`;
+  Bild des ersten Schritts über der Eingabe, Bild zum Ergebnis in der Rückmeldung.
 - Tests: `linalg/vectorTasks.test.ts` (Gegenprobe je Art mit Kommazahlen aus `data`, Antworten, Texte, Bilder, jeder
-  Fehler kommt vor, Abwechslung), `e2e/vectors.spec.ts`.
+  Fehler kommt vor, Abwechslung), `linalg/vectorFree.test.ts` (freier Modus), `e2e/vectors.spec.ts`.

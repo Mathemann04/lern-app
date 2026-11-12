@@ -19,9 +19,13 @@ type Props = {
   onSubmit: (latex: string) => void
   // Höhe der Bildschirm-Tastatur, damit die Seite darüber Platz lässt
   onKeyboardHeight: (height: number) => void
+  // am Laptop gleich den Fokus setzen (bei mehreren Kästchen nur im ersten)
+  autoFocus?: boolean
+  // Klassen des Felds (Schriftgröße)
+  fieldClassName?: string
 }
 
-export function MathInput({ label, keyboard: spec, readOnly, onInput, onSubmit, onKeyboardHeight }: Props) {
+export function MathInput({ label, keyboard: spec, readOnly, onInput, onSubmit, onKeyboardHeight, autoFocus = true, fieldClassName = 'block w-full text-2xl' }: Props) {
   const hostRef = useRef<HTMLDivElement>(null)
   const fieldRef = useRef<MathfieldElement | null>(null)
   // Aktuelle Rückruffunktionen, ohne das Feld neu anzulegen
@@ -33,11 +37,12 @@ export function MathInput({ label, keyboard: spec, readOnly, onInput, onSubmit, 
   const readOnlyRef = useRef(readOnly)
   // Die Tastatur gehört zur Aufgabe; eine neue Aufgabe legt ohnehin ein neues Feld an
   const specRef = useRef(spec)
+  const setupRef = useRef({ autoFocus, fieldClassName })
 
   useEffect(() => {
     const field = new MathfieldElement()
     field.setAttribute('aria-label', label)
-    field.className = 'block w-full text-2xl'
+    field.className = setupRef.current.fieldClassName
     // Nur echte Änderungen melden: Nach Enter schickt MathLive noch ein „input" ohne neuen Inhalt
     let lastValue = ''
     field.addEventListener('input', () => {
@@ -62,7 +67,7 @@ export function MathInput({ label, keyboard: spec, readOnly, onInput, onSubmit, 
         field.readOnly = readOnlyRef.current
         field.dataset.ready = 'true'
         // Am Laptop gleich lostippen; am Handy erst beim Antippen, sonst verdeckt die Tastatur die Aufgabe
-        if (window.matchMedia('(pointer: fine)').matches) field.focus()
+        if (setupRef.current.autoFocus && window.matchMedia('(pointer: fine)').matches) field.focus()
       },
       { once: true },
     )

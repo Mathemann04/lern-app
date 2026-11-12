@@ -802,7 +802,7 @@ export const SUBJECTS: readonly Subject[] = [
             tone: 'cyan',
             cards: 'vektoren',
             levels: vectorLevels,
-            free: false,
+            free: true,
             focus: false,
             parts: blockParts(VECTOR_BLOCKS, VECTOR_PLAYABLE_COMBOS),
             blockCombos: splitCombos(VECTOR_PLAYABLE_COMBOS),

@@ -65,6 +65,12 @@ describe('Aufbau der App (Fächer, Gebiete, Themen)', () => {
       }
       // freier Modus: das Ergebnis des geführten Modus (Mathe-Engine) gilt als richtig
       if (course.free) {
+        const free = engine.prepareFree({ level, seed })
+        // Vektoren (M7 Schritt 1b): Eingabe in Kästchen, eigene Tests in engine/linalg/vectorFree.test.ts
+        if (free.entries) {
+          expect(free.checkEntries, course.id).toBeDefined()
+          continue
+        }
         if (!isMathTask(plan)) throw new Error(`${course.id}: freier Modus ohne Ergebnis als Term`)
         expect(engine.prepareFree({ level, seed }).check(toLatex(plan.result)).kind, course.id).toBe('correct')
       }

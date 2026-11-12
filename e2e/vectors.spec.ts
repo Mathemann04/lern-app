@@ -97,3 +97,53 @@ test('Lernkarte „Länge eines Vektors" mit Beispiel und Bild', async ({ page }
   await expectCleanPage(page, 'Lernkarte')
   expect(errors).toEqual([])
 })
+
+// M7 Schritt 1b: freier Modus mit je einem Kästchen pro Eintrag; falsche Einträge werden markiert
+async function typeInto(page: Page, label: string, text: string) {
+  const field = page.locator(`math-field[data-ready][aria-label="${label}"]`)
+  await field.focus()
+  await expect(field).toBeFocused()
+  await page.keyboard.press('Control+A')
+  await page.keyboard.press('Backspace')
+  await page.keyboard.type(text)
+}
+
+test('Frei: Punkt und Länge in Kästchen, typischer Fehler mit Markierung, dann richtig', async ({ page }) => {
+  const errors = collectErrors(page)
+  // Parallelogramm, Stufe 5: F(−2 | −4 | 3) und Diagonale √13
+  await page.goto('./#/frei/vektoren/rechnen.5-5')
+  await expect(page.getByTestId('entry')).toHaveCount(4)
+  await expectCleanPage(page, 'frei leer')
+  await typeInto(page, '1. Koordinate von Teil 1', '-2')
+  await typeInto(page, '2. Koordinate von Teil 1', '-4')
+  await typeInto(page, '3. Koordinate von Teil 1', '3')
+  await typeInto(page, 'Dein Ergebnis von Teil 2', '13')
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Typischer Fehler: Wurzel vergessen.')).toBeVisible()
+  // nur das Kästchen der Länge ist markiert
+  await expect(page.locator('[data-testid="entry"][data-marked]')).toHaveCount(1)
+  await typeInto(page, 'Dein Ergebnis von Teil 2', 'sqrt13')
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
+  // Bild zum Ergebnis in der Rückmeldung
+  await expect(page.locator('[aria-live="polite"]').getByTestId('vector-figure')).toBeVisible()
+  await expectCleanPage(page, 'frei gelöst')
+  expect(errors).toEqual([])
+})
+
+test('Frei: Einheitsvektor als Spalte, ungekürzter Bruch ist noch nicht fertig', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./#/frei/vektoren/rechnen.2-10')
+  await expect(page.getByTestId('entry')).toHaveCount(3)
+  await typeInto(page, '1. Eintrag', '-6/9')
+  await typeInto(page, '2. Eintrag', '2/3')
+  await typeInto(page, '3. Eintrag', '1/3')
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Richtig gerechnet, aber noch nicht fertig.')).toBeVisible()
+  await expect(page.locator('[data-testid="entry"][data-marked]')).toHaveCount(1)
+  await typeInto(page, '1. Eintrag', '-2/3')
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
+  await expectCleanPage(page, 'Einheitsvektor frei')
+  expect(errors).toEqual([])
+})

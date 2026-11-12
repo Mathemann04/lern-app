@@ -1,6 +1,7 @@
 import { type ReactNode, useMemo, useRef, useState } from 'react'
 import { type FreeVerdict, NO_SOLUTION_INPUT } from '../../engine/check/freeTask.ts'
 import { type GuidedStep, isMathTask } from '../../engine/guided/types.ts'
+import type { VectorDrawing } from '../../engine/linalg/figures.ts'
 import type { TaskRef } from '../../engine/tasks/taskNumber.ts'
 import { recordAttempt, recordError } from '../../state/progress.ts'
 import type { ExplanationDetail } from '../../state/storage.ts'
@@ -8,16 +9,19 @@ import { FitWidth } from '../FitWidth.tsx'
 import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
 import { CardSheetButton, TaskCardLinks } from '../cards/CardSheet.tsx'
+import { VectorFigure } from '../draw/VectorFigure.tsx'
 import type { CourseEngine } from '../courseEngines.ts'
 import { courseHref, mixHref, nextTaskHref, taskHref } from '../routes.ts'
 import { LevelUpSuggestion } from '../task/LevelUpSuggestion.tsx'
 import { CheckBadge, FocusBanner, SkipNotice, TaskFooter, TaskIntro, TaskTopBar } from '../task/TaskParts.tsx'
 import { type ExplanationMode, useExplanationMode } from '../task/explanationMode.ts'
+import { EntryInput } from './EntryInput.tsx'
 import { MathInput } from './MathInput.tsx'
 
 // Freier Modus: das Ergebnis selbst eintippen. Die Engine des Themas (engine) prüft auf
 // Gleichwertigkeit und ob das Ergebnis fertig ist, erkennt typische Fehler und kann den Lösungsweg
-// Schritt für Schritt aufdecken (aus dem geführten Modus).
+// Schritt für Schritt aufdecken (aus dem geführten Modus). Vektoren (M7 Schritt 1b): je Eintrag ein Kästchen
+// (EntryInput, FreeTask.entries), dazu die Bilder der Aufgabe.
 
 // mix: Id des Fachs, wenn die Aufgabe aus „Themen mischen" kommt (weiter geht es dann in der Mischung)
 type Props = { course: string; engine: CourseEngine; taskRef: TaskRef; focus?: string | null; mix?: string | null }
@@ -25,13 +29,16 @@ type Props = { course: string; engine: CourseEngine; taskRef: TaskRef; focus?: s
 export default function FreeTaskScreen({ course, engine, taskRef, focus = null, mix = null }: Props) {
   const { level, seed } = taskRef
   const { free, plan } = useMemo(() => {
-    // Den freien Modus gibt es nur für Aufgaben mit Term und Ergebnis (Mathe)
+    // Den freien Modus gibt es nur für Aufgaben mit Term und Ergebnis (Mathe) oder mit Kästchen (Vektoren)
     const plan = engine.planGuidedTask({ level, seed })
-    if (!isMathTask(plan)) throw new Error(`Aufgabe ${level}-${seed} hat keinen freien Modus`)
-    return { free: engine.prepareFree({ level, seed }), plan }
+    const free = engine.prepareFree({ level, seed })
+    if (!free.entries && !isMathTask(plan)) throw new Error(`Aufgabe ${level}-${seed} hat keinen freien Modus`)
+    return { free, plan }
   }, [engine, level, seed])
   const { mode, detail, cycle } = useExplanationMode()
   const [latex, setLatex] = useState('')
+  // Eingabe in Kästchen: je Teil und Eintrag (in einer Ref, damit Enter im letzten Feld den neuesten Stand prüft)
+  const entriesRef = useRef<string[][]>(free.entries?.map((g) => Array.from({ length: g.count }, () => '')) ?? [])
   const [verdict, setVerdict] = useState<FreeVerdict | null>(null)
   const [hintOpen, setHintOpen] = useState(false)
   const [revealed, setRevealed] = useState(0)
@@ -46,9 +53,16 @@ export default function FreeTaskScreen({ course, engine, taskRef, focus = null, 
   const tally = useRef({ mistake: false, helped: false, errors: new Set<string>(), recorded: false })
 
   function submit(value: string) {
-    setLatex(value)
-    submittedRef.current = value
-    const result = free.check(value)
+    let result: FreeVerdict
+    if (free.entries) {
+      const input = entriesRef.current.map((row) => [...row])
+      submittedRef.current = JSON.stringify(input)
+      result = free.checkEntries!(input)
+    } else {
+      setLatex(value)
+      submittedRef.current = value
+      result = free.check(value)
+    }
     setVerdict(result)
     const t = tally.current
     if (result.kind === 'correct') {
@@ -80,23 +94,42 @@ export default function FreeTaskScreen({ course, engine, taskRef, focus = null, 
         <TaskIntro course={course} mix={mix} taskRef={taskRef} functionLatex={plan.functionLatex} instruction={plan.instruction} note={plan.note} />
       </section>
 
+      {/* Bild zur Aufgabe (Vektoren): das des ersten Schritts, es zeigt nur Gegebenes */}
+      {plan.steps[0]?.drawing && <VectorFigure drawing={plan.steps[0].drawing} />}
+
       <section className="space-y-3" aria-label="Deine Antwort">
-        <div className="flex items-center gap-2 rounded-2xl border-2 border-zinc-200 bg-surface px-3 py-2 focus-within:border-accent-600">
-          <span className="shrink-0 text-2xl">
-            <Formula tex={free.answerLabel} />
-          </span>
-          <MathInput
-            label={free.inputLabel}
+        {free.entries ? (
+          <EntryInput
+            groups={free.entries}
             keyboard={free.keyboard}
             readOnly={solved}
-            onInput={(value) => {
-              setLatex(value)
-              if (!solved && value !== submittedRef.current) setVerdict(null)
+            marks={verdict?.marks ?? null}
+            markTone={verdict?.kind === 'wrong' ? 'red' : 'amber'}
+            onInput={(group, entry, value) => {
+              entriesRef.current[group][entry] = value
+              if (!solved && JSON.stringify(entriesRef.current) !== submittedRef.current) setVerdict(null)
             }}
-            onSubmit={submit}
+            onSubmit={() => submit('')}
             onKeyboardHeight={setKeyboardHeight}
           />
-        </div>
+        ) : (
+          <div className="flex items-center gap-2 rounded-2xl border-2 border-zinc-200 bg-surface px-3 py-2 focus-within:border-accent-600">
+            <span className="shrink-0 text-2xl">
+              <Formula tex={free.answerLabel} />
+            </span>
+            <MathInput
+              label={free.inputLabel}
+              keyboard={free.keyboard}
+              readOnly={solved}
+              onInput={(value) => {
+                setLatex(value)
+                if (!solved && value !== submittedRef.current) setVerdict(null)
+              }}
+              onSubmit={submit}
+              onKeyboardHeight={setKeyboardHeight}
+            />
+          </div>
+        )}
         {!solved && (
           <div className="flex gap-3">
             <button
@@ -121,7 +154,9 @@ export default function FreeTaskScreen({ course, engine, taskRef, focus = null, 
       </section>
 
       <div ref={feedbackRef} aria-live="polite">
-        {verdict && <Feedback verdict={verdict} resultLatex={plan.resultLatex} resultNote={plan.resultNote} detail={detail} mode={mode} />}
+        {verdict && (
+          <Feedback verdict={verdict} resultLatex={plan.resultLatex ?? ''} resultNote={plan.resultNote} resultDrawing={plan.resultDrawing} detail={detail} mode={mode} />
+        )}
       </div>
 
       {solved && !mix && <LevelUpSuggestion course={course} level={level} mode="free" />}
@@ -146,7 +181,7 @@ export default function FreeTaskScreen({ course, engine, taskRef, focus = null, 
         </div>
       ) : (
         <div className="flex flex-wrap gap-2">
-          {!hintOpen && (
+          {!hintOpen && plan.ruleHint && (
             <button type="button" onClick={() => setHintOpen(true)} className="rounded-xl px-3 py-2.5 font-medium text-amber-800 hover:bg-amber-50">
               Tipp anzeigen
             </button>
@@ -172,7 +207,7 @@ export default function FreeTaskScreen({ course, engine, taskRef, focus = null, 
         </div>
       )}
 
-      {hintOpen && !solved && (
+      {hintOpen && !solved && plan.ruleHint && (
         <div className="rounded-2xl bg-amber-50 px-4 py-3 text-zinc-800">
           <p className="mb-1 text-sm font-semibold text-amber-800">Tipp</p>
           <RichText text={plan.ruleHint.short} />
@@ -189,7 +224,8 @@ export default function FreeTaskScreen({ course, engine, taskRef, focus = null, 
         <SolutionPath
           steps={plan.steps}
           revealed={revealed}
-          resultLatex={plan.resultLatex}
+          resultLatex={plan.resultLatex ?? ''}
+          resultDrawing={plan.resultDrawing}
           mode={mode}
           onNext={() => setRevealed((n) => n + 1)}
         />
@@ -200,9 +236,9 @@ export default function FreeTaskScreen({ course, engine, taskRef, focus = null, 
   )
 }
 
-type FeedbackProps = { verdict: FreeVerdict; resultLatex: string; resultNote?: string; detail: ExplanationDetail; mode: ExplanationMode }
+type FeedbackProps = { verdict: FreeVerdict; resultLatex: string; resultNote?: string; resultDrawing?: VectorDrawing; detail: ExplanationDetail; mode: ExplanationMode }
 
-function Feedback({ verdict, resultLatex, resultNote, detail, mode }: FeedbackProps) {
+function Feedback({ verdict, resultLatex, resultNote, resultDrawing, detail, mode }: FeedbackProps) {
   const [whyOpen, setWhyOpen] = useState(false)
   const tone = verdict.kind === 'correct' ? 'green' : verdict.kind === 'wrong' ? 'red' : 'amber'
   return (
@@ -216,6 +252,7 @@ function Feedback({ verdict, resultLatex, resultNote, detail, mode }: FeedbackPr
             </FitWidth>
           </div>
           {resultNote && <RichText text={resultNote} className="text-zinc-700" />}
+          {resultDrawing && <VectorFigure drawing={resultDrawing} />}
         </>
       )}
       {verdict.error && (
@@ -264,12 +301,14 @@ function SolutionPath({
   steps,
   revealed,
   resultLatex,
+  resultDrawing,
   mode,
   onNext,
 }: {
   steps: readonly GuidedStep[]
   revealed: number
   resultLatex: string
+  resultDrawing?: VectorDrawing
   mode: ExplanationMode
   onNext: () => void
 }) {
@@ -289,6 +328,7 @@ function SolutionPath({
                   <RichText text={answer.content} inline />
                   {answer.caption && <RichText text={answer.caption} className="mt-1 block text-[0.78em] text-zinc-600" inline />}
                 </FitWidth>
+                {answer.drawing && <VectorFigure drawing={answer.drawing} compact label={answer.content.replace(/\$/g, '')} />}
               </div>
               {mode !== 'off' && <RichText text={step.explanation[mode]} className="text-zinc-700" />}
             </li>
@@ -300,6 +340,7 @@ function SolutionPath({
           <FitWidth className="text-xl">
             <Formula tex={resultLatex} />
           </FitWidth>
+          {resultDrawing && <VectorFigure drawing={resultDrawing} />}
         </div>
       ) : (
         <button

@@ -13,6 +13,8 @@ export type FreeVerdict = {
   readonly error?: { readonly id: string; readonly name: string; readonly why: Explanation }
   // Erklärung, die gleich zu sehen ist
   readonly explanation?: Explanation
+  // Eingabe in Kästchen (FreeTask.entries): je Teil und Eintrag, ob das Kästchen markiert wird (falsch, leer, nicht fertig)
+  readonly marks?: readonly (readonly boolean[])[]
 }
 
 // Bildschirm-Tastatur: beim Ableiten alle Funktionen, bei Brüchen die Buchstaben der Aufgabe, bei
@@ -22,6 +24,12 @@ export type KeyboardSpec =
   | { readonly kind: 'derivative' }
   | { readonly kind: 'fraction'; readonly letters: readonly string[]; readonly blocks: boolean; readonly root: boolean; readonly imag?: boolean; readonly hyperbolic?: boolean }
   | { readonly kind: 'rearrange'; readonly letters: readonly string[]; readonly root: boolean; readonly exp?: boolean; readonly trig?: boolean; readonly pi?: boolean }
+  // Vektoren (M7): Zahlen, Brüche, Wurzeln, Klammern, Komma
+  | { readonly kind: 'vector' }
+
+// Ein Teil des Ergebnisses, je Eintrag ein Kästchen (M7): Vektor als Spalte, Punkt als Zeile, eine Zahl, zwei Lösungen
+// in beliebiger Reihenfolge. label ist LaTeX vor den Kästchen („\overrightarrow{AB} =", „Q", „t")
+export type EntryGroup = { readonly shape: 'vector' | 'point' | 'number' | 'solutions'; readonly label: string; readonly count: number }
 
 export type FreeTask = {
   // vor dem Eingabefeld, z. B. f'(x) = (LaTeX)
@@ -32,6 +40,9 @@ export type FreeTask = {
   check(latex: string): FreeVerdict
   // Gleichungen mit Zahlen (M6 Schritt 4b-3): Knopf „Keine Lösung", er prüft NO_SOLUTION_INPUT
   readonly noSolution?: true
+  // Eingabe in Kästchen statt in einem Feld (M7, Vektoren): dann prüft checkEntries alle Kästchen zusammen
+  readonly entries?: readonly EntryGroup[]
+  checkEntries?(input: readonly (readonly string[])[]): FreeVerdict
 }
 
 // Eingabe des Knopfs „Keine Lösung" (leere Menge)

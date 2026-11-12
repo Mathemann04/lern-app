@@ -1006,3 +1006,10 @@ Neue Entscheidungen unten anfügen.
   kein Schritt nach dem Ergebnis), neuer Fehler „Zahl vor dem Vektor vergessen“ (`vec-equation-no-divide`), Text zum
   Parallelogramm-Fehler berichtigt, Endpunkt „PQ minus P“ zählt als „Punkte addiert“, Tests rechnen Endpunkt, Länge
   einer Summe und Vektor gegebener Länge aus zwei Punkten aus den gegebenen Größen nach.
+- 12.11.2026: M7 Schritt 1b, freier Modus bei Vektoren. Je Eintrag ein eigenes Kästchen mit der Mathe-Tastatur statt
+  eines Felds für die ganze Spalte: So lässt sich jeder Eintrag einzeln prüfen und markieren. Was gesucht ist (Vektor,
+  Punkt, Zahl, zwei Lösungen), liest die Engine aus dem Ergebnis der Aufgabe; so braucht keine Art eigenen Code für den
+  freien Modus. Typische Fehler kommen aus den falschen Antworten des geführten Modus. Als fertig zählt auch eine Wurzel
+  im Nenner wie $\frac{3}{\sqrt{14}}$ (beide Schreibweisen sind üblich) und eine Kommazahl, die genau stimmt
+  ($0{,}5$); eine gerundete Kommazahl ist ein Hinweis, kein Fehler. Am Handy fehlt im Kästchen der Knopf für die
+  Tastatur: Sie erscheint beim Antippen ohnehin, und das schmale Kästchen braucht den Platz für die Zahl.

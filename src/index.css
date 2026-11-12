@@ -367,3 +367,10 @@ math-field {
 math-field::part(menu-toggle) {
   display: none;
 }
+/* Kästchen für Einträge (Vektoren, M7 Schritt 1b): Am Handy erscheint die Mathe-Tastatur beim Antippen von selbst; ohne
+   den Knopf dafür bleibt im schmalen Kästchen Platz für die Zahl */
+@media (pointer: coarse) {
+  .entry-box math-field::part(virtual-keyboard-toggle) {
+    display: none !important;
+  }
+}
