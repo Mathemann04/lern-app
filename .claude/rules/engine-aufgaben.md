@@ -172,7 +172,8 @@ Teil der Mathe-Engine `src/engine/` (reines TypeScript, ohne React).
     spielbare Mengen auch aus den Arten. Test `logEquationTasks.test.ts` (Art und Bausteine, Gegenprobe, geführt und frei,
     Abwechslung je Stufe, Ziehen)
   - Gleichungen mit Zahlen (M6 Schritt 4b-3): `tasks/numberEquationKinds.ts` (reine Daten `NUMBER_EQUATION_KINDS`, 14
-    Arten in Stufe 1 bis 4 mit Bausteinen und Anteil, `numberEquationKind(level, s)`; Arten nur hinten anhängen),
+    Arten in Stufe 1 bis 4 mit Bausteinen und Anteil, `numberEquationKind(level, s)`; Arten nur hinten anhängen; spätere
+    Arten mit festem Anteil `share` und eigenem Zufall, z. B. `hoch-drei` in Stufe 1 aus M6 Schritt 4c),
     `tasks/numberEquationTasks.ts` (erst die Lösung, dann die Zahlen; lineare Teile `linearWith`, Summanden wechseln Seite
     und Reihenfolge, Zahlen je Seite zusammengefasst, nie mit Minus vorn, wenn ein Plus folgt, `spread`; einige Arten mit
     Absicht ohne Lösung, `none`). Nummern `zahlen.2-4711` (Code `zahlen` in `BLOCK_CODES`). `rearrangeTerms.ts`:

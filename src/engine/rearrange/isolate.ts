@@ -1,5 +1,6 @@
 import { contains, key, subterms } from '../expr/compare.ts'
 import { type Env, evaluate } from '../expr/evaluate.ts'
+import { normalize } from '../expr/normalize.ts'
 import { FN_LATEX, equationToLatex, toLatex } from '../expr/print.ts'
 import { type Equation, type Expr, type FnName, E, PI, add, asRational, div, eq, fn, log, mul, neg, num, pow, root, sqrt, variable } from '../expr/types.ts'
 import { type Factored, factoredDivide, factoredLcm, factoredPoly, factorize, reduceFrac } from '../fraction/factor.ts'
@@ -2652,7 +2653,10 @@ export function foldNumbers(e: Equation): Equation {
     if (variablesOf(side).length > 0 || side.kind === 'num' || (side.kind === 'neg' && side.arg.kind === 'num')) return side
     const f = toRat(side, anyAtoms())
     const v = f && fracValue(f)
-    return v ? finalForm(numberExpr(v)) : side
+    if (v) return finalForm(numberExpr(v))
+    // Wurzeln, die aufgehen, auch ungerade aus negativen Zahlen (M6 Schritt 4c): \sqrt[3]{-8} = -2
+    const exact = normalize(side)
+    return exact.kind === 'num' ? finalForm(numberExpr(exact.value)) : side
   }
   return eq(fold(e.lhs), fold(e.rhs))
 }

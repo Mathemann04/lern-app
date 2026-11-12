@@ -10,7 +10,7 @@ Stand: 12.11.2026
 | M3 | Gleichungen umstellen (nach einer Variablen auflösen: Brüche, Wurzeln, verschachtelte e- und ln-Gleichungen, Substitution; Stufe 5 quer durch die Mathematik mit Ableitungen, Integralen, Reihen, Grenzwerten, komplexen Zahlen, Determinanten, Vektoren, Additionstheoremen) | fertig |
 | M4 | **Chemie 1**: neues Fach mit Wissensfragen (Auswahl, Zuordnen, Ordnen) und Rechnungen zu allen Themen der Vorlesung, drei Stufen (Grundlagen, Vertiefung, Klausurniveau), Lernkarten, Wiederholung, Probeklausur wie die echte (45 min, 50 Punkte) | in Arbeit: Plan freigegeben ([PLAN-M4.md](PLAN-M4.md)), Klausur-Sprint S1 bis S9 fertig, Klausur-Sprint mit S10 und S11 fertig; N1 und N2a fertig, N2b bis N5 nach M6 und M12 |
 | M5 | **Werkstoffkunde**: eigenes Fach nach demselben Muster wie Chemie, mit Nachschlagewerk; Vorbild für Tabellen und Bilder auch das Lehrbuch „Physik für Ingenieure“ (Festkörperphysik) | offen (nach M6, M12 und M6b; früher, falls die Werkstoffkunde-Klausur früher ist). Unterlagen der Kapitel 1 bis 7 gesichtet: [WERKSTOFFKUNDE.md](WERKSTOFFKUNDE.md); Kapitel 8 bis 15, Altklausuren und Buchfotos fehlen noch |
-| M6 | **Neue Struktur** (ersetzt „Themen einzeln üben“, Idee des Nutzers, 10.11.2026): drei getrennte Fragen – was tust du (Tätigkeit als Kachel: Vereinfachen, Gleichungen umstellen, Ableiten), womit (Bausteine ankreuzen, ein Thema gezielt mit „nur“), wie schwer (Stufe = nur Verschachtelung, nie neuer Stoff); aufgeräumte Startseite, Fortschritt je Baustein, „Meine Schwächen“, Knopf „Überspringen“, ohne Kopfzeile, Startseite nur mit Fächern. Plan: [PLAN-M6.md](PLAN-M6.md) | in Arbeit: Schritte 1 bis 4 und 4b fertig (12.11.2026); als Nächstes 4c: ungerade Wurzeln aus negativen Zahlen |
+| M6 | **Neue Struktur** (ersetzt „Themen einzeln üben“, Idee des Nutzers, 10.11.2026): drei getrennte Fragen – was tust du (Tätigkeit als Kachel: Vereinfachen, Gleichungen umstellen, Ableiten), womit (Bausteine ankreuzen, ein Thema gezielt mit „nur“), wie schwer (Stufe = nur Verschachtelung, nie neuer Stoff); aufgeräumte Startseite, Fortschritt je Baustein, „Meine Schwächen“, Knopf „Überspringen“, ohne Kopfzeile, Startseite nur mit Fächern. Plan: [PLAN-M6.md](PLAN-M6.md) | in Arbeit: Schritte 1 bis 4, 4b und 4c fertig (12.11.2026); als Nächstes vorgezogen M7 (Vektoren und Matrizen), erst Plan |
 | M6b | **Bilder in Mathe** (Wunsch des Nutzers, 10.11.2026): gemeinsame Zeichen-Grundlage (Koordinatensystem, Graph, Pfeile, Einheitskreis, Zahlenebene); je Baustein ein Bild in Aufgaben und Lernkarten (Graph bei e-Funktion und Logarithmus, Tangente beim Ableiten, Fläche beim Integral, Einheitskreis bei Winkelfunktionen, Pfeile bei Vektoren, Zahlenebene bei komplexen Zahlen); Aufgaben wie „Welcher Graph gehört zur Funktion?“. Später Bilder zum Anfassen (Punkt verschieben). Ausblick in [PLAN-M6.md](PLAN-M6.md) | offen: direkt nach M6, vor M5 |
 | M7 | **Vektoren** (seit 12.11.2026 Baustein beim Umstellen in M6, später eigene Tätigkeit „Vektoren rechnen“): Rechnen mit Vektoren, Länge, Skalarprodukt, Winkel, Zerlegung, Kreuzprodukt, Spatprodukt, Linearkombination und Basis, Projektion, Matrizen mit Falk-Schema und Inverse (wie in der Vorlesung, [AUFGABENARTEN.md](AUFGABENARTEN.md); mit Geraden und Ebenen, Gleichungssystemen mit Parameter und Determinanten) | offen, **vorgezogen**: direkt nach M6 Schritt 4b und 4c (Entscheidung 12.11.2026) |
 | M8 | Potenz-, Wurzel- und Logarithmusgesetze | in M6 aufgegangen (Bausteine bei „Vereinfachen“, Schritt 6) |
@@ -66,6 +66,9 @@ Stand: 12.11.2026
   M6 Schritt 4b und 4c, danach M6 ab Schritt 5 und die übrige Reihenfolge wie oben. M7 umfasst
   auch Geraden und Ebenen sowie Gleichungssysteme mit Parameter (Liste in
   [AUFGABENARTEN.md](AUFGABENARTEN.md)).
+- **Dritte Wurzel mit $x$ darin** (aus M6 Schritt 4c): Gleichungen wie $\sqrt[3]{2x + 1} = -3$ (beide Seiten hoch 3,
+  ohne Probe) löst die Engine noch nicht; dazu ein Schritt „hoch 3 nehmen“ mit Frage, Irrwegen und Fehlern. Passt zu
+  M6 Schritt 6 („Vereinfachen“ mit Wurzelgesetzen) oder als eigene Art bei den Gleichungen mit Zahlen.
 - **Unterlagen sichten** (Wunsch des Nutzers, 12.11.2026, vor M6 Schritt 4b-2): Der Nutzer lädt
   in einer eigenen Sitzung die Unterlagen aller Fächer hoch (Skripte, Übungsblätter mit
   Lösungen, Altklausuren). Jedes Fach wird vollständig durchgesehen (bei vielen Seiten mit
@@ -153,9 +156,10 @@ Details: [PLAN-M6.md](PLAN-M6.md) (Plan ausgearbeitet und Fragen beantwortet am
     entlogarithmieren; neun Arten in Stufe 1 bis 4, Nummern wie `logeq.2-4711`)
   - [x] 4b-3. Gleichungen mit Zahlen (Probe, Scheinlösungen, keine Lösung; 14 Arten in Stufe 1 bis 4, Nummern wie
     `zahlen.2-4711`, Knopf „Keine Lösung“ im freien Modus, Lernkarte „Gleichungen mit Zahlen“)
-- [ ] 4c. Ungerade Wurzeln aus negativen Zahlen erlauben wie im Skript (Entscheidung 12.11.2026):
+- [x] 4c. Ungerade Wurzeln aus negativen Zahlen erlauben wie im Skript (Entscheidung 12.11.2026):
   $\sqrt[3]{-8} = -2$; gebrochene Hochzahlen wie $x^{1/3}$ bleiben nur für $x \ge 0$; Engine,
-  Definitionsbereich, Zufallstests, Lernkarte
+  Definitionsbereich, Zufallstests, Lernkarte „Dritte Wurzel und Hochzahl 3“; neue Art bei den Gleichungen mit
+  Zahlen in Stufe 1 wie $(x - 10)^3 = -8$, typischer Fehler „Minus verloren“, Frage „Wie wirst du die Hochzahl 3 los?“
 - **Danach M7 (Vektoren und Matrizen) vorgezogen** (Entscheidung 12.11.2026, die Vorlesung ist
   gerade dort), erst Plan; anschließend M6 ab Schritt 5 weiter
 - [ ] 5. Umstellen: leichte Aufgaben aus späteren Kapiteln (5a bis 5d)

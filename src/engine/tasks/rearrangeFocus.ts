@@ -23,7 +23,7 @@ const shows = (ref: TaskRef, errorId: string) => planRearrangeTask(ref, errorId)
 export const LOG_EQUATION_ERRORS: ReadonlySet<string> = new Set(['eq-log-base-flipped', 'eq-log-base-quotient', 'eq-log-power-factor', 'eq-log-number-plain', 'eq-log-number-inside'])
 
 // Fehler, die nur bei Gleichungen mit Zahlen vorkommen (M6 Schritt 4b-3): nur unter Nummern wie „zahlen.1-4711“
-export const NUMBER_EQUATION_ERRORS: ReadonlySet<string> = new Set(['eq-root-negative-squared'])
+export const NUMBER_EQUATION_ERRORS: ReadonlySet<string> = new Set(['eq-root-negative-squared', 'eq-cube-root-sign'])
 
 export function findRearrangeTaskWithError(errorId: string, levels: readonly Level[], rng: Rng): TaskRef | null {
   if (NUMBER_EQUATION_ERRORS.has(errorId)) {

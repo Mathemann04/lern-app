@@ -23,6 +23,7 @@ function wrongs(lhs: string, rhs: string, target = 'x', numeric = false) {
 // numeric: Gleichung mit Zahlen (M6 Schritt 4b-3)
 const CATALOG: Array<{ id: string; lhs: string; rhs: string; target?: string; after?: string; result?: string; numeric?: boolean }> = [
   { id: 'eq-root-negative-squared', lhs: '2\\sqrt{x+3}+7', rhs: '3', numeric: true, after: 'x + 3 = 4', result: '1' },
+  { id: 'eq-cube-root-sign', lhs: '(x-1)^3', rhs: '-8', numeric: true, after: 'x - 1 = 2', result: '3' },
   { id: 'eq-sign-not-flipped', lhs: 'y', rhs: 'x+b', result: 'y + b' },
   { id: 'eq-inverse-op', lhs: 'y', rhs: 'ax', result: 'ay' },
   { id: 'eq-divide-one-term', lhs: 'ax', rhs: 'y+b', after: 'x = \\frac{y}{a} + b' },

@@ -76,8 +76,8 @@ function exactRoot(x: bigint, q: bigint): bigint | null {
 }
 
 // a^r exakt, z. B. 4^(1/2) = 2 oder 8^(2/3) = 4. null, wenn das Ergebnis nicht
-// rational ist (2^(1/2)) oder undefiniert. Nach deutscher Schulkonvention sind
-// gebrochene Potenzen (Wurzeln) negativer Zahlen nicht definiert.
+// rational ist (2^(1/2)) oder undefiniert. Gebrochene Hochzahlen negativer Zahlen
+// sind nicht definiert (wie im Skript), auch (−8)^(1/3); die Wurzel ∛(−8) rechnet ratRoot.
 export function ratPow(a: Rational, r: Rational): Rational | null {
   if (isInteger(r)) return ratPowInt(a, r.n)
   if (ratSign(a) < 0) return null
@@ -86,6 +86,16 @@ export function ratPow(a: Rational, r: Rational): Rational | null {
   const rootD = exactRoot(a.d, r.d)
   if (rootN === null || rootD === null) return null
   return ratPowInt(rat(rootN, rootD), r.n)
+}
+
+// n-te Wurzel exakt, z. B. √(9/4) = 3/2 oder ∛(−8) = −2 (M6 Schritt 4c: ungerade Wurzeln auch aus
+// negativen Zahlen wie im Skript). null, wenn das Ergebnis nicht rational ist oder eine gerade Wurzel
+// aus einer negativen Zahl gezogen wird.
+export function ratRoot(a: Rational, n: number): Rational | null {
+  if (ratSign(a) >= 0) return ratPow(a, rat(1n, BigInt(n)))
+  if (n % 2 === 0) return null
+  const r = ratPow(ratNeg(a), rat(1n, BigInt(n)))
+  return r && ratNeg(r)
 }
 
 // Liest eine Dezimalzahl mit Komma oder Punkt exakt ein: „2,5" → 5/2

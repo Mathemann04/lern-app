@@ -5,16 +5,24 @@ import {
   isInteger,
   isOne,
   isZero,
+  rat,
   ratAdd,
   ratMul,
+  ratNeg,
   ratPow,
+  ratRoot,
+  ratSign,
 } from '../rational.ts'
-import { compareExpr, key } from './compare.ts'
+import { compareExpr, key, subterms } from './compare.ts'
+import { evaluate } from './evaluate.ts'
 import { type Expr, type FnName, num } from './types.ts'
 
 // Normalform: eine feste, eindeutige Schreibweise zum Vergleichen und Vereinfachen.
 // - nur Zahl, Konstante, Variable, Summe, Produkt, Potenz, Funktion, Logarithmus
-//   (Minus → ·(−1), Bruch → ·(…)^(−1), Wurzel → ^(1/n)),
+//   (Minus → ·(−1), Bruch → ·(…)^(−1), gerade Wurzel → ^(1/n)),
+// - ungerade Wurzeln bleiben Wurzeln, denn ∛x ist auch für x < 0 definiert, x^(1/3) nicht
+//   (M6 Schritt 4c): Zahlfaktoren und Faktoren werden einzeln gezogen (∛(−8x) = −2∛x),
+//   ∛(u^k) wird (∛u)^k, (∛u)³ wird u,
 // - Summen und Produkte flach und sortiert, Zahlen zusammengefasst,
 // - gleichartige Summanden zusammengefasst (2x + 3x = 5x),
 // - in Summen „Zahl mal Klammer" aufgelöst (x − (x + 1) = −1),
@@ -39,7 +47,7 @@ export function normalize(e: Expr): Expr {
     case 'div':
       return makeMul([normalize(e.num), makePow(normalize(e.den), num(-1))])
     case 'root':
-      return makePow(normalize(e.arg), num(1, e.index))
+      return e.index % 2 === 1 ? makeOddRoot(normalize(e.arg), e.index) : makePow(normalize(e.arg), num(1, e.index))
     case 'add':
       return makeAdd(e.terms.map(normalize))
     case 'mul':
@@ -106,7 +114,7 @@ function makeAdd(terms: readonly Expr[]): Expr {
 }
 
 function makeMul(factors: readonly Expr[]): Expr {
-  const flat = factors.flatMap((f) => (f.kind === 'mul' ? f.factors : [f]))
+  const flat = mergeOddRoots(factors.flatMap((f) => (f.kind === 'mul' ? f.factors : [f]))).flatMap((f) => (f.kind === 'mul' ? f.factors : [f]))
   let coef = ONE
   const groups = new Map<string, { base: Expr; exps: Expr[]; original: Expr }>()
   for (const factor of flat) {
@@ -154,6 +162,20 @@ function makePow(base: Expr, exponent: Expr): Expr {
     }
     if (isOne(base.value)) return ONE_NUM
   }
+  // (ⁿ√u)^k für ungerades n und ganzzahliges k: ganze Potenzen herausziehen, (∛u)⁴ = u · ∛u, (∛u)³ = u
+  if (base.kind === 'root' && r && isInteger(r)) {
+    const n = BigInt(base.index)
+    const whole = r.n / n
+    if (whole !== 0n) return makeMul([makePow(base.arg, num(whole)), makePow(base, num(r.n % n))])
+  }
+  // u^(p/q) mit ungeradem q als Wurzel: x^(2/3) → (∛x)². Das vergrößert nur den Definitionsbereich (x^(2/3) gilt
+  // nur für x ≥ 0) und gibt ∛x und x^(1/3) dieselbe Normalform. Feste Werte ohne Buchstaben (2, e, \sqrt{2})
+  // bleiben Potenzen, passend zu makeOddRoot.
+  if (r && !isInteger(r) && r.d % 2n === 1n && !isFixedValue(base)) {
+    return makePow(makeOddRoot(base, Number(r.d)), num(r.n))
+  }
+  // (ⁿ√u)^a mit nicht ganzzahligem a (√, Buchstabe): nur für ⁿ√u ≥ 0 definiert, also u ≥ 0; dann u^(a/n)
+  if (base.kind === 'root' && !(r && isInteger(r))) return makePow(base.arg, makeMul([exponent, num(1, base.index)]))
   // (u^a)^k = u^(a·k) nur für ganzzahliges k; sonst wäre z. B. (x²)^(1/2) = x falsch
   if (base.kind === 'pow' && r && isInteger(r)) return makePow(base.base, makeMul([base.exp, exponent]))
   // (a · b)^k = a^k · b^k für ganzzahliges k
@@ -193,4 +215,63 @@ function makeLog(base: Expr, arg: Expr): Expr {
   if (arg.kind === 'num' && isOne(arg.value)) return ZERO_NUM
   if (key(base) === key(arg)) return ONE_NUM
   return { kind: 'log', base, arg }
+}
+
+// Ungerade Wurzel ⁿ√u (n ungerade) in Normalform. Jede Umformung gilt für alle reellen u:
+// ⁿ√(a · b) = ⁿ√a · ⁿ√b, ⁿ√(u^k) = (ⁿ√u)^k für ganzzahliges k, ⁿ√(ᵐ√u) = ⁿᵐ√u, ⁿ√(−8) exakt.
+// Eine Zahl ohne exakte Wurzel wird zur Potenz (positiv: ∛2 = 2^(1/3); negativ: ∛(−2) = −2^(1/3)).
+function makeOddRoot(arg: Expr, n: number): Expr {
+  if (arg.kind === 'num') {
+    const exact = ratRoot(arg.value, n)
+    if (exact) return num(exact)
+    if (ratSign(arg.value) < 0) return makeMul([num(-1), makePow(num(ratNeg(arg.value)), num(1, n))])
+    return makePow(arg, num(1, n))
+  }
+  // Fester positiver Wert ohne Buchstaben (e, π, 2^(1/2)): Potenz wie bei Zahlen (passend zu makePow)
+  if (isFixedValue(arg) && evaluate(arg, {}) > 0) return makePow(arg, num(1, n))
+  if (arg.kind === 'mul') return makeMul(arg.factors.map((f) => makeOddRoot(f, n)))
+  if (arg.kind === 'pow' && arg.exp.kind === 'num' && isInteger(arg.exp.value)) return makePow(makeOddRoot(arg.base, n), arg.exp)
+  // Potenz mit gebrochener oder variabler Hochzahl: nur für w ≥ 0 (bzw. w > 0) definiert, nie negativ; dann
+  // ⁿ√(w^a) = w^(a/n) mit demselben Definitionsbereich
+  if (arg.kind === 'pow') return makePow(arg.base, makeMul([arg.exp, num(1, n)]))
+  if (arg.kind === 'root' && arg.index % 2 === 1) return makeOddRoot(arg.arg, n * arg.index)
+  return { kind: 'root', arg, index: n }
+}
+
+// Term ohne Buchstaben und ohne i (z. B. e, π, 2^(1/2), 1 − π)
+const isFixedValue = (e: Expr) => subterms(e).every((t) => t.kind !== 'var' && !(t.kind === 'const' && t.name === 'i'))
+
+// Ungerade Wurzel ⁿ√u und Potenzen von u im selben Produkt zusammenfassen (M6 Schritt 4c), damit x²/∛x und x^(5/3)
+// dieselbe Normalform haben:
+// - nur ganzzahlige Potenzen von u: alles in Potenzen von ⁿ√u zählen (u^a = (ⁿ√u)^(a·n), gilt für alle u), dann ganze
+//   Potenzen herausziehen: x² · (∛x)^(−1) = (∛x)^5 = x · (∛x)²,
+// - mit einer gebrochenen Potenz wie √u: Das Produkt ist nur für u ≥ 0 definiert, dort ist ⁿ√u = u^(1/n); alles als
+//   Potenz von u: √x · ∛x = x^(5/6).
+function mergeOddRoots(flat: readonly Expr[]): readonly Expr[] {
+  let out = flat
+  for (const f of flat) {
+    const r = f.kind === 'root' ? f : f.kind === 'pow' && f.base.kind === 'root' ? f.base : null
+    if (!r || r.index % 2 === 0) continue
+    const u = key(r.arg)
+    const rootKey = key(r)
+    const n = BigInt(r.index)
+    let thirds = 0n
+    let fractional: Rational | null = null
+    const rest: Expr[] = []
+    let touchesU = false
+    for (const g of out) {
+      const [base, exponent] = g.kind === 'pow' ? [g.base, g.exp] : [g, ONE_NUM]
+      const k = exponent.kind === 'num' ? exponent.value : null
+      if (k && isInteger(k) && key(base) === rootKey) thirds += k.n
+      else if (k && key(base) === u) {
+        touchesU = true
+        if (isInteger(k)) thirds += k.n * n
+        else fractional = ratAdd(fractional ?? ZERO, k)
+      } else rest.push(g)
+    }
+    if (!touchesU) continue
+    if (fractional) out = [...rest, makePow(r.arg, num(ratAdd(fractional, rat(thirds, n))))]
+    else out = [...rest, makePow(r.arg, num(thirds / n)), makePow(r, num(thirds % n))]
+  }
+  return out
 }

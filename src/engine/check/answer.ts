@@ -16,7 +16,7 @@ import { contains, key } from '../expr/compare.ts'
 import { type Env, evaluate } from '../expr/evaluate.ts'
 import { normalize } from '../expr/normalize.ts'
 import { samplePoints } from '../expr/sample.ts'
-import { type Equation, type Expr, asRational, neg } from '../expr/types.ts'
+import { type Equation, type Expr, asRational, neg, num, pow, root } from '../expr/types.ts'
 import { parseLatex } from '../parse/latex.ts'
 import { createRng } from '../random/rng.ts'
 
@@ -204,16 +204,48 @@ export function checkAnswer(context: AnswerContext, latex: string): Verdict {
   return implicit ? checkImplicit(context, answer) : checkFunction(context, answer)
 }
 
+// Hochzahlen mit ungeradem Nenner als Wurzel gelesen: x^{-\frac{2}{3}} wie \frac{1}{\sqrt[3]{x^2}}. Seit M6 Schritt 4c ist
+// \sqrt[3]{x} auch für x < 0 definiert, x^{\frac{1}{3}} nicht; wer die Ableitung von \sqrt[3]{x} wie im Buch als Potenz
+// schreibt, meint dieselbe Funktion und soll nicht an den Stellen x < 0 scheitern.
+export function oddPowersAsRoots(e: Expr): Expr {
+  switch (e.kind) {
+    case 'num':
+    case 'const':
+    case 'var':
+      return e
+    case 'add':
+      return { ...e, terms: e.terms.map(oddPowersAsRoots) }
+    case 'mul':
+      return { ...e, factors: e.factors.map(oddPowersAsRoots) }
+    case 'neg':
+    case 'root':
+    case 'fn':
+      return { ...e, arg: oddPowersAsRoots(e.arg) }
+    case 'div':
+      return { ...e, num: oddPowersAsRoots(e.num), den: oddPowersAsRoots(e.den) }
+    case 'log':
+      return { ...e, base: oddPowersAsRoots(e.base), arg: oddPowersAsRoots(e.arg) }
+    case 'pow': {
+      const base = oddPowersAsRoots(e.base)
+      const r = asRational(e.exp)
+      if (r && r.d > 1n && r.d % 2n === 1n) return pow(root(base, Number(r.d)), num(Number(r.n)))
+      return { ...e, base, exp: oddPowersAsRoots(e.exp) }
+    }
+  }
+}
+
 function checkFunction(context: FunctionAnswerContext, answer: Expr): Verdict {
   const { task, derivation, points } = context
   const correct = derivation.result
-  if (sameFunction(correct, answer, points)) return { kind: 'correct', answer }
+  // verglichen wird mit Wurzeln statt Hochzahlen wie x^{\frac{1}{3}}; angezeigt bleibt die Eingabe
+  const typed = oddPowersAsRoots(answer)
+  if (sameFunction(correct, typed, points)) return { kind: 'correct', answer }
   for (const wrong of context.wrongAnswers) {
-    if (sameFunction(wrong.result, answer, points, MIN_COMPARED_ERROR)) return { kind: 'knownError', answer, wrong }
+    if (sameFunction(wrong.result, typed, points, MIN_COMPARED_ERROR)) return { kind: 'knownError', answer, wrong }
   }
-  if (sameFunction(task, answer, points)) return { kind: 'functionItself', answer }
-  if (sameFunction(neg(correct), answer, points)) return { kind: 'wrongSign', answer }
-  const ratio = constantRatio(correct, answer, points)
+  if (sameFunction(task, typed, points)) return { kind: 'functionItself', answer }
+  if (sameFunction(neg(correct), typed, points)) return { kind: 'wrongSign', answer }
+  const ratio = constantRatio(correct, typed, points)
   if (ratio !== null && ratio !== 0) return { kind: 'wrongFactor', answer }
   return { kind: 'wrong', answer }
 }

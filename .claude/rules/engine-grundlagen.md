@@ -45,7 +45,12 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
     nach Kahan, ein Additionstheorem als die Funktion selbst, als Gegenprobe), `contains` und
     `variablesOf` sehen ihre freien Buchstaben (`toolBound`, `toolLimits`)
   - `expr/normalize.ts`: *Normalform* zum Vergleichen; `expr/display.ts`:
-    `simplify` = Normalform als *Anzeigeform* (schöne Schreibweise)
+    `simplify` = Normalform als *Anzeigeform* (schöne Schreibweise). Seit M6
+    Schritt 4c bleibt eine ungerade Wurzel in der Normalform eine Wurzel
+    (`makeOddRoot`: Faktoren einzeln, $(\sqrt[3]{u})^k$ mit ganzen Potenzen
+    herausgezogen, Zahlen exakt mit `ratRoot`); $u^{p/q}$ mit ungeradem $q$ wird
+    dazu umgekehrt zur Wurzel, feste Werte ohne Buchstaben bleiben Potenzen;
+    die Anzeige schreibt $(\sqrt[3]{u})^2$ als $\sqrt[3]{u^2}$
   - `expr/print.ts`: LaTeX in deutscher Schreibweise; `expr/evaluate.ts`,
     `expr/sample.ts`: Werte und Prüfstellen im Definitionsbereich
   - `expr/finalForm.ts`: Endform von Ergebnissen (Ausklammern, Kürzen,

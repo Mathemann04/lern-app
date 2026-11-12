@@ -12,6 +12,9 @@ export type NumberEquationKind = {
   readonly blocks: readonly string[]
   // Anteil innerhalb der Stufe
   readonly weight: number
+  // später dazugekommene Arten: fester Anteil aller Nummern der Stufe, vorab mit eigenem Zufall gewählt; die übrigen
+  // Nummern behalten ihre Art (weight dann 0)
+  readonly share?: number
 }
 
 export const NUMBER_EQUATION_KINDS: readonly NumberEquationKind[] = [
@@ -43,6 +46,9 @@ export const NUMBER_EQUATION_KINDS: readonly NumberEquationKind[] = [
   { id: 'wurzel-bruch', level: 4, blocks: ['brueche', 'wurzeln', 'quadratisch'], weight: 0.25 },
   // Stufe 4: Wurzel aus einem quadratischen Term gleich Term mit x, Scheinlösung oder keine Lösung: \sqrt{x^2 + 7} = x + 1
   { id: 'wurzel-quadrat', level: 4, blocks: ['wurzeln', 'quadratisch'], weight: 0.25 },
+  // M6 Schritt 4c, Stufe 1: Hochzahl 3, meist gleich einer negativen Zahl (dritte Wurzel aus einer negativen Zahl):
+  // 2(x - 3)^3 + 5 = -11
+  { id: 'hoch-drei', level: 1, blocks: ['potenzen'], weight: 0, share: 0.2 },
 ]
 
 export const numberEquationKinds = (level: Level) => NUMBER_EQUATION_KINDS.filter((kind) => kind.level === level)
@@ -51,8 +57,15 @@ export const hasNumberEquations = (level: Level) => numberEquationKinds(level).l
 
 // Art der Nummer s (ab 1) einer Stufe, vorab mit eigenem Zufall; null, wenn die Stufe keine solchen Aufgaben hat
 export function numberEquationKind(level: Level, s: number): NumberEquationKind | null {
-  const kinds = numberEquationKinds(level)
-  if (kinds.length === 0) return null
+  const all = numberEquationKinds(level)
+  if (all.length === 0) return null
+  let late = createRng(`zahlen-art-neu:${level}:${s}`).next()
+  for (const kind of all) {
+    if (!kind.share) continue
+    if (late < kind.share) return kind
+    late -= kind.share
+  }
+  const kinds = all.filter((kind) => !kind.share)
   const total = kinds.reduce((sum, kind) => sum + kind.weight, 0)
   let r = createRng(`zahlen-art:${level}:${s}`).next() * total
   for (const kind of kinds) {

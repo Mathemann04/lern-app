@@ -219,8 +219,8 @@ const potenzen: FamilyBuild = (rng, n, level) => {
     return { side: e, conditions: base.conditions, label: `Baustein Potenzen: Potenz mit ${count} Schalen` }
   }
   // Potenz in Potenz: das Innere ist immer sicher positiv (Potenz einer positiven Basis, dann nur plus, mal und geteilt
-  // durch Buchstaben und Zahlen). Sonst hätte eine gerade Hochzahl eine zweite Lösung, und bei einer ungeraden stünde eine
-  // dritte Wurzel aus einer möglicherweise negativen Zahl da.
+  // durch Buchstaben und Zahlen). Sonst hätte eine gerade Hochzahl eine zweite Lösung, und bei einer ungeraden müsste man
+  // das Vorzeichen der dritten Wurzel verfolgen (seit M6 Schritt 4c definiert, geübt bei den Gleichungen mit Zahlen).
   const inner = rng.chance(0.6) ? plus(power, constant(rng, n)) : growing(rng, n, power, level === 3 ? 1 : 2)
   let e = pow(inner, exponent())
   if (level === 5) e = pow(plus(growing(rng, n, e, 1), constant(rng, n)), num(rng.pick([2, 3])))

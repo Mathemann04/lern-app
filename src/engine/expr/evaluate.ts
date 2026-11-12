@@ -5,8 +5,9 @@ export type Env = Readonly<Record<string, number>>
 
 // Wert eines Terms an einer Stelle. NaN, wenn der Term dort nicht definiert ist.
 //
-// Definitionsbereich nach deutscher Schulkonvention:
-// - Wurzeln und gebrochene Exponenten nur für Zahlen ≥ 0 (auch die dritte Wurzel),
+// Definitionsbereich wie im Skript (M6 Schritt 4c, Entscheidung 12.11.2026):
+// - gerade Wurzeln (√, ⁴√) nur für Zahlen ≥ 0, ungerade (∛, ⁵√) für alle Zahlen: ∛(−8) = −2,
+// - gebrochene Exponenten nur für Zahlen ≥ 0, auch x^(1/3),
 // - Potenzen mit variablem Exponenten (a^x, x^x) nur für Basis > 0,
 // - ln und log nur für Zahlen > 0.
 export function evaluate(e: Expr, env: Env): number {
@@ -37,8 +38,11 @@ function evaluateRaw(e: Expr, env: Env): number {
       return evaluatePow(e.base, e.exp, env)
     case 'root': {
       const a = evaluate(e.arg, env)
-      if (!(a >= 0)) return NaN
-      return e.index === 2 ? Math.sqrt(a) : e.index === 3 ? Math.cbrt(a) : a ** (1 / e.index)
+      if (Number.isNaN(a)) return NaN
+      if (e.index === 2) return a >= 0 ? Math.sqrt(a) : NaN
+      if (e.index === 3) return Math.cbrt(a)
+      if (e.index % 2 === 1) return Math.sign(a) * Math.abs(a) ** (1 / e.index)
+      return a >= 0 ? a ** (1 / e.index) : NaN
     }
     case 'fn':
       return evaluateFn(e.name, evaluate(e.arg, env))

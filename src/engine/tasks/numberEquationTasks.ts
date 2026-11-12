@@ -409,6 +409,21 @@ function buildRootSquare(rng: Rng): NumberKitTask | null {
   return { task: spread(rng, [sqrt(inner)], c === 0 ? [times(k)] : [times(k), n(c)], 1, 0.45), label: 'Wurzel aus einem quadratischen Term, Scheinlösung', none }
 }
 
+// --- M6 Schritt 4c ---
+
+// f(P)^3 + d = c mit (P)^3 meist negativ: Die dritte Wurzel aus einer negativen Zahl gibt es (\sqrt[3]{-8} = -2)
+function buildCube(rng: Rng): NumberKitTask | null {
+  const f = rng.chance(0.4) ? rng.pick([2, 3, -1, -2]) : 1
+  const size = rng.int(1, f === 1 ? 5 : 4)
+  const p0 = rng.chance(0.75) ? -size : size
+  let inner: Expr | null = X
+  if (rng.chance(0.75)) inner = linearWith(rng, rng.pick(['x+m', 'kx+m', 'm-x', 'm-kx', 'x/k+m'] as const), rng.int(-8, 8), p0)
+  if (!inner) return null
+  const d = rng.chance(0.6) ? sign(rng) * rng.int(1, 9) : 0
+  const left = d === 0 ? [times(f, pow(inner, num(3)))] : [times(f, pow(inner, num(3))), n(d)]
+  return { task: spread(rng, left, [n(f * p0 ** 3 + d)]), label: p0 < 0 ? 'Hochzahl 3 gleich einer negativen Zahl' : 'Hochzahl 3', none: false }
+}
+
 const BUILDERS: Readonly<Record<string, (rng: Rng) => NumberKitTask | null>> = {
   wurzel: buildRoot,
   bruch: buildFraction,
@@ -424,6 +439,7 @@ const BUILDERS: Readonly<Record<string, (rng: Rng) => NumberKitTask | null>> = {
   'log-zahl-quadratisch': buildLogNumberQuadratic,
   'wurzel-bruch': buildRootFraction,
   'wurzel-quadrat': buildRootSquare,
+  'hoch-drei': buildCube,
 }
 
 // Aufgabe einer Art (null: diesmal nichts Brauchbares gewürfelt)

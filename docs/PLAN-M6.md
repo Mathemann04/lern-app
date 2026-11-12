@@ -270,6 +270,13 @@ mit eigenen Zahlen und Buchstaben:
   als eigene Frage, „keine Lösung“ geführt und frei mit eigenem Knopf; Lernkarte „Gleichungen mit Zahlen: Probe und
   keine Lösung“). Gleichungen mit zwei Lösungen (z. B. $x^2 = 9$) kommen noch nicht vor.
 
+#### Schritt 4c: Ungerade Wurzeln aus negativen Zahlen (Entscheidung 12.11.2026)
+
+Fertig 12.11.2026: $\sqrt[3]{-8} = -2$ wie im Skript, $x^{1/3}$ weiter nur für $x \ge 0$ (Engine, Normalform, Anzeige,
+Zufallstests); neue Art „Hochzahl 3“ bei den Gleichungen mit Zahlen in Stufe 1 (Nummern wie `zahlen.1-5`), typischer
+Fehler „Minus verloren“, Frage und Erklärung beim Ziehen der dritten Wurzel, Lernkarte „Dritte Wurzel und Hochzahl 3“.
+Einzelheiten in docs/ENTSCHEIDUNGEN.md.
+
 #### Schritt 5: Umstellen, leichte Aufgaben aus späteren Kapiteln (in Teilen)
 
 - 5a: Ableitungen, Integrale, Summen und Reihen, Grenzwerte ab Stufe 1
