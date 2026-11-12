@@ -18,6 +18,7 @@ export const REARRANGE_CARD_IDS = {
   exp: 'rearrange-exp',
   laws: 'rearrange-laws',
   logEquation: 'rearrange-log-equation',
+  numberEquation: 'rearrange-number-equation',
   arc: 'rearrange-arc',
   trig: 'rearrange-trig',
   substitution: 'rearrange-substitution',
@@ -207,6 +208,25 @@ export const REARRANGE_CARD_LIST: readonly Card[] = [
       task(log(n(2), x), log(n(4), add(x, a))),
     ],
     errors: ['eq-log-number-inside', 'eq-log-number-plain', 'eq-log-power-factor', 'eq-log-base-flipped', 'eq-log-base-quotient'],
+  },
+  {
+    // M6 Schritt 4b-3
+    id: REARRANGE_CARD_IDS.numberEquation,
+    topic: 'umstellen',
+    title: 'Gleichungen mit Zahlen: Probe und keine Lösung',
+    level: 1,
+    rules: [],
+    formulas: ['\\sqrt{u} \\ge 0', '\\sqrt{u} = -2 \\;\\Rightarrow\\; \\mathbb{L} = \\{\\,\\}', 'u = v \\;\\Rightarrow\\; u^2 = v^2 \\quad (\\text{nur in diese Richtung})'],
+    memo: 'Quadrieren, Malnehmen mit einem Term mit $x$ und das Zusammenfassen von Logarithmen können Zahlen bringen, die gar keine Lösung sind. Darum am Ende jede Zahl in die Gleichung der Aufgabe einsetzen: die Probe.',
+    note: 'Eine Zahl fällt weg, wenn die beiden Seiten verschieden sind (Scheinlösung) oder wenn ein Teil der Gleichung für sie nicht definiert ist: ein Nenner $0$, eine Wurzel aus einer negativen Zahl, ein Logarithmus ohne positives Argument. Bleibt keine Zahl übrig oder steht eine Wurzel allein gleich einer negativen Zahl, hat die Gleichung keine Lösung.',
+    when: 'Wenn eine Gleichung nur Zahlen enthält und $x$ unter einer Wurzel, in einem Logarithmus oder in einem Nenner steht.',
+    examples: [
+      { equation: eq(sqrt(add(mul(n(2), x), n(1))), sub(x, n(1))), target: 'x', conditions: [], numeric: true },
+      { equation: eq(div(mul(n(2), x), sub(x, n(1))), add(div(n(2), sub(x, n(1))), n(3))), target: 'x', conditions: [], numeric: true },
+      { equation: eq(add(mul(n(2), sqrt(add(x, n(3)))), n(7)), n(3)), target: 'x', conditions: [], numeric: true },
+      { equation: eq(add(log(n(2), x), log(n(2), sub(x, n(2)))), n(3)), target: 'x', conditions: [], numeric: true },
+    ],
+    errors: ['eq-root-negative-squared', 'eq-spurious-root'],
   },
   {
     id: REARRANGE_CARD_IDS.arc,

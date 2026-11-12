@@ -77,6 +77,23 @@ test('Seite „Gleichungen umstellen": Bausteine in Gruppen, Stufen, Beispiel, a
   expect(errors).toEqual([])
 })
 
+test('Breites Beispiel bleibt im Rahmen der Karte (Fehler vom 12.11.2026: fieldset wurde so breit wie die Formel)', async ({ page }) => {
+  await page.goto('./#/thema/umstellen')
+  const card = page.getByRole('region', { name: 'Üben' })
+  for (const level of [4, 5]) {
+    await page.getByRole('radio', { name: new RegExp(`^Stufe ${level}`) }).check({ force: true })
+    for (let i = 0; i < 6; i++) {
+      await expect(example(page).locator('.katex').first()).toBeVisible()
+      const box = (await card.boundingBox())!
+      for (const part of [example(page), page.getByRole('radio', { name: /^Stufe 5/ }).locator('..')]) {
+        const inner = (await part.boundingBox())!
+        expect(inner.x + inner.width, `Stufe ${level}, Beispiel ${i + 1}`).toBeLessThanOrEqual(box.x + box.width + 0.5)
+      }
+      await page.getByRole('button', { name: 'Anderes Beispiel' }).click()
+    }
+  }
+})
+
 test('„nur Determinanten": in Stufe 1 gesperrt mit Hinweis, Stufe 5 wählen, Aufgabe nur mit Determinante', async ({ page }) => {
   const errors = collectErrors(page)
   await page.goto('./#/thema/umstellen')
@@ -209,5 +226,23 @@ test('Logarithmen auf beiden Seiten (M6 Schritt 4b-2): geführt bis zum Ergebnis
   await page.goto('./#/frei/umstellen/logeq.3-2')
   await expect(page.locator('math-field[data-ready]')).toBeVisible()
   await expectCleanPage(page, 'Logarithmen frei')
+  expect(errors).toEqual([])
+})
+
+test('Gleichungen mit Zahlen (M6 Schritt 4b-3): geführt mit Probe bis zum Ergebnis, frei mit „Keine Lösung"', async ({ page }) => {
+  const errors = collectErrors(page)
+  // x - 2 = \sqrt{x + 10}: quadrieren, pq-Formel, Probe mit beiden Zahlen
+  await page.goto('./#/ueben/umstellen/zahlen.2-9')
+  await expect(page.getByText('Stufe 2 · Löse die Gleichung')).toBeVisible()
+  await expect(page.getByText(/Mach am Ende die Probe/)).toBeVisible()
+  await expectCleanPage(page, 'Zahlen')
+  await solveWholeTask(page)
+
+  // \frac{13}{x + 6} + 2 = \frac{7 - x}{x + 6}: keine Lösung (x = -6 ist verboten)
+  await page.goto('./#/frei/umstellen/zahlen.2-8')
+  await expect(page.locator('math-field[data-ready]')).toBeVisible()
+  await expectCleanPage(page, 'Zahlen frei')
+  await page.getByRole('button', { name: 'Keine Lösung' }).click()
+  await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
   expect(errors).toEqual([])
 })

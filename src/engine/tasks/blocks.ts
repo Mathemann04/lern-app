@@ -68,4 +68,6 @@ export const BLOCK_CODES: Readonly<Record<string, number>> = {
   // kein Baustein, sondern eine Sammlung: Logarithmen auf beiden Seiten, verschiedene Basen (logEquationKinds.ts,
   // „logeq.2-4711", M6 Schritt 4b-2)
   logeq: 19,
+  // kein Baustein, sondern eine Sammlung: Gleichungen mit Zahlen (numberEquationKinds.ts, „zahlen.2-4711", M6 Schritt 4b-3)
+  zahlen: 20,
 }

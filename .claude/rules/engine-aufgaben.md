@@ -171,3 +171,13 @@ Teil der Mathe-Engine `src/engine/` (reines TypeScript, ohne React).
     einem Baustein, Gegenprobe `robust`). Ziehen: `logEquationPool`, `LOG_EQUATION_SHARE` (25 %) in `rearrangePick.ts`;
     spielbare Mengen auch aus den Arten. Test `logEquationTasks.test.ts` (Art und Bausteine, Gegenprobe, geführt und frei,
     Abwechslung je Stufe, Ziehen)
+  - Gleichungen mit Zahlen (M6 Schritt 4b-3): `tasks/numberEquationKinds.ts` (reine Daten `NUMBER_EQUATION_KINDS`, 14
+    Arten in Stufe 1 bis 4 mit Bausteinen und Anteil, `numberEquationKind(level, s)`; Arten nur hinten anhängen),
+    `tasks/numberEquationTasks.ts` (erst die Lösung, dann die Zahlen; lineare Teile `linearWith`, Summanden wechseln Seite
+    und Reihenfolge, Zahlen je Seite zusammengefasst, nie mit Minus vorn, wenn ein Plus folgt, `spread`; einige Arten mit
+    Absicht ohne Lösung, `none`). Nummern `zahlen.2-4711` (Code `zahlen` in `BLOCK_CODES`). `rearrangeTerms.ts`:
+    `isGoodNumberEquation` (Lösung wie gewollt, ganze Zahl, einfacher Bruch oder $\ln$ einer Zahl bis 60, bei quadratisch
+    fällt etwas weg, Normalform ohne Brüche, Bausteine der Art, höchstens 16 em). Ziehen: `numberEquationPool`,
+    `NUMBER_EQUATION_SHARE` (25 %, nach Formeln und Logarithmen). Gezielt üben: `NUMBER_EQUATION_ERRORS` in
+    `rearrangeFocus.ts`. Test `numberEquationTasks.test.ts` (Lösung gegen eine unabhängige numerische Suche aller Lösungen,
+    Abwechslung je Stufe, geführt und frei, Ziehen)

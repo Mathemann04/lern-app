@@ -1,6 +1,6 @@
 import { explainFractionError, listing } from '../explain/fractionTexts.ts'
-import { explainRearrangeError } from '../explain/rearrangeTexts.ts'
-import { explainError } from '../explain/texts.ts'
+import { PROBE_WHY, explainRearrangeError } from '../explain/rearrangeTexts.ts'
+import { type Explanation, explainError } from '../explain/texts.ts'
 import { contains, key, subterms } from '../expr/compare.ts'
 import { type Env, evaluate } from '../expr/evaluate.ts'
 import { equationToLatex, toLatex } from '../expr/print.ts'
@@ -12,7 +12,7 @@ import { parseLatex, parseLatexEquation } from '../parse/latex.ts'
 import { createRng } from '../random/rng.ts'
 import { newAtoms, toRat } from '../rearrange/algebra.ts'
 import { samplePoints } from '../rearrange/check.ts'
-import { type RearrangeWrong, isToolStep, rearrangeWrongAnswers } from '../rearrange/errorRules.ts'
+import { type RearrangeWrong, isToolStep, rearrangeErrorRule, rearrangeWrongAnswers } from '../rearrange/errorRules.ts'
 import { type RearrangeSolution, solveTask } from '../rearrange/isolate.ts'
 import { hasFraction, hasLooseFraction, hasNestedFraction } from '../rearrange/finished.ts'
 import { type RearrangeTask, taskVariables } from '../rearrange/task.ts'
@@ -21,7 +21,7 @@ import { isInteger, ratAbs } from '../rational.ts'
 import { generateRearrangeTask } from '../tasks/rearrangeTerms.ts'
 import type { TaskRef } from '../tasks/taskNumber.ts'
 import { variablesOf } from './answer.ts'
-import type { FreeTask, FreeVerdict } from './freeTask.ts'
+import { type FreeTask, type FreeVerdict, NO_SOLUTION_INPUT } from './freeTask.ts'
 
 // Prüft ein frei eingegebenes Ergebnis beim Umstellen (docs/PLAN-M3.md, „Wann ist ein Ergebnis
 // fertig?"). Eingabe: die rechte Seite von „x = …" oder eine ganze Gleichung.
@@ -57,24 +57,67 @@ export type RearrangeVerdict =
   | { readonly kind: 'unreadable'; readonly message: string }
   | { readonly kind: 'correct' }
   | { readonly kind: 'unfinished'; readonly reason: NotDone }
-  | { readonly kind: 'knownError'; readonly wrong: RearrangeWrong }
+  // why: eigene Erklärung (Scheinlösung bei Gleichungen mit Zahlen)
+  | { readonly kind: 'knownError'; readonly wrong: RearrangeWrong; readonly why?: Explanation }
   // passt zu mehreren typischen Fehlern (je Regel einer, in der Reihenfolge des Rechenwegs)
   | { readonly kind: 'knownErrors'; readonly wrongs: readonly RearrangeWrong[] }
   | { readonly kind: 'wrongSign' }
   | { readonly kind: 'wrong' }
+  // Gleichungen mit Zahlen (M6 Schritt 4b-3): „Keine Lösung" gewählt, es gibt aber eine; eine Zahl eingegeben, es gibt aber
+  // keine Lösung (ohne das zu verraten: Probe machen)
+  | { readonly kind: 'hasSolution' }
+  | { readonly kind: 'probeFails' }
 
 const POINTS = 24
 
 export function prepareRearrangeCheck(task: RearrangeTask, lenient = false): RearrangeCheckContext {
   const solution = solveTask(task)
   if (!solution) throw new Error(`Die Aufgabe ${equationToLatex(task.equation)} lässt sich nicht auflösen`)
-  const points = samplePoints(task, solution.result, createRng(`umstellen-frei:${equationToLatex(task.equation)}`), POINTS, solution.requires)
+  // Gleichungen mit Zahlen: die Lösung selbst ist die einzige Prüfstelle
+  const points = task.numeric
+    ? solution.none
+      ? []
+      : [{ [task.target]: evaluate(solution.result, {}) }]
+    : samplePoints(task, solution.result, createRng(`umstellen-frei:${equationToLatex(task.equation)}`), POINTS, solution.requires)
   const typed = parseLatex(toLatex(solution.result))
   const resultForm = formKey(typed.ok ? typed.expr : solution.result)
   return { task, solution, wrongs: rearrangeWrongAnswers(task, solution), letters: taskVariables(task), points, lenient, resultForm }
 }
 
+// Gleichung mit Zahlen (M6 Schritt 4b-3): eine Zahl oder „Keine Lösung" (Knopf, NO_SOLUTION_INPUT)
+function checkNumberAnswer(context: RearrangeCheckContext, latex: string): RearrangeVerdict {
+  const { solution, task } = context
+  const t = task.target
+  if (latex.trim() === NO_SOLUTION_INPUT) return solution.none ? { kind: 'correct' } : { kind: 'hasSolution' }
+  const parsed = parseLatexEquation(latex)
+  if (!parsed.ok) return { kind: 'unreadable', message: parsed.message }
+  const isTarget = (e: Expr) => e.kind === 'var' && e.name === t
+  const answer = !parsed.lhs || isTarget(parsed.lhs) ? parsed.rhs : isTarget(parsed.rhs) ? parsed.lhs : null
+  if (!answer || contains(answer, t)) return { kind: 'unfinished', reason: 'not-isolated' }
+  const name = variablesOf(answer).values().next().value
+  if (name !== undefined) return { kind: 'unreadable', message: `Gesucht ist eine Zahl. Was soll $${name}$ bedeuten?` }
+  const v = evaluate(answer, {})
+  if (!Number.isFinite(v)) return { kind: 'wrong' }
+  if (!solution.none && close(v, evaluate(solution.result, {}))) {
+    if (formKey(answer) === context.resultForm) return { kind: 'correct' }
+    const reason = context.lenient ? (hasNestedFraction(answer) ? 'nested' : null) : notDone(answer, solution.result)
+    return reason ? { kind: 'unfinished', reason } : { kind: 'correct' }
+  }
+  // eine Zahl, die die Probe verwirft (Scheinlösung, nicht im Definitionsbereich): behalten
+  const rejected = solution.steps.findIndex((s) => (s.kind === 'probe' || s.kind === 'choose') && s.reason && s.operand && s.unknown === undefined && close(v, evaluate(s.operand, {})))
+  if (rejected >= 0) {
+    const step = solution.steps[rejected]
+    const wrong = { rule: rearrangeErrorRule('eq-spurious-root'), stepIndex: rejected, after: eq(variable(t), step.operand!), result: step.operand! }
+    return { kind: 'knownError', wrong, why: PROBE_WHY.kept }
+  }
+  const match = context.wrongs.find((w) => w.result && close(v, evaluate(w.result, {})))
+  if (match) return { kind: 'knownError', wrong: match }
+  if (solution.none) return { kind: 'probeFails' }
+  return close(-v, evaluate(solution.result, {})) ? { kind: 'wrongSign' } : { kind: 'wrong' }
+}
+
 export function checkRearrangeAnswer(context: RearrangeCheckContext, latex: string): RearrangeVerdict {
+  if (context.task.numeric) return checkNumberAnswer(context, latex)
   const parsed = parseLatexEquation(latex)
   if (!parsed.ok) return { kind: 'unreadable', message: parsed.message }
   const t = context.task.target
@@ -289,8 +332,16 @@ export function rearrangeFreeVerdict(v: RearrangeVerdict, target: string): FreeV
       return { kind: 'unfinished', title: v.reason === 'not-isolated' ? 'Richtig umgeformt, aber noch nicht fertig.' : 'Richtig gerechnet, aber noch nicht fertig.', message: notDoneText(v.reason, target) }
     case 'knownError': {
       const { id, name } = v.wrong.rule
-      return { kind: 'wrong', title: 'Nicht ganz.', error: { id, name, why: whyOf(v.wrong) } }
+      return { kind: 'wrong', title: 'Nicht ganz.', error: { id, name, why: v.why ?? whyOf(v.wrong) } }
     }
+    case 'hasSolution':
+      return { kind: 'wrong', title: 'Es gibt eine Lösung.', message: 'Rechne weiter und mach am Ende die Probe in der Gleichung der Aufgabe.' }
+    case 'probeFails':
+      return {
+        kind: 'wrong',
+        title: 'Das stimmt noch nicht.',
+        message: 'Mach die Probe: Setze deine Zahl in die Gleichung der Aufgabe ein und prüfe, ob beide Seiten gleich und alle Teile definiert sind.',
+      }
     // kein einzelner Fehler (der Fortschritt zählt keinen davon), dafür jeder mit seiner Regel
     case 'knownErrors': {
       const rules = v.wrongs.map((w) => `${w.rule.name}: ${whyOf(w).short}`).join('\n')
@@ -354,5 +405,6 @@ export function prepareRearrangeFree(ref: TaskRef): FreeTask {
       pi: hasPi(context.solution.result) || toolsIn(equation).some((t) => t.tool.kind === 'arg'),
     },
     check: (latex) => rearrangeFreeVerdict(checkRearrangeAnswer(context, latex), target),
+    ...(task.numeric ? { noSolution: true as const } : {}),
   }
 }

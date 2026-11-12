@@ -227,6 +227,12 @@ export const REARRANGE_ERROR_TEXTS: Readonly<Record<string, Explanation>> = {
       'Die $pq$-Formel liefert zwei Lösungen, aber nicht jede passt zur Aufgabe. Prüfe, welche Werte möglich sind: $u = e^x$ ist immer positiv, $u = \\sqrt{x}$ und $u = x^2$ sind nie negativ, und $x$ muss positiv sein und die Bedingungen der Aufgabe erfüllen. Die andere Lösung ist eine Scheinlösung.',
     short: 'Nicht jede Lösung passt: $e^x$ ist zum Beispiel immer positiv.',
   },
+  // M6 Schritt 4b-3
+  'eq-root-negative-squared': {
+    detailed:
+      'Quadrieren ist nur eine Folgerung: Es kann Zahlen bringen, die die Gleichung davor gar nicht erfüllen. Schau vor dem Quadrieren, welche Werte die Wurzel auf der einen Seite überhaupt annehmen kann, und vergleiche mit der anderen Seite.',
+    short: 'Vor dem Quadrieren: Welche Werte kann eine Wurzel annehmen?',
+  },
   'eq-not-resubstituted': {
     detailed: 'Die $pq$-Formel liefert $u$, gesucht ist aber $x$. Setze für $u$ wieder den Baustein ein, zum Beispiel $e^x$, und löse dann nach $x$ auf.',
     short: 'Zurück einsetzen: $u$ ist noch nicht $x$.',
@@ -1082,6 +1088,9 @@ export const REARRANGE_HINTS = {
   zero: 'Für die $pq$-Formel muss rechts $0$ stehen: Bringe alles auf die linke Seite, $u^2$ mit Plus vorn.',
   normalize: 'Die $pq$-Formel gilt für $u^2 + pu + q = 0$. Teile vorher durch die Zahl vor $u^2$.',
   pq: '$u^2 + pu + q = 0 \\;\\Rightarrow\\; u_{1,2} = -\\frac{p}{2} \\pm \\sqrt{\\left(\\frac{p}{2}\\right)^2 - q}$, $p$ und $q$ mit Vorzeichen.',
+  probe:
+    'Setze die Zahl in die Gleichung der Aufgabe ein, nicht in eine spätere, und rechne beide Seiten getrennt aus. Achte darauf, ob jeder Nenner, jede Wurzel und jeder Logarithmus definiert ist.',
+  rootNegative: 'Welche Werte kann eine Wurzel überhaupt haben?',
   choose: 'Prüfe beide Lösungen: $u = e^x$ ist immer positiv, $\\sqrt{x}$ nie negativ, und $x$ muss im Bereich der Aufgabe liegen.',
   resubstitute: 'Gesucht ist $x$: Setze für $u$ wieder den Baustein ein und löse nach $x$ auf.',
   extend: 'Erweitere den Doppelbruch: Zähler und Nenner mal den Hauptnenner der inneren Brüche. Dann kürzen sich die inneren Nenner weg.',
@@ -1441,6 +1450,50 @@ export function explainAngle(work: { readonly dot: string; readonly dotValue: st
 }
 
 // Warum fällt die andere Lösung der pq-Formel weg? rejected: die andere Lösung, why: Grund als Satz
+// --- Gleichungen mit Zahlen (M6 Schritt 4b-3): Probe ---
+
+// „Warum ist das falsch?" bei der Probe, ohne das Ergebnis zu verraten
+export const PROBE_WHY: Record<'kept' | 'spurious' | 'domain', Explanation> = {
+  // eine Scheinlösung oder eine Zahl außerhalb des Definitionsbereichs behalten
+  kept: {
+    detailed:
+      'Quadrieren, Malnehmen mit einem Term mit $x$ und das Zusammenfassen von Logarithmen können Zahlen bringen, die die Gleichung der Aufgabe gar nicht erfüllen. Darum entscheidet nur die Probe in der Gleichung der Aufgabe.',
+    short: 'Nur die Probe in der Gleichung der Aufgabe entscheidet.',
+  },
+  // „Scheinlösung" gewählt, obwohl es nicht an den Seiten liegt
+  spurious: {
+    detailed:
+      'Eine Scheinlösung ist für alle Teile der Gleichung definiert, aber die beiden Seiten sind verschieden. Setze die Zahl in die Gleichung der Aufgabe ein und rechne beide Seiten getrennt aus.',
+    short: 'Beide Seiten getrennt ausrechnen und vergleichen.',
+  },
+  // „nicht im Definitionsbereich" gewählt, obwohl alles definiert ist
+  domain: {
+    detailed:
+      'Nicht im Definitionsbereich heißt: Ein Nenner wäre $0$, unter einer Wurzel stünde eine negative Zahl oder ein Logarithmus hätte kein positives Argument. Prüfe jeden dieser Teile mit der Zahl.',
+    short: 'Prüfe Nenner, Wurzeln und Logarithmen mit der Zahl.',
+  },
+}
+
+// Erklärung der Probe: eingesetzt, Ergebnis, warum es die Probe braucht
+export function explainProbe(inserted: string, verdict: string): Explanation {
+  return {
+    detailed: `Eingesetzt in die Gleichung der Aufgabe:\n$${inserted}$\n${verdict} Die Probe braucht es, weil Quadrieren, Malnehmen mit einem Term mit $x$ und das Zusammenfassen von Logarithmen Zahlen bringen können, die gar keine Lösung sind.`,
+    short: verdict,
+  }
+}
+
+// Wurzel gleich negativer Zahl: nicht quadrieren
+export const ROOT_NEGATIVE_EXPLANATION: Explanation = {
+  detailed:
+    'Eine Wurzel ist nie negativ: $\\sqrt{u} \\ge 0$. Steht sie allein gleich einer negativen Zahl, passt kein $x$, die Gleichung hat keine Lösung: $\\mathbb{L} = \\{\\,\\}$.',
+  short: 'Eine Wurzel ist nie negativ: keine Lösung.',
+}
+
+export const ROOT_NEGATIVE_DROP_MINUS: Explanation = {
+  detailed: 'Das Minus gehört zur Zahl und darf nicht einfach wegfallen. Überlege lieber, welche Werte eine Wurzel annehmen kann.',
+  short: 'Das Minus darf nicht wegfallen.',
+}
+
 export function explainChoose(rejected: string, why: string, after: string): Explanation {
   return {
     detailed: `Die andere Lösung $${rejected}$ passt nicht: ${why} Also bleibt\n$${after}$`,

@@ -88,7 +88,7 @@ export function CourseScreen({ id }: { id: string }) {
         </div>
         {/* Linie am umgebenden Element: Bei fieldset würde die Beschriftung sie unterbrechen */}
         <div className="border-t border-zinc-100">
-          <fieldset>
+          <fieldset className="min-w-0">
             <legend className="px-5 pt-4 text-sm font-medium text-zinc-500">Stufe wählen</legend>
             <div className="space-y-2 p-3 pt-2">
               {course.levels.map((level) => {

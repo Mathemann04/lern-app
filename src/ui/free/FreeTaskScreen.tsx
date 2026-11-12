@@ -1,5 +1,5 @@
 import { type ReactNode, useMemo, useRef, useState } from 'react'
-import type { FreeVerdict } from '../../engine/check/freeTask.ts'
+import { type FreeVerdict, NO_SOLUTION_INPUT } from '../../engine/check/freeTask.ts'
 import { type GuidedStep, isMathTask } from '../../engine/guided/types.ts'
 import type { TaskRef } from '../../engine/tasks/taskNumber.ts'
 import { recordAttempt, recordError } from '../../state/progress.ts'
@@ -98,13 +98,25 @@ export default function FreeTaskScreen({ course, engine, taskRef, focus = null, 
           />
         </div>
         {!solved && (
-          <button
-            type="button"
-            onClick={() => submit(latex)}
-            className="w-full rounded-xl bg-accent-700 px-4 py-3 text-lg font-medium text-on-accent hover:bg-accent-800"
-          >
-            Prüfen
-          </button>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => submit(latex)}
+              className="flex-1 rounded-xl bg-accent-700 px-4 py-3 text-lg font-medium text-on-accent hover:bg-accent-800"
+            >
+              Prüfen
+            </button>
+            {/* Gleichungen mit Zahlen (M6 Schritt 4b-3): statt einer Zahl „keine Lösung" */}
+            {free.noSolution && (
+              <button
+                type="button"
+                onClick={() => submit(NO_SOLUTION_INPUT)}
+                className="rounded-xl border-2 border-accent-700 px-4 py-3 text-lg font-medium text-accent-700 hover:bg-accent-50"
+              >
+                Keine Lösung
+              </button>
+            )}
+          </div>
         )}
       </section>
 

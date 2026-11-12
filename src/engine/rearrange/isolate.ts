@@ -24,7 +24,7 @@ import {
   polySum,
   totalDegree,
 } from '../fraction/poly.ts'
-import { type Rational, isInteger, isOne, isZero, rat, ratAbs, ratDiv, ratEq, ratMul, ratNeg, ratSign, ratSub } from '../rational.ts'
+import { type Rational, isInteger, isOne, isZero, rat, ratAbs, ratAdd, ratDiv, ratEq, ratMul, ratNeg, ratPow, ratSign, ratSub, ratToNumber } from '../rational.ts'
 import {
   type Atoms,
   BLOCK_ATOM,
@@ -86,6 +86,9 @@ export type StepKind =
   | 'pq'
   | 'choose'
   | 'resubstitute'
+  // M6 Schritt 4b-3, Gleichungen mit Zahlen: Probe in der Ausgangsgleichung, Wurzel gleich negativer Zahl
+  | 'probe'
+  | 'rootNegative'
   // Stufe 5: Werkzeug ausrechnen (tools/steps.ts)
   | 'derive'
   | 'partial'
@@ -139,6 +142,8 @@ export const STEP_NAMES: Record<StepKind, string> = {
   pq: 'pq-Formel anwenden',
   choose: 'Passende Lösung wählen',
   resubstitute: 'Zurück einsetzen',
+  probe: 'Probe',
+  rootNegative: 'Keine Lösung',
   derive: 'Ableiten',
   partial: 'In Partialbrüche zerlegen',
   antiderivative: 'Stammfunktion bilden',
@@ -246,8 +251,14 @@ export function stepLabel(step: RearrangeStep, taskTarget: string): string {
     case 'pq':
       return '$pq$-Formel anwenden'
     case 'choose':
+      // mit Zahlen (M6 Schritt 4b-3) die Lösung als Zahl
+      if (step.numeric) return `Die Lösung $${target} = ${operand}$ verwerfen`
       // u_1 mit Plus vor der Wurzel, u_2 mit Minus
       return `Die Lösung $${target}_${termsOf(step.operand!).at(-1)?.kind === 'neg' ? 2 : 1} = ${operand}$ verwerfen`
+    case 'probe':
+      return `Probe mit $${target} = ${operand}$`
+    case 'rootNegative':
+      return 'Keine Lösung: Eine Wurzel ist nie negativ'
     case 'resubstitute':
       return `Zurück einsetzen: $${step.substitution!.name} = ${toLatex(step.substitution!.expr)}$`
     case 'combine':
@@ -279,8 +290,15 @@ export type RearrangeStep = {
   readonly substitution?: Substitution
   // nach dem Substituieren: die Unbekannte, nach der gerade aufgelöst wird (u)
   readonly unknown?: string
-  // bei der pq-Formel und beim Wählen: warum die andere Lösung (operand) wegfällt
+  // bei der pq-Formel und beim Wählen: warum die andere Lösung (operand) wegfällt; bei der Probe (M6 Schritt 4b-3),
+  // warum die Zahl (operand) keine Lösung ist, ohne reason ist sie eine
   readonly reason?: RejectReason
+  // Gleichung mit Zahlen (M6 Schritt 4b-3): pq-Formel mit ausgerechneter Wurzel
+  readonly numeric?: true
+  // nach der pq-Formel mit Zahlen: die gewählte Lösung als Zahl (die Gleichung danach zeigt beide)
+  readonly value?: Expr
+  // nach der pq-Formel mit Zahlen ohne Substitution: beide Lösungen, mit Grund, falls die Probe sie verwirft
+  readonly candidates?: readonly { readonly value: Expr; readonly reason?: RejectReason }[]
 }
 
 // Substitution: u steht für den Baustein expr (e^x, \sqrt{x}, \sin x, \ln x, x^2)
@@ -288,7 +306,9 @@ export type Substitution = { readonly name: string; readonly expr: Expr }
 
 // Warum die zweite Lösung der pq-Formel wegfällt: u₂ ist negativ, kann es aber nicht sein (u = e^x);
 // mit u₂ wird x negativ; u₂ verletzt eine Bedingung der Aufgabe
-export type RejectReason = 'negative' | 'targetNegative' | 'condition'
+// M6 Schritt 4b-3 (Gleichungen mit Zahlen): die Probe in der Ausgangsgleichung stimmt nicht (Scheinlösung, z. B. nach
+// dem Quadrieren) bzw. die Zahl liegt nicht im Definitionsbereich (Nenner 0, Wurzel oder Logarithmus nicht definiert)
+export type RejectReason = 'negative' | 'targetNegative' | 'condition' | 'probe' | 'domain'
 
 export type RearrangeSolution = {
   readonly target: string
@@ -303,11 +323,22 @@ export type RearrangeSolution = {
   readonly novel?: true
   // mit Logarithmen auf beiden Seiten oder verschiedenen Basen (M6 Schritt 4b-2, siehe logPaths)
   readonly logPath?: true
+  // Gleichung mit Zahlen ohne Lösung (M6 Schritt 4b-3); result ist dann die zuletzt verworfene Zahl bzw. bei einer
+  // Wurzel gleich einer negativen Zahl diese Zahl
+  readonly none?: true
 }
 
 // Was das Lösen über die Aufgabe wissen muss: Bedingungen (welche Lösung der pq-Formel passt) und,
-// beim Weiterrechnen ab einer Gleichung in u, die Substitution
-export type SolveOptions = { readonly conditions?: readonly Condition[]; readonly substitution?: Substitution }
+// beim Weiterrechnen ab einer Gleichung in u, die Substitution; bei Gleichungen mit Zahlen (M6 Schritt 4b-3) numeric:
+// x ist eine beliebige reelle Zahl, Lösungen prüft die Probe in der Ausgangsgleichung
+// noProbe: beim Weiterrechnen mit einem typischen Fehler ohne die Probe zum Schluss (wer quadriert und nicht prüft, behält die
+// Zahl)
+export type SolveOptions = {
+  readonly conditions?: readonly Condition[]
+  readonly substitution?: Substitution
+  readonly numeric?: boolean
+  readonly noProbe?: boolean
+}
 
 type Context = {
   readonly original: Equation
@@ -316,6 +347,9 @@ type Context = {
   readonly sub?: Substitution
   // Buchstaben, die nach den Bedingungen spitze Winkel sind (Teil 8b, acuteLetters)
   readonly acute: ReadonlySet<string>
+  readonly numeric: boolean
+  // beim Weiterrechnen mit einem typischen Fehler: auch eine Wurzel gleich einer negativen Zahl wird quadriert
+  readonly noProbe: boolean
 }
 
 const MAX_STEPS = 30
@@ -2160,7 +2194,8 @@ function timesUnknown(c: Expr, power: Expr): Expr {
 
 // a u^2 + b u + c (Summanden mit Vorzeichen)
 function quadraticExpr(a: Expr, b: Expr, c: Expr, u: Expr): Expr {
-  return add(timesUnknown(a, pow(u, num(2))), timesUnknown(b, u), ...termsOf(c))
+  // mit Zahlen (M6 Schritt 4b-3) kann u oder die Zahl fehlen: x^2 - 4x = 0
+  return add(timesUnknown(a, pow(u, num(2))), ...(isZeroExpr(b) ? [] : [timesUnknown(b, u)]), ...termsOf(c).filter((x) => !isZeroExpr(x)))
 }
 
 // Steht die Normalform u^2 + pu + q = 0 schon da (vorn u^2 mit der Zahl 1)?
@@ -2169,13 +2204,13 @@ function isNormalized(e: Equation, u: string): boolean {
 }
 
 // p und q der Normalform (Gleichung = 0 bzw. irgendeine quadratische Gleichung, durch die Zahl vor u^2 geteilt)
-function pqParts(e: Equation, u: string): { p: Frac; q: Frac; atoms: Atoms } | null {
+function pqParts(e: Equation, u: string, numeric = false): { p: Frac; q: Frac; atoms: Atoms } | null {
   const z = zeroPoly(e, u)
   if (!z || degreeIn(z.n, u) !== 2) return null
   const a = fracOf(coefficientOf(z.n, u, 2))
   const b = coefficientOf(z.n, u, 1)
   const c = coefficientOf(z.n, u, 0)
-  if (b.length === 0 || c.length === 0) return null
+  if (!numeric && (b.length === 0 || c.length === 0)) return null
   return { p: fracDiv(fracOf(b), a), q: fracDiv(fracOf(c), a), atoms: z.atoms }
 }
 
@@ -2274,6 +2309,7 @@ function chooseRoot(roots: readonly [Expr, Expr], u: string, ctx: Context): { in
 // pq-Formel auf u^2 + pu + q = 0: beide Lösungen, die passende steht in der Gleichung danach, die
 // andere als operand
 function pqDraft(e: Equation, u: string, ctx: Context): Draft | null {
+  if (ctx.numeric) return numericPqDraft(e, u, ctx)
   const parts = pqParts(e, u)
   const roots = parts && pqRoots(parts, null)
   if (!roots) return null
@@ -2288,8 +2324,9 @@ function pqDraft(e: Equation, u: string, ctx: Context): Draft | null {
 export function pqWrong(step: RearrangeStep, wrong: PqMistake): Equation | null {
   if (step.kind !== 'pq' || step.after.lhs.kind !== 'var') return null
   const u = step.after.lhs.name
-  const parts = pqParts(step.before, u)
-  const roots = parts && pqRoots(parts, wrong)
+  // mit Zahlen (M6 Schritt 4b-3): Wurzel ausgerechnet, wenn sie aufgeht
+  const parts = pqParts(step.before, u, step.numeric)
+  const roots = parts && (step.numeric ? numericPqRoots(parts, wrong) : pqRoots(parts, wrong))
   if (!roots) return null
   const last = termsOf(step.after.rhs).at(-1)
   return eq(variable(u), last?.kind === 'neg' ? roots.minus : roots.plus)
@@ -2302,13 +2339,15 @@ export function stepEquationLatex(kind: StepKind, e: Equation): string {
   const terms = e.rhs.terms
   const last = terms[terms.length - 1]
   const radical = last.kind === 'neg' ? last.arg : last
-  return `${e.lhs.name}_{1,2} = ${toLatex(add(...terms.slice(0, -1)))} \\pm ${toLatex(radical)}`
+  const center = toLatex(add(...terms.slice(0, -1)))
+  // mit Zahlen ohne -\frac{p}{2} (M6 Schritt 4b-3): x_{1,2} = \pm 3
+  return `${e.lhs.name}_{1,2} = ${center === '0' ? '' : `${center} `}\\pm ${toLatex(radical)}`
 }
 
 // Quadratische Gleichung in der Unbekannten t (keine Wurzel, kein Baustein): alles nach links,
 // durch die Zahl vor t^2 teilen, pq-Formel
 function quadraticStep(e: Equation, t: string, diff: Poly, atoms: Atoms, ctx: Context): Draft | null {
-  const zero = zeroForm(diff, t, atoms)
+  const zero = zeroForm(diff, t, atoms, ctx.numeric)
   if (!zero) return null
   const { a, b, c } = zero
   if (!(isZeroExpr(e.rhs) && key(e.lhs) === key(zero.equation.lhs))) return { kind: 'zero', after: zero.equation }
@@ -2336,11 +2375,11 @@ function minusOutside(e: Expr): Expr {
 }
 
 // au^2 + bu + c = 0 aus dem Polynom (vorn mit Plus); null, wenn es keine solche Gleichung ist
-function zeroForm(diff: Poly, u: string, atoms: Atoms): { a: Poly; b: Poly; c: Poly; equation: Equation } | null {
+function zeroForm(diff: Poly, u: string, atoms: Atoms, numeric = false): { a: Poly; b: Poly; c: Poly; equation: Equation } | null {
   let a = coefficientOf(diff, u, 2)
   let b = coefficientOf(diff, u, 1)
   let c = coefficientOf(diff, u, 0)
-  if (degreeIn(diff, u) !== 2 || b.length === 0 || c.length === 0) return null
+  if (degreeIn(diff, u) !== 2 || (!numeric && (b.length === 0 || c.length === 0))) return null
   // vor u^2 ein Monom mit Plus, eine Summe mit Plus vor der Zahl: (1 - y)x^2
   const constant = a.find((term) => term.mono.length === 0)
   if (ratSign((a.length === 1 ? a[0] : (constant ?? a[0])).coef) < 0) [a, b, c] = [a, b, c].map((p) => polyScale(p, rat(-1)))
@@ -2437,7 +2476,8 @@ function rational(e: Equation, t: string, ctx: Context): Draft | null {
   const diff = polyAdd(pl, polyScale(pr, rat(-1)))
   if (degreeIn(diff, u) === 2 && u === t) {
     // nur x^2, kein x: nach x^2 auflösen wie nach einer Unbekannten (x^2 - yx^2 = a → x^2(1 - y) = a)
-    const square = coefficientOf(diff, t, 1).length === 0 ? squareUnknown(pl, pr, t, atoms) : null
+    // mit Zahlen (M6 Schritt 4b-3) gibt es zu x^2 = 9 zwei Lösungen: dann wie jede quadratische Gleichung
+    const square = coefficientOf(diff, t, 1).length === 0 && !ctx.numeric ? squareUnknown(pl, pr, t, atoms) : null
     if (square) return linearSteps(e, t, square.pl, square.pr, square.atoms, SQUARE_ATOM, pow(variable(t), num(2)), { operand: pow(variable(t), num(2)) })
     // quadratisch: alles nach links, Normalform, pq-Formel
     return quadraticStep(e, t, diff, atoms, ctx)
@@ -2533,6 +2573,8 @@ function nextStep(e: Equation, t: string, ctx: Context): Draft | null {
   if (acuteSquared) return acuteSquared
   if (parts === 'both') return mustStep(rational(e, t, ctx))
   const { s, o, side } = parts
+  // Gleichung mit Zahlen (M6 Schritt 4b-3): eine Wurzel gleich einer negativen Zahl hat keine Lösung
+  if (ctx.numeric && !ctx.noProbe && s.kind === 'root' && s.index % 2 === 0 && isNegativeNumber(o)) return { kind: 'rootNegative', operand: o, after: e }
   if (s.kind === 'var') {
     // mit spitzen Winkeln: Wurzel aus \sin^2 y und \cos^2 y, geschrieben mit \tan y
     const acute = acuteForm(o, ctx.acute)
@@ -2580,8 +2622,114 @@ function mustStep(d: Draft | null): Draft {
 }
 
 // Löst eine Aufgabe (mit ihren Bedingungen)
-export const solveTask = (task: { readonly equation: Equation; readonly target: string; readonly conditions: readonly Condition[] }) =>
-  solveEquation(task.equation, task.target, { conditions: task.conditions })
+export const solveTask = (task: { readonly equation: Equation; readonly target: string; readonly conditions: readonly Condition[]; readonly numeric?: true }) =>
+  solveEquation(task.equation, task.target, { conditions: task.conditions, ...(task.numeric ? { numeric: true } : {}) })
+
+// --- Gleichungen mit Zahlen (M6 Schritt 4b-3) ---
+
+// Zahl als Term: -\frac{3}{2} mit Minus vorn
+export const numberExpr = (r: Rational): Expr => niceFrac({ num: polyConst(r), den: polyConst(rat(1)) }, anyAtoms())
+
+// Probe in der Ausgangsgleichung: null, wenn die Zahl eine Lösung ist; sonst warum nicht
+export function probeReason(original: Equation, t: string, value: number): RejectReason | null {
+  const env = { [t]: value }
+  const l = evaluate(original.lhs, env)
+  const r = evaluate(original.rhs, env)
+  if (!Number.isFinite(l) || !Number.isFinite(r)) return 'domain'
+  return Math.abs(l - r) <= 1e-9 * Math.max(1, Math.abs(l), Math.abs(r)) ? null : 'probe'
+}
+
+// Braucht die Gleichung eine Probe? Mit x unter einer Wurzel, in einem Logarithmus oder im Nenner kann der Rechenweg
+// Scheinlösungen bringen (Quadrieren, Malnehmen mit dem Nenner, Logarithmen zusammenfassen)
+export const needsProbe = (e: Equation, t: string) =>
+  [...subterms(e.lhs), ...subterms(e.rhs)].some(
+    (s) => ((s.kind === 'root' || s.kind === 'log' || (s.kind === 'fn' && s.name === 'ln')) && contains(s.arg, t)) || (s.kind === 'div' && contains(s.den, t)),
+  )
+
+// Seiten ohne Buchstaben ausgerechnet: 2x = 11 - 3 wird 2x = 8 (Wurzeln und Logarithmen bleiben stehen)
+export function foldNumbers(e: Equation): Equation {
+  const fold = (side: Expr): Expr => {
+    if (variablesOf(side).length > 0 || side.kind === 'num' || (side.kind === 'neg' && side.arg.kind === 'num')) return side
+    const f = toRat(side, anyAtoms())
+    const v = f && fracValue(f)
+    return v ? finalForm(numberExpr(v)) : side
+  }
+  return eq(fold(e.lhs), fold(e.rhs))
+}
+
+// Schritte, deren Gleichung mit Zahlen so bleibt, wie sie ist (pq-Formel mit \pm, Probe)
+const UNFOLDED = new Set<StepKind>(['pq', 'choose', 'probe', 'rootNegative'])
+
+// Steht auf der anderen Seite einer Wurzel eine negative Zahl?
+const isNegativeNumber = (o: Expr) => variablesOf(o).length === 0 && evaluate(o, {}) < 0
+
+// Wert eines Bruchs ohne Buchstaben
+function fracValue(f: Frac): Rational | null {
+  const n = constValue(f.num)
+  const d = constValue(f.den)
+  return n && d && !isZero(d) ? ratDiv(n, d) : null
+}
+
+// Beide Lösungen der pq-Formel mit Zahlen, die Wurzel ausgerechnet, wenn sie aufgeht: -\frac{p}{2} \pm \frac{5}{2};
+// mit einem typischen Fehler auch mit Wurzel. null bei negativer Zahl unter der Wurzel.
+function numericPqRoots(parts: { p: Frac; q: Frac }, wrong: PqMistake | null): { plus: Expr; minus: Expr; values: readonly [Rational, Rational] | null } | null {
+  const p = fracValue(parts.p)
+  const q = fracValue(parts.q)
+  if (!p || !q) return null
+  const h = ratMul(p, rat(1, 2))
+  const center = wrong === 'sign' ? h : ratNeg(h)
+  const half = wrong === 'half' ? p : h
+  const d = ratAdd(ratMul(half, half), wrong === 'q' ? q : ratNeg(q))
+  if (ratSign(d) <= 0) return null
+  const s = ratPow(d, rat(1, 2))
+  const radical = s ? numberExpr(s) : sqrt(numberExpr(d))
+  const c = numberExpr(center)
+  return { plus: add(c, radical), minus: add(c, neg(radical)), values: s ? [ratAdd(center, s), ratSub(center, s)] : null }
+}
+
+// Kann u (nach der Substitution u = \sqrt{x} oder u = e^x) diesen Wert gar nicht haben?
+function outOfRange(sub: Substitution, target: string, v: Rational): boolean {
+  const e = sub.expr
+  if (e.kind === 'root' && e.index % 2 === 0) return ratSign(v) < 0
+  if (e.kind === 'pow' && contains(e.exp, target) && !contains(e.base, target)) return ratSign(v) <= 0
+  return false
+}
+
+// pq-Formel mit Zahlen: Die Wurzel geht auf, beide Lösungen sind Zahlen. Nach einer Substitution entscheidet der
+// Wertebereich von u bzw. die Probe, welche passt (danach „Passende Lösung wählen"); sonst kommt für beide die Probe
+// (candidates). null, wenn beide passen (zwei Lösungen) oder nach einer Substitution keine.
+function numericPqDraft(e: Equation, u: string, ctx: Context): Draft | null {
+  const parts = pqParts(e, u, true)
+  const roots = parts && numericPqRoots(parts, null)
+  if (!roots?.values) return null
+  const values = roots.values
+  if (ctx.sub && u === ctx.sub.name) {
+    const sub = ctx.sub
+    const reasons = values.map((v): RejectReason | null => {
+      if (outOfRange(sub, ctx.target, v)) return 'negative'
+      const back = solveEquation(eq(sub.expr, numberExpr(v)), ctx.target)
+      if (!back || contains(back.result, ctx.target)) return 'domain'
+      return probeReason(ctx.original, ctx.target, evaluate(back.result, {}))
+    })
+    const index = reasons[0] === null && reasons[1] !== null ? 0 : reasons[1] === null && reasons[0] !== null ? 1 : null
+    if (index === null) return null
+    const other = index === 0 ? 1 : 0
+    return {
+      kind: 'pq',
+      numeric: true,
+      operand: numberExpr(values[other]),
+      reason: reasons[other]!,
+      after: eq(variable(u), index === 0 ? roots.plus : roots.minus),
+      value: numberExpr(values[index]),
+    }
+  }
+  const candidates = values.map((v) => {
+    const reason = probeReason(ctx.original, ctx.target, ratToNumber(v))
+    return { value: numberExpr(v), ...(reason ? { reason } : {}) }
+  })
+  if (candidates.every((c) => !c.reason)) return null
+  return { kind: 'pq', numeric: true, after: eq(variable(u), roots.plus), candidates }
+}
 
 // Löst die Gleichung nach t auf; null, wenn das mit diesen Schritten nicht geht. Mit den Bedingungen
 // der Aufgabe wird die passende Lösung der pq-Formel gewählt; mit einer Substitution geht es ab einer
@@ -2603,28 +2751,61 @@ export function solveEquation(equation: Equation, target: string, options: Solve
       current = draft.after
     }
     const original = current
+    const numeric = options.numeric === true
+    const done = (none = false): RearrangeSolution => ({
+      target,
+      steps,
+      result: current.rhs,
+      requires: steps.flatMap((x) => (x.requires ? [x.requires] : [])),
+      ...(sub ? { substitution: sub } : {}),
+      ...(novelPaths > startPaths ? { novel: true as const } : {}),
+      ...(logPaths > startLogPaths ? { logPath: true as const } : {}),
+      ...(none ? { none: true as const } : {}),
+    })
     for (let i = 0; i < MAX_STEPS; i++) {
       // nach dem Substituieren: nach u auflösen, dann zurück einsetzen
       const inU = sub !== undefined && (contains(current.lhs, sub.name) || contains(current.rhs, sub.name))
       const t = inU ? sub!.name : target
-      const ctx: Context = { original, target, conditions, sub, acute }
-      const draft = (inU ? resubstituteDraft(current, sub!) : null) ?? nextStep(current, t, ctx)
+      const ctx: Context = { original, target, conditions, sub, acute, numeric, noProbe: options.noProbe === true }
+      const raw = (inU ? resubstituteDraft(current, sub!) : null) ?? nextStep(current, t, ctx)
+      // mit Zahlen: Seiten ohne x gleich ausgerechnet; x^2 = 9 hat zwei Lösungen (geht nur über die pq-Formel)
+      if (numeric && raw?.kind === 'root' && !(raw.operand && toLatex(raw.operand) === '3')) return null
+      const draft = numeric && raw && !UNFOLDED.has(raw.kind) ? { ...raw, after: foldNumbers(raw.after) } : raw
       if (!draft) {
-        return {
-          target,
-          steps,
-          result: current.rhs,
-          requires: steps.flatMap((x) => (x.requires ? [x.requires] : [])),
-          ...(sub ? { substitution: sub } : {}),
-          ...(novelPaths > startPaths ? { novel: true as const } : {}),
-          ...(logPaths > startLogPaths ? { logPath: true as const } : {}),
+        // Gleichung mit Zahlen: zum Schluss die Probe in der Ausgangsgleichung (nach der pq-Formel schon geschehen)
+        if (numeric && !options.noProbe && needsProbe(original, target) && !steps.some((s) => s.kind === 'probe')) {
+          if (variablesOf(current.rhs).length > 0 || current.lhs.kind !== 'var') return null
+          const reason = probeReason(original, target, evaluate(current.rhs, {}))
+          steps.push({ kind: 'probe', operand: current.rhs, ...(reason ? { reason } : {}), before: current, after: current })
+          return done(reason !== null)
         }
+        return done()
       }
       const unknown = inU && draft.kind !== 'resubstitute' ? { unknown: sub!.name } : {}
       steps.push({ ...draft, ...unknown, before: current })
       if (draft.kind === 'substitute') sub = draft.substitution
-      // nach der pq-Formel: die passende Lösung wählen
-      if (draft.kind === 'pq') steps.push({ kind: 'choose', operand: draft.operand, reason: draft.reason, ...unknown, before: draft.after, after: draft.after })
+      // Wurzel gleich negativer Zahl: keine Lösung
+      if (draft.kind === 'rootNegative') {
+        current = eq(current.lhs, draft.operand!)
+        return done(true)
+      }
+      // nach der pq-Formel mit Zahlen ohne Substitution: Probe mit beiden Lösungen
+      if (draft.kind === 'pq' && draft.candidates) {
+        for (const c of draft.candidates) {
+          steps.push({ kind: 'probe', operand: c.value, ...(c.reason ? { reason: c.reason } : {}), before: draft.after, after: c.reason ? draft.after : eq(variable(target), c.value) })
+        }
+        const valid = draft.candidates.find((c) => !c.reason)
+        current = eq(variable(target), (valid ?? draft.candidates.at(-1)!).value)
+        if (!valid) return done(true)
+        continue
+      }
+      // nach der pq-Formel: die passende Lösung wählen (mit Zahlen: als Zahl ausgerechnet)
+      if (draft.kind === 'pq') {
+        const after = draft.value ? eq(draft.after.lhs, draft.value) : draft.after
+        steps.push({ kind: 'choose', operand: draft.operand, reason: draft.reason, ...(draft.numeric ? { numeric: true as const } : {}), ...unknown, before: draft.after, after })
+        current = after
+        continue
+      }
       current = draft.after
     }
   } catch {

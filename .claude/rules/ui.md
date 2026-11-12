@@ -133,4 +133,6 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   `courseTone`): Vereinfachen orange, Gleichungen umstellen blau, Ableiten violett. Die Tätigkeit
   „Vereinfachen" ist bis Schritt 6 die Seite der Brüche (Id `brueche`). Zurück-Links der Mathe-Themen
   und -Gebiete führen zur Seite des Fachs.
-
+- Freier Modus (M6 Schritt 4b-3): bei Gleichungen mit Zahlen neben „Prüfen“ der Knopf „Keine Lösung“ (`FreeTask.noSolution`).
+- Ein `fieldset` wird im Browser nie schmaler als sein breitester Inhalt: Steht darin eine Formel mit `FitWidth`, braucht es
+  `min-w-0` (Fehler vom 12.11.2026 auf der Seite „Gleichungen umstellen“, Browser-Test in `e2e/blocks.spec.ts`).

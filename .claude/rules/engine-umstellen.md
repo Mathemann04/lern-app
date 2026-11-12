@@ -141,8 +141,8 @@ Teil der Mathe-Engine `src/engine/` (reines TypeScript, ohne React).
     Rechenweg oder eine Vorlage, ändern sich die Bausteine einzelner Nummern; dann
     `node scripts/rearrange-index.ts` laufen lassen (`rearrangeIndex.test.ts` meldet es sonst). Seit Schritt 4
     gehört ein Quadrat wie $x^2$, das die pq-Formel löst, zu „Quadratische Gleichungen“, nicht zu „Quadrate und
-    Potenzen“. Die Engine löst noch nicht: Gleichungen nur
-    mit Zahlen wie $3\sqrt{x} + 4 = x$, $a x^n = y$ mit Buchstaben als Hochzahl, $\sqrt[3]{\ldots}$ in der Aufgabe,
+    Potenzen“. Die Engine löst noch nicht: Gleichungen mit Zahlen
+    und zwei Lösungen wie $x^2 = 9$, $a x^n = y$ mit Buchstaben als Hochzahl, $\sqrt[3]{\ldots}$ in der Aufgabe,
     eine Wurzel in einer Wurzel als Baustein auf beiden Seiten (geplant in M6 4b, docs/AUFGABENARTEN.md)
   - Logarithmen auf beiden Seiten (M6 Schritt 4b-2, `logEquationStep` in `isolate.ts`, vor `logCombineStep`): nur wenn
     die Variable allein in Logarithmen steht, die Summanden sind (Faktor davor erlaubt, `logTerm`), nicht nach dem
@@ -156,3 +156,15 @@ Teil der Mathe-Engine `src/engine/` (reines TypeScript, ohne React).
     ältere Vorlagen und Aufgaben einzelner Bausteine nehmen sie nicht. Typische Fehler `eq-log-base-flipped`,
     `eq-log-base-quotient` (`logBaseWrong`), `eq-log-power-factor`, `eq-log-number-plain`, `eq-log-number-inside`
     (`logEquationMistakes`); beim Zusammenfassen nach `logNumber` auch `eq-log-sum` mit der Zahl
+  - Gleichungen mit Zahlen (M6 Schritt 4b-3): `RearrangeTask.numeric` bzw. `SolveOptions.numeric` (nur dann greift
+    alles Folgende, Aufgaben mit Buchstaben bleiben unverändert): $x$ beliebig reell; Seiten ohne $x$ nach jedem Schritt
+    ausgerechnet (`foldNumbers`, nicht bei `pq`, `choose`, `probe`, `rootNegative`); Wurzel allein gleich negativer Zahl:
+    Schritt `rootNegative`, Lösung `none`; $pq$-Formel nur, wenn die Wurzel aufgeht (`numericPqDraft`, angezeigt als
+    $x_{1,2} = \frac{3}{2} \pm \frac{5}{2}$, ohne $-\frac{p}{2}$ als $\pm 3$), ohne Substitution danach je Zahl ein Schritt
+    `probe` (`candidates`, Grund `probe` oder `domain`, `probeReason`), mit Substitution `choose` mit der Zahl (`value`,
+    Grund `negative` für $u < 0$ bei $\sqrt{x}$ bzw. $u \le 0$ bei $e^x$); passen beide, gibt es keinen Rechenweg (zwei
+    Lösungen kommen noch nicht vor); $x^2 = 9$ ebenso; zum Schluss `probe`, wenn $x$ unter einer Wurzel, in einem
+    Logarithmus oder Nenner steht (`needsProbe`). `noProbe`: beim Weiterrechnen eines typischen Fehlers ohne Probe und ohne
+    `rootNegative`. Probe als Zeile `rearrange/probe.ts` (`probeOf`, `probeLatex`, `DOMAIN_TEXT`). Falsche Antworten
+    `numericWrongAnswers`: falsch ist, was andere Lösungen hat als die richtige Gleichung (numerisch zwischen $-60$ und $60$,
+    `numericRoots`), Zahlen ausgerechnet; Fehler `eq-root-negative-squared`

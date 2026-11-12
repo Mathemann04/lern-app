@@ -30,4 +30,9 @@ export type FreeTask = {
   readonly inputLabel: string
   readonly keyboard: KeyboardSpec
   check(latex: string): FreeVerdict
+  // Gleichungen mit Zahlen (M6 Schritt 4b-3): Knopf „Keine Lösung", er prüft NO_SOLUTION_INPUT
+  readonly noSolution?: true
 }
+
+// Eingabe des Knopfs „Keine Lösung" (leere Menge)
+export const NO_SOLUTION_INPUT = '\\emptyset'

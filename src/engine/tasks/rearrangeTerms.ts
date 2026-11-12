@@ -13,6 +13,8 @@ import { latexWidthEm } from './latexWidth.ts'
 import { formulaTaskAt } from './formulaTasks.ts'
 import { type LogEquationKind, logEquationKind } from './logEquationKinds.ts'
 import { buildLogEquation } from './logEquationTasks.ts'
+import { type NumberEquationKind, numberEquationKind } from './numberEquationKinds.ts'
+import { buildNumberEquation } from './numberEquationTasks.ts'
 import { buildFamilyTask } from './rearrangeBlockKit.ts'
 import { rearrangeTaskBlocks } from './rearrangeBlocks.ts'
 import { hasRearrangeFamily } from './rearrangeFamilies.ts'
@@ -350,6 +352,7 @@ export function likelyRearrangeTemplate(ref: TaskRef): RearrangeTemplate | null 
   const own = seedBlock(ref.seed)
   if (own?.block === 'formel' && formulaTaskAt(ref.level, own.s)) return FORMULA_TEMPLATE
   if (own?.block === 'logeq' && logEquationKind(ref.level, own.s)) return LOG_EQUATION_TEMPLATE
+  if (own?.block === 'zahlen' && numberEquationKind(ref.level, own.s)) return NUMBER_EQUATION_TEMPLATE
   if (own) return hasRearrangeFamily(own.block, ref.level) ? familyTemplate(own.block, ref.level) : likelyRearrangeTemplate({ level: ref.level, seed: own.s })
   const templates = rearrangeTemplatesForLevel(ref.level)
   if (templates.length === 0) return null
@@ -453,6 +456,50 @@ const LOG_EQUATION_TEMPLATE: RearrangeTemplate = {
   },
 }
 
+// Gleichungen mit Zahlen (M6 Schritt 4b-3): Bausteine der Art, Lösung wie gewollt (eine Zahl oder keine Lösung), die Zahl
+// eine ganze Zahl oder ein einfacher Bruch, Logarithmus als \ln einer ganzen Zahl, nicht zu breit; nie zwei Lösungen (dann
+// liefert die Engine keinen Weg)
+const MIN_NUMBER_STEPS: Record<Level, number> = { 1: 2, 2: 5, 3: 5, 4: 6, 5: 6 }
+function isGoodNumberEquation(t: RearrangeTask, level: Level, kind: NumberEquationKind, none: boolean): boolean {
+  const latex = equationToLatex(t.equation)
+  if (taskVariables(t).length !== 1 || latex.length > MAX_TASK_LATEX || latexWidthEm(latex) > MAX_FAMILY_TASK_WIDTH) return false
+  const solution = solveTask(t)
+  if (!solution || (solution.none === true) !== none || solution.steps.length < MIN_NUMBER_STEPS[level]) return false
+  // nach der pq-Formel bzw. der Probe soll auch etwas wegfallen (Scheinlösung, Definitionsbereich oder u < 0)
+  if (kind.blocks.includes('quadratisch') && !solution.steps.some((s) => s.reason !== undefined)) return false
+  // Normalform ohne Brüche (sonst rechnet die pq-Formel mit Neunteln)
+  if (solution.steps.some((s) => s.kind === 'normalize' && subterms(s.after.lhs).some((x) => x.kind === 'div'))) return false
+  if (!none) {
+    const value = solution.result
+    const plain = value.kind === 'num' || (value.kind === 'neg' && value.arg.kind === 'num') || (value.kind === 'div' && value.num.kind === 'num' && value.den.kind === 'num')
+    const ln = value.kind === 'fn' && value.name === 'ln' && value.arg.kind === 'num'
+    const x = evaluate(value, {})
+    if (!(plain || ln) || !Number.isFinite(x) || Math.abs(x) > 60 || toLatex(value).length > 14) return false
+    if (holds(t.equation, { [t.target]: x }) !== true) return false
+  }
+  const blocks = rearrangeTaskBlocks(t, solution)
+  return blocks.length === kind.blocks.length && kind.blocks.every((b) => blocks.includes(b))
+}
+
+// Nummern wie „zahlen.2-4711": Art vorab fest (numberEquationKinds.ts), dann so lange gewürfelt, bis die Aufgabe taugt
+function generateNumberEquationTask(ref: TaskRef, kind: NumberEquationKind, s: number): GeneratedRearrangeTask {
+  const rng = createRng(`umstellen-zahlen:${ref.level}:${s}`)
+  for (let i = 0; i < FAMILY_ATTEMPTS; i++) {
+    const kit = buildNumberEquation(rng, kind)
+    if (kit && isGoodNumberEquation(kit.task, ref.level, kind, kit.none)) return { ref, template: NUMBER_EQUATION_TEMPLATE, task: kit.task, label: `Zahlen: ${kit.label}` }
+  }
+  throw new Error(`Keine Aufgabe für zahlen.${ref.level}-${s}`)
+}
+
+const NUMBER_EQUATION_TEMPLATE: RearrangeTemplate = {
+  id: 'zahlen',
+  level: 1,
+  label: 'Gleichungen mit Zahlen',
+  build: () => {
+    throw new Error('Gleichungen mit Zahlen haben eigene Nummern (numberEquationTasks.ts)')
+  },
+}
+
 // Hebt sich an der Stelle eine Summe mit der Variable fast auf (\ln(4x) + 2a nahe 0)? Dann kippt die Gegenprobe dort
 // durch Rundung, auch wenn die Lösung stimmt; solche Aufgaben haben empfindliche Bereiche und werden nicht genommen.
 const CANCEL_LIMIT = 1e5
@@ -503,6 +550,11 @@ export function generateRearrangeTask(ref: TaskRef): GeneratedRearrangeTask {
     if (own.block === 'logeq') {
       const kind = logEquationKind(ref.level, own.s)
       if (kind) return generateLogEquationTask(ref, kind, own.s)
+      return { ...generateRearrangeTask({ level: ref.level, seed: own.s }), ref }
+    }
+    if (own.block === 'zahlen') {
+      const kind = numberEquationKind(ref.level, own.s)
+      if (kind) return generateNumberEquationTask(ref, kind, own.s)
       return { ...generateRearrangeTask({ level: ref.level, seed: own.s }), ref }
     }
     if (hasRearrangeFamily(own.block, ref.level)) return generateFamilyTask(ref, own.block, own.s)
