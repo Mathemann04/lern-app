@@ -7,6 +7,10 @@ import { DOT_KINDS_BY_LEVEL } from './dotTasks.ts'
 import { VECTOR_ERROR_RULES } from './errorRules.ts'
 import { type VectorDrawing, anglePath, drawingCoordinates } from './figures.ts'
 import { cardsInTopic, isVectorExample } from '../explain/cards.ts'
+import { variablesOf } from '../check/answer.ts'
+import { evaluate } from '../expr/evaluate.ts'
+import { parseLatex } from '../parse/latex.ts'
+import { readResult } from './vectorFree.ts'
 import { type VectorTask, buildVectorTask } from './vectorTasks.ts'
 
 // M7 Schritt 2: Baustein „Skalarprodukt und Winkel". Jede Aufgabe wird unabhängig mit Kommazahlen nachgerechnet (nicht
@@ -184,6 +188,53 @@ describe('Vektoren: Skalarprodukt und Winkel', () => {
         if (task.answer.length === 2) expect(close(task.answer[0], cos), task.form).toBe(true)
       }
     }
+  })
+
+  it('bei spitz oder stumpf zeigt kein Schritt vor dem Ergebnis ein Bild', () => {
+    for (const level of LEVELS)
+      for (const task of tasks(level, 100))
+        if (task.kind === 'classify' || (task.kind === 'angle' && task.answer.length === 2))
+          for (const step of task.steps) expect(step.drawing, task.form).toBeUndefined()
+  })
+
+  // Regel aus CLAUDE.md: falsche Antworten nie gleichwertig zur Lösung. Zahlen, Vektoren und Lösungen nach Wert;
+  // Gleichungen mit Parameter: links minus rechts darf kein Vielfaches der richtigen Gleichung sein
+  it('keine falsche Antwort ist so viel wert wie die richtige', () => {
+    const values = (content: string) => readResult(content)?.flatMap((p) => p.values) ?? null
+    const equation = (content: string) => {
+      const body = content.replace(/^\$|\$$/g, '')
+      const sides = body.split(' = ')
+      if (sides.length !== 2) return null
+      const parsed = parseLatex(`${sides[0]} - (${sides[1]})`)
+      if (!parsed.ok) return null
+      const names = [...variablesOf(parsed.expr)]
+      if (names.length !== 1) return null
+      return (x: number) => evaluate(parsed.expr, { [names[0]]: x })
+    }
+    let compared = 0
+    for (const level of LEVELS) {
+      for (const task of tasks(level, 150)) {
+        for (const step of task.steps) {
+          const correct = step.choices.find((c) => c.correct)!.content
+          const f = equation(correct)
+          const right = f ? null : values(correct)
+          for (const c of step.choices.filter((c) => !c.correct)) {
+            const wrong = equation(c.content) ? null : values(c.content)
+            if (right && wrong && right.length === wrong.length) {
+              expect(wrong.every((x, i) => close(x, right[i])), `${task.form} ${step.id}: ${c.content}`).toBe(false)
+              compared++
+            }
+            const g = equation(c.content)
+            if (f && g) {
+              const ratios = [0.37, 1.91, -2.63].map((x) => g(x) / f(x))
+              expect(ratios.every((r) => close(r, ratios[0])), `${task.form} ${step.id}: ${c.content}`).toBe(false)
+              compared++
+            }
+          }
+        }
+      }
+    }
+    expect(compared).toBeGreaterThan(1000)
   })
 
   // Kennzahlen aus docs/PLAN-M2b.md: unter 200 Aufgaben mindestens 100 Formen, keine öfter als 3 von 100

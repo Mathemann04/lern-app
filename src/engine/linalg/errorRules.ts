@@ -57,7 +57,7 @@ export const VECTOR_ERROR_RULES: readonly VectorErrorRule[] = [
     name: 'Nur einen Eintrag vervielfacht',
     wrongFormula: String.raw`3 ${col(2, -1)} = ${col(6, -1)}`,
     why: {
-      detailed: String.raw`Eine Zahl vor einem Vektor streckt den ganzen Pfeil. Deshalb wird **jeder** Eintrag mit ihr malgenommen, nicht nur der erste.`,
+      detailed: String.raw`Eine Zahl vor einem Vektor streckt den ganzen Pfeil. Deshalb wird **jeder** Eintrag mit ihr malgenommen, nicht nur einer.`,
       short: String.raw`Jeder Eintrag wird mit der Zahl malgenommen.`,
     },
   },
@@ -156,8 +156,8 @@ export const VECTOR_ERROR_RULES: readonly VectorErrorRule[] = [
     name: 'Zweite Lösung vergessen',
     wrongFormula: String.raw`t^2 = 4 \;\Rightarrow\; t = 2`,
     why: {
-      detailed: String.raw`Ein Quadrat ist für eine Zahl und ihre Gegenzahl gleich: $2^2 = (-2)^2$. Deshalb hat $u^2 = c$ mit $c > 0$ zwei Lösungen, $u = \sqrt{c}$ und $u = -\sqrt{c}$. Beide Vektoren haben die gesuchte Länge.`,
-      short: String.raw`$u^2 = c > 0$ hat zwei Lösungen: $u = \pm\sqrt{c}$.`,
+      detailed: String.raw`Eine quadratische Gleichung hat oft zwei Lösungen, und gesucht sind alle. Bei $u^2 = c$ mit $c > 0$ sind es $u = \sqrt{c}$ und $u = -\sqrt{c}$, denn $2^2 = (-2)^2$. Bei $t^2 + pt + q = 0$ liefert die pq-Formel mit $\pm$ beide. Prüfe jede Lösung durch Einsetzen.`,
+      short: String.raw`Quadratische Gleichungen haben oft zwei Lösungen: beide angeben.`,
     },
   },
   {
@@ -201,7 +201,7 @@ export const VECTOR_ERROR_RULES: readonly VectorErrorRule[] = [
     name: 'Nur einen Teil geteilt',
     wrongFormula: String.raw`2\vec x = \vec b - \vec a \;\Rightarrow\; \vec x = \tfrac{1}{2}\vec b - \vec a`,
     why: {
-      detailed: String.raw`Teilst du eine Seite durch eine Zahl, wird jeder Summand dieser Seite geteilt, nicht nur der erste.`,
+      detailed: String.raw`Teilst du eine Seite durch eine Zahl, wird jeder Summand dieser Seite geteilt, nicht nur einer.`,
       short: String.raw`Beim Teilen jeden Summanden teilen.`,
     },
   },
@@ -289,11 +289,11 @@ export const VECTOR_ERROR_RULES: readonly VectorErrorRule[] = [
   },
   {
     id: 'vec-angle-supplement',
-    name: 'Vorzeichen des Kosinus übersehen',
+    name: 'Winkel und Nebenwinkel verwechselt',
     wrongFormula: String.raw`\cos\varphi = -\tfrac{1}{2} \;\Rightarrow\; \varphi = 60^\circ`,
     why: {
-      detailed: String.raw`Ein negativer Kosinus gehört zu einem **stumpfen** Winkel zwischen $90^\circ$ und $180^\circ$. Es gilt $\cos(180^\circ - \alpha) = -\cos\alpha$: Lässt du das Minus weg, landest du beim Nebenwinkel.`,
-      short: String.raw`Negativer Kosinus: stumpfer Winkel, $\cos(180^\circ - \alpha) = -\cos\alpha$.`,
+      detailed: String.raw`Das Vorzeichen von $\cos\varphi$ entscheidet: positiv heißt spitz (unter $90^\circ$), negativ heißt stumpf (über $90^\circ$). Ein Winkel und sein Nebenwinkel haben Kosinuswerte mit entgegengesetztem Vorzeichen, $\cos(180^\circ - \alpha) = -\cos\alpha$. Prüfe, ob dein Winkel zum Vorzeichen passt.`,
+      short: String.raw`Vorzeichen von $\cos\varphi$: positiv spitz, negativ stumpf.`,
     },
   },
   {
@@ -319,7 +319,7 @@ export const VECTOR_ERROR_RULES: readonly VectorErrorRule[] = [
     name: 'Pfeil nicht am Scheitel begonnen',
     wrongFormula: String.raw`\angle B: \; \overrightarrow{AB} \cdot \overrightarrow{BC}`,
     why: {
-      detailed: String.raw`Der Winkel an einer Ecke liegt zwischen zwei Pfeilen, die **beide an dieser Ecke beginnen**, bei $B$ also $\overrightarrow{BA}$ und $\overrightarrow{BC}$. Zeigt einer zur Ecke hin, kippt das Vorzeichen des Skalarprodukts und du bekommst den Nebenwinkel.`,
+      detailed: String.raw`Der Winkel an einer Ecke liegt zwischen zwei Pfeilen, die **beide an dieser Ecke beginnen**, bei $B$ also $\overrightarrow{BA}$ und $\overrightarrow{BC}$. Zeigt einer zur Ecke hin, kippt das Vorzeichen des Skalarprodukts und damit das von $\cos\varphi$.`,
       short: String.raw`Beide Pfeile beginnen am Scheitel des Winkels.`,
     },
   },

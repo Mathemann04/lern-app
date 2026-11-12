@@ -638,7 +638,8 @@ function buildAngle(rng: Rng, level: Level): Built {
     const cos = cosSurd(d, ratMul(n2a, n2b))
     const pic = drawableDim(dim)
     const steps = [
-      dotStep(rng, an, bn, a, b, pic ? pairDrawing(dim, an, bn, a, b, `Gesucht ist der Winkel $\\varphi$ zwischen $${an}$ und $${bn}$.`, '\\varphi') : undefined),
+      // Bei „spitz oder stumpf" kein Bild vor dem Ergebnis: Es verriete die Antwort
+      dotStep(rng, an, bn, a, b, pic && !general ? pairDrawing(dim, an, bn, a, b, `Gesucht ist der Winkel $\\varphi$ zwischen $${an}$ und $${bn}$.`, '\\varphi') : undefined),
       lengthsStep(rng, [an, bn], [a, b]),
       cosStep(rng, an, bn, d, n2a, n2b, general),
       general ? classifyStep(rng, an, bn, d, true) : angleStep(rng, cos, phi),

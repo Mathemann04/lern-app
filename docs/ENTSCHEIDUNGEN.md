@@ -1026,3 +1026,9 @@ Neue Entscheidungen unten anfügen.
   Winkels als Knöpfe zum Antippen, eine Ungleichung mit den Knöpfen „<“ und „>“ und einem Kästchen für die Grenze.
   Bilder: Winkelbogen und rechter Winkel als kleines Quadrat (`DrawAngle`). Bei „spitz, recht oder stumpf“ zeigt erst
   das Ergebnis ein Bild, weil das Bild die Antwort verriete. 18 neue typische Fehler.
+
+  Nach der unabhängigen Prüfung: Beim Winkel mit „spitz oder stumpf“ kein Bild vor dem Ergebnis (auch nicht im freien
+  Modus), Texte zu „Zweite Lösung vergessen“ (passt jetzt auch zu $t^2 + pt + q = 0$), „Winkel und Nebenwinkel
+  verwechselt“ (neutral, passt zu spitzen und stumpfen Winkeln) und „Pfeil nicht am Scheitel“ ohne Hinweis auf die
+  Antwort; neuer Test: keine falsche Antwort hat denselben Wert wie die richtige (Gleichungen mit Parameter über
+  Einsetzen).
