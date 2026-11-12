@@ -851,4 +851,7 @@ Neue Entscheidungen unten anfügen.
   und einzelne Tätigkeiten nicht gegeneinander arbeiten). „Brüche“ heißt jetzt „Vereinfachen“; das kommende Thema
   „Potenzen, Wurzeln, Logarithmen“ ist aus dem Katalog genommen (wird Baustein bei „Vereinfachen“, Schritt 6).
   Farben nach dem Entwurf: Vereinfachen orange, Gleichungen umstellen blau, Ableiten violett.
+  Nach der unabhängigen Prüfung: Bei Bausteinen fällt die App nie auf „alle“ zurück (sonst kämen z. B. über „Eine Stufe
+  höher?“ Aufgaben mit nicht angekreuzten Bausteinen); gibt es zur Auswahl in einer Stufe nichts, zeigt die Übungsseite
+  einen Hinweis. „Eine Stufe höher?“ schlägt nur Stufen vor, in denen es zur Auswahl Aufgaben gibt (auch in Chemie).
 

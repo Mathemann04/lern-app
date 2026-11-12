@@ -58,5 +58,9 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   „Weitermachen"), `playableLevels`, `partWords` („Bausteine" statt „Unterthemen"). `PartPicker.tsx`
   zeigt Bausteine in Gruppen (`BLOCK_GROUPS`) mit Knopf „nur", am Laptop in zwei Spalten. Die Engine
   bekommt die angekreuzten über `nextSeed(level, shown, parts)` (`engine/tasks/rearrangePick.ts`);
-  `questionNoOf` erkennt Wissensfragen an `questionNos`, nicht an `nextSeed`.
+  `questionNoOf` erkennt Wissensfragen an `questionNos`, nicht an `nextSeed`. Bei Bausteinen **nie
+  Rückfall auf alle** (`selectedParts` gibt die angekreuzten zurück, auch wenn die Stufe gesperrt ist):
+  Die Übungsseite zeigt dann „Gerade gibt es hier keine Aufgabe.“ mit Hinweis und „Zur Auswahl“
+  (`NoTasksForSelection` in `PracticePage.tsx`), „Eine Stufe höher?“ kommt nur, wenn die Auswahl in
+  der nächsten Stufe spielbar ist (`LevelUpSuggestion.tsx`, gilt auch für Chemie).
 

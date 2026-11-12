@@ -147,7 +147,7 @@ export default function ActivityScreen({ id }: { id: string }) {
                   onClick={() => setCourseLevel(id, nearest(elsewhere, selected))}
                   className="-ml-2 min-h-11 rounded-lg px-2 text-sm font-medium text-accent-700 hover:bg-accent-50"
                 >
-                  {levelName(id, nearest(elsewhere, selected))} wählen: dort gibt es Aufgaben dazu
+                  {levelName(id, nearest(elsewhere, selected))} wählen
                 </button>
               )}
             </div>

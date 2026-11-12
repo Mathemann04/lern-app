@@ -6,14 +6,14 @@ import { setLastMix, updateSettings, useSettings } from '../state/settings.ts'
 import { getAppState } from '../state/store.ts'
 import type { PracticeMode } from '../state/storage.ts'
 import { TaskScreen } from './guided/TaskScreen.tsx'
-import { courseById, isChemCourse, isFreeAt, isLevelAvailable, levelCount, levelName, subjectById } from './catalog.ts'
+import { type Course, courseById, hasBlocks, isChemCourse, isFreeAt, isLevelAvailable, levelCount, levelName, subjectById } from './catalog.ts'
 import { type CourseEngine, loadCourseEngine } from './courseEngines.ts'
 import { type MixEngine, pickMixed } from './mix.ts'
 import { recentForms, rememberForm } from './recentForms.ts'
 import { knownFocus, newTaskHref, pickNewSeed, questionNoOf } from './practice.ts'
 import { avoidedQuestion, taskShown } from './skip.ts'
-import { mixHref, mixPracticeHref, practiceHref, reviewHref, taskExitHref, taskHref } from './routes.ts'
-import { mixBlockedHint, mixedCourses, selectedParts } from './selection.ts'
+import { courseHref, mixHref, mixPracticeHref, practiceHref, reviewHref, taskExitHref, taskHref } from './routes.ts'
+import { blockedHint, isSelectionPlayable, mixBlockedHint, mixedCourses, selectedParts } from './selection.ts'
 
 // Eine Aufgabe üben, geführt oder frei; mix: Id des Fachs, wenn die Aufgabe aus „Themen mischen"
 // kommt (?mischen=): Dann führen X, „Zur Übersicht" und „Nächste Aufgabe" zur Mischung zurück, und
@@ -28,6 +28,7 @@ type PracticeProps = { course: string; mode: PracticeMode; level: Level; seed: n
 
 export default function PracticePage({ course: courseId, mode: wantedMode, level, seed, focus: wanted, mix, review }: PracticeProps) {
   const { course } = courseById(courseId)!
+  const settings = useSettings()
   const focus = knownFocus(courseId, wanted)
   // Ohne freien Modus: geführt mit derselben Aufgabe
   const mode = isFreeAt(course, level) ? wantedMode : 'guided'
@@ -40,6 +41,9 @@ export default function PracticePage({ course: courseId, mode: wantedMode, level
   // dieselbe Aufgabe zeigt. Gezielt üben sucht eine passende Aufgabe; sonst wählt PickNewTask eine
   // mit anderer Form als die letzten (dafür braucht es die Engine).
   const pick = seed === null && !focus && !tooHigh && isLevelAvailable(course, level)
+  // Bausteine (M6): Gibt es zur Auswahl in der Stufe keine Aufgabe (Auswahl während des Übens geändert, alte Adresse), kommt
+  // keine mit nicht angekreuztem Baustein, sondern ein Hinweis mit dem Weg zur Auswahl
+  const blocked = pick && hasBlocks(course) && !isSelectionPlayable(course, settings, level)
   useEffect(() => {
     if (tooHigh) {
       window.location.replace(
@@ -57,7 +61,7 @@ export default function PracticePage({ course: courseId, mode: wantedMode, level
 
   // „Weitermachen" auf der Startseite führt zum zuletzt geübten Thema bzw. zur zuletzt geübten Mischung; die
   // Wiederholung ist ein Abstecher und ändert daran nichts
-  const { lastCourse } = useSettings()
+  const { lastCourse } = settings
   useEffect(() => {
     if (review) return
     if (lastCourse !== courseId) updateSettings({ lastCourse: courseId })
@@ -70,6 +74,7 @@ export default function PracticePage({ course: courseId, mode: wantedMode, level
   }, [review, seed])
   if (review && seed === null) return null
 
+  if (blocked) return <NoTasksForSelection course={course} level={level} />
   if (pick) return <PickNewTask course={courseId} level={level} mode={mode} mix={mix} />
   if (seed === null && focus && !tooHigh) return <p className="text-zinc-500">Suche eine Aufgabe, in der dieser Fehler passieren kann …</p>
   if (redirect) return null
@@ -130,6 +135,22 @@ function MissingTask({ course, level, mode, mix, review }: { course: string; lev
           Zur Übersicht
         </a>
       </div>
+    </main>
+  )
+}
+
+// Zur Auswahl gibt es in der Stufe keine Aufgabe (Bausteine, M6): Hinweis, was fehlt, und der Weg zur Auswahl
+function NoTasksForSelection({ course, level }: { course: Course; level: Level }) {
+  const settings = useSettings()
+  return (
+    <main className="space-y-4">
+      <h1 className="text-2xl font-semibold text-balance">Gerade gibt es hier keine Aufgabe.</h1>
+      <p className="text-pretty text-zinc-600" data-testid="no-tasks">
+        {blockedHint(course, settings, level)}
+      </p>
+      <a href={courseHref(course.id)} className="inline-flex min-h-11 items-center rounded-xl bg-accent-700 px-5 font-medium text-on-accent hover:bg-accent-800">
+        Zur Auswahl
+      </a>
     </main>
   )
 }

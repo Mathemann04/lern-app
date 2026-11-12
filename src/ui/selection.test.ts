@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { DEFAULT_SETTINGS, type Settings } from '../state/storage.ts'
-import { ATOMBAU, type Course, DERIVATIVES, courseById, subjectById } from './catalog.ts'
+import { ATOMBAU, type Course, DERIVATIVES, REARRANGE, courseById, partsAvailable, subjectById } from './catalog.ts'
 import {
   allPartsChecked,
+  blockedHint,
   checkedParts,
   courseSummary,
   isMixCourseChecked,
@@ -13,6 +14,9 @@ import {
   mixBlockedHint,
   mixChoiceOf,
   mixedCourses,
+  missingBlocks,
+  partWords,
+  playableLevels,
   selectedParts,
 } from './selection.ts'
 
@@ -142,5 +146,64 @@ describe('Texte zur Auswahl', () => {
     expect(joinTitles(['Atombau'])).toBe('Atombau')
     expect(joinTitles(['Atombau', 'Elektronen'])).toBe('Atombau und Elektronen')
     expect(joinTitles(['Atombau', 'Elektronen', 'Trends'])).toBe('Atombau, Elektronen und Trends')
+  })
+})
+
+describe('Bausteine ankreuzen (M6 Schritt 3, Gleichungen umstellen)', () => {
+  const rearrange = courseById(REARRANGE)!.course
+  const all = rearrange.parts!.map((part) => part.id)
+  // nur diese Bausteine angekreuzt
+  const only = (...keep: string[]): Settings => withSkip(all.filter((id) => !keep.includes(id)), REARRANGE)
+
+  it('kennt Bausteine mit Gruppen und je Stufe die Mengen, die zusammen vorkommen', () => {
+    expect(all).toHaveLength(17)
+    expect(new Set(rearrange.parts!.map((part) => part.group))).toEqual(new Set(['grundlagen', 'funktionen', 'spaeter']))
+    expect(partWords(rearrange).many).toBe('Bausteine')
+    expect(partWords(atombau).many).toBe('Unterthemen')
+    // in Stufe 1 gibt es nur lineare Gleichungen
+    expect(partsAvailable(rearrange, 1).map((part) => part.id)).toEqual(['linear'])
+  })
+
+  it('ist spielbar, wenn eine Menge der Stufe ganz angekreuzt ist, sonst nicht', () => {
+    expect(isSelectionPlayable(rearrange, DEFAULT_SETTINGS, 5)).toBe(true)
+    expect(isSelectionPlayable(rearrange, only('det'), 5)).toBe(true)
+    expect(isSelectionPlayable(rearrange, only('det'), 1)).toBe(false)
+    // Ableitungen gibt es in Stufe 5 nur zusammen mit anderen Bausteinen
+    expect(isSelectionPlayable(rearrange, only('ableitung'), 5)).toBe(false)
+    expect(isSelectionPlayable(rearrange, only('ableitung', 'winkel'), 5)).toBe(true)
+    // Quadratische Gleichungen gibt es in Stufe 3 nur mit Wurzeln, allein nur in Stufe 4 (in Stufe 5 steckt in jeder
+    // Aufgabe ein Werkzeug)
+    expect(playableLevels(rearrange, only('quadratisch'))).toEqual([4])
+    expect(isSelectionPlayable(rearrange, only(), 1)).toBe(false)
+  })
+
+  it('fällt nie auf alle Bausteine zurück (keine Aufgabe mit nicht angekreuztem Baustein)', () => {
+    expect(selectedParts(rearrange, DEFAULT_SETTINGS, 3)).toBeUndefined()
+    expect(ids(selectedParts(rearrange, only('det'), 1))).toEqual(['det'])
+    expect(ids(selectedParts(rearrange, only('brueche'), 4))).toEqual(['brueche'])
+    expect(ids(selectedParts(rearrange, only(), 2))).toEqual([])
+  })
+
+  it('schlägt nur Bausteine vor, die mit den angekreuzten eine Aufgabe ergeben', () => {
+    // nur Ableitungen in Stufe 5: jeder Vorschlag macht die Auswahl spielbar
+    const missing = missingBlocks(rearrange, only('ableitung'), 5)
+    expect(missing.length).toBeGreaterThan(0)
+    for (const title of missing) {
+      const id = rearrange.parts!.find((part) => part.title === title)!.id
+      expect(isSelectionPlayable(rearrange, only('ableitung', id), 5), title).toBe(true)
+    }
+    // nur Determinanten in Stufe 1: Lineare Gleichungen ergäben Aufgaben, aber keine mit Determinanten
+    expect(missingBlocks(rearrange, only('det'), 1)).toEqual([])
+  })
+
+  it('nennt im Hinweis nur Stufen und Bausteine, mit denen es wirklich Aufgaben gibt', () => {
+    expect(blockedHint(rearrange, only(), 3)).toBe('Kreuze mindestens einen Baustein an.')
+    expect(blockedHint(rearrange, only('det'), 1)).toBe('Zu deiner Auswahl gibt es in Stufe 1 keine Aufgaben. In Stufe 5 gibt es welche.')
+    expect(blockedHint(rearrange, only('quadratisch'), 1)).toBe('Zu deiner Auswahl gibt es in Stufe 1 keine Aufgaben. In Stufe 4 gibt es welche.')
+    expect(blockedHint(rearrange, only('det', 'dgl'), 3)).toBe('Zu deiner Auswahl gibt es in Stufe 3 keine Aufgaben. In Stufe 5 gibt es welche.')
+    expect(blockedHint(rearrange, only('ableitung'), 5)).toMatch(/^Zu deiner Auswahl gibt es in Stufe 5 keine Aufgaben\. Kreuze dazu z\. B\. .+ an\.$/)
+    expect(blockedHint(rearrange, only('ableitung'), 2)).toMatch(/^Zu deiner Auswahl gibt es in Stufe 2 keine Aufgaben\. In Stufe 5 gibt es welche, wenn du z\. B\. .+ dazu ankreuzt\.$/)
+    // Chemie wie bisher
+    expect(blockedHint(atombau, withSkip(['teilchen', 'isotope-ionen', 'modelle', 'licht']), 2)).toBe('Kreuze mindestens ein Unterthema an, das es in Vertiefung gibt.')
   })
 })

@@ -49,10 +49,13 @@ export function isSelectionPlayable(course: Course, settings: PartSettings, leve
 
 // Erlaubte Unterthemen für die Engine (nextSeed, questionNos, pickNewSeed): undefined heißt alle. Alle
 // angekreuzt, nichts angekreuzt oder (mit Stufe) kein angekreuztes mit Aufgaben in der Stufe: Rückfall auf
-// alle, wie in der Engine, damit „Weitermachen" nie hängt.
+// alle, wie in der Engine, damit „Weitermachen" nie hängt. Bausteine (M6) nie mit Rückfall: Eine Aufgabe mit nicht
+// angekreuztem Baustein darf nicht kommen; ist die Auswahl in der Stufe nicht spielbar, zeigt die Übungsseite einen
+// Hinweis statt einer Aufgabe (PracticePage.tsx), „Eine Stufe höher?" schlägt solche Stufen nicht vor.
 export function selectedParts(course: Course, settings: PartSettings, level?: Level): ReadonlySet<string> | undefined {
   if (!course.parts || allPartsChecked(course, settings)) return undefined
   const checked = new Set(checkedParts(course, settings))
+  if (course.blockCombos) return checked
   if (checked.size === 0) return undefined
   if (level !== undefined && !hasTasks(course, checked, level)) return undefined
   return checked
@@ -83,26 +86,27 @@ export function playableLevels(course: Course, settings: PartSettings): readonly
   return course.levels.filter((l) => isSelectionPlayable(course, settings, l.level)).map((l) => l.level)
 }
 
-// Warum der Üben-Knopf gesperrt ist (Seite einer Tätigkeit und „Weitermachen"): nichts angekreuzt; die angekreuzten gibt es
-// in der Stufe noch nicht; oder zur Auswahl gibt es dort keine Aufgabe (mit Bausteinen, die helfen würden)
+// Aufzählung mit „oder": „A", „A oder B", „A, B oder C"
+const orList = (titles: readonly string[]) => (titles.length > 1 ? `${titles.slice(0, -1).join(', ')} oder ${titles.at(-1)}` : (titles[0] ?? ''))
+
+// Warum der Üben-Knopf gesperrt ist (Seite einer Tätigkeit, „Weitermachen", Übungsseite): nichts angekreuzt; sonst mit
+// Bausteinen (M6), was hilft, und nur, was wirklich hilft: ein Baustein, der in dieser Stufe dazu reicht; sonst die Stufen,
+// in denen es zur Auswahl Aufgaben gibt; sonst eine Stufe, in der ein Baustein mehr reicht
 export function blockedHint(course: Course, settings: PartSettings, level: Level): string {
   const words = partWords(course)
-  const checked = (course.parts ?? []).filter((part) => isPartChecked(course, part.id, settings))
-  if (checked.length === 0) return `Kreuze mindestens ${words.a} an.`
+  if (checkedParts(course, settings).length === 0) return `Kreuze mindestens ${words.a} an.`
   const where = levelName(course.id, level)
   if (!course.blockCombos) return `Kreuze mindestens ${words.a} an, das es in ${where} gibt.`
-  const later = checked.filter((part) => !part.levels.includes(level))
-  if (later.length === checked.length) {
-    const first = Math.min(...checked.flatMap((part) => part.levels)) as Level
-    const titles = joinTitles(checked.map((part) => part.title))
-    return first > level ? `${titles} gibt es erst ab ${levelName(course.id, first)}.` : `${titles} gibt es nicht in ${where}.`
-  }
+  const none = `Zu deiner Auswahl gibt es in ${where} keine Aufgaben.`
   const missing = missingBlocks(course, settings, level)
-  if (missing.length > 0) {
-    const names = missing.slice(0, 3)
-    return `Zu deiner Auswahl gibt es in ${where} keine Aufgaben. Kreuze dazu z. B. ${names.length > 1 ? `${names.slice(0, -1).join(', ')} oder ${names.at(-1)}` : names[0]} an.`
+  if (missing.length > 0) return `${none} Kreuze dazu z. B. ${orList(missing.slice(0, 3))} an.`
+  const elsewhere = playableLevels(course, settings).filter((l) => l !== level)
+  if (elsewhere.length > 0) return `${none} In ${joinTitles(elsewhere.map((l) => levelName(course.id, l)))} gibt es welche.`
+  const other = course.levels.map((l) => l.level).find((l) => l !== level && missingBlocks(course, settings, l).length > 0)
+  if (other !== undefined) {
+    return `${none} In ${levelName(course.id, other)} gibt es welche, wenn du z. B. ${orList(missingBlocks(course, settings, other).slice(0, 3))} dazu ankreuzt.`
   }
-  return `Zu deiner Auswahl gibt es in ${where} keine Aufgaben. Kreuze mehr ${words.many} an oder wähle eine andere Stufe.`
+  return `${none} Kreuze mehr ${words.many} an.`
 }
 
 // Auswahl der Mischung eines Fachs: die gemerkte, sonst Stufe 1 mit allen Themen. Eine Stufe, die das

@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { subterms } from '../expr/compare.ts'
-import { PI, type Expr, div, eq, exp, mul, num, pow, variable } from '../expr/types.ts'
+import { IMAG, PI, type Expr, add, cos, div, eq, exp, mul, num, pow, sin, variable } from '../expr/types.ts'
 import { parseLatex } from '../parse/latex.ts'
 import { solveTask } from '../rearrange/isolate.ts'
 import type { Condition, RearrangeTask } from '../rearrange/task.ts'
-import { derivativeOf, detOf, integralOf, lengthOf, seriesOf } from '../rearrange/tools/tool.ts'
+import { absOf, derivativeOf, detOf, integralOf, lengthOf, limitOf, odeOf, seriesOf, theoremOf } from '../rearrange/tools/tool.ts'
 import { REARRANGE_BLOCKS } from './blocks.ts'
 import { rearrangeTaskBlocks } from './rearrangeBlocks.ts'
 import { generateRearrangeTask } from './rearrangeTerms.ts'
@@ -24,6 +24,8 @@ const a = variable('a')
 const b = variable('b')
 const c = variable('c')
 const y = variable('y')
+const n = variable('n')
+const f = variable('f')
 
 function blocksOf(lhs: Expr, rhs: Expr, conditions: readonly Condition[] = []): string[] {
   const task: RearrangeTask = { equation: eq(lhs, rhs), target: 'x', conditions }
@@ -75,6 +77,19 @@ describe('Bausteine einer Umstell-Aufgabe', () => {
     expect(blocksOf(lengthOf([x, a]), y, [above(num(0))])).toEqual(['vektoren'])
     // Ableitung: was abgeleitet wird, steht mit x da
     expect(blocksOf(derivativeOf(exp(mul(num(2), x))), y)).toEqual(['exp', 'ableitung'])
+  })
+
+  it('Logarithmus zu anderen Basen, komplexe Zahlen, Grenzwerte, Differentialgleichungen, Additionstheoreme', () => {
+    expect(latex('\\log_{2}(x+a)', 'y')).toEqual(['log'])
+    // Betrag einer komplexen Zahl, mit x im Nenner zusätzlich Brüche
+    expect(blocksOf(absOf(add(x, mul(a, IMAG))), y, [above(num(0))])).toEqual(['komplex'])
+    expect(blocksOf(absOf(div(num(1), add(x, IMAG))), y, [above(num(0))])).toEqual(['brueche', 'komplex'])
+    // Grenzwert (1 + x/n)^n: die Hochzahl n ist gebunden
+    expect(blocksOf(limitOf(pow(add(num(1), div(x, n)), n)), y)).toEqual(['grenzwert'])
+    // Differentialgleichung f' = kf, f(0) = a, an der Stelle x
+    expect(blocksOf(odeOf(mul(k, f), 1, [a]), y)).toEqual(['dgl'])
+    // Additionstheorem gegen den Kosinus (Beispiel aus dem Plan): Winkelfunktionen
+    expect(blocksOf(mul(b, theoremOf(sin(add(x, a)))), mul(y, cos(x)), [below(div(PI, num(2)))])).toEqual(['winkel'])
   })
 
   it('jede Aufgabe hat mindestens einen Baustein aus der Liste, in der Reihenfolge der Liste', () => {

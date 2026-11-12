@@ -23,7 +23,7 @@ export function AreaScreen({ id }: { id: string }) {
       <ul className="space-y-3">
         {area.courses.map((course) => (
           <li key={course.id}>
-            <CourseTile course={course} />
+            <CourseTile course={course} tone={course.tone} />
           </li>
         ))}
       </ul>
