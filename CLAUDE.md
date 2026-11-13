@@ -13,7 +13,8 @@ den Nutzer zugeschnitten: Maschinenbau, 1. Semester, THU, „Mathematik MB1".
   dasselbe je Fach: Chemie [docs/AUFGABENARTEN-CHEMIE.md](docs/AUFGABENARTEN-CHEMIE.md),
   Werkstoffkunde [docs/WERKSTOFFKUNDE.md](docs/WERKSTOFFKUNDE.md), Physik
   [docs/PHYSIK.md](docs/PHYSIK.md), Technische Mechanik 1 mit festen Schreibweisen
-  [docs/MECHANIK.md](docs/MECHANIK.md)
+  [docs/MECHANIK.md](docs/MECHANIK.md); alle Fächer und Prüfungen laut Modulhandbuch:
+  [docs/STUDIENPLAN.md](docs/STUDIENPLAN.md)
 - Meilensteine und aktueller Stand: [docs/ROADMAP.md](docs/ROADMAP.md)
 - Laufender Plan: [docs/PLAN-M7.md](docs/PLAN-M7.md) (Vektoren, Geraden und
   Ebenen, Matrizen; freigegeben 12.11.2026, Schritte 1a bis 8b und 9a fertig, offen 9b), vorgezogen vor den
