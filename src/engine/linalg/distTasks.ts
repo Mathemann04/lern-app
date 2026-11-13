@@ -33,7 +33,7 @@ const num = (r: Rational) => Number(r.n) / Number(r.d)
 const nonzero = (rng: Rng, xs: readonly number[] = [-3, -2, -1, 1, 2, 3]) => rat(rng.pick(xs))
 const tooBig = (v: Vec, lim = 12) => v.some((x) => Math.abs(num(x)) > lim)
 const POINT_NAMES = ['P', 'Q', 'R'] as const
-const PLANE_NAMES = ['E', 'F'] as const
+const PLANE_NAMES = ['E', 'H'] as const
 
 // Abstand |s| / √n2 als Zahl mal Wurzel (mit Vorzeichen, wenn signed)
 function distOf(s: Rational, n2: Rational, signed = false): Surd {
@@ -188,7 +188,8 @@ function footCondStep(rng: Rng, o: { readonly N: string; readonly P: Vec; readon
   const right = eq(c0, c1)
   const wrongs: Wrong[] = []
   const pv = vecDot(o.v, o.p)
-  if (!isZero(pv)) wrongs.push({ content: eq(vecDot(base, o.p), pv), rule: 'gl-foot-support' })
+  // nur, wenn die Gleichung eine andere Lösung hat (sonst wäre sie gleichwertig)
+  if (!isZero(pv) && !ratEq(ratMul(c0, pv), ratMul(c1, vecDot(base, o.p)))) wrongs.push({ content: eq(vecDot(base, o.p), pv), rule: 'gl-foot-support' })
   wrongs.push({ content: eq(c0, c1, '1'), rule: 'vec-perp-one' }, { content: eq(ratNeg(c0), c1), rule: 'vec-sign-slip' })
   const name = `\\overrightarrow{${o.N}F_${o.t}}`
   const terms = o.v.map((x, i) => `${fac(x)} \\cdot \\left(${linLatex(base[i], x, o.t)}\\right)`).join(' + ')
@@ -244,7 +245,7 @@ function footSteps(rng: Rng, o: { readonly N: string; readonly P: Vec; readonly 
     target: rat(0),
     p: cond.c0,
     v: cond.c1,
-    lead: 'Die Gleichung lautet',
+    lead: 'Die Gleichung ist linear:',
     card: GL_CARD.abstandGerade,
   })
   const F = at(o.p, o.v, solved.t)
@@ -354,7 +355,7 @@ function buildPointPlane(rng: Rng, level: Level): Built {
     let given = stack(coordLatex(E, n, d), pointLatex(N, P))
     if (variant === 'normal') {
       given = stack(normalFormLatex(E, n, P0), pointLatex(N, P))
-      const co = coordStep(rng, { name: E, n, p: P0 })
+      const co = coordStep(rng, { name: E, n, p: P0, pName: pointLatex('A', P0) })
       if (co.choices.length < 4) continue
       steps.push({ ...co, drawing: before })
       cards.push(GL_CARD.koordinaten)
@@ -368,7 +369,7 @@ function buildPointPlane(rng: Rng, level: Level): Built {
         pointLatex(N, P),
       )
       const cs = crossStep(rng, '\\vec u', '\\vec w', u, w)
-      const co = coordStep(rng, { name: E, n, p: P0, from: raw })
+      const co = coordStep(rng, { name: E, n, p: P0, pName: pointLatex('A', P0), from: raw })
       if (cs.choices.length < 4 || co.choices.length < 4) continue
       steps.push({ ...cs, question: `Die Richtungen von $${E}$ heißen $\\vec u$ und $\\vec w$. Ein Normalenvektor steht senkrecht auf beiden. Wie lautet $\\vec u \\times \\vec w$?`, drawing: before }, co)
       cards.push(CARD.kreuz, GL_CARD.koordinaten)
@@ -425,7 +426,7 @@ function buildPointPlaneParam(rng: Rng): Built {
     const insWrongs: Wrong[] = [
       { content: expr(restVal), rule: 'gl-dist-rhs' },
       { content: expr(ratAdd(restVal, d)), rule: 'gl-move-sign' },
-      { content: expr(ratAdd(c0, c1)), rule: 'gl-param-forgotten' },
+      { content: math(linLatex(c0, ratNeg(c1), 'a')), rule: 'vec-sign-slip' },
     ]
     const Pa = paramPointLatex(N, P, j, 'a')
     const ins = choiceStep(rng, {
@@ -518,7 +519,6 @@ function buildMirrorPlane(rng: Rng): Built {
     const wrongLines: WrongLine[] = [
       { p: n, v: P, rule: 'gl-support-swapped' },
       { p: P, v: P, rule: 'gl-position-direction' },
-      { p: P, v: u, rule: 'gl-normal-as-direction' },
     ]
     const lot = formStep(rng, {
       name: 'l',
@@ -530,7 +530,7 @@ function buildMirrorPlane(rng: Rng): Built {
       why: `Stützpunkt ist $${N}$, Richtung der Normalenvektor $\\vec n = ${vecLatex(n)}$ (die Zahlen vor $x$, $y$ und $z$).`,
     })
     const ins = insertStep(rng, { into: E, from: 'l', n, d, p: P, dirs: [[t, n]], card: GL_CARD.abstandEbene })
-    const solved = solveStep(rng, { id: 'parameter', title: 'Parameter', question: `Für welches $${t}$ trifft $l$ die Ebene $${E}$?`, t, target: d, p: ins.c0, v: ins.cs[0], lead: 'Die Gleichung lautet', card: GL_CARD.abstandEbene })
+    const solved = solveStep(rng, { id: 'parameter', title: 'Parameter', question: `Für welches $${t}$ trifft $l$ die Ebene $${E}$?`, t, target: d, p: ins.c0, v: ins.cs[0], lead: 'Die Gleichung ist linear:', card: GL_CARD.abstandEbene })
     const pt = pointStep(rng, { Q: 'F', p: P, v: n, t: solved.t, tName: t, slips: solved.slips, question: 'Welcher Punkt ist der Lotfußpunkt $F$?', card: GL_CARD.abstandEbene })
     const mir = mirrorStep(rng, { N, P, F, card: GL_CARD.abstandEbene })
     const before = pointPlaneFigure({ n, d, pts: [{ P, N }], lot: false, caption: `Spiegle $${N}$ an $${E}$.` })
@@ -793,7 +793,7 @@ function buildLines(rng: Rng, level: Level): Built {
 function buildParallel(rng: Rng, level: Level): Built {
   for (;;) {
     const [E, F] = rng.pick([
-      ['E', 'F'],
+      ['E', 'H'],
       ['E_1', 'E_2'],
     ] as const)
     if (level <= 2) {
@@ -868,7 +868,7 @@ function buildParallel(rng: Rng, level: Level): Built {
     let plane = coordLatex(E, n, d)
     if (level === 4) {
       plane = normalFormLatex(E, n, P0)
-      const co = coordStep(rng, { name: E, n, p: P0 })
+      const co = coordStep(rng, { name: E, n, p: P0, pName: pointLatex('A', P0) })
       if (co.choices.length < 4) continue
       steps.push({ ...co, drawing: before })
       cards.push(GL_CARD.koordinaten)

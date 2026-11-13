@@ -10,7 +10,7 @@ import { GL_CARD, solveStep } from './lineTasks.ts'
 import { directionsFor, threePoints } from './planeTasks.ts'
 import { PATCH, patch, stack } from './posTasks.ts'
 import { type Built, type VectorKind, type Wrong, CARD, choiceStep, connectStep, math, nums, signShape } from './taskKit.ts'
-import { type Surd, type Vec, pointLatex, ratLatex, surdLatex, surdValue, vec, vecAdd, vecDot, vecIsZero, vecLatex, vecNorm2, vecScale } from './vec.ts'
+import { type Surd, type Vec, pointLatex, ratFactorLatex, ratLatex, surdLatex, surdValue, vec, vecAdd, vecDot, vecIsZero, vecLatex, vecNorm2, vecScale } from './vec.ts'
 
 // Baustein „Schnittwinkel" der Tätigkeit „Geraden und Ebenen" (M7 Schritt 7b): Winkel zwischen zwei Geraden (Richtungen,
 // cos mit Betrag), zwischen Gerade und Ebene (Richtung und Normale, sin mit Betrag) und zwischen zwei Ebenen (Normalen,
@@ -28,12 +28,15 @@ export const WINKEL_KINDS_BY_LEVEL: Readonly<Record<Level, readonly VectorKind[]
 type Mode = 'lines' | 'linePlane' | 'planes'
 
 const show = ratLatex
+const fac = ratFactorLatex
 const num = (r: Rational) => Number(r.n) / Number(r.d)
 const nonzero = (rng: Rng, xs: readonly number[] = [-2, -1, 1, 2]) => rat(rng.pick(xs))
 const tooBig = (v: Vec, lim = 12) => v.some((x) => Math.abs(num(x)) > lim)
 const deg = (phi: number) => `${phi}^\\circ`
 const decimal1 = (x: number) => x.toFixed(1).replace('.', '{,}')
 const SWAP: Readonly<Record<number, number>> = { 30: 45, 45: 60, 60: 45 }
+// zweite Verwechslung der Tabelle (Gerade und Ebene, wo 180° − φ kein typischer Fehler ist)
+const SWAP2: Readonly<Record<number, number>> = { 30: 60, 45: 30, 60: 30 }
 
 // Besonderes Paar mit dem Winkel alpha zwischen den Vektoren (in der Ebene nur 45° und 135°)
 function specialPair(rng: Rng, dim: 2 | 3, mode: Mode): { readonly a: Vec; readonly b: Vec; readonly phi: number } {
@@ -57,7 +60,7 @@ const fnOf = (mode: Mode) => (mode === 'linePlane' ? '\\sin' : '\\cos')
 // ------------------------------------------------------------------ Schritte
 
 // Welche Formel? (Richtungen bzw. Normalen, Betrag, cos oder sin)
-function formulaStep(rng: Rng, o: { readonly mode: Mode; readonly an: string; readonly bn: string; readonly paramPlane: boolean; readonly drawing?: VectorDrawing }): GuidedStep {
+function formulaStep(rng: Rng, o: { readonly mode: Mode; readonly an: string; readonly bn: string; readonly paramPlane: boolean; readonly uName?: string; readonly drawing?: VectorDrawing }): GuidedStep {
   const fn = fnOf(o.mode)
   const f = (fun: string, a: string, b: string, abs = true) =>
     math(`${fun}\\varphi = \\frac{${abs ? '\\lvert ' : ''}${a} \\cdot ${b}${abs ? ' \\rvert' : ''}}{\\lvert ${a} \\rvert \\, \\lvert ${b} \\rvert}`)
@@ -65,11 +68,11 @@ function formulaStep(rng: Rng, o: { readonly mode: Mode; readonly an: string; re
   const wrongs: Wrong[] = [{ content: f(fn, o.an, o.bn, false), rule: 'gl-angle-abs' }]
   if (o.mode === 'linePlane') {
     wrongs.push({ content: f('\\cos', o.an, o.bn), rule: 'gl-angle-plane-cos' })
-    wrongs.push(o.paramPlane ? { content: f('\\sin', '\\vec u', o.bn), rule: 'gl-angle-plane-dirs' } : { content: f('\\sin', o.an, '\\vec p'), rule: 'gl-angle-support' })
+    wrongs.push(o.paramPlane ? { content: f('\\sin', o.an, o.uName ?? '\\vec u'), rule: 'gl-angle-plane-dirs' } : { content: f('\\sin', o.an, '\\vec p'), rule: 'gl-angle-support' })
   } else {
     wrongs.push({ content: f('\\sin', o.an, o.bn), rule: 'vec-angle-arcsin' })
     if (o.mode === 'lines') wrongs.push({ content: f('\\cos', '\\vec p', '\\vec q'), rule: 'gl-angle-support' })
-    else if (o.paramPlane) wrongs.push({ content: f('\\cos', '\\vec u', '\\vec m'), rule: 'gl-angle-plane-dirs' })
+    else if (o.paramPlane) wrongs.push({ content: f('\\cos', '\\vec u', o.bn), rule: 'gl-angle-plane-dirs' })
   }
   const what = {
     lines: `Der Schnittwinkel zweier Geraden ist der Winkel zwischen ihren Richtungsvektoren $${o.an}$ und $${o.bn}$, und zwar der spitze (höchstens $90^\\circ$): deshalb der Betrag.`,
@@ -126,7 +129,7 @@ function degreeStep(rng: Rng, o: { readonly mode: Mode; readonly value: Surd; re
   const fn = fnOf(o.mode)
   const line = (x: number) => math(`\\varphi = ${deg(x)}`)
   const wrongs: Wrong[] = [
-    { content: line(180 - o.phi), rule: 'gl-angle-abs' },
+    o.mode === 'linePlane' ? { content: line(SWAP2[o.phi]), rule: 'vec-angle-table' } : { content: line(180 - o.phi), rule: 'gl-angle-abs' },
     { content: line(90 - o.phi), rule: o.mode === 'linePlane' ? 'gl-angle-plane-cos' : 'vec-angle-arcsin' },
     { content: line(SWAP[o.phi]), rule: 'vec-angle-table' },
   ]
@@ -301,7 +304,7 @@ function buildAngleLines(rng: Rng, level: Level): Built {
         lead: '$\\vec v \\cdot \\vec w$ ausgerechnet:',
         card: GL_CARD.schnittwinkel,
       })
-      steps.push({ ...cond, drawing: before }, solved.step)
+      steps.push({ ...cond, drawing: { ...before, angles: [], caption: 'Gesucht ist $ so, dass ein rechter Winkel entsteht.' } }, solved.step)
       if (steps.some((st) => st.choices.length < 3) || !ratEq(solved.t, a0)) continue
       const vShown = withParamLatex(v, j, 'a')
       return {
@@ -449,13 +452,13 @@ function buildAngleLinePlane(rng: Rng, level: Level): Built {
         wrongs: aWrongs.filter((x) => x.content !== line(a0)),
         hint: `Bestimme den Faktor $k$ aus der Zeile für $${COORDS[i]}$ (ohne $a$). Derselbe Faktor gilt in der Zeile mit $a$.`,
         explanation: {
-          detailed: `Zeile für $${COORDS[i]}$: $k = ${show(v[i])} : ${show(n[i])} = ${show(k)}$. Zeile mit $a$: $a = ${show(k)} \\cdot ${show(n[j])} = ${show(a0)}$. Die übrigen Zeilen passen auch.`,
+          detailed: `Zeile für $${COORDS[i]}$: $k = ${show(v[i])} : ${fac(n[i])} = ${show(k)}$. Zeile mit $a$: $a = ${show(k)} \\cdot ${fac(n[j])} = ${show(a0)}$. Die übrigen Zeilen passen auch.`,
           short: `$k = ${show(k)}$, also $a = ${show(a0)}$.`,
         },
         established: [`a = ${show(a0)}`],
         cards: [GL_CARD.schnittwinkel],
       })
-      steps.push({ ...cond, drawing: before }, aStep)
+      steps.push({ ...cond, drawing: { ...before, angles: [], caption: 'Gesucht ist $ so, dass ein rechter Winkel entsteht.' } }, aStep)
       if (steps.some((st) => st.choices.length < 3)) continue
       return {
         kind: 'angleLinePlane',
@@ -485,7 +488,7 @@ function buildAngleLinePlane(rng: Rng, level: Level): Built {
       steps.push({ ...cs, question: `Die Richtungen von $${E}$ heißen $\\vec u$ und $\\vec w$. Ein Normalenvektor $\\vec n$ steht senkrecht auf beiden. Wie lautet $\\vec u \\times \\vec w$?` })
       cards.push(CARD.kreuz)
     }
-    steps.push(formulaStep(rng, { mode: 'linePlane', an: vn, bn: nn, paramPlane: paramPlane || level === 5 }))
+    steps.push(formulaStep(rng, { mode: 'linePlane', an: vn, bn: nn, paramPlane: paramPlane || level === 5, uName: level === 5 ? '\\overrightarrow{AB}' : '\\vec u' }))
     steps.push(dotStep(rng, vn, nn, v, n), lengthsStep(rng, [vn, nn], [v, n]))
     const val = valueStep(rng, { mode: 'linePlane', an: vn, bn: nn, a: v, b: n, general })
     steps.push(val.step)
@@ -551,6 +554,8 @@ function buildAnglePlanes(rng: Rng, level: Level): Built {
       if (general) {
         n0 = pickDir(rng, 3, 3, 1)
         axis = rng.chance(0.5) ? rng.int(0, 2) : -1
+        // F ist die Koordinatenebene: der gemeinsame Punkt im Bild liegt in ihr
+        if (axis >= 0) X = X.map((x, i) => (i === axis ? rat(0) : x))
         n2 = axis >= 0 ? [0, 1, 2].map((i) => rat(i === axis ? 1 : 0)) : pickDir(rng, 3, 3, 1)
       } else ({ a: n0, b: n2, phi } = specialPair(rng, 3, 'planes'))
       if (axis < 0) {
@@ -598,7 +603,7 @@ function buildAnglePlanes(rng: Rng, level: Level): Built {
         lead: `$${nE} \\cdot ${nF}$ ausgerechnet:`,
         card: GL_CARD.schnittwinkel,
       })
-      steps.push({ ...cond, drawing: before }, solved.step)
+      steps.push({ ...cond, drawing: { ...before, angles: [], caption: 'Gesucht ist $ so, dass ein rechter Winkel entsteht.' } }, solved.step)
       if (steps.some((st) => st.choices.length < 3) || !ratEq(solved.t, a0)) continue
       const eWithA = `${E}\\colon ${termsLatex(n1.map((c, i) => (i === j ? ([rat(1), `a${COORDS[i]}`] as const) : ([c, COORDS[i]] as const))))} = ${show(vecDot(n1, X))}`
       return {

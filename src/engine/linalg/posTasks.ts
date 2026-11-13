@@ -709,7 +709,7 @@ function buildLinePlane(rng: Rng, level: Level, meet: boolean): Built {
           answer: [truth],
         }
       }
-      const solved = solveStep(rng, { id: 'parameter', title: 'Parameter', question: `Für welches $${t}$ ist die Gleichung erfüllt?`, t, target: d, p: ins.c0, v: ins.cs[0], lead: 'Die Gleichung lautet', card: GL_CARD.lageGeradeEbene })
+      const solved = solveStep(rng, { id: 'parameter', title: 'Parameter', question: `Für welches $${t}$ ist die Gleichung erfüllt?`, t, target: d, p: ins.c0, v: ins.cs[0], lead: 'Die Gleichung ist linear:', card: GL_CARD.lageGeradeEbene })
       const pt = pointStep(rng, { Q: 'S', p, v, t: t0, tName: t, slips: solved.slips, question: 'Welcher Punkt ist der Durchstoßpunkt $S$?', card: GL_CARD.lageGeradeEbene })
       steps.push(solved.step, pt)
       if (steps.some((st) => st.choices.length < 3)) continue

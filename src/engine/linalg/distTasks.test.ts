@@ -11,6 +11,8 @@ import { type VectorDrawing, drawingCoordinates } from './figures.ts'
 import { LINE_ERROR_RULES } from './lineErrorRules.ts'
 import { checkVectorEntries, prepareVectorCheck, readResult } from './vectorFree.ts'
 import { type VectorTask, buildVectorTask } from './vectorTasks.ts'
+import { evaluate } from '../expr/evaluate.ts'
+import { parseLatex } from '../parse/latex.ts'
 
 // M7 Schritt 7b: Bausteine „Abstände“ und „Schnittwinkel“ der Tätigkeit „Geraden und Ebenen“. Jede Aufgabe wird
 // unabhängig mit Kommazahlen nachgerechnet (Abstand über den Lotfußpunkt bzw. das Kreuzprodukt, Winkel mit acos und asin);
@@ -204,6 +206,53 @@ describe('Geraden und Ebenen: Abstände und Schnittwinkel', () => {
         expect(shown, task.form).toBeLessThanOrEqual(90 + 1e-6)
         if (task.resultLatex!.startsWith('\\varphi')) expect(Math.abs(shown - task.answer[0]) < 1e-6, task.form).toBe(true)
       }
+  })
+
+  // Funde der unabhängigen Prüfung
+  it('die Bedingung für den Lotfußpunkt: jede falsche Gleichung hat eine andere Lösung', () => {
+    // lineare Gleichung „… = c“ in t: Lösung über zwei Werte der linken Seite
+    const solve = (latex: string, t: string) => {
+      const [lhs, rhs] = latex.replace(/^\$|\$$/g, '').split(' = ')
+      const e = parseLatex(lhs)
+      if (!e.ok) throw new Error(latex)
+      const name = t.replace('\\', '')
+      const at = (x: number) => evaluate(e.expr, { [name]: x })
+      return (Number(rhs) - at(0)) / (at(1) - at(0))
+    }
+    let checked = 0
+    for (const level of LEVELS)
+      for (const task of tasks('abstand', level, 150)) {
+        const step = task.steps.find((s) => s.id === 'bedingung')
+        if (!step) continue
+        const t = /F_(\\?[a-z]+)\}/.exec(step.question)![1]
+        const right = solve(step.choices.find((c) => c.correct)!.content, t)
+        for (const c of step.choices.filter((c) => !c.correct)) expect(close(solve(c.content, t), right), `${task.form}: ${c.content}`).toBe(false)
+        checked++
+      }
+    expect(checked).toBeGreaterThan(100)
+  })
+
+  it('kein Name doppelt: Ebene und Lotfußpunkt, gegebener Punkt und Stützpunkt', () => {
+    for (const level of LEVELS)
+      for (const task of tasks('abstand', level, 150)) {
+        expect(task.instruction, task.form).not.toMatch(/Ebene \$F\$/)
+        const named = [...task.functionLatex!.matchAll(/([A-Z])\(/g)].map((m) => m[1])
+        for (const step of task.steps.filter((s) => s.id === 'koordinatenform')) {
+          const own = [...`${step.hint} ${step.explanation.detailed}`.matchAll(/([A-Z])\(/g)].map((m) => m[1])
+          expect(own.some((x) => named.includes(x) && x !== 'A'), task.form).toBe(false)
+        }
+      }
+  })
+
+  it('Winkel zur Koordinatenebene: der Punkt im Bild liegt in ihr', () => {
+    let checked = 0
+    for (const task of tasks('schnittwinkel', 3, 200).filter((t) => t.form.includes('|axis'))) {
+      const axis = Number(/\|axis(\d)/.exec(task.form)![1])
+      const X = task.resultDrawing!.points[0].at
+      expect(close(X[axis], 0), task.form).toBe(true)
+      checked++
+    }
+    expect(checked).toBeGreaterThan(10)
   })
 
   it.each(cells)('%s Stufe %i: mindestens 100 Formen unter 200, keine öfter als 3 %%', (block, level) => {

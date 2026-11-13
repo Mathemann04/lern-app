@@ -1191,3 +1191,10 @@ Neue Entscheidungen unten anfügen.
   der Ebene statt Normale) dort entstehen. Stufe 4 fragt nach dem Parameter, für den Geraden, Gerade und Ebene oder Ebenen
   senkrecht stehen. Vor dem Ergebnis zeigt das Bild die Aufgabe ohne Lot bzw. ohne Winkelwert; der Knopf zum Abspielen
   heißt bei Abständen „Lot fällen“.
+- 13.11.2026: Funde der unabhängigen Prüfung zu M7 Schritt 7b behoben: Beim Lotfußpunkt war die falsche Bedingung „mit dem
+  Stützvektor malgenommen“ manchmal ein Vielfaches der richtigen Gleichung (jetzt nur, wenn ihre Lösung anders ist); Ebene
+  und Lotfußpunkt hießen beide $F$ (Ebenen jetzt $E$ und $H$); der Stützpunkt der Normalenform hieß wie der gegebene Punkt
+  (jetzt $A$); unpassende Fehler bei der Lotgeraden und beim Einsetzen mit Parameter entfernt bzw. ersetzt; „Richtung der
+  Ebene statt Normale“ ersetzt jetzt die Normale; bei Gerade und Ebene ist $180^\circ - \varphi$ kein Betragsfehler (dort
+  eine zweite Verwechslung der Tabelle); Bild zum Winkel mit einer Koordinatenebene liegt in ihr; Klammern um negative
+  Faktoren; Tipp beim Auflösen als ganzer Satz. Neue Tests für die ersten beiden Funde und das Bild.
