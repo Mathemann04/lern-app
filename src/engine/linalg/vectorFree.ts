@@ -11,6 +11,8 @@ import { vectorErrorRule } from './errorRules.ts'
 import { ANGLE_TYPES } from './dotTasks.ts'
 import { ORIENTATIONS } from './spatTasks.ts'
 import { INDEPENDENCE, SPAN_ANSWERS } from './basisTasks.ts'
+import { COLLINEAR, ON_LINE } from './lineTasks.ts'
+import { IN_PLANE } from './planeTasks.ts'
 import { type VectorTask, buildVectorTask } from './vectorTasks.ts'
 
 // Freier Modus der Tätigkeit „Vektoren" (M7 Schritt 1b): Das Ergebnis wird je Eintrag in ein eigenes Kästchen getippt
@@ -20,7 +22,10 @@ import { type VectorTask, buildVectorTask } from './vectorTasks.ts'
 
 // Seit Schritt 2 (Skalarprodukt): choice ist eine Auswahl (spitz, rechtwinklig, stumpf; Wert = Nummer der Antwort),
 // inequality eine Ungleichung wie t > 3/2 (Werte: +1 für >, −1 für <, dann die Grenze)
-export type EntryShape = 'vector' | 'point' | 'number' | 'solutions' | 'choice' | 'inequality'
+// Seit Schritt 6 (Geraden und Ebenen): param ist eine Parameterform (Stützvektor und ein oder zwei Richtungen, jede
+// gleichwertige Form ist richtig), equation eine Koordinatenform a x + b y + c z = d (jedes Vielfache ist richtig, bei
+// der Hesseschen Normalform mit exact nur genau diese)
+export type EntryShape = 'vector' | 'point' | 'number' | 'solutions' | 'choice' | 'inequality' | 'param' | 'equation'
 
 // Ein Teil des Ergebnisses: label ist LaTeX (vor den Kästchen: „\overrightarrow{AB} =", „Q", „\lvert \vec a \rvert =", „t");
 // options: die Antworten einer Auswahl bzw. die Zeichen einer Ungleichung; suffix: LaTeX nach dem Kästchen (Grad)
@@ -30,6 +35,10 @@ export type ResultPart = {
   readonly values: readonly number[]
   readonly options?: readonly string[]
   readonly suffix?: string
+  // Parameterform: Namen der Parameter (ein Name: Gerade, zwei: Ebene)
+  readonly params?: readonly string[]
+  // Koordinatenform: nur genau diese Zahlen (Hessesche Normalform), nicht jedes Vielfache
+  readonly exact?: boolean
 }
 
 export const RELATIONS = ['<', '>'] as const
@@ -43,6 +52,10 @@ const CHOICE_SETS: readonly { readonly options: readonly string[]; readonly labe
   { options: INDEPENDENCE, label: 'Die Vektoren sind', special: 0, rules: ['vec-indep-swapped', 'vec-indep-swapped'] },
   // „im Spann“ gewählt, obwohl nicht: Probe vergessen; „nicht im Spann“, obwohl doch: im Spann übersehen
   { options: SPAN_ANSWERS, label: 'Der Vektor liegt', special: 0, rules: ['vec-lc-no-check', 'vec-lc-no-check'], byChoice: ['vec-lc-no-check', 'vec-lc-span-denied'] },
+  // Geraden und Ebenen (Schritt 6): „drauf“ gewählt, obwohl nicht: nur eine Zeile geprüft bzw. Probe falsch gedeutet
+  { options: ON_LINE, label: 'Der Punkt liegt', special: 0, rules: ['gl-check-one', 'gl-check-one'], byChoice: ['gl-check-one', 'gl-probe-misread'] },
+  { options: COLLINEAR, label: 'Die drei Punkte liegen', special: 0, rules: ['gl-check-one', 'gl-check-one'], byChoice: ['gl-check-one', 'gl-probe-misread'] },
+  { options: IN_PLANE, label: 'Der Punkt liegt', special: 0, rules: ['gl-probe-misread', 'gl-probe-misread'] },
 ]
 const DEGREE = '^\\circ'
 // Einheiten am Ende eines Ergebnisses (Kräfte, Schritt 3b): \,\text{N}, \,\text{Nm}, \,\text{J}, \,\text{m}
@@ -99,8 +112,11 @@ function readPart(text: string): ResultPart | null {
     const v = numberOf(ineq[3])
     return v === null ? null : { shape: 'inequality', label: ineq[1], values: [ineq[2] === '>' ? 1 : -1, v], options: RELATIONS }
   }
-  // Punkt: Q(1 \mid 2 \mid 3)
-  const point = /^([A-Z](?:_\d)?)\((.*)\)$/s.exec(t)
+  // Gerade oder Ebene (Schritt 6): g\colon \vec x = … (Parameterform) oder E\colon 2x - y + 3z = 6 (Koordinatenform)
+  const named = /^([a-zA-Z])\\colon (.*)$/s.exec(t)
+  if (named) return readForm(named[1], named[2])
+  // Punkt: Q(1 \mid 2 \mid 3); seit Schritt 6 auch Spurpunkte S_x, S_{xy}
+  const point = /^([A-Z](?:_\d|_[a-z]|_\{[a-z]+\})?)\((.*)\)$/s.exec(t)
   if (point) {
     const values = point[2].split('\\mid').map(numberOf)
     return values.every((v) => v !== null) ? { shape: 'point', label: point[1], values: values as number[] } : null
@@ -135,6 +151,37 @@ function readPart(text: string): ResultPart | null {
   return v === null ? null : { shape: 'number', label: lhs ? `${lhs} =` : '', values: [v], ...(suffix ? { suffix } : {}) }
 }
 
+const COLUMN = /^\s*(?:\+\s*([a-z]|\\[a-z]+)\s*)?\\begin\{pmatrix\}(.*?)\\end\{pmatrix\}/s
+
+// Gleichung einer Geraden oder Ebene: Parameterform mit Spalten oder Koordinatenform in x, y, z
+function readForm(name: string, body: string): ResultPart | null {
+  const sides = splitTop(body, ' = ')
+  if (sides.length !== 2) return null
+  const [lhs, rhs] = sides.map((s) => s.trim())
+  if (lhs === '\\vec x') {
+    const values: number[] = []
+    const params: string[] = []
+    let rest = rhs
+    while (rest.trim() !== '') {
+      const col = COLUMN.exec(rest)
+      // erste Spalte ohne Parameter, jede weitere mit
+      if (!col || (values.length === 0) !== !col[1]) return null
+      if (values.length > 0) params.push(col[1])
+      const entries = col[2].split('\\\\').map(numberOf)
+      if (!entries.every((v) => v !== null)) return null
+      values.push(...(entries as number[]))
+      rest = rest.slice(col[0].length)
+    }
+    return params.length === 0 ? null : { shape: 'param', label: `${name}\\colon \\vec x =`, values, params }
+  }
+  const parsed = parseLatex(`${lhs} - (${rhs})`)
+  if (!parsed.ok || [...variablesOf(parsed.expr)].some((v) => !['x', 'y', 'z'].includes(v))) return null
+  const f = (x: number, y: number, z: number) => evaluate(parsed.expr, { x, y, z })
+  const c = f(0, 0, 0)
+  const values = [f(1, 0, 0) - c, f(0, 1, 0) - c, f(0, 0, 1) - c, -c]
+  return values.every(Number.isFinite) ? { shape: 'equation', label: `${name}\\colon`, values } : null
+}
+
 // Ergebnis (LaTeX, auch zwischen $…$) als Teile; t_1 = …, t_2 = … werden zu einem Teil mit zwei Lösungen. null: nicht lesbar
 export function readResult(latex: string): ResultPart[] | null {
   const body = latex.trim().replace(/^\$/, '').replace(/\$$/, '')
@@ -161,15 +208,62 @@ export function readResult(latex: string): ResultPart[] | null {
 
 const close = (a: number, b: number) => Math.abs(a - b) <= 1e-9 * Math.max(1, Math.abs(b))
 
-function sameValues(shape: EntryShape, a: readonly number[], b: readonly number[]): boolean {
+// Geraden und Ebenen (Schritt 6): parallel (alle 2 × 2-Unterdeterminanten 0, relativ zur Größe), Kreuzprodukt
+const sizeOf = (v: readonly number[]) => Math.max(1e-300, ...v.map(Math.abs))
+const isNull = (v: readonly number[]) => v.every((x) => Math.abs(x) < 1e-12)
+function parallelN(u: readonly number[], v: readonly number[]): boolean {
+  const s = sizeOf(u) * sizeOf(v)
+  for (let i = 0; i < u.length; i++) for (let j = i + 1; j < u.length; j++) if (Math.abs(u[i] * v[j] - u[j] * v[i]) > 1e-9 * s) return false
+  return true
+}
+const crossN = (a: readonly number[], b: readonly number[]) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]
+const dotN = (a: readonly number[], b: readonly number[]) => a.reduce((s, x, i) => s + x * b[i], 0)
+const subN = (a: readonly number[], b: readonly number[]) => a.map((x, i) => x - b[i])
+
+// Spalten einer Parameterform: Stützvektor, dann die Richtungen
+function columns(part: ResultPart, values: readonly number[]): number[][] {
+  const k = (part.params?.length ?? 0) + 1
+  const dim = values.length / k
+  return Array.from({ length: k }, (_, c) => values.slice(c * dim, (c + 1) * dim))
+}
+
+// Welche Spalten einer Parameterform passen nicht zur gesuchten Geraden bzw. Ebene: [Stützvektor falsch, Richtungen falsch]
+function formFaults(part: ResultPart, a: readonly number[]): readonly [boolean, boolean] {
+  const [p, ...dirs] = columns(part, a)
+  const [q, ...want] = columns(part, part.values)
+  if (dirs.length === 1) {
+    const dirOk = !isNull(dirs[0]) && parallelN(dirs[0], want[0])
+    return [!parallelN(subN(p, q), want[0]), !dirOk]
+  }
+  const n = crossN(want[0], want[1])
+  const scale = sizeOf(n)
+  const inPlane = (v: readonly number[]) => Math.abs(dotN(n, v)) <= 1e-9 * scale * sizeOf(v)
+  const dirOk = dirs.every((v) => !isNull(v) && inPlane(v)) && !isNull(crossN(dirs[0], dirs[1])) && parallelN(crossN(dirs[0], dirs[1]), n)
+  return [!inPlane(subN(p, q)), !dirOk]
+}
+
+// Koordinatenform: gleiches Vielfaches (Faktor ungleich 0), bei exact genau gleich
+const proportional = (a: readonly number[], b: readonly number[]) => !isNull(a.slice(0, -1)) && parallelN(a, b)
+
+function sameValues(part: Pick<ResultPart, 'shape' | 'params' | 'exact' | 'values'>, a: readonly number[], b: readonly number[]): boolean {
   if (a.length !== b.length) return false
-  if (shape !== 'solutions') return a.every((x, i) => close(x, b[i]))
+  if (part.shape === 'param') {
+    const target: ResultPart = { ...part, label: '', values: b }
+    // falsche Antwort ohne echte Gerade bzw. Ebene (Richtung 0, Richtungen parallel): Mit ihr ist nichts gleich
+    const [, ...dirs] = columns(target, b)
+    if (dirs.length === 1 ? isNull(dirs[0]) : isNull(crossN(dirs[0], dirs[1]))) return false
+    const [p, d] = formFaults(target, a)
+    return !p && !d
+  }
+  if (part.shape === 'equation' && !part.exact) return proportional(a, b)
+  if (part.shape !== 'solutions') return a.every((x, i) => close(x, b[i]))
   const sa = [...a].sort((x, y) => x - y)
   const sb = [...b].sort((x, y) => x - y)
   return sa.every((x, i) => close(x, sb[i]))
 }
 
-const samePart = (a: ResultPart, b: ResultPart) => a.shape === b.shape && sameValues(a.shape, a.values, b.values)
+// b ist der gesuchte Teil (bestimmt, was als gleich gilt)
+const samePart = (a: ResultPart, b: ResultPart) => a.shape === b.shape && (a.params?.length ?? 0) === (b.params?.length ?? 0) && sameValues(b, a.values, b.values)
 
 // Typischer Fehler zu einem Teil des Ergebnisses: falsche Antwort aus dem Schritt, der diesen Teil liefert
 export type PartWrong = { readonly values: readonly number[]; readonly rule: string; readonly why: Explanation }
@@ -279,8 +373,10 @@ function choiceWrongs(part: ResultPart): PartWrong[] {
 }
 
 export function prepareVectorCheck(task: VectorTask): VectorCheck {
-  const parts = readResult(task.resultLatex!)
-  if (!parts) throw new Error(`Ergebnis nicht lesbar: ${task.resultLatex}`)
+  const read = readResult(task.resultLatex!)
+  if (!read) throw new Error(`Ergebnis nicht lesbar: ${task.resultLatex}`)
+  // Hessesche Normalform (Schritt 6): nur genau diese Koordinatenform
+  const parts = task.kind === 'planeHesse' ? read.map((p) => (p.shape === 'equation' ? { ...p, exact: true } : p)) : read
   return { parts, wrongs: parts.map((p) => (p.shape === 'choice' ? choiceWrongs(p) : wrongsFor(task.steps, p))) }
 }
 
@@ -299,8 +395,9 @@ const noMarks = (input: EntryInput) => input.map((row) => row.map(() => false))
 const vectorPair = (check: VectorCheck): number =>
   check.parts.findIndex((p, i) => {
     const q = check.parts[i + 1]
-    const m1 = /^(.+)_1 =$/.exec(p.label)
-    return p.shape === 'vector' && q?.shape === 'vector' && !!m1 && q.label === `${m1[1]}_2 =`
+    // seit Schritt 6 auch zwei Punkte Q_1 und Q_2
+    const m1 = /^(.+)_1( =)?$/.exec(p.label)
+    return (p.shape === 'vector' || p.shape === 'point') && q?.shape === p.shape && !!m1 && q.label === `${m1[1]}_2${m1[2] ?? ''}`
   })
 
 const swapRows = <T,>(rows: readonly (readonly T[])[], i: number): (readonly T[])[] => rows.map((row, j) => (j === i ? rows[i + 1] : j === i + 1 ? rows[i] : row))
@@ -351,6 +448,18 @@ function checkEntriesInOrder(check: VectorCheck, input: EntryInput): FreeVerdict
   const values = reads.map((row) => row.map((r) => r.value!))
   // falsche Einträge je Teil; bei zwei Lösungen jede Zahl, die keine Lösung ist (oder doppelt)
   const marks = check.parts.map((part, i) => {
+    if (part.shape === 'param') {
+      // falsche Spalten markieren: Stützvektor nicht auf der Geraden bzw. Ebene, Richtungen falsch
+      const [p, d] = formFaults(part, values[i])
+      const dim = part.values.length / ((part.params?.length ?? 0) + 1)
+      return values[i].map((_, j) => (j < dim ? p : d))
+    }
+    if (part.shape === 'equation') {
+      if (sameValues(part, values[i], part.values)) return values[i].map(() => false)
+      // Zahlen vor x, y, z passen (Vielfaches): nur die rechte Seite markieren
+      const coefOk = !part.exact && !isNull(values[i].slice(0, 3)) && parallelN(values[i].slice(0, 3), part.values.slice(0, 3))
+      return values[i].map((_, j) => (coefOk ? j === 3 : true))
+    }
     if (part.shape !== 'solutions') return values[i].map((v, j) => !close(v, part.values[j]))
     const left = [...part.values]
     return values[i].map((v) => {
@@ -406,12 +515,22 @@ function checkEntriesInOrder(check: VectorCheck, input: EntryInput): FreeVerdict
 
   // typischer Fehler: ein falscher Teil (der erste, zu dem einer passt) ist eine falsche Antwort seines Schritts
   const match = check.parts
-    .map((part, i) => (wrongParts[i] ? check.wrongs[i].find((w) => sameValues(part.shape, values[i], w.values)) : undefined))
+    .map((part, i) => (wrongParts[i] ? check.wrongs[i].find((w) => sameValues(part, values[i], w.values)) : undefined))
     .find((w) => w !== undefined)
   if (match) {
     const rule = vectorErrorRule(match.rule)
     return { kind: 'wrong', title: 'Nicht ganz.', error: { id: rule.id, name: rule.name, why: match.why }, marks }
   }
+  // Hessesche Normalform (Schritt 6), wenn keine falsche Antwort des Schritts passt: dieselbe Ebene, aber nicht normiert (Faktor nicht ±1) oder nur rechts negativ (−1)
+  const hesse = check.parts.findIndex((part, i) => wrongParts[i] && part.shape === 'equation' && part.exact && proportional(values[i], part.values))
+  if (hesse >= 0) {
+    const part = check.parts[hesse]
+    const at = part.values.findIndex((x) => Math.abs(x) > 1e-12)
+    const k = values[hesse][at] / part.values[at]
+    const rule = vectorErrorRule(close(k, -1) ? 'gl-hesse-d-sign' : 'gl-hesse-not-normed')
+    return { kind: 'wrong', title: 'Nicht ganz.', error: { id: rule.id, name: rule.name, why: rule.why }, marks }
+  }
+
   const count = marks.flat().filter(Boolean).length
   const total = marks.flat().length
   const message =
@@ -454,7 +573,14 @@ export function prepareVectorFreeTask(ref: TaskRef): FreeTask {
     inputLabel: 'Dein Ergebnis',
     // Wurzel-Taste immer: Sonst verriete die Tastatur, ob das Ergebnis eine Wurzel hat
     keyboard: { kind: 'vector' },
-    entries: check.parts.map((p) => ({ shape: p.shape, label: p.label, count: p.values.length, ...(p.options ? { options: p.options } : {}), ...(p.suffix ? { suffix: p.suffix } : {}) })),
+    entries: check.parts.map((p) => ({
+      shape: p.shape,
+      label: p.label,
+      count: p.values.length,
+      ...(p.options ? { options: p.options } : {}),
+      ...(p.suffix ? { suffix: p.suffix } : {}),
+      ...(p.params ? { params: p.params } : {}),
+    })),
     checkEntries: (input) => checkVectorEntries(check, input),
     check: (latex) => checkVectorEntries(check, [[latex]]),
   }

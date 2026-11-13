@@ -71,6 +71,17 @@ export type VectorKind =
   | 'basisCoords'
   | 'basisSpanParam'
   | 'basisParam'
+  // Geraden und Ebenen (M7 Schritt 6, lineTasks.ts und planeTasks.ts)
+  | 'lineThrough'
+  | 'linePoint'
+  | 'lineContains'
+  | 'lineTrace'
+  | 'lineDistance'
+  | 'planeContains'
+  | 'planeCoord'
+  | 'planeParam'
+  | 'planeHesse'
+  | 'planeTraces'
 
 export type VectorTask = GuidedTaskBase & {
   readonly kind: VectorKind

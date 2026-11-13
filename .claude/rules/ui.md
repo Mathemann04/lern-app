@@ -141,3 +141,7 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   auch „Lage der drei Vektoren:“ mit Rechtssystem, Linkssystem, komplanar).
 - Ein `fieldset` wird im Browser nie schmaler als sein breitester Inhalt: Steht darin eine Formel mit `FitWidth`, braucht es
   `min-w-0` (Fehler vom 12.11.2026 auf der Seite „Gleichungen umstellen“, Browser-Test in `e2e/blocks.spec.ts`).
+- Seit M7 Schritt 6 gibt es den Ton `emerald` (Geraden und Ebenen, smaragdgrün wie im Plan) und im freien Modus die Kästchen
+  `param` (Parameterform: Spalten in Klammern, dazwischen „+ t“, Namen „2. Eintrag des Stützvektors“, „1. Eintrag des
+  Richtungsvektors“ bzw. „… des 2. Richtungsvektors“; am Handy bricht die dritte Spalte um) und `equation`
+  (Koordinatenform □ x + □ y + □ z = □, Namen „Zahl vor x“ … „Rechte Seite“) in `ui/free/EntryInput.tsx`.

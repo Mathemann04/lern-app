@@ -95,7 +95,8 @@ export function bestYaw(d: VectorDrawing): number {
   const angles = d.angles ?? []
   const candidates = [-0.62, -0.25, -1.0, 0.3, -1.4, 0.75, 2.2, -2.3, ...(angles.length > 0 ? [1.2, -1.8, 1.7, -2.8, 2.7, 0.0] : [])]
   const arrows = d.arrows.filter((a) => !a.ghost)
-  if (arrows.length === 0 && angles.length === 0) return candidates[0]
+  // ohne Pfeile und Winkel zählt nur die Fläche (Spurdreieck, M7 Schritt 6)
+  if (arrows.length === 0 && angles.length === 0 && !d.polygons.some((p) => p.points.length >= 3 && !p.from)) return candidates[0]
   let best = { yaw: candidates[0], score: -1 }
   for (const yaw of candidates) {
     const view = spaceView(d, yaw, START_PITCH)

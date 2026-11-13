@@ -33,11 +33,14 @@ export type KeyboardSpec =
 // Seit Schritt 2: choice (Auswahl unter options, eine Antwort) und inequality (Zeichen < oder > aus options, dann ein
 // Kästchen); suffix steht hinter dem Kästchen einer Zahl (z. B. ^\circ)
 export type EntryGroup = {
-  readonly shape: 'vector' | 'point' | 'number' | 'solutions' | 'choice' | 'inequality'
+  readonly shape: 'vector' | 'point' | 'number' | 'solutions' | 'choice' | 'inequality' | 'param' | 'equation'
   readonly label: string
   readonly count: number
   readonly options?: readonly string[]
   readonly suffix?: string
+  // Parameterform einer Geraden oder Ebene (M7 Schritt 6): Namen der Parameter; Spalten: Stützvektor, dann je Parameter
+  // eine Richtung. Koordinatenform (equation): vier Kästchen, Zahl vor x, y, z und rechte Seite
+  readonly params?: readonly string[]
 }
 
 export type FreeTask = {

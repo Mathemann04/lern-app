@@ -4,6 +4,8 @@ paths:
   - "src/ui/draw/**"
   - "src/engine/explain/vectorCards.ts"
   - "e2e/vectors.spec.ts"
+  - "src/engine/explain/lineCards.ts"
+  - "e2e/lines.spec.ts"
 ---
 
 # Notizen: Vektoren (M7) und Bilder zu Vektoren
@@ -107,6 +109,29 @@ gezieltes Üben noch nicht (`focus: false`).
   violett, verfehlt: rote Strecke; Gerade `line`, Parallelogramm. In vier Dimensionen kein Bild, bei „linear unabhängig“ in der Ebene keins vor dem Ergebnis. Bei der Probe
   „Faktoren vertauscht“ nur, wenn sich dadurch ein Wert ändert. Tests in
   `basisTasks.test.ts` (Rang mit Gauß, Abstand zum Spann, falsche Gleichungssysteme werden von der Lösung nicht erfüllt).
+- Geraden und Ebenen (Schritt 6): eigene Tätigkeit `geraden` (Farbe `emerald`, Bild `lines`, Lernkarten-Ordner
+  `geraden` in `explain/lineCards.ts`), aber dieselbe Engine: Bausteine `gerade` (Code 28) und `ebene` (Code 29) in
+  `LINE_BLOCKS` (Gruppe `geo-formen`), `buildVectorTask` wählt nach dem Baustein, `nextLineSeed` in `vectorEngine.ts`.
+  `linalg/lineKit.ts`: Schreibweisen (`paramFormLatex` „g\colon \vec x = … + t …“, `coordLatex` „E\colon 2x - y + 3z =
+  6“, `normalFormLatex`, `insertLatex`), `primitive` (gekürzt), `isParallel`, `sameLine`, `samePlane`, `sameCoord` (falsche
+  Formen, die dieselbe Gerade oder Ebene beschreiben, fallen weg), Bilder `lineFigure` (Stützvektor blass, Richtung,
+  Gerade gestrichelt als Strecke, Phasen 1 bis 3), `planeFigure` (Parallelogramm um den Stützpunkt, Richtungen, Normale),
+  `traceFigure` (Spurdreieck, Achsen bis zu den Spurpunkten gestrichelt; `bestYaw` in `ui/draw/view.ts` richtet auch
+  Bilder ohne Pfeile nach der Fläche aus). `linalg/lineTasks.ts`: `LINE_KINDS_BY_LEVEL` (lineThrough, linePoint,
+  lineContains, lineTrace, lineDistance), Schritte `formStep`, `solveStep` (Zeile nach dem Parameter auflösen, liefert die
+  Fehl-Werte als `Slip` für Folgefehler), `pointStep`, `decideStep` (Punktprobe mit Begründung), Karten `GL_CARD`, Auswahlen
+  `ON_LINE`, `COLLINEAR`. `linalg/planeTasks.ts`: `PLANE_KINDS_BY_LEVEL` (planeContains, planeCoord, planeParam,
+  planeHesse, planeTraces), Schritte `coordStep` (d = n · p; ohne Punktnamen „den Stützpunkt“), `probeStep` (Einsetzen und
+  Schluss in einem Schritt, falsche Antworten aus Rechenfehlern), `hesseStep`, `traceSteps`, `paramStep`; Normale aus
+  `crossStep` (crossTasks.ts), gekürzt mit `primitive`; Hesse nur mit ganzzahliger Länge (`HESSE_POOL`), Ergebnis als
+  Koordinatenform mit Brüchen und $d \ge 0$; Auswahl `IN_PLANE`. Fehler mit Vorsilbe `gl-` in `linalg/lineErrorRules.ts`
+  (33; `vectorErrorRule` sucht in beiden Listen, Katalog `geraden` in `errorCatalog.ts` mit beiden). Freier Modus
+  (`vectorFree.ts`): Teile `param` (Spalten, `params`; gleich, wenn Stützpunkt auf der Geraden bzw. in der Ebene und die
+  Richtungen passen, `formFaults` markiert die falsche Spalte) und `equation` (Werte a, b, c, d aus der Gleichung durch
+  Einsetzen von x, y, z; jedes Vielfache gilt, mit `exact` nur genau diese: Hesse, dann „Nicht normiert“ bzw. bei Faktor −1
+  „Rechte Seite negativ gelassen“); Punkte auch `S_x`, `S_{xy}`, zwei Punkte `Q_1`, `Q_2` in beliebiger Reihenfolge.
+  Tests in `linalg/lineTasks.test.ts` (Gegenprobe mit Kommazahlen, keine falsche Form gleichwertig, gleichwertige Formen
+  im freien Modus richtig), Browser-Test `e2e/lines.spec.ts`.
 - `linalg/vectorTasks.ts`: Baukasten. Je Art (`VectorKind`) eine Funktion, die die ganze geführte Aufgabe baut (Schritte
   mit `choiceStep`: falsche Antworten ohne Doppelte, höchstens drei, aus `errorRules.ts`; Bilder; Ergebnis; Form;
   `answer` und `data` für die Gegenprobe in Tests). Arten je Stufe in `KINDS_BY_LEVEL`: Stufe 1 Ebene, 2 Raum, 3 zwei

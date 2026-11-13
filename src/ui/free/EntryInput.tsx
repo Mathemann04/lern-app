@@ -35,6 +35,17 @@ function boxLabel(group: EntryGroup, entry: number): string {
       return 'Dein Ergebnis'
     case 'choice':
       return 'Deine Antwort'
+    case 'param': {
+      // Spalten: Stützvektor, dann je Parameter ein Richtungsvektor (M7 Schritt 6)
+      const k = (group.params?.length ?? 0) + 1
+      const dim = group.count / k
+      const col = Math.floor(entry / dim)
+      const row = (entry % dim) + 1
+      if (col === 0) return `${row}. Eintrag des Stützvektors`
+      return k > 2 ? `${row}. Eintrag des ${col}. Richtungsvektors` : `${row}. Eintrag des Richtungsvektors`
+    }
+    case 'equation':
+      return entry < 3 ? `Zahl vor ${['x', 'y', 'z'][entry]}` : 'Rechte Seite'
   }
 }
 
@@ -175,6 +186,53 @@ export function EntryInput({ groups, keyboard, readOnly, marks, markTone, onInpu
               <div key={gi} className="flex flex-wrap items-center gap-2">
                 <span className="shrink-0">{group.label || 'Der Winkel ist'}</span>
                 {options(gi, 0, group.label || 'Der Winkel ist', false)}
+              </div>
+            )
+          case 'param': {
+            // Parameterform: Spalten in Klammern, dazwischen „+ t“
+            const k = (group.params?.length ?? 0) + 1
+            const dim = group.count / k
+            const column = (c: number) => (
+              <div key={c} className="flex items-stretch gap-1">
+                <span aria-hidden="true" className="w-2.5 rounded-l-[100%_50%] border-l-2 border-zinc-600" />
+                <div className="flex flex-col gap-2 py-1">{Array.from({ length: dim }, (_, r) => box(gi, c * dim + r, 'w-16 sm:w-24'))}</div>
+                <span aria-hidden="true" className="w-2.5 rounded-r-[100%_50%] border-r-2 border-zinc-600" />
+              </div>
+            )
+            return (
+              <div key={gi} className="flex flex-wrap items-center gap-x-2 gap-y-2">
+                <span className="w-full shrink-0 text-2xl sm:w-auto">
+                  <Formula tex={group.label} />
+                </span>
+                {column(0)}
+                {(group.params ?? []).map((t, c) => (
+                  <span key={t} className="flex items-center gap-2">
+                    <span className="shrink-0 text-2xl">
+                      <Formula tex={`+\\,${t}`} />
+                    </span>
+                    {column(c + 1)}
+                  </span>
+                ))}
+              </div>
+            )
+          }
+          case 'equation':
+            // Koordinatenform: □ x + □ y + □ z = □ (negative Zahlen mit Minus ins Kästchen)
+            return (
+              <div key={gi} className="flex flex-wrap items-center gap-x-1 gap-y-2 text-2xl">
+                <span className="shrink-0">
+                  <Formula tex={group.label} />
+                </span>
+                {entries.map((ei) => (
+                  <span key={ei} className="flex items-center gap-1">
+                    {box(gi, ei, 'w-16 sm:w-24')}
+                    {ei < 3 && (
+                      <span aria-hidden="true" className="shrink-0">
+                        <Formula tex={['x +', 'y +', 'z ='][ei]} />
+                      </span>
+                    )}
+                  </span>
+                ))}
               </div>
             )
           case 'solutions':

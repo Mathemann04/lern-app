@@ -1144,3 +1144,21 @@ Neue Entscheidungen unten anfügen.
   falsch?“ nennen die Dimension nicht mehr; Stufe 5 mit Parameter stellt das Gleichungssystem vor dem Eliminieren auf.
   Neuer Test: Jede falsche Antwort der Probe unterscheidet sich in einem Wert oder im Schluss.
 - 13.11.2026: Pull Requests von Claude (Branches `claude/...`) übernimmt GitHub automatisch, sobald die Prüfung grün ist (`.github/workflows/automerge.yml`, Wunsch des Nutzers); danach startet die Veröffentlichung. Übernommen wird nur genau der geprüfte Stand; rote Prüfung oder Konflikt: der Pull Request bleibt liegen.
+- 13.11.2026: M7 Schritt 6, Tätigkeit „Geraden und Ebenen“: eigene Kachel neben „Vektoren“ im Gebiet „Vektoren und
+  Matrizen“, Farbe Smaragdgrün wie im freigegebenen Plan (neuer Ton `emerald`; er ist deutlich blauer als das Grün für
+  „richtig“). Technisch dieselbe Engine wie „Vektoren“ (Bausteine `gerade` und `ebene`, Nummern `gerade.2-4711`), damit
+  Kreuzprodukt, Verbindungsvektor und Länge samt ihren Fehlern mitrechnen. Koordinaten heißen $x$, $y$, $z$, Parameter
+  $t$, $s$, $\lambda$ bei Geraden und $r, s$ bzw. $\lambda, \mu$ bei Ebenen. Hessesche Normalform als
+  $n_{0,1} x + n_{0,2} y + n_{0,3} z = d$ mit $d \ge 0$, vorerst nur mit Normalenvektoren ganzzahliger Länge (Brüche statt
+  Wurzeln, auch im freien Modus gut einzutippen); mit Wurzel folgt bei Bedarf in Schritt 7 (Abstände). Im freien Modus
+  zählt jede gleichwertige Form als richtig (anderer Stützpunkt, Vielfaches der Richtung, Vielfaches der
+  Koordinatenform), bei der Hesseschen Normalform nur genau diese. Lage, Abstände und Winkel kommen in Schritt 7 als
+  weitere Bausteine dazu.
+- 13.11.2026: M7 Schritt 6, Funde der unabhängigen Prüfung behoben: In der Erklärung der Hesseschen Normalform stand bei
+  negativer rechter Seite der Bruch mit falschem Vorzeichen (beschrieb eine andere Ebene); die Punktprobe in der Ebene
+  hat jetzt nie die rechte Seite 0 (sonst war eine „falsche“ Antwort richtig); im freien Modus passte die falsche
+  Antwort „zweimal dieselbe Richtung“ zu fast jeder falschen Ebene (eine falsche Antwort ohne echte Ebene passt jetzt zu
+  keiner Eingabe); „Stützpunkt vergessen“ bei Punkten mit Abstand hat einen eigenen Text; „Vorzeichen beim Spurpunkt“
+  erklärt beide Vorzeichen; nach dem Auflösen bietet der Schritt „Punkt“ bzw. „Unbekannte“ keine Fehler aus dem Auflösen
+  mehr an; bei der Hesseschen Normalform sind „nicht normiert“ und „durch das Quadrat geteilt“ immer unter den Antworten,
+  und der freie Modus erkennt zuerst diese Fehler. Neue Tests für jeden Fund.
