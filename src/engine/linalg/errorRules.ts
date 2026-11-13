@@ -414,6 +414,142 @@ export const VECTOR_ERROR_RULES: readonly VectorErrorRule[] = [
       short: String.raw`$(\vec a + \vec b) \cdot (\vec a - \vec b) = \lvert \vec a \rvert^2 - \lvert \vec b \rvert^2$: gleich lang, nicht senkrecht.`,
     },
   },
+  // Projektion und Zerlegung (M7 Schritt 3)
+  {
+    id: 'vec-proj-not-squared',
+    name: 'Durch die Länge statt durch ihr Quadrat geteilt',
+    wrongFormula: String.raw`\vec a_{\parallel} = \frac{\vec a \cdot \vec b}{\lvert \vec b \rvert} \, \vec b`,
+    why: {
+      detailed: String.raw`Im Schatten $\vec a_{\parallel} = \frac{\vec a \cdot \vec b}{\lvert \vec b \rvert^2} \, \vec b$ steht die Länge von $\vec b$ **im Quadrat**: Einmal teilst du durch $\lvert \vec b \rvert$, um aus dem Skalarprodukt die Länge des Schattens zu machen, und noch einmal, weil $\vec b$ selbst schon die Länge $\lvert \vec b \rvert$ mitbringt. Bequem: $\lvert \vec b \rvert^2 = \vec b \cdot \vec b$ ist die Summe der Quadrate der Einträge, ganz ohne Wurzel.`,
+      short: String.raw`Im Nenner steht $\lvert \vec b \rvert^2 = \vec b \cdot \vec b$, ohne Wurzel.`,
+    },
+  },
+  {
+    id: 'vec-proj-swapped',
+    name: 'Auf den falschen Vektor projiziert',
+    wrongFormula: String.raw`\vec a_{\parallel} = \frac{\vec a \cdot \vec b}{\lvert \vec a \rvert^2} \, \vec a`,
+    why: {
+      detailed: String.raw`Der Schatten von $\vec a$ auf $\vec b$ liegt auf der Geraden von $\vec b$. Deshalb kommt im Nenner und am Ende **der Vektor, auf den projiziert wird**, vor: $\frac{\vec a \cdot \vec b}{\lvert \vec b \rvert^2} \, \vec b$. Mit $\vec a$ an diesen Stellen bekommst du den Schatten von $\vec b$ auf $\vec a$, also etwas anderes.`,
+      short: String.raw`Nenner und Richtung kommen vom Vektor, auf den projiziert wird.`,
+    },
+  },
+  {
+    id: 'vec-proj-inverted',
+    name: 'Bruch umgedreht',
+    wrongFormula: String.raw`k = \frac{\lvert \vec b \rvert^2}{\vec a \cdot \vec b}`,
+    why: {
+      detailed: String.raw`Der Faktor vor $\vec b$ ist **Skalarprodukt durch Längenquadrat**, $k = \frac{\vec a \cdot \vec b}{\lvert \vec b \rvert^2}$. Probe: Ist $\vec a$ selbst schon ein Vielfaches von $\vec b$, muss genau diese Zahl herauskommen.`,
+      short: String.raw`$k = \frac{\vec a \cdot \vec b}{\lvert \vec b \rvert^2}$: Skalarprodukt oben.`,
+    },
+  },
+  {
+    id: 'vec-proj-times-a',
+    name: 'Faktor mal den falschen Vektor',
+    wrongFormula: String.raw`\vec a_{\parallel} = k\,\vec a`,
+    why: {
+      detailed: String.raw`Der Schatten liegt auf der Geraden von $\vec b$, also ist er ein Vielfaches von $\vec b$: $\vec a_{\parallel} = k\,\vec b$. Ein Vielfaches von $\vec a$ zeigt in die Richtung von $\vec a$ und ist deshalb kein Schatten auf $\vec b$.`,
+      short: String.raw`Der Schatten ist ein Vielfaches von $\vec b$.`,
+    },
+  },
+  {
+    id: 'vec-rest-reversed',
+    name: 'Rest falsch herum abgezogen',
+    wrongFormula: String.raw`\vec a_{\perp} = \vec a_{\parallel} - \vec a`,
+    why: {
+      detailed: String.raw`Die beiden Teile ergeben zusammen wieder $\vec a$: $\vec a = \vec a_{\parallel} + \vec a_{\perp}$. Stellst du nach $\vec a_{\perp}$ um, steht $\vec a$ vorn. Andersherum zeigt der Rest genau in die Gegenrichtung. Probe: $\vec a_{\parallel} + \vec a_{\perp}$ muss $\vec a$ ergeben.`,
+      short: String.raw`$\vec a_{\perp} = \vec a - \vec a_{\parallel}$; Probe: Summe gleich $\vec a$.`,
+    },
+  },
+  {
+    id: 'vec-rest-added',
+    name: 'Schatten addiert statt abgezogen',
+    wrongFormula: String.raw`\vec a_{\perp} = \vec a + \vec a_{\parallel}`,
+    why: {
+      detailed: String.raw`Der senkrechte Teil ist das, was von $\vec a$ **übrig bleibt**, wenn du den Schatten wegnimmst. Aus $\vec a = \vec a_{\parallel} + \vec a_{\perp}$ folgt, dass du den Schatten abziehst. Probe: $\vec a_{\perp} \cdot \vec b$ muss $0$ sein.`,
+      short: String.raw`Den Schatten abziehen; Probe: $\vec a_{\perp} \cdot \vec b = 0$.`,
+    },
+  },
+  {
+    id: 'vec-rest-minus-b',
+    name: 'Ganzen Vektor statt Schatten abgezogen',
+    wrongFormula: String.raw`\vec a_{\perp} = \vec a - \vec b`,
+    why: {
+      detailed: String.raw`Abgezogen wird der **Schatten** $\vec a_{\parallel}$, nicht der Vektor $\vec b$, auf den projiziert wird. $\vec b$ gibt nur die Richtung vor; wie lang der Schatten ist, hängt von $\vec a$ ab. Probe: Der Rest muss senkrecht auf $\vec b$ stehen.`,
+      short: String.raw`$\vec a_{\perp} = \vec a - \vec a_{\parallel}$, nicht $\vec a - \vec b$.`,
+    },
+  },
+  {
+    id: 'vec-shadow-squared',
+    name: 'Länge des Schattens durch das Quadrat geteilt',
+    wrongFormula: String.raw`\lvert \vec a_{\parallel} \rvert = \frac{\lvert \vec a \cdot \vec b \rvert}{\lvert \vec b \rvert^2}`,
+    why: {
+      detailed: String.raw`Das Quadrat im Nenner gehört nur zum Faktor **vor dem Vektor** $\vec b$, weil $\vec b$ selbst noch die Länge $\lvert \vec b \rvert$ mitbringt. Für die Länge des Schattens als Zahl teilst du nur einmal: $\lvert \vec a_{\parallel} \rvert = \frac{\lvert \vec a \cdot \vec b \rvert}{\lvert \vec b \rvert}$.`,
+      short: String.raw`Länge des Schattens: einmal durch $\lvert \vec b \rvert$ teilen.`,
+    },
+  },
+  {
+    id: 'vec-shadow-no-abs',
+    name: 'Betrag vergessen',
+    wrongFormula: String.raw`\lvert \vec a_{\parallel} \rvert = \frac{\vec a \cdot \vec b}{\lvert \vec b \rvert} < 0`,
+    why: {
+      detailed: String.raw`Eine Länge ist nie negativ. Ist das Skalarprodukt negativ, zeigt der Schatten nur entgegen $\vec b$; seine Länge ist der **Betrag** $\frac{\lvert \vec a \cdot \vec b \rvert}{\lvert \vec b \rvert}$.`,
+      short: String.raw`Längen sind positiv: Betrag des Skalarprodukts nehmen.`,
+    },
+  },
+  {
+    id: 'vec-proj-no-denominator',
+    name: 'Durch das Längenquadrat teilen vergessen',
+    wrongFormula: String.raw`\vec a_{\parallel} = 2\,\vec b \;\Rightarrow\; \vec a \cdot \vec b = 2`,
+    why: {
+      detailed: String.raw`Der Faktor vor $\vec b$ ist nicht das Skalarprodukt selbst, sondern $\frac{\vec a \cdot \vec b}{\lvert \vec b \rvert^2}$. Aus $\vec a_{\parallel} = k\,\vec b$ folgt deshalb $\vec a \cdot \vec b = k \, \lvert \vec b \rvert^2$.`,
+      short: String.raw`$\vec a_{\parallel} = k\,\vec b \;\Leftrightarrow\; \vec a \cdot \vec b = k\,\lvert \vec b \rvert^2$.`,
+    },
+  },
+  {
+    id: 'vec-foot-no-start',
+    name: 'Stützpunkt vergessen',
+    wrongFormula: String.raw`F = k\,\vec v`,
+    why: {
+      detailed: String.raw`Die Gerade beginnt nicht im Ursprung, sondern beim Punkt $A$. Der Schatten $k\,\vec v$ ist nur der Weg **von $A$ aus** entlang der Geraden; den Lotfußpunkt bekommst du mit $F = A + k\,\vec v$.`,
+      short: String.raw`$F = A + k\,\vec v$: vom Stützpunkt aus abtragen.`,
+    },
+  },
+  {
+    id: 'vec-foot-from-p',
+    name: 'Vom falschen Punkt aus abgetragen',
+    wrongFormula: String.raw`F = P + k\,\vec v`,
+    why: {
+      detailed: String.raw`Der Lotfußpunkt liegt **auf der Geraden**. Du projizierst $\overrightarrow{AP}$ auf die Richtung $\vec v$ und gehst diesen Schatten vom Punkt $A$ der Geraden aus: $F = A + k\,\vec v$. Vom Punkt $P$ aus landest du neben der Geraden.`,
+      short: String.raw`$F$ liegt auf der Geraden: $F = A + k\,\vec v$.`,
+    },
+  },
+  {
+    id: 'vec-dist-shadow',
+    name: 'Falsche Strecke gemessen',
+    wrongFormula: String.raw`d = \lvert \vec a_{\parallel} \rvert`,
+    why: {
+      detailed: String.raw`Der Abstand ist die Länge des **Lots**, also des senkrechten Teils $\vec a_{\perp}$, der vom Schatten zur Spitze führt. Der Schatten selbst oder der ganze Pfeil sind länger oder liegen in der falschen Richtung. Im Bild ist es die Strecke mit dem rechten Winkel.`,
+      short: String.raw`Abstand = Länge des Lots $\lvert \vec a_{\perp} \rvert$.`,
+    },
+  },
+  {
+    id: 'vec-span-one-part',
+    name: 'Nur auf einen Vektor projiziert',
+    wrongFormula: String.raw`\vec a_E = \frac{\vec a \cdot \vec b}{\lvert \vec b \rvert^2} \, \vec b`,
+    why: {
+      detailed: String.raw`Die Ebene wird von **zwei** Vektoren aufgespannt. Stehen sie senkrecht aufeinander, ist der Schatten auf die Ebene die Summe der Schatten auf beide: $\vec a_E = \frac{\vec a \cdot \vec b}{\lvert \vec b \rvert^2} \, \vec b + \frac{\vec a \cdot \vec c}{\lvert \vec c \rvert^2} \, \vec c$.`,
+      short: String.raw`Auf beide Vektoren projizieren und die Schatten addieren.`,
+    },
+  },
+  {
+    id: 'vec-span-factors-swapped',
+    name: 'Faktoren vertauscht',
+    wrongFormula: String.raw`\vec a_E = k_c\,\vec b + k_b\,\vec c`,
+    why: {
+      detailed: String.raw`Jeder Faktor gehört zu dem Vektor, mit dem er gerechnet wurde: $k_b = \frac{\vec a \cdot \vec b}{\lvert \vec b \rvert^2}$ steht vor $\vec b$, $k_c$ vor $\vec c$. Probe: $\vec a - \vec a_E$ muss auf $\vec b$ **und** auf $\vec c$ senkrecht stehen.`,
+      short: String.raw`$k_b$ vor $\vec b$, $k_c$ vor $\vec c$.`,
+    },
+  },
 ]
 
 export const vectorErrorRule = (id: string): VectorErrorRule => {

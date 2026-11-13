@@ -134,7 +134,7 @@ function dotCaption(an: string, bn: string, d: Rational): string {
 // ------------------------------------------------------------------ Schritte
 
 // Skalarprodukt zweier Vektoren mit Zahlen
-function dotStep(rng: Rng, an: string, bn: string, a: Vec, b: Vec, drawing?: VectorDrawing): GuidedStep {
+export function dotStep(rng: Rng, an: string, bn: string, a: Vec, b: Vec, drawing?: VectorDrawing): GuidedStep {
   const d = vecDot(a, b)
   const prods = a.map((x, i) => ratMul(x, b[i]))
   const wrongs: Wrong[] = [{ content: math(vecLatex(prods)), rule: 'vec-dot-vector' }]

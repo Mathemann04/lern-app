@@ -1,6 +1,6 @@
 # Plan für Meilenstein 7: Vektoren, Geraden und Ebenen, Matrizen
 
-Status: **freigegeben** (Nutzer, 12.11.2026: „Passt alles“). Schritte 1a, 1b, 2a und 2b fertig (12.11.2026).
+Status: **freigegeben** (Nutzer, 12.11.2026: „Passt alles“). Schritte 1a, 1b, 2a, 2b und 3a fertig (12.11.2026).
 
 Entwurf zum Ansehen und Anfassen (privat, nur für den Nutzer):
 https://claude.ai/artifact/WXe4sjavAGF64jyAWSa3hi. Er zeigt acht Bilder und Aufgaben im geplanten Stil. Die Seite ist
@@ -101,7 +101,7 @@ Animationen starten nur auf Knopfdruck („Abspielen“) und entfallen, wenn am 
   vergessen, Zeile statt Spalte (Falk, Cramer), Produkt nicht definiert, $(AB)^{\mathsf T} = A^{\mathsf T}B^{\mathsf T}$,
   $\lambda$ statt $\lambda^n$, Vorzeichen beim Zeilentausch, Sarrus bei 4×4, rechte Seite vergessen, Nullzeile falsch
   gedeutet, gleicher Parameter für zwei Geraden, beim Ziehen (2b): nur vertauscht oder nur ein Vorzeichen geändert, rechter Winkel als spitz
-  oder stumpf gezählt, rechter Winkel an der falschen Ecke, Seiten statt Diagonalen senkrecht, cos statt sin bei Gerade–Ebene, „$A - 2$“ ohne $E$, auf der falschen
+  oder stumpf gezählt, rechter Winkel an der falschen Ecke, Seiten statt Diagonalen senkrecht, bei der Projektion (3a) die 15 Fehler aus Schritt 3a, cos statt sin bei Gerade–Ebene, „$A - 2$“ ohne $E$, auf der falschen
   Seite ausgeklammert. Jede mit Katalogbeispiel, eigenem Text für „Warum ist das falsch?“ und Platz auf einer Lernkarte
   (Regeln aus CLAUDE.md).
 - **Aufgabennummern** wie seit M6 mit Baustein (`taskNumber.ts`); neue Bausteine bekommen die nächsten freien Nummern in
@@ -153,7 +153,23 @@ Request.
      Ergebnis wird gezogen, mit Parameter wird getippt und das Bild dient zum Ausprobieren. Vier neue typische Fehler:
      nur vertauscht oder nur ein Vorzeichen geändert, rechter Winkel als spitz oder stumpf gezählt, rechter Winkel an der falschen Ecke,
      Seiten statt Diagonalen senkrecht.
-3. **Projektion, Zerlegung und Kräfte:** Animation „Licht an“, typischer Fehler im Bild, schiefe Ebene.
+3. **Projektion, Zerlegung und Kräfte**, in zwei Teilen:
+   - **3a (fertig, 12.11.2026):** Baustein „Projektion und Zerlegung“ (`projektion`, Code 23) in den Stufen 1 bis 5,
+     geführt und frei. Sechs Arten: Schatten $\vec a_{\parallel}$ von $\vec a$ auf $\vec b$ (Stufe 3 mit $\vec b$ aus
+     zwei Punkten), Zerlegung in $\vec a_{\parallel}$ und $\vec a_{\perp}$ (Stufe 3 mit der Länge des Rests, Stufe 4 in
+     vier und fünf Dimensionen), Länge des Schattens, Lotfußpunkt $F$ und Abstand eines Punktes von einer Geraden
+     (Stufe 5 Gerade durch zwei Punkte), Parameter so, dass der Schatten ein gegebener Vektor ist (Stufe 4) bzw. eine
+     gegebene Länge hat (Stufe 5, Betrag, zwei Lösungen), Schatten auf eine Ebene aus zwei senkrechten Vektoren mit
+     Abstand (Stufe 5, auch in vier Dimensionen). Bilder: Knopf „Licht an“ (Lot fällt, Schatten wächst, senkrechter
+     Rest mit rechtem Winkel erscheint) und „Typischen Fehler zeigen“ (Schatten rot, wenn durch $\lvert\vec b\rvert$
+     statt $\lvert\vec b\rvert^2$ geteilt; nur, wenn er ins Bild passt). Zahlen so gezogen, dass Schatten und Rest
+     beide gut zu sehen sind. Drei Lernkarten, 15 neue typische Fehler: durch die Länge statt ihr Quadrat geteilt, auf
+     den falschen Vektor projiziert, Bruch umgedreht, Faktor mal den falschen Vektor, Rest falsch herum, Schatten
+     addiert, ganzen Vektor abgezogen, Länge des Schattens durch das Quadrat geteilt, Betrag vergessen, durch das
+     Längenquadrat teilen vergessen, Stützpunkt vergessen, vom falschen Punkt abgetragen, falsche Strecke gemessen,
+     nur auf einen Vektor projiziert, Faktoren vertauscht.
+   - **3b:** Baustein „Kräfte“: Kräfte aus Betrag und Winkel, resultierende Kraft mit Winkel (Quadrant), schiefe Ebene
+     (Hangabtrieb und Normalkraft als Zerlegung wie in 3a), Arbeit $W = \vec F \cdot \vec s$, Drehmoment in der Ebene.
 4. **Kreuzprodukt und Spatprodukt:** räumliche Ansicht zum Drehen, Schema mit Hilfszeilen, Flächen und Volumen
    (Spat, Prisma, Pyramide, Tetraeder), komplanar, Volumen mit Parameter.
 5. **Linearkombination und Basis:** Spann im Raum, kleine Gleichungssysteme Schritt für Schritt.

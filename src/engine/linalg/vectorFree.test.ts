@@ -9,9 +9,11 @@ import { buildVectorTask } from './vectorTasks.ts'
 // die richtige Eingabe zählt, jede falsche Antwort eines Schritts wird als ihr typischer Fehler erkannt, falsche
 // Einträge werden einzeln markiert.
 
-// beide Bausteine: Nummern 1 bis 999 „Rechnen und Länge", ab 1000 „Skalarprodukt und Winkel" (Schritt 2)
-const ref = (level: Level, s: number) => (s < 1000 ? { level, seed: blockSeed('rechnen', s) } : { level, seed: blockSeed('skalar', s - 999) })
-const SEEDS = (n: number) => [...Array.from({ length: n }, (_, i) => i + 1), ...Array.from({ length: n }, (_, i) => 1000 + i)]
+// alle Bausteine: Nummern 1 bis 999 „Rechnen und Länge", ab 1000 „Skalarprodukt und Winkel" (Schritt 2), ab 2000
+// „Projektion und Zerlegung" (Schritt 3a)
+const ref = (level: Level, s: number) =>
+  s < 1000 ? { level, seed: blockSeed('rechnen', s) } : s < 2000 ? { level, seed: blockSeed('skalar', s - 999) } : { level, seed: blockSeed('projektion', s - 1999) }
+const SEEDS = (n: number) => [...Array.from({ length: n }, (_, i) => i + 1), ...Array.from({ length: n }, (_, i) => 1000 + i), ...Array.from({ length: n }, (_, i) => 2000 + i)]
 const close = (a: number, b: number) => Math.abs(a - b) < 1e-9 * Math.max(1, Math.abs(a), Math.abs(b))
 
 // Zahl als LaTeX, wie sie jemand eintippt: ganze Zahl, Bruch oder Kommazahl mit sechs Stellen (nur für falsche Werte)

@@ -68,6 +68,17 @@ export type VectorDrawing = {
   readonly caption: string
   // fester Ausschnitt der Ebene (Zieh-Aufgaben, Schritt 2b): Das Bild springt beim Ziehen nicht
   readonly frame?: { readonly xmin: number; readonly xmax: number; readonly ymin: number; readonly ymax: number }
+  // Name des Knopfs zum Abspielen, wenn nicht „Abspielen" (Projektion, Schritt 3: „Licht an")
+  readonly playLabel?: string
+  // typischer Fehler zum Einblenden (Schritt 3, Knopf „Typischen Fehler zeigen"): rote Teile und eine Erklärung
+  readonly mistake?: DrawMistake
+}
+
+export type DrawMistake = {
+  readonly arrows: readonly DrawArrow[]
+  readonly segments: readonly DrawSegment[]
+  // Erklärung (Text mit Formeln), ersetzt beim Einblenden die Beschreibung
+  readonly caption: string
 }
 
 export const hasAnimation = (d: VectorDrawing): boolean =>
@@ -81,7 +92,16 @@ export function drawingCoordinates(d: VectorDrawing): (readonly number[])[] {
     ...d.segments.flatMap((s) => [s.from, s.to]),
     ...d.polygons.flatMap((p) => p.points),
     ...(d.angles ?? []).map((a) => a.at),
+    // der typische Fehler gehört zum Ausschnitt, damit das Bild beim Einblenden nicht springt
+    ...(d.mistake?.arrows ?? []).flatMap((a) => [a.from, a.to]),
+    ...(d.mistake?.segments ?? []).flatMap((s) => [s.from, s.to]),
   ]
+}
+
+// Bild mit eingeblendetem typischem Fehler; die roten Pfeile liegen unter den richtigen, damit diese sichtbar bleiben
+export function withMistake(d: VectorDrawing): VectorDrawing {
+  if (!d.mistake) return d
+  return { ...d, arrows: [...d.mistake.arrows, ...d.arrows], segments: [...d.segments, ...d.mistake.segments], caption: d.mistake.caption }
 }
 
 export const emptyDrawing = (dim: 2 | 3, caption: string): VectorDrawing => ({ dim, arrows: [], points: [], segments: [], polygons: [], caption })
