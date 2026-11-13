@@ -64,7 +64,7 @@ const latexOf = (e: CardExample): string =>
 const DERIVATIVE_CARDS = cardsInTopic('ableitungen')
 const FRACTION_CARDS = cardsInTopic('brueche')
 const REARRANGE_CARDS = cardsInTopic('umstellen')
-const VECTOR_CARDS = [...cardsInTopic('vektoren'), ...cardsInTopic('geraden')]
+const VECTOR_CARDS = [...cardsInTopic('vektoren'), ...cardsInTopic('geraden'), ...cardsInTopic('matrizen')]
 const MATH_CARDS = [...DERIVATIVE_CARDS, ...FRACTION_CARDS, ...REARRANGE_CARDS, ...VECTOR_CARDS]
 const CHEM_CARDS = CARDS.filter((c) => c.topic.startsWith('chem-'))
 const derivativeExample = (e: CardExample): Expr | Equation => {

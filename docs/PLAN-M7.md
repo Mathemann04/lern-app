@@ -101,7 +101,7 @@ Animationen starten nur auf Knopfdruck („Abspielen“) und entfallen, wenn am 
   vergessen, Zeile statt Spalte (Falk, Cramer), Produkt nicht definiert, $(AB)^{\mathsf T} = A^{\mathsf T}B^{\mathsf T}$,
   $\lambda$ statt $\lambda^n$, Vorzeichen beim Zeilentausch, Sarrus bei 4×4, rechte Seite vergessen, Nullzeile falsch
   gedeutet, gleicher Parameter für zwei Geraden, beim Ziehen (2b): nur vertauscht oder nur ein Vorzeichen geändert, rechter Winkel als spitz
-  oder stumpf gezählt, rechter Winkel an der falschen Ecke, Seiten statt Diagonalen senkrecht, bei der Projektion (3a) die 15 Fehler aus Schritt 3a, bei den Kräften (3b) die 26 Fehler aus Schritt 3b, beim Kreuzprodukt (4a) die 14 Fehler aus Schritt 4a, beim Spatprodukt (4b) die 14 Fehler aus Schritt 4b, bei Linearkombination und Basis (5) die 20 Fehler aus Schritt 5, bei Geraden und Ebenen (6) die 33 Fehler aus Schritt 6 (Vorsilbe „gl-“), bei der Lage (7a) die 17 Fehler aus Schritt 7a, cos statt sin bei Gerade–Ebene, „$A - 2$“ ohne $E$, auf der falschen
+  oder stumpf gezählt, rechter Winkel an der falschen Ecke, Seiten statt Diagonalen senkrecht, bei der Projektion (3a) die 15 Fehler aus Schritt 3a, bei den Kräften (3b) die 26 Fehler aus Schritt 3b, beim Kreuzprodukt (4a) die 14 Fehler aus Schritt 4a, beim Spatprodukt (4b) die 14 Fehler aus Schritt 4b, bei Linearkombination und Basis (5) die 20 Fehler aus Schritt 5, bei Geraden und Ebenen (6) die 33 Fehler aus Schritt 6 (Vorsilbe „gl-“), bei der Lage (7a) die 17 Fehler aus Schritt 7a, bei Abständen und Schnittwinkeln (7b) die 14 Fehler aus Schritt 7b, bei den Matrizen (8a) die 27 Fehler aus Schritt 8a (Vorsilbe „mat-“), cos statt sin bei Gerade–Ebene, „$A - 2$“ ohne $E$, auf der falschen
   Seite ausgeklammert. Jede mit Katalogbeispiel, eigenem Text für „Warum ist das falsch?“ und Platz auf einer Lernkarte
   (Regeln aus CLAUDE.md).
 - **Aufgabennummern** wie seit M6 mit Baustein (`taskNumber.ts`); neue Bausteine bekommen die nächsten freien Nummern in
@@ -299,8 +299,30 @@ Request.
      Ursprung, Lotfußpunkt statt Spiegelpunkt, Spiegelpunkt in die falsche Richtung, Abstand der Stützpunkte statt der
      Geraden, rechte Seiten ohne gleiche Normalen verglichen, Betrag vergessen (Winkel stumpf), cos statt sin bei Gerade
      und Ebene, Stützvektor statt Richtung, Richtung der Ebene statt Normale.
-8. **Matrizen rechnen:** Tätigkeit „Matrizen und Gleichungssysteme“; Formate, Falk-Schema animiert, Transponierte,
-   „Welche Ausdrücke sind definiert?“, Matrix verzerrt das Gitter; Eingabe einer Matrix.
+8. **Matrizen rechnen**, in zwei Teilen:
+   - **8a (fertig, 13.11.2026):** Tätigkeit „Matrizen und Gleichungssysteme“ (Id `matrizen`, Farbe Rosé, Bild: Matrix in
+     Klammern mit hervorgehobener Zeile und Spalte) mit dem Baustein „Matrizen rechnen“ (`matrix`, Code 33, Gruppe
+     „Matrizen“) in den Stufen 1 bis 5, geführt und frei. Zehn Arten: Matrix aus einer Vorschrift $a_{ij}$ mit Format
+     (Stufe 1), Summe und Vielfache (1 eine Rechnung, 2 mit Vielfachem oder Transponierter vorweg), Transponierte (1),
+     Produkt mit Format, einem Eintrag im Falk-Schema und dem ganzen Produkt (2 kleine, 3 auch $3 \times 3$ und „Welches
+     der Produkte ist definiert?“), Matrix mal Vektor (2 in der Ebene mit Bild, 3 im Raum; erst $A\vec e_j$ = Spalte),
+     „Welcher Ausdruck ist definiert?“ unter vier mit drei Matrizen, dann berechnen (3, ab 4 mit Transponierter),
+     $(AB)^{\mathsf T}$ mit Regel, Produkt, Transponierter (3, 4), Zeile mal Spalte und Spalte mal Zeile (4), für welches
+     $a$ gilt $AB = BA$ (4 mit $2 \times 2$, 5 mit $3 \times 3$; $B = \lambda A(a^*) + \mu E$, genau ein Wert),
+     längere Ausdrücke $A B^{\mathsf T} - kC$, $(A + kB)^{\mathsf T} C$, $A^{\mathsf T} A - kE$ (5). Falk-Schema als Tabelle
+     in der Erklärung (Zeile und Spalte fett, Eintrag umrahmt). Bild bei Matrix mal Vektor: Einheitsquadrat, beim Abspielen
+     wird es zum Parallelogramm der Spalten, das Gitter $[0, 2]^2$ verzerrt sich mit, dann erscheint $A\vec x$. Frei: Matrix
+     im Raster aus Kästchen („Zeile 2, Spalte 1“), falscher Eintrag markiert. Sechs Lernkarten, 27 neue typische Fehler:
+     Zeilen und Spalten beim Format vertauscht, Anzahl der Einträge statt Format, Zeile und Spalte beim Eintrag vertauscht,
+     Zahl nur mit der ersten Zeile malgenommen, Zahl addiert statt malgenommen, Minus nur beim ersten Eintrag, falsch herum
+     abgezogen, Summe verschiedener Formate, an der falschen Diagonale gespiegelt, Einträge nur ins neue Format umgefüllt,
+     $(AB)^{\mathsf T} = A^{\mathsf T} B^{\mathsf T}$, nur die Reihenfolge getauscht, Transponieren vergessen, Format des
+     Produkts aus den falschen Zahlen, nur das erste Produkt, addiert statt malgenommen, Zeile mal Zeile, Spalte mal Spalte, Plus und Minus verwechselt, Eintrag für
+     Eintrag malgenommen, Reihenfolge vertauscht, Produkt mit unpassenden Formaten, Zeile mal Spalte und Spalte mal Zeile
+     verwechselt, Zeile statt Spalte genommen ($A\vec e_j$), $kE$ von jedem Eintrag abgezogen, Vorzeichen beim Auflösen,
+     $AB = BA$ für jedes $a$.
+   - **8b:** Falk-Schema als Animation auf Knopfdruck (Zeile und Spalte leuchten auf, der Eintrag entsteht), in den
+     Schritten zum Produkt und auf der Lernkarte; ohne bei „Bewegung reduzieren“.
 9. **Determinanten:** Fläche und Volumen als Bild, Sarrus animiert, Entwicklung mit Schachbrett, Umformungen, Regeln
    ($\det(\lambda A)$, $\det A^{\mathsf T}$, $\det A^{-1}$, $\det(AB)$), mit Parameter.
 10. **Gauß:** Tabelle mit Zeilenumformungen, Geraden und Ebenen als Bild, alle drei Fälle, Lösung mit Parametern.

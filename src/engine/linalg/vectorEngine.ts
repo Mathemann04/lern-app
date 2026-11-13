@@ -34,3 +34,12 @@ export function nextLineSeed(_level: Level, parts?: ReadonlySet<string>): number
   const block = chosen.length > 0 ? chosen[Math.floor(Math.random() * chosen.length)] : LINE_BLOCK_IDS[0]
   return blockSeed(block, randomSeed())
 }
+
+// Tätigkeit „Matrizen und Gleichungssysteme“ (M7 Schritt 8a): dieselbe Engine, eigene Bausteine
+export const MATRIX_BLOCK_IDS = ['matrix'] as const
+
+export function nextMatrixSeed(_level: Level, parts?: ReadonlySet<string>): number {
+  const chosen = MATRIX_BLOCK_IDS.filter((id) => !parts || parts.has(id))
+  const block = chosen.length > 0 ? chosen[Math.floor(Math.random() * chosen.length)] : MATRIX_BLOCK_IDS[0]
+  return blockSeed(block, randomSeed())
+}

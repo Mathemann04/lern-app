@@ -1,4 +1,4 @@
-import { type Block, LINE_BLOCKS, LINE_PLAYABLE_COMBOS, REARRANGE_BLOCKS, VECTOR_BLOCKS, VECTOR_PLAYABLE_COMBOS } from '../engine/tasks/blocks.ts'
+import { type Block, LINE_BLOCKS, LINE_PLAYABLE_COMBOS, MATRIX_BLOCKS, MATRIX_PLAYABLE_COMBOS, REARRANGE_BLOCKS, VECTOR_BLOCKS, VECTOR_PLAYABLE_COMBOS } from '../engine/tasks/blocks.ts'
 import { REARRANGE_PLAYABLE_COMBOS } from '../engine/tasks/rearrangeFamilies.ts'
 import { LEVELS, type Level } from '../engine/tasks/taskNumber.ts'
 
@@ -22,6 +22,8 @@ export type AreaIcon =
   | 'vectors'
   // Geraden und Ebenen (M7 Schritt 6): Ebene, von einer Geraden durchstoßen
   | 'lines'
+  // Matrizen und Gleichungssysteme (M7 Schritt 8a): Matrix in Klammern, eine Zeile und eine Spalte hervorgehoben
+  | 'matrices'
   | 'powers'
   | 'atom'
   | 'nucleus'
@@ -41,7 +43,7 @@ export type AreaIcon =
 
 // Farbe eines Gebiets (Farbfamilie aus index.css, gesetzt über data-tone). Die App selbst ist Blaugrün.
 // Nicht green, red, amber (richtig, falsch, Tipp) und nicht teal (App-Farbe).
-export type Tone = 'orange' | 'blue' | 'violet' | 'pink' | 'cyan' | 'indigo' | 'sky' | 'fuchsia' | 'emerald'
+export type Tone = 'orange' | 'blue' | 'violet' | 'pink' | 'cyan' | 'indigo' | 'sky' | 'fuchsia' | 'emerald' | 'rose'
 
 // Eine Stufe eines Themas mit Vorschau-Formeln (nur Aufgabenterme, keine Lösungen)
 export type LevelPreview = {
@@ -144,6 +146,7 @@ export const FRACTIONS = 'brueche'
 export const REARRANGE = 'umstellen'
 export const VECTORS = 'vektoren'
 export const LINES = 'geraden'
+export const MATRICES = 'matrizen'
 export const ATOMBAU = 'chem-atombau'
 export const STOFFMENGE = 'chem-stoffmenge'
 export const GLEICHUNGEN = 'chem-gleichungen'
@@ -362,6 +365,45 @@ const lineLevels: LevelPreview[] = [
     title: 'Profi – alles ineinander',
     examples: [String.raw`\text{Spurpunkte von } E \text{ durch } A,\, B,\, C`, String.raw`\lvert \overrightarrow{AQ} 
 vert = 6,\; Q \in g`],
+  },
+]
+
+// Matrizen und Gleichungssysteme (M7 Schritt 8a): bisher der Baustein „Matrizen rechnen“
+const matrixLevels: LevelPreview[] = [
+  {
+    level: 1,
+    available: true,
+    name: 'Einstieg',
+    title: 'Einstieg – Format, Summe, Vielfache, Transponierte',
+    examples: [String.raw`a_{ij} = 2i - j`, String.raw`2A - B`],
+  },
+  {
+    level: 2,
+    available: true,
+    name: 'Grundlagen',
+    title: 'Grundlagen – Produkt mit Falk-Schema, Matrix mal Vektor',
+    examples: [String.raw`AB`, String.raw`A\vec x`],
+  },
+  {
+    level: 3,
+    available: true,
+    name: 'Kombiniert',
+    title: 'Kombiniert – welcher Ausdruck ist definiert, Transponierte eines Produkts',
+    examples: [String.raw`A^{\mathsf T} B \text{ oder } A B^{\mathsf T}?`, String.raw`(AB)^{\mathsf T}`],
+  },
+  {
+    level: 4,
+    available: true,
+    name: 'Klausur',
+    title: 'Klausur – mit Parameter, Zeile mal Spalte und Spalte mal Zeile',
+    examples: [String.raw`AB = BA \text{ für welches } a?`, String.raw`\vec u\,\vec v^{\mathsf T}`],
+  },
+  {
+    level: 5,
+    available: true,
+    name: 'Profi',
+    title: 'Profi – längere Ausdrücke, alles ineinander',
+    examples: [String.raw`A B^{\mathsf T} - 2C`, String.raw`A^{\mathsf T} A - 3E`],
   },
 ]
 
@@ -780,7 +822,7 @@ export const SUBJECTS: readonly Subject[] = [
     icon: 'derivative',
     tone: 'blue',
     activities: true,
-    soon: ['Matrizen und Gleichungssysteme', 'Mathe mischen', 'Integrieren'],
+    soon: ['Mathe mischen', 'Integrieren'],
     areas: [
       {
         id: 'grundlagen',
@@ -867,6 +909,19 @@ export const SUBJECTS: readonly Subject[] = [
             focus: false,
             parts: blockParts(LINE_BLOCKS, LINE_PLAYABLE_COMBOS),
             blockCombos: splitCombos(LINE_PLAYABLE_COMBOS),
+          },
+          {
+            id: MATRICES,
+            title: 'Matrizen und Gleichungssysteme',
+            description: 'Format, Summe und Vielfache, Transponierte, Produkt mit Falk-Schema, Matrix mal Vektor mit Bild, welcher Ausdruck ist definiert',
+            icon: 'matrices',
+            tone: 'rose',
+            cards: 'matrizen',
+            levels: matrixLevels,
+            free: true,
+            focus: false,
+            parts: blockParts(MATRIX_BLOCKS, MATRIX_PLAYABLE_COMBOS),
+            blockCombos: splitCombos(MATRIX_PLAYABLE_COMBOS),
           },
         ],
       },

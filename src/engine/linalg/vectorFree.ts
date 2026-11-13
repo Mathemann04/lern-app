@@ -26,7 +26,8 @@ import { type VectorTask, buildVectorTask } from './vectorTasks.ts'
 // Seit Schritt 6 (Geraden und Ebenen): param ist eine Parameterform (Stützvektor und ein oder zwei Richtungen, jede
 // gleichwertige Form ist richtig), equation eine Koordinatenform a x + b y + c z = d (jedes Vielfache ist richtig, bei
 // der Hesseschen Normalform mit exact nur genau diese)
-export type EntryShape = 'vector' | 'point' | 'number' | 'solutions' | 'choice' | 'inequality' | 'param' | 'equation'
+// Seit Schritt 8a: matrix, Einträge Zeile für Zeile, cols Spalten
+export type EntryShape = 'vector' | 'point' | 'number' | 'solutions' | 'choice' | 'inequality' | 'param' | 'equation' | 'matrix'
 
 // Ein Teil des Ergebnisses: label ist LaTeX (vor den Kästchen: „\overrightarrow{AB} =", „Q", „\lvert \vec a \rvert =", „t");
 // options: die Antworten einer Auswahl bzw. die Zeichen einer Ungleichung; suffix: LaTeX nach dem Kästchen (Grad)
@@ -40,6 +41,8 @@ export type ResultPart = {
   readonly params?: readonly string[]
   // Koordinatenform: nur genau diese Zahlen (Hessesche Normalform), nicht jedes Vielfache
   readonly exact?: boolean
+  // Matrix: Zahl der Spalten (values Zeile für Zeile)
+  readonly cols?: number
 }
 
 export const RELATIONS = ['<', '>'] as const
@@ -107,6 +110,8 @@ const END = '\\end{pmatrix}'
 
 function readPart(text: string): ResultPart | null {
   const t = text.trim()
+  // Format einer Matrix wie 2 \times 3 (Schritt 8a) ist kein Ergebnis, auch wenn es sich als Zahl lesen ließe
+  if (/^\d+ \\times \d+$/.test(t)) return null
   // Art des Winkels: \text{spitz}; seit Schritt 4b auch die Lage dreier Vektoren: \text{Rechtssystem} (Text vor den
   // Knöpfen in label)
   // seit Schritt 5 auch mit Umlauten und Leerzeichen: \text{linear unabhängig}
@@ -143,6 +148,14 @@ function readPart(text: string): ResultPart | null {
     const end = rhs.indexOf(END)
     if (end < 0 || rhs.slice(end + END.length).trim() !== '') return null
     const prefix = rhs.slice(0, begin).trim()
+    const body = rhs.slice(begin + BEGIN.length, end)
+    // Matrix (Schritt 8a): Zeilen mit & getrennt
+    if (body.includes('&')) {
+      const rows = body.split('\\\\').map((r) => r.split('&').map(numberOf))
+      const cols = rows[0].length
+      if (prefix !== '' || !rows.every((r) => r.length === cols && r.every((v) => v !== null))) return null
+      return { shape: 'matrix', label: lhs ? `${lhs} =` : '', values: rows.flat() as number[], cols }
+    }
     const factor = prefix === '' ? 1 : numberOf(prefix)
     const entries = rhs.slice(begin + BEGIN.length, end).split('\\\\').map(numberOf)
     if (factor === null || !entries.every((v) => v !== null)) return null
@@ -275,7 +288,8 @@ function sameValues(part: Pick<ResultPart, 'shape' | 'params' | 'exact' | 'value
 }
 
 // b ist der gesuchte Teil (bestimmt, was als gleich gilt)
-const samePart = (a: ResultPart, b: ResultPart) => a.shape === b.shape && (a.params?.length ?? 0) === (b.params?.length ?? 0) && sameValues(b, a.values, b.values)
+const samePart = (a: ResultPart, b: ResultPart) =>
+  a.shape === b.shape && (a.params?.length ?? 0) === (b.params?.length ?? 0) && a.cols === b.cols && sameValues(b, a.values, b.values)
 
 // Typischer Fehler zu einem Teil des Ergebnisses: falsche Antwort aus dem Schritt, der diesen Teil liefert
 export type PartWrong = { readonly values: readonly number[]; readonly rule: string; readonly why: Explanation }
@@ -292,7 +306,7 @@ function wrongsFor(steps: readonly GuidedStep[], part: ResultPart): PartWrong[] 
       const wrong = readResult(choice.content)
       // eine falsche Antwort mit gleich vielen Teilen; der Teil an derselben Stelle in derselben Form
       const p = wrong && wrong.length === parts.length ? wrong[at] : undefined
-      if (p && p.shape === part.shape && p.values.length === part.values.length && !samePart(p, part))
+      if (p && p.shape === part.shape && p.values.length === part.values.length && p.cols === part.cols && !samePart(p, part))
         out.push({ values: p.values, rule: choice.errorRuleId, why: choice.whyWrong ?? vectorErrorRule(choice.errorRuleId).why })
     }
   }
@@ -592,6 +606,7 @@ export function prepareVectorFreeTask(ref: TaskRef): FreeTask {
       ...(p.options ? { options: p.options } : {}),
       ...(p.suffix ? { suffix: p.suffix } : {}),
       ...(p.params ? { params: p.params } : {}),
+      ...(p.cols ? { cols: p.cols } : {}),
     })),
     checkEntries: (input) => checkVectorEntries(check, input),
     check: (latex) => checkVectorEntries(check, [[latex]]),

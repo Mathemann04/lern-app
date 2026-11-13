@@ -24,6 +24,8 @@ export const BLOCK_GROUPS: readonly BlockGroup[] = [
   { id: 'geo-formen', title: 'Formen' },
   // seit Schritt 7a
   { id: 'geo-lage', title: 'Lage, Abstände, Winkel' },
+  // Tätigkeit „Matrizen und Gleichungssysteme“ (M7 Schritt 8a)
+  { id: 'mat-rechnen', title: 'Matrizen' },
 ]
 
 // Gleichungen umstellen. „Lineare Gleichungen" sind die Aufgaben ganz ohne andere Bausteine (die Variable steht nur
@@ -87,6 +89,19 @@ export const LINE_PLAYABLE_COMBOS: Readonly<Record<1 | 2 | 3 | 4 | 5, readonly s
   5: ['gerade', 'ebene', 'lage', 'abstand', 'schnittwinkel'],
 }
 
+// Matrizen und Gleichungssysteme (M7 Schritt 8a): „Matrizen rechnen“; Determinanten, Gauß, Inverse folgen in Schritt 9 bis 12
+export const MATRIX_BLOCKS: readonly Block[] = [
+  { id: 'matrix', title: 'Matrizen rechnen', note: 'Format, Summe und Vielfache, Transponierte, Produkt mit Falk-Schema, Matrix mal Vektor, welcher Ausdruck ist definiert', group: 'mat-rechnen' },
+]
+
+export const MATRIX_PLAYABLE_COMBOS: Readonly<Record<1 | 2 | 3 | 4 | 5, readonly string[]>> = {
+  1: ['matrix'],
+  2: ['matrix'],
+  3: ['matrix'],
+  4: ['matrix'],
+  5: ['matrix'],
+}
+
 // Feste Nummer je Baustein für Aufgabennummern mit Baustein wie „exp.1-4711" (M6 Schritt 4, taskNumber.ts). Gilt für alle
 // Tätigkeiten (dieselbe Id heißt überall derselbe Baustein); nie ändern, neue Bausteine bekommen die nächste freie Nummer.
 export const BLOCK_CODES: Readonly<Record<string, number>> = {
@@ -136,4 +151,6 @@ export const BLOCK_CODES: Readonly<Record<string, number>> = {
   // M7 Schritt 7b: Abstände („abstand.1-4711“) und Schnittwinkel („schnittwinkel.1-4711“)
   abstand: 31,
   schnittwinkel: 32,
+  // Tätigkeit „Matrizen und Gleichungssysteme“ (M7 Schritt 8a): Matrizen rechnen („matrix.1-4711“)
+  matrix: 33,
 }

@@ -97,6 +97,17 @@ export type VectorKind =
   | 'angleLines'
   | 'angleLinePlane'
   | 'anglePlanes'
+  // Matrizen rechnen (M7 Schritt 8a, matrixTasks.ts)
+  | 'matBuild'
+  | 'matLinear'
+  | 'matTranspose'
+  | 'matProduct'
+  | 'matVector'
+  | 'matDefined'
+  | 'matTransposeProduct'
+  | 'matOuter'
+  | 'matParam'
+  | 'matExpression'
 
 export type VectorTask = GuidedTaskBase & {
   readonly kind: VectorKind

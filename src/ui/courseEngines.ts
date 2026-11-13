@@ -1,7 +1,7 @@
 import type { FreeTask } from '../engine/check/freeTask.ts'
 import type { GuidedTaskBase } from '../engine/guided/types.ts'
 import type { Level, TaskRef } from '../engine/tasks/taskNumber.ts'
-import { DERIVATIVES, FRACTIONS, LINES, REARRANGE, VECTORS, isChemCourse } from './catalog.ts'
+import { DERIVATIVES, FRACTIONS, LINES, MATRICES, REARRANGE, VECTORS, isChemCourse } from './catalog.ts'
 
 // Engine je Thema für den geführten und den freien Modus, erst bei Bedarf geladen (Ladezeit;
 // offline liegt sie ohnehin schon auf dem Gerät): Mathe-Engines und für alle Chemie-Themen die
@@ -75,6 +75,17 @@ const LOADERS: Readonly<Record<string, () => Promise<CourseEngine>>> = {
       prepareFree: engine.prepareVectorFree,
       formOf: engine.vectorForm,
       nextSeed: (level, _shown, parts) => engine.nextLineSeed(level, parts),
+      exampleLatex: engine.vectorExampleLatex,
+    }
+  },
+  // Matrizen und Gleichungssysteme (M7 Schritt 8a): Engine der Vektoren mit eigenen Bausteinen
+  [MATRICES]: async () => {
+    const engine = await import('../engine/linalg/vectorEngine.ts')
+    return {
+      planGuidedTask: (ref) => engine.planVectorTask(ref),
+      prepareFree: engine.prepareVectorFree,
+      formOf: engine.vectorForm,
+      nextSeed: (level, _shown, parts) => engine.nextMatrixSeed(level, parts),
       exampleLatex: engine.vectorExampleLatex,
     }
   },

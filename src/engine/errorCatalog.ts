@@ -5,6 +5,7 @@ import { FRACTION_ERROR_RULES } from './fraction/errorRules.ts'
 import { REARRANGE_ERROR_RULES } from './rearrange/errorRules.ts'
 import { VECTOR_ERROR_RULES } from './linalg/errorRules.ts'
 import { LINE_ERROR_RULES } from './linalg/lineErrorRules.ts'
+import { MATRIX_ERROR_RULES } from './linalg/matrixErrorRules.ts'
 
 // Typische Fehler aller Themen, mit Namen und Beispiel (für Fortschritt, Lernkarten und gezieltes
 // Üben). Die Ids sind über alle Themen eindeutig (Brüche mit der Vorsilbe „frac-", Umstellen mit
@@ -28,6 +29,8 @@ export const ERRORS_BY_COURSE: Readonly<Record<string, readonly NamedError[]>> =
   vektoren: VECTOR_ERROR_RULES.map(({ id, name, wrongFormula }) => ({ id, name, wrongFormula })),
   // Geraden und Ebenen (M7 Schritt 6): eigene Fehler und die aus „Vektoren“, die dort mitrechnen (Verbindungsvektor, Kreuzprodukt, Länge)
   geraden: [...LINE_ERROR_RULES, ...VECTOR_ERROR_RULES].map(({ id, name, wrongFormula }) => ({ id, name, wrongFormula })),
+  // Matrizen und Gleichungssysteme (M7 Schritt 8a): eigene Fehler mit Vorsilbe „mat-“
+  matrizen: MATRIX_ERROR_RULES.map(({ id, name, wrongFormula }) => ({ id, name, wrongFormula })),
   umstellen: [...REARRANGE_ERROR_RULES, ...FRACTION_ERROR_RULES.filter((r) => r.step === 'combine' || r.step === 'expand')],
   // Chemie: Denkfehler der Wissensfragen (als Aussage) und Rechenfehler (als Formel)
   ...Object.fromEntries(
