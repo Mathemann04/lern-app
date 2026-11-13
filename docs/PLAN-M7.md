@@ -321,8 +321,15 @@ Request.
      Eintrag malgenommen, Reihenfolge vertauscht, Produkt mit unpassenden Formaten, Zeile mal Spalte und Spalte mal Zeile
      verwechselt, Zeile statt Spalte genommen ($A\vec e_j$), $kE$ von jedem Eintrag abgezogen, Vorzeichen beim Auflösen,
      $AB = BA$ für jedes $a$.
-   - **8b:** Falk-Schema als Animation auf Knopfdruck (Zeile und Spalte leuchten auf, der Eintrag entsteht), in den
-     Schritten zum Produkt und auf der Lernkarte; ohne bei „Bewegung reduzieren“.
+   - **8b (fertig, 13.11.2026):** Falk-Schema als Bild über den Antworten in jedem Schritt zum Produkt (ein Eintrag, das
+     ganze Produkt, Zeile mal Spalte, Spalte mal Zeile, $AB$ und $BA$ mit Parameter) und auf der Lernkarte „Produkt mit dem
+     Falk-Schema“: rechte Matrix oben rechts, linke unten links. Vor der Antwort sind die gefragten Felder leer (ein
+     einzelner Eintrag mit „?“), und es gibt nichts abzuspielen. Danach stehen die Einträge da, und „Abspielen“ geht
+     Eintrag für Eintrag durch: Zeile und Spalte leuchten auf, das gerade malgenommene Paar ist umrahmt, die Rechnung
+     darunter wächst Produkt für Produkt, zuletzt erscheint der Eintrag in seinem Feld (der erste langsam, die übrigen
+     schneller; „Alles zeigen“ springt ans Ende). Bei „Bewegung reduzieren“ zeigt der Knopf gleich das Ende. Die Tabelle
+     in der Erklärung ist dafür weggefallen. Nebenbei: Sternchen für Fettdruck auf den Lernkarten zu Geraden und Matrizen
+     entfernt (die App kennt keinen Fettdruck; ein Test verbietet sie jetzt).
 9. **Determinanten:** Fläche und Volumen als Bild, Sarrus animiert, Entwicklung mit Schachbrett, Umformungen, Regeln
    ($\det(\lambda A)$, $\det A^{\mathsf T}$, $\det A^{-1}$, $\det(AB)$), mit Parameter.
 10. **Gauß:** Tabelle mit Zeilenumformungen, Geraden und Ebenen als Bild, alle drei Fälle, Lösung mit Parametern.

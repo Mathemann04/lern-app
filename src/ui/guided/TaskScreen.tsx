@@ -23,6 +23,7 @@ import { LevelUpSuggestion } from '../task/LevelUpSuggestion.tsx'
 import { CheckBadge, FocusBanner, SkipNotice, TaskFooter, TaskIntro, TaskTopBar } from '../task/TaskParts.tsx'
 import { ChemFigure, FigureDrawing } from '../chem/ChemFigure.tsx'
 import { figureById } from '../../engine/chem/figures.ts'
+import { FalkScheme } from '../draw/FalkScheme.tsx'
 import { VectorFigure } from '../draw/VectorFigure.tsx'
 import { DragPad } from '../draw/DragPad.tsx'
 import { type DragLineReport, type DragStep, judgeDrag } from '../../engine/linalg/drag.ts'
@@ -294,6 +295,7 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext,
       </div>
       {step.figure && <ChemFigure id={step.figure} />}
       {step.drawing && !step.drag && <VectorFigure drawing={step.drawing} />}
+      {step.falk && <FalkScheme key={step.id} falk={step.falk} done={solved} />}
 
       {step.drag && step.drawing ? (
         <DragAnswers key={step.id} step={step.drag} drawing={step.drawing} solved={solved} revealed={revealed} onCheck={checkDrag} onMove={() => typed && setTyped(null)} />

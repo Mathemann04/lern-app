@@ -4,6 +4,7 @@ import { type Rational, ZERO, isZero, rat, ratAdd, ratDiv, ratEq, ratMul, ratNeg
 import type { Level } from '../tasks/taskNumber.ts'
 import { termsLatex } from './crossTasks.ts'
 import { type VectorDrawing, emptyDrawing } from './figures.ts'
+import type { FalkFigure } from './falk.ts'
 import { type Built, type VectorKind, type Wrong, choiceStep, math } from './taskKit.ts'
 import { ratLatex } from './vec.ts'
 
@@ -121,19 +122,18 @@ function product<T>(R: Ring<T>, A: Mat<T>, B: Mat<T>, how: Falk = 'right'): Mat<
 }
 const mul = (A: Mat, B: Mat): Mat => product(Q, A, B)!
 
-// Falk-Schema als Tabelle: B oben rechts, A unten links, darunter rechts das Produkt. hi = (Zeile, Spalte) des
-// Eintrags: Zeile von A und Spalte von B fett, der Eintrag umrahmt, die übrigen Felder leer
-function falkLatex<T>(R: Ring<T>, A: Mat<T>, B: Mat<T>, hi: readonly [number, number] | null): string {
-  const n = colsOf(A)
-  const p = colsOf(B)
+// Falk-Schema als Bild zum Abspielen (Schritt 8b): Einträge und Produkte als LaTeX, wie in falkEntry geschrieben
+function falkFigure<T>(R: Ring<T>, A: Mat<T>, B: Mat<T>, name: string, cells: readonly (readonly [number, number])[]): FalkFigure {
   const C = product(R, A, B)!
-  const bold = (s: string, on: boolean) => (on ? `\\mathbf{${s}}` : s)
-  const top = B.map((row) => [...Array.from({ length: n }, () => ''), ...row.map((x, c) => bold(R.latex(x), hi !== null && c === hi[1]))].join(' & '))
-  const bottom = A.map((row, r) => {
-    const right = Array.from({ length: p }, (_, c) => (hi === null ? R.latex(C[r][c]) : r === hi[0] && c === hi[1] ? `\\boxed{${R.latex(C[r][c])}}` : ''))
-    return [...row.map((x) => bold(R.latex(x), hi !== null && r === hi[0])), ...right].join(' & ')
-  })
-  return `\\begin{array}{${'r'.repeat(n)}|${'r'.repeat(p)}} ${top.join(' \\\\ ')} \\\\ \\hline ${bottom.join(' \\\\ ')} \\end{array}`
+  const ks = Array.from({ length: colsOf(A) }, (_, k) => k)
+  return {
+    name,
+    left: A.map((r) => r.map(R.latex)),
+    top: B.map((r) => r.map(R.latex)),
+    product: C.map((r) => r.map(R.latex)),
+    terms: C.map((r, i) => r.map((_, j) => ks.map((k) => `${R.factor(A[i][k])} \\cdot ${R.factor(B[k][j])}`))),
+    cells,
+  }
 }
 
 // ------------------------------------------------------------------ Zufall und Namen
@@ -238,7 +238,7 @@ function entryStep<T>(rng: Rng, R: Ring<T>, A: Mat<T>, B: Mat<T>, expr: string, 
     const e = falkEntry(R, A, B, i, j, how)
     if (e && !R.eq(e.value, right.value)) wrongs.push({ content: line(e), rule: rules[how] })
   }
-  return choiceStep(rng, {
+  const step = choiceStep(rng, {
     id: 'eintrag',
     title: 'Falk-Schema',
     question: `Wie lautet der Eintrag $${name}$ (Zeile $${i + 1}$, Spalte $${j + 1}$)?`,
@@ -246,12 +246,13 @@ function entryStep<T>(rng: Rng, R: Ring<T>, A: Mat<T>, B: Mat<T>, expr: string, 
     wrongs,
     hint: `Nimm die $${i + 1}$. Zeile der linken Matrix und die $${j + 1}$. Spalte der rechten. Multipliziere sie Eintrag für Eintrag und addiere die Produkte.`,
     explanation: {
-      detailed: `Im Falk-Schema steht die rechte Matrix oben, die linke unten links. Der Eintrag $${name}$ sitzt dort, wo sich die $${i + 1}$. Zeile und die $${j + 1}$. Spalte kreuzen (fett):\n$${falkLatex(R, A, B, [i, j])}$\nZeile mal Spalte: $${right.latex} = ${R.latex(right.value)}$.`,
+      detailed: `Im Falk-Schema über den Antworten steht die rechte Matrix oben, die linke unten links. Der Eintrag $${name}$ sitzt dort, wo sich die $${i + 1}$. Zeile der linken und die $${j + 1}$. Spalte der rechten Matrix kreuzen; „Abspielen“ zeigt es Schritt für Schritt. Zeile mal Spalte: $${right.latex} = ${R.latex(right.value)}$.`,
       short: `Zeile $${i + 1}$ mal Spalte $${j + 1}$: $${R.latex(right.value)}$.`,
     },
     established: [`${name} = ${R.latex(right.value)}`],
     cards: [MAT_CARD.produkt],
   })
+  return { ...step, falk: falkFigure(R, A, B, expr, [[i, j]]) }
 }
 
 // das ganze Produkt; falsche Antworten aus den Fehlern im Falk-Schema, dazu andere (z. B. vergessenes Transponieren)
@@ -272,7 +273,7 @@ function productStep<T>(rng: Rng, R: Ring<T>, A: Mat<T>, B: Mat<T>, expr: string
     [product(R, A, B, 'noSum'), 'mat-falk-no-sum'],
   ]
   for (const [X, rule] of variants) push(X, rule)
-  return choiceStep(rng, {
+  const step = choiceStep(rng, {
     id,
     title: 'Produkt',
     question: `Wie lautet $${expr}$?`,
@@ -280,12 +281,14 @@ function productStep<T>(rng: Rng, R: Ring<T>, A: Mat<T>, B: Mat<T>, expr: string
     wrongs,
     hint: 'Jeder Eintrag ist Zeile der linken Matrix mal Spalte der rechten. Das Falk-Schema hilft: rechte Matrix oben, linke unten links.',
     explanation: {
-      detailed: `Im Falk-Schema steht jeder Eintrag dort, wo sich seine Zeile der linken und seine Spalte der rechten Matrix kreuzen:\n$${falkLatex(R, A, B, null)}$`,
+      detailed: 'Jeder Eintrag ist seine Zeile der linken Matrix mal seine Spalte der rechten. Im Falk-Schema über den Antworten steht er dort, wo sich beide kreuzen; „Abspielen“ geht alle Einträge nacheinander durch.',
       short: 'Zeile mal Spalte, für jeden Eintrag.',
     },
     established: [`${expr} = ${matLatexR(R, C)}`],
     cards: [MAT_CARD.produkt],
   })
+  const cells = C.flatMap((r, i) => r.map((_, j) => [i, j] as const))
+  return { ...step, falk: falkFigure(R, A, B, expr, cells) }
 }
 
 // Transponierte
@@ -963,8 +966,8 @@ function buildMatOuter(rng: Rng, _level: Level): Built {
       if (!matEq(Q, swapped, R)) wrongs.push({ content: show(swapped), rule: 'mat-order-swap' })
       wrongs.push({ content: math(`${expr} = ${ratLatex(dotV)}`), rule: 'mat-outer-inner' })
       wrongs.push({ content: math(`${expr} = ${col(build(dim, 1, (i) => ratMul(U[i][0], V[i][0])))}`), rule: 'mat-entrywise' })
-      steps.push(
-        choiceStep(rng, {
+      steps.push({
+        ...choiceStep(rng, {
           id: 'produkt',
           title: 'Spalte mal Zeile',
           question: `Wie lautet $${expr}$?`,
@@ -975,7 +978,8 @@ function buildMatOuter(rng: Rng, _level: Level): Built {
           established: [`${expr} = ${matLatex(R)}`],
           cards: [MAT_CARD.produkt],
         }),
-      )
+        falk: falkFigure(Q, U, transpose(V), expr, R.flatMap((r, i) => r.map((_, j) => [i, j] as const))),
+      })
       resultLatex = `${expr} = ${matLatex(R)}`
       answer = nums(R)
     } else {
@@ -986,8 +990,8 @@ function buildMatOuter(rng: Rng, _level: Level): Built {
         if (!ratEq(w.value, dotV)) wrongs.push({ content: math(`${expr} = ${w.latex} = ${ratLatex(w.value)}`), rule: how === 'noSum' ? 'mat-falk-no-sum' : 'mat-falk-plus' })
       }
       wrongs.push({ content: math(`${expr} = ${matLatex(mul(U, transpose(V)))}`), rule: 'mat-outer-inner' })
-      steps.push(
-        choiceStep(rng, {
+      steps.push({
+        ...choiceStep(rng, {
           id: 'produkt',
           title: 'Zeile mal Spalte',
           question: `Wie lautet $${expr}$?`,
@@ -998,7 +1002,8 @@ function buildMatOuter(rng: Rng, _level: Level): Built {
           established: [`${expr} = ${ratLatex(dotV)}`],
           cards: [MAT_CARD.produkt],
         }),
-      )
+        falk: falkFigure(Q, transpose(U), V, expr, [[0, 0]]),
+      })
       resultLatex = `${expr} = ${ratLatex(dotV)}`
       answer = [Number(dotV.n) / Number(dotV.d)]
     }

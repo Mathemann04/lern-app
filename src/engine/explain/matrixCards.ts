@@ -12,7 +12,7 @@ export const MATRIX_CARD_LIST: readonly Card[] = [
     level: 1,
     rules: [],
     formulas: [String.raw`A = (a_{ij}) \in \mathbb{R}^{m \times n}`, String.raw`a_{ij}\colon\ i = \text{Zeile},\ j = \text{Spalte}`],
-    memo: 'Eine Matrix ist ein rechteckiges Zahlenschema. Ihr **Format** $m \\times n$ nennt zuerst die Zahl der **Zeilen** (waagrecht), dann die der **Spalten** (senkrecht): „Zeilen zuerst, Spalten später“. Der Eintrag $a_{ij}$ steht in Zeile $i$ und Spalte $j$.',
+    memo: 'Eine Matrix ist ein rechteckiges Zahlenschema. Ihr Format $m \\times n$ nennt zuerst die Zahl der Zeilen (waagrecht), dann die der Spalten (senkrecht): „Zeilen zuerst, Spalten später“. Der Eintrag $a_{ij}$ steht in Zeile $i$ und Spalte $j$.',
     note: 'Eine Matrix mit nur einer Spalte ist ein Vektor ($n \\times 1$), eine mit nur einer Zeile ein transponierter Vektor ($1 \\times n$). Quadratisch heißt: gleich viele Zeilen wie Spalten.',
     when: 'Am Anfang jeder Aufgabe mit Matrizen: Erst die Formate notieren, dann rechnen.',
     examples: [
@@ -28,7 +28,7 @@ export const MATRIX_CARD_LIST: readonly Card[] = [
     level: 1,
     rules: [],
     formulas: [String.raw`(A + B)_{ij} = a_{ij} + b_{ij}`, String.raw`(\lambda A)_{ij} = \lambda\, a_{ij}`, String.raw`E = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}`],
-    memo: 'Summe, Differenz und Vielfache rechnest du **Stelle für Stelle**: Die Zahl vor einer Matrix geht an jeden Eintrag, und addiert wird, was an derselben Stelle steht. Das geht nur bei **gleichem Format**.',
+    memo: 'Summe, Differenz und Vielfache rechnest du Stelle für Stelle: Die Zahl vor einer Matrix geht an jeden Eintrag, und addiert wird, was an derselben Stelle steht. Das geht nur bei gleichem Format.',
     note: 'Die Einheitsmatrix $E$ hat Einsen auf der Hauptdiagonale und sonst Nullen. „$A - 2$“ gibt es nicht; gemeint ist $A - 2E$, und abgezogen wird nur auf der Diagonale.',
     when: 'In jeder Rechnung mit Matrizen, oft als letzter Schritt eines längeren Ausdrucks.',
     examples: [
@@ -44,7 +44,7 @@ export const MATRIX_CARD_LIST: readonly Card[] = [
     level: 1,
     rules: [],
     formulas: [String.raw`(A^{\mathsf T})_{ij} = a_{ji}`, String.raw`(AB)^{\mathsf T} = B^{\mathsf T} A^{\mathsf T}`, String.raw`(A^{\mathsf T})^{\mathsf T} = A`],
-    memo: 'Beim Transponieren werden **Zeilen zu Spalten**: Die erste Zeile von $A$ wird die erste Spalte von $A^{\\mathsf T}$. Aus dem Format $m \\times n$ wird $n \\times m$; die Hauptdiagonale bleibt stehen.',
+    memo: 'Beim Transponieren werden Zeilen zu Spalten: Die erste Zeile von $A$ wird die erste Spalte von $A^{\\mathsf T}$. Aus dem Format $m \\times n$ wird $n \\times m$; die Hauptdiagonale bleibt stehen.',
     note: 'Bei einem Produkt dreht sich die Reihenfolge um, und jeder Faktor wird transponiert: $(AB)^{\\mathsf T} = B^{\\mathsf T} A^{\\mathsf T}$. Die Formate zeigen, warum: Nur so passen die Matrizen zusammen.',
     when: 'In Ausdrücken wie $A^{\\mathsf T} B$ oder $(AB)^{\\mathsf T}$ und beim Prüfen, welcher Ausdruck definiert ist.',
     examples: [
@@ -60,7 +60,7 @@ export const MATRIX_CARD_LIST: readonly Card[] = [
     level: 2,
     rules: [],
     formulas: [String.raw`(m \times n) \cdot (n \times p) = m \times p`, String.raw`(AB)_{ij} = a_{i1} b_{1j} + a_{i2} b_{2j} + \dots + a_{in} b_{nj}`],
-    memo: '$AB$ ist nur definiert, wenn $A$ so viele **Spalten** hat wie $B$ **Zeilen** (innen gleich); das Ergebnis hat die äußeren Zahlen. Jeder Eintrag ist **Zeile mal Spalte**: die $i$-te Zeile von $A$ mal die $j$-te Spalte von $B$, Eintrag für Eintrag malgenommen und addiert. Im **Falk-Schema** steht $B$ oben rechts, $A$ unten links, und jeder Eintrag von $AB$ steht dort, wo sich seine Zeile und seine Spalte kreuzen.',
+    memo: '$AB$ ist nur definiert, wenn $A$ so viele Spalten hat wie $B$ Zeilen (innen gleich); das Ergebnis hat die äußeren Zahlen. Jeder Eintrag ist Zeile mal Spalte: die $i$-te Zeile von $A$ mal die $j$-te Spalte von $B$, Eintrag für Eintrag malgenommen und addiert. Im Falk-Schema steht $B$ oben rechts, $A$ unten links, und jeder Eintrag von $AB$ steht dort, wo sich seine Zeile und seine Spalte kreuzen.',
     note: 'Die Reihenfolge zählt: Meist ist $AB \\ne BA$, oft ist eins von beiden gar nicht definiert. Zeile mal Spalte ($\\vec u^{\\mathsf T} \\vec v$) gibt eine Zahl, Spalte mal Zeile ($\\vec u\\,\\vec v^{\\mathsf T}$) eine Matrix.',
     when: 'In fast jeder Klausuraufgabe zu Matrizen: „Welche Ausdrücke sind definiert? Berechne sie.“, Matrizengleichungen, Gleichungssysteme.',
     examples: [
@@ -78,7 +78,7 @@ export const MATRIX_CARD_LIST: readonly Card[] = [
     level: 2,
     rules: [],
     formulas: [String.raw`A\vec x = x_1\,\vec a_1 + x_2\,\vec a_2 + \dots`, String.raw`A\vec e_j = \vec a_j \;(\text{$j$-te Spalte})`],
-    memo: '$A\\vec x$ rechnest du Zeile mal Vektor. Anders gesehen ist es $x_1$ mal die erste **Spalte** plus $x_2$ mal die zweite und so weiter. Darum sind die Spalten von $A$ genau die Bilder der Einheitsvektoren.',
+    memo: '$A\\vec x$ rechnest du Zeile mal Vektor. Anders gesehen ist es $x_1$ mal die erste Spalte plus $x_2$ mal die zweite und so weiter. Darum sind die Spalten von $A$ genau die Bilder der Einheitsvektoren.',
     note: 'Im Bild: Eine $2 \\times 2$-Matrix macht aus dem Einheitsquadrat das Parallelogramm, das ihre Spalten aufspannen, und verzerrt das ganze Gitter mit.',
     when: 'Bei Abbildungen in der Ebene, bei Gleichungssystemen $A\\vec x = \\vec b$ und als Probe einer Lösung.',
     examples: [
@@ -94,8 +94,8 @@ export const MATRIX_CARD_LIST: readonly Card[] = [
     level: 4,
     rules: [],
     formulas: [String.raw`AB = BA \iff (AB)_{ij} = (BA)_{ij} \text{ für alle } i, j`],
-    memo: 'Matrizen sind beim Malnehmen im Allgemeinen **nicht vertauschbar**. Steht ein Parameter in einer Matrix, rechnest du $AB$ und $BA$ mit ihm aus und vergleichst die Einträge an derselben Stelle. Jeder Vergleich ist eine Gleichung für den Parameter.',
-    note: 'Ein Wert passt nur, wenn **alle** Einträge übereinstimmen: Löse eine Gleichung und mach mit den übrigen die Probe.',
+    memo: 'Matrizen sind beim Malnehmen im Allgemeinen nicht vertauschbar. Steht ein Parameter in einer Matrix, rechnest du $AB$ und $BA$ mit ihm aus und vergleichst die Einträge an derselben Stelle. Jeder Vergleich ist eine Gleichung für den Parameter.',
+    note: 'Ein Wert passt nur, wenn alle Einträge übereinstimmen: Löse eine Gleichung und mach mit den übrigen die Probe.',
     when: 'In Klausuraufgaben mit Parameter: „Für welches $a$ gilt $AB = BA$?“',
     examples: [
       { vector: { kind: 'matParam', level: 4, seed: 1 } },
