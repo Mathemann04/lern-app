@@ -98,6 +98,10 @@ Stand: 13.11.2026
   - **Werkstoffkunde:** [WERKSTOFFKUNDE.md](WERKSTOFFKUNDE.md), Skripte und Aufgabenblätter der Kapitel 1
     bis 7 (rund 330 Seiten); Kapitel 8 bis 15 und Altklausuren fehlen noch. Am Ende der Übersicht
     stehen vier Fragen an den Nutzer (vor M5 klären).
+  - **Modulhandbuch** (13.11.2026): [STUDIENPLAN.md](STUDIENPLAN.md) mit allen Pflichtmodulen, Prüfungen und
+    Lücken. Ergebnis: Chemie gehört zum Modul Physik 1; Werkstoffkunde läuft über zwei Semester; in Mathe 1 nennt
+    das Handbuch vier Themen ohne Plan (Parameterkurven und Polarkoordinaten, Drehmatrizen, Krümmungsmaß,
+    Newton-Verfahren); Konstruktion 1 und CAx 1 fehlen in der App ganz. Vier Fragen an den Nutzer am Ende der Datei.
   Neue Unterlagen eines Fachs: in einer neuen Sitzung hochladen und die Übersicht des Fachs ergänzen.
 - **Lehrbuch „Physik für Ingenieure“** (Fotos des Nutzers, 11.11.2026): Kapitel
   Kernphysik und Festkörperphysik, passend zu Chemie und Werkstoffkunde, teils

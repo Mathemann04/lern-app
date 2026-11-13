@@ -1235,6 +1235,10 @@ Neue Entscheidungen unten anfügen.
   behandelt“ und „Potenz vergessen“, kein Doppelfehler mehr); $\det(\lambda A B)$ mit einer Matrix ohne Zusatz kommt jetzt
   vor (vorher wegen zu weniger Antworten immer verworfen); „Die Null fällt weg“ in der Einzahl; $3 \times 3$ in Tipps und
   Namen als Formel. Neue Tests: Entwicklung mit Parameter an mehreren Stellen, kein Vielfaches bei Sarrus, jede Art Faktor.
+- 13.11.2026: Das Modulhandbuch (öffentlich, Fassung vom 09.11.2025) ist nur **Rahmen und Lückenfinder**, nicht
+  Maßstab: Es gelten weiter Skripte, Übungen und Altklausuren der Vorlesung. Ein Thema, das nur im Handbuch steht
+  (z. B. Drehmatrizen, Newton-Verfahren, Gläser in Chemie), kommt erst in die App, wenn Unterlagen es bestätigen oder
+  der Nutzer es will. Übersicht in docs/STUDIENPLAN.md.
 - 13.11.2026: Lehrbuch „Physik für Ingenieure“, Kapitel 9 Festkörperphysik gesichtet (Fotos S. 735 bis 795 und Lösungen
   im Anhang). Übersicht mit Gegenprobe in docs/WERKSTOFFKUNDE.md, Abschnitt „Lehrbuch“. Festlegungen: Atome je Zelle bei
   hdp nennt die App immer mit der Zelle (Standard wie Vorlesung: 6 im Sechseckprisma; das Buch zählt 2 in der kleinsten
