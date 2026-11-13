@@ -101,7 +101,7 @@ Animationen starten nur auf Knopfdruck („Abspielen“) und entfallen, wenn am 
   vergessen, Zeile statt Spalte (Falk, Cramer), Produkt nicht definiert, $(AB)^{\mathsf T} = A^{\mathsf T}B^{\mathsf T}$,
   $\lambda$ statt $\lambda^n$, Vorzeichen beim Zeilentausch, Sarrus bei 4×4, rechte Seite vergessen, Nullzeile falsch
   gedeutet, gleicher Parameter für zwei Geraden, beim Ziehen (2b): nur vertauscht oder nur ein Vorzeichen geändert, rechter Winkel als spitz
-  oder stumpf gezählt, rechter Winkel an der falschen Ecke, Seiten statt Diagonalen senkrecht, bei der Projektion (3a) die 15 Fehler aus Schritt 3a, bei den Kräften (3b) die 26 Fehler aus Schritt 3b, beim Kreuzprodukt (4a) die 14 Fehler aus Schritt 4a, beim Spatprodukt (4b) die 14 Fehler aus Schritt 4b, bei Linearkombination und Basis (5) die 20 Fehler aus Schritt 5, bei Geraden und Ebenen (6) die 33 Fehler aus Schritt 6 (Vorsilbe „gl-“), bei der Lage (7a) die 17 Fehler aus Schritt 7a, bei Abständen und Schnittwinkeln (7b) die 14 Fehler aus Schritt 7b, bei den Matrizen (8a) die 27 Fehler aus Schritt 8a (Vorsilbe „mat-“), bei den Determinanten (9a) die 37 Fehler aus Schritt 9a (Vorsilbe „det-“), beim Gauß-Verfahren (10a) die 34 Fehler aus Schritt 10a (Vorsilbe „gauss-“), cos statt sin bei Gerade–Ebene, „$A - 2$“ ohne $E$, auf der falschen
+  oder stumpf gezählt, rechter Winkel an der falschen Ecke, Seiten statt Diagonalen senkrecht, bei der Projektion (3a) die 15 Fehler aus Schritt 3a, bei den Kräften (3b) die 26 Fehler aus Schritt 3b, beim Kreuzprodukt (4a) die 14 Fehler aus Schritt 4a, beim Spatprodukt (4b) die 14 Fehler aus Schritt 4b, bei Linearkombination und Basis (5) die 20 Fehler aus Schritt 5, bei Geraden und Ebenen (6) die 33 Fehler aus Schritt 6 (Vorsilbe „gl-“), bei der Lage (7a) die 17 Fehler aus Schritt 7a, bei Abständen und Schnittwinkeln (7b) die 14 Fehler aus Schritt 7b, bei den Matrizen (8a) die 27 Fehler aus Schritt 8a (Vorsilbe „mat-“), bei den Determinanten (9a) die 37 Fehler aus Schritt 9a (Vorsilbe „det-“), beim Gauß-Verfahren (10a) die 34 Fehler aus Schritt 10a (Vorsilbe „gauss-“), bei der Cramerschen Regel (11a) die 10 Fehler aus Schritt 11a (Vorsilbe „cramer-“), cos statt sin bei Gerade–Ebene, „$A - 2$“ ohne $E$, auf der falschen
   Seite ausgeklammert. Jede mit Katalogbeispiel, eigenem Text für „Warum ist das falsch?“ und Platz auf einer Lernkarte
   (Regeln aus CLAUDE.md).
 - **Aufgabennummern** wie seit M6 mit Baustein (`taskNumber.ts`); neue Bausteine bekommen die nächsten freien Nummern in
@@ -395,7 +395,27 @@ Request.
       Gerade bzw. Ebene); ohne Lösung nennt die Beschreibung den Grund (parallel, nicht alle durch einen Punkt mit grauen
       Schnittpunkten, parallele Schnittgeraden gestrichelt). Lernkarten: „Tabelle und Stufenform“ mit der Drehung, die
       übrigen mit dem Bild zum Ergebnis.
-11. **Gleichungssysteme mit Parameter und Cramer:** Determinante als Polynom, Sonderfälle mit Schieberegler, Rang.
+11. **Gleichungssysteme mit Parameter und Cramer**, in drei Teilen:
+    - **11a (fertig, 13.11.2026):** Baustein „Cramersche Regel“ (`cramer`, Code 36, Gruppe „Gleichungssysteme“) in der
+      Tätigkeit „Matrizen und Gleichungssysteme“, Stufen 1 bis 5, geführt und frei. Fünf Arten: $2 \times 2$ ganz (Stufe 1
+      mit ganzen Zahlen, Stufe 2 auch mit Brüchen; $\det A$, $\det A_x$, $x$, $\det A_y$, Lösung als Vektor), $3 \times 3$
+      nur eine Unbekannte (Stufe 2 und 3; Sarrus, „Welche Matrix ist $A_z$?“, Sarrus, Quotient), zwei Unbekannte mit Cramer
+      und die dritte durch Einsetzen (Stufe 3 und 4), mit Parameter $a$ in der Matrix (Stufe 4 $2 \times 2$, Stufe 5 auch
+      mit $\det A$ quadratisch): $\det A$ als Polynom, für welche $a$ anwendbar, $\det A_k$, die Unbekannte als Bruch in $a$,
+      für welche $a$ es genau eine Lösung mit vorgegebenem Wert gibt; Stufe 5 $3 \times 3$ mit Parameter, in etwa der Hälfte
+      mit einem Wert, bei dem $\det A = 0$ wäre und der wegfällt (Klausurfalle „durch einen Ausdruck geteilt, der 0 sein
+      kann“). Bild beim Ergebnis ohne Parameter: Geraden bzw. Ebenen mit Schnittpunkt (aus Schritt 10b). Frei: Vektor,
+      eine Zahl ($z = \frac{7}{3}$), $a = \dots$ bzw. zwei Lösungen in beliebiger Reihenfolge. Zwei Lernkarten, zehn neue
+      typische Fehler: Zeile statt Spalte ersetzt, Spalte einer anderen Unbekannten, Bruch umgedreht, nicht durch
+      $\det A$ geteilt, Bedingung umgedreht, $\det A = 0$ nicht geprüft, Wert mit $\det A = 0$ behalten, nur eine Lösung
+      der quadratischen Gleichung, nur den Zähler gleich dem Wert gesetzt, Vorzeichen beim Auflösen nach $a$; dazu die
+      Fehler bei $2 \times 2$ und Sarrus aus 9a und beim Einsetzen aus 10a.
+    - **11b:** Baustein „Gleichungssysteme mit Parameter“ (Klausur, jedes Jahr): $\det A$ als Polynom, Sonderfälle einzeln
+      mit Gauß (keine oder unendlich viele Lösungen), Rang der Koeffizienten- und der erweiterten Matrix, Parameter auch
+      rechts ($b$), Lösung mit vorgegebener Komponente, Folgefehler „durch etwas geteilt, das 0 sein kann“.
+    - **11c:** Bilder: Schieberegler für den Parameter (Geraden bzw. Ebenen bewegen sich, bei den Sonderwerten parallel
+      oder gleich), Cramer als Flächen (2 × 2: $x$ ist das Verhältnis der Parallelogramme aus $\vec b, \vec a_2$ und
+      $\vec a_1, \vec a_2$).
 12. **Inverse und Matrizengleichungen:** 2×2 mit Formel, 3×3 mit Gauß-Jordan Zeile für Zeile, Matrizengleichung erst
     allgemein nach $X$ auflösen (wie beim Umstellen), dann ausrechnen.
 13. **Abschluss:** Mischen über alle drei Tätigkeiten, Abwechslung gemessen, Prüfung aus mehreren Blickwinkeln, Doku.

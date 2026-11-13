@@ -3,6 +3,7 @@ paths:
   - "src/engine/linalg/matrix*"
   - "src/engine/linalg/det*"
   - "src/engine/linalg/gauss*"
+  - "src/engine/linalg/cramer*"
   - "src/engine/linalg/falk.ts"
   - "src/engine/linalg/sarrus*"
   - "src/ui/draw/SarrusScheme.tsx"
@@ -10,6 +11,7 @@ paths:
   - "src/engine/explain/matrixCards.ts"
   - "src/engine/explain/detCards.ts"
   - "src/engine/explain/gaussCards.ts"
+  - "src/engine/explain/cramerCards.ts"
   - "e2e/matrices.spec.ts"
 ---
 
@@ -100,3 +102,20 @@ freier Modus `vectorFree.ts`, `buildVectorTask` wählt die Arten nach dem Bauste
   (`CardBody.tsx`). Tests in `linalg/gaussFigures.test.ts` (jedes Teil liegt auf der Zeile seiner Farbe, alte Lage auf der
   alten Zeile, Drehpunkt auf Stufenzeile, alter und neuer Zeile; Fehler auf der Zeile mit alter rechter Seite; Lösung auf
   allen Zeilen), Browser-Test in `e2e/matrices.spec.ts`.
+- Cramersche Regel (Schritt 11a): Baustein `cramer` (Code 36, Gruppe `mat-lgs`), `linalg/cramerTasks.ts`, Arten in
+  `CRAMER_KINDS_BY_LEVEL` (cramerTwo, cramerThree, cramerPair, cramerParam, cramerParamThree). Matrizen als `PMat` mit
+  Einträgen `Lin` (c0 + c1·a) aus `detTasks.ts` (dort exportiert: `Mat`, `Lin`, `PMat`, `lin`, `at`, `linLatex`, `linFactor`,
+  `pmat`, `det`, `polyOf`, `sarrusStep`, `paramMatrix`), rechte Seite `b` ohne Parameter; Determinanten als `Quad` über
+  `polyOf`. Unbekannte immer x, y, z (der freie Modus liest `x_1 = …` als erste von zwei Lösungen), Matrizen `A_x`, `A_y`,
+  `A_z`. Schritte `detStep` (2 × 2 mit Formel, falsch auch `cramer-row`/`cramer-col`; 3 × 3 `sarrusStep`, Ids `det`,
+  `det-x` …), `matrixStep` (Id `matrix-z`, nur 3 × 3), `quotientStep` (Id `wert-z`; mit `vector` als Schritt `loesung`, der
+  gleich den Vektor nennt; mit Parameter ein Bruch in a, falsche nie gleichwertig über `fracEq` an sieben Stellen),
+  `conditionStep` (`bedingung`), `targetStep` (`vorgabe`: Dk = c·D, Werte mit D = 0 fallen weg), `insertStep` (dritte
+  Unbekannte durch Einsetzen, Fehler `gauss-backsub-…`). Bau: ohne Parameter rückwärts aus einer ganzen Lösung oder mit
+  Brüchen aus zufälligem b; mit Parameter 2 × 2 mit Nullstellen von det A ganz und nicht 0 (`pickTarget` sucht c),
+  3 × 3 aus `paramMatrix`, mit Falle (`trap`, vor den Versuchen gewählt) b aus zwei Spalten von A an einer Nullstelle
+  (dort auch det A_k = 0), sonst rückwärts aus einer Lösung an einer Stelle a0 (`targetFor`). 10 Fehler `cramer-…` in
+  `linalg/cramerErrorRules.ts`, zwei Karten in `explain/cramerCards.ts`. Bild beim Ergebnis ohne Parameter:
+  `systemDrawing` aus `gaussFigures.ts`. Tests in `linalg/cramerTasks.test.ts` (Gegenprobe mit eigenem Gauß, mit
+  Parameter alle ganzen a von −30 bis 30, jede Determinante des Rechenwegs an mehreren Stellen, keine Wörter im
+  Formelsatz).

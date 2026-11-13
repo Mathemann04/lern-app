@@ -1292,3 +1292,10 @@ Neue Entscheidungen unten anfügen.
   Fehler sagt „so kann die Umformung die Lösungen verändern“ (bei Systemen ohne Lösung bleibt die Lösungsmenge leer);
   die Beschreibung nennt nur Farben, die im Bild vorkommen (eine Zeile 0 = c ist grau: „grau ihre alte Lage“). Neue
   Tests prüfen diese Aussagen gegen die Zeilen und dass eine Lösungsgerade im Raum eingezeichnet ist.
+- 13.11.2026: M7 Schritt 11 dreigeteilt: 11a Baustein „Cramersche Regel“ (Id `cramer`, Code 36), 11b Baustein
+  „Gleichungssysteme mit Parameter“ mit Rang, 11c die Bilder (Schieberegler, Cramer als Flächen). Cramer ist ein eigener
+  Baustein, damit er sich allein üben lässt; der Parameter kommt dort schon ab Stufe 4 vor (wann anwendbar, Unbekannte mit
+  vorgegebenem Wert), weil die Klausur Cramer meist so fragt. Unbekannte heißen bei Cramer immer $x, y, z$ (nicht
+  $x_1, x_2$), weil der freie Modus $x_1 = \dots$ als erste von zwei Lösungen liest; Matrizen heißen $A_x, A_y, A_z$.
+  Die Frage „genau eine Lösung mit $z = c$“ ist bewusst so gestellt: Bei dem Wert, der wegfällt, hat das System
+  unendlich viele Lösungen, unter denen auch eine mit $z = c$ sein kann.
