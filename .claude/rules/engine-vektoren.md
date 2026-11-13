@@ -206,7 +206,13 @@ gezieltes Üben noch nicht (`focus: false`).
   Fehler `det-…` in `linalg/detErrorRules.ts` (`vectorErrorRule` sucht dort, Katalog `matrizen`), sechs Karten `det-…` in
   `explain/detCards.ts` (Ordner `matrizen`). Ergebnisse `\det A = 5`, dazu `F = 5` bzw. `V = 5`, `\det(2A^{-1}) = …`,
   `a_1 = …,\; a_2 = …`. Tests in `linalg/detTasks.test.ts` (Laplace mit Kommazahlen, jede Entwicklung in den Antworten
-  ausgerechnet, Sarrus der Erklärung, Bilder, freier Modus). Sarrus als Animation folgt in 9b (wie `falk.ts`).
+  ausgerechnet, Sarrus der Erklärung, Bilder, freier Modus).
+- Sarrus zum Abspielen (Schritt 9b): `linalg/sarrus.ts` (Typ `SarrusFigure`: Name, Einträge, Produkte `plus`/`minus` in
+  der Reihenfolge von `SARRUS_PLUS`/`SARRUS_MINUS` = Diagonalen im Schema mit fünf Spalten, `values` nur ohne Parameter,
+  `result`), `GuidedStep.sarrus`. Beide `sarrusStep` (`detTasks.ts`, `spatTasks.ts`, damit auch Basis) hängen es an;
+  jeder Schritt mit „Sarrus“ im Titel hat eins, sonst keiner. Oberfläche `ui/draw/SarrusScheme.tsx` (wie `FalkScheme`),
+  Lernkarte nur bei genau einem Schritt mit Sarrus. Tests in `linalg/sarrus.test.ts` (Diagonalen des Bildes gegen
+  Laplace, Rechnung = Erklärung).
 - `linalg/vectorTasks.ts`: Baukasten. Je Art (`VectorKind`) eine Funktion, die die ganze geführte Aufgabe baut (Schritte
   mit `choiceStep`: falsche Antworten ohne Doppelte, höchstens drei, aus `errorRules.ts`; Bilder; Ergebnis; Form;
   `answer` und `data` für die Gegenprobe in Tests). Arten je Stufe in `KINDS_BY_LEVEL`: Stufe 1 Ebene, 2 Raum, 3 zwei
