@@ -49,6 +49,7 @@ test('Mathe-Seite zeigt die Kachel „Vektoren", die Seite der Tätigkeit hat Ba
   await expect(page.getByRole('checkbox', { name: 'Projektion und Zerlegung', exact: true })).toBeChecked()
   await expect(page.getByRole('checkbox', { name: 'Kräfte', exact: true })).toBeChecked()
   await expect(page.getByRole('checkbox', { name: 'Kreuzprodukt und Fläche', exact: true })).toBeChecked()
+  await expect(page.getByRole('checkbox', { name: 'Spatprodukt und Volumen', exact: true })).toBeChecked()
   await expect(page.getByTestId('example').locator('.katex').first()).toBeVisible()
   await expectCleanPage(page, 'Tätigkeit Vektoren')
   expect(errors).toEqual([])
@@ -358,5 +359,42 @@ test('Frei: zwei Normalen in beliebiger Reihenfolge, zweite vergessen wird erkan
   await page.getByRole('button', { name: 'Prüfen' }).click()
   await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
   await expectCleanPage(page, 'Kreuzprodukt frei')
+  expect(errors).toEqual([])
+})
+
+// M7 Schritt 4b: Spatprodukt und Volumen
+test('Spatprodukt: jede Stufe lässt sich lösen, Körper zieht sich auf, Lernkarte', async ({ page }) => {
+  const errors = collectErrors(page)
+  for (const level of [1, 2, 3, 4, 5]) {
+    await page.goto(`./#/ueben/vektoren/spat.${level}-${50 + level}`)
+    await solveWholeTask(page)
+    await expect(page.getByTestId('result').getByTestId('vector-figure')).toBeVisible()
+    await expectCleanPage(page, `Spatprodukt Stufe ${level}`)
+  }
+  // Stufe 1, Nummer 51 ist ein Volumen: „Aufziehen" spielt das Bild ab
+  await page.goto('./#/ueben/vektoren/spat.1-51')
+  await solveWholeTask(page)
+  await page.getByTestId('result').getByRole('button', { name: 'Aufziehen' }).click()
+  await expect(page.getByTestId('result').getByTestId('vector-figure').locator('svg polygon').first()).toBeVisible()
+  await page.goto('./#/karten/vektoren/vec-spat')
+  await expect(page.getByRole('heading', { name: 'Spatprodukt, Sarrus und komplanar' })).toBeVisible()
+  await expect(page.getByTestId('vector-figure').first()).toBeVisible()
+  await expectCleanPage(page, 'Lernkarte Spatprodukt')
+  expect(errors).toEqual([])
+})
+
+test('Frei: Spatprodukt und Rechtssystem zum Antippen, Verwechslung wird erkannt', async ({ page }) => {
+  const errors = collectErrors(page)
+  // spat.2-6: (u × v) · w = 18, Rechtssystem
+  await page.goto('./#/frei/vektoren/spat.2-6')
+  await expect(page.getByRole('radiogroup', { name: 'Lage der drei Vektoren:' })).toBeVisible()
+  await typeInto(page, 'Dein Ergebnis von Teil 1', '18')
+  await page.getByRole('radio', { name: 'Linkssystem' }).click()
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Typischer Fehler: Rechts- und Linkssystem verwechselt.')).toBeVisible()
+  await page.getByRole('radio', { name: 'Rechtssystem' }).click()
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
+  await expectCleanPage(page, 'Spatprodukt frei')
   expect(errors).toEqual([])
 })

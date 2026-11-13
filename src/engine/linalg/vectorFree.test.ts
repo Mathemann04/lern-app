@@ -10,8 +10,9 @@ import { buildVectorTask } from './vectorTasks.ts'
 // Einträge werden einzeln markiert.
 
 // alle Bausteine: Nummern 1 bis 999 „Rechnen und Länge", ab 1000 „Skalarprodukt und Winkel" (Schritt 2), ab 2000
-// „Projektion und Zerlegung" (Schritt 3a), ab 3000 „Kräfte" (Schritt 3b), ab 4000 „Kreuzprodukt und Fläche" (Schritt 4a)
-const BLOCKS = ['rechnen', 'skalar', 'projektion', 'kraefte', 'kreuz'] as const
+// „Projektion und Zerlegung" (Schritt 3a), ab 3000 „Kräfte" (Schritt 3b), ab 4000 „Kreuzprodukt und Fläche" (Schritt 4a),
+// ab 5000 „Spatprodukt und Volumen" (Schritt 4b)
+const BLOCKS = ['rechnen', 'skalar', 'projektion', 'kraefte', 'kreuz', 'spat'] as const
 const ref = (level: Level, s: number) => ({ level, seed: blockSeed(BLOCKS[Math.floor(s / 1000)], (s % 1000) + (s < 1000 ? 0 : 1)) })
 const SEEDS = (n: number) => BLOCKS.flatMap((_, b) => Array.from({ length: n }, (_, i) => b * 1000 + i + (b === 0 ? 1 : 0)))
 const close = (a: number, b: number) => Math.abs(a - b) < 1e-9 * Math.max(1, Math.abs(a), Math.abs(b))

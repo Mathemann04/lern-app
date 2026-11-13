@@ -912,6 +912,133 @@ export const VECTOR_ERROR_RULES: readonly VectorErrorRule[] = [
       short: String.raw`Scheitel: Ableitung $2p\,t + q = 0$, also durch $2p$ teilen.`,
     },
   },
+  // Spatprodukt und Volumen (M7 Schritt 4b)
+  {
+    id: 'vec-sarrus-swap',
+    name: 'Haupt- und Nebendiagonalen vertauscht',
+    wrongFormula: String.raw`\det A = (\text{Nebendiagonalen}) - (\text{Hauptdiagonalen})`,
+    why: {
+      detailed: String.raw`Bei Sarrus zählen die drei Diagonalen von **links oben nach rechts unten** positiv, die drei von rechts oben nach links unten negativ. Andersherum bekommst du das Spatprodukt mit dem falschen Vorzeichen, und dann stimmen Rechts- und Linkssystem nicht mehr.`,
+      short: String.raw`Nach rechts unten: Plus; nach links unten: Minus.`,
+    },
+  },
+  {
+    id: 'vec-sarrus-plus',
+    name: 'Nebendiagonalen addiert',
+    wrongFormula: String.raw`\det A = a_{11}a_{22}a_{33} + \ldots + a_{13}a_{22}a_{31} + \ldots`,
+    why: {
+      detailed: String.raw`Bei Sarrus werden die drei Produkte der Diagonalen nach rechts unten addiert und die drei Produkte der Diagonalen nach links unten **abgezogen**. Schreib die ersten beiden Spalten noch einmal rechts daneben, dann siehst du alle sechs Diagonalen.`,
+      short: String.raw`Die drei Diagonalen nach links unten werden abgezogen.`,
+    },
+  },
+  {
+    id: 'vec-sarrus-one-diagonal',
+    name: 'Nur eine Diagonale je Richtung',
+    wrongFormula: String.raw`\det A = a_{11}a_{22}a_{33} - a_{13}a_{22}a_{31}`,
+    why: {
+      detailed: String.raw`„Hauptdiagonale minus Nebendiagonale" gilt nur bei $2 \times 2$-Matrizen. Bei $3 \times 3$ gehören zu Sarrus **sechs** Produkte: Schreib die ersten beiden Spalten rechts daneben, dann gibt es drei Diagonalen nach rechts unten (Plus) und drei nach links unten (Minus).`,
+      short: String.raw`$3 \times 3$: sechs Produkte, drei mit Plus und drei mit Minus.`,
+    },
+  },
+  {
+    id: 'vec-spat-cross-twice',
+    name: 'Zweimal das Kreuzprodukt',
+    wrongFormula: String.raw`(\vec a \times \vec b) \times \vec c`,
+    why: {
+      detailed: String.raw`Das Spatprodukt ist $(\vec a \times \vec b) \cdot \vec c$: erst das Kreuzprodukt, dann das **Skalarprodukt** mit dem dritten Vektor. Das Ergebnis ist eine Zahl (das Volumen mit Vorzeichen), kein Vektor.`,
+      short: String.raw`Zweiter Schritt: Skalarprodukt, das Ergebnis ist eine Zahl.`,
+    },
+  },
+  {
+    id: 'vec-spat-orientation',
+    name: 'Rechts- und Linkssystem verwechselt',
+    wrongFormula: String.raw`(\vec a \times \vec b) \cdot \vec c < 0 \Rightarrow \text{Rechtssystem}`,
+    why: {
+      detailed: String.raw`Ist das Spatprodukt **positiv**, zeigt $\vec c$ auf dieselbe Seite wie $\vec a \times \vec b$: $\vec a$, $\vec b$, $\vec c$ bilden ein Rechtssystem (rechte Hand: Daumen, Zeigefinger, Mittelfinger). Ist es **negativ**, liegt $\vec c$ auf der anderen Seite: Linkssystem.`,
+      short: String.raw`Positiv: Rechtssystem; negativ: Linkssystem.`,
+    },
+  },
+  {
+    id: 'vec-spat-coplanar',
+    name: 'Komplanar falsch erkannt',
+    wrongFormula: String.raw`\text{komplanar} \iff (\vec a \times \vec b) \cdot \vec c \ne 0`,
+    why: {
+      detailed: String.raw`Komplanar heißt: Alle drei Vektoren liegen in einer Ebene. Dann ist der Spat flach und hat kein Volumen, das Spatprodukt ist **genau** $0$. Ist es nicht $0$, spannen die Vektoren einen echten Spat auf, und sein Vorzeichen sagt Rechts- oder Linkssystem.`,
+      short: String.raw`Komplanar genau dann, wenn das Spatprodukt $0$ ist.`,
+    },
+  },
+  {
+    id: 'vec-spat-abs',
+    name: 'Betrag vergessen',
+    wrongFormula: String.raw`V = (\vec a \times \vec b) \cdot \vec c = -12`,
+    why: {
+      detailed: String.raw`Das Spatprodukt kann negativ sein (Linkssystem), ein Volumen nicht. Das Volumen ist der **Betrag**: $V = \lvert (\vec a \times \vec b) \cdot \vec c \rvert$. Ist ein Volumen gegeben, gibt es deshalb zwei Möglichkeiten für das Spatprodukt: $+V$ und $-V$. Genauso sind Höhe und Abstand nie negativ: Auch dort gehört der Betrag hin.`,
+      short: String.raw`$V = \lvert (\vec a \times \vec b) \cdot \vec c \rvert$; bei gegebenem Volumen $\pm$.`,
+    },
+  },
+  {
+    id: 'vec-volume-factor',
+    name: 'Faktor des Körpers verwechselt',
+    wrongFormula: String.raw`V_{\text{Tetraeder}} = \frac{1}{3}\,\lvert (\vec a \times \vec b) \cdot \vec c \rvert`,
+    why: {
+      detailed: String.raw`Jeder Körper ist ein fester Teil des Spats: Prisma (Dreieck als Grundfläche) $\frac{1}{2}$, Pyramide (Parallelogramm als Grundfläche) $\frac{1}{3}$, Tetraeder (Dreieck als Grundfläche, eine Spitze) $\frac{1}{6}$, denn $\frac{1}{3}$ für die Spitze mal $\frac{1}{2}$ für das Dreieck.`,
+      short: String.raw`Spat $1$, Prisma $\frac{1}{2}$, Pyramide $\frac{1}{3}$, Tetraeder $\frac{1}{6}$.`,
+    },
+  },
+  {
+    id: 'vec-volume-no-factor',
+    name: 'Faktor vergessen',
+    wrongFormula: String.raw`V_{\text{Tetraeder}} = \lvert (\vec a \times \vec b) \cdot \vec c \rvert`,
+    why: {
+      detailed: String.raw`Der Betrag des Spatprodukts ist das Volumen des **ganzen Spats**. Prisma, Pyramide und Tetraeder sind nur ein Teil davon: Prisma $\frac{1}{2}$, Pyramide $\frac{1}{3}$, Tetraeder $\frac{1}{6}$.`,
+      short: String.raw`Nur der Spat ist der ganze Betrag; sonst mit $\frac{1}{2}$, $\frac{1}{3}$ oder $\frac{1}{6}$ malnehmen.`,
+    },
+  },
+  {
+    id: 'vec-volume-lengths',
+    name: 'Längen malgenommen wie beim Quader',
+    wrongFormula: String.raw`V = \lvert \vec a \rvert \cdot \lvert \vec b \rvert \cdot \lvert \vec c \rvert`,
+    why: {
+      detailed: String.raw`Länge mal Breite mal Höhe gilt nur beim Quader, wo alle Kanten senkrecht aufeinander stehen. Ein Spat ist schief: Es zählen die Grundfläche $\lvert \vec a \times \vec b \rvert$ und die Höhe senkrecht dazu. Beides zusammen steckt im Spatprodukt.`,
+      short: String.raw`Schiefe Kanten: Volumen über das Spatprodukt, nicht über die Längen.`,
+    },
+  },
+  {
+    id: 'vec-volume-slant',
+    name: 'Schräge Kante statt Höhe',
+    wrongFormula: String.raw`V = \lvert \vec a \times \vec b \rvert \cdot \lvert \vec c \rvert`,
+    why: {
+      detailed: String.raw`Volumen ist Grundfläche mal **Höhe**, und die Höhe steht senkrecht auf der Grundfläche. $\lvert \vec c \rvert$ ist die schräge Kante, sie ist länger als die Höhe (außer $\vec c$ steht senkrecht). Das Skalarprodukt mit $\vec a \times \vec b$ nimmt nur den senkrechten Anteil von $\vec c$.`,
+      short: String.raw`Höhe statt schräger Kante: $(\vec a \times \vec b) \cdot \vec c$.`,
+    },
+  },
+  {
+    id: 'vec-spat-height-volume',
+    name: 'Volumen statt Höhe',
+    wrongFormula: String.raw`h = V`,
+    why: {
+      detailed: String.raw`Das Volumen ist Grundfläche mal Höhe (beim Tetraeder $\frac{1}{3}$ davon). Für die Höhe musst du noch durch die Grundfläche teilen: $h = \frac{V}{G}$ beim Spat, $h = \frac{3V}{A}$ beim Tetraeder.`,
+      short: String.raw`Höhe = Volumen durch Grundfläche (Tetraeder: $\frac{3V}{A}$).`,
+    },
+  },
+  {
+    id: 'vec-spat-height-squared',
+    name: 'Durch das Quadrat der Grundfläche geteilt',
+    wrongFormula: String.raw`h = \frac{\lvert (\vec a \times \vec b) \cdot \vec c \rvert}{\lvert \vec a \times \vec b \rvert^2}`,
+    why: {
+      detailed: String.raw`Die Grundfläche ist die **Länge** von $\vec a \times \vec b$, also mit Wurzel. Das Quadrat $\lvert \vec a \times \vec b \rvert^2$ ist nur die Summe der Quadrate der Einträge, noch ohne Wurzel. Volumen durch Grundfläche heißt: einmal durch $\lvert \vec a \times \vec b \rvert$ teilen.`,
+      short: String.raw`Durch $\lvert \vec a \times \vec b \rvert$ teilen, mit Wurzel.`,
+    },
+  },
+  {
+    id: 'vec-spat-height-third',
+    name: 'Beim Tetraeder das Drittel vergessen',
+    wrongFormula: String.raw`h = \frac{V}{A} \text{ statt } \frac{3V}{A}`,
+    why: {
+      detailed: String.raw`Beim Tetraeder (und bei jeder Pyramide) ist $V = \frac{1}{3}\,A\,h$. Nach $h$ umgestellt: $h = \frac{3V}{A}$. Wer nur durch $A$ teilt, bekommt ein Drittel der Höhe.`,
+      short: String.raw`Pyramide und Tetraeder: $h = \frac{3V}{A}$.`,
+    },
+  },
 ]
 
 export const vectorErrorRule = (id: string): VectorErrorRule => {

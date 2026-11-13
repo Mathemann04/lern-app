@@ -107,10 +107,27 @@ export function bestYaw(d: VectorDrawing): number {
         return Math.hypot(x2 - x1, y2 - y1) / Math.max(1e-9, Math.hypot(...a.to.map((x, k) => x - a.from[k])))
       }),
     )
-    const score = (lengths === 1e9 ? 1 : lengths) * Math.pow(angleFidelity(view, angles), 2)
+    const score = (lengths === 1e9 ? 1 : lengths) * Math.pow(angleFidelity(view, angles), 2) * Math.sqrt(faceFidelity(d, yaw))
     if (score > best.score * 1.15) best = { yaw, score }
   }
   return best.yaw
+}
+
+// Grundfläche (erste Fläche ohne Bewegung, M7 Schritt 4b): 1, wenn man senkrecht draufschaut, klein, wenn man sie von der
+// Kante sieht (sonst zeigt z. B. das Bild „komplanar" alle Pfeile auf einem Strich)
+function faceFidelity(d: VectorDrawing, yaw: number): number {
+  const face = d.dim === 3 ? d.polygons.find((p) => p.points.length >= 3 && !p.from) : undefined
+  if (!face) return 1
+  const [p, q, r] = face.points
+  const u = q.map((x, i) => x - p[i])
+  const v = r.map((x, i) => x - p[i])
+  const n = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]]
+  const length = Math.hypot(...n)
+  if (length < 1e-9) return 1
+  // Blickrichtung der Ansicht (senkrecht zu beiden Achsen des Bildschirms, siehe spaceView)
+  const [cy, sy, cp, sp] = [Math.cos(yaw), Math.sin(yaw), Math.cos(START_PITCH), Math.sin(START_PITCH)]
+  const look = [-sy * cp, -cy * cp, sp]
+  return Math.max(0.2, Math.abs(n.reduce((s, x, i) => s + x * look[i], 0)) / length)
 }
 
 // 1, wenn alle Winkel im Bild so groß erscheinen wie in Wirklichkeit; kleiner, je mehr sie verzerrt sind

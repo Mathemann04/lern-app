@@ -166,9 +166,9 @@ describe('Vektoren: Rechnen und Länge', () => {
 
   it('nutzt jeden Fehler des Katalogs in mindestens einer Stufe', () => {
     const used = new Set<string>()
-    // alle Bausteine: Rechnen und Länge, Skalarprodukt und Winkel (Schritt 2), Projektion und Zerlegung (Schritt 3a), Kräfte (3b), Kreuzprodukt (4a)
+    // alle Bausteine: Rechnen und Länge, Skalarprodukt und Winkel (Schritt 2), Projektion und Zerlegung (Schritt 3a), Kräfte (3b), Kreuzprodukt (4a), Spatprodukt (4b)
     const other = (level: Level, block: string) => Array.from({ length: 200 }, (_, i) => buildVectorTask({ level, seed: blockSeed(block, i + 1) }))
-    const both = (level: Level) => [...tasks(level, 200), ...other(level, 'skalar'), ...other(level, 'projektion'), ...other(level, 'kraefte'), ...other(level, 'kreuz')]
+    const both = (level: Level) => [...tasks(level, 200), ...other(level, 'skalar'), ...other(level, 'projektion'), ...other(level, 'kraefte'), ...other(level, 'kreuz'), ...other(level, 'spat')]
     for (const level of LEVELS)
       for (const task of both(level))
         for (const step of task.steps) {

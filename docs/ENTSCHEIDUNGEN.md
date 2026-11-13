@@ -1098,3 +1098,24 @@ Neue Entscheidungen unten anfügen.
   $\vec a \times \vec b$“; „$-1\,\vec a$“ heißt jetzt „$-\vec a$“; keine Kette mit doppeltem Glied (z. B. beim Abstand,
   wenn $\lvert\vec v\rvert$ ganzzahlig ist); beim Dreieck mit Parameter sagt das Bild, dass das Dreieck die Hälfte ist.
   Der Test prüft jetzt auch „$-1\,\vec a$“ und doppelte Glieder.
+- 13.11.2026: M7 Schritt 4b, Baustein „Spatprodukt und Volumen“ (Code 26, `spat.2-4711`). Schreibweise
+  $(\vec a \times \vec b) \cdot \vec c$ (auf der Lernkarte auch $[\vec a, \vec b, \vec c]$); Sarrus mit den drei
+  Vektoren als **Spalten** und den ersten beiden Spalten rechts daneben. Stufe 1 rechnet über das Kreuzprodukt (wie in
+  Schritt 4a), ab Stufe 2 mit Sarrus. Rechtssystem, Linkssystem und komplanar sind eine Auswahl wie „spitz, recht,
+  stumpf“ (Vorzeichen einer Zahl); im freien Modus zum Antippen unter „Lage der drei Vektoren:“. Körper: Spat (1),
+  dreiseitiges Prisma über dem Dreieck aus $\vec a$ und $\vec b$ ($\frac{1}{2}$), Pyramide über dem Parallelogramm mit
+  der Spitze am Ende von $\vec c$ ($\frac{1}{3}$), Tetraeder ($\frac{1}{6}$). Volumen mit Parameter: der Betrag bleibt in
+  der Gleichung stehen, zwei Lösungen; der Parameter steht in $\vec c$ bzw. in einer Koordinate der Spitze (dann ist das
+  Spatprodukt linear). Komplanar mit Parameter in Stufe 5: Parameter in zwei Vektoren, quadratisch, nur Zahlen mit
+  zwei rationalen Lösungen, bei denen keine zwei Vektoren parallel werden (sonst verdeckt im Bild ein Pfeil den
+  anderen). Bild: Beim Knopf „Aufziehen“ wandern die Seitenflächen und der Deckel aus der Grundfläche nach oben
+  (`DrawPolygon.from`). Der Startblick im Raum achtet jetzt auch darauf, dass die Grundfläche nicht von der Kante zu
+  sehen ist (sonst lagen bei „komplanar“ alle Pfeile auf einem Strich); das gilt auch für die Bilder aus Schritt 4a.
+- 13.11.2026: M7 Schritt 4b, Funde der unabhängigen Prüfung behoben (keine falsche Mathematik): Vor dem Ergebnis zeigt
+  das Bild bei „Rechtssystem, Linkssystem oder komplanar“ nur $\vec a$, $\vec b$ und die Grundfläche (sonst sah man
+  $\vec c$ in der Ebene liegen); mit Parameter zeigt das Bild einen Wert, der keine Lösung ist und bei dem der Spat nicht
+  flach ist und keine zwei Pfeile parallel sind; mit Parameter keine falschen Antworten „Diagonalen vertauscht“ und
+  „Reihenfolge vertauscht“ (−s führt auf dieselben Lösungen); Aufgabentext ohne falsches Komma; „Das Ergebnis ist eine
+  Zahl“ nur ohne Parameter; „Durch 1 geteilt“ entfällt; Text zu „Betrag vergessen“ nennt auch die Höhe. Neue Tests dazu.
+  Nebenbei: Der Browser-Test „Gleichungen umstellen, Stufe 2“ scheiterte zufällig bei Gleichungen mit Zahlen (anderer
+  Hinweis); er kennt den Hinweis jetzt.

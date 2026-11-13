@@ -173,8 +173,8 @@ export function EntryInput({ groups, keyboard, readOnly, marks, markTone, onInpu
           case 'choice':
             return (
               <div key={gi} className="flex flex-wrap items-center gap-2">
-                <span className="shrink-0">Der Winkel ist</span>
-                {options(gi, 0, 'Der Winkel ist', false)}
+                <span className="shrink-0">{group.label || 'Der Winkel ist'}</span>
+                {options(gi, 0, group.label || 'Der Winkel ist', false)}
               </div>
             )
           case 'solutions':
