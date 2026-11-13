@@ -1,6 +1,6 @@
 # Plan für Meilenstein 7: Vektoren, Geraden und Ebenen, Matrizen
 
-Status: **freigegeben** (Nutzer, 12.11.2026: „Passt alles“). Schritte 1a, 1b, 2a, 2b und 3a fertig (12.11.2026), 3b, 4a, 4b, 5 und 6 fertig (13.11.2026).
+Status: **freigegeben** (Nutzer, 12.11.2026: „Passt alles“). Schritte 1a, 1b, 2a, 2b und 3a fertig (12.11.2026), 3b, 4a, 4b, 5, 6 und 7a fertig (13.11.2026).
 
 Entwurf zum Ansehen und Anfassen (privat, nur für den Nutzer):
 https://claude.ai/artifact/WXe4sjavAGF64jyAWSa3hi. Er zeigt acht Bilder und Aufgaben im geplanten Stil. Die Seite ist
@@ -101,7 +101,7 @@ Animationen starten nur auf Knopfdruck („Abspielen“) und entfallen, wenn am 
   vergessen, Zeile statt Spalte (Falk, Cramer), Produkt nicht definiert, $(AB)^{\mathsf T} = A^{\mathsf T}B^{\mathsf T}$,
   $\lambda$ statt $\lambda^n$, Vorzeichen beim Zeilentausch, Sarrus bei 4×4, rechte Seite vergessen, Nullzeile falsch
   gedeutet, gleicher Parameter für zwei Geraden, beim Ziehen (2b): nur vertauscht oder nur ein Vorzeichen geändert, rechter Winkel als spitz
-  oder stumpf gezählt, rechter Winkel an der falschen Ecke, Seiten statt Diagonalen senkrecht, bei der Projektion (3a) die 15 Fehler aus Schritt 3a, bei den Kräften (3b) die 26 Fehler aus Schritt 3b, beim Kreuzprodukt (4a) die 14 Fehler aus Schritt 4a, beim Spatprodukt (4b) die 14 Fehler aus Schritt 4b, bei Linearkombination und Basis (5) die 20 Fehler aus Schritt 5, bei Geraden und Ebenen (6) die 33 Fehler aus Schritt 6 (Vorsilbe „gl-“), cos statt sin bei Gerade–Ebene, „$A - 2$“ ohne $E$, auf der falschen
+  oder stumpf gezählt, rechter Winkel an der falschen Ecke, Seiten statt Diagonalen senkrecht, bei der Projektion (3a) die 15 Fehler aus Schritt 3a, bei den Kräften (3b) die 26 Fehler aus Schritt 3b, beim Kreuzprodukt (4a) die 14 Fehler aus Schritt 4a, beim Spatprodukt (4b) die 14 Fehler aus Schritt 4b, bei Linearkombination und Basis (5) die 20 Fehler aus Schritt 5, bei Geraden und Ebenen (6) die 33 Fehler aus Schritt 6 (Vorsilbe „gl-“), bei der Lage (7a) die 17 Fehler aus Schritt 7a, cos statt sin bei Gerade–Ebene, „$A - 2$“ ohne $E$, auf der falschen
   Seite ausgeklammert. Jede mit Katalogbeispiel, eigenem Text für „Warum ist das falsch?“ und Platz auf einer Lernkarte
   (Regeln aus CLAUDE.md).
 - **Aufgabennummern** wie seit M6 mit Baustein (`taskNumber.ts`); neue Bausteine bekommen die nächsten freien Nummern in
@@ -259,8 +259,28 @@ Request.
    Seite negativ gelassen, durch das Quadrat der Länge geteilt, nur die linke Seite geteilt, Bruch beim Spurpunkt
    umgedreht, nicht durch den Faktor geteilt, Vorzeichen beim Spurpunkt, auf der falschen Achse eingetragen, mit $0$
    statt der rechten Seite verglichen.
-7. **Lage, Abstände, Winkel:** Entscheidungsbaum für zwei Geraden, Gerade–Ebene, Ebene–Ebene, alle Abstände mit Lot,
-   Winkel mit cos bzw. sin.
+7. **Lage, Abstände, Winkel**, in zwei Teilen:
+   - **7a (fertig, 13.11.2026):** Baustein „Lage“ (`lage`, Code 30, Gruppe „Lage, Abstände, Winkel“) in den Stufen 1 bis 5,
+     geführt und frei. Sechs Arten: Lage zweier Geraden als Entscheidungsbaum (Richtungen parallel? Faktor je Zeile;
+     Punktprobe mit dem Stützpunkt; sonst gleichsetzen mit zwei Parametern, eliminieren, einsetzen, Probe in der dritten
+     Gleichung; Stufe 1 in der Ebene, 2 im Raum, 3 mit $g$ durch zwei Punkte; jede Lage kommt vor), Schnittpunkt (Stufe 1
+     Ebene, 2 Raum, 4 Parameter $a$ im Stützvektor aus der dritten Gleichung, 5 dazu $g$ durch zwei Punkte), Lage Gerade
+     und Ebene (einsetzen: eine Lösung, keine oder jede; Stufe 4 Parameter $a$ mit $\vec n \cdot \vec v = 0$ und
+     Punktprobe, Stufe 5 $a$ und $b$ so, dass die Gerade in der Ebene liegt, Ebene in Normalenform), Durchstoßpunkt
+     (Stufe 1 und 2 Koordinatenform, 3 Parameterform mit Kreuzprodukt), Lage zweier Ebenen (Normalen und rechte Seite;
+     Stufe 3 aus Normalen- oder Parameterform, Stufe 4 Parameter $a$ bzw. $a$ und $b$), Schnittgerade (Stufe 3 eine
+     Variable frei wählen, Stufe 4 Parameterform in die Koordinatenform einsetzen, Stufe 5 Ebene durch drei Punkte). Bilder
+     im Raum (in Stufe 1 in der Ebene): Geraden mit Richtungspfeil, Ebenenstücke, Schnittpunkt, Durchstoßpunkt und
+     Schnittgerade zum Abspielen; bei Fragen nach der Lage erst beim Ergebnis. Frei: Lage zum Antippen, Schnittpunkt,
+     Parameter und Schnittgerade in Kästchen (jede Gleichung derselben Geraden ist richtig). Drei Lernkarten, 17 neue
+     typische Fehler: gleicher Parameter für beide Geraden, Vorzeichen beim Herüberbringen, Richtungen bzw. Normalen nicht
+     verglichen, identisch und echt parallel verwechselt, nicht parallel heißt nicht windschief, dritte Gleichung nicht
+     geprüft, Vielfaches nicht erkannt, Vielfaches nur in einer Zeile geprüft, Parameter in die falsche Gerade
+     eingesetzt, Stützvektor beim Einsetzen vergessen, liegt in der Ebene und parallel verwechselt, Richtung und Normale
+     falsch gedeutet, rechte Seite nicht verglichen, frei gewählte Variable weggelassen, ihre Zeile vergessen, beim
+     Einsetzen nur einen Teil berücksichtigt, gleiche Einträge statt Vielfaches.
+   - **7b:** Abstände (Punkt–Ebene mit Hesse, Punkt–Gerade mit Lotfußpunkt, parallele und windschiefe Geraden,
+     parallele Ebenen; Bild: Lot fällt) und Winkel (Gerade–Gerade, Gerade–Ebene mit sin, Ebene–Ebene).
 8. **Matrizen rechnen:** Tätigkeit „Matrizen und Gleichungssysteme“; Formate, Falk-Schema animiert, Transponierte,
    „Welche Ausdrücke sind definiert?“, Matrix verzerrt das Gitter; Eingabe einer Matrix.
 9. **Determinanten:** Fläche und Volumen als Bild, Sarrus animiert, Entwicklung mit Schachbrett, Umformungen, Regeln

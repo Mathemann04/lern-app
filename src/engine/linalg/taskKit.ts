@@ -82,6 +82,13 @@ export type VectorKind =
   | 'planeParam'
   | 'planeHesse'
   | 'planeTraces'
+  // Lage (M7 Schritt 7a, posTasks.ts)
+  | 'posLines'
+  | 'meetLines'
+  | 'posLinePlane'
+  | 'meetLinePlane'
+  | 'posPlanes'
+  | 'meetPlanes'
 
 export type VectorTask = GuidedTaskBase & {
   readonly kind: VectorKind

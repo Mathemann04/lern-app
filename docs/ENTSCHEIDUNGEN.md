@@ -1162,3 +1162,21 @@ Neue Entscheidungen unten anfügen.
   erklärt beide Vorzeichen; nach dem Auflösen bietet der Schritt „Punkt“ bzw. „Unbekannte“ keine Fehler aus dem Auflösen
   mehr an; bei der Hesseschen Normalform sind „nicht normiert“ und „durch das Quadrat geteilt“ immer unter den Antworten,
   und der freie Modus erkennt zuerst diese Fehler. Neue Tests für jeden Fund.
+- 13.11.2026: M7 Schritt 7 in zwei Teile geteilt (wie 1, 2, 3 und 4): **7a** Baustein „Lage“ (zwei Geraden, Gerade und
+  Ebene, zwei Ebenen, mit Schnittpunkt, Durchstoßpunkt und Schnittgerade), **7b** Abstände und Winkel. Neue Gruppe
+  „Lage, Abstände, Winkel“ auf der Seite der Tätigkeit; 7b bekommt dort eigene Bausteine (die Id `winkel` ist schon
+  vergeben, also z. B. `schnittwinkel`). Antworten zum Antippen: Geraden „identisch, echt parallel, Schnittpunkt,
+  windschief“, Gerade und Ebene „liegt in der Ebene, parallel zur Ebene, Durchstoßpunkt“, Ebenen „gleich, parallel,
+  Schnittgerade“ (alle Wörter verschieden, weil der freie Modus die Auswahl am Wort erkennt). Fragt eine Aufgabe nach der
+  Lage, ist das Ergebnis nur die Auswahl, und vor dem Ergebnis gibt es kein Bild (sonst verrieten im freien Modus die
+  Kästchen für einen Schnittpunkt und im geführten das Bild die Antwort); Schnittpunkt, Durchstoßpunkt und Schnittgerade
+  sind eigene Aufgaben, die sagen, dass es ihn gibt. In der Ebene entscheidet bei nicht parallelen Richtungen schon die
+  Richtung (Stufe 1 ohne Gleichungssystem). Welcher Fehler zu einer falschen Lage gehört, steht als Tabelle wahre Lage ×
+  gewählte Lage in `posTasks.ts` und gilt geführt wie frei.
+
+- 13.11.2026: M7 Schritt 7a, Funde der unabhängigen Prüfung behoben: Bei Stufe 3 hießen der Stützpunkt von $h$ und ein
+  Punkt von $g$ beide $Q$ (jetzt $R$); der Durchstoßpunkt durch eine Ebene in Parameterform war immer ihr sichtbarer
+  Stützpunkt (jetzt ein anderer Punkt der Ebene); bei der Punktprobe nach dem Parameter konnte die rechte Seite $0$ sein,
+  dann war eine „falsche“ Antwort richtig (jetzt nie $0$); „Stützvektor beim Einsetzen vergessen“ passt jetzt auch zu
+  Ebenen; vertauschte $t$ und $s$ beim Bestimmen von $a$ heißen „Faktoren den falschen Vektoren zugeordnet“. Neue Tests
+  für die ersten drei Funde.

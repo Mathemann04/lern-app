@@ -13,6 +13,7 @@ import { ORIENTATIONS } from './spatTasks.ts'
 import { INDEPENDENCE, SPAN_ANSWERS } from './basisTasks.ts'
 import { COLLINEAR, ON_LINE } from './lineTasks.ts'
 import { IN_PLANE } from './planeTasks.ts'
+import { LINE_PAIR, LINE_PAIR_RULES, LINE_PLANE, LINE_PLANE_RULES, PLANE_PAIR, PLANE_PAIR_RULES } from './posTasks.ts'
 import { type VectorTask, buildVectorTask } from './vectorTasks.ts'
 
 // Freier Modus der Tätigkeit „Vektoren" (M7 Schritt 1b): Das Ergebnis wird je Eintrag in ein eigenes Kästchen getippt
@@ -44,8 +45,15 @@ export type ResultPart = {
 export const RELATIONS = ['<', '>'] as const
 // Auswahlen im Ergebnis: Antworten, Text vor den Knöpfen, die besondere Antwort (Wert 0) und die Fehler (besondere Antwort
 // verwechselt, sonst die beiden anderen vertauscht)
-// byChoice: Fehler je gewählter Antwort (statt nach special)
-const CHOICE_SETS: readonly { readonly options: readonly string[]; readonly label: string; readonly special: number; readonly rules: readonly [string, string]; readonly byChoice?: readonly string[] }[] = [
+// byChoice: Fehler je gewählter Antwort (statt nach special); matrix: Fehler je wahrer und gewählter Antwort (Lage, Schritt 7a)
+const CHOICE_SETS: readonly {
+  readonly options: readonly string[]
+  readonly label: string
+  readonly special: number
+  readonly rules: readonly [string, string]
+  readonly byChoice?: readonly string[]
+  readonly matrix?: readonly (readonly string[])[]
+}[] = [
   { options: ANGLE_TYPES, label: '', special: 1, rules: ['vec-angle-zero', 'vec-angle-sign'] },
   { options: ORIENTATIONS, label: 'Lage der drei Vektoren:', special: 2, rules: ['vec-spat-coplanar', 'vec-spat-orientation'] },
   // Linearkombination und Basis (Schritt 5): zwei Antworten, jede Verwechslung ist derselbe Fehler
@@ -56,6 +64,10 @@ const CHOICE_SETS: readonly { readonly options: readonly string[]; readonly labe
   { options: ON_LINE, label: 'Der Punkt liegt', special: 0, rules: ['gl-check-one', 'gl-check-one'], byChoice: ['gl-check-one', 'gl-probe-misread'] },
   { options: COLLINEAR, label: 'Die drei Punkte liegen', special: 0, rules: ['gl-check-one', 'gl-check-one'], byChoice: ['gl-check-one', 'gl-probe-misread'] },
   { options: IN_PLANE, label: 'Der Punkt liegt', special: 0, rules: ['gl-probe-misread', 'gl-probe-misread'] },
+  // Lage (Schritt 7a)
+  { options: LINE_PAIR, label: 'Lage der Geraden:', special: 0, rules: ['gl-pos-dirs', 'gl-pos-dirs'], matrix: LINE_PAIR_RULES },
+  { options: LINE_PLANE, label: 'Lage der Geraden zur Ebene:', special: 0, rules: ['gl-lp-normal', 'gl-lp-normal'], matrix: LINE_PLANE_RULES },
+  { options: PLANE_PAIR, label: 'Lage der Ebenen:', special: 0, rules: ['gl-pos-dirs', 'gl-pos-dirs'], matrix: PLANE_PAIR_RULES },
 ]
 const DEGREE = '^\\circ'
 // Einheiten am Ende eines Ergebnisses (Kräfte, Schritt 3b): \,\text{N}, \,\text{Nm}, \,\text{J}, \,\text{m}
@@ -367,7 +379,7 @@ function choiceWrongs(part: ResultPart): PartWrong[] {
   const set = CHOICE_SETS.find((x) => x.options === part.options) ?? CHOICE_SETS[0]
   return set.options.flatMap((_, j) => {
     if (j === idx) return []
-    const rule = vectorErrorRule(set.byChoice?.[j] ?? (j === set.special || idx === set.special ? set.rules[0] : set.rules[1]))
+    const rule = vectorErrorRule(set.matrix?.[idx][j] ?? set.byChoice?.[j] ?? (j === set.special || idx === set.special ? set.rules[0] : set.rules[1]))
     return [{ values: [j], rule: rule.id, why: rule.why }]
   })
 }

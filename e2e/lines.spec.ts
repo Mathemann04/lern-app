@@ -56,6 +56,7 @@ test('Mathe-Seite zeigt die Kachel „Geraden und Ebenen“, die Seite der Täti
   await expect(page.getByRole('heading', { name: 'Geraden und Ebenen', level: 1 })).toBeVisible()
   await expect(page.getByRole('checkbox', { name: 'Geraden', exact: true })).toBeChecked()
   await expect(page.getByRole('checkbox', { name: 'Ebenen', exact: true })).toBeChecked()
+  await expect(page.getByRole('checkbox', { name: 'Lage', exact: true })).toBeChecked()
   await expect(page.getByTestId('example').locator('.katex').first()).toBeVisible()
   await expectCleanPage(page, 'Tätigkeit Geraden und Ebenen')
   expect(errors).toEqual([])
@@ -125,5 +126,48 @@ test('Frei: Koordinatenform in Kästchen, Vorzeichen rechts wird erkannt, Vielfa
   await page.getByRole('button', { name: 'Prüfen' }).click()
   await expect(page.getByText('Typischer Fehler: Nicht normiert.')).toBeVisible()
   await expectCleanPage(page, 'Hesse frei')
+  expect(errors).toEqual([])
+})
+
+// M7 Schritt 7a: Lage
+test('Lage: jede Stufe lässt sich lösen, Bild zum Ergebnis', async ({ page }) => {
+  const errors = collectErrors(page)
+  for (const level of [1, 2, 3, 4, 5]) {
+    await page.goto(`./#/ueben/geraden/lage.${level}-${60 + level}`)
+    await solveWholeTask(page)
+    await expect(page.getByTestId('result').getByTestId('vector-figure')).toBeVisible()
+    await expectCleanPage(page, `lage Stufe ${level}`)
+  }
+  expect(errors).toEqual([])
+})
+
+test('Frei: Lage zweier Geraden zum Antippen, Schnittpunkt mit vertauschtem Parameter wird erkannt', async ({ page }) => {
+  const errors = collectErrors(page)
+  // lage.2-8: windschiefe Geraden; „Schnittpunkt“ heißt: dritte Gleichung nicht geprüft
+  await page.goto('./#/frei/geraden/lage.2-8')
+  await expect(page.getByRole('radiogroup', { name: 'Lage der Geraden:' })).toBeVisible()
+  await page.getByRole('radio', { name: 'Schnittpunkt' }).click()
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Typischer Fehler: Dritte Gleichung nicht geprüft.')).toBeVisible()
+  await page.getByRole('radio', { name: 'windschief' }).click()
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
+  await expectCleanPage(page, 'Lage frei')
+
+  // lage.1-3: g: (−1, 0) + λ (1, −3), h: (−8, 6) + μ (−2, 1), S(−2 | 3); λ = −1 in h eingesetzt ergibt (−6 | 5)
+  await page.goto('./#/frei/geraden/lage.1-3')
+  await typeInto(page, '1. Koordinate', '-6')
+  await typeInto(page, '2. Koordinate', '5')
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Typischer Fehler: Parameter in die falsche Gerade eingesetzt.')).toBeVisible()
+  await typeInto(page, '1. Koordinate', '-2')
+  await typeInto(page, '2. Koordinate', '3')
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
+
+  await page.goto('./#/karten/geraden/gl-lage-geraden')
+  await expect(page.getByRole('heading', { name: 'Lage zweier Geraden' })).toBeVisible()
+  await expect(page.getByTestId('vector-figure').first()).toBeVisible()
+  await expectCleanPage(page, 'Lernkarte Lage')
   expect(errors).toEqual([])
 })

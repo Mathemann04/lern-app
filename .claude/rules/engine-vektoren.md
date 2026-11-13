@@ -111,7 +111,7 @@ gezieltes Üben noch nicht (`focus: false`).
   `basisTasks.test.ts` (Rang mit Gauß, Abstand zum Spann, falsche Gleichungssysteme werden von der Lösung nicht erfüllt).
 - Geraden und Ebenen (Schritt 6): eigene Tätigkeit `geraden` (Farbe `emerald`, Bild `lines`, Lernkarten-Ordner
   `geraden` in `explain/lineCards.ts`), aber dieselbe Engine: Bausteine `gerade` (Code 28) und `ebene` (Code 29) in
-  `LINE_BLOCKS` (Gruppe `geo-formen`), `buildVectorTask` wählt nach dem Baustein, `nextLineSeed` in `vectorEngine.ts`.
+  `LINE_BLOCKS` (Gruppe `geo-formen`; seit 7a dazu `lage`), `buildVectorTask` wählt nach dem Baustein, `nextLineSeed` in `vectorEngine.ts`.
   `linalg/lineKit.ts`: Schreibweisen (`paramFormLatex` „g\colon \vec x = … + t …“, `coordLatex` „E\colon 2x - y + 3z =
   6“, `normalFormLatex`, `insertLatex`), `primitive` (gekürzt), `isParallel`, `sameLine`, `samePlane`, `sameCoord` (falsche
   Formen, die dieselbe Gerade oder Ebene beschreiben, fallen weg), Bilder `lineFigure` (Stützvektor blass, Richtung,
@@ -132,6 +132,22 @@ gezieltes Üben noch nicht (`focus: false`).
   „Rechte Seite negativ gelassen“); Punkte auch `S_x`, `S_{xy}`, zwei Punkte `Q_1`, `Q_2` in beliebiger Reihenfolge.
   Tests in `linalg/lineTasks.test.ts` (Gegenprobe mit Kommazahlen, keine falsche Form gleichwertig, gleichwertige Formen
   im freien Modus richtig), Browser-Test `e2e/lines.spec.ts`.
+- Lage (Schritt 7a): Baustein `lage` (Code 30, Gruppe `geo-lage` „Lage, Abstände, Winkel“), `linalg/posTasks.ts`, Arten in
+  `LAGE_KINDS_BY_LEVEL` (posLines, meetLines, posLinePlane, meetLinePlane, posPlanes, meetPlanes). Nutzt Schritte anderer
+  Bausteine (exportiert): `systemLatex`, `solveTwo`, `probeStep` (mode `check`), `Row`, `ROMAN` aus `basisTasks.ts` (Karten
+  und Tipp beim Einbau überschrieben), `formStep`, `solveStep`, `pointStep`, `decideStep`, `rowTs` aus `lineTasks.ts`,
+  `coordStep`, `probeStep`, `directionsFor`, `threePoints` aus `planeTasks.ts`, `crossStep`. Eigene Schritte:
+  `parallelStep` (Faktor je Zeile; Namen der Geraden nie `k`, weil der Faktor so heißt), `lineSystemStep` (gleichsetzen,
+  Parameter `a` rechts über `Row.rt`), `aFromRowStep`, `meetStep`, `insertStep` (Gerade oder Ebene in Parameterform in
+  eine Koordinatenform, `insertedLatex` mit „0 \cdot t + 3“, wenn der Parameter wegfällt), die Entscheidungen
+  `linePosStep`, `linePlanePosStep` (nach dem Einsetzen oder nach Parameter und Punktprobe), `planePosStep`. Antworten
+  `LINE_PAIR`, `LINE_PLANE`, `PLANE_PAIR` mit Fehlertabellen `…_RULES` (wahr × gewählt), im freien Modus über `matrix` in
+  `CHOICE_SETS` (`vectorFree.ts`); alle Wörter verschieden. Lage-Aufgaben: Ergebnis nur die Auswahl, kein Bild vor dem
+  Ergebnis. Bilder `sceneFigure` (Ebenenstücke `patch`, Geraden mit Richtungspfeil, Punkte zuletzt), Schnittgerade als
+  Strecke. Schnittgerade aus zwei Koordinatenformen: Konstruktion rückwärts (Richtung mit 1 an der frei gewählten Stelle,
+  Normalen senkrecht darauf), aus der Parameterform: `m · w` = ±1 oder ±2 und teilt `m · u`. Fehler `gl-…` am Ende von
+  `lineErrorRules.ts` (17, ab Nummer 34), Karten `gl-lage-geraden`, `gl-lage-gerade-ebene`, `gl-lage-ebenen`. Tests in
+  `linalg/posTasks.test.ts` (Gegenprobe mit Kreuz- und Spatprodukt, jede Lage kommt vor, Fehlertabelle im freien Modus).
 - `linalg/vectorTasks.ts`: Baukasten. Je Art (`VectorKind`) eine Funktion, die die ganze geführte Aufgabe baut (Schritte
   mit `choiceStep`: falsche Antworten ohne Doppelte, höchstens drei, aus `errorRules.ts`; Bilder; Ergebnis; Form;
   `answer` und `data` für die Gegenprobe in Tests). Arten je Stufe in `KINDS_BY_LEVEL`: Stufe 1 Ebene, 2 Raum, 3 zwei
