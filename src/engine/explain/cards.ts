@@ -64,7 +64,7 @@ export const TOPICS: readonly Topic[] = [
   { id: 'ableitungen', title: 'Ableiten', description: 'Von der Potenzregel bis zum impliziten Ableiten' },
   { id: 'brueche', title: 'Brüche', description: 'Kürzen, erweitern, Hauptnenner, mal und geteilt' },
   { id: 'umstellen', title: 'Gleichungen umstellen', description: 'Gegenrechnung, Rüberbringen, Variable im Nenner, Ausklammern' },
-  { id: 'vektoren', title: 'Vektoren', description: 'Rechnen, Verbindungsvektor, Länge, Mittelpunkt, Einheitsvektor, Parameter' },
+  { id: 'vektoren', title: 'Vektoren', description: 'Rechnen, Länge, Skalarprodukt, Projektion, Kräfte, Kreuzprodukt' },
   { id: 'chem-atombau', title: 'Atombau', description: 'Elementarteilchen, Kernsymbol, Isotope, Ionen, Atommodelle und Licht' },
   { id: 'chem-elektronen', title: 'Elektronen', description: 'Quantenzahlen, Orbitale, Pauli und Hund, Elektronenkonfiguration, Valenzelektronen und Ionen' },
   { id: 'chem-pse', title: 'Aufbau des Periodensystems', description: 'Perioden, Gruppen, Blöcke, Metalle und Nichtmetalle, Edelgasregel, Ionen, Ionisierungsenergie' },

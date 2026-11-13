@@ -11,7 +11,7 @@ paths:
 Plan: docs/PLAN-M7.md. Tätigkeit „Vektoren“ (Id `vektoren`) im Gebiet „Vektoren und Matrizen“ (`lineare-algebra`, Farbe
 `cyan`, Bild `vectors` in `AreaIcon.tsx`), Bausteine in `tasks/blocks.ts` (`VECTOR_BLOCKS`, Gruppe `vektor-grundlagen`,
 `VECTOR_PLAYABLE_COMBOS`; Bausteine `rechnen`, Code 21, Nummern `rechnen.2-4711`, seit Schritt 2a `skalar`, Code 22, seit
-Schritt 3a `projektion`, Code 23, seit Schritt 3b `kraefte`, Code 24;
+Schritt 3a `projektion`, Code 23, seit Schritt 3b `kraefte`, Code 24, seit Schritt 4a `kreuz`, Code 25;
 jeder Baustein allein spielbar, `buildVectorTask` wählt die Arten nach dem Baustein in der Nummer). Freier Modus seit Schritt 1b (`free: true`),
 gezieltes Üben noch nicht (`focus: false`).
 
@@ -63,13 +63,26 @@ gezieltes Üben noch nicht (`focus: false`).
   winzig), `forcesDrawing` (Krafteck, Gegenkraft am Punkt), `inclineDrawing` und Arbeit mit Winkel als `scene` (ohne
   Gitter, `planeView` ohne Ursprung), `knotDrawing` (Kräfte verkleinert), `torqueDrawing`. `planeView` lässt bei großen
   Zahlen 8 % Rand. Tests in `forceTasks.test.ts` (Gegenprobe mit Math.cos/sin, Gleichungen an vielen Stellen).
+- Kreuzprodukt und Fläche (Schritt 4a): `linalg/crossTasks.ts`, Arten in `CROSS_KINDS_BY_LEVEL` (cross, crossArea,
+  crossNormal, crossDistance, crossParallel, crossAreaParam). `cross` und die typischen Fehler als bilineare Funktionen
+  (`CrossFn`: middleSign, orderSwap, plusCross, rowsCross, entrywise), mit Parameter über `paramCross` (Vektor
+  `PVec` = base + t·slope, Quadrat der Länge `normQuad`). `crossStep` (ein Schritt, Schema mit Hilfszeilen
+  `schemaLatex` in der Erklärung; mit Parameter ohne „Reihenfolge vertauscht“, weil −(a×b) dort gleich viel wert ist),
+  `swapStep` (b × a), `normStep`, `areaStep` (Parallelogramm `par` oder Dreieck `tri`). Normale gegebener Länge ohne
+  Wurzel: `pickNormalPair` (a, b senkrecht auf einer Richtung ganzzahliger Länge aus `LENGTH_POOLS`). Ergebnis zweier
+  Vektoren `\vec n_1 = …,\; \vec n_2 = …`: im freien Modus in beliebiger Reihenfolge (`vectorPair` in `vectorFree.ts`),
+  einer leer und der andere richtig: `vec-one-solution`. Flächen heißen `A`, Punkte deshalb `PT_LETTERS` (P Q R S, K L M
+  N, U V W X). Bilder: `spanDrawing` (Pfeile vom selben Fuß, Fläche Phase 1, Normale Phase 2 so lang wie die Fläche,
+  höchstens 1,6-mal der längere Pfeil, sonst verkürzt mit Hinweis `shortNote`, rechter Winkel Phase 3; Stufe 1 der
+  Fläche in der Ebene `flat`), `distDrawing` (Gerade gestrichelt, Parallelogramm, Lot mit Lotfußpunkt `F`). Vor dem
+  Ergebnis keine Normale und kein Lot im Bild. Tests in `crossTasks.test.ts` (Gegenprobe mit |a| |b| sin φ).
 - `linalg/vectorTasks.ts`: Baukasten. Je Art (`VectorKind`) eine Funktion, die die ganze geführte Aufgabe baut (Schritte
   mit `choiceStep`: falsche Antworten ohne Doppelte, höchstens drei, aus `errorRules.ts`; Bilder; Ergebnis; Form;
   `answer` und `data` für die Gegenprobe in Tests). Arten je Stufe in `KINDS_BY_LEVEL`: Stufe 1 Ebene, 2 Raum, 3 zwei
   Rechnungen zusammen, 4 Parameter oder vier und fünf Dimensionen, 5 alles ineinander. Gibt eine Art in einem Schritt
   weniger als drei Antworten, zieht sie neu (Schleife). Kennzahlen der Abwechslung wie überall (100 Formen unter 200,
   keine über 3 %); die Form enthält Art, Dimension, Variante, Buchstaben und Zahl der negativen Einträge.
-- `linalg/errorRules.ts`: 85 typische Fehler (22 aus Schritt 1, 18 zum Skalarprodukt, 4 beim Ziehen, 15 zur Projektion, 26 zu Kräften) (`vec-…`), im Katalog `errorCatalog.ts` unter `vektoren`; Lernkarten in
+- `linalg/errorRules.ts`: 99 typische Fehler (22 aus Schritt 1, 18 zum Skalarprodukt, 4 beim Ziehen, 15 zur Projektion, 26 zu Kräften, 14 zum Kreuzprodukt) (`vec-…`), im Katalog `errorCatalog.ts` unter `vektoren`; Lernkarten in
   `explain/vectorCards.ts` (Ordner `vektoren`, Beispiele `{ vector: { kind, level, seed } }`, gerechnet vom Baukasten,
   in `CardBody.tsx` mit Bild und Rechenweg).
 - `linalg/vectorEngine.ts`: Anschluss an `ui/courseEngines.ts` (planen, Form, neue Nummer, Beispiel).

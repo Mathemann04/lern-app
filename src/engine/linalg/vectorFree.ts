@@ -275,7 +275,37 @@ function readSymbol(text: string, part: ResultPart): Read {
 
 const noMarks = (input: EntryInput) => input.map((row) => row.map(() => false))
 
+// Zwei Vektoren als Lösungen (Kreuzprodukt, Schritt 4a: \vec n_1 und \vec n_2 = −\vec n_1): Stelle i des ersten Teils
+const vectorPair = (check: VectorCheck): number =>
+  check.parts.findIndex((p, i) => {
+    const q = check.parts[i + 1]
+    const m1 = /^(.+)_1 =$/.exec(p.label)
+    return p.shape === 'vector' && q?.shape === 'vector' && !!m1 && q.label === `${m1[1]}_2 =`
+  })
+
+const swapRows = <T,>(rows: readonly (readonly T[])[], i: number): (readonly T[])[] => rows.map((row, j) => (j === i ? rows[i + 1] : j === i + 1 ? rows[i] : row))
+
+// Die beiden Lösungen dürfen in beliebiger Reihenfolge stehen; nur eine eingetragen: zweite Lösung vergessen
 export function checkVectorEntries(check: VectorCheck, input: EntryInput): FreeVerdict {
+  const i = vectorPair(check)
+  if (i < 0 || input.length !== check.parts.length) return checkEntriesInOrder(check, input)
+  const valuesOf = (row: readonly string[]) => row.map((x) => readEntry(x).value)
+  const hits = (row: readonly string[], part: ResultPart) => valuesOf(row).filter((v, j) => v !== null && close(v, part.values[j])).length
+  const [a, b] = [check.parts[i], check.parts[i + 1]]
+  const empty = (row: readonly string[]) => row.every((x) => x.trim() === '')
+  for (const [k, other] of [[i, i + 1], [i + 1, i]] as const) {
+    if (!empty(input[k]) || empty(input[other])) continue
+    if (hits(input[other], a) === a.values.length || hits(input[other], b) === b.values.length) {
+      const rule = vectorErrorRule('vec-one-solution')
+      return { kind: 'wrong', title: 'Nicht ganz.', error: { id: rule.id, name: rule.name, why: rule.why }, marks: input.map((row, j) => row.map(() => j === k)) }
+    }
+  }
+  if (hits(input[i], b) + hits(input[i + 1], a) <= hits(input[i], a) + hits(input[i + 1], b)) return checkEntriesInOrder(check, input)
+  const verdict = checkEntriesInOrder(check, swapRows(input, i))
+  return verdict.marks ? { ...verdict, marks: swapRows(verdict.marks, i) } : verdict
+}
+
+function checkEntriesInOrder(check: VectorCheck, input: EntryInput): FreeVerdict {
   const reads = input.map((row, i) => row.map((x, j) => (check.parts[i] && isSymbol(check.parts[i], j) ? readSymbol(x, check.parts[i]) : readEntry(x))))
   const flat = reads.flat()
   if (flat.every((r) => r.problem === 'empty')) return { kind: 'unreadable', title: 'Noch nichts eingetragen.', message: 'Trage in jedes Kästchen eine Zahl ein.', marks: noMarks(input) }

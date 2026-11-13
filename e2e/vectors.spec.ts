@@ -48,6 +48,7 @@ test('Mathe-Seite zeigt die Kachel „Vektoren", die Seite der Tätigkeit hat Ba
   await expect(page.getByRole('checkbox', { name: 'Skalarprodukt und Winkel', exact: true })).toBeChecked()
   await expect(page.getByRole('checkbox', { name: 'Projektion und Zerlegung', exact: true })).toBeChecked()
   await expect(page.getByRole('checkbox', { name: 'Kräfte', exact: true })).toBeChecked()
+  await expect(page.getByRole('checkbox', { name: 'Kreuzprodukt und Fläche', exact: true })).toBeChecked()
   await expect(page.getByTestId('example').locator('.katex').first()).toBeVisible()
   await expectCleanPage(page, 'Tätigkeit Vektoren')
   expect(errors).toEqual([])
@@ -323,5 +324,39 @@ test('Frei: Komponenten mit Einheit N, Sinus und Kosinus vertauscht wird erkannt
   await page.getByRole('button', { name: 'Prüfen' }).click()
   await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
   await expectCleanPage(page, 'Kräfte frei')
+  expect(errors).toEqual([])
+})
+
+// M7 Schritt 4a: Kreuzprodukt und Fläche
+test('Kreuzprodukt: jede Stufe lässt sich lösen, Bild zum Ergebnis, Lernkarte', async ({ page }) => {
+  const errors = collectErrors(page)
+  for (const level of [1, 2, 3, 4, 5]) {
+    await page.goto(`./#/ueben/vektoren/kreuz.${level}-${50 + level}`)
+    await solveWholeTask(page)
+    await expect(page.getByTestId('result').getByTestId('vector-figure')).toBeVisible()
+    await expectCleanPage(page, `Kreuzprodukt Stufe ${level}`)
+  }
+  await page.goto('./#/karten/vektoren/vec-kreuz')
+  await expect(page.getByRole('heading', { name: 'Kreuzprodukt mit dem Schema' })).toBeVisible()
+  await expect(page.getByTestId('vector-figure').first()).toBeVisible()
+  await expectCleanPage(page, 'Lernkarte Kreuzprodukt')
+  expect(errors).toEqual([])
+})
+
+test('Frei: zwei Normalen in beliebiger Reihenfolge, zweite vergessen wird erkannt', async ({ page }) => {
+  const errors = collectErrors(page)
+  // kreuz.4-3: Länge 18 senkrecht auf a und b; n_1 = (6, 12, 12), n_2 = (−6, −12, −12)
+  await page.goto('./#/frei/vektoren/kreuz.4-3')
+  await typeInto(page, '1. Eintrag von Teil 1', '-6')
+  await typeInto(page, '2. Eintrag von Teil 1', '-12')
+  await typeInto(page, '3. Eintrag von Teil 1', '-12')
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Typischer Fehler: Zweite Lösung vergessen.')).toBeVisible()
+  await typeInto(page, '1. Eintrag von Teil 2', '6')
+  await typeInto(page, '2. Eintrag von Teil 2', '12')
+  await typeInto(page, '3. Eintrag von Teil 2', '12')
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
+  await expectCleanPage(page, 'Kreuzprodukt frei')
   expect(errors).toEqual([])
 })

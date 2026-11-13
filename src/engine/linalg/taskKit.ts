@@ -8,7 +8,7 @@ import { type Vec, arrowName, vec, vecAdd, vecLatex, vecNumbers, vecSub } from '
 
 // Gemeinsame Teile der Vektor-Baukästen (M7): Typen, Schritt mit Auswahl, Zufallszahlen, Buchstaben, Bilder-Hilfen und
 // der Verbindungsvektor. Genutzt von vectorTasks.ts (Rechnen und Länge), dotTasks.ts (Skalarprodukt und Winkel), projTasks.ts
-// (Projektion und Zerlegung) und forceTasks.ts (Kräfte).
+// (Projektion und Zerlegung), forceTasks.ts (Kräfte) und crossTasks.ts (Kreuzprodukt und Fläche).
 
 export type VectorKind =
   | 'connect'
@@ -48,6 +48,13 @@ export type VectorKind =
   | 'work'
   | 'torque'
   | 'knot'
+  // Kreuzprodukt und Fläche (M7 Schritt 4a, crossTasks.ts)
+  | 'cross'
+  | 'crossArea'
+  | 'crossNormal'
+  | 'crossDistance'
+  | 'crossParallel'
+  | 'crossAreaParam'
 
 export type VectorTask = GuidedTaskBase & {
   readonly kind: VectorKind
@@ -86,6 +93,11 @@ export const CARD = {
   schiefeEbene: 'vec-schiefe-ebene',
   arbeit: 'vec-arbeit',
   drehmoment: 'vec-drehmoment',
+  // Kreuzprodukt und Fläche (M7 Schritt 4a)
+  kreuz: 'vec-kreuz',
+  flaeche: 'vec-flaeche',
+  normale: 'vec-normale',
+  abstandKreuz: 'vec-abstand-kreuz',
 } as const
 
 // ------------------------------------------------------------------ Hilfen

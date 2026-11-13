@@ -10,8 +10,8 @@ import { buildVectorTask } from './vectorTasks.ts'
 // Einträge werden einzeln markiert.
 
 // alle Bausteine: Nummern 1 bis 999 „Rechnen und Länge", ab 1000 „Skalarprodukt und Winkel" (Schritt 2), ab 2000
-// „Projektion und Zerlegung" (Schritt 3a), ab 3000 „Kräfte" (Schritt 3b)
-const BLOCKS = ['rechnen', 'skalar', 'projektion', 'kraefte'] as const
+// „Projektion und Zerlegung" (Schritt 3a), ab 3000 „Kräfte" (Schritt 3b), ab 4000 „Kreuzprodukt und Fläche" (Schritt 4a)
+const BLOCKS = ['rechnen', 'skalar', 'projektion', 'kraefte', 'kreuz'] as const
 const ref = (level: Level, s: number) => ({ level, seed: blockSeed(BLOCKS[Math.floor(s / 1000)], (s % 1000) + (s < 1000 ? 0 : 1)) })
 const SEEDS = (n: number) => BLOCKS.flatMap((_, b) => Array.from({ length: n }, (_, i) => b * 1000 + i + (b === 0 ? 1 : 0)))
 const close = (a: number, b: number) => Math.abs(a - b) < 1e-9 * Math.max(1, Math.abs(a), Math.abs(b))
@@ -191,6 +191,20 @@ describe('prüfen', () => {
     expect(checkVectorEntries(between, [['420']]).kind).toBe('wrong')
     const path = { parts: readResult('s = 5\\,\\text{m}')!, wrongs: [[]] }
     expect(checkVectorEntries(path, [['5m']]).kind).toBe('correct')
+  })
+
+  it('zwei Vektoren als Lösungen in beliebiger Reihenfolge, einer vergessen (Schritt 4a)', () => {
+    const check = { parts: readResult('\\vec n_1 = \\begin{pmatrix} 2 \\\\ -1 \\\\ 2 \\end{pmatrix},\\; \\vec n_2 = \\begin{pmatrix} -2 \\\\ 1 \\\\ -2 \\end{pmatrix}')!, wrongs: [[], []] }
+    expect(checkVectorEntries(check, [['2', '-1', '2'], ['-2', '1', '-2']]).kind).toBe('correct')
+    expect(checkVectorEntries(check, [['-2', '1', '-2'], ['2', '-1', '2']]).kind).toBe('correct')
+    const one = checkVectorEntries(check, [['', '', ''], ['2', '-1', '2']])
+    expect(one.kind).toBe('wrong')
+    expect(one.error?.id).toBe('vec-one-solution')
+    expect(one.marks).toEqual([[true, true, true], [false, false, false]])
+    // vertauscht und ein Eintrag falsch: markiert an der Stelle der Eingabe
+    const wrong = checkVectorEntries(check, [['-2', '1', '-3'], ['2', '-1', '2']])
+    expect(wrong.kind).toBe('wrong')
+    expect(wrong.marks).toEqual([[false, false, true], [false, false, false]])
   })
 
   it('leer, unlesbar, gerundet, nicht fertig', () => {
