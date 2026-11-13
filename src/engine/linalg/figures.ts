@@ -53,6 +53,8 @@ export type DrawAngle = {
   // Beschriftung (LaTeX ohne $), z. B. \varphi oder 60^\circ
   readonly label?: string
   readonly phase?: number
+  // Ebene: Winkel gegen den Uhrzeigersinn von u nach v, auch über 180° (Richtung einer Kraft, Schritt 3b)
+  readonly ccw?: true
 }
 
 export type VectorDrawing = {
@@ -66,6 +68,8 @@ export type VectorDrawing = {
   readonly angles?: readonly DrawAngle[]
   // Beschreibung (Text mit Formeln) unter dem Bild und für Vorlesehilfen
   readonly caption: string
+  // Szene ohne Gitter und Achsen (schiefe Ebene, Schritt 3b): Die Koordinaten sind nur Zeichnung, der Ursprung muss nicht ins Bild
+  readonly scene?: true
   // fester Ausschnitt der Ebene (Zieh-Aufgaben, Schritt 2b): Das Bild springt beim Ziehen nicht
   readonly frame?: { readonly xmin: number; readonly xmax: number; readonly ymin: number; readonly ymax: number }
   // Name des Knopfs zum Abspielen, wenn nicht „Abspielen" (Projektion, Schritt 3: „Licht an")
@@ -92,6 +96,8 @@ export function drawingCoordinates(d: VectorDrawing): (readonly number[])[] {
     ...d.segments.flatMap((s) => [s.from, s.to]),
     ...d.polygons.flatMap((p) => p.points),
     ...(d.angles ?? []).map((a) => a.at),
+    // Winkel über 180° (Schritt 3b): Platz für Bogen und Beschriftung auf der anderen Seite
+    ...(d.angles ?? []).filter((a) => a.ccw).map((a) => anglePath(a, 0.15 * Math.min(Math.hypot(...a.u), Math.hypot(...a.v))).labelAt),
     // der typische Fehler gehört zum Ausschnitt, damit das Bild beim Einblenden nicht springt
     ...(d.mistake?.arrows ?? []).flatMap((a) => [a.from, a.to]),
     ...(d.mistake?.segments ?? []).flatMap((s) => [s.from, s.to]),
@@ -116,6 +122,14 @@ export function anglePath(a: DrawAngle, r: number): { readonly points: readonly 
   const c = Math.max(-1, Math.min(1, dot(e1, vn)))
   const theta = Math.acos(c)
   const at = (k: readonly number[], s: number) => a.at.map((x, i) => x + s * k[i])
+  // gegen den Uhrzeigersinn über 180° (nur in der Ebene): Bogen über die andere Seite
+  if (a.ccw && e1.length === 2 && e1[0] * vn[1] - e1[1] * vn[0] < -1e-9) {
+    const turn = 2 * Math.PI - theta
+    const rot = (t: number) => [Math.cos(t) * e1[0] - Math.sin(t) * e1[1], Math.sin(t) * e1[0] + Math.cos(t) * e1[1]]
+    const n = Math.max(6, Math.ceil(turn / 0.12))
+    const points = Array.from({ length: n + 1 }, (_, k) => at(rot((turn * k) / n), r))
+    return { points, right: false, labelAt: at(rot(turn / 2), r * 2.3) }
+  }
   const bis = e1.map((x, i) => x + vn[i])
   const bisector = len(bis) < 1e-9 ? e1 : bis.map((x) => x / len(bis))
   if (Math.abs(c) < 1e-9) {

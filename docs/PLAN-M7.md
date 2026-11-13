@@ -1,6 +1,6 @@
 # Plan für Meilenstein 7: Vektoren, Geraden und Ebenen, Matrizen
 
-Status: **freigegeben** (Nutzer, 12.11.2026: „Passt alles“). Schritte 1a, 1b, 2a, 2b und 3a fertig (12.11.2026).
+Status: **freigegeben** (Nutzer, 12.11.2026: „Passt alles“). Schritte 1a, 1b, 2a, 2b und 3a fertig (12.11.2026), 3b fertig (13.11.2026).
 
 Entwurf zum Ansehen und Anfassen (privat, nur für den Nutzer):
 https://claude.ai/artifact/WXe4sjavAGF64jyAWSa3hi. Er zeigt acht Bilder und Aufgaben im geplanten Stil. Die Seite ist
@@ -101,7 +101,7 @@ Animationen starten nur auf Knopfdruck („Abspielen“) und entfallen, wenn am 
   vergessen, Zeile statt Spalte (Falk, Cramer), Produkt nicht definiert, $(AB)^{\mathsf T} = A^{\mathsf T}B^{\mathsf T}$,
   $\lambda$ statt $\lambda^n$, Vorzeichen beim Zeilentausch, Sarrus bei 4×4, rechte Seite vergessen, Nullzeile falsch
   gedeutet, gleicher Parameter für zwei Geraden, beim Ziehen (2b): nur vertauscht oder nur ein Vorzeichen geändert, rechter Winkel als spitz
-  oder stumpf gezählt, rechter Winkel an der falschen Ecke, Seiten statt Diagonalen senkrecht, bei der Projektion (3a) die 15 Fehler aus Schritt 3a, cos statt sin bei Gerade–Ebene, „$A - 2$“ ohne $E$, auf der falschen
+  oder stumpf gezählt, rechter Winkel an der falschen Ecke, Seiten statt Diagonalen senkrecht, bei der Projektion (3a) die 15 Fehler aus Schritt 3a, bei den Kräften (3b) die 26 Fehler aus Schritt 3b, cos statt sin bei Gerade–Ebene, „$A - 2$“ ohne $E$, auf der falschen
   Seite ausgeklammert. Jede mit Katalogbeispiel, eigenem Text für „Warum ist das falsch?“ und Platz auf einer Lernkarte
   (Regeln aus CLAUDE.md).
 - **Aufgabennummern** wie seit M6 mit Baustein (`taskNumber.ts`); neue Bausteine bekommen die nächsten freien Nummern in
@@ -168,8 +168,24 @@ Request.
      addiert, ganzen Vektor abgezogen, Länge des Schattens durch das Quadrat geteilt, Betrag vergessen, durch das
      Längenquadrat teilen vergessen, Stützpunkt vergessen, vom falschen Punkt abgetragen, falsche Strecke gemessen,
      nur auf einen Vektor projiziert, Faktoren vertauscht.
-   - **3b:** Baustein „Kräfte“: Kräfte aus Betrag und Winkel, resultierende Kraft mit Winkel (Quadrant), schiefe Ebene
-     (Hangabtrieb und Normalkraft als Zerlegung wie in 3a), Arbeit $W = \vec F \cdot \vec s$, Drehmoment in der Ebene.
+   - **3b (fertig, 13.11.2026):** Baustein „Kräfte“ (`kraefte`, Code 24) in den Stufen 1 bis 5, geführt und frei, mit
+     Einheiten (N, Nm, J, m). Sieben Arten: Kraft zerlegen (Winkel ab der $x$-Achse in allen Quadranten oder ab der
+     $y$-Achse), Betrag und Winkel aus den Komponenten (Hilfswinkel über den Tangens, dann der Quadrant),
+     Resultierende (Stufe 2 in Komponenten, Stufe 3 aus Betrag und Winkel, Stufe 4 Gegenkraft im Gleichgewicht),
+     schiefe Ebene (Stufe 1 mit $\sin$ und $\cos$, Stufe 3 als Projektion wie in 3a, Stufe 4 waagrechte Haltekraft,
+     Stufe 5 als Vektorgleichung mit der Normalenrichtung), Arbeit (Skalarprodukt, mit Punkten, mit Betrag und Winkel,
+     umgestellt nach Winkel oder Weg, Stufe 5 mit Parameter), Drehmoment in der Ebene (um $O$, um $A$, zwei Kräfte,
+     Stufe 5 Momentengleichgewicht), Seilkräfte am Knoten (Stufe 4 ein Seil waagrecht, Stufe 5 beide schräg). Bilder:
+     Komponenten zum Abspielen, Winkel auch über $180^\circ$, Krafteck, schiefe Ebene als Szene mit rechtem Winkel,
+     Knoten mit Seilen. Fünf Lernkarten, 26 neue typische Fehler: Sinus und Kosinus vertauscht, Vorzeichen nicht aus
+     dem Quadranten, Betrag der Kraft vergessen, Bruch im Tangens umgedreht, Wert des Taschenrechners ungeprüft
+     übernommen, falscher Quadrant, Beträge addiert statt Vektoren, abgezogen statt addiert, Gegenkraft mit falschem
+     Vorzeichen, ganze Kraft statt Anteil, falsch umgestellt, am Hang $\sin$ und $\cos$ vertauscht, waagrechte
+     Haltekraft wie die Hangabtriebskraft, Anteil der Haltekraft in der Normalkraft vergessen, Normalenrichtung
+     falsch, Winkel zwischen Kraft und Weg vergessen, Vorzeichen der Arbeit falsch gedeutet, Reihenfolge im Moment
+     vertauscht, Plus statt Minus im Moment, Skalarprodukt statt Moment, Hebel ab dem Ursprung, Hebelarm schräg
+     gemessen, Drehsinn falsch abgelesen, Richtung nicht auf Länge 1 gebracht, falsche Komponente genommen,
+     Seilkräfte vertauscht.
 4. **Kreuzprodukt und Spatprodukt:** räumliche Ansicht zum Drehen, Schema mit Hilfszeilen, Flächen und Volumen
    (Spat, Prisma, Pyramide, Tetraeder), komplanar, Volumen mit Parameter.
 5. **Linearkombination und Basis:** Spann im Raum, kleine Gleichungssysteme Schritt für Schritt.

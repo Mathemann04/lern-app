@@ -7,8 +7,8 @@ import { type VectorDrawing, emptyDrawing } from './figures.ts'
 import { type Vec, arrowName, vec, vecAdd, vecLatex, vecNumbers, vecSub } from './vec.ts'
 
 // Gemeinsame Teile der Vektor-Baukästen (M7): Typen, Schritt mit Auswahl, Zufallszahlen, Buchstaben, Bilder-Hilfen und
-// der Verbindungsvektor. Genutzt von vectorTasks.ts (Rechnen und Länge), dotTasks.ts (Skalarprodukt und Winkel) und projTasks.ts
-// (Projektion und Zerlegung).
+// der Verbindungsvektor. Genutzt von vectorTasks.ts (Rechnen und Länge), dotTasks.ts (Skalarprodukt und Winkel), projTasks.ts
+// (Projektion und Zerlegung) und forceTasks.ts (Kräfte).
 
 export type VectorKind =
   | 'connect'
@@ -40,6 +40,14 @@ export type VectorKind =
   | 'foot'
   | 'projParam'
   | 'spanProjection'
+  // Kräfte (M7 Schritt 3b, forceTasks.ts)
+  | 'forceComponents'
+  | 'forcePolar'
+  | 'resultant'
+  | 'incline'
+  | 'work'
+  | 'torque'
+  | 'knot'
 
 export type VectorTask = GuidedTaskBase & {
   readonly kind: VectorKind
@@ -72,6 +80,12 @@ export const CARD = {
   projektion: 'vec-projektion',
   zerlegung: 'vec-zerlegung',
   lot: 'vec-lot',
+  // Kräfte (M7 Schritt 3b)
+  kraft: 'vec-kraft',
+  resultierende: 'vec-resultierende',
+  schiefeEbene: 'vec-schiefe-ebene',
+  arbeit: 'vec-arbeit',
+  drehmoment: 'vec-drehmoment',
 } as const
 
 // ------------------------------------------------------------------ Hilfen

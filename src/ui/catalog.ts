@@ -310,7 +310,7 @@ const vectorLevels: LevelPreview[] = [
     available: true,
     name: 'Klausur',
     title: 'Klausur – mit Parameter oder in mehr Dimensionen',
-    examples: [String.raw`\left\lvert \begin{pmatrix} 2t \\ 1 \\ -2 \end{pmatrix} \right\rvert = 3`, String.raw`\begin{pmatrix} 3 \\ -5 \end{pmatrix} \cdot \begin{pmatrix} 3t \\ 3 \end{pmatrix} < 0`],
+    examples: [String.raw`\left\lvert \begin{pmatrix} 2t \\ 1 \\ -2 \end{pmatrix} \right\rvert = 3`, String.raw`\begin{pmatrix} 3 \\ -5 \end{pmatrix} \cdot \begin{pmatrix} 3t \\ 3 \end{pmatrix} < 0`, String.raw`F = F_G\tan 30^\circ`],
   },
   {
     level: 5,
@@ -801,7 +801,7 @@ export const SUBJECTS: readonly Subject[] = [
           {
             id: VECTORS,
             title: 'Vektoren',
-            description: 'Mit Pfeilen rechnen, Längen, Skalarprodukt und Winkel, Projektion und Zerlegung, mit Bildern zum Abspielen und Drehen',
+            description: 'Mit Pfeilen rechnen, Längen, Skalarprodukt und Winkel, Projektion und Zerlegung, Kräfte, mit Bildern zum Abspielen und Drehen',
             icon: 'vectors',
             tone: 'cyan',
             cards: 'vektoren',

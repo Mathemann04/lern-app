@@ -11,7 +11,7 @@ paths:
 Plan: docs/PLAN-M7.md. Tätigkeit „Vektoren“ (Id `vektoren`) im Gebiet „Vektoren und Matrizen“ (`lineare-algebra`, Farbe
 `cyan`, Bild `vectors` in `AreaIcon.tsx`), Bausteine in `tasks/blocks.ts` (`VECTOR_BLOCKS`, Gruppe `vektor-grundlagen`,
 `VECTOR_PLAYABLE_COMBOS`; Bausteine `rechnen`, Code 21, Nummern `rechnen.2-4711`, seit Schritt 2a `skalar`, Code 22, seit
-Schritt 3a `projektion`, Code 23;
+Schritt 3a `projektion`, Code 23, seit Schritt 3b `kraefte`, Code 24;
 jeder Baustein allein spielbar, `buildVectorTask` wählt die Arten nach dem Baustein in der Nummer). Freier Modus seit Schritt 1b (`free: true`),
 gezieltes Üben noch nicht (`focus: false`).
 
@@ -52,13 +52,24 @@ gezieltes Üben noch nicht (`focus: false`).
   `drawingCoordinates` nimmt den Fehler mit (Ausschnitt springt nicht); `VectorFigure` mit Knopf „Typischen Fehler
   zeigen“/„Fehler ausblenden“ (`aria-pressed`). Stufe 5 mit Betrag: Skalarprodukt nie ohne Zahl (sonst wäre
   „Vorzeichen falsch“ gleichwertig). Tests in `projTasks.test.ts` (Gleichungen mit Betrag an vielen Stellen verglichen).
+- Kräfte (Schritt 3b): `linalg/forceTasks.ts`, Arten in `FORCE_KINDS_BY_LEVEL` (forceComponents, forcePolar, resultant,
+  incline, work, torque, knot). Zahlen als `Surd` (k·√r) mit `sMul`, `sAdd` (nur gleiche Wurzel, sonst null), Vektoren
+  der Ebene `SV`; besondere Winkel aus `TRIG` (30°, 45°, 60°) mit Quadrant (`trigOf`, `fullAngle`, `direction` erkennt
+  Hilfswinkel und Quadrant). Schritte `componentStep`, `magnitudeStep`, `refAngleStep` (tan α′), `quadrantStep`,
+  `polarVectorStep`, `sumStep`, `momentStep` (M = r_x F_y − r_y F_x), `senseStep`, `workStep`, `unitStep`. Ergebnisse
+  mit Einheit (`\,\text{N}`, `Nm`, `J`, `m`; der freie Modus zeigt sie als `suffix` hinter dem Kästchen, `readEntry`
+  streicht getippte Einheiten), Namen nie mit Index 1 oder 2 (sonst „zwei Lösungen“). Bilder: `angleFromX` mit `ccw`
+  (Bogen gegen den Uhrzeigersinn auch über 180°, `anglePath`; Schenkel `u` so lang wie der Pfeil, sonst wird der Bogen
+  winzig), `forcesDrawing` (Krafteck, Gegenkraft am Punkt), `inclineDrawing` und Arbeit mit Winkel als `scene` (ohne
+  Gitter, `planeView` ohne Ursprung), `knotDrawing` (Kräfte verkleinert), `torqueDrawing`. `planeView` lässt bei großen
+  Zahlen 8 % Rand. Tests in `forceTasks.test.ts` (Gegenprobe mit Math.cos/sin, Gleichungen an vielen Stellen).
 - `linalg/vectorTasks.ts`: Baukasten. Je Art (`VectorKind`) eine Funktion, die die ganze geführte Aufgabe baut (Schritte
   mit `choiceStep`: falsche Antworten ohne Doppelte, höchstens drei, aus `errorRules.ts`; Bilder; Ergebnis; Form;
   `answer` und `data` für die Gegenprobe in Tests). Arten je Stufe in `KINDS_BY_LEVEL`: Stufe 1 Ebene, 2 Raum, 3 zwei
   Rechnungen zusammen, 4 Parameter oder vier und fünf Dimensionen, 5 alles ineinander. Gibt eine Art in einem Schritt
   weniger als drei Antworten, zieht sie neu (Schleife). Kennzahlen der Abwechslung wie überall (100 Formen unter 200,
   keine über 3 %); die Form enthält Art, Dimension, Variante, Buchstaben und Zahl der negativen Einträge.
-- `linalg/errorRules.ts`: 59 typische Fehler (22 aus Schritt 1, 18 zum Skalarprodukt, 4 beim Ziehen, 15 zur Projektion) (`vec-…`), im Katalog `errorCatalog.ts` unter `vektoren`; Lernkarten in
+- `linalg/errorRules.ts`: 85 typische Fehler (22 aus Schritt 1, 18 zum Skalarprodukt, 4 beim Ziehen, 15 zur Projektion, 26 zu Kräften) (`vec-…`), im Katalog `errorCatalog.ts` unter `vektoren`; Lernkarten in
   `explain/vectorCards.ts` (Ordner `vektoren`, Beispiele `{ vector: { kind, level, seed } }`, gerechnet vom Baukasten,
   in `CardBody.tsx` mit Bild und Rechenweg).
 - `linalg/vectorEngine.ts`: Anschluss an `ui/courseEngines.ts` (planen, Form, neue Nummer, Beispiel).

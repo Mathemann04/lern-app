@@ -22,10 +22,12 @@ const MAX_HEIGHT = 260
 
 export function planeView(d: VectorDrawing): View {
   if (d.frame) return frameView(d.frame)
-  const coords = [[0, 0], ...drawingCoordinates(d)]
+  const coords = [...(d.scene ? [] : [[0, 0]]), ...drawingCoordinates(d)]
   const xs = coords.map((c) => c[0])
   const ys = coords.map((c) => c[1])
-  const pad = 0.9
+  // Rand: ein knappes Kästchen, bei großen Zahlen (Kräfte in Newton, Schritt 3b) ein Anteil der Größe
+  const size = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys))
+  const pad = Math.max(0.9, 0.08 * size)
   let xmin = Math.floor(Math.min(...xs) - pad)
   let xmax = Math.ceil(Math.max(...xs) + pad)
   let ymin = Math.floor(Math.min(...ys) - pad)
@@ -44,7 +46,7 @@ export function planeView(d: VectorDrawing): View {
     width: (xmax - xmin) * unit,
     height: (ymax - ymin) * unit,
     project: (p) => [(p[0] - xmin) * unit, (ymax - p[1]) * unit],
-    grid: { xmin, xmax, ymin, ymax, step },
+    ...(d.scene ? {} : { grid: { xmin, xmax, ymin, ymax, step } }),
   }
 }
 
