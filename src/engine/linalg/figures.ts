@@ -36,6 +36,10 @@ export type DrawSegment = {
   readonly phase?: number
   // Beschriftung an der Mitte (LaTeX ohne $), z. B. die Länge einer Kathete
   readonly label?: string
+  // Stelle der Beschriftung als Anteil der Strecke (0 am Anfang, 1 am Ende), sonst die Mitte
+  readonly labelAt?: number
+  // beim Abspielen: die Enden gleiten von hier an ihren Platz, die Strecke ist dabei ganz da (Gerade dreht sich, Schritt 10b)
+  readonly slideFrom?: readonly [readonly number[], readonly number[]]
 }
 
 export type DrawPolygon = {
@@ -44,6 +48,10 @@ export type DrawPolygon = {
   readonly phase?: number
   // beim Abspielen: jede Ecke wandert von hier an ihren Platz (Spat zieht sich aus der Grundfläche auf, Schritt 4b)
   readonly from?: readonly (readonly number[])[]
+  // Name an einer Ecke (LaTeX ohne $), z. B. die Zeile einer Tabelle (Ebenen beim Gauß-Verfahren, Schritt 10b)
+  readonly label?: string
+  // Nummer der Ecke für den Namen (sonst 2), damit gleiche Flächen ihre Namen nicht übereinander tragen
+  readonly labelCorner?: number
 }
 
 // Winkel zwischen zwei Pfeilen am Scheitel at (Richtungen u und v): als Bogen, bei 90° als kleines Quadrat
@@ -83,6 +91,8 @@ export type VectorDrawing = {
 export type DrawMistake = {
   readonly arrows: readonly DrawArrow[]
   readonly segments: readonly DrawSegment[]
+  // rote Flächen (verschobene Ebene beim Gauß-Verfahren, Schritt 10b)
+  readonly polygons?: readonly DrawPolygon[]
   // Erklärung (Text mit Formeln), ersetzt beim Einblenden die Beschreibung
   readonly caption: string
 }
@@ -95,21 +105,22 @@ export function drawingCoordinates(d: VectorDrawing): (readonly number[])[] {
   return [
     ...d.arrows.flatMap((a) => [a.from, a.to, ...(a.slideFrom ? [a.slideFrom] : [])]),
     ...d.points.map((p) => p.at),
-    ...d.segments.flatMap((s) => [s.from, s.to]),
-    ...d.polygons.flatMap((p) => p.points),
+    ...d.segments.flatMap((s) => [s.from, s.to, ...(s.slideFrom ?? [])]),
+    ...d.polygons.flatMap((p) => [...p.points, ...(p.from ?? [])]),
     ...(d.angles ?? []).map((a) => a.at),
     // Winkel über 180° (Schritt 3b): Platz für Bogen und Beschriftung auf der anderen Seite
     ...(d.angles ?? []).filter((a) => a.ccw).map((a) => anglePath(a, 0.15 * Math.min(Math.hypot(...a.u), Math.hypot(...a.v))).labelAt),
     // der typische Fehler gehört zum Ausschnitt, damit das Bild beim Einblenden nicht springt
     ...(d.mistake?.arrows ?? []).flatMap((a) => [a.from, a.to]),
     ...(d.mistake?.segments ?? []).flatMap((s) => [s.from, s.to]),
+    ...(d.mistake?.polygons ?? []).flatMap((p) => p.points),
   ]
 }
 
 // Bild mit eingeblendetem typischem Fehler; die roten Pfeile liegen unter den richtigen, damit diese sichtbar bleiben
 export function withMistake(d: VectorDrawing): VectorDrawing {
   if (!d.mistake) return d
-  return { ...d, arrows: [...d.mistake.arrows, ...d.arrows], segments: [...d.segments, ...d.mistake.segments], caption: d.mistake.caption }
+  return { ...d, arrows: [...d.mistake.arrows, ...d.arrows], segments: [...d.segments, ...d.mistake.segments], polygons: [...d.polygons, ...(d.mistake.polygons ?? [])], caption: d.mistake.caption }
 }
 
 export const emptyDrawing = (dim: 2 | 3, caption: string): VectorDrawing => ({ dim, arrows: [], points: [], segments: [], polygons: [], caption })

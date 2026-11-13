@@ -272,3 +272,42 @@ test('Gauß-Verfahren frei: keine Lösung als Auswahl, Lösungsmenge mit Paramet
   await expectCleanPage(page, 'Gauß frei')
   expect(errors).toEqual([])
 })
+
+// Gauß-Verfahren mit Bildern (M7 Schritt 10b): vor der Antwort kein Bild, danach die Geraden mit „Abspielen“ und dem
+// typischen Fehler „rechte Seite vergessen“ (rot); im Raum Ebenen; beim Ergebnis der Schnittpunkt; im freien Modus das
+// Bild zum Ergebnis in der Rückmeldung
+test('Gauß-Verfahren: Geraden und Ebenen als Bild nach der Antwort und beim Ergebnis', async ({ page }) => {
+  const errors = collectErrors(page)
+  const figure = page.getByTestId('vector-figure')
+  // gauss.1-81: zwei Geraden, erster Schritt „Spalte 1: Nullen erzeugen“
+  await page.goto('./#/ueben/matrizen/gauss.1-81')
+  await expect(page.locator('#question')).toBeVisible()
+  await expect(figure).toHaveCount(0)
+  const count = await answers(page).count()
+  for (let i = 0; i < count; i++) {
+    await answers(page).nth(i).click()
+    await correctFeedback(page).or(wrongFeedback(page)).waitFor()
+    if (await correctFeedback(page).isVisible()) break
+  }
+  await expect(figure).toBeVisible()
+  await expect(figure).toContainText('dreht Gerade II um ihren Schnittpunkt')
+  await page.getByRole('button', { name: 'Abspielen' }).click()
+  await page.getByRole('button', { name: 'Typischen Fehler zeigen' }).click()
+  await expect(figure).toContainText('Rechte Seite nicht mitgerechnet')
+  await expectCleanPage(page, 'Gauß Bild Gerade')
+  await page.goto('./#/ueben/matrizen/gauss.1-81')
+  await solveWholeTask(page)
+  await expect(figure).toContainText('schneiden sich in genau einem Punkt')
+  // gauss.2-3: drei Ebenen, Bild beim Ergebnis
+  await page.goto('./#/ueben/matrizen/gauss.2-3')
+  await solveWholeTask(page)
+  await expect(figure).toContainText('Alle drei Ebenen gehen durch genau einen Punkt')
+  await expectCleanPage(page, 'Gauß Bild Ebenen')
+  // frei: keine Lösung, Bild in der Rückmeldung
+  await page.goto('./#/frei/matrizen/gauss.1-1')
+  await expect(figure).toHaveCount(0)
+  await page.getByRole('radio', { name: 'keine Lösung' }).click()
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(figure).toContainText('parallel und verschieden')
+  expect(errors).toEqual([])
+})

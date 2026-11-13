@@ -53,6 +53,9 @@ export type GuidedStep = {
   readonly figure?: string
   // Vektor-Bild unter der Frage (M7, engine/linalg/figures.ts)
   readonly drawing?: VectorDrawing
+  // Vektor-Bild, das erst nach der Antwort erscheint (statt drawing), z. B. die gedrehte Gerade beim Gauß-Verfahren
+  // (M7 Schritt 10b): Vorher verriete es die Antwort
+  readonly solvedDrawing?: VectorDrawing
   // Falk-Schema unter der Frage (M7 Schritt 8b); abspielen lässt es sich erst nach der Antwort
   readonly falk?: FalkFigure
   // Sarrus-Schema unter der Frage (M7 Schritt 9b); abspielen lässt es sich erst nach der Antwort

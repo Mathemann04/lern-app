@@ -163,14 +163,23 @@ export function VectorFigure({ drawing: given, compact = false, label, drag: dra
         if (q <= 0) return null
         const corners = poly.from ? poly.points.map((p, k) => lerpPoint(poly.from![k], p, q)) : poly.points
         const shown = poly.from ? 1 : q
+        if (poly.label && q > 0.95 && !compact) {
+          // Name nahe einer Ecke, etwas nach innen gerückt (Schritt 10b)
+          const mid = corners.reduce((s, p) => s.map((x, k) => x + p[k] / corners.length), corners[0].map(() => 0))
+          const [lx, ly] = project(lerpPoint(mid, corners[(poly.labelCorner ?? 2) % corners.length], 0.82))
+          labels.push({ key: `f${i}`, x: lx, y: ly, tex: poly.label, color: COLOR[poly.color] })
+        }
         return <polygon key={`poly${i}`} points={corners.map((p) => project(p).join(',')).join(' ')} style={{ fill: COLOR[poly.color], fillOpacity: 0.14 * shown, stroke: COLOR[poly.color], strokeOpacity: 0.5 * shown }} strokeWidth={1.5} />
       })}
       {drawing.segments.map((seg, i) => {
         const q = progress(seg.phase)
         if (q <= 0) return null
-        const [x1, y1] = project(seg.from)
-        const [x2, y2] = project(lerpPoint(seg.from, seg.to, q))
-        if (seg.label && q > 0.95) labels.push({ key: `s${i}`, x: (x1 + x2) / 2 + (y2 - y1 === 0 ? 0 : 12), y: (y1 + y2) / 2 + (y2 - y1 === 0 ? -13 : 0), tex: seg.label, color: COLOR.muted })
+        // gleitende Strecke (Schritt 10b): ganz da, die Enden wandern von slideFrom an ihren Platz
+        const [x1, y1] = project(seg.slideFrom ? lerpPoint(seg.slideFrom[0], seg.from, q) : seg.from)
+        const [x2, y2] = project(seg.slideFrom ? lerpPoint(seg.slideFrom[1], seg.to, q) : lerpPoint(seg.from, seg.to, q))
+        const at = seg.labelAt ?? 0.5
+        if (seg.label && q > 0.95)
+          labels.push({ key: `s${i}`, x: x1 + (x2 - x1) * at + (y2 - y1 === 0 ? 0 : 12), y: y1 + (y2 - y1) * at + (y2 - y1 === 0 ? -13 : 0), tex: seg.label, color: seg.labelAt === undefined ? COLOR.muted : COLOR[seg.color] })
         return <line key={`seg${i}`} x1={x1} y1={y1} x2={x2} y2={y2} style={{ stroke: COLOR[seg.color] }} strokeWidth={seg.dashed ? 1.6 : 2} strokeDasharray={seg.dashed ? '5 5' : undefined} strokeLinecap="round" />
       })}
       {(drawing.angles ?? []).map((angle, i) => {

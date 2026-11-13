@@ -97,7 +97,9 @@ export type ChemCardExample = {
 export type MathCardExample = Expr | Equation | FractionTask | RearrangeTask
 
 // Beispiel einer Vektor-Karte (M7): eine Aufgabe des Baukastens (Art, Stufe, Startwert), von der Engine mit Bild gerechnet
-export type VectorCardExample = { readonly vector: { readonly kind: VectorKind; readonly level: Level; readonly seed: number } }
+// picture 'step': statt des Bildes zum Ergebnis das Bild des ersten Schritts, das erst nach der Antwort erscheint
+// (Gauß-Verfahren, M7 Schritt 10b: die Gerade dreht sich bei der Umformung)
+export type VectorCardExample = { readonly vector: { readonly kind: VectorKind; readonly level: Level; readonly seed: number; readonly picture?: 'step' } }
 
 // Beispiel einer Karte: beim Ableiten eine Funktion (beim impliziten Ableiten eine Gleichung), bei
 // Brüchen eine Aufgabe der Bruch-Engine, beim Umstellen eine Umstell-Aufgabe, in Chemie ein Text

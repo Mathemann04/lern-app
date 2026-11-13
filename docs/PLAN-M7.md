@@ -1,6 +1,6 @@
 # Plan für Meilenstein 7: Vektoren, Geraden und Ebenen, Matrizen
 
-Status: **freigegeben** (Nutzer, 12.11.2026: „Passt alles“). Schritte 1a, 1b, 2a, 2b und 3a fertig (12.11.2026), 3b, 4a, 4b, 5, 6, 7a, 7b, 8a, 8b, 9a, 9b und 10a fertig (13.11.2026); offen 10b.
+Status: **freigegeben** (Nutzer, 12.11.2026: „Passt alles“). Schritte 1a, 1b, 2a, 2b und 3a fertig (12.11.2026), 3b, 4a, 4b, 5, 6, 7a, 7b, 8a, 8b, 9a, 9b, 10a und 10b fertig (13.11.2026); offen ab 11.
 
 Entwurf zum Ansehen und Anfassen (privat, nur für den Nutzer):
 https://claude.ai/artifact/WXe4sjavAGF64jyAWSa3hi. Er zeigt acht Bilder und Aufgaben im geplanten Stil. Die Seite ist
@@ -383,8 +383,18 @@ Request.
       freie Variable übersehen, weniger Stufen als Variablen als „keine Lösung“, Variable mit Stufe frei gewählt, keine bzw. zu viele frei, Vorzeichen beim Rüberbringen,
       nicht geteilt, Zahl vor der Variablen vergessen, falsch herum geteilt, abgezogen statt geteilt, Reihenfolge der
       Variablen, die 1 der freien Variablen vergessen, Stützvektor und Richtung vertauscht.
-    - **10b:** Bilder: zwei Geraden (zwei Unbekannte), drei Ebenen (drei Unbekannte); die richtige Umformung dreht die Gerade
-      um den Schnittpunkt, „rechte Seite vergessen“ schiebt sie weg (rot); auch auf den Lernkarten.
+    - **10b (fertig, 13.11.2026):** Bilder bei zwei Unbekannten (jede Zeile eine Gerade) und drei Unbekannten (jede Zeile
+      eine Ebene, zum Drehen), bei vier Unbekannten keins. Nach der Antwort in jedem Schritt „Nullen erzeugen“: die Zeilen
+      in ihren Farben (I blau, II orange, III blaugrün); „Abspielen“ dreht jede umgeformte Gerade um ihren Schnittpunkt mit
+      der Stufenzeile (Ebene um die Schnittgerade, gestrichelt) aus der alten Lage (blass gestrichelt) in die neue, die
+      parallel zur Achse der weggefallenen Variablen liegt. „Typischen Fehler zeigen“: rechte Seite nicht mitgerechnet, die
+      Gerade bzw. Ebene liegt parallel verschoben (rot) und geht nicht mehr durch den Schnitt. Wird eine Zeile zu $0 = c$,
+      bleibt ihre alte Lage blass, die Beschreibung sagt „keine Gerade mehr“ (ohne die Antwort des nächsten Schritts zu
+      verraten). Vor der Antwort kein Bild (es verriete sie), auch nicht im freien Modus. Beim Ergebnis (auch im freien
+      Modus in der Rückmeldung): die Gleichungen nacheinander, dann die Lösung (Punkt $S$, Lösungsgerade violett, dieselbe
+      Gerade bzw. Ebene); ohne Lösung nennt die Beschreibung den Grund (parallel, nicht alle durch einen Punkt mit grauen
+      Schnittpunkten, parallele Schnittgeraden gestrichelt). Lernkarten: „Tabelle und Stufenform“ mit der Drehung, die
+      übrigen mit dem Bild zum Ergebnis.
 11. **Gleichungssysteme mit Parameter und Cramer:** Determinante als Polynom, Sonderfälle mit Schieberegler, Rang.
 12. **Inverse und Matrizengleichungen:** 2×2 mit Formel, 3×3 mit Gauß-Jordan Zeile für Zeile, Matrizengleichung erst
     allgemein nach $X$ auflösen (wie beim Umstellen), dann ausrechnen.

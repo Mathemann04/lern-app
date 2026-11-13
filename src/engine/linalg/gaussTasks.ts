@@ -3,6 +3,8 @@ import type { Rng } from '../random/rng.ts'
 import { type Rational, ONE, ZERO, isInteger, isOne, isZero, rat, ratAbs, ratAdd, ratDiv, ratEq, ratMul, ratNeg, ratSign, ratSub, toDecimalString } from '../rational.ts'
 import type { Level } from '../tasks/taskNumber.ts'
 import { termsLatex } from './crossTasks.ts'
+import type { VectorDrawing } from './figures.ts'
+import { elimDrawing, sceneCenter, systemDrawing } from './gaussFigures.ts'
 import { type Built, type VectorKind, type Wrong, choiceStep, math } from './taskKit.ts'
 import { ratLatex, vecLatex } from './vec.ts'
 
@@ -319,7 +321,9 @@ function makeTable(rng: Rng, spec: Spec, level: Level): Tab | null {
 
 // ------------------------------------------------------------------ Schritte
 
-type Ctx = { readonly vars: readonly string[]; readonly n: number }
+// center: Mitte der Bilder (Lösung bzw. ein Punkt der Lösungsmenge, Schritt 10b)
+type Ctx = { readonly vars: readonly string[]; readonly n: number; readonly center: readonly number[] }
+const numsTab = (M: Tab) => M.map((r) => r.map(num))
 
 // Aufstellen der Tabelle aus Gleichungen, wie sie dastehen; falsche aus typischen Abschreibfehlern
 function setupShown(rng: Rng, T: Tab, n: number): { shown: Shown[]; wrongs: [Tab, string][] } {
@@ -481,7 +485,9 @@ function elimStep(rng: Rng, st: Extract<Stage, { kind: 'elim' }>, idx: number, c
   const rhsCalc = `${pf}${ratSign(ri[n]) < 0 && !isOne(o.p) ? `(${ratLatex(ri[n])})` : ratLatex(ri[n])} - ${ratSign(o.q) < 0 ? `(${ratLatex(o.q)})` : ratLatex(o.q)} \\cdot ${ratSign(rr[n]) < 0 ? `(${ratLatex(rr[n])})` : ratLatex(rr[n])} = ${ratLatex(after[o.target][n])}`
   const pivot = before[row][col]
   const crossNote = ops.some((x) => !isOne(x.p)) ? ' Geht das nicht mit einem ganzzahligen Vielfachen, nimmst du über Kreuz mal: Zeile mal Zahl der Stufe, minus Stufenzeile mal Zahl der Zeile.' : ''
-  return choiceStep(rng, {
+  // Bild nach der Antwort: Geraden bzw. Ebenen, die umgeformten drehen sich (Schritt 10b)
+  const solvedDrawing = elimDrawing({ before: numsTab(before), after: numsTab(after), row, targets: ops.map((x) => ({ target: x.target, label: opLabel(x, row) })), n, vars: ctx.vars, center: ctx.center })
+  const step = choiceStep(rng, {
     id: `spalte-${idx}`,
     title: `Spalte ${col + 1}: Nullen erzeugen`,
     question: `Erzeuge in Spalte ${col + 1} unter der $${ratLatex(pivot)}$ in Zeile ${ROMAN[row]} Nullen. Wie sieht die Tabelle danach aus?${showBefore ? `\n$${tabLatex(before, ctx.vars)}$` : ''}`,
@@ -494,6 +500,7 @@ function elimStep(rng: Rng, st: Extract<Stage, { kind: 'elim' }>, idx: number, c
     },
     cards: [GAUSS_CARD.tabelle],
   })
+  return solvedDrawing ? { ...step, solvedDrawing } : step
 }
 
 // Stufenform deuten
@@ -609,11 +616,13 @@ function sameAffine(p: Aff, dirs: readonly Aff[], q: Aff, dirs2: readonly Aff[])
 const solutionLatex = (p: Aff, dirs: readonly Aff[], params: readonly string[]) =>
   `L\\colon \\vec x = ${vecLatex(p)}${dirs.map((d, k) => ` + ${params[k]} ${vecLatex(d)}`).join('')}`
 
+const optional = (resultDrawing: VectorDrawing | undefined) => (resultDrawing ? { resultDrawing } : {})
+
 function buildFrom(rng: Rng, kind: VectorKind, level: Level, spec: Spec): Built | null {
   const T = makeTable(rng, spec, level)
   if (!T) return null
   const { n, vars } = spec
-  const ctx: Ctx = { vars, n }
+  const ctx: Ctx = { vars, n, center: sceneCenter(numsTab(T), n) }
   const stages = runGauss(T, n)
   if (stages.some((s) => s.after.some((r) => r.some((x) => !isInteger(x) || Math.abs(num(x)) > (level <= 3 ? 30 : 40))))) return null
   if (spec.swap !== stages.some((s) => s.kind === 'swap')) return null
@@ -674,6 +683,7 @@ function buildFrom(rng: Rng, kind: VectorKind, level: Level, spec: Spec): Built 
       steps,
       cards,
       resultLatex: `\\text{${LGS_CASES[1]}}`,
+      ...optional(systemDrawing({ T: numsTab(T), n, solution: null })),
       form: formBase,
       data,
       answer: [1],
@@ -754,6 +764,7 @@ function buildFrom(rng: Rng, kind: VectorKind, level: Level, spec: Spec): Built 
       steps,
       cards: [...cards, GAUSS_CARD.rueckwaerts],
       resultLatex: `\\vec x = ${vecLatex(x)}`,
+      ...optional(systemDrawing({ T: numsTab(T), n, solution: { p: x.map(num), dirs: [] } })),
       form: formBase,
       data,
       answer: x.map(num),
@@ -799,6 +810,7 @@ function buildFrom(rng: Rng, kind: VectorKind, level: Level, spec: Spec): Built 
     steps,
     cards: [...cards, GAUSS_CARD.rueckwaerts],
     resultLatex: right,
+    ...optional(systemDrawing({ T: numsTab(T), n, solution: { p: sol.p.map(num), dirs: sol.dirs.map((d) => d.map(num)) } })),
     form: `${formBase}|${params[0]}`,
     data: { ...data, free: free.map((j) => j) },
     answer: [...sol.p, ...sol.dirs.flat()].map(num),

@@ -1279,3 +1279,16 @@ Neue Entscheidungen unten anfügen.
   eine falsche Tabelle zeilengleichwertig zur richtigen sein (alle Tabellen mit Widerspruch und gleichen Zeilen links
   haben dieselbe reduzierte Stufenform); falsch ist sie trotzdem, weil sie nicht das Ergebnis der genannten Umformung
   ist. Neue Tests dafür.
+- 13.11.2026: M7 Schritt 10b (Bilder zum Gauß-Verfahren, Wunsch des Nutzers: „Weiter mit M7, Schritt 10b“; 10a lag da
+  noch als offener Pull Request, 10b baut darauf auf). Festlegungen: Die Bilder der Schritte erscheinen erst nach der
+  Antwort (neues Feld `solvedDrawing`), weil die gedrehte Gerade die neue Tabelle und der Schnittpunkt die Lösung
+  verraten würden; im freien Modus darum nur das Bild zum Ergebnis. Bei „Zeile wird zu $0 = c$“ sagt die Beschreibung nur
+  „keine Gerade mehr“, nicht „keine Lösung“ (das fragt erst der nächste Schritt). Im Raum keine blassen alten Ebenen
+  (zu voll), nur die Drehachse gestrichelt; die Bewegung zeigt „Abspielen“. Mit vier Unbekannten kein Bild. Ohne Lösung
+  zeigt das Bild zum Ergebnis den Grund: parallele Geraden bzw. Ebenen oder (ohne parallele) die Schnittpunkte bzw.
+  Schnittgeraden je zweier Zeilen blass.
+- 13.11.2026: Funde der unabhängigen Prüfung zu M7 Schritt 10b behoben (Geometrie war richtig, Texte nicht immer):
+  „Ohne … parallel zur …-Achse“ nennt bei mehreren gedrehten Ebenen nur noch Variablen, die in allen fehlen; der rote
+  Fehler sagt „so kann die Umformung die Lösungen verändern“ (bei Systemen ohne Lösung bleibt die Lösungsmenge leer);
+  die Beschreibung nennt nur Farben, die im Bild vorkommen (eine Zeile 0 = c ist grau: „grau ihre alte Lage“). Neue
+  Tests prüfen diese Aussagen gegen die Zeilen und dass eine Lösungsgerade im Raum eingezeichnet ist.
