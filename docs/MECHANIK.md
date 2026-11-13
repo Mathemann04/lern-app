@@ -10,6 +10,10 @@ sie löst, welche **Fehler** naheliegen und **welche Schreibweisen** die App gen
 übernehmen muss. Aufgaben entstehen später immer aus der Engine mit eigenen Zahlen
 und eigenen Bildern; Skizzen aus Skript und Lehrbuch werden nie nachgezeichnet.
 
+Am 13.11.2026 kamen 135 Fotos des Lehrbuchs „Technische Mechanik 1 (Statik)“ des
+Nutzers dazu (ganzes Buch: Kapitel 1 bis 9 und Anhang). Was das Buch ergänzt, steht im
+Abschnitt „Lehrbuch“ und bei Reibung; Inhalte, die nur im Buch stehen, sind so markiert.
+
 Grundlage für M11 (Technische Mechanik, laut Roadmap das letzte Fach). In der Spalte
 „Fehler“ steht (S), wenn das Skript selbst davor warnt; alle anderen sind aus dem
 Stoff naheliegend vermutet.
@@ -17,10 +21,9 @@ Stoff naheliegend vermutet.
 ## Was in den Unterlagen fehlt
 
 - **Reibung (Kapitel 9):** kein Skript, nur die Blätter 18 (Haften nach Coulomb) und
-  19 (Seilhaftung, Seilreibung). Reibkegel und die Formel für das Seil um eine Trommel
-  ($S_2 = S_1\, e^{\mu_0 \alpha}$) stehen in keiner Unterlage. Bevor Reibung in die
-  App kommt: Skript nachreichen lassen oder ein frei zugängliches Lehrbuch als Maßstab
-  festlegen.
+  19 (Seilhaftung, Seilreibung). **Geklärt seit 13.11.2026:** Maßstab ist Kapitel 9 des
+  Lehrbuchs (Haftung, Reibung, Haftungswinkel, Seilhaftung und Seilreibung). Zahlenwerte
+  für Reibzahlen nimmt die App aus einer frei zugänglichen Tabelle, nicht aus dem Buch.
 - **Lösungen:** Die meisten Blätter haben keine. Einige (9, 12, 16, 19) haben
   „Lösungsstellen“: nur die Ziffernfolge des Ergebnisses ohne Komma und Einheit, zur
   Selbstkontrolle. Blatt 18 hat nur zu einer Aufgabe einen Lösungshinweis.
@@ -37,7 +40,10 @@ Stoff naheliegend vermutet.
   Drehsinn festlegen.
 - Winkel $\alpha$ einer Kraft wird gegen den Uhrzeigersinn ab der $x$-Achse gemessen:
   $F_x = F\cos\alpha$, $F_y = F\sin\alpha$, $F = \sqrt{F_x^2 + F_y^2}$.
-- Moment einer Kraft um $A$ in der Ebene: $M_A = (x - x_A)F_y - (y - y_A)F_x$.
+- Moment einer Kraft um $A$ in der Ebene: $M^{(A)} = (x - x_A)F_y - (y - y_A)F_x$.
+  Die App schreibt das Moment **um** einen Punkt mit hochgestelltem Punkt ($M^{(A)}$, wie
+  das Lehrbuch) und das Einspannmoment **im** Lager $A$ als $M_A$, damit beides nicht
+  verwechselt wird.
 - Räumlich (Kapitel 6): rechtshändiges $x$-$y$-$z$-System, oft gedreht gezeichnet;
   Moment als $\vec M_A = \vec r_A \times \vec F$, immer in dieser Reihenfolge.
 - **Schnittgrößen (Kapitel 8): $x$ entlang der Balkenachse, $z$ nach unten**, $y$ nach
@@ -55,7 +61,8 @@ Stoff naheliegend vermutet.
   die App: $S_1, S_2, \ldots$; Knoten mit römischen Zahlen.
 - Schnittgrößen $N$, $Q$, $M$ als Funktionen $N(x)$, $Q(x)$, $M(x)$; räumlich $N$,
   $Q_y$, $Q_z$, $M_T$, $M_y$, $M_z$.
-- Reibung: $\mu_0$ für Haften, $\mu$ für Gleiten.
+- Reibung: $\mu_0$ für Haften, $\mu$ für Gleiten; Haftungskraft $H$ (Reaktionskraft,
+  Richtung frei annehmbar), Reibungskraft $R$ (eingeprägt, Richtung festgelegt).
 
 **Vorzeichen**
 - Unbekannte Kräfte werden in positiver Achsrichtung angenommen. Ein negatives
@@ -113,7 +120,8 @@ Festlager der Tabelle. Die App trennt beides mit eigenen Namen.
 **Weitere Regeln**
 - Die vier Axiome: Trägheit, Verschiebung längs der Wirkungslinie (nur am starren
   Körper), Reaktion ($\vec F_{12} = -\vec F_{21}$), Parallelogramm.
-- Drei Kräfte im Gleichgewicht: Ihre Wirkungslinien schneiden sich in einem Punkt.
+- Drei nicht parallele Kräfte im Gleichgewicht: Ihre Wirkungslinien schneiden sich in
+  einem Punkt (drei parallele Kräfte können auch im Gleichgewicht sein).
 - Kräftepaar: Resultierende null, nur Drehwirkung $M = F \cdot h$, frei verschiebbar.
 - Nullstäbe: (1) unbelasteter Knoten mit zwei Stäben, die nicht in einer Linie liegen:
   beide null; (2) belasteter Knoten mit zwei Stäben, Last in Richtung des einen: der
@@ -131,7 +139,12 @@ Festlager der Tabelle. Die App trennt beides mit eigenen Namen.
   Grundflächen im Skript: Dreiecke, Parallelogramm, Trapez, Kreisausschnitt, Halbkreis,
   Kreisabschnitt, Fläche unter einer Parabel; Linie nur der Kreisbogen
   ($r\frac{\sin\alpha}{\alpha}$). Keine Körpertabelle, kein Satz von Guldin.
-- Haften: $|F_H| \le \mu_0 F_N$; nur im Grenzfall gilt Gleichheit.
+- Haften: $|H| \le H_0 = \mu_0 N$; nur im Grenzfall gilt Gleichheit. Gleiten: $R = \mu N$,
+  entgegen der Relativbewegung, $\mu < \mu_0$. Haftungswinkel $\varrho_0$ mit
+  $\tan\varrho_0 = \mu_0$ (Haftungskeil in der Ebene, Haftungskegel im Raum).
+- Seil um eine Trommel (Euler-Eytelwein), $\alpha$ im Bogenmaß:
+  $S_1 e^{-\mu_0\alpha} \le S_2 \le S_1 e^{\mu_0\alpha}$; beim Gleiten $\mu$ statt $\mu_0$,
+  welches Ende stärker gespannt ist, folgt aus der Rutschrichtung.
 
 ## Kräfte in der Ebene (Kapitel 2 bis 4, Blätter 9 und 10)
 
@@ -187,14 +200,67 @@ Festlager der Tabelle. Die App trennt beides mit eigenen Namen.
 | Rahmen (auch schiefwinklig, verzweigt) und Bogen | Strichlinie, Teilsysteme, alle drei Größen; an Ecken wechseln $N$ und $Q$ bei rechtem Winkel die Rollen, $M$ stetig | Strichlinie springt die Seite (S); ⊕/⊖ fehlt (S); Regel $\frac{dM}{dx} = Q$ am Bogen angewandt (S) | M11, Stufe 5 |
 | Räumlicher Träger (abgewinkelt, eingespannt) | vom freien Ende her schneiden, 6 Gleichungen | – | M11, Stufe 5 |
 
-## Reibung (Blätter 18 und 19, ohne Skript)
+## Reibung (Blätter 18 und 19, Lehrbuch Kapitel 9)
 
 | Art | Schema (kurz) | Fehler | Wohin |
 | --- | --- | --- | --- |
-| Haften prüfen (gestapelte Körper, Körper auf schiefer Ebene) | Freischnitt mit Normal- und Haftkraft, Gleichgewicht gibt nötige Haftkraft, Vergleich mit $\mu_0 F_N$; bei mehreren Fugen rutscht die mit der kleinsten Reserve | Haftkraft ohne Prüfung gleich $\mu_0 F_N$ gesetzt; $\mu$ und $\mu_0$ verwechselt; Normalkraft mit sin statt cos | M11, nach Klärung des Maßstabs |
+| Haften prüfen (gestapelte Körper, Körper auf schiefer Ebene) | Freischnitt mit Normal- und Haftkraft, Gleichgewicht gibt nötige Haftkraft, Vergleich mit $\mu_0 F_N$; bei mehreren Fugen rutscht die mit der kleinsten Reserve | Haftkraft ohne Prüfung gleich $\mu_0 F_N$ gesetzt; $\mu$ und $\mu_0$ verwechselt; Normalkraft mit sin statt cos | M11 |
 | Grenzfall: größte Zugkraft, größter Neigungswinkel (Fahrzeug mit Antrieb oder Bremse an einer Achse) | Achslasten aus dem Momentengleichgewicht, nur angetriebene oder gebremste Räder übertragen Haftkraft, Gleichheit an der Grenze | alle Räder angesetzt | M11 |
 | Selbstsperrung (Hebel an Trommel, Bandbremse) | Bedingung, unter der Gleichgewicht für jede Kraft hält: Ungleichung für ein Maß | Richtung der Ungleichung | M11 |
-| Seil um Trommel oder Rollen (Bandbremse in beiden Drehrichtungen, Körper auf schiefer Ebene mit Gegengewicht) | Umschlingungswinkel im Bogenmaß, stärker gespanntes Ende aus der Rutschrichtung, Seilkräfte verknüpfen, Momente an Scheibe und Hebel; beide Richtungen getrennt | Winkel in Grad; Seilenden vertauscht | M11 |
+| Grenzen einer Kraft für Ruhe (Klotz auf rauer schiefer Ebene mit Zusatzkraft): untere Grenze gegen Abrutschen, obere gegen Hochschieben; ohne Kraft Ruhe, solange $\alpha \le \varrho_0$ | je Richtung eigener Freischnitt mit $H$ in Gegenrichtung der drohenden Bewegung, Haftbedingung einsetzen, Ungleichung lösen | nur eine Richtung untersucht; $H$ falsch herum | M11 |
+| Leiter an der Wand (nur Boden rau, oder Boden und Wand rau: statisch unbestimmt, dann Grenzfall oder Haftungskeile) | Gleichgewicht, Haftbedingung an jeder rauen Stelle, Ungleichung für die Stellung | statisch unbestimmten Fall wie bestimmten gerechnet | M11, Stufe 5 |
+| Schraube mit Flachgewinde: Moment zum Heben und Halten, Selbsthemmung | Steigungswinkel aus Ganghöhe und Umfang, Grenzen $F\tan(\alpha - \varrho_0) \le \frac{M}{r} \le F\tan(\alpha + \varrho_0)$, selbsthemmend für $\alpha \le \varrho_0$ | Vorzeichen von $\varrho_0$ vertauscht | M11, Stufe 5 (nur Lehrbuch) |
+| Seil um Trommel oder Rollen (Bandbremse in beiden Drehrichtungen, Körper auf schiefer Ebene mit Gegengewicht, Klotz auf drehender Walze) | Umschlingungswinkel im Bogenmaß, stärker gespanntes Ende aus der Rutschrichtung, Seilkräfte verknüpfen, Momente an Scheibe und Hebel; beide Richtungen getrennt | Winkel in Grad; Seilenden vertauscht | M11 |
+
+## Lehrbuch: was es ergänzt (Fotos vom 13.11.2026)
+
+Das Buch folgt derselben Reihenfolge wie die Vorlesung und geht an einigen Stellen weiter.
+Richtig für die App ist, was Skript und Buch gemeinsam sagen; die **Schreibweise kommt aus
+dem Skript** (danach richtet sich die Klausur), nur wo das Skript nichts festlegt, aus dem
+Buch. Tabellen und Bilder des Buchs werden nie übernommen, sondern selbst gestaltet.
+
+| Kapitel im Buch | Vorlesung | In der App |
+| --- | --- | --- |
+| 1 Grundbegriffe (Kraft, starrer Körper, Schnittprinzip, Wechselwirkung, Einheiten, Lösungsschema in vier Schritten) | Kapitel 1 und 2 | Lernkarten, Nachschlagewerk |
+| 2 Kräfte mit gemeinsamem Angriffspunkt (eben und räumlich, auch zeichnerisch mit Sinus- und Kosinussatz) | Kapitel 3 | M11 |
+| 3 Allgemeine Kraftsysteme (Kräftepaar, Moment, Reduktion auf einen Punkt mit vier Fällen, Gleichgewicht, Seileck; räumlich: Momentenvektor, Dyname, Kraftschraube und Zentralachse) | Kapitel 4 und 6 | M11; Seileck, Kraftschraube und Zentralachse nur im Buch: später, Stufe 5 |
+| 4 Schwerpunkt (parallele Kräfte, Körper mit verschiedener Dichte, Fläche, Linie; statische Momente; Tabelle der Grundflächen) | Kapitel 7 | M11 |
+| 5 Lagerreaktionen (Wertigkeit, Bestimmtheit, räumliche Lager, mehrteilige Tragwerke, Polplan für kinematische Bestimmtheit, Matrixform) | Kapitel 5 und 6 | M11; Polplan nur im Buch: Wissensfrage |
+| 6 Fachwerke (Bildungsgesetze, Nullstäbe, Knotenpunktverfahren, Cremona-Plan, Ritterschnitt, Raumfachwerk) | Kapitel 5 | M11; Cremona-Plan nur im Buch: später |
+| 7 Balken, Rahmen, Bogen (Schnittgrößen, Rand- und Übergangsbedingungen, Föppl-Symbol, punktweise, Rahmenecken, Kreisbogen, räumlich) | Kapitel 8 | M11; Föppl-Symbol nur im Buch: Stufe 5 |
+| 8 Arbeit (Arbeit, Potential, virtuelle Verrückungen, Arbeitssatz, Stabilität einer Gleichgewichtslage) | fehlt | nur im Buch: erst, wenn es in der Vorlesung vorkommt |
+| 9 Haftung und Reibung | nur Blätter 18 und 19 | M11 (Maßstab) |
+| Anhang: Vektoren, lineare Gleichungssysteme (Gauß-Algorithmus, Cramersche Regel), englische Fachwörter | Mathematik MB1 | M7, M9 |
+
+**Andere Schreibweisen im Buch** (die App bleibt beim Skript, erwähnt das Buch aber auf der
+Lernkarte, damit beim Lesen nichts verwirrt): Vektoren fett statt mit Pfeil; Resultierende
+$R$ statt $F_R$; Gewicht $G$ statt $F_G$; Lagerkräfte $A$, $B$ mit Komponenten $A_H$,
+$A_V$ (horizontal, vertikal) statt $F_{Ax}$, $F_{Ay}$; Kontakt $N$ und $T$; Moment um $A$
+als $M^{(A)}$ (übernommen, siehe oben); Schwerpunkt $x_s$; Kurzschrift für die Gleichungen
+mit Pfeilen („→:“, „↑:“, Momentenpunkt mit Drehpfeil). Statische Momente
+$S_y = \int x\,dA$, $S_x = \int y\,dA$ (Index „verdreht“, Stolperstein).
+
+**Was das Buch an Aufgabenarten dazubringt** (nur die Art, eigene Zahlen):
+- Gleichgewichtswinkel gesucht (Gewichte an Seilen über Rollen, Stange mit zwei Lasten).
+- Wo muss das Lager hin, damit der Balken im Gleichgewicht ist?
+- Grenze bis zum Abheben (Kontaktkraft wird null), sinnvoller Winkelbereich.
+- Körper mit Ausschnitt oder Einsatz anderer Dichte (Schwerpunkt mit Dichten gewichtet).
+- Rahmenecke: an einer rechtwinkligen, unbelasteten Ecke tauschen $N$ und $Q$ die Rollen
+  (Vorzeichen je nach Lage der Strichlinie), $M$ bleibt gleich; Probe am Verzweigungspunkt.
+- Kreisbogen: Schnittgrößen als Funktion des Winkels; Sprünge an einer Last gleich ihren
+  Anteilen normal und tangential.
+- Schnittgrößen mit Rand- und Übergangsbedingungen (Tabelle: gelenkig $M = 0$, Parallelführung
+  $Q = 0$, Einspannung beide frei, freies Ende beide null); Einfeldträger mit Gleichstreckenlast
+  $M_{max} = \frac{q_0 l^2}{8}$ in der Mitte als Kontrollwert.
+
+**Rezepte und Warnungen aus dem Buch:** Lösungsschema in vier Schritten (Problem, Modell,
+Lösen mit Freikörperbild und Abzählen „so viele Gleichungen wie Unbekannte“, Ergebnis
+deuten); Ergebnisse nicht genauer als die Eingangsdaten; Momentenpunkt auf die
+Wirkungslinien von Unbekannten legen, Probe um einen anderen Punkt; Symmetrie nutzen;
+Grenzfälle prüfen; Kraft- und Momentenvektoren nie addieren; eine Kraft parallel zu
+verschieben ändert ihre Wirkung (Versatzmoment); beim arctan den Quadranten beachten.
+Winkel stehen in den Beispielen meist zur Waagrechten oder Senkrechten, nicht ab der
+$x$-Achse: Die App übt beides (Fehlerregel „sin und cos vertauscht“).
 
 ## Bilder, die die App selbst zeichnen muss
 
@@ -217,6 +283,60 @@ Zeichen-Grundlage aus M6b.
 - Umstellen und allgemein mit Buchstaben rechnen („Zahlen erst am Schluss“): M3/M6.
 - Polynome bis Grad 3 abschnittsweise, Ableiten, Integrieren, Extremum: M1, M9.
 - e-Funktion und ln (Seilreibung), Ungleichungen (Haftgrenze, Selbstsperrung): M6.
+
+## Gestaltung in der App (Wünsche des Nutzers, 13.11.2026)
+
+- **Aufbau wie in den anderen Fächern:** Das Fach „Technische Mechanik“ bekommt Themen,
+  zuerst das große Thema **Statik**. Darin stehen Unterthemen zum Ankreuzen und Mischen,
+  so wie bei Chemie und den Mathe-Tätigkeiten (Regeln in `.claude/rules/auswahl.md`).
+  Vorschlag für die Unterthemen: Kräfte zerlegen und zusammensetzen, Momente,
+  **Freischneiden**, Lagerreaktionen, statische Bestimmtheit, mehrteilige Tragwerke,
+  Fachwerke (darin einzeln wählbar: Nullstäbe, Knotenpunktverfahren, **Ritterschnitt**),
+  räumliche Statik, Schwerpunkte, Schnittgrößen, Reibung.
+- **Freischneiden als eigene Übung:** Die App zeigt ein Bild (Tragwerk, Hebel, Walze,
+  Leiter …) und fragt nach dem Freikörperbild.
+  - Geführt: mehrere Bilder zur Auswahl, eins richtig. Die falschen zeigen typische Fehler:
+    Loslager mit zwei Kräften, Einspannung ohne Moment, Moment im Gelenk, Seil auf Druck,
+    Normalkraft schräg statt senkrecht zur Fläche, Kraft vergessen, Kraft eingezeichnet, die
+    das Teil selbst ausübt, Zwischenreaktion an beiden Teilen gleich gerichtet.
+  - Frei: Man setzt die Kräfte an einem Punkt selbst, als Pfeile im Bild (Richtung wählen,
+    Moment als Drehpfeil) oder als Vektor eingetippt, z. B. $(F_{Ax};\,F_{Ay})$. Die App
+    prüft, ob die Kräfte zum Lager oder Kontakt passen; die Pfeilrichtung darf frei
+    angenommen werden (ein negatives Ergebnis heißt dann nur „andersherum“).
+- **Ketten wie bei den Rechnungen:** Aufgaben laufen Schritt für Schritt und lassen sich
+  mischen: erst freischneiden, dann halb geführt die Gleichgewichtsgleichungen aufstellen
+  (z. B. den fehlenden Term wählen oder den Momentenpunkt aussuchen), dann Punkt für Punkt
+  lösen. Höhere Stufen verketten mehr Schritte (Stufe = Verschachtelung, nie neuer Stoff).
+- **Ritterschnitt als eigene Übung** (Wunsch des Nutzers, 13.11.2026), in Schritten, die
+  sich einzeln üben und zu einer Kette verbinden lassen:
+  1. Schnitt legen: im Fachwerk drei Stäbe antippen. Die App prüft, ob der Schnitt taugt
+     (drei Stäbe, nicht alle am selben Knoten, das Fachwerk zerfällt in zwei Teile).
+     Falsche Wahl: drei Stäbe an einem Knoten, nur zwei Stäbe, Schnitt trennt nichts.
+  2. Teil wählen: welches Teil ist einfacher (weniger Lasten, Lagerkräfte schon bekannt)?
+  3. Ritterpunkt wählen: den Schnittpunkt zweier geschnittener Stäbe antippen; dann bleibt in
+     der Momentengleichung nur die gesuchte Stabkraft übrig.
+  4. Gleichung aufstellen (halb geführt) und die Stabkraft ausrechnen, Zug oder Druck angeben.
+  Der Ritterschnitt kommt auch in den anderen Übungen vor: schätzen „Zug oder Druck?“,
+  Fehler finden (falscher Ritterpunkt, Schnitt durch drei Stäbe an einem Knoten), Spielwiese
+  (Last verschieben, Stabkraft ändert sich), Vergleich mit dem Knotenpunktverfahren.
+- **Weitere Übungsarten** (vorgeschlagen, vom Nutzer alle gewünscht, 13.11.2026):
+  1. *Erst schätzen, dann rechnen:* vor der Rechnung die Richtung einer Lagerkraft oder Zug
+     und Druck eines Stabs tippen, danach mit dem Ergebnis vergleichen.
+  2. *Momentenpunkt wählen:* „Um welchen Punkt rechnest du am besten?“ Richtig ist der Punkt,
+     durch den die meisten Unbekannten gehen; ohne Rechnen.
+  3. *Fehler finden:* eine fertig gerechnete Lösung mit genau einem Fehler (aus den
+     Fehlerregeln oben), den falschen Schritt antippen.
+  4. *Verläufe zuordnen:* zum Balken den passenden $Q$- oder $M$-Verlauf wählen, und
+     umgekehrt zum Verlauf die passende Belastung.
+  5. *Spielwiese:* Last oder Lager mit dem Finger verschieben, Lagerkräfte, Stabkräfte und
+     Verläufe ändern sich sofort mit (aufwendigste Übung, passt zu „Bilder zum Anfassen“).
+  6. *Vom echten Ding zum Modell:* zu einem Gegenstand (Leiter, Kran, Brücke, Hebel) das
+     passende Modell wählen: welches Lager wo, welche Last wo.
+  7. *Kurze Übungen für jeden Tag:* Wertigkeit der Lager, statisch bestimmt oder nicht,
+     Nullstäbe antippen; wenige Minuten, über die Wiederholung.
+  8. *Probeklausur* mit Zeit und Punkten wie bei Chemie, sobald eine Altklausur da ist.
+- Bilder zeichnet die App selbst aus derselben Beschreibung, aus der sie rechnet
+  (Zeichen-Grundlage aus M6b); Antippen und Pfeile setzen wie bei „Bilder zum Anfassen“.
 
 ## Ideen für die App (für den Plan von M11)
 

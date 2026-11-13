@@ -1,6 +1,6 @@
 # Plan für Meilenstein 7: Vektoren, Geraden und Ebenen, Matrizen
 
-Status: **freigegeben** (Nutzer, 12.11.2026: „Passt alles“). Schritte 1a, 1b, 2a, 2b und 3a fertig (12.11.2026), 3b, 4a, 4b, 5, 6, 7a, 7b, 8a, 8b, 9a und 10a fertig (13.11.2026); offen 9b und 10b.
+Status: **freigegeben** (Nutzer, 12.11.2026: „Passt alles“). Schritte 1a, 1b, 2a, 2b und 3a fertig (12.11.2026), 3b, 4a, 4b, 5, 6, 7a, 7b, 8a, 8b, 9a, 9b und 10a fertig (13.11.2026); offen 10b.
 
 Entwurf zum Ansehen und Anfassen (privat, nur für den Nutzer):
 https://claude.ai/artifact/WXe4sjavAGF64jyAWSa3hi. Er zeigt acht Bilder und Aufgaben im geplanten Stil. Die Seite ist
@@ -355,9 +355,16 @@ Request.
      statt Produkt, invertierbar verwechselt,
      $\det A = 1$ gefordert, Vorzeichen der Nullstellen. Nebenbei: `**fett**` in Erklärungen und Fehlertexten wird jetzt fett gesetzt (bisher
      standen die Sternchen sichtbar da); auf Lernkarten bleibt es seit 8b verboten.
-   - **9b:** Sarrus als Animation auf Knopfdruck (die Diagonalen leuchten nacheinander auf, plus und minus), wie das
-     Falk-Schema aus 8b; ohne bei „Bewegung reduzieren“.
-10. **Gauß**, in zwei Teilen (Vorlesung zuerst, Wunsch des Nutzers 13.11.2026: 10 vor 9b):
+   - **9b (fertig, 13.11.2026):** Sarrus als Bild über den Antworten in jedem Schritt mit Sarrus (Determinanten, auch
+     Unterdeterminanten beim Entwickeln und mit Parameter; Spatprodukt; Linearkombination und Basis) und auf den Lernkarten,
+     deren Beispiel genau einen Schritt mit Sarrus hat: die Matrix zwischen Determinantenstrichen, die ersten beiden
+     Spalten blass rechts daneben. Vor der Antwort nur das Schema, ohne Knopf. Danach „Abspielen“: erst leuchten die
+     abgeschriebenen Spalten, dann nacheinander die drei Diagonalen nach rechts unten (blau, Plus) und die drei nach links
+     unten (orange, Minus) wie mit einem Textmarker, die drei Felder umrahmt; die Rechnung darunter wächst Produkt für
+     Produkt (Plus-Zeile, Minus-Zeile, Ergebnis untereinander), am Ende stehen alle sechs Diagonalen dünn hinter den
+     Zahlen. „Alles zeigen“ springt ans Ende, bei „Bewegung reduzieren“ gleich. Die Erklärung behält das Schema als
+     Text (der freie Modus hat kein Bild).
+10. **Gauß**, in zwei Teilen:
     - **10a (fertig, 13.11.2026):** Baustein „Gauß-Verfahren“ (`gauss`, Code 35, Gruppe „Gleichungssysteme“) in der Tätigkeit
       „Matrizen und Gleichungssysteme“, Stufen 1 bis 5, geführt und frei. Acht Arten: zwei Gleichungen mit zwei Unbekannten
       (Stufe 1), drei mal drei (Stufe 2; Stufe 3 auch über Kreuz wie $3 \cdot \text{II} - 2 \cdot \text{I}$), mit Zeilentausch

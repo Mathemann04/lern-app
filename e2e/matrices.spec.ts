@@ -199,6 +199,41 @@ test('Determinanten frei: Betrag vergessen erkannt, Lösungen in beliebiger Reih
   expect(errors).toEqual([])
 })
 
+// M7 Schritt 9b: Sarrus als Bild. Vor der Antwort nur das Schema ohne Knopf, danach „Abspielen“: erst leuchten die
+// abgeschriebenen Spalten, dann je Diagonale drei Felder, die Rechnung wächst; „Alles zeigen“ springt ans Ende. Auch
+// auf der Lernkarte und beim Spatprodukt.
+test('Sarrus: erst nach der Antwort abspielen, Diagonale für Diagonale, auch auf der Lernkarte', async ({ page }) => {
+  const errors = collectErrors(page)
+  // determinante.1-1: 3 × 3 mit Sarrus
+  await page.goto('./#/ueben/matrizen/determinante.1-1')
+  const scheme = page.getByTestId('sarrus-scheme')
+  await expect(scheme).toBeVisible()
+  await expect(scheme.locator('[data-sarrus="copy"]')).toHaveCount(6)
+  await expect(scheme.getByRole('button', { name: 'Abspielen' })).toHaveCount(0)
+  await solveStep(page)
+  await scheme.getByRole('button', { name: 'Abspielen' }).click()
+  await expect(scheme.getByRole('button', { name: 'Alles zeigen' })).toBeVisible()
+  await expect(scheme.locator('[data-sarrus="copy"][data-lit="true"]')).toHaveCount(6)
+  await expect(scheme.locator('[data-lit="true"]')).toHaveCount(3)
+  await expect(scheme.getByText('nach links unten: Minus')).toBeVisible()
+  await expect(scheme.getByRole('button', { name: 'Abspielen' })).toBeVisible({ timeout: 10000 })
+  await expect(scheme.locator('figcaption .katex')).toHaveCount(1)
+  await expectCleanPage(page, 'Sarrus')
+  // Spatprodukt mit Sarrus (Vektoren)
+  await page.goto('./#/ueben/vektoren/spat.2-1')
+  await expect(page.getByTestId('sarrus-scheme')).toBeVisible()
+  // Bewegung reduzieren: Der Knopf zeigt gleich das Ende
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('./#/karten/matrizen/det-sarrus')
+  const onCard = page.getByTestId('sarrus-scheme').first()
+  await expect(onCard).toBeVisible()
+  await onCard.getByRole('button', { name: 'Abspielen' }).click()
+  await expect(onCard.getByRole('button', { name: 'Alles zeigen' })).toHaveCount(0)
+  await expect(onCard.locator('figcaption .katex')).toHaveCount(1)
+  await expectCleanPage(page, 'Lernkarte mit Sarrus')
+  expect(errors).toEqual([])
+})
+
 // Gauß-Verfahren (M7 Schritt 10a): Baustein auf der Seite der Tätigkeit, je Stufe eine Aufgabe, Lernkarte, freier Modus
 // mit „keine Lösung“ als Auswahl und einer Lösungsmenge mit Parameter (andere Darstellung derselben Geraden zählt)
 test('Gauß-Verfahren: Baustein, jede Stufe lösbar, Lernkarte', async ({ page }) => {

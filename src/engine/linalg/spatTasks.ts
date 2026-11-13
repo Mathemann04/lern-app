@@ -6,6 +6,7 @@ import { type DrawArrow, type DrawPoint, type DrawPolygon, type DrawSegment, typ
 import { type Built, type VectorKind, type Wrong, CARD, PARAMS, VEC_LETTERS, choiceStep, connectStep, ints, math, negCount, nums, signShape, zeroCount } from './taskKit.ts'
 import { type PVec, type Quad, type Shape, areaClass, areaStep, chain, cross, crossStep, linLatex, middleSign, normStep, pAt, quadLatex, termsLatex } from './crossTasks.ts'
 import { type Surd, type Vec, arrowName, columnLatex, pointLatex, ratLatex, sqrtRat, surdLatex, surdValue, vec, vecAdd, vecDot, vecLatex, vecName, vecNeg, vecNorm2, vecScale } from './vec.ts'
+import { sarrusFigure } from './sarrus.ts'
 
 // Baukasten für den Baustein „Spatprodukt und Volumen" der Tätigkeit „Vektoren" (M7 Schritt 4b, docs/PLAN-M7.md):
 // Spatprodukt (über das Kreuzprodukt oder mit Sarrus), Rechts- oder Linkssystem, komplanar (auch vier Punkte in einer
@@ -125,7 +126,8 @@ export function sarrusStep(rng: Rng, an: string, bn: string, cn: string, A: PVec
   // ohne doppeltes Glied, wenn nur ein Produkt nicht 0 ist
   const values = constants && sixValues !== result ? ` = ${sixValues}` : ''
   const formula = `${name} = \\det ${matrix}`
-  return choiceStep(rng, {
+  const sarrus = sarrusFigure(name, M, M.map((r) => r.map(fac)), values.slice(3), result)
+  const step = choiceStep(rng, {
     id: 'spat',
     title: opts.title ?? 'Spatprodukt mit Sarrus',
     question: `Wie groß ist $${name}$?`,
@@ -139,6 +141,7 @@ export function sarrusStep(rng: Rng, an: string, bn: string, cn: string, A: PVec
     established: [`${name} = ${result}`],
     cards: opts.card ? [opts.card, CARD.spat] : [CARD.spat],
   })
+  return { ...step, sarrus }
 }
 
 // (a × b) · c, wenn a × b schon bekannt ist; c darf einen Parameter haben

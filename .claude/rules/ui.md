@@ -154,3 +154,6 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
 - Seit M7 Schritt 9a setzt `RichText` `**…**` fett (`<strong>`, auch über eine Formel hinweg, der Zustand läuft durch den
   Absatz); vorher standen die Sternchen in Erklärungen und Fehlertexten sichtbar da. Test in `RichText.test.ts`. Auf Lernkarten
   bleiben Sternchen verboten (Test seit 8b).
+- Seit M7 Schritt 9b Sarrus als eigenes Bild `ui/draw/SarrusScheme.tsx` (CSS-Raster mit fünf gleich breiten Spalten,
+  darüber ein SVG mit Linien in Prozent, also ohne Messen; Plus `var(--vec-a)`, Minus `var(--vec-b)`; am Ende liegen die
+  Zahlen auf `bg-surface` über den dünnen Linien). Die Rechnung steht als ein `aligned` in einer `FitWidth`.

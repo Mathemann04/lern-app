@@ -1245,7 +1245,24 @@ Neue Entscheidungen unten anfügen.
   Zelle); Rechnungen aus dem Buch (Abstand nächster Nachbarn, Dichte aus der Gitterkonstante, Mischungsregel) kommen nur
   in Vertiefung und Klausurniveau und nur, wenn die Vorlesung sie nahelegt; Halbleiter, Supraleitung, Phononen und
   Thermoelektrik gehören zu Physik (M10).
-- 13.11.2026: M7 Schritt 10 vor 9b (Wunsch des Nutzers: „Weiter mit M7, Schritt 10“). Schritt 10 ist zweigeteilt wie die
+- 13.11.2026: Lehrbuch „Technische Mechanik 1 (Statik)“ des Nutzers durchgesehen (135 Fotos, ganzes Buch) und in
+  docs/MECHANIK.md eingearbeitet. Maßstab für Reibung ist Kapitel 9 des Buchs (es gibt kein Skript dazu); Reibzahlen
+  nimmt die App aus einer frei zugänglichen Tabelle. Die Schreibweise kommt aus dem Skript der Vorlesung, weil die
+  Klausur danach geht; nur das Moment um einen Punkt heißt wie im Buch $M^{(A)}$, damit es nicht mit dem
+  Einspannmoment $M_A$ verwechselt wird. Inhalte, die nur im Buch stehen (Arbeitssatz und Stabilität, Seileck,
+  Kraftschraube, Cremona-Plan, Föppl-Symbol, Polplan), sind markiert und kommen höchstens später oder in Stufe 5.
+  Korrigiert: Der Satz über drei Kräfte im Gleichgewicht gilt nur für nicht parallele Kräfte.
+- 13.11.2026: Gestaltung von Technische Mechanik (Wunsch des Nutzers): Aufbau wie die anderen Fächer, zuerst das
+  Thema Statik mit Unterthemen zum Ankreuzen und Mischen; „Freischneiden“ als eigene Übung (geführt: richtiges
+  Freikörperbild unter mehreren wählen, falsche Bilder zeigen typische Fehler; frei: Kräfte als Pfeile im Bild setzen
+  oder als Vektor eintippen); Aufgaben als Ketten aus Freischneiden, halb geführtem Aufstellen der Gleichungen und
+  Rechnen Punkt für Punkt. Festgehalten in docs/MECHANIK.md, gebaut wird nach dem Plan zu M11.
+- 13.11.2026: Weitere Übungsarten für Technische Mechanik (Vorschläge, vom Nutzer alle gewünscht): erst schätzen,
+  dann rechnen; Momentenpunkt wählen; Fehler finden; Verläufe zuordnen; Spielwiese zum Verschieben; vom echten
+  Ding zum Modell; kurze tägliche Übungen; Probeklausur, sobald eine Altklausur da ist. Dazu der Ritterschnitt als
+  eigene Übung in Schritten (Schnitt legen, Teil wählen, Ritterpunkt wählen, rechnen) und als einzeln wählbares
+  Unterthema bei den Fachwerken. Festgehalten in docs/MECHANIK.md für den Plan zu M11.
+- 13.11.2026: M7 Schritt 10 (Wunsch des Nutzers: „Weiter mit M7, Schritt 10“; 9b entstand gleichzeitig in einer anderen Sitzung). Schritt 10 ist zweigeteilt wie die
   übrigen großen Schritte: 10a das Rechnen (Baustein „Gauß-Verfahren“, Id `gauss`, Code 35), 10b die Bilder (Geraden und
   Ebenen). Festlegungen: Die Engine rechnet wie in der Vorlesung (bei 0 oben mit der ersten Zeile darunter tauschen,
   sonst ganzzahliges Vielfaches, sonst über Kreuz); eine falsche Tabelle wird nur angeboten, wenn sie nicht gleichwertig

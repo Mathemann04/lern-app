@@ -6,6 +6,7 @@ import { type Quad, quadAt, quadLatex, termsLatex } from './crossTasks.ts'
 import { type VectorDrawing, emptyDrawing } from './figures.ts'
 import { bodyDrawing } from './spatTasks.ts'
 import { type Built, type VectorKind, type Wrong, choiceStep, math } from './taskKit.ts'
+import { sarrusFigure } from './sarrus.ts'
 import { ratLatex } from './vec.ts'
 
 // Baustein „Determinanten“ (M7 Schritt 9a) der Tätigkeit „Matrizen und Gleichungssysteme“: 2 × 2 mit Fläche als Bild,
@@ -212,7 +213,8 @@ function sarrusStep(rng: Rng, name: string, A: PMat, opts: { readonly id?: strin
   const offered = withParam ? cands.filter(([q]) => !isMultiple(q, right)) : cands
   const six = withParam ? '' : termsLatex([...MAIN.map((d) => [prodOf(M, d), ''] as const), ...ANTI.map((d) => [ratNeg(prodOf(M, d)), ''] as const)])
   const values = six !== '' && six !== qLatex(right) ? ` = ${six}` : ''
-  return choiceStep(rng, {
+  const sarrus = sarrusFigure(name, A.map((r) => r.map(linLatex)), A.map((r) => r.map(linFactor)), values.slice(3), qLatex(right))
+  const step = choiceStep(rng, {
     id: opts.id ?? 'sarrus',
     title: 'Sarrus',
     question: `Wie groß ist $${name}$?`,
@@ -226,6 +228,7 @@ function sarrusStep(rng: Rng, name: string, A: PMat, opts: { readonly id?: strin
     established: [`${name} = ${qLatex(right)}`],
     cards: opts.cards ?? [DET_CARD.sarrus],
   })
+  return { ...step, sarrus }
 }
 
 // ------------------------------------------------------------------ Bilder: Fläche und Volumen

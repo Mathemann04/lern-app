@@ -166,7 +166,7 @@ gezieltes Üben noch nicht (`focus: false`).
   `gl-…` ab Nummer 51 in `lineErrorRules.ts`, Karten `gl-abstand-ebene`, `gl-abstand-gerade`, `gl-abstand-windschief`,
   `gl-schnittwinkel`. Tests in `linalg/distTasks.test.ts` (Abstand über Fläche und Kreuzprodukt, Winkel mit acos/asin,
   Schritt-Ids eindeutig, freier Modus mit Wurzeln und typischen Fehlern).
-- Matrizen und Gleichungssysteme (Schritte 8a bis 10a): eigene Notizen in `.claude/rules/engine-matrizen.md`.
+- Matrizen und Gleichungssysteme (Schritte 8a bis 10a, auch Sarrus 9b): eigene Notizen in `.claude/rules/engine-matrizen.md`.
 - `linalg/vectorTasks.ts`: Baukasten. Je Art (`VectorKind`) eine Funktion, die die ganze geführte Aufgabe baut (Schritte
   mit `choiceStep`: falsche Antworten ohne Doppelte, höchstens drei, aus `errorRules.ts`; Bilder; Ergebnis; Form;
   `answer` und `data` für die Gegenprobe in Tests). Arten je Stufe in `KINDS_BY_LEVEL`: Stufe 1 Ebene, 2 Raum, 3 zwei
