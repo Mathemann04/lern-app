@@ -1254,3 +1254,11 @@ Neue Entscheidungen unten anfügen.
   statt $z = t$ wird nie als falsch angeboten). Im freien Modus zeigt die Eingabe die Form der Lösung (Vektor, Auswahl oder
   Lösungsmenge); wer den Fall noch nicht kennt, findet ihn im geführten Modus. Die Notizen zu Matrizen, Determinanten und
   Gauß stehen jetzt in `.claude/rules/engine-matrizen.md` (die Vektor-Notizen wären sonst über 30 000 Zeichen gekommen).
+- 13.11.2026: Funde der unabhängigen Prüfung zu M7 Schritt 10a behoben (keine falsche Mathematik in Karten und Texten):
+  Bekam eine Zeile beim Rückwärts-Einsetzen keinen eigenen Schritt (zu wenige falsche Antworten), nannte die Lösung sie
+  trotzdem als bekannt; jetzt rechnet die Lösung sie mit („Rechne von unten nach oben … aus“). Getauscht wird nie an
+  einer Zeile $0 \dots 0 \mid c$ (dort wäre „keine Lösung“ schon richtig). Neuer Fehler „Weniger Stufen als Variablen als
+  ‚keine Lösung‘ gedeutet“ für unterbestimmte Systeme ohne Nullzeile. Bewusst so gelassen: Bei Systemen ohne Lösung darf
+  eine falsche Tabelle zeilengleichwertig zur richtigen sein (alle Tabellen mit Widerspruch und gleichen Zeilen links
+  haben dieselbe reduzierte Stufenform); falsch ist sie trotzdem, weil sie nicht das Ergebnis der genannten Umformung
+  ist. Neue Tests dafür.

@@ -110,8 +110,9 @@ function rref(T: Tab): Rational[][] {
 }
 // Zeile 0 … 0 | c mit c ≠ 0 in der reduzierten Stufenform
 const inconsistent = (A: Tab) => rref(A).some((r) => r.slice(0, -1).every(isZero) && !isZero(r[r.length - 1]))
-// gleichwertig: dieselben Zeilen bis auf Umformungen; ohne Lösung zählt nur genau dieselbe Tabelle (dort verwischt die
-// reduzierte Stufenform die rechte Seite)
+// gleichwertig: dieselben Zeilen bis auf Umformungen (gleiche reduzierte Stufenform). Ohne Lösung haben alle Tabellen mit
+// denselben Zeilen links dieselbe reduzierte Stufenform, egal was rechts steht; dort zählt der Rechenfehler selbst, und
+// nur genau dieselbe Tabelle fällt weg (Entscheidung in docs/ENTSCHEIDUNGEN.md, 13.11.2026)
 const equivalent = (A: Tab, B: Tab) => (inconsistent(A) || inconsistent(B) ? sameTab(A, B) : sameTab(rref(A), rref(B)))
 const rankOf = (vs: readonly (readonly Rational[])[]) => (vs.length === 0 ? 0 : rref(vs).filter((r) => r.some((x) => !isZero(x))).length)
 
@@ -437,7 +438,7 @@ function swapStep(rng: Rng, st: Extract<Stage, { kind: 'swap' }>, idx: number, c
     wrongs: [
       { content: 'Abbrechen: Das System hat keine Lösung.', rule: 'gauss-zero-pivot-none' },
       { content: `$${v} = 0$ setzen und weiterrechnen`, rule: 'gauss-zero-pivot-zero' },
-      { content: `Spalte ${st.col + 1} überspringen und mit Spalte ${st.col + 2} weitermachen`, rule: 'gauss-zero-pivot-skip' },
+      { content: `Spalte ${st.col + 1} überspringen${st.col + 1 < ctx.n ? ` und mit Spalte ${st.col + 2} weitermachen` : ''}`, rule: 'gauss-zero-pivot-skip' },
     ],
     hint: 'Die Reihenfolge der Gleichungen ist egal. Hol eine Zeile nach oben, die in dieser Spalte keine $0$ hat.',
     explanation: {
@@ -503,7 +504,7 @@ function caseStep(rng: Rng, F: Tab, info: ReturnType<typeof analyze>, ctx: Ctx):
   const rules: Readonly<Record<Case, Readonly<Record<Case, string>>>> = {
     unique: { unique: '', none: zeroRhs ? 'gauss-zero-rhs-none' : 'gauss-unique-none', inf: zeroRows > 0 ? 'gauss-zero-row-inf' : 'gauss-unique-inf' },
     none: { unique: 'gauss-contradiction-value', none: '', inf: 'gauss-contradiction-zero' },
-    inf: { unique: 'gauss-free-missed', none: 'gauss-zero-row-none', inf: '' },
+    inf: { unique: 'gauss-free-missed', none: zeroRows > 0 ? 'gauss-zero-row-none' : 'gauss-under-none', inf: '' },
   }
   const free = n - pivots.length
   const detailed =
@@ -616,6 +617,8 @@ function buildFrom(rng: Rng, kind: VectorKind, level: Level, spec: Spec): Built 
   const stages = runGauss(T, n)
   if (stages.some((s) => s.after.some((r) => r.some((x) => !isInteger(x) || Math.abs(num(x)) > (level <= 3 ? 30 : 40))))) return null
   if (spec.swap !== stages.some((s) => s.kind === 'swap')) return null
+  // getauscht wird nur, wo oben noch eine Variable steht (nicht bei 0 … 0 | c: dort ist schon alles entschieden)
+  if (stages.some((s) => s.kind === 'swap' && s.before[s.row].slice(0, n).every(isZero))) return null
   const crossUsed = stages.some((s) => s.kind === 'elim' && s.ops.some((o) => !isOne(o.p)))
   if (crossUsed !== spec.cross) return null
   const F = stages.length > 0 ? stages[stages.length - 1].after : T
@@ -692,6 +695,7 @@ function buildFrom(rng: Rng, kind: VectorKind, level: Level, spec: Spec): Built 
   }
   // die unteren Stufen einzeln (höchstens zwei), die oberen zusammen in der Lösung
   const singles = info.pivots.slice(1).slice(-2).reverse()
+  const shownRows = new Set<number>()
   for (const pv of singles) {
     const st = valueStep(
       rng,
@@ -702,11 +706,16 @@ function buildFrom(rng: Rng, kind: VectorKind, level: Level, spec: Spec): Built 
       params,
       ctx,
     )
-    if (st) steps.push(st)
+    if (st) {
+      steps.push(st)
+      shownRows.add(pv.row)
+    }
   }
-  const shownRows = new Set(singles.map((p) => p.row))
-  const rest = info.pivots.filter((p) => !shownRows.has(p.row))
-  const restWords = rest.map((p) => `$${vars[p.col]}$`).join(' und ')
+  // was keinen eigenen Schritt bekommt (zu wenige falsche Antworten), rechnet die Lösung mit, von unten nach oben
+  const rest = info.pivots.filter((p) => !shownRows.has(p.row)).reverse()
+  const restNames = rest.map((p) => `$${vars[p.col]}$`)
+  const restWords = restNames.length === 1 ? restNames[0] : `${restNames.slice(0, -1).join(', ')} und ${restNames[restNames.length - 1]}`
+  const restAsk = shownRows.size > 0 ? `Setz die bekannten Werte oben ein und rechne ${restWords} aus.` : `Rechne von unten nach oben ${restWords} aus.`
   if (spec.kase === 'unique') {
     const x = vals.map((a) => a[0])
     const right = math(`\\vec x = ${vecLatex(x)}`)
@@ -726,7 +735,7 @@ function buildFrom(rng: Rng, kind: VectorKind, level: Level, spec: Spec): Built 
       choiceStep(rng, {
         id: 'loesung',
         title: 'Lösung',
-        question: `Setz die bekannten Werte oben ein und rechne ${restWords} aus. Wie lautet die Lösung $\\vec x$?`,
+        question: `${restAsk} Wie lautet die Lösung $\\vec x$?`,
         correct: right,
         wrongs,
         hint: 'Von unten nach oben: In jeder Zeile ist nur noch eine Variable unbekannt. Am Ende in der Reihenfolge der Spalten aufschreiben.',
@@ -771,7 +780,7 @@ function buildFrom(rng: Rng, kind: VectorKind, level: Level, spec: Spec): Built 
     choiceStep(rng, {
       id: 'loesung',
       title: 'Lösungsmenge',
-      question: `Mit ${assign}: Setz oben ein, rechne ${restWords} aus und schreib alle Lösungen als Vektor. Was stimmt?`,
+      question: `Mit ${assign}: ${restAsk} Schreib dann alle Lösungen als Vektor. Was stimmt?`,
       correct: math(right),
       wrongs,
       hint: `Schreib jede Variable als Zahl plus Vielfache der Parameter, auch die freien (${assign}). Die Zahlen bilden den Stützvektor, die Faktoren vor ${params.map((p) => `$${p}$`).join(' und ')} die Richtungen.`,

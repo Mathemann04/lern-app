@@ -228,6 +228,54 @@ describe('Gauß-Verfahren', () => {
     expect(compared).toBeGreaterThan(500)
   })
 
+  it('rückwärts einsetzen: jede Variable mit Stufe wird ausgerechnet (eigener Schritt oder in der Lösung genannt)', () => {
+    let checked = 0
+    for (const level of LEVELS) {
+      for (const task of tasks(level, 100)) {
+        const step = task.steps.find((s) => s.id === 'loesung')
+        if (!step) continue
+        const { n } = system(task)
+        const vars = task.functionLatex!.includes('x_') ? ['x_1', 'x_2', 'x_3', 'x_4'].slice(0, n) : ['x', 'y', 'z'].slice(0, n)
+        const free = task.data.free ?? []
+        // Frage ohne den Teil „Mit $z = t$:“ vorweg
+        const asked = step.question.split(': ').at(-1)!
+        vars.forEach((v, j) => {
+          if (free.includes(j)) return
+          const own = task.steps.some((s) => s.id === `wert-${j}`)
+          const named = asked.includes(`$${v}$`)
+          // genau eins von beiden; ohne eigenen Schritt steht der Wert in der Erklärung der Lösung
+          expect(own !== named, `${task.form} ${v}: ${step.question}`).toBe(true)
+          if (!own) expect(step.explanation.detailed, `${task.form} ${v}`).toContain(`$${v} = `)
+          checked++
+        })
+      }
+    }
+    expect(checked).toBeGreaterThan(500)
+  })
+
+  it('Zeilen tauschen nur, wo oben noch eine Variable steht; Fehler beim Deuten passen zur Tabelle', () => {
+    let swaps = 0
+    for (const level of LEVELS) {
+      for (const task of tasks(level, 150)) {
+        const { n } = system(task)
+        for (const step of task.steps.filter((s) => s.id.startsWith('tausch-'))) {
+          const row = ['I', 'II', 'III', 'IV'].indexOf(/in Zeile (I+V?|IV) eine/.exec(step.question)![1])
+          const table = readTable(step.question, n)!
+          expect(table[row].slice(0, n).some((x) => x !== 0), `${task.form} ${step.id}`).toBe(true)
+          // „Spalte überspringen“ nennt nie die rechte Seite als Spalte
+          for (const c of step.choices) expect(c.content, task.form).not.toContain(`Spalte ${n + 1}`)
+          swaps++
+        }
+        const deuten = task.steps.find((s) => s.id === 'deuten')!
+        const F = readTable(deuten.question, n)!
+        const zeroRows = F.filter((r) => r.every((x) => x === 0)).length
+        const rules = deuten.choices.filter((c) => !c.correct).map((c) => c.errorRuleId)
+        if (zeroRows === 0) for (const r of ['gauss-zero-row-none', 'gauss-zero-row-inf']) expect(rules, task.form).not.toContain(r)
+      }
+    }
+    expect(swaps).toBeGreaterThan(30)
+  })
+
   it.each(cells)('Stufe %i: Abwechslung (100 Formen unter 200, keine über 3 %)', (level) => {
     const stats = varietyStats(tasks(level, 200).map((t) => t.form))
     expect(stats.distinct).toBeGreaterThanOrEqual(100)

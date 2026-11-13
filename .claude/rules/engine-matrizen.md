@@ -63,18 +63,18 @@ freier Modus `vectorFree.ts`, `buildVectorTask` wählt die Arten nach dem Bauste
   `none`, `inf`), dann `T = P · D · L · E` (L unten links ganzzahlig, D Faktoren je Zeile, bei `cross` auch 2 oder 3; beim
   Tausch eine Zeile ohne Anteil von Zeile I nach oben). `runGauss` rechnet wie in der Vorlesung: Spalte für Spalte, bei 0
   oben mit der ersten Zeile darunter tauschen, sonst `II − k · I` (ganzzahlig) bzw. über Kreuz `p · II − q · I`. Filter:
-  Fall und Stufen wie gewollt, Tausch und Über-Kreuz genau wie in `Spec`, Zahlen klein, erste Spalte voll besetzt, keine
+  Fall und Stufen wie gewollt, Tausch und Über-Kreuz genau wie in `Spec`, kein Tausch an einer Zeile 0 … 0 | c, Zahlen klein, erste Spalte voll besetzt, keine
   zwei gleichen Zeilen, Lösung ganzzahlig. `retry` hält die Art (Fall, Stufen …) für 400 Versuche fest, damit die Fälle so
   oft kommen wie geplant. Schritte: `setupStep` (Gleichungen mit Glied rechts, Zahl links, vertauschter Reihenfolge,
   Lücke), `scaleStep` (Kommazahlen mit 10, 2, 4 oder 5 wegschaffen), `swapStep`, `elimStep` (ganze Tabelle mit
   Umformungen rechts, Ids `spalte-1` …; vorher gezeigt, außer sie steht schon als Aufgabe da), `caseStep` (Id `deuten`,
   Antworten `LGS_CASES`, Fehler je wahrem und gewähltem Fall), `freeStep` (nur wenn es drei falsche gibt: Mengen, ohne die
-  die übrigen Spalten nicht den vollen Rang haben), `valueStep` (die unteren höchstens zwei Stufen einzeln, Werte `Aff`
+  die übrigen Spalten nicht den vollen Rang haben), `valueStep` (die unteren höchstens zwei Stufen einzeln, ohne genug falsche Antworten rechnet sie `loesung` mit, von unten nach oben; Werte `Aff`
   linear in den Parametern, Fehler über `backSolve` mit `Slip`), `loesung` (Vektor bzw. `L\colon \vec x = … + t …`).
   Falsche Tabellen nie gleichwertig: `equivalent` vergleicht die reduzierte Stufenform, ohne Lösung nur genau dieselbe
   Tabelle. Tabellen als `\begin{array}{c|rrr|rl}` mit Kopfzeile und Zeilennamen; Kommazahlen mit `{,}` (`decLatex`).
   Ergebnis „keine Lösung“ als Auswahl (`CHOICE_SETS` in `vectorFree.ts` mit `LGS_CASE_RULES`); Lösungsmenge im freien Modus
-  wie eine Gerade bzw. Ebene (jede Darstellung zählt; zwei Parameter nur im Raum). 33 Fehler `gauss-…` in
+  wie eine Gerade bzw. Ebene (jede Darstellung zählt; zwei Parameter nur im Raum). 34 Fehler `gauss-…` in
   `linalg/gaussErrorRules.ts`, vier Karten in `explain/gaussCards.ts`. Tests in `linalg/gaussTasks.test.ts` (Gegenprobe
   mit eigenem Rang in Kommazahlen, jede Tabelle des Rechenwegs gleichwertig zur Aufgabe und mit Nullen unter der Stufe,
   angezeigte Gleichungen gegen die Tabelle, falsche Lösungen erfüllen das System nicht). Bilder (Geraden und Ebenen) folgen

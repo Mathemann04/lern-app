@@ -101,7 +101,7 @@ Animationen starten nur auf Knopfdruck („Abspielen“) und entfallen, wenn am 
   vergessen, Zeile statt Spalte (Falk, Cramer), Produkt nicht definiert, $(AB)^{\mathsf T} = A^{\mathsf T}B^{\mathsf T}$,
   $\lambda$ statt $\lambda^n$, Vorzeichen beim Zeilentausch, Sarrus bei 4×4, rechte Seite vergessen, Nullzeile falsch
   gedeutet, gleicher Parameter für zwei Geraden, beim Ziehen (2b): nur vertauscht oder nur ein Vorzeichen geändert, rechter Winkel als spitz
-  oder stumpf gezählt, rechter Winkel an der falschen Ecke, Seiten statt Diagonalen senkrecht, bei der Projektion (3a) die 15 Fehler aus Schritt 3a, bei den Kräften (3b) die 26 Fehler aus Schritt 3b, beim Kreuzprodukt (4a) die 14 Fehler aus Schritt 4a, beim Spatprodukt (4b) die 14 Fehler aus Schritt 4b, bei Linearkombination und Basis (5) die 20 Fehler aus Schritt 5, bei Geraden und Ebenen (6) die 33 Fehler aus Schritt 6 (Vorsilbe „gl-“), bei der Lage (7a) die 17 Fehler aus Schritt 7a, bei Abständen und Schnittwinkeln (7b) die 14 Fehler aus Schritt 7b, bei den Matrizen (8a) die 27 Fehler aus Schritt 8a (Vorsilbe „mat-“), bei den Determinanten (9a) die 37 Fehler aus Schritt 9a (Vorsilbe „det-“), beim Gauß-Verfahren (10a) die 33 Fehler aus Schritt 10a (Vorsilbe „gauss-“), cos statt sin bei Gerade–Ebene, „$A - 2$“ ohne $E$, auf der falschen
+  oder stumpf gezählt, rechter Winkel an der falschen Ecke, Seiten statt Diagonalen senkrecht, bei der Projektion (3a) die 15 Fehler aus Schritt 3a, bei den Kräften (3b) die 26 Fehler aus Schritt 3b, beim Kreuzprodukt (4a) die 14 Fehler aus Schritt 4a, beim Spatprodukt (4b) die 14 Fehler aus Schritt 4b, bei Linearkombination und Basis (5) die 20 Fehler aus Schritt 5, bei Geraden und Ebenen (6) die 33 Fehler aus Schritt 6 (Vorsilbe „gl-“), bei der Lage (7a) die 17 Fehler aus Schritt 7a, bei Abständen und Schnittwinkeln (7b) die 14 Fehler aus Schritt 7b, bei den Matrizen (8a) die 27 Fehler aus Schritt 8a (Vorsilbe „mat-“), bei den Determinanten (9a) die 37 Fehler aus Schritt 9a (Vorsilbe „det-“), beim Gauß-Verfahren (10a) die 34 Fehler aus Schritt 10a (Vorsilbe „gauss-“), cos statt sin bei Gerade–Ebene, „$A - 2$“ ohne $E$, auf der falschen
   Seite ausgeklammert. Jede mit Katalogbeispiel, eigenem Text für „Warum ist das falsch?“ und Platz auf einer Lernkarte
   (Regeln aus CLAUDE.md).
 - **Aufgabennummern** wie seit M6 mit Baustein (`taskNumber.ts`); neue Bausteine bekommen die nächsten freien Nummern in
@@ -367,13 +367,13 @@ Request.
       andere Reihenfolge, fehlende Variable) oder Kommazahlen wegschaffen, je Spalte die ganze Tabelle nach den Umformungen
       (Umformung rechts daneben), Zeilen tauschen, Stufenform deuten, freie Variablen wählen, rückwärts einsetzen, Lösung als
       Vektor bzw. Lösungsmenge $\vec x = \vec p + t\,\vec r$. Frei: Vektor, „keine Lösung“ zum Antippen, Lösungsmenge in
-      Kästchen (jede Darstellung derselben Menge zählt). Vier Lernkarten, 33 neue typische Fehler: Reihenfolge des
+      Kästchen (jede Darstellung derselben Menge zählt). Vier Lernkarten, 34 neue typische Fehler: Reihenfolge des
       Aufschreibens, Vorzeichen beim Rüberbringen (Variable, Zahl), fehlende Variable nicht als 0, Zeilen und Spalten
       vertauscht, rechte Seite nicht umgeformt, rechts das Vielfache vergessen, Vielfaches nur beim ersten Eintrag,
       Vorzeichenfehler beim Abziehen, beim Malnehmen nur die erste Zahl bzw. nur die Kommazahlen, bei 0 oben „keine Lösung“,
       Variable 0 gesetzt, Spalte übersprungen, keine bzw. unendlich viele Lösungen ohne Grund, 0 rechts als Widerspruch,
       Nullzeile als „unendlich viele“, Widerspruch als Wert gelesen, Widerspruch und Nullzeile verwechselt (beide Richtungen),
-      freie Variable übersehen, Variable mit Stufe frei gewählt, keine bzw. zu viele frei, Vorzeichen beim Rüberbringen,
+      freie Variable übersehen, weniger Stufen als Variablen als „keine Lösung“, Variable mit Stufe frei gewählt, keine bzw. zu viele frei, Vorzeichen beim Rüberbringen,
       nicht geteilt, Zahl vor der Variablen vergessen, falsch herum geteilt, abgezogen statt geteilt, Reihenfolge der
       Variablen, die 1 der freien Variablen vergessen, Stützvektor und Richtung vertauscht.
     - **10b:** Bilder: zwei Geraden (zwei Unbekannte), drei Ebenen (drei Unbekannte); die richtige Umformung dreht die Gerade

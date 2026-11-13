@@ -42,7 +42,7 @@ export const GAUSS_CARD_LIST: readonly Card[] = [
       { vector: { kind: 'gaussThree', level: 2, seed: 3 } },
       { vector: { kind: 'gaussOver', level: 3, seed: 1 } },
     ],
-    errors: ['gauss-unique-none', 'gauss-unique-inf', 'gauss-zero-rhs-none', 'gauss-zero-row-inf', 'gauss-contradiction-value', 'gauss-contradiction-zero', 'gauss-zero-row-none', 'gauss-free-missed'],
+    errors: ['gauss-unique-none', 'gauss-unique-inf', 'gauss-zero-rhs-none', 'gauss-zero-row-inf', 'gauss-contradiction-value', 'gauss-contradiction-zero', 'gauss-zero-row-none', 'gauss-under-none', 'gauss-free-missed'],
   },
   {
     id: 'gauss-rueckwaerts',

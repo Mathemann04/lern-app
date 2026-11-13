@@ -198,6 +198,15 @@ export const GAUSS_ERROR_RULES: readonly VectorErrorRule[] = [
     },
   },
   {
+    id: 'gauss-under-none',
+    name: 'Weniger Stufen als Variablen als „keine Lösung“ gedeutet',
+    wrongFormula: String.raw`\begin{array}{rrr|r} 1 & 2 & 1 & 3 \\ 0 & 1 & -1 & 2 \end{array} \;\Rightarrow\; \text{keine Lösung}`,
+    why: {
+      detailed: String.raw`Dass eine Variable keine Stufe hat, heißt nicht, dass es keine Lösung gibt. Keine Lösung gibt es nur bei einem **Widerspruch** $0 = c$ mit $c \ne 0$. Ohne ihn ist die Variable ohne Stufe frei wählbar.`,
+      short: String.raw`Ohne Zeile $0 = c$ kein Widerspruch.`,
+    },
+  },
+  {
     id: 'gauss-free-missed',
     name: 'Freie Variable übersehen',
     wrongFormula: String.raw`\text{2 Stufen, 3 Variablen} \;\Rightarrow\; \text{genau eine Lösung}`,
