@@ -1119,4 +1119,28 @@ Neue Entscheidungen unten anfügen.
   Zahl“ nur ohne Parameter; „Durch 1 geteilt“ entfällt; Text zu „Betrag vergessen“ nennt auch die Höhe. Neue Tests dazu.
   Nebenbei: Der Browser-Test „Gleichungen umstellen, Stufe 2“ scheiterte zufällig bei Gleichungen mit Zahlen (anderer
   Hinweis); er kennt den Hinweis jetzt.
+- 13.11.2026: M7 Schritt 5, Baustein „Linearkombination und Basis“ (Code 27, `basis.2-4711`). Gleichungssysteme
+  löst die App wie in der Vorlesung Schritt für Schritt: aufstellen (je Zeile der Vektoren eine Gleichung, Namen (I),
+  (II), …), zwei Gleichungen so malnehmen und abziehen, dass eine Unbekannte wegfällt (Faktoren durch den ggT gekürzt,
+  der erste positiv), einsetzen, im Raum die Probe in den übrigen Gleichungen. Mit drei Unbekannten (Koordinaten in
+  einer Basis) erst eine Hilfsgleichung wählen (kleinster Faktor vor der ersten Unbekannten) und die erste Unbekannte
+  aus den anderen beiden eliminieren ((II'), (III')), dann wie mit zwei. Linear unabhängig entscheidet die Determinante
+  ($2 \times 2$ in der Ebene, Sarrus im Raum, geschrieben $\det(\vec a, \vec b, \vec c)$), mit Begründung als Antwort;
+  die Faustregeln (Nullvektor, parallel, mehr als drei Vektoren im Raum) stehen als falsche Umkehrungen in den Antworten
+  und auf der Lernkarte. Dimension als $\dim U$ mit $U = \operatorname{span}(\ldots)$; sind alle Vektoren Vielfache von
+  einem, ohne Determinante (Sarrus gäbe fast nur Nullen). Koeffizienten heißen $\lambda, \mu, \nu$ oder
+  $\alpha, \beta, \gamma$ (nie mit Index, sonst liest der freie Modus „zwei Lösungen“), Parameter $t$ oder $k$. Im
+  freien Modus zwei neue Auswahlen: „Die Vektoren sind“ linear unabhängig / linear abhängig, „Der Vektor liegt“ im
+  Spann / nicht im Spann (Text in `\text{…}` jetzt auch mit Umlauten und Leerzeichen). Stufe 5: Parameter im Zielvektor
+  in vier Dimensionen mit Probe, oder Parameter so, dass drei Vektoren abhängig sind, und dann der dritte als
+  Linearkombination der beiden anderen. Bild: der Spann als Ebene, beim „Abspielen“ hängen sich die Vielfachen
+  aneinander und treffen das Ziel; verfehlen sie es, zeigt eine rote Strecke den Rest. Vor dem Ergebnis kein Bild mit
+  dem Ziel, wenn es die Antwort verriete.
+- 13.11.2026: M7 Schritt 5, Funde der unabhängigen Prüfung behoben: Bei der Probe war „Werte vertauscht“ richtig, wenn
+  vor beiden Unbekannten derselbe Faktor stand (entfällt dann); in Stufe 1 verrieten zwei Pfeile auf einer Geraden vor
+  dem Ergebnis „linear abhängig“ (dort jetzt kein Bild vor dem Ergebnis); im freien Modus bekommt „nicht im Spann“,
+  obwohl der Vektor im Spann liegt, einen eigenen Fehler „Im Spann übersehen“ (auch geführt bei der Probe); beim
+  Einsetzen kein Folgefehler mehr mit einem falschen Wert, der in der Frage gar nicht steht; zwei Texte zu „Warum ist das
+  falsch?“ nennen die Dimension nicht mehr; Stufe 5 mit Parameter stellt das Gleichungssystem vor dem Eliminieren auf.
+  Neuer Test: Jede falsche Antwort der Probe unterscheidet sich in einem Wert oder im Schluss.
 - 13.11.2026: Pull Requests von Claude (Branches `claude/...`) übernimmt GitHub automatisch, sobald die Prüfung grün ist (`.github/workflows/automerge.yml`, Wunsch des Nutzers); danach startet die Veröffentlichung. Übernommen wird nur genau der geprüfte Stand; rote Prüfung oder Konflikt: der Pull Request bleibt liegen.

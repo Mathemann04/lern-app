@@ -32,7 +32,7 @@ const m = ratMul
 const ZERO3 = vec(0, 0, 0)
 
 // Spatprodukt und die typischen Fehler beim Sarrus, alle linear in jedem der drei Vektoren (Spalten der Matrix)
-type Triple = (a: Vec, b: Vec, c: Vec) => Rational
+export type Triple = (a: Vec, b: Vec, c: Vec) => Rational
 const prod = (xs: readonly Rational[]) => xs.reduce((acc, x) => m(acc, x), rat(1))
 const sum = (xs: readonly Rational[]) => xs.reduce((acc, x) => ratAdd(acc, x), rat(0))
 // Hauptdiagonalen und Nebendiagonalen der Matrix mit den Spalten a, b, c (Sarrus)
@@ -40,9 +40,9 @@ const mainDiag = (a: Vec, b: Vec, c: Vec) => [[a[0], b[1], c[2]], [b[0], c[1], a
 const antiDiag = (a: Vec, b: Vec, c: Vec) => [[c[0], b[1], a[2]], [a[0], c[1], b[2]], [b[0], a[1], c[2]]] as const
 export const spatProduct: Triple = (a, b, c) => vecDot(cross(a, b), c)
 // Nebendiagonalen addiert
-const sarrusPlus: Triple = (a, b, c) => ratAdd(sum(mainDiag(a, b, c).map(prod)), sum(antiDiag(a, b, c).map(prod)))
+export const sarrusPlus: Triple = (a, b, c) => ratAdd(sum(mainDiag(a, b, c).map(prod)), sum(antiDiag(a, b, c).map(prod)))
 // nur eine Diagonale je Richtung, wie bei einer 2×2-Matrix
-const sarrusOne: Triple = (a, b, c) => ratSub(prod(mainDiag(a, b, c)[0]), prod(antiDiag(a, b, c)[0]))
+export const sarrusOne: Triple = (a, b, c) => ratSub(prod(mainDiag(a, b, c)[0]), prod(antiDiag(a, b, c)[0]))
 // Haupt- und Nebendiagonalen vertauscht
 const sarrusSwap: Triple = (a, b, c) => ratNeg(spatProduct(a, b, c))
 // mittlere Komponente des Kreuzprodukts mit falschem Vorzeichen
@@ -58,7 +58,7 @@ function quadOf(f: (t: Rational) => Rational): Quad {
   const [f0, f1, fm] = [f(rat(0)), f(rat(1)), f(rat(-1))]
   return { q2: ratSub(ratDiv(ratAdd(f1, fm), rat(2)), f0), q1: ratDiv(ratSub(f1, fm), rat(2)), q0: f0 }
 }
-const tripleQuad = (f: Triple, A: PVec, B: PVec, C: PVec) => quadOf((t) => f(pAt(A, t), pAt(B, t), pAt(C, t)))
+export const tripleQuad = (f: Triple, A: PVec, B: PVec, C: PVec) => quadOf((t) => f(pAt(A, t), pAt(B, t), pAt(C, t)))
 const sameQuad = (p: Quad, q: Quad) => [p.q2, p.q1, p.q0].every((x, i) => isZero(ratSub(x, [q.q2, q.q1, q.q0][i])))
 const isConst = (q: Quad) => isZero(q.q2) && isZero(q.q1)
 
@@ -98,8 +98,9 @@ const WRONG_FACTOR: Readonly<Record<Body, Rational>> = { spat: rat(1, 6), prism:
 
 // Spatprodukt mit Sarrus: Matrix mit den Spalten a, b, c, die ersten beiden Spalten noch einmal daneben
 // Mit Parameter ohne „Diagonalen vertauscht": −s hat dieselben Nullstellen wie s
-function sarrusStep(rng: Rng, an: string, bn: string, cn: string, A: PVec, B: PVec, C: PVec, t = 't'): GuidedStep {
-  const name = spatName(an, bn, cn)
+// Schritt 5 nutzt ihn als Determinante (name = \det(\vec a, \vec b, \vec c), eigener Titel)
+export function sarrusStep(rng: Rng, an: string, bn: string, cn: string, A: PVec, B: PVec, C: PVec, t = 't', opts: { readonly name?: string; readonly title?: string; readonly card?: string } = {}): GuidedStep {
+  const name = opts.name ?? spatName(an, bn, cn)
   const line = (q: Quad) => math(`${name} = ${quadLatex(q, t)}`)
   const s = tripleQuad(spatProduct, A, B, C)
   const withParam = [A, B, C].some((p) => !p.slope.every(isZero))
@@ -119,14 +120,14 @@ function sarrusStep(rng: Rng, an: string, bn: string, cn: string, A: PVec, B: PV
   const products = `${main.map(prodLatex).join(' + ')} - ${anti.map(prodLatex).join(' - ')}`
   const constants = isConst(tripleQuad(spatProduct, A, B, C)) && [A, B, C].every((p) => p.slope.every(isZero))
   // ohne Parameter: die sechs Produkte als Zahlen
-  const values = constants
-    ? ` = ${termsLatex([...mainDiag(A.base, B.base, C.base).map((p) => [prod(p), ''] as const), ...antiDiag(A.base, B.base, C.base).map((p) => [ratNeg(prod(p)), ''] as const)])}`
-    : ''
   const result = quadLatex(s, t)
+  const sixValues = termsLatex([...mainDiag(A.base, B.base, C.base).map((p) => [prod(p), ''] as const), ...antiDiag(A.base, B.base, C.base).map((p) => [ratNeg(prod(p)), ''] as const)])
+  // ohne doppeltes Glied, wenn nur ein Produkt nicht 0 ist
+  const values = constants && sixValues !== result ? ` = ${sixValues}` : ''
   const formula = `${name} = \\det ${matrix}`
   return choiceStep(rng, {
     id: 'spat',
-    title: 'Spatprodukt mit Sarrus',
+    title: opts.title ?? 'Spatprodukt mit Sarrus',
     question: `Wie groß ist $${name}$?`,
     correct: line(s),
     wrongs,
@@ -136,7 +137,7 @@ function sarrusStep(rng: Rng, an: string, bn: string, cn: string, A: PVec, B: PV
       short: `$${name} = ${products} = ${result}$.`,
     },
     established: [`${name} = ${result}`],
-    cards: [CARD.spat],
+    cards: opts.card ? [opts.card, CARD.spat] : [CARD.spat],
   })
 }
 

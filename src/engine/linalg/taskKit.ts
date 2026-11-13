@@ -8,7 +8,8 @@ import { type Vec, arrowName, vec, vecAdd, vecLatex, vecNumbers, vecSub } from '
 
 // Gemeinsame Teile der Vektor-Baukästen (M7): Typen, Schritt mit Auswahl, Zufallszahlen, Buchstaben, Bilder-Hilfen und
 // der Verbindungsvektor. Genutzt von vectorTasks.ts (Rechnen und Länge), dotTasks.ts (Skalarprodukt und Winkel), projTasks.ts
-// (Projektion und Zerlegung), forceTasks.ts (Kräfte), crossTasks.ts (Kreuzprodukt und Fläche) und spatTasks.ts (Spatprodukt und Volumen).
+// (Projektion und Zerlegung), forceTasks.ts (Kräfte), crossTasks.ts (Kreuzprodukt und Fläche), spatTasks.ts (Spatprodukt und Volumen) und basisTasks.ts
+// (Linearkombination und Basis).
 
 export type VectorKind =
   | 'connect'
@@ -62,6 +63,14 @@ export type VectorKind =
   | 'spatHeight'
   | 'spatCoplanarParam'
   | 'spatVolumeParam'
+  // Linearkombination und Basis (M7 Schritt 5, basisTasks.ts)
+  | 'basisComb'
+  | 'basisSpan'
+  | 'basisIndep'
+  | 'basisDim'
+  | 'basisCoords'
+  | 'basisSpanParam'
+  | 'basisParam'
 
 export type VectorTask = GuidedTaskBase & {
   readonly kind: VectorKind
@@ -109,6 +118,10 @@ export const CARD = {
   spat: 'vec-spat',
   volumen: 'vec-volumen',
   hoeheSpat: 'vec-hoehe-spat',
+  // Linearkombination und Basis (M7 Schritt 5)
+  linearkombination: 'vec-linearkombination',
+  unabhaengig: 'vec-unabhaengig',
+  basis: 'vec-basis',
 } as const
 
 // ------------------------------------------------------------------ Hilfen

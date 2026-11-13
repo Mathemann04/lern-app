@@ -11,8 +11,8 @@ import { buildVectorTask } from './vectorTasks.ts'
 
 // alle Bausteine: Nummern 1 bis 999 „Rechnen und Länge", ab 1000 „Skalarprodukt und Winkel" (Schritt 2), ab 2000
 // „Projektion und Zerlegung" (Schritt 3a), ab 3000 „Kräfte" (Schritt 3b), ab 4000 „Kreuzprodukt und Fläche" (Schritt 4a),
-// ab 5000 „Spatprodukt und Volumen" (Schritt 4b)
-const BLOCKS = ['rechnen', 'skalar', 'projektion', 'kraefte', 'kreuz', 'spat'] as const
+// ab 5000 „Spatprodukt und Volumen" (Schritt 4b), ab 6000 „Linearkombination und Basis" (Schritt 5)
+const BLOCKS = ['rechnen', 'skalar', 'projektion', 'kraefte', 'kreuz', 'spat', 'basis'] as const
 const ref = (level: Level, s: number) => ({ level, seed: blockSeed(BLOCKS[Math.floor(s / 1000)], (s % 1000) + (s < 1000 ? 0 : 1)) })
 const SEEDS = (n: number) => BLOCKS.flatMap((_, b) => Array.from({ length: n }, (_, i) => b * 1000 + i + (b === 0 ? 1 : 0)))
 const close = (a: number, b: number) => Math.abs(a - b) < 1e-9 * Math.max(1, Math.abs(a), Math.abs(b))
@@ -38,7 +38,7 @@ const inputOf = (p: ResultPart, values: readonly number[]) =>
 // Einträge des richtigen Ergebnisses so, wie die Engine sie schreibt (Spalte, Punkt, Zahl, Lösungen)
 function exactEntries(resultLatex: string): string[][] {
   return resultLatex.split(',\\;').flatMap((piece) => {
-    const word = /^\s*\\text\{(\w+)\}\s*$/.exec(piece)
+    const word = /^\s*\\text\{([^{}$]+)\}\s*$/.exec(piece)
     if (word) return [[word[1]]]
     const ineq = /^\s*([a-z]|\\lambda) ([<>]) (.+)$/.exec(piece)
     if (ineq) return [[ineq[2], ineq[3].trim()]]
@@ -115,7 +115,9 @@ describe('prüfen', () => {
       if (!task.resultLatex!.includes('}\\begin{pmatrix}')) expect(plain.kind, task.resultLatex).toBe('correct')
       // ein Eintrag um 1 daneben: falsch, genau dieser markiert (der erste, der eine Zahl ist)
       const j0 = free.entries![0].shape === 'inequality' ? 1 : 0
-      const wrongInput = exact.map((row, i) => row.map((e, j) => (i === 0 && j === j0 ? `${e}+1` : e)))
+      // nur eine Auswahl (im Spann oder nicht, Schritt 5): die andere Antwort
+      const other = (e: string) => free.entries![0].options!.find((o) => o !== e)!
+      const wrongInput = exact.map((row, i) => row.map((e, j) => (i === 0 && j === j0 ? (free.entries![0].shape === 'choice' ? other(e) : `${e}+1`) : e)))
       const v = free.checkEntries!(wrongInput)
       expect(v.kind, task.resultLatex).toBe('wrong')
       if (free.entries![0].shape !== 'solutions') expect(v.marks![0], task.resultLatex).toEqual(exact[0].map((_, j) => j === j0))
