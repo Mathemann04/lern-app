@@ -1245,3 +1245,10 @@ Neue Entscheidungen unten anfügen.
   Zelle); Rechnungen aus dem Buch (Abstand nächster Nachbarn, Dichte aus der Gitterkonstante, Mischungsregel) kommen nur
   in Vertiefung und Klausurniveau und nur, wenn die Vorlesung sie nahelegt; Halbleiter, Supraleitung, Phononen und
   Thermoelektrik gehören zu Physik (M10).
+- 13.11.2026: Lehrbuch „Technische Mechanik 1 (Statik)“ des Nutzers durchgesehen (135 Fotos, ganzes Buch) und in
+  docs/MECHANIK.md eingearbeitet. Maßstab für Reibung ist Kapitel 9 des Buchs (es gibt kein Skript dazu); Reibzahlen
+  nimmt die App aus einer frei zugänglichen Tabelle. Die Schreibweise kommt aus dem Skript der Vorlesung, weil die
+  Klausur danach geht; nur das Moment um einen Punkt heißt wie im Buch $M^{(A)}$, damit es nicht mit dem
+  Einspannmoment $M_A$ verwechselt wird. Inhalte, die nur im Buch stehen (Arbeitssatz und Stabilität, Seileck,
+  Kraftschraube, Cremona-Plan, Föppl-Symbol, Polplan), sind markiert und kommen höchstens später oder in Stufe 5.
+  Korrigiert: Der Satz über drei Kräfte im Gleichgewicht gilt nur für nicht parallele Kräfte.
