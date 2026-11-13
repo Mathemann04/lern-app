@@ -69,7 +69,7 @@ const PAIR_CACHE = new Map<number, Pairs>()
 
 // Alle Paare kleiner ganzzahliger Vektoren mit besonderem Winkel (einmal gerechnet). Ebene: Einträge bis 5 ohne Null;
 // Raum: bis 3, höchstens eine Null; vier Dimensionen: bis 2, höchstens zwei Nullen. Mindestens ein negativer Eintrag.
-function anglePairs(dim: number): Pairs {
+export function anglePairs(dim: number): Pairs {
   const cached = PAIR_CACHE.get(dim)
   if (cached) return cached
   const R = dim === 2 ? 5 : dim === 3 ? 3 : 2
@@ -159,7 +159,7 @@ export function dotStep(rng: Rng, an: string, bn: string, a: Vec, b: Vec, drawin
 }
 
 // Längen zweier Vektoren in einem Schritt
-function lengthsStep(rng: Rng, names: readonly [string, string], vs: readonly [Vec, Vec]): GuidedStep {
+export function lengthsStep(rng: Rng, names: readonly [string, string], vs: readonly [Vec, Vec]): GuidedStep {
   const line = (vals: readonly string[]) => math(vals.map((x, i) => `\\lvert ${names[i]} \\rvert = ${x}`).join(',\\; '))
   const wrongs: Wrong[] = [
     { content: line(vs.map((v) => ratLatex(vecNorm2(v)))), rule: 'vec-length-no-root' },

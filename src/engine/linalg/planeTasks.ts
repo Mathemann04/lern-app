@@ -125,7 +125,7 @@ export function probeStep(rng: Rng, o: { readonly name: string; readonly n: Vec;
 }
 
 // Hessesche Normalform aus der Koordinatenform n · x = d mit ganzzahliger Länge von n
-function hesseStep(rng: Rng, o: { readonly name: string; readonly n: Vec; readonly d: Rational; readonly len: number }): { readonly step: GuidedStep; readonly n0: Vec; readonly d0: Rational } {
+export function hesseStep(rng: Rng, o: { readonly name: string; readonly n: Vec; readonly d: Rational; readonly len: number }): { readonly step: GuidedStep; readonly n0: Vec; readonly d0: Rational } {
   const L = rat(o.len)
   const flip = ratSign(o.d) < 0
   const n0 = vecScale(ratDiv(rat(flip ? -1 : 1), L), o.n)
@@ -237,7 +237,7 @@ const HESSE_POOL: readonly (readonly number[])[] = [
   [2, 10, 11, 15],
 ]
 
-function hesseNormal(rng: Rng): { readonly n: Vec; readonly len: number } {
+export function hesseNormal(rng: Rng): { readonly n: Vec; readonly len: number } {
   const row = rng.pick(HESSE_POOL)
   const e = rng.shuffle(row.slice(0, 3)).map((x) => (rng.chance(0.4) ? -x : x))
   return { n: vec(...e), len: row[3] }

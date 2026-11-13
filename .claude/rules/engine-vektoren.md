@@ -148,6 +148,22 @@ gezieltes Üben noch nicht (`focus: false`).
   Normalen senkrecht darauf), aus der Parameterform: `m · w` = ±1 oder ±2 und teilt `m · u`. Fehler `gl-…` am Ende von
   `lineErrorRules.ts` (17, ab Nummer 34), Karten `gl-lage-geraden`, `gl-lage-gerade-ebene`, `gl-lage-ebenen`. Tests in
   `linalg/posTasks.test.ts` (Gegenprobe mit Kreuz- und Spatprodukt, jede Lage kommt vor, Fehlertabelle im freien Modus).
+- Abstände und Schnittwinkel (Schritt 7b): Bausteine `abstand` (Code 31) und `schnittwinkel` (Code 32), Gruppe `geo-lage`.
+  `linalg/distTasks.ts`, Arten in `ABSTAND_KINDS_BY_LEVEL` (distPointPlane, distPointLine, distLines, distParallel):
+  Schritte `insertValueStep` (n · P − d), `distStep` (|s| / |n| als `Surd`, Fehler Betrag, nicht geteilt, Quadrat, dazu
+  `extra`), `hesseDistStep`, `genVecStep` (Id `lotvektor`, Spalten mit t), `footCondStep`, `footSteps` (Lotfußpunkt mit
+  `solveStep`, `pointStep`, Länge), `mirrorStep` (Punkt `P'`; der freie Modus liest Punktnamen mit Strich). Nutzt aus
+  `posTasks.ts` (exportiert): `parallelStep`, `insertStep`, `patch`, `footN`, `stack`, `PATCH`; aus `planeTasks.ts`:
+  `hesseStep`, `hesseNormal`. Bilder `pointPlaneFigure`, `pointLineFigure` (Lot Phase 1, rechter Winkel Phase 2,
+  Spiegelpunkt Phase 3, Knopf „Lot fällen“), windschief kürzeste Verbindung über `closest`. `linalg/cutAngleTasks.ts`:
+  `WINKEL_KINDS_BY_LEVEL` (angleLines, angleLinePlane, anglePlanes), Schritte `formulaStep` (Id `formel`, immer zuerst),
+  `dotStep`, `lengthsStep` und `anglePairs` aus `dotTasks.ts`, `valueStep` (cos bzw. sin mit Betrag), `degreeStep`,
+  `perpCondStep` (Stufe 4). Allgemein nur mit |a|²|b|² ≤ 180 (sonst krumme Wurzeln). Bilder `linesFigure`,
+  `linePlaneFigure` (Winkel zum Schatten der Geraden; senkrecht: rechter Winkel zu einer Richtung der Ebene),
+  `planesFigure` (Winkel senkrecht zur Schnittgeraden). Jede Aufgabe hat im ersten Schritt ein Bild ohne Lösung. 14 Fehler
+  `gl-…` ab Nummer 51 in `lineErrorRules.ts`, Karten `gl-abstand-ebene`, `gl-abstand-gerade`, `gl-abstand-windschief`,
+  `gl-schnittwinkel`. Tests in `linalg/distTasks.test.ts` (Abstand über Fläche und Kreuzprodukt, Winkel mit acos/asin,
+  Schritt-Ids eindeutig, freier Modus mit Wurzeln und typischen Fehlern).
 - `linalg/vectorTasks.ts`: Baukasten. Je Art (`VectorKind`) eine Funktion, die die ganze geführte Aufgabe baut (Schritte
   mit `choiceStep`: falsche Antworten ohne Doppelte, höchstens drei, aus `errorRules.ts`; Bilder; Ergebnis; Form;
   `answer` und `data` für die Gegenprobe in Tests). Arten je Stufe in `KINDS_BY_LEVEL`: Stufe 1 Ebene, 2 Raum, 3 zwei

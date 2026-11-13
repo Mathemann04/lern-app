@@ -57,7 +57,7 @@ const sumOf = (xs: readonly Rational[]) => xs.reduce((s, x) => ratAdd(s, x), rat
 // k · Name: \vec v, -\vec v, 2 \cdot \vec v
 const multLatex = (k: Rational, name: string) => (ratEq(k, rat(1)) ? name : ratEq(k, rat(-1)) ? `-${name}` : `${show(k)} \\cdot ${name}`)
 // Angabe mit zwei Gleichungen untereinander (passt so auch am Handy)
-const stack = (...rows: readonly string[]) => `\\begin{array}{l} ${rows.join(' \\\\[4pt] ')} \\end{array}`
+export const stack = (...rows: readonly string[]) => `\\begin{array}{l} ${rows.join(' \\\\[4pt] ')} \\end{array}`
 const sameRats = (a: readonly Rational[], b: readonly Rational[]) => a.length === b.length && a.every((x, i) => ratEq(x, b[i]))
 
 const PARAM_PAIRS = [
@@ -90,7 +90,7 @@ function lineNames(rng: Rng) {
 // ------------------------------------------------------------------ Schritte
 
 // Sind zwei Richtungs- bzw. Normalenvektoren parallel? Faktor je Zeile
-function parallelStep(rng: Rng, o: { readonly vn: string; readonly wn: string; readonly v: Vec; readonly w: Vec; readonly what: string; readonly card: string }): GuidedStep {
+export function parallelStep(rng: Rng, o: { readonly vn: string; readonly wn: string; readonly v: Vec; readonly w: Vec; readonly what: string; readonly card: string }): GuidedStep {
   const par = isParallel(o.v, o.w)
   const ks = o.v.map((x, i) => (isZero(x) ? null : ratDiv(o.w[i], x)))
   const factors = o.v
@@ -299,7 +299,7 @@ function insertedLatex(c0: Rational, cs: readonly Rational[], params: readonly s
 }
 
 // Gerade bzw. Ebene in Parameterform zeilenweise in eine Koordinatenform n · x = d einsetzen
-function insertStep(
+export function insertStep(
   rng: Rng,
   o: { readonly into: string; readonly from: string; readonly n: Vec; readonly d: Rational; readonly p: Vec; readonly dirs: readonly (readonly [string, Vec])[]; readonly card: string; readonly drawing?: VectorDrawing },
 ): { readonly step: GuidedStep; readonly c0: Rational; readonly cs: readonly Rational[] } {
@@ -432,7 +432,7 @@ const crossN = (a: N, b: N) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * 
 const dotN = (a: N, b: N) => a.reduce((s, x, i) => s + x * b[i], 0)
 
 // Stück einer Ebene (Quadrat mit halber Seite size) um center
-function patch(center: N, n: Vec, size: number, color: DrawColor, phase: number): DrawPolygon {
+export function patch(center: N, n: Vec, size: number, color: DrawColor, phase: number): DrawPolygon {
   const nn = nums(n)
   const e1 = unitN(nums(planeDirections(n)[0]))
   const e2 = unitN(crossN(nn, e1))
@@ -441,15 +441,15 @@ function patch(center: N, n: Vec, size: number, color: DrawColor, phase: number)
 }
 
 // Lotfußpunkt von x auf die Ebene n · y = d (als Zahlen)
-const footN = (x: N, n: Vec, d: Rational) => {
+export const footN = (x: N, n: Vec, d: Rational) => {
   const nn = nums(n)
   return addN(x, scaleN((num(d) - dotN(nn, x)) / dotN(nn, nn), nn))
 }
 
-type LineSpec = { readonly name: string; readonly p: Vec; readonly v: Vec; readonly ts: readonly number[]; readonly color: DrawColor; readonly dir: string }
+export type LineSpec = { readonly name: string; readonly p: Vec; readonly v: Vec; readonly ts: readonly number[]; readonly color: DrawColor; readonly dir: string }
 
 // Geraden (mit Richtungspfeil am Stützpunkt), Punkte und Ebenenstücke; Ebenen zuerst, dann die Geraden, dann die Punkte
-function sceneFigure(dim: 2 | 3, o: { readonly lines: readonly LineSpec[]; readonly points?: readonly DrawPoint[]; readonly polygons?: readonly DrawPolygon[]; readonly caption: string }): VectorDrawing {
+export function sceneFigure(dim: 2 | 3, o: { readonly lines: readonly LineSpec[]; readonly points?: readonly DrawPoint[]; readonly polygons?: readonly DrawPolygon[]; readonly caption: string }): VectorDrawing {
   const base = (o.polygons ?? []).reduce((x, p) => Math.max(x, p.phase ?? 0), 0)
   const segments = o.lines.map((l, i) => ({ ...lineSegment(l.p, l.v, l.ts), color: l.color, label: l.name, phase: base + i + 1 }))
   const arrows = o.lines.map((l, i) => ({ from: nums(l.p), to: addN(nums(l.p), nums(l.v)), color: l.color, label: l.dir, phase: base + i + 1 }))
@@ -458,7 +458,7 @@ function sceneFigure(dim: 2 | 3, o: { readonly lines: readonly LineSpec[]; reado
   return { ...emptyDrawing(dim, o.caption), segments, arrows, points, polygons: o.polygons ?? [] }
 }
 
-const PATCH = 3
+export const PATCH = 3
 
 // ------------------------------------------------------------------ Arten: zwei Geraden
 
@@ -709,7 +709,7 @@ function buildLinePlane(rng: Rng, level: Level, meet: boolean): Built {
           answer: [truth],
         }
       }
-      const solved = solveStep(rng, { id: 'parameter', title: 'Parameter', question: `Für welches $${t}$ ist die Gleichung erfüllt?`, t, target: d, p: ins.c0, v: ins.cs[0], lead: 'Die Gleichung lautet', card: GL_CARD.lageGeradeEbene })
+      const solved = solveStep(rng, { id: 'parameter', title: 'Parameter', question: `Für welches $${t}$ ist die Gleichung erfüllt?`, t, target: d, p: ins.c0, v: ins.cs[0], lead: 'Die Gleichung ist linear:', card: GL_CARD.lageGeradeEbene })
       const pt = pointStep(rng, { Q: 'S', p, v, t: t0, tName: t, slips: solved.slips, question: 'Welcher Punkt ist der Durchstoßpunkt $S$?', card: GL_CARD.lageGeradeEbene })
       steps.push(solved.step, pt)
       if (steps.some((st) => st.choices.length < 3)) continue

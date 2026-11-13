@@ -1180,3 +1180,21 @@ Neue Entscheidungen unten anfügen.
   dann war eine „falsche“ Antwort richtig (jetzt nie $0$); „Stützvektor beim Einsetzen vergessen“ passt jetzt auch zu
   Ebenen; vertauschte $t$ und $s$ beim Bestimmen von $a$ heißen „Faktoren den falschen Vektoren zugeordnet“. Neue Tests
   für die ersten drei Funde.
+- 13.11.2026: M7 Schritt 7b als zwei eigene Bausteine in der Gruppe „Lage, Abstände, Winkel“: **„Abstände“** (`abstand`,
+  Code 31) und **„Schnittwinkel“** (`schnittwinkel`, Code 32; die Id `winkel` ist beim Umstellen vergeben). Abstand
+  Punkt–Gerade wie in der Vorlesung über den allgemeinen Punkt $F_t$ und $\overrightarrow{PF_t} \cdot \vec v = 0$ (nicht
+  über die Projektion aus Schritt 3a und nicht über die Fläche aus Schritt 4a, die es dort schon gibt); das Ergebnis nennt
+  Lotfußpunkt und Abstand. Windschiefe Geraden mit $\vec n = \vec v \times \vec w$ ungekürzt (wie man es rechnet).
+  Spiegelpunkte heißen $P'$ (der freie Modus liest jetzt auch Punktnamen mit Strich). Schnittwinkel: besondere Winkel in
+  Grad, sonst $\cos\varphi$ bzw. $\sin\varphi$ exakt (wie bei „Skalarprodukt und Winkel“); jede Winkelaufgabe beginnt mit
+  „Welche Formel?“, weil die typischen Fehler (Betrag vergessen, cos statt sin, Stütz- statt Richtungsvektor, Richtung
+  der Ebene statt Normale) dort entstehen. Stufe 4 fragt nach dem Parameter, für den Geraden, Gerade und Ebene oder Ebenen
+  senkrecht stehen. Vor dem Ergebnis zeigt das Bild die Aufgabe ohne Lot bzw. ohne Winkelwert; der Knopf zum Abspielen
+  heißt bei Abständen „Lot fällen“.
+- 13.11.2026: Funde der unabhängigen Prüfung zu M7 Schritt 7b behoben: Beim Lotfußpunkt war die falsche Bedingung „mit dem
+  Stützvektor malgenommen“ manchmal ein Vielfaches der richtigen Gleichung (jetzt nur, wenn ihre Lösung anders ist); Ebene
+  und Lotfußpunkt hießen beide $F$ (Ebenen jetzt $E$ und $H$); der Stützpunkt der Normalenform hieß wie der gegebene Punkt
+  (jetzt $A$); unpassende Fehler bei der Lotgeraden und beim Einsetzen mit Parameter entfernt bzw. ersetzt; „Richtung der
+  Ebene statt Normale“ ersetzt jetzt die Normale; bei Gerade und Ebene ist $180^\circ - \varphi$ kein Betragsfehler (dort
+  eine zweite Verwechslung der Tabelle); Bild zum Winkel mit einer Koordinatenebene liegt in ihr; Klammern um negative
+  Faktoren; Tipp beim Auflösen als ganzer Satz. Neue Tests für die ersten beiden Funde und das Bild.

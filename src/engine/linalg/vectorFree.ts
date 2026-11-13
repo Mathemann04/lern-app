@@ -128,7 +128,7 @@ function readPart(text: string): ResultPart | null {
   const named = /^([a-zA-Z])\\colon (.*)$/s.exec(t)
   if (named) return readForm(named[1], named[2])
   // Punkt: Q(1 \mid 2 \mid 3); seit Schritt 6 auch Spurpunkte S_x, S_{xy}
-  const point = /^([A-Z](?:_\d|_[a-z]|_\{[a-z]+\})?)\((.*)\)$/s.exec(t)
+  const point = /^([A-Z](?:'|_\d|_[a-z]|_\{[a-z]+\})?)\((.*)\)$/s.exec(t)
   if (point) {
     const values = point[2].split('\\mid').map(numberOf)
     return values.every((v) => v !== null) ? { shape: 'point', label: point[1], values: values as number[] } : null
