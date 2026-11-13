@@ -234,7 +234,7 @@ function readEntry(raw: string): Read {
   const latex = raw
     .trim()
     .replace(/(\^\{?\\circ\}?|°|\\degree)$/, '')
-    .replace(/(\\[,;: ]|\s)*(\\(text|mathrm)\{\s*(N|Nm|J|m)\s*\}|N\s?m|N|J)$/, '')
+    .replace(/(\\[,;: ]|\s)*(\\(text|mathrm)\{\s*(N|Nm|J|m)\s*\}|N\s?m|N|J|m)$/, '')
     .trim()
   if (latex === '') return { value: null, expr: null, problem: 'empty' }
   const parsed = parseLatex(latex)
@@ -335,15 +335,19 @@ export function checkVectorEntries(check: VectorCheck, input: EntryInput): FreeV
       return targets.some((x) => Math.abs(x - r.value!) <= 0.01 * Math.max(1, Math.abs(x)))
     }),
   )
-  // Winkel in Grad mit derselben Richtung, aber nicht zwischen 0° und 360° (z. B. −30° statt 330°)
-  const turned = reads.some((row, i) =>
-    row.some((r, j) => {
-      const part = check.parts[i]
-      if (!marks[i][j] || part.suffix !== DEGREE || r.value === null) return false
-      const diff = (r.value - part.values[j]) / 360
-      return Math.abs(diff - Math.round(diff)) < 1e-9
-    }),
-  )
+  // Richtung einer Kraft (α ab der x-Achse, Schritt 3b) mit demselben Pfeil, aber nicht zwischen 0° und 360°
+  // (z. B. −30° statt 330°); nur, wenn sonst alles stimmt
+  const wrongCount = marks.flat().filter(Boolean).length
+  const turned =
+    wrongCount === 1 &&
+    reads.some((row, i) =>
+      row.some((r, j) => {
+        const part = check.parts[i]
+        if (!marks[i][j] || part.suffix !== DEGREE || !part.label.startsWith('\\alpha') || r.value === null) return false
+        const diff = (r.value - part.values[j]) / 360
+        return Math.abs(diff - Math.round(diff)) < 1e-9
+      }),
+    )
   if (turned)
     return { kind: 'unfinished', title: 'Fast: Richtung stimmt.', message: 'Gib den Winkel zwischen $0^\\circ$ und $360^\\circ$ an, gegen den Uhrzeigersinn ab der positiven $x$-Achse gemessen.', marks }
 

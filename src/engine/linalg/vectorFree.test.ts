@@ -177,14 +177,20 @@ describe('prüfen', () => {
       { shape: 'number', label: 'F_x =', values: [-5 * Math.sqrt(3)], suffix: '\\text{N}' },
       { shape: 'number', label: '\\alpha =', values: [330], suffix: '^\\circ' },
     ])
-    const check = { parts: readResult('M_A = -14\\,\\text{Nm},\\; \\alpha = 330^\\circ')!, wrongs: [[], []] }
-    expect(checkVectorEntries(check, [['-14'], ['330']]).kind).toBe('correct')
-    expect(checkVectorEntries(check, [['-14\\,\\text{Nm}'], ['330°']]).kind).toBe('correct')
-    expect(checkVectorEntries(check, [['-14Nm'], ['330']]).kind).toBe('correct')
-    const turned = checkVectorEntries(check, [['-14'], ['-30']])
+    const check = { parts: readResult('F = 14\\,\\text{N},\\; \\alpha = 330^\\circ')!, wrongs: [[], []] }
+    expect(checkVectorEntries(check, [['14'], ['330']]).kind).toBe('correct')
+    expect(checkVectorEntries(check, [['14\\,\\text{N}'], ['330°']]).kind).toBe('correct')
+    expect(checkVectorEntries(check, [['14N'], ['330']]).kind).toBe('correct')
+    const turned = checkVectorEntries(check, [['14'], ['-30']])
     expect(turned.kind).toBe('unfinished')
     expect(turned.marks).toEqual([[false], [true]])
-    expect(checkVectorEntries(check, [['-14'], ['30']]).kind).toBe('wrong')
+    expect(checkVectorEntries(check, [['14'], ['30']]).kind).toBe('wrong')
+    // nur, wenn sonst alles stimmt, und nur beim Winkel ab der x-Achse
+    expect(checkVectorEntries(check, [['-15'], ['-30']]).kind).toBe('wrong')
+    const between = { parts: readResult('\\varphi = 60^\\circ')!, wrongs: [[]] }
+    expect(checkVectorEntries(between, [['420']]).kind).toBe('wrong')
+    const path = { parts: readResult('s = 5\\,\\text{m}')!, wrongs: [[]] }
+    expect(checkVectorEntries(path, [['5m']]).kind).toBe('correct')
   })
 
   it('leer, unlesbar, gerundet, nicht fertig', () => {

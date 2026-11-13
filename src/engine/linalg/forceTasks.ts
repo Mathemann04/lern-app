@@ -663,8 +663,16 @@ function buildIncline(rng: Rng, level: Level): Built {
       question: 'Welche Gleichung gilt längs der Ebene?',
       correct: eq('F\\cos\\alpha = F_G\\sin\\alpha'),
       wrongs: [
-        { content: eq('F = F_G\\sin\\alpha'), rule: 'vec-incline-hold-along' },
-        { content: eq('F\\sin\\alpha = F_G\\cos\\alpha'), rule: 'vec-incline-sin-cos' },
+        {
+          content: eq('F = F_G\\sin\\alpha'),
+          rule: 'vec-incline-hold-along',
+          why: {
+            detailed: 'Die waagrechte Kraft zeigt nicht längs der Ebene. Längs der Ebene zählt von ihr nur ihr **Anteil** in diese Richtung, und der ist kleiner als die ganze Kraft. Zerlege $\\vec F$ in einen Teil längs und einen Teil senkrecht zur Ebene und setz nur den Teil längs der Ebene ins Gleichgewicht.',
+            short: 'Von der waagrechten Kraft zählt längs der Ebene nur ihr Anteil.',
+          },
+        },
+        // bei 45° wäre diese Gleichung gleichwertig zur richtigen (sin = cos)
+        ...(r === 45 ? [] : [{ content: eq('F\\sin\\alpha = F_G\\cos\\alpha'), rule: 'vec-incline-sin-cos' }]),
         { content: eq('F\\cos\\alpha = F_G'), rule: 'vec-force-whole' },
       ],
       hint: 'Längs der Ebene zählt von jeder Kraft nur ihr Anteil in diese Richtung. Die Normalkraft hat dort keinen Anteil.',
@@ -938,6 +946,9 @@ function buildInclineHoldVector(rng: Rng): Built {
 
 // ------------------------------------------------------------------ Arbeit
 
+// gleich- oder gegensinnig parallel: (F · s)² = |F|² |s|² (dann gäbe es keinen Winkelbogen im Bild)
+const parallel = (F: Vec, s: Vec) => ratEq(ratMul(vecDot(F, s), vecDot(F, s)), ratMul(vecNorm2(F), vecNorm2(s)))
+
 const WORK_NAMES = [
   { F: '\\vec F', s: '\\vec s' },
   { F: '\\vec F_1', s: '\\vec s' },
@@ -1026,7 +1037,7 @@ function buildWork(rng: Rng, level: Level): Built {
     for (;;) {
       const F = ints(rng, dim, -6, 6)
       const s = ints(rng, dim, -6, 6)
-      if (F.filter(isZero).length > dim - 2 || s.filter(isZero).length > dim - 2) continue
+      if (F.filter(isZero).length > dim - 2 || s.filter(isZero).length > dim - 2 || parallel(F, s)) continue
       const W = vecDot(F, s)
       // selten null
       if (isZero(W) && !rng.chance(0.25)) continue
@@ -1059,7 +1070,7 @@ function buildWorkPoints(rng: Rng, names: { readonly F: string; readonly s: stri
     const A = ints(rng, dim, -4, 4)
     const s = ints(rng, dim, -5, 5)
     const F = ints(rng, dim, -6, 6)
-    if (s.filter(isZero).length > dim - 2 || F.filter(isZero).length > dim - 2) continue
+    if (s.filter(isZero).length > dim - 2 || F.filter(isZero).length > dim - 2 || parallel(F, s)) continue
     const B = vecAdd(A, s)
     const W = vecDot(F, s)
     if (isZero(W)) continue

@@ -1073,3 +1073,9 @@ Neue Entscheidungen unten anfügen.
   zwei schräge Seile, Momentengleichgewicht, Arbeit mit Parameter, schiefe Ebene mit waagrechter Haltekraft als
   Vektorgleichung. Bilder der schiefen Ebene und der Arbeit mit Winkel als Szene ohne Gitter (die Zahlen dort wären
   nur Zeichnung); Knoten und Moment mit Gitter, weil dort die Koordinaten gegeben sind (Kräfte am Knoten verkleinert).
+- 13.11.2026: M7 Schritt 3b, Funde der unabhängigen Prüfung behoben: bei $45^\circ$ war die falsche Gleichung
+  „$F\sin\alpha = F_G\cos\alpha$“ gleichwertig zur richtigen (fällt dort weg); der Text zu „Haltekraft wie
+  Hangabtriebskraft“ nannte im Gleichgewichtsschritt die richtige Gleichung (dort eigener Text); Kraft und Weg nie
+  parallel (sonst kein Winkelbogen); „Fast: Richtung stimmt“ nur beim Winkel ab der $x$-Achse und nur, wenn sonst alles
+  stimmt; ein getipptes „m“ hinter einer Länge stört nicht. Neue Tests: Bilder über 1500 Nummern je Stufe, kein Text
+  zu einer falschen Antwort enthält die richtige.

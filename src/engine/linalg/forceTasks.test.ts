@@ -221,6 +221,27 @@ describe('Vektoren: Kräfte', () => {
     expect(equations).toBeGreaterThan(20)
   })
 
+  // Fund der Prüfung: Kraft und Weg parallel gaben einen Winkelbogen aus NaN
+  it('alle Bilder lassen sich zeichnen, auch bei vielen Nummern', () => {
+    for (const level of LEVELS)
+      for (let i = 1; i <= 1500; i++) {
+        const task = buildVectorTask(ref(level, i))
+        for (const d of [...task.steps.map((s) => s.drawing), task.resultDrawing])
+          for (const a of d?.angles ?? []) for (const p of anglePath(a, 0.5).points) for (const x of p) expect(Number.isFinite(x), task.form).toBe(true)
+      }
+  })
+
+  // Regel aus CLAUDE.md: „Warum ist das falsch?" verrät nicht das Ergebnis des Schritts
+  it('kein Text zu einer falschen Antwort enthält die richtige Antwort', () => {
+    for (const level of LEVELS)
+      for (const task of tasks(level, 200))
+        for (const step of task.steps) {
+          const correct = step.choices.find((c) => c.correct)!.content.replace(/^\$|\$$/g, '')
+          for (const c of step.choices.filter((c) => !c.correct))
+            for (const text of [c.whyWrong!.detailed, c.whyWrong!.short]) expect(text.includes(correct), `${task.form} ${step.id}: ${c.errorRuleId}`).toBe(false)
+        }
+  })
+
   it('Winkel im Bild: über 180° läuft der Bogen gegen den Uhrzeigersinn über die andere Seite', () => {
     const a = { at: [0, 0], u: [1, 0], v: [1, -1], color: 'r' as const, ccw: true as const }
     const path = anglePath(a, 1).points
