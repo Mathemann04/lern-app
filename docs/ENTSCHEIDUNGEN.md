@@ -1262,3 +1262,20 @@ Neue Entscheidungen unten anfügen.
   Ding zum Modell; kurze tägliche Übungen; Probeklausur, sobald eine Altklausur da ist. Dazu der Ritterschnitt als
   eigene Übung in Schritten (Schnitt legen, Teil wählen, Ritterpunkt wählen, rechnen) und als einzeln wählbares
   Unterthema bei den Fachwerken. Festgehalten in docs/MECHANIK.md für den Plan zu M11.
+- 13.11.2026: M7 Schritt 10 (Wunsch des Nutzers: „Weiter mit M7, Schritt 10“; 9b entstand gleichzeitig in einer anderen Sitzung). Schritt 10 ist zweigeteilt wie die
+  übrigen großen Schritte: 10a das Rechnen (Baustein „Gauß-Verfahren“, Id `gauss`, Code 35), 10b die Bilder (Geraden und
+  Ebenen). Festlegungen: Die Engine rechnet wie in der Vorlesung (bei 0 oben mit der ersten Zeile darunter tauschen,
+  sonst ganzzahliges Vielfaches, sonst über Kreuz); eine falsche Tabelle wird nur angeboten, wenn sie nicht gleichwertig
+  ist (gleiche reduzierte Stufenform; ohne Lösung, wo diese die rechte Seite verwischt, nur genau dieselbe Tabelle).
+  „Freie Variablen wählen“ kommt nur, wenn es drei wirklich falsche Antworten gibt (eine andere gültige Wahl wie $x = t$
+  statt $z = t$ wird nie als falsch angeboten). Im freien Modus zeigt die Eingabe die Form der Lösung (Vektor, Auswahl oder
+  Lösungsmenge); wer den Fall noch nicht kennt, findet ihn im geführten Modus. Die Notizen zu Matrizen, Determinanten und
+  Gauß stehen jetzt in `.claude/rules/engine-matrizen.md` (die Vektor-Notizen wären sonst über 30 000 Zeichen gekommen).
+- 13.11.2026: Funde der unabhängigen Prüfung zu M7 Schritt 10a behoben (keine falsche Mathematik in Karten und Texten):
+  Bekam eine Zeile beim Rückwärts-Einsetzen keinen eigenen Schritt (zu wenige falsche Antworten), nannte die Lösung sie
+  trotzdem als bekannt; jetzt rechnet die Lösung sie mit („Rechne von unten nach oben … aus“). Getauscht wird nie an
+  einer Zeile $0 \dots 0 \mid c$ (dort wäre „keine Lösung“ schon richtig). Neuer Fehler „Weniger Stufen als Variablen als
+  ‚keine Lösung‘ gedeutet“ für unterbestimmte Systeme ohne Nullzeile. Bewusst so gelassen: Bei Systemen ohne Lösung darf
+  eine falsche Tabelle zeilengleichwertig zur richtigen sein (alle Tabellen mit Widerspruch und gleichen Zeilen links
+  haben dieselbe reduzierte Stufenform); falsch ist sie trotzdem, weil sie nicht das Ergebnis der genannten Umformung
+  ist. Neue Tests dafür.

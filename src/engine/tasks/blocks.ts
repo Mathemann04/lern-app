@@ -28,6 +28,8 @@ export const BLOCK_GROUPS: readonly BlockGroup[] = [
   { id: 'mat-rechnen', title: 'Matrizen' },
   // seit Schritt 9a
   { id: 'mat-det', title: 'Determinanten' },
+  // seit Schritt 10a
+  { id: 'mat-lgs', title: 'Gleichungssysteme' },
 ]
 
 // Gleichungen umstellen. „Lineare Gleichungen" sind die Aufgaben ganz ohne andere Bausteine (die Variable steht nur
@@ -92,18 +94,19 @@ export const LINE_PLAYABLE_COMBOS: Readonly<Record<1 | 2 | 3 | 4 | 5, readonly s
 }
 
 // Matrizen und Gleichungssysteme (M7 Schritt 8a): „Matrizen rechnen“, seit Schritt 9a „Determinanten“ (Id „determinante“, weil
-// „det“ beim Umstellen schon vergeben ist); Gauß und Inverse folgen in Schritt 10 bis 12
+// „det“ beim Umstellen schon vergeben ist); seit Schritt 10a „Gauß-Verfahren“; Gleichungssysteme mit Parameter und Inverse folgen in Schritt 11 und 12
 export const MATRIX_BLOCKS: readonly Block[] = [
   { id: 'matrix', title: 'Matrizen rechnen', note: 'Format, Summe und Vielfache, Transponierte, Produkt mit Falk-Schema, Matrix mal Vektor, welcher Ausdruck ist definiert', group: 'mat-rechnen' },
   { id: 'determinante', title: 'Determinanten', note: '2 × 2 und Sarrus mit Fläche und Volumen, Entwickeln mit dem Schachbrett, Umformungen, Regeln, mit Parameter', group: 'mat-det' },
+  { id: 'gauss', title: 'Gauß-Verfahren', note: 'Tabelle mit Zeilenumformungen, Zeilen tauschen, Kommazahlen wegschaffen, eine, keine oder unendlich viele Lösungen, Lösung mit Parametern', group: 'mat-lgs' },
 ]
 
 export const MATRIX_PLAYABLE_COMBOS: Readonly<Record<1 | 2 | 3 | 4 | 5, readonly string[]>> = {
-  1: ['matrix', 'determinante'],
-  2: ['matrix', 'determinante'],
-  3: ['matrix', 'determinante'],
-  4: ['matrix', 'determinante'],
-  5: ['matrix', 'determinante'],
+  1: ['matrix', 'determinante', 'gauss'],
+  2: ['matrix', 'determinante', 'gauss'],
+  3: ['matrix', 'determinante', 'gauss'],
+  4: ['matrix', 'determinante', 'gauss'],
+  5: ['matrix', 'determinante', 'gauss'],
 }
 
 // Feste Nummer je Baustein für Aufgabennummern mit Baustein wie „exp.1-4711" (M6 Schritt 4, taskNumber.ts). Gilt für alle
@@ -159,4 +162,6 @@ export const BLOCK_CODES: Readonly<Record<string, number>> = {
   matrix: 33,
   // M7 Schritt 9a: Determinanten („determinante.1-4711“)
   determinante: 34,
+  // M7 Schritt 10a: Gauß-Verfahren („gauss.1-4711“)
+  gauss: 35,
 }
