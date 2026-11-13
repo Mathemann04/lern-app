@@ -148,3 +148,5 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
 - Seit M7 Schritt 8a gibt es den Ton `rose` (Matrizen und Gleichungssysteme, Rosé wie im Plan) und im freien Modus die
   Kästchen `matrix` (Raster in großen Klammern, `cols` Spalten, Namen „Zeile 2, Spalte 1“; bei vier Spalten schmaler) in
   `ui/free/EntryInput.tsx`.
+- Seit M7 Schritt 9a setzt `RichText` `**…**` fett (`<strong>`, auch über eine Formel hinweg, der Zustand läuft durch den
+  Absatz); vorher standen die Sternchen in Erklärungen, Fehlertexten und Lernkarten sichtbar da. Test in `RichText.test.ts`.

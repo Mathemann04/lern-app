@@ -45,6 +45,7 @@ import { REARRANGE_CARD_LIST } from './rearrangeCards.ts'
 import { VECTOR_CARD_LIST } from './vectorCards.ts'
 import { LINE_CARD_LIST } from './lineCards.ts'
 import { MATRIX_CARD_LIST } from './matrixCards.ts'
+import { DET_CARD_LIST } from './detCards.ts'
 import type { VectorKind } from '../linalg/vectorTasks.ts'
 import { WHEN_NEEDED } from './texts.ts'
 
@@ -68,7 +69,7 @@ export const TOPICS: readonly Topic[] = [
   { id: 'umstellen', title: 'Gleichungen umstellen', description: 'Gegenrechnung, Rüberbringen, Variable im Nenner, Ausklammern' },
   { id: 'vektoren', title: 'Vektoren', description: 'Rechnen, Länge, Skalarprodukt, Projektion, Kräfte, Kreuzprodukt, Spatprodukt, Basis' },
   { id: 'geraden', title: 'Geraden und Ebenen', description: 'Parameterform, Punktprobe, Koordinatenform, Hessesche Normalform, Spurpunkte, Lage, Abstände, Schnittwinkel' },
-  { id: 'matrizen', title: 'Matrizen und Gleichungssysteme', description: 'Format, Summe und Vielfache, Transponierte, Produkt mit Falk-Schema, Matrix mal Vektor, vertauschbar' },
+  { id: 'matrizen', title: 'Matrizen und Gleichungssysteme', description: 'Format, Summe und Vielfache, Transponierte, Produkt mit Falk-Schema, Matrix mal Vektor, vertauschbar, Determinanten' },
   { id: 'chem-atombau', title: 'Atombau', description: 'Elementarteilchen, Kernsymbol, Isotope, Ionen, Atommodelle und Licht' },
   { id: 'chem-elektronen', title: 'Elektronen', description: 'Quantenzahlen, Orbitale, Pauli und Hund, Elektronenkonfiguration, Valenzelektronen und Ionen' },
   { id: 'chem-pse', title: 'Aufbau des Periodensystems', description: 'Perioden, Gruppen, Blöcke, Metalle und Nichtmetalle, Edelgasregel, Ionen, Ionisierungsenergie' },
@@ -403,6 +404,7 @@ export const CARDS: readonly Card[] = [
   ...VECTOR_CARD_LIST,
   ...LINE_CARD_LIST,
   ...MATRIX_CARD_LIST,
+  ...DET_CARD_LIST,
   ...ATOMBAU_CARDS,
   ...STOFFMENGE_CARDS,
   ...GLEICHUNGEN_CARDS,

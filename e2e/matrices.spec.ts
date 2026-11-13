@@ -108,3 +108,45 @@ test('Frei: Matrix in Kästchen, falscher Eintrag markiert, typischer Fehler bei
   await expectCleanPage(page, 'Matrix frei')
   expect(errors).toEqual([])
 })
+
+// Determinanten (M7 Schritt 9a): Baustein auf der Seite der Tätigkeit, je Stufe eine Aufgabe, Fläche als Bild,
+// Lernkarte, freier Modus mit Betrag vergessen und zwei Lösungen in beliebiger Reihenfolge
+test('Determinanten: Baustein, jede Stufe lösbar, Bild der Fläche, Lernkarte', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./#/thema/matrizen')
+  await expect(page.getByRole('checkbox', { name: 'Determinanten', exact: true })).toBeChecked()
+  for (const level of [1, 2, 3, 4, 5]) {
+    await page.goto(`./#/ueben/matrizen/determinante.${level}-${70 + level}`)
+    await solveWholeTask(page)
+    await expectCleanPage(page, `Determinanten Stufe ${level}`)
+  }
+  // determinante.1-2: 2 × 2 mit Fläche, beim Ergebnis wird das Einheitsquadrat zum Parallelogramm
+  await page.goto('./#/ueben/matrizen/determinante.1-2')
+  await solveWholeTask(page)
+  await expect(page.getByTestId('result').getByTestId('vector-figure')).toBeVisible()
+  await page.goto('./#/karten/matrizen/det-entwickeln')
+  await expect(page.getByRole('heading', { name: 'Entwickeln mit dem Schachbrett' })).toBeVisible()
+  await expectCleanPage(page, 'Lernkarte Entwickeln')
+  expect(errors).toEqual([])
+})
+
+test('Determinanten frei: Betrag vergessen erkannt, Lösungen in beliebiger Reihenfolge', async ({ page }) => {
+  const errors = collectErrors(page)
+  // determinante.1-2: B = (1 2 | 5 −4), det B = −14, F = 14
+  await page.goto('./#/frei/matrizen/determinante.1-2')
+  await typeInto(page, 'Dein Ergebnis von Teil 1', '-14')
+  await typeInto(page, 'Dein Ergebnis von Teil 2', '-14')
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Typischer Fehler: Betrag vergessen (Fläche oder Volumen negativ).')).toBeVisible()
+  await typeInto(page, 'Dein Ergebnis von Teil 2', '14')
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
+  // determinante.4-2: nicht invertierbar für a = −3 und a = −2
+  await page.goto('./#/frei/matrizen/determinante.4-2')
+  await typeInto(page, '1. Lösung', '-2')
+  await typeInto(page, '2. Lösung', '-3')
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
+  await expectCleanPage(page, 'Determinanten frei')
+  expect(errors).toEqual([])
+})

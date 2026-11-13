@@ -85,7 +85,7 @@ const spatName = (an: string, bn: string, cn: string) => `(${an} \\times ${bn}) 
 const surdOrRat = (x: Surd | Rational) => ('rad' in x ? surdLatex(x) : ratLatex(x))
 
 // Körper: Spat, dreiseitiges Prisma (halber Spat), Pyramide mit Parallelogramm als Grundfläche, Tetraeder
-type Body = 'spat' | 'prism' | 'pyramid' | 'tetra'
+export type Body = 'spat' | 'prism' | 'pyramid' | 'tetra'
 const BODY_FACTOR: Readonly<Record<Body, Rational>> = { spat: rat(1), prism: rat(1, 2), pyramid: rat(1, 3), tetra: rat(1, 6) }
 const BODY_BASE: Readonly<Record<Body, Shape>> = { spat: 'par', prism: 'tri', pyramid: 'par', tetra: 'tri' }
 const BODY_GEN: Readonly<Record<Body, string>> = { spat: 'des Spats', prism: 'des Prismas', pyramid: 'der Pyramide', tetra: 'des Tetraeders' }

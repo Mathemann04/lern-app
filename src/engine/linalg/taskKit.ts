@@ -108,6 +108,15 @@ export type VectorKind =
   | 'matOuter'
   | 'matParam'
   | 'matExpression'
+  // Determinanten (M7 Schritt 9a, detTasks.ts)
+  | 'detTwo'
+  | 'detSarrus'
+  | 'detTriangle'
+  | 'detExpand'
+  | 'detRowOps'
+  | 'detRules'
+  | 'detEliminate'
+  | 'detParam'
 
 export type VectorTask = GuidedTaskBase & {
   readonly kind: VectorKind

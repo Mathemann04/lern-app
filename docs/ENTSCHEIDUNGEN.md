@@ -1215,3 +1215,16 @@ Neue Entscheidungen unten anfügen.
   „Kehrwert“ beim Parameter entfernt (kein eigener Fehler); bei $AB = BA$ ist $\lvert\lambda\rvert \ge 2$, sonst stünde die
   Lösung als Eintrag in $B$; Stufe 5 ohne „Welcher Ausdruck ist definiert?“ (gleich schwer wie Stufe 4), nur noch längere
   Ausdrücke und $AB = BA$ mit $3 \times 3$.
+- 13.11.2026: M7 Schritt 9 in zwei Teile geteilt: **9a** bringt den Baustein „Determinanten“ (Id `determinante`, Code 34,
+  Gruppe „Determinanten“; die Id `det` ist beim Umstellen schon vergeben) mit allen Aufgabenarten und den Bildern zu Fläche
+  und Volumen; **9b** bringt Sarrus als Animation, zusammen mit dem animierten Falk-Schema aus 8b (beides „Diagonalen bzw.
+  Zeile und Spalte leuchten auf“, gleiche Technik). Schritt 9 wurde vor 8b begonnen, weil der Nutzer ihn ausdrücklich
+  gewählt hat. Entwickelt wird nach der Zeile oder Spalte mit **echt** den meisten Nullen (ab $4 \times 4$; bei $3 \times 3$
+  mit einer Null hat die Spalte durch diese Null genauso viele, darum nennt die Aufgabe dort die Zeile). Unterdeterminanten
+  stehen mit senkrechten Strichen ($\begin{vmatrix} \dots \end{vmatrix}$), Streichmatrizen heißen $A_{ij}$, bei $5 \times 5$
+  heißt die erste Unterdeterminante $B$. Eine falsche Entwicklung, die zufällig denselben Wert hat, wird nie angeboten (ein
+  Test rechnet jede Entwicklung in den Antworten aus). Zeilenumformungen als Klausuraufgabe „$\det A$ bekannt, $B$ hat die
+  Zeilen $\vec z_2,\ 3\vec z_1,\ \vec z_3 - 2\vec z_2$“; Vielfache nur von Zeilen, die selbst nichts dazubekommen (sonst
+  ändert sich die Determinante). Mit Parameter ist die Determinante quadratisch (Parameter an zwei Stellen in verschiedenen
+  Zeilen und Spalten) mit zwei ganzzahligen Nullstellen verschiedenen Betrags; „Haupt- und Nebendiagonalen vertauscht“ gibt
+  es dort nicht als falsche Antwort ($-p(a)$ hat dieselben Nullstellen, wie beim Spatprodukt).

@@ -1,6 +1,7 @@
 import type { Explanation } from '../explain/texts.ts'
 import { LINE_ERROR_RULES } from './lineErrorRules.ts'
 import { MATRIX_ERROR_RULES } from './matrixErrorRules.ts'
+import { DET_ERROR_RULES } from './detErrorRules.ts'
 
 // Typische Fehler beim Rechnen mit Vektoren (M7, Katalog in docs/PLAN-M7.md, „Typische Fehler"). Jeder Fehler rechnet
 // einen Schritt falsch weiter (vectorTasks.ts); hier stehen Name, Katalogbeispiel als Formel und „Warum ist das falsch?".
@@ -1224,9 +1225,9 @@ export const VECTOR_ERROR_RULES: readonly VectorErrorRule[] = [
   },
 ]
 
-// Geraden und Ebenen (M7 Schritt 6) mit Vorsilbe „gl-“ in lineErrorRules.ts, Matrizen (Schritt 8a) mit „mat-“ in matrixErrorRules.ts
+// Geraden und Ebenen (M7 Schritt 6) mit Vorsilbe „gl-“ in lineErrorRules.ts, Matrizen (Schritt 8a) mit „mat-“ in matrixErrorRules.ts, Determinanten (Schritt 9a) mit „det-“ in detErrorRules.ts
 export const vectorErrorRule = (id: string): VectorErrorRule => {
-  const rule = VECTOR_ERROR_RULES.find((r) => r.id === id) ?? LINE_ERROR_RULES.find((r) => r.id === id) ?? MATRIX_ERROR_RULES.find((r) => r.id === id)
+  const rule = VECTOR_ERROR_RULES.find((r) => r.id === id) ?? LINE_ERROR_RULES.find((r) => r.id === id) ?? MATRIX_ERROR_RULES.find((r) => r.id === id) ?? DET_ERROR_RULES.find((r) => r.id === id)
   if (!rule) throw new Error(`Unbekannter Fehler ${id}`)
   return rule
 }

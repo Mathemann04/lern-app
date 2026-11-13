@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { type Segment, parseRichText } from '../engine/explain/richText.ts'
 import { Formula } from './Formula.tsx'
 
@@ -6,28 +7,41 @@ import { Formula } from './Formula.tsx'
 // bleibt in der Zeile, mehrere stehen untereinander).
 export function RichText({ text, className = '', inline = false }: { text: string; className?: string; inline?: boolean }) {
   const paragraphs = parseRichText(text)
-  const content = (segments: (typeof paragraphs)[number]) =>
-    segments.map((s, j) => {
+  const content = (segments: (typeof paragraphs)[number]) => {
+    // **fett** (seit M7 Schritt 9a), auch über eine Formel hinweg: Der Zustand läuft durch den Absatz
+    let bold = false
+    const strong = (node: ReactNode, key: string | number) => (bold ? <strong key={key}>{node}</strong> : node)
+    return segments.map((s, j) => {
       if (s.kind === 'text') {
         // Satzzeichen direkt nach einer Formel und eine öffnende Klammer oder „ direkt davor stehen schon
         // bei der Formel (siehe unten)
         const glued = j > 0 ? gluedPunctuation(segments, j - 1) : ''
         const opening = gluedOpening(segments, j + 1)
-        return <span key={j}>{s.text.slice(glued.length, s.text.length - opening.length)}</span>
+        const pieces = s.text.slice(glued.length, s.text.length - opening.length).split('**')
+        return (
+          <span key={j}>
+            {pieces.map((piece, k) => {
+              if (k > 0) bold = !bold
+              return piece === '' ? null : strong(piece, k)
+            })}
+          </span>
+        )
       }
       const opening = gluedOpening(segments, j)
       const punctuation = gluedPunctuation(segments, j)
-      if (!opening && !punctuation) return <Formula key={j} tex={s.latex} />
+      if (!opening && !punctuation) return strong(<Formula key={j} tex={s.latex} />, j)
       // Kurze Formel und Satzzeichen bleiben zusammen, sonst steht etwa „?" allein in der nächsten Zeile
       // oder „(" allein am Ende der Zeile davor
-      return (
+      return strong(
         <span key={j} className="whitespace-nowrap">
           {opening}
           <Formula tex={s.latex} />
           {punctuation}
-        </span>
+        </span>,
+        j,
       )
     })
+  }
   if (inline) {
     if (paragraphs.length === 1) return <span className={className}>{content(paragraphs[0])}</span>
     return (

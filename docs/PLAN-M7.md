@@ -323,8 +323,32 @@ Request.
      $AB = BA$ für jedes $a$.
    - **8b:** Falk-Schema als Animation auf Knopfdruck (Zeile und Spalte leuchten auf, der Eintrag entsteht), in den
      Schritten zum Produkt und auf der Lernkarte; ohne bei „Bewegung reduzieren“.
-9. **Determinanten:** Fläche und Volumen als Bild, Sarrus animiert, Entwicklung mit Schachbrett, Umformungen, Regeln
-   ($\det(\lambda A)$, $\det A^{\mathsf T}$, $\det A^{-1}$, $\det(AB)$), mit Parameter.
+9. **Determinanten**, in zwei Teilen:
+   - **9a (fertig, 13.11.2026):** Baustein „Determinanten“ (`determinante`, Code 34, Gruppe „Determinanten“) in der Tätigkeit
+     „Matrizen und Gleichungssysteme“, Stufen 1 bis 5, geführt und frei. Acht Arten: $2 \times 2$ (Stufe 1, oft mit der
+     Fläche des Parallelogramms aus den Spalten), Sarrus (Stufe 1; Stufe 2 oft mit dem Volumen des Spats aus den Spalten),
+     Dreiecksmatrix (Stufe 2, $3 \times 3$ und $4 \times 4$), Entwickeln mit dem Schachbrett (Stufe 2 $3 \times 3$ nach
+     einer Zeile oder Spalte mit einer Null, Stufe 3 $4 \times 4$ mit drei Nullen, Stufe 4 mit zwei Nullen und zwei
+     Unterdeterminanten, Stufe 5 $5 \times 5$ zweimal entwickeln; ab $4 \times 4$ zuerst „Wie berechnest du am
+     geschicktesten?“), Zeilenumformungen ($\det A$ bekannt, $B$ aus Tausch, Faktor und Vielfachen der Zeilen
+     $\vec z_1, \vec z_2, \dots$; Stufe 3 $3 \times 3$, Stufe 5 $4 \times 4$ mit allem), Nullen erzeugen und entwickeln
+     (Stufe 4), Regeln (Stufe 3 $\det(\lambda X)$ mit $X^{\mathsf T}$, $X^{-1}$ oder $X^k$, Stufe 4 mit zwei Matrizen und
+     „Zerlegen“, Stufe 5 dazu $\det A$ erst mit Sarrus), mit Parameter (Stufe 4 $3 \times 3$, Stufe 5 $4 \times 4$ erst
+     entwickeln; „nicht invertierbar“, „Spalten bzw. Zeilen linear abhängig“, „$A\vec x = \vec 0$ hat mehr als eine
+     Lösung“, zwei ganzzahlige Lösungen). Bilder: Einheitsquadrat wird beim Abspielen zum Parallelogramm der Spalten
+     (Fläche $\lvert\det A\rvert$, Orientierung bei negativer Determinante), Spat der Spalten zieht sich auf. Frei: Zahl,
+     Fläche bzw. Volumen, zwei Lösungen in beliebiger Reihenfolge. Sechs Lernkarten, 35 neue typische Fehler: Plus statt
+     Minus bei $2 \times 2$, Diagonalen vertauscht, Zeilen statt Diagonalen, Nebendiagonalen addiert, nur eine Diagonale je
+     Richtung, Haupt- und Nebendiagonalen vertauscht, nur die Hauptdiagonale, Sarrus bei großer Matrix, Betrag vergessen,
+     halbiert, Faktor eines anderen Körpers, Diagonale addiert, Gegendiagonale, 0 ohne Nullzeile, Schachbrett vergessen,
+     Schachbrett falsch angesetzt, falsche Zeile oder Spalte gestrichen, Eintrag vergessen, Vorzeichen beim Tausch, Faktor
+     vergessen, Faktor hoch $n$, durch den Faktor geteilt, Vielfaches verändert die Determinante, Vielfaches macht sie 0,
+     addiert statt abgezogen, nur den ersten Eintrag verändert, falsch herum abgezogen, $\lambda$ statt $\lambda^n$,
+     Transponieren verändert sie, Kehrwert vergessen, Potenz als Faktor, Summe statt Produkt, invertierbar verwechselt,
+     $\det A = 1$ gefordert, Vorzeichen der Nullstellen. Nebenbei: `**fett**` in Texten wird jetzt fett gesetzt (bisher
+     standen die Sternchen sichtbar da).
+   - **9b:** Sarrus als Animation auf Knopfdruck (die Diagonalen leuchten nacheinander auf, plus und minus), zusammen mit
+     dem Falk-Schema aus 8b; ohne bei „Bewegung reduzieren“.
 10. **Gauß:** Tabelle mit Zeilenumformungen, Geraden und Ebenen als Bild, alle drei Fälle, Lösung mit Parametern.
 11. **Gleichungssysteme mit Parameter und Cramer:** Determinante als Polynom, Sonderfälle mit Schieberegler, Rang.
 12. **Inverse und Matrizengleichungen:** 2×2 mit Formel, 3×3 mit Gauß-Jordan Zeile für Zeile, Matrizengleichung erst
