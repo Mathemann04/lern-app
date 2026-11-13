@@ -1235,3 +1235,7 @@ Neue Entscheidungen unten anfügen.
   behandelt“ und „Potenz vergessen“, kein Doppelfehler mehr); $\det(\lambda A B)$ mit einer Matrix ohne Zusatz kommt jetzt
   vor (vorher wegen zu weniger Antworten immer verworfen); „Die Null fällt weg“ in der Einzahl; $3 \times 3$ in Tipps und
   Namen als Formel. Neue Tests: Entwicklung mit Parameter an mehreren Stellen, kein Vielfaches bei Sarrus, jede Art Faktor.
+- 13.11.2026: Das Modulhandbuch (öffentlich, Fassung vom 09.11.2025) ist nur **Rahmen und Lückenfinder**, nicht
+  Maßstab: Es gelten weiter Skripte, Übungen und Altklausuren der Vorlesung. Ein Thema, das nur im Handbuch steht
+  (z. B. Drehmatrizen, Newton-Verfahren, Gläser in Chemie), kommt erst in die App, wenn Unterlagen es bestätigen oder
+  der Nutzer es will. Übersicht in docs/STUDIENPLAN.md.
