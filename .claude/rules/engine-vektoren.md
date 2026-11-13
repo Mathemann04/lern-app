@@ -191,6 +191,22 @@ gezieltes Üben noch nicht (`focus: false`).
   auf Lernkarten das Schema des letzten Schritts mit Schema (`CardBody.tsx`). Die Erklärung verweist aufs Bild statt einer
   Tabelle. Tests in `matrixTasks.test.ts` (Gegenprobe mit Kommazahlen, Teilprodukte = Zeile mal Spalte, Felder passen zu
   `established`).
+- Determinanten (Schritt 9a): Baustein `determinante` (Code 34, Gruppe `mat-det`; `det` gehört dem Umstellen) in
+  `MATRIX_BLOCKS`, `linalg/detTasks.ts`, Arten in `DET_KINDS_BY_LEVEL` (detTwo, detSarrus, detTriangle, detExpand,
+  detRowOps, detRules, detEliminate, detParam). Einträge als `Lin` (c0 + c1·a), Werte als `Quad` über `polyOf` (drei
+  Stellen, Probe an zwei weiteren: Determinante höchstens quadratisch, Parameter an zwei Stellen in verschiedenen Zeilen
+  und Spalten); `det` exakt mit Gauß. Schritte `det2Step`, `sarrusStep` (`SARRUS`: right, plus, one, swap, diag; mit
+  Parameter ohne swap und ohne Vielfache), `measureStep` (Fläche `F` bzw. Volumen `V` = Betrag), `methodStep` (ab 4 × 4), `expandStep`
+  (`expansion(A, line, how)`: right, ignored, shift, minor, factor; falsche nur mit anderem Wert), Unterdeterminanten
+  `\begin{vmatrix}`, Namen `A_{ij}`, bei 5 × 5 `B = A_{rc}` (`embed` baut die größere Matrix um B). Entwickelt wird ab
+  4 × 4 nach der Zeile oder Spalte mit echt den meisten Nullen (`uniqueBest`). Umformungen: Zeilen `\vec z_{i}`
+  (`RowSpec`: Hauptzeile, Faktor k, Vielfaches nur von Zeilen ohne eigenes), Gegenprobe über die Koeffizientenmatrix C.
+  Regeln: `Factor` (plain, T, inv, pow) mit `factorSlips` (je Fehler sein eigener Name); mit Parameter bietet Sarrus kein Vielfaches von p(a) an (`isMultiple`). Bilder `areaDrawing` (Einheitsquadrat wird zum Parallelogramm
+  der Spalten, Orientierung in der Beschreibung) und `spatDrawing` (`bodyDrawing('spat', …)` aus `spatTasks.ts`). 37
+  Fehler `det-…` in `linalg/detErrorRules.ts` (`vectorErrorRule` sucht dort, Katalog `matrizen`), sechs Karten `det-…` in
+  `explain/detCards.ts` (Ordner `matrizen`). Ergebnisse `\det A = 5`, dazu `F = 5` bzw. `V = 5`, `\det(2A^{-1}) = …`,
+  `a_1 = …,\; a_2 = …`. Tests in `linalg/detTasks.test.ts` (Laplace mit Kommazahlen, jede Entwicklung in den Antworten
+  ausgerechnet, Sarrus der Erklärung, Bilder, freier Modus). Sarrus als Animation folgt in 9b (wie `falk.ts`).
 - `linalg/vectorTasks.ts`: Baukasten. Je Art (`VectorKind`) eine Funktion, die die ganze geführte Aufgabe baut (Schritte
   mit `choiceStep`: falsche Antworten ohne Doppelte, höchstens drei, aus `errorRules.ts`; Bilder; Ergebnis; Form;
   `answer` und `data` für die Gegenprobe in Tests). Arten je Stufe in `KINDS_BY_LEVEL`: Stufe 1 Ebene, 2 Raum, 3 zwei

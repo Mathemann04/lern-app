@@ -333,6 +333,10 @@ Einzelheiten in docs/ENTSCHEIDUNGEN.md.
 
 - Prüfung aus mehreren Blickwinkeln, Doku, alte Adressen ein letztes Mal
   durchgetestet.
+- Klausur-Karte nur noch im Fach (Wunsch des Nutzers, 13.11.2026): Das ganze
+  Feld „Chemie 1 · Klausur Teil 1“ (Wiederholen, Probeklausur,
+  Klausur-Überblick) wandert von der Startseite auf die Seite des Fachs
+  Chemie 1. Die Startseite zeigt dann nur „Weitermachen“ und die Fächer.
 
 ### Antworten des Nutzers (12.11.2026)
 

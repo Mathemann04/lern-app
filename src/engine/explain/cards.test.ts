@@ -101,7 +101,7 @@ describe('Lernkarten: Katalog', () => {
     expect(cardById('gibt-es-nicht')).toBeUndefined()
   })
 
-  // RichText kennt keinen Fettdruck: „**Spalten**“ stünde mit Sternchen da (Fund in M7 Schritt 8b)
+  // Lernkarten ohne Fettdruck (Fund in M7 Schritt 8b; RichText setzt **…** seit 9a zwar fett, die Karten bleiben schlicht)
   it('schreibt keine Sternchen für Fettdruck', () => {
     for (const card of CARDS)
       for (const text of [card.title, card.memo, card.note, card.when]) expect(text ?? '', card.id).not.toContain('**')

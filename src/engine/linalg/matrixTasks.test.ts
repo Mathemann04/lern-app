@@ -286,7 +286,8 @@ describe('Matrizen rechnen: Fehler und Lernkarten', () => {
   it('jede Karte der Aufgaben gibt es, und jedes Beispiel ist eine Aufgabe der genannten Art, die die Gegenprobe besteht', () => {
     for (const level of LEVELS) for (const task of tasks(level, 40)) for (const id of [...task.cards, ...task.steps.flatMap((s) => s.cards)]) expect(cardById(id)?.topic, id).toBe('matrizen')
     let examples = 0
-    for (const card of cardsInTopic('matrizen')) {
+    // nur die Karten zu „Matrizen rechnen“ (die Determinanten prüft detTasks.test.ts)
+    for (const card of cardsInTopic('matrizen').filter((c) => c.id.startsWith('mat-'))) {
       for (const e of card.examples) {
         if (!isVectorExample(e)) throw new Error(card.id)
         const task = buildVectorTask({ level: e.vector.level, seed: blockSeed('rechnen', e.vector.seed) }, e.vector.kind)

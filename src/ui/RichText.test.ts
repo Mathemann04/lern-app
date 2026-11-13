@@ -44,3 +44,15 @@ describe('RichText: Formeln mit Satzzeichen und Klammern', () => {
     expect(layout('$a$)($b$')).toBe('[<i>a</i>)]||[(<i>b</i>]')
   })
 })
+
+describe('RichText: fett', () => {
+  const html = (text: string) => renderToStaticMarkup(createElement(RichText, { text, inline: true }))
+  it('setzt **…** fett, auch über eine Formel hinweg, und lässt keine Sternchen stehen', () => {
+    expect(html('Das ist **wichtig** hier.')).toContain('<strong>wichtig</strong>')
+    const across = html('Die Determinante wird **$k$-mal so groß** sein.')
+    expect(across).toContain('<strong><i>k</i></strong>')
+    expect(across).toContain('<strong>-mal so groß</strong>')
+    expect(across).not.toContain('*')
+    expect(html('Nur **Text**.')).not.toContain('*')
+  })
+})

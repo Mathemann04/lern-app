@@ -26,6 +26,8 @@ export const BLOCK_GROUPS: readonly BlockGroup[] = [
   { id: 'geo-lage', title: 'Lage, Abstände, Winkel' },
   // Tätigkeit „Matrizen und Gleichungssysteme“ (M7 Schritt 8a)
   { id: 'mat-rechnen', title: 'Matrizen' },
+  // seit Schritt 9a
+  { id: 'mat-det', title: 'Determinanten' },
 ]
 
 // Gleichungen umstellen. „Lineare Gleichungen" sind die Aufgaben ganz ohne andere Bausteine (die Variable steht nur
@@ -89,17 +91,19 @@ export const LINE_PLAYABLE_COMBOS: Readonly<Record<1 | 2 | 3 | 4 | 5, readonly s
   5: ['gerade', 'ebene', 'lage', 'abstand', 'schnittwinkel'],
 }
 
-// Matrizen und Gleichungssysteme (M7 Schritt 8a): „Matrizen rechnen“; Determinanten, Gauß, Inverse folgen in Schritt 9 bis 12
+// Matrizen und Gleichungssysteme (M7 Schritt 8a): „Matrizen rechnen“, seit Schritt 9a „Determinanten“ (Id „determinante“, weil
+// „det“ beim Umstellen schon vergeben ist); Gauß und Inverse folgen in Schritt 10 bis 12
 export const MATRIX_BLOCKS: readonly Block[] = [
   { id: 'matrix', title: 'Matrizen rechnen', note: 'Format, Summe und Vielfache, Transponierte, Produkt mit Falk-Schema, Matrix mal Vektor, welcher Ausdruck ist definiert', group: 'mat-rechnen' },
+  { id: 'determinante', title: 'Determinanten', note: '2 × 2 und Sarrus mit Fläche und Volumen, Entwickeln mit dem Schachbrett, Umformungen, Regeln, mit Parameter', group: 'mat-det' },
 ]
 
 export const MATRIX_PLAYABLE_COMBOS: Readonly<Record<1 | 2 | 3 | 4 | 5, readonly string[]>> = {
-  1: ['matrix'],
-  2: ['matrix'],
-  3: ['matrix'],
-  4: ['matrix'],
-  5: ['matrix'],
+  1: ['matrix', 'determinante'],
+  2: ['matrix', 'determinante'],
+  3: ['matrix', 'determinante'],
+  4: ['matrix', 'determinante'],
+  5: ['matrix', 'determinante'],
 }
 
 // Feste Nummer je Baustein für Aufgabennummern mit Baustein wie „exp.1-4711" (M6 Schritt 4, taskNumber.ts). Gilt für alle
@@ -153,4 +157,6 @@ export const BLOCK_CODES: Readonly<Record<string, number>> = {
   schnittwinkel: 32,
   // Tätigkeit „Matrizen und Gleichungssysteme“ (M7 Schritt 8a): Matrizen rechnen („matrix.1-4711“)
   matrix: 33,
+  // M7 Schritt 9a: Determinanten („determinante.1-4711“)
+  determinante: 34,
 }
