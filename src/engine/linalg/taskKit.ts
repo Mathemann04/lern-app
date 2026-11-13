@@ -117,6 +117,15 @@ export type VectorKind =
   | 'detRules'
   | 'detEliminate'
   | 'detParam'
+  // Gauß-Verfahren (M7 Schritt 10a, gaussTasks.ts)
+  | 'gaussTwo'
+  | 'gaussThree'
+  | 'gaussPivot'
+  | 'gaussOver'
+  | 'gaussUnder'
+  | 'gaussPlane'
+  | 'gaussDecimal'
+  | 'gaussBig'
 
 export type VectorTask = GuidedTaskBase & {
   readonly kind: VectorKind

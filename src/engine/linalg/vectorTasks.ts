@@ -12,6 +12,7 @@ import { BASIS_BUILDERS, BASIS_KINDS_BY_LEVEL } from './basisTasks.ts'
 import { LINE_BUILDERS, LINE_KINDS_BY_LEVEL } from './lineTasks.ts'
 import { MATRIX_BUILDERS, MATRIX_KINDS_BY_LEVEL } from './matrixTasks.ts'
 import { DET_BUILDERS, DET_KINDS_BY_LEVEL } from './detTasks.ts'
+import { GAUSS_BUILDERS, GAUSS_KINDS_BY_LEVEL } from './gaussTasks.ts'
 import { PLANE_BUILDERS, PLANE_KINDS_BY_LEVEL } from './planeTasks.ts'
 import { LAGE_BUILDERS, LAGE_KINDS_BY_LEVEL } from './posTasks.ts'
 import { ABSTAND_BUILDERS, ABSTAND_KINDS_BY_LEVEL } from './distTasks.ts'
@@ -1158,6 +1159,7 @@ const BUILDERS: Readonly<Record<VectorKind, (rng: Rng, level: Level) => Built>> 
   ...LINE_BUILDERS,
   ...MATRIX_BUILDERS,
   ...DET_BUILDERS,
+  ...GAUSS_BUILDERS,
   ...PLANE_BUILDERS,
   ...LAGE_BUILDERS,
   ...ABSTAND_BUILDERS,
@@ -1182,11 +1184,11 @@ export function buildVectorTask(ref: TaskRef, kind?: VectorKind): VectorTask {
   // Baustein aus der Nummer: „skalar.2-4711" zieht aus dem Skalarprodukt, „projektion.2-4711" aus Projektion und
   // Zerlegung (Schritt 3a), „kraefte.2-4711" aus den Kräften (Schritt 3b), „kreuz.2-4711" aus Kreuzprodukt und Fläche
   // (Schritt 4a), „spat.2-4711" aus Spatprodukt und Volumen (Schritt 4b), „basis.2-4711" aus Linearkombination und Basis
-  // (Schritt 5), „gerade.2-4711“ und „ebene.2-4711“ aus der Tätigkeit „Geraden und Ebenen“ (Schritt 6), „lage.2-4711“ aus dem Baustein „Lage“ (Schritt 7a), „abstand.2-4711“ und „schnittwinkel.2-4711“ aus Schritt 7b, „matrix.2-4711“ aus „Matrizen rechnen“ (Schritt 8a), „determinante.2-4711“ aus „Determinanten“ (Schritt 9a), alles andere aus
+  // (Schritt 5), „gerade.2-4711“ und „ebene.2-4711“ aus der Tätigkeit „Geraden und Ebenen“ (Schritt 6), „lage.2-4711“ aus dem Baustein „Lage“ (Schritt 7a), „abstand.2-4711“ und „schnittwinkel.2-4711“ aus Schritt 7b, „matrix.2-4711“ aus „Matrizen rechnen“ (Schritt 8a), „determinante.2-4711“ aus „Determinanten“ (Schritt 9a), „gauss.2-4711“ aus „Gauß-Verfahren“ (Schritt 10a), alles andere aus
   // „Rechnen und Länge"
   const block = seedBlock(ref.seed)?.block
   const dotBlock = block === 'skalar'
-  const kinds = dotBlock ? DOT_KINDS_BY_LEVEL : block === 'projektion' ? PROJ_KINDS_BY_LEVEL : block === 'kraefte' ? FORCE_KINDS_BY_LEVEL : block === 'kreuz' ? CROSS_KINDS_BY_LEVEL : block === 'spat' ? SPAT_KINDS_BY_LEVEL : block === 'basis' ? BASIS_KINDS_BY_LEVEL : block === 'gerade' ? LINE_KINDS_BY_LEVEL : block === 'ebene' ? PLANE_KINDS_BY_LEVEL : block === 'lage' ? LAGE_KINDS_BY_LEVEL : block === 'abstand' ? ABSTAND_KINDS_BY_LEVEL : block === 'schnittwinkel' ? WINKEL_KINDS_BY_LEVEL : block === 'matrix' ? MATRIX_KINDS_BY_LEVEL : block === 'determinante' ? DET_KINDS_BY_LEVEL : KINDS_BY_LEVEL
+  const kinds = dotBlock ? DOT_KINDS_BY_LEVEL : block === 'projektion' ? PROJ_KINDS_BY_LEVEL : block === 'kraefte' ? FORCE_KINDS_BY_LEVEL : block === 'kreuz' ? CROSS_KINDS_BY_LEVEL : block === 'spat' ? SPAT_KINDS_BY_LEVEL : block === 'basis' ? BASIS_KINDS_BY_LEVEL : block === 'gerade' ? LINE_KINDS_BY_LEVEL : block === 'ebene' ? PLANE_KINDS_BY_LEVEL : block === 'lage' ? LAGE_KINDS_BY_LEVEL : block === 'abstand' ? ABSTAND_KINDS_BY_LEVEL : block === 'schnittwinkel' ? WINKEL_KINDS_BY_LEVEL : block === 'matrix' ? MATRIX_KINDS_BY_LEVEL : block === 'determinante' ? DET_KINDS_BY_LEVEL : block === 'gauss' ? GAUSS_KINDS_BY_LEVEL : KINDS_BY_LEVEL
   // Zieh-Aufgaben (Schritt 2b) mit festem Anteil und eigenem Zufall: Die übrigen Nummern behalten ihre Aufgabe
   const drag = dotBlock && createRng(`vektoren-ziehen:${ref.level}:${ref.seed}`).chance(DRAG_SHARE)
   const chosen = kind ?? (drag ? 'drag' : rng.pick(kinds[ref.level]))

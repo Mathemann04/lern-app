@@ -1245,3 +1245,12 @@ Neue Entscheidungen unten anfügen.
   Zelle); Rechnungen aus dem Buch (Abstand nächster Nachbarn, Dichte aus der Gitterkonstante, Mischungsregel) kommen nur
   in Vertiefung und Klausurniveau und nur, wenn die Vorlesung sie nahelegt; Halbleiter, Supraleitung, Phononen und
   Thermoelektrik gehören zu Physik (M10).
+- 13.11.2026: M7 Schritt 10 vor 9b (Wunsch des Nutzers: „Weiter mit M7, Schritt 10“). Schritt 10 ist zweigeteilt wie die
+  übrigen großen Schritte: 10a das Rechnen (Baustein „Gauß-Verfahren“, Id `gauss`, Code 35), 10b die Bilder (Geraden und
+  Ebenen). Festlegungen: Die Engine rechnet wie in der Vorlesung (bei 0 oben mit der ersten Zeile darunter tauschen,
+  sonst ganzzahliges Vielfaches, sonst über Kreuz); eine falsche Tabelle wird nur angeboten, wenn sie nicht gleichwertig
+  ist (gleiche reduzierte Stufenform; ohne Lösung, wo diese die rechte Seite verwischt, nur genau dieselbe Tabelle).
+  „Freie Variablen wählen“ kommt nur, wenn es drei wirklich falsche Antworten gibt (eine andere gültige Wahl wie $x = t$
+  statt $z = t$ wird nie als falsch angeboten). Im freien Modus zeigt die Eingabe die Form der Lösung (Vektor, Auswahl oder
+  Lösungsmenge); wer den Fall noch nicht kennt, findet ihn im geführten Modus. Die Notizen zu Matrizen, Determinanten und
+  Gauß stehen jetzt in `.claude/rules/engine-matrizen.md` (die Vektor-Notizen wären sonst über 30 000 Zeichen gekommen).

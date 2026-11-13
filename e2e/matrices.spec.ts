@@ -198,3 +198,42 @@ test('Determinanten frei: Betrag vergessen erkannt, Lösungen in beliebiger Reih
   await expectCleanPage(page, 'Determinanten frei')
   expect(errors).toEqual([])
 })
+
+// Gauß-Verfahren (M7 Schritt 10a): Baustein auf der Seite der Tätigkeit, je Stufe eine Aufgabe, Lernkarte, freier Modus
+// mit „keine Lösung“ als Auswahl und einer Lösungsmenge mit Parameter (andere Darstellung derselben Geraden zählt)
+test('Gauß-Verfahren: Baustein, jede Stufe lösbar, Lernkarte', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./#/thema/matrizen')
+  await expect(page.getByRole('checkbox', { name: 'Gauß-Verfahren', exact: true })).toBeChecked()
+  for (const level of [1, 2, 3, 4, 5]) {
+    await page.goto(`./#/ueben/matrizen/gauss.${level}-${80 + level}`)
+    await solveWholeTask(page)
+    await expectCleanPage(page, `Gauß Stufe ${level}`)
+  }
+  await page.goto('./#/karten/matrizen/gauss-faelle')
+  await expect(page.getByRole('heading', { name: 'Eine, keine oder unendlich viele Lösungen' })).toBeVisible()
+  await expectCleanPage(page, 'Lernkarte Gauß')
+  expect(errors).toEqual([])
+})
+
+test('Gauß-Verfahren frei: keine Lösung als Auswahl, Lösungsmenge mit Parameter', async ({ page }) => {
+  const errors = collectErrors(page)
+  // gauss.1-1: zwei parallele Geraden, keine Lösung
+  await page.goto('./#/frei/matrizen/gauss.1-1')
+  await page.getByRole('radio', { name: 'unendlich viele Lösungen' }).click()
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Typischer Fehler: Widerspruch mit einer Nullzeile verwechselt.')).toBeVisible()
+  await page.getByRole('radio', { name: 'keine Lösung' }).click()
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
+  // gauss.1-12: L: x = (−6, 0) + t (3, 1); anderer Stützpunkt (−3, 1) und Richtung (−3, −1) ist dieselbe Gerade
+  await page.goto('./#/frei/matrizen/gauss.1-12')
+  await typeInto(page, '1. Eintrag des Stützvektors', '-3')
+  await typeInto(page, '2. Eintrag des Stützvektors', '1')
+  await typeInto(page, '1. Eintrag des Richtungsvektors', '-3')
+  await typeInto(page, '2. Eintrag des Richtungsvektors', '-1')
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
+  await expectCleanPage(page, 'Gauß frei')
+  expect(errors).toEqual([])
+})

@@ -14,6 +14,7 @@ import { INDEPENDENCE, SPAN_ANSWERS } from './basisTasks.ts'
 import { COLLINEAR, ON_LINE } from './lineTasks.ts'
 import { IN_PLANE } from './planeTasks.ts'
 import { LINE_PAIR, LINE_PAIR_RULES, LINE_PLANE, LINE_PLANE_RULES, PLANE_PAIR, PLANE_PAIR_RULES } from './posTasks.ts'
+import { LGS_CASES, LGS_CASE_RULES } from './gaussTasks.ts'
 import { type VectorTask, buildVectorTask } from './vectorTasks.ts'
 
 // Freier Modus der Tätigkeit „Vektoren" (M7 Schritt 1b): Das Ergebnis wird je Eintrag in ein eigenes Kästchen getippt
@@ -71,6 +72,8 @@ const CHOICE_SETS: readonly {
   { options: LINE_PAIR, label: 'Lage der Geraden:', special: 0, rules: ['gl-pos-dirs', 'gl-pos-dirs'], matrix: LINE_PAIR_RULES },
   { options: LINE_PLANE, label: 'Lage der Geraden zur Ebene:', special: 0, rules: ['gl-lp-normal', 'gl-lp-normal'], matrix: LINE_PLANE_RULES },
   { options: PLANE_PAIR, label: 'Lage der Ebenen:', special: 0, rules: ['gl-pos-dirs', 'gl-pos-dirs'], matrix: PLANE_PAIR_RULES },
+  // Gauß (Schritt 10a): nur „keine Lösung“ ist ein Ergebnis als Auswahl (sonst Vektor oder Lösungsmenge)
+  { options: LGS_CASES, label: 'Das Gleichungssystem hat', special: 1, rules: ['gauss-contradiction-zero', 'gauss-contradiction-zero'], matrix: LGS_CASE_RULES },
 ]
 const DEGREE = '^\\circ'
 // Einheiten am Ende eines Ergebnisses (Kräfte, Schritt 3b): \,\text{N}, \,\text{Nm}, \,\text{J}, \,\text{m}
