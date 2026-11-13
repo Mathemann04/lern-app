@@ -1,0 +1,41 @@
+# Übernimmt Pull Requests von Claude (Branches claude/...) automatisch nach main,
+# sobald die Prüfung grün ist (Wunsch des Nutzers, 13.11.2026), und stößt danach
+# die Veröffentlichung an. Rote Prüfung oder Konflikt: der Pull Request bleibt liegen.
+name: Automatisch übernehmen
+
+on:
+  workflow_run:
+    workflows: ['Prüfen und veröffentlichen']
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+jobs:
+  merge:
+    name: Übernehmen
+    if: >-
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      startsWith(github.event.workflow_run.head_branch, 'claude/') &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      BRANCH: ${{ github.event.workflow_run.head_branch }}
+      SHA: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      - name: Pull Request übernehmen
+        run: |
+          pr=$(gh api "repos/$REPO/pulls?state=open&head=${REPO%%/*}:$BRANCH" --jq '.[0].number // empty')
+          if [ -z "$pr" ]; then echo "Kein offener Pull Request für $BRANCH"; exit 0; fi
+          head=$(gh api "repos/$REPO/pulls/$pr" --jq .head.sha)
+          # Nur genau den geprüften Stand übernehmen; neuere Stände prüft GitHub erneut
+          if [ "$head" != "$SHA" ]; then echo "Neuerer Stand im Pull Request #$pr, warte auf dessen Prüfung"; exit 0; fi
+          gh api -X PUT "repos/$REPO/pulls/$pr/merge" -f merge_method=merge -f sha="$SHA"
+          gh api -X DELETE "repos/$REPO/git/refs/heads/$BRANCH" || true
+          # Übernahmen mit diesem Schlüssel starten keine weiteren Abläufe, daher von Hand veröffentlichen
+          gh workflow run app.yml --repo "$REPO" --ref main

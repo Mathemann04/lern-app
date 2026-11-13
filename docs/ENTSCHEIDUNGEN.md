@@ -1143,3 +1143,4 @@ Neue Entscheidungen unten anfügen.
   Einsetzen kein Folgefehler mehr mit einem falschen Wert, der in der Frage gar nicht steht; zwei Texte zu „Warum ist das
   falsch?“ nennen die Dimension nicht mehr; Stufe 5 mit Parameter stellt das Gleichungssystem vor dem Eliminieren auf.
   Neuer Test: Jede falsche Antwort der Probe unterscheidet sich in einem Wert oder im Schluss.
+- 13.11.2026: Pull Requests von Claude (Branches `claude/...`) übernimmt GitHub automatisch, sobald die Prüfung grün ist (`.github/workflows/automerge.yml`, Wunsch des Nutzers); danach startet die Veröffentlichung. Übernommen wird nur genau der geprüfte Stand; rote Prüfung oder Konflikt: der Pull Request bleibt liegen.
