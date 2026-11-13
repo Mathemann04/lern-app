@@ -85,5 +85,18 @@ freier Modus `vectorFree.ts`, `buildVectorTask` wählt die Arten nach dem Bauste
   wie eine Gerade bzw. Ebene (jede Darstellung zählt; zwei Parameter nur im Raum). 34 Fehler `gauss-…` in
   `linalg/gaussErrorRules.ts`, vier Karten in `explain/gaussCards.ts`. Tests in `linalg/gaussTasks.test.ts` (Gegenprobe
   mit eigenem Rang in Kommazahlen, jede Tabelle des Rechenwegs gleichwertig zur Aufgabe und mit Nullen unter der Stufe,
-  angezeigte Gleichungen gegen die Tabelle, falsche Lösungen erfüllen das System nicht). Bilder (Geraden und Ebenen) folgen
-  in 10b.
+  angezeigte Gleichungen gegen die Tabelle, falsche Lösungen erfüllen das System nicht).
+- Bilder zum Gauß-Verfahren (Schritt 10b): `linalg/gaussFigures.ts` rechnet mit Kommazahlen aus den Zeilen (n = 2:
+  Geraden als Strecken der halben Länge `LINE_HALF` um einen Punkt, n = 3: Ebenenstücke `PLANE_HALF`; n = 4 oder mehr als
+  drei Zeilen: kein Bild). Mitte `Ctx.center` = `sceneCenter` (Lösung mit freien Variablen 0, ohne Lösung Schwerpunkt der
+  Lotfußpunkte des Ursprungs). `elimDrawing` hängt als `GuidedStep.solvedDrawing` an jedem `elimStep` (neues Feld: Bild
+  erst nach der Antwort, `TaskScreen` zeigt es statt `drawing`, Schlüssel je Schritt): Zeilen in den Farben a, b, c
+  (`ROW_COLORS`), umgeformte gleiten mit `DrawSegment.slideFrom` bzw. `DrawPolygon.from` um den Drehpunkt
+  (`pivotOf`: Schnittpunkt bzw. Punkt der Schnittgeraden nahe der Mitte, mit Richtung), Fehler `mistake` mit
+  `DrawMistake.polygons` (rechte Seite alt, nur wenn 0,3 bis 6 Einheiten entfernt). `systemDrawing` ist `resultDrawing`
+  (Zeilen Phase 1 bis m, Lösung Phase m + 1, Schnitte je zweier Zeilen blass bei „keine Lösung“). Neu in `figures.ts`:
+  `DrawSegment.labelAt` (Name als Anteil der Strecke, dann in der Farbe der Strecke), `DrawPolygon.label`/`labelCorner`.
+  Lernkarten: `VectorCardExample.vector.picture: 'step'` zeigt statt des Ergebnisbildes das erste `solvedDrawing`
+  (`CardBody.tsx`). Tests in `linalg/gaussFigures.test.ts` (jedes Teil liegt auf der Zeile seiner Farbe, alte Lage auf der
+  alten Zeile, Drehpunkt auf Stufenzeile, alter und neuer Zeile; Fehler auf der Zeile mit alter rechter Seite; Lösung auf
+  allen Zeilen), Browser-Test in `e2e/matrices.spec.ts`.

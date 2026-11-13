@@ -295,7 +295,8 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext,
         </h1>
       </div>
       {step.figure && <ChemFigure id={step.figure} />}
-      {step.drawing && !step.drag && <VectorFigure drawing={step.drawing} />}
+      {step.drawing && !step.drag && !(solved && step.solvedDrawing) && <VectorFigure drawing={step.drawing} />}
+      {solved && step.solvedDrawing && <VectorFigure key={`${step.id}-geloest`} drawing={step.solvedDrawing} />}
       {step.falk && <FalkScheme key={step.id} falk={step.falk} done={solved} />}
       {step.sarrus && <SarrusScheme key={step.id} sarrus={step.sarrus} done={solved} />}
 

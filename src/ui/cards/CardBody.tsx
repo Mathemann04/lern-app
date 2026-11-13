@@ -127,6 +127,8 @@ function VectorExample({ example }: { example: VectorCardExample }) {
   // Sarrus (Schritt 9b): nur bei genau einem Schritt mit Sarrus (sonst wäre unklar, welche Determinante gemeint ist)
   const sarrusSteps = task.steps.filter((s) => s.sarrus)
   const sarrus = sarrusSteps.length === 1 ? sarrusSteps[0].sarrus : undefined
+  // Bild: zum Ergebnis oder (Gauß, Schritt 10b) das des ersten Schritts mit Bild nach der Antwort
+  const picture = example.vector.picture === 'step' ? task.steps.find((s) => s.solvedDrawing)?.solvedDrawing : task.resultDrawing
   return (
     <>
       <RichText text={task.instruction} className="text-lg font-medium" />
@@ -135,7 +137,7 @@ function VectorExample({ example }: { example: VectorCardExample }) {
           <Formula tex={task.functionLatex} />
         </FitWidth>
       )}
-      {task.resultDrawing && <VectorFigure drawing={task.resultDrawing} />}
+      {picture && <VectorFigure drawing={picture} />}
       {falk && <FalkScheme falk={falk} done />}
       {sarrus && <SarrusScheme sarrus={sarrus} done />}
       <ol className="space-y-3 border-l-2 border-accent-200 pl-4">
