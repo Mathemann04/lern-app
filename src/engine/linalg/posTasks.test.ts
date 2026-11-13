@@ -309,7 +309,7 @@ describe('Lage: freier Modus', () => {
 })
 
 describe('Lage: Fehler und Lernkarten', () => {
-  const NEW_RULES = LINE_ERROR_RULES.slice(33)
+  const NEW_RULES = LINE_ERROR_RULES.slice(33, 50)
 
   it('nutzt jeden neuen Fehler, und jeder steht auf einer Karte des Ordners', () => {
     const used = new Set<string>()

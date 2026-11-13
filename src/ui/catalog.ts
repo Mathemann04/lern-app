@@ -858,7 +858,7 @@ export const SUBJECTS: readonly Subject[] = [
           {
             id: LINES,
             title: 'Geraden und Ebenen',
-            description: 'Parameter-, Normalen- und Koordinatenform, Hessesche Normalform, Punktprobe, Spurpunkte, Lage mit Schnittpunkt, Durchstoßpunkt und Schnittgerade, mit Bildern zum Abspielen und Drehen',
+            description: 'Parameter-, Normalen- und Koordinatenform, Hessesche Normalform, Punktprobe, Spurpunkte, Lage mit Schnittpunkt, Durchstoßpunkt und Schnittgerade, Abstände und Schnittwinkel, mit Bildern zum Abspielen und Drehen',
             icon: 'lines',
             tone: 'emerald',
             cards: 'geraden',

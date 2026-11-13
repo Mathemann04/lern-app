@@ -171,3 +171,41 @@ test('Frei: Lage zweier Geraden zum Antippen, Schnittpunkt mit vertauschtem Para
   await expectCleanPage(page, 'Lernkarte Lage')
   expect(errors).toEqual([])
 })
+
+// M7 Schritt 7b: Abstände und Schnittwinkel
+for (const block of ['abstand', 'schnittwinkel']) {
+  test(`${block}: jede Stufe lässt sich lösen, Bild zum Ergebnis`, async ({ page }) => {
+    const errors = collectErrors(page)
+    for (const level of [1, 2, 3, 4, 5]) {
+      await page.goto(`./#/ueben/geraden/${block}.${level}-${60 + level}`)
+      await solveWholeTask(page)
+      await expect(page.getByTestId('result').getByTestId('vector-figure')).toBeVisible()
+      await expectCleanPage(page, `${block} Stufe ${level}`)
+    }
+    expect(errors).toEqual([])
+  })
+}
+
+test('Frei: Abstand ohne Teilen und stumpfer Schnittwinkel werden erkannt', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./#/fach/mathe')
+  await page.getByRole('link', { name: /Geraden und Ebenen/ }).first().click()
+  await expect(page.getByRole('checkbox', { name: 'Abstände', exact: true })).toBeChecked()
+  await expect(page.getByRole('checkbox', { name: 'Schnittwinkel', exact: true })).toBeChecked()
+  // abstand.1-1: d = 26/7; ohne durch |n| = 7 zu teilen: 26
+  await page.goto('./#/frei/geraden/abstand.1-1')
+  await typeInto(page, 'Dein Ergebnis', '26')
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Typischer Fehler: Nicht normiert.')).toBeVisible()
+  await typeInto(page, 'Dein Ergebnis', '26/7')
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
+  await expectCleanPage(page, 'Abstand frei')
+  // schnittwinkel.2-1: 60°, der stumpfe Winkel 120° heißt: Betrag vergessen
+  await page.goto('./#/frei/geraden/schnittwinkel.2-1')
+  await typeInto(page, 'Dein Ergebnis', '120')
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Typischer Fehler: Betrag vergessen: Schnittwinkel stumpf.')).toBeVisible()
+  await expectCleanPage(page, 'Schnittwinkel frei')
+  expect(errors).toEqual([])
+})

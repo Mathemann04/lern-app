@@ -279,8 +279,26 @@ Request.
      eingesetzt, Stützvektor beim Einsetzen vergessen, liegt in der Ebene und parallel verwechselt, Richtung und Normale
      falsch gedeutet, rechte Seite nicht verglichen, frei gewählte Variable weggelassen, ihre Zeile vergessen, beim
      Einsetzen nur einen Teil berücksichtigt, gleiche Einträge statt Vielfaches.
-   - **7b:** Abstände (Punkt–Ebene mit Hesse, Punkt–Gerade mit Lotfußpunkt, parallele und windschiefe Geraden,
-     parallele Ebenen; Bild: Lot fällt) und Winkel (Gerade–Gerade, Gerade–Ebene mit sin, Ebene–Ebene).
+   - **7b (fertig, 13.11.2026):** Bausteine „Abstände“ (`abstand`, Code 31) und „Schnittwinkel“ (`schnittwinkel`, Code 32)
+     in der Gruppe „Lage, Abstände, Winkel“, Stufen 1 bis 5, geführt und frei. Abstände, vier Arten: Punkt–Ebene (Stufe 1
+     Koordinatenform mit ganzzahliger Länge der Normalen, 2 Normalenform oder Hessesche Normalform, 3 Parameterform mit
+     Kreuzprodukt, 4 Punkt mit Parameter $a$ und gegebenem Abstand, zwei Lösungen, 5 Lotgerade, Lotfußpunkt und
+     Spiegelpunkt), Punkt–Gerade über den Lotfußpunkt (allgemeiner Punkt $F_t$, $\overrightarrow{PF_t} \cdot \vec v = 0$,
+     $t$, $F$, Länge; Stufe 1 Ebene, 2 Raum, 3 Gerade durch zwei Punkte, 5 Spiegelpunkt), zwei Geraden (Stufe 2
+     parallel, 3 parallel oder windschief, 4 windschief mit $g$ durch zwei Punkte, 5 beide durch zwei Punkte mit Prüfung
+     „nicht parallel“; windschief mit $\vec n = \vec v \times \vec w$), parallele Ebenen bzw. Gerade parallel zur Ebene
+     (Stufe 1 gleiche Normale, 2 Vielfaches, 3 Gerade, 4 Ebene in Normalenform; ein Punkt der einen in die andere). Bild:
+     Knopf „Lot fällen“ (Lot mit Lotfußpunkt, dann rechter Winkel, beim Spiegeln der Spiegelpunkt), windschief die
+     kürzeste Verbindung mit zwei rechten Winkeln. Schnittwinkel, drei Arten: zwei Geraden, Gerade und Ebene ($\sin$),
+     zwei Ebenen; Stufe 1 und 2 besondere Winkel in Grad, 3 Ebene in Parameterform oder allgemein ($\cos\varphi$ bzw.
+     $\sin\varphi$ exakt) bzw. Winkel zu einer Koordinatenebene, 4 Parameter so, dass senkrecht, 5 aus Punkten. Erster
+     Schritt „Welche Formel?“ (Richtungen bzw. Normalen, Betrag, $\sin$ bei Gerade und Ebene). Bild mit Winkelbogen am
+     Schnittpunkt, bei Gerade und Ebene zum Schatten der Geraden, bei Ebenen senkrecht zur Schnittgeraden. Vier
+     Lernkarten, 14 neue typische Fehler: Betrag vergessen (Abstand negativ), rechte Seite nicht abgezogen, beim Betrag
+     nur ein Fall, Ortsvektor statt Verbindungsvektor, mit dem Stützvektor statt der Richtung malgenommen, Abstand vom
+     Ursprung, Lotfußpunkt statt Spiegelpunkt, Spiegelpunkt in die falsche Richtung, Abstand der Stützpunkte statt der
+     Geraden, rechte Seiten ohne gleiche Normalen verglichen, Betrag vergessen (Winkel stumpf), cos statt sin bei Gerade
+     und Ebene, Stützvektor statt Richtung, Richtung der Ebene statt Normale.
 8. **Matrizen rechnen:** Tätigkeit „Matrizen und Gleichungssysteme“; Formate, Falk-Schema animiert, Transponierte,
    „Welche Ausdrücke sind definiert?“, Matrix verzerrt das Gitter; Eingabe einer Matrix.
 9. **Determinanten:** Fläche und Volumen als Bild, Sarrus animiert, Entwicklung mit Schachbrett, Umformungen, Regeln

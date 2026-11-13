@@ -89,6 +89,14 @@ export type VectorKind =
   | 'meetLinePlane'
   | 'posPlanes'
   | 'meetPlanes'
+  // Abstände und Schnittwinkel (M7 Schritt 7b, distTasks.ts, cutAngleTasks.ts)
+  | 'distPointPlane'
+  | 'distPointLine'
+  | 'distLines'
+  | 'distParallel'
+  | 'angleLines'
+  | 'angleLinePlane'
+  | 'anglePlanes'
 
 export type VectorTask = GuidedTaskBase & {
   readonly kind: VectorKind

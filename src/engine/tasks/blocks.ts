@@ -70,19 +70,21 @@ export const VECTOR_PLAYABLE_COMBOS: Readonly<Record<1 | 2 | 3 | 4 | 5, readonly
   5: ['rechnen', 'skalar', 'projektion', 'kraefte', 'kreuz', 'spat', 'basis'],
 }
 
-// Geraden und Ebenen (M7 Schritt 6): „Geraden“ und „Ebenen“ (Formen); seit Schritt 7a „Lage“, Abstände und Winkel folgen in Schritt 7b
+// Geraden und Ebenen (M7 Schritt 6): „Geraden“ und „Ebenen“ (Formen); seit Schritt 7a „Lage“, seit Schritt 7b „Abstände“ und „Schnittwinkel“
 export const LINE_BLOCKS: readonly Block[] = [
   { id: 'gerade', title: 'Geraden', note: 'Parameterform, Punkt auf der Geraden, Punktprobe, Spurpunkte, Punkte mit Abstand', group: 'geo-formen' },
   { id: 'ebene', title: 'Ebenen', note: 'Parameter-, Normalen- und Koordinatenform, umrechnen, Hessesche Normalform, Spurpunkte', group: 'geo-formen' },
   { id: 'lage', title: 'Lage', note: 'zwei Geraden, Gerade und Ebene, zwei Ebenen, Schnittpunkt, Durchstoßpunkt, Schnittgerade', group: 'geo-lage' },
+  { id: 'abstand', title: 'Abstände', note: 'Punkt und Ebene, Punkt und Gerade mit Lotfußpunkt, parallele und windschiefe Geraden, parallele Ebenen, Spiegelpunkt', group: 'geo-lage' },
+  { id: 'schnittwinkel', title: 'Schnittwinkel', note: 'zwei Geraden, Gerade und Ebene, zwei Ebenen, senkrecht mit Parameter', group: 'geo-lage' },
 ]
 
 export const LINE_PLAYABLE_COMBOS: Readonly<Record<1 | 2 | 3 | 4 | 5, readonly string[]>> = {
-  1: ['gerade', 'ebene', 'lage'],
-  2: ['gerade', 'ebene', 'lage'],
-  3: ['gerade', 'ebene', 'lage'],
-  4: ['gerade', 'ebene', 'lage'],
-  5: ['gerade', 'ebene', 'lage'],
+  1: ['gerade', 'ebene', 'lage', 'abstand', 'schnittwinkel'],
+  2: ['gerade', 'ebene', 'lage', 'abstand', 'schnittwinkel'],
+  3: ['gerade', 'ebene', 'lage', 'abstand', 'schnittwinkel'],
+  4: ['gerade', 'ebene', 'lage', 'abstand', 'schnittwinkel'],
+  5: ['gerade', 'ebene', 'lage', 'abstand', 'schnittwinkel'],
 }
 
 // Feste Nummer je Baustein für Aufgabennummern mit Baustein wie „exp.1-4711" (M6 Schritt 4, taskNumber.ts). Gilt für alle
@@ -131,4 +133,7 @@ export const BLOCK_CODES: Readonly<Record<string, number>> = {
   ebene: 29,
   // M7 Schritt 7a: Lage („lage.1-4711“)
   lage: 30,
+  // M7 Schritt 7b: Abstände („abstand.1-4711“) und Schnittwinkel („schnittwinkel.1-4711“)
+  abstand: 31,
+  schnittwinkel: 32,
 }

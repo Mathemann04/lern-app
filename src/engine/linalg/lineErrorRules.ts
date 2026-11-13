@@ -457,4 +457,131 @@ export const LINE_ERROR_RULES: readonly VectorErrorRule[] = [
       short: String.raw`Erst den Faktor $k$ bestimmen, dann gilt er in jeder Zeile.`,
     },
   },
+  // ---------------------------------------------------------------- Abstände und Schnittwinkel (Schritt 7b)
+  {
+    id: 'gl-dist-abs',
+    name: 'Betrag vergessen: Abstand negativ',
+    wrongFormula: String.raw`d = \frac{\vec n \cdot \vec p - d_0}{\lvert \vec n \rvert} = -2`,
+    why: {
+      detailed: String.raw`Ein Abstand ist eine Länge und nie negativ. Das Vorzeichen von $\vec n \cdot \vec p - d$ sagt nur, auf welcher Seite der Ebene der Punkt liegt (auf der Seite, in die $\vec n$ zeigt, oder auf der anderen). Für den Abstand nimmst du deshalb den **Betrag**.`,
+      short: String.raw`Abstand $= \frac{\lvert \ldots \rvert}{\lvert \vec n \rvert}$: immer mit Betrag.`,
+    },
+  },
+  {
+    id: 'gl-dist-rhs',
+    name: 'Rechte Seite nicht abgezogen',
+    wrongFormula: String.raw`E\colon 2x - y + 2z = 6 \;\Rightarrow\; d = \frac{\lvert 2p_1 - p_2 + 2p_3 \rvert}{3}`,
+    why: {
+      detailed: String.raw`In die Abstandsformel kommt die ganze Gleichung mit allem auf einer Seite: $\vec n \cdot \vec p - d$. Lässt du die rechte Seite weg, rechnest du den Abstand zu einer **anderen**, parallelen Ebene durch den Ursprung.`,
+      short: String.raw`Erst alles auf eine Seite bringen: $\vec n \cdot \vec p - d$.`,
+    },
+  },
+  {
+    id: 'gl-dist-one-case',
+    name: 'Beim Betrag nur einen Fall gerechnet',
+    wrongFormula: String.raw`\lvert 2a - 1 \rvert = 6 \;\Rightarrow\; 2a - 1 = 6`,
+    why: {
+      detailed: String.raw`$\lvert u \rvert = c$ mit $c > 0$ hat zwei Lösungen: $u = c$ und $u = -c$. Beim Abstand heißt das: Auf **jeder Seite** der Ebene gibt es einen Punkt mit diesem Abstand. Rechne beide Fälle.`,
+      short: String.raw`$\lvert u \rvert = c$: $u = c$ oder $u = -c$, zwei Fälle.`,
+    },
+  },
+  {
+    id: 'gl-foot-position',
+    name: 'Ortsvektor statt Verbindungsvektor',
+    wrongFormula: String.raw`\overrightarrow{PF_t} = \vec p + t\,\vec v`,
+    why: {
+      detailed: String.raw`$\vec p + t\,\vec v$ ist der **Ortsvektor** von $F_t$: der Pfeil vom Ursprung. Gesucht ist der Pfeil von $P$ nach $F_t$, also Spitze minus Fuß: $\vec p + t\,\vec v - \overrightarrow{OP}$. Nur dieser Pfeil muss im Lotfußpunkt senkrecht auf der Geraden stehen.`,
+      short: String.raw`Von $P$ nach $F_t$: $F_t$ minus $P$.`,
+    },
+  },
+  {
+    id: 'gl-foot-support',
+    name: 'Mit dem Stützvektor statt der Richtung malgenommen',
+    wrongFormula: String.raw`\overrightarrow{PF_t} \cdot \vec p = 0`,
+    why: {
+      detailed: String.raw`Das Lot steht senkrecht auf der **Geraden**, also auf ihrem Richtungsvektor $\vec v$ (dem Vektor hinter dem Parameter). Der Stützvektor $\vec p$ zeigt vom Ursprung zur Geraden und hat mit ihrer Richtung nichts zu tun.`,
+      short: String.raw`Bedingung: $\overrightarrow{PF_t} \cdot \vec v = 0$ mit der Richtung $\vec v$.`,
+    },
+  },
+  {
+    id: 'gl-foot-origin',
+    name: 'Abstand vom Ursprung statt vom Punkt',
+    wrongFormula: String.raw`d = \lvert \overrightarrow{OF} \rvert`,
+    why: {
+      detailed: String.raw`Der Abstand ist die Länge der Strecke vom Punkt $P$ zum Lotfußpunkt $F$, also $\lvert \overrightarrow{PF} \rvert$ mit $\overrightarrow{PF} = F - P$. Die Länge des Ortsvektors von $F$ ist nur der Abstand von $F$ zum Ursprung.`,
+      short: String.raw`$d = \lvert \overrightarrow{PF} \rvert$, nicht $\lvert \overrightarrow{OF} \rvert$.`,
+    },
+  },
+  {
+    id: 'gl-mirror-foot',
+    name: 'Lotfußpunkt statt Spiegelpunkt',
+    wrongFormula: String.raw`P' = F`,
+    why: {
+      detailed: String.raw`Der Lotfußpunkt $F$ liegt genau in der **Mitte** zwischen $P$ und seinem Spiegelpunkt $P'$. Von $P$ aus gehst du den Weg $\overrightarrow{PF}$ also **zweimal**: $\overrightarrow{OP'} = \overrightarrow{OP} + 2\,\overrightarrow{PF}$.`,
+      short: String.raw`$P' = P + 2\,\overrightarrow{PF}$: doppelt so weit wie bis $F$.`,
+    },
+  },
+  {
+    id: 'gl-mirror-side',
+    name: 'Spiegelpunkt in die falsche Richtung abgetragen',
+    wrongFormula: String.raw`\overrightarrow{OP'} = \overrightarrow{OP} - 2\,\overrightarrow{PF}`,
+    why: {
+      detailed: String.raw`Der Spiegelpunkt liegt auf der **anderen** Seite, hinter dem Lotfußpunkt. Du gehst von $P$ aus in Richtung $F$ weiter: $+2\,\overrightarrow{PF}$. Mit $-2\,\overrightarrow{PF}$ entfernst du dich von der Ebene bzw. Geraden.`,
+      short: String.raw`Von $P$ aus Richtung $F$ weiter: $+2\,\overrightarrow{PF}$.`,
+    },
+  },
+  {
+    id: 'gl-skew-points',
+    name: 'Abstand der Stützpunkte statt der Geraden',
+    wrongFormula: String.raw`d(g, h) = \lvert \overrightarrow{PQ} \rvert`,
+    why: {
+      detailed: String.raw`Die Stützpunkte sind irgendwelche Punkte der Geraden, ihre Verbindung ist meist schräg. Der Abstand ist die **kürzeste** Verbindung, die auf beiden Geraden senkrecht steht, also in Richtung $\vec n = \vec v \times \vec w$. Deshalb zählt nur der Anteil von $\overrightarrow{PQ}$ in dieser Richtung: $\frac{\lvert \overrightarrow{PQ} \cdot \vec n \rvert}{\lvert \vec n \rvert}$.`,
+      short: String.raw`Nur der Anteil in Richtung $\vec v \times \vec w$ zählt.`,
+    },
+  },
+  {
+    id: 'gl-planes-not-scaled',
+    name: 'Rechte Seiten verglichen, ohne die Normalen gleich zu machen',
+    wrongFormula: String.raw`E\colon \vec n \cdot \vec x = 3,\; F\colon 2\vec n \cdot \vec x = 10 \;\Rightarrow\; d = \frac{\lvert 10 - 3 \rvert}{\lvert \vec n \rvert}`,
+    why: {
+      detailed: String.raw`Die rechten Seiten darfst du nur vergleichen, wenn links **derselbe** Normalenvektor steht. Hier ist der von $F$ ein Vielfaches: Teil erst die Gleichung von $F$ durch den Faktor, oder setz einen Punkt von $F$ in die Gleichung von $E$ ein.`,
+      short: String.raw`Erst die Normalen gleich machen, oder einen Punkt einsetzen.`,
+    },
+  },
+  {
+    id: 'gl-angle-abs',
+    name: 'Betrag vergessen: Schnittwinkel stumpf',
+    wrongFormula: String.raw`\cos\varphi = \frac{\vec v \cdot \vec w}{\lvert \vec v \rvert \, \lvert \vec w \rvert} = -\frac{1}{2} \;\Rightarrow\; \varphi = 120^\circ`,
+    why: {
+      detailed: String.raw`Zwei Geraden (oder Ebenen) bilden zwei Winkel, die sich zu $180^\circ$ ergänzen. Als **Schnittwinkel** gilt der spitze, höchstens $90^\circ$. Deshalb steht in der Formel der Betrag des Skalarprodukts: Dreht man eine Richtung um, ändert sich nur das Vorzeichen, nicht der Schnittwinkel.`,
+      short: String.raw`Schnittwinkel liegen zwischen $0^\circ$ und $90^\circ$: Betrag nehmen.`,
+    },
+  },
+  {
+    id: 'gl-angle-plane-cos',
+    name: 'Gerade und Ebene: cos statt sin',
+    wrongFormula: String.raw`\cos\varphi = \frac{\lvert \vec n \cdot \vec v \rvert}{\lvert \vec n \rvert \, \lvert \vec v \rvert}`,
+    why: {
+      detailed: String.raw`Mit $\vec n$ und $\vec v$ rechnest du den Winkel zwischen der Geraden und der **Normalen**. Die Normale steht senkrecht auf der Ebene, deshalb ergänzen sich dieser Winkel und der gesuchte zu $90^\circ$. Aus $\cos(90^\circ - \varphi) = \sin\varphi$ folgt: Bei Gerade und Ebene steht $\sin\varphi$ in der Formel.`,
+      short: String.raw`Gerade und Ebene: $\sin\varphi = \frac{\lvert \vec n \cdot \vec v \rvert}{\lvert \vec n \rvert \, \lvert \vec v \rvert}$.`,
+    },
+  },
+  {
+    id: 'gl-angle-support',
+    name: 'Stützvektor statt Richtungsvektor',
+    wrongFormula: String.raw`\cos\varphi = \frac{\lvert \vec p \cdot \vec q \rvert}{\lvert \vec p \rvert \, \lvert \vec q \rvert}`,
+    why: {
+      detailed: String.raw`Der Winkel hängt nur davon ab, **wohin** die Geraden laufen, also von den Richtungsvektoren hinter den Parametern. Die Stützvektoren führen vom Ursprung zu einem Punkt der Geraden; verschiebst du eine Gerade, ändern sie sich, der Winkel aber nicht.`,
+      short: String.raw`Für Winkel nur die Richtungsvektoren (bzw. Normalen) nehmen.`,
+    },
+  },
+  {
+    id: 'gl-angle-plane-dirs',
+    name: 'Richtung der Ebene statt Normalenvektor',
+    wrongFormula: String.raw`\sin\varphi = \frac{\lvert \vec u \cdot \vec v \rvert}{\lvert \vec u \rvert \, \lvert \vec v \rvert}`,
+    why: {
+      detailed: String.raw`Eine Ebene hat unendlich viele Richtungen, und jede bildet mit der Geraden einen anderen Winkel. Eindeutig ist nur der **Normalenvektor**. Bestimme ihn bei einer Ebene in Parameterform mit dem Kreuzprodukt der beiden Richtungen und rechne mit ihm.`,
+      short: String.raw`Bei Ebenen mit dem Normalenvektor rechnen (Kreuzprodukt der Richtungen).`,
+    },
+  },
 ]

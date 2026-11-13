@@ -37,6 +37,11 @@ export const GL_CARD = {
   lageGeraden: 'gl-lage-geraden',
   lageGeradeEbene: 'gl-lage-gerade-ebene',
   lageEbenen: 'gl-lage-ebenen',
+  // Abstände und Schnittwinkel (Schritt 7b, distTasks.ts, cutAngleTasks.ts)
+  abstandEbene: 'gl-abstand-ebene',
+  abstandGerade: 'gl-abstand-gerade',
+  windschief: 'gl-abstand-windschief',
+  schnittwinkel: 'gl-schnittwinkel',
 } as const
 
 const LINE_NAMES = ['g', 'h'] as const

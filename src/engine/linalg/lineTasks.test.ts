@@ -295,8 +295,8 @@ describe('Geraden und Ebenen: Fehler und Lernkarten', () => {
   it('nutzt jeden neuen Fehler, und jeder steht auf einer Karte des Ordners', () => {
     const used = new Set<string>()
     for (const block of BLOCKS) for (const level of LEVELS) for (const task of tasks(block, level, 150)) for (const step of task.steps) for (const c of step.choices) if (c.errorRuleId) used.add(c.errorRuleId)
-    // die ersten 33 gehören zu Schritt 6, die übrigen zur Lage (posTasks.test.ts)
-    expect(LINE_ERROR_RULES.length).toBe(50)
+    // die ersten 33 gehören zu Schritt 6, 17 zur Lage (posTasks.test.ts), die übrigen zu Schritt 7b (distTasks.test.ts)
+    expect(LINE_ERROR_RULES.length).toBe(64)
     expect(LINE_ERROR_RULES.slice(0, 33).map((r) => r.id).filter((id) => !used.has(id))).toEqual([])
     const shown = new Set(cardsInTopic('geraden').flatMap((c) => c.errors))
     for (const rule of LINE_ERROR_RULES) expect(shown.has(rule.id), rule.id).toBe(true)
@@ -307,7 +307,7 @@ describe('Geraden und Ebenen: Fehler und Lernkarten', () => {
       for (const level of LEVELS)
         for (const task of tasks(block, level, 40)) for (const id of [...task.cards, ...task.steps.flatMap((s) => s.cards)]) expect(['geraden', 'vektoren'], id).toContain(cardById(id)?.topic)
     let examples = 0
-    for (const card of cardsInTopic('geraden').filter((c) => !c.id.startsWith('gl-lage'))) {
+    for (const card of cardsInTopic('geraden').filter((c) => !c.id.startsWith('gl-lage') && !c.id.startsWith('gl-abstand') && c.id !== 'gl-schnittwinkel')) {
       for (const e of card.examples) {
         if (!isVectorExample(e)) throw new Error(card.id)
         const task = buildVectorTask({ level: e.vector.level, seed: blockSeed('rechnen', e.vector.seed) }, e.vector.kind)
