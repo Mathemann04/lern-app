@@ -1235,3 +1235,9 @@ Neue Entscheidungen unten anfügen.
   behandelt“ und „Potenz vergessen“, kein Doppelfehler mehr); $\det(\lambda A B)$ mit einer Matrix ohne Zusatz kommt jetzt
   vor (vorher wegen zu weniger Antworten immer verworfen); „Die Null fällt weg“ in der Einzahl; $3 \times 3$ in Tipps und
   Namen als Formel. Neue Tests: Entwicklung mit Parameter an mehreren Stellen, kein Vielfaches bei Sarrus, jede Art Faktor.
+- 13.11.2026: Lehrbuch „Physik für Ingenieure“, Kapitel 9 Festkörperphysik gesichtet (Fotos S. 735 bis 795 und Lösungen
+  im Anhang). Übersicht mit Gegenprobe in docs/WERKSTOFFKUNDE.md, Abschnitt „Lehrbuch“. Festlegungen: Atome je Zelle bei
+  hdp nennt die App immer mit der Zelle (Standard wie Vorlesung: 6 im Sechseckprisma; das Buch zählt 2 in der kleinsten
+  Zelle); Rechnungen aus dem Buch (Abstand nächster Nachbarn, Dichte aus der Gitterkonstante, Mischungsregel) kommen nur
+  in Vertiefung und Klausurniveau und nur, wenn die Vorlesung sie nahelegt; Halbleiter, Supraleitung, Phononen und
+  Thermoelektrik gehören zu Physik (M10).

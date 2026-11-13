@@ -215,3 +215,9 @@ Tätigkeiten im Fach Physik, je mit Bausteinen und Stufen wie in M6:
 Dazu Wissensfragen, Lernkarten, Nachschlagewerk (M12) mit der Formelsammlung des
 Fachs und später eine Probeklausur. Arbeit, Energie, Stöße und Schwingungen kommen
 dazu, sobald die Unterlagen da sind.
+
+Aus dem Lehrbuch „Physik für Ingenieure“ ist das Kapitel Festkörperphysik gesichtet
+(13.11.2026, Übersicht in [WERKSTOFFKUNDE.md](WERKSTOFFKUNDE.md), Abschnitt „Lehrbuch“).
+Halbleiter, Supraleitung, Phononen, Wärmekapazität, Thermoelektrik und Piezoelektrizität
+gehören zu M10, sobald die Vorlesung sie behandelt; die Übungen des Kapitels taugen dann
+zur Gegenprobe.

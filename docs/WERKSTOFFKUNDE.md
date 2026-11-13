@@ -332,7 +332,8 @@ der Übersichtstabelle). Die Vorlesung zählt bei krz und hdp nur die Hauptgleit
 Vorlesung. „Zwischengitterdefekte temperaturunabhängig“ gilt nur für gelöste Fremdatome.
 Bruchbild-Aufgabe ist nicht eindeutig (krz ist bei Raumtemperatur teils auch spröde): in der
 App nur kfz gegen hdp. **Ob Packungsdichte, Koordinationszahl und Miller-Indizes in der
-Klausur gerechnet werden, ist offen** (die Herleitung lief über Videos).
+Klausur gerechnet werden, ist offen** (die Herleitung lief über Videos; das Lehrbuch „Physik für
+Ingenieure“ behandelt sie, siehe den Abschnitt zum Lehrbuch unten).
 
 ## Kapitel 4: Erstarrung metallischer Schmelzen
 
@@ -618,6 +619,73 @@ Folien nennen sie nicht (in der App nur mit Prüfung aus der Fachliteratur). Roh
 gerechnet): nicht mischen. Spülgas Argon (Text) oder Stickstoff/Argon (Bild). Zonen-
 Temperaturen nur grob. Eine Hochrechnung auf Folie 10 passt nicht zu ihren eigenen Werten.
 
+## Lehrbuch „Physik für Ingenieure“, Kapitel 9 Festkörperphysik (gesichtet am 13.11.2026)
+
+Der Nutzer hat Fotos der Seiten 735 bis 795 und der Lösungen zu den Übungen des Kapitels
+hochgeladen (Anhang, S. 914 bis 918). Es fehlen die Seiten 764 und 765 und die Texte der
+Übungen ab Ü 9-11 (Lösungen dazu sind da). Regeln wie in [CHEMIE.md](CHEMIE.md) §1: Das Buch
+ist Gegenprobe und Vorbild für selbst gestaltete Tafeln im Nachschlagewerk; nichts daraus kommt
+ins Repo (Texte, Bilder, Tabellen, Zahlenbeispiele, Übungen). Bei Widerspruch gilt die
+Vorlesung, bei Zahlenwerten ein frei zugängliches Tabellenwerk.
+
+**Gegenprobe der Übersicht (Vorlesung) mit dem Buch**
+
+| Punkt | Vorlesung | Buch | Urteil |
+| --- | --- | --- | --- |
+| Packungsdichte kfz, hdp, krz | 74 %, 74 %, 68 % | gleich | passt |
+| Koordinationszahl | fehlt | kfz 12, hdp 12, krz 8 | Buch bestätigt die Ergänzung in Kapitel 3 |
+| Atome je Zelle hdp | 6 (Sechseckprisma) | 2 (kleinste Zelle mit Rautengrundfläche) | beides richtig, je nach Zelle; App nennt immer die Zelle, Standard wie Vorlesung |
+| dichtest gepackte Richtung | nur „dichteste Reihe“ | kfz Flächendiagonale, hdp Sechseckseite, krz Raumdiagonale | passt, gibt die Kontaktbedingung für die Packungsdichte |
+| Bindungsenergien | kJ/mol: VdW < 50, Metall 100–800, kovalent 150–1000, Ion 600–1500 | eV je Atom: VdW 0,01–0,1, Metall 1–5, kovalent 1–7, Ion 6–20 | umgerechnet (1 eV je Atom ≈ 96,5 kJ/mol) gleiche Reihenfolge und Größenordnung; Bereiche überlappen in beiden |
+| Kristallsysteme | 7 | 7, mit den vier Belegungen (primitiv, raum-, basis-, flächenzentriert) 14 Bravais-Gitter | Buch geht weiter |
+| Miller-Indizes | fehlen | Achsenabschnitte in Vielfachen der Gitterkonstanten, Kehrwerte, kleinste ganze Zahlen; (hkl) für Ebenen, [uvw] für Richtungen | bestätigt das Schema in Kapitel 3 |
+| Gitterkonstanten und Abstand nächster Nachbarn | in der Übersicht aus Tabellenwerken | gleiche Werte; Abstand = $a/\sqrt2$ (kfz) bzw. $a\sqrt3/2$ (krz) | passt; Dichte aus der Gitterkonstante für Cu nachgerechnet: etwa 8,97 g/cm³ |
+| Versetzungsdichte | Schätzfrage ohne Antwort | weichgeglüht etwa $10^6$ bis $10^8$ cm⁻², stark verformt etwa $10^{11}$ bis $10^{12}$ cm⁻² | **beantwortet die Schätzfrage aus Kapitel 6**; Einheit Länge je Volumen |
+| metallische Gläser | über $10^6$ K/s, schlechter leitend | gleich; Widerstand zwei- bis dreimal so groß wie kristallin; Bruch unter 45°, keine Versetzungsbewegung | passt |
+| Wiedemann-Franz | Lorenz-Zahl fehlt | $L = \frac{\pi^2}{3}\left(\frac{k}{e}\right)^2 \approx 2{,}44 \cdot 10^{-8}\ \text{V}^2/\text{K}^2$ | **liefert die fehlende Konstante** |
+| Leiter, Halbleiter, Isolator | Kunststoff spez. Widerstand $10^{11}\ \Omega\,\text{mm}^2/\text{m}$ (= $10^5\ \Omega$m) | Isolatoren über $10^{7}\ \Omega$m, Kunststoffe weit darüber | **bestätigt: der Folienwert für PP ist zu klein** (siehe Kapitel 2, Unklar) |
+| Dispersionshärtung, Pinning | Kapitel 6 | Teilchenverbund mit harten Teilchen = Dispersionshärtung; in Supraleitern dienen Versetzungen, Ausscheidungen und Korngrenzen als Haftstellen für Flussschläuche | passt, schöne Querverbindung |
+
+**Was das Kapitel bietet und wohin es passt** (Inhalte in eigenen Worten)
+
+| Inhalt | Wohin |
+| --- | --- |
+| Vier Bindungsarten mit Kraftgesetz und typischen Eigenschaften; Van-der-Waals-Energie fällt mit $1/r^6$ (kurze Reichweite), Ionenbindung mit $1/r$ (lange Reichweite, Madelung-Konstante; für eine Ionenkette $2\ln 2$ aus der alternierenden harmonischen Reihe); Tetraeder des Diamanten (109,5°) | M5 Aufbau der Metalle (Bindung); Nachschlagewerk Chemie (Ionenbindung, Gitterenergie); die Reihe $1 - \frac12 + \frac13 - \dots = \ln 2$ als Beispiel für Reihen in Mathe (M9) |
+| Kristallin und amorph, isotrop und anisotrop, polykristallin, Einkristalle; 7 Kristallsysteme, 14 Bravais-Gitter; kfz, krz, hdp mit Stapelfolgen ABC und AB | M5 Aufbau der Metalle; Vorbild für eine selbst gezeichnete Tafel der Gittertypen (Elementarzelle, Kugelbild, Packungsdichte, Atome je Zelle, Koordinationszahl, dichteste Richtung) |
+| Miller-Indizes für Ebenen und Richtungen im kubischen Gitter | M5 Vertiefung (falls die Klausur es verlangt); Tafel wichtiger Ebenen im Würfel selbst zeichnen |
+| Gitterfehler: Punktfehler (Leerstelle als Schottky-Fehlordnung, Zwischengitteratom, Frenkel-Paar, Fremdatome auf Gitter- oder Zwischengitterplatz), Linienfehler (Stufen- und Schraubenversetzung, Burgers-Vektor, gemischte Versetzungen, Teppichfalte), Flächenfehler (Stapelfehler, Korngrenzen, Kleinwinkelkorngrenzen) | M5 Aufbau der Metalle; Baum der Gitterfehler als eigene Tafel; die Namen Schottky und Frenkel nur im Nachschlagewerk, nicht in Fragen (Vorlesung nennt sie nicht) |
+| Amorphe Metalle: Herstellung durch Schmelzspinnen, Eigenschaften zwischen Metall und Glas, weichmagnetisch (Trafobleche, Abschirmung) | M5 Aufbau der Metalle (metallische Gläser) |
+| Kunststoffe: Polymerisation, Faden-, Schicht-, Raumnetzstrukturen; Thermoplaste, Elastomere, Duromere (Schmelzen, Quellen, Lösen, Vernetzung, Wiederverwertung, Beispiele); Festigkeit stark abhängig von Temperatur, Dehngeschwindigkeit, Zeit (Kriechen) und UV-Licht; Modelle aus Feder und Dämpfer (Hooke, Newton, Maxwell, Voigt-Kelvin, Burger mit Kriechformel) | M5 späteres Kapitel Kunststoffe (Vorlesung noch nicht da); die Kriechformel mit e-Funktion auch als Formel zum Umstellen |
+| Verbundwerkstoffe: Schicht-, Teilchen-, Durchdringungs-, Faserverbund mit Beispielen (Thermobimetall, Kontaktwerkstoffe, Hartmetall, getränktes Wolfram, Sinterlager); Mischungsregel $\sigma = \sigma_m V_m + \sigma_f V_f$, $E = E_m V_m + E_f V_f$ | M5 Werkstoffgruppen (Kapitel 1) und Kunststoffe; Mischungsregel als neue Rechnung (Elastizitätsmodul eines Faserverbunds, Faseranteil rückwärts) |
+| Formgedächtnis-Legierungen: Umwandlung Austenit (warm) und Martensit (kalt), Einweg-, Zweiweg- und Rundum-Effekt, NiTi, CuZnAl, CuAlNi | M5 später (Wärmebehandlung, Nichteisenmetalle); nur Wissen |
+| Flüssigkristalle (nematisch, cholesterisch, smektisch), Anzeigen, Thermografie | Physik (M10), nur Wissen |
+| Bändermodell: Energiebänder, Valenz- und Leitungsband, verbotene Zone; Leiter erster und zweiter Art, Halbleiter (Bandlücke bis etwa 3 eV), Isolatoren; Einteilung nach dem spezifischen Widerstand über 25 Zehnerpotenzen | Nachschlagewerk Chemie (Zusatz 3.4, Metallbindung und Halbleiter); M5 Eigenschaften (Leitfähigkeit); Tafel „Widerstand und Bänder“ selbst zeichnen (logarithmische Skala) |
+| Freies Elektronengas, Fermi-Energie, Fermi-Dirac-Verteilung, Wärmekapazität der Elektronen, Drift im elektrischen Feld | Physik (M10), über die Vorlesung hinaus |
+| Halbleiter: Eigenleitung (Elektronen und Löcher, $n\,p = n_i^2$), Dotierung n (Gruppe V) und p (Gruppe III), Widerstand fällt mit steigender Temperatur (NTC); pn-Übergang mit Diffusionsspannung $U_d = \frac{kT}{e}\ln\frac{n_A n_D}{n_i^2}$, Sperr- und Flussrichtung, Diodenkennlinie $I = I_S\,(e^{U/U_T} - 1)$; Diodenarten, Transistoren | Chemie (Zusatz 3.4, Dotierung als Wissen); Physik (M10); die e- und ln-Formeln als Formeln zum Umstellen in Mathe (M6) |
+| Supraleitung: Sprungtemperatur, Meißner-Ochsenfeld-Effekt, Typ I und II, kritische Feldstärke $B_c = B_0\,(1 - (T/T_c)^2)$, Hochtemperatur-Supraleiter (flüssiger Stickstoff), Cooper-Paare; technische Leiter aus NbTi, deren Haftstellen durch Kaltverformen und Ausscheidungen entstehen | Physik (M10); im Nachschlagewerk von M5 als Ausblick bei Ver- und Entfestigung |
+| Gitterschwingungen und Phononen, Schallgeschwindigkeit $c = \sqrt{E/\rho}$, Wärmekapazität (Dulong-Petit $3R$, Einstein, Debye mit $T^3$), Wärmeleitung durch Phononen und Elektronen, Wiedemann-Franz | Physik (M10); Wiedemann-Franz und $c = \sqrt{E/\rho}$ auch in M5 (Eigenschaften, Kapitel 2) |
+| Thermoelektrik: Seebeck- und Peltier-Effekt, Thermoelemente (Paare und ihre Einsatzgrenzen nach Norm), galvano- und thermomagnetische Effekte (Hall usw.) | Physik (M10); Thermoelemente auch als Wissen bei Werkstoffprüfung |
+| Piezoelektrizität: direkter und umgekehrter Effekt, Längs-, Quer- und Schereffekt, Perowskit-Gitter, Bariumtitanat und PZT, Curie-Temperatur, Anwendungen | Physik (M10); im Nachschlagewerk von M5 als Funktionswerkstoff (Kapitel 1) |
+
+**Was M5 daraus übernimmt** (Vorschlag für den Plan)
+- Rechnungen, die über die Vorlesung hinausgehen, aber zu ihrem Stoff passen: Abstand nächster
+  Nachbarn aus der Gitterkonstante; Dichte aus der Gitterkonstante (und rückwärts);
+  Mischungsregel für Faserverbunde; Bindungsenergie in eV je Atom und kJ/mol umrechnen. Nur in
+  „Vertiefung“ und „Klausurniveau“, und nur, wenn die Vorlesung oder die Altklausuren es nahelegen.
+- Selbst gezeichnete Tafeln für das Nachschlagewerk: Gittertypen, Bravais-Gitter, Ebenen im
+  Würfel, Baum der Gitterfehler, Bindungsarten, Bändermodell mit Widerstandsskala, Einteilung
+  der Verbundwerkstoffe, Thermoplast/Elastomer/Duromer.
+- Kennwerte nur aus frei zugänglichen Tabellenwerken; das Buch dient als Gegenprobe.
+
+**Unklar oder auffällig im Buch**
+- Das Buch schreibt, die Kristallrichtung stehe immer senkrecht zur Ebene gleicher Indizes. Das
+  gilt nur im kubischen Gitter; die App sagt es nur dort.
+- Die Spannung zum Verschieben einer Versetzung ist mit 0,1 bis 1 N/m² angegeben; das ist viel
+  zu klein (gemeint sind wohl N/mm²). Nicht übernehmen.
+- Atome je Zelle bei hdp: 2 im Buch, 6 in der Vorlesung (siehe Gegenprobe).
+- Bei den Übungen fehlen die Aufgabentexte ab Ü 9-11 und die Seiten 764 und 765. Die Übungen
+  gehören zu Physik (M10); eine Gegenprobe mit ihnen lohnt erst dort.
+
 ## Ziel in der App (Entwurf für den Plan von M5)
 
 Werkstoffkunde wird ein Fach nach dem Muster von Chemie, in der neuen Struktur (M6) und mit
@@ -670,6 +738,7 @@ eigene Regeldatei wie [CHEMIE.md](CHEMIE.md) entsteht mit dem Plan von M5.
 **Offene Fragen an den Nutzer** (vor dem Plan von M5 klären)
 1. Kapitel 8 bis 15 (Fe-C-Diagramm, Wärmebehandlung, Bezeichnung der Stähle, Gusseisen,
    Nichteisenmetalle, Kunststoffe, Übungen) und **Altklausuren** fehlen noch.
-2. Werden Packungsdichte, Koordinationszahl und Miller-Indizes in der Klausur gerechnet?
+2. Werden Packungsdichte, Koordinationszahl und Miller-Indizes in der Klausur gerechnet? (Das
+   Lehrbuch behandelt sie; offen ist, ob die Vorlesung sie verlangt.)
 3. Wann ist die Werkstoffkunde-Klausur (entscheidet, ob M5 vorgezogen wird)?
 4. Gibt es Lösungen zu den Aufgabenblättern (alle hochgeladenen Blätter sind leer)?
