@@ -35,7 +35,7 @@ export const MATRIX_CARD_LIST: readonly Card[] = [
       { vector: { kind: 'matLinear', level: 1, seed: 1 } },
       { vector: { kind: 'matLinear', level: 2, seed: 3 } },
     ],
-    errors: ['mat-scalar-row', 'mat-scalar-added', 'mat-minus-first', 'mat-sub-reversed', 'mat-sum-formats', 'mat-identity-all'],
+    errors: ['mat-scalar-row', 'mat-scalar-added', 'mat-minus-first', 'mat-sub-reversed', 'mat-plus-minus', 'mat-sum-formats', 'mat-identity-all'],
   },
   {
     id: 'mat-transponieren',
@@ -69,7 +69,7 @@ export const MATRIX_CARD_LIST: readonly Card[] = [
       { vector: { kind: 'matDefined', level: 3, seed: 1 } },
       { vector: { kind: 'matOuter', level: 4, seed: 1 } },
     ],
-    errors: ['mat-product-format', 'mat-falk-no-sum', 'mat-falk-plus', 'mat-row-row', 'mat-entrywise', 'mat-order-swap', 'mat-product-undefined', 'mat-outer-inner'],
+    errors: ['mat-product-format', 'mat-falk-no-sum', 'mat-falk-plus', 'mat-row-row', 'mat-col-col', 'mat-entrywise', 'mat-order-swap', 'mat-product-undefined', 'mat-outer-inner'],
   },
   {
     id: 'mat-matrix-vektor',

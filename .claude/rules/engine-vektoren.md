@@ -178,7 +178,7 @@ gezieltes Üben noch nicht (`focus: false`).
   `A = \begin{pmatrix} 1 & 2 \\ … \end{pmatrix}` (freier Modus: Teil `matrix` mit `cols`, Kästchen „Zeile 2, Spalte 1“;
   Formate wie `2 \times 3` liest `readPart` nicht als Zahl) oder Zahl. Bild `gridDrawing` bei 2 × 2: Einheitsquadrat,
   Parallelogramm mit `from` (wandert beim Abspielen), Bild des Gitters [0, 2]² gestrichelt, Spalten als Pfeile, dann
-  $A\vec x$; vor dem Ergebnis nur Einheitsquadrat, $\vec e_1$, $\vec e_2$, $\vec x$. 25 Fehler `mat-…` in
+  $A\vec x$; vor dem Ergebnis nur Einheitsquadrat, $\vec e_1$, $\vec e_2$, $\vec x$. 27 Fehler `mat-…` in
   `linalg/matrixErrorRules.ts` (`vectorErrorRule` sucht auch dort, Katalog `matrizen`). Tests in
   `linalg/matrixTasks.test.ts` (eigene Matrizenrechnung mit Kommazahlen, Bild, Karten, freier Modus), Browser-Test
   `e2e/matrices.spec.ts`. Falk-Schema als Animation folgt in Schritt 8b.

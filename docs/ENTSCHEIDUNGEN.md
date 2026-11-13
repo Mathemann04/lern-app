@@ -1208,3 +1208,10 @@ Neue Entscheidungen unten anfügen.
   den Wert und dass ein anderer nicht passt. Bei der Aufgabe „Welcher Ausdruck ist definiert?“ nennt der Hinweis unter der
   Angabe die vier Ausdrücke (im freien Modus muss man sie kennen). Angaben mit großen Matrizen stehen am Handy
   untereinander (geschätzte Breite, wie bei der Lage in Schritt 7a).
+- 13.11.2026: Funde der unabhängigen Prüfung zu M7 Schritt 8a behoben: Die Erklärung zu Summe und Vielfachen verlor das
+  Minus, wenn vorn eine negative Zahl stand (jetzt mit Minus; ein Test rechnet jede solche Rechnung nach); der Tipp zum
+  Format eines Produkts schrieb die Formate schon hin (jetzt nur die Regel); neue Fehler „Spalte mal Spalte“ und „Plus und
+  Minus verwechselt“ statt unpassender Namen; bei $X^{\mathsf T}X - kE$ passende Fehler ($+kE$, $kE - X^{\mathsf T}X$);
+  „Kehrwert“ beim Parameter entfernt (kein eigener Fehler); bei $AB = BA$ ist $\lvert\lambda\rvert \ge 2$, sonst stünde die
+  Lösung als Eintrag in $B$; Stufe 5 ohne „Welcher Ausdruck ist definiert?“ (gleich schwer wie Stufe 4), nur noch längere
+  Ausdrücke und $AB = BA$ mit $3 \times 3$.

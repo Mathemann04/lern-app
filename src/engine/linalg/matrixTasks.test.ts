@@ -217,6 +217,62 @@ describe('Matrizen rechnen', () => {
   })
 })
 
+// kleine Rechnung aus der Erklärung (ganze Zahlen, +, −, \cdot, Klammern) unabhängig auswerten
+function evalSimple(latex: string): number {
+  const tokens = latex.replace(/\\cdot/g, '*').match(/\d+|[-+*()]/g) ?? []
+  let i = 0
+  const atom = (): number => {
+    const t = tokens[i++]
+    if (t === '(') {
+      const v = sum()
+      i++
+      return v
+    }
+    if (t === '-') return -atom()
+    return Number(t)
+  }
+  const prod = (): number => {
+    let v = atom()
+    while (tokens[i] === '*') {
+      i++
+      v *= atom()
+    }
+    return v
+  }
+  const sum = (): number => {
+    let v = prod()
+    while (tokens[i] === '+' || tokens[i] === '-') v = tokens[i++] === '+' ? v + prod() : v - prod()
+    return v
+  }
+  return sum()
+}
+
+describe('Matrizen rechnen: Funde der Prüfung', () => {
+  it('die Rechnung „oben links“ in der Erklärung stimmt (auch mit negativer Zahl vorn)', () => {
+    let checked = 0
+    for (const level of LEVELS)
+      for (const task of tasks(level, 150))
+        for (const step of task.steps) {
+          const m = /oben links (?:ist )?\$([^$=]+) = (-?\d+)\$/.exec(step.explanation.detailed)
+          if (!m) continue
+          expect(evalSimple(m[1]) === Number(m[2]), `${task.form} ${step.id}: ${m[0]}`).toBe(true)
+          checked++
+        }
+    expect(checked).toBeGreaterThan(100)
+  })
+
+  it('der Tipp zum Format verrät kein Format, und beim Parameter steht die Lösung nicht als Eintrag in der zweiten Matrix', () => {
+    for (const level of LEVELS)
+      for (const task of tasks(level, 150)) {
+        for (const step of task.steps.filter((s) => s.id === 'format')) expect(step.hint, task.form).not.toContain('\\times')
+        if (task.kind === 'matParam') {
+          const n = task.data.dim[0]
+          expect(task.data.B[task.data.pos[0] * n + task.data.pos[1]], task.form).not.toBe(task.answer[0])
+        }
+      }
+  })
+})
+
 describe('Matrizen rechnen: Fehler und Lernkarten', () => {
   it('nutzt jeden Fehler, und jeder steht auf einer Karte des Ordners', () => {
     const used = new Set<string>()

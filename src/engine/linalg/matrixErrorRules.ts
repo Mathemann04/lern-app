@@ -70,6 +70,15 @@ export const MATRIX_ERROR_RULES: readonly VectorErrorRule[] = [
     },
   },
   {
+    id: 'mat-plus-minus',
+    name: 'Plus und Minus verwechselt',
+    wrongFormula: String.raw`A^{\mathsf T} + B = \begin{pmatrix} a_{11} - b_{11} & \dots \end{pmatrix}`,
+    why: {
+      detailed: String.raw`Schau auf das Rechenzeichen zwischen den Matrizen: Bei $+$ werden die Einträge an derselben Stelle addiert, bei $-$ abgezogen. Das Zeichen gilt für jeden Eintrag.`,
+      short: String.raw`Das Rechenzeichen zwischen den Matrizen gilt für jeden Eintrag.`,
+    },
+  },
+  {
     id: 'mat-sum-formats',
     name: 'Summe verschiedener Formate',
     wrongFormula: String.raw`A \in \mathbb{R}^{2 \times 3},\; B \in \mathbb{R}^{3 \times 2} \;\Rightarrow\; A + B \text{ definiert}`,
@@ -159,6 +168,15 @@ export const MATRIX_ERROR_RULES: readonly VectorErrorRule[] = [
     why: {
       detailed: String.raw`Für $c_{ij}$ nimmst du die $i$-te **Zeile** der linken Matrix und die $j$-te **Spalte** der rechten. Im Falk-Schema steht die rechte Matrix oben: Ihre Spalte läuft senkrecht über dem Eintrag.`,
       short: String.raw`Zeile der linken mal **Spalte** der rechten Matrix.`,
+    },
+  },
+  {
+    id: 'mat-col-col',
+    name: 'Spalte mal Spalte statt Zeile mal Spalte',
+    wrongFormula: String.raw`c_{21} = a_{12} b_{11} + a_{22} b_{21}`,
+    why: {
+      detailed: String.raw`Von der **linken** Matrix nimmst du eine **Zeile**, von der rechten eine Spalte. Im Falk-Schema läuft die Zeile der linken Matrix waagrecht auf den Eintrag zu, die Spalte der rechten senkrecht.`,
+      short: String.raw`Links eine **Zeile**, rechts eine Spalte.`,
     },
   },
   {

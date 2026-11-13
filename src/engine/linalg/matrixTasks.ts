@@ -217,7 +217,7 @@ function productFormatStep(rng: Rng, expr: string, fa: readonly [number, number]
     question: `Welches Format hat $${expr}$?`,
     correct: math(right),
     wrongs,
-    hint: `Schreib die Formate nebeneinander: $(${fmtLatex(m, n)}) \\cdot (${fmtLatex(fb[0], p)})$. Die inneren Zahlen müssen gleich sein, die äußeren bleiben.`,
+    hint: 'Schreib die Formate der beiden Faktoren nebeneinander (eine Transponierte hat Zeilen und Spalten getauscht). Die inneren Zahlen müssen gleich sein, das Ergebnis hat die äußeren.',
     explanation: {
       detailed: `$(${fmtLatex(m, n)}) \\cdot (${fmtLatex(fb[0], p)})$: Innen steht zweimal $${n}$, das passt. Das Ergebnis hat so viele Zeilen wie die linke Matrix ($${m}$) und so viele Spalten wie die rechte ($${p}$): $${right}$.`,
       short: `Innen gleich, außen bleibt: $${right}$.`,
@@ -233,7 +233,7 @@ function entryStep<T>(rng: Rng, R: Ring<T>, A: Mat<T>, B: Mat<T>, expr: string, 
   const right = falkEntry(R, A, B, i, j, 'right')!
   const line = (e: { value: T; latex: string }) => math(`${name} = ${e.latex} = ${R.latex(e.value)}`)
   const wrongs: Wrong[] = []
-  const rules: Readonly<Record<Exclude<Falk, 'right'>, string>> = { noSum: 'mat-falk-no-sum', rowRow: 'mat-row-row', colCol: 'mat-row-row', entrywise: 'mat-entrywise', plus: 'mat-falk-plus' }
+  const rules: Readonly<Record<Exclude<Falk, 'right'>, string>> = { noSum: 'mat-falk-no-sum', rowRow: 'mat-row-row', colCol: 'mat-col-col', entrywise: 'mat-entrywise', plus: 'mat-falk-plus' }
   for (const how of rng.shuffle(['noSum', 'rowRow', 'colCol', 'entrywise', 'plus'] as const)) {
     const e = falkEntry(R, A, B, i, j, how)
     if (e && !R.eq(e.value, right.value)) wrongs.push({ content: line(e), rule: rules[how] })
@@ -267,7 +267,7 @@ function productStep<T>(rng: Rng, R: Ring<T>, A: Mat<T>, B: Mat<T>, expr: string
     [product(R, B, A), 'mat-order-swap'],
     [sameFormat(A, B) ? build(rowsOf(A), colsOf(A), (i, j) => R.mul(A[i][j], B[i][j])) : null, 'mat-entrywise'],
     [product(R, A, B, 'rowRow'), 'mat-row-row'],
-    [product(R, A, B, 'colCol'), 'mat-row-row'],
+    [product(R, A, B, 'colCol'), 'mat-col-col'],
     [product(R, A, B, 'plus'), 'mat-falk-plus'],
     [product(R, A, B, 'noSum'), 'mat-falk-no-sum'],
   ]
@@ -364,7 +364,7 @@ function combStep(rng: Rng, terms: readonly Term[], id = 'summe', name?: string)
     explanation: {
       detailed:
         terms.length > 1
-          ? `Summe und Vielfache rechnest du **Stelle für Stelle**: Der Eintrag oben links ist $${terms.map((t, i) => `${i === 0 ? '' : ratSign(t.k) < 0 ? ' - ' : ' + '}${ratEq(t.k, rat(1)) || ratEq(t.k, rat(-1)) ? '' : `${ratLatex(ratSign(t.k) < 0 ? ratNeg(t.k) : t.k)} \\cdot `}${Q.factor(t.M[0][0])}`).join('')} = ${ratLatex(right[0][0])}$, die anderen genauso.`
+          ? `Summe und Vielfache rechnest du **Stelle für Stelle**: Der Eintrag oben links ist $${terms.map((t, i) => `${i === 0 ? (ratSign(t.k) < 0 ? '-' : '') : ratSign(t.k) < 0 ? ' - ' : ' + '}${ratEq(t.k, rat(1)) || ratEq(t.k, rat(-1)) ? '' : `${ratLatex(ratSign(t.k) < 0 ? ratNeg(t.k) : t.k)} \\cdot `}${Q.factor(t.M[0][0])}`).join('')} = ${ratLatex(right[0][0])}$, die anderen genauso.`
           : `Jeder Eintrag wird mit $${ratLatex(terms[0].k)}$ malgenommen, in allen Zeilen.`,
       short: 'Stelle für Stelle.',
     },
@@ -415,7 +415,7 @@ function buildMatBuild(rng: Rng, _level: Level): Built {
           { content: `$${n}$ Zeilen, $${m}$ Spalten`, rule: 'mat-format-swap' },
           { content: `eine Zeile mit $${m * n}$ Einträgen`, rule: 'mat-format-count' },
         ],
-        hint: `Im Format $${fmtLatex(m, n)}$ steht zuerst die Zahl der Zeilen, dann die der Spalten.`,
+        hint: 'Im Format steht zuerst die Zahl der Zeilen (waagrecht), dann die der Spalten (senkrecht).',
         explanation: { detailed: `$${fmtLatex(m, n)}$ heißt: $${m}$ Zeilen (waagrecht) und $${n}$ Spalten (senkrecht), zusammen $${m * n}$ Einträge.`, short: 'Zeilen zuerst, Spalten später.' },
         cards: [MAT_CARD.format],
       }),
@@ -808,7 +808,7 @@ function buildMatDefined(rng: Rng, level: Level): Built {
         [sameFormat(X, Y) ? add(X, Y) : null, 'mat-transpose-ignored'],
         [add(reshape(X), Y), 'mat-transpose-reshape'],
         [add(antiTranspose(X), Y), 'mat-transpose-anti'],
-        [build(rowsOf(Y), colsOf(Y), (i, j) => ratSub(transpose(X)[i][j], Y[i][j])), 'mat-sub-reversed'],
+        [build(rowsOf(Y), colsOf(Y), (i, j) => ratSub(transpose(X)[i][j], Y[i][j])), 'mat-plus-minus'],
       ] as const)
         if (M2 && !matEq(Q, M2, R)) wrongs.push({ content: show(M2), rule })
       steps.push(
@@ -940,9 +940,9 @@ function buildMatOuter(rng: Rng, _level: Level): Built {
         wrongs: [
           { content: math(outer ? fmtLatex(1, 1) : fmtLatex(dim, dim)), rule: 'mat-outer-inner' },
           { content: math(fmtLatex(dim, 1)), rule: 'mat-product-format' },
-          { content: 'nicht definiert', rule: 'mat-product-undefined' },
+          { content: 'nicht definiert', rule: 'mat-outer-inner' },
         ],
-        hint: `Ein Vektor ist eine Spalte: $${fmtLatex(dim, 1)}$, transponiert eine Zeile: $${fmtLatex(1, dim)}$.`,
+        hint: 'Ein Vektor ist eine Spalte, transponiert eine Zeile. Schreib die Formate der beiden Faktoren nebeneinander: Innen gleich, außen bleibt.',
         explanation: {
           detailed: outer
             ? `$(${fmtLatex(dim, 1)}) \\cdot (${fmtLatex(1, dim)})$: Innen steht zweimal $1$, außen bleibt $${fmtLatex(dim, dim)}$, eine Matrix.`
@@ -1026,10 +1026,11 @@ function buildMatParam(rng: Rng, level: Level): Built {
     // Stelle des Parameters: nicht auf der Diagonale
     const pos = rng.pick(dim === 2 ? ([[0, 1], [1, 0]] as const) : ([[0, 1], [1, 0], [0, 2], [2, 1], [1, 2]] as const))
     const Astar = A0.map((r, i) => r.map((x, j) => (i === pos[0] && j === pos[1] ? rat(star) : x)))
-    const lam = rng.pick([1, 2, -1])
+    // |λ| ≥ 2: sonst stünde a* als Eintrag von B an derselben Stelle
+    const lam = rng.pick([2, -2, 3])
     const mu = rng.pick([1, -1, 2, -2])
     const B = add(scale(rat(lam), Astar), scale(rat(mu), identity(dim)))
-    if (B.flat().some((x) => Math.abs(Number(x.n)) > 9) || negCount(B) === 0) return { steps: [] } as unknown as Built
+    if (B.flat().some((x) => Math.abs(Number(x.n)) > 12) || negCount(B) === 0) return { steps: [] } as unknown as Built
     const AL: Mat<Lin> = A0.map((r, i) => r.map((x, j) => (i === pos[0] && j === pos[1] ? lin(ZERO, rat(1)) : lin(x))))
     const BL: Mat<Lin> = B.map((r) => r.map((x) => lin(x)))
     const AB = product(L, AL, BL)!
@@ -1048,8 +1049,6 @@ function buildMatParam(rng: Rng, level: Level): Built {
     const wrongSign = ratDiv(ratSub(lhs.c0, rhs.c0), ratSub(lhs.c1, rhs.c1))
     const wrongs: Wrong[] = [{ content: `für jedes $${PARAM}$`, rule: 'mat-commute' }]
     if (!ratEq(wrongSign, aValue)) wrongs.push({ content: math(`${PARAM} = ${ratLatex(wrongSign)}`), rule: 'mat-param-sign' })
-    const flipped = ratDiv(ratSub(lhs.c1, rhs.c1), ratSub(rhs.c0, lhs.c0))
-    if (!isZero(ratSub(rhs.c0, lhs.c0)) && !ratEq(flipped, aValue) && !ratEq(flipped, wrongSign)) wrongs.push({ content: math(`${PARAM} = ${ratLatex(flipped)}`), rule: 'mat-param-sign' })
     steps.push(
       choiceStep(rng, {
         id: 'parameter',
@@ -1123,7 +1122,7 @@ function buildMatExpression(rng: Rng, _level: Level): Built {
       ]
       const inner = combLatex(sum)
       expr = `(${inner})${T} ${Z}`
-      steps.push(...productFormatStep(rng, expr, [n, m], [m, p], m !== n ? [{ content: math(fmtLatex(m, p)), rule: 'mat-transpose-ignored' }] : []))
+      steps.push(...productFormatStep(rng, expr, [n, m], [m, p], m !== n ? [{ content: 'nicht definiert', rule: 'mat-transpose-ignored' }] : []))
       steps.push(combStep(rng, sum, 'summe'))
       const S = combValue(sum)
       steps.push(transposeStep(rng, `(${inner})`, S))
@@ -1135,7 +1134,7 @@ function buildMatExpression(rng: Rng, _level: Level): Built {
       // Aᵀ A − kE mit A ∈ m × n
       const A = randMat(rng, m, n, -2, 3)
       expr = `${X}${T} ${X} - ${ratLatex(kk)}E`
-      steps.push(...productFormatStep(rng, `${X}${T} ${X}`, [n, m], [m, n], m !== n ? [{ content: math(fmtLatex(m, m)), rule: 'mat-transpose-ignored' }] : []))
+      steps.push(...productFormatStep(rng, `${X}${T} ${X}`, [n, m], [m, n], m !== n ? [{ content: 'nicht definiert', rule: 'mat-transpose-ignored' }, { content: math(fmtLatex(m, m)), rule: 'mat-order-swap' }] : []))
       steps.push(transposeStep(rng, X, A))
       const G = mul(transpose(A), A)
       steps.push(productStep(rng, Q, transpose(A), A, `${X}${T} ${X}`, m === n ? [{ M: mul(A, A), rule: 'mat-transpose-ignored' }] : []))
@@ -1144,8 +1143,8 @@ function buildMatExpression(rng: Rng, _level: Level): Built {
       const wrongs: Wrong[] = []
       for (const [M2, rule] of [
         [G.map((r) => r.map((x) => ratSub(x, kk))), 'mat-identity-all'],
-        [add(G, scale(kk, identity(n))), 'mat-sub-reversed'],
-        [G.map((r, i) => r.map((x, j) => (i === 0 && j === 0 ? ratSub(x, kk) : x))), 'mat-scalar-row'],
+        [add(G, scale(kk, identity(n))), 'mat-plus-minus'],
+        [add(scale(kk, identity(n)), scale(rat(-1), G)), 'mat-sub-reversed'],
       ] as const)
         if (!matEq(Q, M2, result)) wrongs.push({ content: show(M2), rule })
       steps.push(
@@ -1171,7 +1170,7 @@ function buildMatExpression(rng: Rng, _level: Level): Built {
       steps,
       cards: [MAT_CARD.produkt, MAT_CARD.transponieren, MAT_CARD.rechnen],
       resultLatex: `${expr} = ${matLatex(result)}`,
-      form: `matExpression|${variant}|${m}x${n}|${k}|${X}|${mats.map(negCount).join(',')}`,
+      form: `matExpression|${variant}|${m}x${n}|${variant === 1 ? k : Math.abs(k)}|${X}|${mats.map(negCount).join(',')}`,
       data: { variant: [variant], k: [k], ...Object.fromEntries(mats.map((M2, i) => [`M${i}`, nums(M2)])), ...Object.fromEntries(mats.map((M2, i) => [`F${i}`, [...formatOf(M2)]])) },
       answer: nums(result),
     }
@@ -1183,7 +1182,7 @@ export const MATRIX_KINDS_BY_LEVEL: Readonly<Record<Level, readonly VectorKind[]
   2: ['matLinear', 'matProduct', 'matVector'],
   3: ['matProduct', 'matVector', 'matDefined', 'matTransposeProduct'],
   4: ['matDefined', 'matTransposeProduct', 'matOuter', 'matParam'],
-  5: ['matExpression', 'matParam', 'matDefined'],
+  5: ['matExpression', 'matParam'],
 }
 
 export const MATRIX_BUILDERS: Readonly<Record<Extract<VectorKind, `mat${string}`>, (rng: Rng, level: Level) => Built>> = {
