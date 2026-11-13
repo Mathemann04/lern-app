@@ -155,6 +155,18 @@
   --tone-700: oklch(51.8% 0.253 323.949);
   --tone-800: oklch(45.2% 0.211 324.591);
 }
+[data-tone='rose'] {
+  /* Matrizen und Gleichungssysteme (M7 Schritt 8a), Rosé wie im Plan */
+  --tone-50: oklch(96.9% 0.015 12.422);
+  --tone-100: oklch(94.1% 0.03 12.58);
+  --tone-200: oklch(89.2% 0.058 10.001);
+  --tone-300: oklch(81% 0.117 11.638);
+  --tone-400: oklch(71.2% 0.194 13.428);
+  --tone-500: oklch(64.5% 0.246 16.439);
+  --tone-600: oklch(58.6% 0.253 17.585);
+  --tone-700: oklch(51.4% 0.222 16.935);
+  --tone-800: oklch(45.5% 0.188 13.697);
+}
 [data-tone='emerald'] {
   /* Geraden und Ebenen (M7 Schritt 6), Smaragdgrün wie im Plan */
   --tone-50: oklch(97.9% 0.021 166.113);

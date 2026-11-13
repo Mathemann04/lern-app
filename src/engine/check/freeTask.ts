@@ -33,7 +33,7 @@ export type KeyboardSpec =
 // Seit Schritt 2: choice (Auswahl unter options, eine Antwort) und inequality (Zeichen < oder > aus options, dann ein
 // Kästchen); suffix steht hinter dem Kästchen einer Zahl (z. B. ^\circ)
 export type EntryGroup = {
-  readonly shape: 'vector' | 'point' | 'number' | 'solutions' | 'choice' | 'inequality' | 'param' | 'equation'
+  readonly shape: 'vector' | 'point' | 'number' | 'solutions' | 'choice' | 'inequality' | 'param' | 'equation' | 'matrix'
   readonly label: string
   readonly count: number
   readonly options?: readonly string[]
@@ -41,6 +41,8 @@ export type EntryGroup = {
   // Parameterform einer Geraden oder Ebene (M7 Schritt 6): Namen der Parameter; Spalten: Stützvektor, dann je Parameter
   // eine Richtung. Koordinatenform (equation): vier Kästchen, Zahl vor x, y, z und rechte Seite
   readonly params?: readonly string[]
+  // Matrix (M7 Schritt 8a): Zahl der Spalten, die Kästchen Zeile für Zeile
+  readonly cols?: number
 }
 
 export type FreeTask = {

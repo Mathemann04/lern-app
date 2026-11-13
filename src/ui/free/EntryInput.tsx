@@ -46,6 +46,11 @@ function boxLabel(group: EntryGroup, entry: number): string {
     }
     case 'equation':
       return entry < 3 ? `Zahl vor ${['x', 'y', 'z'][entry]}` : 'Rechte Seite'
+    case 'matrix': {
+      // Zeile für Zeile (M7 Schritt 8a)
+      const cols = group.cols ?? 1
+      return `Zeile ${Math.floor(entry / cols) + 1}, Spalte ${(entry % cols) + 1}`
+    }
   }
 }
 
@@ -235,6 +240,27 @@ export function EntryInput({ groups, keyboard, readOnly, marks, markTone, onInpu
                 ))}
               </div>
             )
+          case 'matrix': {
+            // Matrix: Kästchen im Raster in großen Klammern; bei vier Spalten am Handy schmaler
+            const cols = group.cols ?? 1
+            const width = cols >= 4 ? 'w-14 sm:w-20' : cols === 3 ? 'w-[4.5rem] sm:w-24' : 'w-24 sm:w-28'
+            return (
+              <div key={gi} className="flex flex-wrap items-center gap-2">
+                {group.label && (
+                  <span className="shrink-0 text-2xl">
+                    <Formula tex={group.label} />
+                  </span>
+                )}
+                <div className="flex items-stretch gap-1">
+                  <span aria-hidden="true" className="w-3 rounded-l-[100%_50%] border-l-2 border-zinc-600" />
+                  <div className="grid gap-2 py-1" style={{ gridTemplateColumns: `repeat(${cols}, auto)` }}>
+                    {entries.map((ei) => box(gi, ei, width))}
+                  </div>
+                  <span aria-hidden="true" className="w-3 rounded-r-[100%_50%] border-r-2 border-zinc-600" />
+                </div>
+              </div>
+            )
+          }
           case 'solutions':
             return (
               <div key={gi} className="space-y-2">

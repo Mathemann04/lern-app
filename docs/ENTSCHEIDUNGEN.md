@@ -1198,3 +1198,13 @@ Neue Entscheidungen unten anfügen.
   Ebene statt Normale“ ersetzt jetzt die Normale; bei Gerade und Ebene ist $180^\circ - \varphi$ kein Betragsfehler (dort
   eine zweite Verwechslung der Tabelle); Bild zum Winkel mit einer Koordinatenebene liegt in ihr; Klammern um negative
   Faktoren; Tipp beim Auflösen als ganzer Satz. Neue Tests für die ersten beiden Funde und das Bild.
+- 13.11.2026: M7 Schritt 8 in zwei Teile geteilt: **8a** bringt die Tätigkeit „Matrizen und Gleichungssysteme“ (Rosé wie
+  im Plan) mit dem Baustein „Matrizen rechnen“ (`matrix`, Code 33) und allen Aufgabenarten, das Bild „Matrix verzerrt das
+  Gitter“ (bei Matrix mal Vektor in der Ebene) und die Eingabe einer Matrix im freien Modus; **8b** bringt das animierte
+  Falk-Schema (bis dahin steht es als Tabelle mit fetter Zeile und Spalte in der Erklärung). Dieselbe Engine wie bei den
+  Vektoren (`buildVectorTask`), eigene Fehler mit Vorsilbe „mat-“. Formate wie $2 \times 3$ sind im freien Modus kein
+  Ergebnis (sonst läse die Engine sie als Zahl $6$). „Für welches $a$ gilt $AB = BA$?“ wird rückwärts gebaut:
+  $B = \lambda A(a^*) + \mu E$ ist genau für $a = a^*$ mit $A$ vertauschbar, weil $AB - BA$ linear in $a$ ist; ein Test prüft
+  den Wert und dass ein anderer nicht passt. Bei der Aufgabe „Welcher Ausdruck ist definiert?“ nennt der Hinweis unter der
+  Angabe die vier Ausdrücke (im freien Modus muss man sie kennen). Angaben mit großen Matrizen stehen am Handy
+  untereinander (geschätzte Breite, wie bei der Lage in Schritt 7a).

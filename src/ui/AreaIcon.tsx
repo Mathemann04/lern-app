@@ -77,6 +77,16 @@ const ART: Record<Kind, (id: string) => ReactNode> = {
       <circle cx="24" cy="28" r="2.4" className="fill-tone-800" />
     </>
   ),
+  // Matrizen und Gleichungssysteme (M7 Schritt 8a): Matrix in Klammern, eine Zeile und eine Spalte hervorgehoben
+  matrices: () => (
+    <>
+      <Card />
+      <path d="M13 12C9 18 9 30 13 36M35 12C39 18 39 30 35 36" className="stroke-tone-700" strokeWidth="2.6" fill="none" strokeLinecap="round" />
+      <rect x="14.5" y="15.5" width="19" height="5" rx="2.5" className="fill-tone-300" />
+      <rect x="27.5" y="14" width="5" height="19" rx="2.5" className="fill-tone-300" />
+      {[18, 24, 30].flatMap((y) => [18, 24, 30].map((x) => <circle key={`${x}-${y}`} cx={x} cy={y} r="1.9" className={y === 18 || x === 30 ? 'fill-tone-800' : 'fill-tone-500'} />))}
+    </>
+  ),
   // Potenzen, Wurzeln, Logarithmen: Quadrate, die immer größer werden
   powers: () => (
     <>

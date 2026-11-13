@@ -6,6 +6,8 @@ paths:
   - "e2e/vectors.spec.ts"
   - "src/engine/explain/lineCards.ts"
   - "e2e/lines.spec.ts"
+  - "src/engine/explain/matrixCards.ts"
+  - "e2e/matrices.spec.ts"
 ---
 
 # Notizen: Vektoren (M7) und Bilder zu Vektoren
@@ -164,6 +166,22 @@ gezieltes Üben noch nicht (`focus: false`).
   `gl-…` ab Nummer 51 in `lineErrorRules.ts`, Karten `gl-abstand-ebene`, `gl-abstand-gerade`, `gl-abstand-windschief`,
   `gl-schnittwinkel`. Tests in `linalg/distTasks.test.ts` (Abstand über Fläche und Kreuzprodukt, Winkel mit acos/asin,
   Schritt-Ids eindeutig, freier Modus mit Wurzeln und typischen Fehlern).
+- Matrizen rechnen (Schritt 8a): eigene Tätigkeit `matrizen` (Farbe `rose`, Bild `matrices`, Lernkarten-Ordner `matrizen` in
+  `explain/matrixCards.ts`), dieselbe Engine: Baustein `matrix` (Code 33, Gruppe `mat-rechnen`) in `MATRIX_BLOCKS`,
+  `nextMatrixSeed` in `vectorEngine.ts`. `linalg/matrixTasks.ts`: Matrizen als Zeilen (`Mat<T>`), Einträge über einen
+  `Ring` (Zahlen `Q` oder lineare Ausdrücke `L` = c0 + c1·a beim Parameter), `product` mit den Fehlern im Falk-Schema
+  (`Falk`: noSum, plus, rowRow, colCol, entrywise), `falkLatex` (Tabelle, Zeile und Spalte fett, Eintrag umrahmt), `retry`
+  (baut neu, bis jeder Schritt drei Antworten hat), `arrange` (Angabe untereinander, wenn breiter als etwa 470 px).
+  Arten in `MATRIX_KINDS_BY_LEVEL` (matBuild, matLinear, matTranspose, matProduct, matVector, matDefined,
+  matTransposeProduct, matOuter, matParam, matExpression); Schritte `productFormatStep` (keiner bei n × n mal n × n),
+  `entryStep`, `productStep`, `transposeStep` (quadratisch: „umgefüllt“ = „vergessen“), `combStep`. Ergebnis als Matrix
+  `A = \begin{pmatrix} 1 & 2 \\ … \end{pmatrix}` (freier Modus: Teil `matrix` mit `cols`, Kästchen „Zeile 2, Spalte 1“;
+  Formate wie `2 \times 3` liest `readPart` nicht als Zahl) oder Zahl. Bild `gridDrawing` bei 2 × 2: Einheitsquadrat,
+  Parallelogramm mit `from` (wandert beim Abspielen), Bild des Gitters [0, 2]² gestrichelt, Spalten als Pfeile, dann
+  $A\vec x$; vor dem Ergebnis nur Einheitsquadrat, $\vec e_1$, $\vec e_2$, $\vec x$. 25 Fehler `mat-…` in
+  `linalg/matrixErrorRules.ts` (`vectorErrorRule` sucht auch dort, Katalog `matrizen`). Tests in
+  `linalg/matrixTasks.test.ts` (eigene Matrizenrechnung mit Kommazahlen, Bild, Karten, freier Modus), Browser-Test
+  `e2e/matrices.spec.ts`. Falk-Schema als Animation folgt in Schritt 8b.
 - `linalg/vectorTasks.ts`: Baukasten. Je Art (`VectorKind`) eine Funktion, die die ganze geführte Aufgabe baut (Schritte
   mit `choiceStep`: falsche Antworten ohne Doppelte, höchstens drei, aus `errorRules.ts`; Bilder; Ergebnis; Form;
   `answer` und `data` für die Gegenprobe in Tests). Arten je Stufe in `KINDS_BY_LEVEL`: Stufe 1 Ebene, 2 Raum, 3 zwei
