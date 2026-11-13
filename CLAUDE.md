@@ -185,8 +185,10 @@ Ausführliche Notizen je Bereich (wörtlich wie früher hier, jetzt ausgelagert)
 - Jede Sitzung arbeitet auf einem eigenen Branch `claude/...`, nie direkt auf
   `main`.
 - Am Ende jeder Sitzung erstellt Claude selbst einen Pull Request nach
-  `main` (vom Nutzer so gewünscht). Der Nutzer übernimmt ihn mit
-  „Merge pull request" und „Confirm merge".
+  `main` (vom Nutzer so gewünscht). Ist die Prüfung grün, übernimmt GitHub
+  ihn automatisch und veröffentlicht die App
+  (`.github/workflows/automerge.yml`, seit 13.11.2026). Bei roter Prüfung
+  oder Konflikt bleibt er liegen: Claude behebt das in derselben Sitzung.
 - Neue Sitzungen starten mit dem Stand von `main`; nicht übernommene
   Branches sieht die nächste Sitzung also nicht.
 

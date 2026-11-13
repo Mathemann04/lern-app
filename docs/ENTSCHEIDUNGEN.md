@@ -1119,3 +1119,4 @@ Neue Entscheidungen unten anfügen.
   Zahl“ nur ohne Parameter; „Durch 1 geteilt“ entfällt; Text zu „Betrag vergessen“ nennt auch die Höhe. Neue Tests dazu.
   Nebenbei: Der Browser-Test „Gleichungen umstellen, Stufe 2“ scheiterte zufällig bei Gleichungen mit Zahlen (anderer
   Hinweis); er kennt den Hinweis jetzt.
+- 13.11.2026: Pull Requests von Claude (Branches `claude/...`) übernimmt GitHub automatisch, sobald die Prüfung grün ist (`.github/workflows/automerge.yml`, Wunsch des Nutzers); danach startet die Veröffentlichung. Übernommen wird nur genau der geprüfte Stand; rote Prüfung oder Konflikt: der Pull Request bleibt liegen.
