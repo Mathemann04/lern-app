@@ -291,7 +291,8 @@ Zeichen-Grundlage aus M6b.
   so wie bei Chemie und den Mathe-Tätigkeiten (Regeln in `.claude/rules/auswahl.md`).
   Vorschlag für die Unterthemen: Kräfte zerlegen und zusammensetzen, Momente,
   **Freischneiden**, Lagerreaktionen, statische Bestimmtheit, mehrteilige Tragwerke,
-  Fachwerke, räumliche Statik, Schwerpunkte, Schnittgrößen, Reibung.
+  Fachwerke (darin einzeln wählbar: Nullstäbe, Knotenpunktverfahren, **Ritterschnitt**),
+  räumliche Statik, Schwerpunkte, Schnittgrößen, Reibung.
 - **Freischneiden als eigene Übung:** Die App zeigt ein Bild (Tragwerk, Hebel, Walze,
   Leiter …) und fragt nach dem Freikörperbild.
   - Geführt: mehrere Bilder zur Auswahl, eins richtig. Die falschen zeigen typische Fehler:
@@ -306,6 +307,34 @@ Zeichen-Grundlage aus M6b.
   mischen: erst freischneiden, dann halb geführt die Gleichgewichtsgleichungen aufstellen
   (z. B. den fehlenden Term wählen oder den Momentenpunkt aussuchen), dann Punkt für Punkt
   lösen. Höhere Stufen verketten mehr Schritte (Stufe = Verschachtelung, nie neuer Stoff).
+- **Ritterschnitt als eigene Übung** (Wunsch des Nutzers, 13.11.2026), in Schritten, die
+  sich einzeln üben und zu einer Kette verbinden lassen:
+  1. Schnitt legen: im Fachwerk drei Stäbe antippen. Die App prüft, ob der Schnitt taugt
+     (drei Stäbe, nicht alle am selben Knoten, das Fachwerk zerfällt in zwei Teile).
+     Falsche Wahl: drei Stäbe an einem Knoten, nur zwei Stäbe, Schnitt trennt nichts.
+  2. Teil wählen: welches Teil ist einfacher (weniger Lasten, Lagerkräfte schon bekannt)?
+  3. Ritterpunkt wählen: den Schnittpunkt zweier geschnittener Stäbe antippen; dann bleibt in
+     der Momentengleichung nur die gesuchte Stabkraft übrig.
+  4. Gleichung aufstellen (halb geführt) und die Stabkraft ausrechnen, Zug oder Druck angeben.
+  Der Ritterschnitt kommt auch in den anderen Übungen vor: schätzen „Zug oder Druck?“,
+  Fehler finden (falscher Ritterpunkt, Schnitt durch drei Stäbe an einem Knoten), Spielwiese
+  (Last verschieben, Stabkraft ändert sich), Vergleich mit dem Knotenpunktverfahren.
+- **Weitere Übungsarten** (vorgeschlagen, vom Nutzer alle gewünscht, 13.11.2026):
+  1. *Erst schätzen, dann rechnen:* vor der Rechnung die Richtung einer Lagerkraft oder Zug
+     und Druck eines Stabs tippen, danach mit dem Ergebnis vergleichen.
+  2. *Momentenpunkt wählen:* „Um welchen Punkt rechnest du am besten?“ Richtig ist der Punkt,
+     durch den die meisten Unbekannten gehen; ohne Rechnen.
+  3. *Fehler finden:* eine fertig gerechnete Lösung mit genau einem Fehler (aus den
+     Fehlerregeln oben), den falschen Schritt antippen.
+  4. *Verläufe zuordnen:* zum Balken den passenden $Q$- oder $M$-Verlauf wählen, und
+     umgekehrt zum Verlauf die passende Belastung.
+  5. *Spielwiese:* Last oder Lager mit dem Finger verschieben, Lagerkräfte, Stabkräfte und
+     Verläufe ändern sich sofort mit (aufwendigste Übung, passt zu „Bilder zum Anfassen“).
+  6. *Vom echten Ding zum Modell:* zu einem Gegenstand (Leiter, Kran, Brücke, Hebel) das
+     passende Modell wählen: welches Lager wo, welche Last wo.
+  7. *Kurze Übungen für jeden Tag:* Wertigkeit der Lager, statisch bestimmt oder nicht,
+     Nullstäbe antippen; wenige Minuten, über die Wiederholung.
+  8. *Probeklausur* mit Zeit und Punkten wie bei Chemie, sobald eine Altklausur da ist.
 - Bilder zeichnet die App selbst aus derselben Beschreibung, aus der sie rechnet
   (Zeichen-Grundlage aus M6b); Antippen und Pfeile setzen wie bei „Bilder zum Anfassen“.
 
