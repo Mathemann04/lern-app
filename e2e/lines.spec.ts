@@ -64,7 +64,7 @@ test('Mathe-Seite zeigt die Kachel „Geraden und Ebenen“, die Seite der Täti
 
 test('Geraden und Ebenen: jede Stufe lässt sich lösen, Bild zum Ergebnis, Lernkarte', async ({ page }) => {
   const errors = collectErrors(page)
-  for (const block of ['gerade', 'ebene', 'lage']) {
+  for (const block of ['gerade', 'ebene']) {
     for (const level of [1, 2, 3, 4, 5]) {
       await page.goto(`./#/ueben/geraden/${block}.${level}-${60 + level}`)
       await solveWholeTask(page)
@@ -130,6 +130,17 @@ test('Frei: Koordinatenform in Kästchen, Vorzeichen rechts wird erkannt, Vielfa
 })
 
 // M7 Schritt 7a: Lage
+test('Lage: jede Stufe lässt sich lösen, Bild zum Ergebnis', async ({ page }) => {
+  const errors = collectErrors(page)
+  for (const level of [1, 2, 3, 4, 5]) {
+    await page.goto(`./#/ueben/geraden/lage.${level}-${60 + level}`)
+    await solveWholeTask(page)
+    await expect(page.getByTestId('result').getByTestId('vector-figure')).toBeVisible()
+    await expectCleanPage(page, `lage Stufe ${level}`)
+  }
+  expect(errors).toEqual([])
+})
+
 test('Frei: Lage zweier Geraden zum Antippen, Schnittpunkt mit vertauschtem Parameter wird erkannt', async ({ page }) => {
   const errors = collectErrors(page)
   // lage.2-8: windschiefe Geraden; „Schnittpunkt“ heißt: dritte Gleichung nicht geprüft

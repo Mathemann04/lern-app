@@ -56,6 +56,8 @@ const tooBig = (v: Vec, lim = 12) => v.some((x) => Math.abs(num(x)) > lim)
 const sumOf = (xs: readonly Rational[]) => xs.reduce((s, x) => ratAdd(s, x), rat(0))
 // k · Name: \vec v, -\vec v, 2 \cdot \vec v
 const multLatex = (k: Rational, name: string) => (ratEq(k, rat(1)) ? name : ratEq(k, rat(-1)) ? `-${name}` : `${show(k)} \\cdot ${name}`)
+// Angabe mit zwei Gleichungen untereinander (passt so auch am Handy)
+const stack = (...rows: readonly string[]) => `\\begin{array}{l} ${rows.join(' \\\\[4pt] ')} \\end{array}`
 const sameRats = (a: readonly Rational[], b: readonly Rational[]) => a.length === b.length && a.every((x, i) => ratEq(x, b[i]))
 
 const PARAM_PAIRS = [
@@ -570,7 +572,7 @@ function buildLinePair(rng: Rng, level: Level, meet: boolean): Built {
     ]
     const points: DrawPoint[] = [...(via ? [{ at: nums(p), label: A, color: 'a' as const }, { at: nums(b), label: B, color: 'a' as const }] : []), ...(truth === 2 ? [{ at: nums(S), label: 'S', color: 'r' as const }] : [])]
     const drawing = sceneFigure(dim, { lines: [lines[0], { ...lines[1], p: qReal }], points, caption: captions[truth] })
-    const given = via ? `${pointLatex(A, p)},\\; ${pointLatex(B, b)},\\; ${hLatex}` : `${gLatex},\\; ${hLatex}`
+    const given = via ? stack(`${pointLatex(A, p)},\\; ${pointLatex(B, b)}`, hLatex) : stack(gLatex, hLatex)
     const intro = via ? `Die Gerade $${g}$ geht durch $${A}$ und $${B}$. ` : ''
     const form = `${dim}|${via ? 'pts' : 'form'}|${k3}|${t}|${g}|${signShape(p, v, w)}`
     if (!meet) {
@@ -685,7 +687,7 @@ function buildLinePlane(rng: Rng, level: Level, meet: boolean): Built {
     const lineSpec: LineSpec = { name: g, p, v, ts: [0, num(t0)], color: 'a', dir: '\\vec v' }
     const captions = [`$${g}$ liegt ganz in $${E}$.`, `$${g}$ ist parallel zu $${E}$: Sie haben keinen gemeinsamen Punkt.`, `$${g}$ durchstößt $${E}$ in $S$.`]
     const drawing = sceneFigure(3, { lines: [lineSpec], polygons: [plane], points: truth === 2 ? [{ at: nums(S), label: 'S', color: 'r' }] : [], caption: captions[truth] })
-    const given = `${planeLatex},\\; ${lineLatex}`
+    const given = stack(planeLatex, lineLatex)
     const form = `${variant}|${t}|${g}|${E}|${n.filter(isZero).length}|${signShape(p, v, n)}`
     if (variant === 'coord' || variant === 'param') {
       const before = meet ? sceneFigure(3, { lines: [lineSpec], polygons: [plane], caption: `Wo durchstößt $${g}$ die Ebene $${E}$?` }) : undefined
@@ -882,7 +884,7 @@ function buildPosPlanes(rng: Rng, level: Level): Built {
       return {
         kind: 'posPlanes',
         instruction: `Wie liegen die Ebenen $${E}$ und $${F}$ zueinander?`,
-        functionLatex: `${eLatex},\\; ${coordLatex(F, mv, e)}`,
+        functionLatex: stack(eLatex, coordLatex(F, mv, e)),
         steps,
         cards,
         resultLatex: `\\text{${PLANE_PAIR[truth]}}`,
@@ -921,7 +923,7 @@ function buildPosPlanes(rng: Rng, level: Level): Built {
       return {
         kind: 'posPlanes',
         instruction: `Für welches $a$ sind die Normalenvektoren von $${E}$ und $${F}$ parallel? Wie liegen die Ebenen dann zueinander?`,
-        functionLatex: `${eLatex},\\; ${coordWithLatex(F, mv, j, show(e))}`,
+        functionLatex: stack(eLatex, coordWithLatex(F, mv, j, show(e))),
         steps,
         cards,
         resultLatex: `a = ${show(a0)},\\; \\text{${PLANE_PAIR[truth]}}`,
@@ -951,7 +953,7 @@ function buildPosPlanes(rng: Rng, level: Level): Built {
     return {
       kind: 'posPlanes',
       instruction: `Für welche Werte von $a$ und $b$ sind die Ebenen $${E}$ und $${F}$ gleich?`,
-      functionLatex: `${eLatex},\\; ${coordWithLatex(F, mv, j, 'b')}`,
+      functionLatex: stack(eLatex, coordWithLatex(F, mv, j, 'b')),
       steps,
       cards,
       resultLatex: `a = ${show(a0)},\\; b = ${show(e)}`,
@@ -1077,7 +1079,7 @@ function buildMeetPlanes(rng: Rng, level: Level): Built {
         why: `Untereinander: $\\vec x = ${columnLatex(columns)}$. Die Zahlen ohne $${t}$ ergeben den Stützvektor, die Faktoren vor $${t}$ den Richtungsvektor.`,
       })
       steps.push(s1, s2, { ...s3, cards: [GL_CARD.lageEbenen, GL_CARD.gerade] })
-      given = `${coordLatex(E, n, d)},\\; ${coordLatex(F, mv, e)}`
+      given = stack(coordLatex(E, n, d), coordLatex(F, mv, e))
       form = `coord|${kf}|${t}|${g}|${signShape(n, mv, P)}`
     } else {
       // Stufe 4: E in Parameterform; Stufe 5: E durch drei Punkte (Richtungen AB und AC)
@@ -1187,7 +1189,7 @@ function buildMeetPlanes(rng: Rng, level: Level): Built {
           ? `Mit den Richtungen $\\overrightarrow{${A}${B}}$ und $\\overrightarrow{${A}${C}}$ ist $${eForm}$. Setz ihre Zeilen für $x$, $y$ und $z$ in $${F}$ ein. Welche Gleichung entsteht?`
           : ins.step.question
       steps.push({ ...ins.step, question: insQuestion }, s3, { ...s4, cards: [GL_CARD.lageEbenen, GL_CARD.gerade] })
-      given = level === 5 ? `${pointLatex(A, pts[0])},\\; ${pointLatex(B, pts[1])},\\; ${pointLatex(C, pts[2])},\\; ${coordLatex(F, mv, e)}` : `${eForm},\\; ${coordLatex(F, mv, e)}`
+      given = level === 5 ? stack(`${pointLatex(A, pts[0])},\\; ${pointLatex(B, pts[1])},\\; ${pointLatex(C, pts[2])}`, coordLatex(F, mv, e)) : stack(eForm, coordLatex(F, mv, e))
       form = `${level === 5 ? 'points' : 'param'}|${num(alpha)}|${num(beta)}|${r}|${g}|${signShape(p, uOld, w, mv)}`
     }
     if (steps.some((st) => st.choices.length < 3)) continue
