@@ -197,8 +197,9 @@ Nichts aus dem Buch kommt ins Repo (Texte, Bilder, Tabellen, Zahlenbeispiele).
 
 Keine Rechenaufgabe des Kapitels gehört zum Stoff von Chemie 1; eine Gegenprobe
 mit Aufgaben aus dem Buch entfällt deshalb. Das Kapitel Festkörperphysik
-(Bändermodell, Halbleiter; passend zu Zusatz 3.4 und Werkstoffkunde) ist noch
-nicht hochgeladen.
+(Bändermodell, Halbleiter; passend zu Zusatz 3.4 und Werkstoffkunde) ist am 13.11.2026
+gesichtet: [WERKSTOFFKUNDE.md](WERKSTOFFKUNDE.md), Abschnitt „Lehrbuch“ (Bindungsarten,
+Bändermodell und Dotierung fürs Nachschlagewerk Chemie).
 
 ## Stand der Umsetzung
 

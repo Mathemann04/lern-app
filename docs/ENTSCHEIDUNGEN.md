@@ -1239,3 +1239,9 @@ Neue Entscheidungen unten anfügen.
   Maßstab: Es gelten weiter Skripte, Übungen und Altklausuren der Vorlesung. Ein Thema, das nur im Handbuch steht
   (z. B. Drehmatrizen, Newton-Verfahren, Gläser in Chemie), kommt erst in die App, wenn Unterlagen es bestätigen oder
   der Nutzer es will. Übersicht in docs/STUDIENPLAN.md.
+- 13.11.2026: Lehrbuch „Physik für Ingenieure“, Kapitel 9 Festkörperphysik gesichtet (Fotos S. 735 bis 795 und Lösungen
+  im Anhang). Übersicht mit Gegenprobe in docs/WERKSTOFFKUNDE.md, Abschnitt „Lehrbuch“. Festlegungen: Atome je Zelle bei
+  hdp nennt die App immer mit der Zelle (Standard wie Vorlesung: 6 im Sechseckprisma; das Buch zählt 2 in der kleinsten
+  Zelle); Rechnungen aus dem Buch (Abstand nächster Nachbarn, Dichte aus der Gitterkonstante, Mischungsregel) kommen nur
+  in Vertiefung und Klausurniveau und nur, wenn die Vorlesung sie nahelegt; Halbleiter, Supraleitung, Phononen und
+  Thermoelektrik gehören zu Physik (M10).
