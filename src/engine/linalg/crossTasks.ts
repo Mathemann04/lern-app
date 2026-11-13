@@ -51,11 +51,11 @@ const s = ratSub
 type CrossFn = (a: Vec, b: Vec) => Vec
 export const cross: CrossFn = (a, b) => [s(m(a[1], b[2]), m(a[2], b[1])), s(m(a[2], b[0]), m(a[0], b[2])), s(m(a[0], b[1]), m(a[1], b[0]))]
 // mittlere Komponente mit falschem Vorzeichen: a1 b3 − a3 b1
-const middleSign: CrossFn = (a, b) => cross(a, b).map((x, i) => (i === 1 ? ratNeg(x) : x))
+export const middleSign: CrossFn = (a, b) => cross(a, b).map((x, i) => (i === 1 ? ratNeg(x) : x))
 // Reihenfolge vertauscht: b × a
 const orderSwap: CrossFn = (a, b) => vecNeg(cross(a, b))
 // Plus statt Minus im Schema
-const plusCross: CrossFn = (a, b) => [ratAdd(m(a[1], b[2]), m(a[2], b[1])), ratAdd(m(a[2], b[0]), m(a[0], b[2])), ratAdd(m(a[0], b[1]), m(a[1], b[0]))]
+export const plusCross: CrossFn = (a, b) => [ratAdd(m(a[1], b[2]), m(a[2], b[1])), ratAdd(m(a[2], b[0]), m(a[0], b[2])), ratAdd(m(a[0], b[1]), m(a[1], b[0]))]
 // falsche Zeile abgedeckt: jede Komponente mit der Rechnung einer anderen
 const rowsCross: CrossFn = (a, b) => {
   const c = cross(a, b)
@@ -68,8 +68,8 @@ const unit = (j: number): Vec => vec(...[0, 1, 2].map((i) => (i === j ? 1 : 0)))
 const isParallel = (a: Vec, b: Vec) => vecIsZero(cross(a, b))
 
 // Vektor mit Parameter: base + t · slope (Einträge linear in t)
-type PVec = { readonly base: Vec; readonly slope: Vec }
-const pAt = (p: PVec, t: Rational): Vec => vecAdd(p.base, vecScale(t, p.slope))
+export type PVec = { readonly base: Vec; readonly slope: Vec }
+export const pAt = (p: PVec, t: Rational): Vec => vecAdd(p.base, vecScale(t, p.slope))
 
 // Kreuzprodukt (oder ein Fehler davon), wenn einer der beiden Vektoren einen Parameter an der Stelle j hat
 function paramCross(f: CrossFn, a: Vec, b: Vec, j: number, inA: boolean): PVec {
@@ -78,15 +78,15 @@ function paramCross(f: CrossFn, a: Vec, b: Vec, j: number, inA: boolean): PVec {
 }
 
 // |base + t slope|² = q2 t² + q1 t + q0
-type Quad = { readonly q2: Rational; readonly q1: Rational; readonly q0: Rational }
+export type Quad = { readonly q2: Rational; readonly q1: Rational; readonly q0: Rational }
 const normQuad = (p: PVec): Quad => ({ q2: vecNorm2(p.slope), q1: m(rat(2), vecDot(p.base, p.slope)), q0: vecNorm2(p.base) })
-const quadAt = (q: Quad, t: Rational) => ratAdd(ratAdd(m(q.q2, m(t, t)), m(q.q1, t)), q.q0)
+export const quadAt = (q: Quad, t: Rational) => ratAdd(ratAdd(m(q.q2, m(t, t)), m(q.q1, t)), q.q0)
 
 // ------------------------------------------------------------------ LaTeX
 
 const factor = (x: string) => (x.startsWith('-') ? `(${x})` : x)
 // Summe von Termen mit Koeffizient: [Koeffizient, Buchstabe] (Buchstabe leer: Zahl)
-function termsLatex(terms: readonly (readonly [Rational, string])[]): string {
+export function termsLatex(terms: readonly (readonly [Rational, string])[]): string {
   const parts = terms.filter(([c]) => !isZero(c))
   if (parts.length === 0) return '0'
   return parts
@@ -99,11 +99,11 @@ function termsLatex(terms: readonly (readonly [Rational, string])[]): string {
     .join('')
 }
 // Eintrag linear im Parameter: 3t - 2 (der Parameter zuerst)
-const linLatex = (c0: Rational, c1: Rational, t: string) => termsLatex([[c1, t], [c0, '']])
+export const linLatex = (c0: Rational, c1: Rational, t: string) => termsLatex([[c1, t], [c0, '']])
 const pvecLatex = (p: PVec, t: string) => columnLatex(p.base.map((x, i) => linLatex(x, p.slope[i], t)))
-const quadLatex = (q: Quad, t: string) => termsLatex([[q.q2, `${t}^2`], [q.q1, t], [q.q0, '']])
+export const quadLatex = (q: Quad, t: string) => termsLatex([[q.q2, `${t}^2`], [q.q1, t], [q.q0, '']])
 // Vektor mit Parameter an der Stelle j (dort steht nur der Buchstabe)
-const withParamLatex = (v: Vec, j: number, t: string) => columnLatex(v.map((x, i) => (i === j ? t : ratLatex(x))))
+export const withParamLatex = (v: Vec, j: number, t: string) => columnLatex(v.map((x, i) => (i === j ? t : ratLatex(x))))
 
 // Schema mit Hilfszeilen: a und b nebeneinander, die ersten beiden Zeilen noch einmal darunter
 const schemaLatex = (a: readonly string[], b: readonly string[]) =>
@@ -114,24 +114,26 @@ const crossTerms = (a: readonly string[], b: readonly string[]) =>
     const [p, q] = [(i + 1) % 3, (i + 2) % 3]
     return `${factor(a[p])} \\cdot ${factor(b[q])} - ${factor(a[q])} \\cdot ${factor(b[p])}`
   }))
-const squares = (v: Vec) => v.map((x) => (x.d === 1n && ratSign(x) >= 0 ? `${ratLatex(x)}^2` : `\\left(${ratLatex(x)}\\right)^2`)).join(' + ')
-const half = (x: Surd): Surd => ({ coef: ratDiv(x.coef, rat(2)), rad: x.rad })
-const lengthOf = (v: Vec) => sqrtRat(vecNorm2(v))
+export const squares = (v: Vec) => v.map((x) => (x.d === 1n && ratSign(x) >= 0 ? `${ratLatex(x)}^2` : `\\left(${ratLatex(x)}\\right)^2`)).join(' + ')
+export const half = (x: Surd): Surd => ({ coef: ratDiv(x.coef, rat(2)), rad: x.rad })
+export const lengthOf = (v: Vec) => sqrtRat(vecNorm2(v))
 // Kette ohne doppeltes Glied
-const chain = (...parts: readonly string[]) => parts.filter((p, i) => i === 0 || p !== parts[i - 1]).join(' = ')
-const rootChain = (v: Vec) => chain(`\\sqrt{${squares(v)}}`, `\\sqrt{${ratLatex(vecNorm2(v))}}`, surdLatex(lengthOf(v)))
+export const chain = (...parts: readonly string[]) => parts.filter((p, i) => i === 0 || p !== parts[i - 1]).join(' = ')
+export const rootChain = (v: Vec) => chain(`\\sqrt{${squares(v)}}`, `\\sqrt{${ratLatex(vecNorm2(v))}}`, surdLatex(lengthOf(v)))
 
 // ------------------------------------------------------------------ Schritte
 
 // a × b in einem Schritt; das Schema mit Hilfszeilen steht in der Erklärung. Mit Parameter (param) ohne „Reihenfolge
 // vertauscht": −(a × b) ist bei Fläche und Parallelität gleich viel wert.
 type Param = { readonly j: number; readonly inA: boolean; readonly t: string }
-function crossStep(rng: Rng, an: string, bn: string, a: Vec, b: Vec, param?: Param, id = 'kreuz'): GuidedStep {
+// withoutOrder (Schritt 4b): ohne „Reihenfolge vertauscht", wenn danach ein Parameter aus dem Betrag oder aus „= 0" folgt
+// (−(a × b) führt dort auf dieselben Lösungen)
+export function crossStep(rng: Rng, an: string, bn: string, a: Vec, b: Vec, param?: Param, id = 'kreuz', withoutOrder = false): GuidedStep {
   const name = `${an} \\times ${bn}`
   const show = (p: PVec) => math(`${name} = ${param ? pvecLatex(p, param.t) : vecLatex(p.base)}`)
   const of = (f: CrossFn): PVec => (param ? paramCross(f, a, b, param.j, param.inA) : { base: f(a, b), slope: vec(0, 0, 0) })
   const others: Wrong[] = [
-    ...(param ? [] : [{ content: show(of(orderSwap)), rule: 'vec-cross-order' }]),
+    ...(param || withoutOrder ? [] : [{ content: show(of(orderSwap)), rule: 'vec-cross-order' }]),
     { content: show(of(plusCross)), rule: 'vec-cross-plus' },
     { content: show(of(rowsCross)), rule: 'vec-cross-rows' },
     { content: show(of(entrywise)), rule: 'vec-cross-entrywise' },
@@ -187,7 +189,7 @@ function swapStep(rng: Rng, an: string, bn: string, a: Vec, b: Vec): GuidedStep 
 }
 
 // Länge eines Vektors (mit Name)
-function normStep(rng: Rng, name: string, v: Vec, id = 'laenge', card: string = CARD.flaeche): GuidedStep {
+export function normStep(rng: Rng, name: string, v: Vec, id = 'laenge', card: string = CARD.flaeche): GuidedStep {
   const line = (x: string) => math(`${name} = ${x}`)
   const n2 = vecNorm2(v)
   const wrongs: Wrong[] = [
@@ -210,11 +212,11 @@ function normStep(rng: Rng, name: string, v: Vec, id = 'laenge', card: string = 
   })
 }
 
-type Shape = 'par' | 'tri'
+export type Shape = 'par' | 'tri'
 const SHAPE_NAME: Readonly<Record<Shape, string>> = { par: 'Parallelogramms', tri: 'Dreiecks' }
 
 // Fläche aus dem Kreuzprodukt: Parallelogramm |a × b|, Dreieck die Hälfte
-function areaStep(rng: Rng, shape: Shape, an: string, bn: string, a: Vec, b: Vec): GuidedStep {
+export function areaStep(rng: Rng, shape: Shape, an: string, bn: string, a: Vec, b: Vec): GuidedStep {
   const c = cross(a, b)
   const full = lengthOf(c)
   const area = shape === 'tri' ? half(full) : full
@@ -346,7 +348,7 @@ function names(rng: Rng) {
   return { an: vecName(v[0]), bn: vecName(v[1]), key: v[0], pts: PT_LETTERS[rng.int(0, 2)] }
 }
 
-const areaClass = (x: Surd) => (x.rad === 1n ? (x.coef.d === 1n ? 'int' : 'frac') : x.coef.d === 1n ? 'root' : 'fracroot')
+export const areaClass = (x: Surd) => (x.rad === 1n ? (x.coef.d === 1n ? 'int' : 'frac') : x.coef.d === 1n ? 'root' : 'fracroot')
 
 // ------------------------------------------------------------------ Arten
 

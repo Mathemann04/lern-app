@@ -46,22 +46,23 @@ export const REARRANGE_BLOCKS: readonly Block[] = [
 ]
 
 // Vektoren (M7, docs/PLAN-M7.md): Schritt 1 bringt „Rechnen und Länge“, Schritt 2 „Skalarprodukt und Winkel“, Schritt 3a
-// „Projektion und Zerlegung“, Schritt 3b „Kräfte“, Schritt 4a „Kreuzprodukt und Fläche“; die übrigen folgen in 4b und 5.
+// „Projektion und Zerlegung“, Schritt 3b „Kräfte“, Schritt 4a „Kreuzprodukt und Fläche“, Schritt 4b „Spatprodukt und Volumen“; die übrigen folgen ab Schritt 5.
 export const VECTOR_BLOCKS: readonly Block[] = [
   { id: 'rechnen', title: 'Rechnen und Länge', note: 'Summe, Vielfache, Verbindungsvektor, Mittelpunkt, Länge, Einheitsvektor', group: 'vektor-grundlagen' },
   { id: 'skalar', title: 'Skalarprodukt und Winkel', note: 'senkrecht, spitz, stumpf, Winkel, Länge aus Winkel', group: 'vektor-grundlagen' },
   { id: 'projektion', title: 'Projektion und Zerlegung', note: 'Schatten, parallel und senkrecht zerlegen, Lotfußpunkt, Abstand', group: 'vektor-grundlagen' },
   { id: 'kraefte', title: 'Kräfte', note: 'Betrag und Winkel, Resultierende, schiefe Ebene, Arbeit, Drehmoment, Seilkräfte', group: 'vektor-grundlagen' },
   { id: 'kreuz', title: 'Kreuzprodukt und Fläche', note: 'Kreuzprodukt, Fläche von Parallelogramm und Dreieck, Normalenvektor, Abstand Punkt–Gerade', group: 'vektor-grundlagen' },
+  { id: 'spat', title: 'Spatprodukt und Volumen', note: 'Spatprodukt mit Sarrus, komplanar, Rechtssystem, Volumen von Spat, Prisma, Pyramide und Tetraeder, Höhe', group: 'vektor-grundlagen' },
 ]
 
 // Spielbare Mengen von Bausteinen je Stufe (wie REARRANGE_PLAYABLE_COMBOS)
 export const VECTOR_PLAYABLE_COMBOS: Readonly<Record<1 | 2 | 3 | 4 | 5, readonly string[]>> = {
-  1: ['rechnen', 'skalar', 'projektion', 'kraefte', 'kreuz'],
-  2: ['rechnen', 'skalar', 'projektion', 'kraefte', 'kreuz'],
-  3: ['rechnen', 'skalar', 'projektion', 'kraefte', 'kreuz'],
-  4: ['rechnen', 'skalar', 'projektion', 'kraefte', 'kreuz'],
-  5: ['rechnen', 'skalar', 'projektion', 'kraefte', 'kreuz'],
+  1: ['rechnen', 'skalar', 'projektion', 'kraefte', 'kreuz', 'spat'],
+  2: ['rechnen', 'skalar', 'projektion', 'kraefte', 'kreuz', 'spat'],
+  3: ['rechnen', 'skalar', 'projektion', 'kraefte', 'kreuz', 'spat'],
+  4: ['rechnen', 'skalar', 'projektion', 'kraefte', 'kreuz', 'spat'],
+  5: ['rechnen', 'skalar', 'projektion', 'kraefte', 'kreuz', 'spat'],
 }
 
 // Feste Nummer je Baustein für Aufgabennummern mit Baustein wie „exp.1-4711" (M6 Schritt 4, taskNumber.ts). Gilt für alle
@@ -101,4 +102,6 @@ export const BLOCK_CODES: Readonly<Record<string, number>> = {
   kraefte: 24,
   // Tätigkeit „Vektoren“ (M7 Schritt 4a): Kreuzprodukt und Fläche („kreuz.1-4711“)
   kreuz: 25,
+  // Tätigkeit „Vektoren“ (M7 Schritt 4b): Spatprodukt und Volumen („spat.1-4711“)
+  spat: 26,
 }

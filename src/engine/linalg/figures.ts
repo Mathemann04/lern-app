@@ -42,6 +42,8 @@ export type DrawPolygon = {
   readonly points: readonly (readonly number[])[]
   readonly color: DrawColor
   readonly phase?: number
+  // beim Abspielen: jede Ecke wandert von hier an ihren Platz (Spat zieht sich aus der Grundfläche auf, Schritt 4b)
+  readonly from?: readonly (readonly number[])[]
 }
 
 // Winkel zwischen zwei Pfeilen am Scheitel at (Richtungen u und v): als Bogen, bei 90° als kleines Quadrat

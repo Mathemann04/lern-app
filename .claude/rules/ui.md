@@ -137,5 +137,7 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
 - Freier Modus mit Kästchen (M7 Schritt 1b, `FreeTask.entries`): `ui/free/EntryInput.tsx`, je Kästchen ein `MathInput`
   (`autoFocus` nur im ersten), Markierung aus `FreeVerdict.marks` (rot bei falsch, sonst gelb). Browser-Tests tippen über
   `math-field[aria-label="…"]` mit `focus()`; Enter in einem Bruch prüft nicht, darum dort „Prüfen“ klicken.
+  Eine Auswahl (`shape: 'choice'`) zeigt `label` als Text vor den Knöpfen, ohne Text „Der Winkel ist“ (seit M7 Schritt 4b
+  auch „Lage der drei Vektoren:“ mit Rechtssystem, Linkssystem, komplanar).
 - Ein `fieldset` wird im Browser nie schmaler als sein breitester Inhalt: Steht darin eine Formel mit `FitWidth`, braucht es
   `min-w-0` (Fehler vom 12.11.2026 auf der Seite „Gleichungen umstellen“, Browser-Test in `e2e/blocks.spec.ts`).

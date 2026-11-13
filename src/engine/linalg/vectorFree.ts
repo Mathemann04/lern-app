@@ -9,6 +9,7 @@ import type { TaskRef } from '../tasks/taskNumber.ts'
 import { type DragStep, judgeDrag } from './drag.ts'
 import { vectorErrorRule } from './errorRules.ts'
 import { ANGLE_TYPES } from './dotTasks.ts'
+import { ORIENTATIONS } from './spatTasks.ts'
 import { type VectorTask, buildVectorTask } from './vectorTasks.ts'
 
 // Freier Modus der Tätigkeit „Vektoren" (M7 Schritt 1b): Das Ergebnis wird je Eintrag in ein eigenes Kästchen getippt
@@ -31,6 +32,12 @@ export type ResultPart = {
 }
 
 export const RELATIONS = ['<', '>'] as const
+// Auswahlen im Ergebnis: Antworten, Text vor den Knöpfen, die besondere Antwort (Wert 0) und die Fehler (besondere Antwort
+// verwechselt, sonst die beiden anderen vertauscht)
+const CHOICE_SETS: readonly { readonly options: readonly string[]; readonly label: string; readonly special: number; readonly rules: readonly [string, string] }[] = [
+  { options: ANGLE_TYPES, label: '', special: 1, rules: ['vec-angle-zero', 'vec-angle-sign'] },
+  { options: ORIENTATIONS, label: 'Lage der drei Vektoren:', special: 2, rules: ['vec-spat-coplanar', 'vec-spat-orientation'] },
+]
 const DEGREE = '^\\circ'
 // Einheiten am Ende eines Ergebnisses (Kräfte, Schritt 3b): \,\text{N}, \,\text{Nm}, \,\text{J}, \,\text{m}
 const UNIT = /\\,\\text\{(N|Nm|J|m)\}$/
@@ -69,11 +76,15 @@ const END = '\\end{pmatrix}'
 
 function readPart(text: string): ResultPart | null {
   const t = text.trim()
-  // Art des Winkels: \text{spitz}
+  // Art des Winkels: \text{spitz}; seit Schritt 4b auch die Lage dreier Vektoren: \text{Rechtssystem} (Text vor den
+  // Knöpfen in label)
   const word = /^\\text\{(\w+)\}$/.exec(t)
   if (word) {
-    const idx = ANGLE_TYPES.indexOf(word[1] as (typeof ANGLE_TYPES)[number])
-    return idx < 0 ? null : { shape: 'choice', label: '', values: [idx], options: ANGLE_TYPES }
+    for (const set of CHOICE_SETS) {
+      const idx = set.options.indexOf(word[1])
+      if (idx >= 0) return { shape: 'choice', label: set.label, values: [idx], options: set.options }
+    }
+    return null
   }
   // Ungleichung für einen Parameter: t > \frac{3}{2}
   const ineq = /^([a-z]|\\lambda) ([<>]) (.+)$/s.exec(t)
@@ -248,12 +259,14 @@ function readEntry(raw: string): Read {
 
 export type VectorCheck = { readonly parts: readonly ResultPart[]; readonly wrongs: readonly (readonly PartWrong[])[] }
 
-// Art des Winkels falsch gewählt: spitz und stumpf verwechselt oder senkrecht falsch erkannt
+// Art des Winkels falsch gewählt: spitz und stumpf verwechselt oder senkrecht falsch erkannt; Lage dreier Vektoren
+// (Schritt 4b): Rechts- und Linkssystem verwechselt oder komplanar falsch erkannt
 function choiceWrongs(part: ResultPart): PartWrong[] {
   const idx = part.values[0]
-  return ANGLE_TYPES.flatMap((_, j) => {
+  const set = CHOICE_SETS.find((x) => x.options === part.options) ?? CHOICE_SETS[0]
+  return set.options.flatMap((_, j) => {
     if (j === idx) return []
-    const rule = vectorErrorRule(j === 1 || idx === 1 ? 'vec-angle-zero' : 'vec-angle-sign')
+    const rule = vectorErrorRule(j === set.special || idx === set.special ? set.rules[0] : set.rules[1])
     return [{ values: [j], rule: rule.id, why: rule.why }]
   })
 }

@@ -67,8 +67,9 @@ test('Von der Startseite zu „Gleichungen umstellen" und eine Aufgabe der Stufe
   await page.getByRole('link', { name: 'Stufe 2 geführt üben' }).click()
   // mit allen Bausteinen auch eine Nummer mit Baustein wie „wurzeln.2-4711“ (M6 Schritt 4)
   await expect(page).toHaveURL(/#\/ueben\/umstellen\/(?:[a-z]+\.)?2-\d+$/)
-  // bei einer Formel aus Technik und Physik (4b-1): „Alle Größen sind positiv“
-  await expect(page.getByText(/Alle (Buchstaben stehen für positive Zahlen|Größen sind positiv)/)).toBeVisible()
+  // bei einer Formel aus Technik und Physik (4b-1): „Alle Größen sind positiv“; bei einer Gleichung mit Zahlen (4b-3):
+  // „Gesucht ist eine reelle Zahl“ (vorher fehlte das hier, der Test scheiterte bei solchen Nummern)
+  await expect(page.getByText(/Alle (Buchstaben stehen für positive Zahlen|Größen sind positiv)|Gesucht ist eine reelle Zahl/)).toBeVisible()
   await solveWholeTask(page)
   await expect(page.getByTestId('result')).toBeVisible()
   await expectCleanPage(page, 'Aufgabe gelöst')

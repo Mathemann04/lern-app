@@ -11,13 +11,14 @@ paths:
 Plan: docs/PLAN-M7.md. Tätigkeit „Vektoren“ (Id `vektoren`) im Gebiet „Vektoren und Matrizen“ (`lineare-algebra`, Farbe
 `cyan`, Bild `vectors` in `AreaIcon.tsx`), Bausteine in `tasks/blocks.ts` (`VECTOR_BLOCKS`, Gruppe `vektor-grundlagen`,
 `VECTOR_PLAYABLE_COMBOS`; Bausteine `rechnen`, Code 21, Nummern `rechnen.2-4711`, seit Schritt 2a `skalar`, Code 22, seit
-Schritt 3a `projektion`, Code 23, seit Schritt 3b `kraefte`, Code 24, seit Schritt 4a `kreuz`, Code 25;
+Schritt 3a `projektion`, Code 23, seit Schritt 3b `kraefte`, Code 24, seit Schritt 4a `kreuz`, Code 25, seit Schritt 4b `spat`, Code 26;
 jeder Baustein allein spielbar, `buildVectorTask` wählt die Arten nach dem Baustein in der Nummer). Freier Modus seit Schritt 1b (`free: true`),
 gezieltes Üben noch nicht (`focus: false`).
 
 - `linalg/vec.ts`: Vektoren als Listen exakter Brüche (`rational.ts`), Längen als `Surd` (Zahl mal Wurzel, quadratfrei
   vereinfacht, `sqrtRat`), LaTeX: Spaltenvektoren `vecLatex`, Punkte `A(1 \mid 2)`, `coefLatex` für Faktoren vor Vektoren.
-- `linalg/figures.ts`: Bilder als reine Daten (`VectorDrawing`: Ebene oder Raum, Pfeile, Punkte, Strecken, Flächen,
+- `linalg/figures.ts`: Bilder als reine Daten (`VectorDrawing`: Ebene oder Raum, Pfeile, Punkte, Strecken, Flächen (mit
+  `from` wandern die Ecken beim Abspielen an ihren Platz, Schritt 4b),
   Winkel `angles` (Bogen, bei 90° Quadrat; `anglePath` rechnet die Punkte, Radius wählt `VectorFigure` in Pixeln),
   Farben `a` blau, `b` orange, `r` Ergebnis violett, `c` blaugrün, `muted`, `bad`). `phase` > 0 erscheint beim
   „Abspielen“ nacheinander, `slideFrom` lässt einen Pfeil an seinen Platz gleiten. Namen sind LaTeX ohne `$`.
@@ -76,19 +77,33 @@ gezieltes Üben noch nicht (`focus: false`).
   höchstens 1,6-mal der längere Pfeil, sonst verkürzt mit Hinweis `shortNote`, rechter Winkel Phase 3; Stufe 1 der
   Fläche in der Ebene `flat`), `distDrawing` (Gerade gestrichelt, Parallelogramm, Lot mit Lotfußpunkt `F`). Vor dem
   Ergebnis keine Normale und kein Lot im Bild. Tests in `crossTasks.test.ts` (Gegenprobe mit |a| |b| sin φ).
+  `crossTasks.ts` gibt seine Helfer an Schritt 4b weiter (`crossStep`, `normStep`, `areaStep`, `termsLatex`, `quadLatex`,
+  `linLatex`, `PVec`, `pAt`, `Quad`, `chain`).
+- Spatprodukt und Volumen (Schritt 4b): `linalg/spatTasks.ts`, Arten in `SPAT_KINDS_BY_LEVEL` (spat, spatVolume,
+  spatCoplanar, spatHeight, spatCoplanarParam, spatVolumeParam). Spatprodukt und Sarrus-Fehler als in jedem Vektor
+  lineare Funktionen (`Triple`: spatProduct, sarrusPlus, sarrusOne, sarrusSwap, middleSpat); mit Parameter (Vektoren als
+  `PVec`, Parameter in höchstens zwei Vektoren) über `quadOf` (Polynom aus den Werten bei 0, 1, −1). Schritte
+  `sarrusStep` (Schema in der Erklärung), `dotSpatStep` ((a × b) · c, c auch mit Parameter), `orientStep`
+  (`ORIENTATIONS`: Rechtssystem, Linkssystem, komplanar), `volumeStep` (Körper `Body` mit Faktor 1, 1/2, 1/3, 1/6),
+  `heightStep`, `paramConnectStep`. Ergebnis `\text{Rechtssystem}`: im freien Modus eine zweite Auswahl
+  (`CHOICE_SETS` in `vectorFree.ts`, Text vor den Knöpfen im `label` des Teils). Punkte `P Q R S`, `K L M N`, `E F G H`
+  (nicht U V W X, weil das Volumen V heißt). Bilder: `bodyDrawing` (Grundfläche Phase 1, Seitenflächen und Deckel
+  Phase 2 mit `from` = Lage in der Grundfläche, Knopf „Aufziehen“; Höhe Phase 3 mit rechtem Winkel; komplanar nur die
+  Grundfläche). Vor dem Ergebnis nur die Grundfläche. Tests in `spatTasks.test.ts` (Gegenprobe mit der Determinante nach
+  der ersten Zeile entwickelt, Höhe über Gram-Schmidt).
 - `linalg/vectorTasks.ts`: Baukasten. Je Art (`VectorKind`) eine Funktion, die die ganze geführte Aufgabe baut (Schritte
   mit `choiceStep`: falsche Antworten ohne Doppelte, höchstens drei, aus `errorRules.ts`; Bilder; Ergebnis; Form;
   `answer` und `data` für die Gegenprobe in Tests). Arten je Stufe in `KINDS_BY_LEVEL`: Stufe 1 Ebene, 2 Raum, 3 zwei
   Rechnungen zusammen, 4 Parameter oder vier und fünf Dimensionen, 5 alles ineinander. Gibt eine Art in einem Schritt
   weniger als drei Antworten, zieht sie neu (Schleife). Kennzahlen der Abwechslung wie überall (100 Formen unter 200,
   keine über 3 %); die Form enthält Art, Dimension, Variante, Buchstaben und Zahl der negativen Einträge.
-- `linalg/errorRules.ts`: 99 typische Fehler (22 aus Schritt 1, 18 zum Skalarprodukt, 4 beim Ziehen, 15 zur Projektion, 26 zu Kräften, 14 zum Kreuzprodukt) (`vec-…`), im Katalog `errorCatalog.ts` unter `vektoren`; Lernkarten in
+- `linalg/errorRules.ts`: 113 typische Fehler (22 aus Schritt 1, 18 zum Skalarprodukt, 4 beim Ziehen, 15 zur Projektion, 26 zu Kräften, 14 zum Kreuzprodukt, 14 zum Spatprodukt) (`vec-…`), im Katalog `errorCatalog.ts` unter `vektoren`; Lernkarten in
   `explain/vectorCards.ts` (Ordner `vektoren`, Beispiele `{ vector: { kind, level, seed } }`, gerechnet vom Baukasten,
   in `CardBody.tsx` mit Bild und Rechenweg).
 - `linalg/vectorEngine.ts`: Anschluss an `ui/courseEngines.ts` (planen, Form, neue Nummer, Beispiel).
 - Oberfläche `src/ui/draw/`: `view.ts` (Ausschnitt der Ebene mit Gitter, Schritt 1, 2 oder 5; Raum mit Drehung um die
   senkrechte Achse und Kippen, Drehpunkt in der Mitte des Inhalts, Startblick `bestYaw`, damit kein Pfeil auf den
-  Betrachter zeigt), `VectorFigure.tsx` (SVG, Namen als KaTeX darüber, „Abspielen“, Ziehen dreht im Raum, `compact` für
+  Betrachter zeigt und die erste Fläche ohne `from` nicht von der Kante zu sehen ist, `faceFidelity`), `VectorFigure.tsx` (SVG, Namen als KaTeX darüber, „Abspielen“, Ziehen dreht im Raum, `compact` für
   Bild-Antworten ohne Knöpfe). Farben `--vec-*` in `index.css`, hell und dunkel. Im Lernbildschirm: `step.drawing` unter
   der Frage, `choice.drawing` als Antwort (zwei Spalten, wenn alle Antworten Bilder sind), `task.resultDrawing` beim
   Ergebnis.

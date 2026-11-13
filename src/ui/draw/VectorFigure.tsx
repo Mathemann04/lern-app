@@ -161,7 +161,9 @@ export function VectorFigure({ drawing: given, compact = false, label, drag: dra
       {drawing.polygons.map((poly, i) => {
         const q = progress(poly.phase)
         if (q <= 0) return null
-        return <polygon key={`poly${i}`} points={poly.points.map((p) => project(p).join(',')).join(' ')} style={{ fill: COLOR[poly.color], fillOpacity: 0.14 * q, stroke: COLOR[poly.color], strokeOpacity: 0.5 * q }} strokeWidth={1.5} />
+        const corners = poly.from ? poly.points.map((p, k) => lerpPoint(poly.from![k], p, q)) : poly.points
+        const shown = poly.from ? 1 : q
+        return <polygon key={`poly${i}`} points={corners.map((p) => project(p).join(',')).join(' ')} style={{ fill: COLOR[poly.color], fillOpacity: 0.14 * shown, stroke: COLOR[poly.color], strokeOpacity: 0.5 * shown }} strokeWidth={1.5} />
       })}
       {drawing.segments.map((seg, i) => {
         const q = progress(seg.phase)
