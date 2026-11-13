@@ -398,3 +398,39 @@ test('Frei: Spatprodukt und Rechtssystem zum Antippen, Verwechslung wird erkannt
   await expectCleanPage(page, 'Spatprodukt frei')
   expect(errors).toEqual([])
 })
+
+// M7 Schritt 5: Linearkombination und Basis
+test('Linearkombination: jede Stufe lässt sich lösen, Vielfache laufen zum Ziel, Lernkarte', async ({ page }) => {
+  const errors = collectErrors(page)
+  for (const level of [1, 2, 3, 4, 5]) {
+    await page.goto(`./#/ueben/vektoren/basis.${level}-${50 + level}`)
+    await solveWholeTask(page)
+    await expect(page.getByTestId('result').getByTestId('vector-figure')).toBeVisible()
+    await expectCleanPage(page, `Linearkombination Stufe ${level}`)
+  }
+  // Stufe 1, Nummer 51 ist eine Linearkombination: „Abspielen" hängt die Vielfachen aneinander
+  await page.goto('./#/ueben/vektoren/basis.1-51')
+  await solveWholeTask(page)
+  await page.getByTestId('result').getByRole('button', { name: 'Abspielen' }).click()
+  await page.goto('./#/karten/vektoren/vec-linearkombination')
+  await expect(page.getByRole('heading', { name: 'Linearkombination und Spann' })).toBeVisible()
+  await expect(page.getByTestId('vector-figure').first()).toBeVisible()
+  await expectCleanPage(page, 'Lernkarte Linearkombination')
+  expect(errors).toEqual([])
+})
+
+test('Frei: Determinante und „linear unabhängig“ zum Antippen, Verwechslung wird erkannt', async ({ page }) => {
+  const errors = collectErrors(page)
+  // basis.1-3: det(u, v) = 1, linear unabhängig
+  await page.goto('./#/frei/vektoren/basis.1-3')
+  await expect(page.getByRole('radiogroup', { name: 'Die Vektoren sind' })).toBeVisible()
+  await typeInto(page, 'Dein Ergebnis von Teil 1', '1')
+  await page.getByRole('radio', { name: 'linear abhängig' }).click()
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Typischer Fehler: Abhängig und unabhängig verwechselt.')).toBeVisible()
+  await page.getByRole('radio', { name: 'linear unabhängig' }).click()
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
+  await expectCleanPage(page, 'Unabhängig frei')
+  expect(errors).toEqual([])
+})
