@@ -5,9 +5,9 @@ import { prepareVectorFreeTask } from './vectorFree.ts'
 import { buildVectorTask } from './vectorTasks.ts'
 
 // Engine der Tätigkeit „Vektoren" für die Oberfläche (ui/courseEngines.ts): Aufgaben aus dem Baukasten (vectorTasks.ts),
-// Nummern mit Baustein („rechnen.1-4711", „skalar.1-4711", Schritt 2, „projektion.1-4711", Schritt 3a); freier Modus mit Eingabe je Eintrag (vectorFree.ts, Schritt 1b).
+// Nummern mit Baustein („rechnen.1-4711", „skalar.1-4711", Schritt 2, „projektion.1-4711", Schritt 3a, „kraefte.1-4711", Schritt 3b); freier Modus mit Eingabe je Eintrag (vectorFree.ts, Schritt 1b).
 
-export const VECTOR_BLOCK_IDS = ['rechnen', 'skalar', 'projektion'] as const
+export const VECTOR_BLOCK_IDS = ['rechnen', 'skalar', 'projektion', 'kraefte'] as const
 
 export function planVectorTask(ref: TaskRef): GuidedTaskBase {
   return buildVectorTask(ref)

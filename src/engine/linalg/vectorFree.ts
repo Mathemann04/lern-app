@@ -32,6 +32,8 @@ export type ResultPart = {
 
 export const RELATIONS = ['<', '>'] as const
 const DEGREE = '^\\circ'
+// Einheiten am Ende eines Ergebnisses (Kräfte, Schritt 3b): \,\text{N}, \,\text{Nm}, \,\text{J}, \,\text{m}
+const UNIT = /\\,\\text\{(N|Nm|J|m)\}$/
 
 // ------------------------------------------------------------------ Ergebnis lesen
 
@@ -106,10 +108,13 @@ function readPart(text: string): ResultPart | null {
     const base = /^(.+)_\{1,2\}$/.exec(lhs)
     return v === null || !base ? null : { shape: 'solutions', label: base[1], values: [-v, v] }
   }
-  // Winkel in Grad: \varphi = 60^\circ
+  // Winkel in Grad: \varphi = 60^\circ; Zahl mit Einheit: F = 10\,\text{N}
   const degree = rhs.endsWith(DEGREE)
-  const v = numberOf(degree ? rhs.slice(0, -DEGREE.length) : rhs)
-  return v === null ? null : { shape: 'number', label: lhs ? `${lhs} =` : '', values: [v], ...(degree ? { suffix: DEGREE } : {}) }
+  const unit = UNIT.exec(rhs)
+  const body = degree ? rhs.slice(0, -DEGREE.length) : unit ? rhs.slice(0, unit.index) : rhs
+  const v = numberOf(body)
+  const suffix = degree ? DEGREE : unit ? `\\text{${unit[1]}}` : undefined
+  return v === null ? null : { shape: 'number', label: lhs ? `${lhs} =` : '', values: [v], ...(suffix ? { suffix } : {}) }
 }
 
 // Ergebnis (LaTeX, auch zwischen $…$) als Teile; t_1 = …, t_2 = … werden zu einem Teil mit zwei Lösungen. null: nicht lesbar
@@ -225,8 +230,12 @@ export type EntryInput = readonly (readonly string[])[]
 type Read = { readonly value: number | null; readonly expr: Expr | null; readonly problem: string | null }
 
 function readEntry(raw: string): Read {
-  // ein Gradzeichen am Ende darf stehen (die Einheit steht schon hinter dem Kästchen)
-  const latex = raw.trim().replace(/(\^\{?\\circ\}?|°|\\degree)$/, '').trim()
+  // ein Gradzeichen oder eine Einheit am Ende darf stehen (die Einheit steht schon hinter dem Kästchen)
+  const latex = raw
+    .trim()
+    .replace(/(\^\{?\\circ\}?|°|\\degree)$/, '')
+    .replace(/(\\[,;: ]|\s)*(\\(text|mathrm)\{\s*(N|Nm|J|m)\s*\}|N\s?m|N|J|m)$/, '')
+    .trim()
   if (latex === '') return { value: null, expr: null, problem: 'empty' }
   const parsed = parseLatex(latex)
   if (!parsed.ok) return { value: null, expr: null, problem: parsed.message }
@@ -326,6 +335,22 @@ export function checkVectorEntries(check: VectorCheck, input: EntryInput): FreeV
       return targets.some((x) => Math.abs(x - r.value!) <= 0.01 * Math.max(1, Math.abs(x)))
     }),
   )
+  // Richtung einer Kraft (α ab der x-Achse, Schritt 3b) mit demselben Pfeil, aber nicht zwischen 0° und 360°
+  // (z. B. −30° statt 330°); nur, wenn sonst alles stimmt
+  const wrongCount = marks.flat().filter(Boolean).length
+  const turned =
+    wrongCount === 1 &&
+    reads.some((row, i) =>
+      row.some((r, j) => {
+        const part = check.parts[i]
+        if (!marks[i][j] || part.suffix !== DEGREE || !part.label.startsWith('\\alpha') || r.value === null) return false
+        const diff = (r.value - part.values[j]) / 360
+        return Math.abs(diff - Math.round(diff)) < 1e-9
+      }),
+    )
+  if (turned)
+    return { kind: 'unfinished', title: 'Fast: Richtung stimmt.', message: 'Gib den Winkel zwischen $0^\\circ$ und $360^\\circ$ an, gegen den Uhrzeigersinn ab der positiven $x$-Achse gemessen.', marks }
+
   if (rounded)
     return { kind: 'unfinished', title: 'Fast: Das ist gerundet.', message: 'Gib den Wert genau an, als Bruch oder mit Wurzel, z. B. $\\frac{1}{3}$ statt $0{,}33$.', marks }
 

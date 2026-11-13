@@ -1059,3 +1059,23 @@ Neue Entscheidungen unten anfügen.
   aber nur, wenn er ins Bild passt, sonst würde das Bild zu klein. Der Ausschnitt rechnet den Fehler immer mit ein,
   damit das Bild beim Einblenden nicht springt. Projektion auf eine Ebene nur mit senkrechten Vektoren (Summe der
   Schatten); die Normalgleichungen für schiefe Vektoren kommen mit den Gleichungssystemen (Schritt 5 bzw. 10).
+- 13.11.2026: M7 Schritt 3b, Baustein „Kräfte“ (Code 24, `kraefte.2-4711`). Schreibweise wie in der Technischen Mechanik
+  (docs/MECHANIK.md): Winkel $\alpha$ gegen den Uhrzeigersinn ab der positiven $x$-Achse zwischen $0^\circ$ und
+  $360^\circ$, $F_x = F\cos\alpha$, Moment $M_A = (x - x_A)F_y - (y - y_A)F_x$, positiv gegen den Uhrzeigersinn. Ohne
+  Taschenrechner: nur besondere Winkel ($30^\circ$, $45^\circ$, $60^\circ$ und ihre Verwandten in allen Quadranten),
+  Ergebnisse exakt mit Wurzeln; schiefe Ebenen mit ganzzahligen Dreiecken (3-4-5, 5-12-13, 8-15-17) für die
+  Rechnung mit Vektoren. Einheiten stehen schon jetzt dabei (N, Nm, J, m), im freien Modus hinter dem Kästchen; eine
+  getippte Einheit stört nicht. Die eigentliche Rechnung mit Einheiten bleibt bei M10. Ein Winkel mit derselben
+  Richtung außerhalb von $0^\circ$ bis $360^\circ$ (z. B. $-30^\circ$ statt $330^\circ$) gilt als „fast richtig“
+  mit Hinweis. Ergebnisnamen ohne Index 1 oder 2 ($F_A$, $S_A$, $S_B$), weil der freie Modus „…_1 = …, …_2 = …“ als
+  zwei Lösungen liest. Stufe 1 und 2 ein Gedanke (zerlegen, zusammensetzen, Arbeit, Moment um $O$), Stufe 3 mit
+  Punkten und Zerlegung als Projektion, Stufe 4 Gleichgewicht, Umstellen und Seilkräfte (ein Seil waagrecht), Stufe 5
+  zwei schräge Seile, Momentengleichgewicht, Arbeit mit Parameter, schiefe Ebene mit waagrechter Haltekraft als
+  Vektorgleichung. Bilder der schiefen Ebene und der Arbeit mit Winkel als Szene ohne Gitter (die Zahlen dort wären
+  nur Zeichnung); Knoten und Moment mit Gitter, weil dort die Koordinaten gegeben sind (Kräfte am Knoten verkleinert).
+- 13.11.2026: M7 Schritt 3b, Funde der unabhängigen Prüfung behoben: bei $45^\circ$ war die falsche Gleichung
+  „$F\sin\alpha = F_G\cos\alpha$“ gleichwertig zur richtigen (fällt dort weg); der Text zu „Haltekraft wie
+  Hangabtriebskraft“ nannte im Gleichgewichtsschritt die richtige Gleichung (dort eigener Text); Kraft und Weg nie
+  parallel (sonst kein Winkelbogen); „Fast: Richtung stimmt“ nur beim Winkel ab der $x$-Achse und nur, wenn sonst alles
+  stimmt; ein getipptes „m“ hinter einer Länge stört nicht. Neue Tests: Bilder über 1500 Nummern je Stufe, kein Text
+  zu einer falschen Antwort enthält die richtige.

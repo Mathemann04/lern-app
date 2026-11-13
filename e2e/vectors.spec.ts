@@ -47,6 +47,7 @@ test('Mathe-Seite zeigt die Kachel „Vektoren", die Seite der Tätigkeit hat Ba
   await expect(page.getByRole('checkbox', { name: 'Rechnen und Länge', exact: true })).toBeChecked()
   await expect(page.getByRole('checkbox', { name: 'Skalarprodukt und Winkel', exact: true })).toBeChecked()
   await expect(page.getByRole('checkbox', { name: 'Projektion und Zerlegung', exact: true })).toBeChecked()
+  await expect(page.getByRole('checkbox', { name: 'Kräfte', exact: true })).toBeChecked()
   await expect(page.getByTestId('example').locator('.katex').first()).toBeVisible()
   await expectCleanPage(page, 'Tätigkeit Vektoren')
   expect(errors).toEqual([])
@@ -290,5 +291,37 @@ test('Frei: Schatten als Spalte, Projektion auf den falschen Vektor wird erkannt
   await page.getByRole('button', { name: 'Prüfen' }).click()
   await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
   await expectCleanPage(page, 'Projektion frei')
+  expect(errors).toEqual([])
+})
+
+// M7 Schritt 3b: Kräfte
+test('Kräfte: jede Stufe lässt sich lösen, Bild zum Ergebnis, Lernkarte', async ({ page }) => {
+  const errors = collectErrors(page)
+  for (const level of [1, 2, 3, 4, 5]) {
+    await page.goto(`./#/ueben/vektoren/kraefte.${level}-${40 + level}`)
+    await solveWholeTask(page)
+    await expect(page.getByTestId('result').getByTestId('vector-figure')).toBeVisible()
+    await expectCleanPage(page, `Kräfte Stufe ${level}`)
+  }
+  await page.goto('./#/karten/vektoren/vec-kraft')
+  await expect(page.getByRole('heading', { name: 'Kraft zerlegen und zusammensetzen' })).toBeVisible()
+  await expect(page.getByTestId('vector-figure').first()).toBeVisible()
+  await expectCleanPage(page, 'Lernkarte Kräfte')
+  expect(errors).toEqual([])
+})
+
+test('Frei: Komponenten mit Einheit N, Sinus und Kosinus vertauscht wird erkannt', async ({ page }) => {
+  const errors = collectErrors(page)
+  // kraefte.1-10: F_S = 50 N, β = 30° zur y-Achse; F_Sx = 25 N, F_Sy = 25√3 N; vertauscht: F_Sy = 25 N
+  await page.goto('./#/frei/vektoren/kraefte.1-10')
+  await expect(page.getByText('N', { exact: true }).first()).toBeVisible()
+  await typeInto(page, 'Dein Ergebnis von Teil 1', '25')
+  await typeInto(page, 'Dein Ergebnis von Teil 2', '25')
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Typischer Fehler: Sinus und Kosinus vertauscht.')).toBeVisible()
+  await typeInto(page, 'Dein Ergebnis von Teil 2', '25sqrt3')
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
+  await expectCleanPage(page, 'Kräfte frei')
   expect(errors).toEqual([])
 })

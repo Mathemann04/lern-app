@@ -46,20 +46,21 @@ export const REARRANGE_BLOCKS: readonly Block[] = [
 ]
 
 // Vektoren (M7, docs/PLAN-M7.md): Schritt 1 bringt „Rechnen und Länge“, Schritt 2 „Skalarprodukt und Winkel“, Schritt 3a
-// „Projektion und Zerlegung“; die übrigen Bausteine folgen in den Schritten 3b bis 5.
+// „Projektion und Zerlegung“, Schritt 3b „Kräfte“; die übrigen Bausteine folgen in den Schritten 4 und 5.
 export const VECTOR_BLOCKS: readonly Block[] = [
   { id: 'rechnen', title: 'Rechnen und Länge', note: 'Summe, Vielfache, Verbindungsvektor, Mittelpunkt, Länge, Einheitsvektor', group: 'vektor-grundlagen' },
   { id: 'skalar', title: 'Skalarprodukt und Winkel', note: 'senkrecht, spitz, stumpf, Winkel, Länge aus Winkel', group: 'vektor-grundlagen' },
   { id: 'projektion', title: 'Projektion und Zerlegung', note: 'Schatten, parallel und senkrecht zerlegen, Lotfußpunkt, Abstand', group: 'vektor-grundlagen' },
+  { id: 'kraefte', title: 'Kräfte', note: 'Betrag und Winkel, Resultierende, schiefe Ebene, Arbeit, Drehmoment, Seilkräfte', group: 'vektor-grundlagen' },
 ]
 
 // Spielbare Mengen von Bausteinen je Stufe (wie REARRANGE_PLAYABLE_COMBOS)
 export const VECTOR_PLAYABLE_COMBOS: Readonly<Record<1 | 2 | 3 | 4 | 5, readonly string[]>> = {
-  1: ['rechnen', 'skalar', 'projektion'],
-  2: ['rechnen', 'skalar', 'projektion'],
-  3: ['rechnen', 'skalar', 'projektion'],
-  4: ['rechnen', 'skalar', 'projektion'],
-  5: ['rechnen', 'skalar', 'projektion'],
+  1: ['rechnen', 'skalar', 'projektion', 'kraefte'],
+  2: ['rechnen', 'skalar', 'projektion', 'kraefte'],
+  3: ['rechnen', 'skalar', 'projektion', 'kraefte'],
+  4: ['rechnen', 'skalar', 'projektion', 'kraefte'],
+  5: ['rechnen', 'skalar', 'projektion', 'kraefte'],
 }
 
 // Feste Nummer je Baustein für Aufgabennummern mit Baustein wie „exp.1-4711" (M6 Schritt 4, taskNumber.ts). Gilt für alle
@@ -95,4 +96,6 @@ export const BLOCK_CODES: Readonly<Record<string, number>> = {
   skalar: 22,
   // Tätigkeit „Vektoren“ (M7 Schritt 3a): Projektion und Zerlegung („projektion.1-4711“)
   projektion: 23,
+  // Tätigkeit „Vektoren“ (M7 Schritt 3b): Kräfte („kraefte.1-4711“)
+  kraefte: 24,
 }

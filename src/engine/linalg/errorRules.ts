@@ -550,6 +550,241 @@ export const VECTOR_ERROR_RULES: readonly VectorErrorRule[] = [
       short: String.raw`$k_b$ vor $\vec b$, $k_c$ vor $\vec c$.`,
     },
   },
+  // Kräfte (M7 Schritt 3b)
+  {
+    id: 'vec-force-sin-cos',
+    name: 'Sinus und Kosinus vertauscht',
+    wrongFormula: String.raw`F_x = F \sin\alpha`,
+    why: {
+      detailed: String.raw`Welche Winkelfunktion zu welcher Komponente gehört, hängt davon ab, **wo der Winkel gemessen wird**. Wird $\alpha$ ab der $x$-Achse gemessen, liegt $F_x$ am Winkel an (Ankathete): $F_x = F\cos\alpha$, $F_y = F\sin\alpha$. Wird der Winkel ab der $y$-Achse gemessen, ist es genau andersherum. Zeichne das rechtwinklige Dreieck aus $F_x$, $F_y$ und $\vec F$ und schau, welche Seite am Winkel anliegt.`,
+      short: String.raw`Ankathete am Winkel: mit $\cos$; Gegenkathete: mit $\sin$.`,
+    },
+  },
+  {
+    id: 'vec-force-sign',
+    name: 'Vorzeichen nicht aus dem Quadranten',
+    wrongFormula: String.raw`\vec F \text{ zeigt nach links, aber } F_x > 0`,
+    why: {
+      detailed: String.raw`Eine Komponente ist negativ, wenn der Pfeil entgegen der Achse zeigt: nach links heißt $F_x < 0$, nach unten heißt $F_y < 0$. Mit dem Winkel ab der positiven $x$-Achse liefern $\cos\alpha$ und $\sin\alpha$ das Vorzeichen von selbst, z. B. $\cos 120^\circ = -\cos 60^\circ$. Prüfe am Bild, in welchen Quadranten der Pfeil zeigt.`,
+      short: String.raw`Zeigt der Pfeil nach links oder unten, ist die Komponente negativ.`,
+    },
+  },
+  {
+    id: 'vec-force-no-magnitude',
+    name: 'Betrag der Kraft vergessen',
+    wrongFormula: String.raw`F_x = \cos\alpha`,
+    why: {
+      detailed: String.raw`$\cos\alpha$ und $\sin\alpha$ sind nur die Anteile eines Pfeils der Länge 1. Die Komponenten einer Kraft bekommst du, wenn du diese Anteile **mit dem Betrag** $F$ malnimmst: $F_x = F\cos\alpha$, $F_y = F\sin\alpha$.`,
+      short: String.raw`$F_x = F\cos\alpha$: mit dem Betrag malnehmen.`,
+    },
+  },
+  {
+    id: 'vec-force-tan-inverted',
+    name: 'Bruch im Tangens umgedreht',
+    wrongFormula: String.raw`\tan\alpha' = \frac{\lvert F_x \rvert}{\lvert F_y \rvert}`,
+    why: {
+      detailed: String.raw`Der Tangens ist **Gegenkathete durch Ankathete**. Für den Winkel an der $x$-Achse liegt $F_x$ an und $F_y$ gegenüber: $\tan\alpha' = \frac{\lvert F_y \rvert}{\lvert F_x \rvert}$. Mit dem umgedrehten Bruch bekommst du den Winkel zur $y$-Achse, also den Rest zu $90^\circ$.`,
+      short: String.raw`$\tan\alpha' = \frac{\lvert F_y \rvert}{\lvert F_x \rvert}$: Gegenkathete durch Ankathete.`,
+    },
+  },
+  {
+    id: 'vec-force-arctan',
+    name: 'Wert des Taschenrechners ungeprüft übernommen',
+    wrongFormula: String.raw`\alpha = \arctan\frac{F_y}{F_x}`,
+    why: {
+      detailed: String.raw`Der $\arctan$ liefert nur Winkel zwischen $-90^\circ$ und $90^\circ$, also nur Richtungen nach rechts. Zeigt die Kraft nach links ($F_x < 0$), liegt der Winkel im 2. oder 3. Quadranten. Darum rechnest du erst den spitzen Hilfswinkel $\alpha'$ mit Beträgen aus und legst ihn dann in den richtigen Quadranten.`,
+      short: String.raw`$\arctan$ kennt nur rechts; bei $F_x < 0$ in den richtigen Quadranten legen.`,
+    },
+  },
+  {
+    id: 'vec-force-quadrant',
+    name: 'Falscher Quadrant',
+    wrongFormula: String.raw`F_x < 0,\; F_y < 0:\; \alpha = 180^\circ - \alpha'`,
+    why: {
+      detailed: String.raw`Die Vorzeichen der Komponenten sagen, wohin der Pfeil zeigt: rechts oben $\alpha = \alpha'$, links oben $\alpha = 180^\circ - \alpha'$, links unten $\alpha = 180^\circ + \alpha'$, rechts unten $\alpha = 360^\circ - \alpha'$. Gemessen wird immer gegen den Uhrzeigersinn ab der positiven $x$-Achse.`,
+      short: String.raw`Vorzeichen von $F_x$ und $F_y$ bestimmen den Quadranten.`,
+    },
+  },
+  {
+    id: 'vec-force-add-magnitudes',
+    name: 'Beträge addiert statt Vektoren',
+    wrongFormula: String.raw`F_R = F_1 + F_2`,
+    why: {
+      detailed: String.raw`Kräfte sind Vektoren: Sie heben sich teilweise auf, wenn sie in verschiedene Richtungen zeigen. Deshalb addierst du die **Komponenten** (Pfeile aneinanderhängen) und rechnest erst danach den Betrag aus. Die Summe der Beträge stimmt nur, wenn alle Kräfte in dieselbe Richtung zeigen.`,
+      short: String.raw`Erst die Vektoren addieren, dann den Betrag bilden.`,
+    },
+  },
+  {
+    id: 'vec-force-subtracted',
+    name: 'Abgezogen statt addiert',
+    wrongFormula: String.raw`\vec F_R = \vec F_1 - \vec F_2`,
+    why: {
+      detailed: String.raw`Alle Kräfte wirken gleichzeitig, also werden **alle addiert**, Eintrag für Eintrag. Die Richtung steckt schon in den Vorzeichen der Einträge; ein zusätzliches Minus dreht eine Kraft um.`,
+      short: String.raw`Kräfte (und Momente) werden addiert; die Richtung steckt in den Vorzeichen.`,
+    },
+  },
+  {
+    id: 'vec-force-equilibrium-sign',
+    name: 'Gegenkraft mit falschem Vorzeichen',
+    wrongFormula: String.raw`\vec F_3 = \vec F_1 + \vec F_2`,
+    why: {
+      detailed: String.raw`Im Gleichgewicht ist die Summe **aller** Kräfte der Nullvektor: $\vec F_1 + \vec F_2 + \vec F_3 = \vec 0$. Die gesuchte Kraft muss die anderen also aufheben und zeigt genau entgegen ihrer Summe: $\vec F_3 = -(\vec F_1 + \vec F_2)$. Genauso bei Momenten: Das gesuchte Moment hebt die anderen auf.`,
+      short: String.raw`Gleichgewicht: Summe aller Kräfte $= \vec 0$, die Gegenkraft zeigt entgegen.`,
+    },
+  },
+  {
+    id: 'vec-force-whole',
+    name: 'Ganze Kraft statt Anteil',
+    wrongFormula: String.raw`F_H = F_G`,
+    why: {
+      detailed: String.raw`Schräg zur Richtung, um die es geht, wirkt nur ein **Anteil** einer Kraft: der Teil längs dieser Richtung, mit $\sin$ oder $\cos$ des Winkels. Die ganze Kraft zählt nur, wenn sie genau in diese Richtung zeigt.`,
+      short: String.raw`Nur der Anteil in der betrachteten Richtung zählt.`,
+    },
+  },
+  {
+    id: 'vec-force-solve',
+    name: 'Falsch umgestellt',
+    wrongFormula: String.raw`F\cos\alpha = W:\; F = W \cdot \cos\alpha`,
+    why: {
+      detailed: String.raw`Steht die gesuchte Größe mit einem Faktor da, teilst du **beide Seiten** durch diesen Faktor. Probe: Setz deinen Wert in die Gleichung ein; beide Seiten müssen gleich sein.`,
+      short: String.raw`Durch den Faktor teilen, nicht malnehmen; Probe durch Einsetzen.`,
+    },
+  },
+  {
+    id: 'vec-incline-sin-cos',
+    name: 'Sinus und Kosinus am Hang vertauscht',
+    wrongFormula: String.raw`F_H = F_G \cos\alpha`,
+    why: {
+      detailed: String.raw`Der Neigungswinkel $\alpha$ der Ebene steht im Kräftedreieck noch einmal, und zwar zwischen $\vec F_G$ und der Normalkraft. Deshalb liegt die Normalkraft am Winkel an: $F_N = F_G\cos\alpha$, und die Hangabtriebskraft liegt gegenüber: $F_H = F_G\sin\alpha$. Probe: Bei einer flachen Ebene ($\alpha \to 0^\circ$) muss die Hangabtriebskraft fast verschwinden.`,
+      short: String.raw`$F_H = F_G\sin\alpha$, $F_N = F_G\cos\alpha$; Probe mit flacher Ebene.`,
+    },
+  },
+  {
+    id: 'vec-incline-hold-along',
+    name: 'Waagrechte Haltekraft wie die Hangabtriebskraft',
+    wrongFormula: String.raw`F = F_G\sin\alpha`,
+    why: {
+      detailed: String.raw`Eine **waagrechte** Kraft zeigt nicht längs der Ebene. Längs der Ebene wirkt nur ihr Anteil $F\cos\alpha$, und der muss die Hangabtriebskraft $F_G\sin\alpha$ aufheben: $F\cos\alpha = F_G\sin\alpha$. Die waagrechte Kraft ist deshalb größer als die Hangabtriebskraft.`,
+      short: String.raw`Längs der Ebene zählt nur $F\cos\alpha$: $F\cos\alpha = F_G\sin\alpha$.`,
+    },
+  },
+  {
+    id: 'vec-incline-normal-only',
+    name: 'Anteil der Haltekraft in der Normalkraft vergessen',
+    wrongFormula: String.raw`F_N = F_G\cos\alpha`,
+    why: {
+      detailed: String.raw`Die Ebene drückt so stark zurück, wie **alle** Kräfte senkrecht auf sie drücken. Eine schräge Haltekraft drückt mit ihrem Anteil senkrecht zur Ebene mit: Zur Normalkraft kommt deren Anteil dazu. Rechne das Gleichgewicht senkrecht zur Ebene mit allen Kräften.`,
+      short: String.raw`Senkrecht zur Ebene: alle Kräfte mitzählen.`,
+    },
+  },
+  {
+    id: 'vec-incline-normal-dir',
+    name: 'Normalenrichtung falsch',
+    wrongFormula: String.raw`\vec n \parallel \vec d`,
+    why: {
+      detailed: String.raw`Die Normalkraft steht **senkrecht** auf der Ebene und zeigt **von der Ebene weg** zum Körper. Senkrecht auf $\vec d = \begin{pmatrix} d_1 \\ d_2 \end{pmatrix}$ steht $\begin{pmatrix} -d_2 \\ d_1 \end{pmatrix}$ oder sein Gegenstück; welches nach oben vom Hang weg zeigt, siehst du an der $y$-Komponente. Probe: $\vec n \cdot \vec d = 0$ und $\lvert \vec n \rvert = 1$.`,
+      short: String.raw`$\vec n \perp \vec d$, Länge 1, vom Hang weg.`,
+    },
+  },
+  {
+    id: 'vec-work-no-cos',
+    name: 'Winkel zwischen Kraft und Weg vergessen',
+    wrongFormula: String.raw`W = \lvert \vec F \rvert \, \lvert \vec s \rvert`,
+    why: {
+      detailed: String.raw`Arbeit verrichtet nur der Anteil der Kraft **in Richtung des Weges**: $W = \vec F \cdot \vec s = \lvert \vec F \rvert \, \lvert \vec s \rvert \cos\varphi$. Das Produkt der Beträge stimmt nur, wenn Kraft und Weg in dieselbe Richtung zeigen; steht die Kraft senkrecht zum Weg, ist die Arbeit $0$.`,
+      short: String.raw`$W = \lvert \vec F \rvert \, \lvert \vec s \rvert \cos\varphi$: nur der Anteil längs des Weges zählt.`,
+    },
+  },
+  {
+    id: 'vec-work-sign',
+    name: 'Vorzeichen der Arbeit falsch gedeutet',
+    wrongFormula: String.raw`W < 0:\; \text{die Kraft hilft}`,
+    why: {
+      detailed: String.raw`Ist $W > 0$, zeigt die Kraft eher mit der Bewegung (spitzer Winkel), sie hilft. Ist $W < 0$, zeigt sie eher gegen die Bewegung (stumpfer Winkel), sie bremst. Bei $W = 0$ steht sie senkrecht zum Weg und verrichtet keine Arbeit.`,
+      short: String.raw`$W > 0$ hilft, $W < 0$ bremst, $W = 0$ senkrecht.`,
+    },
+  },
+  {
+    id: 'vec-torque-order',
+    name: 'Reihenfolge im Moment vertauscht',
+    wrongFormula: String.raw`M = y\,F_x - x\,F_y`,
+    why: {
+      detailed: String.raw`Das Moment um einen Punkt ist $M = r_x F_y - r_y F_x$ (wie $\vec r \times \vec F$, Hebel zuerst). Vertauschst du die Reihenfolge, kehrt sich das Vorzeichen um, und damit der Drehsinn. Positiv heißt gegen den Uhrzeigersinn.`,
+      short: String.raw`$M = r_x F_y - r_y F_x$: Hebel zuerst.`,
+    },
+  },
+  {
+    id: 'vec-torque-plus',
+    name: 'Plus statt Minus im Moment',
+    wrongFormula: String.raw`M = r_x F_y + r_y F_x`,
+    why: {
+      detailed: String.raw`Im Moment steht ein **Minus**: $M = r_x F_y - r_y F_x$. Anschaulich: $F_y$ mit Hebel $r_x$ dreht gegen den Uhrzeigersinn, $F_x$ mit Hebel $r_y$ dreht im Uhrzeigersinn. Die beiden Drehungen arbeiten gegeneinander.`,
+      short: String.raw`$M = r_x F_y - r_y F_x$ mit Minus.`,
+    },
+  },
+  {
+    id: 'vec-torque-dot',
+    name: 'Skalarprodukt statt Moment',
+    wrongFormula: String.raw`M = r_x F_x + r_y F_y`,
+    why: {
+      detailed: String.raw`Das Skalarprodukt misst, wie weit $\vec F$ **längs** des Hebels zeigt, und genau dieser Anteil dreht nicht. Fürs Moment zählt der Anteil **quer** zum Hebel: Du nimmst die Einträge über Kreuz, $M = r_x F_y - r_y F_x$.`,
+      short: String.raw`Moment: über Kreuz, $r_x F_y - r_y F_x$.`,
+    },
+  },
+  {
+    id: 'vec-torque-no-reference',
+    name: 'Hebel ab dem Ursprung statt ab dem Bezugspunkt',
+    wrongFormula: String.raw`M_A = x\,F_y - y\,F_x`,
+    why: {
+      detailed: String.raw`Der Hebel führt vom **Bezugspunkt** $A$ zum Angriffspunkt $P$ der Kraft: $\vec r = \overrightarrow{AP} = P - A$. Die Koordinaten von $P$ allein gehören zum Moment um den Ursprung, nicht um $A$: $M_A = (x - x_A)F_y - (y - y_A)F_x$.`,
+      short: String.raw`Hebel $\vec r = P - A$, vom Bezugspunkt zum Angriffspunkt.`,
+    },
+  },
+  {
+    id: 'vec-torque-lever',
+    name: 'Hebelarm schräg gemessen',
+    wrongFormula: String.raw`M_A = F \cdot \lvert \overrightarrow{AP} \rvert`,
+    why: {
+      detailed: String.raw`Der Hebelarm ist der **senkrechte** Abstand der Wirkungslinie vom Bezugspunkt, nicht die schräge Strecke $\lvert \overrightarrow{AP} \rvert$. Bei einer senkrechten Kraft zählt nur der waagrechte Abstand, bei einer waagrechten nur der senkrechte. Sicher geht es mit $M_A = r_x F_y - r_y F_x$.`,
+      short: String.raw`Hebelarm senkrecht zur Kraft messen.`,
+    },
+  },
+  {
+    id: 'vec-torque-sense',
+    name: 'Drehsinn falsch abgelesen',
+    wrongFormula: String.raw`M < 0:\; \text{gegen den Uhrzeigersinn}`,
+    why: {
+      detailed: String.raw`Vereinbarung wie in der Mechanik: Ein **positives** Moment dreht **gegen** den Uhrzeigersinn, ein negatives im Uhrzeigersinn. Ist das Moment $0$, dreht die Kraft nicht um diesen Punkt (die Wirkungslinie geht durch ihn).`,
+      short: String.raw`$M > 0$: gegen den Uhrzeigersinn; $M < 0$: im Uhrzeigersinn.`,
+    },
+  },
+  {
+    id: 'vec-knot-not-normalized',
+    name: 'Richtung nicht auf Länge 1 gebracht',
+    wrongFormula: String.raw`\vec S = S \cdot \overrightarrow{KA}`,
+    why: {
+      detailed: String.raw`Eine Kraft mit Betrag $S$ in Richtung $\overrightarrow{KA}$ ist $S$ mal der **Einheitsvektor**: $\vec S = S \, \frac{\overrightarrow{KA}}{\lvert \overrightarrow{KA} \rvert}$. Ohne das Teilen durch die Länge wäre der Betrag $S \cdot \lvert \overrightarrow{KA} \rvert$ statt $S$.`,
+      short: String.raw`Richtung durch ihre Länge teilen: Einheitsvektor.`,
+    },
+  },
+  {
+    id: 'vec-knot-wrong-component',
+    name: 'Falsche Komponente genommen',
+    wrongFormula: String.raw`S_A \, e_{Ax} = F_G`,
+    why: {
+      detailed: String.raw`Eine senkrechte Last hält nur der **senkrechte** Anteil einer Seilkraft, eine waagrechte Kraft nur der **waagrechte**. Schreib das Gleichgewicht getrennt für $x$ und $y$ auf und setz in jede Gleichung nur die Einträge dieser Richtung ein.`,
+      short: String.raw`$x$-Gleichung mit $x$-Einträgen, $y$-Gleichung mit $y$-Einträgen.`,
+    },
+  },
+  {
+    id: 'vec-knot-swapped',
+    name: 'Seilkräfte vertauscht',
+    wrongFormula: String.raw`S_A \leftrightarrow S_B`,
+    why: {
+      detailed: String.raw`Jede Seilkraft gehört zu ihrem Seil. Das steilere Seil trägt mehr von der Last, das flachere weniger. Probe: Setz beide Werte in die $x$- und die $y$-Gleichung ein; beide müssen aufgehen.`,
+      short: String.raw`Das steilere Seil trägt mehr; Probe in beiden Gleichungen.`,
+    },
+  },
 ]
 
 export const vectorErrorRule = (id: string): VectorErrorRule => {

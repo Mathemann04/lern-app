@@ -10,10 +10,10 @@ import { buildVectorTask } from './vectorTasks.ts'
 // Einträge werden einzeln markiert.
 
 // alle Bausteine: Nummern 1 bis 999 „Rechnen und Länge", ab 1000 „Skalarprodukt und Winkel" (Schritt 2), ab 2000
-// „Projektion und Zerlegung" (Schritt 3a)
-const ref = (level: Level, s: number) =>
-  s < 1000 ? { level, seed: blockSeed('rechnen', s) } : s < 2000 ? { level, seed: blockSeed('skalar', s - 999) } : { level, seed: blockSeed('projektion', s - 1999) }
-const SEEDS = (n: number) => [...Array.from({ length: n }, (_, i) => i + 1), ...Array.from({ length: n }, (_, i) => 1000 + i), ...Array.from({ length: n }, (_, i) => 2000 + i)]
+// „Projektion und Zerlegung" (Schritt 3a), ab 3000 „Kräfte" (Schritt 3b)
+const BLOCKS = ['rechnen', 'skalar', 'projektion', 'kraefte'] as const
+const ref = (level: Level, s: number) => ({ level, seed: blockSeed(BLOCKS[Math.floor(s / 1000)], (s % 1000) + (s < 1000 ? 0 : 1)) })
+const SEEDS = (n: number) => BLOCKS.flatMap((_, b) => Array.from({ length: n }, (_, i) => b * 1000 + i + (b === 0 ? 1 : 0)))
 const close = (a: number, b: number) => Math.abs(a - b) < 1e-9 * Math.max(1, Math.abs(a), Math.abs(b))
 
 // Zahl als LaTeX, wie sie jemand eintippt: ganze Zahl, Bruch oder Kommazahl mit sechs Stellen (nur für falsche Werte)
@@ -51,7 +51,7 @@ function exactEntries(resultLatex: string): string[][] {
       return [prefix ? entries.map((e) => `${prefix}\\cdot ${e}`) : entries]
     }
     if (rhs.startsWith('\\pm')) return [[`-${rhs.slice(3).trim()}`, rhs.slice(3).trim()]]
-    return [[rhs.replace('^\\circ', '')]]
+    return [[rhs.replace('^\\circ', '').replace(/\\,\\text\{\w+\}$/, '')]]
   })
 }
 
@@ -170,6 +170,27 @@ describe('prüfen', () => {
     expect(checkVectorEntries(ineq, [['>', '\\frac{3}{2}']]).kind).toBe('correct')
     expect(checkVectorEntries(ineq, [['<', '\\frac{3}{2}']]).marks).toEqual([[true, false]])
     expect(checkVectorEntries(ineq, [['>', '\\frac{6}{4}']]).kind).toBe('unfinished')
+  })
+
+  it('Einheiten hinter dem Kästchen, Winkel außerhalb von 0° bis 360° (Schritt 3b)', () => {
+    expect(readResult('F_x = -5\\sqrt{3}\\,\\text{N},\\; \\alpha = 330^\\circ')).toEqual([
+      { shape: 'number', label: 'F_x =', values: [-5 * Math.sqrt(3)], suffix: '\\text{N}' },
+      { shape: 'number', label: '\\alpha =', values: [330], suffix: '^\\circ' },
+    ])
+    const check = { parts: readResult('F = 14\\,\\text{N},\\; \\alpha = 330^\\circ')!, wrongs: [[], []] }
+    expect(checkVectorEntries(check, [['14'], ['330']]).kind).toBe('correct')
+    expect(checkVectorEntries(check, [['14\\,\\text{N}'], ['330°']]).kind).toBe('correct')
+    expect(checkVectorEntries(check, [['14N'], ['330']]).kind).toBe('correct')
+    const turned = checkVectorEntries(check, [['14'], ['-30']])
+    expect(turned.kind).toBe('unfinished')
+    expect(turned.marks).toEqual([[false], [true]])
+    expect(checkVectorEntries(check, [['14'], ['30']]).kind).toBe('wrong')
+    // nur, wenn sonst alles stimmt, und nur beim Winkel ab der x-Achse
+    expect(checkVectorEntries(check, [['-15'], ['-30']]).kind).toBe('wrong')
+    const between = { parts: readResult('\\varphi = 60^\\circ')!, wrongs: [[]] }
+    expect(checkVectorEntries(between, [['420']]).kind).toBe('wrong')
+    const path = { parts: readResult('s = 5\\,\\text{m}')!, wrongs: [[]] }
+    expect(checkVectorEntries(path, [['5m']]).kind).toBe('correct')
   })
 
   it('leer, unlesbar, gerundet, nicht fertig', () => {
