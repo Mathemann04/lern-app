@@ -79,6 +79,54 @@ test('Matrizen: jede Stufe lässt sich lösen, Bild bei Matrix mal Vektor, Lernk
   expect(errors).toEqual([])
 })
 
+// M7 Schritt 8b: Falk-Schema als Bild. Vor der Antwort leer mit „?“ und ohne Knopf, danach „Abspielen“: Zeile und Spalte
+// leuchten auf, die Rechnung wächst, der Eintrag erscheint; „Alles zeigen“ springt ans Ende. Auch auf der Lernkarte.
+async function solveStep(page: Page) {
+  const count = await answers(page).count()
+  for (let i = 0; i < count; i++) {
+    const button = answers(page).nth(i)
+    if (await button.isDisabled()) continue
+    await button.click()
+    await correctFeedback(page).or(wrongFeedback(page)).waitFor()
+    if (await correctFeedback(page).isVisible()) return
+  }
+}
+
+test('Falk-Schema: erst nach der Antwort abspielen, Eintrag für Eintrag, auch auf der Lernkarte', async ({ page }) => {
+  const errors = collectErrors(page)
+  // matrix.3-4: AB mit zwei 3 × 3-Matrizen, zuerst ein Eintrag, dann das ganze Produkt
+  await page.goto('./#/ueben/matrizen/matrix.3-4')
+  const scheme = page.getByTestId('falk-scheme')
+  await expect(scheme).toBeVisible()
+  await expect(scheme.locator('[data-falk="product"] .katex-html').filter({ hasText: '?' })).toHaveCount(1)
+  await expect(scheme.getByRole('button', { name: 'Abspielen' })).toHaveCount(0)
+  await solveStep(page)
+  await scheme.getByRole('button', { name: 'Abspielen' }).click()
+  await expect(scheme.getByRole('button', { name: 'Alles zeigen' })).toBeVisible()
+  await expect(scheme.locator('.bg-accent-100').first()).toBeVisible()
+  await expect(scheme.getByRole('button', { name: 'Abspielen' })).toBeVisible({ timeout: 8000 })
+  await expect(scheme.locator('figcaption .katex').first()).toContainText('=')
+  await expectCleanPage(page, 'Falk-Schema Eintrag')
+  await page.getByRole('button', { name: 'Weiter' }).click()
+  await expect(page.getByTestId('falk-scheme')).toBeVisible()
+  await solveStep(page)
+  await page.getByTestId('falk-scheme').getByRole('button', { name: 'Abspielen' }).click()
+  await page.getByTestId('falk-scheme').getByRole('button', { name: 'Alles zeigen' }).click()
+  await expect(page.getByTestId('falk-scheme').locator('[data-falk="product"] .katex')).toHaveCount(9)
+  await expectCleanPage(page, 'Falk-Schema Produkt')
+  // Bewegung reduzieren: Der Knopf zeigt gleich das Ende
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('./#/karten/matrizen/mat-produkt')
+  const onCard = page.getByTestId('falk-scheme').first()
+  await expect(onCard).toBeVisible()
+  await onCard.getByRole('button', { name: 'Abspielen' }).click()
+  await expect(onCard.getByRole('button', { name: 'Abspielen' })).toBeVisible()
+  await expect(onCard.getByRole('button', { name: 'Alles zeigen' })).toHaveCount(0)
+  await expect(onCard.locator('figcaption .katex').first()).toBeVisible()
+  await expectCleanPage(page, 'Lernkarte mit Falk-Schema')
+  expect(errors).toEqual([])
+})
+
 test('Frei: Matrix in Kästchen, falscher Eintrag markiert, typischer Fehler beim Transponieren erkannt', async ({ page }) => {
   const errors = collectErrors(page)
   // matrix.1-1: P = (−3 −2 −2 | 5 0 −2), Pᵀ = (−3 5 | −2 0 | −2 −2)

@@ -12,7 +12,7 @@ export const DET_CARD_LIST: readonly Card[] = [
     level: 1,
     rules: [],
     formulas: [String.raw`\det\begin{pmatrix} a & b \\ c & d \end{pmatrix} = \begin{vmatrix} a & b \\ c & d \end{vmatrix} = ad - bc`, String.raw`F = \lvert\det A\rvert`],
-    memo: 'Bei einer $2 \\times 2$-Matrix ist die Determinante **Hauptdiagonale minus Nebendiagonale**: oben links mal unten rechts, minus oben rechts mal unten links. Statt $\\det A$ schreibt man auch die Matrix zwischen senkrechte Striche.',
+    memo: 'Bei einer $2 \\times 2$-Matrix ist die Determinante Hauptdiagonale minus Nebendiagonale: oben links mal unten rechts, minus oben rechts mal unten links. Statt $\\det A$ schreibt man auch die Matrix zwischen senkrechte Striche.',
     note: 'Im Bild: Die Spalten von $A$ spannen ein Parallelogramm auf; seine Fläche ist $\\lvert\\det A\\rvert$. $A$ macht aus dem Einheitsquadrat (Fläche $1$) genau dieses Parallelogramm. Ist $\\det A$ negativ, kehrt sich die Orientierung um; ist sie $0$, liegen die Spalten auf einer Geraden.',
     when: 'Bei kleinen Gleichungssystemen, bei der Frage nach linear unabhängigen Vektoren in der Ebene, als Unterdeterminante beim Entwickeln.',
     examples: [
@@ -31,8 +31,8 @@ export const DET_CARD_LIST: readonly Card[] = [
       String.raw`\det A = a_{11}a_{22}a_{33} + a_{12}a_{23}a_{31} + a_{13}a_{21}a_{32} - a_{13}a_{22}a_{31} - a_{11}a_{23}a_{32} - a_{12}a_{21}a_{33}`,
       String.raw`V_{\text{Spat}} = \lvert\det A\rvert`,
     ],
-    memo: 'Für $3 \\times 3$: Schreib die ersten beiden Spalten noch einmal rechts daneben. Die drei Diagonalen nach **rechts unten** zählen mit Plus, die drei nach **links unten** mit Minus.',
-    note: 'Sarrus gilt **nur** für $3 \\times 3$. Die Spalten von $A$ spannen einen Spat auf, sein Volumen ist $\\lvert\\det A\\rvert$ (wie beim Spatprodukt: $\\det A = (\\vec a_1 \\times \\vec a_2) \\cdot \\vec a_3$).',
+    memo: 'Für $3 \\times 3$: Schreib die ersten beiden Spalten noch einmal rechts daneben. Die drei Diagonalen nach rechts unten zählen mit Plus, die drei nach links unten mit Minus.',
+    note: 'Sarrus gilt nur für $3 \\times 3$. Die Spalten von $A$ spannen einen Spat auf, sein Volumen ist $\\lvert\\det A\\rvert$ (wie beim Spatprodukt: $\\det A = (\\vec a_1 \\times \\vec a_2) \\cdot \\vec a_3$).',
     when: 'Bei jeder $3 \\times 3$-Determinante, auch als letzter Schritt nach dem Entwickeln einer größeren Matrix.',
     examples: [
       { vector: { kind: 'detSarrus', level: 1, seed: 1 } },
@@ -47,8 +47,8 @@ export const DET_CARD_LIST: readonly Card[] = [
     level: 2,
     rules: [],
     formulas: [String.raw`\det A = \sum_{j=1}^{n} (-1)^{i+j}\, a_{ij} \det A_{ij}`, String.raw`\begin{pmatrix} + & - & + & - \\ - & + & - & + \\ + & - & + & - \\ - & + & - & + \end{pmatrix}`],
-    memo: 'Wähle eine Zeile (oder Spalte) mit **möglichst vielen Nullen**. Jeder ihrer Einträge $a_{ij}$ wird mit der Unterdeterminante $\\det A_{ij}$ malgenommen (Zeile $i$ und Spalte $j$ gestrichen), dazu das Vorzeichen aus dem **Schachbrett**: oben links $+$, dann abwechselnd.',
-    note: 'Einträge $0$ fallen ganz weg. Eine $4 \\times 4$-Determinante wird so zu $3 \\times 3$-Determinanten (Sarrus), eine $5 \\times 5$ erst zu $4 \\times 4$. Nur eine **ganze** Nullzeile macht die Determinante sicher $0$.',
+    memo: 'Wähle eine Zeile (oder Spalte) mit möglichst vielen Nullen. Jeder ihrer Einträge $a_{ij}$ wird mit der Unterdeterminante $\\det A_{ij}$ malgenommen (Zeile $i$ und Spalte $j$ gestrichen), dazu das Vorzeichen aus dem Schachbrett: oben links $+$, dann abwechselnd.',
+    note: 'Einträge $0$ fallen ganz weg. Eine $4 \\times 4$-Determinante wird so zu $3 \\times 3$-Determinanten (Sarrus), eine $5 \\times 5$ erst zu $4 \\times 4$. Nur eine ganze Nullzeile macht die Determinante sicher $0$.',
     when: 'Bei $4 \\times 4$ und $5 \\times 5$ in der Klausur, und immer, wenn eine Zeile oder Spalte viele Nullen hat.',
     examples: [
       { vector: { kind: 'detExpand', level: 2, seed: 1 } },
@@ -68,7 +68,7 @@ export const DET_CARD_LIST: readonly Card[] = [
       String.raw`\text{Vielfaches einer anderen Zeile addieren: } \det \text{ bleibt}`,
       String.raw`\det\begin{pmatrix} d_1 & * & * \\ 0 & d_2 & * \\ 0 & 0 & d_3 \end{pmatrix} = d_1 d_2 d_3`,
     ],
-    memo: 'Drei Umformungen, drei Wirkungen: **Tauschen** zweier Zeilen dreht das Vorzeichen, ein **Faktor** in einer Zeile kommt einmal vor die Determinante, und das **Vielfache einer anderen Zeile addieren** ändert nichts. Bei einer **Dreiecksmatrix** ist die Determinante das Produkt der Hauptdiagonale.',
+    memo: 'Drei Umformungen, drei Wirkungen: Tauschen zweier Zeilen dreht das Vorzeichen, ein Faktor in einer Zeile kommt einmal vor die Determinante, und das Vielfache einer anderen Zeile addieren ändert nichts. Bei einer Dreiecksmatrix ist die Determinante das Produkt der Hauptdiagonale.',
     note: 'So rechnest du große Determinanten geschickt: Mit Vielfachen Nullen in einer Spalte erzeugen (Determinante bleibt), dann nach dieser Spalte entwickeln. Für Spalten gilt alles genauso, weil $\\det A^{\\mathsf T} = \\det A$.',
     when: 'Wenn $\\det A$ bekannt ist und nach einer umgeformten Matrix gefragt wird, und zum Vereinfachen vor dem Entwickeln.',
     examples: [
@@ -103,7 +103,7 @@ export const DET_CARD_LIST: readonly Card[] = [
       String.raw`\det(A^{-1}) = \frac{1}{\det A}`,
       String.raw`\det(A^k) = (\det A)^k`,
     ],
-    memo: 'Die Determinante eines **Produkts** ist das Produkt der Determinanten. Daraus folgen die Regeln für Inverse ($\\det A \\cdot \\det(A^{-1}) = \\det E = 1$) und Potenzen. Eine Zahl $\\lambda$ vor einer $n \\times n$-Matrix steckt in jeder der $n$ Zeilen, darum $\\lambda^n$.',
+    memo: 'Die Determinante eines Produkts ist das Produkt der Determinanten. Daraus folgen die Regeln für Inverse ($\\det A \\cdot \\det(A^{-1}) = \\det E = 1$) und Potenzen. Eine Zahl $\\lambda$ vor einer $n \\times n$-Matrix steckt in jeder der $n$ Zeilen, darum $\\lambda^n$.',
     note: 'Für eine Summe gibt es keine solche Regel: $\\det(A + B)$ ist im Allgemeinen nicht $\\det A + \\det B$.',
     when: 'In Klausuraufgaben wie „$\\det A = 3$, berechne $\\det(2A^{\\mathsf T} B^{-1})$“.',
     examples: [
@@ -119,7 +119,7 @@ export const DET_CARD_LIST: readonly Card[] = [
     level: 4,
     rules: [],
     formulas: [String.raw`A \text{ invertierbar} \iff \det A \ne 0`],
-    memo: 'Für eine quadratische Matrix bedeuten diese Aussagen dasselbe: **nicht invertierbar**, Spalten linear abhängig, Zeilen linear abhängig, $A\\vec x = \\vec 0$ hat mehr als eine Lösung, $\\det A = 0$. Steht ein Parameter in $A$, ist $\\det A$ ein Term in ihm; seine Nullstellen sind genau die Sonderfälle.',
+    memo: 'Für eine quadratische Matrix bedeuten diese Aussagen dasselbe: nicht invertierbar, Spalten linear abhängig, Zeilen linear abhängig, $A\\vec x = \\vec 0$ hat mehr als eine Lösung, $\\det A = 0$. Steht ein Parameter in $A$, ist $\\det A$ ein Term in ihm; seine Nullstellen sind genau die Sonderfälle.',
     note: 'Rechne $\\det A$ als Term aus (Sarrus oder Entwickeln), setz ihn gleich $0$ und löse. Für alle anderen Werte ist $A$ invertierbar.',
     when: 'In jeder Klausur: Gleichungssysteme und Matrizen mit Parameter, „Für welche $a$ ist $A$ invertierbar?“.',
     examples: [

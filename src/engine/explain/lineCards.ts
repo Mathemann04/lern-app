@@ -12,7 +12,7 @@ export const LINE_CARD_LIST: readonly Card[] = [
     level: 1,
     rules: [],
     formulas: [String.raw`g\colon \vec x = \vec p + t\,\vec v, \quad t \in \mathbb{R}`, String.raw`\text{durch } A \text{ und } B\colon \vec x = \vec a + t\,\overrightarrow{AB}`],
-    memo: 'Eine Gerade braucht einen Startpunkt und eine Richtung. Der **Stützvektor** $\\vec p$ führt vom Ursprung zu einem Punkt der Geraden, der **Richtungsvektor** $\\vec v$ zeigt, wohin sie läuft. Jeder Wert des Parameters $t$ gibt einen Punkt: $t = 0$ den Stützpunkt, $t = 2$ zwei Schritte weiter, $t = -1$ einen Schritt zurück.',
+    memo: 'Eine Gerade braucht einen Startpunkt und eine Richtung. Der Stützvektor $\\vec p$ führt vom Ursprung zu einem Punkt der Geraden, der Richtungsvektor $\\vec v$ zeigt, wohin sie läuft. Jeder Wert des Parameters $t$ gibt einen Punkt: $t = 0$ den Stützpunkt, $t = 2$ zwei Schritte weiter, $t = -1$ einen Schritt zurück.',
     note: 'Dieselbe Gerade hat viele Gleichungen: Jeder Punkt der Geraden taugt als Stützpunkt, jedes Vielfache von $\\vec v$ (außer $\\vec 0$) als Richtung. Ein Schritt $t = 1$ ist so lang wie $\\vec v$; für einen Abstand $L$ brauchst du $t = \\pm\\frac{L}{\\lvert \\vec v \\rvert}$.',
     when: 'In jeder Klausur bei Geraden und Ebenen: Gerade durch zwei Punkte, parallel zu einer anderen, Punkte mit gegebenem Abstand.',
     examples: [
@@ -30,7 +30,7 @@ export const LINE_CARD_LIST: readonly Card[] = [
     level: 1,
     rules: [],
     formulas: [String.raw`P \in g \iff \vec p + t\,\vec v = \vec P \text{ für ein und dasselbe } t`, String.raw`P \in E\colon a x + b y + c z = d \iff a x_P + b y_P + c z_P = d`],
-    memo: 'Liegt ein Punkt auf einer Geraden? Setz ihn für $\\vec x$ ein und löse **jede Zeile** nach $t$ auf. Nur wenn alle Zeilen denselben Wert liefern, liegt er drauf. Bei einer Ebene in Koordinatenform ist es noch einfacher: Koordinaten einsetzen, ausrechnen, mit der rechten Seite vergleichen.',
+    memo: 'Liegt ein Punkt auf einer Geraden? Setz ihn für $\\vec x$ ein und löse jede Zeile nach $t$ auf. Nur wenn alle Zeilen denselben Wert liefern, liegt er drauf. Bei einer Ebene in Koordinatenform ist es noch einfacher: Koordinaten einsetzen, ausrechnen, mit der rechten Seite vergleichen.',
     note: 'Stehen Unbekannte in den Koordinaten, nimmst du die Zeile ohne Unbekannte, um $t$ zu bestimmen, und setzt $t$ in die übrigen Zeilen ein. Drei Punkte liegen auf einer Geraden, wenn der dritte auf der Geraden durch die ersten beiden liegt.',
     when: 'Fast in jeder Aufgabe zu Geraden und Ebenen, auch als Probe nach dem Aufstellen einer Gleichung.',
     examples: [
@@ -66,7 +66,7 @@ export const LINE_CARD_LIST: readonly Card[] = [
     level: 2,
     rules: [],
     formulas: [String.raw`E\colon \vec x = \vec p + r\,\vec u + s\,\vec v, \quad \vec u \nparallel \vec v`, String.raw`\text{durch } A, B, C\colon \vec x = \vec a + r\,\overrightarrow{AB} + s\,\overrightarrow{AC}`],
-    memo: 'Eine Ebene braucht einen Stützpunkt und **zwei** Richtungen, die nicht parallel sind. Durch drei Punkte, die nicht auf einer Geraden liegen: Stützvektor $\\vec a$, Richtungen $\\overrightarrow{AB}$ und $\\overrightarrow{AC}$.',
+    memo: 'Eine Ebene braucht einen Stützpunkt und zwei Richtungen, die nicht parallel sind. Durch drei Punkte, die nicht auf einer Geraden liegen: Stützvektor $\\vec a$, Richtungen $\\overrightarrow{AB}$ und $\\overrightarrow{AC}$.',
     note: 'Aus der Koordinatenform: Löse nach einer Koordinate auf und setz die beiden anderen gleich $r$ und $s$. Dann schreibst du $x$, $y$, $z$ untereinander: die Zahlen ergeben den Stützvektor, die Faktoren vor $r$ und $s$ die Richtungen.',
     when: 'Wenn eine Ebene durch Punkte gegeben ist, und beim Umrechnen zwischen den Formen.',
     examples: [
@@ -82,7 +82,7 @@ export const LINE_CARD_LIST: readonly Card[] = [
     level: 1,
     rules: [],
     formulas: [String.raw`E\colon \vec n \cdot (\vec x - \vec p) = 0`, String.raw`E\colon n_1 x + n_2 y + n_3 z = d, \quad d = \vec n \cdot \vec p`, String.raw`\vec n = \vec u \times \vec v`],
-    memo: 'Der **Normalenvektor** $\\vec n$ steht senkrecht auf der Ebene. Seine Einträge sind die Zahlen vor $x$, $y$ und $z$. Die rechte Seite $d$ bekommst du, wenn du einen Punkt der Ebene einsetzt. Aus der Parameterform: $\\vec n = \\vec u \\times \\vec v$, gern gekürzt.',
+    memo: 'Der Normalenvektor $\\vec n$ steht senkrecht auf der Ebene. Seine Einträge sind die Zahlen vor $x$, $y$ und $z$. Die rechte Seite $d$ bekommst du, wenn du einen Punkt der Ebene einsetzt. Aus der Parameterform: $\\vec n = \\vec u \\times \\vec v$, gern gekürzt.',
     note: 'Auch hier gibt es viele Gleichungen für dieselbe Ebene: Jedes Vielfache der ganzen Gleichung (außer mit $0$) beschreibt sie. Probe: Alle gegebenen Punkte müssen die Gleichung erfüllen.',
     when: 'In fast jeder Klausur: Ebene aufstellen, Punktprobe, Spurpunkte, später Lage, Abstände und Winkel.',
     examples: [
@@ -119,7 +119,7 @@ export const LINE_CARD_LIST: readonly Card[] = [
       String.raw`\vec v \parallel \vec w\colon\; Q \in g \Rightarrow \text{identisch},\; Q \notin g \Rightarrow \text{echt parallel}`,
       String.raw`\vec v \nparallel \vec w\colon\; \vec p + t\,\vec v = \vec q + s\,\vec w \;\Rightarrow\; \text{Lösung: Schnittpunkt, keine: windschief}`,
     ],
-    memo: 'Ein Entscheidungsbaum in zwei Fragen. **Erstens:** Sind die Richtungsvektoren parallel (überall derselbe Faktor $k$)? Dann sind die Geraden identisch, wenn der Stützpunkt der einen auf der anderen liegt, sonst echt parallel. **Zweitens:** Sind sie nicht parallel, setzt du die Geraden gleich, mit **zwei verschiedenen** Parametern. Zwei Gleichungen liefern $t$ und $s$; stimmt auch die dritte, schneiden sich die Geraden, sonst sind sie windschief.',
+    memo: 'Ein Entscheidungsbaum in zwei Fragen. Erstens: Sind die Richtungsvektoren parallel (überall derselbe Faktor $k$)? Dann sind die Geraden identisch, wenn der Stützpunkt der einen auf der anderen liegt, sonst echt parallel. Zweitens: Sind sie nicht parallel, setzt du die Geraden gleich, mit zwei verschiedenen Parametern. Zwei Gleichungen liefern $t$ und $s$; stimmt auch die dritte, schneiden sich die Geraden, sonst sind sie windschief.',
     note: 'In der Ebene gibt es kein windschief: Dort schneiden sich nicht parallele Geraden immer. Den Schnittpunkt bekommst du, wenn du $t$ in $g$ einsetzt; zur Probe muss $s$ in $h$ denselben Punkt liefern. Steht ein Parameter $a$ in einer Geraden, legt die dritte Gleichung ihn fest.',
     when: 'In jeder Klausur: Lage zweier Geraden untersuchen, Schnittpunkt bestimmen, auch mit Parameter.',
     examples: [
@@ -140,7 +140,7 @@ export const LINE_CARD_LIST: readonly Card[] = [
       String.raw`\vec n \cdot (\vec p + t\,\vec v) = d \iff (\vec n \cdot \vec v)\, t + \vec n \cdot \vec p = d`,
       String.raw`\vec n \cdot \vec v \ne 0\colon \text{Durchstoßpunkt}; \quad \vec n \cdot \vec v = 0\colon \text{parallel oder in } E`,
     ],
-    memo: 'Setz die Zeilen der Geraden für $x$, $y$ und $z$ in die Koordinatenform ein, jede Zeile ganz, mit Klammern. Es bleibt eine Gleichung für $t$. **Genau eine Lösung:** Die Gerade durchstößt die Ebene; $t$ einsetzen liefert den Durchstoßpunkt. **Fällt $t$ weg** und die Gleichung stimmt, liegt die Gerade in der Ebene; stimmt sie nicht, ist sie parallel.',
+    memo: 'Setz die Zeilen der Geraden für $x$, $y$ und $z$ in die Koordinatenform ein, jede Zeile ganz, mit Klammern. Es bleibt eine Gleichung für $t$. Genau eine Lösung: Die Gerade durchstößt die Ebene; $t$ einsetzen liefert den Durchstoßpunkt. Fällt $t$ weg und die Gleichung stimmt, liegt die Gerade in der Ebene; stimmt sie nicht, ist sie parallel.',
     note: 'Der Faktor vor $t$ ist $\\vec n \\cdot \\vec v$. Ist er $0$, steht die Richtung senkrecht auf der Normalen, die Gerade läuft also an der Ebene entlang. Liegt die Ebene in Parameterform vor, bestimmst du zuerst die Koordinatenform (Normale mit dem Kreuzprodukt).',
     when: 'In jeder Klausur: Durchstoßpunkt, Lage von Gerade und Ebene, Parameter so, dass die Gerade parallel ist oder in der Ebene liegt.',
     examples: [
@@ -183,7 +183,7 @@ export const LINE_CARD_LIST: readonly Card[] = [
       String.raw`d(P, E) = \frac{\lvert \vec n \cdot \vec p - d \rvert}{\lvert \vec n \rvert} \quad \text{für } E\colon \vec n \cdot \vec x = d`,
       String.raw`\text{Lotgerade } l\colon \vec x = \vec p + t\,\vec n, \quad \overrightarrow{OP'} = \overrightarrow{OP} + 2\,\overrightarrow{PF}`,
     ],
-    memo: 'Bring die Koordinatenform auf eine Seite ($2x - y + 2z - 6$), setz den Punkt ein, nimm den **Betrag** und teile durch die Länge des Normalenvektors. Steht die Ebene schon in Hessescher Normalform, entfällt das Teilen. Den Lotfußpunkt $F$ findest du mit der Lotgeraden: durch $P$, Richtung $\\vec n$, in die Ebene einsetzen. Der Spiegelpunkt liegt doppelt so weit wie $F$.',
+    memo: 'Bring die Koordinatenform auf eine Seite ($2x - y + 2z - 6$), setz den Punkt ein, nimm den Betrag und teile durch die Länge des Normalenvektors. Steht die Ebene schon in Hessescher Normalform, entfällt das Teilen. Den Lotfußpunkt $F$ findest du mit der Lotgeraden: durch $P$, Richtung $\\vec n$, in die Ebene einsetzen. Der Spiegelpunkt liegt doppelt so weit wie $F$.',
     note: 'Parallele Ebenen und eine Gerade parallel zur Ebene: Jeder Punkt hat denselben Abstand, also nimmst du einen Punkt der einen (z. B. mit zwei Koordinaten $0$) und rechnest den Abstand zur anderen. Mit Parameter gibt es zwei Lösungen, je eine auf jeder Seite der Ebene.',
     when: 'In jeder Klausur: Abstand Punkt–Ebene, parallele Ebenen, Spiegeln an einer Ebene, Punkte mit gegebenem Abstand.',
     examples: [
@@ -201,7 +201,7 @@ export const LINE_CARD_LIST: readonly Card[] = [
     level: 2,
     rules: [],
     formulas: [String.raw`\overrightarrow{PF_t} = \vec p + t\,\vec v - \overrightarrow{OP}, \quad \overrightarrow{PF_t} \cdot \vec v = 0`, String.raw`d(P, g) = \lvert \overrightarrow{PF} \rvert`],
-    memo: 'Nimm einen beliebigen Punkt $F_t$ der Geraden (die Parameterform mit $t$) und den Pfeil $\\overrightarrow{PF_t}$ dorthin. Im Lotfußpunkt steht dieser Pfeil **senkrecht** auf der Richtung: Skalarprodukt mit $\\vec v$ gleich $0$. Das gibt eine Gleichung für $t$; eingesetzt liefert sie $F$, und die Länge von $\\overrightarrow{PF}$ ist der Abstand.',
+    memo: 'Nimm einen beliebigen Punkt $F_t$ der Geraden (die Parameterform mit $t$) und den Pfeil $\\overrightarrow{PF_t}$ dorthin. Im Lotfußpunkt steht dieser Pfeil senkrecht auf der Richtung: Skalarprodukt mit $\\vec v$ gleich $0$. Das gibt eine Gleichung für $t$; eingesetzt liefert sie $F$, und die Länge von $\\overrightarrow{PF}$ ist der Abstand.',
     note: 'Parallele Geraden: Nimm den Stützpunkt der einen und rechne seinen Abstand zur anderen. Spiegelpunkt an der Geraden: $\\overrightarrow{OP\'} = \\overrightarrow{OP} + 2\\,\\overrightarrow{PF}$.',
     when: 'In der Klausur bei Abstand Punkt–Gerade, Lotfußpunkt, parallelen Geraden und Spiegeln an einer Geraden.',
     examples: [
@@ -219,7 +219,7 @@ export const LINE_CARD_LIST: readonly Card[] = [
     level: 3,
     rules: [],
     formulas: [String.raw`\vec n = \vec v \times \vec w, \quad d(g, h) = \frac{\lvert \overrightarrow{PQ} \cdot \vec n \rvert}{\lvert \vec n \rvert}`],
-    memo: 'Die kürzeste Verbindung zweier windschiefer Geraden steht auf **beiden** senkrecht, also in Richtung $\\vec n = \\vec v \\times \\vec w$. Vom Pfeil $\\overrightarrow{PQ}$ zwischen den Stützpunkten zählt nur der Anteil in dieser Richtung: Skalarprodukt mit $\\vec n$, Betrag, durch $\\lvert \\vec n \\rvert$ teilen.',
+    memo: 'Die kürzeste Verbindung zweier windschiefer Geraden steht auf beiden senkrecht, also in Richtung $\\vec n = \\vec v \\times \\vec w$. Vom Pfeil $\\overrightarrow{PQ}$ zwischen den Stützpunkten zählt nur der Anteil in dieser Richtung: Skalarprodukt mit $\\vec n$, Betrag, durch $\\lvert \\vec n \\rvert$ teilen.',
     note: 'Das ist dieselbe Formel wie beim Abstand Punkt–Ebene: $Q$ gegen die Ebene durch $g$, die parallel zu $h$ ist. Kommt $0$ heraus, schneiden sich die Geraden.',
     when: 'In der Klausur bei windschiefen Geraden, oft nach der Untersuchung der Lage.',
     examples: [
@@ -238,7 +238,7 @@ export const LINE_CARD_LIST: readonly Card[] = [
       String.raw`\text{Geraden: } \cos\varphi = \frac{\lvert \vec v \cdot \vec w \rvert}{\lvert \vec v \rvert \, \lvert \vec w \rvert}, \quad \text{Ebenen: } \cos\varphi = \frac{\lvert \vec n_1 \cdot \vec n_2 \rvert}{\lvert \vec n_1 \rvert \, \lvert \vec n_2 \rvert}`,
       String.raw`\text{Gerade und Ebene: } \sin\varphi = \frac{\lvert \vec n \cdot \vec v \rvert}{\lvert \vec n \rvert \, \lvert \vec v \rvert}`,
     ],
-    memo: 'Winkel zwischen Geraden kommen aus den **Richtungsvektoren**, Winkel zwischen Ebenen aus den **Normalenvektoren**. Der Betrag im Zähler macht den Winkel spitz: Ein Schnittwinkel liegt zwischen $0^\\circ$ und $90^\\circ$. Bei Gerade und Ebene rechnest du mit Richtung und Normale; dieser Winkel ergänzt den gesuchten zu $90^\\circ$, deshalb **sin** statt cos.',
+    memo: 'Winkel zwischen Geraden kommen aus den Richtungsvektoren, Winkel zwischen Ebenen aus den Normalenvektoren. Der Betrag im Zähler macht den Winkel spitz: Ein Schnittwinkel liegt zwischen $0^\\circ$ und $90^\\circ$. Bei Gerade und Ebene rechnest du mit Richtung und Normale; dieser Winkel ergänzt den gesuchten zu $90^\\circ$, deshalb sin statt cos.',
     note: 'Senkrecht: Geraden mit $\\vec v \\cdot \\vec w = 0$, Ebenen mit $\\vec n_1 \\cdot \\vec n_2 = 0$; eine Gerade steht senkrecht auf einer Ebene, wenn $\\vec v$ ein Vielfaches von $\\vec n$ ist. Ist eine Ebene in Parameterform gegeben, bestimmst du zuerst $\\vec n$ mit dem Kreuzprodukt.',
     when: 'In jeder Klausur: Schnittwinkel zweier Geraden, Gerade und Ebene, zweier Ebenen, oft zusammen mit Schnittpunkt oder Schnittgerade.',
     examples: [

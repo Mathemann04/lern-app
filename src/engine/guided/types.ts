@@ -2,6 +2,7 @@ import type { RuleId } from '../derive/rules.ts'
 import type { Explanation } from '../explain/texts.ts'
 import type { Expr } from '../expr/types.ts'
 import type { DragStep } from '../linalg/drag.ts'
+import type { FalkFigure } from '../linalg/falk.ts'
 import type { VectorDrawing } from '../linalg/figures.ts'
 import type { NumericAnswer } from '../quantity/judge.ts'
 import type { TaskRef } from '../tasks/taskNumber.ts'
@@ -51,6 +52,8 @@ export type GuidedStep = {
   readonly figure?: string
   // Vektor-Bild unter der Frage (M7, engine/linalg/figures.ts)
   readonly drawing?: VectorDrawing
+  // Falk-Schema unter der Frage (M7 Schritt 8b); abspielen lässt es sich erst nach der Antwort
+  readonly falk?: FalkFigure
   // Zahl als Ergebnis: Im freien Modus (Chemie, S8b) tippt man sie selbst ein, statt auszuwählen
   readonly numeric?: NumericAnswer
   // „Wähle alle richtigen“ (N1): mehrere Antworten können richtig sein; man kreuzt an und prüft einmal,

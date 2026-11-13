@@ -321,8 +321,15 @@ Request.
      Eintrag malgenommen, Reihenfolge vertauscht, Produkt mit unpassenden Formaten, Zeile mal Spalte und Spalte mal Zeile
      verwechselt, Zeile statt Spalte genommen ($A\vec e_j$), $kE$ von jedem Eintrag abgezogen, Vorzeichen beim Auflösen,
      $AB = BA$ für jedes $a$.
-   - **8b:** Falk-Schema als Animation auf Knopfdruck (Zeile und Spalte leuchten auf, der Eintrag entsteht), in den
-     Schritten zum Produkt und auf der Lernkarte; ohne bei „Bewegung reduzieren“.
+   - **8b (fertig, 13.11.2026):** Falk-Schema als Bild über den Antworten in jedem Schritt zum Produkt (ein Eintrag, das
+     ganze Produkt, Zeile mal Spalte, Spalte mal Zeile, $AB$ und $BA$ mit Parameter) und auf der Lernkarte „Produkt mit dem
+     Falk-Schema“: rechte Matrix oben rechts, linke unten links. Vor der Antwort sind die gefragten Felder leer (ein
+     einzelner Eintrag mit „?“), und es gibt nichts abzuspielen. Danach stehen die Einträge da, und „Abspielen“ geht
+     Eintrag für Eintrag durch: Zeile und Spalte leuchten auf, das gerade malgenommene Paar ist umrahmt, die Rechnung
+     darunter wächst Produkt für Produkt, zuletzt erscheint der Eintrag in seinem Feld (der erste langsam, die übrigen
+     schneller; „Alles zeigen“ springt ans Ende). Bei „Bewegung reduzieren“ zeigt der Knopf gleich das Ende. Die Tabelle
+     in der Erklärung ist dafür weggefallen. Nebenbei: Sternchen für Fettdruck auf den Lernkarten zu Geraden und Matrizen
+     entfernt (die App kennt keinen Fettdruck; ein Test verbietet sie jetzt).
 9. **Determinanten**, in zwei Teilen:
    - **9a (fertig, 13.11.2026):** Baustein „Determinanten“ (`determinante`, Code 34, Gruppe „Determinanten“) in der Tätigkeit
      „Matrizen und Gleichungssysteme“, Stufen 1 bis 5, geführt und frei. Acht Arten: $2 \times 2$ (Stufe 1, oft mit der
@@ -346,10 +353,10 @@ Request.
      addiert statt abgezogen, nur den ersten Eintrag verändert, falsch herum abgezogen, $\lambda$ statt $\lambda^n$,
      Transponieren verändert sie, Kehrwert vergessen, Inverse wie das Negative, Potenz als Faktor, Potenz vergessen, Summe
      statt Produkt, invertierbar verwechselt,
-     $\det A = 1$ gefordert, Vorzeichen der Nullstellen. Nebenbei: `**fett**` in Texten wird jetzt fett gesetzt (bisher
-     standen die Sternchen sichtbar da).
-   - **9b:** Sarrus als Animation auf Knopfdruck (die Diagonalen leuchten nacheinander auf, plus und minus), zusammen mit
-     dem Falk-Schema aus 8b; ohne bei „Bewegung reduzieren“.
+     $\det A = 1$ gefordert, Vorzeichen der Nullstellen. Nebenbei: `**fett**` in Erklärungen und Fehlertexten wird jetzt fett gesetzt (bisher
+     standen die Sternchen sichtbar da); auf Lernkarten bleibt es seit 8b verboten.
+   - **9b:** Sarrus als Animation auf Knopfdruck (die Diagonalen leuchten nacheinander auf, plus und minus), wie das
+     Falk-Schema aus 8b; ohne bei „Bewegung reduzieren“.
 10. **Gauß:** Tabelle mit Zeilenumformungen, Geraden und Ebenen als Bild, alle drei Fälle, Lösung mit Parametern.
 11. **Gleichungssysteme mit Parameter und Cramer:** Determinante als Polynom, Sonderfälle mit Schieberegler, Rang.
 12. **Inverse und Matrizengleichungen:** 2×2 mit Formel, 3×3 mit Gauß-Jordan Zeile für Zeile, Matrizengleichung erst
