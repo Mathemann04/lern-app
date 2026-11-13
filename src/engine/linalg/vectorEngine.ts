@@ -25,3 +25,12 @@ export function nextVectorSeed(_level: Level, parts?: ReadonlySet<string>): numb
 export const vectorExampleLatex = (ref: TaskRef): string => buildVectorTask(ref).functionLatex ?? ''
 
 export const prepareVectorFree = (ref: TaskRef): FreeTask => prepareVectorFreeTask(ref)
+
+// Tätigkeit „Geraden und Ebenen“ (M7 Schritt 6): dieselbe Engine, eigene Bausteine
+export const LINE_BLOCK_IDS = ['gerade', 'ebene'] as const
+
+export function nextLineSeed(_level: Level, parts?: ReadonlySet<string>): number {
+  const chosen = LINE_BLOCK_IDS.filter((id) => !parts || parts.has(id))
+  const block = chosen.length > 0 ? chosen[Math.floor(Math.random() * chosen.length)] : LINE_BLOCK_IDS[0]
+  return blockSeed(block, randomSeed())
+}

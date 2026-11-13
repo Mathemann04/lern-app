@@ -67,6 +67,16 @@ const ART: Record<Kind, (id: string) => ReactNode> = {
       <circle cx="11" cy="33.5" r="2.6" className="fill-tone-800" />
     </>
   ),
+  // Geraden und Ebenen (M7 Schritt 6): Ebenenstück, das eine Gerade durchstößt
+  lines: () => (
+    <>
+      <Card />
+      <path d="M9 30 21 23 39 25 27 33Z" className="fill-tone-300 stroke-tone-500" strokeWidth="1.5" strokeLinejoin="round" />
+      <path d="M17 11 24 28" className="stroke-tone-700" strokeWidth="3" strokeLinecap="round" />
+      <path d="M24 28 27 35" className="stroke-tone-700" strokeWidth="3" strokeLinecap="round" strokeDasharray="2 3" />
+      <circle cx="24" cy="28" r="2.4" className="fill-tone-800" />
+    </>
+  ),
   // Potenzen, Wurzeln, Logarithmen: Quadrate, die immer größer werden
   powers: () => (
     <>

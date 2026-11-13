@@ -1,4 +1,4 @@
-import { type Block, REARRANGE_BLOCKS, VECTOR_BLOCKS, VECTOR_PLAYABLE_COMBOS } from '../engine/tasks/blocks.ts'
+import { type Block, LINE_BLOCKS, LINE_PLAYABLE_COMBOS, REARRANGE_BLOCKS, VECTOR_BLOCKS, VECTOR_PLAYABLE_COMBOS } from '../engine/tasks/blocks.ts'
 import { REARRANGE_PLAYABLE_COMBOS } from '../engine/tasks/rearrangeFamilies.ts'
 import { LEVELS, type Level } from '../engine/tasks/taskNumber.ts'
 
@@ -20,6 +20,8 @@ export type AreaIcon =
   | 'rearrange'
   // Vektoren (M7): zwei Pfeile aneinandergehängt
   | 'vectors'
+  // Geraden und Ebenen (M7 Schritt 6): Ebene, von einer Geraden durchstoßen
+  | 'lines'
   | 'powers'
   | 'atom'
   | 'nucleus'
@@ -39,7 +41,7 @@ export type AreaIcon =
 
 // Farbe eines Gebiets (Farbfamilie aus index.css, gesetzt über data-tone). Die App selbst ist Blaugrün.
 // Nicht green, red, amber (richtig, falsch, Tipp) und nicht teal (App-Farbe).
-export type Tone = 'orange' | 'blue' | 'violet' | 'pink' | 'cyan' | 'indigo' | 'sky' | 'fuchsia'
+export type Tone = 'orange' | 'blue' | 'violet' | 'pink' | 'cyan' | 'indigo' | 'sky' | 'fuchsia' | 'emerald'
 
 // Eine Stufe eines Themas mit Vorschau-Formeln (nur Aufgabenterme, keine Lösungen)
 export type LevelPreview = {
@@ -141,6 +143,7 @@ export const DERIVATIVES = 'ableiten'
 export const FRACTIONS = 'brueche'
 export const REARRANGE = 'umstellen'
 export const VECTORS = 'vektoren'
+export const LINES = 'geraden'
 export const ATOMBAU = 'chem-atombau'
 export const STOFFMENGE = 'chem-stoffmenge'
 export const GLEICHUNGEN = 'chem-gleichungen'
@@ -318,6 +321,47 @@ const vectorLevels: LevelPreview[] = [
     name: 'Profi',
     title: 'Profi – alles ineinander',
     examples: [String.raw`\lvert \overrightarrow{AB} \rvert = 9 \text{ für } B(t \mid 2 \mid 5)`, String.raw`\overrightarrow{CA} \perp \overrightarrow{CB} \text{ für } C(t \mid 0 \mid -2)`],
+  },
+]
+
+// Geraden und Ebenen (M7 Schritt 6): Stufe 1 in der Ebene (Geraden) bzw. mit einem Schritt (Ebenen), Stufe 4 mit
+// Unbekannten wie in der Klausur
+const lineLevels: LevelPreview[] = [
+  {
+    level: 1,
+    available: true,
+    name: 'Einstieg',
+    title: 'Einstieg – Geraden in der Ebene, ein bis zwei Schritte',
+    examples: [String.raw`g \text{ durch } A(1 \mid 2),\; B(4 \mid -1)`, String.raw`E\colon 2x - y + 3z = 6,\; P(1 \mid 2 \mid 2)`],
+  },
+  {
+    level: 2,
+    available: true,
+    name: 'Grundlagen',
+    title: 'Grundlagen – im Raum, mehrere Schritte',
+    examples: [String.raw`E \text{ durch } A,\, B,\, C`, String.raw`\text{Hessesche Normalform}`],
+  },
+  {
+    level: 3,
+    available: true,
+    name: 'Kombiniert',
+    title: 'Kombiniert – Formen umrechnen, Spurpunkte',
+    examples: [String.raw`A,\, B,\, C \text{ auf einer Geraden?}`, String.raw`S_x(2 \mid 0 \mid 0),\; S_y(0 \mid 3 \mid 0),\; S_z(0 \mid 0 \mid 6)`],
+  },
+  {
+    level: 4,
+    available: true,
+    name: 'Klausur',
+    title: 'Klausur – mit Unbekannten und Brüchen',
+    examples: [String.raw`P(a \mid 3 \mid b) \in g`, String.raw`D(1 \mid a \mid 2) \in E`],
+  },
+  {
+    level: 5,
+    available: true,
+    name: 'Profi',
+    title: 'Profi – alles ineinander',
+    examples: [String.raw`\text{Spurpunkte von } E \text{ durch } A,\, B,\, C`, String.raw`\lvert \overrightarrow{AQ} 
+vert = 6,\; Q \in g`],
   },
 ]
 
@@ -736,7 +780,7 @@ export const SUBJECTS: readonly Subject[] = [
     icon: 'derivative',
     tone: 'blue',
     activities: true,
-    soon: ['Geraden und Ebenen', 'Matrizen und Gleichungssysteme', 'Mathe mischen', 'Integrieren'],
+    soon: ['Matrizen und Gleichungssysteme', 'Mathe mischen', 'Integrieren'],
     areas: [
       {
         id: 'grundlagen',
@@ -810,6 +854,19 @@ export const SUBJECTS: readonly Subject[] = [
             focus: false,
             parts: blockParts(VECTOR_BLOCKS, VECTOR_PLAYABLE_COMBOS),
             blockCombos: splitCombos(VECTOR_PLAYABLE_COMBOS),
+          },
+          {
+            id: LINES,
+            title: 'Geraden und Ebenen',
+            description: 'Parameterform, Normalen- und Koordinatenform, Hessesche Normalform, umrechnen, Punktprobe und Spurpunkte, mit Bildern zum Abspielen und Drehen',
+            icon: 'lines',
+            tone: 'emerald',
+            cards: 'geraden',
+            levels: lineLevels,
+            free: true,
+            focus: false,
+            parts: blockParts(LINE_BLOCKS, LINE_PLAYABLE_COMBOS),
+            blockCombos: splitCombos(LINE_PLAYABLE_COMBOS),
           },
         ],
       },

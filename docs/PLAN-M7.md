@@ -1,6 +1,6 @@
 # Plan für Meilenstein 7: Vektoren, Geraden und Ebenen, Matrizen
 
-Status: **freigegeben** (Nutzer, 12.11.2026: „Passt alles“). Schritte 1a, 1b, 2a, 2b und 3a fertig (12.11.2026), 3b, 4a, 4b und 5 fertig (13.11.2026).
+Status: **freigegeben** (Nutzer, 12.11.2026: „Passt alles“). Schritte 1a, 1b, 2a, 2b und 3a fertig (12.11.2026), 3b, 4a, 4b, 5 und 6 fertig (13.11.2026).
 
 Entwurf zum Ansehen und Anfassen (privat, nur für den Nutzer):
 https://claude.ai/artifact/WXe4sjavAGF64jyAWSa3hi. Er zeigt acht Bilder und Aufgaben im geplanten Stil. Die Seite ist
@@ -101,7 +101,7 @@ Animationen starten nur auf Knopfdruck („Abspielen“) und entfallen, wenn am 
   vergessen, Zeile statt Spalte (Falk, Cramer), Produkt nicht definiert, $(AB)^{\mathsf T} = A^{\mathsf T}B^{\mathsf T}$,
   $\lambda$ statt $\lambda^n$, Vorzeichen beim Zeilentausch, Sarrus bei 4×4, rechte Seite vergessen, Nullzeile falsch
   gedeutet, gleicher Parameter für zwei Geraden, beim Ziehen (2b): nur vertauscht oder nur ein Vorzeichen geändert, rechter Winkel als spitz
-  oder stumpf gezählt, rechter Winkel an der falschen Ecke, Seiten statt Diagonalen senkrecht, bei der Projektion (3a) die 15 Fehler aus Schritt 3a, bei den Kräften (3b) die 26 Fehler aus Schritt 3b, beim Kreuzprodukt (4a) die 14 Fehler aus Schritt 4a, beim Spatprodukt (4b) die 14 Fehler aus Schritt 4b, bei Linearkombination und Basis (5) die 20 Fehler aus Schritt 5, cos statt sin bei Gerade–Ebene, „$A - 2$“ ohne $E$, auf der falschen
+  oder stumpf gezählt, rechter Winkel an der falschen Ecke, Seiten statt Diagonalen senkrecht, bei der Projektion (3a) die 15 Fehler aus Schritt 3a, bei den Kräften (3b) die 26 Fehler aus Schritt 3b, beim Kreuzprodukt (4a) die 14 Fehler aus Schritt 4a, beim Spatprodukt (4b) die 14 Fehler aus Schritt 4b, bei Linearkombination und Basis (5) die 20 Fehler aus Schritt 5, bei Geraden und Ebenen (6) die 33 Fehler aus Schritt 6 (Vorsilbe „gl-“), cos statt sin bei Gerade–Ebene, „$A - 2$“ ohne $E$, auf der falschen
   Seite ausgeklammert. Jede mit Katalogbeispiel, eigenem Text für „Warum ist das falsch?“ und Platz auf einer Lernkarte
   (Regeln aus CLAUDE.md).
 - **Aufgabennummern** wie seit M6 mit Baustein (`taskNumber.ts`); neue Bausteine bekommen die nächsten freien Nummern in
@@ -230,8 +230,35 @@ Request.
    verwechselt, Faustregel „kein Nullvektor“ umgedreht, nur paarweise auf parallel geprüft, Anzahl der Vektoren statt
    Dimension, zu viele Vektoren gestrichen, parallele Vektoren mitgezählt, Zahl der Einträge statt Dimension, Plus statt
    Minus bei der $2 \times 2$-Determinante, Einträge eines Vektors miteinander malgenommen.
-6. **Geraden und Ebenen, Formen:** Tätigkeit „Geraden und Ebenen“; Parameter-, Normalen-, Koordinatenform, Hesse,
-   umrechnen, Spurpunkte.
+6. **Geraden und Ebenen, Formen (fertig, 13.11.2026):** Tätigkeit „Geraden und Ebenen“ (Id `geraden`, Farbe Smaragdgrün,
+   Bild: Ebene, von einer Geraden durchstoßen) mit den Bausteinen „Geraden“ (`gerade`, Code 28) und „Ebenen“ (`ebene`,
+   Code 29) in den Stufen 1 bis 5, geführt und frei. Geraden, fünf Arten: Parameterform durch zwei Punkte (Stufe 1 in der
+   Ebene, 2 im Raum) oder durch einen Punkt parallel zu einer Geraden (3), Punkt zu einem Parameterwert (1, 2) oder mit
+   gegebener Koordinate (2, 3), Punktprobe (1 Ebene, 2 Raum; bei der Hälfte nicht drauf), drei Punkte auf einer Geraden
+   (3), Unbekannte in den Koordinaten (4 mit gegebener Geraden, 5 mit der Geraden durch zwei Punkte), Spurpunkte (2
+   Schnitt mit den Achsen, 3 mit zwei Koordinatenebenen, 4 mit allen dreien und Brüchen, 5 zwei und ihr Abstand),
+   Punkte mit gegebenem Abstand vom Stützpunkt (4, 5; zwei Lösungen). Ebenen, fünf Arten: Punktprobe in der
+   Koordinatenform (1) bzw. erst aus der Normalenform umrechnen (2), Koordinatenform aus der Normalenform (1), der
+   Parameterform mit Kreuzprodukt (2), drei Punkten oder Achsenabschnitten (3), dazu ein Punkt mit Unbekannter (4 aus
+   der Parameterform, 5 aus drei Punkten), Parameterform aus drei Punkten (2) oder aus der Koordinatenform (3, zwei
+   Variablen frei wählen), Hessesche Normalform (2 aus der Koordinatenform, 3 aus der Normalenform, 4 aus der
+   Parameterform, 5 aus drei Punkten; rechts negativ: mal $-1$), Spurpunkte (1 und 2 ganze, 3 Brüche, 4 aus der
+   Parameterform, 5 aus drei Punkten). Bilder: Gerade mit Stützvektor, Richtung und gestrichelter Geraden zum Abspielen,
+   Punkte darauf; Ebene als Stück mit Richtungen und Normale; Spurdreieck mit verlängerten Achsen. Frei: Parameterform in
+   Spalten (jeder andere Stützpunkt und jedes Vielfache der Richtung ist richtig, die falsche Spalte wird markiert),
+   Koordinatenform in vier Kästchen (jedes Vielfache ist richtig; nur rechts falsch: nur dieses Kästchen markiert),
+   Hessesche Normalform nur genau normiert, Punktprobe zum Antippen, zwei Punkte in beliebiger Reihenfolge. Sechs
+   Lernkarten im eigenen Ordner, 33 neue typische Fehler: Stützvektor und Richtung vertauscht, Ortsvektor statt
+   Richtungsvektor, Stützpunkt der gegebenen Geraden genommen, Stützvektor der anderen Geraden als Richtung, Parameterwert
+   nicht eingesetzt, Parameter mal Stützvektor, Vorzeichen beim Auflösen nach dem Parameter, malgenommen statt geteilt,
+   nur eine Zeile geprüft, Punktprobe falsch gedeutet, nur der Stützpunkt zählt, falsche Koordinate gleich 0 gesetzt,
+   Richtung nicht auf Länge 1 gebracht, Vorzeichen der rechten Seite, Normalenvektor und Punkt vertauscht, Zahlen vor
+   $x$, $y$, $z$ vergessen, Koordinaten an der falschen Stelle eingesetzt, Richtungsvektor als Normalenvektor, zweimal
+   dieselbe Richtung, Vorzeichen beim Auflösen nach einer Koordinate, Stützvektor vergessen, Normalenvektor als
+   Richtung, Achsenabschnitte als Zahlen vor $x$, $y$, $z$, rechte Seite nicht mit malgenommen, nicht normiert, rechte
+   Seite negativ gelassen, durch das Quadrat der Länge geteilt, nur die linke Seite geteilt, Bruch beim Spurpunkt
+   umgedreht, nicht durch den Faktor geteilt, Vorzeichen beim Spurpunkt, auf der falschen Achse eingetragen, mit $0$
+   statt der rechten Seite verglichen.
 7. **Lage, Abstände, Winkel:** Entscheidungsbaum für zwei Geraden, Gerade–Ebene, Ebene–Ebene, alle Abstände mit Lot,
    Winkel mit cos bzw. sin.
 8. **Matrizen rechnen:** Tätigkeit „Matrizen und Gleichungssysteme“; Formate, Falk-Schema animiert, Transponierte,
