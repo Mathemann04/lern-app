@@ -1257,3 +1257,8 @@ Neue Entscheidungen unten anfügen.
   Freikörperbild unter mehreren wählen, falsche Bilder zeigen typische Fehler; frei: Kräfte als Pfeile im Bild setzen
   oder als Vektor eintippen); Aufgaben als Ketten aus Freischneiden, halb geführtem Aufstellen der Gleichungen und
   Rechnen Punkt für Punkt. Festgehalten in docs/MECHANIK.md, gebaut wird nach dem Plan zu M11.
+- 13.11.2026: Weitere Übungsarten für Technische Mechanik (Vorschläge, vom Nutzer alle gewünscht): erst schätzen,
+  dann rechnen; Momentenpunkt wählen; Fehler finden; Verläufe zuordnen; Spielwiese zum Verschieben; vom echten
+  Ding zum Modell; kurze tägliche Übungen; Probeklausur, sobald eine Altklausur da ist. Dazu der Ritterschnitt als
+  eigene Übung in Schritten (Schnitt legen, Teil wählen, Ritterpunkt wählen, rechnen) und als einzeln wählbares
+  Unterthema bei den Fachwerken. Festgehalten in docs/MECHANIK.md für den Plan zu M11.
