@@ -303,4 +303,158 @@ export const LINE_ERROR_RULES: readonly VectorErrorRule[] = [
       short: String.raw`Eingesetzt mit der rechten Seite vergleichen, nicht mit $0$.`,
     },
   },
+  // ---------------------------------------------------------------- Lage (Schritt 7a)
+  {
+    id: 'gl-same-param',
+    name: 'Gleicher Parameter für beide Geraden',
+    wrongFormula: String.raw`\vec p + t\,\vec v = \vec q + t\,\vec w`,
+    why: {
+      detailed: String.raw`Jede Gerade hat ihren **eigenen** Parameter. Der Schnittpunkt kann auf $g$ zu einem ganz anderen Wert gehören als auf $h$. Mit demselben Buchstaben für beide verlangst du, dass beide Geraden gleichzeitig beim selben Wert dort sind, und übersiehst Schnittpunkte. Nimm $t$ für die eine und $s$ für die andere Gerade.`,
+      short: String.raw`Zwei Geraden, zwei verschiedene Parameter: $t$ und $s$.`,
+    },
+  },
+  {
+    id: 'gl-move-sign',
+    name: 'Beim Herüberbringen das Vorzeichen nicht gedreht',
+    wrongFormula: String.raw`2 + 3t = 1 + s \;\Rightarrow\; 3t + s = 1 + 2`,
+    why: {
+      detailed: String.raw`Was du auf die andere Seite der Gleichung bringst, wechselt das Vorzeichen: Aus $+2$ links wird $-2$ rechts, aus $+s$ rechts wird $-s$ links. Das gilt für Zahlen genauso wie für Glieder mit einem Parameter.`,
+      short: String.raw`Auf die andere Seite: Vorzeichen umdrehen, auch bei Gliedern mit Parameter.`,
+    },
+  },
+  {
+    id: 'gl-pos-dirs',
+    name: 'Richtungen bzw. Normalen nicht verglichen',
+    wrongFormula: String.raw`\vec v \nparallel \vec w \;\Rightarrow\; \text{parallel}`,
+    why: {
+      detailed: String.raw`Bei der Lage entscheiden zuerst die **Richtungen** (bei Ebenen die **Normalenvektoren**): Sind sie parallel, können die Geraden bzw. Ebenen nur parallel oder gleich sein. Sind sie nicht parallel, schneiden sich die Ebenen in einer Geraden, und Geraden schneiden sich oder sind windschief. Stützpunkte und rechte Seiten kommen erst danach.`,
+      short: String.raw`Erst Richtungen bzw. Normalen vergleichen, dann den Rest.`,
+    },
+  },
+  {
+    id: 'gl-pos-same-parallel',
+    name: 'Identisch und echt parallel verwechselt',
+    wrongFormula: String.raw`\vec v \parallel \vec w \;\Rightarrow\; \text{immer identisch}`,
+    why: {
+      detailed: String.raw`Parallele Richtungen allein sagen noch nicht, ob es dieselbe Gerade ist. Prüfe, ob der Stützpunkt der einen Geraden auf der anderen liegt: ja heißt identisch, nein heißt echt parallel.`,
+      short: String.raw`Bei parallelen Richtungen entscheidet die Punktprobe.`,
+    },
+  },
+  {
+    id: 'gl-pos-skew-hasty',
+    name: 'Nicht parallel heißt nicht windschief',
+    wrongFormula: String.raw`\vec v \nparallel \vec w \;\Rightarrow\; \text{windschief}`,
+    why: {
+      detailed: String.raw`Sind die Richtungen nicht parallel, gibt es zwei Möglichkeiten: Die Geraden schneiden sich, oder sie sind windschief. Das entscheidet erst das Gleichungssystem mit $t$ und $s$: Hat es eine Lösung, schneiden sie sich. In der Ebene gibt es kein windschief, dort schneiden sich nicht parallele Geraden immer.`,
+      short: String.raw`Nicht parallel: Das Gleichungssystem entscheidet zwischen Schnittpunkt und windschief.`,
+    },
+  },
+  {
+    id: 'gl-pos-third-row',
+    name: 'Dritte Gleichung nicht geprüft',
+    wrongFormula: String.raw`\text{(I), (II)} \Rightarrow t, s \;\Rightarrow\; \text{Schnittpunkt}`,
+    why: {
+      detailed: String.raw`Im Raum hat das Gleichungssystem drei Gleichungen, aber nur zwei Unbekannte. Zwei Gleichungen legen $t$ und $s$ immer fest. Erst wenn diese Werte auch die **dritte** Gleichung erfüllen, haben die Geraden einen gemeinsamen Punkt; sonst sind sie windschief.`,
+      short: String.raw`Die gefundenen $t$ und $s$ in die dritte Gleichung einsetzen.`,
+    },
+  },
+  {
+    id: 'gl-parallel-missed',
+    name: 'Vielfaches nicht erkannt',
+    wrongFormula: String.raw`\begin{pmatrix} 2 \\ -1 \end{pmatrix},\; \begin{pmatrix} -4 \\ 2 \end{pmatrix} \;\Rightarrow\; \text{nicht parallel}`,
+    why: {
+      detailed: String.raw`Parallel heißt nicht „gleiche Einträge“, sondern: Der eine Vektor ist ein Vielfaches des anderen, auch mit negativem Faktor oder einem Bruch. Teile in jeder Zeile den Eintrag des einen durch den des anderen. Kommt überall dieselbe Zahl heraus, sind sie parallel.`,
+      short: String.raw`In jeder Zeile den Faktor ausrechnen; überall gleich heißt parallel.`,
+    },
+  },
+  {
+    id: 'gl-dir-one-row',
+    name: 'Vielfaches nur in einer Zeile geprüft',
+    wrongFormula: String.raw`\begin{pmatrix} 1 \\ 2 \\ 3 \end{pmatrix},\; \begin{pmatrix} 2 \\ 4 \\ 5 \end{pmatrix}:\; k = 2 \text{ (nur } x\text{)}`,
+    why: {
+      detailed: String.raw`Ein Faktor aus einer einzigen Zeile passt immer. Parallel sind die Vektoren erst, wenn **derselbe** Faktor in jeder Zeile stimmt. Prüfe ihn deshalb in allen Zeilen.`,
+      short: String.raw`Den Faktor in jeder Zeile prüfen, nicht nur in einer.`,
+    },
+  },
+  {
+    id: 'gl-meet-wrong-line',
+    name: 'Parameter in die falsche Gerade eingesetzt',
+    wrongFormula: String.raw`t \text{ von } g \text{ in } h\colon \vec q + t\,\vec w`,
+    why: {
+      detailed: String.raw`Aus dem Gleichungssystem kommen zwei Werte: $t$ gehört zu der Geraden, die mit $t$ geschrieben ist, $s$ zu der mit $s$. Setzt du einen Wert in die andere Gerade ein, landest du an einem Punkt, der mit dem Schnittpunkt nichts zu tun hat. Probe: Beide Geraden müssen mit ihrem eigenen Wert denselben Punkt liefern.`,
+      short: String.raw`$t$ in die Gerade mit $t$, $s$ in die mit $s$.`,
+    },
+  },
+  {
+    id: 'gl-insert-dirs-only',
+    name: 'Stützvektor beim Einsetzen vergessen',
+    wrongFormula: String.raw`2x - y + z = 4,\; \vec x = \vec p + t\,\vec v \;\Rightarrow\; \vec n \cdot \vec v\, t = 4`,
+    why: {
+      detailed: String.raw`Jede Zeile der Parameterform besteht aus dem Eintrag des Stützvektors **plus** dem Glied mit dem Parameter, z. B. $x = 1 + 3t$. Beim Einsetzen kommt beides in die Klammer. Lässt du den Stützvektor weg, setzt du eine Gerade durch den Ursprung ein.`,
+      short: String.raw`Ganze Zeile einsetzen: Stützvektor plus Parameter mal Richtung.`,
+    },
+  },
+  {
+    id: 'gl-lp-zero-equation',
+    name: 'Liegt in der Ebene und parallel verwechselt',
+    wrongFormula: String.raw`0 \cdot t + 3 = 3 \;\Rightarrow\; \text{keine Lösung}`,
+    why: {
+      detailed: String.raw`Fällt der Parameter weg, bleibt eine Gleichung ohne Unbekannte. Stimmt sie (wie $3 = 3$), erfüllt **jeder** Wert sie: Jeder Punkt der Geraden liegt in der Ebene. Ist sie falsch (wie $3 = 5$), erfüllt **kein** Wert sie: Die Gerade ist parallel zur Ebene. Genauso bei der Punktprobe: Liegt ein Punkt der Geraden in der Ebene, liegt die ganze Gerade drin.`,
+      short: String.raw`Wahre Aussage: liegt drin; falsche Aussage: parallel.`,
+    },
+  },
+  {
+    id: 'gl-lp-normal',
+    name: 'Richtung und Normale falsch gedeutet',
+    wrongFormula: String.raw`\vec n \cdot \vec v = 0 \;\Rightarrow\; g \perp E`,
+    why: {
+      detailed: String.raw`Der Faktor vor dem Parameter nach dem Einsetzen ist $\vec n \cdot \vec v$. Ist er $0$, steht die Richtung senkrecht auf der **Normalen**, also läuft die Gerade parallel zur Ebene (oder liegt in ihr). Ist er nicht $0$, hat die Gleichung genau eine Lösung: Die Gerade durchstößt die Ebene in einem Punkt.`,
+      short: String.raw`$\vec n \cdot \vec v = 0$: parallel oder drin; sonst genau ein Durchstoßpunkt.`,
+    },
+  },
+  {
+    id: 'gl-pp-rhs',
+    name: 'Rechte Seite nicht verglichen',
+    wrongFormula: String.raw`x + 2y = 3,\; 2x + 4y = 6 \;\Rightarrow\; \text{nur parallel}`,
+    why: {
+      detailed: String.raw`Sind die Normalenvektoren parallel, ist die linke Seite der einen Gleichung ein Vielfaches der anderen. Ob die Ebenen gleich oder nur parallel sind, entscheidet die rechte Seite: Geht sie mit **demselben Faktor** mit, ist es dieselbe Ebene, sonst sind die Ebenen echt parallel.`,
+      short: String.raw`Gleich, wenn auch die rechte Seite mit demselben Faktor mitgeht.`,
+    },
+  },
+  {
+    id: 'gl-free-dropped',
+    name: 'Frei gewählte Variable weggelassen',
+    wrongFormula: String.raw`z = t \;\Rightarrow\; x + y = 3 \text{ (ohne } t\text{)}`,
+    why: {
+      detailed: String.raw`Setzt du eine Variable gleich $t$, bleibt $t$ in beiden Gleichungen stehen und kommt nach rechts. Lässt du es weg, rechnest du mit $z = 0$ und bekommst nur einen einzigen Punkt statt der ganzen Schnittgeraden.`,
+      short: String.raw`$t$ bleibt stehen und wandert mit umgedrehtem Vorzeichen nach rechts.`,
+    },
+  },
+  {
+    id: 'gl-free-row',
+    name: 'Zeile der frei gewählten Variable vergessen',
+    wrongFormula: String.raw`x = 1 + 2t,\; y = 3 - t,\; z = t \;\Rightarrow\; \vec v = \begin{pmatrix} 2 \\ -1 \\ 0 \end{pmatrix}`,
+    why: {
+      detailed: String.raw`Auch die frei gewählte Variable gehört in die Parameterform: Aus $z = t$ wird die Zeile $z = 0 + 1 \cdot t$. Im Stützvektor steht dort eine $0$, im Richtungsvektor eine $1$.`,
+      short: String.raw`$z = t$ heißt: Stützvektor $0$, Richtung $1$ in dieser Zeile.`,
+    },
+  },
+  {
+    id: 'gl-relation-partial',
+    name: 'Beim Einsetzen nur einen Teil berücksichtigt',
+    wrongFormula: String.raw`s = 2 - r \;\Rightarrow\; \vec x = \vec p + r\,(\vec u - \vec w)`,
+    why: {
+      detailed: String.raw`Setzt du $s = \alpha + \beta r$ in $\vec p + r\,\vec u + s\,\vec w$ ein, entstehen zwei Teile: $\alpha\,\vec w$ ohne $r$ gehört zum Stützvektor, $\beta r\,\vec w$ zur Richtung. Beides muss in die neue Gleichung: Stützvektor $\vec p + \alpha\,\vec w$, Richtung $\vec u + \beta\,\vec w$.`,
+      short: String.raw`$\alpha\,\vec w$ zum Stützvektor, $\beta\,\vec w$ zur Richtung.`,
+    },
+  },
+  {
+    id: 'gl-normal-factor',
+    name: 'Gleiche Einträge statt Vielfaches',
+    wrongFormula: String.raw`\begin{pmatrix} 2 \\ 1 \\ -1 \end{pmatrix} \parallel \begin{pmatrix} 4 \\ a \\ -2 \end{pmatrix} \;\Rightarrow\; a = 1`,
+    why: {
+      detailed: String.raw`Parallele Normalenvektoren müssen nicht gleich sein, nur Vielfache voneinander. Bestimme den Faktor $k$ aus einer Zeile ohne Parameter; derselbe Faktor gilt in der Zeile mit dem Parameter.`,
+      short: String.raw`Erst den Faktor $k$ bestimmen, dann gilt er in jeder Zeile.`,
+    },
+  },
 ]

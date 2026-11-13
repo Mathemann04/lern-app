@@ -33,6 +33,10 @@ export const GL_CARD = {
   ebene: 'gl-ebene',
   koordinaten: 'gl-koordinatenform',
   hesse: 'gl-hesse',
+  // Lage (Schritt 7a, posTasks.ts)
+  lageGeraden: 'gl-lage-geraden',
+  lageGeradeEbene: 'gl-lage-gerade-ebene',
+  lageEbenen: 'gl-lage-ebenen',
 } as const
 
 const LINE_NAMES = ['g', 'h'] as const
@@ -43,8 +47,8 @@ const show = (r: Rational) => ratLatex(r)
 
 // Parameterform aufstellen: richtige Form und falsche (Wrong mit fertigem Inhalt)
 // falsche Formen, die zufällig dieselbe Gerade beschreiben, fallen weg
-type WrongLine = { readonly p: Vec; readonly v: Vec; readonly rule: string }
-function formStep(rng: Rng, o: { readonly name: string; readonly p: Vec; readonly v: Vec; readonly t: string; readonly wrongs: readonly WrongLine[]; readonly hint: string; readonly why: string }): GuidedStep {
+export type WrongLine = { readonly p: Vec; readonly v: Vec; readonly rule: string }
+export function formStep(rng: Rng, o: { readonly name: string; readonly p: Vec; readonly v: Vec; readonly t: string; readonly wrongs: readonly WrongLine[]; readonly hint: string; readonly why: string }): GuidedStep {
   const form = paramFormLatex(o.name, o.p, [[o.t, o.v]])
   const wrongs: Wrong[] = o.wrongs.filter((w) => !sameLine(o.p, o.v, w.p, w.v)).map((w) => ({ content: math(paramFormLatex(o.name, w.p, [[o.t, w.v]])), rule: w.rule }))
   return choiceStep(rng, {
@@ -62,10 +66,10 @@ function formStep(rng: Rng, o: { readonly name: string; readonly p: Vec; readonl
 
 const lineEq = (target: Rational, p: Rational, v: Rational, t: string) => `${show(target)} = ${termsLatex([[p, ''], [v, t]])}`
 
-type Slip = { readonly t: Rational; readonly rule: string }
+export type Slip = { readonly t: Rational; readonly rule: string }
 
 // Eine Zeile der Parameterform nach dem Parameter auflösen: target = p + t · v
-function solveStep(
+export function solveStep(
   rng: Rng,
   o: { readonly id: string; readonly title: string; readonly question: string; readonly t: string; readonly target: Rational; readonly p: Rational; readonly v: Rational; readonly lead: string; readonly card: string; readonly extra?: readonly Slip[] },
 ): { readonly step: GuidedStep; readonly t: Rational; readonly slips: readonly Slip[] } {
@@ -99,7 +103,7 @@ function solveStep(
 }
 
 // Punkt der Geraden zum Parameter t (mit falschen Punkten aus den Fehlern beim Auflösen)
-function pointStep(rng: Rng, o: { readonly id?: string; readonly Q: string; readonly p: Vec; readonly v: Vec; readonly t: Rational; readonly tName: string; readonly slips: readonly Slip[]; readonly question?: string; readonly card: string }): GuidedStep {
+export function pointStep(rng: Rng, o: { readonly id?: string; readonly Q: string; readonly p: Vec; readonly v: Vec; readonly t: Rational; readonly tName: string; readonly slips: readonly Slip[]; readonly question?: string; readonly card: string }): GuidedStep {
   const q = at(o.p, o.v, o.t)
   const wrongs: Wrong[] = o.slips.map((s) => ({ content: math(pointLatex(o.Q, at(o.p, o.v, s.t))), rule: s.rule }))
   if (!ratEq(o.t, rat(1))) wrongs.push({ content: math(pointLatex(o.Q, vecAdd(o.p, o.v))), rule: 'gl-param-forgotten' })
@@ -119,11 +123,11 @@ function pointStep(rng: Rng, o: { readonly id?: string; readonly Q: string; read
 }
 
 // Werte jeder Zeile beim Einsetzen eines Punkts: t_j = (P_j − p_j) / v_j (v ohne Nullen)
-const rowTs = (P: Vec, p: Vec, v: Vec) => P.map((x, j) => ratDiv(ratSub(x, p[j]), v[j]))
+export const rowTs = (P: Vec, p: Vec, v: Vec) => P.map((x, j) => ratDiv(ratSub(x, p[j]), v[j]))
 const rowsLatex = (ts: readonly Rational[], t: string) => ts.map((x, j) => `$${COORDS[j]}$: $${t} = ${show(x)}$`).join(', ')
 
 // Entscheidung der Punktprobe: Antworten mit Begründung
-function decideStep(rng: Rng, o: { readonly P: string; readonly ts: readonly Rational[]; readonly i0: number; readonly t: string; readonly question: string; readonly subject: string }): { readonly step: GuidedStep; readonly on: boolean } {
+export function decideStep(rng: Rng, o: { readonly P: string; readonly ts: readonly Rational[]; readonly i0: number; readonly t: string; readonly question: string; readonly subject: string }): { readonly step: GuidedStep; readonly on: boolean } {
   const t0 = o.ts[o.i0]
   const j = o.ts.findIndex((x) => !ratEq(x, t0))
   const on = j < 0

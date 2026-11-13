@@ -11,6 +11,7 @@ import { SPAT_BUILDERS, SPAT_KINDS_BY_LEVEL } from './spatTasks.ts'
 import { BASIS_BUILDERS, BASIS_KINDS_BY_LEVEL } from './basisTasks.ts'
 import { LINE_BUILDERS, LINE_KINDS_BY_LEVEL } from './lineTasks.ts'
 import { PLANE_BUILDERS, PLANE_KINDS_BY_LEVEL } from './planeTasks.ts'
+import { LAGE_BUILDERS, LAGE_KINDS_BY_LEVEL } from './posTasks.ts'
 import { type DrawArrow, type VectorDrawing, emptyDrawing } from './figures.ts'
 import {
   type Built,
@@ -1152,6 +1153,7 @@ const BUILDERS: Readonly<Record<VectorKind, (rng: Rng, level: Level) => Built>> 
   ...BASIS_BUILDERS,
   ...LINE_BUILDERS,
   ...PLANE_BUILDERS,
+  ...LAGE_BUILDERS,
   connect: buildConnect,
   combo: buildCombo,
   length: buildLength,
@@ -1172,11 +1174,11 @@ export function buildVectorTask(ref: TaskRef, kind?: VectorKind): VectorTask {
   // Baustein aus der Nummer: „skalar.2-4711" zieht aus dem Skalarprodukt, „projektion.2-4711" aus Projektion und
   // Zerlegung (Schritt 3a), „kraefte.2-4711" aus den Kräften (Schritt 3b), „kreuz.2-4711" aus Kreuzprodukt und Fläche
   // (Schritt 4a), „spat.2-4711" aus Spatprodukt und Volumen (Schritt 4b), „basis.2-4711" aus Linearkombination und Basis
-  // (Schritt 5), „gerade.2-4711“ und „ebene.2-4711“ aus der Tätigkeit „Geraden und Ebenen“ (Schritt 6), alles andere aus
+  // (Schritt 5), „gerade.2-4711“ und „ebene.2-4711“ aus der Tätigkeit „Geraden und Ebenen“ (Schritt 6), „lage.2-4711“ aus dem Baustein „Lage“ (Schritt 7a), alles andere aus
   // „Rechnen und Länge"
   const block = seedBlock(ref.seed)?.block
   const dotBlock = block === 'skalar'
-  const kinds = dotBlock ? DOT_KINDS_BY_LEVEL : block === 'projektion' ? PROJ_KINDS_BY_LEVEL : block === 'kraefte' ? FORCE_KINDS_BY_LEVEL : block === 'kreuz' ? CROSS_KINDS_BY_LEVEL : block === 'spat' ? SPAT_KINDS_BY_LEVEL : block === 'basis' ? BASIS_KINDS_BY_LEVEL : block === 'gerade' ? LINE_KINDS_BY_LEVEL : block === 'ebene' ? PLANE_KINDS_BY_LEVEL : KINDS_BY_LEVEL
+  const kinds = dotBlock ? DOT_KINDS_BY_LEVEL : block === 'projektion' ? PROJ_KINDS_BY_LEVEL : block === 'kraefte' ? FORCE_KINDS_BY_LEVEL : block === 'kreuz' ? CROSS_KINDS_BY_LEVEL : block === 'spat' ? SPAT_KINDS_BY_LEVEL : block === 'basis' ? BASIS_KINDS_BY_LEVEL : block === 'gerade' ? LINE_KINDS_BY_LEVEL : block === 'ebene' ? PLANE_KINDS_BY_LEVEL : block === 'lage' ? LAGE_KINDS_BY_LEVEL : KINDS_BY_LEVEL
   // Zieh-Aufgaben (Schritt 2b) mit festem Anteil und eigenem Zufall: Die übrigen Nummern behalten ihre Aufgabe
   const drag = dotBlock && createRng(`vektoren-ziehen:${ref.level}:${ref.seed}`).chance(DRAG_SHARE)
   const chosen = kind ?? (drag ? 'drag' : rng.pick(kinds[ref.level]))

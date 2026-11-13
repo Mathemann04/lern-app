@@ -27,7 +27,7 @@ export const vectorExampleLatex = (ref: TaskRef): string => buildVectorTask(ref)
 export const prepareVectorFree = (ref: TaskRef): FreeTask => prepareVectorFreeTask(ref)
 
 // Tätigkeit „Geraden und Ebenen“ (M7 Schritt 6): dieselbe Engine, eigene Bausteine
-export const LINE_BLOCK_IDS = ['gerade', 'ebene'] as const
+export const LINE_BLOCK_IDS = ['gerade', 'ebene', 'lage'] as const
 
 export function nextLineSeed(_level: Level, parts?: ReadonlySet<string>): number {
   const chosen = LINE_BLOCK_IDS.filter((id) => !parts || parts.has(id))

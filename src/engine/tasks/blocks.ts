@@ -22,6 +22,8 @@ export const BLOCK_GROUPS: readonly BlockGroup[] = [
   { id: 'vektor-grundlagen', title: 'Grundlagen' },
   // Tätigkeit „Geraden und Ebenen“ (M7 Schritt 6)
   { id: 'geo-formen', title: 'Formen' },
+  // seit Schritt 7a
+  { id: 'geo-lage', title: 'Lage, Abstände, Winkel' },
 ]
 
 // Gleichungen umstellen. „Lineare Gleichungen" sind die Aufgaben ganz ohne andere Bausteine (die Variable steht nur
@@ -68,18 +70,19 @@ export const VECTOR_PLAYABLE_COMBOS: Readonly<Record<1 | 2 | 3 | 4 | 5, readonly
   5: ['rechnen', 'skalar', 'projektion', 'kraefte', 'kreuz', 'spat', 'basis'],
 }
 
-// Geraden und Ebenen (M7 Schritt 6): „Geraden“ und „Ebenen“ (Formen); Lage, Abstände und Winkel folgen in Schritt 7
+// Geraden und Ebenen (M7 Schritt 6): „Geraden“ und „Ebenen“ (Formen); seit Schritt 7a „Lage“, Abstände und Winkel folgen in Schritt 7b
 export const LINE_BLOCKS: readonly Block[] = [
   { id: 'gerade', title: 'Geraden', note: 'Parameterform, Punkt auf der Geraden, Punktprobe, Spurpunkte, Punkte mit Abstand', group: 'geo-formen' },
   { id: 'ebene', title: 'Ebenen', note: 'Parameter-, Normalen- und Koordinatenform, umrechnen, Hessesche Normalform, Spurpunkte', group: 'geo-formen' },
+  { id: 'lage', title: 'Lage', note: 'zwei Geraden, Gerade und Ebene, zwei Ebenen, Schnittpunkt, Durchstoßpunkt, Schnittgerade', group: 'geo-lage' },
 ]
 
 export const LINE_PLAYABLE_COMBOS: Readonly<Record<1 | 2 | 3 | 4 | 5, readonly string[]>> = {
-  1: ['gerade', 'ebene'],
-  2: ['gerade', 'ebene'],
-  3: ['gerade', 'ebene'],
-  4: ['gerade', 'ebene'],
-  5: ['gerade', 'ebene'],
+  1: ['gerade', 'ebene', 'lage'],
+  2: ['gerade', 'ebene', 'lage'],
+  3: ['gerade', 'ebene', 'lage'],
+  4: ['gerade', 'ebene', 'lage'],
+  5: ['gerade', 'ebene', 'lage'],
 }
 
 // Feste Nummer je Baustein für Aufgabennummern mit Baustein wie „exp.1-4711" (M6 Schritt 4, taskNumber.ts). Gilt für alle
@@ -126,4 +129,6 @@ export const BLOCK_CODES: Readonly<Record<string, number>> = {
   // Tätigkeit „Geraden und Ebenen“ (M7 Schritt 6): Geraden („gerade.1-4711“) und Ebenen („ebene.1-4711“)
   gerade: 28,
   ebene: 29,
+  // M7 Schritt 7a: Lage („lage.1-4711“)
+  lage: 30,
 }

@@ -51,7 +51,7 @@ function gcdInt(a: bigint, b: bigint): bigint {
 }
 
 // Eine Gleichung: Faktoren vor den Unbekannten, rechte Seite r (+ rt · Parameter)
-type Row = { readonly c: readonly Rational[]; readonly r: Rational; readonly rt?: Rational }
+export type Row = { readonly c: readonly Rational[]; readonly r: Rational; readonly rt?: Rational }
 
 // Zeile i der Vektorgleichung k1·v1 + k2·v2 + … = Ziel (rechts optional mit Parameter)
 const rowsOf = (vs: readonly Vec[], target: Vec, slope?: Vec): Row[] => target.map((r, i) => ({ c: vs.map((v) => v[i]), r, ...(slope ? { rt: slope[i] } : {}) }))
@@ -74,7 +74,7 @@ const lhsValue = (row: Row, xs: readonly Rational[]) => sumOf(row.c.map((c, i) =
 
 // ------------------------------------------------------------------ LaTeX
 
-const ROMAN = ['I', 'II', 'III', 'IV'] as const
+export const ROMAN = ['I', 'II', 'III', 'IV'] as const
 const tag = (label: string) => `\\text{${label}}`
 
 function rowLatex(row: Row, unk: readonly string[], t = 't'): string {
@@ -83,7 +83,7 @@ function rowLatex(row: Row, unk: readonly string[], t = 't'): string {
   return `${lhs} = ${rhs}`
 }
 
-const systemLatex = (rows: readonly Row[], unk: readonly string[], labels: readonly string[], t = 't') =>
+export const systemLatex = (rows: readonly Row[], unk: readonly string[], labels: readonly string[], t = 't') =>
   `\\begin{array}{ll} ${rows.map((r, i) => `${tag(`${labels[i]}:`)} & ${rowLatex(r, unk, t)}`).join(' \\\\ ')} \\end{array}`
 
 // Summe von Produkten Faktor · Wert: 2 \cdot 3 - 1 \cdot (-2)
@@ -240,7 +240,7 @@ function backsubStep(
 }
 
 // Probe in den übrigen Gleichungen; mode 'span' schließt daraus, ob das Ziel im Spann liegt
-function probeStep(
+export function probeStep(
   rng: Rng,
   o: { readonly rows: readonly Row[]; readonly labels: readonly string[]; readonly xs: readonly [Rational, Rational]; readonly unk: readonly string[]; readonly target: string; readonly mode: 'span' | 'check' },
 ): GuidedStep {
@@ -484,7 +484,7 @@ const tooBig = (v: Vec, lim: number) => v.some((x) => Math.abs(num(x)) > lim)
 // ------------------------------------------------------------------ Arten
 
 // λ und μ aus zwei Zeilen: Schritt für λ (μ fällt weg), dann μ durch Einsetzen
-function solveTwo(rng: Rng, rows: readonly Row[], i: number, j: number, unk: readonly string[], sol: readonly [Rational, Rational]): GuidedStep[] {
+export function solveTwo(rng: Rng, rows: readonly Row[], i: number, j: number, unk: readonly string[], sol: readonly [Rational, Rational]): GuidedStep[] {
   const step = elimValueStep(rng, { id: 'erste', rows: [rows[i], rows[j]], labels: [ROMAN[i], ROMAN[j]], x: 0, y: 1, unk, sol })
   const back = rng.pick([i, j])
   return [

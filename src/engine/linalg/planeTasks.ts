@@ -66,7 +66,7 @@ type WrongCoord = { readonly n: Vec; readonly d: Rational; readonly rule: string
 
 // Koordinatenform aus Normalenvektor n und Punkt p: d = n · p. Falsche Formen, die dieselbe Ebene beschreiben, fallen weg
 // pName: Name des Punkts (ohne Name: der Stützpunkt)
-function coordStep(rng: Rng, o: { readonly name: string; readonly n: Vec; readonly p: Vec; readonly pName?: string; readonly extra?: readonly WrongCoord[]; readonly from?: Vec }): GuidedStep {
+export function coordStep(rng: Rng, o: { readonly name: string; readonly n: Vec; readonly p: Vec; readonly pName?: string; readonly extra?: readonly WrongCoord[]; readonly from?: Vec }): GuidedStep {
   const pText = o.pName ? `den Punkt $${o.pName}$` : `den Stützpunkt $${pointLatex('P', o.p)}$`
   const d = dOf(o.n, o.p)
   const wrongs: WrongCoord[] = [
@@ -95,7 +95,7 @@ function coordStep(rng: Rng, o: { readonly name: string; readonly n: Vec; readon
 }
 
 // Punktprobe in der Koordinatenform: einsetzen und vergleichen, in einem Schritt (falsche Antworten aus Rechenfehlern)
-function probeStep(rng: Rng, o: { readonly name: string; readonly n: Vec; readonly d: Rational; readonly P: Vec; readonly pName: string }): { readonly step: GuidedStep; readonly on: boolean } {
+export function probeStep(rng: Rng, o: { readonly name: string; readonly n: Vec; readonly d: Rational; readonly P: Vec; readonly pName: string }): { readonly step: GuidedStep; readonly on: boolean } {
   const val = vecDot(o.n, o.P)
   const on = ratEq(val, o.d)
   const verdict = (w: Rational) => `$${show(w)} ${ratEq(w, o.d) ? '=' : '\\ne'} ${show(o.d)}$: $${o.pName}$ liegt ${ratEq(w, o.d) ? '' : 'nicht '}in $${o.name}$.`
@@ -244,7 +244,7 @@ function hesseNormal(rng: Rng): { readonly n: Vec; readonly len: number } {
 }
 
 // Zwei Richtungen senkrecht auf n, gemischt (ganzzahlig, nicht parallel)
-function directionsFor(rng: Rng, n: Vec): readonly [Vec, Vec] {
+export function directionsFor(rng: Rng, n: Vec): readonly [Vec, Vec] {
   for (;;) {
     const [u0, w0] = planeDirections(n)
     const k = rat(rng.pick([-1, 0, 1]))
@@ -263,7 +263,7 @@ function names(rng: Rng) {
 }
 
 // Drei Punkte einer Ebene (nicht auf einer Geraden), Richtungen AB und AC
-function threePoints(rng: Rng): { readonly a: Vec; readonly b: Vec; readonly c: Vec; readonly u: Vec; readonly w: Vec } {
+export function threePoints(rng: Rng): { readonly a: Vec; readonly b: Vec; readonly c: Vec; readonly u: Vec; readonly w: Vec } {
   for (;;) {
     const a = pickPoint(rng, 3, 4)
     const b = pickPoint(rng, 3, 4)
