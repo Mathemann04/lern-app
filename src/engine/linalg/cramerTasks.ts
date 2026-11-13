@@ -256,7 +256,9 @@ function conditionStep(rng: Rng, D: Quad, rs: readonly Rational[]): GuidedStep {
     { content: eq(rs), rule: 'cramer-cond-flip' },
     { content: 'für alle $a$', rule: 'cramer-cond-all' },
   ]
-  if (rs.some((r) => !isZero(r))) wrongs.push({ content: ne(rs.map(ratNeg)), rule: 'det-root-sign' })
+  // Vorzeichen der Nullstellen vertauscht, nur wenn das eine andere Menge ist (nicht bei ±r)
+  const flipped = rs.map(ratNeg)
+  if (!flipped.every((r) => rs.some((q) => ratEq(q, r)))) wrongs.push({ content: ne(sortRats(flipped)), rule: 'det-root-sign' })
   const zero = rs.map((r) => math(`${PARAM} = ${ratLatex(r)}`)).join(' oder ')
   return choiceStep(rng, {
     id: 'bedingung',

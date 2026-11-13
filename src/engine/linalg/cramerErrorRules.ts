@@ -72,8 +72,7 @@ export const CRAMER_ERROR_RULES: readonly VectorErrorRule[] = [
     name: 'Nur eine Lösung der quadratischen Gleichung genommen',
     wrongFormula: String.raw`(a - 1)(a + 3) = 0 \;\Rightarrow\; a = 1`,
     why: {
-      detailed: String.raw`Nach dem Malnehmen mit dem Nenner steht eine **quadratische** Gleichung in $a$ da. Sie kann zwei Lösungen haben, und beide gehören zur Antwort, solange dort $\det A 
-e 0$ ist.`,
+      detailed: String.raw`Nach dem Malnehmen mit dem Nenner steht eine **quadratische** Gleichung in $a$ da. Sie kann zwei Lösungen haben, und beide gehören zur Antwort, solange dort $\det A \ne 0$ ist.`,
       short: String.raw`Quadratische Gleichung: beide Lösungen prüfen.`,
     },
   },

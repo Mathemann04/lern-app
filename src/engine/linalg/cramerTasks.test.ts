@@ -204,6 +204,11 @@ describe('Cramersche Regel', () => {
         const zeros: number[] = []
         for (let a = -30; a <= 30; a++) if (Math.abs(detN(at(a))) < 1e-9) zeros.push(a)
         expect(excluded, task.form).toEqual(zeros)
+        // keine falsche Antwort schließt dieselben Werte aus (z. B. ±2 in anderer Reihenfolge)
+        for (const c of step.choices.filter((x) => !x.correct)) {
+          const other = [...c.content.matchAll(/a \\ne (-?\d+)/g)].map((m) => Number(m[1])).sort((p, q) => p - q)
+          if (c.content.includes('\\ne')) expect(other, `${task.form} ${c.errorRuleId}`).not.toEqual(zeros)
+        }
         const target = task.steps.find((s) => s.id === 'vorgabe')!
         if (target.choices.some((c) => c.errorRuleId === 'cramer-excluded')) traps++
       }
@@ -232,7 +237,12 @@ describe('Cramersche Regel: Fehler und Lernkarten', () => {
     expect(CRAMER_ERROR_RULES.map((r) => r.id).filter((id) => !used.has(id))).toEqual([])
     const shown = new Set(cardsInTopic('matrizen').flatMap((c) => c.errors))
     for (const id of used) expect(shown.has(id), id).toBe(true)
-    for (const rule of CRAMER_ERROR_RULES) expect(latexProblem(rule.wrongFormula, { checkUgly: false }), rule.id).toBeNull()
+    for (const rule of CRAMER_ERROR_RULES) {
+      expect(latexProblem(rule.wrongFormula, { checkUgly: false }), rule.id).toBeNull()
+      // keine Zeilenumbrüche oder Steuerzeichen (z. B. aus \ne beim Schreiben mit Skripten)
+      // oxlint-disable-next-line no-control-regex
+      for (const text of [rule.name, rule.wrongFormula, rule.why.detailed, rule.why.short]) expect(text, rule.id).not.toMatch(/[\u0000-\u001f]/)
+    }
   })
 
   it('jede Karte der Aufgaben gibt es, und jedes Beispiel ist eine Aufgabe der genannten Art, die die Gegenprobe besteht', () => {
