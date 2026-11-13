@@ -1079,3 +1079,22 @@ Neue Entscheidungen unten anfügen.
   parallel (sonst kein Winkelbogen); „Fast: Richtung stimmt“ nur beim Winkel ab der $x$-Achse und nur, wenn sonst alles
   stimmt; ein getipptes „m“ hinter einer Länge stört nicht. Neue Tests: Bilder über 1500 Nummern je Stufe, kein Text
   zu einer falschen Antwort enthält die richtige.
+- 13.11.2026: M7 Schritt 4 in zwei Teile geteilt (wie im Plan vorgesehen): 4a Baustein „Kreuzprodukt und Fläche“
+  (Code 25, `kreuz.2-4711`), 4b „Spatprodukt und Volumen“. Das Kreuzprodukt rechnet in einem Schritt, das Schema mit
+  Hilfszeilen steht in der Erklärung (so wie in der Vorlesung: Zeile abdecken, mit den zwei Zeilen darunter über Kreuz).
+  Stufe 1 Kreuzprodukt mit kleinen Zahlen und Nullen, Fläche in der $x$-$y$-Ebene (dritter Eintrag $0$, Bild in der
+  Ebene); Stufe 2 im Raum, dazu $\vec b \times \vec a$, Dreieck aus Punkten, Normalenvektor einer Ebene durch drei
+  Punkte; Stufe 3 vierte Ecke und Fläche, Normale der Länge $1$, Abstand Punkt–Gerade über Fläche durch Grundseite;
+  Stufe 4 parallel mit Parameter (über $\vec a \times \vec b = \vec 0$), gegebene Fläche (zwei Lösungen), Normale
+  gegebener Länge (zwei Lösungen); Stufe 5 kleinste Fläche (Scheitel über die Ableitung), Normale gegebener Länge zu drei
+  Punkten, Fläche und Abstand im Dreieck. Mit Parameter ist „Reihenfolge vertauscht“ keine falsche Antwort, weil
+  $-(\vec a \times \vec b)$ dort dieselbe Fläche und dieselbe Parallelität ergibt. Zwei Vektoren als Lösungen
+  ($\vec n_1$, $\vec n_2$) dürfen im freien Modus in beliebiger Reihenfolge stehen; fehlt einer, ist das „zweite Lösung
+  vergessen“. Die Normale im Bild ist so lang wie die Fläche, höchstens 1,6-mal so lang wie der längere Pfeil (sonst
+  verkürzt mit Hinweis). Flächen heißen $A$, deshalb tragen Punkte hier die Namen $P, Q, R, S$ bzw. $K, L, M, N$ bzw.
+  $U, V, W, X$.
+- 13.11.2026: M7 Schritt 4a, Funde der unabhängigen Prüfung behoben (keine falsche Mathematik): Die Erklärung zu
+  $\vec b \times \vec a$ sagte „Mittelfinger zeigt nach unten“, richtig ist „in die Gegenrichtung von
+  $\vec a \times \vec b$“; „$-1\,\vec a$“ heißt jetzt „$-\vec a$“; keine Kette mit doppeltem Glied (z. B. beim Abstand,
+  wenn $\lvert\vec v\rvert$ ganzzahlig ist); beim Dreieck mit Parameter sagt das Bild, dass das Dreieck die Hälfte ist.
+  Der Test prüft jetzt auch „$-1\,\vec a$“ und doppelte Glieder.

@@ -801,7 +801,7 @@ export const SUBJECTS: readonly Subject[] = [
           {
             id: VECTORS,
             title: 'Vektoren',
-            description: 'Mit Pfeilen rechnen, Längen, Skalarprodukt und Winkel, Projektion und Zerlegung, Kräfte, mit Bildern zum Abspielen und Drehen',
+            description: 'Mit Pfeilen rechnen, Längen, Skalarprodukt und Winkel, Projektion und Zerlegung, Kräfte, Kreuzprodukt und Fläche, mit Bildern zum Abspielen und Drehen',
             icon: 'vectors',
             tone: 'cyan',
             cards: 'vektoren',

@@ -1,6 +1,6 @@
 # Plan für Meilenstein 7: Vektoren, Geraden und Ebenen, Matrizen
 
-Status: **freigegeben** (Nutzer, 12.11.2026: „Passt alles“). Schritte 1a, 1b, 2a, 2b und 3a fertig (12.11.2026), 3b fertig (13.11.2026).
+Status: **freigegeben** (Nutzer, 12.11.2026: „Passt alles“). Schritte 1a, 1b, 2a, 2b und 3a fertig (12.11.2026), 3b und 4a fertig (13.11.2026).
 
 Entwurf zum Ansehen und Anfassen (privat, nur für den Nutzer):
 https://claude.ai/artifact/WXe4sjavAGF64jyAWSa3hi. Er zeigt acht Bilder und Aufgaben im geplanten Stil. Die Seite ist
@@ -101,7 +101,7 @@ Animationen starten nur auf Knopfdruck („Abspielen“) und entfallen, wenn am 
   vergessen, Zeile statt Spalte (Falk, Cramer), Produkt nicht definiert, $(AB)^{\mathsf T} = A^{\mathsf T}B^{\mathsf T}$,
   $\lambda$ statt $\lambda^n$, Vorzeichen beim Zeilentausch, Sarrus bei 4×4, rechte Seite vergessen, Nullzeile falsch
   gedeutet, gleicher Parameter für zwei Geraden, beim Ziehen (2b): nur vertauscht oder nur ein Vorzeichen geändert, rechter Winkel als spitz
-  oder stumpf gezählt, rechter Winkel an der falschen Ecke, Seiten statt Diagonalen senkrecht, bei der Projektion (3a) die 15 Fehler aus Schritt 3a, bei den Kräften (3b) die 26 Fehler aus Schritt 3b, cos statt sin bei Gerade–Ebene, „$A - 2$“ ohne $E$, auf der falschen
+  oder stumpf gezählt, rechter Winkel an der falschen Ecke, Seiten statt Diagonalen senkrecht, bei der Projektion (3a) die 15 Fehler aus Schritt 3a, bei den Kräften (3b) die 26 Fehler aus Schritt 3b, beim Kreuzprodukt (4a) die 14 Fehler aus Schritt 4a, cos statt sin bei Gerade–Ebene, „$A - 2$“ ohne $E$, auf der falschen
   Seite ausgeklammert. Jede mit Katalogbeispiel, eigenem Text für „Warum ist das falsch?“ und Platz auf einer Lernkarte
   (Regeln aus CLAUDE.md).
 - **Aufgabennummern** wie seit M6 mit Baustein (`taskNumber.ts`); neue Bausteine bekommen die nächsten freien Nummern in
@@ -186,8 +186,22 @@ Request.
      vertauscht, Plus statt Minus im Moment, Skalarprodukt statt Moment, Hebel ab dem Ursprung, Hebelarm schräg
      gemessen, Drehsinn falsch abgelesen, Richtung nicht auf Länge 1 gebracht, falsche Komponente genommen,
      Seilkräfte vertauscht.
-4. **Kreuzprodukt und Spatprodukt:** räumliche Ansicht zum Drehen, Schema mit Hilfszeilen, Flächen und Volumen
-   (Spat, Prisma, Pyramide, Tetraeder), komplanar, Volumen mit Parameter.
+4. **Kreuzprodukt und Spatprodukt**, in zwei Teilen:
+   - **4a (fertig, 13.11.2026):** Baustein „Kreuzprodukt und Fläche“ (`kreuz`, Code 25) in den Stufen 1 bis 5, geführt
+     und frei. Sechs Arten: Kreuzprodukt (Schema mit Hilfszeilen in der Erklärung; Stufe 2 dazu $\vec b \times \vec a$),
+     Fläche von Parallelogramm und Dreieck (Stufe 1 in der $x$-$y$-Ebene, Stufe 2 Dreieck aus Punkten, Stufe 3 vierte
+     Ecke und Fläche), Normalenvektor (Ebene durch drei Punkte, Länge $1$, gegebene Länge mit zwei Lösungen), Abstand
+     Punkt–Gerade als Fläche durch Grundseite (Stufe 5 mit der Fläche des Dreiecks), parallel mit Parameter, Fläche mit
+     Parameter (Stufe 4 gegeben, zwei Lösungen; Stufe 5 am kleinsten). Bilder im Raum zum Drehen: Parallelogramm bzw.
+     Dreieck, beim Abspielen erscheint die Fläche, die Normale wächst bis zur Länge der Fläche, dann der rechte Winkel;
+     beim Abstand Parallelogramm und Lot mit Lotfußpunkt. Frei: zwei Vektoren als Lösungen in beliebiger Reihenfolge.
+     Vier Lernkarten, 14 neue typische Fehler: Vorzeichen der mittleren Komponente, Reihenfolge vertauscht, Plus statt
+     Minus, falsche Zeilen im Schema, Einträge an derselben Stelle malgenommen, beim Dreieck die Hälfte vergessen, beim
+     Parallelogramm halbiert, Längen malgenommen (Winkel vergessen), Skalarprodukt statt Kreuzprodukt, nur auf Länge 1
+     gebracht, Fläche statt Abstand, durch das Quadrat der Grundseite geteilt, parallel und senkrecht verwechselt,
+     Scheitel ohne die 2.
+   - **4b:** Baustein „Spatprodukt und Volumen“: Spatprodukt (auch mit Sarrus), Volumen von Spat, Prisma, Pyramide und
+     Tetraeder, komplanar, Volumen mit Parameter (zwei Lösungen), Bild: Spat zieht sich aus dem Parallelogramm auf.
 5. **Linearkombination und Basis:** Spann im Raum, kleine Gleichungssysteme Schritt für Schritt.
 6. **Geraden und Ebenen, Formen:** Tätigkeit „Geraden und Ebenen“; Parameter-, Normalen-, Koordinatenform, Hesse,
    umrechnen, Spurpunkte.

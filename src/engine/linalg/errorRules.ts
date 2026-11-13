@@ -785,6 +785,133 @@ export const VECTOR_ERROR_RULES: readonly VectorErrorRule[] = [
       short: String.raw`Das steilere Seil trägt mehr; Probe in beiden Gleichungen.`,
     },
   },
+  // Kreuzprodukt und Fläche (M7 Schritt 4a)
+  {
+    id: 'vec-cross-middle-sign',
+    name: 'Vorzeichen der mittleren Komponente',
+    wrongFormula: String.raw`(\vec a \times \vec b)_2 = a_1 b_3 - a_3 b_1`,
+    why: {
+      detailed: String.raw`Die mittlere Komponente ist die Falle des Kreuzprodukts: $(\vec a \times \vec b)_2 = a_3 b_1 - a_1 b_3$. Mit den Hilfszeilen passiert das nicht: Deck die zweite Zeile ab und rechne mit den **zwei Zeilen darunter** (dritte Zeile und die wiederholte erste) über Kreuz, links oben mal rechts unten minus rechts oben mal links unten.`,
+      short: String.raw`Mitte: $a_3 b_1 - a_1 b_3$; mit den Hilfszeilen immer die zwei Zeilen darunter nehmen.`,
+    },
+  },
+  {
+    id: 'vec-cross-order',
+    name: 'Reihenfolge beim Kreuzprodukt vertauscht',
+    wrongFormula: String.raw`\vec b \times \vec a = \vec a \times \vec b`,
+    why: {
+      detailed: String.raw`Beim Kreuzprodukt zählt die Reihenfolge: $\vec b \times \vec a = -(\vec a \times \vec b)$. Beide stehen senkrecht auf $\vec a$ und $\vec b$, zeigen aber in entgegengesetzte Richtungen (Rechte-Hand-Regel: Daumen der erste, Zeigefinger der zweite Vektor, der Mittelfinger zeigt das Ergebnis). Im Schema steht der erste Vektor links.`,
+      short: String.raw`$\vec b \times \vec a = -(\vec a \times \vec b)$: erster Vektor links im Schema.`,
+    },
+  },
+  {
+    id: 'vec-cross-plus',
+    name: 'Plus statt Minus im Schema',
+    wrongFormula: String.raw`(\vec a \times \vec b)_1 = a_2 b_3 + a_3 b_2`,
+    why: {
+      detailed: String.raw`Jede Komponente ist eine **Differenz** zweier Produkte: links oben mal rechts unten **minus** rechts oben mal links unten, z. B. $(\vec a \times \vec b)_1 = a_2 b_3 - a_3 b_2$. Probe: Das Ergebnis muss mit $\vec a$ und mit $\vec b$ das Skalarprodukt $0$ haben.`,
+      short: String.raw`Über Kreuz malnehmen und die Produkte **abziehen**.`,
+    },
+  },
+  {
+    id: 'vec-cross-rows',
+    name: 'Falsche Zeilen im Schema',
+    wrongFormula: String.raw`(\vec a \times \vec b)_1 = a_1 b_2 - a_2 b_1`,
+    why: {
+      detailed: String.raw`Für die erste Komponente deckst du die **erste** Zeile ab und rechnest mit der zweiten und dritten; für die zweite mit der dritten und der wiederholten ersten; für die dritte mit der ersten und zweiten. Wer mit den falschen Zeilen anfängt, bekommt die richtigen Zahlen an den falschen Stellen.`,
+      short: String.raw`Komponente $i$: Zeile $i$ abdecken, mit den zwei Zeilen darunter rechnen.`,
+    },
+  },
+  {
+    id: 'vec-cross-entrywise',
+    name: 'Einträge an derselben Stelle malgenommen',
+    wrongFormula: String.raw`\vec a \times \vec b = \begin{pmatrix} a_1 b_1 \\ a_2 b_2 \\ a_3 b_3 \end{pmatrix}`,
+    why: {
+      detailed: String.raw`Eintrag für Eintrag malnehmen ist kein Kreuzprodukt (und auch kein Skalarprodukt, das wäre die Summe davon). Beim Kreuzprodukt wird **über Kreuz** gerechnet: Jede Komponente nimmt die Einträge der beiden **anderen** Zeilen, z. B. $(\vec a \times \vec b)_1 = a_2 b_3 - a_3 b_2$.`,
+      short: String.raw`Über Kreuz rechnen: jede Komponente aus den beiden anderen Zeilen.`,
+    },
+  },
+  {
+    id: 'vec-area-half-forgotten',
+    name: 'Beim Dreieck die Hälfte vergessen',
+    wrongFormula: String.raw`A_{\triangle} = \lvert \vec a \times \vec b \rvert`,
+    why: {
+      detailed: String.raw`$\lvert \vec a \times \vec b \rvert$ ist die Fläche des **Parallelogramms**, das $\vec a$ und $\vec b$ aufspannen. Die Diagonale teilt es in zwei gleiche Dreiecke, das Dreieck hat also die Fläche $\frac{1}{2}\lvert \vec a \times \vec b \rvert$.`,
+      short: String.raw`Dreieck: $A = \frac{1}{2}\lvert \vec a \times \vec b \rvert$.`,
+    },
+  },
+  {
+    id: 'vec-area-half-parallelogram',
+    name: 'Beim Parallelogramm halbiert',
+    wrongFormula: String.raw`A_{\square} = \frac{1}{2}\lvert \vec a \times \vec b \rvert`,
+    why: {
+      detailed: String.raw`Die Länge des Kreuzprodukts ist schon die ganze Fläche des Parallelogramms aus $\vec a$ und $\vec b$: $A = \lvert \vec a \rvert\,\lvert \vec b \rvert \sin\varphi = \lvert \vec a \times \vec b \rvert$. Das $\frac{1}{2}$ gehört nur zum Dreieck.`,
+      short: String.raw`Parallelogramm: $A = \lvert \vec a \times \vec b \rvert$, ohne $\frac{1}{2}$.`,
+    },
+  },
+  {
+    id: 'vec-area-lengths',
+    name: 'Längen malgenommen, Winkel vergessen',
+    wrongFormula: String.raw`A = \lvert \vec a \rvert \cdot \lvert \vec b \rvert`,
+    why: {
+      detailed: String.raw`Seite mal Seite ist nur beim Rechteck die Fläche. Beim Parallelogramm zählt die Höhe: $A = \lvert \vec a \rvert\,\lvert \vec b \rvert \sin\varphi$, und genau das ist $\lvert \vec a \times \vec b \rvert$. Rechne deshalb erst das Kreuzprodukt und dann seine Länge.`,
+      short: String.raw`$A = \lvert \vec a \rvert\,\lvert \vec b \rvert \sin\varphi = \lvert \vec a \times \vec b \rvert$.`,
+    },
+  },
+  {
+    id: 'vec-area-dot',
+    name: 'Skalarprodukt statt Kreuzprodukt',
+    wrongFormula: String.raw`A = \lvert \vec a \cdot \vec b \rvert`,
+    why: {
+      detailed: String.raw`Das Skalarprodukt $\lvert \vec a \rvert\,\lvert \vec b \rvert \cos\varphi$ misst, wie sehr zwei Vektoren in dieselbe Richtung zeigen; bei senkrechten ist es $0$, obwohl die Fläche dann am größten ist. Die Fläche gehört zum Sinus, also zum Kreuzprodukt: $A = \lvert \vec a \times \vec b \rvert$.`,
+      short: String.raw`Fläche: Kreuzprodukt (Sinus), nicht Skalarprodukt (Kosinus).`,
+    },
+  },
+  {
+    id: 'vec-normal-no-length',
+    name: 'Auf Länge 1 gebracht, aber nicht gestreckt',
+    wrongFormula: String.raw`\vec n = \frac{\vec a \times \vec b}{\lvert \vec a \times \vec b \rvert} \text{ statt Länge } 6`,
+    why: {
+      detailed: String.raw`Nach dem Teilen durch die Länge hat der Vektor die Länge $1$. Für eine andere gewünschte Länge nimmst du ihn danach noch mit dieser Länge mal.`,
+      short: String.raw`Erst auf Länge $1$ bringen, dann mit der gewünschten Länge malnehmen.`,
+    },
+  },
+  {
+    id: 'vec-height-no-divide',
+    name: 'Fläche statt Abstand',
+    wrongFormula: String.raw`d = \lvert \vec v \times \overrightarrow{PQ} \rvert`,
+    why: {
+      detailed: String.raw`$\lvert \vec v \times \overrightarrow{PQ} \rvert$ ist die Fläche des Parallelogramms aus $\vec v$ und $\overrightarrow{PQ}$. Fläche ist Grundseite mal Höhe, und die Höhe ist der Abstand. Teile deshalb noch durch die Grundseite $\lvert \vec v \rvert$.`,
+      short: String.raw`$d = \frac{\lvert \vec v \times \overrightarrow{PQ} \rvert}{\lvert \vec v \rvert}$: Fläche durch Grundseite.`,
+    },
+  },
+  {
+    id: 'vec-height-squared',
+    name: 'Durch das Quadrat der Grundseite geteilt',
+    wrongFormula: String.raw`d = \frac{\lvert \vec v \times \overrightarrow{PQ} \rvert}{\lvert \vec v \rvert^2}`,
+    why: {
+      detailed: String.raw`Fläche = Grundseite mal Höhe, also Höhe = Fläche durch Grundseite, einmal geteilt. Das Quadrat $\lvert \vec v \rvert^2$ gehört zur Projektion (dem Faktor vor $\vec v$), nicht zum Abstand mit dem Kreuzprodukt.`,
+      short: String.raw`Einmal durch $\lvert \vec v \rvert$ teilen, nicht durch $\lvert \vec v \rvert^2$.`,
+    },
+  },
+  {
+    id: 'vec-parallel-dot',
+    name: 'Parallel und senkrecht verwechselt',
+    wrongFormula: String.raw`\vec a \parallel \vec b \iff \vec a \cdot \vec b = 0`,
+    why: {
+      detailed: String.raw`$\vec a \cdot \vec b = 0$ heißt **senkrecht**. Parallel heißt: Die Vektoren spannen keine Fläche auf, also $\vec a \times \vec b = \vec 0$; jede Komponente des Kreuzprodukts muss $0$ sein. Probe: Dann ist der eine ein Vielfaches des anderen.`,
+      short: String.raw`Parallel: $\vec a \times \vec b = \vec 0$; senkrecht: $\vec a \cdot \vec b = 0$.`,
+    },
+  },
+  {
+    id: 'vec-area-min-vertex',
+    name: 'Scheitel ohne die 2',
+    wrongFormula: String.raw`t^* = -\frac{q}{p} \text{ statt } -\frac{q}{2p}`,
+    why: {
+      detailed: String.raw`Die Parabel $p\,t^2 + q\,t + r$ hat ihren Scheitel dort, wo die Ableitung $2p\,t + q$ gleich $0$ ist, also bei $t = -\frac{q}{2p}$. Die $2$ kommt aus der Ableitung von $t^2$.`,
+      short: String.raw`Scheitel: Ableitung $2p\,t + q = 0$, also durch $2p$ teilen.`,
+    },
+  },
 ]
 
 export const vectorErrorRule = (id: string): VectorErrorRule => {
