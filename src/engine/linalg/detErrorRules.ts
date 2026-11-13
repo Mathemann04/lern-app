@@ -7,7 +7,7 @@ export const DET_ERROR_RULES: readonly VectorErrorRule[] = [
   // ---------------------------------------------------------------- 2 × 2 und Sarrus
   {
     id: 'det-2-plus',
-    name: 'Plus statt Minus bei der 2 × 2-Determinante',
+    name: 'Plus statt Minus bei der $2 \\times 2$-Determinante',
     wrongFormula: String.raw`\begin{vmatrix} 2 & 3 \\ 1 & 4 \end{vmatrix} = 2 \cdot 4 + 3 \cdot 1`,
     why: {
       detailed: String.raw`Bei einer $2 \times 2$-Matrix gilt $\begin{vmatrix} a & b \\ c & d \end{vmatrix} = ad - bc$: Hauptdiagonale **minus** Nebendiagonale. Mit Plus kommt etwas anderes heraus.`,
@@ -274,10 +274,19 @@ export const DET_ERROR_RULES: readonly VectorErrorRule[] = [
   {
     id: 'det-inverse',
     name: 'Kehrwert bei der Inversen vergessen',
-    wrongFormula: String.raw`\det(A^{-1}) = -\det A`,
+    wrongFormula: String.raw`\det(A^{-1}) = \det A`,
     why: {
       detailed: String.raw`Aus $A A^{-1} = E$ folgt $\det A \cdot \det(A^{-1}) = \det E = 1$. Also ist $\det(A^{-1}) = \frac{1}{\det A}$, der **Kehrwert**.`,
       short: String.raw`$\det(A^{-1}) = \frac{1}{\det A}$.`,
+    },
+  },
+  {
+    id: 'det-inverse-negative',
+    name: 'Inverse wie das Negative behandelt',
+    wrongFormula: String.raw`\det(A^{-1}) = -\det A`,
+    why: {
+      detailed: String.raw`Die Inverse ist nicht „$A$ mit Minus“. Aus $A A^{-1} = E$ folgt $\det A \cdot \det(A^{-1}) = 1$: Die Determinante der Inversen ist der **Kehrwert** $\frac{1}{\det A}$, das Vorzeichen bleibt.`,
+      short: String.raw`Kehrwert, nicht Gegenzahl.`,
     },
   },
   {
@@ -286,6 +295,15 @@ export const DET_ERROR_RULES: readonly VectorErrorRule[] = [
     wrongFormula: String.raw`\det(A^3) = 3\det A`,
     why: {
       detailed: String.raw`$A^k$ ist das Produkt $A \cdot A \cdots A$ mit $k$ Faktoren. Weil die Determinante eines Produkts das Produkt der Determinanten ist, gilt $\det(A^k) = (\det A)^k$.`,
+      short: String.raw`$\det(A^k) = (\det A)^k$.`,
+    },
+  },
+  {
+    id: 'det-power-forgot',
+    name: 'Potenz vergessen',
+    wrongFormula: String.raw`\det(A^3) = \det A`,
+    why: {
+      detailed: String.raw`$A^k = A \cdot A \cdots A$ hat $k$ Faktoren, und jeder bringt seine Determinante mit: $\det(A^k) = (\det A)^k$. Die Hochzahl darf nicht wegfallen.`,
       short: String.raw`$\det(A^k) = (\det A)^k$.`,
     },
   },

@@ -70,6 +70,9 @@ Stand: 13.11.2026
   M6 Schritt 4b und 4c, danach M6 ab Schritt 5 und die übrige Reihenfolge wie oben. M7 umfasst
   auch Geraden und Ebenen sowie Gleichungssysteme mit Parameter (Liste in
   [AUFGABENARTEN.md](AUFGABENARTEN.md)).
+- **Klausur-Karte ins Fach** (Wunsch des Nutzers, 13.11.2026, für den Rest von M6): Das ganze Feld „Chemie 1 · Klausur
+  Teil 1“ (Wiederholen, Probeklausur, Klausur-Überblick) gehört auf die Seite von Chemie 1, nicht auf die Startseite.
+  Vorgemerkt in [PLAN-M6.md](PLAN-M6.md), Schritt 10.
 - **Dritte Wurzel mit $x$ darin** (aus M6 Schritt 4c): Gleichungen wie $\sqrt[3]{2x + 1} = -3$ (beide Seiten hoch 3,
   ohne Probe) löst die Engine noch nicht; dazu ein Schritt „hoch 3 nehmen“ mit Frage, Irrwegen und Fehlern. Passt zu
   M6 Schritt 6 („Vereinfachen“ mit Wurzelgesetzen) oder als eigene Art bei den Gleichungen mit Zahlen.

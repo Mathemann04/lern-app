@@ -1228,3 +1228,10 @@ Neue Entscheidungen unten anfügen.
   ändert sich die Determinante). Mit Parameter ist die Determinante quadratisch (Parameter an zwei Stellen in verschiedenen
   Zeilen und Spalten) mit zwei ganzzahligen Nullstellen verschiedenen Betrags; „Haupt- und Nebendiagonalen vertauscht“ gibt
   es dort nicht als falsche Antwort ($-p(a)$ hat dieselben Nullstellen, wie beim Spatprodukt).
+- 13.11.2026: Funde der unabhängigen Prüfung zu M7 Schritt 9a behoben (keine falsche Mathematik gefunden): Mit Parameter
+  bietet Sarrus kein Vielfaches des richtigen Polynoms mehr an (z. B. „Nebendiagonalen addiert“ gleich $-p(a)$, gleiche
+  Nullstellen); „falsch herum abgezogen“ beim Nullen-Erzeugen nur, wenn es die Determinante wirklich ändert (bei
+  $3 \times 3$ zweimal $-1$); bei den Regeln trägt jede falsche Antwort genau ihren Fehler (neu „Inverse wie das Negative
+  behandelt“ und „Potenz vergessen“, kein Doppelfehler mehr); $\det(\lambda A B)$ mit einer Matrix ohne Zusatz kommt jetzt
+  vor (vorher wegen zu weniger Antworten immer verworfen); „Die Null fällt weg“ in der Einzahl; $3 \times 3$ in Tipps und
+  Namen als Formel. Neue Tests: Entwicklung mit Parameter an mehreren Stellen, kein Vielfaches bei Sarrus, jede Art Faktor.

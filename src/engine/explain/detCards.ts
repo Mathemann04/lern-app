@@ -8,7 +8,7 @@ export const DET_CARD_LIST: readonly Card[] = [
   {
     id: 'det-zwei',
     topic: 'matrizen',
-    title: 'Determinante 2 × 2 und Fläche',
+    title: 'Determinante $2 \\times 2$ und Fläche',
     level: 1,
     rules: [],
     formulas: [String.raw`\det\begin{pmatrix} a & b \\ c & d \end{pmatrix} = \begin{vmatrix} a & b \\ c & d \end{vmatrix} = ad - bc`, String.raw`F = \lvert\det A\rvert`],
@@ -110,7 +110,7 @@ export const DET_CARD_LIST: readonly Card[] = [
       { vector: { kind: 'detRules', level: 3, seed: 1 } },
       { vector: { kind: 'detRules', level: 4, seed: 1 } },
     ],
-    errors: ['det-scalar-power', 'det-transpose', 'det-inverse', 'det-power', 'det-product-sum'],
+    errors: ['det-scalar-power', 'det-transpose', 'det-inverse', 'det-inverse-negative', 'det-power', 'det-power-forgot', 'det-product-sum'],
   },
   {
     id: 'det-parameter',

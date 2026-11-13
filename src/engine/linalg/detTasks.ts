@@ -79,6 +79,11 @@ const qAdd = (p: Quad, q: Quad): Quad => ({ q2: ratAdd(p.q2, q.q2), q1: ratAdd(p
 const qScale = (k: Rational, q: Quad): Quad => ({ q2: ratMul(k, q.q2), q1: ratMul(k, q.q1), q0: ratMul(k, q.q0) })
 const qLatex = (q: Quad) => quadLatex(q, PARAM)
 const detQ = (A: PMat) => polyOf(A, det)
+// q = c · p für eine Zahl c (p nicht 0)
+const isMultiple = (q: Quad, p: Quad) => {
+  const [a, b] = [[q.q2, q.q1, q.q0], [p.q2, p.q1, p.q0]]
+  return a.every((x, i) => a.every((y, j) => ratEq(ratMul(x, b[j]), ratMul(y, b[i]))))
+}
 
 // ------------------------------------------------------------------ Karten, Namen, Zufall
 
@@ -147,7 +152,7 @@ function det2Step(rng: Rng, name: string, A: Mat): GuidedStep {
     if (!ratEq(x, right)) wrongs.push({ content: line(x), rule })
   return choiceStep(rng, {
     id: 'det',
-    title: '2 × 2-Determinante',
+    title: 'Determinante',
     question: `Wie groß ist $${name}$?`,
     correct: line(right),
     wrongs,
@@ -203,6 +208,8 @@ function sarrusStep(rng: Rng, name: string, A: PMat, opts: { readonly id?: strin
   ])
   const { scheme, products } = sarrusLatex(A)
   const M = at(A, ZERO)
+  // mit Parameter auch kein anderes Vielfaches von p(a) (z. B. Nebendiagonalen addiert gleich −p(a)): gleiche Nullstellen
+  const offered = withParam ? cands.filter(([q]) => !isMultiple(q, right)) : cands
   const six = withParam ? '' : termsLatex([...MAIN.map((d) => [prodOf(M, d), ''] as const), ...ANTI.map((d) => [ratNeg(prodOf(M, d)), ''] as const)])
   const values = six !== '' && six !== qLatex(right) ? ` = ${six}` : ''
   return choiceStep(rng, {
@@ -210,7 +217,7 @@ function sarrusStep(rng: Rng, name: string, A: PMat, opts: { readonly id?: strin
     title: 'Sarrus',
     question: `Wie groß ist $${name}$?`,
     correct: valueLine(name, right),
-    wrongs: valueWrongs(name, right, cands),
+    wrongs: valueWrongs(name, right, offered),
     hint: 'Schreib die ersten beiden Spalten noch einmal rechts daneben. Drei Diagonalen nach rechts unten zählen mit Plus, drei nach links unten mit Minus.',
     explanation: {
       detailed: `Sarrus mit den ersten beiden Spalten daneben:\n$${scheme}$\nDrei Diagonalen nach rechts unten positiv, drei nach links unten negativ: $${name} = ${products}${values} = ${qLatex(right)}$.`,
@@ -376,7 +383,7 @@ function methodStep(rng: Rng, name: string, A: PMat, line: Line): GuidedStep {
       { content: 'Die Einträge der Hauptdiagonale malnehmen.', rule: 'det-triangle-not' },
       { content: `Gar nicht nötig: $\\det ${name} = 0$, weil die ${lineWord(line)} fast nur Nullen hat.`, rule: 'det-zero-row' },
     ],
-    hint: 'Sarrus gilt nur für 3 × 3. Bei größeren Matrizen entwickelst du nach einer Zeile oder Spalte; je mehr Nullen darin, desto weniger Unterdeterminanten.',
+    hint: 'Sarrus gilt nur für $3 \\times 3$. Bei größeren Matrizen entwickelst du nach einer Zeile oder Spalte; je mehr Nullen darin, desto weniger Unterdeterminanten.',
     explanation: {
       detailed: `Sarrus gibt es nur für $3 \\times 3$. Beim Entwickeln fällt jeder Summand weg, dessen Eintrag $0$ ist. Die ${lineWord(line)} hat ${zeros} Nullen, mehr als jede andere Zeile oder Spalte; ${n - zeros === 1 ? 'es bleibt eine Unterdeterminante' : `es bleiben ${n - zeros} Unterdeterminanten`} der Größe $${n - 1} \\times ${n - 1}$.`,
       short: `Nach der ${lineWord(line)} entwickeln (${zeros} Nullen).`,
@@ -415,7 +422,7 @@ function expandStep(rng: Rng, name: string, A: PMat, line: Line, id = 'entwickel
     wrongs,
     hint: `Jeder Eintrag der ${lineWord(line)} mal die Determinante ohne seine Zeile und Spalte. Das Vorzeichen kommt aus dem Schachbrett, oben links $+$.`,
     explanation: {
-      detailed: `Schachbrett der Vorzeichen: $${checkerLatex(n)}$. Die ${zeros} Nullen der ${lineWord(line)} fallen weg. Für jeden übrigen Eintrag streichst du seine Zeile und Spalte (Unterdeterminante $\\det ${name}_{ij}$): $\\det ${name} = ${named}$.`,
+      detailed: `Schachbrett der Vorzeichen: $${checkerLatex(n)}$. ${zeros === 1 ? 'Die Null' : `Die ${zeros} Nullen`} der ${lineWord(line)} ${zeros === 1 ? 'fällt' : 'fallen'} weg. Für jeden übrigen Eintrag streichst du seine Zeile und Spalte (Unterdeterminante $\\det ${name}_{ij}$): $\\det ${name} = ${named}$.`,
       short: `$\\det ${name} = ${named}$.`,
     },
     cards: [DET_CARD.entwickeln],
@@ -815,7 +822,7 @@ function buildDetEliminate(rng: Rng, _level: Level): Built {
     const mats: [Mat, string][] = rng.shuffle([
       [signE, 'det-elim-sign'],
       [firstE, 'det-elim-first'],
-      [revE, 'det-elim-reversed'],
+      ...(ratEq(det(revE), d) ? [] : [[revE, 'det-elim-reversed'] as [Mat, string]]),
     ])
     const steps: GuidedStep[] = [
       choiceStep(rng, {
@@ -886,13 +893,27 @@ type Factor = { readonly name: string; readonly kind: FKind; readonly k: number;
 const factorExpr = (f: Factor) => (f.kind === 'T' ? `${f.name}^{\\mathsf T}` : f.kind === 'inv' ? `${f.name}^{-1}` : f.kind === 'pow' ? `${f.name}^{${f.k}}` : f.name)
 const detOf = (f: Factor) => (f.kind === 'plain' || f.kind === 'T' ? `\\det ${factorExpr(f)}` : `\\det(${factorExpr(f)})`)
 const factorValue = (f: Factor): Rational => (f.kind === 'inv' ? ratDiv(ONE, f.d) : f.kind === 'pow' ? Array.from({ length: f.k }, () => f.d).reduce(ratMul, ONE) : f.d)
-// typischer Fehler je Faktor (mit Ausweichwert, wenn der erste zufällig richtig wäre)
-function factorSlip(f: Factor): [Rational, string] | null {
+// typische Fehler je Faktor, jeder mit seinem eigenen Namen; nur die, die einen anderen Wert geben
+function factorSlips(f: Factor): [Rational, string][] {
   const right = factorValue(f)
-  const cands: Rational[] = f.kind === 'T' ? [ratNeg(f.d), ratDiv(ONE, f.d)] : f.kind === 'inv' ? [ratNeg(f.d), f.d] : f.kind === 'pow' ? [ratMul(R(f.k), f.d), f.d] : []
-  const x = cands.find((c) => !ratEq(c, right))
-  const rule = f.kind === 'T' ? 'det-transpose' : f.kind === 'inv' ? 'det-inverse' : 'det-power'
-  return x ? [x, rule] : null
+  const cands: [Rational, string][] =
+    f.kind === 'T'
+      ? [
+          [ratNeg(f.d), 'det-transpose'],
+          [ratDiv(ONE, f.d), 'det-transpose'],
+        ]
+      : f.kind === 'inv'
+        ? [
+            [f.d, 'det-inverse'],
+            [ratNeg(f.d), 'det-inverse-negative'],
+          ]
+        : f.kind === 'pow'
+          ? [
+              [ratMul(R(f.k), f.d), 'det-power'],
+              [f.d, 'det-power-forgot'],
+            ]
+          : []
+  return cands.filter(([x], i) => !ratEq(x, right) && !cands.slice(0, i).some(([y]) => ratEq(x, y)))
 }
 const powR = (x: Rational, n: number) => Array.from({ length: n }, () => x).reduce(ratMul, ONE)
 const lamLatex = (lam: Rational) => (ratEq(lam, R(-1)) ? '-' : ratLatex(lam))
@@ -956,20 +977,13 @@ function buildDetRules(rng: Rng, level: Level): Built {
     }
     // einzelne Determinanten
     const pairLatex = (vs: readonly Rational[]) => math(factors.map((f, i) => `${detOf(f)} = ${ratLatex(vs[i])}`).join(',\\; '))
-    const slips = factors.map(factorSlip)
+    const slips = factors.map(factorSlips)
     const singleWrongs: Wrong[] = []
-    slips.forEach((s, i) => {
-      if (s) singleWrongs.push({ content: pairLatex(vals.map((v, j) => (j === i ? s[0] : v))), rule: s[1] })
+    // je Faktor seine Fehler (der andere richtig); bei zwei Faktoren dazu beide mit dem ersten Fehler
+    slips.forEach((list, i) => {
+      for (const [x, rule] of list) singleWrongs.push({ content: pairLatex(vals.map((v, j) => (j === i ? x : v))), rule })
     })
-    if (factors.length === 1 && slips[0]) {
-      // zweiter Fehler beim selben Faktor
-      const f = factors[0]
-      const other = f.kind === 'T' ? ratDiv(ONE, f.d) : f.kind === 'inv' ? f.d : f.d
-      if (!ratEq(other, vals[0]) && !ratEq(other, slips[0][0])) singleWrongs.push({ content: pairLatex([other]), rule: slips[0][1] })
-      // Vorzeichen allein falsch
-      if (!ratEq(ratNeg(vals[0]), slips[0][0]) && !ratEq(ratNeg(vals[0]), other)) singleWrongs.push({ content: pairLatex([ratNeg(vals[0])]), rule: slips[0][1] })
-    }
-    if (factors.length === 2 && slips[0] && slips[1]) singleWrongs.push({ content: pairLatex([slips[0][0], slips[1][0]]), rule: slips[0][1] })
+    if (factors.length === 2 && slips[0].length > 0 && slips[1].length > 0) singleWrongs.push({ content: pairLatex([slips[0][0][0], slips[1][0][0]]), rule: slips[0][0][1] })
     const ruleText = (f: Factor) =>
       f.kind === 'T' ? `$\\det ${f.name}^{\\mathsf T} = \\det ${f.name}$` : f.kind === 'inv' ? `$\\det(${f.name}^{-1}) = \\frac{1}{\\det ${f.name}}$` : f.kind === 'pow' ? `$\\det(${f.name}^{${f.k}}) = (\\det ${f.name})^{${f.k}}$` : `$\\det ${f.name}$ ist gegeben`
     steps.push(
@@ -988,7 +1002,8 @@ function buildDetRules(rng: Rng, level: Level): Built {
       }),
     )
     const q = (x: Rational | null) => (x ? qConst(x) : null)
-    const slipProd = (i: number) => (slips[i] ? vals.reduce((s, v, j) => ratMul(s, j === i ? slips[i]![0] : v), ONE) : null)
+    // Wert mit einem Fehler beim Faktor i
+    const slipped = (i: number, x: Rational) => ratMul(lamN, vals.reduce((s, v, j) => ratMul(s, j === i ? x : v), ONE))
     steps.push(
       choiceStep(rng, {
         id: 'wert',
@@ -997,9 +1012,8 @@ function buildDetRules(rng: Rng, level: Level): Built {
         correct: valueLine(expr, qConst(right)),
         wrongs: valueWrongs(expr, qConst(right), [
           [q(ratMul(lam, prodV)), 'det-scalar-power'],
-          ...factors.map((_, i) => [q(slipProd(i) && ratMul(lamN, slipProd(i)!)), slips[i]?.[1] ?? 'det-inverse'] as [Quad | null, string]),
+          ...slips.flatMap((list, i) => list.map(([x, rule]) => [q(slipped(i, x)), rule] as [Quad | null, string])),
           [factors.length === 2 ? q(ratMul(lamN, ratAdd(vals[0], vals[1]))) : null, 'det-product-sum'],
-          [q(slipProd(0) && ratMul(lam, slipProd(0)!)), 'det-scalar-power'],
         ]),
         hint: `$\\det(\\lambda M) = \\lambda^n \\det M$ mit $n = ${n}$, dann die einzelnen Determinanten malnehmen.`,
         explanation: {

@@ -187,13 +187,13 @@ gezieltes Üben noch nicht (`focus: false`).
   detRowOps, detRules, detEliminate, detParam). Einträge als `Lin` (c0 + c1·a), Werte als `Quad` über `polyOf` (drei
   Stellen, Probe an zwei weiteren: Determinante höchstens quadratisch, Parameter an zwei Stellen in verschiedenen Zeilen
   und Spalten); `det` exakt mit Gauß. Schritte `det2Step`, `sarrusStep` (`SARRUS`: right, plus, one, swap, diag; mit
-  Parameter ohne swap), `measureStep` (Fläche `F` bzw. Volumen `V` = Betrag), `methodStep` (ab 4 × 4), `expandStep`
+  Parameter ohne swap und ohne Vielfache), `measureStep` (Fläche `F` bzw. Volumen `V` = Betrag), `methodStep` (ab 4 × 4), `expandStep`
   (`expansion(A, line, how)`: right, ignored, shift, minor, factor; falsche nur mit anderem Wert), Unterdeterminanten
   `\begin{vmatrix}`, Namen `A_{ij}`, bei 5 × 5 `B = A_{rc}` (`embed` baut die größere Matrix um B). Entwickelt wird ab
   4 × 4 nach der Zeile oder Spalte mit echt den meisten Nullen (`uniqueBest`). Umformungen: Zeilen `\vec z_{i}`
   (`RowSpec`: Hauptzeile, Faktor k, Vielfaches nur von Zeilen ohne eigenes), Gegenprobe über die Koeffizientenmatrix C.
-  Regeln: `Factor` (plain, T, inv, pow) mit `factorSlip`. Bilder `areaDrawing` (Einheitsquadrat wird zum Parallelogramm
-  der Spalten, Orientierung in der Beschreibung) und `spatDrawing` (`bodyDrawing('spat', …)` aus `spatTasks.ts`). 35
+  Regeln: `Factor` (plain, T, inv, pow) mit `factorSlips` (je Fehler sein eigener Name); mit Parameter bietet Sarrus kein Vielfaches von p(a) an (`isMultiple`). Bilder `areaDrawing` (Einheitsquadrat wird zum Parallelogramm
+  der Spalten, Orientierung in der Beschreibung) und `spatDrawing` (`bodyDrawing('spat', …)` aus `spatTasks.ts`). 37
   Fehler `det-…` in `linalg/detErrorRules.ts` (`vectorErrorRule` sucht dort, Katalog `matrizen`), sechs Karten `det-…` in
   `explain/detCards.ts` (Ordner `matrizen`). Ergebnisse `\det A = 5`, dazu `F = 5` bzw. `V = 5`, `\det(2A^{-1}) = …`,
   `a_1 = …,\; a_2 = …`. Tests in `linalg/detTasks.test.ts` (Laplace mit Kommazahlen, jede Entwicklung in den Antworten

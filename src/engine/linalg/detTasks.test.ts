@@ -83,14 +83,9 @@ function checkDrawing(drawing: VectorDrawing, context: string) {
 }
 
 // Entwicklung wie „\det A = 2 \cdot \begin{vmatrix} … \end{vmatrix} - (-1) \cdot \begin{vmatrix} … \end{vmatrix}“ ausrechnen
-function evalExpansion(latex: string): number | null {
-  const rhs = latex.replace(/^\$|\$$/g, '').split(' = ').slice(1).join(' = ')
-  if (/[a-z]/.test(rhs.replace(/\\(begin|end)\{vmatrix\}|\\cdot/g, ''))) return null
-  const replaced = rhs.replace(/\\begin\{vmatrix\}(.*?)\\end\{vmatrix\}/g, (_, body: string) => {
-    const M = body.split('\\\\').map((r) => r.split('&').map((x) => Number(x.trim())))
-    return `(${laplace(M)})`
-  })
-  const tokens = replaced.replace(/\\cdot/g, '*').match(/\d+(?:\.\d+)?|[-+*()]/g) ?? []
+// Rechnung mit ganzen Zahlen, +, −, \cdot und Klammern
+function evalArith(text: string): number {
+  const tokens = text.replace(/\\cdot/g, '*').match(/\d+(?:\.\d+)?|[-+*()]/g) ?? []
   let i = 0
   const atom = (): number => {
     const t = tokens[i++]
@@ -116,6 +111,16 @@ function evalExpansion(latex: string): number | null {
     return v
   }
   return sum()
+}
+
+// Entwicklung wie „\det A = 2 \cdot \begin{vmatrix} … \end{vmatrix} - (-1) \cdot \begin{vmatrix} … \end{vmatrix}“ ausrechnen;
+// Einträge mit dem Parameter (a + 1, -a, 2a - 2) an der Stelle a
+function evalExpansion(latex: string, a = 0): number | null {
+  const rhs = latex.replace(/^\$|\$$/g, '').split(' = ').slice(1).join(' = ')
+  const entry = (x: string) => evalArith(x.trim().replace(/(\d)a/g, '$1 \\cdot a').replace(/a/g, `(${a})`))
+  const replaced = rhs.replace(/\\begin\{vmatrix\}(.*?)\\end\{vmatrix\}/g, (_, body: string) => `(${laplace(body.split('\\\\').map((r) => r.split('&').map(entry)))})`)
+  if (/[a-z]/.test(replaced.replace(/\\cdot/g, ''))) return null
+  return evalArith(replaced)
 }
 
 describe('Determinanten', () => {
@@ -183,6 +188,48 @@ describe('Determinanten', () => {
         }
       }
     expect(checked).toBeGreaterThan(500)
+  })
+
+  it('mit Parameter: Entwicklung an mehreren Stellen richtig, und keine falsche Sarrus-Antwort ist ein Vielfaches der richtigen', () => {
+    let checked = 0
+    for (const level of [4, 5] as const)
+      for (const task of tasks(level, 150).filter((t) => t.kind === 'detParam')) {
+        const d = task.data
+        const n = d.n[0]
+        const detAt = (a: number) => laplace(rows(d.A0.map((x, i) => x + a * (d.A1[i] - x)), n))
+        const exp = task.steps.find((s) => s.id === 'entwickeln')
+        if (exp)
+          for (const c of exp.choices) {
+            for (const a of [-1.5, 0.5, 2]) {
+              const v = evalExpansion(c.content, a)
+              expect(v, c.content).not.toBeNull()
+              if (c.correct) expect(close(v!, detAt(a)), `${task.form}: ${c.content}`).toBe(true)
+            }
+            if (!c.correct) expect([-1.5, 0.5, 2].some((a) => !close(evalExpansion(c.content, a)!, detAt(a))), c.content).toBe(true)
+          }
+        // Sarrus: Polynome als Werte an drei Stellen; keine falsche Antwort ist c mal die richtige
+        const sarrus = task.steps.find((s) => s.id === 'sarrus')!
+        const poly = (content: string) => {
+          const body = content.replace(/^\$[^=]+= /, '').replace(/\$$/, '').replace(/a\^2/g, 'a \\cdot a')
+          return [-2, 1, 3].map((a) => evalArith(body.replace(/(\d) ?a/g, '$1 \\cdot a').replace(/a/g, `(${a})`)))
+        }
+        const right = poly(sarrus.choices.find((c) => c.correct)!.content)
+        for (const c of sarrus.choices.filter((c) => !c.correct)) {
+          const w = poly(c.content)
+          // Faktor an der Stelle, an der p(a) am größten ist (nie an einer Nullstelle)
+          const at = right.reduce((best, x, i) => (Math.abs(x) > Math.abs(right[best]) ? i : best), 0)
+          const k = w[at] / right[at]
+          expect(w.every((x, i) => close(x, k * right[i])), `${task.form}: ${c.content}`).toBe(false)
+        }
+        checked++
+      }
+    expect(checked).toBeGreaterThan(60)
+  })
+
+  it('Regeln: jede Art Faktor kommt vor, auch ohne Transponierte oder Inverse', () => {
+    const kinds = new Set<number>()
+    for (const level of [4, 5] as const) for (const task of tasks(level, 150).filter((t) => t.kind === 'detRules')) for (const k of task.data.kinds) kinds.add(k)
+    expect([...kinds].sort()).toEqual([0, 1, 2, 3])
   })
 
   it('Sarrus: die richtige Antwort ist die Determinante der Matrix im Schritt (auch bei Unterdeterminanten)', () => {

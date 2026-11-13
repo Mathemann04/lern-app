@@ -337,14 +337,15 @@ Request.
      entwickeln; „nicht invertierbar“, „Spalten bzw. Zeilen linear abhängig“, „$A\vec x = \vec 0$ hat mehr als eine
      Lösung“, zwei ganzzahlige Lösungen). Bilder: Einheitsquadrat wird beim Abspielen zum Parallelogramm der Spalten
      (Fläche $\lvert\det A\rvert$, Orientierung bei negativer Determinante), Spat der Spalten zieht sich auf. Frei: Zahl,
-     Fläche bzw. Volumen, zwei Lösungen in beliebiger Reihenfolge. Sechs Lernkarten, 35 neue typische Fehler: Plus statt
+     Fläche bzw. Volumen, zwei Lösungen in beliebiger Reihenfolge. Sechs Lernkarten, 37 neue typische Fehler: Plus statt
      Minus bei $2 \times 2$, Diagonalen vertauscht, Zeilen statt Diagonalen, Nebendiagonalen addiert, nur eine Diagonale je
      Richtung, Haupt- und Nebendiagonalen vertauscht, nur die Hauptdiagonale, Sarrus bei großer Matrix, Betrag vergessen,
      halbiert, Faktor eines anderen Körpers, Diagonale addiert, Gegendiagonale, 0 ohne Nullzeile, Schachbrett vergessen,
      Schachbrett falsch angesetzt, falsche Zeile oder Spalte gestrichen, Eintrag vergessen, Vorzeichen beim Tausch, Faktor
      vergessen, Faktor hoch $n$, durch den Faktor geteilt, Vielfaches verändert die Determinante, Vielfaches macht sie 0,
      addiert statt abgezogen, nur den ersten Eintrag verändert, falsch herum abgezogen, $\lambda$ statt $\lambda^n$,
-     Transponieren verändert sie, Kehrwert vergessen, Potenz als Faktor, Summe statt Produkt, invertierbar verwechselt,
+     Transponieren verändert sie, Kehrwert vergessen, Inverse wie das Negative, Potenz als Faktor, Potenz vergessen, Summe
+     statt Produkt, invertierbar verwechselt,
      $\det A = 1$ gefordert, Vorzeichen der Nullstellen. Nebenbei: `**fett**` in Texten wird jetzt fett gesetzt (bisher
      standen die Sternchen sichtbar da).
    - **9b:** Sarrus als Animation auf Knopfdruck (die Diagonalen leuchten nacheinander auf, plus und minus), zusammen mit
