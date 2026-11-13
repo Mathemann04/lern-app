@@ -4,6 +4,7 @@ import { type Card, type CardExample as Example, type ChemCardExample, type Math
 import { buildVectorTask } from '../../engine/linalg/vectorTasks.ts'
 import { blockSeed } from '../../engine/tasks/taskNumber.ts'
 import { FalkScheme } from '../draw/FalkScheme.tsx'
+import { SarrusScheme } from '../draw/SarrusScheme.tsx'
 import { VectorFigure } from '../draw/VectorFigure.tsx'
 import { cardExample } from '../../engine/explain/example.ts'
 import type { Expr } from '../../engine/expr/types.ts'
@@ -123,6 +124,9 @@ function VectorExample({ example }: { example: VectorCardExample }) {
   const task = useMemo(() => buildVectorTask({ level: example.vector.level, seed: blockSeed('rechnen', example.vector.seed) }, example.vector.kind), [example])
   // Falk-Schema (Schritt 8b): das des ganzen Produkts, also des letzten Schritts mit Schema
   const falk = task.steps.findLast((s) => s.falk)?.falk
+  // Sarrus (Schritt 9b): nur bei genau einem Schritt mit Sarrus (sonst wäre unklar, welche Determinante gemeint ist)
+  const sarrusSteps = task.steps.filter((s) => s.sarrus)
+  const sarrus = sarrusSteps.length === 1 ? sarrusSteps[0].sarrus : undefined
   return (
     <>
       <RichText text={task.instruction} className="text-lg font-medium" />
@@ -133,6 +137,7 @@ function VectorExample({ example }: { example: VectorCardExample }) {
       )}
       {task.resultDrawing && <VectorFigure drawing={task.resultDrawing} />}
       {falk && <FalkScheme falk={falk} done />}
+      {sarrus && <SarrusScheme sarrus={sarrus} done />}
       <ol className="space-y-3 border-l-2 border-accent-200 pl-4">
         {task.steps.map((step) => (
           <li key={step.id} className="space-y-1">

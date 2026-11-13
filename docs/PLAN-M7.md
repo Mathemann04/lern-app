@@ -355,8 +355,15 @@ Request.
      statt Produkt, invertierbar verwechselt,
      $\det A = 1$ gefordert, Vorzeichen der Nullstellen. Nebenbei: `**fett**` in Erklärungen und Fehlertexten wird jetzt fett gesetzt (bisher
      standen die Sternchen sichtbar da); auf Lernkarten bleibt es seit 8b verboten.
-   - **9b:** Sarrus als Animation auf Knopfdruck (die Diagonalen leuchten nacheinander auf, plus und minus), wie das
-     Falk-Schema aus 8b; ohne bei „Bewegung reduzieren“.
+   - **9b (fertig, 13.11.2026):** Sarrus als Bild über den Antworten in jedem Schritt mit Sarrus (Determinanten, auch
+     Unterdeterminanten beim Entwickeln und mit Parameter; Spatprodukt; Linearkombination und Basis) und auf den Lernkarten,
+     deren Beispiel genau einen Schritt mit Sarrus hat: die Matrix zwischen Determinantenstrichen, die ersten beiden
+     Spalten blass rechts daneben. Vor der Antwort nur das Schema, ohne Knopf. Danach „Abspielen“: erst leuchten die
+     abgeschriebenen Spalten, dann nacheinander die drei Diagonalen nach rechts unten (blau, Plus) und die drei nach links
+     unten (orange, Minus) wie mit einem Textmarker, die drei Felder umrahmt; die Rechnung darunter wächst Produkt für
+     Produkt (Plus-Zeile, Minus-Zeile, Ergebnis untereinander), am Ende stehen alle sechs Diagonalen dünn hinter den
+     Zahlen. „Alles zeigen“ springt ans Ende, bei „Bewegung reduzieren“ gleich. Die Erklärung behält das Schema als
+     Text (der freie Modus hat kein Bild).
 10. **Gauß:** Tabelle mit Zeilenumformungen, Geraden und Ebenen als Bild, alle drei Fälle, Lösung mit Parametern.
 11. **Gleichungssysteme mit Parameter und Cramer:** Determinante als Polynom, Sonderfälle mit Schieberegler, Rang.
 12. **Inverse und Matrizengleichungen:** 2×2 mit Formel, 3×3 mit Gauß-Jordan Zeile für Zeile, Matrizengleichung erst
