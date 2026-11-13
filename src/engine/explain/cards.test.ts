@@ -101,6 +101,12 @@ describe('Lernkarten: Katalog', () => {
     expect(cardById('gibt-es-nicht')).toBeUndefined()
   })
 
+  // RichText kennt keinen Fettdruck: „**Spalten**“ stünde mit Sternchen da (Fund in M7 Schritt 8b)
+  it('schreibt keine Sternchen für Fettdruck', () => {
+    for (const card of CARDS)
+      for (const text of [card.title, card.memo, card.note, card.when]) expect(text ?? '', card.id).not.toContain('**')
+  })
+
   it('legt jede Karte in einen bestehenden Ordner, keine Ordner-Id ist auch eine Karten-Id', () => {
     for (const card of CARDS) expect(topicById(card.topic), card.id).toBeDefined()
     for (const topic of TOPICS) {

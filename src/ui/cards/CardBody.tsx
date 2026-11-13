@@ -3,6 +3,7 @@ import { findError } from '../../engine/errorCatalog.ts'
 import { type Card, type CardExample as Example, type ChemCardExample, type MathCardExample, type VectorCardExample, examplesFor, isChemExample, isVectorExample } from '../../engine/explain/cards.ts'
 import { buildVectorTask } from '../../engine/linalg/vectorTasks.ts'
 import { blockSeed } from '../../engine/tasks/taskNumber.ts'
+import { FalkScheme } from '../draw/FalkScheme.tsx'
 import { VectorFigure } from '../draw/VectorFigure.tsx'
 import { cardExample } from '../../engine/explain/example.ts'
 import type { Expr } from '../../engine/expr/types.ts'
@@ -120,6 +121,8 @@ function WorkedExample({ example: e }: { example: MathCardExample }) {
 // Vektoren (M7): Aufgabe des Baukastens mit Bild und den Zeilen des Rechenwegs, von der Engine gerechnet
 function VectorExample({ example }: { example: VectorCardExample }) {
   const task = useMemo(() => buildVectorTask({ level: example.vector.level, seed: blockSeed('rechnen', example.vector.seed) }, example.vector.kind), [example])
+  // Falk-Schema (Schritt 8b): das des ganzen Produkts, also des letzten Schritts mit Schema
+  const falk = task.steps.findLast((s) => s.falk)?.falk
   return (
     <>
       <RichText text={task.instruction} className="text-lg font-medium" />
@@ -129,6 +132,7 @@ function VectorExample({ example }: { example: VectorCardExample }) {
         </FitWidth>
       )}
       {task.resultDrawing && <VectorFigure drawing={task.resultDrawing} />}
+      {falk && <FalkScheme falk={falk} done />}
       <ol className="space-y-3 border-l-2 border-accent-200 pl-4">
         {task.steps.map((step) => (
           <li key={step.id} className="space-y-1">

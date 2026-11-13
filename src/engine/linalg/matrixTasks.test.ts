@@ -346,3 +346,91 @@ describe('Matrizen rechnen: freier Modus', () => {
     for (const id of ['mat-order-swap', 'mat-transpose-anti', 'mat-transpose-reshape', 'mat-scalar-row', 'mat-index-swap', 'mat-col-row']) expect(found.has(id), id).toBe(true)
   })
 })
+
+// M7 Schritt 8b: Falk-Schema als Bild zum Abspielen. Linke und rechte Matrix, Produkt und jedes Teilprodukt werden
+// unabhängig mit Kommazahlen nachgerechnet; das Bild gehört genau zu den Schritten „Eintrag“ und „Produkt“ und passt zu
+// dem, was der Schritt danach feststellt.
+describe('Matrizen rechnen: Falk-Schema zum Abspielen', () => {
+  // Zahl aus LaTeX: ganze Zahl oder Bruch, auch negativ, ohne Parameter
+  const num = (s: string): number | null => {
+    const t = s.replace(/^\((.*)\)$/, '$1').trim()
+    const frac = /^(-?)\\frac\{(\d+)\}\{(\d+)\}$/.exec(t)
+    if (frac) return (frac[1] ? -1 : 1) * (Number(frac[2]) / Number(frac[3]))
+    return /^-?\d+$/.test(t) ? Number(t) : null
+  }
+  const numMat = (M: readonly (readonly string[])[]): N | null => {
+    const out = M.map((r) => r.map(num))
+    return out.flat().every((x) => x !== null) ? (out as N) : null
+  }
+
+  it('jedes Schema stimmt mit der Gegenprobe, die Teilprodukte sind Zeile mal Spalte, die Felder passen zum Schritt', () => {
+    let numeric = 0
+    let withParam = 0
+    const ids = new Set<string>()
+    for (const level of LEVELS) {
+      for (const task of tasks(level, 120)) {
+        for (const step of task.steps) {
+          const where = `${level}-${task.ref.seed} ${task.form} ${step.id}`
+          const isProduct = step.id === 'eintrag' || step.id.startsWith('produkt')
+          expect(!!step.falk, where).toBe(isProduct)
+          const f = step.falk
+          if (!f) continue
+          ids.add(step.id)
+          const m = f.left.length
+          const n = f.top.length
+          const p = f.top[0].length
+          expect(f.left.every((r) => r.length === n), where).toBe(true)
+          expect(f.product.length, where).toBe(m)
+          expect(f.product.every((r) => r.length === p), where).toBe(true)
+          // Teilprodukte: k-tes ist Eintrag (i, k) links mal Eintrag (k, j) oben
+          const strip = (s: string) => s.replace(/^\((.*)\)$/, '$1')
+          for (let i = 0; i < m; i++)
+            for (let j = 0; j < p; j++) {
+              expect(f.terms[i][j].length, where).toBe(n)
+              f.terms[i][j].forEach((t, k) => {
+                const [x, y] = t.split(' \\cdot ')
+                expect([strip(x), strip(y)], where).toEqual([f.left[i][k], f.top[k][j]])
+              })
+            }
+          for (const tex of [...f.left.flat(), ...f.top.flat(), ...f.product.flat(), ...f.terms.flat(2)]) expect(latexProblem(tex, { checkUgly: false }), `${where}: ${tex}`).toBeNull()
+          // Felder: beim Eintrag genau einer, beim Produkt alle in Lesereihenfolge
+          if (step.id === 'eintrag' || m * p === 1) expect(f.cells.length, where).toBe(1)
+          else expect(f.cells, where).toEqual(Array.from({ length: m * p }, (_, c) => [Math.floor(c / p), c % p]))
+          // was der Schritt feststellt, steht im Schema
+          const fact = (Array.isArray(step.established) ? step.established : [step.established]).join(' ')
+          for (const [i, j] of f.cells) expect(fact, where).toContain(f.product[i][j])
+          if (m * p === 1) expect([`${f.name} = ${f.product[0][0]}`, `${f.name} = \\begin{pmatrix} ${f.product[0][0]} \\end{pmatrix}`], where).toContain(fact)
+          else if (step.id === 'eintrag') {
+            const [i, j] = f.cells[0]
+            expect(fact, where).toBe(`(${f.name})_{${i + 1}${j + 1}} = ${f.product[i][j]}`)
+          } else expect(fact, where).toContain(`\\begin{pmatrix} ${f.product.map((r) => r.join(' & ')).join(' \\\\ ')} \\end{pmatrix}`)
+          // unabhängig nachgerechnet
+          const L = numMat(f.left)
+          const R = numMat(f.top)
+          if (L && R) {
+            const C = mm(L, R)
+            const P = numMat(f.product)!
+            expect(sameFlat(flat(P), flat(C)), where).toBe(true)
+            for (let i = 0; i < m; i++)
+              for (let j = 0; j < p; j++) {
+                const sum = f.terms[i][j].reduce((s, t) => s + t.split(' \\cdot ').map((x) => num(x)!).reduce((a, b) => a * b, 1), 0)
+                expect(close(sum, C[i][j]), where).toBe(true)
+              }
+            numeric++
+          } else withParam++
+        }
+      }
+    }
+    expect(numeric).toBeGreaterThan(200)
+    expect(withParam).toBeGreaterThan(5)
+    expect(ids.has('eintrag') && ids.has('produkt') && ids.has('produkt-ab') && ids.has('produkt-ba')).toBe(true)
+  })
+
+  it('die Lernkarte zum Produkt zeigt ein Schema in jedem Beispiel', () => {
+    const card = cardById('mat-produkt')!
+    for (const ex of card.examples.filter(isVectorExample)) {
+      const task = buildVectorTask({ level: ex.vector.level, seed: blockSeed('rechnen', ex.vector.seed) }, ex.vector.kind)
+      expect(task.steps.some((s) => s.falk), ex.vector.kind).toBe(true)
+    }
+  })
+})
