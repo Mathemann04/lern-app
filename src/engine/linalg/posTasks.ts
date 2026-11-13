@@ -182,7 +182,7 @@ function aFromRowStep(rng: Rng, o: { readonly row: Row; readonly label: string; 
   const line = (x: Rational) => math(`a = ${show(x)}`)
   const wrongs: Wrong[] = [
     { content: line(ratSub(lhs, pk)), rule: 'gl-move-sign' },
-    { content: line(ratAdd(ratAdd(m(cv, o.s0), m(cw, o.t0)), pk)), rule: 'gl-meet-wrong-line' },
+    { content: line(ratAdd(ratAdd(m(cv, o.s0), m(cw, o.t0)), pk)), rule: 'vec-lc-swapped' },
     { content: line(ratAdd(ratSub(m(cv, o.t0), m(cw, o.s0)), pk)), rule: 'vec-sign-slip' },
   ].filter((w) => w.content !== line(a))
   const rowText = `${termsLatex([
@@ -532,7 +532,9 @@ function buildLinePair(rng: Rng, level: Level, meet: boolean): Built {
     if (!meet && dim === 2 && truth === 2) {
       // in der Ebene: nicht parallel heißt schneiden, ohne Gleichungssystem
     } else if (truth <= 1) {
-      const decided = decideStep(rng, { P: 'Q', ts: rowTs(q, p, v), i0: 0, t, question: `Liegt der Stützpunkt $${pointLatex('Q', q)}$ von $${h}$ auf $${g}$?`, subject: `$Q$ auf $${g}$` })
+      // Name des Stützpunkts von h: nicht wie einer der Punkte von g
+      const Qn = via && B === 'Q' ? 'R' : 'Q'
+      const decided = decideStep(rng, { P: Qn, ts: rowTs(q, p, v), i0: 0, t, question: `Liegt der Stützpunkt $${pointLatex(Qn, q)}$ von $${h}$ auf $${g}$?`, subject: `$${Qn}$ auf $${g}$` })
       steps.push({ ...decided.step, cards: [GL_CARD.lageGeraden, GL_CARD.punktprobe] })
     } else {
       const rows: Row[] = Array.from({ length: dim }, (_, i) =>
@@ -624,7 +626,8 @@ function buildLinePlane(rng: Rng, level: Level, meet: boolean): Built {
       if (tooBig(u, 6) || tooBig(w, 6)) continue
     }
     const d = vecDot(n, P0)
-    if (isZero(d) && rng.chance(0.7)) continue
+    // Punktprobe nach dem Parameter (Stufe 4): rechts nie 0, sonst wäre „links 0, wie rechts“ eine richtige „falsche“ Antwort
+    if (isZero(d) && (variant === 'a' || rng.chance(0.7))) continue
     const truth = meet ? 2 : variant === 'coord' ? rng.int(0, 2) : variant === 'a' ? rng.int(0, 1) : 0
     let p: Vec
     let v: Vec
@@ -633,7 +636,9 @@ function buildLinePlane(rng: Rng, level: Level, meet: boolean): Built {
       v = pickDir(rng, 3, 3, 1)
       if (isZero(vecDot(n, v))) continue
       t0 = nonzero(rng)
-      p = at(P0, v, ratNeg(t0))
+      // in der Parameterform (Stufe 3) nicht der sichtbare Stützpunkt, sonst stünde das Ergebnis schon da
+      const S0 = variant === 'param' ? vecAdd(at(P0, u, nonzero(rng, [-2, -1, 1, 2])), vecScale(nonzero(rng, [-2, -1, 1, 2]), w)) : P0
+      p = at(S0, v, ratNeg(t0))
     } else {
       const [d1, d2] = directionsFor(rng, n)
       v = d1
@@ -715,7 +720,7 @@ function buildLinePlane(rng: Rng, level: Level, meet: boolean): Built {
         resultLatex: pointLatex('S', S),
         resultDrawing: drawing,
         form: `meetLinePlane|${num(t0)}|${form}`,
-        data: { n: nums(n), d: [num(d)], p: nums(p), v: nums(v) },
+        data: { n: nums(n), d: [num(d)], p: nums(p), v: nums(v), P0: nums(P0) },
         answer: nums(S),
       }
     }

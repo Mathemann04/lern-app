@@ -209,6 +209,35 @@ describe('Geraden und Ebenen: Baustein lage', () => {
     expect(stats.maxShare).toBeLessThanOrEqual(0.03)
   })
 
+  // Funde der unabhängigen Prüfung
+  it('kein Punktname doppelt: der Stützpunkt von h heißt anders als die Punkte von g', () => {
+    let checked = 0
+    for (const task of tasks(3, 300).filter((t) => t.kind === 'posLines')) {
+      const given = new Set([...task.functionLatex!.matchAll(/([A-Z])\(/g)].map((m) => m[1]))
+      const probe = task.steps.find((s) => s.id === 'probe' && s.question.startsWith('Liegt der Stützpunkt'))
+      if (!probe) continue
+      const name = /\$([A-Z])\(/.exec(probe.question)![1]
+      expect(given.has(name), task.form).toBe(false)
+      checked++
+    }
+    expect(checked).toBeGreaterThan(30)
+  })
+
+  it('Durchstoßpunkt aus der Parameterform ist nicht ihr Stützpunkt (sonst stünde das Ergebnis schon da)', () => {
+    const level3 = tasks(3, 200).filter((t) => t.kind === 'meetLinePlane')
+    expect(level3.length).toBeGreaterThan(20)
+    for (const task of level3) expect(task.answer.every((x, i) => close(x, task.data.P0[i])), task.form).toBe(false)
+  })
+
+  it('Punktprobe nach dem Parameter nur mit rechter Seite ungleich 0 (sonst wäre eine falsche Antwort richtig)', () => {
+    let checked = 0
+    for (const task of tasks(4, 300).filter((t) => t.kind === 'posLinePlane')) {
+      expect(task.data.d[0], task.form).not.toBe(0)
+      checked++
+    }
+    expect(checked).toBeGreaterThan(30)
+  })
+
   it('baut dieselbe Aufgabe zur selben Nummer', () => {
     expect(buildVectorTask(ref(5, 42))).toEqual(buildVectorTask(ref(5, 42)))
   })

@@ -390,7 +390,7 @@ export const LINE_ERROR_RULES: readonly VectorErrorRule[] = [
     name: 'Stützvektor beim Einsetzen vergessen',
     wrongFormula: String.raw`2x - y + z = 4,\; \vec x = \vec p + t\,\vec v \;\Rightarrow\; \vec n \cdot \vec v\, t = 4`,
     why: {
-      detailed: String.raw`Jede Zeile der Parameterform besteht aus dem Eintrag des Stützvektors **plus** dem Glied mit dem Parameter, z. B. $x = 1 + 3t$. Beim Einsetzen kommt beides in die Klammer. Lässt du den Stützvektor weg, setzt du eine Gerade durch den Ursprung ein.`,
+      detailed: String.raw`Jede Zeile der Parameterform besteht aus dem Eintrag des Stützvektors **plus** dem Glied mit dem Parameter, z. B. $x = 1 + 3t$. Beim Einsetzen kommt beides in die Klammer. Lässt du den Stützvektor weg, setzt du eine Gerade bzw. Ebene durch den Ursprung ein, nicht die gegebene.`,
       short: String.raw`Ganze Zeile einsetzen: Stützvektor plus Parameter mal Richtung.`,
     },
   },
