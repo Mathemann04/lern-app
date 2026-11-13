@@ -1252,3 +1252,8 @@ Neue Entscheidungen unten anfügen.
   Einspannmoment $M_A$ verwechselt wird. Inhalte, die nur im Buch stehen (Arbeitssatz und Stabilität, Seileck,
   Kraftschraube, Cremona-Plan, Föppl-Symbol, Polplan), sind markiert und kommen höchstens später oder in Stufe 5.
   Korrigiert: Der Satz über drei Kräfte im Gleichgewicht gilt nur für nicht parallele Kräfte.
+- 13.11.2026: Gestaltung von Technische Mechanik (Wunsch des Nutzers): Aufbau wie die anderen Fächer, zuerst das
+  Thema Statik mit Unterthemen zum Ankreuzen und Mischen; „Freischneiden“ als eigene Übung (geführt: richtiges
+  Freikörperbild unter mehreren wählen, falsche Bilder zeigen typische Fehler; frei: Kräfte als Pfeile im Bild setzen
+  oder als Vektor eintippen); Aufgaben als Ketten aus Freischneiden, halb geführtem Aufstellen der Gleichungen und
+  Rechnen Punkt für Punkt. Festgehalten in docs/MECHANIK.md, gebaut wird nach dem Plan zu M11.

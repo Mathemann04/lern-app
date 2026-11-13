@@ -284,6 +284,31 @@ Zeichen-Grundlage aus M6b.
 - Polynome bis Grad 3 abschnittsweise, Ableiten, Integrieren, Extremum: M1, M9.
 - e-Funktion und ln (Seilreibung), Ungleichungen (Haftgrenze, Selbstsperrung): M6.
 
+## Gestaltung in der App (Wünsche des Nutzers, 13.11.2026)
+
+- **Aufbau wie in den anderen Fächern:** Das Fach „Technische Mechanik“ bekommt Themen,
+  zuerst das große Thema **Statik**. Darin stehen Unterthemen zum Ankreuzen und Mischen,
+  so wie bei Chemie und den Mathe-Tätigkeiten (Regeln in `.claude/rules/auswahl.md`).
+  Vorschlag für die Unterthemen: Kräfte zerlegen und zusammensetzen, Momente,
+  **Freischneiden**, Lagerreaktionen, statische Bestimmtheit, mehrteilige Tragwerke,
+  Fachwerke, räumliche Statik, Schwerpunkte, Schnittgrößen, Reibung.
+- **Freischneiden als eigene Übung:** Die App zeigt ein Bild (Tragwerk, Hebel, Walze,
+  Leiter …) und fragt nach dem Freikörperbild.
+  - Geführt: mehrere Bilder zur Auswahl, eins richtig. Die falschen zeigen typische Fehler:
+    Loslager mit zwei Kräften, Einspannung ohne Moment, Moment im Gelenk, Seil auf Druck,
+    Normalkraft schräg statt senkrecht zur Fläche, Kraft vergessen, Kraft eingezeichnet, die
+    das Teil selbst ausübt, Zwischenreaktion an beiden Teilen gleich gerichtet.
+  - Frei: Man setzt die Kräfte an einem Punkt selbst, als Pfeile im Bild (Richtung wählen,
+    Moment als Drehpfeil) oder als Vektor eingetippt, z. B. $(F_{Ax};\,F_{Ay})$. Die App
+    prüft, ob die Kräfte zum Lager oder Kontakt passen; die Pfeilrichtung darf frei
+    angenommen werden (ein negatives Ergebnis heißt dann nur „andersherum“).
+- **Ketten wie bei den Rechnungen:** Aufgaben laufen Schritt für Schritt und lassen sich
+  mischen: erst freischneiden, dann halb geführt die Gleichgewichtsgleichungen aufstellen
+  (z. B. den fehlenden Term wählen oder den Momentenpunkt aussuchen), dann Punkt für Punkt
+  lösen. Höhere Stufen verketten mehr Schritte (Stufe = Verschachtelung, nie neuer Stoff).
+- Bilder zeichnet die App selbst aus derselben Beschreibung, aus der sie rechnet
+  (Zeichen-Grundlage aus M6b); Antippen und Pfeile setzen wie bei „Bilder zum Anfassen“.
+
 ## Ideen für die App (für den Plan von M11)
 
 - **Kern ist ein Löser für Tragwerke in der Engine:** Beschreibung (Teile, Lager, Lasten,
