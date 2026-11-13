@@ -10,6 +10,7 @@ import { type DragStep, judgeDrag } from './drag.ts'
 import { vectorErrorRule } from './errorRules.ts'
 import { ANGLE_TYPES } from './dotTasks.ts'
 import { ORIENTATIONS } from './spatTasks.ts'
+import { INDEPENDENCE, SPAN_ANSWERS } from './basisTasks.ts'
 import { type VectorTask, buildVectorTask } from './vectorTasks.ts'
 
 // Freier Modus der Tätigkeit „Vektoren" (M7 Schritt 1b): Das Ergebnis wird je Eintrag in ein eigenes Kästchen getippt
@@ -34,9 +35,14 @@ export type ResultPart = {
 export const RELATIONS = ['<', '>'] as const
 // Auswahlen im Ergebnis: Antworten, Text vor den Knöpfen, die besondere Antwort (Wert 0) und die Fehler (besondere Antwort
 // verwechselt, sonst die beiden anderen vertauscht)
-const CHOICE_SETS: readonly { readonly options: readonly string[]; readonly label: string; readonly special: number; readonly rules: readonly [string, string] }[] = [
+// byChoice: Fehler je gewählter Antwort (statt nach special)
+const CHOICE_SETS: readonly { readonly options: readonly string[]; readonly label: string; readonly special: number; readonly rules: readonly [string, string]; readonly byChoice?: readonly string[] }[] = [
   { options: ANGLE_TYPES, label: '', special: 1, rules: ['vec-angle-zero', 'vec-angle-sign'] },
   { options: ORIENTATIONS, label: 'Lage der drei Vektoren:', special: 2, rules: ['vec-spat-coplanar', 'vec-spat-orientation'] },
+  // Linearkombination und Basis (Schritt 5): zwei Antworten, jede Verwechslung ist derselbe Fehler
+  { options: INDEPENDENCE, label: 'Die Vektoren sind', special: 0, rules: ['vec-indep-swapped', 'vec-indep-swapped'] },
+  // „im Spann“ gewählt, obwohl nicht: Probe vergessen; „nicht im Spann“, obwohl doch: im Spann übersehen
+  { options: SPAN_ANSWERS, label: 'Der Vektor liegt', special: 0, rules: ['vec-lc-no-check', 'vec-lc-no-check'], byChoice: ['vec-lc-no-check', 'vec-lc-span-denied'] },
 ]
 const DEGREE = '^\\circ'
 // Einheiten am Ende eines Ergebnisses (Kräfte, Schritt 3b): \,\text{N}, \,\text{Nm}, \,\text{J}, \,\text{m}
@@ -78,7 +84,8 @@ function readPart(text: string): ResultPart | null {
   const t = text.trim()
   // Art des Winkels: \text{spitz}; seit Schritt 4b auch die Lage dreier Vektoren: \text{Rechtssystem} (Text vor den
   // Knöpfen in label)
-  const word = /^\\text\{(\w+)\}$/.exec(t)
+  // seit Schritt 5 auch mit Umlauten und Leerzeichen: \text{linear unabhängig}
+  const word = /^\\text\{([^{}$]+)\}$/.exec(t)
   if (word) {
     for (const set of CHOICE_SETS) {
       const idx = set.options.indexOf(word[1])
@@ -266,7 +273,7 @@ function choiceWrongs(part: ResultPart): PartWrong[] {
   const set = CHOICE_SETS.find((x) => x.options === part.options) ?? CHOICE_SETS[0]
   return set.options.flatMap((_, j) => {
     if (j === idx) return []
-    const rule = vectorErrorRule(j === set.special || idx === set.special ? set.rules[0] : set.rules[1])
+    const rule = vectorErrorRule(set.byChoice?.[j] ?? (j === set.special || idx === set.special ? set.rules[0] : set.rules[1]))
     return [{ values: [j], rule: rule.id, why: rule.why }]
   })
 }

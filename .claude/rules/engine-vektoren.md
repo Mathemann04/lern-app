@@ -11,7 +11,7 @@ paths:
 Plan: docs/PLAN-M7.md. Tätigkeit „Vektoren“ (Id `vektoren`) im Gebiet „Vektoren und Matrizen“ (`lineare-algebra`, Farbe
 `cyan`, Bild `vectors` in `AreaIcon.tsx`), Bausteine in `tasks/blocks.ts` (`VECTOR_BLOCKS`, Gruppe `vektor-grundlagen`,
 `VECTOR_PLAYABLE_COMBOS`; Bausteine `rechnen`, Code 21, Nummern `rechnen.2-4711`, seit Schritt 2a `skalar`, Code 22, seit
-Schritt 3a `projektion`, Code 23, seit Schritt 3b `kraefte`, Code 24, seit Schritt 4a `kreuz`, Code 25, seit Schritt 4b `spat`, Code 26;
+Schritt 3a `projektion`, Code 23, seit Schritt 3b `kraefte`, Code 24, seit Schritt 4a `kreuz`, Code 25, seit Schritt 4b `spat`, Code 26, seit Schritt 5 `basis`, Code 27;
 jeder Baustein allein spielbar, `buildVectorTask` wählt die Arten nach dem Baustein in der Nummer). Freier Modus seit Schritt 1b (`free: true`),
 gezieltes Üben noch nicht (`focus: false`).
 
@@ -91,13 +91,29 @@ gezieltes Üben noch nicht (`focus: false`).
   Phase 2 mit `from` = Lage in der Grundfläche, Knopf „Aufziehen“; Höhe Phase 3 mit rechtem Winkel; komplanar nur die
   Grundfläche). Vor dem Ergebnis nur die Grundfläche. Tests in `spatTasks.test.ts` (Gegenprobe mit der Determinante nach
   der ersten Zeile entwickelt, Höhe über Gram-Schmidt).
+- Linearkombination und Basis (Schritt 5): `linalg/basisTasks.ts`, Arten in `BASIS_KINDS_BY_LEVEL` (basisComb,
+  basisSpan, basisIndep, basisDim, basisCoords, basisSpanParam, basisParam). Gleichungen als `Row` (Faktoren `c`, rechts
+  `r` + `rt`·Parameter), `rowsOf` aus der Vektorgleichung, `systemLatex` als `array` mit (I), (II), …. Schritte
+  `systemStep` (falsch: Einträge eines Vektors in eine Gleichung, Faktoren vertauscht, Vorzeichen rechts, rechts 0),
+  `elimValueStep` (f1·R1 − f2·R2 über `eliminators`, liefert den Wert mit vergessener rechter Seite als Folgefehler),
+  `backsubStep` (einsetzen), `probeStep` (übrige Gleichungen; Antworten sind Text, `productsLatex(…, true)` mit
+  „1 \cdot“), `det2Step`, `indepStep` (Antwort mit Begründung), bei drei Unbekannten Schritt „eliminieren“ mit
+  (II'), (III'). Sarrus aus `spatTasks.ts` (`sarrusStep` mit `name`, `title`, `card`; `tripleQuad`, `sarrusPlus`,
+  `sarrusOne` exportiert). Koeffizienten $\lambda, \mu, \nu$ oder $\alpha, \beta, \gamma$, alle verschieden und nicht 0
+  (sonst fällt ein Fehler in der Probe nicht auf, und der freie Modus nähme die Fehler des falschen Schritts). Ergebnis
+  `\text{linear unabhängig}` bzw. `\text{im Spann}`: Auswahlen `INDEPENDENCE`, `SPAN_ANSWERS` in `CHOICE_SETS`
+  (`vectorFree.ts`). Bild `spanFigure`: gegebene Pfeile (mit Kette blass), Ebene durch den Ursprung (`plane`, Ecken aus
+  den Koordinaten aller Punkte in der Ebene), Kette der Vielfachen (Phase 1, 2, 3, ab dem zweiten gleitend), Ziel
+  violett, verfehlt: rote Strecke; Gerade `line`, Parallelogramm. In vier Dimensionen kein Bild, bei „linear unabhängig“ in der Ebene keins vor dem Ergebnis. Bei der Probe
+  „Faktoren vertauscht“ nur, wenn sich dadurch ein Wert ändert. Tests in
+  `basisTasks.test.ts` (Rang mit Gauß, Abstand zum Spann, falsche Gleichungssysteme werden von der Lösung nicht erfüllt).
 - `linalg/vectorTasks.ts`: Baukasten. Je Art (`VectorKind`) eine Funktion, die die ganze geführte Aufgabe baut (Schritte
   mit `choiceStep`: falsche Antworten ohne Doppelte, höchstens drei, aus `errorRules.ts`; Bilder; Ergebnis; Form;
   `answer` und `data` für die Gegenprobe in Tests). Arten je Stufe in `KINDS_BY_LEVEL`: Stufe 1 Ebene, 2 Raum, 3 zwei
   Rechnungen zusammen, 4 Parameter oder vier und fünf Dimensionen, 5 alles ineinander. Gibt eine Art in einem Schritt
   weniger als drei Antworten, zieht sie neu (Schleife). Kennzahlen der Abwechslung wie überall (100 Formen unter 200,
   keine über 3 %); die Form enthält Art, Dimension, Variante, Buchstaben und Zahl der negativen Einträge.
-- `linalg/errorRules.ts`: 113 typische Fehler (22 aus Schritt 1, 18 zum Skalarprodukt, 4 beim Ziehen, 15 zur Projektion, 26 zu Kräften, 14 zum Kreuzprodukt, 14 zum Spatprodukt) (`vec-…`), im Katalog `errorCatalog.ts` unter `vektoren`; Lernkarten in
+- `linalg/errorRules.ts`: 133 typische Fehler (22 aus Schritt 1, 18 zum Skalarprodukt, 4 beim Ziehen, 15 zur Projektion, 26 zu Kräften, 14 zum Kreuzprodukt, 14 zum Spatprodukt, 20 zu Linearkombination und Basis) (`vec-…`), im Katalog `errorCatalog.ts` unter `vektoren`; Lernkarten in
   `explain/vectorCards.ts` (Ordner `vektoren`, Beispiele `{ vector: { kind, level, seed } }`, gerechnet vom Baukasten,
   in `CardBody.tsx` mit Bild und Rechenweg).
 - `linalg/vectorEngine.ts`: Anschluss an `ui/courseEngines.ts` (planen, Form, neue Nummer, Beispiel).

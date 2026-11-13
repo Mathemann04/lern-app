@@ -1039,6 +1039,187 @@ export const VECTOR_ERROR_RULES: readonly VectorErrorRule[] = [
       short: String.raw`Pyramide und Tetraeder: $h = \frac{3V}{A}$.`,
     },
   },
+  // Linearkombination und Basis (M7 Schritt 5)
+  {
+    id: 'vec-lc-transposed',
+    name: 'Einträge eines Vektors in eine Gleichung geschrieben',
+    wrongFormula: String.raw`\lambda \vec a + \mu \vec b = \vec v \;\Rightarrow\; a_1 \lambda + a_2 \mu = v_1`,
+    why: {
+      detailed: String.raw`Jede Gleichung gehört zu **einer Zeile** der Vektorgleichung: In (I) stehen die ersten Einträge aller Vektoren, $a_1 \lambda + b_1 \mu = v_1$. Die Einträge eines Vektors stehen dagegen alle vor derselben Unbekannten, untereinander in verschiedenen Gleichungen.`,
+      short: String.raw`Gleichung (I): erste Einträge aller Vektoren, $a_1 \lambda + b_1 \mu = v_1$.`,
+    },
+  },
+  {
+    id: 'vec-lc-swapped',
+    name: 'Faktoren den falschen Vektoren zugeordnet',
+    wrongFormula: String.raw`\lambda \vec a + \mu \vec b \;\Rightarrow\; b_1 \lambda + a_1 \mu`,
+    why: {
+      detailed: String.raw`Jeder Faktor gehört fest zu seinem Vektor: $\lambda$ steht vor $\vec a$, $\mu$ vor $\vec b$. In jeder Gleichung und beim Einsetzen muss $\lambda$ also mit den Einträgen von $\vec a$ malgenommen werden. Vertauscht kommen andere Zahlen heraus.`,
+      short: String.raw`$\lambda$ gehört zu $\vec a$, $\mu$ zu $\vec b$; nicht vertauschen.`,
+    },
+  },
+  {
+    id: 'vec-lc-target-sign',
+    name: 'Zielvektor mit falschem Vorzeichen',
+    wrongFormula: String.raw`\lambda \vec a + \mu \vec b = \vec v \;\Rightarrow\; a_1 \lambda + b_1 \mu = -v_1`,
+    why: {
+      detailed: String.raw`Die Einträge von $\vec v$ stehen schon auf der rechten Seite, so wie sie sind. Ein Minus käme nur dazu, wenn du $\vec v$ von der anderen Seite herüberbringst; das ist hier nicht nötig.`,
+      short: String.raw`Rechts stehen die Einträge des Zielvektors unverändert.`,
+    },
+  },
+  {
+    id: 'vec-lc-homogeneous',
+    name: 'Rechte Seite 0 statt Zielvektor',
+    wrongFormula: String.raw`\lambda \vec a + \mu \vec b = \vec 0`,
+    why: {
+      detailed: String.raw`Mit $\vec 0$ auf der rechten Seite prüfst du, ob die Vektoren linear unabhängig sind. Hier soll aber $\vec v$ herauskommen: Rechts stehen die Einträge von $\vec v$.`,
+      short: String.raw`Rechts steht $\vec v$, nicht $\vec 0$ (das wäre der Test auf Unabhängigkeit).`,
+    },
+  },
+  {
+    id: 'vec-lc-no-check',
+    name: 'Übrige Gleichungen nicht geprüft',
+    wrongFormula: String.raw`\text{(I), (II) lösbar} \;\Rightarrow\; \vec v \in \operatorname{span}(\vec a, \vec b)`,
+    why: {
+      detailed: String.raw`Zwei Gleichungen legen $\lambda$ und $\mu$ fest. Im Raum gibt es aber mehr Gleichungen: Erst wenn **jede** mit denselben Zahlen stimmt, ist $\vec v$ eine Linearkombination, liegt also im Spann. Stimmt eine nicht, verfehlen die Vielfachen den Vektor. Deshalb gehört immer die Probe in den übrigen Gleichungen dazu.`,
+      short: String.raw`Im Spann nur, wenn auch die übrigen Gleichungen stimmen: Probe machen.`,
+    },
+  },
+  {
+    id: 'vec-lc-span-denied',
+    name: 'Im Spann übersehen',
+    wrongFormula: String.raw`\text{alle Gleichungen stimmen} \;\Rightarrow\; \vec v \notin \operatorname{span}(\vec a, \vec b)`,
+    why: {
+      detailed: String.raw`Erfüllen dieselben Zahlen $\lambda$ und $\mu$ **alle** Gleichungen, dann ist $\vec v = \lambda \vec a + \mu \vec b$, also eine Linearkombination: $\vec v$ liegt im Spann. Dass zwei Vektoren nur eine Ebene aufspannen, spielt keine Rolle, solange $\vec v$ in dieser Ebene liegt. Rechne die Probe Produkt für Produkt nach.`,
+      short: String.raw`Stimmen alle Gleichungen, liegt der Vektor im Spann.`,
+    },
+  },
+  {
+    id: 'vec-gauss-rhs',
+    name: 'Rechte Seite nicht mitgerechnet',
+    wrongFormula: String.raw`3 \cdot \text{I} - 2 \cdot \text{II}: \text{ links abgezogen, rechts nur } 3 \cdot r_1`,
+    why: {
+      detailed: String.raw`Eine Gleichung ist eine Waage: Was du links machst, musst du auch rechts machen. Nimmst du (I) mal $3$ und ziehst $2$-mal (II) ab, rechnest du rechts genauso: $3 r_1 - 2 r_2$.`,
+      short: String.raw`Malnehmen und Abziehen auch auf der rechten Seite.`,
+    },
+  },
+  {
+    id: 'vec-gauss-sign',
+    name: 'Vorzeichen beim Abziehen',
+    wrongFormula: String.raw`\text{I} - \text{II}: \; r_1 + r_2`,
+    why: {
+      detailed: String.raw`Beim Abziehen zweier Gleichungen wird **jeder** Eintrag der zweiten abgezogen, auch die Zahl rechts und negative Faktoren: $r_1 - (-4) = r_1 + 4$. Rechne Eintrag für Eintrag mit Klammern, dann geht kein Minus verloren.`,
+      short: String.raw`Jeden Eintrag abziehen, auch rechts; Minus mal Minus beachten.`,
+    },
+  },
+  {
+    id: 'vec-backsub-sign',
+    name: 'Beim Einsetzen das Vorzeichen nicht gedreht',
+    wrongFormula: String.raw`6 + 2\mu = 4 \;\Rightarrow\; 2\mu = 4 + 6`,
+    why: {
+      detailed: String.raw`Nach dem Einsetzen steht links eine bekannte Zahl. Sie kommt mit **umgedrehtem** Vorzeichen auf die andere Seite: aus $6 + 2\mu = 4$ wird $2\mu = 4 - 6$.`,
+      short: String.raw`Bekannte Zahl mit umgedrehtem Vorzeichen auf die andere Seite.`,
+    },
+  },
+  {
+    id: 'vec-backsub-divide',
+    name: 'Nicht durch den Faktor geteilt',
+    wrongFormula: String.raw`3\mu = 6 \;\Rightarrow\; \mu = 6`,
+    why: {
+      detailed: String.raw`Am Ende steht noch eine Zahl vor der Unbekannten. Erst wenn du durch diesen Faktor teilst, steht die Unbekannte allein: aus $3\mu = 6$ wird $\mu = \frac{6}{3}$.`,
+      short: String.raw`Zum Schluss durch den Faktor vor der Unbekannten teilen.`,
+    },
+  },
+  {
+    id: 'vec-indep-swapped',
+    name: 'Abhängig und unabhängig verwechselt',
+    wrongFormula: String.raw`\det(\vec a, \vec b, \vec c) \ne 0 \;\Rightarrow\; \text{linear abhängig}`,
+    why: {
+      detailed: String.raw`Determinante **ungleich** $0$: Die Vektoren spannen ein echtes Parallelogramm oder einen echten Spat auf, keiner lässt sich aus den anderen kombinieren, sie sind linear **unabhängig**. Determinante gleich $0$: Die Fläche oder das Volumen ist weg, die Vektoren sind linear abhängig. Mit Parameter heißt das: Abhängig nur für die Lösungen von $\det = 0$, für alle anderen Werte unabhängig.`,
+      short: String.raw`$\det \ne 0$: unabhängig; $\det = 0$: abhängig.`,
+    },
+  },
+  {
+    id: 'vec-indep-perp',
+    name: 'Unabhängig mit senkrecht verwechselt',
+    wrongFormula: String.raw`\vec a \cdot \vec b \ne 0 \;\Rightarrow\; \text{linear abhängig}`,
+    why: {
+      detailed: String.raw`Linear unabhängig heißt nur: Keiner der Vektoren lässt sich aus den anderen kombinieren, sie zeigen in verschiedene Richtungen. Senkrecht müssen sie dafür nicht stehen. Das Skalarprodukt sagt etwas über den Winkel, die Determinante über die Unabhängigkeit.`,
+      short: String.raw`Unabhängig heißt nicht senkrecht; entscheidend ist die Determinante.`,
+    },
+  },
+  {
+    id: 'vec-indep-no-zero',
+    name: 'Faustregel umgedreht: kein Nullvektor',
+    wrongFormula: String.raw`\text{kein Nullvektor} \;\Rightarrow\; \text{linear unabhängig}`,
+    why: {
+      detailed: String.raw`Ist der Nullvektor dabei, sind die Vektoren sicher abhängig. Umgekehrt gilt das nicht: Auch Vektoren ohne Nullvektor können abhängig sein, z. B. $\vec b = 2\vec a$ oder $\vec c = \vec a + \vec b$. Das sagt erst die Rechnung.`,
+      short: String.raw`Ohne Nullvektor kann es trotzdem abhängig sein; rechnen.`,
+    },
+  },
+  {
+    id: 'vec-indep-pairwise',
+    name: 'Nur paarweise auf parallel geprüft',
+    wrongFormula: String.raw`\text{keine zwei parallel} \;\Rightarrow\; \vec a, \vec b, \vec c \text{ unabhängig}`,
+    why: {
+      detailed: String.raw`Bei drei Vektoren reicht es nicht, dass keine zwei parallel sind: $\vec c$ kann trotzdem in der Ebene von $\vec a$ und $\vec b$ liegen, z. B. $\vec c = \vec a + \vec b$. Ob das so ist, sagt die Determinante. Vier Vektoren im Raum sind immer abhängig.`,
+      short: String.raw`Drei Vektoren: Determinante prüfen; vier im Raum sind immer abhängig.`,
+    },
+  },
+  {
+    id: 'vec-dim-count',
+    name: 'Anzahl der Vektoren statt Dimension',
+    wrongFormula: String.raw`\dim \operatorname{span}(\vec a, \vec b, \vec c) = 3`,
+    why: {
+      detailed: String.raw`Die Dimension zählt nur die **linear unabhängigen** Vektoren. Ein Vektor, der sich aus den anderen kombinieren lässt, bringt keine neue Richtung dazu. Eine Basis enthält deshalb keine abhängigen Vektoren.`,
+      short: String.raw`Dimension: nur die unabhängigen Vektoren zählen.`,
+    },
+  },
+  {
+    id: 'vec-dim-too-low',
+    name: 'Zu viele Vektoren gestrichen',
+    wrongFormula: String.raw`\det = 0 \;\Rightarrow\; \dim = 1`,
+    why: {
+      detailed: String.raw`$\det = 0$ heißt nur: Mindestens einer der Vektoren ist überflüssig. Zwei nicht parallele Vektoren zeigen trotzdem in zwei Richtungen und spannen eine Ebene auf. Und ist $\det \ne 0$, zählen alle drei. Eine Basis mit zu wenigen Vektoren lässt eine Richtung aus.`,
+      short: String.raw`Nur die abhängigen streichen; nicht parallele zählen weiter.`,
+    },
+  },
+  {
+    id: 'vec-dim-parallel',
+    name: 'Parallele Vektoren mitgezählt',
+    wrongFormula: String.raw`\vec b = 2\vec a \;\Rightarrow\; \dim \operatorname{span}(\vec a, \vec b) = 2`,
+    why: {
+      detailed: String.raw`Parallele Vektoren zeigen in dieselbe Richtung (oder die genau entgegengesetzte) und bringen keine neue Richtung dazu. Prüf, ob ein Vektor ein Vielfaches eines anderen ist: Dann zählen beide zusammen nur einmal.`,
+      short: String.raw`Parallele Vektoren zählen zusammen nur als eine Richtung.`,
+    },
+  },
+  {
+    id: 'vec-dim-entries',
+    name: 'Zahl der Einträge statt Dimension',
+    wrongFormula: String.raw`\vec a, \vec b, \vec c, \vec d \in \mathbb{R}^3 \;\Rightarrow\; \dim = 3`,
+    why: {
+      detailed: String.raw`Drei Einträge heißt nur: Die Vektoren liegen im Raum, die Dimension ist **höchstens** $3$. Liegen alle in einer Ebene, ist der Spann nur diese Ebene. Das zeigt die Determinante.`,
+      short: String.raw`Drei Einträge: Dimension höchstens $3$, nicht immer $3$.`,
+    },
+  },
+  {
+    id: 'vec-det2-plus',
+    name: 'Plus statt Minus bei der 2 × 2-Determinante',
+    wrongFormula: String.raw`\det\begin{pmatrix} a_1 & b_1 \\ a_2 & b_2 \end{pmatrix} = a_1 b_2 + a_2 b_1`,
+    why: {
+      detailed: String.raw`Bei einer $2 \times 2$-Matrix gilt: Hauptdiagonale **minus** Nebendiagonale, $a_1 b_2 - a_2 b_1$. Mit Plus kommt nicht die Fläche heraus, und bei parallelen Vektoren nicht $0$.`,
+      short: String.raw`$a_1 b_2 - a_2 b_1$: Hauptdiagonale minus Nebendiagonale.`,
+    },
+  },
+  {
+    id: 'vec-det2-rows',
+    name: 'Einträge eines Vektors miteinander malgenommen',
+    wrongFormula: String.raw`\det(\vec a, \vec b) = a_1 a_2 - b_1 b_2`,
+    why: {
+      detailed: String.raw`Die Vektoren sind die **Spalten** der Matrix. Über Kreuz malgenommen wird immer ein Eintrag von $\vec a$ mit einem von $\vec b$: $a_1 b_2 - a_2 b_1$.`,
+      short: String.raw`Immer ein Eintrag von $\vec a$ mal einer von $\vec b$.`,
+    },
+  },
 ]
 
 export const vectorErrorRule = (id: string): VectorErrorRule => {

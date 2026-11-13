@@ -1,6 +1,6 @@
 # Plan für Meilenstein 7: Vektoren, Geraden und Ebenen, Matrizen
 
-Status: **freigegeben** (Nutzer, 12.11.2026: „Passt alles“). Schritte 1a, 1b, 2a, 2b und 3a fertig (12.11.2026), 3b, 4a und 4b fertig (13.11.2026).
+Status: **freigegeben** (Nutzer, 12.11.2026: „Passt alles“). Schritte 1a, 1b, 2a, 2b und 3a fertig (12.11.2026), 3b, 4a, 4b und 5 fertig (13.11.2026).
 
 Entwurf zum Ansehen und Anfassen (privat, nur für den Nutzer):
 https://claude.ai/artifact/WXe4sjavAGF64jyAWSa3hi. Er zeigt acht Bilder und Aufgaben im geplanten Stil. Die Seite ist
@@ -101,7 +101,7 @@ Animationen starten nur auf Knopfdruck („Abspielen“) und entfallen, wenn am 
   vergessen, Zeile statt Spalte (Falk, Cramer), Produkt nicht definiert, $(AB)^{\mathsf T} = A^{\mathsf T}B^{\mathsf T}$,
   $\lambda$ statt $\lambda^n$, Vorzeichen beim Zeilentausch, Sarrus bei 4×4, rechte Seite vergessen, Nullzeile falsch
   gedeutet, gleicher Parameter für zwei Geraden, beim Ziehen (2b): nur vertauscht oder nur ein Vorzeichen geändert, rechter Winkel als spitz
-  oder stumpf gezählt, rechter Winkel an der falschen Ecke, Seiten statt Diagonalen senkrecht, bei der Projektion (3a) die 15 Fehler aus Schritt 3a, bei den Kräften (3b) die 26 Fehler aus Schritt 3b, beim Kreuzprodukt (4a) die 14 Fehler aus Schritt 4a, beim Spatprodukt (4b) die 14 Fehler aus Schritt 4b, cos statt sin bei Gerade–Ebene, „$A - 2$“ ohne $E$, auf der falschen
+  oder stumpf gezählt, rechter Winkel an der falschen Ecke, Seiten statt Diagonalen senkrecht, bei der Projektion (3a) die 15 Fehler aus Schritt 3a, bei den Kräften (3b) die 26 Fehler aus Schritt 3b, beim Kreuzprodukt (4a) die 14 Fehler aus Schritt 4a, beim Spatprodukt (4b) die 14 Fehler aus Schritt 4b, bei Linearkombination und Basis (5) die 20 Fehler aus Schritt 5, cos statt sin bei Gerade–Ebene, „$A - 2$“ ohne $E$, auf der falschen
   Seite ausgeklammert. Jede mit Katalogbeispiel, eigenem Text für „Warum ist das falsch?“ und Platz auf einer Lernkarte
   (Regeln aus CLAUDE.md).
 - **Aufgabennummern** wie seit M6 mit Baustein (`taskNumber.ts`); neue Bausteine bekommen die nächsten freien Nummern in
@@ -213,7 +213,23 @@ Request.
      Linkssystem verwechselt, komplanar falsch erkannt, Betrag vergessen, Faktor des Körpers verwechselt, Faktor
      vergessen, Längen malgenommen wie beim Quader, schräge Kante statt Höhe, Volumen statt Höhe, durch das Quadrat der
      Grundfläche geteilt, beim Tetraeder das Drittel vergessen.
-5. **Linearkombination und Basis:** Spann im Raum, kleine Gleichungssysteme Schritt für Schritt.
+5. **Linearkombination und Basis (fertig, 13.11.2026):** Baustein „Linearkombination und Basis“ (`basis`, Code 27) in den
+   Stufen 1 bis 5, geführt und frei. Sieben Arten: Linearkombination bestimmen (Stufe 1 in der Ebene, Stufe 2 im Raum
+   mit Probe), liegt ein Vektor im Spann (Stufe 2 im Raum, Stufe 3 in vier Dimensionen; bei der Hälfte nicht), linear
+   unabhängig (Stufe 1 mit der $2 	imes 2$-Determinante, Stufe 2 mit Sarrus; bei der Hälfte abhängig), Dimension und
+   Basis des Spanns (drei oder vier Vektoren im Raum, Dimension 1, 2 oder 3), Koordinaten in einer Basis mit Gauß
+   (Stufe 3 ganze Zahlen, Stufe 4 Brüche), Parameter so, dass ein Vektor im Spann liegt (Stufe 4 im Raum, Stufe 5 in
+   vier Dimensionen mit Probe), Parameter so, dass drei Vektoren abhängig sind (Stufe 5 dazu der dritte als
+   Linearkombination). Kleine Gleichungssysteme Schritt für Schritt: aufstellen, eliminieren, einsetzen, Probe. Bild:
+   Spann als Ebene im Raum, beim „Abspielen“ hängen sich die Vielfachen aneinander und treffen das Ziel oder verfehlen
+   es (rote Strecke). Frei: „linear unabhängig“ oder „linear abhängig“ und „im Spann“ oder „nicht im Spann“ zum
+   Antippen. Drei Lernkarten, 20 neue typische Fehler: Einträge eines Vektors in eine Gleichung geschrieben, Faktoren
+   den falschen Vektoren zugeordnet, Zielvektor mit falschem Vorzeichen, rechte Seite 0 statt Zielvektor, übrige
+   Gleichungen nicht geprüft, im Spann übersehen, rechte Seite nicht mitgerechnet, Vorzeichen beim Abziehen, beim Einsetzen das Vorzeichen
+   nicht gedreht, nicht durch den Faktor geteilt, abhängig und unabhängig verwechselt, unabhängig mit senkrecht
+   verwechselt, Faustregel „kein Nullvektor“ umgedreht, nur paarweise auf parallel geprüft, Anzahl der Vektoren statt
+   Dimension, zu viele Vektoren gestrichen, parallele Vektoren mitgezählt, Zahl der Einträge statt Dimension, Plus statt
+   Minus bei der $2 \times 2$-Determinante, Einträge eines Vektors miteinander malgenommen.
 6. **Geraden und Ebenen, Formen:** Tätigkeit „Geraden und Ebenen“; Parameter-, Normalen-, Koordinatenform, Hesse,
    umrechnen, Spurpunkte.
 7. **Lage, Abstände, Winkel:** Entscheidungsbaum für zwei Geraden, Gerade–Ebene, Ebene–Ebene, alle Abstände mit Lot,
