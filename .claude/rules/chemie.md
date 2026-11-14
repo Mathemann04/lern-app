@@ -278,3 +278,8 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   anderer Fassung, Stufe über `resolve`, Weiterleitung mit `?wiederholen=<fach>`; dort führen X und „Zur Übersicht" zur Startseite,
   „Nächste Aufgabe" zur nächsten fälligen Frage; kein Stufenvorschlag; `lastCourse` und `lastMix` bleiben. Browser-Tests
   `e2e/exam-start.spec.ts`.
+- Ratefallen (S12): `engine/quiz/answerLength.ts` (`visibleLength`: Formeln nach ihrem Inhalt; `lengthStat`: Anteil „richtige
+  ist die längste/kürzeste“ und Wert bei Zufall; Auswahlen mit längster Antwort unter 30 Zeichen zählen nicht), Test
+  `chem/guessing.test.ts` je Thema, Stufe und Art (Fragen: Zufall − 15 bis + 10 Prozentpunkte; Rechnungen nur die Obergrenze).
+  Neue Fragen gleich so schreiben: falsche Antworten so genau wie die richtige (mit Begründung, wenn die richtige eine hat),
+  und je Stufe soll die richtige mal die längste, mal die kürzeste, meist in der Mitte sein.
