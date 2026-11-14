@@ -1,6 +1,6 @@
 # Plan für Meilenstein 7: Vektoren, Geraden und Ebenen, Matrizen
 
-Status: **freigegeben** (Nutzer, 12.11.2026: „Passt alles“). Schritte 1a, 1b, 2a, 2b und 3a fertig (12.11.2026), 3b, 4a, 4b, 5, 6, 7a, 7b, 8a, 8b, 9a, 9b, 10a und 10b fertig (13.11.2026); offen ab 11.
+Status: **freigegeben** (Nutzer, 12.11.2026: „Passt alles“). Schritte 1a, 1b, 2a, 2b und 3a fertig (12.11.2026), 3b, 4a, 4b, 5, 6, 7a, 7b, 8a, 8b, 9a, 9b, 10a, 10b und 11a fertig (13.11.2026), 11b fertig (14.11.2026); offen ab 11c.
 
 Entwurf zum Ansehen und Anfassen (privat, nur für den Nutzer):
 https://claude.ai/artifact/WXe4sjavAGF64jyAWSa3hi. Er zeigt acht Bilder und Aufgaben im geplanten Stil. Die Seite ist
@@ -101,7 +101,7 @@ Animationen starten nur auf Knopfdruck („Abspielen“) und entfallen, wenn am 
   vergessen, Zeile statt Spalte (Falk, Cramer), Produkt nicht definiert, $(AB)^{\mathsf T} = A^{\mathsf T}B^{\mathsf T}$,
   $\lambda$ statt $\lambda^n$, Vorzeichen beim Zeilentausch, Sarrus bei 4×4, rechte Seite vergessen, Nullzeile falsch
   gedeutet, gleicher Parameter für zwei Geraden, beim Ziehen (2b): nur vertauscht oder nur ein Vorzeichen geändert, rechter Winkel als spitz
-  oder stumpf gezählt, rechter Winkel an der falschen Ecke, Seiten statt Diagonalen senkrecht, bei der Projektion (3a) die 15 Fehler aus Schritt 3a, bei den Kräften (3b) die 26 Fehler aus Schritt 3b, beim Kreuzprodukt (4a) die 14 Fehler aus Schritt 4a, beim Spatprodukt (4b) die 14 Fehler aus Schritt 4b, bei Linearkombination und Basis (5) die 20 Fehler aus Schritt 5, bei Geraden und Ebenen (6) die 33 Fehler aus Schritt 6 (Vorsilbe „gl-“), bei der Lage (7a) die 17 Fehler aus Schritt 7a, bei Abständen und Schnittwinkeln (7b) die 14 Fehler aus Schritt 7b, bei den Matrizen (8a) die 27 Fehler aus Schritt 8a (Vorsilbe „mat-“), bei den Determinanten (9a) die 37 Fehler aus Schritt 9a (Vorsilbe „det-“), beim Gauß-Verfahren (10a) die 34 Fehler aus Schritt 10a (Vorsilbe „gauss-“), bei der Cramerschen Regel (11a) die 10 Fehler aus Schritt 11a (Vorsilbe „cramer-“), cos statt sin bei Gerade–Ebene, „$A - 2$“ ohne $E$, auf der falschen
+  oder stumpf gezählt, rechter Winkel an der falschen Ecke, Seiten statt Diagonalen senkrecht, bei der Projektion (3a) die 15 Fehler aus Schritt 3a, bei den Kräften (3b) die 26 Fehler aus Schritt 3b, beim Kreuzprodukt (4a) die 14 Fehler aus Schritt 4a, beim Spatprodukt (4b) die 14 Fehler aus Schritt 4b, bei Linearkombination und Basis (5) die 20 Fehler aus Schritt 5, bei Geraden und Ebenen (6) die 33 Fehler aus Schritt 6 (Vorsilbe „gl-“), bei der Lage (7a) die 17 Fehler aus Schritt 7a, bei Abständen und Schnittwinkeln (7b) die 14 Fehler aus Schritt 7b, bei den Matrizen (8a) die 27 Fehler aus Schritt 8a (Vorsilbe „mat-“), bei den Determinanten (9a) die 37 Fehler aus Schritt 9a (Vorsilbe „det-“), beim Gauß-Verfahren (10a) die 34 Fehler aus Schritt 10a (Vorsilbe „gauss-“), bei der Cramerschen Regel (11a) die 10 Fehler aus Schritt 11a (Vorsilbe „cramer-“), bei Gleichungssystemen mit Parameter (11b) die 19 Fehler aus Schritt 11b (Vorsilbe „lgsp-“), cos statt sin bei Gerade–Ebene, „$A - 2$“ ohne $E$, auf der falschen
   Seite ausgeklammert. Jede mit Katalogbeispiel, eigenem Text für „Warum ist das falsch?“ und Platz auf einer Lernkarte
   (Regeln aus CLAUDE.md).
 - **Aufgabennummern** wie seit M6 mit Baustein (`taskNumber.ts`); neue Bausteine bekommen die nächsten freien Nummern in
@@ -410,9 +410,23 @@ Request.
       $\det A$ geteilt, Bedingung umgedreht, $\det A = 0$ nicht geprüft, Wert mit $\det A = 0$ behalten, nur eine Lösung
       der quadratischen Gleichung, nur den Zähler gleich dem Wert gesetzt, Vorzeichen beim Auflösen nach $a$; dazu die
       Fehler bei $2 \times 2$ und Sarrus aus 9a und beim Einsetzen aus 10a.
-    - **11b:** Baustein „Gleichungssysteme mit Parameter“ (Klausur, jedes Jahr): $\det A$ als Polynom, Sonderfälle einzeln
-      mit Gauß (keine oder unendlich viele Lösungen), Rang der Koeffizienten- und der erweiterten Matrix, Parameter auch
-      rechts ($b$), Lösung mit vorgegebener Komponente, Folgefehler „durch etwas geteilt, das 0 sein kann“.
+    - **11b (fertig, 14.11.2026):** Baustein „Gleichungssysteme mit Parameter“ (`lgsparam`, Code 37, Gruppe
+      „Gleichungssysteme“, Klausur jedes Jahr), Stufen 1 bis 5, geführt und frei. Zwei Wege: **Gauß mit Parameter** (die
+      Stufen haben feste Zahlen, $a$ steht in der letzten Spalte und rechts; Nullen erzeugen mit den Einträgen in $a$, die
+      letzte Zeile $q(a)\,z = s(a)$ deuten) und **Determinante zuerst** ($a$ irgendwo in der Matrix: $\det A$ als Polynom,
+      jeden Sonderwert einsetzen und mit Gauß in Zahlen auf Stufenform bringen). Sechs Arten: $2 \times 2$ (Stufe 1 und 2),
+      $3 \times 3$ (Stufe 2, ab Stufe 3 mit zwei Sonderwerten, $a^2$ in der Tabelle und Rang), Determinante zuerst (Stufe 3
+      und 4), zweiter Parameter $b$ rechts (Stufe 4 und 5: für welche $a$ und $b$ unendlich viele), Unbekannte mit
+      vorgegebenem Wert (Stufe 4 und 5, auch mit einem Sonderwert, der wegfällt), alle Fälle mit Lösungsmenge beim Sonderwert
+      (Stufe 5). Schritte: Nullen erzeugen, „Für welche $a$ genau eine Lösung?“, Stufenform beim Sonderwert, Rang mit
+      Folgerung, „Für welche $a$ keine bzw. unendlich viele Lösungen?“, $b$ beim Sonderwert, Wert vorgegeben, Lösungsmenge.
+      Frei: $a = \dots$, zwei Werte, $a$ und $b$, Lösungsmenge in Kästchen. Drei Lernkarten, 19 neue typische Fehler:
+      Bedingung umgedreht, Sonderfälle übersehen (durch einen Ausdruck mit $a$ geteilt), Nullstelle der rechten Seite,
+      nur eine Lösung der quadratischen Gleichung, „für kein $a$“, sechs beim Rang (Widerspruchszeile bei $A$ gezählt, rechte
+      Seite übersehen, verschiedene Ränge als lösbar, gleiche Ränge als genau eine Lösung, Nullzeile mitgezählt, Zeilen
+      gezählt), vier beim Parameter rechts (Vorzeichen, nicht geteilt, für jedes $b$, für kein $b$), Wert behalten, der
+      wegfällt, nur rechte Seite gleich dem Wert, Bruch umgedreht, allgemeine Formel auf den Sonderfall angewandt; dazu die
+      Fehler beim Nullen erzeugen und Deuten aus 10a.
     - **11c:** Bilder: Schieberegler für den Parameter (Geraden bzw. Ebenen bewegen sich, bei den Sonderwerten parallel
       oder gleich), Cramer als Flächen (2 × 2: $x$ ist das Verhältnis der Parallelogramme aus $\vec b, \vec a_2$ und
       $\vec a_1, \vec a_2$).
