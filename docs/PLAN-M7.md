@@ -395,6 +395,23 @@ Request.
       Gerade bzw. Ebene); ohne Lösung nennt die Beschreibung den Grund (parallel, nicht alle durch einen Punkt mit grauen
       Schnittpunkten, parallele Schnittgeraden gestrichelt). Lernkarten: „Tabelle und Stufenform“ mit der Drehung, die
       übrigen mit dem Bild zum Ergebnis.
+    - **10c (freigegeben 14.11.2026, als Nächstes, vor 11c; Wunsch des Nutzers):** Baustein „Einsetzen, Gleichsetzen,
+      Addieren“ (nächster freier Code, Gruppe „Gleichungssysteme“) in der Tätigkeit „Matrizen und Gleichungssysteme“, Stufen 1
+      bis 5, geführt und frei. Die drei Schulverfahren Schritt für Schritt: **Einsetzen** (eine Gleichung nach einer
+      Unbekannten auflösen, am besten nach der, die schon fast allein steht; in die andere einsetzen; lösen; zurückrechnen),
+      **Gleichsetzen** (beide nach derselben Unbekannten auflösen, gleichsetzen, lösen, zurückrechnen), **Addieren** (so
+      malnehmen, dass beim Addieren eine Unbekannte wegfällt). Manchmal die Frage „Welches Verfahren passt hier am besten?“
+      (y steht schon allein: Einsetzen; beide nach y aufgelöst: Gleichsetzen; gleiche oder entgegengesetzte Zahlen: Addieren).
+      Stufen: 1 zwei Gleichungen mit ganzen Zahlen, Verfahren vorgegeben, eine Unbekannte steht fast allein; 2 alle drei
+      Verfahren, Zahlen vor den Unbekannten nicht 1, Lösung ganzzahlig; 3 Gleichungen erst ordnen (Klammern, Unbekannte auf
+      beiden Seiten, Brüche wegschaffen), Lösung auch als Bruch, auch keine oder unendlich viele Lösungen ($0 = 5$, $0 = 0$);
+      4 drei Gleichungen, die sich durch Einsetzen lösen lassen (eine mit nur zwei Unbekannten), oder Unbekannte im Nenner mit
+      $u = \frac{1}{x}$; 5 alles ineinander, auch mit Parameter. Zahlen wie seit 11b nicht fast immer 1. Typische Fehler:
+      Vorzeichen beim Auflösen, Klammer beim Einsetzen vergessen ($-2(3 - y) \to -6 - 2y$), nur eine Seite malgenommen,
+      addiert statt abgezogen, zweite Unbekannte nicht ausgerechnet, $0 = 0$ als „keine Lösung“ gedeutet, in die eben
+      umgeformte Gleichung zurückgesetzt (ergibt $0 = 0$). Bilder: jede Gleichung eine Gerade, Lösung als Schnittpunkt; beim
+      Addieren dreht sich die neue Gerade durch den Schnittpunkt (wie 10b), bei keiner Lösung parallele Geraden. Frei: Lösung
+      in Kästchen, „keine Lösung“ zum Antippen, Lösungsmenge. Lernkarten je Verfahren und „Welches Verfahren wann?“.
 11. **Gleichungssysteme mit Parameter und Cramer**, in drei Teilen:
     - **11a (fertig, 13.11.2026):** Baustein „Cramersche Regel“ (`cramer`, Code 36, Gruppe „Gleichungssysteme“) in der
       Tätigkeit „Matrizen und Gleichungssysteme“, Stufen 1 bis 5, geführt und frei. Fünf Arten: $2 \times 2$ ganz (Stufe 1
