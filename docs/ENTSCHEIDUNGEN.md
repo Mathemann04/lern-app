@@ -1299,3 +1299,13 @@ Neue Entscheidungen unten anfügen.
   $x_1, x_2$), weil der freie Modus $x_1 = \dots$ als erste von zwei Lösungen liest; Matrizen heißen $A_x, A_y, A_z$.
   Die Frage „genau eine Lösung mit $z = c$“ ist bewusst so gestellt: Bei dem Wert, der wegfällt, hat das System
   unendlich viele Lösungen, unter denen auch eine mit $z = c$ sein kann.
+- 14.11.2026: M7 Schritt 11b, Baustein „Gleichungssysteme mit Parameter“ (Id `lgsparam`, Code 37). Beide Wege der
+  Vorlesung kommen vor: Gauß mit Parameter (Stufe 1 bis 3, 5) und Determinante zuerst (Stufe 3 und 4). Beim Gauß-Weg
+  stehen in den Stufen-Spalten feste Zahlen und $a$ nur in der letzten Spalte und rechts, damit beim Nullen erzeugen nie
+  durch einen Ausdruck mit $a$ geteilt werden muss (das wäre selbst schon der typische Fehler); steht $a$ woanders, rechnet
+  die Aufgabe zuerst die Determinante. Jede Aufgabe stellt eine Frage mit Zahlen als Antwort (für welche $a$ keine bzw.
+  unendlich viele Lösungen, $a$ und $b$, $a$ für einen vorgegebenen Wert, Lösungsmenge), damit der freie Modus sie prüfen
+  kann; „für welche $a$ genau eine Lösung“ ist ein Schritt im geführten Weg. Der Rang wird mit seiner Folgerung gefragt
+  („$\operatorname{rg}(A) = 2$, $\operatorname{rg}(A \mid \vec b) = 2$: unendlich viele Lösungen“), damit auch „gleiche
+  Ränge heißen genau eine Lösung“ als Fehler vorkommt. Falsche Stufenformen ohne Lösung zählen wie beim Gauß-Verfahren
+  (13.11.2026) nur, wenn sie nicht genau die richtige Tabelle sind.

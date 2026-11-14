@@ -14,9 +14,9 @@ import { ratLatex, vecLatex } from './vec.ts'
 // Lösungen) und rückwärts einsetzen, bei unendlich vielen Lösungen mit freien Variablen als Parameter. Alles exakt mit
 // Brüchen; die Aufgaben werden rückwärts gebaut (Stufenform, dann gemischt), damit alles ohne Taschenrechner aufgeht.
 
-type Row = readonly Rational[]
-type Tab = readonly Row[]
-type Case = 'unique' | 'none' | 'inf'
+export type Row = readonly Rational[]
+export type Tab = readonly Row[]
+export type Case = 'unique' | 'none' | 'inf'
 type Fmt = (x: Rational) => string
 
 const R = (k: number) => rat(k)
@@ -61,7 +61,7 @@ function sideLatex(terms: readonly (readonly [Rational, string])[], fmt: Fmt): s
 }
 
 // Tabelle mit Kopfzeile (Variablen), Zeilennamen links und Umformungen rechts
-function tabLatex(T: Tab, vars: readonly string[], notes: readonly (string | undefined)[] = [], fmt: Fmt = ratLatex): string {
+export function tabLatex(T: Tab, vars: readonly string[], notes: readonly (string | undefined)[] = [], fmt: Fmt = ratLatex): string {
   const n = vars.length
   const withNotes = notes.some(Boolean)
   const spec = `c|${'r'.repeat(n)}|r${withNotes ? 'l' : ''}`
@@ -86,7 +86,7 @@ const systemLatex = (rows: readonly Shown[], vars: readonly string[], fmt: Fmt =
 
 // ------------------------------------------------------------------ exakte Hilfen
 
-const sameTab = (A: Tab, B: Tab) => A.length === B.length && A.every((r, i) => r.length === B[i].length && r.every((x, j) => ratEq(x, B[i][j])))
+export const sameTab = (A: Tab, B: Tab) => A.length === B.length && A.every((r, i) => r.length === B[i].length && r.every((x, j) => ratEq(x, B[i][j])))
 
 // reduzierte Stufenform (zum Vergleichen: gleiche Zeilen bis auf Umformungen)
 function rref(T: Tab): Rational[][] {
@@ -115,8 +115,8 @@ const inconsistent = (A: Tab) => rref(A).some((r) => r.slice(0, -1).every(isZero
 // gleichwertig: dieselben Zeilen bis auf Umformungen (gleiche reduzierte Stufenform). Ohne Lösung haben alle Tabellen mit
 // denselben Zeilen links dieselbe reduzierte Stufenform, egal was rechts steht; dort zählt der Rechenfehler selbst, und
 // nur genau dieselbe Tabelle fällt weg (Entscheidung in docs/ENTSCHEIDUNGEN.md, 13.11.2026)
-const equivalent = (A: Tab, B: Tab) => (inconsistent(A) || inconsistent(B) ? sameTab(A, B) : sameTab(rref(A), rref(B)))
-const rankOf = (vs: readonly (readonly Rational[])[]) => (vs.length === 0 ? 0 : rref(vs).filter((r) => r.some((x) => !isZero(x))).length)
+export const equivalent = (A: Tab, B: Tab) => (inconsistent(A) || inconsistent(B) ? sameTab(A, B) : sameTab(rref(A), rref(B)))
+export const rankOf = (vs: readonly (readonly Rational[])[]) => (vs.length === 0 ? 0 : rref(vs).filter((r) => r.some((x) => !isZero(x))).length)
 
 const gcd = (a: bigint, b: bigint): bigint => (b === 0n ? (a < 0n ? -a : a) : gcd(b, a % b))
 
@@ -124,7 +124,7 @@ const gcd = (a: bigint, b: bigint): bigint => (b === 0n ? (a < 0n ? -a : a) : gc
 
 // neue Zeile = p · Zeile target − q · Zeile der Stufe
 type Op = { readonly target: number; readonly p: Rational; readonly q: Rational }
-type Stage =
+export type Stage =
   | { readonly kind: 'swap'; readonly row: number; readonly other: number; readonly col: number; readonly before: Tab; readonly after: Tab }
   | { readonly kind: 'elim'; readonly row: number; readonly col: number; readonly ops: readonly Op[]; readonly before: Tab; readonly after: Tab }
 
@@ -139,7 +139,7 @@ function opFor(a: Rational, b: Rational, target: number): Op {
   return { target, p: rat(p), q: rat(q) }
 }
 
-function opLabel(o: Op, row: number): string {
+export function opLabel(o: Op, row: number): string {
   const left = isOne(o.p) ? roman(o.target) : `${ratLatex(o.p)} \\cdot ${roman(o.target)}`
   const k = ratAbs(o.q)
   return `${left} ${ratSign(o.q) < 0 ? '+' : '-'} ${isOne(k) ? '' : `${ratLatex(k)} \\cdot `}${roman(row)}`
@@ -152,7 +152,7 @@ const applyOps = (M: Tab, row: number, col: number, ops: readonly Op[], f: RowFn
     return o ? f(o.p, r, o.q, M[row], col) : r
   })
 
-function runGauss(T: Tab, n: number): Stage[] {
+export function runGauss(T: Tab, n: number): Stage[] {
   let M: Tab = T
   const m = T.length
   const stages: Stage[] = []
@@ -179,9 +179,9 @@ function runGauss(T: Tab, n: number): Stage[] {
   return stages
 }
 
-type Pivot = { readonly row: number; readonly col: number }
+export type Pivot = { readonly row: number; readonly col: number }
 // Stufen der Stufenform, Widerspruchszeile, Nullzeilen
-function analyze(F: Tab, n: number) {
+export function analyze(F: Tab, n: number) {
   const pivots: Pivot[] = []
   let contradiction = -1
   let zeroRows = 0
@@ -198,24 +198,24 @@ function analyze(F: Tab, n: number) {
 
 // ------------------------------------------------------------------ rückwärts einsetzen (Werte linear in den Parametern)
 
-type Aff = readonly Rational[]
+export type Aff = readonly Rational[]
 const affAdd = (a: Aff, b: Aff): Aff => a.map((x, i) => ratAdd(x, b[i]))
 const affScale = (k: Rational, a: Aff): Aff => a.map((x) => ratMul(k, x))
 const affEq = (a: Aff, b: Aff) => a.every((x, i) => ratEq(x, b[i]))
 const affLatex = (a: Aff, params: readonly string[]) => termsLatex([[a[0], ''], ...params.map((p, k) => [a[k + 1], p] as const)])
 
-type SlipKind = 'sign' | 'forgot' | 'coef' | 'flip' | 'sub'
-const SLIP_RULE: Readonly<Record<SlipKind, string>> = {
+export type SlipKind = 'sign' | 'forgot' | 'coef' | 'flip' | 'sub'
+export const SLIP_RULE: Readonly<Record<SlipKind, string>> = {
   sign: 'gauss-backsub-sign',
   forgot: 'gauss-divide-forgot',
   coef: 'gauss-backsub-coef',
   flip: 'gauss-divide-flip',
   sub: 'gauss-divide-sub',
 }
-type Slip = { readonly row: number; readonly kind: SlipKind }
+export type Slip = { readonly row: number; readonly kind: SlipKind }
 
 // Werte aller Variablen; mit slip wird eine Zeile falsch aufgelöst (null: Fehler hier nicht möglich oder ohne Wirkung)
-function backSolve(F: Tab, n: number, pivots: readonly Pivot[], free: readonly number[], slip?: Slip): Aff[] | null {
+export function backSolve(F: Tab, n: number, pivots: readonly Pivot[], free: readonly number[], slip?: Slip): Aff[] | null {
   const s = free.length
   const zero: Aff = Array.from({ length: s + 1 }, () => ZERO)
   const vals: Aff[] = Array.from({ length: n }, () => zero)
@@ -454,13 +454,10 @@ function swapStep(rng: Rng, st: Extract<Stage, { kind: 'swap' }>, idx: number, c
   })
 }
 
-function elimStep(rng: Rng, st: Extract<Stage, { kind: 'elim' }>, idx: number, ctx: Ctx, showBefore: boolean): GuidedStep | null {
-  const n = ctx.n
+// Falsche Tabellen zu einer Umformung (typische Fehler beim Nullen erzeugen); auch für Gleichungssysteme mit Parameter
+// (Schritt 11b, lgspTasks.ts)
+export function elimCands(rng: Rng, st: Extract<Stage, { kind: 'elim' }>, n: number): [Tab, string][] {
   const { row, col, ops, before, after } = st
-  const notes = after.map((_, i) => {
-    const o = ops.find((x) => x.target === i)
-    return o ? opLabel(o, row) : undefined
-  })
   const sgn = (q: Rational) => R(ratSign(q))
   const cands: [Tab, string][] = [
     [applyOps(before, row, col, ops, (p, ri, q, rr) => combine(p, ri, q, rr).map((x, j) => (j === n ? ri[j] : x))), 'gauss-rhs'],
@@ -476,6 +473,17 @@ function elimStep(rng: Rng, st: Extract<Stage, { kind: 'elim' }>, idx: number, c
     const W = after.map((r, i) => (i === t ? r.map((x, k) => (k === j ? ratAdd(ratMul(ops.find((o) => o.target === t)!.p, before[t][k]), ratMul(ops.find((o) => o.target === t)!.q, before[row][k])) : x)) : r))
     cands.push([W, 'gauss-sign'])
   }
+  return cands
+}
+
+function elimStep(rng: Rng, st: Extract<Stage, { kind: 'elim' }>, idx: number, ctx: Ctx, showBefore: boolean): GuidedStep | null {
+  const n = ctx.n
+  const { row, col, ops, before, after } = st
+  const notes = after.map((_, i) => {
+    const o = ops.find((x) => x.target === i)
+    return o ? opLabel(o, row) : undefined
+  })
+  const cands = elimCands(rng, st, n)
   const wrongs = tableWrongs(after, [cands[0], ...rng.shuffle(cands.slice(1))], ctx, notes)
   if (wrongs.length < 3) return null
   const o = ops[0]
@@ -603,17 +611,17 @@ function valueStep(rng: Rng, F: Tab, pv: Pivot, vals: readonly Aff[], slipped: r
 
 // ------------------------------------------------------------------ Aufgabe
 
-const paramNames = (rng: Rng) => (rng.chance(0.5) ? ['t', 's', 'r'] : ['\\lambda', '\\mu', '\\nu'])
+export const paramNames = (rng: Rng) => (rng.chance(0.5) ? ['t', 's', 'r'] : ['\\lambda', '\\mu', '\\nu'])
 // k Namen: lateinisch von hinten (t; s, t), griechisch von vorn (λ; λ, μ)
-const takeNames = (pool: readonly string[], k: number) => (pool[0] === 't' ? [...pool.slice(0, k)].reverse() : pool.slice(0, k))
+export const takeNames = (pool: readonly string[], k: number) => (pool[0] === 't' ? [...pool.slice(0, k)].reverse() : pool.slice(0, k))
 
-function sameAffine(p: Aff, dirs: readonly Aff[], q: Aff, dirs2: readonly Aff[]): boolean {
+export function sameAffine(p: Aff, dirs: readonly Aff[], q: Aff, dirs2: readonly Aff[]): boolean {
   const r = rankOf(dirs)
   if (rankOf(dirs2) !== r || rankOf([...dirs, ...dirs2]) !== r) return false
   return rankOf([...dirs, q.map((x, i) => ratSub(x, p[i]))]) === r
 }
 
-const solutionLatex = (p: Aff, dirs: readonly Aff[], params: readonly string[]) =>
+export const solutionLatex = (p: Aff, dirs: readonly Aff[], params: readonly string[]) =>
   `L\\colon \\vec x = ${vecLatex(p)}${dirs.map((d, k) => ` + ${params[k]} ${vecLatex(d)}`).join('')}`
 
 const optional = (resultDrawing: VectorDrawing | undefined) => (resultDrawing ? { resultDrawing } : {})

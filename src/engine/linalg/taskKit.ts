@@ -132,6 +132,13 @@ export type VectorKind =
   | 'cramerPair'
   | 'cramerParam'
   | 'cramerParamThree'
+  // Gleichungssysteme mit Parameter (M7 Schritt 11b, lgspTasks.ts)
+  | 'lgspTwo'
+  | 'lgspThree'
+  | 'lgspDet'
+  | 'lgspRhs'
+  | 'lgspTarget'
+  | 'lgspFull'
 
 export type VectorTask = GuidedTaskBase & {
   readonly kind: VectorKind

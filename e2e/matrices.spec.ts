@@ -342,3 +342,34 @@ test('Cramersche Regel frei: Wert für a, Vorzeichenfehler erkannt', async ({ pa
   await expectCleanPage(page, 'Cramer frei')
   expect(errors).toEqual([])
 })
+
+// Gleichungssysteme mit Parameter (M7 Schritt 11b): Baustein auf der Seite der Tätigkeit, je Stufe eine Aufgabe, Lernkarte,
+// freier Modus (Vorzeichen der Nullstelle erkannt)
+test('Gleichungssysteme mit Parameter: Baustein, jede Stufe lösbar, Lernkarte', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./#/thema/matrizen')
+  await expect(page.getByRole('checkbox', { name: 'Gleichungssysteme mit Parameter', exact: true })).toBeChecked()
+  for (const level of [1, 2, 3, 4, 5]) {
+    await page.goto(`./#/ueben/matrizen/lgsparam.${level}-${80 + level}`)
+    await solveWholeTask(page)
+    await expectCleanPage(page, `Parameter Stufe ${level}`)
+  }
+  await page.goto('./#/karten/matrizen/lgsp-rang')
+  await expect(page.getByRole('heading', { name: 'Rang und Lösbarkeit' })).toBeVisible()
+  await expectCleanPage(page, 'Lernkarte Rang')
+  expect(errors).toEqual([])
+})
+
+test('Gleichungssysteme mit Parameter frei: Sonderwert, Vorzeichenfehler erkannt', async ({ page }) => {
+  const errors = collectErrors(page)
+  // lgsparam.1-1: keine Lösung für a = -3
+  await page.goto('./#/frei/matrizen/lgsparam.1-1')
+  await typeInto(page, 'Dein Ergebnis', '3')
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Typischer Fehler: Vorzeichen der Nullstellen falsch abgelesen.')).toBeVisible()
+  await typeInto(page, 'Dein Ergebnis', '-3')
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
+  await expectCleanPage(page, 'Parameter frei')
+  expect(errors).toEqual([])
+})

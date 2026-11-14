@@ -4,6 +4,7 @@ paths:
   - "src/engine/linalg/det*"
   - "src/engine/linalg/gauss*"
   - "src/engine/linalg/cramer*"
+  - "src/engine/linalg/lgsp*"
   - "src/engine/linalg/falk.ts"
   - "src/engine/linalg/sarrus*"
   - "src/ui/draw/SarrusScheme.tsx"
@@ -12,6 +13,7 @@ paths:
   - "src/engine/explain/detCards.ts"
   - "src/engine/explain/gaussCards.ts"
   - "src/engine/explain/cramerCards.ts"
+  - "src/engine/explain/lgspCards.ts"
   - "e2e/matrices.spec.ts"
 ---
 
@@ -119,3 +121,20 @@ freier Modus `vectorFree.ts`, `buildVectorTask` wählt die Arten nach dem Bauste
   `systemDrawing` aus `gaussFigures.ts`. Tests in `linalg/cramerTasks.test.ts` (Gegenprobe mit eigenem Gauß, mit
   Parameter alle ganzen a von −30 bis 30, jede Determinante des Rechenwegs an mehreren Stellen, keine Wörter im
   Formelsatz).
+- Gleichungssysteme mit Parameter (Schritt 11b): Baustein `lgsparam` (Code 37, Gruppe `mat-lgs`), `linalg/lgspTasks.ts`, Arten
+  in `LGSP_KINDS_BY_LEVEL` (lgspTwo, lgspThree, lgspDet, lgspRhs, lgspTarget, lgspFull). Einträge als `Poly` = [c0, c1, c2,
+  cb] (c0 + c1·a + c2·a² + cb·b). Gauß mit Parameter: `makeSym` baut rückwärts aus der Stufenform E (Stufen fest, a nur in
+  der letzten Spalte und rechts, letzte Zeile q(a) | s(a) + βb mit den geplanten Sonderwerten und Fällen), T = D · L · E;
+  `runParam` (Faktoren immer ganze Zahlen) und `pElimStep` (falsche Tabellen `pCands` wie `elimCands`, gleichwertig über
+  `ptEquivalent`: Gauß in Zahlen an zwei krummen Stellen). Determinante zuerst (`buildDet`): `paramSystemMatrix`
+  (2 × 2 an ein oder zwei Stellen, 3 × 3 eine Stelle oder `paramMatrix`), b so, dass ein Sonderwert unendlich viele hat
+  oder keiner; `detStep` aus `cramerTasks.ts`, `numericStep` (Gauß in Zahlen beim Sonderwert, Fehler aus `elimCands` der
+  letzten Umformung). Schritte `conditionStep` (`bedingung`), `specialStep` (`sonderfall`, Fehler aus `LGS_CASE_RULES`),
+  `rankStep` (`rang`: Ränge mit Folgerung), `b-wert`, `vorgabe`, `loesung` (mit `backSolve` aus `gaussTasks.ts`, falsch auch
+  der Punkt aus der gekürzten allgemeinen Formel). Aus `gaussTasks.ts` exportiert: `tabLatex`, `runGauss`, `analyze`,
+  `equivalent`, `rankOf`, `opLabel`, `elimCands` (aus `elimStep` herausgelöst, gleiche Zufallsfolge), `backSolve` u. a.;
+  aus `cramerTasks.ts`: `detStep`, `roots`, `solLatex`, `sortRats`. Ergebnis `a = …` (ein oder zwei Werte), `a = …,\; b =
+  …` oder die Lösungsmenge `L\colon \vec x = …` (Bild `systemDrawing` beim Sonderwert). 20 Fehler `lgsp-…` in
+  `linalg/lgspErrorRules.ts`, drei Karten in `explain/lgspCards.ts`. Tests in `linalg/lgspTasks.test.ts` (Fall für jedes
+  ganze a von −30 bis 30 mit eigenem Rang in Kommazahlen, jede Tabelle gleichwertig zur Aufgabe an mehreren Stellen,
+  Ränge gegen die Aufgabe beim Sonderwert).

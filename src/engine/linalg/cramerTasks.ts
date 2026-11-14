@@ -51,7 +51,7 @@ function ratSqrt(x: Rational): Rational | null {
 }
 
 // rationale Nullstellen, aufsteigend (null: keine rationale, unendlich viele oder keine)
-function roots(q: Quad): Rational[] | null {
+export function roots(q: Quad): Rational[] | null {
   if (isZero(q.q2)) {
     if (isZero(q.q1)) return null
     return [ratDiv(ratNeg(q.q0), q.q1)]
@@ -108,7 +108,7 @@ const paramMask = (A: PMat) => A.flatMap((r, i) => r.map((x, j) => (isZero(x.c1)
 
 // ------------------------------------------------------------------ Schritte
 
-type Ctx = { readonly A: PMat; readonly b: readonly Rational[]; readonly n: number }
+export type CramerCtx = { readonly A: PMat; readonly b: readonly Rational[]; readonly n: number }
 
 const valueLine = (name: string, q: Quad) => math(`${name} = ${qLatex(q)}`)
 function valueWrongs(name: string, right: Quad, cands: readonly (readonly [Quad | null, string])[]): Wrong[] {
@@ -130,7 +130,7 @@ const D2 = {
 }
 
 // Determinante von A bzw. A_k: 2 × 2 mit Formel (falsch auch Zeile statt Spalte ersetzt, andere Spalte), 3 × 3 mit Sarrus
-function detStep(rng: Rng, ctx: Ctx, k: number | null, id: string, cards: readonly string[]): GuidedStep {
+export function detStep(rng: Rng, ctx: CramerCtx, k: number | null, id: string, cards: readonly string[]): GuidedStep {
   const { A, b, n } = ctx
   const M = k === null ? A : replaceCol(A, k, b)
   const name = `\\det ${k === null ? 'A' : matName(k)}`
@@ -171,7 +171,7 @@ function detStep(rng: Rng, ctx: Ctx, k: number | null, id: string, cards: readon
 }
 
 // Welche Matrix ist A_k? (3 × 3) Falsch: Zeile ersetzt, andere Spalten ersetzt
-function matrixStep(rng: Rng, ctx: Ctx, k: number, cards: readonly string[]): GuidedStep {
+function matrixStep(rng: Rng, ctx: CramerCtx, k: number, cards: readonly string[]): GuidedStep {
   const { A, b } = ctx
   const right = replaceCol(A, k, b)
   const cands: [PMat, string][] = [[replaceRow(A, k, b), 'cramer-row'], ...[0, 1, 2].filter((j) => j !== k).map((j) => [replaceCol(A, j, b), 'cramer-col'] as [PMat, string])]
@@ -199,7 +199,7 @@ function matrixStep(rng: Rng, ctx: Ctx, k: number, cards: readonly string[]): Gu
 
 // Wert einer Unbekannten: Quotient (ohne Parameter als Zahl, mit Parameter als Bruch in a)
 // vector: die übrigen Unbekannten sind bekannt, die Antwort ist gleich die Lösung als Vektor (Schritt „Lösung“)
-function quotientStep(rng: Rng, ctx: Ctx, k: number, cards: readonly string[], vector?: readonly Rational[]): GuidedStep {
+function quotientStep(rng: Rng, ctx: CramerCtx, k: number, cards: readonly string[], vector?: readonly Rational[]): GuidedStep {
   const { A, b, n } = ctx
   const D = dq(A)
   const Dk = dq(replaceCol(A, k, b))
@@ -277,11 +277,11 @@ function conditionStep(rng: Rng, D: Quad, rs: readonly Rational[]): GuidedStep {
 }
 
 // Lösungen als Text: a = 2 bzw. a_1 = …,\; a_2 = …
-function solLatex(xs: readonly Rational[]): string {
+export function solLatex(xs: readonly Rational[]): string {
   if (xs.length === 1) return `${PARAM} = ${ratLatex(xs[0])}`
   return `${PARAM}_1 = ${ratLatex(xs[0])},\\; ${PARAM}_2 = ${ratLatex(xs[1])}`
 }
-const sortRats = (xs: readonly Rational[]) => [...xs].sort((p, q) => ratSign(ratSub(p, q)))
+export const sortRats = (xs: readonly Rational[]) => [...xs].sort((p, q) => ratSign(ratSub(p, q)))
 
 // Für welches a hat die Unbekannte den Wert c? Dk(a) = c · D(a), Werte mit D(a) = 0 fallen weg
 function targetStep(rng: Rng, D: Quad, Dk: Quad, k: number, c: Rational, valid: readonly Rational[], excluded: readonly Rational[]): GuidedStep {
@@ -321,7 +321,7 @@ function targetStep(rng: Rng, D: Quad, Dk: Quad, k: number, c: Rational, valid: 
 }
 
 // letzte Unbekannte durch Einsetzen in eine Gleichung (Fehler wie beim Rückwärts-Einsetzen im Gauß-Verfahren)
-function insertStep(rng: Rng, ctx: Ctx, x: readonly Rational[], m: number): GuidedStep | null {
+function insertStep(rng: Rng, ctx: CramerCtx, x: readonly Rational[], m: number): GuidedStep | null {
   const A = ctx.A.map((r) => r.map((e) => e.c0))
   const rows = rng.shuffle([0, 1, 2]).filter((i) => !isZero(A[i][m]))
   // am liebsten eine Zeile, in der die gesuchte Zahl nicht 1 ist und die anderen mitspielen
@@ -431,7 +431,7 @@ function buildTwo(rng: Rng, level: Level): Built | null {
   }
   if (!small(b, 30) || b.every(isZero)) return null
   const PA = constMat(A)
-  const ctx: Ctx = { A: PA, b, n: 2 }
+  const ctx: CramerCtx = { A: PA, b, n: 2 }
   const sys = showSystem(rng, PA, b)
   const cards = [CRAMER_CARD.regel]
   // y zusammen mit der Lösung (das Ergebnis ist der Vektor)
@@ -475,7 +475,7 @@ function buildThree(rng: Rng, level: Level): Built | null {
   }
   if (!small(b, 30) || b.filter(isZero).length > 1) return null
   const PA = constMat(A)
-  const ctx: Ctx = { A: PA, b, n: 3 }
+  const ctx: CramerCtx = { A: PA, b, n: 3 }
   const sys = showSystem(rng, PA, b)
   const cards = [CRAMER_CARD.regel]
   const v = VARS[k]
@@ -503,7 +503,7 @@ function buildPair(rng: Rng, _level: Level): Built | null {
   const b = mulVec(A, x)
   if (!small(b, 30) || b.filter(isZero).length > 1) return null
   const PA = constMat(A)
-  const ctx: Ctx = { A: PA, b, n: 3 }
+  const ctx: CramerCtx = { A: PA, b, n: 3 }
   const sys = showSystem(rng, PA, b)
   const m = rng.int(0, 2)
   const [k1, k2] = rng.shuffle([0, 1, 2].filter((j) => j !== m))
@@ -603,7 +603,7 @@ function buildParam(rng: Rng, level: Level, n: 2 | 3, trap: boolean): Built | nu
   if (qIsZero(Dk)) return null
   const t = fixed ? targetFor(D, Dk, Droots, fixed) : pickTarget(rng, D, Dk, Droots, trap)
   if (!t) return null
-  const ctx: Ctx = { A, b, n }
+  const ctx: CramerCtx = { A, b, n }
   const sys = showSystem(rng, A, b)
   const v = VARS[k]
   const pc = [CRAMER_CARD.parameter, n === 3 ? DET_CARD.sarrus : DET_CARD.zwei]
