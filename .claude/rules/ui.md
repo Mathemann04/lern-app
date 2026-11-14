@@ -164,3 +164,10 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
 - Seit M7 Schritt 12c Gauß-Jordan als eigenes Bild `ui/draw/JordanScheme.tsx` (CSS-Raster: Zeilenname, 2n Einträge mit
   Strich in der Mitte, Umformung; Zeile mit den Namen der Hälften bleibt immer stehen, damit nichts springt), erst nach der
   Antwort; geänderte Einträge gleiten mit `animate-step-in` neu herein.
+- Seit M7 Schritt 13 (Handy): `RichText` setzt einen Absatz, der nur aus einer Formel besteht, in `FitWidth` (min 0,6; vorher
+  verbreiterten Tabellen in Fragen die ganze Seite); Formel und Satzzeichen bleiben nur zusammen (`gluable`), wenn die
+  Formel kurz ist (höchstens 60 Zeichen LaTeX und 22 sichtbare) und höchstens ein Gleichheitszeichen hat, sonst ragten
+  Rechenketten in Erklärungen heraus. Die Gleichung oben (`TaskIntro`) und Antworten aus einer Formel schrumpfen bis 0,6.
+  `VectorFigure`: Höhe höchstens `FIGURE_MAX_HEIGHT` (min(260px, 32dvh)), Breite folgt; Beschriftungen (`data-label`)
+  weichen nach jedem Zeichnen einander aus (`spreadLabels`: über, unter, neben den Platz per `margin`, nicht per
+  `translate`, das die Mitte setzt). Sarrus-Schema am Handy `max-sm:text-sm`.

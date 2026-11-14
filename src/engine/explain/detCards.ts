@@ -65,7 +65,7 @@ export const DET_CARD_LIST: readonly Card[] = [
     formulas: [
       String.raw`\text{Zeilen tauschen: } \det \to -\det`,
       String.raw`\text{Zeile mal } k\colon\ \det \to k \cdot \det`,
-      String.raw`\text{Vielfaches einer anderen Zeile addieren: } \det \text{ bleibt}`,
+      String.raw`\text{Vielfaches addieren: } \det \text{ bleibt}`,
       String.raw`\det\begin{pmatrix} d_1 & * & * \\ 0 & d_2 & * \\ 0 & 0 & d_3 \end{pmatrix} = d_1 d_2 d_3`,
     ],
     memo: 'Drei Umformungen, drei Wirkungen: Tauschen zweier Zeilen dreht das Vorzeichen, ein Faktor in einer Zeile kommt einmal vor die Determinante, und das Vielfache einer anderen Zeile addieren ändert nichts. Bei einer Dreiecksmatrix ist die Determinante das Produkt der Hauptdiagonale.',
