@@ -343,6 +343,39 @@ test('Cramersche Regel frei: Wert für a, Vorzeichenfehler erkannt', async ({ pa
   expect(errors).toEqual([])
 })
 
+// Einsetzen, Gleichsetzen, Addieren (M7 Schritt 10c): Baustein auf der Seite der Tätigkeit, je Stufe eine Aufgabe, Bild nach
+// dem Addieren, Lernkarte, freier Modus (Vorzeichenfehler beim Einsetzen erkannt)
+test('Einsetzen, Gleichsetzen, Addieren: Baustein, jede Stufe lösbar, Bild, Lernkarte', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./#/thema/matrizen')
+  await expect(page.getByRole('checkbox', { name: 'Einsetzen, Gleichsetzen, Addieren', exact: true })).toBeChecked()
+  for (const level of [1, 2, 3, 4, 5]) {
+    await page.goto(`./#/ueben/matrizen/einsetzen.${level}-${80 + level}`)
+    await solveWholeTask(page)
+    await expectCleanPage(page, `Schulverfahren Stufe ${level}`)
+  }
+  await page.goto('./#/karten/matrizen/eqs-addieren')
+  await expect(page.getByRole('heading', { name: 'Additionsverfahren' })).toBeVisible()
+  await expect(page.locator('svg').first()).toBeVisible()
+  await expectCleanPage(page, 'Lernkarte Addieren')
+  expect(errors).toEqual([])
+})
+
+test('Einsetzen, Gleichsetzen, Addieren frei: Vorzeichenfehler beim Einsetzen erkannt', async ({ page }) => {
+  const errors = collectErrors(page)
+  // einsetzen.1-1: Gleichsetzen, Lösung x = -3, y = 4
+  await page.goto('./#/frei/matrizen/einsetzen.1-1')
+  await typeInto(page, 'Dein Ergebnis von Teil 1', '5')
+  await typeInto(page, 'Dein Ergebnis von Teil 2', '4')
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Typischer Fehler: Vorzeichen beim Einsetzen verloren.')).toBeVisible()
+  await typeInto(page, 'Dein Ergebnis von Teil 1', '-3')
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
+  await expectCleanPage(page, 'Schulverfahren frei')
+  expect(errors).toEqual([])
+})
+
 // Gleichungssysteme mit Parameter (M7 Schritt 11b): Baustein auf der Seite der Tätigkeit, je Stufe eine Aufgabe, Lernkarte,
 // freier Modus (Vorzeichen der Nullstelle erkannt)
 test('Gleichungssysteme mit Parameter: Baustein, jede Stufe lösbar, Lernkarte', async ({ page }) => {

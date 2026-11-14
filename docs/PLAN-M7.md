@@ -395,8 +395,8 @@ Request.
       Gerade bzw. Ebene); ohne Lösung nennt die Beschreibung den Grund (parallel, nicht alle durch einen Punkt mit grauen
       Schnittpunkten, parallele Schnittgeraden gestrichelt). Lernkarten: „Tabelle und Stufenform“ mit der Drehung, die
       übrigen mit dem Bild zum Ergebnis.
-    - **10c (freigegeben 14.11.2026, als Nächstes, vor 11c; Wunsch des Nutzers):** Baustein „Einsetzen, Gleichsetzen,
-      Addieren“ (nächster freier Code, Gruppe „Gleichungssysteme“) in der Tätigkeit „Matrizen und Gleichungssysteme“, Stufen 1
+    - **10c (fertig, 14.11.2026; Wunsch des Nutzers):** Baustein „Einsetzen, Gleichsetzen,
+      Addieren“ (`einsetzen`, Code 38, Gruppe „Gleichungssysteme“) in der Tätigkeit „Matrizen und Gleichungssysteme“, Stufen 1
       bis 5, geführt und frei. Die drei Schulverfahren Schritt für Schritt: **Einsetzen** (eine Gleichung nach einer
       Unbekannten auflösen, am besten nach der, die schon fast allein steht; in die andere einsetzen; lösen; zurückrechnen),
       **Gleichsetzen** (beide nach derselben Unbekannten auflösen, gleichsetzen, lösen, zurückrechnen), **Addieren** (so
@@ -412,6 +412,15 @@ Request.
       umgeformte Gleichung zurückgesetzt (ergibt $0 = 0$). Bilder: jede Gleichung eine Gerade, Lösung als Schnittpunkt; beim
       Addieren dreht sich die neue Gerade durch den Schnittpunkt (wie 10b), bei keiner Lösung parallele Geraden. Frei: Lösung
       in Kästchen, „keine Lösung“ zum Antippen, Lösungsmenge. Lernkarten je Verfahren und „Welches Verfahren wann?“.
+      **Umgesetzt:** sieben Arten (Einsetzen, Gleichsetzen, Addieren in Stufe 1 und 2, Stufe 2 in knapp der Hälfte mit
+      „Welches Verfahren passt?“; Ordnen in Stufe 3 mit Gliedern auf beiden Seiten, Klammer $k(px + q)$ oder Brüchen, dazu
+      etwa je ein Sechstel keine bzw. unendlich viele Lösungen; drei Gleichungen und Unbekannte im Nenner in Stufe 4 und 5,
+      in Stufe 5 mit einer Gleichung zum Ordnen bzw. einem Bruch rechts; Parameter vor einer Unbekannten in Stufe 5:
+      Addieren, Sonderwert, „Was gilt dort?“). Ergebnis als $x = \dots,\; y = \dots$, „keine Lösung“, Lösungsmenge oder
+      $a = \dots$ mit Fall. Fünf Lernkarten (je Verfahren, „Welches Verfahren wann?“, „Drei Gleichungen, Nenner,
+      Parameter“), 30 neue typische Fehler (`eqs-…`) und sieben aus dem Gauß-Verfahren (Rüberbringen, Teilen,
+      Lösungsmenge). Bilder: nach dem Einsetzen, Gleichsetzen und Addieren dreht sich die neue Gerade durch den
+      Schnittpunkt (wie 10b), beim Ergebnis Geraden mit Schnittpunkt, parallel oder gleich (bei drei Gleichungen Ebenen).
 11. **Gleichungssysteme mit Parameter und Cramer**, in drei Teilen:
     - **11a (fertig, 13.11.2026):** Baustein „Cramersche Regel“ (`cramer`, Code 36, Gruppe „Gleichungssysteme“) in der
       Tätigkeit „Matrizen und Gleichungssysteme“, Stufen 1 bis 5, geführt und frei. Fünf Arten: $2 \times 2$ ganz (Stufe 1

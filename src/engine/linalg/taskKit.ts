@@ -139,6 +139,14 @@ export type VectorKind =
   | 'lgspRhs'
   | 'lgspTarget'
   | 'lgspFull'
+  // Einsetzen, Gleichsetzen, Addieren (M7 Schritt 10c, eqsTasks.ts)
+  | 'eqsSubst'
+  | 'eqsEqual'
+  | 'eqsAdd'
+  | 'eqsMessy'
+  | 'eqsThree'
+  | 'eqsRecip'
+  | 'eqsParam'
 
 export type VectorTask = GuidedTaskBase & {
   readonly kind: VectorKind
