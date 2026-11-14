@@ -65,7 +65,7 @@ export const EQS_CARD_LIST: readonly Card[] = [
     level: 4,
     rules: [],
     formulas: [String.raw`u = \frac{1}{x},\; v = \frac{1}{y}`, String.raw`\frac{2}{x} + \frac{3}{y} = 4 \;\Rightarrow\; 2u + 3v = 4`],
-    memo: 'Drei Gleichungen: Löse eine nach der Unbekannten auf, die dort allein steht, und setz in die zweite ein; mit der dritten (ohne diese Unbekannte) bleiben zwei Gleichungen mit zwei Unbekannten. Unbekannte im Nenner: Mit $u = \\frac{1}{x}$ wird das System linear; am Ende $x = \\frac{1}{u}$.',
+    memo: 'Drei Gleichungen: Löse eine nach der Unbekannten auf, die dort allein steht, und setz in die zweite ein; mit der dritten (ohne diese Unbekannte) bleiben zwei Gleichungen mit zwei Unbekannten. Unbekannte im Nenner: Mit $u$ als Kehrwert von $x$ (und $v$ als Kehrwert von $y$) wird das System linear; am Ende ist $x$ der Kehrwert von $u$.',
     note: 'Mit Parameter $a$ bleibt nach dem Addieren etwa $(2a - 6)\\,x = 4$. Teilen darfst du nur, wenn der Ausdruck vor $x$ nicht $0$ ist. Beim Sonderwert $a = 3$ steht $0 = 4$ da: keine Lösung (bei $0 = 0$ unendlich viele).',
     when: 'Bei Systemen mit drei Gleichungen, bei Unbekannten im Nenner und bei Parametern.',
     examples: [{ vector: { kind: 'eqsThree', level: 4, seed: 1 } }, { vector: { kind: 'eqsRecip', level: 4, seed: 2 } }, { vector: { kind: 'eqsParam', level: 5, seed: 3 } }],
