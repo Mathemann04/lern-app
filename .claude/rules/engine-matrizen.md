@@ -13,6 +13,8 @@ paths:
   - "src/engine/linalg/sarrus*"
   - "src/ui/draw/SarrusScheme.tsx"
   - "src/ui/draw/FalkScheme.tsx"
+  - "src/engine/linalg/jordan.ts"
+  - "src/ui/draw/JordanScheme.tsx"
   - "src/engine/explain/matrixCards.ts"
   - "src/engine/explain/detCards.ts"
   - "src/engine/explain/gaussCards.ts"
@@ -223,3 +225,14 @@ freier Modus `vectorFree.ts`, `buildVectorTask` wählt die Arten nach dem Bauste
   `C0`…, `a0`, `roots`. 12 Fehler `mgl-…` in `linalg/mglErrorRules.ts`, drei Karten in `explain/mglCards.ts`. Tests in
   `linalg/mglTasks.test.ts` (Lösung in die gezeigte Gleichung eingesetzt, lineare Abbildung aus Einheitsmatrizen
   eigenständig gelöst, mit Parameter jedes ganze a von −30 bis 30, Klammer und rechte Seite gegen die Gleichung).
+- Bilder zu Inverse und Matrizengleichungen (Schritt 12c): `linalg/jordan.ts` (Typ `JordanFigure`: Bilder `frames` mit
+  Zeilen als LaTeX, Umformungen `notes`, geänderte Zeilen `changed`, Stufenzahl `pivot`, neue Nullen `zeros`, Namen der
+  Hälften `labels`, Satz `caption`), gebaut von `jordanTables`/`jordanFigure` in `invTasks.ts` aus `runJordan`;
+  `jordanSteps` hängt es als `GuidedStep.jordan` an den letzten Schritt (`ablesen` bzw. `deuten`), damit auch bei
+  Matrizengleichungen mit 3 × 3. Oberfläche `ui/draw/JordanScheme.tsx` (nur nach der Antwort, Knöpfe „Abspielen“/„Anhalten“,
+  „←“/„→“, `data-testid="jordan-count"`), auf der Lernkarte über `CardBody.tsx`. `mglDrawing` in `mglTasks.ts` (2 × 2,
+  `resultDrawing`): Einheitsquadrat und Gitterlinien bei 0, 1/2, 1 unter X (Phase 1), Probe `MglProbe` (M, R, Seite; bei
+  `inv` ist M = A⁻¹; nicht bei conj) mit R aus X (Seite L, Phase 2) bzw. aus M (Seite R, Phase 2 und 3), Fehler
+  `mgl-mult-side` als `mistake`. Nicht bei det X = 0 oder über `MGL_SPAN`; ohne Probe, wenn sie nicht passt oder zwei Pfeile
+  übereinander lägen (`overlapping`). Tests in `invTasks.test.ts` (jedes Bild L = R · A, Ende E | A⁻¹ bzw. Nullzeile) und
+  `mglTasks.test.ts` (M und R eigenständig aus der Gleichung, M X = R bzw. X M = R, Fehler verfehlt R).

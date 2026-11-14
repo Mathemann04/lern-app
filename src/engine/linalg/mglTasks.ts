@@ -6,6 +6,7 @@ import { type Quad, quadLatex } from './crossTasks.ts'
 import { detStep, roots, sortRats } from './cramerTasks.ts'
 import { type Lin, type Mat, type PMat, DET_CARD, det, lin, polyOf } from './detTasks.ts'
 import { vectorErrorRule } from './errorRules.ts'
+import { type DrawArrow, type DrawPolygon, type DrawSegment, type VectorDrawing, emptyDrawing } from './figures.ts'
 import { INV_CARD, detTwoStep, inverse, inverseStep, jordanOk, jordanSteps, unimodular } from './invTasks.ts'
 import { MAT_CARD, arrange, combStep, matLatex, productQ, productStepQ } from './matrixTasks.ts'
 import { type Built, type VectorKind, type Wrong, choiceStep, math } from './taskKit.ts'
@@ -496,6 +497,93 @@ function inverseSteps(rng: Rng, name: string, M: Mat, withDet: boolean, param = 
   return out
 }
 
+// ------------------------------------------------------------------ Bild (Schritt 12c)
+
+// Wirkung von X im Gitter (nur 2 × 2): X macht aus dem Einheitsquadrat das Parallelogramm seiner Spalten, die Gitterlinien
+// im Quadrat verzerren sich mit. Probe im Bild: Bei M X = R bringt M die Spalten von X auf die Spalten von R (erst X, dann
+// M), bei X M = R bringt X die Spalten von M auf die von R (erst M, dann X). Typischer Fehler: X von der falschen Seite
+// ausgerechnet, dann landet das Produkt nicht auf R. probe = null: nur X (bei A X A⁻¹).
+export const MGL_SPAN = 12
+const MGL_MIN = 0.45
+// zwei Pfeile vom Ursprung in dieselbe Richtung liegen übereinander
+const overlapping = (ps: readonly (readonly number[])[]) =>
+  ps.some((p, i) => ps.some((q, j) => j > i && Math.abs(p[0] * q[1] - p[1] * q[0]) < 1e-9 && p[0] * q[0] + p[1] * q[1] > 0))
+export type MglProbe = { readonly M: Mat; readonly mName: string; readonly miName: string; readonly R: Mat; readonly rName: string; readonly rIntro: string; readonly side: Side }
+export function mglDrawing(X: Mat, probe: MglProbe | null): VectorDrawing | undefined {
+  // nur mit Fläche: Ein X mit det X = 0 quetscht alles auf eine Gerade, dann liegen die Pfeile übereinander
+  if (X.length !== 2 || isZero(det(X))) return undefined
+  const v = (M: Mat, j: number): number[] => [num(M[0][j]), num(M[1][j])]
+  const O = [0, 0]
+  const sum = (p: readonly number[], q: readonly number[]) => [p[0] + q[0], p[1] + q[1]]
+  const par = (M: Mat) => [O, v(M, 0), sum(v(M, 0), v(M, 1)), v(M, 1)]
+  const sq = [O, [1, 0], [1, 1], [0, 1]]
+  const img = (p: readonly number[]) => [num(X[0][0]) * p[0] + num(X[0][1]) * p[1], num(X[1][0]) * p[0] + num(X[1][1]) * p[1]]
+  const fits = (pts: readonly (readonly number[])[]) => [0, 1].every((c) => Math.max(...pts.map((p) => p[c])) - Math.min(...pts.map((p) => p[c])) <= MGL_SPAN)
+  const long = (M: Mat) => [0, 1].every((j) => Math.hypot(...v(M, j)) >= MGL_MIN)
+  const mats = probe ? [X, probe.R, ...(probe.side === 'R' ? [probe.M] : [])] : [X]
+  // passt die Probe nicht ins Bild (rechte Seite zu groß) oder läge ein Pfeil auf einem anderen (etwa bei einer Spalte
+  // (1, 0) in M), zeigt es nur X
+  if (probe && (!mats.every(long) || !fits([...sq, ...mats.flatMap(par)]) || overlapping(mats.flatMap((M) => [v(M, 0), v(M, 1)])))) return mglDrawing(X, null)
+  if (!mats.every(long) || !fits([...sq, ...mats.flatMap(par)])) return undefined
+  // Gitterlinien im Einheitsquadrat (bei 0, 1/2, 1) und ihr Bild unter X
+  const grid: DrawSegment[] = [0, 0.5, 1].flatMap((k) => [
+    { from: [k, 0], to: [k, 1], color: 'muted' as const, dashed: true },
+    { from: [0, k], to: [1, k], color: 'muted' as const, dashed: true },
+    { from: img([k, 0]), to: img([k, 1]), color: 'c' as const, dashed: true, phase: 1 },
+    { from: img([0, k]), to: img([1, k]), color: 'c' as const, dashed: true, phase: 1 },
+  ])
+  const polygons: DrawPolygon[] = [
+    { points: sq, color: 'muted' },
+    { points: par(X), from: sq, color: 'c', phase: 1 },
+  ]
+  const arrows: DrawArrow[] = [
+    { from: O, to: [1, 0], color: 'muted', label: '\\vec e_1', ghost: true },
+    { from: O, to: [0, 1], color: 'muted', label: '\\vec e_2', ghost: true },
+    { from: O, to: v(X, 0), color: 'a', label: '\\vec x_1', phase: 1 },
+    { from: O, to: v(X, 1), color: 'b', label: '\\vec x_2', phase: 1 },
+  ]
+  const xText = `$X$ macht aus dem Einheitsquadrat (grau) das Parallelogramm seiner Spalten $\\vec x_1$ (blau) und $\\vec x_2$ (orange); die Gitterlinien im Quadrat verzerren sich mit (blaugrün), $\\vec e_1$ wird zu $\\vec x_1$ und $\\vec e_2$ zu $\\vec x_2$.`
+  if (!probe) return { ...emptyDrawing(2, xText), polygons, arrows, segments: grid }
+  const { M, mName, miName, R, rName, rIntro, side } = probe
+  let probeText: string
+  if (side === 'L') {
+    polygons.push({ points: par(R), from: par(X), color: 'r', phase: 2 })
+    arrows.push({ from: O, to: v(R, 0), color: 'r', label: '\\vec r_1', phase: 2 }, { from: O, to: v(R, 1), color: 'r', label: '\\vec r_2', phase: 2 })
+    probeText = `Probe: $${mName}X = ${rName}$ heißt, $${mName}$ bringt die Spalten von $X$ auf die Spalten $\\vec r_1$ und $\\vec r_2$ ${rIntro} (violett). Beim Abspielen wirkt erst $X$, dann $${mName}$.`
+  } else {
+    polygons.push({ points: par(M), color: 'muted', phase: 2 }, { points: par(R), from: par(M), color: 'r', phase: 3 })
+    arrows.push(
+      { from: O, to: v(M, 0), color: 'muted', label: '\\vec m_1', phase: 2 },
+      { from: O, to: v(M, 1), color: 'muted', label: '\\vec m_2', phase: 2 },
+      { from: O, to: v(R, 0), color: 'r', label: '\\vec r_1', phase: 3 },
+      { from: O, to: v(R, 1), color: 'r', label: '\\vec r_2', phase: 3 },
+    )
+    probeText = `Probe: $X${mName} = ${rName}$ heißt, $X$ bringt die Spalten $\\vec m_1$ und $\\vec m_2$ von $${mName}$ (grau) auf die Spalten $\\vec r_1$ und $\\vec r_2$ ${rIntro} (violett). Beim Abspielen wirkt erst $${mName}$, dann $X$.`
+  }
+  const drawing: VectorDrawing = { ...emptyDrawing(2, `${xText} ${probeText}`), polygons, arrows, segments: grid }
+  // typischer Fehler: von der falschen Seite mit der Inversen malgenommen
+  const Mi = inverse(M)
+  if (!Mi) return drawing
+  const W = side === 'L' ? mul(R, Mi) : mul(Mi, R)
+  const WR = side === 'L' ? mul(M, W) : mul(W, M)
+  if (matEq(WR, R) || !long(WR) || !fits([...sq, ...mats.flatMap(par), ...par(WR)]) || overlapping([...mats, WR].flatMap((M) => [v(M, 0), v(M, 1)]))) return drawing
+  const wrongX = side === 'L' ? `${rName}${miName}` : `${miName}${rName}`
+  const rightX = side === 'L' ? `${miName}${rName}` : `${rName}${miName}`
+  const product = side === 'L' ? `${mName}X` : `X${mName}`
+  return {
+    ...drawing,
+    mistake: {
+      arrows: [
+        { from: O, to: v(WR, 0), color: 'bad' },
+        { from: O, to: v(WR, 1), color: 'bad' },
+      ],
+      segments: [],
+      polygons: [{ points: par(WR), color: 'bad' }],
+      caption: `${xText} Rot der typische Fehler: $X$ von der falschen Seite ausgerechnet, $X = ${wrongX}$ statt $X = ${rightX}$. Dann landet $${product}$ (rot) nicht auf den Spalten von $${rName}$ (violett): Die Probe geht nicht auf.`,
+    },
+  }
+}
+
 // ------------------------------------------------------------------ Aufbau einer Aufgabe
 
 type Numbers = {
@@ -554,12 +642,16 @@ function assemble(rng: Rng, kind: VectorKind, s: Shape, names: readonly string[]
     steps.push(conditionStep(rng, D, nums.roots!))
   }
   const named = !linZero(f.beta)
+  const rName = rSimple(f.rt) ? rLatex(ctx, f.rt) : 'R'
+  const rIntro = rSimple(f.rt) ? `von $${rName}$` : `der rechten Seite $R = ${rLatex(ctx, f.rt)}$`
+  let probe: MglProbe | null = null
   if (s.wrap === 'inv') {
     // X = A R bzw. R A
     if (!rSimple(f.rt)) steps.push(rhsStep(rng, ctx, f.rt, given))
     const rn = rSimple(f.rt) ? rLatex(ctx, f.rt) : rFactor(ctx, f.rt)
     const Ai = inverse(A)!
     X = s.side === 'L' ? mul(A, Rv) : mul(Rv, A)
+    probe = { M: inverse(A)!, mName: `${a}^{-1}`, miName: a, R: Rv, rName, rIntro, side: s.side }
     const other = s.side === 'L' ? mul(Rv, A) : mul(A, Rv)
     const wrongInv = s.side === 'L' ? mul(Ai, Rv) : mul(Rv, Ai)
     const extra = [
@@ -595,6 +687,7 @@ function assemble(rng: Rng, kind: VectorKind, s: Shape, names: readonly string[]
     steps.push(...inv)
     const Mi = inverse(M)!
     X = s.side === 'L' ? mul(Mi, Rv) : mul(Rv, Mi)
+    probe = { M, mName, miName: `${mName}^{-1}`, R: Rv, rName, rIntro, side: s.side }
     const rn = rSimple(f.rt) ? rLatex(ctx, f.rt) : rFactor(ctx, f.rt)
     const extra = [
       { M: s.side === 'L' ? mul(Rv, Mi) : mul(Mi, Rv), rule: 'mgl-mult-side' },
@@ -623,6 +716,10 @@ function assemble(rng: Rng, kind: VectorKind, s: Shape, names: readonly string[]
     steps,
     cards,
     resultLatex: `X = ${matLatex(X)}`,
+    ...(() => {
+      const d = mglDrawing(X, probe)
+      return d ? { resultDrawing: d } : {}
+    })(),
     form: `${kind}|${s.n}|${s.wrap}|${s.side}|${s.flip ? 'f' : ''}|${sig(s.lhs)}=${sig(s.rhs)}|${a}|${param ? num(a0) : num(b0)}|${negCount(A)}|${negCount(X)}|${steps.length}`,
     data: {
       shape: [s.n, s.side === 'L' ? 0 : 1, WRAP_CODE[s.wrap], s.flip ? 1 : 0],

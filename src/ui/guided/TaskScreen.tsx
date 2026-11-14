@@ -24,6 +24,7 @@ import { CheckBadge, FocusBanner, SkipNotice, TaskFooter, TaskIntro, TaskTopBar 
 import { ChemFigure, FigureDrawing } from '../chem/ChemFigure.tsx'
 import { figureById } from '../../engine/chem/figures.ts'
 import { FalkScheme } from '../draw/FalkScheme.tsx'
+import { JordanScheme } from '../draw/JordanScheme.tsx'
 import { SarrusScheme } from '../draw/SarrusScheme.tsx'
 import { VectorFigure } from '../draw/VectorFigure.tsx'
 import { DragPad } from '../draw/DragPad.tsx'
@@ -299,6 +300,7 @@ function StepView({ step, task, report, isLast, mode, detail, onMistake, onNext,
       {solved && step.solvedDrawing && <VectorFigure key={`${step.id}-geloest`} drawing={step.solvedDrawing} />}
       {step.falk && <FalkScheme key={step.id} falk={step.falk} done={solved} />}
       {step.sarrus && <SarrusScheme key={step.id} sarrus={step.sarrus} done={solved} />}
+      {step.jordan && solved && <JordanScheme key={step.id} jordan={step.jordan} />}
 
       {step.drag && step.drawing ? (
         <DragAnswers key={step.id} step={step.drag} drawing={step.drawing} solved={solved} revealed={revealed} onCheck={checkDrag} onMove={() => typed && setTyped(null)} />

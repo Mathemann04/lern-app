@@ -510,3 +510,52 @@ test('Matrizengleichungen: Baustein, jede Stufe lösbar, Lernkarte, frei', async
   await expectCleanPage(page, 'Matrizengleichung frei')
   expect(errors).toEqual([])
 })
+
+// Bilder zu Inverse und Matrizengleichungen (M7 Schritt 12c): Gauß-Jordan zum Abspielen erst nach der letzten Antwort des
+// Verfahrens, Bild für Bild auch mit „Zurück“ und „Weiter“, auf der Lernkarte; Wirkung von X im Gitter mit Probe und
+// typischem Fehler
+test('Gauß-Jordan zum Abspielen und Wirkung von X im Gitter', async ({ page }) => {
+  const errors = collectErrors(page)
+  // inverse.3-1: 3 × 3 mit Zeilentausch, sechs Bilder
+  await page.goto('./#/ueben/matrizen/inverse.3-1')
+  const scheme = page.getByTestId('jordan-scheme')
+  for (let step = 0; step < 10; step++) {
+    await expect(page.locator('#question')).toBeVisible()
+    await expect(scheme).toHaveCount(0)
+    await solveStep(page)
+    if (await scheme.isVisible()) break
+    await page.getByRole('button', { name: 'Weiter', exact: true }).click()
+  }
+  await expect(scheme).toBeVisible()
+  await expect(scheme.getByTestId('jordan-count')).toHaveText('Bild 1 von 6')
+  await expect(scheme.locator('[data-jordan="left"]')).toHaveCount(9)
+  await expect(scheme.locator('[data-jordan="right"]')).toHaveCount(9)
+  await expect(scheme.getByRole('button', { name: 'Ein Bild zurück' })).toBeDisabled()
+  await scheme.getByRole('button', { name: 'Ein Bild weiter' }).click()
+  await expect(scheme.getByTestId('jordan-count')).toHaveText('Bild 2 von 6')
+  await expect(scheme.locator('[data-lit="true"]').first()).toBeVisible()
+  await expectCleanPage(page, 'Gauß-Jordan')
+  await scheme.getByRole('button', { name: 'Abspielen' }).click()
+  await expect(scheme.getByRole('button', { name: 'Anhalten' })).toBeVisible()
+  await expect(scheme.getByTestId('jordan-count')).toHaveText('Bild 6 von 6', { timeout: 15000 })
+  await expect(scheme.getByRole('button', { name: 'Abspielen' })).toBeVisible()
+  await expect(scheme.getByText(/Links steht/)).toBeVisible()
+  await expectCleanPage(page, 'Gauß-Jordan am Ende')
+  // Lernkarte, Bewegung reduzieren: „Abspielen“ springt ans Ende
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('./#/karten/matrizen/inv-gauss-jordan')
+  const onCard = page.getByTestId('jordan-scheme').first()
+  await expect(onCard).toBeVisible()
+  await onCard.getByRole('button', { name: 'Abspielen' }).click()
+  await expect(onCard.getByRole('button', { name: 'Ein Bild weiter' })).toBeDisabled()
+  await expectCleanPage(page, 'Lernkarte mit Gauß-Jordan')
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
+  // matgleichung.1-64: K X + N = L mit Probe (K bringt die Spalten von X auf die von L − N) und typischem Fehler
+  await page.goto('./#/ueben/matrizen/matgleichung.1-64')
+  await solveWholeTask(page)
+  await expect(page.getByRole('button', { name: 'Abspielen' })).toBeVisible()
+  await page.getByRole('button', { name: 'Typischen Fehler zeigen' }).click()
+  await expect(page.getByText(/von der falschen Seite ausgerechnet/)).toBeVisible()
+  await expectCleanPage(page, 'Bild der Matrizengleichung')
+  expect(errors).toEqual([])
+})

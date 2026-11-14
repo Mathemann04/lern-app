@@ -206,6 +206,81 @@ describe('Matrizengleichungen', () => {
     expect(checked).toBeGreaterThan(500)
   })
 
+  it('Bild bei 2 × 2 (Schritt 12c): X verzerrt das Gitter, die Probe bringt die Spalten auf R, der Fehler nicht', () => {
+    const par = (M: N) => [[0, 0], [M[0][0], M[1][0]], [M[0][0] + M[0][1], M[1][0] + M[1][1]], [M[0][1], M[1][1]]]
+    const pts = (ps: readonly (readonly number[])[]) => ps.map((p) => [...p])
+    const col = (M: N, j: number) => [M[0][j], M[1][j]]
+    let drawings = 0
+    let probes = 0
+    let mistakes = 0
+    const sides = new Set<number>()
+    for (const level of LEVELS) {
+      for (const task of tasks(level, 120)) {
+        const d = task.resultDrawing
+        const eq = equationOf(task)
+        if (eq.n === 3) {
+          expect(d, task.form).toBeUndefined()
+          continue
+        }
+        if (!d) continue
+        drawings++
+        const context = `${task.form}`
+        const X = rowsOf(task.answer, 2)
+        const a0 = task.data.a0?.[0] ?? 0
+        // Einheitsquadrat wird zum Parallelogramm der Spalten von X, die Gitterlinien liegen darin
+        const xPar = d.polygons.find((p) => p.color === 'c')!
+        expect(sameN(pts(xPar.points), par(X)), context).toBe(true)
+        expect(sameN(pts(xPar.from!), [[0, 0], [1, 0], [1, 1], [0, 1]]), context).toBe(true)
+        for (const [j, label] of ['\\vec x_1', '\\vec x_2'].entries()) expect(sameN([[...d.arrows.find((a) => a.label === label)!.to]], [col(X, j)]), context).toBe(true)
+        const Xi = inverseN(X)
+        if (Xi)
+          for (const sg of d.segments.filter((x) => x.color === 'c'))
+            for (const q of [sg.from, sg.to]) {
+              const back = mulN(Xi, [[q[0]], [q[1]]]).flat()
+              expect(back.every((v) => v > -1e-9 && v < 1 + 1e-9), context).toBe(true)
+            }
+        expectRenderable(d.caption, context)
+        // keine zwei Pfeile von X, M, R oder dem Fehler liegen übereinander
+        const tips = [...d.arrows.filter((a) => !a.ghost), ...(d.mistake?.arrows ?? [])].map((a) => a.to)
+        tips.forEach((p, i) => tips.forEach((q, j) => j > i && expect(Math.abs(p[0] * q[1] - p[1] * q[0]) > 1e-9 || p[0] * q[0] + p[1] * q[1] < 0, context).toBe(true)))
+        const rPar = d.polygons.find((p) => p.color === 'r')
+        if (!rPar) {
+          expect(d.mistake, context).toBeUndefined()
+          continue
+        }
+        probes++
+        sides.add(eq.side)
+        expect([4, 5], context).not.toContain(eq.wrap)
+        // rechte Seite R und Matrix M der aufgelösten Gleichung M X = R bzw. X M = R, eigenständig aus der Gleichung
+        const R = scaleN(-1, eq.wrap === 3 ? transposeN(eq.constPart) : eq.constPart)
+        let M: N
+        if (eq.wrap === 2) M = inverseN(rowsOf(task.data.A, 2))!
+        else {
+          const got = addN(eq.residual([[1, 0], [0, 1]], a0), scaleN(-1, eq.residual(zeroN(2), a0)))
+          M = eq.wrap === 3 ? transposeN(got) : got
+        }
+        expect(sameN(eq.side === 0 ? mulN(M, X) : mulN(X, M), R), context).toBe(true)
+        expect(sameN(pts(rPar.points), par(R)), context).toBe(true)
+        expect(sameN(pts(rPar.from!), par(eq.side === 0 ? X : M)), context).toBe(true)
+        if (eq.side === 1) for (const [j, label] of ['\\vec m_1', '\\vec m_2'].entries()) expect(sameN([[...d.arrows.find((a) => a.label === label)!.to]], [col(M, j)]), context).toBe(true)
+        if (d.mistake) {
+          mistakes++
+          // X von der falschen Seite: X' = R M⁻¹ bzw. M⁻¹ R; das Produkt landet nicht auf R
+          const Mi = inverseN(M)!
+          const W = eq.side === 0 ? mulN(R, Mi) : mulN(Mi, R)
+          const WR = eq.side === 0 ? mulN(M, W) : mulN(W, M)
+          expect(sameN(pts(d.mistake.polygons![0].points), par(WR)), context).toBe(true)
+          expect(sameN(WR, R), context).toBe(false)
+          expectRenderable(d.mistake.caption, context)
+        }
+      }
+    }
+    expect(drawings).toBeGreaterThan(350)
+    expect(probes).toBeGreaterThan(150)
+    expect(mistakes).toBeGreaterThan(25)
+    expect([...sides].sort()).toEqual([0, 1])
+  })
+
   it('jede Art der Angabe kommt vor: ordnen, ausklammern, beide Seiten, Transponierte, Inverse, AXA⁻¹, ganz transponiert, Gauß-Jordan', () => {
     const wraps = new Set<number>()
     const sides = new Set<number>()

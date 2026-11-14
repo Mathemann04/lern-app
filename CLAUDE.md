@@ -18,8 +18,8 @@ den Nutzer zugeschnitten: Maschinenbau, 1. Semester, THU, „Mathematik MB1".
 - Meilensteine und aktueller Stand: [docs/ROADMAP.md](docs/ROADMAP.md)
 - Laufender Plan: [docs/PLAN-M4.md](docs/PLAN-M4.md) (Chemie 1: S1 bis S12 fertig, vor
   Teil 1 der Klausur nichts mehr offen, danach N2 bis N5), jetzt zuerst der Rest von
-  [docs/PLAN-M7.md](docs/PLAN-M7.md) (Vektoren, Geraden, Ebenen, Matrizen; 1a bis 12b fertig,
-  als Nächstes 12c), dann M13 Klausurmodus Mathe (wichtigster Punkt laut Nutzer, 14.11.2026),
+  [docs/PLAN-M7.md](docs/PLAN-M7.md) (Vektoren, Geraden, Ebenen, Matrizen; 1a bis 12c fertig,
+  als Nächstes 13 Abschluss), dann M13 Klausurmodus Mathe (wichtigster Punkt laut Nutzer, 14.11.2026),
   dann Rest von [docs/PLAN-M6.md](docs/PLAN-M6.md) (fertig bis 4c), M12 und N2 bis N5;
   Reihenfolge in docs/ROADMAP.md unter „Vorgemerkt“; feste Regeln für alle Chemie-Inhalte:
   [docs/CHEMIE.md](docs/CHEMIE.md). Abgeschlossen: [docs/PLAN-M1.md](docs/PLAN-M1.md),

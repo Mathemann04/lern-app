@@ -6,6 +6,7 @@ import { type Quad, quadLatex } from './crossTasks.ts'
 import { detStep, roots, sortRats } from './cramerTasks.ts'
 import { type Mat, type PMat, DET_CARD, at, det, det2Step, lin, paramMatrix, pmat, polyOf, sarrusStep } from './detTasks.ts'
 import { type VectorDrawing, emptyDrawing } from './figures.ts'
+import type { JordanFigure } from './jordan.ts'
 import { type Op, combine, opFor, opLabel } from './gaussTasks.ts'
 import { MAT_CARD, matLatex, productQ, productStepQ } from './matrixTasks.ts'
 import { vectorErrorRule } from './errorRules.ts'
@@ -446,6 +447,91 @@ function readStep(rng: Rng, name: string, F: Tab, n: number, A: Mat): GuidedStep
   })
 }
 
+// Bilder des Gauß-Jordan-Verfahrens (Schritt 12c) mit exakten Tabellen: Start (A | E), je Umformung ein Bild, zuletzt
+// „Diagonale auf 1“ (E | A⁻¹) bzw. die Nullzeile links
+export type JordanTable = {
+  readonly tab: Tab
+  readonly notes: readonly (string | undefined)[]
+  readonly changed: readonly number[]
+  readonly pivot?: readonly [number, number]
+  readonly zeros: readonly (readonly [number, number])[]
+  readonly labels?: readonly [string, string]
+  readonly caption: string
+}
+export function jordanTables(name: string, A: Mat): JordanTable[] {
+  const n = A.length
+  const run = runJordan(A)
+  const none = A.map(() => undefined)
+  const out: JordanTable[] = [
+    { tab: run.start, notes: none, changed: [], zeros: [], labels: [name, 'E'], caption: `Start: links $${name}$, rechts vom Strich die Einheitsmatrix $E$. Jede Umformung gilt für die ganze Zeile.` },
+  ]
+  for (const st of run.stages) {
+    if (st.kind === 'swap')
+      out.push({
+        tab: st.after,
+        notes: st.after.map((_, i) => (i === st.row ? `${roman(i)} \\leftrightarrow ${roman(st.other)}` : undefined)),
+        changed: [st.row, st.other],
+        pivot: [st.row, st.col],
+        zeros: [],
+        caption: `In Spalte ${st.col + 1} steht auf der Diagonale eine $0$: Zeilen ${ROMAN[st.row]} und ${ROMAN[st.other]} tauschen, links und rechts vom Strich.`,
+      })
+    else {
+      const targets = st.ops.map((o) => o.target)
+      out.push({
+        tab: st.after,
+        notes: st.after.map((_, i) => {
+          const o = st.ops.find((x) => x.target === i)
+          return o ? opLabel(o, st.row) : undefined
+        }),
+        changed: targets,
+        pivot: [st.row, st.col],
+        zeros: targets.map((t) => [t, st.col] as const),
+        caption: `Spalte ${st.col + 1}: Nullen ${st.dir === 'down' ? 'unter' : 'über'} der Diagonale mit Zeile ${ROMAN[st.row]}. Die rechte Hälfte rechnet mit.`,
+      })
+    }
+  }
+  const F = run.final
+  if (run.singular >= 0) {
+    const zero = F.findIndex((r) => r.slice(0, n).every(isZero))
+    out.push({
+      tab: F,
+      notes: none,
+      changed: zero >= 0 ? [zero] : [],
+      zeros: [],
+      caption: `Links ist Zeile ${ROMAN[Math.max(zero, 0)]} eine Nullzeile. Links kann nie $E$ entstehen: $${name}$ ist nicht invertierbar.`,
+    })
+  } else {
+    const diag = F.map((r, i) => r[i])
+    const done: Tab = F.map((r, i) => r.map((x) => ratDiv(x, diag[i])))
+    out.push({
+      tab: done,
+      notes: diag.map((d) => (isOne(d) ? undefined : `: ${ratSign(d) < 0 ? `(${ratLatex(d)})` : ratLatex(d)}`)),
+      changed: diag.flatMap((d, i) => (isOne(d) ? [] : [i])),
+      zeros: [],
+      labels: ['E', inv(name)],
+      caption: diag.every(isOne) ? `Auf der Diagonale stehen schon Einsen: Links steht $E$, rechts $${inv(name)}$.` : `Jede Zeile durch ihre Zahl auf der Diagonale: Links steht $E$, rechts $${inv(name)}$.`,
+    })
+  }
+  return out
+}
+export function jordanFigure(name: string, A: Mat): JordanFigure {
+  const tables = jordanTables(name, A)
+  return {
+    name,
+    n: A.length,
+    singular: runJordan(A).singular >= 0,
+    frames: tables.map((t) => ({
+      rows: t.tab.map((r) => r.map(ratLatex)),
+      notes: t.notes.map((x) => x ?? ''),
+      changed: t.changed,
+      ...(t.pivot ? { pivot: t.pivot } : {}),
+      zeros: t.zeros,
+      ...(t.labels ? { labels: t.labels } : {}),
+      caption: t.caption,
+    })),
+  }
+}
+
 // alle Schritte des Gauß-Jordan-Verfahrens (null: zu wenige falsche Antworten)
 export function jordanSteps(rng: Rng, name: string, A: Mat, withStart: boolean): { steps: GuidedStep[]; singular: boolean; swaps: number; ups: number } | null {
   const n = A.length
@@ -465,6 +551,8 @@ export function jordanSteps(rng: Rng, name: string, A: Mat, withStart: boolean):
     if (zero < 0) return null
     steps.push(singularJordanStep(rng, name, run.final, n, zero))
   } else steps.push(readStep(rng, name, run.final, n, A))
+  // das ganze Verfahren zum Abspielen hängt am letzten Schritt (Schritt 12c)
+  steps.push({ ...steps.pop()!, jordan: jordanFigure(name, A) })
   return { steps, singular: run.singular >= 0, swaps: run.stages.filter((s) => s.kind === 'swap').length, ups: run.stages.filter((s) => s.kind === 'elim' && s.dir === 'up').length }
 }
 
