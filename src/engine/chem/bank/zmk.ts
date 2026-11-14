@@ -192,12 +192,12 @@ export const ZMK_BANK: QuestionBank = {
       prompt: 'Was halten zwischenmolekulare Kräfte zusammen?',
       correct: 'die Moleküle untereinander, etwa in einer Flüssigkeit',
       wrong: [
-        w('f1', 'die Atome innerhalb eines Moleküls, etwa H und O im Wasser', 'chem-mis-zk-intra'),
+        w('f1', 'die Atome innerhalb eines Moleküls', 'chem-mis-zk-intra'),
         w('f2', 'die Protonen und Neutronen im Atomkern', 'chem-mis-zk-intra', {
           detailed: 'Den Atomkern hält die Kernkraft zusammen; mit Chemie zwischen Molekülen hat sie nichts zu tun. Zwischenmolekulare Kräfte wirken zwischen ganzen Molekülen.',
           short: 'Zwischenmolekular heißt: zwischen Molekülen.',
         }),
-        w('f3', 'die Ionen in einem Salzkristall, etwa im Kochsalz $\\ce{NaCl}$', 'chem-mis-zk-stronger', {
+        w('f3', 'die Ionen in einem Salzkristall', 'chem-mis-zk-stronger', {
           detailed: 'Ein Salzkristall wird von der Ionenbindung zusammengehalten, der viel stärkeren Anziehung zwischen ganzen Ladungen. Zwischenmolekulare Kräfte wirken zwischen ungeladenen Molekülen.',
           short: 'Salze hält die Ionenbindung zusammen.',
         }),
@@ -314,14 +314,14 @@ export const ZMK_BANK: QuestionBank = {
       part: 'kraefte',
       title: 'Van-der-Waals-Kräfte',
       prompt: 'Wie entstehen Van-der-Waals-Kräfte?',
-      correct: 'Kurzzeitig ungleich verteilte Elektronen bilden Dipole, die im Nachbarn Dipole hervorrufen.',
+      correct: 'Kurzzeitig ungleich verteilte Elektronen bilden winzige Dipole, die im Nachbarn Dipole hervorrufen.',
       wrong: [
         w('f1', 'Ein Molekül gibt Elektronen an seinen Nachbarn ab.', 'chem-mis-zk-intra'),
-        w('f2', 'Dauerhafte Dipole richten sich so aus, dass ihre positiven und negativen Enden aneinanderliegen.', 'chem-mis-zk-vdw-some', {
+        w('f2', 'Dauerhafte Dipole richten sich aneinander aus.', 'chem-mis-zk-vdw-some', {
           detailed: 'Dauerhafte Dipole gibt es nur bei polaren Molekülen; ihre Anziehung heißt Dipol-Dipol-Wechselwirkung. Van-der-Waals-Kräfte gibt es auch bei unpolaren Teilchen, deren Dipole nur kurz bestehen.',
           short: 'Dauerhafte Dipole: das sind Dipol-Dipol-Wechselwirkungen.',
         }),
-        w('f3', 'Zwei benachbarte Moleküle teilen sich ein gemeinsames Elektronenpaar wie in einer Atombindung.', 'chem-mis-zk-hbond-covalent'),
+        w('f3', 'Zwei Moleküle teilen sich ein Elektronenpaar.', 'chem-mis-zk-hbond-covalent'),
         w('f4', 'Positive und negative Ionen ziehen sich an.', 'chem-mis-zk-stronger'),
       ],
       hint: 'Auch unpolare Teilchen ziehen sich an. Dafür muss es wenigstens kurz eine ungleiche Ladungsverteilung geben.',
@@ -514,13 +514,13 @@ export const ZMK_BANK: QuestionBank = {
       part: 'wasser',
       title: 'Wasser',
       prompt: 'Warum schwimmt Eis auf Wasser?',
-      correct: 'Wasserstoffbrücken ordnen die Moleküle im Eis weitmaschig an; Eis ist weniger dicht als Wasser.',
+      correct: 'Im Eis ordnen die Wasserstoffbrücken die Moleküle weitmaschig an; Eis ist weniger dicht als Wasser.',
       wrong: [
-        w('f1', 'Eis ist eigentlich dichter als Wasser, schwimmt aber wegen der vielen eingeschlossenen Luftbläschen.', 'chem-mis-zk-ice-sinks', {
+        w('f1', 'Eis ist dichter, schwimmt aber wegen eingeschlossener Luft.', 'chem-mis-zk-ice-sinks', {
           detailed: "Was schwimmt, ist weniger dicht als die Flüssigkeit darunter. Überlege, wie die Wasserstoffbrücken die Moleküle im Eis anordnen.",
           short: "Was schwimmt, ist weniger dicht.",
         }),
-        w('f2', 'Im Eis liegen die Moleküle enger beieinander als im flüssigen Wasser, deshalb ist das Eis leichter.', 'chem-mis-zk-ice-sinks', {
+        w('f2', 'Im Eis liegen die Moleküle enger, deshalb ist es leichter.', 'chem-mis-zk-ice-sinks', {
           detailed: "Was schwimmt, ist weniger dicht als die Flüssigkeit darunter. Überlege, wie die Wasserstoffbrücken die Moleküle im Eis anordnen.",
           short: "Was schwimmt, ist weniger dicht.",
         }),
@@ -570,14 +570,14 @@ export const ZMK_BANK: QuestionBank = {
       part: 'wasser',
       title: 'Wasser',
       prompt: 'Manche Insekten können über Wasser laufen. Was macht das möglich?',
-      correct: 'die hohe Oberflächenspannung: Wasserstoffbrücken halten die Oberfläche fest zusammen',
+      correct: 'die hohe Oberflächenspannung durch Wasserstoffbrücken',
       wrong: [
-        w('f1', 'Die Insekten sind leichter als Luft.', 'chem-mis-zk-water-normal', {
+        w('f1', 'Die Insekten sind leichter als Luft und schweben knapp über dem Wasser.', 'chem-mis-zk-water-normal', {
           detailed: "Leichter als Luft wäre ein Ballon, kein Insekt. Das Tier wird von der Wasseroberfläche getragen; die Frage ist, was sie so belastbar macht.",
           short: "Die Oberfläche trägt das Tier.",
         }),
         w('f2', 'An der Oberfläche bilden die Wassermoleküle feste Atombindungen untereinander, wie in einer Haut.', 'chem-mis-zk-hbond-covalent'),
-        w('f3', 'Wassermoleküle sind unpolar und stoßen die Beine ab.', 'chem-mis-zk-opposites', {
+        w('f3', 'Wassermoleküle sind unpolar und stoßen die Beine der Insekten ab.', 'chem-mis-zk-opposites', {
           detailed: "Wasser ist kein unpolarer Stoff: Seine Moleküle sind gewinkelt und haben eine positive und eine negative Seite.",
           short: "Wasser ist polar.",
         }),
@@ -601,11 +601,11 @@ export const ZMK_BANK: QuestionBank = {
       part: 'wasser',
       title: 'Wasser',
       prompt: r`Schwefelwasserstoff $\ce{H2S}$ ist größer als Wasser, siedet aber bei etwa −60 °C. Warum siedet Wasser höher?`,
-      correct: r`Zwischen Wassermolekülen gibt es Wasserstoffbrücken, zwischen $\ce{H2S}$-Molekülen nicht.`,
+      correct: r`Wasser bildet Wasserstoffbrücken, $\ce{H2S}$ nicht.`,
       wrong: [
-        w('f1', 'Wasser ist das schwerere Molekül.', 'chem-mis-zk-mass-only'),
+        w('f1', 'Wasser ist das schwerere der beiden Moleküle und siedet deshalb höher.', 'chem-mis-zk-mass-only'),
         w('f2', r`Auch zwischen $\ce{H2S}$-Molekülen gibt es Wasserstoffbrücken, nur weniger als im Wasser.`, 'chem-mis-zk-h-other'),
-        w('f3', 'Größere Moleküle sieden immer niedriger.', 'chem-mis-zk-size'),
+        w('f3', 'Größere Moleküle sieden immer niedriger als kleinere.', 'chem-mis-zk-size'),
         w('f4', 'Beim Sieden von Wasser müssen zusätzlich die $\\ce{O-H}$-Bindungen in den Molekülen brechen.', 'chem-mis-zk-boil-breaks'),
       ],
       hint: 'Woran sitzen die H-Atome in den beiden Molekülen?',
@@ -625,15 +625,15 @@ export const ZMK_BANK: QuestionBank = {
       part: 'siedepunkte',
       title: 'Van-der-Waals-Kräfte',
       prompt: 'Warum steigen die Siedepunkte der Halogene von Fluor bis Iod?',
-      correct: 'Die Moleküle werden größer und haben mehr Elektronen, also stärkere Van-der-Waals-Kräfte.',
+      correct: 'Die Moleküle werden größer und haben mehr Elektronen; die Van-der-Waals-Kräfte werden stärker.',
       wrong: [
         w('f1', 'Die Moleküle werden polarer.', 'chem-mis-zk-dipole-nonpolar', {
           detailed: "Halogenmoleküle bestehen aus zwei gleichen Atomen; sie haben keine polaren Bindungen und werden auch weiter unten in der Gruppe nicht polar.",
           short: "Zwei gleiche Atome: unpolar.",
         }),
-        w('f2', 'Größere Moleküle haben zwar schwächere Kräfte, brauchen aber mehr Wärme, um sich zu bewegen.', 'chem-mis-zk-size'),
+        w('f2', 'Größere Moleküle haben schwächere Kräfte, brauchen aber mehr Wärme.', 'chem-mis-zk-size'),
         w('f3', 'Ab Brom bilden sich Wasserstoffbrücken.', 'chem-mis-zk-h-other'),
-        w('f4', 'Die Bindung zwischen den beiden Halogenatomen wird stärker und muss beim Sieden aufbrechen.', 'chem-mis-zk-boil-breaks'),
+        w('f4', 'Die Bindung zwischen den Halogenatomen wird stärker und muss beim Sieden brechen.', 'chem-mis-zk-boil-breaks'),
       ],
       hint: 'Alle Halogene sind unpolar. Was ändert sich von oben nach unten in der Gruppe?',
       explanation: {
@@ -652,12 +652,12 @@ export const ZMK_BANK: QuestionBank = {
       prompt: 'Wie ändert sich der Siedepunkt der Alkane mit der Länge der Kette?',
       correct: 'Er steigt, weil längere Ketten stärkere Van-der-Waals-Kräfte haben.',
       wrong: [
-        w('f1', 'Er sinkt, weil längere Ketten schwerer zusammenzuhalten sind als kurze.', 'chem-mis-zk-size'),
+        w('f1', 'Er sinkt, weil längere Ketten schwerer zusammenzuhalten sind.', 'chem-mis-zk-size'),
         w('f2', 'Er bleibt gleich, weil alle Alkane unpolar sind.', 'chem-mis-zk-size', {
           detailed: 'Dass alle Alkane unpolar sind, heißt nur, dass bei allen dieselbe Art von Kraft wirkt. Wie stark sie ist, hängt von der Größe ab; längere Ketten berühren ihre Nachbarn auf größerer Fläche.',
           short: 'Gleiche Art, aber verschieden stark.',
         }),
-        w('f3', 'Er steigt, weil lange Ketten mit ihren vielen H-Atomen Wasserstoffbrücken bilden.', 'chem-mis-zk-any-h'),
+        w('f3', 'Er steigt, weil lange Ketten Wasserstoffbrücken bilden.', 'chem-mis-zk-any-h'),
         w('f4', 'Er steigt, weil beim Sieden mehr $\\ce{C-C}$-Bindungen brechen müssen.', 'chem-mis-zk-boil-breaks'),
       ],
       hint: 'Methan ist ein Gas, Octan eine Flüssigkeit, lange Ketten sind wachsartig. Welche Kraft wird stärker?',
@@ -753,15 +753,15 @@ export const ZMK_BANK: QuestionBank = {
       part: 'kraefte',
       title: 'Zwischenmolekulare Kräfte',
       prompt: r`Tetrachlormethan $\ce{CCl4}$ hat vier polare Bindungen. Welche Kräfte wirken zwischen seinen Molekülen?`,
-      correct: 'nur Van-der-Waals-Kräfte, weil das Molekül als Ganzes unpolar ist',
+      correct: 'nur Van-der-Waals-Kräfte, weil es unpolar ist',
       wrong: [
         w('f1', 'Dipol-Dipol-Wechselwirkungen, weil alle vier $\\ce{C-Cl}$-Bindungen polar sind', 'chem-mis-zk-dipole-nonpolar'),
         w('f2', 'Wasserstoffbrücken, weil die vier Chloratome sehr elektronegativ sind', 'chem-mis-zk-h-other', {
           detailed: 'Wasserstoffbrücken brauchen ein H-Atom an N, O oder F. Tetrachlormethan hat gar keine H-Atome.',
           short: 'Kein H-Atom vorhanden.',
         }),
-        w('f3', 'gar keine, weil es unpolar ist', 'chem-mis-zk-vdw-some'),
-        w('f4', 'Ionenbindungen zwischen C und Cl', 'chem-mis-zk-stronger'),
+        w('f3', 'gar keine, weil das Molekül als Ganzes unpolar ist', 'chem-mis-zk-vdw-some'),
+        w('f4', 'Ionenbindungen zwischen den C- und Cl-Atomen benachbarter Moleküle', 'chem-mis-zk-stronger'),
       ],
       hint: 'Polare Bindungen allein machen kein polares Molekül. Wie ist es gebaut?',
       explanation: {
@@ -778,15 +778,15 @@ export const ZMK_BANK: QuestionBank = {
       part: 'kraefte',
       title: 'Wasserstoffbrücken',
       prompt: 'Was für eine Anziehung ist eine Wasserstoffbrücke?',
-      correct: 'ein besonders starker Fall der Dipol-Dipol-Wechselwirkungen',
+      correct: 'eine besonders starke Dipol-Dipol-Wechselwirkung',
       wrong: [
         w('f1', 'eine besonders starke Atombindung mit gemeinsamem Elektronenpaar', 'chem-mis-zk-hbond-covalent', {
           detailed: "Bei einer Atombindung teilen sich zwei Atome ein Elektronenpaar. Bei einer Wasserstoffbrücke gehört das H-Atom weiter fest zu seinem eigenen Molekül.",
           short: "Kein gemeinsames Paar zwischen den Molekülen.",
         }),
-        w('f2', 'eine Ionenbindung zwischen einem Proton und einem Anion', 'chem-mis-zk-stronger'),
+        w('f2', 'eine Ionenbindung zwischen einem Proton und einem Anion im Nachbarmolekül', 'chem-mis-zk-stronger'),
         w('f3', 'eine Van-der-Waals-Kraft, wie sie zwischen unpolaren Molekülen wirkt', 'chem-mis-zk-order'),
-        w('f4', 'eine Bindung zwischen zwei H-Atomen', 'chem-mis-zk-any-h'),
+        w('f4', 'eine Bindung zwischen zwei H-Atomen benachbarter Moleküle', 'chem-mis-zk-any-h'),
       ],
       hint: 'Das H-Atom trägt eine positive Teilladung, das Nachbaratom eine negative.',
       explanation: {
@@ -906,14 +906,14 @@ export const ZMK_BANK: QuestionBank = {
       part: 'loesen',
       title: 'Löslichkeit',
       prompt: 'Warum mischen sich Öl und Wasser nicht?',
-      correct: 'Wasser hält über Wasserstoffbrücken zusammen und schließt das unpolare Öl aus.',
+      correct: 'Wasser ist polar und hält über Wasserstoffbrücken zusammen; das unpolare Öl wird davon ausgeschlossen.',
       wrong: [
         w('f1', 'Weil Öl leichter ist als Wasser.', 'chem-mis-zk-oil-light', {
           detailed: "Die Dichte sagt nur, welche Schicht oben liegt. Warum sich überhaupt zwei Schichten bilden, müssen die Kräfte zwischen den Teilchen erklären.",
           short: "Die Dichte erklärt nur die Lage der Schichten.",
         }),
-        w('f2', 'Weil sich Öl und Wasser chemisch abstoßen, so wie zwei gleiche elektrische Ladungen.', 'chem-mis-zk-opposites'),
-        w('f3', 'Weil Öl keine Van-der-Waals-Kräfte hat, die es an die Wassermoleküle binden könnten.', 'chem-mis-zk-vdw-some'),
+        w('f2', 'Weil Öl und Wasser sich chemisch abstoßen, wie gleiche Ladungen.', 'chem-mis-zk-opposites'),
+        w('f3', 'Weil Öl keine Van-der-Waals-Kräfte hat.', 'chem-mis-zk-vdw-some'),
         w('f4', 'Weil Wasser und Öl beide unpolar sind.', 'chem-mis-zk-dipole-nonpolar'),
       ],
       hint: 'Welche Kräfte gewinnt oder verliert ein Wassermolekül, wenn es neben ein Ölmolekül rückt?',
@@ -978,13 +978,13 @@ export const ZMK_BANK: QuestionBank = {
       part: 'siedepunkte',
       title: 'Sieden',
       prompt: 'Was ist Wasserdampf auf der Ebene der Teilchen?',
-      correct: 'dieselben Wassermoleküle wie im flüssigen Wasser, nur weit voneinander entfernt',
+      correct: 'dieselben Wassermoleküle, nur weit voneinander entfernt',
       wrong: [
-        w('f1', 'einzelne Wasserstoff- und Sauerstoffatome', 'chem-mis-zk-boil-breaks', {
+        w('f1', 'einzelne Wasserstoff- und Sauerstoffatome, weil die Moleküle zerfallen sind', 'chem-mis-zk-boil-breaks', {
           detailed: "Kondensiert Dampf, entsteht wieder Wasser mit allen seinen Eigenschaften. Das ginge nicht, wenn die Moleküle beim Sieden zerfallen wären.",
           short: "Kondensiert Dampf, entsteht wieder Wasser.",
         }),
-        w('f2', 'ein Gemisch aus Wasserstoff und Sauerstoff', 'chem-mis-zk-boil-breaks', {
+        w('f2', 'ein Gemisch aus Wasserstoffgas und Sauerstoffgas, die beim Sieden entstehen', 'chem-mis-zk-boil-breaks', {
           detailed: "Kondensiert Dampf, entsteht wieder Wasser mit allen seinen Eigenschaften. Das ginge nicht, wenn die Moleküle beim Sieden zerfallen wären.",
           short: "Kondensiert Dampf, entsteht wieder Wasser.",
         }),
@@ -1011,13 +1011,13 @@ export const ZMK_BANK: QuestionBank = {
       part: 'kraefte',
       title: 'Van-der-Waals-Kräfte',
       prompt: 'Argon wird bei etwa −186 °C flüssig. Welche Aussage über flüssiges Argon stimmt?',
-      correct: 'Van-der-Waals-Kräfte aus kurzzeitigen Dipolen halten die Atome zusammen.',
+      correct: 'Die Atome halten über Van-der-Waals-Kräfte zusammen, die durch kurzzeitige Dipole entstehen.',
       wrong: [
         w('f1', 'Die Atome halten über Wasserstoffbrücken zusammen.', 'chem-mis-zk-h-other', {
           detailed: 'Wasserstoffbrücken brauchen ein H-Atom an N, O oder F. Argon hat weder Wasserstoff noch einen solchen Partner.',
           short: 'Kein H-Atom vorhanden.',
         }),
-        w('f2', 'Zwischen den Atomen wirken keine Kräfte, weil Argon unpolar ist und keine Dipole bildet.', 'chem-mis-zk-vdw-some', {
+        w('f2', 'Zwischen den Atomen wirken keine Kräfte, weil Argon unpolar ist.', 'chem-mis-zk-vdw-some', {
           detailed: 'Ohne jede Anziehung könnte Argon gar nicht flüssig werden; die Atome würden auseinanderfliegen. Auch zwischen unpolaren Teilchen muss also eine Kraft wirken.',
           short: 'Ohne Anziehung keine Flüssigkeit.',
         }),
@@ -1195,7 +1195,7 @@ export const ZMK_BANK: QuestionBank = {
       part: 'wasser',
       title: 'Wasserstoffbrücken',
       prompt: 'Wo spielen Wasserstoffbrücken außerhalb des Wassers eine wichtige Rolle?',
-      correct: 'beim Zusammenhalt der DNA-Doppelhelix und bei der Faltung von Eiweißen',
+      correct: 'in der DNA und in Eiweißen',
       wrong: [
         w('f1', 'nirgends; es gibt sie nur in Wasser', 'chem-mis-zk-water-only', {
           detailed: "Wasserstoffbrücken hängen nicht am Stoff Wasser, sondern daran, woran das H-Atom sitzt.",
@@ -1220,7 +1220,7 @@ export const ZMK_BANK: QuestionBank = {
       part: 'loesen',
       title: 'Mischbarkeit',
       prompt: r`Methanol $\ce{CH3OH}$ mischt sich mit Wasser, Octan $\ce{C8H18}$ nicht. Welcher Teil des Methanols macht den Unterschied?`,
-      correct: 'die OH-Gruppe, die mit Wasser Wasserstoffbrücken eingeht',
+      correct: 'die OH-Gruppe',
       wrong: [
         w('f1', 'die H-Atome am Kohlenstoff, die mit Wasser Wasserstoffbrücken bilden', 'chem-mis-zk-any-h', {
           detailed: 'H-Atome am Kohlenstoff hat Octan auch, sogar viel mehr. Sie können also nicht den Unterschied machen.',
@@ -1254,14 +1254,14 @@ export const ZMK_BANK: QuestionBank = {
       part: 'loesen',
       title: 'Mischbarkeit',
       prompt: 'Methanol mischt sich gut mit Wasser, Alkohole mit langer Kohlenstoffkette kaum noch. Warum?',
-      correct: 'Die lange, unpolare Kette überwiegt; die eine OH-Gruppe reicht nicht mehr aus.',
+      correct: 'Die lange, unpolare Kette überwiegt; die eine OH-Gruppe reicht nicht mehr für die Mischung mit Wasser.',
       wrong: [
         w('f1', 'Lange Alkohole haben keine OH-Gruppe mehr.', 'chem-mis-zk-water-only', {
           detailed: "Ein Alkohol hat immer eine OH-Gruppe, egal wie lang seine Kette ist. Überlege, was sich mit der Kette am Verhältnis von polarem und unpolarem Teil ändert.",
           short: "Die OH-Gruppe bleibt.",
         }),
-        w('f2', 'Lange Ketten bilden über ihre vielen H-Atome mehr Wasserstoffbrücken mit Wasser.', 'chem-mis-zk-any-h'),
-        w('f3', 'Lange Alkohole sind schwerer als Wasser und sinken deshalb einfach auf den Boden ab.', 'chem-mis-zk-oil-light'),
+        w('f2', 'Lange Ketten bilden mehr Wasserstoffbrücken mit Wasser.', 'chem-mis-zk-any-h'),
+        w('f3', 'Lange Alkohole sind schwerer und sinken einfach ab.', 'chem-mis-zk-oil-light'),
         w('f4', 'Lange Ketten sind polarer als kurze.', 'chem-mis-zk-dipole-nonpolar', {
           detailed: "Ketten aus C- und H-Atomen sind unpolar; eine längere Kette fügt keinen polaren Teil hinzu.",
           short: "Die Kette selbst ist unpolar.",
@@ -1335,13 +1335,13 @@ export const ZMK_BANK: QuestionBank = {
       part: 'kraefte',
       title: 'Van-der-Waals-Kräfte',
       prompt: 'Geckos haften an glatten Wänden mit Millionen feiner Härchen an den Füßen. Welche Kraft nutzen sie, und warum helfen die Härchen?',
-      correct: 'Van-der-Waals-Kräfte; die Härchen vergrößern die Berührungsfläche',
+      correct: 'Van-der-Waals-Kräfte auf riesiger Berührungsfläche',
       wrong: [
         w('f1', 'Wasserstoffbrücken, weil die Wand nass sein muss', 'chem-mis-zk-water-only', {
           detailed: "Geckos haften auch an trockenem Glas. Die Kraft muss also zwischen trockenen Oberflächen wirken.",
           short: "Es geht auch trocken.",
         }),
-        w('f2', 'Ionenbindungen zwischen Fuß und Wand', 'chem-mis-zk-stronger'),
+        w('f2', 'Ionenbindungen zwischen den Härchen am Fuß und der Wand', 'chem-mis-zk-stronger'),
         w('f3', 'Atombindungen, die der Gecko bei jedem Schritt mit der Wand knüpft und wieder löst', 'chem-mis-zk-intra'),
         w('f4', 'Van-der-Waals-Kräfte, die mit kleinerer Berührungsfläche stärker werden', 'chem-mis-zk-size'),
       ],
@@ -1360,11 +1360,11 @@ export const ZMK_BANK: QuestionBank = {
       part: 'kraefte',
       title: 'Vergleich',
       prompt: r`Warum schmilzt Kochsalz $\ce{NaCl}$ erst bei etwa 800 °C, Eis aber schon bei 0 °C?`,
-      correct: 'Im Salz muss die starke Ionenbindung überwunden werden, im Eis nur Wasserstoffbrücken.',
+      correct: 'Im Salz muss die starke Ionenbindung überwunden werden, im Eis nur Wasserstoffbrücken zwischen Molekülen.',
       wrong: [
         w('f1', 'Im Eis wirken stärkere Kräfte als im Salz.', 'chem-mis-zk-stronger'),
-        w('f2', 'Beim Schmelzen von Eis brechen die $\\ce{O-H}$-Bindungen in den Molekülen, beim Salz dagegen nicht.', 'chem-mis-zk-boil-breaks'),
-        w('f3', 'Kochsalz bildet zwischen seinen Ionen stärkere Wasserstoffbrücken als Wasser zwischen seinen Molekülen.', 'chem-mis-zk-h-other'),
+        w('f2', 'Beim Schmelzen von Eis brechen die $\\ce{O-H}$-Bindungen, beim Salz nicht.', 'chem-mis-zk-boil-breaks'),
+        w('f3', 'Kochsalz bildet stärkere Wasserstoffbrücken als Wasser.', 'chem-mis-zk-h-other'),
         w('f4', 'Salz ist schwerer, das allein erklärt es.', 'chem-mis-zk-mass-only'),
       ],
       hint: 'Was hält ein Salz zusammen, was die Moleküle im Eis?',

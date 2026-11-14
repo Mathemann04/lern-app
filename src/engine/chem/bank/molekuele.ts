@@ -224,7 +224,7 @@ export const MOLEKUELE_BANK: QuestionBank = {
       part: 'lewis',
       title: 'Oktettregel',
       prompt: 'Was besagt die Oktettregel für Moleküle?',
-      correct: 'Meist hat jedes Atom außer Wasserstoff acht Elektronen um sich; bindende Paare zählen für beide Partner.',
+      correct: 'In der Regel hat jedes Atom außer Wasserstoff acht Elektronen um sich; bindende Paare zählen für beide Partner mit.',
       wrong: [
         w('f1', 'Jedes Atom, auch Wasserstoff, hat acht Elektronen um sich; bindende Paare zählen dabei für beide Partner mit.', 'chem-mis-mo-octet-hydrogen'),
         w('f2', 'Das ganze Molekül hat genau acht Valenzelektronen.', 'chem-mis-mo-octet-molecule'),
@@ -302,11 +302,11 @@ export const MOLEKUELE_BANK: QuestionBank = {
       part: 'lewis',
       title: 'Bindende und freie Paare',
       prompt: r`Wie viele Bindungen und freie Elektronenpaare hat das Stickstoffatom in $\ce{NH3}$?`,
-      correct: 'drei $\\ce{N-H}$-Bindungen und ein freies Paar',
+      correct: 'drei Bindungen und ein freies Paar',
       wrong: [
         w('f1', 'fünf Bindungen und kein freies Paar', 'chem-mis-mo-bonds-valence'),
-        w('f2', 'drei $\\ce{N-H}$-Bindungen und kein freies Paar', 'chem-mis-mo-lone-forgotten'),
-        w('f3', 'drei $\\ce{N-H}$-Bindungen und zwei freie Paare', 'chem-mis-mo-electron-count', {
+        w('f2', 'drei Bindungen und kein freies Paar', 'chem-mis-mo-lone-forgotten'),
+        w('f3', 'drei Bindungen und zwei freie Paare', 'chem-mis-mo-electron-count', {
           detailed: 'Zähl nach: Drei Bindungen und zwei freie Paare wären fünf Paare, also zehn Elektronen um den Stickstoff. Das Oktett sind vier Paare, und das Molekül hat insgesamt nur acht Valenzelektronen.',
           short: 'Vier Paare um den Stickstoff, nicht fünf.',
         }),
@@ -329,9 +329,9 @@ export const MOLEKUELE_BANK: QuestionBank = {
       prompt: 'Welche Elektronen zeichnet man in einer Lewis-Formel?',
       correct: 'nur die Valenzelektronen in der äußersten Schale',
       wrong: [
-        w('f1', 'alle Elektronen des Atoms', 'chem-mis-mo-lewis-all'),
+        w('f1', 'alle Elektronen des Atoms, auch die der inneren Schalen', 'chem-mis-mo-lewis-all'),
         w('f2', 'nur die Elektronen, die eine Bindung zu einem Nachbarn bilden', 'chem-mis-mo-lone-forgotten'),
-        w('f3', 'nur die Elektronen der innersten Schale', 'chem-mis-mo-lewis-all', {
+        w('f3', 'nur die Elektronen der innersten Schale, nahe am Kern', 'chem-mis-mo-lewis-all', {
           detailed: 'Die inneren Elektronen sind fest an den Kern gebunden und nehmen an Bindungen nicht teil. Gezeichnet werden die Elektronen der äußersten Schale, die Valenzelektronen.',
           short: 'Gezeichnet werden die äußeren Elektronen.',
         }),
@@ -355,7 +355,7 @@ export const MOLEKUELE_BANK: QuestionBank = {
       part: 'lewis',
       title: 'Freies Elektronenpaar',
       prompt: 'Was ist ein freies Elektronenpaar?',
-      correct: 'ein Paar Valenzelektronen an einem Atom, das keine Bindung bildet',
+      correct: 'ein Paar Valenzelektronen, das nur zu einem Atom gehört und keine Bindung bildet',
       wrong: [
         w('f1', 'ein Paar, das zwei Atome miteinander verbindet und zu beiden gehört', 'chem-mis-mo-pair-types'),
         w('f2', 'ein einzelnes Elektron, das keinen Partner hat', 'chem-mis-mo-stroke-electron'),
@@ -512,7 +512,7 @@ export const MOLEKUELE_BANK: QuestionBank = {
       part: 'gestalt',
       title: 'Gestalt',
       prompt: r`Welche Gestalt hat Kohlenstoffdioxid, $\ce{O=C=O}$?`,
-      correct: 'linear, mit einem Winkel von $180^\\circ$',
+      correct: 'linear',
       wrong: [
         w('f1', 'gewinkelt wie Wasser', 'chem-mis-mo-shape-formula', {
           detailed: 'Wasser ist gewinkelt, weil am Sauerstoff zwei freie Paare sitzen. Ob der Kohlenstoff in diesem Molekül freie Paare hat, musst du selbst nachzählen; die Formel allein sagt es nicht.',
@@ -599,12 +599,12 @@ export const MOLEKUELE_BANK: QuestionBank = {
       correct: 'zwei Elektronenpaare, die dieselben zwei Atome teilen',
       wrong: [
         w('f1', 'ein einzelnes Elektronenpaar, das doppelt so stark bindet', 'chem-mis-mo-double-one-pair'),
-        w('f2', 'zwei Elektronen, die zwischen den Atomen liegen', 'chem-mis-mo-stroke-electron'),
+        w('f2', 'zwei einzelne Elektronen, die zwischen den beiden Atomen liegen', 'chem-mis-mo-stroke-electron'),
         w('f3', 'zwei Bindungen eines Atoms zu zwei verschiedenen Partnern', 'chem-mis-mo-pair-types', {
           detailed: 'Zwei Bindungen zu verschiedenen Partnern sind zwei Einfachbindungen, wie im Wasser. Eine Doppelbindung liegt zwischen denselben zwei Atomen: Sie teilen sich zwei Paare.',
           short: 'Doppelbindung: zwei Paare zwischen denselben Atomen.',
         }),
-        w('f4', 'ein Paar, das ein Atom ganz an das andere abgibt', 'chem-mis-mo-bond-transfer'),
+        w('f4', 'ein Elektronenpaar, das ein Atom ganz an das andere abgibt', 'chem-mis-mo-bond-transfer'),
       ],
       hint: 'In der Lewis-Formel steht sie als Doppelstrich. Was bedeutet jeder Strich?',
       explanation: {
@@ -753,9 +753,9 @@ export const MOLEKUELE_BANK: QuestionBank = {
       correct: 'Die beiden freien Paare am Sauerstoff brauchen mehr Platz und drücken die Bindungen zusammen.',
       wrong: [
         w('f1', 'Die beiden H-Atome ziehen sich gegenseitig an.', 'chem-mis-mo-pairs-attract'),
-        w('f2', 'Freie Paare brauchen weniger Platz als bindende, und die Bindungen rücken in die frei gewordene Lücke.', 'chem-mis-mo-lone-small'),
+        w('f2', 'Freie Paare brauchen weniger Platz, und die Bindungen rücken in die Lücke.', 'chem-mis-mo-lone-small'),
         w('f3', 'Weil die Lewis-Formel von Wasser gewinkelt gezeichnet wird.', 'chem-mis-mo-shape-drawing'),
-        w('f4', r`Weil die vier Elektronenpaare um den Sauerstoff nicht tetraedrisch, sondern in einer Ebene liegen.`, 'chem-mis-mo-shape-arrangement', {
+        w('f4', r`Weil die vier Paare um den Sauerstoff nicht tetraedrisch, sondern in einer Ebene liegen.`, 'chem-mis-mo-shape-arrangement', {
           detailed: 'Die vier Paare am Sauerstoff liegen ungefähr tetraedrisch, im Raum. Der Winkel wird kleiner, weil die freien Paare mehr Platz beanspruchen als die bindenden.',
           short: 'Die Paare liegen räumlich; die freien drücken.',
         }),
@@ -829,7 +829,7 @@ export const MOLEKUELE_BANK: QuestionBank = {
       part: 'polaritaet',
       title: 'Elektronegativität',
       prompt: 'Was gibt die Elektronegativität eines Atoms an?',
-      correct: 'wie stark es in einer Bindung das gemeinsame Paar anzieht',
+      correct: 'wie stark es in einer Bindung das gemeinsame Elektronenpaar zu sich zieht',
       wrong: [
         w('f1', 'wie viele Elektronen es abgeben kann, wenn es zum Ion wird', 'chem-mis-mo-en-meaning'),
         w('f2', 'wie viele Bindungen es bildet', 'chem-mis-mo-en-meaning', {
@@ -906,8 +906,8 @@ export const MOLEKUELE_BANK: QuestionBank = {
       prompt: r`Welches Atom trägt in $\ce{HCl}$ die negative Teilladung $\delta-$?`,
       correct: 'das Chloratom, weil es elektronegativer ist',
       wrong: [
-        w('f1', 'das Wasserstoffatom, weil es kleiner ist', 'chem-mis-mo-partial-swapped'),
-        w('f2', 'keines, die Bindung ist unpolar', 'chem-mis-mo-en-boundaries', {
+        w('f1', 'das Wasserstoffatom, weil es kleiner ist als das Chloratom', 'chem-mis-mo-partial-swapped'),
+        w('f2', 'keines, die Bindung zwischen H und Cl ist unpolar', 'chem-mis-mo-en-boundaries', {
           detailed: 'Chlor und Wasserstoff unterscheiden sich in der Elektronegativität um fast 1. Das reicht für eine deutlich polare Bindung.',
           short: 'Der Unterschied macht die Bindung polar.',
         }),
@@ -942,11 +942,11 @@ export const MOLEKUELE_BANK: QuestionBank = {
           detailed: 'Wasser ist gewinkelt, weil am Sauerstoff zwei freie Paare sitzen. Zähle nach, ob der Kohlenstoff hier freie Paare hat.',
           short: 'Freie Paare am Zentralatom nachzählen.',
         }),
-        w('f3', r`Nein, weil die $\ce{C=O}$-Bindungen unpolar sind.`, 'chem-mis-mo-en-boundaries', {
+        w('f3', r`Nein, weil die $\ce{C=O}$-Bindungen unpolar sind und deshalb gar keine Teilladungen tragen.`, 'chem-mis-mo-en-boundaries', {
           detailed: r`Kohlenstoff (2,55) und Sauerstoff (3,44) unterscheiden sich um 0,89: Die Bindungen sind polar. Die Begründung muss also bei etwas anderem ansetzen.`,
           short: 'Die Bindungen sind polar.',
         }),
-        w('f4', 'Ja, weil es insgesamt negativ geladen ist.', 'chem-mis-mo-dipole-charged'),
+        w('f4', 'Ja, weil das ganze Molekül wie ein Ion insgesamt eine negative elektrische Ladung trägt.', 'chem-mis-mo-dipole-charged'),
       ],
       hint: 'Erst die Bindungen, dann die Gestalt: Zeigen die beiden polaren Bindungen in entgegengesetzte Richtungen?',
       explanation: {
@@ -964,7 +964,7 @@ export const MOLEKUELE_BANK: QuestionBank = {
       part: 'polaritaet',
       title: 'Polares Molekül',
       prompt: 'Wann ist ein Molekül polar, also ein Dipol?',
-      correct: 'wenn es polare Bindungen hat und wegen der Gestalt die Ladungsschwerpunkte getrennt sind',
+      correct: 'wenn es polare Bindungen hat und die Ladungsschwerpunkte wegen der Gestalt nicht zusammenfallen',
       wrong: [
         w('f1', 'sobald es mindestens eine polare Bindung hat, ganz gleich, wie das Molekül räumlich gebaut ist', 'chem-mis-mo-polar-bond-molecule'),
         w('f2', 'wenn es insgesamt eine Ladung trägt', 'chem-mis-mo-dipole-charged'),
@@ -1181,7 +1181,7 @@ export const MOLEKUELE_BANK: QuestionBank = {
       part: 'gestalt',
       title: 'Gestalt',
       prompt: r`Welche Gestalt hat Schwefelhexafluorid $\ce{SF6}$ (sechs Partner, kein freies Paar am Schwefel)?`,
-      correct: 'oktaedrisch, mit Winkeln von $90^\\circ$',
+      correct: 'oktaedrisch',
       wrong: [
         w('f1', 'trigonal-bipyramidal', 'chem-mis-mo-shape-formula'),
         w('f2', 'sechseckig in einer Ebene', 'chem-mis-mo-shape-drawing'),
@@ -1232,7 +1232,7 @@ export const MOLEKUELE_BANK: QuestionBank = {
       part: 'gestalt',
       title: 'Gestalt begründen',
       prompt: r`Warum ist Ammoniak $\ce{NH3}$ trigonal-pyramidal, Bortrifluorid $\ce{BF3}$ aber trigonal-planar?`,
-      correct: 'Am Stickstoff sitzt noch ein freies Paar; vier Paare liegen tetraedrisch, die Atome bilden eine Pyramide.',
+      correct: 'Am Stickstoff sitzt zusätzlich ein freies Paar; vier Paare liegen tetraedrisch, und ohne das freie Paar bleibt eine Pyramide.',
       wrong: [
         w('f1', 'Weil Stickstoff elektronegativer ist als Bor.', 'chem-mis-mo-shape-formula', {
           detailed: 'Die Elektronegativität bestimmt, wie polar die Bindungen sind, nicht die Gestalt. Die Gestalt folgt aus der Zahl der Paare am Zentralatom: drei bei Bor, vier bei Stickstoff.',
@@ -1289,7 +1289,7 @@ export const MOLEKUELE_BANK: QuestionBank = {
       correct: r`Nein: Die vier polaren $\ce{C-Cl}$-Bindungen heben sich im Tetraeder auf.`,
       wrong: [
         w('f1', r`Ja, weil die $\ce{C-Cl}$-Bindungen polar sind und Chlor die Elektronen stärker anzieht.`, 'chem-mis-mo-polar-bond-molecule'),
-        w('f2', r`Nein, weil die $\ce{C-Cl}$-Bindungen unpolar sind.`, 'chem-mis-mo-en-boundaries', {
+        w('f2', r`Nein, weil die $\ce{C-Cl}$-Bindungen unpolar sind und keine Teilladungen tragen.`, 'chem-mis-mo-en-boundaries', {
           detailed: r`Kohlenstoff (2,55) und Chlor (3,16) unterscheiden sich um 0,61: Die Bindungen sind polar. Die Begründung muss also bei etwas anderem ansetzen.`,
           short: 'Die Bindungen sind polar.',
         }),
@@ -1535,7 +1535,7 @@ export const MOLEKUELE_BANK: QuestionBank = {
       part: 'polaritaet',
       title: 'Dipolmoment des Moleküls',
       prompt: r`$\ce{CO2}$ und $\ce{H2O}$ haben je zwei polare Bindungen. Wie ergibt sich daraus das Dipolmoment des ganzen Moleküls?`,
-      correct: r`Die Bindungsdipole addiert man mit ihrer Richtung: In $\ce{CO2}$ heben sie sich auf, in $\ce{H2O}$ nicht.`,
+      correct: r`Die Bindungsdipole werden als Pfeile mit Richtung addiert: In $\ce{CO2}$ zeigen sie entgegengesetzt und heben sich auf, in $\ce{H2O}$ zeigen sie schräg zur selben Seite und ergeben einen Dipol.`,
       wrong: [
         w('f1', r`Man addiert die Bindungsdipole als bloße Zahlen; beide Moleküle haben deshalb ein Dipolmoment.`, 'chem-mis-mo-dipole-scalar'),
         w('f2', r`Man zieht die beiden Bindungsdipole voneinander ab; bei zwei gleichen Bindungen ist das Molekül immer unpolar, auch $\ce{H2O}$.`, 'chem-mis-mo-symmetry-assumed', {
@@ -1564,7 +1564,7 @@ export const MOLEKUELE_BANK: QuestionBank = {
       part: 'polaritaet',
       title: 'Bindungen einordnen',
       prompt: r`In hypochloriger Säure $\ce{H-O-Cl}$ sitzt der Sauerstoff in der Mitte. Für welche Atompaare rechnet man $\Delta \mathrm{EN}$ aus, um die Bindungen einzuordnen?`,
-      correct: r`für $\ce{O-H}$ und $\ce{O-Cl}$, weil nur diese Atome direkt verbunden sind`,
+      correct: r`für $\ce{O-H}$ und $\ce{O-Cl}$`,
       wrong: [
         w('f1', r`für H und Cl, weil sie an den beiden Enden sitzen`, 'chem-mis-mo-en-unbonded'),
         w('f2', r`für alle drei Paare: $\ce{O-H}$, $\ce{O-Cl}$ und H mit Cl`, 'chem-mis-mo-en-unbonded'),

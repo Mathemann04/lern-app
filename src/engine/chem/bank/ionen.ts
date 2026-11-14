@@ -394,7 +394,7 @@ export const IONEN_BANK: QuestionBank = {
       part: 'gitter',
       title: "Spröde",
       prompt: "Schlägt man mit einem Hammer auf einen Salzkristall, zerspringt er, statt sich zu verbiegen. Warum?",
-      correct: { id: 'r', text: "Verschiebt sich eine Schicht, liegen gleich geladene Ionen nebeneinander und stoßen sich ab." },
+      correct: { id: 'r', text: "Verschiebt sich eine Schicht des Gitters, kommen gleich geladene Ionen nebeneinander und stoßen sich ab." },
       wrong: [
         { id: 'f1', text: "Zwischen den Ionen wirken nur schwache Kräfte, die schon ein leichter Hammerschlag überwinden kann.", misconception: 'chem-mis-io-weak-forces' },
         { id: 'f2', text: "Das Elektronengas zwischen den Schichten reißt ab und hält sie nicht mehr zusammen.", misconception: 'chem-mis-io-bond-mixup', why: {
@@ -430,12 +430,12 @@ export const IONEN_BANK: QuestionBank = {
       correct: { id: 'r', text: "Ihre Ionen bilden ein regelmäßiges Gitter, das sich in alle Richtungen wiederholt." },
       wrong: [
         { id: 'f1', text: "Sie sind durchsichtig und glänzen an ihren glatten Flächen wie ein geschliffenes Glas.", misconception: 'chem-mis-io-crystal-look' },
-        { id: 'f2', text: "Ihre Ionen sind zufällig verteilt, ohne erkennbare Ordnung.", misconception: 'chem-mis-io-amorphous' },
+        { id: 'f2', text: "Ihre Ionen sind zufällig verteilt, ohne eine erkennbare Ordnung über größere Strecken.", misconception: 'chem-mis-io-amorphous' },
         { id: 'f3', text: "Sie werden beim Erhitzen langsam und über einen breiten Temperaturbereich hinweg weich.", misconception: 'chem-mis-io-amorphous', why: {
           detailed: "Allmähliches Erweichen kennzeichnet Stoffe ohne feste Ordnung, etwa Glas. Kristalline Stoffe verhalten sich beim Erhitzen anders, weil in ihrem Gitter alle Plätze gleichwertig sind.",
           short: "Allmähliches Erweichen ist typisch für amorphe Stoffe.",
         } },
-        { id: 'f4', text: "Sie bestehen aus einzelnen Molekülen, die lose nebeneinanderliegen.", misconception: 'chem-mis-io-molecule' },
+        { id: 'f4', text: "Sie bestehen aus einzelnen Molekülen, die ohne feste Bindung lose nebeneinanderliegen.", misconception: 'chem-mis-io-molecule' },
       ],
       hint: "Das Gegenteil von kristallin ist amorph, wie bei Glas. Worin unterscheiden sich die beiden im Inneren?",
       explanation: {
@@ -454,7 +454,7 @@ export const IONEN_BANK: QuestionBank = {
       part: 'gitter',
       title: "Hoher Schmelzpunkt",
       prompt: "Warum haben Salze meist sehr hohe Schmelzpunkte?",
-      correct: { id: 'r', text: "Jedes Ion zieht seine entgegengesetzt geladenen Nachbarn stark an; das muss man beim Schmelzen überwinden." },
+      correct: { id: 'r', text: "Jedes Ion wird von mehreren entgegengesetzt geladenen Nachbarn stark angezogen; diese Anziehung muss man beim Schmelzen überwinden." },
       wrong: [
         { id: 'f1', text: "Beim Schmelzen müssen die Ionen erst wieder zu neutralen Atomen werden, und dieser Umbau kostet viel Energie.", misconception: 'chem-mis-io-dissolve-atoms' },
         { id: 'f2', text: "Ionen sind schwerer als Atome und brauchen deshalb mehr Wärme, um sich zu bewegen.", misconception: 'chem-mis-io-mass-decides' },
@@ -478,7 +478,7 @@ export const IONEN_BANK: QuestionBank = {
       part: 'zerfall',
       title: "Ein Salz löst sich",
       prompt: "Kaliumchlorid löst sich in Wasser. Was geschieht dabei mit dem Kristall?",
-      correct: { id: 'r', text: "Die Kalium- und Chlorid-Ionen lösen sich aus dem Gitter und werden von Wassermolekülen umhüllt." },
+      correct: { id: 'r', text: "Das Gitter löst sich auf; die Kalium- und Chlorid-Ionen verteilen sich einzeln, jeweils von Wassermolekülen umhüllt." },
       wrong: [
         { id: 'f1', text: "Er zerfällt in neutrale Kalium- und Chloratome, die sich gleichmäßig im ganzen Wasser verteilen.", misconception: 'chem-mis-io-dissolve-atoms' },
         { id: 'f2', text: String.raw`Er zerfällt in einzelne $\ce{KCl}$-Moleküle, die im Wasser schwimmen.`, misconception: 'chem-mis-io-molecule' },
@@ -583,9 +583,9 @@ export const IONEN_BANK: QuestionBank = {
       correct: { id: 'r', text: "die gelösten Kalium- und Chlorid-Ionen, die zu den Polen wandern" },
       wrong: [
         { id: 'f1', text: "freie Elektronen, die das Salz beim Lösen an das Wasser abgegeben hat", misconception: 'chem-mis-io-electrons-conduct' },
-        { id: 'f2', text: String.raw`gelöste $\ce{KCl}$-Moleküle, die sich im Strom ausrichten`, misconception: 'chem-mis-io-molecule' },
+        { id: 'f2', text: String.raw`gelöste $\ce{KCl}$-Moleküle, die sich im elektrischen Feld zwischen den Polen ausrichten`, misconception: 'chem-mis-io-molecule' },
         { id: 'f3', text: "Protonen, die die Kaliumatome beim Lösen an das Wasser abgegeben haben", misconception: 'chem-mis-io-proton-charge' },
-        { id: 'f4', text: "Kalium- und Chloratome, die sich frei im Wasser bewegen", misconception: 'chem-mis-io-dissolve-atoms' },
+        { id: 'f4', text: "Kalium- und Chloratome, die sich frei zwischen den Wassermolekülen bewegen", misconception: 'chem-mis-io-dissolve-atoms' },
       ],
       hint: "Strom ist bewegte Ladung. Welche geladenen Teilchen sind nach dem Lösen im Wasser unterwegs?",
       explanation: {
@@ -605,7 +605,7 @@ export const IONEN_BANK: QuestionBank = {
       part: 'formel',
       title: "Römische Ziffer",
       prompt: "Was gibt die römische Ziffer im Namen Kupfer(II)-oxid an?",
-      correct: { id: 'r', text: "die Ladung des Kupfer-Ions: Es ist zweifach positiv geladen" },
+      correct: { id: 'r', text: "die Ladung des Kupfer-Ions: zweifach positiv" },
       wrong: [
         { id: 'f1', text: "die Zahl der Kupfer-Ionen in der Formel: Es sind zwei", misconception: 'chem-mis-io-numeral-count' },
         { id: 'f2', text: "die Zahl der Oxid-Ionen in der Formel: Es sind zwei", misconception: 'chem-mis-io-numeral-count', why: {
@@ -860,7 +860,7 @@ export const IONEN_BANK: QuestionBank = {
       part: 'gitter',
       title: "Warum mehr Nachbarn?",
       prompt: "Im Caesiumchlorid hat jedes Kation acht nächste Nachbarn, im Natriumchlorid nur sechs. Woran liegt das vor allem?",
-      correct: { id: 'r', text: "Das Caesium-Ion ist viel größer als das Natrium-Ion; um es herum finden mehr Chlorid-Ionen Platz." },
+      correct: { id: 'r', text: "Das Caesium-Ion ist viel größer als das Natrium-Ion; um ein großes Kation finden mehr Chlorid-Ionen Platz." },
       wrong: [
         { id: 'f1', text: "Das Caesium-Ion ist kleiner, und je kleiner ein Kation ist, desto mehr Anionen passen um es herum.", misconception: 'chem-mis-io-cn-size' },
         { id: 'f2', text: "Das Caesium-Ion trägt eine höhere Ladung als das Natrium-Ion und zieht deshalb mehr Chlorid-Ionen an.", misconception: 'chem-mis-io-cn-from-formula', why: {
@@ -950,7 +950,7 @@ export const IONEN_BANK: QuestionBank = {
       part: 'zerfall',
       title: "Warm oder kalt?",
       prompt: "Ammoniumchlorid wird in Wasser gelöst. Was beobachtet man, und wie lässt es sich erklären?",
-      correct: { id: 'r', text: "Die Lösung kühlt ab: Das Gitter aufzubrechen kostet mehr Energie, als die Hydratation freisetzt." },
+      correct: { id: 'r', text: "Die Lösung kühlt ab: Das Gitter aufzubrechen kostet mehr Energie, als die Hydratation der Ionen freisetzt." },
       wrong: [
         { id: 'f1', text: "Die Lösung erwärmt sich, denn beim Lösen eines Salzes wird immer Wärme frei.", misconception: 'chem-mis-io-dissolve-always-same' },
         { id: 'f2', text: "Die Lösung kühlt ab, weil die Hydratation mehr Energie freisetzt, als das Aufbrechen des Gitters kostet.", misconception: 'chem-mis-io-balance-reversed' },
@@ -1022,7 +1022,7 @@ export const IONEN_BANK: QuestionBank = {
       part: 'energie',
       title: "Gitterenergie",
       prompt: "Was beschreibt die Gitterenergie eines Salzes?",
-      correct: { id: 'r', text: "die Energie, die frei wird, wenn sich getrennte gasförmige Ionen zu einem Kristall zusammenlagern" },
+      correct: { id: 'r', text: "die Energie, die abgegeben wird, wenn sich weit voneinander entfernte Ionen im Gaszustand zu einem Kristall zusammenlagern" },
       wrong: [
         { id: 'f1', text: "die Kraft, mit der sich zwei benachbarte Ionen im Gitter gegenseitig anziehen, gemessen in der Einheit Newton", misconception: 'chem-mis-io-lattice-is-force' },
         { id: 'f2', text: "die Energie, die abgegeben wird, wenn das Salz aus den Elementen entsteht", misconception: 'chem-mis-io-lattice-mixup' },
@@ -1049,7 +1049,7 @@ export const IONEN_BANK: QuestionBank = {
       part: 'energie',
       title: "Wozu Born-Haber?",
       prompt: "Warum bestimmt man die Gitterenergie mit dem Born-Haber-Kreisprozess?",
-      correct: { id: 'r', text: "Sie ist nicht direkt messbar; man berechnet sie aus messbaren Schritten, da die Energie nicht vom Weg abhängt." },
+      correct: { id: 'r', text: "Sie lässt sich nicht direkt messen; man berechnet sie aus messbaren Schritten, weil die Energie von den Elementen zum Salz nicht vom Weg abhängt." },
       wrong: [
         { id: 'f1', text: "Weil Salze in der Industrie genau über diese Schritte hergestellt werden.", misconception: 'chem-mis-io-bh-real-path' },
         { id: 'f2', text: "Weil der Umweg über die Ionen mehr Energie liefert als der direkte Weg.", misconception: 'chem-mis-io-bh-path-dependent' },
@@ -1200,10 +1200,10 @@ export const IONEN_BANK: QuestionBank = {
       prompt: String.raw`Calciumoxid schmilzt bei etwa $2\,600\,^{\circ}\mathrm{C}$, Kaliumchlorid bei etwa $770\,^{\circ}\mathrm{C}$. Welche Begründung passt?`,
       correct: { id: 'r', text: String.raw`$\ce{Ca^2+}$ und $\ce{O^2-}$ sind doppelt geladen und kleiner als $\ce{K+}$ und $\ce{Cl-}$; sie ziehen sich stärker an.` },
       wrong: [
-        { id: 'f1', text: "Im Calciumoxid sind die Ionen größer, und größere Ionen ziehen sich stärker an.", misconception: 'chem-mis-io-distance' },
+        { id: 'f1', text: "Im Calciumoxid sind die Ionen größer, und größere Ionen ziehen sich stärker an als kleine.", misconception: 'chem-mis-io-distance' },
         { id: 'f2', text: "Calciumoxid ist aus schwereren Teilchen aufgebaut, und schwerere Ionen halten fester zusammen.", misconception: 'chem-mis-io-mass-decides' },
         { id: 'f3', text: "Im Calciumoxid teilen sich die Atome Elektronenpaare, die fester halten als Ionenbindungen.", misconception: 'chem-mis-io-bond-mixup' },
-        { id: 'f4', text: "Alle vier Ionen sind einfach geladen; der Unterschied liegt nur an der Form der Gitter.", misconception: 'chem-mis-io-charge-always-one' },
+        { id: 'f4', text: "Alle vier Ionen sind einfach geladen; der Unterschied liegt nur an der Form der beiden Gitter.", misconception: 'chem-mis-io-charge-always-one' },
       ],
       hint: "Vergleiche die Ladungen der Ionen und ihre Größe; beides bestimmt die Coulomb-Kraft.",
       explanation: {
@@ -1222,7 +1222,7 @@ export const IONEN_BANK: QuestionBank = {
       part: 'gitter',
       title: "Schmelzpunkte vergleichen",
       prompt: "Welche Aussage über die Schmelzpunkte ionischer Salze trifft zu?",
-      correct: { id: 'r', text: "Kaliumchlorid schmilzt niedriger als Natriumchlorid: Das größere Kalium-Ion hat mehr Abstand zum Chlorid." },
+      correct: { id: 'r', text: "Kaliumchlorid schmilzt niedriger als Natriumchlorid, weil das Kalium-Ion größer ist und die Ionen deshalb weiter auseinanderliegen." },
       wrong: [
         { id: 'f1', text: "Natriumchlorid schmilzt niedriger als Kaliumchlorid, weil größere Ionen sich stärker anziehen.", misconception: 'chem-mis-io-distance' },
         { id: 'f2', text: "Caesiumiodid schmilzt am höchsten von allen Alkalimetallhalogeniden, weil seine beiden Ionen am schwersten sind.", misconception: 'chem-mis-io-mass-decides' },
@@ -1378,7 +1378,7 @@ export const IONEN_BANK: QuestionBank = {
       part: 'zerfall',
       title: "Woher kommt die Energie?",
       prompt: "Das Aufbrechen eines Ionengitters kostet viel Energie. Woher kommt die Energie, wenn sich ein Salz trotzdem in Wasser löst?",
-      correct: { id: 'r', text: "Beim Umhüllen der Ionen mit Wassermolekülen wird Energie frei; fehlt noch etwas, liefert die Umgebung Wärme." },
+      correct: { id: 'r', text: "Beim Anlagern der Wassermoleküle an die Ionen wird Energie frei; sie deckt den Aufwand ganz oder zum großen Teil, den Rest liefert die Umgebung als Wärme." },
       wrong: [
         { id: 'f1', text: "Beim Lösen wird die im Gitter gespeicherte Gitterenergie selbst frei, und genau diese Energie treibt das Lösen an.", misconception: 'chem-mis-io-lattice-sign' },
         { id: 'f2', text: "Die Ionen verlieren im Wasser ihre Ladung; ungeladene Atome halten nicht zusammen, deshalb kostet das Trennen nichts.", misconception: 'chem-mis-io-dissolve-atoms', why: {
@@ -1405,7 +1405,7 @@ export const IONEN_BANK: QuestionBank = {
       part: 'zerfall',
       title: "Kältekompresse",
       prompt: "In einer Sofort-Kältekompresse wird beim Knicken ein Salz in Wasser gelöst, und die Kompresse wird kalt. Welches Salz eignet sich, und warum?",
-      correct: { id: 'r', text: "Ammoniumchlorid, weil das Aufbrechen seines Gitters mehr Energie kostet, als die Hydratation freisetzt" },
+      correct: { id: 'r', text: "Ammoniumchlorid, weil das Aufbrechen seines Gitters mehr Energie kostet, als die Hydratation seiner Ionen freisetzt" },
       wrong: [
         { id: 'f1', text: "Natriumhydroxid, weil es beim Lösen viel Energie aus der Umgebung aufnimmt", misconception: 'chem-mis-io-exo-endo-mixup', why: {
           detailed: "Natriumhydroxid erwärmt das Wasser beim Lösen stark, sein Lösen ist exotherm. Ein Salz, das Energie aus der Umgebung aufnimmt, verhält sich umgekehrt.",
@@ -1463,8 +1463,8 @@ export const IONEN_BANK: QuestionBank = {
       wrong: [
         { id: 'f1', text: "positiv, weil man Energie zuführen muss, um die gasförmigen Ionen zu einem dichten Gitter zusammenzudrücken", misconception: 'chem-mis-io-lattice-sign' },
         { id: 'f2', text: "gleich Null, weil sich die positiven und negativen Ladungen im nach außen neutralen Salz gegenseitig aufheben", misconception: 'chem-mis-io-neutral-no-force' },
-        { id: 'f3', text: "positiv oder negativ, je nachdem, welchen Weg man im Kreisprozess geht", misconception: 'chem-mis-io-bh-path-dependent' },
-        { id: 'f4', text: "negativ, weil die Gitterenergie eine Kraft ist, die nach innen zeigt", misconception: 'chem-mis-io-lattice-is-force' },
+        { id: 'f3', text: "positiv oder negativ, je nachdem, welchen Weg man im Kreisprozess von den Elementen bis zum Salz geht", misconception: 'chem-mis-io-bh-path-dependent' },
+        { id: 'f4', text: "negativ, weil die Gitterenergie eine Kraft ist, die von allen Seiten nach innen auf die einzelnen Ionen zeigt", misconception: 'chem-mis-io-lattice-is-force' },
       ],
       hint: "Was geschieht mit der Energie, wenn sich zwei Teilchen, die sich anziehen, einander nähern?",
       explanation: {
@@ -1515,9 +1515,9 @@ export const IONEN_BANK: QuestionBank = {
       prompt: "Im Born-Haber-Kreisprozess ergibt die Summe aller Schritte über die gasförmigen Ionen genau die Bildungsenthalpie des Salzes. Warum muss das so sein?",
       correct: { id: 'r', text: "Die Energie hängt nur vom Anfangs- und Endzustand ab, nicht vom Weg dazwischen." },
       wrong: [
-        { id: 'f1', text: "Weil das Salz in Wirklichkeit genau über diese Schritte entsteht.", misconception: 'chem-mis-io-bh-real-path' },
+        { id: 'f1', text: "Weil das Salz in Wirklichkeit genau über diese Schritte entsteht, einer nach dem anderen.", misconception: 'chem-mis-io-bh-real-path' },
         { id: 'f2', text: "Das muss nicht so sein; der Umweg über die gasförmigen Ionen liefert meist mehr Energie.", misconception: 'chem-mis-io-bh-path-dependent' },
-        { id: 'f3', text: "Weil die Gitterenthalpie und die Bildungsenthalpie dasselbe sind.", misconception: 'chem-mis-io-lattice-mixup', why: {
+        { id: 'f3', text: "Weil die Gitterenthalpie und die Bildungsenthalpie dasselbe sind, nur anders benannt.", misconception: 'chem-mis-io-lattice-mixup', why: {
           detailed: "Die Gitterenthalpie ist nur einer der Schritte auf dem Umweg; die Bildungsenthalpie gehört zum direkten Weg von den Elementen zum Salz. Sie sind verschieden, und gerade deshalb lässt sich die eine aus der anderen berechnen.",
           short: "Gitterenthalpie und Bildungsenthalpie sind verschiedene Größen.",
         } },
@@ -1659,7 +1659,7 @@ export const IONEN_BANK: QuestionBank = {
       part: 'gitter',
       title: "Atomkristall",
       prompt: "In einem Atomkristall wie Diamant sind alle Gitterbausteine über Atombindungen miteinander verbunden. Welche Eigenschaften hat ein solcher Stoff?",
-      correct: { id: 'r', text: "einen hohen Schmelzpunkt und eine große Härte wegen der festen Bindungen" },
+      correct: { id: 'r', text: "einen hohen Schmelzpunkt und eine große Härte" },
       wrong: [
         { id: 'f1', text: "einen niedrigen Schmelzpunkt und eine geringe Härte", misconception: 'chem-mis-io-atom-crystal-weak' },
         { id: 'f2', text: "einen niedrigen Schmelzpunkt, aber eine große Härte", misconception: 'chem-mis-io-atom-crystal-weak', why: {
@@ -1694,9 +1694,9 @@ export const IONEN_BANK: QuestionBank = {
       prompt: String.raw`Natriumchlorid $\ce{NaCl}$ löst sich gut in Wasser. Wie verhält sich Magnesiumoxid $\ce{MgO}$?`,
       correct: { id: 'r', text: "Es löst sich kaum, weil seine zweifach geladenen Ionen viel fester zusammenhalten." },
       wrong: [
-        { id: 'f1', text: "Es löst sich ebenso gut, denn Salze sind in Wasser immer gut löslich.", misconception: 'chem-mis-io-all-soluble' },
+        { id: 'f1', text: "Es löst sich ebenso gut, denn Salze sind in Wasser immer gut löslich, egal welche Ionen sie enthalten.", misconception: 'chem-mis-io-all-soluble' },
         { id: 'f2', text: "Es löst sich noch besser, weil zweifach geladene Ionen das Wasser stärker anziehen.", misconception: 'chem-mis-io-charge-soluble' },
-        { id: 'f3', text: "Es zerfällt im Wasser in Magnesium- und Sauerstoffatome.", misconception: 'chem-mis-io-dissolve-atoms' },
+        { id: 'f3', text: "Es zerfällt im Wasser in neutrale Magnesium- und Sauerstoffatome, die sich verteilen.", misconception: 'chem-mis-io-dissolve-atoms' },
         { id: 'f4', text: String.raw`Es löst sich nicht, weil es aus einzelnen $\ce{MgO}$-Molekülen statt aus geladenen Ionen besteht.`, misconception: 'chem-mis-io-molecule' },
       ],
       hint: "Vergleiche die Ladungen der Ionen in beiden Salzen. Was bedeutet das für den Zusammenhalt im Gitter?",

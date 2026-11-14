@@ -250,9 +250,9 @@ export const TRENDS_BANK: QuestionBank = {
       prompt: 'Was beschreibt die Elektronegativität eines Elements?',
       correct: 'wie stark ein Atom in einer Bindung die gemeinsamen Elektronen anzieht',
       wrong: [
-        w('f1', 'die Energie, die frei wird, wenn ein Atom im Gaszustand ein Elektron aufnimmt', 'chem-mis-tr-en-ea-same'),
+        w('f1', 'die Energie, die frei wird, wenn ein Atom ein Elektron aufnimmt', 'chem-mis-tr-en-ea-same'),
         w('f2', 'die Energie, die man braucht, um ein Elektron zu entfernen', 'chem-mis-tr-en-ea-same', why('Das ist die Ionisierungsenergie, eine gemessene Energie eines einzelnen Atoms. Die Elektronegativität betrifft Atome in einer Bindung.', 'Das ist die Ionisierungsenergie.')),
-        w('f3', 'die Zahl der Valenzelektronen, die ein Atom in eine Bindung einbringen kann', 'chem-mis-tr-en-ea-same', why('Die Zahl der Valenzelektronen ist eine ganze Zahl und steht in der Hauptgruppe. Die Elektronegativität ist eine Vergleichszahl mit Nachkommastellen.', 'Das ist eine andere Zahl.')),
+        w('f3', 'die Zahl der Valenzelektronen', 'chem-mis-tr-en-ea-same', why('Die Zahl der Valenzelektronen ist eine ganze Zahl und steht in der Hauptgruppe. Die Elektronegativität ist eine Vergleichszahl mit Nachkommastellen.', 'Das ist eine andere Zahl.')),
         w('f4', 'die negative Ladung eines Ions', 'chem-mis-tr-en-ea-same', why('Die Ladung eines Ions zählt aufgenommene oder abgegebene Elektronen. Die Elektronegativität beschreibt ein Atom in einer Bindung, das gar nicht geladen sein muss.', 'Das ist die Ionenladung.')),
       ],
       hint: 'Denk an eine Bindung zwischen zwei verschiedenen Atomen, etwa H und Cl.',
@@ -324,7 +324,7 @@ export const TRENDS_BANK: QuestionBank = {
       part: 'atomradius',
       title: 'Größe vergleichen',
       prompt: r`Magnesium ($\ce{Mg}$) und Schwefel ($\ce{S}$) stehen beide in der 3. Periode. Welches der beiden Atome ist größer?`,
-      correct: 'Magnesium, weil seine Kernladung kleiner ist',
+      correct: 'Magnesium',
       wrong: [
         w('f1', 'Schwefel, weil es mehr Elektronen hat', 'chem-mis-tr-radius-electrons'),
         w('f2', 'Schwefel, weil sein Atom schwerer ist als das von Magnesium', 'chem-mis-tr-radius-mass'),
@@ -343,7 +343,7 @@ export const TRENDS_BANK: QuestionBank = {
       part: 'elektronegativitaet',
       title: 'Elektronegativität vergleichen',
       prompt: r`Welches Element hat die größere Elektronegativität: Fluor ($\ce{F}$) oder Iod ($\ce{I}$)?`,
-      correct: 'Fluor, weil es in der Gruppe weiter oben steht',
+      correct: 'Fluor',
       wrong: [
         w('f1', 'Iod, weil es mehr Elektronen hat', 'chem-mis-tr-en-reversed', why('Mehr Elektronen bedeuten hier mehr Schalen; die äußeren Elektronen sitzen weiter vom Kern entfernt. Überlege, was das für die Anziehung von Bindungselektronen bedeutet.', 'Mehr Schalen, weiter weg.')),
         w('f2', 'Iod, weil es schwerer ist und deshalb stärker anzieht', 'chem-mis-tr-radius-mass', why('Die Masse spielt für die Elektronegativität keine Rolle. Es zählt, wie nah und wie stark angezogen die Bindungselektronen sind.', 'Die Masse spielt keine Rolle.')),
@@ -381,7 +381,7 @@ export const TRENDS_BANK: QuestionBank = {
       part: 'affinitaet-metall',
       title: 'Elektronenaffinität',
       prompt: 'Was ist die Elektronenaffinität?',
-      correct: 'die Energie, die umgesetzt wird, wenn ein Atom im Gaszustand ein Elektron aufnimmt',
+      correct: 'die Energie, die umgesetzt wird, wenn ein einzelnes Atom im Gaszustand ein Elektron aufnimmt',
       wrong: [
         w('f1', 'wie stark ein Atom in einer Bindung die gemeinsamen Elektronen anzieht', 'chem-mis-tr-en-ea-same', why('Hier ist ein anderer, ähnlich klingender Begriff beschrieben. Gefragt ist ein Vorgang, bei dem sich die Zahl der Elektronen eines Atoms ändert.', 'Das ist ein anderer Begriff.')),
         w('f2', 'die Energie, die man braucht, um einem Atom im Gaszustand ein Elektron zu entreißen', 'chem-mis-tr-en-ea-same', why('Das ist die Ionisierungsenergie. Bei der Elektronenaffinität geht es um den umgekehrten Vorgang.', 'Das ist die Ionisierungsenergie.')),
@@ -516,7 +516,7 @@ export const TRENDS_BANK: QuestionBank = {
       part: 'atomradius',
       title: 'Abschirmung',
       prompt: 'Was versteht man unter Abschirmung?',
-      correct: 'Innere Elektronen schwächen die Anziehung des Kerns auf die äußeren Elektronen.',
+      correct: 'Die inneren Elektronen schwächen die Anziehung, die der Kern auf die äußeren Elektronen ausübt.',
       wrong: [
         w('f1', 'Die Neutronen schirmen die Protonen voneinander ab.', 'chem-mis-tr-shielding', why('Hier geht es um die Elektronenhülle, nicht um den Kern. Abschirmung beschreibt, wie viel Anziehung bei den äußeren Elektronen ankommt.', 'Es geht um die Hülle.')),
         w('f2', 'Die äußeren Elektronen schützen die inneren Elektronen vor den Elektronen anderer Atome.', 'chem-mis-tr-shielding', why('Die Richtung ist umgekehrt: Es geht darum, was zwischen Kern und äußeren Elektronen liegt.', 'Die Richtung ist umgekehrt.')),
@@ -535,7 +535,7 @@ export const TRENDS_BANK: QuestionBank = {
       part: 'affinitaet-metall',
       title: 'Elektronegativität und Elektronenaffinität',
       prompt: 'Worin unterscheiden sich Elektronegativität und Elektronenaffinität?',
-      correct: 'Elektronegativität ist eine Vergleichszahl für gebundene Atome, Elektronenaffinität eine Energie freier Atome.',
+      correct: 'Die Elektronegativität ist eine Vergleichszahl für Atome in einer Bindung, die Elektronenaffinität eine gemessene Energie eines einzelnen Atoms.',
       wrong: [
         w('f1', 'Gar nicht; beide Begriffe meinen dasselbe.', 'chem-mis-tr-en-ea-same', why('Die beiden Begriffe klingen ähnlich, haben aber verschiedene Einheiten und Definitionen. Prüfe, welcher eine gemessene Energie ist.', 'Sie haben verschiedene Einheiten.')),
         w('f2', 'Die Elektronegativität gibt man nur für die Metalle an, die Elektronenaffinität dagegen nur für die Nichtmetalle.', 'chem-mis-tr-en-ea-same', why('Beide Größen gibt es für Metalle und Nichtmetalle. Der Unterschied liegt darin, was sie beschreiben.', 'Beide gibt es für alle.')),
@@ -554,7 +554,7 @@ export const TRENDS_BANK: QuestionBank = {
       part: 'ionenradien',
       title: 'Kation und Atom',
       prompt: r`Wie verhält sich die Größe von $\ce{Na+}$ zu der des Natriumatoms?`,
-      correct: r`$\ce{Na+}$ ist kleiner, weil die äußerste Schale fehlt.`,
+      correct: r`$\ce{Na+}$ ist deutlich kleiner.`,
       wrong: [
         w('f1', r`$\ce{Na+}$ ist größer, weil es positiv geladen ist.`, 'chem-mis-tr-cation-larger', why('Die positive Ladung zieht die Hülle eher zusammen. Überlege, welche Elektronen beim Bilden des Ions verloren gehen.', 'Welche Elektronen gehen verloren?')),
         w('f2', r`Beide sind gleich groß, weil der Kern gleich bleibt.`, 'chem-mis-tr-constant', why('Der Kern bleibt gleich, aber die Hülle ändert sich. Die Größe bestimmt die Hülle.', 'Die Hülle ändert sich.')),
@@ -746,8 +746,8 @@ export const TRENDS_BANK: QuestionBank = {
       prompt: 'Du gehst in der 3. Periode von Natrium aus Feld für Feld nach rechts bis zum Chlor. Was geschieht mit dem Metallcharakter?',
       correct: 'Die Elemente werden immer weniger metallisch.',
       wrong: [
-        w('f1', 'Die Elemente werden immer metallischer.', 'chem-mis-tr-metal-right'),
-        w('f2', 'Alle Elemente sind gleich metallisch.', 'chem-mis-tr-constant'),
+        w('f1', 'Die Elemente werden immer metallischer, je weiter rechts sie stehen.', 'chem-mis-tr-metal-right'),
+        w('f2', 'Alle Elemente der Periode sind gleich metallisch, weil sie drei Schalen haben.', 'chem-mis-tr-constant'),
         w('f3', 'Die Elemente werden metallischer, weil die Atome schwerer werden.', 'chem-mis-tr-radius-mass', why('Die Masse spielt für den Metallcharakter keine Rolle. Es kommt darauf an, wie leicht ein Element Elektronen abgibt.', 'Die Masse spielt keine Rolle.')),
         w('f4', 'Sie werden erst weniger metallisch, beim Edelgas am Ende dann wieder metallischer.', 'chem-mis-tr-metal-right', why('Edelgase sind Nichtmetalle; am Ende der Periode steigt der Metallcharakter nicht wieder an.', 'Edelgase sind Nichtmetalle.')),
       ],
@@ -898,7 +898,7 @@ export const TRENDS_BANK: QuestionBank = {
       part: 'elektronegativitaet',
       title: 'Elektronegativität begründen',
       prompt: 'Warum nimmt die Elektronegativität innerhalb einer Periode nach rechts zu?',
-      correct: 'Die Kernladung wächst und zieht die Bindungselektronen stärker an.',
+      correct: 'Die Kernladung wächst, die Atome werden kleiner, und die Bindungselektronen werden stärker angezogen.',
       wrong: [
         w('f1', 'Weil die Atome nach rechts größer werden.', 'chem-mis-tr-radius-electrons'),
         w('f2', 'Weil die Atome nach rechts mehr Schalen haben, die Elektronen aufnehmen.', 'chem-mis-tr-radius-electrons', why('In einer Periode bleibt die Zahl der Schalen gleich.', 'Gleiche Zahl der Schalen.')),
@@ -917,7 +917,7 @@ export const TRENDS_BANK: QuestionBank = {
       part: 'ionenradien',
       title: 'Kation',
       prompt: r`Wie viele besetzte Schalen hat $\ce{Na+}$, und was folgt für seine Größe?`,
-      correct: 'zwei; es ist kleiner als das Natriumatom',
+      correct: 'zwei; also kleiner als das Atom',
       wrong: [
         w('f1', 'drei; es ist gleich groß wie das Atom', 'chem-mis-tr-cation-larger', why('Natrium hatte in der 3. Schale nur ein Elektron. Prüfe, was nach dessen Abgabe übrig bleibt.', 'Was bleibt von der 3. Schale?')),
         w('f2', 'drei; es ist größer als das Atom', 'chem-mis-tr-cation-larger', why('Natrium hatte in der 3. Schale nur ein Elektron. Prüfe, was nach dessen Abgabe von dieser Schale übrig ist.', 'Was bleibt von der 3. Schale?')),
@@ -955,7 +955,7 @@ export const TRENDS_BANK: QuestionBank = {
       part: 'affinitaet-metall',
       title: 'Elektronenaffinität',
       prompt: 'Welche Aussage über die Elektronenaffinität stimmt?',
-      correct: 'Viele Nichtmetalle setzen beim Aufnehmen eines Elektrons Energie frei, Halogene besonders viel.',
+      correct: 'Bei vielen Nichtmetallen wird beim Aufnehmen eines Elektrons Energie frei, bei den Halogenen besonders viel.',
       wrong: [
         w('f1', 'Um einem Atom ein Elektron hinzuzufügen, muss man immer Energie aufwenden, auch bei den Halogenen.', 'chem-mis-tr-ea-sign', why('Das gilt nicht allgemein; es gibt Atome, bei denen beim Aufnehmen Energie frei wird. Überlege, welche das sein könnten.', 'Das gilt nicht allgemein.')),
         w('f2', 'Die Elektronenaffinität ist dasselbe wie die Elektronegativität.', 'chem-mis-tr-en-ea-same'),

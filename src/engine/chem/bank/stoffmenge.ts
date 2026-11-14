@@ -943,7 +943,7 @@ export const STOFFMENGE_BANK: QuestionBank = {
           detailed: String.raw`Gezählt wird, was die Formel beschreibt, nicht jedes Ion für sich. Zähle, wie viele Ionen in einer Einheit $\ce{NaCl}$ stecken.`,
           short: "Nicht jedes Ion einzeln zählen.",
         } },
-        { id: 'f3', text: String.raw`$2\,\mathrm{mol}$ Formeleinheiten, weil jede aus zwei Ionen besteht`, misconception: 'chem-mis-st-atoms-molecules', why: {
+        { id: 'f3', text: String.raw`$2\,\mathrm{mol}$ Formeleinheiten, weil jede Formeleinheit aus zwei Ionen, $\ce{Na+}$ und $\ce{Cl-}$, besteht`, misconception: 'chem-mis-st-atoms-molecules', why: {
           detailed: "Die Zahl der Formeleinheiten ist die Stoffmenge selbst. Dass jede Formeleinheit zwei Ionen enthält, verdoppelt die Zahl der Ionen, nicht die Zahl der Formeleinheiten.",
           short: "Zwei Ionen je Formeleinheit verdoppeln die Ionen, nicht die Formeleinheiten.",
         } },
@@ -1061,7 +1061,7 @@ export const STOFFMENGE_BANK: QuestionBank = {
       prompt: String.raw`Was bedeutet die 2 in der Formel $\ce{Ca(OH)2}$?`,
       correct: { id: 'r', text: String.raw`Die Gruppe $\ce{OH}$ kommt zweimal vor: zwei Sauerstoff- und zwei Wasserstoffatome je Formeleinheit.` },
       wrong: [
-        { id: 'f1', text: "Nur das Wasserstoffatom kommt zweimal vor: ein Calcium-, ein Sauerstoff- und zwei Wasserstoffatome je Formeleinheit.", misconception: 'chem-mis-st-bracket', why: {
+        { id: 'f1', text: "Nur das Wasserstoffatom kommt zweimal vor, der Sauerstoff einmal.", misconception: 'chem-mis-st-bracket', why: {
           detailed: "Die 2 steht nicht direkt hinter dem H, sondern hinter der Klammer. Wofür steht eine Klammer in einer Formel?",
           short: "Die 2 steht hinter der Klammer.",
         } },
@@ -1095,7 +1095,7 @@ export const STOFFMENGE_BANK: QuestionBank = {
       correct: { id: 'r', text: "Zu jeder Formeleinheit Kupfer(II)-sulfat gehören fünf fest im Kristall eingebaute Wassermoleküle." },
       wrong: [
         { id: 'f1', text: "Die molare Masse des Salzes wird mit der von fünf Wassermolekülen malgenommen.", misconception: 'chem-mis-st-hydrate-factor' },
-        { id: 'f2', text: "Das Salz ist in Wasser gelöst; das Wasser umgibt nur die Ionen und gehört nicht zur Formeleinheit.", misconception: 'chem-mis-st-hydrate-forgotten', why: {
+        { id: 'f2', text: "Das Salz ist in Wasser gelöst; das Wasser gehört nicht zur Formeleinheit.", misconception: 'chem-mis-st-hydrate-forgotten', why: {
           detailed: "Ein gelöstes Salz kennzeichnet man mit (aq), nicht mit einem Malpunkt in der Formel.",
           short: "Gelöst schreibt man mit (aq).",
         } },
@@ -1307,12 +1307,12 @@ export const STOFFMENGE_BANK: QuestionBank = {
       correct: { id: 'r', text: String.raw`an der Einheit: $\mathrm{g} \cdot \mathrm{g/mol}$ ergibt $\mathrm{g^2/mol}$, nicht $\mathrm{mol}$` },
       wrong: [
         { id: 'f1', text: String.raw`am Ergebnis: Eine Stoffmenge kann nie größer als $1\,\mathrm{mol}$ sein`, misconception: 'chem-mis-st-magnitude' },
-        { id: 'f2', text: "gar nicht, denn die Rechnung ist richtig", misconception: 'chem-mis-st-n-times-m', why: {
+        { id: 'f2', text: "gar nicht, denn die Rechnung ist richtig und das Ergebnis passt", misconception: 'chem-mis-st-n-times-m', why: {
           detailed: String.raw`Für die Stoffmenge stellt man $m = n \cdot M$ nach $n$ um; dabei wird durch die molare Masse geteilt, nicht malgenommen. Die Rechnung im Beispiel nimmt mal und ist deshalb falsch.`,
           short: String.raw`Für die Stoffmenge wird durch die molare Masse geteilt.`,
         } },
-        { id: 'f3', text: String.raw`an der molaren Masse: Wasser hat $10\,\mathrm{g/mol}$`, misconception: 'chem-mis-st-atomic-number' },
-        { id: 'f4', text: String.raw`daran, dass es $n = \frac{18\,\mathrm{g/mol}}{36\,\mathrm{g}}$ heißen müsste`, misconception: 'chem-mis-st-n-inverted', why: {
+        { id: 'f3', text: String.raw`an der molaren Masse: Wasser hat $10\,\mathrm{g/mol}$, nicht $18\,\mathrm{g/mol}$`, misconception: 'chem-mis-st-atomic-number' },
+        { id: 'f4', text: String.raw`daran, dass man die molare Masse durch die Masse teilen müsste: $n = \frac{18\,\mathrm{g/mol}}{36\,\mathrm{g}}$`, misconception: 'chem-mis-st-n-inverted', why: {
           detailed: "Auch diese Umstellung ist falsch: Die Masse gehört in den Zähler. Eine schwerere Portion desselben Stoffes muss mehr Mol ergeben, nicht weniger.",
           short: "Die Masse gehört in den Zähler.",
         } },
@@ -1661,7 +1661,7 @@ export const STOFFMENGE_BANK: QuestionBank = {
           detailed: "Die Stoffmenge zählt Teilchen, nicht Raum. Beim Verdampfen rücken die Moleküle nur weiter auseinander; ihre Zahl ändert sich nicht.",
           short: "Mehr Raum heißt nicht mehr Teilchen.",
         } },
-        { id: 'f2', text: "Die molare Masse wird kleiner, weil Dampf leichter ist als Flüssigkeit.", misconception: 'chem-mis-st-molar-mass-portion', why: {
+        { id: 'f2', text: "Die molare Masse des Wassers wird kleiner, weil Dampf leichter ist als die Flüssigkeit.", misconception: 'chem-mis-st-molar-mass-portion', why: {
           detailed: "Dampf hat nur eine kleinere Dichte, weil sich dieselbe Masse auf ein größeres Volumen verteilt. Die molare Masse hängt allein vom Molekül ab, und das bleibt beim Verdampfen dasselbe.",
           short: "Kleinere Dichte ist nicht kleinere molare Masse.",
         } },
@@ -1669,7 +1669,7 @@ export const STOFFMENGE_BANK: QuestionBank = {
           detailed: "Beim Verdampfen bleiben die Moleküle ganz; es werden nur die Kräfte zwischen ihnen überwunden. In Wasserstoff und Sauerstoff zerlegt man Wasser nur durch eine chemische Reaktion.",
           short: "Beim Verdampfen bleiben die Moleküle ganz.",
         } },
-        { id: 'f4', text: String.raw`Erst als Gas enthält die Portion wirklich $6{,}022 \cdot 10^{23}$ Moleküle.`, misconception: 'chem-mis-st-mol-only-gas', why: {
+        { id: 'f4', text: String.raw`Erst als Gas enthält die Portion wirklich $6{,}022 \cdot 10^{23}$ Moleküle, denn das Mol gilt nur für Gase.`, misconception: 'chem-mis-st-mol-only-gas', why: {
           detailed: "Ein Mol enthält in jedem Aggregatzustand gleich viele Teilchen; das Mol ist nicht an Gase gebunden. Auch flüssiges Wasser wird in Mol gezählt.",
           short: "Das Mol gilt in jedem Zustand.",
         } },

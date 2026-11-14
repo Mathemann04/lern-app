@@ -243,7 +243,7 @@ const LEVEL_1: readonly Question[] = [
         detailed: String.raw`In $\ce{O2}$ sind die Atome schon zu Paaren verbunden. Prüfe, ob die große Zahl davor einzelne Atome zählen kann.`,
         short: 'Die Atome sind schon zu Paaren verbunden.',
       } },
-      { id: 'f3', text: 'Es reagieren drei Gramm Sauerstoff.', misconception: 'chem-mis-gl-ratio-mass', why: {
+      { id: 'f3', text: 'Es reagieren genau drei Gramm Sauerstoffgas.', misconception: 'chem-mis-gl-ratio-mass', why: {
         detailed: 'In einer Gleichung steht keine Einheit Gramm; Massen ergeben sich erst mit der molaren Masse.',
         short: 'Massen ergeben sich erst mit der molaren Masse.',
       } },
@@ -280,7 +280,7 @@ const LEVEL_1: readonly Question[] = [
         detailed: 'Wie viele Sauerstoffatome dabei sind, sagt die Zahl hinter dem O. Prüfe, zu welchem Symbol die kleine 2 gehört.',
         short: 'Die Zahl der O-Atome steht hinter dem O.',
       } },
-      { id: 'f3', text: 'Die ganze Formel kommt zweimal vor.', misconception: 'chem-mis-gl-count-index', why: {
+      { id: 'f3', text: 'Die ganze Formel kommt in der Gleichung zweimal vor.', misconception: 'chem-mis-gl-count-index', why: {
         detailed: 'Wie oft die ganze Formel vorkommt, stünde als große Zahl davor. Diese 2 steht aber klein unten an einem Symbol.',
         short: 'Für die ganze Formel stünde die Zahl groß davor.',
       } },
@@ -932,7 +932,7 @@ const LEVEL_2: readonly Question[] = [
     prompt: String.raw`Was sagen die Koeffizienten in $\ce{2 H2 + O2 -> 2 H2O}$ aus?`,
     correct: { id: 'r', text: String.raw`Auf zwei Moleküle $\ce{H2}$ kommt ein Molekül $\ce{O2}$; dasselbe Verhältnis gilt für die Stoffmengen.` },
     wrong: [
-      { id: 'f1', text: 'Zwei Gramm Wasserstoff reagieren mit einem Gramm Sauerstoff; die Koeffizienten geben Massen an.', misconception: 'chem-mis-gl-ratio-mass', why: {
+      { id: 'f1', text: 'Zwei Gramm Wasserstoff reagieren mit einem Gramm Sauerstoff.', misconception: 'chem-mis-gl-ratio-mass', why: {
         detailed: 'Wasserstoffmoleküle sind viel leichter als Sauerstoffmoleküle; aus der Gleichung allein liest man kein Verhältnis in Gramm ab.',
         short: 'Aus der Gleichung allein liest man keine Gramm ab.',
       } },
@@ -1493,7 +1493,7 @@ const LEVEL_3: readonly Question[] = [
         detailed: 'Magnesium verschwindet beim Verbrennen nicht, es wird zu einem Oxid. Überlege für jedes Gefäß, ob dabei Stoff hinein- oder hinausgelangen kann.',
         short: 'Magnesium verschwindet nicht.',
       } },
-      { id: 'f2', text: 'In beiden Fällen ist die Masse größer geworden, weil das Magnesium Sauerstoff gebunden hat.', misconception: 'chem-mis-gl-mass-changes', why: {
+      { id: 'f2', text: 'In beiden Fällen ist die Masse größer geworden, weil Sauerstoff gebunden wurde.', misconception: 'chem-mis-gl-mass-changes', why: {
         detailed: 'Im verschlossenen Kolben war der Sauerstoff schon vor der Reaktion im Gefäß und wurde mitgewogen. Durch die Wand kommt kein Atom hinzu.',
         short: 'Im geschlossenen Gefäß kommt kein Atom hinzu.',
       } },
@@ -1525,11 +1525,11 @@ const LEVEL_3: readonly Question[] = [
     prompt: String.raw`Kalk wird in einem offenen Tiegel stark erhitzt: $\ce{CaCO3 -> CaO + CO2}$. Danach ist der Inhalt des Tiegels leichter. Warum widerspricht das nicht der Erhaltung der Masse?`,
     correct: { id: 'r', text: String.raw`Das Gas $\ce{CO2}$ ist entwichen; zählt man es mit, ist die Masse gleich geblieben.` },
     wrong: [
-      { id: 'f1', text: 'Bei hoher Temperatur gilt die Erhaltung der Masse nicht.', misconception: 'chem-mis-gl-mass-changes', why: {
+      { id: 'f1', text: 'Bei hoher Temperatur gilt die Erhaltung der Masse nicht, nur bei Raumtemperatur.', misconception: 'chem-mis-gl-mass-changes', why: {
         detailed: 'Die Erhaltung der Masse gilt bei jeder Temperatur. Prüfe, ob alle Produkte im offenen Tiegel bleiben.',
         short: 'Die Erhaltung der Masse gilt immer.',
       } },
-      { id: 'f2', text: 'Ein Teil der Atome wird beim Erhitzen zerstört.', misconception: 'chem-mis-gl-atoms-transform' },
+      { id: 'f2', text: 'Ein Teil der Atome wird beim starken Erhitzen zerstört und verschwindet aus dem Tiegel.', misconception: 'chem-mis-gl-atoms-transform' },
       { id: 'f3', text: 'Die Gleichung ist nicht ausgeglichen: Links steht ein Stoff, rechts stehen zwei.', misconception: 'chem-mis-gl-molecules-conserved' },
       { id: 'f4', text: 'Calcium hat sich beim Erhitzen in ein anderes, leichteres Element umgewandelt.', misconception: 'chem-mis-gl-atoms-transform' },
     ],
@@ -1612,7 +1612,7 @@ const LEVEL_3: readonly Question[] = [
         detailed: String.raw`Ein geänderter Index ist mehr als eine Frage der Schreibweise. Überlege, ob $\ce{H2O2}$ noch derselbe Stoff ist wie $\ce{H2O}$.`,
         short: 'Ein geänderter Index ist keine bloße Schreibweise.',
       } },
-      { id: 'f2', text: 'Weil dann die Masse auf beiden Seiten der Gleichung nicht mehr gleich wäre.', misconception: 'chem-mis-gl-index-changed', why: {
+      { id: 'f2', text: 'Weil dann die Masse nicht mehr erhalten bliebe.', misconception: 'chem-mis-gl-index-changed', why: {
         detailed: String.raw`Die Atombilanz von $\ce{H2 + O2 -> H2O2}$ stimmt sogar, also auch die Masse. Das Problem liegt woanders.`,
         short: 'Die Atombilanz stimmt sogar; das Problem liegt woanders.',
       } },

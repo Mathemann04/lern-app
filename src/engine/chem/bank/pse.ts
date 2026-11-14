@@ -186,9 +186,9 @@ export const PSE_BANK: QuestionBank = {
       correct: 'die Nummer der äußersten besetzten Schale',
       wrong: [
         w('f1', 'die Zahl der Valenzelektronen, also der Elektronen ganz außen', 'chem-mis-pse-row-column', why('Die Zahl der Valenzelektronen liest man an der Spalte ab, nicht an der Zeile.', 'Valenzelektronen zeigt die Spalte.')),
-        w('f2', 'die Zahl aller Elektronen des Atoms', 'chem-mis-pse-z-meaning', why('Die Zahl aller Elektronen ist im ungeladenen Atom gleich der Ordnungszahl; sie wächst von Feld zu Feld, nicht von Zeile zu Zeile.', 'Das ist die Ordnungszahl.')),
+        w('f2', 'die Zahl aller Elektronen in der Hülle des Atoms', 'chem-mis-pse-z-meaning', why('Die Zahl aller Elektronen ist im ungeladenen Atom gleich der Ordnungszahl; sie wächst von Feld zu Feld, nicht von Zeile zu Zeile.', 'Das ist die Ordnungszahl.')),
         w('f3', 'die Ladung des Ions, das das Element bildet', 'chem-mis-pse-row-column', why('Die Ionenladung hängt davon ab, wie viele Elektronen abgegeben oder aufgenommen werden. Das hängt mit der Spalte zusammen, nicht mit der Zeile.', 'Die Ladung hängt an der Spalte.')),
-        w('f4', 'die Zahl der Neutronen im Kern', 'chem-mis-pse-z-meaning', why('Neutronen haben mit dem Platz im Periodensystem nichts zu tun; Isotope desselben Elements haben verschiedene Neutronenzahlen.', 'Neutronen bestimmen den Platz nicht.')),
+        w('f4', 'die Zahl der Neutronen, die im Atomkern sitzen', 'chem-mis-pse-z-meaning', why('Neutronen haben mit dem Platz im Periodensystem nichts zu tun; Isotope desselben Elements haben verschiedene Neutronenzahlen.', 'Neutronen bestimmen den Platz nicht.')),
       ],
       hint: 'Mit jeder neuen Zeile beginnt eine neue …',
       explanation: why('Mit jeder Periode beginnt eine neue Schale. Die Nummer der Periode ist die Nummer der äußersten besetzten Schale: Natrium in der 3. Periode hat sein Valenzelektron in der dritten Schale.', 'Die äußerste Schale.'),
@@ -297,7 +297,7 @@ export const PSE_BANK: QuestionBank = {
       part: 'ionen',
       title: 'Edelgase',
       prompt: 'Warum reagieren Edelgase kaum mit anderen Stoffen?',
-      correct: 'Die s- und p-Orbitale ihrer äußersten Schale sind voll besetzt (bei Helium die erste Schale).',
+      correct: 'Die s- und p-Orbitale ihrer äußersten Schale sind voll besetzt (bei Helium die erste Schale); das ist besonders stabil.',
       wrong: [
         w('f1', 'Sie haben keine Elektronen.', 'chem-mis-pse-noble-reactive', why('Edelgase haben Elektronen wie alle Atome, Argon zum Beispiel 18. Es kommt darauf an, wie die äußerste Schale besetzt ist.', 'Auch Edelgase haben Elektronen.')),
         w('f2', 'Ihre Atome sind zu schwer und zu träge, um sich schnell genug zu einem Reaktionspartner zu bewegen.', 'chem-mis-pse-mass-order', why('Helium ist das zweitleichteste Element und reagiert trotzdem nicht. Die Masse ist nicht der Grund.', 'Helium ist sehr leicht.')),
@@ -433,7 +433,7 @@ export const PSE_BANK: QuestionBank = {
       part: 'aufbau',
       title: 'Nebengruppen',
       prompt: 'Wo stehen die Nebengruppenelemente (Übergangsmetalle)?',
-      correct: 'ab der 4. Periode zwischen II. und III. Hauptgruppe',
+      correct: 'zwischen der II. und der III. Hauptgruppe, ab der 4. Periode',
       wrong: [
         w('f1', 'rechts neben den Edelgasen', 'chem-mis-pse-block', why('Rechts neben den Edelgasen endet eine Periode; die nächste beginnt mit der I. Hauptgruppe.', 'Nach den Edelgasen endet die Periode.')),
         w('f2', 'links von der I. Hauptgruppe, noch vor den Alkalimetallen', 'chem-mis-pse-block', why('Jede Periode beginnt mit der I. Hauptgruppe; links davon steht nichts.', 'Jede Periode beginnt mit der I. Hauptgruppe.')),
@@ -490,7 +490,7 @@ export const PSE_BANK: QuestionBank = {
       part: 'metalle',
       title: 'Metallcharakter',
       prompt: 'Stell dir vor, du gehst in einer Hauptgruppe Zeile für Zeile nach unten. Was geschieht mit dem Metallcharakter der Elemente?',
-      correct: 'Die Elemente werden nach unten hin immer metallischer.',
+      correct: 'Die Elemente werden immer metallischer.',
       wrong: [
         w('f1', 'Die Elemente werden immer weniger metallisch.', 'chem-mis-pse-metal-direction', why('In der IV. Hauptgruppe ist Kohlenstoff oben ein Nichtmetall, Blei unten ein Metall. Prüfe daran die Richtung.', 'Vergleiche Kohlenstoff und Blei.')),
         w('f2', 'Alle bleiben gleich metallisch, weil sie gleich viele Valenzelektronen haben.', 'chem-mis-pse-metal-direction'),
@@ -511,7 +511,7 @@ export const PSE_BANK: QuestionBank = {
       part: 'ionisierung',
       title: 'Ionisierungsenergie',
       prompt: 'Was ist die erste Ionisierungsenergie eines Elements?',
-      correct: 'die Energie, um einem freien Atom im Gaszustand ein äußeres Elektron zu entreißen',
+      correct: 'die Energie, um einem freien Atom im Gaszustand ein Elektron aus seinem äußersten besetzten Orbital ganz zu entreißen',
       wrong: [
         w('f1', 'die Energie, die frei wird, wenn ein freies Atom im Gaszustand ein Elektron abgibt', 'chem-mis-pse-ie-definition', why('Der Kern zieht seine Elektronen an. Überlege, ob man beim Entfernen gegen diese Anziehung arbeitet oder ob sie einem hilft.', 'Denk an die Anziehung durch den Kern.')),
         w('f2', 'die Energie, die frei wird, wenn ein freies Atom im Gaszustand ein Elektron aufnimmt', 'chem-mis-pse-ie-definition', why('Beim Aufnehmen eines Elektrons geht es um die Elektronenaffinität. Hier ist der umgekehrte Vorgang gemeint.', 'Das ist die Elektronenaffinität.')),
@@ -666,7 +666,7 @@ export const PSE_BANK: QuestionBank = {
       part: 'aufbau',
       title: 'Block von Eisen',
       prompt: r`Eisen hat die Konfiguration $[\mathrm{Ar}]\,4\mathrm{s}^{2}\,3\mathrm{d}^{6}$. Wo steht es im Periodensystem?`,
-      correct: 'im d-Block bei den Nebengruppen (Gruppe 8)',
+      correct: 'im d-Block, Nebengruppe (Gruppe 8)',
       wrong: [
         w('f1', 'im s-Block, II. Hauptgruppe (Gruppe 2)', 'chem-mis-pse-block'),
         w('f2', 'in der VIII. Hauptgruppe (Gruppe 18) bei den Edelgasen', 'chem-mis-pse-fe-main'),
@@ -709,7 +709,7 @@ export const PSE_BANK: QuestionBank = {
         w('f1', 'Beide stehen in derselben Periode und haben deshalb ähnliche Eigenschaften.', 'chem-mis-pse-period-similar', why('Fluor steht in der 2., Chlor in der 3. Periode. Ähnlich sind sich Elemente einer Spalte.', 'Verschiedene Perioden.')),
         w('f2', 'Beide haben fast dieselbe Masse.', 'chem-mis-pse-mass-order', why('Chlor ist fast doppelt so schwer wie Fluor. Die Masse erklärt die Ähnlichkeit nicht.', 'Ihre Massen sind verschieden.')),
         w('f3', 'Beide geben leicht sieben Elektronen ab und werden so zu positiven Ionen.', 'chem-mis-pse-charge-count', why('Sieben Elektronen abzugeben wäre sehr aufwendig. Halogene erreichen das Oktett auf einem viel kürzeren Weg.', 'Sieben abzugeben ist zu aufwendig.')),
-        w('f4', 'Beide haben gleich viele Schalen.', 'chem-mis-pse-row-column', why('Chlor hat eine Schale mehr als Fluor. Gleich viele Schalen hätten Elemente derselben Periode.', 'Chlor hat eine Schale mehr.')),
+        w('f4', 'Beide haben gleich viele Schalen und deshalb ähnliche Eigenschaften.', 'chem-mis-pse-row-column', why('Chlor hat eine Schale mehr als Fluor. Gleich viele Schalen hätten Elemente derselben Periode.', 'Chlor hat eine Schale mehr.')),
       ],
       hint: 'Fluor und Chlor stehen in derselben Spalte.',
       explanation: why('Fluor und Chlor stehen in der VII. Hauptgruppe. Beide haben sieben Valenzelektronen; mit einem zusätzlichen erreichen sie das Oktett. Deshalb reagieren sie ähnlich.', 'Sieben Valenzelektronen.'),
@@ -916,7 +916,7 @@ export const PSE_BANK: QuestionBank = {
       part: 'aufbau',
       title: 'Unbekanntes Element',
       prompt: 'Ein Element hat die Ordnungszahl 37. Welche Aussage stimmt?',
-      correct: 'Es steht in der I. Hauptgruppe der 5. Periode und bildet einfach positive Ionen.',
+      correct: 'Es steht in der I. Hauptgruppe (Gruppe 1) der 5. Periode und bildet leicht einfach positive Ionen.',
       wrong: [
         w('f1', 'Es ist ein Edelgas der 5. Periode.', 'chem-mis-pse-noble-reactive', why('Das Edelgas der 4. Periode, Krypton, hat die Ordnungszahl 36. Das nächste Element beginnt eine neue Periode.', 'Krypton hat 36.')),
         w('f2', 'Es steht in der VII. Hauptgruppe (Gruppe 17) der 5. Periode und bildet einfach negative Ionen.', 'chem-mis-pse-row-column', why('Die Halogene stehen direkt vor den Edelgasen. Das Element mit 37 kommt direkt danach.', 'Es kommt nach dem Edelgas.')),
@@ -935,7 +935,7 @@ export const PSE_BANK: QuestionBank = {
       part: 'aufbau',
       title: 'Helium',
       prompt: r`Helium ($1\mathrm{s}^{2}$) gehört eigentlich zum s-Block. Warum steht es trotzdem in Gruppe 18?`,
-      correct: 'Seine einzige Schale ist voll besetzt; es verhält sich wie die Edelgase.',
+      correct: 'Seine einzige Schale ist voll.',
       wrong: [
         w('f1', 'Weil es acht Außenelektronen hat.', 'chem-mis-pse-octet-all', why('Ein Heliumatom hat insgesamt nur zwei Elektronen. Der Grund für seinen Platz muss also ein anderer sein.', 'Helium hat nur zwei Elektronen.')),
         w('f2', 'Weil es so leicht ist.', 'chem-mis-pse-mass-order', why('Die Masse bestimmt den Platz nicht. Es kommt auf das chemische Verhalten an.', 'Die Masse zählt nicht.')),
@@ -954,7 +954,7 @@ export const PSE_BANK: QuestionBank = {
       part: 'aufbau',
       title: 'Länge der Perioden',
       prompt: 'Die 2. und 3. Periode haben je 8 Elemente, die 4. Periode hat 18. Warum?',
-      correct: 'In der 4. Periode kommt die 3d-Unterschale mit zehn Elektronen hinzu.',
+      correct: 'In der 4. Periode wird zusätzlich die 3d-Unterschale mit zehn Elektronen aufgefüllt.',
       wrong: [
         w('f1', 'Weil die 4. Schale 18 Elektronen fasst.', 'chem-mis-pse-row-column', why('Die 4. Schale fasst sogar 32. Die Länge einer Periode hängt davon ab, welche Unterschalen in ihr aufgefüllt werden.', 'Die 4. Schale fasst 32.')),
         w('f2', 'Weil in der 4. Periode zusätzlich die f-Unterschale mit ihren Elektronen aufgefüllt wird.', 'chem-mis-pse-block', why('Die 4f-Unterschale wird erst in der 6. Periode aufgefüllt.', '4f kommt erst später.')),
@@ -1011,7 +1011,7 @@ export const PSE_BANK: QuestionBank = {
       part: 'metalle',
       title: 'V. Hauptgruppe',
       prompt: 'Stickstoff und Phosphor sind Nichtmetalle. Was ist Bismut, das in derselben Hauptgruppe ganz unten steht?',
-      correct: 'ein Metall wie sein Nachbar Blei',
+      correct: 'ein Metall',
       wrong: [
         w('f1', 'ein Nichtmetall wie Stickstoff', 'chem-mis-pse-metal-direction'),
         w('f2', 'ein Edelgas', 'chem-mis-pse-noble-reactive', why('Edelgase stehen in der VIII. Hauptgruppe; Bismut hat fünf Valenzelektronen.', 'Bismut hat fünf Valenzelektronen.')),

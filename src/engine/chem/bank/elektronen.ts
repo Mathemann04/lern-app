@@ -144,7 +144,7 @@ export const ELEKTRONEN_BANK: QuestionBank = {
       part: 'quantenzahlen',
       title: 'Hauptquantenzahl',
       prompt: 'Was gibt die Hauptquantenzahl $n$ eines Elektrons an?',
-      correct: 'die Schale, also Energie und Größe seines Aufenthaltsraums',
+      correct: 'die Schale des Elektrons',
       wrong: [
         w('f1', 'die Form seines Orbitals, zum Beispiel kugelförmig oder hantelförmig', 'chem-mis-el-qn-meaning', why('Die Form eines Orbitals ändert sich mit den Buchstaben s, p, d, f. Gefragt ist die Quantenzahl mit den Werten 1, 2, 3 …', 'Die Form hängt an den Buchstaben.')),
         w('f2', 'die Ausrichtung seines Orbitals im Raum, etwa entlang einer Achse', 'chem-mis-el-qn-meaning', why('Die Richtung im Raum unterscheidet Orbitale derselben Unterschale. Gefragt ist die Quantenzahl mit den Werten 1, 2, 3 …', 'Die Richtung unterscheidet Orbitale einer Unterschale.')),
@@ -277,7 +277,7 @@ export const ELEKTRONEN_BANK: QuestionBank = {
       part: 'besetzung',
       title: 'Pauli-Prinzip',
       prompt: 'Was besagt das Pauli-Prinzip?',
-      correct: 'Zwei Elektronen eines Atoms stimmen nie in allen vier Quantenzahlen überein.',
+      correct: 'Zwei Elektronen eines Atoms stimmen nie in allen vier Quantenzahlen überein; ein Orbital fasst höchstens zwei.',
       wrong: [
         w('f1', 'Gleichwertige Orbitale werden zuerst einzeln besetzt.', 'chem-mis-el-pauli-hund'),
         w('f2', 'Ein Orbital fasst beliebig viele Elektronen, solange sie denselben Spin haben.', 'chem-mis-el-pauli-same'),
@@ -296,7 +296,7 @@ export const ELEKTRONEN_BANK: QuestionBank = {
       part: 'besetzung',
       title: 'Hund’sche Regel',
       prompt: 'Was besagt die Hund’sche Regel?',
-      correct: 'Energiegleiche Orbitale werden erst einzeln mit gleichem Spin besetzt, dann gepaart.',
+      correct: 'Energiegleiche (entartete) Orbitale werden zuerst einzeln mit gleichem Spin besetzt, erst dann gepaart.',
       wrong: [
         w('f1', 'Elektronen bilden in einer Unterschale zuerst Paare.', 'chem-mis-el-hund-pair'),
         w('f2', 'Ein Orbital fasst höchstens zwei Elektronen, und die haben dann entgegengesetzten Spin.', 'chem-mis-el-pauli-hund', why('Das ist eine richtige Aussage, aber sie ist das Pauli-Prinzip. Die Hund’sche Regel sagt etwas über die Verteilung auf mehrere gleichwertige Orbitale.', 'Das ist das Pauli-Prinzip.')),
@@ -430,7 +430,7 @@ export const ELEKTRONEN_BANK: QuestionBank = {
       part: 'quantenzahlen',
       title: 'Energie der Orbitale',
       prompt: 'Wie unterscheiden sich die drei 2p-Orbitale eines Atoms in ihrer Energie?',
-      correct: 'gar nicht; alle drei sind energiegleich (entartet)',
+      correct: 'gar nicht, sie sind energiegleich',
       wrong: [
         w('f1', 'Jedes hat eine andere Energie; das erste ist das energieärmste.', 'chem-mis-el-orbital-energy', why('Die Reihenfolge der drei p-Orbitale ist willkürlich; sie haben dieselbe Form und unterscheiden sich nur in ihrer Richtung im Raum.', 'Die Reihenfolge ist willkürlich.')),
         w('f2', 'Sie haben die Energie der 2s-Orbitale.', 'chem-mis-el-orbital-energy', why('2s und 2p sind verschiedene Unterschalen. Gleich sind nur die Energien der Orbitale innerhalb einer Unterschale.', 'Gleich ist es nur innerhalb einer Unterschale.')),
@@ -665,7 +665,7 @@ export const ELEKTRONEN_BANK: QuestionBank = {
       wrong: [
         w('f1', 'die von Argon', 'chem-mis-el-noble-ion'),
         w('f2', 'die von Helium', 'chem-mis-el-noble-ion', why('Magnesium gibt nur seine zwei 3s-Elektronen ab. Die zweite Schale mit acht Elektronen bleibt; Helium hätte nur die erste.', 'Die zweite Schale bleibt.')),
-        w('f3', 'keine; das haben Ionen nie', 'chem-mis-el-noble-ion', why('Viele Ionen der Hauptgruppen erreichen gerade dadurch eine Edelgaskonfiguration; deshalb bilden sie sich so leicht.', 'Viele Hauptgruppen-Ionen erreichen sie.')),
+        w('f3', 'keine, Ionen haben nie eine Edelgaskonfiguration', 'chem-mis-el-noble-ion', why('Viele Ionen der Hauptgruppen erreichen gerade dadurch eine Edelgaskonfiguration; deshalb bilden sie sich so leicht.', 'Viele Hauptgruppen-Ionen erreichen sie.')),
         w('f4', 'die von Natrium', 'chem-mis-el-noble-ion', why('Natrium ist kein Edelgas, sondern ein Alkalimetall mit einem Valenzelektron.', 'Natrium ist kein Edelgas.')),
       ],
       hint: r`Magnesium hat 12 Elektronen. Wie viele hat $\ce{Mg^2+}$?`,
@@ -814,7 +814,7 @@ export const ELEKTRONEN_BANK: QuestionBank = {
       part: 'quantenzahlen',
       title: 'Spin und Magnetismus',
       prompt: 'Woher kommt der Magnetismus von Eisen, Cobalt und Nickel?',
-      correct: 'Durch ihren Spin sind Elektronen winzige Magnete; ungepaarte Spins vieler Atome richten sich gemeinsam aus.',
+      correct: 'Jedes Elektron ist durch seinen Spin ein winziger Magnet; die ungepaarten Spins vieler Atome richten sich gemeinsam aus.',
       wrong: [
         w('f1', 'Die beiden Elektronen eines Orbitals verstärken sich magnetisch, gerade weil ihre Spins entgegengesetzt sind.', 'chem-mis-el-spin-pair-magnet'),
         w('f2', 'Der Magnetismus entsteht allein im Atomkern von Eisen, Cobalt und Nickel; die Elektronen tragen gar nichts dazu bei.', 'chem-mis-el-magnet-nucleus'),
@@ -892,7 +892,7 @@ export const ELEKTRONEN_BANK: QuestionBank = {
       part: 'ionen',
       title: 'Ionen der Übergangsmetalle',
       prompt: r`Eisen füllt 4s vor 3d, gibt bei der Bildung von $\ce{Fe^2+}$ aber zuerst die 4s-Elektronen ab. Wie passt das zusammen?`,
-      correct: r`Abgegeben werden die äußersten Elektronen; 4s liegt mit größerem $n$ weiter außen.`,
+      correct: r`Abgegeben werden die äußersten Elektronen; 4s hat das größere $n$ und liegt weiter außen als 3d.`,
       wrong: [
         w('f1', 'Gar nicht: Eisen gibt zuerst die 3d-Elektronen ab, weil sie zuletzt eingebaut wurden.', 'chem-mis-el-ion-3d', why(r`Die Konfiguration von $\ce{Fe^2+}$ zeigt etwas anderes: Dort ist 3d unverändert. Gefragt ist, warum das kein Widerspruch ist.`, '3d bleibt beim Ion unverändert.')),
         w('f2', 'Elektronen werden immer in derselben Reihenfolge abgegeben, in der sie eingebaut wurden.', 'chem-mis-el-ion-3d', why(r`Wäre das so, müsste Eisen zuerst 3d-Elektronen abgeben. Die Konfiguration von $\ce{Fe^2+}$ zeigt aber, dass 3d vollständig bleibt.`, '3d bleibt vollständig.')),
@@ -951,7 +951,7 @@ export const ELEKTRONEN_BANK: QuestionBank = {
       part: 'besetzung',
       title: 'Besetzung beurteilen',
       prompt: 'Das Kästchenbild unten zeigt Chrom im Grundzustand. Wie ist es zu beurteilen?',
-      correct: 'Richtig: Chrom ist eine Ausnahme mit halb voller 3d-Unterschale.',
+      correct: 'Richtig, Chrom ist eine Ausnahme.',
       wrong: [
         w('f1', '4s müsste mit zwei Elektronen ganz voll sein, bevor 3d besetzt wird.', 'chem-mis-el-exception', why('Das gilt nach der einfachen Reihenfolge. Chrom gehört aber zu den Ausnahmen.', 'Chrom ist eine Ausnahme.')),
         w('f2', 'Die 3d-Elektronen müssten Paare bilden.', 'chem-mis-el-hund-pair'),
