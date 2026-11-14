@@ -41,3 +41,6 @@ export function lengthStat(choiceSets: readonly (readonly { readonly content: st
 
 // erlaubt: höchstens der Wert bei Zufall plus 10 Prozentpunkte
 export const GUESS_MARGIN = 0.1
+// und mindestens der Wert bei Zufall minus 15 Prozentpunkte: Ist die richtige fast nie die längste und fast nie die
+// kürzeste, streicht man beide und rät aus der Mitte (auch das ist eine Ratefalle)
+export const GUESS_LOWER = 0.15

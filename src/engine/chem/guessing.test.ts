@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { GUESS_MARGIN, lengthStat, visibleLength } from '../quiz/answerLength.ts'
+import { GUESS_LOWER, GUESS_MARGIN, lengthStat, visibleLength } from '../quiz/answerLength.ts'
 import { GENERATED_MIN, VARIANTS, questionSeed } from '../quiz/numbers.ts'
 import { planQuestion } from '../quiz/plan.ts'
 import { CHEM_TOPICS } from './banks.ts'
@@ -8,7 +8,7 @@ import { generatedCalc, generatorsOf } from './generators/index.ts'
 // Ratefallen (S12): Je Thema und Stufe darf die richtige Antwort nicht viel öfter die längste (oder die kürzeste) sein
 // als bei Zufall, sonst kommt man durch Raten weit. Gemessen an allen Fassungen der Fragen mit einer richtigen Antwort und
 // an 300 erzeugten Rechnungen je Stufe (jeder Schritt mit Antworten zum Auswählen); Auswahlen, deren längste Antwort
-// kürzer als 30 Zeichen ist, zählen nicht. Erlaubt: Wert bei Zufall plus 10 Prozentpunkte. Gilt für alle neuen Fragen mit.
+// kürzer als 30 Zeichen ist, zählen nicht. Erlaubt: Wert bei Zufall minus 15 bis plus 10 Prozentpunkte. Gilt für alle neuen Fragen mit.
 
 type Choices = readonly { readonly content: string; readonly correct: boolean }[]
 // Gruppen mit weniger Auswahlen sagen nichts (wenige lange Antworten wiegen sonst zu schwer)
@@ -54,5 +54,11 @@ describe('Ratefallen: Länge der richtigen Antwort', () => {
     const limit = stat.chance + GUESS_MARGIN
     expect(stat.longest, `längste: ${percent(stat.longest)} bei ${stat.count} Auswahlen, erlaubt ${percent(limit)}`).toBeLessThanOrEqual(limit)
     expect(stat.shortest, `kürzeste: ${percent(stat.shortest)} bei ${stat.count} Auswahlen, erlaubt ${percent(limit)}`).toBeLessThanOrEqual(limit)
+    // auch nicht fast nie: sonst streicht man längste und kürzeste und rät aus der Mitte (nur bei Fragen; die Texte der
+    // Rechnungen kommen aus wenigen festen Bausteinen, dort zählt nur die Obergrenze)
+    if (kind === 'Rechnungen') return
+    const lower = stat.chance - GUESS_LOWER
+    expect(stat.longest, `längste: ${percent(stat.longest)} bei ${stat.count} Auswahlen, mindestens ${percent(lower)}`).toBeGreaterThanOrEqual(lower)
+    expect(stat.shortest, `kürzeste: ${percent(stat.shortest)} bei ${stat.count} Auswahlen, mindestens ${percent(lower)}`).toBeGreaterThanOrEqual(lower)
   })
 })
