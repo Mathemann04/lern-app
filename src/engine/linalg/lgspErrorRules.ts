@@ -50,6 +50,15 @@ export const LGSP_ERROR_RULES: readonly VectorErrorRule[] = [
     },
   },
   {
+    id: 'lgsp-special-swapped',
+    name: 'Sonderwerte und übrige Werte verwechselt',
+    wrongFormula: String.raw`(a - 2)\,z = 3 \;\Rightarrow\; \text{keine Lösung für } a \ne 2`,
+    why: {
+      detailed: String.raw`Für alle $a$ außer den Sonderwerten hat jede Unbekannte eine Stufe: Dort gibt es genau eine Lösung. Keine oder unendlich viele Lösungen kann es nur **bei** den Sonderwerten geben, wo die letzte Stufe wegfällt.`,
+      short: String.raw`Keine oder unendlich viele Lösungen nur bei den Sonderwerten.`,
+    },
+  },
+  {
     id: 'lgsp-rank-augmented',
     name: 'Widerspruchszeile auch beim Rang von A gezählt',
     wrongFormula: String.raw`0 \;\; 0 \;\; 0 \mid 5 \;\Rightarrow\; \operatorname{rg}(A) = 3`,

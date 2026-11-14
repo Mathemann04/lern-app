@@ -299,7 +299,7 @@ function specialStep(rng: Rng, specials: readonly Special[], ask: Case2, questio
   const fromRhs = rhsRoots.filter((u) => !specials.some((x) => ratEq(x.r, u)))
   if (fromRhs.length > 0) add([fromRhs[0]], 'lgsp-cond-rhs')
   // „genau eine Lösung“ mit dem Sonderfall verwechselt: alle a außer den Sonderwerten
-  wrongs.push({ content: neLatex(specials.map((x) => x.r)), rule: 'lgsp-cond-flip' })
+  wrongs.push({ content: neLatex(specials.map((x) => x.r)), rule: 'lgsp-special-swapped' })
   const ordered = rng.shuffle(wrongs).sort((p, q) => Number(q.rule.startsWith('gauss')) - Number(p.rule.startsWith('gauss')))
   ordered.splice(Math.min(ordered.length, rng.int(1, 2)), 0, { content: `für kein $a$`, rule: 'lgsp-special-missed' })
   return choiceStep(rng, {

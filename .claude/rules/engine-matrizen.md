@@ -134,7 +134,7 @@ freier Modus `vectorFree.ts`, `buildVectorTask` wählt die Arten nach dem Bauste
   der Punkt aus der gekürzten allgemeinen Formel). Aus `gaussTasks.ts` exportiert: `tabLatex`, `runGauss`, `analyze`,
   `equivalent`, `rankOf`, `opLabel`, `elimCands` (aus `elimStep` herausgelöst, gleiche Zufallsfolge), `backSolve` u. a.;
   aus `cramerTasks.ts`: `detStep`, `roots`, `solLatex`, `sortRats`. Ergebnis `a = …` (ein oder zwei Werte), `a = …,\; b =
-  …` oder die Lösungsmenge `L\colon \vec x = …` (Bild `systemDrawing` beim Sonderwert). 19 Fehler `lgsp-…` in
+  …` oder die Lösungsmenge `L\colon \vec x = …` (Bild `systemDrawing` beim Sonderwert). 20 Fehler `lgsp-…` in
   `linalg/lgspErrorRules.ts`, drei Karten in `explain/lgspCards.ts`. Tests in `linalg/lgspTasks.test.ts` (Fall für jedes
   ganze a von −30 bis 30 mit eigenem Rang in Kommazahlen, jede Tabelle gleichwertig zur Aufgabe an mehreren Stellen,
   Ränge gegen die Aufgabe beim Sonderwert).

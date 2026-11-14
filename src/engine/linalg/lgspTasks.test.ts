@@ -259,6 +259,57 @@ describe('Gleichungssysteme mit Parameter', () => {
     expect(checked).toBeGreaterThan(100)
   })
 
+  it('falsche Antworten bei Sonderwerten, b, vorgegebenem Wert und Lösungsmenge sind nie richtig; Zahlen der Erklärungen stimmen', () => {
+    const counts: Record<string, number> = {}
+    const setOf = (content: string) => [...content.matchAll(/a(?:_[12])? = (-?\d+)/g)].map((m) => Number(m[1])).sort((p, q) => p - q)
+    const ints = Array.from({ length: 61 }, (_, i) => i - 30)
+    for (const level of LEVELS) {
+      for (const task of tasks(level, 100)) {
+        const { n, at } = system(task)
+        const sonder = task.steps.find((s) => s.id === 'sonderfall')
+        if (sonder) {
+          const ask = task.kind === 'lgspFull' ? 'none' : KASES[task.data.ask[0]]
+          const good = ints.filter((a) => kaseOf(at(a)) === ask)
+          expect(setOf(sonder.choices.find((c) => c.correct)!.content), task.form).toEqual(good)
+          for (const c of sonder.choices.filter((x) => !x.correct && !x.content.includes('\\ne') && !x.content.includes('kein'))) expect(setOf(c.content), `${task.form} ${c.errorRuleId}`).not.toEqual(good)
+          // je Sonderwert: rechts 0 genau bei unendlich vielen Lösungen
+          const shown = [...sonder.explanation.detailed.matchAll(/Für \$a = (-?\d+)\$[^$]*\$0(?: \\cdot [a-z_0-9]+)? = (-?\d+)\$/g)]
+          expect(shown.length, task.form).toBeGreaterThan(0)
+          for (const m of shown) expect(Number(m[2]) === 0, task.form).toBe(kaseOf(at(Number(m[1]))) === 'inf')
+          counts.sonderfall = (counts.sonderfall ?? 0) + 1
+        }
+        const vorgabe = task.steps.find((s) => s.id === 'vorgabe')
+        if (vorgabe) {
+          for (const c of vorgabe.choices.filter((x) => !x.correct)) expect(setOf(c.content), `${task.form} ${c.errorRuleId}`).not.toEqual([...task.answer])
+          // die zusammengefasste Gleichung hat die Lösungen als Nullstellen
+          const E = /Zusammengefasst: \$(.*?) = 0\$/.exec(vorgabe.explanation.detailed)![1]
+          for (const a of task.answer) expect(close(valueOf(E, { a }), 0), task.form).toBe(true)
+          counts.vorgabe = (counts.vorgabe ?? 0) + 1
+        }
+        const bStep = task.steps.find((s) => s.id === 'b-wert')
+        if (bStep) {
+          const [a] = task.answer
+          for (const c of bStep.choices.filter((x) => !x.correct && x.content.includes('b ='))) expect(kaseOf(at(a, Number(/b = (-?\d+)/.exec(c.content)![1]))), `${task.form} ${c.errorRuleId}`).not.toBe('inf')
+          counts.b = (counts.b ?? 0) + 1
+        }
+        const loesung = task.steps.find((s) => s.id === 'loesung')
+        if (loesung) {
+          const T = at(task.data.inf[0])
+          for (const c of loesung.choices.filter((x) => !x.correct)) {
+            const part = readResult(c.content)?.[0]
+            if (!part || part.shape !== 'param') continue
+            const p = part.values.slice(0, n)
+            const d = part.values.slice(n)
+            const solves = T.every((row) => close(row.slice(0, n).reduce((s, x, j) => s + x * p[j], 0), row[n]) && close(row.slice(0, n).reduce((s, x, j) => s + x * d[j], 0), 0))
+            expect(solves && d.some((x) => x !== 0), `${task.form} ${c.errorRuleId}`).toBe(false)
+          }
+          counts.loesung = (counts.loesung ?? 0) + 1
+        }
+      }
+    }
+    for (const id of ['sonderfall', 'vorgabe', 'b', 'loesung']) expect(counts[id] ?? 0, id).toBeGreaterThan(20)
+  })
+
   it.each(cells)('Stufe %i: Abwechslung (100 Formen unter 200, keine über 3 %)', (level) => {
     const stats = varietyStats(tasks(level, 200).map((t) => t.form))
     expect(stats.distinct).toBeGreaterThanOrEqual(100)
