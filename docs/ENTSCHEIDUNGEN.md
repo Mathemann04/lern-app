@@ -1309,3 +1309,10 @@ Neue Entscheidungen unten anfügen.
   („$\operatorname{rg}(A) = 2$, $\operatorname{rg}(A \mid \vec b) = 2$: unendlich viele Lösungen“), damit auch „gleiche
   Ränge heißen genau eine Lösung“ als Fehler vorkommt. Falsche Stufenformen ohne Lösung zählen wie beim Gauß-Verfahren
   (13.11.2026) nur, wenn sie nicht genau die richtige Tabelle sind.
+- 14.11.2026: Gleichungssysteme mit Parameter nachgeschärft (Hinweis des Nutzers: oben links fast immer eine 1). Statt
+  rückwärts aus einer Stufenform mit 1 oben links wird vorwärts gebaut: zufällige Zeilen, dann legen zwei Zahlen der Zeile mit
+  $a$ Sonderwerte und Fälle fest. Umformungen auch über Kreuz, auch mit einem Ausdruck in $a$ als Faktor der Stufenzeile (die
+  umgeformte Zeile wird nur mit einer festen Zahl malgenommen, das bleibt eine erlaubte Umformung). Steht die Zeile mit $a$
+  vorne oben, ist der erste Schritt, sie nach unten zu tauschen. Bei nur einem Sonderwert fragt die Aufgabe „Was gilt dort?“,
+  weil „Für welche $a$ keine Lösung?“ die Antwort verriet. Dieselben Zahlen-Regeln im Baustein „Gauß-Verfahren“; Tests messen
+  den Anteil der Einsen (höchstens 30 bis 35 %) und der Umformungen über Kreuz (mindestens 30 %).

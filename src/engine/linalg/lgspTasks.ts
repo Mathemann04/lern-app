@@ -33,10 +33,11 @@ import { ratLatex, vecLatex } from './vec.ts'
 
 // Baustein „Gleichungssysteme mit Parameter“ (M7 Schritt 11b, Klausur jedes Jahr) der Tätigkeit „Matrizen und
 // Gleichungssysteme“. Zwei Wege wie in der Vorlesung:
-// - Gauß mit Parameter: Die Stufen-Spalten haben feste Zahlen, der Parameter $a$ steht nur in der letzten Spalte und
-//   rechts. Dann bleibt beim Nullen erzeugen alles ein Polynom in $a$, und die letzte Zeile heißt $q(a)\,z = s(a)$:
-//   Für $q(a) \ne 0$ genau eine Lösung, an den Nullstellen von $q$ (Sonderwerte) keine oder unendlich viele, je nachdem,
-//   ob $s$ dort $0$ ist. Gebaut rückwärts aus der Stufenform E: T = D · L · E (L unten links ganzzahlig, D ±1).
+// - Gauß mit Parameter: Die Stufen sind feste Zahlen, $a$ steht in der letzten Spalte und rechts (Zeile beliebig) oder in
+//   der untersten Zeile auch vorne (steht sie oben, wird sie zuerst nach unten getauscht). Beim Nullen erzeugen (auch über
+//   Kreuz) bleibt alles ein Polynom in $a$, und die letzte Zeile heißt $q(a)\,z = s(a)$: Für $q(a) \ne 0$ genau eine
+//   Lösung, an den Nullstellen von $q$ (Sonderwerte) keine oder unendlich viele, je nachdem, ob $s$ dort $0$ ist. Gebaut
+//   vorwärts: zufällige Zeilen, dann legen zwei Zahlen der Zeile mit $a$ Sonderwerte und Fälle fest (makeSym).
 // - Determinante zuerst ($a$ irgendwo in der Matrix): $\det A$ als Polynom, Sonderwerte einzeln einsetzen und mit Gauß
 //   (gaussTasks.ts) auf Stufenform bringen.
 // Dazu der Rang von $A$ und $(A \mid \vec b)$, ein zweiter Parameter $b$ rechts, eine Unbekannte mit vorgegebenem Wert
@@ -74,6 +75,8 @@ const quadPoly = (q: Quad): Poly => P(q.q0, q.q1, q.q2)
 const fromLin = (x: Lin): Poly => P(x.c0, x.c1)
 const pLatex = (p: Poly) => termsLatex([[p[2], 'a^2'], [p[1], 'a'], [p[3], 'b'], [p[0], '']])
 const terms = (p: Poly) => p.filter((x) => !isZero(x)).length
+// Vorzeichen des ersten Glieds, wie pLatex schreibt (a², a, b, Zahl)
+const leadNeg = (p: Poly) => ratSign([p[2], p[1], p[3], p[0]].find((x) => !isZero(x)) ?? ZERO) < 0
 const ptAt = (T: PT, a: Rational, b: Rational = ZERO): Tab => T.map((r) => r.map((x) => pAt(x, a, b)))
 const samePT = (A: PT, B: PT) => A.length === B.length && A.every((r, i) => r.every((x, j) => pEq(x, B[i][j])))
 
@@ -81,7 +84,7 @@ const samePT = (A: PT, B: PT) => A.length === B.length && A.every((r, i) => r.ev
 function termLatex(p: Poly, v: string, first: boolean): string {
   if (pIsZero(p)) return ''
   const sign = (neg: boolean) => (first ? (neg ? '-' : '') : neg ? ' - ' : ' + ')
-  if (terms(p) > 1) return `${sign(false)}(${pLatex(p)})\\,${v}`
+  if (terms(p) > 1) return leadNeg(p) ? `${sign(true)}(${pLatex(pScale(R(-1), p))})\\,${v}` : `${sign(false)}(${pLatex(p)})\\,${v}`
   const idx = p.findIndex((x) => !isZero(x))
   const c = p[idx]
   const abs = ratAbs(c)
@@ -123,11 +126,47 @@ function factoredLatex(q: Quad, rs: readonly Rational[]): string {
   return `${ratLatex(lead)}${body}`
 }
 
-// ------------------------------------------------------------------ Gauß mit Parameter (feste Stufen-Zahlen)
+// ------------------------------------------------------------------ Gauß mit Parameter (Stufen-Zahlen ohne a)
 
-type POp = { readonly target: number; readonly k: Rational }
+// Produkt zweier Einträge; null, wenn es über a² hinausgeht oder a mal b ergäbe
+function pMul(p: Poly, q: Poly): Poly | null {
+  if ((!isZero(p[3]) && !pIsConst(q)) || (!isZero(q[3]) && !pIsConst(p))) return null
+  const c3 = ratAdd(ratMul(p[1], q[2]), ratMul(p[2], q[1]))
+  const c4 = ratMul(p[2], q[2])
+  if (!isZero(c3) || !isZero(c4)) return null
+  return P(
+    ratMul(p[0], q[0]),
+    ratAdd(ratMul(p[0], q[1]), ratMul(p[1], q[0])),
+    ratAdd(ratAdd(ratMul(p[0], q[2]), ratMul(p[1], q[1])), ratMul(p[2], q[0])),
+    ratAdd(ratMul(p[0], q[3]), ratMul(p[3], q[0])),
+  )
+}
+
+// neue Zeile = p · Zeile target − q · Zeile der Stufe. p ist eine Zahl (vorne positiv); q darf a enthalten: Dann wird die
+// Stufenzeile mit einem Ausdruck in a malgenommen, die umgeformte Zeile aber nur mit einer Zahl (das bleibt erlaubt)
+type POp = { readonly target: number; readonly p: Rational; readonly q: Poly }
 type PStage = { readonly row: number; readonly col: number; readonly ops: readonly POp[]; readonly before: PT; readonly after: PT }
 
+const gcdN = (a: bigint, b: bigint): bigint => (b === 0n ? (a < 0n ? -a : a) : gcdN(b, a % b))
+// ganzes Vielfaches, sonst über Kreuz wie opFor in gaussTasks.ts (Einträge ganzzahlig)
+function pOpFor(piv: Rational, e: Poly, target: number): POp {
+  const k = e.map((x) => ratDiv(x, piv))
+  if (k.every(isInteger)) return { target, p: ONE, q: P(k[0], k[1], k[2], k[3]) }
+  const g = e.reduce((acc, x) => gcdN(acc, x.n), piv.n)
+  const sg = piv.n < 0n ? -1n : 1n
+  return { target, p: rat((sg * piv.n) / g), q: P(...(e.map((x) => rat((sg * x.n) / g)) as [Rational, Rational, Rational, Rational])) }
+}
+const applyOp = (o: POp, ri: readonly Poly[], rr: readonly Poly[]): Poly[] | null => {
+  const out: Poly[] = []
+  for (let j = 0; j < ri.length; j++) {
+    const m = pMul(o.q, rr[j])
+    if (!m) return null
+    out.push(pSub(pScale(o.p, ri[j]), m))
+  }
+  return out
+}
+
+// Spalte für Spalte ohne Tausch; die Stufen müssen feste Zahlen sein (sonst null)
 function runParam(T: PT, n: number): PStage[] | null {
   let M = T
   const stages: PStage[] = []
@@ -135,26 +174,34 @@ function runParam(T: PT, n: number): PStage[] | null {
     const piv = M[c][c]
     if (!pIsConst(piv) || isZero(piv[0])) return null
     const ops: POp[] = []
-    for (let i = c + 1; i < M.length; i++) {
-      const e = M[i][c]
-      if (pIsZero(e)) continue
-      if (!pIsConst(e)) return null
-      const k = ratDiv(e[0], piv[0])
-      if (!isInteger(k)) return null
-      ops.push({ target: i, k })
-    }
+    for (let i = c + 1; i < M.length; i++) if (!pIsZero(M[i][c])) ops.push(pOpFor(piv[0], M[i][c], i))
     if (ops.length === 0) continue
     const before = M
-    const after = M.map((r, i) => {
+    const after: Poly[][] = []
+    for (const [i, r] of M.entries()) {
       const o = ops.find((x) => x.target === i)
-      return o ? r.map((x, j) => pSub(x, pScale(o.k, before[c][j]))) : r
-    })
+      const row = o ? applyOp(o, r, before[c]) : [...r]
+      if (!row) return null
+      after.push(row)
+    }
     stages.push({ row: c, col: c, ops, before, after })
     M = after
   }
   return stages
 }
-const pOpLabel = (o: POp, row: number) => opLabel({ target: o.target, p: ONE, q: o.k }, row)
+// Faktor als LaTeX: Zahl, a-Glied oder Klammer
+const pFactor = (p: Poly) => {
+  const s = pLatex(p)
+  return s.startsWith('-') || terms(p) > 1 ? `(${s})` : s
+}
+function pOpLabel(o: POp, row: number): string {
+  if (pIsConst(o.q)) return opLabel({ target: o.target, p: o.p, q: o.q[0] }, row)
+  const left = isOne(o.p) ? roman(o.target) : `${ratLatex(o.p)} \\cdot ${roman(o.target)}`
+  const neg = leadNeg(o.q)
+  const q = neg ? pScale(R(-1), o.q) : o.q
+  const s = pLatex(q)
+  return `${left} ${neg ? '+' : '-'} ${terms(q) === 1 ? s : `(${s})`} \\cdot ${roman(row)}`
+}
 
 // zwei Stellen, an denen nichts Besonderes passiert: Dort zeigt Gauß mit Zahlen, ob zwei Tabellen gleichwertig sind
 const GENERIC: readonly (readonly [Rational, Rational])[] = [
@@ -166,26 +213,40 @@ const ptEquivalent = (A: PT, B: PT) => samePT(A, B) || GENERIC.some(([a, b]) => 
 // falsche Tabellen zu einer Umformung (wie elimCands in gaussTasks.ts, mit Einträgen in a)
 function pCands(rng: Rng, st: PStage, n: number): [PT, string][] {
   const { row, col, ops, before, after } = st
-  const apply = (f: (k: Rational, ri: readonly Poly[], rr: readonly Poly[]) => Poly[]): PT =>
-    before.map((r, i) => {
+  const apply = (f: (o: POp, ri: readonly Poly[], rr: readonly Poly[]) => (Poly | null)[]): PT | null => {
+    const out: Poly[][] = []
+    for (const [i, r] of before.entries()) {
       const o = ops.find((x) => x.target === i)
-      return o ? f(o.k, r, before[row]) : r
-    })
-  const sg = (k: Rational) => R(ratSign(k))
-  const cands: [PT, string][] = [
-    [apply((k, ri, rr) => ri.map((x, j) => (j === n ? x : pSub(x, pScale(k, rr[j]))))), 'gauss-rhs'],
-    [apply((k, ri, rr) => ri.map((x, j) => pSub(x, pScale(j === n ? sg(k) : k, rr[j])))), 'gauss-rhs-multiple'],
-    [apply((k, ri, rr) => ri.map((x, j) => (j === col ? PZERO : pSub(x, pScale(sg(k), rr[j]))))), 'gauss-first-only'],
+      const res = o ? f(o, r, before[row]) : [...r]
+      if (res.some((x) => !x)) return null
+      out.push(res as Poly[])
+    }
+    return out
+  }
+  // ein Glied p · x − q · y mit der Zahl k statt q (für „nur das Vorzeichen von q“)
+  const sg = (q: Poly) => {
+    const lead = [q[2], q[1], q[0]].find((x) => !isZero(x)) ?? ONE
+    return P(R(ratSign(lead)))
+  }
+  const term = (o: POp, x: Poly, y: Poly, q: Poly = o.q) => {
+    const m = pMul(q, y)
+    return m ? pSub(pScale(o.p, x), m) : null
+  }
+  const cands: [PT | null, string][] = [
+    [apply((o, ri, rr) => ri.map((x, j) => (j === n ? x : term(o, x, rr[j])))), 'gauss-rhs'],
+    [apply((o, ri, rr) => ri.map((x, j) => (j === n ? term(o, x, rr[j], sg(o.q)) : term(o, x, rr[j])))), 'gauss-rhs-multiple'],
+    [apply((o, ri, rr) => ri.map((x, j) => (j === col ? PZERO : term(o, x, rr[j], sg(o.q))))), 'gauss-first-only'],
   ]
   // Vorzeichenfehler bei einem Eintrag, am liebsten in der Spalte mit a oder rechts
   const slips: [number, number][] = []
   for (const o of ops) for (let j = col + 1; j <= n; j++) if (!pIsZero(before[row][j])) slips.push([o.target, j])
   const ranked = rng.shuffle(slips).sort((p, q) => Number(q[1] >= n - 1) - Number(p[1] >= n - 1))
   for (const [t, j] of ranked.slice(0, 2)) {
-    const k = ops.find((o) => o.target === t)!.k
-    cands.push([after.map((r, i) => (i === t ? r.map((x, jj) => (jj === j ? pAdd(before[t][jj], pScale(k, before[row][jj])) : x)) : r)), 'gauss-sign'])
+    const o = ops.find((x) => x.target === t)!
+    const m = pMul(o.q, before[row][j])
+    if (m) cands.push([after.map((r, i) => (i === t ? r.map((x, jj) => (jj === j ? pAdd(pScale(o.p, before[t][jj]), m) : x)) : r)), 'gauss-sign'])
   }
-  return cands
+  return cands.filter((c): c is [PT, string] => c[0] !== null)
 }
 
 type Sys = { readonly vars: readonly string[]; readonly n: number }
@@ -206,25 +267,57 @@ function pElimStep(rng: Rng, st: PStage, idx: number, sys: Sys): GuidedStep | nu
     wrongs.push({ content: math(ptabLatex(W, vars, notes)), rule })
   }
   if (wrongs.length < 3) return null
+  // Beispielrechnung: am liebsten ein Eintrag mit a
   const withA = after.findIndex((r, i) => ops.some((o) => o.target === i) && r.some((x) => !pIsConst(x)))
   const example = withA >= 0 ? withA : ops[0].target
   const o = ops.find((x) => x.target === example)!
   const j = after[example].findIndex((x, jj) => jj > col && !pIsConst(x))
   const jj = j >= 0 ? j : n
-  const kAbs = ratAbs(o.k)
-  const calc = `${pLatex(before[example][jj]) === '0' ? '0' : `(${pLatex(before[example][jj])})`} ${ratSign(o.k) < 0 ? '+' : '-'} ${isOne(kAbs) ? '' : `${ratLatex(kAbs)} \\cdot `}${pLatex(before[row][jj]).startsWith('-') || terms(before[row][jj]) > 1 ? `(${pLatex(before[row][jj])})` : pLatex(before[row][jj])} = ${pLatex(after[example][jj])}`
+  const negConst = leadNeg(o.q)
+  const qShown = negConst ? pScale(R(-1), o.q) : o.q
+  const qPart = pIsConst(qShown) && isOne(qShown[0]) ? '' : `${pFactor(qShown)} \\cdot `
+  const first = isOne(o.p) ? pLatex(before[example][jj]) : `${ratLatex(o.p)} \\cdot ${pFactor(before[example][jj])}`
+  const calc = `${first} ${negConst ? '+' : '-'} ${qPart}${pFactor(before[row][jj])} = ${pLatex(after[example][jj])}`
+  const cross = ops.some((x) => !isOne(x.p))
+  const withParam = ops.some((x) => !pIsConst(x.q))
+  const crossNote = cross ? ' Geht es nicht mit einem ganzzahligen Vielfachen, nimmst du über Kreuz mal: Zeile mal Stufenzahl, minus Stufenzeile mal Zahl der Zeile.' : ''
+  const paramNote = withParam ? ' Steht in der Spalte schon $a$, nimmst du die Stufenzeile mit diesem Ausdruck mal und ziehst sie ab. Das ist erlaubt: Die umgeformte Zeile wird nur mit einer festen Zahl malgenommen, nie mit etwas, das $0$ werden kann.' : ''
   return choiceStep(rng, {
     id: `spalte-${idx}`,
     title: `Spalte ${col + 1}: Nullen erzeugen`,
     question: `Erzeuge in Spalte ${col + 1} unter der $${ratLatex(before[row][col][0])}$ in Zeile ${ROMAN[row]} Nullen. Wie sieht die Tabelle danach aus?\n$${ptabLatex(before, vars)}$`,
     correct: math(ptabLatex(after, vars, notes)),
     wrongs,
-    hint: `Zieh von jeder Zeile darunter so ein Vielfaches von Zeile ${ROMAN[row]} ab, dass in Spalte ${col + 1} eine $0$ entsteht. Rechne jede Zahl mit, auch die Einträge mit $a$ und die rechte Seite.`,
+    hint: `Zieh von jeder Zeile darunter so ein Vielfaches von Zeile ${ROMAN[row]} ab, dass in Spalte ${col + 1} eine $0$ entsteht${cross ? ' (wenn nötig über Kreuz)' : ''}. Rechne jede Zahl mit, auch die Einträge mit $a$ und die rechte Seite.`,
     explanation: {
-      detailed: `Umformungen: ${ops.map((x) => `$${pOpLabel(x, row)}$`).join(', ')}. Die Stufenzahl $${ratLatex(before[row][col][0])}$ hängt nicht von $a$ ab, darum geht das wie ohne Parameter. Ein Eintrag mit $a$ wird genauso umgerechnet, zum Beispiel in Zeile ${ROMAN[example]}, Spalte ${jj < n ? `von $${vars[jj]}$` : 'rechts'}: $${calc}$.`,
+      detailed: `Umformungen: ${ops.map((x) => `$${pOpLabel(x, row)}$`).join(', ')}.${crossNote} Die Stufenzahl $${ratLatex(before[row][col][0])}$ hängt nicht von $a$ ab, darum geht das wie ohne Parameter.${paramNote} Ein Eintrag mit $a$ wird genauso umgerechnet, zum Beispiel in Zeile ${ROMAN[example]}, Spalte ${jj < n ? `von $${vars[jj]}$` : 'rechts'}: $${calc}$.`,
       short: `${ops.map((x) => `$${pOpLabel(x, row)}$`).join(', ')}, jede Zahl mitrechnen.`,
     },
     cards: [LGSP_CARD.gauss, GAUSS_CARD.tabelle],
+  })
+}
+
+// Zeile mit a in der ersten Spalte steht oben: zuerst nach unten tauschen
+function paramSwapStep(rng: Rng, T: PT, other: number, vars: readonly string[]): GuidedStep {
+  const e = pLatex(T[0][0])
+  const ef = pFactor(T[0][0])
+  return choiceStep(rng, {
+    id: 'tausch',
+    title: 'Zeile mit $a$',
+    question: `In Zeile I steht in der ersten Spalte $${e}$, ein Ausdruck mit $a$. Wie fängst du am besten an?\n$${ptabLatex(T, vars)}$`,
+    correct: `Zeilen I und ${ROMAN[other]} tauschen, damit die Zeile mit $a$ unten steht`,
+    wrongs: [
+      { content: `Zeile I durch $${e}$ teilen, damit vorne eine $1$ steht`, rule: 'lgsp-divide-param' },
+      { content: `Die Zeilen darunter mit $${ef}$ malnehmen und dann Vielfache von Zeile I abziehen`, rule: 'lgsp-multiply-param' },
+      { content: 'Für $a$ eine Zahl einsetzen, zum Beispiel $a = 1$, und dann rechnen', rule: 'lgsp-fix-param' },
+    ],
+    hint: 'Die Zahlen, unter denen du Nullen erzeugst, sollten nicht von $a$ abhängen. Die Reihenfolge der Gleichungen darfst du ändern.',
+    explanation: {
+      detailed: `Mit $${e}$ als Stufe müsstest du durch einen Ausdruck mit $a$ teilen oder andere Zeilen damit malnehmen. Beides geht schief, wenn er für ein $a$ gleich $0$ wird. Die Reihenfolge der Gleichungen spielt keine Rolle: Tausch Zeile I mit Zeile ${ROMAN[other]}. Dann sind die Stufen feste Zahlen, und $a$ wird nur mitgerechnet.`,
+      short: `Zeilen I und ${ROMAN[other]} tauschen: Stufen ohne $a$.`,
+    },
+    established: [`\\text{I} \\leftrightarrow \\text{${ROMAN[other]}}`],
+    cards: [LGSP_CARD.gauss, GAUSS_CARD.tricks],
   })
 }
 
@@ -318,6 +411,38 @@ function specialStep(rng: Rng, specials: readonly Special[], ask: Case2, questio
   })
 }
 
+// Nur ein Sonderwert: Was gilt dort? (Fall mit Begründung aus der letzten Zeile; c = Zahl rechts beim Sonderwert)
+function singleCaseStep(rng: Rng, r: Rational, kase: Case2, rowText: string, c: Rational, v: string, question: string, why: string): GuidedStep {
+  const general: Wrong = { content: 'genau eine Lösung, wie für alle anderen $a$', rule: 'lgsp-general-formula' }
+  const wrongs: Wrong[] =
+    kase === 'none'
+      ? [
+          { content: 'unendlich viele Lösungen, denn links steht nur noch $0$', rule: 'gauss-contradiction-zero' },
+          { content: `genau eine Lösung, nämlich $${v} = ${ratLatex(c)}$`, rule: 'gauss-contradiction-value' },
+          general,
+        ]
+      : [
+          { content: 'keine Lösung, denn links steht nur noch $0$', rule: 'gauss-zero-row-none' },
+          { content: `genau eine Lösung, nämlich $${v} = 0$`, rule: 'gauss-free-missed' },
+          general,
+        ]
+  return choiceStep(rng, {
+    id: 'sonderfall',
+    title: 'Sonderwert',
+    question,
+    correct: `${LGS_CASES[CASE_INDEX[kase]]}, denn die letzte Zeile heißt $${rowText}$`,
+    wrongs,
+    hint: 'Setz den Sonderwert ein. Heißt die letzte Zeile dann $0 = c$ mit $c \\ne 0$, gibt es keine Lösung; heißt sie $0 = 0$, unendlich viele.',
+    explanation: {
+      detailed: `${why} Für alle anderen $a$ gibt es genau eine Lösung.`,
+      short: `$a = ${ratLatex(r)}$: ${LGS_CASES[CASE_INDEX[kase]]}.`,
+    },
+    established: [`\\text{${LGS_CASES[CASE_INDEX[kase]]}}`],
+    cards: [LGSP_CARD.gauss, GAUSS_CARD.faelle],
+  })
+}
+const singleResult = (r: Rational, kase: Case2) => `a = ${ratLatex(r)},\\; \\text{${LGS_CASES[CASE_INDEX[kase]]}}`
+
 // Ränge und was daraus folgt (beim Sonderwert: Rang von A ist n − 1)
 const rankText = (ra: number, rb: number, c: Case) => `$\\operatorname{rg}(A) = ${ra}$, $\\operatorname{rg}(A \\mid \\vec b) = ${rb}$: ${LGS_CASES[CASE_INDEX[c]]}`
 function rankStep(rng: Rng, question: string, kase: Case2, n: number): GuidedStep {
@@ -350,16 +475,37 @@ function rankStep(rng: Rng, question: string, kase: Case2, n: number): GuidedSte
   })
 }
 
-// ------------------------------------------------------------------ Bau rückwärts aus der Stufenform
+// ------------------------------------------------------------------ Bau vorwärts mit Ziel
 
+// Wo steht a? last: in der letzten Spalte und rechts (Zeile beliebig); first/mid: in der ersten bzw. zweiten Spalte der
+// untersten Zeile (sonst teilte Gauß durch a); square: zusätzlich a² in der letzten Spalte; upper: eine andere Zeile hat
+// a in der letzten Spalte (mit first/mid entsteht so a² beim Nullen erzeugen); swapTop: die Zeile mit a steht oben und wird
+// zuerst nach unten getauscht (nur bei first)
+type Place = 'last' | 'first' | 'mid'
 type SymSpec = {
   readonly n: 2 | 3
   readonly cases: readonly Case2[]
   readonly withB: boolean
-  readonly paramUpper: boolean
+  readonly place: Place
+  readonly square: boolean
+  readonly upper: boolean
+  readonly swapTop: boolean
   readonly level: Level
 }
-type SymSystem = { readonly T: PT; readonly F: PT; readonly stages: readonly PStage[]; readonly rs: readonly Rational[]; readonly cases: readonly Case2[]; readonly q: Quad; readonly s: Quad; readonly beta: Rational }
+type SymSystem = {
+  // Angabe (bei swapTop mit der Zeile mit a oben) und die Tabelle, mit der Gauß rechnet
+  readonly T: PT
+  readonly work: PT
+  readonly swapWith: number
+  readonly F: PT
+  readonly stages: readonly PStage[]
+  readonly rs: readonly Rational[]
+  readonly cases: readonly Case2[]
+  readonly q: Quad
+  readonly s: Quad
+  readonly beta: Rational
+  readonly spec: SymSpec
+}
 
 const nonzero = (rng: Rng, lo: number, hi: number) => {
   for (;;) {
@@ -367,67 +513,110 @@ const nonzero = (rng: Rng, lo: number, hi: number) => {
     if (k !== 0) return k
   }
 }
-const mulQ = (p: Quad, l: Quad): Quad => ({ q2: ratAdd(ratMul(p.q1, l.q1), ratAdd(ratMul(p.q2, l.q0), ratMul(p.q0, l.q2))), q1: ratAdd(ratMul(p.q1, l.q0), ratMul(p.q0, l.q1)), q0: ratMul(p.q0, l.q0) })
-const linQ = (r: Rational): Quad => ({ q2: ZERO, q1: ONE, q0: ratNeg(r) })
-const constQ = (c: Rational): Quad => ({ q2: ZERO, q1: ZERO, q0: c })
-const scaleQ = (k: Rational, q: Quad): Quad => ({ q2: ratMul(k, q.q2), q1: ratMul(k, q.q1), q0: ratMul(k, q.q0) })
 const quadAtR = (q: Quad, a: Rational) => pAt(quadPoly(q), a)
+const constQ = (c: Rational): Quad => ({ q2: ZERO, q1: ZERO, q0: c })
+// Stufenzahl oben links: meist 2 oder 3, selten 1 (Wunsch des Nutzers, 14.11.2026: nicht fast immer Einsen)
+const PIVOTS = [2, 3, -2, -3, 2, 3, -2, -3, 4, -4, 1, -1]
+const smallInt = (x: Rational, lim: number) => isInteger(x) && Math.abs(num(x)) <= lim
 
+// Zufällige Zeilen; die Zahl t0 in der letzten Spalte der Zeile mit a legt einen Sonderwert fest, die rechte Seite
+// v0 + v1·a (+ β b) der Zeile mit a die Fälle. Was die übrigen Zeilen beitragen, rechnet Gauß selbst (zweimal: mit 0 und 1)
 function makeSym(rng: Rng, spec: SymSpec): SymSystem | null {
   const { n, cases } = spec
   const count = cases.length
-  const pool = [-4, -3, -2, -1, 1, 2, 3, 4, 5]
-  const rs = sortRats(rng.shuffle(pool).slice(0, count).map(R))
-  if (count === 2 && ratEq(ratAbs(rs[0]), ratAbs(rs[1]))) return null
-  const c = R(count === 1 ? rng.pick([1, 1, -1, 2, -2, 3]) : rng.pick([1, 1, -1]))
-  const q = scaleQ(c, rs.map(linQ).reduce(mulQ, constQ(ONE)))
-  // rechte Seite der letzten Zeile: 0 an den Sonderwerten mit unendlich vielen Lösungen, sonst nicht
-  const infs = rs.filter((_, i) => cases[i] === 'inf')
-  const sigma = R(nonzero(rng, -3, 3))
-  let s: Quad
-  if (infs.length > 0) s = scaleQ(sigma, infs.map(linQ).reduce(mulQ, constQ(ONE)))
-  else if (rng.chance(0.4)) s = constQ(R(nonzero(rng, -6, 6)))
-  else s = scaleQ(sigma, linQ(R(rng.int(-4, 5))))
-  if (rs.some((r, i) => isZero(quadAtR(s, r)) !== (cases[i] === 'inf'))) return null
-  const beta = spec.withB ? R(rng.pick([1, -1, 1, -1, 2, -2])) : ZERO
-  // obere Zeilen: feste Stufen, Lösung x0 für alle a
-  const small = spec.level <= 2
-  const x0 = Array.from({ length: n }, () => R(small ? rng.int(-2, 2) : rng.int(-3, 3)))
-  const upperParam = spec.paramUpper ? rng.int(0, n - 2) : -1
-  const E: Poly[][] = []
-  for (let i = 0; i < n - 1; i++) {
-    const row: Poly[] = Array.from({ length: n }, (_, j) => {
-      if (j < i) return PZERO
-      if (j === i) return P(R(i === 0 ? rng.pick([1, 1, -1, 2, 1]) : rng.pick([1, -1, 2, 1, -2])))
-      if (j === n - 1 && i === upperParam) return P(R(rng.int(-2, 2)), R(rng.pick([1, -1])))
-      return P(R(small ? rng.int(-2, 2) : rng.int(-3, 3)))
-    })
-    const rhs = row.reduce((acc, x, j) => pAdd(acc, pScale(x0[j], x)), PZERO)
-    E.push([...row, rhs])
+  const lim = spec.level <= 2 ? 9 : 12
+  const ia = spec.place === 'last' ? rng.int(0, n - 1) : n - 1
+  const base: Poly[][] = Array.from({ length: n }, (_, i) =>
+    Array.from({ length: n + 1 }, (_, j) => {
+      if (j === n) return P(R(rng.int(-9, 9)))
+      if (j === 0) return P(R(i === 0 ? rng.pick(PIVOTS) : nonzero(rng, -6, 6)))
+      return P(R(rng.int(-5, 6)))
+    }),
+  )
+  if (spec.place === 'first') base[ia][0] = P(R(rng.pick([0, 0, 1, -1, 2, -2, 3])), R(rng.pick([1, -1])))
+  if (spec.place === 'mid') base[ia][1] = P(R(rng.int(-4, 4)), R(rng.pick([1, -1])))
+  if (spec.upper) {
+    const iu = rng.pick(Array.from({ length: n }, (_, i) => i).filter((i) => i !== ia))
+    base[iu][n - 1] = P(base[iu][n - 1][0], R(rng.pick([1, -1])))
   }
-  E.push([...Array.from({ length: n - 1 }, () => PZERO), quadPoly(q), P(s.q0, s.q1, s.q2, beta)])
-  // unten links mischen (erste Spalte voll besetzt), Zeilen auch mal mit −1
-  const L = Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => (i === j ? 1 : j === 0 && i > 0 ? (small ? nonzero(rng, -2, 2) : nonzero(rng, -3, 3)) : j < i ? rng.int(-2, 2) : 0)))
-  const D = Array.from({ length: n }, () => (rng.chance(0.3) ? -1 : 1))
-  const T: PT = L.map((l, i) => E[0].map((_, k) => l.reduce((acc, x, j) => pAdd(acc, pScale(R(x * D[i]), E[j][k])), PZERO)))
-  // kleine Zahlen, genug Minus, keine zwei gleichen Zeilen
-  const coefs = T.flat()
-  if (coefs.some((x) => x.some((y) => Math.abs(num(y)) > 14))) return null
-  if (T.some((r) => r.slice(0, n).some((x) => Math.abs(num(x[0])) > (spec.level <= 2 ? 9 : 12)))) return null
-  if (T.flat().filter((x) => ratSign(x[0]) < 0).length < 2) return null
-  if (T.some((r, i) => T.some((o, k) => k > i && r.every((x, j) => pEq(x, o[j]))))) return null
-  const stages = runParam(T, n)
+  const a1 = spec.place === 'last' ? R(spec.square ? rng.pick([0, 0, 1, -1]) : rng.pick([1, -1, 2, -2, 1, -1])) : ZERO
+  const a2 = spec.square ? R(rng.pick([1, -1])) : ZERO
+  const build = (t0: Rational, rhs: Poly): PT => base.map((r, i) => (i !== ia ? r : r.map((x, j) => (j === n - 1 ? P(t0, a1, a2) : j === n ? rhs : x))))
+  const lastRow = (W: PT) => {
+    const st = runParam(W, n)
+    return st && st.length === n - 1 ? st[st.length - 1].after[n - 1] : null
+  }
+  const L0 = lastRow(build(ZERO, PZERO))
+  const L1 = lastRow(build(ONE, P(ONE)))
+  if (!L0 || !L1 || !L0.slice(0, n - 1).every(pIsZero)) return null
+  const kappa = pSub(L1[n - 1], L0[n - 1])
+  if (!pIsConst(kappa) || isZero(kappa[0]) || !pEq(pSub(L1[n], L0[n]), kappa)) return null
+  const k = kappa[0]
+  const qRest = pQuad(L0[n - 1])
+  if ((isZero(qRest.q2) ? (isZero(qRest.q1) ? 0 : 1) : 2) !== count) return null
+  // ein Sonderwert über t0, bei a² der zweite aus der Gleichung
+  let t0: Rational | null = null
+  let rs: Rational[] | null = null
+  for (const r of rng.shuffle([-5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 6])) {
+    const t = ratDiv(ratNeg(quadAtR(qRest, R(r))), k)
+    if (!smallInt(t, lim)) continue
+    const found = roots({ ...qRest, q0: ratAdd(qRest.q0, ratMul(k, t)) })
+    if (!found || found.length !== count || found.some((x) => !isInteger(x) || isZero(x) || Math.abs(num(x)) > 6)) continue
+    if (count === 2 && ratEq(ratAbs(found[0]), ratAbs(found[1]))) continue
+    t0 = t
+    rs = found
+    break
+  }
+  if (!t0 || !rs) return null
+  // rechte Seite der Zeile mit a: rechts in der letzten Zeile steht sR(a) + κ · (v0 + v1 a + β b)
+  const sR = pQuad(L0[n])
+  let w1 = R(rng.pick([0, 0, 1, -1]))
+  let v0: Rational
+  let beta = ZERO
+  const infs = rs.filter((_, i) => cases[i] === 'inf')
+  if (spec.withB) {
+    beta = R(rng.pick([1, -1, 1, -1, 2, -2]))
+    const r = rs[0]
+    const bStar = R(nonzero(rng, -6, 6))
+    if (ratEq(bStar, r)) return null
+    v0 = ratSub(ratSub(ratDiv(ratNeg(quadAtR(sR, r)), k), ratMul(w1, r)), ratMul(beta, bStar))
+  } else if (infs.length === 2) {
+    const [r1, r2] = infs
+    w1 = ratDiv(ratNeg(ratSub(quadAtR(sR, r1), quadAtR(sR, r2))), ratMul(k, ratSub(r1, r2)))
+    if (!smallInt(w1, 3)) return null
+    v0 = ratSub(ratDiv(ratNeg(quadAtR(sR, r1)), k), ratMul(w1, r1))
+  } else if (infs.length === 1) v0 = ratSub(ratDiv(ratNeg(quadAtR(sR, infs[0])), k), ratMul(w1, infs[0]))
+  else v0 = R(rng.int(-9, 9))
+  if (!smallInt(v0, 30)) return null
+  const work = build(t0, P(v0, w1, ZERO, beta))
+  const stages = runParam(work, n)
   if (!stages || stages.length !== n - 1) return null
   const F = stages[stages.length - 1].after
-  if (stages.some((st) => st.after.some((r) => r.some((x) => x.some((y) => Math.abs(num(y)) > 30))))) return null
-  // letzte Zeile: q(a) z = s(a) + β b (bis aufs Vorzeichen wie geplant)
   const last = F[n - 1]
-  if (!last.slice(0, n - 1).every(pIsZero)) return null
-  const qF = pQuad(last[n - 1])
-  const sF: Quad = { q2: last[n][2], q1: last[n][1], q0: last[n][0] }
-  const found = roots(qF)
+  const q = pQuad(last[n - 1])
+  const s: Quad = { q2: last[n][2], q1: last[n][1], q0: last[n][0] }
+  const found = roots(q)
   if (!found || !sameSet(found, rs)) return null
-  return { T, F, stages, rs, cases, q: qF, s: sF, beta: last[n][3] }
+  if (!spec.withB && rs.some((r, i) => isZero(quadAtR(s, r)) !== (cases[i] === 'inf'))) return null
+  // kleine Zahlen in der Angabe und unterwegs, genug Minus, keine zwei gleichen Zeilen
+  if (work.some((r) => r.slice(0, n).some((x) => Math.abs(num(x[0])) > lim) || Math.abs(num(r[n][0])) > 30)) return null
+  if (work.flat().some((x) => [x[1], x[2], x[3]].some((y) => Math.abs(num(y)) > 9))) return null
+  if (stages.some((st) => st.after.some((r) => r.some((x) => x.some((y) => Math.abs(num(y)) > 60))))) return null
+  if (work.flat().filter((x) => ratSign(x[0]) < 0).length < 2) return null
+  if (work.some((r, i) => work.some((o, j) => j > i && r.every((x, c) => pEq(x, o[c]))))) return null
+  const T = spec.swapTop ? work.map((r, i) => (i === 0 ? work[n - 1] : i === n - 1 ? work[0] : r)) : work
+  return { T, work, swapWith: spec.swapTop ? n - 1 : -1, F, stages, rs, cases, q, s, beta: last[n][3], spec }
+}
+
+// Lage von a je Stufe und Zahl der Sonderwerte
+function placeSpec(rng: Rng, level: Level, n: 2 | 3, count: number): Pick<SymSpec, 'place' | 'square' | 'upper' | 'swapTop'> {
+  if (count === 2) {
+    const kind = rng.pick(n === 3 ? (['square', 'first', 'mid'] as const) : (['square', 'first'] as const))
+    if (kind === 'square') return { place: 'last', square: true, upper: false, swapTop: false }
+    return { place: kind, square: false, upper: true, swapTop: kind === 'first' && level >= 3 && rng.chance(0.3) }
+  }
+  const place = rng.pick(n === 3 ? (['last', 'last', 'first', 'mid'] as const) : (['last', 'last', 'first'] as const))
+  return { place, square: false, upper: place === 'last' && level >= 3 && rng.chance(0.4), swapTop: place === 'first' && level >= 2 && rng.chance(0.5) }
 }
 
 // ------------------------------------------------------------------ Aufgaben
@@ -458,7 +647,7 @@ function rowWhy(sys: SymSystem, r: Rational, kase: Case2, v: string): string {
 }
 
 function symSteps(rng: Rng, sys: SymSystem, s: Sys): GuidedStep[] | null {
-  const steps: GuidedStep[] = []
+  const steps: GuidedStep[] = sys.swapWith >= 0 ? [paramSwapStep(rng, sys.T, sys.swapWith, s.vars)] : []
   let idx = 0
   for (const st of sys.stages) {
     idx++
@@ -469,10 +658,11 @@ function symSteps(rng: Rng, sys: SymSystem, s: Sys): GuidedStep[] | null {
   return steps
 }
 
-// Stufe 1 und 2 (2 × 2), 2 und 3 (3 × 3): Gauß mit Parameter, für welche a keine bzw. unendlich viele Lösungen
+// Stufe 1 und 2 (2 × 2), 2 und 3 (3 × 3): Gauß mit Parameter. Ein Sonderwert: Was gilt dort? Zwei: für welche a keine
+// bzw. unendlich viele Lösungen?
 function buildSym(rng: Rng, level: Level, kind: 'lgspTwo' | 'lgspThree', cases: readonly Case2[]): Built | null {
   const n = kind === 'lgspTwo' ? 2 : 3
-  const sys = makeSym(rng, { n, cases, withB: false, paramUpper: level >= 3 && rng.chance(0.5), level })
+  const sys = makeSym(rng, { n, cases, withB: false, ...placeSpec(rng, level, n, cases.length), level })
   if (!sys) return null
   const vars = rng.pick(VARS[n])
   const s: Sys = { vars, n }
@@ -481,16 +671,34 @@ function buildSym(rng: Rng, level: Level, kind: 'lgspTwo' | 'lgspThree', cases: 
   const v = vars[n - 1]
   const table = ptabLatex(sys.F, vars)
   steps.push(conditionStep(rng, { kind: 'row', q: sys.q, rhs: sys.F[n - 1][n], v, table, withB: false }, sys.rs))
-  const specials: Special[] = sys.rs.map((r, i) => ({ r, kase: sys.cases[i], why: rowWhy(sys, r, sys.cases[i], v) }))
-  const ask = rng.pick(sys.cases)
   if (level >= 3) {
     const i = rng.int(0, sys.rs.length - 1)
     const r = sys.rs[i]
     steps.push(rankStep(rng, `Setz $a = ${ratLatex(r)}$ in die Stufenform ein. Welche Ränge haben $A$ und $(A \\mid \\vec b)$, und was folgt daraus?\n$${tabLatex(ptAt(sys.F, r), vars)}$`, sys.cases[i], n))
   }
+  const disp = shown(rng, sys.T, vars)
+  const form = `${kind}|${disp.eq ? 'eq' : 'mat'}|${sys.cases.join('')}|${sys.spec.place}${sys.spec.square ? 'q' : ''}${sys.spec.upper ? 'u' : ''}${sys.swapWith >= 0 ? 's' : ''}|${vars[0]}|${signs(sys.T)}|${paramMask(sys.T)}|${sys.rs.map((r) => ratSign(r)).join('')}`
+  if (sys.rs.length === 1) {
+    const [r] = sys.rs
+    const [kase] = sys.cases
+    const c = quadAtR(sys.s, r)
+    steps.push(singleCaseStep(rng, r, kase, `0 \\cdot ${v} = ${ratLatex(c)}`, c, v, `Was gilt für den Sonderwert $a = ${ratLatex(r)}$?\n$${table}$`, rowWhy(sys, r, kase, v)))
+    return {
+      kind,
+      instruction: `${disp.what} hängt vom Parameter $a$ ab. Für welches $a$ hat es nicht genau eine Lösung, und was gilt dort? Rechne mit dem Gauß-Verfahren.`,
+      functionLatex: disp.functionLatex,
+      steps,
+      cards: [LGSP_CARD.gauss, ...(level >= 3 ? [LGSP_CARD.rang] : [])],
+      resultLatex: singleResult(r, kase),
+      form,
+      data: { ...dataOf(sys.T), single: [1] },
+      answer: [num(r), CASE_INDEX[kase]],
+    }
+  }
+  const specials: Special[] = sys.rs.map((r, i) => ({ r, kase: sys.cases[i], why: rowWhy(sys, r, sys.cases[i], v) }))
+  const ask = rng.pick(sys.cases)
   const askText = ask === 'none' ? 'keine Lösung' : 'unendlich viele Lösungen'
   steps.push(specialStep(rng, specials, ask, `Für welche $a$ hat das System ${askText}?\n$${table}$`, roots(sys.s) ?? []))
-  const disp = shown(rng, sys.T, vars)
   const right = sys.rs.filter((_, i) => sys.cases[i] === ask)
   return {
     kind,
@@ -499,7 +707,7 @@ function buildSym(rng: Rng, level: Level, kind: 'lgspTwo' | 'lgspThree', cases: 
     steps,
     cards: [LGSP_CARD.gauss, ...(level >= 3 ? [LGSP_CARD.rang] : [])],
     resultLatex: solLatex(sortRats(right)),
-    form: `${kind}|${disp.eq ? 'eq' : 'mat'}|${sys.cases.join('')}|${ask}|${vars[0]}|${signs(sys.T)}|${paramMask(sys.T)}|${sys.rs.map((r) => ratSign(r)).join('')}`,
+    form: `${form}|${ask}`,
     data: { ...dataOf(sys.T), ask: [CASE_INDEX[ask]] },
     answer: sortRats(right).map(num),
   }
@@ -508,7 +716,7 @@ function buildSym(rng: Rng, level: Level, kind: 'lgspTwo' | 'lgspThree', cases: 
 // Stufe 4 und 5: Parameter b rechts. Für welche a und b unendlich viele Lösungen?
 function buildRhs(rng: Rng, level: Level): Built | null {
   const n = level >= 5 || rng.chance(0.5) ? 3 : 2
-  const sys = makeSym(rng, { n, cases: ['none'], withB: true, paramUpper: level >= 5 && rng.chance(0.5), level })
+  const sys = makeSym(rng, { n, cases: ['none'], withB: true, ...placeSpec(rng, level, n, 1), level })
   if (!sys || isZero(sys.beta)) return null
   const r = sys.rs[0]
   const sr = quadAtR(sys.s, r)
@@ -558,7 +766,7 @@ function buildRhs(rng: Rng, level: Level): Built | null {
     steps,
     cards: [LGSP_CARD.gauss, LGSP_CARD.rechts],
     resultLatex: `a = ${ratLatex(r)},\\; b = ${ratLatex(bStar)}`,
-    form: `lgspRhs|${n}|${disp.eq ? 'eq' : 'mat'}|${vars[0]}|${signs(sys.T)}|${paramMask(sys.T)}|${ratSign(r)}${ratSign(bStar)}|${num(sys.beta)}`,
+    form: `lgspRhs|${n}|${disp.eq ? 'eq' : 'mat'}|${sys.spec.place}${sys.spec.upper ? 'u' : ''}${sys.swapWith >= 0 ? 's' : ''}|${vars[0]}|${signs(sys.T)}|${paramMask(sys.T)}|${ratSign(r)}${ratSign(bStar)}|${num(sys.beta)}`,
     data: dataOf(sys.T),
     answer: [num(r), num(bStar)],
   }
@@ -568,7 +776,7 @@ function buildRhs(rng: Rng, level: Level): Built | null {
 function buildTarget(rng: Rng, level: Level, trap: boolean): Built | null {
   const n = level >= 5 || rng.chance(0.6) ? 3 : 2
   const cases: Case2[] = trap ? rng.shuffle(['inf', 'none']) : level >= 5 && rng.chance(0.5) ? ['none', 'none'] : ['none']
-  const sys = makeSym(rng, { n, cases, withB: false, paramUpper: level >= 5 && rng.chance(0.4), level })
+  const sys = makeSym(rng, { n, cases, withB: false, ...placeSpec(rng, level, n, cases.length), level })
   if (!sys) return null
   const vars = rng.pick(VARS[n])
   const v = vars[n - 1]
@@ -634,7 +842,7 @@ function buildTarget(rng: Rng, level: Level, trap: boolean): Built | null {
     steps,
     cards: [LGSP_CARD.gauss, LGSP_CARD.rechts],
     resultLatex: solLatex(sortRats(valid)),
-    form: `lgspTarget|${n}|${disp.eq ? 'eq' : 'mat'}|${sys.cases.join('')}|${excluded.length}|${valid.length}|${vars[0]}|${ratSign(c)}|${signs(sys.T)}|${paramMask(sys.T)}`,
+    form: `lgspTarget|${n}|${disp.eq ? 'eq' : 'mat'}|${sys.cases.join('')}|${sys.spec.place}${sys.spec.square ? 'q' : ''}${sys.swapWith >= 0 ? 's' : ''}|${excluded.length}|${valid.length}|${vars[0]}|${ratSign(c)}|${signs(sys.T)}|${paramMask(sys.T)}`,
     data: { ...dataOf(sys.T), k: [n - 1], c: [num(c)] },
     answer: sortRats(valid).map(num),
   }
@@ -643,7 +851,7 @@ function buildTarget(rng: Rng, level: Level, trap: boolean): Built | null {
 // Stufe 5: alle Fälle, Lösungsmenge beim Sonderwert mit unendlich vielen Lösungen
 function buildFull(rng: Rng, level: Level): Built | null {
   const cases: Case2[] = rng.shuffle(['inf', 'none'])
-  const sys = makeSym(rng, { n: 3, cases, withB: false, paramUpper: rng.chance(0.5), level })
+  const sys = makeSym(rng, { n: 3, cases, withB: false, ...placeSpec(rng, level, 3, 2), level })
   if (!sys) return null
   const vars = rng.pick(VARS[3])
   const n = 3
@@ -723,7 +931,7 @@ function buildFull(rng: Rng, level: Level): Built | null {
     cards: [LGSP_CARD.gauss, LGSP_CARD.rang],
     resultLatex: right,
     ...(drawing ? { resultDrawing: drawing } : {}),
-    form: `lgspFull|${disp.eq ? 'eq' : 'mat'}|${sys.cases.join('')}|${vars[0]}|${params[0]}|${signs(sys.T)}|${paramMask(sys.T)}`,
+    form: `lgspFull|${disp.eq ? 'eq' : 'mat'}|${sys.cases.join('')}|${sys.spec.place}${sys.spec.square ? 'q' : ''}${sys.swapWith >= 0 ? 's' : ''}|${vars[0]}|${params[0]}|${signs(sys.T)}|${paramMask(sys.T)}`,
     data: { ...dataOf(sys.T), inf: [num(r1)] },
     answer: [...sol.p, ...sol.dirs.flat()].map(num),
   }
@@ -773,7 +981,7 @@ function paramSystemMatrix(rng: Rng, n: 2 | 3, count: 1 | 2): { A: PMat; rs: Rat
     const pm = paramMatrix(rng)
     return pm ? { A: pm.M, rs: [...pm.roots] } : null
   }
-  const M: Lin[][] = Array.from({ length: n }, () => Array.from({ length: n }, () => lin(R(nonzero(rng, -4, 5)))))
+  const M: Lin[][] = Array.from({ length: n }, () => Array.from({ length: n }, () => lin(R(nonzero(rng, -6, 6)))))
   if (n === 3) M[rng.int(0, 2)][rng.int(0, 2)] = lin(ZERO)
   const spots: (readonly [number, number])[] =
     count === 2 ? [...rng.pick([[[0, 0], [1, 1]], [[0, 1], [1, 0]]] as const)] : [[rng.int(0, n - 1), rng.int(0, n - 1)] as const]
@@ -789,8 +997,9 @@ function paramSystemMatrix(rng: Rng, n: 2 | 3, count: 1 | 2): { A: PMat; rs: Rat
 const mulVec = (A: Tab, x: readonly Rational[]) => A.map((r) => r.reduce((acc, a, j) => ratAdd(acc, ratMul(a, x[j])), ZERO))
 
 function buildDet(rng: Rng, level: Level): Built | null {
-  const n: 2 | 3 = level >= 4 ? (rng.chance(0.6) ? 3 : 2) : rng.chance(0.5) ? 3 : 2
-  const count: 1 | 2 = level >= 4 ? 2 : n === 2 ? (rng.chance(0.5) ? 2 : 1) : 1
+  // Stufe 2: 2 × 2; Stufe 3: auch 3 × 3; ab Stufe 4 zwei Sonderwerte, Stufe 5 nur 3 × 3
+  const n: 2 | 3 = level <= 2 ? 2 : level >= 5 ? 3 : rng.chance(0.5) ? 3 : 2
+  const count: 1 | 2 = level >= 4 ? 2 : rng.chance(0.5) ? 2 : 1
   const pm = paramSystemMatrix(rng, n, count)
   if (!pm) return null
   const { A, rs } = pm
@@ -829,6 +1038,26 @@ function buildDet(rng: Rng, level: Level): Built | null {
     const lastRow = res.F[n - 1]
     specials.push({ r, kase, why: `Für $a = ${ratLatex(r)}$ endet die Stufenform mit der Zeile $0 = ${ratLatex(lastRow[n])}$: ${kase === 'none' ? 'ein Widerspruch, keine Lösung.' : 'eine Nullzeile, eine Unbekannte ist frei, unendlich viele Lösungen.'}` })
   }
+  const T: PT = A.map((row, i) => [...row.map(fromLin), P(b[i])])
+  const disp = shown(rng, T, vars)
+  const formBase = `lgspDet|${n}|${disp.eq ? 'eq' : 'mat'}|${cases.join('')}|${vars[0]}|${signs(T)}|${paramMask(T)}`
+  if (rs.length === 1) {
+    const [r] = rs
+    const kase = cases[0]!
+    const c = tables[0][n - 1][n]
+    steps.push(singleCaseStep(rng, r, kase, `0 = ${ratLatex(c)}`, c, vars[n - 1], `Was gilt für den Sonderwert $a = ${ratLatex(r)}$?\n$${tabLatex(tables[0], vars)}$`, specials[0].why))
+    return {
+      kind: 'lgspDet',
+      instruction: `${disp.what} hängt vom Parameter $a$ ab. Für welches $a$ hat es nicht genau eine Lösung, und was gilt dort? Bestimme zuerst $\\det A$.`,
+      functionLatex: disp.functionLatex,
+      steps,
+      cards: [LGSP_CARD.gauss],
+      resultLatex: singleResult(r, kase),
+      form: formBase,
+      data: { ...dataOf(T), single: [1] },
+      answer: [num(r), CASE_INDEX[kase]],
+    }
+  }
   if (level >= 4) {
     const i = rng.int(0, rs.length - 1)
     steps.push(rankStep(rng, `Für $a = ${ratLatex(rs[i])}$ hat die Stufenform diese Gestalt. Welche Ränge haben $A$ und $(A \\mid \\vec b)$, und was folgt daraus?\n$${tabLatex(tables[i], vars)}$`, cases[i]!, n))
@@ -837,8 +1066,6 @@ function buildDet(rng: Rng, level: Level): Built | null {
   const askText = ask === 'none' ? 'keine Lösung' : 'unendlich viele Lösungen'
   const right = rs.filter((_, i) => cases[i] === ask)
   steps.push(specialStep(rng, specials, ask, `Für welche $a$ hat das System ${askText}?`))
-  const T: PT = A.map((row, i) => [...row.map(fromLin), P(b[i])])
-  const disp = shown(rng, T, vars)
   return {
     kind: 'lgspDet',
     instruction: `${disp.what} hängt vom Parameter $a$ ab. Für welche $a$ hat es ${askText}? Bestimme zuerst $\\det A$ und untersuche dann die Sonderwerte einzeln.`,
@@ -846,7 +1073,7 @@ function buildDet(rng: Rng, level: Level): Built | null {
     steps,
     cards: [LGSP_CARD.gauss, ...(level >= 4 ? [LGSP_CARD.rang] : [])],
     resultLatex: solLatex(sortRats(right)),
-    form: `lgspDet|${n}|${disp.eq ? 'eq' : 'mat'}|${cases.join('')}|${ask}|${vars[0]}|${signs(T)}|${paramMask(T)}`,
+    form: `${formBase}|${ask}`,
     data: { ...dataOf(T), ask: [CASE_INDEX[ask]] },
     answer: sortRats(right).map(num),
   }
@@ -868,15 +1095,15 @@ function retry(make: () => (() => Built | null)): Built {
 
 const symCases = (rng: Rng, level: Level, n: 2 | 3): Case2[] => {
   if (n === 2 || level <= 2) return [rng.pick(['none', 'inf'] as const)]
-  return rng.pick([['inf', 'none'], ['none', 'inf'], ['none', 'none'], ['inf', 'inf'], ['inf', 'none']] as const).slice()
+  return rng.pick([['none'], ['inf'], ['inf', 'none'], ['none', 'inf'], ['none', 'none'], ['inf', 'inf']] as const).slice()
 }
 
 export const LGSP_KINDS_BY_LEVEL: Readonly<Record<Level, readonly VectorKind[]>> = {
   1: ['lgspTwo'],
-  2: ['lgspTwo', 'lgspThree'],
+  2: ['lgspTwo', 'lgspThree', 'lgspDet'],
   3: ['lgspThree', 'lgspDet'],
   4: ['lgspDet', 'lgspRhs', 'lgspTarget'],
-  5: ['lgspFull', 'lgspRhs', 'lgspTarget'],
+  5: ['lgspFull', 'lgspRhs', 'lgspTarget', 'lgspDet'],
 }
 
 export const LGSP_BUILDERS: Readonly<Record<Extract<VectorKind, `lgsp${string}`>, (rng: Rng, level: Level) => Built>> = {

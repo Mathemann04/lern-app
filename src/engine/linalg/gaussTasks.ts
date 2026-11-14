@@ -283,14 +283,17 @@ const nonzero = (rng: Rng, lo: number, hi: number) => {
   }
 }
 
+const TOP_PIVOTS = [2, 3, -2, -3, 2, 3, 4, 1, -1]
+
 function makeTable(rng: Rng, spec: Spec, level: Level): Tab | null {
   const { m, n, pivots } = spec
-  const pool = level <= 2 ? [1, 1, 1, -1, 2] : [1, 1, -1, 2, -2, 3]
+  // Stufenzahlen: oben links meist 2 oder 3, selten 1 (Wunsch des Nutzers, 14.11.2026: nicht fast immer Einsen)
+  const pool = level <= 2 ? [1, -1, 2, -2, 3, 2] : [1, -1, 2, -2, 3, -3]
   const x0 = Array.from({ length: n }, () => R(rng.int(-3, 4)))
   const E: Rational[][] = Array.from({ length: m }, (_, i) => {
     if (i >= pivots.length) return Array.from({ length: n + 1 }, () => ZERO)
     const pc = pivots[i]
-    const row = Array.from({ length: n }, (_, j) => (j < pc ? ZERO : j === pc ? R(i === 0 ? rng.pick([1, 1, 1, -1, 2]) : rng.pick(pool)) : R(rng.int(-3, 3))))
+    const row = Array.from({ length: n }, (_, j) => (j < pc ? ZERO : j === pc ? R(i === 0 ? rng.pick(TOP_PIVOTS) : rng.pick(pool)) : R(rng.int(-3, 3))))
     return [...row, row.reduce((s, c, j) => ratAdd(s, ratMul(c, x0[j])), ZERO)]
   })
   if (spec.kase === 'none') E[pivots.length][n] = R(nonzero(rng, -5, 5))
@@ -855,7 +858,7 @@ function spec(rng: Rng, kind: VectorKind, level: Level): Spec {
   switch (kind) {
     case 'gaussTwo': {
       const kase = pickCase(rng, ['unique', 'unique', 'unique', 'none', 'inf'])
-      return { ...base, m: 2, n: 2, kase, pivots: kase === 'unique' ? [0, 1] : [0], vars: ['x', 'y'] }
+      return { ...base, m: 2, n: 2, kase, pivots: kase === 'unique' ? [0, 1] : [0], cross: rng.chance(0.4), vars: ['x', 'y'] }
     }
     case 'gaussThree':
     case 'gaussPivot': {
@@ -867,7 +870,7 @@ function spec(rng: Rng, kind: VectorKind, level: Level): Spec {
         kase,
         pivots: kase === 'unique' ? [0, 1, 2] : rng.pick([[0, 1], [0, 1], [0, 2]]),
         swap: kind === 'gaussPivot',
-        cross: kind === 'gaussThree' && level >= 3,
+        cross: kind === 'gaussThree' ? level >= 3 || rng.chance(0.4) : rng.chance(0.3),
         vars: rng.pick(VARS3),
       }
     }
@@ -878,7 +881,7 @@ function spec(rng: Rng, kind: VectorKind, level: Level): Spec {
     case 'gaussUnder': {
       if (level <= 4) {
         const kase = pickCase(rng, ['inf', 'inf', 'inf', 'none'])
-        return { ...base, m: 2, n: 3, kase, pivots: kase === 'none' ? [0] : rng.pick([[0, 1], [0, 2], [0, 1]]), vars: rng.pick(VARS3) }
+        return { ...base, m: 2, n: 3, kase, pivots: kase === 'none' ? [0] : rng.pick([[0, 1], [0, 2], [0, 1]]), cross: rng.chance(0.3), vars: rng.pick(VARS3) }
       }
       const kase = pickCase(rng, ['inf', 'inf', 'inf', 'none'])
       return {
@@ -894,7 +897,7 @@ function spec(rng: Rng, kind: VectorKind, level: Level): Spec {
     }
     case 'gaussPlane': {
       const kase = pickCase(rng, ['inf', 'inf', 'none'])
-      return { ...base, m: 3, n: 3, kase, pivots: [0], vars: rng.pick(VARS3) }
+      return { ...base, m: 3, n: 3, kase, pivots: [0], cross: rng.chance(0.3), vars: rng.pick(VARS3) }
     }
     case 'gaussDecimal': {
       const kase = pickCase(rng, ['unique', 'unique', 'none', 'inf'])
@@ -905,7 +908,7 @@ function spec(rng: Rng, kind: VectorKind, level: Level): Spec {
         kase,
         pivots: kase === 'unique' ? [0, 1, 2] : rng.pick([[0, 1], [0, 2]]),
         swap: level >= 5 && rng.chance(0.5),
-        cross: level >= 5 && rng.chance(0.3),
+        cross: rng.chance(level >= 5 ? 0.4 : 0.3),
         decimals: level >= 5 ? 2 : rng.pick([1, 2]),
         display: 'eq',
         vars: rng.pick(VARS3),

@@ -21,7 +21,7 @@ export const LGSP_CARD_LIST: readonly Card[] = [
     note: 'Steht $a$ an Stellen, die das Gauß-Verfahren schwer machen, rechnest du zuerst $\\det A$ als Polynom in $a$: Seine Nullstellen sind dieselben Sonderwerte. Für sie bringst du die Tabelle mit Zahlen auf Stufenform. Teile nie durch einen Ausdruck mit $a$, ohne zu prüfen, ob er $0$ sein kann; die Formel für den allgemeinen Fall gilt beim Sonderwert nicht.',
     when: 'Bei jedem Gleichungssystem, in dem ein Parameter steht und gefragt ist, wann es genau eine, keine oder unendlich viele Lösungen gibt.',
     examples: [{ vector: { kind: 'lgspTwo', level: 1, seed: 1 } }, { vector: { kind: 'lgspDet', level: 3, seed: 2 } }],
-    errors: ['lgsp-cond-flip', 'lgsp-cond-all', 'lgsp-cond-rhs', 'lgsp-one-root', 'lgsp-special-missed', 'lgsp-special-swapped', 'lgsp-general-formula'],
+    errors: ['lgsp-cond-flip', 'lgsp-cond-all', 'lgsp-cond-rhs', 'lgsp-one-root', 'lgsp-special-missed', 'lgsp-special-swapped', 'lgsp-general-formula', 'lgsp-divide-param', 'lgsp-multiply-param', 'lgsp-fix-param'],
   },
   {
     id: 'lgsp-rang',

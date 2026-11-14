@@ -123,18 +123,26 @@ freier Modus `vectorFree.ts`, `buildVectorTask` wählt die Arten nach dem Bauste
   Formelsatz).
 - Gleichungssysteme mit Parameter (Schritt 11b): Baustein `lgsparam` (Code 37, Gruppe `mat-lgs`), `linalg/lgspTasks.ts`, Arten
   in `LGSP_KINDS_BY_LEVEL` (lgspTwo, lgspThree, lgspDet, lgspRhs, lgspTarget, lgspFull). Einträge als `Poly` = [c0, c1, c2,
-  cb] (c0 + c1·a + c2·a² + cb·b). Gauß mit Parameter: `makeSym` baut rückwärts aus der Stufenform E (Stufen fest, a nur in
-  der letzten Spalte und rechts, letzte Zeile q(a) | s(a) + βb mit den geplanten Sonderwerten und Fällen), T = D · L · E;
-  `runParam` (Faktoren immer ganze Zahlen) und `pElimStep` (falsche Tabellen `pCands` wie `elimCands`, gleichwertig über
-  `ptEquivalent`: Gauß in Zahlen an zwei krummen Stellen). Determinante zuerst (`buildDet`): `paramSystemMatrix`
-  (2 × 2 an ein oder zwei Stellen, 3 × 3 eine Stelle oder `paramMatrix`), b so, dass ein Sonderwert unendlich viele hat
-  oder keiner; `detStep` aus `cramerTasks.ts`, `numericStep` (Gauß in Zahlen beim Sonderwert, Fehler aus `elimCands` der
-  letzten Umformung). Schritte `conditionStep` (`bedingung`), `specialStep` (`sonderfall`, Fehler aus `LGS_CASE_RULES`),
+  cb] (c0 + c1·a + c2·a² + cb·b), `pMul` (null über a² oder bei a·b). Gauß mit Parameter: `makeSym` baut vorwärts (seit
+  14.11.2026): zufällige Zeilen (oben links meist 2 oder 3, `PIVOTS`), a nach `placeSpec` (`last`: letzte Spalte, Zeile
+  beliebig; `first`/`mid`: vorne in der untersten Zeile; `square`: a²; `upper`: a auch in der letzten Spalte einer anderen
+  Zeile; `swapTop`: Zeile mit a steht oben, Schritt `tausch` mit `paramSwapStep`). Gauß zweimal mit Probe-Werten (0 und 1)
+  für die Zahl t0 in der letzten Spalte und die rechte Seite v0 + v1·a (+ βb) der Zeile mit a: t0 legt einen Sonderwert
+  fest, v0, v1 die Fälle. `runParam`: Spalte für Spalte ohne Tausch, Stufen feste Zahlen, `pOpFor` ganzes Vielfaches oder
+  über Kreuz, `POp` = p · Zeile − q · Stufenzeile (q darf a enthalten); `pOpLabel` mit führendem Minus als „+ (a + 2)“.
+  `pElimStep` (falsche Tabellen `pCands` wie `elimCands`, gleichwertig über `ptEquivalent`: Gauß in Zahlen an zwei krummen
+  Stellen). Determinante zuerst (`buildDet`, Stufe 2 bis 5): `paramSystemMatrix` (2 × 2 an ein oder zwei Stellen, 3 × 3 eine
+  Stelle oder `paramMatrix`), b so, dass ein Sonderwert unendlich viele hat oder keiner; `detStep` aus `cramerTasks.ts`,
+  `numericStep` (Gauß in Zahlen beim Sonderwert, Fehler aus `elimCands` der letzten Umformung). Schritte `conditionStep`
+  (`bedingung`), bei einem Sonderwert `singleCaseStep` (`sonderfall`: „Was gilt dort?“, Fall mit Begründung, Ergebnis
+  `a = 3,\; \text{keine Lösung}`, `data.single`), bei zweien `specialStep` (`sonderfall`, Fehler aus `LGS_CASE_RULES`),
   `rankStep` (`rang`: Ränge mit Folgerung), `b-wert`, `vorgabe`, `loesung` (mit `backSolve` aus `gaussTasks.ts`, falsch auch
   der Punkt aus der gekürzten allgemeinen Formel). Aus `gaussTasks.ts` exportiert: `tabLatex`, `runGauss`, `analyze`,
   `equivalent`, `rankOf`, `opLabel`, `elimCands` (aus `elimStep` herausgelöst, gleiche Zufallsfolge), `backSolve` u. a.;
   aus `cramerTasks.ts`: `detStep`, `roots`, `solLatex`, `sortRats`. Ergebnis `a = …` (ein oder zwei Werte), `a = …,\; b =
-  …` oder die Lösungsmenge `L\colon \vec x = …` (Bild `systemDrawing` beim Sonderwert). 20 Fehler `lgsp-…` in
-  `linalg/lgspErrorRules.ts`, drei Karten in `explain/lgspCards.ts`. Tests in `linalg/lgspTasks.test.ts` (Fall für jedes
-  ganze a von −30 bis 30 mit eigenem Rang in Kommazahlen, jede Tabelle gleichwertig zur Aufgabe an mehreren Stellen,
-  Ränge gegen die Aufgabe beim Sonderwert).
+  …`, Sonderwert mit Fall oder die Lösungsmenge `L\colon \vec x = …` (Bild `systemDrawing` beim Sonderwert). 23 Fehler
+  `lgsp-…` in `linalg/lgspErrorRules.ts`, drei Karten in `explain/lgspCards.ts`. Tests in `linalg/lgspTasks.test.ts` (Fall für
+  jedes ganze a von −30 bis 30 mit eigenem Rang in Kommazahlen, jede Tabelle gleichwertig zur Aufgabe an mehreren Stellen,
+  Ränge gegen die Aufgabe beim Sonderwert, Anteil der Einsen und der Umformungen über Kreuz, Tausch).
+- Zahlen im Gauß-Verfahren (14.11.2026): oben links `TOP_PIVOTS` (meist 2 oder 3), über Kreuz auch in Stufe 1 und 2 und bei
+  den meisten Arten mit Zufall; `gaussTasks.test.ts` misst den Anteil der Einsen und der Umformungen über Kreuz.
