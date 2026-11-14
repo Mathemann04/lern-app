@@ -218,7 +218,7 @@ const HOSTS = [
 const DOPE_TEXT = {
   n: 'Ein Elektron bleibt übrig und kann wandern: n-Leiter.',
   p: 'Ein Elektron fehlt; es entsteht ein Loch, das wandern kann: p-Leiter.',
-  none: 'Nichts ändert sich; alle Elektronen bleiben in Bindungen.',
+  none: 'Nichts ändert sich; alle Elektronen bleiben fest in den Bindungen zu den Nachbarn.',
   charged: 'Der Kristall wird insgesamt elektrisch geladen.',
 }
 

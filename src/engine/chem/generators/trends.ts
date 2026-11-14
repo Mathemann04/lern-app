@@ -213,9 +213,9 @@ const ionCe = (ion: IonRadius) => ce(`${ion.symbol}^${Math.abs(ion.charge) === 1
 const ionsText = (ions: readonly IonRadius[]) => `$${ions.map((i) => ionCe(i)).join(' < ')}$`
 
 const ION_RULE = {
-  correct: 'Alle haben gleich viele Elektronen; je mehr Protonen im Kern, desto stärker werden sie angezogen und desto kleiner ist das Teilchen.',
-  reversed: 'Je mehr Protonen im Kern, desto größer ist das Teilchen.',
-  same: 'Alle haben gleich viele Elektronen und sind deshalb gleich groß.',
+  correct: 'Alle haben gleich viele Elektronen; je mehr Protonen im Kern, desto stärker werden sie angezogen und desto kleiner das Teilchen.',
+  reversed: 'Alle haben gleich viele Elektronen; je mehr Protonen im Kern, desto mehr Platz braucht der Kern und desto größer ist das Teilchen.',
+  same: 'Alle haben gleich viele Elektronen und sind deshalb gleich groß; die Zahl der Protonen spielt keine Rolle.',
 }
 
 function ionTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc | null {

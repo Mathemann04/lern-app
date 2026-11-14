@@ -339,14 +339,14 @@ export const ZMK_BANK: QuestionBank = {
       part: 'kraefte',
       title: 'Dipol-Dipol-Wechselwirkungen',
       prompt: 'Welche Moleküle ziehen sich über Dipol-Dipol-Wechselwirkungen an?',
-      correct: 'Moleküle, die als Ganzes eine positive und eine negative Seite haben',
+      correct: 'solche Moleküle, die als Ganzes eine positive und eine negative Seite haben',
       wrong: [
-        w('f1', 'alle Moleküle mit polaren Bindungen, auch symmetrisch gebaute', 'chem-mis-zk-dipole-nonpolar'),
+        w('f1', 'alle Moleküle mit polaren Bindungen, auch symmetrisch gebaute wie $\\ce{CO2}$ oder $\\ce{CCl4}$', 'chem-mis-zk-dipole-nonpolar'),
         w('f2', 'nur Moleküle aus gleichen Atomen', 'chem-mis-zk-dipole-nonpolar', {
           detailed: 'Moleküle aus gleichen Atomen haben keinen Unterschied der Elektronegativität und damit keine positive und negative Seite. Sie ziehen sich nur über Van-der-Waals-Kräfte an.',
           short: 'Gleiche Atome: kein Dipol.',
         }),
-        w('f3', 'nur Ionen mit entgegengesetzter Ladung', 'chem-mis-zk-stronger'),
+        w('f3', 'nur Ionen mit entgegengesetzter Ladung, etwa $\\ce{Na+}$ und $\\ce{Cl-}$ in einem Salzkristall', 'chem-mis-zk-stronger'),
         w('f4', 'nur Wassermoleküle', 'chem-mis-zk-water-only'),
       ],
       hint: 'Ein Dipol hat zwei verschieden geladene Enden. Das muss für das ganze Molekül gelten.',
@@ -570,18 +570,18 @@ export const ZMK_BANK: QuestionBank = {
       part: 'wasser',
       title: 'Wasser',
       prompt: 'Manche Insekten können über Wasser laufen. Was macht das möglich?',
-      correct: 'die hohe Oberflächenspannung: Die Moleküle an der Oberfläche halten über Wasserstoffbrücken fest zusammen',
+      correct: 'Die hohe Oberflächenspannung, die Wasserstoffbrücken bewirken.',
       wrong: [
-        w('f1', 'Die Insekten sind leichter als Luft.', 'chem-mis-zk-water-normal', {
+        w('f1', 'Die Insekten sind leichter als Luft und schweben knapp über dem Wasser.', 'chem-mis-zk-water-normal', {
           detailed: "Leichter als Luft wäre ein Ballon, kein Insekt. Das Tier wird von der Wasseroberfläche getragen; die Frage ist, was sie so belastbar macht.",
           short: "Die Oberfläche trägt das Tier.",
         }),
-        w('f2', 'An der Oberfläche bilden die Wassermoleküle Atombindungen untereinander.', 'chem-mis-zk-hbond-covalent'),
-        w('f3', 'Wassermoleküle sind unpolar und stoßen die Beine ab.', 'chem-mis-zk-opposites', {
+        w('f2', 'An der Oberfläche bilden die Wassermoleküle feste Atombindungen untereinander, wie in einer Haut.', 'chem-mis-zk-hbond-covalent'),
+        w('f3', 'Wassermoleküle sind unpolar und stoßen die Beine der Insekten ab.', 'chem-mis-zk-opposites', {
           detailed: "Wasser ist kein unpolarer Stoff: Seine Moleküle sind gewinkelt und haben eine positive und eine negative Seite.",
           short: "Wasser ist polar.",
         }),
-        w('f4', 'Das gelingt auf jeder Flüssigkeit gleich gut.', 'chem-mis-zk-water-normal', {
+        w('f4', 'Das gelingt auf jeder Flüssigkeit gleich gut; entscheidend ist nur, wie leicht das Insekt ist.', 'chem-mis-zk-water-normal', {
           detailed: "Auf vielen anderen Flüssigkeiten sinkt ein solches Insekt ein. Wasser hat hier etwas Besonderes.",
           short: "Wasser ist hier besonders.",
         }),
@@ -601,12 +601,12 @@ export const ZMK_BANK: QuestionBank = {
       part: 'wasser',
       title: 'Wasser',
       prompt: r`Schwefelwasserstoff $\ce{H2S}$ ist größer als Wasser, siedet aber bei etwa −60 °C. Warum siedet Wasser höher?`,
-      correct: r`Zwischen Wassermolekülen gibt es Wasserstoffbrücken, zwischen $\ce{H2S}$-Molekülen nicht.`,
+      correct: r`Wasser bildet Wasserstoffbrücken, $\ce{H2S}$ nicht.`,
       wrong: [
-        w('f1', 'Wasser ist das schwerere Molekül.', 'chem-mis-zk-mass-only'),
-        w('f2', r`Auch $\ce{H2S}$ bildet Wasserstoffbrücken, nur weniger.`, 'chem-mis-zk-h-other'),
-        w('f3', 'Größere Moleküle sieden immer niedriger.', 'chem-mis-zk-size'),
-        w('f4', 'Beim Sieden von Wasser müssen $\\ce{O-H}$-Bindungen brechen.', 'chem-mis-zk-boil-breaks'),
+        w('f1', 'Wasser ist das schwerere der beiden Moleküle und siedet deshalb höher.', 'chem-mis-zk-mass-only'),
+        w('f2', r`Auch zwischen $\ce{H2S}$-Molekülen gibt es Wasserstoffbrücken, nur weniger als im Wasser.`, 'chem-mis-zk-h-other'),
+        w('f3', 'Größere Moleküle sieden immer niedriger als kleinere.', 'chem-mis-zk-size'),
+        w('f4', 'Beim Sieden von Wasser müssen zusätzlich die $\\ce{O-H}$-Bindungen in den Molekülen brechen.', 'chem-mis-zk-boil-breaks'),
       ],
       hint: 'Woran sitzen die H-Atome in den beiden Molekülen?',
       explanation: {
@@ -753,15 +753,15 @@ export const ZMK_BANK: QuestionBank = {
       part: 'kraefte',
       title: 'Zwischenmolekulare Kräfte',
       prompt: r`Tetrachlormethan $\ce{CCl4}$ hat vier polare Bindungen. Welche Kräfte wirken zwischen seinen Molekülen?`,
-      correct: 'nur Van-der-Waals-Kräfte, weil das Molekül als Ganzes unpolar ist',
+      correct: 'nur Van-der-Waals-Kräfte, weil es unpolar ist',
       wrong: [
-        w('f1', 'Dipol-Dipol-Wechselwirkungen, weil die Bindungen polar sind', 'chem-mis-zk-dipole-nonpolar'),
-        w('f2', 'Wasserstoffbrücken, weil Chlor sehr elektronegativ ist', 'chem-mis-zk-h-other', {
+        w('f1', 'Dipol-Dipol-Wechselwirkungen, weil alle vier $\\ce{C-Cl}$-Bindungen polar sind', 'chem-mis-zk-dipole-nonpolar'),
+        w('f2', 'Wasserstoffbrücken, weil die vier Chloratome sehr elektronegativ sind', 'chem-mis-zk-h-other', {
           detailed: 'Wasserstoffbrücken brauchen ein H-Atom an N, O oder F. Tetrachlormethan hat gar keine H-Atome.',
           short: 'Kein H-Atom vorhanden.',
         }),
-        w('f3', 'gar keine, weil es unpolar ist', 'chem-mis-zk-vdw-some'),
-        w('f4', 'Ionenbindungen zwischen C und Cl', 'chem-mis-zk-stronger'),
+        w('f3', 'gar keine, weil das Molekül als Ganzes unpolar ist', 'chem-mis-zk-vdw-some'),
+        w('f4', 'Ionenbindungen zwischen den C- und Cl-Atomen benachbarter Moleküle', 'chem-mis-zk-stronger'),
       ],
       hint: 'Polare Bindungen allein machen kein polares Molekül. Wie ist es gebaut?',
       explanation: {
@@ -778,15 +778,15 @@ export const ZMK_BANK: QuestionBank = {
       part: 'kraefte',
       title: 'Wasserstoffbrücken',
       prompt: 'Was für eine Anziehung ist eine Wasserstoffbrücke?',
-      correct: 'ein besonders starker Fall der Dipol-Dipol-Wechselwirkungen zwischen Molekülen',
+      correct: 'eine besonders starke Dipol-Dipol-Wechselwirkung',
       wrong: [
-        w('f1', 'eine besonders starke Atombindung', 'chem-mis-zk-hbond-covalent', {
+        w('f1', 'eine besonders starke Atombindung mit gemeinsamem Elektronenpaar', 'chem-mis-zk-hbond-covalent', {
           detailed: "Bei einer Atombindung teilen sich zwei Atome ein Elektronenpaar. Bei einer Wasserstoffbrücke gehört das H-Atom weiter fest zu seinem eigenen Molekül.",
           short: "Kein gemeinsames Paar zwischen den Molekülen.",
         }),
-        w('f2', 'eine Ionenbindung zwischen einem Proton und einem Anion', 'chem-mis-zk-stronger'),
-        w('f3', 'eine Van-der-Waals-Kraft zwischen unpolaren Molekülen', 'chem-mis-zk-order'),
-        w('f4', 'eine Bindung zwischen zwei H-Atomen', 'chem-mis-zk-any-h'),
+        w('f2', 'eine Ionenbindung zwischen einem Proton und einem Anion im Nachbarmolekül', 'chem-mis-zk-stronger'),
+        w('f3', 'eine Van-der-Waals-Kraft, wie sie zwischen unpolaren Molekülen wirkt', 'chem-mis-zk-order'),
+        w('f4', 'eine Bindung zwischen zwei H-Atomen benachbarter Moleküle', 'chem-mis-zk-any-h'),
       ],
       hint: 'Das H-Atom trägt eine positive Teilladung, das Nachbaratom eine negative.',
       explanation: {
@@ -856,12 +856,12 @@ export const ZMK_BANK: QuestionBank = {
       correct: 'Eis schwimmt oben, und am Grund sammelt sich das dichteste Wasser von etwa 4 °C.',
       wrong: [
         w('f1', 'Eis sinkt nach unten und wärmt dort das Wasser.', 'chem-mis-zk-ice-sinks'),
-        w('f2', 'Am Grund ist das Wasser genau 0 °C, weil es dort am dichtesten ist.', 'chem-mis-zk-density-zero', {
+        w('f2', 'Am Grund ist das Wasser genau 0 °C kalt, weil Wasser bei dieser Temperatur am dichtesten ist.', 'chem-mis-zk-density-zero', {
           detailed: "Die größte Dichte liegt nicht am Gefrierpunkt: Schon beim Abkühlen kurz vor 0 °C beginnen die Wasserstoffbrücken, die Moleküle weitmaschiger anzuordnen.",
           short: "Nicht am Gefrierpunkt.",
         }),
         w('f3', 'Wasser kann gar nicht gefrieren, wenn es tief genug ist.', 'chem-mis-zk-water-normal'),
-        w('f4', 'Am Grund zerfallen die Wassermoleküle und geben Wärme ab.', 'chem-mis-zk-boil-breaks'),
+        w('f4', 'Am Grund zerfallen ständig Wassermoleküle in ihre Atome und geben dabei Wärme an den See ab.', 'chem-mis-zk-boil-breaks'),
       ],
       hint: 'Welches Wasser sinkt nach unten, und wo bleibt das Eis?',
       explanation: {
@@ -906,7 +906,7 @@ export const ZMK_BANK: QuestionBank = {
       part: 'loesen',
       title: 'Löslichkeit',
       prompt: 'Warum mischen sich Öl und Wasser nicht?',
-      correct: 'Wasser ist polar und hält über Wasserstoffbrücken zusammen; das unpolare Öl wird davon ausgeschlossen.',
+      correct: 'Weil Wasser polar ist und über Wasserstoffbrücken zusammenhält; das unpolare Öl wird davon ausgeschlossen.',
       wrong: [
         w('f1', 'Weil Öl leichter ist als Wasser.', 'chem-mis-zk-oil-light', {
           detailed: "Die Dichte sagt nur, welche Schicht oben liegt. Warum sich überhaupt zwei Schichten bilden, müssen die Kräfte zwischen den Teilchen erklären.",
@@ -978,21 +978,21 @@ export const ZMK_BANK: QuestionBank = {
       part: 'siedepunkte',
       title: 'Sieden',
       prompt: 'Was ist Wasserdampf auf der Ebene der Teilchen?',
-      correct: 'dieselben Wassermoleküle wie im flüssigen Wasser, nur weit voneinander entfernt',
+      correct: 'dieselben Wassermoleküle, nur weit voneinander entfernt',
       wrong: [
-        w('f1', 'einzelne Wasserstoff- und Sauerstoffatome', 'chem-mis-zk-boil-breaks', {
+        w('f1', 'einzelne Wasserstoff- und Sauerstoffatome, weil die Moleküle zerfallen sind', 'chem-mis-zk-boil-breaks', {
           detailed: "Kondensiert Dampf, entsteht wieder Wasser mit allen seinen Eigenschaften. Das ginge nicht, wenn die Moleküle beim Sieden zerfallen wären.",
           short: "Kondensiert Dampf, entsteht wieder Wasser.",
         }),
-        w('f2', 'ein Gemisch aus Wasserstoff und Sauerstoff', 'chem-mis-zk-boil-breaks', {
+        w('f2', 'ein Gemisch aus Wasserstoffgas und Sauerstoffgas, die beim Sieden entstehen', 'chem-mis-zk-boil-breaks', {
           detailed: "Kondensiert Dampf, entsteht wieder Wasser mit allen seinen Eigenschaften. Das ginge nicht, wenn die Moleküle beim Sieden zerfallen wären.",
           short: "Kondensiert Dampf, entsteht wieder Wasser.",
         }),
-        w('f3', 'Luft, in der etwas Wasser gelöst ist, aber keine Wassermoleküle', 'chem-mis-zk-boil-breaks', {
+        w('f3', 'Luft, in der etwas Wasser gelöst ist, aber keine Wassermoleküle mehr', 'chem-mis-zk-boil-breaks', {
           detailed: "Kondensiert Dampf, entsteht wieder Wasser mit allen seinen Eigenschaften. Das ginge nicht, wenn die Moleküle beim Sieden zerfallen wären.",
           short: "Kondensiert Dampf, entsteht wieder Wasser.",
         }),
-        w('f4', 'Wassermoleküle, die über Atombindungen zu großen Ketten verbunden sind', 'chem-mis-zk-hbond-covalent'),
+        w('f4', 'Wassermoleküle, die beim Erhitzen über Atombindungen zu großen Ketten verknüpft wurden', 'chem-mis-zk-hbond-covalent'),
       ],
       hint: 'Kondensiert Dampf, entsteht wieder Wasser. Was muss der Dampf also enthalten?',
       explanation: {
@@ -1045,17 +1045,17 @@ export const ZMK_BANK: QuestionBank = {
       part: 'kraefte',
       title: 'Zwischenmolekulare Kräfte',
       prompt: 'Welche Aussage ist falsch?',
-      correct: 'Zwischen Molekülen von Dimethylether bilden sich Wasserstoffbrücken, weil sie Sauerstoff enthalten.',
+      correct: 'Dimethylether bildet Wasserstoffbrücken untereinander, weil er Sauerstoff enthält.',
       wrong: [
         w('f1', 'Ammoniakmoleküle bilden untereinander Wasserstoffbrücken.', 'chem-mis-zk-water-only', {
           detailed: 'Diese Aussage stimmt: Im Ammoniak sitzt H direkt am Stickstoff, der ein freies Paar hat. Gesucht ist die falsche Aussage.',
           short: 'Diese Aussage stimmt.',
         }),
-        w('f2', 'Tetrachlormethan ist trotz polarer Bindungen ein unpolares Molekül.', 'chem-mis-zk-dipole-nonpolar', {
+        w('f2', 'Tetrachlormethan ist trotz seiner vier polaren Bindungen insgesamt ein unpolares Molekül.', 'chem-mis-zk-dipole-nonpolar', {
           detailed: 'Diese Aussage stimmt: Die vier Bindungen liegen symmetrisch und heben sich auf. Gesucht ist die falsche Aussage.',
           short: 'Diese Aussage stimmt.',
         }),
-        w('f3', 'Iod siedet höher als Chlor, weil seine Moleküle größer sind.', 'chem-mis-zk-size', {
+        w('f3', 'Iod siedet höher als Chlor, weil seine Moleküle größer sind und mehr Elektronen haben.', 'chem-mis-zk-size', {
           detailed: 'Diese Aussage stimmt: Größere Moleküle haben stärkere Van-der-Waals-Kräfte. Gesucht ist die falsche Aussage.',
           short: 'Diese Aussage stimmt.',
         }),
@@ -1079,12 +1079,12 @@ export const ZMK_BANK: QuestionBank = {
       part: 'siedepunkte',
       title: 'Siedepunkte begründen',
       prompt: r`Warum siedet Fluorwasserstoff $\ce{HF}$ (20 °C) viel höher als Chlorwasserstoff $\ce{HCl}$ (−85 °C), obwohl er kleiner ist?`,
-      correct: 'Fluorwasserstoff bildet Wasserstoffbrücken; Chlorwasserstoff nur Dipol-Dipol-Wechselwirkungen.',
+      correct: 'Nur $\\ce{HF}$ bildet Wasserstoffbrücken, $\\ce{HCl}$ dagegen Dipol-Dipol-Wechselwirkungen.',
       wrong: [
         w('f1', 'Fluorwasserstoff ist das schwerere Molekül.', 'chem-mis-zk-mass-only'),
         w('f2', 'Kleinere Moleküle haben immer stärkere Van-der-Waals-Kräfte.', 'chem-mis-zk-size'),
-        w('f3', 'Beim Sieden von Fluorwasserstoff muss die sehr starke $\\ce{H-F}$-Bindung brechen.', 'chem-mis-zk-boil-breaks'),
-        w('f4', 'Beide bilden gleich starke Wasserstoffbrücken; der Unterschied ist Zufall.', 'chem-mis-zk-h-other'),
+        w('f3', 'Beim Sieden von Fluorwasserstoff muss zusätzlich die sehr starke $\\ce{H-F}$-Bindung brechen.', 'chem-mis-zk-boil-breaks'),
+        w('f4', 'Beide bilden gleich starke Wasserstoffbrücken; der große Unterschied ist bloßer Zufall.', 'chem-mis-zk-h-other'),
       ],
       hint: 'Erst die Art der Kraft vergleichen, dann die Größe.',
       explanation: {
@@ -1101,12 +1101,12 @@ export const ZMK_BANK: QuestionBank = {
       part: 'siedepunkte',
       title: 'Siedepunkte begründen',
       prompt: r`Methanol, Ethanol und Propan-1-ol bilden alle Wasserstoffbrücken. Warum siedet Propan-1-ol $\ce{C3H7OH}$ am höchsten?`,
-      correct: 'Bei gleicher Art der Kraft entscheidet die Größe: Die längere Kette verstärkt die Van-der-Waals-Kräfte.',
+      correct: 'Gleiche Art der Kraft: Die längste Kette hat die stärksten Van-der-Waals-Kräfte.',
       wrong: [
-        w('f1', 'Propan-1-ol bildet mehr Wasserstoffbrücken, weil es mehr H-Atome hat.', 'chem-mis-zk-any-h'),
+        w('f1', 'Propan-1-ol bildet mehr Wasserstoffbrücken, weil es mehr H-Atome hat als Methanol.', 'chem-mis-zk-any-h'),
         w('f2', 'Längere Ketten machen die Van-der-Waals-Kräfte schwächer.', 'chem-mis-zk-size'),
         w('f3', 'Bei Propan-1-ol müssen mehr $\\ce{C-C}$-Bindungen beim Sieden brechen.', 'chem-mis-zk-boil-breaks'),
-        w('f4', 'Propan-1-ol ist kein Alkohol und bildet Dipol-Dipol-Wechselwirkungen.', 'chem-mis-zk-order'),
+        w('f4', 'Propan-1-ol hat die schwächsten Kräfte, und schwächere Kräfte heben den Siedepunkt.', 'chem-mis-zk-boil-weak'),
       ],
       hint: 'Jedes dieser Moleküle hat genau eine OH-Gruppe. Was unterscheidet sie dann?',
       explanation: {
@@ -1148,12 +1148,12 @@ export const ZMK_BANK: QuestionBank = {
       part: 'siedepunkte',
       title: 'Siedepunkte begründen',
       prompt: r`Tetrachlormethan $\ce{CCl4}$ ist unpolar und siedet trotzdem höher (77 °C) als das polare Chlormethan $\ce{CH3Cl}$ (−24 °C). Wie passt das zusammen?`,
-      correct: 'Das große Molekül mit vielen Elektronen hat so starke Van-der-Waals-Kräfte, dass sie die Dipol-Dipol-Wechselwirkungen des kleinen übertreffen.',
+      correct: 'Die Van-der-Waals-Kräfte des großen Moleküls übertreffen die Dipol-Dipol-Wechselwirkungen des kleinen.',
       wrong: [
         w('f1', 'Tetrachlormethan bildet Wasserstoffbrücken.', 'chem-mis-zk-h-other'),
         w('f2', 'Tetrachlormethan ist in Wirklichkeit polar.', 'chem-mis-zk-dipole-nonpolar'),
-        w('f3', 'Das passt nicht; die Siedepunkte müssen falsch sein, denn polare Stoffe sieden immer höher.', 'chem-mis-zk-order'),
-        w('f4', 'Bei Tetrachlormethan müssen beim Sieden vier $\\ce{C-Cl}$-Bindungen brechen.', 'chem-mis-zk-boil-breaks'),
+        w('f3', 'Das passt nicht; die Siedepunkte müssen falsch sein, denn polare Stoffe sieden immer höher als unpolare.', 'chem-mis-zk-order'),
+        w('f4', 'Beim Sieden von Tetrachlormethan müssen alle vier $\\ce{C-Cl}$-Bindungen brechen, bei Chlormethan nur eine.', 'chem-mis-zk-boil-breaks'),
       ],
       hint: 'Die Reihenfolge der Kräfte gilt bei ähnlich großen Molekülen. Wie groß sind die beiden Moleküle?',
       explanation: {
@@ -1195,14 +1195,14 @@ export const ZMK_BANK: QuestionBank = {
       part: 'wasser',
       title: 'Wasserstoffbrücken',
       prompt: 'Wo spielen Wasserstoffbrücken außerhalb des Wassers eine wichtige Rolle?',
-      correct: 'beim Zusammenhalt der beiden Stränge der DNA und bei der Faltung von Eiweißen',
+      correct: 'in der DNA und in Eiweißen',
       wrong: [
         w('f1', 'nirgends; es gibt sie nur in Wasser', 'chem-mis-zk-water-only', {
           detailed: "Wasserstoffbrücken hängen nicht am Stoff Wasser, sondern daran, woran das H-Atom sitzt.",
           short: "Woran sitzt das H-Atom?",
         }),
-        w('f2', 'beim Zusammenhalt von Kochsalzkristallen', 'chem-mis-zk-stronger'),
-        w('f3', 'in Methan und anderen Alkanen', 'chem-mis-zk-any-h'),
+        w('f2', 'beim Zusammenhalt von Kochsalzkristallen zwischen den $\\ce{Na+}$- und $\\ce{Cl-}$-Ionen', 'chem-mis-zk-stronger'),
+        w('f3', 'in Methan und anderen Alkanen, deren viele H-Atome Brücken zu Nachbarmolekülen bilden', 'chem-mis-zk-any-h'),
         w('f4', 'bei der Leitfähigkeit von Metallen', 'chem-mis-zk-intra'),
       ],
       hint: 'Wo gibt es in Biomolekülen H-Atome an N oder O?',
@@ -1220,9 +1220,9 @@ export const ZMK_BANK: QuestionBank = {
       part: 'loesen',
       title: 'Mischbarkeit',
       prompt: r`Methanol $\ce{CH3OH}$ mischt sich mit Wasser, Octan $\ce{C8H18}$ nicht. Welcher Teil des Methanols macht den Unterschied?`,
-      correct: 'die OH-Gruppe, über die Methanol mit Wasser Wasserstoffbrücken eingeht',
+      correct: 'die OH-Gruppe',
       wrong: [
-        w('f1', 'die H-Atome am Kohlenstoff', 'chem-mis-zk-any-h', {
+        w('f1', 'die H-Atome am Kohlenstoff, die mit Wasser Wasserstoffbrücken bilden', 'chem-mis-zk-any-h', {
           detailed: 'H-Atome am Kohlenstoff hat Octan auch, sogar viel mehr. Sie können also nicht den Unterschied machen.',
           short: 'Die hat Octan auch.',
         }),
@@ -1234,7 +1234,7 @@ export const ZMK_BANK: QuestionBank = {
           detailed: 'Die Dichte sagt nur, welche Schicht oben liegt, wenn sich zwei Flüssigkeiten nicht mischen. Ob sie sich mischen, entscheiden die Kräfte zwischen den Teilchen.',
           short: 'Die Dichte entscheidet nicht über das Mischen.',
         }),
-        w('f4', r`die $\ce{C-O}$-Bindung, die im Wasser aufbricht`, 'chem-mis-zk-intra', {
+        w('f4', r`die $\ce{C-O}$-Bindung, die im Wasser aufbricht und neue Bindungen zum Wasser knüpft`, 'chem-mis-zk-intra', {
           detailed: 'Beim Lösen bleiben die Moleküle ganz; es ändern sich nur die Kräfte zwischen ihnen. Gelöstes Methanol lässt sich unverändert zurückgewinnen.',
           short: 'Beim Lösen bleiben die Moleküle ganz.',
         }),
@@ -1289,11 +1289,11 @@ export const ZMK_BANK: QuestionBank = {
           detailed: 'Ethanol mischt sich in jedem Verhältnis mit Wasser; es bildet keine eigene Schicht. Zum Ausschütteln braucht man ein Lösemittel, das sich nicht mit Wasser mischt.',
           short: 'Ethanol bildet mit Wasser keine zweite Schicht.',
         }),
-        w('f3', 'Die Lösung kochen, bis die Iodmoleküle in Atome zerfallen.', 'chem-mis-zk-boil-breaks', {
+        w('f3', 'Die Lösung kochen, bis die Iodmoleküle in Atome zerfallen und als Gas entweichen.', 'chem-mis-zk-boil-breaks', {
           detailed: "Beim Kochen zerfallen Moleküle nicht; dafür reicht die Energie bei weitem nicht. Das Iod bliebe außerdem in der Lösung.",
           short: "Kochen zerlegt keine Moleküle.",
         }),
-        w('f4', 'Salz zugeben, damit Iod Wasserstoffbrücken bildet.', 'chem-mis-zk-h-other'),
+        w('f4', 'Salz zugeben, damit Iod Wasserstoffbrücken bildet und als Feststoff ausfällt.', 'chem-mis-zk-h-other'),
       ],
       hint: 'Iod ist unpolar. In welchem Lösemittel fühlt es sich wohler, und mischt sich dieses mit Wasser?',
       explanation: {
@@ -1310,15 +1310,15 @@ export const ZMK_BANK: QuestionBank = {
       part: 'siedepunkte',
       title: 'Siedepunkte begründen',
       prompt: r`Brom $\ce{Br2}$ (unpolar, 160 g/mol) siedet bei 59 °C, Chlorwasserstoff $\ce{HCl}$ (polar, 36,5 g/mol) bei −85 °C. Was folgt daraus?`,
-      correct: 'Bei sehr verschieden großen Molekülen können Van-der-Waals-Kräfte stärker sein als Dipol-Dipol-Wechselwirkungen.',
+      correct: 'Van-der-Waals-Kräfte großer Moleküle können Dipol-Dipol-Wechselwirkungen übertreffen.',
       wrong: [
         w('f1', 'Brom muss polar sein.', 'chem-mis-zk-dipole-nonpolar', {
           detailed: "Halogenmoleküle bestehen aus zwei gleichen Atomen; sie haben keine polaren Bindungen und werden auch weiter unten in der Gruppe nicht polar.",
           short: "Zwei gleiche Atome: unpolar.",
         }),
-        w('f2', 'Polare Stoffe sieden immer niedriger als unpolare.', 'chem-mis-zk-order'),
+        w('f2', 'Polare Stoffe sieden immer niedriger als unpolare, weil sich ihre Dipole gegenseitig abstoßen.', 'chem-mis-zk-order'),
         w('f3', 'Brom bildet Wasserstoffbrücken.', 'chem-mis-zk-h-other'),
-        w('f4', 'Beim Sieden von Brom muss die $\\ce{Br-Br}$-Bindung brechen.', 'chem-mis-zk-boil-breaks'),
+        w('f4', 'Beim Sieden von Brom muss zusätzlich die $\\ce{Br-Br}$-Bindung in jedem Molekül aufbrechen.', 'chem-mis-zk-boil-breaks'),
       ],
       hint: 'Die Reihenfolge der Kräfte gilt für ähnlich große Moleküle. Sind diese beiden ähnlich groß?',
       explanation: {
@@ -1335,14 +1335,14 @@ export const ZMK_BANK: QuestionBank = {
       part: 'kraefte',
       title: 'Van-der-Waals-Kräfte',
       prompt: 'Geckos haften an glatten Wänden mit Millionen feiner Härchen an den Füßen. Welche Kraft nutzen sie, und warum helfen die Härchen?',
-      correct: 'Van-der-Waals-Kräfte; die Härchen vergrößern die Berührungsfläche enorm',
+      correct: 'Van-der-Waals-Kräfte auf riesiger Berührungsfläche',
       wrong: [
         w('f1', 'Wasserstoffbrücken, weil die Wand nass sein muss', 'chem-mis-zk-water-only', {
           detailed: "Geckos haften auch an trockenem Glas. Die Kraft muss also zwischen trockenen Oberflächen wirken.",
           short: "Es geht auch trocken.",
         }),
-        w('f2', 'Ionenbindungen zwischen Fuß und Wand', 'chem-mis-zk-stronger'),
-        w('f3', 'Atombindungen, die der Gecko beim Laufen knüpft und löst', 'chem-mis-zk-intra'),
+        w('f2', 'Ionenbindungen zwischen den Härchen am Fuß und der Wand', 'chem-mis-zk-stronger'),
+        w('f3', 'Atombindungen, die der Gecko bei jedem Schritt mit der Wand knüpft und wieder löst', 'chem-mis-zk-intra'),
         w('f4', 'Van-der-Waals-Kräfte, die mit kleinerer Berührungsfläche stärker werden', 'chem-mis-zk-size'),
       ],
       hint: 'Welche Kraft wirkt zwischen allen Oberflächen, und wovon hängt ihre Stärke ab?',

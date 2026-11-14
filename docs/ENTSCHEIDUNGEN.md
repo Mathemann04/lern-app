@@ -1358,3 +1358,12 @@ Neue Entscheidungen unten anfügen.
   (gebrochen-rationale Funktionen, Graph ablesen, Umkehrfunktion, Tangenten, Kurvendiskussion, L'Hospital,
   nachgeschärftes Ableiten). Nichts wird aus den Themen genommen, auch nicht Stoff, der nie in der Klausur kommt;
   eine Schnellwahl „Nur Klausurstoff“ bei den Bausteinen gibt es deshalb nicht, Klausurstoff zeigt der Klausurmodus.
+- 14.11.2026: Chemie S12 (Ratefallen). Der Test misst neben der Obergrenze aus dem Plan (Zufall plus 10 Prozentpunkte)
+  auch eine Untergrenze (Zufall minus 15 Prozentpunkte): Beim ersten Angleichen war die richtige Antwort in mehreren
+  Themen fast nie mehr die längste und fast nie die kürzeste (2 bis 6 %); dann streicht man beide und rät aus der Mitte.
+  Die Untergrenze gilt nur für Fragen; bei Rechnungen kommen die Texte aus wenigen festen Bausteinen (bei Trends immer
+  dieselben drei Sätze), dort gilt nur die Obergrenze. Wo die richtige Antwort beim Kürzen Einzelheiten verlor, stehen
+  sie weiter in der Erklärung. Inhaltliche Prüfung aller geänderten Antworten durch eine unabhängige Prüfung; sie fand
+  elf missglückte Formulierungen (behoben) und ein älteres Muster: Bei 17 Fragen begannen alle falschen Antworten mit
+  „Weil“, nur die richtige nicht. Jetzt beginnt auch die richtige mit „Weil“, und ein Test prüft solche Formmerkmale
+  („Weil“, Punkt am Ende, großer oder kleiner Anfang).

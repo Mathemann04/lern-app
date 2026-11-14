@@ -1263,7 +1263,7 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   Überblick; seinen Umbau übernimmt M6. Damit ist der Klausur-Sprint
   abgeschlossen.
   Ausprobieren: Start → Karte „Klausur Teil 1“ → Klausur-Überblick.
-- **S12: Ratefallen** (Durchsicht 14.11.2026, vor Teil 1). Gemessen an je 40
+- **S12: Ratefallen** (Durchsicht 14.11.2026, vor Teil 1; **fertig 14.11.2026**). Gemessen an je 40
   erzeugten Aufgaben je Thema und Stufe, nur Textfragen mit mindestens drei
   Antworten: Die richtige Antwort ist die längste auf Stufe 1 in 35 %, auf
   Stufe 2 in 48 %, auf Klausurniveau in 59 % der Fragen; bei Zufall wären es
@@ -1281,6 +1281,13 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   Antwort kürzer als etwa 30 Zeichen ist, zählen nicht mit), und erlaubt
   höchstens den Wert bei Zufall plus 10 Prozentpunkte; er gilt für alle
   neuen Fragen mit. Inhaltliche Prüfung wie immer.
+  **Umgesetzt:** Messung `quiz/answerLength.ts` (sichtbare Länge, Anteile), Test `chem/guessing.test.ts` je Thema,
+  Stufe und Art (alle Fassungen der Fragen, 300 Rechnungen je Stufe). Zusätzlich eine Untergrenze (Zufall minus 15
+  Prozentpunkte): Ist die richtige fast nie die längste und fast nie die kürzeste, streicht man beide und rät aus der
+  Mitte. Die Untergrenze gilt nur für Fragen; die Texte der Rechnungen kommen aus wenigen festen Bausteinen. In allen
+  13 Themen Antworten angeglichen (rund 280 Fragen, dazu Textbausteine in den Rechnungen zu Energie, Metallen, Trends
+  und zwischenmolekularen Kräften); danach liegt je Thema und Stufe die richtige in etwa 15 bis 30 % der Fragen als
+  längste und ebenso oft als kürzeste da.
 
 #### Nach Teil 1 der Klausur
 Die Reihenfolge richtet sich nach dem Termin von Teil 2: Kommt Teil 2 bald,
