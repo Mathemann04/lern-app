@@ -450,8 +450,8 @@ test('Inverse Matrix: Baustein, jede Stufe lösbar, Bild, Lernkarte', async ({ p
     await solveWholeTask(page)
     await expectCleanPage(page, `Inverse Stufe ${level}`)
   }
-  // inverse.1-1: 2 × 2 mit Bild beim Ergebnis
-  await page.goto('./#/ueben/matrizen/inverse.1-1')
+  // inverse.1-2: 2 × 2 mit Bild beim Ergebnis
+  await page.goto('./#/ueben/matrizen/inverse.1-2')
   await solveWholeTask(page)
   await expect(page.getByRole('button', { name: 'Rückgängig machen' })).toBeVisible()
   await page.goto('./#/karten/matrizen/inv-gauss-jordan')
