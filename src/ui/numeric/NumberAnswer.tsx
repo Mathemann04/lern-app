@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useLayoutEffect, useState } from 'react'
 import type { NumericAnswer } from '../../engine/quantity/judge.ts'
 import { formatLatex, readNumber } from '../../engine/quantity/numberDe.ts'
 import type { Rational } from '../../engine/rational.ts'
@@ -95,8 +95,10 @@ export function NumberAnswer({ answer, disabled, onSubmit, submitLabel = 'Prüfe
   }
 
   // Tastatur des Laptops (nicht, solange ein Fenster wie die Lernkarten offen ist oder eine Taste mit
-  // Strg, Alt oder Cmd gedrückt wird)
-  useEffect(() => {
+  // Strg, Alt oder Cmd gedrückt wird). useLayoutEffect, damit die Tasten ab dem ersten sichtbaren Bild
+  // ankommen: Mit useEffect hing der Empfänger erst ein paar Millisekunden nach dem Zeichnen dran; schnell
+  // getippte Ziffern gingen dann verloren (Browser-Test „Lösung zeigen nach einem Fehler“ am 14.11.2026 rot).
+  useLayoutEffect(() => {
     if (disabled) return
     function onKey(event: KeyboardEvent) {
       if (event.ctrlKey || event.metaKey || event.altKey || document.querySelector('[role="dialog"]')) return
