@@ -1389,3 +1389,12 @@ Neue Entscheidungen unten anfügen.
   höchstens ein Drittel der Bildschirmhöhe und 260 px hoch, damit die Antworten meist ohne Scrollen zu sehen sind (mit
   Bild und Sarrus-Schema in einer Frage geht das nicht immer). Stufe 1 der Vektoren heißt nicht mehr „in der Ebene“,
   weil Kreuz- und Spatprodukt dort im Raum rechnen.
+- 14.11.2026: Plan für M13 (Klausurmodus Mathe) geschrieben, [PLAN-M13.md](PLAN-M13.md), mit Entwurf zum Anfassen als
+  private Seite (nicht im Repo). Vorschläge, die auf das OK des Nutzers warten: Klausuraufgaben auf Papier rechnen, dann den
+  Rechenweg der Engine Schritt für Schritt vergleichen und selbst abhaken (eingetippte Werte prüft die App, passt ein Wert
+  zu einem typischen Fehler, sagt sie welcher); „Ich komme nicht weiter“ öffnet den Teil geführt und zählt beim Üben
+  höchstens halb. Klausur-Karte nur auf der Mathe-Seite (wie für Chemie am 13.11.2026 gewünscht). Zuerst der Klausurmodus
+  mit den fertigen Bausteinen der linearen Algebra und eine Probeklausur „Nur lineare Algebra“, dann die fehlenden
+  Analysis-Bausteine als drei neue Tätigkeiten („Grenzwerte“, „Funktionen“, „Funktion untersuchen“) und „Ableiten“
+  nachgeschärft; M6 Schritt 7 („Ableiten“ mit Bausteinen) kommt deshalb in M13, damit „Ableiten“ nur einmal umgebaut
+  wird. Die Klausur hat 13 Bausteine (elf jedes Jahr), nicht elf, wie AUFGABENARTEN.md bisher schrieb.

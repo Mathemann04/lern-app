@@ -42,7 +42,7 @@ Die echten Klausuren seit 2015 sind fast jedes Jahr gleich gebaut:
 
 Etwa die Hälfte der Punkte ist Analysis, die andere Hälfte lineare Algebra und Geometrie.
 
-**Die elf Bausteine und wie oft sie vorkamen** (Zählung über die neun Klausuren 2015 bis 2026
+**Die 13 Bausteine und wie oft sie vorkamen** (elf davon jedes Jahr) (Zählung über die neun Klausuren 2015 bis 2026
 mit lesbarem Text; die übrigen sieben bestätigen das Bild):
 
 | Baustein | Häufigkeit | Punkte | Was genau |
@@ -259,4 +259,4 @@ Grundlage: Skript-Kapitel 6 (und 1.8 für Gauß), Blätter 4 und 12, Übung 6, j
   - „Funktion untersuchen“ (gebrochen-rational und Kurvendiskussion) als eigene Tätigkeit in M9
   - Geraden und Ebenen, Gleichungssysteme, Matrizengleichungen und Determinanten mit Parameter
     in M7
-  - später eine Probeklausur Mathe aus den elf Klausur-Bausteinen
+  - später eine Probeklausur Mathe aus den 13 Klausur-Bausteinen (Plan: docs/PLAN-M13.md)
