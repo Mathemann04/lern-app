@@ -276,6 +276,27 @@ describe('Gauß-Verfahren', () => {
     expect(swaps).toBeGreaterThan(30)
   })
 
+  // Wunsch des Nutzers (14.11.2026): nicht fast immer eine 1 oben links, Umformungen auch über Kreuz
+  it.each(cells)('Stufe %i: Zahlen nicht zu einfach (selten 1 oben links und in der ersten Spalte, oft über Kreuz)', (level) => {
+    let top = 0
+    let col = 0
+    let rows = 0
+    let cross = 0
+    const list = tasks(level, 200)
+    for (const task of list) {
+      const w = task.data.n[0] + 1
+      if (Math.abs(task.data.T[0]) === 1) top++
+      for (let i = 0; i < task.data.m[0]; i++) {
+        rows++
+        if (Math.abs(task.data.T[i * w]) === 1) col++
+      }
+      if (task.steps.some((s) => /\\quad \d+ \\cdot \\text\{I/.test(s.choices.find((c) => c.correct)!.content))) cross++
+    }
+    expect(top / list.length, 'oben links').toBeLessThanOrEqual(0.35)
+    expect(col / rows, 'erste Spalte').toBeLessThanOrEqual(0.3)
+    expect(cross / list.length, 'über Kreuz').toBeGreaterThanOrEqual(0.3)
+  })
+
   it.each(cells)('Stufe %i: Abwechslung (100 Formen unter 200, keine über 3 %)', (level) => {
     const stats = varietyStats(tasks(level, 200).map((t) => t.form))
     expect(stats.distinct).toBeGreaterThanOrEqual(100)

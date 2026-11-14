@@ -138,6 +138,12 @@ function verify(task: VectorTask, context: string) {
       return
     }
     default: {
+      if (task.data.single) {
+        // ein Sonderwert: genau dort nicht genau eine Lösung, und der Fall stimmt
+        expect(ints.filter((a) => kaseOf(at(a)) !== 'unique'), context).toEqual([task.answer[0]])
+        expect(KASES[task.answer[1]], context).toBe(kaseOf(at(task.answer[0])))
+        return
+      }
       const ask = KASES[task.data.ask[0]]
       const good = ints.filter((a) => kaseOf(at(a)) === ask)
       expect([...task.answer], context).toEqual(good)
@@ -267,11 +273,19 @@ describe('Gleichungssysteme mit Parameter', () => {
       for (const task of tasks(level, 100)) {
         const { n, at } = system(task)
         const sonder = task.steps.find((s) => s.id === 'sonderfall')
-        if (sonder) {
+        if (sonder && task.data.single) {
+          // ein Sonderwert: richtig ist genau der Fall, den die Gegenprobe dort findet, keine falsche Antwort nennt ihn
+          const kase = kaseOf(at(task.answer[0]))
+          const text = kase === 'none' ? 'keine Lösung' : 'unendlich viele Lösungen'
+          expect(sonder.choices.find((c) => c.correct)!.content.startsWith(text), task.form).toBe(true)
+          for (const c of sonder.choices.filter((x) => !x.correct)) expect(c.content.startsWith(text), `${task.form} ${c.errorRuleId}`).toBe(false)
+        } else if (sonder) {
           const ask = task.kind === 'lgspFull' ? 'none' : KASES[task.data.ask[0]]
           const good = ints.filter((a) => kaseOf(at(a)) === ask)
           expect(setOf(sonder.choices.find((c) => c.correct)!.content), task.form).toEqual(good)
           for (const c of sonder.choices.filter((x) => !x.correct && !x.content.includes('\\ne') && !x.content.includes('kein'))) expect(setOf(c.content), `${task.form} ${c.errorRuleId}`).not.toEqual(good)
+        }
+        if (sonder) {
           // je Sonderwert: rechts 0 genau bei unendlich vielen Lösungen
           const shown = [...sonder.explanation.detailed.matchAll(/Für \$a = (-?\d+)\$[^$]*\$0(?: \\cdot [a-z_0-9]+)? = (-?\d+)\$/g)]
           expect(shown.length, task.form).toBeGreaterThan(0)
@@ -310,6 +324,50 @@ describe('Gleichungssysteme mit Parameter', () => {
     for (const id of ['sonderfall', 'vorgabe', 'b', 'loesung']) expect(counts[id] ?? 0, id).toBeGreaterThan(20)
   })
 
+  it.each(cells)('Stufe %i: Zahlen nicht zu einfach (selten 1 oben links und in der ersten Spalte, oft über Kreuz)', (level) => {
+    let top = 0
+    let col = 0
+    let cells1 = 0
+    let cross = 0
+    const list = tasks(level, 200)
+    for (const task of list) {
+      const { n } = system(task)
+      const w = n + 1
+      const plainOne = (i: number) => Math.abs(task.data.T0[i * w]) === 1 && task.data.T1[i * w] === 0
+      if (plainOne(0)) top++
+      for (let i = 0; i < n; i++) {
+        cells1++
+        if (plainOne(i)) col++
+      }
+      // Umformung über Kreuz: eine Zahl vor der umgeformten Zeile (wie 3 \cdot \text{II})
+      if (task.steps.some((s) => /\\quad \d+ \\cdot \\text\{I/.test(s.choices.find((c) => c.correct)!.content))) cross++
+    }
+    expect(top / list.length, 'oben links').toBeLessThanOrEqual(0.3)
+    expect(col / cells1, 'erste Spalte').toBeLessThanOrEqual(0.3)
+    expect(cross / list.length, 'über Kreuz').toBeGreaterThanOrEqual(0.3)
+  })
+
+  it('die Zeile mit a steht auch oben; dann ist Tauschen der erste Schritt, und die Tabelle danach ist dieselbe', () => {
+    let swaps = 0
+    for (const level of [2, 3, 4, 5] as const) {
+      for (const task of tasks(level, 100)) {
+        const step = task.steps.find((s) => s.id === 'tausch')
+        if (!step) continue
+        swaps++
+        expect(task.steps[0].id, task.form).toBe('tausch')
+        // oben steht a in der ersten Spalte
+        expect(task.data.T1[0] !== 0, task.form).toBe(true)
+        const { n, at } = system(task)
+        const next = task.steps[1]
+        const before = readTable(tableIn(next.question), n, { a: 0.37, b: 0 })
+        const swapped = at(0.37)
+        ;[swapped[0], swapped[n - 1]] = [swapped[n - 1], swapped[0]]
+        before.forEach((r, i) => r.forEach((x, j) => expect(close(x, swapped[i][j]), task.form).toBe(true)))
+      }
+    }
+    expect(swaps).toBeGreaterThan(20)
+  })
+
   it.each(cells)('Stufe %i: Abwechslung (100 Formen unter 200, keine über 3 %)', (level) => {
     const stats = varietyStats(tasks(level, 200).map((t) => t.form))
     expect(stats.distinct).toBeGreaterThanOrEqual(100)
@@ -323,9 +381,10 @@ describe('Gleichungssysteme mit Parameter', () => {
       for (const task of tasks(level, 60)) {
         seen.add(task.kind)
         if (task.data.ask) asked.add(task.data.ask[0])
+        if (task.data.single) asked.add(10 + task.answer[1])
       }
     expect([...seen].sort()).toEqual([...new Set(Object.values(LGSP_KINDS_BY_LEVEL).flat())].sort())
-    expect([...asked].sort()).toEqual([1, 2])
+    expect([...asked].sort((p, q) => p - q)).toEqual([1, 2, 11, 12])
     expect(buildVectorTask(ref(5, 42))).toEqual(buildVectorTask(ref(5, 42)))
   })
 })
@@ -367,13 +426,15 @@ describe('Gleichungssysteme mit Parameter: freier Modus', () => {
     for (const level of LEVELS) {
       for (const task of tasks(level, 60)) {
         const check = prepareVectorCheck(task)
-        const input = check.parts.map((p) => p.values.map(String))
+        // Auswahl als Text der Antwort, Zahlen als Zahl
+        const typed = (p: (typeof check.parts)[number], values: readonly number[]) => (p.shape === 'choice' ? values.map((v) => p.options![v]) : values.map(String))
+        const input = check.parts.map((p) => typed(p, p.values))
         expect(checkVectorEntries(check, input).kind, task.form).toBe('correct')
         check.wrongs.forEach((ws, i) => {
           for (const w of ws) {
             const verdict = checkVectorEntries(
               check,
-              check.parts.map((p, j) => (j === i ? w.values : p.values).map(String)),
+              check.parts.map((p, j) => typed(p, j === i ? w.values : p.values)),
             )
             expect(verdict.kind, task.form).toBe('wrong')
             if (verdict.kind === 'wrong' && verdict.error) found.add(verdict.error.id)

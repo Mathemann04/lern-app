@@ -59,6 +59,33 @@ export const LGSP_ERROR_RULES: readonly VectorErrorRule[] = [
     },
   },
   {
+    id: 'lgsp-divide-param',
+    name: 'Durch einen Ausdruck mit a geteilt, der 0 sein kann',
+    wrongFormula: String.raw`\text{I} : (a - 2) \;\Rightarrow\; \text{vorne steht } 1`,
+    why: {
+      detailed: String.raw`Durch $a - 2$ darfst du nur teilen, wenn $a \ne 2$ ist. Für $a = 2$ geht das nicht, und genau solche Werte sind die spannenden Sonderfälle. Hol lieber eine Zeile ohne $a$ nach oben; die Reihenfolge der Gleichungen ist egal.`,
+      short: String.raw`Nicht durch einen Ausdruck mit $a$ teilen; Zeile mit $a$ nach unten.`,
+    },
+  },
+  {
+    id: 'lgsp-multiply-param',
+    name: 'Eine Zeile mit einem Ausdruck in a malgenommen',
+    wrongFormula: String.raw`(a - 2) \cdot \text{II} - 3 \cdot \text{I}`,
+    why: {
+      detailed: String.raw`Eine Zeile, die du ersetzt, darfst du nur mit einer Zahl ungleich $0$ malnehmen. Ein Ausdruck wie $a - 2$ ist für $a = 2$ gleich $0$: Dann wird aus der Gleichung $0 = 0$, und sie geht verloren. Hol lieber eine Zeile ohne $a$ nach oben.`,
+      short: String.raw`Ersetzte Zeilen nur mit festen Zahlen malnehmen.`,
+    },
+  },
+  {
+    id: 'lgsp-fix-param',
+    name: 'Für den Parameter eine Zahl eingesetzt',
+    wrongFormula: String.raw`a = 1 \;\Rightarrow\; \text{nur ein Fall gerechnet}`,
+    why: {
+      detailed: String.raw`Gefragt ist nach **allen** Werten von $a$. Setzt du eine Zahl ein, untersuchst du nur diesen einen Fall und übersiehst die Sonderwerte. Rechne mit $a$ als Buchstaben und setz erst am Ende die Sonderwerte ein.`,
+      short: String.raw`Mit $a$ rechnen, Sonderwerte erst am Ende einsetzen.`,
+    },
+  },
+  {
     id: 'lgsp-rank-augmented',
     name: 'Widerspruchszeile auch beim Rang von A gezählt',
     wrongFormula: String.raw`0 \;\; 0 \;\; 0 \mid 5 \;\Rightarrow\; \operatorname{rg}(A) = 3`,

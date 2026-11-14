@@ -101,7 +101,7 @@ Animationen starten nur auf Knopfdruck („Abspielen“) und entfallen, wenn am 
   vergessen, Zeile statt Spalte (Falk, Cramer), Produkt nicht definiert, $(AB)^{\mathsf T} = A^{\mathsf T}B^{\mathsf T}$,
   $\lambda$ statt $\lambda^n$, Vorzeichen beim Zeilentausch, Sarrus bei 4×4, rechte Seite vergessen, Nullzeile falsch
   gedeutet, gleicher Parameter für zwei Geraden, beim Ziehen (2b): nur vertauscht oder nur ein Vorzeichen geändert, rechter Winkel als spitz
-  oder stumpf gezählt, rechter Winkel an der falschen Ecke, Seiten statt Diagonalen senkrecht, bei der Projektion (3a) die 15 Fehler aus Schritt 3a, bei den Kräften (3b) die 26 Fehler aus Schritt 3b, beim Kreuzprodukt (4a) die 14 Fehler aus Schritt 4a, beim Spatprodukt (4b) die 14 Fehler aus Schritt 4b, bei Linearkombination und Basis (5) die 20 Fehler aus Schritt 5, bei Geraden und Ebenen (6) die 33 Fehler aus Schritt 6 (Vorsilbe „gl-“), bei der Lage (7a) die 17 Fehler aus Schritt 7a, bei Abständen und Schnittwinkeln (7b) die 14 Fehler aus Schritt 7b, bei den Matrizen (8a) die 27 Fehler aus Schritt 8a (Vorsilbe „mat-“), bei den Determinanten (9a) die 37 Fehler aus Schritt 9a (Vorsilbe „det-“), beim Gauß-Verfahren (10a) die 34 Fehler aus Schritt 10a (Vorsilbe „gauss-“), bei der Cramerschen Regel (11a) die 10 Fehler aus Schritt 11a (Vorsilbe „cramer-“), bei Gleichungssystemen mit Parameter (11b) die 20 Fehler aus Schritt 11b (Vorsilbe „lgsp-“), cos statt sin bei Gerade–Ebene, „$A - 2$“ ohne $E$, auf der falschen
+  oder stumpf gezählt, rechter Winkel an der falschen Ecke, Seiten statt Diagonalen senkrecht, bei der Projektion (3a) die 15 Fehler aus Schritt 3a, bei den Kräften (3b) die 26 Fehler aus Schritt 3b, beim Kreuzprodukt (4a) die 14 Fehler aus Schritt 4a, beim Spatprodukt (4b) die 14 Fehler aus Schritt 4b, bei Linearkombination und Basis (5) die 20 Fehler aus Schritt 5, bei Geraden und Ebenen (6) die 33 Fehler aus Schritt 6 (Vorsilbe „gl-“), bei der Lage (7a) die 17 Fehler aus Schritt 7a, bei Abständen und Schnittwinkeln (7b) die 14 Fehler aus Schritt 7b, bei den Matrizen (8a) die 27 Fehler aus Schritt 8a (Vorsilbe „mat-“), bei den Determinanten (9a) die 37 Fehler aus Schritt 9a (Vorsilbe „det-“), beim Gauß-Verfahren (10a) die 34 Fehler aus Schritt 10a (Vorsilbe „gauss-“), bei der Cramerschen Regel (11a) die 10 Fehler aus Schritt 11a (Vorsilbe „cramer-“), bei Gleichungssystemen mit Parameter (11b) die 23 Fehler aus Schritt 11b (Vorsilbe „lgsp-“), cos statt sin bei Gerade–Ebene, „$A - 2$“ ohne $E$, auf der falschen
   Seite ausgeklammert. Jede mit Katalogbeispiel, eigenem Text für „Warum ist das falsch?“ und Platz auf einer Lernkarte
   (Regeln aus CLAUDE.md).
 - **Aufgabennummern** wie seit M6 mit Baustein (`taskNumber.ts`); neue Bausteine bekommen die nächsten freien Nummern in
@@ -395,6 +395,23 @@ Request.
       Gerade bzw. Ebene); ohne Lösung nennt die Beschreibung den Grund (parallel, nicht alle durch einen Punkt mit grauen
       Schnittpunkten, parallele Schnittgeraden gestrichelt). Lernkarten: „Tabelle und Stufenform“ mit der Drehung, die
       übrigen mit dem Bild zum Ergebnis.
+    - **10c (freigegeben 14.11.2026, als Nächstes, vor 11c; Wunsch des Nutzers):** Baustein „Einsetzen, Gleichsetzen,
+      Addieren“ (nächster freier Code, Gruppe „Gleichungssysteme“) in der Tätigkeit „Matrizen und Gleichungssysteme“, Stufen 1
+      bis 5, geführt und frei. Die drei Schulverfahren Schritt für Schritt: **Einsetzen** (eine Gleichung nach einer
+      Unbekannten auflösen, am besten nach der, die schon fast allein steht; in die andere einsetzen; lösen; zurückrechnen),
+      **Gleichsetzen** (beide nach derselben Unbekannten auflösen, gleichsetzen, lösen, zurückrechnen), **Addieren** (so
+      malnehmen, dass beim Addieren eine Unbekannte wegfällt). Manchmal die Frage „Welches Verfahren passt hier am besten?“
+      (y steht schon allein: Einsetzen; beide nach y aufgelöst: Gleichsetzen; gleiche oder entgegengesetzte Zahlen: Addieren).
+      Stufen: 1 zwei Gleichungen mit ganzen Zahlen, Verfahren vorgegeben, eine Unbekannte steht fast allein; 2 alle drei
+      Verfahren, Zahlen vor den Unbekannten nicht 1, Lösung ganzzahlig; 3 Gleichungen erst ordnen (Klammern, Unbekannte auf
+      beiden Seiten, Brüche wegschaffen), Lösung auch als Bruch, auch keine oder unendlich viele Lösungen ($0 = 5$, $0 = 0$);
+      4 drei Gleichungen, die sich durch Einsetzen lösen lassen (eine mit nur zwei Unbekannten), oder Unbekannte im Nenner mit
+      $u = \frac{1}{x}$; 5 alles ineinander, auch mit Parameter. Zahlen wie seit 11b nicht fast immer 1. Typische Fehler:
+      Vorzeichen beim Auflösen, Klammer beim Einsetzen vergessen ($-2(3 - y) \to -6 - 2y$), nur eine Seite malgenommen,
+      addiert statt abgezogen, zweite Unbekannte nicht ausgerechnet, $0 = 0$ als „keine Lösung“ gedeutet, in die eben
+      umgeformte Gleichung zurückgesetzt (ergibt $0 = 0$). Bilder: jede Gleichung eine Gerade, Lösung als Schnittpunkt; beim
+      Addieren dreht sich die neue Gerade durch den Schnittpunkt (wie 10b), bei keiner Lösung parallele Geraden. Frei: Lösung
+      in Kästchen, „keine Lösung“ zum Antippen, Lösungsmenge. Lernkarten je Verfahren und „Welches Verfahren wann?“.
 11. **Gleichungssysteme mit Parameter und Cramer**, in drei Teilen:
     - **11a (fertig, 13.11.2026):** Baustein „Cramersche Regel“ (`cramer`, Code 36, Gruppe „Gleichungssysteme“) in der
       Tätigkeit „Matrizen und Gleichungssysteme“, Stufen 1 bis 5, geführt und frei. Fünf Arten: $2 \times 2$ ganz (Stufe 1
@@ -420,13 +437,19 @@ Request.
       vorgegebenem Wert (Stufe 4 und 5, auch mit einem Sonderwert, der wegfällt), alle Fälle mit Lösungsmenge beim Sonderwert
       (Stufe 5). Schritte: Nullen erzeugen, „Für welche $a$ genau eine Lösung?“, Stufenform beim Sonderwert, Rang mit
       Folgerung, „Für welche $a$ keine bzw. unendlich viele Lösungen?“, $b$ beim Sonderwert, Wert vorgegeben, Lösungsmenge.
-      Frei: $a = \dots$, zwei Werte, $a$ und $b$, Lösungsmenge in Kästchen. Drei Lernkarten, 20 neue typische Fehler:
+      Frei: $a = \dots$, zwei Werte, $a$ und $b$, Lösungsmenge in Kästchen. Drei Lernkarten, 23 neue typische Fehler:
       Bedingung umgedreht, Sonderfälle übersehen (durch einen Ausdruck mit $a$ geteilt), Nullstelle der rechten Seite,
       nur eine Lösung der quadratischen Gleichung, „für kein $a$“, Sonderwerte und übrige Werte verwechselt, sechs beim Rang (Widerspruchszeile bei $A$ gezählt, rechte
       Seite übersehen, verschiedene Ränge als lösbar, gleiche Ränge als genau eine Lösung, Nullzeile mitgezählt, Zeilen
       gezählt), vier beim Parameter rechts (Vorzeichen, nicht geteilt, für jedes $b$, für kein $b$), Wert behalten, der
-      wegfällt, nur rechte Seite gleich dem Wert, Bruch umgedreht, allgemeine Formel auf den Sonderfall angewandt; dazu die
-      Fehler beim Nullen erzeugen und Deuten aus 10a.
+      wegfällt, nur rechte Seite gleich dem Wert, Bruch umgedreht, allgemeine Formel auf den Sonderfall angewandt, beim Zeilentausch durch $a$ geteilt, mit $a$ malgenommen, Zahl für $a$
+      eingesetzt; dazu die Fehler beim Nullen erzeugen und Deuten aus 10a.
+      **Nachgeschärft (14.11.2026, Wunsch des Nutzers):** Zahlen nicht mehr fast immer 1 oben links (vorher 77–85 %, jetzt
+      höchstens 30 %), Umformungen oft über Kreuz (auch mit $a$: $2 \cdot \text{III} + (a + 2) \cdot \text{I}$), $a$ auch
+      vorne in der untersten Zeile oder in mehreren Zeilen; steht die Zeile mit $a$ oben, ist „nach unten tauschen“ der erste
+      Schritt. Bei nur einem Sonderwert heißt die Frage „Was gilt dort?“ (vorher verriet „Für welche $a$ keine Lösung?“ die
+      Antwort); frei: $a = \dots$ und die Auswahl. „Determinante zuerst“ schon ab Stufe 2 und auch in Stufe 5. Dasselbe für
+      die Zahlen im Baustein „Gauß-Verfahren“ (10a).
     - **11c:** Bilder: Schieberegler für den Parameter (Geraden bzw. Ebenen bewegen sich, bei den Sonderwerten parallel
       oder gleich), Cramer als Flächen (2 × 2: $x$ ist das Verhältnis der Parallelogramme aus $\vec b, \vec a_2$ und
       $\vec a_1, \vec a_2$).

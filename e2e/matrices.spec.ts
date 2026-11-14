@@ -261,11 +261,11 @@ test('Gauß-Verfahren frei: keine Lösung als Auswahl, Lösungsmenge mit Paramet
   await page.getByRole('radio', { name: 'keine Lösung' }).click()
   await page.getByRole('button', { name: 'Prüfen' }).click()
   await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
-  // gauss.1-12: L: x = (−6, 0) + t (3, 1); anderer Stützpunkt (−3, 1) und Richtung (−3, −1) ist dieselbe Gerade
+  // gauss.1-12: L: x = (4, 0) + t (−1, 1); anderer Stützpunkt (3, 1) und Richtung (1, −1) ist dieselbe Gerade
   await page.goto('./#/frei/matrizen/gauss.1-12')
-  await typeInto(page, '1. Eintrag des Stützvektors', '-3')
+  await typeInto(page, '1. Eintrag des Stützvektors', '3')
   await typeInto(page, '2. Eintrag des Stützvektors', '1')
-  await typeInto(page, '1. Eintrag des Richtungsvektors', '-3')
+  await typeInto(page, '1. Eintrag des Richtungsvektors', '1')
   await typeInto(page, '2. Eintrag des Richtungsvektors', '-1')
   await page.getByRole('button', { name: 'Prüfen' }).click()
   await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
@@ -360,14 +360,15 @@ test('Gleichungssysteme mit Parameter: Baustein, jede Stufe lösbar, Lernkarte',
   expect(errors).toEqual([])
 })
 
-test('Gleichungssysteme mit Parameter frei: Sonderwert, Vorzeichenfehler erkannt', async ({ page }) => {
+test('Gleichungssysteme mit Parameter frei: Sonderwert und was dort gilt, Fehler beim Deuten erkannt', async ({ page }) => {
   const errors = collectErrors(page)
-  // lgsparam.1-1: keine Lösung für a = -3
+  // lgsparam.1-1: Sonderwert a = 3, dort keine Lösung
   await page.goto('./#/frei/matrizen/lgsparam.1-1')
-  await typeInto(page, 'Dein Ergebnis', '3')
+  await typeInto(page, 'Dein Ergebnis von Teil 1', '3')
+  await page.getByRole('radio', { name: 'unendlich viele Lösungen' }).click()
   await page.getByRole('button', { name: 'Prüfen' }).click()
-  await expect(page.getByText('Typischer Fehler: Vorzeichen der Nullstellen falsch abgelesen.')).toBeVisible()
-  await typeInto(page, 'Dein Ergebnis', '-3')
+  await expect(page.getByText('Typischer Fehler: Widerspruch mit einer Nullzeile verwechselt.')).toBeVisible()
+  await page.getByRole('radio', { name: 'keine Lösung' }).click()
   await page.getByRole('button', { name: 'Prüfen' }).click()
   await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
   await expectCleanPage(page, 'Parameter frei')
