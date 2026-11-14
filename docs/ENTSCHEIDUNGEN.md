@@ -1338,8 +1338,11 @@ Neue Entscheidungen unten anfügen.
   Gerade I“ statt „Beide Gleichungen …“); liegen Schnittgeraden außerhalb des Bildes, sagt sie es; auf der Lernkarte
   „Cramersche Regel“ hieß es, Strecken und Scheren hielten die Fläche gleich (nur das Scheren tut es).
 - 14.11.2026: Durchsicht der ganzen App. Der Nutzer übernimmt die Vorschläge für Chemie ganz: vor Teil 1 noch
-  S12 (Ratefallen: die richtige Antwort ist zu oft die längste, ein Test misst das künftig) und S13 (Fortschritt
-  sichern, für die ganze App). Für Mathe ist ihm „der wichtigste Punkt ein adäquater Klausurmodus“: neuer Meilenstein
+  S12 (Ratefallen: die richtige Antwort ist zu oft die längste, ein Test misst das künftig). S13 (Fortschritt als
+  Datei sichern) hat er am selben Tag wieder gestrichen: Wichtigste Grundlage sind Funktion und Übersicht der App,
+  die Qualität der Aufgaben und der Lerneffekt; Zusätze wie Sichern, Konto oder Teilen kommen ganz am Schluss (Regel
+  „Vorrang“ in CLAUDE.md, Zeile „Später“ in der ROADMAP). Für Mathe ist ihm „der wichtigste Punkt ein adäquater
+  Klausurmodus“: neuer Meilenstein
   M13 direkt nach M7, mit Klausur-Überblick, Klausuraufgaben im Format der Klausur (auf Papier lösen, Rechenweg
   vergleichen, Punkte vergeben), Probeklausur (90 Minuten, 100 Punkte) und den Klausur-Bausteinen, die noch fehlen
   (gebrochen-rationale Funktionen, Graph ablesen, Umkehrfunktion, Tangenten, Kurvendiskussion, L'Hospital,
