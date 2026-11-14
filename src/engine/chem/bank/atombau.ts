@@ -954,7 +954,7 @@ export const ATOMBAU_BANK: QuestionBank = {
       prompt: "Was besagt das Atommodell von Dalton?",
       correct: { id: 'r', text: "Atome sind unteilbare Kugeln, für jedes Element eine eigene Sorte." },
       wrong: [
-        { id: 'f1', text: "Atome sind positiv geladene Kugeln, in denen Elektronen stecken.", misconception: 'chem-mis-model-mixup', why: {
+        { id: 'f1', text: "Atome sind positiv geladene Kugeln, in denen die Elektronen verteilt stecken.", misconception: 'chem-mis-model-mixup', why: {
           detailed: "Ein Atommodell enthält nur, was die Versuche seiner Zeit zeigten. Zu Daltons Zeit, Anfang des 19. Jahrhunderts, waren Elektronen noch unbekannt; geladene Teilchen im Atom kamen erst in einem späteren Modell vor.",
           short: "Zu Daltons Zeit kannte man noch keine Elektronen.",
         } },
@@ -966,7 +966,7 @@ export const ATOMBAU_BANK: QuestionBank = {
           detailed: "Feste Energien für Elektronen wurden erst eingeführt, um die Linienspektren zu erklären, lange nach Dalton. Damals waren weder Elektronen noch Atomkern bekannt.",
           short: "Bahnen mit festen Energien kamen erst lange nach Dalton.",
         } },
-        { id: 'f4', text: "Elektronen halten sich in Orbitalen auf, nicht auf festen Bahnen.", misconception: 'chem-mis-model-mixup', why: {
+        { id: 'f4', text: "Elektronen halten sich in Orbitalen um den Kern auf, nicht auf festen Bahnen.", misconception: 'chem-mis-model-mixup', why: {
           detailed: "Orbitale stammen aus dem quantenmechanischen Modell des 20. Jahrhunderts; dafür musste man erst wissen, dass sich Elektronen auch wie Wellen verhalten. Dalton kannte noch keine Elektronen.",
           short: "Orbitale gehören zum jüngsten Atommodell, nicht zu Dalton.",
         } },
@@ -988,7 +988,7 @@ export const ATOMBAU_BANK: QuestionBank = {
       part: 'modelle',
       title: "Atommodelle",
       prompt: "Wie stellte sich Thomson den Aufbau eines Atoms vor?",
-      correct: { id: 'r', text: "als positiv geladene Kugel, in der die Elektronen verteilt stecken" },
+      correct: { id: 'r', text: "als positiv geladene Kugel mit darin verteilten Elektronen" },
       wrong: [
         { id: 'f1', text: "als winzigen positiven Kern, um den die Elektronen kreisen", misconception: 'chem-mis-model-mixup', why: {
           detailed: "Einen Atomkern konnte Thomson noch nicht kennen; den zeigte erst ein späterer Versuch. Jedes Atommodell enthält nur, was die Versuche seiner Zeit zeigten.",
@@ -1160,7 +1160,7 @@ export const ATOMBAU_BANK: QuestionBank = {
       prompt: "Beim Streuversuch prallen sehr wenige Alpha-Teilchen von der Goldfolie zurück. Wie deutete man das?",
       correct: { id: 'r', text: "Positive Ladung und fast alle Masse sitzen in einem winzigen Kern." },
       wrong: [
-        { id: 'f1', text: "Die Teilchen prallen an den Elektronen der Hülle ab.", misconception: 'chem-mis-alpha-hit-electrons' },
+        { id: 'f1', text: "Die Teilchen prallen an den Elektronen der Hülle ab, die ihnen im Weg stehen.", misconception: 'chem-mis-alpha-hit-electrons' },
         { id: 'f2', text: "Die positive Ladung ist gleichmäßig über das Atom verteilt.", misconception: 'chem-mis-model-mixup', why: {
           detailed: "So sah es das ältere Modell von Thomson. Eine gleichmäßig verteilte Ladung übt auf ein durchfliegendes Teilchen überall nur schwache Kräfte aus; zurückwerfen könnte sie es nicht.",
           short: "Eine verteilte Ladung wirkt überall nur schwach und wirft kein Teilchen zurück.",
@@ -1169,7 +1169,7 @@ export const ATOMBAU_BANK: QuestionBank = {
           detailed: "Im Kern sitzen die Protonen, und die sind positiv geladen. Negativ geladen sind die Elektronen, und die bilden die Hülle um den Kern.",
           short: "Der Kern ist positiv; negativ geladen sind die Elektronen der Hülle.",
         } },
-        { id: 'f4', text: "Das Atom ist dicht mit Masse gefüllt, die alle Teilchen bremst.", misconception: 'chem-mis-scatter-misread', why: {
+        { id: 'f4', text: "Das Atom ist dicht mit Masse gefüllt, die alle durchfliegenden Teilchen bremst.", misconception: 'chem-mis-scatter-misread', why: {
           detailed: "Wäre das Atom überall dicht mit Masse gefüllt, würden fast alle Teilchen gebremst oder abgelenkt. Tatsächlich fliegen aber fast alle ungehindert durch, zurück kommen nur sehr wenige. Eine Deutung muss beides zugleich erklären.",
           short: "Fast alle fliegen ungehindert durch; das passt nicht zu einem gefüllten Atom.",
         } },
@@ -1220,10 +1220,10 @@ export const ATOMBAU_BANK: QuestionBank = {
       prompt: "Rotes Licht hat eine größere Wellenlänge als blaues. Was folgt daraus für seine Frequenz?",
       correct: { id: 'r', text: "Sie ist kleiner, denn Wellenlänge mal Frequenz ergibt im Vakuum immer $c$." },
       wrong: [
-        { id: 'f1', text: "Sie ist größer, denn längere Wellen schwingen öfter in der Sekunde.", misconception: 'chem-mis-wavelength-frequency-same' },
+        { id: 'f1', text: "Sie ist größer, denn längere Wellen schwingen in jeder Sekunde öfter hin und her.", misconception: 'chem-mis-wavelength-frequency-same' },
         { id: 'f2', text: "Sie ist gleich, denn alles Licht ist gleich schnell unterwegs.", misconception: 'chem-mis-light-same-energy' },
         { id: 'f3', text: "Sie ist größer, denn rotes Licht trägt mehr Energie je Portion.", misconception: 'chem-mis-longer-wavelength-more-energy' },
-        { id: 'f4', text: "Sie ist beliebig, denn Frequenz und Wellenlänge hängen nicht zusammen.", misconception: 'chem-mis-wavelength-frequency-same', why: {
+        { id: 'f4', text: "Sie ist beliebig, denn Frequenz und Wellenlänge hängen bei Licht nicht zusammen.", misconception: 'chem-mis-wavelength-frequency-same', why: {
           detailed: String.raw`Wellenlänge und Frequenz hängen fest zusammen: Für Licht gilt $c = \lambda \cdot f$ mit derselben Geschwindigkeit $c$ für alle Farben. Kennt man die Wellenlänge, liegt die Frequenz also fest.`,
           short: String.raw`Über $c = \lambda \cdot f$ legt die Wellenlänge die Frequenz fest.`,
         } },
@@ -1495,12 +1495,12 @@ export const ATOMBAU_BANK: QuestionBank = {
           detailed: "Atome desselben Elements haben nicht immer gleich viele Neutronen. Vergleiche die oberen Zahlen der beiden Symbole: Sie zählen die Teilchen im Kern.",
           short: "Vergleiche auch die Massenzahlen; sie zählen die Teilchen im Kern.",
         } },
-        { id: 'f2', text: "nur in der Neutronenzahl, nicht in der Hülle", misconception: 'chem-mis-ion-charge-ignored' },
+        { id: 'f2', text: "nur in der Neutronenzahl, nicht in der Elektronenhülle", misconception: 'chem-mis-ion-charge-ignored' },
         { id: 'f3', text: "in der Protonenzahl und in der Neutronenzahl", misconception: 'chem-mis-ion-changes-nucleus', why: {
           detailed: "Beide Symbole tragen unten links die 29; die Protonenzahl ist also gleich, und beide Teilchen sind Kupfer. Eine Ionenladung wie $2+$ entsteht in der Hülle, nicht durch zusätzliche Protonen im Kern.",
           short: "Gleiche Ordnungszahl heißt gleiche Protonenzahl; die Ladung entsteht in der Hülle.",
         } },
-        { id: 'f4', text: "in der Protonenzahl und in der Elektronenzahl", misconception: 'chem-mis-isotope-protons' },
+        { id: 'f4', text: "in der Protonenzahl und in der Zahl der Elektronen", misconception: 'chem-mis-isotope-protons' },
       ],
       hint: "Prüfe jede der drei Angaben am Symbol einzeln: unten links, oben links und oben rechts.",
       explanation: {
@@ -1849,9 +1849,9 @@ export const ATOMBAU_BANK: QuestionBank = {
       prompt: String.raw`Ein Elektron ist auf den Raum eines Atoms eingegrenzt, also auf etwa $\Delta x = 10^{-10}\,\mathrm{m}$. Was folgt daraus nach der Unschärferelation?`,
       correct: { id: 'r', text: "Seine Geschwindigkeit ist so unscharf, dass sich keine Bahn angeben lässt." },
       wrong: [
-        { id: 'f1', text: "Seine Geschwindigkeit ist genau bekannt, weil es sich kaum bewegen kann.", misconception: 'chem-mis-uncertainty-reversed' },
+        { id: 'f1', text: "Seine Geschwindigkeit ist genau bekannt, weil es sich im Atom kaum bewegen kann.", misconception: 'chem-mis-uncertainty-reversed' },
         { id: 'f2', text: "Seine Bahn ließe sich mit genaueren Messgeräten trotzdem verfolgen.", misconception: 'chem-mis-uncertainty-instrument' },
-        { id: 'f3', text: "Es läuft auf einer festen Kreisbahn mit genau diesem Durchmesser.", misconception: 'chem-mis-orbital-is-path' },
+        { id: 'f3', text: "Es läuft auf einer festen Kreisbahn mit genau diesem Durchmesser um den Kern.", misconception: 'chem-mis-orbital-is-path' },
         { id: 'f4', text: "Es verhält sich dort nur als Teilchen, ohne jede Welleneigenschaft.", misconception: 'chem-mis-wave-or-particle-only' },
       ],
       hint: "In der Unschärferelation steht ein Produkt. Was geschieht mit dem einen Faktor, wenn der andere klein wird?",

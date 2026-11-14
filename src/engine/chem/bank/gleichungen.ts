@@ -18,7 +18,7 @@ const LEVEL_1: readonly Question[] = [
     part: 'lesen',
     title: 'Edukte und Produkte',
     prompt: 'Eine dieser Aussagen über Reaktionsgleichungen trifft zu. Welche?',
-    correct: { id: 'r', text: 'Links vom Pfeil stehen die Ausgangsstoffe (Edukte), rechts die Stoffe, die bei der Reaktion entstehen (Produkte).' },
+    correct: { id: 'r', text: 'Links vom Pfeil stehen die Ausgangsstoffe (Edukte), rechts die entstehenden Stoffe (Produkte).' },
     wrong: [
       { id: 'f1', text: 'Links vom Pfeil stehen die Produkte, rechts die Ausgangsstoffe.', misconception: 'chem-mis-gl-sides-swapped' },
       { id: 'f2', text: 'Edukte und Produkte enthalten verschiedene Elemente, weil sich Atome bei der Reaktion umwandeln.', misconception: 'chem-mis-gl-atoms-transform' },
@@ -49,9 +49,9 @@ const LEVEL_1: readonly Question[] = [
     part: 'lesen',
     title: 'Doppelpfeil',
     prompt: String.raw`Zwischen Edukten und Produkten steht der Doppelpfeil $\rightleftharpoons$. Was sagt er aus?`,
-    correct: { id: 'r', text: 'Die Reaktion läuft in beide Richtungen; es stellt sich ein Gleichgewicht ein.' },
+    correct: { id: 'r', text: 'Die Reaktion läuft in beide Richtungen bis zu einem Gleichgewicht.' },
     wrong: [
-      { id: 'f1', text: 'Die Reaktion läuft vollständig ab, bis ein Edukt verbraucht ist.', misconception: 'chem-mis-gl-arrow', why: {
+      { id: 'f1', text: 'Die Reaktion läuft vollständig ab, bis eines der Edukte ganz verbraucht ist.', misconception: 'chem-mis-gl-arrow', why: {
         detailed: String.raw`Eine Reaktion, die vollständig abläuft, schreibt man mit dem einfachen Pfeil $\rightarrow$. Der Doppelpfeil hat zwei Spitzen, und das hat einen Grund.`,
         short: String.raw`Für einen vollständigen Ablauf steht der einfache Pfeil $\rightarrow$.`,
       } },
@@ -63,7 +63,7 @@ const LEVEL_1: readonly Question[] = [
         detailed: 'Ob eine Gleichung ausgeglichen ist, zeigt die Zahl der Atome links und rechts, nicht die Art des Pfeils. Auch eine Gleichung mit Doppelpfeil muss ausgeglichen sein.',
         short: 'Der Pfeil sagt nichts darüber, ob die Atome links und rechts stimmen.',
       } },
-      { id: 'f4', text: 'Links und rechts stehen dieselben Stoffe in derselben Menge.', misconception: 'chem-mis-gl-arrow', why: {
+      { id: 'f4', text: 'Links und rechts stehen dieselben Stoffe in derselben Menge, wie bei einem Gleichheitszeichen.', misconception: 'chem-mis-gl-arrow', why: {
         detailed: 'Auch beim Doppelpfeil stehen links und rechts verschiedene Stoffe. Ein Reaktionspfeil ist kein Gleichheitszeichen.',
         short: 'Auch beim Doppelpfeil stehen links und rechts verschiedene Stoffe.',
       } },
@@ -930,9 +930,9 @@ const LEVEL_2: readonly Question[] = [
     part: 'lesen',
     title: 'Was Koeffizienten aussagen',
     prompt: String.raw`Was sagen die Koeffizienten in $\ce{2 H2 + O2 -> 2 H2O}$ aus?`,
-    correct: { id: 'r', text: 'Auf zwei Wasserstoffmoleküle kommt ein Sauerstoffmolekül; im selben Verhältnis stehen die Stoffmengen in mol.' },
+    correct: { id: 'r', text: String.raw`Auf zwei Moleküle $\ce{H2}$ kommt ein Molekül $\ce{O2}$; dasselbe Verhältnis gilt für die Stoffmengen.` },
     wrong: [
-      { id: 'f1', text: 'Zwei Gramm Wasserstoff reagieren mit einem Gramm Sauerstoff.', misconception: 'chem-mis-gl-ratio-mass', why: {
+      { id: 'f1', text: 'Zwei Gramm Wasserstoff reagieren mit einem Gramm Sauerstoff; die Koeffizienten geben Massen an.', misconception: 'chem-mis-gl-ratio-mass', why: {
         detailed: 'Wasserstoffmoleküle sind viel leichter als Sauerstoffmoleküle; aus der Gleichung allein liest man kein Verhältnis in Gramm ab.',
         short: 'Aus der Gleichung allein liest man keine Gramm ab.',
       } },
@@ -1417,7 +1417,7 @@ const LEVEL_3: readonly Question[] = [
     part: 'ausgleichen',
     title: 'Vielfaches einer Gleichung',
     prompt: String.raw`Jemand schreibt die Verbrennung von Wasserstoff als $\ce{4 H2 + 2 O2 -> 4 H2O}$. Welche Beurteilung trifft zu?`,
-    correct: { id: 'r', text: 'Die Atombilanz stimmt; es ist ein Vielfaches der üblichen Gleichung mit den kleinsten ganzen Zahlen.' },
+    correct: { id: 'r', text: 'Richtig ausgeglichen, nur ein Vielfaches der Gleichung mit den kleinsten ganzen Zahlen.' },
     wrong: [
       { id: 'f1', text: 'Die Gleichung ist falsch, weil die Atombilanz nicht stimmt.', misconception: 'chem-mis-gl-multiple-wrong', why: {
         detailed: 'Zähle Wasserstoff und Sauerstoff auf beiden Seiten mit Koeffizient mal Index nach, bevor du die Bilanz verwirfst.',
@@ -1431,7 +1431,7 @@ const LEVEL_3: readonly Question[] = [
         detailed: 'Beim Verdoppeln kommen links und rechts von jedem Element gleich viele Atome hinzu. Prüfe, ob sich die Masse dann auf einer Seite anders ändern kann als auf der anderen.',
         short: 'Links und rechts kommt gleich viel hinzu.',
       } },
-      { id: 'f4', text: 'Hier entsteht je Sauerstoffmolekül mehr Wasser als in der üblichen Gleichung.', misconception: 'chem-mis-gl-ratio-fixed', why: {
+      { id: 'f4', text: String.raw`Hier entsteht je Sauerstoffmolekül mehr Wasser als in der üblichen Gleichung $\ce{2 H2 + O2 -> 2 H2O}$.`, misconception: 'chem-mis-gl-ratio-fixed', why: {
         detailed: 'Rechne nach: Wie viele Wassermoleküle entstehen hier je Sauerstoffmolekül, und wie viele in der üblichen Gleichung?',
         short: 'Wasser je Sauerstoffmolekül in beiden Gleichungen nachrechnen.',
       } },
@@ -1487,13 +1487,13 @@ const LEVEL_3: readonly Question[] = [
     part: 'lesen',
     title: 'Erhaltung der Masse',
     prompt: 'Magnesium verbrennt einmal in einem offenen Tiegel und einmal in einem fest verschlossenen Glaskolben voller Luft. Was zeigt die Waage nach der Reaktion?',
-    correct: { id: 'r', text: 'Im offenen Tiegel ist die Probe schwerer geworden, der verschlossene Kolben wiegt so viel wie vorher.' },
+    correct: { id: 'r', text: 'Die Probe im offenen Tiegel wird schwerer, der verschlossene Kolben bleibt gleich schwer.' },
     wrong: [
       { id: 'f1', text: 'In beiden Fällen ist die Masse kleiner geworden, weil Magnesium verbrannt ist.', misconception: 'chem-mis-gl-mass-changes', why: {
         detailed: 'Magnesium verschwindet beim Verbrennen nicht, es wird zu einem Oxid. Überlege für jedes Gefäß, ob dabei Stoff hinein- oder hinausgelangen kann.',
         short: 'Magnesium verschwindet nicht.',
       } },
-      { id: 'f2', text: 'In beiden Fällen ist die Masse größer geworden, weil Sauerstoff gebunden wurde.', misconception: 'chem-mis-gl-mass-changes', why: {
+      { id: 'f2', text: 'In beiden Fällen ist die Masse größer geworden, weil das Magnesium Sauerstoff gebunden hat.', misconception: 'chem-mis-gl-mass-changes', why: {
         detailed: 'Im verschlossenen Kolben war der Sauerstoff schon vor der Reaktion im Gefäß und wurde mitgewogen. Durch die Wand kommt kein Atom hinzu.',
         short: 'Im geschlossenen Gefäß kommt kein Atom hinzu.',
       } },
@@ -1501,7 +1501,7 @@ const LEVEL_3: readonly Question[] = [
         detailed: 'In den verschlossenen Kolben kann nichts hineingelangen; seine Masse kann also nicht steigen. Beim offenen Tiegel dagegen kann Stoff aus der Luft dazukommen.',
         short: 'In ein verschlossenes Gefäß gelangt nichts hinein.',
       } },
-      { id: 'f4', text: 'Der verschlossene Kolben wiegt weniger als vorher, weil Sauerstoff verbraucht wurde.', misconception: 'chem-mis-gl-mass-changes', why: {
+      { id: 'f4', text: 'Der verschlossene Kolben wiegt weniger als vorher, weil der Sauerstoff darin verbraucht wurde.', misconception: 'chem-mis-gl-mass-changes', why: {
         detailed: 'Der verbrauchte Sauerstoff ist nicht verschwunden, sondern steckt jetzt im Magnesiumoxid, und das liegt weiter im Kolben.',
         short: 'Der verbrauchte Sauerstoff steckt jetzt im Produkt.',
       } },
@@ -1523,7 +1523,7 @@ const LEVEL_3: readonly Question[] = [
     part: 'lesen',
     title: 'Erhaltung der Masse',
     prompt: String.raw`Kalk wird in einem offenen Tiegel stark erhitzt: $\ce{CaCO3 -> CaO + CO2}$. Danach ist der Inhalt des Tiegels leichter. Warum widerspricht das nicht der Erhaltung der Masse?`,
-    correct: { id: 'r', text: 'Das Kohlenstoffdioxid ist als Gas entwichen; zählt man es mit, ist die Masse gleich geblieben.' },
+    correct: { id: 'r', text: String.raw`Das Gas $\ce{CO2}$ ist entwichen; zählt man es mit, ist die Masse gleich geblieben.` },
     wrong: [
       { id: 'f1', text: 'Bei hoher Temperatur gilt die Erhaltung der Masse nicht.', misconception: 'chem-mis-gl-mass-changes', why: {
         detailed: 'Die Erhaltung der Masse gilt bei jeder Temperatur. Prüfe, ob alle Produkte im offenen Tiegel bleiben.',
@@ -1531,7 +1531,7 @@ const LEVEL_3: readonly Question[] = [
       } },
       { id: 'f2', text: 'Ein Teil der Atome wird beim Erhitzen zerstört.', misconception: 'chem-mis-gl-atoms-transform' },
       { id: 'f3', text: 'Die Gleichung ist nicht ausgeglichen: Links steht ein Stoff, rechts stehen zwei.', misconception: 'chem-mis-gl-molecules-conserved' },
-      { id: 'f4', text: 'Calcium hat sich beim Erhitzen in ein leichteres Element umgewandelt.', misconception: 'chem-mis-gl-atoms-transform' },
+      { id: 'f4', text: 'Calcium hat sich beim Erhitzen in ein anderes, leichteres Element umgewandelt.', misconception: 'chem-mis-gl-atoms-transform' },
     ],
     hint: 'Was ist das zweite Produkt, und kann es im offenen Tiegel bleiben?',
     explanation: {
@@ -1606,17 +1606,17 @@ const LEVEL_3: readonly Question[] = [
     part: 'ausgleichen',
     title: 'Index und Koeffizient',
     prompt: String.raw`Beim Ausgleichen von $\ce{H2 + O2 -> H2O}$ möchte jemand rechts $\ce{H2O2}$ statt $\ce{H2O}$ schreiben, damit der Sauerstoff ohne Koeffizienten stimmt. Warum ist das nicht erlaubt?`,
-    correct: { id: 'r', text: String.raw`$\ce{H2O2}$ ist ein anderer Stoff, Wasserstoffperoxid; die Gleichung beschriebe dann eine andere Reaktion.` },
+    correct: { id: 'r', text: String.raw`Ein anderer Index macht einen anderen Stoff: $\ce{H2O2}$ ist Wasserstoffperoxid.` },
     wrong: [
       { id: 'f1', text: 'Es ist erlaubt, nur unüblich.', misconception: 'chem-mis-gl-index-changed', why: {
         detailed: String.raw`Ein geänderter Index ist mehr als eine Frage der Schreibweise. Überlege, ob $\ce{H2O2}$ noch derselbe Stoff ist wie $\ce{H2O}$.`,
         short: 'Ein geänderter Index ist keine bloße Schreibweise.',
       } },
-      { id: 'f2', text: 'Weil dann die Masse nicht mehr erhalten bliebe.', misconception: 'chem-mis-gl-index-changed', why: {
+      { id: 'f2', text: 'Weil dann die Masse auf beiden Seiten der Gleichung nicht mehr gleich wäre.', misconception: 'chem-mis-gl-index-changed', why: {
         detailed: String.raw`Die Atombilanz von $\ce{H2 + O2 -> H2O2}$ stimmt sogar, also auch die Masse. Das Problem liegt woanders.`,
         short: 'Die Atombilanz stimmt sogar; das Problem liegt woanders.',
       } },
-      { id: 'f3', text: 'Weil Indizes nur bei den Edukten geändert werden dürfen.', misconception: 'chem-mis-gl-index-changed', why: {
+      { id: 'f3', text: 'Weil Indizes nur bei den Edukten geändert werden dürfen, bei den Produkten aber nicht.', misconception: 'chem-mis-gl-index-changed', why: {
         detailed: 'Indizes darf man beim Ausgleichen auf keiner Seite ändern, weder bei den Edukten noch bei den Produkten.',
         short: 'Indizes bleiben auf beiden Seiten unverändert.',
       } },
@@ -1642,7 +1642,7 @@ const LEVEL_3: readonly Question[] = [
     part: 'ausgleichen',
     title: 'Zweiatomige Elemente',
     prompt: String.raw`Warum schreibt man Sauerstoff in einer Reaktionsgleichung als $\ce{O2}$ und nicht als $\ce{O}$?`,
-    correct: { id: 'r', text: 'Sauerstoff besteht aus Molekülen mit zwei gebundenen Atomen, und die Gleichung beschreibt die Teilchen, die tatsächlich reagieren.' },
+    correct: { id: 'r', text: 'Die Gleichung zeigt die echten Teilchen: Sauerstoff besteht aus Molekülen aus zwei Atomen.' },
     wrong: [
       { id: 'f1', text: 'Nur, damit sich die Gleichung leichter ausgleichen lässt.', misconception: 'chem-mis-gl-single-atom', why: {
         detailed: String.raw`Mit $\ce{O}$ wäre das Ausgleichen oft sogar einfacher. Die Schreibweise richtet sich nicht nach der Bequemlichkeit, sondern nach dem, was im Stoff tatsächlich vorliegt.`,
@@ -1652,11 +1652,11 @@ const LEVEL_3: readonly Question[] = [
         detailed: String.raw`$\ce{O}$ wäre ein einzelnes Sauerstoffatom, $\ce{O2}$ ist ein Molekül. Einzelne Sauerstoffatome kommen unter gewöhnlichen Bedingungen nicht als Stoff vor.`,
         short: 'Ein einzelnes Atom ist etwas anderes als ein Molekül.',
       } },
-      { id: 'f3', text: 'Weil in der Luft immer zwei Sauerstoffatome lose nebeneinander schweben.', misconception: 'chem-mis-gl-single-atom', why: {
+      { id: 'f3', text: 'Weil in der Luft immer zwei Sauerstoffatome lose nebeneinander schweben, ohne miteinander verbunden zu sein.', misconception: 'chem-mis-gl-single-atom', why: {
         detailed: 'Die beiden Atome sind nicht lose, sondern durch eine Bindung fest miteinander verbunden.',
         short: 'Die beiden Atome sind fest gebunden.',
       } },
-      { id: 'f4', text: 'Weil man jedes Element in Gleichungen mit einer 2 schreibt.', misconception: 'chem-mis-gl-diatomic-metal', why: {
+      { id: 'f4', text: 'Weil man jedes Element in Gleichungen mit einer 2 schreibt, Metalle wie Eisen genauso wie Gase.', misconception: 'chem-mis-gl-diatomic-metal', why: {
         detailed: 'Metalle wie Natrium oder Eisen stehen als einzelnes Symbol in Gleichungen; eine 2 bekommen nur wenige Elemente.',
         short: 'Nur wenige Elemente bekommen eine 2.',
       } },

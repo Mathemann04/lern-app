@@ -947,11 +947,11 @@ export const STOFFMENGE_BANK: QuestionBank = {
           detailed: "Die Zahl der Formeleinheiten ist die Stoffmenge selbst. Dass jede Formeleinheit zwei Ionen enthält, verdoppelt die Zahl der Ionen, nicht die Zahl der Formeleinheiten.",
           short: "Zwei Ionen je Formeleinheit verdoppeln die Ionen, nicht die Formeleinheiten.",
         } },
-        { id: 'f4', text: String.raw`$58{,}5$ Formeleinheiten, so viele, wie die molare Masse angibt`, misconception: 'chem-mis-st-n-is-count', why: {
+        { id: 'f4', text: String.raw`$58{,}5$ Formeleinheiten, so viele, wie die molare Masse von Natriumchlorid angibt`, misconception: 'chem-mis-st-n-is-count', why: {
           detailed: "Die molare Masse sagt, wie viele Gramm ein Mol wiegt, nicht wie viele Teilchen es enthält. Ein Mol enthält bei jedem Stoff dieselbe riesige Zahl von Teilchen.",
           short: "Die molare Masse ist eine Masse, keine Teilchenzahl.",
         } },
-        { id: 'f5', text: String.raw`$6{,}022 \cdot 10^{23}$ Natriumatome und ebenso viele Chlormoleküle $\ce{Cl2}$`, misconception: 'chem-mis-st-formula-split', why: {
+        { id: 'f5', text: String.raw`$6{,}022 \cdot 10^{23}$ Natriumatome und ebenso viele Chlormoleküle $\ce{Cl2}$, aus denen das Salz aufgebaut ist`, misconception: 'chem-mis-st-formula-split', why: {
           detailed: "Natriumchlorid enthält weder Natriumatome noch Chlormoleküle. Natrium und Chlor liegen darin als Ionen vor, fest in einem Gitter gebunden.",
           short: "Im Salz liegen Ionen vor, keine Atome oder Moleküle.",
         } },
@@ -981,7 +981,7 @@ export const STOFFMENGE_BANK: QuestionBank = {
           detailed: "Mit den Ordnungszahlen statt der molaren Massen kämen Methan und Ammoniak auf denselben Wert, 10. Gerechnet wird mit den molaren Massen aus der Aufgabe.",
           short: "Mit den angegebenen molaren Massen rechnen.",
         } },
-        { id: 'f5', text: "Alle enthalten gleich viele Moleküle, weil alle gleich schwer sind.", misconception: 'chem-mis-st-same-mass-same-n' },
+        { id: 'f5', text: "Alle enthalten gleich viele.", misconception: 'chem-mis-st-same-mass-same-n' },
       ],
       hint: "Bei gleicher Masse: Welche Teilchen müssen besonders zahlreich sein, damit sie zusammen genauso viel wiegen?",
       explanation: {
@@ -1061,12 +1061,12 @@ export const STOFFMENGE_BANK: QuestionBank = {
       prompt: String.raw`Was bedeutet die 2 in der Formel $\ce{Ca(OH)2}$?`,
       correct: { id: 'r', text: String.raw`Die Gruppe $\ce{OH}$ kommt zweimal vor: zwei Sauerstoff- und zwei Wasserstoffatome je Formeleinheit.` },
       wrong: [
-        { id: 'f1', text: "Nur das Wasserstoffatom kommt zweimal vor, der Sauerstoff einmal.", misconception: 'chem-mis-st-bracket', why: {
+        { id: 'f1', text: "Nur das Wasserstoffatom kommt zweimal vor: ein Calcium-, ein Sauerstoff- und zwei Wasserstoffatome je Formeleinheit.", misconception: 'chem-mis-st-bracket', why: {
           detailed: "Die 2 steht nicht direkt hinter dem H, sondern hinter der Klammer. Wofür steht eine Klammer in einer Formel?",
           short: "Die 2 steht hinter der Klammer.",
         } },
         { id: 'f2', text: "Es liegen zwei Formeleinheiten Calciumhydroxid vor.", misconception: 'chem-mis-st-index-coefficient' },
-        { id: 'f3', text: "Alle Atome der Formel kommen zweimal vor, auch das Calcium.", misconception: 'chem-mis-st-bracket', why: {
+        { id: 'f3', text: "Alle Atome der Formel kommen zweimal vor, auch das Calcium: je zwei Calcium-, Sauerstoff- und Wasserstoffatome.", misconception: 'chem-mis-st-bracket', why: {
           detailed: "Das Calcium steht vor der Klammer, die 2 dahinter. Prüfe, welche Atome die Klammer einschließt.",
           short: "Prüfe, was in der Klammer steht.",
         } },
@@ -1092,19 +1092,19 @@ export const STOFFMENGE_BANK: QuestionBank = {
       part: 'molmasse',
       title: "Kristallwasser lesen",
       prompt: String.raw`Was bedeutet der Teil $\ce{* 5 H2O}$ in der Formel $\ce{CuSO4 * 5 H2O}$?`,
-      correct: { id: 'r', text: "Zu jeder Formeleinheit Kupfer(II)-sulfat gehören fünf Wassermoleküle, die fest im Kristall eingebaut sind." },
+      correct: { id: 'r', text: "Zu jeder Formeleinheit Kupfer(II)-sulfat gehören fünf fest im Kristall eingebaute Wassermoleküle." },
       wrong: [
         { id: 'f1', text: "Die molare Masse des Salzes wird mit der von fünf Wassermolekülen malgenommen.", misconception: 'chem-mis-st-hydrate-factor' },
-        { id: 'f2', text: "Das Salz ist in Wasser gelöst; das Wasser gehört nicht zur Formeleinheit.", misconception: 'chem-mis-st-hydrate-forgotten', why: {
+        { id: 'f2', text: "Das Salz ist in Wasser gelöst; das Wasser umgibt nur die Ionen und gehört nicht zur Formeleinheit.", misconception: 'chem-mis-st-hydrate-forgotten', why: {
           detailed: "Ein gelöstes Salz kennzeichnet man mit (aq), nicht mit einem Malpunkt in der Formel.",
           short: "Gelöst schreibt man mit (aq).",
         } },
-        { id: 'f3', text: "Die 5 gilt nur für den Wasserstoff: fünf Wasserstoffatome und ein Sauerstoffatom.", misconception: 'chem-mis-st-hydrate-factor' },
+        { id: 'f3', text: "Die 5 gilt nur für den Wasserstoff: Zu jeder Formeleinheit gehören fünf Wasserstoffatome und ein Sauerstoffatom.", misconception: 'chem-mis-st-hydrate-factor' },
         { id: 'f4', text: "Es ist ein Gemisch aus Kupfer(II)-sulfat und beliebig viel Wasser.", misconception: 'chem-mis-st-formula-split', why: {
           detailed: "Kristallwasser ist in einem festen Zahlenverhältnis in den Kristall eingebaut. Die Formel nennt dieses Verhältnis; ein Gemisch könnte dagegen beliebige Anteile haben.",
           short: "Kristallwasser hat ein festes Zahlenverhältnis.",
         } },
-        { id: 'f5', text: "Das Wasser ist nur Feuchtigkeit von außen und verdunstet an der Luft.", misconception: 'chem-mis-st-hydrate-forgotten', why: {
+        { id: 'f5', text: "Das Wasser ist nur Feuchtigkeit, die außen am Kristall haftet und an der Luft verdunstet.", misconception: 'chem-mis-st-hydrate-forgotten', why: {
           detailed: "Lose Feuchtigkeit hätte keine feste Zahl und stünde nicht in der Formel.",
           short: "Feuchtigkeit stünde nicht in der Formel.",
         } },
@@ -1393,7 +1393,7 @@ export const STOFFMENGE_BANK: QuestionBank = {
       part: 'molmasse',
       title: "Eine Summenformel lesen",
       prompt: String.raw`Wie ist die Summenformel $\ce{C6H12O6}$ von Glucose zu verstehen?`,
-      correct: { id: 'r', text: "als ein Stoff aus gleichen Molekülen, von denen jedes 6 Kohlenstoff-, 12 Wasserstoff- und 6 Sauerstoffatome enthält" },
+      correct: { id: 'r', text: "als ein Stoff aus gleichen Molekülen mit je 6 Kohlenstoff-, 12 Wasserstoff- und 6 Sauerstoffatomen" },
       wrong: [
         { id: 'f1', text: "als Gemisch aus Kohlenstoff, Wasserstoff und Sauerstoff im Verhältnis 6 zu 12 zu 6", misconception: 'chem-mis-st-formula-split', why: {
           detailed: "In einem Gemisch liegen Stoffe nebeneinander vor und lassen sich in beliebigem Verhältnis mischen. In Glucose sind die Atome dagegen fest aneinander gebunden.",
@@ -1404,7 +1404,7 @@ export const STOFFMENGE_BANK: QuestionBank = {
           short: "Glucose steht in Gleichungen immer als Ganzes.",
         } },
         { id: 'f3', text: String.raw`als dasselbe wie $\ce{CH2O}$, weil man die Indizes durch 6 kürzen darf`, misconception: 'chem-mis-st-formula-reduced' },
-        { id: 'f4', text: "als Molekül, das aus insgesamt drei Atomen besteht", misconception: 'chem-mis-st-index-ignored' },
+        { id: 'f4', text: "als Molekül, das aus insgesamt drei Atomen besteht, je einem Kohlenstoff-, Wasserstoff- und Sauerstoffatom", misconception: 'chem-mis-st-index-ignored' },
         { id: 'f5', text: String.raw`als Angabe, dass $1\,\mathrm{mol}$ Glucose $24 \cdot 6{,}022 \cdot 10^{23}$ Moleküle enthält`, misconception: 'chem-mis-st-atoms-molecules' },
       ],
       hint: "Was zählen die Indizes in einer Summenformel, und was zählen sie nicht?",
@@ -1423,7 +1423,7 @@ export const STOFFMENGE_BANK: QuestionBank = {
       part: 'molmasse',
       title: "Molare Masse von Chlor",
       prompt: String.raw`Warum steht für Chlor im Periodensystem $M(\ce{Cl}) = 35{,}5\,\mathrm{g/mol}$ und keine ganze Zahl?`,
-      correct: { id: 'r', text: String.raw`Natürliches Chlor besteht aus den Isotopen $\ce{^{35}Cl}$ und $\ce{^{37}Cl}$; $35{,}5$ ist der nach ihrer Häufigkeit gewichtete Mittelwert.` },
+      correct: { id: 'r', text: String.raw`Chlor ist ein Gemisch der Isotope $\ce{^{35}Cl}$ und $\ce{^{37}Cl}$; $35{,}5$ ist ihr nach Häufigkeit gewichteter Mittelwert.` },
       wrong: [
         { id: 'f1', text: String.raw`Ein Chloratom hat $35{,}5$ Kernteilchen.`, misconception: 'chem-mis-st-mass-number', why: {
           detailed: "Kernteilchen gibt es nur ganz: Ein einzelnes Chloratom hat je nach Isotop 35 oder 37 Protonen und Neutronen zusammen. Ein krummer Wert kann nicht von einem einzelnen Atom stammen.",
@@ -1433,11 +1433,11 @@ export const STOFFMENGE_BANK: QuestionBank = {
           detailed: "Die Massenzahl 37 gehört nur zum schwereren der beiden Chlorisotope. Eine Probe natürlichen Chlors besteht nicht nur aus diesem Isotop, deshalb ist 37 nicht der Mittelwert über alle Chloratome.",
           short: "37 ist die Massenzahl eines einzelnen Isotops, nicht der Mittelwert.",
         } },
-        { id: 'f3', text: "Beide Isotope kommen genau gleich häufig vor, und der Wert liegt in der Mitte.", misconception: 'chem-mis-st-mass-number', why: {
+        { id: 'f3', text: String.raw`Die Isotope $\ce{^{35}Cl}$ und $\ce{^{37}Cl}$ kommen genau gleich häufig vor, und der Wert liegt deshalb genau in ihrer Mitte.`, misconception: 'chem-mis-st-mass-number', why: {
           detailed: String.raw`Wären beide Isotope gleich häufig, läge der Mittelwert genau zwischen den Massenzahlen, also bei 36. Der Wert liegt aber näher an einer der beiden; das zeigt, dass ein Isotop deutlich häufiger ist.`,
           short: "Gleich häufige Isotope ergäben genau die Mitte.",
         } },
-        { id: 'f4', text: String.raw`Chlor kommt als $\ce{Cl2}$ vor, und $35{,}5$ ist die Hälfte der molaren Masse des Moleküls.`, misconception: 'chem-mis-st-atom-for-molecule', why: {
+        { id: 'f4', text: String.raw`Chlor kommt in der Natur als Moleküle $\ce{Cl2}$ vor, und $35{,}5$ ist die Hälfte der molaren Masse eines solchen Moleküls.`, misconception: 'chem-mis-st-atom-for-molecule', why: {
           detailed: String.raw`Die Begründung dreht sich im Kreis: Die molare Masse von $\ce{Cl2}$ ist doppelt so groß wie die eines Chloratoms, weil sie aus zwei Atomen besteht. Warum der Wert für ein Atom keine ganze Zahl ist, erklärt das nicht.`,
           short: "Das Molekül erklärt nicht, warum der Wert für ein Atom krumm ist.",
         } },
@@ -1594,13 +1594,13 @@ export const STOFFMENGE_BANK: QuestionBank = {
       part: 'molmasse',
       title: "Atommasse und molare Masse",
       prompt: String.raw`Ein Atom $\ce{^{12}C}$ hat die Masse $12\,\mathrm{u}$. Wie hängt das mit der molaren Masse zusammen?`,
-      correct: { id: 'r', text: String.raw`Ein Mol dieser Atome wiegt $12\,\mathrm{g}$: Die Zahl bleibt gleich, nur steht $\mathrm{g/mol}$ statt $\mathrm{u}$.` },
+      correct: { id: 'r', text: String.raw`Ein Mol dieser Atome wiegt $12\,\mathrm{g}$: gleiche Zahl, Einheit $\mathrm{g/mol}$ statt $\mathrm{u}$.` },
       wrong: [
         { id: 'f1', text: String.raw`Ein einzelnes Atom $\ce{^{12}C}$ wiegt $12\,\mathrm{g}$.`, misconception: 'chem-mis-st-particle-mass' },
         { id: 'f2', text: String.raw`Ein Mol dieser Atome wiegt $12\,\mathrm{u}$.`, misconception: 'chem-mis-st-units' },
         { id: 'f3', text: String.raw`Ein Mol dieser Atome wiegt $12 \cdot 6{,}022 \cdot 10^{23}\,\mathrm{g}$.`, misconception: 'chem-mis-st-particle-mass' },
-        { id: 'f4', text: String.raw`Die molare Masse beträgt $\frac{12}{6{,}022 \cdot 10^{23}}\,\mathrm{g/mol}$.`, misconception: 'chem-mis-st-avogadro-inverted' },
-        { id: 'f5', text: String.raw`Gar nicht: $\mathrm{u}$ gilt nur für Atome, $\mathrm{g/mol}$ nur für Moleküle.`, misconception: 'chem-mis-st-atoms-molecules', why: {
+        { id: 'f4', text: String.raw`Die molare Masse beträgt $\frac{12}{6{,}022 \cdot 10^{23}}\,\mathrm{g/mol}$, weil man durch die Avogadro-Konstante teilt.`, misconception: 'chem-mis-st-avogadro-inverted' },
+        { id: 'f5', text: String.raw`Gar nicht: Die Einheit $\mathrm{u}$ gilt nur für einzelne Atome, die Einheit $\mathrm{g/mol}$ nur für Moleküle.`, misconception: 'chem-mis-st-atoms-molecules', why: {
           detailed: String.raw`Beide Angaben gibt es für jede Teilchenart. Ein Molekül hat eine Masse in u, und ein Element wie Eisen hat eine molare Masse in $\mathrm{g/mol}$; die eine Angabe bezieht sich auf ein Teilchen, die andere auf ein Mol.`,
           short: "u und g/mol gibt es für Atome wie für Moleküle.",
         } },
@@ -1655,9 +1655,9 @@ export const STOFFMENGE_BANK: QuestionBank = {
       part: 'stoffmenge',
       title: "Verdampfen",
       prompt: String.raw`$1\,\mathrm{mol}$ flüssiges Wasser wird bei gleichbleibendem Druck vollständig verdampft, ohne dass etwas verloren geht. Was trifft zu?`,
-      correct: { id: 'r', text: "Das Volumen wird viel größer; Stoffmenge, Masse und Zahl der Moleküle bleiben gleich." },
+      correct: { id: 'r', text: "Das Volumen wächst stark; Stoffmenge, Masse und Zahl der Moleküle bleiben gleich." },
       wrong: [
-        { id: 'f1', text: "Die Stoffmenge wird größer, weil der Dampf viel mehr Raum einnimmt.", misconception: 'chem-mis-st-n-is-mass', why: {
+        { id: 'f1', text: "Die Stoffmenge wird größer, weil der Dampf bei gleichem Druck viel mehr Raum einnimmt.", misconception: 'chem-mis-st-n-is-mass', why: {
           detailed: "Die Stoffmenge zählt Teilchen, nicht Raum. Beim Verdampfen rücken die Moleküle nur weiter auseinander; ihre Zahl ändert sich nicht.",
           short: "Mehr Raum heißt nicht mehr Teilchen.",
         } },
@@ -1673,7 +1673,7 @@ export const STOFFMENGE_BANK: QuestionBank = {
           detailed: "Ein Mol enthält in jedem Aggregatzustand gleich viele Teilchen; das Mol ist nicht an Gase gebunden. Auch flüssiges Wasser wird in Mol gezählt.",
           short: "Das Mol gilt in jedem Zustand.",
         } },
-        { id: 'f5', text: "Die Stoffmenge wird kleiner, weil Dampf eine viel kleinere Dichte hat.", misconception: 'chem-mis-st-n-is-mass', why: {
+        { id: 'f5', text: "Die Stoffmenge wird kleiner, weil Dampf eine viel kleinere Dichte hat als flüssiges Wasser.", misconception: 'chem-mis-st-n-is-mass', why: {
           detailed: "Die Dichte sagt, wie viel Masse in einem Liter steckt. Die Stoffmenge zählt die Moleküle der ganzen Portion, und keines geht verloren.",
           short: "Die Dichte ist nicht die Stoffmenge.",
         } },
@@ -1727,16 +1727,16 @@ export const STOFFMENGE_BANK: QuestionBank = {
           detailed: String.raw`Ohne den Index käme man auf $12 + 1 = 13\,\mathrm{g/mol}$, nicht auf 10. Rechne jede vermutete Ursache nach, bis sie genau den falschen Wert ergibt.`,
           short: "Ohne Index käme ein anderer Wert heraus.",
         } },
-        { id: 'f2', text: "Beim Zusammenzählen ist ein Komma verrutscht.", misconception: 'chem-mis-st-decimal', why: {
+        { id: 'f2', text: "Beim Zusammenzählen der molaren Massen ist ein Komma verrutscht.", misconception: 'chem-mis-st-decimal', why: {
           detailed: "Ein verrutschtes Komma ändert einen Wert um den Faktor zehn. Aus der richtigen molaren Masse von Methan entsteht so nicht die 10; rechne die Ursache genau nach.",
           short: "Ein Kommafehler ergäbe einen anderen Wert.",
         } },
         { id: 'f3', text: String.raw`Es ist kein Fehler: Methan hat $10\,\mathrm{g/mol}$.`, misconception: 'chem-mis-st-atomic-number' },
-        { id: 'f4', text: String.raw`Die Formel wurde in $\ce{C}$ und $\ce{H4}$ zerlegt und nur ein Teil gezählt.`, misconception: 'chem-mis-st-formula-split', why: {
+        { id: 'f4', text: String.raw`Die Formel wurde in $\ce{C}$ und $\ce{H4}$ zerlegt und nur einer der beiden Teile gezählt.`, misconception: 'chem-mis-st-formula-split', why: {
           detailed: String.raw`Zählt man nur einen Teil der Formel, kommt man auf $12$ oder $4\,\mathrm{g/mol}$, nicht auf 10. Außerdem steht die Formel für ein Molekül, das man nicht in Teile aufspalten darf.`,
           short: "Ein Teil der Formel ergäbe 12 oder 4, nicht 10.",
         } },
-        { id: 'f5', text: "Es wurde mit den Massenzahlen der häufigsten Isotope gerechnet.", misconception: 'chem-mis-st-mass-number', why: {
+        { id: 'f5', text: "Es wurde mit den Massenzahlen der häufigsten Isotope von Kohlenstoff und Wasserstoff gerechnet.", misconception: 'chem-mis-st-mass-number', why: {
           detailed: "Die Massenzahlen der häufigsten Isotope von Kohlenstoff und Wasserstoff sind 12 und 1; damit käme man auf denselben Wert wie mit den angegebenen molaren Massen, nicht auf 10.",
           short: "Mit den Massenzahlen käme dasselbe heraus wie mit den molaren Massen.",
         } },

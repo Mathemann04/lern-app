@@ -651,15 +651,15 @@ export const LOESUNGEN_BANK: QuestionBank = {
       part: 'konzentration',
       title: "Vorgehen beim Ansetzen",
       prompt: String.raw`Wie setzt man $1\,\mathrm{L}$ einer Lösung mit $c = 0{,}5\,\mathrm{mol/L}$ richtig an?`,
-      correct: { id: 'r', text: String.raw`$0{,}5\,\mathrm{mol}$ des Stoffs abwiegen, in etwas Wasser lösen und im Maßkolben auf genau $1\,\mathrm{L}$ Lösung auffüllen` },
+      correct: { id: 'r', text: String.raw`$0{,}5\,\mathrm{mol}$ des Stoffs abwiegen, lösen und im Maßkolben auf $1\,\mathrm{L}$ Lösung auffüllen` },
       wrong: [
-        { id: 'f1', text: String.raw`$0{,}5\,\mathrm{mol}$ des Stoffs abwiegen und in genau $1\,\mathrm{L}$ Wasser geben`, misconception: 'chem-mis-lo-v-not-solution' },
+        { id: 'f1', text: String.raw`$0{,}5\,\mathrm{mol}$ des Stoffs abwiegen, genau $1\,\mathrm{L}$ Wasser abmessen und den Stoff darin lösen`, misconception: 'chem-mis-lo-v-not-solution' },
         { id: 'f2', text: String.raw`$0{,}5\,\mathrm{g}$ des Stoffs abwiegen, lösen und auf $1\,\mathrm{L}$ Lösung auffüllen`, misconception: 'chem-mis-lo-mol-as-gram' },
         { id: 'f3', text: String.raw`$1\,\mathrm{mol}$ des Stoffs abwiegen, lösen und auf $0{,}5\,\mathrm{L}$ Lösung auffüllen`, misconception: 'chem-mis-lo-c-inverted', why: {
           detailed: String.raw`So kommen auf jeden Liter zwei Mol; Stoffmenge und Volumen sind vertauscht. Prüfe mit $c = \frac{n}{V}$ nach, welche Konzentration herauskommt.`,
           short: "Stoffmenge und Volumen sind vertauscht.",
         } },
-        { id: 'f4', text: String.raw`$0{,}5\,\mathrm{mol}$ des Stoffs abwiegen, lösen und auf $500\,\mathrm{mL}$ Lösung auffüllen`, misconception: 'chem-mis-lo-reference', why: {
+        { id: 'f4', text: String.raw`$0{,}5\,\mathrm{mol}$ des Stoffs abwiegen, lösen und im Maßkolben auf $500\,\mathrm{mL}$ Lösung auffüllen`, misconception: 'chem-mis-lo-reference', why: {
           detailed: "So stecken die abgewogenen Mol in einem halben Liter, also doppelt so viel je Liter wie verlangt. Die Konzentration bezieht sich auf einen ganzen Liter.",
           short: "Die Konzentration bezieht sich auf einen ganzen Liter.",
         } },
@@ -1051,7 +1051,7 @@ export const LOESUNGEN_BANK: QuestionBank = {
       part: 'gase',
       title: "Helium und Kohlenstoffdioxid",
       prompt: String.raw`$2\,\mathrm{mol}$ Helium $\ce{He}$ und $2\,\mathrm{mol}$ Kohlenstoffdioxid $\ce{CO2}$ stehen unter gleichem Druck und bei gleicher Temperatur. Was gilt für ihr Volumen?`,
-      correct: { id: 'r', text: "Beide nehmen dasselbe Volumen ein." },
+      correct: { id: 'r', text: "Beide nehmen dasselbe Volumen ein, weil es nur von der Stoffmenge abhängt." },
       wrong: [
         { id: 'f1', text: "Kohlenstoffdioxid nimmt mehr Raum ein, weil seine Moleküle schwerer sind.", misconception: 'chem-mis-lo-vm-gas-specific' },
         { id: 'f2', text: "Helium nimmt mehr Raum ein, weil es leichter ist und in Luft nach oben steigt.", misconception: 'chem-mis-lo-vm-gas-specific', why: {
@@ -1111,11 +1111,11 @@ export const LOESUNGEN_BANK: QuestionBank = {
       prompt: String.raw`Bei $0\,^{\circ}\mathrm{C}$ und $1013\,\mathrm{hPa}$ nimmt ein Mol Gas $22{,}4\,\mathrm{L}$ ein, bei $25\,^{\circ}\mathrm{C}$ und $1013\,\mathrm{hPa}$ dagegen rund $24{,}5\,\mathrm{L}$. Warum?`,
       correct: { id: 'r', text: "Bei gleichem Druck dehnt sich ein Gas aus, wenn es wärmer wird." },
       wrong: [
-        { id: 'f1', text: String.raw`Bei $25\,^{\circ}\mathrm{C}$ stecken in einem Mol mehr Gasteilchen.`, misconception: 'chem-mis-lo-heat-more-particles', why: {
+        { id: 'f1', text: String.raw`Bei $25\,^{\circ}\mathrm{C}$ stecken in einem Mol mehr Gasteilchen, die zusammen mehr Raum brauchen.`, misconception: 'chem-mis-lo-heat-more-particles', why: {
           detailed: "Ein Mol ist immer dieselbe Zahl von Teilchen, egal bei welcher Temperatur. Der Unterschied muss also eine andere Ursache haben.",
           short: "Ein Mol hat immer gleich viele Teilchen.",
         } },
-        { id: 'f2', text: String.raw`Bei $25\,^{\circ}\mathrm{C}$ sind die Gasteilchen selbst größer.`, misconception: 'chem-mis-lo-ideal-model', why: {
+        { id: 'f2', text: String.raw`Bei $25\,^{\circ}\mathrm{C}$ sind die Gasteilchen selbst größer und brauchen deshalb mehr Platz.`, misconception: 'chem-mis-lo-ideal-model', why: {
           detailed: "Beim idealen Gas spielt das Eigenvolumen der Teilchen keine Rolle; selbst wenn sie wüchsen, änderte das das Gasvolumen kaum. Entscheidend ist der Raum zwischen den Teilchen.",
           short: "Das Eigenvolumen der Teilchen spielt keine Rolle.",
         } },
@@ -1146,7 +1146,7 @@ export const LOESUNGEN_BANK: QuestionBank = {
       part: 'konzentration',
       title: "Die wichtigste Konzentrationsangabe",
       prompt: "Mit welcher Konzentrationsangabe arbeitet man in der Chemie bevorzugt, und aus welchem Grund?",
-      correct: { id: 'r', text: String.raw`die Stoffmengenkonzentration in $\mathrm{mol/L}$, weil Stoffe in festen Verhältnissen von Teilchen miteinander reagieren` },
+      correct: { id: 'r', text: String.raw`die Stoffmengenkonzentration in $\mathrm{mol/L}$, weil Stoffe in festen Teilchenverhältnissen reagieren` },
       wrong: [
         { id: 'f1', text: "der Massenanteil, weil sich Massen am genauesten wiegen lassen", misconception: 'chem-mis-lo-most-important', why: {
           detailed: "Genau wiegen ist praktisch, aber bei einer Reaktion reagieren nicht Gramm mit Gramm. Entscheidend ist, was die Reaktionsgleichung angibt.",
@@ -1156,7 +1156,7 @@ export const LOESUNGEN_BANK: QuestionBank = {
           detailed: String.raw`Stoffe reagieren nicht im Massenverhältnis $1 : 1$: Bei der Bildung von Wasser reagieren $4\,\mathrm{g}$ Wasserstoff mit $32\,\mathrm{g}$ Sauerstoff. Die Reaktionsgleichung zählt etwas anderes als Gramm.`,
           short: "Stoffe reagieren nicht im Massenverhältnis 1 : 1.",
         } },
-        { id: 'f3', text: "der Volumenanteil, weil sich Flüssigkeiten am leichtesten abmessen lassen", misconception: 'chem-mis-lo-most-important', why: {
+        { id: 'f3', text: "der Volumenanteil, weil sich Flüssigkeiten mit Messzylinder oder Pipette am leichtesten abmessen lassen", misconception: 'chem-mis-lo-most-important', why: {
           detailed: "Bequemes Abmessen hilft im Labor, sagt aber nichts darüber, wie viel von einem Stoff mit einem anderen reagiert. Dafür braucht man eine Angabe, die zur Reaktionsgleichung passt.",
           short: "Abmessen sagt nichts darüber, wie viel reagiert.",
         } },
@@ -1164,7 +1164,7 @@ export const LOESUNGEN_BANK: QuestionBank = {
           detailed: "ppm nimmt man für Spuren, etwa Schadstoffe im Wasser. Bei den meisten Reaktionen setzt man große Mengen um, und ppm vergleicht nur Massen.",
           short: "ppm ist für Spuren gedacht.",
         } },
-        { id: 'f5', text: String.raw`die Stoffmengenkonzentration in $\mathrm{mol/L}$, weil sie sich mit der Temperatur nicht ändert`, misconception: 'chem-mis-lo-most-important', why: {
+        { id: 'f5', text: String.raw`die Stoffmengenkonzentration in $\mathrm{mol/L}$, weil sie sich beim Erwärmen oder Abkühlen der Lösung nicht ändert`, misconception: 'chem-mis-lo-most-important', why: {
           detailed: "Diese Begründung stimmt nicht: Eine Angabe je Liter Lösung ändert sich leicht mit der Temperatur, weil sich Flüssigkeiten beim Erwärmen ausdehnen.",
           short: "Eine Angabe je Liter hängt leicht von der Temperatur ab.",
         } },
@@ -1244,7 +1244,7 @@ export const LOESUNGEN_BANK: QuestionBank = {
       part: 'konzentration',
       title: "Gleiche Gramm, verschiedene Mol",
       prompt: String.raw`Eine Kochsalzlösung ($\ce{NaCl}$, $M = 58{,}5\,\mathrm{g/mol}$) und eine Glucoselösung ($\ce{C6H12O6}$, $M = 180\,\mathrm{g/mol}$) haben beide die Massenkonzentration $\beta = 10\,\mathrm{g/L}$. Welche hat die größere Stoffmengenkonzentration?`,
-      correct: { id: 'r', text: "die Kochsalzlösung, weil bei gleicher Masse die kleinere molare Masse mehr Mol ergibt" },
+      correct: { id: 'r', text: "die Kochsalzlösung, weil Kochsalz die kleinere molare Masse hat" },
       wrong: [
         { id: 'f1', text: String.raw`beide gleich, weil beide $10\,\mathrm{g}$ je Liter enthalten`, misconception: 'chem-mis-lo-c-mixup', why: {
           detailed: "Gleiche Gramm je Liter heißen nicht gleiche Mol je Liter: Zwischen Masse und Stoffmenge steht die molare Masse, und die ist hier verschieden.",
@@ -1254,11 +1254,11 @@ export const LOESUNGEN_BANK: QuestionBank = {
           detailed: String.raw`Prüfe die Richtung mit $n = \frac{m}{M}$: Was passiert mit $n$, wenn bei gleicher Masse $M$ größer wird?`,
           short: String.raw`Prüfe die Richtung mit $n = \frac{m}{M}$.`,
         } },
-        { id: 'f3', text: "die Glucoselösung, weil ein Glucosemolekül viel mehr Atome hat", misconception: 'chem-mis-lo-atoms-count', why: {
+        { id: 'f3', text: String.raw`die Glucoselösung, weil ein Glucosemolekül viel mehr Atome hat als eine Formeleinheit $\ce{NaCl}$`, misconception: 'chem-mis-lo-atoms-count', why: {
           detailed: String.raw`Ein Mol zählt Formeleinheiten oder Moleküle, nicht die Atome darin. Wie viel Mol in $10\,\mathrm{g}$ stecken, entscheidet allein die molare Masse: $n = \frac{m}{M}$.`,
           short: "Gezählt werden Moleküle oder Formeleinheiten, nicht Atome.",
         } },
-        { id: 'f4', text: "Das lässt sich ohne die Dichten der Lösungen nicht sagen.", misconception: 'chem-mis-lo-beta-density', why: {
+        { id: 'f4', text: "Das lässt sich ohne die Dichten der beiden Lösungen nicht entscheiden.", misconception: 'chem-mis-lo-beta-density', why: {
           detailed: "Die Dichte braucht man, um zwischen Masse und Volumen der ganzen Lösung umzurechnen. Hier ist schon gegeben, wie viel Gramm gelöster Stoff in einem Liter Lösung stecken.",
           short: "Die Masse je Liter Lösung ist schon gegeben.",
         } },
@@ -1280,7 +1280,7 @@ export const LOESUNGEN_BANK: QuestionBank = {
       part: 'konzentration',
       title: "Fehler beim Ansetzen",
       prompt: String.raw`Jemand löst $0{,}2\,\mathrm{mol}$ Natriumhydroxid in genau $1\,\mathrm{L}$ Wasser und beschriftet die Flasche mit $c = 0{,}2\,\mathrm{mol/L}$. Was ist daran falsch?`,
-      correct: { id: 'r', text: String.raw`Die Konzentration bezieht sich auf das Volumen der Lösung; man hätte lösen und dann auf genau $1\,\mathrm{L}$ Lösung auffüllen müssen.` },
+      correct: { id: 'r', text: String.raw`Man hätte auf genau $1\,\mathrm{L}$ Lösung auffüllen müssen, statt $1\,\mathrm{L}$ Wasser zu nehmen.` },
       wrong: [
         { id: 'f1', text: String.raw`Nichts, denn $1\,\mathrm{L}$ Wasser ergibt mit dem gelösten Stoff genau $1\,\mathrm{L}$ Lösung.`, misconception: 'chem-mis-lo-volume-conserved' },
         { id: 'f2', text: String.raw`Man hätte $0{,}2\,\mathrm{g}$ statt $0{,}2\,\mathrm{mol}$ abwiegen müssen.`, misconception: 'chem-mis-lo-mol-as-gram' },
@@ -1403,13 +1403,13 @@ export const LOESUNGEN_BANK: QuestionBank = {
       part: 'anteile',
       title: "Volumenkontraktion begründen",
       prompt: String.raw`Warum ergeben $500\,\mathrm{mL}$ Ethanol und $500\,\mathrm{mL}$ Wasser zusammen weniger als $1\,\mathrm{L}$ Mischung?`,
-      correct: { id: 'r', text: "Die verschieden großen Moleküle ordnen sich beim Mischen dichter an; kleinere finden Platz in Lücken zwischen größeren." },
+      correct: { id: 'r', text: "Verschieden große Moleküle packen sich dichter: Kleinere füllen Lücken zwischen größeren." },
       wrong: [
         { id: 'f1', text: "Beim Mischen verdunstet ein Teil des Ethanols.", misconception: 'chem-mis-lo-contraction-loss', why: {
           detailed: "Wiegt man die Mischung, findet man dieselbe Masse wie vorher; es ist also nichts verdunstet. Das fehlende Volumen hat einen anderen Grund.",
           short: "Die Mischung wiegt so viel wie vorher.",
         } },
-        { id: 'f2', text: "Ethanol und Wasser reagieren zu einem neuen Stoff, der weniger Platz braucht.", misconception: 'chem-mis-lo-contraction-loss', why: {
+        { id: 'f2', text: "Ethanol und Wasser reagieren beim Mischen zu einem neuen Stoff, der weniger Platz braucht als beide zusammen.", misconception: 'chem-mis-lo-contraction-loss', why: {
           detailed: "Ethanol und Wasser reagieren beim Mischen nicht miteinander; man kann sie durch Destillieren wieder trennen. Die Erklärung liegt in den Molekülen, wie sie sind.",
           short: "Ethanol und Wasser reagieren nicht miteinander.",
         } },
@@ -1417,7 +1417,7 @@ export const LOESUNGEN_BANK: QuestionBank = {
           detailed: "Masse geht beim Mischen nicht verloren; die Mischung wiegt genau so viel wie beide Flüssigkeiten zusammen. Weniger Volumen heißt hier nicht weniger Stoff.",
           short: "Die Masse bleibt beim Mischen erhalten.",
         } },
-        { id: 'f4', text: "Das stimmt nicht: Beim Mischen addieren sich Volumina immer genau.", misconception: 'chem-mis-lo-volume-conserved' },
+        { id: 'f4', text: "Das stimmt nicht: Beim Mischen addieren sich Volumina immer genau, auch bei Ethanol und Wasser.", misconception: 'chem-mis-lo-volume-conserved' },
       ],
       hint: "Wiegt die Mischung weniger als die beiden Flüssigkeiten vorher?",
       explanation: {
@@ -1490,14 +1490,14 @@ export const LOESUNGEN_BANK: QuestionBank = {
       part: 'anteile',
       title: "Massenanteil prüfen",
       prompt: String.raw`Jemand löst $25\,\mathrm{g}$ Salz in $100\,\mathrm{g}$ Wasser und notiert: „Massenanteil $25\,\%$“. Was stimmt?`,
-      correct: { id: 'r', text: String.raw`Falsch: Die Lösung wiegt $125\,\mathrm{g}$, der Massenanteil ist $20\,\%$.` },
+      correct: { id: 'r', text: String.raw`Falsch: Die Lösung wiegt $125\,\mathrm{g}$, also $w = 20\,\%$.` },
       wrong: [
         { id: 'f1', text: String.raw`Richtig: $25\,\mathrm{g}$ auf $100\,\mathrm{g}$ sind $25\,\%$.`, misconception: 'chem-mis-lo-share-solvent' },
-        { id: 'f2', text: String.raw`Falsch: Der Massenanteil ist $80\,\%$.`, misconception: 'chem-mis-lo-share-solvent', why: {
+        { id: 'f2', text: String.raw`Falsch: Der Massenanteil des Salzes an der ganzen Lösung ist $80\,\%$.`, misconception: 'chem-mis-lo-share-solvent', why: {
           detailed: "Das ist der Anteil des Wassers an der Lösung. Gefragt ist der Anteil des Salzes.",
           short: "Das ist der Anteil des Wassers.",
         } },
-        { id: 'f3', text: String.raw`Falsch: Richtig wäre $25\,\mathrm{g/L}$.`, misconception: 'chem-mis-lo-w-volume', why: {
+        { id: 'f3', text: String.raw`Falsch: Richtig wäre $25\,\mathrm{g/L}$, also Gramm Salz je Liter.`, misconception: 'chem-mis-lo-w-volume', why: {
           detailed: "Gramm je Liter ist eine Massenkonzentration, und hier ist gar kein Volumen gegeben. Ein Massenanteil vergleicht zwei Massen.",
           short: "Ein Massenanteil vergleicht zwei Massen.",
         } },
@@ -1590,10 +1590,10 @@ export const LOESUNGEN_BANK: QuestionBank = {
       part: 'gase',
       title: "Volumen bei einer Gasreaktion",
       prompt: String.raw`Kohlenstoffmonoxid verbrennt vollständig zu Kohlenstoffdioxid: $\ce{2 CO + O2 -> 2 CO2}$. Alle Stoffe sind gasförmig, Druck und Temperatur bleiben gleich. Wie viel Kohlenstoffdioxid entsteht aus $3\,\mathrm{L}$ $\ce{CO}$ und $1{,}5\,\mathrm{L}$ $\ce{O2}$?`,
-      correct: { id: 'r', text: String.raw`$3\,\mathrm{L}$` },
+      correct: { id: 'r', text: String.raw`$3\,\mathrm{L}$, genauso viel wie das eingesetzte Kohlenstoffmonoxid` },
       wrong: [
-        { id: 'f1', text: String.raw`$4{,}5\,\mathrm{L}$`, misconception: 'chem-mis-lo-volume-conserved' },
-        { id: 'f2', text: String.raw`$9\,\mathrm{L}$`, misconception: 'chem-mis-lo-atoms-count', why: {
+        { id: 'f1', text: String.raw`$4{,}5\,\mathrm{L}$, so viel wie beide Gase vorher zusammen`, misconception: 'chem-mis-lo-volume-conserved' },
+        { id: 'f2', text: String.raw`$9\,\mathrm{L}$, weil jedes Molekül $\ce{CO2}$ aus drei Atomen besteht`, misconception: 'chem-mis-lo-atoms-count', why: {
           detailed: "Ein Molekül Kohlenstoffdioxid hat drei Atome, zählt für das Gasvolumen aber nur einmal. Die Zahlen vor den Formeln zählen Moleküle.",
           short: "Für das Gasvolumen zählt jedes Molekül einmal.",
         } },
@@ -1648,12 +1648,12 @@ export const LOESUNGEN_BANK: QuestionBank = {
       part: 'gase',
       title: "Gas im Stahlbehälter",
       prompt: String.raw`Ein Gas in einem fest verschlossenen Stahlbehälter wird von $20\,^{\circ}\mathrm{C}$ auf $40\,^{\circ}\mathrm{C}$ erwärmt. Wie ändert sich der Druck?`,
-      correct: { id: 'r', text: String.raw`Er steigt um rund $7\,\%$, auf das $\frac{313{,}15}{293{,}15}$-fache.` },
+      correct: { id: 'r', text: String.raw`Er steigt um rund $7\,\%$, auf das $\frac{313{,}15}{293{,}15}$-fache des Anfangsdrucks.` },
       wrong: [
         { id: 'f1', text: "Er verdoppelt sich, weil sich die Temperatur verdoppelt.", misconception: 'chem-mis-lo-celsius' },
         { id: 'f2', text: "Er bleibt gleich, weil sich das Volumen nicht ändern kann.", misconception: 'chem-mis-lo-gas-fixed' },
         { id: 'f3', text: "Er sinkt, weil sich die Teilchen beim Erwärmen weiter voneinander entfernen.", misconception: 'chem-mis-lo-gas-direction' },
-        { id: 'f4', text: "Er steigt, weil beim Erwärmen zusätzliche Gasteilchen entstehen.", misconception: 'chem-mis-lo-heat-more-particles', why: {
+        { id: 'f4', text: "Er steigt, weil beim Erwärmen im Behälter zusätzliche Gasteilchen entstehen.", misconception: 'chem-mis-lo-heat-more-particles', why: {
           detailed: "Im verschlossenen Behälter bleibt die Zahl der Teilchen gleich; beim Erwärmen entstehen keine neuen. Eine Änderung des Drucks muss also eine andere Ursache haben.",
           short: "Im verschlossenen Behälter bleibt die Teilchenzahl gleich.",
         } },
@@ -1679,17 +1679,17 @@ export const LOESUNGEN_BANK: QuestionBank = {
       part: 'gase',
       title: "Rechenfehler finden",
       prompt: String.raw`Jemand rechnet $V = \frac{n \cdot R \cdot T}{p}$ für $1\,\mathrm{mol}$ Gas mit $R = 8{,}314\,\mathrm{J/(mol \cdot K)}$ und $T = 273{,}15\,\mathrm{K}$ und setzt für den Druck $1013$ ein, weil er $1013\,\mathrm{hPa}$ beträgt. Heraus kommt $2{,}24$. Was ist passiert?`,
-      correct: { id: 'r', text: String.raw`Der Druck hätte in Pa eingesetzt werden müssen; das Ergebnis ist 100-mal zu groß, richtig sind $0{,}0224\,\mathrm{m^3} = 22{,}4\,\mathrm{L}$.` },
+      correct: { id: 'r', text: String.raw`Der Druck gehört in Pa: Richtig sind $0{,}0224\,\mathrm{m^3} = 22{,}4\,\mathrm{L}$, 100-mal weniger.` },
       wrong: [
         { id: 'f1', text: String.raw`Nichts, das Ergebnis sind $2{,}24\,\mathrm{L}$.`, misconception: 'chem-mis-lo-si-units', why: {
           detailed: "Mit dieser Gaskonstante kommt das Volumen nur richtig heraus, wenn alle Größen in SI-Einheiten eingesetzt sind. Prüfe, ob das hier für jede Größe gilt.",
           short: "Prüfe die Einheit jeder eingesetzten Größe.",
         } },
-        { id: 'f2', text: String.raw`Nichts, das Ergebnis sind $2{,}24\,\mathrm{m^3}$.`, misconception: 'chem-mis-lo-si-units', why: {
+        { id: 'f2', text: String.raw`Nichts, das Ergebnis sind $2{,}24\,\mathrm{m^3}$, weil die übrigen Größen in SI-Einheiten stehen.`, misconception: 'chem-mis-lo-si-units', why: {
           detailed: "Über 2000 Liter für ein einziges Mol Gas sind viel zu viel. Prüfe, ob jede Größe in der Einheit eingesetzt wurde, zu der die Gaskonstante passt.",
           short: "Über 2000 Liter für ein Mol Gas sind zu viel.",
         } },
-        { id: 'f3', text: String.raw`Die Temperatur hätte in $^{\circ}\mathrm{C}$ eingesetzt werden müssen, also $0$.`, misconception: 'chem-mis-lo-celsius' },
+        { id: 'f3', text: String.raw`Die Temperatur hätte in $^{\circ}\mathrm{C}$ eingesetzt werden müssen, also $0$ statt $273{,}15$.`, misconception: 'chem-mis-lo-celsius' },
         { id: 'f4', text: String.raw`Das Ergebnis ist in Litern und muss noch mit 10 malgenommen werden.`, misconception: 'chem-mis-lo-si-units', why: {
           detailed: "Mit SI-Einheiten liefert das Gasgesetz keine Liter, und ein Faktor 10 kommt in keiner Umrechnung zwischen den Einheiten dieser Rechnung vor.",
           short: "Ein Faktor 10 kommt in keiner Umrechnung vor.",
