@@ -559,3 +559,23 @@ test('Gauß-Jordan zum Abspielen und Wirkung von X im Gitter', async ({ page }) 
   await expectCleanPage(page, 'Bild der Matrizengleichung')
   expect(errors).toEqual([])
 })
+
+// Abschluss M7 (Schritt 13): Tabellen im Fragetext werden kleiner statt die Seite zu verbreitern, Sarrus mit Parameter
+// passt, Bilder sind höchstens 260 px hoch
+test('Am Handy: breite Tabellen in der Frage passen, Bilder in der Höhe begrenzt', async ({ page }) => {
+  const errors = collectErrors(page)
+  for (const nr of ['5-3', '5-10', '5-35']) {
+    await page.goto(`./#/ueben/matrizen/lgsparam.${nr}`)
+    await expect(page.locator('#question')).toBeVisible()
+    await expectCleanPage(page, `lgsparam.${nr}`)
+  }
+  await page.goto('./#/ueben/matrizen/lgsparam.5-9')
+  const sarrus = page.getByTestId('sarrus-scheme').locator('.overflow-x-auto')
+  await expect(sarrus).toBeVisible()
+  expect(await sarrus.evaluate((e) => e.scrollWidth - e.clientWidth)).toBeLessThanOrEqual(1)
+  await page.goto('./#/ueben/geraden/schnittwinkel.4-12')
+  const svg = page.getByTestId('vector-figure').locator('svg').first()
+  await expect(svg).toBeVisible()
+  expect((await svg.boundingBox())!.height).toBeLessThanOrEqual(261)
+  expect(errors).toEqual([])
+})

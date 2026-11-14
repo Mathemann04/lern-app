@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { type Segment, parseRichText } from '../engine/explain/richText.ts'
+import { FitWidth } from './FitWidth.tsx'
 import { Formula } from './Formula.tsx'
 
 // Text mit eingebetteten Formeln ($…$), ein Absatz pro Zeile.
@@ -42,23 +43,38 @@ export function RichText({ text, className = '', inline = false }: { text: strin
       )
     })
   }
+  // Ein Absatz aus nur einer Formel (z. B. eine Tabelle in der Frage) wird am Handy kleiner, statt die Seite seitlich
+  // zu verbreitern (M7 Schritt 13)
+  const alone = (segments: (typeof paragraphs)[number]) => segments.length === 1 && segments[0].kind === 'math'
   if (inline) {
     if (paragraphs.length === 1) return <span className={className}>{content(paragraphs[0])}</span>
     return (
       <span className={className}>
-        {paragraphs.map((segments, i) => (
-          <span key={i} className="block">
-            {content(segments)}
-          </span>
-        ))}
+        {paragraphs.map((segments, i) =>
+          alone(segments) ? (
+            <FitWidth key={i} min={0.6}>
+              {content(segments)}
+            </FitWidth>
+          ) : (
+            <span key={i} className="block">
+              {content(segments)}
+            </span>
+          ),
+        )}
       </span>
     )
   }
   return (
     <div className={`space-y-2 ${className}`}>
-      {paragraphs.map((segments, i) => (
-        <p key={i}>{content(segments)}</p>
-      ))}
+      {paragraphs.map((segments, i) =>
+        alone(segments) ? (
+          <FitWidth key={i} min={0.6}>
+            {content(segments)}
+          </FitWidth>
+        ) : (
+          <p key={i}>{content(segments)}</p>
+        ),
+      )}
     </div>
   )
 }

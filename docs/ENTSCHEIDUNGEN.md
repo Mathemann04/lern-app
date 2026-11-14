@@ -1378,3 +1378,14 @@ Neue Entscheidungen unten anfügen.
   Form verworfen wird. Das Ordnen ist nur dann ein eigener Schritt, wenn es drei verschiedene Vorzeichenfehler gibt
   (Glieder mit $X$ und gegebene Matrizen wechseln die Seite); sonst steckt der Vorzeichenfehler als falsche Antwort im
   Ausklammern bzw. Auflösen. Ein Bild kommt erst mit 12c.
+- 14.11.2026: M7 Schritt 12c (Bilder zu Inverse und Matrizengleichungen). Gauß-Jordan erscheint erst nach der letzten
+  Antwort des Verfahrens (vorher verriete es die Tabellen) und geht neben „Abspielen“ auch Bild für Bild mit „←“ und „→“,
+  weil jedes Bild eine eigene Umformung ist. Das Gitterbild der Matrizengleichungen zeigt die Probe nur, wenn sie in den
+  Ausschnitt passt und kein Pfeil auf einem anderen liegt (sonst verwirrt es mehr, als es hilft); bei $\det X = 0$ kein Bild.
+- 14.11.2026: M7 Schritt 13 (Abschluss). Das Mischen über alle drei Tätigkeiten kommt nicht als Zwischenlösung, sondern
+  mit „Mathe mischen“ (M6 Schritt 8) für ganz Mathe auf einmal; innerhalb jeder Tätigkeit lassen sich die Bausteine schon
+  mischen. Am Handy: Formeln, die allein in einer Zeile eines Textes stehen (Tabellen in Fragen), werden kleiner statt
+  die Seite zu verbreitern; die Gleichung oben und Antworten dürfen bis 60 % schrumpfen (vorher 70 %); Bilder sind
+  höchstens ein Drittel der Bildschirmhöhe und 260 px hoch, damit die Antworten meist ohne Scrollen zu sehen sind (mit
+  Bild und Sarrus-Schema in einer Frage geht das nicht immer). Stufe 1 der Vektoren heißt nicht mehr „in der Ebene“,
+  weil Kreuz- und Spatprodukt dort im Raum rechnen.

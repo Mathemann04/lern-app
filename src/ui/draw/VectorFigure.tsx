@@ -25,6 +25,9 @@ const COLOR: Readonly<Record<DrawColor, string>> = {
 
 const PHASE_MS = 900
 const ease = (p: number) => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2)
+// höchste Höhe eines Bildes: ein Drittel des Bildschirms, höchstens 260 px
+const FIGURE_MAX_HEIGHT = 'min(260px, 32dvh)'
+
 const reducedMotion = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
 
 export type FigureDrag = { readonly step: DragStep; readonly at: readonly number[]; readonly onMove?: (at: readonly number[]) => void }
@@ -264,8 +267,10 @@ export function VectorFigure({ drawing: given, compact = false, label, drag: dra
     </svg>
   )
 
+  // Höhe begrenzt (M7 Schritt 13): Große Bilder schoben am Handy die Antworten unter den Bildschirmrand. Das Bild wird
+  // dann schmaler und bleibt mittig; Antwort-Bilder (compact) bleiben, wie sie sind
   const picture = (
-    <div className="relative text-zinc-900">
+    <div className={`relative text-zinc-900 ${compact ? '' : 'mx-auto'}`} style={compact ? undefined : { maxWidth: `calc(${FIGURE_MAX_HEIGHT} * ${view.width / view.height})` }}>
       {svg}
       {labels.map((l) => (
         <span
