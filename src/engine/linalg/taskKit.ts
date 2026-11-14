@@ -126,6 +126,12 @@ export type VectorKind =
   | 'gaussPlane'
   | 'gaussDecimal'
   | 'gaussBig'
+  // Cramersche Regel (M7 Schritt 11a, cramerTasks.ts)
+  | 'cramerTwo'
+  | 'cramerThree'
+  | 'cramerPair'
+  | 'cramerParam'
+  | 'cramerParamThree'
 
 export type VectorTask = GuidedTaskBase & {
   readonly kind: VectorKind

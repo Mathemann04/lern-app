@@ -18,28 +18,28 @@ import { ratLatex } from './vec.ts'
 
 // ------------------------------------------------------------------ Matrizen
 
-type Mat = readonly (readonly Rational[])[]
-type Lin = { readonly c0: Rational; readonly c1: Rational }
-type PMat = readonly (readonly Lin[])[]
+export type Mat = readonly (readonly Rational[])[]
+export type Lin = { readonly c0: Rational; readonly c1: Rational }
+export type PMat = readonly (readonly Lin[])[]
 
 const PARAM = 'a'
-const lin = (c0: Rational, c1: Rational = ZERO): Lin => ({ c0, c1 })
+export const lin = (c0: Rational, c1: Rational = ZERO): Lin => ({ c0, c1 })
 const constMat = (A: Mat): PMat => A.map((r) => r.map((x) => lin(x)))
-const at = (A: PMat, a: Rational): Mat => A.map((r) => r.map((x) => ratAdd(x.c0, ratMul(x.c1, a))))
+export const at = (A: PMat, a: Rational): Mat => A.map((r) => r.map((x) => ratAdd(x.c0, ratMul(x.c1, a))))
 const hasParam = (A: PMat) => A.some((r) => r.some((x) => !isZero(x.c1)))
 const num = (x: Rational) => Number(x.n) / Number(x.d)
 const nums = (A: Mat) => A.flat().map(num)
 const R = (k: number) => rat(k)
 
-const linLatex = (x: Lin) => termsLatex([[x.c1, PARAM], [x.c0, '']])
+export const linLatex = (x: Lin) => termsLatex([[x.c1, PARAM], [x.c0, '']])
 // als Faktor: in Klammern, wenn negativ oder eine Summe
-const linFactor = (x: Lin) => {
+export const linFactor = (x: Lin) => {
   const s = linLatex(x)
   return (!isZero(x.c1) && !isZero(x.c0)) || s.startsWith('-') ? `(${s})` : s
 }
 const fac = (x: Rational) => (ratSign(x) < 0 ? `(${ratLatex(x)})` : ratLatex(x))
 const env = (A: PMat, e: string) => `\\begin{${e}} ${A.map((r) => r.map(linLatex).join(' & ')).join(' \\\\ ')} \\end{${e}}`
-const pmat = (A: PMat) => env(A, 'pmatrix')
+export const pmat = (A: PMat) => env(A, 'pmatrix')
 const vmat = (A: PMat) => env(A, 'vmatrix')
 export const detMatLatex = (A: Mat) => pmat(constMat(A))
 
@@ -68,7 +68,7 @@ export function det(A: Mat): Rational {
 }
 
 // Wert einer Rechnung mit der Matrix als Polynom im Parameter (höchstens quadratisch): aus drei Stellen, mit Probe
-function polyOf(A: PMat, f: (M: Mat) => Rational): Quad {
+export function polyOf(A: PMat, f: (M: Mat) => Rational): Quad {
   const [v0, v1, vm] = [f(at(A, ZERO)), f(at(A, ONE)), f(at(A, R(-1)))]
   const q: Quad = { q2: ratSub(ratDiv(ratAdd(v1, vm), R(2)), v0), q1: ratDiv(ratSub(v1, vm), R(2)), q0: v0 }
   if (!ratEq(quadAt(q, R(2)), f(at(A, R(2)))) || !ratEq(quadAt(q, R(-3)), f(at(A, R(-3))))) throw new Error('Determinante: Grad über 2')
@@ -197,7 +197,7 @@ export function sarrusLatex(A: PMat): { readonly scheme: string; readonly produc
   return { scheme, products: `${MAIN.map(p).join(' + ')} - ${ANTI.map(p).join(' - ')}` }
 }
 
-function sarrusStep(rng: Rng, name: string, A: PMat, opts: { readonly id?: string; readonly cards?: readonly string[] } = {}): GuidedStep {
+export function sarrusStep(rng: Rng, name: string, A: PMat, opts: { readonly id?: string; readonly cards?: readonly string[] } = {}): GuidedStep {
   const right = polyOf(A, SARRUS.right)
   const withParam = hasParam(A)
   // mit Parameter ohne „vertauscht“: −p(a) hat dieselben Nullstellen (wie beim Spatprodukt)
@@ -1052,7 +1052,7 @@ const CONDITIONS = [
 
 // 3 × 3 mit dem Parameter an zwei Stellen (verschiedene Zeilen und Spalten); Determinante quadratisch mit zwei
 // ganzzahligen Nullstellen verschiedenen Betrags, nicht 0
-function paramMatrix(rng: Rng): { readonly M: PMat; readonly roots: readonly [Rational, Rational] } | null {
+export function paramMatrix(rng: Rng): { readonly M: PMat; readonly roots: readonly [Rational, Rational] } | null {
   const M: Lin[][] = Array.from({ length: 3 }, () => Array.from({ length: 3 }, () => lin(R(nonzero(rng)))))
   const [i1, i2] = rng.shuffle([0, 1, 2]).slice(0, 2)
   const [j1, j2] = rng.shuffle([0, 1, 2]).slice(0, 2)

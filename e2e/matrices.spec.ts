@@ -311,3 +311,34 @@ test('Gauß-Verfahren: Geraden und Ebenen als Bild nach der Antwort und beim Erg
   await expect(figure).toContainText('parallel und verschieden')
   expect(errors).toEqual([])
 })
+
+// Cramersche Regel (M7 Schritt 11a): Baustein auf der Seite der Tätigkeit, je Stufe eine Aufgabe, Lernkarte, freier Modus
+// mit Parameter (Vorzeichenfehler beim Auflösen erkannt)
+test('Cramersche Regel: Baustein, jede Stufe lösbar, Lernkarte', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./#/thema/matrizen')
+  await expect(page.getByRole('checkbox', { name: 'Cramersche Regel', exact: true })).toBeChecked()
+  for (const level of [1, 2, 3, 4, 5]) {
+    await page.goto(`./#/ueben/matrizen/cramer.${level}-${80 + level}`)
+    await solveWholeTask(page)
+    await expectCleanPage(page, `Cramer Stufe ${level}`)
+  }
+  await page.goto('./#/karten/matrizen/cramer-parameter')
+  await expect(page.getByRole('heading', { name: 'Cramersche Regel mit Parameter' })).toBeVisible()
+  await expectCleanPage(page, 'Lernkarte Cramer')
+  expect(errors).toEqual([])
+})
+
+test('Cramersche Regel frei: Wert für a, Vorzeichenfehler erkannt', async ({ page }) => {
+  const errors = collectErrors(page)
+  // cramer.4-1: genau eine Lösung mit dem vorgegebenen Wert für a = 3
+  await page.goto('./#/frei/matrizen/cramer.4-1')
+  await typeInto(page, 'Dein Ergebnis', '-3')
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Typischer Fehler: Vorzeichenfehler beim Auflösen nach a.')).toBeVisible()
+  await typeInto(page, 'Dein Ergebnis', '3')
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
+  await expectCleanPage(page, 'Cramer frei')
+  expect(errors).toEqual([])
+})
