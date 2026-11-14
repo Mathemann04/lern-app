@@ -51,6 +51,7 @@ import { CRAMER_CARD_LIST } from './cramerCards.ts'
 import { LGSP_CARD_LIST } from './lgspCards.ts'
 import { EQS_CARD_LIST } from './eqsCards.ts'
 import { INV_CARD_LIST } from './invCards.ts'
+import { MGL_CARD_LIST } from './mglCards.ts'
 import type { VectorKind } from '../linalg/vectorTasks.ts'
 import { WHEN_NEEDED } from './texts.ts'
 
@@ -74,7 +75,7 @@ export const TOPICS: readonly Topic[] = [
   { id: 'umstellen', title: 'Gleichungen umstellen', description: 'Gegenrechnung, Rüberbringen, Variable im Nenner, Ausklammern' },
   { id: 'vektoren', title: 'Vektoren', description: 'Rechnen, Länge, Skalarprodukt, Projektion, Kräfte, Kreuzprodukt, Spatprodukt, Basis' },
   { id: 'geraden', title: 'Geraden und Ebenen', description: 'Parameterform, Punktprobe, Koordinatenform, Hessesche Normalform, Spurpunkte, Lage, Abstände, Schnittwinkel' },
-  { id: 'matrizen', title: 'Matrizen und Gleichungssysteme', description: 'Format, Summe und Vielfache, Transponierte, Produkt mit Falk-Schema, Matrix mal Vektor, vertauschbar, Determinanten, Gauß-Verfahren, Einsetzen, Gleichsetzen und Addieren, Cramersche Regel, Gleichungssysteme mit Parameter und Rang, Inverse' },
+  { id: 'matrizen', title: 'Matrizen und Gleichungssysteme', description: 'Format, Summe und Vielfache, Transponierte, Produkt mit Falk-Schema, Matrix mal Vektor, vertauschbar, Determinanten, Gauß-Verfahren, Einsetzen, Gleichsetzen und Addieren, Cramersche Regel, Gleichungssysteme mit Parameter und Rang, Inverse, Matrizengleichungen' },
   { id: 'chem-atombau', title: 'Atombau', description: 'Elementarteilchen, Kernsymbol, Isotope, Ionen, Atommodelle und Licht' },
   { id: 'chem-elektronen', title: 'Elektronen', description: 'Quantenzahlen, Orbitale, Pauli und Hund, Elektronenkonfiguration, Valenzelektronen und Ionen' },
   { id: 'chem-pse', title: 'Aufbau des Periodensystems', description: 'Perioden, Gruppen, Blöcke, Metalle und Nichtmetalle, Edelgasregel, Ionen, Ionisierungsenergie' },
@@ -417,6 +418,7 @@ export const CARDS: readonly Card[] = [
   ...LGSP_CARD_LIST,
   ...EQS_CARD_LIST,
   ...INV_CARD_LIST,
+  ...MGL_CARD_LIST,
   ...ATOMBAU_CARDS,
   ...STOFFMENGE_CARDS,
   ...GLEICHUNGEN_CARDS,

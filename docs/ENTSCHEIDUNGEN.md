@@ -1367,3 +1367,14 @@ Neue Entscheidungen unten anfügen.
   elf missglückte Formulierungen (behoben) und ein älteres Muster: Bei 17 Fragen begannen alle falschen Antworten mit
   „Weil“, nur die richtige nicht. Jetzt beginnt auch die richtige mit „Weil“, und ein Test prüft solche Formmerkmale
   („Weil“, Punkt am Ende, großer oder kleiner Anfang).
+- 14.11.2026: M7 Schritt 12b (Matrizengleichungen). Eigener Baustein in der Gruppe „Inverse und Matrizengleichungen“.
+  Die Aufgaben werden rückwärts gebaut: erst die Klammer $M$ (kleine Determinante) und ein ganzzahliges $X$, daraus die
+  rechte Seite und die gegebenen Matrizen; so geht jede Aufgabe ohne Taschenrechner auf, auch wenn $M^{-1}$ Brüche hat.
+  Mit Parameter hat $A$ ganzzahlige Eigenwerte (Dreiecksmatrix oder $UDU^{-1}$ mit $\det U = \pm 1$), damit
+  $\det(A - aE)$ ganze Nullstellen hat; das Wort „Eigenwert“ kommt in der App nicht vor. Bei $(X^{-1}A)^{-1}$ wird mit $A$
+  malgenommen, es braucht keine Inverse (sonst wären es zwei Inversen in einer Aufgabe); $X$ ist dort invertierbar,
+  sonst wäre die Gleichung gar nicht erklärt. Bei $AXA^{-1}$ hat $A$ die Determinante $\pm 1$. Die Form (welche Glieder
+  wo) wird vor den Versuchen festgelegt, damit die leichter zu bauenden Formen nicht überwiegen; ein Test prüft, dass keine
+  Form verworfen wird. Das Ordnen ist nur dann ein eigener Schritt, wenn es drei verschiedene Vorzeichenfehler gibt
+  (Glieder mit $X$ und gegebene Matrizen wechseln die Seite); sonst steckt der Vorzeichenfehler als falsche Antwort im
+  Ausklammern bzw. Auflösen. Ein Bild kommt erst mit 12c.

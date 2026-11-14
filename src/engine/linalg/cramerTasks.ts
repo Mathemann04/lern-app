@@ -131,10 +131,11 @@ const D2 = {
 }
 
 // Determinante von A bzw. A_k: 2 × 2 mit Formel (falsch auch Zeile statt Spalte ersetzt, andere Spalte), 3 × 3 mit Sarrus
-export function detStep(rng: Rng, ctx: CramerCtx, k: number | null, id: string, cards: readonly string[]): GuidedStep {
+// label: Name der Matrix (Matrizengleichungen, Schritt 12b: M = A - aE)
+export function detStep(rng: Rng, ctx: CramerCtx, k: number | null, id: string, cards: readonly string[], label = 'A'): GuidedStep {
   const { A, b, n } = ctx
   const M = k === null ? A : replaceCol(A, k, b)
-  const name = `\\det ${k === null ? 'A' : matName(k)}`
+  const name = `\\det ${k === null ? label : matName(k)}`
   const intro = k === null ? '' : ` Dabei ist $${matName(k)}$ die Matrix $A$, in der die Spalte von $${VARS[k]}$ durch $\\vec b$ ersetzt ist.`
   if (n === 3) {
     const step = sarrusStep(rng, name, M, { id, cards })
@@ -155,7 +156,7 @@ export function detStep(rng: Rng, ctx: CramerCtx, k: number | null, id: string, 
   return choiceStep(rng, {
     id,
     title: k === null ? 'Determinante' : `Determinante für $${VARS[k]}$`,
-    question: k === null ? `Wie groß ist $\\det A$ für $A = ${pmat(A)}$?` : `Wie groß ist $${name}$?${intro}`,
+    question: k === null ? `Wie groß ist $\\det ${label}$ für $${label} = ${pmat(A)}$?` : `Wie groß ist $${name}$?${intro}`,
     correct: valueLine(name, right),
     wrongs: valueWrongs(name, right, ordered),
     hint:

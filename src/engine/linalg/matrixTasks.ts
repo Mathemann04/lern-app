@@ -180,7 +180,7 @@ const nameEq = (name: string, A: Mat) => `${name} = ${matLatex(A)}`
 // Angabe: Matrizen nebeneinander; wird es zu breit für das Handy (geschätzt in Pixeln bei voller Größe, FitWidth
 // verkleinert bis 70 %), stehen sie zeilenweise untereinander
 const ROW_WIDTH = 470
-function arrange(parts: readonly { readonly latex: string; readonly cols: number }[]): string {
+export function arrange(parts: readonly { readonly latex: string; readonly cols: number }[]): string {
   const rows: string[][] = [[]]
   let width = 0
   for (const p of parts) {
@@ -326,7 +326,7 @@ export function transposeStep(rng: Rng, name: string, A: Mat): GuidedStep {
 
 // λX + μY (μ darf negativ sein, Y darf fehlen); Fehler: Zahl nur an der ersten Zeile, Zahl addiert, Minus nur beim
 // ersten Eintrag, falsch herum abgezogen
-type Term = { readonly k: Rational; readonly name: string; readonly M: Mat }
+export type Term = { readonly k: Rational; readonly name: string; readonly M: Mat }
 const termLatex = (t: Term, first: boolean) => {
   const abs = ratSign(t.k) < 0 ? ratNeg(t.k) : t.k
   const coef = ratEq(abs, rat(1)) ? '' : ratLatex(abs)
@@ -336,7 +336,8 @@ const termLatex = (t: Term, first: boolean) => {
 export const combLatex = (terms: readonly Term[]) => terms.map((t, i) => termLatex(t, i === 0)).join('')
 const combValue = (terms: readonly Term[]) => terms.map((t) => scale(t.k, t.M)).reduce(add)
 
-function combStep(rng: Rng, terms: readonly Term[], id = 'summe', name?: string): GuidedStep {
+// extra: weitere falsche Ergebnisse vorneweg (Matrizengleichungen, Schritt 12b: Transponieren vergessen)
+export function combStep(rng: Rng, terms: readonly Term[], id = 'summe', name?: string, extra: readonly { readonly M: Mat; readonly rule: string }[] = []): GuidedStep {
   const expr = name ?? combLatex(terms)
   const right = combValue(terms)
   const show = (X: Mat) => math(`${expr} = ${matLatex(X)}`)
@@ -344,6 +345,7 @@ function combStep(rng: Rng, terms: readonly Term[], id = 'summe', name?: string)
   const push = (X: Mat, rule: string) => {
     if (!matEq(Q, X, right)) wrongs.push({ content: show(X), rule })
   }
+  for (const e of extra) push(e.M, e.rule)
   const scaled = terms.findIndex((t) => !ratEq(t.k, rat(1)) && !ratEq(t.k, rat(-1)))
   if (scaled >= 0) {
     const t = terms[scaled]

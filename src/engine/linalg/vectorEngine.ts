@@ -36,7 +36,7 @@ export function nextLineSeed(_level: Level, parts?: ReadonlySet<string>): number
 }
 
 // Tätigkeit „Matrizen und Gleichungssysteme“ (M7 Schritt 8a): dieselbe Engine, eigene Bausteine
-export const MATRIX_BLOCK_IDS = ['matrix', 'determinante', 'gauss', 'einsetzen', 'cramer', 'lgsparam', 'inverse'] as const
+export const MATRIX_BLOCK_IDS = ['matrix', 'determinante', 'gauss', 'einsetzen', 'cramer', 'lgsparam', 'inverse', 'matgleichung'] as const
 
 export function nextMatrixSeed(_level: Level, parts?: ReadonlySet<string>): number {
   const chosen = MATRIX_BLOCK_IDS.filter((id) => !parts || parts.has(id))

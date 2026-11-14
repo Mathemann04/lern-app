@@ -153,6 +153,11 @@ export type VectorKind =
   | 'invRules'
   | 'invSystem'
   | 'invParam'
+  // Matrizengleichungen (M7 Schritt 12b, mglTasks.ts)
+  | 'mglBasic'
+  | 'mglFactor'
+  | 'mglWrap'
+  | 'mglParam'
 
 export type VectorTask = GuidedTaskBase & {
   readonly kind: VectorKind

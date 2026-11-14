@@ -481,3 +481,32 @@ test('Inverse Matrix frei: nicht geteilt erkannt, nicht invertierbar zum Antippe
   await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
   expect(errors).toEqual([])
 })
+
+// Matrizengleichungen (M7 Schritt 12b): Baustein auf der Seite der Tätigkeit, je Stufe eine Aufgabe, Lernkarte, freier
+// Modus (von der falschen Seite malgenommen erkannt)
+test('Matrizengleichungen: Baustein, jede Stufe lösbar, Lernkarte, frei', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./#/thema/matrizen')
+  await expect(page.getByRole('checkbox', { name: 'Matrizengleichungen', exact: true })).toBeChecked()
+  for (const level of [1, 2, 3, 4, 5]) {
+    await page.goto(`./#/ueben/matrizen/matgleichung.${level}-${80 + level}`)
+    await solveWholeTask(page)
+    await expectCleanPage(page, `Matrizengleichungen Stufe ${level}`)
+  }
+  await page.goto('./#/karten/matrizen/mgl-aufloesen')
+  await expect(page.getByRole('heading', { name: /Matrizengleichung nach/ })).toBeVisible()
+  await expectCleanPage(page, 'Lernkarte Matrizengleichung')
+  // matgleichung.1-1: XP + S = Q, X = (Q - S)P⁻¹ = (3 -3; 2 -2), von links malgenommen: (-1 1; -2 2)
+  await page.goto('./#/frei/matrizen/matgleichung.1-1')
+  const fill = async (xs: readonly string[]) => {
+    for (const [k, x] of xs.entries()) await typeInto(page, `Zeile ${Math.floor(k / 2) + 1}, Spalte ${(k % 2) + 1}`, x)
+  }
+  await fill(['-1', '1', '-2', '2'])
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Typischer Fehler: Von der falschen Seite mit der Inversen malgenommen.')).toBeVisible()
+  await fill(['3', '-3', '2', '-2'])
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
+  await expectCleanPage(page, 'Matrizengleichung frei')
+  expect(errors).toEqual([])
+})
