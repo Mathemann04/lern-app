@@ -517,8 +517,19 @@ Request.
       nicht aufgehoben, $AXA^{-1}$ zu $X$ gekürzt, von beiden Seiten mit derselben Matrix, Zahl zu jedem Eintrag bzw. auf
       der Nebendiagonale; dazu Fehler aus Matrizen rechnen, Determinanten und Inverse (durch eine Matrix geteilt, mit $A$
       statt $A^{-1}$, Reihenfolge beim Invertieren, Transponieren vergessen). Bild kommt mit 12c.
-    - **12c:** Bilder: Gauß-Jordan zum Abspielen (links entsteht Schritt für Schritt $E$, rechts $A^{-1}$), bei
-      Matrizengleichungen mit $2 \times 2$ die Wirkung von $X$ im Gitter.
+    - **12c (fertig, 14.11.2026):** Bilder: Gauß-Jordan zum Abspielen (links entsteht Schritt für Schritt $E$, rechts
+      $A^{-1}$), bei Matrizengleichungen mit $2 \times 2$ die Wirkung von $X$ im Gitter. **Umgesetzt:** Gauß-Jordan
+      erscheint nach der Antwort im letzten Schritt des Verfahrens („Diagonale auf 1, ablesen“ bzw. „Invertierbar?“), bei
+      „Inverse Matrix“ und bei Matrizengleichungen mit $3 \times 3$, auch auf der Lernkarte „Inverse mit Gauß-Jordan“: Bild
+      1 ist $(A \mid E)$, dann je Tausch und je Spalte mit Nullen unter bzw. über der Diagonale ein Bild, zuletzt jede Zeile
+      durch ihre Zahl auf der Diagonale ($E \mid A^{-1}$) bzw. die Nullzeile links. Geänderte Zeilen leuchten mit ihrer
+      Umformung daneben, die Stufenzahl hat einen Rahmen, neue Nullen sind kräftiger, darunter ein Satz, was geschieht.
+      „Abspielen“ läuft durch (bei „Bewegung reduzieren“ gleich ans Ende), „←“ und „→“ gehen einzeln. Matrizengleichungen
+      $2 \times 2$ beim Ergebnis: Einheitsquadrat wird zum Parallelogramm der Spalten $\vec x_1, \vec x_2$ von $X$, die
+      Gitterlinien im Quadrat verzerren sich mit; Probe (nicht bei $AXA^{-1}$): bei $MX = R$ bringt $M$ das Parallelogramm von
+      $X$ auf das von $R$ (erst $X$, dann $M$), bei $XM = R$ bringt $X$ das von $M$ auf das von $R$; „Typischen Fehler
+      zeigen“: $X$ von der falschen Seite, das Produkt (rot) verfehlt $R$. Kein Bild bei $\det X = 0$ oder über 12 Einheiten;
+      Probe nur, wenn sie hineinpasst und kein Pfeil auf einem anderen liegt (etwa ein Drittel der Bilder).
 13. **Abschluss:** Mischen über alle drei Tätigkeiten, Abwechslung gemessen, Prüfung aus mehreren Blickwinkeln, Doku.
     Dazu die Befunde der Durchsicht vom 14.11.2026 (docs/ROADMAP.md, „Vorgemerkt“): Gleichungssysteme mit Parameter
     auf Stufe 5 am Handy rechts abgeschnitten (Tabelle und $\vec b$, etwa jede 25. Aufgabe); große Vektorbilder auf

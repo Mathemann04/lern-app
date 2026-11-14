@@ -238,6 +238,63 @@ describe('Inverse Matrix', () => {
     expect(drawings).toBeGreaterThan(80)
   })
 
+  it('Gauß-Jordan zum Abspielen (Schritt 12c): jedes Bild ist gleichwertig zu (A | E), am Ende (E | A⁻¹) bzw. eine Nullzeile', () => {
+    let checked = 0
+    let singular = 0
+    for (const level of LEVELS) {
+      for (const task of tasks(level, 100)) {
+        const withJordan = task.steps.filter((s) => s.jordan)
+        const jordanSteps = task.steps.filter((s) => /^(start|unten|oben|tausch|ablesen)/.test(s.id) || (s.id === 'deuten' && task.kind === 'invGauss'))
+        if (jordanSteps.length === 0) {
+          expect(withJordan, task.form).toEqual([])
+          continue
+        }
+        // genau ein Bild, am letzten Schritt des Verfahrens
+        expect(withJordan.length, task.form).toBe(1)
+        const step = withJordan[0]
+        expect(step, task.form).toBe(jordanSteps.at(-1))
+        const f = step.jordan!
+        const A = matrixA(task)
+        const n = A.length
+        expect(f.n, task.form).toBe(n)
+        // ein Bild je Umformung, dazu Start und Ende
+        expect(f.frames.length, task.form).toBe(task.steps.filter((s) => /^(unten|oben|tausch)/.test(s.id)).length + 2)
+        const E = A.map((r, i) => r.map((_, j) => (i === j ? 1 : 0)))
+        f.frames.forEach((fr, k) => {
+          const where = `${task.form} Bild ${k}`
+          const rows = fr.rows.map((r) => r.map((x) => valueOf(x)))
+          const [L, R] = [rows.map((r) => r.slice(0, n)), rows.map((r) => r.slice(n))]
+          expect(rows.every((r) => r.length === 2 * n), where).toBe(true)
+          // aus (A | E) durch Zeilenumformungen: L = R · A, R invertierbar
+          expect(sameN(L, mulN(R, A)) && inverseN(R) !== null, where).toBe(true)
+          if (k === 0) expect(sameN(L, A) && sameN(R, E), where).toBe(true)
+          for (const [r, c] of fr.zeros) expect(L[r][c], where).toBe(0)
+          if (fr.pivot) expect(L[fr.pivot[0]][fr.pivot[1]], where).not.toBe(0)
+          if (k > 0 && k < f.frames.length - 1) expect(fr.changed.length, where).toBeGreaterThan(0)
+          fr.notes.forEach((x, r) => {
+            if (x) expect(latexProblem(x, { checkUgly: false }), where).toBeNull()
+            if (x !== '') expect(fr.changed, where).toContain(r)
+          })
+          for (const x of [...fr.rows.flat(), ...(fr.labels ?? [])]) expect(latexProblem(x, { checkUgly: false }), where).toBeNull()
+          expectRenderable(fr.caption, where)
+        })
+        const last = f.frames.at(-1)!.rows.map((r) => r.map((x) => valueOf(x)))
+        const inv = inverseN(A)
+        expect(f.singular, task.form).toBe(inv === null)
+        if (inv) {
+          expect(sameN(last.map((r) => r.slice(0, n)), E), task.form).toBe(true)
+          expect(sameN(last.map((r) => r.slice(n)), inv), task.form).toBe(true)
+        } else {
+          expect(last.some((r) => r.slice(0, n).every((x) => x === 0)), task.form).toBe(true)
+          singular++
+        }
+        checked++
+      }
+    }
+    expect(checked).toBeGreaterThan(150)
+    expect(singular).toBeGreaterThan(10)
+  })
+
   it.each(cells)('Stufe %i: Abwechslung (100 Formen unter 200, keine über 3 %)', (level) => {
     const stats = varietyStats(tasks(level, 200).map((t) => t.form))
     expect(stats.distinct).toBeGreaterThanOrEqual(100)

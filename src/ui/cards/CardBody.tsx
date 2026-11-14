@@ -4,6 +4,7 @@ import { type Card, type CardExample as Example, type ChemCardExample, type Math
 import { buildVectorTask } from '../../engine/linalg/vectorTasks.ts'
 import { blockSeed } from '../../engine/tasks/taskNumber.ts'
 import { FalkScheme } from '../draw/FalkScheme.tsx'
+import { JordanScheme } from '../draw/JordanScheme.tsx'
 import { SarrusScheme } from '../draw/SarrusScheme.tsx'
 import { VectorFigure } from '../draw/VectorFigure.tsx'
 import { cardExample } from '../../engine/explain/example.ts'
@@ -127,6 +128,8 @@ function VectorExample({ example }: { example: VectorCardExample }) {
   // Sarrus (Schritt 9b): nur bei genau einem Schritt mit Sarrus (sonst wäre unklar, welche Determinante gemeint ist)
   const sarrusSteps = task.steps.filter((s) => s.sarrus)
   const sarrus = sarrusSteps.length === 1 ? sarrusSteps[0].sarrus : undefined
+  // Gauß-Jordan (Schritt 12c): hängt am letzten Schritt des Verfahrens
+  const jordan = task.steps.find((s) => s.jordan)?.jordan
   // Bild: zum Ergebnis oder (Gauß, Schritt 10b) das des ersten Schritts mit Bild nach der Antwort
   const picture = example.vector.picture === 'step' ? task.steps.find((s) => s.solvedDrawing)?.solvedDrawing : task.resultDrawing
   return (
@@ -140,6 +143,7 @@ function VectorExample({ example }: { example: VectorCardExample }) {
       {picture && <VectorFigure drawing={picture} />}
       {falk && <FalkScheme falk={falk} done />}
       {sarrus && <SarrusScheme sarrus={sarrus} done />}
+      {jordan && <JordanScheme jordan={jordan} />}
       <ol className="space-y-3 border-l-2 border-accent-200 pl-4">
         {task.steps.map((step) => (
           <li key={step.id} className="space-y-1">

@@ -161,3 +161,6 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   `input type="range"` über die Nummern der Stellen (Name „Wert von a“, `aria-valuetext` „a gleich 2,75“), daneben der
   Wert als Formel, darunter Knöpfe zu den besonderen Stellen (`aria-pressed`); das Bild ist das fertige Bild der Engine
   zur Stelle (`slider.frames`), bei einem neuen Bild wieder der Startwert.
+- Seit M7 Schritt 12c Gauß-Jordan als eigenes Bild `ui/draw/JordanScheme.tsx` (CSS-Raster: Zeilenname, 2n Einträge mit
+  Strich in der Mitte, Umformung; Zeile mit den Namen der Hälften bleibt immer stehen, damit nichts springt), erst nach der
+  Antwort; geänderte Einträge gleiten mit `animate-step-in` neu herein.
