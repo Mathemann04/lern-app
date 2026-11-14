@@ -1316,3 +1316,9 @@ Neue Entscheidungen unten anfügen.
   vorne oben, ist der erste Schritt, sie nach unten zu tauschen. Bei nur einem Sonderwert fragt die Aufgabe „Was gilt dort?“,
   weil „Für welche $a$ keine Lösung?“ die Antwort verriet. Dieselben Zahlen-Regeln im Baustein „Gauß-Verfahren“; Tests messen
   den Anteil der Einsen (höchstens 30 bis 35 %) und der Umformungen über Kreuz (mindestens 30 %).
+- 14.11.2026: M7 Schritt 10c, Baustein „Einsetzen, Gleichsetzen, Addieren“ (Id `einsetzen`, Code 38, Gruppe
+  „Gleichungssysteme“ vor der Cramerschen Regel). Ergebnis wie in der Schule als $x = \dots,\; y = \dots$ (nicht als
+  Vektor); „keine Lösung“ und die Lösungsmenge wie beim Gauß-Verfahren. Der Schritt „Was bleibt?“ ($0 = 5$ bzw. $0 = 0$
+  deuten) hat drei Antworten (die drei Fälle mit Begründung); eine vierte wäre nur eine richtige Antwort mit schiefer
+  Begründung. Wo die Rechenfehler dieselben sind wie beim Gauß-Verfahren (Vorzeichen beim Rüberbringen, nicht geteilt,
+  falsch herum geteilt, Lösungsmenge, Ordnen), nutzt der Baustein deren Fehler und Texte, statt sie doppelt anzulegen.

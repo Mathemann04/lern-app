@@ -5,6 +5,7 @@ paths:
   - "src/engine/linalg/gauss*"
   - "src/engine/linalg/cramer*"
   - "src/engine/linalg/lgsp*"
+  - "src/engine/linalg/eqs*"
   - "src/engine/linalg/falk.ts"
   - "src/engine/linalg/sarrus*"
   - "src/ui/draw/SarrusScheme.tsx"
@@ -14,6 +15,7 @@ paths:
   - "src/engine/explain/gaussCards.ts"
   - "src/engine/explain/cramerCards.ts"
   - "src/engine/explain/lgspCards.ts"
+  - "src/engine/explain/eqsCards.ts"
   - "e2e/matrices.spec.ts"
 ---
 
@@ -146,3 +148,21 @@ freier Modus `vectorFree.ts`, `buildVectorTask` wählt die Arten nach dem Bauste
   Ränge gegen die Aufgabe beim Sonderwert, Anteil der Einsen und der Umformungen über Kreuz, Tausch).
 - Zahlen im Gauß-Verfahren (14.11.2026): oben links `TOP_PIVOTS` (meist 2 oder 3), über Kreuz auch in Stufe 1 und 2 und bei
   den meisten Arten mit Zufall; `gaussTasks.test.ts` misst den Anteil der Einsen und der Umformungen über Kreuz.
+- Einsetzen, Gleichsetzen, Addieren (Schritt 10c): Baustein `einsetzen` (Code 38, Gruppe `mat-lgs`), `linalg/eqsTasks.ts`,
+  Arten in `EQS_KINDS_BY_LEVEL` (eqsSubst, eqsEqual, eqsAdd in Stufe 1 und 2; eqsMessy in 3; eqsThree, eqsRecip in 4 und 5;
+  eqsParam in 5). Gleichungen als `Row` (Zahlen `a`, rechte Seite `c`), Terme `Expr`; `solveFor`, `substitute`,
+  `rowsEquivalent` (falsche Gleichungen nie gleichwertig). Kern `solveTwo` (zwei Unbekannte `pair`, Verfahren, Gleichung `i`,
+  Unbekannte `v`, schon aufgelöst gezeigte `solvedShown`, Vorsilbe `tag` der Ids im Teilsystem): Schritte `solveStep`
+  (`aufloesen-k`), `insertStep` (`einsetzen`, zusammengefasste Gleichung; Fehler Klammer nur erstes Glied, Minus vor der
+  Klammer, in dieselbe Gleichung, Zahl ohne Vorzeichenwechsel), `valueStep` (`wert-x`, nur wenn vor der Unbekannten nicht 1
+  steht), `equateStep`, `factorStep` (`faktoren`, nur wenn nicht beide Faktoren ±1; `factorsFor` kleinste Faktoren, p > 0),
+  `combineStep` (`wert-…`, bei $0 = D$ gleich `caseStep`), `caseStep` (`deuten`, drei Antworten), `setStep` (Lösungsmenge,
+  falsche nie dieselbe Gerade), `backStep` (Ergebnis `x = …,\; y = …`, falsch auch nur eine Unbekannte). Ordnen
+  (`orderStep`, `ordnen-k`) mit `moveForm`, `bracketForm`, `fractionForm` (Fehler `gauss-setup-side`, `gauss-setup-const`,
+  `eqs-…`). Stufe 2 in 45 % mit `methodStep` (`verfahren`, Fehler `eqs-method` mit eigener Begründung je Lage). Bilder:
+  `turnDrawing` (`elimDrawing` aus `gaussFigures.ts`, „Zeile“ → „Gleichung“) als `solvedDrawing` nach Einsetzen,
+  Gleichsetzen und Addieren, `systemDrawing` beim Ergebnis (nicht bei Nenner und Parameter). 25 Fehler `eqs-…` in
+  `linalg/eqsErrorRules.ts`, dazu `gauss-…` (Rüberbringen, Teilen, Lösungsmenge, Ordnen); fünf Karten in
+  `explain/eqsCards.ts`. Tests in `linalg/eqsTasks.test.ts` (eigener Gauß mit Rang in Kommazahlen, jede Gleichung im
+  Rechenweg von der Lösung erfüllt und keine falsche gleichwertig, Werte, Fälle, Bilder, freier Modus), Browser-Test in
+  `e2e/matrices.spec.ts`.
