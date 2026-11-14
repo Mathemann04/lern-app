@@ -86,7 +86,7 @@ export const EQS_ERROR_RULES: readonly VectorErrorRule[] = [
     name: 'Die Faktoren vertauscht',
     wrongFormula: String.raw`2x \text{ in I}, \; 3x \text{ in II} \;\Rightarrow\; 2 \cdot \text{I} - 3 \cdot \text{II}`,
     why: {
-      detailed: String.raw`Jede Gleichung nimmst du mit der Zahl **der anderen** Gleichung mal: Vor $x$ stehen dann in beiden dieselben Zahlen, hier das kleinste gemeinsame Vielfache.`,
+      detailed: String.raw`Jede Gleichung nimmst du mit der Zahl **der anderen** Gleichung mal (haben beide Zahlen einen gemeinsamen Teiler, teilst du sie vorher durch ihn): Vor $x$ stehen dann in beiden dieselben Zahlen, das kleinste gemeinsame Vielfache.`,
       short: String.raw`Mit der Zahl der jeweils anderen Gleichung malnehmen.`,
     },
   },

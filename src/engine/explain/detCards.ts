@@ -48,7 +48,7 @@ export const DET_CARD_LIST: readonly Card[] = [
     rules: [],
     formulas: [String.raw`\det A = \sum_{j=1}^{n} (-1)^{i+j}\, a_{ij} \det A_{ij}`, String.raw`\begin{pmatrix} + & - & + & - \\ - & + & - & + \\ + & - & + & - \\ - & + & - & + \end{pmatrix}`],
     memo: 'Wähle eine Zeile (oder Spalte) mit möglichst vielen Nullen. Jeder ihrer Einträge $a_{ij}$ wird mit der Unterdeterminante $\\det A_{ij}$ malgenommen (Zeile $i$ und Spalte $j$ gestrichen), dazu das Vorzeichen aus dem Schachbrett: oben links $+$, dann abwechselnd.',
-    note: 'Einträge $0$ fallen ganz weg. Eine $4 \\times 4$-Determinante wird so zu $3 \\times 3$-Determinanten (Sarrus), eine $5 \\times 5$ erst zu $4 \\times 4$. Nur eine ganze Nullzeile macht die Determinante sicher $0$.',
+    note: 'Einträge $0$ fallen ganz weg. Eine $4 \\times 4$-Determinante wird so zu $3 \\times 3$-Determinanten (Sarrus), eine $5 \\times 5$ erst zu $4 \\times 4$. Einzelne Nullen machen die Determinante nicht $0$, eine ganze Nullzeile oder Nullspalte schon.',
     when: 'Bei $4 \\times 4$ und $5 \\times 5$ in der Klausur, und immer, wenn eine Zeile oder Spalte viele Nullen hat.',
     examples: [
       { vector: { kind: 'detExpand', level: 2, seed: 1 } },
