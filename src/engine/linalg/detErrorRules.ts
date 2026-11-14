@@ -130,7 +130,7 @@ export const DET_ERROR_RULES: readonly VectorErrorRule[] = [
     wrongFormula: String.raw`\begin{vmatrix} 1 & 2 & 3 \\ 0 & 0 & 4 \\ 5 & 1 & 2 \end{vmatrix} = 0`,
     why: {
       detailed: String.raw`Die Determinante ist sicher $0$, wenn eine **ganze** Zeile oder Spalte aus Nullen besteht. Einzelne Nullen machen sie nicht $0$; sie machen das Rechnen nur leichter, weil Summanden wegfallen.`,
-      short: String.raw`Nur eine ganze Nullzeile gibt sicher $0$.`,
+      short: String.raw`Einzelne Nullen machen die Determinante nicht $0$, erst eine ganze Nullzeile oder Nullspalte.`,
     },
   },
   // ---------------------------------------------------------------- Entwickeln

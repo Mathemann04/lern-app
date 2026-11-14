@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { type Segment, parseRichText } from '../engine/explain/richText.ts'
+import { FitWidth } from './FitWidth.tsx'
 import { Formula } from './Formula.tsx'
 
 // Text mit eingebetteten Formeln ($…$), ein Absatz pro Zeile.
@@ -42,40 +43,61 @@ export function RichText({ text, className = '', inline = false }: { text: strin
       )
     })
   }
+  // Ein Absatz aus nur einer Formel (z. B. eine Tabelle in der Frage) wird am Handy kleiner, statt die Seite seitlich
+  // zu verbreitern (M7 Schritt 13)
+  const alone = (segments: (typeof paragraphs)[number]) => segments.length === 1 && segments[0].kind === 'math'
   if (inline) {
     if (paragraphs.length === 1) return <span className={className}>{content(paragraphs[0])}</span>
     return (
       <span className={className}>
-        {paragraphs.map((segments, i) => (
-          <span key={i} className="block">
-            {content(segments)}
-          </span>
-        ))}
+        {paragraphs.map((segments, i) =>
+          alone(segments) ? (
+            <FitWidth key={i} min={0.6}>
+              {content(segments)}
+            </FitWidth>
+          ) : (
+            <span key={i} className="block">
+              {content(segments)}
+            </span>
+          ),
+        )}
       </span>
     )
   }
   return (
     <div className={`space-y-2 ${className}`}>
-      {paragraphs.map((segments, i) => (
-        <p key={i}>{content(segments)}</p>
-      ))}
+      {paragraphs.map((segments, i) =>
+        alone(segments) ? (
+          <FitWidth key={i} min={0.6}>
+            {content(segments)}
+          </FitWidth>
+        ) : (
+          <p key={i}>{content(segments)}</p>
+        ),
+      )}
     </div>
   )
 }
 
-// Lange Formeln dürfen in sich umbrechen; nur kurze werden mit dem Satzzeichen zusammengehalten
+// Lange Formeln dürfen in sich umbrechen; nur kurze werden mit dem Satzzeichen zusammengehalten (kurz im LaTeX und
+// in den sichtbaren Zeichen). Eine Rechenkette mit mehreren Gleichheitszeichen bleibt umbrechbar, auch wenn sie kurz aussieht (sonst ragte etwa
+// $\det M = (-1) \cdot 6 - 2 \cdot (-4) = -6 - (-8) = 2$. am Handy seitlich heraus, M7 Schritt 13)
 const GLUE_MAX_LATEX = 60
+// sichtbare Zeichen, grob: ohne Befehle wie \cdot, Klammern {}, Hoch- und Tiefstellung und Abstände
+const GLUE_MAX_VISIBLE = 22
+const visibleLength = (latex: string) => latex.replace(/\\[a-zA-Z]+/g, '').replace(/[{}^_\s\\,;]/g, '').length
+const gluable = (latex: string) => latex.length <= GLUE_MAX_LATEX && visibleLength(latex) <= GLUE_MAX_VISIBLE && (latex.match(/=/g) ?? []).length < 2
 
 // Satzzeichen direkt hinter der Formel an Stelle i, die bei ihr bleiben
 function gluedPunctuation(segments: readonly Segment[], i: number): string {
   const [formula, next] = [segments[i], segments[i + 1]]
-  if (formula?.kind !== 'math' || next?.kind !== 'text' || formula.latex.length > GLUE_MAX_LATEX) return ''
+  if (formula?.kind !== 'math' || next?.kind !== 'text' || !gluable(formula.latex)) return ''
   return /^[.,:;!?)“]+/.exec(next.text)?.[0] ?? ''
 }
 
 // Öffnende Klammer oder Anführungszeichen direkt vor der Formel an Stelle i, die bei ihr bleiben
 function gluedOpening(segments: readonly Segment[], i: number): string {
   const [previous, formula] = [segments[i - 1], segments[i]]
-  if (formula?.kind !== 'math' || previous?.kind !== 'text' || formula.latex.length > GLUE_MAX_LATEX) return ''
+  if (formula?.kind !== 'math' || previous?.kind !== 'text' || !gluable(formula.latex)) return ''
   return /[(„]+$/.exec(previous.text)?.[0] ?? ''
 }

@@ -312,6 +312,9 @@ function makeTable(rng: Rng, spec: Spec, level: Level): Tab | null {
   let T: Rational[][] = L.map((l, i) => E[0].map((_, k) => l.reduce((s, x, j) => ratAdd(s, ratMul(R(x * D[i]), E[j][k])), ZERO)))
   if (swapWith > 0) [T[0], T[swapWith]] = [T[swapWith], T[0]]
   if (T.some((row) => row.slice(0, n).every(isZero))) return null
+  // jede Unbekannte kommt in einer Gleichung vor (eine Nullspalte sähe man der Aufgabe nicht an: Die Unbekannte stünde
+  // nirgends, wäre aber frei; Fund der Prüfung zum Abschluss von M7)
+  if (Array.from({ length: n }, (_, j) => T.every((row) => isZero(row[j]))).some(Boolean)) return null
   // erste Spalte voll besetzt (beim Tausch: oben 0, sonst nicht 0)
   if (!T.every((row, i) => (spec.swap && i === 0 ? isZero(row[0]) : !isZero(row[0])))) return null
   if (T.some((row) => row.slice(0, n).some((x) => Math.abs(num(x)) > (level <= 2 ? 9 : 12)) || Math.abs(num(row[n])) > 30)) return null

@@ -34,6 +34,9 @@ describe('RichText: Formeln mit Satzzeichen und Klammern', () => {
     expect(layout('Masse ( $m$ ) und Ladung')).not.toContain('[')
     const long = `$${'a + '.repeat(20)}b$`
     expect(layout(`Lang (${long}) und mehr`)).not.toContain('[')
+    // Rechenketten mit mehreren Gleichheitszeichen brechen am Handy um (M7 Schritt 13)
+    expect(layout(String.raw`Also $\det M = (-1) \cdot 6 - 2 \cdot (-4) = 2$.`)).not.toContain('[')
+    expect(layout(String.raw`Also $-2a - 8 - (2a + 6) \cdot (-a - 4) = 2a^2 + 12a + 16$.`)).not.toContain('[')
   })
 
   it('verliert keinen Text, auch zwischen zwei Formeln', () => {

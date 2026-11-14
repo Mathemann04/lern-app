@@ -101,7 +101,7 @@ export function SarrusScheme({ sarrus, done }: { sarrus: SarrusFigure; done: boo
       cells.push(
         <span key={`${r}-${c}`} className={`p-0.5 ${c === 0 ? 'border-l-2 border-zinc-400' : ''} ${c === 2 ? 'border-r-2 border-zinc-400' : ''}`}>
           <span
-            className={`flex min-h-10 min-w-10 items-center justify-center rounded-md px-1.5 py-1 transition-colors duration-200 motion-reduce:transition-none ${copy ? 'text-zinc-500' : ''} ${
+            className={`flex min-h-10 min-w-10 items-center justify-center rounded-md px-1 py-1 transition-colors duration-200 motion-reduce:transition-none sm:px-1.5 ${copy ? 'text-zinc-500' : ''} ${
               copyLit ? 'bg-accent-100 ring-2 ring-accent-600' : ''
             }`}
             style={lit && current ? { boxShadow: `0 0 0 2px ${current.color}` } : undefined}
@@ -120,7 +120,7 @@ export function SarrusScheme({ sarrus, done }: { sarrus: SarrusFigure; done: boo
     <figure className="space-y-3 rounded-2xl border border-zinc-200 bg-surface px-3 py-3" data-testid="sarrus-scheme">
       <div className="overflow-x-auto">
         <div
-          className="relative mx-auto grid w-max items-center text-center"
+          className="relative mx-auto grid w-max items-center text-center max-sm:text-sm"
           style={{ gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gridTemplateRows: 'repeat(3, minmax(0, 1fr))' }}
           role="img"
           aria-label="Sarrus-Schema: die Matrix mit den ersten beiden Spalten noch einmal rechts daneben. Die drei Diagonalen nach rechts unten zählen mit Plus, die drei nach links unten mit Minus."

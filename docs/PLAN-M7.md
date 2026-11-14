@@ -530,7 +530,17 @@ Request.
       $X$ auf das von $R$ (erst $X$, dann $M$), bei $XM = R$ bringt $X$ das von $M$ auf das von $R$; „Typischen Fehler
       zeigen“: $X$ von der falschen Seite, das Produkt (rot) verfehlt $R$. Kein Bild bei $\det X = 0$ oder über 12 Einheiten;
       Probe nur, wenn sie hineinpasst und kein Pfeil auf einem anderen liegt (etwa ein Drittel der Bilder).
-13. **Abschluss:** Mischen über alle drei Tätigkeiten, Abwechslung gemessen, Prüfung aus mehreren Blickwinkeln, Doku.
+13. **Abschluss (fertig, 14.11.2026):** Mischen über alle drei Tätigkeiten, Abwechslung gemessen, Prüfung aus mehreren Blickwinkeln, Doku.
+    **Umgesetzt:** Mischen über die Tätigkeiten kommt mit „Mathe mischen“ (M6 Schritt 8) für ganz Mathe; innerhalb jeder
+    Tätigkeit mischen sich die Bausteine schon, die Abwechslung misst je Baustein und Stufe ein Test. Prüfung aus drei
+    Blickwinkeln: Mathematik (6000 Aufgaben mit eigener Rechnung, rund 56 000 Gleichheiten und 63 000 Paare aus falscher
+    und richtiger Antwort; Fund: beim Gauß-Verfahren eine Unbekannte, die in keiner Gleichung steht, jetzt ausgeschlossen und
+    getestet), Regeln und Texte (drei ungenaue Aussagen korrigiert: Faktoren beim Addieren, Nullzeile, dritte Gleichung),
+    Oberfläche (300 Aufgaben, 80 Lernkarten, Handy und Laptop, hell und dunkel; behoben: Rechenketten in Erklärungen und
+    Tabellen in Fragen ragten heraus, Beschriftungen in Bildern lagen übereinander, eine Zeile einer Lernkarte war
+    abgeschnitten). Befunde der Durchsicht: Tabellen und Sarrus mit Parameter passen am Handy, Bilder höchstens 260 px
+    hoch, Stufe 1 der Vektoren heißt „meist mit Vektoren der Ebene“. Mit Bild und Sarrus-Schema in einer Frage muss man
+    weiterhin scrollen.
     Dazu die Befunde der Durchsicht vom 14.11.2026 (docs/ROADMAP.md, „Vorgemerkt“): Gleichungssysteme mit Parameter
     auf Stufe 5 am Handy rechts abgeschnitten (Tabelle und $\vec b$, etwa jede 25. Aufgabe); große Vektorbilder auf
     eine Höhe begrenzen, bei der die Antworten noch zu sehen sind; Stufe 1 „in der Ebene“ passt nicht zu Kreuz- und

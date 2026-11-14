@@ -354,7 +354,7 @@ export const LINE_ERROR_RULES: readonly VectorErrorRule[] = [
     name: 'Dritte Gleichung nicht geprüft',
     wrongFormula: String.raw`\text{(I), (II)} \Rightarrow t, s \;\Rightarrow\; \text{Schnittpunkt}`,
     why: {
-      detailed: String.raw`Im Raum hat das Gleichungssystem drei Gleichungen, aber nur zwei Unbekannte. Zwei Gleichungen legen $t$ und $s$ immer fest. Erst wenn diese Werte auch die **dritte** Gleichung erfüllen, haben die Geraden einen gemeinsamen Punkt; sonst sind sie windschief.`,
+      detailed: String.raw`Im Raum hat das Gleichungssystem drei Gleichungen, aber nur zwei Unbekannte. Aus zwei Gleichungen bekommst du $t$ und $s$. Erst wenn diese Werte auch die **dritte** Gleichung erfüllen, haben die Geraden einen gemeinsamen Punkt; sonst sind sie windschief.`,
       short: String.raw`Die gefundenen $t$ und $s$ in die dritte Gleichung einsetzen.`,
     },
   },

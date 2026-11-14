@@ -40,7 +40,7 @@ export const EQS_CARD_LIST: readonly Card[] = [
     rules: [],
     formulas: [String.raw`\begin{array}{rl} \text{I}\colon & 2x + 3y = 12 \\ \text{II}\colon & 3x - 2y = 5 \end{array}`, String.raw`2 \cdot \text{I} + 3 \cdot \text{II}\colon\; 13x = 39`],
     memo: 'Nimm die Gleichungen so mal, dass vor einer Unbekannten dieselbe Zahl steht, einmal mit Plus und einmal mit Minus. Beim Addieren fällt sie weg; die andere rechnest du aus und setzt sie in eine Gleichung ein.',
-    note: 'Jede Gleichung nimmst du mit der Zahl vor der Unbekannten in der anderen Gleichung mal, und zwar ganz: auch die rechte Seite. Stehen gleiche Zahlen davor, ziehst du ab; dann wechselt jedes Vorzeichen der abgezogenen Gleichung. Das Bild zeigt: Die neue Gleichung ist eine Gerade durch denselben Schnittpunkt.',
+    note: 'Jede Gleichung nimmst du mit der Zahl vor der Unbekannten in der anderen Gleichung mal (bei einem gemeinsamen Teiler beider Zahlen vorher durch ihn geteilt, etwa bei $6y$ und $3y$ nur die zweite mit $2$), und zwar ganz: auch die rechte Seite. Stehen gleiche Zahlen davor, ziehst du ab; dann wechselt jedes Vorzeichen der abgezogenen Gleichung. Das Bild zeigt: Die neue Gleichung ist eine Gerade durch denselben Schnittpunkt.',
     when: 'Wenn keine Unbekannte allein steht, vor allem bei gleichen oder entgegengesetzten Zahlen vor einer Unbekannten.',
     examples: [{ vector: { kind: 'eqsAdd', level: 2, seed: 1, picture: 'step' } }, { vector: { kind: 'eqsAdd', level: 1, seed: 4 } }],
     errors: ['eqs-add-sign', 'eqs-factor-swap', 'eqs-factor-one', 'eqs-one-side', 'eqs-sub-sign'],

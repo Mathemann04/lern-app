@@ -236,3 +236,5 @@ freier Modus `vectorFree.ts`, `buildVectorTask` wählt die Arten nach dem Bauste
   `mgl-mult-side` als `mistake`. Nicht bei det X = 0 oder über `MGL_SPAN`; ohne Probe, wenn sie nicht passt oder zwei Pfeile
   übereinander lägen (`overlapping`). Tests in `invTasks.test.ts` (jedes Bild L = R · A, Ende E | A⁻¹ bzw. Nullzeile) und
   `mglTasks.test.ts` (M und R eigenständig aus der Gleichung, M X = R bzw. X M = R, Fehler verfehlt R).
+- Abschluss M7 (Schritt 13): Gauß-Systeme ohne Nullspalte (jede Unbekannte steht in einer Gleichung, sonst wäre sie frei,
+  ohne dass man es der Aufgabe ansieht; Test in `gaussTasks.test.ts`).

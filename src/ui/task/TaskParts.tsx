@@ -69,7 +69,7 @@ export function TaskIntro({ course, mix = null, review = null, taskRef, function
       {/* lange Gleichungen werden am Handy kleiner statt umzubrechen oder seitlich zu wischen (Chemie seit S4a, Mathe seit
           M6 Schritt 4: vorher brach KaTeX nach dem Gleichheitszeichen um) */}
       {functionLatex !== undefined && (
-        <FitWidth className="text-2xl">
+        <FitWidth className="text-2xl" min={0.6}>
           <Formula tex={functionLatex} />
         </FitWidth>
       )}

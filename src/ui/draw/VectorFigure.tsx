@@ -1,4 +1,4 @@
-import { type PointerEvent, useEffect, useMemo, useRef, useState } from 'react'
+import { type PointerEvent, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { type DragStep, snapDrag } from '../../engine/linalg/drag.ts'
 import { type DrawAngle, type DrawArrow, type DrawColor, type DrawPoint, type DrawSegment, type DrawSlider, type VectorDrawing, anglePath, hasAnimation, withMistake } from '../../engine/linalg/figures.ts'
 import { Formula } from '../Formula.tsx'
@@ -25,6 +25,9 @@ const COLOR: Readonly<Record<DrawColor, string>> = {
 
 const PHASE_MS = 900
 const ease = (p: number) => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2)
+// höchste Höhe eines Bildes: ein Drittel des Bildschirms, höchstens 260 px
+const FIGURE_MAX_HEIGHT = 'min(260px, 32dvh)'
+
 const reducedMotion = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
 
 export type FigureDrag = { readonly step: DragStep; readonly at: readonly number[]; readonly onMove?: (at: readonly number[]) => void }
@@ -130,6 +133,9 @@ export function VectorFigure({ drawing: given, compact = false, label, drag: dra
 
   // Zieh-Aufgabe: Stelle unter dem Finger, eingerastet
   const svgRef = useRef<SVGSVGElement>(null)
+  // Beschriftungen, die sich überdecken, rücken nach jedem Zeichnen an eine freie Stelle daneben (M7 Schritt 13)
+  const labelBox = useRef<HTMLDivElement>(null)
+  useLayoutEffect(() => spreadLabels(labelBox.current))
   const pulling = useRef(false)
   const canPull = !!dragged?.onMove && !space && !!view.unproject
   function pullTo(e: PointerEvent<SVGSVGElement>) {
@@ -264,13 +270,16 @@ export function VectorFigure({ drawing: given, compact = false, label, drag: dra
     </svg>
   )
 
+  // Höhe begrenzt (M7 Schritt 13): Große Bilder schoben am Handy die Antworten unter den Bildschirmrand. Das Bild wird
+  // dann schmaler und bleibt mittig; Antwort-Bilder (compact) bleiben, wie sie sind
   const picture = (
-    <div className="relative text-zinc-900">
+    <div ref={labelBox} className={`relative text-zinc-900 ${compact ? '' : 'mx-auto'}`} style={compact ? undefined : { maxWidth: `calc(${FIGURE_MAX_HEIGHT} * ${view.width / view.height})` }}>
       {svg}
       {labels.map((l) => (
         <span
           key={l.key}
           className={`pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded bg-surface/80 px-0.5 leading-none ${compact ? 'text-xs' : 'text-sm'}`}
+          data-label
           style={{ left: `${(l.x / view.width) * 100}%`, top: `${(l.y / view.height) * 100}%`, color: l.color }}
         >
           <Formula tex={l.tex} />
@@ -422,3 +431,45 @@ function Axes({ view }: { view: View }) {
 
 // Beschreibung ohne Formelzeichen für Vorlesehilfen
 const stripMath = (text: string) => text.replace(/\$([^$]*)\$/g, (_, tex: string) => tex.replace(/\\[a-zA-Z]+|[{}]/g, ' ').replace(/\s+/g, ' ').trim())
+
+// Beschriftungen nacheinander setzen: Überdeckt eine eine schon gesetzte, rückt sie über, unter oder neben ihren Platz,
+// je an die erste freie Stelle (über den Rand, nicht über das CSS-Verschieben, das die Mitte setzt)
+function spreadLabels(box: HTMLElement | null) {
+  if (!box) return
+  const spans = [...box.querySelectorAll<HTMLElement>('[data-label]')]
+  for (const span of spans) {
+    span.style.marginLeft = ''
+    span.style.marginTop = ''
+  }
+  type Box = { left: number; top: number; right: number; bottom: number }
+  const placed: Box[] = []
+  const hits = (q: Box) => placed.some((p) => q.left < p.right - 1 && q.right > p.left + 1 && q.top < p.bottom - 1 && q.bottom > p.top + 1)
+  for (const span of spans) {
+    const r = span.getBoundingClientRect()
+    let best: Box = { left: r.left, top: r.top, right: r.right, bottom: r.bottom }
+    if (hits(best)) {
+      const [w, h] = [r.width, r.height]
+      const moves = [
+        [0, -h],
+        [0, h],
+        [0.7 * w, 0],
+        [-0.7 * w, 0],
+        [0.7 * w, -h],
+        [-0.7 * w, -h],
+        [0.7 * w, h],
+        [-0.7 * w, h],
+        [0, -2 * h],
+        [0, 2 * h],
+      ]
+      for (const [dx, dy] of moves) {
+        const q = { left: r.left + dx, top: r.top + dy, right: r.right + dx, bottom: r.bottom + dy }
+        if (hits(q)) continue
+        span.style.marginLeft = `${dx}px`
+        span.style.marginTop = `${dy}px`
+        best = q
+        break
+      }
+    }
+    placed.push(best)
+  }
+}

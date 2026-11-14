@@ -283,14 +283,14 @@ const rearrangeLevels: LevelPreview[] = [
   },
 ]
 
-// Vektoren (M7, docs/PLAN-M7.md): Stufen wie bei den anderen Tätigkeiten; Stufe 1 in der Ebene, Stufe 2 im Raum, Stufe 4
+// Vektoren (M7, docs/PLAN-M7.md): Stufen wie bei den anderen Tätigkeiten; Stufe 1 meist in der Ebene (Kreuz- und Spatprodukt im Raum), Stufe 2 im Raum, Stufe 4
 // mit Parameter wie in der Klausur
 const vectorLevels: LevelPreview[] = [
   {
     level: 1,
     available: true,
     name: 'Einstieg',
-    title: 'Einstieg – in der Ebene, ein bis zwei Schritte',
+    title: 'Einstieg – ein bis zwei Schritte, meist mit Vektoren der Ebene',
     examples: [
       String.raw`\overrightarrow{AB} \text{ für } A(1 \mid -2),\; B(4 \mid 3)`,
       String.raw`\left\lvert \begin{pmatrix} 3 \\ -4 \end{pmatrix} \right\rvert`,
