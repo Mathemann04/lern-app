@@ -83,7 +83,8 @@ Ein Beispiel: Die Probe vor 2018/19 hatte weder das Taylorpolynom noch die Frage
 „waagrechte Tangente oder Extremum“.
 
 **Ziel in der App:** eine Probeklausur Mathe wie bei Chemie, aus genau diesen Bausteinen,
-ohne Taschenrechner, mit Kontrollwerten. Das kann kommen, sobald die Tätigkeiten dafür stehen.
+ohne Taschenrechner, mit Kontrollwerten. Eingeplant als M13 direkt nach M7 (Wunsch des Nutzers, 14.11.2026:
+„der wichtigste Punkt“), zusammen mit den Bausteinen, die noch fehlen (docs/ROADMAP.md).
 
 ## Das laufende Semester (WS 26/27)
 

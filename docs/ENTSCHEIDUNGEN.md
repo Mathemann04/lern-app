@@ -1337,3 +1337,11 @@ Neue Entscheidungen unten anfügen.
   immer): Wird beim Schieben eine Gleichung zu $0 = 0$, zählt die Beschreibung sie nicht mehr mit („Übrig ist nur
   Gerade I“ statt „Beide Gleichungen …“); liegen Schnittgeraden außerhalb des Bildes, sagt sie es; auf der Lernkarte
   „Cramersche Regel“ hieß es, Strecken und Scheren hielten die Fläche gleich (nur das Scheren tut es).
+- 14.11.2026: Durchsicht der ganzen App. Der Nutzer übernimmt die Vorschläge für Chemie ganz: vor Teil 1 noch
+  S12 (Ratefallen: die richtige Antwort ist zu oft die längste, ein Test misst das künftig) und S13 (Fortschritt
+  sichern, für die ganze App). Für Mathe ist ihm „der wichtigste Punkt ein adäquater Klausurmodus“: neuer Meilenstein
+  M13 direkt nach M7, mit Klausur-Überblick, Klausuraufgaben im Format der Klausur (auf Papier lösen, Rechenweg
+  vergleichen, Punkte vergeben), Probeklausur (90 Minuten, 100 Punkte) und den Klausur-Bausteinen, die noch fehlen
+  (gebrochen-rationale Funktionen, Graph ablesen, Umkehrfunktion, Tangenten, Kurvendiskussion, L'Hospital,
+  nachgeschärftes Ableiten). Nichts wird aus den Themen genommen, auch nicht Stoff, der nie in der Klausur kommt;
+  eine Schnellwahl „Nur Klausurstoff“ bei den Bausteinen gibt es deshalb nicht, Klausurstoff zeigt der Klausurmodus.
