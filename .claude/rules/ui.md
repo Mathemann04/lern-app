@@ -157,3 +157,7 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
 - Seit M7 Schritt 9b Sarrus als eigenes Bild `ui/draw/SarrusScheme.tsx` (CSS-Raster mit fünf gleich breiten Spalten,
   darüber ein SVG mit Linien in Prozent, also ohne Messen; Plus `var(--vec-a)`, Minus `var(--vec-b)`; am Ende liegen die
   Zahlen auf `bg-surface` über den dünnen Linien). Die Rechnung steht als ein `aligned` in einer `FitWidth`.
+- Seit M7 Schritt 11c der Schieberegler in `ui/draw/VectorFigure.tsx` (`SliderControls`, `data-testid="param-slider"`):
+  `input type="range"` über die Nummern der Stellen (Name „Wert von a“, `aria-valuetext` „a gleich 2,75“), daneben der
+  Wert als Formel, darunter Knöpfe zu den besonderen Stellen (`aria-pressed`); das Bild ist das fertige Bild der Engine
+  zur Stelle (`slider.frames`), bei einem neuen Bild wieder der Startwert.

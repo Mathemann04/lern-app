@@ -1323,3 +1323,13 @@ Neue Entscheidungen unten anfügen.
   Begründung. Wo die Rechenfehler dieselben sind wie beim Gauß-Verfahren (Vorzeichen beim Rüberbringen, nicht geteilt,
   falsch herum geteilt, Lösungsmenge), nutzt der Baustein deren Fehler und Texte, statt sie doppelt anzulegen; beim Ordnen
   eigene Fehler, weil die Texte des Gauß-Verfahrens vom Strich der Tabelle sprechen (Fund der unabhängigen Prüfung).
+- 14.11.2026: M7 Schritt 11c (Wunsch des Nutzers: „Weiter mit M7, Schritt 11c“). Der Schieberegler steht nur beim
+  Ergebnis (vorher verriete er die Sonderwerte) und bei allen Aufgaben mit Parameter $a$, auch bei „Einsetzen,
+  Gleichsetzen, Addieren“ und Cramer mit Parameter, damit das Bild überall gleich funktioniert. Die Engine rechnet je
+  Stelle ein fertiges Bild (bis etwa 50 Stellen), die Oberfläche wählt nur aus: so bleibt alles in der Engine und
+  testbar. Die Mitte des Bildes bleibt fest (beim Startwert), sonst spränge das Bild beim Schieben; der Schnittpunkt
+  darf dafür aus dem Bild laufen (genau das zeigt, dass es beim Sonderwert keinen gibt). Mit zweitem Parameter $b$ steht
+  $b$ beim gefundenen Wert fest (ein zweiter Regler wäre am Handy zu viel). Cramer als Flächen nur bei $2 \times 2$ ohne
+  Parameter und nur bis 22 Einheiten Breite und Höhe (sonst wird das Parallelogramm von $A$ winzig); das trifft etwa
+  zwei Drittel der Aufgaben. Gleiche Geraden tragen ihre Namen jetzt an verschiedenen Enden (vorher verdeckte „II“ das
+  „I“).

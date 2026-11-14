@@ -4,7 +4,8 @@ import { type Rational, ONE, ZERO, isInteger, isOne, isZero, rat, ratAbs, ratAdd
 import type { Level } from '../tasks/taskNumber.ts'
 import { type Quad, quadAt, quadLatex, termsLatex } from './crossTasks.ts'
 import { type Lin, type Mat, type PMat, DET_CARD, at, det, lin, linFactor, linLatex, paramMatrix, pmat, polyOf, sarrusStep } from './detTasks.ts'
-import { systemDrawing } from './gaussFigures.ts'
+import { type VectorDrawing, emptyDrawing } from './figures.ts'
+import { paramSlider, systemDrawing } from './gaussFigures.ts'
 import { type Built, type VectorKind, type Wrong, choiceStep, math } from './taskKit.ts'
 import { ratLatex, vecLatex } from './vec.ts'
 
@@ -399,6 +400,56 @@ const optionalDrawing = (A: Mat, b: readonly Rational[], x: readonly Rational[])
   return d ? { resultDrawing: d } : {}
 }
 
+// Cramer als Flächen (Schritt 11c, nur 2 × 2 ohne Parameter): Die Spalten a_1, a_2 von A spannen ein Parallelogramm mit
+// der Fläche |det A| auf. Streckt man die Spalte der Unbekannten mit ihrem Wert, wird es so oft größer; schiebt man die
+// Ecke dann parallel zur anderen Spalte bis b (Scheren), bleibt die Fläche gleich: Das Parallelogramm aus b und der
+// anderen Spalte hat |det A_k|. Also ist die Unbekannte det A_k / det A (mit Vorzeichen: Umlaufsinn).
+// Kein Bild bei Wert 0 (die Fläche fällt zu einer Strecke zusammen) oder wenn es zu groß würde.
+export const AREA_SPAN = 22
+export function cramerArea(A: Mat, b: readonly Rational[], k: 0 | 1): VectorDrawing | undefined {
+  const col = (j: number) => [num(A[0][j]), num(A[1][j])]
+  const D = det(A)
+  const Dk = det(A.map((r, i) => r.map((e, j) => (j === k ? b[i] : e))))
+  const value = ratDiv(Dk, D)
+  if (isZero(value)) return undefined
+  const x = num(value)
+  const u = col(k)
+  const w = col(1 - k)
+  const bb = b.map(num)
+  const plus = (p: readonly number[], q: readonly number[]) => p.map((e, i) => e + q[i])
+  const times = (t: number, p: readonly number[]) => p.map((e) => t * e)
+  const O = [0, 0]
+  const base = [O, u, plus(u, w), w]
+  const stretched = [O, times(x, u), plus(times(x, u), w), w]
+  const sheared = [O, bb, plus(bb, w), w]
+  const all = [...base, ...stretched, ...sheared]
+  for (const c of [0, 1]) if (Math.max(0, ...all.map((p) => p[c])) - Math.min(0, ...all.map((p) => p[c])) > AREA_SPAN) return undefined
+  const v = VARS[k]
+  const [nu, nw] = k === 0 ? ['\\vec a_1', '\\vec a_2'] : ['\\vec a_2', '\\vec a_1']
+  const flip = ratSign(value) < 0 ? ' (negativ: Die Richtung dreht sich um, der Umlaufsinn auch)' : ''
+  const caption =
+    `Die Spalten von $A$ sind $\\vec a_1$ (blau) und $\\vec a_2$ (orange). Ihr Parallelogramm hat die Fläche $|\\det A| = ${ratLatex(ratAbs(D))}$. ` +
+    `Streckt man $${nu}$ mit $${v} = ${ratLatex(value)}$${flip}, ändert sich seine Fläche um den Faktor $${ratLatex(ratAbs(value))}$ (grau). ` +
+    `Schiebt man die Ecke dann parallel zu $${nw}$ bis $\\vec b$, bleibt die Fläche gleich (Scheren): Das Parallelogramm aus $\\vec b$ und $${nw}$ (blaugrün) hat die Fläche $|\\det A_${v}| = ${ratLatex(ratAbs(Dk))}$. ` +
+    `Darum ist $${v} = \\frac{\\det A_${v}}{\\det A}$, das Vorzeichen zählt den Umlaufsinn mit.`
+  return {
+    ...emptyDrawing(2, caption),
+    playLabel: 'Strecken und Scheren',
+    arrows: [
+      { from: O, to: col(0), color: 'a', label: '\\vec a_1' },
+      { from: O, to: col(1), color: 'b', label: '\\vec a_2' },
+      { from: O, to: bb, color: 'r', label: '\\vec b' },
+    ],
+    polygons: [
+      { points: base, color: k === 0 ? 'a' : 'b' },
+      { points: stretched, from: base, color: 'muted', phase: 1 },
+      { points: sheared, from: stretched, color: 'c', phase: 2 },
+    ],
+    segments: [{ from: times(x, u), to: bb, color: 'muted', dashed: true, phase: 2 }],
+    points: [],
+  }
+}
+
 const showSystem = (rng: Rng, A: PMat, b: readonly Rational[]) => {
   const eq = rng.chance(0.6)
   return {
@@ -413,6 +464,8 @@ const dataOf = (A: PMat, b: readonly Rational[]) => ({
   b: b.map(num),
   n: [A.length],
 })
+
+const withArea = (step: GuidedStep, d: VectorDrawing | undefined): GuidedStep => (d ? { ...step, solvedDrawing: d } : step)
 
 // Stufe 1 (2 × 2, ganze Lösung) und 2 (Brüche möglich): beide Unbekannten
 function buildTwo(rng: Rng, level: Level): Built | null {
@@ -438,9 +491,9 @@ function buildTwo(rng: Rng, level: Level): Built | null {
   const steps: GuidedStep[] = [
     detStep(rng, ctx, null, 'det', [CRAMER_CARD.regel, DET_CARD.zwei]),
     detStep(rng, ctx, 0, 'det-x', cards),
-    quotientStep(rng, ctx, 0, cards),
+    withArea(quotientStep(rng, ctx, 0, cards), cramerArea(A, b, 0)),
     detStep(rng, ctx, 1, 'det-y', cards),
-    quotientStep(rng, ctx, 1, cards, x),
+    withArea(quotientStep(rng, ctx, 1, cards, x), cramerArea(A, b, 1)),
   ]
   return {
     kind: 'cramerTwo',
@@ -617,10 +670,23 @@ function buildParam(rng: Rng, level: Level, n: 2 | 3, trap: boolean): Built | nu
     steps,
     cards: [CRAMER_CARD.regel, CRAMER_CARD.parameter],
     resultLatex: solLatex(t.valid),
+    ...paramSliderOf(A, b, Droots, t.valid, `$${v} = ${ratLatex(t.c)}$`),
     form: `cramerParam|${n}|${sys.eq ? 'eq' : 'mat'}|${v}|${paramMask(A)}|${t.excluded.length}|${t.valid.length}|${negCount(A, b)}|${isZero(D.q2) ? 1 : 2}|${ratSign(t.c)}|${at(A, ZERO).flat().map((e) => '0+-'[(ratSign(e) + 3) % 3]).join('')}`,
     data: { ...dataOf(A, b), k: [k], c: [num(t.c)] },
     answer: t.valid.map(num),
   }
+}
+
+// Schieberegler für a (Schritt 11c): Sonderwerte mit det A = 0, die gesuchten Werte mit ihrem Text
+function paramSliderOf(A: PMat, b: readonly Rational[], Droots: readonly Rational[], valid: readonly Rational[], note: string) {
+  const d = paramSlider({
+    rowsAt: (a) => A.map((r, i) => [...r.map((e) => num(e.c0) + num(e.c1) * a), num(b[i])]),
+    n: A.length,
+    specials: Droots.map(num),
+    targets: valid.map((x) => ({ value: num(x), note })),
+    start: num(valid[0]),
+  })
+  return d ? { resultDrawing: d } : {}
 }
 
 // ------------------------------------------------------------------ Arten

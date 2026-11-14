@@ -58,8 +58,12 @@ export function footOn(z: Pt, row: NRow, n: number): Pt {
 // Abstand eines Punktes von der Geraden bzw. Ebene einer Zeile (für Tests und den typischen Fehler)
 export const distanceTo = (p: Pt, row: NRow, n: number) => Math.abs(dot(normalOf(row, n), p) - rhsOf(row, n)) / len(normalOf(row, n))
 
-// Richtung einer Geraden a x + b y = c
-const lineDir = (row: NRow) => unit([-row[1], row[0]])
+// Richtung einer Geraden a x + b y = c, immer nach rechts (bzw. oben): Gleiche Geraden tragen ihre Namen dann an
+// verschiedenen Enden (LABEL_AT)
+const lineDir = (row: NRow) => {
+  const d = unit([-row[1], row[0]])
+  return d[0] < -EPS || (Math.abs(d[0]) <= EPS && d[1] < 0) ? scale(-1, d) : d
+}
 
 // zwei Richtungen in der Ebene der Zeile, fest aus der Normalen (gleiche Ebenen bekommen dieselben Ecken)
 function planeBasis(row: NRow): [Pt, Pt] {
@@ -94,32 +98,10 @@ function planePatch(row: NRow, center: Pt, color: DrawColor, i: number, extra: P
 // Mittelpunkt des Bildes: die Lösung (bzw. ein Punkt der Lösungsmenge, freie Variablen 0), ohne Lösung der Schwerpunkt
 // der Lotfußpunkte des Ursprungs
 export function sceneCenter(T: readonly NRow[], n: number): Pt {
-  const p = particularSolution(T, n)
-  if (p) return p
+  const sol = numericSolution(T, n)
+  if (sol) return sol.p
   const feet = T.filter((r) => !isFlat(r, n)).map((r) => footOn(Array(n).fill(0), r, n))
   return scale(1 / feet.length, feet.reduce((s, f) => add(s, f), Array(n).fill(0)))
-}
-
-// eine Lösung mit freien Variablen 0 (oder null, wenn es keine gibt), mit Kommazahlen gerechnet
-function particularSolution(T: readonly NRow[], n: number): Pt | null {
-  const M = T.map((r) => [...r])
-  const pivots: number[] = []
-  let r = 0
-  for (let c = 0; c < n && r < M.length; c++) {
-    let p = r
-    for (let i = r + 1; i < M.length; i++) if (Math.abs(M[i][c]) > Math.abs(M[p][c])) p = i
-    if (Math.abs(M[p][c]) < 1e-9) continue
-    ;[M[p], M[r]] = [M[r], M[p]]
-    const piv = M[r][c]
-    M[r] = M[r].map((x) => x / piv)
-    for (let i = 0; i < M.length; i++) if (i !== r) M[i] = M[i].map((x, j) => x - M[i][c] * M[r][j])
-    pivots.push(c)
-    r++
-  }
-  if (M.slice(r).some((row) => Math.abs(row[n]) > 1e-7)) return null
-  const x = Array(n).fill(0)
-  pivots.forEach((c, i) => (x[c] = M[i][n]))
-  return x
 }
 
 const nounOf = (n: number) => (n === 2 ? 'Gerade' : 'Ebene')
@@ -270,32 +252,62 @@ export function systemDrawing(s: SystemInput): VectorDrawing | undefined {
   const { T, n, solution } = s
   const m = T.length
   if ((n !== 2 && n !== 3) || m > 3) return undefined
-  const center = solution ? solution.p : sceneCenter(T, n)
+  const parts = systemParts(T, n, solution, solution ? solution.p : sceneCenter(T, n), { phased: true, coords: true })
+  return { ...emptyDrawing(n, `${colorList(parts.rows, m, n, 'Gleichung')} ${parts.tail}`), segments: parts.segments, polygons: parts.polygons, points: parts.points }
+}
+
+type PartsOptions = {
+  // nacheinander erscheinen (Ergebnis) oder alles sofort (Schieberegler)
+  readonly phased: boolean
+  // Koordinaten des Schnittpunkts in der Beschreibung (beim Schieberegler krumme Kommazahlen, dort ohne)
+  readonly coords: boolean
+  // Schieberegler: Teile weiter als far von der Mitte bleiben weg (die Beschreibung sagt es)
+  readonly far?: number
+}
+
+// Geraden bzw. Ebenen um center, die Lösung und der Satz dazu; Zeilen 0 = c zeichnet es nicht
+function systemParts(T: readonly NRow[], n: number, solution: SystemInput['solution'], center: Pt, o: PartsOptions) {
+  const m = T.length
+  const far = o.far ?? Infinity
+  const ph = (k: number) => (o.phased ? { phase: k } : {})
   const segments: DrawSegment[] = []
   const polygons: DrawPolygon[] = []
   const points: DrawPoint[] = []
-  T.forEach((row, i) => {
+  const rows = T.map((_, i) => i).filter((i) => !isFlat(T[i], n))
+  const outside: number[] = []
+  for (const i of rows) {
+    const row = T[i]
+    if (distanceTo(center, row, n) > far) {
+      outside.push(i)
+      continue
+    }
     const c = footOn(center, row, n)
-    const twin = T.slice(0, i).some((r) => sameRow(r, row))
-    if (n === 2) segments.push(lineSegment(row, c, ROW_COLORS[i], i, { phase: i + 1, ...(twin ? { dashed: true } : {}) }))
-    else polygons.push(planePatch(row, c, ROW_COLORS[i], i, { phase: i + 1 }))
-  })
+    const twin = rows.filter((k) => k < i).some((k) => sameRow(T[k], row))
+    if (n === 2) segments.push(lineSegment(row, c, ROW_COLORS[i], i, { ...ph(i + 1), ...(twin ? { dashed: true } : {}) }))
+    else polygons.push(planePatch(row, c, ROW_COLORS[i], i, ph(i + 1)))
+  }
+  const N = nounOf(n)
   const Ns = nounsOf(n)
   const pairs: [number, number][] = []
-  for (let i = 0; i < m; i++) for (let k = i + 1; k < m; k++) pairs.push([i, k])
+  for (const i of rows) for (const k of rows) if (i < k) pairs.push([i, k])
   const same = pairs.filter(([i, k]) => sameRow(T[i], T[k]))
   const parallel = pairs.filter(([i, k]) => parallelRows(T[i], T[k], n) && !sameRow(T[i], T[k]))
   const pairWords = (ps: readonly [number, number][]) => words(ps.map(([i, k]) => `${ROMAN[i]} und ${ROMAN[k]}`))
+  const flat = T.map((_, i) => i).filter((i) => isFlat(T[i], n))
   let tail: string
+  const flatText = flat.map((i) => `Gleichung ${ROMAN[i]} heißt $0 = ${fmt(T[i][n])}$ und ist keine ${N}.`).join(' ')
   if (!solution) {
-    if (parallel.length === pairs.length) tail = m === 2 ? `Die ${Ns} sind parallel und verschieden: Kein Punkt liegt auf beiden, keine Lösung.` : `Alle ${Ns} sind parallel, aber nicht alle gleich: Kein Punkt liegt auf allen, keine Lösung.`
+    const contradiction = flat.find((i) => Math.abs(T[i][n]) > 1e-9)
+    if (contradiction !== undefined) tail = `${flatText} $0 = ${fmt(T[contradiction][n])}$ ist ein Widerspruch: keine Lösung.`
+    else if (parallel.length === pairs.length) tail = pairs.length === 1 ? `Die ${Ns} sind parallel und verschieden: Kein Punkt liegt auf beiden, keine Lösung.` : `Alle ${Ns} sind parallel, aber nicht alle gleich: Kein Punkt liegt auf allen, keine Lösung.`
     else if (parallel.length > 0) tail = `Die ${Ns} ${pairWords(parallel)} sind parallel und verschieden: Kein Punkt liegt auf allen, keine Lösung.`
     else {
       // die Schnittpunkte bzw. Schnittgeraden je zweier Zeilen blass dazu: Sie fallen nicht zusammen
       for (const [i, k] of pairs) {
         const pv = pivotOf(T[i], T[k], n, center)!
-        if (n === 2) points.push({ at: pv.at, color: 'muted', phase: m + 1 })
-        else segments.push({ from: add(pv.at, scale(-SOLUTION_HALF, pv.dir!)), to: add(pv.at, scale(SOLUTION_HALF, pv.dir!)), color: 'muted', dashed: true, phase: m + 1 })
+        if (len(add(pv.at, scale(-1, center))) > far) continue
+        if (n === 2) points.push({ at: pv.at, color: 'muted', ...ph(m + 1) })
+        else segments.push({ from: add(pv.at, scale(-SOLUTION_HALF, pv.dir!)), to: add(pv.at, scale(SOLUTION_HALF, pv.dir!)), color: 'muted', dashed: true, ...ph(m + 1) })
       }
       tail =
         n === 2
@@ -303,17 +315,116 @@ export function systemDrawing(s: SystemInput): VectorDrawing | undefined {
           : 'Je zwei Ebenen schneiden sich in einer Geraden (gestrichelt), aber die drei Schnittgeraden sind parallel: Kein Punkt liegt auf allen drei Ebenen, keine Lösung.'
     }
   } else if (solution.dirs.length === 0) {
-    points.push({ at: solution.p, label: 'S', color: 'r', phase: m + 1 })
-    tail = `${m === 2 ? `Die beiden ${Ns} schneiden sich in genau einem` : `Alle drei ${Ns} gehen durch genau einen`} Punkt $${pointLatex('S', solution.p)}$: die Lösung.`
+    const inside = len(add(solution.p, scale(-1, center))) <= far
+    if (inside) points.push({ at: solution.p, label: 'S', color: 'r', ...ph(m + 1) })
+    const where = o.coords ? `Punkt $${pointLatex('S', solution.p)}$` : inside ? 'Punkt $S$' : 'Punkt, der hier außerhalb des Bildes liegt'
+    tail = `${m === 2 ? `Die beiden ${Ns} schneiden sich in genau einem` : `Alle drei ${Ns} gehen durch genau einen`} ${where}: ${o.coords ? 'die Lösung' : 'genau eine Lösung'}.`
   } else if (solution.dirs.length === n - 1) {
-    tail = `${m === 2 ? 'Beide Gleichungen beschreiben' : 'Alle Gleichungen beschreiben'} dieselbe ${nounOf(n)}: Jeder ihrer Punkte ist eine Lösung.`
+    tail = `${m === 2 ? 'Beide Gleichungen beschreiben' : 'Alle Gleichungen beschreiben'} dieselbe ${N}: Jeder ihrer Punkte ist eine Lösung${o.coords ? '' : ', unendlich viele'}.`
   } else {
-    // eine Gerade als Lösung im Raum
+    // eine Gerade als Lösung im Raum (nahe der Mitte)
     const r = unit(solution.dirs[0])
-    segments.push({ from: add(solution.p, scale(-SOLUTION_HALF, r)), to: add(solution.p, scale(SOLUTION_HALF, r)), color: 'r', phase: m + 1 })
-    tail = `${m === 2 ? 'Die beiden Ebenen schneiden sich' : 'Die Ebenen schneiden sich alle'} in einer Geraden (violett): Jeder ihrer Punkte ist eine Lösung.${same.length > 0 ? ` Die Ebenen ${pairWords(same)} sind gleich.` : ''}`
+    const q = add(solution.p, scale(dot(add(center, scale(-1, solution.p)), r), r))
+    segments.push({ from: add(q, scale(-SOLUTION_HALF, r)), to: add(q, scale(SOLUTION_HALF, r)), color: 'r', ...ph(m + 1) })
+    tail = `${m === 2 ? 'Die beiden Ebenen schneiden sich' : 'Die Ebenen schneiden sich alle'} in einer Geraden (violett): Jeder ihrer Punkte ist eine Lösung${o.coords ? '' : ', unendlich viele'}.${same.length > 0 ? ` Die Ebenen ${pairWords(same)} sind gleich.` : ''}`
   }
-  return { ...emptyDrawing(n, `${colorList(T.map((_, i) => i), m, n, 'Gleichung')} ${tail}`), segments, polygons, points }
+  if (flat.length > 0 && solution) tail = `${flatText} ${tail}`
+  if (outside.length > 0) tail = `${tail} ${outside.length === 1 ? `${N} ${ROMAN[outside[0]]} liegt` : `Die ${Ns} ${words(outside.map((i) => ROMAN[i]))} liegen`} außerhalb des Bildes.`
+  return { segments, polygons, points, tail, rows }
+}
+
+// Lösung mit Kommazahlen: ein Punkt (freie Variablen 0) und je freier Variable eine Richtung; null ohne Lösung
+export function numericSolution(T: readonly NRow[], n: number): SystemInput['solution'] {
+  const M = T.map((r) => [...r])
+  const pivots: number[] = []
+  let r = 0
+  for (let c = 0; c < n && r < M.length; c++) {
+    let p = r
+    for (let i = r + 1; i < M.length; i++) if (Math.abs(M[i][c]) > Math.abs(M[p][c])) p = i
+    if (Math.abs(M[p][c]) < 1e-9) continue
+    ;[M[p], M[r]] = [M[r], M[p]]
+    const piv = M[r][c]
+    M[r] = M[r].map((x) => x / piv)
+    for (let i = 0; i < M.length; i++) if (i !== r) M[i] = M[i].map((x, j) => x - M[i][c] * M[r][j])
+    pivots.push(c)
+    r++
+  }
+  if (M.slice(r).some((row) => Math.abs(row[n]) > 1e-7)) return null
+  const p: number[] = Array(n).fill(0)
+  pivots.forEach((c, i) => (p[c] = M[i][n]))
+  const dirs = Array.from({ length: n }, (_, c) => c)
+    .filter((c) => !pivots.includes(c))
+    .map((f) => {
+      const d: number[] = Array(n).fill(0)
+      d[f] = 1
+      pivots.forEach((c, i) => (d[c] = -M[i][f]))
+      return d
+    })
+  return { p, dirs }
+}
+
+export type SliderInput = {
+  // Zeilen (a_1, …, a_n | c) an einer Stelle des Parameters
+  readonly rowsAt: (a: number) => readonly NRow[]
+  readonly n: number
+  // Sonderwerte (dort parallel oder gleich), das erste ist der Startwert, außer start ist angegeben
+  readonly specials: readonly number[]
+  // weitere besondere Stellen mit Text, z. B. gesuchte Werte mit $y = 3$
+  readonly targets?: readonly { readonly value: number; readonly note: string }[]
+  readonly start?: number
+  // Satz vor jeder Beschreibung, z. B. „$b = 4$ fest.“
+  readonly fixed?: string
+}
+
+// Teile höchstens so weit von der Mitte entfernt (sonst wird das Bild zu klein)
+export const SLIDER_FAR = 5.5
+const near = (x: number, y: number) => Math.abs(x - y) < 1e-9
+
+// Stellen des Schiebereglers: ganze Viertel (bei großem Bereich Halbe) um die besonderen Stellen, diese genau
+export function sliderValues(special: readonly number[]): number[] {
+  const lo = Math.floor(Math.min(0, ...special)) - 3
+  const hi = Math.ceil(Math.max(0, ...special)) + 3
+  const step = hi - lo > 12 ? 0.5 : 0.25
+  const grid: number[] = []
+  for (let k = 0; lo + k * step <= hi + 1e-9; k++) grid.push(lo + k * step)
+  const all = [...grid.filter((x) => special.every((s) => Math.abs(x - s) > step / 3 || near(x, s))), ...special]
+  return all.sort((x, y) => x - y).filter((x, i, xs) => i === 0 || !near(x, xs[i - 1]))
+}
+
+// Bild mit Schieberegler (Schritt 11c): Mit dem Parameter bewegen sich die Geraden bzw. Ebenen, bei den Sonderwerten
+// werden sie parallel oder gleich. Mitte fest (Lösung bzw. Mitte beim Startwert), alle Bilder im selben Ausschnitt.
+export function paramSlider(s: SliderInput): VectorDrawing | undefined {
+  const { n, rowsAt } = s
+  if (n !== 2 && n !== 3) return undefined
+  const m = rowsAt(s.specials[0] ?? 0).length
+  if (m > 3 || m < 2) return undefined
+  const targets = s.targets ?? []
+  const values = sliderValues([...s.specials, ...targets.map((t) => t.value)])
+  const startValue = s.start ?? s.specials[0] ?? targets[0]?.value ?? 0
+  const T0 = rowsAt(startValue)
+  const sol0 = numericSolution(T0, n)
+  const center = sol0 ? sol0.p : sceneCenter(T0, n)
+  const name = 'a'
+  const caseWord = (sol: SystemInput['solution']) => (!sol ? 'keine Lösung' : sol.dirs.length > 0 ? 'unendlich viele Lösungen' : 'genau eine Lösung')
+  const frames = values.map((a) => {
+    const T = rowsAt(a)
+    const sol = numericSolution(T, n)
+    const parts = systemParts(T, n, sol, center, { phased: false, coords: false, far: SLIDER_FAR })
+    const caption = `${s.fixed ? `${s.fixed} ` : ''}Für $${name} = ${fmt(a)}$: ${parts.tail}`
+    return { ...emptyDrawing(n, caption), segments: parts.segments, polygons: parts.polygons, points: parts.points }
+  })
+  // gemeinsamer Ausschnitt: das Kästchen um alle Bilder
+  const coords = frames.flatMap((f) => [...f.segments.flatMap((x) => [x.from, x.to]), ...f.polygons.flatMap((x) => x.points), ...f.points.map((x) => x.at)])
+  if (coords.length === 0) return undefined
+  const extent = [0, 1].map((side) => Array.from({ length: n }, (_, k) => (side === 0 ? Math.min : Math.max)(...coords.map((c) => c[k]))))
+  const marks = values.flatMap((a, index) => {
+    const t = targets.find((x) => near(x.value, a))
+    if (t) return [{ index, note: t.note }]
+    return s.specials.some((x) => near(x, a)) ? [{ index, note: caseWord(numericSolution(rowsAt(a), n)) }] : []
+  })
+  const start = values.findIndex((a) => near(a, startValue))
+  const withExtent = frames.map((f) => ({ ...f, extent }))
+  return { ...withExtent[start], slider: { name, values, frames: withExtent, start, marks } }
 }
 
 // für Tests: Abstand eines Punktes von einer Zeile, unabhängig von der Darstellung

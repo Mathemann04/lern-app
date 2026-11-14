@@ -16,9 +16,9 @@ export const CRAMER_CARD_LIST: readonly Card[] = [
       String.raw`A = \begin{pmatrix} 2 & 1 \\ 1 & 3 \end{pmatrix},\; \vec b = \begin{pmatrix} 5 \\ 5 \end{pmatrix}\colon\; A_x = \begin{pmatrix} 5 & 1 \\ 5 & 3 \end{pmatrix},\; A_y = \begin{pmatrix} 2 & 5 \\ 1 & 5 \end{pmatrix}`,
     ],
     memo: 'Für die Unbekannte $x_k$ ersetzt du in $A$ ihre Spalte durch die rechte Seite $\\vec b$ und erhältst $A_k$. Dann ist $x_k$ die Determinante von $A_k$ geteilt durch die Determinante von $A$. Unten steht für jede Unbekannte dasselbe $\\det A$.',
-    note: 'Die Regel gilt nur für quadratische Systeme (so viele Gleichungen wie Unbekannte) mit $\\det A \\ne 0$; dann gibt es genau eine Lösung. Praktisch ist sie, wenn nur eine Unbekannte gefragt ist: Du brauchst zwei Determinanten statt des ganzen Gauß-Verfahrens. Kennst du schon zwei Unbekannte, bekommst du die dritte schneller durch Einsetzen in eine Gleichung.',
+    note: 'Die Regel gilt nur für quadratische Systeme (so viele Gleichungen wie Unbekannte) mit $\\det A \\ne 0$; dann gibt es genau eine Lösung. Praktisch ist sie, wenn nur eine Unbekannte gefragt ist: Du brauchst zwei Determinanten statt des ganzen Gauß-Verfahrens. Kennst du schon zwei Unbekannte, bekommst du die dritte schneller durch Einsetzen in eine Gleichung. Als Bild (bei $2 \\times 2$): Die Spalten von $A$ spannen ein Parallelogramm mit der Fläche $|\\det A|$ auf. Streckst du die erste Spalte mit $x$ und schiebst die Ecke parallel zur zweiten Spalte bis $\\vec b$, bleibt die Fläche gleich. Darum ist $x$ das Verhältnis der Flächen aus $\\vec b$, $\\vec a_2$ und aus $\\vec a_1$, $\\vec a_2$.',
     when: 'Bei $2 \\times 2$- und $3 \\times 3$-Systemen mit $\\det A \\ne 0$, vor allem wenn nur eine Unbekannte gefragt ist oder Parameter in der Matrix stehen.',
-    examples: [{ vector: { kind: 'cramerTwo', level: 1, seed: 1 } }, { vector: { kind: 'cramerThree', level: 2, seed: 2 } }],
+    examples: [{ vector: { kind: 'cramerTwo', level: 1, seed: 14, picture: 'step' } }, { vector: { kind: 'cramerThree', level: 2, seed: 2 } }],
     errors: ['cramer-row', 'cramer-col', 'cramer-flip', 'cramer-no-divide'],
   },
   {

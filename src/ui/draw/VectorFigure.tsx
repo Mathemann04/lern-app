@@ -1,6 +1,6 @@
 import { type PointerEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { type DragStep, snapDrag } from '../../engine/linalg/drag.ts'
-import { type DrawAngle, type DrawArrow, type DrawColor, type DrawPoint, type DrawSegment, type VectorDrawing, anglePath, hasAnimation, withMistake } from '../../engine/linalg/figures.ts'
+import { type DrawAngle, type DrawArrow, type DrawColor, type DrawPoint, type DrawSegment, type DrawSlider, type VectorDrawing, anglePath, hasAnimation, withMistake } from '../../engine/linalg/figures.ts'
 import { Formula } from '../Formula.tsx'
 import { RichText } from '../RichText.tsx'
 import { START_PITCH, type View, arrowGeometry, bestYaw, lerpPoint, planeView, spaceView } from './view.ts'
@@ -68,10 +68,20 @@ function withDrag(drawing: VectorDrawing, step: DragStep, at: readonly number[])
 export function VectorFigure({ drawing: given, compact = false, label, drag: dragged }: Props) {
   // typischer Fehler eingeblendet (Schritt 3): rote Teile dazu, Erklärung statt der Beschreibung
   const [showMistake, setShowMistake] = useState(false)
+  // Schieberegler (Schritt 11c): gewählte Stelle, das Bild dazu kommt fertig aus der Engine
+  const slider = given.slider
+  const [pos, setPos] = useState(slider?.start ?? 0)
+  // neue Aufgabe im selben Bild: wieder beim Startwert anfangen
+  const [seen, setSeen] = useState(slider)
+  if (seen !== slider) {
+    setSeen(slider)
+    setPos(slider?.start ?? 0)
+  }
+  const source = slider ? (slider.frames[pos] ?? given) : given
   const drawing = useMemo(() => {
-    const base = dragged ? withDrag(given, dragged.step, dragged.at) : given
+    const base = dragged ? withDrag(source, dragged.step, dragged.at) : source
     return showMistake ? withMistake(base) : base
-  }, [given, dragged, showMistake])
+  }, [source, dragged, showMistake])
   const maxPhase = useMemo(() => Math.max(0, ...[...drawing.arrows, ...drawing.points, ...drawing.segments, ...drawing.polygons, ...(drawing.angles ?? [])].map((e) => e.phase ?? 0)), [drawing])
   const [time, setTime] = useState(maxPhase)
   const [angles, setAngles] = useState(() => ({ yaw: drawing.dim === 3 ? bestYaw(drawing) : 0, pitch: START_PITCH }))
@@ -308,9 +318,55 @@ export function VectorFigure({ drawing: given, compact = false, label, drag: dra
             {canPull && <span className="text-sm text-zinc-600">Ziehen oder ins Gitter tippen</span>}
           </div>
         )}
+        {slider && <SliderControls slider={slider} pos={pos} onChange={setPos} />}
         <RichText text={drawing.caption} className="block text-sm text-zinc-600 text-pretty" inline />
       </figcaption>
     </figure>
+  )
+}
+
+// Zahl mit Dezimalkomma (LaTeX und Text für Vorlesehilfen)
+const valueLatex = (x: number) => String(Math.round(x * 1000) / 1000).replace('.', '{,}')
+const valueText = (x: number) => String(Math.round(x * 1000) / 1000).replace('.', ',').replace(/^-/, 'minus ')
+
+// Schieberegler für den Parameter (Schritt 11c): Regler über alle Stellen, Knöpfe für die besonderen Stellen
+function SliderControls({ slider, pos, onChange }: { slider: DrawSlider; pos: number; onChange: (pos: number) => void }) {
+  const value = slider.values[pos]
+  return (
+    <div className="space-y-2" data-testid="param-slider">
+      <label className="flex min-h-11 items-center gap-3">
+        <span className="w-20 shrink-0 whitespace-nowrap" data-testid="param-value">
+          <Formula tex={`${slider.name} = ${valueLatex(value)}`} />
+        </span>
+        <input
+          type="range"
+          min={0}
+          max={slider.values.length - 1}
+          step={1}
+          value={pos}
+          onChange={(e) => onChange(Number(e.target.value))}
+          aria-label={`Wert von ${slider.name}`}
+          aria-valuetext={`${slider.name} gleich ${valueText(value)}`}
+          className="h-11 w-full cursor-pointer accent-[var(--color-accent-600)]"
+        />
+      </label>
+      {slider.marks.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {slider.marks.map((m) => (
+            <button
+              key={m.index}
+              type="button"
+              aria-pressed={pos === m.index}
+              onClick={() => onChange(m.index)}
+              className={`inline-flex min-h-11 items-center gap-2 rounded-xl border-2 px-3 text-sm ${pos === m.index ? 'border-accent-600 bg-accent-50' : 'border-zinc-300'}`}
+            >
+              <Formula tex={`${slider.name} = ${valueLatex(slider.values[m.index])}`} />
+              <RichText text={m.note} className="text-zinc-600" inline />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
 

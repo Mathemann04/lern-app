@@ -27,7 +27,7 @@ import {
   solutionLatex,
   tabLatex,
 } from './gaussTasks.ts'
-import { systemDrawing } from './gaussFigures.ts'
+import { paramSlider } from './gaussFigures.ts'
 import { type Built, type VectorKind, type Wrong, choiceStep, math } from './taskKit.ts'
 import { ratLatex, vecLatex } from './vec.ts'
 
@@ -79,6 +79,21 @@ const terms = (p: Poly) => p.filter((x) => !isZero(x)).length
 const leadNeg = (p: Poly) => ratSign([p[2], p[1], p[3], p[0]].find((x) => !isZero(x)) ?? ZERO) < 0
 const ptAt = (T: PT, a: Rational, b: Rational = ZERO): Tab => T.map((r) => r.map((x) => pAt(x, a, b)))
 const samePT = (A: PT, B: PT) => A.length === B.length && A.every((r, i) => r.every((x, j) => pEq(x, B[i][j])))
+
+// Bild mit Schieberegler für a (Schritt 11c): die Zeilen der Aufgabe an jeder Stelle, b fest beim gefundenen Wert
+const pNum = (p: Poly, a: number, b: number) => num(p[0]) + num(p[1]) * a + num(p[2]) * a * a + num(p[3]) * b
+function sliderOf(T: PT, n: number, specials: readonly Rational[], o: { start?: Rational; targets?: readonly { value: Rational; note: string }[]; b?: Rational } = {}) {
+  const b = o.b ? num(o.b) : 0
+  const d = paramSlider({
+    rowsAt: (a) => T.map((r) => r.map((x) => pNum(x, a, b))),
+    n,
+    specials: specials.map(num),
+    ...(o.start ? { start: num(o.start) } : {}),
+    ...(o.targets ? { targets: o.targets.map((t) => ({ value: num(t.value), note: t.note })) } : {}),
+    ...(o.b ? { fixed: `Mit $b = ${ratLatex(o.b)}$.` } : {}),
+  })
+  return d ? { resultDrawing: d } : {}
+}
 
 // Glied „Faktor mal Variable“: 2x, -y, a\,z, -2a\,z, (a - 2)\,z
 function termLatex(p: Poly, v: string, first: boolean): string {
@@ -690,6 +705,7 @@ function buildSym(rng: Rng, level: Level, kind: 'lgspTwo' | 'lgspThree', cases: 
       steps,
       cards: [LGSP_CARD.gauss, ...(level >= 3 ? [LGSP_CARD.rang] : [])],
       resultLatex: singleResult(r, kase),
+      ...sliderOf(sys.T, n, sys.rs),
       form,
       data: { ...dataOf(sys.T), single: [1] },
       answer: [num(r), CASE_INDEX[kase]],
@@ -707,6 +723,7 @@ function buildSym(rng: Rng, level: Level, kind: 'lgspTwo' | 'lgspThree', cases: 
     steps,
     cards: [LGSP_CARD.gauss, ...(level >= 3 ? [LGSP_CARD.rang] : [])],
     resultLatex: solLatex(sortRats(right)),
+    ...sliderOf(sys.T, n, sys.rs, { start: right[0] }),
     form: `${form}|${ask}`,
     data: { ...dataOf(sys.T), ask: [CASE_INDEX[ask]] },
     answer: sortRats(right).map(num),
@@ -766,6 +783,7 @@ function buildRhs(rng: Rng, level: Level): Built | null {
     steps,
     cards: [LGSP_CARD.gauss, LGSP_CARD.rechts],
     resultLatex: `a = ${ratLatex(r)},\\; b = ${ratLatex(bStar)}`,
+    ...sliderOf(sys.T, n, sys.rs, { b: bStar }),
     form: `lgspRhs|${n}|${disp.eq ? 'eq' : 'mat'}|${sys.spec.place}${sys.spec.upper ? 'u' : ''}${sys.swapWith >= 0 ? 's' : ''}|${vars[0]}|${signs(sys.T)}|${paramMask(sys.T)}|${ratSign(r)}${ratSign(bStar)}|${num(sys.beta)}`,
     data: dataOf(sys.T),
     answer: [num(r), num(bStar)],
@@ -842,6 +860,7 @@ function buildTarget(rng: Rng, level: Level, trap: boolean): Built | null {
     steps,
     cards: [LGSP_CARD.gauss, LGSP_CARD.rechts],
     resultLatex: solLatex(sortRats(valid)),
+    ...sliderOf(sys.T, n, sys.rs, { start: sortRats(valid)[0], targets: valid.map((x) => ({ value: x, note: `$${v} = ${ratLatex(c)}$` })) }),
     form: `lgspTarget|${n}|${disp.eq ? 'eq' : 'mat'}|${sys.cases.join('')}|${sys.spec.place}${sys.spec.square ? 'q' : ''}${sys.swapWith >= 0 ? 's' : ''}|${excluded.length}|${valid.length}|${vars[0]}|${ratSign(c)}|${signs(sys.T)}|${paramMask(sys.T)}`,
     data: { ...dataOf(sys.T), k: [n - 1], c: [num(c)] },
     answer: sortRats(valid).map(num),
@@ -922,7 +941,6 @@ function buildFull(rng: Rng, level: Level): Built | null {
     }),
   )
   const disp = shown(rng, sys.T, vars)
-  const drawing = systemDrawing({ T: Fr.map((r) => r.map(num)), n, solution: { p: sol.p.map(num), dirs: sol.dirs.map((d) => d.map(num)) } })
   return {
     kind: 'lgspFull',
     instruction: `${disp.what} hängt vom Parameter $a$ ab. Untersuche, für welche $a$ es genau eine, keine oder unendlich viele Lösungen hat, und gib die Lösungsmenge für den Fall mit unendlich vielen Lösungen an.`,
@@ -930,7 +948,7 @@ function buildFull(rng: Rng, level: Level): Built | null {
     steps,
     cards: [LGSP_CARD.gauss, LGSP_CARD.rang],
     resultLatex: right,
-    ...(drawing ? { resultDrawing: drawing } : {}),
+    ...sliderOf(sys.T, n, sys.rs, { start: r1 }),
     form: `lgspFull|${disp.eq ? 'eq' : 'mat'}|${sys.cases.join('')}|${sys.spec.place}${sys.spec.square ? 'q' : ''}${sys.swapWith >= 0 ? 's' : ''}|${vars[0]}|${params[0]}|${signs(sys.T)}|${paramMask(sys.T)}`,
     data: { ...dataOf(sys.T), inf: [num(r1)] },
     answer: [...sol.p, ...sol.dirs.flat()].map(num),
@@ -1053,6 +1071,7 @@ function buildDet(rng: Rng, level: Level): Built | null {
       steps,
       cards: [LGSP_CARD.gauss],
       resultLatex: singleResult(r, kase),
+      ...sliderOf(T, n, rs),
       form: formBase,
       data: { ...dataOf(T), single: [1] },
       answer: [num(r), CASE_INDEX[kase]],
@@ -1073,6 +1092,7 @@ function buildDet(rng: Rng, level: Level): Built | null {
     steps,
     cards: [LGSP_CARD.gauss, ...(level >= 4 ? [LGSP_CARD.rang] : [])],
     resultLatex: solLatex(sortRats(right)),
+    ...sliderOf(T, n, rs, { start: right[0] }),
     form: `${formBase}|${ask}`,
     data: { ...dataOf(T), ask: [CASE_INDEX[ask]] },
     answer: sortRats(right).map(num),
