@@ -303,30 +303,37 @@ function systemParts(T: readonly NRow[], n: number, solution: SystemInput['solut
     else if (parallel.length > 0) tail = `Die ${Ns} ${pairWords(parallel)} sind parallel und verschieden: Kein Punkt liegt auf allen, keine Lösung.`
     else {
       // die Schnittpunkte bzw. Schnittgeraden je zweier Zeilen blass dazu: Sie fallen nicht zusammen
+      let drawn = 0
       for (const [i, k] of pairs) {
         const pv = pivotOf(T[i], T[k], n, center)!
         if (len(add(pv.at, scale(-1, center))) > far) continue
+        drawn++
         if (n === 2) points.push({ at: pv.at, color: 'muted', ...ph(m + 1) })
         else segments.push({ from: add(pv.at, scale(-SOLUTION_HALF, pv.dir!)), to: add(pv.at, scale(SOLUTION_HALF, pv.dir!)), color: 'muted', dashed: true, ...ph(m + 1) })
       }
+      // Schieberegler: nicht jeder Schnitt liegt im Bild, die Beschreibung sagt es
+      const look = n === 2 ? 'graue Punkte' : 'gestrichelt'
+      const shown = drawn === pairs.length ? ` (${look})` : drawn > 0 ? ` (${look}, nicht alle im Bild)` : ' (außerhalb des Bildes)'
       tail =
         n === 2
-          ? 'Je zwei Geraden schneiden sich (graue Punkte), aber nicht alle drei im selben Punkt: keine Lösung.'
-          : 'Je zwei Ebenen schneiden sich in einer Geraden (gestrichelt), aber die drei Schnittgeraden sind parallel: Kein Punkt liegt auf allen drei Ebenen, keine Lösung.'
+          ? `Je zwei Geraden schneiden sich${shown}, aber nicht alle drei im selben Punkt: keine Lösung.`
+          : `Je zwei Ebenen schneiden sich in einer Geraden${shown}, aber die drei Schnittgeraden sind parallel: Kein Punkt liegt auf allen drei Ebenen, keine Lösung.`
     }
   } else if (solution.dirs.length === 0) {
     const inside = len(add(solution.p, scale(-1, center))) <= far
     if (inside) points.push({ at: solution.p, label: 'S', color: 'r', ...ph(m + 1) })
     const where = o.coords ? `Punkt $${pointLatex('S', solution.p)}$` : inside ? 'Punkt $S$' : 'Punkt, der hier außerhalb des Bildes liegt'
-    tail = `${m === 2 ? `Die beiden ${Ns} schneiden sich in genau einem` : `Alle drei ${Ns} gehen durch genau einen`} ${where}: ${o.coords ? 'die Lösung' : 'genau eine Lösung'}.`
+    tail = `${rows.length === 2 ? `Die beiden ${Ns} schneiden sich in genau einem` : `Alle drei ${Ns} gehen durch genau einen`} ${where}: ${o.coords ? 'die Lösung' : 'genau eine Lösung'}.`
   } else if (solution.dirs.length === n - 1) {
-    tail = `${m === 2 ? 'Beide Gleichungen beschreiben' : 'Alle Gleichungen beschreiben'} dieselbe ${N}: Jeder ihrer Punkte ist eine Lösung${o.coords ? '' : ', unendlich viele'}.`
+    // gezählt werden nur Zeilen, die noch eine Gerade bzw. Ebene sind (0 = 0 fällt weg)
+    const who = rows.length === 1 ? `Übrig ist nur ${N} ${ROMAN[rows[0]]}` : `${rows.length === 2 ? 'Beide' : 'Alle'}${flat.length > 0 ? ' übrigen' : ''} Gleichungen beschreiben dieselbe ${N}`
+    tail = `${who}: Jeder ihrer Punkte ist eine Lösung${o.coords ? '' : ', unendlich viele'}.`
   } else {
     // eine Gerade als Lösung im Raum (nahe der Mitte)
     const r = unit(solution.dirs[0])
     const q = add(solution.p, scale(dot(add(center, scale(-1, solution.p)), r), r))
     segments.push({ from: add(q, scale(-SOLUTION_HALF, r)), to: add(q, scale(SOLUTION_HALF, r)), color: 'r', ...ph(m + 1) })
-    tail = `${m === 2 ? 'Die beiden Ebenen schneiden sich' : 'Die Ebenen schneiden sich alle'} in einer Geraden (violett): Jeder ihrer Punkte ist eine Lösung${o.coords ? '' : ', unendlich viele'}.${same.length > 0 ? ` Die Ebenen ${pairWords(same)} sind gleich.` : ''}`
+    tail = `${rows.length === 2 ? `Die beiden${flat.length > 0 ? ' übrigen' : ''} Ebenen schneiden sich` : 'Die Ebenen schneiden sich alle'} in einer Geraden (violett): Jeder ihrer Punkte ist eine Lösung${o.coords ? '' : ', unendlich viele'}.${same.length > 0 ? ` Die Ebenen ${pairWords(same)} sind gleich.` : ''}`
   }
   if (flat.length > 0 && solution) tail = `${flatText} ${tail}`
   if (outside.length > 0) tail = `${tail} ${outside.length === 1 ? `${N} ${ROMAN[outside[0]]} liegt` : `Die ${Ns} ${words(outside.map((i) => ROMAN[i]))} liegen`} außerhalb des Bildes.`

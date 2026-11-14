@@ -95,8 +95,9 @@ describe('Schieberegler für den Parameter (Schritt 11c)', () => {
   it('an jeder Stelle: Geraden bzw. Ebenen auf den Zeilen, Fall wie mit eigenem Rang, gleicher Ausschnitt', () => {
     const notes = new Set<string>()
     let frames = 0
+    let flatFrames = 0
     for (const [kind, level] of SLIDER_KINDS) {
-      for (let seed = 1; seed <= 12; seed++) {
+      for (let seed = 1; seed <= 30; seed++) {
         const task = buildVectorTask({ level, seed: blockSeed('rechnen', seed) }, kind)
         const where = `${kind} ${level}-${seed}`
         const d = task.resultDrawing
@@ -121,6 +122,16 @@ describe('Schieberegler für den Parameter (Schritt 11c)', () => {
           const kase = caseOf(T, n)
           expect(f.caption, at).toContain(kase === 'unendlich viele Lösungen' ? 'unendlich viele' : kase)
           for (const other of CASES.filter((c) => c !== kase)) expect(f.caption.includes(other), `${at}: ${other}`).toBe(false)
+          // Anzahl in Worten nur aus den Zeilen, die noch eine Gerade bzw. Ebene sind (0 = 0 zählt nicht)
+          const left = T.filter((r) => !flat(r, n)).length
+          if (left < T.length) flatFrames++
+          if (/Beide|beiden/.test(f.caption)) expect(left, at).toBe(2)
+          if (/Alle drei|alle drei Ebenen/.test(f.caption)) expect(left, at).toBe(3)
+          // so viele Schnitte im Bild, wie die Beschreibung sagt
+          const cuts = n === 2 ? f.points.filter((p) => p.color === 'muted').length : f.segments.filter((x) => x.color === 'muted').length
+          if (/\((gestrichelt|graue Punkte)\)/.test(f.caption)) expect(cuts, at).toBe(3)
+          else if (f.caption.includes('nicht alle im Bild')) expect(cuts > 0 && cuts < 3, at).toBe(true)
+          else expect(cuts, at).toBe(0)
           // jede farbige Gerade bzw. Ebene liegt ganz auf ihrer Zeile; fehlt eine, sagt die Beschreibung warum
           const parts = [...f.segments, ...f.polygons].filter((e) => ROW_OF[e.color] !== undefined)
           for (const e of parts) {
@@ -154,7 +165,9 @@ describe('Schieberegler für den Parameter (Schritt 11c)', () => {
       }
     }
     expect([...notes].filter((x) => !x.startsWith('$')).sort()).toEqual(['keine Lösung', 'unendlich viele Lösungen'])
-    expect(frames).toBeGreaterThan(3000)
+    expect(frames).toBeGreaterThan(8000)
+    // Zeilen, die zu 0 = c werden, kommen vor (Fund der unabhängigen Prüfung: Wortlaut zählte sie mit)
+    expect(flatFrames).toBeGreaterThan(0)
   })
 
   it('Lernkarten mit Parameter zeigen den Schieberegler', () => {
