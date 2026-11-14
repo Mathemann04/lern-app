@@ -101,7 +101,7 @@ export const INV_ERROR_RULES: readonly VectorErrorRule[] = [
     name: 'Nullzeile durch Tauschen wegschaffen wollen',
     wrongFormula: String.raw`\text{Nullzeile links} \;\Rightarrow\; \text{tauschen und weiter}`,
     why: {
-      detailed: String.raw`Tauschen ändert nur die Reihenfolge der Zeilen; die Nullzeile bleibt eine Nullzeile. Weil alle Umformungen die Zeilen nur kombinieren, entsteht aus ihr nie eine Zeile von $E$. Die Matrix ist nicht invertierbar.`,
+      detailed: String.raw`Tauschen ändert nur die Reihenfolge der Zeilen; die Nullzeile bleibt eine Nullzeile. Sie zeigt, dass die Zeilen links linear abhängig sind, und daran ändert keine Zeilenumformung etwas: Links kann nie ganz $E$ entstehen. Die Matrix ist nicht invertierbar.`,
       short: String.raw`Tauschen hilft nicht: Nullzeile bleibt.`,
     },
   },

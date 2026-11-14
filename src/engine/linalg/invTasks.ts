@@ -102,7 +102,7 @@ const adjugate = (A: Mat): Mat => [
 ]
 
 // A⁻¹ = 1/det A · (d −b; −c a) und die typischen Fehler
-function inverseStep(rng: Rng, name: string, A: Mat, cards: readonly string[], intro = ''): GuidedStep {
+function inverseStep(rng: Rng, name: string, A: Mat, cards: readonly string[], intro = '', letters: readonly string[] = ['a', 'b', 'c', 'd']): GuidedStep {
   const D = det(A)
   const adj = adjugate(A)
   const right = scale(ratDiv(ONE, D), adj)
@@ -119,7 +119,9 @@ function inverseStep(rng: Rng, name: string, A: Mat, cards: readonly string[], i
   for (const [X, rule] of rng.shuffle(cands)) if (X && !matEq(X, right)) wrongs.push({ content: show(X), rule })
   const factor = coefLatex(ratDiv(ONE, D))
   const adjLatex = matLatex(adj)
-  const general = `\\frac{1}{\\det ${name}} \\begin{pmatrix} d & -b \\\\ -c & a \\end{pmatrix}`
+  // Buchstaben der allgemeinen Formel; mit Parameter a heißen sie p, q, r, s (sonst stünde a doppelt)
+  const [la, lb, lc, ld] = letters
+  const general = `\\frac{1}{\\det ${name}} \\begin{pmatrix} ${ld} & -${lb} \\\\ -${lc} & ${la} \\end{pmatrix}`
   const calc = `${inv(name)} = ${general} = ${factor}${adjLatex}${isOne(ratAbs(D)) && isOne(D) ? '' : ` = ${matLatex(right)}`}`
   return choiceStep(rng, {
     id: 'inverse',
@@ -129,7 +131,7 @@ function inverseStep(rng: Rng, name: string, A: Mat, cards: readonly string[], i
     wrongs,
     hint: 'Auf der Hauptdiagonale die beiden Zahlen tauschen, auf der Nebendiagonale nur das Vorzeichen wechseln, dann jeden Eintrag durch die Determinante teilen.',
     explanation: {
-      detailed: `Für $${name} = \\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}$ gilt $${general}$: Die Hauptdiagonale tauscht ihre Zahlen, die Nebendiagonale wechselt nur das Vorzeichen, und alles wird durch $\\det ${name}$ geteilt. Hier: $${calc}$.`,
+      detailed: `Für $${name} = \\begin{pmatrix} ${la} & ${lb} \\\\ ${lc} & ${ld} \\end{pmatrix}$ gilt $${inv(name)} = ${general}$: Die Hauptdiagonale tauscht ihre Zahlen, die Nebendiagonale wechselt nur das Vorzeichen, und alles wird durch $\\det ${name}$ geteilt. Hier: $${calc}$.`,
       short: `$${calc}$.`,
     },
     established: [`${inv(name)} = ${matLatex(right)}`],
@@ -169,7 +171,7 @@ function singularTwoStep(rng: Rng, name: string, A: Mat): GuidedStep {
       { content: `$${name}$ ist invertierbar, denn keine Zeile von $${name}$ ist eine Nullzeile.`, rule: 'inv-singular-rows' },
       { content: `$${inv(name)}$ ist die Nullmatrix.`, rule: 'inv-singular-zero' },
     ],
-    hint: 'In der Formel steht $\\frac{1}{\\det A}$. Was passiert bei $\\det A = 0$?',
+    hint: `In der Formel steht $\\frac{1}{\\det ${name}}$. Was passiert bei $\\det ${name} = 0$?`,
     explanation: {
       detailed: `Die Formel teilt durch $\\det ${name}$, und das geht bei $0$ nicht. Allgemein gilt: Eine quadratische Matrix ist genau dann invertierbar, wenn ihre Determinante nicht $0$ ist. Hier sind die Spalten Vielfache voneinander, das Parallelogramm hat die Fläche $0$, und es gibt keinen Weg zurück.`,
       short: `$\\det ${name} = 0$: nicht invertierbar.`,
@@ -183,7 +185,7 @@ function singularTwoStep(rng: Rng, name: string, A: Mat): GuidedStep {
 // Spalten von A⁻¹ sind die Pfeile, die A auf e₁ und e₂ bringt.
 export const INV_SPAN = 9
 const INV_MIN = 0.45
-export function inverseDrawing(A: Mat, name: string): VectorDrawing | undefined {
+export function inverseDrawing(A: Mat, name: string, prefix = ''): VectorDrawing | undefined {
   const B = inverse(A)
   if (!B) return undefined
   const col = (M: Mat, j: number) => [num(M[0][j]), num(M[1][j])]
@@ -200,7 +202,7 @@ export function inverseDrawing(A: Mat, name: string): VectorDrawing | undefined 
   const low = name.toLowerCase()
   const area = ratLatex(ratAbs(det(A)))
   const caption =
-    `$${name}$ macht aus dem Einheitsquadrat (grau) das Parallelogramm seiner Spalten $\\vec ${low}_1$ (blau) und $\\vec ${low}_2$ (orange) mit der Fläche $|\\det ${name}| = ${area}$. ` +
+    `${prefix}$${name}$ macht aus dem Einheitsquadrat (grau) das Parallelogramm seiner Spalten $\\vec ${low}_1$ (blau) und $\\vec ${low}_2$ (orange) mit der Fläche $|\\det ${name}| = ${area}$. ` +
     `$${inv(name)}$ macht das rückgängig: Beim Abspielen zieht sich das Parallelogramm zurück auf das Quadrat, $\\vec ${low}_1$ wird wieder $\\vec e_1$ und $\\vec ${low}_2$ wieder $\\vec e_2$. ` +
     `Die Spalten $\\vec s_1$ und $\\vec s_2$ von $${inv(name)}$ (violett) sind genau die Pfeile, die $${name}$ auf $\\vec e_1$ und $\\vec e_2$ bringt; ihr Parallelogramm (blaugrün) hat die Fläche $\\frac{1}{|\\det ${name}|}$.`
   return {
@@ -395,7 +397,7 @@ function singularJordanStep(rng: Rng, name: string, F: Tab, n: number, zeroRow: 
     id: 'deuten',
     title: 'Invertierbar?',
     question: `Links vom Strich ist Zeile ${ROMAN[zeroRow]} eine Nullzeile:\n$${jordanLatex(F, n)}$\nWas folgt daraus?`,
-    correct: `$${name}$ ist nicht invertierbar: Aus einer Nullzeile links wird nie eine Zeile von $E$.`,
+    correct: `$${name}$ ist nicht invertierbar: Die Zeilen links sind linear abhängig, links kann nie ganz $E$ entstehen.`,
     wrongs: [
       { content: `$${name}$ ist invertierbar, denn rechts vom Strich steht keine Nullzeile.`, rule: 'inv-singular-right' },
       { content: `Zeilen tauschen und weiterrechnen, dann ist $${name}$ invertierbar.`, rule: 'inv-singular-swap' },
@@ -403,8 +405,8 @@ function singularJordanStep(rng: Rng, name: string, F: Tab, n: number, zeroRow: 
     ],
     hint: 'Links soll am Ende $E$ stehen. Lässt sich das mit einer Nullzeile noch erreichen?',
     explanation: {
-      detailed: `Links soll am Ende die Einheitsmatrix stehen. Eine Zeile aus lauter Nullen bleibt bei jeder Umformung mit den anderen Zeilen eine Kombination dieser Zeilen, eine $1$ auf der Diagonale entsteht dort nie. Also ist $${name}$ nicht invertierbar; es gilt $\\det ${name} = 0$, und die Zeilen von $${name}$ sind linear abhängig. Was rechts vom Strich steht, spielt dafür keine Rolle.`,
-      short: 'Nullzeile links: nicht invertierbar ($\\det A = 0$).',
+      detailed: `Links soll am Ende die Einheitsmatrix stehen. Eine Nullzeile links heißt: Die Zeilen von $${name}$ sind linear abhängig (der Rang ist kleiner als ${n}). Zeilenumformungen ändern den Rang nicht, also können links nie ${n} unabhängige Zeilen wie in $E$ stehen. Damit ist $${name}$ nicht invertierbar, und es gilt $\\det ${name} = 0$. Was rechts vom Strich steht, spielt dafür keine Rolle.`,
+      short: `Nullzeile links: Zeilen linear abhängig, nicht invertierbar ($\\det ${name} = 0$).`,
     },
     established: ['\\text{nicht invertierbar}'],
     cards: [INV_CARD.gaussJordan],
@@ -659,10 +661,16 @@ function buildRules(rng: Rng, level: Level): Built | null {
   if (asked.facs.some((f) => f.t)) kinds.push('transpose')
   if (asked.facs.some((f) => f.inv)) kinds.push('twice')
   const slipSets: RuleSlip[][] = [...kinds.map((s) => [s]), ...kinds.flatMap((s, i) => kinds.slice(i + 1).map((t) => [s, t]))]
-  const wrongRules: [Rule, string][] = []
+  // zwei Fehler auf einmal: Id des ersten, „Warum falsch?“ erklärt beide
+  const wrongRules: [Rule, string, RuleSlip[]][] = []
   for (const set of slipSets) {
     const w = slipped(asked, set)
-    if (!sameRule(w, right) && !wrongRules.some(([x]) => sameRule(x, w))) wrongRules.push([w, SLIP_RULE[set[0]]])
+    if (!sameRule(w, right) && !wrongRules.some(([x]) => sameRule(x, w))) wrongRules.push([w, SLIP_RULE[set[0]], set])
+  }
+  const whyOf = (set: readonly RuleSlip[]) => {
+    if (set.length === 1) return undefined
+    const parts = set.map((s) => vectorErrorRule(SLIP_RULE[s]).why)
+    return { detailed: `Hier stecken zwei Fehler. ${parts.map((p) => p.detailed).join(' Außerdem: ')}`, short: parts.map((p) => p.short).join(' ') }
   }
   const value = ruleValue(right, Ms, Is)
   if (maxAbs(value) > 40) return null
@@ -675,7 +683,10 @@ function buildRules(rng: Rng, level: Level): Built | null {
       title: 'Regeln anwenden',
       question: `Wie lässt sich $${askedLatex}$ mit den gegebenen Matrizen schreiben?`,
       correct: math(`${askedLatex} = ${rewrite}`),
-      wrongs: wrongRules.map(([w, rule]) => ({ content: math(`${askedLatex} = ${ruleLatex(names, w)}`), rule })),
+      wrongs: wrongRules.map(([w, rule, set]) => {
+        const why = whyOf(set)
+        return { content: math(`${askedLatex} = ${ruleLatex(names, w)}`), rule, ...(why ? { why } : {}) }
+      }),
       hint: 'Beim Invertieren eines Produkts dreht sich die Reihenfolge um, jeder Faktor wird invertiert, eine Zahl wird zum Kehrwert, und Transponieren und Invertieren dürfen die Plätze tauschen.',
       explanation: {
         detailed: `Mit $(XY)^{-1} = Y^{-1}X^{-1}$ (Reihenfolge dreht sich um), $(\\lambda X)^{-1} = \\frac{1}{\\lambda}X^{-1}$, $(X${T})^{-1} = (X^{-1})${T}$ und $(X^{-1})^{-1} = X$ wird $${askedLatex} = ${rewrite}$.`,
@@ -731,7 +742,7 @@ function buildRules(rng: Rng, level: Level): Built | null {
   const givenLatex = given.map((g) => `${g.name} = ${matLatex(g.M)}`).join(',\\quad ')
   return {
     kind: 'invRules',
-    instruction: `Gegeben sind nur ${given.map((g) => `$${g.name}$`).join(' und ')}. Berechne $${askedLatex}$ mit den Regeln für Inverse, ohne eine neue Inverse auszurechnen.`,
+    instruction: `Gegeben ${given.length === 1 ? 'ist' : 'sind'} nur ${given.map((g) => `$${g.name}$`).join(' und ')}. Berechne $${askedLatex}$ mit den Regeln für Inverse, ohne eine neue Inverse auszurechnen.`,
     functionLatex: n === 3 && given.length === 2 ? `\\begin{array}{l} ${given.map((g) => `${g.name} = ${matLatex(g.M)}`).join(' \\\\[10pt] ')} \\end{array}` : givenLatex,
     steps,
     cards: [INV_CARD.regeln],
@@ -874,7 +885,7 @@ function buildParam(rng: Rng, _level: Level, n: 2 | 3): Built | null {
   else steps.push(sarrusStep(rng, `\\det ${name}`, A, { id: 'det', cards: [INV_CARD.parameter, DET_CARD.sarrus] }))
   steps.push(conditionStep(rng, D, rs, name))
   const valueIntro = `Für $${PARAM} = ${ratLatex(a0)}$ ist $${name} = ${matLatex(A0)}$. `
-  if (n === 2) steps.push(inverseStep(rng, name, A0, [INV_CARD.formel, INV_CARD.parameter], valueIntro))
+  if (n === 2) steps.push(inverseStep(rng, name, A0, [INV_CARD.formel, INV_CARD.parameter], valueIntro, ['p', 'q', 'r', 's']))
   else {
     if (!jordanOk(A0, 48, false)) return null
     const js = jordanSteps(rng, name, A0, false)
@@ -889,7 +900,7 @@ function buildParam(rng: Rng, _level: Level, n: 2 | 3): Built | null {
     steps,
     cards: [INV_CARD.parameter],
     resultLatex: `${inv(name)} = ${matLatex(Ai)}`,
-    ...(n === 2 ? withDrawing(inverseDrawing(A0, name)) : {}),
+    ...(n === 2 ? withDrawing(inverseDrawing(A0, name, `Für $${PARAM} = ${ratLatex(a0)}$: `)) : {}),
     form: `invParam|${n}|${rs.length}|${ratLatex(a0)}|${A.flatMap((r, i) => r.map((x, j) => (isZero(x.c1) ? '' : `${i}${j}`))).join('')}|${negCount(A0)}|${steps.length}`,
     data: { A0: at(A, ZERO).flat().map(num), A1: at(A, ONE).flat().map(num), a0: [num(a0)], roots: rs.map(num), n: [n] },
     answer: Ai.flat().map(num),
