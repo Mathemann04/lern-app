@@ -17,7 +17,7 @@ export const EQS_CARD_LIST: readonly Card[] = [
     note: 'Beim Einsetzen nimmt die Zahl vor der Klammer jedes Glied mal, mit Vorzeichen: $-2(3 - y) = -6 + 2y$. Setzt du den Term in dieselbe Gleichung zurück, aus der er kommt, bleibt nur $0 = 0$.',
     when: 'Wenn eine Unbekannte schon allein steht oder sich ohne Brüche freistellen lässt.',
     examples: [{ vector: { kind: 'eqsSubst', level: 1, seed: 1, picture: 'step' } }, { vector: { kind: 'eqsSubst', level: 2, seed: 3 } }],
-    errors: ['eqs-solve-sign', 'eqs-solve-divide', 'eqs-solve-minus', 'eqs-bracket-partial', 'eqs-bracket-sign', 'eqs-same-equation', 'eqs-second-missing', 'eqs-swap-values'],
+    errors: ['eqs-solve-sign', 'eqs-solve-divide', 'eqs-solve-minus', 'eqs-bracket-partial', 'eqs-bracket-sign', 'eqs-same-equation', 'eqs-insert-sign', 'eqs-second-missing', 'eqs-swap-values'],
   },
   {
     id: 'eqs-gleichsetzen',
@@ -56,7 +56,7 @@ export const EQS_CARD_LIST: readonly Card[] = [
     note: 'Fallen beim Rechnen alle Unbekannten weg, entscheidet die Aussage, die übrig bleibt: $0 = 5$ ist nie wahr, keine Lösung (parallele Geraden). $0 = 0$ ist immer wahr, unendlich viele Lösungen (dieselbe Gerade); dann wählst du eine Unbekannte frei.',
     when: 'Bei jedem Gleichungssystem mit zwei Unbekannten, bevor du losrechnest.',
     examples: [{ vector: { kind: 'eqsMessy', level: 3, seed: 1 } }, { vector: { kind: 'eqsMessy', level: 3, seed: 5 } }],
-    errors: ['eqs-method', 'eqs-fraction-drop', 'eqs-zero-none', 'eqs-zero-unique', 'eqs-contradiction-inf', 'eqs-contradiction-value'],
+    errors: ['eqs-method', 'eqs-order-side', 'eqs-order-const', 'eqs-fraction-drop', 'eqs-set-point', 'eqs-zero-none', 'eqs-zero-unique', 'eqs-contradiction-inf', 'eqs-contradiction-value'],
   },
   {
     id: 'eqs-tricks',
@@ -69,6 +69,6 @@ export const EQS_CARD_LIST: readonly Card[] = [
     note: 'Mit Parameter $a$ bleibt nach dem Addieren etwa $(2a - 6)\\,x = 4$. Teilen darfst du nur, wenn der Ausdruck vor $x$ nicht $0$ ist. Beim Sonderwert $a = 3$ steht $0 = 4$ da: keine Lösung (bei $0 = 0$ unendlich viele).',
     when: 'Bei Systemen mit drei Gleichungen, bei Unbekannten im Nenner und bei Parametern.',
     examples: [{ vector: { kind: 'eqsThree', level: 4, seed: 1 } }, { vector: { kind: 'eqsRecip', level: 4, seed: 2 } }, { vector: { kind: 'eqsParam', level: 5, seed: 3 } }],
-    errors: ['eqs-recip-rhs', 'eqs-recip-coef', 'eqs-recip-back', 'eqs-param-zero', 'eqs-param-sign'],
+    errors: ['eqs-recip-rhs', 'eqs-recip-coef', 'eqs-recip-back', 'eqs-factor-term', 'eqs-param-zero', 'eqs-param-sign'],
   },
 ]

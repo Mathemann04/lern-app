@@ -231,6 +231,118 @@ describe('Einsetzen, Gleichsetzen, Addieren', () => {
   })
 })
 
+// Gleichung in beliebigen Unbekannten: Zahlen vor ihnen und rechte Seite; mit festen Werten weiterer Buchstaben (a)
+const ALL = ['x', 'y', 'z', 'u', 'v']
+function coeffs(eq: string, fixed: Record<string, number> = {}): number[] {
+  const sides = eq.replace(/^\$/, '').replace(/\$$/, '').split(' = ')
+  const parsed = parseLatex(`${sides[0]} - (${sides[1]})`)
+  if (!parsed.ok || sides.length !== 2) throw new Error(eq)
+  const f = (k: number) => evaluate(parsed.expr, { ...fixed, ...Object.fromEntries(ALL.map((v, j) => [v, j === k ? 1 : 0])) })
+  const c = f(-1)
+  return [...ALL.map((_, k) => f(k) - c), -c]
+}
+// Gleichungen eines Systems \begin{array}{ll} \text{I}\colon & … \\ … \end{array} nach Namen (mit Strich: II')
+function systemOf(latex: string): Map<string, string> {
+  const out = new Map<string, string>()
+  for (const m of latex.matchAll(/\\text\{([IV]+)\}('?)\\colon & (.*?)(?= \\\\ | \\end\{array\})/g)) out.set(m[1] + m[2], m[3])
+  return out
+}
+const holds = (c: readonly number[], x: Record<string, number>) => close(ALL.reduce((s, v, j) => s + c[j] * (x[v] ?? 0), 0), c[ALL.length])
+
+describe('Einsetzen, Gleichsetzen, Addieren: einzelne Schritte', () => {
+  it('Auflösen: die richtige Form ist dieselbe Gleichung, keine falsche', () => {
+    let checked = 0
+    for (const level of LEVELS) {
+      for (const task of tasks(level, 80)) {
+        for (const step of task.steps.filter((s) => s.id.includes('aufloesen'))) {
+          const given = coeffs(/\$([^$]*)\$$/.exec(step.question)![1])
+          for (const c of step.choices) expect(proportional(coeffs(c.content), given), `${task.form} ${step.id} ${c.content}`).toBe(c.correct)
+          checked++
+        }
+      }
+    }
+    expect(checked).toBeGreaterThan(200)
+  })
+
+  it('Womit malnehmen: mit der richtigen Rechnung fällt die Unbekannte weg, mit keiner falschen', () => {
+    let checked = 0
+    for (const level of LEVELS) {
+      for (const task of tasks(level, 80)) {
+        for (const step of task.steps.filter((s) => s.id === 'faktoren')) {
+          const rows = systemOf(step.question)
+          const e = ALL.indexOf(/fällt \$([a-z])\$ weg/.exec(step.question)![1])
+          // mit Parameter: an einer Stelle a; die Unbekannte, die wegfällt, hat dort keinen
+          const at = { a: 1.7 }
+          for (const c of step.choices) {
+            let sum = 0
+            for (const m of c.content.matchAll(/(^\$|[+-]) ?(?:(\d+) \\cdot )?\\text\{([IV]+)\}('?)/g)) {
+              const k = (m[1] === '-' ? -1 : 1) * Number(m[2] ?? 1)
+              sum += k * coeffs(rows.get(m[3] + m[4])!, at)[e]
+            }
+            expect(Math.abs(sum) < 1e-9, `${task.form} ${c.content}`).toBe(c.correct)
+          }
+          checked++
+        }
+      }
+    }
+    expect(checked).toBeGreaterThan(150)
+  })
+
+  it('Lösungsmenge: die richtige liegt auf allen Gleichungen, keine falsche beschreibt dieselbe Gerade', () => {
+    let checked = 0
+    for (const task of tasks(3, 200)) {
+      const step = task.steps.find((s) => s.id === 'loesung' && s.choices.some((c) => c.content.includes('colon')))
+      if (!step) continue
+      const M = rowsOf(task)
+      for (const c of step.choices) {
+        const [part] = readResult(c.content)!
+        const [p, r] = [part.values.slice(0, 2), part.values.slice(2)]
+        const ok = r.some((x) => x !== 0) && M.every((row) => close(row[0] * p[0] + row[1] * p[1], row[2]) && close(row[0] * r[0] + row[1] * r[1], 0))
+        expect(ok, `${task.form} ${c.content}`).toBe(c.correct)
+      }
+      checked++
+    }
+    expect(checked).toBeGreaterThan(15)
+  })
+
+  it('mit Parameter: die Gleichung nach dem Addieren gilt für die Lösung bei jedem a, keine falsche', () => {
+    let checked = 0
+    for (const task of tasks(5, 150).filter((t) => t.kind === 'eqsParam')) {
+      const M0 = rowsOf(task)
+      const M1 = rowsOf(task, 'A1')
+      const step = task.steps.find((s) => s.id === 'addieren')!
+      const sol = (a: number) => gauss(M0.map((r, i) => r.map((x, j) => x + a * (M1[i][j] - x))), 2).x
+      const fits = (content: string) =>
+        [-2.5, 0.5, 1.7, 7.25].every((a) => {
+          const [x, y] = sol(a)
+          return holds(coeffs(content, { a }), { x, y })
+        })
+      // bei 0 rechts erfüllt jede Gleichung (…) · x = 0 die Lösung: dann muss die falsche beim Sonderwert noch eine Unbekannte haben
+      const special = task.data.special[0]
+      const keepsUnknown = (content: string) => coeffs(content, { a: special }).slice(0, 2).some((x) => Math.abs(x) > 1e-9)
+      for (const c of step.choices) {
+        if (c.correct) expect(fits(c.content) && !keepsUnknown(c.content), `${task.form} ${c.content}`).toBe(true)
+        else expect(!fits(c.content) || keepsUnknown(c.content), `${task.form} ${c.content}`).toBe(true)
+      }
+      checked++
+    }
+    expect(checked).toBeGreaterThan(30)
+  })
+
+  it('Unbekannte im Nenner: das System in u und v gilt für u = 1/x, v = 1/y, keine falsche', () => {
+    let checked = 0
+    for (const level of [4, 5] as const) {
+      for (const task of tasks(level, 100).filter((t) => t.kind === 'eqsRecip')) {
+        const step = task.steps.find((s) => s.id === 'substitution')!
+        const at = { u: 1 / task.answer[0], v: 1 / task.answer[1] }
+        for (const c of step.choices) expect([...systemOf(c.content).values()].every((eq) => holds(coeffs(eq), at)), `${task.form} ${c.content}`).toBe(c.correct)
+        checked++
+      }
+    }
+    expect(checked).toBeGreaterThan(50)
+  })
+})
+
 describe('Einsetzen, Gleichsetzen, Addieren: Fehler und Lernkarten', () => {
   it('nutzt jeden Fehler, und jeder steht auf einer Karte des Ordners', () => {
     const used = new Set<string>()

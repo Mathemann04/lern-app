@@ -158,11 +158,13 @@ freier Modus `vectorFree.ts`, `buildVectorTask` wählt die Arten nach dem Bauste
   steht), `equateStep`, `factorStep` (`faktoren`, nur wenn nicht beide Faktoren ±1; `factorsFor` kleinste Faktoren, p > 0),
   `combineStep` (`wert-…`, bei $0 = D$ gleich `caseStep`), `caseStep` (`deuten`, drei Antworten), `setStep` (Lösungsmenge,
   falsche nie dieselbe Gerade), `backStep` (Ergebnis `x = …,\; y = …`, falsch auch nur eine Unbekannte). Ordnen
-  (`orderStep`, `ordnen-k`) mit `moveForm`, `bracketForm`, `fractionForm` (Fehler `gauss-setup-side`, `gauss-setup-const`,
-  `eqs-…`). Stufe 2 in 45 % mit `methodStep` (`verfahren`, Fehler `eqs-method` mit eigener Begründung je Lage). Bilder:
+  (`orderStep`, `ordnen-k`) mit `moveForm`, `bracketForm`, `fractionForm` (Fehler `eqs-order-side`, `eqs-order-const`,
+  `eqs-bracket-…`, `eqs-one-side`, `eqs-fraction-drop`). Stufe 2 in 45 % mit `methodStep` (`verfahren`, Fehler `eqs-method`, dessen Text das richtige Verfahren nicht nennt). Bilder:
   `turnDrawing` (`elimDrawing` aus `gaussFigures.ts`, „Zeile“ → „Gleichung“) als `solvedDrawing` nach Einsetzen,
-  Gleichsetzen und Addieren, `systemDrawing` beim Ergebnis (nicht bei Nenner und Parameter). 25 Fehler `eqs-…` in
-  `linalg/eqsErrorRules.ts`, dazu `gauss-…` (Rüberbringen, Teilen, Lösungsmenge, Ordnen); fünf Karten in
+  Gleichsetzen und Addieren, `systemDrawing` beim Ergebnis (nicht bei Nenner und Parameter). 30 Fehler `eqs-…` in
+  `linalg/eqsErrorRules.ts` (`eqs-sub-sign` nur beim Abziehen, `eqs-insert-sign` beim Einsetzen in $v = \dots$), dazu
+  `gauss-…` (Rüberbringen, Teilen, Lösungsmenge); fünf Karten in
   `explain/eqsCards.ts`. Tests in `linalg/eqsTasks.test.ts` (eigener Gauß mit Rang in Kommazahlen, jede Gleichung im
-  Rechenweg von der Lösung erfüllt und keine falsche gleichwertig, Werte, Fälle, Bilder, freier Modus), Browser-Test in
+  Rechenweg von der Lösung erfüllt und keine falsche gleichwertig, Auflösen, Faktoren, Lösungsmenge, Parameter, Substitution,
+  Werte, Fälle, Bilder, freier Modus), Browser-Test in
   `e2e/matrices.spec.ts`.

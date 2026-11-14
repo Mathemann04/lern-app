@@ -1321,4 +1321,5 @@ Neue Entscheidungen unten anfügen.
   Vektor); „keine Lösung“ und die Lösungsmenge wie beim Gauß-Verfahren. Der Schritt „Was bleibt?“ ($0 = 5$ bzw. $0 = 0$
   deuten) hat drei Antworten (die drei Fälle mit Begründung); eine vierte wäre nur eine richtige Antwort mit schiefer
   Begründung. Wo die Rechenfehler dieselben sind wie beim Gauß-Verfahren (Vorzeichen beim Rüberbringen, nicht geteilt,
-  falsch herum geteilt, Lösungsmenge, Ordnen), nutzt der Baustein deren Fehler und Texte, statt sie doppelt anzulegen.
+  falsch herum geteilt, Lösungsmenge), nutzt der Baustein deren Fehler und Texte, statt sie doppelt anzulegen; beim Ordnen
+  eigene Fehler, weil die Texte des Gauß-Verfahrens vom Strich der Tabelle sprechen (Fund der unabhängigen Prüfung).

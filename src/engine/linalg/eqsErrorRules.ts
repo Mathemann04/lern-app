@@ -101,16 +101,25 @@ export const EQS_ERROR_RULES: readonly VectorErrorRule[] = [
   },
   {
     id: 'eqs-one-side',
-    name: 'Nur die linke Seite malgenommen',
+    name: 'Die Zahl auf der rechten Seite nicht malgenommen',
     wrongFormula: String.raw`3 \cdot (x + 2y = 4) \;\Rightarrow\; 3x + 6y = 4`,
     why: {
-      detailed: String.raw`Malnehmen gilt für die **ganze** Gleichung: jedes Glied links und auch die Zahl auf der rechten Seite. Sonst ist es nicht mehr dieselbe Gleichung.`,
-      short: String.raw`Auch die rechte Seite malnehmen.`,
+      detailed: String.raw`Malnehmen gilt für die **ganze** Gleichung: jedes Glied mit Unbekannter und auch die Zahl auf der rechten Seite. Sonst ist es nicht mehr dieselbe Gleichung.`,
+      short: String.raw`Auch die Zahl rechts malnehmen.`,
+    },
+  },
+  {
+    id: 'eqs-factor-term',
+    name: 'Den Ausdruck mit dem Parameter nicht malgenommen',
+    wrongFormula: String.raw`3 \cdot \big((2a - 2)\,y\big) \;\Rightarrow\; (2a - 6)\,y`,
+    why: {
+      detailed: String.raw`Der Faktor gilt für **jedes** Glied der Gleichung, auch für den Ausdruck mit $a$ vor der Unbekannten: Er wird als Ganzes malgenommen, Glied für Glied in der Klammer.`,
+      short: String.raw`Auch den Ausdruck mit $a$ ganz malnehmen.`,
     },
   },
   {
     id: 'eqs-sub-sign',
-    name: 'Vorzeichenfehler beim Zusammenrechnen',
+    name: 'Vorzeichenfehler beim Abziehen',
     wrongFormula: String.raw`(4y = 9) - (-2y = 3) \;\Rightarrow\; 2y = 6`,
     why: {
       detailed: String.raw`Ziehst du eine Gleichung ab, wechselt **jedes** ihrer Glieder das Vorzeichen, auch die rechte Seite: $4y - (-2y) = 6y$. Rechne Glied für Glied mit Klammern.`,
@@ -125,6 +134,15 @@ export const EQS_ERROR_RULES: readonly VectorErrorRule[] = [
     why: {
       detailed: String.raw`Die Lösung eines Gleichungssystems besteht aus Werten für **alle** Unbekannten. Setz den gefundenen Wert in eine Gleichung ein und rechne die übrige aus.`,
       short: String.raw`Alle Unbekannten angeben.`,
+    },
+  },
+  {
+    id: 'eqs-insert-sign',
+    name: 'Vorzeichen beim Einsetzen verloren',
+    wrongFormula: String.raw`x = -2y + 1,\; y = -3 \;\Rightarrow\; x = -6 + 1`,
+    why: {
+      detailed: String.raw`Setz den bekannten Wert **in Klammern** ein und rechne das Produkt mit Vorzeichen aus: $-2 \cdot (-3) = +6$. Ein Minus vor der Zahl und ein Minus im Wert ergeben Plus.`,
+      short: String.raw`Wert in Klammern einsetzen, Vorzeichen mitrechnen.`,
     },
   },
   {
@@ -175,6 +193,24 @@ export const EQS_ERROR_RULES: readonly VectorErrorRule[] = [
   },
   // ---------------------------------------------------------------- Ordnen
   {
+    id: 'eqs-order-side',
+    name: 'Glied mit Unbekannter ohne Vorzeichenwechsel nach links gebracht',
+    wrongFormula: String.raw`2x = 5 - 3y \;\Rightarrow\; 2x - 3y = 5`,
+    why: {
+      detailed: String.raw`In der Form $ax + by = c$ stehen alle Unbekannten links. Ein Glied, das rechts steht, wechselt beim Rüberbringen sein **Vorzeichen**: aus $-3y$ rechts wird $+3y$ links.`,
+      short: String.raw`Glied von rechts nach links: Vorzeichen wechselt.`,
+    },
+  },
+  {
+    id: 'eqs-order-const',
+    name: 'Zahl ohne Vorzeichenwechsel nach rechts gebracht',
+    wrongFormula: String.raw`2x + 3 = y + 7 \;\Rightarrow\; 2x - y = 10`,
+    why: {
+      detailed: String.raw`In der Form $ax + by = c$ steht die Zahl allein rechts. Eine Zahl auf der linken Seite bringst du hinüber, dabei wechselt ihr **Vorzeichen**: aus $+3$ links wird $-3$ rechts.`,
+      short: String.raw`Zahl von links nach rechts: Vorzeichen wechselt.`,
+    },
+  },
+  {
     id: 'eqs-fraction-drop',
     name: 'Nenner einfach weggelassen',
     wrongFormula: String.raw`\frac{x}{2} + \frac{y}{3} = 1 \;\Rightarrow\; x + y = 1`,
@@ -188,11 +224,20 @@ export const EQS_ERROR_RULES: readonly VectorErrorRule[] = [
     name: 'Ein umständliches Verfahren gewählt',
     wrongFormula: String.raw`y = 2x - 1,\; 3x + 2y = 5 \;\Rightarrow\; \text{Gleichsetzen}`,
     why: {
-      detailed: String.raw`Alle Verfahren führen zum Ziel, aber eines passt meist am besten: Steht eine Unbekannte allein, setzt du ein; sind beide nach derselben aufgelöst, setzt du gleich; stehen vor einer Unbekannten gleiche oder entgegengesetzte Zahlen, addierst du.`,
+      detailed: String.raw`Alle Verfahren führen zum Ziel, aber eines passt meist am besten: Steht eine Unbekannte allein, setzt du ein; sind beide nach derselben aufgelöst, setzt du gleich; steht keine allein, aber vor einer Unbekannten gleiche oder entgegengesetzte Zahlen, addierst du.`,
       short: String.raw`Auf die Form der Gleichungen achten.`,
     },
   },
   // ---------------------------------------------------------------- Unbekannte im Nenner und Parameter
+  {
+    id: 'eqs-set-point',
+    name: 'Stützvektor ist kein Punkt der Lösung',
+    wrongFormula: String.raw`x + 2y = 4 \;\Rightarrow\; \vec x = \begin{pmatrix} -4 \\ 0 \end{pmatrix} + t \begin{pmatrix} -2 \\ 1 \end{pmatrix}`,
+    why: {
+      detailed: String.raw`Mit $t = 0$ muss der Stützvektor selbst eine Lösung sein. Mach die Probe: Setz seine Einträge in die Gleichung ein; es muss die rechte Seite herauskommen, mit ihrem Vorzeichen.`,
+      short: String.raw`Probe mit $t = 0$: Stützvektor erfüllt die Gleichung.`,
+    },
+  },
   {
     id: 'eqs-recip-rhs',
     name: 'Auch die rechte Seite umgedreht',

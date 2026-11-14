@@ -122,7 +122,7 @@ function solveStep(rng: Rng, ctx: Ctx, row: Row, name: string, v: number, id: st
     cands.push({ content: show({ a: E.a, t: row.c }), rule: 'eqs-solve-divide' })
   }
   cands.push({ content: show({ a: E.a.map(ratNeg), t: ratNeg(E.t) }), rule: 'eqs-solve-minus' })
-  if (!isZero(E.t)) cands.push({ content: show({ a: E.a, t: ratNeg(E.t) }), rule: 'eqs-solve-sign' })
+  if (!isZero(E.t)) cands.push({ content: show({ a: E.a, t: ratNeg(E.t) }), rule: ratSign(av) < 0 ? 'eqs-solve-minus' : 'eqs-solve-sign' })
   const correct = show(E)
   const moved: Expr = { a: row.a.map((x, j) => (j === v ? ZERO : ratNeg(x))), t: row.c }
   const first = `${term(av, vars[v])} = ${exprLatex(moved, vars)}`
@@ -288,7 +288,6 @@ function factorStep(rng: Rng, ctx: Ctx, rows: readonly [Row, Row], e: number): G
   const cands: [Rational, Rational, string][] = [
     [p, ratNeg(q), 'eqs-add-sign'],
     [Q, sg(P), 'eqs-factor-swap'],
-    [Q, ratNeg(sg(P)), 'eqs-add-sign'],
     [ONE, q, 'eqs-factor-one'],
     [p, sg(ONE), 'eqs-factor-one'],
   ]
@@ -333,8 +332,10 @@ function combineStep(rng: Rng, ctx: Ctx, rows: readonly [Row, Row], e: number, k
   const oneSide = ratAdd(ratMul(R(ratSign(p)), rows[0].c), ratMul(R(ratSign(q)), rows[1].c))
   if (!isOne(ratAbs(p)) || !isOne(ratAbs(q))) cands.push({ content: show(ratDiv(oneSide, K)), rule: 'eqs-one-side' })
   const Kw = ratSub(ratMul(p, rows[0].a[k]), ratMul(q, rows[1].a[k]))
-  if (!isZero(Kw)) cands.push({ content: show(ratDiv(N.c, Kw)), rule: 'eqs-sub-sign' })
-  cands.push({ content: show(ratDiv(ratSub(ratMul(p, rows[0].c), ratMul(q, rows[1].c)), K)), rule: 'eqs-sub-sign' })
+  if (ratSign(q) < 0) {
+    if (!isZero(Kw)) cands.push({ content: show(ratDiv(N.c, Kw)), rule: 'eqs-sub-sign' })
+    cands.push({ content: show(ratDiv(ratSub(ratMul(p, rows[0].c), ratMul(q, rows[1].c)), K)), rule: 'eqs-sub-sign' })
+  }
   if (!isZero(N.c)) cands.push({ content: show(ratDiv(K, N.c)), rule: 'gauss-divide-flip' })
   if (!isOne(K)) cands.push({ content: show(N.c), rule: 'gauss-divide-forgot' })
   const correct = show(val)
@@ -413,12 +414,12 @@ function setStep(rng: Rng, ctx: Ctx, row: Row): { step: GuidedStep; set: LineSet
     [{ p: r, r: p }, 'gauss-param-swap'],
     [{ p, r: r.map((x, j) => (j === f ? ZERO : x)) }, 'gauss-param-free-one'],
     [{ p, r: r.map((x, j) => (j === s ? ratNeg(x) : x)) }, 'gauss-backsub-sign'],
-    [{ p: p.map(ratNeg), r }, 'gauss-backsub-sign'],
+    [{ p: p.map(ratNeg), r }, 'eqs-set-point'],
   ]
   const correct = math(setLatex(set))
   const wrongs = distinct(
     correct,
-    cands.filter(([w]) => !sameLine(set, w)).map(([w, rule]) => ({ content: math(setLatex(w)), rule })),
+    rng.shuffle(cands.filter(([w]) => !sameLine(set, w))).map(([w, rule]) => ({ content: math(setLatex(w)), rule })),
   )
   const solved = `${vars[s]} = ${exprLatex({ a: [f === 0 ? r[s] : ZERO, f === 1 ? r[s] : ZERO], t: p[s] }, vars)}`
   return {
@@ -461,7 +462,7 @@ function backStep(
   const show = (y: readonly Rational[], idx = shown) => math(idx.map((j) => `${names[j]} = ${ratLatex(y[j])}`).join(',\\; '))
   const withV = (w: Rational) => x.map((e, j) => (j === v ? w : e))
   const cands: Wrong[] = []
-  if (!isZero(rest)) cands.push({ content: show(withV(ratDiv(ratAdd(row.c, rest), av))), rule: 'gauss-backsub-sign' })
+  if (!isZero(rest)) cands.push({ content: show(withV(ratDiv(ratAdd(row.c, rest), av))), rule: src.expr ? 'eqs-insert-sign' : 'gauss-backsub-sign' })
   if (!isOne(av)) cands.push({ content: show(withV(ratSub(row.c, rest))), rule: 'gauss-divide-forgot' })
   if (others.some((j) => !isOne(ratAbs(row.a[j])) && !isZero(known[j]))) {
     const plain = others.reduce((s, j) => ratAdd(s, ratMul(R(ratSign(row.a[j])), known[j])), ZERO)
@@ -501,17 +502,16 @@ function backStep(
 const METHOD_TEXT: Readonly<Record<Method | 'gauss', string>> = {
   subst: 'Einsetzen, denn eine Gleichung ist schon nach einer Unbekannten aufgelöst, die andere nicht',
   equal: 'Gleichsetzen, denn beide Gleichungen sind nach derselben Unbekannten aufgelöst',
-  add: 'Addieren, denn vor einer Unbekannten stehen gleiche oder entgegengesetzte Zahlen',
+  add: 'Addieren, denn keine Unbekannte steht allein, aber vor einer stehen gleiche oder entgegengesetzte Zahlen',
   gauss: 'Gauß-Verfahren mit Tabelle, denn das geht immer',
 }
 function methodStep(rng: Rng, method: Method, why: string): GuidedStep {
+  const rule = 'Steht eine Unbekannte schon allein, setzt du ein; sind beide Gleichungen nach derselben aufgelöst, setzt du gleich; steht keine allein, aber vor einer Unbekannten gleiche oder entgegengesetzte Zahlen, addierst du.'
   const reason = (m: Method | 'gauss') =>
-    m === 'gauss'
-      ? `Das Gauß-Verfahren geht zwar immer, ist bei zwei Gleichungen aber Umweg. ${why}`
-      : `Das geht auch, ist hier aber umständlicher. ${why}`
+    m === 'gauss' ? `Das Gauß-Verfahren geht zwar immer, ist bei zwei Gleichungen aber ein Umweg. ${rule}` : `Die Begründung passt nicht zu diesen Gleichungen. ${rule}`
   const wrongs: Wrong[] = (['subst', 'equal', 'add', 'gauss'] as const)
     .filter((m) => m !== method)
-    .map((m) => ({ content: METHOD_TEXT[m], rule: 'eqs-method', why: { detailed: reason(m), short: why } }))
+    .map((m) => ({ content: METHOD_TEXT[m], rule: 'eqs-method', why: { detailed: reason(m), short: 'Auf die Form der Gleichungen achten.' } }))
   return choiceStep(rng, {
     id: 'verfahren',
     title: 'Welches Verfahren?',
@@ -666,9 +666,9 @@ function moveForm(rng: Rng, row: Row, vars: readonly string[]): Messy | null {
     latex: `${termsLatex(left)} = ${termsLatex(rightTerms)}`,
     row,
     wrongs: [
-      [{ a: neg, c: row.c }, 'gauss-setup-side'],
-      [{ a: row.a, c: ratAdd(rc, c1) }, 'gauss-setup-const'],
-      [{ a: neg, c: ratAdd(rc, c1) }, 'gauss-setup-side'],
+      [{ a: neg, c: row.c }, 'eqs-order-side'],
+      [{ a: row.a, c: ratAdd(rc, c1) }, 'eqs-order-const'],
+      [{ a: neg, c: ratAdd(rc, c1) }, 'eqs-order-side'],
     ],
     form: `m${j}`,
   }
@@ -692,8 +692,8 @@ function bracketForm(rng: Rng, row: Row, vars: readonly string[]): Messy | null 
     row,
     wrongs: [
       [{ a: row.a, c: ratSub(r, q) }, 'eqs-bracket-partial'],
-      [{ a: row.a, c: ratAdd(r, ratMul(R(k), q)) }, k < 0 ? 'eqs-bracket-sign' : 'gauss-setup-const'],
-      [{ a: row.a.map((x, i) => (i === m ? ratNeg(x) : x)), c: row.c }, 'gauss-setup-side'],
+      [{ a: row.a, c: ratAdd(r, ratMul(R(k), q)) }, k < 0 ? 'eqs-bracket-sign' : 'eqs-order-const'],
+      [{ a: row.a.map((x, i) => (i === m ? ratNeg(x) : x)), c: row.c }, 'eqs-order-side'],
     ],
     form: `k${j}${k < 0 ? '-' : '+'}`,
   }
@@ -718,7 +718,7 @@ function fractionForm(rng: Rng, point: readonly Rational[], vars: readonly strin
     wrongs: [
       [{ a: row.a, c: r }, 'eqs-one-side'],
       [{ a: [R(n1), R(n2)], c: r }, 'eqs-fraction-drop'],
-      [{ a: [row.a[0], ratNeg(row.a[1])], c: row.c }, 'gauss-setup-side'],
+      [{ a: [row.a[0], ratNeg(row.a[1])], c: row.c }, 'eqs-order-side'],
     ],
     form: `f${p}${q}`,
   }
@@ -1032,7 +1032,7 @@ function buildRecip(rng: Rng, level: Level): Built | null {
     [rows.map((r) => ({ a: r.a.map(inv), c: r.c })), 'eqs-recip-coef'],
     [rows.map((r) => ({ a: r.a.map(inv), c: inv(r.c) })), 'eqs-recip-coef'],
   ]
-  if (moved >= 0) cands.unshift([rows.map((r, k) => (k === moved ? { a: [r.a[0], ratNeg(r.a[1])], c: r.c } : r)), 'gauss-setup-side'])
+  if (moved >= 0) cands.unshift([rows.map((r, k) => (k === moved ? { a: [r.a[0], ratNeg(r.a[1])], c: r.c } : r)), 'eqs-order-side'])
   const correct = sysOf(rows)
   const subst = choiceStep(rng, {
     id: 'substitution',
@@ -1040,7 +1040,7 @@ function buildRecip(rng: Rng, level: Level): Built | null {
     question: `Setz $u = \\frac{1}{x}$ und $v = \\frac{1}{y}$${moved >= 0 ? ` und bring die Unbekannten nach links` : ''}. Welches Gleichungssystem entsteht?`,
     correct,
     wrongs: distinct(correct, rng.shuffle(cands.filter(([rs]) => rs.some((r, k) => !rowsEquivalent(r, rows[k])))).map(([rs, rule]) => ({ content: sysOf(rs), rule }))),
-    hint: 'Schreib $\\frac{3}{x}$ als $3 \\cdot \\frac{1}{x} = 3u$: Die Zahl im Zähler bleibt vor $u$ stehen, die rechte Seite bleibt, wie sie ist.',
+    hint: `Schreib $\\frac{3}{x}$ als $3 \\cdot \\frac{1}{x} = 3u$: Die Zahl im Zähler bleibt vor $u$ stehen${moved >= 0 ? '. Der Bruch rechts wechselt beim Rüberbringen sein Vorzeichen, die Zahl bleibt rechts.' : ', die rechte Seite bleibt, wie sie ist.'}`,
     explanation: {
       detailed: `Jeder Bruch $\\frac{k}{x}$ ist $k \\cdot \\frac{1}{x} = k\\,u$, ebenso $\\frac{k}{y} = k\\,v$${moved >= 0 ? '; den Bruch rechts bringst du nach links (Vorzeichen wechselt)' : ''}. Das System in $u$ und $v$ ist linear: $${systemLatex(rows.map((r) => rowLatex(r, UV)), names)}$.`,
       short: `$\\frac{k}{x} = k\\,u$, $\\frac{k}{y} = k\\,v$.`,
@@ -1166,10 +1166,14 @@ function buildParam(rng: Rng): Built | null {
   const eqLatex = (pa: Rational, p0: Rational, d: Rational) => `${isZero(pa) ? term(p0, vars[w]) : coefLatex(pa, p0, vars[w])} = ${ratLatex(d)}`
   const oneSide = ratAdd(ratMul(R(ratSign(p)), cs[0]), ratMul(R(ratSign(q)), cs[1]))
   const cands: Wrong[] = [
-    { content: math(eqLatex(P, ratSub(ratMul(fp, l), ratMul(fo, other)), Dn)), rule: 'eqs-sub-sign' },
-    { content: math(eqLatex(P, P0, ratSub(ratMul(p, cs[0]), ratMul(q, cs[1])))), rule: 'eqs-sub-sign' },
+    ...(ratSign(q) < 0
+      ? [
+          { content: math(eqLatex(P, ratSub(ratMul(fp, l), ratMul(fo, other)), Dn)), rule: 'eqs-sub-sign' },
+          { content: math(eqLatex(P, P0, ratSub(ratMul(p, cs[0]), ratMul(q, cs[1])))), rule: 'eqs-sub-sign' },
+        ]
+      : []),
     ...(ratEq(oneSide, Dn) ? [] : [{ content: math(eqLatex(P, P0, oneSide)), rule: 'eqs-one-side' }]),
-    ...(isOne(fp) ? [] : [{ content: math(eqLatex(k, P0, Dn)), rule: 'eqs-bracket-partial' }]),
+    ...(isOne(fp) ? [] : [{ content: math(eqLatex(k, P0, Dn)), rule: 'eqs-factor-term' }]),
   ]
   const correct = math(eqLatex(P, P0, Dn))
   steps.push(

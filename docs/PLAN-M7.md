@@ -418,8 +418,8 @@ Request.
       in Stufe 5 mit einer Gleichung zum Ordnen bzw. einem Bruch rechts; Parameter vor einer Unbekannten in Stufe 5:
       Addieren, Sonderwert, „Was gilt dort?“). Ergebnis als $x = \dots,\; y = \dots$, „keine Lösung“, Lösungsmenge oder
       $a = \dots$ mit Fall. Fünf Lernkarten (je Verfahren, „Welches Verfahren wann?“, „Drei Gleichungen, Nenner,
-      Parameter“), 25 neue typische Fehler (`eqs-…`) und zehn aus dem Gauß-Verfahren (Rüberbringen, Teilen,
-      Lösungsmenge, Ordnen). Bilder: nach dem Einsetzen, Gleichsetzen und Addieren dreht sich die neue Gerade durch den
+      Parameter“), 30 neue typische Fehler (`eqs-…`) und sieben aus dem Gauß-Verfahren (Rüberbringen, Teilen,
+      Lösungsmenge). Bilder: nach dem Einsetzen, Gleichsetzen und Addieren dreht sich die neue Gerade durch den
       Schnittpunkt (wie 10b), beim Ergebnis Geraden mit Schnittpunkt, parallel oder gleich (bei drei Gleichungen Ebenen).
 11. **Gleichungssysteme mit Parameter und Cramer**, in drei Teilen:
     - **11a (fertig, 13.11.2026):** Baustein „Cramersche Regel“ (`cramer`, Code 36, Gruppe „Gleichungssysteme“) in der
