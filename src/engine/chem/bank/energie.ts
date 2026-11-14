@@ -234,7 +234,7 @@ export const ENERGIE_BANK: QuestionBank = {
       part: 'enthalpie',
       title: 'Bildungsenthalpie 0',
       prompt: 'Welcher Stoff hat die Standardbildungsenthalpie $0$?',
-      correct: r`$\ce{O2(g)}$ (Sauerstoff)`,
+      correct: r`$\ce{O2(g)}$`,
       wrong: [
         w('f1', r`$\ce{O3(g)}$ (Ozon)`, 'chem-mis-en-element-any-form'),
         w('f2', r`$\ce{H2O(l)}$`, 'chem-mis-en-formation-def', why('Wasser ist eine Verbindung; bei seiner Bildung aus Wasserstoff und Sauerstoff wird Wärme frei.', 'Wasser ist eine Verbindung.')),
@@ -272,7 +272,7 @@ export const ENERGIE_BANK: QuestionBank = {
       part: 'enthalpie',
       title: 'Standardzustand von Kohlenstoff',
       prompt: 'Welche Form von Kohlenstoff hat die Standardbildungsenthalpie $0$?',
-      correct: 'Graphit, wie in einer Bleistiftmine',
+      correct: 'Graphit',
       wrong: [
         w('f1', 'Diamant, die härteste Form', 'chem-mis-en-element-any-form'),
         w('f2', 'Graphit und Diamant gleichermaßen', 'chem-mis-en-element-any-form'),
@@ -351,9 +351,9 @@ export const ENERGIE_BANK: QuestionBank = {
       correct: 'Energie bleibt erhalten; sie wird nur umgewandelt oder übertragen.',
       wrong: [
         w('f1', 'Die Entropie eines abgeschlossenen Systems nimmt nicht ab.', 'chem-mis-en-first-law', why('Das ist eine Aussage über die Entropie, also der zweite Hauptsatz. Der erste handelt von der Energie.', 'Das ist der zweite Hauptsatz.')),
-        w('f2', 'Bei exothermen Reaktionen entsteht neue Energie, die vorher nicht vorhanden war.', 'chem-mis-en-first-law', why('Die frei werdende Wärme war vorher in den Stoffen gespeichert.', 'Sie war in den Stoffen gespeichert.')),
+        w('f2', 'Bei exothermen Reaktionen entsteht neue Energie.', 'chem-mis-en-first-law', why('Die frei werdende Wärme war vorher in den Stoffen gespeichert.', 'Sie war in den Stoffen gespeichert.')),
         w('f3', 'Den absoluten Nullpunkt kann man nicht erreichen.', 'chem-mis-en-third-law', why('Das ist der dritte Hauptsatz. Der erste handelt von der Energie.', 'Das ist der dritte Hauptsatz.')),
-        w('f4', 'Bei endothermen Reaktionen geht die aufgenommene Energie endgültig verloren.', 'chem-mis-en-first-law', why('Die aufgenommene Wärme steckt danach in den Produkten.', 'Sie steckt in den Produkten.')),
+        w('f4', 'Bei endothermen Reaktionen geht Energie verloren.', 'chem-mis-en-first-law', why('Die aufgenommene Wärme steckt danach in den Produkten.', 'Sie steckt in den Produkten.')),
       ],
       hint: 'Es geht um die Energie: Kann sie neu entstehen oder verschwinden?',
       explanation: why('Erster Hauptsatz: Die Energie bleibt erhalten. Bei einer Reaktion wird sie nur zwischen den Stoffen und der Umgebung verschoben oder in andere Formen umgewandelt.', 'Energie bleibt erhalten.'),
@@ -389,9 +389,9 @@ export const ENERGIE_BANK: QuestionBank = {
       correct: 'Den absoluten Nullpunkt der Temperatur kann man nicht erreichen.',
       wrong: [
         w('f1', 'Energie bleibt erhalten.', 'chem-mis-en-third-law', why('Das ist der erste Hauptsatz. Der dritte handelt vom absoluten Nullpunkt.', 'Das ist der erste Hauptsatz.')),
-        w('f2', 'Mit genug Kühlung lässt sich der absolute Nullpunkt von 0 K erreichen.', 'chem-mis-en-third-law'),
+        w('f2', 'Mit genug Kühlung erreicht man 0 K.', 'chem-mis-en-third-law'),
         w('f3', 'Unter 0 °C hören alle Teilchen auf, sich zu bewegen.', 'chem-mis-en-celsius', why('0 °C ist nur der Gefrierpunkt von Wasser; der absolute Nullpunkt liegt bei −273,15 °C.', '0 °C ist nicht der Nullpunkt.')),
-        w('f4', 'Die Entropie eines abgeschlossenen Systems nimmt bei freiwilligen Vorgängen zu.', 'chem-mis-en-third-law', why('Das ist eine Aussage über die Entropie, also der zweite Hauptsatz.', 'Das ist der zweite Hauptsatz.')),
+        w('f4', 'Die Entropie nimmt immer zu.', 'chem-mis-en-third-law', why('Das ist eine Aussage über die Entropie, also der zweite Hauptsatz.', 'Das ist der zweite Hauptsatz.')),
       ],
       hint: 'Der dritte Hauptsatz handelt von der tiefsten denkbaren Temperatur.',
       explanation: why('Dritter Hauptsatz: Der absolute Nullpunkt (0 K, −273,15 °C) lässt sich nicht erreichen, nur annähern.', 'Der absolute Nullpunkt ist unerreichbar.'),
@@ -464,10 +464,10 @@ export const ENERGIE_BANK: QuestionBank = {
       prompt: 'Bei welchem Vorgang nimmt die Entropie der Stoffe zu?',
       correct: 'Ein Feststoff zerfällt und setzt dabei ein Gas frei.',
       wrong: [
-        w('f1', 'Ein Gas kondensiert beim Abkühlen an einer kalten Wand zu einer Flüssigkeit.', 'chem-mis-en-phase-ds', why('Beim Kondensieren werden die Teilchen weniger beweglich.', 'Weniger beweglich.')),
+        w('f1', 'Ein Gas kondensiert zu einer Flüssigkeit.', 'chem-mis-en-phase-ds', why('Beim Kondensieren werden die Teilchen weniger beweglich.', 'Weniger beweglich.')),
         w('f2', 'Zwei Gasteilchen verbinden sich zu einem.', 'chem-mis-en-gas-count'),
         w('f3', 'Eine Metallschmelze erstarrt.', 'chem-mis-en-phase-ds', why('Beim Erstarren ordnen sich die Teilchen in einem Kristall.', 'Ordnung im Kristall.')),
-        w('f4', 'Wasserdampf schlägt sich an einer kalten Scheibe als Reif nieder.', 'chem-mis-en-phase-ds', why('Aus frei beweglichen Gasteilchen wird ein geordneter Feststoff.', 'Aus Gas wird Feststoff.')),
+        w('f4', 'Wasserdampf schlägt sich als Reif nieder.', 'chem-mis-en-phase-ds', why('Aus frei beweglichen Gasteilchen wird ein geordneter Feststoff.', 'Aus Gas wird Feststoff.')),
       ],
       hint: 'Wo werden die Teilchen beweglicher, oder wo entsteht Gas?',
       explanation: why('Entsteht aus einem Feststoff ein Gas, werden Teilchen frei beweglich: Die Unordnung und damit die Entropie nehmen zu.', 'Ein Gas wird frei.'),
@@ -505,9 +505,9 @@ export const ENERGIE_BANK: QuestionBank = {
       correct: 'Weil Brom im Standardzustand flüssig ist und das Verdampfen Energie kostet.',
       wrong: [
         w('f1', 'Weil Brom eine Verbindung ist.', 'chem-mis-en-element-nonzero', why('Brom ist ein Element. Entscheidend ist, in welchem Zustand es vorliegt.', 'Brom ist ein Element.')),
-        w('f2', 'Weil nur feste Elemente den Wert 0 haben, Flüssigkeiten und Gase dagegen nicht.', 'chem-mis-en-standard-state', why('Auch Gase wie $\\ce{O2(g)}$ und Flüssigkeiten haben den Wert 0, wenn das ihr Standardzustand ist.', 'Es zählt der Standardzustand.')),
+        w('f2', 'Weil nur feste Elemente den Wert 0 haben.', 'chem-mis-en-standard-state', why('Auch Gase wie $\\ce{O2(g)}$ und Flüssigkeiten haben den Wert 0, wenn das ihr Standardzustand ist.', 'Es zählt der Standardzustand.')),
         w('f3', r`Das stimmt nicht: Auch $\ce{Br2(g)}$ hat den Wert 0.`, 'chem-mis-en-element-any-form'),
-        w('f4', r`Weil $\ce{Br2}$ aus zwei Atomen besteht, die durch eine Bindung zusammengehalten werden.`, 'chem-mis-en-element-any-form', why('Auch $\\ce{O2(g)}$ und $\\ce{N2(g)}$ bestehen aus zwei Atomen und haben trotzdem den Wert 0.', 'Zweiatomig ist nicht der Grund.')),
+        w('f4', r`Weil $\ce{Br2}$ aus zwei Atomen besteht.`, 'chem-mis-en-element-any-form', why('Auch $\\ce{O2(g)}$ und $\\ce{N2(g)}$ bestehen aus zwei Atomen und haben trotzdem den Wert 0.', 'Zweiatomig ist nicht der Grund.')),
       ],
       hint: 'Wie liegt Brom bei 25 °C und 1013 hPa vor?',
       explanation: why('Brom ist bei Standardbedingungen flüssig. Gasförmiges Brom entsteht daraus nur unter Energieaufwand; deshalb ist $\\Delta_f H^{0}(\\ce{Br2(g)})$ positiv.', 'Standardzustand flüssig.'),
@@ -616,7 +616,7 @@ export const ENERGIE_BANK: QuestionBank = {
       part: 'reaktionsenthalpie',
       title: 'Elemente in der Rechnung',
       prompt: r`Warum spielt $\ce{O2(g)}$ beim Berechnen von $${DH}^{0}$ einer Verbrennung zahlenmäßig keine Rolle?`,
-      correct: 'Seine Standardbildungsenthalpie ist 0; es trägt nichts zur Summe bei.',
+      correct: 'Seine Standardbildungsenthalpie ist 0.',
       wrong: [
         w('f1', 'Weil Gase in der Rechnung nicht zählen, nur Flüssigkeiten und Feststoffe.', 'chem-mis-en-state', why('Auch Gase wie $\\ce{CO2(g)}$ zählen mit ihrem Tabellenwert. Bei Sauerstoff ist der Wert aus einem anderen Grund unerheblich.', 'Gase zählen auch.')),
         w('f2', 'Weil man die Edukte nie berücksichtigt.', 'chem-mis-en-reversed', why('Die Edukte werden abgezogen; sie zählen also mit. Bei Sauerstoff ist der Wert aus einem anderen Grund unerheblich.', 'Edukte zählen mit.')),
@@ -675,8 +675,8 @@ export const ENERGIE_BANK: QuestionBank = {
       prompt: 'Im Gefrierfach wird Wasser zu Eis, die Entropie des Wassers nimmt also ab. Widerspricht das dem zweiten Hauptsatz?',
       correct: 'Nein: Das Wasser ist nicht abgeschlossen; seine Wärme erhöht die Entropie der Umgebung.',
       wrong: [
-        w('f1', 'Ja; im Gefrierfach gilt der zweite Hauptsatz nicht, weil die Kühlung von außen angetrieben wird.', 'chem-mis-en-second-law', why('Der zweite Hauptsatz gilt überall. Er spricht aber von einem abgeschlossenen System; überlege, ob das Wasser im Gefrierfach eines ist.', 'Ist das Wasser abgeschlossen?')),
-        w('f2', 'Nein, denn beim Gefrieren nimmt die Entropie des Wassers zu, weil Eis mehr Platz braucht.', 'chem-mis-en-phase-ds'),
+        w('f1', 'Ja; im Gefrierfach gilt der zweite Hauptsatz nicht.', 'chem-mis-en-second-law', why('Der zweite Hauptsatz gilt überall. Er spricht aber von einem abgeschlossenen System; überlege, ob das Wasser im Gefrierfach eines ist.', 'Ist das Wasser abgeschlossen?')),
+        w('f2', 'Nein, denn beim Gefrieren nimmt die Entropie zu.', 'chem-mis-en-phase-ds'),
         w('f3', 'Ja; deshalb ist Gefrieren eigentlich unmöglich.', 'chem-mis-en-second-law', why('Gefrieren findet ja tatsächlich statt. Der zweite Hauptsatz spricht von einem abgeschlossenen System; überlege, ob das Wasser eines ist.', 'Ist das Wasser abgeschlossen?')),
         w('f4', 'Nein, weil der zweite Hauptsatz nur für Gase gilt.', 'chem-mis-en-second-law', why('Der zweite Hauptsatz gilt für alle Stoffe. Er spricht aber von einem abgeschlossenen System.', 'Er gilt für alle Stoffe.')),
       ],
@@ -749,7 +749,7 @@ export const ENERGIE_BANK: QuestionBank = {
       part: 'freie-enthalpie',
       title: 'Freiwillig und endotherm',
       prompt: 'Welcher endotherme Vorgang läuft bei 25 °C freiwillig ab?',
-      correct: 'Eis schmilzt auf dem Küchentisch.',
+      correct: 'Eis schmilzt.',
       wrong: [
         w('f1', 'keiner; endotherme Vorgänge laufen nie freiwillig ab', 'chem-mis-en-endo-never', why('Solche Vorgänge gibt es. Suche unter den Antworten einen, der Wärme aufnimmt und trotzdem von selbst passiert.', 'Solche Vorgänge gibt es.')),
         w('f2', 'Wasserdampf kondensiert an einer kalten Scheibe.', 'chem-mis-en-phase-dh', why('Beim Kondensieren rücken die Teilchen zusammen, und Anziehungskräfte werden wirksam. Wird dabei Wärme gebraucht oder frei?', 'Teilchen rücken zusammen.')),
@@ -768,7 +768,7 @@ export const ENERGIE_BANK: QuestionBank = {
       part: 'freie-enthalpie',
       title: 'Temperatur und ΔG',
       prompt: r`Warum kann sich das Vorzeichen von $${DG}$ mit der Temperatur ändern?`,
-      correct: r`Weil der Beitrag $T \cdot ${DS}$ mit steigender Temperatur wächst.`,
+      correct: r`Weil $T \cdot ${DS}$ mit der Temperatur wächst.`,
       wrong: [
         w('f1', r`Weil sich das Vorzeichen von $${DH}$ mit der Temperatur umkehrt.`, 'chem-mis-en-dg-temp', why('$\\Delta H$ ändert sich mit der Temperatur kaum, schon gar nicht im Vorzeichen. Sieh dir den anderen Term der Gleichung an.', 'Sieh dir den anderen Term an.')),
         w('f2', r`Es kann sich nicht ändern; $${DG}$ hängt nicht von $T$ ab.`, 'chem-mis-en-dg-temp', why('Es gibt Reaktionen, die bei tiefer Temperatur freiwillig ablaufen und bei hoher nicht. Sieh dir an, wo $T$ in der Gleichung steht.', 'Wo steht T in der Gleichung?')),
@@ -960,7 +960,7 @@ export const ENERGIE_BANK: QuestionBank = {
       part: 'freie-enthalpie',
       title: 'ΔH < 0 und ΔS > 0',
       prompt: r`Eine Reaktion hat $${DH} < 0$ und $${DS} > 0$. Bei welchen Temperaturen läuft sie freiwillig ab?`,
-      correct: 'bei jeder Temperatur, ob hoch oder tief',
+      correct: 'bei jeder Temperatur',
       wrong: [
         w('f1', 'bei keiner Temperatur', 'chem-mis-en-exergonic-sign'),
         w('f2', 'nur unterhalb einer bestimmten Temperatur', 'chem-mis-en-gibbs-sign'),
@@ -981,7 +981,7 @@ export const ENERGIE_BANK: QuestionBank = {
       prompt: r`Eine Reaktion hat $${DH} > 0$ und $${DS} < 0$. Bei welchen Temperaturen läuft sie freiwillig ab?`,
       correct: 'bei keiner Temperatur',
       wrong: [
-        w('f1', 'bei jeder Temperatur', 'chem-mis-en-exergonic-sign'),
+        w('f1', 'bei jeder Temperatur, ob hoch oder tief', 'chem-mis-en-exergonic-sign'),
         w('f2', 'nur oberhalb einer bestimmten Temperatur', 'chem-mis-en-gibbs-sign'),
         w('f3', 'nur unterhalb einer bestimmten Temperatur', 'chem-mis-en-dg-temp', why('Prüfe die beiden Beiträge $\\Delta H$ und $-T \\cdot \\Delta S$ getrennt: Welches Vorzeichen hat jeder, auch bei niedriger Temperatur?', 'Prüfe beide Beiträge.')),
         w('f4', 'nur, wenn ein Katalysator zugegen ist', 'chem-mis-en-cat-dg'),
@@ -1074,7 +1074,7 @@ export const ENERGIE_BANK: QuestionBank = {
       part: 'freie-enthalpie',
       title: 'Die hochgestellte 0',
       prompt: r`Was bedeutet die hochgestellte 0 in $${DG}^{0}$ oder $${DH}^{0}$?`,
-      correct: 'Die Werte gelten unter Standardbedingungen.',
+      correct: 'Die Werte gelten unter Standardbedingungen (Normdruck, Stoffe in ihrem Standardzustand).',
       wrong: [
         w('f1', 'Die Größe hat den Wert 0.', 'chem-mis-en-k-sign', why('Die hochgestellte 0 ist ein Zeichen für Standardbedingungen, kein Zahlenwert.', 'Ein Zeichen, kein Wert.')),
         w('f2', 'Die Werte gelten bei 0 K, also am absoluten Nullpunkt.', 'chem-mis-en-third-law', why('Der absolute Nullpunkt ist unerreichbar; Tabellenwerte beziehen sich auf Standardbedingungen.', 'Nicht bei 0 K.')),
@@ -1135,8 +1135,8 @@ export const ENERGIE_BANK: QuestionBank = {
       wrong: [
         w('f1', 'Gar nicht; die Reaktion dürfte nicht ablaufen.', 'chem-mis-en-second-law', why('Der zweite Hauptsatz spricht von einem abgeschlossenen System. Die Stoffe allein sind keines; überlege, wohin die Wärme geht.', 'Wohin geht die Wärme?')),
         w('f2', 'Der zweite Hauptsatz gilt nur für Gase.', 'chem-mis-en-second-law', why('Der zweite Hauptsatz gilt für alle Stoffe. Er spricht aber von einem abgeschlossenen System.', 'Er gilt für alle Stoffe.')),
-        w('f3', 'Die Entropie der Stoffe nimmt in Wahrheit doch zu, weil die frei werdende Wärme ihre Teilchen beweglicher macht.', 'chem-mis-en-entropy-order', why('In der Aufgabe ist $\\Delta S < 0$ gegeben. Die Lösung liegt außerhalb der Stoffe.', 'ΔS < 0 ist gegeben.')),
-        w('f4', 'Die abgegebene Wärme verschwindet in der Umgebung, deshalb zählt sie für die Entropie nicht.', 'chem-mis-en-first-law'),
+        w('f3', 'Die Entropie der Stoffe nimmt in Wahrheit doch zu.', 'chem-mis-en-entropy-order', why('In der Aufgabe ist $\\Delta S < 0$ gegeben. Die Lösung liegt außerhalb der Stoffe.', 'ΔS < 0 ist gegeben.')),
+        w('f4', 'Die abgegebene Wärme verschwindet, deshalb zählt sie nicht.', 'chem-mis-en-first-law'),
       ],
       hint: 'Wohin geht die Wärme einer exothermen Reaktion, und was macht sie dort mit der Unordnung?',
       explanation: why('Der zweite Hauptsatz gilt für Stoffe und Umgebung zusammen. Die abgegebene Wärme erhöht die Entropie der Umgebung; insgesamt nimmt die Entropie zu. Das steckt im Beitrag $\\Delta H$ der Gleichung für $\\Delta G$.', 'Die Umgebung gewinnt mehr Entropie.'),
