@@ -1263,6 +1263,31 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   Überblick; seinen Umbau übernimmt M6. Damit ist der Klausur-Sprint
   abgeschlossen.
   Ausprobieren: Start → Karte „Klausur Teil 1“ → Klausur-Überblick.
+- **S12: Ratefallen** (Durchsicht 14.11.2026, vor Teil 1). Gemessen an je 40
+  erzeugten Aufgaben je Thema und Stufe, nur Textfragen mit mindestens drei
+  Antworten: Die richtige Antwort ist die längste auf Stufe 1 in 35 %, auf
+  Stufe 2 in 48 %, auf Klausurniveau in 59 % der Fragen; bei Zufall wären es
+  etwa 26 %. Wer immer die längste antippt, kommt also weit, und der
+  Klausur-Überblick zeigt mehr Sicherheit an, als da ist. Am stärksten:
+  Periodensystem (alle Stufen), Zwischenmolekulare Kräfte und Ionen auf
+  Klausurniveau, Energie und Trends ab Stufe 2, Metalle, Moleküle,
+  Reaktionsgleichungen. Umgekehrt ist die richtige Antwort fast nie die
+  kürzeste, und bei „Trends“ Stufe 1 ist sie zu oft die kürzeste.
+  Vorgehen: falsche Antworten so genau und lang formulieren wie die
+  richtige (oder die richtige straffen), ohne den Inhalt zu ändern; bei
+  „Welche Aussage ist falsch?“ ebenso. Ein Test misst je Thema und Stufe, wie
+  oft die richtige Antwort die längste und wie oft die kürzeste ist
+  (sichtbare Länge, Formeln nach ihrem Inhalt gezählt; Fragen, deren längste
+  Antwort kürzer als etwa 30 Zeichen ist, zählen nicht mit), und erlaubt
+  höchstens den Wert bei Zufall plus 10 Prozentpunkte; er gilt für alle
+  neuen Fragen mit. Inhaltliche Prüfung wie immer.
+- **S13: Fortschritt sichern** (Durchsicht 14.11.2026, gilt für die ganze
+  App). Der Fortschritt liegt nur im Speicher des Browsers; ein neues Handy
+  oder gelöschte Browserdaten löschen ihn. Die App bittet den Browser, die
+  Daten dauerhaft zu behalten, und bekommt in den Einstellungen „Fortschritt
+  sichern“ (eine Datei zum Ablegen, z. B. in der Cloud des Handys) und
+  „Fortschritt laden“ (mit Rückfrage, ersetzt den Stand); dazu, wann zuletzt
+  gesichert wurde. Browser-Test: sichern, löschen, laden, alles wieder da.
 
 #### Nach Teil 1 der Klausur
 Die Reihenfolge richtet sich nach dem Termin von Teil 2: Kommt Teil 2 bald,

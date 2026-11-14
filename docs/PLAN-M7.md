@@ -476,6 +476,10 @@ Request.
 12. **Inverse und Matrizengleichungen:** 2×2 mit Formel, 3×3 mit Gauß-Jordan Zeile für Zeile, Matrizengleichung erst
     allgemein nach $X$ auflösen (wie beim Umstellen), dann ausrechnen.
 13. **Abschluss:** Mischen über alle drei Tätigkeiten, Abwechslung gemessen, Prüfung aus mehreren Blickwinkeln, Doku.
+    Dazu die Befunde der Durchsicht vom 14.11.2026 (docs/ROADMAP.md, „Vorgemerkt“): Gleichungssysteme mit Parameter
+    auf Stufe 5 am Handy rechts abgeschnitten (Tabelle und $\vec b$, etwa jede 25. Aufgabe); große Vektorbilder auf
+    eine Höhe begrenzen, bei der die Antworten noch zu sehen sind; Stufe 1 „in der Ebene“ passt nicht zu Kreuz- und
+    Spatprodukt. Danach kommt M13 (Klausurmodus Mathe).
 
 Größere Schritte (vor allem 1, 4, 10) werden bei Bedarf in Teile geteilt (1a, 1b …), damit jeder Teil schnell zum
 Ausprobieren kommt.
