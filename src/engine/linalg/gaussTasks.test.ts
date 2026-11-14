@@ -79,6 +79,8 @@ function expectRenderable(text: string, context: string) {
 // unabhängige Gegenprobe: Fall und Lösung
 function verify(task: VectorTask, context: string) {
   const { n, T, A } = system(task)
+  // jede Unbekannte steht in mindestens einer Gleichung (sonst sähe man sie in der Aufgabe nicht)
+  for (let j = 0; j < n; j++) expect(A.some((row) => row[j] !== 0), `${context}: Unbekannte ${j + 1} kommt nicht vor`).toBe(true)
   const rA = rank(A)
   const rT = rank(T)
   const parts = readResult(task.resultLatex!)!
