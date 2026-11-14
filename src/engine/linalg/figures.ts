@@ -86,6 +86,22 @@ export type VectorDrawing = {
   readonly playLabel?: string
   // typischer Fehler zum Einblenden (Schritt 3, Knopf „Typischen Fehler zeigen"): rote Teile und eine Erklärung
   readonly mistake?: DrawMistake
+  // Punkte, die zum Ausschnitt gehören, ohne gezeichnet zu werden (Schieberegler, Schritt 11c: alle Bilder im selben Ausschnitt)
+  readonly extent?: readonly (readonly number[])[]
+  // Schieberegler für einen Parameter (Schritt 11c): Das Bild selbst ist frames[start]
+  readonly slider?: DrawSlider
+}
+
+// Schieberegler (M7 Schritt 11c): je Stelle des Parameters ein fertiges Bild (gleicher Ausschnitt über extent), die
+// Oberfläche zeigt das Bild der gewählten Stelle. Besondere Stellen (Sonderwerte, gesuchte Werte) bekommen Knöpfe.
+export type DrawSlider = {
+  // Name des Parameters (LaTeX ohne $), z. B. a
+  readonly name: string
+  readonly values: readonly number[]
+  readonly frames: readonly VectorDrawing[]
+  readonly start: number
+  // Nummer der Stelle in values und kurzer Text (mit Formeln), z. B. „keine Lösung“
+  readonly marks: readonly { readonly index: number; readonly note: string }[]
 }
 
 export type DrawMistake = {
@@ -108,6 +124,7 @@ export function drawingCoordinates(d: VectorDrawing): (readonly number[])[] {
     ...d.segments.flatMap((s) => [s.from, s.to, ...(s.slideFrom ?? [])]),
     ...d.polygons.flatMap((p) => [...p.points, ...(p.from ?? [])]),
     ...(d.angles ?? []).map((a) => a.at),
+    ...(d.extent ?? []),
     // Winkel über 180° (Schritt 3b): Platz für Bogen und Beschriftung auf der anderen Seite
     ...(d.angles ?? []).filter((a) => a.ccw).map((a) => anglePath(a, 0.15 * Math.min(Math.hypot(...a.u), Math.hypot(...a.v))).labelAt),
     // der typische Fehler gehört zum Ausschnitt, damit das Bild beim Einblenden nicht springt

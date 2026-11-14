@@ -6,6 +6,7 @@ paths:
   - "src/engine/linalg/cramer*"
   - "src/engine/linalg/lgsp*"
   - "src/engine/linalg/eqs*"
+  - "src/engine/linalg/paramSlider*"
   - "src/engine/linalg/falk.ts"
   - "src/engine/linalg/sarrus*"
   - "src/ui/draw/SarrusScheme.tsx"
@@ -168,3 +169,14 @@ freier Modus `vectorFree.ts`, `buildVectorTask` wählt die Arten nach dem Bauste
   Rechenweg von der Lösung erfüllt und keine falsche gleichwertig, Auflösen, Faktoren, Lösungsmenge, Parameter, Substitution,
   Werte, Fälle, Bilder, freier Modus), Browser-Test in
   `e2e/matrices.spec.ts`.
+- Bilder mit Parameter (Schritt 11c): `paramSlider` in `gaussFigures.ts` (Eingabe `rowsAt(a)` mit Kommazahlen, Sonderwerte,
+  gesuchte Werte `targets` mit Text, `start`, `fixed`), Stellen aus `sliderValues`, je Stelle ein Bild aus `systemParts`
+  (gemeinsam mit `systemDrawing`: Mitte fest, ohne Phasen, ohne Koordinaten von S, Teile weiter als `SLIDER_FAR` weg
+  bleiben weg und die Beschreibung sagt es; Zeilen 0 = c werden genannt, nicht gezeichnet), Lösung über
+  `numericSolution`. `VectorDrawing.slider` (`DrawSlider`: values, frames, start, marks) und `extent` (gemeinsamer
+  Ausschnitt) in `figures.ts`; `lineDir` zeigt immer nach rechts (gleiche Geraden tragen ihre Namen an verschiedenen
+  Enden). Angehängt als `resultDrawing` bei allen `lgsp…` (`sliderOf`, b fest beim gefundenen Wert), `cramerParam…`
+  (`paramSliderOf`) und `eqsParam`. Cramer als Flächen: `cramerArea` in `cramerTasks.ts` (2 × 2 ohne Parameter, als
+  `solvedDrawing` an `wert-x` und `loesung`; Flächen mit `from`, Knopf „Strecken und Scheren“, nicht bei Wert 0 oder
+  über `AREA_SPAN`). Tests in `linalg/paramSlider.test.ts` (Zeilen aus `task.data` neu eingesetzt, eigener Rang, Fall
+  in der Beschreibung, Knöpfe, S mit dem gesuchten Wert; Flächen = |det A| und |det A_k|, Verhältnis = Lösung).

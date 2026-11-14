@@ -4,7 +4,7 @@ import { type Rational, ONE, ZERO, isInteger, isOne, isZero, rat, ratAbs, ratAdd
 import type { Level } from '../tasks/taskNumber.ts'
 import { termsLatex } from './crossTasks.ts'
 import type { VectorDrawing } from './figures.ts'
-import { elimDrawing, sceneCenter, systemDrawing } from './gaussFigures.ts'
+import { elimDrawing, paramSlider, sceneCenter, systemDrawing } from './gaussFigures.ts'
 import { LGS_CASES } from './gaussTasks.ts'
 import { type Built, type VectorKind, type Wrong, choiceStep, math } from './taskKit.ts'
 import { ratLatex, vecLatex } from './vec.ts'
@@ -1221,6 +1221,18 @@ function buildParam(rng: Rng): Built | null {
   steps.push(caseStep(rng, flat, `Was gilt für $a = ${ratLatex(a0)}$? Dann heißt die Gleichung $${rowLatex(flat, vars)}$.`, [EQS_CARD.tricks, EQS_CARD.wann], `Für $a = ${ratLatex(a0)}$ steht vor $${vars[w]}$ eine $0$, es bleibt $${rowLatex(flat, vars)}$.`, vars[w]))
   const kase: Case = none ? 'none' : 'inf'
   if (!steps.every((s) => s.choices.length >= (s.id === 'deuten' ? 3 : 4))) return null
+  // Schieberegler für a (Schritt 11c): die beiden Geraden an jeder Stelle
+  const slider = paramSlider({
+    rowsAt: (x) =>
+      [0, 1].map((r) => {
+        const row = [0, 0, num(cs[r])]
+        row[w] = r === pr ? num(k) * x + num(l) : num(other)
+        row[e] = num(be[r])
+        return row
+      }),
+    n: 2,
+    specials: [num(a0)],
+  })
   return {
     kind: 'eqsParam',
     instruction: `Das Gleichungssystem hängt von $a$ ab. Für welches $a$ hat es nicht genau eine Lösung, und was gilt dort? Rechne mit dem ${METHOD_NAME.add}.`,
@@ -1228,6 +1240,7 @@ function buildParam(rng: Rng): Built | null {
     steps,
     cards: [EQS_CARD.tricks, EQS_CARD.addieren],
     resultLatex: `a = ${ratLatex(a0)},\\; \\text{${LGS_CASES[CASE_INDEX[kase]]}}`,
+    ...(slider ? { resultDrawing: slider } : {}),
     form: `eqsParam|${w}${pr}|${kase}|${sgn(k)}${isOne(ratAbs(k)) ? 1 : ''}|${sgn(a0)}|${isZero(l) ? 0 : 1}|${be.map(sgn).join('')}|${sgn(other)}`,
     data: { ...dataOf(at(ZERO)), A1: at(ONE).flatMap(nrow), special: [num(a0)] },
     answer: [num(a0), CASE_INDEX[kase]],

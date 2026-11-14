@@ -1,6 +1,6 @@
 # Plan für Meilenstein 7: Vektoren, Geraden und Ebenen, Matrizen
 
-Status: **freigegeben** (Nutzer, 12.11.2026: „Passt alles“). Schritte 1a, 1b, 2a, 2b und 3a fertig (12.11.2026), 3b, 4a, 4b, 5, 6, 7a, 7b, 8a, 8b, 9a, 9b, 10a, 10b und 11a fertig (13.11.2026), 11b fertig (14.11.2026); offen ab 11c.
+Status: **freigegeben** (Nutzer, 12.11.2026: „Passt alles“). Schritte 1a, 1b, 2a, 2b und 3a fertig (12.11.2026), 3b, 4a, 4b, 5, 6, 7a, 7b, 8a, 8b, 9a, 9b, 10a, 10b und 11a fertig (13.11.2026), 11b und 11c fertig (14.11.2026); offen ab 12.
 
 Entwurf zum Ansehen und Anfassen (privat, nur für den Nutzer):
 https://claude.ai/artifact/WXe4sjavAGF64jyAWSa3hi. Er zeigt acht Bilder und Aufgaben im geplanten Stil. Die Seite ist
@@ -459,9 +459,20 @@ Request.
       Schritt. Bei nur einem Sonderwert heißt die Frage „Was gilt dort?“ (vorher verriet „Für welche $a$ keine Lösung?“ die
       Antwort); frei: $a = \dots$ und die Auswahl. „Determinante zuerst“ schon ab Stufe 2 und auch in Stufe 5. Dasselbe für
       die Zahlen im Baustein „Gauß-Verfahren“ (10a).
-    - **11c:** Bilder: Schieberegler für den Parameter (Geraden bzw. Ebenen bewegen sich, bei den Sonderwerten parallel
+    - **11c (fertig, 14.11.2026):** Bilder: Schieberegler für den Parameter (Geraden bzw. Ebenen bewegen sich, bei den Sonderwerten parallel
       oder gleich), Cramer als Flächen (2 × 2: $x$ ist das Verhältnis der Parallelogramme aus $\vec b, \vec a_2$ und
-      $\vec a_1, \vec a_2$).
+      $\vec a_1, \vec a_2$). **Umgesetzt:** Beim Ergebnis jeder Aufgabe mit Parameter $a$ (alle Arten von
+      „Gleichungssysteme mit Parameter“, Cramer mit Parameter, „Einsetzen, Gleichsetzen, Addieren“ mit Parameter) ein
+      Schieberegler: $a$ in Vierteln (bei großem Bereich Halben) von 3 unter bis 3 über den besonderen Stellen, die
+      Sonderwerte und gesuchten Werte genau; je Stelle ein fertiges Bild im selben Ausschnitt. Start beim gesuchten Wert
+      (bei Cramer und „Wert vorgegeben“ dort der Punkt $S$ in der Mitte, sonst beim ersten Sonderwert der Antwort). Unter dem
+      Regler Knöpfe „$a = 3$ keine Lösung“ bzw. „$a = 4$ $y = 2$“. Die Beschreibung nennt je Stelle den Fall; läuft der
+      Schnittpunkt weit weg, sagt sie „außerhalb des Bildes“. Mit zweitem Parameter $b$ steht $b$ fest beim gefundenen
+      Wert. Kein Abspielen. Cramer als Flächen bei $2 \times 2$ ohne Parameter nach der Antwort zu $x$ und zur Lösung
+      ($y$): Parallelogramm der Spalten (Fläche $|\det A|$), „Strecken und Scheren“: die Spalte der Unbekannten mit ihrem
+      Wert gestreckt (grau), dann die Ecke parallel zur anderen Spalte bis $\vec b$ geschoben (blaugrün, Fläche
+      $|\det A_k|$). Kein Bild bei Wert 0 oder wenn es breiter oder höher als 22 Einheiten würde (etwa ein Drittel der
+      Aufgaben); auch auf der Lernkarte „Cramersche Regel“.
 12. **Inverse und Matrizengleichungen:** 2×2 mit Formel, 3×3 mit Gauß-Jordan Zeile für Zeile, Matrizengleichung erst
     allgemein nach $X$ auflösen (wie beim Umstellen), dann ausrechnen.
 13. **Abschluss:** Mischen über alle drei Tätigkeiten, Abwechslung gemessen, Prüfung aus mehreren Blickwinkeln, Doku.
