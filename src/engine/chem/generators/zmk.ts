@@ -39,7 +39,7 @@ const HB = {
   noH: 'Nein: Kein H-Atom sitzt direkt an N, O oder F.',
   anyH: 'Ja: Das Molekül enthält H-Atome.',
   other: 'Ja: Das H-Atom sitzt an einem elektronegativen Atom wie Cl, Br, I oder S.',
-  waterOnly: 'Nein: Wasserstoffbrücken gibt es nur zwischen Wassermolekülen.',
+  waterOnly: 'Nein: Wasserstoffbrücken gibt es nur zwischen Wassermolekülen, nicht bei anderen Stoffen.',
 }
 
 function hbondStep(x: ZmkSubstance, rng: Rng, focus?: string): GuidedStep | null {
@@ -66,7 +66,7 @@ function hbondStep(x: ZmkSubstance, rng: Rng, focus?: string): GuidedStep | null
   }
 }
 
-const INTRA = 'die Atombindungen innerhalb der Moleküle'
+const INTRA = 'die Atombindungen im Molekül'
 
 function forceStep(x: ZmkSubstance, rng: Rng, focus?: string): GuidedStep | null {
   const force = forceOf(x)
@@ -105,7 +105,7 @@ function forceStep(x: ZmkSubstance, rng: Rng, focus?: string): GuidedStep | null
 
 const BOIL_TEXT = {
   inter: 'nur die Kräfte zwischen den Molekülen; die Moleküle selbst bleiben ganz',
-  intra: 'die Atombindungen in den Molekülen; die Moleküle zerfallen in Atome',
+  intra: 'die Atombindungen innerhalb der Moleküle; die Moleküle zerfallen dabei in ihre Atome',
   both: 'die Kräfte zwischen den Molekülen und die Atombindungen in ihnen',
 }
 
@@ -184,11 +184,11 @@ const structures = (subs: readonly ZmkSubstance[]) =>
 const orderText = (ids: readonly string[]) => ids.map((id) => `$${ce(id)}$`).join(' < ')
 
 const REASON: Readonly<Record<BoilRule, string>> = {
-  mass: 'Alle haben dieselbe Art von stärkster Kraft; größere Moleküle haben stärkere Van-der-Waals-Kräfte.',
+  mass: 'Gleiche Art der stärksten Kraft: Größere Moleküle haben stärkere Van-der-Waals-Kräfte.',
   force: 'Die Molmassen sind ähnlich; es entscheidet die Art der stärksten Kraft.',
-  'force-then-mass': 'Zuerst die Wasserstoffbrücken, die viel stärker sind; bei gleicher Art der Kraft dann die Größe der Moleküle.',
+  'force-then-mass': 'Zuerst die viel stärkeren Wasserstoffbrücken, bei gleicher Art der Kraft dann die Größe der Moleküle.',
 }
-const REASON_INTRA = 'Die Zahl der Atombindungen im Molekül, denn sie müssen beim Sieden aufbrechen.'
+const REASON_INTRA = 'Die Zahl der Atombindungen im Molekül, denn je mehr es sind, desto mehr müssen beim Sieden aufbrechen.'
 
 function boilTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCalc | null {
   const ids = pickBoilSet(level, rng)

@@ -314,7 +314,10 @@ const TEMPERATURES = [25, 100, 200, 300, 400, 500, 600]
 
 const EXERGON = 'Sie läuft freiwillig ab, $\\Delta G < 0$ (exergonisch).'
 const ENDERGON = 'Sie läuft nicht freiwillig ab, $\\Delta G > 0$ (endergonisch).'
-const BY_DH = { exo: 'Sie läuft freiwillig ab, weil sie exotherm ist.', endo: 'Sie läuft nicht freiwillig ab, weil sie endotherm ist.' }
+const BY_DH = {
+  exo: 'Sie läuft freiwillig ab, weil sie exotherm ist ($\\Delta H < 0$).',
+  endo: 'Sie läuft nicht freiwillig ab, weil sie endotherm ist ($\\Delta H > 0$).',
+}
 
 const kelvinLatex = (theta: number) => r`T = ${theta} + 273{,}15 = ${dec(ratAdd(rat(theta), KELVIN))}\,\mathrm{K}`
 
@@ -530,7 +533,8 @@ function limitTask(level: Level, rng: Rng, ref: TaskRef, focus?: string): ChemCa
     { key: correct, content: correct },
     [
       textWrong('chem-dg-sign', text(!above)),
-      textWrong('chem-dg-enthalpy-only', above ? 'Bei keiner Temperatur, weil sie endotherm ist.' : 'Bei jeder Temperatur, weil sie exotherm ist.'),
+      // Länge (Ratefallen): „Oberhalb“ ist ein Zeichen kürzer als „Unterhalb“; der exotherme Fall bekommt deshalb den längeren Text
+      textWrong('chem-dg-enthalpy-only', above ? 'Bei keiner Temperatur, weil sie endotherm ist.' : 'Bei jeder Temperatur, weil exotherme Reaktionen freiwillig ablaufen.'),
     ],
     focus,
   )
