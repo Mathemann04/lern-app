@@ -1333,3 +1333,7 @@ Neue Entscheidungen unten anfügen.
   Parameter und nur bis 22 Einheiten Breite und Höhe (sonst wird das Parallelogramm von $A$ winzig); das trifft etwa
   zwei Drittel der Aufgaben. Gleiche Geraden tragen ihre Namen jetzt an verschiedenen Enden (vorher verdeckte „II“ das
   „I“).
+- 14.11.2026: Funde der unabhängigen Prüfung zu M7 Schritt 11c behoben (die Mathematik der Bilder war richtig, Texte nicht
+  immer): Wird beim Schieben eine Gleichung zu $0 = 0$, zählt die Beschreibung sie nicht mehr mit („Übrig ist nur
+  Gerade I“ statt „Beide Gleichungen …“); liegen Schnittgeraden außerhalb des Bildes, sagt sie es; auf der Lernkarte
+  „Cramersche Regel“ hieß es, Strecken und Scheren hielten die Fläche gleich (nur das Scheren tut es).
