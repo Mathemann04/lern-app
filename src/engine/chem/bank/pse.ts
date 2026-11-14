@@ -571,7 +571,7 @@ export const PSE_BANK: QuestionBank = {
       part: 'ionisierung',
       title: 'Ionisierungsenergie von Natrium',
       prompt: r`Bei Natrium ist $I_{2} = 4562$ kJ/mol fast zehnmal so groß wie $I_{1} = 496$ kJ/mol. Warum?`,
-      correct: r`Das zweite Elektron kommt aus der vollen 2. Schale; $\ce{Na+}$ ist wie Neon gebaut.`,
+      correct: r`Weil das zweite Elektron aus der vollen 2. Schale kommt; $\ce{Na+}$ ist wie Neon gebaut.`,
       wrong: [
         w('f1', 'Weil Natrium zwei Valenzelektronen hat.', 'chem-mis-pse-group-number', why('Dann käme auch das zweite Elektron aus der äußersten Schale, und der Sprung läge später. Natrium steht in der I. Hauptgruppe.', 'Natrium steht in der I. Hauptgruppe.')),
         w('f2', 'Weil bei jedem Atom das zweite Elektron zehnmal schwerer zu entfernen ist als das erste.', 'chem-mis-pse-ie-decrease', why('Bei Magnesium ist $I_{2}$ nur etwa doppelt so groß wie $I_{1}$. Eine feste Regel „mal zehn“ gibt es nicht.', 'Bei Magnesium ist es etwa das Doppelte.')),
@@ -628,7 +628,7 @@ export const PSE_BANK: QuestionBank = {
       part: 'ionen',
       title: 'IV. Hauptgruppe',
       prompt: 'Warum bildet Kohlenstoff kaum einfache Ionen?',
-      correct: 'Er müsste vier Elektronen abgeben oder aufnehmen; Atombindungen sind günstiger.',
+      correct: 'Weil er vier Elektronen abgeben oder aufnehmen müsste; Atombindungen sind günstiger.',
       wrong: [
         w('f1', 'Weil er schon die Konfiguration eines Edelgases hat und deshalb kaum reagiert.', 'chem-mis-pse-noble-reactive', why('Kohlenstoff hat vier Valenzelektronen, also kein Oktett.', 'Kohlenstoff hat vier Valenzelektronen.')),
         w('f2', 'Weil er keine Valenzelektronen hat.', 'chem-mis-pse-noble-reactive', why('Kohlenstoff steht in der IV. Hauptgruppe und hat Valenzelektronen.', 'Er hat Valenzelektronen.')),
@@ -954,7 +954,7 @@ export const PSE_BANK: QuestionBank = {
       part: 'aufbau',
       title: 'Länge der Perioden',
       prompt: 'Die 2. und 3. Periode haben je 8 Elemente, die 4. Periode hat 18. Warum?',
-      correct: 'In der 4. Periode wird zusätzlich die 3d-Unterschale mit zehn Elektronen aufgefüllt.',
+      correct: 'Weil in der 4. Periode zusätzlich die 3d-Unterschale mit zehn Elektronen aufgefüllt wird.',
       wrong: [
         w('f1', 'Weil die 4. Schale 18 Elektronen fasst.', 'chem-mis-pse-row-column', why('Die 4. Schale fasst sogar 32. Die Länge einer Periode hängt davon ab, welche Unterschalen in ihr aufgefüllt werden.', 'Die 4. Schale fasst 32.')),
         w('f2', 'Weil in der 4. Periode zusätzlich die f-Unterschale mit ihren Elektronen aufgefüllt wird.', 'chem-mis-pse-block', why('Die 4f-Unterschale wird erst in der 6. Periode aufgefüllt.', '4f kommt erst später.')),
@@ -1030,7 +1030,7 @@ export const PSE_BANK: QuestionBank = {
       part: 'ionisierung',
       title: 'Ionenladung',
       prompt: r`Warum bildet Natrium kein $\ce{Na^2+}$?`,
-      correct: 'Das zweite Elektron käme aus der vollen 2. Schale; das kostet fast zehnmal so viel Energie.',
+      correct: 'Weil das zweite Elektron aus der vollen 2. Schale käme; das kostet fast zehnmal so viel Energie.',
       wrong: [
         w('f1', 'Weil Natrium nur ein Elektron hat.', 'chem-mis-pse-z-meaning', why('Natrium hat 11 Elektronen; nur eines davon ist ein Valenzelektron.', 'Natrium hat 11 Elektronen.')),
         w('f2', 'Weil das zweite Elektron zwar leichter abzugeben wäre, das Natriumatom es aber trotzdem behält.', 'chem-mis-pse-ie-decrease'),

@@ -554,7 +554,7 @@ export const TRENDS_BANK: QuestionBank = {
       part: 'ionenradien',
       title: 'Kation und Atom',
       prompt: r`Wie verhält sich die Größe von $\ce{Na+}$ zu der des Natriumatoms?`,
-      correct: r`$\ce{Na+}$ ist deutlich kleiner.`,
+      correct: r`$\ce{Na+}$ ist deutlich kleiner, weil die 3. Schale fehlt.`,
       wrong: [
         w('f1', r`$\ce{Na+}$ ist größer, weil es positiv geladen ist.`, 'chem-mis-tr-cation-larger', why('Die positive Ladung zieht die Hülle eher zusammen. Überlege, welche Elektronen beim Bilden des Ions verloren gehen.', 'Welche Elektronen gehen verloren?')),
         w('f2', r`Beide sind gleich groß, weil der Kern gleich bleibt.`, 'chem-mis-tr-constant', why('Der Kern bleibt gleich, aber die Hülle ändert sich. Die Größe bestimmt die Hülle.', 'Die Hülle ändert sich.')),
@@ -630,7 +630,7 @@ export const TRENDS_BANK: QuestionBank = {
       part: 'elektronegativitaet',
       title: 'Edelgase',
       prompt: 'Warum wird für Helium, Neon und Argon meist keine Elektronegativität angegeben?',
-      correct: 'Sie bilden kaum Bindungen; die Elektronegativität gilt für gebundene Atome.',
+      correct: 'Weil sie kaum Bindungen bilden; die Elektronegativität gilt für gebundene Atome.',
       wrong: [
         w('f1', 'Weil ihre Elektronegativität unendlich groß ist und sich nicht als Zahl angeben lässt.', 'chem-mis-tr-noble-en', why('Es gibt keine unendlich großen Werte; die Skala reicht bis etwa 4. Überlege, wofür die Elektronegativität überhaupt gedacht ist.', 'Die Skala reicht bis etwa 4.')),
         w('f2', 'Weil sie keine Elektronen haben.', 'chem-mis-tr-noble-en', why('Edelgase haben Elektronen wie alle Atome. Überlege, wofür die Elektronegativität überhaupt gedacht ist.', 'Edelgase haben Elektronen.')),
@@ -782,7 +782,7 @@ export const TRENDS_BANK: QuestionBank = {
       part: 'ionisierung',
       title: 'Ionisierungsenergie begründen',
       prompt: 'Warum ist die erste Ionisierungsenergie von Kalium kleiner als die von Natrium?',
-      correct: 'Sein Valenzelektron sitzt weiter außen und ist stärker abgeschirmt.',
+      correct: 'Weil sein Valenzelektron weiter außen sitzt und stärker abgeschirmt ist.',
       wrong: [
         w('f1', 'Weil Kalium weniger Protonen hat.', 'chem-mis-tr-radius-protons', why('Kalium hat mehr Protonen als Natrium (19 statt 11). Der Grund liegt woanders.', 'Kalium hat mehr Protonen.')),
         w('f2', 'Weil Kalium schwerer ist.', 'chem-mis-tr-radius-mass', why('Die Masse bestimmt nicht, wie fest ein Elektron gebunden ist. Es kommt darauf an, wo das Valenzelektron sitzt.', 'Die Masse spielt keine Rolle.')),
@@ -898,7 +898,7 @@ export const TRENDS_BANK: QuestionBank = {
       part: 'elektronegativitaet',
       title: 'Elektronegativität begründen',
       prompt: 'Warum nimmt die Elektronegativität innerhalb einer Periode nach rechts zu?',
-      correct: 'Die Kernladung wächst, die Atome werden kleiner, und die Bindungselektronen werden stärker angezogen.',
+      correct: 'Weil die Kernladung wächst, die Atome kleiner werden und die Bindungselektronen stärker angezogen werden.',
       wrong: [
         w('f1', 'Weil die Atome nach rechts größer werden.', 'chem-mis-tr-radius-electrons'),
         w('f2', 'Weil die Atome nach rechts mehr Schalen haben, die Elektronen aufnehmen.', 'chem-mis-tr-radius-electrons', why('In einer Periode bleibt die Zahl der Schalen gleich.', 'Gleiche Zahl der Schalen.')),

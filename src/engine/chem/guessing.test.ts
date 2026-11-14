@@ -62,3 +62,24 @@ describe('Ratefallen: Länge der richtigen Antwort', () => {
     expect(stat.shortest, `kürzeste: ${percent(stat.shortest)} bei ${stat.count} Auswahlen, mindestens ${percent(lower)}`).toBeGreaterThanOrEqual(lower)
   })
 })
+
+// Auch die Form darf die richtige Antwort nicht verraten (Fund der inhaltlichen Prüfung zu S12): Beginnen alle falschen mit
+// „Weil“, tut es die richtige auch; enden alle falschen mit Punkt (oder keine), dann auch die richtige; beginnen alle falschen
+// groß (oder alle klein), dann auch die richtige.
+describe('Ratefallen: Form der richtigen Antwort', () => {
+  const firstWord = (t: string) => t.trim().split(/[\s,;:]/)[0]
+  const endsWithDot = (t: string) => /[.!?]$/.test(t.trim())
+  const startCase = (t: string) => (/^[A-ZÄÖÜ]/.test(t.trim()) ? 'groß' : /^[a-zäöü]/.test(t.trim()) ? 'klein' : 'anders')
+  it.each(CHEM_TOPICS.map((t) => [t.bank.course, t] as const))('%s', (_course, topic) => {
+    for (const q of topic.bank.questions) {
+      if (q.kind !== 'single') continue
+      const wrong = q.wrong.map((w) => w.text)
+      const right = q.correct.text
+      if (wrong.every((w) => firstWord(w) === 'Weil')) expect(firstWord(right), `${q.id}: nur die richtige ohne „Weil“`).toBe('Weil')
+      if (wrong.every(endsWithDot)) expect(endsWithDot(right), `${q.id}: nur die richtige ohne Punkt`).toBe(true)
+      if (!wrong.some(endsWithDot)) expect(endsWithDot(right), `${q.id}: nur die richtige mit Punkt`).toBe(false)
+      const cases = new Set(wrong.map(startCase))
+      if (cases.size === 1 && !cases.has('anders') && startCase(right) !== 'anders') expect(startCase(right), `${q.id}: Anfang groß oder klein`).toBe([...cases][0])
+    }
+  })
+})

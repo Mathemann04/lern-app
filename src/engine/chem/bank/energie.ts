@@ -616,7 +616,7 @@ export const ENERGIE_BANK: QuestionBank = {
       part: 'reaktionsenthalpie',
       title: 'Elemente in der Rechnung',
       prompt: r`Warum spielt $\ce{O2(g)}$ beim Berechnen von $${DH}^{0}$ einer Verbrennung zahlenmäßig keine Rolle?`,
-      correct: 'Seine Standardbildungsenthalpie ist 0.',
+      correct: 'Weil seine Standardbildungsenthalpie 0 ist.',
       wrong: [
         w('f1', 'Weil Gase in der Rechnung nicht zählen, nur Flüssigkeiten und Feststoffe.', 'chem-mis-en-state', why('Auch Gase wie $\\ce{CO2(g)}$ zählen mit ihrem Tabellenwert. Bei Sauerstoff ist der Wert aus einem anderen Grund unerheblich.', 'Gase zählen auch.')),
         w('f2', 'Weil man die Edukte nie berücksichtigt.', 'chem-mis-en-reversed', why('Die Edukte werden abgezogen; sie zählen also mit. Bei Sauerstoff ist der Wert aus einem anderen Grund unerheblich.', 'Edukte zählen mit.')),
@@ -659,7 +659,7 @@ export const ENERGIE_BANK: QuestionBank = {
         w('f1', 'an der Zahl der verschiedenen Stoffe auf der linken und der rechten Seite', 'chem-mis-en-gas-count', why('Ein einziger Stoff mit großem Koeffizienten kann mehr Gas bedeuten als zwei Stoffe mit kleinem. Überlege, was die Gleichung wirklich zählt.', 'Was zählt die Gleichung wirklich?')),
         w('f2', r`am Vorzeichen von $${DH}$`, 'chem-mis-en-exergonic-exotherm', why('Enthalpie und Entropie sind verschiedene Größen; das Vorzeichen der einen verrät nichts über das der anderen.', 'Verschiedene Größen.')),
         w('f3', 'an der Masse der Produkte', 'chem-mis-en-entropy-order', why('Die Masse bleibt bei jeder Reaktion erhalten. Für die Entropie zählt, wie frei die Teilchen beweglich sind.', 'Die Masse bleibt gleich.')),
-        w('f4', 'an der Temperatur, bei der die Reaktion abläuft: je heißer, desto größer', 'chem-mis-en-dg-temp', why('Die Temperatur bestimmt, wie stark $T \\cdot \\Delta S$ ins Gewicht fällt, nicht das Vorzeichen von $\\Delta S$.', 'T verstärkt nur den Beitrag.')),
+        w('f4', 'an der Temperatur, bei der die Reaktion abläuft: je heißer, desto eher positiv', 'chem-mis-en-dg-temp', why('Die Temperatur bestimmt, wie stark $T \\cdot \\Delta S$ ins Gewicht fällt, nicht das Vorzeichen von $\\Delta S$.', 'T verstärkt nur den Beitrag.')),
       ],
       hint: 'Welche Teilchen haben besonders viel Entropie?',
       explanation: why('Gase haben viel mehr Entropie als Flüssigkeiten und Feststoffe. Entsteht mehr Gas (mit Koeffizienten gezählt), ist meist $\\Delta S > 0$, sonst $\\Delta S < 0$.', 'Änderung der Stoffmenge an Gas.'),
@@ -673,7 +673,7 @@ export const ENERGIE_BANK: QuestionBank = {
       part: 'entropie',
       title: 'Gefrieren und zweiter Hauptsatz',
       prompt: 'Im Gefrierfach wird Wasser zu Eis, die Entropie des Wassers nimmt also ab. Widerspricht das dem zweiten Hauptsatz?',
-      correct: 'Nein: Das Wasser ist nicht abgeschlossen; seine Wärme erhöht die Entropie der Umgebung.',
+      correct: 'Nein: Das Wasser ist kein abgeschlossenes System; die abgegebene Wärme erhöht die Entropie der Umgebung.',
       wrong: [
         w('f1', 'Ja; im Gefrierfach gilt der zweite Hauptsatz nicht.', 'chem-mis-en-second-law', why('Der zweite Hauptsatz gilt überall. Er spricht aber von einem abgeschlossenen System; überlege, ob das Wasser im Gefrierfach eines ist.', 'Ist das Wasser abgeschlossen?')),
         w('f2', 'Nein, denn beim Gefrieren nimmt die Entropie zu.', 'chem-mis-en-phase-ds'),
@@ -787,7 +787,7 @@ export const ENERGIE_BANK: QuestionBank = {
       part: 'freie-enthalpie',
       title: 'Diamant und Graphit',
       prompt: r`Die Umwandlung von Diamant in Graphit hat bei 25 °C ein negatives $${DG}$. Warum bleibt ein Diamant trotzdem ein Diamant?`,
-      correct: 'Die Umwandlung ist extrem langsam; freiwillig heißt nicht schnell.',
+      correct: 'Weil die Umwandlung extrem langsam ist; freiwillig heißt nicht schnell.',
       wrong: [
         w('f1', r`Weil ein negatives $${DG}$ bedeutet, dass nichts passiert.`, 'chem-mis-en-exergonic-sign'),
         w('f2', r`Weil freiwillige Vorgänge immer schnell sind; das negative $${DG}$ muss also falsch sein.`, 'chem-mis-en-spont-fast', why('Das negative $\\Delta G$ stimmt. Überlege, welche Größe aus dem Energiediagramm bestimmt, wie schnell etwas passiert.', 'Das negative ΔG stimmt.')),
@@ -1112,7 +1112,7 @@ export const ENERGIE_BANK: QuestionBank = {
       part: 'freie-enthalpie',
       title: 'Erst bei hoher Temperatur',
       prompt: r`Warum läuft eine Reaktion mit $${DH} > 0$ und $${DS} > 0$ erst oberhalb einer bestimmten Temperatur freiwillig ab?`,
-      correct: r`Erst dann ist $T \cdot ${DS}$ größer als $${DH}$, sodass $${DG}$ negativ wird.`,
+      correct: r`Weil erst dann $T \cdot ${DS}$ größer als $${DH}$ ist, sodass $${DG}$ negativ wird.`,
       wrong: [
         w('f1', 'Weil erst bei hoher Temperatur genug Teilchen die Aktivierungsenergie überwinden.', 'chem-mis-en-spont-fast'),
         w('f2', r`Weil $${DH}$ bei hoher Temperatur negativ wird.`, 'chem-mis-en-dg-temp', why('$\\Delta H$ ändert sich mit der Temperatur kaum. Sieh dir den anderen Term der Gleichung an.', 'Sieh dir den anderen Term an.')),

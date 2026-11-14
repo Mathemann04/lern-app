@@ -1049,7 +1049,7 @@ export const IONEN_BANK: QuestionBank = {
       part: 'energie',
       title: "Wozu Born-Haber?",
       prompt: "Warum bestimmt man die Gitterenergie mit dem Born-Haber-Kreisprozess?",
-      correct: { id: 'r', text: "Sie lässt sich nicht direkt messen; man berechnet sie aus messbaren Schritten, weil die Energie von den Elementen zum Salz nicht vom Weg abhängt." },
+      correct: { id: 'r', text: "Weil sie sich nicht direkt messen lässt; man berechnet sie aus messbaren Schritten, da die Energie von den Elementen zum Salz nicht vom Weg abhängt." },
       wrong: [
         { id: 'f1', text: "Weil Salze in der Industrie genau über diese Schritte hergestellt werden.", misconception: 'chem-mis-io-bh-real-path' },
         { id: 'f2', text: "Weil der Umweg über die Ionen mehr Energie liefert als der direkte Weg.", misconception: 'chem-mis-io-bh-path-dependent' },

@@ -607,7 +607,7 @@ export const STOFFMENGE_BANK: QuestionBank = {
       part: 'stoffmenge',
       title: "Wozu das Mol?",
       prompt: "Warum zählt man in der Chemie Teilchen in Mol und nicht einzeln?",
-      correct: { id: 'r', text: "Teilchen sind so winzig, dass schon eine kleine Portion riesig viele enthält; das Mol fasst sie zu handlichen Zahlen zusammen." },
+      correct: { id: 'r', text: "Weil Teilchen so winzig sind, dass schon eine kleine Portion riesig viele enthält; das Mol fasst sie zu handlichen Zahlen zusammen." },
       wrong: [
         { id: 'f1', text: "Weil sich Teilchen nicht zählen lassen, ist das Mol nur eine grobe Schätzung.", misconception: 'chem-mis-st-na-estimate' },
         { id: 'f2', text: "Weil ein Mol jedes Stoffes genau ein Gramm wiegt und sich so leicht abwiegen lässt.", misconception: 'chem-mis-st-mol-is-mass' },

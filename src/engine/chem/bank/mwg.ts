@@ -421,7 +421,7 @@ export const MWG_BANK: QuestionBank = {
       part: 'katalysator',
       title: 'Katalysator im Gleichgewicht',
       prompt: 'Welche Richtung einer Gleichgewichtsreaktion beschleunigt ein Katalysator?',
-      correct: 'Hin- und Rückreaktion gleichermaßen',
+      correct: 'beide gleichermaßen, Hin- und Rückreaktion',
       wrong: [
         w('f1', 'nur die Hinreaktion', 'chem-mis-gg-cat-one-way'),
         w('f2', 'nur die Rückreaktion', 'chem-mis-gg-cat-one-way'),
@@ -518,7 +518,7 @@ export const MWG_BANK: QuestionBank = {
       part: 'gleichgewicht',
       title: 'Warum konstant?',
       prompt: 'Weshalb bleiben die Konzentrationen im Gleichgewicht konstant, obwohl weiterhin Teilchen reagieren?',
-      correct: 'Jeder Stoff wird genauso schnell gebildet, wie er verbraucht wird.',
+      correct: 'Weil jeder Stoff genauso schnell gebildet wie verbraucht wird.',
       wrong: [
         w('f1', 'Weil alle Edukte aufgebraucht sind.', 'chem-mis-gg-complete'),
         w('f2', 'Weil die Teilchen im Gleichgewicht zu wenig Energie haben, um noch zu reagieren.', 'chem-mis-gg-stopped'),
@@ -978,10 +978,10 @@ export const MWG_BANK: QuestionBank = {
       part: 'le-chatelier',
       title: 'Ausbeute an Schwefeltrioxid',
       prompt: r`Für $\ce{2 SO2(g) + O2(g) <=> 2 SO3(g)}$ ist $\Delta H = -198\,\mathrm{kJ}$. Welche Bedingungen liefern im Gleichgewicht am meisten $\ce{SO3}$?`,
-      correct: 'hoher Druck, niedrige Temperatur',
+      correct: 'hoher Druck und niedrige Temperatur',
       wrong: [
         w('f1', 'niedriger Druck und niedrige Temperatur', 'chem-mis-gg-pressure-more'),
-        w('f2', 'hoher Druck und ebenfalls hohe Temperatur', 'chem-mis-gg-heat-products'),
+        w('f2', 'hoher Druck und dazu hohe Temperatur', 'chem-mis-gg-heat-products'),
         w('f3', 'niedriger Druck und hohe Temperatur', 'chem-mis-gg-pressure-more'),
         w('f4', 'ein Katalysator, denn er erhöht den Umsatz', 'chem-mis-gg-cat-shift'),
       ],
@@ -1113,7 +1113,7 @@ export const MWG_BANK: QuestionBank = {
       part: 'katalysator',
       title: 'Exotherm, aber kein Selbstläufer',
       prompt: 'Die Verbrennung von Holz ist exotherm. Warum brennt ein Streichholz trotzdem nicht von selbst?',
-      correct: 'Auch exotherme Reaktionen brauchen Aktivierungsenergie; das Anreiben liefert sie.',
+      correct: 'Weil auch exotherme Reaktionen Aktivierungsenergie brauchen; das Anreiben liefert sie.',
       wrong: [
         w('f1', 'Weil die Verbrennung in Wahrheit endotherm ist.', 'chem-mis-gg-exo-endo'),
         w('f2', 'Weil exotherme Reaktionen erst Wärme aufnehmen müssen, die sie dann behalten und nicht abgeben.', 'chem-mis-gg-exo-endo'),

@@ -282,4 +282,6 @@ Neues Wissen über diesen Bereich gehört hierher, nicht in CLAUDE.md.
   ist die längste/kürzeste“ und Wert bei Zufall; Auswahlen mit längster Antwort unter 30 Zeichen zählen nicht), Test
   `chem/guessing.test.ts` je Thema, Stufe und Art (Fragen: Zufall − 15 bis + 10 Prozentpunkte; Rechnungen nur die Obergrenze).
   Neue Fragen gleich so schreiben: falsche Antworten so genau wie die richtige (mit Begründung, wenn die richtige eine hat),
-  und je Stufe soll die richtige mal die längste, mal die kürzeste, meist in der Mitte sein.
+  und je Stufe soll die richtige mal die längste, mal die kürzeste, meist in der Mitte sein. Auch die Form verrät nichts
+  (Test „Form der richtigen Antwort“): beginnen alle falschen mit „Weil“, dann auch die richtige; Punkt am Ende und großer
+  oder kleiner Anfang wie bei den falschen.

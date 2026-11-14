@@ -1363,4 +1363,7 @@ Neue Entscheidungen unten anfügen.
   Themen fast nie mehr die längste und fast nie die kürzeste (2 bis 6 %); dann streicht man beide und rät aus der Mitte.
   Die Untergrenze gilt nur für Fragen; bei Rechnungen kommen die Texte aus wenigen festen Bausteinen (bei Trends immer
   dieselben drei Sätze), dort gilt nur die Obergrenze. Wo die richtige Antwort beim Kürzen Einzelheiten verlor, stehen
-  sie weiter in der Erklärung. Inhaltliche Prüfung aller geänderten Antworten durch eine unabhängige Prüfung.
+  sie weiter in der Erklärung. Inhaltliche Prüfung aller geänderten Antworten durch eine unabhängige Prüfung; sie fand
+  elf missglückte Formulierungen (behoben) und ein älteres Muster: Bei 17 Fragen begannen alle falschen Antworten mit
+  „Weil“, nur die richtige nicht. Jetzt beginnt auch die richtige mit „Weil“, und ein Test prüft solche Formmerkmale
+  („Weil“, Punkt am Ende, großer oder kleiner Anfang).

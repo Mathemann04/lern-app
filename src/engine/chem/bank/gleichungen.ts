@@ -49,7 +49,7 @@ const LEVEL_1: readonly Question[] = [
     part: 'lesen',
     title: 'Doppelpfeil',
     prompt: String.raw`Zwischen Edukten und Produkten steht der Doppelpfeil $\rightleftharpoons$. Was sagt er aus?`,
-    correct: { id: 'r', text: 'Die Reaktion läuft in beide Richtungen bis zu einem Gleichgewicht.' },
+    correct: { id: 'r', text: 'Hin- und Rückreaktion laufen ständig; es stellt sich ein Gleichgewicht ein.' },
     wrong: [
       { id: 'f1', text: 'Die Reaktion läuft vollständig ab, bis eines der Edukte ganz verbraucht ist.', misconception: 'chem-mis-gl-arrow', why: {
         detailed: String.raw`Eine Reaktion, die vollständig abläuft, schreibt man mit dem einfachen Pfeil $\rightarrow$. Der Doppelpfeil hat zwei Spitzen, und das hat einen Grund.`,

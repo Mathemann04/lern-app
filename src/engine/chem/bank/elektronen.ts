@@ -430,12 +430,12 @@ export const ELEKTRONEN_BANK: QuestionBank = {
       part: 'quantenzahlen',
       title: 'Energie der Orbitale',
       prompt: 'Wie unterscheiden sich die drei 2p-Orbitale eines Atoms in ihrer Energie?',
-      correct: 'gar nicht, sie sind energiegleich',
+      correct: 'Gar nicht; sie sind alle energiegleich.',
       wrong: [
         w('f1', 'Jedes hat eine andere Energie; das erste ist das energieärmste.', 'chem-mis-el-orbital-energy', why('Die Reihenfolge der drei p-Orbitale ist willkürlich; sie haben dieselbe Form und unterscheiden sich nur in ihrer Richtung im Raum.', 'Die Reihenfolge ist willkürlich.')),
         w('f2', 'Sie haben die Energie der 2s-Orbitale.', 'chem-mis-el-orbital-energy', why('2s und 2p sind verschiedene Unterschalen. Gleich sind nur die Energien der Orbitale innerhalb einer Unterschale.', 'Gleich ist es nur innerhalb einer Unterschale.')),
         w('f3', 'Das hängt davon ab, wie viele Elektronen gerade darin sitzen.', 'chem-mis-el-orbital-energy', why('Die Energie eines Orbitals in der Unterschale hängt nicht davon ab, ob es leer ist. Die drei p-Orbitale unterscheiden sich nur in ihrer Richtung.', 'Sie unterscheiden sich nur in der Richtung.')),
-        w('f4', 'Je weiter rechts im Bild, desto energiereicher.', 'chem-mis-el-orbital-energy', why('Die Reihenfolge der Kästchen im Bild ist nur eine Schreibweise. Die drei Orbitale unterscheiden sich allein in ihrer Richtung im Raum.', 'Die Reihenfolge im Bild ist willkürlich.')),
+        w('f4', 'Je weiter rechts im Kästchenbild, desto energiereicher.', 'chem-mis-el-orbital-energy', why('Die Reihenfolge der Kästchen im Bild ist nur eine Schreibweise. Die drei Orbitale unterscheiden sich allein in ihrer Richtung im Raum.', 'Die Reihenfolge im Bild ist willkürlich.')),
       ],
       hint: 'Die drei p-Orbitale unterscheiden sich nur in ihrer Ausrichtung.',
       explanation: why('Die Orbitale einer Unterschale haben dieselbe Energie und unterscheiden sich nur in ihrer Ausrichtung. Deshalb verteilen sich Elektronen darauf nach der Hund’schen Regel.', 'Energiegleich.'),
@@ -509,7 +509,7 @@ export const ELEKTRONEN_BANK: QuestionBank = {
       part: 'besetzung',
       title: 'Besetzungsreihenfolge',
       prompt: 'Warum wird bei Kalium das 19. Elektron in 4s und nicht in 3d eingebaut?',
-      correct: '4s liegt beim Auffüllen energetisch tiefer als 3d.',
+      correct: 'Weil 4s beim Auffüllen energetisch tiefer liegt als 3d.',
       wrong: [
         w('f1', 'Weil Unterschalen streng nach der Nummer der Schale besetzt werden.', 'chem-mis-el-order-n', why('Nach der Nummer der Schale käme 3d vor 4s. Besetzt wird aber nach der Energie der Unterschalen.', 'Es zählt die Energie, nicht die Nummer.')),
         w('f2', 'Weil die 3d-Unterschale schon voll ist.', 'chem-mis-el-order-n', why('Bei Kalium ist 3d noch ganz leer. Sie wird erst ab Scandium besetzt.', '3d ist bei Kalium leer.')),
@@ -566,7 +566,7 @@ export const ELEKTRONEN_BANK: QuestionBank = {
       part: 'besetzung',
       title: 'Ausnahme Kupfer',
       prompt: r`Kupfer hat die Konfiguration $[\mathrm{Ar}]\,4\mathrm{s}^{1}\,3\mathrm{d}^{10}$. Warum nicht $[\mathrm{Ar}]\,4\mathrm{s}^{2}\,3\mathrm{d}^{9}$?`,
-      correct: 'Eine ganz volle d-Unterschale ist besonders günstig; dafür wechselt ein 4s-Elektron.',
+      correct: 'Weil eine ganz volle d-Unterschale besonders günstig ist; dafür wechselt ein 4s-Elektron.',
       wrong: [
         w('f1', 'Weil 3d vor 4s besetzt wird.', 'chem-mis-el-order-n'),
         w('f2', 'Weil 4s nach dem Pauli-Prinzip nur ein einziges Elektron fassen darf, wenn 3d besetzt ist.', 'chem-mis-el-pauli-same', why('Jedes Orbital fasst zwei Elektronen, auch 4s; bei Zink sitzen dort zwei. Der Grund liegt in der Besetzung von 3d.', '4s fasst zwei Elektronen.')),
@@ -623,7 +623,7 @@ export const ELEKTRONEN_BANK: QuestionBank = {
       part: 'quantenzahlen',
       title: 'Plätze einer Schale',
       prompt: 'Warum fasst die vierte Schale höchstens 32 Elektronen?',
-      correct: '4s, 4p, 4d und 4f haben zusammen 16 Orbitale, jedes fasst zwei Elektronen.',
+      correct: 'Weil 4s, 4p, 4d und 4f zusammen 16 Orbitale mit je zwei Elektronen haben.',
       wrong: [
         w('f1', 'Weil jede Schale genau acht Elektronen mehr fasst als die Schale direkt davor.', 'chem-mis-el-shell-8', why('Die Zunahme ist nicht gleichmäßig: 2, 8, 18, 32. Sie kommt daher, dass in jeder Schale eine neue Unterschale mit mehr Orbitalen dazukommt.', '2, 8, 18, 32 wächst nicht um je 8.')),
         w('f2', 'Weil sie 32 Orbitale hat und jedes Orbital nur genau ein Elektron aufnehmen kann.', 'chem-mis-el-orbital-count'),
@@ -854,7 +854,7 @@ export const ELEKTRONEN_BANK: QuestionBank = {
       part: 'besetzung',
       title: 'Pauli-Prinzip',
       prompt: 'Warum fasst ein Orbital höchstens zwei Elektronen?',
-      correct: r`$n$, $l$ und $m$ legen das Orbital fest; nach Pauli bleibt nur der Spin mit zwei Werten.`,
+      correct: r`Weil $n$, $l$ und $m$ das Orbital festlegen und nach Pauli nur der Spin mit zwei Werten bleibt.`,
       wrong: [
         w('f1', 'Weil sich mehr als zwei Elektronen in einem Orbital zu stark gegenseitig abstoßen würden.', 'chem-mis-el-pauli-same', why('Die Abstoßung erklärt die Hund’sche Regel. Die Grenze von zwei Elektronen je Orbital ist dagegen streng und folgt aus dem Pauli-Prinzip.', 'Die Grenze kommt von Pauli.')),
         w('f2', 'Weil die Hund’sche Regel das so festlegt.', 'chem-mis-el-pauli-hund', why('Die Hund’sche Regel sagt, wie sich Elektronen auf mehrere gleichwertige Orbitale verteilen. Die Grenze je Orbital kommt aus einer anderen Regel.', 'Hund regelt die Verteilung.')),

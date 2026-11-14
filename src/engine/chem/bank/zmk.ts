@@ -339,7 +339,7 @@ export const ZMK_BANK: QuestionBank = {
       part: 'kraefte',
       title: 'Dipol-Dipol-Wechselwirkungen',
       prompt: 'Welche Moleküle ziehen sich über Dipol-Dipol-Wechselwirkungen an?',
-      correct: 'Moleküle, die als Ganzes eine positive und eine negative Seite haben',
+      correct: 'solche Moleküle, die als Ganzes eine positive und eine negative Seite haben',
       wrong: [
         w('f1', 'alle Moleküle mit polaren Bindungen, auch symmetrisch gebaute wie $\\ce{CO2}$ oder $\\ce{CCl4}$', 'chem-mis-zk-dipole-nonpolar'),
         w('f2', 'nur Moleküle aus gleichen Atomen', 'chem-mis-zk-dipole-nonpolar', {
@@ -570,7 +570,7 @@ export const ZMK_BANK: QuestionBank = {
       part: 'wasser',
       title: 'Wasser',
       prompt: 'Manche Insekten können über Wasser laufen. Was macht das möglich?',
-      correct: 'die hohe Oberflächenspannung durch Wasserstoffbrücken',
+      correct: 'Die hohe Oberflächenspannung, die Wasserstoffbrücken bewirken.',
       wrong: [
         w('f1', 'Die Insekten sind leichter als Luft und schweben knapp über dem Wasser.', 'chem-mis-zk-water-normal', {
           detailed: "Leichter als Luft wäre ein Ballon, kein Insekt. Das Tier wird von der Wasseroberfläche getragen; die Frage ist, was sie so belastbar macht.",
@@ -906,7 +906,7 @@ export const ZMK_BANK: QuestionBank = {
       part: 'loesen',
       title: 'Löslichkeit',
       prompt: 'Warum mischen sich Öl und Wasser nicht?',
-      correct: 'Wasser ist polar und hält über Wasserstoffbrücken zusammen; das unpolare Öl wird davon ausgeschlossen.',
+      correct: 'Weil Wasser polar ist und über Wasserstoffbrücken zusammenhält; das unpolare Öl wird davon ausgeschlossen.',
       wrong: [
         w('f1', 'Weil Öl leichter ist als Wasser.', 'chem-mis-zk-oil-light', {
           detailed: "Die Dichte sagt nur, welche Schicht oben liegt. Warum sich überhaupt zwei Schichten bilden, müssen die Kräfte zwischen den Teilchen erklären.",
@@ -988,7 +988,7 @@ export const ZMK_BANK: QuestionBank = {
           detailed: "Kondensiert Dampf, entsteht wieder Wasser mit allen seinen Eigenschaften. Das ginge nicht, wenn die Moleküle beim Sieden zerfallen wären.",
           short: "Kondensiert Dampf, entsteht wieder Wasser.",
         }),
-        w('f3', 'Luft mit gelöstem Wasser, das beim Sieden in Wasserstoff und Sauerstoff zerfallen ist', 'chem-mis-zk-boil-breaks', {
+        w('f3', 'Luft, in der etwas Wasser gelöst ist, aber keine Wassermoleküle mehr', 'chem-mis-zk-boil-breaks', {
           detailed: "Kondensiert Dampf, entsteht wieder Wasser mit allen seinen Eigenschaften. Das ginge nicht, wenn die Moleküle beim Sieden zerfallen wären.",
           short: "Kondensiert Dampf, entsteht wieder Wasser.",
         }),
@@ -1106,7 +1106,7 @@ export const ZMK_BANK: QuestionBank = {
         w('f1', 'Propan-1-ol bildet mehr Wasserstoffbrücken, weil es mehr H-Atome hat als Methanol.', 'chem-mis-zk-any-h'),
         w('f2', 'Längere Ketten machen die Van-der-Waals-Kräfte schwächer.', 'chem-mis-zk-size'),
         w('f3', 'Bei Propan-1-ol müssen mehr $\\ce{C-C}$-Bindungen beim Sieden brechen.', 'chem-mis-zk-boil-breaks'),
-        w('f4', 'Propan-1-ol ist kein Alkohol und bildet deshalb nur Dipol-Dipol-Wechselwirkungen.', 'chem-mis-zk-order'),
+        w('f4', 'Propan-1-ol hat die schwächsten Kräfte, und schwächere Kräfte heben den Siedepunkt.', 'chem-mis-zk-boil-weak'),
       ],
       hint: 'Jedes dieser Moleküle hat genau eine OH-Gruppe. Was unterscheidet sie dann?',
       explanation: {
