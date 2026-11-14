@@ -140,7 +140,7 @@ function valueWrongs(name: string, right: Quad, cands: readonly (readonly [Quad 
 
 const det2Latex = (M: PMat) => `${linFactor(M[0][0])} \\cdot ${linFactor(M[1][1])} - ${linFactor(M[0][1])} \\cdot ${linFactor(M[1][0])}`
 
-function det2Step(rng: Rng, name: string, A: Mat): GuidedStep {
+export function det2Step(rng: Rng, name: string, A: Mat): GuidedStep {
   const [[a, b], [c, d]] = A
   const right = det(A)
   const line = (x: Rational) => math(`${name} = ${ratLatex(x)}`)

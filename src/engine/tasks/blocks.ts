@@ -30,6 +30,8 @@ export const BLOCK_GROUPS: readonly BlockGroup[] = [
   { id: 'mat-det', title: 'Determinanten' },
   // seit Schritt 10a
   { id: 'mat-lgs', title: 'Gleichungssysteme' },
+  // seit Schritt 12a
+  { id: 'mat-inv', title: 'Inverse und Matrizengleichungen' },
 ]
 
 // Gleichungen umstellen. „Lineare Gleichungen" sind die Aufgaben ganz ohne andere Bausteine (die Variable steht nur
@@ -94,7 +96,7 @@ export const LINE_PLAYABLE_COMBOS: Readonly<Record<1 | 2 | 3 | 4 | 5, readonly s
 }
 
 // Matrizen und Gleichungssysteme (M7 Schritt 8a): „Matrizen rechnen“, seit Schritt 9a „Determinanten“ (Id „determinante“, weil
-// „det“ beim Umstellen schon vergeben ist); seit Schritt 10a „Gauß-Verfahren“, seit 10c „Einsetzen, Gleichsetzen, Addieren“ (Id „einsetzen“), seit 11a „Cramersche Regel“, seit 11b „Gleichungssysteme mit Parameter“ (Id „lgsparam“); die Inverse folgt in Schritt 12
+// „det“ beim Umstellen schon vergeben ist); seit Schritt 10a „Gauß-Verfahren“, seit 10c „Einsetzen, Gleichsetzen, Addieren“ (Id „einsetzen“), seit 11a „Cramersche Regel“, seit 11b „Gleichungssysteme mit Parameter“ (Id „lgsparam“), seit 12a „Inverse Matrix“ (Id „inverse“)
 export const MATRIX_BLOCKS: readonly Block[] = [
   { id: 'matrix', title: 'Matrizen rechnen', note: 'Format, Summe und Vielfache, Transponierte, Produkt mit Falk-Schema, Matrix mal Vektor, welcher Ausdruck ist definiert', group: 'mat-rechnen' },
   { id: 'determinante', title: 'Determinanten', note: '2 × 2 und Sarrus mit Fläche und Volumen, Entwickeln mit dem Schachbrett, Umformungen, Regeln, mit Parameter', group: 'mat-det' },
@@ -102,14 +104,15 @@ export const MATRIX_BLOCKS: readonly Block[] = [
   { id: 'einsetzen', title: 'Einsetzen, Gleichsetzen, Addieren', note: 'die Schulverfahren für zwei und drei Gleichungen, Gleichungen ordnen, keine oder unendlich viele Lösungen, Unbekannte im Nenner, mit Parameter', group: 'mat-lgs' },
   { id: 'cramer', title: 'Cramersche Regel', note: 'Lösung mit Determinanten, eine Unbekannte allein, mit Parameter: wann anwendbar, Lösung mit vorgegebenem Wert', group: 'mat-lgs' },
   { id: 'lgsparam', title: 'Gleichungssysteme mit Parameter', note: 'Gauß mit Parameter, Determinante zuerst, Sonderwerte mit keiner oder unendlich vielen Lösungen, Rang, Parameter rechts, vorgegebener Wert', group: 'mat-lgs' },
+  { id: 'inverse', title: 'Inverse Matrix', note: '2 × 2 mit der Formel, Gauß-Jordan, nicht invertierbar, Regeln für Inverse, Gleichungssystem über die Inverse, mit Parameter', group: 'mat-inv' },
 ]
 
 export const MATRIX_PLAYABLE_COMBOS: Readonly<Record<1 | 2 | 3 | 4 | 5, readonly string[]>> = {
-  1: ['matrix', 'determinante', 'gauss', 'einsetzen', 'cramer', 'lgsparam'],
-  2: ['matrix', 'determinante', 'gauss', 'einsetzen', 'cramer', 'lgsparam'],
-  3: ['matrix', 'determinante', 'gauss', 'einsetzen', 'cramer', 'lgsparam'],
-  4: ['matrix', 'determinante', 'gauss', 'einsetzen', 'cramer', 'lgsparam'],
-  5: ['matrix', 'determinante', 'gauss', 'einsetzen', 'cramer', 'lgsparam'],
+  1: ['matrix', 'determinante', 'gauss', 'einsetzen', 'cramer', 'lgsparam', 'inverse'],
+  2: ['matrix', 'determinante', 'gauss', 'einsetzen', 'cramer', 'lgsparam', 'inverse'],
+  3: ['matrix', 'determinante', 'gauss', 'einsetzen', 'cramer', 'lgsparam', 'inverse'],
+  4: ['matrix', 'determinante', 'gauss', 'einsetzen', 'cramer', 'lgsparam', 'inverse'],
+  5: ['matrix', 'determinante', 'gauss', 'einsetzen', 'cramer', 'lgsparam', 'inverse'],
 }
 
 // Feste Nummer je Baustein für Aufgabennummern mit Baustein wie „exp.1-4711" (M6 Schritt 4, taskNumber.ts). Gilt für alle
@@ -173,4 +176,6 @@ export const BLOCK_CODES: Readonly<Record<string, number>> = {
   lgsparam: 37,
   // M7 Schritt 10c: Einsetzen, Gleichsetzen, Addieren („einsetzen.1-4711“)
   einsetzen: 38,
+  // M7 Schritt 12a: Inverse Matrix („inverse.1-4711“)
+  inverse: 39,
 }

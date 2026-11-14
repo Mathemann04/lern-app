@@ -147,6 +147,12 @@ export type VectorKind =
   | 'eqsThree'
   | 'eqsRecip'
   | 'eqsParam'
+  // Inverse Matrix (M7 Schritt 12a, invTasks.ts)
+  | 'invTwo'
+  | 'invGauss'
+  | 'invRules'
+  | 'invSystem'
+  | 'invParam'
 
 export type VectorTask = GuidedTaskBase & {
   readonly kind: VectorKind

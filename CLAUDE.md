@@ -17,7 +17,7 @@ den Nutzer zugeschnitten: Maschinenbau, 1. Semester, THU, „Mathematik MB1".
   [docs/STUDIENPLAN.md](docs/STUDIENPLAN.md)
 - Meilensteine und aktueller Stand: [docs/ROADMAP.md](docs/ROADMAP.md)
 - Laufender Plan: [docs/PLAN-M7.md](docs/PLAN-M7.md) (Vektoren, Geraden und
-  Ebenen, Matrizen; freigegeben 12.11.2026, Schritte 1a bis 11c fertig, auch 10c, als Nächstes 12), vorgezogen vor den
+  Ebenen, Matrizen; freigegeben 12.11.2026, Schritte 1a bis 12a fertig, auch 10c, als Nächstes 12b), vorgezogen vor den
   Rest von [docs/PLAN-M6.md](docs/PLAN-M6.md) (fertig bis Schritt 4c); danach
   M12 und der Rest von [docs/PLAN-M4.md](docs/PLAN-M4.md) (Chemie 1, Klausur-Sprint
   S1 bis S11 fertig, offen N2 bis N5), Reihenfolge in docs/ROADMAP.md unter

@@ -1337,3 +1337,13 @@ Neue Entscheidungen unten anfügen.
   immer): Wird beim Schieben eine Gleichung zu $0 = 0$, zählt die Beschreibung sie nicht mehr mit („Übrig ist nur
   Gerade I“ statt „Beide Gleichungen …“); liegen Schnittgeraden außerhalb des Bildes, sagt sie es; auf der Lernkarte
   „Cramersche Regel“ hieß es, Strecken und Scheren hielten die Fläche gleich (nur das Scheren tut es).
+- 14.11.2026: M7 Schritt 12 in drei Teile geteilt (12a Inverse, 12b Matrizengleichungen, 12c Bilder), weil jeder Teil
+  für sich ausprobierbar ist. 12a als eigener Baustein „Inverse Matrix“ in einer neuen Gruppe „Inverse und
+  Matrizengleichungen“, in die 12b dazukommt. Gauß-Jordan nur mit ganzen Zahlen (über Kreuz malnehmen, erst am Ende durch
+  die Diagonale teilen), wie beim Gauß-Verfahren: So bleiben die Tabellen am Handy lesbar, und Brüche erscheinen erst im
+  Ergebnis. Die Starttabelle $(A \mid E)$ wird nur bis Stufe 3 gefragt. Bei den Regeln sind nur die Matrizen gegeben, die
+  die richtige Umformung braucht ($A^{-1}$ oder $A$); so lohnt sich nur der Weg über die Regeln. Die Matrizen dort haben
+  $\det = \pm 1$, damit keine Brüche die Regeln verdecken. Transponieren ist bei den Regeln kein eigener Schritt (bei
+  quadratischen Matrizen gibt es dafür zu wenige verschiedene falsche Antworten); „Transponieren vergessen“ steckt im
+  Produkt bzw. in der Zahl davor. Im freien Modus ist „nicht invertierbar“ wie „keine Lösung“ beim Gauß-Verfahren eine
+  Auswahl. Bild nur bei $2 \times 2$ und nur, wenn es lesbar bleibt (bis 9 Einheiten, Pfeile der Inversen nicht zu kurz).
