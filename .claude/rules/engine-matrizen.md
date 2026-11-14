@@ -7,6 +7,7 @@ paths:
   - "src/engine/linalg/lgsp*"
   - "src/engine/linalg/eqs*"
   - "src/engine/linalg/inv*"
+  - "src/engine/linalg/mgl*"
   - "src/engine/linalg/paramSlider*"
   - "src/engine/linalg/falk.ts"
   - "src/engine/linalg/sarrus*"
@@ -19,6 +20,7 @@ paths:
   - "src/engine/explain/lgspCards.ts"
   - "src/engine/explain/eqsCards.ts"
   - "src/engine/explain/invCards.ts"
+  - "src/engine/explain/mglCards.ts"
   - "e2e/matrices.spec.ts"
 ---
 
@@ -202,3 +204,22 @@ freier Modus `vectorFree.ts`, `buildVectorTask` wählt die Arten nach dem Bauste
   in `explain/invCards.ts`. Tests in `linalg/invTasks.test.ts` (Gegenprobe mit eigener Inversen in Kommazahlen, jede
   Tabelle links = rechts · A, falsche nicht; Bild: A bringt die Ecken zurück aufs Quadrat), Browser-Test in
   `e2e/matrices.spec.ts`.
+- Matrizengleichungen (Schritt 12b): Baustein `matgleichung` (Code 40, Gruppe `mat-inv`), `linalg/mglTasks.ts`, Arten in
+  `MGL_KINDS_BY_LEVEL` (mglBasic, mglFactor, mglWrap, mglParam). `Shape`: aufgelöste Gleichung als Glieder (`P` = Glied mit
+  der Matrix, immer links mit +1; `x` = Vielfaches von X als `Lin`, auch mit a; `c` = gegebene Matrix c mit Faktor), Seite
+  `L` (AX) oder `R` (XA), `flip` (Seiten vertauscht gezeigt), `tBase` (gegebene Matrix in der aufgelösten Gleichung
+  transponiert) und `Wrap`: none, tProduct ((XᵀA)ᵀ → AᵀX), inv ((X⁻¹A)⁻¹ → A⁻¹X, dann X = AR), tWhole (alles transponiert
+  gezeigt), conj (AXA⁻¹), conjInv (A⁻¹XA). `ordered` liefert β (Faktor vor E) und die rechte Seite `rt` (Glieder rechts,
+  dann links mit Minus); `moveSlips` die Vorzeichenfehler. Schritte: `aufloesen`, `ordnen` (nur mit drei Slips, sonst als
+  erste falsche Antwort im nächsten Schritt), `ausklammern`, `malnehmen`, mit Parameter `det-a` (`detStep` aus
+  `cramerTasks.ts` mit `label` M) und `bedingung`, dann `klammer` (M = P + βE; Fehler `mat-identity-all` bei Minus,
+  `mgl-e-all` bei Plus, `mgl-e-anti`, `mat-plus-minus`, `mat-transpose-ignored`), `rechts` (`combStep` aus `matrixTasks.ts`
+  mit `extra`: Transponieren vergessen, Zeichen vor dem letzten Glied), `det`/`inverse` (`detTwoStep`, `inverseStep` aus
+  `invTasks.ts`) bzw. Gauß-Jordan (`jordanSteps`, `jordanOk`), `produkt` (`productStepQ`, falsch auch von der anderen Seite),
+  bei conj `produkt-2`. Zahlen rückwärts (`numbersFor`): M und ganzzahliges X, R = MX bzw. XM, `split` verteilt R auf die
+  gegebenen Matrizen; inv/conj: A und gegebene Matrizen zufällig (conj mit `unimodular`), X invertierbar bei inv;
+  Parameter: A mit ganzen Eigenwerten. `buildKind` legt die Form vor den Versuchen fest, `MGL_DISCARDED` zählt verworfene
+  Formen (Test: 0). Ergebnis `X = …`, `data` mit `shape` [n, Seite, Wrap-Code, flip], `terms` (je 5 Zahlen), `tBase`, `A`,
+  `C0`…, `a0`, `roots`. 12 Fehler `mgl-…` in `linalg/mglErrorRules.ts`, drei Karten in `explain/mglCards.ts`. Tests in
+  `linalg/mglTasks.test.ts` (Lösung in die gezeigte Gleichung eingesetzt, lineare Abbildung aus Einheitsmatrizen
+  eigenständig gelöst, mit Parameter jedes ganze a von −30 bis 30, Klammer und rechte Seite gegen die Gleichung).

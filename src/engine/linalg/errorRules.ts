@@ -7,6 +7,7 @@ import { CRAMER_ERROR_RULES } from './cramerErrorRules.ts'
 import { LGSP_ERROR_RULES } from './lgspErrorRules.ts'
 import { EQS_ERROR_RULES } from './eqsErrorRules.ts'
 import { INV_ERROR_RULES } from './invErrorRules.ts'
+import { MGL_ERROR_RULES } from './mglErrorRules.ts'
 
 // Typische Fehler beim Rechnen mit Vektoren (M7, Katalog in docs/PLAN-M7.md, „Typische Fehler"). Jeder Fehler rechnet
 // einen Schritt falsch weiter (vectorTasks.ts); hier stehen Name, Katalogbeispiel als Formel und „Warum ist das falsch?".
@@ -1230,9 +1231,9 @@ export const VECTOR_ERROR_RULES: readonly VectorErrorRule[] = [
   },
 ]
 
-// Geraden und Ebenen (M7 Schritt 6) mit Vorsilbe „gl-“ in lineErrorRules.ts, Matrizen (Schritt 8a) mit „mat-“ in matrixErrorRules.ts, Determinanten (Schritt 9a) mit „det-“ in detErrorRules.ts, Gauß (Schritt 10a) mit „gauss-“ in gaussErrorRules.ts, Cramer (Schritt 11a) mit „cramer-“ in cramerErrorRules.ts, Gleichungssysteme mit Parameter (Schritt 11b) mit „lgsp-“ in lgspErrorRules.ts, Einsetzen, Gleichsetzen, Addieren (Schritt 10c) mit „eqs-“ in eqsErrorRules.ts, Inverse (Schritt 12a) mit „inv-“ in invErrorRules.ts
+// Geraden und Ebenen (M7 Schritt 6) mit Vorsilbe „gl-“ in lineErrorRules.ts, Matrizen (Schritt 8a) mit „mat-“ in matrixErrorRules.ts, Determinanten (Schritt 9a) mit „det-“ in detErrorRules.ts, Gauß (Schritt 10a) mit „gauss-“ in gaussErrorRules.ts, Cramer (Schritt 11a) mit „cramer-“ in cramerErrorRules.ts, Gleichungssysteme mit Parameter (Schritt 11b) mit „lgsp-“ in lgspErrorRules.ts, Einsetzen, Gleichsetzen, Addieren (Schritt 10c) mit „eqs-“ in eqsErrorRules.ts, Inverse (Schritt 12a) mit „inv-“ in invErrorRules.ts, Matrizengleichungen (Schritt 12b) mit „mgl-“ in mglErrorRules.ts
 export const vectorErrorRule = (id: string): VectorErrorRule => {
-  const rule = VECTOR_ERROR_RULES.find((r) => r.id === id) ?? LINE_ERROR_RULES.find((r) => r.id === id) ?? MATRIX_ERROR_RULES.find((r) => r.id === id) ?? DET_ERROR_RULES.find((r) => r.id === id) ?? GAUSS_ERROR_RULES.find((r) => r.id === id) ?? CRAMER_ERROR_RULES.find((r) => r.id === id) ?? LGSP_ERROR_RULES.find((r) => r.id === id) ?? EQS_ERROR_RULES.find((r) => r.id === id) ?? INV_ERROR_RULES.find((r) => r.id === id)
+  const rule = VECTOR_ERROR_RULES.find((r) => r.id === id) ?? LINE_ERROR_RULES.find((r) => r.id === id) ?? MATRIX_ERROR_RULES.find((r) => r.id === id) ?? DET_ERROR_RULES.find((r) => r.id === id) ?? GAUSS_ERROR_RULES.find((r) => r.id === id) ?? CRAMER_ERROR_RULES.find((r) => r.id === id) ?? LGSP_ERROR_RULES.find((r) => r.id === id) ?? EQS_ERROR_RULES.find((r) => r.id === id) ?? INV_ERROR_RULES.find((r) => r.id === id) ?? MGL_ERROR_RULES.find((r) => r.id === id)
   if (!rule) throw new Error(`Unbekannter Fehler ${id}`)
   return rule
 }

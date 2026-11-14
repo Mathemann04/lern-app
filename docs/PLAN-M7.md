@@ -101,7 +101,7 @@ Animationen starten nur auf Knopfdruck („Abspielen“) und entfallen, wenn am 
   vergessen, Zeile statt Spalte (Falk, Cramer), Produkt nicht definiert, $(AB)^{\mathsf T} = A^{\mathsf T}B^{\mathsf T}$,
   $\lambda$ statt $\lambda^n$, Vorzeichen beim Zeilentausch, Sarrus bei 4×4, rechte Seite vergessen, Nullzeile falsch
   gedeutet, gleicher Parameter für zwei Geraden, beim Ziehen (2b): nur vertauscht oder nur ein Vorzeichen geändert, rechter Winkel als spitz
-  oder stumpf gezählt, rechter Winkel an der falschen Ecke, Seiten statt Diagonalen senkrecht, bei der Projektion (3a) die 15 Fehler aus Schritt 3a, bei den Kräften (3b) die 26 Fehler aus Schritt 3b, beim Kreuzprodukt (4a) die 14 Fehler aus Schritt 4a, beim Spatprodukt (4b) die 14 Fehler aus Schritt 4b, bei Linearkombination und Basis (5) die 20 Fehler aus Schritt 5, bei Geraden und Ebenen (6) die 33 Fehler aus Schritt 6 (Vorsilbe „gl-“), bei der Lage (7a) die 17 Fehler aus Schritt 7a, bei Abständen und Schnittwinkeln (7b) die 14 Fehler aus Schritt 7b, bei den Matrizen (8a) die 27 Fehler aus Schritt 8a (Vorsilbe „mat-“), bei den Determinanten (9a) die 37 Fehler aus Schritt 9a (Vorsilbe „det-“), beim Gauß-Verfahren (10a) die 34 Fehler aus Schritt 10a (Vorsilbe „gauss-“), bei der Cramerschen Regel (11a) die 10 Fehler aus Schritt 11a (Vorsilbe „cramer-“), bei Gleichungssystemen mit Parameter (11b) die 23 Fehler aus Schritt 11b (Vorsilbe „lgsp-“), bei der Inversen (12a) die 29 Fehler aus Schritt 12a (Vorsilbe „inv-“), cos statt sin bei Gerade–Ebene, „$A - 2$“ ohne $E$, auf der falschen
+  oder stumpf gezählt, rechter Winkel an der falschen Ecke, Seiten statt Diagonalen senkrecht, bei der Projektion (3a) die 15 Fehler aus Schritt 3a, bei den Kräften (3b) die 26 Fehler aus Schritt 3b, beim Kreuzprodukt (4a) die 14 Fehler aus Schritt 4a, beim Spatprodukt (4b) die 14 Fehler aus Schritt 4b, bei Linearkombination und Basis (5) die 20 Fehler aus Schritt 5, bei Geraden und Ebenen (6) die 33 Fehler aus Schritt 6 (Vorsilbe „gl-“), bei der Lage (7a) die 17 Fehler aus Schritt 7a, bei Abständen und Schnittwinkeln (7b) die 14 Fehler aus Schritt 7b, bei den Matrizen (8a) die 27 Fehler aus Schritt 8a (Vorsilbe „mat-“), bei den Determinanten (9a) die 37 Fehler aus Schritt 9a (Vorsilbe „det-“), beim Gauß-Verfahren (10a) die 34 Fehler aus Schritt 10a (Vorsilbe „gauss-“), bei der Cramerschen Regel (11a) die 10 Fehler aus Schritt 11a (Vorsilbe „cramer-“), bei Gleichungssystemen mit Parameter (11b) die 23 Fehler aus Schritt 11b (Vorsilbe „lgsp-“), bei der Inversen (12a) die 29 Fehler aus Schritt 12a (Vorsilbe „inv-“), bei Matrizengleichungen (12b) die 12 Fehler aus Schritt 12b (Vorsilbe „mgl-“), cos statt sin bei Gerade–Ebene, „$A - 2$“ ohne $E$, auf der falschen
   Seite ausgeklammert. Jede mit Katalogbeispiel, eigenem Text für „Warum ist das falsch?“ und Platz auf einer Lernkarte
   (Regeln aus CLAUDE.md).
 - **Aufgabennummern** wie seit M6 mit Baustein (`taskNumber.ts`); neue Bausteine bekommen die nächsten freien Nummern in
@@ -498,11 +498,25 @@ Request.
       $(\lambda A)^{-1} = \lambda A^{-1}$, Transponieren vergessen, $(A^{-1})^{-1}$ nicht aufgehoben, von der falschen Seite
       malgenommen, mit $A$ statt $A^{-1}$, durch eine Matrix geteilt, Bedingung umgedreht, für jedes $a$; dazu Fehler aus
       Determinanten, Gauß-Verfahren und Matrizen rechnen.
-    - **12b:** Baustein „Matrizengleichungen“ (`matgleichung`): erst allgemein nach $X$ auflösen, Schritt für Schritt wie
-      beim Umstellen (Transponierte und Inverse mit den Regeln auflösen, $X$ auf eine Seite, Zahl als Vielfaches von $E$
-      schreiben, $X$ links oder rechts ausklammern, von derselben Seite mit der Inversen malnehmen), dann einsetzen und
-      ausrechnen; Stufe 5 mit Parameter (wann lösbar). Typische Fehler: „$A - 2$“ ohne $E$, auf der falschen Seite
-      ausgeklammert oder malgenommen, durch eine Matrix geteilt, $AXA^{-1}$ zu $X$ gekürzt.
+    - **12b (fertig, 14.11.2026):** Baustein „Matrizengleichungen“ (`matgleichung`, Code 40, Gruppe „Inverse und
+      Matrizengleichungen“), Stufen 1 bis 5, geführt und frei. Erst allgemein nach $X$ auflösen, Schritt für Schritt wie
+      beim Umstellen, dann einsetzen und ausrechnen; $X$ kommt immer ganzzahlig heraus. Vier Arten: einfach ($AX = B$,
+      $XA = B$, $AX + C = B$, auch $B = AX$; Stufe 1 und 2), mit Vielfachen von $X$ ($AX = 2X + B$, $XA + X = B$, ab Stufe 3
+      Glieder mit $X$ auf beiden Seiten, zwei oder drei gegebene Matrizen, ab Stufe 4 auch $3 \times 3$ mit Gauß-Jordan,
+      Stufe 5 mit $B^{\mathsf T}$ und $2C$ rechts), mit Transponierten und Inversen ($(X^{\mathsf T}A)^{\mathsf T}$ und
+      $(AX^{\mathsf T})^{\mathsf T}$ ab Stufe 3, $(X^{-1}A)^{-1}$ ab Stufe 3: dann ist $X = AB$ ganz ohne Inverse,
+      $AXA^{-1}$ und $A^{-1}XA$ ab Stufe 4, Stufe 5 die ganze Gleichung transponiert, wenn $X$ nur als $X^{\mathsf T}$
+      dasteht) und mit Parameter (Stufe 4 und 5: $AX = aX + B$, für welche $a$ eindeutig lösbar, dann $X$ für einen Wert;
+      Stufe 5 auch mit einer Zahl dazu oder ganz transponiert). Schritte: Transponierte bzw. Inverse auflösen, ordnen
+      (nur mit drei falschen Antworten als eigener Schritt, sonst steckt „Vorzeichen beim Rüberbringen“ im nächsten),
+      $X$ ausklammern, nach $X$ auflösen, $\det M$ mit $a$ und Bedingung, Klammer $M = A - 2E$ ausrechnen, rechte Seite
+      ausrechnen, Determinante und Inverse (Formel bzw. Gauß-Jordan), Produkt mit Falk-Schema (bei $AXA^{-1}$ zwei).
+      Frei: $X$ in Kästchen. Drei Lernkarten, 12 neue typische Fehler (`mgl-…`): Vorzeichen beim Rüberbringen, „$A - 2$“
+      ohne $E$, auf der falschen Seite ausgeklammert, von der falschen Seite malgenommen, nur einen Teil der rechten Seite
+      malgenommen, Inverse einer Summe gliedweise, mit der Inversen statt mit der Matrix, $(X^{\mathsf T})^{\mathsf T}$
+      nicht aufgehoben, $AXA^{-1}$ zu $X$ gekürzt, von beiden Seiten mit derselben Matrix, Zahl zu jedem Eintrag bzw. auf
+      der Nebendiagonale; dazu Fehler aus Matrizen rechnen, Determinanten und Inverse (durch eine Matrix geteilt, mit $A$
+      statt $A^{-1}$, Reihenfolge beim Invertieren, Transponieren vergessen). Bild kommt mit 12c.
     - **12c:** Bilder: Gauß-Jordan zum Abspielen (links entsteht Schritt für Schritt $E$, rechts $A^{-1}$), bei
       Matrizengleichungen mit $2 \times 2$ die Wirkung von $X$ im Gitter.
 13. **Abschluss:** Mischen über alle drei Tätigkeiten, Abwechslung gemessen, Prüfung aus mehreren Blickwinkeln, Doku.

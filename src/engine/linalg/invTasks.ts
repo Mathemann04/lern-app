@@ -102,7 +102,7 @@ const adjugate = (A: Mat): Mat => [
 ]
 
 // A⁻¹ = 1/det A · (d −b; −c a) und die typischen Fehler
-function inverseStep(rng: Rng, name: string, A: Mat, cards: readonly string[], intro = '', letters: readonly string[] = ['a', 'b', 'c', 'd']): GuidedStep {
+export function inverseStep(rng: Rng, name: string, A: Mat, cards: readonly string[], intro = '', letters: readonly string[] = ['a', 'b', 'c', 'd']): GuidedStep {
   const D = det(A)
   const adj = adjugate(A)
   const right = scale(ratDiv(ONE, D), adj)
@@ -141,7 +141,7 @@ function inverseStep(rng: Rng, name: string, A: Mat, cards: readonly string[], i
 
 // det A bei 2 × 2 (aus detTasks.ts); bei det A = 0 fällt „Diagonalen vertauscht“ weg (−0 = 0), dann kommt „nur die
 // Hauptdiagonale“ dazu
-function detTwoStep(rng: Rng, name: string, A: Mat): GuidedStep {
+export function detTwoStep(rng: Rng, name: string, A: Mat): GuidedStep {
   const step = det2Step(rng, `\\det ${name}`, A)
   const out = { ...step, cards: [INV_CARD.formel, DET_CARD.zwei] }
   const main = ratMul(A[0][0], A[1][1])
@@ -152,7 +152,7 @@ function detTwoStep(rng: Rng, name: string, A: Mat): GuidedStep {
 }
 
 // Matrix mit det ±1 (ganzzahlige Inverse): P · L · U mit kleinen Zahlen
-function unimodular(rng: Rng, n: number): Mat {
+export function unimodular(rng: Rng, n: number): Mat {
   const L = build(n, n, (i, j) => (i === j ? ONE : i > j ? R(rng.int(-2, 2)) : ZERO))
   const U = build(n, n, (i, j) => (i === j ? R(rng.pick([1, -1])) : i < j ? R(rng.int(-2, 2)) : ZERO))
   const M = mul(L, U)
@@ -447,7 +447,7 @@ function readStep(rng: Rng, name: string, F: Tab, n: number, A: Mat): GuidedStep
 }
 
 // alle Schritte des Gauß-Jordan-Verfahrens (null: zu wenige falsche Antworten)
-function jordanSteps(rng: Rng, name: string, A: Mat, withStart: boolean): { steps: GuidedStep[]; singular: boolean; swaps: number; ups: number } | null {
+export function jordanSteps(rng: Rng, name: string, A: Mat, withStart: boolean): { steps: GuidedStep[]; singular: boolean; swaps: number; ups: number } | null {
   const n = A.length
   const run = runJordan(A)
   const steps: GuidedStep[] = []
@@ -469,7 +469,7 @@ function jordanSteps(rng: Rng, name: string, A: Mat, withStart: boolean): { step
 }
 
 // geeignet für Gauß-Jordan: Zahlen in allen Tabellen klein; singulär nur mit Nullzeile ganz unten nach dem Weg nach unten
-function jordanOk(A: Mat, limit: number, singular: boolean): boolean {
+export function jordanOk(A: Mat, limit: number, singular: boolean): boolean {
   const run = runJordan(A)
   const tabs = [run.start, ...run.stages.map((s) => s.after)]
   if (tabs.some((t) => maxAbs(t) > limit)) return false
