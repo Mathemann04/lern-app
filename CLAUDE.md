@@ -16,17 +16,14 @@ den Nutzer zugeschnitten: Maschinenbau, 1. Semester, THU, „Mathematik MB1".
   [docs/MECHANIK.md](docs/MECHANIK.md); alle Fächer und Prüfungen laut Modulhandbuch:
   [docs/STUDIENPLAN.md](docs/STUDIENPLAN.md)
 - Meilensteine und aktueller Stand: [docs/ROADMAP.md](docs/ROADMAP.md)
-- Laufender Plan: zuerst S12 und S13 in [docs/PLAN-M4.md](docs/PLAN-M4.md) (Chemie 1, vor
+- Laufender Plan: zuerst S12 in [docs/PLAN-M4.md](docs/PLAN-M4.md) (Chemie 1, vor
   Teil 1 der Klausur; S1 bis S11 fertig, danach offen N2 bis N5), dann der Rest von
   [docs/PLAN-M7.md](docs/PLAN-M7.md) (Vektoren, Geraden, Ebenen, Matrizen; 1a bis 12a fertig,
   als Nächstes 12b), dann M13 Klausurmodus Mathe (wichtigster Punkt laut Nutzer, 14.11.2026),
   dann Rest von [docs/PLAN-M6.md](docs/PLAN-M6.md) (fertig bis 4c), M12 und N2 bis N5;
   Reihenfolge in docs/ROADMAP.md unter „Vorgemerkt“; feste Regeln für alle Chemie-Inhalte:
-  [docs/CHEMIE.md](docs/CHEMIE.md). Abgeschlossen:
-  [docs/PLAN-M1.md](docs/PLAN-M1.md), [docs/PLAN-M2.md](docs/PLAN-M2.md),
-  [docs/PLAN-M2b.md](docs/PLAN-M2b.md) (Brüche nachschärfen: Abwechslung und
-  Profi-Niveau), [docs/PLAN-M3.md](docs/PLAN-M3.md) (Gleichungen umstellen,
-  4. Fassung)
+  [docs/CHEMIE.md](docs/CHEMIE.md). Abgeschlossen: [docs/PLAN-M1.md](docs/PLAN-M1.md),
+  [docs/PLAN-M2.md](docs/PLAN-M2.md), [docs/PLAN-M2b.md](docs/PLAN-M2b.md), [docs/PLAN-M3.md](docs/PLAN-M3.md)
 
 ## Sparsam arbeiten (Kontingent des Nutzers)
 - **Lesen:** Zu Beginn nur diese Datei. Von docs/ROADMAP.md die Tabelle oben
@@ -89,6 +86,9 @@ Ausführliche Notizen je Bereich (wörtlich wie früher hier, jetzt ausgelagert)
 - Speichern auf dem Gerät `src/state/`: `.claude/rules/state.md`
 
 ## Arbeitsregeln
+- **Vorrang** (Nutzer, 14.11.2026): Wichtigste Grundlage sind Funktion und Übersicht der App,
+  die Qualität der Aufgaben und der Lerneffekt. Zusätze wie Fortschritt sichern, Konto oder
+  Teilen kommen ganz am Schluss (Zeile „Später“ in docs/ROADMAP.md), nie vorher einplanen.
 - **Erst Plan, dann bauen.** Jeder Meilenstein in kleinen Schritten, die der
   Nutzer einzeln ausprobieren kann. Ohne OK des Nutzers zum Plan nicht
   programmieren.

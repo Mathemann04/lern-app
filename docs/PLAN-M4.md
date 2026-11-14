@@ -1281,13 +1281,6 @@ wirklich falsch, eigene Worte), Pull Request und einem kurzen Bericht.
   Antwort kürzer als etwa 30 Zeichen ist, zählen nicht mit), und erlaubt
   höchstens den Wert bei Zufall plus 10 Prozentpunkte; er gilt für alle
   neuen Fragen mit. Inhaltliche Prüfung wie immer.
-- **S13: Fortschritt sichern** (Durchsicht 14.11.2026, gilt für die ganze
-  App). Der Fortschritt liegt nur im Speicher des Browsers; ein neues Handy
-  oder gelöschte Browserdaten löschen ihn. Die App bittet den Browser, die
-  Daten dauerhaft zu behalten, und bekommt in den Einstellungen „Fortschritt
-  sichern“ (eine Datei zum Ablegen, z. B. in der Cloud des Handys) und
-  „Fortschritt laden“ (mit Rückfrage, ersetzt den Stand); dazu, wann zuletzt
-  gesichert wurde. Browser-Test: sichern, löschen, laden, alles wieder da.
 
 #### Nach Teil 1 der Klausur
 Die Reihenfolge richtet sich nach dem Termin von Teil 2: Kommt Teil 2 bald,
