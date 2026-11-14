@@ -80,7 +80,7 @@ const negCount = (A: Mat) => A.flat().filter((x) => ratSign(x) < 0).length
 const fmtLatex = (m: number, n: number) => `${m} \\times ${n}`
 
 // Eintrag (i, j) des Produkts und seine typischen Fehler im Falk-Schema; null, wenn der Fehler hier nicht geht
-type Falk = 'right' | 'noSum' | 'plus' | 'rowRow' | 'colCol' | 'entrywise'
+export type Falk = 'right' | 'noSum' | 'plus' | 'rowRow' | 'colCol' | 'entrywise'
 function falkEntry<T>(R: Ring<T>, A: Mat<T>, B: Mat<T>, i: number, j: number, how: Falk): { value: T; latex: string } | null {
   const n = colsOf(A)
   const sum = (terms: readonly (readonly [T, T])[], op: 'mul' | 'add') => {
@@ -121,6 +121,8 @@ function product<T>(R: Ring<T>, A: Mat<T>, B: Mat<T>, how: Falk = 'right'): Mat<
   return out
 }
 const mul = (A: Mat, B: Mat): Mat => product(Q, A, B)!
+// für die Inverse (Schritt 12a, invTasks.ts): Produkt mit Zahlen, auch mit den Fehlern im Falk-Schema
+export const productQ = (A: Mat, B: Mat, how: Falk = 'right') => product(Q, A, B, how)
 
 // Falk-Schema als Bild zum Abspielen (Schritt 8b): Einträge und Produkte als LaTeX, wie in falkEntry geschrieben
 function falkFigure<T>(R: Ring<T>, A: Mat<T>, B: Mat<T>, name: string, cells: readonly (readonly [number, number])[]): FalkFigure {
@@ -291,8 +293,11 @@ function productStep<T>(rng: Rng, R: Ring<T>, A: Mat<T>, B: Mat<T>, expr: string
   return { ...step, falk: falkFigure(R, A, B, expr, cells) }
 }
 
+// Produkt mit Zahlen für andere Bausteine (Inverse, Schritt 12a)
+export const productStepQ = (rng: Rng, A: Mat, B: Mat, expr: string, extra: readonly { readonly M: Mat; readonly rule: string }[] = [], id = 'produkt') => productStep(rng, Q, A, B, expr, extra, id)
+
 // Transponierte
-function transposeStep(rng: Rng, name: string, A: Mat): GuidedStep {
+export function transposeStep(rng: Rng, name: string, A: Mat): GuidedStep {
   const right = transpose(A)
   const show = (X: Mat) => math(`${name}${T} = ${matLatex(X)}`)
   const wrongs: Wrong[] = []

@@ -1,0 +1,73 @@
+import type { Card } from './cards.ts'
+
+// Lernkarten zur Inversen (M7 Schritt 12a) im Ordner „Matrizen und Gleichungssysteme“. Beispiele sind Aufgaben des
+// Baukastens (linalg/invTasks.ts, Art, Stufe und Startwert); den Rechenweg rechnet die Engine. Jeder typische Fehler der
+// Aufgaben steht auf einer Karte.
+
+export const INV_CARD_LIST: readonly Card[] = [
+  {
+    id: 'inv-formel',
+    topic: 'matrizen',
+    title: 'Inverse einer 2×2-Matrix',
+    level: 1,
+    rules: [],
+    formulas: [String.raw`A \cdot A^{-1} = A^{-1} \cdot A = E`, String.raw`\begin{pmatrix} a & b \\ c & d \end{pmatrix}^{-1} = \frac{1}{ad - bc} \begin{pmatrix} d & -b \\ -c & a \end{pmatrix}`],
+    memo: 'Die Inverse $A^{-1}$ macht $A$ rückgängig: $A \\cdot A^{-1} = E$. Bei $2 \\times 2$: Zahlen der Hauptdiagonale tauschen, auf der Nebendiagonale nur das Vorzeichen wechseln, dann jeden Eintrag durch $\\det A$ teilen.',
+    note: 'Es gibt die Inverse nur, wenn $\\det A \\ne 0$ ist; dann heißt $A$ invertierbar. Bei $\\det A = 0$ sind die Zeilen (und die Spalten) Vielfache voneinander, eine Nullzeile braucht es dafür nicht. Als Bild: $A$ macht aus dem Einheitsquadrat das Parallelogramm seiner Spalten, $A^{-1}$ bringt es zurück. Die Spalten von $A^{-1}$ sind die Pfeile, die $A$ auf $\\vec e_1$ und $\\vec e_2$ bringt. Probe immer mit $A \\cdot A^{-1} = E$.',
+    when: 'Bei $2 \\times 2$-Matrizen; für größere Matrizen nimmst du das Gauß-Jordan-Verfahren.',
+    examples: [{ vector: { kind: 'invTwo', level: 1, seed: 17 } }, { vector: { kind: 'invTwo', level: 2, seed: 3 } }],
+    errors: ['inv-det-main', 'inv-reciprocal', 'inv-2-no-swap', 'inv-2-sign', 'inv-2-no-divide', 'inv-2-times-det', 'inv-singular-formula', 'inv-singular-rows', 'inv-singular-zero'],
+  },
+  {
+    id: 'inv-gauss-jordan',
+    topic: 'matrizen',
+    title: 'Inverse mit Gauß-Jordan',
+    level: 2,
+    rules: [],
+    formulas: [String.raw`(A \mid E) \;\longrightarrow\; (E \mid A^{-1})`],
+    memo: 'Schreib $A$ und rechts daneben $E$. Erzeuge Spalte für Spalte Nullen unter der Diagonale, dann von rechts nach links Nullen darüber. Teile zuletzt jede Zeile durch ihre Zahl auf der Diagonale. Links steht dann $E$, rechts $A^{-1}$.',
+    note: 'Jede Umformung gilt für die ganze Zeile, links und rechts vom Strich: Die rechte Hälfte zeichnet auf, was mit $A$ geschieht. Mit ganzen Zahlen bleibt die Rechnung übersichtlich (über Kreuz malnehmen, erst am Ende teilen). Eine $0$ auf der Diagonale: Zeilen tauschen. Entsteht links eine Nullzeile, ist $A$ nicht invertierbar ($\\det A = 0$), egal was rechts steht.',
+    when: 'Bei $3 \\times 3$-Matrizen und größer, auch um zu prüfen, ob es die Inverse überhaupt gibt.',
+    examples: [{ vector: { kind: 'invGauss', level: 2, seed: 1 } }, { vector: { kind: 'invGauss', level: 3, seed: 1 } }],
+    errors: ['inv-start-swap', 'inv-start-zero', 'inv-start-transpose', 'inv-right-forgot', 'inv-zero-pivot', 'inv-scale-forgot', 'inv-scale-multiply', 'inv-read-transpose', 'inv-scale-det', 'inv-singular-right', 'inv-singular-swap'],
+  },
+  {
+    id: 'inv-regeln',
+    topic: 'matrizen',
+    title: 'Regeln für Inverse',
+    level: 3,
+    rules: [],
+    formulas: [String.raw`(AB)^{-1} = B^{-1}A^{-1}`, String.raw`(\lambda A)^{-1} = \frac{1}{\lambda}A^{-1}`, String.raw`(A^{\mathsf T})^{-1} = (A^{-1})^{\mathsf T}`, String.raw`(A^{-1})^{-1} = A`],
+    memo: 'Beim Invertieren eines Produkts dreht sich die Reihenfolge um, und jeder Faktor wird invertiert. Eine Zahl davor wird zum Kehrwert, Transponieren und Invertieren tauschen nur die Plätze, und zweimal invertieren hebt sich auf.',
+    note: 'Wie beim Anziehen: Wer erst Socken, dann Schuhe anzieht, zieht erst die Schuhe, dann die Socken aus. Probe: $AB \\cdot B^{-1}A^{-1} = A\\,E\\,A^{-1} = E$. Mit den Regeln brauchst du keine neue Inverse auszurechnen, wenn $A^{-1}$ und $B^{-1}$ schon bekannt sind.',
+    when: 'Wenn die Inverse eines Produkts, eines Vielfachen oder einer Transponierten gefragt ist.',
+    examples: [{ vector: { kind: 'invRules', level: 3, seed: 1 } }, { vector: { kind: 'invRules', level: 4, seed: 2 } }],
+    errors: ['inv-order', 'inv-factor', 'inv-transpose-drop', 'inv-inverse-twice'],
+  },
+  {
+    id: 'inv-gleichungssystem',
+    topic: 'matrizen',
+    title: 'Gleichungssystem mit der Inversen',
+    level: 3,
+    rules: [],
+    formulas: [String.raw`A\vec x = \vec b \;\Rightarrow\; \vec x = A^{-1}\vec b`],
+    memo: 'Ist $A$ invertierbar, nimmst du beide Seiten von links mit $A^{-1}$ mal: $A^{-1}A\\vec x = \\vec x = A^{-1}\\vec b$.',
+    note: 'Von links, weil $A$ links von $\\vec x$ steht; Matrizen darf man nicht vertauschen, und durch eine Matrix teilen gibt es nicht. Lohnt sich vor allem, wenn dasselbe $A$ mit mehreren rechten Seiten vorkommt: Die Lösungen sind die Spalten von $A^{-1}(\\vec b \\;\\; \\vec c)$.',
+    when: 'Bei quadratischen Systemen, deren Inverse schon bekannt ist oder die mit mehreren rechten Seiten gelöst werden sollen.',
+    examples: [{ vector: { kind: 'invSystem', level: 3, seed: 1 } }, { vector: { kind: 'invSystem', level: 4, seed: 1 } }],
+    errors: ['inv-side', 'inv-not-inverted', 'inv-divide'],
+  },
+  {
+    id: 'inv-parameter',
+    topic: 'matrizen',
+    title: 'Inverse mit Parameter',
+    level: 4,
+    rules: [],
+    formulas: [String.raw`A \text{ invertierbar} \;\Leftrightarrow\; \det A \ne 0`],
+    memo: 'Steht ein Parameter $a$ in der Matrix, ist $\\det A$ ein Ausdruck in $a$. Die Matrix ist für alle $a$ invertierbar außer den Nullstellen von $\\det A$.',
+    note: 'Zuerst die Determinante als Ausdruck in $a$ aufstellen, dann ihre Nullstellen bestimmen. Für einen erlaubten Wert setzt du ihn ein und rechnest die Inverse mit Zahlen aus (Formel bei $2 \\times 2$, sonst Gauß-Jordan).',
+    when: 'Wenn gefragt ist, für welche Werte eines Parameters eine Matrix invertierbar ist.',
+    examples: [{ vector: { kind: 'invParam', level: 4, seed: 1 } }, { vector: { kind: 'invParam', level: 5, seed: 1 } }],
+    errors: ['inv-cond-flip', 'inv-cond-all'],
+  },
+]

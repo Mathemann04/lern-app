@@ -6,6 +6,7 @@ paths:
   - "src/engine/linalg/cramer*"
   - "src/engine/linalg/lgsp*"
   - "src/engine/linalg/eqs*"
+  - "src/engine/linalg/inv*"
   - "src/engine/linalg/paramSlider*"
   - "src/engine/linalg/falk.ts"
   - "src/engine/linalg/sarrus*"
@@ -17,6 +18,7 @@ paths:
   - "src/engine/explain/cramerCards.ts"
   - "src/engine/explain/lgspCards.ts"
   - "src/engine/explain/eqsCards.ts"
+  - "src/engine/explain/invCards.ts"
   - "e2e/matrices.spec.ts"
 ---
 
@@ -180,3 +182,23 @@ freier Modus `vectorFree.ts`, `buildVectorTask` wählt die Arten nach dem Bauste
   `solvedDrawing` an `wert-x` und `loesung`; Flächen mit `from`, Knopf „Strecken und Scheren“, nicht bei Wert 0 oder
   über `AREA_SPAN`). Tests in `linalg/paramSlider.test.ts` (Zeilen aus `task.data` neu eingesetzt, eigener Rang, Fall
   in der Beschreibung, Knöpfe, S mit dem gesuchten Wert; Flächen = |det A| und |det A_k|, Verhältnis = Lösung).
+- Inverse Matrix (Schritt 12a): Baustein `inverse` (Code 39, Gruppe `mat-inv` „Inverse und Matrizengleichungen“),
+  `linalg/invTasks.ts`, Arten in `INV_KINDS_BY_LEVEL` (invTwo, invGauss, invRules, invSystem, invParam). `inverse(A)` exakt
+  (null bei det 0). Schritte: `detTwoStep` (`det2Step` aus `detTasks.ts`, bei det 0 kommt `inv-det-main` dazu, weil
+  „Diagonalen vertauscht“ dann gleich ist), `inverseStep` (Id `inverse`, Formel), `singularTwoStep` (`invertierbar`).
+  Gauß-Jordan: `runJordan` (nach unten mit `opFor`/`combine` aus `gaussTasks.ts`, bei 0 tauschen, dann von rechts nach
+  links nach oben; `singular` = Spalte ohne Stufe), Tabellen `jordanLatex` (`c|rrr|rrr` mit Zeilennamen und Umformungen),
+  Schritte `startStep` (`start`, nur bis Stufe 3), `jordanElimStep` (`unten-k`, `oben-k`; falsch: rechte Hälfte vergessen,
+  Vielfaches nur beim ersten Eintrag, Vorzeichen), `jordanSwapStep` (`tausch-k`), `singularJordanStep` (`deuten`),
+  `readStep` (`ablesen`: durch die Diagonale teilen). `jordanOk` begrenzt die Zahlen in allen Tabellen; nicht invertierbar
+  nur mit Nullzeile ganz unten. Fall (`JordanCase`) vor den Versuchen gewählt. Regeln: `Rule` (Zahl k, Faktoren `Fac` mit
+  inv/t), `invertRule`, `slipped` (order, factor, transpose, twice), Matrizen mit det ±1 aus `unimodular`; Schritte
+  `regel`, `produkt` (`productStepQ` aus `matrixTasks.ts` mit Falk-Schema, Transponierte gleich eingesetzt, Fehler
+  `mat-transpose-ignored`), `faktor`. Gleichungssystem: `ansatz`, bei 2 × 2 Determinante und Inverse, dann `produkt`.
+  Parameter: `detStep` aus `cramerTasks.ts` bzw. `sarrusStep`, `bedingung`, dann Formel bzw. Gauß-Jordan beim Wert a0.
+  Ergebnis Matrix `A^{-1} = …` bzw. `\text{nicht invertierbar}` (Auswahl `INVERTIBLE` in `CHOICE_SETS`), Vektor oder
+  `X = …`. Bild `inverseDrawing` bei 2 × 2 (Parallelogramm zurück aufs Quadrat, Spalten $\vec s_1, \vec s_2$ von
+  $A^{-1}$; nicht über `INV_SPAN` oder bei zu kurzen Pfeilen). 29 Fehler `inv-…` in `linalg/invErrorRules.ts`, fünf Karten
+  in `explain/invCards.ts`. Tests in `linalg/invTasks.test.ts` (Gegenprobe mit eigener Inversen in Kommazahlen, jede
+  Tabelle links = rechts · A, falsche nicht; Bild: A bringt die Ecken zurück aufs Quadrat), Browser-Test in
+  `e2e/matrices.spec.ts`.

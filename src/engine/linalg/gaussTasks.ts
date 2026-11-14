@@ -123,15 +123,15 @@ const gcd = (a: bigint, b: bigint): bigint => (b === 0n ? (a < 0n ? -a : a) : gc
 // ------------------------------------------------------------------ Gauß Schritt für Schritt
 
 // neue Zeile = p · Zeile target − q · Zeile der Stufe
-type Op = { readonly target: number; readonly p: Rational; readonly q: Rational }
+export type Op = { readonly target: number; readonly p: Rational; readonly q: Rational }
 export type Stage =
   | { readonly kind: 'swap'; readonly row: number; readonly other: number; readonly col: number; readonly before: Tab; readonly after: Tab }
   | { readonly kind: 'elim'; readonly row: number; readonly col: number; readonly ops: readonly Op[]; readonly before: Tab; readonly after: Tab }
 
-const combine = (p: Rational, ri: Row, q: Rational, rr: Row): Rational[] => ri.map((x, j) => ratSub(ratMul(p, x), ratMul(q, rr[j])))
+export const combine = (p: Rational, ri: Row, q: Rational, rr: Row): Rational[] => ri.map((x, j) => ratSub(ratMul(p, x), ratMul(q, rr[j])))
 
 // Vielfaches mit ganzer Zahl, sonst über Kreuz (3 · II − 2 · I), vorne immer positiv
-function opFor(a: Rational, b: Rational, target: number): Op {
+export function opFor(a: Rational, b: Rational, target: number): Op {
   const k = ratDiv(b, a)
   if (isInteger(k)) return { target, p: ONE, q: k }
   const g = gcd(a.n, b.n)

@@ -438,3 +438,46 @@ test('Schieberegler für den Parameter und Cramer als Flächen', async ({ page }
   await expectCleanPage(page, 'Cramer als Flächen')
   expect(errors).toEqual([])
 })
+
+// Inverse Matrix (M7 Schritt 12a): Baustein auf der Seite der Tätigkeit, je Stufe eine Aufgabe, Bild „Rückgängig machen“,
+// Lernkarte, freier Modus (nicht durch det A geteilt erkannt, „nicht invertierbar“ zum Antippen)
+test('Inverse Matrix: Baustein, jede Stufe lösbar, Bild, Lernkarte', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('./#/thema/matrizen')
+  await expect(page.getByRole('checkbox', { name: 'Inverse Matrix', exact: true })).toBeChecked()
+  for (const level of [1, 2, 3, 4, 5]) {
+    await page.goto(`./#/ueben/matrizen/inverse.${level}-${80 + level}`)
+    await solveWholeTask(page)
+    await expectCleanPage(page, `Inverse Stufe ${level}`)
+  }
+  // inverse.1-2: 2 × 2 mit Bild beim Ergebnis
+  await page.goto('./#/ueben/matrizen/inverse.1-2')
+  await solveWholeTask(page)
+  await expect(page.getByRole('button', { name: 'Rückgängig machen' })).toBeVisible()
+  await page.goto('./#/karten/matrizen/inv-gauss-jordan')
+  await expect(page.getByRole('heading', { name: 'Inverse mit Gauß-Jordan' })).toBeVisible()
+  await expectCleanPage(page, 'Lernkarte Gauß-Jordan')
+  expect(errors).toEqual([])
+})
+
+test('Inverse Matrix frei: nicht geteilt erkannt, nicht invertierbar zum Antippen', async ({ page }) => {
+  const errors = collectErrors(page)
+  // inverse.1-1: M = (-1 2; -4 6), M⁻¹ = (3 -1; 2 -1/2)
+  await page.goto('./#/frei/matrizen/inverse.1-1')
+  const fill = async (xs: readonly string[]) => {
+    for (const [k, x] of xs.entries()) await typeInto(page, `Zeile ${Math.floor(k / 2) + 1}, Spalte ${(k % 2) + 1}`, x)
+  }
+  await fill(['6', '-2', '4', '-1'])
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Typischer Fehler: Nicht durch det A geteilt.')).toBeVisible()
+  await fill(['3', '-1', '2', '-1/2'])
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
+  await expectCleanPage(page, 'Inverse frei')
+  // inverse.2-4: nicht invertierbar
+  await page.goto('./#/frei/matrizen/inverse.2-4')
+  await page.getByRole('radio', { name: 'nicht invertierbar' }).click()
+  await page.getByRole('button', { name: 'Prüfen' }).click()
+  await expect(page.getByText('Richtig!', { exact: true })).toBeVisible()
+  expect(errors).toEqual([])
+})

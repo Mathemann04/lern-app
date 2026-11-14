@@ -101,7 +101,7 @@ Animationen starten nur auf Knopfdruck („Abspielen“) und entfallen, wenn am 
   vergessen, Zeile statt Spalte (Falk, Cramer), Produkt nicht definiert, $(AB)^{\mathsf T} = A^{\mathsf T}B^{\mathsf T}$,
   $\lambda$ statt $\lambda^n$, Vorzeichen beim Zeilentausch, Sarrus bei 4×4, rechte Seite vergessen, Nullzeile falsch
   gedeutet, gleicher Parameter für zwei Geraden, beim Ziehen (2b): nur vertauscht oder nur ein Vorzeichen geändert, rechter Winkel als spitz
-  oder stumpf gezählt, rechter Winkel an der falschen Ecke, Seiten statt Diagonalen senkrecht, bei der Projektion (3a) die 15 Fehler aus Schritt 3a, bei den Kräften (3b) die 26 Fehler aus Schritt 3b, beim Kreuzprodukt (4a) die 14 Fehler aus Schritt 4a, beim Spatprodukt (4b) die 14 Fehler aus Schritt 4b, bei Linearkombination und Basis (5) die 20 Fehler aus Schritt 5, bei Geraden und Ebenen (6) die 33 Fehler aus Schritt 6 (Vorsilbe „gl-“), bei der Lage (7a) die 17 Fehler aus Schritt 7a, bei Abständen und Schnittwinkeln (7b) die 14 Fehler aus Schritt 7b, bei den Matrizen (8a) die 27 Fehler aus Schritt 8a (Vorsilbe „mat-“), bei den Determinanten (9a) die 37 Fehler aus Schritt 9a (Vorsilbe „det-“), beim Gauß-Verfahren (10a) die 34 Fehler aus Schritt 10a (Vorsilbe „gauss-“), bei der Cramerschen Regel (11a) die 10 Fehler aus Schritt 11a (Vorsilbe „cramer-“), bei Gleichungssystemen mit Parameter (11b) die 23 Fehler aus Schritt 11b (Vorsilbe „lgsp-“), cos statt sin bei Gerade–Ebene, „$A - 2$“ ohne $E$, auf der falschen
+  oder stumpf gezählt, rechter Winkel an der falschen Ecke, Seiten statt Diagonalen senkrecht, bei der Projektion (3a) die 15 Fehler aus Schritt 3a, bei den Kräften (3b) die 26 Fehler aus Schritt 3b, beim Kreuzprodukt (4a) die 14 Fehler aus Schritt 4a, beim Spatprodukt (4b) die 14 Fehler aus Schritt 4b, bei Linearkombination und Basis (5) die 20 Fehler aus Schritt 5, bei Geraden und Ebenen (6) die 33 Fehler aus Schritt 6 (Vorsilbe „gl-“), bei der Lage (7a) die 17 Fehler aus Schritt 7a, bei Abständen und Schnittwinkeln (7b) die 14 Fehler aus Schritt 7b, bei den Matrizen (8a) die 27 Fehler aus Schritt 8a (Vorsilbe „mat-“), bei den Determinanten (9a) die 37 Fehler aus Schritt 9a (Vorsilbe „det-“), beim Gauß-Verfahren (10a) die 34 Fehler aus Schritt 10a (Vorsilbe „gauss-“), bei der Cramerschen Regel (11a) die 10 Fehler aus Schritt 11a (Vorsilbe „cramer-“), bei Gleichungssystemen mit Parameter (11b) die 23 Fehler aus Schritt 11b (Vorsilbe „lgsp-“), bei der Inversen (12a) die 29 Fehler aus Schritt 12a (Vorsilbe „inv-“), cos statt sin bei Gerade–Ebene, „$A - 2$“ ohne $E$, auf der falschen
   Seite ausgeklammert. Jede mit Katalogbeispiel, eigenem Text für „Warum ist das falsch?“ und Platz auf einer Lernkarte
   (Regeln aus CLAUDE.md).
 - **Aufgabennummern** wie seit M6 mit Baustein (`taskNumber.ts`); neue Bausteine bekommen die nächsten freien Nummern in
@@ -474,7 +474,37 @@ Request.
       $|\det A_k|$). Kein Bild bei Wert 0 oder wenn es breiter oder höher als 22 Einheiten würde (etwa ein Drittel der
       Aufgaben); auch auf der Lernkarte „Cramersche Regel“.
 12. **Inverse und Matrizengleichungen:** 2×2 mit Formel, 3×3 mit Gauß-Jordan Zeile für Zeile, Matrizengleichung erst
-    allgemein nach $X$ auflösen (wie beim Umstellen), dann ausrechnen.
+    allgemein nach $X$ auflösen (wie beim Umstellen), dann ausrechnen. In drei Teilen:
+    - **12a (fertig, 14.11.2026):** Baustein „Inverse Matrix“ (`inverse`, Code 39, neue Gruppe „Inverse und
+      Matrizengleichungen“) in der Tätigkeit „Matrizen und Gleichungssysteme“, Stufen 1 bis 5, geführt und frei. Fünf Arten:
+      $2 \times 2$ mit der Formel (Stufe 1 mit $|\det A| \le 2$, Stufe 2 mit Brüchen und in einem Fünftel nicht
+      invertierbar), Gauß-Jordan (Stufe 2 $2 \times 2$ oder obere Dreiecksmatrix, Stufe 3 $3 \times 3$ mit Starttabelle,
+      Stufe 4 und 5 auch mit Zeilentausch oder nicht invertierbar), Regeln (Stufe 3 bis 5: nur $A^{-1}$, $B^{-1}$ bzw. $A$
+      gegeben, $(kAB)^{-1}$, $(A^{\mathsf T}B)^{-1}$, $(A^{-1}B)^{-1}$, $(kA^{\mathsf T})^{-1}$ …, ab Stufe 4 mit drei
+      Besonderheiten und $3 \times 3$), Gleichungssystem über die Inverse (Stufe 3 $2 \times 2$: Ansatz, $\det A$, Inverse,
+      $A^{-1}\vec b$; Stufe 4 $3 \times 3$ mit gegebener Inverse und zwei rechten Seiten, $X = A^{-1}(\vec b \;\; \vec c)$),
+      mit Parameter (Stufe 4 $2 \times 2$, Stufe 5 $3 \times 3$ mit Sarrus: für welche $a$ invertierbar, dann $A^{-1}$ für
+      einen Wert mit Formel bzw. Gauß-Jordan). Gauß-Jordan mit ganzen Zahlen: Spalte für Spalte Nullen unter der Diagonale
+      (über Kreuz, wenn nötig), dann von rechts nach links darüber, zuletzt jede Zeile durch ihre Zahl auf der Diagonale
+      („Diagonale auf 1, ablesen“). Bild bei $2 \times 2$ beim Ergebnis: „Rückgängig machen“ zieht das Parallelogramm der
+      Spalten zurück aufs Einheitsquadrat, die Spalten $\vec s_1, \vec s_2$ von $A^{-1}$ erscheinen (nur bis 9 Einheiten
+      Breite und Höhe). Frei: Matrix in Kästchen (auch Brüche), „nicht invertierbar“ zum Antippen, Vektor. Fünf Lernkarten,
+      29 neue typische Fehler (`inv-…`): bei der Determinante nur die Hauptdiagonale, Kehrwert jedes Eintrags,
+      Hauptdiagonale nicht getauscht, Minus an der falschen Diagonale, nicht durch bzw. mal $\det A$, Formel trotz
+      $\det A = 0$, ohne Nullzeile für invertierbar gehalten, Nullmatrix als Inverse, wegen der rechten Seite für
+      invertierbar gehalten, Nullzeile durch Tauschen wegschaffen, Starttabelle $(E \mid A)$, $(A \mid 0)$,
+      $(A^{\mathsf T} \mid E)$, rechte Hälfte nicht mitgerechnet, bei einer 0 auf der Diagonale abgebrochen, Diagonale nicht
+      auf 1, malgenommen statt geteilt, gespiegelt abgelesen, alles durch $\det A$ geteilt, $(AB)^{-1} = A^{-1}B^{-1}$,
+      $(\lambda A)^{-1} = \lambda A^{-1}$, Transponieren vergessen, $(A^{-1})^{-1}$ nicht aufgehoben, von der falschen Seite
+      malgenommen, mit $A$ statt $A^{-1}$, durch eine Matrix geteilt, Bedingung umgedreht, für jedes $a$; dazu Fehler aus
+      Determinanten, Gauß-Verfahren und Matrizen rechnen.
+    - **12b:** Baustein „Matrizengleichungen“ (`matgleichung`): erst allgemein nach $X$ auflösen, Schritt für Schritt wie
+      beim Umstellen (Transponierte und Inverse mit den Regeln auflösen, $X$ auf eine Seite, Zahl als Vielfaches von $E$
+      schreiben, $X$ links oder rechts ausklammern, von derselben Seite mit der Inversen malnehmen), dann einsetzen und
+      ausrechnen; Stufe 5 mit Parameter (wann lösbar). Typische Fehler: „$A - 2$“ ohne $E$, auf der falschen Seite
+      ausgeklammert oder malgenommen, durch eine Matrix geteilt, $AXA^{-1}$ zu $X$ gekürzt.
+    - **12c:** Bilder: Gauß-Jordan zum Abspielen (links entsteht Schritt für Schritt $E$, rechts $A^{-1}$), bei
+      Matrizengleichungen mit $2 \times 2$ die Wirkung von $X$ im Gitter.
 13. **Abschluss:** Mischen über alle drei Tätigkeiten, Abwechslung gemessen, Prüfung aus mehreren Blickwinkeln, Doku.
     Dazu die Befunde der Durchsicht vom 14.11.2026 (docs/ROADMAP.md, „Vorgemerkt“): Gleichungssysteme mit Parameter
     auf Stufe 5 am Handy rechts abgeschnitten (Tabelle und $\vec b$, etwa jede 25. Aufgabe); große Vektorbilder auf
